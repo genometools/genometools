@@ -28,12 +28,12 @@ struct GtProgressTimer
   const char *eventdescription;
 };
 
-GtProgressTimer* gt_progress_timer_new(const char *event)
+GtProgressTimer* gt_progress_timer_new(const char *desc)
 {
   GtProgressTimer *pt;
 
   pt = gt_malloc(sizeof (GtProgressTimer));
-  if (event == NULL)
+  if (desc == NULL)
   {
     pt->startclock = pt->overalltime = 0;
     pt->eventdescription = NULL;
@@ -41,17 +41,17 @@ GtProgressTimer* gt_progress_timer_new(const char *event)
   {
     pt->startclock = clock();
     pt->overalltime = 0;
-    pt->eventdescription = event;
+    pt->eventdescription = desc;
   }
   return pt;
 }
 
 void gt_progress_timer_start_new_state(GtProgressTimer *pt,
-                                       const char *newstate,
+                                       const char *newevent,
                                        FILE *fp)
 {
-  gt_assert(pt);
   clock_t stopclock;
+  gt_assert(pt);
 
   stopclock = clock();
   fprintf(fp,"# TIME %s %.2f\n",pt->eventdescription,
@@ -59,7 +59,7 @@ void gt_progress_timer_start_new_state(GtProgressTimer *pt,
            (double) CLOCKS_PER_SEC);
   (void) fflush(fp);
   pt->overalltime += (stopclock - pt->startclock);
-  if (newstate == NULL)
+  if (newevent == NULL)
   {
     fprintf(fp,"# TIME overall %.2f\n",
                 (double) pt->overalltime/(double) CLOCKS_PER_SEC);
@@ -67,7 +67,7 @@ void gt_progress_timer_start_new_state(GtProgressTimer *pt,
   } else
   {
     pt->startclock = stopclock;
-    pt->eventdescription = newstate;
+    pt->eventdescription = newevent;
   }
 }
 

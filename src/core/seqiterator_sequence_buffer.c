@@ -54,7 +54,7 @@ GtSeqIterator* gt_seqiterator_sequence_buffer_new(const GtStrArray *filenametab,
 }
 
 GtSeqIterator* gt_seqiterator_sequence_buffer_new_with_buffer(
-                                                          GtSequenceBuffer *buf)
+                                                       GtSequenceBuffer *buffer)
 {
   GtSeqIterator *si;
   GtSeqIteratorSequenceBuffer *seqit;
@@ -62,7 +62,7 @@ GtSeqIterator* gt_seqiterator_sequence_buffer_new_with_buffer(
   seqit = gt_seqiterator_sequence_buffer_cast(si);
   GT_INITARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->descptr = gt_queue_new();
-  seqit->fb = gt_sequence_buffer_ref(buf);
+  seqit->fb = gt_sequence_buffer_ref(buffer);
   gt_sequence_buffer_set_desc_queue(seqit->fb, seqit->descptr);
   seqit->exhausted = false;
   seqit->unitnum = 0;
@@ -143,7 +143,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
       {
         /* make sure the outgoing sequence is '\0' terminated */
         seqit->sequencebuffer.spaceGtUchar
-          [seqit->sequencebuffer.nextfreeGtUchar] = '\0';
+          [seqit->sequencebuffer.nextfreeGtUchar] = (GtUchar) '\0';
         *sequence = seqit->sequencebuffer.spaceGtUchar;
       }
       seqit->sequencebuffer.nextfreeGtUchar = 0;
@@ -154,7 +154,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
     if (seqit->withsequence)
     {
       GT_STOREINARRAY(&seqit->sequencebuffer, GtUchar,
-                   MAX(1024, seqit->sequencebuffer.nextfreeGtUchar * 0.5),
+                   MAX(1024UL, seqit->sequencebuffer.nextfreeGtUchar * 0.5),
                    charcode);
     } else
     {
@@ -168,7 +168,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
     {
       /* make sure the outgoing sequence is '\0' terminated */
       seqit->sequencebuffer.spaceGtUchar
-        [seqit->sequencebuffer.nextfreeGtUchar] = '\0';
+        [seqit->sequencebuffer.nextfreeGtUchar] = (GtUchar) '\0';
       *sequence = seqit->sequencebuffer.spaceGtUchar;
     }
     *len = seqit->sequencebuffer.nextfreeGtUchar;
@@ -188,8 +188,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
 
 static const unsigned long long*
 gt_seqiterator_sequence_buffer_getcurrentcounter(GtSeqIterator *si,
-                                                 unsigned long long
-                                                 maxread)
+                                                 unsigned long long maxread)
 {
   GtSeqIteratorSequenceBuffer *seqit;
   gt_assert(si);
@@ -200,9 +199,8 @@ gt_seqiterator_sequence_buffer_getcurrentcounter(GtSeqIterator *si,
 
 static void gt_seqiterator_sequence_buffer_delete(GtSeqIterator *si)
 {
-  if (!si) return;
   GtSeqIteratorSequenceBuffer *seqit;
-  gt_assert(si);
+  if (!si) return;
   seqit = gt_seqiterator_sequence_buffer_cast(si);
   gt_queue_delete_with_contents(seqit->descptr);
   gt_sequence_buffer_delete(seqit->fb);

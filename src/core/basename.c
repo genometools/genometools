@@ -27,7 +27,7 @@ char *gt_basename(const char *path)
   bool foundother = false;
   size_t i, pathlen;
 
-  if (path)
+  if (path != NULL)
     pathlen = strlen(path);
   else
     pathlen = 0;

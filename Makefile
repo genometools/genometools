@@ -801,9 +801,7 @@ EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 
-MOVEDENCSEQFILES = ${CURDIR}/src/core/mapspec-gen.c\
-                   ${CURDIR}/src/core/readmode.c\
-                   ${CURDIR}/src/core/encseq.c
+MOVEDENCSEQFILES = ${shell grep -l 'Stefan Kurtz' src/core/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\

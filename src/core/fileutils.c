@@ -103,12 +103,12 @@ void gt_file_dirname(GtStr *path, const char *file)
 {
   long i;
   gt_str_reset(path);
-  for (i = strlen(file) - 1; i >= 0; i--) {
+  for (i = (long) (strlen(file) - 1); i >= 0; i--) {
     if (file[i] == '/')
       break;
   }
   if (i > 0)
-    gt_str_append_cstr_nt(path, file, i);
+    gt_str_append_cstr_nt(path, file, (unsigned long) i);
 }
 
 int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
@@ -133,7 +133,7 @@ int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
     return had_err;
   /* 'file' has no dirname -> scan $env */
   pathvariable = getenv(env);
-  if (pathvariable)
+  if (pathvariable != NULL)
     pathvariable = gt_cstr_dup(pathvariable); /* make writeable copy */
   else {
     gt_error_set(err, "environment variable $%s is not defined", env);
@@ -142,7 +142,8 @@ int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
 
   if (!had_err) {
     splitter = gt_splitter_new();
-    gt_splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
+    gt_splitter_split(splitter, pathvariable,
+                      (unsigned long) strlen(pathvariable), ':');
     for (i = 0; i < gt_splitter_size(splitter); i++) {
       pathcomponent = gt_splitter_get_token(splitter, i);
       gt_str_reset(path);
@@ -170,18 +171,18 @@ int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
   return had_err;
 }
 
-off_t gt_file_estimate_size(const char *filename)
+off_t gt_file_estimate_size(const char *file)
 {
   off_t size;
   struct stat sb;
   GtFileMode gfm;
   int fd;
 
-  gt_assert(filename);
+  gt_assert(file);
 
-  fd = gt_xopen(filename, O_RDONLY, 0);
+  fd = gt_xopen(file, O_RDONLY, 0);
   gt_xfstat(fd, &sb);
-  gfm = gt_file_mode_determine(filename);
+  gfm = gt_file_mode_determine(file);
   if (gfm == GT_FILE_MODE_UNCOMPRESSED)
     size = sb.st_size;
   else
@@ -191,12 +192,12 @@ off_t gt_file_estimate_size(const char *filename)
   return size;
 }
 
-off_t gt_file_size(const char *filename)
+off_t gt_file_size(const char *file)
 {
   struct stat sb;
   int fd;
-  gt_assert(filename);
-  fd = gt_xopen(filename, O_RDONLY, 0);
+  gt_assert(file);
+  fd = gt_xopen(file, O_RDONLY, 0);
   gt_xfstat(fd, &sb);
   gt_xclose(fd);
   return sb.st_size;

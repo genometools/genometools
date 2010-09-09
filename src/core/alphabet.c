@@ -720,7 +720,7 @@ void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
 }
 
 void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
-                                      const GtUchar *w, unsigned long wlen)
+                                  const GtUchar *src, unsigned long len)
 {
   unsigned long i;
   const GtUchar *characters;
@@ -732,16 +732,16 @@ void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
   {
     characters = alphabet->characters;
   }
-  for (i = 0; i < wlen; i++)
+  for (i = 0; i < len; i++)
   {
-    gt_xfputc((int) characters[(int) w[i]],fpout);
+    gt_xfputc((int) characters[(int) src[i]],fpout);
   }
 }
 
 void gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
-                                     const GtUchar *w, unsigned long wlen)
+                                     const GtUchar *w, unsigned long len)
 {
-  gt_alphabet_decode_seq_to_fp(alphabet, stdout, w, wlen);
+  gt_alphabet_decode_seq_to_fp(alphabet, stdout, w, len);
 }
 
 static char converttoprettysymbol(const GtAlphabet *alphabet,
@@ -770,27 +770,27 @@ static char converttoprettysymbol(const GtAlphabet *alphabet,
   return ret;
 }
 
-void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *buffer,
-                                      const GtUchar *w, unsigned long wlen)
+void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *dest,
+                                      const GtUchar *src, unsigned long len)
 {
   unsigned long i;
 
-  for (i = 0; i < wlen; i++)
+  for (i = 0; i < len; i++)
   {
-    buffer[i] = converttoprettysymbol(alphabet, (GtUchar) w[i]);
+    dest[i] = converttoprettysymbol(alphabet, (GtUchar) src[i]);
   }
-  buffer[wlen] = '\0';
+  dest[len] = '\0';
 }
 
 GtStr* gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
-                                     const GtUchar *w,
-                                     unsigned long wlen)
+                                     const GtUchar *src,
+                                     unsigned long len)
 {
   char *buffer;
   GtStr *ret;
-  gt_assert(alphabet && w);
-  buffer = gt_malloc(sizeof (char) * wlen+1);
-  gt_alphabet_decode_seq_to_cstr(alphabet, buffer, w, wlen);
+  gt_assert(alphabet && src);
+  buffer = gt_malloc(sizeof (char) * len+1);
+  gt_alphabet_decode_seq_to_cstr(alphabet, buffer, src, len);
   ret = gt_str_new_cstr(buffer);
   gt_free(buffer);
   return ret;

@@ -544,19 +544,19 @@ static inline unsigned int smallestbase(unsigned char bits)
 {
   if (bits & GT_T_BIT)
   {
-    return GT_T_CODE;
+    return (unsigned int) GT_T_CODE;
   }
   if (bits & GT_C_BIT)
   {
-    return GT_C_CODE;
+    return (unsigned int) GT_C_CODE;
   }
   if (bits & GT_A_BIT)
   {
-    return GT_A_CODE;
+    return (unsigned int) GT_A_CODE;
   }
   if (bits & GT_G_BIT)
   {
-    return GT_G_CODE;
+    return (unsigned int) GT_G_CODE;
   }
   gt_assert(0);
   /*@ignore@*/
@@ -579,7 +579,7 @@ static inline char codon2amino(const char *aminos, bool forward,
     case 'A':
       if (forward)
       {
-        code = (GT_A_CODE << 4);
+        code = ((unsigned int) GT_A_CODE << 4);
       } else
       {
         code = 0;
@@ -589,20 +589,20 @@ static inline char codon2amino(const char *aminos, bool forward,
     case 'C':
       if (forward)
       {
-        code = (GT_C_CODE << 4);
+        code = ((unsigned int) GT_C_CODE << 4);
       } else
       {
-        code = (GT_G_CODE << 4);
+        code = ((unsigned int) GT_G_CODE << 4);
       }
       break;
     case 'g':
     case 'G':
       if (forward)
       {
-        code = (GT_G_CODE << 4);
+        code = ((unsigned int) GT_G_CODE << 4);
       } else
       {
-        code = (GT_C_CODE << 4);
+        code = ((unsigned int) GT_C_CODE << 4);
       }
       break;
     case 't':
@@ -614,7 +614,7 @@ static inline char codon2amino(const char *aminos, bool forward,
         code = 0;
       } else
       {
-        code = (GT_A_CODE << 4);
+        code = ((unsigned int) GT_A_CODE << 4);
       }
       break;
     GT_CASEWILDCARD: /* delete this and the next line,
@@ -739,7 +739,7 @@ GtStrArray* gt_trans_table_get_scheme_descriptions()
   GtStr *str;
   GtStrArray *sa = gt_str_array_new();
   str = gt_str_new();
-  for (i = 1; i < GT_SIZEOFTRANSRANGE; i++) {
+  for (i = 1UL; i < (unsigned long) GT_SIZEOFTRANSRANGE; i++) {
     if (transnum2index[i] == GT_UNDEFTRANSNUM)
       continue;
     scheme = schemetable + transnum2index[i];
@@ -763,7 +763,7 @@ GtTransTable* gt_trans_table_new(unsigned int scheme, GtError *err)
   GtTransTable *tt;
   if (!(schemep = getschemetable(scheme, err)))
     return NULL;
-  tt = gt_calloc(1, sizeof (GtTransTable));
+  tt = gt_calloc((size_t) 1, sizeof (GtTransTable));
   tt->scheme = schemep;
   return tt;
 }
@@ -785,7 +785,11 @@ int gt_trans_table_translate_codon(const GtTransTable *tt,
 {
   gt_assert(tt && amino);
   gt_error_check(err);
-  *amino = codon2amino(tt->scheme->aminos, true, c1, c2, c3, NULL, err);
+  *amino = codon2amino(tt->scheme->aminos, true,
+                       (unsigned char) c1,
+                       (unsigned char) c2,
+                       (unsigned char) c3,
+                        NULL, err);
   if (*amino == GT_AMINOACIDFAIL) {
     return -1;
   }
@@ -795,9 +799,13 @@ int gt_trans_table_translate_codon(const GtTransTable *tt,
 bool gt_trans_table_is_start_codon(const GtTransTable *tt,
                                    char c1, char c2, char c3)
 {
-  gt_assert(tt);
   unsigned int code = 0;
-  (void) codon2amino(tt->scheme->aminos, true, c1, c2, c3, &code, NULL);
+  gt_assert(tt);
+  (void) codon2amino(tt->scheme->aminos, true,
+                     (unsigned char) c1,
+                     (unsigned char) c2,
+                     (unsigned char) c3,
+                     &code, NULL);
   if (tt->scheme->startcodon[code] == GT_START_AMINO) {
     return true;
   }
@@ -807,9 +815,13 @@ bool gt_trans_table_is_start_codon(const GtTransTable *tt,
 bool gt_trans_table_is_stop_codon(const GtTransTable *tt,
                                   char c1, char c2, char c3)
 {
-  gt_assert(tt);
   char trans;
-  trans = codon2amino(tt->scheme->aminos, true, c1, c2, c3, NULL, NULL);
+  gt_assert(tt);
+  trans = codon2amino(tt->scheme->aminos, true,
+                      (unsigned char) c1,
+                      (unsigned char) c2,
+                      (unsigned char) c3,
+                      NULL, NULL);
   if (trans == GT_STOP_AMINO) {
     return true;
   }
@@ -830,9 +842,10 @@ int gt_trans_table_unit_test(GtError *err)
 
   /* check retrieval of table descriptions */
   schemes = gt_trans_table_get_scheme_descriptions();
-  ensure(had_err, gt_str_array_size(schemes) == GT_NUMOFTRANSSCHEMES);
+  ensure(had_err,
+         gt_str_array_size(schemes) == (unsigned long) GT_NUMOFTRANSSCHEMES);
 
-    /* check switching translation scheme */
+  /* check switching translation scheme */
   /* test_errnum = gt_translator_set_translation_scheme(tr, 3, test_err);
   ensure(had_err, !test_errnum && !gt_error_is_set(test_err)); */
 

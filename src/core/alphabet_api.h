@@ -117,23 +117,23 @@ char           gt_alphabet_decode(const GtAlphabet *alphabet, GtUchar c);
    in <out>. <in> has to be encodable with the given <alphabet>! */
 void           gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
                                       const char *in, unsigned long length);
-/* Suppose the string <src> of length <wlen> was transformed according to the
-   <alphabet>. The following method shows each character in <w> as the
+/* Suppose the string <src> of length <len> was transformed according to the
+   <alphabet>. The following method shows each character in <src> as the
    printable character specified in the transformation. The output is written
    to the given file pointer <fpout>. */
 void           gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet,
                                             FILE *fpout,
                                             const GtUchar *src,
-                                            unsigned long wlen);
+                                            unsigned long len);
 /* Analog to <gt_alphabet_decode_seq_to_fp()> but writing the output to
    <dest>. */
 void           gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet,
                                               char *dest,
                                               const GtUchar *src,
-                                              unsigned long wlen);
+                                              unsigned long len);
 /* Analog to <gt_alphabet_decode_seq_to_fp()> writing the output to
    a new <GtStr>. */
 GtStr*         gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
                                              const GtUchar *src,
-                                             unsigned long wlen);
+                                             unsigned long len);
 #endif

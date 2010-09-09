@@ -38,12 +38,12 @@ void           gt_seqiterator_set_symbolmap(GtSeqIterator*,
    only the descriptions). By default, sequences are processed. */
 void           gt_seqiterator_set_sequence_output(GtSeqIterator*, bool);
 
-/* Get next <sequence> (of length <len>) and <description> from <seq_iterator>.
+/* Get next <sequence> (of length <len>) and <description> from <seqit>.
    The caller is responsible to free the received <description>.
    Returns 1, if another sequence could be parsed. 0, if all given sequence
    files are exhausted. And -1, if an error occured (<err> is set
    accordingly). */
-int            gt_seqiterator_next(GtSeqIterator *seq_iterator,
+int            gt_seqiterator_next(GtSeqIterator *seqit,
                                    const GtUchar **sequence,
                                    unsigned long *len,
                                    char **description, GtError*);

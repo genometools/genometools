@@ -142,13 +142,14 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
                 {
                   currentfileadd++;
                 }
-                pvt->outbuf[currentoutpos++] = (GtUchar) SEPARATOR;
+                pvt->outbuf[currentoutpos++] = (unsigned char) SEPARATOR;
                 pvt->lastspeciallength++;
               }
               sbf->indesc = true;
             } else
             {
-              if ((ret = process_char(sb, currentoutpos, currentchar, err)))
+              if ((ret = process_char(sb, currentoutpos,
+                                      (unsigned char) currentchar, err)))
                 return ret;
               currentoutpos++;
               currentfileadd++;
@@ -179,7 +180,7 @@ static unsigned long
 gt_sequence_buffer_fasta_get_file_index(GtSequenceBuffer *sb)
 {
   gt_assert(sb);
-  return sb->pvt->filenum;
+  return (unsigned long) sb->pvt->filenum;
 }
 
 bool gt_sequence_buffer_fasta_guess(const char* txt)

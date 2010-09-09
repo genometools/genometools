@@ -33,7 +33,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
                                   unsigned long *characterdistribution)
 {
   GtFastaBuffer *fb;
-  fb = gt_calloc(1, sizeof (GtFastaBuffer));
+  fb = gt_calloc((size_t) 1, sizeof (GtFastaBuffer));
   fb->plainformat = plainformat;
   fb->filenum = 0;
   fb->firstoverallseq = true;
@@ -45,9 +45,9 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
   fb->complete = false;
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
-  if (filelengthtab)
+  if (filelengthtab != NULL)
   {
-    *filelengthtab = gt_calloc(gt_str_array_size(filenametab),
+    *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                sizeof (GtFilelengthvalues));
     fb->filelengthtab = *filelengthtab;
   } else
@@ -64,16 +64,16 @@ static inline int ownbuffer_genfile_getc(GtFastaBuffer *fb,
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
-    fb->currentfillpos = gt_file_xread(inputstream,
-                                          fb->inputbuffer,
-                                          (size_t) INPUTFILEBUFFERSIZE);
+    fb->currentfillpos = (ssize_t) gt_file_xread(inputstream,
+                                                 fb->inputbuffer,
+                                                 (size_t) INPUTFILEBUFFERSIZE);
     if (fb->currentfillpos == 0)
     {
        return EOF;
     }
     fb->currentinpos = 0;
   }
-  return fb->inputbuffer[fb->currentinpos++];
+  return (int) fb->inputbuffer[fb->currentinpos++];
 }
 
 static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
@@ -192,7 +192,8 @@ static int advancefastabufferstate(GtFastaBuffer *fb, GtError *err)
                   gt_error_set(err,
                             "illegal character '%c': file \"%s\", line %llu",
                             currentchar,
-                            gt_str_array_get(fb->filenametab, fb->filenum),
+                            gt_str_array_get(fb->filenametab,
+                                             (unsigned long) fb->filenum),
                             (unsigned long long) fb->linenum);
                   return -1;
                 }

@@ -31,8 +31,9 @@ struct GtLogger
 
 GtLogger* gt_logger_new(bool enabled, const char *prefix, FILE *target)
 {
+  GtLogger *l;
   gt_assert(target);
-  GtLogger *l = (GtLogger*) gt_calloc(1, sizeof (GtLogger));
+  l = (GtLogger*) gt_calloc((size_t) 1, sizeof (GtLogger));
   l->target = target;
   l->prefix = gt_cstr_dup(prefix);
   l->enabled = enabled;
@@ -94,7 +95,7 @@ void gt_logger_log_va_force(GtLogger *logger, const char *format, va_list ap)
 {
   if (!logger) return;
   gt_assert(format && logger->target);
-  if (logger->prefix)
+  if (logger->prefix != NULL)
     fprintf(logger->target, "%s", logger->prefix);
   (void) vfprintf(logger->target, format, ap);
   (void) putc('\n', logger->target);
@@ -105,7 +106,7 @@ void gt_logger_log_va(GtLogger *logger, const char *format, va_list ap)
   if (!logger) return;
   if (!logger->enabled) return;
   gt_assert(format && logger->target);
-  if (logger->prefix)
+  if (logger->prefix != NULL)
     fprintf(logger->target, "%s", logger->prefix);
   (void) vfprintf(logger->target, format, ap);
   (void) putc('\n', logger->target);

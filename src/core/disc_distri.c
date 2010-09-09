@@ -32,12 +32,12 @@ struct GtDiscDistri {
 
 GtDiscDistri* gt_disc_distri_new(void)
 {
-  return gt_calloc(1, sizeof (GtDiscDistri));
+  return gt_calloc((size_t) 1, sizeof (GtDiscDistri));
 }
 
 void gt_disc_distri_add(GtDiscDistri *d, unsigned long key)
 {
-  gt_disc_distri_add_multi(d, key, 1);
+  gt_disc_distri_add_multi(d, key, (unsigned long long) 1);
 }
 
 DECLARE_HASHMAP(unsigned long, ul, unsigned long long, ull, static, inline)
@@ -90,7 +90,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
   gt_assert(data && occurrences);
   info = (ShowValueInfo*) data;
 
-  probability = (double) occurrences / info->num_of_occurrences;
+  probability = (double) ((double) occurrences / info->num_of_occurrences);
   info->cumulative_probability += probability;
   gt_file_xprintf(info->outfp, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
                   key, occurrences, probability, info->cumulative_probability);
@@ -104,7 +104,7 @@ void gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp)
 
   gt_assert(d);
 
-  if (d->hashdist) {
+  if (d->hashdist != NULL) {
     showvalueinfo.cumulative_probability = 0.0;
     showvalueinfo.num_of_occurrences = d->num_of_occurrences;
     showvalueinfo.outfp = outfp;
@@ -140,10 +140,10 @@ void gt_disc_distri_foreach_generic(const GtDiscDistri *d,
   DiscDistriForeachInfo info;
   int rval;
   gt_assert(d);
-  if (d->hashdist) {
+  if (d->hashdist != NULL) {
     info.func = func;
     info.data = data;
-    if (cmp)
+    if (cmp != NULL)
       rval = ul_ull_gt_hashmap_foreach_ordered(d->hashdist,
                                                disc_distri_foreach_iterfunc,
                                                &info, cmp, NULL);
@@ -194,8 +194,10 @@ static void foreachtester(unsigned long key,
   GtError *err = tdata->err;
   tdata->counter++;
   ensure(*(tdata->had_err), tdata->counter < DISC_DISTRI_FOREACHTESTSIZE);
-  ensure(*(tdata->had_err), tdata->expkeys[tdata->counter] == key);
-  ensure(*(tdata->had_err), tdata->expvalues[tdata->counter] == value);
+  ensure(*(tdata->had_err),
+         (unsigned long) tdata->expkeys[tdata->counter] == key);
+  ensure(*(tdata->had_err),
+         (unsigned long long) tdata->expvalues[tdata->counter] == value);
 }
 
 int gt_disc_distri_unit_test(GtError *err)
@@ -208,17 +210,17 @@ int gt_disc_distri_unit_test(GtError *err)
 
   d = gt_disc_distri_new();
 
-  ensure(had_err, gt_disc_distri_get(d, 0) == 0);
-  ensure(had_err, gt_disc_distri_get(d, 100) == 0);
+  ensure(had_err, gt_disc_distri_get(d, 0UL) == 0);
+  ensure(had_err, gt_disc_distri_get(d, 100UL) == 0);
   if (!had_err) {
     gt_disc_distri_add(d, 0);
-    gt_disc_distri_add_multi(d, 100, 256);
+    gt_disc_distri_add_multi(d, 100UL, 256ULL);
   }
-  ensure(had_err, gt_disc_distri_get(d, 0) == 1);
-  ensure(had_err, gt_disc_distri_get(d, 100) == 256);
+  ensure(had_err, gt_disc_distri_get(d, 0UL) == 1ULL);
+  ensure(had_err, gt_disc_distri_get(d, 100UL) == 256ULL);
 
   /* test foreach and foreach_in_reverse_order: */
-  gt_disc_distri_add(d, 2);
+  gt_disc_distri_add(d, 2UL);
   if (!had_err) {
     tdata.counter = -1;
     tdata.expkeys[0] = 0;

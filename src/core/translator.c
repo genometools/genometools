@@ -39,7 +39,7 @@ GtTranslator* gt_translator_new_with_table(GtTransTable *tt,
 {
   GtTranslator *tr;
   gt_assert(tt && ci);
-  tr = gt_calloc(1, sizeof (GtTranslator));
+  tr = gt_calloc((size_t) 1, sizeof (GtTranslator));
   tr->transtable = tt;
   tr->ci = ci;
   tr->owntable = false;
@@ -55,44 +55,45 @@ GtTranslator* gt_translator_new(GtCodonIterator *ci)
   return tr;
 }
 
-void gt_translator_reset(GtTranslator *tr, GtCodonIterator *ci)
+void gt_translator_reset(GtTranslator *translator, GtCodonIterator *ci)
 {
-  gt_assert(tr && ci);
-  tr->ci = ci;
+  gt_assert(translator && ci);
+  translator->ci = ci;
 }
 
-void gt_translator_set_codon_iterator(GtTranslator *tr,
+void gt_translator_set_codon_iterator(GtTranslator *translator,
                                       GtCodonIterator *ci)
 {
-  gt_assert(tr && ci);
-  tr->ci = ci;
+  gt_assert(translator && ci);
+  translator->ci = ci;
 }
 
-void gt_translator_set_translation_table(GtTranslator *tr,
+void gt_translator_set_translation_table(GtTranslator *translator,
                                          GtTransTable *tt)
 {
-  gt_assert(tr && tt);
-  if (tr->owntable) {
-    gt_trans_table_delete(tr->transtable);
-    tr->owntable = false;
+  gt_assert(translator && tt);
+  if (translator->owntable) {
+    gt_trans_table_delete(translator->transtable);
+    translator->owntable = false;
   }
-  tr->transtable = tt;
+  translator->transtable = tt;
 }
 
-GtTranslatorStatus gt_translator_find_startcodon(GtTranslator *tr,
+GtTranslatorStatus gt_translator_find_startcodon(GtTranslator *translator,
                                                  unsigned long *pos,
                                                  GtError *err)
 {
   char n1, n2, n3;
   unsigned int frame;
   GtCodonIteratorStatus retval;
-  gt_assert(tr && pos);
+  gt_assert(translator && pos);
   gt_error_check(err);
 
   while (!(retval =
-             gt_codon_iterator_next(tr->ci, &n1, &n2, &n3, &frame, err))) {
-    if (gt_trans_table_is_start_codon(tr->transtable, n1, n2, n3)) {
-      *pos = gt_codon_iterator_current_position(tr->ci)-1;
+             gt_codon_iterator_next(translator->ci,
+                                    &n1, &n2, &n3, &frame, err))) {
+    if (gt_trans_table_is_start_codon(translator->transtable, n1, n2, n3)) {
+      *pos = gt_codon_iterator_current_position(translator->ci)-1;
       return GT_TRANSLATOR_OK;
     }
   }
@@ -102,20 +103,21 @@ GtTranslatorStatus gt_translator_find_startcodon(GtTranslator *tr,
     return GT_TRANSLATOR_ERROR;
 }
 
-GtTranslatorStatus gt_translator_find_stopcodon(GtTranslator *tr,
+GtTranslatorStatus gt_translator_find_stopcodon(GtTranslator *translator,
                                                 unsigned long *pos,
                                                 GtError *err)
 {
   char n1, n2, n3;
   unsigned int frame;
   GtCodonIteratorStatus retval;
-  gt_assert(tr && pos);
+  gt_assert(translator && pos);
   gt_error_check(err);
 
   while (!(retval =
-             gt_codon_iterator_next(tr->ci, &n1, &n2, &n3, &frame, err))) {
-    if (gt_trans_table_is_stop_codon(tr->transtable, n1, n2, n3)) {
-      *pos = gt_codon_iterator_current_position(tr->ci)-1;
+             gt_codon_iterator_next(translator->ci,
+                                    &n1, &n2, &n3, &frame, err))) {
+    if (gt_trans_table_is_stop_codon(translator->transtable, n1, n2, n3)) {
+      *pos = gt_codon_iterator_current_position(translator->ci)-1;
       return GT_TRANSLATOR_OK;
     }
   }
@@ -125,7 +127,7 @@ GtTranslatorStatus gt_translator_find_stopcodon(GtTranslator *tr,
     return GT_TRANSLATOR_ERROR;
 }
 
-GtTranslatorStatus gt_translator_find_codon(GtTranslator *tr,
+GtTranslatorStatus gt_translator_find_codon(GtTranslator *translator,
                                             GtStrArray *codons,
                                             unsigned long *pos,
                                             GtError *err)
@@ -134,12 +136,12 @@ GtTranslatorStatus gt_translator_find_codon(GtTranslator *tr,
   unsigned int frame;
   unsigned long i;
   GtCodonIteratorStatus retval;
-  gt_assert(tr && codons && pos);
+  gt_assert(translator && codons && pos);
   gt_error_check(err);
 
   for (i = 0; i<gt_str_array_size(codons); i++) {
     int len;
-    if ((len = strlen(gt_str_array_get(codons, i))) != GT_CODON_LENGTH) {
+    if ((len = (int) strlen(gt_str_array_get(codons, i))) != GT_CODON_LENGTH) {
       gt_error_set(err, "invalid codon length for codon %s: %d",
                    gt_str_array_get(codons, i), len);
       return GT_TRANSLATOR_ERROR;
@@ -147,12 +149,13 @@ GtTranslatorStatus gt_translator_find_codon(GtTranslator *tr,
   }
 
   while (!(retval =
-             gt_codon_iterator_next(tr->ci, &n1, &n2, &n3, &frame, err))) {
+             gt_codon_iterator_next(translator->ci,
+                                    &n1, &n2, &n3, &frame, err))) {
     for (i = 0; i<gt_str_array_size(codons); i++) {
       const char *codon;
       codon = gt_str_array_get(codons, i);
       if (n1 == codon[0] && n2 == codon[1] && n3 == codon[2]) {
-        *pos = gt_codon_iterator_current_position(tr->ci)-1;
+        *pos = gt_codon_iterator_current_position(translator->ci)-1;
         return GT_TRANSLATOR_OK;
       }
     }
@@ -163,51 +166,54 @@ GtTranslatorStatus gt_translator_find_codon(GtTranslator *tr,
     return GT_TRANSLATOR_ERROR;
 }
 
-GtTranslatorStatus gt_translator_next(GtTranslator *tr,
+GtTranslatorStatus gt_translator_next(GtTranslator *translator,
                                       char *translated,
                                       unsigned int *frame,
                                       GtError *err)
 {
-  return gt_translator_next_with_start(tr, translated, frame, NULL, err);
+  return gt_translator_next_with_start(translator, translated, frame, NULL,
+                                       err);
 }
 
-GtTranslatorStatus gt_translator_next_with_start(GtTranslator *tr,
+GtTranslatorStatus gt_translator_next_with_start(GtTranslator *translator,
                                                  char *translated,
                                                  unsigned int *frame,
                                                  bool *start,
                                                  GtError *err)
 {
   char n1, n2, n3;
+  GtCodonIteratorStatus status;
   int retval;
-  gt_assert(tr && translated && frame);
+  gt_assert(translator && translated && frame);
   gt_error_check(err);
 
-  retval = gt_codon_iterator_next(tr->ci, &n1, &n2, &n3, frame, err);
-  if (retval == GT_CODON_ITERATOR_END)
+  status = gt_codon_iterator_next(translator->ci, &n1, &n2, &n3, frame, err);
+  if (status == GT_CODON_ITERATOR_END)
     return GT_TRANSLATOR_END;
-  if (retval == GT_CODON_ITERATOR_ERROR)
+  if (status == GT_CODON_ITERATOR_ERROR)
     return GT_TRANSLATOR_ERROR;
-  retval = gt_trans_table_translate_codon(tr->transtable, n1, n2, n3,
+  retval = gt_trans_table_translate_codon(translator->transtable, n1, n2, n3,
                                           translated, err);
   if (retval)
     return GT_TRANSLATOR_ERROR;
-  if (start)
-    *start = gt_trans_table_is_start_codon(tr->transtable, n1, n2, n3);
-  gt_assert(*frame < GT_CODON_LENGTH);
+  if (start != NULL)
+    *start = gt_trans_table_is_start_codon(translator->transtable, n1, n2, n3);
+  gt_assert(*frame < (unsigned int) GT_CODON_LENGTH);
   return GT_TRANSLATOR_OK;
 }
 
-void gt_translator_delete(GtTranslator *tr)
+void gt_translator_delete(GtTranslator *translator)
 {
-  if (!tr) return;
-  if (tr->owntable)
-    gt_trans_table_delete(tr->transtable);
-  gt_free(tr);
+  if (!translator) return;
+  if (translator->owntable)
+    gt_trans_table_delete(translator->transtable);
+  gt_free(translator);
 }
 
 int gt_translator_unit_test(GtError *err)
 {
-  int had_err = 0, test_errnum = 0;
+  int had_err = 0;
+  GtTranslatorStatus test_errnum;
   GtTranslator *tr;
   GtCodonIterator *ci;
   GtError *test_err;
@@ -226,7 +232,7 @@ int gt_translator_unit_test(GtError *err)
   gt_error_check(err);
 
   test_err = gt_error_new();
-  ci = gt_codon_iterator_simple_new(seq, strlen(seq), test_err);
+  ci = gt_codon_iterator_simple_new(seq, (unsigned long) strlen(seq), test_err);
   tr = gt_translator_new(ci);
   protein[0] = gt_str_new();
   protein[1] = gt_str_new();
@@ -263,21 +269,21 @@ int gt_translator_unit_test(GtError *err)
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_startcodon(tr, &pos, test_err);
   ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
-  ensure(had_err, pos == 11);
+  ensure(had_err, pos == 11UL);
 
   /* find stop codon -- positive */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_stopcodon(tr, &pos, test_err);
   ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
-  ensure(had_err, pos == 12);
+  ensure(had_err, pos == 12UL);
 
   /* find arbitrary codons -- positive */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_codon(tr, codons, &pos, test_err);
   ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
-  ensure(had_err, pos == 14);
+  ensure(had_err, pos == 14UL);
 
   /* find arbitrary codons -- negative (invalid codons) */
   gt_error_unset(test_err);
@@ -288,7 +294,9 @@ int gt_translator_unit_test(GtError *err)
 
   gt_error_unset(test_err);
   gt_codon_iterator_delete(ci);
-  ci = gt_codon_iterator_simple_new(invalidseq, strlen(invalidseq), test_err);
+  ci = gt_codon_iterator_simple_new(invalidseq,
+                                    (unsigned long) strlen(invalidseq),
+                                    test_err);
   ensure(had_err, ci && !gt_error_is_set(test_err));
   gt_translator_reset(tr, ci);
   /* check translation of sequence with invalid beginning */
@@ -298,7 +306,9 @@ int gt_translator_unit_test(GtError *err)
   /* check translation of sequence with invalid character within */
   gt_error_unset(test_err);
   gt_codon_iterator_delete(ci);
-  ci = gt_codon_iterator_simple_new(invalidseq2, strlen(invalidseq2), test_err);
+  ci = gt_codon_iterator_simple_new(invalidseq2,
+                                    (unsigned long) strlen(invalidseq2),
+                                    test_err);
   ensure(had_err, ci && !gt_error_is_set(test_err));
   gt_translator_reset(tr, ci);
   test_errnum = gt_translator_next(tr, &translated, &frame, test_err);
@@ -312,7 +322,8 @@ int gt_translator_unit_test(GtError *err)
   /* find start codon -- fail */
   gt_error_unset(test_err);
   gt_codon_iterator_delete(ci);
-  ci = gt_codon_iterator_simple_new(no_startcodon, strlen(no_startcodon),
+  ci = gt_codon_iterator_simple_new(no_startcodon,
+                                    (unsigned long) strlen(no_startcodon),
                                     test_err);
   ensure(had_err, ci && !gt_error_is_set(test_err));
   gt_translator_reset(tr, ci);

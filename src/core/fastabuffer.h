@@ -33,6 +33,7 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
                                   GtFilelengthvalues **filelengthtab,
                                   GtQueue *descptr,
                                   unsigned long *characterdistribution);
+/*@unused@*/
 static int   gt_fastabuffer_next(GtFastaBuffer*, GtUchar *val, GtError*);
 void         gt_fastabuffer_delete(GtFastaBuffer*);
 

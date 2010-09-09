@@ -53,7 +53,7 @@ void               gt_translator_set_codon_iterator(GtTranslator *translator,
 
 /* Selects the translation scheme in <translator> to the one identified by
    translation table <tt>. */
-void               gt_translator_set_translation_table(GtTranslator *tr,
+void               gt_translator_set_translation_table(GtTranslator *translator,
                                                        GtTransTable *tt);
 
 /* Returns the translation of the next codon. The currently translated

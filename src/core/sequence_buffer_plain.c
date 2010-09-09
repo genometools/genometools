@@ -100,7 +100,7 @@ static int gt_sequence_buffer_plain_advance(GtSequenceBuffer *sb, GtError *err)
       } else
       {
         currentfileread++;
-        pvt->outbuf[currentoutpos++] = (GtUchar) currentchar;
+        pvt->outbuf[currentoutpos++] = (unsigned char) currentchar;
       }
     }
   }
@@ -118,7 +118,7 @@ static unsigned long
 gt_sequence_buffer_plain_get_file_index(GtSequenceBuffer *sb)
 {
   gt_assert(sb);
-  return sb->pvt->filenum;
+  return (unsigned long) sb->pvt->filenum;
 }
 
 void gt_sequence_buffer_plain_free(GT_UNUSED GtSequenceBuffer *sb)

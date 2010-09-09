@@ -22,27 +22,30 @@
 #include "core/file.h"
 #include "core/sequence_buffer_rep.h"
 
-static inline int process_char(GtSequenceBuffer *sb,
-                               unsigned long currentoutpos, unsigned char cc,
-                               GtError *err)
+/*@unused@*/ static inline int process_char(GtSequenceBuffer *sb,
+                                            unsigned long currentoutpos,
+                                            unsigned char cc,
+                                            GtError *err)
 {
   GtSequenceBufferMembers *pvt;
   unsigned char charcode;
   pvt = sb->pvt;
-  if (pvt->symbolmap) {
+  if (pvt->symbolmap != NULL) {
     charcode = pvt->symbolmap[(unsigned int) cc];
     if (charcode == UNDEFCHAR) {
       gt_error_set(err, "illegal character '%c': file \"%s\", line %llu",
-                        cc, gt_str_array_get(pvt->filenametab, pvt->filenum),
+                        cc,
+                        gt_str_array_get(pvt->filenametab,
+                                         (unsigned long) pvt->filenum),
                         (unsigned long long) pvt->linenum);
       return -1;
     }
-    if (ISSPECIAL(charcode)) {
+    if (ISSPECIAL((GtUchar) charcode)) {
       pvt->lastspeciallength++;
     } else {
       if (pvt->lastspeciallength > 0)
         pvt->lastspeciallength = 0;
-      if (pvt->chardisttab)
+      if (pvt->chardisttab != NULL)
         pvt->chardisttab[(int) charcode]++;
     }
     pvt->outbuf[currentoutpos] = charcode;
@@ -52,26 +55,28 @@ static inline int process_char(GtSequenceBuffer *sb,
   return 0;
 }
 
-static inline int inlinebuf_getchar(GtSequenceBuffer *sb, GtFile *f)
+/*@unused@*/ static inline int inlinebuf_getchar(GtSequenceBuffer *sb,
+                                                 GtFile *f)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
   if (pvt->use_ungetchar) {
     pvt->use_ungetchar = false;
-    return pvt->ungetchar;
+    return (int) pvt->ungetchar;
   } else {
     if (pvt->currentinpos >= pvt->currentfillpos) {
-      pvt->currentfillpos = gt_file_xread(f, pvt->inbuf, INBUFSIZE);
+      pvt->currentfillpos = (unsigned long) gt_file_xread(f, pvt->inbuf,
+                                                          (size_t) INBUFSIZE);
       if (pvt->currentfillpos == 0)
          return EOF;
       pvt->currentinpos = 0;
     }
     pvt->ungetchar = pvt->inbuf[pvt->currentinpos++];
-    return pvt->ungetchar;
+    return (int) pvt->ungetchar;
   }
 }
 
-static inline void inlinebuf_ungetchar(GtSequenceBuffer *sb)
+/*@unused@*/ static inline void inlinebuf_ungetchar(GtSequenceBuffer *sb)
 {
   gt_assert(!sb->pvt->use_ungetchar);
   sb->pvt->use_ungetchar = true;

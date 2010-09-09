@@ -23,7 +23,7 @@
 typedef struct GtTransTable GtTransTable;
 
 /* The number of the standard translation scheme. */
-#define GT_STANDARD_TRANSLATION_SCHEME 1
+#define GT_STANDARD_TRANSLATION_SCHEME 1U
 
 /* Returns a <GtStrArray> of translation scheme descriptions, each of the
    format "%d: %s" where the number is the translation scheme number (usable in

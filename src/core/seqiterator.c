@@ -60,7 +60,7 @@ GtSeqIterator* gt_seqiterator_create(const GtSeqIteratorClass *sic)
 {
   GtSeqIterator *si;
   gt_assert(sic && sic->size);
-  si = gt_calloc(1, sic->size);
+  si = gt_calloc((size_t) 1, sic->size);
   si->c_class = sic;
   return si;
 }
@@ -103,12 +103,12 @@ void gt_seqiterator_set_sequence_output(GtSeqIterator *seqit, bool withsequence)
 int gt_seqiterator_next(GtSeqIterator *seqit,
                         const GtUchar **sequence,
                         unsigned long *len,
-                        char **desc,
+                        char **description,
                         GtError *err)
 {
   gt_assert(seqit);
   if (seqit->c_class && seqit->c_class->next_func)
-    return seqit->c_class->next_func(seqit, sequence, len, desc, err);
+    return seqit->c_class->next_func(seqit, sequence, len, description, err);
   else
     return 0;
 }
@@ -128,6 +128,7 @@ void gt_seqiterator_delete(GtSeqIterator *seqit)
 {
   if (!seqit) return;
   gt_assert(seqit->c_class);
-  if (seqit->c_class->free_func) seqit->c_class->free_func(seqit);
+  if (seqit->c_class->free_func != NULL)
+    seqit->c_class->free_func(seqit);
   gt_free(seqit);
 }
