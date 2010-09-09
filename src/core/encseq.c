@@ -136,7 +136,7 @@ typedef struct
 typedef struct
 {
   const char *funcname;
-  bool(*function)(const GtEncseq *,bool,GtEncseqReader *,
+  bool(*function)(const GtEncseq *,GtReadmode,GtEncseqReader *,
                   unsigned long,unsigned long);
 } Containsspecialfunc;
 
@@ -437,18 +437,13 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 /* The following function is only used in tyr-mkindex.c */
 
 bool gt_encseq_contains_special(const GtEncseq *encseq,
-                                bool moveforward,
+                                GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 unsigned long startpos,
                                 unsigned long len)
 {
   gt_assert(len >= 1UL && startpos + len <= encseq->totallength);
-  return encseq->delivercontainsspecial(encseq,moveforward,esr,
-                                        moveforward
-                                          ? startpos
-                                          : GT_REVERSEPOS(encseq->totallength,
-                                                          startpos),
-                                        len);
+  return encseq->delivercontainsspecial(encseq,readmode,esr,startpos,len);
 }
 
 #undef RANGEDEBUG
@@ -995,7 +990,7 @@ static GtUchar seqdelivercharViadirectaccess(GT_UNUSED const GtEncseq *encseq,
 }
 
 static bool containsspecialViadirectaccess(const GtEncseq *encseq,
-                                           bool moveforward,
+                                           GtReadmode readmode,
                                            GT_UNUSED GtEncseqReader *esr,
                                            unsigned long startpos,
                                            unsigned long len)
@@ -1003,7 +998,7 @@ static bool containsspecialViadirectaccess(const GtEncseq *encseq,
   unsigned long pos;
 
   gt_assert(encseq != NULL);
-  if (moveforward)
+  if (!GT_ISDIRREVERSE(readmode))
   {
     for (pos = startpos; pos < startpos + len; pos++)
     {
@@ -1014,6 +1009,8 @@ static bool containsspecialViadirectaccess(const GtEncseq *encseq,
     }
   } else
   {
+    gt_assert(startpos < encseq->totallength);
+    startpos = GT_REVERSEPOS(encseq->totallength,startpos);
     gt_assert (startpos + 1 >= len);
     for (pos = startpos; /* Nothing */; pos--)
     {
@@ -1108,7 +1105,7 @@ static GtUchar seqdelivercharViabytecompress(GT_UNUSED const GtEncseq *encseq,
 }
 
 static bool containsspecialViabytecompress(const GtEncseq *encseq,
-                                           bool moveforward,
+                                           GtReadmode readmode,
                                            GT_UNUSED GtEncseqReader *esr,
                                            unsigned long startpos,
                                            unsigned long len)
@@ -1116,8 +1113,7 @@ static bool containsspecialViabytecompress(const GtEncseq *encseq,
   unsigned long pos;
   GtUchar cc;
 
-  gt_assert(encseq != NULL);
-  if (moveforward)
+  if (!GT_ISDIRREVERSE(readmode))
   {
     for (pos = startpos; pos < startpos + len; pos++)
     {
@@ -1129,6 +1125,8 @@ static bool containsspecialViabytecompress(const GtEncseq *encseq,
     }
   } else
   {
+    gt_assert(startpos < encseq->totallength);
+    startpos = GT_REVERSEPOS(encseq->totallength,startpos);
     gt_assert (startpos + 1 >= len);
     for (pos = startpos; /* Nothing */; pos--)
     {
@@ -1251,21 +1249,17 @@ static bool checkspecialbruteforce(const GtEncseq *encseq,
 */
 
 static bool containsspecialViaequallength(const GtEncseq *encseq,
-                                          bool moveforward,
+                                          GtReadmode readmode,
                                           GT_UNUSED GtEncseqReader *esr,
                                           unsigned long startpos,
                                           unsigned long len)
 {
   gt_assert(encseq != NULL);
-
-  if (specialsingleposViaequallength(encseq,startpos))
-  {
-    return true;
-  }
-  if (moveforward)
+  if (!GT_ISDIRREVERSE(readmode))
   {
     gt_assert(startpos + len <= encseq->totallength);
-    if (specialsingleposViaequallength(encseq,startpos + len - 1) ||
+    if (specialsingleposViaequallength(encseq,startpos) ||
+        specialsingleposViaequallength(encseq,startpos + len - 1) ||
         gt_encseq_seqnum_Viaequallength(encseq,startpos) !=
         gt_encseq_seqnum_Viaequallength(encseq,startpos + len - 1))
     {
@@ -1273,8 +1267,11 @@ static bool containsspecialViaequallength(const GtEncseq *encseq,
     }
   } else
   {
+    gt_assert(startpos < encseq->totallength);
+    startpos = GT_REVERSEPOS(encseq->totallength,startpos);
     gt_assert (startpos + 1 >= len);
-    if (specialsingleposViaequallength(encseq,startpos + 1 - len) ||
+    if (specialsingleposViaequallength(encseq,startpos) ||
+        specialsingleposViaequallength(encseq,startpos + 1 - len) ||
         gt_encseq_seqnum_Viaequallength(encseq,startpos) !=
         gt_encseq_seqnum_Viaequallength(encseq,startpos + 1 - len))
     {
@@ -1355,7 +1352,7 @@ static GtUchar seqdelivercharViabitaccessSpecial(GT_UNUSED
 }
 
 static bool containsspecialViabitaccess(const GtEncseq *encseq,
-                                        bool moveforward,
+                                        GtReadmode readmode,
                                         GT_UNUSED GtEncseqReader *esr,
                                         unsigned long startpos,
                                         unsigned long len)
@@ -1363,11 +1360,16 @@ static bool containsspecialViabitaccess(const GtEncseq *encseq,
   unsigned long pos;
 
   gt_assert(encseq != NULL);
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    gt_assert(startpos < encseq->totallength);
+    startpos = GT_REVERSEPOS(encseq->totallength,startpos);
+  }
   if (encseq->specialbits == NULL)
   {
     return false;
   }
-  if (moveforward)
+  if (!GT_ISDIRREVERSE(readmode))
   {
     gt_assert(startpos + len <= encseq->totallength);
     for (pos = startpos; pos < startpos + len; pos++)
@@ -1721,12 +1723,12 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
 }
 
 static bool containsspecialViatables(const GtEncseq *encseq,
-                                     bool moveforward,
+                                     GtReadmode readmode,
                                      GtEncseqReader *esr,
                                      unsigned long startpos,
                                      unsigned long len)
 {
-  gt_encseq_reader_reinit_with_direction(esr,encseq,moveforward,startpos);
+  gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
   if (esr->idx->hasprevious)
   {
     if (esr->idx->moveforward)
@@ -1739,6 +1741,7 @@ static bool containsspecialViatables(const GtEncseq *encseq,
       }
     } else
     {
+      startpos = GT_REVERSEPOS(encseq->totallength,startpos);
       gt_assert(startpos + 1 >= len);
       if (startpos + 1 - len < esr->idx->previousrange.end &&
           startpos >= esr->idx->previousrange.start)
@@ -4782,27 +4785,34 @@ static void checkextractspecialbits(const GtEncseq *encseq,bool fwd)
 }
 
 static void multicharactercompare_withtest(const GtEncseq *encseq,
-                                           bool fwd,
-                                           bool complement,
-                                           GtEncseqReader *esr1,
+                                           GtReadmode readmode,
                                            unsigned long pos1,
-                                           GtEncseqReader *esr2,
                                            unsigned long pos2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtCommonunits commonunits1;
   unsigned long commonunits2;
   int ret1, ret2;
+  GtEncseqReader *esr1, *esr2;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
+       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  gt_encseq_reader_reinit_with_direction(esr1,encseq,fwd,pos1);
-  gt_encseq_reader_reinit_with_direction(esr2,encseq,fwd,pos2);
-  gt_encseq_extract2bitenc(fwd,&ptbe1,encseq,esr1,pos1);
-  gt_encseq_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
+  esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos1);
+  esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos2);
+  gt_encseq_extract2bitenc2(fwd,&ptbe1,encseq,esr1,pos1);
+  gt_encseq_extract2bitenc2(fwd,&ptbe2,encseq,esr2,pos2);
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
   ret1 = gt_encseq_compare_twobitencodings(fwd, complement,
                                            &commonunits1,&ptbe1, &ptbe2);
   commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos1 = GT_REVERSEPOS(encseq->totallength,pos1);
+    pos2 = GT_REVERSEPOS(encseq->totallength,pos2);
+  }
   ret2 = gt_encseq_comparetwostrings(encseq,fwd,complement,
-                                              &commonunits2,pos1,pos2,0);
+                                     &commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || commonunits2 != (unsigned long) commonunits1.common)
   {
     char buf1[GT_INTWORDSIZE+1], buf2[GT_INTWORDSIZE+1];
@@ -5461,31 +5471,21 @@ static void testmulticharactercompare(const GtEncseq *encseq,
                                       GtReadmode readmode,
                                       unsigned long multicharcmptrials)
 {
-  GtEncseqReader *esr1, *esr2;
   unsigned long pos1, pos2, totallength;
   unsigned long trial;
-  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
-       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   totallength = gt_encseq_total_length(encseq);
-  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,0);
-  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,0,esr2,
-                                        totallength-1);
-  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,
-                                        totallength-1,esr2,0);
-  (void) multicharactercompare_withtest(encseq,fwd,complement,esr1,
-                                        totallength-1,esr2,totallength-1);
+  (void) multicharactercompare_withtest(encseq,readmode,0,0);
+  (void) multicharactercompare_withtest(encseq,readmode,0,totallength-1);
+  (void) multicharactercompare_withtest(encseq,readmode,totallength-1,0);
+  (void) multicharactercompare_withtest(encseq,readmode,totallength-1,
+                                                        totallength-1);
   for (trial = 0; trial < multicharcmptrials; trial++)
   {
     pos1 = (unsigned long) (random() % totallength);
     pos2 = (unsigned long) (random() % totallength);
-    (void) multicharactercompare_withtest(encseq,fwd,complement,
-                                          esr1,pos1,esr2,pos2);
+    (void) multicharactercompare_withtest(encseq,readmode,pos1,pos2);
   }
-  gt_encseq_reader_delete(esr1);
-  gt_encseq_reader_delete(esr2);
 }
 
 static int testfullscan(const GtStrArray *filenametab,

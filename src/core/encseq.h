@@ -224,7 +224,7 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   GtEncseqReader. <moveforward> is true if and only if the
   scanning is done in forward direction. */
 bool gt_encseq_contains_special(const GtEncseq *encseq,
-                                bool moveforward,
+                                GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 unsigned long startpos,
                                 unsigned long len);

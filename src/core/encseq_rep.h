@@ -66,7 +66,7 @@ struct GtEncseq
                            GtEncseqReader *,unsigned long);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const GtEncseq *,
-                                bool,
+                                GtReadmode,
                                 GtEncseqReader *,
                                 unsigned long,
                                 unsigned long);

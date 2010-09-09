@@ -70,7 +70,6 @@ typedef struct /* global information */
   GtArrayCountwithpositions occdistribution;
   FILE *merindexfpout,
        *countsfilefpout;
-  bool moveforward;
   GtEncseqReader *esrspace;
   bool performtest;
   bool storecounts;
@@ -92,7 +91,7 @@ static uint64_t bruteforcecountnumofmers(const TyrDfsstate *state)
   for (idx=0; idx <= state->totallength - state->mersize; idx++)
   {
     if (!gt_encseq_contains_special(state->encseq,
-                                    state->moveforward,
+                                    state->readmode,
                                     state->esrspace,
                                     idx,
                                     state->mersize))
@@ -437,41 +436,6 @@ static void tyr_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
   FREESPACE(dfsinfo);
 }
 
-#ifdef WITHcontainsspecial2
-static bool containsspecial2(const GtEncseq *encseq,
-                     GT_UNUSED bool moveforward,
-                     GT_UNUSED GtEncseqReader *esrspace,
-                     unsigned long startpos,
-                     unsigned long len)
-{
-  unsigned long pos;
-  bool result = false, result2;
-
-  for (pos=startpos; pos<startpos+len; pos++)
-  {
-    if (ISSPECIAL(gt_encseq_get_encoded_char(encseq,pos, GT_READMODE_FORWARD)))
-    {
-      result = true;
-      break;
-    }
-  }
-  result2 = containsspecial(encseq,
-                            moveforward,
-                            esrspace,
-                            startpos,len);
-  if ((result && !result2) || (!result && result2))
-  {
-    fprintf(stderr,"pos = %lu, len = %lu: result = %s != %s = result2\n",
-                    (unsigned long) startpos,
-                    (unsigned long) len,
-                    result ? "true" : "false",
-                    result2 ? "true" : "false");
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  return result;
-}
-#endif
-
 static int tyr_processleafedge(GT_UNUSED bool firstsucc,
                            unsigned long fatherdepth,
                            GT_UNUSED Dfsinfo *father,
@@ -484,10 +448,10 @@ static int tyr_processleafedge(GT_UNUSED bool firstsucc,
   if (fatherdepth < state->mersize &&
       leafnumber + state->mersize <= state->totallength &&
       !gt_encseq_contains_special(state->encseq,
-                                           state->moveforward,
-                                           state->esrspace,
-                                           leafnumber + fatherdepth,
-                                           state->mersize - fatherdepth))
+                                  state->readmode,
+                                  state->esrspace,
+                                  leafnumber + fatherdepth,
+                                  state->mersize - fatherdepth))
   {
     if (state->processoccurrencecount(1UL,leafnumber,state,err) != 0)
     {
@@ -590,7 +554,6 @@ static int enumeratelcpintervals(const char *inputindex,
   state->storecounts = storecounts;
   state->minocc = minocc;
   state->maxocc = maxocc;
-  state->moveforward = GT_ISDIRREVERSE(state->readmode) ? false : true;
   state->totallength = gt_encseq_total_length(state->encseq);
   state->performtest = performtest;
   state->countoutputmers = 0;
