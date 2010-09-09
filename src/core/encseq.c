@@ -1589,9 +1589,9 @@ static void binpreparenextrange(const GtEncseq *encseq,
 }
 
 static void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
-                                                    const GtEncseq *encseq,
-                                                    bool moveforward,
-                                                    unsigned long startpos)
+                                                   const GtEncseq *encseq,
+                                                   bool moveforward,
+                                                   unsigned long startpos)
 {
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq) {
@@ -1658,17 +1658,6 @@ GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
   esr = gt_calloc((size_t) 1, sizeof (GtEncseqReader));
   gt_encseq_reader_reinit_with_readmode(esr, (GtEncseq*) encseq, readmode,
                                         startpos);
-  return esr;
-}
-
-GtEncseqReader* gt_encseq_create_reader_with_direction(const GtEncseq *encseq,
-                                                       bool moveforward,
-                                                       unsigned long startpos)
-{
-  GtEncseqReader *esr;
-  esr = gt_calloc((size_t) 1, sizeof (GtEncseqReader));
-  gt_encseq_reader_reinit_with_direction(esr, (GtEncseq*) encseq, moveforward,
-                                         startpos);
   return esr;
 }
 
@@ -1814,11 +1803,10 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   {
     sri->pos = 0;
     sri->esr
-      = gt_encseq_create_reader_with_direction(encseq,
-                                               moveforward,
-                                               moveforward
-                                                 ? 0
-                                                 : (encseq->totallength-1));
+      = gt_encseq_create_reader_with_readmode(encseq,
+                                              moveforward ? GT_READMODE_FORWARD
+                                                          : GT_READMODE_REVERSE,
+                                              0);
   }
   gt_assert(sri != NULL);
   return sri;
@@ -4134,8 +4122,8 @@ int gt_encseq_compare(const GtEncseq *encseq,
     {
       if (pos1 >= depth && pos2 >= depth)
       {
-        gt_encseq_reader_reinit_with_direction(esr1,encseq,false, pos1 - depth);
-        gt_encseq_reader_reinit_with_direction(esr2,encseq,false, pos2 - depth);
+        gt_encseq_reader_reinit_with_direction(esr1,encseq,false,pos1 - depth);
+        gt_encseq_reader_reinit_with_direction(esr2,encseq,false,pos2 - depth);
       }
     }
   }
@@ -4293,10 +4281,6 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   {
     if (fwd)
     {
-      /*
-      printf("depth=%lu, pos1=%lu, pos2=%lu, endpos1=%lu, endpos2=%lu\n",
-              depth,pos1,pos2,endpos1,endpos2);
-      */
       if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
       {
         fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
@@ -4332,8 +4316,8 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
         revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
         revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
         retval = gt_encseq_compare_twobitencodings(false,complement,
-                                                            commonunits,
-                                                            &ptbe1,&ptbe2);
+                                                   commonunits,
+                                                   &ptbe1,&ptbe2);
         if (depth + commonunits->common < maxdepth)
         {
           depth += commonunits->common;
@@ -4472,7 +4456,8 @@ static void extract2bitenc_bruteforce(bool fwd,
     fwdextract2bitenc_bruteforce(ptbe,encseq,startpos);
   } else
   {
-    revextract2bitenc_bruteforce(ptbe,encseq,startpos);
+    revextract2bitenc_bruteforce(ptbe,encseq,
+                                 GT_REVERSEPOS(encseq->totallength,startpos));
   }
 }
 
@@ -4694,17 +4679,17 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
 }
 
 static void checkextractunitatpos(const GtEncseq *encseq,
-                                  bool fwd,bool complement)
+                                  GtReadmode readmode,bool complement)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtEncseqReader *esr;
   unsigned long startpos;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
-  startpos = fwd ? 0 : (encseq->totallength-1);
-  esr = gt_encseq_create_reader_with_direction(encseq,fwd,startpos);
-  while (true)
+  esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
+  for (startpos = 0; startpos < encseq->totallength; startpos++)
   {
-    gt_encseq_extract2bitenc(fwd,&ptbe1,encseq,esr,startpos);
+    gt_encseq_extract2bitenc2(fwd,&ptbe1,encseq,esr,startpos);
     extract2bitenc_bruteforce(fwd,&ptbe2,encseq,startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial)
     {
@@ -4713,9 +4698,12 @@ static void checkextractunitatpos(const GtEncseq *encseq,
                      " != %u = brute.unitsnotspecial\n",
               fwd ? "true" : "false",
               complement ? "true" : "false",
-              startpos,
+              fwd ? startpos : GT_REVERSEPOS(encseq->totallength,startpos),
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
-      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,startpos);
+      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,
+                               fwd ? startpos 
+                                   : GT_REVERSEPOS(encseq->totallength,
+                                                   startpos));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
@@ -4723,24 +4711,13 @@ static void checkextractunitatpos(const GtEncseq *encseq,
       fprintf(stderr,"fwd=%s,complement=%s: pos %lu\n",
                       fwd ? "true" : "false",
                       complement ? "true" : "false",
-                      startpos);
-      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,startpos);
+                      fwd ? startpos 
+                          : GT_REVERSEPOS(encseq->totallength,startpos));
+      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,
+                               fwd ? startpos 
+                                   : GT_REVERSEPOS(encseq->totallength,
+                                                   startpos));
       exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    if (fwd)
-    {
-      if (startpos == encseq->totallength - 1)
-      {
-        break;
-      }
-      startpos++;
-    } else
-    {
-      if (startpos == 0)
-      {
-        break;
-      }
-      startpos--;
     }
   }
   gt_encseq_reader_delete(esr);
@@ -5620,9 +5597,8 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
 
   if (encseq->sat != GT_ACCESS_TYPE_DIRECTACCESS &&
       encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS)
-  /*satviautables(encseq->sat)*/
   {
-    checkextractunitatpos(encseq,fwd,complement);
+    checkextractunitatpos(encseq,readmode,complement);
     if (multicharcmptrials > 0)
     {
       testmulticharactercompare(encseq,readmode,multicharcmptrials);
