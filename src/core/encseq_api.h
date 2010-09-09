@@ -95,12 +95,7 @@ char              gt_encseq_get_decoded_char(const GtEncseq *encseq,
 
 /* Increases the reference count of <encseq>. */
 GtEncseq*         gt_encseq_ref(GtEncseq *encseq);
-/* Returns a new <GtEncseqReader> for <encseq>, starting from position
-   <startpos>. If <moveforward> is true, the iterator will move forward in the
-   sequence, if false, it will move backwards. */
-GtEncseqReader*   gt_encseq_create_reader_with_direction(const GtEncseq *encseq,
-                                                        bool moveforward,
-                                                        unsigned long startpos);
+
 /* Returns a new <GtEncseqReader> for <encseq>, starting from position
    <startpos>. Also supports reading the sequence from the reverse and
    delivering (reverse) complement characters on DNA alphabets using the
@@ -171,12 +166,6 @@ void            gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                                       const GtEncseq *encseq,
                                                       GtReadmode readmode,
                                                       unsigned long startpos);
-/* Reinitializes the given <esr> with the values as described in
-   <gt_encseq_create_reader_with_direction()>. */
-void            gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
-                                                       const GtEncseq *encseq,
-                                                       bool moveforward,
-                                                       unsigned long startpos);
 /* Returns the next encoded character from current position of <esr>, advancing
    the iterator by one position. */
 GtUchar         gt_encseq_reader_next_encoded_char(GtEncseqReader *esr);

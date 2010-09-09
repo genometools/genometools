@@ -49,7 +49,8 @@ static void output_sequence(GtEncseq *encseq)
     gt_xfwrite(desc, 1, desclen, stdout);
     gt_xfputc('\n', stdout);
     /* output sequence */
-    encseq_reader = gt_encseq_create_reader_with_direction(encseq, true,
+    encseq_reader 
+      = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
                                               gt_encseq_seqstartpos(encseq, i));
     /* XXX: make this more efficient by writing in a buffer first and the
        showing the result */

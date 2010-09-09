@@ -273,9 +273,8 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
-      fprintf(stderr,"gt_encseq_get_encoded_char: "
-                     "readmode %d not implemented\n",
-                     (int) readmode);
+      fprintf(stderr,"%s: readmode %d not implemented\n",
+                     __func__,(int) readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -1589,10 +1588,10 @@ static void binpreparenextrange(const GtEncseq *encseq,
   }
 }
 
-void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
-                                            const GtEncseq *encseq,
-                                            bool moveforward,
-                                            unsigned long startpos)
+static void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
+                                                    const GtEncseq *encseq,
+                                                    bool moveforward,
+                                                    unsigned long startpos)
 {
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq) {
@@ -3818,6 +3817,22 @@ void gt_encseq_extract2bitenc(bool fwd,
 {
   gt_assert(encseq == esr->encseq);
   (fwd ? fwdextract2bitenc : revextract2bitenc) (ptbe,encseq,esr,startpos);
+}
+
+void gt_encseq_extract2bitenc2(bool fwd,
+                               GtEndofTwobitencoding *ptbe,
+                               const GtEncseq *encseq,
+                               GtEncseqReader *esr,
+                               unsigned long startpos)
+{
+  if (fwd)
+  {
+    fwdextract2bitenc(ptbe,encseq,esr,startpos);
+  } else
+  {
+    revextract2bitenc (ptbe,encseq,esr,
+                       GT_REVERSEPOS(encseq->totallength,startpos));
+  }
 }
 
 #define MASKPREFIX(PREFIX)\

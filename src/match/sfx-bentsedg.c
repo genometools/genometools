@@ -130,6 +130,27 @@ typedef GtEndofTwobitencoding Sfxcmp;
         {\
           unsigned long pos\
             = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
+          if (pos + depth < bsr->totallength)\
+          {\
+            pos += depth;\
+            gt_encseq_reader_reinit_with_readmode(bsr->esr1,bsr->encseq,\
+                                                  bsr->readmode,pos);\
+            gt_assert(pos < bsr->totallength);\
+            gt_encseq_extract2bitenc2(bsr->fwd,&(VAR),bsr->encseq,\
+                                      bsr->esr1,pos);\
+          } else\
+          {\
+            VAR.tbe = 0;\
+            VAR.unitsnotspecial = 0;\
+            VAR.position = pos;\
+          }\
+        }
+
+/*
+#define PTR2INT(VAR,SUBBUCKETLEFT,IDX)\
+        {\
+          unsigned long pos\
+            = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
           if (bsr->fwd)\
           {\
             if (pos + depth < bsr->totallength)\
@@ -166,6 +187,7 @@ typedef GtEndofTwobitencoding Sfxcmp;
             }\
           }\
         }
+*/
 
 #define Sfxdocompare(COMMONUNITS,X,Y)\
         ret##X##Y = gt_encseq_compare_twobitencodings(bsr->fwd,\

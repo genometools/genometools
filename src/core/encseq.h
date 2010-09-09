@@ -92,6 +92,12 @@ void gt_encseq_extract2bitenc(bool fwd,
                               GtEncseqReader *esr,
                               unsigned long startpos);
 
+void gt_encseq_extract2bitenc2(bool fwd,
+                               GtEndofTwobitencoding *ptbe,
+                               const GtEncseq *encseq,
+                               GtEncseqReader *esr,
+                               unsigned long startpos);
+
 /* Returns the encoded representation of the character at position <pos> of
   <encseq> read in the direction as indicated by <readmode>.
   The function only works for the case that encodesequence[pos] does not
