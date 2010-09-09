@@ -4385,34 +4385,6 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   return retval;
 }
 
-GT_UNUSED static int multicharactercompare(const GtEncseq *encseq,
-                                           bool fwd,
-                                           bool complement,
-                                           GtEncseqReader *esr1,
-                                           unsigned long pos1,
-                                           GtEncseqReader *esr2,
-                                           unsigned long pos2)
-{
-  GtEndofTwobitencoding ptbe1, ptbe2;
-  int retval;
-  GtCommonunits commonunits;
-
-  gt_encseq_reader_reinit_with_direction(esr1,encseq,fwd,pos1);
-  gt_encseq_reader_reinit_with_direction(esr2,encseq,fwd,pos2);
-  gt_encseq_extract2bitenc(fwd,&ptbe2,encseq,esr2,pos2);
-  retval = gt_encseq_compare_twobitencodings(fwd,complement,
-                                                      &commonunits,
-                                                      &ptbe1,&ptbe2);
-  if (retval == 0)
-  {
-    gt_assert(commonunits.common == (unsigned int) GT_UNITSIN2BITENC);
-  } else
-  {
-    gt_assert(commonunits.common < (unsigned int) GT_UNITSIN2BITENC);
-  }
-  return retval;
-}
-
 /* now some functions for testing the different functions follow */
 
 static void fwdextract2bitenc_bruteforce(GtEndofTwobitencoding *ptbe,
