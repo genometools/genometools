@@ -5762,6 +5762,16 @@ void gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
   ee->pt = pt;
 }
 
+void gt_encseq_encoder_create_esq_tab(GT_UNUSED GtEncseqEncoder *ee)
+{
+  /* stub for API compatibility */
+}
+
+void gt_encseq_encoder_do_not_create_esq_tab(GT_UNUSED GtEncseqEncoder *ee)
+{
+  /* stub for API compatibility */
+}
+
 void gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -5926,6 +5936,16 @@ GtEncseqLoader* gt_encseq_loader_new()
   gt_encseq_loader_require_description_support(el);
   gt_encseq_loader_enable_range_iterator(el);
   return el;
+}
+
+void gt_encseq_loader_require_esq_tab(GT_UNUSED GtEncseqLoader *el)
+{
+  /* stub for API compatibility */
+}
+
+void gt_encseq_loader_do_not_require_esq_tab(GT_UNUSED GtEncseqLoader *el)
+{
+  /* stub for API compatibility */
 }
 
 void gt_encseq_loader_require_des_tab(GtEncseqLoader *el)
