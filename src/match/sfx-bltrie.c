@@ -339,10 +339,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
     gt_assert(currentstartpos < blindtrie->totallength);
     (void) gt_encseq_compare(blindtrie->encseq,
                              &commonunits,
-                             GT_ISDIRREVERSE(blindtrie->readmode)
-                             ? false : true,
-                             GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                             ? true : false,
+                             blindtrie->readmode,
                              blindtrie->esr1,
                              blindtrie->esr2,
                              leafpos,

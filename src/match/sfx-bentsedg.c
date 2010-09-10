@@ -507,8 +507,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
         gt_assert(startpos1 < bsr->totallength);
         startpos2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
         gt_assert(startpos2 < bsr->totallength);
-        retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->fwd,
-                                   bsr->complement,
+        retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->readmode,
                                    bsr->esr1,bsr->esr2,
                                    startpos1,
                                    startpos2,

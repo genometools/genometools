@@ -4134,6 +4134,7 @@ static void verifycomparestringresults(const GtEncseq *encseq,
 }
 #endif
 
+/*
 int gt_encseq_compare(const GtEncseq *encseq,
                       GtCommonunits *commonunits,
                       bool fwd,
@@ -4179,7 +4180,6 @@ int gt_encseq_compare(const GtEncseq *encseq,
   {
     if (fwd)
     {
-      /*printf("pos1=%lu,pos2=%lu,depth=%lu\n",pos1,pos2,depth);*/
       if (pos1 + depth < encseq->totallength &&
           pos2 + depth < encseq->totallength)
       {
@@ -4189,7 +4189,6 @@ int gt_encseq_compare(const GtEncseq *encseq,
                                                    commonunits,
                                                    &ptbe1,&ptbe2);
         depth += commonunits->common;
-        /*printf("depth=%lu\n",depth);*/
       } else
       {
         retval = comparewithonespecial(&commonunits->leftspecial,
@@ -4233,6 +4232,77 @@ int gt_encseq_compare(const GtEncseq *encseq,
                              complement,
                              pos1,
                              pos2,
+                             depth,
+                             0,
+                             retval);
+#endif
+  return retval;
+}
+*/
+
+int gt_encseq_compare(const GtEncseq *encseq,
+                      GtCommonunits *commonunits,
+                      GtReadmode readmode,
+                      GtEncseqReader *esr1,
+                      GtEncseqReader *esr2,
+                      unsigned long pos1,
+                      unsigned long pos2,
+                      unsigned long depth)
+{
+  GtEndofTwobitencoding ptbe1, ptbe2;
+  int retval;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
+       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
+
+  countgt_encseq_compare++;
+  gt_assert(pos1 != pos2);
+  if (encseq->numofspecialstostore > 0)
+  {
+    if (pos1 + depth < encseq->totallength &&
+        pos2 + depth < encseq->totallength)
+    {
+      gt_encseq_reader_reinit_with_readmode(esr1,encseq,readmode,pos1+depth);
+      gt_encseq_reader_reinit_with_readmode(esr2,encseq,readmode,pos2+depth);
+    }
+  }
+  do
+  {
+    if (pos1 + depth < encseq->totallength &&
+        pos2 + depth < encseq->totallength)
+    {
+      gt_encseq_extract2bitenc2(fwd,&ptbe1,encseq,esr1,pos1 + depth);
+      gt_encseq_extract2bitenc2(fwd,&ptbe2,encseq,esr2,pos2 + depth);
+      retval = gt_encseq_compare_twobitencodings(fwd,complement,
+                                                 commonunits,
+                                                 &ptbe1,&ptbe2);
+      depth += commonunits->common;
+    } else
+    {
+      retval = comparewithonespecial(&commonunits->leftspecial,
+                                     &commonunits->rightspecial,
+                                     encseq,
+                                     fwd,
+                                     complement,
+                                     fwd ? pos1
+                                         : GT_REVERSEPOS(encseq->totallength,
+                                           pos1),
+                                     fwd ? pos2
+                                         : GT_REVERSEPOS(encseq->totallength,
+                                           pos2),
+                                     depth,
+                                     0);
+    }
+  } while (retval == 0);
+  commonunits->finaldepth = depth;
+#ifdef FASTCOMPAREDEBUG
+  verifycomparestringresults(encseq,
+                             commonunits,
+                             fwd,
+                             complement,
+                             fwd ? pos1
+                                 : GT_REVERSEPOS(encseq->totallength,pos1),
+                             fwd ? pos2 
+                                 : GT_REVERSEPOS(encseq->totallength,pos2),
                              depth,
                              0,
                              retval);
