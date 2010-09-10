@@ -365,8 +365,7 @@ typedef struct {
                 nextpage;  /* next page to be used */
   GtRange previousrange,  /* previous range of wildcards */
           currentrange;   /* current range of wildcards */
-  bool moveforward,
-       morepagesleft,
+  bool morepagesleft,
        hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
@@ -1543,20 +1542,19 @@ static void showallspecialpositions(const GtEncseq *encseq)
 #endif
 
 static void advanceGtEncseqReader(const GtEncseq *encseq,
-                                  GtEncseqReader *esr,
-                                  bool moveforward)
+                                  GtEncseqReader *esr)
 {
   gt_assert(encseq == esr->encseq);
   switch (encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharadvanceGtEncseqReader(encseq,esr,moveforward);
+      ucharadvanceGtEncseqReader(encseq,esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortadvanceGtEncseqReader(encseq,esr,moveforward);
+      ushortadvanceGtEncseqReader(encseq,esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32advanceGtEncseqReader(encseq,esr,moveforward);
+      uint32advanceGtEncseqReader(encseq,esr);
       break;
     default: fprintf(stderr,"advanceGtEncseqReader(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(encseq->sat));
@@ -1566,20 +1564,19 @@ static void advanceGtEncseqReader(const GtEncseq *encseq,
 
 static void binpreparenextrange(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
-                                bool moveforward,
                                 unsigned long startpos)
 {
   gt_assert(encseq == esr->encseq);
   switch (encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharbinpreparenextrange(encseq,esr,moveforward,startpos);
+      ucharbinpreparenextrange(encseq,esr,startpos);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortbinpreparenextrange(encseq,esr,moveforward,startpos);
+      ushortbinpreparenextrange(encseq,esr,startpos);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32binpreparenextrange(encseq,esr,moveforward,startpos);
+      uint32binpreparenextrange(encseq,esr,startpos);
       break;
     default: fprintf(stderr,"binpreparenextrange(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(encseq->sat));
@@ -1615,15 +1612,14 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
     {
       esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
     }
-    esr->idx->moveforward = GT_ISDIRREVERSE(readmode) ? false : true;
     esr->idx->hasprevious = esr->idx->hascurrent = false;
-    binpreparenextrange(encseq,esr,esr->idx->moveforward,esr->currentpos);
+    binpreparenextrange(encseq,esr,esr->currentpos);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->idx->firstcell,esr->idx->lastcell,
                        esr->idx->nextpage);
 #endif
-    advanceGtEncseqReader(encseq,esr,esr->idx->moveforward);
+    advanceGtEncseqReader(encseq,esr);
   } else {
     if (esr->idx != NULL) {
       gt_free(esr->idx);
@@ -1667,7 +1663,7 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
 #endif
   if (esr->idx->hasprevious)
   {
-    if (esr->idx->moveforward)
+    if (!GT_ISDIRREVERSE(esr->readmode))
     {
       if (pos >= esr->idx->previousrange.start)
       {
@@ -1679,7 +1675,7 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
         }
         if (esr->idx->hasrange)
         {
-          advanceGtEncseqReader(encseq,esr,true);
+          advanceGtEncseqReader(encseq,esr);
         }
       }
     } else
@@ -1694,7 +1690,7 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
         }
         if (esr->idx->hasrange)
         {
-          advanceGtEncseqReader(encseq,esr,false);
+          advanceGtEncseqReader(encseq,esr);
         }
       }
     }
@@ -1711,7 +1707,7 @@ static bool containsspecialViatables(const GtEncseq *encseq,
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
   if (esr->idx->hasprevious)
   {
-    if (esr->idx->moveforward)
+    if (!GT_ISDIRREVERSE(esr->readmode))
     {
       gt_assert(startpos + len > 0);
       if (startpos + len - 1 >= esr->idx->previousrange.start &&
@@ -2008,7 +2004,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       *range = sri->esr->idx->previousrange;
       if (sri->esr->idx->hasrange)
       {
-        advanceGtEncseqReader(sri->encseq,sri->esr,sri->moveforward);
+        advanceGtEncseqReader(sri->encseq,sri->esr);
       } else
       {
         sri->exhausted = true;
@@ -3386,7 +3382,7 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
 {
   gt_assert(encseq == esr->encseq);
   gt_assert(satviautables(esr->encseq->sat));
-  gt_assert(esr->idx->moveforward);
+  gt_assert(!GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {
     if (pos >= esr->idx->previousrange.start)
@@ -3398,7 +3394,7 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
       /* follows current special range */
       if (esr->idx->hasrange)
       {
-        advanceGtEncseqReader(encseq,esr,true);
+        advanceGtEncseqReader(encseq,esr);
       } else
       {
         break;
@@ -3442,7 +3438,7 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
 {
   gt_assert(encseq == esr->encseq);
   gt_assert(satviautables(encseq->sat));
-  gt_assert(!esr->idx->moveforward);
+  gt_assert(GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {
     if (pos < esr->idx->previousrange.end)
@@ -3454,7 +3450,7 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
       /* follows current special range */
       if (esr->idx->hasrange)
       {
-        advanceGtEncseqReader(encseq,esr,false);
+        advanceGtEncseqReader(encseq,esr);
       } else
       {
         break;
