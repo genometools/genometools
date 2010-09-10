@@ -140,9 +140,11 @@ Test do
   run_test "#{$bin}/gt simreads -coverage 10 -len 100 -force -o u8.reads u8idx"
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dna -db u8.reads"
   run "grep -q '# init character encoding (eqlen ' #{$last_stdout}"
-  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads"
+  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads", \
+           :maxtime => 200
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dir rev -dna -db u8.reads"
-  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads"
+  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads", \
+           :maxtime => 200
 end
 
 Name "gt qsortbench"
