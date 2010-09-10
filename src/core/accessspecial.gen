@@ -198,8 +198,7 @@ static void ADDTYPE(determinerange)(GtRange *range,
                ACCESSENCSEQ(encseq,specialrangelength)[cellnum] + 1;
 }
 
-static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
-                                         GtEncseqReader *esr,
+static void ADDTYPE(binpreparenextrange)(GtEncseqReader *esr,
                                          unsigned long startpos)
 {
   unsigned long endpos0, endpos1, cellnum, pagenum;
@@ -210,20 +209,20 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
   pagenum = POS2PAGENUM(startpos);
   if (pagenum > 0)
   {
-    endpos0 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum-1];
+    endpos0 = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum-1];
   } else
   {
     endpos0 = 0;
   }
   esr->idx->firstcell = endpos0;
   esr->idx->lastcell = endpos1 
-                     = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum];
+                     = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum];
   if (startpos > 0)
   {
     while (endpos0  < endpos1)
     {
       cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
-      ADDTYPE(determinerange)(&range,encseq,pagenum,cellnum);
+      ADDTYPE(determinerange)(&range,esr->encseq,pagenum,cellnum);
 #ifdef RANGEDEBUG
       printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
       showsequencerange(&range);
@@ -269,7 +268,7 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
   {
     if (endpos0  < endpos1)
     {
-      ADDTYPE(determinerange)(&range,encseq,pagenum,0);
+      ADDTYPE(determinerange)(&range,esr->encseq,pagenum,0);
       if (moveforward)
       {
         if (range.start == 0)
@@ -291,9 +290,9 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
       endpos0 = 0;
     } else
     {
-      endpos0 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum-2];
+      endpos0 = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum-2];
     }
-    endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum-1];
+    endpos1 = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum-1];
     if (endpos0 < endpos1)
     {
       esr->idx->firstcell = endpos1-1;
@@ -305,7 +304,7 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
 #ifdef RANGEDEBUG
   if (found)
   {
-    ADDTYPE(determinerange)(&range,encseq,pagenum,
+    ADDTYPE(determinerange)(&range,esr->encseq,pagenum,
                             moveforward ? esr->idx->firstcell
                                         : (esr->idx->lastcell-1));
     printf("binary found pos %lu in ", startpos);
@@ -320,7 +319,7 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
 #endif
   if (found)
   {
-    ADDTYPE(determinerange)(&esr->idx->previousrange,encseq,pagenum,
+    ADDTYPE(determinerange)(&esr->idx->previousrange,esr->encseq,pagenum,
                             moveforward ? esr->idx->firstcell
                                         : (esr->idx->lastcell-1));
 #ifdef RANGEDEBUG
@@ -375,8 +374,7 @@ static void ADDTYPE(binpreparenextrange)(const GtEncseq *encseq,
    page and lastcell to the last plus 1 index of the page.
 */
 
-static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
-                                      GtEncseqReader *esr,
+static bool ADDTYPE(nextnonemptypage)(GtEncseqReader *esr,
                                       bool moveforward)
 {
   unsigned long endpos0, endpos1, pagenum;
@@ -408,9 +406,9 @@ static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
       endpos0 = 0;
     } else
     {
-      endpos0 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum-1];
+      endpos0 = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum-1];
     }
-    endpos1 = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenum];
+    endpos1 = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum];
     if (endpos0 < endpos1)
     {
       esr->idx->firstcell = endpos0;
@@ -421,8 +419,7 @@ static bool ADDTYPE(nextnonemptypage)(const GtEncseq *encseq,
   return false;
 }
 
-static void ADDTYPE(advanceGtEncseqReader)(const GtEncseq *encseq,
-                                           GtEncseqReader *esr)
+static void ADDTYPE(advanceGtEncseqReader)(GtEncseqReader *esr)
 {
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
@@ -447,7 +444,7 @@ static void ADDTYPE(advanceGtEncseqReader)(const GtEncseq *encseq,
 #endif
     /* do not let comparison values become negative, hence compare with + 1 */
     if (esr->idx->firstcell + 1 < esr->idx->lastcell + 1 ||
-        ADDTYPE(nextnonemptypage)(encseq,esr,moveforward))
+        ADDTYPE(nextnonemptypage)(esr,moveforward))
     {
       if (moveforward)
       {
@@ -456,7 +453,7 @@ static void ADDTYPE(advanceGtEncseqReader)(const GtEncseq *encseq,
       {
         cellnum = esr->idx->lastcell - 1;
       }
-      ADDTYPE(determinerange)(&esr->idx->currentrange,encseq,
+      ADDTYPE(determinerange)(&esr->idx->currentrange,esr->encseq,
                               esr->idx->morepagesleft
                                  ? (moveforward ? (esr->idx->nextpage-1)
                                                 : (esr->idx->nextpage+1))

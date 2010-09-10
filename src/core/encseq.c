@@ -129,8 +129,7 @@ typedef struct
 typedef struct
 {
   const char *funcname;
-  GtUchar(*function)(const GtEncseq *,GtEncseqReader *,
-                     unsigned long);
+  GtUchar(*function)(GtEncseqReader *,unsigned long);
 } SeqDelivercharfunc;
 
 typedef struct
@@ -393,19 +392,17 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
   switch (esr->readmode)
   {
     case GT_READMODE_FORWARD:
-      return esr->encseq->seqdeliverchar(esr->encseq, esr, esr->currentpos++);
+      return esr->encseq->seqdeliverchar(esr, esr->currentpos++);
     case GT_READMODE_REVERSE:
-      return esr->encseq->seqdeliverchar(esr->encseq, esr, esr->currentpos--);
+      return esr->encseq->seqdeliverchar(esr, esr->currentpos--);
     case GT_READMODE_COMPL: /* only works with dna */
       {
-        GtUchar cc = esr->encseq->seqdeliverchar(esr->encseq, esr,
-                                                 esr->currentpos++);
+        GtUchar cc = esr->encseq->seqdeliverchar(esr, esr->currentpos++);
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     case GT_READMODE_REVCOMPL: /* only works with dna */
       {
-        GtUchar cc = esr->encseq->seqdeliverchar(esr->encseq, esr,
-                                                 esr->currentpos--);
+        GtUchar cc = esr->encseq->seqdeliverchar(esr, esr->currentpos--);
         return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
       }
     default:
@@ -929,13 +926,9 @@ static GtUchar deliverfromtwobitencoding(const GtEncseq *encseq,
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-/* XXX use esr->encseq to extract encoding */
-
-static GtUchar seqdelivercharnospecial(GT_UNUSED const GtEncseq *encseq,
-                                       GtEncseqReader *esr,
-                                       unsigned long pos)
+static GtUchar seqdelivercharnospecial2bitenc(GtEncseqReader *esr, 
+                                              unsigned long pos)
 {
-  gt_assert(encseq == esr->encseq);
   return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos);
 }
 
@@ -979,11 +972,9 @@ static GtUchar delivercharViadirectaccess(const GtEncseq *encseq,
   return encseq->plainseq[pos];
 }
 
-static GtUchar seqdelivercharViadirectaccess(GT_UNUSED const GtEncseq *encseq,
-                                             GtEncseqReader *esr,
+static GtUchar seqdelivercharViadirectaccess(GtEncseqReader *esr,
                                              unsigned long pos)
 {
-  gt_assert(encseq == esr->encseq);
   return esr->encseq->plainseq[pos];
 }
 
@@ -1094,11 +1085,9 @@ static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-static GtUchar seqdelivercharViabytecompress(GT_UNUSED const GtEncseq *encseq,
-                                             GtEncseqReader *esr,
+static GtUchar seqdelivercharViabytecompress(GtEncseqReader *esr,
                                              unsigned long pos)
 {
-  gt_assert(encseq == esr->encseq);
   return delivercharViabytecompress(esr->encseq,pos);
 }
 
@@ -1201,11 +1190,9 @@ static GtUchar delivercharViaequallength(const GtEncseq *encseq,
   return (GtUchar) SEPARATOR;
 }
 
-static GtUchar seqdelivercharViaequallength(GT_UNUSED const GtEncseq *encseq,
-                                            GtEncseqReader *esr,
+static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr,
                                             unsigned long pos)
 {
-  gt_assert(encseq == esr->encseq);
   return delivercharViaequallength(esr->encseq,pos);
 }
 
@@ -1334,12 +1321,9 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                : (GtUchar) WILDCARD;
 }
 
-static GtUchar seqdelivercharViabitaccessSpecial(GT_UNUSED
-                                                         const GtEncseq *encseq,
-                                                 GT_UNUSED GtEncseqReader *esr,
+static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr,
                                                  unsigned long pos)
 {
-  gt_assert(encseq == esr->encseq);
   if (!GT_ISIBITSET(esr->encseq->specialbits,pos))
   {
     return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos);
@@ -1541,45 +1525,40 @@ static void showallspecialpositions(const GtEncseq *encseq)
 
 #endif
 
-static void advanceGtEncseqReader(const GtEncseq *encseq,
-                                  GtEncseqReader *esr)
+static void advanceGtEncseqReader(GtEncseqReader *esr)
 {
-  gt_assert(encseq == esr->encseq);
-  switch (encseq->sat)
+  switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharadvanceGtEncseqReader(encseq,esr);
+      ucharadvanceGtEncseqReader(esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortadvanceGtEncseqReader(encseq,esr);
+      ushortadvanceGtEncseqReader(esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32advanceGtEncseqReader(encseq,esr);
+      uint32advanceGtEncseqReader(esr);
       break;
     default: fprintf(stderr,"advanceGtEncseqReader(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(encseq->sat));
+                     gt_encseq_access_type_str(esr->encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
    }
 }
 
-static void binpreparenextrange(const GtEncseq *encseq,
-                                GtEncseqReader *esr,
-                                unsigned long startpos)
+static void binpreparenextrange(GtEncseqReader *esr,unsigned long startpos)
 {
-  gt_assert(encseq == esr->encseq);
-  switch (encseq->sat)
+  switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharbinpreparenextrange(encseq,esr,startpos);
+      ucharbinpreparenextrange(esr,startpos);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortbinpreparenextrange(encseq,esr,startpos);
+      ushortbinpreparenextrange(esr,startpos);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32binpreparenextrange(encseq,esr,startpos);
+      uint32binpreparenextrange(esr,startpos);
       break;
     default: fprintf(stderr,"binpreparenextrange(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(encseq->sat));
+                     gt_encseq_access_type_str(esr->encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -1613,13 +1592,13 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
     }
     esr->idx->hasprevious = esr->idx->hascurrent = false;
-    binpreparenextrange(encseq,esr,esr->currentpos);
+    binpreparenextrange(esr,esr->currentpos);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->idx->firstcell,esr->idx->lastcell,
                        esr->idx->nextpage);
 #endif
-    advanceGtEncseqReader(encseq,esr);
+    advanceGtEncseqReader(esr);
   } else {
     if (esr->idx != NULL) {
       gt_free(esr->idx);
@@ -1651,11 +1630,9 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   gt_free(esr);
 }
 
-static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
-                                              GtEncseqReader *esr,
+static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr,
                                               unsigned long pos)
 {
-  gt_assert(encseq == esr->encseq);
 #ifdef RANGEDEBUG
   printf("pos=%lu,previous=(%lu,%lu)\n",pos,
           esr->idx->previousrange.start,
@@ -1675,7 +1652,7 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
         }
         if (esr->idx->hasrange)
         {
-          advanceGtEncseqReader(encseq,esr);
+          advanceGtEncseqReader(esr);
         }
       }
     } else
@@ -1690,7 +1667,7 @@ static GtUchar seqdelivercharSpecialViatables(const GtEncseq *encseq,
         }
         if (esr->idx->hasrange)
         {
-          advanceGtEncseqReader(encseq,esr);
+          advanceGtEncseqReader(esr);
         }
       }
     }
@@ -2004,7 +1981,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       *range = sri->esr->idx->previousrange;
       if (sri->esr->idx->hasrange)
       {
-        advanceGtEncseqReader(sri->encseq,sri->esr);
+        advanceGtEncseqReader(sri->esr);
       } else
       {
         sri->exhausted = true;
@@ -2401,7 +2378,7 @@ typedef struct
   Delivercharfunc delivercharnospecial,
                   delivercharspecial,
                   delivercharspecialrange;
-  SeqDelivercharfunc seqdeliverchar,
+  SeqDelivercharfunc seqdelivercharnospecial,
                      seqdelivercharspecial;
   Containsspecialfunc delivercontainsspecial;
 } GtEncseqfunctions;
@@ -2415,7 +2392,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,delivercharViadirectaccess),
       NFCT(delivercharspecial,delivercharViadirectaccess),
       NFCT(delivercharspecialrange,delivercharViadirectaccess),
-      NFCT(seqdeliverchar,seqdelivercharViadirectaccess),
+      NFCT(seqdelivercharnospecial,seqdelivercharViadirectaccess),
       NFCT(seqdelivercharspecial,seqdelivercharViadirectaccess),
       NFCT(delivercontainsspecial,containsspecialViadirectaccess)
     },
@@ -2425,7 +2402,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,delivercharViabytecompress),
       NFCT(delivercharspecial,delivercharViabytecompress),
       NFCT(delivercharspecialrange,delivercharViabytecompress),
-      NFCT(seqdeliverchar,seqdelivercharViabytecompress),
+      NFCT(seqdelivercharnospecial,seqdelivercharViabytecompress),
       NFCT(seqdelivercharspecial,seqdelivercharViabytecompress),
       NFCT(delivercontainsspecial,containsspecialViabytecompress)
     },
@@ -2435,7 +2412,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViaequallength),
       NFCT(delivercharspecialrange,delivercharViaequallength),
-      NFCT(seqdeliverchar,seqdelivercharnospecial),
+      NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharViaequallength),
       NFCT(delivercontainsspecial,containsspecialViaequallength)
     },
@@ -2445,7 +2422,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViabitaccessSpecial),
       NFCT(delivercharspecialrange,delivercharViabitaccessSpecial),
-      NFCT(seqdeliverchar,seqdelivercharnospecial),
+      NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharViabitaccessSpecial),
       NFCT(delivercontainsspecial,containsspecialViabitaccess)
     },
@@ -2455,7 +2432,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViauchartablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViauchartablesSpecialrange),
-      NFCT(seqdeliverchar,seqdelivercharnospecial),
+      NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecialViatables),
       NFCT(delivercontainsspecial,containsspecialViatables)
     },
@@ -2465,7 +2442,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViaushorttablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViaushorttablesSpecialrange),
-      NFCT(seqdeliverchar,seqdelivercharnospecial),
+      NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecialViatables),
       NFCT(delivercontainsspecial,containsspecialViatables)
     },
@@ -2475,7 +2452,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViauint32tablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViauint32tablesSpecialrange),
-      NFCT(seqdeliverchar,seqdelivercharnospecial),
+      NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecialViatables),
       NFCT(delivercontainsspecial,containsspecialViatables)
     }
@@ -2507,7 +2484,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
         } else\
         {\
           ASSIGNAPPFUNC(SAT,nospecial);\
-          SEQASSIGNAPPFUNC(SAT, );\
+          SEQASSIGNAPPFUNC(SAT,nospecial);\
         }\
         encseq->delivercharnospecial\
           = encodedseqfunctab[(int) (SAT)].delivercharnospecial.function;\
@@ -3394,7 +3371,7 @@ static unsigned long fwdgetnextstopposViatables(const GtEncseq *encseq,
       /* follows current special range */
       if (esr->idx->hasrange)
       {
-        advanceGtEncseqReader(encseq,esr);
+        advanceGtEncseqReader(esr);
       } else
       {
         break;
@@ -3450,7 +3427,7 @@ static unsigned long revgetnextstopposViatables(const GtEncseq *encseq,
       /* follows current special range */
       if (esr->idx->hasrange)
       {
-        advanceGtEncseqReader(encseq,esr);
+        advanceGtEncseqReader(esr);
       } else
       {
         break;
