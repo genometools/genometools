@@ -349,10 +349,7 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   {
     (void) gt_encseq_compare_maxdepth(blindtrie->encseq,
                                       &commonunits,
-                                      GT_ISDIRREVERSE(blindtrie->readmode)
-                                        ? false : true,
-                                      GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                                        ? true : false,
+                                      blindtrie->readmode,
                                       blindtrie->esr1,
                                       blindtrie->esr2,
                                       leafpos,

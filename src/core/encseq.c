@@ -1587,10 +1587,10 @@ static void binpreparenextrange(const GtEncseq *encseq,
   }
 }
 
-static void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
-                                                   const GtEncseq *encseq,
-                                                   bool moveforward,
-                                                   unsigned long startpos)
+void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
+                                           const GtEncseq *encseq,
+                                           GtReadmode readmode,
+                                           unsigned long startpos)
 {
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq) {
@@ -1599,52 +1599,37 @@ static void gt_encseq_reader_reinit_with_direction(GtEncseqReader *esr,
     esr->encseq = gt_encseq_ref((GtEncseq*) encseq);
   }
   gt_assert(esr->encseq);
-  esr->readmode = moveforward ? GT_READMODE_FORWARD : GT_READMODE_REVERSE;
+  esr->readmode = readmode;
+  if (startpos >= encseq->totallength)
+  {
+    fprintf(stderr,"readmode %d: startpos = %lu >= %lu = totallength\n",
+            (int) readmode,startpos,encseq->totallength);
+  }
+  gt_assert(startpos < encseq->totallength);
+  esr->currentpos
+    = GT_ISDIRREVERSE(readmode) ? GT_REVERSEPOS(encseq->totallength,startpos)
+                                : startpos;
   if (satviautables(encseq->sat))
   {
-    gt_assert(startpos < encseq->totallength);
     if (esr->idx == NULL)
     {
       esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
     }
-    esr->idx->moveforward = moveforward;
+    esr->idx->moveforward = GT_ISDIRREVERSE(readmode) ? false : true;
     esr->idx->hasprevious = esr->idx->hascurrent = false;
-    binpreparenextrange(encseq,esr,moveforward,startpos);
+    binpreparenextrange(encseq,esr,esr->idx->moveforward,esr->currentpos);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->idx->firstcell,esr->idx->lastcell,
                        esr->idx->nextpage);
 #endif
-    advanceGtEncseqReader(encseq,esr,moveforward);
+    advanceGtEncseqReader(encseq,esr,esr->idx->moveforward);
   } else {
     if (esr->idx != NULL) {
       gt_free(esr->idx);
       esr->idx = NULL;
     }
   }
-  esr->currentpos = startpos;
-}
-
-void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
-                                           const GtEncseq *encseq,
-                                           GtReadmode readmode,
-                                           unsigned long startpos)
-{
-  if (GT_ISDIRREVERSE(readmode))
-  {
-    gt_encseq_reader_reinit_with_direction(esr,
-                                           encseq,
-                                           false,
-                                           GT_REVERSEPOS(encseq->totallength,
-                                                         startpos));
-  } else
-  {
-    gt_encseq_reader_reinit_with_direction(esr,
-                                           encseq,
-                                           true,
-                                           startpos);
-  }
-  esr->readmode = readmode;
 }
 
 GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
@@ -4044,15 +4029,22 @@ static unsigned long extractsinglecharacter(const GtEncseq *encseq,
   return cc;
 }
 
-static int comparewithonespecial(bool *leftspecial,
-                                 bool *rightspecial,
-                                 const GtEncseq *encseq,
-                                 bool fwd,
-                                 bool complement,
-                                 unsigned long pos1,
-                                 unsigned long pos2,
-                                 unsigned long depth,
-                                 unsigned long maxdepth)
+/* The following function compares two positions in an encoded sequence
+   of which at least one is at the end of the sequence or contains a special 
+   character. The comparison is done in forward direction iff <fwd> is true. 
+   The comparison is done for the complemented characters iff <complement> is 
+   true. The positions are used with offset depth.
+*/
+
+static int gt_encseq_comparewithonespecial(bool *leftspecial,
+                                           bool *rightspecial,
+                                           const GtEncseq *encseq,
+                                           bool fwd,
+                                           bool complement,
+                                           unsigned long pos1,
+                                           unsigned long pos2,
+                                           unsigned long depth,
+                                           unsigned long maxdepth)
 {
   unsigned long cc1, cc2, totallength = gt_encseq_total_length(encseq);
 
@@ -4134,112 +4126,6 @@ static void verifycomparestringresults(const GtEncseq *encseq,
 }
 #endif
 
-/*
-int gt_encseq_compare(const GtEncseq *encseq,
-                      GtCommonunits *commonunits,
-                      bool fwd,
-                      bool complement,
-                      GtEncseqReader *esr1,
-                      GtEncseqReader *esr2,
-                      unsigned long pos1,
-                      unsigned long pos2,
-                      unsigned long depth)
-{
-  GtEndofTwobitencoding ptbe1, ptbe2;
-  int retval;
-
-  countgt_encseq_compare++;
-  gt_assert(pos1 != pos2);
-  if (!fwd)
-  {
-    gt_assert(pos1 < encseq->totallength);
-    pos1 = GT_REVERSEPOS(encseq->totallength,pos1);
-    gt_assert(pos2 < encseq->totallength);
-    pos2 = GT_REVERSEPOS(encseq->totallength,pos2);
-  }
-  if (encseq->numofspecialstostore > 0)
-  {
-    if (fwd)
-    {
-      if (pos1 + depth < encseq->totallength &&
-          pos2 + depth < encseq->totallength)
-      {
-        gt_encseq_reader_reinit_with_direction(esr1,encseq,true,pos1 + depth);
-        gt_encseq_reader_reinit_with_direction(esr2,encseq,true,pos2 + depth);
-      }
-    } else
-    {
-      if (pos1 >= depth && pos2 >= depth)
-      {
-        gt_encseq_reader_reinit_with_direction(esr1,encseq,false,pos1 - depth);
-        gt_encseq_reader_reinit_with_direction(esr2,encseq,false,pos2 - depth);
-      }
-    }
-  }
-  do
-  {
-    if (fwd)
-    {
-      if (pos1 + depth < encseq->totallength &&
-          pos2 + depth < encseq->totallength)
-      {
-        fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
-        fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = gt_encseq_compare_twobitencodings(true,complement,
-                                                   commonunits,
-                                                   &ptbe1,&ptbe2);
-        depth += commonunits->common;
-      } else
-      {
-        retval = comparewithonespecial(&commonunits->leftspecial,
-                                       &commonunits->rightspecial,
-                                       encseq,
-                                       true,
-                                       complement,
-                                       pos1,
-                                       pos2,
-                                       depth,
-                                       0);
-      }
-    } else
-    {
-      if (pos1 >= depth && pos2 >= depth)
-      {
-        revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
-        revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = gt_encseq_compare_twobitencodings(false, complement,
-                                                   commonunits, &ptbe1,&ptbe2);
-        depth += commonunits->common;
-      } else
-      {
-        retval = comparewithonespecial(&commonunits->leftspecial,
-                                       &commonunits->rightspecial,
-                                       encseq,
-                                       false,
-                                       complement,
-                                       pos1,
-                                       pos2,
-                                       depth,
-                                       0);
-      }
-    }
-  } while (retval == 0);
-  commonunits->finaldepth = depth;
-#ifdef FASTCOMPAREDEBUG
-  verifycomparestringresults(encseq,
-                             commonunits,
-                             fwd,
-                             complement,
-                             pos1,
-                             pos2,
-                             depth,
-                             0,
-                             retval);
-#endif
-  return retval;
-}
-*/
-
 int gt_encseq_compare(const GtEncseq *encseq,
                       GtCommonunits *commonunits,
                       GtReadmode readmode,
@@ -4278,7 +4164,8 @@ int gt_encseq_compare(const GtEncseq *encseq,
       depth += commonunits->common;
     } else
     {
-      retval = comparewithonespecial(&commonunits->leftspecial,
+      retval = gt_encseq_comparewithonespecial(
+                                     &commonunits->leftspecial,
                                      &commonunits->rightspecial,
                                      encseq,
                                      fwd,
@@ -4301,7 +4188,7 @@ int gt_encseq_compare(const GtEncseq *encseq,
                              complement,
                              fwd ? pos1
                                  : GT_REVERSEPOS(encseq->totallength,pos1),
-                             fwd ? pos2 
+                             fwd ? pos2
                                  : GT_REVERSEPOS(encseq->totallength,pos2),
                              depth,
                              0,
@@ -4312,8 +4199,7 @@ int gt_encseq_compare(const GtEncseq *encseq,
 
 int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
                                GtCommonunits *commonunits,
-                               bool fwd,
-                               bool complement,
+                               GtReadmode readmode,
                                GtEncseqReader *esr1,
                                GtEncseqReader *esr2,
                                unsigned long pos1,
@@ -4324,108 +4210,63 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
   unsigned long endpos1, endpos2;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
+       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
   countgt_encseq_compare_maxdepth++;
   gt_assert(pos1 != pos2);
   gt_assert(depth < maxdepth);
-  if (fwd)
+  endpos1 = pos1 + maxdepth;
+  if (endpos1 > encseq->totallength)
   {
-    endpos1 = pos1 + maxdepth;
-    if (endpos1 > encseq->totallength)
-    {
-      endpos1 = encseq->totallength;
-    }
-    endpos2 = pos2 + maxdepth;
-    if (endpos2 > encseq->totallength)
-    {
-      endpos2 = encseq->totallength;
-    }
-  } else
+    endpos1 = encseq->totallength;
+  }
+  endpos2 = pos2 + maxdepth;
+  if (endpos2 > encseq->totallength)
   {
-    pos1 = GT_REVERSEPOS(encseq->totallength,pos1);
-    pos2 = GT_REVERSEPOS(encseq->totallength,pos2);
-    endpos1 = endpos2 = 0;
+    endpos2 = encseq->totallength;
   }
   if (encseq->numofspecialstostore > 0)
   {
-    if (fwd)
+    if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
-      if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
-      {
-        gt_encseq_reader_reinit_with_direction(esr1,encseq,true,pos1 + depth);
-        gt_encseq_reader_reinit_with_direction(esr2,encseq,true,pos2 + depth);
-      }
-    } else
-    {
-      if (pos1 >= depth && pos2 >= depth)
-      {
-        gt_encseq_reader_reinit_with_direction(esr1,encseq,false,pos1 - depth);
-        gt_encseq_reader_reinit_with_direction(esr2,encseq,false,pos2 - depth);
-      }
+      gt_encseq_reader_reinit_with_readmode(esr1,encseq,readmode,pos1 + depth);
+      gt_encseq_reader_reinit_with_readmode(esr2,encseq,readmode,pos2 + depth);
     }
   }
   do
   {
-    if (fwd)
+    if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
-      if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
+      gt_encseq_extract2bitenc2(fwd,&ptbe1,encseq,esr1,pos1 + depth);
+      gt_encseq_extract2bitenc2(fwd,&ptbe2,encseq,esr2,pos2 + depth);
+      retval = gt_encseq_compare_twobitencodings(fwd,complement,
+                                                 commonunits,&ptbe1,&ptbe2);
+      if (depth + commonunits->common < maxdepth)
       {
-        fwdextract2bitenc(&ptbe1,encseq,esr1,pos1 + depth);
-        fwdextract2bitenc(&ptbe2,encseq,esr2,pos2 + depth);
-        retval = gt_encseq_compare_twobitencodings(true,complement,
-                                                   commonunits,
-                                                   &ptbe1,&ptbe2);
-        if (depth + commonunits->common < maxdepth)
-        {
-          depth += commonunits->common;
-        } else
-        {
-          depth = maxdepth;
-          retval = 0;
-          break;
-        }
+        depth += commonunits->common;
       } else
       {
-        retval = comparewithonespecial(&commonunits->leftspecial,
-                                       &commonunits->rightspecial,
-                                       encseq,
-                                       true,
-                                       complement,
-                                       pos1,
-                                       pos2,
-                                       depth,
-                                       maxdepth);
+        depth = maxdepth;
+        retval = 0;
+        break;
       }
     } else
     {
-      if (pos1 >= depth && pos2 >= depth)
-      {
-        revextract2bitenc(&ptbe1,encseq,esr1,pos1 - depth);
-        revextract2bitenc(&ptbe2,encseq,esr2,pos2 - depth);
-        retval = gt_encseq_compare_twobitencodings(false,complement,
-                                                   commonunits,
-                                                   &ptbe1,&ptbe2);
-        if (depth + commonunits->common < maxdepth)
-        {
-          depth += commonunits->common;
-        } else
-        {
-          depth = maxdepth;
-          retval = 0;
-          break;
-        }
-      } else
-      {
-        retval = comparewithonespecial(&commonunits->leftspecial,
-                                       &commonunits->rightspecial,
-                                       encseq,
-                                       false,
-                                       complement,
-                                       pos1,
-                                       pos2,
-                                       depth,
-                                       maxdepth);
-      }
+      retval = gt_encseq_comparewithonespecial(
+                                     &commonunits->leftspecial,
+                                     &commonunits->rightspecial,
+                                     encseq,
+                                     fwd,
+                                     complement,
+                                     fwd ? pos1
+                                         : GT_REVERSEPOS(encseq->totallength,
+                                           pos1),
+                                     fwd ? pos2
+                                         : GT_REVERSEPOS(encseq->totallength,
+                                           pos2),
+                                     depth,
+                                     maxdepth);
     }
   } while (retval == 0);
   commonunits->finaldepth = depth;
@@ -4434,8 +4275,10 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
                              commonunits,
                              fwd,
                              complement,
-                             pos1,
-                             pos2,
+                             fwd ? pos1
+                                 : GT_REVERSEPOS(encseq->totallength,pos1),
+                             fwd ? pos2
+                                 : GT_REVERSEPOS(encseq->totallength,pos2),
                              depth,
                              maxdepth,
                              retval);
@@ -4760,7 +4603,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
               fwd ? startpos : GT_REVERSEPOS(encseq->totallength,startpos),
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
       gt_encseq_showatstartpos(stderr,fwd,complement,encseq,
-                               fwd ? startpos 
+                               fwd ? startpos
                                    : GT_REVERSEPOS(encseq->totallength,
                                                    startpos));
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -4770,10 +4613,10 @@ static void checkextractunitatpos(const GtEncseq *encseq,
       fprintf(stderr,"fwd=%s,complement=%s: pos %lu\n",
                       fwd ? "true" : "false",
                       complement ? "true" : "false",
-                      fwd ? startpos 
+                      fwd ? startpos
                           : GT_REVERSEPOS(encseq->totallength,startpos));
       gt_encseq_showatstartpos(stderr,fwd,complement,encseq,
-                               fwd ? startpos 
+                               fwd ? startpos
                                    : GT_REVERSEPOS(encseq->totallength,
                                                    startpos));
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -5225,7 +5068,8 @@ int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
                                  maxdepth == 0 ? 0 : (maxdepth - depth));
     } else
     {
-      retval = comparewithonespecial(&leftspecial,
+      retval = gt_encseq_comparewithonespecial(
+                                     &leftspecial,
                                      &rightspecial,
                                      encseq,
                                      fwd,
@@ -5252,7 +5096,8 @@ int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
                                  maxdepth == 0 ? 0 : (maxdepth - depth));
     } else
     {
-      retval = comparewithonespecial(&leftspecial,
+      retval = gt_encseq_comparewithonespecial(
+                                     &leftspecial,
                                      &rightspecial,
                                      encseq,
                                      fwd,

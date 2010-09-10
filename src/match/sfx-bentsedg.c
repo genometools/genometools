@@ -146,49 +146,6 @@ typedef GtEndofTwobitencoding Sfxcmp;
           }\
         }
 
-/*
-#define PTR2INT(VAR,SUBBUCKETLEFT,IDX)\
-        {\
-          unsigned long pos\
-            = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
-          if (bsr->fwd)\
-          {\
-            if (pos + depth < bsr->totallength)\
-            {\
-              pos += depth;\
-              gt_encseq_reader_reinit_with_direction(bsr->esr1,bsr->encseq,\
-                                                     true,pos);\
-              gt_assert(pos < bsr->totallength);\
-              gt_encseq_extract2bitenc(true,&(VAR),bsr->encseq,\
-                                       bsr->esr1,pos);\
-            } else\
-            {\
-              VAR.tbe = 0;\
-              VAR.unitsnotspecial = 0;\
-              VAR.position = pos;\
-            }\
-          } else\
-          {\
-            gt_assert(pos < bsr->totallength);\
-            pos = GT_REVERSEPOS(bsr->totallength,pos);\
-            if (pos >= depth)\
-            {\
-              pos -= depth;\
-              gt_encseq_reader_reinit_with_direction(bsr->esr1,bsr->encseq,\
-                                                    false,pos);\
-              gt_assert(pos < bsr->totallength);\
-              gt_encseq_extract2bitenc(false,&(VAR),bsr->encseq,\
-                                       bsr->esr1,pos);\
-            } else\
-            {\
-              VAR.tbe = 0;\
-              VAR.unitsnotspecial = 0;\
-              VAR.position = pos;\
-            }\
-          }\
-        }
-*/
-
 #define Sfxdocompare(COMMONUNITS,X,Y)\
         ret##X##Y = gt_encseq_compare_twobitencodings(bsr->fwd,\
                                                       bsr->complement,\
@@ -445,7 +402,8 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                              unsigned long width,
                              unsigned long offset)
 {
-  unsigned long pi, pj, startpos1, startpos2, temp, lcpindex, lcplen = 0;
+  unsigned long sval1, sval2, pi, pj, startpos1, startpos2, temp,
+                lcpindex, lcplen = 0;
   int retval;
   GtCommonunits commonunits;
 
@@ -458,15 +416,22 @@ static void bs_insertionsort(Bentsedgresources *bsr,
   {
     for (pj = pi; pj > 0; pj--)
     {
+      sval1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1);
+      sval2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
       if (bsr->sfxstrategy->cmpcharbychar)
       {
-        startpos1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1)
-                      + offset;
-        gt_encseq_reader_reinit_with_readmode(bsr->esr1, bsr->encseq,
-                                              bsr->readmode, startpos1);
-        startpos2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj) + offset;
-        gt_encseq_reader_reinit_with_readmode(bsr->esr2, bsr->encseq,
-                                              bsr->readmode, startpos2);
+        startpos1 = sval1 + offset;
+        if (startpos1 < bsr->totallength)
+        {
+          gt_encseq_reader_reinit_with_readmode(bsr->esr1, bsr->encseq,
+                                                bsr->readmode, startpos1);
+        }
+        startpos2 = sval2 + offset;
+        if (startpos2 < bsr->totallength)
+        {
+          gt_encseq_reader_reinit_with_readmode(bsr->esr2, bsr->encseq,
+                                                bsr->readmode, startpos2);
+        }
         for (;;)
         {
           unsigned long ccs, cct;
@@ -476,10 +441,9 @@ static void bs_insertionsort(Bentsedgresources *bsr,
           cct = DEREFSEQ(tmp2,startpos2,bsr->esr2);
           if (ccs != cct)
           {
-            lcplen = startpos2
-                     - gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
+            lcplen = startpos2 - sval2;
             retval = (ccs < cct) ? -1 : 1;
-            break;
+          break;
           }
           startpos1++;
           startpos2++;
@@ -488,29 +452,22 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       {
 #ifdef SKDEBUG
         printf("gt_encseq_compare[%lu,%lu] at offset %lu\n",
-                gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1),
-                gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj),offset);
+                sval1,sval2,offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
                                  bsr->encseq,
-                                 gt_suffixsortspace_get(bsr->sssp,subbucketleft,
-                                                        pj-1));
+                                 sval1);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
                                  bsr->complement,
                                  bsr->encseq,
-                                 gt_suffixsortspace_get(bsr->sssp,subbucketleft,
-                                                        pj));
+                                 sval2);
 #endif
-        startpos1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1);
-        gt_assert(startpos1 < bsr->totallength);
-        startpos2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
-        gt_assert(startpos2 < bsr->totallength);
         retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->readmode,
                                    bsr->esr1,bsr->esr2,
-                                   startpos1,
-                                   startpos2,
+                                   sval1,
+                                   sval2,
                                    offset);
         lcplen = commonunits.finaldepth;
       }
@@ -610,8 +567,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
         gt_assert(offset < maxdepth);
         retval = gt_encseq_compare_maxdepth(bsr->encseq,
                                             &commonunits,
-                                            bsr->fwd,
-                                            bsr->complement,
+                                            bsr->readmode,
                                             bsr->esr1,bsr->esr2,
                                             sval1,
                                             sval2,

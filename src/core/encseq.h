@@ -107,9 +107,9 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
                                              GtReadmode readmode);
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
-  and stores the result of the comparison in <commonunits>. The direction is
-  done in forward direction iff <fwd> is true. The comparison is
-  is defined by <fwd>. The comparison is done for the complemented characters
+  and stores the result of the comparison in <commonunits>. The comparison is
+  done in forward direction iff <fwd> is true. 
+  The comparison is done for the complemented characters
   iff <complement> is true. */
 int gt_encseq_compare_twobitencodings(bool fwd,
                                       bool complement,
@@ -208,8 +208,7 @@ int gt_encseq_compare(const GtEncseq *encseq,
   the comparison is restricted to the prefixes of length <maxdepth>. */
 int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
                                GtCommonunits *commonunits,
-                               bool fwd,
-                               bool complement,
+                               GtReadmode readmode,
                                GtEncseqReader *esr1,
                                GtEncseqReader *esr2,
                                unsigned long pos1,
