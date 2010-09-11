@@ -1518,18 +1518,18 @@ static void advanceGtEncseqReader(GtEncseqReader *esr)
    }
 }
 
-static void binpreparenextrange(GtEncseqReader *esr,unsigned long startpos)
+static void binpreparenextrange(GtEncseqReader *esr)
 {
   switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharbinpreparenextrange(esr,startpos);
+      ucharbinpreparenextrange(esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortbinpreparenextrange(esr,startpos);
+      ushortbinpreparenextrange(esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32binpreparenextrange(esr,startpos);
+      uint32binpreparenextrange(esr);
       break;
     default: fprintf(stderr,"binpreparenextrange(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(esr->encseq->sat));
@@ -1550,11 +1550,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   }
   gt_assert(esr->encseq);
   esr->readmode = readmode;
-  if (startpos >= encseq->totallength)
-  {
-    fprintf(stderr,"readmode %d: startpos = %lu >= %lu = totallength\n",
-            (int) readmode,startpos,encseq->totallength);
-  }
   gt_assert(startpos < encseq->totallength);
   esr->currentpos
     = GT_ISDIRREVERSE(readmode) ? GT_REVERSEPOS(encseq->totallength,startpos)
@@ -1566,7 +1561,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
     }
     esr->idx->hasprevious = esr->idx->hascurrent = false;
-    binpreparenextrange(esr,esr->currentpos);
+    binpreparenextrange(esr);
 #ifdef RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->idx->firstcell,esr->idx->lastcell,
@@ -4604,45 +4599,45 @@ static void checkextractspecialbits(const GtEncseq *encseq,bool fwd)
     {
       if (fwd)
       {
-  spbits1 = fwdextractspecialbits(encseq->specialbits,startpos);
-  unitsnotspecial = fwdbitaccessunitsnotspecial(spbits1,encseq,startpos);
-  spbits2 = fwdextractspecialbits_bruteforce
-      (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+        spbits1 = fwdextractspecialbits(encseq->specialbits,startpos);
+        unitsnotspecial = fwdbitaccessunitsnotspecial(spbits1,encseq,startpos);
+        spbits2 = fwdextractspecialbits_bruteforce
+                  (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
       } else
       {
-  spbits1 = revextractspecialbits(encseq->specialbits,startpos);
-  unitsnotspecial = revbitaccessunitsnotspecial(spbits1,startpos);
-  spbits2 = revextractspecialbits_bruteforce
-      (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
+        spbits1 = revextractspecialbits(encseq->specialbits,startpos);
+        unitsnotspecial = revbitaccessunitsnotspecial(spbits1,startpos);
+        spbits2 = revextractspecialbits_bruteforce
+                  (&unitsnotspecial_bruteforce,encseq->specialbits,startpos);
       }
       gt_assert(unitsnotspecial_bruteforce == unitsnotspecial);
       if (spbits1 != spbits2)
       {
-  char buffer[GT_INTWORDSIZE+1];
+        char buffer[GT_INTWORDSIZE+1];
 
-  gt_bitsequence_tostring(buffer,spbits2);
-  fprintf(stderr,"%sextractspecialbits at startpos %lu"
-           " (unitsnotspecial=%u)\n correct=%s!=\n",
-           fwd ? "fwd" : "rev",
-           startpos,unitsnotspecial,buffer);
-  gt_bitsequence_tostring(buffer,spbits1);
-  fprintf(stderr,"     %s=fast\n",buffer);
-  exit(GT_EXIT_PROGRAMMING_ERROR);
+        gt_bitsequence_tostring(buffer,spbits2);
+        fprintf(stderr,"%sextractspecialbits at startpos %lu"
+                       " (unitsnotspecial=%u)\n correct=%s!=\n",
+                       fwd ? "fwd" : "rev",
+                       startpos,unitsnotspecial,buffer);
+        gt_bitsequence_tostring(buffer,spbits1);
+        fprintf(stderr,"     %s=fast\n",buffer);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
       }
       if (fwd)
       {
-  if (startpos == encseq->totallength - 1)
-  {
-    break;
-  }
-  startpos++;
+        if (startpos == encseq->totallength - 1)
+        {
+          break;
+        }
+        startpos++;
       } else
       {
-  if (startpos == 0)
-  {
-    break;
-  }
-  startpos--;
+        if (startpos == 0)
+        {
+          break;
+        }
+        startpos--;
       }
     }
   }

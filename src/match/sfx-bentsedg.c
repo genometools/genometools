@@ -42,12 +42,12 @@
 #define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
 #define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(bsr->encseq,\
                                                           POS,bsr->readmode)
-#define ACCESSCHARSEQ(POS,ESR) gt_encseq_reader_next_encoded_char(ESR)
+#define ACCESSCHARSEQ(ESR)     gt_encseq_reader_next_encoded_char(ESR)
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
                                 ISNOTSPECIAL(ACCESSCHAR(POS)))
 
 #define DEREFSTOPPOSSEQ(VAR,PTR,STOPPOS,ESR)\
-        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(PTR,ESR))) ?\
+        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
         ((unsigned long) VAR) : UNIQUEINT(PTR))
 
 #define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
