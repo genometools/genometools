@@ -81,20 +81,18 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
 /* The following function extracts a twobit encoding at position <startpos>
-  in the sequence encoded by <encseq>. The <esr> structure stores
+  in the sequence encoded by <esr->encseq>. The <esr> structure stores
   information allowing for efficient retrieval of the next special
   position relative to <startpos>. The scanning is performed in forward or
   reverse direction depending on the value of <fwd>. The result is stored
   in <ptbe>. */
 void gt_encseq_extract2bitenc(bool fwd,
                               GtEndofTwobitencoding *ptbe,
-                              const GtEncseq *encseq,
                               GtEncseqReader *esr,
                               unsigned long startpos);
 
 void gt_encseq_extract2bitenc2(bool fwd,
                                GtEndofTwobitencoding *ptbe,
-                               const GtEncseq *encseq,
                                GtEncseqReader *esr,
                                unsigned long startpos);
 
