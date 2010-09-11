@@ -1599,51 +1599,6 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   gt_free(esr);
 }
 
-static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr)
-{
-#ifdef RANGEDEBUG
-  printf("pos=%lu,previous=(%lu,%lu)\n",esr->currentpos,
-          esr->idx->previousrange.start,
-          esr->idx->previousrange.end);
-#endif
-  if (esr->idx->hasprevious)
-  {
-    if (!GT_ISDIRREVERSE(esr->readmode))
-    {
-      if (esr->currentpos >= esr->idx->previousrange.start)
-      {
-        if (esr->currentpos < esr->idx->previousrange.end)
-        {
-          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
-                    ? (GtUchar) SEPARATOR
-                    : (GtUchar) WILDCARD;
-        }
-        if (esr->idx->hasrange)
-        {
-          advanceGtEncseqReader(esr);
-        }
-      }
-    } else
-    {
-      if (esr->currentpos < esr->idx->previousrange.end)
-      {
-        if (esr->currentpos >= esr->idx->previousrange.start)
-        {
-          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
-                     ? (GtUchar) SEPARATOR
-                     : (GtUchar) WILDCARD;
-        }
-        if (esr->idx->hasrange)
-        {
-          advanceGtEncseqReader(esr);
-        }
-      }
-    }
-  }
-  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
-                                      esr->currentpos);
-}
-
 static bool containsspecialViatables(const GtEncseq *encseq,
                                      GtReadmode readmode,
                                      GtEncseqReader *esr,
@@ -2428,7 +2383,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharspecial,delivercharViauchartablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViauchartablesSpecialrange),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,seqdelivercharSpecialViatables),
+      NFCT(seqdelivercharspecial,ucharseqdelivercharSpecial),
       NFCT(delivercontainsspecial,containsspecialViatables)
     },
 
@@ -2438,7 +2393,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharspecial,delivercharViaushorttablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViaushorttablesSpecialrange),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,seqdelivercharSpecialViatables),
+      NFCT(seqdelivercharspecial,ushortseqdelivercharSpecial),
       NFCT(delivercontainsspecial,containsspecialViatables)
     },
 
@@ -2448,7 +2403,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(delivercharspecial,delivercharViauint32tablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViauint32tablesSpecialrange),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,seqdelivercharSpecialViatables),
+      NFCT(seqdelivercharspecial,uint32seqdelivercharSpecial),
       NFCT(delivercontainsspecial,containsspecialViatables)
     }
   };
@@ -3348,35 +3303,6 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   gt_disc_distri_delete(distspralen);
 }
 
-static unsigned long fwdgetnextstopposViatables(GtEncseqReader *esr,
-                                                unsigned long pos)
-{
-  gt_assert(satviautables(esr->encseq->sat));
-  gt_assert(!GT_ISDIRREVERSE(esr->readmode));
-  while (esr->idx->hasprevious)
-  {
-    if (pos >= esr->idx->previousrange.start)
-    {
-      if (pos < esr->idx->previousrange.end)
-      {
-        return pos; /* is in current special range */
-      }
-      /* follows current special range */
-      if (esr->idx->hasrange)
-      {
-        advanceGtEncseqReader(esr);
-      } else
-      {
-        break;
-      }
-    } else
-    {
-      return esr->idx->previousrange.start;
-    }
-  }
-  return esr->encseq->totallength;
-}
-
 static unsigned long fwdgetnextstopposViaequallength(const GtEncseq *encseq,
                                                      unsigned long pos)
 {
@@ -3402,10 +3328,13 @@ static unsigned long revgetnextstopposViaequallength(const GtEncseq *encseq,
   return pos+1;
 }
 
+/* XXX move the following to accesspecialpos.gen */
+
 static unsigned long revgetnextstopposViatables(GtEncseqReader *esr,
                                                 unsigned long pos)
 {
-  gt_assert(satviautables(esr->encseq->sat));
+  gt_assert(esr != NULL && esr->encseq != NULL &&
+            satviautables(esr->encseq->sat));
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {
@@ -3629,12 +3558,24 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
 
     if (gt_encseq_has_specialranges(esr->encseq))
     {
-      if (esr->encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
+      switch(esr->encseq->sat)
       {
-        stoppos = fwdgetnextstopposViatables(esr,startpos);
-      } else
-      {
-        stoppos = fwdgetnextstopposViaequallength(esr->encseq,startpos);
+        case GT_ACCESS_TYPE_UCHARTABLES:
+          stoppos = ucharfwdgetnextstopposViatables(esr,startpos);
+          break;
+        case GT_ACCESS_TYPE_USHORTTABLES:
+          stoppos = ushortfwdgetnextstopposViatables(esr,startpos);
+          break;
+        case GT_ACCESS_TYPE_UINT32TABLES:
+          stoppos = uint32fwdgetnextstopposViatables(esr,startpos);
+          break;
+        case GT_ACCESS_TYPE_EQUALLENGTH:
+          stoppos = fwdgetnextstopposViaequallength(esr->encseq,startpos);
+	  break;
+        default:
+         fprintf(stderr,"fwdextract2bitenc(%d) undefined\n",
+                         (int) esr->encseq->sat);
+         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     } else
     {

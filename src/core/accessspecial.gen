@@ -498,6 +498,81 @@ static void ADDTYPE(advanceGtEncseqReader)(GtEncseqReader *esr)
   }
 }
 
+static GtUchar ADDTYPE(seqdelivercharSpecial)(GtEncseqReader *esr)
+{
+#ifdef RANGEDEBUG
+  printf("pos=%lu,previous=(%lu,%lu)\n",esr->currentpos,
+          esr->idx->previousrange.start,
+          esr->idx->previousrange.end);
+#endif
+  if (esr->idx->hasprevious)
+  {
+    if (!GT_ISDIRREVERSE(esr->readmode))
+    {
+      if (esr->currentpos >= esr->idx->previousrange.start)
+      {
+        if (esr->currentpos < esr->idx->previousrange.end)
+        {
+          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
+                    ? (GtUchar) SEPARATOR
+                    : (GtUchar) WILDCARD;
+        }
+        if (esr->idx->hasrange)
+        {
+          ADDTYPE(advanceGtEncseqReader)(esr);
+        }
+      }
+    } else
+    {
+      if (esr->currentpos < esr->idx->previousrange.end)
+      {
+        if (esr->currentpos >= esr->idx->previousrange.start)
+        {
+          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
+                     ? (GtUchar) SEPARATOR
+                     : (GtUchar) WILDCARD;
+        }
+        if (esr->idx->hasrange)
+        {
+          ADDTYPE(advanceGtEncseqReader)(esr);
+        }
+      }
+    }
+  }
+  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                      esr->currentpos);
+}
+
+static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr,
+                                                         unsigned long pos)
+{
+  gt_assert(esr != NULL && esr->encseq != NULL &&
+            satviautables(esr->encseq->sat));
+  gt_assert(!GT_ISDIRREVERSE(esr->readmode));
+  while (esr->idx->hasprevious)
+  {
+    if (pos >= esr->idx->previousrange.start)
+    {
+      if (pos < esr->idx->previousrange.end)
+      {
+        return pos; /* is in current special range */
+      }
+      /* follows current special range */
+      if (esr->idx->hasrange)
+      {
+        ADDTYPE(advanceGtEncseqReader)(esr);
+      } else
+      {
+        break;
+      }
+    } else
+    {
+      return esr->idx->previousrange.start;
+    }
+  }
+  return esr->encseq->totallength;
+}
+
 #ifdef POS2PAGENUM
 
 static bool ADDTYPE(checknospecial)(const GtEncseq *encseq,
