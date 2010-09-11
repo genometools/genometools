@@ -1737,10 +1737,14 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   sri->encseq = encseq;
   sri->exhausted = (encseq->numofspecialstostore == 0) ? true : false;
   sri->lengthofspecialrange = 0;
-  if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS ||
-      encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS ||
-      encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH ||
-      encseq->sat == GT_ACCESS_TYPE_BITACCESS)
+  sri->esr = gt_encseq_create_reader_with_readmode(encseq,
+                                                   moveforward 
+                                                     ? GT_READMODE_FORWARD
+                                                     : GT_READMODE_REVERSE,
+                                                   0);
+  /* for satviautables we do not need sri->pos and therefore we do not
+     initialize it. */
+  if (!satviautables(encseq->sat))
   {
     if (moveforward)
     {
@@ -1754,15 +1758,6 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
         sri->pos -= (GT_MODWORDSIZE(sri->pos) + 1);
       }
     }
-    sri->esr = NULL;
-  } else
-  {
-    sri->pos = 0;
-    sri->esr
-      = gt_encseq_create_reader_with_readmode(encseq,
-                                              moveforward ? GT_READMODE_FORWARD
-                                                          : GT_READMODE_REVERSE,
-                                              0);
   }
   gt_assert(sri != NULL);
   return sri;
@@ -1992,7 +1987,10 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
 {
-  if (!sri) return;
+  if (!sri)
+  {
+    return;
+  }
   if (sri->esr != NULL)
   {
     gt_encseq_reader_delete(sri->esr);
