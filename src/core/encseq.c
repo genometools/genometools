@@ -1720,7 +1720,6 @@ bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq)
 struct GtSpecialrangeiterator
 {
   bool moveforward, exhausted;
-  const GtEncseq *encseq;
   GtEncseqReader *esr;
   unsigned long pos,
                 lengthofspecialrange;
@@ -1734,7 +1733,6 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   gt_assert(encseq->numofspecialstostore > 0);
   sri = gt_malloc(sizeof (*sri));
   sri->moveforward = moveforward;
-  sri->encseq = encseq;
   sri->exhausted = (encseq->numofspecialstostore == 0) ? true : false;
   sri->lengthofspecialrange = 0;
   sri->esr = gt_encseq_create_reader_with_readmode(encseq,
@@ -1753,7 +1751,7 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
     {
       sri->pos = encseq->totallength-1;
       if (encseq->sat == GT_ACCESS_TYPE_BITACCESS &&
-          GT_BITNUM2WORD(sri->encseq->specialbits,sri->pos) == 0)
+          GT_BITNUM2WORD(sri->esr->encseq->specialbits,sri->pos) == 0)
       {
         sri->pos -= (GT_MODWORDSIZE(sri->pos) + 1);
       }
@@ -1776,10 +1774,10 @@ static bool gt_dabc_specialrangeiterator_next(bool directaccess,
   {
     if (directaccess)
     {
-      cc = sri->encseq->plainseq[sri->pos];
+      cc = sri->esr->encseq->plainseq[sri->pos];
     } else
     {
-      cc = delivercharViabytecompress(sri->encseq,sri->pos);
+      cc = delivercharViabytecompress(sri->esr->encseq,sri->pos);
     }
     if (ISSPECIAL(cc))
     {
@@ -1803,12 +1801,13 @@ static bool gt_dabc_specialrangeiterator_next(bool directaccess,
     }
     if (sri->moveforward)
     {
-      if (sri->pos == sri->encseq->totallength - 1)
+      if (sri->pos == sri->esr->encseq->totallength - 1)
       {
         if (sri->lengthofspecialrange > 0)
         {
-          range->start = sri->encseq->totallength - sri->lengthofspecialrange;
-          range->end = sri->encseq->totallength;
+          range->start = sri->esr->encseq->totallength -
+                         sri->lengthofspecialrange;
+          range->end = sri->esr->encseq->totallength;
           success = true;
         }
         sri->exhausted = true;
@@ -1838,27 +1837,27 @@ static bool gt_equallength_specialrangeiterator_next(GtRange *range,
                                                    GtSpecialrangeiterator *sri)
 {
   gt_assert(!sri->exhausted);
-  gt_assert(!specialsingleposViaequallength(sri->encseq,sri->pos));
+  gt_assert(!specialsingleposViaequallength(sri->esr->encseq,sri->pos));
   if (sri->moveforward)
   {
-    if (sri->pos + sri->encseq->equallength.valueunsignedlong >=
-        sri->encseq->totallength)
+    if (sri->pos + sri->esr->encseq->equallength.valueunsignedlong >=
+        sri->esr->encseq->totallength)
     {
       sri->exhausted = true;
       return false;
     }
-    sri->pos += sri->encseq->equallength.valueunsignedlong + 1;
+    sri->pos += sri->esr->encseq->equallength.valueunsignedlong + 1;
     range->start = sri->pos - 1;
     range->end = sri->pos;
   } else
   {
-    if (sri->pos < sri->encseq->equallength.valueunsignedlong)
+    if (sri->pos < sri->esr->encseq->equallength.valueunsignedlong)
     {
       sri->exhausted = true;
       return false;
     }
-    gt_assert(sri->pos >= sri->encseq->equallength.valueunsignedlong + 1);
-    sri->pos -= sri->encseq->equallength.valueunsignedlong + 1;
+    gt_assert(sri->pos >= sri->esr->encseq->equallength.valueunsignedlong + 1);
+    sri->pos -= sri->esr->encseq->equallength.valueunsignedlong + 1;
     range->start = sri->pos + 1;
     range->end = sri->pos + 2;
   }
@@ -1873,7 +1872,7 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
 
   while (!success)
   {
-    currentword = GT_BITNUM2WORD(sri->encseq->specialbits,sri->pos);
+    currentword = GT_BITNUM2WORD(sri->esr->encseq->specialbits,sri->pos);
     if (GT_ISBITSET(currentword,sri->pos))
     {
       sri->lengthofspecialrange++;
@@ -1896,12 +1895,13 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
     }
     if (sri->moveforward)
     {
-      if (sri->pos == sri->encseq->totallength - 1)
+      if (sri->pos == sri->esr->encseq->totallength - 1)
       {
         if (sri->lengthofspecialrange > 0)
         {
-          range->start = sri->encseq->totallength - sri->lengthofspecialrange;
-          range->end = sri->encseq->totallength;
+          range->start = sri->esr->encseq->totallength -
+                         sri->lengthofspecialrange;
+          range->end = sri->esr->encseq->totallength;
           success = true;
         }
         sri->exhausted = true;
@@ -1911,7 +1911,7 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
       {
         gt_assert(GT_MODWORDSIZE(sri->pos) == 0);
         sri->pos += GT_INTWORDSIZE;
-        if (sri->pos >= sri->encseq->totallength)
+        if (sri->pos >= sri->esr->encseq->totallength)
         {
           sri->exhausted = true;
           break;
@@ -1960,7 +1960,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
   {
     return false;
   }
-  switch (sri->encseq->sat)
+  switch (sri->esr->encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
       return gt_dabc_specialrangeiterator_next(true,range,sri);
@@ -1971,7 +1971,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
     case GT_ACCESS_TYPE_BITACCESS:
       return gt_bitaccess_specialrangeiterator_next(range,sri);
     default:
-      gt_assert(satviautables(sri->encseq->sat));
+      gt_assert(satviautables(sri->esr->encseq->sat));
       gt_assert(sri->esr->idx->hasprevious);
       *range = sri->esr->idx->previousrange;
       if (sri->esr->idx->hasrange)
