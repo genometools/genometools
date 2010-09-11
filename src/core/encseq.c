@@ -360,6 +360,7 @@ static uint64_t countgt_encseq_get_encoded_char = 0;
 
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
+  GtUchar cc;
 #ifdef WITHshowgetencodedcharcounters
   countgt_encseq_get_encoded_char++;
 #endif
@@ -367,23 +368,24 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
   switch (esr->readmode)
   {
     case GT_READMODE_FORWARD:
-      return esr->encseq->seqdeliverchar(esr, esr->currentpos++);
+      cc = esr->encseq->seqdeliverchar(esr);
+      esr->currentpos++;
+      return cc;
     case GT_READMODE_REVERSE:
-      return esr->encseq->seqdeliverchar(esr, esr->currentpos--);
+      cc = esr->encseq->seqdeliverchar(esr);
+      esr->currentpos--;
+      return cc;
     case GT_READMODE_COMPL: /* only works with dna */
-      {
-        GtUchar cc = esr->encseq->seqdeliverchar(esr, esr->currentpos++);
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
-      }
+      cc = esr->encseq->seqdeliverchar(esr);
+      esr->currentpos++;
+      return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
     case GT_READMODE_REVCOMPL: /* only works with dna */
-      {
-        GtUchar cc = esr->encseq->seqdeliverchar(esr, esr->currentpos--);
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
-      }
+      cc = esr->encseq->seqdeliverchar(esr);
+      esr->currentpos--;
+      return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
     default:
       fprintf(stderr,"gt_encseq_get_encoded_char: "
-                     "readmode %d not implemented\n",
-                     (int) esr->readmode);
+                     "readmode %d not implemented\n",(int) esr->readmode);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -901,10 +903,10 @@ static GtUchar deliverfromtwobitencoding(const GtEncseq *encseq,
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
-static GtUchar seqdelivercharnospecial2bitenc(GtEncseqReader *esr, 
-                                              unsigned long pos)
+static GtUchar seqdelivercharnospecial2bitenc(GtEncseqReader *esr)
 {
-  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                      esr->currentpos);
 }
 
 /* GT_ACCESS_TYPE_DIRECTACCESS */
@@ -947,10 +949,9 @@ static GtUchar delivercharViadirectaccess(const GtEncseq *encseq,
   return encseq->plainseq[pos];
 }
 
-static GtUchar seqdelivercharViadirectaccess(GtEncseqReader *esr,
-                                             unsigned long pos)
+static GtUchar seqdelivercharViadirectaccess(GtEncseqReader *esr)
 {
-  return esr->encseq->plainseq[pos];
+  return esr->encseq->plainseq[esr->currentpos];
 }
 
 static bool containsspecialViadirectaccess(const GtEncseq *encseq,
@@ -1060,10 +1061,9 @@ static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
-static GtUchar seqdelivercharViabytecompress(GtEncseqReader *esr,
-                                             unsigned long pos)
+static GtUchar seqdelivercharViabytecompress(GtEncseqReader *esr)
 {
-  return delivercharViabytecompress(esr->encseq,pos);
+  return delivercharViabytecompress(esr->encseq,esr->currentpos);
 }
 
 static bool containsspecialViabytecompress(const GtEncseq *encseq,
@@ -1165,10 +1165,9 @@ static GtUchar delivercharViaequallength(const GtEncseq *encseq,
   return (GtUchar) SEPARATOR;
 }
 
-static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr,
-                                            unsigned long pos)
+static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
 {
-  return delivercharViaequallength(esr->encseq,pos);
+  return delivercharViaequallength(esr->encseq,esr->currentpos);
 }
 
 static unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
@@ -1296,14 +1295,14 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                : (GtUchar) WILDCARD;
 }
 
-static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr,
-                                                 unsigned long pos)
+static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr)
 {
-  if (!GT_ISIBITSET(esr->encseq->specialbits,pos))
+  if (!GT_ISIBITSET(esr->encseq->specialbits,esr->currentpos))
   {
-    return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos);
+    return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                        esr->currentpos);
   }
-  return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos)
+  return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
              ? (GtUchar) SEPARATOR
              : (GtUchar) WILDCARD;
 }
@@ -1605,11 +1604,10 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   gt_free(esr);
 }
 
-static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr,
-                                              unsigned long pos)
+static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr)
 {
 #ifdef RANGEDEBUG
-  printf("pos=%lu,previous=(%lu,%lu)\n",pos,
+  printf("pos=%lu,previous=(%lu,%lu)\n",esr->currentpos,
           esr->idx->previousrange.start,
           esr->idx->previousrange.end);
 #endif
@@ -1617,11 +1615,11 @@ static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr,
   {
     if (!GT_ISDIRREVERSE(esr->readmode))
     {
-      if (pos >= esr->idx->previousrange.start)
+      if (esr->currentpos >= esr->idx->previousrange.start)
       {
-        if (pos < esr->idx->previousrange.end)
+        if (esr->currentpos < esr->idx->previousrange.end)
         {
-          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos)
+          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
                     ? (GtUchar) SEPARATOR
                     : (GtUchar) WILDCARD;
         }
@@ -1632,11 +1630,11 @@ static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr,
       }
     } else
     {
-      if (pos < esr->idx->previousrange.end)
+      if (esr->currentpos < esr->idx->previousrange.end)
       {
-        if (pos >= esr->idx->previousrange.start)
+        if (esr->currentpos >= esr->idx->previousrange.start)
         {
-          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos)
+          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
                      ? (GtUchar) SEPARATOR
                      : (GtUchar) WILDCARD;
         }
@@ -1647,7 +1645,8 @@ static GtUchar seqdelivercharSpecialViatables(GtEncseqReader *esr,
       }
     }
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,pos);
+  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                      esr->currentpos);
 }
 
 static bool containsspecialViatables(const GtEncseq *encseq,
@@ -2361,7 +2360,7 @@ typedef struct
 typedef struct
 {
   const char *funcname;
-  GtUchar(*function)(GtEncseqReader *,unsigned long);
+  GtUchar(*function)(GtEncseqReader *);
 } SeqDelivercharfunc;
 
 typedef struct

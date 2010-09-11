@@ -62,7 +62,7 @@ struct GtEncseq
   const char *delivercharname;
   GtUchar(*delivercharnospecial)(const GtEncseq *,unsigned long);
   const char *delivercharnospecialname;
-  GtUchar(*seqdeliverchar)(GtEncseqReader *,unsigned long);
+  GtUchar(*seqdeliverchar)(GtEncseqReader *);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const GtEncseq *,
                                 GtReadmode,
