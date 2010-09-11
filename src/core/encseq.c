@@ -114,31 +114,6 @@
           *tbeptr = bitwise;\
         }
 
-typedef struct
-{
-  const char *funcname;
-  int(*function)(GtEncseq *,GtSequenceBuffer *,GtError *);
-} Fillencposfunc;
-
-typedef struct
-{
-  const char *funcname;
-  GtUchar(*function)(const GtEncseq *,unsigned long);
-} Delivercharfunc;
-
-typedef struct
-{
-  const char *funcname;
-  GtUchar(*function)(GtEncseqReader *,unsigned long);
-} SeqDelivercharfunc;
-
-typedef struct
-{
-  const char *funcname;
-  bool(*function)(const GtEncseq *,GtReadmode,GtEncseqReader *,
-                  unsigned long,unsigned long);
-} Containsspecialfunc;
-
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                  const GtUchar *seq,
                                  unsigned long len)
@@ -2368,11 +2343,36 @@ unsigned long gt_encseq_charcount(const GtEncseq *encseq, GtUchar cc)
   return encseq->characterdistribution[cc];
 }
 
+typedef struct
+{
+  const char *funcname;
+  int(*function)(GtEncseq *,GtSequenceBuffer *,GtError *);
+} Fillencseqfunc;
+
+typedef struct
+{
+  const char *funcname;
+  GtUchar(*function)(const GtEncseq *,unsigned long);
+} Delivercharfunc;
+
+typedef struct
+{
+  const char *funcname;
+  GtUchar(*function)(GtEncseqReader *,unsigned long);
+} SeqDelivercharfunc;
+
+typedef struct
+{
+  const char *funcname;
+  bool(*function)(const GtEncseq *,GtReadmode,GtEncseqReader *,
+                  unsigned long,unsigned long);
+} Containsspecialfunc;
+
 /* Do not change the order of the following components */
 
 typedef struct
 {
-  Fillencposfunc fillpos;
+  Fillencseqfunc fillpos;
   Delivercharfunc delivercharnospecial,
                   delivercharspecial,
                   delivercharspecialrange;
