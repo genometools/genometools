@@ -2928,12 +2928,12 @@ static unsigned long calcspecialranges(unsigned long *specialrangestab,
   return updatesumrangeinfo.realspecialranges;
 }
 
-static uint64_t detencseqofsatviatables(int kind,
-                                        unsigned long totallength,
-                                        unsigned long numofdbfiles,
-                                        unsigned long lengthofdbfilenames,
-                                        unsigned long specialranges,
-                                        unsigned int numofchars)
+static uint64_t detencseqofsatviautables(int kind,
+                                         unsigned long totallength,
+                                         unsigned long numofdbfiles,
+                                         unsigned long lengthofdbfilenames,
+                                         unsigned long specialranges,
+                                         unsigned int numofchars)
 {
   GtEncseqAccessType sat[] = {GT_ACCESS_TYPE_UCHARTABLES,
                               GT_ACCESS_TYPE_USHORTTABLES,
@@ -3045,10 +3045,10 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
   {
     if (forcetable == 3U || c == (int) forcetable)
     {
-      tmp = detencseqofsatviatables(c,totallength,numofdbfiles,
-                                    lengthofdbfilenames,
-                                    specialrangestab[c],
-                                    numofchars);
+      tmp = detencseqofsatviautables(c,totallength,numofdbfiles,
+                                     lengthofdbfilenames,
+                                     specialrangestab[c],
+                                     numofchars);
       if (!smallestdefined || tmp < smallestsize)
       {
         smallestdefined = true;
