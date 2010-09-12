@@ -56,6 +56,12 @@ int gt_genomediff_shu(GtLogger *logger,
   if (arguments->withesa)
   {
     gt_error_check(err);
+    if (timer != NULL)
+    {
+      gt_progress_timer_start_new_state(timer,
+                                        "load sequential sa reader",
+                                        stdout);
+    }
     ssar =
       gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(
                                                   arguments->indexname),
@@ -76,6 +82,12 @@ int gt_genomediff_shu(GtLogger *logger,
       numoffiles = gt_encseq_num_of_files(encseq);
       gt_array2dim_calloc(shulen, numoffiles, numoffiles);
       filelength = gt_calloc((size_t) numoffiles, sizeof (unsigned long));
+      if (timer != NULL)
+      {
+        gt_progress_timer_start_new_state(timer,
+                                          "dfs esa index",
+                                          stdout);
+      }
       if (gt_get_multiesashulengthdist(ssar,
                                        encseq,
                                        shulen,
