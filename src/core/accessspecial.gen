@@ -543,19 +543,18 @@ static GtUchar ADDTYPE(seqdelivercharSpecial)(GtEncseqReader *esr)
                                       esr->currentpos);
 }
 
-static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr,
-                                                         unsigned long pos)
+static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr)
 {
   gt_assert(esr != NULL && esr->encseq != NULL &&
             satviautables(esr->encseq->sat));
   gt_assert(!GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {
-    if (pos >= esr->idx->previousrange.start)
+    if (esr->currentpos >= esr->idx->previousrange.start)
     {
-      if (pos < esr->idx->previousrange.end)
+      if (esr->currentpos < esr->idx->previousrange.end)
       {
-        return pos; /* is in current special range */
+        return esr->currentpos; /* is in current special range */
       }
       /* follows current special range */
       if (esr->idx->hasrange)
@@ -573,19 +572,18 @@ static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr,
   return esr->encseq->totallength;
 }
 
-static unsigned long ADDTYPE(revgetnextstopposViatables)(GtEncseqReader *esr,
-                                                         unsigned long pos)
+static unsigned long ADDTYPE(revgetnextstopposViatables)(GtEncseqReader *esr)
 {
   gt_assert(esr != NULL && esr->encseq != NULL &&
             satviautables(esr->encseq->sat));
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {
-    if (pos < esr->idx->previousrange.end)
+    if (esr->currentpos < esr->idx->previousrange.end)
     {
-      if (pos >= esr->idx->previousrange.start)
+      if (esr->currentpos >= esr->idx->previousrange.start)
       {
-        return pos+1; /* is in current special range */
+        return esr->currentpos+1; /* is in current special range */
       }
       /* follows current special range */
       if (esr->idx->hasrange)
