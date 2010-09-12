@@ -3667,14 +3667,6 @@ void gt_encseq_extract2bitenc(bool fwd,
                               GtEncseqReader *esr,
                               unsigned long startpos)
 {
-  (fwd ? fwdextract2bitenc : revextract2bitenc) (ptbe,esr,startpos);
-}
-
-void gt_encseq_extract2bitenc2(bool fwd,
-                               GtEndofTwobitencoding *ptbe,
-                               GtEncseqReader *esr,
-                               unsigned long startpos)
-{
   if (fwd)
   {
     fwdextract2bitenc(ptbe,esr,startpos);
@@ -4038,8 +4030,8 @@ int gt_encseq_compare(const GtEncseq *encseq,
     if (pos1 + depth < encseq->totallength &&
         pos2 + depth < encseq->totallength)
     {
-      gt_encseq_extract2bitenc2(fwd,&ptbe1,esr1,pos1 + depth);
-      gt_encseq_extract2bitenc2(fwd,&ptbe2,esr2,pos2 + depth);
+      gt_encseq_extract2bitenc(fwd,&ptbe1,esr1,pos1 + depth);
+      gt_encseq_extract2bitenc(fwd,&ptbe2,esr2,pos2 + depth);
       retval = gt_encseq_compare_twobitencodings(fwd,complement,
                                                  commonunits,
                                                  &ptbe1,&ptbe2);
@@ -4120,8 +4112,8 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
   {
     if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
     {
-      gt_encseq_extract2bitenc2(fwd,&ptbe1,esr1,pos1 + depth);
-      gt_encseq_extract2bitenc2(fwd,&ptbe2,esr2,pos2 + depth);
+      gt_encseq_extract2bitenc(fwd,&ptbe1,esr1,pos1 + depth);
+      gt_encseq_extract2bitenc(fwd,&ptbe2,esr2,pos2 + depth);
       retval = gt_encseq_compare_twobitencodings(fwd,complement,
                                                  commonunits,&ptbe1,&ptbe2);
       if (depth + commonunits->common < maxdepth)
@@ -4473,7 +4465,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
   esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
   for (startpos = 0; startpos < encseq->totallength; startpos++)
   {
-    gt_encseq_extract2bitenc2(fwd,&ptbe1,esr,startpos);
+    gt_encseq_extract2bitenc(fwd,&ptbe1,esr,startpos);
     extract2bitenc_bruteforce(fwd,&ptbe2,encseq,startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial)
     {
@@ -4580,8 +4572,8 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
 
   esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos1);
   esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos2);
-  gt_encseq_extract2bitenc2(fwd,&ptbe1,esr1,pos1);
-  gt_encseq_extract2bitenc2(fwd,&ptbe2,esr2,pos2);
+  gt_encseq_extract2bitenc(fwd,&ptbe1,esr1,pos1);
+  gt_encseq_extract2bitenc(fwd,&ptbe2,esr2,pos2);
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   ret1 = gt_encseq_compare_twobitencodings(fwd, complement,

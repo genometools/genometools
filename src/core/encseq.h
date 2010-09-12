@@ -86,15 +86,11 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
   position relative to <startpos>. The scanning is performed in forward or
   reverse direction depending on the value of <fwd>. The result is stored
   in <ptbe>. */
+
 void gt_encseq_extract2bitenc(bool fwd,
                               GtEndofTwobitencoding *ptbe,
                               GtEncseqReader *esr,
                               unsigned long startpos);
-
-void gt_encseq_extract2bitenc2(bool fwd,
-                               GtEndofTwobitencoding *ptbe,
-                               GtEncseqReader *esr,
-                               unsigned long startpos);
 
 /* Returns the encoded representation of the character at position <pos> of
   <encseq> read in the direction as indicated by <readmode>.

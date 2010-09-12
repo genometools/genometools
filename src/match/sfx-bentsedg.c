@@ -136,7 +136,7 @@ typedef GtEndofTwobitencoding Sfxcmp;
             gt_encseq_reader_reinit_with_readmode(bsr->esr1,bsr->encseq,\
                                                   bsr->readmode,pos);\
             gt_assert(pos < bsr->totallength);\
-            gt_encseq_extract2bitenc2(bsr->fwd,&(VAR),bsr->esr1,pos);\
+            gt_encseq_extract2bitenc(bsr->fwd,&(VAR),bsr->esr1,pos);\
           } else\
           {\
             VAR.tbe = 0;\
