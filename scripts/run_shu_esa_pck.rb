@@ -3,6 +3,7 @@
 
 $:.unshift File.join(File.dirname(__FILE__), ".")
 require 'evalshurun'
+require 'fileutils'
 
 $bin=ENV['GTDIR'] + "/bin/"
 
@@ -13,7 +14,6 @@ def shu_pck(files, param)
            "-dna                " +
            "-dir rev            " +
            "-ssp                " +
-           "-dc 64              " +
            "-bsize 8            " +
            "-sprank             " +
            "-pl                 " +
@@ -56,17 +56,27 @@ ARGV.each do |file|
   unless File.exist?(file)
     puts "non existing file " + file
   else
-    files += file + " "
+    files += reverse_and_concat(file) + " "
   end
 end
 
 puts "***ESA***"
 shu_esa(files, "-v")
+system "gprof $GTDIR/bin/gt > esa_full.prof"
+FileUtils.rm_f("gmon.out")
 puts "***PCK***"
 shu_pck(files, "-v")
+system "gprof $GTDIR/bin/gt > pck_full.prof"
+FileUtils.rm_f("gmon.out")
 puts "***ESA***"
 shu_esa(files, "-v -shulen")
+system "gprof $GTDIR/bin/gt > esa_shulen.prof"
+FileUtils.rm_f("gmon.out")
 puts "***PCK***"
 shu_pck(files, "-v -shulen")
+system "gprof $GTDIR/bin/gt > pck_shulen.prof"
+FileUtils.rm_f("gmon.out")
 puts "***PCK TRAVERSE***"
 shu_pck(files, "-v -traverse")
+system "gprof $GTDIR/bin/gt > pck_traverse.prof"
+FileUtils.rm_f("gmon.out")
