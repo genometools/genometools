@@ -573,6 +573,36 @@ static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr,
   return esr->encseq->totallength;
 }
 
+static unsigned long ADDTYPE(revgetnextstopposViatables)(GtEncseqReader *esr,
+                                                         unsigned long pos)
+{
+  gt_assert(esr != NULL && esr->encseq != NULL &&
+            satviautables(esr->encseq->sat));
+  gt_assert(GT_ISDIRREVERSE(esr->readmode));
+  while (esr->idx->hasprevious)
+  {
+    if (pos < esr->idx->previousrange.end)
+    {
+      if (pos >= esr->idx->previousrange.start)
+      {
+        return pos+1; /* is in current special range */
+      }
+      /* follows current special range */
+      if (esr->idx->hasrange)
+      {
+        ADDTYPE(advanceGtEncseqReader)(esr);
+      } else
+      {
+        break;
+      }
+    } else
+    {
+      return esr->idx->previousrange.end;
+    }
+  }
+  return 0; /* virtual stop at -1 */
+}
+
 #ifdef POS2PAGENUM
 
 static bool ADDTYPE(checknospecial)(const GtEncseq *encseq,

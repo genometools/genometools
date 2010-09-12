@@ -3328,38 +3328,6 @@ static unsigned long revgetnextstopposViaequallength(const GtEncseq *encseq,
   return pos+1;
 }
 
-/* XXX move the following to accesspecialpos.gen */
-
-static unsigned long revgetnextstopposViatables(GtEncseqReader *esr,
-                                                unsigned long pos)
-{
-  gt_assert(esr != NULL && esr->encseq != NULL &&
-            satviautables(esr->encseq->sat));
-  gt_assert(GT_ISDIRREVERSE(esr->readmode));
-  while (esr->idx->hasprevious)
-  {
-    if (pos < esr->idx->previousrange.end)
-    {
-      if (pos >= esr->idx->previousrange.start)
-      {
-        return pos+1; /* is in current special range */
-      }
-      /* follows current special range */
-      if (esr->idx->hasrange)
-      {
-        advanceGtEncseqReader(esr);
-      } else
-      {
-        break;
-      }
-    } else
-    {
-      return esr->idx->previousrange.end;
-    }
-  }
-  return 0; /* virtual stop at -1 */
-}
-
 static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
                                               unsigned long startpos)
 {
@@ -3633,12 +3601,25 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,
 
     if (gt_encseq_has_specialranges(esr->encseq))
     {
-      if (esr->encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
+      switch(esr->encseq->sat)
       {
-        stoppos = revgetnextstopposViatables(esr,startpos);
-      } else
-      {
-        stoppos = revgetnextstopposViaequallength(esr->encseq,startpos);
+        case GT_ACCESS_TYPE_UCHARTABLES:
+          stoppos = ucharrevgetnextstopposViatables(esr,startpos);
+          break;
+        case GT_ACCESS_TYPE_USHORTTABLES:
+          stoppos = ushortrevgetnextstopposViatables(esr,startpos);
+          break;
+        case GT_ACCESS_TYPE_UINT32TABLES:
+          stoppos = uint32revgetnextstopposViatables(esr,startpos);
+          break;
+        case GT_ACCESS_TYPE_EQUALLENGTH:
+          stoppos = revgetnextstopposViaequallength(esr->encseq,startpos);
+          break;
+        default:
+         fprintf(stderr,"revextract2bitenc(%d) undefined\n",
+                         (int) esr->encseq->sat);
+         exit(GT_EXIT_PROGRAMMING_ERROR);
+	
       }
     } else
     {
