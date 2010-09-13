@@ -145,9 +145,9 @@ typedef GtEndofTwobitencoding Sfxcmp;
         }
 
 #define Sfxdocompare(COMMONUNITS,X,Y)\
-        ret##X##Y = gt_encseq_compare_twobitencodings(bsr->fwd,\
-                                                      bsr->complement,\
-                                                      COMMONUNITS,&X,&Y)
+        ret##X##Y = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,\
+                                                             bsr->complement,\
+                                                             COMMONUNITS,&X,&Y)
 
 #define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
 #define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
@@ -396,7 +396,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
       } else
       {
 #ifdef SKDEBUG
-        printf("gt_encseq_compare[%lu,%lu] at offset %lu\n",
+        printf("gt_encseq_compare_viatwobitencoding[%lu,%lu] at offset %lu\n",
                 sval1,sval2,offset);
         gt_encseq_showatstartpos(stdout,
                                  bsr->fwd,
@@ -409,11 +409,13 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                                  bsr->encseq,
                                  sval2);
 #endif
-        retval = gt_encseq_compare(bsr->encseq,&commonunits,bsr->readmode,
-                                   bsr->esr1,bsr->esr2,
-                                   sval1,
-                                   sval2,
-                                   offset);
+        retval = gt_encseq_compare_viatwobitencoding(bsr->encseq,
+                                                     &commonunits,
+                                                     bsr->readmode,
+                                                     bsr->esr1,bsr->esr2,
+                                                     sval1,
+                                                     sval2,
+                                                     offset);
         lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
@@ -510,14 +512,15 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
       } else
       {
         gt_assert(offset < maxdepth);
-        retval = gt_encseq_compare_maxdepth(bsr->encseq,
-                                            &commonunits,
-                                            bsr->readmode,
-                                            bsr->esr1,bsr->esr2,
-                                            sval1,
-                                            sval2,
-                                            offset,
-                                            maxdepth);
+        retval = gt_encseq_compare_viatwobitencoding_maxdepth(bsr->encseq,
+                                                              &commonunits,
+                                                              bsr->readmode,
+                                                              bsr->esr1,
+                                                              bsr->esr2,
+                                                              sval1,
+                                                              sval2,
+                                                              offset,
+                                                              maxdepth);
         lcplen = commonunits.finaldepth;
         gt_assert(lcplen <= maxdepth);
         if (lcplen == maxdepth)
@@ -609,8 +612,8 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
 }
 
 #define DOMEDIANCOMPARE(A,B)\
-        gt_encseq_compare_twobitencodings(fwd,complement,&commonunits,\
-                                          &((A)->etbe),&((B)->etbe))
+        gt_encseq_compare_pairof_twobitencodings(fwd,complement,&commonunits,\
+                                                 &((A)->etbe),&((B)->etbe))
 
 #define MedianElemGREATER(A,B)  (DOMEDIANCOMPARE(A,B) > 0)
 
@@ -1019,11 +1022,11 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (idx != pivotidx)
     {
       PTR2INT(etbecurrent,subbucketleft,idx);
-      cmp = gt_encseq_compare_twobitencodings(bsr->fwd,
-                                              bsr->complement,
-                                              &commonunits,
-                                              &etbecurrent,
-                                              pivotcmpbits);
+      cmp = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,
+                                                     bsr->complement,
+                                                     &commonunits,
+                                                     &etbecurrent,
+                                                     pivotcmpbits);
       bsr->countingsortinfo[idx].suffix
         = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
       gt_assert(commonunits.common <= (unsigned int) GT_UNITSIN2BITENC);

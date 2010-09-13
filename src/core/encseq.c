@@ -722,7 +722,7 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
 }
 
 static unsigned long countgt_encseq_compare_maxdepth = 0;
-static unsigned long countgt_encseq_compare = 0;
+static unsigned long countgt_encseq_compareviatwobitencoding = 0;
 
 void gt_encseq_delete(GtEncseq *encseq)
 {
@@ -3745,11 +3745,11 @@ static int endofdifftbe(bool fwd,
          (complement,commonunits,tbe1,tbe2);
 }
 
-int gt_encseq_compare_twobitencodings(bool fwd,
-                                      bool complement,
-                                      GtCommonunits *commonunits,
-                                      const GtEndofTwobitencoding *ptbe1,
-                                      const GtEndofTwobitencoding *ptbe2)
+int gt_encseq_compare_pairof_twobitencodings(bool fwd,
+                                             bool complement,
+                                             GtCommonunits *commonunits,
+                                             const GtEndofTwobitencoding *ptbe1,
+                                             const GtEndofTwobitencoding *ptbe2)
 {
   GtTwobitencoding mask;
 
@@ -3909,7 +3909,8 @@ static unsigned long extractsinglecharacter(const GtEncseq *encseq,
    true. The positions are used with offset depth.
 */
 
-static int gt_encseq_comparepositions_withonespecial(bool *leftspecial,
+static int gt_encseq_comparepositions_withonespecial(
+                                           bool *leftspecial,
                                            bool *rightspecial,
                                            const GtEncseq *encseq,
                                            bool fwd,
@@ -3946,21 +3947,21 @@ static int gt_encseq_comparepositions_withonespecial(bool *leftspecial,
   return cc1 < cc2 ? -1 : 1;
 }
 
-int gt_encseq_compare(const GtEncseq *encseq,
-                      GtCommonunits *commonunits,
-                      GtReadmode readmode,
-                      GtEncseqReader *esr1,
-                      GtEncseqReader *esr2,
-                      unsigned long pos1,
-                      unsigned long pos2,
-                      unsigned long depth)
+int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
+                                        GtCommonunits *commonunits,
+                                        GtReadmode readmode,
+                                        GtEncseqReader *esr1,
+                                        GtEncseqReader *esr2,
+                                        unsigned long pos1,
+                                        unsigned long pos2,
+                                        unsigned long depth)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
-  countgt_encseq_compare++;
+  countgt_encseq_compareviatwobitencoding++;
   gt_assert(pos1 != pos2);
   if (pos1 + depth < encseq->totallength &&
       pos2 + depth < encseq->totallength)
@@ -3975,9 +3976,9 @@ int gt_encseq_compare(const GtEncseq *encseq,
     {
       gt_encseq_extract2bitenc(&ptbe1,esr1);
       gt_encseq_extract2bitenc(&ptbe2,esr2);
-      retval = gt_encseq_compare_twobitencodings(fwd,complement,
-                                                 commonunits,
-                                                 &ptbe1,&ptbe2);
+      retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
+                                                        commonunits,
+                                                        &ptbe1,&ptbe2);
       depth += commonunits->common;
     } else
     {
@@ -4001,15 +4002,15 @@ int gt_encseq_compare(const GtEncseq *encseq,
   return retval;
 }
 
-int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
-                               GtCommonunits *commonunits,
-                               GtReadmode readmode,
-                               GtEncseqReader *esr1,
-                               GtEncseqReader *esr2,
-                               unsigned long pos1,
-                               unsigned long pos2,
-                               unsigned long depth,
-                               unsigned long maxdepth)
+int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
+                                                 GtCommonunits *commonunits,
+                                                 GtReadmode readmode,
+                                                 GtEncseqReader *esr1,
+                                                 GtEncseqReader *esr2,
+                                                 unsigned long pos1,
+                                                 unsigned long pos2,
+                                                 unsigned long depth,
+                                                 unsigned long maxdepth)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
@@ -4041,8 +4042,9 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
     {
       gt_encseq_extract2bitenc(&ptbe1,esr1);
       gt_encseq_extract2bitenc(&ptbe2,esr2);
-      retval = gt_encseq_compare_twobitencodings(fwd,complement,
-                                                 commonunits,&ptbe1,&ptbe2);
+      retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
+                                                        commonunits,
+                                                        &ptbe1,&ptbe2);
       if (depth + commonunits->common < maxdepth)
       {
         depth += commonunits->common;
@@ -4600,8 +4602,8 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   gt_encseq_extract2bitenc(&ptbe2,esr2);
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
-  ret1 = gt_encseq_compare_twobitencodings(fwd,complement,
-                                           &commonunits1,&ptbe1, &ptbe2);
+  ret1 = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
+                                                  &commonunits1,&ptbe1,&ptbe2);
   commonunits2 = (unsigned long) GT_UNITSIN2BITENC;
   if (GT_ISDIRREVERSE(readmode))
   {

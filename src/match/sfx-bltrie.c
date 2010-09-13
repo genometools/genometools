@@ -337,25 +337,26 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
   {
     gt_assert(leafpos < blindtrie->totallength);
     gt_assert(currentstartpos < blindtrie->totallength);
-    (void) gt_encseq_compare(blindtrie->encseq,
-                             &commonunits,
-                             blindtrie->readmode,
-                             blindtrie->esr1,
-                             blindtrie->esr2,
-                             leafpos,
-                             currentstartpos,
-                             0);
+    (void) gt_encseq_compare_viatwobitencoding(blindtrie->encseq,
+                                               &commonunits,
+                                               blindtrie->readmode,
+                                               blindtrie->esr1,
+                                               blindtrie->esr2,
+                                               leafpos,
+                                               currentstartpos,
+                                               0);
   } else
   {
-    (void) gt_encseq_compare_maxdepth(blindtrie->encseq,
-                                      &commonunits,
-                                      blindtrie->readmode,
-                                      blindtrie->esr1,
-                                      blindtrie->esr2,
-                                      leafpos,
-                                      currentstartpos,
-                                      0,
-                                      blindtrie->maxdepthminusoffset);
+    (void) gt_encseq_compare_viatwobitencoding_maxdepth(blindtrie->encseq,
+                                                        &commonunits,
+                                                        blindtrie->readmode,
+                                                        blindtrie->esr1,
+                                                        blindtrie->esr2,
+                                                        leafpos,
+                                                        currentstartpos,
+                                                        0,
+                                                        blindtrie->
+                                                          maxdepthminusoffset);
   }
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)

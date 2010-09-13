@@ -135,26 +135,26 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
   return value is -1, 0 or 1 depending on weather the sequence beginning at
   position <pos1> is smaller than, equal to, or larger than the sequence
   beginning at position <pos2>. */
-int gt_encseq_compare(const GtEncseq *encseq,
-                      GtCommonunits *commonunits,
-                      GtReadmode readmode,
-                      GtEncseqReader *esr1,
-                      GtEncseqReader *esr2,
-                      unsigned long pos1,
-                      unsigned long pos2,
-                      unsigned long depth);
+int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
+                                        GtCommonunits *commonunits,
+                                        GtReadmode readmode,
+                                        GtEncseqReader *esr1,
+                                        GtEncseqReader *esr2,
+                                        unsigned long pos1,
+                                        unsigned long pos2,
+                                        unsigned long depth);
 
 /* The function is identical to the previous function except that the
   the comparison is restricted to the prefixes of length <maxdepth>. */
-int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
-                               GtCommonunits *commonunits,
-                               GtReadmode readmode,
-                               GtEncseqReader *esr1,
-                               GtEncseqReader *esr2,
-                               unsigned long pos1,
-                               unsigned long pos2,
-                               unsigned long depth,
-                               unsigned long maxdepth);
+int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
+                                                 GtCommonunits *commonunits,
+                                                 GtReadmode readmode,
+                                                 GtEncseqReader *esr1,
+                                                 GtEncseqReader *esr2,
+                                                 unsigned long pos1,
+                                                 unsigned long pos2,
+                                                 unsigned long depth,
+                                                 unsigned long maxdepth);
 
 /* The following function extracts a twobit encoding at position 
   <esr->currentpos>
@@ -170,11 +170,12 @@ void gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
   done in forward direction iff <fwd> is true. 
   The comparison is done for the complemented characters
   iff <complement> is true. */
-int gt_encseq_compare_twobitencodings(bool fwd,
-                                      bool complement,
-                                      GtCommonunits *commonunits,
-                                      const GtEndofTwobitencoding *ptbe1,
-                                      const GtEndofTwobitencoding *ptbe2);
+int gt_encseq_compare_pairof_twobitencodings(bool fwd,
+                                             bool complement,
+                                             GtCommonunits *commonunits,
+                                             const GtEndofTwobitencoding *ptbe1,
+                                             const GtEndofTwobitencoding 
+                                                                      *ptbe2);
 
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.
