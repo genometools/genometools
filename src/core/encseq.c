@@ -3745,12 +3745,11 @@ static int endofdifftbe(bool fwd,
          (complement,commonunits,tbe1,tbe2);
 }
 
-int gt_encseq_compare_twobitencodings(
-                              bool fwd,
-                              bool complement,
-                              GtCommonunits *commonunits,
-                              const GtEndofTwobitencoding *ptbe1,
-                              const GtEndofTwobitencoding *ptbe2)
+int gt_encseq_compare_twobitencodings(bool fwd,
+                                      bool complement,
+                                      GtCommonunits *commonunits,
+                                      const GtEndofTwobitencoding *ptbe1,
+                                      const GtEndofTwobitencoding *ptbe2)
 {
   GtTwobitencoding mask;
 
@@ -3910,7 +3909,7 @@ static unsigned long extractsinglecharacter(const GtEncseq *encseq,
    true. The positions are used with offset depth.
 */
 
-static int gt_encseq_comparewithonespecial(bool *leftspecial,
+static int gt_encseq_comparepositions_withonespecial(bool *leftspecial,
                                            bool *rightspecial,
                                            const GtEncseq *encseq,
                                            bool fwd,
@@ -3982,7 +3981,7 @@ int gt_encseq_compare(const GtEncseq *encseq,
       depth += commonunits->common;
     } else
     {
-      retval = gt_encseq_comparewithonespecial(
+      retval = gt_encseq_comparepositions_withonespecial(
                                      &commonunits->leftspecial,
                                      &commonunits->rightspecial,
                                      encseq,
@@ -4055,7 +4054,7 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
       }
     } else
     {
-      retval = gt_encseq_comparewithonespecial(
+      retval = gt_encseq_comparepositions_withonespecial(
                                      &commonunits->leftspecial,
                                      &commonunits->rightspecial,
                                      encseq,
@@ -4302,13 +4301,13 @@ static unsigned long derefcharboundaries(const GtEncseq *encseq,
   beginning at position <pos1> is smaller than, equal to, or larger than the
   sequence beginning at position <pos2>. */
 
-static int gt_encseq_test_comparetwostrings(const GtEncseq *encseq,
-                                            bool fwd,
-                                            bool complement,
-                                            unsigned long *maxcommon,
-                                            unsigned long pos1,
-                                            unsigned long pos2,
-                                            unsigned long maxdepth)
+static int gt_encseq_check_comparetwostrings(const GtEncseq *encseq,
+                                             bool fwd,
+                                             bool complement,
+                                             unsigned long *maxcommon,
+                                             unsigned long pos1,
+                                             unsigned long pos2,
+                                             unsigned long maxdepth)
 {
   unsigned long currentoffset, maxoffset, cc1, cc2,
          totallength = gt_encseq_total_length(encseq);
@@ -4609,8 +4608,8 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
     pos1 = GT_REVERSEPOS(encseq->totallength,pos1);
     pos2 = GT_REVERSEPOS(encseq->totallength,pos2);
   }
-  ret2 = gt_encseq_test_comparetwostrings(encseq,fwd,complement,
-                                          &commonunits2,pos1,pos2,0);
+  ret2 = gt_encseq_check_comparetwostrings(encseq,fwd,complement,
+                                           &commonunits2,pos1,pos2,0);
   if (ret1 != ret2 || commonunits2 != (unsigned long) commonunits1.common)
   {
     char buf1[GT_INTWORDSIZE+1], buf2[GT_INTWORDSIZE+1];
