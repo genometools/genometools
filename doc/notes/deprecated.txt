@@ -1,0 +1,346 @@
+
+/for sfx-blindtrie.c */
+static void checkcurrentblindtrie(Blindtrie *blindtrie)
+{
+  unsigned long suffixtable[6],
+                idx, numofsuffixes, maxcommon;
+  int retval;
+
+  numofsuffixes = enumeratetrieleaves (blindtrie,&suffixtable[0], NULL, NULL);
+  for (idx=1UL; idx < numofsuffixes; idx++)
+  {
+    maxcommon = 0;
+    retval = gt_encseq_comparetwostringsgeneric(
+                                        blindtrie->encseq,
+                                        GT_ISDIRREVERSE(blindtrie->readmode)
+                                          ? false : true,
+                                        GT_ISDIRCOMPLEMENT(blindtrie->readmode)
+                                          ? true : false,
+                                        &maxcommon,
+                                        suffixtable[idx-1],
+                                        suffixtable[idx],
+                                        0);
+    if (retval >= 0)
+    {
+      fprintf(stderr,"retval = %d, maxcommon = %u for idx = %lu\n",
+              retval,maxcommon,idx);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+}
+
+/* The following generalizes the previous in that the comparison
+  of the sequences starts at offset <depth>. */
+
+int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
+                                       bool fwd,
+                                       bool complement,
+                                       unsigned long *maxcommon,
+                                       unsigned long pos1,
+                                       unsigned long pos2,
+                                       unsigned long depth,
+                                       unsigned long maxdepth)
+{
+  unsigned long totallength = gt_encseq_total_length(encseq);
+  int retval;
+  bool leftspecial, rightspecial;
+
+  if (fwd)
+  {
+    unsigned long endpos1, endpos2;
+
+    if (maxdepth == 0)
+    {
+      endpos1 = endpos2 = totallength;
+    } else
+    {
+      gt_assert(maxdepth >= depth);
+      endpos1 = MIN(pos1 + maxdepth,totallength);
+      endpos2 = MIN(pos2 + maxdepth,totallength);
+    }
+    if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
+    {
+      retval = gt_encseq_comparetwostrings(encseq,
+                                 fwd,
+                                 complement,
+                                 maxcommon,
+                                 pos1+depth,
+                                 pos2+depth,
+                                 maxdepth == 0 ? 0 : (maxdepth - depth));
+    } else
+    {
+      retval = gt_encseq_comparewithonespecial(
+                                     &leftspecial,
+                                     &rightspecial,
+                                     encseq,
+                                     fwd,
+                                     complement,
+                                     pos1,
+                                     pos2,
+                                     depth,
+                                     maxdepth);
+    }
+  } else
+  {
+    if (maxdepth > 0)
+    {
+      gt_assert(false);
+    }
+    if (pos1 >= depth && pos2 >= depth)
+    {
+      retval = gt_encseq_comparetwostrings(encseq,
+                                 fwd,
+                                 complement,
+                                 maxcommon,
+                                 pos1-depth,
+                                 pos2-depth,
+                                 maxdepth == 0 ? 0 : (maxdepth - depth));
+    } else
+    {
+      retval = gt_encseq_comparewithonespecial(
+                                     &leftspecial,
+                                     &rightspecial,
+                                     encseq,
+                                     fwd,
+                                     complement,
+                                     pos1,
+                                     pos2,
+                                     depth,
+                                     maxdepth);
+    }
+  }
+  *maxcommon += depth;
+  return retval;
+}
+
+#undef FASTCOMPAREDEBUG
+#ifdef FASTCOMPAREDEBUG
+static void verifycomparestringresults(const GtEncseq *encseq,
+                                       GtCommonunits *commonunits,
+                                       bool fwd,
+                                       bool complement,
+                                       unsigned long pos1,
+                                       unsigned long pos2,
+                                       unsigned long depth,
+                                       unsigned long maxdepth,
+                                       int retval)
+{
+  unsigned long lcp2 = 0;
+  int retval2;
+
+  retval2 = gt_encseq_comparetwostringsgeneric(encseq,
+					       fwd,
+					       complement,
+					       &lcp2,
+					       pos1,
+					       pos2,
+					       depth,
+					       maxdepth);
+  if (retval != retval2)
+  {
+    fprintf(stderr,"line %d: retval = %d != %d = retval2\n",__LINE__,
+	    retval,retval2);
+    fprintf(stderr,"pos1 = %lu, pos2 = %lu, depth = %lu, maxdepth = %lu "
+		   "lcp = %lu, lcp2 = %lu\n",
+		    pos1,
+		    pos2,
+		    depth,
+                    maxdepth,
+		    commonunits->finaldepth,
+		    lcp2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (commonunits->finaldepth != lcp2)
+  {
+    fprintf(stderr,"line %d: pos1 = %lu, pos2 = %lu, depth = %lu, maxdepth=%lu "
+		   "lcp = %lu != %lu = lcp2\n",
+		    __LINE__,
+		    pos1,
+		    pos2,
+		    depth,
+                    maxdepth,
+		    commonunits->finaldepth,
+		    lcp2);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+#endif
+
+#undef CHECKSUFFIXRANGE
+#ifdef CHECKSUFFIXRANGE
+static void checksuffixrange(const Bentsedgresources *bsr,
+                             unsigned long subbucketleft,
+                             unsigned long width,
+                             unsigned long depth,
+                             int line)
+{
+  unsigned long idx, newdepth = depth, pos1, pos2;
+
+#ifdef SKDEBUG
+  printf("checksuffixrange ");
+  showsuffixrange(bsr, subbucketleft, width, depth);
+#endif
+  for (idx=0; idx<width; idx++)
+  {
+    if (bsr->fwd)
+    {
+      pos1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
+      pos2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx+1);
+    } else
+    {
+      pos1 = GT_REVERSEPOS(gt_encseq_total_length(bsr->encseq),
+                           gt_suffixsortspace_get(bsr->sssp,subbucketleft,
+                                                  idx));
+      pos2 = GT_REVERSEPOS(gt_encseq_total_length(bsr->encseq),
+                           gt_suffixsortspace_get(bsr->sssp,subbucketleft,
+                                                  idx+1));
+    }
+    (void) gt_encseq_comparetwostrings(bsr->encseq,
+                                       bsr->fwd,
+                                       bsr->complement,
+                                       &newdepth,
+                                       pos1,
+                                       pos2,
+                                       depth);
+    if (depth > newdepth)
+    {
+      fprintf(stderr,"line %d: "
+                     "depth=%lu > %lu=newdepth\n",
+                     line,
+                     depth,
+                     newdepth);
+      fprintf(stderr,"suffix %lu vs %lu\n",
+                     gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx),
+                     gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx+1));
+      fprintf(stderr,"in range of length %lu\n",width);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+}
+#endif
+#ifdef FASTCOMPAREDEBUG
+  verifycomparestringresults(encseq,
+                             commonunits,
+                             fwd,
+                             complement,
+                             fwd ? pos1
+                                 : GT_REVERSEPOS(encseq->totallength,pos1),
+                             fwd ? pos2
+                                 : GT_REVERSEPOS(encseq->totallength,pos2),
+                             depth,
+                             maxdepth,
+                             retval);
+#endif
+#ifdef FASTCOMPAREDEBUG
+  verifycomparestringresults(encseq,
+                             commonunits,
+                             fwd,
+                             complement,
+                             fwd ? pos1
+                                 : GT_REVERSEPOS(encseq->totallength,pos1),
+                             fwd ? pos2
+                                 : GT_REVERSEPOS(encseq->totallength,pos2),
+                             depth,
+                             0,
+                             retval);
+#endif
+
+static inline void
+writeLCPVal(const GtEncseq *encseq, GtReadmode readmode,
+            unsigned long *dest, unsigned long a, unsigned long b)
+{
+#ifndef NDEBUG
+  int cmp =
+#endif
+    gt_encseq_comparetwosuffixes(encseq,
+                       readmode,
+                       dest,
+                       false,
+                       false,
+                       0,
+                       a,
+                       b,
+                       NULL,
+                       NULL);
+#ifndef NDEBUG
+  if (cmp > 0)
+  {
+    fprintf(stderr, ": cmp %lu %lu = %d",
+            a, b, cmp);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+#endif
+}
+
+#ifdef WITHbruteforcelcpvalue
+static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
+{
+  char buffer[18+1];
+
+  gt_fromkmercode2string(buffer,
+                      suffix->code,
+                      4,
+                      8,
+                      "acgt");
+  fprintf(fp,"(startpos=%lu,code=%u,prefixindex=%u,\"%s\")",
+              suffix->startpos,
+              (unsigned int) suffix->code,
+              suffix->prefixindex,
+              buffer);
+}
+
+static unsigned long bruteforcelcpvalue(const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 const Suffixwithcode *previoussuffix,
+                                 const Suffixwithcode *currentsuffix,
+                                 unsigned int minchanged,
+                                 GtEncseqReader *esr1,
+                                 GtEncseqReader *esr2)
+{
+  unsigned long lcpvalue;
+  unsigned int lcpvalue2;
+  int cmp;
+
+  cmp = gt_encseq_comparetwosuffixes(encseq,
+                           readmode,
+                           &lcpvalue,
+                           false,
+                           false,
+                           0,
+                           previoussuffix->startpos,
+                           currentsuffix->startpos,
+                           esr1,
+                           esr2);
+  if (cmp > 0)
+  {
+    fprintf(stderr,"cmp %lu %lu = %d, lcpval=%lu\n",
+            previoussuffix->startpos,
+            currentsuffix->startpos,
+            cmp,
+            lcpvalue);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if (previoussuffix->code == currentsuffix->code)
+  {
+    gt_assert(lcpvalue == MIN(previoussuffix->prefixindex,
+                           currentsuffix->prefixindex));
+  } else
+  {
+    gt_assert(previoussuffix->code < currentsuffix->code);
+    lcpvalue2 = MIN(minchanged,MIN(previoussuffix->prefixindex,
+                                   currentsuffix->prefixindex));
+    if (lcpvalue != lcpvalue2)
+    {
+      fprintf(stderr,"lcpvalue = %lu != %u = lcpvalue2\n",lcpvalue,lcpvalue2);
+      fprintf(stderr,"previoussuffix=");
+      showSuffixwithcode(stderr,previoussuffix);
+      fprintf(stderr,"\ncurrentsuffix=");
+      showSuffixwithcode(stderr,currentsuffix);
+      fprintf(stderr,"\n");
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+  return lcpvalue;
+}
+#endif
+
