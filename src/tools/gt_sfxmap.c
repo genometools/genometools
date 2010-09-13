@@ -272,16 +272,16 @@ static void gt_checkentiresuftab(const char *filename,
     if (idx < numberofsuffixes - 1)
     {
       gt_assert(ESASUFFIXPTRGET(suftab,idx) < totallength);
-      cmp = gt_encseq_comparetwosuffixes(encseq,
-                                         readmode,
-                                         &maxlcp,
-                                         specialsareequal,
-                                         specialsareequalatdepth0,
-                                         depth,
-                                         ESASUFFIXPTRGET(suftab,idx-1),
-                                         ESASUFFIXPTRGET(suftab,idx),
-                                         esr1,
-                                         esr2);
+      cmp = gt_encseq_check_comparetwosuffixes(encseq,
+                                               readmode,
+                                               &maxlcp,
+                                               specialsareequal,
+                                               specialsareequalatdepth0,
+                                               depth,
+                                               ESASUFFIXPTRGET(suftab,idx-1),
+                                               ESASUFFIXPTRGET(suftab,idx),
+                                               esr1,
+                                               esr2);
       if (cmp > 0)
       {
         showcomparisonfailureESA(filename,

@@ -74,18 +74,20 @@ void gt_checkifprefixesareidentical(const char *filename,
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   for (idx = left; idx < right; idx++)
   {
-    cmp = gt_encseq_comparetwosuffixes(encseq,
-                                       readmode,
-                                       &maxlcp,
-                                       false,
-                                       true,
-                                       depth,
-                                       gt_suffixsortspace_get(suffixsortspace,
-                                                    subbucketleft,idx),
-                                       gt_suffixsortspace_get(suffixsortspace,
-                                                    subbucketleft,idx+1),
-                                       esr1,
-                                       esr2);
+    cmp = gt_encseq_check_comparetwosuffixes(encseq,
+                                             readmode,
+                                             &maxlcp,
+                                             false, /* specialsareequal */
+                                             true,/* specialsareequalatdepth0 */
+                                             depth,
+                                             gt_suffixsortspace_get(
+                                                          suffixsortspace,
+                                                          subbucketleft,idx),
+                                             gt_suffixsortspace_get(
+                                                          suffixsortspace,
+                                                          subbucketleft,idx+1),
+                                             esr1,
+                                             esr2);
     if (cmp != 0 || maxlcp != (unsigned long) prefixlength)
     {
       showcomparisonfailure(filename,
@@ -155,16 +157,16 @@ void gt_checksortedsuffixes(const char *filename,
     {
       gt_assert(gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx)
                 < totallength);
-      cmp = gt_encseq_comparetwosuffixes(encseq,
-                                         readmode,
-                                         &maxlcp,
-                                         specialsareequal,
-                                         specialsareequalatdepth0,
-                                         depth,
-                                         pos1,
-                                         pos2,
-                                         esr1,
-                                         esr2);
+      cmp = gt_encseq_check_comparetwosuffixes(encseq,
+                                               readmode,
+                                               &maxlcp,
+                                               specialsareequal,
+                                               specialsareequalatdepth0,
+                                               depth,
+                                               pos1,
+                                               pos2,
+                                               esr1,
+                                               esr2);
       if (cmp > 0)
       {
         showcomparisonfailure(filename,

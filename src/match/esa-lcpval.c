@@ -58,16 +58,17 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
   {
     int cmp;
 
-    cmp = gt_encseq_comparetwosuffixes(lvi->encseq,
-                                       lvi->readmode,
-                                       &lcpvalue,
-                                       false,
-                                       false,
-                                       0,
-                                       lvi->lastsuftabentry,
-                                       ESASUFFIXPTRGET(suftabptr,lvi->relpos),
-                                       lvi->esr1,
-                                       lvi->esr2);
+    cmp = gt_encseq_check_comparetwosuffixes(lvi->encseq,
+                                             lvi->readmode,
+                                             &lcpvalue,
+                                             false,
+                                             false,
+                                             0,
+                                             lvi->lastsuftabentry,
+                                             ESASUFFIXPTRGET(suftabptr,
+                                                             lvi->relpos),
+                                             lvi->esr1,
+                                             lvi->esr2);
 #ifndef NDEBUG
     if (cmp > 0)
     {

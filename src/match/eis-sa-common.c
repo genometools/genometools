@@ -59,33 +59,6 @@ size_t gt_translateSuftab2BWTSuffixsortspace(
   return len * sizeof (GtUchar);
 }
 
-static inline void
-writeLCPVal(const GtEncseq *encseq, GtReadmode readmode,
-            unsigned long *dest, unsigned long a, unsigned long b)
-{
-#ifndef NDEBUG
-  int cmp =
-#endif /* NDEBUG */
-    gt_encseq_comparetwosuffixes(encseq,
-                       readmode,
-                       dest,
-                       false,
-                       false,
-                       0,
-                       a,
-                       b,
-                       NULL,  /* XXX FIXME */
-                       NULL);  /* XXX FIXME */
-#ifndef NDEBUG
-  if (cmp > 0)
-  {
-    fprintf(stderr, ": cmp %lu %lu = %d",
-            a, b, cmp);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-#endif /* NDEBUG */
-}
-
 struct saTaggedXltorStateLE
 {
   struct saTaggedXltorStateLE *next;

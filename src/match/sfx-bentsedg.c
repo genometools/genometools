@@ -235,59 +235,6 @@ static void showsuffixrange(const Bentsedgresources *bsr,
 }
 #endif
 
-#undef CHECKSUFFIXRANGE
-#ifdef CHECKSUFFIXRANGE
-static void checksuffixrange(const Bentsedgresources *bsr,
-                             unsigned long subbucketleft,
-                             unsigned long width,
-                             unsigned long depth,
-                             int line)
-{
-  unsigned long idx, newdepth = depth, pos1, pos2;
-
-#ifdef SKDEBUG
-  printf("checksuffixrange ");
-  showsuffixrange(bsr, subbucketleft, width, depth);
-#endif
-  for (idx=0; idx<width; idx++)
-  {
-    if (bsr->fwd)
-    {
-      pos1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
-      pos2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx+1);
-    } else
-    {
-      pos1 = GT_REVERSEPOS(gt_encseq_total_length(bsr->encseq),
-                           gt_suffixsortspace_get(bsr->sssp,subbucketleft,
-                                                  idx));
-      pos2 = GT_REVERSEPOS(gt_encseq_total_length(bsr->encseq),
-                           gt_suffixsortspace_get(bsr->sssp,subbucketleft,
-                                                  idx+1));
-    }
-    (void) gt_encseq_comparetwostrings(bsr->encseq,
-                                       bsr->fwd,
-                                       bsr->complement,
-                                       &newdepth,
-                                       pos1,
-                                       pos2,
-                                       depth);
-    if (depth > newdepth)
-    {
-      fprintf(stderr,"line %d: "
-                     "depth=%lu > %lu=newdepth\n",
-                     line,
-                     depth,
-                     newdepth);
-      fprintf(stderr,"suffix %lu vs %lu\n",
-                     gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx),
-                     gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx+1));
-      fprintf(stderr,"in range of length %lu\n",width);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-  }
-}
-#endif
-
 #ifdef WITHCHECKSTARTPOINTER
 static unsigned int checkstartpointorder(const unsigned long *left,
                                          const unsigned long *right)
@@ -975,9 +922,6 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                      unsigned long depth,
                                      Ordertype ordertype)
 {
-#ifdef CHECKSUFFIXRANGE
-  checksuffixrange(bsr, subbucketleft, width, depth, __LINE__);
-#endif
   if (width > 1UL)
   {
     if (bsr->sfxstrategy->ssortmaxdepth.defined)
@@ -1471,81 +1415,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
-#ifdef WITHbruteforcelcpvalue
-static void showSuffixwithcode(FILE *fp,const Suffixwithcode *suffix)
-{
-  char buffer[18+1];
-
-  gt_fromkmercode2string(buffer,
-                      suffix->code,
-                      4,
-                      8,
-                      "acgt");
-  fprintf(fp,"(startpos=%lu,code=%u,prefixindex=%u,\"%s\")",
-              suffix->startpos,
-              (unsigned int) suffix->code,
-              suffix->prefixindex,
-              buffer);
-}
-
-static unsigned long bruteforcelcpvalue(const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 const Suffixwithcode *previoussuffix,
-                                 const Suffixwithcode *currentsuffix,
-                                 unsigned int minchanged,
-                                 GtEncseqReader *esr1,
-                                 GtEncseqReader *esr2)
-{
-  unsigned long lcpvalue;
-  unsigned int lcpvalue2;
-  int cmp;
-
-  cmp = gt_encseq_comparetwosuffixes(encseq,
-                           readmode,
-                           &lcpvalue,
-                           false,
-                           false,
-                           0,
-                           previoussuffix->startpos,
-                           currentsuffix->startpos,
-                           esr1,
-                           esr2);
-  if (cmp > 0)
-  {
-    fprintf(stderr,"cmp %lu %lu = %d, lcpval=%lu\n",
-            previoussuffix->startpos,
-            currentsuffix->startpos,
-            cmp,
-            lcpvalue);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  if (previoussuffix->code == currentsuffix->code)
-  {
-    gt_assert(lcpvalue == MIN(previoussuffix->prefixindex,
-                           currentsuffix->prefixindex));
-  } else
-  {
-    gt_assert(previoussuffix->code < currentsuffix->code);
-    lcpvalue2 = MIN(minchanged,MIN(previoussuffix->prefixindex,
-                                   currentsuffix->prefixindex));
-    if (lcpvalue != lcpvalue2)
-    {
-      fprintf(stderr,"lcpvalue = %lu != %u = lcpvalue2\n",lcpvalue,lcpvalue2);
-      fprintf(stderr,"previoussuffix=");
-      showSuffixwithcode(stderr,previoussuffix);
-      fprintf(stderr,"\ncurrentsuffix=");
-      showSuffixwithcode(stderr,currentsuffix);
-      fprintf(stderr,"\n");
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-  }
-  return lcpvalue;
-}
-#endif
-
 static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
-                                   const Suffixwithcode *currentsuffix,
-                                   unsigned int minchanged)
+                                          const Suffixwithcode *currentsuffix,
+                                          unsigned int minchanged)
 {
   unsigned int lcpvalue;
 

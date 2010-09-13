@@ -152,7 +152,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
             {
               for (idx=itv.left; idx<=itv.right; idx++)
               {
-                retval = gt_encseq_comparetwosuffixes(
+                retval = gt_encseq_check_comparetwosuffixes(
                                         suffixarray.encseq,
                                         suffixarray.readmode,
                                         &maxlcp,

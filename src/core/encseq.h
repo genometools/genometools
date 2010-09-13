@@ -80,15 +80,6 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri,
 /* Delete <sri> and free associated memory. */
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri);
 
-/* The following function extracts a twobit encoding at position 
-  <esr->currentpos>
-  in the sequence encoded by <esr->encseq>. The <esr> structure stores
-  information allowing for efficient retrieval of sequence information
-  at <esr->currentpos>. The result is stored in <ptbe>. */
-
-void gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
-                              GtEncseqReader *esr);
-
 /* Returns the encoded representation of the character at position <pos> of
   <encseq> read in the direction as indicated by <readmode>.
   The function only works for the case that encodesequence[pos] does not
@@ -96,17 +87,6 @@ void gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
 GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode);
-
-/* The following function compares the two bit encodings <ptbe1> and <ptbe2>
-  and stores the result of the comparison in <commonunits>. The comparison is
-  done in forward direction iff <fwd> is true. 
-  The comparison is done for the complemented characters
-  iff <complement> is true. */
-int gt_encseq_compare_twobitencodings(bool fwd,
-                                      bool complement,
-                                      GtCommonunits *commonunits,
-                                      const GtEndofTwobitencoding *ptbe1,
-                                      const GtEndofTwobitencoding *ptbe2);
 
 /* The following function extracts from the byte sequence of length <len>
   pointed to by <seq> the sequence of len/4 bytecodes each
@@ -122,37 +102,6 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  const GtEncseq *encseq,
                                  unsigned long startindex,
                                  unsigned long len);
-
-/* Similar to <gt_error_check()>, this function exits with an error message
-  if <encseq> returns inconsistent descriptions when compared to the
-  destab. */
-void gt_encseq_check_descriptions(const GtEncseq *encseq);
-
-/* Similar to <gt_error_check()>, this function exits with an error message
-  if <encseq> returns inconsistent marked positions. */
-void gt_encseq_check_markpos(const GtEncseq *encseq);
-
-/* The following function checks the iterators delivering the ranges
-  of special characters in an encoded sequence <encseq> in forward and
-  in reverse directions. */
-int gt_encseq_check_specialranges(const GtEncseq *encseq);
-
-/* The following checks if the encoded sequence <encseq> for consistency.
-  It does so by scanning the files given in <filenametab> and comparing
-  the extracted symbols to those obtained by directly reading the files.
-  Additional, <scantrials> many trials are performed each reading character
-  by character starting at some random position and scanning until
-  the end of the sequence, while comparing the extraced character
-  to the characters extracted by random access. Finally <multicharcmptrials>
-  trials are performed each checking the validity of a multicharacter
-  extraction.  */
-int gt_encseq_check_consistency(const GtEncseq *encseq,
-                                const GtStrArray *filenametab,
-                                GtReadmode readmode,
-                                unsigned long scantrials,
-                                unsigned long multicharcmptrials,
-                                bool withseqnumcheck,
-                                GtError *err);
 
 /* Returns true is <encseq> has special ranges, false otherwise. */
 bool gt_encseq_has_specialranges(const GtEncseq *encseq);
@@ -207,6 +156,26 @@ int gt_encseq_compare_maxdepth(const GtEncseq *encseq,
                                unsigned long depth,
                                unsigned long maxdepth);
 
+/* The following function extracts a twobit encoding at position 
+  <esr->currentpos>
+  in the sequence encoded by <esr->encseq>. The <esr> structure stores
+  information allowing for efficient retrieval of sequence information
+  at <esr->currentpos>. The result is stored in <ptbe>. */
+
+void gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
+                              GtEncseqReader *esr);
+
+/* The following function compares the two bit encodings <ptbe1> and <ptbe2>
+  and stores the result of the comparison in <commonunits>. The comparison is
+  done in forward direction iff <fwd> is true. 
+  The comparison is done for the complemented characters
+  iff <complement> is true. */
+int gt_encseq_compare_twobitencodings(bool fwd,
+                                      bool complement,
+                                      GtCommonunits *commonunits,
+                                      const GtEndofTwobitencoding *ptbe1,
+                                      const GtEndofTwobitencoding *ptbe2);
+
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.
   <esr> refer to a memory areas for storeing a
@@ -235,57 +204,8 @@ void gt_encseq_show_features(const GtEncseq *encseq,
                              GtLogger *logger,
                              bool withfilenames);
 
-/* The following function compares the two suffixes
-  at position <start1> and <start2> in <encseq>.  <esr1> and <esr2> refer
-  to memory areas for storeing a GtEncseqReader. If <maxdepth>
-  is 0, then the entire suffixes are compared. If <maxdepth> is larger than
-  0, then only the suffixes up to length <maxdepth> are compared.
-  The length of the longest common prefix is stored in <maxlcp>.
-  <specialsareequal> specifies if special symbols are considered equal
-  during pairwise character comparisons. <specialsareequalatdepth0> specifies
-  if special symbols occurring as first symbols of the suffixes
-  are considered equal  during pairwise character comparisons.
-  The return value is -1, 0 or 1 depending on whether the sequence beginning at
-  position <start1> is smaller than, equal to, or larger than the sequence
-  beginning at position <start2>. */
-int gt_encseq_comparetwosuffixes(const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 unsigned long *maxlcp,
-                                 bool specialsareequal,
-                                 bool specialsareequalatdepth0,
-                                 unsigned long maxdepth,
-                                 unsigned long start1,
-                                 unsigned long start2,
-                                 GtEncseqReader *esr1,
-                                 GtEncseqReader *esr2);
-
-/* The following function compares the two suffixes
-  at position <pos1> and <pos2> in <encseq>.   If <maxdepth> is 0,
-  then the entire suffixes are compared (until a mismatch occurs).
-  If <maxdepth> is larger than 0, the comparison is restricted to
-  the prefixes of length <maxdepth>.
-  The length of the longest common prefix is stored in <maxcommon>.
-  The return value is -1, 0 or 1 depending on whether the sequence
-  beginning at position <pos1> is smaller than, equal to, or larger than the
-  sequence beginning at position <pos2>. */
-int gt_encseq_comparetwostrings(const GtEncseq *encseq,
-                                bool fwd,
-                                bool complement,
-                                unsigned long *maxcommon,
-                                unsigned long pos1,
-                                unsigned long pos2,
-                                unsigned long maxdepth);
-
 /* The following generalizes the previous in that the comparison
   of the sequences starts at offset <depth>. */
-int gt_encseq_comparetwostringsgeneric(const GtEncseq *encseq,
-                                       bool fwd,
-                                       bool complement,
-                                       unsigned long *maxcommon,
-                                       unsigned long pos1,
-                                       unsigned long pos2,
-                                       unsigned long depth,
-                                       unsigned long maxdepth);
 
 /* Return the number of positions in <encseq> containing special characters */
 unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq);
@@ -323,17 +243,13 @@ GtUchar gt_encseq_extract_encoded_char(const GtEncseq *encseq,
                                        GtReadmode readmode);
 
 /* Sets the sequence input type for <ee> to be pre-encoded. Only for internal
-  use. */
-void             gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
-
-int gt_encseq_builder_unit_test(GtError *err);
+   use. */
+void  gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
 
 /* The following function shows the encoded sequence at position <startpos>.
    The output goes to the file pointer <fp>. The parameters <fwd> and
    <complement> define whether the sequence is read in forward direction or
-   the complement of the sequence is shown.
-*/
-
+   the complement of the sequence is shown. */
 void gt_encseq_showatstartpos(FILE *fp,
                               bool fwd,
                               bool complement,
@@ -350,9 +266,7 @@ void gt_encseq_effective_filelength_ptr(const GtEncseq *encseq,
    to the first <depth> characters or 30 positions, whichever is the minimum.
    If <depth> is 0, then the entire suffix is shown.
    The output goes to the file pointer <fp>. The parameter readmode and
-   define whether the mode in which the sequence is read.
-*/
-
+   define whether the mode in which the sequence is read. */
 void gt_encseq_showatstartposwithdepth(FILE *fp,
                                        const GtEncseq *encseq,
                                        GtReadmode readmode,
@@ -369,9 +283,67 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol);
 /*
-  The following function returns the size of the encoded sequence in bytes.
-*/
-
+  The following function returns the size of the encoded sequence in bytes. */
 unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
+
+/* The following functions are for testing */
+
+int gt_encseq_builder_unit_test(GtError *err);
+
+/* The following function should only be used for test purposes, because it
+  is not efficient. It compares the two suffixes
+  at position <start1> and <start2> in <encseq>.  <esr1> and <esr2> refer
+  to memory areas for storeing a GtEncseqReader. If <maxdepth>
+  is 0, then the entire suffixes are compared. If <maxdepth> is larger than
+  0, then only the suffixes up to length <maxdepth> are compared.
+  The length of the longest common prefix is stored in <maxlcp>.
+  <specialsareequal> specifies if special symbols are considered equal
+  during pairwise character comparisons. <specialsareequalatdepth0> specifies
+  if special symbols occurring as first symbols of the suffixes
+  are considered equal  during pairwise character comparisons.
+  The return value is -1, 0 or 1 depending on whether the sequence beginning at
+  position <start1> is smaller than, equal to, or larger than the sequence
+  beginning at position <start2>. */
+int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
+                                       GtReadmode readmode,
+                                       unsigned long *maxlcp,
+                                       bool specialsareequal,
+                                       bool specialsareequalatdepth0,
+                                       unsigned long maxdepth,
+                                       unsigned long start1,
+                                       unsigned long start2,
+                                       GtEncseqReader *esr1,
+                                       GtEncseqReader *esr2);
+
+/* Similar to <gt_error_check()>, this function exits with an error message
+  if <encseq> returns inconsistent descriptions when compared to the
+  destab. */
+void gt_encseq_check_descriptions(const GtEncseq *encseq);
+
+/* Similar to <gt_error_check()>, this function exits with an error message
+  if <encseq> returns inconsistent marked positions. */
+void gt_encseq_check_markpos(const GtEncseq *encseq);
+
+/* The following function checks the iterators delivering the ranges
+  of special characters in an encoded sequence <encseq> in forward and
+  in reverse directions. */
+int gt_encseq_check_specialranges(const GtEncseq *encseq);
+
+/* The following checks if the encoded sequence <encseq> for consistency.
+  It does so by scanning the files given in <filenametab> and comparing
+  the extracted symbols to those obtained by directly reading the files.
+  Additional, <scantrials> many trials are performed each reading character
+  by character starting at some random position and scanning until
+  the end of the sequence, while comparing the extraced character
+  to the characters extracted by random access. Finally <multicharcmptrials>
+  trials are performed each checking the validity of a multicharacter
+  extraction.  */
+int gt_encseq_check_consistency(const GtEncseq *encseq,
+                                const GtStrArray *filenametab,
+                                GtReadmode readmode,
+                                unsigned long scantrials,
+                                unsigned long multicharcmptrials,
+                                bool withseqnumcheck,
+                                GtError *err);
 
 #endif

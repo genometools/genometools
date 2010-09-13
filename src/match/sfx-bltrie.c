@@ -548,49 +548,21 @@ void gt_blindtrie_delete(Blindtrie *blindtrie)
 }
 
 #ifdef SKDEBUG
-static void checkcurrentblindtrie(Blindtrie *blindtrie)
-{
-  unsigned long suffixtable[6],
-                idx, numofsuffixes, maxcommon;
-  int retval;
-
-  numofsuffixes = enumeratetrieleaves (blindtrie,&suffixtable[0], NULL, NULL);
-  for (idx=1UL; idx < numofsuffixes; idx++)
-  {
-    maxcommon = 0;
-    retval = gt_encseq_comparetwostringsgeneric(
-                                        blindtrie->encseq,
-                                        GT_ISDIRREVERSE(blindtrie->readmode)
-                                          ? false : true,
-                                        GT_ISDIRCOMPLEMENT(blindtrie->readmode)
-                                          ? true : false,
-                                        &maxcommon,
-                                        suffixtable[idx-1],
-                                        suffixtable[idx],
-                                        0);
-    if (retval >= 0)
-    {
-      fprintf(stderr,"retval = %d, maxcommon = %u for idx = %lu\n",
-              retval,maxcommon,idx);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-  }
-}
-
-static void showleaf(const Blindtrie *blindtrie,unsigned int level,
-                     Nodeptr current)
+static void gt_blindtrie_showleaf(const Blindtrie *blindtrie,unsigned int level,
+                                  Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
   gt_assert(current != NULL);
   printf("Leaf(add=%lu,firstchar=%u,startpos=%lu,rightsibling=%lu)\n",
          NODENUM(current),
          (unsigned int) current->firstchar,
-         current->either.startpos,
+         current->either.nodestartpos,
          NODENUM(current->rightsibling));
 }
 
-static void showintern(const Blindtrie *blindtrie,unsigned int level,
-                       Nodeptr current)
+static void gt_blindtrie_showintern(const Blindtrie *blindtrie,
+                                    unsigned int level,
+                                    Nodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
   gt_assert(current != NULL);
@@ -603,9 +575,9 @@ static void showintern(const Blindtrie *blindtrie,unsigned int level,
           NODENUM(current->rightsibling));
 }
 
-static void showblindtrie2(const Blindtrie *blindtrie,
-                           unsigned int level,
-                           Nodeptr node)
+static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
+                                       unsigned int level,
+                                       Nodeptr node)
 {
   Nodeptr current;
 
@@ -615,18 +587,18 @@ static void showblindtrie2(const Blindtrie *blindtrie,
   {
     if (ISLEAF(current))
     {
-      showleaf(blindtrie,level,current);
+      gt_blindtrie_showleaf(blindtrie,level,current);
     } else
     {
-      showintern(blindtrie,level,current);
-      showblindtrie2(blindtrie,level+1,current);
+      gt_blindtrie_showintern(blindtrie,level,current);
+      gt_blindtrie_showrecursive(blindtrie,level+1,current);
     }
   }
 }
 
-static void showblindtrie(const Blindtrie *blindtrie)
+static void gt_blindtrie_show(const Blindtrie *blindtrie)
 {
-  showblindtrie2(blindtrie,0,blindtrie->root);
+  gt_blindtrie_showrecursive(blindtrie,0,blindtrie->root);
 }
 #endif
 
@@ -782,7 +754,7 @@ unsigned long gt_blindtrie_suffixsort(
            gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx) + offset);
   }
   printf("\nstep 0\n");
-  showblindtrie(blindtrie);
+  gt_blindtrie_show(blindtrie);
 #endif
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
@@ -813,9 +785,8 @@ unsigned long gt_blindtrie_suffixsort(
                                 mm_newsuffix,
                                 pos);
 #ifdef SKDEBUG
-      printf("step %lu\n",i);
-      showblindtrie(blindtrie);
-      checkcurrentblindtrie(blindtrie);
+      printf("step %lu\n",idx);
+      gt_blindtrie_show(blindtrie);
 #endif
     } else
     {
