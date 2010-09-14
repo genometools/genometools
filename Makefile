@@ -748,9 +748,6 @@ installwww:
 # install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
-patch:
-	if test -f $(CURDIR)/src/patches/$(SYSTEMNAME).patch; then $(patch) -p1 < $(CURDIR)/src/patches/$(SYSTEMNAME).patch; fi
-
 push:
 	git push origin master
 	git push github master
