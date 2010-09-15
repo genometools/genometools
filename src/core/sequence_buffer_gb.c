@@ -248,11 +248,6 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
     if (had_err && had_err != EOF)
       break;
 
-    had_err = get_keyword(sb, sbe->keywordbuffer, &currentfileread);
-
-    if (had_err && had_err != EOF)
-      break;
-
     if (currentoutpos >= (unsigned long) OUTBUFSIZE) {
       if (pvt->filelengthtab) {
         pvt->filelengthtab[pvt->filenum].length
@@ -262,6 +257,11 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
       }
       break;
     }
+
+    had_err = get_keyword(sb, sbe->keywordbuffer, &currentfileread);
+
+    if (had_err && had_err != EOF)
+      break;
 
     /* terminators may occur in any line */
     if (!had_err && strcmp(gt_str_get(sbe->keywordbuffer),
