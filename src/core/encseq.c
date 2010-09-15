@@ -3833,119 +3833,19 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   return 0;
 }
 
-static unsigned long extractsinglecharacter(const GtEncseq *encseq,
-                                            bool fwd,
-                                            bool complement,
-                                            unsigned long pos,
-                                            unsigned long depth,
-                                            unsigned long totallength,
-                                            unsigned long maxdepth)
-{
-  unsigned long cc;
+#define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
+#define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(encseq,POS,readmode)
 
-  if (fwd)
-  {
-    unsigned long endpos;
-
-    if (maxdepth > 0)
-    {
-      endpos = pos+maxdepth;
-      if (endpos > totallength)
-      {
-        endpos = totallength;
-      }
-    } else
-    {
-      endpos = totallength;
-    }
-    if (pos + depth >= endpos)
-    {
-      cc = pos + depth + GT_COMPAREOFFSET;
-    } else
-    {
-      cc = (unsigned long) gt_encseq_get_encoded_char(encseq,
-                                                      pos + depth,
-                                                      GT_READMODE_FORWARD);
-      if (ISSPECIAL((GtUchar) cc))
-      {
-        cc = pos + depth + GT_COMPAREOFFSET;
-      } else
-      {
-        if (complement)
-        {
-          cc = GT_COMPLEMENTBASE(cc);
+#define DEREFSTOPPOS(VAR,SPECIAL,TMPVAR,POS,STOPPOS)\
+        if ((POS) < (STOPPOS) && ISNOTSPECIAL(TMPVAR = ACCESSCHAR(POS)))\
+        {\
+          VAR = (unsigned long) TMPVAR;\
+          SPECIAL = false;\
+        } else\
+        {\
+          VAR = UNIQUEINT(POS);\
+          SPECIAL = true;\
         }
-      }
-    }
-  } else
-  {
-    if (pos < depth)
-    {
-      cc = depth - pos + GT_COMPAREOFFSET;
-    } else
-    {
-      cc = (unsigned long) gt_encseq_get_encoded_char(encseq,
-                                                      pos - depth,
-                                                      GT_READMODE_FORWARD);
-      if (ISSPECIAL((GtUchar) cc))
-      {
-        cc = pos - depth + GT_COMPAREOFFSET;
-      } else
-      {
-        if (complement)
-        {
-          cc = GT_COMPLEMENTBASE(cc);
-        }
-      }
-    }
-  }
-  return cc;
-}
-
-/* The following function compares two positions in an encoded sequence
-   of which at least one is at the end of the sequence or contains a special
-   character. The comparison is done in forward direction iff <fwd> is true.
-   The comparison is done for the complemented characters iff <complement> is
-   true. The positions are used with offset depth.
-*/
-
-static int gt_encseq_comparepositions_withonespecial(
-                                           bool *leftspecial,
-                                           bool *rightspecial,
-                                           const GtEncseq *encseq,
-                                           bool fwd,
-                                           bool complement,
-                                           unsigned long pos1,
-                                           unsigned long pos2,
-                                           unsigned long depth,
-                                           unsigned long maxdepth)
-{
-  unsigned long cc1, cc2, totallength = gt_encseq_total_length(encseq);
-
-  cc1 = extractsinglecharacter(encseq,
-                               fwd,
-                               complement,
-                               pos1,
-                               depth,
-                               totallength,
-                               maxdepth);
-  *leftspecial = (cc1 >= (unsigned long) GT_COMPAREOFFSET) ? true : false;
-  cc2 = extractsinglecharacter(encseq,
-                               fwd,
-                               complement,
-                               pos2,
-                               depth,
-                               totallength,
-                               maxdepth);
-  *rightspecial = (cc2 >= (unsigned long) GT_COMPAREOFFSET) ? true : false;
-  gt_assert(cc1 != cc2);
-  if (!fwd && cc1 >= (unsigned long) GT_COMPAREOFFSET &&
-              cc2 >= (unsigned long) GT_COMPAREOFFSET)
-  {
-    return cc1 > cc2 ? -1 : 1;
-  }
-  return cc1 < cc2 ? -1 : 1;
-}
 
 int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
                                         GtCommonunits *commonunits,
@@ -3960,6 +3860,8 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
   int retval;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
+  unsigned long cc1, cc2;
+  GtUchar tmp;
 
   countgt_encseq_compareviatwobitencoding++;
   gt_assert(pos1 != pos2);
@@ -3982,20 +3884,11 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
       depth += commonunits->common;
     } else
     {
-      retval = gt_encseq_comparepositions_withonespecial(
-                                     &commonunits->leftspecial,
-                                     &commonunits->rightspecial,
-                                     encseq,
-                                     fwd,
-                                     complement,
-                                     fwd ? pos1
-                                         : GT_REVERSEPOS(encseq->totallength,
-                                           pos1),
-                                     fwd ? pos2
-                                         : GT_REVERSEPOS(encseq->totallength,
-                                           pos2),
-                                     depth,
-                                     0);
+      DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,pos1 + depth,
+                   encseq->totallength);
+      DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,pos2 + depth,
+                   encseq->totallength);
+      retval = (cc1 < cc2) ? -1 : ((cc1 > cc2) ? 1 : 0);
     }
   } while (retval == 0);
   commonunits->finaldepth = depth;
@@ -4017,6 +3910,8 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
   unsigned long endpos1, endpos2;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
        complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
+  unsigned long cc1, cc2;
+  GtUchar tmp;
 
   countgt_encseq_compare_maxdepth++;
   gt_assert(pos1 != pos2);
@@ -4056,20 +3951,9 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
       }
     } else
     {
-      retval = gt_encseq_comparepositions_withonespecial(
-                                     &commonunits->leftspecial,
-                                     &commonunits->rightspecial,
-                                     encseq,
-                                     fwd,
-                                     complement,
-                                     fwd ? pos1
-                                         : GT_REVERSEPOS(encseq->totallength,
-                                           pos1),
-                                     fwd ? pos2
-                                         : GT_REVERSEPOS(encseq->totallength,
-                                           pos2),
-                                     depth,
-                                     maxdepth);
+      DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,pos1 + depth,endpos1);
+      DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,pos2 + depth,endpos2);
+      retval = (cc1 < cc2) ? -1 : ((cc1 > cc2) ? 1 : 0);
     }
   } while (retval == 0);
   commonunits->finaldepth = depth;

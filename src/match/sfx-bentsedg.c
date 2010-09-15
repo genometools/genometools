@@ -46,11 +46,11 @@
 #define ISNOTEND(POS)          ((POS) < bsr->totallength &&\
                                 ISNOTSPECIAL(ACCESSCHAR(POS)))
 
-#define DEREFSTOPPOSSEQ(VAR,PTR,STOPPOS,ESR)\
-        (((PTR) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
-        ((unsigned long) VAR) : UNIQUEINT(PTR))
+#define DEREFSTOPPOSSEQ(VAR,POS,STOPPOS,ESR)\
+        (((POS) < (STOPPOS) && ISNOTSPECIAL(VAR = ACCESSCHARSEQ(ESR))) ?\
+        ((unsigned long) VAR) : UNIQUEINT(POS))
 
-#define DEREFSEQ(VAR,PTR,ESR) DEREFSTOPPOSSEQ(VAR,PTR,bsr->totallength,ESR)
+#define DEREFSEQ(VAR,POS,ESR) DEREFSTOPPOSSEQ(VAR,POS,bsr->totallength,ESR)
 
 #define BS_SWAPARRAY(TMP,SUBBUCKETLEFT,IDX1,IDX2)\
         if ((IDX1) != (IDX2))\
@@ -388,7 +388,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
           {
             lcplen = startpos2 - sval2;
             retval = (ccs < cct) ? -1 : 1;
-          break;
+            break;
           }
           startpos1++;
           startpos2++;
