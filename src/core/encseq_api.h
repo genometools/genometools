@@ -73,6 +73,10 @@ typedef struct GtEncseqReader GtEncseqReader;
 /* The file suffix used for sequence description separator position tables. */
 #define GT_SDSTABFILESUFFIX ".sds"
 
+/* for a position outside the range from 0 to totallength -1 deliver a
+   unique integer */
+#define GT_UNIQUEINT(POS)        ((unsigned long) ((POS) + GT_COMPAREOFFSET))
+
 #ifdef GT_INLINEDENCSEQ
   #include "core/encseq_inlined.h"
 #else

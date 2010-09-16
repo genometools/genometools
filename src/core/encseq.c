@@ -3833,17 +3833,16 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   return 0;
 }
 
-#define UNIQUEINT(P)           ((unsigned long) ((P) + GT_COMPAREOFFSET))
-#define ACCESSCHAR(POS)        gt_encseq_get_encoded_char(encseq,POS,readmode)
-
-#define DEREFSTOPPOS(VAR,SPECIAL,TMPVAR,POS,STOPPOS)\
-        if ((POS) < (STOPPOS) && ISNOTSPECIAL(TMPVAR = ACCESSCHAR(POS)))\
+#define GT_ENCSEQ_DEREFSTOPPOS(VAR,SPECIAL,TMPVAR,POS,STOPPOS)\
+        if ((POS) < (STOPPOS) &&\
+            ISNOTSPECIAL(TMPVAR = gt_encseq_get_encoded_char(encseq,POS,\
+                                                             readmode)))\
         {\
           VAR = (unsigned long) TMPVAR;\
           SPECIAL = false;\
         } else\
         {\
-          VAR = UNIQUEINT(POS);\
+          VAR = GT_UNIQUEINT(POS);\
           SPECIAL = true;\
         }
 
@@ -3865,6 +3864,7 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
 
   countgt_encseq_compareviatwobitencoding++;
   gt_assert(pos1 != pos2);
+  /*gt_assert(depth > 0);*/
   if (pos1 + depth < encseq->totallength &&
       pos2 + depth < encseq->totallength)
   {
@@ -3884,9 +3884,9 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
       depth += commonunits->common;
     } else
     {
-      DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,pos1 + depth,
+      GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,pos1 + depth,
                    encseq->totallength);
-      DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,pos2 + depth,
+      GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,pos2 + depth,
                    encseq->totallength);
       retval = (cc1 < cc2) ? -1 : ((cc1 > cc2) ? 1 : 0);
     }
@@ -3915,6 +3915,7 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
 
   countgt_encseq_compare_maxdepth++;
   gt_assert(pos1 != pos2);
+  /*gt_assert(depth > 0);*/
   gt_assert(depth < maxdepth);
   endpos1 = pos1 + maxdepth;
   if (endpos1 > encseq->totallength)
@@ -3951,8 +3952,10 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
       }
     } else
     {
-      DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,pos1 + depth,endpos1);
-      DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,pos2 + depth,endpos2);
+      GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,
+                             pos1 + depth,endpos1);
+      GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,
+                             pos2 + depth,endpos2);
       retval = (cc1 < cc2) ? -1 : ((cc1 > cc2) ? 1 : 0);
     }
   } while (retval == 0);
@@ -4384,12 +4387,9 @@ static void checkextractunitatpos(const GtEncseq *encseq,
                      " != %u = brute.unitsnotspecial\n",
               fwd ? "true" : "false",
               complement ? "true" : "false",
-              fwd ? startpos : GT_REVERSEPOS(encseq->totallength,startpos),
+              esr->currentpos,
               ptbe1.unitsnotspecial,ptbe2.unitsnotspecial);
-      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,
-                               fwd ? startpos
-                                   : GT_REVERSEPOS(encseq->totallength,
-                                                   startpos));
+      gt_encseq_showatstartpos(stderr,fwd,complement,encseq,esr->currentpos);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (!checktbe(fwd,ptbe1.tbe,ptbe2.tbe,ptbe1.unitsnotspecial))
@@ -4397,12 +4397,9 @@ static void checkextractunitatpos(const GtEncseq *encseq,
       fprintf(stderr,"fwd=%s,complement=%s: pos %lu\n",
                       fwd ? "true" : "false",
                       complement ? "true" : "false",
-                      fwd ? startpos
-                          : GT_REVERSEPOS(encseq->totallength,startpos));
+                      esr->currentpos);
       gt_encseq_showatstartpos(stderr,fwd,complement,encseq,
-                               fwd ? startpos
-                                   : GT_REVERSEPOS(encseq->totallength,
-                                                   startpos));
+                               esr->currentpos);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
