@@ -239,7 +239,7 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   oh = gt_option_new_filenamearray("hmms",
                                    "profile HMM models for domain detection "
                                    "(separate by spaces, finish with --) in "
-                                   "HMMER2 format\n"
+                                   "HMMER3 format\n"
                                    "Omit this option to disable pHMM search.",
                                    arguments->pdom_opts.hmm_files);
   gt_option_parser_add_option(op, oh);
