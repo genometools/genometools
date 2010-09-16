@@ -123,7 +123,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
       avgShuLength += currentShuLength;
       if (currentQuery[currentSuffix] == c_sym ||
           currentQuery[currentSuffix] == g_sym)
-        gc_query += 1;
+        gc_query++;
     }
     if (arguments->shulen_only)
     {

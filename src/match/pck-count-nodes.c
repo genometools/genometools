@@ -65,17 +65,17 @@ static void visit_count_children(const FMindex *index,
     {
       /* XXX do sth with non branching nodes */
       child.on_branch = true;
-      parent->branching -= 1UL;
+      parent->branching--;
       GT_STACK_PUSH(stack, child);
       num_special = 0UL;
-      offset += 1U;
+      offset++;
     } else
     {
       /* we found a leave on parent*/
       if (child.lower + 1 == child.upper)
       {
-        parent->leaves += 1;
-        num_special -= 1;
+        parent->leaves++;
+        num_special--;
       } else
         /* child is a branch of parent node */
       {
@@ -85,7 +85,7 @@ static void visit_count_children(const FMindex *index,
         } else
         {
           GT_STACK_PUSH(stack, child);
-          offset += 1U;
+          offset++;
           num_special -= (child.upper - child.lower);
         }
       }
