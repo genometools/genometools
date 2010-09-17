@@ -721,9 +721,6 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
-static unsigned long countgt_encseq_compare_maxdepth = 0;
-static unsigned long countgt_encseq_compareviatwobitencoding = 0;
-
 void gt_encseq_delete(GtEncseq *encseq)
 {
   if (encseq == NULL)
@@ -3846,6 +3843,8 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
           SPECIAL = true;\
         }
 
+static unsigned long countgt_encseq_compare_viatwobitencoding = 0;
+
 int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
                                         GtCommonunits *commonunits,
                                         GtReadmode readmode,
@@ -3853,57 +3852,8 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
                                         GtEncseqReader *esr2,
                                         unsigned long pos1,
                                         unsigned long pos2,
-                                        unsigned long depth)
-{
-  GtEndofTwobitencoding ptbe1, ptbe2;
-  int retval;
-  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
-       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
-  unsigned long cc1, cc2;
-  GtUchar tmp;
-
-  countgt_encseq_compareviatwobitencoding++;
-  gt_assert(pos1 != pos2);
-  /*gt_assert(depth > 0);*/
-  if (pos1 + depth < encseq->totallength &&
-      pos2 + depth < encseq->totallength)
-  {
-    gt_encseq_reader_reinit_with_readmode(esr1,encseq,readmode,pos1+depth);
-    gt_encseq_reader_reinit_with_readmode(esr2,encseq,readmode,pos2+depth);
-  }
-  do
-  {
-    if (pos1 + depth < encseq->totallength &&
-        pos2 + depth < encseq->totallength)
-    {
-      gt_encseq_extract2bitenc(&ptbe1,esr1);
-      gt_encseq_extract2bitenc(&ptbe2,esr2);
-      retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
-                                                        commonunits,
-                                                        &ptbe1,&ptbe2);
-      depth += commonunits->common;
-    } else
-    {
-      GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,pos1 + depth,
-                   encseq->totallength);
-      GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,pos2 + depth,
-                   encseq->totallength);
-      retval = (cc1 < cc2) ? -1 : ((cc1 > cc2) ? 1 : 0);
-    }
-  } while (retval == 0);
-  commonunits->finaldepth = depth;
-  return retval;
-}
-
-int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
-                                                 GtCommonunits *commonunits,
-                                                 GtReadmode readmode,
-                                                 GtEncseqReader *esr1,
-                                                 GtEncseqReader *esr2,
-                                                 unsigned long pos1,
-                                                 unsigned long pos2,
-                                                 unsigned long depth,
-                                                 unsigned long maxdepth)
+                                        unsigned long depth,
+                                        unsigned long maxdepth)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
@@ -3913,19 +3863,24 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
   unsigned long cc1, cc2;
   GtUchar tmp;
 
-  countgt_encseq_compare_maxdepth++;
+  countgt_encseq_compare_viatwobitencoding++;
   gt_assert(pos1 != pos2);
-  /*gt_assert(depth > 0);*/
-  gt_assert(depth < maxdepth);
-  endpos1 = pos1 + maxdepth;
-  if (endpos1 > encseq->totallength)
+  if (maxdepth == 0)
   {
-    endpos1 = encseq->totallength;
-  }
-  endpos2 = pos2 + maxdepth;
-  if (endpos2 > encseq->totallength)
+    endpos1 = endpos2 = encseq->totallength;
+  } else
   {
-    endpos2 = encseq->totallength;
+    gt_assert(depth < maxdepth);
+    endpos1 = pos1 + maxdepth;
+    if (endpos1 > encseq->totallength)
+    {
+      endpos1 = encseq->totallength;
+    }
+    endpos2 = pos2 + maxdepth;
+    if (endpos2 > encseq->totallength)
+    {
+      endpos2 = encseq->totallength;
+    }
   }
   if (pos1 + depth < endpos1 && pos2 + depth < endpos2)
   {
@@ -3941,7 +3896,7 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
       retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
                                                         commonunits,
                                                         &ptbe1,&ptbe2);
-      if (depth + commonunits->common < maxdepth)
+      if (maxdepth == 0 || depth + commonunits->common < maxdepth)
       {
         depth += commonunits->common;
       } else
@@ -3956,6 +3911,7 @@ int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
                              pos1 + depth,endpos1);
       GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,
                              pos2 + depth,endpos2);
+      gt_assert(cc1 != cc2);
       retval = (cc1 < cc2) ? -1 : ((cc1 > cc2) ? 1 : 0);
     }
   } while (retval == 0);

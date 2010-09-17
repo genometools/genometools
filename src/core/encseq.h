@@ -126,15 +126,17 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        unsigned int prefixlength);
 
 /* The following function compares two substrings beginning
-  at position <pos1> and <pos2> in <encseq>. <esr1> and <esr2> refer
-  to memory areas for storeing a GtEncseqReader.
-  The comparison starts at offset <depth>. The information about the length
+  at position <pos1>+<depth> and <pos2>+<depth> in <encseq>. 
+  <esr1> and <esr2> refer to memory areas for storeing a GtEncseqReader.
+  The information about the length
   of the longest common prefix is stored in <commonunits>. <fwd> and
   <complement> specify if the sequence is scanned in forward direction
   and if the complement of the sequence is to be considered. The
-  return value is -1, 0 or 1 depending on weather the sequence beginning at
-  position <pos1> is smaller than, equal to, or larger than the sequence
-  beginning at position <pos2>. */
+  return value is -1, 0 or 1 depending on whether the sequence beginning at
+  position <pos1>+<depth> is smaller than, equal to, or larger than the 
+  sequence beginning at position <pos2>+<depth>. If <madepth> is 0, then the 
+  entire suffixes are compared. Otherwise, the comparison is restricted to 
+  the prefixes of length <maxdepth>. */
 int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
                                         GtCommonunits *commonunits,
                                         GtReadmode readmode,
@@ -142,19 +144,8 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
                                         GtEncseqReader *esr2,
                                         unsigned long pos1,
                                         unsigned long pos2,
-                                        unsigned long depth);
-
-/* The function is identical to the previous function except that the
-  the comparison is restricted to the prefixes of length <maxdepth>. */
-int gt_encseq_compare_viatwobitencoding_maxdepth(const GtEncseq *encseq,
-                                                 GtCommonunits *commonunits,
-                                                 GtReadmode readmode,
-                                                 GtEncseqReader *esr1,
-                                                 GtEncseqReader *esr2,
-                                                 unsigned long pos1,
-                                                 unsigned long pos2,
-                                                 unsigned long depth,
-                                                 unsigned long maxdepth);
+                                        unsigned long depth,
+                                        unsigned long maxdepth);
 
 /* The following function extracts a twobit encoding at position 
   <esr->currentpos>
