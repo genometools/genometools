@@ -669,5 +669,9 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
     }
   }
   gt_wrapsfxoptions(&so);
+  /*
+  printf("countgt_encseq_compare_viatwobitencoding=%lu\n",
+          countgt_encseq_compare_viatwobitencoding_get());
+  */
   return haserr ? -1 : 0;
 }

@@ -338,4 +338,8 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 bool withseqnumcheck,
                                 GtError *err);
 
+/* the following function returns a count value */
+
+unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
+
 #endif
