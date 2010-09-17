@@ -38,7 +38,6 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
   unsigned long k;
   double s = 0.0, ln_x_choose_k;
   double ln, ln1, m1, m, delta;
-  double pS = p;
 
   if (x > n_s)
   {
@@ -64,8 +63,8 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     m_a = pow (2.0, (double) x);
     m_b = pow (p, (double) k);
     m_c = pow (0.5 - p, (double) x - k);
-    m_d = pow (pS, (double) k);
-    m_e = pow (0.5 - pS, (double) x -k);
+    m_d = pow (p, (double) k);
+    m_e = pow (0.5 - p, (double) x -k);
     m = (m_a * m_b * m_c * pow (1.0 - m_d * m_e, (double) subjectLength));
     /* this is ok even with double, because of next if!*/
     if (m == 0.0)
@@ -101,7 +100,7 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
 }
 
 static double expShulen(double T, /* absolute error */
-                 double M,
+                 double M, /* min logarithm */
                  double d,
                  double p,
                  unsigned long subjectLength,
@@ -152,10 +151,10 @@ static double expShulen(double T, /* absolute error */
 }
 
 /* calculate divergence */
-double gt_divergence(double E, /* relative error for shulen length */
-                   double T, /* absolute error */
-                   double M,
-                   double threshold,
+double gt_divergence(double E, /* relative error for divergence calculation */
+                   double T, /* absolute error for exp shulen*/
+                   double M, /* minimum for logarithm */
+                   double threshold, /* abs error for divergence */
                    double shulen,
                    unsigned long subjectLength,
                    double gc,
@@ -171,14 +170,13 @@ double gt_divergence(double E, /* relative error for shulen length */
   q = (1.0 - gc) / 2.0;
   du = 0.0;
   dl = 1.0 - (2 * p * p + 2 * q * q);  /* dl < 0.75 */
-  /*this should become user definable*/
   t = threshold;
 
   while (gt_double_smaller_double(t, (dl - du) / 2.0))
   {
     dm = (du + dl) / 2.0;
     if (gt_double_smaller_double(shulen,
-          expShulen (T, M, dm, p, subjectLength, ln_n_fac, s1, n_s)))
+          expShulen(T, M, dm, p, subjectLength, ln_n_fac, s1, n_s)))
     {
       du = dm;
     } else

@@ -42,17 +42,18 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
   GtSeqIterator *queries = NULL;
   const GtUchar *symbolmap, *currentQuery;
   const GtAlphabet *alphabet;
-  GtUchar c_sym, g_sym;
+  GtUchar c_sym = 0,
+          g_sym = 0;
   uint64_t queryNo;
   char *description = NULL;
   unsigned long queryLength,
-                subjectLength,
+                subjectLength = 0,
                 currentSuffix;
   double avgShuLength,
          currentShuLength = 0.0,
          /*gc_subject,*/
          gc_query /*, gc*/;
-  const FMindex *subjectindex;
+  const FMindex *subjectindex = NULL;
   Genericindex *genericindexSubject;
   const GtEncseq *encseq = NULL;
 

@@ -21,6 +21,7 @@
 #include "core/array2dim_api.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
+#include "core/format64.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/safearith.h"
@@ -93,7 +94,7 @@ static inline unsigned long get_start_idx_binary_search(ShuNode *parent,
                                                   unsigned long **special_pos,
                                                   unsigned long max_idx)
 {
-  unsigned long start_idx;
+  unsigned long start_idx = 0;
 
   if (parent->lower <= special_pos[0][0])
     start_idx = 0;
@@ -274,9 +275,10 @@ static int process_shu_node(ShuNode *node,
                             GT_UNUSED GtError *err)
 {
   int had_err = 0;
+  uint64_t old;
   unsigned long idx_i, idx_j, termChild_x_i, idx_char;
   unsigned child_y;
-  ShuNode *parent;
+  ShuNode *parent = NULL;
 
   gt_assert(node->process);
 
@@ -303,9 +305,18 @@ static int process_shu_node(ShuNode *node,
           if (node->countTermSubtree[0][idx_j] > 0 &&
                  idx_j != idx_i)
           {
-            gt_safe_add(shulen[idx_i][idx_j],
-                       shulen[idx_i][idx_j],
-                       ((node->depth + 1) * termChild_x_i));
+            old = shulen[idx_i][idx_j];
+            shulen[idx_i][idx_j] += ((node->depth + 1) * termChild_x_i);
+            if (shulen[idx_i][idx_j] < old)
+            {
+              had_err = -1;
+              gt_error_set(err, "overflow in addition of shuSums! "
+                                Formatuint64_t "+ %lu ="
+                                Formatuint64_t "\n",
+                  PRINTuint64_tcast(old),
+                  (node->depth + 1) * termChild_x_i,
+                  PRINTuint64_tcast(shulen[idx_i][idx_j]));
+            }
           }
         }
       }
@@ -320,10 +331,19 @@ static int process_shu_node(ShuNode *node,
             if (node->countTermSubtree[0][idx_j] > 0 &&
                 node->countTermSubtree[child_y][idx_j] == 0)
             {
-              gt_safe_add(shulen[idx_i][idx_j],
-                         shulen[idx_i][idx_j],
-                         ((node->depth + 1) *
-                          node->countTermSubtree[child_y][idx_i]));
+              old = shulen[idx_i][idx_j];
+              shulen[idx_i][idx_j] += ((node->depth + 1) *
+                                       node->countTermSubtree[child_y][idx_i]);
+              if (shulen[idx_i][idx_j] < old)
+              {
+                had_err = -1;
+                gt_error_set(err, "overflow in addition of shuSums! "
+                                  Formatuint64_t "+ %lu ="
+                                  Formatuint64_t "\n",
+                    PRINTuint64_tcast(old),
+                    (node->depth + 1) * termChild_x_i,
+                    PRINTuint64_tcast(shulen[idx_i][idx_j]));
+              }
             }
           }
         }
@@ -398,7 +418,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
     {
       maxdepth = stackdepth;
     }
-    current = stack.space + stack.nextfree - 1;
+    current = stack.space + stack.nextfree -1;
     if (current->process)
     {
       GT_STACK_DECREMENTTOP(&stack);
