@@ -154,16 +154,21 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
   at <esr->currentpos>. <outerstoppos> is the stop position of the
   traversal for most traversals. The result is stored in <ptbe>. */
 
-void gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
-                              GtEncseqReader *esr,
-                              unsigned long outerstoppos);
+unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
+                                       const GtEncseq *encseq,
+                                       bool fwd,
+                                       unsigned long currentpos,
+                                       unsigned long outerstoppos);
 
 /* The following function is like the previous, excepth that the 
    <outerstoppos> is determined internally, rather than providing it
    as a parameter. */
 
-void gt_encseq_extract2bitenc2withstoppos(GtEndofTwobitencoding *ptbe,
-                                          GtEncseqReader *esr);
+void gt_encseq_extract2bitencwithstoppos(GtEndofTwobitencoding *ptbe,
+                                         GtEncseqReader *esr,
+                                         const GtEncseq *encseq,
+                                         GtReadmode readmode,
+                                         unsigned long pos);
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
