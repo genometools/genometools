@@ -3510,6 +3510,31 @@ static inline unsigned int revbitaccessunitsnotspecial(GtBitsequence spbits,
                        : (unsigned int) numberoftrailingzeros(spbits);
 }
 
+static unsigned long fwdgetnextstoppos(GtEncseqReader *esr)
+{
+  if (gt_encseq_has_specialranges(esr->encseq))
+  {
+    switch(esr->encseq->sat)
+    {
+      case GT_ACCESS_TYPE_UCHARTABLES:
+	return ucharfwdgetnextstopposViatables(esr);
+      case GT_ACCESS_TYPE_USHORTTABLES:
+	return ushortfwdgetnextstopposViatables(esr);
+      case GT_ACCESS_TYPE_UINT32TABLES:
+	return uint32fwdgetnextstopposViatables(esr);
+      case GT_ACCESS_TYPE_EQUALLENGTH:
+	return fwdgetnextstopposViaequallength(esr->encseq,esr->currentpos);
+      default:
+       fprintf(stderr,"fwdextract2bitenc(%d) undefined\n",
+		       (int) esr->encseq->sat);
+       exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  } else
+  {
+    return esr->encseq->totallength;
+  }
+}
+
 static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                               GtEncseqReader *esr)
 {
@@ -3518,34 +3543,8 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
   ptbe->position = esr->currentpos;
   if (esr->encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
-    unsigned long stoppos;
+    unsigned long stoppos = fwdgetnextstoppos(esr);
 
-    if (gt_encseq_has_specialranges(esr->encseq))
-    {
-      switch(esr->encseq->sat)
-      {
-        case GT_ACCESS_TYPE_UCHARTABLES:
-          stoppos = ucharfwdgetnextstopposViatables(esr);
-          break;
-        case GT_ACCESS_TYPE_USHORTTABLES:
-          stoppos = ushortfwdgetnextstopposViatables(esr);
-          break;
-        case GT_ACCESS_TYPE_UINT32TABLES:
-          stoppos = uint32fwdgetnextstopposViatables(esr);
-          break;
-        case GT_ACCESS_TYPE_EQUALLENGTH:
-          stoppos = fwdgetnextstopposViaequallength(esr->encseq,
-                                                    esr->currentpos);
-	  break;
-        default:
-         fprintf(stderr,"fwdextract2bitenc(%d) undefined\n",
-                         (int) esr->encseq->sat);
-         exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-    } else
-    {
-      stoppos = esr->encseq->totallength;
-    }
     if (esr->currentpos < stoppos)
     {
       if (stoppos - esr->currentpos > (unsigned long) GT_UNITSIN2BITENC)
@@ -3586,6 +3585,31 @@ static void fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
   esr->currentpos += (unsigned long) GT_UNITSIN2BITENC;
 }
 
+static unsigned long revgetnextstoppos(GtEncseqReader *esr)
+{
+  if (gt_encseq_has_specialranges(esr->encseq))
+  {
+    switch(esr->encseq->sat)
+    {
+      case GT_ACCESS_TYPE_UCHARTABLES:
+	return ucharrevgetnextstopposViatables(esr);
+      case GT_ACCESS_TYPE_USHORTTABLES:
+	return ushortrevgetnextstopposViatables(esr);
+      case GT_ACCESS_TYPE_UINT32TABLES:
+	return uint32revgetnextstopposViatables(esr);
+      case GT_ACCESS_TYPE_EQUALLENGTH:
+	return revgetnextstopposViaequallength(esr->encseq,esr->currentpos);
+      default:
+       fprintf(stderr,"revextract2bitenc(%d) undefined\n",
+		       (int) esr->encseq->sat);
+         exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  } else
+  {
+    return 0;
+  }
+}
+
 static void revextract2bitenc(GtEndofTwobitencoding *ptbe,GtEncseqReader *esr)
 {
   gt_assert(esr != NULL && esr->encseq != NULL &&
@@ -3593,35 +3617,8 @@ static void revextract2bitenc(GtEndofTwobitencoding *ptbe,GtEncseqReader *esr)
   ptbe->position = esr->currentpos;
   if (esr->encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
-    unsigned long stoppos;
+    unsigned long stoppos = revgetnextstoppos(esr);
 
-    if (gt_encseq_has_specialranges(esr->encseq))
-    {
-      switch(esr->encseq->sat)
-      {
-        case GT_ACCESS_TYPE_UCHARTABLES:
-          stoppos = ucharrevgetnextstopposViatables(esr);
-          break;
-        case GT_ACCESS_TYPE_USHORTTABLES:
-          stoppos = ushortrevgetnextstopposViatables(esr);
-          break;
-        case GT_ACCESS_TYPE_UINT32TABLES:
-          stoppos = uint32revgetnextstopposViatables(esr);
-          break;
-        case GT_ACCESS_TYPE_EQUALLENGTH:
-          stoppos = revgetnextstopposViaequallength(esr->encseq,
-                                                    esr->currentpos);
-          break;
-        default:
-         fprintf(stderr,"revextract2bitenc(%d) undefined\n",
-                         (int) esr->encseq->sat);
-         exit(GT_EXIT_PROGRAMMING_ERROR);
-	
-      }
-    } else
-    {
-      stoppos = 0;
-    }
     if (esr->currentpos >= stoppos)
     {
       if (esr->currentpos - stoppos + 1 > (unsigned long) GT_UNITSIN2BITENC)
@@ -3867,8 +3864,8 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
   unsigned long cc1, cc2;
   GtUchar tmp;
 
-  gt_assert(pos1 != pos2);
   countgt_encseq_compare_viatwobitencoding++;
+  gt_assert(pos1 != pos2);
   if (maxdepth == 0)
   {
     endpos1 = endpos2 = encseq->totallength;
