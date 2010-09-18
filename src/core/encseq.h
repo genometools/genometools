@@ -151,10 +151,19 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
   <esr->currentpos>
   in the sequence encoded by <esr->encseq>. The <esr> structure stores
   information allowing for efficient retrieval of sequence information
-  at <esr->currentpos>. The result is stored in <ptbe>. */
+  at <esr->currentpos>. <outerstoppos> is the stop position of the
+  traversal for most traversals. The result is stored in <ptbe>. */
 
 void gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
-                              GtEncseqReader *esr);
+                              GtEncseqReader *esr,
+                              unsigned long outerstoppos);
+
+/* The following function is like the previous, excepth that the 
+   <outerstoppos> is determined internally, rather than providing it
+   as a parameter. */
+
+void gt_encseq_extract2bitenc2withstoppos(GtEndofTwobitencoding *ptbe,
+                                          GtEncseqReader *esr);
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
