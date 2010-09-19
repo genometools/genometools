@@ -137,8 +137,8 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
   sequence beginning at position <pos2>+<depth>. If <madepth> is 0, then the 
   entire suffixes are compared. Otherwise, the comparison is restricted to 
   the prefixes of length <maxdepth>. */
-int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
-                                        GtCommonunits *commonunits,
+int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
+                                        const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GtEncseqReader *esr1,
                                         GtEncseqReader *esr2,

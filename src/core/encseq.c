@@ -3868,8 +3868,8 @@ unsigned long countgt_encseq_compare_viatwobitencoding_get(void)
   return countgt_encseq_compare_viatwobitencoding;
 }
 
-int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
-                                        GtCommonunits *commonunits,
+int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
+                                        const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GtEncseqReader *esr1,
                                         GtEncseqReader *esr2,

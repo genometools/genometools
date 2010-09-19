@@ -333,8 +333,8 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
 {
   GtCommonunits commonunits;
 
-  (void) gt_encseq_compare_viatwobitencoding(blindtrie->encseq,
-                                             &commonunits,
+  (void) gt_encseq_compare_viatwobitencoding(&commonunits,
+                                             blindtrie->encseq,
                                              blindtrie->readmode,
                                              blindtrie->esr1,
                                              blindtrie->esr2,
