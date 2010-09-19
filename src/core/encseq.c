@@ -3662,11 +3662,11 @@ static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
   }
 }
 
-unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
-                                       const GtEncseq *encseq,
-                                       bool fwd,
-                                       unsigned long currentpos,
-                                       unsigned long outerstoppos)
+static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
+                                              const GtEncseq *encseq,
+                                              bool fwd,
+                                              unsigned long currentpos,
+                                              unsigned long outerstoppos)
 {
   return (fwd ? fwdextract2bitenc
               : revextract2bitenc) (ptbe,encseq,currentpos,outerstoppos);

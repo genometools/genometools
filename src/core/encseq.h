@@ -148,21 +148,9 @@ int gt_encseq_compare_viatwobitencoding(const GtEncseq *encseq,
                                         unsigned long maxdepth);
 
 /* The following function extracts a twobit encoding at position 
-  <esr->currentpos>
-  in the sequence encoded by <esr->encseq>. The <esr> structure stores
-  information allowing for efficient retrieval of sequence information
-  at <esr->currentpos>. <outerstoppos> is the stop position of the
-  traversal for most traversals. The result is stored in <ptbe>. */
-
-unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
-                                       const GtEncseq *encseq,
-                                       bool fwd,
-                                       unsigned long currentpos,
-                                       unsigned long outerstoppos);
-
-/* The following function is like the previous, excepth that the 
-   <outerstoppos> is determined internally, rather than providing it
-   as a parameter. */
+  <pos> with the given <readmode> in the sequence encoded by <encseq>. 
+  The <esr> structure refers to a memory area reinitialized in the
+  function. The result is stored in <ptbe>. */
 
 void gt_encseq_extract2bitencwithstoppos(GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
