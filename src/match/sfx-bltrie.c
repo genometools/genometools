@@ -342,9 +342,10 @@ static unsigned long fastgetlcp(GtUchar *mm_oldsuffix,
                                              currentstartpos,
                                              0,
                                              (blindtrie->maxdepth == 0)
-                                                ? 0
-                                                : blindtrie->maxdepthminusoffset
-                                             );
+                                               ? 0
+                                               : blindtrie->maxdepthminusoffset,
+                                             NULL,
+                                             NULL);
   if (isleftofboundary(leafpos,commonunits.finaldepth,blindtrie) &&
       !commonunits.leftspecial)
   {

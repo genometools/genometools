@@ -411,11 +411,14 @@ static void bs_insertionsort(Bentsedgresources *bsr,
         retval = gt_encseq_compare_viatwobitencoding(&commonunits,
                                                      bsr->encseq,
                                                      bsr->readmode,
-                                                     bsr->esr1,bsr->esr2,
+                                                     bsr->esr1,
+                                                     bsr->esr2,
                                                      sval1,
                                                      sval2,
                                                      offset,
-                                                     0);
+                                                     0,
+                                                     NULL,
+                                                     NULL);
         lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
@@ -520,7 +523,9 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
                                                      sval1,
                                                      sval2,
                                                      offset,
-                                                     maxdepth);
+                                                     maxdepth,
+                                                     NULL,
+                                                     NULL);
         lcplen = commonunits.finaldepth;
         gt_assert(lcplen <= maxdepth);
         if (lcplen == maxdepth)
