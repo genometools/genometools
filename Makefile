@@ -170,7 +170,7 @@ HMMER_SRC:=$(HMMER_DIR)/emit.c $(HMMER_DIR)/build.c \
            $(HMMER_DIR)/hmmer.c $(HMMER_DIR)/p7_tophits.c \
            $(HMMER_DIR)/p7_trace.c $(HMMER_DIR)/phmmer.c \
            $(HMMER_DIR)/seqmodel.c $(HMMER_DIR)/tracealign.c \
-           $(HMMER_DIR)/logsum.c src/external/hmmer-3.0/src/impl/decoding.c \
+           $(HMMER_DIR)/logsum.c $(HMMER_DIR)/impl/decoding.c \
            $(HMMER_DIR)/impl/optacc.c \
            $(HMMER_DIR)/impl/fwdback.c $(HMMER_DIR)/impl/p7_omx.c \
            $(HMMER_DIR)/impl/io.c $(HMMER_DIR)/impl/p7_oprofile.c \
