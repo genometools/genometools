@@ -3871,9 +3871,12 @@ unsigned long countgt_encseq_compare_viatwobitencoding_get(void)
 
 typedef struct
 {
-  unsigned long pos, currentpos, endpos, stoppos; 
+  unsigned long pos,
+                currentpos,
+                endpos,
+                stoppos;
 } Viatwobitkeyvalues;
-  
+
 static void assignvittwobitkeyvalues(Viatwobitkeyvalues *vtk,
                                      const GtEncseq *encseq,
                                      GtReadmode readmode,
@@ -3898,19 +3901,21 @@ static void assignvittwobitkeyvalues(Viatwobitkeyvalues *vtk,
   vtk->pos = pos + depth;
   if (vtk->pos < vtk->endpos)
   {
-    gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
+    bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+
     if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
     {
       if (outerstoppos == NULL)
       {
-        bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+        gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
         vtk->stoppos = (fwd ? fwdgetnextstoppos : revgetnextstoppos)(esr);
       } else
       {
         vtk->stoppos = *outerstoppos;
       }
     }
-    vtk->currentpos = esr->currentpos;
+    vtk->currentpos = fwd ? vtk->pos
+                          : GT_REVERSEPOS(encseq->totallength,vtk->pos);
   }
 }
 
