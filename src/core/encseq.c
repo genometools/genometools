@@ -3883,8 +3883,7 @@ static void assignvittwobitkeyvalues(Viatwobitkeyvalues *vtk,
                                      GtEncseqReader *esr,
                                      unsigned long pos,
                                      unsigned long depth,
-                                     unsigned long maxdepth,
-                                     unsigned long *outerstoppos)
+                                     unsigned long maxdepth)
 {
   if (maxdepth == 0)
   {
@@ -3903,16 +3902,12 @@ static void assignvittwobitkeyvalues(Viatwobitkeyvalues *vtk,
   {
     bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
-    if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+    if (esr != NULL && 
+        (satviautables(encseq->sat) || 
+         encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH))
     {
-      if (outerstoppos == NULL)
-      {
-        gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
-        vtk->stoppos = (fwd ? fwdgetnextstoppos : revgetnextstoppos)(esr);
-      } else
-      {
-        vtk->stoppos = *outerstoppos;
-      }
+      gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
+      vtk->stoppos = (fwd ? fwdgetnextstoppos : revgetnextstoppos)(esr);
     }
     vtk->currentpos = fwd ? vtk->pos
                           : GT_REVERSEPOS(encseq->totallength,vtk->pos);
@@ -3928,15 +3923,11 @@ static void gt_encseq_prepare_viatwobitencoding(Viatwobitkeyvalues *vtk1,
                                                 unsigned long pos1,
                                                 unsigned long pos2,
                                                 unsigned long depth,
-                                                unsigned long maxdepth,
-                                                unsigned long *outerstoppos1,
-                                                unsigned long *outerstoppos2)
+                                                unsigned long maxdepth)
 {
   gt_assert(pos1 != pos2);
-  assignvittwobitkeyvalues(vtk1,encseq,readmode,esr1,pos1,depth,maxdepth,
-                           outerstoppos1);
-  assignvittwobitkeyvalues(vtk2,encseq,readmode,esr2,pos2,depth,maxdepth,
-                           outerstoppos2);
+  assignvittwobitkeyvalues(vtk1,encseq,readmode,esr1,pos1,depth,maxdepth);
+  assignvittwobitkeyvalues(vtk2,encseq,readmode,esr2,pos2,depth,maxdepth);
 }
 
 static int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
@@ -4021,9 +4012,7 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long pos1,
                                         unsigned long pos2,
                                         unsigned long depth,
-                                        unsigned long maxdepth,
-                                        unsigned long *outerstoppos1,
-                                        unsigned long *outerstoppos2)
+                                        unsigned long maxdepth)
 {
   Viatwobitkeyvalues vtk1, vtk2;
 
@@ -4036,9 +4025,7 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                       pos1,
                                       pos2,
                                       depth,
-                                      maxdepth,
-                                      outerstoppos1,
-                                      outerstoppos2);
+                                      maxdepth);
   return gt_encseq_process_viatwobitencoding(commonunits,
                                              encseq,
                                              readmode,

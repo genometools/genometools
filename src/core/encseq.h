@@ -145,9 +145,7 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long pos1,
                                         unsigned long pos2,
                                         unsigned long depth,
-                                        unsigned long maxdepth,
-                                        unsigned long *outerstoppos1,
-                                        unsigned long *outerstoppos2);
+                                        unsigned long maxdepth);
 
 /* The following function extracts a twobit encoding at position 
   <pos> with the given <readmode> in the sequence encoded by <encseq>. 

@@ -353,10 +353,9 @@ static unsigned long blindtrie_twobitencodinggetlcp(
                                              currentstartpos,
                                              0,
                                              (blindtrie->maxdepth == 0)
-                                               ? 0
-                                               : blindtrie->maxdepthminusoffset,
-                                             NULL,
-                                             NULL);
+                                                ? 0
+                                                : blindtrie->maxdepthminusoffset
+                                             );
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {

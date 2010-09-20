@@ -416,9 +416,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
                                                      sval1,
                                                      sval2,
                                                      offset,
-                                                     0,
-                                                     NULL,
-                                                     NULL);
+                                                     0);
         lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
@@ -523,9 +521,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
                                                      sval1,
                                                      sval2,
                                                      offset,
-                                                     maxdepth,
-                                                     NULL,
-                                                     NULL);
+                                                     maxdepth);
         lcplen = commonunits.finaldepth;
         gt_assert(lcplen <= maxdepth);
         if (lcplen == maxdepth)
