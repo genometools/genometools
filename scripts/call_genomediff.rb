@@ -1,44 +1,29 @@
 #!/usr/bin/ruby
 #
-# XXX: add licence
+# Copyright (c) 2007-2008 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+$:.unshift File.join(File.dirname(__FILE__), ".")
 require 'optparse'
 require 'ostruct'
 require 'set'
 require 'pp'
+require 'genomediff'
 
 GT_DIR = ENV['GTDIR']
-
-def gt_rev(file, newfile)
-  call = "#{GT_DIR}/bin/gt \
-             convertseq -r -o #{newfile} #{file}"
-#  puts call
-  if system(call)
-    return true
-  else
-    return false
-  end
-end
-
-def gt_idx(file, revfile, idxname)
-  call = "#{GT_DIR}/bin/gt \
-             packedindex mkindex -db #{file} #{revfile} \
-             -v -dna \
-             -dir rev \
-             -ssp \
-             -dc 64 \
-             -bsize 8 \
-             -sprank \
-             -pl \
-             -indexname #{idxname}"
-  #puts call-tis
-  if system(call)
-    return true
-  else
-    return false
-  end
-end
 
 def gt_gdiff(subject, queries, debug, verbose)
   call = "#{GT_DIR}/bin/gt #{debug} \
@@ -52,11 +37,14 @@ end
 
 options = OpenStruct.new
 options.files = Array.new
+options.revfiles = Array.new
 options.header = Array.new
 options.debug = ""
 options.verbose = false
 options.detail = false
 options.search = true
+options.idx = true
+options.cores = 1
 
 opt = OptionParser.new do |opt|
   opt.banner = "Usage #{$0} <inputfiles>\n
@@ -79,6 +67,10 @@ opt = OptionParser.new do |opt|
   end
   opt.on("--nokr", "builds indices, but doesnt calculate kr") do
     options.search = false
+  end
+  opt.on("--noidx", "just reduceN and revconcat") do
+    options.search = false
+    options.idx = false
   end
   opt.on("-v", "--verbose", "be verbose") do
     options.verbose = true
@@ -108,27 +100,14 @@ divergence = Array.new(num) {Array.new(num) {0}}
 # prepare data
 options.files.each do |file|
   if File.exist?(file)
-    dir = File.dirname(file)
-    filename = File.basename(file)
-    basename = File.basename(file, ".*")
-    revdir = File.join(dir, "reverse")
-    revfile = File.join(revdir, filename)
-    idxbase = File.join(dir, "#{basename}_idx")
-    Dir.mkdir(revdir) unless File.exist?(revdir)
-    if File.exist?(File.join(revdir, filename))
-      revfile = File.join(revdir, filename)
-    else
-      unless gt_rev(file, revfile)
-        STDERR.puts "couldnt create reverse"
-        puts opt
-        exit 1
-      end
-    end
-    unless File.exist?("#{idxbase}.bdx")
-      unless gt_idx(file, revfile, idxbase)
-        STDERR.puts "error creating index"
-      end
-    end
+    newfile = Genomediff.reduceN(file)
+    newfile = Genomediff.reverse_and_concat(newfile, false)
+    options.revfiles.push newfile
+    Genomediff.pck_index(newfile,
+                         8,
+                         1,
+                         File.join(File.dirname(newfile),
+                                   "#{File.basename(newfile, ".*")}_idx")) if options.idx
   else
     STDERR.puts "file #{file} does not exist!"
     puts opt
@@ -143,7 +122,7 @@ end
 
 # do the comparisons
 subcount = 0
-options.files.each do |file|
+options.revfiles.each do |file|
   subject = File.join(File.dirname(file),
                       "#{File.basename(file, ".*")}_idx")
   File.open(file, "r") do |subj|
