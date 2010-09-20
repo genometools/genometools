@@ -205,23 +205,24 @@ void gt_pdom_single_hit_get_aaseq(const GtPdomSingleHit *sh,
   }
 }
 
-static GtPdomSingleHit* gt_pdom_single_hit_new(P7_HIT *singlehit,
+static GtPdomSingleHit* gt_pdom_single_hit_new(P7_DOMAIN *singlehit,
                                                GtPdomModelHit *mhit)
 {
   GtPdomSingleHit *hit;
-  gt_assert(singlehit);
+  gt_assert(singlehit && singlehit->ad);
   hit = gt_calloc(1, sizeof (GtPdomSingleHit));
-  hit->phase = gt_phase_get(singlehit->name[0]);
-  hit->range.start = singlehit->dcl->ad->sqfrom-1;
-  hit->range.end = singlehit->dcl->ad->sqto-1;
+  hit->phase = gt_phase_get(singlehit->ad->sqname[0]);
+  hit->range.start = singlehit->ad->sqfrom-1;
+  hit->range.end = singlehit->ad->sqto-1;
+  gt_assert(gt_range_length(&(hit->range)) > 0);
   hit->mhit = mhit;
   hit->eval = singlehit->pvalue;
-  if (singlehit->dcl->ad && singlehit->dcl->ad->aseq)
-    hit->aa_seq_matched = gt_str_new_cstr(singlehit->dcl->ad->aseq);
-  if (singlehit->dcl->ad && singlehit->dcl->ad->model)
-    hit->aa_seq_model = gt_str_new_cstr(singlehit->dcl->ad->model);
-  if (singlehit->dcl->ad && singlehit->dcl->ad->mline)
-    hit->mline = gt_str_new_cstr(singlehit->dcl->ad->mline);
+  if (singlehit->ad && singlehit->ad->aseq)
+    hit->aa_seq_matched = gt_str_new_cstr(singlehit->ad->aseq);
+  if (singlehit->ad && singlehit->ad->model)
+    hit->aa_seq_model = gt_str_new_cstr(singlehit->ad->model);
+  if (singlehit->ad && singlehit->ad->mline)
+    hit->mline = gt_str_new_cstr(singlehit->ad->mline);
   gt_assert(hit->range.start <= hit->range.end);
 
   return hit;
@@ -502,7 +503,7 @@ static void chainproc(GtChain *c, GtFragment *f,
   gt_log_log("resulting chain has %ld GtFragments, score %ld",
              gt_chain_size(c),
              gt_chain_get_score(c));
-  for (i=0;i<gt_chain_size(c);i++)
+  for (i = 0; i < gt_chain_size(c); i++)
   {
     GtPdomSingleHit *sh;
     GtFragment frag;
@@ -532,7 +533,6 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
   P7_PIPELINE *pli;
   P7_TOPHITS *hits = NULL;
   bool best_fwd = TRUE;
-  unsigned long i;
   GtFragment *frags;
   GtPdomModelHit *hit;
 
@@ -544,6 +544,11 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
 
   for (;;)
   {
+    unsigned long h = 0,
+                  d = 0,
+                  nof_domains = 0;
+    P7_DOMAIN *lastdom = NULL;
+
     gt_mutex_lock(shared->in_lock);
     /* Have all HMMs been distributed? If so, we are done here. */
     if (shared->next_hmm == gt_array_size(shared->gpf->models))
@@ -562,7 +567,7 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
 
     /* prepare HMM for searching */
     pli = p7_pipeline_Create(shared->gpf->getopts, hmm->model->M, 400,
-                           p7_SEARCH_SEQS);
+                             p7_SEARCH_SEQS);
 
     bg = p7_bg_Create(hmm->abc);
     gm = p7_profile_Create(hmm->model->M, hmm->abc);
@@ -622,21 +627,30 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
                     hit->hits_rev,
                     shared->out_lock);
 
+    p7_tophits_Sort(hit->hits_fwd);
+    p7_tophits_Sort(hit->hits_rev);
+    p7_tophits_Threshold(hit->hits_fwd, pli);
+    p7_tophits_Threshold(hit->hits_rev, pli);
+
     p7_pipeline_Destroy(pli);
     p7_oprofile_Destroy(om);
     p7_profile_Destroy(gm);
     p7_bg_Destroy(bg);
 
-    p7_tophits_Sort(hit->hits_fwd);
-    p7_tophits_Sort(hit->hits_rev);
-
     /* check if there were any hits */
-    if (hit->hits_fwd->N > 0 || hit->hits_rev->N > 0)
+    if (hit->hits_fwd->nreported > 0 || hit->hits_rev->nreported > 0)
     {
+      gt_log_log("N: %llu/%llu, nreported: %llu/%llu, nincluded: %llu/%llu",
+                  (unsigned long long) hit->hits_fwd->N,
+                  (unsigned long long) hit->hits_rev->N,
+                  (unsigned long long) hit->hits_fwd->nreported,
+                  (unsigned long long) hit->hits_rev->nreported,
+                  (unsigned long long) hit->hits_fwd->nincluded,
+                  (unsigned long long) hit->hits_rev->nincluded);
       shared->results->empty = FALSE;
-      if (hit->hits_fwd->N > 0)
+      if (hit->hits_fwd->nreported > 0)
       {
-        if (hit->hits_rev->N > 0)
+        if (hit->hits_rev->nreported > 0)
         {
           if (gt_double_compare(hit->hits_fwd->hit[0]->score,
                                 hit->hits_rev->hit[0]->score) < 0)
@@ -650,27 +664,54 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
       hits = (best_fwd ? hit->hits_fwd : hit->hits_rev);
       gt_assert(hits);
 
-      /* no need to chain if there is only one hit */
-      if (hits->N > 1)
+      /* determine number of domain hits, track single domain hits */
+      for (h = 0; h < hits->N; h++) {
+        if (hits->hit[h]->flags & p7_IS_REPORTED) {
+          for (d = 0; d < hits->hit[h]->ndom; d++) {
+            if (hits->hit[h]->dcl[d].is_reported) {
+              nof_domains++;
+              lastdom = &(hits->hit[h]->dcl[d]);
+              gt_log_log("domain %s, from: %lu, to %lu, on %s (%lu/%d)",
+                         hits->hit[h]->dcl[d].ad->hmmname,
+                         hits->hit[h]->dcl[d].ad->sqfrom,
+                         hits->hit[h]->dcl[d].ad->sqto,
+                         hits->hit[h]->dcl[d].ad->sqname,
+                         d+1,
+                         hits->hit[h]->ndom);
+            }
+          }
+        }
+      }
+
+      /* no need to chain if there is only one domain hit */
+      if (nof_domains > 1)
       {
+        unsigned long i = 0;
+        gt_log_log("nof_domains: %lu", nof_domains);
         /* create GtFragment set for chaining */
-        frags = (GtFragment*) gt_calloc(hits->N, sizeof (GtFragment));
-        for (i=0;i<hits->N;i++)
-        {
-          frags[i].startpos1 = hits->hit[i]->dcl->ad->hmmfrom;
-          frags[i].endpos1   = hits->hit[i]->dcl->ad->hmmto;
-          frags[i].startpos2 = hits->hit[i]->dcl->ad->sqfrom;
-          frags[i].endpos2   = hits->hit[i]->dcl->ad->sqto;
-          /* let weight(f) be targetlength(f) multiplied by hmmerscore(f) */
-          frags[i].weight    = (hits->hit[i]->dcl->ad->sqto
-                                 - hits->hit[i]->dcl->ad->sqfrom + 1)
-                                   * hits->hit[i]->score;
-          frags[i].data      = hits->hit[i];
+        frags = (GtFragment*) gt_calloc(nof_domains, sizeof (GtFragment));
+        for (h = 0; h < hits->N; h++) {
+          if (hits->hit[h]->flags & p7_IS_REPORTED) {
+            for (d = 0; d < hits->hit[h]->ndom; d++) {
+              if (hits->hit[h]->dcl[d].is_reported) {
+                P7_DOMAIN *dom = &(hits->hit[h]->dcl[d]);
+                frags[i].startpos1 = dom->ad->hmmfrom;
+                frags[i].endpos1   = dom->ad->hmmto;
+                frags[i].startpos2 = dom->ad->sqfrom;
+                frags[i].endpos2   = dom->ad->sqto;
+                /* let weight(f) be targetlength(f) multiplied by bitscore(f) */
+                frags[i].weight    = (dom->ad->sqto - dom->ad->sqfrom + 1)
+                                         * dom->bitscore;
+                frags[i].data      = dom;
+                i++;
+              }
+            }
+          }
         }
 
         /* sort GtFragments by position */
-        qsort(frags, hits->N, sizeof (GtFragment), gt_fragcmp);
-        for (i=0;i<hits->N;i++)
+        qsort(frags, nof_domains, sizeof (GtFragment), gt_fragcmp);
+        for (i=0;i<nof_domains;i++)
         {
           gt_log_log("(%lu %lu) (%lu %lu) %p", frags[i].startpos1,
                                                frags[i].endpos1,
@@ -678,18 +719,22 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
                                                frags[i].endpos2,
                                                frags[i].data);
         }
-        gt_log_log("chaining %lu frags", (unsigned long) hits->N);
+        gt_log_log("chaining %lu frags", nof_domains);
+
         /* do chaining */
-        gt_globalchaining_max(frags, hits->N,
+        gt_globalchaining_max(frags, nof_domains,
                               shared->gpf->chain_max_gap_length,
                               chainproc, hit);
         gt_free(frags);
       }
       else
       {
-        GtPdomSingleHit *sh = gt_pdom_single_hit_new(hits->hit[0],
-                                                     hit);
-        gt_pdom_model_hit_add_single_hit(hit, sh);
+        /* single domain hit, no chaining necessary */
+        if (lastdom != NULL) {
+          GtPdomSingleHit *sh;
+          sh = gt_pdom_single_hit_new(lastdom, hit);
+          gt_pdom_model_hit_add_single_hit(hit, sh);
+        }
       }
 
       /* Lock results, we want to write to the result hashtable */
@@ -967,7 +1012,7 @@ GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
   had_err = gt_pdom_finder_load_files(gpf, hmmfiles, e);
 
   if (!had_err) {
-    cmd = gt_str_new();
+    cmd = gt_str_new_cstr("--noali ");
     switch (cutoff) {
       case GT_PHMM_CUTOFF_GA:
         gt_str_append_cstr(cmd, "--cut_ga ");
