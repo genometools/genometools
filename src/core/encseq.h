@@ -147,6 +147,8 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long depth,
                                         unsigned long maxdepth);
 
+/* XXX the following needs to be documented */
+
 typedef struct
 {
   unsigned long pos,
@@ -170,6 +172,10 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long maxdepth,
                                         GtViatwobitkeyvalues *vtk1,
                                         GtViatwobitkeyvalues *vtk2);
+
+bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq);
+
+unsigned long gt_getnexttwobitencodingstoppos(bool fwd,GtEncseqReader *esr);
 
 /* The following function extracts a twobit encoding at position
   <pos> with the given <readmode> in the sequence encoded by <encseq>.
