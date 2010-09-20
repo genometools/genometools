@@ -343,7 +343,25 @@ static unsigned long blindtrie_twobitencodinggetlcp(
                                           unsigned long currentstartpos)
 {
   GtCommonunits commonunits;
+  GtViatwobitkeyvalues vtk1, vtk2;
+  const unsigned long depth = 0;
+  unsigned long maxdepth = (blindtrie->maxdepth == 0)
+                             ? 0
+                             : blindtrie->maxdepthminusoffset;
 
+  gt_assert(leafpos != currentstartpos);
+  gt_assignvittwobitkeyvalues(&vtk1,blindtrie->encseq,blindtrie->readmode,
+                              blindtrie->esr1,leafpos,depth,maxdepth);
+  gt_assignvittwobitkeyvalues(&vtk2,blindtrie->encseq,blindtrie->readmode,
+                              blindtrie->esr2,currentstartpos,depth,maxdepth);
+  (void) gt_encseq_process_viatwobitencoding(&commonunits,
+                                             blindtrie->encseq,
+                                             blindtrie->readmode,
+                                             depth,
+                                             maxdepth,
+                                             &vtk1,
+                                             &vtk2);
+  /*
   (void) gt_encseq_compare_viatwobitencoding(&commonunits,
                                              blindtrie->encseq,
                                              blindtrie->readmode,
@@ -356,6 +374,7 @@ static unsigned long blindtrie_twobitencodinggetlcp(
                                                 ? 0
                                                 : blindtrie->maxdepthminusoffset
                                              );
+  */
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {

@@ -3869,21 +3869,13 @@ unsigned long countgt_encseq_compare_viatwobitencoding_get(void)
   return countgt_encseq_compare_viatwobitencoding;
 }
 
-typedef struct
-{
-  unsigned long pos,
-                currentpos,
-                endpos,
-                stoppos;
-} Viatwobitkeyvalues;
-
-static void assignvittwobitkeyvalues(Viatwobitkeyvalues *vtk,
-                                     const GtEncseq *encseq,
-                                     GtReadmode readmode,
-                                     GtEncseqReader *esr,
-                                     unsigned long pos,
-                                     unsigned long depth,
-                                     unsigned long maxdepth)
+void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 GtEncseqReader *esr,
+                                 unsigned long pos,
+                                 unsigned long depth,
+                                 unsigned long maxdepth)
 {
   if (maxdepth == 0)
   {
@@ -3914,29 +3906,13 @@ static void assignvittwobitkeyvalues(Viatwobitkeyvalues *vtk,
   }
 }
 
-static void gt_encseq_prepare_viatwobitencoding(Viatwobitkeyvalues *vtk1,
-                                                Viatwobitkeyvalues *vtk2,
-                                                const GtEncseq *encseq,
-                                                GtReadmode readmode,
-                                                GtEncseqReader *esr1,
-                                                GtEncseqReader *esr2,
-                                                unsigned long pos1,
-                                                unsigned long pos2,
-                                                unsigned long depth,
-                                                unsigned long maxdepth)
-{
-  gt_assert(pos1 != pos2);
-  assignvittwobitkeyvalues(vtk1,encseq,readmode,esr1,pos1,depth,maxdepth);
-  assignvittwobitkeyvalues(vtk2,encseq,readmode,esr2,pos2,depth,maxdepth);
-}
-
-static int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
-                                               const GtEncseq *encseq,
-                                               GtReadmode readmode,
-                                               unsigned long depth,
-                                               unsigned long maxdepth,
-                                               Viatwobitkeyvalues *vtk1,
-                                               Viatwobitkeyvalues *vtk2)
+int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
+                                        const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned long depth,
+                                        unsigned long maxdepth,
+                                        GtViatwobitkeyvalues *vtk1,
+                                        GtViatwobitkeyvalues *vtk2)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   int retval;
@@ -4014,18 +3990,11 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long depth,
                                         unsigned long maxdepth)
 {
-  Viatwobitkeyvalues vtk1, vtk2;
+  GtViatwobitkeyvalues vtk1, vtk2;
 
-  gt_encseq_prepare_viatwobitencoding(&vtk1,
-                                      &vtk2,
-                                      encseq,
-                                      readmode,
-                                      esr1,
-                                      esr2,
-                                      pos1,
-                                      pos2,
-                                      depth,
-                                      maxdepth);
+  gt_assert(pos1 != pos2);
+  gt_assignvittwobitkeyvalues(&vtk1,encseq,readmode,esr1,pos1,depth,maxdepth);
+  gt_assignvittwobitkeyvalues(&vtk2,encseq,readmode,esr2,pos2,depth,maxdepth);
   return gt_encseq_process_viatwobitencoding(commonunits,
                                              encseq,
                                              readmode,

@@ -147,6 +147,30 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long depth,
                                         unsigned long maxdepth);
 
+typedef struct
+{
+  unsigned long pos,
+                currentpos,
+                endpos,
+                stoppos;
+} GtViatwobitkeyvalues;
+
+void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 GtEncseqReader *esr,
+                                 unsigned long pos,
+                                 unsigned long depth,
+                                 unsigned long maxdepth);
+
+int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
+                                        const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned long depth,
+                                        unsigned long maxdepth,
+                                        GtViatwobitkeyvalues *vtk1,
+                                        GtViatwobitkeyvalues *vtk2);
+
 /* The following function extracts a twobit encoding at position 
   <pos> with the given <readmode> in the sequence encoded by <encseq>. 
   The <esr> structure refers to a memory area reinitialized in the
