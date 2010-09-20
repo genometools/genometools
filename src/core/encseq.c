@@ -3615,6 +3615,12 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
+static unsigned long getnexttwobitencodingstoppos(bool fwd,GtEncseqReader *esr)
+{
+  return (fwd ? fwdgetnexttwobitencodingstoppos
+              : revgetnexttwobitencodingstoppos) (esr);
+}
+
 static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
                                        unsigned long currentpos,
@@ -3695,8 +3701,7 @@ void gt_encseq_extract2bitencwithtwobitencodingstoppos(
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
   if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    twobitencodingstoppos = (fwd ? fwdgetnexttwobitencodingstoppos
-                                 : revgetnexttwobitencodingstoppos) (esr);
+    twobitencodingstoppos = getnexttwobitencodingstoppos(fwd,esr);
   } else
   {
     twobitencodingstoppos = 0;
@@ -3914,9 +3919,7 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
          encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH))
     {
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
-      vtk->twobitencodingstoppos
-        = (fwd ? fwdgetnexttwobitencodingstoppos
-               : revgetnexttwobitencodingstoppos)(esr);
+      vtk->twobitencodingstoppos = getnexttwobitencodingstoppos(fwd,esr);
     }
     vtk->currentpos = fwd ? vtk->pos
                           : GT_REVERSEPOS(encseq->totallength,vtk->pos);
@@ -4438,8 +4441,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
     }
     if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
     {
-      twobitencodingstoppos = (fwd ? fwdgetnexttwobitencodingstoppos :
-revgetnexttwobitencodingstoppos) (esr);
+      twobitencodingstoppos = getnexttwobitencodingstoppos(fwd,esr);
     } else
     {
       twobitencodingstoppos = 0;
@@ -4548,8 +4550,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos1);
   if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    twobitencodingstoppos1 = (fwd ? fwdgetnexttwobitencodingstoppos :
-revgetnexttwobitencodingstoppos)(esr1);
+    twobitencodingstoppos1 = getnexttwobitencodingstoppos (fwd,esr1);
   } else
   {
     twobitencodingstoppos1 = 0;
@@ -4560,8 +4561,7 @@ revgetnexttwobitencodingstoppos)(esr1);
   esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos2);
   if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    twobitencodingstoppos2 = (fwd ? fwdgetnexttwobitencodingstoppos
-                                  : revgetnexttwobitencodingstoppos)(esr2);
+    twobitencodingstoppos2 = getnexttwobitencodingstoppos (fwd,esr2);
   } else
   {
     twobitencodingstoppos2 = 0;
