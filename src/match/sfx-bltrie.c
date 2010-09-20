@@ -286,7 +286,7 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
   }
 }
 
-static unsigned long blindtrie_cmpcharbychargetlcp(
+static unsigned long blindtrie_cmpcharbychar_getlcp(
                                  GtUchar *mm_oldsuffix,
                                  GtUchar *mm_newsuffix,
                                  const Blindtrie *blindtrie,
@@ -335,7 +335,7 @@ static unsigned long blindtrie_cmpcharbychargetlcp(
   return lcp;
 }
 
-static unsigned long blindtrie_twobitencodinggetlcp(
+static unsigned long blindtrie_twobitencoding_getlcp(
                                           GtUchar *mm_oldsuffix,
                                           GtUchar *mm_newsuffix,
                                           const Blindtrie *blindtrie,
@@ -361,20 +361,6 @@ static unsigned long blindtrie_twobitencodinggetlcp(
                                              maxdepth,
                                              &vtk1,
                                              &vtk2);
-  /*
-  (void) gt_encseq_compare_viatwobitencoding(&commonunits,
-                                             blindtrie->encseq,
-                                             blindtrie->readmode,
-                                             blindtrie->esr1,
-                                             blindtrie->esr2,
-                                             leafpos,
-                                             currentstartpos,
-                                             0,
-                                             (blindtrie->maxdepth == 0)
-                                                ? 0
-                                                : blindtrie->maxdepthminusoffset
-                                             );
-  */
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {
@@ -785,7 +771,7 @@ unsigned long gt_blindtrie_suffixsort(
       gt_assert(ISLEAF(leafinsubtree));
       if (blindtrie->cmpcharbychar)
       {
-        lcp = blindtrie_cmpcharbychargetlcp
+        lcp = blindtrie_cmpcharbychar_getlcp
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,
@@ -793,7 +779,7 @@ unsigned long gt_blindtrie_suffixsort(
                                 currentstartpos);
       } else
       {
-        lcp = blindtrie_twobitencodinggetlcp
+        lcp = blindtrie_twobitencoding_getlcp
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,

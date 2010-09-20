@@ -3300,7 +3300,8 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   gt_disc_distri_delete(distspralen);
 }
 
-static unsigned long fwdgetnextstopposViaequallength(const GtEncseq *encseq,
+static unsigned long fwdgetnexttwobitencodingstopposViaequallength(
+                                                     const GtEncseq *encseq,
                                                      unsigned long pos)
 {
   if (!specialsingleposViaequallength(encseq,pos))
@@ -3313,7 +3314,8 @@ static unsigned long fwdgetnextstopposViaequallength(const GtEncseq *encseq,
   return pos;
 }
 
-static unsigned long revgetnextstopposViaequallength(const GtEncseq *encseq,
+static unsigned long revgetnexttwobitencodingstopposViaequallength(
+                                                     const GtEncseq *encseq,
                                                      unsigned long pos)
 {
   if (!specialsingleposViaequallength(encseq,pos))
@@ -3510,23 +3512,24 @@ static inline unsigned int revbitaccessunitsnotspecial(GtBitsequence spbits,
                        : (unsigned int) numberoftrailingzeros(spbits);
 }
 
-static unsigned long fwdgetnextstoppos(GtEncseqReader *esr)
+static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
-    switch(esr->encseq->sat)
+    switch (esr->encseq->sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-	return ucharfwdgetnextstopposViatables(esr);
+        return ucharfwdgetnexttwobitencodingstopposViatables(esr);
       case GT_ACCESS_TYPE_USHORTTABLES:
-	return ushortfwdgetnextstopposViatables(esr);
+        return ushortfwdgetnexttwobitencodingstopposViatables(esr);
       case GT_ACCESS_TYPE_UINT32TABLES:
-	return uint32fwdgetnextstopposViatables(esr);
+        return uint32fwdgetnexttwobitencodingstopposViatables(esr);
       case GT_ACCESS_TYPE_EQUALLENGTH:
-	return fwdgetnextstopposViaequallength(esr->encseq,esr->currentpos);
+        return fwdgetnexttwobitencodingstopposViaequallength(esr->encseq,
+                                                             esr->currentpos);
       default:
-       fprintf(stderr,"fwdgetnextstoppos(%d) undefined\n",
-		       (int) esr->encseq->sat);
+       fprintf(stderr,"fwdgetnexttwobitencodingstoppos(%d) undefined\n",
+                      (int) esr->encseq->sat);
        exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
@@ -3538,20 +3541,22 @@ static unsigned long fwdgetnextstoppos(GtEncseqReader *esr)
 static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
                                        unsigned long currentpos,
-                                       unsigned long stoppos)
+                                       unsigned long twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
   ptbe->position = currentpos;
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
-    if (currentpos < stoppos)
+    if (currentpos < twobitencodingstoppos)
     {
-      if (stoppos - currentpos > (unsigned long) GT_UNITSIN2BITENC)
+      if (twobitencodingstoppos - currentpos >
+          (unsigned long) GT_UNITSIN2BITENC)
       {
         ptbe->unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
       } else
       {
-        ptbe->unitsnotspecial = (unsigned int) (stoppos - currentpos);
+        ptbe->unitsnotspecial
+          = (unsigned int) (twobitencodingstoppos - currentpos);
       }
       ptbe->tbe = calctbeforward(encseq->twobitencoding,currentpos);
     } else
@@ -3584,23 +3589,24 @@ static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
   return currentpos + (unsigned long) GT_UNITSIN2BITENC;
 }
 
-static unsigned long revgetnextstoppos(GtEncseqReader *esr)
+static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
-    switch(esr->encseq->sat)
+    switch (esr->encseq->sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-	return ucharrevgetnextstopposViatables(esr);
+        return ucharrevgetnexttwobitencodingstopposViatables(esr);
       case GT_ACCESS_TYPE_USHORTTABLES:
-	return ushortrevgetnextstopposViatables(esr);
+        return ushortrevgetnexttwobitencodingstopposViatables(esr);
       case GT_ACCESS_TYPE_UINT32TABLES:
-	return uint32revgetnextstopposViatables(esr);
+        return uint32revgetnexttwobitencodingstopposViatables(esr);
       case GT_ACCESS_TYPE_EQUALLENGTH:
-	return revgetnextstopposViaequallength(esr->encseq,esr->currentpos);
+        return revgetnexttwobitencodingstopposViaequallength(esr->encseq,
+                                                             esr->currentpos);
       default:
-       fprintf(stderr,"revgetnextstoppos(%d) undefined\n",
-		       (int) esr->encseq->sat);
+       fprintf(stderr,"revgetnexttwobitencodingstoppos(%d) undefined\n",
+               (int) esr->encseq->sat);
          exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
@@ -3612,20 +3618,22 @@ static unsigned long revgetnextstoppos(GtEncseqReader *esr)
 static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
                                        unsigned long currentpos,
-                                       unsigned long stoppos)
+                                       unsigned long twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
   ptbe->position = currentpos;
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
-    if (currentpos >= stoppos)
+    if (currentpos >= twobitencodingstoppos)
     {
-      if (currentpos - stoppos + 1 > (unsigned long) GT_UNITSIN2BITENC)
+      if (currentpos - twobitencodingstoppos + 1 >
+          (unsigned long) GT_UNITSIN2BITENC)
       {
         ptbe->unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
       } else
       {
-        ptbe->unitsnotspecial = (unsigned int) (currentpos - stoppos + 1);
+        ptbe->unitsnotspecial
+          = (unsigned int) (currentpos - twobitencodingstoppos + 1);
       }
       ptbe->tbe = calctbereverse(encseq->twobitencoding,currentpos);
     } else
@@ -3666,31 +3674,36 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
                                               const GtEncseq *encseq,
                                               bool fwd,
                                               unsigned long currentpos,
-                                              unsigned long stoppos)
+                                              unsigned long
+                                                twobitencodingstoppos)
 {
   return (fwd ? fwdextract2bitenc
-              : revextract2bitenc) (ptbe,encseq,currentpos,stoppos);
+              : revextract2bitenc) (ptbe,encseq,currentpos,
+                                    twobitencodingstoppos);
 }
 
-void gt_encseq_extract2bitencwithstoppos(GtEndofTwobitencoding *ptbe,
+void gt_encseq_extract2bitencwithtwobitencodingstoppos(
+                                         GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
                                          const GtEncseq *encseq,
                                          GtReadmode readmode,
                                          unsigned long pos)
 {
-  unsigned long stoppos;
+  unsigned long twobitencodingstoppos;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
   if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    stoppos = (fwd ? fwdgetnextstoppos : revgetnextstoppos) (esr);
+    twobitencodingstoppos = (fwd ? fwdgetnexttwobitencodingstoppos
+                                 : revgetnexttwobitencodingstoppos) (esr);
   } else
   {
-    stoppos = 0;
+    twobitencodingstoppos = 0;
   }
   esr->currentpos = gt_encseq_extract2bitenc(ptbe,encseq,fwd,
-                                             esr->currentpos,stoppos);
+                                             esr->currentpos,
+                                             twobitencodingstoppos);
 }
 
 #define MASKPREFIX(PREFIX)\
@@ -3890,16 +3903,20 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
     }
   }
   vtk->pos = pos + depth;
+  vtk->currentpos = encseq->totallength; /* to have a defined value */
+  vtk->twobitencodingstoppos = encseq->totallength+1;  /* have defined value */
   if (vtk->pos < vtk->endpos)
   {
     bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
-    if (esr != NULL && 
-        (satviautables(encseq->sat) || 
+    if (esr != NULL &&
+        (satviautables(encseq->sat) ||
          encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH))
     {
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
-      vtk->stoppos = (fwd ? fwdgetnextstoppos : revgetnextstoppos)(esr);
+      vtk->twobitencodingstoppos
+        = (fwd ? fwdgetnexttwobitencodingstoppos
+               : revgetnexttwobitencodingstoppos)(esr);
     }
     vtk->currentpos = fwd ? vtk->pos
                           : GT_REVERSEPOS(encseq->totallength,vtk->pos);
@@ -3928,12 +3945,12 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
     {
       if (vtk2->pos < vtk2->endpos)
       {
-        vtk1->currentpos = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,
-                                                    vtk1->currentpos,
-                                                    vtk1->stoppos);
-        vtk2->currentpos = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,
-                                                    vtk2->currentpos,
-                                                    vtk2->stoppos);
+        vtk1->currentpos
+           = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,vtk1->currentpos,
+                                      vtk1->twobitencodingstoppos);
+        vtk2->currentpos
+           = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,vtk2->currentpos,
+                                      vtk2->twobitencodingstoppos);
         retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
                                                           commonunits,
                                                           &ptbe1,&ptbe2);
@@ -4370,15 +4387,15 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
   unsigned long idx;
   GtBitsequence result = 0, mask = (GtBitsequence) 1;
   bool found = false;
-  unsigned long stoppos;
+  unsigned long twobitencodingstoppos;
 
   if (startpos >= (unsigned long) GT_UNITSIN2BITENC)
   {
-    stoppos = startpos - GT_UNITSIN2BITENC + 1;
+    twobitencodingstoppos = startpos - GT_UNITSIN2BITENC + 1;
     *unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
   } else
   {
-    stoppos = 0;
+    twobitencodingstoppos = 0;
     *unitsnotspecial = (unsigned int) (startpos+1);
   }
   for (idx=startpos; /* Nothing */; idx--)
@@ -4393,7 +4410,7 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
       result |= mask;
     }
     mask <<= 1;
-    if (idx == stoppos)
+    if (idx == twobitencodingstoppos)
     {
       break;
     }
@@ -4406,7 +4423,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtEncseqReader *esr;
-  unsigned long startpos, stoppos;
+  unsigned long startpos, twobitencodingstoppos;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
   esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
@@ -4421,13 +4438,15 @@ static void checkextractunitatpos(const GtEncseq *encseq,
     }
     if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
     {
-      stoppos = (fwd ? fwdgetnextstoppos : revgetnextstoppos) (esr);
+      twobitencodingstoppos = (fwd ? fwdgetnexttwobitencodingstoppos :
+revgetnexttwobitencodingstoppos) (esr);
     } else
     {
-      stoppos = 0;
+      twobitencodingstoppos = 0;
     }
     esr->currentpos = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,
-                                               esr->currentpos,stoppos);
+                                               esr->currentpos,
+                                               twobitencodingstoppos);
     extract2bitenc_bruteforce(fwd,&ptbe2,encseq,startpos);
     if (ptbe1.unitsnotspecial != ptbe2.unitsnotspecial)
     {
@@ -4520,7 +4539,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtCommonunits commonunits1;
-  unsigned long commonunits2, stoppos1, stoppos2;
+  unsigned long commonunits2, twobitencodingstoppos1, twobitencodingstoppos2;
   int ret1, ret2;
   GtEncseqReader *esr1, *esr2;
   bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
@@ -4529,23 +4548,27 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos1);
   if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    stoppos1 = (fwd ? fwdgetnextstoppos : revgetnextstoppos)(esr1);
+    twobitencodingstoppos1 = (fwd ? fwdgetnexttwobitencodingstoppos :
+revgetnexttwobitencodingstoppos)(esr1);
   } else
   {
-    stoppos1 = 0;
+    twobitencodingstoppos1 = 0;
   }
   esr1->currentpos = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,
-                                              esr1->currentpos,stoppos1);
+                                              esr1->currentpos,
+                                              twobitencodingstoppos1);
   esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos2);
   if (satviautables(encseq->sat) || encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    stoppos2 = (fwd ? fwdgetnextstoppos : revgetnextstoppos)(esr2);
+    twobitencodingstoppos2 = (fwd ? fwdgetnexttwobitencodingstoppos
+                                  : revgetnexttwobitencodingstoppos)(esr2);
   } else
   {
-    stoppos2 = 0;
+    twobitencodingstoppos2 = 0;
   }
   esr2->currentpos = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,
-                                              esr2->currentpos,stoppos2);
+                                              esr2->currentpos,
+                                              twobitencodingstoppos2);
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   ret1 = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
@@ -4589,7 +4612,7 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        unsigned long frompos,
                                        unsigned int prefixlength)
 {
-  unsigned long pos, stoppos;
+  unsigned long pos, twobitencodingstoppos;
   GtCodetype code = 0;
   GtUchar cc;
 
@@ -4597,13 +4620,13 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,frompos);
   if (frompos + prefixlength - 1 < encseq->totallength)
   {
-    stoppos = frompos + prefixlength;
+    twobitencodingstoppos = frompos + prefixlength;
   } else
   {
-    stoppos = encseq->totallength;
+    twobitencodingstoppos = encseq->totallength;
   }
   *unitsnotspecial = 0;
-  for (pos=frompos; pos < stoppos; pos++)
+  for (pos=frompos; pos < twobitencodingstoppos; pos++)
   {
     cc = gt_encseq_reader_next_encoded_char(esr);
     if (ISNOTSPECIAL(cc))

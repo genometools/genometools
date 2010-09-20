@@ -70,7 +70,7 @@ struct GtEncseq
                                 unsigned long,
                                 unsigned long);
   const char *delivercontainsspecialname;
-  unsigned long numofspecialcells; 
+  unsigned long numofspecialcells;
   /* encseq->totallength/encseq->maxspecialtype + 1;*/
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;

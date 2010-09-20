@@ -126,16 +126,16 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
                                        unsigned int prefixlength);
 
 /* The following function compares two substrings beginning
-  at position <pos1>+<depth> and <pos2>+<depth> in <encseq>. 
+  at position <pos1>+<depth> and <pos2>+<depth> in <encseq>.
   <esr1> and <esr2> refer to memory areas for storeing a GtEncseqReader.
   The information about the length
   of the longest common prefix is stored in <commonunits>. <fwd> and
   <complement> specify if the sequence is scanned in forward direction
   and if the complement of the sequence is to be considered. The
   return value is -1, 0 or 1 depending on whether the sequence beginning at
-  position <pos1>+<depth> is smaller than, equal to, or larger than the 
-  sequence beginning at position <pos2>+<depth>. If <madepth> is 0, then the 
-  entire suffixes are compared. Otherwise, the comparison is restricted to 
+  position <pos1>+<depth> is smaller than, equal to, or larger than the
+  sequence beginning at position <pos2>+<depth>. If <madepth> is 0, then the
+  entire suffixes are compared. Otherwise, the comparison is restricted to
   the prefixes of length <maxdepth>. */
 int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         const GtEncseq *encseq,
@@ -152,7 +152,7 @@ typedef struct
   unsigned long pos,
                 currentpos,
                 endpos,
-                stoppos;
+                twobitencodingstoppos;
 } GtViatwobitkeyvalues;
 
 void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
@@ -171,12 +171,13 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
                                         GtViatwobitkeyvalues *vtk1,
                                         GtViatwobitkeyvalues *vtk2);
 
-/* The following function extracts a twobit encoding at position 
-  <pos> with the given <readmode> in the sequence encoded by <encseq>. 
+/* The following function extracts a twobit encoding at position
+  <pos> with the given <readmode> in the sequence encoded by <encseq>.
   The <esr> structure refers to a memory area reinitialized in the
   function. The result is stored in <ptbe>. */
 
-void gt_encseq_extract2bitencwithstoppos(GtEndofTwobitencoding *ptbe,
+void gt_encseq_extract2bitencwithtwobitencodingstoppos(
+                                         GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
                                          const GtEncseq *encseq,
                                          GtReadmode readmode,
@@ -184,14 +185,14 @@ void gt_encseq_extract2bitencwithstoppos(GtEndofTwobitencoding *ptbe,
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
-  done in forward direction iff <fwd> is true. 
+  done in forward direction iff <fwd> is true.
   The comparison is done for the complemented characters
   iff <complement> is true. */
 int gt_encseq_compare_pairof_twobitencodings(bool fwd,
                                              bool complement,
                                              GtCommonunits *commonunits,
                                              const GtEndofTwobitencoding *ptbe1,
-                                             const GtEndofTwobitencoding 
+                                             const GtEndofTwobitencoding
                                                                       *ptbe2);
 
 /* Return true if and only if the substring of length <len> starting

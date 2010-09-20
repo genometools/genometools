@@ -132,8 +132,11 @@ typedef GtEndofTwobitencoding Sfxcmp;
           if (pos + depth < bsr->totallength)\
           {\
             pos += depth;\
-            gt_encseq_extract2bitencwithstoppos(&(VAR),bsr->esr1,\
-                                                bsr->encseq,bsr->readmode,pos);\
+            gt_encseq_extract2bitencwithtwobitencodingstoppos(&(VAR),\
+                                                              bsr->esr1,\
+                                                              bsr->encseq,\
+                                                              bsr->readmode,\
+                                                              pos);\
           } else\
           {\
             VAR.tbe = 0;\

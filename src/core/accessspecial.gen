@@ -214,7 +214,7 @@ static void ADDTYPE(binpreparenextrange)(GtEncseqReader *esr)
     endpos0 = 0;
   }
   esr->idx->firstcell = endpos0;
-  esr->idx->lastcell = endpos1 
+  esr->idx->lastcell = endpos1
                      = ACCESSENCSEQ(esr->encseq,endspecialsubsUint)[pagenum];
   if (esr->currentpos > 0)
   {
@@ -543,7 +543,8 @@ static GtUchar ADDTYPE(seqdelivercharSpecial)(GtEncseqReader *esr)
                                       esr->currentpos);
 }
 
-static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr)
+static unsigned long ADDTYPE(fwdgetnexttwobitencodingstopposViatables)(
+                                      GtEncseqReader *esr)
 {
   gt_assert(esr != NULL && esr->encseq != NULL &&
             satviautables(esr->encseq->sat));
@@ -572,7 +573,8 @@ static unsigned long ADDTYPE(fwdgetnextstopposViatables)(GtEncseqReader *esr)
   return esr->encseq->totallength;
 }
 
-static unsigned long ADDTYPE(revgetnextstopposViatables)(GtEncseqReader *esr)
+static unsigned long ADDTYPE(revgetnexttwobitencodingstopposViatables)(
+                                               GtEncseqReader *esr)
 {
   gt_assert(esr != NULL && esr->encseq != NULL &&
             satviautables(esr->encseq->sat));
@@ -658,7 +660,7 @@ static bool ADDTYPE(checknospecialrange)(const GtEncseq *encseq,
       if (found != NULL)
       {
         unsigned long rangeend
-               = (unsigned long) *found 
+               = (unsigned long) *found
                  + (unsigned long) ACCESSENCSEQ(encseq,specialrangelength)
                                                [(unsigned long) (found - start)]
                  + 1;
@@ -683,8 +685,8 @@ static bool ADDTYPE(checknospecialrange)(const GtEncseq *encseq,
       if (found != NULL)
       {
         unsigned long rangeend
-               = (unsigned long) ((MAXSPECIALTYPE+1) * pagenumber) 
-                 + (unsigned long) *found 
+               = (unsigned long) ((MAXSPECIALTYPE+1) * pagenumber)
+                 + (unsigned long) *found
                  + (unsigned long) ACCESSENCSEQ(encseq,specialrangelength)
                                                [(unsigned long) (found - start)]
                  + 1;
@@ -719,8 +721,8 @@ static bool ADDTYPE(checknospecialrange)(const GtEncseq *encseq,
         unsigned long rangeend;
 
         idx = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
-        rangeend = (unsigned long) ((MAXSPECIALTYPE+1) * (pagenumber-1)) 
-                   + (unsigned long)ACCESSENCSEQ(encseq,specialpositions)[idx] 
+        rangeend = (unsigned long) ((MAXSPECIALTYPE+1) * (pagenumber-1))
+                   + (unsigned long)ACCESSENCSEQ(encseq,specialpositions)[idx]
                    + (unsigned long)ACCESSENCSEQ(encseq,specialrangelength)[idx]
                    + 1;
         if (pos < rangeend)
