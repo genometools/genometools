@@ -34,14 +34,14 @@
            : (unsigned long) ((PTR) - blindtrie->spaceBlindtrienode))
 #endif
 
-#define ISLEAF(NODE)      blindtrie_isleaf(blindtrie,NODE)
+#define ISLEAF(NODE)      blindtrie_isleaf(NODE)
 #define ISNOTLEAF(NODE)   (!ISLEAF(NODE))
 #define SETLEAF(NODE,VAL) (NODE)->isleaf = VAL
                           /* Nothing: used for documentation purpose */
 
 typedef struct Blindtrienode
 {
-  unsigned long depth;
+  unsigned long internaldepth;
   struct Blindtrienode *rightsibling;
   union
   {
@@ -79,9 +79,21 @@ struct Blindtrie
   GtSuffixsortspace *sssp;
 };
 
-static bool blindtrie_isleaf(const Blindtrie *blindtrie,const Nodeptr node)
+static bool blindtrie_isleaf(const Nodeptr node)
 {
-  return (node != blindtrie->root && node->depth == 0) ? true : false;
+  return node->isleaf;
+}
+
+static unsigned long blindtrie_getdepth(const Nodeptr node)
+{
+  gt_assert(ISNOTLEAF(node));
+  return node->internaldepth;
+}
+
+static void blindtrie_setdepth(const Nodeptr node,unsigned long depth)
+{
+  gt_assert(ISNOTLEAF(node));
+  node->internaldepth = depth;
 }
 
 static bool blindtrie_isleftofboundary(const Blindtrie *blindtrie,
@@ -122,10 +134,9 @@ static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
   Blindtrienode *newleaf;
 
   newleaf = blindtrie_newnode(blindtrie);
-  newleaf->depth = 0;
+  SETLEAF(newleaf,true);
   newleaf->either.leafinfo.nodestartpos = currentstartpos;
   newleaf->either.leafinfo.nodestoppos = currenttwobitencodingstoppos;
-  SETLEAF(newleaf,true);
   newleaf->firstchar = firstchar;
   newleaf->rightsibling = rightsibling;
   return newleaf;
@@ -139,10 +150,10 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   unsigned long currenttwobitencodingstoppos;
 
   root = blindtrie_newnode(blindtrie);
-  root->depth = 0;
+  SETLEAF(root,false);
+  blindtrie_setdepth(root,0);
   root->firstchar = 0; /* undefined */
   root->rightsibling = NULL;
-  SETLEAF(root,false);
   if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
   {
     /* Random access */
@@ -175,8 +186,7 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   return root;
 }
 
-static inline Nodeptr blindtrie_extractleafnode(const Blindtrie *blindtrie,
-                                                Nodeptr head)
+static inline Nodeptr blindtrie_extractleafnode(Nodeptr head)
 {
   gt_assert(ISNOTLEAF(head));
   do
@@ -223,17 +233,19 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
 {
   GtUchar newchar;
   Nodeptr head, succ;
+  unsigned long headdepth;
 
   blindtrie->stack.nextfreeNodeptr = 0;
   head = blindtrie->root;
   while (ISNOTLEAF(head))
   {
     GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, head);
-    if (blindtrie_isleftofboundary(blindtrie,currentstartpos,head->depth))
+    headdepth = blindtrie_getdepth(head);
+    if (blindtrie_isleftofboundary(blindtrie,currentstartpos,headdepth))
     {
       /* Random access */
       newchar = gt_encseq_get_encoded_char(blindtrie->encseq,
-                                           currentstartpos + head->depth,
+                                           currentstartpos + headdepth,
                                            blindtrie->readmode);
       if (newchar == (GtUchar) WILDCARD)
       {
@@ -245,12 +257,12 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
     }
     if (ISSPECIAL(newchar))
     {
-      return blindtrie_extractleafnode(blindtrie,head);
+      return blindtrie_extractleafnode(head);
     }
     succ = blindtrie_findsucc(head->either.firstchild,newchar);
     if (succ == NULL)
     {
-      return blindtrie_extractleafnode(blindtrie,head);
+      return blindtrie_extractleafnode(head);
     }
     head = succ;
   }
@@ -270,22 +282,31 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
 
   gt_assert(ISSPECIAL(mm_oldsuffix) || ISSPECIAL(mm_newsuffix) ||
             mm_oldsuffix != mm_newsuffix || ISLEAF(oldnode) ||
-            oldnode->depth == lcp);
+            blindtrie_getdepth(oldnode) == lcp);
 
   /* insert a new node before node oldnode if necessary */
-  if (oldnode->depth != lcp)
+  if (ISLEAF(oldnode))
+  {
+    gt_assert(lcp > 0);
+  }
+  if (ISLEAF(oldnode) || blindtrie_getdepth(oldnode) != lcp)
   {
     newnode = blindtrie_newnode(blindtrie);
+    SETLEAF(newnode,ISLEAF(oldnode));
     newnode->firstchar = mm_oldsuffix;
-    newnode->depth = oldnode->depth; /* newnode inherits depth+children */
-    SETLEAF(newnode,oldnode->isleaf);
+    if (ISNOTLEAF(oldnode))
+    {
+      blindtrie_setdepth(newnode,blindtrie_getdepth(oldnode));
+      /* newnode inherits depth+children */
+    }
     newnode->either = oldnode->either;
     newnode->rightsibling = NULL;
-    oldnode->depth = lcp;
     SETLEAF(oldnode,false);
+    gt_assert(lcp > 0);
+    blindtrie_setdepth(oldnode,lcp);
     oldnode->either.firstchild = newnode; /* oldnode has newnode as only child*/
   }
-  gt_assert(oldnode->depth == lcp);
+  gt_assert(ISLEAF(oldnode) || blindtrie_getdepth(oldnode) == lcp);
   previous = NULL;
   current = oldnode->either.firstchild;
   while (current != NULL &&
@@ -436,7 +457,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
 {
   bool readyforpop = false, currentnodeisleaf;
   Nodeptr currentnode, siblval, lcpnode = blindtrie->root;
-  unsigned long nextfree = 0, equalsrangewidth = 0,
+  unsigned long nextfree = 0, equalsrangewidth = 0, lcpnodedepth,
                 bucketleftidxplussubbucketleft;
 
   blindtrie->stack.nextfreeNodeptr = 0;
@@ -447,36 +468,37 @@ static unsigned long blindtrie_enumeratetrieleaves (
     = gt_suffixsortspace_bucketleftidx_get(blindtrie->sssp) + subbucketleft;
   for (;;)
   {
+    lcpnodedepth = blindtrie_getdepth(lcpnode);
     if (currentnodeisleaf)
     {
       if (nextfree > 0)
       {
         if (lcpsubtab != NULL)
         {
-          lcpsubtab[nextfree] = lcpnode->depth + blindtrie->offset;
-          if (lcpnode->depth + blindtrie->offset >= (unsigned long) LCPOVERFLOW)
+          lcpsubtab[nextfree] = lcpnodedepth + blindtrie->offset;
+          if (lcpnodedepth + blindtrie->offset >= (unsigned long) LCPOVERFLOW)
           {
             (*numoflargelcpvalues)++;
           }
         }
         if (blindtrie->maxdepth > 0)
         {
-          if (lcpnode->depth + blindtrie->offset == blindtrie->maxdepth)
+          if (lcpnodedepth + blindtrie->offset == blindtrie->maxdepth)
           {
             equalsrangewidth++;
           } else
           {
 #ifndef NDEBUG
-            if (lcpnode->depth + blindtrie->offset >= blindtrie->maxdepth)
+            if (lcpnodedepth + blindtrie->offset >= blindtrie->maxdepth)
             {
               fprintf(stderr,"lcpnode.depth=%lu,offset=%lu,maxdepth=%lu\n",
-                              (unsigned long) lcpnode->depth,
-                              (unsigned long) blindtrie->offset,
-                              (unsigned long) blindtrie->maxdepth);
+                              lcpnodedepth,
+                              blindtrie->offset,
+                              blindtrie->maxdepth);
               exit(EXIT_FAILURE);
             }
 #endif
-            gt_assert(lcpnode->depth + blindtrie->offset < blindtrie->maxdepth);
+            gt_assert(lcpnodedepth + blindtrie->offset < blindtrie->maxdepth);
             if (equalsrangewidth > 0)
             {
               dc_processunsortedrange(
@@ -737,6 +759,8 @@ typedef void * QSORTNAME(Sorttype);
 
 #include "qsort-array.gen"
 
+unsigned long inverse_order = 0, no_order = 0, correct_order = 0;
+
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             unsigned long subbucketleft,
@@ -758,6 +782,7 @@ unsigned long gt_blindtrie_suffixsort(
   */
   if (ordertype == Noorder)
   {
+    no_order++;
     blindtrie->subbucketleft = subbucketleft;
     QSORTNAME(gt_inlinedarr_qsort_r) (NULL,numberofsuffixes,
                                       (void *) blindtrie);
@@ -768,12 +793,14 @@ unsigned long gt_blindtrie_suffixsort(
 #ifndef NDEBUG
       checksorting(blindtrie,subbucketleft,numberofsuffixes,false);
 #endif
+      inverse_order++;
       inplace_reverseSuffixptr(blindtrie,subbucketleft,numberofsuffixes);
     } else
     {
 #ifndef NDEBUG
       checksorting(blindtrie,subbucketleft,numberofsuffixes,true);
 #endif
+      correct_order++;
     }
   }
   gt_assert(maxdepth == 0 || maxdepth > offset);
@@ -831,7 +858,7 @@ unsigned long gt_blindtrie_suffixsort(
       for (stackidx=0;stackidx<blindtrie->stack.nextfreeNodeptr;stackidx++)
       {
         currentnode = blindtrie->stack.spaceNodeptr[stackidx];
-        if (ISLEAF(currentnode) || currentnode->depth >= lcp)
+        if (ISLEAF(currentnode) || blindtrie_getdepth(currentnode) >= lcp)
         {
           break;
         }
@@ -849,6 +876,9 @@ unsigned long gt_blindtrie_suffixsort(
 #endif
     } else
     {
+      /* the substrings of the current and all remaining begin with a
+         special character or are at position textlen. As the sequence of
+         suffixes is sorted by length, they are alread sorted. */
       break;
     }
   }
