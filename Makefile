@@ -434,7 +434,7 @@ endif
 lib/libgenometools.a: obj/gt_config.h  $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBGENOMETOOLS_OBJ)
+	@ar r $@ $(LIBGENOMETOOLS_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
