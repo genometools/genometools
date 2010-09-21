@@ -38,9 +38,9 @@
 #define GT_UNDEFTRANSNUM GT_NUMOFTRANSSCHEMES
 
 #define GT_INCONSISTENT(BASE)\
-        gt_log_log("code=%lu with wildcard %c: inconsistent " \
+        /*gt_log_log("code=%lu with wildcard %c: inconsistent " \
                    "aminoacids %c and %c",\
-                   (unsigned long) codeof2, wildcard, aa, newaa);\
+                   (unsigned long) codeof2, wildcard, aa, newaa);*/\
         return GT_AMINOACIDFAIL
 
 #define GT_ILLEGALCHAR(V)\
