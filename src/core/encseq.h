@@ -157,6 +157,8 @@ typedef struct
                 twobitencodingstoppos;
 } GtViatwobitkeyvalues;
 
+#define GT_TWOBITENCODINGSTOPPOSUNDEF(PTR) ((PTR)->totallength)
+
 void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,

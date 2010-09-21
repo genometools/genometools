@@ -3916,7 +3916,8 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
   }
   vtk->pos = pos + depth;
   vtk->currentpos = encseq->totallength; /* to have a defined value */
-  vtk->twobitencodingstoppos = encseq->totallength+1;  /* have defined value */
+  vtk->twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
+                               /* to have a defined value */
   if (vtk->pos < vtk->endpos)
   {
     bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
