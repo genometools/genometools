@@ -145,6 +145,9 @@ static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
   return newleaf;
 }
 
+unsigned long call_gt_encseq_get_encoded_char = 0,
+              call_gt_encseq_extract_encoded_char = 0;
+
 static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
                                   unsigned long currentstartpos)
 {
@@ -232,6 +235,8 @@ static Nodeptr blindtrie_findsucc(Nodeptr node,GtUchar newchar)
   }
 }
 
+unsigned long call_findcompanion = 0;
+
 static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
                                        unsigned long currentstartpos)
 {
@@ -241,6 +246,7 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
 
   blindtrie->stack.nextfreeNodeptr = 0;
   head = blindtrie->root;
+  call_findcompanion++;
   while (ISNOTLEAF(head))
   {
     GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, head);
@@ -248,6 +254,7 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,headdepth))
     {
       /* Random access */
+      call_gt_encseq_get_encoded_char++;
       newchar = gt_encseq_get_encoded_char(blindtrie->encseq,
                                            currentstartpos + headdepth,
                                            blindtrie->readmode);
@@ -425,6 +432,7 @@ static unsigned long blindtrie_twobitencoding_getlcp(
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {
+    call_gt_encseq_extract_encoded_char++;
     *mm_oldsuffix = gt_encseq_extract_encoded_char(blindtrie->encseq,
                                                    leafpos +
                                                      commonunits.finaldepth,
@@ -437,6 +445,7 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                  commonunits.finaldepth) &&
       !commonunits.rightspecial)
   {
+    call_gt_encseq_extract_encoded_char++;
     *mm_newsuffix = gt_encseq_extract_encoded_char(blindtrie->encseq,
                                                    currentstartpos +
                                                    commonunits.finaldepth,
