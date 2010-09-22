@@ -130,7 +130,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
     {
       printf("# Query %d sum of shulen:\n %.0f\n",
              (int) queryNo, avgShuLength);
-    }
+    } else
     {
       avgShuLength /= (double) queryLength;
       gc_query /= (double) queryLength;

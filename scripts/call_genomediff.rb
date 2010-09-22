@@ -25,11 +25,12 @@ require 'genomediff'
 
 GT_DIR = ENV['GTDIR']
 
-def gt_gdiff(subject, queries, debug, verbose)
+def gt_gdiff(subject, queries, debug, verbose, shulen_only)
   call = "#{GT_DIR}/bin/gt #{debug} \
              genomediff -pck #{subject} \
              -query #{queries}"
   call += " -v" if verbose
+  call += " -shulen" if shulen_only
   #puts call
   result = `#{call}`
   return result
@@ -45,6 +46,7 @@ options.detail = false
 options.search = true
 options.idx = true
 options.cores = 1
+options.shulen_only = false
 
 opt = OptionParser.new do |opt|
   opt.banner = "Usage #{$0} <inputfiles>\n
@@ -78,6 +80,9 @@ opt = OptionParser.new do |opt|
   opt.on_tail("-h", "--help", "print this help") do
     puts opt.help
     exit 0
+  end
+  opt.on("--shulen", "only calculate shulen") do
+    options.shulen_only = true
   end
 end
 
@@ -131,15 +136,15 @@ options.revfiles.each do |file|
     options.header.push line
   end
   queries = ""
-  (options.files-[file]).each do |query|
-    queries += query + " "
+  (options.revfiles-[file]).each do |query|
+    queries += query.sub('_plus_rev','') + " "
   end
 
   querycount = 0
-  if options.verbose
-    shu = true
-    div = true
-    gt_gdiff(subject, queries, options.debug, options.verbose).each do |line|
+  shu = true
+  div = true
+  gt_gdiff(subject, queries, options.debug, options.verbose, options.shulen_only).each do |line|
+    if options.verbose and !options.shulen_only
       puts line
       if querycount == subcount
         querycount +=1
@@ -147,40 +152,41 @@ options.revfiles.each do |file|
       next if line =~ /^#/
       next if line =~ /^debug/
       if shu
-        shulen[subcount][querycount] = line.to_f
+        shulen[querycount][subcount] = line.to_f
         shu = false
       elsif div
-        divergence[subcount][querycount] = line.to_f
+        divergence[querycount][subcount] = line.to_f
         div = false
       else
-        result[subcount][querycount] = line.to_f
+        result[querycount][subcount] = line.to_f
         querycount += 1
         shu = div = true
       end
-    end
-  else
-    gt_gdiff(subject, queries, options.debug, options.verbose).each do |line|
+    else
+      puts line if options.verbose
       if querycount == subcount
         querycount +=1
       end
       next if line =~ /^#/
       next if line =~ /^debug/
-      result[subcount][querycount] = line.to_f
+      result[querycount][subcount] = line.to_f
       querycount += 1
     end
   end
   subcount += 1
 end
 # only show conservative K_r
-0.upto(num-1) do |i|
-  0.upto(num-1) do |j|
-    if result[i][j] < result[j][i]
-      result[i][j] = result[j][i]
+if !options.shulen_only
+  0.upto(num-1) do |i|
+    0.upto(num-1) do |j|
+      if result[i][j] < result[j][i]
+        result[i][j] = result[j][i]
+      end
     end
   end
 end
 # detailed output
-if options.detail
+if options.detail and !options.shulen_only
   0.upto(num-1) do |i|
     0.upto(num-1) do |j|
       if divergence[i][j] < divergence[j][i]
@@ -191,7 +197,7 @@ if options.detail
   for array in [shulen, divergence, result]
     options.detail.print "         "
     1.upto(num) do |i|
-      options.detail.printf("%8d ", i)
+      options.detail.printf "%-10.10s ", options.header[i].chomp
     end
     options.detail.puts
     0.upto(num-1) do |i|
@@ -204,13 +210,23 @@ if options.detail
     options.detail.puts
     options.detail.puts
   end
-end
-# simple output
-puts num
-0.upto(num-1) do |i|
-  printf "%-10.10s ", options.header[i].chomp
-  0.upto(num-1) do |j|
-    printf "%8.6f ", result[i][j]
+elsif options.detail
+  options.detail.puts num
+  0.upto(num-1) do |i|
+    options.detail.printf "%-10.10s ", options.header[i].chomp
+    0.upto(num-1) do |j|
+      options.detail.printf "%d ", result[i][j].to_i
+    end
+    options.detail.puts
   end
-  puts
+else
+  # simple output
+  puts num
+  0.upto(num-1) do |i|
+    printf "%-10.10s ", options.header[i].chomp
+    0.upto(num-1) do |j|
+      printf "%8.6f ", result[i][j]
+    end
+    puts
+  end
 end
