@@ -41,11 +41,14 @@
 
 typedef struct Blindtrienode
 {
-  unsigned long internaldepth;
   struct Blindtrienode *rightsibling;
   union
   {
-    struct Blindtrienode *firstchild;
+    struct
+    {
+      struct Blindtrienode *firstchild;
+      unsigned long depth;
+    } internalinfo;
     struct
     {
       unsigned long nodestartpos,
@@ -87,13 +90,13 @@ static bool blindtrie_isleaf(const Nodeptr node)
 static unsigned long blindtrie_getdepth(const Nodeptr node)
 {
   gt_assert(ISNOTLEAF(node));
-  return node->internaldepth;
+  return node->either.internalinfo.depth;
 }
 
 static void blindtrie_setdepth(const Nodeptr node,unsigned long depth)
 {
   gt_assert(ISNOTLEAF(node));
-  node->internaldepth = depth;
+  node->either.internalinfo.depth = depth;
 }
 
 static bool blindtrie_isleftofboundary(const Blindtrie *blindtrie,
@@ -180,9 +183,10 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   {
     currenttwobitencodingstoppos = 0;
   }
-  root->either.firstchild = blindtrie_newleaf(blindtrie,currentstartpos,
-                                              currenttwobitencodingstoppos,
-                                              firstchar,NULL);
+  root->either.internalinfo.firstchild
+    = blindtrie_newleaf(blindtrie,currentstartpos,
+                        currenttwobitencodingstoppos,
+                        firstchar,NULL);
   return root;
 }
 
@@ -191,7 +195,7 @@ static inline Nodeptr blindtrie_extractleafnode(Nodeptr head)
   gt_assert(ISNOTLEAF(head));
   do
   {
-    head = head->either.firstchild;
+    head = head->either.internalinfo.firstchild;
   } while (ISNOTLEAF(head));
   return head;
 }
@@ -259,7 +263,7 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
     {
       return blindtrie_extractleafnode(head);
     }
-    succ = blindtrie_findsucc(head->either.firstchild,newchar);
+    succ = blindtrie_findsucc(head->either.internalinfo.firstchild,newchar);
     if (succ == NULL)
     {
       return blindtrie_extractleafnode(head);
@@ -304,11 +308,12 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
     SETLEAF(oldnode,false);
     gt_assert(lcp > 0);
     blindtrie_setdepth(oldnode,lcp);
-    oldnode->either.firstchild = newnode; /* oldnode has newnode as only child*/
+    /* oldnode has newnode as only child*/
+    oldnode->either.internalinfo.firstchild = newnode;
   }
   gt_assert(ISLEAF(oldnode) || blindtrie_getdepth(oldnode) == lcp);
   previous = NULL;
-  current = oldnode->either.firstchild;
+  current = oldnode->either.internalinfo.firstchild;
   while (current != NULL &&
          blindtrie_comparecharacters(current->firstchar,mm_newsuffix) < 0)
   {
@@ -325,7 +330,7 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
     previous->rightsibling = newleaf;
   } else
   {
-    oldnode->either.firstchild = newleaf;
+    oldnode->either.internalinfo.firstchild = newleaf;
   }
 }
 
@@ -462,7 +467,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
 
   blindtrie->stack.nextfreeNodeptr = 0;
   GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, blindtrie->root);
-  SETCURRENT(blindtrie->root->either.firstchild);
+  SETCURRENT(blindtrie->root->either.internalinfo.firstchild);
   gt_assert(blindtrie->maxdepth == 0 || dc_processunsortedrange != NULL);
   bucketleftidxplussubbucketleft
     = gt_suffixsortspace_bucketleftidx_get(blindtrie->sssp) + subbucketleft;
@@ -548,7 +553,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
       } else
       {
         GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, currentnode);
-        SETCURRENT (currentnode->either.firstchild);
+        SETCURRENT (currentnode->either.internalinfo.firstchild);
       }
     }
   }
@@ -633,7 +638,7 @@ static void gt_blindtrie_showintern(const Blindtrie *blindtrie,
           NODENUM(current),
           (unsigned int) current->firstchar,
           current->depth,
-          NODENUM(current->either.firstchild),
+          NODENUM(current->either.internalinfo.firstchild),
           NODENUM(current->rightsibling));
 }
 
@@ -643,7 +648,7 @@ static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
 {
   Nodeptr current;
 
-  for (current = node->either.firstchild;
+  for (current = node->either.internalinfo.firstchild;
        current != NULL;
        current = current->rightsibling)
   {
