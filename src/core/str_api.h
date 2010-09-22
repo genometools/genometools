@@ -42,7 +42,8 @@ void          gt_str_set(GtStr *str, const char *cstr);
 void          gt_str_append_str(GtStr *dest, const GtStr *src);
 /* Append the <\0>-terminated <cstr> to <str>. */
 void          gt_str_append_cstr(GtStr *str, const char *cstr);
-/* Append the non <\0>-terminated <cstr> with given <length> to <str>. */
+/* Append the (not necessarily <\0>-terminated) <cstr> with given <length> to
+   <str>. */
 void          gt_str_append_cstr_nt(GtStr *str,
                                     const char *cstr, unsigned long length);
 /* Append character <c> to <str>. */
