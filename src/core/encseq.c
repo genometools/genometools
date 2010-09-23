@@ -217,6 +217,7 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
   return encseq->numofdbsequences;
 }
 
+#undef WITHshowgetencodedcharcounters
 #ifdef WITHshowgetencodedcharcounters
 static uint64_t countgt_encseq_get_encoded_char = 0;
 #endif
@@ -355,14 +356,14 @@ struct GtEncseqReader
 
 #ifndef INLINEDENCSEQ
 #ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encseq_get_encoded_char = 0;
+static uint64_t countgt_encseq_reader_next_encoded_char = 0;
 #endif
 
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
   GtUchar cc;
 #ifdef WITHshowgetencodedcharcounters
-  countgt_encseq_get_encoded_char++;
+  countgt_encseq_reader_next_encoded_char++;
 #endif
   gt_assert(esr && esr->currentpos < esr->encseq->totallength);
   switch (esr->readmode)
@@ -396,6 +397,8 @@ void showgetencodedcharcounters(void)
 {
   printf("calls of gt_encseq_get_encoded_char = " Formatuint64_t "\n",
           PRINTuint64_tcast(countgt_encseq_get_encoded_char));
+  printf("calls of gt_encseq_reader_next_encoded_char = " Formatuint64_t "\n",
+          PRINTuint64_tcast(countgt_encseq_reader_next_encoded_char));
 }
 #endif
 

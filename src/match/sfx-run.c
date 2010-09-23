@@ -641,9 +641,7 @@ static int runsuffixerator(bool doesa,
 extern unsigned long correct_order;
 extern unsigned long inverse_order;
 extern unsigned long no_order;
-extern unsigned long call_gt_encseq_get_encoded_char;
-extern unsigned long call_gt_encseq_extract_encoded_char;
-extern unsigned long call_findcompanion;
+void showgetencodedcharcounters(void);
 
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                 const char **argv,GtError *err)
@@ -667,7 +665,6 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
     }
     gt_logger_delete(logger);
     logger = NULL;
-    /*showgetencodedcharcounters(); */
   } else
   {
     if (retval < 0)
@@ -677,18 +674,12 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
   }
   gt_wrapsfxoptions(&so);
 /*
+  showgetencodedcharcounters();
   printf("countgt_encseq_compare_viatwobitencoding=%lu\n",
           countgt_encseq_compare_viatwobitencoding_get());
   printf("# inverse_order = %lu\n",inverse_order);
   printf("# no_order = %lu\n",no_order);
   printf("# correct_order = %lu\n",correct_order);
-  printf("# call_gt_encseq_get_encoded_char = %lu\n",
-          call_gt_encseq_get_encoded_char);
-  printf("# call_findcompanion = %lu (%.2f)\n",call_findcompanion,
-                         (double)
-                         call_gt_encseq_get_encoded_char/call_findcompanion);
-  printf("# call_gt_encseq_extract_encoded_char = %lu\n",
-          call_gt_encseq_extract_encoded_char);
 */
   return haserr ? -1 : 0;
 }
