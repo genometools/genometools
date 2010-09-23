@@ -141,6 +141,10 @@ static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
   SETLEAF(newleaf,true);
   newleaf->either.leafinfo.nodestartpos = currentstartpos;
   newleaf->either.leafinfo.nodestoppos = currenttwobitencodingstoppos;
+  /*
+  printf("insert %lu %lu\n",currentstartpos,
+                            currenttwobitencodingstoppos);
+  */
   newleaf->firstchar = firstchar;
   newleaf->rightsibling = rightsibling;
   return newleaf;
@@ -260,23 +264,15 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
       call_gt_encseq_get_encoded_char++;
       if (blindtrie->has_twobitencoding_stoppos_support)
       {
-        if (currentstartpos + headdepth < currenttwobitencodingstoppos)
+        if ((GT_ISDIRREVERSE(blindtrie->readmode) &&
+            GT_REVERSEPOS(blindtrie->totallength,currentstartpos+headdepth)
+            >= currenttwobitencodingstoppos) ||
+            (!GT_ISDIRREVERSE(blindtrie->readmode) &&
+             currentstartpos + headdepth < currenttwobitencodingstoppos))
         {
-          /* GtUchar newchar2; */
-          newchar = gt_encseq_get_encoded_char(blindtrie->encseq,
-                                               currentstartpos + headdepth,
-                                               blindtrie->readmode);
-          /*
-          newchar2 = gt_encseq_extract_encoded_char(blindtrie->encseq,
-                                               currentstartpos + headdepth,
-                                               blindtrie->readmode);
-          if (newchar != newchar2)
-          {
-            fprintf(stderr,"newchar = %u != %u =  newchar2\n",
-                    newchar,newchar2);
-            exit(EXIT_FAILURE);
-          }
-          */
+          newchar = gt_encseq_extract_encoded_char(blindtrie->encseq,
+                                                   currentstartpos + headdepth,
+                                                   blindtrie->readmode);
         } else
         {
           newchar = (GtUchar) SEPARATOR;
@@ -626,7 +622,7 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   */
   blindtrie->nextfreeBlindtrienode = 0;
   blindtrie->encseq = encseq;
-  blindtrie->has_twobitencoding_stoppos_support 
+  blindtrie->has_twobitencoding_stoppos_support
     = gt_has_twobitencoding_stoppos_support(encseq);
   blindtrie->readmode = readmode;
   blindtrie->sssp = suffixsortspace;

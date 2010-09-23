@@ -685,7 +685,7 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
   printf("# call_gt_encseq_get_encoded_char = %lu\n",
           call_gt_encseq_get_encoded_char);
   printf("# call_findcompanion = %lu (%.2f)\n",call_findcompanion,
-                         (double) 
+                         (double)
                          call_gt_encseq_get_encoded_char/call_findcompanion);
   printf("# call_gt_encseq_extract_encoded_char = %lu\n",
           call_gt_encseq_extract_encoded_char);
