@@ -60,7 +60,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
 
   gt_option_parser_set_mailaddress (op, "<kurtz@zbh.uni-hamburg.de>");
   option = gt_option_new_filename("m","Specify file containing the matches\n"
-                                  "mandatory options",
+                                  "mandatory option",
                                   arguments->matchfile);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory (option);
