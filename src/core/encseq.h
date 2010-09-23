@@ -111,7 +111,7 @@ bool gt_encseq_has_specialranges(const GtEncseq *encseq);
 bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq);
 
 /* Return the integer code of the sequence of length <prefixlength>
-  beginning at position <frompos> represetned by <encseq>. <esr> is
+  beginning at position <frompos> represented by <encseq>. <esr> is
   used for efficiently scanning the sequence of symbols. <filltable>
   and <multimappower> are used for completing the integer code
   in cases where prefix of length <prefixlength> contains a special
@@ -128,15 +128,14 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
 /* The following function compares two substrings beginning
   at position <pos1>+<depth> and <pos2>+<depth> in <encseq>.
   <esr1> and <esr2> refer to memory areas for storeing a GtEncseqReader.
-  The information about the length
-  of the longest common prefix is stored in <commonunits>. <fwd> and
-  <complement> specify if the sequence is scanned in forward direction
-  and if the complement of the sequence is to be considered. The
-  return value is -1, 0 or 1 depending on whether the sequence beginning at
-  position <pos1>+<depth> is smaller than, equal to, or larger than the
-  sequence beginning at position <pos2>+<depth>. If <madepth> is 0, then the
-  entire suffixes are compared. Otherwise, the comparison is restricted to
-  the prefixes of length <maxdepth>. */
+  The information about the length of the longest common prefix is stored
+  in <commonunits>. <fwd> and <complement> specify if the sequence is
+  scanned in forward direction and if the complement of the sequence is to
+  be considered. Thereturn value is -1, 0 or 1 depending on whether the
+  sequence beginning at position <pos1>+<depth> is smaller than, equal to,
+  or larger than the sequence beginning at position <pos2>+<depth>.
+  If <madepth> is 0, then the entire suffixes are compared. Otherwise, the
+  comparison is restricted to the prefixes of length <maxdepth>. */
 int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
@@ -194,8 +193,8 @@ void gt_encseq_extract2bitencwithtwobitencodingstoppos(
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
   done in forward direction iff <fwd> is true.
-  The comparison is done for the complemented characters
-  iff <complement> is true. */
+  The comparison is done for the complemented characters iff <complement>
+  is true. */
 int gt_encseq_compare_pairof_twobitencodings(bool fwd,
                                              bool complement,
                                              GtCommonunits *commonunits,
@@ -205,16 +204,16 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
 
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.
-  <esr> refer to a memory areas for storeing a
-  GtEncseqReader. <moveforward> is true if and only if the
-  scanning is done in forward direction. */
+  <esr> refers to a memory area for storing a GtEncseqReader.
+  <moveforward> is true if and only if the scanning is done in forward
+  direction. */
 bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 unsigned long startpos,
                                 unsigned long len);
 
-/* Returns the sequence number from the given <position> for an array of of
+/* Returns the sequence number from the given <position> for an array of
   SEPARATOR positions <recordseps>.  */
 unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
                                    unsigned long numofrecords,
@@ -326,8 +325,8 @@ int gt_encseq_builder_unit_test(GtError *err);
   The length of the longest common prefix is stored in <maxlcp>.
   <specialsareequal> specifies if special symbols are considered equal
   during pairwise character comparisons. <specialsareequalatdepth0> specifies
-  if special symbols occurring as first symbols of the suffixes
-  are considered equal  during pairwise character comparisons.
+  if special symbols occurring as first symbols of the suffixes are considered
+  equal during pairwise character comparisons.
   The return value is -1, 0 or 1 depending on whether the sequence beginning at
   position <start1> is smaller than, equal to, or larger than the sequence
   beginning at position <start2>. */
@@ -361,7 +360,7 @@ int gt_encseq_check_specialranges(const GtEncseq *encseq);
   the extracted symbols to those obtained by directly reading the files.
   Additional, <scantrials> many trials are performed each reading character
   by character starting at some random position and scanning until
-  the end of the sequence, while comparing the extraced character
+  the end of the sequence, while comparing the extracted character
   to the characters extracted by random access. Finally <multicharcmptrials>
   trials are performed each checking the validity of a multicharacter
   extraction.  */
@@ -374,7 +373,6 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 GtError *err);
 
 /* the following function returns a count value */
-
 unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
 
 #endif
