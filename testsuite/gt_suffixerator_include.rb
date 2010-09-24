@@ -137,7 +137,7 @@ Keywords "gt_suffixerator_reads"
 Test do
   run_test "#{$bin}/gt suffixerator -des -tis -ssp -dna " +
            "-db #{$testdata}U89959_genomic.fas -indexname u8idx"
-  run_test "#{$bin}/gt simreads -coverage 10 -len 100 -force -o u8.reads u8idx"
+  run_test "#{$bin}/gt simreads -coverage 4 -len 100 -force -o u8.reads u8idx"
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dna -db u8.reads"
   run "grep -q '# init character encoding (eqlen ' #{$last_stdout}"
   run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads", \
