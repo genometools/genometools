@@ -21,6 +21,9 @@ module GT
   class GTError < RuntimeError
   end
 
+  # this is needed because DL is unaware of the native ulong size
+  NATIVEULONGSIZE = [0].pack('L!').size
+
   def GT.gterror(err)
     if err.class == GT::Error then
       raise GTError, "GenomeTools error: #{err.get}"

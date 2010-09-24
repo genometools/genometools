@@ -88,29 +88,34 @@ module GT
   typealias "GtUchar", "unsigned char"
   typealias "GtUlong", "unsigned long"
   typealias "GtReadmode", "int"
-  extern "unsigned long gt_encseq_total_length(const GtEncseq*)"
-  extern "unsigned long gt_encseq_num_of_sequences(const GtEncseq*)"
-  extern "GtUchar gt_encseq_get_encoded_char(const GtEncseq*, unsigned long,
-                                             GtReadmode)"
-  extern "char gt_encseq_get_decoded_char(const GtEncseq*, unsigned long,
-                                          GtReadmode)"
-  extern "void gt_encseq_extract_substring(const GtEncseq*, GtUchar*,
-                                           unsigned long, unsigned long)"
-  extern "void gt_encseq_extract_decoded(const GtEncseq*, void*,
-                                         unsigned long, unsigned long)"
-  extern "unsigned long gt_encseq_seqlength(const GtEncseq*, unsigned long)"
-  extern "unsigned long gt_encseq_seqstartpos(const GtEncseq *, unsigned long)"
-  extern "void* gt_encseq_description(const GtEncseq*, unsigned long*,
-                                      unsigned long)"
-  extern "GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq*,
-                                                                GtReadmode,
-                                                                unsigned long)"
+  extern "void gt_encseq_total_length_p(const GtEncseq*, unsigned long*)"
+  extern "void gt_encseq_num_of_sequences_p(const GtEncseq*, unsigned long*)"
+  extern "GtUchar gt_encseq_get_encoded_char_p(const GtEncseq*,
+                                               unsigned long*,
+                                               GtReadmode)"
+  extern "char gt_encseq_get_decoded_char_p(const GtEncseq*,
+                                            unsigned long*,
+                                            GtReadmode)"
+  extern "void gt_encseq_extract_substring_p(const GtEncseq*, GtUchar*,
+                                           GtRange*)"
+  extern "void gt_encseq_extract_decoded_p(const GtEncseq*, void*,
+                                         GtRange*)"
+  extern "void gt_encseq_seqlength_p(const GtEncseq*, unsigned long*,
+                                   unsigned long*)"
+  extern "void gt_encseq_seqstartpos_p(const GtEncseq *, unsigned long*,
+                                     unsigned long*)"
+  extern "void* gt_encseq_description_p(const GtEncseq*, unsigned long*,
+                                      unsigned long*)"
+  extern "GtEncseqReader*
+            gt_encseq_create_reader_with_readmode_p(const GtEncseq*,
+                                                    GtReadmode,
+                                                    unsigned long*)"
   extern "GtAlphabet* gt_encseq_alphabet(const GtEncseq*)"
   extern "const GtStrArray* gt_encseq_filenames(const GtEncseq*)"
-  extern "unsigned long gt_encseq_num_of_files(const GtEncseq*)"
-  extern "void gt_encseq_effective_filelength_ptr(const GtEncseq*,
-                                                  void*,
-                                                  unsigned long)"
+  extern "void gt_encseq_num_of_files_p(const GtEncseq*, unsigned long*)"
+  extern "void gt_encseq_effective_filelength_p(const GtEncseq*,
+                                                void*,
+                                                unsigned long*)"
   extern "void gt_encseq_delete(GtEncseq*)"
 
   extern "GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader*)"
@@ -426,11 +431,15 @@ module GT
     end
 
     def num_of_sequences
-      return GT.gt_encseq_num_of_sequences(@encseq)
+      n = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_num_of_sequences_p(@encseq, n)
+      return n[0, n.size].unpack("L!")[0]
     end
 
     def num_of_files
-      return GT.gt_encseq_num_of_files(@encseq)
+      n = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_num_of_files_p(@encseq, n)
+      return  n[0, n.size].unpack("L!")[0]
     end
 
     def description(num)
@@ -438,10 +447,12 @@ module GT
       if num >= self.num_of_sequences then
         GT.gterror("invalid sequence number #{num}")
       end
-      len = UlongParam.malloc
-      charptr = GT.gt_encseq_description(@encseq, len, num)
-      if len.val > 0 and charptr != GT::NULL then
-        charptr.to_s(len.val)
+      len = DL::malloc(GT::NATIVEULONGSIZE)
+      n = [num.to_i].pack("L!")
+      charptr = GT.gt_encseq_description_p(@encseq, len, n)
+      lval = len[0, len.size].unpack("L!")[0]
+      if lval > 0 and charptr != GT::NULL then
+        charptr.to_s(lval)
       else
         ""
       end
@@ -451,18 +462,22 @@ module GT
       if readmode < 0 or readmode > 3 then
           GT.gterror("invalid readmode!")
       end
-      return GT.gt_encseq_get_encoded_char(@encseq, pos, readmode)
+      p = [pos.to_i].pack("L!")
+      return GT.gt_encseq_get_encoded_char_p(@encseq, p, readmode)
     end
 
     def get_decoded_char(pos, readmode = GT::READMODE_FORWARD)
       if readmode < 0 or readmode > 3 then
           GT.gterror("invalid readmode!")
       end
-      return GT.gt_encseq_get_decoded_char(@encseq, pos, readmode)
+      p = [pos.to_i].pack("L!")
+      return GT.gt_encseq_get_decoded_char_p(@encseq, p, readmode)
     end
 
     def total_length
-      GT.gt_encseq_total_length(@encseq)
+      n = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_total_length_p(@encseq, n)
+      return n[0, n.size].unpack("L!")[0]
     end
 
     def alphabet
@@ -478,16 +493,21 @@ module GT
       if num >= self.num_of_sequences then
         GT.gterror("invalid sequence number #{num}")
       end
-      GT.gt_encseq_seqlength(@encseq, num)
+      n = [num.to_i].pack("L!")
+      l = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_seqlength_p(@encseq, n, l)
+      return l[0, l.size].unpack("L!")[0]
     end
 
     def file_effective_length(num)
       if num >= self.num_of_files then
         GT.gterror("invalid file number #{num}")
       end
+      n = UlongParam.malloc
+      n.val = num.to_i
       # 64-bit size hardcoded
       res = DL::malloc(8)
-      GT.gt_encseq_effective_filelength_ptr(@encseq, res, num)
+      GT.gt_encseq_effective_filelength_p(@encseq, res, n)
       # 64-bit size hardcoded
       res[0, 8].unpack("Q")[0]
     end
@@ -496,7 +516,10 @@ module GT
       if num >= self.num_of_sequences then
         GT.gterror("invalid sequence number #{num}")
       end
-      GT.gt_encseq_seqstartpos(@encseq, num)
+      n = [num.to_i].pack("L!")
+      l = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_seqstartpos_p(@encseq, n, l)
+      return l[0, l.size].unpack("L!")[0]
     end
 
     def create_reader(readmode, startpos)
@@ -507,8 +530,8 @@ module GT
         gterror("invalid start position: #{startpos} " + \
                 "(allowed: 0-#{total_length-1})")
       end
-      er_ptr = GT.gt_encseq_create_reader_with_readmode(@encseq, readmode, \
-                                                        startpos)
+      p = [startpos.to_i].pack("L!")
+      er_ptr = GT.gt_encseq_create_reader_with_readmode_p(@encseq, readmode, p)
       return EncseqReader.new(er_ptr)
     end
 
@@ -523,8 +546,8 @@ module GT
                 "(allowed: #{0}-#{seqlength-1})")
       end
       buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
-      GT.gt_encseq_extract_substring(@encseq, buf, seqstartpos+start, \
-                                     seqstartpos+stop)
+      r = GT::Range.new(seqstartpos+start, seqstartpos+stop)
+      GT.gt_encseq_extract_substring_p(@encseq, buf, r)
       buf.to_a('C')
     end
 
@@ -539,8 +562,8 @@ module GT
                 "(allowed: #{0}-#{seqlength-1})")
       end
       buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
-      GT.gt_encseq_extract_decoded(@encseq, buf, seqstartpos+start, \
-                                   seqstartpos+stop)
+      r = GT::Range.new(seqstartpos+start, seqstartpos+stop)
+      GT.gt_encseq_extract_decoded_p(@encseq, buf, r)
       buf.to_s(stop-start+1)
     end
   end
