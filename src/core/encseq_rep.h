@@ -94,8 +94,10 @@ struct GtEncseq
        has_ssptabnew;
   unsigned long totallength,
                 *totallengthptr,
+                logicaltotallength,
                 numofdbsequences,
-                *numofdbsequencesptr, /* need for writing numofdbsequences */
+                *numofdbsequencesptr,    /* need for writing numofdbsequences */
+                logicalnumofdbsequences,
                 numofdbfiles,
                 *numofdbfilesptr,
                 lengthofdbfilenames,
@@ -171,5 +173,7 @@ struct GtEncseq
 
   unsigned long reference_count;
   GtMutex *refcount_lock;
+
+  bool hasmirror;
 };
 #endif

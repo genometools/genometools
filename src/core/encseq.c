@@ -46,6 +46,7 @@
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/types_api.h"
+#include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/mapspec-gen.h"
@@ -99,6 +100,22 @@
 
 #define GT_TWOBITS_FOR_WILDCARD  0
 #define GT_TWOBITS_FOR_SEPARATOR 1
+
+#define INVERTREADMODE(readmode)\
+        switch (readmode) {\
+          case GT_READMODE_FORWARD:\
+            readmode = GT_READMODE_REVCOMPL;\
+            break;\
+          case GT_READMODE_REVERSE:\
+            readmode = GT_READMODE_COMPL;\
+            break;\
+          case GT_READMODE_COMPL:\
+            readmode = GT_READMODE_REVERSE;\
+            break;\
+          case GT_READMODE_REVCOMPL:\
+            readmode = GT_READMODE_FORWARD;\
+            break;\
+        }
 
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                  const GtUchar *seq,
@@ -195,12 +212,12 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
 #ifndef GT_INLINEDENCSEQ
 unsigned long gt_encseq_total_length(const GtEncseq *encseq)
 {
-  return encseq->totallength;
+  return encseq->logicaltotallength;
 }
 
 unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
 {
-  return encseq->numofdbsequences;
+  return encseq->logicalnumofdbsequences;
 }
 
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
@@ -213,11 +230,23 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                    unsigned long pos,
                                    GtReadmode readmode)
 {
-  gt_assert(pos < encseq->totallength);
+  gt_assert(pos < encseq->logicaltotallength);
+  /* translate into forward coords */
   if (GT_ISDIRREVERSE(readmode))
   {
-    pos = GT_REVERSEPOS(encseq->totallength,pos);
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
   }
+  /* handle virtual coordinates */
+  if (encseq->hasmirror) {
+    if (pos > encseq->totallength) {
+      /* invert coordinates and readmode */
+      INVERTREADMODE(readmode)
+      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
+    } else if (pos == encseq->totallength) {
+      return (GtUchar) SEPARATOR;
+    }
+  }
+  gt_assert(pos < encseq->totallength);
   if (encseq->twobitencoding != NULL)
   {
     unsigned long twobits;
@@ -277,7 +306,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
     gt_assert(!GT_ISDIRCOMPLEMENT(readmode));
-    return delivercharViabytecompress(encseq,pos);
+    return delivercharViabytecompress(encseq, pos);
   } else
   {
     GtUchar cc;
@@ -302,6 +331,15 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode)
 {
+  gt_assert(pos < encseq->logicaltotallength);
+  if (encseq->hasmirror) {
+    if (pos > encseq->totallength) {
+      INVERTREADMODE(readmode)
+      pos = MAX(0, (pos % (encseq->totallength + 1)));
+    } else if (pos == encseq->totallength) {
+      return (GtUchar) SEPARATOR;
+    }
+  }
   gt_assert(pos < encseq->totallength);
   if (GT_ISDIRREVERSE(readmode))
   {
@@ -355,17 +393,61 @@ typedef struct {
 struct GtEncseqReader
 {
   GtEncseq *encseq;
-  GtReadmode readmode;
+  GtReadmode readmode,
+             originalreadmode;   /* only important for mirroring */
   unsigned long currentpos;
+  bool startedonmiddle;
   GtEncseqReaderViatablesinfo *wildcardrangestate,
                               *ssptabnewstate;
 };
+
+typedef enum
+{
+  SWtable_wildcardrange,
+  SWtable_ssptabnew
+} KindofSWtable;
+
+static void advancerangeGtEncseqReader(GtEncseqReader *esr,
+                                       KindofSWtable kindsw);
+
+static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
+                                              KindofSWtable kindsw);
 
 #ifndef INLINEDENCSEQ
 
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
   GtUchar cc;
+  gt_assert(esr->encseq
+              && esr->currentpos < esr->encseq->logicaltotallength);
+  /* if we have mirroring enabled, we need to check whether we cross the
+     boundary between real and virtual sequences, turn around if necessary */
+  if (esr->encseq->hasmirror && esr->currentpos == esr->encseq->totallength) {
+    if (!esr->startedonmiddle) {
+      /* only turn around if we arrived from complementary side */
+      INVERTREADMODE(esr->readmode);
+    }
+    /* from now on, we can only go backwards on the original sequence! */
+    gt_assert(GT_ISDIRREVERSE(esr->readmode));
+    /* go back */
+    esr->currentpos--;
+    /* XXX: replace this with gt_encseq_access_type_isviatables() */
+    if (esr->encseq->sat >= GT_ACCESS_TYPE_UCHARTABLES
+          && esr->encseq->sat != GT_ACCESS_TYPE_UNDEFINED) {
+      /* prepare esr for directional change */
+      if (esr->encseq->has_wildcardranges) {
+        gt_assert(esr->wildcardrangestate != NULL);
+        binpreparenextrangeGtEncseqReader(esr, SWtable_wildcardrange);
+        advancerangeGtEncseqReader(esr, SWtable_wildcardrange);
+      }
+      if (esr->encseq->numofdbsequences > 1UL) {
+        gt_assert(esr->ssptabnewstate != NULL);
+        binpreparenextrangeGtEncseqReader(esr, SWtable_ssptabnew);
+        advancerangeGtEncseqReader(esr, SWtable_ssptabnew);
+      }
+    }
+    return (GtUchar) SEPARATOR;
+  }
   gt_assert(esr && esr->currentpos < esr->encseq->totallength);
 
   switch (esr->readmode)
@@ -814,7 +896,9 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   if (!haserr)
   {
     encseq->totallength = *encseq->totallengthptr;
+    encseq->logicaltotallength = encseq->totallength;
     encseq->numofdbsequences = *encseq->numofdbsequencesptr;
+    encseq->logicalnumofdbsequences = encseq->numofdbsequences;
     encseq->numofdbfiles = *encseq->numofdbfilesptr;
     encseq->lengthofdbfilenames = *encseq->lengthofdbfilenamesptr;
     encseq->specialcharinfo = *encseq->specialcharinfoptr;
@@ -1238,12 +1322,6 @@ void gt_encseq_delete(GtEncseq *encseq)
   gt_free(encseq);
 }
 
-typedef enum
-{
-  SWtable_wildcardrange,
-  SWtable_ssptabnew
-} KindofSWtable;
-
 static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
                                                   KindofSWtable kindsw)
 {
@@ -1261,9 +1339,6 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
   return NULL;
 #endif
 }
-
-static void advancerangeGtEncseqReader(GtEncseqReader *esr,
-                                       KindofSWtable kindsw);
 
 #define GT_APPENDINT(V)          V##_uchar
 #define GT_SPECIALTABLETYPE      GtUchar
@@ -1692,7 +1767,7 @@ static unsigned long gt_encseq_seqstartpos_Viaequallength(
                                                   const GtEncseq *encseq,
                                                   unsigned long seqnum)
 {
-  gt_assert(encseq != NULL && seqnum < encseq->numofdbsequences);
+  gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
   return seqnum * (encseq->equallength.valueunsignedlong + 1);
 }
 
@@ -2070,11 +2145,63 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
     esr->encseq = gt_encseq_ref((GtEncseq*) encseq);
   }
   gt_assert(esr->encseq);
-  esr->readmode = readmode;
-  gt_assert(startpos < encseq->totallength);
-  esr->currentpos
-    = GT_ISDIRREVERSE(readmode) ? GT_REVERSEPOS(encseq->totallength,startpos)
-                                : startpos;
+
+  /* translate reverse positions into forward positions */
+  startpos = GT_ISDIRREVERSE(readmode)
+               ? GT_REVERSEPOS(encseq->logicaltotallength, startpos)
+               : startpos;
+
+  /* if inside virtual mirror sequence, adjust start position and reading
+     direction */
+  if (encseq->hasmirror) {
+    if (startpos >= encseq->totallength) {
+      switch (readmode) {
+        case GT_READMODE_FORWARD:
+          if (startpos != encseq->totallength) {
+            readmode = GT_READMODE_REVCOMPL;
+            startpos = GT_REVERSEPOS(encseq->totallength,
+                                     startpos - encseq->totallength - 1);
+          } else {
+            readmode = GT_READMODE_REVCOMPL;
+            esr->startedonmiddle = true;
+          }
+          break;
+        case GT_READMODE_REVERSE:
+          if (startpos != encseq->totallength) {
+            readmode = GT_READMODE_COMPL;
+            startpos = GT_REVERSEPOS(encseq->totallength,
+                                     startpos - encseq->totallength - 1);
+          }  else {
+            readmode = GT_READMODE_REVERSE;
+            esr->startedonmiddle = true;
+          }
+          break;
+        case GT_READMODE_COMPL:
+          if (startpos != encseq->totallength) {
+            readmode = GT_READMODE_REVERSE;
+            startpos = GT_REVERSEPOS(encseq->totallength,
+                                     startpos - encseq->totallength - 1);
+          } else {
+            readmode = GT_READMODE_REVERSE;
+            esr->startedonmiddle = true;
+          }
+          break;
+        case GT_READMODE_REVCOMPL:
+          if (startpos != encseq->totallength) {
+            readmode = GT_READMODE_FORWARD;
+            startpos = GT_REVERSEPOS(encseq->totallength,
+                                     startpos - encseq->totallength - 1);
+          } else {
+            readmode = GT_READMODE_REVCOMPL;
+            esr->startedonmiddle = true;
+          }
+          break;
+      }
+    }
+  }
+  gt_assert(startpos <= encseq->totallength);
+  esr->readmode = esr->originalreadmode = readmode;
+  esr->currentpos = startpos;
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
     /* Do not need this in once all is done by wildcards */
@@ -2791,34 +2918,79 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
 unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
                                unsigned long position)
 {
+  unsigned long num;
+  bool wasmirrored = false;
+  if (encseq->hasmirror && position >= encseq->totallength) {
+    position = encseq->totallength - position;
+    wasmirrored = true;
+  }
+  gt_assert(position < encseq->totallength);
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
     gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-    return gt_encseq_sep2seqnum(encseq->ssptab,
+    num = gt_encseq_sep2seqnum(encseq->ssptab,
                                 encseq->numofdbsequences,
                                 encseq->totallength,
                                 position);
+  } else {
+    num = gt_encseq_seqnum_Viaequallength(encseq,position);
   }
-  return gt_encseq_seqnum_Viaequallength(encseq,position);
+  if (wasmirrored) {
+    num = encseq->logicalnumofdbsequences - num;
+  }
+  return num;
 }
 
 unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
                                     unsigned long seqnum)
 {
+  unsigned long pos;
+  bool wasmirrored = false;
+  if (encseq->hasmirror && seqnum >= encseq->numofdbsequences) {
+    seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
+    wasmirrored = true;
+  }
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
-    if (seqnum > 0)
-    {
-      return encseq->ssptab[seqnum-1] + 1;
+    gt_assert(encseq->logicalnumofdbsequences == 1UL
+                || encseq->ssptab != NULL);
+    pos = (seqnum > 0 ? encseq->ssptab[seqnum-1] + 1 : 0);
+    if (wasmirrored) {
+      if (pos == 0) {
+        pos = encseq->logicaltotallength - encseq->ssptab[0];
+      } else {
+        unsigned long val;
+        if (seqnum == encseq->numofdbsequences - 1)
+          val = encseq->totallength - 1;
+        else
+          val = encseq->ssptab[seqnum] - 1;
+        pos = encseq->logicaltotallength - val - 1;
+      }
     }
-    return 0;
+  } else {
+    pos = seqnum > 0 ? gt_encseq_seqstartpos_Viaequallength(encseq, seqnum) : 0;
+    if (wasmirrored) {
+      if (pos == 0) {
+        pos = encseq->logicaltotallength + 1
+                - gt_encseq_seqstartpos_Viaequallength(encseq, 1UL);
+      } else {
+        unsigned long val;
+        if (seqnum == encseq->numofdbsequences - 1)
+          val = encseq->totallength - 1;
+        else
+          val = gt_encseq_seqstartpos_Viaequallength(encseq, seqnum + 1) - 2;
+        pos = encseq->logicaltotallength - val - 1;
+      }
+    }
   }
-  return gt_encseq_seqstartpos_Viaequallength(encseq,seqnum);
+  return pos;
 }
 
 unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
 {
+  if (seqnum >= encseq->numofdbsequences) {
+    seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
+  }
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
     unsigned long startpos;
@@ -2858,7 +3030,7 @@ void gt_encseq_check_markpos(const GtEncseq *encseq)
     GtEncseqReader *esr;
 
     markpos = encseq2markpositions(encseq);
-    totallength = gt_encseq_total_length(encseq);
+    totallength = encseq->logicaltotallength;
     esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
 
     for (pos=0; pos<totallength; pos++)
@@ -2937,6 +3109,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->reference_count = 0;
   encseq->refcount_lock = gt_mutex_new();
   encseq->destab = NULL;
+  encseq->hasmirror = false;
   encseq->hasallocateddestab = false;
   encseq->sdstab = NULL;
   encseq->hasallocatedsdstab = false;
@@ -2954,7 +3127,9 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   }
   encseq->alpha = alpha;
   encseq->totallength = totallength;
+  encseq->logicaltotallength = totallength;
   encseq->numofdbsequences = numofsequences;
+  encseq->logicalnumofdbsequences = numofsequences;
   encseq->numofdbfiles = numofdbfiles;
   encseq->lengthofdbfilenames = lengthofdbfilenames;
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
@@ -3530,10 +3705,13 @@ const char *gt_encseq_description(const GtEncseq *encseq,
                                   unsigned long *desclen,
                                   unsigned long seqnum)
 {
+  if (seqnum >= encseq->numofdbsequences) {
+      seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
+  }
   if (seqnum > 0)
   {
     unsigned long nextend;
-
+    gt_assert(seqnum < encseq->numofdbsequences);
     if (seqnum < encseq->numofdbsequences - 1)
     {
       nextend = encseq->sdstab[seqnum];
@@ -3568,14 +3746,14 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
   const char *desptr;
   char *copydestab;
 
-  totaldesclength = encseq->numofdbsequences; /* for each new line */
-  for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
+  totaldesclength = encseq->logicalnumofdbsequences; /* for each new line */
+  for (seqnum = 0; seqnum < encseq->logicalnumofdbsequences; seqnum++)
   {
     desptr = gt_encseq_description(encseq,&desclen,seqnum);
     totaldesclength += desclen;
   }
   copydestab = gt_malloc(sizeof (*copydestab) * totaldesclength);
-  for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
+  for (seqnum = 0; seqnum < encseq->logicalnumofdbsequences; seqnum++)
   {
     desptr = gt_encseq_description(encseq,&desclen,seqnum);
     strncpy(copydestab + offset,desptr,(size_t) desclen);
@@ -5030,7 +5208,7 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
   GtUchar cc;
   const GtUchar *characters;
 
-  totallength = gt_encseq_total_length(encseq);
+  totallength = encseq->logicaltotallength;
   characters = gt_alphabet_characters(gt_encseq_alphabet(encseq));
   if (depth == 0)
   {
@@ -5115,7 +5293,7 @@ static int gt_encseq_check_comparetwostrings(const GtEncseq *encseq,
                                              unsigned long maxdepth)
 {
   unsigned long currentoffset, maxoffset, cc1, cc2,
-         totallength = gt_encseq_total_length(encseq);
+         totallength = encseq->logicaltotallength;
 
   if (fwd)
   {
@@ -5539,8 +5717,7 @@ void gt_encseq_show_features(const GtEncseq *encseq,
   }
   gt_logger_log(logger,"totallength=%lu",
                        encseq->totallength);
-  gt_logger_log(logger,"numofsequences=%lu",
-                       gt_encseq_num_of_sequences(encseq));
+  gt_logger_log(logger,"numofsequences=%lu",encseq->logicalnumofdbsequences);
   gt_logger_log(logger,"specialcharacters=%lu",
                        gt_encseq_specialcharacters(encseq));
   gt_logger_log(logger,"specialranges=%lu",
@@ -5573,7 +5750,7 @@ int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
   unsigned long pos1, pos2, end1, end2;
   int retval;
 
-  end1 = end2 = gt_encseq_total_length(encseq);
+  end1 = end2 = encseq->logicaltotallength;
   if (maxdepth > 0)
   {
     if (end1 > start1 + maxdepth)
@@ -5903,7 +6080,7 @@ static void runscanatpostrial(const GtEncseq *encseq,
   unsigned long pos, totallength;
   GtUchar ccra, ccsr;
 
-  totallength = gt_encseq_total_length(encseq);
+  totallength = encseq->logicaltotallength;
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
   printf("runscanatpostrial with startpos %lu\n",startpos);
   for (pos=startpos; pos < totallength; pos++)
@@ -5934,7 +6111,7 @@ static void testseqnumextraction(const GtEncseq *encseq)
   bool startofsequence = true;
   unsigned long pos, startpos, totallength, currentseqnum = 0, seqnum;
 
-  totallength = gt_encseq_total_length(encseq);
+  totallength = encseq->logicaltotallength;
   for (pos=0; pos < totallength; pos++)
   {
     /* Random access */
@@ -5969,7 +6146,7 @@ static void testscanatpos(const GtEncseq *encseq,
   GtEncseqReader *esr = NULL;
   unsigned long startpos, totallength, trial;
 
-  totallength = gt_encseq_total_length(encseq);
+  totallength = encseq->logicaltotallength;
   esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   runscanatpostrial(encseq,esr,readmode,0);
   runscanatpostrial(encseq,esr,readmode,totallength-1);
@@ -5989,7 +6166,7 @@ static void testmulticharactercompare(const GtEncseq *encseq,
   unsigned long pos1, pos2, totallength;
   unsigned long trial;
 
-  totallength = gt_encseq_total_length(encseq);
+  totallength = encseq->logicaltotallength;
   (void) multicharactercompare_withtest(encseq,readmode,0,0);
   (void) multicharactercompare_withtest(encseq,readmode,0,totallength-1);
   (void) multicharactercompare_withtest(encseq,readmode,totallength-1,0);
@@ -6017,7 +6194,7 @@ static int testfullscan(const GtStrArray *filenametab,
   unsigned long long fullscanpbar = 0;
 
   gt_error_check(err);
-  totallength = gt_encseq_total_length(encseq);
+  totallength = encseq->logicaltotallength;
   gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
   if (filenametab != NULL)
   {
@@ -6993,4 +7170,26 @@ unsigned long gt_encseq_filestartpos(const GtEncseq *encseq,
 unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq)
 {
   return encseq->sizeofrep;
+}
+
+void gt_encseq_mirror(GtEncseq *encseq)
+{
+  gt_assert(encseq && !encseq->hasmirror);
+  encseq->hasmirror = true;
+  encseq->logicalnumofdbsequences = 2 * encseq->numofdbsequences;
+  encseq->logicaltotallength = 2 * encseq->totallength + 1;
+}
+
+void gt_encseq_unmirror(GtEncseq *encseq)
+{
+  gt_assert(encseq && encseq->hasmirror);
+  encseq->hasmirror = false;
+  encseq->logicalnumofdbsequences = encseq->numofdbsequences;
+  encseq->logicaltotallength = encseq->totallength;
+}
+
+bool gt_encseq_is_mirrored(GtEncseq *encseq)
+{
+  gt_assert(encseq);
+  return encseq->hasmirror;
 }

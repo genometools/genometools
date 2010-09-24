@@ -162,6 +162,14 @@ unsigned long     gt_encseq_filenum(const GtEncseq *encseq,
                                     unsigned long position);
 /* Returns the <GtAlphabet> associated with <encseq>. */
 GtAlphabet*       gt_encseq_alphabet(const GtEncseq *encseq);
+/* Extends <encseq>  by virtual reverse complement sequences. */
+void              gt_encseq_mirror(GtEncseq *encseq);
+/* Removes virtual reverse complement sequences added by
+   <gt_encseq_mirror()>. */
+void              gt_encseq_unmirror(GtEncseq *encseq);
+/* Returns TRUE if <encseq> contains virtual reverse complement sequences as
+   added by <gt_encseq_mirror()>. */
+bool              gt_encseq_is_mirrored(GtEncseq *encseq);
 /* Deletes <encseq> and frees all associated space. */
 void              gt_encseq_delete(GtEncseq *encseq);
 
