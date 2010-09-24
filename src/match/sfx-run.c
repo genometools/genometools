@@ -205,6 +205,16 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       {
         break;
       }
+      printf("numberofsuffixes: %lu, special=%s\n",numberofsuffixes,
+                                  specialsuffixes ? "true" : "false");
+      {
+        unsigned long idx;
+        for(idx = 0; idx<numberofsuffixes; idx++)
+        {
+          printf("%lu %lu\n",idx,
+                             gt_suffixsortspace_getdirect(suffixsortspace,idx));
+        }
+      }
       if (outfileinfo->outfpsuftab != NULL)
       {
         if (gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,
@@ -673,13 +683,13 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
     }
   }
   gt_wrapsfxoptions(&so);
-/*
+  /*
   showgetencodedcharcounters();
   printf("countgt_encseq_compare_viatwobitencoding=%lu\n",
           countgt_encseq_compare_viatwobitencoding_get());
   printf("# inverse_order = %lu\n",inverse_order);
   printf("# no_order = %lu\n",no_order);
   printf("# correct_order = %lu\n",correct_order);
-*/
+  */
   return haserr ? -1 : 0;
 }

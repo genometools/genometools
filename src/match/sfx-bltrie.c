@@ -160,7 +160,7 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   root = blindtrie_newnode(blindtrie);
   SETLEAF(root,false);
   blindtrie_setdepth(root,0);
-  root->firstchar = 0; /* undefined */
+  root->firstchar = 0; /* undefined, will never be used */
   root->rightsibling = NULL;
   if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
   {

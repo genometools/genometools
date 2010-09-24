@@ -232,10 +232,8 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx)
 {
   gt_assert(idx <= sssp->maxindex);
-  /*
-  printf("idx=%lu\n",idx);
-  */
 #ifdef GT_SUFTABASULONGARRAY
+  printf("getdirect(%lu)=%lu\n",idx,sssp->ulongtab[idx]);
   return sssp->ulongtab[idx];
 #else
   return sssp->getdirect(sssp,idx);
@@ -257,6 +255,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
     sssp->longestidx.valueunsignedlong = idx + sssp->offset;
   }
 #ifdef GT_SUFTABASULONGARRAY
+  printf("setdirect(%lu)=%lu\n",idx,value);
   sssp->ulongtab[idx] = value;
 #else
   sssp->setdirect(sssp,idx,value);

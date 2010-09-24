@@ -69,8 +69,8 @@ static int comparesuperbucketsizes(const void *a,const void *b,void *data)
 }
 
 static unsigned long getstartidx(const GtBucketspec2 *bucketspec2,
-                          unsigned int first,
-                          unsigned int second)
+                                 unsigned int first,
+                                 unsigned int second)
 {
   gt_assert(first < bucketspec2->numofchars);
   gt_assert(second <= bucketspec2->numofchars);
@@ -148,70 +148,6 @@ static GtCodetype expandtwocharcode(GtCodetype twocharcode,
   return twocharcode * bucketspec2->expandfactor + bucketspec2->expandfillsum;
 }
 
-/*
-static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
-                                            const GtEncseq *encseq,
-                                            GtReadmode readmode)
-{
-  GtUchar cc;
-  unsigned int idx;
-  unsigned long *specialchardist,
-         totallength = gt_encseq_total_length(encseq);
-
-  specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
-  for (idx = 0; idx<numofchars; idx++)
-  {
-    specialchardist[idx] = 0;
-  }
-  if (gt_encseq_has_specialranges(encseq))
-  {
-    GtSpecialrangeiterator *sri;
-    GtRange range;
-
-    sri = gt_specialrangeiterator_new(encseq,
-                                  GT_ISDIRREVERSE(readmode) ? false : true);
-    while (gt_specialrangeiterator_next(&range,sri))
-    {
-      printf("range %lu %lu\n",(unsigned long) range.leftpos,
-                               (unsigned long) range.rightpos);
-      gt_assert(range.leftpos < totallength);
-      if (GT_ISDIRREVERSE(readmode))
-      {
-        if (range.rightpos < totallength)
-        {
-          cc = gt_encseq_get_encoded_char(encseq,range.rightpos,
-                           readmode == GT_READMODE_REVERSE ? GT_READMODE_FORWARD
-                                                   : GT_READMODE_COMPL);
-          if (ISNOTSPECIAL(cc))
-          {
-            specialchardist[cc]++;
-          }
-        }
-      } else
-      {
-        if (range.leftpos > 0)
-        {
-        cc = gt_encseq_get_encoded_char(encseq,range.leftpos-1,
-        *                                        readmode);
-          if (ISNOTSPECIAL(cc))
-          {
-            specialchardist[cc]++;
-          }
-        }
-      }
-    }
-    gt_specialrangeiterator_delete(&sri);
-  }
-  if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
-  {
-    cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
-    gt_assert(ISNOTSPECIAL(cc));
-    specialchardist[cc]++;
-  }
-  return specialchardist;
-}
-*/
-
 static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
                                                    const GtEncseq *encseq,
                                                    GtReadmode readmode)
@@ -219,7 +155,10 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   GtUchar cc;
   unsigned int idx;
   unsigned long *specialchardist,
-         totallength = gt_encseq_total_length(encseq);
+                totallength = gt_encseq_total_length(encseq);
+  GtReadmode convertedreadmode = (readmode == GT_READMODE_REVERSE) 
+                                      ? GT_READMODE_FORWARD
+                                      : GT_READMODE_COMPL;
 
   specialchardist = gt_malloc(sizeof (*specialchardist) * numofchars);
   for (idx = 0; idx<numofchars; idx++)
@@ -230,18 +169,14 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-
     sri = gt_specialrangeiterator_new(encseq,true);
     if (GT_ISDIRREVERSE(readmode))
     {
-      GtReadmode thismode =
-                 (readmode == GT_READMODE_REVERSE) ? GT_READMODE_FORWARD
-                                                   : GT_READMODE_COMPL;
       while (gt_specialrangeiterator_next(sri,&range))
       {
         if (range.end < totallength)
         {
-          cc = gt_encseq_get_encoded_char(encseq,range.end,thismode);
+          cc = gt_encseq_get_encoded_char(encseq,range.end,convertedreadmode);
           if (ISNOTSPECIAL(cc))
           {
             specialchardist[cc]++;
@@ -252,7 +187,6 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
     {
       while (gt_specialrangeiterator_next(sri,&range))
       {
-        gt_assert(range.start < totallength);
         if (range.start > 0)
         {
           cc = gt_encseq_get_encoded_char(encseq,range.start-1,readmode);
@@ -269,16 +203,14 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   {
     if (gt_encseq_lengthofspecialprefix(encseq) == 0)
     {
-      cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
-      gt_assert(ISNOTSPECIAL(cc));
+      cc = gt_encseq_extract_encoded_char(encseq,0,convertedreadmode);
       specialchardist[cc]++;
     }
   } else
   {
     if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
     {
-      cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
-      gt_assert(ISNOTSPECIAL(cc));
+      cc = gt_encseq_extract_encoded_char(encseq,totallength-1,readmode);
       specialchardist[cc]++;
     }
   }
@@ -343,12 +275,12 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
   for (code = 0; code <= maxcode; code++)
   {
     rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                      bcktab,
-                                      code,
-                                      maxcode,
-                                      bucketspec2->partwidth,
-                                      rightchar,
-                                      bucketspec2->numofchars);
+                                         bcktab,
+                                         code,
+                                         maxcode,
+                                         bucketspec2->partwidth,
+                                         rightchar,
+                                         bucketspec2->numofchars);
     accubucketsize += bucketspec.nonspecialsinbucket;
     if (rightchar == 0)
     {
@@ -362,8 +294,7 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
     {
       gt_assert(bucketspec.specialsinbucket == 0);
       bucketspec2->subbuckettab[currentchar]
-                               [rightchar-1].bucketend
-        = accubucketsize;
+                               [rightchar-1].bucketend = accubucketsize;
     }
   }
 }
@@ -391,9 +322,9 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
     GtCodetype ecode = expandtwocharcode(code2,bucketspec2);
     gt_assert(ecode / bucketspec2->expandfactor == code2);
     rightbound = gt_calcbucketrightbounds(bcktab,
-                                       ecode,
-                                       maxcode,
-                                       bucketspec2->partwidth);
+                                          ecode,
+                                          maxcode,
+                                          bucketspec2->partwidth);
     rightchar = (unsigned int) ((code2+1) % bucketspec2->numofchars);
     gt_assert((GtCodetype) currentchar == code2 / bucketspec2->numofchars);
     if (rightchar == 0)

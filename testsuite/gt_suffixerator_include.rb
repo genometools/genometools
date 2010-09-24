@@ -10,23 +10,30 @@ def trials()
   return "-scantrials 10 -multicharcmptrials 1000"
 end
 
-def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist)
-  extra=withsmap
-  if cmp
-    extra=extra + " -cmpcharbychar"
-    if doubling
-      extra=extra + " -maxdepth"
-    end
-  end
+def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist,alldirs=true)
   filearg=""
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
-           "-algbds 10 31 80 #{extra} #{outoptions} " +
-           "-indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v sfx",
-           :maxtime => 600
+  if alldirs 
+    dirlist=["fwd","rev","cpl ","rcl "]
+  else
+    dirlist=["fwd ","rev"]
+  end
+  dirlist.each do |dirarg|
+    extra=""
+    if cmp
+      extra=extra + " -cmpcharbychar"
+      if dirarg == "fwd" and doubling
+        extra=extra + " -maxdepth"
+      end
+    end
+    run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
+             "-algbds 10 31 80 #{extra} #{outoptions} " +
+             "-indexname sfx -dir " + dirarg + " -db " + filearg
+    run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v sfx",
+             :maxtime => 600
+  end
 end
 
 def checkdc(filelist)
@@ -274,9 +281,9 @@ end
     Keywords "gt_suffixerator"
     Test do
       checksfx(parts,2,extra,"direct",true,doubling,
-               ["sw100K1.fsa","sw100K2.fsa"])
+               ["sw100K1.fsa","sw100K2.fsa"],false)
       checksfx(parts,2,extra,"bytecompress",true,doubling,
-               ["sw100K1.fsa","sw100K2.fsa"])
+               ["sw100K1.fsa","sw100K2.fsa"],false)
     end
   end
 end
@@ -329,11 +336,11 @@ end
           checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.gbk"])
           checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.embl"])
           checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna","Random.fna",
-                                          "Atinsert.fna"])
+                                                   "Atinsert.fna"])
           checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.gbk","Random.gbk",
-                                          "Atinsert.gbk"])
+                                                   "Atinsert.gbk"])
           checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.embl","Random.embl",
-                                          "Atinsert.embl"])
+                                                   "Atinsert.embl"])
         end
       end
     end
