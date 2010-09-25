@@ -157,6 +157,22 @@ static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
   return newleaf;
 }
 
+static unsigned long blindtrie_currenttwobitencodingstoppos_get(
+                                     const Blindtrie *blindtrie,
+                                     unsigned long currentstartpos)
+{
+  if (!blindtrie->cmpcharbychar &&
+      blindtrie->has_twobitencoding_stoppos_support)
+  {
+    gt_encseq_reader_reinit_with_readmode(blindtrie->esr1,blindtrie->encseq,
+                                          blindtrie->readmode,
+                                          currentstartpos);
+    return gt_getnexttwobitencodingstoppos(GT_ISDIRREVERSE(blindtrie->readmode)
+                                           ? false : true,blindtrie->esr1);
+  }
+  return GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie);
+}
+
 static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
                                   unsigned long currentstartpos)
 {
@@ -183,18 +199,8 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   {
     firstchar = (GtUchar) SEPARATOR;
   }
-  if (!blindtrie->cmpcharbychar &&
-      blindtrie->has_twobitencoding_stoppos_support)
-  {
-    gt_encseq_reader_reinit_with_readmode(blindtrie->esr2,blindtrie->encseq,
-                                          blindtrie->readmode,currentstartpos);
-    currenttwobitencodingstoppos
-      = gt_getnexttwobitencodingstoppos(GT_ISDIRREVERSE(blindtrie->readmode)
-                                          ? false : true,blindtrie->esr2);
-  } else
-  {
-    currenttwobitencodingstoppos = 0;
-  }
+  currenttwobitencodingstoppos
+    = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
   root->either.internalinfo.firstchild
     = blindtrie_newleaf(blindtrie,currentstartpos,
                         currenttwobitencodingstoppos,
@@ -424,10 +430,11 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                           unsigned long
                                             leaftwobitencodingstoppos,
                                           unsigned long currentstartpos,
-                                          GtViatwobitkeyvalues *vtk2)
+                                          unsigned long
+                                            currenttwobitencodingstoppos)
 {
   GtCommonunits commonunits;
-  GtViatwobitkeyvalues vtk1;
+  GtViatwobitkeyvalues vtk1, vtk2;
   const unsigned long depth = 0;
   unsigned long maxdepth = (blindtrie->maxdepth == 0)
                              ? 0
@@ -436,21 +443,18 @@ static unsigned long blindtrie_twobitencoding_getlcp(
   gt_assert(leafpos != currentstartpos);
   gt_assignvittwobitkeyvalues(&vtk1,blindtrie->encseq,blindtrie->readmode,
                               NULL,leafpos,depth,maxdepth);
-  if (!blindtrie->cmpcharbychar &&
-      blindtrie->has_twobitencoding_stoppos_support)
-  {
-    vtk1.twobitencodingstoppos = leaftwobitencodingstoppos;
-  } else
-  {
-    vtk1.twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie);
-  }
+  gt_assignvittwobitkeyvalues(&vtk2,blindtrie->encseq,blindtrie->readmode,
+                              NULL,currentstartpos,depth,
+                              maxdepth);
+  vtk1.twobitencodingstoppos = leaftwobitencodingstoppos;
+  vtk2.twobitencodingstoppos = currenttwobitencodingstoppos;
   (void) gt_encseq_process_viatwobitencoding(&commonunits,
                                              blindtrie->encseq,
                                              blindtrie->readmode,
                                              depth,
                                              maxdepth,
                                              &vtk1,
-                                             vtk2);
+                                             &vtk2);
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {
@@ -809,10 +813,9 @@ unsigned long gt_blindtrie_suffixsort(
                             Dc_processunsortedrange dc_processunsortedrange)
 {
   unsigned long idx, stackidx, currentstartpos, lcp, numoflargelcpvalues = 0,
-                localmaxdepth;
-  Nodeptr leafinsubtree, currentnode;
+                currenttwobitencodingstoppos;
+  Nodeptr leafinsubtrie, currentnode;
   GtUchar mm_oldsuffix, mm_newsuffix;
-  GtViatwobitkeyvalues vtk2;
 
   /*
   printf("sizeof (Blindtrienode)=%lu\n",(unsigned long) sizeof (Blindtrienode));
@@ -864,27 +867,24 @@ unsigned long gt_blindtrie_suffixsort(
   printf("\nstep 0\n");
   gt_blindtrie_show(blindtrie);
 #endif
-  localmaxdepth = (blindtrie->maxdepth == 0) ? 0
-                                             : blindtrie->maxdepthminusoffset;
   for (idx=1UL; idx < numberofsuffixes; idx++)
   {
     currentstartpos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx)
                       + offset;
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
     {
-      gt_assignvittwobitkeyvalues(&vtk2,blindtrie->encseq,blindtrie->readmode,
-                                  blindtrie->esr2,currentstartpos,0,
-                                  localmaxdepth);
-      leafinsubtree = blindtrie_findcompanion(blindtrie,currentstartpos,
-                                              vtk2.twobitencodingstoppos);
-      gt_assert(blindtrie_isleaf(leafinsubtree));
+      currenttwobitencodingstoppos
+        = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+      leafinsubtrie = blindtrie_findcompanion(blindtrie,currentstartpos,
+                                              currenttwobitencodingstoppos);
+      gt_assert(blindtrie_isleaf(leafinsubtrie));
       if (blindtrie->cmpcharbychar)
       {
         lcp = blindtrie_cmpcharbychar_getlcp
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,
-                                leafinsubtree->either.leafinfo.nodestartpos,
+                                leafinsubtrie->either.leafinfo.nodestartpos,
                                 currentstartpos);
       } else
       {
@@ -892,10 +892,10 @@ unsigned long gt_blindtrie_suffixsort(
                                (&mm_oldsuffix,
                                 &mm_newsuffix,
                                 blindtrie,
-                                leafinsubtree->either.leafinfo.nodestartpos,
-                                leafinsubtree->either.leafinfo.nodestoppos,
+                                leafinsubtrie->either.leafinfo.nodestartpos,
+                                leafinsubtrie->either.leafinfo.nodestoppos,
                                 currentstartpos,
-                                &vtk2);
+                                currenttwobitencodingstoppos);
       }
       currentnode = blindtrie->root;
       for (stackidx=0;stackidx<blindtrie->stack.nextfreeNodeptr;stackidx++)
@@ -913,7 +913,7 @@ unsigned long gt_blindtrie_suffixsort(
                              lcp,
                              mm_newsuffix,
                              currentstartpos,
-                             vtk2.twobitencodingstoppos);
+                             currenttwobitencodingstoppos);
 #ifdef SKDEBUG
       printf("step %lu\n",idx);
       gt_blindtrie_show(blindtrie);
