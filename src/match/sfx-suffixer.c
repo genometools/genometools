@@ -271,14 +271,14 @@ static void updatekmercount(void *processinfo,
                                        position);
       if (code2 != 0)
       {
-        printf("### position %lu, code2 = %lu != 0\n",position,code2);
-        printf("previouscode = " FormatGtCodetype "\n",previouscode);
+        fprintf(stderr,"### position %lu, code2 = %lu != 0\n",position,code2);
+        fprintf(stderr,"previouscode = " FormatGtCodetype "\n",previouscode);
         if (previouskmercodedefined)
         {
-          printf("previouskmercodedefined = true\n");
-          printf("previousstorespecials = %s\n",
+          fprintf(stderr,"previouskmercodedefined = true\n");
+          fprintf(stderr,"previousstorespecials = %s\n",
                   previousstorespecials ? "true" : "false");
-          printf("previousspecialpos = %u\n",previousspecialpos);
+          fprintf(stderr,"previousspecialpos = %u\n",previousspecialpos);
         }
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }

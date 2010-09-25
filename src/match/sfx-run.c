@@ -205,18 +205,6 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       {
         break;
       }
-      /*
-      printf("numberofsuffixes: %lu, special=%s\n",numberofsuffixes,
-                                  specialsuffixes ? "true" : "false");
-      {
-        unsigned long idx;
-        for(idx = 0; idx<numberofsuffixes; idx++)
-        {
-          printf("%lu %lu\n",idx,
-                             gt_suffixsortspace_getdirect(suffixsortspace,idx));
-        }
-      }
-      */
       if (outfileinfo->outfpsuftab != NULL)
       {
         if (gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,

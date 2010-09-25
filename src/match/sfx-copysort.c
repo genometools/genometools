@@ -156,7 +156,7 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   unsigned int idx;
   unsigned long *specialchardist,
                 totallength = gt_encseq_total_length(encseq);
-  GtReadmode convertedreadmode = (readmode == GT_READMODE_REVERSE) 
+  GtReadmode convertedreadmode = (readmode == GT_READMODE_REVERSE)
                                       ? GT_READMODE_FORWARD
                                       : GT_READMODE_COMPL;
 

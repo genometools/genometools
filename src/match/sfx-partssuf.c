@@ -61,9 +61,33 @@ static GtCodetype findfirstlarger(const unsigned long *leftborder,
   return found;
 }
 
+#ifdef SKDEBUG
+static void showrecord(const Suftabpartcomponent *component)
+{
+  printf("# part: width=%lu offset=%lu sumwidth=%lu nextcode=%lu\n",
+          component->widthofpart,component->suftaboffset,
+                                 component->sumofwidth,
+                                 component->nextcode);
+}
+
+static void showallrecords(const Suftabparts *suftabparts)
+{
+  unsigned int idx;
+
+  for (idx = 0; idx < suftabparts->numofparts; idx++)
+  {
+    showrecord(suftabparts->components + idx);
+  }
+}
+#endif
+
 static void removeemptyparts(Suftabparts *suftabparts,
                              GtLogger *logger)
 {
+#ifdef SKDEBUG
+  printf("# before removial\n");
+  showallrecords(suftabparts);
+#endif
   if (suftabparts->numofparts > 0)
   {
     unsigned int destpart, srcpart;
@@ -79,18 +103,47 @@ static void removeemptyparts(Suftabparts *suftabparts,
         destpart++;
       }
     }
-    if (destpart < srcpart)
+    if (suftabparts->components[suftabparts->numofparts-1].widthofpart == 0)
     {
-      suftabparts->numofparts -= (srcpart - destpart);
+      gt_assert(suftabparts->numofparts > 1U);
+      destpart = suftabparts->numofparts-2;
+      while (true)
+      {
+        if (suftabparts->components[destpart].widthofpart > 0)
+        {
+          suftabparts->components[destpart].nextcode
+            = suftabparts->components[suftabparts->numofparts-1].nextcode;
+          suftabparts->numofparts = destpart + 1;
+          break;
+        }
+        if (destpart > 0)
+        {
+          destpart--;
+        } else
+        {
+          gt_assert(false);
+        }
+      }
+    } else
+    {
+      if (destpart < srcpart)
+      {
+        suftabparts->numofparts -= (srcpart - destpart);
+        gt_assert(suftabparts->numofparts == destpart);
+      }
     }
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       gt_assert(suftabparts->components[srcpart].widthofpart > 0);
       gt_logger_log(logger,"widthofpart[%u]=%lu",
-                  srcpart,
-                  suftabparts->components[srcpart].widthofpart);
+                    srcpart,
+                    suftabparts->components[srcpart].widthofpart);
     }
   }
+#ifdef SKDEBUG
+  printf("#after removal\n");
+  showallrecords(suftabparts);
+#endif
 }
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
