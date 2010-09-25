@@ -34,10 +34,7 @@
            : (unsigned long) ((PTR) - blindtrie->spaceBlindtrienode))
 #endif
 
-#define ISLEAF(NODE)      blindtrie_isleaf(NODE)
-#define ISNOTLEAF(NODE)   (!ISLEAF(NODE))
-#define SETLEAF(NODE,VAL) (NODE)->isleaf = VAL
-                          /* Nothing: used for documentation purpose */
+#define BLINDTRIE_SETLEAF(NODE,VAL) (NODE)->isleaf = VAL
 
 typedef struct Blindtrienode
 {
@@ -90,14 +87,24 @@ static bool blindtrie_isleaf(const Nodeptr node)
 
 static unsigned long blindtrie_getdepth(const Nodeptr node)
 {
-  gt_assert(ISNOTLEAF(node));
+  gt_assert(!blindtrie_isleaf(node));
   return node->either.internalinfo.depth;
 }
 
 static void blindtrie_setdepth(const Nodeptr node,unsigned long depth)
 {
-  gt_assert(ISNOTLEAF(node));
+  gt_assert(!blindtrie_isleaf(node));
   node->either.internalinfo.depth = depth;
+}
+
+static GtUchar blindtrie_firstchar_get(const Nodeptr node)
+{
+  return node->firstchar;
+}
+
+static void blindtrie_firstchar_set(Nodeptr node,GtUchar firstchar)
+{
+  node->firstchar = firstchar;
 }
 
 static bool blindtrie_isleftofboundary(const Blindtrie *blindtrie,
@@ -138,14 +145,14 @@ static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
   Blindtrienode *newleaf;
 
   newleaf = blindtrie_newnode(blindtrie);
-  SETLEAF(newleaf,true);
+  BLINDTRIE_SETLEAF(newleaf,true);
   newleaf->either.leafinfo.nodestartpos = currentstartpos;
   newleaf->either.leafinfo.nodestoppos = currenttwobitencodingstoppos;
   /*
   printf("insert %lu %lu\n",currentstartpos,
                             currenttwobitencodingstoppos);
   */
-  newleaf->firstchar = firstchar;
+  blindtrie_firstchar_set(newleaf,firstchar);
   newleaf->rightsibling = rightsibling;
   return newleaf;
 }
@@ -158,9 +165,9 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   unsigned long currenttwobitencodingstoppos;
 
   root = blindtrie_newnode(blindtrie);
-  SETLEAF(root,false);
+  BLINDTRIE_SETLEAF(root,false);
   blindtrie_setdepth(root,0);
-  root->firstchar = 0; /* undefined, will never be used */
+  blindtrie_firstchar_set(root,0); /* undefined, will never be used */
   root->rightsibling = NULL;
   if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
   {
@@ -197,11 +204,11 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
 
 static inline Nodeptr blindtrie_extractleafnode(Nodeptr head)
 {
-  gt_assert(ISNOTLEAF(head));
+  gt_assert(!blindtrie_isleaf(head));
   do
   {
     head = head->either.internalinfo.firstchild;
-  } while (ISNOTLEAF(head));
+  } while (!blindtrie_isleaf(head));
   return head;
 }
 
@@ -220,7 +227,7 @@ static Nodeptr blindtrie_findsucc(Nodeptr node,GtUchar newchar)
 
   for (;;)
   {
-    retval = blindtrie_comparecharacters(node->firstchar,newchar);
+    retval = blindtrie_comparecharacters(blindtrie_firstchar_get(node),newchar);
     if (retval == 0)
     {              /* found branch corresponding to newchar */
       return node;
@@ -248,7 +255,7 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
 
   blindtrie->stack.nextfreeNodeptr = 0;
   head = blindtrie->root;
-  while (ISNOTLEAF(head))
+  while (!blindtrie_isleaf(head))
   {
     GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, head);
     headdepth = blindtrie_getdepth(head);
@@ -310,37 +317,38 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
   Nodeptr newleaf, newnode, previous, current;
 
   gt_assert(ISSPECIAL(mm_oldsuffix) || ISSPECIAL(mm_newsuffix) ||
-            mm_oldsuffix != mm_newsuffix || ISLEAF(oldnode) ||
+            mm_oldsuffix != mm_newsuffix || blindtrie_isleaf(oldnode) ||
             blindtrie_getdepth(oldnode) == lcp);
 
   /* insert a new node before node oldnode if necessary */
-  if (ISLEAF(oldnode))
+  if (blindtrie_isleaf(oldnode))
   {
     gt_assert(lcp > 0);
   }
-  if (ISLEAF(oldnode) || blindtrie_getdepth(oldnode) != lcp)
+  if (blindtrie_isleaf(oldnode) || blindtrie_getdepth(oldnode) > lcp)
   {
     newnode = blindtrie_newnode(blindtrie);
-    SETLEAF(newnode,ISLEAF(oldnode));
-    newnode->firstchar = mm_oldsuffix;
-    if (ISNOTLEAF(oldnode))
+    BLINDTRIE_SETLEAF(newnode,blindtrie_isleaf(oldnode));
+    blindtrie_firstchar_set(newnode,mm_oldsuffix);
+    if (!blindtrie_isleaf(oldnode))
     {
       blindtrie_setdepth(newnode,blindtrie_getdepth(oldnode));
       /* newnode inherits depth+children */
     }
     newnode->either = oldnode->either;
     newnode->rightsibling = NULL;
-    SETLEAF(oldnode,false);
+    BLINDTRIE_SETLEAF(oldnode,false);
     gt_assert(lcp > 0);
     blindtrie_setdepth(oldnode,lcp);
     /* oldnode has newnode as only child*/
     oldnode->either.internalinfo.firstchild = newnode;
   }
-  gt_assert(ISLEAF(oldnode) || blindtrie_getdepth(oldnode) == lcp);
+  gt_assert(blindtrie_isleaf(oldnode) || blindtrie_getdepth(oldnode) == lcp);
   previous = NULL;
   current = oldnode->either.internalinfo.firstchild;
   while (current != NULL &&
-         blindtrie_comparecharacters(current->firstchar,mm_newsuffix) < 0)
+         blindtrie_comparecharacters(blindtrie_firstchar_get(current),
+                                     mm_newsuffix) < 0)
   {
     previous = current;
     current = current->rightsibling;
@@ -469,9 +477,9 @@ static unsigned long blindtrie_twobitencoding_getlcp(
   return commonunits.finaldepth;
 }
 
-#define SETCURRENT(VAL)\
-        currentnodeisleaf = ISLEAF(VAL) ? true : false;\
-        currentnode = VAL
+#define SETCURRENTNODE(NODEPTR)\
+        currentnodeisleaf = blindtrie_isleaf(NODEPTR) ? true : false;\
+        currentnode = NODEPTR
 
 static unsigned long blindtrie_enumeratetrieleaves (
                            Blindtrie *blindtrie,
@@ -488,7 +496,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
 
   blindtrie->stack.nextfreeNodeptr = 0;
   GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, blindtrie->root);
-  SETCURRENT(blindtrie->root->either.internalinfo.firstchild);
+  SETCURRENTNODE(blindtrie->root->either.internalinfo.firstchild);
   gt_assert(blindtrie->maxdepth == 0 || dc_processunsortedrange != NULL);
   bucketleftidxplussubbucketleft
     = gt_suffixsortspace_bucketleftidx_get(blindtrie->sssp) + subbucketleft;
@@ -549,7 +557,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
         currentnodeisleaf = false; /* STATE 1 */
       } else
       {
-        SETCURRENT (siblval);  /* current comes from brother */
+        SETCURRENTNODE(siblval);  /* current comes from brother */
         lcpnode
           = blindtrie->stack.spaceNodeptr[blindtrie->stack.nextfreeNodeptr-1];
       }
@@ -566,7 +574,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
                            blindtrie->stack.nextfreeNodeptr]->rightsibling;
         if (siblval != NULL)
         {
-          SETCURRENT (siblval);        /* current comes from brother */
+          SETCURRENTNODE(siblval);        /* current comes from brother */
           lcpnode = blindtrie->stack.spaceNodeptr[
                              blindtrie->stack.nextfreeNodeptr - 1];
           readyforpop = false;
@@ -574,7 +582,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
       } else
       {
         GT_STOREINARRAY (&blindtrie->stack, Nodeptr, 128, currentnode);
-        SETCURRENT (currentnode->either.internalinfo.firstchild);
+        SETCURRENTNODE(currentnode->either.internalinfo.firstchild);
       }
     }
   }
@@ -675,7 +683,7 @@ static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
        current != NULL;
        current = current->rightsibling)
   {
-    if (ISLEAF(current))
+    if (blindtrie_isleaf(current))
     {
       gt_blindtrie_showleaf(blindtrie,level,current);
     } else
@@ -869,7 +877,7 @@ unsigned long gt_blindtrie_suffixsort(
                                   localmaxdepth);
       leafinsubtree = blindtrie_findcompanion(blindtrie,currentstartpos,
                                               vtk2.twobitencodingstoppos);
-      gt_assert(ISLEAF(leafinsubtree));
+      gt_assert(blindtrie_isleaf(leafinsubtree));
       if (blindtrie->cmpcharbychar)
       {
         lcp = blindtrie_cmpcharbychar_getlcp
@@ -893,7 +901,8 @@ unsigned long gt_blindtrie_suffixsort(
       for (stackidx=0;stackidx<blindtrie->stack.nextfreeNodeptr;stackidx++)
       {
         currentnode = blindtrie->stack.spaceNodeptr[stackidx];
-        if (ISLEAF(currentnode) || blindtrie_getdepth(currentnode) >= lcp)
+        if (blindtrie_isleaf(currentnode) ||
+            blindtrie_getdepth(currentnode) >= lcp)
         {
           break;
         }
