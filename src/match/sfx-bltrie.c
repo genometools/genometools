@@ -239,11 +239,11 @@ static Nodeptr blindtrie_findsucc(Nodeptr node,GtUchar newchar)
       return node;
     }
     if (retval == 1)
-    {               /* found branch which is already greater than newchar */
+    {               /* found sibling which is already greater than newchar */
       return NULL;
     }
     node = node->rightsibling;
-    if (node == NULL) /* no other branches: mismatch */
+    if (node == NULL) /* no more siblings: mismatch */
     {
       return NULL;
     }
@@ -288,10 +288,10 @@ static Nodeptr blindtrie_findcompanion(Blindtrie *blindtrie,
         newchar = gt_encseq_get_encoded_char(blindtrie->encseq,
                                              currentstartpos + headdepth,
                                              blindtrie->readmode);
-      }
-      if (newchar == (GtUchar) WILDCARD)
-      {
-        newchar = (GtUchar) SEPARATOR;
+        if (newchar == (GtUchar) WILDCARD)
+        {
+          newchar = (GtUchar) SEPARATOR;
+        }
       }
     } else
     {
