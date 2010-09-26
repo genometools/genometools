@@ -34,8 +34,6 @@
            : (unsigned long) ((PTR) - blindtrie->spaceBlindtrienode))
 #endif
 
-#define BLINDTRIE_SETLEAF(NODE,VAL) (NODE)->isleaf = VAL
-
 typedef struct Blindtrienode
 {
   struct Blindtrienode *rightsibling;
@@ -85,6 +83,11 @@ static bool blindtrie_isleaf(const Nodeptr node)
   return node->isleaf;
 }
 
+static void blindtrie_setleaf(const Nodeptr node,bool isleaf)
+{
+  node->isleaf = isleaf;
+}
+
 static unsigned long blindtrie_getdepth(const Nodeptr node)
 {
   gt_assert(!blindtrie_isleaf(node));
@@ -102,8 +105,9 @@ static GtUchar blindtrie_firstchar_get(const Nodeptr node)
   return node->firstchar;
 }
 
-static void blindtrie_firstchar_set(Nodeptr node,GtUchar firstchar)
+static void blindtrie_firstchar_set(Nodeptr node,bool isleaf,GtUchar firstchar)
 {
+  blindtrie_setleaf(node,isleaf);
   node->firstchar = firstchar;
 }
 
@@ -145,14 +149,9 @@ static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
   Blindtrienode *newleaf;
 
   newleaf = blindtrie_newnode(blindtrie);
-  BLINDTRIE_SETLEAF(newleaf,true);
+  blindtrie_firstchar_set(newleaf,true,firstchar);
   newleaf->either.leafinfo.nodestartpos = currentstartpos;
   newleaf->either.leafinfo.nodestoppos = currenttwobitencodingstoppos;
-  /*
-  printf("insert %lu %lu\n",currentstartpos,
-                            currenttwobitencodingstoppos);
-  */
-  blindtrie_firstchar_set(newleaf,firstchar);
   newleaf->rightsibling = rightsibling;
   return newleaf;
 }
@@ -181,9 +180,9 @@ static Nodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   unsigned long currenttwobitencodingstoppos;
 
   root = blindtrie_newnode(blindtrie);
-  BLINDTRIE_SETLEAF(root,false);
+  blindtrie_firstchar_set(root,false,0); /* firstchar of root will
+                                            never be used */
   blindtrie_setdepth(root,0);
-  blindtrie_firstchar_set(root,0); /* undefined, will never be used */
   root->rightsibling = NULL;
   if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
   {
@@ -334,8 +333,7 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
   if (blindtrie_isleaf(oldnode) || blindtrie_getdepth(oldnode) > lcp)
   {
     newnode = blindtrie_newnode(blindtrie);
-    BLINDTRIE_SETLEAF(newnode,blindtrie_isleaf(oldnode));
-    blindtrie_firstchar_set(newnode,mm_oldsuffix);
+    blindtrie_firstchar_set(newnode,blindtrie_isleaf(oldnode),mm_oldsuffix);
     if (!blindtrie_isleaf(oldnode))
     {
       blindtrie_setdepth(newnode,blindtrie_getdepth(oldnode));
@@ -343,7 +341,7 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
     }
     newnode->either = oldnode->either;
     newnode->rightsibling = NULL;
-    BLINDTRIE_SETLEAF(oldnode,false);
+    blindtrie_setleaf(oldnode,false);
     gt_assert(lcp > 0);
     blindtrie_setdepth(oldnode,lcp);
     /* oldnode has newnode as only child*/
