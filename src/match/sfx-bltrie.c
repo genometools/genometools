@@ -108,6 +108,7 @@ static GtUchar blindtrie_firstchar_get(const Nodeptr node)
 static void blindtrie_firstchar_set(Nodeptr node,bool isleaf,GtUchar firstchar)
 {
   blindtrie_setleaf(node,isleaf);
+  gt_assert(isleaf || ISNOTSPECIAL(firstchar));
   node->firstchar = firstchar;
 }
 
@@ -342,6 +343,7 @@ static void blindtrie_insertsuffix(Blindtrie *blindtrie,
     newnode->either = oldnode->either;
     newnode->rightsibling = NULL;
     blindtrie_setleaf(oldnode,false);
+    gt_assert(ISNOTSPECIAL(blindtrie_firstchar_get(oldnode)));
     gt_assert(lcp > 0);
     blindtrie_setdepth(oldnode,lcp);
     /* oldnode has newnode as only child*/
