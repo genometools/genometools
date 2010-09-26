@@ -76,6 +76,7 @@ typedef struct GtEncseqReader GtEncseqReader;
 /* for a position outside the range from 0 to totallength -1 deliver a
    unique integer */
 #define GT_UNIQUEINT(POS)        ((unsigned long) ((POS) + GT_COMPAREOFFSET))
+#define GT_ISUNIQUEINT(POS)      ((POS) >= GT_COMPAREOFFSET)
 
 #ifdef GT_INLINEDENCSEQ
   #include "core/encseq_inlined.h"
