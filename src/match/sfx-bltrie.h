@@ -24,13 +24,6 @@
 
 typedef struct Blindtrie Blindtrie;
 
-typedef enum
-{
-  Ascending,
-  Descending,
-  Noorder
-} Ordertype;
-
 Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                             unsigned long numofsuffixes,
                             const GtEncseq *encseq,
@@ -46,7 +39,6 @@ unsigned long gt_blindtrie_suffixsort(
                             unsigned long numberofsuffixes,
                             unsigned long offset,
                             unsigned long maxdepth,
-                            Ordertype ordertype,
                             void *voiddcov,
                             Dc_processunsortedrange dc_processunsortedrange);
 

@@ -203,14 +203,16 @@ static unsigned long *leftcontextofspecialchardist(unsigned int numofchars,
   {
     if (gt_encseq_lengthofspecialprefix(encseq) == 0)
     {
-      cc = gt_encseq_extract_encoded_char(encseq,0,convertedreadmode);
+      cc = gt_encseq_get_encoded_char(encseq,0,convertedreadmode);
+      gt_assert(ISNOTSPECIAL(cc));
       specialchardist[cc]++;
     }
   } else
   {
     if (gt_encseq_lengthofspecialsuffix(encseq) == 0)
     {
-      cc = gt_encseq_extract_encoded_char(encseq,totallength-1,readmode);
+      cc = gt_encseq_get_encoded_char(encseq,totallength-1,readmode);
+      gt_assert(ISNOTSPECIAL(cc));
       specialchardist[cc]++;
     }
   }

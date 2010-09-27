@@ -159,7 +159,6 @@ typedef struct
   unsigned long subbucketleft,
                 width,
                 depth;
-  Ordertype ordertype;
 } MKVstack;
 
 typedef struct
@@ -867,24 +866,10 @@ static void showcountingsortinfo(const Countingsortinfo *countingsortinfo,
 }
 */
 
-static Ordertype deriveordertype(Ordertype parentordertype,bool turn)
-{
-  switch (parentordertype)
-  {
-    case Noorder : return Noorder;
-    case Descending: return turn ? Ascending : Descending;
-    case Ascending: return turn ? Descending : Ascending;
-  }
-  /*@ignore@*/
-  return Noorder;
-  /*@end@*/
-}
-
 static bool comparisonsort(Bentsedgresources *bsr,
                            unsigned long subbucketleft,
                            unsigned long width,
-                           unsigned long depth,
-                           Ordertype ordertype)
+                           unsigned long depth)
 {
   gt_assert(width > 1UL);
   gt_assert(bsr->sfxstrategy->maxinsertionsort <=
@@ -910,7 +895,6 @@ static bool comparisonsort(Bentsedgresources *bsr,
                                 depth,
                                 (unsigned long)
                                    bsr->sfxstrategy->differencecover,
-                                ordertype,
                                 NULL,
                                 NULL);
     if (bsr->lcpsubtab != NULL)
@@ -926,8 +910,7 @@ static bool comparisonsort(Bentsedgresources *bsr,
 static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                      unsigned long subbucketleft,
                                      unsigned long width,
-                                     unsigned long depth,
-                                     Ordertype ordertype)
+                                     unsigned long depth)
 {
   if (width > 1UL)
   {
@@ -975,7 +958,6 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                       depth,
                                       (unsigned long)
                                         bsr->sfxstrategy->differencecover,
-                                      ordertype,
                                       bsr->voiddcov,
                                       bsr->dc_processunsortedrange);
           if (bsr->lcpsubtab != NULL)
@@ -987,7 +969,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
         }
       } else
       {
-        if (comparisonsort(bsr,subbucketleft,width,depth,ordertype))
+        if (comparisonsort(bsr,subbucketleft,width,depth))
         {
           return;
         }
@@ -998,7 +980,6 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
     STACKTOP.subbucketleft = subbucketleft;
     STACKTOP.width = width;
     STACKTOP.depth = depth;
-    STACKTOP.ordertype = ordertype;
     bsr->mkvauxstack.nextfreeMKVstack++;
   }
 }
@@ -1008,7 +989,6 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                              unsigned long width,
                              const Sfxcmp *pivotcmpbits,
                              unsigned long pivotidx,
-                             Ordertype parentordertype,
                              unsigned long depth)
 {
   int cmp;
@@ -1119,8 +1099,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       subsort_bentleysedgewick(bsr,
                                subbucketleft + bsr->leftlcpdist[idx],
                                currentwidth,
-                               depth + idx,
-                               deriveordertype(parentordertype,false));
+                               depth + idx);
     }
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->leftlcpdist[idx] < end)
@@ -1135,8 +1114,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     subsort_bentleysedgewick(bsr,
                              subbucketleft + smaller,
                              currentwidth,
-                             depth + GT_UNITSIN2BITENC,
-                             deriveordertype(parentordertype,false));
+                             depth + GT_UNITSIN2BITENC);
   }
   for (idx = 0; idx <= (unsigned long) maxlargerwithlcp; idx++)
   {
@@ -1153,8 +1131,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
       subsort_bentleysedgewick(bsr,
                                subbucketleft + width - end,
                                currentwidth,
-                               depth + idx,
-                               deriveordertype(parentordertype,true));
+                               depth + idx);
     }
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->rightlcpdist[idx] < end)
@@ -1186,7 +1163,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                              unsigned long depth)
 {
   bsr->mkvauxstack.nextfreeMKVstack = 0;
-  subsort_bentleysedgewick(bsr, 0, width, depth, Descending);
+  subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeMKVstack > 0)
   {
     unsigned long leftplusw, pa, pb, pc, pd, pm, bucketright,
@@ -1196,7 +1173,6 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     Sfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
     GtUchar tmpvar;
-    Ordertype parentordertype;
     GtCommonunits commonunits;
     const int commonunitsequal = bsr->sfxstrategy->cmpcharbychar
                                  ? 1
@@ -1207,7 +1183,6 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     subbucketleft = STACKTOP.subbucketleft;
     width = STACKTOP.width;
     depth = STACKTOP.depth;
-    parentordertype = STACKTOP.ordertype;
     bucketright = width - 1;
 
     if (bsr->sfxstrategy->cmpcharbychar)
@@ -1231,10 +1206,8 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                          width,
                          &pivotcmpbits,
                          pm,
-                         parentordertype,
                          depth);
-        /* new values for subbucketleft, bucketright, depth and
-           parentordertype */
+        /* new values for subbucketleft, bucketright, depth */
         continue;
       }
       BS_SWAPARRAY(temp, subbucketleft, 0, pm);
@@ -1382,8 +1355,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       subsort_bentleysedgewick(bsr,
                                subbucketleft,
                                wtmp,
-                               depth + smallerminlcp,
-                               Noorder);
+                               depth + smallerminlcp);
     } else
     {
       leftplusw = 0;
@@ -1395,8 +1367,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       subsort_bentleysedgewick(bsr,
                                subbucketleft + leftplusw,
                                bucketright-(pd-pb)-leftplusw,
-                               depth+commonunitsequal,
-                               Noorder);
+                               depth+commonunitsequal);
     }
 
     gt_assert(pd >= pc);
@@ -1416,8 +1387,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       subsort_bentleysedgewick(bsr,
                                subbucketleft + bucketright - wtmp + 1,
                                wtmp,
-                               depth + greaterminlcp,
-                               Noorder);
+                               depth + greaterminlcp);
     }
   }
 }
