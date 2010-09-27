@@ -494,19 +494,19 @@ unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex)
 }
 
 unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
-                                       const GtUchar *query,
-                                       unsigned long queryLength)
+                                       const GtUchar *suffix,
+                                       unsigned long suffixLength)
 {
   const GtUchar *qptr, *qend;
   Symbol curChar;
   const MRAEnc *alphabet;
-  unsigned long start, end, retval;
+  unsigned long start, end;
 
-  gt_assert(bwtSubject && query);
+  gt_assert(bwtSubject && suffix);
   alphabet = BWTSeqGetAlphabet((const BWTSeq *) bwtSubject);
 
-  qptr = query;
-  qend = query + queryLength;
+  qptr = suffix;
+  qend = suffix + suffixLength;
 
   curChar = MRAEncMapSymbol(alphabet, *qptr);
 
@@ -525,10 +525,9 @@ unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
     end = ((const BWTSeq *) bwtSubject)->count[curChar] + occPair.b;
   }
   if (qptr == qend && start < end)
-    retval = queryLength + 1;
+    return suffixLength + 1;
   else
-    retval = qptr - query;
-  return retval;
+    return qptr - suffix;
 }
 
 double gt_pck_getGCcontent(const FMindex *bwtSubject,

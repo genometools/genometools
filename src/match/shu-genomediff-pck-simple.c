@@ -56,6 +56,11 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
   const FMindex *subjectindex = NULL;
   Genericindex *genericindexSubject;
   const GtEncseq *encseq = NULL;
+  double *ln_n_fac;
+
+  ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
+  gt_log_log("ln(max_ln_n_fac!) = %f\n",
+             ln_n_fac[arguments->max_ln_n_fac]);
 
   genericindexSubject = genericindex_new(gt_str_get(
                                            arguments->indexname),
@@ -145,12 +150,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
 
       if ( !had_err )
       {
-        double *ln_n_fac;
         double div, kr;
-
-        ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
-        gt_log_log("ln(max_ln_n_fac!) = %f\n",
-                   ln_n_fac[arguments->max_ln_n_fac]);
 
         gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
         gt_log_log("shu: %f, gc: %f, len: %lu",
@@ -169,12 +169,11 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
         kr = gt_calculateKr(div);
 
         printf("# Kr:\n%f\n", kr);
-
-        gt_free(ln_n_fac);
       }
     }
     gt_free(description);
   }
+  gt_free(ln_n_fac);
   gt_seqiterator_delete(queries);
   genericindex_delete(genericindexSubject);
   return had_err;

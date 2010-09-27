@@ -277,7 +277,7 @@ static int process_shu_node(ShuNode *node,
   int had_err = 0;
   uint64_t old;
   unsigned long idx_i, idx_j, termChild_x_i, idx_char;
-  unsigned child_y;
+  unsigned child_c;
   ShuNode *parent = NULL;
 
   gt_assert(node->process);
@@ -321,19 +321,19 @@ static int process_shu_node(ShuNode *node,
         }
       }
       /* scan branch */
-      for (child_y = 1U; (unsigned long) child_y <= numofchars; child_y++)
+      for (child_c = 1U; (unsigned long) child_c <= numofchars; child_c++)
       {
-        if (!had_err && node->countTermSubtree[child_y][idx_i] > 0)
+        if (!had_err && node->countTermSubtree[child_c][idx_i] > 0)
         {
           for (idx_j = 0; idx_j < numoffiles; idx_j++)
           {
-            /* idx_j elem seqIds[x] \ seqIds[child_y] */
+            /* idx_j elem seqIds[x] \ seqIds[child_c] */
             if (node->countTermSubtree[0][idx_j] > 0 &&
-                node->countTermSubtree[child_y][idx_j] == 0)
+                node->countTermSubtree[child_c][idx_j] == 0)
             {
               old = shulen[idx_i][idx_j];
               shulen[idx_i][idx_j] += ((node->depth + 1) *
-                                       node->countTermSubtree[child_y][idx_i]);
+                                       node->countTermSubtree[child_c][idx_i]);
               if (shulen[idx_i][idx_j] < old)
               {
                 had_err = -1;
