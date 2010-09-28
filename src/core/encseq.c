@@ -107,6 +107,25 @@
           bitwise = 0;\
         }
 
+#define UPDATESEQBUFFEREQUALLENGTH(CC)\
+        bitwise <<= 2;\
+        if (ISNOTSPECIAL(CC))\
+        {\
+          bitwise |= (GtTwobitencoding) (CC);\
+        } else\
+        {\
+          gt_assert((CC) == (GtUchar) SEPARATOR);\
+        }\
+        if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))\
+        {\
+          widthbuffer++;\
+        } else\
+        {\
+          *tbeptr++ = bitwise;\
+          widthbuffer = 0;\
+          bitwise = 0;\
+        }
+
 #define UPDATESEQBUFFERFINAL\
         if (widthbuffer > 0)\
         {\
@@ -1132,7 +1151,7 @@ static int fillViaequallength(GtEncseq *encseq,
     retval = gt_sequence_buffer_next(fb,&cc,err);
     if (retval == 1)
     {
-      UPDATESEQBUFFER(cc);
+      UPDATESEQBUFFEREQUALLENGTH(cc);
     } else
     {
       if (retval < 0)
@@ -1165,9 +1184,10 @@ static bool specialsingleposViaequallength(const GtEncseq *encseq,
 static GtUchar delivercharViaequallength(const GtEncseq *encseq,
                                          unsigned long pos)
 {
-  if (!specialsingleposViaequallength(encseq,pos))
+  unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  if (twobits > 0 || !specialsingleposViaequallength(encseq,pos))
   {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+    return (GtUchar) twobits;
   }
   return (GtUchar) SEPARATOR;
 }
@@ -1293,25 +1313,17 @@ static int fillViabitaccess(GtEncseq *encseq,
 static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                                               unsigned long pos)
 {
-  if (!GT_ISIBITSET(encseq->specialbits,pos))
+  unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  if (twobits > 1UL || !GT_ISIBITSET(encseq->specialbits,pos))
   {
-    return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+    return (GtUchar) twobits;
   }
-  return EXTRACTENCODEDCHAR(encseq->twobitencoding,pos)
-               ? (GtUchar) SEPARATOR
-               : (GtUchar) WILDCARD;
+  return twobits ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
 }
 
 static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr)
 {
-  if (!GT_ISIBITSET(esr->encseq->specialbits,esr->currentpos))
-  {
-    return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
-                                        esr->currentpos);
-  }
-  return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
-             ? (GtUchar) SEPARATOR
-             : (GtUchar) WILDCARD;
+  return delivercharViabitaccessSpecial(esr->encseq,esr->currentpos);
 }
 
 static bool containsspecialViabitaccess(const GtEncseq *encseq,
