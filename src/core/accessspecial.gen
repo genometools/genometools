@@ -120,7 +120,7 @@ static int ADDTYPE(fillspecialtables)(GtEncseq *encseq,
     UPDATESEQBUFFER(cc);
   }
   gt_assert(sumspecials == countspecials);
-  UPDATESEQBUFFERFINAL;
+  UPDATESEQBUFFERFINAL(1UL);
 #ifndef NOENDPTR
   while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)
   {

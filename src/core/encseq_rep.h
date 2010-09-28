@@ -70,6 +70,9 @@ struct GtEncseq
                                 unsigned long,
                                 unsigned long);
   const char *delivercontainsspecialname;
+  bool(*issinglepositionspecial)(const GtEncseq *,
+                                 unsigned long);
+  const char *issinglepositionspecialname;
   unsigned long numofspecialcells;
   /* encseq->totallength/encseq->maxspecialtype + 1;*/
   unsigned int maxspecialtype;  /* maximal value of special type */
@@ -103,6 +106,7 @@ struct GtEncseq
 
   GtTwobitencoding *twobitencoding;
   unsigned long unitsoftwobitencoding;
+  unsigned long maxcharforspecial; /* only defined when twobitencoding != NULL*/
 
   /* only for GT_ACCESS_TYPE_UCHARTABLES,
               GT_ACCESS_TYPE_USHORTTABLES,
