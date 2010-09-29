@@ -311,13 +311,14 @@ static Blindtrienodeptr blindtrie_findcompanion(
   return head;
 }
 
-static void blindtrie_insertsuffix(Blindtrie *blindtrie,
-                                   Blindtrienodeptr oldnode,
-                                   Blindtriesymbol mm_oldsuffix,
-                                   unsigned long lcp,
-                                   Blindtriesymbol mm_newsuffix,
-                                   unsigned long currentstartpos,
-                                   unsigned long currenttwobitencodingstoppos)
+static void blindtrie_insertatsplitpoint(Blindtrie *blindtrie,
+                                         Blindtrienodeptr oldnode,
+                                         Blindtriesymbol mm_oldsuffix,
+                                         unsigned long lcp,
+                                         Blindtriesymbol mm_newsuffix,
+                                         unsigned long currentstartpos,
+                                         unsigned long
+                                           currenttwobitencodingstoppos)
 {
   Blindtrienodeptr newleaf, newnode, previous, current;
 
@@ -897,13 +898,13 @@ unsigned long gt_blindtrie_suffixsort(
           break;
         }
       }
-      blindtrie_insertsuffix(blindtrie,
-                             currentnode,
-                             mm_oldsuffix,
-                             lcp,
-                             mm_newsuffix,
-                             currentstartpos,
-                             currenttwobitencodingstoppos);
+      blindtrie_insertatsplitpoint(blindtrie,
+                                   currentnode,
+                                   mm_oldsuffix,
+                                   lcp,
+                                   mm_newsuffix,
+                                   currentstartpos,
+                                   currenttwobitencodingstoppos);
 #ifdef SKDEBUG
       printf("step %lu\n",idx);
       gt_blindtrie_show(blindtrie);
