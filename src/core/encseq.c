@@ -241,10 +241,18 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
 static uint64_t countgt_encseq_get_encoded_char = 0;
 #endif
 
+#define NEWVERSION
+#ifdef NEWVERSION
 static GtUchar gt_encseq_get_encoded_char_nontwobitencoding(
                                    const GtEncseq *encseq,
                                    unsigned long pos,
                                    GtReadmode readmode)
+#else
+GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
+                                   unsigned long pos,
+                                   GtReadmode readmode)
+
+#endif
 {
 #ifdef WITHshowgetencodedcharcounters
   countgt_encseq_get_encoded_char++;
@@ -274,6 +282,7 @@ static GtUchar gt_encseq_get_encoded_char_nontwobitencoding(
   }
 }
 
+#ifdef NEWVERSION
 GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                    unsigned long pos,
                                    GtReadmode readmode)
@@ -305,6 +314,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                                         readmode);
   }
 }
+#endif
 
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
