@@ -126,13 +126,12 @@
           bitwise = 0;\
         }
 
-#define UPDATESEQBUFFERFINAL(MAXCHARFORSPECIAL)\
+#define UPDATESEQBUFFERFINAL\
         if (widthbuffer > 0)\
         {\
           bitwise <<= GT_MULT2(GT_UNITSIN2BITENC - widthbuffer);\
           *tbeptr = bitwise;\
-        } \
-        encseq->maxcharforspecial = MAXCHARFORSPECIAL
+        }
 
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                  const GtUchar *seq,
@@ -283,21 +282,22 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   if (encseq->twobitencoding != NULL)
   {
     unsigned long twobits;
+
     if (GT_ISDIRREVERSE(readmode))
     {
       pos = GT_REVERSEPOS(encseq->totallength,pos);
     }
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-    if (encseq->numofspecialstostore  == 0 ||
-        (twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos))
-         > encseq->maxcharforspecial ||
+    if (encseq->numofspecialstostore == 0 ||
+        twobits > encseq->maxcharforspecial ||
         !encseq->issinglepositionspecial(encseq,pos))
     {
-      return GT_ISDIRCOMPLEMENT(readmode) ? GT_COMPLEMENTBASE((GtUchar) twobits)
-                                          : (GtUchar) twobits;
+      return GT_ISDIRCOMPLEMENT(readmode)
+               ? GT_COMPLEMENTBASE((GtUchar) twobits)
+               : (GtUchar) twobits;
     }
-    return (encseq->maxcharforspecial == 0 || twobits) ?
-           (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
+    return (encseq->maxcharforspecial == 0 || twobits)
+             ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
   } else
   {
     return gt_encseq_get_encoded_char_nontwobitencoding(encseq,
@@ -1121,7 +1121,7 @@ static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
   {
     return (GtUchar) SEPARATOR;
   }
-  fprintf(stderr,"delivercharViabytecompress: cc=%lu\n not possible\n",
+  fprintf(stderr,"delivercharViabytecompress: cc=%lu not possible\n",
                   (unsigned long) cc);
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
@@ -1207,7 +1207,7 @@ static int fillViaequallength(GtEncseq *encseq,
       break;
     }
   }
-  UPDATESEQBUFFERFINAL(0);
+  UPDATESEQBUFFERFINAL;
   return 0;
 }
 
@@ -1357,7 +1357,7 @@ static int fillViabitaccess(GtEncseq *encseq,
       break;
     }
   }
-  UPDATESEQBUFFERFINAL(1UL);
+  UPDATESEQBUFFERFINAL;
   return 0;
 }
 
@@ -1459,7 +1459,7 @@ DECLAREDELIVERVIATABLESFUNCTION(delivercharViauchartablesSpecialrange,
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauchar,
-                                ucharchecknospecial)
+                                ucharchecknospecialrange)
 
 /* GT_ACCESS_TYPE_USHORTTABLES */
 
@@ -1471,7 +1471,7 @@ DECLAREDELIVERVIATABLESFUNCTION(delivercharViaushorttablesSpecialrange,
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViaushort,
-                                ushortchecknospecial)
+                                ushortchecknospecialrange)
 
 /* GT_ACCESS_TYPE_UINT32TABLES */
 
@@ -1483,7 +1483,7 @@ DECLAREDELIVERVIATABLESFUNCTION(delivercharViauint32tablesSpecialrange,
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauint32,
-                                uint32checknospecial)
+                                uint32checknospecialrange)
 
 #ifdef GT_RANGEDEBUG
 
@@ -2306,9 +2306,11 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   if (sat == GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
     encseq->unitsoftwobitencoding = 0;
+    encseq->maxcharforspecial = 0; /* to have a defined value */
   } else
   {
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
+    encseq->maxcharforspecial = (sat == GT_ACCESS_TYPE_EQUALLENGTH) ? 0 : 1UL;
   }
   encseq->ucharspecialrangelength = NULL;
   encseq->ushortspecialrangelength = NULL;
@@ -4536,12 +4538,13 @@ static inline GtBitsequence revextractspecialbits_bruteforce(
 }
 
 static void checkextractunitatpos(const GtEncseq *encseq,
-                                  GtReadmode readmode,bool complement)
+                                  GtReadmode readmode)
 {
   GtEndofTwobitencoding ptbe1, ptbe2;
   GtEncseqReader *esr;
   unsigned long startpos, twobitencodingstoppos;
-  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true,
+       complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
 
   esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
   for (startpos = 0; startpos < encseq->totallength; startpos++)
@@ -5101,6 +5104,7 @@ static void runscanatpostrial(const GtEncseq *encseq,
 
   totallength = gt_encseq_total_length(encseq);
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
+  printf("runscanatpostrial with startpos %lu\n",startpos);
   for (pos=startpos; pos < totallength; pos++)
   {
     /* Random access */
@@ -5308,7 +5312,7 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
   if (encseq->sat != GT_ACCESS_TYPE_DIRECTACCESS &&
       encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS)
   {
-    checkextractunitatpos(encseq,readmode,complement);
+    checkextractunitatpos(encseq,readmode);
     if (multicharcmptrials > 0)
     {
       testmulticharactercompare(encseq,readmode,multicharcmptrials);
