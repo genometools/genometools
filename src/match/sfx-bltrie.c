@@ -820,47 +820,32 @@ static unsigned long gt_blindtrie2sorting(Blindtrie *blindtrie,
   return numoflargelcpvalues;
 }
 
-unsigned long gt_blindtrie_suffixsort(
-                            Blindtrie *blindtrie,
-                            unsigned long subbucketleft,
-                            unsigned long *lcpsubtab,
-                            unsigned long numberofsuffixes,
-                            unsigned long offset,
-                            unsigned long maxdepth,
-                            void *voiddcov,
-                            Dc_processunsortedrange dc_processunsortedrange)
+void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
+                               unsigned long offset,
+                               unsigned long maxdepth,
+                               unsigned long currentstartpos)
 {
-  unsigned long idx,
-                stackidx,
-                currentstartpos,
-                lcp,
-                currenttwobitencodingstoppos;
-  Blindtrienodeptr leafinsubtrie, currentnode;
-  Blindtriesymbol mm_oldsuffix, mm_newsuffix;
 
-  /*
-  printf("sizeof (Blindtrienode)=%lu\n",(unsigned long) sizeof (Blindtrienode));
-  */
   gt_assert(maxdepth == 0 || maxdepth > offset);
-  if (maxdepth == 0)
-  {
-    blindtrie->maxdepthminusoffset = 0;
+  if (blindtrie->nextfreeBlindtrienode == 0)
+  { /* empty tree */
+    if (maxdepth == 0)
+    {
+      blindtrie->maxdepthminusoffset = 0;
+    } else
+    {
+      blindtrie->maxdepthminusoffset = maxdepth - offset;
+    }
+    blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
+    blindtrie->root = blindtrie_makeroot(blindtrie,currentstartpos);
   } else
   {
-    blindtrie->maxdepthminusoffset = maxdepth - offset;
-  }
-  blindtrie->nextfreeBlindtrienode = 0;
-  blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
-  currentstartpos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,0)
-                    + offset;
-  blindtrie->root = blindtrie_makeroot(blindtrie,currentstartpos);
-#ifdef SKDEBUG
-  blindtrie_showstate(blindtrie,subbucketleft,numberofsuffixes,offset);
-#endif
-  for (idx=1UL; idx < numberofsuffixes; idx++)
-  {
-    currentstartpos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx)
-                      + offset;
+    unsigned long stackidx,
+                  lcp,
+                  currenttwobitencodingstoppos;
+    Blindtrienodeptr leafinsubtrie, currentnode;
+    Blindtriesymbol mm_oldsuffix, mm_newsuffix;
+
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
     {
       currenttwobitencodingstoppos
@@ -905,15 +890,33 @@ unsigned long gt_blindtrie_suffixsort(
                                    mm_newsuffix,
                                    currentstartpos,
                                    currenttwobitencodingstoppos);
-#ifdef SKDEBUG
-      printf("step %lu\n",idx);
-      gt_blindtrie_show(blindtrie);
-#endif
     } else
     {
-      /* current position is out of range */
       GT_STOREINARRAY(&blindtrie->overflowsuffixes,GtUlong,32,currentstartpos);
     }
+  }
+}
+
+unsigned long gt_blindtrie_suffixsort(
+                            Blindtrie *blindtrie,
+                            unsigned long subbucketleft,
+                            unsigned long *lcpsubtab,
+                            unsigned long numberofsuffixes,
+                            unsigned long offset,
+                            unsigned long maxdepth,
+                            void *voiddcov,
+                            Dc_processunsortedrange dc_processunsortedrange)
+{
+  unsigned long idx, currentstartpos;
+
+  blindtrie->nextfreeBlindtrienode = 0;
+  for (idx=0; idx < numberofsuffixes; idx++)
+  {
+    currentstartpos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx);
+    gt_blindtrie_insertsuffix(blindtrie,
+                              offset,
+                              maxdepth,
+                              currentstartpos + offset);
   }
   return gt_blindtrie2sorting(blindtrie,
                               subbucketleft,
