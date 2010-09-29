@@ -638,9 +638,6 @@ static int runsuffixerator(bool doesa,
   return haserr ? -1 : 0;
 }
 
-extern unsigned long correct_order;
-extern unsigned long inverse_order;
-extern unsigned long no_order;
 void showgetencodedcharcounters(void);
 
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,

@@ -760,8 +760,6 @@ static int blindtrie_compare_ascending(const void *a,const void *b)
   return *aptr < *bptr ? -1 : 1;
 }
 
-unsigned long inverse_order = 0, no_order = 0, correct_order = 0;
-
 static void processoverflowsuffixes(Blindtrie *blindtrie,
                                     unsigned long offset,
                                     unsigned long *lcpsubtab,
