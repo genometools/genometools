@@ -377,7 +377,7 @@ static void blindtrie_insertatsplitnode(Blindtrie *blindtrie,
 
 static unsigned long blindtrie_cmpcharbychar_getlcp(
                                  Blindtriesymbol *mm_oldsuffix,
-                                 GT_UNUSED bool *mm_oldsuffixisseparator,
+                                 bool *mm_oldsuffixisseparator,
                                  Blindtriesymbol *mm_newsuffix,
                                  const Blindtrie *blindtrie,
                                  unsigned long leafpos,
@@ -404,10 +404,18 @@ static unsigned long blindtrie_cmpcharbychar_getlcp(
             gt_encseq_reader_next_encoded_char(blindtrie->esr1);
       if (BLINDTRIECHAR_ISSPECIAL(cc1))
       {
+        if (mm_oldsuffixisseparator != NULL)
+        {
+          *mm_oldsuffixisseparator = (cc1 == SEPARATOR) ? true : false;
+        }
         cc1 = GT_UNIQUEINT(leafpos + lcp);
       }
     } else
     {
+      if (mm_oldsuffixisseparator != NULL)
+      {
+        *mm_oldsuffixisseparator = true;
+      }
       cc1 = GT_UNIQUEINT(leafpos + lcp);
     }
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,lcp))
@@ -436,7 +444,7 @@ static unsigned long blindtrie_cmpcharbychar_getlcp(
 
 static unsigned long blindtrie_twobitencoding_getlcp(
                                  Blindtriesymbol *mm_oldsuffix,
-                                 GT_UNUSED bool *mm_oldsuffixisseparator,
+                                 bool *mm_oldsuffixisseparator,
                                  Blindtriesymbol *mm_newsuffix,
                                  const Blindtrie *blindtrie,
                                  unsigned long leafpos,
@@ -474,6 +482,20 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                                    blindtrie->readmode);
   } else
   {
+    if (mm_oldsuffixisseparator != NULL)
+    {
+      if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth))
+      {
+        *mm_oldsuffixisseparator = true;
+      } else
+      {
+        gt_assert(commonunits.leftspecial);
+        /* be careful: if wildcards occur in the sequence,
+           the following statement may be wrong. Please contact stefan
+           if program is applied for such sequences. */
+        *mm_oldsuffixisseparator = true;
+      }
+    }
     *mm_oldsuffix = GT_UNIQUEINT(leafpos + commonunits.finaldepth);
   }
   if (blindtrie_isleftofboundary(blindtrie,currentstartpos,
@@ -673,21 +695,27 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                              blindtrie->allocatedBlindtrienode *
                              sizeof (Blindtrienode)));
   */
-  blindtrie->nextfreeBlindtrienode = 0;
   GT_INITARRAY (&blindtrie->overflowsuffixes, GtUlong);
   GT_INITARRAY (&blindtrie->stack, Blindtrienodeptr);
-
+  blindtrie->nextfreeBlindtrienode = 0;
+  blindtrie->root = NULL;
   blindtrie->encseq = encseq;
   blindtrie->has_twobitencoding_stoppos_support
     = gt_has_twobitencoding_stoppos_support(encseq);
   blindtrie->readmode = readmode;
-  blindtrie->root = NULL;
   blindtrie->esr1 = esr1;
   blindtrie->esr2 = esr2;
   blindtrie->totallength = gt_encseq_total_length(encseq);
   blindtrie->cmpcharbychar = cmpcharbychar;
   blindtrie->sssp = suffixsortspace;
   return blindtrie;
+}
+
+void gt_blindtrie_reset(Blindtrie *blindtrie)
+{
+  blindtrie->root = NULL;
+  blindtrie->nextfreeBlindtrienode = 0;
+  blindtrie->stack.nextfreeBlindtrienodeptr = 0;
 }
 
 void gt_blindtrie_delete(Blindtrie *blindtrie)
@@ -825,7 +853,7 @@ static void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
     {
       unsigned long lcp, currenttwobitencodingstoppos;
-      Blindtrienodeptr leafinsubtrie, currentnode;
+      Blindtrienodeptr leafinsubtrie, splitnode;
       Blindtriesymbol mm_oldsuffix, mm_newsuffix;
 
       currenttwobitencodingstoppos
@@ -833,16 +861,16 @@ static void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
       leafinsubtrie = blindtrie_findcompanion(blindtrie,currentstartpos,
                                               currenttwobitencodingstoppos);
       gt_assert(blindtrie_isleaf(leafinsubtrie));
-      lcp = blindtrie_getlcp (&mm_oldsuffix,
-                              NULL,
-                              &mm_newsuffix,
-                              blindtrie,
-                              leafinsubtrie,
-                              currentstartpos,
-                              currenttwobitencodingstoppos);
-      currentnode = blindtrie_findsplitnode(blindtrie,lcp);
+      lcp = blindtrie_getlcp(&mm_oldsuffix,
+                             NULL,
+                             &mm_newsuffix,
+                             blindtrie,
+                             leafinsubtrie,
+                             currentstartpos,
+                             currenttwobitencodingstoppos);
+      splitnode = blindtrie_findsplitnode(blindtrie,lcp);
       blindtrie_insertatsplitnode(blindtrie,
-                                  currentnode,
+                                  splitnode,
                                   mm_oldsuffix,
                                   lcp,
                                   mm_newsuffix,
@@ -933,7 +961,7 @@ unsigned long gt_blindtrie_suffixsort(
 {
   unsigned long idx, currentstartpos;
 
-  blindtrie->nextfreeBlindtrienode = 0;
+  gt_blindtrie_reset(blindtrie);
   for (idx=0; idx < numberofsuffixes; idx++)
   {
     currentstartpos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx);
@@ -949,4 +977,48 @@ unsigned long gt_blindtrie_suffixsort(
                               maxdepth,
                               voiddcov,
                               dc_processunsortedrange);
+}
+
+bool gt_blindtrie_retrieve(Blindtrie *blindtrie,
+                           unsigned long currentstartpos)
+{
+  if (blindtrie->nextfreeBlindtrienode == 0)
+  {
+    blindtrie->maxdepthminusoffset = 0;
+    blindtrie->root = blindtrie_makeroot(blindtrie,currentstartpos);
+    return false;
+  } else
+  {
+    Blindtrienodeptr leafinsubtrie, splitnode;
+    Blindtriesymbol mm_oldsuffix, mm_newsuffix;
+    bool mm_oldsuffixisseparator;
+    unsigned long currenttwobitencodingstoppos, lcp;
+
+    currenttwobitencodingstoppos
+      = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+    leafinsubtrie = blindtrie_findcompanion(blindtrie,currentstartpos,
+                                            currenttwobitencodingstoppos);
+    gt_assert(blindtrie_isleaf(leafinsubtrie));
+    lcp = blindtrie_getlcp(&mm_oldsuffix,
+                           &mm_oldsuffixisseparator,
+                           &mm_newsuffix,
+                           blindtrie,
+                           leafinsubtrie,
+                           currentstartpos,
+                           currenttwobitencodingstoppos);
+    splitnode = blindtrie_findsplitnode(blindtrie,lcp);
+    if (blindtrie_isleaf(splitnode) && GT_ISUNIQUEINT(mm_oldsuffix) &&
+        mm_oldsuffixisseparator)
+    {
+      return true;
+    }
+    blindtrie_insertatsplitnode(blindtrie,
+                                splitnode,
+                                mm_oldsuffix,
+                                lcp,
+                                mm_newsuffix,
+                                currentstartpos,
+                                currenttwobitencodingstoppos);
+    return false;
+  }
 }

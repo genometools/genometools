@@ -32,6 +32,8 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                             GtEncseqReader *esr2,
                             GtReadmode readmode);
 
+void gt_blindtrie_reset(Blindtrie *blindtrie);
+
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             unsigned long subbucketleft,
@@ -43,5 +45,8 @@ unsigned long gt_blindtrie_suffixsort(
                             Dc_processunsortedrange dc_processunsortedrange);
 
 void gt_blindtrie_delete(Blindtrie *blindtrie);
+
+bool gt_blindtrie_retrieve(Blindtrie *blindtrie,
+                           unsigned long currentstartpos);
 
 #endif
