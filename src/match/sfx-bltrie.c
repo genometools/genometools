@@ -782,6 +782,79 @@ static void blindtrie_showstate(const Blindtrie *blindtrie,
 
 #endif
 
+static Blindtrienodeptr blindtrie_findsplitnode(const Blindtrie *blindtrie,
+                                                unsigned long lcp)
+{
+  Blindtrienodeptr currentnode;
+  unsigned long stackidx;
+
+  currentnode = blindtrie->root;
+  for (stackidx=0;stackidx<blindtrie->stack.nextfreeBlindtrienodeptr;
+       stackidx++)
+  {
+    currentnode = blindtrie->stack.spaceBlindtrienodeptr[stackidx];
+    if (blindtrie_isleaf(currentnode) ||
+        blindtrie_getdepth(currentnode) >= lcp)
+    {
+      break;
+    }
+  }
+  return currentnode;
+}
+
+static void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
+                                      unsigned long offset,
+                                      unsigned long maxdepth,
+                                      unsigned long currentstartpos)
+{
+
+  gt_assert(maxdepth == 0 || maxdepth > offset);
+  if (blindtrie->nextfreeBlindtrienode == 0)
+  { /* empty tree */
+    if (maxdepth == 0)
+    {
+      blindtrie->maxdepthminusoffset = 0;
+    } else
+    {
+      blindtrie->maxdepthminusoffset = maxdepth - offset;
+    }
+    blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
+    blindtrie->root = blindtrie_makeroot(blindtrie,currentstartpos);
+  } else
+  {
+    if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
+    {
+      unsigned long lcp, currenttwobitencodingstoppos;
+      Blindtrienodeptr leafinsubtrie, currentnode;
+      Blindtriesymbol mm_oldsuffix, mm_newsuffix;
+
+      currenttwobitencodingstoppos
+        = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+      leafinsubtrie = blindtrie_findcompanion(blindtrie,currentstartpos,
+                                              currenttwobitencodingstoppos);
+      gt_assert(blindtrie_isleaf(leafinsubtrie));
+      lcp = blindtrie_getlcp (&mm_oldsuffix,
+                              NULL,
+                              &mm_newsuffix,
+                              blindtrie,
+                              leafinsubtrie,
+                              currentstartpos,
+                              currenttwobitencodingstoppos);
+      currentnode = blindtrie_findsplitnode(blindtrie,lcp);
+      blindtrie_insertatsplitnode(blindtrie,
+                                  currentnode,
+                                  mm_oldsuffix,
+                                  lcp,
+                                  mm_newsuffix,
+                                  currentstartpos,
+                                  currenttwobitencodingstoppos);
+    } else
+    {
+      GT_STOREINARRAY(&blindtrie->overflowsuffixes,GtUlong,32,currentstartpos);
+    }
+  }
+}
+
 static int blindtrie_compare_ascending(const void *a,const void *b)
 {
   unsigned long *aptr = (unsigned long *) a;
@@ -846,79 +919,6 @@ static unsigned long gt_blindtrie2sorting(Blindtrie *blindtrie,
     numoflargelcpvalues += blindtrie->overflowsuffixes.nextfreeGtUlong;
   }
   return numoflargelcpvalues;
-}
-
-static Blindtrienodeptr blindtrie_findsplitnode(const Blindtrie *blindtrie,
-                                                unsigned long lcp)
-{
-  Blindtrienodeptr currentnode;
-  unsigned long stackidx;
-
-  currentnode = blindtrie->root;
-  for (stackidx=0;stackidx<blindtrie->stack.nextfreeBlindtrienodeptr;
-       stackidx++)
-  {
-    currentnode = blindtrie->stack.spaceBlindtrienodeptr[stackidx];
-    if (blindtrie_isleaf(currentnode) ||
-        blindtrie_getdepth(currentnode) >= lcp)
-    {
-      break;
-    }
-  }
-  return currentnode;
-}
-
-void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
-                               unsigned long offset,
-                               unsigned long maxdepth,
-                               unsigned long currentstartpos)
-{
-
-  gt_assert(maxdepth == 0 || maxdepth > offset);
-  if (blindtrie->nextfreeBlindtrienode == 0)
-  { /* empty tree */
-    if (maxdepth == 0)
-    {
-      blindtrie->maxdepthminusoffset = 0;
-    } else
-    {
-      blindtrie->maxdepthminusoffset = maxdepth - offset;
-    }
-    blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
-    blindtrie->root = blindtrie_makeroot(blindtrie,currentstartpos);
-  } else
-  {
-    unsigned long lcp, currenttwobitencodingstoppos;
-    Blindtrienodeptr leafinsubtrie, currentnode;
-    Blindtriesymbol mm_oldsuffix, mm_newsuffix;
-
-    if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
-    {
-      currenttwobitencodingstoppos
-        = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
-      leafinsubtrie = blindtrie_findcompanion(blindtrie,currentstartpos,
-                                              currenttwobitencodingstoppos);
-      gt_assert(blindtrie_isleaf(leafinsubtrie));
-      lcp = blindtrie_getlcp (&mm_oldsuffix,
-                              NULL,
-                              &mm_newsuffix,
-                              blindtrie,
-                              leafinsubtrie,
-                              currentstartpos,
-                              currenttwobitencodingstoppos);
-      currentnode = blindtrie_findsplitnode(blindtrie,lcp);
-      blindtrie_insertatsplitnode(blindtrie,
-                                  currentnode,
-                                  mm_oldsuffix,
-                                  lcp,
-                                  mm_newsuffix,
-                                  currentstartpos,
-                                  currenttwobitencodingstoppos);
-    } else
-    {
-      GT_STOREINARRAY(&blindtrie->overflowsuffixes,GtUlong,32,currentstartpos);
-    }
-  }
 }
 
 unsigned long gt_blindtrie_suffixsort(
