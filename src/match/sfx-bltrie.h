@@ -25,7 +25,7 @@
 typedef struct Blindtrie Blindtrie;
 
 Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
-                            unsigned long numofsuffixes,
+                            unsigned long maxnumofsuffixes,
                             const GtEncseq *encseq,
                             bool cmpcharbychar,
                             GtEncseqReader *esr1,

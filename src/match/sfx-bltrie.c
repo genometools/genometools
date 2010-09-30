@@ -110,6 +110,20 @@ static void blindtrie_firstchar_set(Blindtrienodeptr node,bool isleaf,
   node->firstchar = firstchar;
 }
 
+static Blindtrienodeptr blindtrie_rightsibling_get(
+                     GT_UNUSED const Blindtrie *blindtrie,
+                     const Blindtrienodeptr node)
+{
+  return node->rightsibling;
+}
+
+static void blindtrie_rightsibling_set(GT_UNUSED const Blindtrie *blindtrie,
+                                       Blindtrienodeptr node,
+                                       Blindtrienodeptr rightsibling)
+{
+  node->rightsibling = rightsibling;
+}
+
 static bool blindtrie_isleftofboundary(const Blindtrie *blindtrie,
                                        unsigned long currentstartpos,
                                        unsigned long add)
@@ -137,20 +151,20 @@ static Blindtrienodeptr blindtrie_newnode(Blindtrie *blindtrie)
   return blindtrie->spaceBlindtrienode + blindtrie->nextfreeBlindtrienode++;
 }
 
-static Blindtrienode *blindtrie_newleaf(Blindtrie *blindtrie,
-                                        unsigned long currentstartpos,
-                                        unsigned long
+static Blindtrienodeptr blindtrie_newleaf(Blindtrie *blindtrie,
+                                          unsigned long currentstartpos,
+                                          unsigned long
                                           currenttwobitencodingstoppos,
-                                        Blindtriesymbol firstchar,
-                                        struct Blindtrienode *rightsibling)
+                                          Blindtriesymbol firstchar,
+                                          Blindtrienodeptr rightsibling)
 {
-  Blindtrienode *newleaf;
+  Blindtrienodeptr newleaf;
 
   newleaf = blindtrie_newnode(blindtrie);
   blindtrie_firstchar_set(newleaf,true,firstchar);
   newleaf->either.leafinfo.nodestartpos = currentstartpos;
   newleaf->either.leafinfo.nodestoppos = currenttwobitencodingstoppos;
-  newleaf->rightsibling = rightsibling;
+  blindtrie_rightsibling_set(blindtrie,newleaf,rightsibling);
   return newleaf;
 }
 
@@ -173,7 +187,7 @@ static unsigned long blindtrie_currenttwobitencodingstoppos_get(
 static Blindtrienodeptr blindtrie_makeroot(Blindtrie *blindtrie,
                                            unsigned long currentstartpos)
 {
-  Blindtrienode *root;
+  Blindtrienodeptr root;
   Blindtriesymbol firstchar;
   unsigned long currenttwobitencodingstoppos;
 
@@ -181,7 +195,7 @@ static Blindtrienodeptr blindtrie_makeroot(Blindtrie *blindtrie,
   blindtrie_firstchar_set(root,false,0); /* firstchar of root will
                                             never be used */
   blindtrie_setdepth(root,0);
-  root->rightsibling = NULL;
+  blindtrie_rightsibling_set(blindtrie,root,NULL);
   if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
   {
     /* Random access */
@@ -223,7 +237,8 @@ static inline int blindtrie_comparecharacters(Blindtriesymbol oldchar,
   return (oldchar > newchar) ? 1 : ((oldchar < newchar) ? -1 : 0);
 }
 
-static Blindtrienodeptr blindtrie_findsucc(Blindtrienodeptr node,
+static Blindtrienodeptr blindtrie_findsucc(const Blindtrie *blindtrie,
+                                           Blindtrienodeptr node,
                                            Blindtriesymbol newchar)
 {
   int retval;
@@ -239,7 +254,7 @@ static Blindtrienodeptr blindtrie_findsucc(Blindtrienodeptr node,
     {               /* found sibling which is already greater than newchar */
       return NULL;
     }
-    node = node->rightsibling;
+    node = blindtrie_rightsibling_get(blindtrie,node);
     if (node == NULL) /* no more siblings: mismatch */
     {
       return NULL;
@@ -300,7 +315,8 @@ static Blindtrienodeptr blindtrie_findcompanion(
     {
       return blindtrie_extractleafnode(head);
     }
-    succ = blindtrie_findsucc(head->either.internalinfo.firstchild,newchar);
+    succ = blindtrie_findsucc(blindtrie,head->either.internalinfo.firstchild,
+                              newchar);
     if (succ == NULL)
     {
       return blindtrie_extractleafnode(head);
@@ -320,7 +336,7 @@ static void blindtrie_insertatsplitnode(Blindtrie *blindtrie,
                                         unsigned long
                                            currenttwobitencodingstoppos)
 {
-  Blindtrienodeptr newleaf, newnode, previous, current;
+  Blindtrienodeptr newleaf, newnode, previousnode, currentnode;
 
   gt_assert(GT_ISUNIQUEINT(mm_oldsuffix) ||
             GT_ISUNIQUEINT(mm_newsuffix) ||
@@ -343,7 +359,7 @@ static void blindtrie_insertatsplitnode(Blindtrie *blindtrie,
       /* newnode inherits depth+children */
     }
     newnode->either = oldnode->either;
-    newnode->rightsibling = NULL;
+    blindtrie_rightsibling_set(blindtrie,newnode,NULL);
     blindtrie_setleaf(oldnode,false);
     gt_assert(!GT_ISUNIQUEINT(blindtrie_firstchar_get(oldnode)));
     gt_assert(lcp > 0);
@@ -352,23 +368,23 @@ static void blindtrie_insertatsplitnode(Blindtrie *blindtrie,
     oldnode->either.internalinfo.firstchild = newnode;
   }
   gt_assert(blindtrie_isleaf(oldnode) || blindtrie_getdepth(oldnode) == lcp);
-  previous = NULL;
-  current = oldnode->either.internalinfo.firstchild;
-  while (current != NULL &&
-         blindtrie_comparecharacters(blindtrie_firstchar_get(current),
+  previousnode = NULL;
+  currentnode = oldnode->either.internalinfo.firstchild;
+  while (currentnode != NULL &&
+         blindtrie_comparecharacters(blindtrie_firstchar_get(currentnode),
                                      mm_newsuffix) < 0)
   {
-    previous = current;
-    current = current->rightsibling;
+    previousnode = currentnode;
+    currentnode = blindtrie_rightsibling_get(blindtrie,currentnode);
   }
   /* insert new leaf with current suffix */
   /* search S[lcp] among the offsprings */
   newleaf = blindtrie_newleaf(blindtrie,currentstartpos,
                               currenttwobitencodingstoppos,mm_newsuffix,
-                              current);
-  if (previous != NULL)
+                              currentnode);
+  if (previousnode != NULL)
   {
-    previous->rightsibling = newleaf;
+    blindtrie_rightsibling_set(blindtrie,previousnode,newleaf);
   } else
   {
     oldnode->either.internalinfo.firstchild = newleaf;
@@ -626,7 +642,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
       blindtrie_suffixout(blindtrie,subbucketleft,offset,nextfree,
                           currentnode->either.leafinfo.nodestartpos);
       nextfree++;
-      siblval = currentnode->rightsibling;
+      siblval = blindtrie_rightsibling_get(blindtrie,currentnode);
       if (siblval == NULL)
       {
         readyforpop = true;
@@ -646,8 +662,9 @@ static unsigned long blindtrie_enumeratetrieleaves (
           break;
         }
         blindtrie->stack.nextfreeBlindtrienodeptr--;
-        siblval = blindtrie->stack.spaceBlindtrienodeptr[
-                       blindtrie->stack.nextfreeBlindtrienodeptr]->rightsibling;
+        siblval = blindtrie_rightsibling_get(blindtrie,
+                       blindtrie->stack.spaceBlindtrienodeptr[
+                       blindtrie->stack.nextfreeBlindtrienodeptr]);
         if (siblval != NULL)
         {
           BLINDTRIE_SETCURRENTNODE(siblval);   /* current comes from brother */
@@ -675,7 +692,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
 }
 
 Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
-                            unsigned long numofsuffixes,
+                            unsigned long maxnumofsuffixes,
                             const GtEncseq *encseq,
                             bool cmpcharbychar,
                             GtEncseqReader *esr1,
@@ -685,7 +702,7 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   Blindtrie *blindtrie;
 
   blindtrie = gt_malloc(sizeof (*blindtrie));
-  blindtrie->allocatedBlindtrienode = GT_MULT2(numofsuffixes + 1) + 1;
+  blindtrie->allocatedBlindtrienode = GT_MULT2(maxnumofsuffixes + 1) + 1;
   blindtrie->spaceBlindtrienode
     = gt_malloc(sizeof (*blindtrie->spaceBlindtrienode) *
                 blindtrie->allocatedBlindtrienode);
@@ -747,7 +764,7 @@ static void gt_blindtrie_showleaf(const Blindtrie *blindtrie,unsigned int level,
          NODENUM(current),
          (unsigned int) current->firstchar,
          current->either.leafinfo.nodestartpos,
-         NODENUM(current->rightsibling));
+         NODENUM(blindtrie_rightsibling_get(blindtrie,current)));
 }
 
 static void gt_blindtrie_showintern(const Blindtrie *blindtrie,
@@ -762,7 +779,7 @@ static void gt_blindtrie_showintern(const Blindtrie *blindtrie,
           (unsigned int) current->firstchar,
           blindtrie_getdepth(current),
           NODENUM(current->either.internalinfo.firstchild),
-          NODENUM(current->rightsibling));
+          NODENUM(blindtrie_rightsibling_get(current)));
 }
 
 static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
@@ -773,7 +790,7 @@ static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
 
   for (current = node->either.internalinfo.firstchild;
        current != NULL;
-       current = current->rightsibling)
+       current = blindtrie_rightsibling_get(blindtrie,current))
   {
     if (blindtrie_isleaf(current))
     {
