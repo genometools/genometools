@@ -848,6 +848,26 @@ static unsigned long gt_blindtrie2sorting(Blindtrie *blindtrie,
   return numoflargelcpvalues;
 }
 
+static Blindtrienodeptr blindtrie_findsplitnode(const Blindtrie *blindtrie,
+                                                unsigned long lcp)
+{
+  Blindtrienodeptr currentnode;
+  unsigned long stackidx;
+
+  currentnode = blindtrie->root;
+  for (stackidx=0;stackidx<blindtrie->stack.nextfreeBlindtrienodeptr;
+       stackidx++)
+  {
+    currentnode = blindtrie->stack.spaceBlindtrienodeptr[stackidx];
+    if (blindtrie_isleaf(currentnode) ||
+        blindtrie_getdepth(currentnode) >= lcp)
+    {
+      break;
+    }
+  }
+  return currentnode;
+}
+
 void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
                                unsigned long offset,
                                unsigned long maxdepth,
@@ -868,9 +888,7 @@ void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
     blindtrie->root = blindtrie_makeroot(blindtrie,currentstartpos);
   } else
   {
-    unsigned long stackidx,
-                  lcp,
-                  currenttwobitencodingstoppos;
+    unsigned long lcp, currenttwobitencodingstoppos;
     Blindtrienodeptr leafinsubtrie, currentnode;
     Blindtriesymbol mm_oldsuffix, mm_newsuffix;
 
@@ -888,17 +906,7 @@ void gt_blindtrie_insertsuffix(Blindtrie *blindtrie,
                               leafinsubtrie,
                               currentstartpos,
                               currenttwobitencodingstoppos);
-      currentnode = blindtrie->root;
-      for (stackidx=0;stackidx<blindtrie->stack.nextfreeBlindtrienodeptr;
-           stackidx++)
-      {
-        currentnode = blindtrie->stack.spaceBlindtrienodeptr[stackidx];
-        if (blindtrie_isleaf(currentnode) ||
-            blindtrie_getdepth(currentnode) >= lcp)
-        {
-          break;
-        }
-      }
+      currentnode = blindtrie_findsplitnode(blindtrie,lcp);
       blindtrie_insertatsplitnode(blindtrie,
                                   currentnode,
                                   mm_oldsuffix,
