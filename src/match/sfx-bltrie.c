@@ -30,11 +30,13 @@
 #define BLINDTRIE_REFNULL          0
 
 typedef unsigned long Blindtriesymbol;
-typedef unsigned long Blindtrienodeptr;
+typedef unsigned int Blindtrienodeptr;
 
 typedef struct
 {
   Blindtrienodeptr rightsibling;
+  Blindtriesymbol firstchar;
+  bool isleaf;
   union
   {
     struct
@@ -48,8 +50,6 @@ typedef struct
                     nodestoppos;
     } leafinfo;
   } either;
-  Blindtriesymbol firstchar;
-  bool isleaf;
 } Blindtrienode;
 
 GT_DECLAREARRAYSTRUCT(Blindtrienodeptr);
@@ -57,8 +57,8 @@ GT_DECLAREARRAYSTRUCT(Blindtrienodeptr);
 struct Blindtrie
 {
   /* The following belongs to the state and is initialized by blindtrie_new */
-  unsigned long allocatedBlindtrienode,
-                nextfreeBlindtrienode;
+  Blindtrienodeptr allocatedBlindtrienode,
+                   nextfreeBlindtrienode;
   Blindtrienode *spaceBlindtrienode;
   GtArrayBlindtrienodeptr stack;
   GtArrayGtUlong overflowsuffixes;
@@ -71,6 +71,7 @@ struct Blindtrie
                 maxdepthminusoffset;
   bool cmpcharbychar,
        has_twobitencoding_stoppos_support;
+  unsigned int nodenumberincrement;
   GtSuffixsortspace *sssp;
 };
 
@@ -204,8 +205,17 @@ static bool blindtrie_isleftofboundary(const Blindtrie *blindtrie,
 
 static Blindtrienodeptr blindtrie_newnode(Blindtrie *blindtrie)
 {
-  gt_assert(blindtrie->nextfreeBlindtrienode <
-            blindtrie->allocatedBlindtrienode);
+  if (blindtrie->nextfreeBlindtrienode >= blindtrie->allocatedBlindtrienode)
+  {
+    gt_assert(blindtrie->nodenumberincrement >= 1U);
+    gt_assert(blindtrie->allocatedBlindtrienode +
+              blindtrie->nodenumberincrement < UINT_MAX);
+    blindtrie->allocatedBlindtrienode += blindtrie->nodenumberincrement;
+    blindtrie->spaceBlindtrienode
+      = gt_realloc(blindtrie->spaceBlindtrienode,
+                   sizeof (*blindtrie->spaceBlindtrienode) *
+                          blindtrie->allocatedBlindtrienode);
+  }
   return blindtrie->nextfreeBlindtrienode++;
 }
 
@@ -765,6 +775,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
 
 Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                             unsigned long maxnumofsuffixes,
+                            unsigned int nodenumberincrement,
                             const GtEncseq *encseq,
                             bool cmpcharbychar,
                             GtEncseqReader *esr1,
@@ -774,7 +785,18 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   Blindtrie *blindtrie;
 
   blindtrie = gt_malloc(sizeof (*blindtrie));
-  blindtrie->allocatedBlindtrienode = GT_MULT2(maxnumofsuffixes + 1) + 1;
+  if (nodenumberincrement == 0)
+  {
+    gt_assert(maxnumofsuffixes >= 2UL);
+    blindtrie->allocatedBlindtrienode
+      = (Blindtrienodeptr) GT_MULT2(maxnumofsuffixes + 1) + 1;
+    blindtrie->nodenumberincrement = 0;
+  } else
+  {
+    gt_assert(maxnumofsuffixes == 0);
+    blindtrie->allocatedBlindtrienode = 0;
+    blindtrie->nodenumberincrement = nodenumberincrement;
+  }
   blindtrie->spaceBlindtrienode
     = gt_malloc(sizeof (*blindtrie->spaceBlindtrienode) *
                 blindtrie->allocatedBlindtrienode);

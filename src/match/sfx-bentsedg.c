@@ -1826,6 +1826,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
                                       sfxstrategy->maxbltriesort,
+                                      0, /* the nodenumberincrement */
                                       encseq,
                                       sfxstrategy->cmpcharbychar,
                                       bsr->esr1,
