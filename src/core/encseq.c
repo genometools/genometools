@@ -3831,7 +3831,7 @@ void gt_encseq_extract2bitencwithtwobitencodingstoppos(
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
   } else
   {
-    twobitencodingstoppos = 0;
+    twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
   esr->currentpos = gt_encseq_extract2bitenc(ptbe,encseq,fwd,
                                              esr->currentpos,
@@ -4022,6 +4022,8 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
                                  unsigned long depth,
                                  unsigned long maxdepth)
 {
+  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+
   if (maxdepth == 0)
   {
     vtk->endpos = encseq->totallength;
@@ -4040,8 +4042,6 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
                                /* to have a defined value */
   if (vtk->pos < vtk->endpos)
   {
-    bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
-
     if (esr != NULL && gt_has_twobitencoding_stoppos_support(encseq))
     {
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
@@ -4571,7 +4571,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
       twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
     } else
     {
-      twobitencodingstoppos = 0;
+      twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
     }
     esr->currentpos = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,
                                                esr->currentpos,
@@ -4680,7 +4680,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
     twobitencodingstoppos1 = gt_getnexttwobitencodingstoppos (fwd,esr1);
   } else
   {
-    twobitencodingstoppos1 = 0;
+    twobitencodingstoppos1 = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
   esr1->currentpos = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,
                                               esr1->currentpos,
@@ -4691,7 +4691,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
     twobitencodingstoppos2 = gt_getnexttwobitencodingstoppos (fwd,esr2);
   } else
   {
-    twobitencodingstoppos2 = 0;
+    twobitencodingstoppos2 = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
   esr2->currentpos = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,
                                               esr2->currentpos,

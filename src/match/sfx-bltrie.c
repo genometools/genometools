@@ -26,31 +26,43 @@
 #include "sfx-bltrie.h"
 #include "sfx-suffixgetset.h"
 
-#define BLINDTRIECHAR_ISSPECIAL(X) ((X) >= (Blindtriesymbol) WILDCARD)
-#define BLINDTRIE_REFNULL          0
+#define BLINDTRIECHAR_ISSPECIAL(X)     ((X) >= (Blindtriesymbol) WILDCARD)
+#define BLINDTRIE_REFNULL              0
+#define BLINDTRIE_BITSFORRIGHTSIBLING  31
 
 typedef unsigned long Blindtriesymbol;
 typedef unsigned int Blindtrienodeptr;
 
 typedef struct
 {
-  Blindtrienodeptr rightsibling;
   Blindtriesymbol firstchar;
-  bool isleaf;
   union
   {
     struct
     {
-      Blindtrienodeptr firstchild;
       unsigned long depth;
+      Blindtrienodeptr firstchild;
     } internalinfo;
-    struct
+    struct Leafinfo
     {
-      unsigned long nodestartpos,
-                    nodestoppos;
+      unsigned long nodestartpos;
+      unsigned int nodestartstopposoffset;
     } leafinfo;
   } either;
+  unsigned int rightsibling:BLINDTRIE_BITSFORRIGHTSIBLING;
+  unsigned int isleafbit:1;
 } Blindtrienode;
+
+/*
+typedef struct
+{
+  Blindtriesymbol firstchar;
+  unsigned long depth_or_nodestartpos;
+  unsigned int firstchild_or_nodestartstopposoffset;
+  unsigned int rightsibling:BLINDTRIE_BITSFORRIGHTSIBLING;
+  unsigned int isleafbit:1;
+} Blindtrienode;
+*/
 
 GT_DECLAREARRAYSTRUCT(Blindtrienodeptr);
 
@@ -78,13 +90,13 @@ struct Blindtrie
 static bool blindtrie_isleaf(const Blindtrie *blindtrie,
                              const Blindtrienodeptr node)
 {
-  return blindtrie->spaceBlindtrienode[node].isleaf;
+  return blindtrie->spaceBlindtrienode[node].isleafbit ? true : false;
 }
 
 static void blindtrie_setleaf(Blindtrie *blindtrie,
                               const Blindtrienodeptr node,bool isleaf)
 {
-  blindtrie->spaceBlindtrienode[node].isleaf = isleaf;
+  blindtrie->spaceBlindtrienode[node].isleafbit = isleaf ? 1U : 0;
 }
 
 static unsigned long blindtrie_getdepth(const Blindtrie *blindtrie,
@@ -147,17 +159,51 @@ static void blindtrie_firstchild_set(const Blindtrie *blindtrie,
     = firstchild;
 }
 
-static void blindtrie_leafinfo_set(
-                      Blindtrie *blindtrie,
-                      Blindtrienodeptr node,
-                      unsigned long currentstartpos,
-                      unsigned long currenttwobitencodingstoppos)
+#define GT_TWOBITENCODINGSTARTSTOPOFFSETUNDEF UINT_MAX
+
+static void blindtrie_leafinfo_set(Blindtrie *blindtrie,
+                                   struct Leafinfo *leafinfo,
+                                   unsigned long currentstartpos,
+                                   unsigned long currenttwobitencodingstoppos)
 {
-  gt_assert(blindtrie_isleaf(blindtrie,node));
-  blindtrie->spaceBlindtrienode[node].either.leafinfo.nodestartpos
-    = currentstartpos;
-  blindtrie->spaceBlindtrienode[node].either.leafinfo.nodestoppos
-    = currenttwobitencodingstoppos;
+  leafinfo->nodestartpos = currentstartpos;
+  if (currenttwobitencodingstoppos != GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie))
+  {
+    if (GT_ISDIRREVERSE(blindtrie->readmode))
+    {
+      gt_assert(GT_REVERSEPOS(blindtrie->totallength,currentstartpos) + 1 >=
+                currenttwobitencodingstoppos);
+      if (currenttwobitencodingstoppos == 0)
+      {
+        leafinfo->nodestartstopposoffset = 0;
+      } else
+      {
+        unsigned long tmp = GT_REVERSEPOS(blindtrie->totallength,
+                                          currentstartpos) + 2
+                                          - currenttwobitencodingstoppos;
+        gt_assert(tmp > 0 &&
+                  tmp < (unsigned long) GT_TWOBITENCODINGSTARTSTOPOFFSETUNDEF);
+        leafinfo->nodestartstopposoffset = (unsigned int) tmp;
+      }
+    } else
+    {
+      gt_assert(currentstartpos <= currenttwobitencodingstoppos);
+      if (currenttwobitencodingstoppos == blindtrie->totallength)
+      {
+        leafinfo->nodestartstopposoffset = 0;
+      } else
+      {
+        unsigned long tmp = currenttwobitencodingstoppos - currentstartpos + 1;
+
+        gt_assert(tmp > 0 &&
+                  tmp < (unsigned long) GT_TWOBITENCODINGSTARTSTOPOFFSETUNDEF);
+        leafinfo->nodestartstopposoffset = (unsigned int) tmp;
+      }
+    }
+  } else
+  {
+    leafinfo->nodestartstopposoffset = GT_TWOBITENCODINGSTARTSTOPOFFSETUNDEF;
+  }
 }
 
 static unsigned long blindtrie_nodestartpos_get(const Blindtrie *blindtrie,
@@ -170,8 +216,40 @@ static unsigned long blindtrie_nodestartpos_get(const Blindtrie *blindtrie,
 static unsigned long blindtrie_nodestoppos_get(const Blindtrie *blindtrie,
                                                Blindtrienodeptr node)
 {
+  struct Leafinfo *leafinfo = &(blindtrie->spaceBlindtrienode[node].either.
+                                                                    leafinfo);
   gt_assert(blindtrie_isleaf(blindtrie,node));
-  return blindtrie->spaceBlindtrienode[node].either.leafinfo.nodestoppos;
+  if (leafinfo->nodestartstopposoffset != GT_TWOBITENCODINGSTARTSTOPOFFSETUNDEF)
+  {
+    unsigned long nodestoppos;
+
+    if (GT_ISDIRREVERSE(blindtrie->readmode))
+    {
+      if (leafinfo->nodestartstopposoffset == 0)
+      {
+        nodestoppos = 0;
+      } else
+      {
+        gt_assert(GT_REVERSEPOS(blindtrie->totallength,leafinfo->nodestartpos)+2
+                  >= (unsigned long) leafinfo->nodestartstopposoffset);
+        nodestoppos
+          = GT_REVERSEPOS(blindtrie->totallength,leafinfo->nodestartpos) + 2
+            - (unsigned long) leafinfo->nodestartstopposoffset;
+      }
+    } else
+    {
+      if (leafinfo->nodestartstopposoffset == 0)
+      {
+        nodestoppos = blindtrie->totallength;
+      } else
+      {
+        nodestoppos = leafinfo->nodestartpos +
+                      (unsigned long) leafinfo->nodestartstopposoffset - 1;
+      }
+    }
+    return nodestoppos;
+  }
+  return GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie);
 }
 
 static void blindtrie_copy_either(
@@ -209,7 +287,8 @@ static Blindtrienodeptr blindtrie_newnode(Blindtrie *blindtrie)
   {
     gt_assert(blindtrie->nodenumberincrement >= 1U);
     gt_assert(blindtrie->allocatedBlindtrienode +
-              blindtrie->nodenumberincrement < UINT_MAX);
+              blindtrie->nodenumberincrement <=
+              (1U << BLINDTRIE_BITSFORRIGHTSIBLING) - 1);
     blindtrie->allocatedBlindtrienode += blindtrie->nodenumberincrement;
     blindtrie->spaceBlindtrienode
       = gt_realloc(blindtrie->spaceBlindtrienode,
@@ -222,7 +301,7 @@ static Blindtrienodeptr blindtrie_newnode(Blindtrie *blindtrie)
 static Blindtrienodeptr blindtrie_newleaf(Blindtrie *blindtrie,
                                           unsigned long currentstartpos,
                                           unsigned long
-                                          currenttwobitencodingstoppos,
+                                            currenttwobitencodingstoppos,
                                           Blindtriesymbol firstchar,
                                           Blindtrienodeptr rightsibling)
 {
@@ -230,7 +309,10 @@ static Blindtrienodeptr blindtrie_newleaf(Blindtrie *blindtrie,
 
   newleaf = blindtrie_newnode(blindtrie);
   blindtrie_firstchar_set(blindtrie,newleaf,true,firstchar);
-  blindtrie_leafinfo_set(blindtrie,newleaf,currentstartpos,
+  blindtrie_leafinfo_set(blindtrie,
+                         &blindtrie->spaceBlindtrienode[newleaf].
+                                                          either.leafinfo,
+                         currentstartpos,
                          currenttwobitencodingstoppos);
   blindtrie_rightsibling_set(blindtrie,newleaf,rightsibling);
   return newleaf;
@@ -785,6 +867,8 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   Blindtrie *blindtrie;
 
   blindtrie = gt_malloc(sizeof (*blindtrie));
+  /* printf("sizeof(Blindtrienode)=%lu\n",
+           (unsigned long) sizeof (Blindtrienode));*/
   if (nodenumberincrement == 0)
   {
     gt_assert(maxnumofsuffixes >= 2UL);
