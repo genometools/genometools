@@ -64,7 +64,7 @@ typedef struct
   unsigned long *endsubsUint;
 } GtSpecialtable_uint32;
 
-typedef struct
+typedef union
 {
   GtSpecialtable_uchar st_uchar;
   GtSpecialtable_ushort st_ushort;
