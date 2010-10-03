@@ -671,12 +671,12 @@ static void assignencseqmapspecification(
     case GT_ACCESS_TYPE_UCHARTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialtable.numofspecialstostore > 0)
+      if (encseq->specialtable.st_uchar.numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->specialtable.st_uchar.positions,GtUchar,
-                   encseq->specialtable.numofspecialstostore);
+                   encseq->specialtable.st_uchar.numofspecialstostore);
         NEWMAPSPEC(encseq->specialtable.st_uchar.rangelengths,GtUchar,
-                   encseq->specialtable.numofspecialstostore);
+                   encseq->specialtable.st_uchar.numofspecialstostore);
         numofunits = encseq->totallength/UCHAR_MAX+1;
         NEWMAPSPEC(encseq->specialtable.st_uchar.endsubsUint,GtUlong,
                    numofunits);
@@ -685,12 +685,12 @@ static void assignencseqmapspecification(
     case GT_ACCESS_TYPE_USHORTTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialtable.numofspecialstostore > 0)
+      if (encseq->specialtable.st_ushort.numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->specialtable.st_ushort.positions,GtUshort,
-                   encseq->specialtable.numofspecialstostore);
+                   encseq->specialtable.st_ushort.numofspecialstostore);
         NEWMAPSPEC(encseq->specialtable.st_ushort.rangelengths,GtUshort,
-                   encseq->specialtable.numofspecialstostore);
+                   encseq->specialtable.st_ushort.numofspecialstostore);
         numofunits = encseq->totallength/USHRT_MAX+1;
         NEWMAPSPEC(encseq->specialtable.st_ushort.endsubsUint,GtUlong,
                    numofunits);
@@ -699,12 +699,12 @@ static void assignencseqmapspecification(
     case GT_ACCESS_TYPE_UINT32TABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialtable.numofspecialstostore > 0)
+      if (encseq->specialtable.st_uint32.numofspecialstostore > 0)
       {
         NEWMAPSPEC(encseq->specialtable.st_uint32.positions,Uint32,
-                   encseq->specialtable.numofspecialstostore);
+                   encseq->specialtable.st_uint32.numofspecialstostore);
         NEWMAPSPEC(encseq->specialtable.st_uint32.rangelengths,Uint32,
-                   encseq->specialtable.numofspecialstostore);
+                   encseq->specialtable.st_uint32.numofspecialstostore);
         numofunits = encseq->totallength/UINT32_MAX+1;
         NEWMAPSPEC(encseq->specialtable.st_uint32.endsubsUint,GtUlong,
                    numofunits);
@@ -1965,7 +1965,8 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
 
 static void sat2maxspecialtype(GtSpecialtable *specialtable,
                                unsigned long totallength,
-                               GtEncseqAccessType sat)
+                               GtEncseqAccessType sat,
+                               unsigned long specialranges)
 {
   switch (sat)
   {
@@ -1973,16 +1974,19 @@ static void sat2maxspecialtype(GtSpecialtable *specialtable,
       specialtable->st_uchar.maxspecialtype = (unsigned int) UCHAR_MAX;
       specialtable->st_uchar.numofspecialcells
         = totallength/specialtable->st_uchar.maxspecialtype + 1;
+      specialtable->st_uchar.numofspecialstostore = specialranges;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       specialtable->st_ushort.maxspecialtype = (unsigned int) USHRT_MAX;
       specialtable->st_ushort.numofspecialcells
         = totallength/specialtable->st_ushort.maxspecialtype + 1;
+      specialtable->st_ushort.numofspecialstostore = specialranges;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       specialtable->st_uint32.maxspecialtype = (unsigned int) UINT32_MAX;
       specialtable->st_uint32.numofspecialcells
         = totallength/specialtable->st_uint32.maxspecialtype + 1;
+      specialtable->st_uint32.numofspecialstostore = specialranges;
       break;
     default:
       fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
@@ -2209,8 +2213,9 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->sat = sat;
   if (satviautables(sat))
   {
-    sat2maxspecialtype(&encseq->specialtable,totallength,sat);
+    sat2maxspecialtype(&encseq->specialtable,totallength,sat,specialranges);
   }
+  encseq->has_specialranges = (specialranges > 0) ? true : false;
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
   encseq->mappedptr = NULL;
@@ -2239,8 +2244,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
     encseq->equallength = *equallength;
   }
   encseq->alpha = alpha;
-  encseq->specialtable.numofspecialstostore = specialranges;
-  encseq->has_specialranges = (specialranges > 0) ? true : false;
   encseq->totallength = totallength;
   encseq->numofdbsequences = numofsequences;
   encseq->numofdbfiles = numofdbfiles;

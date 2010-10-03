@@ -50,6 +50,7 @@ typedef struct
   unsigned long *endsubsUint;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long numofspecialcells;
+  unsigned long numofspecialstostore;
 } GtSpecialtable_uchar;
 
 typedef struct
@@ -59,6 +60,7 @@ typedef struct
   unsigned long *endsubsUint;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long numofspecialcells;
+  unsigned long numofspecialstostore;
 } GtSpecialtable_ushort;
 
 typedef struct
@@ -68,14 +70,14 @@ typedef struct
   unsigned long *endsubsUint;
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long numofspecialcells;
+  unsigned long numofspecialstostore;
 } GtSpecialtable_uint32;
 
-typedef struct
+typedef union
 {
   GtSpecialtable_uchar st_uchar;
   GtSpecialtable_ushort st_ushort;
   GtSpecialtable_uint32 st_uint32;
-  unsigned long numofspecialstostore;
 } GtSpecialtable;
 
 struct GtEncseq

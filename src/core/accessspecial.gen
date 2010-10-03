@@ -36,10 +36,10 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
 
   specialtable->positions
     = gt_malloc(sizeof (*specialtable->positions) *
-                encseq->specialtable.numofspecialstostore);
+                specialtable->numofspecialstostore);
   specialtable->rangelengths
     = gt_malloc(sizeof(*specialtable->positions) *
-                encseq->specialtable.numofspecialstostore);
+                specialtable->numofspecialstostore);
 #ifndef NOENDPTR
   endspecialcells
     = (unsigned long) (encseq->totallength/GT_MAXSPECIALTABLETYPE + 1);
@@ -62,8 +62,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
       {
         /* note that we store one less than the length to prevent overflows */
         gt_assert(currentspecialchar > 0);
-        gt_assert(currentspecialchar - 1 <
-                  encseq->specialtable.numofspecialstostore);
+        gt_assert(currentspecialchar - 1 < specialtable->numofspecialstostore);
         specialtable->rangelengths[currentspecialchar-1]
           = (GT_SPECIALTABLETYPE) (lastspeciallength-1);
 #ifndef NDEBUG
@@ -669,8 +668,6 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
   return 0; /* virtual stop at -1 */
 }
 
-#ifdef GT_POS2PAGENUM
-
 static bool GT_APPENDINT(checknospecial)(
                          const GT_APPENDINT(GtSpecialtable) *specialtable,
                          unsigned long pos)
@@ -800,42 +797,3 @@ static bool GT_APPENDINT(checknospecialrange)(
   }
   return true;
 }
-
-#else
-
-static bool GT_APPENDINT(checknospecial)(const GtEncseq *encseq,
-                                         void *voidspecialtable,
-                                         unsigned long pos)
-{
-  GT_APPENDINT(GtSpecialtable) *specialtable = voidspecialtable;
-
-  return GT_APPENDINT(binarysearchpage)(specialtable->positions,
-                                        specialtable->positions)
-                                         + encseq->specialtable.
-                                                   numofspecialstostore - 1,
-                                         (GT_SPECIALTABLETYPE) pos) ? false
-                                                                    : true;
-}
-
-static bool GT_APPENDINT(checknospecialrange)(const GtEncseq *encseq,
-                                              void *voidspecialtable,
-                                              unsigned long pos)
-{
-  GT_APPENDINT(GtSpecialtable) *specialtable = voidspecialtable;
-  const GT_SPECIALTABLETYPE *found, *start;
-
-  start = specialtable->positions;
-  found = GT_APPENDINT(binarysearchpreviousequal)(start,
-                                                  start +
-                                                  encseq->specialtable.
-                                                          numofspecialstostore
-                                                  - 1,
-                                                  (GT_SPECIALTABLETYPE) pos);
-  return (found != NULL &&
-          pos <= (unsigned long) *found +
-                 (unsigned long) specialtable->rangelengths
-                                      [(unsigned long) (found - start)]) ? false
-                                                                         : true;
-}
-
-#endif
