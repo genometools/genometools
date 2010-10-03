@@ -76,16 +76,18 @@ struct GtEncseq
   /* Common part */
   unsigned long *satcharptr; /* need for writing char */
   GtEncseqAccessType sat;
+  const char *satname;
   void *mappedptr; /* NULL or pointer to the mapped space block */
-  unsigned long numofspecialstostore;
-  unsigned long *totallengthptr,
-                totallength;
-  unsigned long numofdbsequences,
-                *numofdbsequencesptr; /* need for writing numofdbsequences */
-  unsigned long numofdbfiles, *numofdbfilesptr;
-  unsigned long lengthofdbfilenames, *lengthofdbfilenamesptr;
-  unsigned long sizeofrep;
-  const char *name;
+  unsigned long numofspecialstostore,
+                totallength,
+                *totallengthptr,
+                numofdbsequences,
+                *numofdbsequencesptr, /* need for writing numofdbsequences */
+                numofdbfiles,
+                *numofdbfilesptr,
+                lengthofdbfilenames,
+                *lengthofdbfilenamesptr,
+                sizeofrep;
   GtUchar(*deliverchar)(const GtEncseq *,unsigned long);
   const char *delivercharname;
   GtUchar(*delivercharnospecial)(const GtEncseq *,unsigned long);

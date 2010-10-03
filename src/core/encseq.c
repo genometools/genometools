@@ -2322,7 +2322,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                          lengthofdbfilenames,specialranges,
                                          encseq->numofchars,
                                          gt_alphabet_bits_per_symbol(alpha)));
-  encseq->name = gt_encseq_access_type_str(sat);
+  encseq->satname = gt_encseq_access_type_str(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
   encseq->twobitencoding = NULL;
@@ -2350,13 +2350,13 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
     gt_assert(encseq->equallength.defined);
     gt_logger_log(logger,
                   "init character encoding (%s %lu,%lu bytes,%.2f bits/symbol)",
-                  encseq->name,encseq->equallength.valueunsignedlong,
+                  encseq->satname,encseq->equallength.valueunsignedlong,
                   encseq->sizeofrep,spaceinbitsperchar);
   } else
   {
     gt_logger_log(logger,
                   "init character encoding (%s,%lu bytes,%.2f bits/symbol)",
-                  encseq->name,encseq->sizeofrep,spaceinbitsperchar);
+                  encseq->satname,encseq->sizeofrep,spaceinbitsperchar);
   }
   return encseq;
 }
