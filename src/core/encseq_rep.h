@@ -48,6 +48,8 @@ typedef struct
   GtUchar *positions,
           *rangelengths;
   unsigned long *endsubsUint;
+  unsigned int maxspecialtype;  /* maximal value of special type */
+  unsigned long numofspecialcells;
 } GtSpecialtable_uchar;
 
 typedef struct
@@ -55,6 +57,8 @@ typedef struct
   GtUshort *positions,
            *rangelengths;
   unsigned long *endsubsUint;
+  unsigned int maxspecialtype;  /* maximal value of special type */
+  unsigned long numofspecialcells;
 } GtSpecialtable_ushort;
 
 typedef struct
@@ -62,6 +66,8 @@ typedef struct
    Uint32 *positions,
           *rangelengths;
   unsigned long *endsubsUint;
+  unsigned int maxspecialtype;  /* maximal value of special type */
+  unsigned long numofspecialcells;
 } GtSpecialtable_uint32;
 
 typedef struct
@@ -104,9 +110,6 @@ struct GtEncseq
   bool(*issinglepositionspecial)(const GtEncseq *,
                                  unsigned long);
   const char *issinglepositionspecialname;
-  unsigned long numofspecialcells;
-  /* encseq->totallength/encseq->maxspecialtype + 1;*/
-  unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long *characterdistribution;
   GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                   specialcharinfo; /* information about specialcharacters */

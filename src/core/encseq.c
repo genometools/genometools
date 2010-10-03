@@ -61,6 +61,8 @@
 #include "core/defined-types.h"
 #include "match/stamp.h"
 
+#undef GT_RANGEDEBUG
+
 /* The following implements the access functions to the bit encoding */
 
 #define EXTRACTENCODEDCHARSCALARFROMLEFT(SCALAR,PREFIX)\
@@ -483,8 +485,6 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
   return encseq->delivercontainsspecial(encseq,readmode,esr,startpos,len);
 }
 
-#undef GT_RANGEDEBUG
-
 #ifdef GT_RANGEDEBUG
 static void showsequencerange(const GtRange *range)
 {
@@ -496,6 +496,7 @@ static void showsequencerange(const GtRange *range)
     printf("%lu,%lu",range->start,range->end);
   }
 }
+
 #endif
 
 void gt_encseq_extract_substring(const GtEncseq *encseq,
@@ -977,6 +978,33 @@ void gt_encseq_delete(GtEncseq *encseq)
 #undef GT_SPECIALTABLETYPE
 #undef GT_MAXSPECIALTABLETYPE
 #undef GT_POS2PAGENUM
+
+#ifdef GT_RANGEDEBUG
+
+static void showallspecialpositions(const GtEncseq *encseq)
+{
+  if (encseq->has_specialranges)
+  {
+    switch (encseq->sat)
+    {
+      case GT_ACCESS_TYPE_UCHARTABLES:
+        showallspecialpositionswithpages_uchar(&encseq->specialtable.st_uchar);
+        break;
+      case GT_ACCESS_TYPE_USHORTTABLES:
+        showallspecialpositionswithpages_ushort(&encseq->specialtable.
+                                                st_ushort);
+        break;
+      case GT_ACCESS_TYPE_UINT32TABLES:
+        showallspecialpositionswithpages_uint32(&encseq->specialtable.
+                                                st_uint32);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+#endif
 
 /* generic for the case that there are no specialsymbols */
 
@@ -1509,114 +1537,6 @@ DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauint32,
                                 checknospecialrange,uint32)
 
-#ifdef GT_RANGEDEBUG
-
-static unsigned long accessendspecialsubsUint(const GtEncseq *encseq,
-                                              unsigned long pgnum)
-{
-  switch (encseq->sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      return encseq->specialtable.st_uchar.endsubsUint[pgnum];
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return encseq->specialtable.st_ushort.endsubsUint[pgnum];
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return encseq->specialtable.st_uint32.endsubsUint[pgnum];
-    default: fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(encseq->sat));
-             exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
-static unsigned long accessspecialrangelength(const GtEncseq *encseq,
-                                              unsigned long idx)
-{
-  switch (encseq->sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      return (unsigned long) encseq->specialtable.st_uchar.rangelengths[idx];
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return (unsigned long) encseq->specialtable.st_ushort.rangelengths[idx];
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return (unsigned long) encseq->specialtable.st_uint32.rangelengths[idx];
-    default: fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(encseq->sat));
-             exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
-static unsigned long accessspecialpositions(const GtEncseq *encseq,
-                                            unsigned long idx)
-{
-  switch (encseq->sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      return (unsigned long) encseq->specialtable.st_uchar.positions[idx];
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return (unsigned long) encseq->specialtable.st_ushort.positions[idx];
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return (unsigned long) encseq->specialtable.st_uint32.positions[idx];
-    default: fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(encseq->sat));
-             exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
-static void showspecialpositionswithpages(const GtEncseq *encseq,
-                                          unsigned long pgnum,
-                                          unsigned long offset,
-                                          unsigned long first,
-                                          unsigned long last)
-{
-  unsigned long idx;
-  unsigned long startpos;
-  GtRange range;
-
-  printf("page %lu: %lu elems at offset %lu\n",
-          pgnum, last - first + 1, offset);
-  for (idx=first; idx<=last; idx++)
-  {
-    startpos = accessspecialpositions(encseq,idx);
-    range.start = offset + startpos;
-    range.end = range.start + accessspecialrangelength(encseq,idx) + 1;
-    printf("%lu: ",idx);
-    showsequencerange(&range);
-    printf("\n");
-  }
-}
-
-static void showallspecialpositionswithpages(const GtEncseq *encseq)
-{
-  unsigned long endpos0, endpos1, pgnum, offset = 0;
-
-  for (pgnum=0; pgnum<encseq->numofspecialcells; pgnum++)
-  {
-    if (pgnum == 0)
-    {
-      endpos0 = 0;
-    } else
-    {
-      endpos0 = accessendspecialsubsUint(encseq,pgnum-1);
-    }
-    endpos1 = accessendspecialsubsUint(encseq,pgnum);
-    if (endpos0 < endpos1)
-    {
-      showspecialpositionswithpages(encseq,pgnum,offset,endpos0,endpos1-1);
-    }
-    offset += 1UL + (unsigned long) encseq->maxspecialtype;
-  }
-}
-
-static void showallspecialpositions(const GtEncseq *encseq)
-{
-  if (encseq->has_specialranges && satviautables(encseq->sat))
-  {
-    showallspecialpositionswithpages(encseq);
-  }
-}
-
-#endif
-
 static void advanceGtEncseqReader(GtEncseqReader *esr)
 {
   switch (esr->encseq->sat)
@@ -2043,23 +1963,32 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
   gt_free(sri);
 }
 
-static unsigned int sat2maxspecialtype(GtEncseqAccessType sat)
+static void sat2maxspecialtype(GtSpecialtable *specialtable,
+                               unsigned long totallength,
+                               GtEncseqAccessType sat)
 {
-  if (sat == GT_ACCESS_TYPE_UCHARTABLES)
+  switch (sat)
   {
-    return (unsigned int) UCHAR_MAX;
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      specialtable->st_uchar.maxspecialtype = (unsigned int) UCHAR_MAX;
+      specialtable->st_uchar.numofspecialcells
+        = totallength/specialtable->st_uchar.maxspecialtype + 1;
+      break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      specialtable->st_ushort.maxspecialtype = (unsigned int) USHRT_MAX;
+      specialtable->st_ushort.numofspecialcells
+        = totallength/specialtable->st_ushort.maxspecialtype + 1;
+      break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      specialtable->st_uint32.maxspecialtype = (unsigned int) UINT32_MAX;
+      specialtable->st_uint32.numofspecialcells
+        = totallength/specialtable->st_uint32.maxspecialtype + 1;
+      break;
+    default:
+      fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
+                     gt_encseq_access_type_str(sat));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  if (sat == GT_ACCESS_TYPE_USHORTTABLES)
-  {
-    return (unsigned int) USHRT_MAX;
-  }
-  if (sat == GT_ACCESS_TYPE_UINT32TABLES)
-  {
-    return (unsigned int) UINT32_MAX;
-  }
-  fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
-                  gt_encseq_access_type_str(sat));
-  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 static void gt_addmarkpos(GtArrayGtUlong *asp,
@@ -2280,8 +2209,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->sat = sat;
   if (satviautables(sat))
   {
-    encseq->maxspecialtype = sat2maxspecialtype(sat);
-    encseq->numofspecialcells = totallength/encseq->maxspecialtype + 1;
+    sat2maxspecialtype(&encseq->specialtable,totallength,sat);
   }
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
