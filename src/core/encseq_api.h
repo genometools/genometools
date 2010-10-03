@@ -302,12 +302,6 @@ void             gt_encseq_loader_require_sds_tab(GtEncseqLoader *el);
 /* Disables requirement of the .sds table for loading a <GtEncseq>
    using <el>. */
 void             gt_encseq_loader_do_not_require_sds_tab(GtEncseqLoader *el);
-/* Enables support for faster access to special ranges in the
-   <GtEncseq> loaded by <el>. Enabled by default. */
-void             gt_encseq_loader_enable_range_iterator(GtEncseqLoader *el);
-/* Disables support for faster access to special ranges in the
-   <GtEncseq> loaded by <el>. */
-void             gt_encseq_loader_disable_range_iterator(GtEncseqLoader *el);
 /* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
    logging). */
 void             gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l);
@@ -324,12 +318,6 @@ void             gt_encseq_loader_delete(GtEncseqLoader *el);
 /* Creates a new <GtEncseqBuilder> using the alphabet <alpha> as a basis for
    on-the-fly encoding of sequences in memory. */
 GtEncseqBuilder* gt_encseq_builder_new(GtAlphabet *alpha);
-/* Enables support for faster access to special ranges in the
-   <GtEncseq> created by <eb>. Enabled by default. */
-void             gt_encseq_builder_enable_range_iterator(GtEncseqBuilder *eb);
-/* Disables support for faster access to special ranges in the
-   <GtEncseq> created by <eb>. */
-void             gt_encseq_builder_disable_range_iterator(GtEncseqBuilder *eb);
 /* Enables support for retrieving descriptions from the encoded sequence
    to be built by <eb>. Requires additional memory to hold the descriptions and
    a position index.

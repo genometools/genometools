@@ -97,10 +97,6 @@ struct GtEncseq
                 lengthofdbfilenames,
                 *lengthofdbfilenamesptr,
                 sizeofrep;
-  GtUchar(*deliverchar)(const GtEncseq *,unsigned long);
-  const char *delivercharname;
-  GtUchar(*delivercharnospecial)(const GtEncseq *,unsigned long);
-  const char *delivercharnospecialname;
   GtUchar(*seqdeliverchar)(GtEncseqReader *);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const GtEncseq *,

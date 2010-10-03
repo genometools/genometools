@@ -535,9 +535,6 @@ int gt_extractkeysfromdesfile(const char *indexname,
         }
         el = gt_encseq_loader_new();
         gt_encseq_loader_set_logger(el, logger);
-        /*
-        gt_encseq_loader_disable_range_iterator(el);
-        */
         encseq = gt_encseq_loader_load(el, indexname, err);
         gt_encseq_loader_delete(el);
         if (encseq == NULL)
@@ -788,9 +785,6 @@ int gt_extractkeysfromfastaindex(const char *indexname,
   unsigned long numofdbsequences = 0, keysize = 0;
 
   el = gt_encseq_loader_new();
-  /*
-  gt_encseq_loader_disable_range_iterator(el);
-  */
   encseq = gt_encseq_loader_load(el, indexname, err);
   gt_encseq_loader_delete(el);
   if (encseq == NULL)
