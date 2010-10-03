@@ -36,10 +36,10 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
 
   specialtable->positions
     = gt_malloc(sizeof (*specialtable->positions) *
-                encseq->numofspecialstostore);
+                encseq->specialtable.numofspecialstostore);
   specialtable->rangelengths
     = gt_malloc(sizeof(*specialtable->positions) *
-                encseq->numofspecialstostore);
+                encseq->specialtable.numofspecialstostore);
 #ifndef NOENDPTR
   endspecialcells
     = (unsigned long) (encseq->totallength/GT_MAXSPECIALTABLETYPE + 1);
@@ -62,7 +62,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
       {
         /* note that we store one less than the length to prevent overflows */
         gt_assert(currentspecialchar > 0);
-        gt_assert(currentspecialchar - 1 < encseq->numofspecialstostore);
+        gt_assert(currentspecialchar - 1 < encseq->specialtable.numofspecialstostore);
         specialtable->rangelengths[currentspecialchar-1]
           = (GT_SPECIALTABLETYPE) (lastspeciallength-1);
 #ifndef NDEBUG
@@ -192,15 +192,13 @@ static bool GT_APPENDINT(binarysearchpage)(const GT_SPECIALTABLETYPE *leftptr,
 }
 
 static void GT_APPENDINT(determinerange)(GtRange *range,
-                                         const GtEncseq *encseq,
+                                         const GT_APPENDINT(GtSpecialtable) 
+                                           *specialtable,
+                                         unsigned int maxspecialtype,
                                          unsigned long transpagenum,
                                          unsigned long cellnum)
 {
-  const GT_APPENDINT(GtSpecialtable) *specialtable
-    = &(GT_APPENDINT(encseq->specialtable.st));
-
-  range->start = transpagenum *
-                 (1UL + (unsigned long) encseq->maxspecialtype) +
+  range->start = transpagenum * (1UL + (unsigned long) maxspecialtype) +
                  specialtable->positions[cellnum];
   range->end = range->start +
                specialtable->rangelengths[cellnum] + 1;
@@ -231,8 +229,8 @@ static void GT_APPENDINT(binpreparenextrange)(GtEncseqReader *esr)
     while (endpos0  < endpos1)
     {
       cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
-      GT_APPENDINT(determinerange)(&range,esr->encseq,pagenum,
-                                   cellnum);
+      GT_APPENDINT(determinerange)(&range,specialtable,
+                                   esr->encseq->maxspecialtype,pagenum,cellnum);
 #ifdef RANGEDEBUG
       printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
       showsequencerange(&range);
@@ -278,7 +276,8 @@ static void GT_APPENDINT(binpreparenextrange)(GtEncseqReader *esr)
   {
     if (endpos0  < endpos1)
     {
-      GT_APPENDINT(determinerange)(&range,esr->encseq,pagenum,0);
+      GT_APPENDINT(determinerange)(&range,specialtable,
+                                   esr->encseq->maxspecialtype,pagenum,0);
       if (moveforward)
       {
         if (range.start == 0)
@@ -314,7 +313,8 @@ static void GT_APPENDINT(binpreparenextrange)(GtEncseqReader *esr)
 #ifdef RANGEDEBUG
   if (found)
   {
-    GT_APPENDINT(determinerange)(&range,esr->encseq,pagenum,
+    GT_APPENDINT(determinerange)(&range,specialtable,
+                                 esr->encseq->maxspecialtype,pagenum,
                                  moveforward ? esr->idx->firstcell
                                              : (esr->idx->lastcell-1));
     printf("binary found pos %lu in ", esr->currentpos);
@@ -329,7 +329,8 @@ static void GT_APPENDINT(binpreparenextrange)(GtEncseqReader *esr)
 #endif
   if (found)
   {
-    GT_APPENDINT(determinerange)(&esr->idx->previousrange,esr->encseq,pagenum,
+    GT_APPENDINT(determinerange)(&esr->idx->previousrange,specialtable,
+                                 esr->encseq->maxspecialtype,pagenum,
                                  moveforward ? esr->idx->firstcell
                                              : (esr->idx->lastcell-1));
 #ifdef RANGEDEBUG
@@ -435,6 +436,8 @@ static void GT_APPENDINT(advanceGtEncseqReader)(GtEncseqReader *esr)
 {
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
+  GT_APPENDINT(GtSpecialtable) *specialtable
+    = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   while (true)
   {
@@ -465,12 +468,13 @@ static void GT_APPENDINT(advanceGtEncseqReader)(GtEncseqReader *esr)
       {
         cellnum = esr->idx->lastcell - 1;
       }
-      GT_APPENDINT(determinerange)(&esr->idx->currentrange,esr->encseq,
-                                    esr->idx->morepagesleft
-                                        ? (moveforward ? (esr->idx->nextpage-1)
-                                                       : (esr->idx->nextpage+1))
-                                        : esr->idx->nextpage,
-                                    cellnum);
+      GT_APPENDINT(determinerange)(&esr->idx->currentrange,specialtable,
+                                   esr->encseq->maxspecialtype,
+                                   esr->idx->morepagesleft
+                                     ? (moveforward ? (esr->idx->nextpage-1)
+                                                    : (esr->idx->nextpage+1))
+                                     : esr->idx->nextpage,
+                                   cellnum);
       esr->idx->hasrange = true;
     } else
     {
@@ -759,7 +763,7 @@ static bool GT_APPENDINT(checknospecial)(const GtEncseq *encseq,
 
   return GT_APPENDINT(binarysearchpage)(specialtable->positions,
                                         specialtable->positions)
-                                         + encseq->numofspecialstostore - 1,
+                                         + encseq->specialtable.numofspecialstostore - 1,
                                          (GT_SPECIALTABLETYPE) pos) ? false
                                                                     : true;
 }
@@ -774,7 +778,7 @@ static bool GT_APPENDINT(checknospecialrange)(const GtEncseq *encseq,
   start = specialtable->positions;
   found = GT_APPENDINT(binarysearchpreviousequal)(start,
                                                   start +
-                                                  encseq->numofspecialstostore
+                                                  encseq->specialtable.numofspecialstostore
                                                   - 1,
                                                   (GT_SPECIALTABLETYPE) pos);
   return (found != NULL &&

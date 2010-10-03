@@ -64,11 +64,12 @@ typedef struct
   unsigned long *endsubsUint;
 } GtSpecialtable_uint32;
 
-typedef union
+typedef struct
 {
   GtSpecialtable_uchar st_uchar;
   GtSpecialtable_ushort st_ushort;
   GtSpecialtable_uint32 st_uint32;
+  unsigned long numofspecialstostore;
 } GtSpecialtable;
 
 struct GtEncseq
@@ -78,8 +79,8 @@ struct GtEncseq
   GtEncseqAccessType sat;
   const char *satname;
   void *mappedptr; /* NULL or pointer to the mapped space block */
-  unsigned long numofspecialstostore,
-                totallength,
+  bool has_specialranges;
+  unsigned long totallength,
                 *totallengthptr,
                 numofdbsequences,
                 *numofdbsequencesptr, /* need for writing numofdbsequences */
