@@ -15,6 +15,186 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+static unsigned long GT_APPENDINT(determinesingle)(
+                                         const GT_APPENDINT(GtSpecialtable)
+                                           *specialtable,
+                                         unsigned long transpagenum,
+                                         unsigned long cellnum)
+{
+  return transpagenum *
+         (1UL + (unsigned long) specialtable->maxspecialtype) +
+         specialtable->positions[cellnum];
+}
+
+static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
+{
+  unsigned long endpos0, endpos1, cellnum, pagenum, specialpos;
+  bool found = false;
+  bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
+  GT_APPENDINT(GtSpecialtable) *specialtable
+    = &(GT_APPENDINT(esr->encseq->specialtable.st));
+
+  pagenum = GT_POS2PAGENUM(esr->currentpos);
+  if (pagenum > 0)
+  {
+    endpos0 = specialtable->endsubsUint[pagenum-1];
+  } else
+  {
+    endpos0 = 0;
+  }
+  esr->idx->firstcell = endpos0;
+  esr->idx->lastcell = endpos1
+                     = specialtable->endsubsUint[pagenum];
+  if (esr->currentpos > 0)
+  {
+    while (endpos0  < endpos1)
+    {
+      cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
+      specialpos = GT_APPENDINT(determinesingle)(specialtable,pagenum,cellnum);
+#ifdef RANGEDEBUG
+      printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
+      printf("%lu\n",specialpos);
+#endif
+      if (moveforward)
+      {
+        if (esr->currentpos > specialpos + 1)
+        {
+          found = true;
+          esr->idx->firstcell = cellnum;
+          endpos0 = cellnum+1;
+        } else
+        {
+          if (esr->currentpos >= specialpos)
+          {
+            found = true;
+            esr->idx->firstcell = cellnum;
+            break;
+          }
+          endpos1 = cellnum;
+        }
+      } else
+      {
+        if (esr->currentpos < specialpos)
+        {
+          found = true;
+          esr->idx->lastcell = cellnum+1;
+          endpos1 = cellnum;
+        } else
+        {
+          if (esr->currentpos < specialpos + 1)
+          {
+            found = true;
+            esr->idx->lastcell = cellnum+1;
+            break;
+          }
+          endpos0 = cellnum+1;
+        }
+      }
+    }
+  } else
+  {
+    if (endpos0  < endpos1)
+    {
+      specialpos = GT_APPENDINT(determinesingle)(specialtable,pagenum,0);
+      if (moveforward)
+      {
+        if (specialpos == 0)
+        {
+          found = true;
+          esr->idx->firstcell = 0;
+        }
+      } else
+      {
+        found = true;
+        esr->idx->lastcell = 1UL;
+      }
+    }
+  }
+  if (moveforward && !found && pagenum > 0)
+  {
+    if (pagenum == 1UL)
+    {
+      endpos0 = 0;
+    } else
+    {
+      endpos0 = specialtable->endsubsUint[pagenum-2];
+    }
+    endpos1 = specialtable->endsubsUint[pagenum-1];
+    if (endpos0 < endpos1)
+    {
+      esr->idx->firstcell = endpos1-1;
+      esr->idx->lastcell = endpos1;
+      pagenum--;
+      found = true;
+    }
+  }
+#ifdef RANGEDEBUG
+  if (found)
+  {
+    specialpos = GT_APPENDINT(determinesingle)(specialtable,pagenum,
+                                               moveforward 
+                                                 ? esr->idx->firstcell
+                                                 : (esr->idx->lastcell-1));
+    printf("binary found pos %lu in %lu ", esr->currentpos,specialpos);
+    printf(" at cell %lu in page %lu\n",
+           moveforward ? esr->idx->firstcell : (esr->idx->lastcell-1),
+           pagenum);
+  } else
+  {
+    printf("no nearby interval found for startpos %lu\n",esr->currentpos);
+  }
+#endif
+  if (found)
+  {
+    esr->idx->previousspecialpos 
+      = GT_APPENDINT(determinesingle)(specialtable,
+                                      pagenum,
+                                      moveforward ? esr->idx->firstcell
+                                                  : (esr->idx->lastcell-1));
+#ifdef RANGEDEBUG
+    printf("previousspecialpos=%lu\n",esr->idx->previousspecialpos);
+#endif
+    if (esr->idx->previousspecialpos == esr->currentpos)
+    {
+      esr->idx->hasprevious = true;
+    }
+    if (moveforward)
+    {
+      if (pagenum+1 < specialtable->numofspecialcells)
+      {
+        esr->idx->morepagesleft = true;
+        esr->idx->nextpage = pagenum+1;
+      } else
+      {
+        esr->idx->morepagesleft = false;
+        esr->idx->nextpage = pagenum;
+      }
+    } else
+    {
+      if (pagenum > 0)
+      {
+        esr->idx->morepagesleft = true;
+        esr->idx->nextpage = pagenum-1;
+      } else
+      {
+        esr->idx->morepagesleft = false;
+        esr->idx->nextpage = 0;
+      }
+    }
+  } else
+  {
+    esr->idx->firstcell = esr->idx->lastcell = 0;
+    if (pagenum < specialtable->numofspecialcells)
+    {
+      esr->idx->morepagesleft = true;
+    } else
+    {
+      esr->idx->morepagesleft = false;
+    }
+    esr->idx->nextpage = pagenum;
+  }
+}
+
 static bool GT_APPENDINT(binarysearchpage)(const GT_SPECIALTABLETYPE *leftptr,
                                            const GT_SPECIALTABLETYPE *rightptr,
                                            GT_SPECIALTABLETYPE pos)
