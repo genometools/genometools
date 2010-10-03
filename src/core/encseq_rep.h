@@ -66,9 +66,9 @@ typedef struct
 
 typedef struct
 {
-  GtSpecialtable_uchar specialtable_uchar;
-  GtSpecialtable_ushort specialtable_ushort;
-  GtSpecialtable_uint32 specialtable_uint32;
+  GtSpecialtable_uchar st_uchar;
+  GtSpecialtable_ushort st_ushort;
+  GtSpecialtable_uint32 st_uint32;
 } GtSpecialtable;
 
 struct GtEncseq
@@ -127,7 +127,8 @@ struct GtEncseq
                                                       numofdbfiles  -1
                                                       entries */
 
-  /* only for GT_ACCESS_TYPE_BITACCESS,
+  /* only for GT_ACCESS_TYPE_EQUALLENGTH,
+              GT_ACCESS_TYPE_BITACCESS,
               GT_ACCESS_TYPE_UCHARTABLES,
               GT_ACCESS_TYPE_USHORTTABLES,
               GT_ACCESS_TYPE_UINT32TABLES */
@@ -135,10 +136,6 @@ struct GtEncseq
   GtTwobitencoding *twobitencoding;
   unsigned long unitsoftwobitencoding;
   unsigned long maxcharforspecial; /* only defined when twobitencoding != NULL*/
-
-  /* only for GT_ACCESS_TYPE_UCHARTABLES,
-              GT_ACCESS_TYPE_USHORTTABLES,
-              GT_ACCESS_TYPE_UINT32TABLES */
 
   /* only for  GT_ACCESS_TYPE_DIRECTACCESS */
   GtUchar *plainseq;
@@ -151,9 +148,11 @@ struct GtEncseq
   /* only for GT_ACCESS_TYPE_BITACCESS */
   GtBitsequence *specialbits;
 
-  GtSpecialtable_uchar specialtable_uchar;
-  GtSpecialtable_ushort specialtable_ushort;
-  GtSpecialtable_uint32 specialtable_uint32;
+  /* only for GT_ACCESS_TYPE_UCHARTABLES,
+              GT_ACCESS_TYPE_USHORTTABLES,
+              GT_ACCESS_TYPE_UINT32TABLES */
+
+  GtSpecialtable specialtable;
 
   unsigned long reference_count;
   GtMutex *refcount_lock;

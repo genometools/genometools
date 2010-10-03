@@ -25,7 +25,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
   GtTwobitencoding bitwise = 0;
   GtUchar cc;
   GT_APPENDINT(GtSpecialtable) *specialtable
-    = &(GT_APPENDINT(encseq->specialtable));
+    = &(GT_APPENDINT(encseq->specialtable.st));
 #ifndef NDEBUG
   unsigned long sumspecials = 0, countspecials = 0;
 #endif
@@ -197,7 +197,7 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
                                          unsigned long cellnum)
 {
   const GT_APPENDINT(GtSpecialtable) *specialtable
-    = &(GT_APPENDINT(encseq->specialtable));
+    = &(GT_APPENDINT(encseq->specialtable.st));
 
   range->start = transpagenum *
                  (1UL + (unsigned long) encseq->maxspecialtype) +
@@ -213,7 +213,7 @@ static void GT_APPENDINT(binpreparenextrange)(GtEncseqReader *esr)
   GtRange range;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
   GT_APPENDINT(GtSpecialtable) *specialtable
-    = &(GT_APPENDINT(esr->encseq->specialtable));
+    = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   pagenum = GT_POS2PAGENUM(esr->currentpos);
   if (pagenum > 0)
@@ -389,7 +389,7 @@ static bool GT_APPENDINT(nextnonemptypage)(GtEncseqReader *esr,
 {
   unsigned long endpos0, endpos1, pagenum;
   GT_APPENDINT(GtSpecialtable) *specialtable
-    = &(GT_APPENDINT(esr->encseq->specialtable));
+    = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   while (esr->idx->morepagesleft)
   {
