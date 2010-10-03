@@ -1433,44 +1433,44 @@ static GtUchar FCTNAME(const GtEncseq *encseq,unsigned long pos)\
 #define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
 static bool FCTNAME(const GtEncseq *encseq,unsigned long pos)\
 {\
-  return CHECKFUN##_##TYPE(&encseq->specialtable.st_##TYPE,pos) ? false : true;\
+  return CHECKFUN##_##TYPE(&encseq->specialtable.st_##TYPE,pos);\
 }
 
 /* GT_ACCESS_TYPE_UCHARTABLES */
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauchartablesSpecialfirst,
-                                checknospecial,uchar)
+                                checkspecial,uchar)
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauchartablesSpecialrange,
-                                checknospecialrange,uchar)
+                                checkspecialrange,uchar)
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauchar,
-                                checknospecialrange,uchar)
+                                checkspecialrange,uchar)
 
 /* GT_ACCESS_TYPE_USHORTTABLES */
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViaushorttablesSpecialfirst,
-                                checknospecial,ushort)
+                                checkspecial,ushort)
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViaushorttablesSpecialrange,
-                                checknospecialrange,ushort)
+                                checkspecialrange,ushort)
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViaushort,
-                                checknospecialrange,ushort)
+                                checkspecialrange,ushort)
 
 /* GT_ACCESS_TYPE_UINT32TABLES */
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauint32tablesSpecialfirst,
-                                checknospecial,uint32)
+                                checkspecial,uint32)
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauint32tablesSpecialrange,
-                                checknospecialrange,uint32)
+                                checkspecialrange,uint32)
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauint32,
-                                checknospecialrange,uint32)
+                                checkspecialrange,uint32)
 
 static void advanceGtEncseqReader(GtEncseqReader *esr)
 {
@@ -2413,10 +2413,10 @@ static GtEncseqfunctions encodedseqfunctab[] =
         encseq->seqdelivercharname\
           = encodedseqfunctab[(int) (SAT)].seqdeliverchar##NAME.funcname
 
-#define ALLASSIGNAPPENDFUNC(SAT)\
+#define ALLASSIGNAPPENDFUNC(WITHRANGE,SAT)\
         if (encseq->has_specialranges)\
         {\
-          if (withrange)\
+          if (WITHRANGE)\
           {\
             ASSIGNAPPFUNC(SAT,specialrange);\
           } else\
@@ -2511,7 +2511,7 @@ static GtEncseq *files2encodedsequence(
                                       equallength,
                                       alphabet,
                                       logger);
-    ALLASSIGNAPPENDFUNC(sat);
+    ALLASSIGNAPPENDFUNC(withrange,sat);
     gt_logger_log(logger,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
@@ -2614,7 +2614,7 @@ gt_encseq_new_from_index(bool withrange,
                                  alpha,
                                  logger);
     alpha = NULL;
-    ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd));
+    ALLASSIGNAPPENDFUNC(withrange,gt_encseq_metadata_accesstype(emd));
     gt_logger_log(logger, "deliverchar=%s", encseq->delivercharname);
     if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
     {
@@ -5886,7 +5886,6 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
   GtEncseq *encseq = NULL;
   const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
   GtSpecialcharinfo samplespecialcharinfo;
-  bool withrange = eb->withrange;
   gt_assert(eb->plainseq);
 
   sequence2specialcharinfo(&samplespecialcharinfo,eb->plainseq,
@@ -5923,7 +5922,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
     encseq->hasallocatedsdstab = true;
     encseq->sdstab = eb->sdstab.spaceGtUlong;
   }
-  ALLASSIGNAPPENDFUNC(sat);
+  ALLASSIGNAPPENDFUNC(eb->withrange,sat);
   encseq->mappedptr = NULL;
   eb->created_encseq = true;
   gt_encseq_builder_reset(eb);
