@@ -51,7 +51,7 @@ typedef struct
 
 /* The following type stores the result of comparing a pair of twobit
   encodings. <common> stores the number of units which are common
-  (either from the beginning or from the end. common is in the range 0 to 
+  (either from the beginning or from the end. common is in the range 0 to
   GT_UNITSIN2BITENC. <leftspecial> is true
   iff the first twobitencoding contains a special character in the units
   it covers. <rightspecial> is true iff the second twobit encoding contains

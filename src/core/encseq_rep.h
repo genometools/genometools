@@ -43,6 +43,34 @@
 
 typedef uint32_t Uint32;
 
+typedef struct
+{
+  GtUchar *positions,
+          *rangelengths;
+  unsigned long *endsubsUint;
+} GtSpecialtable_uchar;
+
+typedef struct
+{
+  GtUshort *positions,
+           *rangelengths;
+  unsigned long *endsubsUint;
+} GtSpecialtable_ushort;
+
+typedef struct
+{
+   Uint32 *positions,
+          *rangelengths;
+  unsigned long *endsubsUint;
+} GtSpecialtable_uint32;
+
+typedef struct
+{
+  GtSpecialtable_uchar specialtable_uchar;
+  GtSpecialtable_ushort specialtable_ushort;
+  GtSpecialtable_uint32 specialtable_uint32;
+} GtSpecialtable;
+
 struct GtEncseq
 {
   /* Common part */
@@ -123,20 +151,9 @@ struct GtEncseq
   /* only for GT_ACCESS_TYPE_BITACCESS */
   GtBitsequence *specialbits;
 
-  /* only for GT_ACCESS_TYPE_UCHARTABLES */
-  GtUchar *ucharspecialpositions,
-          *ucharspecialrangelength;
-  unsigned long *ucharendspecialsubsUint;
-
-  /* only for GT_ACCESS_TYPE_USHORTTABLES */
-  GtUshort *ushortspecialpositions,
-           *ushortspecialrangelength;
-  unsigned long *ushortendspecialsubsUint;
-
-  /* only for GT_ACCESS_TYPE_UINT32TABLES */
-  Uint32 *uint32specialpositions,
-         *uint32specialrangelength;
-  unsigned long *uint32endspecialsubsUint;
+  GtSpecialtable_uchar specialtable_uchar;
+  GtSpecialtable_ushort specialtable_ushort;
+  GtSpecialtable_uint32 specialtable_uint32;
 
   unsigned long reference_count;
   GtMutex *refcount_lock;

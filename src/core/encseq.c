@@ -672,12 +672,12 @@ static void assignencseqmapspecification(
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
-        NEWMAPSPEC(encseq->ucharspecialpositions,GtUchar,
+        NEWMAPSPEC(encseq->specialtable_uchar.positions,GtUchar,
                    encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ucharspecialrangelength,GtUchar,
+        NEWMAPSPEC(encseq->specialtable_uchar.rangelengths,GtUchar,
                    encseq->numofspecialstostore);
         numofunits = encseq->totallength/UCHAR_MAX+1;
-        NEWMAPSPEC(encseq->ucharendspecialsubsUint,GtUlong,numofunits);
+        NEWMAPSPEC(encseq->specialtable_uchar.endsubsUint,GtUlong,numofunits);
       }
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
@@ -685,12 +685,12 @@ static void assignencseqmapspecification(
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
-        NEWMAPSPEC(encseq->ushortspecialpositions,GtUshort,
+        NEWMAPSPEC(encseq->specialtable_ushort.positions,GtUshort,
                    encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ushortspecialrangelength,GtUshort,
+        NEWMAPSPEC(encseq->specialtable_ushort.rangelengths,GtUshort,
                    encseq->numofspecialstostore);
         numofunits = encseq->totallength/USHRT_MAX+1;
-        NEWMAPSPEC(encseq->ushortendspecialsubsUint,GtUlong,numofunits);
+        NEWMAPSPEC(encseq->specialtable_ushort.endsubsUint,GtUlong,numofunits);
       }
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
@@ -698,12 +698,12 @@ static void assignencseqmapspecification(
                  encseq->unitsoftwobitencoding);
       if (encseq->numofspecialstostore > 0)
       {
-        NEWMAPSPEC(encseq->uint32specialpositions,Uint32,
+        NEWMAPSPEC(encseq->specialtable_uint32.positions,Uint32,
                    encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->uint32specialrangelength,Uint32,
+        NEWMAPSPEC(encseq->specialtable_uint32.rangelengths,Uint32,
                    encseq->numofspecialstostore);
         numofunits = encseq->totallength/UINT32_MAX+1;
-        NEWMAPSPEC(encseq->uint32endspecialsubsUint,GtUlong,numofunits);
+        NEWMAPSPEC(encseq->specialtable_uint32.endsubsUint,GtUlong,numofunits);
       }
       break;
     default: break;
@@ -841,21 +841,21 @@ void gt_encseq_delete(GtEncseq *encseq)
         break;
       case GT_ACCESS_TYPE_UCHARTABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->ucharspecialpositions);
-        gt_free(encseq->ucharendspecialsubsUint);
-        gt_free(encseq->ucharspecialrangelength);
+        gt_free(encseq->specialtable_uchar.positions);
+        gt_free(encseq->specialtable_uchar.endsubsUint);
+        gt_free(encseq->specialtable_uchar.rangelengths);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->ushortspecialpositions);
-        gt_free(encseq->ushortendspecialsubsUint);
-        gt_free(encseq->ushortspecialrangelength);
+        gt_free(encseq->specialtable_ushort.positions);
+        gt_free(encseq->specialtable_ushort.endsubsUint);
+        gt_free(encseq->specialtable_ushort.rangelengths);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->uint32specialpositions);
-        gt_free(encseq->uint32endspecialsubsUint);
-        gt_free(encseq->uint32specialrangelength);
+        gt_free(encseq->specialtable_uint32.positions);
+        gt_free(encseq->specialtable_uint32.endsubsUint);
+        gt_free(encseq->specialtable_uint32.rangelengths);
         break;
       default: break;
     }
@@ -864,15 +864,15 @@ void gt_encseq_delete(GtEncseq *encseq)
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
   encseq->twobitencoding = NULL;
-  encseq->ucharspecialpositions = NULL;
-  encseq->ucharendspecialsubsUint = NULL;
-  encseq->ucharspecialrangelength = NULL;
-  encseq->ushortspecialpositions = NULL;
-  encseq->ushortendspecialsubsUint = NULL;
-  encseq->ushortspecialrangelength = NULL;
-  encseq->uint32specialpositions = NULL;
-  encseq->uint32endspecialsubsUint = NULL;
-  encseq->uint32specialrangelength = NULL;
+  encseq->specialtable_uchar.positions = NULL;
+  encseq->specialtable_uchar.endsubsUint = NULL;
+  encseq->specialtable_uchar.rangelengths = NULL;
+  encseq->specialtable_ushort.positions = NULL;
+  encseq->specialtable_ushort.endsubsUint = NULL;
+  encseq->specialtable_ushort.rangelengths = NULL;
+  encseq->specialtable_uint32.positions = NULL;
+  encseq->specialtable_uint32.endsubsUint = NULL;
+  encseq->specialtable_uint32.rangelengths = NULL;
   if (encseq->destab != NULL)
   {
     if (encseq->hasallocateddestab) {
@@ -918,51 +918,51 @@ void gt_encseq_delete(GtEncseq *encseq)
   gt_free(encseq);
 }
 
-#define ADDTYPE(V)               uchar##V
-#define ACCESSENCSEQ(ES,V)       (ES)->uchar##V
-#define SPECIALTYPE              GtUchar
-#define MAXSPECIALTYPE           UCHAR_MAX
-#define POS2PAGENUM(V)           ((V) >> 8)
+#define GT_APPENDINT(V)          V##_uchar
+#define ACCESSENCSEQ(ES,V)       (ES)->specialtable_uchar . ##V
+#define GT_SPECIALTABLETYPE      GtUchar
+#define GT_MAXSPECIALTABLETYPE   UCHAR_MAX
+#define GT_POS2PAGENUM(V)        ((V) >> 8)
 
 #include "core/accessspecial.gen"
 
-#undef ADDTYPE
+#undef GT_APPENDINT
 #undef ACCESSENCSEQ
-#undef SPECIALTYPE
-#undef MAXSPECIALTYPE
-#undef POS2PAGENUM
+#undef GT_SPECIALTABLETYPE
+#undef GT_MAXSPECIALTABLETYPE
+#undef GT_POS2PAGENUM
 
-#define ADDTYPE(V)               ushort##V
-#define ACCESSENCSEQ(ES,V)       (ES)->ushort##V
-#define SPECIALTYPE              GtUshort
-#define MAXSPECIALTYPE           USHRT_MAX
-#define POS2PAGENUM(V)           ((V) >> 16)
+#define GT_APPENDINT(V)          V##_ushort
+#define ACCESSENCSEQ(ES,V)       (ES)->specialtable_ushort . ##V
+#define GT_SPECIALTABLETYPE      GtUshort
+#define GT_MAXSPECIALTABLETYPE   USHRT_MAX
+#define GT_POS2PAGENUM(V)        ((V) >> 16)
 
 #include "core/accessspecial.gen"
 
-#undef ADDTYPE
+#undef GT_APPENDINT
 #undef ACCESSENCSEQ
-#undef SPECIALTYPE
-#undef MAXSPECIALTYPE
-#undef POS2PAGENUM
+#undef GT_SPECIALTABLETYPE
+#undef GT_MAXSPECIALTABLETYPE
+#undef GT_POS2PAGENUM
 
-#define ADDTYPE(V)               uint32##V
-#define ACCESSENCSEQ(ES,V)       (ES)->uint32##V
-#define SPECIALTYPE              Uint32
-#define MAXSPECIALTYPE           UINT32_MAX
+#define GT_APPENDINT(V)          V##_uint32
+#define ACCESSENCSEQ(ES,V)       (ES)->specialtable_uint32 . ##V
+#define GT_SPECIALTABLETYPE      Uint32
+#define GT_MAXSPECIALTABLETYPE   UINT32_MAX
 #ifdef  _LP64
-#define POS2PAGENUM(V)           ((V) >> 32)
+#define GT_POS2PAGENUM(V)        ((V) >> 32)
 #else
-#define POS2PAGENUM(V)           0
+#define GT_POS2PAGENUM(V)        0
 #endif
 
 #include "core/accessspecial.gen"
 
-#undef ADDTYPE
+#undef GT_APPENDINT
 #undef ACCESSENCSEQ
-#undef SPECIALTYPE
-#undef MAXSPECIALTYPE
-#undef POS2PAGENUM
+#undef GT_SPECIALTABLETYPE
+#undef GT_MAXSPECIALTABLETYPE
+#undef GT_POS2PAGENUM
 
 /* generic for the case that there are no specialsymbols */
 
@@ -1442,58 +1442,58 @@ static bool issinglepositionspecialViabitaccess(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_UCHARTABLES | GT_ACCESS_TYPE_USHORTTABLES |
  * GT_ACCESS_TYPE_UINT32TABLES */
 
-#define DECLAREDELIVERVIATABLESFUNCTION(FCTNAME,CHECKFUN)\
+#define DECLAREDELIVERVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
 static GtUchar FCTNAME(const GtEncseq *encseq,unsigned long pos)\
 {\
   unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);\
-  if (twobits > 1UL || CHECKFUN(encseq,pos))\
+  if (twobits > 1UL || CHECKFUN##_##TYPE(&encseq->specialtable_##TYPE,pos))\
   {\
     return (GtUchar) twobits;\
   }\
   return twobits ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;\
 }
 
-#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN)\
+#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
 static bool FCTNAME(const GtEncseq *encseq,unsigned long pos)\
 {\
-  return CHECKFUN(encseq,pos) ? false : true;\
+  return CHECKFUN##_##TYPE(&encseq->specialtable_##TYPE,pos) ? false : true;\
 }
 
 /* GT_ACCESS_TYPE_UCHARTABLES */
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauchartablesSpecialfirst,
-                                ucharchecknospecial)
+                                checknospecial,uchar)
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauchartablesSpecialrange,
-                                ucharchecknospecialrange)
+                                checknospecialrange,uchar)
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauchar,
-                                ucharchecknospecialrange)
+                                checknospecialrange,uchar)
 
 /* GT_ACCESS_TYPE_USHORTTABLES */
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViaushorttablesSpecialfirst,
-                                ushortchecknospecial)
+                                checknospecial,ushort)
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViaushorttablesSpecialrange,
-                                ushortchecknospecialrange)
+                                checknospecialrange,ushort)
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViaushort,
-                                ushortchecknospecialrange)
+                                checknospecialrange,ushort)
 
 /* GT_ACCESS_TYPE_UINT32TABLES */
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauint32tablesSpecialfirst,
-                                uint32checknospecial)
+                                checknospecial,uint32)
 
 DECLAREDELIVERVIATABLESFUNCTION(delivercharViauint32tablesSpecialrange,
-                                uint32checknospecialrange)
+                                checknospecialrange,uint32)
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositionspecialViauint32,
-                                uint32checknospecialrange)
+                                checknospecialrange,uint32)
 
 #ifdef GT_RANGEDEBUG
 
@@ -1503,11 +1503,11 @@ static unsigned long accessendspecialsubsUint(const GtEncseq *encseq,
   switch (encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      return encseq->ucharendspecialsubsUint[pgnum];
+      return encseq->specialtable_uchar.endsubsUint[pgnum];
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return encseq->ushortendspecialsubsUint[pgnum];
+      return encseq->specialtable_ushort.endsubsUint[pgnum];
     case GT_ACCESS_TYPE_UINT32TABLES:
-      return encseq->uint32endspecialsubsUint[pgnum];
+      return encseq->specialtable_uint32.endsubsUint[pgnum];
     default: fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -1520,11 +1520,11 @@ static unsigned long accessspecialrangelength(const GtEncseq *encseq,
   switch (encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      return (unsigned long) encseq->ucharspecialrangelength[idx];
+      return (unsigned long) encseq->specialtable_uchar.rangelengths[idx];
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return (unsigned long) encseq->ushortspecialrangelength[idx];
+      return (unsigned long) encseq->specialtable_ushort.rangelengths[idx];
     case GT_ACCESS_TYPE_UINT32TABLES:
-      return (unsigned long) encseq->uint32specialrangelength[idx];
+      return (unsigned long) encseq->specialtable_uint32.rangelengths[idx];
     default: fprintf(stderr,"accessspecialrangelength(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -1537,11 +1537,11 @@ static unsigned long accessspecialpositions(const GtEncseq *encseq,
   switch (encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      return (unsigned long) encseq->ucharspecialpositions[idx];
+      return (unsigned long) encseq->specialtable_uchar.positions[idx];
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return (unsigned long) encseq->ushortspecialpositions[idx];
+      return (unsigned long) encseq->specialtable_ushort.positions[idx];
     case GT_ACCESS_TYPE_UINT32TABLES:
-      return (unsigned long) encseq->uint32specialpositions[idx];
+      return (unsigned long) encseq->specialtable_uint32.positions[idx];
     default: fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -1608,13 +1608,13 @@ static void advanceGtEncseqReader(GtEncseqReader *esr)
   switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharadvanceGtEncseqReader(esr);
+      advanceGtEncseqReader_uchar(esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortadvanceGtEncseqReader(esr);
+      advanceGtEncseqReader_ushort(esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32advanceGtEncseqReader(esr);
+      advanceGtEncseqReader_uint32(esr);
       break;
     default: fprintf(stderr,"advanceGtEncseqReader(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(esr->encseq->sat));
@@ -1627,13 +1627,13 @@ static void binpreparenextrange(GtEncseqReader *esr)
   switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ucharbinpreparenextrange(esr);
+      binpreparenextrange_uchar(esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ushortbinpreparenextrange(esr);
+      binpreparenextrange_ushort(esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      uint32binpreparenextrange(esr);
+      binpreparenextrange_uint32(esr);
       break;
     default: fprintf(stderr,"binpreparenextrange(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(esr->encseq->sat));
@@ -2322,19 +2322,19 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
     encseq->maxcharforspecial = (sat == GT_ACCESS_TYPE_EQUALLENGTH) ? 0 : 1UL;
   }
-  encseq->ucharspecialrangelength = NULL;
-  encseq->ushortspecialrangelength = NULL;
-  encseq->uint32specialrangelength = NULL;
   encseq->plainseq = NULL;
   encseq->bitpackarray = NULL;
   encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
-  encseq->ucharspecialpositions = NULL;
-  encseq->ucharendspecialsubsUint = NULL;
-  encseq->ushortspecialpositions = NULL;
-  encseq->ushortendspecialsubsUint = NULL;
-  encseq->uint32specialpositions = NULL;
-  encseq->uint32endspecialsubsUint = NULL;
+  encseq->specialtable_uchar.positions = NULL;
+  encseq->specialtable_uchar.endsubsUint = NULL;
+  encseq->specialtable_uchar.rangelengths = NULL;
+  encseq->specialtable_ushort.positions = NULL;
+  encseq->specialtable_ushort.endsubsUint = NULL;
+  encseq->specialtable_ushort.rangelengths = NULL;
+  encseq->specialtable_uint32.positions = NULL;
+  encseq->specialtable_uint32.endsubsUint = NULL;
+  encseq->specialtable_uint32.rangelengths = NULL;
   encseq->characterdistribution = NULL;
 
   spaceinbitsperchar
@@ -2495,34 +2495,34 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_UCHARTABLES */
-      NFCT(fillpos,ucharfillspecialtables),
+      NFCT(fillpos,fillspecialtable_uchar),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViauchartablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViauchartablesSpecialrange),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,ucharseqdelivercharSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial_uchar),
       NFCT(delivercontainsspecial,containsspecialViatables),
       NFCT(issinglepositionspecial,issinglepositionspecialViauchar)
     },
 
     { /* GT_ACCESS_TYPE_USHORTTABLES */
-      NFCT(fillpos,ushortfillspecialtables),
+      NFCT(fillpos,fillspecialtable_ushort),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViaushorttablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViaushorttablesSpecialrange),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,ushortseqdelivercharSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial_ushort),
       NFCT(delivercontainsspecial,containsspecialViatables),
       NFCT(issinglepositionspecial,issinglepositionspecialViaushort)
     },
 
     { /* GT_ACCESS_TYPE_UINT32TABLES */
-      NFCT(fillpos,uint32fillspecialtables),
+      NFCT(fillpos,fillspecialtable_uint32),
       NFCT(delivercharnospecial,deliverfromtwobitencoding),
       NFCT(delivercharspecial,delivercharViauint32tablesSpecialfirst),
       NFCT(delivercharspecialrange,delivercharViauint32tablesSpecialrange),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,uint32seqdelivercharSpecial),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial_uint32),
       NFCT(delivercontainsspecial,containsspecialViatables),
       NFCT(issinglepositionspecial,issinglepositionspecialViauint32)
     }
@@ -3646,11 +3646,11 @@ static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
     switch (esr->encseq->sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-        return ucharfwdgetnexttwobitencodingstopposViatables(esr);
+        return fwdgetnexttwobitencodingstopposViatables_uchar(esr);
       case GT_ACCESS_TYPE_USHORTTABLES:
-        return ushortfwdgetnexttwobitencodingstopposViatables(esr);
+        return fwdgetnexttwobitencodingstopposViatables_ushort(esr);
       case GT_ACCESS_TYPE_UINT32TABLES:
-        return uint32fwdgetnexttwobitencodingstopposViatables(esr);
+        return fwdgetnexttwobitencodingstopposViatables_uint32(esr);
       case GT_ACCESS_TYPE_EQUALLENGTH:
         return fwdgetnexttwobitencodingstopposViaequallength(esr->encseq,
                                                              esr->currentpos);
@@ -3723,11 +3723,11 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
     switch (esr->encseq->sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-        return ucharrevgetnexttwobitencodingstopposViatables(esr);
+        return revgetnexttwobitencodingstopposViatables_uchar(esr);
       case GT_ACCESS_TYPE_USHORTTABLES:
-        return ushortrevgetnexttwobitencodingstopposViatables(esr);
+        return revgetnexttwobitencodingstopposViatables_ushort(esr);
       case GT_ACCESS_TYPE_UINT32TABLES:
-        return uint32revgetnexttwobitencodingstopposViatables(esr);
+        return revgetnexttwobitencodingstopposViatables_uint32(esr);
       case GT_ACCESS_TYPE_EQUALLENGTH:
         return revgetnexttwobitencodingstopposViaequallength(esr->encseq,
                                                              esr->currentpos);
