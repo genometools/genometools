@@ -206,8 +206,7 @@ static GtCodetype getencseqcode(const GtEncseq *encseq,
   for (idx=0; idx<prefixlength; idx++)
   {
     gt_assert((unsigned long) (pos + idx) < totallength);
-    cc = gt_encseq_get_encoded_char_nospecial(encseq,pos + idx,
-                                                      readmode);
+    cc = gt_encseq_get_encoded_char_nospecial(encseq,pos + idx,readmode);
     gt_assert(ISNOTSPECIAL(cc));
     code += multimappower[idx][cc];
   }

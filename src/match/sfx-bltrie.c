@@ -459,7 +459,8 @@ static Blindtrienodeptr blindtrie_findcompanion(
              currentstartpos + headdepth < currenttwobitencodingstoppos))
         {
           newchar = (Blindtriesymbol)
-                    gt_encseq_extract_encoded_char(blindtrie->encseq,
+                    gt_encseq_get_encoded_char_nospecial(
+                                                   blindtrie->encseq,
                                                    currentstartpos + headdepth,
                                                    blindtrie->readmode);
         } else
@@ -668,10 +669,10 @@ static unsigned long blindtrie_twobitencoding_getlcp(
       !commonunits.leftspecial)
   {
     *mm_oldsuffix = (Blindtriesymbol)
-                    gt_encseq_extract_encoded_char(blindtrie->encseq,
-                                                   leafpos +
-                                                     commonunits.finaldepth,
-                                                   blindtrie->readmode);
+                    gt_encseq_get_encoded_char_nospecial(blindtrie->encseq,
+                                                         leafpos +
+                                                         commonunits.finaldepth,
+                                                         blindtrie->readmode);
   } else
   {
     if (mm_oldsuffixisseparator != NULL)
@@ -695,10 +696,10 @@ static unsigned long blindtrie_twobitencoding_getlcp(
       !commonunits.rightspecial)
   {
     *mm_newsuffix = (Blindtriesymbol)
-                    gt_encseq_extract_encoded_char(blindtrie->encseq,
-                                                   currentstartpos +
-                                                   commonunits.finaldepth,
-                                                   blindtrie->readmode);
+                    gt_encseq_get_encoded_char_nospecial(blindtrie->encseq,
+                                                         currentstartpos +
+                                                         commonunits.finaldepth,
+                                                         blindtrie->readmode);
   } else
   {
     *mm_newsuffix = GT_UNIQUEINT(currentstartpos + commonunits.finaldepth);

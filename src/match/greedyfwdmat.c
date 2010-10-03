@@ -81,8 +81,8 @@ static void checkifsequenceisthere(const GtEncseq *encseq,
   for (i=0; i<gmatchlength; i++)
   {
     cc = gt_encseq_get_encoded_char_nospecial(encseq,
-                                                    witnessposition+i,
-                                                    GT_READMODE_FORWARD);
+                                              witnessposition+i,
+                                              GT_READMODE_FORWARD);
     if (qptr[i] != cc)
     {
       fprintf(stderr,"sequence of length %lu at witnesspos %lu"

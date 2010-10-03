@@ -638,8 +638,6 @@ static int runsuffixerator(bool doesa,
   return haserr ? -1 : 0;
 }
 
-void showgetencodedcharcounters(void);
-
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
                                 const char **argv,GtError *err)
 {
@@ -671,7 +669,6 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
   }
   gt_wrapsfxoptions(&so);
   /*
-  showgetencodedcharcounters();
   printf("countgt_encseq_compare_viatwobitencoding=%lu\n",
           countgt_encseq_compare_viatwobitencoding_get());
   printf("# inverse_order = %lu\n",inverse_order);

@@ -260,15 +260,6 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
 int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
                             const char *indexname, GtError *err);
 
-/* Returns the encoded representation of the character at position <pos> of
-  <encseq> read in the direction as indicated by <readmode>.
-  The function only works for sequence representations based on the two bit
-  encoding and for the case that encodesequence[pos] does not contain a
-  special character. */
-GtUchar gt_encseq_extract_encoded_char(const GtEncseq *encseq,
-                                       unsigned long pos,
-                                       GtReadmode readmode);
-
 /* Sets the sequence input type for <ee> to be pre-encoded. Only for internal
    use. */
 void  gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);

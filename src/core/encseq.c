@@ -238,66 +238,22 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
   return encseq->numofdbsequences;
 }
 
-#undef WITHshowgetencodedcharcounters
-#ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encseq_get_encoded_char = 0;
-#endif
+static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
+                                          unsigned long pos);
 
-#define NEWVERSION
-#ifdef NEWVERSION
-static GtUchar gt_encseq_get_encoded_char_nontwobitencoding(
-                                   const GtEncseq *encseq,
-                                   unsigned long pos,
-                                   GtReadmode readmode)
-#else
 GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                    unsigned long pos,
                                    GtReadmode readmode)
-
-#endif
 {
-#ifdef WITHshowgetencodedcharcounters
-  countgt_encseq_get_encoded_char++;
-#endif
   gt_assert(pos < encseq->totallength);
-  switch (readmode)
+  if (GT_ISDIRREVERSE(readmode))
   {
-    case GT_READMODE_FORWARD:
-      return encseq->deliverchar(encseq,pos);
-    case GT_READMODE_REVERSE:
-      return encseq->deliverchar(encseq,GT_REVERSEPOS(encseq->totallength,pos));
-    case GT_READMODE_COMPL: /* only works with dna */
-      {
-        GtUchar cc = encseq->deliverchar(encseq,pos);
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
-      }
-    case GT_READMODE_REVCOMPL: /* only works with dna */
-      {
-        GtUchar cc = encseq->deliverchar(encseq,
-                                       GT_REVERSEPOS(encseq->totallength,pos));
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
-      }
-    default:
-      fprintf(stderr,"%s: readmode %d not implemented\n",
-                     __func__,(int) readmode);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
+    pos = GT_REVERSEPOS(encseq->totallength,pos);
   }
-}
-
-#ifdef NEWVERSION
-GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
-                                   unsigned long pos,
-                                   GtReadmode readmode)
-{
-  gt_assert(pos < encseq->totallength);
   if (encseq->twobitencoding != NULL)
   {
     unsigned long twobits;
 
-    if (GT_ISDIRREVERSE(readmode))
-    {
-      pos = GT_REVERSEPOS(encseq->totallength,pos);
-    }
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
     if (!encseq->has_specialranges ||
         twobits > encseq->maxcharforspecial ||
@@ -309,14 +265,22 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
     }
     return (encseq->maxcharforspecial == 0 || twobits)
              ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
+  }
+  if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
+  {
+    gt_assert(!GT_ISDIRCOMPLEMENT(readmode));
+    return delivercharViabytecompress(encseq,pos);
   } else
   {
-    return gt_encseq_get_encoded_char_nontwobitencoding(encseq,
-                                                        pos,
-                                                        readmode);
+    GtUchar cc;
+
+    gt_assert(encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
+    cc = encseq->plainseq[pos];
+    return (ISNOTSPECIAL(cc) && GT_ISDIRCOMPLEMENT(readmode))
+           ? GT_COMPLEMENTBASE(cc)
+           : cc;
   }
 }
-#endif
 
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
@@ -326,69 +290,38 @@ char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                             gt_encseq_get_encoded_char(encseq, pos, readmode));
 }
 
-GtUchar gt_encseq_extract_encoded_char(const GtEncseq *encseq,
-                                       unsigned long pos,
-                                       GtReadmode readmode)
-{
-  gt_assert(pos < encseq->totallength);
-  gt_assert(gt_encseq_bitwise_cmp_ok(encseq));
-  switch (readmode)
-  {
-    case GT_READMODE_FORWARD:
-      return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-    case GT_READMODE_REVERSE:
-      return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,
-                                          GT_REVERSEPOS(encseq->totallength,
-                                                        pos));
-    case GT_READMODE_COMPL: /* only works with dna */
-      {
-        GtUchar cc = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-        return GT_COMPLEMENTBASE(cc);
-      }
-    case GT_READMODE_REVCOMPL: /* only works with dna */
-      {
-        GtUchar cc = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,
-                                        GT_REVERSEPOS(encseq->totallength,pos));
-        return GT_COMPLEMENTBASE(cc);
-      }
-    default:
-      fprintf(stderr,"gt_encseq_get_nospecial_encoded_char: "
-                     "readmode %d not implemented\n",
-                     (int) readmode);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
 GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
-  switch (readmode)
+  if (GT_ISDIRREVERSE(readmode))
   {
-    case GT_READMODE_FORWARD:
-      return encseq->delivercharnospecial(encseq,pos);
-    case GT_READMODE_REVERSE:
-      return encseq->delivercharnospecial(encseq,
-                                          GT_REVERSEPOS(encseq->totallength,
-                                                        pos));
-    case GT_READMODE_COMPL: /* only works with dna */
-      {
-        GtUchar cc = encseq->delivercharnospecial(encseq,pos);
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
-      }
-    case GT_READMODE_REVCOMPL: /* only works with dna */
-      {
-        GtUchar cc = encseq->delivercharnospecial(encseq,
-                                              GT_REVERSEPOS(encseq->totallength,
-                                                            pos));
-        return ISSPECIAL(cc) ? cc : GT_COMPLEMENTBASE(cc);
-      }
-    default:
-      fprintf(stderr,"gt_encseq_get_encoded_char_nospecial: "
-                     "readmode %d not implemented\n",
-                     (int) readmode);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
+    pos = GT_REVERSEPOS(encseq->totallength,pos);
+  }
+  if (encseq->twobitencoding != NULL)
+  {
+    unsigned long twobits;
+
+    twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+    return GT_ISDIRCOMPLEMENT(readmode)
+             ? GT_COMPLEMENTBASE((GtUchar) twobits)
+             : (GtUchar) twobits;
+  }
+  if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
+  {
+    gt_assert(!GT_ISDIRCOMPLEMENT(readmode));
+    return delivercharViabytecompress(encseq,pos);
+  } else
+  {
+    GtUchar cc;
+
+    gt_assert(encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
+    cc = encseq->plainseq[pos];
+    gt_assert(ISNOTSPECIAL(cc));
+    return GT_ISDIRCOMPLEMENT(readmode)
+           ? GT_COMPLEMENTBASE(cc)
+           : cc;
   }
 }
 #endif
@@ -419,16 +352,10 @@ struct GtEncseqReader
 };
 
 #ifndef INLINEDENCSEQ
-#ifdef WITHshowgetencodedcharcounters
-static uint64_t countgt_encseq_reader_next_encoded_char = 0;
-#endif
 
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
   GtUchar cc;
-#ifdef WITHshowgetencodedcharcounters
-  countgt_encseq_reader_next_encoded_char++;
-#endif
   gt_assert(esr && esr->currentpos < esr->encseq->totallength);
   switch (esr->readmode)
   {
@@ -455,16 +382,6 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
   }
 }
 #endif /* INLINEDENCSEQ */
-
-#ifdef WITHshowgetencodedcharcounters
-void showgetencodedcharcounters(void)
-{
-  printf("calls of gt_encseq_get_encoded_char = " Formatuint64_t "\n",
-          PRINTuint64_tcast(countgt_encseq_get_encoded_char));
-  printf("calls of gt_encseq_reader_next_encoded_char = " Formatuint64_t "\n",
-          PRINTuint64_tcast(countgt_encseq_reader_next_encoded_char));
-}
-#endif
 
 char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 {
@@ -1011,6 +928,7 @@ static void showallspecialpositions(const GtEncseq *encseq)
 static GtUchar deliverfromtwobitencoding(const GtEncseq *encseq,
                                          unsigned long pos)
 {
+  gt_assert(false);
   return (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
 }
 
@@ -1282,6 +1200,7 @@ static GtUchar delivercharViaequallength(const GtEncseq *encseq,
                                          unsigned long pos)
 {
   unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+  gt_assert(false);
   if (twobits > 0 || !specialsingleposViaequallength(encseq,pos))
   {
     return (GtUchar) twobits;
@@ -1291,7 +1210,14 @@ static GtUchar delivercharViaequallength(const GtEncseq *encseq,
 
 static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
 {
-  return delivercharViaequallength(esr->encseq,esr->currentpos);
+  unsigned long twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                             esr->currentpos);
+  if (twobits > 0 ||
+      !specialsingleposViaequallength(esr->encseq,esr->currentpos))
+  {
+    return (GtUchar) twobits;
+  }
+  return (GtUchar) SEPARATOR;
 }
 
 static unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
@@ -1417,6 +1343,8 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
                                               unsigned long pos)
 {
   unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+
+  gt_assert(false);
   if (twobits > 1UL || !GT_ISIBITSET(encseq->specialbits,pos))
   {
     return (GtUchar) twobits;
@@ -1426,7 +1354,13 @@ static GtUchar delivercharViabitaccessSpecial(const GtEncseq *encseq,
 
 static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr)
 {
-  return delivercharViabitaccessSpecial(esr->encseq,esr->currentpos);
+  unsigned long twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                             esr->currentpos);
+  if (twobits > 1UL || !GT_ISIBITSET(esr->encseq->specialbits,esr->currentpos))
+  {
+    return (GtUchar) twobits;
+  }
+  return twobits ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
 }
 
 static bool containsspecialViabitaccess(const GtEncseq *encseq,
@@ -1488,6 +1422,7 @@ static bool issinglepositionspecialViabitaccess(const GtEncseq *encseq,
 static GtUchar FCTNAME(const GtEncseq *encseq,unsigned long pos)\
 {\
   unsigned long twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);\
+  gt_assert(false);\
   if (twobits > 1UL || CHECKFUN##_##TYPE(&encseq->specialtable.st_##TYPE,pos))\
   {\
     return (GtUchar) twobits;\

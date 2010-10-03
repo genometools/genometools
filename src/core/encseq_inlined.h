@@ -64,6 +64,4 @@ static inline char gt_encseq_get_decoded_char(const GtEncseq *encseq,
 #define gt_encseq_get_encoded_char_nospecial(ENCSEQ,POS,RM) \
           gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
 
-#define gt_encseq_extract_encoded_char(ENCSEQ,POS,RM) \
-          gt_encseq_get_encoded_char(ENCSEQ,POS,RM)
 #endif
