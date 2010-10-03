@@ -70,14 +70,13 @@ void gt_symbolstring2fasta(FILE *fpout,
 }
 
 void gt_encseq2symbolstring(FILE *fpout,
-                         const GtEncseq *encseq,
-                         GtReadmode readmode,
-                         unsigned long start,
-                         unsigned long wlen,
-                         unsigned long width)
+                            const GtEncseq *encseq,
+                            GtReadmode readmode,
+                            unsigned long start,
+                            unsigned long wlen,
+                            unsigned long width)
 {
-  unsigned long j;
-  unsigned long idx, lastpos;
+  unsigned long j, idx, lastpos;
   GtUchar currentchar;
   GtEncseqReader *esr;
   const GtAlphabet *alpha;
@@ -104,8 +103,8 @@ void gt_encseq2symbolstring(FILE *fpout,
     }
     if (currentchar != (GtUchar) SEPARATOR)
     {
-     j++;
-     if (j >= width)
+      j++;
+      if (j >= width)
       {
         fprintf(fpout,"\n");
         j = 0;
@@ -116,9 +115,9 @@ void gt_encseq2symbolstring(FILE *fpout,
 }
 
 void gt_fprintfencseq(FILE *fpout,
-                   const GtEncseq *encseq,
-                   unsigned long start,
-                   unsigned long wlen)
+                      const GtEncseq *encseq,
+                      unsigned long start,
+                      unsigned long wlen)
 {
   unsigned long idx;
   GtUchar currentchar;
@@ -136,12 +135,12 @@ void gt_fprintfencseq(FILE *fpout,
 }
 
 void gt_encseq2fastaoutput(FILE *fpout,
-                        const char *desc,
-                        const GtEncseq *encseq,
-                        GtReadmode readmode,
-                        unsigned long start,
-                        unsigned long wlen,
-                        unsigned long width)
+                           const char *desc,
+                           const GtEncseq *encseq,
+                           GtReadmode readmode,
+                           unsigned long start,
+                           unsigned long wlen,
+                           unsigned long width)
 {
   gt_assert(width > 0);
   if (desc == NULL)
@@ -152,11 +151,11 @@ void gt_encseq2fastaoutput(FILE *fpout,
     fprintf(fpout,">%s\n",desc);
   }
   gt_encseq2symbolstring(fpout,
-                      encseq,
-                      readmode,
-                      start,
-                      wlen,
-                      width);
+                         encseq,
+                         readmode,
+                         start,
+                         wlen,
+                         width);
 }
 
 int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
@@ -174,10 +173,10 @@ int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
   while (true)
   {
     retval = gt_seqiterator_next(seqit,
-                              &sequence,
-                              &seqlen,
-                              &desc,
-                              err);
+                                 &sequence,
+                                 &seqlen,
+                                 &desc,
+                                 err);
     if (retval < 0)
     {
       haserr = true;
