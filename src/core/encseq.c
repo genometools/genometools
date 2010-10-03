@@ -860,7 +860,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #define GT_MAXSPECIALTABLETYPE   UCHAR_MAX
 #define GT_POS2PAGENUM(V)        ((V) >> 8)
 
-#include "core/accessspecial.gen"
+#include "core/accspecialrange.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
@@ -872,7 +872,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #define GT_MAXSPECIALTABLETYPE   USHRT_MAX
 #define GT_POS2PAGENUM(V)        ((V) >> 16)
 
-#include "core/accessspecial.gen"
+#include "core/accspecialrange.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
@@ -888,7 +888,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #define GT_POS2PAGENUM(V)        0
 #endif
 
-#include "core/accessspecial.gen"
+#include "core/accspecialrange.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
