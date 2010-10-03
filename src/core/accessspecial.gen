@@ -229,7 +229,7 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
                specialtable->rangelengths[cellnum] + 1;
 }
 
-static void GT_APPENDINT(binpreparenextrange)(GtEncseqReader *esr)
+static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr)
 {
   unsigned long endpos0, endpos1, cellnum, pagenum;
   bool found = false;
@@ -454,7 +454,7 @@ static bool GT_APPENDINT(nextnonemptypage)(GtEncseqReader *esr,
   return false;
 }
 
-static void GT_APPENDINT(advanceGtEncseqReader)(GtEncseqReader *esr)
+static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr)
 {
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
@@ -557,7 +557,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
         }
         if (esr->idx->hasrange)
         {
-          GT_APPENDINT(advanceGtEncseqReader)(esr);
+          GT_APPENDINT(advancerangeGtEncseqReader)(esr);
         }
       }
     } else
@@ -572,7 +572,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
         }
         if (esr->idx->hasrange)
         {
-          GT_APPENDINT(advanceGtEncseqReader)(esr);
+          GT_APPENDINT(advancerangeGtEncseqReader)(esr);
         }
       }
     }
@@ -599,7 +599,7 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->idx->hasrange)
       {
-        GT_APPENDINT(advanceGtEncseqReader)(esr);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr);
       } else
       {
         break;
@@ -629,7 +629,7 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->idx->hasrange)
       {
-        GT_APPENDINT(advanceGtEncseqReader)(esr);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr);
       } else
       {
         break;

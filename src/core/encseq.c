@@ -1406,39 +1406,41 @@ DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                 issinglepositioninspecialrangeViauint32,
                                 checkspecialrange,uint32)
 
-static void advanceGtEncseqReader(GtEncseqReader *esr)
+static void advancerangeGtEncseqReader(GtEncseqReader *esr)
 {
   switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      advanceGtEncseqReader_uchar(esr);
+      advancerangeGtEncseqReader_uchar(esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      advanceGtEncseqReader_ushort(esr);
+      advancerangeGtEncseqReader_ushort(esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      advanceGtEncseqReader_uint32(esr);
+      advancerangeGtEncseqReader_uint32(esr);
       break;
-    default: fprintf(stderr,"advanceGtEncseqReader(sat = %s is undefined)\n",
+    default: fprintf(stderr,
+                     "advancerangeGtEncseqReader(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(esr->encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
    }
 }
 
-static void binpreparenextrange(GtEncseqReader *esr)
+static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr)
 {
   switch (esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      binpreparenextrange_uchar(esr);
+      binpreparenextrangeGtEncseqReader_uchar(esr);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      binpreparenextrange_ushort(esr);
+      binpreparenextrangeGtEncseqReader_ushort(esr);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      binpreparenextrange_uint32(esr);
+      binpreparenextrangeGtEncseqReader_uint32(esr);
       break;
-    default: fprintf(stderr,"binpreparenextrange(sat = %s is undefined)\n",
+    default: fprintf(stderr,"binpreparenextrangeGtEncseqReader(sat = %s "
+                            "is undefined)\n",
                      gt_encseq_access_type_str(esr->encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -1468,13 +1470,13 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
     }
     esr->idx->hasprevious = esr->idx->hascurrent = false;
-    binpreparenextrange(esr);
+    binpreparenextrangeGtEncseqReader(esr);
 #ifdef GT_RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->idx->firstcell,esr->idx->lastcell,
                        esr->idx->nextpage);
 #endif
-    advanceGtEncseqReader(esr);
+    advancerangeGtEncseqReader(esr);
   } else {
     if (esr->idx != NULL) {
       gt_free(esr->idx);
@@ -1810,7 +1812,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       *range = sri->esr->idx->previousrange;
       if (sri->esr->idx->hasrange)
       {
-        advanceGtEncseqReader(sri->esr);
+        advancerangeGtEncseqReader(sri->esr);
       } else
       {
         sri->exhausted = true;
