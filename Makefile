@@ -25,8 +25,12 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/libtecla-1.6.1
 # these variables are exported by the configuration script
-CC:=gcc
-CXX:=g++
+ifndef CC
+  CC:=gcc
+endif
+ifndef CXX
+  CXX:=g++
+endif
 EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
@@ -246,8 +250,21 @@ ifeq ($(cov),yes)
 endif
 
 ifneq ($(opt),no)
-  GT_CFLAGS += -O3
-  GT_CXXFLAGS += -O3
+  ifeq ($(shell basename $(CC)),clang)
+    ifeq ($(lto),yes)
+      # clang/LLVM supports link-time optimization with -O4
+      # Note that on Linux this usually requires additional configuration of
+      # LLVM! Consult http://llvm.org/docs/GoldPlugin.html if problems arise.
+      GT_CFLAGS += -O4
+      GT_CXXFLAGS += -O4
+    else
+      GT_CFLAGS += -O3
+      GT_CXXFLAGS += -O3
+    endif
+  else
+    GT_CFLAGS += -O3
+    GT_CXXFLAGS += -O3
+  endif
 endif
 
 ifeq ($(prof),yes)
@@ -314,6 +331,12 @@ ifeq ($(m64),yes)
   GT_CFLAGS += -m64
   HMMER_CFLAGS += -m64
   GT_LDFLAGS += -m64
+endif
+
+ifeq ($(shell basename $(CC)),clang)
+  # do not complain about the unnecessary -c
+  GT_CFLAGS += -Qunused-arguments
+  GT_CPPFLAGS += -Qunused-arguments
 endif
 
 ifneq ($(sharedlib),no)
