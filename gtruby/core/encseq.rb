@@ -58,15 +58,11 @@ module GT
   extern "void gt_encseq_loader_do_not_require_ssp_tab(GtEncseqLoader*)"
   extern "void gt_encseq_loader_require_sds_tab(GtEncseqLoader*)"
   extern "void gt_encseq_loader_do_not_require_sds_tab(GtEncseqLoader*)"
-  extern "void gt_encseq_loader_enable_range_iterator(GtEncseqLoader*)"
-  extern "void gt_encseq_loader_disable_range_iterator(GtEncseqLoader*)"
   extern "GtEncseq* gt_encseq_loader_load(GtEncseqLoader*, const char*,
                                           GtError*)"
   extern "void gt_encseq_loader_delete(GtEncseqLoader*)"
 
   extern "GtEncseqBuilder* gt_encseq_builder_new(GtAlphabet*)"
-  extern "void gt_encseq_builder_enable_range_iterator(GtEncseqBuilder*)"
-  extern "void gt_encseq_builder_disable_range_iterator(GtEncseqBuilder*)"
   extern "void gt_encseq_builder_enable_description_support(GtEncseqBuilder*)"
   extern "void gt_encseq_builder_disable_description_support(GtEncseqBuilder*)"
   extern "void gt_encseq_builder_enable_multiseq_support(GtEncseqBuilder*)"
