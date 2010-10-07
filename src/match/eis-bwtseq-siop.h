@@ -128,7 +128,7 @@ BWTSeqRangeOcc(const BWTSeq *bwtSeq, AlphabetRangeID range, unsigned long pos,
     AlphabetRangeSize
       termIdx = MRAEncMapSymbol(alphabet, bwtTerminatorSym)
       - MRAEncGetRangeBase(alphabet, range),
-      fbIdx = MRAEncMapSymbol(alphabet, bwtSeq->bwtTerminatorFallback)
+      fbIdx = bwtSeq->bwtTerminatorFallback
       - MRAEncGetRangeBase(alphabet, range);
     if (pos > BWTSeqTerminatorPos(bwtSeq))
     {
