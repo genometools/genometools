@@ -51,6 +51,7 @@ static inline void add_filenum_count(unsigned long lower,
       filenum = numoffiles - 1;
     else
     {
+      gt_assert((position + 1) <= totallength);
       position = totallength - (position + 1);
       filenum = gt_encseq_filenum(encseq, position);
     }
@@ -83,7 +84,6 @@ static inline unsigned long **get_special_pos(const FMindex *index,
       special_char_rows_and_pos[1][special_idx] =
         gt_BwtSeqpositionextractor_extract(positext, row_idx);
       special_idx++;
-      gt_assert(special_idx <= num_of_specials);
     }
   }
   gt_assert(num_of_specials == special_idx);
@@ -247,7 +247,6 @@ static int visit_shu_children(const FMindex *index,
                     position = special_pos[1][idx];
 
       gt_assert(1UL <= num_of_rows);
-      gt_assert((position + 1) <= totallength);
 
       num_of_rows--;
 
@@ -255,6 +254,7 @@ static int visit_shu_children(const FMindex *index,
         filenum = numoffiles - 1;
       else
       {
+        gt_assert((position + 1) <= totallength);
         position = totallength - (position + 1);
         filenum = gt_encseq_filenum(encseq, position);
       }
