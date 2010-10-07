@@ -77,7 +77,6 @@ def test_pck(files, param)
            "-bsize 8            " +
            "-sprank             " +
            "-pl                 " +
-           "-sat uchar          " +
            "-indexname pck")
   run_test(
     "#{$bin}gt genomediff #{param} -pck pck",
