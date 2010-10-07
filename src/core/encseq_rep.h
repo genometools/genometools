@@ -111,7 +111,7 @@ struct GtEncseq
   const char *issinglepositioninspecialrangename;
   unsigned long *characterdistribution;
   GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
-                  specialcharinfo; /* information about specialcharacters */
+                     specialcharinfo; /* information about specialcharacters */
   Definedunsignedlong equallength;
   GtStrArray *filenametab;    /* table of filenames */
   char *firstfilename;

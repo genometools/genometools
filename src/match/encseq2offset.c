@@ -98,8 +98,7 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
            idx,
            gt_encseq_total_length(suffixarraytable[idx].encseq));
   }
-  tmplength
-    = gt_encseq_total_length(suffixarraytable[numofindexes -1].encseq);
+  tmplength = gt_encseq_total_length(suffixarraytable[numofindexes -1].encseq);
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
   specialcharinfo->specialcharacters = (unsigned long) tmpspecialcharacters;
   specialcharinfo->specialranges = (unsigned long) tmpspecialranges;
@@ -108,5 +107,11 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
     = gt_encseq_lengthofspecialprefix(suffixarraytable[0].encseq);
   specialcharinfo->lengthofspecialsuffix
     = gt_encseq_lengthofspecialsuffix(suffixarraytable[idx-1].encseq);
+  /* XXX Define this */
+  specialcharinfo->wildcards = 0;
+  specialcharinfo->wildcardranges = 0;
+  specialcharinfo->realwildcardranges = 0;
+  specialcharinfo->lengthofwildcardprefix = 0;
+  specialcharinfo->lengthofwildcardsuffix = 0;
   return sequenceoffsettable;
 }

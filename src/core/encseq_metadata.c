@@ -26,8 +26,8 @@
 struct GtEncseqMetadata
 {
   GtEncseqAccessType sat;
-  unsigned long totallength;
-  unsigned long numofdbsequences,
+  unsigned long totallength,
+                numofdbsequences,
                 numofdbfiles,
                 lengthofdbfilenames;
   GtSpecialcharinfo specialcharinfo;

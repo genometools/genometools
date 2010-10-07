@@ -524,9 +524,9 @@ static void assignencseqmapspecification(
       = gt_malloc(sizeof (*encseq->lengthofdbfilenamesptr));
     encseq->lengthofdbfilenamesptr[0] = encseq->lengthofdbfilenames;
 
-    encseq->specialcharinfoptr =
-                                gt_malloc(sizeof (*encseq->specialcharinfoptr));
-    encseq->specialcharinfoptr[0] = encseq->specialcharinfo;
+    encseq->specialcharinfoptr
+      = gt_malloc(sizeof (*encseq->specialcharinfoptr));
+    *encseq->specialcharinfoptr = encseq->specialcharinfo;
 
     encseq->firstfilename = gt_malloc(sizeof (*encseq->firstfilename) *
                                       encseq->lengthofdbfilenames);
@@ -2746,7 +2746,8 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 }
 
 static unsigned long calcspecialranges(unsigned long *specialrangestab,
-                                       GtDiscDistri *distspralen,
+                                       const GtDiscDistri
+*distspecialrangelength,
                                        GtLogger *logger)
 {
   Updatesumrangeinfo updatesumrangeinfo;
@@ -2756,7 +2757,8 @@ static unsigned long calcspecialranges(unsigned long *specialrangestab,
   updatesumrangeinfo.specialrangesUint32 = 0;
   updatesumrangeinfo.realspecialranges = 0;
   updatesumrangeinfo.logger = logger;
-  gt_disc_distri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
+  gt_disc_distri_foreach(distspecialrangelength,updatesumranges,
+                         &updatesumrangeinfo);
   if (specialrangestab != NULL)
   {
     specialrangestab[0] = updatesumrangeinfo.specialrangesGtUchar;
@@ -2869,15 +2871,16 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
                               unsigned long numofdbfiles,
                               unsigned long lengthofdbfilenames,
                               unsigned int numofchars,
-                              GtDiscDistri *distspralen,
+                              const GtDiscDistri *distspecialrangelength,
                               GtLogger *logger)
 {
   uint64_t smallestsize = 0, tmp;
   bool smallestdefined = false;
   int c;
 
+  specialcharinfo->realwildcardranges = 0; /* XXX: define this */
   specialcharinfo->realspecialranges
-    = calcspecialranges(specialrangestab,distspralen,logger);
+    = calcspecialranges(specialrangestab,distspecialrangelength,logger);
   gt_assert(forcetable <= 3U);
   for (c = 0; c<3; c++)
   {
@@ -2892,6 +2895,7 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
         smallestdefined = true;
         smallestsize = tmp;
         specialcharinfo->specialranges = specialrangestab[c];
+        specialcharinfo->wildcardranges = 0; /* XXX: define this */
       }
     }
   }
@@ -2919,11 +2923,11 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   GtUchar charcode;
   int retval;
   unsigned long currentpos = 0,
-                lastspeciallength = 0,
-                lengthofcurrentsequence = 0,
-                idx;
-  bool specialprefix = true, haserr = false;
-  GtDiscDistri *distspralen = NULL;
+                lastspecialrangelength = 0,
+                lastwildcardrangelength = 0,
+                lengthofcurrentsequence = 0;
+  bool specialprefix = true, wildcardprefix = true, haserr = false;
+  GtDiscDistri *distspecialrangelength = NULL, *distwildcardrangelength = NULL;
   GtQueue *descqueue = NULL;
   char *desc;
   FILE *desfp = NULL, *sdsfp = NULL;
@@ -2934,6 +2938,11 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
+  /* XXX define this */
+  specialcharinfo->wildcards = 0;
+  specialcharinfo->lengthofwildcardprefix = 0;
+  specialcharinfo->lengthofwildcardsuffix = 0;
+
   if (outdestab)
   {
     descqueue = gt_queue_new();
@@ -2976,7 +2985,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         gt_sequence_buffer_set_desc_queue(fb, descqueue);
       }
       gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
-      distspralen = gt_disc_distri_new();
+      distspecialrangelength = gt_disc_distri_new();
+      distwildcardrangelength = gt_disc_distri_new();
       for (currentpos = 0; /* Nothing */; currentpos++)
       {
 #ifndef _LP64
@@ -3035,6 +3045,12 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
               }
             } else
             {
+              if (wildcardprefix)
+              {
+                specialcharinfo->lengthofwildcardprefix++;
+              }
+              lastwildcardrangelength++;
+              specialcharinfo->wildcards++;
               lengthofcurrentsequence++;
             }
             if (specialprefix)
@@ -3042,13 +3058,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
               specialcharinfo->lengthofspecialprefix++;
             }
             specialcharinfo->specialcharacters++;
-            if (lastspeciallength == 0)
-            {
-              lastspeciallength = 1UL;
-            } else
-            {
-              lastspeciallength++;
-            }
+            lastspecialrangelength++;
           } else
           {
             lengthofcurrentsequence++;
@@ -3056,21 +3066,36 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
             {
               specialprefix = false;
             }
-            if (lastspeciallength > 0)
+            if (wildcardprefix)
             {
-              idx = lastspeciallength;
-              gt_disc_distri_add(distspralen,idx);
-              lastspeciallength = 0;
+              wildcardprefix = false;
+            }
+            if (lastspecialrangelength > 0)
+            {
+              gt_disc_distri_add(distspecialrangelength,
+                                 lastspecialrangelength);
+              lastspecialrangelength = 0;
+            }
+            if (lastwildcardrangelength > 0)
+            {
+              gt_disc_distri_add(distwildcardrangelength,
+                                 lastwildcardrangelength);
+              lastwildcardrangelength = 0;
             }
           }
         } else
         {
           if (retval == 0)
           {
-            if (lastspeciallength > 0)
+            if (lastspecialrangelength > 0)
             {
-              idx = lastspeciallength;
-              gt_disc_distri_add(distspralen,idx);
+              gt_disc_distri_add(distspecialrangelength,
+                                 lastspecialrangelength);
+            }
+            if (lastwildcardrangelength > 0)
+            {
+              gt_disc_distri_add(distwildcardrangelength,
+                                 lastwildcardrangelength);
             }
           } else /* retval < 0 */
           {
@@ -3092,11 +3117,16 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       desc = NULL;
     }
     *totallength = currentpos;
-    specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-    doupdatesumranges(specialcharinfo,forcetable,specialrangestab,currentpos,
+    specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;
+    doupdatesumranges(specialcharinfo,
+                      forcetable,
+                      specialrangestab,
+                      currentpos,
                       gt_str_array_size(filenametab),
                       determinelengthofdbfilenames(filenametab),
-                      gt_alphabet_num_of_chars(alpha),distspralen,logger);
+                      gt_alphabet_num_of_chars(alpha),
+                      distspecialrangelength,
+                      logger);
     if (equallength->defined)
     {
       if (equallength->valueunsignedlong > 0)
@@ -3119,7 +3149,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   }
   gt_fa_xfclose(desfp);
   gt_fa_xfclose(sdsfp);
-  gt_disc_distri_delete(distspralen);
+  gt_disc_distri_delete(distspecialrangelength);
+  gt_disc_distri_delete(distwildcardrangelength);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
   /*
@@ -3140,14 +3171,16 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
                                      GtLogger *logger)
 {
   GtUchar charcode;
-  unsigned long pos, idx, lastspeciallength = 0;
+  unsigned long pos, lastspecialrangelength = 0;
   bool specialprefix = true;
-  GtDiscDistri *distspralen;
+  GtDiscDistri *distspecialrangelength;
 
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
-  specialcharinfo->lengthofspecialsuffix = 0;
-  distspralen = gt_disc_distri_new();
+  specialcharinfo->wildcards = 0;
+  specialcharinfo->lengthofwildcardprefix = 0;
+
+  distspecialrangelength = gt_disc_distri_new();
   for (pos = 0; pos < len; pos++)
   {
     charcode = seq[pos];
@@ -3158,12 +3191,12 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
         specialcharinfo->lengthofspecialprefix++;
       }
       specialcharinfo->specialcharacters++;
-      if (lastspeciallength == 0)
+      if (lastspecialrangelength == 0)
       {
-        lastspeciallength = 1UL;
+        lastspecialrangelength = 1UL;
       } else
       {
-        lastspeciallength++;
+        lastspecialrangelength++;
       }
     } else
     {
@@ -3171,24 +3204,25 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
       {
         specialprefix = false;
       }
-      if (lastspeciallength > 0)
+      if (lastspecialrangelength > 0)
       {
-        idx = lastspeciallength;
-        gt_disc_distri_add(distspralen,idx);
-        lastspeciallength = 0;
+        gt_disc_distri_add(distspecialrangelength,lastspecialrangelength);
+        lastspecialrangelength = 0;
       }
     }
   }
-  if (lastspeciallength > 0)
+  if (lastspecialrangelength > 0)
   {
-    idx = lastspeciallength;
-    gt_disc_distri_add(distspralen,idx);
+    gt_disc_distri_add(distspecialrangelength,lastspecialrangelength);
   }
-  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+  specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;
   specialcharinfo->realspecialranges
-    = calcspecialranges(NULL,distspralen,logger);
+    = calcspecialranges(NULL,distspecialrangelength,logger);
   specialcharinfo->specialranges = specialcharinfo->realspecialranges;
-  gt_disc_distri_delete(distspralen);
+  specialcharinfo->lengthofwildcardsuffix = 0;
+  specialcharinfo->realwildcardranges = 0;
+  specialcharinfo->wildcardranges = 0;
+  gt_disc_distri_delete(distspecialrangelength);
 }
 
 static unsigned long fwdgetnexttwobitencodingstopposViaequallength(
@@ -4731,7 +4765,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   unsigned long totallength = 0;
   bool haserr = false;
   unsigned int forcetable;
-  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0};
+  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0};
   GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
   GtFilelengthvalues *filelengthtab = NULL;
@@ -4782,22 +4816,22 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   {
     characterdistribution = initcharacterdistribution(alpha);
     if (gt_inputfiles2sequencekeyvalues(indexname,
-                              &totallength,
-                              &specialcharinfo,
-                              &equallength,
-                              forcetable,
-                              specialrangestab,
-                              filenametab,
-                              &filelengthtab,
-                              alpha,
-                              isplain,
-                              outdestab,
-                              outsdstab,
-                              characterdistribution,
-                              outssptab,
-                              &sequenceseppos,
-                              logger,
-                              err) != 0)
+                                        &totallength,
+                                        &specialcharinfo,
+                                        &equallength,
+                                        forcetable,
+                                        specialrangestab,
+                                        filenametab,
+                                        &filelengthtab,
+                                        alpha,
+                                        isplain,
+                                        outdestab,
+                                        outsdstab,
+                                        characterdistribution,
+                                        outssptab,
+                                        &sequenceseppos,
+                                        logger,
+                                        err) != 0)
     {
       haserr = true;
     }

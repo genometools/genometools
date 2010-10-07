@@ -95,8 +95,13 @@ typedef struct
                 realspecialranges,
                 lengthofspecialprefix,  /* number of specials at start of
                                            sequence */
-                lengthofspecialsuffix;  /* number of specials at end of
+                lengthofspecialsuffix,  /* number of specials at end of
                                            sequence */
+                wildcards,
+                wildcardranges,
+                realwildcardranges,
+                lengthofwildcardprefix,
+                lengthofwildcardsuffix;
 } GtSpecialcharinfo;
 
 #endif
