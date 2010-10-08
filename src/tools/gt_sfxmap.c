@@ -18,11 +18,12 @@
 #include "core/error.h"
 #include "core/logger.h"
 #include "core/option.h"
-#include "core/versionfunc.h"
+#include "match/echoseq.h"
+#include "core/encseq_metadata.h"
 #include "match/sarr-def.h"
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
-#include "match/echoseq.h"
+#include "match/eis-voiditf.h"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
 
@@ -598,9 +599,56 @@ static int sfxmap_esa(Sfxmapoptions *arguments,GtError *err)
   return haserr ? -1 : 0;
 }
 
-static int sfxmap_pck(GT_UNUSED Sfxmapoptions *arguments,GT_UNUSED GtError *err)
+static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
 {
-  return 0;
+  bool haserr = false;
+  FMindex *fmindex;
+  GtEncseqMetadata *encseqmetadata = NULL;
+
+  fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->indexname),false,err);
+  if (fmindex == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    encseqmetadata = gt_encseq_metadata_new(gt_str_get(arguments->indexname),
+                                            err);
+    if (encseqmetadata == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    unsigned long idx, pos, numofnonspecials, totallength;
+    GtSpecialcharinfo specialcharinfo;
+    Bwtseqpositioniterator *bspi;
+
+    gt_assert(encseqmetadata != NULL);
+    totallength = gt_encseq_metadata_total_length(encseqmetadata);
+    specialcharinfo = gt_encseq_metadata_specialcharinfo(encseqmetadata);
+    gt_assert(totallength >= specialcharinfo.specialcharacters);
+    numofnonspecials = totallength - specialcharinfo.specialcharacters;
+    bspi = gt_Bwtseqpositioniterator_new(fmindex,0,totallength);
+    for (idx = 0; idx < numofnonspecials; idx++)
+    {
+      if (!gt_Bwtseqpositioniterator_next(&pos,bspi))
+      {
+        gt_error_set(err,"cannot decode enough symbols");
+        haserr = true;
+        break;
+      }
+      /*printf("%lu: pos = %lu\n",idx,pos);*/
+    }
+    gt_Bwtseqpositioniterator_delete(bspi);
+    if (!haserr)
+    {
+      gt_deletevoidBWTSeq(fmindex);
+    }
+  }
+  gt_encseq_metadata_delete(encseqmetadata);
+  return haserr ? -1 : 0;
 }
 
 static int gt_sfxmap_runner(GT_UNUSED int argc,

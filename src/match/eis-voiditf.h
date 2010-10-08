@@ -37,29 +37,29 @@ unsigned long gt_bwtseqfirstmatch(const FMindex *voidbwtseq,
 
 typedef struct Bwtseqpositioniterator Bwtseqpositioniterator;
 
-Bwtseqpositioniterator *gt_newBwtseqpositioniterator(const FMindex *voidbwtseq,
-                                                     unsigned long lowerbound,
-                                                     unsigned long upperbound);
+Bwtseqpositioniterator *gt_Bwtseqpositioniterator_new(const FMindex *voidbwtseq,
+                                                      unsigned long lowerbound,
+                                                      unsigned long upperbound);
 
-bool gt_nextBwtseqpositioniterator(unsigned long *pos,
-                                   Bwtseqpositioniterator *bspi);
+bool gt_Bwtseqpositioniterator_next(unsigned long *pos,
+                                    Bwtseqpositioniterator *bspi);
 
-bool gt_nextBwtseqpositionwithoutSEPiterator(unsigned long *pos,
-                                             Bwtseqpositioniterator *bspi);
+bool gt_BwtseqpositionwithoutSEPiterator_next(unsigned long *pos,
+                                              Bwtseqpositioniterator *bspi);
 
 GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *voidbwtseq);
 
-void gt_freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi);
+void gt_Bwtseqpositioniterator_delete(Bwtseqpositioniterator *bspi);
 
 typedef struct Bwtseqcontextiterator Bwtseqcontextiterator;
 
-Bwtseqcontextiterator *gt_newBwtseqcontextiterator(const FMindex *voidbwtseq,
-                                                   unsigned long bound);
+Bwtseqcontextiterator *gt_Bwtseqcontextiterator_new(const FMindex *voidbwtseq,
+                                                    unsigned long bound);
 
-GtUchar gt_nextBwtseqcontextiterator(unsigned long *bound,
-                                     Bwtseqcontextiterator *bsci);
+GtUchar gt_Bwtseqcontextiterator_next(unsigned long *bound,
+                                      Bwtseqcontextiterator *bsci);
 
-void gt_freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci);
+void gt_Bwtseqcontextiterator_delete(Bwtseqcontextiterator **bsci);
 
 void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     unsigned long *rangeOccs,
@@ -68,8 +68,6 @@ void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     unsigned long ubound);
 
 FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
-                                const GtAlphabet *gtalphabet,
-                                unsigned long totallength,
                                 bool withpckbt,
                                 GtError *err);
 
@@ -118,5 +116,7 @@ unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
 unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq);
 
 const Mbtab **gt_bwtseq2mbtab(const FMindex *voidbwtseq);
+
+unsigned long gt_voidpackedindex_length_get(const FMindex *fmindex);
 
 #endif

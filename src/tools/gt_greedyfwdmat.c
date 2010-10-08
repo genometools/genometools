@@ -350,8 +350,6 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
       {
         packedindex =
           gt_loadvoidBWTSeqForSA(gt_str_get(gfmsubcallinfo.indexname),
-                                 gt_encseq_alphabet(suffixarray.encseq),
-                                 totallength,
                                  false,
                                  err);
         if (packedindex == NULL)
@@ -424,20 +422,20 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
           gt_findsubquerygmatchforward(dotestsequence(doms,&gfmsubcallinfo)
                                       ? suffixarray.encseq
                                       : NULL,
-                                    theindex,
-                                    totallength,
-                                    gmatchforwardfunction,
-                                    alphabet,
-                                    gfmsubcallinfo.queryfilenames,
-                                    gfmsubcallinfo.minlength,
-                                    gfmsubcallinfo.maxlength,
-                                    (gfmsubcallinfo.showmode & SHOWSEQUENCE)
-                                           ? true : false,
-                                    (gfmsubcallinfo.showmode & SHOWQUERYPOS)
-                                           ? true : false,
-                                    (gfmsubcallinfo.showmode & SHOWSUBJECTPOS)
-                                           ? true : false,
-                                    err) != 0)
+                                      theindex,
+                                      totallength,
+                                      gmatchforwardfunction,
+                                      alphabet,
+                                      gfmsubcallinfo.queryfilenames,
+                                      gfmsubcallinfo.minlength,
+                                      gfmsubcallinfo.maxlength,
+                                      (gfmsubcallinfo.showmode & SHOWSEQUENCE)
+                                             ? true : false,
+                                      (gfmsubcallinfo.showmode & SHOWQUERYPOS)
+                                             ? true : false,
+                                      (gfmsubcallinfo.showmode & SHOWSUBJECTPOS)
+                                             ? true : false,
+                                      err) != 0)
       {
         haserr = true;
       }

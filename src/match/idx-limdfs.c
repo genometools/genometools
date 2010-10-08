@@ -136,12 +136,7 @@ Genericindex *genericindex_new(const char *indexname,
   genericindex->maxdepth = 0;
   if (!haserr && !withesa)
   {
-    genericindex->packedindex
-      = gt_loadvoidBWTSeqForSA(indexname,
-                               gt_encseq_alphabet(genericindex->suffixarray
-                                                              ->encseq),
-                               genericindex->totallength,
-                               true, err);
+    genericindex->packedindex = gt_loadvoidBWTSeqForSA(indexname,true, err);
     if (genericindex->packedindex == NULL)
     {
       haserr = true;
@@ -441,16 +436,16 @@ static void gen_pck_overinterval(const Genericindex *genericindex,
   unsigned long dbstartpos;
 
   gt_assert(itv->leftbound < itv->rightbound);
-  bspi = gt_newBwtseqpositioniterator (genericindex->packedindex,
-                                    itv->leftbound,itv->rightbound);
-  while (gt_nextBwtseqpositioniterator(&dbstartpos,bspi))
+  bspi = gt_Bwtseqpositioniterator_new(genericindex->packedindex,
+                                       itv->leftbound,itv->rightbound);
+  while (gt_Bwtseqpositioniterator_next(&dbstartpos,bspi))
   {
     gt_assert(totallength >= (dbstartpos + itv->offset));
     /* call processmatch */
     match->dbstartpos = totallength - (dbstartpos + itv->offset);
     processmatch(processmatchinfo,match);
   }
-  gt_freeBwtseqpositioniterator(&bspi);
+  gt_Bwtseqpositioniterator_delete(bspi);
 }
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
@@ -706,8 +701,9 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
 
   gt_assert(child != NULL);
   bound = child->leftbound;
-  bsci = gt_newBwtseqcontextiterator(limdfsresources->genericindex->packedindex,
-                                  bound);
+  bsci
+    = gt_Bwtseqcontextiterator_new(limdfsresources->genericindex->packedindex,
+                                   bound);
   initparentcopy(limdfsresources,adfst);
 #ifdef SKDEBUG
   printf("retrieve context for bound = %lu\n",(unsigned long) bound);
@@ -720,7 +716,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
       processinchar = false;
     } else
     {
-      cc = gt_nextBwtseqcontextiterator(&bound,bsci);
+      cc = gt_Bwtseqcontextiterator_next(&bound,bsci);
     }
     if (cc != (GtUchar) SEPARATOR &&
         (!limdfsresources->nowildcards || cc != (GtUchar) WILDCARD))
@@ -788,7 +784,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     gt_assert(resetvalue > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo = resetvalue;
   }
-  gt_freeBwtseqcontextiterator(&bsci);
+  gt_Bwtseqcontextiterator_delete(&bsci);
 }
 
 static const Lcpintervalwithinfo *currentparent(const Limdfsresources

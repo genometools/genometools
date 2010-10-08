@@ -98,8 +98,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   if (!haserr)
   {
     packedindex = gt_loadvoidBWTSeqForSA(gt_str_get(prebwtoptions->indexname),
-                                         gt_encseq_alphabet(encseq),
-                                         totallength, false, err);
+                                         false, err);
     if (packedindex == NULL)
     {
       haserr = true;
@@ -107,14 +106,14 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
-    unsigned int numofchars = gt_alphabet_num_of_chars(
-                                                    gt_encseq_alphabet(encseq));
+    unsigned int numofchars
+      = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
     Pckbuckettable *pckbt;
 
     pckbt = gt_pckbuckettable_new((const void *) packedindex,
-                               numofchars,
-                               totallength,
-                               prebwtoptions->maxdepth);
+                                  numofchars,
+                                  totallength,
+                                  prebwtoptions->maxdepth);
     if (gt_pckbucket2file(gt_str_get(prebwtoptions->indexname),pckbt,err) != 0)
     {
       haserr = true;

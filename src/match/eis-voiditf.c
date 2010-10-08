@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/encseq_metadata.h"
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-voiditf.h"
@@ -42,9 +43,9 @@ struct Bwtseqpositioniterator
   unsigned long currentbound, upperbound;
 };
 
-Bwtseqpositioniterator *gt_newBwtseqpositioniterator(const FMindex *voidbwtseq,
-                                                     unsigned long lowerbound,
-                                                     unsigned long upperbound)
+Bwtseqpositioniterator *gt_Bwtseqpositioniterator_new(const FMindex *voidbwtseq,
+                                                      unsigned long lowerbound,
+                                                      unsigned long upperbound)
 {
   Bwtseqpositioniterator *bspi;
 
@@ -56,8 +57,8 @@ Bwtseqpositioniterator *gt_newBwtseqpositioniterator(const FMindex *voidbwtseq,
   return bspi;
 }
 
-bool gt_nextBwtseqpositioniterator(unsigned long *pos,
-                                   Bwtseqpositioniterator *bspi)
+bool gt_Bwtseqpositioniterator_next(unsigned long *pos,
+                                    Bwtseqpositioniterator *bspi)
 {
   if (bspi->currentbound < bspi->upperbound)
   {
@@ -68,8 +69,8 @@ bool gt_nextBwtseqpositioniterator(unsigned long *pos,
   return false;
 }
 
-bool gt_nextBwtseqpositionwithoutSEPiterator(unsigned long *pos,
-                                             Bwtseqpositioniterator *bspi)
+bool gt_BwtseqpositionwithoutSEPiterator_next(unsigned long *pos,
+                                              Bwtseqpositioniterator *bspi)
 {
   while (bspi->currentbound < bspi->upperbound)
   {
@@ -95,11 +96,10 @@ bool gt_nextBwtseqpositionwithoutSEPiterator(unsigned long *pos,
   return false;
 }
 
-void gt_freeBwtseqpositioniterator(Bwtseqpositioniterator **bspi)
+void gt_Bwtseqpositioniterator_delete(Bwtseqpositioniterator *bspi)
 {
-  destructExtBitsRetrieval(&(*bspi)->extBits);
-  gt_free(*bspi);
-  *bspi = NULL;
+  destructExtBitsRetrieval(&bspi->extBits);
+  gt_free(bspi);
 }
 
 struct Bwtseqcontextiterator
@@ -109,8 +109,8 @@ struct Bwtseqcontextiterator
   unsigned long bound;
 };
 
-Bwtseqcontextiterator *gt_newBwtseqcontextiterator(const FMindex *voidbwtseq,
-                                                   unsigned long bound)
+Bwtseqcontextiterator *gt_Bwtseqcontextiterator_new(const FMindex *voidbwtseq,
+                                                    unsigned long bound)
 {
   Bwtseqcontextiterator *bsci;
 
@@ -130,8 +130,8 @@ GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *voidbwtseq)
   return SEPARATOR;
 }
 
-GtUchar gt_nextBwtseqcontextiterator(unsigned long *bound,
-                                  Bwtseqcontextiterator *bsci)
+GtUchar gt_Bwtseqcontextiterator_next(unsigned long *bound,
+                                     Bwtseqcontextiterator *bsci)
 {
   GtUchar cc;
 
@@ -146,7 +146,7 @@ GtUchar gt_nextBwtseqcontextiterator(unsigned long *bound,
   return cc;
 }
 
-void gt_freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
+void gt_Bwtseqcontextiterator_delete(Bwtseqcontextiterator **bsci)
 {
   destructExtBitsRetrieval(&(*bsci)->extBits);
   gt_free(*bsci);
@@ -154,29 +154,49 @@ void gt_freeBwtseqcontextiterator(Bwtseqcontextiterator **bsci)
 }
 
 FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
-                                const GtAlphabet *gtalphabet,
-                                unsigned long totallength,
                                 bool withpckbt,
                                 GtError *err)
 {
-  BWTSeq *bwtseq;
+  BWTSeq *bwtseq = NULL;
   bool haserr = false;
+  GtAlphabet *alphabet;
+  unsigned long totallength;
 
-  bwtseq = gt_loadBWTSeqForSA(indexname,
-                              BWT_ON_BLOCK_ENC,
-                              BWTDEFOPT_MULTI_QUERY,
-                              gtalphabet,
-                              totallength+1,
-                              err);
-  if (bwtseq == NULL)
+  alphabet = gt_alphabet_new_from_file(indexname,err);
+  if (alphabet == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
+    GtEncseqMetadata *encseqmetadata;
+
+    encseqmetadata = gt_encseq_metadata_new(indexname,err);
+    if (encseqmetadata == NULL)
+    {
+      haserr = true;
+    }
+    totallength = gt_encseq_metadata_total_length(encseqmetadata);
+    gt_encseq_metadata_delete(encseqmetadata);
+  }
+  if (!haserr)
+  {
+    bwtseq = gt_loadBWTSeqForSA(indexname,
+                                BWT_ON_BLOCK_ENC,
+                                BWTDEFOPT_MULTI_QUERY,
+                                alphabet,
+                                totallength+1,
+                                err);
+    if (bwtseq == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     if (withpckbt && gt_pckbuckettableexists(indexname))
     {
-      unsigned int numofchars = gt_alphabet_num_of_chars(gtalphabet);
+      unsigned int numofchars = gt_alphabet_num_of_chars(alphabet);
       bwtseq->pckbuckettable = gt_mappckbuckettable(indexname,numofchars,err);
       if (bwtseq->pckbuckettable == NULL)
       {
@@ -187,6 +207,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
       bwtseq->pckbuckettable = NULL;
     }
   }
+  gt_alphabet_delete(alphabet);
   if (haserr && bwtseq != NULL)
   {
     gt_deletevoidBWTSeq((FMindex *) bwtseq);
@@ -382,4 +403,12 @@ bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
     bsemi = NULL;
   }
   return numofmatches > 0 ? true : false;
+}
+
+unsigned long gt_voidpackedindex_length_get(const FMindex *fmindex)
+{
+  unsigned long len = BWTSeqLength((const BWTSeq *) fmindex);
+
+  gt_assert(len > 0);
+  return len - 1;
 }

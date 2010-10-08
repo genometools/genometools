@@ -133,11 +133,11 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
   bdleaf.code = bd->code;
   bdleaf.depth = bd->depth;
   bdleaf.lowerbound = bd->lowerbound;
-  bsci = gt_newBwtseqcontextiterator(voidbwtseq,bdleaf.lowerbound);
+  bsci = gt_Bwtseqcontextiterator_new(voidbwtseq,bdleaf.lowerbound);
   while (bdleaf.depth < pckbt->maxdepth)
   {
     bdleaf.depth++;
-    cc = gt_nextBwtseqcontextiterator(&bdleaf.lowerbound,bsci);
+    cc = gt_Bwtseqcontextiterator_next(&bdleaf.lowerbound,bsci);
     if (ISSPECIAL(cc))
     {
       break;
@@ -146,7 +146,7 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
     bdleaf.upperbound = bdleaf.lowerbound+1;
     storeBoundsatdepth(pckbt,&bdleaf);
   }
-  gt_freeBwtseqcontextiterator(&bsci);
+  gt_Bwtseqcontextiterator_delete(&bsci);
 }
 
 Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
