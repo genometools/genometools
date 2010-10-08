@@ -670,11 +670,8 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
     }
     gt_assert(idx == numofnonspecials);
     gt_Bwtseqpositioniterator_delete(bspi);
-    if (!haserr)
-    {
-      gt_deletevoidBWTSeq(fmindex);
-    }
   }
+  gt_deletevoidBWTSeq(fmindex);
   if (ssar != NULL)
   {
     gt_freeSequentialsuffixarrayreader(&ssar);

@@ -248,9 +248,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
 {
   gt_assert(idx <= sssp->maxindex);
   gt_assert(value <= sssp->maxvalue);
-  /*
-  printf("idx=%lu,value=%lu\n",idx,value);
-  */
+  /*printf("idx=%lu,value=%lu\n",idx,value);*/
   if (value == 0)
   {
     sssp->longestidx.defined = true;

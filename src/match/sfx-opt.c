@@ -265,7 +265,8 @@ static GtOPrval parse_options(int *parsed_args,
   {
     optionsuf = optionlcp = optionbwt = NULL;
 #ifndef S_SPLINT_S
-    gt_registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
+    gt_registerPackedIndexOptions(op,
+                                  &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
                                   so->fn2encopt.indexname);
 #endif
   }

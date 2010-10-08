@@ -331,12 +331,20 @@ static int run_packedindexconstruction(GtLogger *logger,
   BWTSeq *bwtSeq;
   const Sfxiterator *sfi;
   bool haserr = false;
+  struct bwtParam finalcopy;
+  unsigned int numofchars 
+    = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
 
-  gt_logger_log(logger, "run construction of packed index for:\n"
-              "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
-              so->bwtIdxParams.final.seqParams.encParams.blockEnc.blockSize,
-              so->bwtIdxParams.final.seqParams.encParams.blockEnc.bucketBlocks,
-              so->bwtIdxParams.final.locateInterval);
+  finalcopy = so->bwtIdxParams.final;
+  if (numofchars > 10U && finalcopy.seqParams.encParams.blockEnc.blockSize > 3U)
+  {
+    finalcopy.seqParams.encParams.blockEnc.blockSize = 3U;
+  }
+  gt_logger_log(logger, "run construction of packed index for: "
+                        "blocksize=%u, blocks-per-bucket=%u, locfreq=%u",
+                finalcopy.seqParams.encParams.blockEnc.blockSize,
+                finalcopy.seqParams.encParams.blockEnc.bucketBlocks,
+                finalcopy.locateInterval);
   si = gt_newSfxInterface(so->readmode,
                           prefixlength,
                           so->numofparts,
@@ -353,7 +361,7 @@ static int run_packedindexconstruction(GtLogger *logger,
     haserr = true;
   } else
   {
-    bwtSeq = gt_createBWTSeqFromSfxI(&so->bwtIdxParams.final, si, err);
+    bwtSeq = gt_createBWTSeqFromSfxI(&finalcopy, si, err);
     if (bwtSeq == NULL)
     {
       gt_deleteSfxInterface(si);
@@ -378,8 +386,6 @@ static int run_packedindexconstruction(GtLogger *logger,
   }
   return haserr ? -1 : 0;
 }
-#else
-
 #endif
 
 static int runsuffixerator(bool doesa,

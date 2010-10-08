@@ -28,11 +28,14 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist,alldirs=true)
         extra=extra + " -maxdepth"
       end
     end
+    run_test "#{$bin}gt packedindex mkindex -indexname sfx -dir " + dirarg +
+             " -db " + filearg
     run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
              "-algbds 10 31 80 #{extra} #{outoptions} " +
              "-indexname sfx -dir " + dirarg + " -db " + filearg
     run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v -esa sfx",
              :maxtime => 600
+    run_test "#{$bin}gt dev sfxmap -v -pck sfx",:maxtime => 600
   end
 end
 

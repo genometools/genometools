@@ -28,7 +28,7 @@ gt_registerPackedIndexOptions(GtOptionParser *op,
                               int defaultOptimizationFlags,
                               const GtStr *projectName)
 {
- GtOption *option;
+  GtOption *option;
 
   gt_registerEncIdxSeqOptions(op, &paramOutput->final.seqParams);
 
