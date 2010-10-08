@@ -45,12 +45,12 @@ suffixeratornoidx()
 
 sfxmap()
 {
-  gt dev sfxmap -lcp -suf $*
+  gt dev sfxmap -lcp -suf -esa $*
 }
 
 sfxmaponlysuf()
 {
-  gt dev sfxmap -suf $*
+  gt dev sfxmap -suf -esa $*
 }
 
 smallfiles="testdata/Random-Small.fna testdata/TTT-small.fna"

@@ -22,7 +22,7 @@ do
     cmd="gt suffixerator -dir ${dir} -algbds 3 40 120 -parts 5 -dna -v -pl -bck -tis -suf -lcp -bwt -des -db ${AT} -showtime ${extra}"
     ${cmd}
     checkerror
-    cmd="gt dev sfxmap -tis -suf -lcp -bwt -des at1MB"
+    cmd="gt dev sfxmap -tis -suf -lcp -bwt -des -esa at1MB"
     ${cmd}
     checkerror
   done

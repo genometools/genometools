@@ -31,7 +31,7 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist,alldirs=true)
     run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
              "-algbds 10 31 80 #{extra} #{outoptions} " +
              "-indexname sfx -dir " + dirarg + " -db " + filearg
-    run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v sfx",
+    run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v -esa sfx",
              :maxtime => 600
   end
 end
@@ -43,7 +43,7 @@ def checkdc(filelist)
   end
   run_test "#{$bin}gt suffixerator -v -pl -dc 64 -suf -ssp -tis " +
            "-indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -ssp -v sfx",
+  run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -ssp -v -esa sfx",
            :maxtime => 600
   run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -suf -tis " +
            "-indexname sfx3 -db " + filearg
@@ -130,11 +130,11 @@ alldir = ["fwd","cpl","rev","rcl"]
     Test do
     run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
              flattenfilelist(filelist)
-    run_test "#{$bin}gt dev sfxmap -ssp -tis sfx"
+    run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
     filelist.each do |filename|
       run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
                "#{$testdata}#{filename}"
-      run_test "#{$bin}gt dev sfxmap -ssp -tis sfx"
+      run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
     end
   end
 end
@@ -147,10 +147,10 @@ Test do
   run_test "#{$bin}/gt simreads -coverage 4 -len 100 -force -o u8.reads u8idx"
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dna -db u8.reads"
   run "grep -q '# init character encoding (eqlen ' #{$last_stdout}"
-  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads", \
+  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa u8.reads", \
            :maxtime => 200
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dir rev -dna -db u8.reads"
-  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp u8.reads", \
+  run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa u8.reads", \
            :maxtime => 200
 end
 
@@ -229,20 +229,20 @@ allmultifiles.each do |filename|
     run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
              "-db #{$testdata}#{filename}"
     run_test "#{$bin}gt suffixerator -suf -lcp -pl -dir rev -ii localidx"
-    run_test "#{$bin}gt dev sfxmap -tis -des localidx",
+    run_test "#{$bin}gt dev sfxmap -tis -des -esa localidx",
              :retval => 1
     # In short read files with equal read lengths, ssptabs need not
     # be built explicitly.
     # Thus these tests only fail for non-equal length files.
     if !all_fastqfiles.include?(filename) then
-      run_test "#{$bin}gt dev sfxmap -tis -ssp localidx",
+      run_test "#{$bin}gt dev sfxmap -tis -ssp -esa localidx",
                :retval => 1
-      run_test "#{$bin}gt dev sfxmap -ssp localidx",
+      run_test "#{$bin}gt dev sfxmap -ssp -esa localidx",
                :retval => 1
     end
-    run_test "#{$bin}gt dev sfxmap -des localidx",
+    run_test "#{$bin}gt dev sfxmap -des -esa localidx",
              :retval => 1
-    run_test "#{$bin}gt dev sfxmap -tis -bck localidx",
+    run_test "#{$bin}gt dev sfxmap -tis -bck -esa localidx",
              :retval => 1
   end
 end
@@ -354,9 +354,9 @@ def checkmapped(args)
     run_test "#{$bin}gt suffixerator #{outoptions} -algbds 3 34 90 " +
              "-indexname sfxidx #{args}",
              :maxtime => 1200
-    run_test "#{$bin}gt dev sfxmap #{outoptions} #{trials()} -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptions} #{trials()} -v -esa sfxidx",
              :maxtime => 2400
-    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck} -stream -v sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptionsnobck} -stream -v -esa sfxidx",
              :maxtime => 2400
   end
 end
@@ -440,7 +440,7 @@ SATTESTFILES.each do |file|
       if !file[:msgs][sat].nil? then
         grep($last_stderr, /#{file[:msgs][sat]}/)
       end
-      run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp myidx", \
+      run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa myidx", \
                :retval => retval
     end
   end

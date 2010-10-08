@@ -7,7 +7,7 @@ def runmerge(queryfile,referencefiles)
   referencefiles.each do |filename|
     run_test "#{$bin}gt suffixerator #{sfxopts} -indexname midx#{num} " +
              "-db #{filename}"
-    run_test "#{$bin}gt dev sfxmap -tis -suf -lcp midx#{num}"
+    run_test "#{$bin}gt dev sfxmap -tis -suf -lcp -esa midx#{num}"
     indexlist.push("midx#{num}")
     num+=1
   end

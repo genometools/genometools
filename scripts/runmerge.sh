@@ -21,7 +21,7 @@ indexlist=""
 for filename in ${referencefiles}
 do
   ../bin/gt suffixerator ${SFXOPTS} -indexname ${INDEXDIR}/midx${num} -db ${filename}
-  ../bin/gt dev sfxmap -tis -suf -lcp  ${INDEXDIR}/midx${num}
+  ../bin/gt dev sfxmap -tis -suf -lcp -esa ${INDEXDIR}/midx${num}
   indexlist="${indexlist} ${INDEXDIR}/midx${num}"
   num=`expr ${num} + 1`
 done
