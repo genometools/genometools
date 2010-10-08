@@ -18,8 +18,8 @@
 #include "core/error.h"
 #include "core/logger.h"
 #include "core/option.h"
-#include "match/echoseq.h"
 #include "core/encseq_metadata.h"
+#include "match/echoseq.h"
 #include "match/sarr-def.h"
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
@@ -604,6 +604,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   bool haserr = false;
   FMindex *fmindex;
   GtEncseqMetadata *encseqmetadata = NULL;
+  Sequentialsuffixarrayreader *ssar;
 
   fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->indexname),false,err);
   if (fmindex == NULL)
@@ -621,9 +622,22 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
-    unsigned long idx, pos, numofnonspecials, totallength;
+    ssar = gt_newSequentialsuffixarrayreaderfromfile(
+                                        gt_str_get(arguments->indexname),
+                                        SARR_SUFTAB,
+                                        SEQ_scan,
+                                        err);
+    if (ssar == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    unsigned long idx, pos, numofnonspecials, totallength, currentsuffix;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
+    int retval;
 
     gt_assert(encseqmetadata != NULL);
     totallength = gt_encseq_metadata_total_length(encseqmetadata);
@@ -639,13 +653,31 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
         haserr = true;
         break;
       }
+      retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        gt_error_set(err,"missing suftab values");
+        haserr = true;
+        break;
+      }
+      gt_assert(pos == currentsuffix);
       /*printf("%lu: pos = %lu\n",idx,pos);*/
     }
+    gt_assert(idx == numofnonspecials);
     gt_Bwtseqpositioniterator_delete(bspi);
     if (!haserr)
     {
       gt_deletevoidBWTSeq(fmindex);
     }
+  }
+  if (ssar != NULL)
+  {
+    gt_freeSequentialsuffixarrayreader(&ssar);
   }
   gt_encseq_metadata_delete(encseqmetadata);
   return haserr ? -1 : 0;
