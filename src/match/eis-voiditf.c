@@ -15,13 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/divmodmul.h"
 #include "eis-bwtseq.h"
 #include "eis-bwtseq-construct.h"
 #include "eis-voiditf.h"
-#include "splititv.h"
 #include "procmatch.h"
-#include "pckbucket.h"
 
 /* XXX make use of the types declared by the EIS-tools, similar to
   the module core/bitpackarray.h */
@@ -314,8 +311,7 @@ unsigned long gt_voidpackedindexuniqueforward(const void *voidbwtseq,
                                               const GtUchar *qstart,
                                               const GtUchar *qend)
 {
-  return gt_packedindexuniqueforward((const BWTSeq *) voidbwtseq,qstart,
-                                     qend);
+  return gt_packedindexuniqueforward((const BWTSeq *) voidbwtseq,qstart,qend);
 }
 
 unsigned long gt_voidpackedfindfirstmatchconvert(const FMindex *voidbwtseq,
@@ -345,26 +341,26 @@ unsigned long gt_voidpackedindexmstatsforward(const void *voidbwtseq,
   if (matchlength > 0 && witnessposition != NULL)
   {
     *witnessposition = gt_voidpackedfindfirstmatchconvert(voidbwtseq,
-                                                       *witnessposition,
-                                                       matchlength);
+                                                          *witnessposition,
+                                                          matchlength);
   }
   return matchlength;
 }
 
 bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
-                              const GtUchar *pattern,
-                              unsigned long patternlength,
-                              unsigned long totallength,
-                              const GtUchar *dbsubstring,
-                              Processmatch processmatch,
-                              void *processmatchinfo)
+                                 const GtUchar *pattern,
+                                 unsigned long patternlength,
+                                 unsigned long totallength,
+                                 const GtUchar *dbsubstring,
+                                 Processmatch processmatch,
+                                 void *processmatchinfo)
 {
   BWTSeqExactMatchesIterator *bsemi;
   unsigned long dbstartpos, numofmatches;
   GtMatch match;
 
   bsemi = gt_newEMIterator((const BWTSeq *) voidbwtseq,
-                        pattern,(size_t) patternlength, true);
+                           pattern,(size_t) patternlength, true);
   gt_assert(bsemi != NULL);
   numofmatches = gt_EMINumMatchesTotal(bsemi);
   match.dbabsolute = true;
