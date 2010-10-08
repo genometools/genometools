@@ -101,10 +101,10 @@ Genericindex *genericindex_new(const char *indexname,
   genericindex->withesa = withesa;
   genericindex->suffixarray = gt_malloc(sizeof (*genericindex->suffixarray));
   if (gt_mapsuffixarray(genericindex->suffixarray,
-                     demand,
-                     indexname,
-                     logger,
-                     err) != 0)
+                        demand,
+                        indexname,
+                        logger,
+                        err) != 0)
   {
     haserr = true;
     genericindex->totallength = 0;
@@ -168,8 +168,8 @@ Genericindex *genericindex_new(const char *indexname,
 typedef struct
 {
   unsigned long offset,
-         leftbound,
-         rightbound;
+                leftbound,
+                rightbound;
   GtCodetype code;
   GtUchar inchar;
 } Indexbounds;
