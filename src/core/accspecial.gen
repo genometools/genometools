@@ -132,7 +132,7 @@ static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
   if (found)
   {
     specialpos = GT_APPENDINT(determinesingle)(specialtable,pagenum,
-                                               moveforward 
+                                               moveforward
                                                  ? esr->idx->firstcell
                                                  : (esr->idx->lastcell-1));
     printf("binary found pos %lu in %lu ", esr->currentpos,specialpos);
@@ -146,7 +146,7 @@ static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
 #endif
   if (found)
   {
-    esr->idx->previousspecialpos 
+    esr->idx->previousspecialpos
       = GT_APPENDINT(determinesingle)(specialtable,
                                       pagenum,
                                       moveforward ? esr->idx->firstcell
