@@ -24,14 +24,14 @@
 /* XXX make use of the types declared by the EIS-tools, similar to
   the module core/bitpackarray.h */
 
-unsigned long gt_bwtseqfirstmatch(const FMindex *voidbwtseq,
+unsigned long gt_bwtseqfirstmatch(const FMindex *fmindex,
                                   unsigned long bound)
 {
   struct extBitsRetrieval extBits;
   unsigned long pos;
 
   initExtBitsRetrieval(&extBits);
-  pos = gt_BWTSeqLocateMatch((const BWTSeq *) voidbwtseq,bound,&extBits);
+  pos = gt_BWTSeqLocateMatch((const BWTSeq *) fmindex,bound,&extBits);
   destructExtBitsRetrieval(&extBits);
   return pos;
 }
@@ -43,7 +43,7 @@ struct Bwtseqpositioniterator
   unsigned long currentbound, upperbound;
 };
 
-Bwtseqpositioniterator *gt_Bwtseqpositioniterator_new(const FMindex *voidbwtseq,
+Bwtseqpositioniterator *gt_Bwtseqpositioniterator_new(const FMindex *fmindex,
                                                       unsigned long lowerbound,
                                                       unsigned long upperbound)
 {
@@ -51,7 +51,7 @@ Bwtseqpositioniterator *gt_Bwtseqpositioniterator_new(const FMindex *voidbwtseq,
 
   bspi = gt_malloc(sizeof (*bspi));
   initExtBitsRetrieval(&bspi->extBits);
-  bspi->bwtseq = (const BWTSeq *) voidbwtseq;
+  bspi->bwtseq = (const BWTSeq *) fmindex;
   bspi->currentbound = lowerbound;
   bspi->upperbound = upperbound;
   return bspi;
@@ -109,23 +109,23 @@ struct Bwtseqcontextiterator
   unsigned long bound;
 };
 
-Bwtseqcontextiterator *gt_Bwtseqcontextiterator_new(const FMindex *voidbwtseq,
+Bwtseqcontextiterator *gt_Bwtseqcontextiterator_new(const FMindex *fmindex,
                                                     unsigned long bound)
 {
   Bwtseqcontextiterator *bsci;
 
   bsci = gt_malloc(sizeof (*bsci));
   initExtBitsRetrieval(&bsci->extBits);
-  bsci->bwtseq = (const BWTSeq *) voidbwtseq;
+  bsci->bwtseq = (const BWTSeq *) fmindex;
   bsci->bound = bound;
   return bsci;
 }
 
-GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *voidbwtseq)
+GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *fmindex)
 {
-  if (bound != BWTSeqTerminatorPos((const BWTSeq *) voidbwtseq))
+  if (bound != BWTSeqTerminatorPos((const BWTSeq *) fmindex))
   {
-    return BWTSeqGetSym((const BWTSeq *) voidbwtseq, bound);
+    return BWTSeqGetSym((const BWTSeq *) fmindex, bound);
   }
   return SEPARATOR;
 }
@@ -218,24 +218,24 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   return haserr ? NULL : (FMindex *) bwtseq;
 }
 
-const Mbtab **gt_bwtseq2mbtab(const FMindex *voidbwtseq)
+const Mbtab **gt_bwtseq2mbtab(const FMindex *fmindex)
 {
-  if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
+  if (((const BWTSeq *) fmindex)->pckbuckettable == NULL)
   {
     return NULL;
   }
   return (const Mbtab **)
-         gt_pckbuckettable_mbtab_get(((const BWTSeq *) voidbwtseq)
+         gt_pckbuckettable_mbtab_get(((const BWTSeq *) fmindex)
                                      ->pckbuckettable);
 }
 
-unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq)
+unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex)
 {
-  if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
+  if (((const BWTSeq *) fmindex)->pckbuckettable == NULL)
   {
     return 0;
   }
-  return gt_pckbuckettable_maxdepth_get(((const BWTSeq *) voidbwtseq)
+  return gt_pckbuckettable_maxdepth_get(((const BWTSeq *) fmindex)
                                         ->pckbuckettable);
 }
 
@@ -308,15 +308,15 @@ void bwtrangewithspecial(GT_UNUSED GtArrayBoundswithchar *bwci,
     idx = bwtcode -  MRAEncGetRangeBase(EISGetAlphabet(bwtseq->seqIdx),1);
     if (rangeOccs[idx] < rangeOccs[rangesize+idx])
     {
-      pos = gt_BWTSeqLocateMatch((const BWTSeq *) voidbwtseq,bound,&extBits);
+      pos = gt_BWTSeqLocateMatch((const BWTSeq *) fmindex,bound,&extBits);
     }
   }
 }
 */
 
-void gt_deletevoidBWTSeq(FMindex *voidbwtseq)
+void gt_deletevoidBWTSeq(FMindex *fmindex)
 {
-  BWTSeq *bwtseq = (BWTSeq *) voidbwtseq;
+  BWTSeq *bwtseq = (BWTSeq *) fmindex;
 
   if (bwtseq->pckbuckettable != NULL)
   {
@@ -326,7 +326,7 @@ void gt_deletevoidBWTSeq(FMindex *voidbwtseq)
   gt_deleteBWTSeq(bwtseq);
 }
 
-unsigned long gt_voidpackedindexuniqueforward(const void *voidbwtseq,
+unsigned long gt_voidpackedindexuniqueforward(const void *fmindex,
                                               GT_UNUSED unsigned long offset,
                                               GT_UNUSED unsigned long left,
                                               GT_UNUSED unsigned long right,
@@ -335,22 +335,22 @@ unsigned long gt_voidpackedindexuniqueforward(const void *voidbwtseq,
                                               const GtUchar *qstart,
                                               const GtUchar *qend)
 {
-  return gt_packedindexuniqueforward((const BWTSeq *) voidbwtseq,qstart,qend);
+  return gt_packedindexuniqueforward((const BWTSeq *) fmindex,qstart,qend);
 }
 
-unsigned long gt_voidpackedfindfirstmatchconvert(const FMindex *voidbwtseq,
+unsigned long gt_voidpackedfindfirstmatchconvert(const FMindex *fmindex,
                                                  unsigned long witnessbound,
                                                  unsigned long matchlength)
 {
-  const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
+  const BWTSeq *bwtseq = (const BWTSeq *) fmindex;
   unsigned long startpos;
 
-  startpos = gt_bwtseqfirstmatch(voidbwtseq,witnessbound);
+  startpos = gt_bwtseqfirstmatch(fmindex,witnessbound);
   gt_assert((bwtseq->seqIdx->seqLen-1) >= (startpos + matchlength));
   return (bwtseq->seqIdx->seqLen - 1) - (startpos + matchlength);
 }
 
-unsigned long gt_voidpackedindexmstatsforward(const void *voidbwtseq,
+unsigned long gt_voidpackedindexmstatsforward(const void *fmindex,
                                               GT_UNUSED unsigned long offset,
                                               GT_UNUSED unsigned long left,
                                               GT_UNUSED unsigned long right,
@@ -358,20 +358,20 @@ unsigned long gt_voidpackedindexmstatsforward(const void *voidbwtseq,
                                               const GtUchar *qstart,
                                               const GtUchar *qend)
 {
-  const BWTSeq *bwtseq = (const BWTSeq *) voidbwtseq;
+  const BWTSeq *bwtseq = (const BWTSeq *) fmindex;
   unsigned long matchlength;
 
   matchlength = gt_packedindexmstatsforward(bwtseq,witnessposition,qstart,qend);
   if (matchlength > 0 && witnessposition != NULL)
   {
-    *witnessposition = gt_voidpackedfindfirstmatchconvert(voidbwtseq,
+    *witnessposition = gt_voidpackedfindfirstmatchconvert(fmindex,
                                                           *witnessposition,
                                                           matchlength);
   }
   return matchlength;
 }
 
-bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
+bool gt_pck_exactpatternmatching(const FMindex *fmindex,
                                  const GtUchar *pattern,
                                  unsigned long patternlength,
                                  unsigned long totallength,
@@ -383,7 +383,7 @@ bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
   unsigned long dbstartpos, numofmatches;
   GtMatch match;
 
-  bsemi = gt_newEMIterator((const BWTSeq *) voidbwtseq,
+  bsemi = gt_newEMIterator((const BWTSeq *) fmindex,
                            pattern,(size_t) patternlength, true);
   gt_assert(bsemi != NULL);
   numofmatches = gt_EMINumMatchesTotal(bsemi);
@@ -394,7 +394,7 @@ bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
   match.querylen = patternlength;
   match.distance = 0;
   match.alignment = NULL;
-  while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) voidbwtseq))
+  while (EMIGetNextMatch(bsemi,&dbstartpos,(const BWTSeq *) fmindex))
   {
     gt_assert(totallength >= (dbstartpos + patternlength));
     match.dbstartpos = totallength - (dbstartpos + patternlength);
