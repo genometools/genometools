@@ -72,7 +72,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
 
 void gt_deletevoidBWTSeq(FMindex *packedindex);
 
-/* the parameter is const void *, as this is required by the other 
+/* the parameter is const void *, as this is required by the other
    indexed based methods */
 
 unsigned long gt_voidpackedindexuniqueforward(const void *fmindex,
@@ -84,7 +84,7 @@ unsigned long gt_voidpackedindexuniqueforward(const void *fmindex,
                                               const GtUchar *qstart,
                                               const GtUchar *qend);
 
-/* the parameter is const void *, as this is required by the other 
+/* the parameter is const void *, as this is required by the other
    indexed based methods */
 
 unsigned long gt_voidpackedindexmstatsforward(const void *fmindex,

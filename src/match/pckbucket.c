@@ -27,12 +27,12 @@
 typedef struct
 {
   unsigned long lowerbound,
-         upperbound;
+                upperbound;
   unsigned int depth;
   GtCodetype code;
-} Boundsatdepth;
+} Pckbck_Boundsatdepth;
 
-GT_DECLAREARRAYSTRUCT(Boundsatdepth);
+GT_DECLAREARRAYSTRUCT(Pckbck_Boundsatdepth);
 
 struct Pckbuckettable
 {
@@ -107,7 +107,7 @@ void gt_pckbuckettable_delete(Pckbuckettable *pckbt)
 }
 
 static void pckbuckettable_storeBoundsatdepth(Pckbuckettable *pckbt,
-                                              const Boundsatdepth *bd)
+                                              const Pckbck_Boundsatdepth *bd)
 {
   gt_assert(bd->depth <= pckbt->maxdepth);
   gt_assert(bd->code <= pckbt->basepower[bd->depth]);
@@ -124,11 +124,11 @@ static void pckbuckettable_storeBoundsatdepth(Pckbuckettable *pckbt,
 
 static void pckbuckettable_followleafedge(Pckbuckettable *pckbt,
                                           const FMindex *fmindex,
-                                          const Boundsatdepth *bd)
+                                          const Pckbck_Boundsatdepth *bd)
 {
   Bwtseqcontextiterator *bsci;
   GtUchar cc;
-  Boundsatdepth bdleaf;
+  Pckbck_Boundsatdepth bdleaf;
 
   bdleaf.code = bd->code;
   bdleaf.depth = bd->depth;
@@ -155,24 +155,25 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
                                       unsigned long totallength,
                                       unsigned int maxdepth)
 {
-  GtArrayBoundsatdepth stack;
-  Boundsatdepth parent, child;
+  GtArrayPckbck_Boundsatdepth stack;
+  Pckbck_Boundsatdepth parent, child;
   unsigned long rangesize, idx, *rangeOccs;
   Pckbuckettable *pckbt;
   Mbtab *tmpmbtab;
 
-  GT_INITARRAY(&stack,Boundsatdepth);
+  GT_INITARRAY(&stack,Pckbck_Boundsatdepth);
   child.lowerbound = 0;
   child.upperbound = totallength+1;
   child.depth = 0;
   child.code = (GtCodetype) 0;
-  GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
+  GT_STOREINARRAY(&stack,Pckbck_Boundsatdepth,128,child);
   rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
   tmpmbtab = gt_malloc(sizeof (*tmpmbtab) * numofchars);
   pckbt = pckbuckettable_allocandinittable(numofchars,maxdepth,true);
-  while (stack.nextfreeBoundsatdepth > 0)
+  while (stack.nextfreePckbck_Boundsatdepth > 0)
   {
-    parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
+    parent
+      = stack.spacePckbck_Boundsatdepth[--stack.nextfreePckbck_Boundsatdepth];
     gt_assert(parent.lowerbound < parent.upperbound);
     rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
                                                   rangeOccs,
@@ -197,7 +198,7 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
       {
         if (child.lowerbound + 1 < child.upperbound)
         {
-          GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
+          GT_STOREINARRAY(&stack,Pckbck_Boundsatdepth,128,child);
         } else
         {
           pckbuckettable_followleafedge(pckbt,fmindex,&child);
@@ -205,7 +206,7 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
       }
     }
   }
-  GT_FREEARRAY(&stack,Boundsatdepth);
+  GT_FREEARRAY(&stack,Pckbck_Boundsatdepth);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);
   printf("filled: %lu (%.2f)\n",pckbt->numofvalues,

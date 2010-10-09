@@ -24,6 +24,7 @@
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
 #include "match/eis-voiditf.h"
+#include "match/pckdfs.h"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
 
@@ -587,9 +588,12 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
 {
   bool haserr = false;
   FMindex *fmindex;
+  unsigned long totallength = 0;
+  unsigned int numofchars = 0;
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
 
+  gt_assert(gt_str_length(arguments->pckindexname));
   fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->pckindexname),false,
                                    err);
   if (fmindex == NULL)
@@ -625,7 +629,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
-    unsigned long idx, pos, numofnonspecials, totallength, currentsuffix;
+    unsigned long idx, pos, numofnonspecials, currentsuffix;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
     int retval;
@@ -644,7 +648,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
         haserr = true;
         break;
       }
-      if (ssar == NULL)
+      if (ssar != NULL)
       {
         retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
         if (retval < 0)
@@ -665,6 +669,20 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
     gt_assert(idx == numofnonspecials);
     gt_Bwtseqpositioniterator_delete(bspi);
   }
+  if (!haserr)
+  {
+    GtAlphabet *alphabet;
+
+    alphabet = gt_alphabet_new_from_file(gt_str_get(arguments->pckindexname),
+                                         err);
+    if (alphabet == NULL)
+    {
+      haserr = true;
+    }
+    numofchars = gt_alphabet_num_of_chars(alphabet);
+    gt_alphabet_delete(alphabet);
+  }
+  gt_fmindex_dfstraverse(fmindex,numofchars,totallength);
   gt_deletevoidBWTSeq(fmindex);
   if (ssar != NULL)
   {
