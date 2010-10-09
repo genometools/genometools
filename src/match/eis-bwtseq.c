@@ -89,10 +89,11 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
         + EISSymTransformedRank(seqIdx, i - 1, len, hint);
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
+#define EIS_DEBUG
 #ifdef EIS_DEBUG
-    gt_log_log("count[alphabetSize]=%lu, len=%lu\n",count[alphabetSize], len);
+    gt_log_log("count[alphabetSize]=%lu, len=%lu",count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)
-      gt_log_log("count[%u]=%lu\n", (unsigned)i, count[i]);
+      gt_log_log("count[%u]=%lu", (unsigned)i, count[i]);
 #endif
     gt_assert(count[alphabetSize] == len);
   }

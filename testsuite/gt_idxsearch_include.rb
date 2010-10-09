@@ -124,6 +124,22 @@ def checkrepfindwithquery(reffile,queryfile)
   run "cmp -s #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
 end
 
+Name "gt paircmp"
+Keywords "gt_paircmp"
+Test do
+  run_test "#{$bin}gt dev paircmp -a ac 11" # mv to idx 
+end
+
+Name "gt patternmatch"
+Keywords "gt_patternmatch"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
+           "-indexname sfx -dna -bck -suf -tis -pl"
+  run_test "#{$bin}gt dev patternmatch -samples 10000 -minpl 10 -maxpl 15 " +
+           " -bck -imm -ii sfx"
+  run_test "#{$bin}gt dev patternmatch -samples 10000 -ii sfx"
+end
+
 Name "gt repfind small"
 Keywords "gt_repfind"
 Test do
@@ -200,6 +216,15 @@ allfiles.each do |reffile|
       end
     end
   end
+end
+
+Name "gt uniquesub"
+Keywords "gt_uniquesub"
+Test do
+  run "#{$scriptsdir}runmkfm.sh #{$bin}gt 1 . Combined.fna #{$testdata}at1MB"
+  run_test "#{$bin}gt uniquesub -output sequence querypos -min 10 " +
+           "-max 20 -fmi Combined.fna -query #{$testdata}U89959_genomic.fas", \
+           :maxtime => 600
 end
 
 allfiles.each do |reffile|

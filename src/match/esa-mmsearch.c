@@ -47,18 +47,10 @@ typedef struct
   unsigned long offset; /* position relative to startpos */
 } Querysubstring;
 
-static GtUchar accessquery(int line,const Queryrep *queryrep,
-                           unsigned long pos)
+static GtUchar accessquery(const Queryrep *queryrep,unsigned long pos)
 {
   unsigned long abspos = queryrep->startpos + pos;
 
-  if (pos >= queryrep->length)
-  {
-    fprintf(stderr,"line %d: pos = %lu >= %lu=queryrep->length\n",
-                   line,pos,
-                   queryrep->length);
-    exit(EXIT_FAILURE);
-  }
   gt_assert(pos < queryrep->length);
   if (queryrep->sequence != NULL)
   {
@@ -93,7 +85,7 @@ static GtUchar accessquery(int line,const Queryrep *queryrep,
             break;\
           }\
           currentdbchar = gt_encseq_reader_next_encoded_char(esr);\
-          currentquerychar = accessquery(__LINE__,querysubstring->queryrep,\
+          currentquerychar = accessquery(querysubstring->queryrep,\
                                          querysubstring->offset + (LCPLEN));\
           retcode = (int) (currentquerychar - currentdbchar);\
           if (retcode == 0)\
@@ -318,7 +310,7 @@ static bool isleftmaximal(const GtEncseq *dbencseq,
                               dbstart-1,
                               readmode);
   if (ISSPECIAL(dbleftchar) ||
-      dbleftchar != accessquery(__LINE__,querysubstring->queryrep,
+      dbleftchar != accessquery(querysubstring->queryrep,
                                 querysubstring->offset-1))
   {
     return true;
@@ -348,7 +340,7 @@ static unsigned long extendright(const GtEncseq *dbencseq,
   {
     dbchar = gt_encseq_reader_next_encoded_char(esr);
     if (ISSPECIAL(dbchar) ||
-        dbchar != accessquery(__LINE__,querysubstring->queryrep,querypos))
+        dbchar != accessquery(querysubstring->queryrep,querypos))
     {
       break;
     }
@@ -425,8 +417,7 @@ static int runquerysubstringmatch(bool selfmatch,
     gt_freemmsearchiterator(&mmsi);
     if (!haserr)
     {
-      if (accessquery(__LINE__,queryrep,querysubstring.offset)
-          == (GtUchar) SEPARATOR)
+      if (accessquery(queryrep,querysubstring.offset) == (GtUchar) SEPARATOR)
       {
         localqueryunitnum++;
         localqueryoffset = 0;

@@ -474,6 +474,13 @@ static GtOPrval parse_options(int *parsed_args,
     } else
     {
       so->readmode = (GtReadmode) retval;
+      if (!doesa && (so->readmode == GT_READMODE_COMPL ||
+                     so->readmode == GT_READMODE_REVCOMPL))
+      {
+        gt_error_set(err,"construction of packed index not possible for "
+                         "complemented and for reverse complemented sequences");
+        oprval = GT_OPTION_PARSER_ERROR;
+      }
     }
   }
   gt_str_delete(dirarg);

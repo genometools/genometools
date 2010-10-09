@@ -221,7 +221,7 @@ static void suffixptrassert(const GtSuffixsortspace *sssp,
            sssp->bucketleftidx,
            subbucketleft,
            sssp->offset);
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(subbucket + idx == sssp->sortspace +
                                sssp->bucketleftidx + subbucketleft + idx);

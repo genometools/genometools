@@ -35,28 +35,21 @@ runtestsuite=1
 if test $runtestsuite -eq 1
 then
   cd testsuite
-  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-       ${MC} -keywords 'gt_chain2dim' \
-       -gttestdata ${GTTESTDATA}
-  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-       ${MC} -keywords 'gt_tallymer' \
-       -gttestdata ${GTTESTDATA}
-  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-       ${MC} -keywords 'gt_repfind' \
-       -gttestdata ${GTTESTDATA}
-  env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-       ${MC} -keywords 'gt_uniquesub'
-  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords 'gt_repfind and gttestdata' \
-       -gttestdata ${GTTESTDATA}
-  for keyword in gt_idxlocali gt_greedyfwdmat gt_tallymer gt_ltrharvest
+  for keyword in gt_paircmp gt_patternmatch gt_chain2dim gt_tallymer \
+                 gt_repfind gt_uniquesub \
+                 gt_idxlocali gt_greedyfwdmat gt_tallymer gt_ltrharvest
   do
-    env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords ${keyword}
+    env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
+         ${MC} -keywords ${keyword} \
+         -gttestdata ${GTTESTDATA}
     if test $? -ne 0
     then
       exit 1
     fi
   done
+  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
+       ${MC} -keywords 'gt_repfind and gttestdata' \
+       -gttestdata ${GTTESTDATA}
   env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
        ${MC} -keywords 'gt_greedyfwdmat and gttestdata' \
        -gttestdata ${GTTESTDATA}

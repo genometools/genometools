@@ -521,9 +521,9 @@ void gt_copysort_derivesorting(const GtBucketspec2 *bucketspec2,
     {
       for (idx = 0; idx < bucketspec2->numofchars; idx++)
       {
-        unsigned long endidx = getendidx(bucketspec2,idx,source);
-        gt_assert(endidx  > 0);
-        targetoffset[idx] = endidx - 1;
+        /* do not need to assert that getendidx(idx,source)  > 0, as later the
+           value stored in targetoffset is incremented */
+        targetoffset[idx] = getendidx(bucketspec2,idx,source) - 1;
       }
       gt_assert(getendidx(bucketspec2,source,bucketspec2->numofchars) > 0);
       backwardderive(bucketspec2,

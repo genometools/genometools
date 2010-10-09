@@ -449,8 +449,8 @@ static Blindtrienodeptr blindtrie_findcompanion(
     headdepth = blindtrie_getdepth(blindtrie,head);
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,headdepth))
     {
-      /* Random access */
-      if (blindtrie->has_twobitencoding_stoppos_support)
+      if (!blindtrie->cmpcharbychar &&
+          blindtrie->has_twobitencoding_stoppos_support)
       {
         if ((GT_ISDIRREVERSE(blindtrie->readmode) &&
             GT_REVERSEPOS(blindtrie->totallength,currentstartpos+headdepth)
@@ -795,16 +795,6 @@ static unsigned long blindtrie_enumeratetrieleaves (
             equalsrangewidth++;
           } else
           {
-#ifndef NDEBUG
-            if (lcpnodedepth + offset >= maxdepth)
-            {
-              fprintf(stderr,"lcpnode.depth=%lu,offset=%lu,maxdepth=%lu\n",
-                              lcpnodedepth,
-                              offset,
-                              maxdepth);
-              exit(EXIT_FAILURE);
-            }
-#endif
             gt_assert(lcpnodedepth + offset < maxdepth);
             if (equalsrangewidth > 0)
             {
@@ -949,11 +939,11 @@ static void gt_blindtrie_showleaf(const Blindtrie *blindtrie,unsigned int level,
                                   Blindtrienodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-  gt_assert(current != REFNUM_REFNULL);
-  printf("Leaf(add=%lu,firstchar=%u,startpos=%lu,rightsibling=%lu)\n",
+  gt_assert(current != BLINDTRIE_REFNULL);
+  printf("Leaf(%u,firstchar=%u,startpos=%lu,rightsibling=%u)\n",
          NODENUM(current),
-         (unsigned int) current->firstchar,
-         current->either1.nodestartpos,
+         (unsigned int) blindtrie_firstchar_get(blindtrie,current),
+         blindtrie_nodestartpos_get(blindtrie,current),
          NODENUM(blindtrie_rightsibling_get(blindtrie,current)));
 }
 
@@ -962,14 +952,14 @@ static void gt_blindtrie_showintern(const Blindtrie *blindtrie,
                                     Blindtrienodeptr current)
 {
   printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-  gt_assert(current != REFNUM_REFNULL);
-  printf("Intern(add=%lu,firstchar=%u,depth=%lu"
-         ",firstchild=%lu,rightsibling=%lu)\n",
+  gt_assert(current != BLINDTRIE_REFNULL);
+  printf("Intern(%u,firstchar=%lu,depth=%lu"
+         ",firstchild=%u,rightsibling=%u)\n",
           NODENUM(current),
-          (unsigned int) current->firstchar,
+          blindtrie_firstchar_get(blindtrie,current),
           blindtrie_getdepth(blindtrie,current),
-          NODENUM(blindtrie_firstchild_get(current)),
-          NODENUM(blindtrie_rightsibling_get(current)));
+          NODENUM(blindtrie_firstchild_get(blindtrie,current)),
+          NODENUM(blindtrie_rightsibling_get(blindtrie,current)));
 }
 
 static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
@@ -978,8 +968,8 @@ static void gt_blindtrie_showrecursive(const Blindtrie *blindtrie,
 {
   Blindtrienodeptr current;
 
-  for (current = blindtrie_firstchild_get(node);
-       current != REFNUM_REFNULL;
+  for (current = blindtrie_firstchild_get(blindtrie,node);
+       current != BLINDTRIE_REFNULL;
        current = blindtrie_rightsibling_get(blindtrie,current))
   {
     if (blindtrie_isleaf(blindtrie,current))
@@ -1176,6 +1166,12 @@ unsigned long gt_blindtrie_suffixsort(
                               offset,
                               maxdepth,
                               currentstartpos + offset);
+#ifdef SKDEBUG
+    blindtrie_showstate(blindtrie,
+                        subbucketleft,
+                        idx+1,
+                        offset);
+#endif
   }
   return gt_blindtrie2sorting(blindtrie,
                               subbucketleft,

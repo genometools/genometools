@@ -31,7 +31,6 @@ typedef struct
 {
   bool usestream,
        verbose,
-       withesa,
        inputtis,
        inputsuf,
        inputdes,
@@ -43,9 +42,7 @@ typedef struct
   unsigned long scantrials,
                 multicharcmptrials,
                 delspranges;
-  GtStr *indexname;
-  GtOption *refoptionesaindex,
-           *refoptionpckindex;
+  GtStr *pckindexname, *esaindexname;
 } Sfxmapoptions;
 
 static void deletethespranges(const GtEncseq *encseq,
@@ -100,7 +97,8 @@ static void *gt_sfxmap_arguments_new(void)
   Sfxmapoptions *arguments;
 
   arguments = gt_malloc(sizeof (*arguments));
-  arguments->indexname = gt_str_new();
+  arguments->pckindexname = gt_str_new();
+  arguments->esaindexname = gt_str_new();
   return arguments;
 }
 
@@ -110,9 +108,8 @@ static void gt_sfxmap_arguments_delete(void *tool_arguments)
 
   if (arguments != NULL)
   {
-    gt_str_delete(arguments->indexname);
-    gt_option_delete(arguments->refoptionesaindex);
-    gt_option_delete(arguments->refoptionpckindex);
+    gt_str_delete(arguments->pckindexname);
+    gt_str_delete(arguments->esaindexname);
     gt_free(arguments);
   }
 }
@@ -127,22 +124,19 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondelspranges, *optionpckindex, *optionesaindex;
 
   gt_assert(arguments != NULL);
-  op = gt_option_parser_new("[options] indexname",
+  op = gt_option_parser_new("[options]",
                             "Map or Stream <indexname> and check consistency.");
   gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionesaindex = gt_option_new_string("esa",
                                         "Specify index (enhanced suffix array)",
-                                        arguments->indexname, NULL);
+                                        arguments->esaindexname, NULL);
   gt_option_parser_add_option(op, optionesaindex);
-  arguments->refoptionesaindex = gt_option_ref(optionesaindex);
 
   optionpckindex = gt_option_new_string("pck",
                                         "Specify index (packed index)",
-                                        arguments->indexname, NULL);
+                                        arguments->pckindexname, NULL);
   gt_option_parser_add_option(op, optionpckindex);
-  arguments->refoptionpckindex = gt_option_ref(optionpckindex);
-  gt_option_exclude(optionesaindex,optionpckindex);
   gt_option_is_mandatory_either(optionesaindex,optionpckindex);
 
   optionstream = gt_option_new_bool("stream","stream the index",
@@ -215,19 +209,9 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
 }
 
 static int gt_sfxmap_arguments_check(GT_UNUSED int rest_argc,
-                                     void *tool_arguments,
+                                     GT_UNUSED void *tool_arguments,
                                      GT_UNUSED GtError *err)
 {
-  Sfxmapoptions *arguments = tool_arguments;
-
-  if (gt_option_is_set(arguments->refoptionesaindex))
-  {
-    arguments->withesa = true;
-  } else
-  {
-    gt_assert(gt_option_is_set(arguments->refoptionpckindex));
-    arguments->withesa = false;
-  }
   return 0;
 }
 
@@ -450,7 +434,7 @@ static int sfxmap_esa(Sfxmapoptions *arguments,GtError *err)
          ? streamsuffixarray
          : gt_mapsuffixarray)(&suffixarray,
                               demand,
-                              gt_str_get(arguments->indexname),
+                              gt_str_get(arguments->esaindexname),
                               logger,
                               err) != 0)
   {
@@ -521,7 +505,7 @@ static int sfxmap_esa(Sfxmapoptions *arguments,GtError *err)
         if (arguments->inputlcp)
         {
           ssar = gt_newSequentialsuffixarrayreaderfromfile(
-                                        gt_str_get(arguments->indexname),
+                                        gt_str_get(arguments->esaindexname),
                                         SARR_LCPTAB | SARR_ESQTAB,
                                         SEQ_scan,
                                         err);
@@ -606,14 +590,15 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
 
-  fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->indexname),false,err);
+  fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->pckindexname),false,
+                                   err);
   if (fmindex == NULL)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    encseqmetadata = gt_encseq_metadata_new(gt_str_get(arguments->indexname),
+    encseqmetadata = gt_encseq_metadata_new(gt_str_get(arguments->pckindexname),
                                             err);
     if (encseqmetadata == NULL)
     {
@@ -622,14 +607,20 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
-    ssar = gt_newSequentialsuffixarrayreaderfromfile(
-                                        gt_str_get(arguments->indexname),
-                                        SARR_SUFTAB,
-                                        SEQ_scan,
-                                        err);
-    if (ssar == NULL)
+    if (gt_str_length(arguments->esaindexname) > 0)
     {
-      haserr = true;
+      ssar = gt_newSequentialsuffixarrayreaderfromfile(
+                                          gt_str_get(arguments->esaindexname),
+                                          SARR_SUFTAB,
+                                          SEQ_scan,
+                                          err);
+      if (ssar == NULL)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      ssar = NULL;
     }
   }
   if (!haserr)
@@ -653,19 +644,22 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
         haserr = true;
         break;
       }
-      retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
-      if (retval < 0)
+      if (ssar == NULL)
       {
-        haserr = true;
-        break;
+        retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
+        if (retval < 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (retval == 0)
+        {
+          gt_error_set(err,"missing suftab values");
+          haserr = true;
+          break;
+        }
+        gt_assert(pos == currentsuffix);
       }
-      if (retval == 0)
-      {
-        gt_error_set(err,"missing suftab values");
-        haserr = true;
-        break;
-      }
-      gt_assert(pos == currentsuffix);
       /*printf("%lu: pos = %lu\n",idx,pos);*/
     }
     gt_assert(idx == numofnonspecials);
@@ -688,7 +682,15 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   Sfxmapoptions *arguments = tool_arguments;
 
   gt_error_check(err);
-  return (arguments->withesa ? sfxmap_esa : sfxmap_pck) (arguments,err);
+  if (gt_str_length(arguments->esaindexname) > 0)
+  {
+    return sfxmap_esa(arguments,err);
+  }
+  if (gt_str_length(arguments->pckindexname) > 0)
+  {
+    return sfxmap_pck(arguments,err);
+  }
+  return 0;
 }
 
 GtTool* gt_sfxmap(void)

@@ -332,7 +332,7 @@ static int run_packedindexconstruction(GtLogger *logger,
   const Sfxiterator *sfi;
   bool haserr = false;
   struct bwtParam finalcopy;
-  unsigned int numofchars 
+  unsigned int numofchars
     = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
 
   finalcopy = so->bwtIdxParams.final;

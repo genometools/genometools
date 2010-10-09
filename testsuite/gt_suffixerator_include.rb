@@ -10,7 +10,7 @@ def trials()
   return "-scantrials 10 -multicharcmptrials 1000"
 end
 
-def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist,alldirs=true)
+def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
   filearg=""
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
@@ -28,14 +28,20 @@ def checksfx(parts,pl,withsmap,sat,cmp,doubling,filelist,alldirs=true)
         extra=extra + " -maxdepth"
       end
     end
-    run_test "#{$bin}gt packedindex mkindex -indexname sfx -dir " + dirarg +
-             " -db " + filearg
-    run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
+    run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
              "-algbds 10 31 80 #{extra} #{outoptions} " +
-             "-indexname sfx -dir " + dirarg + " -db " + filearg
-    run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v -esa sfx",
-             :maxtime => 600
-    run_test "#{$bin}gt dev sfxmap -v -pck sfx",:maxtime => 600
+             "-indexname esa -dir " + dirarg + " -db " + filearg
+    if dirarg == "cpl" or dirarg = "rcl"
+      run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
+               "-esa esa",
+               :maxtime => 600
+    else
+      run_test "#{$bin}gt packedindex mkindex -indexname pck -dir " + dirarg +
+               " -db " + filearg
+      run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
+               "-esa esa -pck pck",
+               :maxtime => 600
+    end
   end
 end
 
@@ -70,19 +76,12 @@ def checkbwt(filelist)
            flattenfilelist(filelist)
 end
 
-def runsfxfail(args)
-  Name "gt suffixerator failure"
-  Keywords "gt_suffixerator"
-  Test do
-    run_test "#{$bin}gt suffixerator -tis " + args,:retval => 1
-  end
-end
-
 allfiles = []
 all_fastafiles = ["Atinsert.fna",
                   "Duplicate.fna",
                   "Random-Small.fna",
                   "Random.fna",
+                  "Copysorttest.fna",
                   "Random159.fna",
                   "Random160.fna",
                   "RandomN.fna",
@@ -122,14 +121,12 @@ allfiles += all_fastqfiles
 
 alldir = ["fwd","cpl","rev","rcl"]
 
-# put the tests with paircmp, maxpair, patternmatch, into a file gt_idxmatch
-
 {"FASTA" => all_fastafiles,
  "EMBL" => all_emblfiles,
  "GenBank" => all_genbankfiles,
  "FastQ" => all_fastqfiles}.each do |k,filelist|
     Name "gt suffixerator (#{k})"
-    Keywords "gt_suffixerator_tis"
+    Keywords "gt_suffixerator tis"
     Test do
     run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
              flattenfilelist(filelist)
@@ -142,8 +139,19 @@ alldir = ["fwd","cpl","rev","rcl"]
   end
 end
 
+allfiles.each do |filename|
+  Name "gt suffixerator #{filename}"
+  Keywords "gt_suffixerator tis"
+  Test do
+    ["direct", "bit", "uchar", "ushort", "uint32"].each do |sat|
+      run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat #{sat} " +
+               "-db #{$testdata}#{filename}"
+    end
+  end
+end
+
 Name "gt suffixerator file of reads of equal length"
-Keywords "gt_suffixerator_reads"
+Keywords "gt_suffixerator reads"
 Test do
   run_test "#{$bin}/gt suffixerator -des -tis -ssp -dna " +
            "-db #{$testdata}U89959_genomic.fas -indexname u8idx"
@@ -157,44 +165,18 @@ Test do
            :maxtime => 200
 end
 
-Name "gt qsortbench"
-Keywords "gt_qsortbench"
-Test do
-  ["thomas","system","inlinedptr","inlinedarr"].each do |impl|
-    ["-aqsort","-permute",""].each do |option|
-      run_test "#{$bin}gt dev qsortbench -size 10000 -maxval 1000 -impl #{impl} #{option}"
-    end
-  end
-end
-
 all_fastafiles.each do |filename|
   Name "gt suffixerator -dc 64 -parts 1+3 #{filename}"
-  Keywords "gt_suffixerator"
+  Keywords "gt_suffixerator dc"
   Test do
     checkdc([filename])
   end
 end
 
 Name "gt suffixerator -dc 64 -parts 1+3 all-fastafiles"
-Keywords "gt_suffixerator"
+Keywords "gt_suffixerator dc"
 Test do
   checkdc(all_fastafiles)
-end
-
-Name "gt suffixerator paircmp"
-Keywords "gt_suffixerator"
-Test do
-  run_test "#{$bin}gt dev paircmp -a ac 11" # mv to idx 
-end
-
-Name "gt suffixerator patternmatch"
-Keywords "gt_suffixerator"
-Test do
-  run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
-           "-indexname sfx -dna -bck -suf -tis -pl"
-  run_test "#{$bin}gt dev patternmatch -samples 10000 -minpl 10 -maxpl 15 " +
-           " -bck -imm -ii sfx"
-  run_test "#{$bin}gt dev patternmatch -samples 10000 -ii sfx"
 end
 
 alldir.each do |dir|
@@ -216,14 +198,22 @@ alldir.each do |dir|
   end
 end
 
-runsfxfail "-indexname sfx -db /nothing"
-runsfxfail "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna"
-runsfxfail "-smap /nothing -db #{$testdata}TTT-small.fna"
-runsfxfail "-dna -db #{$testdata}sw100K1.fsa"
-runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fsa"
-runsfxfail "-dna -db #{$testdata}Random.fna RandomN.fna"
-runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
-runsfxfail "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"
+faillist = ["-indexname sfx -db /nothing",
+            "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna",
+            "-smap /nothing -db #{$testdata}TTT-small.fna",
+            "-dna -db #{$testdata}sw100K1.fsa",
+            "-protein -dir cpl -db #{$testdata}sw100K1.fsa",
+            "-dna -db #{$testdata}Random.fna RandomN.fna",
+            "-dna -suf -pl 10 -db #{$testdata}Random.fna",
+            "-dna -tis -sat plain -db #{$testdata}TTT-small.fna"]
+
+faillist.each do |failcommand|
+  Name "gt suffixerator failure"
+  Keywords "gt_suffixerator"
+  Test do
+    run_test "#{$bin}gt suffixerator -tis " + failcommand,:retval => 1
+  end
+end
 
 allmultifiles.each do |filename|
   Name "gt suffixerator sfxmap-failure #{filename}"
@@ -256,15 +246,6 @@ Test do
   checkbwt(all_fastafiles)
 end
 
-allfiles.each do |filename|
-  Name "gt suffixerator uint32 #{filename}"
-  Keywords "gt_suffixerator"
-  Test do
-    run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint32 " +
-             "-pl -db #{$testdata}#{filename}"
-  end
-end
-
 1.upto(3) do |parts|
   [0,2].each do |withsmap|
     extra=""
@@ -280,12 +261,10 @@ end
     else
      doubling=false
     end
-    Name "gt suffixerator+sfxmap protein #{extraname} #{parts} parts"
+    Name "gt suffixerator+map protein filelist #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,2,extra,"direct",true,doubling,
-               ["sw100K1.fsa","sw100K2.fsa"],false)
-      checksfx(parts,2,extra,"bytecompress",true,doubling,
+      checksfx(parts,extra,true,doubling,
                ["sw100K1.fsa","sw100K2.fsa"],false)
     end
   end
@@ -293,58 +272,45 @@ end
 
 0.upto(2) do |cmpval|
   1.upto(2) do |parts|
-    ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|
-      [0,2].each do |withsmap|
-        extra=""
-        if withsmap == 1
-          extra="-dna"
-          extraname="dna"
-        elsif withsmap == 2
-          extra="-smap TransDNA"
-          extraname="TransDNA"
-        end
-        doublingname=""
-        if cmpval == 0
-          cmp=false
-          doubling=false
-        elsif cmpval == 1
-          cmp=true
-          doubling=false
-        else
-          cmp=true
-          if parts == 1
-            doubling=true
-            doublingname=" doubling "
-          else
-            doubling=false
-          end
-        end
-        Name "gt suffixerator+sfxmap dna #{extraname} #{sat} " +
-             "#{parts} parts #{doubling}"
-        Keywords "gt_suffixerator"
-        Test do
-          checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.fna"])
-          checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.gbk"])
-          checksfx(parts,1,extra,sat,cmp,doubling,["Random-Small.embl"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["Random.fna"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["Random.gbk"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["Random.embl"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.gbk"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.embl"])
-          checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.fna"])
-          checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.gbk"])
-          checksfx(parts,2,extra,sat,cmp,doubling,["trna_glutamine.embl"])
-          checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.fna"])
-          checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.gbk"])
-          checksfx(parts,1,extra,sat,cmp,doubling,["TTT-small.embl"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.fna","Random.fna",
-                                                   "Atinsert.fna"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.gbk","Random.gbk",
-                                                   "Atinsert.gbk"])
-          checksfx(parts,3,extra,sat,cmp,doubling,["RandomN.embl","Random.embl",
-                                                   "Atinsert.embl"])
-        end
+    [0,2].each do |withsmap|
+      extra=""
+      if withsmap == 1
+	extra="-dna"
+	extraname=" dna"
+      elsif withsmap == 2
+	extra="-smap TransDNA"
+	extraname=" trans"
+      end
+      doublingname=""
+      if cmpval == 0
+	cmp=false
+	doubling=false
+      elsif cmpval == 1
+	cmp=true
+	doubling=false
+      else
+	cmp=true
+	if parts == 1
+	  doubling=true
+	  doublingname=" doubling "
+	else
+	  doubling=false
+	end
+      end
+      all_fastafiles.each do |filename|
+	Name "gt suffixerator+map #{filename}#{extraname} #{parts} parts " +
+             "#{doubling}"
+	Keywords "gt_suffixerator"
+	Test do
+	  checksfx(parts,extra,cmp,doubling,[filename])
+	end
+      end
+      filelist=["RandomN.fna","Random.fna","Atinsert.fna"]
+      Name "gt suffixerator+map dna filelist#{extraname} " +
+	     "#{parts} parts #{doubling}"
+      Keywords "gt_suffixerator"
+      Test do
+	checksfx(parts,extra,cmp,doubling,filelist)
       end
     end
   end
@@ -367,7 +333,6 @@ end
 def grumbach()
   return "#{$gttestdata}DNA-mix/Grumbach.fna/"
 end
-
 
 if $gttestdata then
   checkmapped("-db " +
@@ -448,12 +413,3 @@ SATTESTFILES.each do |file|
     end
   end
 end  
-
-Name "gt uniquesub"
-Keywords "gt_uniquesub"
-Test do
-  run "#{$scriptsdir}runmkfm.sh #{$bin}gt 1 . Combined.fna #{$testdata}at1MB"
-  run_test "#{$bin}gt uniquesub -output sequence querypos -min 10 " +
-           "-max 20 -fmi Combined.fna -query #{$testdata}U89959_genomic.fas", \
-           :maxtime => 600
-end
