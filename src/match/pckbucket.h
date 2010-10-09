@@ -33,23 +33,19 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
                                       unsigned long totallength,
                                       unsigned int maxdepth);
 
-int gt_pckbucket2file(const char *indexname,
-                      const Pckbuckettable *pckbuckettable,
-                      GtError *err);
+int gt_pckbuckettable_2file(const char *indexname,
+                            const Pckbuckettable *pckbuckettable,
+                            GtError *err);
 
-bool gt_pckbuckettableexists(const char *indexname);
+bool gt_pckbuckettable_exists(const char *indexname);
 
-Pckbuckettable *gt_mappckbuckettable(const char *indexname,
-                                  unsigned int numofchars,
-                                  GtError *err);
+Pckbuckettable *gt_pckbuckettable_map(const char *indexname,
+                                      unsigned int numofchars,
+                                      GtError *err);
 
-void enumlowlevelchildintervals(GtArrayBoundswithchar *bwci,
-                                const Pckbuckettable *pcktb,
-                                GtCodetype parentcode,
-                                unsigned long childdepth);
+unsigned int gt_pckbuckettable_maxdepth_get(const Pckbuckettable
+                                             *pckbuckettable);
 
-unsigned int gt_pcktb2maxdepth(const Pckbuckettable *pckbuckettable);
-
-const void *gt_pcktb2mbtab(const Pckbuckettable *pckbuckettable);
+const void *gt_pckbuckettable_mbtab_get(const Pckbuckettable *pckbuckettable);
 
 #endif

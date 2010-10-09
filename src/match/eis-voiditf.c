@@ -196,10 +196,10 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   }
   if (!haserr)
   {
-    if (withpckbt && gt_pckbuckettableexists(indexname))
+    if (withpckbt && gt_pckbuckettable_exists(indexname))
     {
       unsigned int numofchars = gt_alphabet_num_of_chars(alphabet);
-      bwtseq->pckbuckettable = gt_mappckbuckettable(indexname,numofchars,err);
+      bwtseq->pckbuckettable = gt_pckbuckettable_map(indexname,numofchars,err);
       if (bwtseq->pckbuckettable == NULL)
       {
         haserr = true;
@@ -251,7 +251,8 @@ const Mbtab **gt_bwtseq2mbtab(const FMindex *voidbwtseq)
     return NULL;
   }
   return (const Mbtab **)
-         gt_pcktb2mbtab(((const BWTSeq *) voidbwtseq)->pckbuckettable);
+         gt_pckbuckettable_mbtab_get(((const BWTSeq *) voidbwtseq)
+                                     ->pckbuckettable);
 }
 
 unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq)
@@ -260,7 +261,8 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq)
   {
     return 0;
   }
-  return gt_pcktb2maxdepth(((const BWTSeq *) voidbwtseq)->pckbuckettable);
+  return gt_pckbuckettable_maxdepth_get(((const BWTSeq *) voidbwtseq)
+                                        ->pckbuckettable);
 }
 
 unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,

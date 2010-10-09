@@ -105,7 +105,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                                   numofchars,
                                   totallength,
                                   prebwtoptions->maxdepth);
-    if (gt_pckbucket2file(gt_str_get(prebwtoptions->indexname),pckbt,err) != 0)
+    if (gt_pckbuckettable_2file(indexname,pckbt,err) != 0)
     {
       haserr = true;
     }
