@@ -784,7 +784,8 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
     gt_assert(resetvalue > 0);
     limdfsresources->stack.nextfreeLcpintervalwithinfo = resetvalue;
   }
-  gt_Bwtseqcontextiterator_delete(&bsci);
+  gt_Bwtseqcontextiterator_delete(bsci);
+  bsci = NULL;
 }
 
 static const Lcpintervalwithinfo *currentparent(const Limdfsresources

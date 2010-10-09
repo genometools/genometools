@@ -131,7 +131,7 @@ GtUchar gt_bwtseqgetsymbol(unsigned long bound,const FMindex *voidbwtseq)
 }
 
 GtUchar gt_Bwtseqcontextiterator_next(unsigned long *bound,
-                                     Bwtseqcontextiterator *bsci)
+                                      Bwtseqcontextiterator *bsci)
 {
   GtUchar cc;
 
@@ -146,11 +146,13 @@ GtUchar gt_Bwtseqcontextiterator_next(unsigned long *bound,
   return cc;
 }
 
-void gt_Bwtseqcontextiterator_delete(Bwtseqcontextiterator **bsci)
+void gt_Bwtseqcontextiterator_delete(Bwtseqcontextiterator *bsci)
 {
-  destructExtBitsRetrieval(&(*bsci)->extBits);
-  gt_free(*bsci);
-  *bsci = NULL;
+  if (bsci != NULL)
+  {
+    destructExtBitsRetrieval(&bsci->extBits);
+    gt_free(bsci);
+  }
 }
 
 FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
@@ -317,7 +319,7 @@ void gt_deletevoidBWTSeq(FMindex *voidbwtseq)
 
   if (bwtseq->pckbuckettable != NULL)
   {
-    gt_pckbuckettable_free(bwtseq->pckbuckettable);
+    gt_pckbuckettable_delete(bwtseq->pckbuckettable);
     bwtseq->pckbuckettable = NULL;
   }
   gt_deleteBWTSeq(bwtseq);
@@ -405,10 +407,10 @@ bool gt_pck_exactpatternmatching(const FMindex *voidbwtseq,
   return numofmatches > 0 ? true : false;
 }
 
-unsigned long gt_voidpackedindex_length_get(const FMindex *fmindex)
+unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex)
 {
-  unsigned long len = BWTSeqLength((const BWTSeq *) fmindex);
+  unsigned long bwtlen = BWTSeqLength((const BWTSeq *) fmindex);
 
-  gt_assert(len > 0);
-  return len - 1;
+  gt_assert(bwtlen > 0);
+  return bwtlen - 1;
 }

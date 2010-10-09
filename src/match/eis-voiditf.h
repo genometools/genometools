@@ -59,7 +59,7 @@ Bwtseqcontextiterator *gt_Bwtseqcontextiterator_new(const FMindex *voidbwtseq,
 GtUchar gt_Bwtseqcontextiterator_next(unsigned long *bound,
                                       Bwtseqcontextiterator *bsci);
 
-void gt_Bwtseqcontextiterator_delete(Bwtseqcontextiterator **bsci);
+void gt_Bwtseqcontextiterator_delete(Bwtseqcontextiterator *bsci);
 
 void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     unsigned long *rangeOccs,
@@ -117,6 +117,6 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq);
 
 const Mbtab **gt_bwtseq2mbtab(const FMindex *voidbwtseq);
 
-unsigned long gt_voidpackedindex_length_get(const FMindex *fmindex);
+unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex);
 
 #endif

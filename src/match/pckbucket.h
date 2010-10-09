@@ -21,17 +21,17 @@
 #include "core/str.h"
 #include "core/error.h"
 #include "core/codetype.h"
-
+#include "eis-voiditf.h"
 #include "splititv.h"
 
 typedef struct Pckbuckettable Pckbuckettable;
 
-void gt_pckbuckettable_free(Pckbuckettable *pckbt);
+void gt_pckbuckettable_delete(Pckbuckettable *pckbt);
 
-Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
-                                   unsigned int numofchars,
-                                   unsigned long totallength,
-                                   unsigned int maxdepth);
+Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
+                                      unsigned int numofchars,
+                                      unsigned long totallength,
+                                      unsigned int maxdepth);
 
 int gt_pckbucket2file(const char *indexname,
                       const Pckbuckettable *pckbuckettable,

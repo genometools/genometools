@@ -19,10 +19,9 @@
 #include "core/tool.h"
 #include "core/ma.h"
 #include "core/str.h"
-#include "match/sarr-def.h"
+#include "core/alphabet_api.h"
 #include "match/pckbucket.h"
 #include "match/eis-voiditf.h"
-#include "match/esa-map.h"
 
 typedef struct
 {
@@ -76,41 +75,33 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
                             GT_UNUSED int parsed_args,
                             void *tool_arguments, GtError *err)
 {
-  GtEncseq *encseq;
-  GtEncseqLoader *el;
   unsigned long totallength = 0;
-  void *packedindex = NULL;
+  FMindex *fmindex = NULL;
   bool haserr = false;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
+  GtAlphabet *alphabet;
+  const char *indexname = gt_str_get(prebwtoptions->indexname);
 
-  el = gt_encseq_loader_new();
-  gt_encseq_loader_do_not_require_sds_tab(el);
-  gt_encseq_loader_do_not_require_des_tab(el);
-  gt_encseq_loader_do_not_require_ssp_tab(el);
-  encseq = gt_encseq_loader_load(el, gt_str_get(prebwtoptions->indexname), err);
-  if (encseq == NULL)
+  alphabet = gt_alphabet_new_from_file(indexname,err);
+  if (alphabet == NULL)
   {
     haserr = true;
-  } else
-  {
-    totallength = gt_encseq_total_length(encseq);
   }
   if (!haserr)
   {
-    packedindex = gt_loadvoidBWTSeqForSA(gt_str_get(prebwtoptions->indexname),
-                                         false, err);
-    if (packedindex == NULL)
+    fmindex = gt_loadvoidBWTSeqForSA(indexname,false, err);
+    if (fmindex == NULL)
     {
       haserr = true;
     }
   }
   if (!haserr)
   {
-    unsigned int numofchars
-      = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
+    unsigned int numofchars = gt_alphabet_num_of_chars(alphabet);
     Pckbuckettable *pckbt;
+    totallength = gt_voidpackedindex_totallength_get(fmindex);
 
-    pckbt = gt_pckbuckettable_new((const void *) packedindex,
+    pckbt = gt_pckbuckettable_new((const void *) fmindex,
                                   numofchars,
                                   totallength,
                                   prebwtoptions->maxdepth);
@@ -118,13 +109,12 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
     {
       haserr = true;
     }
-    gt_pckbuckettable_free(pckbt);
+    gt_pckbuckettable_delete(pckbt);
   }
-  gt_encseq_loader_delete(el);
-  gt_encseq_delete(encseq);
-  if (packedindex != NULL)
+  gt_alphabet_delete(alphabet);
+  if (fmindex != NULL)
   {
-    gt_deletevoidBWTSeq(packedindex);
+    gt_deletevoidBWTSeq(fmindex);
   }
   return haserr ? -1 : 0;
 }

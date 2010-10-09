@@ -65,13 +65,13 @@ def checktagerator(queryfile,ms)
 end
 
 def createandcheckgreedyfwdmat(reffile,queryfile)
-  run("#{$scriptsdir}/runmkfm.sh #{$bin}gt 0 . fmi #{reffile}",
-      :maxtime => 100)
+  run "#{$scriptsdir}/runmkfm.sh #{$bin}gt 0 . fmi #{reffile}",
+      :maxtime => 100
   run "#{$bin}gt suffixerator -indexname sfx -tis -suf -ssp -dna -v " +
            "-db #{reffile}"
-  run("#{$bin}gt packedindex mkindex -tis -ssp -indexname pck -db #{reffile} " +
-      "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 100)
-  run "#{$bin}gt prebwt -maxdepth 4 -pck pck"
+  run "#{$bin}gt packedindex mkindex -tis -ssp -indexname pck -db #{reffile} " +
+      "-sprank -dna -pl -bsize 10 -locfreq 32 -dir rev", :maxtime => 100
+  run_test "#{$bin}gt prebwt -maxdepth 4 -pck pck", :maxtime => 100
   checkgreedyfwdmat(queryfile,false)
   checkgreedyfwdmat(queryfile,true)
 end

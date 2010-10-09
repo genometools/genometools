@@ -90,7 +90,7 @@ static Pckbuckettable *allocandinitpckbuckettable(unsigned int numofchars,
   return pckbt;
 }
 
-void gt_pckbuckettable_free(Pckbuckettable *pckbt)
+void gt_pckbuckettable_delete(Pckbuckettable *pckbt)
 {
   if (pckbt->mapptr == NULL)
   {
@@ -123,8 +123,9 @@ static void storeBoundsatdepth(Pckbuckettable *pckbt,
   pckbt->mbtab[bd->depth][bd->code].upperbound = bd->upperbound;
 }
 
-static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
-                           const Boundsatdepth *bd)
+static void pckbucket_followleafedge(Pckbuckettable *pckbt,
+                                     const FMindex *fmindex,
+                                     const Boundsatdepth *bd)
 {
   Bwtseqcontextiterator *bsci;
   GtUchar cc;
@@ -133,7 +134,7 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
   bdleaf.code = bd->code;
   bdleaf.depth = bd->depth;
   bdleaf.lowerbound = bd->lowerbound;
-  bsci = gt_Bwtseqcontextiterator_new(voidbwtseq,bdleaf.lowerbound);
+  bsci = gt_Bwtseqcontextiterator_new(fmindex,bdleaf.lowerbound);
   while (bdleaf.depth < pckbt->maxdepth)
   {
     bdleaf.depth++;
@@ -146,13 +147,14 @@ static void followleafedge(Pckbuckettable *pckbt,const void *voidbwtseq,
     bdleaf.upperbound = bdleaf.lowerbound+1;
     storeBoundsatdepth(pckbt,&bdleaf);
   }
-  gt_Bwtseqcontextiterator_delete(&bsci);
+  gt_Bwtseqcontextiterator_delete(bsci);
+  bsci = NULL;
 }
 
-Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
-                                   unsigned int numofchars,
-                                   unsigned long totallength,
-                                   unsigned int maxdepth)
+Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
+                                      unsigned int numofchars,
+                                      unsigned long totallength,
+                                      unsigned int maxdepth)
 {
   GtArrayBoundsatdepth stack;
   Boundsatdepth parent, child;
@@ -175,10 +177,10 @@ Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
     parent = stack.spaceBoundsatdepth[--stack.nextfreeBoundsatdepth];
     gt_assert(parent.lowerbound < parent.upperbound);
     rangesize = gt_bwtrangesplitallwithoutspecial(tmpmbtab,
-                                               rangeOccs,
-                                               voidbwtseq,
-                                               parent.lowerbound,
-                                               parent.upperbound);
+                                                  rangeOccs,
+                                                  fmindex,
+                                                  parent.lowerbound,
+                                                  parent.upperbound);
     gt_assert(rangesize <= (unsigned long) numofchars);
     for (idx = 0; idx < rangesize; idx++)
     {
@@ -200,7 +202,7 @@ Pckbuckettable *gt_pckbuckettable_new(const void *voidbwtseq,
           GT_STOREINARRAY(&stack,Boundsatdepth,128,child);
         } else
         {
-          followleafedge(pckbt,voidbwtseq,&child);
+          pckbucket_followleafedge(pckbt,fmindex,&child);
         }
       }
     }
