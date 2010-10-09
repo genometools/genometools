@@ -218,32 +218,6 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   return haserr ? NULL : (FMindex *) bwtseq;
 }
 
-void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
-                                    unsigned long *rangeOccs,
-                                    const FMindex *voidBwtSeq,
-                                    unsigned long lbound,
-                                    unsigned long ubound)
-{
-  unsigned long idx;
-  const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
-  AlphabetRangeSize rangesize
-    = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
-
-  bwci->nextfreeBoundswithchar = 0;
-  BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
-  for (idx = 0; idx < rangesize; idx++)
-  {
-    if (rangeOccs[idx] < rangeOccs[rangesize+idx])
-    {
-      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].inchar = idx;
-      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound
-        = bwtseq->count[idx] + rangeOccs[idx];
-      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].rbound
-        = bwtseq->count[idx] + rangeOccs[rangesize+idx];
-    }
-  }
-}
-
 const Mbtab **gt_bwtseq2mbtab(const FMindex *voidbwtseq)
 {
   if (((const BWTSeq *) voidbwtseq)->pckbuckettable == NULL)
@@ -265,17 +239,42 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq)
                                         ->pckbuckettable);
 }
 
-unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
-                                             unsigned long *rangeOccs,
-                                             const FMindex *voidBwtSeq,
-                                             unsigned long lbound,
-                                             unsigned long ubound)
+void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
+                                    unsigned long *rangeOccs,
+                                    const FMindex *fmindex,
+                                    unsigned long lbound,
+                                    unsigned long ubound)
 {
-  unsigned long idx;
-  const BWTSeq *bwtseq = (const BWTSeq *) voidBwtSeq;
-  AlphabetRangeSize rangesize
+  const BWTSeq *bwtseq = (const BWTSeq *) fmindex;
+  AlphabetRangeSize idx, rangesize
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
 
+  bwci->nextfreeBoundswithchar = 0;
+  BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
+  for (idx = 0; idx < rangesize; idx++)
+  {
+    if (rangeOccs[idx] < rangeOccs[rangesize+idx])
+    {
+      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].inchar = idx;
+      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar].lbound
+        = bwtseq->count[idx] + rangeOccs[idx];
+      bwci->spaceBoundswithchar[bwci->nextfreeBoundswithchar++].rbound
+        = bwtseq->count[idx] + rangeOccs[rangesize+idx];
+    }
+  }
+}
+
+unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
+                                                unsigned long *rangeOccs,
+                                                const FMindex *fmindex,
+                                                unsigned long lbound,
+                                                unsigned long ubound)
+{
+  const BWTSeq *bwtseq = (const BWTSeq *) fmindex;
+  AlphabetRangeSize idx, rangesize
+    = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
+
+  gt_assert(sizeof(AlphabetRangeSize) == sizeof(unsigned long));
   BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
   for (idx = 0; idx < rangesize; idx++)
   {
@@ -288,7 +287,7 @@ unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
       mbtab[idx].lowerbound = mbtab[idx].upperbound = 0;
     }
   }
-  return rangesize;
+  return (unsigned long) rangesize;
 }
 
 /*

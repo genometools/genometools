@@ -157,8 +157,7 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
 {
   GtArrayBoundsatdepth stack;
   Boundsatdepth parent, child;
-  unsigned long rangesize, idx;
-  unsigned long *rangeOccs;
+  unsigned long rangesize, idx, *rangeOccs;
   Pckbuckettable *pckbt;
   Mbtab *tmpmbtab;
 
