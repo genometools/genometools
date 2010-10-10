@@ -26,6 +26,7 @@
 #include "match/eis-voiditf.h"
 #include "match/pckdfs.h"
 #include "match/test-mappedstr.pr"
+#include "match/stamp.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -43,7 +44,8 @@ typedef struct
   unsigned long scantrials,
                 multicharcmptrials,
                 delspranges;
-  GtStr *pckindexname, *esaindexname;
+  GtStr *esaindexname,
+        *pckindexname; 
 } Sfxmapoptions;
 
 static void deletethespranges(const GtEncseq *encseq,
@@ -98,8 +100,8 @@ static void *gt_sfxmap_arguments_new(void)
   Sfxmapoptions *arguments;
 
   arguments = gt_malloc(sizeof (*arguments));
-  arguments->pckindexname = gt_str_new();
   arguments->esaindexname = gt_str_new();
+  arguments->pckindexname = gt_str_new();
   return arguments;
 }
 
@@ -109,8 +111,8 @@ static void gt_sfxmap_arguments_delete(void *tool_arguments)
 
   if (arguments != NULL)
   {
-    gt_str_delete(arguments->pckindexname);
     gt_str_delete(arguments->esaindexname);
+    gt_str_delete(arguments->pckindexname);
     gt_free(arguments);
   }
 }
@@ -593,7 +595,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
 
-  gt_assert(gt_str_length(arguments->pckindexname));
+  gt_assert(gt_str_length(arguments->pckindexname) > 0);
   fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->pckindexname),false,
                                    err);
   if (fmindex == NULL)
@@ -682,7 +684,12 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
     numofchars = gt_alphabet_num_of_chars(alphabet);
     gt_alphabet_delete(alphabet);
   }
-  gt_fmindex_dfstraverse(fmindex,numofchars,totallength);
+  /*
+  if (!haserr)
+  {
+    gt_fmindex_dfstraverse(fmindex,numofchars,totallength);
+  }
+  */
   gt_deletevoidBWTSeq(fmindex);
   if (ssar != NULL)
   {
@@ -697,18 +704,25 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
                             GT_UNUSED int parsed_args,
                             void *tool_arguments, GtError *err)
 {
+  bool haserr = false;
   Sfxmapoptions *arguments = tool_arguments;
 
   gt_error_check(err);
   if (gt_str_length(arguments->esaindexname) > 0)
   {
-    return sfxmap_esa(arguments,err);
+    if (sfxmap_esa(arguments,err) != 0)
+    {
+      haserr = true;
+    }
   }
-  if (gt_str_length(arguments->pckindexname) > 0)
+  if (!haserr && gt_str_length(arguments->pckindexname) > 0)
   {
-    return sfxmap_pck(arguments,err);
+    if (sfxmap_pck(arguments,err) != 0)
+    {
+      haserr = true;
+    }
   }
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 GtTool* gt_sfxmap(void)

@@ -274,7 +274,7 @@ unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
   AlphabetRangeSize idx, rangesize
     = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
 
-  gt_assert(sizeof (AlphabetRangeSize) == sizeof (unsigned long));
+  gt_assert(sizeof (AlphabetRangeSize) <= sizeof (unsigned long));
   BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
   for (idx = 0; idx < rangesize; idx++)
   {
