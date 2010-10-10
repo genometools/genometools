@@ -594,7 +594,9 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   unsigned int numofchars = 0;
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
+  GtLogger *logger;
 
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   gt_assert(gt_str_length(arguments->pckindexname) > 0);
   fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->pckindexname),false,
                                    err);
@@ -642,6 +644,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
     gt_assert(totallength >= specialcharinfo.specialcharacters);
     numofnonspecials = totallength - specialcharinfo.specialcharacters;
     bspi = gt_Bwtseqpositioniterator_new(fmindex,0,totallength);
+    gt_logger_log(logger, "iterate over all suftab values");
     for (idx = 0; idx < numofnonspecials; idx++)
     {
       if (!gt_Bwtseqpositioniterator_next(&pos,bspi))
@@ -686,6 +689,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
+    gt_logger_log(logger, "perform dfs traversal");
     gt_fmindex_dfstraverse(fmindex,numofchars,totallength);
   }
   gt_deletevoidBWTSeq(fmindex);
@@ -694,6 +698,7 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
   gt_encseq_metadata_delete(encseqmetadata);
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 
