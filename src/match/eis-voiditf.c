@@ -246,9 +246,9 @@ void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     unsigned long ubound)
 {
   const BWTSeq *bwtseq = (const BWTSeq *) fmindex;
-  AlphabetRangeSize idx, rangesize
-    = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
+  AlphabetRangeSize idx, rangesize;
 
+  rangesize = MRAEncGetRangeSize(EISGetAlphabet(bwtseq->seqIdx),0);
   bwci->nextfreeBoundswithchar = 0;
   BWTSeqPosPairRangeOcc(bwtseq, 0, lbound, ubound,rangeOccs);
   for (idx = 0; idx < rangesize; idx++)

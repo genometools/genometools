@@ -45,7 +45,7 @@ typedef struct
                 multicharcmptrials,
                 delspranges;
   GtStr *esaindexname,
-        *pckindexname; 
+        *pckindexname;
 } Sfxmapoptions;
 
 static void deletethespranges(const GtEncseq *encseq,
@@ -684,12 +684,10 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
     numofchars = gt_alphabet_num_of_chars(alphabet);
     gt_alphabet_delete(alphabet);
   }
-  /*
   if (!haserr)
   {
     gt_fmindex_dfstraverse(fmindex,numofchars,totallength);
   }
-  */
   gt_deletevoidBWTSeq(fmindex);
   if (ssar != NULL)
   {

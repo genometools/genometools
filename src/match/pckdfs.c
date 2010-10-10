@@ -21,10 +21,17 @@
 
 typedef struct
 {
-  unsigned long lowerbound,
-                upperbound;
-  unsigned int depth;
-  bool endwithspecial;
+  union
+  {
+    struct
+    {
+      unsigned long lowerbound,
+                    upperbound;
+    } pckitv;
+    unsigned long remainingspecial;
+  } either;
+  unsigned long depth;
+  bool isinterval;
 } Dfs_Boundsatdepth;
 
 GT_DECLAREARRAYSTRUCT(Dfs_Boundsatdepth);
@@ -41,69 +48,92 @@ static unsigned long dfsnonspecialwidth(const GtArrayBoundswithchar *bwci)
   return addwidth;
 }
 
+#ifdef SKDEBUG
+static void showDfs_Boundsatdepth(const Dfs_Boundsatdepth *bd)
+{
+  if (bd->isinterval)
+  {
+    printf("pop l=%lu u=%lu d=%lu\n",bd->either.pckitv.lowerbound,
+                                     bd->either.pckitv.upperbound,
+                                     bd->depth);
+  } else
+  {
+    printf("pop w=%lu d=%lu\n",bd->either.remainingspecial,bd->depth);
+  }
+}
+#endif
+
 void gt_fmindex_dfstraverse(const FMindex *fmindex,
                             unsigned int numofchars,
                             unsigned long totallength)
 {
   GtArrayDfs_Boundsatdepth stack;
   GtArrayBoundswithchar bwci;
+  Boundswithchar *bwciptr;
   Dfs_Boundsatdepth parent, child;
-  unsigned long nonspecialwidth, parentwidth, idx, *rangeOccs;
+  unsigned long nonspecialwidth, parentwidth, *rangeOccs;
 
   GT_INITARRAY(&stack,Dfs_Boundsatdepth);
-  GT_INITARRAY(&bwci,Boundswithchar);
-  child.lowerbound = 0;
-  child.upperbound = totallength+1;
+  bwci.spaceBoundswithchar = gt_malloc(sizeof (*bwci.spaceBoundswithchar) *
+                                       (numofchars+1));
+  bwci.nextfreeBoundswithchar = 0;
+  bwci.allocatedBoundswithchar = (unsigned long) (numofchars+1);
+  child.isinterval = true;
   child.depth = 0;
-  child.endwithspecial = false;
+  child.either.pckitv.lowerbound = 0;
+  child.either.pckitv.upperbound = totallength+1;
   GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
   rangeOccs = gt_malloc(sizeof (*rangeOccs) * GT_MULT2(numofchars));
   while (stack.nextfreeDfs_Boundsatdepth > 0)
   {
     parent = stack.spaceDfs_Boundsatdepth[--stack.nextfreeDfs_Boundsatdepth];
-    parentwidth = child.upperbound - parent.lowerbound;
-    if (parent.endwithspecial)
+#ifdef SKDEBUG
+    showDfs_Boundsatdepth(&parent);
+#endif
+    if (!parent.isinterval)
     {
-      printf("%lu special leaves\n",parentwidth);
+#ifdef OUTPUT
+      printf("%lu special leaves\n",parent.either.remainingspecial);
+#endif
     } else
     {
-      if (parent.lowerbound < parent.upperbound)
+      gt_assert(parent.either.pckitv.lowerbound <
+                parent.either.pckitv.upperbound);
+      parentwidth = parent.either.pckitv.upperbound -
+                    parent.either.pckitv.lowerbound;
+      if (parentwidth == 1UL)
       {
+#ifdef OUTPUT
+        printf("leaf\n");
+#endif
+      } else
+      {
+        gt_assert(parentwidth >= 2UL);
         gt_bwtrangesplitwithoutspecial(&bwci,rangeOccs,fmindex,
-                                       parent.lowerbound,
-                                       parent.upperbound);
-        gt_assert(bwci.nextfreeBoundswithchar > 0);
+                                       parent.either.pckitv.lowerbound,
+                                       parent.either.pckitv.upperbound);
         nonspecialwidth = dfsnonspecialwidth(&bwci);
         gt_assert(nonspecialwidth <= parentwidth);
         if (nonspecialwidth < parentwidth)
         {
-          child.lowerbound = parent.lowerbound + nonspecialwidth;
-          child.upperbound = parent.upperbound;
+          child.isinterval = false;
           child.depth = parent.depth + 1;
-          child.endwithspecial = true;
+          child.either.remainingspecial = parentwidth - nonspecialwidth;
           GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
         }
         gt_assert(bwci.spaceBoundswithchar != NULL);
-        idx = bwci.nextfreeBoundswithchar - 1;
-        while (true)
+        for (bwciptr = bwci.spaceBoundswithchar+bwci.nextfreeBoundswithchar-1;
+             bwciptr >= bwci.spaceBoundswithchar;
+             bwciptr--)
         {
-          child.lowerbound = bwci.spaceBoundswithchar[idx].lbound;
-          child.upperbound = bwci.spaceBoundswithchar[idx].rbound;
+          child.isinterval = true;
           child.depth = parent.depth + 1;
-          child.endwithspecial = false;
-          gt_assert(child.lowerbound < child.upperbound);
+          child.either.pckitv.lowerbound = bwciptr->lbound;
+          child.either.pckitv.upperbound = bwciptr->rbound;
+          gt_assert(child.either.pckitv.lowerbound <
+                    child.either.pckitv.upperbound);
           GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
-          if (idx > 0)
-          {
-            idx--;
-          } else
-          {
-            break;
-          }
         }
-      } else
-      {
-        printf("leaf\nn");
       }
     }
   }
