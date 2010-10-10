@@ -152,8 +152,10 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
       break;
     }
     retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
+    gt_assert(retval >= 0);
     if (retval == 0)
     {
+      gt_error_set(err,"Missing value in suftab");
       haserr = true;
       break;
     }
@@ -290,8 +292,10 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 #else
     retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
+    gt_assert(retval >= 0);
     if (retval == 0)
     {
+      gt_error_set(err,"Missing value in suftab");
       haserr = true;
     }
 #endif

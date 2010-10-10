@@ -20,19 +20,19 @@
 #include "core/option.h"
 #include "core/encseq_metadata.h"
 #include "match/echoseq.h"
-#include "match/sarr-def.h"
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
 #include "match/eis-voiditf.h"
 #include "match/pckdfs.h"
 #include "match/test-mappedstr.pr"
-#include "match/stamp.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
 {
   bool usestream,
        verbose,
+       cmpsuf,
+       cmplcp,
        inputtis,
        inputsuf,
        inputdes,
@@ -124,7 +124,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
   GtOption *optionstream, *optionverbose, *optionscantrials,
          *optionmulticharcmptrials, *optionbck, *optionsuf,
          *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
-         *optiondelspranges, *optionpckindex, *optionesaindex;
+         *optiondelspranges, *optionpckindex, *optionesaindex,
+         *optioncmpsuf, *optioncmplcp;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -198,6 +199,19 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                  &arguments->inputbck,
                                  false);
   gt_option_parser_add_option(op, optionbck);
+
+  optioncmpsuf = gt_option_new_bool("cmpsuf","compare pck derived suftab with "
+                                    "esa-suftab",
+                                    &arguments->cmpsuf,
+                                    false);
+  gt_option_parser_add_option(op, optioncmpsuf);
+
+  optioncmplcp = gt_option_new_bool("cmplcp","compare pck derived lcptab with "
+                                    "esa-lcptab",
+                                    &arguments->cmplcp,
+                                    false);
+  gt_option_parser_add_option(op, optioncmplcp);
+  gt_option_exclude(optioncmpsuf,optioncmplcp);
 
   optionssp = gt_option_new_bool("ssp","input the sequence separator table",
                                  &arguments->inputssp,
@@ -586,6 +600,30 @@ static int sfxmap_esa(Sfxmapoptions *arguments,GtError *err)
   return haserr ? -1 : 0;
 }
 
+static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
+{
+  int retval;
+  unsigned long currentlcpvalue;
+  Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
+
+  retval = gt_nextSequentiallcpvalue(&currentlcpvalue,ssar,err);
+  if (retval < 0)
+  {
+    return -1;
+  }
+  if (retval == 0)
+  {
+    gt_error_set(err,"missing lcpvalue value");
+    return -1;
+  }
+  if (lcp != currentlcpvalue)
+  {
+    fprintf(stderr,"lcp = %lu != %lu = currentlcpvalue\n",lcp,currentlcpvalue);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  return 0;
+}
+
 static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
 {
   bool haserr = false;
@@ -615,11 +653,13 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
-    if (gt_str_length(arguments->esaindexname) > 0)
+    if (gt_str_length(arguments->esaindexname) > 0 &&
+        (arguments->cmpsuf || arguments->cmplcp))
     {
       ssar = gt_newSequentialsuffixarrayreaderfromfile(
                                           gt_str_get(arguments->esaindexname),
-                                          SARR_SUFTAB,
+                                          arguments->cmpsuf ? SARR_SUFTAB
+                                                            : SARR_LCPTAB,
                                           SEQ_scan,
                                           err);
       if (ssar == NULL)
@@ -653,17 +693,13 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
         haserr = true;
         break;
       }
-      if (ssar != NULL)
+      if (arguments->cmpsuf && ssar != NULL)
       {
         retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
-        if (retval < 0)
-        {
-          haserr = true;
-          break;
-        }
+        gt_assert(retval >= 0);
         if (retval == 0)
         {
-          gt_error_set(err,"missing suftab values");
+          gt_error_set(err,"missing suftab value");
           haserr = true;
           break;
         }
@@ -689,8 +725,15 @@ static int sfxmap_pck(Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
-    gt_logger_log(logger, "perform dfs traversal");
-    gt_fmindex_dfstraverse(fmindex,numofchars,totallength);
+    if (arguments->cmplcp && ssar != NULL)
+    {
+      gt_logger_log(logger, "perform dfs traversal");
+      if (gt_fmindex_dfstraverse(fmindex,numofchars,totallength,comparelcpvalue,
+                                  (void *) ssar,err) != 0)
+      {
+        haserr = true;
+      }
+    }
   }
   gt_deletevoidBWTSeq(fmindex);
   if (ssar != NULL)

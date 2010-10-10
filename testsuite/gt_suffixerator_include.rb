@@ -36,10 +36,22 @@ def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
                "-esa esa",
                :maxtime => 600
     else
+      if dirarg == "fwd"
+        dirarg_rev = "rev"
+      else
+        dirarg_rev = "fwd"
+      end
+      run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
+               "-algbds 10 31 80 #{extra} #{outoptions} " +
+               "-indexname esa-#{dirarg_rev} -dir " + dirarg_rev + 
+               " -db " + filearg
       run_test "#{$bin}gt packedindex mkindex -indexname pck -dir " + dirarg +
                " -db " + filearg
       run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
-               "-esa esa -pck pck",
+               "-esa esa -pck pck -cmpsuf",
+               :maxtime => 600
+      run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
+               "-esa esa-#{dirarg_rev} -pck pck -cmplcp",
                :maxtime => 600
     end
   end
