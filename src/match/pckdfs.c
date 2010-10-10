@@ -72,6 +72,10 @@ void gt_fmindex_dfstraverse(const FMindex *fmindex,
   Boundswithchar *bwciptr;
   Dfs_Boundsatdepth parent, child;
   unsigned long nonspecialwidth, parentwidth, *rangeOccs;
+#undef OUTPUT
+#ifdef OUTPUT
+  bool firstleaf = true;
+#endif
 
   GT_INITARRAY(&stack,Dfs_Boundsatdepth);
   bwci.spaceBoundswithchar = gt_malloc(sizeof (*bwci.spaceBoundswithchar) *
@@ -93,7 +97,9 @@ void gt_fmindex_dfstraverse(const FMindex *fmindex,
     if (!parent.isinterval)
     {
 #ifdef OUTPUT
-      printf("%lu special leaves\n",parent.either.remainingspecial);
+      printf("%lu special leaves with lcp %lu\n",
+               parent.either.remainingspecial,
+               parent.depth);
 #endif
     } else
     {
@@ -104,7 +110,15 @@ void gt_fmindex_dfstraverse(const FMindex *fmindex,
       if (parentwidth == 1UL)
       {
 #ifdef OUTPUT
-        printf("leaf\n");
+        printf("leaf");
+        if (!firstleaf)
+        {
+          printf(" with lcp %lu\n",parent.depth);
+        } else
+        {
+          printf("\n");
+          firstleaf = false;
+        }
 #endif
       } else
       {
@@ -112,27 +126,41 @@ void gt_fmindex_dfstraverse(const FMindex *fmindex,
         gt_bwtrangesplitwithoutspecial(&bwci,rangeOccs,fmindex,
                                        parent.either.pckitv.lowerbound,
                                        parent.either.pckitv.upperbound);
-        nonspecialwidth = dfsnonspecialwidth(&bwci);
-        gt_assert(nonspecialwidth <= parentwidth);
-        if (nonspecialwidth < parentwidth)
-        {
-          child.isinterval = false;
-          child.depth = parent.depth + 1;
-          child.either.remainingspecial = parentwidth - nonspecialwidth;
-          GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
-        }
-        gt_assert(bwci.spaceBoundswithchar != NULL);
-        for (bwciptr = bwci.spaceBoundswithchar+bwci.nextfreeBoundswithchar-1;
-             bwciptr >= bwci.spaceBoundswithchar;
-             bwciptr--)
+        if (bwci.nextfreeBoundswithchar == 1UL && 
+            parentwidth == bwci.spaceBoundswithchar[0].rbound - 
+                           bwci.spaceBoundswithchar[0].lbound)
         {
           child.isinterval = true;
           child.depth = parent.depth + 1;
-          child.either.pckitv.lowerbound = bwciptr->lbound;
-          child.either.pckitv.upperbound = bwciptr->rbound;
+          child.either.pckitv.lowerbound = bwci.spaceBoundswithchar[0].lbound;
+          child.either.pckitv.upperbound = bwci.spaceBoundswithchar[0].rbound;
           gt_assert(child.either.pckitv.lowerbound <
                     child.either.pckitv.upperbound);
           GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
+        } else
+        {
+          nonspecialwidth = dfsnonspecialwidth(&bwci);
+          gt_assert(nonspecialwidth <= parentwidth);
+          if (nonspecialwidth < parentwidth)
+          {
+            child.isinterval = false;
+            child.depth = parent.depth + 1;
+            child.either.remainingspecial = parentwidth - nonspecialwidth;
+            GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
+          }
+          gt_assert(bwci.spaceBoundswithchar != NULL);
+          for (bwciptr = bwci.spaceBoundswithchar+bwci.nextfreeBoundswithchar-1;
+               bwciptr >= bwci.spaceBoundswithchar;
+               bwciptr--)
+          {
+            child.isinterval = true;
+            child.depth = parent.depth + 1;
+            child.either.pckitv.lowerbound = bwciptr->lbound;
+            child.either.pckitv.upperbound = bwciptr->rbound;
+            gt_assert(child.either.pckitv.lowerbound <
+                      child.either.pckitv.upperbound);
+            GT_STOREINARRAY(&stack,Dfs_Boundsatdepth,128,child);
+          }
         }
       }
     }
