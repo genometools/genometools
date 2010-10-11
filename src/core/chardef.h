@@ -91,17 +91,23 @@
 typedef struct
 {
   unsigned long specialcharacters,      /* total number of special syms */
-                specialranges,          /* number of ranges with special syms */
-                realspecialranges,
+                specialranges,          /* number of stored ranges (of maximal
+                                           length according to the chosen
+                                           representation) with special syms */
+                realspecialranges,      /* number of ranges with special syms */
                 lengthofspecialprefix,  /* number of specials at start of
                                            sequence */
                 lengthofspecialsuffix,  /* number of specials at end of
                                            sequence */
-                wildcards,
-                wildcardranges,
-                realwildcardranges,
-                lengthofwildcardprefix,
-                lengthofwildcardsuffix;
+                wildcards,              /* total number of wildcards */
+                wildcardranges,         /* number of stored ranges (of maximal
+                                           length according to the chosen
+                                           representation) with wildcards */
+                realwildcardranges,     /* number of ranges with wildcards */
+                lengthofwildcardprefix, /* number of wildcards at start of
+                                           sequence */
+                lengthofwildcardsuffix; /* number of wildcards at end of
+                                           sequence */
 } GtSpecialcharinfo;
 
 #endif
