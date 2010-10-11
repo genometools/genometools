@@ -34,8 +34,7 @@
 #include "stamp.h"
 
 #define PRJSPECIALOUT(VAL)\
-        fprintf(outprj,"%s=%lu\n",#VAL,\
-                gt_encseq_##VAL(encseq))
+        fprintf(outprj,"%s=%lu\n",#VAL,gt_encseq_##VAL(encseq))
 
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
@@ -56,14 +55,18 @@ static void showprjinfo(FILE *outprj,
   PRJSPECIALOUT(realspecialranges);
   PRJSPECIALOUT(lengthofspecialprefix);
   PRJSPECIALOUT(lengthofspecialsuffix);
+  PRJSPECIALOUT(wildcards);
+  PRJSPECIALOUT(wildcardranges);
+  PRJSPECIALOUT(realwildcardranges);
+  PRJSPECIALOUT(lengthofwildcardprefix);
+  PRJSPECIALOUT(lengthofwildcardsuffix);
   numofsequences = gt_encseq_num_of_sequences(encseq);
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
   if (longest->defined)
   {
-    fprintf(outprj,"longest=%lu\n",
-            longest->valueunsignedlong);
+    fprintf(outprj,"longest=%lu\n",longest->valueunsignedlong);
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
   /*
@@ -72,10 +75,8 @@ static void showprjinfo(FILE *outprj,
     fprintf(outprj,"maxdepth=%u\n",maxdepth->valueunsignedint);
   }
   */
-  fprintf(outprj,"largelcpvalues=%lu\n",
-                   numoflargelcpvalues);
-  fprintf(outprj,"maxbranchdepth=%lu\n",
-                   maxbranchdepth);
+  fprintf(outprj,"largelcpvalues=%lu\n",numoflargelcpvalues);
+  fprintf(outprj,"maxbranchdepth=%lu\n",maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');

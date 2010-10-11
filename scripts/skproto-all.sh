@@ -81,6 +81,7 @@ nullcols.c
 opensfxfile.c
 optionargmode.c
 pckbucket.c
+pckdfs.c
 pos2seqnum.c
 pssm.c
 prsqualint.c

@@ -327,6 +327,11 @@ unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
 
 /* The following functions are for testing */
 
+#ifndef NDEBUG
+void gt_GtSpecialcharinfo_check(const GtSpecialcharinfo *specialcharinfo,
+                                unsigned long numofseparatorpositions);
+#endif
+
 int gt_encseq_builder_unit_test(GtError *err);
 
 /* The following function should only be used for test purposes, because it

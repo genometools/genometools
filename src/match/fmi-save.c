@@ -42,16 +42,21 @@ static int writefmascii(const char *indexname,
   fprintf (fmafp, "storeindexpos=%d\n", storeindexpos ? 1 : 0);
   fprintf (fmafp, "log2blocksize=%u\n", fm->log2bsize);
   fprintf (fmafp, "log2markdist=%u\n", fm->log2markdist);
-  fprintf (fmafp, "specialcharacters=%lu\n",
-               specialcharinfo->specialcharacters);
-  fprintf (fmafp, "specialranges=%lu\n",
-               specialcharinfo->specialranges);
-  fprintf (fmafp, "realspecialranges=%lu\n",
-               specialcharinfo->realspecialranges);
+  fprintf (fmafp, "specialcharacters=%lu\n",specialcharinfo->specialcharacters);
+  fprintf (fmafp, "specialranges=%lu\n",specialcharinfo->specialranges);
+  fprintf (fmafp, "realspecialranges=%lu\n",specialcharinfo->realspecialranges);
   fprintf (fmafp, "lengthofspecialprefix=%lu\n",
            specialcharinfo->lengthofspecialprefix);
   fprintf (fmafp, "lengthofspecialsuffix=%lu\n",
            specialcharinfo->lengthofspecialsuffix);
+  fprintf (fmafp, "wildcards=%lu\n",specialcharinfo->wildcards);
+  fprintf (fmafp, "wildcardranges=%lu\n",specialcharinfo->wildcardranges);
+  fprintf (fmafp, "realwildcardranges=%lu\n",
+                   specialcharinfo->realwildcardranges);
+  fprintf (fmafp, "lengthofwildcardprefix=%lu\n",
+           specialcharinfo->lengthofwildcardprefix);
+  fprintf (fmafp, "lengthofwildcardsuffix=%lu\n",
+           specialcharinfo->lengthofwildcardsuffix);
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
   gt_fa_xfclose(fmafp);
   return 0;

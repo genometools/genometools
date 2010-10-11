@@ -24,10 +24,9 @@
 #include "core/array.h"
 #include "core/str.h"
 #include "core/alphabet.h"
+#include "core/logger.h"
 #include "sfx-ri-def.h"
 #include "fmindex.h"
-#include "core/logger.h"
-#include "spacedef.h"
 
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
@@ -64,16 +63,21 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("storeindexpos",&intstoreindexpos,NULL);
   SETREADINTKEYS("log2blocksize",&fmindex->log2bsize,NULL);
   SETREADINTKEYS("log2markdist",&fmindex->log2markdist,NULL);
-  SETREADINTKEYS("specialcharacters",
-                 &specialcharinfo->specialcharacters,NULL);
-  SETREADINTKEYS("specialranges",
-                 &specialcharinfo->specialranges,NULL);
-  SETREADINTKEYS("realspecialranges",
-                 &specialcharinfo->realspecialranges,NULL);
+  SETREADINTKEYS("specialcharacters",&specialcharinfo->specialcharacters,NULL);
+  SETREADINTKEYS("specialranges",&specialcharinfo->specialranges,NULL);
+  SETREADINTKEYS("realspecialranges",&specialcharinfo->realspecialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
                  &specialcharinfo->lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
                  &specialcharinfo->lengthofspecialsuffix,NULL);
+  SETREADINTKEYS("wildcards",&specialcharinfo->wildcards,NULL);
+  SETREADINTKEYS("wildcardranges",&specialcharinfo->wildcardranges,NULL);
+  SETREADINTKEYS("realwildcardranges",
+                 &specialcharinfo->realwildcardranges,NULL);
+  SETREADINTKEYS("lengthofwildcardprefix",
+                 &specialcharinfo->lengthofwildcardprefix,NULL);
+  SETREADINTKEYS("lengthofwildcardsuffix",
+                 &specialcharinfo->lengthofwildcardsuffix,NULL);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
@@ -212,13 +216,13 @@ int gt_mapfmindex (Fmindex *fmindex,const char *indexname,
     GtStr *tmpfilename;
 
     gt_computefmkeyvalues (fmindex,
-                        &specialcharinfo,
-                        fmindex->bwtlength,
-                        fmindex->log2bsize,
-                        fmindex->log2markdist,
-                        gt_alphabet_num_of_chars(fmindex->alphabet),
-                        fmindex->suffixlength,
-                        storeindexpos);
+                           &specialcharinfo,
+                           fmindex->bwtlength,
+                           fmindex->log2bsize,
+                           fmindex->log2markdist,
+                           gt_alphabet_num_of_chars(fmindex->alphabet),
+                           fmindex->suffixlength,
+                           storeindexpos);
     tmpfilename = gt_str_new_cstr(indexname);
     gt_str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (gt_fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,err) != 0)

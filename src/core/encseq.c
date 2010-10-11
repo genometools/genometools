@@ -2973,6 +2973,23 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
   }
 }
 
+#ifndef NDEBUG
+void gt_GtSpecialcharinfo_check(const GtSpecialcharinfo *specialcharinfo,
+                                unsigned long numofseparatorpositions)
+{
+  gt_assert(specialcharinfo->wildcards + numofseparatorpositions ==
+            specialcharinfo->specialcharacters);
+  gt_assert(specialcharinfo->lengthofspecialprefix <=
+            specialcharinfo->specialcharacters);
+  gt_assert(specialcharinfo->lengthofwildcardprefix <=
+            specialcharinfo->wildcards);
+  gt_assert(specialcharinfo->lengthofwildcardprefix <=
+            specialcharinfo->lengthofspecialprefix);
+  gt_assert(specialcharinfo->lengthofwildcardsuffix <=
+            specialcharinfo->lengthofspecialsuffix);
+}
+#endif
+
 static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            unsigned long *totallength,
                                            GtSpecialcharinfo *specialcharinfo,
@@ -3158,6 +3175,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     printf("different length\n");
   }
   */
+  gt_GtSpecialcharinfo_check(specialcharinfo,sequenceseppos->nextfreeGtUlong);
   return haserr ? -1 : 0;
 }
 

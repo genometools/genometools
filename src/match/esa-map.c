@@ -58,7 +58,6 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
   unsigned long currentlinelength;
-
   Definedunsignedlong maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
@@ -85,6 +84,16 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                  &specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
                  &specialcharinfo.lengthofspecialsuffix,NULL);
+  SETREADINTKEYS("wildcards",
+                 &specialcharinfo.wildcards,NULL);
+  SETREADINTKEYS("wildcardranges",
+                 &specialcharinfo.wildcardranges,NULL);
+  SETREADINTKEYS("realwildcardranges",
+                 &specialcharinfo.realwildcardranges,NULL);
+  SETREADINTKEYS("lengthofwildcardprefix",
+                 &specialcharinfo.lengthofwildcardprefix,NULL);
+  SETREADINTKEYS("lengthofwildcardsuffix",
+                 &specialcharinfo.lengthofwildcardsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
   gt_setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);

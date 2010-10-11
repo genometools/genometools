@@ -17,17 +17,17 @@
 
 #include <math.h>
 #include "core/divmodmul.h"
-#include "fmindex.h"
 #include "core/safecast-gen.h"
+#include "fmindex.h"
 
 unsigned long gt_determinenumofcodes(unsigned int numofchars,
-                                  unsigned int prefixlength)
+                                     unsigned int prefixlength)
 {
   return (unsigned long) pow((double) numofchars,(double) prefixlength);
 }
 
 unsigned long gt_determinenumberofspecialstostore(const GtSpecialcharinfo
-                                                               *specialcharinfo)
+                                                        *specialcharinfo)
 {
   unsigned long addprefixsuffix = 0;
 
@@ -74,13 +74,13 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 }
 
 void gt_computefmkeyvalues (Fmindex *fm,
-                         const GtSpecialcharinfo *specialcharinfo,
-                         unsigned long bwtlength,
-                         unsigned int log2bsize,
-                         unsigned int log2markdist,
-                         unsigned int numofchars,
-                         unsigned int suffixlength,
-                         bool storeindexpos)
+                            const GtSpecialcharinfo *specialcharinfo,
+                            unsigned long bwtlength,
+                            unsigned int log2bsize,
+                            unsigned int log2markdist,
+                            unsigned int numofchars,
+                            unsigned int suffixlength,
+                            bool storeindexpos)
 {
   fm->mappedptr = NULL;
   fm->log2bsize = log2bsize;
