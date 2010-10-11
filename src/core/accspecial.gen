@@ -37,14 +37,14 @@ static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
   pagenum = GT_POS2PAGENUM(esr->currentpos);
   if (pagenum > 0)
   {
-    endpos0 = specialtable->endsubsUint[pagenum-1];
+    endpos0 = specialtable->endidxinpage[pagenum-1];
   } else
   {
     endpos0 = 0;
   }
   esr->idx->firstcell = endpos0;
   esr->idx->lastcell = endpos1
-                     = specialtable->endsubsUint[pagenum];
+                     = specialtable->endidxinpage[pagenum];
   if (esr->currentpos > 0)
   {
     while (endpos0  < endpos1)
@@ -117,9 +117,9 @@ static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
       endpos0 = 0;
     } else
     {
-      endpos0 = specialtable->endsubsUint[pagenum-2];
+      endpos0 = specialtable->endidxinpage[pagenum-2];
     }
-    endpos1 = specialtable->endsubsUint[pagenum-1];
+    endpos1 = specialtable->endidxinpage[pagenum-1];
     if (endpos0 < endpos1)
     {
       esr->idx->firstcell = endpos1-1;
@@ -229,11 +229,11 @@ static bool GT_APPENDINT(checkspecial)(
 
   if (pagenumber == 0)
   {
-    if (swtable->endsubsUint[0] >= 1UL)
+    if (swtable->endidxinpage[0] >= 1UL)
     {
       if (GT_APPENDINT(binarysearchpage)(swtable->positions,
                                          swtable->positions
-                                          + swtable->endsubsUint[0] - 1,
+                                          + swtable->endidxinpage[0] - 1,
                                           (GT_SPECIALTABLETYPE) pos))
       {
         return true;
@@ -241,14 +241,14 @@ static bool GT_APPENDINT(checkspecial)(
     }
   } else
   {
-    if (swtable->endsubsUint[pagenumber-1] <
-        swtable->endsubsUint[pagenumber])
+    if (swtable->endidxinpage[pagenumber-1] <
+        swtable->endidxinpage[pagenumber])
     {
       if (GT_APPENDINT(binarysearchpage)(
                swtable->positions +
-               swtable->endsubsUint[pagenumber-1],
+               swtable->endidxinpage[pagenumber-1],
                swtable->positions +
-               swtable->endsubsUint[pagenumber] - 1,
+               swtable->endidxinpage[pagenumber] - 1,
                (GT_SPECIALTABLETYPE) pos))
       {
         return true;

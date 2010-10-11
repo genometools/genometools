@@ -86,6 +86,18 @@
         TABLE[encseq->unitsoftwobitencoding-1] = 0;\
         tbeptr = TABLE
 
+#define DECLARESEQBUFFERVIATABLE(TABLE,TABLESW)\
+        unsigned long widthbuffer = 0;\
+        GtTwobitencoding *tbeptr, *tbeptrSW;\
+        encseq->unitsoftwobitencoding\
+          = gt_unitsoftwobitencoding(encseq->totallength);\
+        TABLE = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
+        TABLESW = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
+        TABLE[encseq->unitsoftwobitencoding-1] = 0;\
+        TABLESW[encseq->unitsoftwobitencoding-1] = 0;\
+        tbeptr = TABLE;\
+        tbeptrSW = TABLESW;\
+
 #define UPDATESEQBUFFER(CC)\
         bitwise <<= 2;\
         if (ISNOTSPECIAL(CC))\
@@ -587,42 +599,78 @@ static void assignencseqmapspecification(
     case GT_ACCESS_TYPE_UCHARTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialtable.st_uchar.numofspecialstostore > 0)
+      if (encseq->specialtable.st_uchar.numofrangestostore > 0)
       {
         NEWMAPSPEC(encseq->specialtable.st_uchar.positions,GtUchar,
-                   encseq->specialtable.st_uchar.numofspecialstostore);
+                   encseq->specialtable.st_uchar.numofrangestostore);
         NEWMAPSPEC(encseq->specialtable.st_uchar.rangelengths,GtUchar,
-                   encseq->specialtable.st_uchar.numofspecialstostore);
+                   encseq->specialtable.st_uchar.numofrangestostore);
         numofunits = encseq->totallength/UCHAR_MAX+1;
-        NEWMAPSPEC(encseq->specialtable.st_uchar.endsubsUint,GtUlong,
+        NEWMAPSPEC(encseq->specialtable.st_uchar.endidxinpage,GtUlong,
+                   numofunits);
+      }
+      NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
+                 encseq->unitsoftwobitencoding);
+      if (encseq->wildcardtable.st_uchar.numofrangestostore > 0)
+      {
+        NEWMAPSPEC(encseq->wildcardtable.st_uchar.positions,GtUchar,
+                   encseq->wildcardtable.st_uchar.numofrangestostore);
+        NEWMAPSPEC(encseq->wildcardtable.st_uchar.rangelengths,GtUchar,
+                   encseq->wildcardtable.st_uchar.numofrangestostore);
+        numofunits = encseq->totallength/UCHAR_MAX+1;
+        NEWMAPSPEC(encseq->wildcardtable.st_uchar.endidxinpage,GtUlong,
                    numofunits);
       }
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialtable.st_ushort.numofspecialstostore > 0)
+      if (encseq->specialtable.st_ushort.numofrangestostore > 0)
       {
         NEWMAPSPEC(encseq->specialtable.st_ushort.positions,GtUshort,
-                   encseq->specialtable.st_ushort.numofspecialstostore);
+                   encseq->specialtable.st_ushort.numofrangestostore);
         NEWMAPSPEC(encseq->specialtable.st_ushort.rangelengths,GtUshort,
-                   encseq->specialtable.st_ushort.numofspecialstostore);
+                   encseq->specialtable.st_ushort.numofrangestostore);
         numofunits = encseq->totallength/USHRT_MAX+1;
-        NEWMAPSPEC(encseq->specialtable.st_ushort.endsubsUint,GtUlong,
+        NEWMAPSPEC(encseq->specialtable.st_ushort.endidxinpage,GtUlong,
+                   numofunits);
+      }
+      NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
+                 encseq->unitsoftwobitencoding);
+      if (encseq->wildcardtable.st_ushort.numofrangestostore > 0)
+      {
+        NEWMAPSPEC(encseq->wildcardtable.st_ushort.positions,GtUshort,
+                   encseq->wildcardtable.st_ushort.numofrangestostore);
+        NEWMAPSPEC(encseq->wildcardtable.st_ushort.rangelengths,GtUshort,
+                   encseq->wildcardtable.st_ushort.numofrangestostore);
+        numofunits = encseq->totallength/USHRT_MAX+1;
+        NEWMAPSPEC(encseq->wildcardtable.st_ushort.endidxinpage,GtUlong,
                    numofunits);
       }
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialtable.st_uint32.numofspecialstostore > 0)
+      if (encseq->specialtable.st_uint32.numofrangestostore > 0)
       {
         NEWMAPSPEC(encseq->specialtable.st_uint32.positions,Uint32,
-                   encseq->specialtable.st_uint32.numofspecialstostore);
+                   encseq->specialtable.st_uint32.numofrangestostore);
         NEWMAPSPEC(encseq->specialtable.st_uint32.rangelengths,Uint32,
-                   encseq->specialtable.st_uint32.numofspecialstostore);
+                   encseq->specialtable.st_uint32.numofrangestostore);
         numofunits = encseq->totallength/UINT32_MAX+1;
-        NEWMAPSPEC(encseq->specialtable.st_uint32.endsubsUint,GtUlong,
+        NEWMAPSPEC(encseq->specialtable.st_uint32.endidxinpage,GtUlong,
+                   numofunits);
+      }
+      NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
+                 encseq->unitsoftwobitencoding);
+      if (encseq->wildcardtable.st_uint32.numofrangestostore > 0)
+      {
+        NEWMAPSPEC(encseq->wildcardtable.st_uint32.positions,Uint32,
+                   encseq->wildcardtable.st_uint32.numofrangestostore);
+        NEWMAPSPEC(encseq->wildcardtable.st_uint32.rangelengths,Uint32,
+                   encseq->wildcardtable.st_uint32.numofrangestostore);
+        numofunits = encseq->totallength/UINT32_MAX+1;
+        NEWMAPSPEC(encseq->wildcardtable.st_uint32.endidxinpage,GtUlong,
                    numofunits);
       }
       break;
@@ -720,17 +768,17 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       swtable->st_uchar.positions = NULL;
-      swtable->st_uchar.endsubsUint = NULL;
+      swtable->st_uchar.endidxinpage = NULL;
       swtable->st_uchar.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       swtable->st_ushort.positions = NULL;
-      swtable->st_ushort.endsubsUint = NULL;
+      swtable->st_ushort.endidxinpage = NULL;
       swtable->st_ushort.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       swtable->st_uint32.positions = NULL;
-      swtable->st_uint32.endsubsUint = NULL;
+      swtable->st_uint32.endidxinpage = NULL;
       swtable->st_uint32.rangelengths = NULL;
       break;
     default:
@@ -787,20 +835,32 @@ void gt_encseq_delete(GtEncseq *encseq)
       case GT_ACCESS_TYPE_UCHARTABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_uchar.positions);
-        gt_free(encseq->specialtable.st_uchar.endsubsUint);
+        gt_free(encseq->specialtable.st_uchar.endidxinpage);
         gt_free(encseq->specialtable.st_uchar.rangelengths);
+        gt_free(encseq->twobitencodingSW);
+        gt_free(encseq->wildcardtable.st_uchar.positions);
+        gt_free(encseq->wildcardtable.st_uchar.endidxinpage);
+        gt_free(encseq->wildcardtable.st_uchar.rangelengths);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_ushort.positions);
-        gt_free(encseq->specialtable.st_ushort.endsubsUint);
+        gt_free(encseq->specialtable.st_ushort.endidxinpage);
         gt_free(encseq->specialtable.st_ushort.rangelengths);
+        gt_free(encseq->twobitencodingSW);
+        gt_free(encseq->wildcardtable.st_ushort.positions);
+        gt_free(encseq->wildcardtable.st_ushort.endidxinpage);
+        gt_free(encseq->wildcardtable.st_ushort.rangelengths);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_uint32.positions);
-        gt_free(encseq->specialtable.st_uint32.endsubsUint);
+        gt_free(encseq->specialtable.st_uint32.endidxinpage);
         gt_free(encseq->specialtable.st_uint32.rangelengths);
+        gt_free(encseq->twobitencodingSW);
+        gt_free(encseq->wildcardtable.st_uint32.positions);
+        gt_free(encseq->wildcardtable.st_uint32.endidxinpage);
+        gt_free(encseq->wildcardtable.st_uint32.rangelengths);
         break;
       default: break;
     }
@@ -810,6 +870,7 @@ void gt_encseq_delete(GtEncseq *encseq)
   encseq->specialbits = NULL;
   encseq->twobitencoding = NULL;
   setencsequtablesNULL(encseq->sat,&encseq->specialtable);
+  encseq->twobitencodingSW = NULL;
   setencsequtablesNULL(encseq->sat,&encseq->wildcardtable);
   if (encseq->destab != NULL)
   {
@@ -858,31 +919,26 @@ void gt_encseq_delete(GtEncseq *encseq)
 
 #define GT_APPENDINT(V)          V##_uchar
 #define GT_SPECIALTABLETYPE      GtUchar
-#define GT_MAXSPECIALTABLETYPE   UCHAR_MAX
 #define GT_POS2PAGENUM(V)        ((V) >> 8)
 
 #include "core/accspecialrange.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
-#undef GT_MAXSPECIALTABLETYPE
 #undef GT_POS2PAGENUM
 
 #define GT_APPENDINT(V)          V##_ushort
 #define GT_SPECIALTABLETYPE      GtUshort
-#define GT_MAXSPECIALTABLETYPE   USHRT_MAX
 #define GT_POS2PAGENUM(V)        ((V) >> 16)
 
 #include "core/accspecialrange.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
-#undef GT_MAXSPECIALTABLETYPE
 #undef GT_POS2PAGENUM
 
 #define GT_APPENDINT(V)          V##_uint32
 #define GT_SPECIALTABLETYPE      Uint32
-#define GT_MAXSPECIALTABLETYPE   UINT32_MAX
 #ifdef  _LP64
 #define GT_POS2PAGENUM(V)        ((V) >> 32)
 #else
@@ -893,7 +949,6 @@ void gt_encseq_delete(GtEncseq *encseq)
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
-#undef GT_MAXSPECIALTABLETYPE
 #undef GT_POS2PAGENUM
 
 #ifdef GT_RANGEDEBUG
@@ -1867,22 +1922,22 @@ static void initSWtable(GtSWtable *swtable,
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      swtable->st_uchar.maxspecialtype = (unsigned int) UCHAR_MAX;
-      swtable->st_uchar.numofspecialcells
-        = totallength/swtable->st_uchar.maxspecialtype + 1;
-      swtable->st_uchar.numofspecialstostore = ranges;
+      swtable->st_uchar.maxrangevalue = (unsigned int) UCHAR_MAX;
+      swtable->st_uchar.numofpages
+        = totallength/swtable->st_uchar.maxrangevalue + 1;
+      swtable->st_uchar.numofrangestostore = ranges;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      swtable->st_ushort.maxspecialtype = (unsigned int) USHRT_MAX;
-      swtable->st_ushort.numofspecialcells
-        = totallength/swtable->st_ushort.maxspecialtype + 1;
-      swtable->st_ushort.numofspecialstostore = ranges;
+      swtable->st_ushort.maxrangevalue = (unsigned int) USHRT_MAX;
+      swtable->st_ushort.numofpages
+        = totallength/swtable->st_ushort.maxrangevalue + 1;
+      swtable->st_ushort.numofrangestostore = ranges;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      swtable->st_uint32.maxspecialtype = (unsigned int) UINT32_MAX;
-      swtable->st_uint32.numofspecialcells
-        = totallength/swtable->st_uint32.maxspecialtype + 1;
-      swtable->st_uint32.numofspecialstostore = ranges;
+      swtable->st_uint32.maxrangevalue = (unsigned int) UINT32_MAX;
+      swtable->st_uint32.numofpages
+        = totallength/swtable->st_uint32.maxrangevalue + 1;
+      swtable->st_uint32.numofrangestostore = ranges;
       break;
     default:
       fprintf(stderr,"initSWtable(sat = %s is undefined)\n",
@@ -2161,6 +2216,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long, sizeofrep_uint64);
   encseq->satname = gt_encseq_access_type_str(sat);
   encseq->twobitencoding = NULL;
+  encseq->twobitencodingSW = NULL;
   if (sat == GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
     encseq->unitsoftwobitencoding = 0;
@@ -2764,22 +2820,22 @@ unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq)
 
 static unsigned long currentspecialrangevalue(unsigned long len,
                                               unsigned long occcount,
-                                              unsigned long maxspecialtype)
+                                              unsigned long maxrangevalue)
 {
-  if (maxspecialtype == UINT32_MAX)
+  if (maxrangevalue == UINT32_MAX)
   {
     gt_assert(len - 1 <= UINT32_MAX);
     return occcount;
   }
-  if (len <= maxspecialtype+1)
+  if (len <= maxrangevalue+1)
   {
     return occcount;
   }
-  if (len % (maxspecialtype+1) == 0)
+  if (len % (maxrangevalue+1) == 0)
   {
-    return len/(maxspecialtype+1) * occcount;
+    return len/(maxrangevalue+1) * occcount;
   }
-  return (1UL + len/(maxspecialtype+1)) * occcount;
+  return (1UL + len/(maxrangevalue+1)) * occcount;
 }
 
 typedef struct
@@ -2857,7 +2913,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
                                   unsigned long specialranges,
-                                  GT_UNUSED unsigned long wildcardranges,/*XXX*/
+                                  unsigned long wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol)
 {
@@ -2895,6 +2951,13 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UCHAR_MAX+1);
          }
+         if (wildcardranges > 0)
+         {
+           sum += (uint64_t) sizeof (GtUchar) * wildcardranges +
+                  (uint64_t) sizeof (GtUchar) * wildcardranges +
+                  (uint64_t) sizeof (unsigned long) *
+                                    (totallength/UCHAR_MAX+1);
+         }
          break;
     case GT_ACCESS_TYPE_USHORTTABLES:
          sum = sizeoftwobitencoding;
@@ -2905,6 +2968,13 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/USHRT_MAX+1);
          }
+         if (wildcardranges > 0)
+         {
+           sum += (uint64_t) sizeof (GtUshort) * wildcardranges +
+                  (uint64_t) sizeof (GtUshort) * wildcardranges +
+                  (uint64_t) sizeof (unsigned long) *
+                                    (totallength/USHRT_MAX+1);
+         }
          break;
     case GT_ACCESS_TYPE_UINT32TABLES:
          sum = sizeoftwobitencoding;
@@ -2912,6 +2982,13 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          {
            sum += (uint64_t) sizeof (uint32_t) * specialranges +
                   (uint64_t) sizeof (uint32_t) * specialranges +
+                  (uint64_t) sizeof (unsigned long) *
+                                    (totallength/UINT32_MAX+1);
+         }
+         if (wildcardranges > 0)
+         {
+           sum += (uint64_t) sizeof (uint32_t) * wildcardranges +
+                  (uint64_t) sizeof (uint32_t) * wildcardranges +
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UINT32_MAX+1);
          }

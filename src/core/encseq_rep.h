@@ -48,30 +48,30 @@ typedef struct
 {
   GtUchar *positions,
           *rangelengths;
-  unsigned long *endsubsUint;
-  unsigned int maxspecialtype;  /* maximal value of special type */
-  unsigned long numofspecialcells;
-  unsigned long numofspecialstostore;
+  unsigned long *endidxinpage;
+  unsigned long numofpages;
+  unsigned long numofrangestostore;
+  unsigned int maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uchar;
 
 typedef struct
 {
   GtUshort *positions,
            *rangelengths;
-  unsigned long *endsubsUint;
-  unsigned int maxspecialtype;  /* maximal value of special type */
-  unsigned long numofspecialcells;
-  unsigned long numofspecialstostore;
+  unsigned long *endidxinpage;
+  unsigned long numofpages;
+  unsigned long numofrangestostore;
+  unsigned int maxrangevalue;  /* maximal value of special type */
 } GtSWtable_ushort;
 
 typedef struct
 {
-   Uint32 *positions,
-          *rangelengths;
-  unsigned long *endsubsUint;
-  unsigned int maxspecialtype;  /* maximal value of special type */
-  unsigned long numofspecialcells;
-  unsigned long numofspecialstostore;
+  Uint32 *positions,
+         *rangelengths;
+  unsigned long *endidxinpage;
+  unsigned long numofpages;
+  unsigned long numofrangestostore;
+  unsigned int maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uint32;
 
 typedef union
@@ -140,6 +140,8 @@ struct GtEncseq
               GT_ACCESS_TYPE_UINT32TABLES */
 
   GtTwobitencoding *twobitencoding;
+  GtTwobitencoding *twobitencodingSW;
+
   unsigned long unitsoftwobitencoding;
   unsigned long maxcharforspecial; /* only defined when twobitencoding != NULL*/
 
