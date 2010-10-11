@@ -123,11 +123,11 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 static void
 destructPermutationsList(struct permList *permutation);
 
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
 static void
-printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
-                 unsigned blockSize);
-#endif /* EIS_DEBUG > 1 */
+printComposition(FILE *fp, const unsigned *composition,
+                 unsigned alphabetSize, unsigned blockSize);
+#endif /* EIS_DEBUG */
 
 static inline BitOffset
 compListPermStartOffset(struct compList *list, unsigned numSyms)
@@ -135,7 +135,7 @@ compListPermStartOffset(struct compList *list, unsigned numSyms)
   return list->numCompositions * list->bitsPerCount * numSyms;
 }
 
-#define gt_initCompositionListErrRet()                                     \
+#define gt_initCompositionListErrRet()                                  \
   do {                                                                  \
     if (newList->permutations)                                          \
     {                                                                   \
@@ -191,9 +191,9 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
     initComposition(maxSym, blockSize, composition, &symRMNZ);
     do
     {
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
       printComposition(stderr, composition, alphabetSize, blockSize);
-#endif /* EIS_DEBUG > 1 */
+#endif /* EIS_DEBUG */
       gt_bsStoreUniformUIntArray(newList->catCompsPerms, offset,
                               bitsPerCount, alphabetSize, composition);
       gt_assert(cmpIdx > 1?(gt_bsCompare(newList->catCompsPerms, offset,
@@ -204,7 +204,7 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
                                newList->catCompsPerms, permOffset, blockSize,
                                alphabetSize, newList->bitsPerSymbol))
         gt_initCompositionListErrRet();
-#if EIS_DEBUG > 1 && !defined(NDEBUG)
+#if defined(EIS_DEBUG) && !defined(NDEBUG)
       gt_log_log("%lu",
               (unsigned long)newList->permutations[cmpIdx].numPermutations);
 #endif
@@ -223,7 +223,7 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
     } while (1);
     /* verify that the last composition is indeed the lexically maximally */
     gt_assert(composition[0] == blockSize);
-#if EIS_DEBUG > 1 && !defined(NDEBUG)
+#if defined(EIS_DEBUG) && !defined(NDEBUG)
     gt_log_log("permSum=%lu, alphabetSize=%lu, blockSize=%d, "
             "pow(alphabetSize, blockSize)=%f",
             (unsigned long)permSum, (unsigned long)alphabetSize, blockSize,
@@ -269,7 +269,7 @@ gt_deleteCompositionList(struct compList *clist)
   gt_free(clist);
 }
 
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
 /**
  * Compute number of digits a value would require when displayed in
  * selected number system (i.e. 2=binary, 10=decimal).
@@ -298,7 +298,7 @@ printComposition(FILE *fp, const unsigned *composition,
   }
   fputs("\n", fp);
 }
-#endif /* EIS_DEBUG > 1 */
+#endif /* EIS_DEBUG */
 
 static void
 initPermutation(Symbol *permutation, const unsigned *composition,
@@ -306,10 +306,10 @@ initPermutation(Symbol *permutation, const unsigned *composition,
 static inline void
 nextPermutation(Symbol *permutation, unsigned blockSize);
 
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
 static void
 printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize);
-#endif /* EIS_DEBUG > 1 */
+#endif /* EIS_DEBUG */
 
 static int
 initPermutationsList(const unsigned *composition, struct permList *permutation,
@@ -336,9 +336,9 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
     {
       gt_bsStoreUniformSymbolArray(permStore, offset,
                                 bitsPerSymbol, blockSize, currentPermutation);
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
       printPermutation(stderr, currentPermutation, blockSize);
-#endif /* EIS_DEBUG > 1 */
+#endif /* EIS_DEBUG */
       gt_assert(i > 0?(gt_bsCompare(permStore, offset, bitsPerPermutation,
                               permStore,
                               offset - bitsPerPermutation,
@@ -420,7 +420,7 @@ nextPermutation(Symbol *permutation, unsigned blockSize)
   }
 }
 
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
 static void
 printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
 {
@@ -433,7 +433,7 @@ printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
   }
   fputs("\n", fp);
 }
-#endif /* EIS_DEBUG > 1 */
+#endif /* EIS_DEBUG */
 
 int
 gt_block2IndexPair(const struct compList *compositionTable,
