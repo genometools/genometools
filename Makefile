@@ -823,13 +823,12 @@ splint: obj/gt_config.h
 EISFILES=${shell ls ${CURDIR}/src/match/*.c | grep eis-}
 
 SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
-
-MOVEDENCSEQFILES = ${shell grep -l 'Stefan Kurtz' src/core/*.c}
+SKCORE=${shell grep -l 'Stefan Kurtz' src/core/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
                      ${wildcard ${CURDIR}/src/ltr/*.c}\
-                                ${SKTOOLS} ${MOVEDENCSEQFILES}}}}\
+                                ${SKTOOLS} ${SKCORE}}}}\
      obj/redblack.splint
 
 spgt:${ALLSPLINT}
