@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2007-2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
@@ -73,6 +74,7 @@ GtEncseqAccessType gt_encseq_access_type_get(const char *str)
         tmp = gt_encseq_determine_size(VAL, totallength, numofdbfiles,\
                                        lengthofdbfilenames,\
                                        specialrangestab[IDX],\
+                                       wildcardrangestab[IDX],\
                                        numofchars,\
                                        0);\
         if (tmp < cmin)\
@@ -80,16 +82,19 @@ GtEncseqAccessType gt_encseq_access_type_get(const char *str)
           cmin = tmp;\
           cret = VAL;\
           *specialranges = specialrangestab[IDX];\
+          *wildcardranges = wildcardrangestab[IDX];\
         }
 
 #ifndef INLINEDENCSEQ
 static GtEncseqAccessType determinesmallestrep(
                                   unsigned long *specialranges,
+                                  unsigned long *wildcardranges,
                                   const Definedunsignedlong *equallength,
                                   unsigned long totallength,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
                                   const unsigned long *specialrangestab,
+                                  const unsigned long *wildcardrangestab,
                                   unsigned int numofchars)
 {
   GtEncseqAccessType cret;
@@ -97,9 +102,11 @@ static GtEncseqAccessType determinesmallestrep(
 
   cmin = gt_encseq_determine_size(GT_ACCESS_TYPE_BITACCESS, totallength,
                                   numofdbfiles, lengthofdbfilenames,
-                                  specialrangestab[0], numofchars, 0);
+                                  specialrangestab[0], wildcardrangestab[0],
+                                  numofchars, 0);
   cret = GT_ACCESS_TYPE_BITACCESS;
   *specialranges = specialrangestab[0];
+  *wildcardranges = wildcardrangestab[0];
   if (equallength != NULL && equallength->defined)
   {
     cret = GT_ACCESS_TYPE_EQUALLENGTH;
@@ -112,27 +119,31 @@ static GtEncseqAccessType determinesmallestrep(
   return cret;
 }
 
-GtEncseqAccessType gt_encseq_access_type_determine(unsigned long *specialranges,
-                                         unsigned long totallength,
-                                         unsigned long numofdbfiles,
-                                         unsigned long lengthofdbfilenames,
-                                         const unsigned long *specialrangestab,
-                                         const Definedunsignedlong *equallength,
-                                         unsigned int numofchars,
-                                         const char *str_sat,
-                                         GtError *err)
+int gt_encseq_access_type_determine(unsigned long *specialranges,
+                                    unsigned long *wildcardranges,
+                                    unsigned long totallength,
+                                    unsigned long numofdbfiles,
+                                    unsigned long lengthofdbfilenames,
+                                    const unsigned long *specialrangestab,
+                                    const unsigned long *wildcardrangestab,
+                                    const Definedunsignedlong *equallength,
+                                    unsigned int numofchars,
+                                    const char *str_sat,
+                                    GtError *err)
 {
   GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
   bool haserr = false;
 
   *specialranges = specialrangestab[0];
+  *wildcardranges = wildcardrangestab[0];
   if (str_sat == NULL)
   {
     if (numofchars == GT_DNAALPHASIZE)
     {
-      sat = determinesmallestrep(specialranges,equallength,totallength,
+      sat = determinesmallestrep(specialranges,wildcardranges,
+                                 equallength,totallength,
                                  numofdbfiles,lengthofdbfilenames,
-                                 specialrangestab,numofchars);
+                                 specialrangestab,wildcardrangestab,numofchars);
     } else
     {
       sat = GT_ACCESS_TYPE_BYTECOMPRESS;
@@ -146,12 +157,15 @@ GtEncseqAccessType gt_encseq_access_type_determine(unsigned long *specialranges,
       {
         case GT_ACCESS_TYPE_UCHARTABLES:
           *specialranges = specialrangestab[0];
+          *wildcardranges = wildcardrangestab[0];
           break;
         case GT_ACCESS_TYPE_USHORTTABLES:
           *specialranges = specialrangestab[1];
+          *wildcardranges = wildcardrangestab[1];
            break;
         case GT_ACCESS_TYPE_UINT32TABLES:
           *specialranges = specialrangestab[2];
+          *wildcardranges = wildcardrangestab[2];
           break;
         case GT_ACCESS_TYPE_DIRECTACCESS:
         case GT_ACCESS_TYPE_BITACCESS:
@@ -197,15 +211,18 @@ GtEncseqAccessType gt_encseq_access_type_determine(unsigned long *specialranges,
 }
 
 #else
-GtEncseqAccessType gt_encseq_access_type_determine(unsigned long *specialranges,
+int gt_encseq_access_type_determine(unsigned long *specialranges,
+                                    unsigned long *wildcardranges,
                                     GT_UNUSED unsigned long totallength,
                                     GT_UNUSED unsigned long lengthofdbfilenames,
                                     const unsigned long *specialrangestab,
+                                    const unsigned long *wildcardrangestab,
                                     GT_UNUSED unsigned int numofchars,
                                     GT_UNUSED const char *str_sat,
                                     GT_UNUSED GtError *err)
 {
   *specialranges = specialrangestab[0];
+  *wildcardranges = wildcardrangestab[0];
   return (int)  GT_ACCESS_TYPE_DIRECTACCESS;
 }
 #endif

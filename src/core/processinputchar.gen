@@ -1,0 +1,98 @@
+          if (ISNOTSPECIAL(charcode))
+          {
+#ifdef WITHEQUALLENGTH_DES_SSP
+            lengthofcurrentsequence++;
+#endif
+            if (specialprefix)
+            {
+              specialprefix = false;
+            }
+            if (wildcardprefix)
+            {
+              wildcardprefix = false;
+            }
+            if (lastspecialrangelength > 0)
+            {
+              gt_disc_distri_add(distspecialrangelength,
+                                 lastspecialrangelength);
+              lastspecialrangelength = 0;
+            }
+            if (lastwildcardrangelength > 0)
+            {
+              gt_disc_distri_add(distwildcardrangelength,
+                                 lastwildcardrangelength);
+              lastwildcardrangelength = 0;
+            }
+          } else
+          {
+            if (charcode == (GtUchar) WILDCARD)
+            {
+              if (wildcardprefix)
+              {
+                specialcharinfo->lengthofwildcardprefix++;
+              }
+              lastwildcardrangelength++;
+              specialcharinfo->wildcards++;
+#ifdef WITHEQUALLENGTH_DES_SSP
+              lengthofcurrentsequence++;
+#endif
+            } else
+            {
+              gt_assert(charcode == (GtUchar) SEPARATOR);
+              if (wildcardprefix)
+              {
+                wildcardprefix = false;
+              }
+              if (lastwildcardrangelength > 0)
+              {
+                gt_disc_distri_add(distwildcardrangelength,
+                                   lastwildcardrangelength);
+                lastwildcardrangelength = 0;
+              }
+#ifdef WITHEQUALLENGTH_DES_SSP
+              if (equallength->defined)
+              {
+                if (equallength->valueunsignedlong > 0)
+                {
+                  if (lengthofcurrentsequence != equallength->valueunsignedlong)
+                  {
+                    equallength->defined = false;
+                  }
+                } else
+                {
+                  gt_assert(lengthofcurrentsequence > 0);
+                  equallength->valueunsignedlong = lengthofcurrentsequence;
+                }
+                lengthofcurrentsequence = 0;
+              }
+              if (desfp != NULL)
+              {
+                desc = gt_queue_get(descqueue);
+                gt_xfputs(desc,desfp);
+                gt_free(desc);
+                desc = NULL;
+                if (sdsfp != NULL)
+                {
+                  unsigned long desoffset;
+
+                  desoffset = (unsigned long) ftello(desfp);
+                  gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
+                }
+                gt_xfputc((int) '\n',desfp);
+              }
+              if (outssptab)
+              {
+                GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
+              } else
+              {
+                sequenceseppos->nextfreeGtUlong++;
+              }
+#endif
+            }
+            if (specialprefix)
+            {
+              specialcharinfo->lengthofspecialprefix++;
+            }
+            specialcharinfo->specialcharacters++;
+            lastspecialrangelength++;
+          }

@@ -24,7 +24,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
   unsigned int lastspeciallength = 0;
   GtTwobitencoding bitwise = 0;
   GtUchar cc;
-  GT_APPENDINT(GtSpecialtable) *specialtable
+  GT_APPENDINT(GtSWtable) *specialtable
     = &(GT_APPENDINT(encseq->specialtable.st));
 #ifndef NDEBUG
   unsigned long sumspecials = 0, countspecials = 0;
@@ -137,7 +137,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
 #ifdef GT_RANGEDEBUG
 
 static void GT_APPENDINT(showspecialpositionswithpages)
-                            (const GT_APPENDINT(GtSpecialtable) *specialtable,
+                            (const GT_APPENDINT(GtSWtable) *swtable,
                              unsigned long pgnum,
                              unsigned long offset,
                              unsigned long first,
@@ -151,9 +151,9 @@ static void GT_APPENDINT(showspecialpositionswithpages)
           pgnum, last - first + 1, offset);
   for (idx=first; idx<=last; idx++)
   {
-    startpos = (unsigned long) specialtable->positions[idx];
+    startpos = (unsigned long) swtable->positions[idx];
     range.start = offset + startpos;
-    range.end = range.start + specialtable->rangelengths[idx] + 1;
+    range.end = range.start + swtable->rangelengths[idx] + 1;
     printf("%lu: ",idx);
     showsequencerange(&range);
     printf("\n");
@@ -161,26 +161,26 @@ static void GT_APPENDINT(showspecialpositionswithpages)
 }
 
 static void GT_APPENDINT(showallspecialpositionswithpages)(
-                            const GT_APPENDINT(GtSpecialtable) *specialtable)
+                            const GT_APPENDINT(GtSWtable) *swtable)
 {
   unsigned long endpos0, endpos1, pgnum, offset = 0;
 
-  for (pgnum=0; pgnum < specialtable->numofspecialcells; pgnum++)
+  for (pgnum=0; pgnum < swtable->numofspecialcells; pgnum++)
   {
     if (pgnum == 0)
     {
       endpos0 = 0;
     } else
     {
-      endpos0 = specialtable->endsubsUint[pgnum-1];
+      endpos0 = swtable->endsubsUint[pgnum-1];
     }
-    endpos1 = specialtable->endsubsUint[pgnum];
+    endpos1 = swtable->endsubsUint[pgnum];
     if (endpos0 < endpos1)
     {
-      GT_APPENDINT(showspecialpositionswithpages)(specialtable,pgnum,offset,
+      GT_APPENDINT(showspecialpositionswithpages)(swtable,pgnum,offset,
                                                   endpos0,endpos1-1);
     }
-    offset += 1UL + (unsigned long) specialtable->maxspecialtype;
+    offset += 1UL + (unsigned long) swtable->maxspecialtype;
   }
 }
 #endif
@@ -217,16 +217,16 @@ static void GT_APPENDINT(showallspecialpositionswithpages)(
 }
 
 static void GT_APPENDINT(determinerange)(GtRange *range,
-                                         const GT_APPENDINT(GtSpecialtable)
-                                           *specialtable,
+                                         const GT_APPENDINT(GtSWtable)
+                                           *swtable,
                                          unsigned long transpagenum,
                                          unsigned long cellnum)
 {
   range->start = transpagenum *
-                 (1UL + (unsigned long) specialtable->maxspecialtype) +
-                 specialtable->positions[cellnum];
+                 (1UL + (unsigned long) swtable->maxspecialtype) +
+                 swtable->positions[cellnum];
   range->end = range->start +
-               specialtable->rangelengths[cellnum] + 1;
+               swtable->rangelengths[cellnum] + 1;
 }
 
 static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr)
@@ -235,7 +235,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr)
   bool found = false;
   GtRange range;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
-  GT_APPENDINT(GtSpecialtable) *specialtable
+  GT_APPENDINT(GtSWtable) *specialtable
     = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   pagenum = GT_POS2PAGENUM(esr->currentpos);
@@ -411,7 +411,7 @@ static bool GT_APPENDINT(nextnonemptypage)(GtEncseqReader *esr,
                                            bool moveforward)
 {
   unsigned long endpos0, endpos1, pagenum;
-  GT_APPENDINT(GtSpecialtable) *specialtable
+  GT_APPENDINT(GtSWtable) *specialtable
     = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   while (esr->idx->morepagesleft)
@@ -458,7 +458,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr)
 {
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
-  GT_APPENDINT(GtSpecialtable) *specialtable
+  GT_APPENDINT(GtSWtable) *specialtable
     = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   while (true)
@@ -643,7 +643,7 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
 }
 
 static bool GT_APPENDINT(checkspecialrange)(
-                         const GT_APPENDINT(GtSpecialtable) *specialtable,
+                         const GT_APPENDINT(GtSWtable) *swtable,
                          unsigned long pos)
 {
   unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
@@ -651,18 +651,18 @@ static bool GT_APPENDINT(checkspecialrange)(
 
   if (pagenumber == 0)
   {
-    if (specialtable->endsubsUint[0] >= 1UL)
+    if (swtable->endsubsUint[0] >= 1UL)
     {
-      start = specialtable->positions;
+      start = swtable->positions;
       found = GT_APPENDINT(binarysearchpreviousequal)(
                         start,
-                        start + specialtable->endsubsUint[0] - 1,
+                        start + swtable->endsubsUint[0] - 1,
                         (GT_SPECIALTABLETYPE) pos);
       if (found != NULL)
       {
         unsigned long rangeend
                = (unsigned long) *found
-                 + (unsigned long) specialtable->rangelengths
+                 + (unsigned long) swtable->rangelengths
                                                [(unsigned long) (found - start)]
                  + 1;
         if (pos < rangeend)
@@ -673,22 +673,22 @@ static bool GT_APPENDINT(checkspecialrange)(
     }
   } else
   {
-    if (specialtable->endsubsUint[pagenumber-1] <
-        specialtable->endsubsUint[pagenumber])
+    if (swtable->endsubsUint[pagenumber-1] <
+        swtable->endsubsUint[pagenumber])
     {
-      start = specialtable->positions;
+      start = swtable->positions;
       found = GT_APPENDINT(binarysearchpreviousequal)(
                         start +
-                        specialtable->endsubsUint[pagenumber-1],
+                        swtable->endsubsUint[pagenumber-1],
                         start +
-                        specialtable->endsubsUint[pagenumber] - 1,
+                        swtable->endsubsUint[pagenumber] - 1,
                         (GT_SPECIALTABLETYPE) pos);
       if (found != NULL)
       {
         unsigned long rangeend
                = (unsigned long) ((GT_MAXSPECIALTABLETYPE+1) * pagenumber)
                  + (unsigned long) *found
-                 + (unsigned long) specialtable->rangelengths
+                 + (unsigned long) swtable->rangelengths
                                                [(unsigned long) (found - start)]
                  + 1;
         if (pos < rangeend)
@@ -699,14 +699,14 @@ static bool GT_APPENDINT(checkspecialrange)(
     }
     if (pagenumber == 1UL)
     {
-      if (specialtable->endsubsUint[0] > 1UL)
+      if (swtable->endsubsUint[0] > 1UL)
       {
         unsigned long idx;
         unsigned long rangeend;
 
-        idx = specialtable->endsubsUint[0] - 1;
-        rangeend = (unsigned long) specialtable->positions[idx] +
-                   (unsigned long) specialtable->rangelengths[idx] + 1;
+        idx = swtable->endsubsUint[0] - 1;
+        rangeend = (unsigned long) swtable->positions[idx] +
+                   (unsigned long) swtable->rangelengths[idx] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -714,16 +714,16 @@ static bool GT_APPENDINT(checkspecialrange)(
       }
     } else
     {
-      if (specialtable->endsubsUint[pagenumber-2] <
-          specialtable->endsubsUint[pagenumber-1])
+      if (swtable->endsubsUint[pagenumber-2] <
+          swtable->endsubsUint[pagenumber-1])
       {
         unsigned long idx;
         unsigned long rangeend;
 
-        idx = specialtable->endsubsUint[pagenumber-1] - 1;
+        idx = swtable->endsubsUint[pagenumber-1] - 1;
         rangeend = (unsigned long) ((GT_MAXSPECIALTABLETYPE+1) * (pagenumber-1))
-                   + (unsigned long) specialtable->positions[idx]
-                   + (unsigned long) specialtable->rangelengths[idx]
+                   + (unsigned long) swtable->positions[idx]
+                   + (unsigned long) swtable->rangelengths[idx]
                    + 1;
         if (pos < rangeend)
         {

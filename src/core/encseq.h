@@ -237,22 +237,42 @@ void gt_encseq_show_features(const GtEncseq *encseq,
 /* Return the number of positions in <encseq> containing special characters */
 unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq);
 
+/* Return the number of positions in <encseq> containing wildcard */
+unsigned long gt_encseq_wildcards(const GtEncseq *encseq);
+
 /* Return the number of ranges of consecutive runs of special characters
   where the length of each range is limited by UCHAR_MAX, USHORT_MAX, and
   UINT32_MAX, depending on whether the GT_ACCESS_TYPE_UCHARTABLES,
   GT_ACCESS_TYPE_USHORTTABLES, GT_ACCESS_TYPE_UINT32TABLES are used */
 unsigned long gt_encseq_specialranges(const GtEncseq *encseq);
 
+/* Return the number of ranges of consecutive runs of wildcards
+  where the length of each range is limited by UCHAR_MAX, USHORT_MAX, and
+  UINT32_MAX, depending on whether the GT_ACCESS_TYPE_UCHARTABLES,
+  GT_ACCESS_TYPE_USHORTTABLES, GT_ACCESS_TYPE_UINT32TABLES are used */
+unsigned long gt_encseq_wildcardranges(const GtEncseq *encseq);
+
 /* Return the number of ranges of consecutive runs of special characters */
 unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq);
+
+/* Return the number of ranges of consecutive runs of wildcards */
+unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq);
 
 /* Return the length of the longest prefix of <encseq> consisting of
   special characters only. */
 unsigned long gt_encseq_lengthofspecialprefix(const GtEncseq *encseq);
 
+/* Return the length of the longest prefix of <encseq> consisting of
+  wildcards only. */
+unsigned long gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq);
+
 /* Return the length of the longest suffix of <encseq> consisting of
   special characters only. */
 unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
+
+/* Return the length of the longest suffix of <encseq> consisting of
+  wildcards only. */
+unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq);
 
 /* Sets <specialcharinfo> to point to a <GtSpecialcharinfo> for the index
   files specified by <indexname>, even if the encoded sequence is not mapped.
@@ -298,6 +318,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
                                   unsigned long specialranges,
+                                  unsigned long wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol);
 /*

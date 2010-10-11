@@ -29,6 +29,7 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
   GtUchar lastofprevious, firstofcurrent;
   unsigned long tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
+           tmpwildcards,
            tmpspecialranges,
            tmprealspecialranges,
            tmplarge;
@@ -36,6 +37,7 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
   gt_assert(numofindexes > 0);
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,unsigned long,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
+  tmpwildcards = 0;
   tmpspecialranges = 0;
   tmprealspecialranges = 0;
   for (idx=0; idx<numofindexes; idx++)
@@ -52,26 +54,25 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
         = sequenceoffsettable[idx-1] + tmplength + (unsigned long) 1;
     }
     tmpspecialcharacters
-      += (uint64_t) gt_encseq_specialcharacters(
-                                                  suffixarraytable[idx].encseq);
+      += (uint64_t) gt_encseq_specialcharacters(suffixarraytable[idx].encseq);
+    tmpwildcards
+      += (uint64_t) gt_encseq_wildcards(suffixarraytable[idx].encseq);
     tmpspecialranges
-      += (uint64_t) gt_encseq_specialranges(
-                                                  suffixarraytable[idx].encseq);
+      += (uint64_t) gt_encseq_specialranges(suffixarraytable[idx].encseq);
     tmprealspecialranges
-      += (uint64_t) gt_encseq_realspecialranges(
-                                                  suffixarraytable[idx].encseq);
+      += (uint64_t) gt_encseq_realspecialranges(suffixarraytable[idx].encseq);
     if (idx > 0)
     {
       /* Random access */
       lastofprevious
-        = gt_encseq_get_encoded_char(suffixarraytable[idx - 1].encseq,
-                                            tmplength-1,
-                                            suffixarraytable[idx - 1].readmode);
+        = gt_encseq_get_encoded_char(suffixarraytable[idx-1].encseq,
+                                     tmplength-1,
+                                     suffixarraytable[idx - 1].readmode);
       /* Random access */
       firstofcurrent
         = gt_encseq_get_encoded_char(suffixarraytable[idx].encseq,
-                                            0,
-                                            suffixarraytable[idx].readmode);
+                                     0,
+                                     suffixarraytable[idx].readmode);
       if (ISSPECIAL(lastofprevious))
       {
          if (ISSPECIAL(firstofcurrent))
@@ -92,6 +93,7 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
        (uint64_t) gt_encseq_total_length(suffixarraytable[idx].encseq);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmplarge);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpspecialcharacters);
+    (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpwildcards);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmpspecialranges);
     (void) CALLCASTFUNC(uint64_t,unsigned_long,tmprealspecialranges);
     printf("# seqlen[%u] = %lu\n",
@@ -101,6 +103,7 @@ unsigned long *gt_encseqtable2sequenceoffsets(unsigned long *totallength,
   tmplength = gt_encseq_total_length(suffixarraytable[numofindexes -1].encseq);
   *totallength = sequenceoffsettable[numofindexes-1] + tmplength;
   specialcharinfo->specialcharacters = (unsigned long) tmpspecialcharacters;
+  specialcharinfo->wildcards = (unsigned long) tmpwildcards;
   specialcharinfo->specialranges = (unsigned long) tmpspecialranges;
   specialcharinfo->realspecialranges = (unsigned long) tmprealspecialranges;
   specialcharinfo->lengthofspecialprefix

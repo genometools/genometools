@@ -52,7 +52,7 @@ typedef struct
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long numofspecialcells;
   unsigned long numofspecialstostore;
-} GtSpecialtable_uchar;
+} GtSWtable_uchar;
 
 typedef struct
 {
@@ -62,7 +62,7 @@ typedef struct
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long numofspecialcells;
   unsigned long numofspecialstostore;
-} GtSpecialtable_ushort;
+} GtSWtable_ushort;
 
 typedef struct
 {
@@ -72,23 +72,24 @@ typedef struct
   unsigned int maxspecialtype;  /* maximal value of special type */
   unsigned long numofspecialcells;
   unsigned long numofspecialstostore;
-} GtSpecialtable_uint32;
+} GtSWtable_uint32;
 
 typedef union
 {
-  GtSpecialtable_uchar st_uchar;
-  GtSpecialtable_ushort st_ushort;
-  GtSpecialtable_uint32 st_uint32;
-} GtSpecialtable;
+  GtSWtable_uchar st_uchar;
+  GtSWtable_ushort st_ushort;
+  GtSWtable_uint32 st_uint32;
+} GtSWtable;
 
 struct GtEncseq
 {
   /* Common part */
-  unsigned long *satcharptr; /* need for writing char */
+  unsigned long *satcharptr;  /* need for writing char sat */
   GtEncseqAccessType sat;
   const char *satname;
   void *mappedptr; /* NULL or pointer to the mapped space block */
-  bool has_specialranges;
+  bool has_specialranges,
+       has_wildcardranges;
   unsigned long totallength,
                 *totallengthptr,
                 numofdbsequences,
@@ -157,7 +158,7 @@ struct GtEncseq
               GT_ACCESS_TYPE_USHORTTABLES,
               GT_ACCESS_TYPE_UINT32TABLES */
 
-  GtSpecialtable specialtable;
+  GtSWtable specialtable, wildcardtable;
 
   unsigned long reference_count;
   GtMutex *refcount_lock;

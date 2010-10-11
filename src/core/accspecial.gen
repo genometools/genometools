@@ -16,14 +16,14 @@
 */
 
 static unsigned long GT_APPENDINT(determinesingle)(
-                                         const GT_APPENDINT(GtSpecialtable)
-                                           *specialtable,
+                                         const GT_APPENDINT(GtSWtable)
+                                           *swtable,
                                          unsigned long transpagenum,
                                          unsigned long cellnum)
 {
   return transpagenum *
-         (1UL + (unsigned long) specialtable->maxspecialtype) +
-         specialtable->positions[cellnum];
+         (1UL + (unsigned long) swtable->maxspecialtype) +
+         swtable->positions[cellnum];
 }
 
 static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
@@ -31,7 +31,7 @@ static void GT_APPENDINT(binpreparenextGtEncseqReader)(GtEncseqReader *esr)
   unsigned long endpos0, endpos1, cellnum, pagenum, specialpos;
   bool found = false;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
-  GT_APPENDINT(GtSpecialtable) *specialtable
+  GT_APPENDINT(GtSWtable) *specialtable
     = &(GT_APPENDINT(esr->encseq->specialtable.st));
 
   pagenum = GT_POS2PAGENUM(esr->currentpos);
@@ -222,18 +222,18 @@ static bool GT_APPENDINT(binarysearchpage)(const GT_SPECIALTABLETYPE *leftptr,
 }
 
 static bool GT_APPENDINT(checkspecial)(
-                         const GT_APPENDINT(GtSpecialtable) *specialtable,
+                         const GT_APPENDINT(GtSWtable) *swtable,
                          unsigned long pos)
 {
   unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
 
   if (pagenumber == 0)
   {
-    if (specialtable->endsubsUint[0] >= 1UL)
+    if (swtable->endsubsUint[0] >= 1UL)
     {
-      if (GT_APPENDINT(binarysearchpage)(specialtable->positions,
-                                         specialtable->positions
-                                          + specialtable->endsubsUint[0] - 1,
+      if (GT_APPENDINT(binarysearchpage)(swtable->positions,
+                                         swtable->positions
+                                          + swtable->endsubsUint[0] - 1,
                                           (GT_SPECIALTABLETYPE) pos))
       {
         return true;
@@ -241,14 +241,14 @@ static bool GT_APPENDINT(checkspecial)(
     }
   } else
   {
-    if (specialtable->endsubsUint[pagenumber-1] <
-        specialtable->endsubsUint[pagenumber])
+    if (swtable->endsubsUint[pagenumber-1] <
+        swtable->endsubsUint[pagenumber])
     {
       if (GT_APPENDINT(binarysearchpage)(
-               specialtable->positions +
-               specialtable->endsubsUint[pagenumber-1],
-               specialtable->positions +
-               specialtable->endsubsUint[pagenumber] - 1,
+               swtable->positions +
+               swtable->endsubsUint[pagenumber-1],
+               swtable->positions +
+               swtable->endsubsUint[pagenumber] - 1,
                (GT_SPECIALTABLETYPE) pos))
       {
         return true;

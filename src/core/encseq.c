@@ -334,9 +334,9 @@ typedef struct {
   unsigned long firstcell, /* first index of tables with startpos and length */
                 lastcell,  /* last index of tables with startpos and length */
                 nextpage;  /* next page to be used */
-  GtRange previousrange,  /* previous range of wildcards */
-          currentrange;   /* current range of wildcards */
-  bool morepagesleft,
+  GtRange previousrange,  /* previous range of special characters */
+          currentrange;   /* current range of special characters */
+  bool morepagesleft,     /* there is some page left to check */
        hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
@@ -714,24 +714,24 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
 }
 
 static void setencsequtablesNULL(GtEncseqAccessType sat,
-                                 GtSpecialtable *specialtable)
+                                 GtSWtable *swtable)
 {
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      specialtable->st_uchar.positions = NULL;
-      specialtable->st_uchar.endsubsUint = NULL;
-      specialtable->st_uchar.rangelengths = NULL;
+      swtable->st_uchar.positions = NULL;
+      swtable->st_uchar.endsubsUint = NULL;
+      swtable->st_uchar.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      specialtable->st_ushort.positions = NULL;
-      specialtable->st_ushort.endsubsUint = NULL;
-      specialtable->st_ushort.rangelengths = NULL;
+      swtable->st_ushort.positions = NULL;
+      swtable->st_ushort.endsubsUint = NULL;
+      swtable->st_ushort.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      specialtable->st_uint32.positions = NULL;
-      specialtable->st_uint32.endsubsUint = NULL;
-      specialtable->st_uint32.rangelengths = NULL;
+      swtable->st_uint32.positions = NULL;
+      swtable->st_uint32.endsubsUint = NULL;
+      swtable->st_uint32.rangelengths = NULL;
       break;
     default:
       break;
@@ -810,6 +810,7 @@ void gt_encseq_delete(GtEncseq *encseq)
   encseq->specialbits = NULL;
   encseq->twobitencoding = NULL;
   setencsequtablesNULL(encseq->sat,&encseq->specialtable);
+  setencsequtablesNULL(encseq->sat,&encseq->wildcardtable);
   if (encseq->destab != NULL)
   {
     if (encseq->hasallocateddestab) {
@@ -912,6 +913,25 @@ static void showallspecialpositions(const GtEncseq *encseq)
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         showallspecialpositionswithpages_uint32(&encseq->specialtable.
+                                                st_uint32);
+        break;
+      default:
+        break;
+    }
+  }
+  if (encseq->has_wildcardranges)
+  {
+    switch (encseq->sat)
+    {
+      case GT_ACCESS_TYPE_UCHARTABLES:
+        showallspecialpositionswithpages_uchar(&encseq->wildcardtable.st_uchar);
+        break;
+      case GT_ACCESS_TYPE_USHORTTABLES:
+        showallspecialpositionswithpages_ushort(&encseq->wildcardtabe.
+                                                st_ushort);
+        break;
+      case GT_ACCESS_TYPE_UINT32TABLES:
+        showallspecialpositionswithpages_uint32(&encseq->wildcardtabe.
                                                 st_uint32);
         break;
       default:
@@ -1544,6 +1564,11 @@ bool gt_encseq_has_specialranges(const GtEncseq *encseq)
   return encseq->has_specialranges;
 }
 
+bool gt_encseq_has_wildcardranges(const GtEncseq *encseq)
+{
+  return encseq->has_wildcardranges;
+}
+
 bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq)
 {
   return (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS ||
@@ -1834,33 +1859,33 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
   gt_free(sri);
 }
 
-static void sat2maxspecialtype(GtSpecialtable *specialtable,
-                               unsigned long totallength,
-                               GtEncseqAccessType sat,
-                               unsigned long specialranges)
+static void initSWtable(GtSWtable *swtable,
+                        unsigned long totallength,
+                        GtEncseqAccessType sat,
+                        unsigned long ranges)
 {
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      specialtable->st_uchar.maxspecialtype = (unsigned int) UCHAR_MAX;
-      specialtable->st_uchar.numofspecialcells
-        = totallength/specialtable->st_uchar.maxspecialtype + 1;
-      specialtable->st_uchar.numofspecialstostore = specialranges;
+      swtable->st_uchar.maxspecialtype = (unsigned int) UCHAR_MAX;
+      swtable->st_uchar.numofspecialcells
+        = totallength/swtable->st_uchar.maxspecialtype + 1;
+      swtable->st_uchar.numofspecialstostore = ranges;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      specialtable->st_ushort.maxspecialtype = (unsigned int) USHRT_MAX;
-      specialtable->st_ushort.numofspecialcells
-        = totallength/specialtable->st_ushort.maxspecialtype + 1;
-      specialtable->st_ushort.numofspecialstostore = specialranges;
+      swtable->st_ushort.maxspecialtype = (unsigned int) USHRT_MAX;
+      swtable->st_ushort.numofspecialcells
+        = totallength/swtable->st_ushort.maxspecialtype + 1;
+      swtable->st_ushort.numofspecialstostore = ranges;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      specialtable->st_uint32.maxspecialtype = (unsigned int) UINT32_MAX;
-      specialtable->st_uint32.numofspecialcells
-        = totallength/specialtable->st_uint32.maxspecialtype + 1;
-      specialtable->st_uint32.numofspecialstostore = specialranges;
+      swtable->st_uint32.maxspecialtype = (unsigned int) UINT32_MAX;
+      swtable->st_uint32.numofspecialcells
+        = totallength/swtable->st_uint32.maxspecialtype + 1;
+      swtable->st_uint32.numofspecialstostore = ranges;
       break;
     default:
-      fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
+      fprintf(stderr,"initSWtable(sat = %s is undefined)\n",
                      gt_encseq_access_type_str(sat));
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -2072,6 +2097,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long numofdbfiles,
                                           unsigned long lengthofdbfilenames,
                                           unsigned long specialranges,
+                                          unsigned long wildcardranges,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
@@ -2079,14 +2105,17 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
 {
   double spaceinbitsperchar;
   GtEncseq *encseq;
+  uint64_t sizeofrep_uint64;
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
   if (satviautables(sat))
   {
-    sat2maxspecialtype(&encseq->specialtable,totallength,sat,specialranges);
+    initSWtable(&encseq->specialtable,totallength,sat,specialranges);
+    initSWtable(&encseq->wildcardtable,totallength,sat,wildcardranges);
   }
   encseq->has_specialranges = (specialranges > 0) ? true : false;
+  encseq->has_wildcardranges = (wildcardranges > 0) ? true : false;
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
   encseq->mappedptr = NULL;
@@ -2120,12 +2149,16 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->numofdbfiles = numofdbfiles;
   encseq->lengthofdbfilenames = lengthofdbfilenames;
   encseq->numofchars = gt_alphabet_num_of_chars(alpha);
-  encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long,
-                                   gt_encseq_determine_size(sat,totallength,
-                                         numofdbfiles,
-                                         lengthofdbfilenames,specialranges,
-                                         encseq->numofchars,
-                                         gt_alphabet_bits_per_symbol(alpha)));
+  sizeofrep_uint64
+    = gt_encseq_determine_size(sat,
+                               totallength,
+                               numofdbfiles,
+                               lengthofdbfilenames,
+                               specialranges,
+                               wildcardranges,
+                               encseq->numofchars,
+                               gt_alphabet_bits_per_symbol(alpha));
+  encseq->sizeofrep = CALLCASTFUNC(uint64_t, unsigned_long, sizeofrep_uint64);
   encseq->satname = gt_encseq_access_type_str(sat);
   encseq->twobitencoding = NULL;
   if (sat == GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
@@ -2142,6 +2175,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
   setencsequtablesNULL(encseq->sat,&encseq->specialtable);
+  setencsequtablesNULL(encseq->sat,&encseq->wildcardtable);
   encseq->characterdistribution = NULL;
 
   spaceinbitsperchar
@@ -2356,6 +2390,7 @@ static GtEncseq *files2encodedsequence(
                                 unsigned long totallength,
                                 unsigned long numofsequences,
                                 const unsigned long *specialrangestab,
+                                const unsigned long *wildcardrangestab,
                                 const Definedunsignedlong *equallength,
                                 GtAlphabet *alphabet,
                                 const char *str_sat,
@@ -2369,18 +2404,21 @@ static GtEncseq *files2encodedsequence(
   bool haserr = false;
   int retcode;
   GtSequenceBuffer *fb = NULL;
-  unsigned long specialranges;
+  unsigned long specialranges, wildcardranges;
 
   gt_error_check(err);
-  retcode = (int) gt_encseq_access_type_determine(&specialranges,
-                                     totallength,
-                                     gt_str_array_size(filenametab),
-                                     determinelengthofdbfilenames(filenametab),
-                                     specialrangestab,
-                                     equallength,
-                                     gt_alphabet_num_of_chars(alphabet),
-                                     str_sat,
-                                     err);
+  retcode
+    = gt_encseq_access_type_determine(&specialranges,
+                                      &wildcardranges,
+                                      totallength,
+                                      gt_str_array_size(filenametab),
+                                      determinelengthofdbfilenames(filenametab),
+                                      specialrangestab,
+                                      wildcardrangestab,
+                                      equallength,
+                                      gt_alphabet_num_of_chars(alphabet),
+                                      str_sat,
+                                      err);
   if (retcode < 0)
   {
     haserr = true;
@@ -2402,6 +2440,7 @@ static GtEncseq *files2encodedsequence(
                                       gt_str_array_size(filenametab),
                                       lengthofdbfilenames,
                                       specialranges,
+                                      wildcardranges,
                                       equallength,
                                       alphabet,
                                       logger);
@@ -2502,6 +2541,7 @@ gt_encseq_new_from_index(const char *indexname,
                                  gt_encseq_metadata_num_of_files(emd),
                                  gt_encseq_metadata_length_of_filenames(emd),
                                  si.specialranges,
+                                 si.wildcardranges,
                                  &equallength,
                                  alpha,
                                  logger);
@@ -2697,6 +2737,31 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq)
   return encseq->specialcharinfo.lengthofspecialsuffix;
 }
 
+unsigned long gt_encseq_wildcards(const GtEncseq *encseq)
+{
+  return encseq->specialcharinfo.wildcards;
+}
+
+unsigned long gt_encseq_wildcardranges(const GtEncseq *encseq)
+{
+  return encseq->specialcharinfo.wildcardranges;
+}
+
+unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq)
+{
+  return encseq->specialcharinfo.realwildcardranges;
+}
+
+unsigned long gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq)
+{
+  return encseq->specialcharinfo.lengthofwildcardprefix;
+}
+
+unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq)
+{
+  return encseq->specialcharinfo.lengthofwildcardsuffix;
+}
+
 static unsigned long currentspecialrangevalue(unsigned long len,
                                               unsigned long occcount,
                                               unsigned long maxspecialtype)
@@ -2720,10 +2785,11 @@ static unsigned long currentspecialrangevalue(unsigned long len,
 typedef struct
 {
   GtLogger *logger;
-  unsigned long specialrangesGtUchar,
-         specialrangesGtUshort,
-         specialrangesUint32,
-         realspecialranges;
+  unsigned long rangesGtUchar,
+                rangesGtUshort,
+                rangesUint32,
+                realranges;
+  const char *kind;
 } Updatesumrangeinfo;
 
 static void updatesumranges(unsigned long key, unsigned long long value,
@@ -2734,38 +2800,38 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 
   gt_assert(value <= (unsigned long long) ULONG_MAX);
   distvalue = (unsigned long) value;
-  updatesumrangeinfo->specialrangesGtUchar
+  updatesumrangeinfo->rangesGtUchar
      += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
-  updatesumrangeinfo->specialrangesGtUshort
+  updatesumrangeinfo->rangesGtUshort
      += currentspecialrangevalue(key,distvalue,(unsigned long) USHRT_MAX);
-  updatesumrangeinfo->specialrangesUint32
+  updatesumrangeinfo->rangesUint32
      += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
-  updatesumrangeinfo->realspecialranges += distvalue;
-  gt_logger_log(updatesumrangeinfo->logger,
-              "specialranges of length %lu=%lu",key,distvalue);
+  updatesumrangeinfo->realranges += distvalue;
+  gt_logger_log(updatesumrangeinfo->logger,"%sranges of length %lu=%lu",
+                updatesumrangeinfo->kind,key,distvalue);
 }
 
-static unsigned long calcspecialranges(unsigned long *specialrangestab,
-                                       const GtDiscDistri
-*distspecialrangelength,
-                                       GtLogger *logger)
+static unsigned long calcswranges(const char *kind,
+                                  unsigned long *rangestab,
+                                  const GtDiscDistri *distrangelength,
+                                  GtLogger *logger)
 {
   Updatesumrangeinfo updatesumrangeinfo;
 
-  updatesumrangeinfo.specialrangesGtUchar = 0;
-  updatesumrangeinfo.specialrangesGtUshort = 0;
-  updatesumrangeinfo.specialrangesUint32 = 0;
-  updatesumrangeinfo.realspecialranges = 0;
+  updatesumrangeinfo.kind = kind;
+  updatesumrangeinfo.rangesGtUchar = 0;
+  updatesumrangeinfo.rangesGtUshort = 0;
+  updatesumrangeinfo.rangesUint32 = 0;
+  updatesumrangeinfo.realranges = 0;
   updatesumrangeinfo.logger = logger;
-  gt_disc_distri_foreach(distspecialrangelength,updatesumranges,
-                         &updatesumrangeinfo);
-  if (specialrangestab != NULL)
+  gt_disc_distri_foreach(distrangelength,updatesumranges,&updatesumrangeinfo);
+  if (rangestab != NULL)
   {
-    specialrangestab[0] = updatesumrangeinfo.specialrangesGtUchar;
-    specialrangestab[1] = updatesumrangeinfo.specialrangesGtUshort;
-    specialrangestab[2] = updatesumrangeinfo.specialrangesUint32;
+    rangestab[0] = updatesumrangeinfo.rangesGtUchar;
+    rangestab[1] = updatesumrangeinfo.rangesGtUshort;
+    rangestab[2] = updatesumrangeinfo.rangesUint32;
   }
-  return updatesumrangeinfo.realspecialranges;
+  return updatesumrangeinfo.realranges;
 }
 
 static uint64_t detencseqofsatviautables(int kind,
@@ -2773,6 +2839,7 @@ static uint64_t detencseqofsatviautables(int kind,
                                          unsigned long numofdbfiles,
                                          unsigned long lengthofdbfilenames,
                                          unsigned long specialranges,
+                                         unsigned long wildcardranges,
                                          unsigned int numofchars)
 {
   GtEncseqAccessType sat[] = {GT_ACCESS_TYPE_UCHARTABLES,
@@ -2782,7 +2849,7 @@ static uint64_t detencseqofsatviautables(int kind,
   gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
   return gt_encseq_determine_size(sat[kind],totallength,numofdbfiles,
                                   lengthofdbfilenames,specialranges,
-                                  numofchars,0);
+                                  wildcardranges,numofchars,0);
 }
 
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
@@ -2790,6 +2857,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
                                   unsigned long specialranges,
+                                  GT_UNUSED unsigned long wildcardranges,/*XXX*/
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol)
 {
@@ -2866,21 +2934,24 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
 
 static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
                               unsigned int forcetable,
-                              unsigned long *specialrangestab,
                               unsigned long totallength,
                               unsigned long numofdbfiles,
                               unsigned long lengthofdbfilenames,
                               unsigned int numofchars,
+                              unsigned long *specialrangestab,
                               const GtDiscDistri *distspecialrangelength,
+                              unsigned long *wildcardrangestab,
+                              const GtDiscDistri *distwildcardrangelength,
                               GtLogger *logger)
 {
   uint64_t smallestsize = 0, tmp;
   bool smallestdefined = false;
   int c;
 
-  specialcharinfo->realwildcardranges = 0; /* XXX: define this */
   specialcharinfo->realspecialranges
-    = calcspecialranges(specialrangestab,distspecialrangelength,logger);
+    = calcswranges("special",specialrangestab,distspecialrangelength,logger);
+  specialcharinfo->realwildcardranges
+    = calcswranges("wildcard",wildcardrangestab,distwildcardrangelength,logger);
   gt_assert(forcetable <= 3U);
   for (c = 0; c<3; c++)
   {
@@ -2889,13 +2960,14 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
       tmp = detencseqofsatviautables(c,totallength,numofdbfiles,
                                      lengthofdbfilenames,
                                      specialrangestab[c],
+                                     wildcardrangestab[c],
                                      numofchars);
       if (!smallestdefined || tmp < smallestsize)
       {
         smallestdefined = true;
         smallestsize = tmp;
         specialcharinfo->specialranges = specialrangestab[c];
-        specialcharinfo->wildcardranges = 0; /* XXX: define this */
+        specialcharinfo->wildcardranges = wildcardrangestab[c];
       }
     }
   }
@@ -2907,6 +2979,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            Definedunsignedlong *equallength,
                                            unsigned int forcetable,
                                            unsigned long *specialrangestab,
+                                           unsigned long *wildcardrangestab,
                                            const GtStrArray *filenametab,
                                            GtFilelengthvalues **filelengthtab,
                                            const GtAlphabet *alpha,
@@ -2938,7 +3011,6 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  /* XXX define this */
   specialcharinfo->wildcards = 0;
   specialcharinfo->lengthofwildcardprefix = 0;
   specialcharinfo->lengthofwildcardsuffix = 0;
@@ -3002,87 +3074,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
         retval = gt_sequence_buffer_next(fb,&charcode,err);
         if (retval > 0)
         {
-          if (ISSPECIAL(charcode))
-          {
-            if (charcode == (GtUchar) SEPARATOR)
-            {
-              if (equallength->defined)
-              {
-                if (equallength->valueunsignedlong > 0)
-                {
-                  if (lengthofcurrentsequence != equallength->valueunsignedlong)
-                  {
-                    equallength->defined = false;
-                  }
-                } else
-                {
-                  gt_assert(lengthofcurrentsequence > 0);
-                  equallength->valueunsignedlong = lengthofcurrentsequence;
-                }
-                lengthofcurrentsequence = 0;
-              }
-              if (desfp != NULL)
-              {
-                desc = gt_queue_get(descqueue);
-                gt_xfputs(desc,desfp);
-                gt_free(desc);
-                desc = NULL;
-                if (sdsfp != NULL)
-                {
-                  unsigned long desoffset;
-
-                  desoffset = (unsigned long) ftello(desfp);
-                  gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
-                }
-                gt_xfputc((int) '\n',desfp);
-              }
-              if (outssptab)
-              {
-                GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
-              } else
-              {
-                sequenceseppos->nextfreeGtUlong++;
-              }
-            } else
-            {
-              if (wildcardprefix)
-              {
-                specialcharinfo->lengthofwildcardprefix++;
-              }
-              lastwildcardrangelength++;
-              specialcharinfo->wildcards++;
-              lengthofcurrentsequence++;
-            }
-            if (specialprefix)
-            {
-              specialcharinfo->lengthofspecialprefix++;
-            }
-            specialcharinfo->specialcharacters++;
-            lastspecialrangelength++;
-          } else
-          {
-            lengthofcurrentsequence++;
-            if (specialprefix)
-            {
-              specialprefix = false;
-            }
-            if (wildcardprefix)
-            {
-              wildcardprefix = false;
-            }
-            if (lastspecialrangelength > 0)
-            {
-              gt_disc_distri_add(distspecialrangelength,
-                                 lastspecialrangelength);
-              lastspecialrangelength = 0;
-            }
-            if (lastwildcardrangelength > 0)
-            {
-              gt_disc_distri_add(distwildcardrangelength,
-                                 lastwildcardrangelength);
-              lastwildcardrangelength = 0;
-            }
-          }
+#define WITHEQUALLENGTH_DES_SSP
+#include "processinputchar.gen"
         } else
         {
           if (retval == 0)
@@ -3118,14 +3111,17 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     }
     *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;
+    specialcharinfo->lengthofwildcardsuffix = lastwildcardrangelength;
     doupdatesumranges(specialcharinfo,
                       forcetable,
-                      specialrangestab,
                       currentpos,
                       gt_str_array_size(filenametab),
                       determinelengthofdbfilenames(filenametab),
                       gt_alphabet_num_of_chars(alpha),
+                      specialrangestab,
                       distspecialrangelength,
+                      wildcardrangestab,
+                      distwildcardrangelength,
                       logger);
     if (equallength->defined)
     {
@@ -3171,58 +3167,43 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
                                      GtLogger *logger)
 {
   GtUchar charcode;
-  unsigned long pos, lastspecialrangelength = 0;
-  bool specialprefix = true;
-  GtDiscDistri *distspecialrangelength;
+  unsigned long currentpos,
+                lastspecialrangelength = 0,
+                lastwildcardrangelength = 0;
+  bool specialprefix = true, wildcardprefix = true;
+  GtDiscDistri *distspecialrangelength,
+               *distwildcardrangelength;
 
   specialcharinfo->specialcharacters = 0;
-  specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->wildcards = 0;
+  specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofwildcardprefix = 0;
-
   distspecialrangelength = gt_disc_distri_new();
-  for (pos = 0; pos < len; pos++)
+  distwildcardrangelength = gt_disc_distri_new();
+  for (currentpos = 0; currentpos < len; currentpos++)
   {
-    charcode = seq[pos];
-    if (ISSPECIAL(charcode))
-    {
-      if (specialprefix)
-      {
-        specialcharinfo->lengthofspecialprefix++;
-      }
-      specialcharinfo->specialcharacters++;
-      if (lastspecialrangelength == 0)
-      {
-        lastspecialrangelength = 1UL;
-      } else
-      {
-        lastspecialrangelength++;
-      }
-    } else
-    {
-      if (specialprefix)
-      {
-        specialprefix = false;
-      }
-      if (lastspecialrangelength > 0)
-      {
-        gt_disc_distri_add(distspecialrangelength,lastspecialrangelength);
-        lastspecialrangelength = 0;
-      }
-    }
+    charcode = seq[currentpos];
+#undef WITHEQUALLENGTH_DES_SSP
+#include "processinputchar.gen"
   }
   if (lastspecialrangelength > 0)
   {
     gt_disc_distri_add(distspecialrangelength,lastspecialrangelength);
   }
+  if (lastwildcardrangelength > 0)
+  {
+    gt_disc_distri_add(distwildcardrangelength,lastwildcardrangelength);
+  }
   specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;
+  specialcharinfo->lengthofwildcardsuffix = lastwildcardrangelength;
   specialcharinfo->realspecialranges
-    = calcspecialranges(NULL,distspecialrangelength,logger);
+    = calcswranges("special",NULL,distspecialrangelength,logger);
+  specialcharinfo->realwildcardranges
+    = calcswranges("wildcard",NULL,distwildcardrangelength,logger);
   specialcharinfo->specialranges = specialcharinfo->realspecialranges;
-  specialcharinfo->lengthofwildcardsuffix = 0;
-  specialcharinfo->realwildcardranges = 0;
-  specialcharinfo->wildcardranges = 0;
+  specialcharinfo->wildcardranges = specialcharinfo->realwildcardranges;
   gt_disc_distri_delete(distspecialrangelength);
+  gt_disc_distri_delete(distwildcardrangelength);
 }
 
 static unsigned long fwdgetnexttwobitencodingstopposViaequallength(
@@ -4608,13 +4589,21 @@ void gt_encseq_show_features(const GtEncseq *encseq,
   }
   gt_logger_log(logger,"totallength=%lu",
                        encseq->totallength);
-  gt_logger_log(logger,"numofsequences=%lu",encseq->numofdbsequences);
+  gt_logger_log(logger,"numofsequences=%lu",
+                       gt_encseq_num_of_sequences(encseq));
   gt_logger_log(logger,"specialcharacters=%lu",
                        gt_encseq_specialcharacters(encseq));
   gt_logger_log(logger,"specialranges=%lu",
                        gt_encseq_specialranges(encseq));
   gt_logger_log(logger,"realspecialranges=%lu",
                        gt_encseq_realspecialranges(encseq));
+  gt_logger_log(logger,"wildcards=%lu",
+                       gt_encseq_wildcards(encseq));
+  gt_logger_log(logger,"wildcardranges=%lu",
+                       gt_encseq_wildcardranges(encseq));
+  gt_logger_log(logger,"realwildcardranges=%lu",
+                       gt_encseq_realwildcardranges(encseq));
+
   gt_assert(encseq->characterdistribution != NULL);
   showcharacterdistribution(alpha,encseq->characterdistribution,logger);
 }
@@ -4762,15 +4751,14 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                          GtLogger *logger,
                          GtError *err)
 {
-  unsigned long totallength = 0;
   bool haserr = false;
   unsigned int forcetable;
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0};
   GtAlphabet *alpha = NULL;
   bool alphaisbound = false;
   GtFilelengthvalues *filelengthtab = NULL;
-  unsigned long specialrangestab[3];
-  unsigned long *characterdistribution = NULL;
+  unsigned long totallength = 0, specialrangestab[3], wildcardrangestab[3],
+                *characterdistribution = NULL;
   GtEncseq *encseq = NULL;
   GtArrayGtUlong sequenceseppos;
   Definedunsignedlong equallength; /* is defined of all sequences are of equal
@@ -4821,6 +4809,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                         &equallength,
                                         forcetable,
                                         specialrangestab,
+                                        wildcardrangestab,
                                         filenametab,
                                         &filelengthtab,
                                         alpha,
@@ -4850,6 +4839,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                    totallength,
                                    sequenceseppos.nextfreeGtUlong+1,
                                    specialrangestab,
+                                   wildcardrangestab,
                                    &equallength,
                                    alpha,
                                    gt_str_length(str_sat) > 0
@@ -5790,6 +5780,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
                                     0,
                                     0,
                                     samplespecialcharinfo.specialranges,
+                                    samplespecialcharinfo.wildcardranges,
                                     NULL,
                                     gt_alphabet_ref(eb->alpha),
                                     eb->logger);
