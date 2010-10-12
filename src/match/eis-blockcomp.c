@@ -416,13 +416,13 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
                   < blockMapAlphabetSize))
             symCounts[bSym]
               += stats->symbolDistributionTable[i];
-#if EIS_DEBUG > 1
+#ifdef EIS_DEBUG
         for (i = 0; i < blockMapAlphabetSize; ++i)
         {
           gt_log_log("symCount[%"PRIuSymbol"]=%lu\n", (Symbol) i,
                   stats->symbolDistributionTable[i]);
         }
-#endif /* EIS_DEBUG > 1 */
+#endif /* EIS_DEBUG */
         if (blockMapAlphabetSize)
         {
           newSeqIdx->partialSymSumBitsSums[0] = 0;
