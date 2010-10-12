@@ -39,6 +39,10 @@ allfiles = ["Atinsert.fna",
 bigfiles = ["U89959_genomic.fas",
             "Atinsert.fna"]
 
+if $gttestdata
+  bigfiles.push "at1mb"
+end
+
 fp = File.open("#{$testdata}/genomediff/testsuite", 'r')
 smallfilecodes = fp.readlines
 fp.close
@@ -78,7 +82,7 @@ def test_pck(files, param)
            "-indexname pck")
   run_test(
     "#{$bin}gt genomediff #{param} -pck pck",
-    :maxtime => 240)
+    :maxtime => 720)
 end
 
 def test_esa(files, param)
