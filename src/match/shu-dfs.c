@@ -359,6 +359,15 @@ static int process_shu_node(ShuNode *node,
   return had_err;
 }
 
+static int initialise_node(void *node)
+{
+  int had_err = 0;
+  ShuNode *tobeinitialised;
+  tobeinitialised = (ShuNode *) node;
+  tobeinitialised->countTermSubtree = NULL;
+  return had_err;
+}
+
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
                             uint64_t **shulen,
@@ -386,7 +395,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
   tmpmbtab = gt_calloc((size_t) (numofchars + 3), sizeof (*tmpmbtab ));
   numoffiles = gt_encseq_num_of_files(encseq);
   numofseq = gt_encseq_num_of_sequences(encseq);
-  GT_STACK_INIT(&stack, resize);
+  GT_STACK_INIT_WITH_INITFUNC(&stack, resize, initialise_node);
   positext = gt_newBwtSeqpositionextractor(index, totallength + 1);
   if (timer != NULL)
   {
