@@ -30,15 +30,13 @@ bigfilecodes = []
 
 allfiles = ["Atinsert.fna",
             "Duplicate.fna",
-            "Random-Small.fna",
             "Random.fna",
             "Random159.fna",
             "Random160.fna",
             "TTT-small.fna",
             "trna_glutamine.fna"]
 
-bigfiles = ["at1MB",
-            "U89959_genomic.fas",
+bigfiles = ["U89959_genomic.fas",
             "Atinsert.fna"]
 
 fp = File.open("#{$testdata}/genomediff/testsuite", 'r')
