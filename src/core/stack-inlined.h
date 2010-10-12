@@ -48,19 +48,42 @@
         {\
           unsigned long allocated, nextfree, staticsize, sizeincrement;\
           TYPE staticspace[STATICSIZE], *space;\
+          int (*initialiseelement)(void *);\
         } GtStack##TYPE
+
+/*
+#define GT_STACK_DECLARESTRUCT(TYPE,STATICSIZE)\
+        typedef struct\
+        {\
+          unsigned long allocated, nextfree, staticsize, sizeincrement;\
+          TYPE staticspace[STATICSIZE], *space;\
+        } GtStack##TYPE
+*/
 
 /*
   Initialize the stack <S> and define the increment.
 */
 
-#define GT_STACK_INIT(S,SIZEINCREMENT)\
+#define GT_STACK_INIT_WITH_INITFUNC(S,SIZEINCREMENT,INITFUNC)\
         (S)->staticsize = (unsigned long) sizeof ((S)->staticspace)/\
                                           sizeof ((S)->staticspace[0]);\
         (S)->sizeincrement = SIZEINCREMENT;\
         (S)->allocated = (S)->staticsize;\
         (S)->nextfree = 0;\
-        (S)->space = &(S)->staticspace[0]
+        (S)->space = &(S)->staticspace[0];\
+        (S)->initialiseelement = INITFUNC;\
+        if ((S)->initialiseelement != NULL)\
+        {\
+          unsigned long idx;\
+          (S)->initialiseelement = INITFUNC;\
+          for (idx = 0; idx < (S)->staticsize; idx++)\
+          {\
+            (S)->initialiseelement((S)->space + idx);\
+          }\
+        }
+
+#define GT_STACK_INIT(S,SIZEINCREMENT)\
+        GT_STACK_INIT_WITH_INITFUNC(S,SIZEINCREMENT,NULL)
 
 /*
   Delete the memory allocated for stack contents
@@ -91,8 +114,17 @@
           {\
             memcpy((S)->space,&(S)->staticspace[0],sizeoftype*(S)->staticsize);\
           }\
+          if ((S)->initialiseelement != NULL)\
+          {\
+            unsigned long idx;\
+            for (idx = 0; idx < (S)->sizeincrement; idx++)\
+            {\
+              (S)->initialiseelement((S)->space + (S)->allocated + idx);\
+            }\
+          }\
           (S)->allocated += (S)->sizeincrement;\
         }
+
 /*
   Push a value.
 */
