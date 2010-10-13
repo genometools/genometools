@@ -250,7 +250,7 @@ ifeq ($(cov),yes)
 endif
 
 ifneq ($(opt),no)
-  ifeq ($(shell basename $(CC)),clang)
+  ifeq ($(findstring clang,$(CC)),clang)
     ifeq ($(lto),yes)
       # clang/LLVM supports link-time optimization with -O4
       # Note that on Linux this usually requires additional configuration of
@@ -333,8 +333,8 @@ ifeq ($(m64),yes)
   GT_LDFLAGS += -m64
 endif
 
-ifeq ($(shell basename $(CC)),clang)
-  # do not complain about the unnecessary -c
+ifeq ($(findstring clang,$(CC)),clang)
+  # do not complain about unnecessary options
   GT_CFLAGS += -Qunused-arguments
   GT_CPPFLAGS += -Qunused-arguments
 endif
