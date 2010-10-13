@@ -40,7 +40,7 @@ bigfiles = ["U89959_genomic.fas",
             "Atinsert.fna"]
 
 if $gttestdata
-  bigfiles.push "at1mb"
+  bigfiles.push "at1MB"
 end
 
 fp = File.open("#{$testdata}/genomediff/testsuite", 'r')
