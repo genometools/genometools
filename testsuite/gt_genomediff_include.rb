@@ -104,27 +104,27 @@ def compare_2d_result(matrix1, matrix2)
 end
 
 allfilecodes.each do |code|
-  Name "gt genomediff pck traverse #{code}"
+  Name "gt genomediff pck traverse #{code.split('/').last}"
   Keywords "gt_genomediff pck traverse"
   Test do
     test_pck("#{code}*.fas", "-traverse")
   end
-  Name "gt genomediff pck shulen #{code}"
+  Name "gt genomediff pck shulen #{code.split('/').last}"
   Keywords "gt_genomediff pck shulen"
   Test do
     test_pck("#{code}*.fas", "-shulen")
   end
-  Name "gt genomediff pck fullrun #{code}"
+  Name "gt genomediff pck fullrun #{code.split('/').last}"
   Keywords "gt_genomediff pck fullrun"
   Test do
     test_pck("#{code}*.fas", "")
   end
-  Name "gt genomediff esa shulen #{code}"
+  Name "gt genomediff esa shulen #{code.split('/').last}"
   Keywords "gt_genomediff esa shulen"
   Test do
     test_esa("#{code}*.fas", "-shulen")
   end
-  Name "gt genomediff esa fullrun #{code}"
+  Name "gt genomediff esa fullrun #{code.split('/').last}"
   Keywords "gt_genomediff esa fullrun"
   Test do
     test_esa("#{code}*.fas", "")
@@ -132,7 +132,7 @@ allfilecodes.each do |code|
 end
 
 kr_testable_files.each do |code|
-  Name "gt genomediff compare shulen #{code}"
+  Name "gt genomediff compare shulen #{code.split('/').last}"
   Keywords "gt_genomediff esa pck check_shulen simulated_data"
   Test do
     pck_out = []
@@ -205,7 +205,7 @@ kr_testable_files.each do |code|
 end
 
 kr_testable_files.each do |code|
-  Name "gt genomediff compare kr #{code}"
+  Name "gt genomediff compare kr #{code.split('/').last}"
   Keywords "gt_genomediff esa pck check_kr simulated_data"
   Test do
     pck_out = []
