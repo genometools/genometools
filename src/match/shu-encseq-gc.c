@@ -217,6 +217,9 @@ int gt_encseq_gc_unit_test(GtError *err)
     ensure(had_err, gt_double_equals_double(results[0], 0.0));
   } else
     had_err = -1;
+  gt_free(results);
+  gt_encseq_builder_delete(eb);
+  gt_encseq_delete(encseq);
 
   /* test c-seq */
   eb = gt_encseq_builder_new(alpha);
@@ -232,6 +235,9 @@ int gt_encseq_gc_unit_test(GtError *err)
     ensure(had_err, gt_double_equals_one(results[0]));
   } else
     had_err = -1;
+  gt_free(results);
+  gt_encseq_builder_delete(eb);
+  gt_encseq_delete(encseq);
 
   /* test a+c filewise */
   eb = gt_encseq_builder_new(alpha);
@@ -248,6 +254,9 @@ int gt_encseq_gc_unit_test(GtError *err)
     ensure(had_err, gt_double_equals_double(results[0], 0.5));
   } else
     had_err = -1;
+  gt_free(results);
+  gt_encseq_builder_delete(eb);
+  gt_encseq_delete(encseq);
 
   /* test dna-seq and dna+special-seq*/
   eb = gt_encseq_builder_new(alpha);
@@ -265,6 +274,7 @@ int gt_encseq_gc_unit_test(GtError *err)
     ensure(had_err, gt_double_equals_double(results[0], 0.5));
   } else
     had_err = -1;
+  gt_free(results);
 
   /* sequence wise */
   if ((results = gt_encseq_get_gc(encseq,
@@ -276,6 +286,7 @@ int gt_encseq_gc_unit_test(GtError *err)
     ensure(had_err, gt_double_equals_double(results[1], 0.5));
   } else
     had_err = -1;
+  gt_free(results);
 
   /* count special chars */
   if ((results = gt_encseq_get_gc(encseq,
@@ -287,19 +298,8 @@ int gt_encseq_gc_unit_test(GtError *err)
     ensure(had_err, gt_double_equals_double(results[1], (2.0/5.0)));
   } else
     had_err = -1;
+  gt_free(results);
 
-  /* test "wrong sequence"
-  eb = gt_encseq_builder_new(alpha);
-  gt_encseq_builder_add_cstr(eb, testseq5, 6UL, "no dna");
-  encseq = gt_encseq_builder_build(eb, err);
-  tmp_err = gt_error_new();
-  if ((results = gt_encseq_get_gc(encseq,
-                                 true,
-                                 false,
-                                 tmp_err)) != NULL)
-    had_err = -1;
-  ensure(had_err, gt_error_is_set(tmp_err));
-  */
   gt_encseq_builder_delete(eb);
   gt_alphabet_delete(alpha);
   gt_encseq_delete(encseq);
