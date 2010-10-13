@@ -1180,6 +1180,10 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
+    if (stpgetnumofparts(sfi->suftabparts) > 1U)
+    {
+      gt_logger_log(sfi->logger,"compute part %u",sfi->part+1);
+    }
     preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
     *specialsuffixes = false;
