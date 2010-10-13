@@ -145,8 +145,6 @@ unsigned long gt_bwtrangesplitallwithspecial(Mbtab *mbtab,
                                              unsigned long lbound,
                                              unsigned long ubound);
 
-unsigned int gt_bwtseq2maxdepth(const FMindex *voidbwtseq);
-
 unsigned long gt_voidpackedindex_totallength_get(const FMindex *fmindex);
 
 /* returns the length of the matching prefix +1, that is it returns the

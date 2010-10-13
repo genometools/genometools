@@ -143,7 +143,7 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
                                             encseq,
                                             GT_READMODE_FORWARD,
                                             char_idx + 1UL);
-      gc_count = at_count = default_count = 0.0;
+      gc_count = at_count = default_count = 0UL;
       continue;
     }
     if (nextsep == char_idx)

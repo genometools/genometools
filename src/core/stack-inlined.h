@@ -74,11 +74,11 @@
         (S)->initialiseelement = INITFUNC;\
         if ((S)->initialiseelement != NULL)\
         {\
-          unsigned long idx;\
+          unsigned long stackidx;\
           (S)->initialiseelement = INITFUNC;\
-          for (idx = 0; idx < (S)->staticsize; idx++)\
+          for (stackidx = 0; stackidx < (S)->staticsize; stackidx++)\
           {\
-            (S)->initialiseelement((S)->space + idx);\
+            (void) (S)->initialiseelement((S)->space + stackidx);\
           }\
         }
 
@@ -116,10 +116,11 @@
           }\
           if ((S)->initialiseelement != NULL)\
           {\
-            unsigned long idx;\
-            for (idx = 0; idx < (S)->sizeincrement; idx++)\
+            unsigned long stackidx;\
+            for (stackidx = 0; stackidx < (S)->sizeincrement; stackidx++)\
             {\
-              (S)->initialiseelement((S)->space + (S)->allocated + idx);\
+              (void) (S)->initialiseelement((S)->space + (S)->allocated + \
+                                            stackidx);\
             }\
           }\
           (S)->allocated += (S)->sizeincrement;\

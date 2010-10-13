@@ -350,6 +350,7 @@ static int process_shu_node(ShuNode *node,
       }
       if (node->parentOffset > 0)
       {
+        gt_assert(parent && parent->countTermSubtree);
         parent->countTermSubtree[0][idx_i] += node->countTermSubtree[0][idx_i];
         parent->countTermSubtree[node->parentOffset][idx_i] =
                                               node->countTermSubtree[0][idx_i];
