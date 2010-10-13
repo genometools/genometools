@@ -17,6 +17,7 @@
 
 #ifndef GTHSPECIESTAB_H
 #define GTHSPECIESTAB_H
+#include "core/unused_api.h"
 
 #define NUMOFSPECIES (sizeof (speciestab)/sizeof (speciestab[0]))
 
@@ -26,7 +27,7 @@
   structure.
 */
 
-static char *speciestab[] =
+GT_UNUSED static char *speciestab[] =
 {
   "human",         /*  0 */
   "mouse",         /*  1 */

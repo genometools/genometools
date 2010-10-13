@@ -49,7 +49,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} curses=no cairo=no opt=yes"
+  fp.print "all:\n\t\${MAKE} -j 4 curses=no cairo=no"
   # fp.print " threads=yes"
   # fp.print " CFLAGS+=-fstrict-aliasing"
   # fp.print " CFLAGS+=-DINLINEDSequentialsuffixarrayreader"
@@ -62,7 +62,7 @@ def makecompilerflags(fp,options)
   if options.prof
     fp.print " prof=yes"
   end
-  fp.puts " CC='ccache gcc'"
+  fp.puts " CC='ccache #{ENV["CC"]}'"
 end
 
 if File.exists?('LocalMakefile')

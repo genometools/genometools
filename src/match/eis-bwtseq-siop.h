@@ -234,7 +234,7 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym)
   return bwtSeq->count[tSym];
 }
 
-static struct matchBound *
+static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym)
 {
