@@ -6,7 +6,7 @@ def reverse_and_concat(file)
   tmpfile = tf.path
   tf.close
   dirname = File.dirname(file)
-  `$GTDIR/bin/gt            \
+  `#{$bin}gt                \
    convertseq -o #{tmpfile} \
    -force -r #{file}`
   basename = File.basename(file, ".*")
