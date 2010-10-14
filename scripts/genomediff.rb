@@ -107,7 +107,7 @@ module Genomediff
     return `$GTDIR/bin/gt       \
             packedindex mkindex \
             -db #{files}        \
-            -dna -v             \
+            -dna                \
             -dir rev            \
             -ssp                \
             -bsize #{bsize}     \
@@ -121,7 +121,7 @@ module Genomediff
             -db #{files}               \
             -indexname #{idxname}      \
             -parts #{parts}            \
-            -dna -suf -tis -lcp -ssp -v`
+            -dna -suf -tis -lcp -ssp`
   end
   def Genomediff.pck_genomediff(idxname,parameter)
     return `$GTDIR/bin/gt genomediff \
@@ -146,19 +146,19 @@ module Eval
     puts "# INDEX PCK" if verbose
 
     idxname = File.join(File.dirname(revfiles[0]), code+"_pck")
-    
+
     log_fp.puts "# RUN #{code} -pck -parts #{parts} -bsize #{bsize}"
     puts "# RUN #{code} -pck -parts"+
          " #{parts} -bsize #{bsize}" if verbose
-    
+
     output = Genomediff.pck_index(revfiles.join(" "),bsize,parts,idxname)
-    
+
     /^# TIME overall \d+.\d+.*$/.match output
     log_fp.puts $&
     /^# space peak .*$/.match output
     log_fp.puts $&
     puts output if verbose
-    
+
     return idxname
   end
 
@@ -170,13 +170,13 @@ module Eval
     puts "# INDEX ESA" if verbose
     m = code.match(/(\d+_\d+)_(\d+\.\d+)_(\d+)/)
     filecode, div, n = m[1], m[2], m[3]
-    
+
     idxname = File.join(File.dirname(revfiles[0]), code+"_esa")
-    
+
     log_fp.puts "# RUN #{filecode} d:#{div} n:#{n} -parts #{parts}"
     puts "# RUN #{filecode} d:#{div} n:#{n}"+
          " -esa" if verbose
-    
+
     output = Genomediff.esa_index(revfiles.join(" "),parts,idxname)
 
     /^# TIME overall \d+.\d+.*$/.match output
@@ -184,7 +184,7 @@ module Eval
     /^# space peak .*$/.match output
     log_fp.puts $&
     puts output if verbose
-    
+
     return idxname
   end
 
@@ -198,7 +198,7 @@ module Eval
     filecode, div, n = m[1], m[2], m[3]
     log_fp.puts "# RUN #{filecode} d:#{div} n:#{n} #{parameter}"
     puts "# RUN #{filecode} d:#{div} n:#{n} #{parameter}" if verbose
-    
+
     output = Genomediff.pck_genomediff(idxname,parameter)
 
     /^# TIME overall \d+.\d+.*$/.match output
@@ -227,7 +227,7 @@ module Eval
     log_fp.puts $&
     puts output if verbose
   end
-  
+
   def Eval.run_pck_index_creation(code, revfiles, log_fp, verbose)
     self.pck_index(code,
               revfiles,
