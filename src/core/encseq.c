@@ -78,72 +78,20 @@
                   GT_MODBYUNITSIN2BITENC(IDX))
 
 #define DECLARESEQBUFFER(TABLE)\
+        GtTwobitencoding bitwise = 0;\
         unsigned long widthbuffer = 0;\
-        GtTwobitencoding *tbeptr;\
+        GtTwobitencoding *twobitencodingptr;\
         encseq->unitsoftwobitencoding\
           = gt_unitsoftwobitencoding(encseq->totallength);\
         TABLE = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
         TABLE[encseq->unitsoftwobitencoding-1] = 0;\
-        tbeptr = TABLE
-
-#define DECLARESEQBUFFERVIATABLE(TABLE,TABLESW)\
-        unsigned long widthbuffer = 0;\
-        GtTwobitencoding *tbeptr, *tbeptrSW;\
-        encseq->unitsoftwobitencoding\
-          = gt_unitsoftwobitencoding(encseq->totallength);\
-        TABLE = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
-        TABLESW = gt_malloc(sizeof (*(TABLE)) * encseq->unitsoftwobitencoding);\
-        TABLE[encseq->unitsoftwobitencoding-1] = 0;\
-        TABLESW[encseq->unitsoftwobitencoding-1] = 0;\
-        tbeptr = TABLE;\
-        tbeptrSW = TABLESW;\
-
-#define UPDATESEQBUFFER(CC)\
-        bitwise <<= 2;\
-        if (ISNOTSPECIAL(CC))\
-        {\
-          bitwise |= (GtTwobitencoding) (CC);\
-        } else\
-        {\
-          if ((CC) == (GtUchar) SEPARATOR)\
-          {\
-            bitwise |= (GtTwobitencoding) 1;\
-          }\
-        }\
-        if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))\
-        {\
-          widthbuffer++;\
-        } else\
-        {\
-          *tbeptr++ = bitwise;\
-          widthbuffer = 0;\
-          bitwise = 0;\
-        }
-
-#define UPDATESEQBUFFEREQUALLENGTH(CC)\
-        bitwise <<= 2;\
-        if (ISNOTSPECIAL(CC))\
-        {\
-          bitwise |= (GtTwobitencoding) (CC);\
-        } else\
-        {\
-          gt_assert((CC) == (GtUchar) SEPARATOR);\
-        }\
-        if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))\
-        {\
-          widthbuffer++;\
-        } else\
-        {\
-          *tbeptr++ = bitwise;\
-          widthbuffer = 0;\
-          bitwise = 0;\
-        }
+        twobitencodingptr = TABLE
 
 #define UPDATESEQBUFFERFINAL\
         if (widthbuffer > 0)\
         {\
           bitwise <<= GT_MULT2(GT_UNITSIN2BITENC - widthbuffer);\
-          *tbeptr = bitwise;\
+          *twobitencodingptr = bitwise;\
         }
 
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
@@ -609,6 +557,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->specialtable.st_uchar.endidxinpage,GtUlong,
                    numofunits);
       }
+#ifdef NEWTWOBITENCODING
       NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->wildcardtable.st_uchar.numofrangestostore > 0)
@@ -621,6 +570,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->wildcardtable.st_uchar.endidxinpage,GtUlong,
                    numofunits);
       }
+#endif
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
@@ -635,6 +585,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->specialtable.st_ushort.endidxinpage,GtUlong,
                    numofunits);
       }
+#ifdef NEWTWOBITENCODING
       NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->wildcardtable.st_ushort.numofrangestostore > 0)
@@ -647,6 +598,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->wildcardtable.st_ushort.endidxinpage,GtUlong,
                    numofunits);
       }
+#endif
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
@@ -661,6 +613,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->specialtable.st_uint32.endidxinpage,GtUlong,
                    numofunits);
       }
+#ifdef NEWTWOBITENCODING
       NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       if (encseq->wildcardtable.st_uint32.numofrangestostore > 0)
@@ -673,6 +626,7 @@ static void assignencseqmapspecification(
         NEWMAPSPEC(encseq->wildcardtable.st_uint32.endidxinpage,GtUlong,
                    numofunits);
       }
+#endif
       break;
     default: break;
   }
@@ -837,30 +791,36 @@ void gt_encseq_delete(GtEncseq *encseq)
         gt_free(encseq->specialtable.st_uchar.positions);
         gt_free(encseq->specialtable.st_uchar.endidxinpage);
         gt_free(encseq->specialtable.st_uchar.rangelengths);
+#ifdef NEWTWOBITENCODING
         gt_free(encseq->twobitencodingSW);
         gt_free(encseq->wildcardtable.st_uchar.positions);
         gt_free(encseq->wildcardtable.st_uchar.endidxinpage);
         gt_free(encseq->wildcardtable.st_uchar.rangelengths);
+#endif
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_ushort.positions);
         gt_free(encseq->specialtable.st_ushort.endidxinpage);
         gt_free(encseq->specialtable.st_ushort.rangelengths);
+#ifdef NEWTWOBITENCODING
         gt_free(encseq->twobitencodingSW);
         gt_free(encseq->wildcardtable.st_ushort.positions);
         gt_free(encseq->wildcardtable.st_ushort.endidxinpage);
         gt_free(encseq->wildcardtable.st_ushort.rangelengths);
+#endif
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_uint32.positions);
         gt_free(encseq->specialtable.st_uint32.endidxinpage);
         gt_free(encseq->specialtable.st_uint32.rangelengths);
+#ifdef NEWTWOBITENCODING
         gt_free(encseq->twobitencodingSW);
         gt_free(encseq->wildcardtable.st_uint32.positions);
         gt_free(encseq->wildcardtable.st_uint32.endidxinpage);
         gt_free(encseq->wildcardtable.st_uint32.rangelengths);
+#endif
         break;
       default: break;
     }
@@ -979,7 +939,8 @@ static void showallspecialpositions(const GtEncseq *encseq)
     switch (encseq->sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-        showallspecialpositionswithpages_uchar(&encseq->wildcardtable.st_uchar);
+        showallspecialpositionswithpages_uchar(&encseq->wildcardtable.
+                                               st_uchar);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         showallspecialpositionswithpages_ushort(&encseq->wildcardtabe.
@@ -1219,8 +1180,7 @@ static int fillViaequallength(GtEncseq *encseq,
   GtUchar cc;
   unsigned long pos;
   int retval;
-  GtTwobitencoding bitwise = 0;
-  DECLARESEQBUFFER(encseq->twobitencoding);
+  DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViaequallength */
 
   gt_error_check(err);
   gt_assert(encseq->equallength.defined);
@@ -1229,7 +1189,23 @@ static int fillViaequallength(GtEncseq *encseq,
     retval = gt_sequence_buffer_next(fb,&cc,err);
     if (retval == 1)
     {
-      UPDATESEQBUFFEREQUALLENGTH(cc);
+      bitwise <<= 2;
+      if (ISNOTSPECIAL(cc))
+      {
+        bitwise |= (GtTwobitencoding) cc;
+      } else
+      {
+        gt_assert(cc == (GtUchar) SEPARATOR);
+      }
+      if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
+      {
+        widthbuffer++;
+      } else
+      {
+        *twobitencodingptr++ = bitwise;
+        widthbuffer = 0;
+        bitwise = 0;
+      }
     } else
     {
       if (retval < 0)
@@ -1240,7 +1216,7 @@ static int fillViaequallength(GtEncseq *encseq,
       break;
     }
   }
-  UPDATESEQBUFFERFINAL;
+  UPDATESEQBUFFERFINAL; /* in fillViaequallength */
   return 0;
 }
 
@@ -1350,15 +1326,12 @@ static bool issinglepositioninspecialrangeViaequallength(const GtEncseq *encseq,
 
 /* GT_ACCESS_TYPE_BITACCESS */
 
-static int fillViabitaccess(GtEncseq *encseq,
-                            GtSequenceBuffer *fb,
-                            GtError *err)
+static int fillViabitaccess(GtEncseq *encseq, GtSequenceBuffer *fb,GtError *err)
 {
   GtUchar cc;
   unsigned long pos;
   int retval;
-  GtTwobitencoding bitwise = 0;
-  DECLARESEQBUFFER(encseq->twobitencoding);
+  DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViabitaccess */
 
   gt_error_check(err);
   GT_INITBITTAB(encseq->specialbits,encseq->totallength + GT_INTWORDSIZE);
@@ -1376,7 +1349,26 @@ static int fillViabitaccess(GtEncseq *encseq,
       {
         GT_SETIBIT(encseq->specialbits,pos);
       }
-      UPDATESEQBUFFER(cc);
+      bitwise <<= 2;
+      if (ISNOTSPECIAL(cc))
+      {
+        bitwise |= (GtTwobitencoding) cc;
+      } else
+      {
+        if (cc == (GtUchar) SEPARATOR)
+        {
+          bitwise |= (GtTwobitencoding) 1;
+        }
+      }
+      if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
+      {
+        widthbuffer++;
+      } else
+      {
+        *twobitencodingptr++ = bitwise;
+        widthbuffer = 0;
+        bitwise = 0;
+      }
     } else
     {
       if (retval < 0)
@@ -1387,7 +1379,7 @@ static int fillViabitaccess(GtEncseq *encseq,
       break;
     }
   }
-  UPDATESEQBUFFERFINAL;
+  UPDATESEQBUFFERFINAL; /* in fillViabitaccess */
   return 0;
 }
 
@@ -2913,6 +2905,9 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
                                   unsigned long specialranges,
+#ifndef NEWTWOBITENCODING
+                                  GT_UNUSED
+#endif
                                   unsigned long wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol)
@@ -2951,6 +2946,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UCHAR_MAX+1);
          }
+#ifdef NEWTWOBITENCODING
          if (wildcardranges > 0)
          {
            sum += (uint64_t) sizeof (GtUchar) * wildcardranges +
@@ -2958,6 +2954,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UCHAR_MAX+1);
          }
+#endif
          break;
     case GT_ACCESS_TYPE_USHORTTABLES:
          sum = sizeoftwobitencoding;
@@ -2968,6 +2965,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/USHRT_MAX+1);
          }
+#ifdef NEWTWOBITENCODING
          if (wildcardranges > 0)
          {
            sum += (uint64_t) sizeof (GtUshort) * wildcardranges +
@@ -2975,6 +2973,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/USHRT_MAX+1);
          }
+#endif
          break;
     case GT_ACCESS_TYPE_UINT32TABLES:
          sum = sizeoftwobitencoding;
@@ -2985,6 +2984,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UINT32_MAX+1);
          }
+#ifdef NEWTWOBITENCODING
          if (wildcardranges > 0)
          {
            sum += (uint64_t) sizeof (uint32_t) * wildcardranges +
@@ -2992,6 +2992,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                   (uint64_t) sizeof (unsigned long) *
                                     (totallength/UINT32_MAX+1);
          }
+#endif
          break;
     default:
          fprintf(stderr,"gt_encseq_determine_size(%d) undefined\n",(int) sat);

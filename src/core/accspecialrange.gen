@@ -22,19 +22,35 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
   unsigned long fillspecialidx = 0, currentposition;
   int retval;
   unsigned int lastspeciallength = 0;
-  GtTwobitencoding bitwise = 0;
   GtUchar cc;
   GT_APPENDINT(GtSWtable) *specialtable
     = &(GT_APPENDINT(encseq->specialtable.st));
-  /*
+#ifdef NEWTWOBITENCODING
   GT_APPENDINT(GtSWtable) *wildcardtable
     = &(GT_APPENDINT(encseq->wildcardtable.st));
-  */
+#endif
 #ifndef NDEBUG
   unsigned long sumspecials = 0, countspecials = 0;
 #endif
   unsigned long pagenum = 0, nextcheckpos;
-  DECLARESEQBUFFERVIATABLE(encseq->twobitencoding,encseq->twobitencodingSW);
+  unsigned long widthbuffer = 0;
+  GtTwobitencoding *twobitencodingptr, bitwise = 0;
+#ifdef NEWTWOBITENCODING
+  GtTwobitencoding *twobitencodingSWptr, bitwiseSW = 0;
+#endif
+
+  encseq->unitsoftwobitencoding
+    = gt_unitsoftwobitencoding(encseq->totallength);
+  encseq->twobitencoding = gt_malloc(sizeof (*(encseq->twobitencoding)) *
+                                     encseq->unitsoftwobitencoding);
+  encseq->twobitencoding[encseq->unitsoftwobitencoding-1] = 0;
+  twobitencodingptr = encseq->twobitencoding;
+#ifdef NEWTWOBITENCODING
+  encseq->twobitencodingSW = gt_malloc(sizeof (*(encseq->twobitencdingSW)) *
+                                       encseq->unitsoftwobitencoding);
+  encseq->twobitencodingSW[encseq->unitsoftwobitencoding-1] = 0;
+  twobitencodingSWptr = encseq->twobitencodingSW;
+#endif
 
   specialtable->positions
     = gt_malloc(sizeof (*specialtable->positions) *
@@ -114,7 +130,26 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
       specialtable->endidxinpage[pagenum++] = fillspecialidx;
       nextcheckpos += (unsigned long) (specialtable->maxrangevalue+1);
     }
-    UPDATESEQBUFFER(cc);
+    bitwise <<= 2;
+    if (ISNOTSPECIAL(cc))
+    {
+      bitwise |= (GtTwobitencoding) cc;
+    } else
+    {
+      if (cc == (GtUchar) SEPARATOR)
+      {
+        bitwise |= (GtTwobitencoding) 1;
+      }
+    }
+    if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
+    {
+      widthbuffer++;
+    } else
+    {
+      *twobitencodingptr++ = bitwise;
+      widthbuffer = 0;
+      bitwise = 0;
+    }
   }
   gt_assert(sumspecials == countspecials);
   UPDATESEQBUFFERFINAL;
