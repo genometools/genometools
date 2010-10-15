@@ -55,71 +55,73 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
     = gt_malloc(sizeof(*specialtable->positions) *
                 specialtable->numofrangestostore);
   specialtable->endidxinpage = gt_malloc(sizeof(unsigned long) *
-                                        specialtable->numofpages);
+                                         specialtable->numofpages);
   nextcheckpos = (unsigned long) specialtable->maxrangevalue;
 
   for (currentposition=0; /* Nothing */; currentposition++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
-    /* XXX: reverse the order of the cases */
-    if (retval < 0)
+    if (retval > 0)
     {
-      return -1;
-    }
-    if (retval == 0)
-    {
-      if (lastspeciallength > 0)
+      if (ISSPECIAL(cc))
       {
-        /* note that we store one less than the length to prevent overflows */
-        gt_assert(fillspecialidx > 0);
-        gt_assert(fillspecialidx - 1 < specialtable->numofrangestostore);
-        specialtable->rangelengths[fillspecialidx-1]
-          = (GT_SPECIALTABLETYPE) (lastspeciallength-1);
 #ifndef NDEBUG
-        sumspecials += (unsigned long) lastspeciallength;
+        countspecials++;
 #endif
-      }
-      break;
-    }
-    if (ISSPECIAL(cc))
-    {
-#ifndef NDEBUG
-      countspecials++;
-#endif
-      if (lastspeciallength == 0) /* at beginning of special range */
-      {
-        specialtable->positions[fillspecialidx++]
-          = (GT_SPECIALTABLETYPE) (currentposition &
-                                   specialtable->maxrangevalue);
-        lastspeciallength = 1U;
-      } else /* extend special range */
-      {
-        if (lastspeciallength == specialtable->maxrangevalue)
-            /* already at maximal length */
+        if (lastspeciallength == 0) /* at beginning of special range */
         {
-          gt_assert(fillspecialidx > 0);
-          specialtable->rangelengths[fillspecialidx-1]
-            = (GT_SPECIALTABLETYPE) specialtable->maxrangevalue;
+          specialtable->positions[fillspecialidx++]
+            = (GT_SPECIALTABLETYPE) (currentposition &
+                                     specialtable->maxrangevalue);
+          lastspeciallength = 1U;
+        } else /* extend special range */
+        {
+          if (lastspeciallength == specialtable->maxrangevalue)
+              /* already at maximal length */
+          {
+            gt_assert(fillspecialidx > 0);
+            specialtable->rangelengths[fillspecialidx-1]
+              = (GT_SPECIALTABLETYPE) specialtable->maxrangevalue;
 #ifndef NDEBUG
-          sumspecials += (1 + (unsigned long) specialtable->maxrangevalue);
+            sumspecials += (1 + (unsigned long) specialtable->maxrangevalue);
+#endif
+            lastspeciallength = 0;
+          } else
+          {
+            lastspeciallength++;
+          }
+        }
+      } else
+      {
+        if (lastspeciallength > 0)
+        {
+          specialtable->rangelengths[fillspecialidx-1]
+            = (GT_SPECIALTABLETYPE) (lastspeciallength-1);
+#ifndef NDEBUG
+          sumspecials += (unsigned long) lastspeciallength;
 #endif
           lastspeciallength = 0;
-        } else
-        {
-          lastspeciallength++;
         }
       }
     } else
     {
-      if (lastspeciallength > 0)
+      if (retval == 0)
       {
-        specialtable->rangelengths[fillspecialidx-1]
-          = (GT_SPECIALTABLETYPE) (lastspeciallength-1);
+        if (lastspeciallength > 0)
+        {
+          /* note that we store one less than the length to prevent overflows */
+          gt_assert(fillspecialidx > 0);
+          gt_assert(fillspecialidx - 1 < specialtable->numofrangestostore);
+          specialtable->rangelengths[fillspecialidx-1]
+            = (GT_SPECIALTABLETYPE) (lastspeciallength-1);
 #ifndef NDEBUG
-        sumspecials += (unsigned long) lastspeciallength;
+          sumspecials += (unsigned long) lastspeciallength;
 #endif
-        lastspeciallength = 0;
+        }
+        break;
       }
+      gt_assert(retval < 0);
+      return -1;
     }
     if (currentposition == nextcheckpos)
     {
@@ -148,6 +150,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
       *twobitencodingSWptr++ = bitwiseSW;
       widthbuffer = 0;
       bitwise = 0;
+      bitwiseSW = 0;
     }
   }
   UPDATESEQBUFFERFINAL;
