@@ -35,9 +35,7 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
   unsigned long pagenum = 0, nextcheckpos;
   unsigned long widthbuffer = 0;
   GtTwobitencoding *twobitencodingptr, bitwise = 0;
-#ifdef NEWTWOBITENCODING
   GtTwobitencoding *twobitencodingSWptr, bitwiseSW = 0;
-#endif
 
   encseq->unitsoftwobitencoding
     = gt_unitsoftwobitencoding(encseq->totallength);
@@ -45,12 +43,10 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
                                      encseq->unitsoftwobitencoding);
   encseq->twobitencoding[encseq->unitsoftwobitencoding-1] = 0;
   twobitencodingptr = encseq->twobitencoding;
-#ifdef NEWTWOBITENCODING
-  encseq->twobitencodingSW = gt_malloc(sizeof (*(encseq->twobitencdingSW)) *
+  encseq->twobitencodingSW = gt_malloc(sizeof (*(encseq->twobitencodingSW)) *
                                        encseq->unitsoftwobitencoding);
   encseq->twobitencodingSW[encseq->unitsoftwobitencoding-1] = 0;
   twobitencodingSWptr = encseq->twobitencodingSW;
-#endif
 
   specialtable->positions
     = gt_malloc(sizeof (*specialtable->positions) *
@@ -131,9 +127,11 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
       nextcheckpos += (unsigned long) (specialtable->maxrangevalue+1);
     }
     bitwise <<= 2;
+    bitwiseSW <<= 2;
     if (ISNOTSPECIAL(cc))
     {
       bitwise |= (GtTwobitencoding) cc;
+      bitwiseSW |= (GtTwobitencoding) cc;
     } else
     {
       if (cc == (GtUchar) SEPARATOR)
@@ -147,12 +145,13 @@ static int GT_APPENDINT(fillspecialtable)(GtEncseq *encseq,
     } else
     {
       *twobitencodingptr++ = bitwise;
+      *twobitencodingSWptr++ = bitwiseSW;
       widthbuffer = 0;
       bitwise = 0;
     }
   }
-  gt_assert(sumspecials == countspecials);
   UPDATESEQBUFFERFINAL;
+  gt_assert(sumspecials == countspecials);
   while (pagenum < specialtable->numofpages)
   {
     specialtable->endidxinpage[pagenum++] = fillspecialidx;

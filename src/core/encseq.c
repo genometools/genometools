@@ -791,36 +791,30 @@ void gt_encseq_delete(GtEncseq *encseq)
         gt_free(encseq->specialtable.st_uchar.positions);
         gt_free(encseq->specialtable.st_uchar.endidxinpage);
         gt_free(encseq->specialtable.st_uchar.rangelengths);
-#ifdef NEWTWOBITENCODING
         gt_free(encseq->twobitencodingSW);
         gt_free(encseq->wildcardtable.st_uchar.positions);
         gt_free(encseq->wildcardtable.st_uchar.endidxinpage);
         gt_free(encseq->wildcardtable.st_uchar.rangelengths);
-#endif
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_ushort.positions);
         gt_free(encseq->specialtable.st_ushort.endidxinpage);
         gt_free(encseq->specialtable.st_ushort.rangelengths);
-#ifdef NEWTWOBITENCODING
         gt_free(encseq->twobitencodingSW);
         gt_free(encseq->wildcardtable.st_ushort.positions);
         gt_free(encseq->wildcardtable.st_ushort.endidxinpage);
         gt_free(encseq->wildcardtable.st_ushort.rangelengths);
-#endif
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
         gt_free(encseq->specialtable.st_uint32.positions);
         gt_free(encseq->specialtable.st_uint32.endidxinpage);
         gt_free(encseq->specialtable.st_uint32.rangelengths);
-#ifdef NEWTWOBITENCODING
         gt_free(encseq->twobitencodingSW);
         gt_free(encseq->wildcardtable.st_uint32.positions);
         gt_free(encseq->wildcardtable.st_uint32.endidxinpage);
         gt_free(encseq->wildcardtable.st_uint32.rangelengths);
-#endif
         break;
       default: break;
     }
