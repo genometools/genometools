@@ -1,3 +1,4 @@
+=begin
 require 'multidimarray.rb'
 
 allfiles = ["Atinsert.fna",
@@ -126,3 +127,4 @@ allfiles.each do |file1|
     end
   end
 end
+=end
