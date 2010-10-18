@@ -83,6 +83,8 @@
 #define GTH_DEFAULT_U12_TYPEDONORPROB               ((GthFlt) 0.99)
 #define GTH_DEFAULT_U12_TYPEDONORPROBONEMISMATCH    ((GthFlt) 0.9)
 
+#define GTH_DEFAULT_JUMPTABLE            false
+
 /* default values for intron cutouts */
 #define GTH_DEFAULT_INTRONCUTOUT         false
 #define GTH_DEFAULT_AUTOICMAXMATRIXSIZE  0

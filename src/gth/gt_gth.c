@@ -46,7 +46,8 @@ int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)
   switch (gth_parse_options(call_info, input, &parsed_args, argc,
                             (const char**) argv, false, NULL, stat,
                             gth_show_on_stdout, gth_show_on_stdout_vmatch,
-                            plugins->gth_version_func, err)) {
+                            plugins->gth_version_func, plugins->jump_table_new,
+                            err)) {
     case GT_OPTION_PARSER_OK: break;
     case GT_OPTION_PARSER_ERROR:
       gth_stat_delete(stat);

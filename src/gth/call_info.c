@@ -23,8 +23,8 @@
 
 GthCallInfo* gth_call_info_new(const char *progname)
 {
-  GthCallInfo *call_info;
-  call_info = gt_malloc(sizeof (GthCallInfo));
+  GthCallInfo *call_info = gt_calloc(1, sizeof *call_info);
+
   call_info->out = gthoutput_new();
 
   call_info->progname                 = gt_cstr_dup(progname);
@@ -36,14 +36,9 @@ GthCallInfo* gth_call_info_new(const char *progname)
   call_info->out->skipalignmentout    = GTH_DEFAULT_SKIPALIGNMENTOUT;
   call_info->speciesnum               = NUMOFSPECIES;
 
-  /* set the DP options to default values */
-  call_info->out->showverbose         = NULL;
-  call_info->out->showverboseVM       = NULL;
-
   call_info->out->comments            = GTH_DEFAULT_COMMENTS;
   call_info->out->verboseseqs         = GTH_DEFAULT_VERBOSESEQS;
   call_info->out->xmlout              = GTH_DEFAULT_XMLOUT;
-  call_info->out->gff3out             = false;
 
   /* init the spliced alignment filter */
   call_info->sa_filter = gth_sa_filter_new();

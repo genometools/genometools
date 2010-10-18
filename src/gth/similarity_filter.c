@@ -125,6 +125,7 @@ static int callsahmt(bool call_dna_dp,
                      const unsigned char *ref_seq_tran,
                      const unsigned char *ref_seq_orig,
                      unsigned long ref_total_length,
+                     unsigned long ref_offset,
                      GthInput *input,
                      Introncutoutinfo *introncutoutinfo,
                      GthStat *stat,
@@ -137,6 +138,7 @@ static int callsahmt(bool call_dna_dp,
                      GthDPOptionsCore *dp_options_core,
                      GthDPOptionsEST *dp_options_est,
                      GthDPOptionsPostpro *dp_options_postpro,
+                     GthDNACompletePathMatrixJT dna_complete_path_matrix_jt,
                      GthOutput *out)
 {
   int rval;
@@ -208,7 +210,9 @@ static int callsahmt(bool call_dna_dp,
                              introncutoutinfo->autoicmaxmatrixsize,
                              out->showeops, out->comments, out->gs2out,
                              gen_seq_bounds, splice_site_model, dp_options_core,
-                             dp_options_est, dp_options_postpro, stat,
+                             dp_options_est, dp_options_postpro,
+                             dna_complete_path_matrix_jt,
+                             raw_chain->forward_jump_table, ref_offset, stat,
                              out->outfp);
       }
       else { /* call_protein_dp */
@@ -239,7 +243,9 @@ static int callsahmt(bool call_dna_dp,
                              out->showeops, out->comments, out->gs2out,
                              gen_seq_bounds_rc, splice_site_model,
                              dp_options_core, dp_options_est,
-                             dp_options_postpro, stat, out->outfp);
+                             dp_options_postpro, dna_complete_path_matrix_jt,
+                             raw_chain->reverse_jump_table, ref_offset, stat,
+                             out->outfp);
       }
       else { /* call_protein_dp */
         rval = gth_align_protein(sa, used_chain->reverseranges,
@@ -311,11 +317,12 @@ static int callsahmt(bool call_dna_dp,
     break;
   }
 
+#if 0
   if (out->comments) {
-    gt_file_xprintf(out->outfp, "%c this SA has been computed:\n",
-                       COMMENTCHAR);
+    gt_file_xprintf(out->outfp, "%c this SA has been computed:\n", COMMENTCHAR);
     gth_sa_show(sa, input, out->outfp);
   }
+#endif
 
   /* free */
   gth_chain_delete(actual_chain);
@@ -362,13 +369,15 @@ static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
                        unsigned long gen_offset,
                        const GtRange *gen_seq_bounds,
                        const GtRange *gen_seq_bounds_rc,
-                       unsigned long ref_total_length, unsigned long chainctr,
+                       unsigned long ref_total_length, unsigned long ref_offset,
+                       unsigned long chainctr,
                        unsigned long num_of_chains, GthMatchInfo *match_info,
                        const unsigned char *ref_seq_tran,
                        const unsigned char *ref_seq_orig,
                        const unsigned char *ref_seq_tran_rc,
                        const unsigned char *ref_seq_orig_rc,
-                       GthChain *chain)
+                       GthChain *chain,
+                       GthDNACompletePathMatrixJT dna_complete_path_matrix_jt)
 {
   int rval;
   bool bothstrandsanalyzed, firstdp = true,
@@ -382,13 +391,13 @@ static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
     rval = callsahmt(true, saA, directmatches, gen_file_num, ref_file_num,
                      chain, gen_total_length, gen_offset, gen_seq_bounds,
                      gen_seq_bounds_rc,
-                     ref_seq_tran, ref_seq_orig, ref_total_length, input,
-                     &call_info->simfilterparam.introncutoutinfo, stat,
+                     ref_seq_tran, ref_seq_orig, ref_total_length, ref_offset,
+                     input, &call_info->simfilterparam.introncutoutinfo, stat,
                      chainctr, num_of_chains, call_info->translationtable,
                      directmatches, call_info->proteinexonpenal,
                      call_info->splice_site_model, call_info->dp_options_core,
                      call_info->dp_options_est, call_info->dp_options_postpro,
-                     call_info->out);
+                     dna_complete_path_matrix_jt, call_info->out);
     if (rval && rval != GTH_ERROR_SA_COULD_NOT_BE_DETERMINED) {
                      /* ^ this error is treated below */
       return rval;
@@ -440,12 +449,13 @@ static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
                        gen_file_num, ref_file_num, chain, gen_total_length,
                        gen_offset, gen_seq_bounds, gen_seq_bounds_rc,
                        ref_seq_tran_rc, ref_seq_orig_rc, ref_total_length,
-                       input, &call_info->simfilterparam.introncutoutinfo, stat,
+                       ref_offset, input,
+                       &call_info->simfilterparam.introncutoutinfo, stat,
                        chainctr, num_of_chains, call_info->translationtable,
                        directmatches, call_info->proteinexonpenal,
                        call_info->splice_site_model, call_info->dp_options_core,
                        call_info->dp_options_est, call_info->dp_options_postpro,
-                       call_info->out);
+                       dna_complete_path_matrix_jt, call_info->out);
       if (rval && rval != GTH_ERROR_SA_COULD_NOT_BE_DETERMINED) {
                        /* ^ this error is treated below */
         return rval;
@@ -504,12 +514,15 @@ static int call_protein_DP(bool directmatches,
                            const GtRange *gen_seq_bounds,
                            const GtRange *gen_seq_bounds_rc,
                            unsigned long ref_total_length,
+                           unsigned long ref_offset,
                            unsigned long chainctr,
                            unsigned long num_of_chains,
                            GthMatchInfo *match_info,
                            const unsigned char *ref_seq_tran,
                            const unsigned char *ref_seq_orig,
-                           GthChain *chain)
+                           GthChain *chain,
+                           GthDNACompletePathMatrixJT
+                           dna_complete_path_matrix_jt)
 {
   GtFile *outfp = call_info->out->outfp;
   int rval;
@@ -526,12 +539,13 @@ static int call_protein_DP(bool directmatches,
   rval = callsahmt(false, saA, directmatches, gen_file_num, ref_file_num,
                    chain, gen_total_length, gen_offset, gen_seq_bounds,
                    gen_seq_bounds_rc, ref_seq_tran, ref_seq_orig,
-                   ref_total_length, input,
+                   ref_total_length, ref_offset, input,
                    &call_info->simfilterparam.introncutoutinfo, stat, chainctr,
                    num_of_chains, call_info->translationtable, directmatches,
                    call_info->proteinexonpenal, call_info->splice_site_model,
                    call_info->dp_options_core, call_info->dp_options_est,
-                   call_info->dp_options_postpro, call_info->out);
+                   call_info->dp_options_postpro, dna_complete_path_matrix_jt,
+                   call_info->out);
   if (rval && rval != GTH_ERROR_SA_COULD_NOT_BE_DETERMINED) {
                    /* ^ this error is treated below */
     return rval;
@@ -619,7 +633,9 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
                                    unsigned long gen_file_num,
                                    unsigned long ref_file_num,
                                    bool directmatches,
-                                   GthMatchInfo *match_info)
+                                   GthMatchInfo *match_info,
+                                   GthDNACompletePathMatrixJT
+                                   dna_complete_path_matrix_jt)
 {
   const unsigned char *ref_seq_tran, *ref_seq_orig, *ref_seq_tran_rc = NULL,
                       *ref_seq_orig_rc = NULL;
@@ -733,19 +749,21 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
       rval = call_dna_DP(directmatches, call_info, input, stat,
                          sa_collection, saA, gen_file_num, ref_file_num,
                          gen_total_length, gen_offset, &gen_seq_bounds,
-                         &gen_seq_bounds_rc, ref_total_length, chainctr,
-                         gth_chain_collection_size(chain_collection),
+                         &gen_seq_bounds_rc, ref_total_length, range.start,
+                         chainctr, gth_chain_collection_size(chain_collection),
                          match_info, ref_seq_tran, ref_seq_orig,
-                         ref_seq_tran_rc, ref_seq_orig_rc, chain);
+                         ref_seq_tran_rc, ref_seq_orig_rc, chain,
+                         dna_complete_path_matrix_jt);
     }
     else {
       rval = call_protein_DP(directmatches, call_info, input,
                              stat, sa_collection, saA, gen_file_num,
                              ref_file_num, gen_total_length, gen_offset,
                              &gen_seq_bounds, &gen_seq_bounds_rc,
-                             ref_total_length, chainctr,
+                             ref_total_length, range.start, chainctr,
                              gth_chain_collection_size(chain_collection),
-                             match_info, ref_seq_tran, ref_seq_orig, chain);
+                             match_info, ref_seq_tran, ref_seq_orig, chain,
+                             dna_complete_path_matrix_jt);
     }
     /* check return value */
     if (rval == GTH_ERROR_DP_PARAMETER_ALLOCATION_FAILED) {
@@ -838,7 +856,8 @@ static int compute_sa_collection(GthSACollection *sa_collection,
         if (chain_collection) {
           rval = calc_spliced_alignments(sa_collection, chain_collection,
                                          call_info, input, stat, g, r, true,
-                                         &match_info);
+                                         &match_info,
+                                         plugins->dna_complete_path_matrix_jt);
           gth_chain_collection_delete(chain_collection);
           if (rval)
             break;
@@ -860,7 +879,8 @@ static int compute_sa_collection(GthSACollection *sa_collection,
         if (chain_collection) {
           rval = calc_spliced_alignments(sa_collection, chain_collection,
                                          call_info, input, stat, g, r, false,
-                                         &match_info);
+                                         &match_info,
+                                         plugins->dna_complete_path_matrix_jt);
           gth_chain_collection_delete(chain_collection);
           if (rval)
             break;

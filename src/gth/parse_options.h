@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,6 +21,7 @@
 #include "core/option.h"
 #include "gth/call_info.h"
 #include "gth/input.h"
+#include "gth/jump_table.h"
 #include "gth/stat.h"
 
 #define FROMPOS_OPT_CSTR  "frompos"
@@ -32,6 +33,6 @@ GtOPrval gth_parse_options(GthCallInfo*, GthInput*, int *parsed_args, int argc,
                            GtStrArray *consensusfiles, GthStat*,
                            void(*showverbose)(const char *),
                            void(*showverboseVM)(char *),
-                           GtShowVersionFunc, GtError*);
+                           GtShowVersionFunc, GthJumpTableNew, GtError*);
 
 #endif

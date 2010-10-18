@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -74,6 +74,21 @@
           }\
         }
 
+typedef struct GthDPMatrix GthDPMatrix;
+
+typedef void (*GthDNACompletePathMatrixJT)(GthDPMatrix *dpm,
+                                           const unsigned char *gen_seq_tran,
+                                           const unsigned char *ref_seq_tran,
+                                           unsigned long genomic_offset,
+                                           GtAlphabet *gen_alphabet,
+                                           GthDPParam *dp_param,
+                                           GthDPOptionsEST *dp_options_est,
+                                           GthDPOptionsCore *dp_options_core,
+                                           GthJumpTable *jumpt_table,
+                                           GtArray *gen_ranges,
+                                           unsigned long ref_dp_length,
+                                           unsigned long ref_offset);
+
 /* The following function implements the Spliced Alignment of Genomic DNA with
    cDNA, as described by Usuka, Zhu and Brendel. */
 int gth_align_dna(GthSA*,
@@ -95,6 +110,9 @@ int gth_align_dna(GthSA*,
                   GthDPOptionsCore *dp_options_core,
                   GthDPOptionsEST *dp_options_est,
                   GthDPOptionsPostpro *dp_options_postpro,
+                  GthDNACompletePathMatrixJT complete_path_matrix_jt,
+                  GthJumpTable *jump_table,
+                  unsigned long ref_offset,
                   GthStat*,
                   GtFile*);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,6 +22,7 @@
 #include "core/file.h"
 #include "core/range_api.h"
 #include "extended/globalchaining.h"
+#include "gth/jump_table.h"
 #include "gth/stat.h"
 
 /*
@@ -38,6 +39,9 @@ typedef struct {
           *reverseranges;  /* refering to reverse complement strand */
 
   double refseqcoverage; /* the reference sequence coverage of this DP range */
+  GthJumpTableDelete jump_table_delete;
+  GthJumpTable *forward_jump_table,
+               *reverse_jump_table;
 } GthChain;
 
 #include "gth/chain_collection.h"
@@ -69,13 +73,19 @@ typedef struct {
                 numofremainingbuckets,
                 gen_total_length,
                 gen_offset,
+                ref_total_length,
+                ref_offset,
                 referencelength,   /* needed by globalchainislongenough() */
                 gcmincoverage;     /* needed by globalchainislongenough() */
   bool comments,
        stopafterchaining,
        directmatches,     /* needed by stopafterchaining */
        paralogs,
-       enrichchains;
+       enrichchains,
+       jump_table;
+  GthJumpTableNew jump_table_new;
+  GthJumpTableNewReverse jump_table_new_reverse;
+  GthJumpTableDelete jump_table_delete;
   GthStat *stat;
   GtFile *outfp;
 } GthSaveChainInfo;

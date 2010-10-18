@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,7 +26,7 @@
 #include "gth/gtherror.h"
 #include "gth/gthoutput.h"
 #include "gth/align_common.h"
-#include "gth/align_dna.h"
+#include "gth/align_dna_imp.h"
 #include "gth/array2dim_plain.h"
 #include "gth/compute_scores.h"
 #include "gth/dp_param.h"
@@ -35,56 +35,8 @@
 #include "gth/sa.h"
 #include "gth/stat.h"
 
-#define DNA_NUMOFSCORETABLES  2
-
-/*
-  Here comes the dirty bitvector stuff to quarter the backtrace matrix.
-  In this case the Retrace type defined above is only used in the lower E_STATE.
-*/
-
-#define LOWER_E_STATE_MASK      0x7     /* |0000|0111| */
-#define LOWER_I_STATE_MASK      0x8     /* |0000|1000| */
-#define UPPER_E_STATE_MASK      0x70    /* |0111|0000| */
-#define UPPER_I_STATE_MASK      0x80    /* |1000|0000| */
-
-#define UPPER_E_N               (DNA_E_N  << 4)
-#define UPPER_E_M               (DNA_E_M  << 4)
-
-#define I_STATE_E_N             (DNA_E_N << 3)
-#define I_STATE_I_N             (DNA_I_N << 3)
-
-#define UPPER_I_STATE_I_N       (I_STATE_I_N << 4)
-
-/* these definitions refer to the state index for the two N x M score matrices
-*/
-typedef enum {
-  DNA_E_STATE = 0,
-  DNA_I_STATE,
-  DNA_NUMOFSTATES
-} DnaStates;
-
-/*
-  These definitions are used to retrace the optimal path in align_dna.c.
-  E, I refer to the original state, N, M, and NM refer to which index
-  should be decremented.
-
-  IMPORTANT: Definition has to be consistent with retracenames given below.
-*/
-typedef enum {
-  DNA_I_N = 0, /* deletion     |01|0^14
-                  or intron    |01|length */
-  DNA_E_N,     /* deletion     |01|0^14
-                  or intron    |01|length */
-  DNA_E_NM,    /* match        |00|length
-                  or mismatch  |11|0^14   */
-  DNA_I_NM,    /* match        |00|length
-                  or mismatch  |11|0^14   */
-  DNA_E_M,     /* insertion    |10|0^14   */
-  DNA_I_M,     /* insertion    |10|0^14   */
-  DNA_NUMOFRETRACE
-} DnaRetrace;
-
-/* IMPORTANT: Definition has to be consistent with Retrace given above. */
+/* IMPORTANT: Definition has to be consistent with DnaRetrace in
+   align_dna_imp.h. */
 static const char *dna_retracenames[]= {
   SHOWENUMTYPE(DNA_I_N),
   SHOWENUMTYPE(DNA_E_N),
@@ -95,19 +47,6 @@ static const char *dna_retracenames[]= {
   SHOWENUMTYPE(DNA_NUMOFRETRACE)
 };
 
-/* the following structure bundles all tables involved in the dynamic
-   programming for cDNAs/ESTs */
-typedef struct {
-  GthFlt *score[DNA_NUMOFSTATES][DNA_NUMOFSCORETABLES]; /* table to store the
-                                                           score of a path */
-  PATHTYPE **path;                   /* backtrace table of size
-                                        gen_dp_length * ref_dp_length */
-  unsigned long *intronstart[DNA_NUMOFSCORETABLES],
-                *exonstart[DNA_NUMOFSCORETABLES],
-                gen_dp_length,
-                ref_dp_length;
-} DPMatrix;
-
 static const char* dna_showretracenames(DnaRetrace retrace)
 {
   gt_assert(retrace <= DNA_NUMOFRETRACE);
@@ -115,11 +54,12 @@ static const char* dna_showretracenames(DnaRetrace retrace)
 }
 
 /* the following function allocates space for the DP tables for cDNAs/ESTs */
-static int dp_matrix_init(DPMatrix *dpm,
+static int dp_matrix_init(GthDPMatrix *dpm,
                           unsigned long gen_dp_length,
                           unsigned long ref_dp_length,
                           unsigned long autoicmaxmatrixsize,
-                          bool introncutout, GthStat *stat)
+                          bool introncutout, GthJumpTable *jump_table,
+                          GthStat *stat)
 {
   unsigned long t, n, m, matrixsize, sizeofpathtype =  sizeof (PATHTYPE);
 
@@ -146,15 +86,22 @@ static int dp_matrix_init(DPMatrix *dpm,
   }
 
   /* allocate space for dpm->path */
-  gth_array2dim_plain_malloc(dpm->path,
-                             GT_DIV2(gen_dp_length + 1) +
-                             GT_MOD2(gen_dp_length + 1), ref_dp_length + 1);
+  if (jump_table) {
+    gth_array2dim_plain_calloc(dpm->path,
+                               GT_DIV2(gen_dp_length + 1) +
+                               GT_MOD2(gen_dp_length + 1), ref_dp_length + 1);
+  }
+  else {
+    gth_array2dim_plain_malloc(dpm->path,
+                               GT_DIV2(gen_dp_length + 1) +
+                               GT_MOD2(gen_dp_length + 1), ref_dp_length + 1);
+  }
   if (!dpm->path)
     return GTH_ERROR_MATRIX_ALLOCATION_FAILED;
 
   /* allocate space for dpm->score */
   for (t = DNA_E_STATE; t < DNA_NUMOFSTATES; t++) {
-    for (n = 0; n <  DNA_NUMOFSCORETABLES; n++) {
+    for (n = 0; n < DNA_NUMOFSCORETABLES; n++) {
       dpm->score[t][n] = gt_malloc(sizeof (GthFlt) * (ref_dp_length + 1));
     }
   }
@@ -170,8 +117,8 @@ static int dp_matrix_init(DPMatrix *dpm,
   dpm->path[0][0]  = DNA_E_NM;
   dpm->path[0][0] |= I_STATE_E_N;
   for (m = 1; m <= ref_dp_length; m++) {
-    dpm->path[0][m]   = DNA_E_M;
-    dpm->path[0][m]  |= I_STATE_I_N;
+    dpm->path[0][m]  = DNA_E_M;
+    dpm->path[0][m] |= I_STATE_I_N;
   }
 
   for (n = 0; n < DNA_NUMOFSCORETABLES; n++) {
@@ -204,7 +151,7 @@ static unsigned long dp_matrix_get_reference_length(DPMatrix *dpm)
 
 /* the following function evaluates state E_1m for indices 1 and <m> and
    stores a backtrace reference */
-static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
+static void E_1m(GthDPMatrix *dpm, unsigned char genomicchar,
                  const unsigned char *ref_seq_tran, unsigned long m,
                  GtAlphabet *gen_alphabet, GthDbl log_probies,
                  GthDPOptionsEST *dp_options_est,
@@ -303,7 +250,7 @@ static void E_1m(DPMatrix *dpm, unsigned char genomicchar,
 
 /* the following function evaluates state I_1m for indices 1 and <m> and
    stores a backtrace reference */
-static void I_1m(DPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
+static void I_1m(GthDPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
 {
   GthFlt value, maxvalue;
   PATHTYPE retrace;
@@ -334,7 +281,7 @@ static void I_1m(DPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
 }
 
 /* the following function evaluate the dynamic programming tables */
-static void dna_complete_path_matrix(DPMatrix *dpm,
+static void dna_complete_path_matrix(GthDPMatrix *dpm,
                                      const unsigned char *gen_seq_tran,
                                      const unsigned char *ref_seq_tran,
                                      unsigned long genomic_offset,
@@ -351,7 +298,6 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
          log_1minusprobies;    /* initial intron state probability */
   GthFlt log_probdelgen,       /* deletion in genomic sequence */
          log_1minusprobdelgen;
-
   unsigned char genomicchar, referencechar;
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(gen_alphabet);
 
@@ -409,7 +355,7 @@ static void dna_complete_path_matrix(DPMatrix *dpm,
     for (m = 1; m <= dpm->ref_dp_length; m++) {
       referencechar = ref_seq_tran[m-1];
 
-      /* evalute E_nm */
+      /* evaluate E_nm */
 
       /* 0. */
       outputweight = 0.0;
@@ -582,7 +528,7 @@ static void dna_include_intron(GthBacktracePath *backtrace_path,
   }
 }
 
-static int dna_evaltracepath(GthBacktracePath *backtrace_path, DPMatrix *dpm,
+static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
                              const unsigned char *ref_seq_tran,
                              const unsigned char *gen_seq_tran,
                              DnaStates actualstate, bool introncutout,
@@ -732,7 +678,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, DPMatrix *dpm,
 }
 
 static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
-                                 DPMatrix *dpm,
+                                 GthDPMatrix *dpm,
                                  const unsigned char *ref_seq_tran,
                                  const unsigned char *gen_seq_tran,
                                  bool introncutout,
@@ -774,7 +720,7 @@ static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
 }
 
 /* the following function frees the DP tables for cDNAs/ESTs */
-static void dp_matrix_free(DPMatrix *dpm)
+static void dp_matrix_free(GthDPMatrix *dpm)
 {
   unsigned long t, n;
 
@@ -971,7 +917,7 @@ static void detect_small_terminal_exons(GthSA *sa,
                                         bool comments,
                                         GthSpliceSiteModel *splice_site_model,
                                         GtAlphabet *gen_alphabet,
-                                        GT_UNUSED DPMatrix *dpm,
+                                        GT_UNUSED GthDPMatrix *dpm,
                                         GthDPOptionsEST *dp_options_est,
                                         GthDPOptionsCore *dp_options_core,
                                         GthStat *stat, GtFile *outfp)
@@ -979,7 +925,7 @@ static void detect_small_terminal_exons(GthSA *sa,
   unsigned long gen_dp_start_terminal, gen_dp_length_terminal,
                 ref_dp_start_terminal, ref_dp_length_terminal;
   GthDPParam *dp_param_terminal;
-  DPMatrix dpm_terminal;
+  GthDPMatrix dpm_terminal;
   GthBacktracePath *backtrace_path;
   GthDPOptionsCore *dp_options_core_terminal;
   GthDPOptionsEST *dp_options_est_terminal;
@@ -1025,7 +971,7 @@ static void detect_small_terminal_exons(GthSA *sa,
   }
 
   if (dp_matrix_init(&dpm_terminal, gen_dp_length_terminal,
-                     ref_dp_length_terminal, 0, false, stat)) {
+                     ref_dp_length_terminal, 0, false, NULL, stat)) {
     /* out of memory */
     return;
   }
@@ -1105,7 +1051,7 @@ static void detect_small_initial_exons(GthSA *sa,
   unsigned long gen_dp_start_initial, gen_dp_length_initial,
                 ref_dp_start_initial, ref_dp_length_initial;
   GthDPParam *dp_param_initial;
-  DPMatrix dpm_initial;
+  GthDPMatrix dpm_initial;
   GthBacktracePath *backtrace_path;
   GthPathWalker *path_walker = NULL; /* XXX */
   int rval;
@@ -1162,7 +1108,7 @@ static void detect_small_initial_exons(GthSA *sa,
             gen_seq_bounds->end);
 
   if (dp_matrix_init(&dpm_initial, gen_dp_length_initial,
-                     ref_dp_length_initial, 0, false, stat)) {
+                     ref_dp_length_initial, 0, false, NULL, stat)) {
     /* out of memory */
     return;
   }
@@ -1219,7 +1165,7 @@ static void detect_small_exons(GthSA *sa, unsigned long *gen_dp_start,
                                const GtRange *gen_seq_bounds, bool showeops,
                                bool comments,
                                GthSpliceSiteModel *splice_site_model,
-                               GtAlphabet *gen_alphabet, DPMatrix *dpm,
+                               GtAlphabet *gen_alphabet, GthDPMatrix *dpm,
                                GthDPOptionsEST *dp_options_est,
                                GthDPOptionsCore *dp_options_core,
                                GthStat *stat, GtFile *outfp)
@@ -1267,13 +1213,16 @@ int gth_align_dna(GthSA *sa,
                   GthDPOptionsCore *dp_options_core,
                   GthDPOptionsEST *dp_options_est,
                   GthDPOptionsPostpro *dp_options_postpro,
+                  GthDNACompletePathMatrixJT dna_complete_path_matrix_jt,
+                  GthJumpTable *jump_table,
+                  unsigned long ref_offset,
                   GthStat *stat,
                   GtFile *outfp)
 {
   unsigned long gen_dp_start, gen_dp_end, gen_dp_length;
   GthSplicedSeq *spliced_seq = NULL;
   GthDPParam *dp_param;
-  DPMatrix dpm;
+  GthDPMatrix dpm;
   int rval;
 
   gt_assert(gen_ranges);
@@ -1295,7 +1244,7 @@ int gth_align_dna(GthSA *sa,
                              introncutout ? spliced_seq->splicedseqlen
                                           : gen_dp_length,
                              ref_dp_length, autoicmaxmatrixsize, introncutout,
-                             stat))) {
+                             jump_table, stat))) {
     gth_dp_param_delete(dp_param);
     gth_spliced_seq_delete(spliced_seq);
     return rval;
@@ -1303,11 +1252,22 @@ int gth_align_dna(GthSA *sa,
   gth_sa_set(sa, DNA_ALPHA, gen_dp_start, gen_dp_length);
 
   /* calculation */
-  dna_complete_path_matrix(&dpm,
-                           introncutout ? spliced_seq->splicedseq
-                                        : gen_seq_tran + gen_dp_start,
-                           ref_seq_tran, 0, gen_alphabet, dp_param,
-                           dp_options_est, dp_options_core);
+  if (jump_table) {
+    gt_assert(dna_complete_path_matrix_jt);
+    dna_complete_path_matrix_jt(&dpm,
+                                introncutout ? spliced_seq->splicedseq
+                                             : gen_seq_tran + gen_dp_start,
+                                ref_seq_tran, 0, gen_alphabet, dp_param,
+                                dp_options_est, dp_options_core, jump_table,
+                                gen_ranges, ref_dp_length, ref_offset);
+  }
+  else {
+    dna_complete_path_matrix(&dpm,
+                             introncutout ? spliced_seq->splicedseq
+                                          : gen_seq_tran + gen_dp_start,
+                             ref_seq_tran, 0, gen_alphabet, dp_param,
+                             dp_options_est, dp_options_core);
+  }
 
   /* backtracing */
   if ((rval = dna_find_optimal_path(gth_sa_backtrace_path(sa), &dpm,
@@ -1436,6 +1396,9 @@ GthSA* gth_align_dna_simple(GthInput *input,
                        dp_options_core,
                        dp_options_est,
                        dp_options_postpro,
+                       NULL,
+                       NULL,
+                       0,
                        stat,
                        NULL);
   if (rval) {

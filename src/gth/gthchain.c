@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,7 +43,7 @@ typedef struct {
 
 GthChain* gth_chain_new(void)
 {
-  GthChain *chain = gt_malloc(sizeof *chain);
+  GthChain *chain = gt_calloc(1, sizeof *chain);
   chain->gen_file_num  = GT_UNDEF_ULONG;
   chain->gen_seq_num   = GT_UNDEF_ULONG;
   chain->ref_file_num  = GT_UNDEF_ULONG;
@@ -56,6 +56,10 @@ GthChain* gth_chain_new(void)
 void gth_chain_delete(GthChain *chain)
 {
   if (!chain) return;
+  if (chain->jump_table_delete) {
+    chain->jump_table_delete(chain->reverse_jump_table);
+    chain->jump_table_delete(chain->forward_jump_table);
+  }
   gt_array_delete(chain->forwardranges);
   gt_array_delete(chain->reverseranges);
   gt_free(chain);
@@ -509,10 +513,8 @@ static GtRange chain_get_genomicrange(GthChain *chain)
 {
   GtRange range;
   gt_assert(chain);
-  range.start  = ((GtRange*)
-                 gt_array_get_first(chain->forwardranges))->start;
-  range.end = ((GtRange*)
-                 gt_array_get_last(chain->forwardranges))->end;
+  range.start = ((GtRange*) gt_array_get_first(chain->forwardranges))->start;
+  range.end = ((GtRange*) gt_array_get_last(chain->forwardranges))->end;
   gt_assert(range.start <= range.end);
   return range;
 }
@@ -594,6 +596,47 @@ void gth_chain_contract(GthChain *dest, const GthChain *src)
   gt_array_add(dest->reverseranges, reverserange);
 }
 
+static GtArray* make_list_of_chain_fragments(GtChain *chain,
+                                             GtFragment *fragments,
+                                             unsigned long num_of_fragments,
+                                             bool enrichchains,
+                                             const GtRange *genomicrange)
+{
+  unsigned long i, fragnum;
+  GtArray *chain_fragments;
+  GthJTMatch match;
+  gt_assert(chain && fragments && num_of_fragments);
+  chain_fragments = gt_array_new(sizeof (GthJTMatch));
+  if (!enrichchains) {
+    /* no chain enrichment used -> store all fragments from chain */
+    for (i = 0; i < gt_chain_size(chain); i++) {
+      fragnum = gt_chain_get_fragnum(chain, i);
+      match.gen_range.start = fragments[fragnum].startpos2;
+      match.gen_range.end   = fragments[fragnum].endpos2;
+      match.ref_range.start = fragments[fragnum].startpos1;
+      match.ref_range.end   = fragments[fragnum].endpos1;
+      gt_array_add(chain_fragments, match);
+    }
+  }
+  else {
+    GtRange fragmentrange;
+    /* chain enrichment used -> store all fragments which overlap with genomic
+       range of computed chain */
+    for (i = 0; i < num_of_fragments; i++) {
+      fragmentrange.start  = fragments[i].startpos2;
+      fragmentrange.end = fragments[i].endpos2;
+      if (gt_range_overlap(genomicrange, &fragmentrange)) {
+        match.gen_range.start = fragments[i].startpos2;
+        match.gen_range.end   = fragments[i].endpos2;
+        match.ref_range.start = fragments[i].startpos1;
+        match.ref_range.end   = fragments[i].endpos1;
+        gt_array_add(chain_fragments, match);
+      }
+    }
+  }
+  return chain_fragments;
+}
+
 void gth_save_chain(GtChain *chain, GtFragment *fragments,
                     unsigned long num_of_fragments,
                     GT_UNUSED unsigned long max_gap_width,
@@ -633,7 +676,7 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
     /* save all potential exons */
     for (i = 0; i < gt_chain_size(chain); i++) {
       fragnum = gt_chain_get_fragnum(chain, i);
-      range.start  = fragments[fragnum].startpos2;
+      range.start = fragments[fragnum].startpos2;
       range.end = fragments[fragnum].endpos2;
 
       /* check for overlap */
@@ -660,6 +703,8 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
       }
     }
 
+    GtRange genomicrange = chain_get_genomicrange(gth_chain);
+
     if (info->enrichchains) {
       enrich_chain(gth_chain, fragments, num_of_fragments, info->comments,
                    info->outfp);
@@ -673,11 +718,34 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
                                       info->gen_total_length,
                                       info->gen_offset);
 
+    /* compute jump table if necessary */
+    if (info->jump_table) {
+      GthJumpTable *forward_jump_table, *reverse_jump_table;
+      GtArray *chain_fragments;
+      chain_fragments = make_list_of_chain_fragments(chain, fragments,
+                                                     num_of_fragments,
+                                                     info->enrichchains,
+                                                     &genomicrange);
+      forward_jump_table =
+        info->jump_table_new(gt_array_get_space(chain_fragments),
+                             gt_array_size(chain_fragments));
+      reverse_jump_table =
+        info->jump_table_new_reverse(forward_jump_table,
+                                     info->gen_total_length, info->gen_offset,
+                                     info->ref_total_length, info->ref_offset);
+      gt_assert(!gth_chain->forward_jump_table);
+      gth_chain->forward_jump_table = forward_jump_table;
+      gt_assert(!gth_chain->reverse_jump_table);
+      gth_chain->reverse_jump_table = reverse_jump_table;
+      gt_array_delete(chain_fragments);
+      gth_chain->jump_table_delete = info->jump_table_delete;
+    }
+
     /* save array of potential exons */
     gth_chain_collection_add(info->chain_collection, gth_chain);
     if (info->comments) {
       gt_file_xprintf(info->outfp, "%c global chain with the following "
-                         "ranges has been saved\n",COMMENTCHAR);
+                                   "ranges has been saved\n",COMMENTCHAR);
       gt_file_xprintf(info->outfp, "%c forward ranges:\n", COMMENTCHAR);
       gt_file_xprintf(info->outfp, "%c ", COMMENTCHAR);
       gt_ranges_show(gth_chain->forwardranges, info->outfp);

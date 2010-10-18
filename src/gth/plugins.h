@@ -17,7 +17,9 @@
 #ifndef PLUGINS_H
 #define PLUGINS_H
 
+#include "gth/align_dna.h"
 #include "gth/input.h"
+#include "gth/jump_table.h"
 #include "gth/matcher.h"
 #include "gth/seq_col.h"
 
@@ -29,6 +31,12 @@ typedef struct {
   GthMatcherRunner matcher_runner;                    /* required */
   const char *gth_version;                            /* required */
   GtShowVersionFunc gth_version_func;                 /* required */
+
+  /* the optional jump table methods */
+  GthJumpTableNew jump_table_new;
+  GthJumpTableNewReverse jump_table_new_reverse;
+  GthJumpTableDelete jump_table_delete;
+  GthDNACompletePathMatrixJT dna_complete_path_matrix_jt;
 } GthPlugins;
 
 #endif

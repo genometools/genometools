@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2007, 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -49,6 +49,7 @@ typedef struct {
                                     (different chaining procedure) */
        enrichchains,             /* enrich chains with additional matches */
        stopafterchaining;        /* stop gth after chaining phase */
+  bool jump_table;               /* use jump table in DP */
   Introncutoutinfo introncutoutinfo; /* parameter for intron cutout */
 } Gthsimfilterparam;
 

@@ -62,6 +62,10 @@ typedef struct {
                 lastrefseqnum;
   double fragweightfactor;
 
+  GthJumpTableNew jump_table_new;
+  GthJumpTableNewReverse jump_table_new_reverse;
+  GthJumpTableDelete jump_table_delete;
+
   /* can be filled and used by matcher */
   GthSeqCol *gen_seq_col,
             *ref_seq_col;
