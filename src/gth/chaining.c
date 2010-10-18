@@ -185,8 +185,7 @@ static void transform_refseq_positions(GtArray *matches,
   GthMatch *match;
   GtRange range;
 
-  for (i = 0; i < gt_array_size(matches); i++)
-  {
+  for (i = 0; i < gt_array_size(matches); i++) {
     match = gt_array_get(matches, i);
     /* get necessary data for transformation */
     range = gth_seq_col_get_range(ref_seq_col, match->Storeseqnumreference);
@@ -337,7 +336,7 @@ static void chaining_info_init(GthChainingInfo *chaining_info,
   chaining_info->directmatches    = directmatches;
   chaining_info->refseqisindex    = call_info->simfilterparam.inverse ||
                                     !refseqisdna;
-  chaining_info->call_info         = call_info;
+  chaining_info->call_info        = call_info;
   chaining_info->input            = input;
   chaining_info->stat             = stat;
   chaining_info->gen_file_num     = gen_file_num;
