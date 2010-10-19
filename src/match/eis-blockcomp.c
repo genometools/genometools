@@ -1431,7 +1431,7 @@ blockCompSeqRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
   struct blockCompositionSeq *seqIdx;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  gt_assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
+  gt_assert(range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
   switch (seqIdx->modes[range])
   {
   case BLOCK_COMPOSITION_INCLUDE:
@@ -1492,7 +1492,7 @@ blockCompSeqPosPairRangeRank(struct encIdxSeq *eSeqIdx, AlphabetRangeID range,
   struct blockCompositionSeq *seqIdx;
   gt_assert(eSeqIdx && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
-  gt_assert(range >= 0 && range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
+  gt_assert(range < MRAEncGetNumRanges(EISGetAlphabet(eSeqIdx)));
   switch (seqIdx->modes[range])
   {
   case BLOCK_COMPOSITION_INCLUDE:
