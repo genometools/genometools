@@ -335,8 +335,8 @@ endif
 
 ifeq ($(findstring clang,$(CC)),clang)
   # do not complain about unnecessary options
-  GT_CFLAGS += -Qunused-arguments -Wno-tautological-compare
-  GT_CPPFLAGS += -Qunused-arguments -Wno-tautological-compare
+  GT_CFLAGS += -Qunused-arguments # -Wno-tautological-compare
+  GT_CPPFLAGS += -Qunused-arguments # -Wno-tautological-compare
 endif
 
 ifneq ($(sharedlib),no)

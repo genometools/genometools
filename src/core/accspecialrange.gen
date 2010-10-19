@@ -220,7 +220,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
     {
       if (cc == (GtUchar) SEPARATOR)
       {
-        bitwise |= (GtTwobitencoding) 1;
+        bitwise |= (GtTwobitencoding) GT_TWOBITS_FOR_SEPARATOR;
       }
     }
     if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
