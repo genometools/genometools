@@ -39,7 +39,8 @@ allfiles = ["Atinsert.fna",
 bigfiles = ["U89959_genomic.fas",
             "Atinsert.fna"]
 
-if $gttestdata
+# do not run the big tests with valgrind
+if $gttestdata and ($memcheck.nil? or !$memcheck.length == 0)
   bigfiles.push "at1MB"
 end
 
@@ -51,7 +52,8 @@ smallfilecodes.collect! do |filecode|
   "#{$testdata}/genomediff/#{filecode}".chomp
 end
 
-if $gttestdata
+# do not run the big tests with valgrind
+if $gttestdata and ($memcheck.nil? or !$memcheck.length == 0)
   fp = File.open("#{$gttestdata}/genomediff/codelist", 'r')
   bigfilecodes = fp.readlines
   fp.close
