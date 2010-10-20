@@ -27,10 +27,9 @@
 
 typedef struct
 {
-  unsigned long left;
-  unsigned long nonspecialsinbucket,
-                specialsinbucket,
-                ordercode;
+  unsigned long left,
+                nonspecialsinbucket,
+                specialsinbucket;
 } Bucketspecification;
 
 typedef struct Bcktab Bcktab;
