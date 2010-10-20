@@ -107,9 +107,13 @@ struct GtEncseq
                                 unsigned long,
                                 unsigned long);
   const char *delivercontainsspecialname;
-  bool(*issinglepositioninspecialrange)(const GtEncseq *,
-                                        unsigned long);
+  bool(*issinglepositioninspecialrange)(const GtEncseq *,unsigned long);
   const char *issinglepositioninspecialrangename;
+  bool(*issinglepositioninwildcardrange)(const GtEncseq *,unsigned long);
+  const char *issinglepositioninwildcardrangename;
+  bool(*issinglepositionseparator)(const GtEncseq *,unsigned long);
+  const char *issinglepositionseparatorname;
+
   unsigned long *characterdistribution;
   GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                      specialcharinfo; /* information about specialcharacters */

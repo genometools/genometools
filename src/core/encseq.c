@@ -244,6 +244,101 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
+GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
+                                    unsigned long pos,
+                                    GtReadmode readmode)
+{
+  gt_assert(pos < encseq->totallength);
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = GT_REVERSEPOS(encseq->totallength,pos);
+  }
+  if (encseq->twobitencodingSW != NULL)
+  {
+    unsigned long twobits;
+
+    twobits = EXTRACTENCODEDCHAR(encseq->twobitencodingSW,pos);
+    if (!encseq->has_specialranges || twobits > 0)
+    {
+      return GT_ISDIRCOMPLEMENT(readmode)
+               ? GT_COMPLEMENTBASE((GtUchar) twobits)
+               : (GtUchar) twobits;
+    }
+    if (encseq->issinglepositionseparator(encseq,pos))
+    {
+      return (GtUchar) SEPARATOR;
+    }
+    if (encseq->issinglepositioninwildcardrange(encseq,pos))
+    {
+      return (GtUchar) WILDCARD;
+    }
+    gt_assert(twobits == 0);
+    return GT_ISDIRCOMPLEMENT(readmode)
+             ? GT_COMPLEMENTBASE((GtUchar) 0)
+             : (GtUchar) 0;
+  }
+  if (encseq->twobitencoding != NULL)
+  {
+    unsigned long twobits;
+
+    gt_assert(encseq->sat == GT_ACCESS_TYPE_BITACCESS);
+    twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
+    if (!encseq->has_specialranges ||
+        twobits > encseq->maxcharforspecial ||
+        !encseq->issinglepositioninspecialrange(encseq,pos))
+    {
+      return GT_ISDIRCOMPLEMENT(readmode)
+               ? GT_COMPLEMENTBASE((GtUchar) twobits)
+               : (GtUchar) twobits;
+    }
+    return (encseq->maxcharforspecial == 0 || twobits)
+             ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
+  }
+  if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
+  {
+    gt_assert(!GT_ISDIRCOMPLEMENT(readmode));
+    return delivercharViabytecompress(encseq,pos);
+  } else
+  {
+    GtUchar cc;
+
+    gt_assert(encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
+    cc = encseq->plainseq[pos];
+    return (ISNOTSPECIAL(cc) && GT_ISDIRCOMPLEMENT(readmode))
+           ? GT_COMPLEMENTBASE(cc)
+           : cc;
+  }
+}
+
+void gt_encseq_verify_encseq(GtEncseq *encseq,unsigned long *ssptab)
+{
+  bool assigned = false;
+  unsigned long pos;
+  GtUchar cc1, cc2;
+
+  if (encseq->ssptab == NULL)
+  {
+    encseq->ssptab = ssptab;
+    assigned = true;
+  }
+  for (pos = 0; pos < encseq->totallength; pos++)
+  {
+    cc1 = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    cc2 = gt_encseq_get_encoded_char2(encseq,pos,GT_READMODE_FORWARD);
+    if (cc1 != cc2)
+    {
+      fprintf(stderr,"pos %lu: cc1 = %u != %u = cc2\n",pos,
+                                                       (unsigned int) cc1,
+                                                       (unsigned int) cc2);
+      exit(EXIT_FAILURE);
+    }
+  }
+  if (assigned)
+  {
+    encseq->ssptab = NULL;
+  }
+}
+
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
@@ -1495,6 +1590,7 @@ static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
   {
     const unsigned long *leftptr, *midptr, *rightptr;
 
+    gt_assert(encseq->ssptab != NULL);
     leftptr = encseq->ssptab;
     rightptr = encseq->ssptab + encseq->numofdbsequences - 2;
     while (leftptr <= rightptr)
@@ -2536,6 +2632,18 @@ static GtEncseqfunctions encodedseqfunctab[] =
                                           .function;\
         encseq->issinglepositioninspecialrangename\
           = encodedseqfunctab[(int) (SAT)].issinglepositioninspecialrange\
+                                          .funcname;\
+        encseq->issinglepositioninwildcardrange\
+          = encodedseqfunctab[(int) (SAT)].issinglepositioninwildcardrange\
+                                          .function;\
+        encseq->issinglepositioninwildcardrangename\
+          = encodedseqfunctab[(int) (SAT)].issinglepositioninwildcardrange\
+                                          .funcname;\
+        encseq->issinglepositionseparator\
+          = encodedseqfunctab[(int) (SAT)].issinglepositionseparator\
+                                          .function;\
+        encseq->issinglepositionseparatorname\
+          = encodedseqfunctab[(int) (SAT)].issinglepositionseparator\
                                           .funcname
 
 static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
@@ -2760,9 +2868,8 @@ gt_encseq_new_from_index(const char *indexname,
       encseq->sdstab = NULL;
     }
   }
-  if (!haserr && (withssptab
-                    && encseq != NULL
-                    && encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH))
+  if (!haserr && withssptab && encseq != NULL
+                            && encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
@@ -2771,7 +2878,7 @@ gt_encseq_new_from_index(const char *indexname,
         = gt_mmap_check_size_with_suffix(indexname,
                                          GT_SSPTABFILESUFFIX,
                                          encseq->numofdbsequences - 1,
-                                         sizeof (unsigned long),
+                                         sizeof (*encseq->ssptab),
                                          err);
       if (encseq->ssptab == NULL)
       {
@@ -5089,6 +5196,9 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                      outfp);
         }
         gt_fa_fclose(outfp);
+        /*
+        gt_encseq_verify_encseq(encseq,sequenceseppos.spaceGtUlong);
+        */
       }
     }
   }
