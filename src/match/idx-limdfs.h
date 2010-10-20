@@ -111,6 +111,6 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
 
 const FMindex *genericindex_get_packedindex(const Genericindex *genericindex);
 
-const long unsigned genericindex_get_totallength(
-    const Genericindex *genericindex);
+unsigned long genericindex_get_totallength(const Genericindex *genericindex);
+
 #endif

@@ -1433,9 +1433,8 @@ const FMindex *genericindex_get_packedindex(const Genericindex *genericindex)
   return genericindex->packedindex;
 }
 
-const long unsigned genericindex_get_totallength(
-    const Genericindex *genericindex)
+unsigned long genericindex_get_totallength(const Genericindex *genericindex)
 {
-  gt_assert(genericindex->totallength != 0);
+  gt_assert(genericindex && genericindex->totallength != 0);
   return genericindex->totallength;
 }
