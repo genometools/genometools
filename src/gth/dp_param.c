@@ -265,19 +265,18 @@ static void calculateprobabilities(GtArray *ranges, unsigned long totallength,
                       Cchar = gen_alphabet_symbolmap['C'],
                       Gchar = gen_alphabet_symbolmap['G'],
                       Tchar = gen_alphabet_symbolmap['T'];
-
   unsigned long rangeindex,
-       startpos,
-       endpos,
-       genomicindex,
-       probindex   = 0,
-       probindexbackupforU12evaluation,
-       numofranges = gt_array_size(ranges);
+                startpos,
+                endpos,
+                genomicindex,
+                probindex = 0,
+                probindexbackupforU12evaluation,
+                numofranges = gt_array_size(ranges);
   unsigned char cc,
-        ccminus1,
-        ccplus1;
-  bool lastgenomicbase   = false,
-       usegenericmodel   = true;
+                ccminus1,
+                ccplus1;
+  bool lastgenomicbase = false,
+       usegenericmodel = true;
 
 #define SET_OTHER_SPLICE_SITE_PROB(P)\
         if (usegenericmodel)\
