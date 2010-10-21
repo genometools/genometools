@@ -26,13 +26,12 @@ static void GT_APPENDINT(allocSWtables)(GT_APPENDINT(GtSWtable) *swtable)
 }
 
 static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
-                                               unsigned long *sequenceseppos,
+                                               FILE *outsspfp,
                                                GtSequenceBuffer *fb,
                                                GtError *err)
 {
   unsigned long fillspecialrangeidx = 0, fillwildcardrangeidx = 0,
-                currentposition, pagenum = 0, nextcheckpos, widthbuffer = 0,
-                nextfree = 0;
+                currentposition, pagenum = 0, nextcheckpos, widthbuffer = 0;
   int retval;
   unsigned int lastspecialrangelength = 0, lastwildcardrangelength = 0;
   GtUchar cc;
@@ -141,9 +140,10 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
 #endif
             lastwildcardrangelength = 0;
           }
-          if (sequenceseppos != NULL)
+          if (outsspfp != NULL)
           {
-            sequenceseppos[nextfree++] = currentposition;
+            gt_xfwrite(&currentposition,sizeof (currentposition),
+                       (size_t) 1, outsspfp);
           }
         }
 #ifndef NDEBUG
