@@ -231,7 +231,7 @@ allmultifiles.each do |filename|
   Name "gt suffixerator sfxmap-failure #{filename}"
   Keywords "gt_suffixerator"
   Test do
-    run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
+    run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx -sat direct " +
              "-db #{$testdata}#{filename}"
     run_test "#{$bin}gt suffixerator -suf -lcp -pl -dir rev -ii localidx"
     run_test "#{$bin}gt dev sfxmap -tis -des -esa localidx",

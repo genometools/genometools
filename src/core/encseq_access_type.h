@@ -34,6 +34,7 @@ typedef enum
 } GtEncseqAccessType;
 
 GtEncseqAccessType gt_encseq_access_type_get(const char *str);
+bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat);
 const char*        gt_encseq_access_type_str(GtEncseqAccessType at);
 const char*        gt_encseq_access_type_list(void);
 int gt_encseq_access_type_determine(unsigned long *specialranges,

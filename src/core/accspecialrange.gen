@@ -26,11 +26,13 @@ static void GT_APPENDINT(allocSWtables)(GT_APPENDINT(GtSWtable) *swtable)
 }
 
 static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
+                                               unsigned long *sequenceseppos,
                                                GtSequenceBuffer *fb,
                                                GtError *err)
 {
   unsigned long fillspecialrangeidx = 0, fillwildcardrangeidx = 0,
-                currentposition, pagenum = 0, nextcheckpos, widthbuffer = 0;
+                currentposition, pagenum = 0, nextcheckpos, widthbuffer = 0,
+                nextfree = 0;
   int retval;
   unsigned int lastspecialrangelength = 0, lastwildcardrangelength = 0;
   GtUchar cc;
@@ -138,6 +140,10 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
             sumwildcardranges += (unsigned long) lastwildcardrangelength;
 #endif
             lastwildcardrangelength = 0;
+          }
+          if (sequenceseppos != NULL)
+          {
+            sequenceseppos[nextfree++] = currentposition;
           }
         }
 #ifndef NDEBUG
@@ -699,7 +705,7 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
 {
 
   gt_assert(esr != NULL && esr->encseq != NULL &&
-            satviautables(esr->encseq->sat));
+            gt_encseq_access_type_isviautables(esr->encseq->sat));
   gt_assert(!GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {
@@ -729,7 +735,7 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
                                                GtEncseqReader *esr)
 {
   gt_assert(esr != NULL && esr->encseq != NULL &&
-            satviautables(esr->encseq->sat));
+            gt_encseq_access_type_isviautables(esr->encseq->sat));
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
   while (esr->idx->hasprevious)
   {

@@ -70,6 +70,12 @@ GtEncseqAccessType gt_encseq_access_type_get(const char *str)
   return GT_ACCESS_TYPE_UNDEFINED;
 }
 
+bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat)
+{
+  gt_assert(sat != GT_ACCESS_TYPE_UNDEFINED);
+  return (sat >= GT_ACCESS_TYPE_UCHARTABLES) ? true : false;
+}
+
 #define CHECKANDUPDATE(VAL,IDX)\
         tmp = gt_encseq_determine_size(VAL, totallength, numofdbfiles,\
                                        lengthofdbfilenames,\

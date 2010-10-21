@@ -29,6 +29,7 @@
 #include "core/readmode.h"
 #include "core/showtime.h"
 #include "core/unused_api.h"
+#include "core/encseq_metadata.h"
 #include "esa-fileend.h"
 #include "giextract.h"
 #include "stamp.h"
@@ -418,7 +419,23 @@ static int runsuffixerator(bool doesa,
     if (!so->fn2encopt.outsdstab)
       gt_encseq_loader_do_not_require_sds_tab(el);
     if (!so->fn2encopt.outssptab)
-      gt_encseq_loader_do_not_require_ssp_tab(el);
+    {
+      GtEncseqMetadata* emd = gt_encseq_metadata_new(
+                                           gt_str_get(so->inputindex),
+                                           err);
+      if (emd == NULL)
+      {
+        haserr = true;
+      } else
+      {
+        GtEncseqAccessType at = gt_encseq_metadata_accesstype(emd);
+        if (!gt_encseq_access_type_isviautables(at))
+        {
+          gt_encseq_loader_do_not_require_ssp_tab(el);
+        }
+      }
+      gt_encseq_metadata_delete(emd);
+    }
     gt_encseq_loader_set_logger(el, logger);
     encseq = gt_encseq_loader_load(el, gt_str_get(so->inputindex), err);
     gt_encseq_loader_delete(el);

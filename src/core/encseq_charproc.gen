@@ -80,13 +80,7 @@
                 }
                 gt_xfputc((int) '\n',desfp);
               }
-              if (outssptab)
-              {
-                GT_STOREINARRAY(sequenceseppos,GtUlong,128,currentpos);
-              } else
-              {
-                sequenceseppos->nextfreeGtUlong++;
-              }
+              (*numofseparators)++;
 #endif
             }
             if (specialprefix)
