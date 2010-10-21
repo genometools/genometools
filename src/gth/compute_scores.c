@@ -284,7 +284,10 @@ static void computescoresprocmismatchordeletion(Traversealignmentstate *state,
   }
   else {
     genomicchar1 = d->gen_seq_tran[state->genomicptr];
-    ADDOUTPUTWEIGHT(d->maxsingleexonweight, genomicchar1, genomicchar1);
+    /* SK: replaced
+       ADDOUTPUTWEIGHT(d->maxsingleexonweight, genomicchar1, genomicchar1);
+       by the following */
+    ADDOUTPUTWEIGHTIDENTITY(d->maxsingleexonweight, genomicchar1);
   }
 }
 
@@ -385,7 +388,10 @@ static void computebordersandscoresprocinsertion(Traversealignmentstate *state,
   else {
     genomicchar   = (unsigned char) DASH;
     ADDOUTPUTWEIGHT(d->singleexonweight, genomicchar, referencechar);
-    ADDOUTPUTWEIGHT(d->maxsingleexonweight, genomicchar, genomicchar);
+    /* SK: replaced
+       ADDOUTPUTWEIGHT(d->maxsingleexonweight, genomicchar, genomicchar);
+       by the following */
+    ADDOUTPUTWEIGHTIDENTITY(d->maxsingleexonweight, genomicchar);
   }
 }
 
@@ -463,7 +469,10 @@ static void computebordersandscoresprocmatch(Traversealignmentstate *state,
     /* genomic char equals reference char */
     gt_assert(genomicchar1 == referencechar);
     ADDOUTPUTWEIGHT(referenceinterimvalue, genomicchar1, referencechar);
-    ADDOUTPUTWEIGHT(genomicinterimvalue, genomicchar1, genomicchar1);
+    /* SK: replaced
+       ADDOUTPUTWEIGHT(genomicinterimvalue, genomicchar1, genomicchar1);
+       by the following */
+    ADDOUTPUTWEIGHTIDENTITY(genomicinterimvalue, genomicchar1);
     genomicinterimvalue   *= lengthofeop;
     referenceinterimvalue *= lengthofeop;
     d->singleexonweight  += referenceinterimvalue;

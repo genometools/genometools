@@ -88,6 +88,19 @@ typedef void (*GthDNACompletePathMatrixJT)(GthDPMatrix *dpm,
                                            GtArray *gen_ranges,
                                            unsigned long ref_dp_length,
                                            unsigned long ref_offset);
+#define ADDOUTPUTWEIGHTIDENTITY(VAR,N)\
+        if ((N) < (gen_alphabet_mapsize-1))\
+        {\
+          VAR += dp_options_est->identityweight;\
+        }\
+        else if ((N) == DASH)\
+        {\
+          VAR += DASH_DASH_WEIGHT;\
+        }\
+        else\
+        {\
+          VAR += dp_options_est->undetcharweight;\
+        }
 
 /* The following function implements the Spliced Alignment of Genomic DNA with
    cDNA, as described by Usuka, Zhu and Brendel. */

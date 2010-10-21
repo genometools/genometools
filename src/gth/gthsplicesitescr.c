@@ -50,7 +50,7 @@ static void calcsplicesitescoreprocmismatchordeletion(Traversealignmentstate
   unsigned char genomicchar;
   if (d->processedalignmentpositions < SPLICE_SITE_SCORE_WINDOW) {
     genomicchar   = d->gen_seq_tran[state->genomicptr];
-    ADDOUTPUTWEIGHT(d->maxsplicesiteweight, genomicchar, genomicchar);
+    ADDOUTPUTWEIGHTIDENTITY(d->maxsplicesiteweight, genomicchar);
     d->processedalignmentpositions++;
   }
   else
@@ -70,7 +70,7 @@ static void calcsplicesitescoreprocinsertion(Traversealignmentstate *state,
     genomicchar   = (unsigned char) DASH;
     referencechar = d->ref_seq_tran[state->referenceptr];
     ADDOUTPUTWEIGHT(d->splicesiteweight, genomicchar, referencechar);
-    ADDOUTPUTWEIGHT(d->maxsplicesiteweight, genomicchar, genomicchar);
+    ADDOUTPUTWEIGHTIDENTITY(d->maxsplicesiteweight, genomicchar);
     d->processedalignmentpositions++;
   }
   else
@@ -95,7 +95,7 @@ static void calcsplicesitescoreprocmatch(Traversealignmentstate *state,
     genomicchar   = d->gen_seq_tran[state->genomicptr];
     referencechar = d->ref_seq_tran[state->referenceptr];
     ADDOUTPUTWEIGHT(referenceinterimvalue, genomicchar, referencechar);
-    ADDOUTPUTWEIGHT(genomicinterimvalue, genomicchar, genomicchar);
+    ADDOUTPUTWEIGHTIDENTITY(genomicinterimvalue, genomicchar);
     genomicinterimvalue   *= numofmatchestoprocess;
     referenceinterimvalue *= numofmatchestoprocess;
     d->splicesiteweight  += referenceinterimvalue;
