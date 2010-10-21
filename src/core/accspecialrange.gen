@@ -235,14 +235,9 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
       bitwiseSW = 0;
     }
   }
-  UPDATESEQBUFFERFINAL;
+  UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr);
+  UPDATESEQBUFFERFINAL(bitwiseSW,twobitencodingSWptr);
   gt_assert(sumspecialranges == countspecials);
-  if (sumwildcardranges != countwildcards)
-  {
-    fprintf(stderr,"sumwildcardranges = %lu != %lu = countwildcards\n",
-                    sumwildcardranges,countwildcards);
-    exit(EXIT_FAILURE);
-  }
   gt_assert(sumwildcardranges == countwildcards);
   while (pagenum < specialrangetable->numofpages)
   {

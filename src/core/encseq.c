@@ -87,11 +87,11 @@
         TABLE[encseq->unitsoftwobitencoding-1] = 0;\
         twobitencodingptr = TABLE
 
-#define UPDATESEQBUFFERFINAL\
+#define UPDATESEQBUFFERFINAL(BITWISE,TWOBITENCODINGPTR)\
         if (widthbuffer > 0)\
         {\
-          bitwise <<= GT_MULT2(GT_UNITSIN2BITENC - widthbuffer);\
-          *twobitencodingptr = bitwise;\
+          BITWISE <<= GT_MULT2(GT_UNITSIN2BITENC - widthbuffer);\
+          *(TWOBITENCODINGPTR) = BITWISE;\
         }
 
 #define GT_TWOBITS_FOR_WILDCARD  0
@@ -1339,7 +1339,7 @@ static int fillViaequallength(GtEncseq *encseq,
       break;
     }
   }
-  UPDATESEQBUFFERFINAL; /* in fillViaequallength */
+  UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr); /* in fillViaequallength */
   return 0;
 }
 
@@ -1497,7 +1497,7 @@ static int fillViabitaccess(GtEncseq *encseq, GtSequenceBuffer *fb,GtError *err)
       break;
     }
   }
-  UPDATESEQBUFFERFINAL; /* in fillViabitaccess */
+  UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr); /* in fillViabitaccess */
   return 0;
 }
 
@@ -5196,9 +5196,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                      outfp);
         }
         gt_fa_fclose(outfp);
-        /*
         gt_encseq_verify_encseq(encseq,sequenceseppos.spaceGtUlong);
-        */
       }
     }
   }
