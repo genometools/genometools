@@ -225,8 +225,10 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                ? GT_COMPLEMENTBASE((GtUchar) twobits)
                : (GtUchar) twobits;
     }
-    return (encseq->maxcharforspecial == 0 || twobits)
-             ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
+    return (encseq->maxcharforspecial == 0 ||
+            twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+             ? (GtUchar) SEPARATOR
+             : (GtUchar) WILDCARD;
   }
   if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
@@ -292,8 +294,10 @@ GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
                ? GT_COMPLEMENTBASE((GtUchar) twobits)
                : (GtUchar) twobits;
     }
-    return (encseq->maxcharforspecial == 0 || twobits)
-             ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
+    return (encseq->maxcharforspecial == 0 ||
+            twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+             ? (GtUchar) SEPARATOR
+             : (GtUchar) WILDCARD;
   }
   if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
@@ -419,7 +423,8 @@ struct GtEncseqReader
   GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long currentpos;
-  GtEncseqReaderViatablesinfo *specialrangestate;
+  GtEncseqReaderViatablesinfo *specialrangestate,
+                              *wildcardrangestate;
 };
 
 #ifndef INLINEDENCSEQ
@@ -1545,7 +1550,9 @@ static GtUchar seqdelivercharViabitaccessSpecial(GtEncseqReader *esr)
   {
     return (GtUchar) twobits;
   }
-  return twobits ? (GtUchar) SEPARATOR : (GtUchar) WILDCARD;
+  return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+           ? (GtUchar) SEPARATOR
+           : (GtUchar) WILDCARD;
 }
 
 static bool containsspecialViabitaccess(const GtEncseq *encseq,
@@ -1738,7 +1745,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                            GtReadmode readmode,
                                            unsigned long startpos)
 {
-  const bool usespecial = true;
 
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq) {
@@ -1754,6 +1760,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                 : startpos;
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
+    bool usespecial = true;
     if (esr->specialrangestate == NULL)
     {
       esr->specialrangestate
@@ -1769,10 +1776,34 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                        esr->specialrangestate->nextpage);
 #endif
     advancerangeGtEncseqReader(esr,usespecial);
-  } else {
-    if (esr->specialrangestate != NULL) {
+
+    usespecial = false;
+    if (esr->wildcardrangestate == NULL)
+    {
+      esr->wildcardrangestate
+        = gt_calloc((size_t) 1, sizeof (*esr->wildcardrangestate));
+    }
+    esr->wildcardrangestate->hasprevious = esr->wildcardrangestate->hascurrent
+                                      = false;
+    /*XXX binpreparenextrangeGtEncseqReader(esr,usespecial);*/
+#ifdef GT_RANGEDEBUG
+      printf("start advance at (%lu,%lu) in page %lu\n",
+                       esr->wildcardrangestate->firstcell,
+                       esr->wildcardrangestate->lastcell,
+                       esr->wildcardrangestate->nextpage);
+#endif
+    /*XXX advancerangeGtEncseqReader(esr,usespecial);*/
+  } else
+  {
+    if (esr->specialrangestate != NULL)
+    {
       gt_free(esr->specialrangestate);
       esr->specialrangestate = NULL;
+    }
+    if (esr->wildcardrangestate != NULL)
+    {
+      gt_free(esr->wildcardrangestate);
+      esr->wildcardrangestate = NULL;
     }
   }
 }
@@ -1781,8 +1812,10 @@ GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
                                                       GtReadmode readmode,
                                                       unsigned long startpos)
 {
-  GtEncseqReader *esr;
-  esr = gt_calloc((size_t) 1, sizeof (GtEncseqReader));
+  GtEncseqReader *esr = gt_calloc((size_t) 1, sizeof (*esr));
+  /* the following is implicit by using calloc, but we better initialize
+     it for documentation */
+  esr->specialrangestate = esr->wildcardrangestate = NULL;
   gt_encseq_reader_reinit_with_readmode(esr, (GtEncseq*) encseq, readmode,
                                         startpos);
   return esr;
@@ -1791,13 +1824,58 @@ GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
 void gt_encseq_reader_delete(GtEncseqReader *esr)
 {
   if (esr == NULL) return;
-  if (esr->encseq != NULL) {
+  if (esr->encseq != NULL)
+  {
     gt_encseq_delete(esr->encseq);
   }
-  if (esr->specialrangestate != NULL) {
+  if (esr->specialrangestate != NULL)
+  {
     gt_free(esr->specialrangestate);
   }
+  if (esr->wildcardrangestate != NULL)
+  {
+    gt_free(esr->wildcardrangestate);
+  }
   gt_free(esr);
+}
+
+static bool containsSWViatables(const GtEncseq *encseq,
+                                GtEncseqReader *esr,
+                                unsigned long startpos,
+                                unsigned long len,
+                                bool usespecial)
+{
+  GtEncseqReaderViatablesinfo *swstate;
+
+  if (usespecial)
+  {
+    swstate = esr->specialrangestate;
+  } else
+  {
+    swstate = esr->wildcardrangestate;
+  }
+  if (swstate->hasprevious)
+  {
+    if (!GT_ISDIRREVERSE(esr->readmode))
+    {
+      gt_assert(startpos + len > 0);
+      if (startpos + len - 1 >= swstate->previousrange.start &&
+          startpos < swstate->previousrange.end)
+      {
+        return true;
+      }
+    } else
+    {
+      startpos = GT_REVERSEPOS(encseq->totallength,startpos);
+      gt_assert(startpos + 1 >= len);
+      if (startpos + 1 - len < swstate->previousrange.end &&
+          startpos >= swstate->previousrange.start)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 static bool containsspecialViatables(const GtEncseq *encseq,
@@ -1807,28 +1885,7 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long len)
 {
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
-  if (esr->specialrangestate->hasprevious)
-  {
-    if (!GT_ISDIRREVERSE(esr->readmode))
-    {
-      gt_assert(startpos + len > 0);
-      if (startpos + len - 1 >= esr->specialrangestate->previousrange.start &&
-          startpos < esr->specialrangestate->previousrange.end)
-      {
-        return true;
-      }
-    } else
-    {
-      startpos = GT_REVERSEPOS(encseq->totallength,startpos);
-      gt_assert(startpos + 1 >= len);
-      if (startpos + 1 - len < esr->specialrangestate->previousrange.end &&
-          startpos >= esr->specialrangestate->previousrange.start)
-      {
-        return true;
-      }
-    }
-  }
-  return false;
+  return containsSWViatables(encseq, esr, startpos, len, true);
 }
 
 bool gt_encseq_has_specialranges(const GtEncseq *encseq)

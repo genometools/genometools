@@ -356,13 +356,16 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
   GtRange range;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
   GT_APPENDINT(GtSWtable) *swrangetable;
+  GtEncseqReaderViatablesinfo *swstate;
 
   if (usespecial)
   {
     swrangetable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
+    swstate = esr->specialrangestate;
   } else
   {
     swrangetable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
+    swstate = esr->wildcardrangestate;
   }
   pagenum = GT_POS2PAGENUM(esr->currentpos);
   if (pagenum > 0)
@@ -372,8 +375,8 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
   {
     endpos0 = 0;
   }
-  esr->specialrangestate->firstcell = endpos0;
-  esr->specialrangestate->lastcell = endpos1
+  swstate->firstcell = endpos0;
+  swstate->lastcell = endpos1
                      = swrangetable->endidxinpage[pagenum];
   if (esr->currentpos > 0)
   {
@@ -391,14 +394,14 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
         if (esr->currentpos > range.end)
         {
           found = true;
-          esr->specialrangestate->firstcell = cellnum;
+          swstate->firstcell = cellnum;
           endpos0 = cellnum+1;
         } else
         {
           if (esr->currentpos >= range.start)
           {
             found = true;
-            esr->specialrangestate->firstcell = cellnum;
+            swstate->firstcell = cellnum;
             break;
           }
           endpos1 = cellnum;
@@ -408,14 +411,14 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
         if (esr->currentpos < range.start)
         {
           found = true;
-          esr->specialrangestate->lastcell = cellnum+1;
+          swstate->lastcell = cellnum+1;
           endpos1 = cellnum;
         } else
         {
           if (esr->currentpos < range.end)
           {
             found = true;
-            esr->specialrangestate->lastcell = cellnum+1;
+            swstate->lastcell = cellnum+1;
             break;
           }
           endpos0 = cellnum+1;
@@ -432,12 +435,12 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
         if (range.start == 0)
         {
           found = true;
-          esr->specialrangestate->firstcell = 0;
+          swstate->firstcell = 0;
         }
       } else
       {
         found = true;
-        esr->specialrangestate->lastcell = 1UL;
+        swstate->lastcell = 1UL;
       }
     }
   }
@@ -453,8 +456,8 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
     endpos1 = swrangetable->endidxinpage[pagenum-1];
     if (endpos0 < endpos1)
     {
-      esr->specialrangestate->firstcell = endpos1-1;
-      esr->specialrangestate->lastcell = endpos1;
+      swstate->firstcell = endpos1-1;
+      swstate->lastcell = endpos1;
       pagenum--;
       found = true;
     }
@@ -464,13 +467,13 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
   {
     GT_APPENDINT(determinerange)(&range,swrangetable,pagenum,
                                  moveforward
-                                   ? esr->specialrangestate->firstcell
-                                   : (esr->specialrangestate->lastcell-1));
+                                   ? swstate->firstcell
+                                   : (swstate->lastcell-1));
     printf("binary found pos %lu in ", esr->currentpos);
     showsequencerange(&range);
     printf(" at cell %lu in page %lu\n",
-           moveforward ? esr->specialrangestate->firstcell
-                       : (esr->specialrangestate->lastcell-1),
+           moveforward ? swstate->firstcell
+                       : (swstate->lastcell-1),
            pagenum);
   } else
   {
@@ -479,56 +482,56 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
 #endif
   if (found)
   {
-    GT_APPENDINT(determinerange)(&esr->specialrangestate->previousrange,
+    GT_APPENDINT(determinerange)(&swstate->previousrange,
                                  swrangetable,
                                  pagenum,
                                  moveforward
-                                   ? esr->specialrangestate->firstcell
-                                   : (esr->specialrangestate->lastcell-1));
+                                   ? swstate->firstcell
+                                   : (swstate->lastcell-1));
 #ifdef RANGEDEBUG
     printf("previousrange=");
-    showsequencerange(&esr->specialrangestate->previousrange);
+    showsequencerange(&swstate->previousrange);
     printf("\n");
 #endif
-    if (esr->specialrangestate->previousrange.start <= esr->currentpos &&
-        esr->currentpos < esr->specialrangestate->previousrange.end)
+    if (swstate->previousrange.start <= esr->currentpos &&
+        esr->currentpos < swstate->previousrange.end)
     {
-      esr->specialrangestate->hasprevious = true;
+      swstate->hasprevious = true;
     }
     if (moveforward)
     {
       if (pagenum+1 < swrangetable->numofpages)
       {
-        esr->specialrangestate->morepagesleft = true;
-        esr->specialrangestate->nextpage = pagenum+1;
+        swstate->morepagesleft = true;
+        swstate->nextpage = pagenum+1;
       } else
       {
-        esr->specialrangestate->morepagesleft = false;
-        esr->specialrangestate->nextpage = pagenum;
+        swstate->morepagesleft = false;
+        swstate->nextpage = pagenum;
       }
     } else
     {
       if (pagenum > 0)
       {
-        esr->specialrangestate->morepagesleft = true;
-        esr->specialrangestate->nextpage = pagenum-1;
+        swstate->morepagesleft = true;
+        swstate->nextpage = pagenum-1;
       } else
       {
-        esr->specialrangestate->morepagesleft = false;
-        esr->specialrangestate->nextpage = 0;
+        swstate->morepagesleft = false;
+        swstate->nextpage = 0;
       }
     }
   } else
   {
-    esr->specialrangestate->firstcell = esr->specialrangestate->lastcell = 0;
+    swstate->firstcell = swstate->lastcell = 0;
     if (pagenum < swrangetable->numofpages)
     {
-      esr->specialrangestate->morepagesleft = true;
+      swstate->morepagesleft = true;
     } else
     {
-      esr->specialrangestate->morepagesleft = false;
+      swstate->morepagesleft = false;
     }
-    esr->specialrangestate->nextpage = pagenum;
+    swstate->nextpage = pagenum;
   }
 }
 
@@ -538,32 +541,32 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
 */
 
 static bool GT_APPENDINT(nextnonemptypage)(
-                          GtEncseqReader *esr,
                           GT_APPENDINT(GtSWtable) *swrangetable,
+                          GtEncseqReaderViatablesinfo *swstate,
                           bool moveforward)
 {
   unsigned long endpos0, endpos1, pagenum;
 
-  while (esr->specialrangestate->morepagesleft)
+  while (swstate->morepagesleft)
   {
-    pagenum = esr->specialrangestate->nextpage;
+    pagenum = swstate->nextpage;
     if (moveforward)
     {
-      if (esr->specialrangestate->nextpage == swrangetable->numofpages-1)
+      if (swstate->nextpage == swrangetable->numofpages-1)
       {
-        esr->specialrangestate->morepagesleft = false;
+        swstate->morepagesleft = false;
       } else
       {
-        esr->specialrangestate->nextpage++;
+        swstate->nextpage++;
       }
     } else
     {
-      if (esr->specialrangestate->nextpage == 0)
+      if (swstate->nextpage == 0)
       {
-        esr->specialrangestate->morepagesleft = false;
+        swstate->morepagesleft = false;
       } else
       {
-        esr->specialrangestate->nextpage--;
+        swstate->nextpage--;
       }
     }
     if (pagenum == 0)
@@ -576,8 +579,8 @@ static bool GT_APPENDINT(nextnonemptypage)(
     endpos1 = swrangetable->endidxinpage[pagenum];
     if (endpos0 < endpos1)
     {
-      esr->specialrangestate->firstcell = endpos0;
-      esr->specialrangestate->lastcell = endpos1;
+      swstate->firstcell = endpos0;
+      swstate->lastcell = endpos1;
       return true;
     }
   }
@@ -590,138 +593,141 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
   GT_APPENDINT(GtSWtable) *swrangetable;
+  GtEncseqReaderViatablesinfo *swstate;
 
   if (usespecial)
   {
     swrangetable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
+    swstate = esr->specialrangestate;
   } else
   {
     swrangetable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
+    swstate = esr->wildcardrangestate;
   }
   while (true)
   {
-    if (esr->specialrangestate->hascurrent)
+    if (swstate->hascurrent)
     {
-      esr->specialrangestate->previousrange
-        = esr->specialrangestate->currentrange;
-      esr->specialrangestate->hascurrent = false;
+      swstate->previousrange = swstate->currentrange;
+      swstate->hascurrent = false;
     }
     if (moveforward)
     {
-      esr->specialrangestate->firstcell++;
+      swstate->firstcell++;
     } else
     {
-      esr->specialrangestate->lastcell--;
+      swstate->lastcell--;
     }
 #ifdef RANGEDEBUG
     printf("advance with firstcell=%lu, lastcell=%lu\n",
-            esr->specialrangestate->firstcell,esr->specialrangestate->lastcell);
+            swstate->firstcell,swstate->lastcell);
 #endif
     /* do not let comparison values become negative, hence compare with + 1 */
-    if (esr->specialrangestate->firstcell + 1 <
-        esr->specialrangestate->lastcell + 1 ||
-        GT_APPENDINT(nextnonemptypage)(esr,swrangetable,moveforward))
+    if (swstate->firstcell + 1 <
+        swstate->lastcell + 1 ||
+        GT_APPENDINT(nextnonemptypage)(swrangetable,swstate,moveforward))
     {
       if (moveforward)
       {
-        cellnum = esr->specialrangestate->firstcell;
+        cellnum = swstate->firstcell;
       } else
       {
-        cellnum = esr->specialrangestate->lastcell - 1;
+        cellnum = swstate->lastcell - 1;
       }
-      GT_APPENDINT(determinerange)(&esr->specialrangestate->currentrange,
+      GT_APPENDINT(determinerange)(&swstate->currentrange,
                                    swrangetable,
-                                   esr->specialrangestate->morepagesleft
+                                   swstate->morepagesleft
                                      ? (moveforward
-                                         ? (esr->specialrangestate->nextpage-1)
-                                         : (esr->specialrangestate->nextpage+1))
-                                     : esr->specialrangestate->nextpage,
+                                         ? (swstate->nextpage-1)
+                                         : (swstate->nextpage+1))
+                                     : swstate->nextpage,
                                    cellnum);
-      esr->specialrangestate->hasrange = true;
+      swstate->hasrange = true;
     } else
     {
-      esr->specialrangestate->hasrange = false;
+      swstate->hasrange = false;
       break;
     }
-    if (esr->specialrangestate->hasprevious)
+    if (swstate->hasprevious)
     {
       if (moveforward)
       {
-        if (esr->specialrangestate->previousrange.end ==
-            esr->specialrangestate->currentrange.start)
+        if (swstate->previousrange.end == swstate->currentrange.start)
         {
-          esr->specialrangestate->previousrange.end
-            = esr->specialrangestate->currentrange.end;
-          esr->specialrangestate->hascurrent = false;
+          swstate->previousrange.end = swstate->currentrange.end;
+          swstate->hascurrent = false;
         } else
         {
-          esr->specialrangestate->hascurrent = true;
+          swstate->hascurrent = true;
           break;
         }
       } else
       {
-        if (esr->specialrangestate->currentrange.end ==
-            esr->specialrangestate->previousrange.start)
+        if (swstate->currentrange.end == swstate->previousrange.start)
         {
-          esr->specialrangestate->previousrange.start
-            = esr->specialrangestate->currentrange.start;
-          esr->specialrangestate->hascurrent = false;
+          swstate->previousrange.start = swstate->currentrange.start;
+          swstate->hascurrent = false;
         } else
         {
-          esr->specialrangestate->hascurrent = true;
+          swstate->hascurrent = true;
           break;
         }
       }
     } else
     {
-      esr->specialrangestate->previousrange
-        = esr->specialrangestate->currentrange;
-      esr->specialrangestate->hasprevious = true;
-      esr->specialrangestate->hascurrent = false;
+      swstate->previousrange = swstate->currentrange;
+      swstate->hasprevious = true;
+      swstate->hascurrent = false;
     }
   }
 }
 
-static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
+static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
+                                              bool usespecial)
 {
-  const bool usespecial = true;
+  GtEncseqReaderViatablesinfo *swstate = usespecial ? esr->specialrangestate
+                                                    : esr->wildcardrangestate;
 #ifdef RANGEDEBUG
   printf("pos=%lu,previous=(%lu,%lu)\n",esr->currentpos,
-          esr->specialrangestate->previousrange.start,
-          esr->specialrangestate->previousrange.end);
+          swstate->previousrange.start,
+          swstate->previousrange.end);
 #endif
-  if (esr->specialrangestate->hasprevious)
+  if (swstate->hasprevious)
   {
     if (!GT_ISDIRREVERSE(esr->readmode))
     {
-      if (esr->currentpos >= esr->specialrangestate->previousrange.start)
+      if (esr->currentpos >= swstate->previousrange.start)
       {
-        if (esr->currentpos < esr->specialrangestate->previousrange.end)
+        if (esr->currentpos < swstate->previousrange.end)
         {
           /* XXX here is the wildcard/separator distinction */
-          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
+          return (EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                     esr->currentpos)
+                  == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
                     ? (GtUchar) SEPARATOR
                     : (GtUchar) WILDCARD;
         }
-        if (esr->specialrangestate->hasrange)
+        if (swstate->hasrange)
         {
           GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
         }
       }
     } else
     {
-      if (esr->currentpos < esr->specialrangestate->previousrange.end)
+      if (esr->currentpos < swstate->previousrange.end)
       {
-        if (esr->currentpos >= esr->specialrangestate->previousrange.start)
+        if (esr->currentpos >= swstate->previousrange.start)
         {
           /* XXX here is the wildcard/separator distinction */
-          return EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos)
+          return (EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                     esr->currentpos)
+                  == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
                      ? (GtUchar) SEPARATOR
                      : (GtUchar) WILDCARD;
         }
-        if (esr->specialrangestate->hasrange)
+        if (swstate->hasrange)
         {
-          GT_APPENDINT(advancerangeGtEncseqReader)(esr,true);
+          GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
         }
       }
     }
@@ -730,10 +736,15 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
                                       esr->currentpos);
 }
 
+static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
+{
+  return GT_APPENDINT(seqdelivercharSW)(esr,true);
+}
+
 static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
                                       GtEncseqReader *esr)
 {
-
+  const bool usespecial = true;
   gt_assert(esr != NULL && esr->encseq != NULL &&
             gt_encseq_access_type_isviautables(esr->encseq->sat));
   gt_assert(!GT_ISDIRREVERSE(esr->readmode));
@@ -748,7 +759,7 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->specialrangestate->hasrange)
       {
-        GT_APPENDINT(advancerangeGtEncseqReader)(esr,true);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
       } else
       {
         break;
@@ -764,6 +775,7 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
 static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
                                                GtEncseqReader *esr)
 {
+  const bool usespecial = true;
   gt_assert(esr != NULL && esr->encseq != NULL &&
             gt_encseq_access_type_isviautables(esr->encseq->sat));
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
@@ -778,7 +790,7 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->specialrangestate->hasrange)
       {
-        GT_APPENDINT(advancerangeGtEncseqReader)(esr,true);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
       } else
       {
         break;
