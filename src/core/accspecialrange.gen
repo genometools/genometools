@@ -335,6 +335,95 @@ static void GT_APPENDINT(showallspecialpositionswithpages)(
   return found;
 }
 
+static bool GT_APPENDINT(checkspecialrange)(
+                         const GT_APPENDINT(GtSWtable) *swtable,
+                         unsigned long pos)
+{
+  unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
+  const GT_SPECIALTABLETYPE *found;
+
+  if (pagenumber == 0)
+  {
+    if (swtable->endidxinpage[0] >= 1UL)
+    {
+      found = GT_APPENDINT(binarysearchpreviousequal)(
+                        swtable->positions,
+                        swtable->positions + swtable->endidxinpage[0] - 1,
+                        (GT_SPECIALTABLETYPE) pos);
+      if (found != NULL)
+      {
+        unsigned long rangeend
+               = (unsigned long) *found
+                 + (unsigned long) swtable->rangelengths
+                                  [(unsigned long) (found - swtable->positions)]
+                 + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    }
+  } else
+  {
+    if (swtable->endidxinpage[pagenumber-1] <
+        swtable->endidxinpage[pagenumber])
+    {
+      found = GT_APPENDINT(binarysearchpreviousequal)(
+                        swtable->positions +
+                        swtable->endidxinpage[pagenumber-1],
+                        swtable->positions +
+                        swtable->endidxinpage[pagenumber] - 1,
+                        (GT_SPECIALTABLETYPE) pos);
+      if (found != NULL)
+      {
+        unsigned long rangeend
+               = (unsigned long) ((swtable->maxrangevalue+1) * pagenumber)
+                 + (unsigned long) *found
+                 + (unsigned long) swtable->rangelengths
+                                  [(unsigned long) (found - swtable->positions)]
+                 + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    }
+    if (pagenumber == 1UL)
+    {
+      if (swtable->endidxinpage[0] > 1UL)
+      {
+        unsigned long idx, rangeend;
+
+        idx = swtable->endidxinpage[0] - 1;
+        rangeend = (unsigned long) swtable->positions[idx] +
+                   (unsigned long) swtable->rangelengths[idx] + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    } else
+    {
+      if (swtable->endidxinpage[pagenumber-2] <
+          swtable->endidxinpage[pagenumber-1])
+      {
+        unsigned long idx, rangeend;
+
+        idx = swtable->endidxinpage[pagenumber-1] - 1;
+        rangeend = (unsigned long) ((swtable->maxrangevalue+1) * (pagenumber-1))
+                   + (unsigned long) swtable->positions[idx]
+                   + (unsigned long) swtable->rangelengths[idx]
+                   + 1;
+        if (pos < rangeend)
+        {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 static void GT_APPENDINT(determinerange)(GtRange *range,
                                          const GT_APPENDINT(GtSWtable)
                                            *swtable,
@@ -344,8 +433,7 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
   range->start = transpagenum *
                  (1UL + (unsigned long) swtable->maxrangevalue) +
                  swtable->positions[cellnum];
-  range->end = range->start +
-               swtable->rangelengths[cellnum] + 1;
+  range->end = range->start + swtable->rangelengths[cellnum] + 1;
 }
 
 static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
@@ -801,93 +889,4 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
     }
   }
   return 0; /* virtual stop at -1 */
-}
-
-static bool GT_APPENDINT(checkspecialrange)(
-                         const GT_APPENDINT(GtSWtable) *swtable,
-                         unsigned long pos)
-{
-  unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
-  const GT_SPECIALTABLETYPE *found;
-
-  if (pagenumber == 0)
-  {
-    if (swtable->endidxinpage[0] >= 1UL)
-    {
-      found = GT_APPENDINT(binarysearchpreviousequal)(
-                        swtable->positions,
-                        swtable->positions + swtable->endidxinpage[0] - 1,
-                        (GT_SPECIALTABLETYPE) pos);
-      if (found != NULL)
-      {
-        unsigned long rangeend
-               = (unsigned long) *found
-                 + (unsigned long) swtable->rangelengths
-                                  [(unsigned long) (found - swtable->positions)]
-                 + 1;
-        if (pos < rangeend)
-        {
-          return true;
-        }
-      }
-    }
-  } else
-  {
-    if (swtable->endidxinpage[pagenumber-1] <
-        swtable->endidxinpage[pagenumber])
-    {
-      found = GT_APPENDINT(binarysearchpreviousequal)(
-                        swtable->positions +
-                        swtable->endidxinpage[pagenumber-1],
-                        swtable->positions +
-                        swtable->endidxinpage[pagenumber] - 1,
-                        (GT_SPECIALTABLETYPE) pos);
-      if (found != NULL)
-      {
-        unsigned long rangeend
-               = (unsigned long) ((swtable->maxrangevalue+1) * pagenumber)
-                 + (unsigned long) *found
-                 + (unsigned long) swtable->rangelengths
-                                  [(unsigned long) (found - swtable->positions)]
-                 + 1;
-        if (pos < rangeend)
-        {
-          return true;
-        }
-      }
-    }
-    if (pagenumber == 1UL)
-    {
-      if (swtable->endidxinpage[0] > 1UL)
-      {
-        unsigned long idx, rangeend;
-
-        idx = swtable->endidxinpage[0] - 1;
-        rangeend = (unsigned long) swtable->positions[idx] +
-                   (unsigned long) swtable->rangelengths[idx] + 1;
-        if (pos < rangeend)
-        {
-          return true;
-        }
-      }
-    } else
-    {
-      if (swtable->endidxinpage[pagenumber-2] <
-          swtable->endidxinpage[pagenumber-1])
-      {
-        unsigned long idx, rangeend;
-
-        idx = swtable->endidxinpage[pagenumber-1] - 1;
-        rangeend = (unsigned long) ((swtable->maxrangevalue+1) * (pagenumber-1))
-                   + (unsigned long) swtable->positions[idx]
-                   + (unsigned long) swtable->rangelengths[idx]
-                   + 1;
-        if (pos < rangeend)
-        {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
 }
