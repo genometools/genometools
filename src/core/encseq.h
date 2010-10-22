@@ -393,6 +393,4 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
 /* the following function returns a count value */
 unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
 
-void gt_encseq_verify_encseq(GtEncseq *encseq,unsigned long *ssptab);
-
 #endif

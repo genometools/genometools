@@ -281,7 +281,8 @@ GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
   {
     unsigned long twobits;
 
-    gt_assert(encseq->sat == GT_ACCESS_TYPE_BITACCESS);
+    gt_assert(encseq->sat == GT_ACCESS_TYPE_BITACCESS ||
+              encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH);
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
     if (!encseq->has_specialranges ||
         twobits > encseq->maxcharforspecial ||
@@ -310,15 +311,26 @@ GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
   }
 }
 
-void gt_encseq_verify_encseq(GtEncseq *encseq,unsigned long *ssptab)
+static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
+                                    GtError *err)
 {
   bool assigned = false;
   unsigned long pos;
   GtUchar cc1, cc2;
 
-  if (encseq->ssptab == NULL)
+  if (encseq->ssptab == NULL &&
+      encseq->numofdbsequences > 1UL &&
+      gt_encseq_access_type_isviautables(encseq->sat))
   {
-    encseq->ssptab = ssptab;
+    encseq->ssptab = gt_mmap_check_size_with_suffix(indexname,
+                                         GT_SSPTABFILESUFFIX,
+                                         encseq->numofdbsequences - 1,
+                                         sizeof (*encseq->ssptab),
+                                         err);
+    if (encseq->ssptab == NULL)
+    {
+      return -1;
+    }
     assigned = true;
   }
   for (pos = 0; pos < encseq->totallength; pos++)
@@ -335,8 +347,10 @@ void gt_encseq_verify_encseq(GtEncseq *encseq,unsigned long *ssptab)
   }
   if (assigned)
   {
+    gt_fa_xmunmap((void *) encseq->ssptab);
     encseq->ssptab = NULL;
   }
+  return 0;
 }
 
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
@@ -405,7 +419,7 @@ struct GtEncseqReader
   GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long currentpos;
-  GtEncseqReaderViatablesinfo *idx;
+  GtEncseqReaderViatablesinfo *specialrangestate;
 };
 
 #ifndef INLINEDENCSEQ
@@ -1740,22 +1754,25 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                 : startpos;
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
-    if (esr->idx == NULL)
+    if (esr->specialrangestate == NULL)
     {
-      esr->idx = gt_calloc((size_t) 1, sizeof (*esr->idx));
+      esr->specialrangestate
+        = gt_calloc((size_t) 1, sizeof (*esr->specialrangestate));
     }
-    esr->idx->hasprevious = esr->idx->hascurrent = false;
+    esr->specialrangestate->hasprevious = esr->specialrangestate->hascurrent
+                                      = false;
     binpreparenextrangeGtEncseqReader(esr,usespecial);
 #ifdef GT_RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
-                       esr->idx->firstcell,esr->idx->lastcell,
-                       esr->idx->nextpage);
+                       esr->specialrangestate->firstcell,
+                       esr->specialrangestate->lastcell,
+                       esr->specialrangestate->nextpage);
 #endif
     advancerangeGtEncseqReader(esr,usespecial);
   } else {
-    if (esr->idx != NULL) {
-      gt_free(esr->idx);
-      esr->idx = NULL;
+    if (esr->specialrangestate != NULL) {
+      gt_free(esr->specialrangestate);
+      esr->specialrangestate = NULL;
     }
   }
 }
@@ -1777,8 +1794,8 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   if (esr->encseq != NULL) {
     gt_encseq_delete(esr->encseq);
   }
-  if (esr->idx != NULL) {
-    gt_free(esr->idx);
+  if (esr->specialrangestate != NULL) {
+    gt_free(esr->specialrangestate);
   }
   gt_free(esr);
 }
@@ -1790,13 +1807,13 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long len)
 {
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
-  if (esr->idx->hasprevious)
+  if (esr->specialrangestate->hasprevious)
   {
     if (!GT_ISDIRREVERSE(esr->readmode))
     {
       gt_assert(startpos + len > 0);
-      if (startpos + len - 1 >= esr->idx->previousrange.start &&
-          startpos < esr->idx->previousrange.end)
+      if (startpos + len - 1 >= esr->specialrangestate->previousrange.start &&
+          startpos < esr->specialrangestate->previousrange.end)
       {
         return true;
       }
@@ -1804,8 +1821,8 @@ static bool containsspecialViatables(const GtEncseq *encseq,
     {
       startpos = GT_REVERSEPOS(encseq->totallength,startpos);
       gt_assert(startpos + 1 >= len);
-      if (startpos + 1 - len < esr->idx->previousrange.end &&
-          startpos >= esr->idx->previousrange.start)
+      if (startpos + 1 - len < esr->specialrangestate->previousrange.end &&
+          startpos >= esr->specialrangestate->previousrange.start)
       {
         return true;
       }
@@ -2090,9 +2107,9 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       return gt_bitaccess_specialrangeiterator_next(range,sri);
     default:
       gt_assert(gt_encseq_access_type_isviautables(sri->esr->encseq->sat));
-      gt_assert(sri->esr->idx->hasprevious);
-      *range = sri->esr->idx->previousrange;
-      if (sri->esr->idx->hasrange)
+      gt_assert(sri->esr->specialrangestate->hasprevious);
+      *range = sri->esr->specialrangestate->previousrange;
+      if (sri->esr->specialrangestate->hasrange)
       {
         advancerangeGtEncseqReader(sri->esr,usespecial);
       } else
@@ -5232,11 +5249,12 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
       {
         haserr = true;
       }
-      /*
-        gt_encseq_verify_encseq(encseq,sequenceseppos);
-      */
     }
     gt_fa_fclose(outsspfp);
+    if (gt_encseq_verify_encseq(encseq,indexname,err) != 0)
+    {
+       haserr = true;
+    }
   }
   if (haserr)
   {
