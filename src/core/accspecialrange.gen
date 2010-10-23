@@ -770,8 +770,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
   }
 }
 
-static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
-                                              bool usespecial)
+static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,bool usespecial)
 {
   GtEncseqReaderViatablesinfo *swstate = usespecial ? esr->specialrangestate
                                                     : esr->wildcardrangestate;
@@ -788,12 +787,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
       {
         if (esr->currentpos < swstate->previousrange.end)
         {
-          /* XXX here is the wildcard/separator distinction */
-          return (EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
-                                     esr->currentpos)
-                  == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
-                    ? (GtUchar) SEPARATOR
-                    : (GtUchar) WILDCARD;
+          return true;
         }
         if (swstate->hasrange)
         {
@@ -806,12 +800,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
       {
         if (esr->currentpos >= swstate->previousrange.start)
         {
-          /* XXX here is the wildcard/separator distinction */
-          return (EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
-                                     esr->currentpos)
-                  == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
-                     ? (GtUchar) SEPARATOR
-                     : (GtUchar) WILDCARD;
+          return true;
         }
         if (swstate->hasrange)
         {
@@ -820,8 +809,21 @@ static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
       }
     }
   }
-  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
-                                      esr->currentpos);
+  return false;
+}
+
+static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
+                                              bool usespecial)
+{
+  unsigned long twobits
+    = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos);
+  if (!GT_APPENDINT(checknextSW)(esr,usespecial))
+  {
+    return twobits;
+  }
+  return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+                     ? (GtUchar) SEPARATOR
+                     : (GtUchar) WILDCARD;
 }
 
 static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
