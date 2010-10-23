@@ -18,9 +18,9 @@
 static void GT_APPENDINT(allocSWtables)(GT_APPENDINT(GtSWtable) *swtable)
 {
   swtable->positions = gt_malloc(sizeof (*swtable->positions) *
-                                 swtable->numofrangestostore);
+                                 swtable->numofpositionstostore);
   swtable->rangelengths = gt_malloc(sizeof(*swtable->rangelengths) *
-                                    swtable->numofrangestostore);
+                                    swtable->numofpositionstostore);
   swtable->endidxinpage = gt_malloc(sizeof(*swtable->endidxinpage) *
                                     swtable->numofpages);
 }
@@ -181,7 +181,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
           /* note that we store one less than the length to prevent overflows */
           gt_assert(fillspecialrangeidx > 0);
           gt_assert(fillspecialrangeidx - 1 <
-                    specialrangetable->numofrangestostore);
+                    specialrangetable->numofpositionstostore);
           specialrangetable->rangelengths[fillspecialrangeidx-1]
             = (GT_SPECIALTABLETYPE) (lastspecialrangelength-1);
 #ifndef NDEBUG
@@ -193,7 +193,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
           /* note that we store one less than the length to prevent overflows */
           gt_assert(fillwildcardrangeidx > 0);
           gt_assert(fillwildcardrangeidx - 1 <
-                    wildcardrangetable->numofrangestostore);
+                    wildcardrangetable->numofpositionstostore);
           wildcardrangetable->rangelengths[fillwildcardrangeidx-1]
             = (GT_SPECIALTABLETYPE) (lastwildcardrangelength-1);
 #ifndef NDEBUG

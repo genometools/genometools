@@ -50,7 +50,7 @@ typedef struct
           *rangelengths;
   unsigned long *endidxinpage;
   unsigned long numofpages;
-  unsigned long numofrangestostore;
+  unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uchar;
 
@@ -60,7 +60,7 @@ typedef struct
            *rangelengths;
   unsigned long *endidxinpage;
   unsigned long numofpages;
-  unsigned long numofrangestostore;
+  unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
 } GtSWtable_ushort;
 
@@ -70,7 +70,7 @@ typedef struct
          *rangelengths;
   unsigned long *endidxinpage;
   unsigned long numofpages;
-  unsigned long numofrangestostore;
+  unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
 } GtSWtable_uint32;
 
@@ -133,7 +133,7 @@ struct GtEncseq
   unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                            numofdbsequences  -1)
                                                            entries */
-  GtSWtable *ssptabnew;
+  GtSWtable ssptabnew;
 
   unsigned long *fsptab; /* (if numofdbfiles = 1 then NULL  else
                                                       numofdbfiles  -1
