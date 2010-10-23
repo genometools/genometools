@@ -854,20 +854,37 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
 typedef struct
 {
   FILE *fp;
+  unsigned long nextcheckpos, pagenumber, fillpos;
 } Gtssptaboutinfo;
 
 static void initsspouttabinfo(Gtssptaboutinfo *ssptaboutinfo)
 {
   ssptaboutinfo->fp = NULL;
+  ssptaboutinfo->nextcheckpos = ssptaboutinfo->pagenumber
+                              = ssptaboutinfo->fillpos = 0;
 }
 
-static void processssptabvalue(Gtssptaboutinfo *ssptaboutinfo,unsigned long pos)
+static void processssptabvalue(Gtssptaboutinfo *ssptaboutinfo,
+                               unsigned long seppos)
 {
   if (ssptaboutinfo->fp != NULL)
   {
-    gt_xfwrite(&pos,sizeof (pos), (size_t) 1, ssptaboutinfo->fp);
+    gt_xfwrite(&seppos,sizeof (seppos), (size_t) 1, ssptaboutinfo->fp);
   }
 }
+
+/*
+static void processssptabeachposition(Gtssptaboutinfo *ssptaboutinfo,
+                                      unsigned long currentposition)
+{
+  if (ssptaboutinfo->fp != NULL)
+  {
+    if (currentposition == ssptaboutinfo->nextcheckpos)
+    {
+    }
+  }
+}
+*/
 
 void gt_encseq_delete(GtEncseq *encseq)
 {

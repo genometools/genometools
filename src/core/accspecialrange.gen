@@ -31,7 +31,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
                                                GtError *err)
 {
   unsigned long fillspecialrangeidx = 0, fillwildcardrangeidx = 0,
-                currentposition, pagenum = 0, nextcheckpos, widthbuffer = 0;
+                currentposition, pagenumber = 0, nextcheckpos, widthbuffer = 0;
   int retval;
   unsigned int lastspecialrangelength = 0, lastwildcardrangelength = 0;
   GtUchar cc;
@@ -62,7 +62,6 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
   gt_assert(specialrangetable->maxrangevalue ==
             wildcardrangetable->maxrangevalue);
   nextcheckpos = (unsigned long) specialrangetable->maxrangevalue;
-
   for (currentposition=0; /* Nothing */; currentposition++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
@@ -207,9 +206,9 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
     }
     if (currentposition == nextcheckpos)
     {
-      specialrangetable->endidxinpage[pagenum] = fillspecialrangeidx;
-      wildcardrangetable->endidxinpage[pagenum] = fillwildcardrangeidx;
-      pagenum++;
+      specialrangetable->endidxinpage[pagenumber] = fillspecialrangeidx;
+      wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
+      pagenumber++;
       nextcheckpos += (unsigned long) (specialrangetable->maxrangevalue+1);
     }
     bitwise <<= 2;
@@ -241,11 +240,11 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
   UPDATESEQBUFFERFINAL(bitwiseSW,twobitencodingSWptr);
   gt_assert(sumspecialranges == countspecials);
   gt_assert(sumwildcardranges == countwildcards);
-  while (pagenum < specialrangetable->numofpages)
+  while (pagenumber < specialrangetable->numofpages)
   {
-    specialrangetable->endidxinpage[pagenum] = fillspecialrangeidx;
-    wildcardrangetable->endidxinpage[pagenum] = fillwildcardrangeidx;
-    pagenum++;
+    specialrangetable->endidxinpage[pagenumber] = fillspecialrangeidx;
+    wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
+    pagenumber++;
   }
   return 0;
 }
