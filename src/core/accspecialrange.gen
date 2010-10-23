@@ -310,8 +310,7 @@ static void GT_APPENDINT(showallspecialpositionswithpages)(
                                            const GT_SPECIALTABLETYPE *rightptr,
                                            GT_SPECIALTABLETYPE pos)
 {
-  const GT_SPECIALTABLETYPE *midptr,
-                    *found = NULL;
+  const GT_SPECIALTABLETYPE *midptr, *found = NULL;
 
   while (leftptr <= rightptr)
   {
@@ -433,7 +432,13 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
   range->start = transpagenum *
                  (1UL + (unsigned long) swtable->maxrangevalue) +
                  swtable->positions[cellnum];
-  range->end = range->start + swtable->rangelengths[cellnum] + 1;
+  if (swtable->rangelengths != NULL)
+  {
+    range->end = range->start + swtable->rangelengths[cellnum] + 1;
+  } else
+  {
+    range->end = range->start + 1;
+  }
 }
 
 static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
@@ -819,7 +824,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
     = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos);
   if (!GT_APPENDINT(checknextSW)(esr,usespecial))
   {
-    return twobits;
+    return (GtUchar) twobits;
   }
   return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
                      ? (GtUchar) SEPARATOR

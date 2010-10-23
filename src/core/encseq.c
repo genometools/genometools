@@ -2422,6 +2422,64 @@ GtEncseq* gt_encseq_ref(GtEncseq *encseq)
   return encseq;
 }
 
+#define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
+        (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
+        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1)
+
+static uint64_t sizeofSWtable(GtEncseqAccessType sat,
+                              bool withrangelength,
+                              unsigned long totallength,
+                              unsigned long items)
+{
+  if (items == 0)
+  {
+    return 0;
+  }
+  switch (sat)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      return SIZEOFSWTABLE(GtUchar,UCHAR_MAX);
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      return SIZEOFSWTABLE(GtUshort,USHRT_MAX);
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      return SIZEOFSWTABLE(uint32_t,UINT32_MAX);
+    default:
+      fprintf(stderr,"sizeofViauint(sat=%d) is undefined\n",(int) sat);
+      exit(EXIT_FAILURE);
+  }
+}
+
+static GtEncseqAccessType determineoptimalsssptablerep(
+                                  unsigned long totallength,
+                                  unsigned long numofseparators)
+{
+  uint64_t sepsizemin, sepsize;
+  GtEncseqAccessType satmin;
+
+  if (numofseparators == 0)
+  {
+    return GT_ACCESS_TYPE_UNDEFINED;
+  }
+  sepsizemin = sizeofSWtable(GT_ACCESS_TYPE_UCHARTABLES,false,totallength,
+                             numofseparators);
+  satmin = GT_ACCESS_TYPE_UCHARTABLES;
+  sepsize = sizeofSWtable(GT_ACCESS_TYPE_USHORTTABLES,false,totallength,
+                          numofseparators);
+  if (sepsize < sepsizemin)
+  {
+    sepsizemin = sepsize;
+    satmin = GT_ACCESS_TYPE_USHORTTABLES;
+  }
+  sepsize = sizeofSWtable(GT_ACCESS_TYPE_UINT32TABLES,false,totallength,
+                          numofseparators);
+  if (sepsize < sepsizemin)
+  {
+    sepsizemin = sepsize;
+    satmin = GT_ACCESS_TYPE_UINT32TABLES;
+  }
+  return satmin;
+}
+
 static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
@@ -2440,6 +2498,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
+  encseq->satsep = determineoptimalsssptablerep(totallength,numofsequences-1);
   if (gt_encseq_access_type_isviautables(sat))
   {
     initSWtable(&encseq->specialrangetable,totallength,sat,specialranges);
@@ -3249,60 +3308,12 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          }
          break;
     case GT_ACCESS_TYPE_UCHARTABLES:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtUchar) * specialranges +
-                  (uint64_t) sizeof (GtUchar) * specialranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/UCHAR_MAX+1);
-         }
-#ifdef NEWTWOBITENCODING
-         if (wildcardranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtUchar) * wildcardranges +
-                  (uint64_t) sizeof (GtUchar) * wildcardranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/UCHAR_MAX+1);
-         }
-#endif
-         break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtUshort) * specialranges +
-                  (uint64_t) sizeof (GtUshort) * specialranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/USHRT_MAX+1);
-         }
-#ifdef NEWTWOBITENCODING
-         if (wildcardranges > 0)
-         {
-           sum += (uint64_t) sizeof (GtUshort) * wildcardranges +
-                  (uint64_t) sizeof (GtUshort) * wildcardranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/USHRT_MAX+1);
-         }
-#endif
-         break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-         sum = sizeoftwobitencoding;
-         if (specialranges > 0)
-         {
-           sum += (uint64_t) sizeof (uint32_t) * specialranges +
-                  (uint64_t) sizeof (uint32_t) * specialranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/UINT32_MAX+1);
-         }
+         sum = sizeoftwobitencoding +
+               sizeofSWtable(sat,true,totallength,specialranges);
 #ifdef NEWTWOBITENCODING
-         if (wildcardranges > 0)
-         {
-           sum += (uint64_t) sizeof (uint32_t) * wildcardranges +
-                  (uint64_t) sizeof (uint32_t) * wildcardranges +
-                  (uint64_t) sizeof (unsigned long) *
-                                    (totallength/UINT32_MAX+1);
-         }
+         sum += sizeofSWtable(sat,true,totallength,wildcardranges);
 #endif
          break;
     default:
@@ -3310,7 +3321,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   sum += sizeof (unsigned long); /* for sat type */
-  sum += sizeof (totallength); /* for totallength */
+  sum += sizeof (totallength);   /* for totallength */
   sum += sizeof (unsigned long); /* for numofdbsequences type */
   sum += sizeof (unsigned long); /* for numofdbfilenames type */
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */

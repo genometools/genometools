@@ -85,7 +85,7 @@ struct GtEncseq
 {
   /* Common part */
   unsigned long *satcharptr;  /* need for writing char sat */
-  GtEncseqAccessType sat;
+  GtEncseqAccessType sat, satsep;
   const char *satname;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   bool has_specialranges,
@@ -133,6 +133,8 @@ struct GtEncseq
   unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
                                                            numofdbsequences  -1)
                                                            entries */
+  GtSWtable *ssptabnew;
+
   unsigned long *fsptab; /* (if numofdbfiles = 1 then NULL  else
                                                       numofdbfiles  -1
                                                       entries */
