@@ -139,7 +139,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
 #endif
             lastwildcardrangelength = 0;
           }
-          processssptabvalue(ssptaboutinfo,currentposition);
+          ssptaboutinfo_processseppos(ssptaboutinfo,currentposition);
         }
 #ifndef NDEBUG
         countspecials++;
@@ -211,6 +211,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
       pagenumber++;
       nextcheckpos += (unsigned long) (specialrangetable->maxrangevalue+1);
     }
+    ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
     bitwise <<= 2;
     bitwiseSW <<= 2;
     if (ISNOTSPECIAL(cc))
