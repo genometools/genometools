@@ -247,6 +247,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
     wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
     pagenumber++;
   }
+  ssptaboutinfo_finalize(ssptaboutinfo);
   return 0;
 }
 

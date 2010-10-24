@@ -945,7 +945,8 @@ typedef struct
 {
   GtSWtable ssptab;
   GtEncseqAccessType satsep;
-  unsigned long nextcheckpos, nextcheckincrement, pagenumber, fillpos;
+  unsigned long nextcheckpos, nextcheckincrement, pagenumber, fillpos,
+                numofpages;
   FILE *fp;
 } Gtssptaboutinfo;
 
@@ -961,26 +962,47 @@ static Gtssptaboutinfo *ssptaboutinfo_new(const char *indexname,
     = determineoptimalsssptablerep(totallength,numofseparators);
   initSWtable(&ssptaboutinfo->ssptab,totallength,ssptaboutinfo->satsep,
               numofseparators);
+  setencsequtablesNULL(ssptaboutinfo->satsep,&ssptaboutinfo->ssptab);
   switch (ssptaboutinfo->satsep)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       ssptaboutinfo->nextcheckincrement
         = (unsigned long) ssptaboutinfo->ssptab.st_uchar.maxrangevalue+1;
+      ssptaboutinfo->numofpages = ssptaboutinfo->ssptab.st_uchar.numofpages;
+      ssptaboutinfo->ssptab.st_uchar.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uchar.positions)
+                    * ssptaboutinfo->ssptab.st_uchar.numofpositionstostore);
+      ssptaboutinfo->ssptab.st_uchar.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uchar.endidxinpage)
+                    * ssptaboutinfo->ssptab.st_uchar.numofpages);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       ssptaboutinfo->nextcheckincrement
         = (unsigned long) ssptaboutinfo->ssptab.st_ushort.maxrangevalue+1;
+      ssptaboutinfo->numofpages = ssptaboutinfo->ssptab.st_ushort.numofpages;
+      ssptaboutinfo->ssptab.st_ushort.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_ushort.positions)
+                    * ssptaboutinfo->ssptab.st_ushort.numofpositionstostore);
+      ssptaboutinfo->ssptab.st_ushort.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_ushort.endidxinpage)
+                    * ssptaboutinfo->ssptab.st_ushort.numofpages);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       ssptaboutinfo->nextcheckincrement
         = (unsigned long) ssptaboutinfo->ssptab.st_uint32.maxrangevalue+1;
+      ssptaboutinfo->numofpages = ssptaboutinfo->ssptab.st_uint32.numofpages;
+      ssptaboutinfo->ssptab.st_uint32.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uint32.positions)
+                    * ssptaboutinfo->ssptab.st_uint32.numofpositionstostore);
+      ssptaboutinfo->ssptab.st_uint32.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uint32.endidxinpage)
+                    * ssptaboutinfo->ssptab.st_uint32.numofpages);
       break;
     default:
       fprintf(stderr,"ssptaboutinfo_new(sat = %d is undefined)\n",
                      (int) ssptaboutinfo->satsep);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  setencsequtablesNULL(ssptaboutinfo->satsep,&ssptaboutinfo->ssptab);
   ssptaboutinfo->nextcheckpos = ssptaboutinfo->nextcheckincrement - 1;
   ssptaboutinfo->pagenumber = ssptaboutinfo->fillpos = 0;
   ssptaboutinfo->fp = gt_fa_fopen_with_suffix(indexname,GT_SSPTABFILESUFFIX,
@@ -998,6 +1020,25 @@ static void ssptaboutinfo_delete(Gtssptaboutinfo *ssptaboutinfo)
   if (ssptaboutinfo != NULL)
   {
     gt_fa_fclose(ssptaboutinfo->fp);
+    switch (ssptaboutinfo->satsep)
+    {
+      case GT_ACCESS_TYPE_UCHARTABLES:
+        gt_free(ssptaboutinfo->ssptab.st_uchar.positions);
+        gt_free(ssptaboutinfo->ssptab.st_uchar.endidxinpage);
+        break;
+      case GT_ACCESS_TYPE_USHORTTABLES:
+        gt_free(ssptaboutinfo->ssptab.st_ushort.positions);
+        gt_free(ssptaboutinfo->ssptab.st_ushort.endidxinpage);
+        break;
+      case GT_ACCESS_TYPE_UINT32TABLES:
+        gt_free(ssptaboutinfo->ssptab.st_uint32.positions);
+        gt_free(ssptaboutinfo->ssptab.st_uint32.endidxinpage);
+        break;
+      default:
+        fprintf(stderr,"ssptaboutinfo_new(sat = %d is undefined)\n",
+                       (int) ssptaboutinfo->satsep);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
     gt_free(ssptaboutinfo);
   }
 }
@@ -1009,6 +1050,48 @@ static void ssptaboutinfo_processseppos(Gtssptaboutinfo *ssptaboutinfo,
   {
     gt_assert(ssptaboutinfo->fp != NULL);
     gt_xfwrite(&seppos,sizeof (seppos), (size_t) 1, ssptaboutinfo->fp);
+    switch (ssptaboutinfo->satsep)
+    {
+      case GT_ACCESS_TYPE_UCHARTABLES:
+        ssptaboutinfo->ssptab.st_uchar.positions[ssptaboutinfo->fillpos++]
+          = (GtUchar) (seppos & ssptaboutinfo->ssptab.st_uchar.maxrangevalue);
+        break;
+      case GT_ACCESS_TYPE_USHORTTABLES:
+        ssptaboutinfo->ssptab.st_ushort.positions[ssptaboutinfo->fillpos++]
+          = (GtUshort) (seppos & ssptaboutinfo->ssptab.st_ushort.maxrangevalue);
+        break;
+      case GT_ACCESS_TYPE_UINT32TABLES:
+        ssptaboutinfo->ssptab.st_uint32.positions[ssptaboutinfo->fillpos++]
+          = (uint32_t) (seppos & ssptaboutinfo->ssptab.st_uint32.maxrangevalue);
+        break;
+      default:
+        fprintf(stderr,"ssptaboutinfo_processseppos(sat = %d is undefined)\n",
+                       (int) ssptaboutinfo->satsep);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+}
+
+static void ssptaboutinfo_setendidx(Gtssptaboutinfo *ssptaboutinfo)
+{
+  switch (ssptaboutinfo->satsep)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      ssptaboutinfo->ssptab.st_uchar.endidxinpage[ssptaboutinfo->pagenumber++]
+        = ssptaboutinfo->fillpos;
+      break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      ssptaboutinfo->ssptab.st_ushort.endidxinpage[ssptaboutinfo->pagenumber++]
+        = ssptaboutinfo->fillpos;
+      break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      ssptaboutinfo->ssptab.st_uint32.endidxinpage[ssptaboutinfo->pagenumber++]
+        = ssptaboutinfo->fillpos;
+      break;
+    default:
+      fprintf(stderr,"ssptaboutinfo_setendidx(sat = %d is undefined)\n",
+                     (int) ssptaboutinfo->satsep);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
@@ -1017,11 +1100,19 @@ static void ssptaboutinfo_processsanyposition(Gtssptaboutinfo *ssptaboutinfo,
 {
   if (ssptaboutinfo != NULL && currentposition == ssptaboutinfo->nextcheckpos)
   {
-    /*
-     ssptaboutinfo->endidxinpage[ssptaboutinfo->pagenumber++]
-       ssptaboutinfo->fillpos;
-     */
+    ssptaboutinfo_setendidx(ssptaboutinfo);
     ssptaboutinfo->nextcheckpos += ssptaboutinfo->nextcheckincrement;
+  }
+}
+
+static void ssptaboutinfo_finalize(Gtssptaboutinfo *ssptaboutinfo)
+{
+  if (ssptaboutinfo != NULL)
+  {
+    while (ssptaboutinfo->pagenumber < ssptaboutinfo->numofpages)
+    {
+      ssptaboutinfo_setendidx(ssptaboutinfo);
+    }
   }
 }
 
@@ -1303,6 +1394,7 @@ static int fillViadirectaccess(GtEncseq *encseq,
       break;
     }
   }
+  ssptaboutinfo_finalize(ssptaboutinfo);
   return 0;
 }
 
@@ -1730,6 +1822,7 @@ static int fillViabitaccess(GtEncseq *encseq,
     }
   }
   UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr); /* in fillViabitaccess */
+  ssptaboutinfo_finalize(ssptaboutinfo);
   return 0;
 }
 
