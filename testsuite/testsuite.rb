@@ -74,10 +74,12 @@ end
 $systemname=`uname -s`
 $systemname.chomp!
 
+$MEMCHECK_SUPPORTEDPLATFORMS = ["Linux", "Darwin"]
+
 # define helper function
 def run_test(str, opts = {})
   if $arguments["memcheck"] then
-    if $systemname == "Linux" then
+    if $MEMCHECK_SUPPORTEDPLATFORMS.include?($systemname) then
       $memcheck = "valgrind --tool=memcheck --suppressions="+
                   File.join($testdata, "gt.supp")+
                   " --leak-check=yes --error-exitcode=1 -q"
