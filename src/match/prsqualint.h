@@ -37,7 +37,7 @@ typedef struct
 } Qualifiedinteger;
 
 Qualifiedinteger *gt_parsequalifiedinteger(const char *option,
-                                        const char *lparam,
-                                        GtError *err);
+                                           const char *lparam,
+                                           GtError *err);
 
 #endif

@@ -21,7 +21,6 @@
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/types_api.h"
-#include "core/types_api.h"
 
 /*
   This file defines macros to conveniently declare and

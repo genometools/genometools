@@ -18,6 +18,7 @@
 #ifndef REDBLACK_H
 #define REDBLACK_H
 
+#include <stdbool.h>
 #include "core/error.h"
 
 typedef enum

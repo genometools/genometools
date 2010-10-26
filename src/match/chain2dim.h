@@ -19,7 +19,6 @@
 #define CHAIN2DIM_H
 
 #include "core/error_api.h"
-
 #include "core/logger.h"
 
 /*

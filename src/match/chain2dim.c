@@ -17,14 +17,14 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include "core/error_api.h"
 #include "core/minmax.h"
-#include "core/mathsupport.h"
-#include "core/str_api.h"
-#include "core/str_array_api.h"
+#include "core/mathsupport.h" /* for gt_double_equals_double */
 #include "core/unused_api.h"
+#include "core/ma.h"
 #include "core/arraydef.h"
-#include "extended/redblack.h"
 #include "core/logger.h"
+#include "extended/redblack.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
 
