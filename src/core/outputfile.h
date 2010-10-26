@@ -30,7 +30,7 @@ void              gt_outputfile_register_options(GtOptionParser*,
                                                  GtOutputFileInfo*);
 void              gt_outputfileinfo_delete(GtOutputFileInfo*);
 
-/* Helper funtion for (rare) tools which do not use the full <GtOutputFileInfo>
+/* Helper function for (rare) tools which do not use the full <GtOutputFileInfo>
    (usually if directories are involved). */
 GtFile*           gt_outputfile_xopen_forcecheck(const char *path,
                                                  const char *mode, bool force,
