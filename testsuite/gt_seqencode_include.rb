@@ -55,7 +55,8 @@ def getseq(filename, mirrored = false, rm = "fwd")
   ret
 end
 
-def run_encseq_comparison(filename, mirrored, readmode, numsamples = NUMSAMPLES)
+def run_encseq_comparison(filename, mirrored, readmode, singlechars,
+                          numsamples = NUMSAMPLES)
   seq = getseq(filename, mirrored, readmode)
   ranges = []
   numsamples.times do
@@ -64,11 +65,12 @@ def run_encseq_comparison(filename, mirrored, readmode, numsamples = NUMSAMPLES)
     stop = start + len
     ranges.push([start, stop])
   end
-  
+
   ranges.each do |rng|
     line = "#{$bin}gt dev seqdecode -output concat " + \
            "-range #{rng[0]} #{rng[1]} " + \
-           "-dir #{readmode} #{"-mirrored" if mirrored} #{filename}"
+           "-dir #{readmode} #{"-mirrored" if mirrored} " + \
+           "#{"-singlechars" if singlechars} #{filename}"
     if mirrored and AATESTSEQS.include?(filename)
       # -mirroring should fail on proteins
       run_test(line, :retval => 1)
@@ -90,35 +92,40 @@ end
 
 def testformirrored(s, readmode)
   [false, true].each do |mirrored|
-    Name "gt seqdecode #{s.split('/').last} cc " + \
-         "#{"mirrored " if mirrored}#{readmode}"
-    Keywords "gt_seqdecode #{" mirroring" if mirrored}"
-    Test do
-      run "#{$bin}gt dev seqencode #{s}"
-      run_encseq_comparison(s, mirrored, readmode)
-    end
+    [false, true].each do |singlechars|
+      Name "gt seqdecode #{s.split('/').last} cc " + \
+           "#{"mirr " if mirrored}#{"sngl " if singlechars}#{readmode}"
+      Keywords "gt_seqdecode #{" mirroring" if mirrored}"
+      Test do
+        run "#{$bin}gt dev seqencode #{s}"
+        run_encseq_comparison(s, mirrored, readmode, singlechars)
+      end
 
-    Name "gt seqdecode #{s.split('/').last} cc " + \
-         "#{"mirrored " if mirrored}#{readmode} whole seq"
-    Keywords "gt_seqdecode#{" mirroring" if mirrored}"
-    Test do
-      run_test "#{$bin}gt dev seqencode #{s}"
-      seq = getseq(s, mirrored, readmode)
-      line = "#{$bin}gt dev seqdecode -output concat -dir #{readmode} " + \
-             "#{"-mirrored" if mirrored} #{s}"
-      if mirrored and AATESTSEQS.include?(s)
-        # -mirroring should fail on proteins
-        run_test(line, :retval => 1)
-      else
-        run_test line
-        File.open("seqout", "w+") do |f|
-          if DNATESTSEQS.include?(s)
-            seq = seq.downcase.tr("rRyYmMkKwWsSbBdDhHvV","nNnNnNnNnNnNnNnNnNnN")
+      Name "gt seqdecode #{s.split('/').last} cc " + \
+           "#{"mirr " if mirrored}#{"sngl " if singlechars}#{readmode} " + \
+           "whole seq"
+      Keywords "gt_seqdecode#{" mirroring" if mirrored}"
+      Test do
+        run_test "#{$bin}gt dev seqencode #{s}"
+        seq = getseq(s, mirrored, readmode)
+        line = "#{$bin}gt dev seqdecode -output concat -dir #{readmode} " + \
+               "#{"-mirrored" if mirrored} " + \
+               "#{"-singlechars" if singlechars} #{s}"
+        if mirrored and AATESTSEQS.include?(s)
+          # -mirroring should fail on proteins
+          run_test(line, :retval => 1)
+        else
+          run_test line
+          File.open("seqout", "w+") do |f|
+            if DNATESTSEQS.include?(s)
+              seq = seq.downcase.tr("rRyYmMkKwWsSbBdDhHvV", \
+                                    "nNnNnNnNnNnNnNnNnNnN")
+            end
+            f.write(seq)
+            f.write("\n")
           end
-          f.write(seq)
-          f.write("\n")
+          run "diff seqout #{$last_stdout}"
         end
-        run "diff seqout #{$last_stdout}"
       end
     end
   end
@@ -134,5 +141,5 @@ AATESTSEQS.each do |s|
   STDREADMODES.each do |readmode|
     testformirrored(s, readmode)
   end
-end  
+end
 

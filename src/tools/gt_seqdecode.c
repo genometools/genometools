@@ -27,7 +27,8 @@
 #include "tools/gt_seqdecode.h"
 
 typedef struct {
-  bool mirrored;
+  bool mirrored,
+       singlechars;
   GtStr *dir,
         *mode,
         *sepchar;
@@ -70,6 +71,14 @@ static GtOptionParser* gt_seqdecode_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("mirrored",
                               "additionally output reverse complements",
                               &arguments->mirrored,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  /* -singlechars */
+  option = gt_option_new_bool("singlechars",
+                              "do not use a GtEncseqReader but access each "
+                              "sequence character separately",
+                              &arguments->singlechars,
                               false);
   gt_option_parser_add_option(op, option);
 
@@ -157,17 +166,26 @@ static int output_sequence(GtEncseq *encseq, GtSeqdecodeArguments *args,
                                      &desclen,
                                      gt_encseq_num_of_sequences(encseq)-1-i);
       }
-      esr = gt_encseq_create_reader_with_readmode(encseq, args->rm, startpos);
       /* output description */
       gt_xfputc(GT_FASTA_SEPARATOR, stdout);
       gt_xfwrite(desc, 1, desclen, stdout);
       gt_xfputc('\n', stdout);
       /* XXX: make this more efficient by writing in a buffer first and the
          showing the result */
-      for (j = 0; j < len; j++) {
-         gt_xfputc(gt_encseq_reader_next_decoded_char(esr), stdout);
+      if (args->singlechars) {
+        for (j = 0; j < len; j++) {
+           gt_xfputc(gt_encseq_get_decoded_char(encseq,
+                                                startpos + j,
+                                                args->rm),
+                     stdout);
+        }
+      } else {
+        esr = gt_encseq_create_reader_with_readmode(encseq, args->rm, startpos);
+        for (j = 0; j < len; j++) {
+           gt_xfputc(gt_encseq_reader_next_decoded_char(esr), stdout);
+        }
+        gt_encseq_reader_delete(esr);
       }
-      gt_encseq_reader_delete(esr);
       gt_xfputc('\n', stdout);
     }
   }
@@ -187,19 +205,31 @@ static int output_sequence(GtEncseq *encseq, GtSeqdecodeArguments *args,
       }
     }
     if (!had_err) {
-      esr = gt_encseq_create_reader_with_readmode(encseq, args->rm, from);
-      if (esr) {
+      if (args->singlechars) {
         for (j = from; j <= to; j++) {
-          GtUchar cc = gt_encseq_reader_next_encoded_char(esr);
+          char outchar;
+          GtUchar cc = gt_encseq_get_encoded_char(encseq, j, args->rm);
           if (cc == SEPARATOR)
-            gt_xfputc(gt_str_get(args->sepchar)[0], stdout);
+            outchar = gt_str_get(args->sepchar)[0];
           else
-            gt_xfputc(gt_alphabet_decode(gt_encseq_alphabet(encseq), cc),
-                      stdout);
+            outchar = gt_alphabet_decode(gt_encseq_alphabet(encseq), cc);
+          gt_xfputc(outchar, stdout);
         }
-        gt_encseq_reader_delete(esr);
-        gt_xfputc('\n', stdout);
+      } else {
+        esr = gt_encseq_create_reader_with_readmode(encseq, args->rm, from);
+        if (esr) {
+          for (j = from; j <= to; j++) {
+            GtUchar cc = gt_encseq_reader_next_encoded_char(esr);
+            if (cc == SEPARATOR)
+              gt_xfputc(gt_str_get(args->sepchar)[0], stdout);
+            else
+              gt_xfputc(gt_alphabet_decode(gt_encseq_alphabet(encseq), cc),
+                        stdout);
+          }
+          gt_encseq_reader_delete(esr);
+        }
       }
+      gt_xfputc('\n', stdout);
     }
   }
   return had_err;
