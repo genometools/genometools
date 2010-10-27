@@ -564,6 +564,55 @@ bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
           encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) ? true : false;
 }
 
+static void addswtabletomapspectable(GtArrayGtMapspecification *mapspectable,
+                                     GtSWtable *swtable,
+                                     unsigned long totallength,
+                                     GtEncseqAccessType sat)
+{
+  GtMapspecification *mapspecptr;
+  unsigned long numofunits;
+
+  switch (sat)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      if (swtable->st_uchar.numofpositionstostore > 0)
+      {
+        NEWMAPSPEC(swtable->st_uchar.positions,GtUchar,
+                   swtable->st_uchar.numofpositionstostore);
+        NEWMAPSPEC(swtable->st_uchar.rangelengths,GtUchar,
+                   swtable->st_uchar.numofpositionstostore);
+        numofunits = totallength/UCHAR_MAX+1;
+        NEWMAPSPEC(swtable->st_uchar.endidxinpage,GtUlong,numofunits);
+      }
+      break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      if (swtable->st_ushort.numofpositionstostore > 0)
+      {
+        NEWMAPSPEC(swtable->st_ushort.positions,GtUshort,
+                   swtable->st_ushort.numofpositionstostore);
+        NEWMAPSPEC(swtable->st_ushort.rangelengths,GtUshort,
+                   swtable->st_ushort.numofpositionstostore);
+        numofunits = totallength/USHRT_MAX+1;
+        NEWMAPSPEC(swtable->st_ushort.endidxinpage,GtUlong,numofunits);
+      }
+      break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      if (swtable->st_uint32.numofpositionstostore > 0)
+      {
+        NEWMAPSPEC(swtable->st_uint32.positions,Uint32,
+                   swtable->st_uint32.numofpositionstostore);
+        NEWMAPSPEC(swtable->st_uint32.rangelengths,Uint32,
+                   swtable->st_uint32.numofpositionstostore);
+        numofunits = totallength/UINT32_MAX+1;
+        NEWMAPSPEC(swtable->st_uint32.endidxinpage,GtUlong,numofunits);
+      }
+      break;
+    default:
+      fprintf(stderr,"addswtabletomapspectable(%d) undefined\n",(int) sat);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+
 static void assignencseqmapspecification(
                                         GtArrayGtMapspecification *mapspectable,
                                         void *voidinfo,
@@ -656,87 +705,21 @@ static void assignencseqmapspecification(
       }
       break;
     case GT_ACCESS_TYPE_UCHARTABLES:
-      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
-      if (encseq->specialrangetable.st_uchar.numofpositionstostore > 0)
-      {
-        NEWMAPSPEC(encseq->specialrangetable.st_uchar.positions,GtUchar,
-                   encseq->specialrangetable.st_uchar.numofpositionstostore);
-        NEWMAPSPEC(encseq->specialrangetable.st_uchar.rangelengths,GtUchar,
-                   encseq->specialrangetable.st_uchar.numofpositionstostore);
-        numofunits = encseq->totallength/UCHAR_MAX+1;
-        NEWMAPSPEC(encseq->specialrangetable.st_uchar.endidxinpage,GtUlong,
-                   numofunits);
-      }
-#ifdef NEWTWOBITENCODING
-      NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
-      if (encseq->wildcardrangetable.st_uchar.numofpositionstostore > 0)
-      {
-        NEWMAPSPEC(encseq->wildcardrangetable.st_uchar.positions,GtUchar,
-                   encseq->wildcardrangetable.st_uchar.numofpositionstostore);
-        NEWMAPSPEC(encseq->wildcardrangetable.st_uchar.rangelengths,GtUchar,
-                   encseq->wildcardrangetable.st_uchar.numofpositionstostore);
-        numofunits = encseq->totallength/UCHAR_MAX+1;
-        NEWMAPSPEC(encseq->wildcardrangetable.st_uchar.endidxinpage,GtUlong,
-                   numofunits);
-      }
-#endif
-      break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
-      if (encseq->specialrangetable.st_ushort.numofpositionstostore > 0)
-      {
-        NEWMAPSPEC(encseq->specialrangetable.st_ushort.positions,GtUshort,
-                   encseq->specialrangetable.st_ushort.numofpositionstostore);
-        NEWMAPSPEC(encseq->specialrangetable.st_ushort.rangelengths,GtUshort,
-                   encseq->specialrangetable.st_ushort.numofpositionstostore);
-        numofunits = encseq->totallength/USHRT_MAX+1;
-        NEWMAPSPEC(encseq->specialrangetable.st_ushort.endidxinpage,GtUlong,
-                   numofunits);
-      }
-#ifdef NEWTWOBITENCODING
-      NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
-      if (encseq->wildcardrangetable.st_ushort.numofpositionstostore > 0)
-      {
-        NEWMAPSPEC(encseq->wildcardrangetable.st_ushort.positions,GtUshort,
-                   encseq->wildcardrangetable.st_ushort.numofpositionstostore);
-        NEWMAPSPEC(encseq->wildcardrangetable.st_ushort.rangelengths,GtUshort,
-                   encseq->wildcardrangetable.st_ushort.numofpositionstostore);
-        numofunits = encseq->totallength/USHRT_MAX+1;
-        NEWMAPSPEC(encseq->wildcardrangetable.st_ushort.endidxinpage,GtUlong,
-                   numofunits);
-      }
-#endif
-      break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->specialrangetable.st_uint32.numofpositionstostore > 0)
-      {
-        NEWMAPSPEC(encseq->specialrangetable.st_uint32.positions,Uint32,
-                   encseq->specialrangetable.st_uint32.numofpositionstostore);
-        NEWMAPSPEC(encseq->specialrangetable.st_uint32.rangelengths,Uint32,
-                   encseq->specialrangetable.st_uint32.numofpositionstostore);
-        numofunits = encseq->totallength/UINT32_MAX+1;
-        NEWMAPSPEC(encseq->specialrangetable.st_uint32.endidxinpage,GtUlong,
-                   numofunits);
-      }
+      addswtabletomapspectable(mapspectable,
+                               &encseq->specialrangetable,
+                               encseq->totallength,
+                               encseq->sat);
 #ifdef NEWTWOBITENCODING
       NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      if (encseq->wildcardrangetable.st_uint32.numofpositionstostore > 0)
-      {
-        NEWMAPSPEC(encseq->wildcardrangetable.st_uint32.positions,Uint32,
-                   encseq->wildcardrangetable.st_uint32.numofpositionstostore);
-        NEWMAPSPEC(encseq->wildcardrangetable.st_uint32.rangelengths,Uint32,
-                   encseq->wildcardrangetable.st_uint32.numofpositionstostore);
-        numofunits = encseq->totallength/UINT32_MAX+1;
-        NEWMAPSPEC(encseq->wildcardrangetable.st_uint32.endidxinpage,GtUlong,
-                   numofunits);
-      }
+      addswtabletomapspectable(mapspectable,
+                               &encseq->wildcardrangetable,
+                               encseq->totallength,
+                               encseq->sat);
 #endif
       break;
     default: break;
