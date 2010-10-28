@@ -377,7 +377,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   MaxpairsDfsstate *state;
   bool haserr = false;
 
-  state = gt_malloc(sizeof(*state));
+  state = gt_malloc(sizeof (*state));
   state->alphabetsize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   state->searchlength = searchlength;
   state->processmaxpairs = processmaxpairs;

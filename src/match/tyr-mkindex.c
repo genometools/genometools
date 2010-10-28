@@ -541,7 +541,7 @@ static int enumeratelcpintervals(const char *inputindex,
   unsigned int alphasize;
 
   gt_error_check(err);
-  state = gt_malloc(sizeof(*state));
+  state = gt_malloc(sizeof (*state));
   GT_INITARRAY(&state->occdistribution,Countwithpositions);
   state->esrspace = gt_encseq_create_reader_with_readmode(
                                    gt_encseqSequentialsuffixarrayreader(ssar),

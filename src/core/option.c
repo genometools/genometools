@@ -1128,6 +1128,7 @@ void gt_option_parser_delete(GtOptionParser *op)
     gt_option_delete(*(GtOption**) gt_array_get(op->options, i));
   gt_array_delete(op->options);
   gt_array_delete(op->hooks);
+  gt_hashmap_delete(op->optionindex);
   gt_free(op);
 }
 

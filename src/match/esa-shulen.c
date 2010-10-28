@@ -68,7 +68,7 @@ static Dfsinfo *shulen_allocateDfsinfo(GT_UNUSED Dfsstate *astate)
 {
   ShulengthdistDfsinfo *dfsinfo;
 
-  dfsinfo = gt_malloc(sizeof(*dfsinfo));
+  dfsinfo = gt_malloc(sizeof (*dfsinfo));
 #ifdef SKDEBUG
   dfsinfo->id = state->nextid++;
 #endif
@@ -152,7 +152,7 @@ static int shulen_processleafedge(bool firstsucc,
     if (father->filenumdist == NULL)
     {
       father->filenumdist
-        = gt_malloc(sizeof(*father->filenumdist) * state->numofdbfiles);
+        = gt_malloc(sizeof (*father->filenumdist) * state->numofdbfiles);
     }
     shulen_resetfilenumdist(father,state->numofdbfiles);
 #ifdef SKDEBUG
@@ -241,7 +241,7 @@ static int shulen_processbranchedge(bool firstsucc,
     if (father->filenumdist == NULL)
     {
       father->filenumdist
-        = gt_malloc(sizeof(*father->filenumdist) * state->numofdbfiles);
+        = gt_malloc(sizeof (*father->filenumdist) * state->numofdbfiles);
       shulen_resetfilenumdist(father,state->numofdbfiles);
     }
 #ifdef SKDEBUG
@@ -278,7 +278,7 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
   unsigned long referidx, shulenidx;
 
-  state = gt_malloc(sizeof(*state));
+  state = gt_malloc(sizeof (*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
   state->encseq = encseq;
 #ifdef SKDEBUG
@@ -467,7 +467,7 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
   Shulengthdiststate *state;
   bool haserr = false;
 
-  state = gt_malloc(sizeof(*state));
+  state = gt_malloc(sizeof (*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
   state->encseq = encseq;
 #ifdef SKDEBUG

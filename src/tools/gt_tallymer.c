@@ -454,7 +454,7 @@ static int gt_tyr_occratio_arguments_check(int rest_argc,
       haserr = true;
     } else
     {
-      mersizes = gt_malloc(sizeof(*mersizes) * numofmersizes);
+      mersizes = gt_malloc(sizeof (*mersizes) * numofmersizes);
       for (idx=0; idx<numofmersizes; idx++)
       {
         long readnum;

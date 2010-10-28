@@ -26,6 +26,7 @@
 #include "core/disc_distri.h"
 #include "core/encseq_api.h"
 #include "core/encseq_access_type.h"
+#include "core/encseq_options.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/range.h"
@@ -36,6 +37,18 @@
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
+
+/* Creates a new <GtEncseqEncoder> using the options given in <opts>.
+   If no encoder could be created using the given options, NULL is
+   returned and <err> is set accordingly. */
+GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
+                                                    GtError *err);
+
+/* Creates a new <GtEncseqLoader> using the options given in <opts>.
+   If no loader could be created using the given options, NULL is
+   returned and <err> is set accordingly. */
+GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
+                                                  GtError *err);
 
 /* The following type stores a two bit encoding in <tbe> with information
   about the number of two bit units which do not store a special
@@ -283,6 +296,9 @@ int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
 /* Sets the sequence input type for <ee> to be pre-encoded. Only for internal
    use. */
 void  gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
+
+/* Returns TRUE if the input sequence has been defined as being pre-encoded. */
+bool gt_encseq_encoder_is_input_preencoded(GtEncseqEncoder *ee);
 
 /* The following function shows the encoded sequence at position <startpos>.
    The output goes to the file pointer <fp>. The parameters <fwd> and

@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -53,8 +54,8 @@
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\
         {\
-          PTR = gt_fa_fopen_with_suffix(gt_str_get(so->fn2encopt.indexname),\
-                                        SUFFIX,"wb",err);\
+          PTR = gt_fa_fopen_with_suffix( \
+            gt_str_get(so->indexname), SUFFIX, "wb",err);\
           if ((PTR) == NULL)\
           {\
             haserr = true;\
@@ -78,7 +79,9 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                           const Suffixeratoroptions *so,
                           GtError *err)
 {
-  bool haserr = false;
+  bool haserr = false,
+       outlcptab = gt_index_options_outlcptab_value(so->idxopts);
+  Sfxstrategy strategy = gt_index_options_sfxstrategy_value(so->idxopts);
 
   outfileinfo->outfpsuftab = NULL;
   outfileinfo->outfpbwttab = NULL;
@@ -86,15 +89,14 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->pageoffset = 0;
   outfileinfo->longest.defined = false;
   outfileinfo->longest.valueunsignedlong = 0;
-  if (so->outlcptab)
+  if (gt_index_options_outlcptab_value(so->idxopts))
   {
     outfileinfo->outlcpinfo
-      = gt_newOutlcpinfo(so->outlcptab ?
-                         gt_str_get(so->fn2encopt.indexname) : NULL,
+      = gt_newOutlcpinfo(outlcptab ? gt_str_get(so->indexname) : NULL,
                          gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
                          prefixlength,
                          gt_encseq_total_length(encseq),
-                         so->sfxstrategy.ssortmaxdepth.defined ? false : true,
+                         strategy.ssortmaxdepth.defined ? false : true,
                          err);
     if (outfileinfo->outlcpinfo == NULL)
     {
@@ -104,10 +106,19 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   {
     outfileinfo->outlcpinfo = NULL;
   }
-  INITOUTFILEPTR(outfileinfo->outfpsuftab,so->outsuftab,SUFTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo->outfpbwttab,so->outbwttab,BWTTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo->outfpbcktab,so->outbcktab,BCKTABSUFFIX);
-  if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab)
+  INITOUTFILEPTR(outfileinfo->outfpsuftab,
+                 gt_index_options_outsuftab_value(so->idxopts),
+                 SUFTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo->outfpbwttab,
+                 gt_index_options_outbwttab_value(so->idxopts),
+                 BWTTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo->outfpbcktab,
+                 gt_index_options_outbcktab_value(so->idxopts),
+                 BCKTABSUFFIX);
+  if (gt_index_options_outsuftab_value(so->idxopts)
+        || gt_index_options_outbwttab_value(so->idxopts)
+        || gt_index_options_outlcptab_value(so->idxopts)
+        || gt_index_options_outbcktab_value(so->idxopts))
   {
     outfileinfo->encseq = encseq;
   } else
@@ -257,8 +268,10 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                                 GtError *err)
 {
   bool haserr = false;
+  Sfxstrategy strategy = gt_index_options_sfxstrategy_value(so->idxopts);
 
-  if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
+  if (gt_index_options_prefixlength_value(so->idxopts)
+                                                   == GT_PREFIXLENGTH_AUTOMATIC)
   {
     *prefixlength = gt_recommendedprefixlength(numofchars,totallength);
     gt_logger_log(logger,
@@ -268,49 +281,48 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
   {
     unsigned int maxprefixlen;
 
-    *prefixlength = so->prefixlength;
+    *prefixlength = gt_index_options_prefixlength_value(so->idxopts);
     maxprefixlen
-      = gt_whatisthemaximalprefixlength(numofchars,
-                                        totallength,
-                                        so->sfxstrategy.storespecialcodes
-                                        ? (unsigned int) PREFIXLENBITS
-                                        : 0);
+            = gt_whatisthemaximalprefixlength(numofchars,
+                                              totallength,
+                                              strategy.storespecialcodes
+                                              ? (unsigned int) PREFIXLENBITS
+                                              : 0);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
     } else
     {
       gt_showmaximalprefixlength(logger,
-                              maxprefixlen,
-                              gt_recommendedprefixlength(
-                              numofchars,
-                              totallength));
+                                 maxprefixlen,
+                                 gt_recommendedprefixlength(
+                                 numofchars,
+                                 totallength));
     }
   }
-  if (!haserr && so->sfxstrategy.ssortmaxdepth.defined)
+  if (!haserr && strategy.ssortmaxdepth.defined)
   {
-    if (so->sfxstrategy.ssortmaxdepth.valueunsignedint == MAXDEPTH_AUTOMATIC)
+    if (strategy.ssortmaxdepth.valueunsignedint == GT_MAXDEPTH_AUTOMATIC)
     {
       maxdepth->defined = true;
       maxdepth->valueunsignedint = *prefixlength;
       gt_logger_log(logger,
-                  "automatically determined maxdepth=%u",
-                  maxdepth->valueunsignedint);
+                    "automatically determined maxdepth=%u",
+                    maxdepth->valueunsignedint);
     } else
     {
-      if (so->sfxstrategy.ssortmaxdepth.valueunsignedint < *prefixlength)
+      if (strategy.ssortmaxdepth.valueunsignedint < *prefixlength)
       {
         maxdepth->defined = true;
         maxdepth->valueunsignedint = *prefixlength;
         gt_logger_log(logger,
-                    "set maxdepth=%u",maxdepth->valueunsignedint);
+                      "set maxdepth=%u",maxdepth->valueunsignedint);
       } else
       {
         maxdepth->defined = true;
-        maxdepth->valueunsignedint
-          = so->sfxstrategy.ssortmaxdepth.valueunsignedint;
+        maxdepth->valueunsignedint = strategy.ssortmaxdepth.valueunsignedint;
         gt_logger_log(logger,
-                    "use maxdepth=%u",maxdepth->valueunsignedint);
+                      "use maxdepth=%u",maxdepth->valueunsignedint);
       }
     }
   }
@@ -333,10 +345,12 @@ static int run_packedindexconstruction(GtLogger *logger,
   const Sfxiterator *sfi;
   bool haserr = false;
   struct bwtParam finalcopy;
+  struct bwtOptions bwtIdxParams =
+                               gt_index_options_bwtIdxParams_value(so->idxopts);
   unsigned int numofchars
     = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
 
-  finalcopy = so->bwtIdxParams.final;
+  finalcopy = bwtIdxParams.final;
   if (numofchars > 10U && finalcopy.seqParams.encParams.blockEnc.blockSize > 3U)
   {
     finalcopy.seqParams.encParams.blockEnc.blockSize = 3U;
@@ -346,10 +360,10 @@ static int run_packedindexconstruction(GtLogger *logger,
                 finalcopy.seqParams.encParams.blockEnc.blockSize,
                 finalcopy.seqParams.encParams.blockEnc.bucketBlocks,
                 finalcopy.locateInterval);
-  si = gt_newSfxInterface(so->readmode,
+  si = gt_newSfxInterface(gt_index_options_readmode_value(so->idxopts),
                           prefixlength,
-                          so->numofparts,
-                          so->maximumspace,
+                          gt_index_options_numofparts_value(so->idxopts),
+                          gt_index_options_maximumspace_value(so->idxopts),
                           sfxstrategy,
                           encseq,
                           sfxprogress,
@@ -401,28 +415,24 @@ static int runsuffixerator(bool doesa,
   Sfxstrategy sfxstrategy;
   GtEncseq *encseq = NULL;
   GtEncseqEncoder *ee = NULL;
+  GtReadmode readmode = gt_index_options_readmode_value(so->idxopts);
 
   gt_error_check(err);
 
-  ee = gt_encseq_encoder_new();
   if (gt_showtime_enabled())
   {
     sfxprogress = gt_progress_timer_new("determining sequence length and "
                                         "number of special symbols");
   }
+
   if (gt_str_length(so->inputindex) > 0)
   {
     GtEncseqLoader *el;
-    el = gt_encseq_loader_new();
-    if (!so->fn2encopt.outdestab)
-      gt_encseq_loader_do_not_require_des_tab(el);
-    if (!so->fn2encopt.outsdstab)
-      gt_encseq_loader_do_not_require_sds_tab(el);
-    if (!so->fn2encopt.outssptab)
+    el = gt_encseq_loader_new_from_options(so->loadopts, err);
+    if (!gt_encseq_options_ssp_value(so->loadopts))
     {
-      GtEncseqMetadata* emd = gt_encseq_metadata_new(
-                                           gt_str_get(so->inputindex),
-                                           err);
+      GtEncseqMetadata* emd = gt_encseq_metadata_new(gt_str_get(so->inputindex),
+                                                     err);
       if (emd == NULL)
       {
         haserr = true;
@@ -436,9 +446,16 @@ static int runsuffixerator(bool doesa,
       }
       gt_encseq_metadata_delete(emd);
     }
-    if (so->fn2encopt.outoistab)
-      gt_encseq_loader_require_lossless_support(el);
     gt_encseq_loader_set_logger(el, logger);
+    /* as we only construct the des, sds, and ssptable, but do not
+       need it later during the construction of the enhanced suffix
+       array, we do not load it again: we just load the information
+       stored in the .esq file. It would be better to use the
+       in memory constructed encseq rather than the one mapped into
+       memory. This would require to free the des, sds, and ssptable. */
+    gt_encseq_loader_do_not_require_des_tab(el);
+    gt_encseq_loader_do_not_require_sds_tab(el);
+    gt_encseq_loader_do_not_require_ssp_tab(el);
     encseq = gt_encseq_loader_load(el, gt_str_get(so->inputindex), err);
     gt_encseq_loader_delete(el);
     if (encseq == NULL)
@@ -447,46 +464,20 @@ static int runsuffixerator(bool doesa,
     }
   } else
   {
-    /* -tis is always implied */
-    if (!so->fn2encopt.outdestab)
-      gt_encseq_encoder_do_not_create_des_tab(ee);
-    if (!so->fn2encopt.outsdstab)
-      gt_encseq_encoder_do_not_create_sds_tab(ee);
-    if (!so->fn2encopt.outssptab)
-      gt_encseq_encoder_do_not_create_ssp_tab(ee);
-    if (so->fn2encopt.outoistab)
-      gt_encseq_encoder_enable_lossless_support(ee);
-    if (so->fn2encopt.isdna)
-      gt_encseq_encoder_set_input_dna(ee);
-    if (so->fn2encopt.isprotein)
-      gt_encseq_encoder_set_input_protein(ee);
-    if (so->fn2encopt.isplain)
-      gt_encseq_encoder_set_input_preencoded(ee);
-    gt_encseq_encoder_set_progresstimer(ee, sfxprogress);
-    if (gt_encseq_encoder_use_symbolmap_file(ee,
-                                             gt_str_get(so->fn2encopt.smap),
-                                             err) != 0)
-    {
+    ee = gt_encseq_encoder_new_from_options(so->encopts, err);
+    if (ee == NULL)
       haserr = true;
-    }
-    if (!haserr) {
-      if (gt_encseq_encoder_use_representation(ee,
-                                               gt_str_get(so->fn2encopt.sat),
-                                               err) != 0)
-      {
-        haserr = true;
-      }
-    }
     if (!haserr) {
       int rval;
+      gt_encseq_encoder_set_progresstimer(ee, sfxprogress);
       gt_encseq_encoder_set_logger(ee, logger);
-      rval = gt_encseq_encoder_encode(ee, so->fn2encopt.filenametab,
-                                      gt_str_get(so->fn2encopt.indexname),
+      rval = gt_encseq_encoder_encode(ee, so->db, gt_str_get(so->indexname),
                                       err);
       if (rval != 0)
         haserr = true;
       if (!haserr) {
-        GtEncseqLoader *el = gt_encseq_loader_new();
+        GtEncseqLoader *el = gt_encseq_loader_new_from_options(so->loadopts,
+                                                               err);
         /* as we only construct the des, sds, and ssptable, but do not
            need it later during the construction of the enhanced suffix
            array, we do not load it again: we just load the information
@@ -496,8 +487,7 @@ static int runsuffixerator(bool doesa,
         gt_encseq_loader_do_not_require_des_tab(el);
         gt_encseq_loader_do_not_require_sds_tab(el);
         gt_encseq_loader_do_not_require_ssp_tab(el);
-        encseq = gt_encseq_loader_load(el, gt_str_get(so->fn2encopt.indexname),
-                                       err);
+        encseq = gt_encseq_loader_load(el, gt_str_get(so->indexname), err);
         if (!encseq)
           haserr = true;
         gt_encseq_loader_delete(el);
@@ -511,34 +501,37 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     gt_encseq_show_features(encseq,logger,false);
-    if (so->readmode == GT_READMODE_COMPL ||
-        so->readmode == GT_READMODE_REVCOMPL)
+    if (readmode == GT_READMODE_COMPL ||
+        readmode == GT_READMODE_REVCOMPL)
     {
       if (!gt_alphabet_is_dna(gt_encseq_alphabet(encseq)))
       {
         gt_error_set(err,"option -%s only can be used for DNA alphabets",
-                          so->readmode == GT_READMODE_COMPL ? "cpl" : "rcl");
+                          readmode == GT_READMODE_COMPL ? "cpl" : "rcl");
         haserr = true;
       }
     }
   }
-  if (!haserr && so->outkystab && !so->outkyssort)
+  if (!haserr
+        && gt_index_options_outkystab_value(so->idxopts)
+        && !gt_index_options_outkyssort_value(so->idxopts))
   {
-    if (gt_extractkeysfromdesfile(gt_str_get(so->fn2encopt.indexname),
+    if (gt_extractkeysfromdesfile(gt_str_get(so->indexname),
                                   false, logger, err) != 0)
     {
       haserr = true;
     }
   }
-  prefixlength = so->prefixlength;
-  sfxstrategy = so->sfxstrategy;
+  prefixlength = gt_index_options_prefixlength_value(so->idxopts);
+  sfxstrategy = gt_index_options_sfxstrategy_value(so->idxopts);
   sfxstrategy.ssortmaxdepth.defined = false;
-  sfxstrategy.iteratorbasedkmerscanning = so->iteratorbasedkmerscanning;
-  sfxstrategy.suftabasulongarray = so->suftabasulongarray;
   if (!haserr)
   {
-    if (so->outsuftab || so->outbwttab || so->outlcptab || so->outbcktab ||
-        !doesa)
+    if (gt_index_options_outsuftab_value(so->idxopts)
+        || gt_index_options_outbwttab_value(so->idxopts)
+        || gt_index_options_outlcptab_value(so->idxopts)
+        || gt_index_options_outbcktab_value(so->idxopts)
+        || !doesa)
     {
       unsigned int numofchars = gt_alphabet_num_of_chars(
                                           gt_encseq_alphabet(encseq));
@@ -555,12 +548,12 @@ static int runsuffixerator(bool doesa,
       }
     } else
     {
-      if (so->readmode != GT_READMODE_FORWARD)
+      if (readmode != GT_READMODE_FORWARD)
       {
         gt_error_set(err,"option '-dir %s' only makes sense in combination "
                           "with at least one of the options -suf, -lcp, or "
                           "-bwt",
-                          gt_readmode_show(so->readmode));
+                          gt_readmode_show(readmode));
         haserr = true;
       }
     }
@@ -578,22 +571,26 @@ static int runsuffixerator(bool doesa,
   }
   if (!haserr)
   {
-    if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
+    if (gt_index_options_outsuftab_value(so->idxopts)
+        || gt_index_options_outbwttab_value(so->idxopts)
+        || gt_index_options_outlcptab_value(so->idxopts)
+        || !doesa)
     {
       if (doesa)
       {
-        if (suffixeratorwithoutput(so->fn2encopt.indexname,
-                                   &outfileinfo,
-                                   encseq,
-                                   so->readmode,
-                                   prefixlength,
-                                   so->numofparts,
-                                   so->maximumspace,
-                                   &sfxstrategy,
-                                   sfxprogress,
-                                   so->showprogress,
-                                   logger,
-                                   err) != 0)
+        if (suffixeratorwithoutput(
+                               so->indexname,
+                               &outfileinfo,
+                               encseq,
+                               readmode,
+                               prefixlength,
+                               gt_index_options_numofparts_value(so->idxopts),
+                               gt_index_options_maximumspace_value(so->idxopts),
+                               &sfxstrategy,
+                               sfxprogress,
+                               so->showprogress,
+                               logger,
+                               err) != 0)
         {
           haserr = true;
         }
@@ -632,8 +629,8 @@ static int runsuffixerator(bool doesa,
       numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
     }
-    if (gt_outprjfile(gt_str_get(so->fn2encopt.indexname),
-                      so->readmode,
+    if (gt_outprjfile(gt_str_get(so->indexname),
+                      readmode,
                       encseq,
                       prefixlength,
                       &sfxstrategy.ssortmaxdepth,
@@ -648,9 +645,12 @@ static int runsuffixerator(bool doesa,
   gt_freeOutlcptab(outfileinfo.outlcpinfo);
   gt_encseq_delete(encseq);
   encseq = NULL;
-  if (!haserr && so->outkystab && so->outkyssort)
+  if (!haserr
+        && gt_index_options_outkystab_value(so->idxopts)
+        && gt_index_options_outkyssort_value(so->idxopts))
   {
-    if (gt_extractkeysfromdesfile(gt_str_get(so->fn2encopt.indexname), true,
+    if (gt_extractkeysfromdesfile(gt_str_get(so->indexname),
+                                  true,
                                   logger, err) != 0)
     {
       haserr = true;
@@ -666,7 +666,7 @@ static int runsuffixerator(bool doesa,
 }
 
 int gt_parseargsandcallsuffixerator(bool doesa,int argc,
-                                const char **argv,GtError *err)
+                                    const char **argv,GtError *err)
 {
   Suffixeratoroptions so;
   int retval;
@@ -695,12 +695,5 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
     }
   }
   gt_wrapsfxoptions(&so);
-  /*
-  printf("countgt_encseq_compare_viatwobitencoding=%lu\n",
-          countgt_encseq_compare_viatwobitencoding_get());
-  printf("# inverse_order = %lu\n",inverse_order);
-  printf("# no_order = %lu\n",no_order);
-  printf("# correct_order = %lu\n",correct_order);
-  */
   return haserr ? -1 : 0;
 }

@@ -6552,11 +6552,56 @@ GtEncseqEncoder* gt_encseq_encoder_new()
   return ee;
 }
 
+GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
+                                                    GtError *err)
+{
+  int had_err = 0;
+  GtEncseqEncoder *ee = NULL;
+  gt_assert(opts);
+
+  ee = gt_encseq_encoder_new();
+  /* reset table requests */
+  gt_encseq_encoder_disable_description_support(ee);
+  gt_encseq_encoder_disable_multiseq_support(ee);
+  gt_encseq_encoder_disable_lossless_support(ee);
+
+  /* set table requests according to options */
+  if (gt_encseq_options_des_value(opts))
+    gt_encseq_encoder_create_des_tab(ee);
+  if (gt_encseq_options_ssp_value(opts))
+    gt_encseq_encoder_create_ssp_tab(ee);
+  if (gt_encseq_options_sds_value(opts))
+    gt_encseq_encoder_create_sds_tab(ee);
+  if (gt_encseq_options_dna_value(opts))
+    gt_encseq_encoder_set_input_dna(ee);
+  if (gt_encseq_options_protein_value(opts))
+    gt_encseq_encoder_set_input_protein(ee);
+  if (gt_encseq_options_plain_value(opts))
+    gt_encseq_encoder_set_input_preencoded(ee);
+  if (gt_encseq_options_lossless_value(opts))
+    gt_encseq_encoder_enable_lossless_support(ee);
+  if (gt_str_length(gt_encseq_options_smap_value(opts)) > 0)
+    had_err = gt_encseq_encoder_use_symbolmap_file(ee,
+                                 gt_str_get(gt_encseq_options_smap_value(opts)),
+                                 err);
+  if (!had_err && gt_encseq_options_sat_value(opts) > 0)
+    had_err = gt_encseq_encoder_use_representation(ee,
+                                  gt_str_get(gt_encseq_options_sat_value(opts)),
+                                  err);
+  return ee;
+}
+
 void gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
                                          GtProgressTimer *pt)
 {
   gt_assert(ee);
   ee->pt = pt;
+}
+
+GtProgressTimer* gt_encseq_encoder_get_progresstimer(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->pt;
 }
 
 void gt_encseq_encoder_create_esq_tab(GT_UNUSED GtEncseqEncoder *ee)
@@ -6593,6 +6638,12 @@ void gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee)
   ee->destab = false;
 }
 
+bool gt_encseq_encoder_des_tab_requested(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->destab;
+}
+
 void gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -6605,6 +6656,12 @@ void gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee)
   ee->ssptab = false;
 }
 
+bool gt_encseq_encoder_ssp_tab_requested(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->ssptab;
+}
+
 void gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -6615,6 +6672,12 @@ void gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   ee->sdstab = false;
+}
+
+bool gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->sdstab;
 }
 
 void gt_encseq_encoder_enable_description_support(GtEncseqEncoder *ee)
@@ -6663,6 +6726,12 @@ void gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee)
   ee->isplain = false;
 }
 
+bool gt_encseq_encoder_is_input_dna(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->isdna;
+}
+
 void gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
@@ -6671,12 +6740,24 @@ void gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee)
   ee->isplain = false;
 }
 
+bool gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->isprotein;
+}
+
 void gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   ee->isdna = false;
   ee->isprotein = false;
   ee->isplain = true;
+}
+
+bool gt_encseq_encoder_is_input_preencoded(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->isplain;
 }
 
 int gt_encseq_encoder_use_representation(GtEncseqEncoder *ee, const char *sat,
@@ -6694,6 +6775,12 @@ int gt_encseq_encoder_use_representation(GtEncseqEncoder *ee, const char *sat,
   return 0;
 }
 
+GtStr* gt_encseq_encoder_representation(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return ee->sat;
+}
+
 int gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee, const char *smap,
                                          GT_UNUSED GtError *err)
 {
@@ -6702,6 +6789,12 @@ int gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee, const char *smap,
     gt_str_delete(ee->smapfile);
   ee->smapfile = gt_str_new_cstr(smap);
   return 0;
+}
+
+const char* gt_encseq_encoder_symbolmap_file(const GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  return gt_str_get(ee->smapfile);
 }
 
 void gt_encseq_encoder_set_logger(GtEncseqEncoder *ee, GtLogger *l)
@@ -6760,6 +6853,22 @@ GtEncseqLoader* gt_encseq_loader_new()
   return el;
 }
 
+GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
+                                                  GT_UNUSED GtError *err)
+{
+  GtEncseqLoader *el = NULL;
+  gt_assert(opts);
+
+  el = gt_encseq_loader_new();
+  /* reset table requests */
+  gt_encseq_loader_drop_lossless_support(el);
+
+  /* set options according to options */
+  if (gt_encseq_options_lossless_value(opts))
+    gt_encseq_loader_require_lossless_support(el);
+  return el;
+}
+
 void gt_encseq_loader_require_esq_tab(GT_UNUSED GtEncseqLoader *el)
 {
   /* stub for API compatibility */
@@ -6782,16 +6891,10 @@ void gt_encseq_loader_do_not_require_des_tab(GtEncseqLoader *el)
   el->destab = false;
 }
 
-void gt_encseq_loader_require_ois_tab(GtEncseqLoader *el)
+bool gt_encseq_loader_des_tab_required(const GtEncseqLoader *el)
 {
   gt_assert(el);
-  el->oistab = true;
-}
-
-void gt_encseq_loader_do_not_require_ois_tab(GtEncseqLoader *el)
-{
-  gt_assert(el);
-  el->oistab = false;
+  return el->destab;
 }
 
 void gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el)
@@ -6806,6 +6909,12 @@ void gt_encseq_loader_do_not_require_ssp_tab(GtEncseqLoader *el)
   el->ssptab = false;
 }
 
+bool gt_encseq_loader_ssp_tab_required(const GtEncseqLoader *el)
+{
+  gt_assert(el);
+  return el->ssptab;
+}
+
 void gt_encseq_loader_require_sds_tab(GtEncseqLoader *el)
 {
   gt_assert(el);
@@ -6816,6 +6925,30 @@ void gt_encseq_loader_do_not_require_sds_tab(GtEncseqLoader *el)
 {
   gt_assert(el);
   el->sdstab = false;
+}
+
+bool gt_encseq_loader_sds_tab_required(const GtEncseqLoader *el)
+{
+  gt_assert(el);
+  return el->sdstab;
+}
+
+void gt_encseq_loader_require_ois_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->oistab = true;
+}
+
+void gt_encseq_loader_do_not_require_ois_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->oistab = false;
+}
+
+bool gt_encseq_loader_ois_tab_required(const GtEncseqLoader *el)
+{
+  gt_assert(el);
+  return el->oistab;
 }
 
 void gt_encseq_loader_require_description_support(GtEncseqLoader *el)

@@ -208,7 +208,7 @@ static int computeoccurrenceratio(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
 
   gt_error_check(err);
-  state = gt_malloc(sizeof(*state));
+  state = gt_malloc(sizeof (*state));
   state->encseq = gt_encseqSequentialsuffixarrayreader(ssar);
   state->readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
   state->totallength = gt_encseq_total_length(state->encseq);

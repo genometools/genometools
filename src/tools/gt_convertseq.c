@@ -145,7 +145,7 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
         break;
       if (opts.revcomp) {
         GtUchar *newseq = gt_calloc(len+1, sizeof (GtUchar));
-        memcpy(newseq, sequence, len*sizeof(GtUchar));
+        memcpy(newseq, sequence, len*sizeof (GtUchar));
         had_err = gt_reverse_complement((char*) newseq, len, err);
         if (had_err)
           break;

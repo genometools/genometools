@@ -184,7 +184,7 @@ typedef struct
 
 static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize)
 {
-  spos->queuespace = gt_malloc(sizeof(*spos->queuespace) * queuesize);
+  spos->queuespace = gt_malloc(sizeof (*spos->queuespace) * queuesize);
   spos->noofelements = 0;
   spos->queuesize = queuesize;
   spos->dequeueindex = spos->enqueueindex = queuesize - 1;
@@ -423,7 +423,7 @@ struct GtKmercodeiterator
   unsigned int numofchars;
   GtUchar charcode;
 
-  kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
+  kmercodeiterator = gt_malloc(sizeof (*kmercodeiterator));
   kmercodeiterator->totallength = gt_encseq_total_length(encseq);
   if (kmercodeiterator->totallength < (unsigned long) kmersize)
   {
@@ -504,7 +504,7 @@ GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
   int retval;
 
   gt_error_check(err);
-  kmercodeiterator = gt_malloc(sizeof(*kmercodeiterator));
+  kmercodeiterator = gt_malloc(sizeof (*kmercodeiterator));
   kmercodeiterator->esr = NULL;
   kmercodeiterator->hasprocessedfirst = false;
   kmercodeiterator->inputexhausted = false;

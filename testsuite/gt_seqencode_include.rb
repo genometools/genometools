@@ -22,6 +22,10 @@ def comp(seq)
   seq.tr("aAcCgGtTnN","tTgGcCaAnN")
 end
 
+def mapwildcards(seq)
+  seq.downcase.tr("rRyYmMkKwWsSbBdDhHvV", "nNnNnNnNnNnNnNnNnNnN")
+end
+
 def getseq(filename, mirrored = false, rm = "fwd")
   sequences = []
   rcseqs = []
@@ -79,8 +83,7 @@ def run_encseq_comparison(filename, mirrored, readmode, singlechars,
       File.open("seqout", "w+") do |f|
         outseq = seq[rng[0]..rng[1]]
         if DNATESTSEQS.include?(filename)
-          outseq = outseq.downcase.tr("rRyYmMkKwWsSbBdDhHvV",\
-                                      "nNnNnNnNnNnNnNnNnNnN")
+          outseq = mapwildcards(outseq)
         end
         f.write(outseq)
         f.write("\n")
@@ -118,8 +121,7 @@ def testformirrored(s, readmode)
           run_test line
           File.open("seqout", "w+") do |f|
             if DNATESTSEQS.include?(s)
-              seq = seq.downcase.tr("rRyYmMkKwWsSbBdDhHvV", \
-                                    "nNnNnNnNnNnNnNnNnNnN")
+              seq = mapwildcards(seq)
             end
             f.write(seq)
             f.write("\n")

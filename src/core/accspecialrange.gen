@@ -61,7 +61,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
         if (lastwildcardrangelength > 0)
         {
           /* when seeing the first character after a wildcard range, process
-             this an store the corresponding range length for the previous
+             this and store the corresponding range length for the previous
              range */
           wildcardrangetable->rangelengths[fillwildcardrangeidx-1]
             = (GT_SPECIALTABLETYPE) (lastwildcardrangelength-1);

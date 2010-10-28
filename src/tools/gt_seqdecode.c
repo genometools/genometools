@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +19,7 @@
 #include "core/ma.h"
 #include "core/chardef.h"
 #include "core/encseq_api.h"
+#include "core/encseq_options.h"
 #include "core/fasta_separator.h"
 #include "core/log_api.h"
 #include "core/readmode.h"
@@ -27,21 +29,21 @@
 #include "tools/gt_seqdecode.h"
 
 typedef struct {
-  bool mirrored,
-       singlechars;
-  GtStr *dir,
-        *mode,
+  bool singlechars;
+  GtStr *mode,
         *sepchar;
   GtRange rng;
+  GtEncseqOptions *eopts;
   GtReadmode rm;
+  GtStr *dir;
 } GtSeqdecodeArguments;
 
 static void* gt_seqdecode_arguments_new(void)
 {
   GtSeqdecodeArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->dir = gt_str_new();
   arguments->mode = gt_str_new();
   arguments->sepchar = gt_str_new();
+  arguments->dir = gt_str_new();
   return arguments;
 }
 
@@ -49,9 +51,10 @@ static void gt_seqdecode_arguments_delete(void *tool_arguments)
 {
   GtSeqdecodeArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_str_delete(arguments->dir);
   gt_str_delete(arguments->mode);
   gt_str_delete(arguments->sepchar);
+  gt_str_delete(arguments->dir);
+  gt_encseq_options_delete(arguments->eopts);
   gt_free(arguments);
 }
 
@@ -59,20 +62,18 @@ static GtOptionParser* gt_seqdecode_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option,
-           *optiondir,
+           *optionsep,
            *optionmode;
   GtSeqdecodeArguments *arguments = (GtSeqdecodeArguments*) tool_arguments;
   static const char *modes[] = {"fasta", "concat", NULL};
 
   /* init */
-  op = gt_option_parser_new("sequence_file", "Decode encoded sequence_file.");
+  op = gt_option_parser_new("(sequence_file|indexname)",
+                            "Decode/extract encoded sequences.");
 
-  /* -mirrored */
-  option = gt_option_new_bool("mirrored",
-                              "additionally output reverse complements",
-                              &arguments->mirrored,
-                              false);
-  gt_option_parser_add_option(op, option);
+  /* encseq options */
+  arguments->eopts = gt_encseq_options_register_loading(op, NULL);
+  gt_encseq_options_add_readmode_option(op, arguments->dir);
 
   /* -singlechars */
   option = gt_option_new_bool("singlechars",
@@ -91,13 +92,6 @@ static GtOptionParser* gt_seqdecode_option_parser_new(void *tool_arguments)
                                     modes);
   gt_option_parser_add_option(op, optionmode);
 
-  /* -dir */
-  optiondir = gt_option_new_string("dir",
-                                   "specify reading direction "
-                                   "(fwd, cpl, rev, rcl)",
-                                   arguments->dir, "fwd");
-  gt_option_parser_add_option(op, optiondir);
-
   /* -range */
   option = gt_option_new_range("range",
                                "concatenated range to extract "
@@ -108,11 +102,11 @@ static GtOptionParser* gt_seqdecode_option_parser_new(void *tool_arguments)
   gt_option_imply(option, optionmode);
 
   /* -sepchar */
-  optiondir = gt_option_new_string("sepchar",
+  optionsep = gt_option_new_string("sepchar",
                                    "specify character to print as SEPARATOR",
                                    arguments->sepchar, "|");
-  gt_option_parser_add_option(op, optiondir);
-  gt_option_imply(option, optionmode);
+  gt_option_parser_add_option(op, optionsep);
+  gt_option_imply(optionsep, optionmode);
 
   gt_option_parser_set_min_max_args(op, 1, 1);
 
@@ -127,7 +121,8 @@ int gt_seqdecode_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   int rval;
 
   if (gt_str_length(args->dir) > 0) {
-    rval = gt_readmode_parse(gt_str_get(args->dir), err);
+    rval =
+         gt_readmode_parse(gt_str_get(args->dir), err);
     if (rval < 0)
       had_err = -1;
     else
@@ -155,7 +150,6 @@ static int output_sequence(GtEncseq *encseq, GtSeqdecodeArguments *args,
         desc = gt_encseq_description(encseq, &desclen, i);
       } else {
         startpos = gt_encseq_seqstartpos(encseq, i);
-        len = gt_encseq_seqlength(encseq, i);
         len = gt_encseq_seqlength(encseq,
                                   gt_encseq_num_of_sequences(encseq)-1-i);
         startpos = gt_encseq_total_length(encseq)
@@ -239,9 +233,12 @@ static int decode_sequence_file(const char *seqfile, GtSeqdecodeArguments *args,
   gt_error_check(err);
   gt_assert(seqfile);
   encseq_loader = gt_encseq_loader_new();
+  if (!had_err && gt_encseq_options_lossless_value(args->eopts)) {
+    gt_encseq_loader_require_lossless_support(encseq_loader);
+  }
   if (!(encseq = gt_encseq_loader_load(encseq_loader, seqfile, err)))
     had_err = -1;
-  if (!had_err && args->mirrored) {
+  if (!had_err && gt_encseq_options_mirrored_value(args->eopts)) {
     if (!gt_alphabet_is_dna(gt_encseq_alphabet(encseq))) {
       gt_error_set(err, "mirroring is only defined on DNA sequences");
       had_err = -1;

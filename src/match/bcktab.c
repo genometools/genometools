@@ -137,7 +137,7 @@ static unsigned long **allocdistprefixindexcounts(const GtCodetype *basepower,
     {
       unsigned long *counters, **distpfxidx;
 
-      distpfxidx = gt_malloc(sizeof(unsigned long *) * (prefixlength-1));
+      distpfxidx = gt_malloc(sizeof (unsigned long *) * (prefixlength-1));
       gt_log_log("sizeof (distpfxidx)=%lu bytes",
                   (unsigned long) sizeof (unsigned long *) * (prefixlength-1));
       counters = gt_malloc(sizeof (*counters) * numofcounters);

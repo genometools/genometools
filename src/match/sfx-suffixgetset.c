@@ -130,7 +130,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   GtSuffixsortspace *suffixsortspace;
 
   gt_assert(numofentries > 0);
-  suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+  suffixsortspace = gt_malloc(sizeof (*suffixsortspace));
   suffixsortspace->maxindex = numofentries-1;
   suffixsortspace->maxvalue = maxvalue;
   suffixsortspace->longestidx.defined = false;
@@ -182,7 +182,7 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
 {
   GtSuffixsortspace *suffixsortspace;
 
-  suffixsortspace = gt_malloc(sizeof(*suffixsortspace));
+  suffixsortspace = gt_malloc(sizeof (*suffixsortspace));
   suffixsortspace->bitpackarray = NULL;
   suffixsortspace->ulongtab
     = gt_fa_mmap_generic_fd(filedesc,filename,

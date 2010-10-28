@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,63 +20,19 @@
 #define SFX_OPTDEF_H
 
 #include <stdbool.h>
-#include "core/str.h"
-#include "core/str_array.h"
-#include "core/readmode.h"
-#include "core/option.h"
-#include "sfx-strategy.h"
-#ifndef S_SPLINT_S /* splint reports too much errors for the following and so
-                      we exclude it */
-#include "eis-bwtseq-param.h"
-#endif
-
-#define PREFIXLENGTH_AUTOMATIC 0
-#define MAXDEPTH_AUTOMATIC     0
+#include "core/encseq_options.h"
+#include "match/index_options.h"
 
 typedef struct
 {
-  GtStr *indexname,
-        *smap,
-        *sat;
-  GtStrArray *filenametab;
-  bool isdna,
-       isprotein,
-       isplain,
-       outtistab,
-       outdestab,
-       outsdstab,
-       outssptab,
-       outoistab;
-} Filenames2encseqoptions;
-
-typedef struct
-{
-  unsigned int numofparts,
-               prefixlength;
-  unsigned long maximumspace;
-  GtStr *inputindex,
-        *maxdepth;
-  GtOption *optionalgboundsref, *optionpartsargvref;
-  GtStrArray *algbounds, *partsargv;
-  GtReadmode readmode;
   bool beverbose,
-       showtime,
-       showprogress,
-       outsuftab,
-       outlcptab,
-       outbwttab,
-       outbcktab,
-       outkystab,
-       outkyssort,
-       iteratorbasedkmerscanning,
-       suftabasulongarray;
-  GtStr *optionkysargumentstring;
-  Sfxstrategy sfxstrategy;
-  Filenames2encseqoptions fn2encopt;
-#ifndef S_SPLINT_S /* splint reports too much errors for the following and so
-                      we exclude it */
-  struct bwtOptions bwtIdxParams;
-#endif
+       showprogress;
+  GtEncseqOptions *encopts,
+                  *loadopts;
+  GtIndexOptions *idxopts;
+  GtStr *indexname,
+        *inputindex;
+  GtStrArray *db;
 } Suffixeratoroptions;
 
 #endif

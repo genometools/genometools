@@ -588,8 +588,7 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
                                          arguments->offset,
                                          arguments->minlengthTSD,
                                          arguments->maxlengthTSD,
-                                         (unsigned long)
-                                            arguments->vicinity,
+                                         (unsigned long) arguments->vicinity,
                                          err);
   if (ltrh_stream == NULL)
     return -1;
