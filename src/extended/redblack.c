@@ -1259,9 +1259,7 @@ int gt_rbt_walkrange(const GtRBTnode *root,
   return 0;
 }
 
-/**
- * This file contains unit tests for the red black tree datastructure
- */
+/* The following implements unit tests for the red black tree datastructure */
 
 #define SEED 0
 #define PASSES 100

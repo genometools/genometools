@@ -201,7 +201,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   BWTSeq *bwtseq = NULL;
   bool haserr = false;
   GtAlphabet *alphabet;
-  unsigned long totallength;
+  unsigned long totallength = 0;
 
   alphabet = gt_alphabet_new_from_file(indexname,err);
   if (alphabet == NULL)
