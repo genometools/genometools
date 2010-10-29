@@ -613,6 +613,21 @@ static void addswtabletomapspectable(GtArrayGtMapspecification *mapspectable,
   }
 }
 
+/*
+static void assignssptabmapspecification(
+                                        GtArrayGtMapspecification *mapspectable,
+                                        void *voidinfo,
+                                        bool writemode)
+{
+  GtSWtable *swtable = (GtSwtable *) voidinfo;
+
+  addswtabletomapspectable(mapspectable,
+                           swtable,
+                           totallength,
+                           sat);
+}
+*/
+
 static void assignencseqmapspecification(
                                         GtArrayGtMapspecification *mapspectable,
                                         void *voidinfo,
@@ -781,11 +796,11 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
   if (gt_mapspec_fillmapspecstartptr(assignencseqmapspecification,
-                          &encseq->mappedptr,
-                          encseq,
-                          tmpfilename,
-                          encseq->sizeofrep,
-                          err) != 0)
+                                     &encseq->mappedptr,
+                                     encseq,
+                                     tmpfilename,
+                                     encseq->sizeofrep,
+                                     err) != 0)
   {
     haserr = true;
   }
@@ -926,7 +941,7 @@ static void initSWtable(GtSWtable *swtable,
 
 typedef struct
 {
-  GtSWtable ssptab;
+  GtSWtable *ssptabptr;
   GtEncseqAccessType satsep;
   unsigned long nextcheckpos, nextcheckincrement, pagenumber, fillpos,
                 numofpages;
@@ -935,51 +950,54 @@ typedef struct
 
 static Gtssptaboutinfo *ssptaboutinfo_new(const char *indexname,
                                           unsigned long totallength,
-                                          unsigned long numofseparators,
+                                          unsigned long numofsequences,
+                                          GtSWtable *ssptabnew,
                                           GtError *err)
 {
   Gtssptaboutinfo *ssptaboutinfo;
 
   ssptaboutinfo = gt_malloc(sizeof (*ssptaboutinfo));
   ssptaboutinfo->satsep
-    = determineoptimalsssptablerep(totallength,numofseparators);
-  initSWtable(&ssptaboutinfo->ssptab,totallength,ssptaboutinfo->satsep,
-              numofseparators);
-  setencsequtablesNULL(ssptaboutinfo->satsep,&ssptaboutinfo->ssptab);
+    = determineoptimalsssptablerep(totallength,numofsequences-1);
+  ssptaboutinfo->ssptabptr = ssptabnew;
   switch (ssptaboutinfo->satsep)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptab.st_uchar.maxrangevalue+1;
-      ssptaboutinfo->numofpages = ssptaboutinfo->ssptab.st_uchar.numofpages;
-      ssptaboutinfo->ssptab.st_uchar.positions
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uchar.positions)
-                    * ssptaboutinfo->ssptab.st_uchar.numofpositionstostore);
-      ssptaboutinfo->ssptab.st_uchar.endidxinpage
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uchar.endidxinpage)
-                    * ssptaboutinfo->ssptab.st_uchar.numofpages);
+        = (unsigned long) ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue+1;
+      ssptaboutinfo->numofpages = ssptaboutinfo->ssptabptr->st_uchar.numofpages;
+      ssptaboutinfo->ssptabptr->st_uchar.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uchar.positions)
+                    * ssptaboutinfo->ssptabptr->st_uchar.numofpositionstostore);
+      ssptaboutinfo->ssptabptr->st_uchar.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uchar.endidxinpage)
+                    * ssptaboutinfo->ssptabptr->st_uchar.numofpages);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptab.st_ushort.maxrangevalue+1;
-      ssptaboutinfo->numofpages = ssptaboutinfo->ssptab.st_ushort.numofpages;
-      ssptaboutinfo->ssptab.st_ushort.positions
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_ushort.positions)
-                    * ssptaboutinfo->ssptab.st_ushort.numofpositionstostore);
-      ssptaboutinfo->ssptab.st_ushort.endidxinpage
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_ushort.endidxinpage)
-                    * ssptaboutinfo->ssptab.st_ushort.numofpages);
+        = (unsigned long) ssptaboutinfo->ssptabptr->st_ushort.maxrangevalue+1;
+      ssptaboutinfo->numofpages
+        = ssptaboutinfo->ssptabptr->st_ushort.numofpages;
+      ssptaboutinfo->ssptabptr->st_ushort.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_ushort.positions)
+                    * ssptaboutinfo->ssptabptr->st_ushort.numofpositionstostore
+                   );
+      ssptaboutinfo->ssptabptr->st_ushort.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_ushort.endidxinpage)
+                    * ssptaboutinfo->ssptabptr->st_ushort.numofpages);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptab.st_uint32.maxrangevalue+1;
-      ssptaboutinfo->numofpages = ssptaboutinfo->ssptab.st_uint32.numofpages;
-      ssptaboutinfo->ssptab.st_uint32.positions
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uint32.positions)
-                    * ssptaboutinfo->ssptab.st_uint32.numofpositionstostore);
-      ssptaboutinfo->ssptab.st_uint32.endidxinpage
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptab.st_uint32.endidxinpage)
-                    * ssptaboutinfo->ssptab.st_uint32.numofpages);
+        = (unsigned long) ssptaboutinfo->ssptabptr->st_uint32.maxrangevalue+1;
+      ssptaboutinfo->numofpages
+        = ssptaboutinfo->ssptabptr->st_uint32.numofpages;
+      ssptaboutinfo->ssptabptr->st_uint32.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uint32.positions)
+                    * ssptaboutinfo->ssptabptr->st_uint32.numofpositionstostore
+                   );
+      ssptaboutinfo->ssptabptr->st_uint32.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uint32.endidxinpage)
+                    * ssptaboutinfo->ssptabptr->st_uint32.numofpages);
       break;
     default:
       fprintf(stderr,"ssptaboutinfo_new(sat = %d is undefined)\n",
@@ -1003,25 +1021,6 @@ static void ssptaboutinfo_delete(Gtssptaboutinfo *ssptaboutinfo)
   if (ssptaboutinfo != NULL)
   {
     gt_fa_fclose(ssptaboutinfo->fp);
-    switch (ssptaboutinfo->satsep)
-    {
-      case GT_ACCESS_TYPE_UCHARTABLES:
-        gt_free(ssptaboutinfo->ssptab.st_uchar.positions);
-        gt_free(ssptaboutinfo->ssptab.st_uchar.endidxinpage);
-        break;
-      case GT_ACCESS_TYPE_USHORTTABLES:
-        gt_free(ssptaboutinfo->ssptab.st_ushort.positions);
-        gt_free(ssptaboutinfo->ssptab.st_ushort.endidxinpage);
-        break;
-      case GT_ACCESS_TYPE_UINT32TABLES:
-        gt_free(ssptaboutinfo->ssptab.st_uint32.positions);
-        gt_free(ssptaboutinfo->ssptab.st_uint32.endidxinpage);
-        break;
-      default:
-        fprintf(stderr,"ssptaboutinfo_new(sat = %d is undefined)\n",
-                       (int) ssptaboutinfo->satsep);
-        exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
     gt_free(ssptaboutinfo);
   }
 }
@@ -1036,16 +1035,19 @@ static void ssptaboutinfo_processseppos(Gtssptaboutinfo *ssptaboutinfo,
     switch (ssptaboutinfo->satsep)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-        ssptaboutinfo->ssptab.st_uchar.positions[ssptaboutinfo->fillpos++]
-          = (GtUchar) (seppos & ssptaboutinfo->ssptab.st_uchar.maxrangevalue);
+        ssptaboutinfo->ssptabptr->st_uchar.positions[ssptaboutinfo->fillpos++]
+          = (GtUchar) (seppos &
+                       ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
-        ssptaboutinfo->ssptab.st_ushort.positions[ssptaboutinfo->fillpos++]
-          = (GtUshort) (seppos & ssptaboutinfo->ssptab.st_ushort.maxrangevalue);
+        ssptaboutinfo->ssptabptr->st_ushort.positions[ssptaboutinfo->fillpos++]
+          = (GtUshort) (seppos &
+                        ssptaboutinfo->ssptabptr->st_ushort.maxrangevalue);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
-        ssptaboutinfo->ssptab.st_uint32.positions[ssptaboutinfo->fillpos++]
-          = (uint32_t) (seppos & ssptaboutinfo->ssptab.st_uint32.maxrangevalue);
+        ssptaboutinfo->ssptabptr->st_uint32.positions[ssptaboutinfo->fillpos++]
+          = (uint32_t) (seppos &
+                        ssptaboutinfo->ssptabptr->st_uint32.maxrangevalue);
         break;
       default:
         fprintf(stderr,"ssptaboutinfo_processseppos(sat = %d is undefined)\n",
@@ -1060,15 +1062,18 @@ static void ssptaboutinfo_setendidx(Gtssptaboutinfo *ssptaboutinfo)
   switch (ssptaboutinfo->satsep)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      ssptaboutinfo->ssptab.st_uchar.endidxinpage[ssptaboutinfo->pagenumber++]
+      ssptaboutinfo->ssptabptr->st_uchar.endidxinpage[
+                                            ssptaboutinfo->pagenumber++]
         = ssptaboutinfo->fillpos;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ssptaboutinfo->ssptab.st_ushort.endidxinpage[ssptaboutinfo->pagenumber++]
+      ssptaboutinfo->ssptabptr->st_ushort.endidxinpage[
+                                             ssptaboutinfo->pagenumber++]
         = ssptaboutinfo->fillpos;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      ssptaboutinfo->ssptab.st_uint32.endidxinpage[ssptaboutinfo->pagenumber++]
+      ssptaboutinfo->ssptabptr->st_uint32.endidxinpage[
+                                             ssptaboutinfo->pagenumber++]
         = ssptaboutinfo->fillpos;
       break;
     default:
@@ -3005,7 +3010,8 @@ static GtEncseq *files2encodedsequence(
                                 const GtFilelengthvalues *filelengthtab,
                                 bool plainformat,
                                 unsigned long totallength,
-                                Gtssptaboutinfo *ssptaboutinfo,
+                                bool outssptab,
+                                const char *indexname,
                                 unsigned long numofsequences,
                                 const Definedunsignedlong *equallength,
                                 GtAlphabet *alphabet,
@@ -3020,6 +3026,7 @@ static GtEncseq *files2encodedsequence(
   GtEncseq *encseq = NULL;
   bool haserr = false;
   GtSequenceBuffer *fb = NULL;
+  Gtssptaboutinfo *ssptaboutinfo = NULL;
 
   gt_error_check(err);
 #ifdef INLINEDENCSEQ
@@ -3058,15 +3065,32 @@ static GtEncseq *files2encodedsequence(
     {
       haserr = true;
     }
-    if (!haserr)
+  }
+  if (!haserr)
+  {
+    if (numofsequences > 1UL &&
+        sat != GT_ACCESS_TYPE_EQUALLENGTH &&
+        (outssptab || gt_encseq_access_type_isviautables(sat)))
     {
-      gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
-      if (encodedseqfunctab[(int) sat].fillpos.function(encseq,ssptaboutinfo,
-                                                        fb,err) != 0)
+      gt_assert(encseq != NULL);
+      ssptaboutinfo = ssptaboutinfo_new(indexname,totallength,
+                                        numofsequences,&encseq->ssptabnew,
+                                        err);
+      if (ssptaboutinfo == NULL)
       {
         haserr = true;
       }
     }
+  }
+  if (!haserr)
+  {
+    gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alphabet));
+    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,ssptaboutinfo,
+                                                      fb,err) != 0)
+    {
+      haserr = true;
+    }
+    ssptaboutinfo_delete(ssptaboutinfo);
   }
 #ifdef GT_RANGEDEBUG
   if (!haserr)
@@ -5361,7 +5385,6 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                 numofseparators = 0,
                 *characterdistribution = NULL;
   GtEncseq *encseq = NULL;
-  Gtssptaboutinfo *ssptaboutinfo = NULL;
   unsigned long specialranges, wildcardranges;
   Definedunsignedlong equallength; /* is defined of all sequences are of equal
                              length and no WILDCARD appears in the sequence */
@@ -5461,25 +5484,12 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   }
   if (!haserr)
   {
-    if (numofseparators > 0 &&
-        sat != GT_ACCESS_TYPE_EQUALLENGTH &&
-        (outssptab || gt_encseq_access_type_isviautables(sat)))
-    {
-      ssptaboutinfo = ssptaboutinfo_new(indexname,totallength,
-                                        numofseparators,err);
-      if (ssptaboutinfo == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr)
-  {
     encseq = files2encodedsequence(filenametab,
                                    filelengthtab,
                                    isplain,
                                    totallength,
-                                   ssptaboutinfo,
+                                   outssptab,
+                                   indexname,
                                    numofseparators+1,
                                    &equallength,
                                    alphabet,
@@ -5501,7 +5511,6 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
         haserr = true;
       }
     }
-    ssptaboutinfo_delete(ssptaboutinfo);
     if (gt_encseq_verify_encseq(encseq,indexname,err) != 0)
     {
        haserr = true;
