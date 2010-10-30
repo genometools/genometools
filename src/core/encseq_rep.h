@@ -87,7 +87,8 @@ struct GtEncseq
   unsigned long *satcharptr;  /* need for writing char sat */
   GtEncseqAccessType sat, satsep;
   const char *satname;
-  void *mappedptr; /* NULL or pointer to the mapped space block */
+  void *mappedptr, /* NULL or pointer to the mapped space block */
+       *ssptabmappedptr; /* NULL or pointer to the mapped space block */
   bool has_specialranges,
        has_wildcardranges;
   unsigned long totallength,

@@ -701,6 +701,36 @@ static int flushssptab2file(const char *indexname,GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
+static int fillssptabmapspecstartptr(GtEncseq *encseq,
+                                     const char *indexname,
+                                     GtError *err)
+{
+  bool haserr = false;
+  GtStr *tmpfilename;
+  unsigned long sizessptab;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_new_cstr(indexname);
+  gt_str_append_cstr(tmpfilename,".ssp1");
+
+  sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
+                            sizeofSWtable(encseq->satsep,
+                                          false,
+                                          encseq->totallength,
+                                          encseq->numofdbsequences-1));
+  if (gt_mapspec_fillmapspecstartptr(assignssptabmapspecification,
+                                     &encseq->ssptabmappedptr,
+                                     encseq,
+                                     tmpfilename,
+                                     sizessptab,
+                                     err) != 0)
+  {
+    haserr = true;
+  }
+  gt_str_delete(tmpfilename);
+  return haserr ? -1 : 0;
+}
+
 static void assignencseqmapspecification(
                                         GtArrayGtMapspecification *mapspectable,
                                         void *voidinfo,
@@ -1258,6 +1288,10 @@ void gt_encseq_delete(GtEncseq *encseq)
         break;
     }
   }
+  if (encseq->ssptabmappedptr != NULL)
+  {
+    gt_fa_xmunmap(encseq->ssptabmappedptr);
+  }
   encseq->characterdistribution = NULL;
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
@@ -1268,27 +1302,33 @@ void gt_encseq_delete(GtEncseq *encseq)
   setencsequtablesNULL(encseq->satsep,&encseq->ssptabnew);
   if (encseq->destab != NULL)
   {
-    if (encseq->hasallocateddestab) {
+    if (encseq->hasallocateddestab)
+    {
       gt_free(encseq->destab);
-    } else {
+    } else
+    {
       gt_fa_xmunmap((void *) encseq->destab);
     }
     encseq->destab = NULL;
   }
   if (encseq->sdstab != NULL)
   {
-    if (encseq->hasallocatedsdstab) {
+    if (encseq->hasallocatedsdstab)
+    {
       gt_free(encseq->sdstab);
-    } else {
+    } else
+    {
       gt_fa_xmunmap((void *) encseq->sdstab);
     }
     encseq->sdstab = NULL;
   }
   if (encseq->ssptab != NULL)
   {
-    if (encseq->hasallocatedssptab) {
+    if (encseq->hasallocatedssptab)
+    {
       gt_free(encseq->ssptab);
-    } else {
+    } else
+    {
       gt_fa_xmunmap((void *) encseq->ssptab);
     }
     encseq->ssptab = NULL;
@@ -2752,6 +2792,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
   encseq->mappedptr = NULL;
+  encseq->ssptabmappedptr = NULL;
   encseq->satcharptr = NULL;
   encseq->numofdbsequencesptr = NULL;
   encseq->numofdbfilesptr = NULL;
@@ -3106,6 +3147,7 @@ static GtEncseq *files2encodedsequence(
                                       logger);
     ALLASSIGNAPPENDFUNC(sat);
     encseq->mappedptr = NULL;
+    encseq->ssptabmappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
     encseq->filenametab = (GtStrArray *) filenametab;
     encseq->filelengthtab = (GtFilelengthvalues *) filelengthtab;
@@ -3292,6 +3334,10 @@ gt_encseq_new_from_index(const char *indexname,
                                          sizeof (*encseq->ssptab),
                                          err);
       if (encseq->ssptab == NULL)
+      {
+        haserr = true;
+      }
+      if (!haserr && fillssptabmapspecstartptr(encseq,indexname,err) != 0)
       {
         haserr = true;
       }
@@ -6518,6 +6564,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
   }
   ALLASSIGNAPPENDFUNC(sat);
   encseq->mappedptr = NULL;
+  encseq->ssptabmappedptr = NULL;
   eb->created_encseq = true;
   gt_encseq_builder_reset(eb);
   return encseq;
