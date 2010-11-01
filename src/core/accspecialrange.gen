@@ -253,7 +253,7 @@ static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
 
 #ifdef GT_RANGEDEBUG
 
-static void GT_APPENDINT(showspecialpositionswithpages)
+static void GT_APPENDINT(showSWtablewithpages)
                             (const GT_APPENDINT(GtSWtable) *swtable,
                              unsigned long pgnum,
                              unsigned long offset,
@@ -269,14 +269,16 @@ static void GT_APPENDINT(showspecialpositionswithpages)
   {
     startpos = (unsigned long) swtable->positions[idx];
     range.start = offset + startpos;
-    range.end = range.start + swtable->rangelengths[idx] + 1;
+    range.end = range.start + ((swtable->rangelengths == 0)
+                                ? 0
+                                : swtable->rangelengths[idx]) + 1;
     printf("%lu: ",idx);
-    showsequencerange(&range);
+    showGtRange(&range);
     printf("\n");
   }
 }
 
-static void GT_APPENDINT(showallspecialpositionswithpages)(
+static void GT_APPENDINT(showallSWtablewithpages)(
                             const GT_APPENDINT(GtSWtable) *swtable)
 {
   unsigned long endpos0, endpos1, pgnum, offset = 0;
@@ -293,8 +295,8 @@ static void GT_APPENDINT(showallspecialpositionswithpages)(
     endpos1 = swtable->endidxinpage[pgnum];
     if (endpos0 < endpos1)
     {
-      GT_APPENDINT(showspecialpositionswithpages)(swtable,pgnum,offset,
-                                                  endpos0,endpos1-1);
+      GT_APPENDINT(showSWtablewithpages)(swtable,pgnum,offset,
+                                         endpos0,endpos1-1);
     }
     offset += 1UL + (unsigned long) swtable->maxrangevalue;
   }
@@ -476,7 +478,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
       GT_APPENDINT(determinerange)(&range,swrangetable,pagenum,cellnum);
 #ifdef RANGEDEBUG
       printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
-      showsequencerange(&range);
+      showGtRange(&range);
       printf("\n");
 #endif
       if (moveforward)
@@ -560,7 +562,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
                                    ? swstate->firstcell
                                    : (swstate->lastcell-1));
     printf("binary found pos %lu in ", esr->currentpos);
-    showsequencerange(&range);
+    showGtRange(&range);
     printf(" at cell %lu in page %lu\n",
            moveforward ? swstate->firstcell
                        : (swstate->lastcell-1),
@@ -580,7 +582,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
                                    : (swstate->lastcell-1));
 #ifdef RANGEDEBUG
     printf("previousrange=");
-    showsequencerange(&swstate->previousrange);
+    showGtRange(&swstate->previousrange);
     printf("\n");
 #endif
     if (swstate->previousrange.start <= esr->currentpos &&

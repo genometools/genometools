@@ -266,7 +266,8 @@ GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
                ? GT_COMPLEMENTBASE((GtUchar) twobits)
                : (GtUchar) twobits;
     }
-    if (encseq->issinglepositionseparator(encseq,pos))
+    if (encseq->numofdbsequences > 1UL &&
+        encseq->issinglepositionseparator(encseq,pos))
     {
       return (GtUchar) SEPARATOR;
     }
@@ -479,7 +480,7 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
 }
 
 #ifdef GT_RANGEDEBUG
-static void showsequencerange(const GtRange *range)
+static void showGtRange(const GtRange *range)
 {
   if (range->start + 1 == range->end)
   {
@@ -685,9 +686,6 @@ static int flushssptab2file(const char *indexname,GtEncseq *encseq,
                                             false,
                                             encseq->totallength,
                                             encseq->numofdbsequences-1));
-    /*
-    printf("sizessptab=%lu\n",sizessptab);
-    */
     if (gt_mapspec_flushtheindex2file(fp,
                                       assignssptabmapspecification,
                                       encseq,
@@ -981,9 +979,6 @@ static GtEncseqAccessType determineoptimalsssptablerep(
     sepsizemin = sepsize;
     satmin = GT_ACCESS_TYPE_UINT32TABLES;
   }
-  /*
-  printf("satmin=%d,sepsizemin=%lu\n",(int) satmin,(unsigned long) sepsizemin);
-  */
   return satmin;
 }
 
@@ -1065,13 +1060,6 @@ static Gtssptaboutinfo *ssptaboutinfo_new(const char *indexname,
       ssptaboutinfo->ssptabptr->st_ushort.endidxinpage
         = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_ushort.endidxinpage)
                     * ssptaboutinfo->ssptabptr->st_ushort.numofpages);
-      /*
-      printf("ssp.allocated=%lu\n",
-              sizeof (*ssptaboutinfo->ssptabptr->st_ushort.positions)
-              * ssptaboutinfo->ssptabptr->st_ushort.numofpositionstostore +
-              sizeof (*ssptaboutinfo->ssptabptr->st_ushort.endidxinpage)
-                    * ssptaboutinfo->ssptabptr->st_ushort.numofpages);
-      */
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       ssptaboutinfo->nextcheckincrement
@@ -1356,6 +1344,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #define GT_POS2PAGENUM(V)        ((V) >> 8)
 
 #include "core/accspecialrange.gen"
+#include "core/accspecial.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
@@ -1366,6 +1355,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #define GT_POS2PAGENUM(V)        ((V) >> 16)
 
 #include "core/accspecialrange.gen"
+#include "core/accspecial.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
@@ -1380,6 +1370,7 @@ void gt_encseq_delete(GtEncseq *encseq)
 #endif
 
 #include "core/accspecialrange.gen"
+#include "core/accspecial.gen"
 
 #undef GT_APPENDINT
 #undef GT_SPECIALTABLETYPE
@@ -1387,47 +1378,36 @@ void gt_encseq_delete(GtEncseq *encseq)
 
 #ifdef GT_RANGEDEBUG
 
-static void showallspecialpositions(const GtEncseq *encseq)
+static void showallSWtablewithpages(GtEncseqAccessType sat,
+                                    const GtSWtable *swtable)
+{
+  switch (sat)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      showallSWtablewithpages_uchar(&swtable->st_uchar);
+      break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      showallSWtablewithpages_ushort(&swtable->st_ushort);
+      break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      showallSWtablewithpages_uint32(&swtable->st_uint32);
+      break;
+    default: fprintf(stderr,
+                     "showallSWtablewithpage"
+                     "(sat=%d is undefined)",(int) sat);
+             exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+
+static void showallSWtables(const GtEncseq *encseq)
 {
   if (encseq->has_specialranges)
   {
-    switch (encseq->sat)
-    {
-      case GT_ACCESS_TYPE_UCHARTABLES:
-        showallspecialpositionswithpages_uchar(&encseq->specialrangetable.
-                                               st_uchar);
-        break;
-      case GT_ACCESS_TYPE_USHORTTABLES:
-        showallspecialpositionswithpages_ushort(&encseq->specialrangetable.
-                                                st_ushort);
-        break;
-      case GT_ACCESS_TYPE_UINT32TABLES:
-        showallspecialpositionswithpages_uint32(&encseq->specialrangetable.
-                                                st_uint32);
-        break;
-      default:
-        break;
-    }
+    showallSWtablewithpages(encseq->sat,&encseq->specialrangetable);
   }
   if (encseq->has_wildcardranges)
   {
-    switch (encseq->sat)
-    {
-      case GT_ACCESS_TYPE_UCHARTABLES:
-        showallspecialpositionswithpages_uchar(&encseq->wildcardrangetable.
-                                               st_uchar);
-        break;
-      case GT_ACCESS_TYPE_USHORTTABLES:
-        showallspecialpositionswithpages_ushort(&encseq->wildcardtabe.
-                                                st_ushort);
-        break;
-      case GT_ACCESS_TYPE_UINT32TABLES:
-        showallspecialpositionswithpages_uint32(&encseq->wildcardtabe.
-                                                st_uint32);
-        break;
-      default:
-        break;
-    }
+    showallSWtablewithpages(encseq->sat,&encseq->wildcardrangetable);
   }
 }
 
@@ -1995,8 +1975,69 @@ static bool issinglepositionseparatorViabitaccess(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_UCHARTABLES | GT_ACCESS_TYPE_USHORTTABLES |
  * GT_ACCESS_TYPE_UINT32TABLES */
 
-static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
-                                                unsigned long pos)
+#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
+{\
+  return CHECKFUN##_##TYPE(&encseq->specialrangetable.st_##TYPE,pos);\
+}
+
+#define DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
+{\
+  return CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE,pos);\
+}
+
+#define DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
+                                                          TYPE)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
+{\
+  return CHECKFUN##_##TYPE(&encseq->ssptabnew.st_##TYPE,pos);\
+}
+
+/* GT_ACCESS_TYPE_UCHARTABLES */
+
+DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
+                                           issinglepositioninspecialrangeVia,
+                                           checkspecialrange,uchar)
+
+DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
+                                           issinglepositioninwildcardrangeVia,
+                                           checkspecialrange,uchar)
+
+DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
+                                           issinglepositionseparatorVia,
+                                           checkspecial,uchar)
+
+/* GT_ACCESS_TYPE_USHORTTABLES */
+
+DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
+                                           issinglepositioninspecialrangeVia,
+                                           checkspecialrange,ushort)
+
+DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
+                                           issinglepositioninwildcardrangeVia,
+                                           checkspecialrange,ushort)
+
+DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
+                                           issinglepositionseparatorVia,
+                                           checkspecial,ushort)
+
+/* GT_ACCESS_TYPE_UINT32TABLES */
+
+DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
+                                           issinglepositioninspecialrangeVia,
+                                           checkspecialrange,uint32)
+
+DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
+                                           issinglepositioninwildcardrangeVia,
+                                           checkspecialrange,uint32)
+
+DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
+                                           issinglepositionseparatorVia,
+                                           checkspecial,uint32)
+
+static bool issinglepositionseparatorViautablesBF(const GtEncseq *encseq,
+                                                  unsigned long pos)
 {
   if (encseq->numofdbsequences > 1UL)
   {
@@ -2026,47 +2067,38 @@ static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
   return false;
 }
 
-#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
-static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
-{\
-  return CHECKFUN##_##TYPE(&encseq->specialrangetable.st_##TYPE,pos);\
+static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
+                                                unsigned long pos)
+{
+  bool value, valueBF = issinglepositionseparatorViautablesBF(encseq,pos);
+
+  switch (encseq->satsep)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      value = issinglepositionseparatorViauchar(encseq,pos);
+      break;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      value = issinglepositionseparatorViaushort(encseq,pos);
+      break;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      value = issinglepositionseparatorViauint32(encseq,pos);
+      break;
+    default: fprintf(stderr,
+                     "issinglepositionseparatorViautables(sat=%s is undefined)"
+                     "\n",
+                     gt_encseq_access_type_str(encseq->satsep));
+             exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  if ((value && !valueBF) || (!value && valueBF))
+  {
+    fprintf(stderr,"pos=%lu, value=%s != %s=valueBF\n",
+             pos,value ? "true" : "false",
+             valueBF ? "true" : "false");
+    exit(EXIT_FAILURE);
+  }
+  gt_assert((value && valueBF) || (!value && !valueBF));
+  return value;
 }
-
-#define DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
-static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
-{\
-  return CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE,pos);\
-}
-
-/* GT_ACCESS_TYPE_UCHARTABLES */
-
-DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
-                                           issinglepositioninspecialrangeVia,
-                                           checkspecialrange,uchar)
-
-DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
-                                           issinglepositioninwildcardrangeVia,
-                                           checkspecialrange,uchar)
-
-/* GT_ACCESS_TYPE_USHORTTABLES */
-
-DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
-                                           issinglepositioninspecialrangeVia,
-                                           checkspecialrange,ushort)
-
-DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
-                                           issinglepositioninwildcardrangeVia,
-                                           checkspecialrange,ushort)
-
-/* GT_ACCESS_TYPE_UINT32TABLES */
-
-DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
-                                           issinglepositioninspecialrangeVia,
-                                           checkspecialrange,uint32)
-
-DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
-                                           issinglepositioninwildcardrangeVia,
-                                           checkspecialrange,uint32)
 
 static void advancerangeGtEncseqReader(GtEncseqReader *esr,bool usespecial)
 {
@@ -3060,7 +3092,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
         encseq->seqdelivercharname\
           = encodedseqfunctab[(int) (SAT)].seqdeliverchar##NAME.funcname
 
-#define ALLASSIGNAPPENDFUNC(SAT)\
+#define ALLASSIGNAPPENDFUNC(SAT,SATSEP)\
         if (encseq->has_specialranges)\
         {\
           SEQASSIGNAPPFUNC(SAT,special);\
@@ -3084,12 +3116,23 @@ static GtEncseqfunctions encodedseqfunctab[] =
         encseq->issinglepositioninwildcardrangename\
           = encodedseqfunctab[(int) (SAT)].issinglepositioninwildcardrange\
                                           .funcname;\
-        encseq->issinglepositionseparator\
-          = encodedseqfunctab[(int) (SAT)].issinglepositionseparator\
-                                          .function;\
-        encseq->issinglepositionseparatorname\
-          = encodedseqfunctab[(int) (SAT)].issinglepositionseparator\
-                                          .funcname
+        if (gt_encseq_access_type_isviautables(SAT))\
+        {\
+          encseq->issinglepositionseparator\
+            = encodedseqfunctab[(int) (SATSEP)].issinglepositionseparator\
+                                               .function;\
+          encseq->issinglepositionseparatorname\
+            = encodedseqfunctab[(int) (SATSEP)].issinglepositionseparator\
+                                               .funcname;\
+        } else\
+        {\
+          encseq->issinglepositionseparator\
+            = encodedseqfunctab[(int) (SAT)].issinglepositionseparator\
+                                            .function;\
+          encseq->issinglepositionseparatorname\
+            = encodedseqfunctab[(int) (SAT)].issinglepositionseparator\
+                                            .funcname;\
+        }
 
 static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
 {
@@ -3145,7 +3188,7 @@ static GtEncseq *files2encodedsequence(
                                       equallength,
                                       alphabet,
                                       logger);
-    ALLASSIGNAPPENDFUNC(sat);
+    ALLASSIGNAPPENDFUNC(sat,encseq->satsep);
     encseq->mappedptr = NULL;
     encseq->ssptabmappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
@@ -3197,7 +3240,7 @@ static GtEncseq *files2encodedsequence(
 #ifdef GT_RANGEDEBUG
   if (!haserr)
   {
-    showallspecialpositions(encseq);
+    showallSWtables(encseq);
   }
 #endif
   if (haserr && encseq != NULL)
@@ -3274,7 +3317,7 @@ gt_encseq_new_from_index(const char *indexname,
                                  alpha,
                                  logger);
     alpha = NULL;
-    ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd));
+    ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd),encseq->satsep);
     if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
     {
       haserr = true;
@@ -3283,7 +3326,7 @@ gt_encseq_new_from_index(const char *indexname,
 #ifdef GT_RANGEDEBUG
   if (!haserr)
   {
-    showallspecialpositions(encseq);
+    showallSWtables(encseq);
   }
 #endif
   if (!haserr && withdestab)
@@ -4243,7 +4286,7 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
       default:
        fprintf(stderr,"revgetnexttwobitencodingstoppos(%d) undefined\n",
                (int) esr->encseq->sat);
-         exit(GT_EXIT_PROGRAMMING_ERROR);
+       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
   {
@@ -5889,13 +5932,12 @@ static void makeerrormsg(const GtRange *vala,
                          const GtRange *valb,
                          const char *cmpflag)
 {
-  fprintf(stderr,
-                "(%lu,%lu) %s (%lu,%lu)\n",
-                vala->start,
-                vala->end,
-                cmpflag,
-                valb->start,
-                valb->end);
+  fprintf(stderr,"(%lu,%lu) %s (%lu,%lu)\n",
+                  vala->start,
+                  vala->end,
+                  cmpflag,
+                  valb->start,
+                  valb->end);
 }
 
 static int compareGtRange(const void *a,const void *b)
@@ -6562,7 +6604,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
     encseq->hasallocatedsdstab = true;
     encseq->sdstab = eb->sdstab.spaceGtUlong;
   }
-  ALLASSIGNAPPENDFUNC(sat);
+  ALLASSIGNAPPENDFUNC(sat,encseq->satsep);
   encseq->mappedptr = NULL;
   encseq->ssptabmappedptr = NULL;
   eb->created_encseq = true;
