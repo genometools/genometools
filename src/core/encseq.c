@@ -830,11 +830,13 @@ static void assignencseqmapspecification(
                                true,
                                encseq->totallength,
                                encseq->sat);
+#undef NEWTWOBITENCODING
 #ifdef NEWTWOBITENCODING
       NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
       addswtabletomapspectable(mapspectable,
                                &encseq->wildcardrangetable,
+                               true,
                                encseq->totallength,
                                encseq->sat);
 #endif
@@ -2186,14 +2188,19 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
     }
     esr->wildcardrangestate->hasprevious = esr->wildcardrangestate->hascurrent
                                       = false;
-    /*XXX binpreparenextrangeGtEncseqReader(esr,usespecial);*/
+#ifdef NEWTWOBITENCODING
+    binpreparenextrangeGtEncseqReader(esr,usespecial);
+#endif
 #ifdef GT_RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
 #endif
-    /*XXX advancerangeGtEncseqReader(esr,usespecial);*/
+#ifdef NEWTWOBITENCODING
+    advancerangeGtEncseqReader(esr,usespecial);
+#endif
+
   } else
   {
     if (esr->specialrangestate != NULL)
@@ -3669,7 +3676,8 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          sum = sizeoftwobitencoding +
                sizeofSWtable(sat,true,totallength,specialranges);
 #ifdef NEWTWOBITENCODING
-         sum += sizeofSWtable(sat,true,totallength,wildcardranges);
+         sum += sizeoftwobitencoding +
+                sizeofSWtable(sat,true,totallength,wildcardranges);
 #endif
          break;
     default:

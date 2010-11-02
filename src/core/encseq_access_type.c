@@ -106,11 +106,11 @@ static GtEncseqAccessType determinesmallestrep(
   GtEncseqAccessType cret;
   uint64_t tmp, cmin;
 
-  cmin = gt_encseq_determine_size(GT_ACCESS_TYPE_BITACCESS, totallength,
+  cret = GT_ACCESS_TYPE_BITACCESS;
+  cmin = gt_encseq_determine_size(cret, totallength,
                                   numofdbfiles, lengthofdbfilenames,
                                   specialrangestab[0], wildcardrangestab[0],
                                   numofchars, 0);
-  cret = GT_ACCESS_TYPE_BITACCESS;
   *specialranges = specialrangestab[0];
   *wildcardranges = wildcardrangestab[0];
   if (equallength != NULL && equallength->defined)
