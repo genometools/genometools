@@ -69,16 +69,16 @@ static int bssm_model_read(GthBSSMModel *bssm_model, FILE *file, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_xfread(&bssm_model->hypothesisnum, sizeof (unsigned long), 1, file);
-  if (bssm_model->hypothesisnum != HYPOTHESIS7 &&
-      bssm_model->hypothesisnum != HYPOTHESIS2) {
+  gt_xfread(&bssm_model->hypothesis_num, sizeof (unsigned long), 1, file);
+  if (bssm_model->hypothesis_num != HYPOTHESIS7 &&
+      bssm_model->hypothesis_num != HYPOTHESIS2) {
     gt_error_set(err, "BSSM model contains unknown hypothesis number");
     had_err = -1;
   }
   if (!had_err) {
-    gt_xfread(&bssm_model->windowsizeleft, sizeof (unsigned long), 1, file);
-    gt_xfread(&bssm_model->windowsizeright, sizeof (unsigned long), 1, file);
-    switch (bssm_model->hypothesisnum) {
+    gt_xfread(&bssm_model->window_size_left, sizeof (unsigned long), 1, file);
+    gt_xfread(&bssm_model->window_size_right, sizeof (unsigned long), 1, file);
+    switch (bssm_model->hypothesis_num) {
       case HYPOTHESIS2:
         gt_xfread(&bssm_model->hypotables.hypo2table, sizeof (Hypo2table), 1,
                   file);
@@ -135,10 +135,10 @@ GthBSSMParam* gth_bssm_param_load(const char *filename, GtError *err)
   /* read version number and check if equals version number 2 */
   if (!had_err) {
     bssm_param = gt_malloc(sizeof *bssm_param);
-    gt_xfread(&bssm_param->versionnum,  sizeof (unsigned char), 1, file);
-    if (bssm_param->versionnum != (unsigned char) 2) {
+    gt_xfread(&bssm_param->version_num,  sizeof (unsigned char), 1, file);
+    if (bssm_param->version_num != (unsigned char) 2) {
       gt_error_set(err, "BSSM file %s has unrecognized version number %u\n",
-                   filename, bssm_param->versionnum);
+                   filename, bssm_param->version_num);
       had_err = -1;
     }
   }
@@ -188,15 +188,15 @@ GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
   gt_error_check(err);
 
   bssm_param = gth_bssm_param_new();
-  bssm_param->versionnum = (unsigned char) 2;
+  bssm_param->version_num = (unsigned char) 2;
   bssm_param->gt_donor_model_set    = true;
   bssm_param->gc_donor_model_set    = false;
   bssm_param->ag_acceptor_model_set = true;
 
   if (speciesnum <= 1) {
     /* read in the human and mouse cases */
-    bssm_param->gt_donor_model.hypothesisnum    = HYPOTHESIS2;
-    bssm_param->ag_acceptor_model.hypothesisnum = HYPOTHESIS2;
+    bssm_param->gt_donor_model.hypothesis_num    = HYPOTHESIS2;
+    bssm_param->ag_acceptor_model.hypothesis_num = HYPOTHESIS2;
     for (i = 0; i < HYPOTHESIS2; i++) {
       for (j = 0; j < WINSIZE + 2; j++) {
         for (k = 0; k < 4; k++) {
@@ -212,8 +212,8 @@ GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
   }
   else if (speciesnum <  NUMOFSPECIES) {
     /* read in all others */
-    bssm_param->gt_donor_model.hypothesisnum    = HYPOTHESIS7;
-    bssm_param->ag_acceptor_model.hypothesisnum = HYPOTHESIS7;
+    bssm_param->gt_donor_model.hypothesis_num    = HYPOTHESIS7;
+    bssm_param->ag_acceptor_model.hypothesis_num = HYPOTHESIS7;
     for (i = 0; i < HYPOTHESIS7; i++) {
       for (j = 0; j < WINSIZE + 2; j++) {
         for (k = 0; k < 4; k++) {
@@ -234,10 +234,10 @@ GthBSSMParam* gth_bssm_param_extract(unsigned long speciesnum, GtError *err)
   }
 
   /* setting the window sizes */
-  bssm_param->gt_donor_model.windowsizeleft     =  wsize[speciesnum][0][0];
-  bssm_param->gt_donor_model.windowsizeright    =  wsize[speciesnum][0][1];
-  bssm_param->ag_acceptor_model.windowsizeleft  =  wsize[speciesnum][1][0];
-  bssm_param->ag_acceptor_model.windowsizeright =  wsize[speciesnum][1][1];
+  bssm_param->gt_donor_model.window_size_left     = wsize[speciesnum][0][0];
+  bssm_param->gt_donor_model.window_size_right    = wsize[speciesnum][0][1];
+  bssm_param->ag_acceptor_model.window_size_left  = wsize[speciesnum][1][0];
+  bssm_param->ag_acceptor_model.window_size_right = wsize[speciesnum][1][1];
 
   return bssm_param;
 }
@@ -254,28 +254,28 @@ static bool bssm_models_are_equal(GthBSSMModel *checkmodel,
 {
   unsigned long i, j, k, l;
 
-  if (checkmodel->hypothesisnum != testmodel->hypothesisnum)
-    return  false;
-  if (checkmodel->windowsizeleft != testmodel->windowsizeleft)
-    return  false;
-  if (checkmodel->windowsizeright != testmodel->windowsizeright)
-    return  false;
+  if (checkmodel->hypothesis_num != testmodel->hypothesis_num)
+    return false;
+  if (checkmodel->window_size_left != testmodel->window_size_left)
+    return false;
+  if (checkmodel->window_size_right != testmodel->window_size_right)
+    return false;
 
-  if (checkmodel->hypothesisnum == HYPOTHESIS2) {
+  if (checkmodel->hypothesis_num == HYPOTHESIS2) {
     for (i = 0; i < HYPOTHESIS2; i++) {
-        for (j = 0; j < WINSIZE + 2; j++) {
-          for (k = 0; k < 4; k++) {
-            for (l = 0; l < 4; l++) {
-              if (checkmodel->hypotables.hypo2table[i][j][k][l] !=
-                  testmodel->hypotables.hypo2table[i][j][k][l]) {
-                return false;
-              }
+      for (j = 0; j < WINSIZE + 2; j++) {
+        for (k = 0; k < 4; k++) {
+          for (l = 0; l < 4; l++) {
+            if (checkmodel->hypotables.hypo2table[i][j][k][l] !=
+                testmodel->hypotables.hypo2table[i][j][k][l]) {
+              return false;
             }
           }
         }
       }
+    }
   }
-  else if (checkmodel->hypothesisnum == HYPOTHESIS7) {
+  else if (checkmodel->hypothesis_num == HYPOTHESIS7) {
     for (i = 0; i < HYPOTHESIS7; i++) {
       for (j = 0; j < WINSIZE + 2; j++) {
         for (k = 0; k < 4; k++) {
@@ -306,7 +306,7 @@ static bool bssmfile_equals_param(const char *filename,
   testparam = gth_bssm_param_load(filename, NULL);
   gt_assert(testparam);
 
-  if (checkparam->versionnum != testparam->versionnum) {
+  if (checkparam->version_num != testparam->version_num) {
     gth_bssm_param_delete(testparam);
     return  false;
   }
@@ -325,21 +325,21 @@ static bool bssmfile_equals_param(const char *filename,
 
   if (checkparam->gt_donor_model_set) {
     if (!bssm_models_are_equal(&checkparam->gt_donor_model,
-                              &testparam->gt_donor_model)) {
+                               &testparam->gt_donor_model)) {
       gth_bssm_param_delete(testparam);
       return false;
     }
   }
   if (checkparam->gc_donor_model_set) {
     if (!bssm_models_are_equal(&checkparam->gc_donor_model,
-                              &testparam->gc_donor_model)) {
+                               &testparam->gc_donor_model)) {
       gth_bssm_param_delete(testparam);
       return false;
     }
   }
   if (checkparam->ag_acceptor_model_set) {
     if (!bssm_models_are_equal(&checkparam->ag_acceptor_model,
-                              &testparam->ag_acceptor_model)) {
+                               &testparam->ag_acceptor_model)) {
       gth_bssm_param_delete(testparam);
       return false;
     }
@@ -355,22 +355,22 @@ static int writeBssmmodeltofile(FILE *file, GthBSSMModel *bssm_model,
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_xfwrite(&bssm_model->hypothesisnum, sizeof (unsigned long), 1, file);
-  if (bssm_model->hypothesisnum != HYPOTHESIS7 &&
-      bssm_model->hypothesisnum != HYPOTHESIS2) {
+  gt_xfwrite(&bssm_model->hypothesis_num, sizeof (unsigned long), 1, file);
+  if (bssm_model->hypothesis_num != HYPOTHESIS7 &&
+      bssm_model->hypothesis_num != HYPOTHESIS2) {
     gt_error_set(err, "BSSM model contains unknown hypothesis number");
     had_err = -1;
   }
   if (!had_err) {
-    gt_xfwrite(&bssm_model->windowsizeleft, sizeof (unsigned long), 1, file);
-    gt_xfwrite(&bssm_model->windowsizeright, sizeof (unsigned long), 1, file);
-    switch (bssm_model->hypothesisnum) {
+    gt_xfwrite(&bssm_model->window_size_left, sizeof (unsigned long), 1, file);
+    gt_xfwrite(&bssm_model->window_size_right, sizeof (unsigned long), 1, file);
+    switch (bssm_model->hypothesis_num) {
       case HYPOTHESIS2:
-        gt_xfwrite(&bssm_model->hypotables.hypo2table,  sizeof (Hypo2table), 1,
+        gt_xfwrite(&bssm_model->hypotables.hypo2table, sizeof (Hypo2table), 1,
                    file);
         break;
       case HYPOTHESIS7:
-        gt_xfwrite(&bssm_model->hypotables.hypo7table,  sizeof (Hypo7table), 1,
+        gt_xfwrite(&bssm_model->hypotables.hypo7table, sizeof (Hypo7table), 1,
                    file);
         break;
       default: gt_assert(0);
@@ -391,12 +391,12 @@ int gth_bssm_param_save(GthBSSMParam *bssm_param, const char *filename,
   gt_assert(file);
 
   /* write version number */
-  gt_xfwrite(&bssm_param->versionnum,  sizeof (unsigned char), 1, file);
+  gt_xfwrite(&bssm_param->version_num, sizeof (unsigned char), 1, file);
 
   /* write in model variables */
-  gt_xfwrite(&bssm_param->gt_donor_model_set,  sizeof (bool), 1, file);
-  gt_xfwrite(&bssm_param->gc_donor_model_set,  sizeof (bool), 1, file);
-  gt_xfwrite(&bssm_param->ag_acceptor_model_set,  sizeof (bool), 1, file);
+  gt_xfwrite(&bssm_param->gt_donor_model_set, sizeof (bool), 1, file);
+  gt_xfwrite(&bssm_param->gc_donor_model_set, sizeof (bool), 1, file);
+  gt_xfwrite(&bssm_param->ag_acceptor_model_set, sizeof (bool), 1, file);
 
   /* check if at least one model is set */
   if (!bssm_param->gt_donor_model_set &&
@@ -433,7 +433,7 @@ int gth_bssm_param_save(GthBSSMParam *bssm_param, const char *filename,
 static bool bssm_model_is_seven_class(const GthBSSMModel *bssm_model)
 {
   gt_assert(bssm_model);
-  return bssm_model->hypothesisnum == HYPOTHESIS7;
+  return bssm_model->hypothesis_num == HYPOTHESIS7;
 }
 
 bool gth_bssm_param_is_seven_class(const GthBSSMParam  *bssm_param)
@@ -473,7 +473,7 @@ static void bssm_model_echo(const GthBSSMModel *bssm_model, FILE *outfp)
 void gth_bssm_param_echo(const GthBSSMParam *bssm_param, FILE *outfp)
 {
   gt_assert(bssm_param && outfp);
-  fprintf(outfp,"BSSMPARAMVERSION is %u\n\n", bssm_param->versionnum);
+  fprintf(outfp,"BSSMPARAMVERSION is %u\n\n", bssm_param->version_num);
   fprintf(outfp,"Is the GT donor model set? -> %s\n",
           GTH_SHOWBOOL(bssm_param->gt_donor_model_set));
   fprintf(outfp,"Is the GC donor model set? -> %s\n\n",
@@ -506,7 +506,7 @@ void gth_bssm_param_show_info(const GthBSSMParam *bssm_param, GtFile *outfp)
   if (bssm_param->MODEL##_model_set) \
   { \
     gt_file_xprintf(outfp, " (%s)", \
-                    bssm_param->MODEL##_model.hypothesisnum == HYPOTHESIS7 \
+                    bssm_param->MODEL##_model.hypothesis_num == HYPOTHESIS7 \
                     ? SEVENCLASSSTRING : TWOCLASSSTRING); \
   } \
   gt_file_xfputc('\n', outfp);
@@ -529,12 +529,12 @@ void gth_bssm_param_show_info(const GthBSSMParam *bssm_param, GtFile *outfp)
 
 static void set_window_sizes_in_Bssmmodel(GthBSSMModel *bssm_model)
 {
-  bssm_model->hypothesisnum      = HYPOTHESIS7;
+  bssm_model->hypothesis_num = HYPOTHESIS7;
 
   /* We have decided to leave maximum splice signal
      extent window at...a maximal value!            */
-  bssm_model->windowsizeleft  = MAXSPLICESIG;
-  bssm_model->windowsizeright = MAXSPLICESIG;
+  bssm_model->window_size_left  = MAXSPLICESIG;
+  bssm_model->window_size_right = MAXSPLICESIG;
 }
 
 /* updates the BSSM parameterization file */
@@ -647,7 +647,7 @@ int gth_bssm_param_parameterize(GthBSSMParam *bssm_param, const char *path,
   gt_error_check(err);
 
   /* set version number */
-  bssm_param->versionnum = (unsigned char) MYVERSION;
+  bssm_param->version_num = (unsigned char) MYVERSION;
 
   /* set model to true and set window sizes */
   switch (termtype) {

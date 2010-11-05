@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -58,19 +58,19 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
 
   /* set start and endpos */
   if (donorsite) {
-    startpos = genpos - bssmmodel->windowsizeleft,
-    endpos   = gt_safe_cast2long(genpos + bssmmodel->windowsizeright + 1);
+    startpos = genpos - bssmmodel->window_size_left,
+    endpos   = gt_safe_cast2long(genpos + bssmmodel->window_size_right + 1);
   }
   else { /* acceptorsite */
-    startpos =  genpos - bssmmodel->windowsizeleft - 1,
-    endpos   =  genpos + bssmmodel->windowsizeright;
+    startpos =  genpos - bssmmodel->window_size_left - 1,
+    endpos   =  genpos + bssmmodel->window_size_right;
   }
 
   if ((startpos >= gt_safe_cast2long(gen_seq_bounds->start)) &&
       (gt_safe_cast2ulong(endpos) <= gen_seq_bounds->end)) {
     pc = gen_seq_tran[startpos];
     SUBSTITUTEWILDCARDWITHA(pc);
-    if (bssmmodel->hypothesisnum == HYPOTHESIS2) {
+    if (bssmmodel->hypothesis_num == HYPOTHESIS2) {
       gt_assert(bssmmodel->hypotables.hypo2table);
       Tv[0] = (double) bssmmodel->hypotables.hypo2table[0][0][pc][0];
       Fv[0] = (double) bssmmodel->hypotables.hypo2table[1][0][pc][0];
@@ -85,12 +85,12 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
       Fv[2] = (double) bssmmodel->hypotables.hypo7table[5][0][pc][0];
       Fv[3] = (double) bssmmodel->hypotables.hypo7table[6][0][pc][0];
     }
-    d =  50 - bssmmodel->windowsizeleft;
+    d = 50 - bssmmodel->window_size_left;
     for (i = startpos + 1; i <= gt_safe_cast2ulong(endpos); i++) {
       j = d + (i - startpos);
       cc = gen_seq_tran[i];
       SUBSTITUTEWILDCARDWITHA(cc);
-      if (bssmmodel->hypothesisnum == HYPOTHESIS2) {
+      if (bssmmodel->hypothesis_num == HYPOTHESIS2) {
         Tv[0] = Tv[0] * bssmmodel->hypotables.hypo2table[0][j][pc][cc];
         Fv[0] = Fv[0] * bssmmodel->hypotables.hypo2table[1][j][pc][cc];
       }
@@ -105,7 +105,7 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
       }
       pc = cc;
     }
-    if (bssmmodel->hypothesisnum == HYPOTHESIS2)
+    if (bssmmodel->hypothesis_num == HYPOTHESIS2)
       pval = Tv[0] / (Tv[0] + Fv[0]);
     else {
       pval = Tv[0] + Tv[1] + Tv[2];

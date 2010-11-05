@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
@@ -33,10 +33,10 @@ typedef GthFlt Hypo7table[HYPOTHESIS7][WINSIZE+2][4][4];
 #define BSSMPARAMVERSION        2
 
 typedef struct {
-  unsigned long hypothesisnum;  /* number of hypothesis, either HYPOTHESIS2 or
-                                   HYPOTHESIS7 */
-  unsigned long windowsizeleft,
-                windowsizeright;
+  unsigned long hypothesis_num;  /* number of hypothesis, either HYPOTHESIS2 or
+                                    HYPOTHESIS7 */
+  unsigned long window_size_left,
+                window_size_right;
   union {
     Hypo2table hypo2table;
     Hypo7table hypo7table;
@@ -44,11 +44,11 @@ typedef struct {
 } GthBSSMModel;
 
 struct GthBSSMParam{
-  unsigned char versionnum;   /* contains version number of the BSSM parameter
-                                 structure */
-  bool gt_donor_model_set,    /* use GT donor site model */
-       gc_donor_model_set,    /* use GC donor site model */
-       ag_acceptor_model_set; /* use AG acceptor site model */
+  unsigned char version_num;   /* contains version number of the BSSM parameter
+                                  structure */
+  bool gt_donor_model_set,     /* use GT donor site model */
+       gc_donor_model_set,     /* use GC donor site model */
+       ag_acceptor_model_set;  /* use AG acceptor site model */
   GthBSSMModel gt_donor_model,
                gc_donor_model,
                ag_acceptor_model;
