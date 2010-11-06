@@ -25,10 +25,10 @@ static void GT_APPENDINT(allocSWtables)(GT_APPENDINT(GtSWtable) *swtable)
                                     swtable->numofpages);
 }
 
-static int GT_APPENDINT(fillspecialrangetable)(GtEncseq *encseq,
-                                               Gtssptaboutinfo *ssptaboutinfo,
-                                               GtSequenceBuffer *fb,
-                                               GtError *err)
+static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
+                                     Gtssptaboutinfo *ssptaboutinfo,
+                                     GtSequenceBuffer *fb,
+                                     GtError *err)
 {
   unsigned long fillspecialrangeidx = 0, fillwildcardrangeidx = 0,
                 currentposition, pagenumber = 0, nextcheckpos, widthbuffer = 0;
@@ -283,8 +283,10 @@ static void GT_APPENDINT(showallSWtablewithpages)(
 {
   unsigned long endpos0, endpos1, pgnum, offset = 0;
 
+  gt_assert(swtable->numofpages > 0 && swtable->endidxinpage != NULL);
   for (pgnum=0; pgnum < swtable->numofpages; pgnum++)
   {
+    gt_assert(swtable->endidxinpage != NULL);
     if (pgnum == 0)
     {
       endpos0 = 0;
@@ -340,6 +342,7 @@ static bool GT_APPENDINT(checkspecialrange)(
   unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
   const GT_SPECIALTABLETYPE *found;
 
+  gt_assert (swtable->endidxinpage != NULL);
   if (pagenumber == 0)
   {
     if (swtable->endidxinpage[0] >= 1UL)
@@ -428,6 +431,7 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
                                          unsigned long transpagenum,
                                          unsigned long cellnum)
 {
+  gt_assert(swtable->positions != NULL);
   range->start = transpagenum *
                  (1UL + (unsigned long) swtable->maxrangevalue) +
                  swtable->positions[cellnum];
@@ -440,42 +444,48 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
   }
 }
 
-static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
-                                                            bool usespecial)
+static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
+                                                GtEncseqReader *esr,
+                                                KindofSWtable kindsw)
 {
   unsigned long endpos0, endpos1, cellnum, pagenum;
   bool found = false;
   GtRange range;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
-  GT_APPENDINT(GtSWtable) *swrangetable;
-  GtEncseqReaderViatablesinfo *swstate;
+  GT_APPENDINT(GtSWtable) *swtable = NULL;
+  GtEncseqReaderViatablesinfo *swstate = NULL;
 
-  if (usespecial)
+  switch (kindsw)
   {
-    swrangetable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
-    swstate = esr->specialrangestate;
-  } else
-  {
-    swrangetable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
-    swstate = esr->wildcardrangestate;
+    case SWtable_specialrange:
+      swtable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
+      swstate = esr->specialrangestate;
+      break;
+    case SWtable_wildcardrange:
+      swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
+      swstate = esr->wildcardrangestate;
+      break;
+    case SWtable_ssptabnew:
+      swtable = &(GT_APPENDINT(esr->encseq->ssptabnew.st));
+      swstate = esr->ssptabnewstate;
+      break;
   }
   pagenum = GT_POS2PAGENUM(esr->currentpos);
   if (pagenum > 0)
   {
-    endpos0 = swrangetable->endidxinpage[pagenum-1];
+    endpos0 = swtable->endidxinpage[pagenum-1];
   } else
   {
     endpos0 = 0;
   }
   swstate->firstcell = endpos0;
-  swstate->lastcell = endpos1
-                     = swrangetable->endidxinpage[pagenum];
+  swstate->lastcell = endpos1 = swtable->endidxinpage[pagenum];
   if (esr->currentpos > 0)
   {
     while (endpos0  < endpos1)
     {
       cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
-      GT_APPENDINT(determinerange)(&range,swrangetable,pagenum,cellnum);
+      GT_APPENDINT(determinerange)(&range,swtable,pagenum,cellnum);
 #ifdef RANGEDEBUG
       printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
       showGtRange(&range);
@@ -521,7 +531,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
   {
     if (endpos0  < endpos1)
     {
-      GT_APPENDINT(determinerange)(&range,swrangetable,pagenum,0);
+      GT_APPENDINT(determinerange)(&range,swtable,pagenum,0);
       if (moveforward)
       {
         if (range.start == 0)
@@ -543,9 +553,9 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
       endpos0 = 0;
     } else
     {
-      endpos0 = swrangetable->endidxinpage[pagenum-2];
+      endpos0 = swtable->endidxinpage[pagenum-2];
     }
-    endpos1 = swrangetable->endidxinpage[pagenum-1];
+    endpos1 = swtable->endidxinpage[pagenum-1];
     if (endpos0 < endpos1)
     {
       swstate->firstcell = endpos1-1;
@@ -557,7 +567,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
 #ifdef RANGEDEBUG
   if (found)
   {
-    GT_APPENDINT(determinerange)(&range,swrangetable,pagenum,
+    GT_APPENDINT(determinerange)(&range,swtable,pagenum,
                                  moveforward
                                    ? swstate->firstcell
                                    : (swstate->lastcell-1));
@@ -575,7 +585,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
   if (found)
   {
     GT_APPENDINT(determinerange)(&swstate->previousrange,
-                                 swrangetable,
+                                 swtable,
                                  pagenum,
                                  moveforward
                                    ? swstate->firstcell
@@ -592,7 +602,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
     }
     if (moveforward)
     {
-      if (pagenum+1 < swrangetable->numofpages)
+      if (pagenum+1 < swtable->numofpages)
       {
         swstate->morepagesleft = true;
         swstate->nextpage = pagenum+1;
@@ -616,7 +626,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
   } else
   {
     swstate->firstcell = swstate->lastcell = 0;
-    if (pagenum < swrangetable->numofpages)
+    if (pagenum < swtable->numofpages)
     {
       swstate->morepagesleft = true;
     } else
@@ -633,7 +643,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(GtEncseqReader *esr,
 */
 
 static bool GT_APPENDINT(nextnonemptypage)(
-                          GT_APPENDINT(GtSWtable) *swrangetable,
+                          GT_APPENDINT(GtSWtable) *swtable,
                           GtEncseqReaderViatablesinfo *swstate,
                           bool moveforward)
 {
@@ -644,7 +654,7 @@ static bool GT_APPENDINT(nextnonemptypage)(
     pagenum = swstate->nextpage;
     if (moveforward)
     {
-      if (swstate->nextpage == swrangetable->numofpages-1)
+      if (swstate->nextpage == swtable->numofpages-1)
       {
         swstate->morepagesleft = false;
       } else
@@ -666,9 +676,9 @@ static bool GT_APPENDINT(nextnonemptypage)(
       endpos0 = 0;
     } else
     {
-      endpos0 = swrangetable->endidxinpage[pagenum-1];
+      endpos0 = swtable->endidxinpage[pagenum-1];
     }
-    endpos1 = swrangetable->endidxinpage[pagenum];
+    endpos1 = swtable->endidxinpage[pagenum];
     if (endpos0 < endpos1)
     {
       swstate->firstcell = endpos0;
@@ -680,21 +690,31 @@ static bool GT_APPENDINT(nextnonemptypage)(
 }
 
 static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
-                                                     bool usespecial)
+                                                     KindofSWtable kindsw)
 {
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
-  GT_APPENDINT(GtSWtable) *swrangetable;
+  GT_APPENDINT(GtSWtable) *swtable;
   GtEncseqReaderViatablesinfo *swstate;
 
-  if (usespecial)
+  switch (kindsw)
   {
-    swrangetable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
-    swstate = esr->specialrangestate;
-  } else
-  {
-    swrangetable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
-    swstate = esr->wildcardrangestate;
+    case SWtable_specialrange:
+      swtable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
+      swstate = esr->specialrangestate;
+      break;
+    case SWtable_wildcardrange:
+      swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
+      swstate = esr->wildcardrangestate;
+      break;
+    case SWtable_ssptabnew:
+      swtable = &(GT_APPENDINT(esr->encseq->ssptabnew.st));
+      gt_assert(swtable != NULL);
+      swstate = esr->ssptabnewstate;
+      gt_assert(swstate != NULL);
+      break;
+    default:
+      gt_assert(false);
   }
   while (true)
   {
@@ -717,7 +737,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
     /* do not let comparison values become negative, hence compare with + 1 */
     if (swstate->firstcell + 1 <
         swstate->lastcell + 1 ||
-        GT_APPENDINT(nextnonemptypage)(swrangetable,swstate,moveforward))
+        GT_APPENDINT(nextnonemptypage)(swtable,swstate,moveforward))
     {
       if (moveforward)
       {
@@ -727,7 +747,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
         cellnum = swstate->lastcell - 1;
       }
       GT_APPENDINT(determinerange)(&swstate->currentrange,
-                                   swrangetable,
+                                   swtable,
                                    swstate->morepagesleft
                                      ? (moveforward
                                          ? (swstate->nextpage-1)
@@ -774,10 +794,10 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
   }
 }
 
-static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,bool usespecial)
+static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
+                                      KindofSWtable kindsw)
 {
-  GtEncseqReaderViatablesinfo *swstate = usespecial ? esr->specialrangestate
-                                                    : esr->wildcardrangestate;
+  GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
 #ifdef RANGEDEBUG
   printf("pos=%lu,previous=(%lu,%lu)\n",esr->currentpos,
           swstate->previousrange.start,
@@ -795,7 +815,7 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,bool usespecial)
         }
         if (swstate->hasrange)
         {
-          GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
+          GT_APPENDINT(advancerangeGtEncseqReader)(esr,kindsw);
         }
       }
     } else
@@ -808,7 +828,7 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,bool usespecial)
         }
         if (swstate->hasrange)
         {
-          GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
+          GT_APPENDINT(advancerangeGtEncseqReader)(esr,kindsw);
         }
       }
     }
@@ -817,11 +837,11 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,bool usespecial)
 }
 
 static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
-                                              bool usespecial)
+                                              KindofSWtable kindsw)
 {
   unsigned long twobits
     = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos);
-  if (!GT_APPENDINT(checknextSW)(esr,usespecial))
+  if (!GT_APPENDINT(checknextSW)(esr,kindsw))
   {
     return (GtUchar) twobits;
   }
@@ -832,13 +852,12 @@ static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
 
 static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
 {
-  return GT_APPENDINT(seqdelivercharSW)(esr,true);
+  return GT_APPENDINT(seqdelivercharSW)(esr,SWtable_specialrange);
 }
 
 static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
                                       GtEncseqReader *esr)
 {
-  const bool usespecial = true;
   gt_assert(esr != NULL && esr->encseq != NULL &&
             gt_encseq_access_type_isviautables(esr->encseq->sat));
   gt_assert(!GT_ISDIRREVERSE(esr->readmode));
@@ -853,7 +872,7 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->specialrangestate->hasrange)
       {
-        GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr,SWtable_specialrange);
       } else
       {
         break;
@@ -869,7 +888,6 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
 static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
                                                GtEncseqReader *esr)
 {
-  const bool usespecial = true;
   gt_assert(esr != NULL && esr->encseq != NULL &&
             gt_encseq_access_type_isviautables(esr->encseq->sat));
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
@@ -884,7 +902,7 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->specialrangestate->hasrange)
       {
-        GT_APPENDINT(advancerangeGtEncseqReader)(esr,usespecial);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr,SWtable_specialrange);
       } else
       {
         break;

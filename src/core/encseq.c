@@ -59,6 +59,7 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/defined-types.h"
+#include "match/stamp.h"
 
 #undef GT_RANGEDEBUG
 
@@ -425,7 +426,8 @@ struct GtEncseqReader
   GtReadmode readmode;
   unsigned long currentpos;
   GtEncseqReaderViatablesinfo *specialrangestate,
-                              *wildcardrangestate;
+                              *wildcardrangestate,
+                              *ssptabnewstate;
 };
 
 #ifndef INLINEDENCSEQ
@@ -725,6 +727,7 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   {
     haserr = true;
   }
+  gt_assert(encseq->ssptabnew.st_ushort.positions != NULL);
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
@@ -954,13 +957,14 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
 }
 
 static GtEncseqAccessType determineoptimalsssptablerep(
+                                  GtEncseqAccessType sat,
                                   unsigned long totallength,
                                   unsigned long numofseparators)
 {
   uint64_t sepsizemin, sepsize;
   GtEncseqAccessType satmin;
 
-  if (numofseparators == 0)
+  if (numofseparators == 0 || sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
     return GT_ACCESS_TYPE_UNDEFINED;
   }
@@ -1026,6 +1030,7 @@ typedef struct
 } Gtssptaboutinfo;
 
 static Gtssptaboutinfo *ssptaboutinfo_new(const char *indexname,
+                                          GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
                                           GtSWtable *ssptabnew,
@@ -1035,7 +1040,7 @@ static Gtssptaboutinfo *ssptaboutinfo_new(const char *indexname,
 
   ssptaboutinfo = gt_malloc(sizeof (*ssptaboutinfo));
   ssptaboutinfo->satsep
-    = determineoptimalsssptablerep(totallength,numofsequences-1);
+    = determineoptimalsssptablerep(sat,totallength,numofsequences-1);
   ssptaboutinfo->ssptabptr = ssptabnew;
   switch (ssptaboutinfo->satsep)
   {
@@ -1339,6 +1344,31 @@ void gt_encseq_delete(GtEncseq *encseq)
   gt_mutex_unlock(encseq->refcount_lock);
   gt_mutex_delete(encseq->refcount_lock);
   gt_free(encseq);
+}
+
+typedef enum
+{
+  SWtable_specialrange,
+  SWtable_wildcardrange,
+  SWtable_ssptabnew
+} KindofSWtable;
+
+static GtEncseqReaderViatablesinfo *assignSWtable(GtEncseqReader *esr,
+                                                  KindofSWtable kindsw)
+{
+  switch (kindsw)
+  {
+    case SWtable_specialrange:
+      return esr->specialrangestate;
+    case SWtable_wildcardrange:
+      return esr->wildcardrangestate;
+    case SWtable_ssptabnew:
+      return esr->ssptabnewstate;
+  }
+#ifndef S_SPLINT_S
+  gt_assert(false);
+  return NULL;
+#endif
 }
 
 #define GT_APPENDINT(V)          V##_uchar
@@ -2102,43 +2132,50 @@ static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
   return value;
 }
 
-static void advancerangeGtEncseqReader(GtEncseqReader *esr,bool usespecial)
+static void advancerangeGtEncseqReader(GtEncseqReader *esr,
+                                       KindofSWtable kindsw)
 {
-  switch (esr->encseq->sat)
+  switch ((kindsw == SWtable_ssptabnew)
+           ? esr->encseq->satsep : esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      advancerangeGtEncseqReader_uchar(esr,usespecial);
+      advancerangeGtEncseqReader_uchar(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      advancerangeGtEncseqReader_ushort(esr,usespecial);
+      advancerangeGtEncseqReader_ushort(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      advancerangeGtEncseqReader_uint32(esr,usespecial);
+      advancerangeGtEncseqReader_uint32(esr,kindsw);
       break;
-    default: fprintf(stderr,
-                     "advancerangeGtEncseqReader(sat = %s is undefined)\n",
-                     gt_encseq_access_type_str(esr->encseq->sat));
-             exit(GT_EXIT_PROGRAMMING_ERROR);
-   }
+    default:
+      fprintf(stderr,"advancerangeGtEncseqReader(sat = %s is undefined)\n",
+              gt_encseq_access_type_str((kindsw == SWtable_ssptabnew)
+                                          ? esr->encseq->satsep
+                                          : esr->encseq->sat));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
 }
 
 static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
-                                              bool usespecial)
+                                              KindofSWtable kindsw)
 {
-  switch (esr->encseq->sat)
+  switch ((kindsw == SWtable_ssptabnew)
+          ? esr->encseq->satsep : esr->encseq->sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
-      binpreparenextrangeGtEncseqReader_uchar(esr,usespecial);
+      binpreparenextrangeGtEncseqReader_uchar(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      binpreparenextrangeGtEncseqReader_ushort(esr,usespecial);
+      binpreparenextrangeGtEncseqReader_ushort(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
-      binpreparenextrangeGtEncseqReader_uint32(esr,usespecial);
+      binpreparenextrangeGtEncseqReader_uint32(esr,kindsw);
       break;
     default: fprintf(stderr,"binpreparenextrangeGtEncseqReader(sat = %s "
                             "is undefined)\n",
-                     gt_encseq_access_type_str(esr->encseq->sat));
+                     gt_encseq_access_type_str((kindsw == SWtable_ssptabnew)
+                                                 ? esr->encseq->satsep
+                                                 : esr->encseq->sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -2163,33 +2200,32 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                 : startpos;
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
-    bool usespecial = true;
     if (esr->specialrangestate == NULL)
     {
       esr->specialrangestate
         = gt_calloc((size_t) 1, sizeof (*esr->specialrangestate));
     }
     esr->specialrangestate->hasprevious = esr->specialrangestate->hascurrent
-                                      = false;
-    binpreparenextrangeGtEncseqReader(esr,usespecial);
+                                        = false;
+    binpreparenextrangeGtEncseqReader(esr,SWtable_specialrange);
 #ifdef GT_RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->specialrangestate->firstcell,
                        esr->specialrangestate->lastcell,
                        esr->specialrangestate->nextpage);
 #endif
-    advancerangeGtEncseqReader(esr,usespecial);
+    advancerangeGtEncseqReader(esr,SWtable_specialrange);
 
-    usespecial = false;
     if (esr->wildcardrangestate == NULL)
     {
       esr->wildcardrangestate
         = gt_calloc((size_t) 1, sizeof (*esr->wildcardrangestate));
     }
     esr->wildcardrangestate->hasprevious = esr->wildcardrangestate->hascurrent
-                                      = false;
+                                         = false;
+
 #ifdef NEWTWOBITENCODING
-    binpreparenextrangeGtEncseqReader(esr,usespecial);
+    binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
 #endif
 #ifdef GT_RANGEDEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
@@ -2198,9 +2234,21 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                        esr->wildcardrangestate->nextpage);
 #endif
 #ifdef NEWTWOBITENCODING
-    advancerangeGtEncseqReader(esr,usespecial);
+    advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
 #endif
-
+    if (esr->encseq->numofdbsequences > 1UL)
+    {
+      gt_assert(esr->encseq->satsep != GT_ACCESS_TYPE_UNDEFINED);
+      if (esr->ssptabnewstate == NULL)
+      {
+        esr->ssptabnewstate
+          = gt_calloc((size_t) 1, sizeof (*esr->ssptabnewstate));
+      }
+      esr->ssptabnewstate->hasprevious = esr->ssptabnewstate->hascurrent
+                                       = false;
+      binpreparenextrangeGtEncseqReader(esr,SWtable_ssptabnew);
+      advancerangeGtEncseqReader(esr,SWtable_ssptabnew);
+    }
   } else
   {
     if (esr->specialrangestate != NULL)
@@ -2213,6 +2261,11 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       gt_free(esr->wildcardrangestate);
       esr->wildcardrangestate = NULL;
     }
+    if (esr->ssptabnewstate != NULL)
+    {
+      gt_free(esr->ssptabnewstate);
+      esr->ssptabnewstate = NULL;
+    }
   }
 }
 
@@ -2223,7 +2276,7 @@ GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
   GtEncseqReader *esr = gt_calloc((size_t) 1, sizeof (*esr));
   /* the following is implicit by using calloc, but we better initialize
      it for documentation */
-  esr->specialrangestate = esr->wildcardrangestate = NULL;
+  esr->specialrangestate = esr->wildcardrangestate = esr->ssptabnewstate = NULL;
   gt_encseq_reader_reinit_with_readmode(esr, (GtEncseq*) encseq, readmode,
                                         startpos);
   return esr;
@@ -2244,6 +2297,10 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   {
     gt_free(esr->wildcardrangestate);
   }
+  if (esr->ssptabnewstate != NULL)
+  {
+    gt_free(esr->ssptabnewstate);
+  }
   gt_free(esr);
 }
 
@@ -2251,17 +2308,11 @@ static bool containsSWViatables(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
                                 unsigned long startpos,
                                 unsigned long len,
-                                bool usespecial)
+                                KindofSWtable kindsw)
 {
   GtEncseqReaderViatablesinfo *swstate;
 
-  if (usespecial)
-  {
-    swstate = esr->specialrangestate;
-  } else
-  {
-    swstate = esr->wildcardrangestate;
-  }
+  swstate = assignSWtable(esr,kindsw);
   if (swstate->hasprevious)
   {
     if (!GT_ISDIRREVERSE(esr->readmode))
@@ -2293,7 +2344,7 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long len)
 {
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
-  return containsSWViatables(encseq, esr, startpos, len, true);
+  return containsSWViatables(encseq, esr, startpos, len, SWtable_specialrange);
 }
 
 bool gt_encseq_has_specialranges(const GtEncseq *encseq)
@@ -2555,7 +2606,6 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
 
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
-  const bool usespecial = true;
   if (sri->exhausted)
   {
     return false;
@@ -2576,7 +2626,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       *range = sri->esr->specialrangestate->previousrange;
       if (sri->esr->specialrangestate->hasrange)
       {
-        advancerangeGtEncseqReader(sri->esr,usespecial);
+        advancerangeGtEncseqReader(sri->esr,SWtable_specialrange);
       } else
       {
         sri->exhausted = true;
@@ -2816,7 +2866,8 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
-  encseq->satsep = determineoptimalsssptablerep(totallength,numofsequences-1);
+  encseq->satsep = determineoptimalsssptablerep(sat,totallength,
+                                                numofsequences-1);
   if (gt_encseq_access_type_isviautables(sat))
   {
     initSWtable(&encseq->specialrangetable,totallength,sat,specialranges);
@@ -3054,7 +3105,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_UCHARTABLES */
-      NFCT(fillpos,fillspecialrangetable_uchar),
+      NFCT(fillpos,fillSWtable_uchar),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecial_uchar),
       NFCT(delivercontainsspecial,containsspecialViatables),
@@ -3067,7 +3118,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_USHORTTABLES */
-      NFCT(fillpos,fillspecialrangetable_ushort),
+      NFCT(fillpos,fillSWtable_ushort),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecial_ushort),
       NFCT(delivercontainsspecial,containsspecialViatables),
@@ -3080,7 +3131,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_UINT32TABLES */
-      NFCT(fillpos,fillspecialrangetable_uint32),
+      NFCT(fillpos,fillSWtable_uint32),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
       NFCT(seqdelivercharspecial,seqdelivercharSpecial_uint32),
       NFCT(delivercontainsspecial,containsspecialViatables),
@@ -3222,13 +3273,14 @@ static GtEncseq *files2encodedsequence(
         sat != GT_ACCESS_TYPE_EQUALLENGTH &&
         (outssptab || gt_encseq_access_type_isviautables(sat)))
     {
-      ssptaboutinfo = ssptaboutinfo_new(indexname,totallength,
+      ssptaboutinfo = ssptaboutinfo_new(indexname,sat,totallength,
                                         numofsequences,&encseq->ssptabnew,
                                         err);
       if (ssptaboutinfo == NULL)
       {
         haserr = true;
       }
+      gt_assert(encseq->ssptabnew.st_ushort.positions != NULL);
     } else
     {
       encseq->satsep = GT_ACCESS_TYPE_UNDEFINED;
@@ -3371,8 +3423,9 @@ gt_encseq_new_from_index(const char *indexname,
       encseq->sdstab = NULL;
     }
   }
-  if (!haserr && withssptab && encseq != NULL
-                            && encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
+  if (!haserr && encseq != NULL &&
+      (withssptab || gt_encseq_access_type_isviautables(encseq->sat)) &&
+      encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
     gt_assert(encseq != NULL);
     if (encseq->numofdbsequences > 1UL)
