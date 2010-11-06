@@ -22,8 +22,8 @@
 #include "gth/bssm_param.h"
 
 #define WINSIZE         100 /* 50nt on the left and right of GT|AG */
-#define HYPOTHESIS7     7   /*  T1, T2, T0, F1, F2, F0 and Fi */
-#define HYPOTHESIS2     2   /*  true (Tr) or false (fs) sites */
+#define HYPOTHESIS7     7   /* T1, T2, T0, F1, F2, F0 and Fi */
+#define HYPOTHESIS2     2   /* true (Tr) or false (fs) sites */
 
 /* The following structures define the tables for the BSSM parameters. */
 typedef GthFlt Hypo2table[HYPOTHESIS2][WINSIZE+2][4][4];
