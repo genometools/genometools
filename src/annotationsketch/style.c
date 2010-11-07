@@ -192,16 +192,15 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
   sty->filename = gt_cstr_dup(filename);
   gt_log_log("Trying to load style file: %s...", filename);
   if (luaL_loadfile(sty->L, filename) || lua_pcall(sty->L, 0, 0, 0)) {
-    gt_error_set(err, "cannot run style file: %s",
-              lua_tostring(sty->L, -1));
+    gt_error_set(err, "cannot run style file: %s", lua_tostring(sty->L, -1));
     had_err = -1;
     lua_pop(sty->L, 1);
   }
   if (!had_err) {
     lua_getglobal(sty->L, "style");
     if (lua_isnil(sty->L, -1) || !lua_istable(sty->L, -1)) {
-      gt_error_set(err, "'style' is not defined or not a table in \"%s\"",
-                filename);
+      gt_error_set(err, "'style' is not defined or is not a table in \"%s\"",
+                   filename);
       had_err = -1;
     }
     lua_pop(sty->L, 1);
