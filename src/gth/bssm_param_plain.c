@@ -23,7 +23,7 @@
 #include "gth/bssm_param_plain.h"
 #include "gth/bssm_param_rep.h"
 
-#define PRECISION  7
+#define BSSM_PRECISION  7
 
 static void write_model(GtStr *str, const char *model_cstr,
                         const GthBSSMModel *model)
@@ -54,11 +54,11 @@ static void write_model(GtStr *str, const char *model_cstr,
             gt_str_append_cstr(str, ", ");
           if (model->hypothesis_num == 2) {
             gt_str_append_double(str, model->hypotables.hypo2table[i][j][k][l],
-                                 PRECISION);
+                                 BSSM_PRECISION);
           }
           else {
             gt_str_append_double(str, model->hypotables.hypo7table[i][j][k][l],
-                                 PRECISION);
+                                 BSSM_PRECISION);
           }
         }
         gt_str_append_cstr(str, " },\n");
