@@ -23,7 +23,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/seqid2file.h"
-#include "extended/md5_to_seqids_stream.h"
+#include "extended/md5s_to_seqids_stream.h"
 #include "tools/gt_md5s_to_seqids.h"
 
 typedef struct {
@@ -79,7 +79,7 @@ static int gt_md5s_to_seqids_runner(GT_UNUSED int argc, const char **argv,
                                    int parsed_args, void *tool_arguments,
                                    GtError *err)
 {
-  GtNodeStream *gff3_in_stream, *md5_to_seqids_stream = NULL,
+  GtNodeStream *gff3_in_stream, *md5s_to_seqids_stream = NULL,
                *gff3_out_stream = NULL;
   MD5ToSeqidsArguments *arguments = tool_arguments;
   GtRegionMapping *region_mapping;
@@ -101,11 +101,11 @@ static int gt_md5s_to_seqids_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create seqid to md5 stream */
-    md5_to_seqids_stream = gt_md5_to_seqids_stream_new(gff3_in_stream,
-                                                       region_mapping);
+    md5s_to_seqids_stream = gt_md5s_to_seqids_stream_new(gff3_in_stream,
+                                                         region_mapping);
 
     /* create gff3 output stream */
-    gff3_out_stream = gt_gff3_out_stream_new(md5_to_seqids_stream,
+    gff3_out_stream = gt_gff3_out_stream_new(md5s_to_seqids_stream,
                                              arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
@@ -114,7 +114,7 @@ static int gt_md5s_to_seqids_runner(GT_UNUSED int argc, const char **argv,
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
-  gt_node_stream_delete(md5_to_seqids_stream);
+  gt_node_stream_delete(md5s_to_seqids_stream);
   gt_node_stream_delete(gff3_in_stream);
 
   return had_err;

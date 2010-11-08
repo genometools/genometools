@@ -14,8 +14,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MD5_TO_SEQIDS_STREAM_H
-#define MD5_TO_SEQIDS_STREAM_H
+#ifndef MD5S_TO_SEQIDS_STREAM_H
+#define MD5S_TO_SEQIDS_STREAM_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
@@ -24,10 +24,10 @@
 /* Implements the ``genome_stream'' interface. */
 typedef struct GtMD5ToSeqidsStream GtMD5ToSeqidsStream;
 
-const GtNodeStreamClass* gt_md5_to_seqids_stream_class(void);
+const GtNodeStreamClass* gt_md5s_to_seqids_stream_class(void);
 
 /* Create a GtSeqidToMD5Stream, takes ownership of <region_mapping>. */
-GtNodeStream*            gt_md5_to_seqids_stream_new(GtNodeStream *in_stream,
+GtNodeStream*            gt_md5s_to_seqids_stream_new(GtNodeStream *in_stream,
                                                      GtRegionMapping
                                                      *region_mapping);
 

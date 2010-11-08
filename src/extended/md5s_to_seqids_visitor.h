@@ -14,21 +14,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQIDS_TO_MD5_STREAM_H
-#define SEQIDS_TO_MD5_STREAM_H
+#ifndef MD5S_TO_SEQIDS_VISITOR_H
+#define MD5S_TO_SEQIDS_VISITOR_H
 
-#include <stdio.h>
-#include "extended/node_stream_api.h"
+/* implements the ``genome visitor'' interface */
+typedef struct GtMD5ToSeqidsVisitor GtMD5ToSeqidsVisitor;
+
+#include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
-/* Implements the ``genome_stream'' interface. */
-typedef struct GtSeqidsToMD5Stream GtSeqidsToMD5Stream;
-
-const GtNodeStreamClass* gt_seqids_to_md5_stream_class(void);
-
-/* Create a GtSeqidToMD5Stream, takes ownership of <region_mapping>. */
-GtNodeStream*            gt_seqids_to_md5_stream_new(GtNodeStream *in_stream,
-                                                     GtRegionMapping
-                                                     *region_mapping);
+const GtNodeVisitorClass* gt_md5s_to_seqids_visitor_class(void);
+/* Takes ownership of <region_mapping>. */
+GtNodeVisitor*            gt_md5s_to_seqids_visitor_new(GtRegionMapping
+                                                       *region_mapping);
 
 #endif
