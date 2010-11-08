@@ -87,6 +87,7 @@
 #include "tools/gt_maxpairs.h"
 #include "tools/gt_merge.h"
 #include "tools/gt_mergefeat.h"
+#include "tools/gt_md5s_to_seqids.h"
 #include "tools/gt_mgth.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
@@ -95,6 +96,7 @@
 #include "tools/gt_prebwt.h"
 #include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
+#include "tools/gt_seqids_to_md5s.h"
 #include "tools/gt_seqstat.h"
 #include "tools/gt_seqtransform.h"
 #include "tools/gt_sequniq.h"
@@ -153,7 +155,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
   gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
-  gt_toolbox_add_tool(tools, "repfind", gt_repfind());
+  gt_toolbox_add_tool(tools, "md5s_to_seqids", gt_md5s_to_seqids());
   gt_toolbox_add(tools, "merge", gt_merge);
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
   gt_toolbox_add(tools, "mgth", gt_mgth);
@@ -162,7 +164,9 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
+  gt_toolbox_add_tool(tools, "repfind", gt_repfind());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
+  gt_toolbox_add_tool(tools, "seqids_to_md5s", gt_seqids_to_md5s());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
   gt_toolbox_add(tools, "seqstat", gt_seqstat);
