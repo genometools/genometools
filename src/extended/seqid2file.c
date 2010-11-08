@@ -90,7 +90,6 @@ void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
                                       " part is used as sequence ID ('III') "
                                       "and the first range as offset "
                                       "('1000001')", &s2fi->usedesc, false);
-  gt_option_is_development_option(usedesc_option);
   gt_option_parser_add_option(op, usedesc_option);
 
   /* -regionmapping */
