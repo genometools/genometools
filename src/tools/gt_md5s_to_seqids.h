@@ -14,12 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_MD5_TO_SEQIDS_H
-#define GT_MD5_TO_SEQIDS_H
+#ifndef GT_MD5S_TO_SEQIDS_H
+#define GT_MD5S_TO_SEQIDS_H
 
 #include "core/tool.h"
 
-/* the MD5 to seqids tool */
-GtTool* gt_md5_to_seqids(void);
+/* the MD5s to seqids tool */
+GtTool* gt_md5s_to_seqids(void);
 
 #endif

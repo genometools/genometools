@@ -26,7 +26,7 @@
 #include "tools/gt_guessprot.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
-#include "tools/gt_md5_to_seqids.h"
+#include "tools/gt_md5s_to_seqids.h"
 #include "tools/gt_paircmp.h"
 #include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
@@ -34,7 +34,7 @@
 #include "tools/gt_regioncov.h"
 #include "tools/gt_seqdecode.h"
 #include "tools/gt_seqencode.h"
-#include "tools/gt_seqids_to_md5.h"
+#include "tools/gt_seqids_to_md5s.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
 #include "tools/gt_readreads.h"
@@ -50,7 +50,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "gthmkbssmfiles", gt_gthmkbssmfiles);
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
   gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
-  gt_toolbox_add_tool(dev_toolbox, "md5_to_seqids", gt_md5_to_seqids());
+  gt_toolbox_add_tool(dev_toolbox, "md5s_to_seqids", gt_md5s_to_seqids());
   gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
@@ -60,7 +60,7 @@ static void* gt_dev_arguments_new(void)
   gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
   gt_toolbox_add_tool(dev_toolbox, "seqdecode", gt_seqdecode());
   gt_toolbox_add_tool(dev_toolbox, "seqencode", gt_seqencode());
-  gt_toolbox_add_tool(dev_toolbox, "seqids_to_md5", gt_seqids_to_md5());
+  gt_toolbox_add_tool(dev_toolbox, "seqids_to_md5s", gt_seqids_to_md5s());
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
   gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
