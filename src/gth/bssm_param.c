@@ -445,13 +445,11 @@ int gth_bssm_param_save(GthBSSMParam *bssm_param, const char *filename,
     had_err = -1;
   }
 
-#if 0
   if (!had_err)
     gth_bssm_param_plain_write(bssm_param, file);
-#endif
 
   /* XXX */
-#if 1
+#if 0
   if (!had_err) {
     /* write version number */
     gt_xfwrite(&bssm_param->version_num, sizeof (unsigned char), 1, file);
