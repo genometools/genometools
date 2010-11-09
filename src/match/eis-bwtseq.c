@@ -89,7 +89,6 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
         + EISSymTransformedRank(seqIdx, i - 1, len, hint);
     /* and finally place the 1-count for the terminator */
     count[i] = count[i - 1] + 1;
-#define EIS_DEBUG
 #ifdef EIS_DEBUG
     gt_log_log("count[alphabetSize]=%lu, len=%lu",count[alphabetSize], len);
     for (i = 0; i <= alphabetSize; ++i)
