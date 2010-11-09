@@ -87,7 +87,6 @@
 
 /*
   Delete the memory allocated for stack contents
-
 */
 
 #define GT_STACK_DELETE(S)\
@@ -97,7 +96,7 @@
         }
 
 /*
-  check if array needs expansion and does so if nessesary
+  check if array needs expansion and do so if nessesary
 */
 
 #define GT_STACK_CHECK_SPACE(S)\
