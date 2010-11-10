@@ -57,7 +57,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} curses=no cairo=no"
+  fp.print "all:\n\t\${MAKE} -j #{options.j} curses=no cairo=no"
   fp.print " CFLAGS+=-fstrict-aliasing"
   if options.ddd
     fp.print " opt=no"
@@ -91,4 +91,4 @@ if File.exists?('LocalMakefile.previous') and
   exit 1
 end
 
-system("make -j #{options.j} -f LocalMakefile")
+system("make -f LocalMakefile")

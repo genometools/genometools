@@ -23,13 +23,16 @@ require 'genomediff'
 require 'optparse'
 require 'ostruct'
 
-GT_DIR = File.join(File.dirname(__FILE__), "..")
-ENV['GTDIR'] = GT_DIR
+if ENV['GTDIR'] == nil
+  GT_DIR = File.join(File.dirname(__FILE__), "..")
+  ENV['GTDIR'] = GT_DIR
+end
 
 options = OpenStruct.new
 options.esa = true
 options.redN = false
 options.parts = 1
+options.parts_set = false
 options.name = "esa"
 
 opt= OptionParser.new do |opt|
@@ -52,7 +55,25 @@ opt= OptionParser.new do |opt|
   end
   opt.on("-p", "--parts PARTS", Integer, "number of PARTS to build index,",
          "reduces peak memory during index construction") do |val|
-    options.parts = val
+    if options.parts_set
+      STDERR.puts "'-p' and '--maxmem' are exclusive options"
+      STDERR.puts opt
+      exit 1
+    else
+      options.parts = val
+      options.parts_set = true
+    end
+  end
+  opt.on("--maxmem MEM", Integer, "max memory to use in MB,",
+         "not to be used with '-p'") do |val|
+    if options.parts_set
+      STDERR.puts "'-p' and '--maxmem' are exclusive options"
+      STDERR.puts opt
+      exit 1
+    else
+      options.parts = "#{val} MB"
+      options.parts_set = true
+    end
   end
   opt.on("--name NAME", String, "the baseNAME of the index files") do |val|
     options.name = val
