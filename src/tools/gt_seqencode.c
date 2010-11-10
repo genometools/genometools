@@ -22,13 +22,15 @@
 #include "core/encseq.h"
 #include "core/encseq_options.h"
 #include "core/fileutils.h"
+#include "core/logger_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
 #include "tools/gt_seqencode.h"
 
 typedef struct {
   GtEncseqOptions *eopts;
-  bool showstats;
+  bool showstats,
+       verbose;
   GtStr *indexname;
 } GtSeqencodeArguments;
 
@@ -71,24 +73,34 @@ static GtOptionParser* gt_seqencode_option_parser_new(void *tool_arguments)
                                                          arguments->indexname,
                                                          NULL);
 
+  /* -v */
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   gt_option_parser_set_min_args(op, 1);
 
   return op;
 }
 
 static int encode_sequence_files(GtStrArray *infiles, GtEncseqOptions *opts,
-                                 const char *indexname, GtError *err)
+                                 const char *indexname, bool verbose,
+                                 GtError *err)
 {
   GtEncseqEncoder *encseq_encoder;
+  GtLogger *logger;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(infiles && gt_str_array_size(infiles) > 0 && opts);
+  logger = gt_logger_new(verbose, "# ", stderr);
   encseq_encoder = gt_encseq_encoder_new_from_options(opts, err);
   if (!encseq_encoder)
     had_err = -1;
-  if (!had_err)
+  if (!had_err) {
+    gt_encseq_encoder_set_logger(encseq_encoder, logger);
     had_err = gt_encseq_encoder_encode(encseq_encoder, infiles, indexname, err);
+  }
   gt_encseq_encoder_delete(encseq_encoder);
+  gt_logger_delete(logger);
   return had_err;
 }
 
@@ -157,6 +169,7 @@ static int gt_seqencode_runner(GT_UNUSED int argc, const char **argv,
     had_err = encode_sequence_files(infiles,
                                     arguments->eopts,
                                     gt_str_get(arguments->indexname),
+                                    arguments->verbose,
                                     err);
   }
 
