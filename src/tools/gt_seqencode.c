@@ -57,8 +57,8 @@ static GtOptionParser* gt_seqencode_option_parser_new(void *tool_arguments)
   GtSeqencodeArguments *arguments = (GtSeqencodeArguments*) tool_arguments;
 
   /* init */
-  op = gt_option_parser_new("sequence_file_1 [sequence_file_2 "
-                            "[sequence_file_3 ...]]",
+  op = gt_option_parser_new("sequence_file [sequence_file "
+                            "[sequence_file ...]]",
                             "Encode sequence files efficiently.");
 
   /* -showstats */
