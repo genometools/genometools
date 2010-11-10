@@ -2946,18 +2946,21 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
 {
   unsigned long pos;
   bool wasmirrored = false;
+  gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
   if (encseq->hasmirror && seqnum >= encseq->numofdbsequences) {
     seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
     wasmirrored = true;
   }
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    gt_assert(encseq->logicalnumofdbsequences == 1UL
-                || encseq->ssptab != NULL);
+    gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
     pos = (seqnum > 0 ? encseq->ssptab[seqnum-1] + 1 : 0);
     if (wasmirrored) {
       if (pos == 0) {
-        pos = encseq->logicaltotallength - encseq->ssptab[0];
+        if (encseq->numofdbsequences > 1UL)
+          pos = encseq->logicaltotallength - encseq->ssptab[0];
+        else
+          pos = encseq->totallength + 1;
       } else {
         unsigned long val;
         if (seqnum == encseq->numofdbsequences - 1)
@@ -5918,7 +5921,8 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   GtEncseq *encseq = NULL;
   unsigned long specialranges, wildcardranges;
   Definedunsignedlong equallength; /* is defined of all sequences are of equal
-                             length and no WILDCARD appears in the sequence */
+                                      length and no WILDCARD appears in the
+                                      * sequence */
   GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
 
   gt_error_check(err);
