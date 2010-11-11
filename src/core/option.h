@@ -48,6 +48,10 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
                                      const char *one_liner);
 /* Takes ownership of <option>. */
 void            gt_option_parser_add_option(GtOptionParser*, GtOption *option);
+/* Return the option object if an option named <option_str> is present in <op>,
+   and NULL if no such option exists in <op>. */
+GtOption*       gt_option_parser_get_option(GtOptionParser *op,
+                                            const char *option_str);
 /* Refer to manual at the end of help output. */
 void            gt_option_parser_refer_to_manual(GtOptionParser*);
 void            gt_option_parser_set_comment_func(GtOptionParser*,

@@ -23,6 +23,7 @@
 #include "core/cstr_api.h"
 #include "core/error.h"
 #include "core/fa.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/mailaddress.h"
 #include "core/minmax.h"
@@ -69,6 +70,7 @@ struct GtOptionParser {
   const char *mailaddress;
   unsigned int min_additional_arguments,
                max_additional_arguments;
+  GtHashmap *optionindex;
 };
 
 struct GtOption {
@@ -188,6 +190,7 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
   op->options = gt_array_new(sizeof (GtOption*));
   op->min_additional_arguments = GT_UNDEF_UINT;
   op->max_additional_arguments = GT_UNDEF_UINT;
+  op->optionindex = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
   return op;
 }
 
@@ -195,6 +198,14 @@ void gt_option_parser_add_option(GtOptionParser *op, GtOption *o)
 {
   gt_assert(op && o);
   gt_array_add(op->options, o);
+  gt_hashmap_add(op->optionindex, gt_str_get(o->option_str), o);
+}
+
+GtOption* gt_option_parser_get_option(GtOptionParser *op,
+                                      const char *option_str)
+{
+  gt_assert(op && option_str);
+  return gt_hashmap_get(op->optionindex, option_str);
 }
 
 void gt_option_parser_refer_to_manual(GtOptionParser *op)
