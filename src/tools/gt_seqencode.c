@@ -74,6 +74,7 @@ static void show_encoded_statistics(const char *seqfile)
   enc_size += index_size(seqfile, GT_SSPTABFILESUFFIX);
   enc_size += index_size(seqfile, GT_DESTABFILESUFFIX);
   enc_size += index_size(seqfile, GT_SDSTABFILESUFFIX);
+  enc_size += index_size(seqfile, GT_OISTABFILESUFFIX);
   printf("encoded sequence file(s) are %.1f%% of original file size\n",
          ((double) enc_size / orig_size) * 100.0);
 }

@@ -30,6 +30,7 @@
 #include "core/chardef.h"
 #include "core/checkencchar.h"
 #include "core/codetype.h"
+#include "core/complement.h"
 #include "core/cstr_api.h"
 #include "core/divmodmul.h"
 #include "core/encseq.h"
@@ -322,9 +323,41 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
+  char cc;
   gt_assert(encseq && encseq->alpha);
-  return gt_alphabet_decode(encseq->alpha,
-                            gt_encseq_get_encoded_char(encseq, pos, readmode));
+  gt_assert(pos < encseq->logicaltotallength);
+  if (encseq->oistab == NULL) {
+    GtUchar mycc = gt_encseq_get_encoded_char(encseq, pos, readmode);
+    if (mycc != (GtUchar) SEPARATOR)
+      cc = gt_alphabet_decode(encseq->alpha, mycc);
+    else
+      cc = (char) mycc;
+    return cc;
+  } else {
+    /* translate into forward coords */
+    if (GT_ISDIRREVERSE(readmode))
+    {
+      pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+    }
+    /* handle virtual coordinates */
+    if (encseq->hasmirror) {
+      if (pos > encseq->totallength) {
+        /* invert coordinates and readmode */
+        INVERTREADMODE(readmode)
+        pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
+      } else if (pos == encseq->totallength) {
+        return (char) SEPARATOR;
+      }
+    }
+    gt_assert(pos < encseq->totallength);
+    cc = encseq->oistab[pos];
+    if (GT_ISDIRCOMPLEMENT(readmode) && cc != (char) SEPARATOR) {
+      GT_UNUSED int retval;
+      retval = gt_complement(&cc, cc, NULL);
+      gt_assert(retval == 0);
+    }
+    return cc;
+  }
 }
 
 GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
@@ -414,7 +447,6 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
                                               KindofSWtable kindsw);
 
 #ifndef INLINEDENCSEQ
-
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
   GtUchar cc;
@@ -479,9 +511,79 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 
 char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 {
+  char cc;
   gt_assert(esr && esr->encseq && esr->encseq->alpha);
-  return gt_alphabet_decode(esr->encseq->alpha,
-                            gt_encseq_reader_next_encoded_char(esr));
+  if (esr->encseq->oistab == NULL) {
+    GtUchar mycc = gt_encseq_reader_next_encoded_char(esr);
+    if (mycc != (GtUchar) SEPARATOR)
+      cc = gt_alphabet_decode(esr->encseq->alpha, mycc);
+    else
+      cc = (char) mycc;
+    return cc;
+  } else {
+    gt_assert(esr->encseq
+              && esr->currentpos < esr->encseq->logicaltotallength);
+    if (esr->encseq->hasmirror && esr->currentpos == esr->encseq->totallength) {
+      if (!esr->startedonmiddle) {
+        /* only turn around if we arrived from complementary side */
+        INVERTREADMODE(esr->readmode);
+      }
+      /* from now on, we can only go backwards on the original sequence! */
+      gt_assert(GT_ISDIRREVERSE(esr->readmode));
+      /* go back */
+      esr->currentpos--;
+      if (gt_encseq_access_type_isviautables(esr->encseq->sat)) {
+        /* prepare esr for directional change */
+        if (esr->encseq->has_wildcardranges) {
+          gt_assert(esr->wildcardrangestate != NULL);
+          binpreparenextrangeGtEncseqReader(esr, SWtable_wildcardrange);
+          advancerangeGtEncseqReader(esr, SWtable_wildcardrange);
+        }
+        if (esr->encseq->numofdbsequences > 1UL) {
+          gt_assert(esr->ssptabnewstate != NULL);
+          binpreparenextrangeGtEncseqReader(esr, SWtable_ssptabnew);
+          advancerangeGtEncseqReader(esr, SWtable_ssptabnew);
+        }
+      }
+      return (char) SEPARATOR;
+    }
+    gt_assert(esr && esr->currentpos < esr->encseq->totallength);
+    switch (esr->readmode)
+    {
+      case GT_READMODE_FORWARD:
+        /* XXX: seqdeliverchar() call kept around to update state, remove? */
+        (void) esr->encseq->seqdeliverchar(esr);
+        cc = esr->encseq->oistab[esr->currentpos];
+        esr->currentpos++;
+        return cc;
+      case GT_READMODE_REVERSE:
+        /* XXX: seqdeliverchar() call kept around to update state, remove? */
+        (void) esr->encseq->seqdeliverchar(esr);
+        cc = esr->encseq->oistab[esr->currentpos];
+        esr->currentpos--;
+        return cc;
+      case GT_READMODE_COMPL: /* only works with dna */
+        /* XXX: seqdeliverchar() call kept around to update state, remove? */
+        (void) esr->encseq->seqdeliverchar(esr);
+        cc = esr->encseq->oistab[esr->currentpos];
+        esr->currentpos++;
+        if (cc != (char) SEPARATOR)
+          (void) gt_complement(&cc, cc, NULL);
+        return cc;
+      case GT_READMODE_REVCOMPL: /* only works with dna */
+        /* XXX: seqdeliverchar() call kept around to update state, remove? */
+        (void) esr->encseq->seqdeliverchar(esr);
+        cc = esr->encseq->oistab[esr->currentpos];
+        esr->currentpos--;
+        if (cc != (char) SEPARATOR)
+          (void) gt_complement(&cc, cc, NULL);
+        return cc;
+      default:
+        fprintf(stderr,"gt_encseq_get_encoded_char: "
+                       "readmode %d not implemented\n",(int) esr->readmode);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
 }
 
 /* The following function is only used in tyr-mkindex.c */
@@ -543,8 +645,7 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
                                               frompos);
   for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
-    buffer[idx] = gt_alphabet_decode(encseq->alpha,
-                                     gt_encseq_reader_next_encoded_char(esr));
+    buffer[idx] = gt_encseq_reader_next_decoded_char(esr);
   }
   gt_encseq_reader_delete(esr);
 }
@@ -1303,6 +1404,11 @@ void gt_encseq_delete(GtEncseq *encseq)
       gt_fa_xmunmap((void *) encseq->ssptab);
     }
     encseq->ssptab = NULL;
+  }
+  if (encseq->oistab != NULL)
+  {
+    gt_fa_xmunmap((void *) encseq->oistab);
+    encseq->oistab = NULL;
   }
   if (encseq->fsptab != NULL)
   {
@@ -3119,6 +3225,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->destablength = 0;
   encseq->ssptab = NULL;
   encseq->fsptab = NULL;
+  encseq->oistab = NULL;
   encseq->hasallocatedssptab = false;
   if (equallength == NULL)
   {
@@ -3538,6 +3645,7 @@ gt_encseq_new_from_index(const char *indexname,
                          bool withdestab,
                          bool withsdstab,
                          bool withssptab,
+                         bool withoistab,
                          GtLogger *logger,
                          GtError *err)
 {
@@ -3666,6 +3774,19 @@ gt_encseq_new_from_index(const char *indexname,
       {
         haserr = true;
       }
+    }
+  }
+  if (!haserr && withoistab)
+  {
+    gt_assert(encseq != NULL);
+    encseq->oistab = gt_mmap_check_size_with_suffix(indexname,
+                                                    GT_OISTABFILESUFFIX,
+                                                    encseq->totallength,
+                                                    sizeof (*encseq->oistab),
+                                                    err);
+    if (encseq->oistab == NULL)
+    {
+      haserr = true;
     }
   }
   if (!haserr)
@@ -4043,6 +4164,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            bool outdestab,
                                            bool outsdstab,
                                            unsigned long *characterdistribution,
+                                           bool outoistab,
                                            unsigned long *numofseparators,
                                            GtLogger *logger,
                                            GtError *err)
@@ -4058,7 +4180,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   GtDiscDistri *distspecialrangelength = NULL, *distwildcardrangelength = NULL;
   GtQueue *descqueue = NULL;
   char *desc;
-  FILE *desfp = NULL, *sdsfp = NULL;
+  FILE *desfp = NULL, *sdsfp = NULL, *oisfp = NULL;
 
   gt_error_check(err);
   equallength->defined = true;
@@ -4087,6 +4209,14 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       haserr = true;
     }
   }
+  if (outoistab)
+  {
+    oisfp = gt_fa_fopen_with_suffix(indexname,GT_OISTABFILESUFFIX,"w",err);
+    if (oisfp == NULL)
+    {
+      haserr = true;
+    }
+  }
   if (!haserr)
   {
     if (plainformat)
@@ -4103,6 +4233,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     }
     if (!haserr)
     {
+      char cc;
       gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
       *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
                                  sizeof (GtFilelengthvalues));
@@ -4126,11 +4257,13 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
           break;
         }
 #endif
-        retval = gt_sequence_buffer_next(fb,&charcode,err);
+        retval = gt_sequence_buffer_next_with_original(fb,&charcode,&cc,err);
         if (retval > 0)
         {
 #define WITHEQUALLENGTH_DES_SSP
+#define WITHOISTAB
 #include "encseq_charproc.gen"
+
         } else
         {
           if (retval == 0)
@@ -4203,6 +4336,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   gt_fa_xfclose(sdsfp);
   gt_disc_distri_delete(distspecialrangelength);
   gt_disc_distri_delete(distwildcardrangelength);
+  gt_fa_xfclose(oisfp);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
   /*
@@ -4243,6 +4377,7 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   {
     charcode = seq[currentpos];
 #undef WITHEQUALLENGTH_DES_SSP
+#undef WITHOISTAB
 #include "encseq_charproc.gen"
   }
   if (lastspecialrangelength > 0)
@@ -5906,6 +6041,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                          bool outdestab,
                          bool outsdstab,
                          bool outssptab,
+                         bool outoistab,
                          GtLogger *logger,
                          GtError *err)
 {
@@ -5976,6 +6112,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                         outdestab,
                                         outsdstab,
                                         characterdistribution,
+                                        outoistab,
                                         &numofseparators,
                                         logger,
                                         err) != 0)
@@ -6393,6 +6530,7 @@ struct GtEncseqEncoder {
   bool destab,
        ssptab,
        sdstab,
+       oistab,
        isdna,
        isprotein,
        isplain;
@@ -6407,6 +6545,7 @@ GtEncseqEncoder* gt_encseq_encoder_new()
   GtEncseqEncoder *ee = gt_calloc((size_t) 1, sizeof (GtEncseqEncoder));
   gt_encseq_encoder_enable_multiseq_support(ee);
   gt_encseq_encoder_enable_description_support(ee);
+  gt_encseq_encoder_disable_lossless_support(ee);
   ee->isdna = ee->isprotein = ee->isplain = false;
   ee->sat = gt_str_new();
   ee->smapfile = gt_str_new();
@@ -6428,6 +6567,18 @@ void gt_encseq_encoder_create_esq_tab(GT_UNUSED GtEncseqEncoder *ee)
 void gt_encseq_encoder_do_not_create_esq_tab(GT_UNUSED GtEncseqEncoder *ee)
 {
   /* stub for API compatibility */
+}
+
+void gt_encseq_encoder_create_ois_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->oistab = true;
+}
+
+void gt_encseq_encoder_do_not_create_ois_tab(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  ee->oistab = false;
 }
 
 void gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee)
@@ -6490,6 +6641,18 @@ void gt_encseq_encoder_disable_multiseq_support(GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   gt_encseq_encoder_do_not_create_ssp_tab(ee);
+}
+
+void gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_create_ois_tab(ee);
+}
+
+void gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder *ee)
+{
+  gt_assert(ee);
+  gt_encseq_encoder_do_not_create_ois_tab(ee);
 }
 
 void gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee)
@@ -6563,6 +6726,7 @@ int gt_encseq_encoder_encode(GtEncseqEncoder *ee, GtStrArray *seqfiles,
                                     ee->destab,
                                     ee->sdstab,
                                     ee->ssptab,
+                                    ee->oistab,
                                     ee->logger,
                                     err);
   if (!encseq)
@@ -6582,6 +6746,7 @@ void gt_encseq_encoder_delete(GtEncseqEncoder *ee)
 struct GtEncseqLoader {
   bool destab,
        ssptab,
+       oistab,
        sdstab;
   GtLogger *logger;
 };
@@ -6590,6 +6755,7 @@ GtEncseqLoader* gt_encseq_loader_new()
 {
   GtEncseqLoader *el = gt_calloc((size_t) 1, sizeof (GtEncseqLoader));
   gt_encseq_loader_require_multiseq_support(el);
+  gt_encseq_loader_drop_lossless_support(el);
   gt_encseq_loader_require_description_support(el);
   return el;
 }
@@ -6614,6 +6780,18 @@ void gt_encseq_loader_do_not_require_des_tab(GtEncseqLoader *el)
 {
   gt_assert(el);
   el->destab = false;
+}
+
+void gt_encseq_loader_require_ois_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->oistab = true;
+}
+
+void gt_encseq_loader_do_not_require_ois_tab(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->oistab = false;
 }
 
 void gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el)
@@ -6662,6 +6840,16 @@ void gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el)
   gt_encseq_loader_do_not_require_ssp_tab(el);
 }
 
+void gt_encseq_loader_require_lossless_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_require_ois_tab(el);
+}
+
+void gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el)
+{
+  gt_encseq_loader_do_not_require_ois_tab(el);
+}
+
 void gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)
 {
   gt_assert(el);
@@ -6677,6 +6865,7 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
                                     el->destab,
                                     el->sdstab,
                                     el->ssptab,
+                                    el->oistab,
                                     el->logger,
                                     err);
   return encseq;

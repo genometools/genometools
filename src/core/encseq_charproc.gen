@@ -23,6 +23,10 @@
                                  lastwildcardrangelength);
               lastwildcardrangelength = 0;
             }
+#ifdef WITHOISTAB
+            if (outoistab)
+              gt_xfputc((char) cc, oisfp);
+#endif
           } else
           {
             if (charcode == (GtUchar) WILDCARD)
@@ -35,6 +39,10 @@
               specialcharinfo->wildcards++;
 #ifdef WITHEQUALLENGTH_DES_SSP
               lengthofcurrentsequence++;
+#endif
+#ifdef WITHOISTAB
+            if (outoistab)
+              gt_xfputc((char) cc, oisfp);
 #endif
             } else
             {
@@ -81,6 +89,10 @@
                 gt_xfputc((int) '\n',desfp);
               }
               (*numofseparators)++;
+#endif
+#ifdef WITHOISTAB
+            if (outoistab)
+              gt_xfputc((char) SEPARATOR, oisfp);
 #endif
             }
             if (specialprefix)

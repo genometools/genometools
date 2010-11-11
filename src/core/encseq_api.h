@@ -72,6 +72,8 @@ typedef struct GtEncseqReader GtEncseqReader;
 #define GT_DESTABFILESUFFIX ".des"
 /* The file suffix used for sequence description separator position tables. */
 #define GT_SDSTABFILESUFFIX ".sds"
+/* The file suffix used for original input sequence tables. */
+#define GT_OISTABFILESUFFIX ".ois"
 
 /* for a position outside the range from 0 to totallength -1 deliver a
    unique integer */
@@ -237,6 +239,17 @@ void             gt_encseq_encoder_enable_multiseq_support(GtEncseqEncoder *ee);
    <gt_encseq_loader_require_multiseq_support()> enabled. */
 void             gt_encseq_encoder_disable_multiseq_support(
                                                            GtEncseqEncoder *ee);
+/* Enables support for lossless reproduction of the original sequence,
+   regardless of alphabet transformations that may apply. Deactivated by
+   default. */
+void gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee);
+/* Enables support for lossless reproduction of the original sequence,
+   regardless of alphabet transformations that may apply. Encoded sequences
+   created without this support will not be able to be loaded via a
+   <GtEncseqLoader> with <gt_encseq_loader_require_lossless_support()>
+   enabled. */
+void gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder *ee);
+
 /* Enables creation of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
@@ -293,6 +306,19 @@ void             gt_encseq_loader_require_multiseq_support(GtEncseqLoader *el);
    the method <gt_encseq_seqlength()> and <gt_encseq_seqstartpos()> on
    the <GtEncseq> object created by <el>. */
 void             gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el);
+/* Enables support for lossless reproduction of the original sequence
+   in the encoded sequence to be loaded by <el>. That is, the .ois table
+   must be present.
+   For example, this table is created by having enabled the
+   <gt_encseq_encoder_enable_lossless_support()> option when encoding.
+   Deactivated by default. */
+void gt_encseq_loader_require_lossless_support(GtEncseqLoader *el);
+/* Disables support for lossless reproduction of the original sequence
+   in the encoded sequence to be loaded by <el>. That is, the .ois table
+   needs not be present.
+   However, disabling this support may result in a reduced alphabet
+   representation when accessing decoded characters. */
+void gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el);
 /* Requires presence of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_loader_require_des_tab(GtEncseqLoader *el);

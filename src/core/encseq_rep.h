@@ -175,5 +175,6 @@ struct GtEncseq
   GtMutex *refcount_lock;
 
   bool hasmirror;
+  char *oistab;  /* original input sequence(s) */
 };
 #endif
