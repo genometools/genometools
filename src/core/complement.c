@@ -21,16 +21,38 @@ int gt_complement(char *reverse_char, char dna_char, GtError *e)
 {
   gt_error_check(e);
   switch (dna_char) {
-    case 'A': *reverse_char = 'T'; return 0;
-    case 'C': *reverse_char = 'G'; return 0;
-    case 'G': *reverse_char = 'C'; return 0;
-    case 'T': *reverse_char = 'A'; return 0;
-    case 'N': *reverse_char = 'N'; return 0;
-    case 'a': *reverse_char = 't'; return 0;
-    case 'c': *reverse_char = 'g'; return 0;
-    case 'g': *reverse_char = 'c'; return 0;
-    case 't': *reverse_char = 'a'; return 0;
-    case 'n': *reverse_char = 'n'; return 0;
+    case 'A': *reverse_char = 'T'; return 0; /* adenine */
+    case 'T': *reverse_char = 'A'; return 0; /* thymine */
+    case 'U': *reverse_char = 'A'; return 0; /* uracil */
+    case 'G': *reverse_char = 'C'; return 0; /* guanine */
+    case 'C': *reverse_char = 'G'; return 0; /* cytosine */
+    case 'Y': *reverse_char = 'R'; return 0; /* pyrimidine */
+    case 'R': *reverse_char = 'Y'; return 0; /* purine */
+    case 'S': *reverse_char = 'S'; return 0; /* strong (3 hbonds) */
+    case 'W': *reverse_char = 'W'; return 0; /* weak (2 hbonds)  */
+    case 'K': *reverse_char = 'M'; return 0; /* keto */
+    case 'M': *reverse_char = 'K'; return 0; /* amino */
+    case 'B': *reverse_char = 'V'; return 0; /* not A */
+    case 'D': *reverse_char = 'H'; return 0; /* not C */
+    case 'H': *reverse_char = 'D'; return 0; /* not G */
+    case 'V': *reverse_char = 'B'; return 0; /* not T/U */
+    case 'N': *reverse_char = 'N'; return 0; /* any */
+    case 'a': *reverse_char = 't'; return 0; /* adenine */
+    case 't': *reverse_char = 'a'; return 0; /* thymine */
+    case 'u': *reverse_char = 'a'; return 0; /* uracil */
+    case 'g': *reverse_char = 'c'; return 0; /* guanine */
+    case 'c': *reverse_char = 'g'; return 0; /* cytosine */
+    case 'y': *reverse_char = 'r'; return 0; /* pyrimidine */
+    case 'r': *reverse_char = 'y'; return 0; /* purine */
+    case 's': *reverse_char = 's'; return 0; /* strong (3 hbonds) */
+    case 'w': *reverse_char = 'w'; return 0; /* weak (2 hbonds)  */
+    case 'k': *reverse_char = 'm'; return 0; /* keto */
+    case 'm': *reverse_char = 'k'; return 0; /* amino */
+    case 'b': *reverse_char = 'v'; return 0; /* not A */
+    case 'd': *reverse_char = 'h'; return 0; /* not C */
+    case 'h': *reverse_char = 'd'; return 0; /* not G */
+    case 'v': *reverse_char = 'b'; return 0; /* not T/U */
+    case 'n': *reverse_char = 'n'; return 0; /* any */
     default:
       gt_error_set(e, "complement of DNA character '%c' not defined", dna_char);
       return -1;
