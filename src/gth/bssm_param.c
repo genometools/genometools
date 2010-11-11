@@ -395,7 +395,7 @@ static bool bssmfile_equals_param(const char *filename,
 #endif
 #endif
 
-#if 1
+#if 0
 static int writeBssmmodeltofile(FILE *file, GthBSSMModel *bssm_model,
                                 GtError *err)
 {
