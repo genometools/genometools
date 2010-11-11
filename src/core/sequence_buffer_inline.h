@@ -51,6 +51,7 @@
     pvt->outbuf[currentoutpos] = charcode;
   } else
     pvt->outbuf[currentoutpos] = cc;
+  pvt->outbuforig[currentoutpos] = cc;
   pvt->counter++;
   return 0;
 }

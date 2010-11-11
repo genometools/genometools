@@ -62,7 +62,8 @@ struct GtSequenceBufferMembers {
   const GtStrArray *filenametab;
   unsigned char ungetchar,
                 inbuf[INBUFSIZE],
-                outbuf[OUTBUFSIZE];
+                outbuf[OUTBUFSIZE],
+                outbuforig[OUTBUFSIZE];
   const unsigned char *symbolmap;
 };
 

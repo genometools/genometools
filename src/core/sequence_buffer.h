@@ -49,6 +49,15 @@ GtSequenceBuffer*  gt_sequence_buffer_new_guess_type(const GtStrArray*,
    -1 on error (see the <GtError> object for details). */
 int gt_sequence_buffer_next(GtSequenceBuffer*, GtUchar*, GtError*);
 
+/* Fetches next character from <GtSequenceBuffer>.
+   This method also always delivers the original character at the current
+   reading position, regardless of symbol mappings that may apply.
+   Returns 1 if a new character could be read, 0 if all files are exhausted, or
+   -1 on error (see the <GtError> object for details). */
+int           gt_sequence_buffer_next_with_original(GtSequenceBuffer*,
+                                                    GtUchar *val, char *orig,
+                                                    GtError*);
+
 /* Returns the index of the currently read sequence file in the input file
    <GtStrArray>. */
 unsigned long gt_sequence_buffer_get_file_index(GtSequenceBuffer*);

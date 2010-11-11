@@ -150,7 +150,7 @@ int gt_sequence_buffer_advance(GtSequenceBuffer *sb, GtError *err)
 }
 
 int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
-                                   GtError *err)
+                            GtError *err)
 {
   GtSequenceBufferMembers *pvt;
   pvt = sb->pvt;
@@ -171,6 +171,34 @@ int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
     }
   }
   *val = pvt->outbuf[pvt->nextread++];
+  return 1;
+}
+
+int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
+                                          GtUchar *val, char *orig,
+                                          GtError *err)
+{
+  GtSequenceBufferMembers *pvt;
+  pvt = sb->pvt;
+  if (pvt->nextread >= pvt->nextfree)
+  {
+    if (pvt->complete)
+    {
+      return 0;
+    }
+    if (gt_sequence_buffer_advance(sb, err) != 0)
+    {
+      return -1;
+    }
+    pvt->nextread = 0;
+    if (pvt->nextfree == 0)
+    {
+      return 0;
+    }
+  }
+  *val = pvt->outbuf[pvt->nextread];
+  *orig = pvt->outbuforig[pvt->nextread];
+  pvt->nextread++;
   return 1;
 }
 
