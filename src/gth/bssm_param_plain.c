@@ -23,7 +23,7 @@
 #include "gth/bssm_param_plain.h"
 #include "gth/bssm_param_rep.h"
 
-#define BSSM_PRECISION  7
+#define BSSM_PRECISION  8
 
 static void write_model(GtStr *str, const char *model_cstr,
                         const GthBSSMModel *model)
