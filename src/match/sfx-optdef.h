@@ -44,7 +44,8 @@ typedef struct
        outtistab,
        outdestab,
        outsdstab,
-       outssptab;
+       outssptab,
+       outoistab;
 } Filenames2encseqoptions;
 
 typedef struct

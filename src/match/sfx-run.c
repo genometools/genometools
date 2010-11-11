@@ -436,6 +436,8 @@ static int runsuffixerator(bool doesa,
       }
       gt_encseq_metadata_delete(emd);
     }
+    if (so->fn2encopt.outoistab)
+      gt_encseq_loader_require_lossless_support(el);
     gt_encseq_loader_set_logger(el, logger);
     encseq = gt_encseq_loader_load(el, gt_str_get(so->inputindex), err);
     gt_encseq_loader_delete(el);
@@ -452,6 +454,8 @@ static int runsuffixerator(bool doesa,
       gt_encseq_encoder_do_not_create_sds_tab(ee);
     if (!so->fn2encopt.outssptab)
       gt_encseq_encoder_do_not_create_ssp_tab(ee);
+    if (so->fn2encopt.outoistab)
+      gt_encseq_encoder_enable_lossless_support(ee);
     if (so->fn2encopt.isdna)
       gt_encseq_encoder_set_input_dna(ee);
     if (so->fn2encopt.isprotein)

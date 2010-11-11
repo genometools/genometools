@@ -59,6 +59,7 @@ static GtOPrval parse_options(int *parsed_args,
          *optiondes,
          *optionsds,
          *optionkys,
+         *optionois,
          *optionshowprogress;
   GtOPrval oprval;
   const char *maxdepthmsg = "option of -maxdepth must be the keyword abs, the "
@@ -226,6 +227,12 @@ static GtOPrval parse_options(int *parsed_args,
                                  &so->fn2encopt.outsdstab,
                                  false);
   gt_option_parser_add_option(op, optionsds);
+
+  optionois = gt_option_new_bool("ois",
+                                 "output original input sequence to file",
+                                 &so->fn2encopt.outoistab,
+                                 false);
+  gt_option_parser_add_option(op, optionois);
 
   optionkys = gt_option_new_string("kys",
                                    "output/sort according to keys of the form "
