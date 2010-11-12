@@ -267,9 +267,10 @@ static void GT_APPENDINT(showSWtablewithpages)
           pgnum, last - first + 1, offset);
   for (idx=first; idx<=last; idx++)
   {
+    gt_assert(idx < swtable->numofpositionstostore);
     startpos = (unsigned long) swtable->positions[idx];
     range.start = offset + startpos;
-    range.end = range.start + ((swtable->rangelengths == 0)
+    range.end = range.start + ((swtable->rangelengths == NULL)
                                 ? 0
                                 : swtable->rangelengths[idx]) + 1;
     printf("%lu: ",idx);
@@ -286,7 +287,6 @@ static void GT_APPENDINT(showallSWtablewithpages)(
   gt_assert(swtable->numofpages > 0 && swtable->endidxinpage != NULL);
   for (pgnum=0; pgnum < swtable->numofpages; pgnum++)
   {
-    gt_assert(swtable->endidxinpage != NULL);
     if (pgnum == 0)
     {
       endpos0 = 0;
@@ -347,6 +347,7 @@ static bool GT_APPENDINT(checkspecialrange)(
   {
     if (swtable->endidxinpage[0] >= 1UL)
     {
+      gt_assert(swtable->endidxinpage[0] - 1 < swtable->numofpositionstostore);
       found = GT_APPENDINT(binarysearchpreviousequal)(
                         swtable->positions,
                         swtable->positions + swtable->endidxinpage[0] - 1,
@@ -369,6 +370,8 @@ static bool GT_APPENDINT(checkspecialrange)(
     if (swtable->endidxinpage[pagenumber-1] <
         swtable->endidxinpage[pagenumber])
     {
+      gt_assert(swtable->endidxinpage[pagenumber] - 1 <
+                swtable->numofpositionstostore);
       found = GT_APPENDINT(binarysearchpreviousequal)(
                         swtable->positions +
                         swtable->endidxinpage[pagenumber-1],
@@ -396,6 +399,7 @@ static bool GT_APPENDINT(checkspecialrange)(
         unsigned long idx, rangeend;
 
         idx = swtable->endidxinpage[0] - 1;
+        gt_assert(idx < swtable->numofpositionstostore);
         rangeend = (unsigned long) swtable->positions[idx] +
                    (unsigned long) swtable->rangelengths[idx] + 1;
         if (pos < rangeend)
@@ -411,6 +415,7 @@ static bool GT_APPENDINT(checkspecialrange)(
         unsigned long idx, rangeend;
 
         idx = swtable->endidxinpage[pagenumber-1] - 1;
+        gt_assert(idx < swtable->numofpositionstostore);
         rangeend = (unsigned long) ((swtable->maxrangevalue+1) * (pagenumber-1))
                    + (unsigned long) swtable->positions[idx]
                    + (unsigned long) swtable->rangelengths[idx]
@@ -431,7 +436,8 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
                                          unsigned long transpagenum,
                                          unsigned long cellnum)
 {
-  gt_assert(swtable->positions != NULL);
+  gt_assert(swtable->positions != NULL &&
+            cellnum < swtable->numofpositionstostore);
   range->start = transpagenum *
                  (1UL + (unsigned long) swtable->maxrangevalue) +
                  swtable->positions[cellnum];
@@ -442,6 +448,14 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
   {
     range->end = range->start + 1;
   }
+  /*
+  printf("new range [%lu,%lu] for rangelength=%s,maxvalue=%u,transpagenum=%lu,"
+         "positions[cellnum=%lu]=%lu\n",
+         range->start,range->end,
+         swtable->rangelengths == NULL ? "NULL" : "not NULL",
+         swtable->maxrangevalue,transpagenum,cellnum,
+         (unsigned long) swtable->positions[cellnum]);
+  */
 }
 
 static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
@@ -486,8 +500,9 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
     {
       cellnum = endpos0 + GT_DIV2(endpos1 - endpos0 - 1);
       GT_APPENDINT(determinerange)(&range,swtable,pagenum,cellnum);
-#ifdef RANGEDEBUG
-      printf("binsearch in [%lu,%lu] => mid = %lu => ",endpos0,endpos1,cellnum);
+#ifdef GT_RANGEDEBUG
+      printf("%s: kindsw=%d: binsearch in [%lu,%lu] => mid = %lu => ",
+              __func__,(int) kindsw,endpos0,endpos1,cellnum);
       showGtRange(&range);
       printf("\n");
 #endif
@@ -564,14 +579,15 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
       found = true;
     }
   }
-#ifdef RANGEDEBUG
+#ifdef GT_RANGEDEBUG
   if (found)
   {
     GT_APPENDINT(determinerange)(&range,swtable,pagenum,
                                  moveforward
                                    ? swstate->firstcell
                                    : (swstate->lastcell-1));
-    printf("binary found pos %lu in ", esr->currentpos);
+    printf("%s: kindsw=%d,binary found pos %lu in ",
+            __func__,(int) kindsw,esr->currentpos);
     showGtRange(&range);
     printf(" at cell %lu in page %lu\n",
            moveforward ? swstate->firstcell
@@ -590,8 +606,8 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
                                  moveforward
                                    ? swstate->firstcell
                                    : (swstate->lastcell-1));
-#ifdef RANGEDEBUG
-    printf("previousrange=");
+#ifdef GT_RANGEDEBUG
+    printf("%s: kindsw=%d,previousrange=",__func__,(int) kindsw);
     showGtRange(&swstate->previousrange);
     printf("\n");
 #endif
@@ -709,9 +725,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
       break;
     case SWtable_ssptabnew:
       swtable = &(GT_APPENDINT(esr->encseq->ssptabnew.st));
-      gt_assert(swtable != NULL);
       swstate = esr->ssptabnewstate;
-      gt_assert(swstate != NULL);
       break;
     default:
       gt_assert(false);
@@ -730,8 +744,9 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
     {
       swstate->lastcell--;
     }
-#ifdef RANGEDEBUG
-    printf("advance with firstcell=%lu, lastcell=%lu\n",
+#ifdef GT_RANGEDEBUG
+    printf("%s: kindsw=%d, firstcell=%lu, lastcell=%lu\n",
+            __func__,(int) kindsw,
             swstate->firstcell,swstate->lastcell);
 #endif
     /* do not let comparison values become negative, hence compare with + 1 */
@@ -798,10 +813,14 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
                                       KindofSWtable kindsw)
 {
   GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
-#ifdef RANGEDEBUG
-  printf("pos=%lu,previous=(%lu,%lu)\n",esr->currentpos,
-          swstate->previousrange.start,
-          swstate->previousrange.end);
+
+#ifdef GT_RANGEDEBUG
+  gt_assert(swstate != NULL);
+  printf("%s(kindsw=%d,pos=%lu,previous=(%lu,%lu))\n",
+         __func__,(int) kindsw,
+         esr->currentpos,
+         swstate->previousrange.start,
+         swstate->previousrange.end);
 #endif
   if (swstate->hasprevious)
   {
@@ -815,7 +834,7 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
         }
         if (swstate->hasrange)
         {
-          GT_APPENDINT(advancerangeGtEncseqReader)(esr,kindsw);
+          advancerangeGtEncseqReader(esr,kindsw);
         }
       }
     } else
@@ -828,7 +847,7 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
         }
         if (swstate->hasrange)
         {
-          GT_APPENDINT(advancerangeGtEncseqReader)(esr,kindsw);
+          advancerangeGtEncseqReader(esr,kindsw);
         }
       }
     }
@@ -836,12 +855,11 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
   return false;
 }
 
-static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
-                                              KindofSWtable kindsw)
+static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
 {
   unsigned long twobits
     = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos);
-  if (!GT_APPENDINT(checknextSW)(esr,kindsw))
+  if (!GT_APPENDINT(checknextSW)(esr,SWtable_specialrange))
   {
     return (GtUchar) twobits;
   }
@@ -850,9 +868,21 @@ static GtUchar GT_APPENDINT(seqdelivercharSW)(GtEncseqReader *esr,
                      : (GtUchar) WILDCARD;
 }
 
-static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
+static GtUchar GT_APPENDINT(seqdelivercharSpecial2)(GtEncseqReader *esr)
 {
-  return GT_APPENDINT(seqdelivercharSW)(esr,SWtable_specialrange);
+  if (GT_APPENDINT(esr->encseq->wildcardrangetable.st).numofpositionstostore
+      > 0 &&
+      GT_APPENDINT(checknextSW)(esr,SWtable_wildcardrange))
+  {
+    return (GtUchar) WILDCARD;
+  }
+  if (esr->encseq->numofdbsequences > 1UL &&
+      GT_APPENDINT(checknextSW)(esr,SWtable_ssptabnew))
+  {
+    return (GtUchar) SEPARATOR;
+  }
+  return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
+                                      esr->currentpos);
 }
 
 static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(

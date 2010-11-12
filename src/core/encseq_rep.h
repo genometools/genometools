@@ -90,7 +90,8 @@ struct GtEncseq
   void *mappedptr, /* NULL or pointer to the mapped space block */
        *ssptabmappedptr; /* NULL or pointer to the mapped space block */
   bool has_specialranges,
-       has_wildcardranges;
+       has_wildcardranges,
+       has_ssptabnew;
   unsigned long totallength,
                 *totallengthptr,
                 numofdbsequences,

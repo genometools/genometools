@@ -174,6 +174,7 @@ void            gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
 /* Returns the next encoded character from current position of <esr>, advancing
    the iterator by one position. */
 GtUchar         gt_encseq_reader_next_encoded_char(GtEncseqReader *esr);
+GtUchar gt_encseq_reader_next_encoded_char2(GtEncseqReader *esr);
 /* Returns the next decoded character from current position of <esr>, advancing
    the iterator by one position. */
 char            gt_encseq_reader_next_decoded_char(GtEncseqReader *esr);

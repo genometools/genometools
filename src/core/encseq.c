@@ -317,48 +317,6 @@ GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
   }
 }
 
-static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
-                                    GtError *err)
-{
-  bool assigned = false;
-  unsigned long pos;
-  GtUchar cc1, cc2;
-
-  if (encseq->ssptab == NULL &&
-      encseq->numofdbsequences > 1UL &&
-      gt_encseq_access_type_isviautables(encseq->sat))
-  {
-    encseq->ssptab = gt_mmap_check_size_with_suffix(indexname,
-                                         GT_SSPTABFILESUFFIX,
-                                         encseq->numofdbsequences - 1,
-                                         sizeof (*encseq->ssptab),
-                                         err);
-    if (encseq->ssptab == NULL)
-    {
-      return -1;
-    }
-    assigned = true;
-  }
-  for (pos = 0; pos < encseq->totallength; pos++)
-  {
-    cc1 = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
-    cc2 = gt_encseq_get_encoded_char2(encseq,pos,GT_READMODE_FORWARD);
-    if (cc1 != cc2)
-    {
-      fprintf(stderr,"pos %lu: cc1 = %u != %u = cc2\n",pos,
-                                                       (unsigned int) cc1,
-                                                       (unsigned int) cc2);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-  }
-  if (assigned)
-  {
-    gt_fa_xmunmap((void *) encseq->ssptab);
-    encseq->ssptab = NULL;
-  }
-  return 0;
-}
-
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
@@ -436,6 +394,7 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
   GtUchar cc;
   gt_assert(esr && esr->currentpos < esr->encseq->totallength);
+
   switch (esr->readmode)
   {
     case GT_READMODE_FORWARD:
@@ -460,6 +419,7 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
+
 #endif /* INLINEDENCSEQ */
 
 char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
@@ -727,7 +687,10 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   {
     haserr = true;
   }
-  gt_assert(encseq->ssptabnew.st_ushort.positions != NULL);
+  if (!haserr)
+  {
+    encseq->has_ssptabnew = true;
+  }
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
@@ -1267,14 +1230,17 @@ void gt_encseq_delete(GtEncseq *encseq)
     switch (encseq->satsep)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
+        gt_assert(encseq->ssptabnew.st_uchar.rangelengths == NULL);
         gt_free(encseq->ssptabnew.st_uchar.positions);
         gt_free(encseq->ssptabnew.st_uchar.endidxinpage);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
+        gt_assert(encseq->ssptabnew.st_ushort.rangelengths == NULL);
         gt_free(encseq->ssptabnew.st_ushort.positions);
         gt_free(encseq->ssptabnew.st_ushort.endidxinpage);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
+        gt_assert(encseq->ssptabnew.st_uint32.rangelengths == NULL);
         gt_free(encseq->ssptabnew.st_uint32.positions);
         gt_free(encseq->ssptabnew.st_uint32.endidxinpage);
         break;
@@ -1359,10 +1325,13 @@ static GtEncseqReaderViatablesinfo *assignSWtable(GtEncseqReader *esr,
   switch (kindsw)
   {
     case SWtable_specialrange:
+      gt_assert(esr->specialrangestate != NULL);
       return esr->specialrangestate;
     case SWtable_wildcardrange:
+      gt_assert(esr->wildcardrangestate != NULL);
       return esr->wildcardrangestate;
     case SWtable_ssptabnew:
+      gt_assert(esr->ssptabnewstate != NULL);
       return esr->ssptabnewstate;
   }
 #ifndef S_SPLINT_S
@@ -1370,6 +1339,9 @@ static GtEncseqReaderViatablesinfo *assignSWtable(GtEncseqReader *esr,
   return NULL;
 #endif
 }
+
+static void advancerangeGtEncseqReader(GtEncseqReader *esr,
+                                       KindofSWtable kindsw);
 
 #define GT_APPENDINT(V)          V##_uchar
 #define GT_SPECIALTABLETYPE      GtUchar
@@ -1416,34 +1388,81 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
   switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
+      printf("uchar pages of maximum value %u\n",
+              swtable->st_uchar.maxrangevalue);
       showallSWtablewithpages_uchar(&swtable->st_uchar);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
+      printf("ushort pages of maximum value %u\n",
+              swtable->st_ushort.maxrangevalue);
       showallSWtablewithpages_ushort(&swtable->st_ushort);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
+      printf("uint32 pages of maximum value %u\n",
+              swtable->st_uint32.maxrangevalue);
       showallSWtablewithpages_uint32(&swtable->st_uint32);
       break;
     default: fprintf(stderr,
-                     "showallSWtablewithpage"
-                     "(sat=%d is undefined)",(int) sat);
+                     "showallSWtablewithpage(sat=%d is undefined)\n",
+                     (int) sat);
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
 static void showallSWtables(const GtEncseq *encseq)
 {
-  if (encseq->has_specialranges)
+  if (gt_encseq_access_type_isviautables(encseq->sat))
   {
-    showallSWtablewithpages(encseq->sat,&encseq->specialrangetable);
+    if (encseq->has_specialranges)
+    {
+      printf("specialrangetable\n");
+      showallSWtablewithpages(encseq->sat,&encseq->specialrangetable);
+    }
+    if (encseq->has_wildcardranges)
+    {
+      printf("wildcardrangetable\n");
+      showallSWtablewithpages(encseq->sat,&encseq->wildcardrangetable);
+    }
   }
-  if (encseq->has_wildcardranges)
+  if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED)
   {
-    showallSWtablewithpages(encseq->sat,&encseq->wildcardrangetable);
+    if (encseq->has_ssptabnew)
+    {
+      printf("ssptabnew\n");
+      showallSWtablewithpages(encseq->satsep,&encseq->ssptabnew);
+    }
   }
 }
 
 #endif
+
+GtUchar gt_encseq_reader_next_encoded_char2(GtEncseqReader *esr)
+{
+  GtUchar cc;
+  gt_assert(esr && esr->currentpos < esr->encseq->totallength);
+
+  gt_assert(esr->readmode == GT_READMODE_FORWARD &&
+            gt_encseq_access_type_isviautables(esr->encseq->sat));
+  switch (esr->encseq->sat)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      cc = seqdelivercharSpecial2_uchar(esr);
+      esr->currentpos++;
+      return cc;
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      cc = seqdelivercharSpecial2_ushort(esr);
+      esr->currentpos++;
+      return cc;
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      cc = seqdelivercharSpecial2_uint32(esr);
+      esr->currentpos++;
+      return cc;
+    default:
+      fprintf(stderr,"gt_encseq_get_encoded_char2: "
+                     "sat %d not possible\n",(int) esr->encseq->sat);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
 
 /* generic for the case that there are no specialsymbols */
 
@@ -2135,8 +2154,9 @@ static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
 static void advancerangeGtEncseqReader(GtEncseqReader *esr,
                                        KindofSWtable kindsw)
 {
-  switch ((kindsw == SWtable_ssptabnew)
-           ? esr->encseq->satsep : esr->encseq->sat)
+  GtEncseqAccessType sat = (kindsw == SWtable_ssptabnew) ? esr->encseq->satsep
+                                                         : esr->encseq->sat;
+  switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       advancerangeGtEncseqReader_uchar(esr,kindsw);
@@ -2149,9 +2169,7 @@ static void advancerangeGtEncseqReader(GtEncseqReader *esr,
       break;
     default:
       fprintf(stderr,"advancerangeGtEncseqReader(sat = %s is undefined)\n",
-              gt_encseq_access_type_str((kindsw == SWtable_ssptabnew)
-                                          ? esr->encseq->satsep
-                                          : esr->encseq->sat));
+              gt_encseq_access_type_str(sat));
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -2209,7 +2227,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                         = false;
     binpreparenextrangeGtEncseqReader(esr,SWtable_specialrange);
 #ifdef GT_RANGEDEBUG
-      printf("start advance at (%lu,%lu) in page %lu\n",
+      printf("specialranges: start advance at (%lu,%lu) in page %lu\n",
                        esr->specialrangestate->firstcell,
                        esr->specialrangestate->lastcell,
                        esr->specialrangestate->nextpage);
@@ -2226,14 +2244,12 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
 
 #ifdef NEWTWOBITENCODING
     binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
-#endif
 #ifdef GT_RANGEDEBUG
-      printf("start advance at (%lu,%lu) in page %lu\n",
+      printf("wildcardranges: start advance at (%lu,%lu) in page %lu\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
 #endif
-#ifdef NEWTWOBITENCODING
     advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
 #endif
     if (esr->encseq->numofdbsequences > 1UL)
@@ -2247,6 +2263,12 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       esr->ssptabnewstate->hasprevious = esr->ssptabnewstate->hascurrent
                                        = false;
       binpreparenextrangeGtEncseqReader(esr,SWtable_ssptabnew);
+#ifdef GT_RANGEDEBUG
+      printf("ssptabnew: start advance at (%lu,%lu) in page %lu\n",
+                       esr->wildcardrangestate->firstcell,
+                       esr->wildcardrangestate->lastcell,
+                       esr->wildcardrangestate->nextpage);
+#endif
       advancerangeGtEncseqReader(esr,SWtable_ssptabnew);
     }
   } else
@@ -2295,7 +2317,7 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   }
   if (esr->wildcardrangestate != NULL)
   {
-    gt_free(esr->wildcardrangestate);
+   gt_free(esr->wildcardrangestate);
   }
   if (esr->ssptabnewstate != NULL)
   {
@@ -2879,6 +2901,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   }
   encseq->has_specialranges = (specialranges > 0) ? true : false;
   encseq->has_wildcardranges = (wildcardranges > 0) ? true : false;
+  encseq->has_ssptabnew = false;
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
   encseq->mappedptr = NULL;
@@ -3279,8 +3302,10 @@ static GtEncseq *files2encodedsequence(
       if (ssptaboutinfo == NULL)
       {
         haserr = true;
+      } else
+      {
+        encseq->has_ssptabnew = true;
       }
-      gt_assert(encseq->ssptabnew.st_ushort.positions != NULL);
     } else
     {
       encseq->satsep = GT_ACCESS_TYPE_UNDEFINED;
@@ -3383,10 +3408,10 @@ gt_encseq_new_from_index(const char *indexname,
     }
   }
 #ifdef GT_RANGEDEBUG
-  if (!haserr)
+  /*if (!haserr)
   {
     showallSWtables(encseq);
-  }
+  }*/
 #endif
   if (!haserr && withdestab)
   {
@@ -5568,6 +5593,70 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
     characterdistribution[idx] = 0;
   }
   return characterdistribution;
+}
+
+static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
+                                    GtError *err)
+{
+  bool assigned = false;
+  unsigned long pos;
+  GtUchar cc1, cc2;
+  GtEncseqReader *esr = NULL;
+  if (encseq->ssptab == NULL &&
+      encseq->numofdbsequences > 1UL &&
+      gt_encseq_access_type_isviautables(encseq->sat))
+  {
+    encseq->ssptab = gt_mmap_check_size_with_suffix(indexname,
+                                         GT_SSPTABFILESUFFIX,
+                                         encseq->numofdbsequences - 1,
+                                         sizeof (*encseq->ssptab),
+                                         err);
+    if (encseq->ssptab == NULL)
+    {
+      return -1;
+    }
+    assigned = true;
+  }
+  if (gt_encseq_access_type_isviautables(encseq->sat))
+  {
+    esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_FORWARD,0);
+    binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
+#ifdef GT_RANGEDEBUG
+    printf("wildcardarnge: start advance at (%lu,%lu) in page %lu\n",
+                       esr->wildcardrangestate->firstcell,
+                       esr->wildcardrangestate->lastcell,
+                       esr->wildcardrangestate->nextpage);
+#endif
+    advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
+  }
+  for (pos = 0; pos < encseq->totallength; pos++)
+  {
+    cc1 = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
+    cc2 = gt_encseq_get_encoded_char2(encseq,pos,GT_READMODE_FORWARD);
+    if (cc1 != cc2)
+    {
+      fprintf(stderr,"random access: pos %lu: cc1 = %u != %u = cc2\n",
+                      pos,(unsigned int) cc1,(unsigned int) cc2);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    if (esr != NULL)
+    {
+      cc2 = gt_encseq_reader_next_encoded_char2(esr);
+      if (cc1 != cc2)
+      {
+        fprintf(stderr,"sequential access: pos %lu: cc1 = %u != %u = cc2\n",
+                        pos,(unsigned int) cc1,(unsigned int) cc2);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+    }
+  }
+  if (assigned)
+  {
+    gt_fa_xmunmap((void *) encseq->ssptab);
+    encseq->ssptab = NULL;
+  }
+  gt_encseq_reader_delete(esr);
+  return 0;
 }
 
 static GtEncseq*
