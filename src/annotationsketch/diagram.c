@@ -281,7 +281,7 @@ static inline int add_to_current(GtDiagram *d, GtFeatureNode *node,
     gt_str_delete(caption);
     gt_block_delete(block);
     return -1;
-  } else {
+  } else if (rval == GT_STYLE_QUERY_NOT_SET) {
     nnid_p = get_node_name_or_id(parent);
     nnid_n = get_node_name_or_id(node);
     if ((nnid_p || nnid_n) && status)
