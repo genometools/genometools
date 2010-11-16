@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,14 +21,10 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtInterFeatureStream GtInterFeatureStream;
-
-const GtNodeStreamClass* gt_inter_feature_stream_class(void);
 /* Adds features of type <inter_type> between features of type
    <outside_type>. */
-GtNodeStream*            gt_inter_feature_stream_new(GtNodeStream*,
-                                                     const char *outside_type,
-                                                     const char *inter_type);
+GtNodeStream* gt_inter_feature_stream_new(GtNodeStream*,
+                                          const char *outside_type,
+                                          const char *inter_type);
 
 #endif
