@@ -16,64 +16,11 @@
 
 #include "extended/md5_to_id_stream.h"
 #include "extended/md5_to_id_visitor.h"
-#include "extended/node_stream_api.h"
-
-struct GtMD5ToIDStream {
-  const GtNodeStream parent_instance;
-  GtNodeStream *in_stream;
-  GtNodeVisitor *md5_to_id_visitor;
-};
-
-#define md5_to_id_stream_cast(GS)\
-        gt_node_stream_cast(gt_md5_to_id_stream_class(), GS)
-
-static int md5_to_id_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
-                                     GtError *err)
-{
-  GtMD5ToIDStream *md5_to_id_stream;
-  int had_err;
-  gt_error_check(err);
-  md5_to_id_stream = md5_to_id_stream_cast(ns);
-  had_err = gt_node_stream_next(md5_to_id_stream->in_stream, gn, err);
-  if (!had_err && *gn) {
-    had_err = gt_genome_node_accept(*gn, md5_to_id_stream->md5_to_id_visitor,
-                                    err);
-  }
-  if (had_err) {
-    /* we own the node -> delete it */
-    gt_genome_node_delete(*gn);
-    *gn = NULL;
-  }
-  return had_err;
-}
-
-static void md5_to_id_stream_free(GtNodeStream *ns)
-{
-  GtMD5ToIDStream *md5_to_id_stream = md5_to_id_stream_cast(ns);
-  gt_node_visitor_delete(md5_to_id_stream->md5_to_id_visitor);
-  gt_node_stream_delete(md5_to_id_stream->in_stream);
-}
-
-const GtNodeStreamClass* gt_md5_to_id_stream_class(void)
-{
-  static const GtNodeStreamClass *nsc = NULL;
-  if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (GtMD5ToIDStream),
-                                   md5_to_id_stream_free,
-                                   md5_to_id_stream_next);
-  }
-  return nsc;
-}
+#include "extended/visitor_stream.h"
 
 GtNodeStream* gt_md5_to_id_stream_new(GtNodeStream *in_stream,
-                                          GtRegionMapping *rm)
+                                      GtRegionMapping *rm)
 {
-  GtMD5ToIDStream *md5_to_id_stream;
-  GtNodeStream *ns;
-  ns = gt_node_stream_create(gt_md5_to_id_stream_class(), true);
-  md5_to_id_stream = md5_to_id_stream_cast(ns);
-  md5_to_id_stream->in_stream = gt_node_stream_ref(in_stream);
-  md5_to_id_stream->md5_to_id_visitor =
-    gt_md5_to_id_visitor_new(rm);
-  return ns;
+  gt_assert(in_stream && rm);
+  return gt_visitor_stream_new(in_stream, gt_md5_to_id_visitor_new(rm));
 }
