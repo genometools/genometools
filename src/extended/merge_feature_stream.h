@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,10 +21,6 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtMergeFeatureStream GtMergeFeatureStream;
-
-const GtNodeStreamClass* gt_merge_feature_stream_class(void);
-GtNodeStream*            gt_merge_feature_stream_new(GtNodeStream*);
+GtNodeStream* gt_merge_feature_stream_new(GtNodeStream*);
 
 #endif
