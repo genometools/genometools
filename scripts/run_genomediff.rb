@@ -34,6 +34,7 @@ options.redN = false
 options.parts = 1
 options.parts_set = false
 options.name = "esa"
+options.prepare_only = "false"
 
 opt= OptionParser.new do |opt|
   opt.banner = "USAGE: #$0 [options] <files>\n
@@ -77,7 +78,10 @@ opt= OptionParser.new do |opt|
   end
   opt.on("--name NAME", String, "the baseNAME of the index files") do |val|
     options.name = val
-  end 
+  end
+  opt.on("--nodiff", "Do not calculate Kr, just prepare the data") do |val|
+    options.prepare_only = val
+  end
   opt.on_tail("-h", "--help", "prints this help and exits") do
     puts opt
     exit 0
@@ -89,7 +93,8 @@ opt.parse!(ARGV)
 files = ""
 ARGV.each do |file|
   unless File.exist?(file)
-    puts "non existing file " + file
+    STDERR.puts "non existing file " + file
+    exit 1
   else
     if options.redN
       file = Genomediff.reduceN(file)
@@ -97,7 +102,10 @@ ARGV.each do |file|
     files += Genomediff.reverse_and_concat(file, false) + " "
   end
 end
-
+if options.prepare_only
+  STDERR.puts "data prepared"
+  exit 0
+end
 
 if options.esa
   puts "***ESA***"
