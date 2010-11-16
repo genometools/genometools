@@ -76,17 +76,56 @@ bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat)
   return (sat >= GT_ACCESS_TYPE_UCHARTABLES) ? true : false;
 }
 
-#define CHECKANDUPDATE(VAL,IDX)\
-        tmp = gt_encseq_determine_size(VAL, totallength, numofdbfiles,\
+#define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
+        (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
+        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1)
+
+uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
+                                 bool withrangelength,
+                                 unsigned long totallength,
+                                 unsigned long items)
+{
+  if (items == 0)
+  {
+    return 0;
+  }
+  switch (sat)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      return SIZEOFSWTABLE(GtUchar,UCHAR_MAX);
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      return SIZEOFSWTABLE(GtUshort,USHRT_MAX);
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      return SIZEOFSWTABLE(uint32_t,UINT32_MAX);
+    default:
+      fprintf(stderr,"gt_encseq_sizeofSWtable(sat=%d) is undefined\n",
+              (int) sat);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+
+#define CHECKANDUPDATE(SAT,IDX)\
+        tmp = gt_encseq_determine_size(SAT, totallength, numofdbfiles,\
                                        lengthofdbfilenames,\
                                        specialrangestab[IDX],\
                                        wildcardrangestab[IDX],\
                                        numofchars,\
                                        0);\
-        if (tmp < cmin)\
+        if (withadditionalsize)\
+        {\
+          additionalsize \
+            = sizeoftwobitencoding + \
+              gt_encseq_sizeofSWtable(SAT,true,totallength,\
+                                      wildcardrangestab[IDX]);\
+        } else\
+        {\
+          additionalsize = 0;\
+        }\
+        gt_assert(tmp >= additionalsize);\
+        if (tmp - additionalsize < cmin)\
         {\
           cmin = tmp;\
-          cret = VAL;\
+          cret = SAT;\
           *specialranges = specialrangestab[IDX];\
           *wildcardranges = wildcardrangestab[IDX];\
         }
@@ -104,7 +143,15 @@ static GtEncseqAccessType determinesmallestrep(
                                   unsigned int numofchars)
 {
   GtEncseqAccessType cret;
-  uint64_t tmp, cmin;
+#ifdef NEWTWOBITENCODING
+  bool withadditionalsize = true;
+#else
+  bool withadditionalsize = false;
+#endif
+  uint64_t tmp, cmin, additionalsize,
+           sizeoftwobitencoding
+             = (uint64_t) gt_unitsoftwobitencoding(totallength) *
+               (uint64_t) sizeof (GtTwobitencoding);
 
   cret = GT_ACCESS_TYPE_BITACCESS;
   cmin = gt_encseq_determine_size(cret, totallength,

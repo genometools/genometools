@@ -20,6 +20,7 @@
 
 #include "core/defined-types.h"
 #include "core/error_api.h"
+#undef NEWTWOBITENCODING
 
 typedef enum
 {
@@ -35,6 +36,10 @@ typedef enum
 
 GtEncseqAccessType gt_encseq_access_type_get(const char *str);
 bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat);
+uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
+                                 bool withrangelength,
+                                 unsigned long totallength,
+                                 unsigned long items);
 const char*        gt_encseq_access_type_str(GtEncseqAccessType at);
 const char*        gt_encseq_access_type_list(void);
 int gt_encseq_access_type_determine(unsigned long *specialranges,

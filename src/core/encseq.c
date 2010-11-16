@@ -586,33 +586,6 @@ static void addswtabletomapspectable(GtArrayGtMapspecification *mapspectable,
   }
 }
 
-#define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
-        (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
-        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1)
-
-static uint64_t sizeofSWtable(GtEncseqAccessType sat,
-                              bool withrangelength,
-                              unsigned long totallength,
-                              unsigned long items)
-{
-  if (items == 0)
-  {
-    return 0;
-  }
-  switch (sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      return SIZEOFSWTABLE(GtUchar,UCHAR_MAX);
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return SIZEOFSWTABLE(GtUshort,USHRT_MAX);
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return SIZEOFSWTABLE(uint32_t,UINT32_MAX);
-    default:
-      fprintf(stderr,"sizeofSWtable(sat=%d) is undefined\n",(int) sat);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
 static void assignssptabmapspecification(
                                         GtArrayGtMapspecification *mapspectable,
                                         void *voidinfo,
@@ -644,7 +617,7 @@ static int flushssptab2file(const char *indexname,GtEncseq *encseq,
     unsigned long sizessptab;
 
     sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
-                              sizeofSWtable(encseq->satsep,
+                              gt_encseq_sizeofSWtable(encseq->satsep,
                                             false,
                                             encseq->totallength,
                                             encseq->numofdbsequences-1));
@@ -673,11 +646,12 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,".ssp1");
 
-  sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
-                            sizeofSWtable(encseq->satsep,
-                                          false,
-                                          encseq->totallength,
-                                          encseq->numofdbsequences-1));
+  sizessptab
+    = CALLCASTFUNC(uint64_t, unsigned_long,
+                   gt_encseq_sizeofSWtable(encseq->satsep,
+                                           false,
+                                           encseq->totallength,
+                                           encseq->numofdbsequences-1));
   if (gt_mapspec_fillmapspecstartptr(assignssptabmapspecification,
                                      &encseq->ssptabmappedptr,
                                      encseq,
@@ -796,7 +770,6 @@ static void assignencseqmapspecification(
                                true,
                                encseq->totallength,
                                encseq->sat);
-#undef NEWTWOBITENCODING
 #ifdef NEWTWOBITENCODING
       NEWMAPSPEC(encseq->twobitencodingSW,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
@@ -931,18 +904,18 @@ static GtEncseqAccessType determineoptimalsssptablerep(
   {
     return GT_ACCESS_TYPE_UNDEFINED;
   }
-  sepsizemin = sizeofSWtable(GT_ACCESS_TYPE_UCHARTABLES,false,totallength,
-                             numofseparators);
+  sepsizemin = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UCHARTABLES,false,
+                                       totallength,numofseparators);
   satmin = GT_ACCESS_TYPE_UCHARTABLES;
-  sepsize = sizeofSWtable(GT_ACCESS_TYPE_USHORTTABLES,false,totallength,
-                          numofseparators);
+  sepsize = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_USHORTTABLES,false,
+                                    totallength,numofseparators);
   if (sepsize < sepsizemin)
   {
     sepsizemin = sepsize;
     satmin = GT_ACCESS_TYPE_USHORTTABLES;
   }
-  sepsize = sizeofSWtable(GT_ACCESS_TYPE_UINT32TABLES,false,totallength,
-                          numofseparators);
+  sepsize = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UINT32TABLES,false,
+                                    totallength,numofseparators);
   if (sepsize < sepsizemin)
   {
     sepsizemin = sepsize;
@@ -1424,13 +1397,10 @@ static void showallSWtables(const GtEncseq *encseq)
       showallSWtablewithpages(encseq->sat,&encseq->wildcardrangetable);
     }
   }
-  if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED)
+  if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED && encseq->has_ssptabnew)
   {
-    if (encseq->has_ssptabnew)
-    {
-      printf("ssptabnew\n");
-      showallSWtablewithpages(encseq->satsep,&encseq->ssptabnew);
-    }
+    printf("ssptabnew\n");
+    showallSWtablewithpages(encseq->satsep,&encseq->ssptabnew);
   }
 }
 
@@ -3752,10 +3722,10 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
     case GT_ACCESS_TYPE_USHORTTABLES:
     case GT_ACCESS_TYPE_UINT32TABLES:
          sum = sizeoftwobitencoding +
-               sizeofSWtable(sat,true,totallength,specialranges);
+               gt_encseq_sizeofSWtable(sat,true,totallength,specialranges);
 #ifdef NEWTWOBITENCODING
          sum += sizeoftwobitencoding +
-                sizeofSWtable(sat,true,totallength,wildcardranges);
+                gt_encseq_sizeofSWtable(sat,true,totallength,wildcardranges);
 #endif
          break;
     default:
@@ -5620,14 +5590,18 @@ static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
     esr = gt_encseq_create_reader_with_readmode(encseq,GT_READMODE_FORWARD,0);
+#ifndef NEWTWOBITENCODING
     binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
+#endif
 #ifdef GT_RANGEDEBUG
     printf("wildcardarnge: start advance at (%lu,%lu) in page %lu\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
 #endif
+#ifndef NEWTWOBITENCODING
     advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
+#endif
   }
   for (pos = 0; pos < encseq->totallength; pos++)
   {
