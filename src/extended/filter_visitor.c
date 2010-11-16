@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,7 +27,7 @@
 
 struct GtFilterVisitor {
   const GtNodeVisitor parent_instance;
-  GtQueue *gt_genome_node_buffer;
+  GtQueue *node_buffer;
   GtStr *seqid,
         *typefilter;
   GtRange contain_range,
@@ -51,7 +51,7 @@ struct GtFilterVisitor {
 static void filter_visitor_free(GtNodeVisitor *nv)
 {
   GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
-  gt_queue_delete(filter_visitor->gt_genome_node_buffer);
+  gt_queue_delete(filter_visitor->node_buffer);
   gt_str_delete(filter_visitor->seqid);
   gt_str_delete(filter_visitor->typefilter);
 }
@@ -62,7 +62,7 @@ static int filter_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
   GtFilterVisitor *filter_visitor;
   gt_error_check(err);
   filter_visitor = filter_visitor_cast(nv);
-  gt_queue_add(filter_visitor->gt_genome_node_buffer, c);
+  gt_queue_add(filter_visitor->node_buffer, c);
   return 0;
 }
 
@@ -202,7 +202,7 @@ static int filter_visitor_feature_node(GtNodeVisitor *nv,
   if (filter_node)
     gt_genome_node_delete((GtGenomeNode*) fn);
   else
-    gt_queue_add(fv->gt_genome_node_buffer, fn);
+    gt_queue_add(fv->node_buffer, fn);
 
   return 0;
 }
@@ -223,13 +223,13 @@ static int filter_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
         range.start = MAX(range.start, filter_visitor->contain_range.start);
         range.end = MIN(range.end, filter_visitor->contain_range.end);
         gt_genome_node_set_range((GtGenomeNode*) rn, &range);
-        gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
+        gt_queue_add(filter_visitor->node_buffer, rn);
       }
       else /* contain range does not overlap with <rn> range -> delete <rn> */
         gt_genome_node_delete((GtGenomeNode*) rn);
     }
     else
-      gt_queue_add(filter_visitor->gt_genome_node_buffer, rn);
+      gt_queue_add(filter_visitor->node_buffer, rn);
   }
   else
     gt_genome_node_delete((GtGenomeNode*) rn);
@@ -244,8 +244,8 @@ static int filter_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   filter_visitor = filter_visitor_cast(nv);
   if (!gt_str_length(filter_visitor->seqid) || /* no seqid was specified */
       !gt_str_cmp(filter_visitor->seqid,       /* or seqids are equal */
-               gt_genome_node_get_seqid((GtGenomeNode*) sn))) {
-    gt_queue_add(filter_visitor->gt_genome_node_buffer, sn);
+                  gt_genome_node_get_seqid((GtGenomeNode*) sn))) {
+    gt_queue_add(filter_visitor->node_buffer, sn);
   }
   else
     gt_genome_node_delete((GtGenomeNode*) sn);
@@ -280,7 +280,7 @@ GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
 {
   GtNodeVisitor *nv = gt_node_visitor_create(gt_filter_visitor_class());
   GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
-  filter_visitor->gt_genome_node_buffer = gt_queue_new();
+  filter_visitor->node_buffer = gt_queue_new();
   filter_visitor->seqid = gt_str_ref(seqid);
   filter_visitor->typefilter = gt_str_ref(typefilter);
   filter_visitor->contain_range = contain_range;
@@ -301,12 +301,12 @@ GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
 unsigned long gt_filter_visitor_node_buffer_size(GtNodeVisitor *nv)
 {
   GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
-  return gt_queue_size(filter_visitor->gt_genome_node_buffer);
+  return gt_queue_size(filter_visitor->node_buffer);
 }
 
 GtGenomeNode* gt_filter_visitor_get_node(GtNodeVisitor *nv)
 {
   GtFilterVisitor *filter_visitor;
   filter_visitor = filter_visitor_cast(nv);
-  return gt_queue_get(filter_visitor->gt_genome_node_buffer);
+  return gt_queue_get(filter_visitor->node_buffer);
 }
