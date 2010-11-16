@@ -24,7 +24,7 @@
 /* Implements the ``genome_stream'' interface. */
 typedef struct GtIDToMD5Stream GtIDToMD5Stream;
 
-/* Create a GtSeqidToMD5Stream, takes ownership of <region_mapping>. */
+/* Create a GtIDToMD5Stream, takes ownership of <region_mapping>. */
 GtNodeStream* gt_id_to_md5_stream_new(GtNodeStream *in_stream,
                                       GtRegionMapping *region_mapping);
 
