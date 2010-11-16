@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,14 +20,9 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtDupFeatureStream GtDupFeatureStream;
-
-const GtNodeStreamClass* gt_dup_feature_stream_class(void);
 /* Duplicate internal feature nodes of type <source_type> as features with type
    <dest_type>. The duplicated features does not inherit the children. */
-GtNodeStream*            gt_dup_feature_stream_new(GtNodeStream*,
-                                                   const char *dest_type,
-                                                   const char *source_type);
+GtNodeStream* gt_dup_feature_stream_new(GtNodeStream*, const char *dest_type,
+                                        const char *source_type);
 
 #endif
