@@ -18,7 +18,7 @@
 #include "extended/md5_to_id_visitor.h"
 #include "extended/node_stream_api.h"
 
-struct GtMD5ToSeqidsStream {
+struct GtMD5ToIDStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *md5_to_id_visitor;
@@ -30,15 +30,14 @@ struct GtMD5ToSeqidsStream {
 static int md5_to_id_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                      GtError *err)
 {
-  GtMD5ToSeqidsStream *md5_to_id_stream;
+  GtMD5ToIDStream *md5_to_id_stream;
   int had_err;
   gt_error_check(err);
   md5_to_id_stream = md5_to_id_stream_cast(ns);
   had_err = gt_node_stream_next(md5_to_id_stream->in_stream, gn, err);
   if (!had_err && *gn) {
-    had_err = gt_genome_node_accept(*gn,
-                                    md5_to_id_stream
-                                    ->md5_to_id_visitor, err);
+    had_err = gt_genome_node_accept(*gn, md5_to_id_stream->md5_to_id_visitor,
+                                    err);
   }
   if (had_err) {
     /* we own the node -> delete it */
@@ -50,7 +49,7 @@ static int md5_to_id_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
 static void md5_to_id_stream_free(GtNodeStream *ns)
 {
-  GtMD5ToSeqidsStream *md5_to_id_stream = md5_to_id_stream_cast(ns);
+  GtMD5ToIDStream *md5_to_id_stream = md5_to_id_stream_cast(ns);
   gt_node_visitor_delete(md5_to_id_stream->md5_to_id_visitor);
   gt_node_stream_delete(md5_to_id_stream->in_stream);
 }
@@ -59,7 +58,7 @@ const GtNodeStreamClass* gt_md5_to_id_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (GtMD5ToSeqidsStream),
+    nsc = gt_node_stream_class_new(sizeof (GtMD5ToIDStream),
                                    md5_to_id_stream_free,
                                    md5_to_id_stream_next);
   }
@@ -69,7 +68,7 @@ const GtNodeStreamClass* gt_md5_to_id_stream_class(void)
 GtNodeStream* gt_md5_to_id_stream_new(GtNodeStream *in_stream,
                                           GtRegionMapping *rm)
 {
-  GtMD5ToSeqidsStream *md5_to_id_stream;
+  GtMD5ToIDStream *md5_to_id_stream;
   GtNodeStream *ns;
   ns = gt_node_stream_create(gt_md5_to_id_stream_class(), true);
   md5_to_id_stream = md5_to_id_stream_cast(ns);

@@ -22,13 +22,13 @@
 #include "extended/region_mapping.h"
 
 /* Implements the ``genome_stream'' interface. */
-typedef struct GtSeqidsToMD5Stream GtSeqidsToMD5Stream;
+typedef struct GtIDToMD5Stream GtIDToMD5Stream;
 
 const GtNodeStreamClass* gt_id_to_md5_stream_class(void);
 
 /* Create a GtSeqidToMD5Stream, takes ownership of <region_mapping>. */
 GtNodeStream*            gt_id_to_md5_stream_new(GtNodeStream *in_stream,
-                                                      GtRegionMapping
-                                                      *region_mapping);
+                                                 GtRegionMapping
+                                                 *region_mapping);
 
 #endif

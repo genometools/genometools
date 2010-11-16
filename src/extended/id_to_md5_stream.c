@@ -18,7 +18,7 @@
 #include "extended/id_to_md5_visitor.h"
 #include "extended/node_stream_api.h"
 
-struct GtSeqidsToMD5Stream {
+struct GtIDToMD5Stream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *id_to_md5_visitor;
@@ -30,7 +30,7 @@ struct GtSeqidsToMD5Stream {
 static int id_to_md5_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                      GtError *err)
 {
-  GtSeqidsToMD5Stream *id_to_md5_stream;
+  GtIDToMD5Stream *id_to_md5_stream;
   int had_err;
   gt_error_check(err);
   id_to_md5_stream = id_to_md5_stream_cast(ns);
@@ -50,7 +50,7 @@ static int id_to_md5_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
 
 static void id_to_md5_stream_free(GtNodeStream *ns)
 {
-  GtSeqidsToMD5Stream *id_to_md5_stream = id_to_md5_stream_cast(ns);
+  GtIDToMD5Stream *id_to_md5_stream = id_to_md5_stream_cast(ns);
   gt_node_visitor_delete(id_to_md5_stream->id_to_md5_visitor);
   gt_node_stream_delete(id_to_md5_stream->in_stream);
 }
@@ -59,7 +59,7 @@ const GtNodeStreamClass* gt_id_to_md5_stream_class(void)
 {
   static const GtNodeStreamClass *nsc = NULL;
   if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (GtSeqidsToMD5Stream),
+    nsc = gt_node_stream_class_new(sizeof (GtIDToMD5Stream),
                                    id_to_md5_stream_free,
                                    id_to_md5_stream_next);
   }
@@ -69,7 +69,7 @@ const GtNodeStreamClass* gt_id_to_md5_stream_class(void)
 GtNodeStream* gt_id_to_md5_stream_new(GtNodeStream *in_stream,
                                           GtRegionMapping *rm)
 {
-  GtSeqidsToMD5Stream *id_to_md5_stream;
+  GtIDToMD5Stream *id_to_md5_stream;
   GtNodeStream *ns;
   ns = gt_node_stream_create(gt_id_to_md5_stream_class(), true);
   id_to_md5_stream = id_to_md5_stream_cast(ns);
