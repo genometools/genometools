@@ -21,6 +21,7 @@
 #include "extended/node_visitor.h"
 #include "extended/node_stream_api.h"
 
+/* Takes ownership of <v>. */
 GtNodeStream* gt_ltrharvest_tabout_stream_new(GtNodeStream *in_stream,
                                               GtNodeVisitor *v);
 void          gt_ltrharvest_tabout_stream_printshortheader(void);

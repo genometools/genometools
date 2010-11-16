@@ -680,7 +680,6 @@ static int gt_ltrharvest_runner(GT_UNUSED int argc,
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
-  gt_node_visitor_delete(tabout_visitor);
   gt_node_stream_delete(tabout_stream);
   gt_node_stream_delete(fasta_out_stream);
   gt_node_stream_delete(fasta_inner_out_stream);
