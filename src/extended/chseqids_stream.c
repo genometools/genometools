@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,7 +27,7 @@ struct GtChseqidsStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtMapping *chseqids_mapping;
-  GtArray *gt_genome_node_buffer;
+  GtArray *node_buffer;
   unsigned long buffer_index;
   bool sequence_regions_processed;
 };
@@ -61,7 +61,7 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     while (!had_err) {
       if (!(had_err = gt_node_stream_next(cs->in_stream, &node, err))) {
         if (node)
-          gt_array_add(cs->gt_genome_node_buffer, node);
+          gt_array_add(cs->node_buffer, node);
         else
           break;
         if (!gt_region_node_try_cast(node))
@@ -70,8 +70,8 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     }
     /* now the buffer contains only sequence regions (except the last entry)
        -> change sequence ids */
-    for (i = 0; !had_err && i < gt_array_size(cs->gt_genome_node_buffer); i++) {
-      node = *(GtGenomeNode**) gt_array_get(cs->gt_genome_node_buffer, i);
+    for (i = 0; !had_err && i < gt_array_size(cs->node_buffer); i++) {
+      node = *(GtGenomeNode**) gt_array_get(cs->node_buffer, i);
       if (gt_genome_node_get_seqid(node)) {
         if  ((changed_seqid = gt_mapping_map_string(cs->chseqids_mapping,
                                      gt_str_get(gt_genome_node_get_seqid(node)),
@@ -92,12 +92,11 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     }
     /* sort them */
     if (!had_err)
-      gt_genome_nodes_sort(cs->gt_genome_node_buffer);
+      gt_genome_nodes_sort(cs->node_buffer);
     /* consolidate them */
-    for (i = 1; !had_err && i + 1 < gt_array_size(cs->gt_genome_node_buffer);
-         i++) {
-      gn_a = gt_array_get(cs->gt_genome_node_buffer, i-1);
-      gn_b = gt_array_get(cs->gt_genome_node_buffer, i);
+    for (i = 1; !had_err && i + 1 < gt_array_size(cs->node_buffer); i++) {
+      gn_a = gt_array_get(cs->node_buffer, i-1);
+      gn_b = gt_array_get(cs->node_buffer, i);
       if (gt_genome_nodes_are_equal_region_nodes(*gn_a, *gn_b)) {
         gt_region_node_consolidate(gt_region_node_cast(*gn_b),
                                    gt_region_node_cast(*gn_a));
@@ -109,10 +108,8 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   }
 
   /* return non-null nodes from buffer */
-  while (!had_err &&
-         cs->buffer_index < gt_array_size(cs->gt_genome_node_buffer)) {
-    node = *(GtGenomeNode**) gt_array_get(cs->gt_genome_node_buffer,
-                                           cs->buffer_index);
+  while (!had_err && cs->buffer_index < gt_array_size(cs->node_buffer)) {
+    node = *(GtGenomeNode**) gt_array_get(cs->node_buffer, cs->buffer_index);
     cs->buffer_index++;
     if (node) {
       *gn = node;
@@ -149,12 +146,9 @@ static void chseqids_stream_free(GtNodeStream *gs)
   unsigned long i;
   cs = chseqids_stream_cast(gs);
   gt_mapping_delete(cs->chseqids_mapping);
-  for (i = cs->buffer_index; i < gt_array_size(cs->gt_genome_node_buffer);
-       i++) {
-    gt_genome_node_delete(*(GtGenomeNode**)
-                           gt_array_get(cs->gt_genome_node_buffer, i));
-  }
-  gt_array_delete(cs->gt_genome_node_buffer);
+  for (i = cs->buffer_index; i < gt_array_size(cs->node_buffer); i++)
+    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(cs->node_buffer, i));
+  gt_array_delete(cs->node_buffer);
   gt_node_stream_delete(cs->in_stream);
 }
 
@@ -186,6 +180,6 @@ GtNodeStream* gt_chseqids_stream_new(GtNodeStream *in_stream,
     gt_node_stream_delete(gs);
     return NULL;
   }
-  cs->gt_genome_node_buffer = gt_array_new(sizeof (GtGenomeNode*));
+  cs->node_buffer = gt_array_new(sizeof (GtGenomeNode*));
   return gs;
 }
