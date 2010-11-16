@@ -16,13 +16,13 @@
 */
 
 #include "core/class_prealloc.h"
-#include "extended/feature_node.h"
-#include "extended/sequence_node_api.h"
-#include "extended/region_node_api.h"
 #include "extended/comment_node_api.h"
+#include "extended/feature_node.h"
+#include "extended/region_node_api.h"
+#include "extended/sequence_node_api.h"
+#include "extended/visitor_stream.h"
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/feature_index_memory.h"
-#include "annotationsketch/feature_stream.h"
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/canvas_cairo_context.h"
@@ -41,8 +41,8 @@ void gt_class_prealloc_run(void)
   (void) gt_comment_node_class();
   (void) gt_region_node_class();
   (void) gt_sequence_node_class();
+  (void) gt_visitor_stream_class();
 #ifndef WITHOUT_CAIRO
-  (void) gt_feature_stream_class();
   (void) gt_feature_visitor_class();
   (void) gt_feature_index_memory_class();
   (void) gt_canvas_cairo_context_class();

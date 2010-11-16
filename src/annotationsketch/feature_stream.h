@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,12 +22,7 @@
 #include "annotationsketch/feature_index.h"
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtFeatureStream GtFeatureStream;
-
-const GtNodeStreamClass* gt_feature_stream_class(void);
-
 /* create a FeatureStream which writes to GtFeatureIndex */
-GtNodeStream*            gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*);
+GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*);
 
 #endif
