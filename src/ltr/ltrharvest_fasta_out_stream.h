@@ -23,15 +23,9 @@
 #include "core/file_api.h"
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome_stream'' interface */
-typedef struct GtLTRharvestFastaOutStream GtLTRharvestFastaOutStream;
-
-const GtNodeStreamClass* gt_ltrharvest_fasta_out_stream_class(void);
-
-GtNodeStream*            gt_ltrharvest_fasta_out_stream_new(GtNodeStream*,
-                                                         bool inner,
-                                                         const GtEncseq *encseq,
-                                                         unsigned long width,
-                                                         GtFile *outfp);
+GtNodeStream* gt_ltrharvest_fasta_out_stream_new(GtNodeStream*, bool inner,
+                                                 const GtEncseq *encseq,
+                                                 unsigned long width,
+                                                 GtFile *outfp);
 
 #endif
