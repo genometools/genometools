@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,54 +17,9 @@
 
 #include "extended/gtf_out_stream.h"
 #include "extended/gtf_visitor.h"
-#include "extended/node_stream_api.h"
-
-struct GtGTFOutStream {
-  const GtNodeStream parent_instance;
-  GtNodeStream *in_stream;
-  GtNodeVisitor *gtf_visitor;
-};
-
-#define gtf_out_stream_cast(GS)\
-        gt_node_stream_cast(gt_gtf_out_stream_class(), GS);
-
-static int gtf_out_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
-                               GtError *err)
-{
-  GtGTFOutStream *gtf_out_stream;
-  int had_err;
-  gt_error_check(err);
-  gtf_out_stream = gtf_out_stream_cast(gs);
-  had_err = gt_node_stream_next(gtf_out_stream->in_stream, gn, err);
-  if (!had_err && *gn)
-    had_err = gt_genome_node_accept(*gn, gtf_out_stream->gtf_visitor, err);
-  return had_err;
-}
-
-static void gtf_out_stream_free(GtNodeStream *gs)
-{
-  GtGTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
-  gt_node_visitor_delete(gtf_out_stream->gtf_visitor);
-  gt_node_stream_delete(gtf_out_stream->in_stream);
-}
-
-const GtNodeStreamClass* gt_gtf_out_stream_class(void)
-{
-  static const GtNodeStreamClass *nsc = NULL;
-  if (!nsc) {
-   nsc = gt_node_stream_class_new(sizeof (GtGTFOutStream),
-                                  gtf_out_stream_free,
-                                  gtf_out_stream_next);
-  }
-  return nsc;
-}
+#include "extended/visitor_stream.h"
 
 GtNodeStream* gt_gtf_out_stream_new(GtNodeStream *in_stream, GtFile *outfp)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_gtf_out_stream_class(),
-                                           gt_node_stream_is_sorted(in_stream));
-  GtGTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
-  gtf_out_stream->in_stream = gt_node_stream_ref(in_stream);
-  gtf_out_stream->gtf_visitor = gt_gtf_visitor_new(outfp);
-  return gs;
+  return gt_visitor_stream_new(in_stream, gt_gtf_visitor_new(outfp));
 }

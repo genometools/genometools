@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,10 +21,6 @@
 #include "core/file.h"
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome stream'' interface */
-typedef struct GtGTFOutStream GtGTFOutStream;
-
-const GtNodeStreamClass* gt_gtf_out_stream_class(void);
-GtNodeStream*            gt_gtf_out_stream_new(GtNodeStream*, GtFile*);
+GtNodeStream* gt_gtf_out_stream_new(GtNodeStream*, GtFile*);
 
 #endif
