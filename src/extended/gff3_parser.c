@@ -1415,7 +1415,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       tmpline++;
     if (tmpline > tmplineend) {
       gt_error_set(err, "missing sequence region name on line %u in file "
-                   "\"%s\"", line_number, filename);
+                        "\"%s\"", line_number, filename);
       had_err = -1;
     }
     if (!had_err) {
@@ -1430,7 +1430,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
         tmpline++;
       if (tmpline > tmplineend) {
         gt_error_set(err, "missing sequence region start on line %u in file "
-                  "\"%s\"", line_number, filename);
+                          "\"%s\"", line_number, filename);
         had_err = -1;
       }
       else
