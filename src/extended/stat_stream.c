@@ -20,8 +20,7 @@
 #include "extended/stat_visitor.h"
 #include "extended/node_stream_api.h"
 
-struct GtStatStream
-{
+struct GtStatStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *stat_visitor;

@@ -20,8 +20,7 @@
 #include "extended/splice_site_info_stream.h"
 #include "extended/splice_site_info_visitor.h"
 
-struct GtSpliceSiteInfoStream
-{
+struct GtSpliceSiteInfoStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtNodeVisitor *splice_site_info_visitor;

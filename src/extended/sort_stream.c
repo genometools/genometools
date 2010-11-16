@@ -21,8 +21,7 @@
 #include "extended/node_stream_api.h"
 #include "extended/sort_stream.h"
 
-struct GtSortStream
-{
+struct GtSortStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   unsigned long idx;

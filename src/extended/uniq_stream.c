@@ -26,7 +26,7 @@ struct GtUniqStream{
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   GtGenomeNode *first_node,
-             *second_node;
+               *second_node;
 };
 
 #define uniq_stream_cast(GS)\
