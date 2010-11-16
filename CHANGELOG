@@ -14,7 +14,7 @@ changes in version 1.3.6 (2010-11-08)
 - `gt seqfilter` has new option -maxseqnum
 - new tool `gt seqtransform` added
 - `gt cds`, `gt extractfeat` and `gt splicesiteinfo` have new option -usedesc
-- new tools `gt md5s_to_seqids` and `gt seqids_to_md5s` added
+- new tools `gt md5_to_id` and `gt id_to_md5` added
 
 
 changes in version 1.3.5 (2010-07-12)

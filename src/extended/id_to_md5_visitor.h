@@ -14,12 +14,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_SEQIDS_TO_MD5S_H
-#define GT_SEQIDS_TO_MD5S_H
+#ifndef ID_TO_MD5_VISITOR_H
+#define ID_TO_MD5_VISITOR_H
 
-#include "core/tool.h"
+/* implements the ``genome visitor'' interface */
+typedef struct GtSeqidsToMD5Visitor GtSeqidsToMD5Visitor;
 
-/* the seqids to MD5s tool */
-GtTool* gt_seqids_to_md5s(void);
+#include "extended/node_visitor.h"
+#include "extended/region_mapping.h"
+
+const GtNodeVisitorClass* gt_id_to_md5_visitor_class(void);
+/* Takes ownership of <region_mapping>. */
+GtNodeVisitor*            gt_id_to_md5_visitor_new(GtRegionMapping
+                                                       *region_mapping);
 
 #endif

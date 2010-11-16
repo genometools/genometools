@@ -1,16 +1,16 @@
-Name "gt seqids_to_md5s (U89959_sas.gff3)"
-Keywords "gt_seqids_to_md5s"
+Name "gt id_to_md5 (U89959_sas.gff3)"
+Keywords "gt_id_to_md5"
 Test do
-  run_test "#{$bin}gt seqids_to_md5s -seqfiles " +
+  run_test "#{$bin}gt id_to_md5 -seqfiles " +
            "#{$testdata}U89959_genomic.fas #{$testdata}U89959_ests.fas " +
            "-matchdesc #{$testdata}U89959_sas.gff3"
   run "diff #{$last_stdout} #{$testdata}U89959_sas.gff3md5"
 end
 
-Name "gt seqids_to_md5s (U89959_csas.gff3)"
-Keywords "gt_seqids_to_md5s"
+Name "gt id_to_md5 (U89959_csas.gff3)"
+Keywords "gt_id_to_md5"
 Test do
-  run_test "#{$bin}gt seqids_to_md5s -seqfiles " +
+  run_test "#{$bin}gt id_to_md5 -seqfiles " +
            "#{$testdata}U89959_genomic.fas #{$testdata}U89959_ests.fas " +
            "-matchdesc #{$testdata}U89959_csas.gff3"
   run "diff #{$last_stdout} #{$testdata}U89959_csas.gff3md5"

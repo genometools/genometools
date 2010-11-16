@@ -23,27 +23,27 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/seqid2file.h"
-#include "extended/md5s_to_seqids_stream.h"
-#include "tools/gt_md5s_to_seqids.h"
+#include "extended/id_to_md5_stream.h"
+#include "tools/gt_id_to_md5.h"
 
 typedef struct {
   bool verbose;
   GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-} MD5ToSeqidsArguments;
+} SeqidsToMD5Arguments;
 
-static void *gt_md5s_to_seqids_arguments_new(void)
+static void *gt_id_to_md5_arguments_new(void)
 {
-  MD5ToSeqidsArguments *arguments = gt_calloc(1, sizeof *arguments);
+  SeqidsToMD5Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->s2fi = gt_seqid2file_info_new();
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
-static void gt_md5s_to_seqids_arguments_delete(void *tool_arguments)
+static void gt_id_to_md5_arguments_delete(void *tool_arguments)
 {
-  MD5ToSeqidsArguments *arguments = tool_arguments;
+  SeqidsToMD5Arguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
@@ -51,16 +51,16 @@ static void gt_md5s_to_seqids_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_md5s_to_seqids_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_id_to_md5_option_parser_new(void *tool_arguments)
 {
-  MD5ToSeqidsArguments *arguments = tool_arguments;
+  SeqidsToMD5Arguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
-                            "Change MD5 fingerprints used as sequence IDs in "
-                            "given GFF3 files to ``regular'' ones.");
+                            "Change sequence IDs in given GFF3 files to MD5 "
+                            "fingerprints of the corresponding sequences.");
 
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
@@ -75,13 +75,13 @@ static GtOptionParser* gt_md5s_to_seqids_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_md5s_to_seqids_runner(GT_UNUSED int argc, const char **argv,
+static int gt_id_to_md5_runner(GT_UNUSED int argc, const char **argv,
                                    int parsed_args, void *tool_arguments,
                                    GtError *err)
 {
-  GtNodeStream *gff3_in_stream, *md5s_to_seqids_stream = NULL,
+  GtNodeStream *gff3_in_stream, *id_to_md5_stream = NULL,
                *gff3_out_stream = NULL;
-  MD5ToSeqidsArguments *arguments = tool_arguments;
+  SeqidsToMD5Arguments *arguments = tool_arguments;
   GtRegionMapping *region_mapping;
   int had_err = 0;
 
@@ -101,11 +101,11 @@ static int gt_md5s_to_seqids_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create seqid to md5 stream */
-    md5s_to_seqids_stream = gt_md5s_to_seqids_stream_new(gff3_in_stream,
+    id_to_md5_stream = gt_id_to_md5_stream_new(gff3_in_stream,
                                                          region_mapping);
 
     /* create gff3 output stream */
-    gff3_out_stream = gt_gff3_out_stream_new(md5s_to_seqids_stream,
+    gff3_out_stream = gt_gff3_out_stream_new(id_to_md5_stream,
                                              arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
@@ -114,17 +114,17 @@ static int gt_md5s_to_seqids_runner(GT_UNUSED int argc, const char **argv,
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
-  gt_node_stream_delete(md5s_to_seqids_stream);
+  gt_node_stream_delete(id_to_md5_stream);
   gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }
 
-GtTool *gt_md5s_to_seqids(void)
+GtTool *gt_id_to_md5(void)
 {
-  return gt_tool_new(gt_md5s_to_seqids_arguments_new,
-                     gt_md5s_to_seqids_arguments_delete,
-                     gt_md5s_to_seqids_option_parser_new,
+  return gt_tool_new(gt_id_to_md5_arguments_new,
+                     gt_id_to_md5_arguments_delete,
+                     gt_id_to_md5_option_parser_new,
                      NULL,
-                     gt_md5s_to_seqids_runner);
+                     gt_id_to_md5_runner);
 }
