@@ -31,12 +31,12 @@ struct GtFilterStream
 #define gt_filter_stream_cast(GS)\
         gt_node_stream_cast(gt_filter_stream_class(), GS);
 
-static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int filter_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtFilterStream *fs;
   int had_err;
   gt_error_check(err);
-  fs = gt_filter_stream_cast(gs);
+  fs = gt_filter_stream_cast(ns);
 
   /* we still have nodes in the buffer */
   if (gt_filter_visitor_node_buffer_size(fs->filter_visitor)) {
@@ -62,9 +62,9 @@ static int filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void filter_stream_free(GtNodeStream *gs)
+static void filter_stream_free(GtNodeStream *ns)
 {
-  GtFilterStream *fs = gt_filter_stream_cast(gs);
+  GtFilterStream *fs = gt_filter_stream_cast(ns);
   gt_node_visitor_delete(fs->filter_visitor);
   gt_node_stream_delete(fs->in_stream);
 }
@@ -90,9 +90,9 @@ GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,
                                 double min_average_splice_site_prob,
                                 unsigned long feature_num)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_filter_stream_class(),
+  GtNodeStream *ns = gt_node_stream_create(gt_filter_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
-  GtFilterStream *filter_stream = gt_filter_stream_cast(gs);
+  GtFilterStream *filter_stream = gt_filter_stream_cast(ns);
   gt_assert(in_stream);
   filter_stream->in_stream = gt_node_stream_ref(in_stream);
   filter_stream->filter_visitor = gt_filter_visitor_new(seqid, typefilter,
@@ -105,5 +105,5 @@ GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,
                                                      max_gene_score,
                                                   min_average_splice_site_prob,
                                                      feature_num);
-  return gs;
+  return ns;
 }
