@@ -15,62 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/node_stream_api.h"
+#include "extended/visitor_stream.h"
 #include "ltr/ltrharvest_tabout_stream.h"
 #include "ltr/ltrharvest_tabout_visitor.h"
-
-struct GtLTRharvestTaboutStream {
-  const GtNodeStream parent_instance;
-  GtNodeStream *in_stream;
-  GtNodeVisitor *v;
-};
-
-#define ltrharvest_tabout_stream_cast(GS)\
-        gt_node_stream_cast(gt_ltrharvest_tabout_stream_class(), GS)
-
-static int ltrharvest_tabout_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
-                                     GtError *err)
-{
-  GtLTRharvestTaboutStream *ltrharvest_tabout_stream;
-  int had_err;
-  gt_error_check(err);
-  ltrharvest_tabout_stream = ltrharvest_tabout_stream_cast(ns);
-  had_err = gt_node_stream_next(ltrharvest_tabout_stream->in_stream, gn, err);
-  gt_assert(ltrharvest_tabout_stream->v != NULL);
-  if (!had_err && *gn != NULL) {
-    had_err = gt_genome_node_accept(*gn, ltrharvest_tabout_stream->v, err);
-  }
-  return had_err;
-}
-
-static void ltrharvest_tabout_stream_free(GtNodeStream *ns)
-{
-  GtLTRharvestTaboutStream *ltrharvest_tabout_stream =
-                                              ltrharvest_tabout_stream_cast(ns);
-  gt_node_stream_delete(ltrharvest_tabout_stream->in_stream);
-}
-
-const GtNodeStreamClass* gt_ltrharvest_tabout_stream_class(void)
-{
-  static const GtNodeStreamClass *nsc = NULL;
-  if (!nsc) {
-    nsc = gt_node_stream_class_new(sizeof (GtLTRharvestTaboutStream),
-                                   ltrharvest_tabout_stream_free,
-                                   ltrharvest_tabout_stream_next);
-  }
-  return nsc;
-}
 
 GtNodeStream* gt_ltrharvest_tabout_stream_new(GtNodeStream *in_stream,
                                               GtNodeVisitor *v)
 {
-  GtLTRharvestTaboutStream *ltrharvest_tabout_stream;
-  GtNodeStream *ns;
-  ns = gt_node_stream_create(gt_ltrharvest_tabout_stream_class(), false);
-  ltrharvest_tabout_stream = ltrharvest_tabout_stream_cast(ns);
-  ltrharvest_tabout_stream->in_stream = gt_node_stream_ref(in_stream);
-  ltrharvest_tabout_stream->v = v;
-  return ns;
+  return gt_visitor_stream_new(in_stream, v);
 }
 
 void gt_ltrharvest_tabout_stream_printshortheader(void)

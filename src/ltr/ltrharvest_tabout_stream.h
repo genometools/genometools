@@ -21,16 +21,9 @@
 #include "extended/node_visitor.h"
 #include "extended/node_stream_api.h"
 
-/* implements the ``genome stream'' interface */
-typedef struct GtLTRharvestTaboutStream GtLTRharvestTaboutStream;
-
-const GtNodeStreamClass* gt_ltrharvest_tabout_stream_class(void);
-GtNodeStream*            gt_ltrharvest_tabout_stream_new(GtNodeStream
-                                                                     *in_stream,
-                                                         GtNodeVisitor *v);
-
-void                     gt_ltrharvest_tabout_stream_printshortheader(void);
-void                     gt_ltrharvest_tabout_stream_printlongheader(
-                                                                bool withtsd,
-                                                                bool withmotif);
+GtNodeStream* gt_ltrharvest_tabout_stream_new(GtNodeStream *in_stream,
+                                              GtNodeVisitor *v);
+void          gt_ltrharvest_tabout_stream_printshortheader(void);
+void          gt_ltrharvest_tabout_stream_printlongheader(bool withtsd,
+                                                          bool withmotif);
 #endif
