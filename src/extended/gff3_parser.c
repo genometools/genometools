@@ -593,8 +593,7 @@ static GtFeatureNode* add_node_to_pseudo_node(GtFeatureNode *pseudo_node,
                                               GtFeatureNode *normal_node,
                                               GtFeatureInfo *feature_info,
                                               GtQueue *genome_nodes,
-                                              AutomaticSequenceRegion
-                                                 *auto_sr)
+                                              AutomaticSequenceRegion *auto_sr)
 {
   gt_assert(pseudo_node &&
          gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_node));
