@@ -306,7 +306,6 @@ unsigned long gt_filter_visitor_node_buffer_size(GtNodeVisitor *nv)
 
 GtGenomeNode* gt_filter_visitor_get_node(GtNodeVisitor *nv)
 {
-  GtFilterVisitor *filter_visitor;
-  filter_visitor = filter_visitor_cast(nv);
+  GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
   return gt_queue_get(filter_visitor->node_buffer);
 }
