@@ -2204,24 +2204,27 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
 #endif
     advancerangeGtEncseqReader(esr,SWtable_specialrange);
 
-    if (esr->wildcardrangestate == NULL)
+    if (encseq->has_wildcardranges)
     {
-      esr->wildcardrangestate
-        = gt_calloc((size_t) 1, sizeof (*esr->wildcardrangestate));
-    }
-    esr->wildcardrangestate->hasprevious = esr->wildcardrangestate->hascurrent
-                                         = false;
+      if (esr->wildcardrangestate == NULL)
+      {
+        esr->wildcardrangestate
+          = gt_calloc((size_t) 1, sizeof (*esr->wildcardrangestate));
+      }
+      esr->wildcardrangestate->hasprevious = esr->wildcardrangestate->hascurrent
+                                           = false;
 
 #ifdef NEWTWOBITENCODING
-    binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
+      binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
 #ifdef GT_RANGEDEBUG
       printf("wildcardranges: start advance at (%lu,%lu) in page %lu\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
 #endif
-    advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
+      advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
 #endif
+    }
     if (esr->encseq->numofdbsequences > 1UL)
     {
       gt_assert(esr->encseq->satsep != GT_ACCESS_TYPE_UNDEFINED);
@@ -2336,6 +2339,7 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long len)
 {
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
+  /* XXX: replace by access to two wildcard range or ssptab */
   return containsSWViatables(encseq, esr, startpos, len, SWtable_specialrange);
 }
 
@@ -2615,6 +2619,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
     default:
       gt_assert(gt_encseq_access_type_isviautables(sri->esr->encseq->sat));
       gt_assert(sri->esr->specialrangestate->hasprevious);
+      /* XXX compute the range from wildcardrange and ssptab_new */
       *range = sri->esr->specialrangestate->previousrange;
       if (sri->esr->specialrangestate->hasrange)
       {

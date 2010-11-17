@@ -859,6 +859,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
 {
   unsigned long twobits
     = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos);
+  /* XXX replace this function by the next one */
   if (!GT_APPENDINT(checknextSW)(esr,SWtable_specialrange))
   {
     return (GtUchar) twobits;
@@ -902,6 +903,7 @@ static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->specialrangestate->hasrange)
       {
+        /* XXX do not know how to replace SWtable_specialrange */
         GT_APPENDINT(advancerangeGtEncseqReader)(esr,SWtable_specialrange);
       } else
       {
@@ -932,6 +934,7 @@ static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
       /* follows current special range */
       if (esr->specialrangestate->hasrange)
       {
+        /* XXX do not know how to replace SWtable_specialrange */
         GT_APPENDINT(advancerangeGtEncseqReader)(esr,SWtable_specialrange);
       } else
       {
