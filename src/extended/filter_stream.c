@@ -49,8 +49,12 @@ static int filter_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   while (!(had_err = gt_node_stream_next(fs->in_stream, gn, err)) && *gn) {
     gt_assert(*gn && !had_err);
     had_err = gt_genome_node_accept(*gn, fs->filter_visitor, err);
-    if (had_err)
+    if (had_err) {
+      /* we own the node -> delete it */
+      gt_genome_node_delete(*gn);
+      *gn = NULL;
       break;
+    }
     if (gt_filter_visitor_node_buffer_size(fs->filter_visitor)) {
       *gn = gt_filter_visitor_get_node(fs->filter_visitor);
       return 0;
