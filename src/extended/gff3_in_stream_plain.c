@@ -33,6 +33,7 @@ struct GtGFF3InStreamPlain {
   GtStr *stdinstr;
   bool ensure_sorting,
        stdin_argument,
+       stdin_processed,
        file_is_open,
        progress_bar,
        checkids;
@@ -113,6 +114,8 @@ static int gff3_in_stream_plain_next(GtNodeStream *ns, GtGenomeNode **gn,
         is->next_file++;
       }
       else {
+        if (is->stdin_processed)
+          break;
         is->fpin = NULL;
         is->file_is_open = true;
       }
@@ -159,8 +162,10 @@ static int gff3_in_stream_plain_next(GtNodeStream *ns, GtGenomeNode **gn,
       is->fpin = NULL;
       is->file_is_open = false;
       gt_gff3_parser_reset(is->gff3_parser);
-      if (!gt_str_array_size(is->files))
+      if (!gt_str_array_size(is->files)) {
+        is->stdin_processed = true;
         break;
+      }
       continue;
     }
 

@@ -92,6 +92,7 @@ const GtNodeVisitorClass* gt_regioncov_visitor_class()
                                     NULL,
                                     gt_regioncov_visitor_feature_node,
                                     gt_regioncov_visitor_region_node,
+                                    NULL,
                                     NULL);
   }
   return nvc;

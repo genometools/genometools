@@ -179,6 +179,7 @@ const GtNodeVisitorClass* gt_stat_visitor_class()
                                     NULL,
                                     stat_visitor_feature_node,
                                     stat_visitor_region_node,
+                                    NULL,
                                     NULL);
   }
   return nvc;

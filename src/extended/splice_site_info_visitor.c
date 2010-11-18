@@ -132,6 +132,7 @@ const GtNodeVisitorClass* gt_splice_site_info_visitor_class()
                                    NULL,
                                    splice_site_info_visitor_feature_node,
                                    NULL,
+                                   NULL,
                                    NULL);
   }
   return nvc;

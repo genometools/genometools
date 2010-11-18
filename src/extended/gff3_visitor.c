@@ -362,7 +362,8 @@ const GtNodeVisitorClass* gt_gff3_visitor_class()
                                     gff3_visitor_comment_node,
                                     gff3_visitor_feature_node,
                                     gff3_visitor_region_node,
-                                    gff3_visitor_sequence_node);
+                                    gff3_visitor_sequence_node,
+                                    NULL);
   }
   return nvc;
 }

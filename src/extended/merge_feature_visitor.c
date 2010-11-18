@@ -122,6 +122,7 @@ const GtNodeVisitorClass* gt_merge_feature_visitor_class()
                                     NULL,
                                     merge_feature_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return nvc;

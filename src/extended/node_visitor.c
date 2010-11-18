@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,6 +30,7 @@ struct GtNodeVisitorClass {
   GtNodeVisitorFeatureNodeFunc feature_node;
   GtNodeVisitorRegionNodeFunc region_node;
   GtNodeVisitorSequenceNodeFunc sequence_node;
+  GtNodeVisitorEOFNodeFunc eof_node;
 };
 
 const GtNodeVisitorClass*
@@ -38,7 +39,8 @@ gt_node_visitor_class_new(size_t size,
                           GtNodeVisitorCommentNodeFunc comment_node,
                           GtNodeVisitorFeatureNodeFunc feature_node,
                           GtNodeVisitorRegionNodeFunc region_node,
-                          GtNodeVisitorSequenceNodeFunc sequence_node)
+                          GtNodeVisitorSequenceNodeFunc sequence_node,
+                          GtNodeVisitorEOFNodeFunc eof_node)
 {
   GtNodeVisitorClass *c_class;
   gt_assert(size);
@@ -49,6 +51,7 @@ gt_node_visitor_class_new(size_t size,
   c_class->feature_node = feature_node;
   c_class->region_node = region_node;
   c_class->sequence_node = sequence_node;
+  c_class->eof_node = eof_node;
   return c_class;
 }
 
@@ -97,12 +100,22 @@ int gt_node_visitor_visit_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
 }
 
 int gt_node_visitor_visit_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
-                                       GtError *err)
+                                        GtError *err)
 {
   gt_error_check(err);
   gt_assert(nv && sn && nv->c_class);
   if (nv->c_class->sequence_node)
     return nv->c_class->sequence_node(nv, sn, err);
+  return 0;
+}
+
+int gt_node_visitor_visit_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
+                                   GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(nv && eofn && nv->c_class);
+  if (nv->c_class->eof_node)
+    return nv->c_class->eof_node(nv, eofn, err);
   return 0;
 }
 

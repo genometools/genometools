@@ -166,6 +166,7 @@ const GtNodeVisitorClass* gt_cds_check_visitor_class()
                                     NULL,
                                     cds_check_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return nvc;

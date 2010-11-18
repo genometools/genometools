@@ -184,6 +184,7 @@ const GtNodeVisitorClass* gt_id_to_md5_visitor_class()
                                     NULL,
                                     id_to_md5_visitor_feature_node,
                                     id_to_md5_visitor_region_node,
+                                    NULL,
                                     NULL);
   }
   return nvc;

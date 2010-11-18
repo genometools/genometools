@@ -64,6 +64,7 @@ const GtNodeVisitorClass* gt_feature_visitor_class()
                                     NULL,
                                     feature_visitor_feature_node,
                                     feature_visitor_region_node,
+                                    NULL,
                                     NULL);
   }
   return gvc;

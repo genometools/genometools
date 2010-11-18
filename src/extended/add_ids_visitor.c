@@ -172,6 +172,17 @@ static int add_ids_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   return 0;
 }
 
+static int add_ids_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
+                                    GT_UNUSED GtError *err)
+{
+  GtAddIDsVisitor *add_ids_visitor;
+  gt_error_check(err);
+  add_ids_visitor = add_ids_visitor_cast(nv);
+  gt_add_ids_visitor_finalize(nv);
+  gt_queue_add(add_ids_visitor->node_buffer, eofn);
+  return 0;
+}
+
 const GtNodeVisitorClass* gt_add_ids_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
@@ -181,7 +192,8 @@ const GtNodeVisitorClass* gt_add_ids_visitor_class()
                                     add_ids_visitor_comment_node,
                                     add_ids_visitor_feature_node,
                                     add_ids_visitor_region_node,
-                                    add_ids_visitor_sequence_node);
+                                    add_ids_visitor_sequence_node,
+                                    add_ids_visitor_eof_node);
   }
   return nvc;
 }

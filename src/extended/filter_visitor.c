@@ -252,6 +252,16 @@ static int filter_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   return 0;
 }
 
+static int filter_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
+                                   GT_UNUSED GtError *err)
+{
+  GtFilterVisitor *filter_visitor;
+  gt_error_check(err);
+  filter_visitor = filter_visitor_cast(nv);
+  gt_queue_add(filter_visitor->node_buffer, eofn);
+  return 0;
+}
+
 const GtNodeVisitorClass* gt_filter_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
@@ -261,7 +271,8 @@ const GtNodeVisitorClass* gt_filter_visitor_class()
                                     filter_visitor_comment_node,
                                     filter_visitor_feature_node,
                                     filter_visitor_region_node,
-                                    filter_visitor_sequence_node);
+                                    filter_visitor_sequence_node,
+                                    filter_visitor_eof_node);
   }
   return nvc;
 }

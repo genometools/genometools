@@ -101,7 +101,8 @@ const GtNodeVisitorClass* gt_script_wrapper_visitor_class()
                                     script_wrapper_visitor_comment_node,
                                     script_wrapper_visitor_feature_node,
                                     script_wrapper_visitor_region_node,
-                                    script_wrapper_visitor_sequence_node);
+                                    script_wrapper_visitor_sequence_node,
+                                    NULL);
   }
   return nvc;
 }

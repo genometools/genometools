@@ -23,6 +23,7 @@ typedef struct GtNodeVisitorClass GtNodeVisitorClass;
 typedef struct GtNodeVisitor GtNodeVisitor;
 
 #include "extended/comment_node_api.h"
+#include "extended/eof_node_api.h"
 #include "extended/feature_node.h"
 #include "extended/region_node.h"
 #include "extended/sequence_node_api.h"
@@ -36,6 +37,7 @@ int   gt_node_visitor_visit_region_node(GtNodeVisitor*, GtRegionNode*,
                                         GtError*);
 int   gt_node_visitor_visit_sequence_node(GtNodeVisitor*, GtSequenceNode*,
                                           GtError*);
+int   gt_node_visitor_visit_eof_node(GtNodeVisitor*, GtEOFNode*, GtError*);
 void  gt_node_visitor_delete(GtNodeVisitor *nv);
 
 #endif

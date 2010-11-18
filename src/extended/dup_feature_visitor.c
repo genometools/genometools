@@ -104,6 +104,7 @@ const GtNodeVisitorClass* gt_dup_feature_visitor_class()
                                     NULL,
                                     dup_feature_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return nvc;

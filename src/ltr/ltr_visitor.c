@@ -120,6 +120,7 @@ const GtNodeVisitorClass* gt_ltr_visitor_class(void)
                                     NULL,
                                     gt_ltr_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return gvc;

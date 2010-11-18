@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -129,6 +129,12 @@ static int csa_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   return csa_visitor_default_func(nv, (GtGenomeNode*) sn, err);
 }
 
+static int csa_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
+                                GtError *err)
+{
+  return csa_visitor_default_func(nv, (GtGenomeNode*) eofn, err);
+}
+
 const GtNodeVisitorClass* gt_csa_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
@@ -138,7 +144,8 @@ const GtNodeVisitorClass* gt_csa_visitor_class()
                                     csa_visitor_comment_node,
                                     csa_visitor_feature_node,
                                     csa_visitor_region_node,
-                                    csa_visitor_sequence_node);
+                                    csa_visitor_sequence_node,
+                                    csa_visitor_eof_node);
   }
   return nvc;
 }

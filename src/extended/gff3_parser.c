@@ -46,7 +46,8 @@ struct GtGFF3Parser {
   bool incomplete_node, /* at least on node is potentially incomplete */
        checkids,
        tidy,
-       fasta_parsing; /* parser is in FASTA parsing mode */
+       fasta_parsing, /* parser is in FASTA parsing mode */
+       eof_emitted;
   long offset;
   GtMapping *offset_mapping;
   GtTypeChecker *type_checker;
@@ -83,21 +84,15 @@ static void simple_sequence_region_delete(SimpleSequenceRegion *ssr)
 GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker)
 {
   GtGFF3Parser *parser;
-  parser = gt_malloc(sizeof *parser);
+  parser = gt_calloc(1, sizeof *parser);
   parser->feature_info = gt_feature_info_new();
   parser->seqid_to_ssr_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
                                         (GtFree) simple_sequence_region_delete);
   parser->source_to_str_mapping = gt_hashmap_new(GT_HASH_STRING, NULL,
                                                  (GtFree) gt_str_delete);
-  parser->incomplete_node = false;
-  parser->checkids = false;
-  parser->tidy = false;
-  parser->fasta_parsing = false;
   parser->offset = GT_UNDEF_LONG;
-  parser->offset_mapping = NULL;
   parser->type_checker = type_checker ? gt_type_checker_ref(type_checker)
                                       : NULL;
-  parser->last_terminator = 0;
   return parser;
 }
 
@@ -1440,6 +1435,12 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
     while (gt_queue_size(genome_nodes))
       gt_genome_node_delete(gt_queue_get(genome_nodes));
   }
+  else if (rval == EOF && !parser->eof_emitted) {
+    GtGenomeNode *eofn = gt_eof_node_new();
+    gt_genome_node_set_origin(eofn, filenamestr, *line_number+1);
+    gt_queue_add(genome_nodes, eofn);
+    parser->eof_emitted = true;
+  }
 
   gt_str_delete(line_buffer);
   if (gt_queue_size(genome_nodes))
@@ -1453,6 +1454,7 @@ void gt_gff3_parser_reset(GtGFF3Parser *parser)
 {
   gt_assert(parser);
   parser->fasta_parsing = false;
+  parser->eof_emitted = false;
   gt_feature_info_reset(parser->feature_info);
   gt_hashmap_reset(parser->seqid_to_ssr_mapping);
   gt_hashmap_reset(parser->source_to_str_mapping);

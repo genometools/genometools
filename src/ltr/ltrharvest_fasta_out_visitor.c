@@ -160,6 +160,7 @@ const GtNodeVisitorClass* gt_ltrharvest_fasta_out_visitor_class(void)
                                    NULL,
                                    gt_ltrharvest_fasta_out_visitor_feature_node,
                                    NULL,
+                                   NULL,
                                    NULL);
   }
   return gvc;

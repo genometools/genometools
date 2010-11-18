@@ -303,6 +303,7 @@ const GtNodeVisitorClass* gt_cds_visitor_class()
                                     NULL,
                                     cds_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return nvc;

@@ -165,6 +165,7 @@ const GtNodeVisitorClass* gt_gtf_visitor_class()
                                     gtf_visitor_comment_node,
                                     gtf_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return nvc;

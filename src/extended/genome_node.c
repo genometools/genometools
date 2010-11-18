@@ -24,6 +24,7 @@
 #include "core/msort.h"
 #include "core/queue.h"
 #include "core/unused_api.h"
+#include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"
 #include "extended/region_node_api.h"
 
@@ -100,24 +101,26 @@ static void userdata_delete(void *data)
 
 static int compare_genome_node_type(GtGenomeNode *gn_a, GtGenomeNode *gn_b)
 {
-  void *sr_a, *sr_b, *sn_a, *sn_b;
+  void *rn_a, *rn_b, *sn_a, *sn_b, *en_a, *en_b;
 
   /* region nodes first */
-  sr_a = gt_region_node_try_cast(gn_a);
-  sr_b = gt_region_node_try_cast(gn_b);
+  rn_a = gt_region_node_try_cast(gn_a);
+  rn_b = gt_region_node_try_cast(gn_b);
 
-  if (sr_a && !sr_b)
+  if (rn_a && !rn_b)
     return -1;
-  if (!sr_a && sr_b)
+  if (!rn_a && rn_b)
     return 1;
 
-  /* sequence nodes last */
+  /* sequence nodes last, but before eof nodes */
   sn_a = gt_sequence_node_try_cast(gn_a);
   sn_b = gt_sequence_node_try_cast(gn_b);
+  en_a = gt_eof_node_try_cast(gn_a);
+  en_b = gt_eof_node_try_cast(gn_b);
 
-  if (sn_a && !sn_b)
+  if ((sn_a && !sn_b) || (en_a && !en_b))
     return 1;
-  if (!sn_a && sn_b)
+  if ((!sn_a && sn_b) || (!en_a && en_b))
     return -1;
 
   return 0;

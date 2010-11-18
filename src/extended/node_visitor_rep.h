@@ -30,6 +30,7 @@ typedef int  (*GtNodeVisitorRegionNodeFunc)(GtNodeVisitor*, GtRegionNode*,
                                             GtError*);
 typedef int  (*GtNodeVisitorSequenceNodeFunc)(GtNodeVisitor*, GtSequenceNode*,
                                               GtError*);
+typedef int  (*GtNodeVisitorEOFNodeFunc)(GtNodeVisitor*, GtEOFNode*, GtError*);
 
 typedef struct GtNodeVisitorMembers GtNodeVisitorMembers;
 
@@ -44,7 +45,8 @@ GtNodeVisitorClass* gt_node_visitor_class_new(size_t size,
                                               GtNodeVisitorCommentNodeFunc,
                                               GtNodeVisitorFeatureNodeFunc,
                                               GtNodeVisitorRegionNodeFunc,
-                                              GtNodeVisitorSequenceNodeFunc);
+                                              GtNodeVisitorSequenceNodeFunc,
+                                              GtNodeVisitorEOFNodeFunc);
 GtNodeVisitor*      gt_node_visitor_create(const GtNodeVisitorClass*);
 
 #endif

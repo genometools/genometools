@@ -17,6 +17,7 @@
 
 #include "core/array.h"
 #include "core/assert_api.h"
+#include "extended/eof_node.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 #include "extended/sort_stream.h"
@@ -36,7 +37,7 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
                                GtError *err)
 {
   GtSortStream *sort_stream;
-  GtGenomeNode *node;
+  GtGenomeNode *node, *eofn;
   int had_err = 0;
   gt_error_check(err);
   sort_stream = gt_sort_stream_cast(gs);
@@ -44,7 +45,10 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   if (!sort_stream->sorted) {
     while (!(had_err = gt_node_stream_next(sort_stream->in_stream, &node,
                                            err)) && node) {
-      gt_array_add(sort_stream->trees, node);
+      if ((eofn = gt_eof_node_try_cast(node)))
+        gt_genome_node_delete(eofn); /* get rid of EOF nodes */
+      else
+        gt_array_add(sort_stream->trees, node);
     }
     if (!had_err) {
       gt_genome_nodes_sort_stable(sort_stream->trees);

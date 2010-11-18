@@ -259,6 +259,7 @@ const GtNodeVisitorClass* gt_ltrharvest_tabout_visitor_class(void)
                                     NULL,
                                     gt_ltrharvest_tabout_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return gvc;

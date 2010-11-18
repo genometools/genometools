@@ -135,6 +135,7 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class()
                                     NULL,
                                     extract_feat_visitor_feature_node,
                                     NULL,
+                                    NULL,
                                     NULL);
   }
   return nvc;
