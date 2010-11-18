@@ -35,5 +35,6 @@ GtStrArray*              gt_gff3_in_stream_get_used_types(GtNodeStream
 void                     gt_gff3_in_stream_set_offset(GtNodeStream*, long);
 int                      gt_gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
                                                           GtError*);
+void                     gt_gff3_in_stream_disable_add_ids(GtNodeStream*);
 
 #endif

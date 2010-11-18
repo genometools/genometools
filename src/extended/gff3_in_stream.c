@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "extended/add_ids_stream.h"
 #include "extended/cds_check_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_in_stream_plain.h"
@@ -23,6 +24,7 @@
 struct GtGFF3InStream {
   const GtNodeStream parent_instance;
   GtNodeStream *gff3_in_stream_plain,
+               *add_ids_stream,
                *cds_check_stream;
 };
 
@@ -40,6 +42,7 @@ static void gff3_in_stream_free(GtNodeStream *ns)
 {
   GtGFF3InStream *gff3_in_stream = gff3_in_stream_cast(ns);
   gt_node_stream_delete(gff3_in_stream->cds_check_stream);
+  gt_node_stream_delete(gff3_in_stream->add_ids_stream);
   gt_node_stream_delete(gff3_in_stream->gff3_in_stream_plain);
 }
 
@@ -100,6 +103,13 @@ int gt_gff3_in_stream_set_offsetfile(GtNodeStream *ns, GtStr *offsetfile,
                                                 offsetfile, err);
 }
 
+void gt_gff3_in_stream_disable_add_ids(GtNodeStream *ns)
+{
+  GtGFF3InStream *is = gff3_in_stream_cast(ns);
+  gt_assert(is && is->add_ids_stream);
+  gt_add_ids_stream_disable(is->add_ids_stream);
+}
+
 void gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream *is)
 {
   gt_assert(is);
@@ -115,7 +125,8 @@ GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
   is->gff3_in_stream_plain = gt_gff3_in_stream_plain_new_unsorted(num_of_files,
                                                                   filenames);
-  is->cds_check_stream = gt_cds_check_stream_new(is->gff3_in_stream_plain);
+  is->add_ids_stream = gt_add_ids_stream_new(is->gff3_in_stream_plain);
+  is->cds_check_stream = gt_cds_check_stream_new(is->add_ids_stream);
   return ns;
 }
 
@@ -124,6 +135,7 @@ GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename)
   GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_class(), true);
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
   is->gff3_in_stream_plain = gt_gff3_in_stream_plain_new_sorted(filename);
-  is->cds_check_stream = gt_cds_check_stream_new(is->gff3_in_stream_plain);
+  is->add_ids_stream = gt_add_ids_stream_new(is->gff3_in_stream_plain);
+  is->cds_check_stream = gt_cds_check_stream_new(is->add_ids_stream);
   return ns;
 }

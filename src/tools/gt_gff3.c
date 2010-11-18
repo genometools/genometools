@@ -25,6 +25,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/gff3_parser.h"
 #include "extended/gtdatahelp.h"
 #include "extended/merge_feature_stream.h"
 #include "extended/sort_stream.h"
@@ -34,8 +35,9 @@
 
 typedef struct {
   bool sort,
-       checkids,
        retainids,
+       checkids,
+       addids,
        mergefeat,
        addintrons,
        verbose,
@@ -107,6 +109,11 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                               "by GFF3 specification\n"
                               "(memory consumption is O(file_size))",
                               &arguments->checkids, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -addids */
+  option = gt_option_new_bool("addids", "add missing \""GFF_SEQUENCE_REGION"\" "
+                              "lines automatically", &arguments->addids, true);
   gt_option_parser_add_option(op, option);
 
   /* -mergefeat */
@@ -191,6 +198,8 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
   if (arguments->checkids)
     gt_gff3_in_stream_check_id_attributes((GtGFF3InStream*) gff3_in_stream);
+  if (!arguments->addids)
+    gt_gff3_in_stream_disable_add_ids(gff3_in_stream);
 
   last_stream = gff3_in_stream;
 

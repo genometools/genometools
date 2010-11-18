@@ -1,4 +1,4 @@
-changes in version 1.3.6 (2010-11-08)
+changes in version 1.3.6 (2010-11-17)
 
 - `gt stat` has new options -addintrons and -cdslengthdistri
 - the tool `gt bioseq` has been renamed to `gt seq`
@@ -15,6 +15,7 @@ changes in version 1.3.6 (2010-11-08)
 - new tool `gt seqtransform` added
 - `gt cds`, `gt extractfeat` and `gt splicesiteinfo` have new option -usedesc
 - new tools `gt md5_to_id` and `gt id_to_md5` added
+- `gt gff3` has new option -addids
 
 
 changes in version 1.3.5 (2010-07-12)
