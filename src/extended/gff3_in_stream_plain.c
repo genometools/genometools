@@ -71,7 +71,7 @@ static int buffer_is_sorted(void **elem, void *info, GtError *err)
 }
 
 static int gff3_in_stream_plain_next(GtNodeStream *ns, GtGenomeNode **gn,
-                               GtError *err)
+                                     GtError *err)
 {
   GtGFF3InStreamPlain *is = gff3_in_stream_plain_cast(ns);
   GtStr *filenamestr;
