@@ -181,12 +181,12 @@ GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass *gnc)
 }
 
 void gt_genome_node_set_origin(GtGenomeNode *gn,
-                            GtStr *filename, unsigned int line_number)
+                               GtStr *filename, unsigned int line_number)
 {
   gt_assert(gn && filename && line_number);
   gt_str_delete(gn->filename);
   gn->filename = gt_str_ref(filename);
-  gn->line_number =line_number;
+  gn->line_number = line_number;
 }
 
 void* gt_genome_node_cast(GT_UNUSED const GtGenomeNodeClass *gnc,
