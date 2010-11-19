@@ -204,9 +204,9 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
                                           unsigned long pos);
 
-GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
-                                   unsigned long pos,
-                                   GtReadmode readmode)
+static GtUchar gt_encseq_get_encoded_char1(const GtEncseq *encseq,
+                                           unsigned long pos,
+                                           GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
   if (GT_ISDIRREVERSE(readmode))
@@ -247,9 +247,9 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
-GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
-                                    unsigned long pos,
-                                    GtReadmode readmode)
+static GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
+                                           unsigned long pos,
+                                           GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
   if (GT_ISDIRREVERSE(readmode))
@@ -315,6 +315,18 @@ GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
            ? GT_COMPLEMENTBASE(cc)
            : cc;
   }
+}
+
+GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
+                                   unsigned long pos,
+                                   GtReadmode readmode)
+{
+  GtUchar cc1, cc2;
+
+  cc1 = gt_encseq_get_encoded_char1(encseq,pos,readmode);
+  cc2 = gt_encseq_get_encoded_char2(encseq,pos,readmode);
+  gt_assert(cc1 == cc2);
+  return cc1;
 }
 
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
@@ -1428,7 +1440,7 @@ GtUchar gt_encseq_reader_next_encoded_char2(GtEncseqReader *esr)
       esr->currentpos++;
       return cc;
     default:
-      fprintf(stderr,"gt_encseq_get_encoded_char2: "
+      fprintf(stderr,"gt_encseq_reader_next_encoded_char2: "
                      "sat %d not possible\n",(int) esr->encseq->sat);
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
@@ -1996,66 +2008,78 @@ static bool issinglepositionseparatorViabitaccess(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_UCHARTABLES | GT_ACCESS_TYPE_USHORTTABLES |
  * GT_ACCESS_TYPE_UINT32TABLES */
 
-#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
+#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
+                                                        EXISTS,TYPE)\
 static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
 {\
-  return CHECKFUN##_##TYPE(&encseq->specialrangetable.st_##TYPE,pos);\
+  return (encseq->EXISTS) &&\
+         CHECKFUN##_##TYPE(&encseq->specialrangetable.st_##TYPE,pos);\
 }
 
-#define DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(FCTNAME,CHECKFUN,TYPE)\
+#define DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
+                                                         EXISTS,TYPE)\
 static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
 {\
-  return CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE,pos);\
+  return (encseq->EXISTS) &&\
+         CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE,pos);\
 }
 
 #define DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
-                                                          TYPE)\
+                                                          EXISTS,TYPE)\
 static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
 {\
-  return CHECKFUN##_##TYPE(&encseq->ssptabnew.st_##TYPE,pos);\
+  return (encseq->EXISTS) &&\
+         CHECKFUN##_##TYPE(&encseq->ssptabnew.st_##TYPE,pos);\
 }
 
 /* GT_ACCESS_TYPE_UCHARTABLES */
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                            issinglepositioninspecialrangeVia,
-                                           checkspecialrange,uchar)
+                                           checkspecialrange,has_specialranges,
+                                           uchar)
 
 DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
                                            issinglepositioninwildcardrangeVia,
-                                           checkspecialrange,uchar)
+                                           checkspecialrange,has_wildcardranges,
+                                           uchar)
 
 DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
                                            issinglepositionseparatorVia,
-                                           checkspecial,uchar)
+                                           checkspecial,has_ssptabnew,
+                                           uchar)
 
 /* GT_ACCESS_TYPE_USHORTTABLES */
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                            issinglepositioninspecialrangeVia,
-                                           checkspecialrange,ushort)
+                                           checkspecialrange,has_specialranges,
+                                           ushort)
 
 DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
                                            issinglepositioninwildcardrangeVia,
-                                           checkspecialrange,ushort)
+                                           checkspecialrange,has_wildcardranges,
+                                           ushort)
 
 DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
                                            issinglepositionseparatorVia,
-                                           checkspecial,ushort)
+                                           checkspecial,has_ssptabnew,ushort)
 
 /* GT_ACCESS_TYPE_UINT32TABLES */
 
 DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(
                                            issinglepositioninspecialrangeVia,
-                                           checkspecialrange,uint32)
+                                           checkspecialrange,has_specialranges,
+                                           uint32)
 
 DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
                                            issinglepositioninwildcardrangeVia,
-                                           checkspecialrange,uint32)
+                                           checkspecialrange,has_wildcardranges,
+                                           uint32)
 
 DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
                                            issinglepositionseparatorVia,
-                                           checkspecial,uint32)
+                                           checkspecial,has_ssptabnew,uint32)
 
 static bool issinglepositionseparatorViautablesBF(const GtEncseq *encseq,
                                                   unsigned long pos)
@@ -5611,13 +5635,6 @@ static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
   for (pos = 0; pos < encseq->totallength; pos++)
   {
     cc1 = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
-    cc2 = gt_encseq_get_encoded_char2(encseq,pos,GT_READMODE_FORWARD);
-    if (cc1 != cc2)
-    {
-      fprintf(stderr,"random access: pos %lu: cc1 = %u != %u = cc2\n",
-                      pos,(unsigned int) cc1,(unsigned int) cc2);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
     if (esr != NULL)
     {
       cc2 = gt_encseq_reader_next_encoded_char2(esr);
