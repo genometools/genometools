@@ -112,7 +112,7 @@ static int csa_visitor_default_func(GtNodeVisitor *nv, GtGenomeNode *gn,
 }
 
 static int csa_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
-                               GtError *err)
+                                    GtError *err)
 {
   return csa_visitor_default_func(nv, (GtGenomeNode*) c, err);
 }
@@ -126,12 +126,14 @@ static int csa_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
 static int csa_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
                                      GtError *err)
 {
+  gt_csa_visitor_process_cluster(nv, false);
   return csa_visitor_default_func(nv, (GtGenomeNode*) sn, err);
 }
 
 static int csa_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
                                 GtError *err)
 {
+  gt_csa_visitor_process_cluster(nv, false);
   return csa_visitor_default_func(nv, (GtGenomeNode*) eofn, err);
 }
 
@@ -465,7 +467,7 @@ void gt_csa_visitor_process_cluster(GtNodeVisitor *nv, bool final_cluster)
 
   if (final_cluster) {
     gt_assert(!gt_array_size(csa_visitor->cluster) ||
-           !csa_visitor->buffered_feature);
+              !csa_visitor->buffered_feature);
     if (csa_visitor->buffered_feature) {
       gt_array_add(csa_visitor->cluster, csa_visitor->buffered_feature);
       csa_visitor->buffered_feature = NULL;
