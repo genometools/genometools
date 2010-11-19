@@ -1333,11 +1333,18 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       /* now we can create a sequence region node */
       gt_assert(seqid);
       ssr = gt_hashmap_get(parser->seqid_to_ssr_mapping, seqid);
-      if (ssr && !ssr->pseudo) {
-        gt_error_set(err, "the sequence region \"%s\" on line %u in file "
-                     "\"%s\" has already been defined",
-                     gt_str_get(ssr->seqid_str), line_number, filename);
-        had_err = -1;
+      if (ssr) {
+        if (!ssr->pseudo) {
+          gt_error_set(err, "the sequence region \"%s\" on line %u in file "
+                       "\"%s\" has already been defined",
+                       gt_str_get(ssr->seqid_str), line_number, filename);
+          had_err = -1;
+        }
+        else {
+          ssr->range = range;
+          ssr->line_number = line_number;
+          ssr->pseudo = false;
+        }
       }
       else {
         ssr = simple_sequence_region_new(seqid, range, line_number);
