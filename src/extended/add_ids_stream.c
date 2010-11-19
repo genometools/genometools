@@ -105,9 +105,8 @@ const GtNodeStreamClass* gt_add_ids_stream_class(void)
 
 GtNodeStream* gt_add_ids_stream_new(GtNodeStream *in_stream)
 {
-  GtNodeStream *ns = gt_node_stream_create(gt_add_ids_stream_class(),
-                                          gt_node_stream_is_sorted(in_stream));
-  GtAddIDsStream *add_ids_stream = gt_add_ids_stream_cast(ns);
+  GtAddIDsStream *add_ids_stream;
+  GtNodeStream *ns;
   gt_assert(in_stream);
   ns = gt_node_stream_create(gt_add_ids_stream_class(), false);
   add_ids_stream = gt_add_ids_stream_cast(ns);
