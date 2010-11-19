@@ -34,7 +34,7 @@ options.redN = false
 options.parts = 1
 options.parts_set = false
 options.name = "esa"
-options.prepare_only = "false"
+options.prepare_only = false
 
 opt= OptionParser.new do |opt|
   opt.banner = "USAGE: #$0 [options] <files>\n
