@@ -17,7 +17,7 @@ if $gttestdata then
   process_bed_files("#{$gttestdata}bed")
 end
 
-Name "gt_bed_to_gff3 (type options)"
+Name "gt bed_to_gff3 (type options)"
 Keywords "gt_bed_to_gff3"
 Test do
   run_test "#{$bin}gt bed_to_gff3 -featuretype gene -thicktype CDS " +
