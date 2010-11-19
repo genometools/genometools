@@ -18,6 +18,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
+#include "extended/add_ids_stream.h"
 #include "extended/cds_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
@@ -80,7 +81,7 @@ static int gt_id_to_md5_runner(GT_UNUSED int argc, const char **argv,
                                    GtError *err)
 {
   GtNodeStream *gff3_in_stream, *id_to_md5_stream = NULL,
-               *gff3_out_stream = NULL;
+               *add_ids_stream = NULL, *gff3_out_stream = NULL;
   SeqidsToMD5Arguments *arguments = tool_arguments;
   GtRegionMapping *region_mapping;
   int had_err = 0;
@@ -93,6 +94,8 @@ static int gt_id_to_md5_runner(GT_UNUSED int argc, const char **argv,
                                                   argv + parsed_args);
   if (arguments->verbose && arguments->outfp)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
+  /* add automatically generated sequence IDs later to avoid collisions */
+  gt_gff3_in_stream_disable_add_ids(gff3_in_stream);
 
   /* create region mapping */
   region_mapping = gt_seqid2file_region_mapping_new(arguments->s2fi, err);
@@ -101,12 +104,13 @@ static int gt_id_to_md5_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create seqid to md5 stream */
-    id_to_md5_stream = gt_id_to_md5_stream_new(gff3_in_stream,
-                                                         region_mapping);
+    id_to_md5_stream = gt_id_to_md5_stream_new(gff3_in_stream, region_mapping);
+
+    /* create add IDs stream */
+    add_ids_stream = gt_add_ids_stream_new(id_to_md5_stream);
 
     /* create gff3 output stream */
-    gff3_out_stream = gt_gff3_out_stream_new(id_to_md5_stream,
-                                             arguments->outfp);
+    gff3_out_stream = gt_gff3_out_stream_new(add_ids_stream, arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
     had_err = gt_node_stream_pull(gff3_out_stream, err);
@@ -114,6 +118,7 @@ static int gt_id_to_md5_runner(GT_UNUSED int argc, const char **argv,
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
+  gt_node_stream_delete(add_ids_stream);
   gt_node_stream_delete(id_to_md5_stream);
   gt_node_stream_delete(gff3_in_stream);
 
