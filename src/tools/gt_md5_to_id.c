@@ -101,8 +101,7 @@ static int gt_md5_to_id_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create seqid to md5 stream */
-    md5_to_id_stream = gt_md5_to_id_stream_new(gff3_in_stream,
-                                                         region_mapping);
+    md5_to_id_stream = gt_md5_to_id_stream_new(gff3_in_stream, region_mapping);
 
     /* create gff3 output stream */
     gff3_out_stream = gt_gff3_out_stream_new(md5_to_id_stream,
