@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "extended/eof_node.h"
 #include "extended/stat_stream.h"
 #include "extended/stat_visitor.h"
 #include "extended/node_stream_api.h"
@@ -40,7 +41,8 @@ static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   if (!had_err) {
     gt_assert(stat_stream->stat_visitor);
     if (*gn) {
-      stat_stream->number_of_DAGs++;
+      if (!gt_eof_node_try_cast(*gn)) /* do not count EOF nodes */
+        stat_stream->number_of_DAGs++;
       had_err = gt_genome_node_accept(*gn, stat_stream->stat_visitor, err);
       gt_assert(!had_err); /* the status visitor is sane */
     }
