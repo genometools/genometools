@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,6 +18,7 @@
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/undef.h"
+#include "extended/eof_node.h"
 #include "extended/genome_node.h"
 #include "extended/merge_stream.h"
 #include "extended/node_stream_api.h"
@@ -45,13 +46,18 @@ static int merge_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   ms = gt_merge_stream_cast(gs);
 
   /* fill buffers */
-  for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
-    if (!ms->buffer[i]) {
+  for (i = 0; !had_err && i < gt_array_size(ms->genome_streams); i++) {
+    while (!ms->buffer[i]) {
       had_err = gt_node_stream_next(*(GtNodeStream**)
                                         gt_array_get(ms->genome_streams, i),
                                         ms->buffer + i, err);
-      if (had_err)
+      if (had_err || !ms->buffer[i])
         break;
+      /* remove EOF nodes */
+      if (gt_eof_node_try_cast(ms->buffer[i])) {
+        gt_genome_node_delete(ms->buffer[i]);
+        ms->buffer[i] = NULL;
+      }
     }
   }
 
