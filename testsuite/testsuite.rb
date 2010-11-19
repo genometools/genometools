@@ -110,6 +110,7 @@ require 'gt_eval_include'
 require 'gt_extractfeat_include'
 require 'gt_filter_include'
 require 'gt_fingerprint_include'
+require 'gt_genomediff_include'
 require 'gt_gff3_include'
 require 'gt_gff3validator_include'
 require 'gt_gtf_to_gff3_include'
@@ -164,7 +165,3 @@ require 'scripts_include'
 if $arguments["gcov"] then
   require 'gcov_include' # must be last
 end
-
-# tests by DW
-
-require 'gt_genomediff_include'
