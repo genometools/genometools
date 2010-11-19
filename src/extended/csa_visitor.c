@@ -126,14 +126,14 @@ static int csa_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
 static int csa_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
                                      GtError *err)
 {
-  gt_csa_visitor_process_cluster(nv, false);
+  gt_csa_visitor_process_cluster(nv, true);
   return csa_visitor_default_func(nv, (GtGenomeNode*) sn, err);
 }
 
 static int csa_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *eofn,
                                 GtError *err)
 {
-  gt_csa_visitor_process_cluster(nv, false);
+  gt_csa_visitor_process_cluster(nv, true);
   return csa_visitor_default_func(nv, (GtGenomeNode*) eofn, err);
 }
 
