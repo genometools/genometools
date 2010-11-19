@@ -68,7 +68,7 @@ GtNodeStream* gt_visitor_stream_new(GtNodeStream *in_stream,
   GtVisitorStream *visitor_stream;
   GtNodeStream *ns;
   ns = gt_node_stream_create(gt_visitor_stream_class(),
-                             gt_genome_stream_is_sorted(in_stream));
+                             gt_node_stream_is_sorted(in_stream));
   visitor_stream = visitor_stream_cast(ns);
   visitor_stream->in_stream = gt_node_stream_ref(in_stream);
   visitor_stream->visitor = visitor;
