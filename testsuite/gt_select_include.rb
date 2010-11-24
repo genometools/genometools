@@ -237,3 +237,132 @@ Test do
   run      "diff #{last_stdout} " +
            "#{$testdata}filter_targetbest_multiple_test.gff3"
 end
+
+Name "gt select test (-rule_files, one file, node type in gff3)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_nodetype.lua -- " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt select test (-rule_files, one file, node type not in gff3)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_wrong_nodetype.lua -- " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_select_test.out"
+end
+
+Name "gt select test (-rule_files, two files, logic = AND)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_nodetype.lua " +
+           "#{$testdata}gtscripts/filter_test_wrong_nodetype.lua -- " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{last_stdout} #{$testdata}gt_select_test.out"
+end
+
+Name "gt select test (-rule_files, two files, logic = OR)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_logic OR -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_nodetype.lua " +
+           "#{$testdata}gtscripts/filter_test_wrong_nodetype.lua -- " +
+           "#{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt select test (-rule_files, one file, wrong function name)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_wrong_function_name.lua -- " +
+           "#{$testdata}standard_gene_as_tree.gff3", :retval => 1
+  grep last_stderr, /error/
+end
+
+Name "gt select test (reading_frame_length % 3 != 0)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_orflength.lua -- " +
+           "#{$testdata}filter_luafilter_test.gff3"
+  run "diff #{last_stdout} #{$testdata}filter_luafilter_filtered_orfs.gff3"
+end
+  
+Name "gt select test (check for LTR_retrotransposon and LTRs)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_LTR.lua -- " +
+           "#{$testdata}filter_luafilter_test.gff3"
+  run "diff #{last_stdout} #{$testdata}filter_luafilter_filtered_LTR.gff3"
+end
+
+Name "gt select test (min two orfs on forward strand)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_orf_pos_strand.lua -- " +
+           "#{$testdata}filter_luafilter_test.gff3"
+  run "diff #{last_stdout} #{$testdata}filter_luafilter_filtered_orf_pos.gff3"
+end
+
+Name "gt select test (orfs without frame attribute)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_frame_attribute.lua -- " +
+           "#{$testdata}filter_luafilter_test_no_frame_attribute.gff3"
+  run "diff #{last_stdout} #{$testdata}filter_luafilter_filtered_orf_frame.gff3"
+end
+
+Name "gt select test (dropped to file (1))"
+ Keywords "gt_select"
+ Test do
+   run_test "#{$bin}gt select -dropped_file nh_file01.gff3 -rule_files " + 
+            "#{$testdata}gtscripts/filter_test_orflength.lua -- " +
+            "#{$testdata}filter_luafilter_test.gff3"
+   run "diff nh_file01.gff3 #{$testdata}filter_nh_file01.gff3"
+end
+  
+Name "gt select test (dropped to file (2))"
+ Keywords "gt_select"
+ Test do
+   run_test "#{$bin}gt select -dropped_file nh_file02.gff3 -rule_files " + 
+            "#{$testdata}gtscripts/filter_test_LTR.lua -- " +
+            "#{$testdata}filter_luafilter_test.gff3"
+   run "diff nh_file02.gff3 #{$testdata}filter_nh_file02.gff3"
+end
+
+Name "gt select test (dropped to file (3))"
+ Keywords "gt_select"
+ Test do
+   run_test "#{$bin}gt select -dropped_file nh_file03.gff3 -rule_files " + 
+            "#{$testdata}gtscripts/filter_test_orf_pos_strand.lua -- " +
+            "#{$testdata}filter_luafilter_test.gff3"
+   run "diff nh_file03.gff3 #{$testdata}filter_nh_file03.gff3"
+end
+
+Name "gt select test (dropped to file (4))"
+ Keywords "gt_select"
+ Test do
+   run_test "#{$bin}gt select -dropped_file nh_file04.gff3 -rule_files " + 
+            "#{$testdata}gtscripts/filter_test_frame_attribute.lua -- " +
+            "#{$testdata}filter_luafilter_test_no_frame_attribute.gff3"
+   run "diff nh_file04.gff3 #{$testdata}filter_nh_file04.gff3"
+end
+
+Name "gt select test (lua syntax fail)"
+Keywords "gt_select"
+Test do
+  run_test "#{$bin}gt select -rule_files " + 
+           "#{$testdata}gtscripts/filter_test_syntax_fail.lua -- " +
+           "#{$testdata}filter_luafilter_test_no_frame_attribute.gff3",
+           :retval => 1
+  grep last_stderr, /error/
+end

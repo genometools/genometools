@@ -15,14 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/ma.h"
 #include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/gff3_output.h"
+#include "extended/gff3_parser.h"
+#include "extended/gtdatahelp.h"
 #include "extended/select_stream.h"
 #include "extended/targetbest_select_stream.h"
 #include "tools/gt_select.h"
@@ -51,6 +56,9 @@ typedef struct {
          single_intron_factor;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
+  GtStrArray  *filter_files;
+  GtStr *filter_logic;
+  GtStr *dropped_file;
 } SelectArguments;
 
 static void* gt_select_arguments_new(void)
@@ -63,6 +71,9 @@ static void* gt_select_arguments_new(void)
   arguments->targetgt_strand_char = gt_str_new();
   arguments->targetstrand = GT_NUM_OF_STRAND_TYPES;
   arguments->ofi = gt_outputfileinfo_new();
+  arguments->filter_files = gt_str_array_new();
+  arguments->filter_logic = gt_str_new();
+  arguments->dropped_file = gt_str_new();
   return arguments;
 }
 
@@ -76,6 +87,9 @@ static void gt_select_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->gt_strand_char);
   gt_str_delete(arguments->source);
   gt_str_delete(arguments->seqid);
+  gt_str_array_delete(arguments->filter_files);
+  gt_str_delete(arguments->filter_logic);
+  gt_str_delete(arguments->dropped_file);
   gt_free(arguments);
 }
 
@@ -84,8 +98,14 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   SelectArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *contain_option, *overlap_option, *minaveragessp_option,
-           *singleintron_option;
+           *singleintron_option, *optiondroppedfile;
   gt_assert(arguments);
+
+  static const char *filter_logic[] = {
+    "AND",
+    "OR",
+    NULL
+  };
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
@@ -203,6 +223,27 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -filter_files */
+  option = gt_option_new_filename_array("rule_files",
+                                        "specify Lua files to be used "
+                                        "for selection",
+                                        arguments->filter_files);
+  gt_option_parser_add_option(op, option);
+
+  /* -filter_logic */
+  option = gt_option_new_choice("rule_logic", "select how multiple Lua "
+                                "files should be combined\nchoose from AND|OR",
+                                arguments->filter_logic, filter_logic[0],
+                                filter_logic);
+  gt_option_parser_add_option(op, option);
+
+  /* -nh_file */
+  optiondroppedfile = gt_option_new_filename("dropped_file",
+                                             "save non-selected features to "
+                                             "file",
+                                             arguments->dropped_file);
+  gt_option_parser_add_option(op, optiondroppedfile);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -215,6 +256,8 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 
   return op;
 }
@@ -252,7 +295,26 @@ static int gt_select_arguments_check(GT_UNUSED int rest_argc,
                                     &arguments->targetstrand,
                                     TARGETGT_STRAND_OPT, err);
   }
+
   return had_err;
+}
+
+static int print_to_file_drophandler(GtGenomeNode *gn, void *data,
+                                     GT_UNUSED GtError *err)
+{
+  GtFile *file;
+  gt_assert(gn && data);
+  file = (GtFile*) data;
+  gt_gff3_output_leading((GtFeatureNode*) gn, file);
+  gt_file_xfputc('\n', file);
+  return 0;
+}
+
+static int default_drophandler(GT_UNUSED GtGenomeNode *gn, GT_UNUSED void *data,
+                               GT_UNUSED GtError *err)
+{
+  gt_assert(gn);
+  return 0;
 }
 
 static int gt_select_runner(int argc, const char **argv, int parsed_args,
@@ -263,6 +325,7 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
                *targetbest_select_stream = NULL, *gff3_out_stream;
   int had_err;
 
+  GtFile *drop_file = NULL;
   gt_error_check(err);
   gt_assert(arguments);
 
@@ -285,28 +348,49 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
                                        arguments->min_gene_score,
                                        arguments->max_gene_score,
                                        arguments->min_average_splice_site_prob,
-                                       arguments->feature_num);
-  gt_select_stream_set_single_intron_factor(select_stream,
-                                            arguments->single_intron_factor);
+                                       arguments->feature_num,
+                                       arguments->filter_files,
+                                       arguments->filter_logic,
+                                       err);
 
-  if (arguments->targetbest)
-    targetbest_select_stream = gt_targetbest_select_stream_new(select_stream);
+  if (select_stream) {
+    GtSelectStream *fs = (GtSelectStream*) select_stream;
 
-  /* create a gff3 output stream */
-  gff3_out_stream = gt_gff3_out_stream_new(arguments->targetbest
-                                           ? targetbest_select_stream
-                                           : select_stream,
-                                           arguments->outfp);
+    if (gt_str_length(arguments->dropped_file) > 0) {
+      drop_file = gt_file_new(gt_str_get(arguments->dropped_file), "w", err);
+      gt_file_xprintf(drop_file, "%s   %u\n", GT_GFF_VERSION_PREFIX,
+                                              GT_GFF_VERSION);
+      gt_select_stream_set_drophandler(fs, print_to_file_drophandler,
+                                       (void*) drop_file);
+    } else {
+      gt_select_stream_set_drophandler(fs, default_drophandler, NULL);
+    }
 
-  /* pull the features through the stream and free them afterwards */
-  had_err = gt_node_stream_pull(gff3_out_stream, err);
+    gt_select_stream_set_single_intron_factor(select_stream,
+                                              arguments->single_intron_factor);
 
-  /* free */
-  gt_node_stream_delete(gff3_out_stream);
-  gt_node_stream_delete(select_stream);
-  gt_node_stream_delete(targetbest_select_stream);
+    if (arguments->targetbest)
+      targetbest_select_stream = gt_targetbest_select_stream_new(select_stream);
+
+    /* create a gff3 output stream */
+    gff3_out_stream = gt_gff3_out_stream_new(arguments->targetbest
+                                             ? targetbest_select_stream
+                                             : select_stream,
+                                             arguments->outfp);
+
+    /* pull the features through the stream and free them afterwards */
+    had_err = gt_node_stream_pull(gff3_out_stream, err);
+
+    /* free */
+    gt_node_stream_delete(gff3_out_stream);
+    gt_node_stream_delete(select_stream);
+    gt_node_stream_delete(targetbest_select_stream);
+  } else {
+    had_err = -1;
+  }
+  if (drop_file)
+    gt_file_delete(drop_file);
   gt_node_stream_delete(gff3_in_stream);
-
   return had_err;
 }
 

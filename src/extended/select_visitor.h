@@ -22,6 +22,7 @@
 typedef struct GtSelectVisitor GtSelectVisitor;
 
 #include "extended/node_visitor.h"
+#include "extended/select_stream_api.h"
 
 const GtNodeVisitorClass* gt_select_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
@@ -38,10 +39,15 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      double min_gene_score,
                                      double max_gene_score,
                                      double min_average_splice_site_prob,
-                                     unsigned long feature_num);
+                                     unsigned long feature_num,
+                                     GtStrArray *select_files,
+                                     GtStr *select_logic,
+                                     GtError *err);
 void           gt_select_visitor_set_single_intron_factor(GtNodeVisitor*,
                                                           double);
 unsigned long  gt_select_visitor_node_buffer_size(GtNodeVisitor*);
 GtGenomeNode*  gt_select_visitor_get_node(GtNodeVisitor*);
-
+void           gt_select_visitor_set_drophandler(GtSelectVisitor *fv,
+                                                 GtSelectNodeFunc fp,
+                                                 void *data);
 #endif

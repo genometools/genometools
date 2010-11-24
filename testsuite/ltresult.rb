@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2008 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
 # Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any

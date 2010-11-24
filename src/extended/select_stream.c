@@ -20,6 +20,7 @@
 #include "extended/node_stream_api.h"
 #include "extended/select_stream_api.h"
 #include "extended/select_visitor.h"
+#include "core/error_api.h"
 
 struct GtSelectStream
 {
@@ -94,7 +95,9 @@ GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream, GtStr *seqid,
                                    unsigned long max_gene_num,
                                    double min_gene_score, double max_gene_score,
                                    double min_average_splice_site_prob,
-                                   unsigned long feature_num)
+                                   unsigned long feature_num,
+                                   GtStrArray *select_files,
+                                   GtStr *select_logic, GtError *err)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_select_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
@@ -105,7 +108,12 @@ GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream, GtStr *seqid,
     gt_select_visitor_new(seqid, source, contain_range, overlap_range, strand,
                           targetstrand, has_CDS, max_gene_length, max_gene_num,
                           min_gene_score, max_gene_score,
-                          min_average_splice_site_prob, feature_num);
+                          min_average_splice_site_prob, feature_num,
+                          select_files, select_logic, err);
+  if  (!select_stream->select_visitor) {
+    gt_node_stream_delete(ns);
+    return NULL;
+  }
   return ns;
 }
 
@@ -115,4 +123,14 @@ void gt_select_stream_set_single_intron_factor(GtNodeStream *ns,
   GtSelectStream *select_stream = gt_select_stream_cast(ns);
   gt_select_visitor_set_single_intron_factor(select_stream->select_visitor,
                                              single_intron_factor);
+}
+
+void gt_select_stream_set_drophandler(GtSelectStream *fs,
+                                      GtSelectNodeFunc fp,
+                                      void *data)
+{
+  gt_assert(fs && fp != NULL);
+  GtSelectVisitor *fv;
+  fv = gt_node_visitor_cast(gt_select_visitor_class(), fs->select_visitor);
+  gt_select_visitor_set_drophandler(fv, fp, data);
 }

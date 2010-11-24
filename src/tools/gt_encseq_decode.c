@@ -90,6 +90,7 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
                               "sequence character separately",
                               &arguments->singlechars,
                               false);
+  gt_option_is_extended_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -seq */

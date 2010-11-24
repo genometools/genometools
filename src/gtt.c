@@ -98,6 +98,7 @@
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_id_to_md5.h"
 #include "tools/gt_interfeat.h"
+#include "tools/gt_matchtool.h"
 #include "tools/gt_matstat.h"
 #include "tools/gt_maxpairs.h"
 #include "tools/gt_md5_to_id.h"
@@ -106,6 +107,7 @@
 #include "tools/gt_mgth.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
+#include "tools/gt_orffinder.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
 #include "tools/gt_select.h"
@@ -128,7 +130,6 @@
 #include "tools/gt_template.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
-
 #ifndef WITHOUT_CAIRO
 #include "annotationsketch/block.h"
 #include "annotationsketch/diagram.h"
@@ -174,6 +175,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
+  gt_toolbox_add_tool(tools, "matchtool", gt_matchtool());
   gt_toolbox_add(tools, "matstat", gt_matstat);
   gt_toolbox_add_tool(tools, "md5_to_id", gt_md5_to_id());
   gt_toolbox_add(tools, "merge", gt_merge);
@@ -184,8 +186,9 @@ GtToolbox* gtt_tools(void)
      compatibility */
   gt_toolbox_add_hidden_tool(tools, "mutate", gt_seqmutate());
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
+  gt_toolbox_add_tool(tools, "orffinder", gt_orffinder());
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
-  gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
+    gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "repfind", gt_repfind());
   gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
@@ -212,7 +215,6 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "sketch", gt_sketch);
   gt_toolbox_add_tool(tools, "sketch_page", gt_sketch_page());
 #endif
-
   return tools;
 }
 

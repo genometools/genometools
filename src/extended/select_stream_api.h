@@ -25,6 +25,8 @@
    nodes it retrieves from its node source and passes them along. */
 typedef struct GtSelectStream GtSelectStream;
 
+typedef int (*GtSelectNodeFunc)(GtGenomeNode *gn, void *data, GtError *err);
+
 /* Create a <GtSelectStream> object which selects genome nodes it retrieves from
    its <in_stream> and passes them along if they meet the criteria defined by
    the other arguments. All comment nodes are selected.
@@ -51,6 +53,13 @@ typedef struct GtSelectStream GtSelectStream;
    selected.
    If <feature_num> is defined, just the <feature_num>th feature node occurring
    in the <in_stream> is selected.
+   If <select_files> is defined and has at least one entry, the entries are
+   evaluated as Lua scripts containing functions taking <GtGenomeNodes> that
+   are evaluated to boolean values to determine selection. <select_logic>
+   can be "OR" or "AND", defining how the results from the select scripts are
+   combined.
+   Returns a pointer to a new <GtSelectStream> or NULL on error (<err> is set
+   accordingly).
 */
 GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream,
                                    GtStr *seqid,
@@ -65,6 +74,17 @@ GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream,
                                    double min_gene_score,
                                    double max_gene_score,
                                    double min_average_splice_site_prob,
-                                   unsigned long feature_num);
+                                   unsigned long feature_num,
+                                   GtStrArray *select_files,
+                                   GtStr *select_logic,
+                                   GtError *err);
+
+/* Sets <fp> as a handler function to be called for every <GtGenomeNode> not
+   selected by <sstr>. The void pointer <data> can be used for arbitrary user
+   data.
+*/
+void          gt_select_stream_set_drophandler(GtSelectStream *sstr,
+                                               GtSelectNodeFunc fp,
+                                               void *data);
 
 #endif
