@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -61,14 +62,80 @@
           }                                                                  \
         } while (0)
 
-int           gt_safe_abs(int);
-long          gt_safe_labs(long);
-long long     gt_safe_llabs(long long);
-uint32_t      gt_safe_mult_u32(uint32_t, uint32_t);
-uint64_t      gt_safe_mult_u64(uint64_t, uint64_t);
-unsigned long gt_safe_mult_ulong(unsigned long, unsigned long);
-long          gt_safe_cast2long(unsigned long);
-unsigned long gt_safe_cast2ulong(long);
+typedef void  (GtOverflowHandlerFunc)(const char *src_file, int src_line,
+                                      void *data);
+
+void          gt_safe_default_overflow_handler(const char*, int, void*);
+
+int           gt_safe_abs_check_func(int, const char*, int,
+                                     GtOverflowHandlerFunc, void*);
+#define       gt_safe_abs(j) \
+              gt_safe_abs_check_func(j, __FILE__, __LINE__, \
+                                     gt_safe_default_overflow_handler, NULL)
+#define       gt_safe_abs_check(j, func, data) \
+              gt_safe_abs_check_func(j, __FILE__, __LINE__, func, data)
+
+long          gt_safe_labs_check_func(long, const char*, int,
+                                      GtOverflowHandlerFunc, void*);
+#define       gt_safe_labs(j) \
+              gt_safe_labs_check_func(j, __FILE__, __LINE__, \
+                                      gt_safe_default_overflow_handler, NULL)
+#define       gt_safe_labs_check(j, func, data) \
+              gt_safe_labs_check_func(j, __FILE__, __LINE__, func, data)
+
+long long     gt_safe_llabs_check_func(long long, const char*, int,
+                                       GtOverflowHandlerFunc, void*);
+#define       gt_safe_llabs(j) \
+              gt_safe_llabs_check_func(j, __FILE__, __LINE__, \
+                                       gt_safe_default_overflow_handler, NULL)
+#define       gt_safe_llabs_check(j, func, data) \
+              gt_safe_llabs_check_func(j, __FILE__, __LINE__, func, data)
+
+uint32_t      gt_safe_mult_u32_check_func(uint32_t, uint32_t, const char*, int,
+                                          GtOverflowHandlerFunc, void*);
+#define       gt_safe_mult_u32(i, j) \
+              gt_safe_mult_u32_check_func(i, j, __FILE__, __LINE__, \
+                                          gt_safe_default_overflow_handler, \
+                                          NULL)
+#define       gt_safe_mult_u32_check(i, j, func, data) \
+              gt_safe_mult_u32_check_func(i, j, __FILE__, __LINE__, func, data)
+
+uint64_t      gt_safe_mult_u64_check_func(uint64_t, uint64_t, const char*, int,
+                                          GtOverflowHandlerFunc, void*);
+#define       gt_safe_mult_u64(i, j) \
+              gt_safe_mult_u64_check_func(i, j, __FILE__, __LINE__, \
+                                          gt_safe_default_overflow_handler, \
+                                          NULL)
+#define       gt_safe_mult_u64_check(i, j, func, data) \
+              gt_safe_mult_u64_check_func(i, j, __FILE__, __LINE__, func, data)
+
+unsigned long gt_safe_mult_ulong_check_func(unsigned long, unsigned long,
+                                            const char*, int,
+                                            GtOverflowHandlerFunc, void*);
+#define       gt_safe_mult_ulong(i, j) \
+              gt_safe_mult_ulong_check_func(i, j, __FILE__, __LINE__, \
+                                          gt_safe_default_overflow_handler, \
+                                          NULL)
+#define       gt_safe_mult_ulong_check(i, j, func, data) \
+              gt_safe_mult_ulong_check_func(i, j, __FILE__, __LINE__, func, \
+                                            data)
+
+long          gt_safe_cast2long_check_func(unsigned long, const char*, int,
+                                           GtOverflowHandlerFunc, void*);
+#define       gt_safe_cast2long(j) \
+              gt_safe_cast2long_check_func(j, __FILE__, __LINE__, \
+                                      gt_safe_default_overflow_handler, NULL)
+#define       gt_safe_cast2long_check(j, func, data) \
+              gt_safe_cast2long_check_func(j, __FILE__, __LINE__, func, data)
+
+unsigned long gt_safe_cast2ulong_check_func(long, const char*, int,
+                                            GtOverflowHandlerFunc, void*);
+#define       gt_safe_cast2ulong(j) \
+              gt_safe_cast2ulong_check_func(j, __FILE__, __LINE__, \
+                                      gt_safe_default_overflow_handler, NULL)
+#define       gt_safe_cast2ulong_check(j, func, data) \
+              gt_safe_cast2ulong_check_func(j, __FILE__, __LINE__, func, data)
+
 int           gt_safearith_example(GtError*);
 int           gt_safearith_unit_test(GtError*);
 

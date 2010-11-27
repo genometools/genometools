@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,35 +21,61 @@
 #include "core/safearith.h"
 #include "core/unused_api.h"
 
-int gt_safe_abs(int j)
+void gt_safe_default_overflow_handler(const char *src_file, int src_line,
+                                      GT_UNUSED void *data)
+{
+  fprintf(stderr, "%s, l.%d: overflow in operation\n", src_file, src_line);
+  exit(EXIT_FAILURE);
+}
+
+int gt_safe_abs_check_func(int j, const char *src_file, int src_line,
+                      GtOverflowHandlerFunc handler_func, void *data)
 {
   int rval = j < 0 ? -j : j;
-  gt_assert(rval >= 0); /* prevent overflow */
+  if (rval < 0) { /* overflow */
+    handler_func(src_file, src_line, data);
+  }
   return rval;
 }
 
-long gt_safe_labs(long j)
+long gt_safe_labs_check_func(long j, const char *src_file, int src_line,
+                             GtOverflowHandlerFunc handler_func, void *data)
 {
   long rval = j < 0 ? -j : j;
-  gt_assert(rval >= 0); /* prevent overflow */
+  if (rval < 0) { /* overflow */
+    handler_func(src_file, src_line, data);
+  }
   return rval;
 }
 
-long long gt_safe_llabs(long long j)
+long long gt_safe_llabs_check_func(long long j, const char *src_file,
+                                   int src_line,
+                                   GtOverflowHandlerFunc handler_func,
+                                   void *data)
 {
   long long rval = j < 0 ? -j : j;
-  gt_assert(rval >= 0); /* prevent overflow */
+  if (rval < 0) { /* overflow */
+    handler_func(src_file, src_line, data);
+  }
   return rval;
 }
 
-uint32_t gt_safe_mult_u32(uint32_t a, uint32_t b)
+uint32_t gt_safe_mult_u32_check_func(uint32_t a, uint32_t b,
+                                     const char *src_file, int src_line,
+                                     GtOverflowHandlerFunc handler_func,
+                                     void *data)
 {
   unsigned long long x = (unsigned long long) a * b;
-  gt_assert(x <= 0xffffffff); /* prevent overflow */
+  if (x > 0xffffffff) { /* overflow */
+    handler_func(src_file, src_line, data);
+  }
   return x;
 }
 
-uint64_t gt_safe_mult_u64(uint64_t a, uint64_t b)
+uint64_t gt_safe_mult_u64_check_func(uint64_t a, uint64_t b,
+                                     const char *src_file, int src_line,
+                                     GtOverflowHandlerFunc handler_func,
+                                     void *data)
 {
   uint32_t a_hi = a >> 32,
            a_lo = a & 0xffffffff,
@@ -61,30 +88,50 @@ uint64_t gt_safe_mult_u64(uint64_t a, uint64_t b)
      a * b = (a_hi*x + a_lo) * (b_hi*x + b_lo)
            = a_hi*x*b_hi*x + a_hi*x*b_lo + a_lo*b_hi*x + a_lo*b_lo
   */
-  gt_assert(!(a_hi && b_hi)); /* prevent overflow */
+  if (a_hi && b_hi) {    /* overflow */
+    handler_func(src_file, src_line, data);
+  }
   a = (uint64_t)(a_hi) * b_lo + (uint64_t)(a_lo) * b_hi;
-  gt_assert(a <= 0xffffffff); /* prevent overflow */
+  if (a > 0xffffffff) {  /* overflow */
+    handler_func(src_file, src_line, data);
+  }
   return (a << 32) + (uint64_t)(a_lo) * b_lo;
 }
 
-unsigned long gt_safe_mult_ulong(unsigned long a, unsigned long b)
+unsigned long gt_safe_mult_ulong_check_func(unsigned long a, unsigned long b,
+                                            const char *src_file, int src_line,
+                                            GtOverflowHandlerFunc handler_func,
+                                            void *data)
 {
   gt_assert(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
-  if (sizeof (unsigned long) == 4)
-    return gt_safe_mult_u32(a, b);
-  else /* sizeof (unsigned long) == 8 */
-    return gt_safe_mult_u64(a, b);
+  if (sizeof (unsigned long) == 4) {
+    return gt_safe_mult_u32_check_func(a, b, src_file, src_line, handler_func,
+                                       data);
+  } else { /* sizeof (unsigned long) == 8 */
+    return gt_safe_mult_u64_check_func(a, b, src_file, src_line, handler_func,
+                                       data);
+  }
 }
 
-long gt_safe_cast2long(unsigned long value)
+long gt_safe_cast2long_check_func(unsigned long value, const char *src_file,
+                                  int src_line,
+                                  GtOverflowHandlerFunc handler_func,
+                                  void *data)
 {
-  gt_assert(value <= (~0UL >> 1));
+  if (value > (~0UL >> 1)) {
+    handler_func(src_file, src_line, data);
+  }
   return value;
 }
 
-unsigned long gt_safe_cast2ulong(long value)
+unsigned long gt_safe_cast2ulong_check_func(long value, const char *src_file,
+                                            int src_line,
+                                            GtOverflowHandlerFunc handler_func,
+                                            void *data)
 {
-  gt_assert(value >= 0);
+  if (value < 0) {
+    handler_func(src_file, src_line, data);
+  }
   return value;
 }
 
