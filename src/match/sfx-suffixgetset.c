@@ -20,11 +20,13 @@
 #include <limits.h>
 #include "core/assert_api.h"
 #include "core/bitpackarray.h"
+#include "core/defined-types.h"
 #include "core/fa.h"
 #include "core/log_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/defined-types.h"
+#include "core/safearith.h"
+#include "core/unused_api.h"
 #include "sfx-suffixgetset.h"
 
 struct GtSuffixsortspace
@@ -107,6 +109,20 @@ size_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
   return requiredspace;
 }
 
+static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
+                                              GT_UNUSED int l,
+                                              void *data)
+{
+  fprintf(stderr, "error: overflow detected while calculating size of "
+                  "suffix sorting space: %lu * %lu bytes is too large for "
+                  "the current platform, please recompile GenomeTools with "
+                  "support for a larger address space to prevent this (e.g. "
+                  "64 bit instead of 32 bit) or use the `-parts' option.\n",
+                  (unsigned long) sizeof (unsigned long),
+                  *(unsigned long*) data);
+  exit(EXIT_FAILURE);
+}
+
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
                                           unsigned long maxvalue,
                                           bool suftabasulongarray)
@@ -125,11 +141,16 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
 #endif
   if (suftabasulongarray)
   {
+    size_t sufspacesize;
     gt_log_log("suftab as array: maxvalue=%lu,numofentries=%lu",
                maxvalue,numofentries);
     suffixsortspace->bitpackarray = NULL;
-    suffixsortspace->ulongtab
-      = gt_malloc(sizeof (*suffixsortspace->ulongtab) * numofentries);
+    sufspacesize = (size_t) gt_safe_mult_ulong_check((unsigned long)
+                                            sizeof (*suffixsortspace->ulongtab),
+                                            numofentries,
+                                            gt_suffixsortspace_overflow_abort,
+                                            &numofentries);
+    suffixsortspace->ulongtab = gt_malloc(sufspacesize);
     gt_log_log("sizeof (ulongtab)=%lu bytes",
                sizeof (*suffixsortspace->ulongtab) * numofentries);
     suffixsortspace->getdirect = getdirect_ulong;
