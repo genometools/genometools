@@ -19,7 +19,7 @@ def revcomp(seq)
 end
 
 def comp(seq)
-  seq.tr("aAcCgGtTnN","tTgGcCaAnN")
+  seq.tr("aAcCgGtTnNrRyYmMkKwWsSbBdDhHvV","tTgGcCaAnNyYrRkKmMwWsSvVhHdDbB")
 end
 
 def mapwildcards(seq)
@@ -59,7 +59,7 @@ def getseq(filename, mirrored = false, rm = "fwd")
   ret
 end
 
-def run_encseq_comparison(filename, mirrored, readmode, singlechars,
+def run_encseq_comparison(filename, mirrored, lossless, readmode, singlechars,
                           numsamples = NUMSAMPLES)
   seq = getseq(filename, mirrored, readmode)
   ranges = []
@@ -73,8 +73,9 @@ def run_encseq_comparison(filename, mirrored, readmode, singlechars,
   ranges.each do |rng|
     line = "#{$bin}gt dev seqdecode -output concat " + \
            "-range #{rng[0]} #{rng[1]} " + \
+           "#{"-lossless" if lossless} " + \
            "-dir #{readmode} #{"-mirrored" if mirrored} " + \
-           "#{"-singlechars" if singlechars} #{filename}"
+           "#{"-singlechars" if singlechars} #{filename.split('/').last}"
     if mirrored and AATESTSEQS.include?(filename)
       # -mirroring should fail on proteins
       run_test(line, :retval => 1)
@@ -82,7 +83,7 @@ def run_encseq_comparison(filename, mirrored, readmode, singlechars,
       run_test line
       File.open("seqout", "w+") do |f|
         outseq = seq[rng[0]..rng[1]]
-        if DNATESTSEQS.include?(filename)
+        if DNATESTSEQS.include?(filename) and !lossless then
           outseq = mapwildcards(outseq)
         end
         f.write(outseq)
@@ -94,39 +95,46 @@ def run_encseq_comparison(filename, mirrored, readmode, singlechars,
 end
 
 def testformirrored(s, readmode)
-  [false, true].each do |mirrored|
-    [false, true].each do |singlechars|
-      Name "gt seqdecode #{s.split('/').last} cc " + \
-           "#{"mirr " if mirrored}#{"sngl " if singlechars}#{readmode}"
-      Keywords "gt_seqdecode #{" mirroring" if mirrored}"
-      Test do
-        run "#{$bin}gt dev seqencode #{s}"
-        run_encseq_comparison(s, mirrored, readmode, singlechars)
-      end
+  [false, true].each do |lossless|
+    [false, true].each do |mirrored|
+      [false, true].each do |singlechars|
+        Name "gt seqdecode #{s.split('/').last} cc " + \
+             "#{"m " if mirrored}#{"s " if singlechars}#{"l " if lossless}#{readmode}"
+        Keywords "gt_seqdecode #{" mirroring" if mirrored}#{" lossless" if lossless}"
+        Test do
+          run "#{$bin}gt dev seqencode -des -ssp -sds " + \
+              "#{"-lossless" if lossless} " + \
+              "#{s}"
+          run_encseq_comparison(s, mirrored, lossless, readmode, singlechars)
+        end
 
-      Name "gt seqdecode #{s.split('/').last} cc " + \
-           "#{"mirr " if mirrored}#{"sngl " if singlechars}#{readmode} " + \
-           "whole seq"
-      Keywords "gt_seqdecode#{" mirroring" if mirrored}"
-      Test do
-        run_test "#{$bin}gt dev seqencode #{s}"
-        seq = getseq(s, mirrored, readmode)
-        line = "#{$bin}gt dev seqdecode -output concat -dir #{readmode} " + \
-               "#{"-mirrored" if mirrored} " + \
-               "#{"-singlechars" if singlechars} #{s}"
-        if mirrored and AATESTSEQS.include?(s)
-          # -mirroring should fail on proteins
-          run_test(line, :retval => 1)
-        else
-          run_test line
-          File.open("seqout", "w+") do |f|
-            if DNATESTSEQS.include?(s)
-              seq = mapwildcards(seq)
+        Name "gt seqdecode #{s.split('/').last} cc " + \
+             "#{"m " if mirrored}#{"s " if singlechars}#{"l " if lossless}#{readmode} " + \
+             "whole seq"
+        Keywords "gt_seqdecode#{" mirroring" if mirrored}#{" lossless" if lossless}"
+        Test do
+          run_test "#{$bin}gt dev seqencode -des -ssp -sds " + \
+                   "#{"-lossless" if lossless} " + \
+                   "#{s}"
+          seq = getseq(s, mirrored, readmode)
+          line = "#{$bin}gt dev seqdecode -output concat -dir #{readmode} " + \
+                 "#{"-mirrored" if mirrored} " + \
+                 "#{"-lossless" if lossless} " + \
+                 "#{"-singlechars" if singlechars} ./#{s.split('/').last}"
+          if mirrored and AATESTSEQS.include?(s)
+            # -mirroring should fail on proteins
+            run_test(line, :retval => 1)
+          else
+            run_test line
+            File.open("seqout", "w+") do |f|
+              if DNATESTSEQS.include?(s) and !lossless then
+                seq = mapwildcards(seq)
+              end
+              f.write(seq)
+              f.write("\n")
             end
-            f.write(seq)
-            f.write("\n")
+            run "diff seqout #{$last_stdout}"
           end
-          run "diff seqout #{$last_stdout}"
         end
       end
     end
