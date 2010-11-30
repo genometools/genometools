@@ -72,3 +72,12 @@ Keywords "gt_splicesiteinfo"
 Test do
   run_test "#{$bin}gt splicesiteinfo -seqfile #{$testdata}gt_splicesiteinfo_test_5.fas #{$testdata}gt_splicesiteinfo_prob_1.gff3"
 end
+
+Name "gt splicesiteinfo error message"
+Keywords "gt_splicesiteinfo"
+Test do
+  run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_splicesiteinfo_test_1.gff3 " +
+      "| #{$bin}gt splicesiteinfo -seqfile " +
+      "#{$testdata}gt_splicesiteinfo_test_1.fas", :retval => 1
+  grep $last_stderr, "Has the sequence-region to sequence mapping been defined correctly"
+end

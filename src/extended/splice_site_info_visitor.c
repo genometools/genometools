@@ -73,7 +73,18 @@ static int process_intron(GtSpliceSiteInfoVisitor *ssiv, GtGenomeNode *intron,
                                                  &sequence, &seqlen, &offset,
                                                  seqid, &range, err);
     if (!had_err) {
-      gt_assert(range.end - offset < seqlen);
+      if (range.end >= seqlen + offset) {
+        gt_error_set(err, "the intron on sequence '%s' defined on line %u in "
+                          "file \"%s\" lies outside its corresponding "
+                          "sequence. Has the sequence-region to sequence "
+                          "mapping been defined correctly?",
+                          gt_str_get(seqid),
+                          gt_genome_node_get_line_number(intron),
+                          gt_genome_node_get_filename(intron));
+        had_err = -1;
+      }
+    }
+    if (!had_err) {
       strand = gt_feature_node_get_strand((GtFeatureNode*) intron);
       if (strand == GT_STRAND_FORWARD || strand == GT_STRAND_REVERSE) {
         /* fill site */
