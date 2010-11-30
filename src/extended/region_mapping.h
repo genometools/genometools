@@ -46,6 +46,7 @@ int              gt_region_mapping_get_description(GtRegionMapping*,
 const char*      gt_region_mapping_get_md5_fingerprint(GtRegionMapping*,
                                                        GtStr *seqid,
                                                        const GtRange *range,
+                                                       unsigned long *offset,
                                                        GtError*);
 void             gt_region_mapping_delete(GtRegionMapping*);
 

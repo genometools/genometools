@@ -40,6 +40,7 @@ static void id_to_md5_visitor_free(GtNodeVisitor *nv)
 typedef struct {
   GtStr *new_seqid;
   GtRegionMapping *region_mapping;
+  unsigned long offset;
 } S2MChangeSeqidInfo;
 
 static void s2m_build_new_target(GtStr *target, GtStrArray *target_ids,
@@ -85,16 +86,23 @@ static int s2m_change_target_seqids(GtGenomeNode *gn, const char *target,
                                              target_strands);
   for (i = 0; !had_err && i < gt_str_array_size(target_ids); i++) {
     GtStr *seqid;
-    const GtRange *range;
+    unsigned long offset;
     const char *md5;
+    GtRange *range;
     seqid = gt_str_array_get_str(target_ids, i);
     range = gt_array_get(target_ranges, i);
     if (!(md5 = gt_region_mapping_get_md5_fingerprint(region_mapping, seqid,
-                                                      range, err))) {
+                                                      range, &offset, err))) {
       had_err = -1;
     }
-    if (!had_err)
+    if (!had_err) {
+      GtRange transformed_range;
       gt_str_array_set_cstr(target_ids, i, md5);
+      gt_assert(offset);
+      transformed_range = gt_range_offset(range, -(offset - 1));
+      range->start = transformed_range.start;
+      range->end = transformed_range.end;
+    }
   }
   if (!had_err) {
     GtStr *new_target = gt_str_new();
@@ -111,11 +119,17 @@ static int s2m_change_target_seqids(GtGenomeNode *gn, const char *target,
 
 static int s2m_change_seqid(GtGenomeNode *gn, void *data, GtError *err)
 {
-  const char *target;
   S2MChangeSeqidInfo *info = (S2MChangeSeqidInfo*) data;
+  const char *target;
   gt_error_check(err);
   gt_assert(gn && info);
   gt_genome_node_change_seqid(gn, info->new_seqid);
+  if (info->offset) {
+    GtRange old_range, new_range;
+    old_range = gt_genome_node_get_range(gn);
+    new_range = gt_range_offset(&old_range, -info->offset);
+    gt_genome_node_set_range(gn, &new_range);
+  }
   if ((target = gt_feature_node_get_attribute((GtFeatureNode*) gn,
                                               TARGET_STRING))) {
     return s2m_change_target_seqids(gn, target, info->region_mapping, err);
@@ -133,10 +147,11 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
   seqid = gt_genome_node_get_seqid(gn);
   if (!gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
     /* seqid is not already a MD5 seqid -> change id */
+    unsigned long offset;
     const char *md5;
     GtRange range = gt_genome_node_get_range(gn);
     if (!(md5 = gt_region_mapping_get_md5_fingerprint(region_mapping, seqid,
-                                                      &range, err))) {
+                                                      &range, &offset, err))) {
       had_err = -1;
     }
     if (!had_err) {
@@ -146,6 +161,8 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
         S2MChangeSeqidInfo info;
         info.new_seqid = new_seqid;
         info.region_mapping = region_mapping;
+        gt_assert(offset);
+        info.offset = offset - 1;
         had_err = gt_genome_node_traverse_children(gn, &info, s2m_change_seqid,
                                                    true, err);
       }

@@ -233,6 +233,7 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
 const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
                                                   GtStr *seqid,
                                                   const GtRange *range,
+                                                  unsigned long *offset,
                                                   GtError *err)
 {
   const char *md5 = NULL;
@@ -244,11 +245,11 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
   had_err = update_bioseq_if_necessary(rm, seqid, err);
   if (!had_err) {
     if (rm->usedesc) {
-      unsigned long seqnum, offset;
+      unsigned long seqnum;
       gt_assert(rm->seqid2seqnum_mapping);
       had_err = gt_seqid2seqnum_mapping_map(rm->seqid2seqnum_mapping,
                                             gt_str_get(seqid), range, &seqnum,
-                                            &offset, err);
+                                            offset, err);
       if (!had_err)
         md5 = gt_bioseq_get_md5_fingerprint(rm->bioseq, seqnum);
     }
@@ -264,10 +265,12 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
         had_err = gt_bioseq_collection_grep_desc_md5(rm->bioseq_collection,
                                                      &md5, seqid, err);
       }
+      *offset = 1;
     }
     else {
       gt_assert(!rm->seqid2seqnum_mapping);
       md5 = gt_bioseq_get_md5_fingerprint(rm->bioseq, 0);
+      *offset = 1;
     }
   }
   return md5;
