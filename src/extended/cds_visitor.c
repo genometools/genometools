@@ -75,6 +75,17 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
                                                  gt_genome_node_get_seqid(gn),
                                                  &range, err);
     if (!had_err) {
+      if (range.end >= raw_sequence_length + v->offset) {
+        gt_error_set(err, "the feature on sequence '%s' defined on line %u in "
+                     "file \"%s\" lies outside its corresponding sequence. Has "
+                     "the sequence-region to sequence mapping been defined "
+                     "correctly?", gt_str_get(gt_genome_node_get_seqid(gn)),
+                     gt_genome_node_get_line_number(gn),
+                     gt_genome_node_get_filename(gn));
+        had_err = -1;
+      }
+    }
+    if (!had_err) {
       gt_assert(range.start && range.end); /* 1-based coordinates */
       gt_assert(range.end - v->offset < raw_sequence_length);
       gt_splicedseq_add(v->splicedseq, range.start - v->offset,

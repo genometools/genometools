@@ -7,6 +7,14 @@
   end
 end
 
+Name "gt cds error message"
+Keywords "gt_cds xxx"
+Test do
+  run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_cds_test_1.in | " +
+      "#{$bin}gt cds -seqfile #{$testdata}gt_cds_test_1.fas -", :retval => 1
+  grep $last_stderr, "Has the sequence-region to sequence mapping been defined correctly"
+end
+
 1.upto(14) do |i|
   Name "gt cds test #{i} (-usedesc)"
   Keywords "gt_cds usedesc"
