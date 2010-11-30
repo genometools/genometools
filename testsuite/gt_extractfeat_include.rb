@@ -103,6 +103,15 @@ Test do
   run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
 end
 
+Name "gt extractfeat error message"
+Keywords "gt_extractfeat xxx"
+Test do
+  run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_extractfeat_succ_1.gff3 | " +
+      "#{$bin}gt extractfeat -type gene -seqfile " +
+      "#{$testdata}/gt_extractfeat_succ_1.fas -", :retval => 1
+  grep $last_stderr, "Has the sequence-region to sequence mapping been defined correctly"
+end
+
 Name "gt extractfeat -help"
 Keywords "gt_extractfeat"
 Test do

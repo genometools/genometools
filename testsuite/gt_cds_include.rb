@@ -8,7 +8,7 @@
 end
 
 Name "gt cds error message"
-Keywords "gt_cds xxx"
+Keywords "gt_cds"
 Test do
   run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_cds_test_1.in | " +
       "#{$bin}gt cds -seqfile #{$testdata}gt_cds_test_1.fas -", :retval => 1
