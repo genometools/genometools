@@ -2,7 +2,7 @@ if not $arguments["nocairo"] then
   Name "gtpython: genome_stream bindings (output stream)"
   Keywords "gt_python"
   Test do
-    run_python "#{$testdata}gtpython/gff3.py #{$testdata}/gff3_file_1_short.txt"
+    run_python "#{$testdata}gtpython/gff3.py #{$testdata}gff3_file_1_short.txt"
     run "env LC_ALL=C sort #{$last_stdout}"
     run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   end
@@ -10,7 +10,7 @@ if not $arguments["nocairo"] then
   Name "gtpython: genome_visitor bindings (output stream)"
   Keywords "gt_python"
   Test do
-    run_python "#{$testdata}gtpython/genome_visitor.py #{$testdata}/gff3_file_1_short.txt"
+    run_python "#{$testdata}gtpython/genome_visitor.py #{$testdata}gff3_file_1_short.txt"
     run "env LC_ALL=C sort #{$last_stdout}"
     run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   end

@@ -12,7 +12,7 @@ testdatafiles.add('TTT-small.fna')
 
 def expandfilename(testdatafiles,filename)
   if testdatafiles.member?(filename)
-    return "#{$testdata}/#{filename}"
+    return "#{$testdata}#{filename}"
   else
     return "#{$gttestdata}DNA-mix/Grumbach.fna/#{filename}"
   end
@@ -91,10 +91,10 @@ Test do
     run_test "#{$bin}gt suffixerator -indexname #{indexname} " +
              "-pl -des #{fileargs(testdatafiles,args)}"
     thislist=grepprjfile("#{indexname}.prj")
-    reflist=grepprjfile("#{$testdata}/prj-files/#{indexname}.prj")
+    reflist=grepprjfile("#{$testdata}prj-files/#{indexname}.prj")
     if thislist != reflist
       STDERR.puts "files #{indexname}.prj and " +
-                  "#{$testdata}/prj-files/#{indexname}.prj differ"
+                  "#{$testdata}prj-files/#{indexname}.prj differ"
       exit 1
     end
   end

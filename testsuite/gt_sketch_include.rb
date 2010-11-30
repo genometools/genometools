@@ -116,7 +116,7 @@ end
 Name "gt sketch -showrecmaps (large text size)"
 Keywords "gt_sketch showrecmaps"
 Test do
-  run_test "#{$bin}gt sketch -style #{$testdata}/bigfonts.style " + \
+  run_test "#{$bin}gt sketch -style #{$testdata}bigfonts.style " + \
            "-showrecmaps out.png #{$testdata}gt_sketch_textwidth.gff3", \
            :maxtime => 600
   run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
@@ -124,7 +124,7 @@ end
 
 
 
-Dir.glob("#{$testdata}/fail*style") do |file|
+Dir.glob("#{$testdata}fail*style") do |file|
   testname = /fail_([^.]+)\.style/.match(file)[1]
   Name "gt sketch runtime Lua error (#{testname})"
   Keywords "gt_sketch lua"
@@ -200,7 +200,7 @@ end
 Name "sketch_parsed reverse order (Python)"
 Keywords "gt_sketch gt_python annotationsketch"
 Test do
-  run_python "#{$testdata}/gtpython/sketch_parsed_with_ordering.py " + \
+  run_python "#{$testdata}gtpython/sketch_parsed_with_ordering.py " + \
              "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
              "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
              :maxtime => 600
@@ -209,7 +209,7 @@ end
 Name "sketch_parsed invalid order (Python, string != int)"
 Keywords "gt_sketch gt_python annotationsketch"
 Test do
-  run_python "#{$testdata}/gtpython/sketch_parsed_with_invalid_ordering.py " + \
+  run_python "#{$testdata}gtpython/sketch_parsed_with_invalid_ordering.py " + \
              "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
              "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
              :maxtime => 600
@@ -219,14 +219,14 @@ end
 Name "sketch_parsed invalid order (Python, None)"
 Keywords "gt_sketch gt_python annotationsketch"
 Test do
-  run_python "#{$testdata}/gtpython/sketch_parsed_with_invalid_ordering_2.py " + \
+  run_python "#{$testdata}gtpython/sketch_parsed_with_invalid_ordering_2.py " + \
              "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
              "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
              :maxtime => 600
   grep($last_stderr, /Track ordering function must return a number/)
 end
 
-Dir.glob("#{$testdata}/fail*style") do |file|
+Dir.glob("#{$testdata}fail*style") do |file|
   testname = /fail_([^.]+)\.style/.match(file)[1]
   Name "sketch_parsed.py style fail (#{testname})"
   Keywords "gt_sketch gt_python annotationsketch"
@@ -275,7 +275,7 @@ end
 Name "sketch_parsed reverse order (Ruby)"
 Keywords "gt_sketch gt_ruby annotationsketch"
 Test do
-  run_ruby "#{$testdata}/gtruby/sketch_parsed_with_ordering.rb " + \
+  run_ruby "#{$testdata}gtruby/sketch_parsed_with_ordering.rb " + \
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
            :maxtime => 600
@@ -284,7 +284,7 @@ end
 Name "sketch_parsed invalid order (Ruby, string != numeric)"
 Keywords "gt_sketch gt_ruby annotationsketch"
 Test do
-  run_ruby "#{$testdata}/gtruby/sketch_parsed_with_invalid_ordering.rb " + \
+  run_ruby "#{$testdata}gtruby/sketch_parsed_with_invalid_ordering.rb " + \
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
            :maxtime => 600, :retval => 1
@@ -294,14 +294,14 @@ end
 Name "sketch_parsed invalid order (Ruby, nil)"
 Keywords "gt_sketch gt_ruby annotationsketch"
 Test do
-  run_ruby "#{$testdata}/gtruby/sketch_parsed_with_invalid_ordering_2.rb " + \
+  run_ruby "#{$testdata}gtruby/sketch_parsed_with_invalid_ordering_2.rb " + \
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
            :maxtime => 600, :retval => 1
   grep($last_stderr, /Track ordering callback must return a number/)
 end
 
-Dir.glob("#{$testdata}/fail*style") do |file|
+Dir.glob("#{$testdata}fail*style") do |file|
   testname = /fail_([^.]+)\.style/.match(file)[1]
   Name "sketch_parsed.rb style fail (#{testname})"
   Keywords "gt_sketch gt_ruby annotationsketch"

@@ -3,7 +3,7 @@
   Keywords "gt_cds"
   Test do
     run_test "#{$bin}gt cds -seqfile #{$testdata}gt_cds_test_#{i}.fas #{$testdata}gt_cds_test_#{i}.in"
-    run "diff #{$last_stdout} #{$testdata}/gt_cds_test_#{i}.out"
+    run "diff #{$last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
 
@@ -20,7 +20,7 @@ end
   Keywords "gt_cds usedesc"
   Test do
     run_test "#{$bin}gt cds -usedesc -seqfile #{$testdata}gt_cds_test_#{i}.fas #{$testdata}gt_cds_test_#{i}.in"
-    run "diff #{$last_stdout} #{$testdata}/gt_cds_test_#{i}.out"
+    run "diff #{$last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
 
@@ -30,7 +30,7 @@ Test do
   run_test "#{$bin}gt cds -usedesc -seqfile " +
            "#{$testdata}gt_cds_test_descrange.fas " +
            "#{$testdata}gt_cds_test_descrange.in"
-  run "diff #{$last_stdout} #{$testdata}/gt_cds_test_descrange.out"
+  run "diff #{$last_stdout} #{$testdata}gt_cds_test_descrange.out"
 end
 
 Name "gt cds test (multi description)"
@@ -39,7 +39,7 @@ Test do
   run_test "#{$bin}gt cds -usedesc -seqfile " +
            "#{$testdata}gt_cds_descrange_multi.fas " +
            "#{$testdata}gt_cds_descrange_multi.in"
-  run "diff #{$last_stdout} #{$testdata}/gt_cds_descrange_multi.out"
+  run "diff #{$last_stdout} #{$testdata}gt_cds_descrange_multi.out"
 end
 
 Name "gt cds test (multi description fail 1)"
@@ -85,7 +85,7 @@ Test do
            "#{$testdata}U89959_genomic.fas " +
            "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.in"
   run "diff #{$last_stdout} " +
-      "#{$testdata}/gt_cds_nostartcodon_nofinalstopcodon.out"
+      "#{$testdata}gt_cds_nostartcodon_nofinalstopcodon.out"
 end
 
 Name "gt cds test (nGASP)"
@@ -102,7 +102,7 @@ if $gttestdata then
   Keywords "gt_cds"
   Test do
     run_test "#{$bin}gt cds -seqfile #{$gttestdata}cds/marker_region.fas " +
-             "#{$gttestdata}/cds/marker_bug.gff3"
-    run "diff #{$last_stdout} #{$gttestdata}/cds/marker_bug.out"
+             "#{$gttestdata}cds/marker_bug.gff3"
+    run "diff #{$last_stdout} #{$gttestdata}cds/marker_bug.out"
   end
 end

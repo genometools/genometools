@@ -124,7 +124,7 @@ end
 Name "gt extractseq -keys from fastafile at1MB"
 Keywords "gt_extractseq"
 Test do
-  run "sed  -e '/^[^\\>]/d' -e 's/^>gi\|\\([^\|]*\\).*/\\1/' #{$testdata}/at1MB"
+  run "sed  -e '/^[^\\>]/d' -e 's/^>gi\|\\([^\|]*\\).*/\\1/' #{$testdata}at1MB"
   run_test "#{$bin}gt extractseq -keys #{$last_stdout} -width 70 " +
            "#{$testdata}at1MB"
   run "grep -v '^#' #{$last_stdout}"
@@ -159,14 +159,14 @@ Name "gt suffixerator -kys with key of length 0"
 Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
-             "-db #{$testdata}/trembl-emptykey.faa",:retval => 1)
+             "-db #{$testdata}trembl-emptykey.faa",:retval => 1)
 end
 
 Name "gt suffixerator -kys with keys of different length"
 Keywords "gt_extractseq"
 Test do
   run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
-             "-db #{$testdata}/trembl-difflenkey.faa",:retval => 1)
+             "-db #{$testdata}trembl-difflenkey.faa",:retval => 1)
 end
 
 if $gttestdata then
@@ -181,22 +181,22 @@ if $gttestdata then
   Keywords "gt_extractseq"
   Test do
     run_test("#{$bin}gt suffixerator -protein -ssp -tis -des -sds -kys " +
-             "-db #{$gttestdata}/trembl/trembl-section.fsa.gz")
-    run("gunzip -c #{$gttestdata}/trembl/trembl-section.fsa.gz")
+             "-db #{$gttestdata}trembl/trembl-section.fsa.gz")
+    run("gunzip -c #{$gttestdata}trembl/trembl-section.fsa.gz")
     run("mv #{$last_stdout} trembl-section.fsa")
-    run("#{$scriptsdir}/tr2deskeys.rb #{$gttestdata}/trembl/trembl-section.fsa.gz")
+    run("#{$scriptsdir}/tr2deskeys.rb #{$gttestdata}trembl/trembl-section.fsa.gz")
     run("mv #{$last_stdout} trembl-section.keylist")
     run("#{$scriptsdir}/randlines.rb trembl-section.keylist 1000")
     run("mv #{$last_stdout} trembl-section.random-keylist")
     run_test("#{$bin}gt extractseq -keys trembl-section.keylist -width 60 " +
              "trembl-section.fsa.gz")
     run("cmp -s #{$last_stdout} trembl-section.fsa")
-    run_test("#{$bin}gt extractseq -keys #{$testdata}/trkeys.txt -width 60 " +
+    run_test("#{$bin}gt extractseq -keys #{$testdata}trkeys.txt -width 60 " +
              "trembl-section.fsa.gz")
-    run("cmp -s #{$last_stdout} #{$testdata}/trkeys-result.txt")
+    run("cmp -s #{$last_stdout} #{$testdata}trkeys-result.txt")
     run_test("#{$bin}gt extractseq -keys #{$last_stdout} " +
              "trembl-section.fsa.gz",:retval => 1)
-    run_test("#{$bin}gt extractseq -keys #{$testdata}/trembl-wrongkey.txt " +
+    run_test("#{$bin}gt extractseq -keys #{$testdata}trembl-wrongkey.txt " +
              "trembl-section.fsa.gz",:retval => 1)
     run_test("#{$bin}gt extractseq -keys trembl-section.random-keylist -width 60 " +
              "trembl-section.fsa.gz")

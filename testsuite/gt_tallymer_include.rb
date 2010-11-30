@@ -1,5 +1,5 @@
 def runtyrmkifail(args)
-  inputfile = "#{$testdata}/Duplicate.fna"
+  inputfile = "#{$testdata}Duplicate.fna"
   Name "gt tallymer mkindex failure"
   Keywords "gt_tallymer mkindex"
   Test do
@@ -11,13 +11,13 @@ end
 
 def checktallymer(reffile,mersize)
   vstreebin="/Users/kurtz/bin-ops/i686-apple-darwin"
-  reffilepath="#{$testdata}/#{reffile}"
+  reffilepath="#{$testdata}#{reffile}"
   if reffile == 'at1MB'
-    query="#{$testdata}/U89959_genomic.fas"
+    query="#{$testdata}U89959_genomic.fas"
   else
-    query="#{$testdata}/at1MB"
+    query="#{$testdata}at1MB"
   end
-  reftestdir="#{$gttestdata}/tallymer"
+  reftestdir="#{$gttestdata}tallymer"
   outoptions="-counts -pl -mersize #{mersize} -minocc 2 -maxocc 30"
   run_test "#{$bin}gt suffixerator -db #{reffilepath} -pl -dna " +
            "-tis -suf -lcp -indexname sfxidx", :maxtime => 360

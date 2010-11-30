@@ -44,22 +44,22 @@ if $gttestdata and ($memcheck.nil? or !$memcheck.length == 0)
   bigfiles.push "at1MB"
 end
 
-fp = File.open("#{$testdata}/genomediff/testsuite", 'r')
+fp = File.open("#{$testdata}genomediff/testsuite", 'r')
 smallfilecodes = fp.readlines
 fp.close
 
 smallfilecodes.collect! do |filecode|
-  "#{$testdata}/genomediff/#{filecode}".chomp
+  "#{$testdata}genomediff/#{filecode}".chomp
 end
 
 # do not run the big tests with valgrind
 if $gttestdata and ($memcheck.nil? or !$memcheck.length == 0)
-  fp = File.open("#{$gttestdata}/genomediff/codelist", 'r')
+  fp = File.open("#{$gttestdata}genomediff/codelist", 'r')
   bigfilecodes = fp.readlines
   fp.close
 
   bigfilecodes.collect! do |filecode|
-    "#{$gttestdata}/genomediff/#{filecode}".chomp
+    "#{$gttestdata}genomediff/#{filecode}".chomp
   end
 end
 
@@ -302,7 +302,7 @@ def check_shulen_for_list_pairwise(list)
           pck_out = []
           esa_out = []
 
-          test_pck("#{$testdata}/#{file1} #{$testdata}/#{file2}", "-shulen")
+          test_pck("#{$testdata}#{file1} #{$testdata}#{file2}", "-shulen")
 
           File.open($last_stdout, 'r') do |outfile|
             while line = outfile.gets do
@@ -319,7 +319,7 @@ def check_shulen_for_list_pairwise(list)
               failtest("can't parse output pck #{file1} #{file2}")
             end
           end
-          test_esa("#{$testdata}/#{file1} #{$testdata}/#{file2}",
+          test_esa("#{$testdata}#{file1} #{$testdata}#{file2}",
                     "-shulen")
 
           File.open($last_stdout, 'r') do |outfile|
@@ -353,7 +353,7 @@ Keywords "gt_genomediff esa pck small check_shulen"
 Test do
   realfiles = ""
   allfiles.each do |file|
-    realfiles += "#{$testdata}/"+ file + " "
+    realfiles += "#{$testdata}"+ file + " "
   end
   numoffiles = 0
   pck_out = []

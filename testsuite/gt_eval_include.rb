@@ -1,23 +1,23 @@
 Name "gt eval test 1"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt eval #{$testdata}/gt_eval_test_1.in #{$testdata}/gt_eval_test_1.in"
-  run "diff #{$last_stdout} #{$testdata}/gt_eval_test_1.out"
+  run_test "#{$bin}gt eval #{$testdata}gt_eval_test_1.in #{$testdata}gt_eval_test_1.in"
+  run "diff #{$last_stdout} #{$testdata}gt_eval_test_1.out"
 end
 
 2.upto(8) do |i|
   Name "gt eval test #{i}"
   Keywords "gt_eval"
   Test do
-    run_test "#{$bin}gt eval #{$testdata}/gt_eval_test_#{i}.reality #{$testdata}/gt_eval_test_#{i}.prediction"
-    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.nuc"
+    run_test "#{$bin}gt eval #{$testdata}gt_eval_test_#{i}.reality #{$testdata}gt_eval_test_#{i}.prediction"
+    run "diff #{$last_stdout} #{$testdata}gt_eval_test_#{i}.nuc"
   end
 
   Name "gt eval test #{i} -nuc no"
   Keywords "gt_eval"
   Test do
-    run_test "#{$bin}gt eval -nuc no #{$testdata}/gt_eval_test_#{i}.reality #{$testdata}/gt_eval_test_#{i}.prediction"
-    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.out"
+    run_test "#{$bin}gt eval -nuc no #{$testdata}gt_eval_test_#{i}.reality #{$testdata}gt_eval_test_#{i}.prediction"
+    run "diff #{$last_stdout} #{$testdata}gt_eval_test_#{i}.out"
   end
 end
 
@@ -25,53 +25,53 @@ end
   Name "gt eval test #{i}"
   Keywords "gt_eval"
   Test do
-    run_test "#{$bin}gt eval #{$testdata}/gt_eval_test_#{i}.in #{$testdata}/gt_eval_test_#{i}.in"
-    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.out"
+    run_test "#{$bin}gt eval #{$testdata}gt_eval_test_#{i}.in #{$testdata}gt_eval_test_#{i}.in"
+    run "diff #{$last_stdout} #{$testdata}gt_eval_test_#{i}.out"
   end
 end
 
 Name "gt eval prob 1"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt eval -nuc no #{$testdata}/gt_eval_prob_1.reality #{$testdata}/gt_eval_prob_1.prediction"
-  run "diff #{$last_stdout} #{$testdata}/gt_eval_prob_1.out"
+  run_test "#{$bin}gt eval -nuc no #{$testdata}gt_eval_prob_1.reality #{$testdata}gt_eval_prob_1.prediction"
+  run "diff #{$last_stdout} #{$testdata}gt_eval_prob_1.out"
 end
 
 Name "gt eval prob 1 (swapped)"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt eval -nuc no #{$testdata}/gt_eval_prob_1.prediction #{$testdata}/gt_eval_prob_1.reality"
-  run "diff #{$last_stdout} #{$testdata}/gt_eval_prob_1.out_swapped"
+  run_test "#{$bin}gt eval -nuc no #{$testdata}gt_eval_prob_1.prediction #{$testdata}gt_eval_prob_1.reality"
+  run "diff #{$last_stdout} #{$testdata}gt_eval_prob_1.out_swapped"
 end
 
 Name "gt eval -ltr test 1"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt eval -ltr #{$testdata}/gt_eval_ltr_test_1.in #{$testdata}/gt_eval_ltr_test_1.in"
-  run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_test_1.out"
+  run_test "#{$bin}gt eval -ltr #{$testdata}gt_eval_ltr_test_1.in #{$testdata}gt_eval_ltr_test_1.in"
+  run "diff #{$last_stdout} #{$testdata}gt_eval_ltr_test_1.out"
 end
 
 2.upto(9) do |i|
   Name "gt eval -ltr test #{i}"
   Keywords "gt_eval"
   Test do
-    run_test "#{$bin}gt eval -ltr #{$testdata}/gt_eval_ltr_test_#{i}.reality #{$testdata}/gt_eval_ltr_test_#{i}.prediction"
-    run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_test_#{i}.out"
+    run_test "#{$bin}gt eval -ltr #{$testdata}gt_eval_ltr_test_#{i}.reality #{$testdata}gt_eval_ltr_test_#{i}.prediction"
+    run "diff #{$last_stdout} #{$testdata}gt_eval_ltr_test_#{i}.out"
   end
 end
 
 Name "gt eval -ltr prob 1 (failure)"
 Keywords "gt_eval"
 Test do
-  run_test("#{$bin}gt eval -ltrdelta 30 -ltr #{$testdata}/gt_eval_ltr_prob_1.reality #{$testdata}/gt_eval_ltr_prob_1.prediction", :retval => 1)
+  run_test("#{$bin}gt eval -ltrdelta 30 -ltr #{$testdata}gt_eval_ltr_prob_1.reality #{$testdata}gt_eval_ltr_prob_1.prediction", :retval => 1)
   grep($last_stderr, "is not sorted")
 end
 
 Name "gt eval -ltr prob 1 (success)"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt gff3 -sort #{$testdata}/gt_eval_ltr_prob_1.prediction | #{$memcheck} #{$bin}gt eval -ltrdelta 30 -ltr #{$testdata}/gt_eval_ltr_prob_1.reality -"
-  run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_prob_1.out"
+  run_test "#{$bin}gt gff3 -sort #{$testdata}gt_eval_ltr_prob_1.prediction | #{$memcheck} #{$bin}gt eval -ltrdelta 30 -ltr #{$testdata}gt_eval_ltr_prob_1.reality -"
+  run "diff #{$last_stdout} #{$testdata}gt_eval_ltr_prob_1.out"
 end
 
 if $gttestdata then

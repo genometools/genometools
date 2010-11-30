@@ -12,7 +12,7 @@ def runchain2dim(args,matchfile)
   Test do
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
     argstring = args.gsub(/[ ]/,"")
-    run "cmp -s #{$last_stdout} #{$testdata}/chaindata/chain#{argstring}"
+    run "cmp -s #{$last_stdout} #{$testdata}chaindata/chain#{argstring}"
   end
 end
 
@@ -45,10 +45,10 @@ runchain2dimfailure("-global xv")
 runchain2dimfailure("-global ov h")
 runchain2dimfailure("-local 2p h")
 runchain2dimfailure("-local -global")
-runchain2dimfailure("-global","#{$testdata}/ecolicmp-neg.of")
-runchain2dimfailure("-global","#{$testdata}/ecolicmp-seÂ.of")
+runchain2dimfailure("-global","#{$testdata}ecolicmp-neg.of")
+runchain2dimfailure("-global","#{$testdata}ecolicmp-seÂ.of")
 
-# runchain2dimall("#{$testdata}/ecolicmp.of")
+# runchain2dimall("#{$testdata}ecolicmp.of")
 
 params = ["-global",
 	  "-silent -global",
@@ -75,4 +75,4 @@ params = ["-global",
 	  "-local 2b -wf 1.8 -maxgap 10",
 	  "-local 20 -wf 1.8 -maxgap 10"]
 
-runchain2dimall(params,"#{$testdata}/ecolicmp250.of")
+runchain2dimall(params,"#{$testdata}ecolicmp250.of")

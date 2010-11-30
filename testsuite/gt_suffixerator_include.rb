@@ -375,17 +375,17 @@ end
 
 SATS = ["direct", "bytecompress", "eqlen", "bit", "uchar", "ushort", "uint32"]
 
-EQLENDNAFILE = {:filename => "#{$testdata}/test1.fasta",
+EQLENDNAFILE = {:filename => "#{$testdata}test1.fasta",
                 :desc => "equal length DNA",
                 :msgs => {
                   "bytecompress" => "cannot use bytecompress on DNA sequences"}}
-DNAFILE   = {:filename => "#{$testdata}/at1MB",
+DNAFILE   = {:filename => "#{$testdata}at1MB",
              :desc => "non-equal length DNA",
              :msgs => {
                 "bytecompress" => "cannot use bytecompress on DNA sequences",
                 "eqlen" => "all sequences are of equal length and no " + \
                 "sequence contains"}}
-EQLENAAFILE = {:filename => "#{$testdata}/trembl-eqlen.faa",
+EQLENAAFILE = {:filename => "#{$testdata}trembl-eqlen.faa",
                 :desc => "equal length AA",
                 :msgs => {
                   "eqlen" => "as the sequence is not DNA",
@@ -393,7 +393,7 @@ EQLENAAFILE = {:filename => "#{$testdata}/trembl-eqlen.faa",
                   "uchar" => "as the sequence is not DNA",
                   "ushort" => "as the sequence is not DNA",
                   "uint32" => "as the sequence is not DNA"}}
-AAFILE    = {:filename => "#{$testdata}/trembl.faa",
+AAFILE    = {:filename => "#{$testdata}trembl.faa",
                 :desc => "non-equal length AA",
                 :msgs => {
                   "eqlen" => "as the sequence is not DNA",

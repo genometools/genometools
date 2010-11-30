@@ -78,9 +78,9 @@ end
 
 def addfilepath(filename)
   if filename == 'Duplicate.fna' or filename == 'at1MB'
-    return "#{$testdata}/#{filename}"
+    return "#{$testdata}#{filename}"
   else
-    return "#{$gttestdata}/DNA-mix/Grumbach.fna/#{filename}"
+    return "#{$gttestdata}DNA-mix/Grumbach.fna/#{filename}"
   end
 end
 
@@ -120,8 +120,8 @@ def checkrepfindwithquery(reffile,queryfile)
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 15 mkv-idx " +
   #    "#{queryfilepath}"
   #run "sed -e '/^#/d' #{$last_stdout} | sort"
-  # run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
-  run "cmp -s #{$last_stdout} #{$gttestdata}/repfind-result/#{reffile}-#{queryfile}.result"
+  # run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
+  run "cmp -s #{$last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
 end
 
 Name "gt paircmp"
@@ -179,10 +179,10 @@ allfiles.each do |reffile|
       Name "gt greedyfwdmat #{reffile} #{queryfile}"
       Keywords "gt_greedyfwdmat small"
       Test do
-        createandcheckgreedyfwdmat("#{$testdata}/#{reffile}",
-                                   "#{$testdata}/#{queryfile}")
-        checktagerator("#{$testdata}/#{reffile}",
-                       "#{$testdata}/#{queryfile}")
+        createandcheckgreedyfwdmat("#{$testdata}#{reffile}",
+                                   "#{$testdata}#{queryfile}")
+        checktagerator("#{$testdata}#{reffile}",
+                       "#{$testdata}#{queryfile}")
         run "rm -f sfx.* fmi.* pck.*"
       end
     end
@@ -196,22 +196,22 @@ allfiles.each do |reffile|
       Keywords "gt_idxlocali"
       Test do
         run("#{$bin}gt packedindex mkindex -ssp -tis -indexname pck -db " +
-            "#{$testdata}/#{reffile} -sprank -dna -pl -bsize 10 " +
+            "#{$testdata}#{reffile} -sprank -dna -pl -bsize 10 " +
             "-locfreq 32 -dir rev",
             :maxtime => 100)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck " +
-                 "-q #{$testdata}/#{queryfile}",
+                 "-q #{$testdata}#{queryfile}",
                  :maxtime => 100)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -pck pck -online " +
-                 "-q #{$testdata}/#{queryfile}",
+                 "-q #{$testdata}#{queryfile}",
                  :maxtime => 100)
         run_test "#{$bin}gt suffixerator -indexname sfx -ssp -tis -suf -dna " +
-                 "-v -db #{$testdata}/#{reffile}"
+                 "-v -db #{$testdata}#{reffile}"
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx " +
-                 "-q #{$testdata}/#{queryfile}",
+                 "-q #{$testdata}#{queryfile}",
                  :maxtime => 100)
         run_test("#{$bin}gt dev idxlocali -s -th 7 -esa sfx -online " +
-                 "-q #{$testdata}/#{queryfile}",
+                 "-q #{$testdata}#{queryfile}",
                  :maxtime => 100)
       end
     end
@@ -232,7 +232,7 @@ allfiles.each do |reffile|
   Keywords "gt_packedindex small"
   Test do
     run_test("#{$bin}gt packedindex mkindex -tis -ssp -indexname pck " +
-             "-sprank -db #{$testdata}/#{reffile} -dna -pl -bsize 10 " +
+             "-sprank -db #{$testdata}#{reffile} -dna -pl -bsize 10 " +
              " -locfreq 32 -dir rev",
              :maxtime => 1200)
   end

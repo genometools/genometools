@@ -167,7 +167,7 @@ end
   Keywords "gt_gff3"
   Test do
     run_test("#{$bin}gt gff3 -typecheck-built-in " +
-             "#{$testdata}/gt_gff3_test_#{i}.gff3", :retval => 1)
+             "#{$testdata}gt_gff3_test_#{i}.gff3", :retval => 1)
   end
 end
 

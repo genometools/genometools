@@ -64,7 +64,7 @@ def checkshulengthdistforlist(filelist)
   numofdbfiles = filelist.length
   realfilelist = []
   filelist.each do |filename|
-    realfilelist.push("#{$testdata}/#{filename}")
+    realfilelist.push("#{$testdata}#{filename}")
   end
   pairwiseshulengthmatrix = MultiDimensionalArray.new(numofdbfiles,numofdbfiles)
   0.upto(numofdbfiles-1) do |idx|
@@ -121,8 +121,8 @@ allfiles.each do |file1|
       Name "gt shulengthdist #{file1} #{file2}"
       Keywords "gt_shulengthdist small"
       Test do
-        checkshulengthdistforpair("#{$testdata}/#{file1}",
-                                  "#{$testdata}/#{file2}")
+        checkshulengthdistforpair("#{$testdata}#{file1}",
+                                  "#{$testdata}#{file2}")
       end
     end
   end
