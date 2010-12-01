@@ -81,5 +81,4 @@ void gt_gff3_out_stream_retain_id_attributes(GtGFF3OutStream *gff3_out_stream)
 {
   gt_assert(gff3_out_stream);
   gt_gff3_visitor_retain_id_attributes(gff3_out_stream->gff3_visitor);
-
 }
