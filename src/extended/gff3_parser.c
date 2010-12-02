@@ -1294,12 +1294,12 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     if (!had_err) {
       seqid = tmpline; /* save seqid */
       /* skip non-blanks */
-      while (tmpline < tmplineend && !(tmpline[0] == ' '))
+      while (tmpline < tmplineend && !(tmpline[0] == ' ' || tmpline[0] == '\t'))
         tmpline++;
       /* terminate seqid */
       *tmpline++ = '\0';
       /* skip blanks */
-      while (tmpline < tmplineend && tmpline[0] == ' ')
+      while (tmpline < tmplineend && (tmpline[0] == ' ' || tmpline[0] == '\t'))
         tmpline++;
       if (tmpline > tmplineend) {
         gt_error_set(err, "missing sequence region start on line %u in file "
@@ -1312,12 +1312,13 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
 
     if (!had_err) {
       /* skip non-blanks */
-      while (tmpline <= tmplineend && !(tmpline[0] == ' '))
+      while (tmpline <= tmplineend && !(tmpline[0] == ' '
+              || tmpline[0] == '\t'))
         tmpline++;
       /* terminate seqstart */
       *tmpline++ = '\0';
       /* skip blanks */
-      while (tmpline < tmplineend && tmpline[0] == ' ')
+      while (tmpline < tmplineend && (tmpline[0] == ' ' || tmpline[0] == '\t'))
         tmpline++;
       if (tmpline > tmplineend) {
         gt_error_set(err, "missing sequence region end on line %u in file "
