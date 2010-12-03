@@ -10,7 +10,7 @@ def reverse_and_concat(file)
    convertseq -o #{tmpfile} \
    -force -r #{file}`
   basename = File.basename(file, ".*")
-  newfile = File.join(dirname, basename + "_plus_rev.fas")
+  newfile = basename + "_plus_rev.fas"
   FileUtils.cp(file, newfile)
   file = newfile
   File.open(file, 'a') {|fp|
@@ -202,7 +202,6 @@ kr_testable_files.each do |code|
     if result = compare_2d_result(esa_out,kr_out)
       failtest("different results esa-kr #{result[0]},#{result[1]}")
     end
-    FileUtils.rm(Dir.glob("#{code}*plus*fas"))
   end
 end
 
@@ -287,7 +286,6 @@ kr_testable_files.each do |code|
         end
       end
     end
-    FileUtils.rm(Dir.glob("#{code}*plus*fas"))
   end
 end
 
