@@ -235,10 +235,12 @@ allmultifiles.each do |filename|
   Name "gt suffixerator sfxmap-failure #{filename}"
   Keywords "gt_suffixerator"
   Test do
-    run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx -sat direct " +
+
+    run_test "#{$bin}gt suffixerator -tis -dna -des no -sds no -ssp no " + 
+             "-indexname localidx  -sat direct " +
              "-db #{$testdata}#{filename}"
     run_test "#{$bin}gt suffixerator -suf -lcp -pl -dir rev -ii localidx"
-    run_test "#{$bin}gt dev sfxmap -tis -des -esa localidx",
+    run_test "#{$bin}gt dev sfxmap -tis -des -sds -esa localidx",
              :retval => 1
     # In short read files with equal read lengths, ssptabs need not
     # be built explicitly.

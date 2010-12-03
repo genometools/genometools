@@ -587,7 +587,7 @@ static int sfxmap_esa(Sfxmapoptions *arguments,GtError *err)
       }
     }
   }
-  if (!haserr && arguments->inputdes)
+  if (!haserr && arguments->inputdes && arguments->inputsds)
   {
     gt_logger_log(logger, "checkallsequencedescriptions");
     gt_encseq_check_descriptions(suffixarray.encseq);

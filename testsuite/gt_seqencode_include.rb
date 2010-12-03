@@ -1,9 +1,27 @@
-Name "gt seqencode|seqdecode test"
+Name "gt seqencode|seqdecode simple test"
 Keywords "gt_seqencode gt_seqdecode"
 Test do
   run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
   run "#{$bin}gt dev seqdecode #{$testdata}foobar.fas"
   run "diff #{$last_stdout} #{$testdata}foobar.fas"
+end
+
+Name "gt seqencode multiple files without indexname"
+Keywords "gt_seqencode"
+Test do
+  run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
+  run_test "#{$bin}gt dev seqencode #{$testdata}foobar.fas " + \
+           "#{$testdata}foobar.fas", :retval => 1
+  grep($last_stderr, /if more than one input file is given/)
+end
+
+Name "gt seqdecode lossless without ois"
+Keywords "gt_seqdecode lossless"
+Test do
+  run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
+  run_test "#{$bin}gt dev seqdecode -lossless #{$testdata}foobar.fas", \
+           :retval => 1
+  grep($last_stderr, /cannot open file.*ois/)
 end
 
 STDREADMODES  = ["fwd", "rev"]
@@ -12,7 +30,7 @@ DNATESTSEQS   = ["#{$testdata}foobar.fas",
                  "#{$testdata}gt_bioseq_succ_3.fas",
                  "#{$testdata}at1MB"]
 AATESTSEQS    = ["#{$testdata}trembl-eqlen.faa"]
-NUMSAMPLES    = 10
+NUMSAMPLES    = 5
 
 def revcomp(seq)
   comp(seq).reverse
