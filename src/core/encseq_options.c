@@ -171,7 +171,7 @@ gt_encseq_options_register_generic(GtOptionParser *op,
                                        "sequence to file (deprecated, kept for "
                                        "compatibility reasons)",
                                        &oi->tis,
-                                       false);
+                                       true);
     gt_option_parser_add_option(op, oi->optiontis);
     gt_option_is_development_option(oi->optiontis);
 
@@ -179,20 +179,20 @@ gt_encseq_options_register_generic(GtOptionParser *op,
                                        "output sequence separator positions "
                                        "to file",
                                        &oi->ssp,
-                                       false);
+                                       true);
     gt_option_parser_add_option(op, oi->optionssp);
 
     oi->optiondes = gt_option_new_bool("des",
                                        "output sequence descriptions to file",
                                        &oi->des,
-                                       false);
+                                       true);
     gt_option_parser_add_option(op, oi->optiondes);
 
     oi->optionsds = gt_option_new_bool("sds",
                                        "output sequence description separator "
                                        "positions to file",
                                        &oi->sds,
-                                       false);
+                                       true);
     gt_option_parser_add_option(op, oi->optionsds);
     gt_option_imply(oi->optionsds, oi->optiondes);
 
