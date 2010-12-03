@@ -149,7 +149,7 @@
 #define GTH_DEFAULT_FINAL_STOP_CODON     false
 
 #define GTH_DEFAULT_GS2OUT               false    /* default for gs2out */
-#define GTH_DEFAULT_MD5SEQIDS            false
+#define GTH_DEFAULT_MD5IDS               false
 
 #define GTH_DEFAULT_EXONDISTRI           false
 #define GTH_DEFAULT_INTRONDISTRI         false

@@ -127,7 +127,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optfinalstopcodon = NULL,       /* output */
          *optshowseqnums = NULL,          /* output */
          *optgs2out = NULL,               /* output */
-         *optmd5seqids = NULL,            /* output */
+         *optmd5ids = NULL,               /* output */
          *optmaskpolyatails = NULL,       /* data preprocessing */
          *optproteinsmap = NULL,          /* data preprocessing */
          *optnoautoindex = NULL,          /* data preprocessing */
@@ -468,12 +468,12 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                  &call_info->out->gs2out, GTH_DEFAULT_GS2OUT);
   gt_option_parser_add_option(op, optgs2out);
 
-  /* -md5seqids */
-  optmd5seqids = gt_option_new_bool("md5seqids", "show MD5 fingerprints as "
-                                    "sequence IDs", &call_info->out->md5seqids,
-                                    GTH_DEFAULT_MD5SEQIDS);
-  gt_option_is_development_option(optmd5seqids);
-  gt_option_parser_add_option(op, optmd5seqids);
+  /* -md5ids */
+  optmd5ids = gt_option_new_bool("md5ids", "show MD5 fingerprints as sequence "
+                                 "IDs", &call_info->out->md5ids,
+                                 GTH_DEFAULT_MD5IDS);
+  gt_option_is_development_option(optmd5ids);
+  gt_option_parser_add_option(op, optmd5ids);
 
   /* -maskpolyatails */
   call_info->simfilterparam.maskpolyAtails = false;

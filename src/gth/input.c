@@ -66,7 +66,7 @@ struct GthInput {
   unsigned long genomicfrompos,   /* analyse genomic seq. from this position */
                 genomicwidth,     /* analyse only this width of genomic seq. */
                 genomictopos;     /* = genomicfrompos + genomicwidth - 1 */
-  bool md5seqids;
+  bool md5ids;
   GtStrArray **genomicMD5s,
              **referenceMD5s;
 };
@@ -149,8 +149,8 @@ int gth_input_preprocess(GthInput *input,
                                      err);
   if (!had_err)
     had_err = gth_input_load_scorematrix(input, scorematrixfile, out, err);
-  if (!had_err && out->md5seqids) {
-    input->md5seqids = out->md5seqids;
+  if (!had_err && out->md5ids) {
+    input->md5ids = out->md5ids;
     had_err = fillMD5s(input, err);
   }
   return had_err;
@@ -351,7 +351,7 @@ void gth_input_save_gen_id(GthInput *input, GtStr *id,
 {
   gt_assert(input && id);
   gt_assert(input->gen_file_num == file_num);
-  if (input->md5seqids) {
+  if (input->md5ids) {
     gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
     gt_str_append_cstr(id, gt_str_array_get(input->genomicMD5s[file_num],
                                             seq_num));
@@ -365,7 +365,7 @@ void gth_input_save_ref_id(GthInput *input, GtStr *id,
 {
   gt_assert(input && id);
   gt_assert(input->ref_file_num == file_num);
-  if (input->md5seqids) {
+  if (input->md5ids) {
     gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
     gt_str_append_cstr(id, gt_str_array_get(input->referenceMD5s[file_num],
                                             seq_num));

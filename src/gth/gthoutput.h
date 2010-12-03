@@ -68,7 +68,7 @@ typedef struct {
        gff3out,                     /* show output in GFF3 format */
        gff3descranges,              /* use description ranges for GFF3 output */
        gs2out,                      /* output in deprecated GeneSeqer2 format */
-       md5seqids,                   /* show MD5 fingerprints as sequence IDs */
+       md5ids,                      /* show MD5 fingerprints as sequence IDs */
        comments,                    /* output (additional) comments */
        showeops,                    /* show edit operations after (protein) DP
                                      */
