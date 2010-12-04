@@ -2,7 +2,9 @@
   Name "gt cds test #{i}"
   Keywords "gt_cds"
   Test do
-    run_test "#{$bin}gt cds -seqfile #{$testdata}gt_cds_test_#{i}.fas #{$testdata}gt_cds_test_#{i}.in"
+    run_test "#{$bin}gt cds -minorflen 1 -startcodon yes " +
+             "-seqfile #{$testdata}gt_cds_test_#{i}.fas " +
+             "#{$testdata}gt_cds_test_#{i}.in"
     run "diff #{$last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
@@ -19,7 +21,9 @@ end
   Name "gt cds test #{i} (-usedesc)"
   Keywords "gt_cds usedesc"
   Test do
-    run_test "#{$bin}gt cds -usedesc -seqfile #{$testdata}gt_cds_test_#{i}.fas #{$testdata}gt_cds_test_#{i}.in"
+    run_test "#{$bin}gt cds -minorflen 1 -startcodon yes -usedesc " +
+             "-seqfile #{$testdata}gt_cds_test_#{i}.fas " +
+             "#{$testdata}gt_cds_test_#{i}.in"
     run "diff #{$last_stdout} #{$testdata}gt_cds_test_#{i}.out"
   end
 end
@@ -27,7 +31,7 @@ end
 Name "gt cds test (description range)"
 Keywords "gt_cds usedesc"
 Test do
-  run_test "#{$bin}gt cds -usedesc -seqfile " +
+  run_test "#{$bin}gt cds -minorflen 1 -usedesc -seqfile " +
            "#{$testdata}gt_cds_test_descrange.fas " +
            "#{$testdata}gt_cds_test_descrange.in"
   run "diff #{$last_stdout} #{$testdata}gt_cds_test_descrange.out"
@@ -36,7 +40,7 @@ end
 Name "gt cds test (multi description)"
 Keywords "gt_cds usedesc"
 Test do
-  run_test "#{$bin}gt cds -usedesc -seqfile " +
+  run_test "#{$bin}gt cds -minorflen 1 -usedesc -seqfile " +
            "#{$testdata}gt_cds_descrange_multi.fas " +
            "#{$testdata}gt_cds_descrange_multi.in"
   run "diff #{$last_stdout} #{$testdata}gt_cds_descrange_multi.out"

@@ -73,19 +73,19 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   option = gt_option_new_uint_min("minorflen", "set the minimum length an open "
                                   "reading frame (ORF) must have to be added "
                                   "as a CDS feature (measured in amino acids)",
-                                  &arguments->minorflen, 1, 1);
+                                  &arguments->minorflen, 64, 1);
   gt_option_parser_add_option(op, option);
 
   /* -startcodon */
   option = gt_option_new_bool("startcodon", "require than an ORF must begin "
                               "with a start codon", &arguments->start_codon,
-                              true);
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -finalstopcodon */
   option = gt_option_new_bool("finalstopcodon", "require that the final ORF "
                               "must end with a stop codon",
-                              &arguments->final_stop_codon, true);
+                              &arguments->final_stop_codon, false);
   gt_option_parser_add_option(op, option);
 
   /* -genericstartcodons */
