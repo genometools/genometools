@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -57,13 +57,13 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]",
-                         "Replace spliced alignments with computed consensus "
-                         "spliced alignments.");
+                            "Replace spliced alignments with computed "
+                            "consensus spliced alignments.");
 
   /* -join-length */
   option = gt_option_new_ulong("join-length", "set join length for the spliced "
-                            "alignment clustering", &arguments->join_length,
-                            DEFAULT_JOIN_LENGTH);
+                               "alignment clustering", &arguments->join_length,
+                               DEFAULT_JOIN_LENGTH);
   gt_option_parser_add_option(op, option);
 
   /* -v */
@@ -81,9 +81,7 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
 static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
                          void *tool_arguments, GtError *err)
 {
-  GtNodeStream *gff3_in_stream,
-               *csa_stream,
-               *gff3_out_stream;
+  GtNodeStream *gff3_in_stream, *csa_stream, *gff3_out_stream;
   CSAArguments *arguments = tool_arguments;
   int had_err;
 
@@ -111,8 +109,8 @@ static int gt_csa_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 GtTool* gt_csa(void)
 {
   return gt_tool_new(gt_csa_arguments_new,
-                  gt_csa_arguments_delete,
-                  gt_csa_option_parser_new,
-                  NULL,
-                  gt_csa_runner);
+                     gt_csa_arguments_delete,
+                     gt_csa_option_parser_new,
+                     NULL,
+                     gt_csa_runner);
 }
