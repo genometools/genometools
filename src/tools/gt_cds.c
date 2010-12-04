@@ -65,7 +65,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   GtOption *option;
   gt_assert(arguments);
 
-  op = gt_option_parser_new("[option ...] GFF3_file",
+  op = gt_option_parser_new("[option ...] [GFF3_file]",
                             "Add CDS features to exon "
                             "features given in GFF3 file.");
 
@@ -105,7 +105,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
-  gt_option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_max_args(op, 1);
 
   return op;
 }
