@@ -148,6 +148,13 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
   gt_assert(rm && rawseq && length && seqid);
   /* MD5 sequence id */
   if (gt_md5_seqid_has_prefix(gt_str_get(seqid))) {
+    if (rm->userawseq) {
+      gt_assert(!rm->seqid2seqnum_mapping);
+      *rawseq = rm->rawseq;
+      *length = rm->rawlength;
+      *offset = rm->rawoffset;
+      return 0;
+    }
     if (!rm->bioseq_collection) {
       rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
                                                        err);
