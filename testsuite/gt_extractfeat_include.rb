@@ -104,7 +104,7 @@ Test do
 end
 
 Name "gt extractfeat error message"
-Keywords "gt_extractfeat xxx"
+Keywords "gt_extractfeat"
 Test do
   run "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_extractfeat_succ_1.gff3 | " +
       "#{$bin}gt extractfeat -type gene -seqfile " +
