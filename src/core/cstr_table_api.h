@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,7 @@ typedef struct GtCstrTable GtCstrTable;
 GtCstrTable*  gt_cstr_table_new(void);
 /* Deletes <table>. */
 void          gt_cstr_table_delete(GtCstrTable *table);
-/* Add <cstr> to <table>. */
+/* Add <cstr> to <table>. <table> must not already contain <cstr>! */
 void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
 /* If a C-string equal to <cstr> is contained in <table>, it is returned.
    Otherwise NULL is returned. */
