@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -84,30 +84,26 @@ const GtNodeStreamClass* gt_filter_stream_class(void)
   return nsc;
 }
 
-GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream,
-                                GtStr *seqid, GtStr *typefilter,
-                                GtRange contain_range, GtRange overlap_range,
-                                GtStrand strand, GtStrand targetstrand,
-                                bool has_CDS, unsigned long max_gene_length,
-                                unsigned long max_gene_num,
-                                double min_gene_score, double max_gene_score,
-                                double min_average_splice_site_prob,
-                                unsigned long feature_num)
+GtNodeStream* gt_filter_stream_new(GtNodeStream *in_stream, GtStr *seqid,
+                                   GtStr *source, GtStr *typefilter,
+                                   GtRange contain_range, GtRange overlap_range,
+                                   GtStrand strand, GtStrand targetstrand,
+                                   bool has_CDS, unsigned long max_gene_length,
+                                   unsigned long max_gene_num,
+                                   double min_gene_score, double max_gene_score,
+                                   double min_average_splice_site_prob,
+                                   unsigned long feature_num)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_filter_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
   GtFilterStream *filter_stream = gt_filter_stream_cast(ns);
   gt_assert(in_stream);
   filter_stream->in_stream = gt_node_stream_ref(in_stream);
-  filter_stream->filter_visitor = gt_filter_visitor_new(seqid, typefilter,
-                                                     contain_range,
-                                                     overlap_range, strand,
-                                                     targetstrand, has_CDS,
-                                                     max_gene_length,
-                                                     max_gene_num,
-                                                     min_gene_score,
-                                                     max_gene_score,
-                                                  min_average_splice_site_prob,
-                                                     feature_num);
+  filter_stream->filter_visitor =
+    gt_filter_visitor_new(seqid, source, typefilter, contain_range,
+                          overlap_range, strand, targetstrand, has_CDS,
+                          max_gene_length, max_gene_num, min_gene_score,
+                          max_gene_score, min_average_splice_site_prob,
+                          feature_num);
   return ns;
 }

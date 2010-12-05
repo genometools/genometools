@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,17 +26,19 @@ typedef struct GtFilterStream GtFilterStream;
 
 const GtNodeStreamClass* gt_filter_stream_class(void);
 GtNodeStream*            gt_filter_stream_new(GtNodeStream*,
-                                           GtStr *seqid, GtStr *typefilter,
-                                           GtRange contain_range,
-                                           GtRange overlap_range,
-                                           GtStrand strand,
-                                           GtStrand targetstrand,
-                                           bool has_CDS,
-                                           unsigned long max_gene_length,
-                                           unsigned long max_gene_num,
-                                           double min_gene_score,
-                                           double max_gene_score,
-                                           double min_average_splice_site_prob,
-                                           unsigned long feature_num);
+                                              GtStr *seqid, GtStr *source,
+                                              GtStr *typefilter,
+                                              GtRange contain_range,
+                                              GtRange overlap_range,
+                                              GtStrand strand,
+                                              GtStrand targetstrand,
+                                              bool has_CDS,
+                                              unsigned long max_gene_length,
+                                              unsigned long max_gene_num,
+                                              double min_gene_score,
+                                              double max_gene_score,
+                                              double
+                                              min_average_splice_site_prob,
+                                              unsigned long feature_num);
 
 #endif

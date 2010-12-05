@@ -29,6 +29,7 @@ struct GtFilterVisitor {
   const GtNodeVisitor parent_instance;
   GtQueue *node_buffer;
   GtStr *seqid,
+        *source,
         *typefilter;
   GtRange contain_range,
           overlap_range;
@@ -51,9 +52,10 @@ struct GtFilterVisitor {
 static void filter_visitor_free(GtNodeVisitor *nv)
 {
   GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
-  gt_queue_delete(filter_visitor->node_buffer);
-  gt_str_delete(filter_visitor->seqid);
   gt_str_delete(filter_visitor->typefilter);
+  gt_str_delete(filter_visitor->source);
+  gt_str_delete(filter_visitor->seqid);
+  gt_queue_delete(filter_visitor->node_buffer);
 }
 
 static int filter_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
@@ -147,9 +149,12 @@ static int filter_visitor_feature_node(GtNodeVisitor *nv,
   gt_error_check(err);
   fv = filter_visitor_cast(nv);
   fv->current_feature++;
-  if (!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are
-                                      equal */
-      !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GtGenomeNode*) fn))) {
+  if ((!gt_str_length(fv->seqid) || /* no seqid was specified or seqids are
+                                       equal */
+       !gt_str_cmp(fv->seqid, gt_genome_node_get_seqid((GtGenomeNode*) fn))) &&
+      (!gt_str_length(fv->source) || /* no source was specified or sources are
+                                        equal */
+       !strcmp(gt_str_get(fv->source), gt_feature_node_get_source(fn)))) {
     GtRange range = gt_genome_node_get_range((GtGenomeNode*) fn);
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
@@ -277,7 +282,9 @@ const GtNodeVisitorClass* gt_filter_visitor_class()
   return nvc;
 }
 
-GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
+GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid,
+                                     GtStr *source,
+                                     GtStr *typefilter,
                                      GtRange contain_range,
                                      GtRange overlap_range,
                                      GtStrand strand, GtStrand targetstrand,
@@ -293,6 +300,7 @@ GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid, GtStr *typefilter,
   GtFilterVisitor *filter_visitor = filter_visitor_cast(nv);
   filter_visitor->node_buffer = gt_queue_new();
   filter_visitor->seqid = gt_str_ref(seqid);
+  filter_visitor->source = gt_str_ref(source);
   filter_visitor->typefilter = gt_str_ref(typefilter);
   filter_visitor->contain_range = contain_range;
   filter_visitor->overlap_range = overlap_range;

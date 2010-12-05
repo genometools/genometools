@@ -19,6 +19,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}empty_file"
 end
 
+Name "gt filter test (-source .)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -source . #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt filter test (-source undef)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -source undef #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.header"
+end
+
 Name "gt filter test (-maxgenelength)"
 Keywords "gt_filter"
 Test do

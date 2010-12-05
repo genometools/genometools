@@ -17,6 +17,7 @@ changes in version 1.3.6 (2010-12-05)
 - new tools `gt md5_to_id` and `gt id_to_md5` added
 - `gt gff3` has new option -addids
 - `gt stat` has new option -source
+- `gt filter` has new option -source
 
 
 changes in version 1.3.5 (2010-07-12)

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -35,6 +35,7 @@ typedef struct {
        has_CDS,
        targetbest;
   GtStr *seqid,
+        *source,
         *typefilter,
         *gt_strand_char,
         *targetgt_strand_char;
@@ -56,6 +57,7 @@ static void* gt_filter_arguments_new(void)
 {
   FilterArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqid = gt_str_new();
+  arguments->source = gt_str_new();
   arguments->typefilter = gt_str_new();
   arguments->gt_strand_char = gt_str_new();
   arguments->strand = GT_NUM_OF_STRAND_TYPES;
@@ -74,6 +76,7 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->targetgt_strand_char);
   gt_str_delete(arguments->gt_strand_char);
   gt_str_delete(arguments->typefilter);
+  gt_str_delete(arguments->source);
   gt_str_delete(arguments->seqid);
   gt_free(arguments);
 }
@@ -94,6 +97,11 @@ static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
                                 "the filter (excluding comments)",
                                 arguments->seqid,
                                 NULL);
+  gt_option_parser_add_option(op, option);
+
+  /* -source */
+  option = gt_option_new_string("source", "source a feature must have to pass "
+                                "the filter", arguments->source, NULL);
   gt_option_parser_add_option(op, option);
 
   /* -typefilter */
@@ -262,7 +270,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
 
   /* create a filter stream */
   filter_stream = gt_filter_stream_new(gff3_in_stream, arguments->seqid,
-                                       arguments->typefilter,
+                                       arguments->source, arguments->typefilter,
                                        arguments->contain_range,
                                        arguments->overlap_range,
                                        arguments->strand,

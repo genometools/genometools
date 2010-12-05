@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,6 +27,7 @@ const GtNodeVisitorClass* gt_filter_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
    strand <strand>. */
 GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid,
+                                     GtStr *source,
                                      GtStr *typefilter,
                                      GtRange contain_range,
                                      GtRange overlap_range,
