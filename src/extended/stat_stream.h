@@ -33,7 +33,8 @@ GtNodeStream*            gt_stat_stream_new(GtNodeStream*,
                                             bool exon_length_distri,
                                             bool exon_number_distri,
                                             bool intron_length_distri,
-                                            bool cds_length_distri);
+                                            bool cds_length_distri,
+                                            bool used_sources);
 void                     gt_stat_stream_show_stats(GtNodeStream*, GtFile*);
 
 #endif

@@ -83,6 +83,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_stat_cdslengthdistri.out"
 end
 
+Name "gt stat (-source)"
+Keywords "gt_stat"
+Test do
+  run_test "#{$bin}gt stat -source #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_stat_source.out"
+end
+
 Name "gt stat (unsorted)"
 Keywords "gt_stat"
 Test do

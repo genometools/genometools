@@ -16,6 +16,7 @@
 */
 
 #include "core/assert_api.h"
+#include "core/cstr_table_api.h"
 #include "core/disc_distri.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_rep.h"
@@ -40,6 +41,7 @@ struct GtStatVisitor {
                *exon_number_distribution,
                *intron_length_distribution,
                *cds_length_distribution;
+  GtCstrTable *used_sources;
 };
 
 #define stat_visitor_cast(GV)\
@@ -48,6 +50,7 @@ struct GtStatVisitor {
 static void stat_visitor_free(GtNodeVisitor *nv)
 {
   GtStatVisitor *sv = stat_visitor_cast(nv);
+  gt_cstr_table_delete(sv->used_sources);
   gt_disc_distri_delete(sv->cds_length_distribution);
   gt_disc_distri_delete(sv->intron_length_distribution);
   gt_disc_distri_delete(sv->exon_number_distribution);
@@ -70,6 +73,16 @@ static int add_exon_or_cds_number(GtGenomeNode *gn, void *data,
     sv->cds_length_for_distri += gt_range_length(&range);
   }
   return 0;
+}
+
+static void compute_source_statistics(GtFeatureNode *fn,
+                                      GtCstrTable *used_sources)
+{
+  const char *source;
+  gt_assert(fn && used_sources);
+  source = gt_feature_node_get_source(fn);
+  if (!gt_cstr_table_get(used_sources, source))
+    gt_cstr_table_add(used_sources, source);
 }
 
 static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
@@ -128,6 +141,8 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
       gt_feature_node_get_multi_representative(fn) == fn) {
     sv->number_of_multi_features++;
   }
+  if (sv->used_sources)
+    compute_source_statistics(fn, sv->used_sources);
   compute_type_statistics(fn, sv);
   if (sv->exon_number_distribution || sv->cds_length_distribution) {
     sv->exon_number_for_distri = 0;
@@ -190,7 +205,8 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
                                    bool exon_length_distri,
                                    bool exon_number_distri,
                                    bool intron_length_distri,
-                                   bool cds_length_distri)
+                                   bool cds_length_distri,
+                                   bool used_sources)
 {
   GtNodeVisitor *nv = gt_node_visitor_create(gt_stat_visitor_class());
   GtStatVisitor *sv = stat_visitor_cast(nv);
@@ -206,6 +222,8 @@ GtNodeVisitor* gt_stat_visitor_new(bool gene_length_distri,
     sv->intron_length_distribution = gt_disc_distri_new();
   if (cds_length_distri)
     sv->cds_length_distribution = gt_disc_distri_new();
+  if (used_sources)
+    sv->used_sources = gt_cstr_table_new();
   return nv;
 }
 
@@ -260,5 +278,14 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
   if (sv->cds_length_distribution) {
     gt_file_xprintf(outfp, "CDS length distribution:\n");
     gt_disc_distri_show(sv->cds_length_distribution, outfp);
+  }
+  if (sv->used_sources) {
+    GtStrArray *sources;
+    unsigned long i;
+    gt_file_xprintf(outfp, "used source tags:\n");
+    sources = gt_cstr_table_get_all(sv->used_sources);
+    for (i = 0; i < gt_str_array_size(sources); i++)
+      gt_file_xprintf(outfp, "%s\n", gt_str_array_get(sources, i));
+    gt_str_array_delete(sources);
   }
 }

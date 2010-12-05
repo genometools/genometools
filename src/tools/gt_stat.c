@@ -32,6 +32,7 @@ typedef struct {
        exon_length_distribution,
        intron_length_distribution,
        cds_length_distribution,
+       used_sources,
        addintrons,
        verbose;
   GtOutputFileInfo *ofi;
@@ -93,10 +94,16 @@ static GtOptionParser* gt_stat_option_parser_new(void *tool_arguments)
                               &arguments->intron_length_distribution, false);
   gt_option_parser_add_option(op, option);
 
-  /* cdslengthdistri */
+  /* -cdslengthdistri */
   option = gt_option_new_bool("cdslengthdistri", "show CDS length distribution "
                               "(measured in amino acids)",
                               &arguments->cds_length_distribution, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -source */
+  option = gt_option_new_bool("source", "show used source tags (column 2 in "
+                              "regular GFF3 lines)",
+                              &arguments->used_sources, false);
   gt_option_parser_add_option(op, option);
 
   /* -addintrons */
@@ -144,7 +151,8 @@ static int gt_stat_runner(int argc, const char **argv, int parsed_args,
                                    arguments->exon_length_distribution,
                                    arguments->exon_number_distribution,
                                    arguments->intron_length_distribution,
-                                   arguments->cds_length_distribution);
+                                   arguments->cds_length_distribution,
+                                   arguments->used_sources);
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */

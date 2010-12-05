@@ -74,7 +74,8 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
                                  bool exon_length_distri,
                                  bool exon_number_distri,
                                  bool intron_length_distri,
-                                 bool cds_length_distri)
+                                 bool cds_length_distri,
+                                 bool used_sources)
 {
   GtNodeStream *gs = gt_node_stream_create(gt_stat_stream_class(), false);
   GtStatStream *ss = stat_stream_cast(gs);
@@ -82,7 +83,7 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
   ss->stat_visitor = gt_stat_visitor_new(gene_length_distri, gene_score_distri,
                                          exon_length_distri, exon_number_distri,
                                          intron_length_distri,
-                                         cds_length_distri);
+                                         cds_length_distri, used_sources);
   return gs;
 }
 
