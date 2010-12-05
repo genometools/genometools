@@ -1069,7 +1069,7 @@ static int parse_regular_gff3_line(GtGFF3Parser *parser,
   gt_splitter_split(splitter, line, line_length, '\t');
   if (gt_splitter_size(splitter) != 9UL) {
     gt_error_set(err, "line %u in file \"%s\" does not contain 9 tab (\\t) "
-                   "separated fields", line_number, filename);
+                      "separated fields", line_number, filename);
     had_err = -1;
   }
   if (!had_err) {
