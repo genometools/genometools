@@ -41,6 +41,7 @@ static void* gt_genomediff_arguments_new(void)
 {
   GtGenomediffArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->indexname = gt_str_new();
+  arguments->unitfile = gt_str_new();
   arguments->queryname = gt_str_array_new();
   return arguments;
 }
@@ -50,10 +51,12 @@ static void gt_genomediff_arguments_delete(void *tool_arguments)
   GtGenomediffArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->indexname);
+  gt_str_delete(arguments->unitfile);
   gt_str_array_delete(arguments->queryname);
   gt_option_delete(arguments->ref_esaindex);
   gt_option_delete(arguments->ref_pckindex);
   gt_option_delete(arguments->ref_queryname);
+  gt_option_delete(arguments->ref_unitfile);
   gt_free(arguments);
 }
 
@@ -62,7 +65,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   GtGenomediffArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *optionquery, *optionesaindex, *optionpckindex,
-           *optiontraverse, *optionscan;
+           *optiontraverse, *optionscan, *option_unitfile;
   gt_assert(arguments);
 
   /* init */
@@ -107,6 +110,21 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /* ref pck */
   arguments->ref_pckindex = gt_option_ref(optionpckindex);
+
+  /*-unitfile*/
+  option_unitfile = gt_option_new_filename("unitfile",
+                                           "specifies genomic units "
+                                           "File should contain comment lines "
+                                           "with names for the units (# NAME) "
+                                           "followed by lines containing the "
+                                           "filenames for that genome/unit",  
+                                           arguments->unitfile);
+  gt_option_is_development_option(option_unitfile);
+  gt_option_exclude(optionesaindex,option_unitfile);
+  gt_option_parser_add_option(op, option_unitfile);
+
+  /*ref unitfile*/
+  arguments->ref_unitfile = gt_option_ref(option_unitfile);
 
   /* -query */
   optionquery = gt_option_new_filenamearray("query",
@@ -222,6 +240,10 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
     printf ("setting showtime = true\n");
     gt_showtime_enable();
   }
+  if (!had_err && gt_option_is_set(arguments->ref_unitfile))
+    arguments->with_units = true;
+  else
+    arguments->with_units = false;
   return had_err;
 }
 
@@ -285,6 +307,10 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     gt_timer_start(timer);
     gt_assert(timer);
   }
+  if (arguments->with_units)
+    printf ("unitfile option set, filename is %s\n",
+       gt_str_get(arguments->unitfile));
+  if (!had_err) {
     if (arguments->simplesearch)
     {
       if (timer != NULL)

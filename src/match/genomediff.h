@@ -26,9 +26,11 @@
 typedef struct {
   GtOption *ref_esaindex,
            *ref_pckindex,
+           *ref_unitfile,
            *ref_queryname;
   bool verbose,
        with_esa,
+       with_units,
        simplesearch,
        shulen_only,
        traverse_only,
@@ -40,7 +42,8 @@ typedef struct {
          divergence_m, /* kr2 M */
          divergence_threshold; /* kr2 THRESHOLD */
   GtStrArray *queryname;
-  GtStr *indexname;
+  GtStr *indexname,
+        *unitfile;
 } GtGenomediffArguments;
 
 #endif
