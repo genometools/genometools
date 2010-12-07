@@ -308,40 +308,36 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     gt_timer_start(timer);
     gt_assert(timer);
   }
-  /* TODO remomve this if it works */
-  if (arguments->with_units)
-    printf ("unitfile option set, filename is %s\n",
-       gt_str_get(arguments->unitfile));
-  if (!had_err) {
-    if (arguments->simplesearch)
+  if (arguments->simplesearch)
+  {
+    if (timer != NULL)
     {
-      if (timer != NULL)
-      {
-        gt_timer_show_progress(timer, "run simple search", stdout);
-      }
-      if (arguments->with_esa)
-      {
-        had_err = callpairswisesshulendistdist(gt_str_get(arguments->indexname),
-                                               arguments->queryname,
-                                               logger,
-                                               err);
-      } else
-      {
-        had_err = gt_genomediff_pck_shu_simple(logger,
-                                               arguments,
-                                               err);
-      }
-    } else
-    {
-      if (timer != NULL)
-      {
-        gt_timer_show_progress(timer, "start shu search", stdout);
-      }
-      had_err = gt_genomediff_shu(logger,
-                                  arguments,
-                                  timer,
-                                  err);
+      gt_timer_show_progress(timer, "run simple search", stdout);
     }
+    if (arguments->with_esa)
+    {
+      had_err = callpairswisesshulendistdist(gt_str_get(arguments->indexname),
+                                             arguments->queryname,
+                                             logger,
+                                             err);
+    }
+    else
+    {
+      had_err = gt_genomediff_pck_shu_simple(logger,
+                                             arguments,
+                                             err);
+    }
+  }
+  else
+  {
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "start shu search", stdout);
+    }
+    had_err = gt_genomediff_shu(logger,
+                                arguments,
+                                timer,
+                                err);
   }
 
   if (timer != NULL)
