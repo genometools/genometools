@@ -734,7 +734,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   /* -fastdp */
   if (jump_table_new && !gthconsensus_parsing) {
     optfastdp = gt_option_new_bool("fastdp", "use jumptable to increase speed "
-                                   "of DP calculation (for cDNA alignments)",
+                                   "of DP calculation",
                                    &call_info->simfilterparam.jump_table,
                                    GTH_DEFAULT_JUMPTABLE);
     gt_option_is_development_option(optfastdp);

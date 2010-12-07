@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,8 +26,6 @@
 #include "gth/dp_scores_protein.h"
 #include "gth/sa.h"
 
-#define PROTEIN_NUMOFSCORETABLES  4
-
 /* the following type bundles nearly all sahmtp input variables, except
    for gen_seq_tran and gen_dp_length */
 typedef struct {
@@ -42,6 +40,24 @@ unsigned char gthgetcodon(unsigned char genomicchar1,
                           unsigned char genomicchar3,
                           const GtUchar *gen_alphabet_characters,
                           const GtTransTable *transtable);
+
+typedef struct GthDPtables GthDPtables;
+
+typedef void (*GthProteinCompletePathMatrixJT)(GthDPtables *dpm,
+                                               GthAlignInputProtein *input,
+                                               bool proteinexonpenal,
+                                               const unsigned char
+                                               *gen_seq_tran,
+                                               unsigned long gen_dp_length,
+                                               unsigned long ref_dp_length,
+                                               GthDPParam *dp_param,
+                                               GthDPOptionsCore
+                                               *dp_options_core,
+                                               GthDPScoresProtein
+                                               *dp_scores_protein,
+                                               GthJumpTable *jump_table,
+                                               GtArray *gen_ranges,
+                                               unsigned long ref_offset);
 
 /* The following function implements the Spliced Alignment of Genomic DNA with
    protein, as described by Usuka and Brendel. */
@@ -65,6 +81,9 @@ int gth_align_protein(GthSA*,
                       GthSpliceSiteModel *splice_site_model,
                       GthDPOptionsCore *dp_options_core,
                       GthDPOptionsPostpro *dp_options_postpro,
+                      GthProteinCompletePathMatrixJT complete_path_matrix_jt,
+                      GthJumpTable *jump_table,
+                      unsigned long ref_offset,
                       GthStat*,
                       GtFile*);
 

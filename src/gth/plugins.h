@@ -18,6 +18,7 @@
 #define PLUGINS_H
 
 #include "gth/align_dna.h"
+#include "gth/align_protein.h"
 #include "gth/input.h"
 #include "gth/jump_table.h"
 #include "gth/matcher.h"
@@ -37,6 +38,7 @@ typedef struct {
   GthJumpTableNewReverse jump_table_new_reverse;
   GthJumpTableDelete jump_table_delete;
   GthDNACompletePathMatrixJT dna_complete_path_matrix_jt;
+  GthProteinCompletePathMatrixJT protein_complete_path_matrix_jt;
 } GthPlugins;
 
 #endif

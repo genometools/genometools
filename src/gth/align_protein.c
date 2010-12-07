@@ -27,7 +27,7 @@
 #include "gth/gthoutput.h"
 #include "gth/gthstopcodon.h"
 #include "gth/align_common.h"
-#include "gth/align_protein.h"
+#include "gth/align_protein_imp.h"
 #include "gth/compute_scores.h"
 #include "gth/dp_param.h"
 #include "gth/gthtravalign.h"
@@ -38,60 +38,10 @@
 #define INDEL_PENALTY   -10.0
 #define SCALEFACTOR     0.4
 
-#define GENOMICDPSTART          3
-#define REFERENCEDPSTART        1
-
 #define ADDEOP    128
 
-#define PROTEIN_NUMOFSCORETABLES  4
-
-#define PATH(T,N,M)     dpm->core.path[T][(N) * dpm->core.columnlength + (M)]
-
-/* these definitions refer to the state index for the two N x M score matrices
-*/
-typedef enum {
-  E_STATE = 0,
-  IA_STATE,
-  IB_STATE,
-  IC_STATE,
-  PROTEIN_NUMOFSTATES
-} States;
-
-/*
-   These definitions are used to retrace the optimal path in align_protein.c.
-   E, I refer to the original state, N, M, and NM refer to which index
-   should be decremented.
-
-   IMPORTANT: Definition has to be consistent with retracenames given below.
-*/
-typedef enum {
-  /*         GS2:       representation as multi editoperation: */
-
-  E_N3M,  /* C_N3M      match               |00|00|length                   */
-          /*            or mismatch         |11|00|0^12                     */
-  E_N2M,  /* C_N2M      mismatch + 1 gap    |11|01|0^12                     */
-  E_N1M,  /* C_N1M      mismatch + 2 gaps   |11|10|0^12                     */
-  E_M,    /* C_M        insertion           |10|00|0^12                     */
-  E_N3,   /* C_N3       deletion            |01|00|0^12                     */
-          /*            or intron                                           */
-  E_N2,   /* C_N2       deletion + 1 gap    |01|01|0^12                     */
-          /*            or intron                                           */
-  E_N1,   /* C_N        deletion + 2 gaps   |01|10|0^12                     */
-          /*            or intron                                           */
-  IA_N3M, /* I_N3M      match               |00|00|length                   */
-          /*            or mismatch         |11|00|0^12                     */
-  IB_N2M, /* I_N2M      match               |00|01|length (XXX: necessary?) */
-          /*            or mismatch         |11|01|0^12                     */
-  IC_N1M, /* I_N1M      match               |00|10|length (XXX: necessary?) */
-          /*            or mismatch         |11|10|0^12                     */
-  IA_N1,  /* IA_N       intron              |01|00|length                   */
-  IB_N1,  /* IB_N       intron keep 1 base  |01|01|length                   */
-  IC_N1,  /* IC_N       intron keep 2 bases |01|10|length                   */
-
-  NUMOFRETRACE
-} Retrace;
-
-/* IMPORTANT: Definition has to be consistent with Retrace given above. */
+/* IMPORTANT: Definition has to be consistent with Retrace in
+ * align_protein_imp.h. */
 static const char *retracenames[]= {
   SHOWENUMTYPE(E_N3M),
   SHOWENUMTYPE(E_N2M),
@@ -109,30 +59,6 @@ static const char *retracenames[]= {
   SHOWENUMTYPE(NUMOFRETRACE)
 };
 
-/* the following structure bundles core all tables involved in the DP */
-typedef struct {
-  /* table to store the score of a path */
-  GthFlt *score[PROTEIN_NUMOFSTATES][PROTEIN_NUMOFSCORETABLES];
-  PATHTYPE *path[PROTEIN_NUMOFSTATES]; /* backtrace table of size
-                                          gen_dp_length * ref_dp_length */
-  unsigned long columnlength;          /* the length of a column of the DP
-                                          matrix (equals ref_dp_length + 1)
-                                          needed for access of pathD */
-} DPtablecore;
-
-/* the following structure bundles all tables involved in the dynamic
-   programming for proteins */
-typedef struct {
-  DPtablecore core; /* the core tables */
-  unsigned long *intronstart_A[PROTEIN_NUMOFSCORETABLES],
-                *intronstart_B[PROTEIN_NUMOFSCORETABLES],
-                *intronstart_C[PROTEIN_NUMOFSCORETABLES];
-  unsigned long *exonstart[PROTEIN_NUMOFSCORETABLES];
-  unsigned char *splitcodon_B[PROTEIN_NUMOFSCORETABLES],
-                *splitcodon_C1[PROTEIN_NUMOFSCORETABLES],
-                *splitcodon_C2[PROTEIN_NUMOFSCORETABLES];
-} DPtables;
-
 static void freeDPtablecore(DPtablecore *core)
 {
   unsigned long t, n;
@@ -148,7 +74,8 @@ static void freeDPtablecore(DPtablecore *core)
 static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
                             unsigned long ref_dp_length,
                             unsigned long autoicmaxmatrixsize,
-                            bool introncutout, GthStat *stat)
+                            bool introncutout, GthJumpTable *jump_table,
+                            GthStat *stat)
 {
   unsigned long matrixsize, t, n,
        sizeofpathtype =  sizeof (PATHTYPE);
@@ -188,7 +115,10 @@ static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
       core->score[t][n] = gt_malloc(sizeof (GthFlt) * (ref_dp_length + 1));
     }
 
-    core->path[t] = malloc(sizeof (PATHTYPE) * matrixsize);
+    if (jump_table)
+      core->path[t] = calloc(matrixsize, sizeof (PATHTYPE));
+    else
+      core->path[t] = malloc(sizeof (PATHTYPE) * matrixsize);
 
     if (!core->path[t]) {
       /* matrix allocation failed, return after free of allocated tables */
@@ -223,17 +153,18 @@ static void initinput(GthAlignInputProtein *input,
 }
 
 /* the following function allocates space for the DP tables for proteins */
-static int allocDPtables(DPtables *dpm, unsigned long gen_dp_length,
+static int allocDPtables(GthDPtables *dpm, unsigned long gen_dp_length,
                          bool proteinexonpenal, unsigned long ref_dp_length,
                          unsigned long autoicmaxmatrixsize, bool introncutout,
-                         GthStat *stat)
+                         GthJumpTable *jump_table, GthStat *stat)
 {
   unsigned long n;
   int rval;
 
   /* allocate core */
   if ((rval = allocDPtablecore(&dpm->core, gen_dp_length, ref_dp_length,
-                               autoicmaxmatrixsize, introncutout, stat))) {
+                               autoicmaxmatrixsize, introncutout, jump_table,
+                               stat))) {
     return rval;
   }
 
@@ -263,7 +194,7 @@ static int allocDPtables(DPtables *dpm, unsigned long gen_dp_length,
 }
 
 /* the following function initializes the DP tables for proteins */
-static void initDPtables(DPtables *dpm,
+static void initDPtables(GthDPtables *dpm,
                          bool proteinexonpenal,
                          unsigned long ref_dp_length)
 {
@@ -349,7 +280,7 @@ unsigned char gthgetcodon(unsigned char genomicchar1,
 }
 
 /* the following function evaluate the dynamic programming tables */
-static void complete_path_matrix(DPtables *dpm, GthAlignInputProtein *input,
+static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
                                  bool proteinexonpenal,
                                  const unsigned char *gen_seq_tran,
                                  unsigned long gen_dp_length,
@@ -699,7 +630,7 @@ typedef enum {
   NUMOFDUMMYSTATUSES
 } Dummystatus;
 
-static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
+static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
                          unsigned long ref_dp_length,
                          const unsigned char *gen_seq_tran,
                          unsigned long gen_dp_length, States actualstate,
@@ -1003,7 +934,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, DPtables *dpm,
   return 0;
 }
 
-static int find_optimal_path(GthBacktracePath *backtrace_path, DPtables *dpm,
+static int find_optimal_path(GthBacktracePath *backtrace_path, GthDPtables *dpm,
                              unsigned long ref_dp_length,
                              const unsigned char *gen_seq_tran,
                              unsigned long gen_dp_length, bool introncutout,
@@ -1041,7 +972,7 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, DPtables *dpm,
 }
 
 /* the following function frees the DP tables for proteins */
-static void freeDPtables(DPtables *dpm, bool proteinexonpenal)
+static void freeDPtables(GthDPtables *dpm, bool proteinexonpenal)
 {
   unsigned long n;
 
@@ -1081,6 +1012,9 @@ int gth_align_protein(GthSA *sa,
                       GthSpliceSiteModel *splice_site_model,
                       GthDPOptionsCore *dp_options_core,
                       GthDPOptionsPostpro *dp_options_postpro,
+                      GthProteinCompletePathMatrixJT complete_path_matrix_jt,
+                      GthJumpTable *jump_table,
+                      unsigned long ref_offset,
                       GthStat *stat,
                       GtFile *outfp)
 {
@@ -1090,7 +1024,7 @@ int gth_align_protein(GthSA *sa,
   GthSplicedSeq *spliced_seq = NULL;
   GthAlignInputProtein input;
   GtTransTable *transtable;
-  DPtables dpm;
+  GthDPtables dpm;
   int rval;
 
   gt_assert(gen_ranges);
@@ -1117,7 +1051,8 @@ int gth_align_protein(GthSA *sa,
   if ((rval = allocDPtables(&dpm, introncutout ? spliced_seq->splicedseqlen
                                                : gen_dp_length,
                             proteinexonpenal, ref_dp_length,
-                            autoicmaxmatrixsize, introncutout, stat))) {
+                            autoicmaxmatrixsize, introncutout, jump_table,
+                            stat))) {
     gth_dp_param_delete(dp_param);
     gth_spliced_seq_delete(spliced_seq);
     gth_dp_scores_protein_delete(dp_scores_protein);
@@ -1131,13 +1066,26 @@ int gth_align_protein(GthSA *sa,
   gt_assert(!rval);
 
   /* calculation */
-  complete_path_matrix(&dpm, &input, proteinexonpenal,
-                       introncutout ? spliced_seq->splicedseq
-                                    : gen_seq_tran + gen_dp_start,
-                       introncutout ? spliced_seq->splicedseqlen
-                                    : gen_dp_length,
-                       ref_dp_length, dp_param, dp_options_core,
-                       dp_scores_protein);
+  if (jump_table) {
+    gt_assert(complete_path_matrix_jt);
+    complete_path_matrix_jt(&dpm, &input, proteinexonpenal,
+                            introncutout ? spliced_seq->splicedseq
+                                         : gen_seq_tran + gen_dp_start,
+                            introncutout ? spliced_seq->splicedseqlen
+                                         : gen_dp_length,
+                            ref_dp_length, dp_param, dp_options_core,
+                            dp_scores_protein, jump_table, gen_ranges,
+                            ref_offset);
+  }
+  else {
+    complete_path_matrix(&dpm, &input, proteinexonpenal,
+                         introncutout ? spliced_seq->splicedseq
+                                      : gen_seq_tran + gen_dp_start,
+                         introncutout ? spliced_seq->splicedseqlen
+                                      : gen_dp_length,
+                         ref_dp_length, dp_param, dp_options_core,
+                         dp_scores_protein);
+  }
 
   /* backtracing */
   if ((rval = find_optimal_path(gth_sa_backtrace_path(sa), &dpm, ref_dp_length,
