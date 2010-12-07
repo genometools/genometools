@@ -58,6 +58,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
   const GtEncseq *encseq = NULL;
   double *ln_n_fac;
 
+  /* get the precalculation of ln(n!) for 0<n<max_ln_n_fac */
   ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
   gt_log_log("ln(max_ln_n_fac!) = %f\n",
              ln_n_fac[arguments->max_ln_n_fac]);
