@@ -205,23 +205,19 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  /* XXX: do some checking after the option have been parsed (usally this is not
-     necessary and this function can be removed completely). */
-  if (gt_option_is_set(arguments->ref_esaindex))
-  {
-    arguments->withesa = true;
-  } else
-  {
+  if (gt_option_is_set(arguments->ref_esaindex)) {
+    arguments->with_esa = true;
+  }
+  else {
     gt_assert(gt_option_is_set(arguments->ref_pckindex));
-    arguments->withesa = false;
+    arguments->with_esa = false;
   }
   if (gt_option_is_set(arguments->ref_queryname))
     arguments->simplesearch = true;
   else
     arguments->simplesearch = false;
   if (!had_err && arguments->traverse_only &&
-      !gt_showtime_enabled())
-  {
+      !gt_showtime_enabled()) {
     printf ("GT_ENV_OPTIONS should be set to -showtime\n");
     printf ("setting showtime = true\n");
     gt_showtime_enable();
@@ -289,15 +285,13 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     gt_timer_start(timer);
     gt_assert(timer);
   }
-  if (!had_err)
-  {
     if (arguments->simplesearch)
     {
       if (timer != NULL)
       {
         gt_timer_show_progress(timer, "run simple search", stdout);
       }
-      if (arguments->withesa)
+      if (arguments->with_esa)
       {
         had_err = callpairswisesshulendistdist(gt_str_get(arguments->indexname),
                                                arguments->queryname,

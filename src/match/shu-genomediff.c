@@ -53,7 +53,7 @@ int gt_genomediff_shu(GtLogger *logger,
   Genericindex *genericindexSubject = NULL;
   Sequentialsuffixarrayreader *ssar = NULL;
 
-  if (arguments->withesa)
+  if (arguments->with_esa)
   {
     gt_error_check(err);
     if (timer != NULL)
@@ -104,9 +104,9 @@ int gt_genomediff_shu(GtLogger *logger,
     {
       gt_timer_show_progress(timer, "map generic index", stdout);
     }
-    gt_assert(!arguments->withesa);
+    gt_assert(!arguments->with_esa);
     genericindexSubject = genericindex_new(gt_str_get(arguments->indexname),
-                                           arguments->withesa,
+                                           arguments->with_esa,
                                            true,
                                            false,
                                            true,
@@ -206,11 +206,11 @@ int gt_genomediff_shu(GtLogger *logger,
         } else
         {
           if (arguments->shulen_only)
-            printf(Formatuint64_t"\t", arguments->withesa ?
+            printf(Formatuint64_t"\t", arguments->with_esa ?
                               PRINTuint64_tcast(shulen[j_idx][i_idx]) :
                               PRINTuint64_tcast(shulen[i_idx][j_idx]));
           else
-            div[i_idx][j_idx] = arguments->withesa ?
+            div[i_idx][j_idx] = arguments->with_esa ?
                                   ((double) shulen[j_idx][i_idx]) / length_i :
                                   ((double) shulen[i_idx][j_idx]) / length_i;
         }
@@ -359,7 +359,7 @@ int gt_genomediff_shu(GtLogger *logger,
       }
     }
   }
-  if (arguments->withesa)
+  if (arguments->with_esa)
   {
     if (ssar != NULL)
     {

@@ -65,7 +65,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
 
   genericindexSubject = genericindex_new(gt_str_get(
                                            arguments->indexname),
-                                         arguments->withesa,
+                                         arguments->with_esa,
                                          true,
                                          false,
                                          true,

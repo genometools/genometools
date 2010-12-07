@@ -28,7 +28,7 @@ typedef struct {
            *ref_pckindex,
            *ref_queryname;
   bool verbose,
-       withesa,
+       with_esa,
        simplesearch,
        shulen_only,
        traverse_only,
