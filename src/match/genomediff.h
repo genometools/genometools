@@ -23,7 +23,7 @@
 #include "core/error.h"
 #include "core/option.h"
 
-typedef struct {
+typedef struct GtGenomediffArguments_tag {
   GtOption *ref_esaindex,
            *ref_pckindex,
            *ref_unitfile,

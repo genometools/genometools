@@ -36,7 +36,8 @@ static inline unsigned long get_unitsep(const GtEncseq *encseq,
   {
     unitsep = gt_encseq_filestartpos(encseq, unit_idx) +
               gt_encseq_effective_filelength(encseq, unit_idx);
-  } else
+  }
+  else
   {
     unitsep = gt_encseq_seqstartpos(encseq, unit_idx) +
               gt_encseq_seqlength(encseq, unit_idx);
@@ -60,13 +61,15 @@ static inline void calculate_gc(const GtEncseq *encseq,
       gc_contens[unit_idx] =
         (double) gc_count / (double) gt_encseq_effective_filelength(encseq,
                                                                     unit_idx);
-    } else
+    }
+    else
     {
       gt_assert(unit_idx < gt_encseq_num_of_sequences(encseq));
       gc_contens[unit_idx] =
         (double) gc_count / (double) gt_encseq_seqlength(encseq, unit_idx);
     }
-  } else
+  }
+  else
   {
     gc_contens[unit_idx] = (double) gc_count / (double) (gc_count + at_count);
   }
@@ -100,9 +103,13 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
                                                  GT_READMODE_FORWARD,
                                                  0);
   if (per_file)
+  {
     max_unit = gt_encseq_num_of_files(encseq);
+  }
   else
+  {
     max_unit = gt_encseq_num_of_sequences(encseq);
+  }
 
   gc_contens = gt_calloc((size_t) max_unit, sizeof (double));
 
@@ -125,7 +132,9 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
                    at_count);
 
       if (per_file)
+      {
         gt_assert(unit_idx == gt_encseq_filenum(encseq, char_idx));
+      }
       else
       {
         gt_assert(unit_idx == gt_encseq_seqnum(encseq, char_idx));
@@ -162,16 +171,22 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
         current_c == acgt[1] ||
         current_c == acgt[2] ||
         current_c == acgt[3])
+    {
        at_count++;
+    }
     else
     {
       if (current_c == acgt[4] ||
           current_c == acgt[5] ||
           current_c == acgt[6] ||
           current_c == acgt[7])
+      {
          gc_count++;
+      }
       else
+      {
         default_count++;
+      }
     }
   }
   calculate_gc(encseq,
@@ -215,12 +230,17 @@ int gt_encseq_gc_unit_test(GtError *err)
                                   err)) != NULL)
   {
     ensure(had_err, gt_double_equals_double(results[0], 0.0));
-  } else
+  }
+  else
+  {
     had_err = -1;
+  }
   gt_free(results);
   gt_encseq_builder_delete(eb);
   gt_encseq_delete(encseq);
 
+  if (!had_err)
+  {
   /* test c-seq */
   eb = gt_encseq_builder_new(alpha);
   gt_encseq_builder_create_ssp_tab(eb);
@@ -233,12 +253,18 @@ int gt_encseq_gc_unit_test(GtError *err)
                                   err)) != NULL)
   {
     ensure(had_err, gt_double_equals_one(results[0]));
-  } else
+  }
+  else
+  {
     had_err = -1;
+  }
   gt_free(results);
   gt_encseq_builder_delete(eb);
   gt_encseq_delete(encseq);
+  }
 
+  if (!had_err)
+  {
   /* test a+c filewise */
   eb = gt_encseq_builder_new(alpha);
   gt_encseq_builder_create_ssp_tab(eb);
@@ -252,12 +278,18 @@ int gt_encseq_gc_unit_test(GtError *err)
                                   err)) != 0)
   {
     ensure(had_err, gt_double_equals_double(results[0], 0.5));
-  } else
+  }
+  else
+  {
     had_err = -1;
+  }
   gt_free(results);
   gt_encseq_builder_delete(eb);
   gt_encseq_delete(encseq);
+  }
 
+  if (!had_err)
+  {
   /* test dna-seq and dna+special-seq*/
   eb = gt_encseq_builder_new(alpha);
   gt_encseq_builder_create_ssp_tab(eb);
@@ -272,10 +304,16 @@ int gt_encseq_gc_unit_test(GtError *err)
                                   err)) != NULL)
   {
     ensure(had_err, gt_double_equals_double(results[0], 0.5));
-  } else
+  }
+  else
+  {
     had_err = -1;
+  }
   gt_free(results);
+  }
 
+  if (!had_err)
+  {
   /* sequence wise */
   if ((results = gt_encseq_get_gc(encseq,
                                   false,
@@ -284,9 +322,46 @@ int gt_encseq_gc_unit_test(GtError *err)
   {
     ensure(had_err, gt_double_equals_double(results[0], 0.5));
     ensure(had_err, gt_double_equals_double(results[1], 0.5));
-  } else
+  }
+  else
+  {
     had_err = -1;
+  }
   gt_free(results);
+
+  /*[>add mirrored sequence<]
+  had_err = gt_encseq_mirror(encseq, err);
+  [> filewise <]
+  if ((results = gt_encseq_get_gc(encseq,
+                                  true,
+                                  false,
+                                  err)) != NULL)
+  {
+    ensure(had_err, gt_double_equals_double(results[0], 0.5));
+  }
+  else
+  {
+    had_err = -1;
+  }
+  gt_free(results);
+
+  [> sequence wise <]
+  if ((results = gt_encseq_get_gc(encseq,
+                                  false,
+                                  false,
+                                  err)) != NULL)
+  {
+    ensure(had_err, gt_double_equals_double(results[0], 0.5));
+    ensure(had_err, gt_double_equals_double(results[1], 0.5));
+  }
+  else
+  {
+    had_err = -1;
+  }
+  gt_free(results);
+
+  [>unmirror again<]
+  gt_encseq_unmirror(encseq);*/
 
   /* count special chars */
   if ((results = gt_encseq_get_gc(encseq,
@@ -296,12 +371,17 @@ int gt_encseq_gc_unit_test(GtError *err)
   {
     ensure(had_err, gt_double_equals_double(results[0], 0.5));
     ensure(had_err, gt_double_equals_double(results[1], (2.0/5.0)));
-  } else
+  }
+  else
+  {
     had_err = -1;
+  }
   gt_free(results);
 
   gt_encseq_builder_delete(eb);
   gt_alphabet_delete(alpha);
   gt_encseq_delete(encseq);
+  }
+
   return had_err;
 }

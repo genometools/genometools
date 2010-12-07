@@ -48,7 +48,9 @@ static inline void add_filenum_count(unsigned long lower,
 
     position = gt_BwtSeqpositionextractor_extract(positext, row);
     if (totallength <= position)
+    {
       filenum = numoffiles - 1;
+    }
     else
     {
       gt_assert((position + 1) <= totallength);
@@ -97,11 +99,15 @@ static inline unsigned long get_start_idx_binary_search(ShuNode *parent,
   unsigned long start_idx = 0;
 
   if (parent->lower <= special_pos[0][0])
+  {
     start_idx = 0;
+  }
   else
   {
     if (special_pos[0][max_idx - 1] < parent->lower)
+    {
       start_idx = max_idx;
+    }
     else
     {
       unsigned long left, mid, right, len;
@@ -119,7 +125,8 @@ static inline unsigned long get_start_idx_binary_search(ShuNode *parent,
             break;
           }
           left = mid + 1;
-        } else
+        }
+        else
         {
           if (special_pos[0][mid - 1] < parent->lower)
           {
@@ -179,6 +186,7 @@ static int visit_shu_children(const FMindex *index,
           tmpmbtab[idx].upperbound)
       { /* we found a leave on parent */
         if (calculate)
+        {
           add_filenum_count(tmpmbtab[idx].lowerbound,
                             tmpmbtab[idx].upperbound,
                             parent,
@@ -186,7 +194,9 @@ static int visit_shu_children(const FMindex *index,
                             totallength,
                             numoffiles,
                             encseq);
-      } else
+        }
+      }
+      else
       {
         if (tmpmbtab[idx].upperbound - tmpmbtab[idx].lowerbound ==
             parent->upper - parent->lower)
@@ -195,7 +205,8 @@ static int visit_shu_children(const FMindex *index,
           parent->upper = tmpmbtab[idx].upperbound;
           parent->depth++;
           return 0;
-        } else
+        }
+        else
         { /* tmpmbtab[idx] is a branch of parent node */
           GT_STACK_NEXT_FREE(stack,child);
           if (child->countTermSubtree == NULL)
@@ -203,7 +214,8 @@ static int visit_shu_children(const FMindex *index,
             gt_array2dim_calloc(child->countTermSubtree,
                                 numofchars+1UL,
                                 numoffiles);
-          } else
+          }
+          else
           {
             unsigned long y_idx, file_idx;
             for (y_idx = 0; y_idx < numofchars+1UL; y_idx++)
@@ -251,7 +263,9 @@ static int visit_shu_children(const FMindex *index,
       num_of_rows--;
 
       if (totallength <= position)
+      {
         filenum = numoffiles - 1;
+      }
       else
       {
         gt_assert((position + 1) <= totallength);
@@ -385,7 +399,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
   Mbtab *tmpmbtab;
   unsigned long *rangeOccs, **special_char_rows_and_pos;
   unsigned long resize = 64UL;
-  unsigned long numoffiles, numofseq, stackdepth, maxdepth, depth_idx,
+  unsigned long numoffiles, stackdepth, maxdepth, depth_idx,
                 processed_nodes,
                 max_idx = gt_pck_special_occ_in_nonspecial_intervals(index)
                           - 1;
@@ -395,7 +409,6 @@ int gt_pck_calculate_shulen(const FMindex *index,
   rangeOccs = gt_calloc((size_t) GT_MULT2(numofchars), sizeof (*rangeOccs));
   tmpmbtab = gt_calloc((size_t) (numofchars + 3), sizeof (*tmpmbtab ));
   numoffiles = gt_encseq_num_of_files(encseq);
-  numofseq = gt_encseq_num_of_sequences(encseq);
   GT_STACK_INIT_WITH_INITFUNC(&stack, resize, initialise_node);
   positext = gt_newBwtSeqpositionextractor(index, totallength + 1);
   if (timer != NULL)
@@ -430,6 +443,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
       GT_STACK_DECREMENTTOP(&stack);
       --stackdepth;
       if (calculate)
+      {
         had_err = process_shu_node(current,
                                    &stack,
                                    shulen,
@@ -437,8 +451,10 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    numofchars,
                                    logger,
                                    err);
+      }
       processed_nodes++;
-    } else
+    }
+    else
     {
       had_err = visit_shu_children(index,
                                    current,

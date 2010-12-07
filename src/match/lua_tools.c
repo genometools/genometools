@@ -15,23 +15,37 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SHU_UNITFILE_H
-#define SHU_UNITFILE_H
+#include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
 
-#include "core/encseq_api.h"
-#include "core/str_array_api.h"
+#include "match/lua_tools.h"
 
-/*
-  reads the Unitfile and collects the names of the Genomes, also compares the
-  number of files and order of files with the files within the encseq.
-  Genomenames and number of genes will be changed, sets err and returns 1 on
-  error
-*/
-int gt_read_genomediff_unitfile(GtStr *unitfile,
-                                const GtEncseq *encseq,
-                                GtStrArray *genome_names,
-                                unsigned long *num_of_genomes,
-                                GtLogger *logger,
-                                GtError *err);
+void gt_lua_stack_dump(lua_State *L) {
+  int i;
+  int top = lua_gettop(L);
+  for (i = 1; i <= top; i++)
+  { /* repeat for each level */
+    int t = lua_type(L, i);
+    switch (t) {
 
-#endif
+      case LUA_TSTRING:  /* strings */
+        fprintf(stderr, "`%s'", lua_tostring(L, i));
+        break;
+
+      case LUA_TBOOLEAN:  /* booleans */
+        lua_toboolean(L, i) ? fprintf(stderr,"true") : fprintf(stderr,"false");
+        break;
+
+      case LUA_TNUMBER:  /* numbers */
+        fprintf(stderr, "%g", lua_tonumber(L, i));
+        break;
+
+      default:  /* other values */
+        fprintf(stderr, "%s", lua_typename(L, t));
+        break;
+    }
+    fprintf(stderr, "  ");  /* put a separator */
+  }
+  fprintf(stderr, "\n");  /* end the listing */
+}

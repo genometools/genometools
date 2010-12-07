@@ -24,7 +24,7 @@
 
 #include "match/eis-voiditf.h"
 
-typedef struct {
+typedef struct Nodecount_tag {
   unsigned long leaves, branching, lower, upper;
   unsigned int parentOffset;
   bool visited, on_branch;

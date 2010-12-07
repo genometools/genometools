@@ -22,7 +22,7 @@
 #include "core/stack-inlined.h"
 #include "match/eis-voiditf.h"
 
-typedef struct {
+typedef struct ShuNode_tag {
   bool process;
   unsigned parentOffset;
   unsigned long **countTermSubtree;

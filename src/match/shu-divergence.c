@@ -56,9 +56,13 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
   {
     double m_a, m_b, m_c, m_d, m_e;
     if (x == k)
+    {
       ln_x_choose_k = 0.0;
+    }
     else
+    {
       ln_x_choose_k =  ln_n_fac[x] - ln_n_fac[k] - ln_n_fac[x-k];
+    }
 
     m_a = pow (2.0, (double) x);
     m_b = pow (p, (double) k);
@@ -70,15 +74,20 @@ static double pmax(double M, /* M value should be explored by simulation ??? */
     if (m == 0.0)
     {
       delta = 0.0;
-    } else if (M <= m)
+    }
+    else if (M <= m)
     {
       ln = log(m);
       if (ln == -HUGE_VAL)
       {
         delta = 0.0;
-      } else
+      }
+      else
+      {
         delta = exp (ln + ln_x_choose_k);
-    } else
+      }
+    }
+    else
     {
       double delta_a, delta_b;
       m1 = 1 + m;  /* for small values of m - to avoid overflow (-INF) */
@@ -133,7 +142,8 @@ static double expShulen(double T, /* absolute error */
                               ln_n_fac,
                               s1,
                               n_s);
-    } else
+    }
+    else
     {
       prob_i = factor;  /* prob_i = factor * s, where s = 1 */
     }
@@ -179,7 +189,8 @@ double gt_divergence(double E, /* relative error for divergence calculation */
           expShulen(T, M, dm, p, subjectLength, ln_n_fac, s1, n_s)))
     {
       du = dm;
-    } else
+    }
+    else
     {
       dl = dm;
     }
@@ -206,9 +217,13 @@ double *gt_get_ln_n_fac(unsigned long n)
   for (i = 0UL; i <= n; i++)
   {
     if (i == 0)
+    {
       ln_n_fac[i] = log(1.0);
+    }
     else
+    {
       ln_n_fac[i] = log((double) i) + ln_n_fac[i-1];
+    }
   }
   return ln_n_fac;
 }

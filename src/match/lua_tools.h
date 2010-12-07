@@ -15,23 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SHU_UNITFILE_H
-#define SHU_UNITFILE_H
+#ifndef LUA_TOOLS_H
+#define LUA_TOOLS_H
 
-#include "core/encseq_api.h"
-#include "core/str_array_api.h"
+#include "lauxlib.h"
+#include "lua.h"
+#include "lualib.h"
 
-/*
-  reads the Unitfile and collects the names of the Genomes, also compares the
-  number of files and order of files with the files within the encseq.
-  Genomenames and number of genes will be changed, sets err and returns 1 on
-  error
-*/
-int gt_read_genomediff_unitfile(GtStr *unitfile,
-                                const GtEncseq *encseq,
-                                GtStrArray *genome_names,
-                                unsigned long *num_of_genomes,
-                                GtLogger *logger,
-                                GtError *err);
+void gt_lua_stack_dump(lua_State *L);
 
 #endif

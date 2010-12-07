@@ -73,9 +73,13 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
                                          logger,
                                          err);
   if (genericindexSubject == NULL)
+  {
     had_err = 1;
+  }
   else
+  {
     encseq = genericindex_getencseq(genericindexSubject);
+  }
 
   if (!had_err)
   {
@@ -94,7 +98,8 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
     {
       fprintf(stderr, "error: Sequences need to be dna");
       had_err = 1;
-    } else
+    }
+    else
     {
       symbolmap = gt_alphabet_symbolmap(alphabet);
       gt_seqiterator_set_symbolmap(queries, symbolmap);
@@ -112,6 +117,10 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
                                  err);
     if ( retval != 1)
     {
+      if (retval < 0)
+      {
+        gt_free(description);
+      }
       break;
     }
     gt_logger_log(logger,
@@ -128,13 +137,16 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
       avgShuLength += currentShuLength;
       if (currentQuery[currentSuffix] == c_sym ||
           currentQuery[currentSuffix] == g_sym)
+      {
         gc_query++;
+      }
     }
     if (arguments->shulen_only)
     {
       printf("# Query %d sum of shulen:\n %.0f\n",
              (int) queryNo, avgShuLength);
-    } else
+    }
+    else
     {
       avgShuLength /= (double) queryLength;
       gc_query /= (double) queryLength;

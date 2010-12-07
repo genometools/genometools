@@ -224,34 +224,45 @@ static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
   gt_error_check(err);
   gt_assert(arguments);
 
-  if (gt_option_is_set(arguments->ref_esaindex)) {
+  if (gt_option_is_set(arguments->ref_esaindex))
+  {
     arguments->with_esa = true;
   }
-  else {
+  else
+  {
     gt_assert(gt_option_is_set(arguments->ref_pckindex));
     arguments->with_esa = false;
   }
   if (gt_option_is_set(arguments->ref_queryname))
+  {
     arguments->simplesearch = true;
+  }
   else
+  {
     arguments->simplesearch = false;
+  }
   if (!had_err && arguments->traverse_only &&
-      !gt_showtime_enabled()) {
+      !gt_showtime_enabled())
+  {
     printf ("GT_ENV_OPTIONS should be set to -showtime\n");
     printf ("setting showtime = true\n");
     gt_showtime_enable();
   }
   if (!had_err && gt_option_is_set(arguments->ref_unitfile))
+  {
     arguments->with_units = true;
+  }
   else
+  {
     arguments->with_units = false;
+  }
   return had_err;
 }
 
-static int callpairswisesshulendistdist(const char *indexname,
-                                        const GtStrArray *queryfilenames,
-                                        GtLogger *logger,
-                                        GtError *err)
+static int callpairswisesshulendist(const char *indexname,
+                                    const GtStrArray *queryfilenames,
+                                    GtLogger *logger,
+                                    GtError *err)
 {
   bool haserr = false;
   Suffixarray suffixarray;
@@ -275,7 +286,8 @@ static int callpairswisesshulendistdist(const char *indexname,
                                    err) != 0)
     {
       haserr = true;
-    } else
+    }
+    else
     {
       printf("%lu\n",totalgmatchlength);
     }
@@ -308,38 +320,45 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     gt_timer_start(timer);
     gt_assert(timer);
   }
-  if (arguments->simplesearch)
+  if (arguments->with_units)
   {
-    if (timer != NULL)
+    printf ("unitfile option set, filename is %s\n",
+       gt_str_get(arguments->unitfile));
+  }
+  if (!had_err)
+  {
+    if (arguments->simplesearch)
     {
-      gt_timer_show_progress(timer, "run simple search", stdout);
-    }
-    if (arguments->with_esa)
-    {
-      had_err = callpairswisesshulendistdist(gt_str_get(arguments->indexname),
-                                             arguments->queryname,
-                                             logger,
-                                             err);
+      if (timer != NULL)
+      {
+        gt_timer_show_progress(timer, "run simple search", stdout);
+      }
+      if (arguments->with_esa)
+      {
+        had_err = callpairswisesshulendist(gt_str_get(arguments->indexname),
+                                           arguments->queryname,
+                                           logger,
+                                           err);
+      }
+      else
+      {
+        had_err = gt_genomediff_pck_shu_simple(logger,
+                                               arguments,
+                                               err);
+      }
     }
     else
     {
-      had_err = gt_genomediff_pck_shu_simple(logger,
-                                             arguments,
-                                             err);
+      if (timer != NULL)
+      {
+        gt_timer_show_progress(timer, "start shu search", stdout);
+      }
+      had_err = gt_genomediff_shu(logger,
+                                  arguments,
+                                  timer,
+                                  err);
     }
   }
-  else
-  {
-    if (timer != NULL)
-    {
-      gt_timer_show_progress(timer, "start shu search", stdout);
-    }
-    had_err = gt_genomediff_shu(logger,
-                                arguments,
-                                timer,
-                                err);
-  }
-
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);

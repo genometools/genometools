@@ -69,20 +69,23 @@ static void visit_count_children(const FMindex *index,
       GT_STACK_PUSH(stack, child);
       num_special = 0UL;
       offset++;
-    } else
+    }
+    else
     {
       /* we found a leave on parent*/
       if (child.lower + 1 == child.upper)
       {
         parent->leaves++;
         num_special--;
-      } else
+      }
+      else
         /* child is a branch of parent node */
       {
         if (child.lower == child.upper)
         {
           /* do nothing, this is no node, this is a missing char */
-        } else
+        }
+        else
         {
           GT_STACK_PUSH(stack, child);
           offset++;
@@ -137,14 +140,17 @@ void gt_pck_count_nodes_dfs(const FMindex *index,
     {
       current = &(GT_STACK_POP(&stack));
       if GT_STACK_ISEMPTY(&stack)
+      {
         /* XXX change to gt_loger_log */
         gt_log_log("on root:\n %lu branching nodes\n %lu leaves\n",
            current->branching, current->leaves);
+      }
       else
       {
         process_count_node(&stack, current);
       }
-    } else
+    }
+    else
     {
       visit_count_children(index, current, &stack,
                      tmpmbtab, rangeOccs, numofchars);
