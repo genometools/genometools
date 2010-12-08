@@ -1012,9 +1012,10 @@ int gth_align_protein(GthSA *sa,
                       GthSpliceSiteModel *splice_site_model,
                       GthDPOptionsCore *dp_options_core,
                       GthDPOptionsPostpro *dp_options_postpro,
-                      GthProteinCompletePathMatrixJT complete_path_matrix_jt,
+                      GT_UNUSED GthProteinCompletePathMatrixJT
+                      complete_path_matrix_jt,
                       GthJumpTable *jump_table,
-                      unsigned long ref_offset,
+                      GT_UNUSED unsigned long ref_offset,
                       GthStat *stat,
                       GtFile *outfp)
 {
@@ -1066,6 +1067,8 @@ int gth_align_protein(GthSA *sa,
   gt_assert(!rval);
 
   /* calculation */
+  /* XXX */
+#if 0
   if (jump_table) {
     gt_assert(complete_path_matrix_jt);
     complete_path_matrix_jt(&dpm, &input, proteinexonpenal,
@@ -1078,6 +1081,7 @@ int gth_align_protein(GthSA *sa,
                             ref_offset);
   }
   else {
+#endif
     complete_path_matrix(&dpm, &input, proteinexonpenal,
                          introncutout ? spliced_seq->splicedseq
                                       : gen_seq_tran + gen_dp_start,
@@ -1085,7 +1089,6 @@ int gth_align_protein(GthSA *sa,
                                       : gen_dp_length,
                          ref_dp_length, dp_param, dp_options_core,
                          dp_scores_protein);
-  }
 
   /* backtracing */
   if ((rval = find_optimal_path(gth_sa_backtrace_path(sa), &dpm, ref_dp_length,
