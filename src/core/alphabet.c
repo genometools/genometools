@@ -473,7 +473,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
   H
   M
   C
-  XUBZ*-
+  XUBZO*-
   \end{alltt}
   If the argument \texttt{wildcard} is 0, then the wildcard characters
   in the last line are mapped to 20. Otherwise they are mapped to
