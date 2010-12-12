@@ -1328,15 +1328,16 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   }
 
   /* check translation table number */
-  /* XXX: the maximal translation tables is set to 15, because that is the
-     current limit in Vmatch, this should be changed in Vmatch and the check
-     refactored into the GtTranslator class */
+  /* XXX: the check should refactored into the GtTranslator class */
   if (oprval == GT_OPTION_PARSER_OK &&
-      (call_info->translationtable < 1  || call_info->translationtable > 15 ||
-       call_info->translationtable == 7 || call_info->translationtable == 8)) {
+      (call_info->translationtable < 1   || call_info->translationtable > 23 ||
+       call_info->translationtable == 7  || call_info->translationtable == 8 ||
+       call_info->translationtable == 17 || call_info->translationtable == 18 ||
+       call_info->translationtable == 19 ||
+       call_info->translationtable == 20)) {
     gt_error_set(err, "wrong argument '%u' to option \"-%s\": "
-                 "must be number in the range [1,15] except for 7 and 8",
-                 call_info->translationtable,
+                 "must be number in the range [1,23] except for 7, 8, 17, 18, "
+                 "19 and 20", call_info->translationtable,
                  gt_option_get_name(opttranslationtable));
     oprval = GT_OPTION_PARSER_ERROR;
   }
