@@ -1101,8 +1101,8 @@ static void processoverflowsuffixes(Blindtrie *blindtrie,
     if (blindtrie->overflowsuffixes.nextfreeGtUlong > 1UL)
     {
       qsort(blindtrie->overflowsuffixes.spaceGtUlong,
-            sizeof (*blindtrie->overflowsuffixes.spaceGtUlong),
             (size_t) blindtrie->overflowsuffixes.nextfreeGtUlong,
+            sizeof (*blindtrie->overflowsuffixes.spaceGtUlong),
             blindtrie_compare_ascending);
     }
     for (idx = 0; idx < blindtrie->overflowsuffixes.nextfreeGtUlong; idx++)
