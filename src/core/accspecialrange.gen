@@ -463,9 +463,9 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
                                                 KindofSWtable kindsw)
 {
   unsigned long endpos0, endpos1, cellnum, pagenum;
-  bool found = false;
+  bool found = false,
+       moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
   GtRange range;
-  bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
   GT_APPENDINT(GtSWtable) *swtable = NULL;
   GtEncseqReaderViatablesinfo *swstate = NULL;
 

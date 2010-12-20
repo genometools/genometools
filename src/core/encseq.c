@@ -2171,8 +2171,9 @@ static void advancerangeGtEncseqReader(GtEncseqReader *esr,
 static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
                                               KindofSWtable kindsw)
 {
-  switch ((kindsw == SWtable_ssptabnew)
-          ? esr->encseq->satsep : esr->encseq->sat)
+  GtEncseqAccessType sat = (kindsw == SWtable_ssptabnew) ? esr->encseq->satsep
+                                                         : esr->encseq->sat;
+  switch (sat)
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       binpreparenextrangeGtEncseqReader_uchar(esr,kindsw);
@@ -2185,9 +2186,7 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
       break;
     default: fprintf(stderr,"binpreparenextrangeGtEncseqReader(sat = %s "
                             "is undefined)\n",
-                     gt_encseq_access_type_str((kindsw == SWtable_ssptabnew)
-                                                 ? esr->encseq->satsep
-                                                 : esr->encseq->sat));
+                     gt_encseq_access_type_str(sat));
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -2212,6 +2211,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                 : startpos;
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
+    /* Do not need this in once all is done by wildcards */
     if (esr->specialrangestate == NULL)
     {
       esr->specialrangestate
@@ -2363,7 +2363,7 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long len)
 {
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
-  /* XXX: replace by access to two wildcard range or ssptab */
+  /* XXX: replace by access to wildcard range or ssptab */
   return containsSWViatables(encseq, esr, startpos, len, SWtable_specialrange);
 }
 
@@ -2622,7 +2622,8 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
   return success;
 }
 
-/* XXX Also put the iterators into the function bundle so that */
+/* XXX Also put the iterators into the function bundle so that
+   the case distinction is not always necessary. */
 
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
@@ -4302,6 +4303,39 @@ static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
+static unsigned long fwdgetnexttwobitencodingstopposSW(
+                                      GtEncseqReader *esr,
+                                      KindofSWtable kindsw)
+{
+  GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
+
+  gt_assert(esr != NULL && esr->encseq != NULL);
+  gt_assert(!GT_ISDIRREVERSE(esr->readmode));
+  while (swstate->hasprevious)
+  {
+    if (esr->currentpos >= swstate->previousrange.start)
+    {
+      if (esr->currentpos < swstate->previousrange.end)
+      {
+        return esr->currentpos; /* is in current special range */
+      }
+      /* follows current special range */
+      if (swstate->hasrange)
+      {
+        /* XXX do not know how to replace SWtable_specialrange */
+        advancerangeGtEncseqReader(esr,kindsw);
+      } else
+      {
+        break;
+      }
+    } else
+    {
+      return swstate->previousrange.start;
+    }
+  }
+  return esr->encseq->totallength;
+}
+
 static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
                                        unsigned long currentpos,
@@ -4370,8 +4404,120 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
                                                              esr->currentpos);
       default:
        fprintf(stderr,"revgetnexttwobitencodingstoppos(%d) undefined\n",
-               (int) esr->encseq->sat);
+                      (int) esr->encseq->sat);
        exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  } else
+  {
+    return 0;
+  }
+}
+
+static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
+                                                       KindofSWtable kindsw)
+{
+  GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
+
+  gt_assert(esr != NULL && esr->encseq != NULL);
+  gt_assert(GT_ISDIRREVERSE(esr->readmode));
+  while (swstate->hasprevious)
+  {
+    if (esr->currentpos < swstate->previousrange.end)
+    {
+      if (esr->currentpos >= swstate->previousrange.start)
+      {
+        return esr->currentpos+1; /* is in current special range */
+      }
+      /* follows current special range */
+      if (swstate->hasrange)
+      {
+        /* XXX do not know how to replace SWtable_specialrange */
+        advancerangeGtEncseqReader(esr,kindsw);
+      } else
+      {
+        break;
+      }
+    } else
+    {
+      return swstate->previousrange.end;
+    }
+  }
+  return 0; /* virtual stop at -1 */
+}
+
+static unsigned long fwdgetnexttwobitencodingstoppos2(
+                                                    GtEncseqReader *esr)
+{
+  if (gt_encseq_has_specialranges(esr->encseq))
+  {
+    if (esr->encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+    {
+      return fwdgetnexttwobitencodingstopposViaequallength(esr->encseq,
+                                                           esr->currentpos);
+    } else
+    {
+      unsigned long stopposwildcard, stopposssptab;
+      if (esr->encseq->has_wildcardranges)
+      {
+        stopposwildcard = fwdgetnexttwobitencodingstopposSW(esr,
+                                                     SWtable_wildcardrange);
+      } else
+      {
+        stopposwildcard = esr->encseq->totallength;
+      }
+      if (esr->encseq->numofdbsequences > 1UL)
+      {
+        stopposssptab = fwdgetnexttwobitencodingstopposSW(esr,
+                                                          SWtable_ssptabnew);
+      } else
+      {
+        stopposssptab = esr->encseq->totallength;
+      }
+      /*
+      printf("stopposwildcard = %lu, stopposssptab=%lu\n",
+              stopposwildcard,stopposssptab);
+      */
+      return MIN(stopposwildcard,stopposssptab);
+    }
+  } else
+  {
+    return esr->encseq->totallength;
+  }
+}
+
+static unsigned long revgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
+{
+  if (gt_encseq_has_specialranges(esr->encseq))
+  {
+    if (esr->encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+    {
+      return revgetnexttwobitencodingstopposViaequallength(esr->encseq,
+                                                           esr->currentpos);
+    } else
+    {
+      unsigned long stopposwildcard, stopposssptab;
+
+      if (esr->encseq->has_wildcardranges)
+      {
+        stopposwildcard = revgetnexttwobitencodingstopposSW(esr,
+                                                        SWtable_wildcardrange);
+      } else
+      {
+        stopposwildcard = 0;
+      }
+      if (esr->encseq->numofdbsequences > 1UL)
+      {
+        stopposssptab = revgetnexttwobitencodingstopposSW(esr,
+                                                          SWtable_ssptabnew);
+      } else
+      {
+        stopposssptab = 0;
+      }
+      /*
+      printf("stopposwildcard = %lu, stopposssptab=%lu\n",
+              stopposwildcard,stopposssptab);
+      */
+      return MAX(stopposwildcard,stopposssptab);
     }
   } else
   {
@@ -4381,8 +4527,14 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 
 unsigned long gt_getnexttwobitencodingstoppos(bool fwd,GtEncseqReader *esr)
 {
-  return (fwd ? fwdgetnexttwobitencodingstoppos
-              : revgetnexttwobitencodingstoppos) (esr);
+  unsigned long stoppos, stoppos2;
+
+  stoppos = (fwd ? fwdgetnexttwobitencodingstoppos
+                 : revgetnexttwobitencodingstoppos) (esr);
+  stoppos2 = (fwd ? fwdgetnexttwobitencodingstoppos2
+                  : revgetnexttwobitencodingstoppos2) (esr);
+  gt_assert(stoppos == stoppos2);
+  return stoppos;
 }
 
 static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
