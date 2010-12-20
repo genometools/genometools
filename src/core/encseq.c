@@ -2362,15 +2362,18 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long startpos,
                                      unsigned long len)
 {
-  bool cspecial, cspecial2;
+  bool cspecial, cspecial2 = false;
 
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
   /* XXX: replace by access to wildcard range or ssptab */
   cspecial = containsSWViatables(encseq, esr, startpos, len,
                                  SWtable_specialrange);
-  cspecial2 = containsSWViatables(encseq, esr, startpos, len,
-                                  SWtable_wildcardrange);
-  if (!cspecial2)
+  if (encseq->has_wildcardranges)
+  {
+    cspecial2 = containsSWViatables(encseq, esr, startpos, len,
+                                    SWtable_wildcardrange);
+  }
+  if (!cspecial2 && encseq->numofdbsequences > 1UL)
   {
     cspecial2 = containsSWViatables(encseq, esr, startpos, len,
                                     SWtable_ssptabnew);
