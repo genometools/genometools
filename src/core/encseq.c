@@ -2362,9 +2362,21 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long startpos,
                                      unsigned long len)
 {
+  bool cspecial, cspecial2;
+
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
   /* XXX: replace by access to wildcard range or ssptab */
-  return containsSWViatables(encseq, esr, startpos, len, SWtable_specialrange);
+  cspecial = containsSWViatables(encseq, esr, startpos, len,
+                                 SWtable_specialrange);
+  cspecial2 = containsSWViatables(encseq, esr, startpos, len,
+                                  SWtable_wildcardrange);
+  if (!cspecial2)
+  {
+    cspecial2 = containsSWViatables(encseq, esr, startpos, len,
+                                    SWtable_ssptabnew);
+  }
+  gt_assert((cspecial && cspecial2) || (!cspecial && !cspecial2));
+  return cspecial;
 }
 
 bool gt_encseq_has_specialranges(const GtEncseq *encseq)
