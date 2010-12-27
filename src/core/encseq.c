@@ -385,9 +385,9 @@ typedef struct {
   GtRange previousrange,  /* previous range of special characters */
           currentrange;   /* current range of special characters */
   bool morepagesleft,     /* there is some page left to check */
-       hasrange,        /* there is some range */
-       hasprevious,     /* there is some previous range */
-       hascurrent;      /* there is some current range */
+       hasmore,           /* there is some more range */
+       hasprevious,       /* there is some previous range */
+       hascurrent;        /* there is some current range */
 } GtEncseqReaderViatablesinfo;
 
 struct GtEncseqReader
@@ -2198,9 +2198,12 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
 {
 
   gt_assert(esr != NULL && encseq != NULL);
-  if (encseq != esr->encseq) {
+  if (encseq != esr->encseq)
+  {
     if (esr->encseq != NULL)
+    {
       gt_encseq_delete(esr->encseq);
+    }
     esr->encseq = gt_encseq_ref((GtEncseq*) encseq);
   }
   gt_assert(esr->encseq);
@@ -2212,22 +2215,22 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
     /* Do not need this in once all is done by wildcards */
-    if (esr->specialrangestate == NULL)
+    if (encseq->has_specialranges)
     {
-      esr->specialrangestate
-        = gt_calloc((size_t) 1, sizeof (*esr->specialrangestate));
-    }
-    esr->specialrangestate->hasprevious = esr->specialrangestate->hascurrent
-                                        = false;
-    binpreparenextrangeGtEncseqReader(esr,SWtable_specialrange);
+      if (esr->specialrangestate == NULL)
+      {
+        esr->specialrangestate
+          = gt_calloc((size_t) 1, sizeof (*esr->specialrangestate));
+      }
+      binpreparenextrangeGtEncseqReader(esr,SWtable_specialrange);
 #ifdef GT_RANGEDEBUG
       printf("specialranges: start advance at (%lu,%lu) in page %lu\n",
                        esr->specialrangestate->firstcell,
                        esr->specialrangestate->lastcell,
                        esr->specialrangestate->nextpage);
 #endif
-    advancerangeGtEncseqReader(esr,SWtable_specialrange);
-
+      advancerangeGtEncseqReader(esr,SWtable_specialrange);
+    }
     if (encseq->has_wildcardranges)
     {
       if (esr->wildcardrangestate == NULL)
@@ -2235,9 +2238,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
         esr->wildcardrangestate
           = gt_calloc((size_t) 1, sizeof (*esr->wildcardrangestate));
       }
-      esr->wildcardrangestate->hasprevious = esr->wildcardrangestate->hascurrent
-                                           = false;
-
 #ifdef NEWTWOBITENCODING
       binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
 #ifdef GT_RANGEDEBUG
@@ -2257,8 +2257,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
         esr->ssptabnewstate
           = gt_calloc((size_t) 1, sizeof (*esr->ssptabnewstate));
       }
-      esr->ssptabnewstate->hasprevious = esr->ssptabnewstate->hascurrent
-                                       = false;
       binpreparenextrangeGtEncseqReader(esr,SWtable_ssptabnew);
 #ifdef GT_RANGEDEBUG
       printf("ssptabnew: start advance at (%lu,%lu) in page %lu\n",
@@ -2400,6 +2398,8 @@ bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq)
 
 struct GtSpecialrangeiterator
 {
+  /*GtRange sriprevious;
+    bool srihasprevious;*/
   bool moveforward, exhausted;
   GtEncseqReader *esr;
   unsigned long lengthofspecialrange,
@@ -2417,6 +2417,9 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   sri = gt_malloc(sizeof (*sri));
   sri->moveforward = moveforward;
   sri->exhausted = false;
+  /*
+  sri->srihasprevious = false;
+  */
   sri->lengthofspecialrange = 0;
   sri->esr = gt_encseq_create_reader_with_readmode(encseq,
                                                    moveforward
@@ -2661,7 +2664,7 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
       gt_assert(sri->esr->specialrangestate->hasprevious);
       /* XXX compute the range from wildcardrange and ssptab_new */
       *range = sri->esr->specialrangestate->previousrange;
-      if (sri->esr->specialrangestate->hasrange)
+      if (sri->esr->specialrangestate->hasmore)
       {
         advancerangeGtEncseqReader(sri->esr,SWtable_specialrange);
       } else
@@ -4335,7 +4338,7 @@ static unsigned long fwdgetnexttwobitencodingstopposSW(
         return esr->currentpos; /* is in current special range */
       }
       /* follows current special range */
-      if (swstate->hasrange)
+      if (swstate->hasmore)
       {
         /* XXX do not know how to replace SWtable_specialrange */
         advancerangeGtEncseqReader(esr,kindsw);
@@ -4444,7 +4447,7 @@ static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
         return esr->currentpos+1; /* is in current special range */
       }
       /* follows current special range */
-      if (swstate->hasrange)
+      if (swstate->hasmore)
       {
         /* XXX do not know how to replace SWtable_specialrange */
         advancerangeGtEncseqReader(esr,kindsw);
