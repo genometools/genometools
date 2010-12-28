@@ -485,6 +485,7 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
       break;
   }
   swstate->hasprevious = swstate->hascurrent = swstate->hasmore = false;
+  swstate->exhausted = false;
   pagenum = GT_POS2PAGENUM(esr->currentpos);
   if (pagenum > 0)
   {

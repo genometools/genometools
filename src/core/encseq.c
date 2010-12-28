@@ -387,7 +387,8 @@ typedef struct {
   bool morepagesleft,     /* there is some page left to check */
        hasmore,           /* there is some more range */
        hasprevious,       /* there is some previous range */
-       hascurrent;        /* there is some current range */
+       hascurrent,        /* there is some current range */
+       exhausted;         /* no more elements to iterate */
 } GtEncseqReaderViatablesinfo;
 
 struct GtEncseqReader
@@ -2656,7 +2657,7 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
                                                     GtSpecialrangeiterator *sri)
 {
   gt_assert(gt_encseq_access_type_isviautables(sri->esr->encseq->sat));
-  if (sri->exhausted)
+  if (sri->esr->specialrangestate->exhausted)
   {
     return false;
   }
@@ -2668,7 +2669,7 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
     advancerangeGtEncseqReader(sri->esr,SWtable_specialrange);
   } else
   {
-    sri->exhausted = true;
+    sri->esr->specialrangestate->exhausted = true;
   }
   return true;
 }
