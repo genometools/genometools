@@ -2397,10 +2397,15 @@ bool gt_encseq_bitwise_cmp_ok(const GtEncseq *encseq)
           encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS) ? false : true;
 }
 
+typedef struct
+{
+  GtRange rng;
+  bool defined;
+} DefinedGtRange;
+
 struct GtSpecialrangeiterator
 {
-  /*GtRange sriprevious;
-    bool srihasprevious;*/
+  DefinedGtRange previous, wildcard, ssptab;
   bool moveforward,
        exhausted;
   GtEncseqReader *esr;
@@ -2419,9 +2424,9 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
   sri = gt_malloc(sizeof (*sri));
   sri->moveforward = moveforward;
   sri->exhausted = false;
-  /*
-  sri->srihasprevious = false;
-  */
+  sri->previous.defined = false;
+  sri->wildcard.defined = false;
+  sri->ssptab.defined = false;
   sri->lengthofspecialrange = 0;
   sri->esr = gt_encseq_create_reader_with_readmode(encseq,
                                                    moveforward
@@ -2722,6 +2727,112 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
     gt_encseq_reader_delete(sri->esr);
   }
   gt_free(sri);
+}
+
+static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
+{
+  while (true)
+  {
+    if (!sri->ssptab.defined)
+    {
+      if (gt_viautables_specialrangeiterator_next(&sri->ssptab.rng,sri->esr,
+                                                  SWtable_ssptabnew))
+      {
+        sri->ssptab.defined = true;
+      }
+    }
+    if (!sri->wildcard.defined)
+    {
+      if (gt_viautables_specialrangeiterator_next(&sri->wildcard.rng,sri->esr,
+                                                  SWtable_wildcardrange))
+      {
+        sri->wildcard.defined = true;
+      }
+    }
+    if (sri->wildcard.defined && sri->ssptab.defined)
+    {
+      if (sri->ssptab.rng.end < sri->wildcard.rng.start)
+      {
+        *range = sri->ssptab.rng;
+        sri->ssptab.defined = false;
+        return true;
+      }
+      if (sri->wildcard.rng.end < sri->ssptab.rng.start)
+      {
+        *range = sri->wildcard.rng;
+        sri->wildcard.defined = false;
+        return true;
+      }
+      if (sri->ssptab.rng.end == sri->wildcard.rng.start)
+      {
+        sri->ssptab.rng.end = sri->wildcard.rng.end;
+        sri->wildcard.defined = false;
+      } else
+      {
+        if (sri->wildcard.rng.end == sri->ssptab.rng.start)
+        {
+          sri->wildcard.rng.end = sri->ssptab.rng.end;
+          sri->ssptab.defined = false;
+        } else
+        {
+          gt_assert(false);
+        }
+      }
+    } else
+    {
+      if (sri->wildcard.defined)
+      {
+        gt_assert(sri->ssptab.defined);
+        *range = sri->wildcard.rng;
+        return true;
+      }
+      if (sri->ssptab.defined)
+      {
+        gt_assert(sri->wildcard.defined);
+        *range = sri->ssptab.rng;
+        return true;
+      }
+      return false;
+    }
+  }
+}
+
+bool gt_viautables_specialrangeiterator_next2(GtRange *range,
+                                              GtSpecialrangeiterator *sri)
+{
+  GtRange current;
+
+  if (sri->exhausted)
+  {
+    return false;
+  }
+  while (true)
+  {
+    if (mergeWildcardssptab(sri, &current))
+    {
+      if (sri->previous.defined)
+      {
+        if (sri->previous.rng.end < current.start)
+        {
+          *range = sri->previous.rng;
+          sri->previous.rng = current;
+          return true;
+        }
+        gt_assert (sri->previous.rng.end == current.start);
+        sri->previous.rng.end = current.end;
+      } else
+      {
+        sri->previous.rng = current;
+        sri->previous.defined = true;
+      }
+    } else
+    {
+      gt_assert(sri->previous.defined);
+      *range = sri->previous.rng;
+      sri->exhausted = false;
+      return true;
+    }
+  }
 }
 
 static void gt_addmarkpos(GtArrayGtUlong *asp,
@@ -5829,7 +5940,7 @@ static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
     binpreparenextrangeGtEncseqReader(esr,SWtable_wildcardrange);
 #endif
 #ifdef GT_RANGEDEBUG
-    printf("wildcardarnge: start advance at (%lu,%lu) in page %lu\n",
+    printf("wildcardrange: start advance at (%lu,%lu) in page %lu\n",
                        esr->wildcardrangestate->firstcell,
                        esr->wildcardrangestate->lastcell,
                        esr->wildcardrangestate->nextpage);
