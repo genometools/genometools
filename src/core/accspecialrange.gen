@@ -808,6 +808,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
       swstate->hascurrent = false;
     }
   }
+  gt_assert(swstate->hasprevious || !swstate->hasmore);
 }
 
 static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,

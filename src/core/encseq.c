@@ -2400,7 +2400,8 @@ struct GtSpecialrangeiterator
 {
   /*GtRange sriprevious;
     bool srihasprevious;*/
-  bool moveforward, exhausted;
+  bool moveforward,
+       exhausted;
   GtEncseqReader *esr;
   unsigned long lengthofspecialrange,
                 jumppos; /* position jumping along the sequence to find the
@@ -2456,6 +2457,10 @@ static bool gt_dabc_specialrangeiterator_next(bool directaccess,
   bool success = false;
   GtUchar cc;
 
+  if (sri->exhausted)
+  {
+    return false;
+  }
   while (!success)
   {
     if (directaccess)
@@ -2522,7 +2527,10 @@ static bool gt_dabc_specialrangeiterator_next(bool directaccess,
 static bool gt_equallength_specialrangeiterator_next(GtRange *range,
                                                    GtSpecialrangeiterator *sri)
 {
-  gt_assert(!sri->exhausted);
+  if (sri->exhausted)
+  {
+    return false;
+  }
   gt_assert(!issinglepositioninspecialrangeViaequallength(sri->esr->encseq,
                                                           sri->jumppos));
   if (sri->moveforward)
@@ -2558,6 +2566,10 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
   bool success = false;
   GtBitsequence currentword;
 
+  if (sri->exhausted)
+  {
+    return false;
+  }
   while (!success)
   {
     currentword = GT_BITNUM2WORD(sri->esr->encseq->specialbits,sri->jumppos);
@@ -2640,15 +2652,32 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
   return success;
 }
 
+static bool gt_viautables_specialrangeiterator_next(GtRange *range,
+                                                    GtSpecialrangeiterator *sri)
+{
+  gt_assert(gt_encseq_access_type_isviautables(sri->esr->encseq->sat));
+  if (sri->exhausted)
+  {
+    return false;
+  }
+  gt_assert(sri->esr->specialrangestate->hasprevious);
+  /* XXX compute the range from wildcardrange and ssptab_new */
+  *range = sri->esr->specialrangestate->previousrange;
+  if (sri->esr->specialrangestate->hasmore)
+  {
+    advancerangeGtEncseqReader(sri->esr,SWtable_specialrange);
+  } else
+  {
+    sri->exhausted = true;
+  }
+  return true;
+}
+
 /* XXX Also put the iterators into the function bundle so that
    the case distinction is not always necessary. */
 
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
-  if (sri->exhausted)
-  {
-    return false;
-  }
   switch (sri->esr->encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
@@ -2660,24 +2689,13 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
     case GT_ACCESS_TYPE_BITACCESS:
       return gt_bitaccess_specialrangeiterator_next(range,sri);
     default:
-      gt_assert(gt_encseq_access_type_isviautables(sri->esr->encseq->sat));
-      gt_assert(sri->esr->specialrangestate->hasprevious);
-      /* XXX compute the range from wildcardrange and ssptab_new */
-      *range = sri->esr->specialrangestate->previousrange;
-      if (sri->esr->specialrangestate->hasmore)
-      {
-        advancerangeGtEncseqReader(sri->esr,SWtable_specialrange);
-      } else
-      {
-        sri->exhausted = true;
-      }
-      return true;
+      return gt_viautables_specialrangeiterator_next(range,sri);
   }
 }
 
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
 {
-  if (!sri)
+  if (sri == NULL)
   {
     return;
   }
