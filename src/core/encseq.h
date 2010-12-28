@@ -371,7 +371,7 @@ void gt_encseq_check_markpos(const GtEncseq *encseq);
 /* The following function checks the iterators delivering the ranges
   of special characters in an encoded sequence <encseq> in forward and
   in reverse directions. */
-int gt_encseq_check_specialranges(const GtEncseq *encseq);
+void gt_encseq_check_specialranges(const GtEncseq *encseq);
 
 /* The following checks if the encoded sequence <encseq> for consistency.
   It does so by scanning the files given in <filenametab> and comparing

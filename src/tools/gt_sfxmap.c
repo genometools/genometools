@@ -494,10 +494,7 @@ static int sfxmap_esa(Sfxmapoptions *arguments,GtError *err)
       if (!haserr && arguments->inputtis)
       {
         gt_logger_log(logger, "checkspecialrangesfast");
-        if (gt_encseq_check_specialranges(suffixarray.encseq) != 0)
-        {
-          haserr = true;
-        }
+        gt_encseq_check_specialranges(suffixarray.encseq);
       }
       if (!haserr && arguments->inputtis)
       {

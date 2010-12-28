@@ -2782,13 +2782,13 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
     {
       if (sri->wildcard.defined)
       {
-        gt_assert(sri->ssptab.defined);
+        gt_assert(!sri->ssptab.defined);
         *range = sri->wildcard.rng;
         return true;
       }
       if (sri->ssptab.defined)
       {
-        gt_assert(sri->wildcard.defined);
+        gt_assert(!sri->wildcard.defined);
         *range = sri->ssptab.rng;
         return true;
       }
@@ -6432,16 +6432,15 @@ static int compareGtRange(const void *a,const void *b)
   return 0;
 }
 
-int gt_encseq_check_specialranges(const GtEncseq *encseq)
+void gt_encseq_check_specialranges(const GtEncseq *encseq)
 {
   GtArray *rangesforward, *rangesbackward;
-  bool haserr = false;
   GtSpecialrangeiterator *sri;
   GtRange range;
 
   if (!gt_encseq_has_specialranges(encseq))
   {
-    return 0;
+    return;
   }
   rangesforward = gt_array_new(sizeof (GtRange));
   rangesbackward = gt_array_new(sizeof (GtRange));
@@ -6452,6 +6451,21 @@ int gt_encseq_check_specialranges(const GtEncseq *encseq)
     gt_array_add(rangesforward,range);
   }
   gt_specialrangeiterator_delete(sri);
+  if (gt_encseq_access_type_isviautables(encseq->sat))
+  {
+    GtArray *rangesforward2 = gt_array_new(sizeof (GtRange));
+    sri = gt_specialrangeiterator_new(encseq,true);
+    while (gt_viautables_specialrangeiterator_next2(&range,sri))
+    {
+      gt_array_add(rangesforward2,range);
+    }
+    gt_specialrangeiterator_delete(sri);
+    if (!gt_array_equal(rangesforward,rangesforward2,compareGtRange))
+    {
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    gt_array_delete(rangesforward2);
+  }
   sri = gt_specialrangeiterator_new(encseq,false);
   while (gt_specialrangeiterator_next(sri,&range))
   {
@@ -6459,16 +6473,12 @@ int gt_encseq_check_specialranges(const GtEncseq *encseq)
   }
   gt_specialrangeiterator_delete(sri);
   gt_array_reverse(rangesbackward);
-  if (!haserr)
+  if (!gt_array_equal(rangesforward,rangesbackward,compareGtRange))
   {
-    if (!gt_array_equal(rangesforward,rangesbackward,compareGtRange))
-    {
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_array_delete(rangesforward);
   gt_array_delete(rangesbackward);
-  return haserr ? - 1 : 0;
 }
 
 struct GtEncseqEncoder {
