@@ -2654,22 +2654,38 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
 }
 
 static bool gt_viautables_specialrangeiterator_next(GtRange *range,
-                                                    GtSpecialrangeiterator *sri)
+                                                    GtEncseqReader *esr,
+                                                    KindofSWtable kindsw)
 {
-  gt_assert(gt_encseq_access_type_isviautables(sri->esr->encseq->sat));
-  if (sri->esr->specialrangestate->exhausted)
+  GtEncseqReaderViatablesinfo *swstate = NULL;
+
+  gt_assert(gt_encseq_access_type_isviautables(esr->encseq->sat));
+  switch (kindsw)
+  {
+    case SWtable_specialrange:
+      swstate = esr->specialrangestate;
+      break;
+    case SWtable_wildcardrange:
+      swstate = esr->wildcardrangestate;
+      break;
+    case SWtable_ssptabnew:
+      swstate = esr->ssptabnewstate;
+      break;
+  }
+  gt_assert(swstate != NULL);
+  if (swstate->exhausted)
   {
     return false;
   }
-  gt_assert(sri->esr->specialrangestate->hasprevious);
+  gt_assert(swstate->hasprevious);
   /* XXX compute the range from wildcardrange and ssptab_new */
-  *range = sri->esr->specialrangestate->previousrange;
-  if (sri->esr->specialrangestate->hasmore)
+  *range = swstate->previousrange;
+  if (swstate->hasmore)
   {
-    advancerangeGtEncseqReader(sri->esr,SWtable_specialrange);
+    advancerangeGtEncseqReader(esr,kindsw);
   } else
   {
-    sri->esr->specialrangestate->exhausted = true;
+    swstate->exhausted = true;
   }
   return true;
 }
@@ -2690,7 +2706,8 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
     case GT_ACCESS_TYPE_BITACCESS:
       return gt_bitaccess_specialrangeiterator_next(range,sri);
     default:
-      return gt_viautables_specialrangeiterator_next(range,sri);
+      return gt_viautables_specialrangeiterator_next(range,sri->esr,
+                                                     SWtable_specialrange);
   }
 }
 
