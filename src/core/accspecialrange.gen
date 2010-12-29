@@ -815,7 +815,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
 static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
                                       KindofSWtable kindsw)
 {
-  GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
 
 #ifdef GT_RANGEDEBUG
   gt_assert(swstate != NULL);
@@ -874,16 +874,29 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
 
 static GtUchar GT_APPENDINT(seqdelivercharSpecial2)(GtEncseqReader *esr)
 {
+  GtUchar cc;
+  bool defined = false;
+
+  /* it is important that both calls of checknextSW are done to
+     correctly maintan the corresponding swstates */
+
+  if (esr->encseq->numofdbsequences > 1UL &&
+      GT_APPENDINT(checknextSW)(esr,SWtable_ssptabnew))
+  {
+    cc = (GtUchar) SEPARATOR;
+    defined = true;
+  }
   if (GT_APPENDINT(esr->encseq->wildcardrangetable.st).numofpositionstostore
       > 0 &&
       GT_APPENDINT(checknextSW)(esr,SWtable_wildcardrange))
   {
-    return (GtUchar) WILDCARD;
+    gt_assert(!defined);
+    cc = (GtUchar) WILDCARD;
+    defined = true;
   }
-  if (esr->encseq->numofdbsequences > 1UL &&
-      GT_APPENDINT(checknextSW)(esr,SWtable_ssptabnew))
+  if (defined)
   {
-    return (GtUchar) SEPARATOR;
+    return cc;
   }
   return (GtUchar) EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
                                       esr->currentpos);

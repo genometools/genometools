@@ -1305,7 +1305,7 @@ typedef enum
   SWtable_ssptabnew
 } KindofSWtable;
 
-static GtEncseqReaderViatablesinfo *assignSWtable(GtEncseqReader *esr,
+static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
                                                   KindofSWtable kindsw)
 {
   switch (kindsw)
@@ -2261,9 +2261,9 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       binpreparenextrangeGtEncseqReader(esr,SWtable_ssptabnew);
 #ifdef GT_RANGEDEBUG
       printf("ssptabnew: start advance at (%lu,%lu) in page %lu\n",
-                       esr->wildcardrangestate->firstcell,
-                       esr->wildcardrangestate->lastcell,
-                       esr->wildcardrangestate->nextpage);
+                       esr->ssptabnewstate->firstcell,
+                       esr->ssptabnewstate->lastcell,
+                       esr->ssptabnewstate->nextpage);
 #endif
       advancerangeGtEncseqReader(esr,SWtable_ssptabnew);
     }
@@ -2328,9 +2328,8 @@ static bool containsSWViatables(const GtEncseq *encseq,
                                 unsigned long len,
                                 KindofSWtable kindsw)
 {
-  GtEncseqReaderViatablesinfo *swstate;
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
 
-  swstate = assignSWtable(esr,kindsw);
   if (swstate->hasprevious)
   {
     if (!GT_ISDIRREVERSE(esr->readmode))
@@ -2361,12 +2360,15 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long startpos,
                                      unsigned long len)
 {
-  bool cspecial, cspecial2 = false;
+  bool cspecial = false, cspecial2 = false;
 
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
   /* XXX: replace by access to wildcard range or ssptab */
-  cspecial = containsSWViatables(encseq, esr, startpos, len,
-                                 SWtable_specialrange);
+  if (encseq->has_specialranges)
+  {
+    cspecial = containsSWViatables(encseq, esr, startpos, len,
+                                   SWtable_specialrange);
+  }
   if (encseq->has_wildcardranges)
   {
     cspecial2 = containsSWViatables(encseq, esr, startpos, len,
@@ -2662,22 +2664,9 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
                                                     GtEncseqReader *esr,
                                                     KindofSWtable kindsw)
 {
-  GtEncseqReaderViatablesinfo *swstate = NULL;
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
 
   gt_assert(gt_encseq_access_type_isviautables(esr->encseq->sat));
-  switch (kindsw)
-  {
-    case SWtable_specialrange:
-      swstate = esr->specialrangestate;
-      break;
-    case SWtable_wildcardrange:
-      swstate = esr->wildcardrangestate;
-      break;
-    case SWtable_ssptabnew:
-      swstate = esr->ssptabnewstate;
-      break;
-  }
-  gt_assert(swstate != NULL);
   if (swstate->exhausted)
   {
     return false;
@@ -2700,6 +2689,10 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
 
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
+  if (!sri->esr->encseq->has_specialranges)
+  {
+    return false;
+  }
   switch (sri->esr->encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
@@ -2735,7 +2728,8 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
   {
     if (!sri->ssptab.defined)
     {
-      if (gt_viautables_specialrangeiterator_next(&sri->ssptab.rng,sri->esr,
+      if (sri->esr->encseq->numofdbsequences > 1UL &&
+          gt_viautables_specialrangeiterator_next(&sri->ssptab.rng,sri->esr,
                                                   SWtable_ssptabnew))
       {
         sri->ssptab.defined = true;
@@ -2743,7 +2737,8 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
     }
     if (!sri->wildcard.defined)
     {
-      if (gt_viautables_specialrangeiterator_next(&sri->wildcard.rng,sri->esr,
+      if (sri->esr->encseq->has_wildcardranges &&
+          gt_viautables_specialrangeiterator_next(&sri->wildcard.rng,sri->esr,
                                                   SWtable_wildcardrange))
       {
         sri->wildcard.defined = true;
@@ -2784,12 +2779,14 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
       {
         gt_assert(!sri->ssptab.defined);
         *range = sri->wildcard.rng;
+        sri->wildcard.defined = false;
         return true;
       }
       if (sri->ssptab.defined)
       {
         gt_assert(!sri->wildcard.defined);
         *range = sri->ssptab.rng;
+        sri->ssptab.defined = false;
         return true;
       }
       return false;
@@ -2797,17 +2794,17 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
   }
 }
 
-bool gt_viautables_specialrangeiterator_next2(GtRange *range,
+static bool gt_viautables_specialrangeiterator_next2(GtRange *range,
                                               GtSpecialrangeiterator *sri)
 {
-  GtRange current;
-
-  if (sri->exhausted)
+  if (!sri->esr->encseq->has_specialranges || sri->exhausted)
   {
     return false;
   }
   while (true)
   {
+    GtRange current;
+
     if (mergeWildcardssptab(sri, &current))
     {
       if (sri->previous.defined)
@@ -2829,7 +2826,8 @@ bool gt_viautables_specialrangeiterator_next2(GtRange *range,
     {
       gt_assert(sri->previous.defined);
       *range = sri->previous.rng;
-      sri->exhausted = false;
+      sri->previous.defined = false;
+      sri->exhausted = true;
       return true;
     }
   }
@@ -4468,11 +4466,10 @@ static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
-static unsigned long fwdgetnexttwobitencodingstopposSW(
-                                      GtEncseqReader *esr,
-                                      KindofSWtable kindsw)
+static unsigned long fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
+                                                       KindofSWtable kindsw)
 {
-  GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
 
   gt_assert(esr != NULL && esr->encseq != NULL);
   gt_assert(!GT_ISDIRREVERSE(esr->readmode));
@@ -4487,7 +4484,6 @@ static unsigned long fwdgetnexttwobitencodingstopposSW(
       /* follows current special range */
       if (swstate->hasmore)
       {
-        /* XXX do not know how to replace SWtable_specialrange */
         advancerangeGtEncseqReader(esr,kindsw);
       } else
       {
@@ -4581,7 +4577,7 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
                                                        KindofSWtable kindsw)
 {
-  GtEncseqReaderViatablesinfo *swstate = assignSWtable(esr,kindsw);
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
 
   gt_assert(esr != NULL && esr->encseq != NULL);
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
@@ -4596,7 +4592,6 @@ static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
       /* follows current special range */
       if (swstate->hasmore)
       {
-        /* XXX do not know how to replace SWtable_specialrange */
         advancerangeGtEncseqReader(esr,kindsw);
       } else
       {
@@ -4610,8 +4605,7 @@ static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
   return 0; /* virtual stop at -1 */
 }
 
-static unsigned long fwdgetnexttwobitencodingstoppos2(
-                                                    GtEncseqReader *esr)
+static unsigned long fwdgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
@@ -4622,6 +4616,7 @@ static unsigned long fwdgetnexttwobitencodingstoppos2(
     } else
     {
       unsigned long stopposwildcard, stopposssptab;
+
       if (esr->encseq->has_wildcardranges)
       {
         stopposwildcard = fwdgetnexttwobitencodingstopposSW(esr,
@@ -4638,10 +4633,6 @@ static unsigned long fwdgetnexttwobitencodingstoppos2(
       {
         stopposssptab = esr->encseq->totallength;
       }
-      /*
-      printf("stopposwildcard = %lu, stopposssptab=%lu\n",
-              stopposwildcard,stopposssptab);
-      */
       return MIN(stopposwildcard,stopposssptab);
     }
   } else
@@ -4678,10 +4669,6 @@ static unsigned long revgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
       {
         stopposssptab = 0;
       }
-      /*
-      printf("stopposwildcard = %lu, stopposssptab=%lu\n",
-              stopposwildcard,stopposssptab);
-      */
       return MAX(stopposwildcard,stopposssptab);
     }
   } else

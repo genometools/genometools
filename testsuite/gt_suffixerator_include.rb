@@ -99,6 +99,8 @@ all_fastafiles = ["Atinsert.fna",
                   "RandomN.fna",
                   "TTT-small.fna",
                   "trna_glutamine.fna",
+                  "awkward.fna",
+                  "awkward-small.fna",
                   "atC99826.fna"]
 
 allfiles += all_fastafiles
@@ -112,6 +114,8 @@ allfiles += (all_emblfiles = all_fastafiles.collect{ |f|
 allmultifiles = []
 all_multifastafiles = ["Atinsert.fna",
                        "Duplicate.fna",
+                       "awkward.fna",
+                       "awkward-small.fna",
                        "Random159.fna",
                        "Random160.fna"]
 
@@ -328,8 +332,8 @@ end
   end
 end
 
-def checkmapped(args)
-  Name "gt suffixerator checkmapped"
+def checkmapped(keyword,args)
+  Name "gt suffixerator checkmapped #{keyword}"
   Keywords "gt_suffixerator gttestdata"
   Test do
     run_test "#{$bin}gt suffixerator #{outoptions} -algbds 3 34 90 " +
@@ -347,7 +351,7 @@ def grumbach()
 end
 
 if $gttestdata then
-  checkmapped("-db " +
+  checkmapped("many .fna files","-db " +
               "#{$gttestdata}Iowa/at100K1 " +
               "#{grumbach()}Wildcards.fna " +
               "#{grumbach()}chntxx.fna " +
@@ -361,15 +365,19 @@ if $gttestdata then
               "#{grumbach()}ychrIII.fna " +
               "-parts 3 -pl")
 
-  checkmapped("-parts 1 -pl -db #{$gttestdata}swissprot/swiss10K " +
+  checkmapped("swiss with parts=1",
+              "-parts 1 -pl -db #{$gttestdata}swissprot/swiss10K " +
               "#{$gttestdata}swissprot/swiss1MB")
 
-  checkmapped("-db #{$gttestdata}swissprot/swiss10K " +
+  checkmapped("swiss with parts=3",
+              "-db #{$gttestdata}swissprot/swiss10K " +
               "#{$gttestdata}swissprot/swiss1MB -parts 3 -pl")
 
-  checkmapped("-parts 2 -pl -smap TransDNA -db  #{$gttestdata}Iowa/at100K1")
+  checkmapped("at100K1",
+              "-parts 2 -pl -smap TransDNA -db  #{$gttestdata}Iowa/at100K1")
 
-  checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
+  checkmapped("swiss with TransProt11",
+              "-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
               "TransProt11")
 end
 

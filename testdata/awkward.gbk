@@ -1,0 +1,30 @@
+LOCUS       sequence0
+DEFINITION  
+ORIGIN      
+        1 naatatcgac atan
+//
+LOCUS       sequence1
+DEFINITION  
+ORIGIN      
+        1 agatctatcc agagcatact acnnnnnnna tatcgtnnnn nnn
+//
+LOCUS       sequence2
+DEFINITION  
+ORIGIN      
+        1 nnnagtacta gcatactcag gactcatcac gac
+//
+LOCUS       sequence3
+DEFINITION  
+ORIGIN      
+        1 nnnnnnnnnn nnnnnnnnnn nnnn
+//
+LOCUS       sequence4
+DEFINITION  
+ORIGIN      
+        1 ntatacgacc atactacgac nnnn
+//
+LOCUS       sequence5
+DEFINITION  
+ORIGIN      
+        1 aagactca
+//

@@ -1,0 +1,15 @@
+LOCUS       sequence0
+DEFINITION  
+ORIGIN      
+        1 ac
+//
+LOCUS       sequence1
+DEFINITION  
+ORIGIN      
+        1 nn
+//
+LOCUS       sequence2
+DEFINITION  
+ORIGIN      
+        1 nt
+//
