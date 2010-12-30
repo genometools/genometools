@@ -2660,7 +2660,8 @@ static bool gt_bitaccess_specialrangeiterator_next(GtRange *range,
   return success;
 }
 
-static bool gt_viautables_specialrangeiterator_next(GtRange *range,
+static bool gt_viautables_specialrangeiterator_next_withkind(
+                                                    GtRange *range,
                                                     GtEncseqReader *esr,
                                                     KindofSWtable kindsw)
 {
@@ -2687,41 +2688,6 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
 /* XXX Also put the iterators into the function bundle so that
    the case distinction is not always necessary. */
 
-bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
-{
-  if (!sri->esr->encseq->has_specialranges)
-  {
-    return false;
-  }
-  switch (sri->esr->encseq->sat)
-  {
-    case  GT_ACCESS_TYPE_DIRECTACCESS:
-      return gt_dabc_specialrangeiterator_next(true,range,sri);
-    case GT_ACCESS_TYPE_BYTECOMPRESS:
-      return gt_dabc_specialrangeiterator_next(false,range,sri);
-    case GT_ACCESS_TYPE_EQUALLENGTH:
-      return gt_equallength_specialrangeiterator_next(range,sri);
-    case GT_ACCESS_TYPE_BITACCESS:
-      return gt_bitaccess_specialrangeiterator_next(range,sri);
-    default:
-      return gt_viautables_specialrangeiterator_next(range,sri->esr,
-                                                     SWtable_specialrange);
-  }
-}
-
-void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
-{
-  if (sri == NULL)
-  {
-    return;
-  }
-  if (sri->esr != NULL)
-  {
-    gt_encseq_reader_delete(sri->esr);
-  }
-  gt_free(sri);
-}
-
 static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
 {
   while (true)
@@ -2729,8 +2695,9 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
     if (!sri->ssptab.defined)
     {
       if (sri->esr->encseq->numofdbsequences > 1UL &&
-          gt_viautables_specialrangeiterator_next(&sri->ssptab.rng,sri->esr,
-                                                  SWtable_ssptabnew))
+          gt_viautables_specialrangeiterator_next_withkind(&sri->ssptab.rng,
+                                                           sri->esr,
+                                                           SWtable_ssptabnew))
       {
         sri->ssptab.defined = true;
       }
@@ -2738,7 +2705,9 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
     if (!sri->wildcard.defined)
     {
       if (sri->esr->encseq->has_wildcardranges &&
-          gt_viautables_specialrangeiterator_next(&sri->wildcard.rng,sri->esr,
+          gt_viautables_specialrangeiterator_next_withkind(
+                                                  &sri->wildcard.rng,
+                                                  sri->esr,
                                                   SWtable_wildcardrange))
       {
         sri->wildcard.defined = true;
@@ -2746,17 +2715,34 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
     }
     if (sri->wildcard.defined && sri->ssptab.defined)
     {
-      if (sri->ssptab.rng.end < sri->wildcard.rng.start)
+      if (sri->moveforward)
       {
-        *range = sri->ssptab.rng;
-        sri->ssptab.defined = false;
-        return true;
-      }
-      if (sri->wildcard.rng.end < sri->ssptab.rng.start)
+        if (sri->ssptab.rng.end < sri->wildcard.rng.start)
+        {
+          *range = sri->ssptab.rng;
+          sri->ssptab.defined = false;
+          return true;
+        }
+        if (sri->wildcard.rng.end < sri->ssptab.rng.start)
+        {
+          *range = sri->wildcard.rng;
+          sri->wildcard.defined = false;
+          return true;
+        }
+      } else
       {
-        *range = sri->wildcard.rng;
-        sri->wildcard.defined = false;
-        return true;
+        if (sri->ssptab.rng.end < sri->wildcard.rng.start)
+        {
+          *range = sri->wildcard.rng;
+          sri->wildcard.defined = false;
+          return true;
+        }
+        if (sri->wildcard.rng.end < sri->ssptab.rng.start)
+        {
+          *range = sri->ssptab.rng;
+          sri->ssptab.defined = false;
+          return true;
+        }
       }
       if (sri->ssptab.rng.end == sri->wildcard.rng.start)
       {
@@ -2794,8 +2780,8 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
   }
 }
 
-static bool gt_viautables_specialrangeiterator_next2(GtRange *range,
-                                              GtSpecialrangeiterator *sri)
+static bool gt_viautables_specialrangeiterator_next(GtRange *range,
+                                                    GtSpecialrangeiterator *sri)
 {
   if (!sri->esr->encseq->has_specialranges || sri->exhausted)
   {
@@ -2809,14 +2795,27 @@ static bool gt_viautables_specialrangeiterator_next2(GtRange *range,
     {
       if (sri->previous.defined)
       {
-        if (sri->previous.rng.end < current.start)
+        if (sri->moveforward)
         {
-          *range = sri->previous.rng;
-          sri->previous.rng = current;
-          return true;
+          if (sri->previous.rng.end < current.start)
+          {
+            *range = sri->previous.rng;
+            sri->previous.rng = current;
+            return true;
+          }
+          gt_assert (sri->previous.rng.end == current.start);
+          sri->previous.rng.end = current.end;
+        } else
+        {
+          if (current.end < sri->previous.rng.start)
+          {
+            *range = sri->previous.rng;
+            sri->previous.rng = current;
+            return true;
+          }
+          gt_assert (current.end == sri->previous.rng.start);
+          sri->previous.rng.start = current.start;
         }
-        gt_assert (sri->previous.rng.end == current.start);
-        sri->previous.rng.end = current.end;
       } else
       {
         sri->previous.rng = current;
@@ -2831,6 +2830,40 @@ static bool gt_viautables_specialrangeiterator_next2(GtRange *range,
       return true;
     }
   }
+}
+
+bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
+{
+  if (!sri->esr->encseq->has_specialranges)
+  {
+    return false;
+  }
+  switch (sri->esr->encseq->sat)
+  {
+    case  GT_ACCESS_TYPE_DIRECTACCESS:
+      return gt_dabc_specialrangeiterator_next(true,range,sri);
+    case GT_ACCESS_TYPE_BYTECOMPRESS:
+      return gt_dabc_specialrangeiterator_next(false,range,sri);
+    case GT_ACCESS_TYPE_EQUALLENGTH:
+      return gt_equallength_specialrangeiterator_next(range,sri);
+    case GT_ACCESS_TYPE_BITACCESS:
+      return gt_bitaccess_specialrangeiterator_next(range,sri);
+    default:
+      return gt_viautables_specialrangeiterator_next(range,sri);
+  }
+}
+
+void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
+{
+  if (sri == NULL)
+  {
+    return;
+  }
+  if (sri->esr != NULL)
+  {
+    gt_encseq_reader_delete(sri->esr);
+  }
+  gt_free(sri);
 }
 
 static void gt_addmarkpos(GtArrayGtUlong *asp,
@@ -6432,6 +6465,8 @@ void gt_encseq_check_specialranges(const GtEncseq *encseq)
   rangesforward = gt_array_new(sizeof (GtRange));
   rangesbackward = gt_array_new(sizeof (GtRange));
 
+  printf("start gt_encseq_check_specialranges\n");
+
   sri = gt_specialrangeiterator_new(encseq,true);
   while (gt_specialrangeiterator_next(sri,&range))
   {
@@ -6442,7 +6477,8 @@ void gt_encseq_check_specialranges(const GtEncseq *encseq)
   {
     GtArray *rangesforward2 = gt_array_new(sizeof (GtRange));
     sri = gt_specialrangeiterator_new(encseq,true);
-    while (gt_viautables_specialrangeiterator_next2(&range,sri))
+    while (gt_viautables_specialrangeiterator_next_withkind(&range,sri->esr,
+                                                        SWtable_specialrange))
     {
       gt_array_add(rangesforward2,range);
     }
