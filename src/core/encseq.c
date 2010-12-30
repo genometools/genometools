@@ -2360,26 +2360,19 @@ static bool containsspecialViatables(const GtEncseq *encseq,
                                      unsigned long startpos,
                                      unsigned long len)
 {
-  bool cspecial = false, cspecial2 = false;
+  bool cspecial = false;
 
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,startpos);
-  /* XXX: replace by access to wildcard range or ssptab */
-  if (encseq->has_specialranges)
-  {
-    cspecial = containsSWViatables(encseq, esr, startpos, len,
-                                   SWtable_specialrange);
-  }
   if (encseq->has_wildcardranges)
   {
-    cspecial2 = containsSWViatables(encseq, esr, startpos, len,
-                                    SWtable_wildcardrange);
+    cspecial = containsSWViatables(encseq, esr, startpos, len,
+                                   SWtable_wildcardrange);
   }
-  if (!cspecial2 && encseq->numofdbsequences > 1UL)
+  if (!cspecial && encseq->numofdbsequences > 1UL)
   {
-    cspecial2 = containsSWViatables(encseq, esr, startpos, len,
-                                    SWtable_ssptabnew);
+    cspecial = containsSWViatables(encseq, esr, startpos, len,
+                                   SWtable_ssptabnew);
   }
-  gt_assert((cspecial && cspecial2) || (!cspecial && !cspecial2));
   return cspecial;
 }
 
