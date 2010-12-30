@@ -6473,22 +6473,6 @@ void gt_encseq_check_specialranges(const GtEncseq *encseq)
     gt_array_add(rangesforward,range);
   }
   gt_specialrangeiterator_delete(sri);
-  if (gt_encseq_access_type_isviautables(encseq->sat))
-  {
-    GtArray *rangesforward2 = gt_array_new(sizeof (GtRange));
-    sri = gt_specialrangeiterator_new(encseq,true);
-    while (gt_viautables_specialrangeiterator_next_withkind(&range,sri->esr,
-                                                        SWtable_specialrange))
-    {
-      gt_array_add(rangesforward2,range);
-    }
-    gt_specialrangeiterator_delete(sri);
-    if (!gt_array_equal(rangesforward,rangesforward2,compareGtRange))
-    {
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-    }
-    gt_array_delete(rangesforward2);
-  }
   sri = gt_specialrangeiterator_new(encseq,false);
   while (gt_specialrangeiterator_next(sri,&range))
   {
