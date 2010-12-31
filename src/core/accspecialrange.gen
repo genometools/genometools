@@ -860,20 +860,6 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
 
 static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
 {
-  unsigned long twobits
-    = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,esr->currentpos);
-  /* XXX replace this function by the next one */
-  if (!GT_APPENDINT(checknextSW)(esr,SWtable_specialrange))
-  {
-    return (GtUchar) twobits;
-  }
-  return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
-                     ? (GtUchar) SEPARATOR
-                     : (GtUchar) WILDCARD;
-}
-
-static GtUchar GT_APPENDINT(seqdelivercharSpecial2)(GtEncseqReader *esr)
-{
   GtUchar cc;
   bool defined = false;
 

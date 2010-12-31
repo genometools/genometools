@@ -1419,34 +1419,6 @@ static void showallSWtables(const GtEncseq *encseq)
 
 #endif
 
-GtUchar gt_encseq_reader_next_encoded_char2(GtEncseqReader *esr)
-{
-  GtUchar cc;
-  gt_assert(esr && esr->currentpos < esr->encseq->totallength);
-
-  gt_assert(esr->readmode == GT_READMODE_FORWARD &&
-            gt_encseq_access_type_isviautables(esr->encseq->sat));
-  switch (esr->encseq->sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      cc = seqdelivercharSpecial2_uchar(esr);
-      esr->currentpos++;
-      return cc;
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      cc = seqdelivercharSpecial2_ushort(esr);
-      esr->currentpos++;
-      return cc;
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      cc = seqdelivercharSpecial2_uint32(esr);
-      esr->currentpos++;
-      return cc;
-    default:
-      fprintf(stderr,"gt_encseq_reader_next_encoded_char2: "
-                     "sat %d not possible\n",(int) esr->encseq->sat);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
 /* generic for the case that there are no specialsymbols */
 
 static GtUchar seqdelivercharnospecial2bitenc(GtEncseqReader *esr)
@@ -5928,9 +5900,8 @@ static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
                                     GtError *err)
 {
   bool assigned = false;
-  unsigned long pos;
-  GtUchar cc1, cc2;
   GtEncseqReader *esr = NULL;
+
   if (encseq->ssptab == NULL &&
       encseq->numofdbsequences > 1UL &&
       gt_encseq_access_type_isviautables(encseq->sat))
@@ -5961,20 +5932,6 @@ static int gt_encseq_verify_encseq(GtEncseq *encseq,const char *indexname,
 #ifndef NEWTWOBITENCODING
     advancerangeGtEncseqReader(esr,SWtable_wildcardrange);
 #endif
-  }
-  for (pos = 0; pos < encseq->totallength; pos++)
-  {
-    cc1 = gt_encseq_get_encoded_char(encseq,pos,GT_READMODE_FORWARD);
-    if (esr != NULL)
-    {
-      cc2 = gt_encseq_reader_next_encoded_char2(esr);
-      if (cc1 != cc2)
-      {
-        fprintf(stderr,"sequential access: pos %lu: cc1 = %u != %u = cc2\n",
-                        pos,(unsigned int) cc1,(unsigned int) cc2);
-        exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-    }
   }
   if (assigned)
   {
