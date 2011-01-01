@@ -204,52 +204,9 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
                                           unsigned long pos);
 
-static GtUchar gt_encseq_get_encoded_char1(const GtEncseq *encseq,
-                                           unsigned long pos,
-                                           GtReadmode readmode)
-{
-  gt_assert(pos < encseq->totallength);
-  if (GT_ISDIRREVERSE(readmode))
-  {
-    pos = GT_REVERSEPOS(encseq->totallength,pos);
-  }
-  if (encseq->twobitencoding != NULL)
-  {
-    unsigned long twobits;
-
-    twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-    if (!encseq->has_specialranges ||
-        twobits > encseq->maxcharforspecial ||
-        !encseq->issinglepositioninspecialrange(encseq,pos))
-    {
-      return GT_ISDIRCOMPLEMENT(readmode)
-               ? GT_COMPLEMENTBASE((GtUchar) twobits)
-               : (GtUchar) twobits;
-    }
-    return (encseq->maxcharforspecial == 0 ||
-            twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
-             ? (GtUchar) SEPARATOR
-             : (GtUchar) WILDCARD;
-  }
-  if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
-  {
-    gt_assert(!GT_ISDIRCOMPLEMENT(readmode));
-    return delivercharViabytecompress(encseq,pos);
-  } else
-  {
-    GtUchar cc;
-
-    gt_assert(encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
-    cc = encseq->plainseq[pos];
-    return (ISNOTSPECIAL(cc) && GT_ISDIRCOMPLEMENT(readmode))
-           ? GT_COMPLEMENTBASE(cc)
-           : cc;
-  }
-}
-
-static GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
-                                           unsigned long pos,
-                                           GtReadmode readmode)
+GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
+                                   unsigned long pos,
+                                   GtReadmode readmode)
 {
   gt_assert(pos < encseq->totallength);
   if (GT_ISDIRREVERSE(readmode))
@@ -315,18 +272,6 @@ static GtUchar gt_encseq_get_encoded_char2(const GtEncseq *encseq,
            ? GT_COMPLEMENTBASE(cc)
            : cc;
   }
-}
-
-GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
-                                   unsigned long pos,
-                                   GtReadmode readmode)
-{
-  GtUchar cc1, cc2;
-
-  cc1 = gt_encseq_get_encoded_char1(encseq,pos,readmode);
-  cc2 = gt_encseq_get_encoded_char2(encseq,pos,readmode);
-  gt_assert(cc1 == cc2);
-  return cc1;
 }
 
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
