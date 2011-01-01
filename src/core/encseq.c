@@ -4438,61 +4438,30 @@ static inline unsigned int revbitaccessunitsnotspecial(GtBitsequence spbits,
                        : (unsigned int) numberoftrailingzeros(spbits);
 }
 
-static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
+static unsigned long fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
+                                      KindofSWtable kindsw)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
-    switch (esr->encseq->sat)
+    GtEncseqAccessType sat = (kindsw == SWtable_ssptabnew)
+                                ? esr->encseq->satsep
+                                : esr->encseq->sat;
+    switch (sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-        return fwdgetnexttwobitencodingstopposViatables_uchar(esr);
+        return fwdgetnexttwobitencodingstopposSW_uchar(esr,kindsw);
       case GT_ACCESS_TYPE_USHORTTABLES:
-        return fwdgetnexttwobitencodingstopposViatables_ushort(esr);
+        return fwdgetnexttwobitencodingstopposSW_ushort(esr,kindsw);
       case GT_ACCESS_TYPE_UINT32TABLES:
-        return fwdgetnexttwobitencodingstopposViatables_uint32(esr);
-      case GT_ACCESS_TYPE_EQUALLENGTH:
-        return fwdgetnexttwobitencodingstopposViaequallength(esr->encseq,
-                                                             esr->currentpos);
+        return fwdgetnexttwobitencodingstopposSW_uint32(esr,kindsw);
       default:
-       fprintf(stderr,"fwdgetnexttwobitencodingstoppos(%d) undefined\n",
-                      (int) esr->encseq->sat);
+       fprintf(stderr,"%s(%d) undefined\n",__func__,(int) sat);
        exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
   {
-    return esr->encseq->totallength;
+   return esr->encseq->totallength;
   }
-}
-
-static unsigned long fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
-                                                       KindofSWtable kindsw)
-{
-  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
-
-  gt_assert(esr != NULL && esr->encseq != NULL);
-  gt_assert(!GT_ISDIRREVERSE(esr->readmode));
-  while (swstate->hasprevious)
-  {
-    if (esr->currentpos >= swstate->previousrange.start)
-    {
-      if (esr->currentpos < swstate->previousrange.end)
-      {
-        return esr->currentpos; /* is in current special range */
-      }
-      /* follows current special range */
-      if (swstate->hasmore)
-      {
-        advancerangeGtEncseqReader(esr,kindsw);
-      } else
-      {
-        break;
-      }
-    } else
-    {
-      return swstate->previousrange.start;
-    }
-  }
-  return esr->encseq->totallength;
 }
 
 static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
@@ -4546,24 +4515,24 @@ static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
   return currentpos + (unsigned long) GT_UNITSIN2BITENC;
 }
 
-static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
+static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
+                                      KindofSWtable kindsw)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
-    switch (esr->encseq->sat)
+    GtEncseqAccessType sat = (kindsw == SWtable_ssptabnew)
+                                ? esr->encseq->satsep
+                                : esr->encseq->sat;
+    switch (sat)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
-        return revgetnexttwobitencodingstopposViatables_uchar(esr);
+        return revgetnexttwobitencodingstopposSW_uchar(esr,kindsw);
       case GT_ACCESS_TYPE_USHORTTABLES:
-        return revgetnexttwobitencodingstopposViatables_ushort(esr);
+        return revgetnexttwobitencodingstopposSW_ushort(esr,kindsw);
       case GT_ACCESS_TYPE_UINT32TABLES:
-        return revgetnexttwobitencodingstopposViatables_uint32(esr);
-      case GT_ACCESS_TYPE_EQUALLENGTH:
-        return revgetnexttwobitencodingstopposViaequallength(esr->encseq,
-                                                             esr->currentpos);
+        return revgetnexttwobitencodingstopposSW_uint32(esr,kindsw);
       default:
-       fprintf(stderr,"revgetnexttwobitencodingstoppos(%d) undefined\n",
-                      (int) esr->encseq->sat);
+       fprintf(stderr,"%s(%d) undefined\n",__func__,(int) sat);
        exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   } else
@@ -4572,38 +4541,7 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
-static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
-                                                       KindofSWtable kindsw)
-{
-  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
-
-  gt_assert(esr != NULL && esr->encseq != NULL);
-  gt_assert(GT_ISDIRREVERSE(esr->readmode));
-  while (swstate->hasprevious)
-  {
-    if (esr->currentpos < swstate->previousrange.end)
-    {
-      if (esr->currentpos >= swstate->previousrange.start)
-      {
-        return esr->currentpos+1; /* is in current special range */
-      }
-      /* follows current special range */
-      if (swstate->hasmore)
-      {
-        advancerangeGtEncseqReader(esr,kindsw);
-      } else
-      {
-        break;
-      }
-    } else
-    {
-      return swstate->previousrange.end;
-    }
-  }
-  return 0; /* virtual stop at -1 */
-}
-
-static unsigned long fwdgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
+static unsigned long fwdgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
@@ -4639,7 +4577,7 @@ static unsigned long fwdgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
   }
 }
 
-static unsigned long revgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
+static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
 {
   if (gt_encseq_has_specialranges(esr->encseq))
   {
@@ -4677,14 +4615,8 @@ static unsigned long revgetnexttwobitencodingstoppos2(GtEncseqReader *esr)
 
 unsigned long gt_getnexttwobitencodingstoppos(bool fwd,GtEncseqReader *esr)
 {
-  unsigned long stoppos, stoppos2;
-
-  stoppos = (fwd ? fwdgetnexttwobitencodingstoppos
-                 : revgetnexttwobitencodingstoppos) (esr);
-  stoppos2 = (fwd ? fwdgetnexttwobitencodingstoppos2
-                  : revgetnexttwobitencodingstoppos2) (esr);
-  gt_assert(stoppos == stoppos2);
-  return stoppos;
+  return (fwd ? fwdgetnexttwobitencodingstoppos
+              : revgetnexttwobitencodingstoppos) (esr);
 }
 
 static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,

@@ -888,61 +888,63 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
                                       esr->currentpos);
 }
 
-static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposViatables)(
-                                      GtEncseqReader *esr)
+static unsigned long GT_APPENDINT(fwdgetnexttwobitencodingstopposSW)(
+                                   GtEncseqReader *esr,KindofSWtable kindsw)
 {
-  gt_assert(esr != NULL && esr->encseq != NULL &&
-            gt_encseq_access_type_isviautables(esr->encseq->sat));
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
+
+  gt_assert(esr != NULL && esr->encseq != NULL);
   gt_assert(!GT_ISDIRREVERSE(esr->readmode));
-  while (esr->specialrangestate->hasprevious)
+  while (swstate->hasprevious)
   {
-    if (esr->currentpos >= esr->specialrangestate->previousrange.start)
+    if (esr->currentpos >= swstate->previousrange.start)
     {
-      if (esr->currentpos < esr->specialrangestate->previousrange.end)
+      if (esr->currentpos < swstate->previousrange.end)
       {
         return esr->currentpos; /* is in current special range */
       }
       /* follows current special range */
-      if (esr->specialrangestate->hasmore)
+      if (swstate->hasmore)
       {
-        GT_APPENDINT(advancerangeGtEncseqReader)(esr,SWtable_specialrange);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr,kindsw);
       } else
       {
         break;
       }
     } else
     {
-      return esr->specialrangestate->previousrange.start;
+      return swstate->previousrange.start;
     }
   }
   return esr->encseq->totallength;
 }
 
-static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposViatables)(
-                                               GtEncseqReader *esr)
+static unsigned long GT_APPENDINT(revgetnexttwobitencodingstopposSW)(
+                                      GtEncseqReader *esr,KindofSWtable kindsw)
 {
-  gt_assert(esr != NULL && esr->encseq != NULL &&
-            gt_encseq_access_type_isviautables(esr->encseq->sat));
+  GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
+
+  gt_assert(esr != NULL && esr->encseq != NULL);
   gt_assert(GT_ISDIRREVERSE(esr->readmode));
-  while (esr->specialrangestate->hasprevious)
+  while (swstate->hasprevious)
   {
-    if (esr->currentpos < esr->specialrangestate->previousrange.end)
+    if (esr->currentpos < swstate->previousrange.end)
     {
-      if (esr->currentpos >= esr->specialrangestate->previousrange.start)
+      if (esr->currentpos >= swstate->previousrange.start)
       {
         return esr->currentpos+1; /* is in current special range */
       }
       /* follows current special range */
-      if (esr->specialrangestate->hasmore)
+      if (swstate->hasmore)
       {
-        GT_APPENDINT(advancerangeGtEncseqReader)(esr,SWtable_specialrange);
+        GT_APPENDINT(advancerangeGtEncseqReader)(esr,kindsw);
       } else
       {
         break;
       }
     } else
     {
-      return esr->specialrangestate->previousrange.end;
+      return swstate->previousrange.end;
     }
   }
   return 0; /* virtual stop at -1 */
