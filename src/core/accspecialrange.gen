@@ -61,7 +61,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   GT_APPENDINT(allocSWtables)(wildcardrangetable);
   gt_assert(specialrangetable->maxrangevalue ==
             wildcardrangetable->maxrangevalue);
-  nextcheckpos = (unsigned long) specialrangetable->maxrangevalue;
+  nextcheckpos = (unsigned long) wildcardrangetable->maxrangevalue;
   for (currentposition=0; /* Nothing */; currentposition++)
   {
     retval = gt_sequence_buffer_next(fb,&cc,err);
@@ -209,7 +209,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
       specialrangetable->endidxinpage[pagenumber] = fillspecialrangeidx;
       wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
       pagenumber++;
-      nextcheckpos += (unsigned long) (specialrangetable->maxrangevalue+1);
+      nextcheckpos += (unsigned long) (wildcardrangetable->maxrangevalue+1);
     }
     ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
     bitwise <<= 2;
@@ -241,7 +241,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   UPDATESEQBUFFERFINAL(bitwiseSW,twobitencodingSWptr);
   gt_assert(sumspecialranges == countspecials);
   gt_assert(sumwildcardranges == countwildcards);
-  while (pagenumber < specialrangetable->numofpages)
+  while (pagenumber < wildcardrangetable->numofpages)
   {
     specialrangetable->endidxinpage[pagenumber] = fillspecialrangeidx;
     wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
