@@ -2897,7 +2897,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long numofsequences,
                                           unsigned long numofdbfiles,
                                           unsigned long lengthofdbfilenames,
-                                          unsigned long specialranges,
                                           unsigned long wildcardranges,
                                           const Definedunsignedlong
                                              *equallength,
@@ -2920,8 +2919,9 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   {
     initSWtable(&encseq->ssptabnew,totallength,encseq->satsep,numofsequences-1);
   }
-  encseq->has_specialranges = (specialranges > 0) ? true : false;
   encseq->has_wildcardranges = (wildcardranges > 0) ? true : false;
+  encseq->has_specialranges
+    = (wildcardranges > 0 || numofsequences > 1UL) ? true : false;
   encseq->has_ssptabnew = false;
   encseq->filelengthtab = NULL;
   encseq->filenametab = NULL;
@@ -2960,9 +2960,9 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   sizeofrep_uint64
     = gt_encseq_determine_size(sat,
                                totallength,
+                               numofsequences,
                                numofdbfiles,
                                lengthofdbfilenames,
-                               specialranges,
                                wildcardranges,
                                encseq->numofchars,
                                gt_alphabet_bits_per_symbol(alpha));
@@ -3238,7 +3238,6 @@ static GtEncseq *files2encodedsequence(
                                 GtEncseqAccessType sat,
                                 unsigned long *characterdistribution,
                                 const GtSpecialcharinfo *specialcharinfo,
-                                unsigned long specialranges,
                                 unsigned long wildcardranges,
                                 GtLogger *logger,
                                 GtError *err)
@@ -3262,7 +3261,6 @@ static GtEncseq *files2encodedsequence(
                                       numofsequences,
                                       gt_str_array_size(filenametab),
                                       lengthofdbfilenames,
-                                      specialranges,
                                       wildcardranges,
                                       equallength,
                                       alphabet,
@@ -3393,7 +3391,6 @@ gt_encseq_new_from_index(const char *indexname,
                                  numofdbsequences,
                                  gt_encseq_metadata_num_of_files(emd),
                                  gt_encseq_metadata_length_of_filenames(emd),
-                                 si.specialranges,
                                  si.wildcardranges,
                                  &equallength,
                                  alpha,
@@ -3693,9 +3690,9 @@ static unsigned long calcswranges(const char *kind,
 
 static uint64_t detencseqofsatviautables(int kind,
                                          unsigned long totallength,
+                                         unsigned long numofsequences,
                                          unsigned long numofdbfiles,
                                          unsigned long lengthofdbfilenames,
-                                         unsigned long specialranges,
                                          unsigned long wildcardranges,
                                          unsigned int numofchars)
 {
@@ -3704,16 +3701,16 @@ static uint64_t detencseqofsatviautables(int kind,
                               GT_ACCESS_TYPE_UINT32TABLES};
 
   gt_assert(kind < (int) (sizeof (sat)/sizeof (sat[0])));
-  return gt_encseq_determine_size(sat[kind],totallength,numofdbfiles,
-                                  lengthofdbfilenames,specialranges,
+  return gt_encseq_determine_size(sat[kind],totallength,numofsequences,
+                                  numofdbfiles,lengthofdbfilenames,
                                   wildcardranges,numofchars,0);
 }
 
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long totallength,
+                                  unsigned long numofsequences,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
-                                  unsigned long specialranges,
                                   unsigned long wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol)
@@ -3737,7 +3734,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          break;
     case GT_ACCESS_TYPE_BITACCESS:
          sum = sizeoftwobitencoding;
-         if (specialranges > 0)
+         if (wildcardranges > 0 || numofsequences > 1UL)
          {
            sum += (uint64_t) sizeof (GtBitsequence) *
                   (uint64_t) GT_NUMOFINTSFORBITS(totallength+GT_INTWORDSIZE);
@@ -3768,6 +3765,7 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
 static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
                               unsigned int forcetable,
                               unsigned long totallength,
+                              unsigned long numofsequences,
                               unsigned long numofdbfiles,
                               unsigned long lengthofdbfilenames,
                               unsigned int numofchars,
@@ -3790,9 +3788,9 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
   {
     if (forcetable == 3U || c == (int) forcetable)
     {
-      tmp = detencseqofsatviautables(c,totallength,numofdbfiles,
+      tmp = detencseqofsatviautables(c,totallength,numofsequences,
+                                     numofdbfiles,
                                      lengthofdbfilenames,
-                                     specialrangestab[c],
                                      wildcardrangestab[c],
                                      numofchars);
       if (!smallestdefined || tmp < smallestsize)
@@ -3964,6 +3962,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     doupdatesumranges(specialcharinfo,
                       forcetable,
                       currentpos,
+                      *numofseparators + 1,
                       gt_str_array_size(filenametab),
                       determinelengthofdbfilenames(filenametab),
                       gt_alphabet_num_of_chars(alpha),
@@ -5789,6 +5788,7 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                       &specialranges,
                                       &wildcardranges,
                                       totallength,
+                                      numofseparators+1,
                                       gt_str_array_size(filenametab),
                                       determinelengthofdbfilenames(filenametab),
                                       specialrangestab,
@@ -5821,7 +5821,6 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
                                    sat,
                                    characterdistribution,
                                    &specialcharinfo,
-                                   specialranges,
                                    wildcardranges,
                                    logger,
                                    err);
@@ -6750,7 +6749,6 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb,
                                     eb->nof_seqs,
                                     0,
                                     0,
-                                    samplespecialcharinfo.specialranges,
                                     samplespecialcharinfo.wildcardranges,
                                     NULL,
                                     gt_alphabet_ref(eb->alpha),

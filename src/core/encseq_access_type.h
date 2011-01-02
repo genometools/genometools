@@ -44,6 +44,7 @@ const char*        gt_encseq_access_type_list(void);
 int gt_encseq_access_type_determine(unsigned long *specialranges,
                                     unsigned long *wildcardranges,
                                     unsigned long totallength,
+                                    unsigned long numofsequences,
                                     unsigned long numofdbfiles,
                                     unsigned long lengthofdbfilenames,
                                     const unsigned long *specialrangestab,

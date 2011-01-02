@@ -315,9 +315,9 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
    with the given characteristics, given the access type <sat>. */
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long totallength,
+                                  unsigned long numofsequences,
                                   unsigned long numofdbfiles,
                                   unsigned long lengthofdbfilenames,
-                                  unsigned long specialranges,
                                   unsigned long wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol);
