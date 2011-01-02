@@ -111,18 +111,7 @@ uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
                                        wildcardrangestab[IDX],\
                                        numofchars,\
                                        0);\
-        if (withadditionalsize)\
-        {\
-          additionalsize \
-            = sizeoftwobitencoding + \
-              gt_encseq_sizeofSWtable(SAT,true,totallength,\
-                                      wildcardrangestab[IDX]);\
-        } else\
-        {\
-          additionalsize = 0;\
-        }\
-        gt_assert(tmp >= additionalsize);\
-        if (tmp - additionalsize < cmin)\
+        if (tmp < cmin)\
         {\
           cmin = tmp;\
           cret = SAT;\
@@ -143,15 +132,7 @@ static GtEncseqAccessType determinesmallestrep(
                                   unsigned int numofchars)
 {
   GtEncseqAccessType cret;
-#ifdef NEWTWOBITENCODING
-  bool withadditionalsize = true;
-#else
-  bool withadditionalsize = false;
-#endif
-  uint64_t tmp, cmin, additionalsize,
-           sizeoftwobitencoding
-             = (uint64_t) gt_unitsoftwobitencoding(totallength) *
-               (uint64_t) sizeof (GtTwobitencoding);
+  uint64_t tmp, cmin;
 
   cret = GT_ACCESS_TYPE_BITACCESS;
   cmin = gt_encseq_determine_size(cret, totallength,

@@ -148,7 +148,6 @@ struct GtEncseq
               GT_ACCESS_TYPE_UINT32TABLES */
 
   GtTwobitencoding *twobitencoding;
-  GtTwobitencoding *twobitencodingSW;
 
   unsigned long unitsoftwobitencoding;
   unsigned long maxcharforspecial; /* only defined when twobitencoding != NULL*/

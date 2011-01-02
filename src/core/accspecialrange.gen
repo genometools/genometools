@@ -44,7 +44,6 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
                 sumwildcardranges = 0, countwildcards = 0;
 #endif
   GtTwobitencoding *twobitencodingptr, bitwise = 0;
-  GtTwobitencoding *twobitencodingSWptr, bitwiseSW = 0;
 
   encseq->unitsoftwobitencoding
     = gt_unitsoftwobitencoding(encseq->totallength);
@@ -52,10 +51,6 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
                                      encseq->unitsoftwobitencoding);
   encseq->twobitencoding[encseq->unitsoftwobitencoding-1] = 0;
   twobitencodingptr = encseq->twobitencoding;
-  encseq->twobitencodingSW = gt_malloc(sizeof (*(encseq->twobitencodingSW)) *
-                                       encseq->unitsoftwobitencoding);
-  encseq->twobitencodingSW[encseq->unitsoftwobitencoding-1] = 0;
-  twobitencodingSWptr = encseq->twobitencodingSW;
 
   GT_APPENDINT(allocSWtables)(specialrangetable);
   GT_APPENDINT(allocSWtables)(wildcardrangetable);
@@ -213,17 +208,9 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     }
     ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
     bitwise <<= 2;
-    bitwiseSW <<= 2;
     if (ISNOTSPECIAL(cc))
     {
       bitwise |= (GtTwobitencoding) cc;
-      bitwiseSW |= (GtTwobitencoding) cc;
-    } else
-    {
-      if (cc == (GtUchar) SEPARATOR)
-      {
-        bitwise |= (GtTwobitencoding) GT_TWOBITS_FOR_SEPARATOR;
-      }
     }
     if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
     {
@@ -231,14 +218,11 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     } else
     {
       *twobitencodingptr++ = bitwise;
-      *twobitencodingSWptr++ = bitwiseSW;
       widthbuffer = 0;
       bitwise = 0;
-      bitwiseSW = 0;
     }
   }
   UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr);
-  UPDATESEQBUFFERFINAL(bitwiseSW,twobitencodingSWptr);
   gt_assert(sumspecialranges == countspecials);
   gt_assert(sumwildcardranges == countwildcards);
   while (pagenumber < wildcardrangetable->numofpages)

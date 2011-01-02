@@ -20,7 +20,6 @@
 
 #include "core/defined-types.h"
 #include "core/error_api.h"
-#define NEWTWOBITENCODING
 
 typedef enum
 {
