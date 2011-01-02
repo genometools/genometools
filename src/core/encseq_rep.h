@@ -151,7 +151,6 @@ struct GtEncseq
   GtTwobitencoding *twobitencoding;
 
   unsigned long unitsoftwobitencoding;
-  unsigned long maxcharforspecial; /* only defined when twobitencoding != NULL*/
 
   /* only for  GT_ACCESS_TYPE_DIRECTACCESS */
   GtUchar *plainseq;

@@ -249,7 +249,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
       if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
       {
         if (encseq->numofdbsequences == 1UL ||
-            twobits > encseq->maxcharforspecial ||
+            twobits != (unsigned long) encseq->leastprobablecharacter ||
             !issinglepositioninspecialrangeViaequallength(encseq,pos))
         {
           return GT_ISDIRCOMPLEMENT(readmode)
@@ -261,15 +261,14 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
       {
         gt_assert(encseq->sat == GT_ACCESS_TYPE_BITACCESS);
         if (!encseq->has_specialranges ||
-            twobits > encseq->maxcharforspecial ||
+            twobits > (unsigned long) GT_TWOBITS_FOR_SEPARATOR ||
             !GT_ISIBITSET(encseq->specialbits,pos))
         {
           return GT_ISDIRCOMPLEMENT(readmode)
                    ? GT_COMPLEMENTBASE((GtUchar) twobits)
                    : (GtUchar) twobits;
         }
-        return (encseq->maxcharforspecial == 0 ||
-                 twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
+        return (twobits == (unsigned long) GT_TWOBITS_FOR_SEPARATOR)
                    ? (GtUchar) SEPARATOR
                    : (GtUchar) WILDCARD;
       }
@@ -1624,6 +1623,8 @@ static int fillViaequallength(GtEncseq *encseq,
       } else
       {
         gt_assert(cc == (GtUchar) SEPARATOR);
+        gt_assert(encseq->leastprobablecharacter < encseq->numofchars);
+        bitwise |= (GtTwobitencoding) encseq->leastprobablecharacter;
       }
       if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
       {
@@ -1667,7 +1668,7 @@ static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
 {
   unsigned long twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
                                              esr->currentpos);
-  if (twobits > 0 || /* XXX: compare against the leastprobable character */
+  if (twobits != (unsigned long) esr->encseq->leastprobablecharacter ||
       !issinglepositioninspecialrangeViaequallength(esr->encseq,
                                                     esr->currentpos))
   {
@@ -2972,11 +2973,9 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   if (sat == GT_ACCESS_TYPE_DIRECTACCESS || sat == GT_ACCESS_TYPE_BYTECOMPRESS)
   {
     encseq->unitsoftwobitencoding = 0;
-    encseq->maxcharforspecial = 0; /* to have a defined value */
   } else
   {
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
-    encseq->maxcharforspecial = (sat == GT_ACCESS_TYPE_EQUALLENGTH) ? 0 : 1UL;
   }
   encseq->plainseq = NULL;
   encseq->bitpackarray = NULL;
@@ -6182,8 +6181,6 @@ void gt_encseq_check_specialranges(const GtEncseq *encseq)
   }
   rangesforward = gt_array_new(sizeof (GtRange));
   rangesbackward = gt_array_new(sizeof (GtRange));
-
-  printf("start gt_encseq_check_specialranges\n");
 
   sri = gt_specialrangeiterator_new(encseq,true);
   while (gt_specialrangeiterator_next(sri,&range))

@@ -153,6 +153,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
       bitwise |= (GtTwobitencoding) cc;
     } else
     {
+      gt_assert(encseq->leastprobablecharacter < encseq->numofchars);
       bitwise |= (GtTwobitencoding) encseq->leastprobablecharacter;
     }
     if (widthbuffer < (unsigned long) (GT_UNITSIN2BITENC - 1))
