@@ -30,18 +30,15 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
                                      GtSequenceBuffer *fb,
                                      GtError *err)
 {
-  unsigned long fillspecialrangeidx = 0, fillwildcardrangeidx = 0,
+  unsigned long fillwildcardrangeidx = 0,
                 currentposition, pagenumber = 0, nextcheckpos, widthbuffer = 0;
   int retval;
-  unsigned int lastspecialrangelength = 0, lastwildcardrangelength = 0;
+  unsigned int lastwildcardrangelength = 0;
   GtUchar cc;
-  GT_APPENDINT(GtSWtable) *specialrangetable
-    = &(GT_APPENDINT(encseq->specialrangetable.st));
   GT_APPENDINT(GtSWtable) *wildcardrangetable
     = &(GT_APPENDINT(encseq->wildcardrangetable.st));
 #ifndef NDEBUG
-  unsigned long sumspecialranges = 0, countspecials = 0,
-                sumwildcardranges = 0, countwildcards = 0;
+  unsigned long sumwildcardranges = 0, countwildcards = 0;
 #endif
   GtTwobitencoding *twobitencodingptr, bitwise = 0;
 
@@ -52,10 +49,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   encseq->twobitencoding[encseq->unitsoftwobitencoding-1] = 0;
   twobitencodingptr = encseq->twobitencoding;
 
-  GT_APPENDINT(allocSWtables)(specialrangetable);
   GT_APPENDINT(allocSWtables)(wildcardrangetable);
-  gt_assert(specialrangetable->maxrangevalue ==
-            wildcardrangetable->maxrangevalue);
   nextcheckpos = (unsigned long) wildcardrangetable->maxrangevalue;
   for (currentposition=0; /* Nothing */; currentposition++)
   {
@@ -64,18 +58,6 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     {
       if (ISNOTSPECIAL(cc))
       {
-        if (lastspecialrangelength > 0)
-        {
-          /* when seeing the first character after a special range, process
-             this an store the corresponding range length for the previous
-             range */
-          specialrangetable->rangelengths[fillspecialrangeidx-1]
-            = (GT_SPECIALTABLETYPE) (lastspecialrangelength-1);
-#ifndef NDEBUG
-          sumspecialranges += (unsigned long) lastspecialrangelength;
-#endif
-          lastspecialrangelength = 0;
-        }
         if (lastwildcardrangelength > 0)
         {
           /* when seeing the first character after a wildcard range, process
@@ -136,52 +118,11 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
           }
           ssptaboutinfo_processseppos(ssptaboutinfo,currentposition);
         }
-#ifndef NDEBUG
-        countspecials++;
-#endif
-        if (lastspecialrangelength == 0) /* at beginning of special range */
-        {
-          /* store remainder of currentposition: this value is not larger
-             than maxrangevalue and this can be stored in a page */
-          specialrangetable->positions[fillspecialrangeidx++]
-            = (GT_SPECIALTABLETYPE) (currentposition &
-                                     specialrangetable->maxrangevalue);
-          lastspecialrangelength = 1U;
-        } else /* extend special range */
-        {
-          if (lastspecialrangelength == specialrangetable->maxrangevalue)
-              /* already at maximal length */
-          {
-            gt_assert(fillspecialrangeidx > 0);
-            specialrangetable->rangelengths[fillspecialrangeidx-1]
-              = (GT_SPECIALTABLETYPE) specialrangetable->maxrangevalue;
-#ifndef NDEBUG
-            sumspecialranges
-              += (1 + (unsigned long) specialrangetable->maxrangevalue);
-#endif
-            lastspecialrangelength = 0;
-          } else
-          {
-            lastspecialrangelength++;
-          }
-        }
       }
     } else
     { /* now retval <= 0 */
       if (retval == 0)
       {
-        if (lastspecialrangelength > 0)
-        {
-          /* note that we store one less than the length to prevent overflows */
-          gt_assert(fillspecialrangeidx > 0);
-          gt_assert(fillspecialrangeidx - 1 <
-                    specialrangetable->numofpositionstostore);
-          specialrangetable->rangelengths[fillspecialrangeidx-1]
-            = (GT_SPECIALTABLETYPE) (lastspecialrangelength-1);
-#ifndef NDEBUG
-          sumspecialranges += (unsigned long) lastspecialrangelength;
-#endif
-        }
         if (lastwildcardrangelength > 0)
         {
           /* note that we store one less than the length to prevent overflows */
@@ -201,7 +142,6 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     }
     if (currentposition == nextcheckpos)
     {
-      specialrangetable->endidxinpage[pagenumber] = fillspecialrangeidx;
       wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
       pagenumber++;
       nextcheckpos += (unsigned long) (wildcardrangetable->maxrangevalue+1);
@@ -223,11 +163,9 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     }
   }
   UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr);
-  gt_assert(sumspecialranges == countspecials);
   gt_assert(sumwildcardranges == countwildcards);
   while (pagenumber < wildcardrangetable->numofpages)
   {
-    specialrangetable->endidxinpage[pagenumber] = fillspecialrangeidx;
     wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
     pagenumber++;
   }

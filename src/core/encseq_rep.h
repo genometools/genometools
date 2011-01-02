@@ -167,7 +167,7 @@ struct GtEncseq
               GT_ACCESS_TYPE_USHORTTABLES,
               GT_ACCESS_TYPE_UINT32TABLES */
 
-  GtSWtable specialrangetable, wildcardrangetable;
+  GtSWtable wildcardrangetable;
 
   unsigned long reference_count;
   GtMutex *refcount_lock;

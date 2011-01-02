@@ -95,6 +95,8 @@
           *(TWOBITENCODINGPTR) = BITWISE;\
         }
 
+/* the following two macros are relevant for GT_ACCESS_TYPE_BITACCESS */
+
 #define GT_TWOBITS_FOR_WILDCARD  0
 #define GT_TWOBITS_FOR_SEPARATOR 1
 
@@ -737,13 +739,6 @@ static void assignencseqmapspecification(
     case GT_ACCESS_TYPE_UINT32TABLES:
       NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
                  encseq->unitsoftwobitencoding);
-      /*
-      addswtabletomapspectable(mapspectable,
-                               &encseq->specialrangetable,
-                               true,
-                               encseq->totallength,
-                               encseq->sat);
-      */
       addswtabletomapspectable(mapspectable,
                                &encseq->wildcardrangetable,
                                true,
@@ -1143,27 +1138,18 @@ void gt_encseq_delete(GtEncseq *encseq)
         break;
       case GT_ACCESS_TYPE_UCHARTABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->specialrangetable.st_uchar.positions);
-        gt_free(encseq->specialrangetable.st_uchar.endidxinpage);
-        gt_free(encseq->specialrangetable.st_uchar.rangelengths);
         gt_free(encseq->wildcardrangetable.st_uchar.positions);
         gt_free(encseq->wildcardrangetable.st_uchar.endidxinpage);
         gt_free(encseq->wildcardrangetable.st_uchar.rangelengths);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->specialrangetable.st_ushort.positions);
-        gt_free(encseq->specialrangetable.st_ushort.endidxinpage);
-        gt_free(encseq->specialrangetable.st_ushort.rangelengths);
         gt_free(encseq->wildcardrangetable.st_ushort.positions);
         gt_free(encseq->wildcardrangetable.st_ushort.endidxinpage);
         gt_free(encseq->wildcardrangetable.st_ushort.rangelengths);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->specialrangetable.st_uint32.positions);
-        gt_free(encseq->specialrangetable.st_uint32.endidxinpage);
-        gt_free(encseq->specialrangetable.st_uint32.rangelengths);
         gt_free(encseq->wildcardrangetable.st_uint32.positions);
         gt_free(encseq->wildcardrangetable.st_uint32.endidxinpage);
         gt_free(encseq->wildcardrangetable.st_uint32.rangelengths);
@@ -1200,7 +1186,6 @@ void gt_encseq_delete(GtEncseq *encseq)
   encseq->plainseq = NULL;
   encseq->specialbits = NULL;
   encseq->twobitencoding = NULL;
-  setencsequtablesNULL(encseq->sat,&encseq->specialrangetable);
   setencsequtablesNULL(encseq->sat,&encseq->wildcardrangetable);
   setencsequtablesNULL(encseq->satsep,&encseq->ssptabnew);
   if (encseq->destab != NULL)
@@ -1351,13 +1336,6 @@ static void showallSWtables(const GtEncseq *encseq)
 {
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
-    /*
-    if (encseq->has_specialranges)
-    {
-      printf("specialrangetable\n");
-      showallSWtablewithpages(encseq->sat,&encseq->specialrangetable);
-    }
-    */
     if (encseq->has_wildcardranges)
     {
       printf("wildcardrangetable\n");
@@ -2936,7 +2914,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                                 numofsequences-1);
   if (gt_encseq_access_type_isviautables(sat))
   {
-    initSWtable(&encseq->specialrangetable,totallength,sat,specialranges);
     initSWtable(&encseq->wildcardrangetable,totallength,sat,wildcardranges);
   }
   if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED)
@@ -3005,7 +2982,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->bitpackarray = NULL;
   encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
-  setencsequtablesNULL(encseq->sat,&encseq->specialrangetable);
   setencsequtablesNULL(encseq->sat,&encseq->wildcardrangetable);
   setencsequtablesNULL(encseq->satsep,&encseq->ssptabnew);
   encseq->characterdistribution = NULL;
