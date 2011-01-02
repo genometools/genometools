@@ -3709,9 +3709,6 @@ static uint64_t detencseqofsatviautables(int kind,
                                   wildcardranges,numofchars,0);
 }
 
-/*#define SHOWSUM printf("line %d: sum=%lu\n",__LINE__,(unsigned long) sum)*/
-#define SHOWSUM /* Nothing */
-
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long totallength,
                                   unsigned long numofdbfiles,
@@ -3749,39 +3746,22 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
     case GT_ACCESS_TYPE_UCHARTABLES:
     case GT_ACCESS_TYPE_USHORTTABLES:
     case GT_ACCESS_TYPE_UINT32TABLES:
-         sum = 0;/*sizeoftwobitencoding +
-               gt_encseq_sizeofSWtable(sat,true,totallength,specialranges);*/
-         sum += sizeoftwobitencoding +
-                gt_encseq_sizeofSWtable(sat,true,totallength,wildcardranges);
-         /*
-         printf("totallength=%lu,wildcardranges=%lu\n",
-                   totallength,wildcardranges);
-         printf("sat=%s\n",gt_encseq_access_type_str(sat));
-         */
-         SHOWSUM;
+         sum = sizeoftwobitencoding +
+               gt_encseq_sizeofSWtable(sat,true,totallength,wildcardranges);
          break;
     default:
          fprintf(stderr,"gt_encseq_determine_size(%d) undefined\n",(int) sat);
          exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   sum += sizeof (unsigned long); /* for sat type */
-         SHOWSUM;
   sum += sizeof (totallength);   /* for totallength */
-         SHOWSUM;
   sum += sizeof (unsigned long); /* for numofdbsequences type */
-         SHOWSUM;
   sum += sizeof (unsigned long); /* for numofdbfilenames type */
-         SHOWSUM;
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
-         SHOWSUM;
   sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
-         SHOWSUM;
   sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
-         SHOWSUM;
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
-         SHOWSUM;
   sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
-         SHOWSUM;
   return sum;
 }
 
