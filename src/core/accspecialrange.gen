@@ -471,10 +471,6 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
 
   switch (kindsw)
   {
-    case SWtable_specialrange:
-      swtable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
-      swstate = esr->specialrangestate;
-      break;
     case SWtable_wildcardrange:
       swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
       swstate = esr->wildcardrangestate;
@@ -717,10 +713,6 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
 
   switch (kindsw)
   {
-    case SWtable_specialrange:
-      swtable = &(GT_APPENDINT(esr->encseq->specialrangetable.st));
-      swstate = esr->specialrangestate;
-      break;
     case SWtable_wildcardrange:
       swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
       swstate = esr->wildcardrangestate;

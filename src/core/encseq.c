@@ -341,8 +341,7 @@ struct GtEncseqReader
   GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long currentpos;
-  GtEncseqReaderViatablesinfo *specialrangestate,
-                              *wildcardrangestate,
+  GtEncseqReaderViatablesinfo *wildcardrangestate,
                               *ssptabnewstate;
 };
 
@@ -1245,7 +1244,6 @@ void gt_encseq_delete(GtEncseq *encseq)
 
 typedef enum
 {
-  SWtable_specialrange,
   SWtable_wildcardrange,
   SWtable_ssptabnew
 } KindofSWtable;
@@ -1255,9 +1253,6 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 {
   switch (kindsw)
   {
-    case SWtable_specialrange:
-      gt_assert(esr->specialrangestate != NULL);
-      return esr->specialrangestate;
     case SWtable_wildcardrange:
       gt_assert(esr->wildcardrangestate != NULL);
       return esr->wildcardrangestate;
@@ -2133,22 +2128,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
     /* Do not need this in once all is done by wildcards */
-    if (encseq->has_specialranges)
-    {
-      if (esr->specialrangestate == NULL)
-      {
-        esr->specialrangestate
-          = gt_calloc((size_t) 1, sizeof (*esr->specialrangestate));
-      }
-      binpreparenextrangeGtEncseqReader(esr,SWtable_specialrange);
-#ifdef GT_RANGEDEBUG
-      printf("specialranges: start advance at (%lu,%lu) in page %lu\n",
-                       esr->specialrangestate->firstcell,
-                       esr->specialrangestate->lastcell,
-                       esr->specialrangestate->nextpage);
-#endif
-      advancerangeGtEncseqReader(esr,SWtable_specialrange);
-    }
     if (encseq->has_wildcardranges)
     {
       if (esr->wildcardrangestate == NULL)
@@ -2186,11 +2165,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
     }
   } else
   {
-    if (esr->specialrangestate != NULL)
-    {
-      gt_free(esr->specialrangestate);
-      esr->specialrangestate = NULL;
-    }
     if (esr->wildcardrangestate != NULL)
     {
       gt_free(esr->wildcardrangestate);
@@ -2211,7 +2185,7 @@ GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
   GtEncseqReader *esr = gt_calloc((size_t) 1, sizeof (*esr));
   /* the following is implicit by using calloc, but we better initialize
      it for documentation */
-  esr->specialrangestate = esr->wildcardrangestate = esr->ssptabnewstate = NULL;
+  esr->wildcardrangestate = esr->ssptabnewstate = NULL;
   gt_encseq_reader_reinit_with_readmode(esr, (GtEncseq*) encseq, readmode,
                                         startpos);
   return esr;
@@ -2223,10 +2197,6 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   if (esr->encseq != NULL)
   {
     gt_encseq_delete(esr->encseq);
-  }
-  if (esr->specialrangestate != NULL)
-  {
-    gt_free(esr->specialrangestate);
   }
   if (esr->wildcardrangestate != NULL)
   {
