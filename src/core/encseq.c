@@ -225,7 +225,8 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
     if (gt_encseq_access_type_isviautables(encseq->sat))
     {
-      if (!encseq->has_specialranges || twobits > 0)
+      if (!encseq->has_specialranges ||
+          twobits != (unsigned long) encseq->leastprobablecharacter)
       {
         return GT_ISDIRCOMPLEMENT(readmode)
                  ? GT_COMPLEMENTBASE((GtUchar) twobits)
@@ -240,10 +241,9 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
       {
         return (GtUchar) WILDCARD;
       }
-      gt_assert(twobits == 0);
       return GT_ISDIRCOMPLEMENT(readmode)
-               ? GT_COMPLEMENTBASE((GtUchar) 0)
-               : (GtUchar) 0;
+               ? GT_COMPLEMENTBASE((GtUchar) twobits)
+               : (GtUchar) twobits;
     } else
     {
       if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
@@ -2985,6 +2985,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   setencsequtablesNULL(encseq->sat,&encseq->wildcardrangetable);
   setencsequtablesNULL(encseq->satsep,&encseq->ssptabnew);
   encseq->characterdistribution = NULL;
+  encseq->leastprobablecharacter = encseq->numofchars; /* undefined */
 
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
@@ -3225,6 +3226,27 @@ static unsigned long determinelengthofdbfilenames(const GtStrArray *filenametab)
   return lengthofdbfilenames;
 }
 
+static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
+                                                     const unsigned long
+                                                     *characterdistribution)
+{
+  unsigned int idx, minidx;
+  unsigned long mindist;
+
+  gt_assert(gt_alphabet_num_of_chars(alpha) > 0);
+  mindist = characterdistribution[0];
+  minidx = 0;
+  for (idx=1U; idx<gt_alphabet_num_of_chars(alpha); idx++)
+  {
+    if (characterdistribution[idx] < mindist)
+    {
+      mindist = characterdistribution[idx];
+      minidx = idx;
+    }
+  }
+  return minidx;
+}
+
 static GtEncseq *files2encodedsequence(
                                 const GtStrArray *filenametab,
                                 const GtFilelengthvalues *filelengthtab,
@@ -3269,6 +3291,8 @@ static GtEncseq *files2encodedsequence(
     encseq->mappedptr = NULL;
     encseq->ssptabmappedptr = NULL;
     encseq->characterdistribution = characterdistribution;
+    encseq->leastprobablecharacter
+      = determineleastprobablecharacter(alphabet,characterdistribution);
     encseq->filenametab = (GtStrArray *) filenametab;
     encseq->filelengthtab = (GtFilelengthvalues *) filelengthtab;
     encseq->specialcharinfo = *specialcharinfo;
@@ -3402,12 +3426,13 @@ gt_encseq_new_from_index(const char *indexname,
       haserr = true;
     }
   }
-#ifdef GT_RANGEDEBUG
-  /*if (!haserr)
+  if (!haserr)
   {
-    showallSWtables(encseq);
-  }*/
-#endif
+    gt_assert(encseq != NULL);
+    encseq->leastprobablecharacter
+      = determineleastprobablecharacter(encseq->alpha,
+                                        encseq->characterdistribution);
+  }
   if (!haserr && withdestab)
   {
     size_t numofbytes;

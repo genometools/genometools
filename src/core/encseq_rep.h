@@ -117,6 +117,7 @@ struct GtEncseq
   const char *issinglepositionseparatorname;
 
   unsigned long *characterdistribution;
+  unsigned int leastprobablecharacter;
   GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
                      specialcharinfo; /* information about specialcharacters */
   Definedunsignedlong equallength;
