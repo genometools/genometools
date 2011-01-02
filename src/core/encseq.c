@@ -820,22 +820,25 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   {
     haserr = true;
   }
-  encseq->totallength = *encseq->totallengthptr;
-  encseq->numofdbsequences = *encseq->numofdbsequencesptr;
-  encseq->numofdbfiles = *encseq->numofdbfilesptr;
-  encseq->lengthofdbfilenames = *encseq->lengthofdbfilenamesptr;
-  encseq->specialcharinfo = *encseq->specialcharinfoptr;
-  encseq->filenametab = gt_str_array_new();
-  nextstart = encseq->firstfilename;
-  for (idx = 0; idx < encseq->numofdbfiles; idx++)
+  if (!haserr)
   {
-    gt_str_array_add_cstr(encseq->filenametab,nextstart);
-    nextstart = strchr(nextstart,(int) '\0');
-    gt_assert(nextstart != NULL);
-    nextstart++;
+    encseq->totallength = *encseq->totallengthptr;
+    encseq->numofdbsequences = *encseq->numofdbsequencesptr;
+    encseq->numofdbfiles = *encseq->numofdbfilesptr;
+    encseq->lengthofdbfilenames = *encseq->lengthofdbfilenamesptr;
+    encseq->specialcharinfo = *encseq->specialcharinfoptr;
+    encseq->filenametab = gt_str_array_new();
+    nextstart = encseq->firstfilename;
+    for (idx = 0; idx < encseq->numofdbfiles; idx++)
+    {
+      gt_str_array_add_cstr(encseq->filenametab,nextstart);
+      nextstart = strchr(nextstart,(int) '\0');
+      gt_assert(nextstart != NULL);
+      nextstart++;
+    }
+    gt_assert(encseq->characterdistribution != NULL);
+    gt_logger_log(logger,"sat=%s",gt_encseq_accessname(encseq));
   }
-  gt_assert(encseq->characterdistribution != NULL);
-  gt_logger_log(logger,"sat=%s",gt_encseq_accessname(encseq));
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
@@ -1917,14 +1920,6 @@ static bool issinglepositionseparatorViabitaccess(const GtEncseq *encseq,
 /* GT_ACCESS_TYPE_UCHARTABLES | GT_ACCESS_TYPE_USHORTTABLES |
  * GT_ACCESS_TYPE_UINT32TABLES */
 
-#define DECLAREISSINGLEPOSITIONSPECIALVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
-                                                        EXISTS,TYPE)\
-static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
-{\
-  return (encseq->EXISTS) &&\
-         CHECKFUN##_##TYPE(&encseq->specialrangetable.st_##TYPE,pos);\
-}
-
 #define DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
                                                          EXISTS,TYPE)\
 static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
@@ -2534,7 +2529,6 @@ static bool gt_viautables_specialrangeiterator_next_withkind(
     return false;
   }
   gt_assert(swstate->hasprevious);
-  /* XXX compute the range from wildcardrange and ssptab_new */
   *range = swstate->previousrange;
   if (swstate->hasmore)
   {
@@ -3747,6 +3741,9 @@ static uint64_t detencseqofsatviautables(int kind,
                                   wildcardranges,numofchars,0);
 }
 
+/*#define SHOWSUM printf("line %d: sum=%lu\n",__LINE__,(unsigned long) sum)*/
+#define SHOWSUM /* Nothing */
+
 uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long totallength,
                                   unsigned long numofdbfiles,
@@ -3789,9 +3786,16 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
     case GT_ACCESS_TYPE_UINT32TABLES:
          sum = sizeoftwobitencoding +
                gt_encseq_sizeofSWtable(sat,true,totallength,specialranges);
+         SHOWSUM;
 #ifdef NEWTWOBITENCODING
          sum += sizeoftwobitencoding +
                 gt_encseq_sizeofSWtable(sat,true,totallength,wildcardranges);
+         /*
+         printf("totallength=%lu,wildcardranges=%lu\n",
+                   totallength,wildcardranges);
+         printf("sat=%s\n",gt_encseq_access_type_str(sat));
+         */
+         SHOWSUM;
 #endif
          break;
     default:
@@ -3799,14 +3803,23 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   sum += sizeof (unsigned long); /* for sat type */
+         SHOWSUM;
   sum += sizeof (totallength);   /* for totallength */
+         SHOWSUM;
   sum += sizeof (unsigned long); /* for numofdbsequences type */
+         SHOWSUM;
   sum += sizeof (unsigned long); /* for numofdbfilenames type */
+         SHOWSUM;
   sum += sizeof (unsigned long); /* for lengthofdbfilenames type */
+         SHOWSUM;
   sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
+         SHOWSUM;
   sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
+         SHOWSUM;
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
+         SHOWSUM;
   sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
+         SHOWSUM;
   return sum;
 }
 
