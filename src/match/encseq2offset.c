@@ -127,6 +127,8 @@ unsigned long *gt_encseqtable2sequenceoffsets(
   specialcharinfo->lengthofwildcardsuffix
     = gt_encseq_lengthofwildcardsuffix(suffixarraytable[idx-1].encseq);
   gt_assert(numofsequences > 0);
+#ifndef NDEBUG
   gt_GtSpecialcharinfo_check(specialcharinfo,numofsequences - 1);
+#endif
   return sequenceoffsettable;
 }

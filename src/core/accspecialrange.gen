@@ -74,7 +74,9 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
       {
         if (cc == (GtUchar) WILDCARD)
         {
+#ifndef NDEBUG
           countwildcards++;
+#endif
           if (lastwildcardrangelength == 0) /* at beginning of wildcard range */
           {
             /* store remainder of currentposition: this value is not larger

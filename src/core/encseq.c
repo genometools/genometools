@@ -3690,6 +3690,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 }
 
 static unsigned long calcswranges(const char *kind,
+                                  bool dolog,
                                   unsigned long *rangestab,
                                   const GtDiscDistri *distrangelength,
                                   GtLogger *logger)
@@ -3701,7 +3702,7 @@ static unsigned long calcswranges(const char *kind,
   updatesumrangeinfo.rangesGtUshort = 0;
   updatesumrangeinfo.rangesUint32 = 0;
   updatesumrangeinfo.realranges = 0;
-  updatesumrangeinfo.logger = logger;
+  updatesumrangeinfo.logger = dolog ? logger : NULL;
   gt_disc_distri_foreach(distrangelength,updatesumranges,&updatesumrangeinfo);
   if (rangestab != NULL)
   {
@@ -3804,9 +3805,11 @@ static void doupdatesumranges(GtSpecialcharinfo *specialcharinfo,
   int c;
 
   specialcharinfo->realspecialranges
-    = calcswranges("special",specialrangestab,distspecialrangelength,logger);
+    = calcswranges("special",false,specialrangestab,distspecialrangelength,
+                   logger);
   specialcharinfo->realwildcardranges
-    = calcswranges("wildcard",wildcardrangestab,distwildcardrangelength,logger);
+    = calcswranges("wildcard",true,wildcardrangestab,distwildcardrangelength,
+                   logger);
   gt_assert(forcetable <= 3U);
   for (c = 0; c<3; c++)
   {
@@ -4030,7 +4033,9 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     printf("different length\n");
   }
   */
+#ifndef NDEBUG
   gt_GtSpecialcharinfo_check(specialcharinfo,*numofseparators);
+#endif
   return haserr ? -1 : 0;
 }
 
@@ -4070,9 +4075,9 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;
   specialcharinfo->lengthofwildcardsuffix = lastwildcardrangelength;
   specialcharinfo->realspecialranges
-    = calcswranges("special",NULL,distspecialrangelength,logger);
+    = calcswranges("special",false,NULL,distspecialrangelength,logger);
   specialcharinfo->realwildcardranges
-    = calcswranges("wildcard",NULL,distwildcardrangelength,logger);
+    = calcswranges("wildcard",true,NULL,distwildcardrangelength,logger);
   specialcharinfo->specialranges = specialcharinfo->realspecialranges;
   specialcharinfo->wildcardranges = specialcharinfo->realwildcardranges;
   gt_disc_distri_delete(distspecialrangelength);
