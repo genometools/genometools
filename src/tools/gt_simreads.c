@@ -217,9 +217,9 @@ static int gt_simreads_runner(GT_UNUSED int argc,
                               void *tool_arguments, GtError *err)
 {
   GtSimReadsArguments *arguments = tool_arguments;
-  GtEncseq *target;
-  GtEncseqLoader *target_loader;
-  GtEncseqReader *target_reader;
+  GtEncseq *target = NULL;
+  GtEncseqLoader *target_loader = NULL;
+  GtEncseqReader *target_reader = NULL;
   GtReadmode readmode;
   GtStr *read = NULL, *description = NULL;
   unsigned long output_bases = 0, output_reads = 0,
@@ -248,9 +248,13 @@ static int gt_simreads_runner(GT_UNUSED int argc,
   /* load encseq */
   target_loader = gt_encseq_loader_new();
   target = gt_encseq_loader_load(target_loader, argv[parsed_args], err);
-  if (target == NULL) had_err = -1;
-  target_reader = gt_encseq_create_reader_with_readmode(target,
-                                         GT_READMODE_FORWARD, 0);
+  if (target == NULL)
+    had_err = -1;
+  if (!had_err) {
+    target_reader = gt_encseq_create_reader_with_readmode(target,
+                                                          GT_READMODE_FORWARD,
+                                                          0);
+  }
 
   if (!had_err)
   {
