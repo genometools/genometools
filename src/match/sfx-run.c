@@ -465,6 +465,11 @@ static int runsuffixerator(bool doesa,
   } else
   {
     ee = gt_encseq_encoder_new_from_options(so->encopts, err);
+    /* '-plain' implies no description support */
+    if (gt_encseq_options_plain_value(so->loadopts)) {
+      gt_encseq_encoder_do_not_create_des_tab(ee);
+      gt_encseq_encoder_do_not_create_sds_tab(ee);
+    }
     if (ee == NULL)
       haserr = true;
     if (!haserr) {
