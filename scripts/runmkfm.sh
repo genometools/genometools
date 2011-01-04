@@ -45,7 +45,7 @@ makesuftab()
 
 plain() 
 {
-  cerr "${gtbin} suffixerator -plain -tis -indexname $1 -smap $1.al1 -db $1.bwt"
+  cerr "${gtbin} suffixerator -plain -des no -ssp no -sds no -tis -indexname $1 -smap $1.al1 -db $1.bwt"
 }
 
 mkfmindex() 

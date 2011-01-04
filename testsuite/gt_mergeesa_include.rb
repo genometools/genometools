@@ -18,8 +18,8 @@ def runmerge(queryfile,referencefiles)
   run "cmp -s midx-all.llv all.llv"
   run_test "#{$bin}gt mkfmindex -noindexpos -fmout fm-all " + 
            "-ii #{indexlist.join(" ")}"
-  run_test "#{$bin}gt suffixerator -indexname fm-all -plain " +
-           "-smap fm-all.al1 -tis -db fm-all.bwt"
+  run_test "#{$bin}gt suffixerator -indexname fm-all -plain -des no -ssp no" +
+           " -sds no -smap fm-all.al1 -tis -db fm-all.bwt"
   run_test "#{$bin}gt uniquesub -fmi fm-all -query #{queryfile} " +
            "-output sequence querypos -min 10 -max 10"
 end

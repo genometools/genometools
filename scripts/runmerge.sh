@@ -30,5 +30,5 @@ cmp ${INDEXDIR}/midx-all.suf ${INDEXDIR}/all.suf
 cmp ${INDEXDIR}/midx-all.lcp ${INDEXDIR}/all.lcp
 cmp ${INDEXDIR}/midx-all.llv ${INDEXDIR}/all.llv
 ../bin/gt mkfmindex -noindexpos -fmout ${INDEXDIR}/fm-all -ii ${indexlist}
-../bin/gt suffixerator -indexname ${INDEXDIR}/fm-all -plain -smap ${INDEXDIR}/fm-all.al1 -tis -db ${INDEXDIR}/fm-all.bwt
+../bin/gt suffixerator -indexname ${INDEXDIR}/fm-all -plain -des no -ssp no -sds no -smap ${INDEXDIR}/fm-all.al1 -tis -db ${INDEXDIR}/fm-all.bwt
 ../bin/gt uniquesub -fmi ${INDEXDIR}/fm-all -query ${queryfile} -output sequence querypos -min 10 -max 10
