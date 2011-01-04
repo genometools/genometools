@@ -2,7 +2,7 @@ Name "gt seqencode|seqdecode simple test"
 Keywords "gt_seqencode gt_seqdecode"
 Test do
   run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
-  run "#{$bin}gt dev seqdecode #{$testdata}foobar.fas"
+  run "#{$bin}gt dev seqdecode foobar.fas"
   run "diff #{$last_stdout} #{$testdata}foobar.fas"
 end
 
@@ -19,7 +19,7 @@ Name "gt seqdecode lossless without ois"
 Keywords "gt_seqdecode lossless"
 Test do
   run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
-  run_test "#{$bin}gt dev seqdecode -lossless #{$testdata}foobar.fas", \
+  run_test "#{$bin}gt dev seqdecode -lossless foobar.fas", \
            :retval => 1
   grep($last_stderr, /cannot open file.*ois/)
 end

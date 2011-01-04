@@ -29,7 +29,7 @@ Test do
   run_test "#{$bin}gt dev seqencode #{fas}"
 
   run_test "#{$bin}gt simreads -num 100 -len 100 "+
-                   "-force -o reads #{fas}"
+                   "-force -o reads #{File.basename(fas)}"
 
   expect("number of reads", nof_seq("reads"), 100)  
   expect("total length", total_length("reads"), 10000)
@@ -43,7 +43,7 @@ Test do
   run_test "#{$bin}gt dev seqencode #{fas}"
 
   run_test "#{$bin}gt simreads -num 100 -minlen 10 -maxlen 100 "+
-                   "-force -o reads #{fas}"
+                   "-force -o reads #{File.basename(fas)}"
 
   expect("number of reads", nof_seq("reads"), 100)  
   expect_range("total length", total_length("reads"), 1000, 10000)
@@ -58,7 +58,7 @@ Test do
   cov = 5
   len = 100
   run_test "#{$bin}gt simreads -coverage #{cov} -len #{len} "+
-                   "-force -o reads #{fas}"
+                   "-force -o reads #{File.basename(fas)}"
   n = total_length(fas)
   exptlen = n * cov
   mod = exptlen % len
@@ -79,7 +79,7 @@ Test do
   n = total_length(fas)
 
   run_test "#{$bin}gt simreads -coverage #{cov} -len #{len} "+
-                   "-force -o reads #{fas}"
+                   "-force -o reads #{File.basename(fas)}"
 
   # test that reads originate from target sequence
   # or its reverse complement
@@ -124,7 +124,7 @@ Test do
   cov = 10
   len = 10
   run_test "#{$bin}gt simreads -coverage #{cov} -len #{len} "+
-                  "-ds starts -force -o reads #{fas}"
+                  "-ds starts -force -o reads #{File.basename(fas)}"
   test_distfile_format("starts")
 end
 
@@ -138,6 +138,6 @@ Test do
   minlen = 10
   maxlen = 100
   run_test "#{$bin}gt simreads -coverage #{cov} -minlen #{minlen} "+
-                  "-maxlen #{maxlen} -dl lengths -force -o reads #{fas}"
+                  "-maxlen #{maxlen} -dl lengths -force -o reads #{File.basename(fas)}"
   test_distfile_format("lengths")
 end
