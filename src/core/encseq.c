@@ -1690,6 +1690,7 @@ static int fillViabytecompress(GtEncseq *encseq,
       break;
     }
   }
+  ssptaboutinfo_finalize(ssptaboutinfo);
   return 0;
 }
 
