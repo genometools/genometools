@@ -3175,6 +3175,13 @@ GtEncseq* gt_encseq_ref(GtEncseq *encseq)
   return encseq;
 }
 
+static double determine_spaceinbitsperchar(unsigned long sizeofrep,
+                                           unsigned long totallength)
+{
+  return (double) ((uint64_t) CHAR_BIT * (uint64_t) sizeofrep)/
+                  (double) totallength;
+}
+
 static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
@@ -3272,21 +3279,35 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->characterdistribution = NULL;
   encseq->leastprobablecharacter = encseq->numofchars; /* undefined */
 
-  spaceinbitsperchar
-    = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
-      (double) totallength;
+  spaceinbitsperchar = determine_spaceinbitsperchar(encseq->sizeofrep,
+                                                    totallength);
   if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
   {
     gt_assert(encseq->equallength.defined);
     gt_logger_log(logger,
                   "init character encoding (%s %lu,%lu bytes,%.2f bits/symbol)",
-                  encseq->satname,encseq->equallength.valueunsignedlong,
-                  encseq->sizeofrep,spaceinbitsperchar);
+                  encseq->satname, encseq->equallength.valueunsignedlong,
+                  encseq->sizeofrep, spaceinbitsperchar);
   } else
   {
     gt_logger_log(logger,
                   "init character encoding (%s,%lu bytes,%.2f bits/symbol)",
                   encseq->satname,encseq->sizeofrep,spaceinbitsperchar);
+    if (encseq->numofdbsequences > 1UL)
+    {
+      unsigned long sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
+                                     gt_encseq_sizeofSWtable(encseq->satsep,
+                                              false,
+                                              totallength,
+                                              numofsequences-1));
+      spaceinbitsperchar = determine_spaceinbitsperchar(sizessptab,
+                                                        totallength);
+      gt_logger_log(logger,
+                    "init ssptab encoding (%s,%lu bytes,%.2f bits/symbol)",
+                    gt_encseq_access_type_str(encseq->satsep),
+                    sizessptab,
+                    spaceinbitsperchar);
+    }
   }
   return encseq;
 }
