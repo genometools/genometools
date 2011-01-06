@@ -77,3 +77,50 @@ static bool GT_APPENDINT(checkspecial)(
   }
   return false;
 }
+
+/*@null@*/ static unsigned long GT_APPENDINT(seqnum2pageoffset)(
+                                       const GT_APPENDINT(GtSWtable) *swtable,
+                                       unsigned long seqnum)
+{
+  unsigned long *leftptr, *midptr, *rightptr, *found = NULL;
+
+  leftptr = swtable->endidxinpage;
+  rightptr = swtable->endidxinpage + swtable->numofpages - 1;
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    if (seqnum < *midptr)
+    {
+      rightptr = midptr - 1;
+    } else
+    {
+      if (seqnum > *midptr)
+      {
+        found = midptr;
+        leftptr = midptr + 1;
+      } else
+      {
+        found = midptr;
+        break;
+      }
+    }
+  }
+  if (found != NULL)
+  {
+    return (unsigned long) (swtable->endidxinpage - found);
+  }
+  return 0;
+}
+
+unsigned long GT_APPENDINT(gt_encseq_seqstartposSW)(
+                     const GT_APPENDINT(GtSWtable) *swtable,
+                     unsigned long seqnum)
+{
+  if (seqnum > 0)
+  {
+    return GT_APPENDINT(seqnum2pageoffset)(swtable,seqnum) *
+           (swtable->maxrangevalue+1) +
+           swtable->positions[seqnum];
+  }
+  return 0;
+}
