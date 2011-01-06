@@ -41,9 +41,8 @@ static bool GT_APPENDINT(binarysearchpage)(const GT_SPECIALTABLETYPE *leftptr,
   return false;
 }
 
-static bool GT_APPENDINT(checkspecial)(
-                         const GT_APPENDINT(GtSWtable) *swtable,
-                         unsigned long pos)
+static bool GT_APPENDINT(checkspecial)(const GT_APPENDINT(GtSWtable) *swtable,
+                                       unsigned long pos)
 {
   unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
 
@@ -113,8 +112,8 @@ static bool GT_APPENDINT(checkspecial)(
 }
 
 unsigned long GT_APPENDINT(gt_encseq_seqstartposSW)(
-                     const GT_APPENDINT(GtSWtable) *swtable,
-                     unsigned long seqnum)
+                           const GT_APPENDINT(GtSWtable) *swtable,
+                           unsigned long seqnum)
 {
   if (seqnum > 0)
   {
