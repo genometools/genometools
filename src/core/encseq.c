@@ -2391,6 +2391,27 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   gt_free(esr);
 }
 
+GT_UNUSED
+static unsigned long gt_encseq_seqstartpos_viautables(const GtEncseq *encseq,
+                                                      unsigned long seqnum)
+{
+  switch (encseq->satsep)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      return gt_encseq_seqstartposSW_uchar(&encseq->ssptabnew.st_uchar,
+                                           seqnum);
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      return gt_encseq_seqstartposSW_ushort(&encseq->ssptabnew.st_ushort,
+                                            seqnum);
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      return gt_encseq_seqstartposSW_uint32(&encseq->ssptabnew.st_uint32,
+                                            seqnum);
+    default:
+      fprintf(stderr,"%s(%d) undefined\n",__func__,(int) encseq->satsep);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+
 static bool containsSWViatables(const GtEncseq *encseq,
                                 GtEncseqReader *esr,
                                 unsigned long startpos,
@@ -6234,27 +6255,6 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
     }
   }
   return haserr ? NULL : encseq;
-}
-
-unsigned long gt_encseq_seqstartpos_viatables(const GtEncseq *encseq,
-                                              unsigned long seqnum)
-{
-  gt_assert(gt_encseq_has_specialranges(encseq));
-  switch (encseq->satsep)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      return gt_encseq_seqstartposSW_uchar(&encseq->ssptabnew.st_uchar,
-                                           seqnum);
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return gt_encseq_seqstartposSW_ushort(&encseq->ssptabnew.st_ushort,
-                                            seqnum);
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return gt_encseq_seqstartposSW_uint32(&encseq->ssptabnew.st_uint32,
-                                            seqnum);
-    default:
-      fprintf(stderr,"%s(%d) undefined\n",__func__,(int) encseq->satsep);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
 }
 
 static void runscanatpostrial(const GtEncseq *encseq,
