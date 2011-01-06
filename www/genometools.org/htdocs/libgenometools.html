@@ -68,6 +68,8 @@ interfaces.
 
   <li><a href="#GtDlistelem">GtDlistelem</a>
 
+  <li><a href="#GtEOFNode">GtEOFNode</a>
+
   <li><a href="#GtEncseq">GtEncseq</a>
 
   <li><a href="#GtEncseqBuilder">GtEncseqBuilder</a>
@@ -1264,7 +1266,7 @@ Deletes <code>table</code>.
 
 <code>void           gt_cstr_table_add(GtCstrTable *table, const char *cstr)</code>
 <p>
-Add <code>cstr</code> to <code>table</code>.
+Add <code>cstr</code> to <code>table</code>. <code>table</code> must not already contain <code>cstr</code>!
 </p>
 <hr>
 <a name="gt_cstr_table_get"></a>
@@ -1523,6 +1525,20 @@ Returns the predecessor of a <code>GtDlistelem</code>, or NULL if the element is
 Returns the data pointer attached to a <code>GtDlistelem</code>.
 </p>
 <hr>
+<a name="GtEOFNode"></a>
+<h2>Class GtEOFNode</h2>
+
+<p> Implements the <code>GtGenomeNode</code> interface. EOF nodes mark the barrier between
+   separate input files in an GFF3 stream. </p>
+
+<hr>
+<a name="gt_eof_node_new"></a>
+
+<code>GtGenomeNode*             gt_eof_node_new(void)</code>
+<p>
+Create a new <code>GtEOFNode*</code> representing an EOF marker.
+</p>
+<hr>
 <a name="GtEncseq"></a>
 <h2>Class GtEncseq</h2>
 
@@ -1551,7 +1567,7 @@ Returns the data pointer attached to a <code>GtDlistelem</code>.
 <code>unsigned long      gt_encseq_total_length(const GtEncseq *encseq)</code>
 <p>
 Returns the total number of characters in all sequences of <code>encseq</code>,
-   not including separators.
+   including separators and wildcards.
 </p>
 <hr>
 <a name="gt_encseq_num_of_sequences"></a>
@@ -1734,22 +1750,6 @@ Deletes <code>encseq</code> and frees all associated space.
 <p>
 Creates a new <code>GtEncseqBuilder</code> using the alphabet <code>alpha</code> as a basis for
    on-the-fly encoding of sequences in memory.
-</p>
-<hr>
-<a name="gt_encseq_builder_enable_range_iterator"></a>
-
-<code>void              gt_encseq_builder_enable_range_iterator(GtEncseqBuilder *eb)</code>
-<p>
-Enables support for faster access to special ranges in the
-   <code>GtEncseq</code> created by <code>eb</code>. Enabled by default.
-</p>
-<hr>
-<a name="gt_encseq_builder_disable_range_iterator"></a>
-
-<code>void              gt_encseq_builder_disable_range_iterator(GtEncseqBuilder *eb)</code>
-<p>
-Disables support for faster access to special ranges in the
-   <code>GtEncseq</code> created by <code>eb</code>.
 </p>
 <hr>
 <a name="gt_encseq_builder_enable_description_support"></a>
@@ -2215,22 +2215,6 @@ Requires presence of the .sds table containing indexes for sequence
 <p>
 Disables requirement of the .sds table for loading a <code>GtEncseq</code>
    using <code>el</code>.
-</p>
-<hr>
-<a name="gt_encseq_loader_enable_range_iterator"></a>
-
-<code>void              gt_encseq_loader_enable_range_iterator(GtEncseqLoader *el)</code>
-<p>
-Enables support for faster access to special ranges in the
-   <code>GtEncseq</code> loaded by <code>el</code>. Enabled by default.
-</p>
-<hr>
-<a name="gt_encseq_loader_disable_range_iterator"></a>
-
-<code>void              gt_encseq_loader_disable_range_iterator(GtEncseqLoader *el)</code>
-<p>
-Disables support for faster access to special ranges in the
-   <code>GtEncseq</code> loaded by <code>el</code>.
 </p>
 <hr>
 <a name="gt_encseq_loader_set_logger"></a>
@@ -3778,6 +3762,8 @@ Creates a new <code>GtProgressTimer</code> with the intitial state <code>desc</c
 Announce the end of the current state and the beginning of the new state
    to <code>pt</code>. The new state will be described by <code>newevent</code>. The time needed for
    the now completed state is written to <code>fp</code>.
+   To announce the end of timing and print the overall-time use
+   <code>newevent</code> = NULL
 </p>
 <hr>
 <a name="gt_progress_timer_delete"></a>
@@ -4310,49 +4296,49 @@ Map <code>strand_char</code> to the corresponding strand enum type.
 <hr>
 <a name="gt_style_new"></a>
 
-<code>GtStyle*       gt_style_new(GtError*)</code>
+<code>GtStyle*  gt_style_new(GtError*)</code>
 <p>
 Creates a new <code>GtStyle</code> object.
 </p>
 <hr>
 <a name="gt_style_ref"></a>
 
-<code>GtStyle*       gt_style_ref(GtStyle*)</code>
+<code>GtStyle*  gt_style_ref(GtStyle*)</code>
 <p>
 Increments the reference count of the given <code>GtStyle</code>.
 </p>
 <hr>
 <a name="gt_style_unsafe_mode"></a>
 
-<code>void            gt_style_unsafe_mode(GtStyle*)</code>
+<code>void      gt_style_unsafe_mode(GtStyle*)</code>
 <p>
 Enables unsafe mode (``io'' and ``os'' libraries loaded).
 </p>
 <hr>
 <a name="gt_style_safe_mode"></a>
 
-<code>void            gt_style_safe_mode(GtStyle*)</code>
+<code>void      gt_style_safe_mode(GtStyle*)</code>
 <p>
 Enables safe mode (``io'' and ``os'' libraries not accessible).
 </p>
 <hr>
 <a name="gt_style_is_unsafe"></a>
 
-<code>bool            gt_style_is_unsafe(GtStyle *sty)</code>
+<code>bool      gt_style_is_unsafe(GtStyle *sty)</code>
 <p>
 Returns true if <code>sty</code> is in unsafe mode.
 </p>
 <hr>
 <a name="gt_style_clone"></a>
 
-<code>GtStyle*       gt_style_clone(const GtStyle*, GtError*)</code>
+<code>GtStyle*  gt_style_clone(const GtStyle*, GtError*)</code>
 <p>
 Creates a independent (``deep'') copy of the given <code>GtStyle</code> object.
 </p>
 <hr>
 <a name="gt_style_load_file"></a>
 
-<code>int             gt_style_load_file(GtStyle*, const char *filename, GtError*)</code>
+<code>int       gt_style_load_file(GtStyle*, const char *filename, GtError*)</code>
 <p>
 Loads and executes Lua style file with given <code>filename</code>.
    This file must define a global table called <em>style</em>.
@@ -4360,7 +4346,7 @@ Loads and executes Lua style file with given <code>filename</code>.
 <hr>
 <a name="gt_style_load_str"></a>
 
-<code>int             gt_style_load_str(GtStyle*, GtStr *instr, GtError*)</code>
+<code>int       gt_style_load_str(GtStyle*, GtStr *instr, GtError*)</code>
 <p>
 Loads and executes Lua style code from the given <code>GtStr</code> <code>instr</code>.
    This code must define a global table called <em>style</em>.
@@ -4368,7 +4354,7 @@ Loads and executes Lua style code from the given <code>GtStr</code> <code>instr<
 <hr>
 <a name="gt_style_to_str"></a>
 
-<code>int             gt_style_to_str(const GtStyle*, GtStr *outstr, GtError*)</code>
+<code>int       gt_style_to_str(const GtStyle*, GtStr *outstr, GtError*)</code>
 <p>
 Generates Lua code which represents the given <code>GtStyle</code> object and
    writes it into the <code>GtStr</code> object <code>outstr</code>.
@@ -4376,15 +4362,15 @@ Generates Lua code which represents the given <code>GtStyle</code> object and
 <hr>
 <a name="gt_style_reload"></a>
 
-<code>void            gt_style_reload(GtStyle*)</code>
+<code>void      gt_style_reload(GtStyle*)</code>
 <p>
 Reloads the Lua style file.
 </p>
 <hr>
 <a name="gt_style_set_color"></a>
 
-<code>void            gt_style_set_color(GtStyle*, const char *section,
-                                  const char *key, const GtColor *color)</code>
+<code>void      gt_style_set_color(GtStyle*, const char *section, const char *key,
+                            const GtColor *color)</code>
 <p>
 Sets a color value in the <code>GtStyle</code> for section <code>section</code> and <code>key</code> to a
    certain <code>color</code>.
@@ -4392,38 +4378,38 @@ Sets a color value in the <code>GtStyle</code> for section <code>section</code> 
 <hr>
 <a name="gt_style_set_str"></a>
 
-<code>void            gt_style_set_str(GtStyle*, const char *section, const char *key,
-                               GtStr *value)</code>
+<code>void      gt_style_set_str(GtStyle*, const char *section, const char *key,
+                          GtStr *value)</code>
 <p>
 Set string with key <code>key</code> in <code>section</code> to <code>value</code>.
 </p>
 <hr>
 <a name="gt_style_set_num"></a>
 
-<code>void            gt_style_set_num(GtStyle*, const char *section, const char *key,
-                              double number)</code>
+<code>void      gt_style_set_num(GtStyle*, const char *section, const char *key,
+                          double number)</code>
 <p>
 Set numeric value of key <code>key</code> in <code>section</code> to <code>number</code>.
 </p>
 <hr>
 <a name="gt_style_set_bool"></a>
 
-<code>void            gt_style_set_bool(GtStyle*, const char *section,
-                                 const char *key, bool val)</code>
+<code>void      gt_style_set_bool(GtStyle*, const char *section, const char *key,
+                           bool val)</code>
 <p>
 Set boolean value of key <code>key</code> in <code>section</code> to <code>val</code>.
 </p>
 <hr>
 <a name="gt_style_unset"></a>
 
-<code>void            gt_style_unset(GtStyle*, const char *section, const char *key)</code>
+<code>void      gt_style_unset(GtStyle*, const char *section, const char *key)</code>
 <p>
 Unset value of key <code>key</code> in <code>section</code>.
 </p>
 <hr>
 <a name="gt_style_delete"></a>
 
-<code>void            gt_style_delete(GtStyle *style)</code>
+<code>void      gt_style_delete(GtStyle *style)</code>
 <p>
 Deletes this <code>style</code>.
 </p>
@@ -5784,8 +5770,6 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_builder_disable_multiseq_support"><code>gt_encseq_builder_disable_multiseq_support</code></a><br>
 
-  <a href="#gt_encseq_builder_disable_range_iterator"><code>gt_encseq_builder_disable_range_iterator</code></a><br>
-
   <a href="#gt_encseq_builder_do_not_create_des_tab"><code>gt_encseq_builder_do_not_create_des_tab</code></a><br>
 
   <a href="#gt_encseq_builder_do_not_create_esq_tab"><code>gt_encseq_builder_do_not_create_esq_tab</code></a><br>
@@ -5797,8 +5781,6 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_builder_enable_description_support"><code>gt_encseq_builder_enable_description_support</code></a><br>
 
   <a href="#gt_encseq_builder_enable_multiseq_support"><code>gt_encseq_builder_enable_multiseq_support</code></a><br>
-
-  <a href="#gt_encseq_builder_enable_range_iterator"><code>gt_encseq_builder_enable_range_iterator</code></a><br>
 
   <a href="#gt_encseq_builder_new"><code>gt_encseq_builder_new</code></a><br>
 
@@ -5868,8 +5850,6 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_loader_delete"><code>gt_encseq_loader_delete</code></a><br>
 
-  <a href="#gt_encseq_loader_disable_range_iterator"><code>gt_encseq_loader_disable_range_iterator</code></a><br>
-
   <a href="#gt_encseq_loader_do_not_require_des_tab"><code>gt_encseq_loader_do_not_require_des_tab</code></a><br>
 
   <a href="#gt_encseq_loader_do_not_require_sds_tab"><code>gt_encseq_loader_do_not_require_sds_tab</code></a><br>
@@ -5879,8 +5859,6 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_loader_drop_description_support"><code>gt_encseq_loader_drop_description_support</code></a><br>
 
   <a href="#gt_encseq_loader_drop_multiseq_support"><code>gt_encseq_loader_drop_multiseq_support</code></a><br>
-
-  <a href="#gt_encseq_loader_enable_range_iterator"><code>gt_encseq_loader_enable_range_iterator</code></a><br>
 
   <a href="#gt_encseq_loader_load"><code>gt_encseq_loader_load</code></a><br>
 
@@ -5919,6 +5897,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_seqstartpos"><code>gt_encseq_seqstartpos</code></a><br>
 
   <a href="#gt_encseq_total_length"><code>gt_encseq_total_length</code></a><br>
+
+  <a href="#gt_eof_node_new"><code>gt_eof_node_new</code></a><br>
 
   <a href="#gt_error_check"><code>gt_error_check</code></a><br>
 
@@ -6543,7 +6523,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2010
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2010-09-29
+Last update: 2011-01-06
 </div>
 </div>
 <script type="text/javascript">
