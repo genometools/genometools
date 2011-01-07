@@ -636,8 +636,8 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
 {
   unsigned long cellnum;
   bool moveforward = GT_ISDIRREVERSE(esr->readmode) ? false : true;
-  GT_APPENDINT(GtSWtable) *swtable;
-  GtEncseqReaderViatablesinfo *swstate;
+  GT_APPENDINT(GtSWtable) *swtable = NULL;
+  GtEncseqReaderViatablesinfo *swstate = NULL;
 
   switch (kindsw)
   {
