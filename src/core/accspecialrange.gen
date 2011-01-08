@@ -652,6 +652,7 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
     default:
       gt_assert(false);
   }
+  gt_assert(swstate != NULL);
   while (true)
   {
     if (swstate->hascurrent)
