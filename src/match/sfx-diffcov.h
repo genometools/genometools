@@ -45,9 +45,13 @@ void gt_differencecover_delete(Differencecover *dcov);
 
 size_t gt_differencecover_requiredspace(const Differencecover *dcov);
 
-void dc_sortunsortedbucket(void *data,
-                           unsigned long subbucketleft,
-                           unsigned long width,
-                           GT_UNUSED unsigned long depth);
+void gt_differencecover_sortunsortedbucket(void *data,
+                                           unsigned long subbucketleft,
+                                           unsigned long width,
+                                           GT_UNUSED unsigned long depth);
+
+int gt_differencecover_compare (const Differencecover *dcov,
+                                unsigned long suffixpos1,
+                                unsigned long suffixpos2);
 
 #endif

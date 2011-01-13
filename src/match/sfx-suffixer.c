@@ -938,7 +938,7 @@ static void preparethispart(Sfxiterator *sfi)
                               sfi->prefixlength,
                               &sfi->sfxstrategy,
                               (void *) sfi->dcov,
-                              dc_sortunsortedbucket,
+                              gt_differencecover_sortunsortedbucket,
                               sfi->logger);
     } else
     {

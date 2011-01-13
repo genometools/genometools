@@ -180,7 +180,7 @@ static void filldiff2pos(Differencecover *dcov)
 
 #ifdef WITHcomputehvalue
 
-/* XXX: following function is currently not used */
+/* XXX: the following function is currently not used */
 
 static unsigned int computehvalue(const Differencecover *dcov,
                                   unsigned long totallength)
@@ -889,19 +889,13 @@ static void dc_addunsortedrange(void *voiddcov,
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
         gt_suffixsortspace_setdirect(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
 
-static int QSORTNAME(qsortcmparr) (
-                  GT_UNUSED const void *subbucket,
-                  unsigned long a,
-                  unsigned long b,
-                  const void *data)
+int gt_differencecover_compare (const Differencecover *dcov,
+                                unsigned long suffixpos1,
+                                unsigned long suffixpos2)
 {
-  const Differencecover *dcov = (const Differencecover *) data;
-  unsigned long suffixpos1, suffixpos2, idx1, idx2;
   unsigned int offset;
+  unsigned long idx1, idx2;
 
-  gt_assert(dcov->sssp != NULL);
-  suffixpos1 = QSORT_ARRAY_GET(NULL,a);
-  suffixpos2 = QSORT_ARRAY_GET(NULL,b);
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
   offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
@@ -919,14 +913,29 @@ static int QSORTNAME(qsortcmparr) (
   return 0;
 }
 
+static int QSORTNAME(qsortcmparr) (
+                  GT_UNUSED const void *subbucket,
+                  unsigned long a,
+                  unsigned long b,
+                  const void *data)
+{
+  const Differencecover *dcov = (const Differencecover *) data;
+  unsigned long suffixpos1, suffixpos2;
+
+  gt_assert(dcov->sssp != NULL);
+  suffixpos1 = QSORT_ARRAY_GET(NULL,a);
+  suffixpos2 = QSORT_ARRAY_GET(NULL,b);
+  return gt_differencecover_compare (dcov, suffixpos1, suffixpos2);
+}
+
 typedef void * QSORTNAME(Sorttype);
 
 #include "qsort-array.gen"
 
-void dc_sortunsortedbucket(void *data,
-                           unsigned long subbucketleft,
-                           unsigned long width,
-                           GT_UNUSED unsigned long depth)
+void gt_differencecover_sortunsortedbucket(void *data,
+                                           unsigned long subbucketleft,
+                                           unsigned long width,
+                                           GT_UNUSED unsigned long depth)
 {
   Differencecover *dcov = (Differencecover *) data;
 
