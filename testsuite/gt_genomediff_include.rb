@@ -1,6 +1,22 @@
 require 'fileutils'
 require 'tempfile'
 
+Name "gt genomediff pck <esa> failure"
+Keywords "gt_genomediff pck failure"
+Test do
+  run_test "#{$bin}gt suffixerator -suf -lcp -indexname esa " +
+           "-db #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt genomediff -pck esa",:retval=>1
+end
+
+Name "gt genomediff esa <pck> failure"
+Keywords "gt_genomediff esa failure"
+Test do
+  run_test "#{$bin}gt packedindex mkindex -indexname pck " +
+           "-db #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt genomediff -esa pck",:retval=>1
+end
+
 def reverse_and_concat(file)
   tf = Tempfile.new("gt_rev")
   tmpfile = tf.path

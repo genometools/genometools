@@ -2126,70 +2126,6 @@ DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
                                            issinglepositionseparatorVia,
                                            checkspecial,has_ssptabnew,uint32)
 
-static bool issinglepositionseparatorViautablesBF(const GtEncseq *encseq,
-                                                  unsigned long pos)
-{
-  if (encseq->numofdbsequences > 1UL)
-  {
-    const unsigned long *leftptr, *midptr, *rightptr;
-
-    gt_assert(encseq->ssptab != NULL);
-    leftptr = encseq->ssptab;
-    rightptr = encseq->ssptab + encseq->numofdbsequences - 2;
-    while (leftptr <= rightptr)
-    {
-      midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
-      if (pos < *midptr)
-      {
-        rightptr = midptr-1;
-      } else
-      {
-        if (pos > *midptr)
-        {
-          leftptr = midptr + 1;
-        } else
-        {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-
-static bool issinglepositionseparatorViautables(const GtEncseq *encseq,
-                                                unsigned long pos)
-{
-  bool value, valueBF = issinglepositionseparatorViautablesBF(encseq,pos);
-
-  switch (encseq->satsep)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      value = issinglepositionseparatorViauchar(encseq,pos);
-      break;
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      value = issinglepositionseparatorViaushort(encseq,pos);
-      break;
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      value = issinglepositionseparatorViauint32(encseq,pos);
-      break;
-    default: fprintf(stderr,
-                     "issinglepositionseparatorViautables(sat=%s is undefined)"
-                     "\n",
-                     gt_encseq_access_type_str(encseq->satsep));
-             exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  if ((value && !valueBF) || (!value && valueBF))
-  {
-    fprintf(stderr,"pos=%lu, value=%s != %s=valueBF\n",
-             pos,value ? "true" : "false",
-             valueBF ? "true" : "false");
-    exit(EXIT_FAILURE);
-  }
-  gt_assert((value && valueBF) || (!value && !valueBF));
-  return value;
-}
-
 static void advancerangeGtEncseqReader(GtEncseqReader *esr,
                                        KindofSWtable kindsw)
 {
@@ -3473,7 +3409,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViauchar),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViautables)
+           issinglepositionseparatorViauchar)
     },
 
     { /* GT_ACCESS_TYPE_USHORTTABLES */
@@ -3484,7 +3420,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViaushort),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViautables)
+           issinglepositionseparatorViaushort)
     },
 
     { /* GT_ACCESS_TYPE_UINT32TABLES */
@@ -3495,7 +3431,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViauint32),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViautables)
+           issinglepositionseparatorViauint32)
     }
   };
 
