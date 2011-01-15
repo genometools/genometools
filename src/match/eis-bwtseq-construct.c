@@ -167,16 +167,21 @@ gt_loadBWTSeqForSA(const char *projectName, enum seqBaseEncoding encType,
   MRAEnc *alphabet = NULL;
   gt_assert(projectName && gtalphabet && err);
   alphabet = gt_SANewMRAEnc(gtalphabet);
-  if ((seqIdx = gt_loadEncIdxSeqForSA(
-         gtalphabet, totalLen, projectName, encType,
-         gt_convertBWTOptFlags2EISFeatures(BWTOptFlags), err)))
+  seqIdx = gt_loadEncIdxSeqForSA(gtalphabet, totalLen, projectName, encType,
+                                 gt_convertBWTOptFlags2EISFeatures(BWTOptFlags),
+                                 err);
+  if (seqIdx != NULL)
+  {
     bwtSeq = gt_newBWTSeq(seqIdx, alphabet,
-                       GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
+                          GTAlphabetRangeSort[GT_ALPHABETHANDLING_DEFAULT]);
+  }
   if (!bwtSeq)
   {
     gt_MRAEncDelete(alphabet);
     if (seqIdx)
+    {
       gt_deleteEncIdxSeq(seqIdx);
+    }
   }
   return bwtSeq;
 }

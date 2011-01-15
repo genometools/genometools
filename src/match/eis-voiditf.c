@@ -206,6 +206,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   alphabet = gt_alphabet_new_from_file(indexname,err);
   if (alphabet == NULL)
   {
+    gt_assert(gt_error_is_set(err));
     haserr = true;
   }
   if (!haserr)
@@ -215,6 +216,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
     encseqmetadata = gt_encseq_metadata_new(indexname,err);
     if (encseqmetadata == NULL)
     {
+      gt_assert(gt_error_is_set(err));
       haserr = true;
     }
     totallength = gt_encseq_metadata_total_length(encseqmetadata);
@@ -230,6 +232,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
                                 err);
     if (bwtseq == NULL)
     {
+      gt_assert(gt_error_is_set(err));
       haserr = true;
     }
   }
@@ -241,6 +244,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
       bwtseq->pckbuckettable = gt_pckbuckettable_map(indexname,numofchars,err);
       if (bwtseq->pckbuckettable == NULL)
       {
+        gt_assert(gt_error_is_set(err));
         haserr = true;
       }
     } else

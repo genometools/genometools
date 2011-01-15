@@ -110,8 +110,8 @@ int gt_genomediff_shu(GtLogger *logger,
                                         "map generic index",
                                         stdout);
     }
-    genericindexSubject = genericindex_new(gt_str_get(
-                                             arguments->indexname),
+    gt_assert(!arguments->withesa);
+    genericindexSubject = genericindex_new(gt_str_get(arguments->indexname),
                                            arguments->withesa,
                                            true,
                                            false,
@@ -120,8 +120,10 @@ int gt_genomediff_shu(GtLogger *logger,
                                            logger,
                                            err);
     if (genericindexSubject == NULL)
+    {
+      gt_assert(gt_error_is_set(err));
       had_err = -1;
-    else
+    } else
     {
       encseq = genericindex_getencseq(genericindexSubject);
       numoffiles = gt_encseq_num_of_files(encseq);
@@ -136,8 +138,8 @@ int gt_genomediff_shu(GtLogger *logger,
           (!arguments->traverse_only ||
            !arguments->shulen_only))
       {
+        gt_error_set(err,"error: sequences need to be dna to calculate gc!");
         had_err = -1;
-        fprintf(stderr,"error: sequences need to be dna to calculate gc!");
       } else
       {
         numofchars = (unsigned long) gt_alphabet_num_of_chars(alphabet);
@@ -160,19 +162,15 @@ int gt_genomediff_shu(GtLogger *logger,
                                         logger,
                                         err);
     }
-    if (!had_err)
+    if (!had_err && arguments->traverse_only)
     {
-      if (arguments->traverse_only)
-      {
-        gt_logger_log(logger, "stopping after traversal");
-        genericindex_delete(genericindexSubject);
-        if (filelength != NULL)
-          gt_free(filelength);
-        if (shulen != NULL)
-          gt_array2dim_delete(shulen);
-        gt_assert(timer != NULL);
-        return had_err;
-      }
+      gt_logger_log(logger, "stopping after traversal");
+      genericindex_delete(genericindexSubject);
+      gt_free(filelength);
+      if (shulen != NULL)
+        gt_array2dim_delete(shulen);
+      gt_assert(timer != NULL);
+      return had_err;
     }
   }
 
@@ -377,10 +375,16 @@ int gt_genomediff_shu(GtLogger *logger,
       }
     }
   }
-  if (!arguments->withesa)
+  if (arguments->withesa)
+  {
+    if (ssar != NULL)
+    {
+      gt_freeSequentialsuffixarrayreader(&ssar);
+    }
+  } else
+  {
     genericindex_delete(genericindexSubject);
-  else
-    gt_freeSequentialsuffixarrayreader(&ssar);
+  }
 
   gt_free(filelength);
   gt_free(gc_contents);

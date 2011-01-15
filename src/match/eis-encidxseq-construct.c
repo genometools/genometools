@@ -204,8 +204,7 @@ gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet, unsigned long totalLen,
     gt_error_set(err, "Illegal/unknown/unimplemented encoding requested!");
     break;
   }
-  if (!seqIdx)
-    gt_MRAEncDelete(alphabet);
+  gt_assert(seqIdx != NULL || gt_error_is_set(err));
   return seqIdx;
 }
 

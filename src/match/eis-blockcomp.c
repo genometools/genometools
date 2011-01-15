@@ -105,7 +105,7 @@ blockEncIdxSeqHeaderLength(const struct blockCompositionSeq *seqIdx,
 
 static int
 openOnDiskData(const char *projectName, struct onDiskBlockCompIdx *idx,
-               char *mode);
+               char *mode, GtError *err);
 
 static void
 initOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx,
@@ -516,7 +516,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
   {
     size_t headerLen = blockEncIdxSeqHeaderLength(newSeqIdx, numExtHeaders,
                                                   extHeaderSizes);
-    if (!openOnDiskData(projectName, &newSeqIdx->externalData, "wb+"))
+    if (!openOnDiskData(projectName, &newSeqIdx->externalData, "wb+",err))
       newBlockEncIdxSeqErrRet();
     initOnDiskBlockCompIdx(&newSeqIdx->externalData,
                            headerLen, cwSize(newSeqIdx));
@@ -1716,11 +1716,11 @@ vwBits(unsigned long seqLen, unsigned blockSize, unsigned bucketBlocks,
  */
 static int
 openOnDiskData(const char *projectName, struct onDiskBlockCompIdx *idx,
-               char *mode)
+               char *mode,GtError *err)
 {
   GtStr *bdxName = gt_str_new_cstr(projectName);
   gt_str_append_cstr(bdxName, ".bdx");
-  idx->idxFP = gt_fa_fopen(gt_str_get(bdxName), mode, NULL);
+  idx->idxFP = gt_fa_fopen(gt_str_get(bdxName), mode, err);
   idx->idxFN = gt_str_ref(bdxName);
   gt_str_delete(bdxName);
   if (!idx->idxFP)
@@ -2115,24 +2115,21 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   return len;
 }
 
-#define loadBlockEncIdxSeqErrRet()                                      \
-  do {                                                                  \
-    if (newSeqIdx->externalData.idxFP)                                  \
-      destructOnDiskBlockCompIdx(&newSeqIdx->externalData);             \
-    if (newSeqIdx->compositionTable.bitsPerCount)                       \
-      gt_destructCompositionList(&newSeqIdx->compositionTable);            \
-    if (newSeqIdx->rangeEncs)                                           \
-      gt_deleteSeqRangeList(newSeqIdx->rangeEncs);                         \
-    if (newSeqIdx->extHeaderPos)                                        \
-      gt_free(newSeqIdx->extHeaderPos);                                 \
-    if (buf) gt_free(buf);                                              \
-    if (alphabet) gt_MRAEncDelete(alphabet);                               \
-    if (modesCopy)                                                      \
-      gt_free(modesCopy);                                               \
-    if (blockMapAlphabet) gt_free(blockMapAlphabet);                    \
-    if (rangeMapAlphabet) gt_free(rangeMapAlphabet);                    \
-    if (newSeqIdx) gt_free(newSeqIdx);                                  \
-    return NULL;                                                        \
+#define loadBlockEncIdxSeqErrRet()                                \
+  do {                                                            \
+    destructOnDiskBlockCompIdx(&newSeqIdx->externalData);         \
+    if (newSeqIdx->compositionTable.bitsPerCount)                 \
+      gt_destructCompositionList(&newSeqIdx->compositionTable);   \
+    if (newSeqIdx->rangeEncs)                                     \
+      gt_deleteSeqRangeList(newSeqIdx->rangeEncs);                \
+    gt_free(newSeqIdx->extHeaderPos);                             \
+    gt_free(buf);                                                 \
+    if (alphabet) gt_MRAEncDelete(alphabet);                      \
+    gt_free(modesCopy);                                           \
+    gt_free(blockMapAlphabet);                                    \
+    gt_free(rangeMapAlphabet);                                    \
+    gt_free(newSeqIdx);                                           \
+    return NULL;                                                  \
   } while (0)
 
 struct encIdxSeq *
@@ -2151,7 +2148,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
   newSeqIdx->baseClass.alphabet = alphabet;
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
 
-  if (!openOnDiskData(projectName, &newSeqIdx->externalData, "rb"))
+  if (!openOnDiskData(projectName, &newSeqIdx->externalData, "rb",err))
     loadBlockEncIdxSeqErrRet();
   {
     size_t offset = HEADER_ID_BLOCK_LEN;

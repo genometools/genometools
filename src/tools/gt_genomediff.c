@@ -300,8 +300,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
       }
       if (arguments->withesa)
       {
-        had_err = callpairswisesshulendistdist(gt_str_get(
-                                                 arguments->indexname),
+        had_err = callpairswisesshulendistdist(gt_str_get(arguments->indexname),
                                                arguments->queryname,
                                                logger,
                                                err);
@@ -341,8 +340,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
 GtTool* gt_genomediff(void)
 {
   return gt_tool_new(gt_genomediff_arguments_new,
-                  gt_genomediff_arguments_delete,
-                  gt_genomediff_option_parser_new,
-                  gt_genomediff_arguments_check,
-                  gt_genomediff_runner);
+                     gt_genomediff_arguments_delete,
+                     gt_genomediff_option_parser_new,
+                     gt_genomediff_arguments_check,
+                     gt_genomediff_runner);
 }

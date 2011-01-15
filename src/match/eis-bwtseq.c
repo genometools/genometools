@@ -64,8 +64,8 @@ initBWTSeqFromEncSeqIdx(BWTSeq *bwtSeq, struct encIdxSeq *seqIdx,
   gt_MRAEncAddSymbolToRange(alphabet, bwtTerminatorSym, 1);
   gt_assert(gt_MRAEncGetSize(alphabet) ==  alphabetSize + 1);
   alphabetSize = gt_MRAEncGetSize(alphabet);
-  bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat =
-    MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
+  bwtSeq->bwtTerminatorFallback = bwtTerminatorFlat
+    = MRAEncMapSymbol(alphabet, UNDEFBWTCHAR);
   bwtSeq->bwtTerminatorFallbackRange = 1;
   bwtSeq->count = counts;
   bwtSeq->rangeSort = rangeSort;

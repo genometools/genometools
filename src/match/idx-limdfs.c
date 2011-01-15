@@ -139,6 +139,7 @@ Genericindex *genericindex_new(const char *indexname,
     genericindex->packedindex = gt_loadvoidBWTSeqForSA(indexname,true, err);
     if (genericindex->packedindex == NULL)
     {
+      gt_assert(gt_error_is_set(err));
       haserr = true;
     }
   }
