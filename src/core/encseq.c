@@ -368,7 +368,7 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   if (encseq->hasmirror) {
     if (pos > encseq->totallength) {
       INVERTREADMODE(readmode)
-      pos = MAX(0, (pos % (encseq->totallength + 1)));
+      pos -= encseq->totallength + 1;
     } else if (pos == encseq->totallength) {
       return (GtUchar) SEPARATOR;
     }
@@ -2979,6 +2979,24 @@ unsigned long gt_encseq_sep2seqnum(const unsigned long *recordseps,
   exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
+unsigned long gt_encseq_seqnum_ssptabnew(const GtEncseq *encseq,
+                                         unsigned long position)
+{
+  gt_assert(position < encseq->totallength);
+  switch (encseq->satsep)
+  {
+    case GT_ACCESS_TYPE_UCHARTABLES:
+      return gt_encseq_seqnum_uchar(&encseq->ssptabnew.st_uchar,position);
+    case GT_ACCESS_TYPE_USHORTTABLES:
+      return gt_encseq_seqnum_ushort(&encseq->ssptabnew.st_ushort,position);
+    case GT_ACCESS_TYPE_UINT32TABLES:
+      return gt_encseq_seqnum_uint32(&encseq->ssptabnew.st_uint32,position);
+    default:
+      fprintf(stderr,"%s(%d) undefined\n",__func__,(int) encseq->satsep);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+}
+
 unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
                                unsigned long position)
 {
@@ -2993,9 +3011,9 @@ unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
   {
     gt_assert(encseq->numofdbsequences == 1UL || encseq->ssptab != NULL);
     num = gt_encseq_sep2seqnum(encseq->ssptab,
-                                encseq->numofdbsequences,
-                                encseq->totallength,
-                                position);
+                               encseq->numofdbsequences,
+                               encseq->totallength,
+                               position);
   } else {
     num = gt_encseq_seqnum_Viaequallength(encseq,position);
   }
@@ -6229,7 +6247,7 @@ static void testseqnumextraction(const GtEncseq *encseq)
 {
   GtUchar cc;
   bool startofsequence = true;
-  unsigned long pos, startpos, totallength, currentseqnum = 0, seqnum;
+  unsigned long pos, startpos, totallength, currentseqnum = 0;
 
   totallength = encseq->logicaltotallength;
   for (pos=0; pos < totallength; pos++)
@@ -6242,16 +6260,28 @@ static void testseqnumextraction(const GtEncseq *encseq)
       startofsequence = true;
     } else
     {
-      seqnum = gt_encseq_seqnum(encseq,pos);
-      if (currentseqnum != seqnum)
+      unsigned long seqnum1, seqnum2;
+
+      seqnum1 = gt_encseq_seqnum(encseq,pos);
+      if (currentseqnum != seqnum1)
       {
         fprintf(stderr,"testseqnumextraction: pos=%lu: currentseqnum = %lu "
-                       "!= %lu = seqnum\n",pos,currentseqnum,seqnum);
+                       "!= %lu = seqnum\n",pos,currentseqnum,seqnum1);
         exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED)
+      {
+        seqnum2 = gt_encseq_seqnum_ssptabnew(encseq,pos);
+        if (seqnum1 != seqnum2)
+        {
+          fprintf(stderr,"pos=%lu: seqnum1=%lu!=%lu=seqnum2\n",
+                         pos,seqnum1,seqnum2);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
       }
       if (startofsequence)
       {
-        startpos = gt_encseq_seqstartpos(encseq,seqnum);
+        startpos = gt_encseq_seqstartpos(encseq,seqnum1);
         gt_assert(startpos == pos);
         startofsequence = false;
       }
