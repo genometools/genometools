@@ -247,6 +247,10 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   if (gt_block_get_max_height(block, &maxbarheight, canvas->pvt->sty, err)) {
     return -1;
   }
+  if (gt_style_get_num(canvas->pvt->sty, "format", "bar_height", &bar_height,
+                       NULL, err) == GT_STYLE_QUERY_ERROR) {
+    return -1;
+  }
   if (gt_style_get_num(canvas->pvt->sty, "format", "min_len_block",
                        &min_len_block,NULL, err) == GT_STYLE_QUERY_ERROR) {
     return -1;
