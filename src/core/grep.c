@@ -17,11 +17,8 @@
 
 #include <sys/types.h>
 #include <regex.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include "core/assert_api.h"
 #include "core/ensure.h"
-#include "core/error.h"
 #include "core/grep_api.h"
 
 static void grep_error(int errcode, regex_t *matcher, GtError *err)

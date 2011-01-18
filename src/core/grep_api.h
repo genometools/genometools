@@ -18,12 +18,7 @@
 #ifndef GREP_API_H
 #define GREP_API_H
 
-#include <sys/types.h>
-#include <regex.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "core/assert_api.h"
 #include "core/error_api.h"
 
 /* Grep module */
