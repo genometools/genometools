@@ -34,23 +34,23 @@ typedef enum
 } GtEncseqAccessType;
 
 GtEncseqAccessType gt_encseq_access_type_get(const char *str);
-bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat);
-uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
-                                 bool withrangelength,
-                                 unsigned long totallength,
-                                 unsigned long items);
+bool               gt_encseq_access_type_isviautables(GtEncseqAccessType sat);
+uint64_t           gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
+                                           bool withrangelength,
+                                           unsigned long totallength,
+                                           unsigned long items);
 const char*        gt_encseq_access_type_str(GtEncseqAccessType at);
 const char*        gt_encseq_access_type_list(void);
-int gt_encseq_access_type_determine(unsigned long *specialranges,
-                                    unsigned long *wildcardranges,
-                                    unsigned long totallength,
-                                    unsigned long numofsequences,
-                                    unsigned long numofdbfiles,
-                                    unsigned long lengthofdbfilenames,
-                                    const unsigned long *specialrangestab,
-                                    const unsigned long *wildcardrangestab,
-                                    const Definedunsignedlong *equallength,
-                                    unsigned int numofchars,
-                                    const char *str_sat,
-                                    GtError *err);
+int                gt_encseq_access_type_determine(unsigned long *specialranges,
+                                         unsigned long *wildcardranges,
+                                         unsigned long totallength,
+                                         unsigned long numofsequences,
+                                         unsigned long numofdbfiles,
+                                         unsigned long lengthofdbfilenames,
+                                         const unsigned long *specialrangestab,
+                                         const unsigned long *wildcardrangestab,
+                                         const Definedunsignedlong *equallength,
+                                         unsigned int numofchars,
+                                         const char *str_sat,
+                                         GtError *err);
 #endif

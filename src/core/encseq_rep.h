@@ -135,9 +135,6 @@ struct GtEncseq
 
   GtAlphabet *alpha;   /* alphabet representation */
 
-  unsigned long *ssptab; /* (if numofdbsequences = 1 then NULL  else
-                                                           numofdbsequences  -1)
-                                                           entries */
   GtSWtable ssptabnew;
 
   unsigned long *fsptab; /* (if numofdbfiles = 1 then NULL  else
