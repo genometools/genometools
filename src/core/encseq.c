@@ -7384,7 +7384,6 @@ int gt_encseq_builder_unit_test(GtError *err)
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
   ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
   ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 11UL);
-  printf("seqlength: %lu / 11\n", gt_encseq_seqlength(encseq, 0UL));
   ensure(had_err, gt_encseq_seqstartpos(encseq, 1UL) == 12UL);
   ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
   ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
