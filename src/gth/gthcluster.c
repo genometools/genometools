@@ -15,12 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "core/array.h"
 #include "core/undef.h"
 #include "gth/gthcluster.h"
-#include "gth/pgl.h"
-#include "gth/sa_collection.h"
 
 static void storeSAinnewPGL(GtArray *pgls, unsigned long *currentPGLindex,
                             GthSA *sa)

@@ -15,9 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gth/gthdef.h"
 #include "gth/gthsadistri.h"
-#include "gth/sa_collection.h"
 
 static void addSAtoexondistribution(GtDiscDistri *exondistribution,
                                     GthSA *sa)

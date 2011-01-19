@@ -17,14 +17,11 @@
 
 #include <math.h>
 #include "core/cstr_api.h"
-#include "core/ma.h"
-#include "core/option.h"
 #include "core/outputfile.h"
 #include "gth/gthxml.h"
 #include "gth/gthverbosefunc.h"
 #include "gth/intermediate.h"
 #include "gth/plugins.h"
-#include "gth/sa_filter.h"
 #include "gth/xml_inter_sa_visitor.h"
 #include "gth/gt_gthsplit.h"
 

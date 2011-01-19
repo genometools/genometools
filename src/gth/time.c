@@ -16,7 +16,6 @@
 */
 
 #include <time.h>
-#include "core/assert_api.h"
 #include "core/ma.h"
 #include "gth/time.h"
 

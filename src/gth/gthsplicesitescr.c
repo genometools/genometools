@@ -15,14 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdbool.h>
-#include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
-#include "gth/align_dna.h"
 #include "gth/gthsplicesitescr.h"
-#include "gth/gthtravalign.h"
 
 #define SPLICE_SITE_SCORE_WINDOW        50 /* (GS2 = WSIZE) */
 #define SSSWINDOW_MINSIZE_FACTOR        .8

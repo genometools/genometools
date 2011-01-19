@@ -17,13 +17,10 @@
 
 #include <ctype.h>
 #include <math.h>
-#include "core/assert_api.h"
 #include "core/bioseq.h"
 #include "core/fileutils_api.h"
-#include "core/ma.h"
 #include "core/md5_seqid.h"
 #include "core/safearith.h"
-#include "core/str.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/regular_seqid.h"

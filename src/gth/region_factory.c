@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/cstr_api.h"
 #include "core/cstr_table.h"
 #include "core/basename_api.h"
 #include "core/ma.h"

@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
 #include "core/unused_api.h"
 #include "extended/redblack.h"
 #include "gth/gthcmpfuncgenomic.h"

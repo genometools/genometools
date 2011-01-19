@@ -14,13 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <limits.h>
 #include "core/array2dim_api.h"
 #include "core/array3dim.h"
-#include "core/chardef.h"
-#include "core/translator_api.h"
 #include "core/trans_table.h"
-#include "gth/gthstopcodon.h"
 #include "gth/align_common.h"
 #include "gth/dp_scores_protein.h"
 

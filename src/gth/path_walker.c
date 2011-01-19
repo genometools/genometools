@@ -15,8 +15,6 @@
 */
 
 #include "core/codon.h"
-#include "core/file.h"
-#include "core/ma_api.h"
 #include "gth/path_walker.h"
 
 struct GthPathWalker {

@@ -15,11 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "gth/gthoutput.h"
 #include "gth/gthsortags.h"
 #include "gth/ags.h"
-#include "gth/pgl.h"
 
 static int compareAGSs(const void *dataA, const void *dataB)
 {

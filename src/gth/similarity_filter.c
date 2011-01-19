@@ -15,30 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "core/safearith.h"
 #include "core/trans_table.h"
 #include "core/undef.h"
-#include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "gth/gtherror.h"
-#include "gth/gthoutput.h"
-#include "gth/gthstrandchar.h"
 #include "gth/gthxml.h"
-#include "gth/align_dna.h"
-#include "gth/align_protein.h"
-#include "gth/call_info.h"
 #include "gth/chaining.h"
-#include "gth/gthintroncutout.h"
-#include "gth/input.h"
 #include "gth/intermediate.h"
 #include "gth/proc_sa_collection.h"
-#include "gth/sa_filter.h"
-#include "gth/sa.h"
 #include "gth/similarity_filter.h"
-#include "gth/splice_site_model.h"
-#include "gth/spliced_seq.h"
-#include "gth/pgl.h"
 
 #define UNSUCCESSFULALIGNMENTSCORE      0.0
 

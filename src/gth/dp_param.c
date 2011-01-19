@@ -16,14 +16,11 @@
 */
 
 #include <math.h>
-#include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/ma_api.h"
-#include "core/minmax.h"
 #include "core/range.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
-#include "gth/gtherror.h"
 #include "gth/bssm_param_rep.h"
 #include "gth/dp_param.h"
 #include "gth/splice_site_model_rep.h"

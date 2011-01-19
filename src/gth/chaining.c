@@ -15,15 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "core/ma.h"
-#include "core/unused_api.h"
-#include "extended/globalchaining.h"
-#include "gth/gthdef.h"
-#include "gth/gthenum.h"
 #include "gth/chaining.h"
-#include "gth/gthmatch.h"
-#include "gth/input.h"
 
 #define POLYATAILFILTERALPHASIZE                4
 #define SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE  160

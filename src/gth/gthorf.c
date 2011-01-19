@@ -15,15 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/codon.h"
 #include "core/orf.h"
 #include "core/trans_table.h"
 #include "gth/gthorf.h"
-#include "gth/gthoutput.h"
 #include "gth/gthstopcodon.h"
 #include "gth/indent.h"
-#include "gth/spliced_seq.h"
 
 #define CONSOLIDATE_ORFS_MAX_OVERLAP            30
 #define CONSOLIDATE_ORFS_WITHIN_LENGTH          30

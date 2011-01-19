@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
 #include "core/unused_api.h"
 #include "gth/sa_visitor_rep.h"
 

@@ -15,12 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include <stdbool.h>
-#include "core/ma.h"
 #include "gth/gthassemblecluster.h"
 #include "gth/gthcmpfuncgenomic.h"
-#include "gth/sa.h"
 
 #ifndef NDEBUG
 static bool spliced_alignments_are_sorted(GtArray *alignments)

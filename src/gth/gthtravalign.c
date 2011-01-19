@@ -15,10 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdbool.h>
-#include "core/assert_api.h"
 #include "core/codon.h"
-#include "core/file.h"
 #include "gth/gthtravalign.h"
 
 bool gt_eops_equal_referencelength(Editoperation *alignment,

@@ -20,10 +20,8 @@
 #include "gth/gt_gth.h"
 #include "gth/gthverbosefunc.h"
 #include "gth/gthverbosefuncvm.h"
-#include "gth/input.h"
 #include "gth/parse_options.h"
 #include "gth/similarity_filter.h"
-#include "gth/stat.h"
 #include "gth/run_header.h"
 
 int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)

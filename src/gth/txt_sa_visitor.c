@@ -15,12 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <ctype.h>
-#include <math.h>
 #include "core/undef.h"
-#include "gth/indent.h"
 #include "gth/sa_visitor_rep.h"
-#include "gth/sa.h"
 #include "gth/txt_sa_visitor.h"
 
 #define SA_DELIMITERLINECHAR  '*'

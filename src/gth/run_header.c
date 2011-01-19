@@ -15,16 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdbool.h>
-#include "core/assert_api.h"
 #include "core/cstr_array.h"
-#include "core/ma.h"
-#include "gth/default.h"
 #include "gth/indent.h"
 #include "gth/showbool.h"
 #include "gth/time.h"
 #include "gth/call_info.h"
-#include "gth/gthalphatype.h"
 #include "gth/gthspeciestab.h"
 #include "gth/run_header.h"
 #include "gt_config.h"

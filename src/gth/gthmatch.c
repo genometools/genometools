@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdbool.h>
 #include "gth/gthmatch.h"
 
 bool gth_matches_are_equal(GthMatch *match1, GthMatch *match2)

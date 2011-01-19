@@ -18,18 +18,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 #include <math.h>
-#include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/codon.h"
-#include "core/file.h"
-#include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/translator_api.h"
 #include "core/unused_api.h"
-#include "gth/indent.h"
 #include "gth/gthalignment.h"
 
 #define OUTCHAR(C)         gt_file_xfputc((C),outfp)

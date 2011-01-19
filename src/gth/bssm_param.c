@@ -16,20 +16,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "lua.h"
 #include "lauxlib.h"
-#include "lualib.h"
 #include "core/bioseq.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"
-#include "core/mathsupport.h"
 #include "core/ma_api.h"
-#include "core/str_api.h"
-#include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "gth/bssm_param_hard_coded.h"
-#include "gth/gthalignment.h"
-#include "gth/gtherror.h"
+#include "gth/bssm_param.h"
 #include "gth/gthoutput.h"
 #include "gth/gthprobdef.h"
 #include "gth/gthspeciestab.h"

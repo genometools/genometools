@@ -15,15 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
-#include "core/option.h"
 #include "gth/gthverbosefunc.h"
 #include "gth/intermediate.h"
 #include "gth/pgl_collection.h"
-#include "gth/pgl.h"
-#include "gth/plugins.h"
-#include "gth/sa_collection.h"
-#include "gth/sa_filter.h"
 #include "gth/gt_gthfilestat.h"
 
 typedef struct {

@@ -16,24 +16,16 @@
 */
 
 #include <math.h>
-#include "core/assert_api.h"
 #include "core/array2dim_api.h"
 #include "core/divmodmul.h"
 #include "core/safearith.h"
-#include "core/undef.h"
 #include "core/unused_api.h"
 #include "gth/gthenum.h"
 #include "gth/gtherror.h"
-#include "gth/gthoutput.h"
-#include "gth/align_common.h"
 #include "gth/align_dna_imp.h"
 #include "gth/array2dim_plain.h"
 #include "gth/compute_scores.h"
-#include "gth/dp_param.h"
-#include "gth/gthtravalign.h"
 #include "gth/path_walker.h"
-#include "gth/sa.h"
-#include "gth/stat.h"
 
 /* IMPORTANT: Definition has to be consistent with DnaRetrace in
    align_dna_imp.h. */

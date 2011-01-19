@@ -15,17 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/str_array.h"
 #include "gth/gthxml.h"
-#include "gth/call_info.h"
 #include "gth/gthverbosefunc.h"
 #include "gth/gthverbosefuncvm.h"
-#include "gth/input.h"
 #include "gth/intermediate.h"
 #include "gth/parse_options.h"
-#include "gth/plugins.h"
 #include "gth/proc_sa_collection.h"
-#include "gth/stat.h"
 #include "gth/gt_gthconsensus.h"
 
 static int process_consensus_files(GtStrArray *consensusfiles,

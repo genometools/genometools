@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "gth/default.h"
 #include "gth/dp_options_est.h"

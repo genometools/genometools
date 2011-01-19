@@ -15,13 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "core/bittab.h"
-#include "core/undef.h"
-#include "gth/ags.h"
 #include "gth/gthassemblebuildags.h"
 #include "gth/gthassembleexonnode.h"
-#include "gth/pgl.h"
 
 static void addSAtoAGS(GthAGS *ags, GthSACluster *sacluster, GtArray *nodes)
 {

@@ -15,8 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include <float.h>
 #include "gth/gthassembleexonnode.h"
 
 #define SAVE_EXONSCORE_ALLOWED_DIFFERENCE       30

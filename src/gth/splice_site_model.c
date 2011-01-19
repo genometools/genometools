@@ -17,7 +17,6 @@
 
 #include <math.h>
 #include "core/ma_api.h"
-#include "core/str_api.h"
 #include "gth/default.h"
 #include "gth/bssm_param.h"
 #include "gth/splice_site_model_rep.h"

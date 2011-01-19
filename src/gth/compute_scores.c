@@ -16,7 +16,6 @@
 */
 
 #include <math.h>
-#include "core/assert_api.h"
 #include "core/codon.h"
 #include "core/safearith.h"
 #include "core/undef.h"
@@ -25,7 +24,6 @@
 #include "gth/align_protein.h"
 #include "gth/compute_scores.h"
 #include "gth/gthsplicesitescr.h"
-#include "gth/gthtravalign.h"
 
 static void evalnewexonifpossible(bool proteineop, bool *newexon,
                                   bool *newintron, bool *firstexon,

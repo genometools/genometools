@@ -16,8 +16,6 @@
 */
 
 #include "core/undef.h"
-#include "extended/gff3_visitor.h"
-#include "gth/indent.h"
 #include "gth/proc_sa_collection.h"
 #include "gth/gthsadistri.h"
 #include "gth/pgl_collection.h"

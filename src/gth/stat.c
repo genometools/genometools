@@ -15,14 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdbool.h>
-#include "core/assert_api.h"
-#include "core/ma.h"
+#include "core/ma_api.h"
 #include "core/safearith.h"
 #include "gth/default.h"
-#include "gth/time.h"
 #include "gth/gthoutput.h"
-#include "gth/gthsadistri.h"
+#include "gth/time.h"
 #include "gth/stat.h"
 
 #define INFOCHAR\

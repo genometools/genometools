@@ -16,7 +16,6 @@
 */
 
 #include "core/cstr_api.h"
-#include "core/ma.h"
 #include "gth/default.h"
 #include "gth/call_info.h"
 #include "gth/gthspeciestab.h"

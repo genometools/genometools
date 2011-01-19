@@ -15,12 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ma.h"
-#include "core/undef.h"
-#include "gth/indent.h"
 #include "gth/ags.h"
-#include "gth/gthtrans.h"
-#include "gth/pgl.h"
 
 struct GthAGSObject {
   const GthPGL *pgl;

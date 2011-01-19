@@ -15,17 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/array.h"
-#include "core/ma.h"
 #include "core/undef.h"
 #include "core/safearith.h"
-#include "gth/indent.h"
 #include "gth/backtrace_path.h"
-#include "gth/gthalignment.h"
 #include "gth/gthcutoffsminimal.h"
 #include "gth/gthcutoffsrelaxed.h"
 #include "gth/gthcutoffsstrict.h"
-#include "gth/gthtravalign.h"
 
 #define DETERMINE_TIMES_MAXLEN     \
         while (length >  maxlen) { \

@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdio.h>
 #include "gth/gthxml.h"
 
 void gth_xml_show_leader(bool intermediate, GtFile *outfp)

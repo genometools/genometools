@@ -18,7 +18,6 @@
 #include "core/unused_api.h"
 #include "extended/cds_visitor.h"
 #include "extended/gff3_visitor.h"
-#include "gth/indent.h"
 #include "gth/ags.h"
 #include "gth/gff3_pgl_visitor.h"
 #include "gth/pgl_visitor_rep.h"

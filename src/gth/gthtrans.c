@@ -15,10 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/codon.h"
 #include "core/codon_iterator_simple.h"
-#include "core/ma.h"
 #include "core/translator_api.h"
 #include "core/trans_table.h"
 #include "core/unused_api.h"
@@ -26,7 +24,6 @@
 #include "gth/indent.h"
 #include "gth/gthorf.h"
 #include "gth/gthtrans.h"
-#include "gth/spliced_seq.h"
 
 #define TRANSLATIONLINEWIDTH    60
 #define EXONSEPARATORSTRING     " : "

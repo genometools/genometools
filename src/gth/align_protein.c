@@ -15,22 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/codon.h"
 #include "core/divmodmul.h"
-#include "core/ma.h"
 #include "core/safearith.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "gth/gthenum.h"
 #include "gth/gtherror.h"
-#include "gth/gthoutput.h"
-#include "gth/gthstopcodon.h"
-#include "gth/align_common.h"
 #include "gth/align_protein_imp.h"
 #include "gth/compute_scores.h"
-#include "gth/dp_param.h"
-#include "gth/gthtravalign.h"
 
 #define WSIZE_PROTEIN   20
 #define WSIZE_DNA       60 /* (3 * WSIZE_PROTEIN) */

@@ -15,20 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "core/cstr_api.h"
-#include "core/error.h"
-#include "core/mailaddress.h"
 #include "core/outputfile.h"
 #include "core/undef.h"
-#include "core/unused_api.h"
 #include "gth/default.h"
 #include "gth/gthdef.h"
-#include "gth/call_info.h"
-#include "gth/gthalphatype.h"
 #include "gth/gthspeciestab.h"
 #include "gth/parse_options.h"
-#include "gth/stat.h"
 
 #define SHOWINTRONMAXLEN_OPT_CSTR   "showintronmaxlen"
 #define TOPOS_OPT_CSTR              "topos"

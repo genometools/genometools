@@ -15,18 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include <ctype.h>
-#include <math.h>
-#include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"
 #include "core/undef.h"
-#include "core/unused_api.h"
 #include "extended/gff3_escaping.h"
 #include "gth/default.h"
-#include "gth/indent.h"
-#include "gth/call_info.h"
 #include "gth/sa.h"
 #include "gth/txt_sa_visitor.h"
 

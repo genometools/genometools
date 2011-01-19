@@ -15,8 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdbool.h>
-#include "core/assert_api.h"
 #include "core/array.h"
 #include "core/dynbittab.h"
 #include "core/ma.h"

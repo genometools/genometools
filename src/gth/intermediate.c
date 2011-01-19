@@ -16,17 +16,9 @@
 */
 
 #include <expat.h>
-#include "core/assert_api.h"
-#include "core/cstr_api.h"
 #include "core/fa.h"
-#include "core/safearith.h"
 #include "core/unused_api.h"
-#include "gth/indent.h"
-#include "gth/gthalignment.h"
 #include "gth/intermediate.h"
-#include "gth/sa_filter.h"
-#include "gth/sa_collection.h"
-#include "gth/sa.h"
 
 #define SHOW_PARSE_FILE_STATUS_BUF_SIZE  PATH_MAX+80
 

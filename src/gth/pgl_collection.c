@@ -15,16 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <math.h>
-#include "core/assert_api.h"
-#include "core/ma.h"
 #include "core/parseutils.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/consensus_sa.h"
-#include "extended/gff3_visitor.h"
-#include "extended/region_mapping.h"
-#include "gth/indent.h"
 #include "gth/pgl_collection.h"
 #include "gth/gthassemblebuildags.h"
 #include "gth/gthassemblecluster.h"

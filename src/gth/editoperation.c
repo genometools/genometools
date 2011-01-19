@@ -16,10 +16,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "gth/indent.h"
 #include "gth/editoperation.h"
-#include "gth/gthalignment.h"
 
 Eoptype gt_editoperation_type(Editoperation eop, bool proteineop)
 {
