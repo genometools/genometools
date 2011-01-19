@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <fcntl.h>
+#include <sys/mman.h>
 #include "core/error.h"
 #include "core/option.h"
 #include "core/progressbar.h"

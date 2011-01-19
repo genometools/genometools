@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <sys/mman.h>
 #include <unistd.h>
-
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"

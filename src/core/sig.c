@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <signal.h>
 #include "core/sig.h"
 #include "core/xposix.h"
 

@@ -18,21 +18,10 @@
 #ifndef XPOSIX_H
 #define XPOSIX_H
 
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <glob.h>
-#include <signal.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-#include "core/assert_api.h"
+#include <sys/resource.h>
+#include <sys/stat.h>
 
 /*
   This module contains wrappers for the POSIX functions we use.

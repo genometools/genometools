@@ -19,6 +19,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/termios.h>
 #include "core/assert_api.h"

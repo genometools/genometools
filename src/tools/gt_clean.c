@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/bioseq.h"
 #include "core/option.h"
 #include "core/versionfunc.h"

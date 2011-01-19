@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <sys/time.h>
 #include "core/ma.h"
 #include "core/timer.h"
 #include "core/xansi_api.h"
