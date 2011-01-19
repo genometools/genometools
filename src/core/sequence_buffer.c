@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/ensure.h"
 #include "core/fa.h"
 #include "core/fileutils_api.h"

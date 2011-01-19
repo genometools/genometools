@@ -18,12 +18,7 @@
 #ifndef XANSI_API_H
 #define XANSI_API_H
 
-#include <errno.h>
-#include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "core/assert_api.h"
 
 /* XANSI module */
 

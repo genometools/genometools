@@ -16,6 +16,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/ma.h"
 #include "core/chardef.h"
 #include "core/encseq_api.h"

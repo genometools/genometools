@@ -16,6 +16,7 @@
 */
 
 #include <ctype.h>
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/ensure.h"

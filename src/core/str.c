@@ -16,6 +16,7 @@
 */
 
 #include <math.h>
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/cstr_api.h"
 #include "core/dynalloc.h"

@@ -15,6 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include "core/assert_api.h"
 #include "core/xansi_api.h"
 
 void gt_xatexit(void (*function)(void))

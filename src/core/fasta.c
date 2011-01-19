@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/fasta.h"
 #include "core/fasta_separator.h"
 #include "core/xansi_api.h"

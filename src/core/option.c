@@ -18,6 +18,7 @@
 #include <ctype.h>
 #include <limits.h>
 #include <stdio.h>
+#include <string.h>
 #include "core/assert_api.h"
 #include "core/array.h"
 #include "core/cstr_api.h"

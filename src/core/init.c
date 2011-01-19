@@ -18,6 +18,7 @@
 #ifndef WITHOUT_CAIRO
 #include <fontconfig.h>
 #endif
+#include <string.h>
 #include "core/init.h"
 #include "core/class_alloc.h"
 #include "core/class_prealloc.h"
