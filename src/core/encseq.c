@@ -3047,7 +3047,6 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
           val = encseq->totallength - 1;
         else
           val = gt_encseq_seqstartpos_viautables(encseq, seqnum) -1 ;
-        /* val = (encseq->ssptab[seqnum+1]-1) - 1;  */
         pos = encseq->logicaltotallength - val - 1;
       }
     }
@@ -3077,8 +3076,6 @@ unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
   }
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    unsigned long startpos;
-    startpos = (seqnum == 0 ? 0 : gt_encseq_seqstartpos(encseq, seqnum));
     if (seqnum == 0)
     {
       if (encseq->numofdbsequences == 1UL)
@@ -3090,13 +3087,14 @@ unsigned long gt_encseq_seqlength(const GtEncseq *encseq, unsigned long seqnum)
       }
     } else
     {
+      unsigned long startpos = gt_encseq_seqstartpos(encseq, seqnum);
       if (seqnum == encseq->numofdbsequences - 1)
       {
         return encseq->totallength - startpos;
       } else
       {
-        /* return encseq->ssptab[seqnum] - startpos; */
-        return gt_encseq_seqstartpos_viautables(encseq, seqnum) - 1 - startpos;
+        return gt_encseq_seqstartpos_viautables(encseq, seqnum + 1UL)
+                 - 1 - startpos;
       }
     }
   } else
