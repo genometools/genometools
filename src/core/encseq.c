@@ -1,8 +1,8 @@
 /*
-  Copyright (c) 2007-2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -101,22 +101,6 @@
 
 #define GT_TWOBITS_FOR_WILDCARD  0
 #define GT_TWOBITS_FOR_SEPARATOR 1
-
-#define INVERTREADMODE(readmode)\
-        switch (readmode) {\
-          case GT_READMODE_FORWARD:\
-            readmode = GT_READMODE_REVCOMPL;\
-            break;\
-          case GT_READMODE_REVERSE:\
-            readmode = GT_READMODE_COMPL;\
-            break;\
-          case GT_READMODE_COMPL:\
-            readmode = GT_READMODE_REVERSE;\
-            break;\
-          case GT_READMODE_REVCOMPL:\
-            readmode = GT_READMODE_FORWARD;\
-            break;\
-        }
 
 void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
                                  const GtUchar *seq,
@@ -241,7 +225,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   if (encseq->hasmirror) {
     if (pos > encseq->totallength) {
       /* invert coordinates and readmode */
-      INVERTREADMODE(readmode)
+      gt_readmode_invert(readmode);
       pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
     } else if (pos == encseq->totallength) {
       return (GtUchar) SEPARATOR;
@@ -343,7 +327,7 @@ char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
     if (encseq->hasmirror) {
       if (pos > encseq->totallength) {
         /* invert coordinates and readmode */
-        INVERTREADMODE(readmode)
+        gt_readmode_invert(readmode);
         pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
       } else if (pos == encseq->totallength) {
         return (char) SEPARATOR;
@@ -367,7 +351,7 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   gt_assert(pos < encseq->logicaltotallength);
   if (encseq->hasmirror) {
     if (pos > encseq->totallength) {
-      INVERTREADMODE(readmode)
+      gt_readmode_invert(readmode);
       pos -= encseq->totallength + 1;
     } else if (pos == encseq->totallength) {
       return (GtUchar) SEPARATOR;
@@ -457,7 +441,7 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
   if (esr->encseq->hasmirror && esr->currentpos == esr->encseq->totallength) {
     if (!esr->startedonmiddle) {
       /* only turn around if we arrived from complementary side */
-      INVERTREADMODE(esr->readmode);
+      gt_readmode_invert(esr->readmode);
     }
     /* from now on, we can only go backwards on the original sequence! */
     gt_assert(GT_ISDIRREVERSE(esr->readmode));
@@ -526,7 +510,7 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
     if (esr->encseq->hasmirror && esr->currentpos == esr->encseq->totallength) {
       if (!esr->startedonmiddle) {
         /* only turn around if we arrived from complementary side */
-        INVERTREADMODE(esr->readmode);
+        gt_readmode_invert(esr->readmode);
       }
       /* from now on, we can only go backwards on the original sequence! */
       gt_assert(GT_ISDIRREVERSE(esr->readmode));

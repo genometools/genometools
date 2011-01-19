@@ -28,6 +28,9 @@ typedef enum
   GT_READMODE_REVCOMPL
 } GtReadmode;
 
+#define     gt_readmode_invert(RM) \
+              RM = ((GtReadmode) (3 - (int) (RM)))
+
 /* Returns the descriptive string for the readmode <readmode>. */
 const char* gt_readmode_show(GtReadmode readmode);
 /* Returns the <GtReadmode> for the description <string>, which must be one
