@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <signal.h>
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/cstr_api.h"

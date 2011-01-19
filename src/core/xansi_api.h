@@ -18,6 +18,7 @@
 #ifndef XANSI_API_H
 #define XANSI_API_H
 
+#include <stdarg.h>
 #include <stdio.h>
 
 /* XANSI module */
