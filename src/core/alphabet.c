@@ -20,21 +20,15 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <errno.h>
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/cstr_api.h"
-#include "core/error.h"
 #include "core/fileutils_api.h"
 #include "core/fa.h"
 #include "core/gtdatapath.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
-#include "core/str.h"
 #include "core/str_array.h"
-#include "core/types_api.h"
 #include "core/xansi_api.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000

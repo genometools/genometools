@@ -16,7 +16,6 @@
 */
 
 #include <string.h>
-#include "core/assert_api.h"
 #include "core/cstr_api.h"
 #include "core/cstr_array.h"
 #include "core/ma.h"

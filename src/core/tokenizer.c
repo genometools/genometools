@@ -16,7 +16,6 @@
 */
 
 #include <string.h>
-#include "core/assert_api.h"
 #include "core/ensure.h"
 #include "core/fa.h"
 #include "core/ma.h"

@@ -15,10 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/score_function.h"
-#include "core/xansi_api.h"
 
 struct GtScoreFunction {
   GtScoreMatrix *sm;

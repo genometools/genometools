@@ -16,12 +16,10 @@
 */
 
 #include <sys/mman.h>
-#include <unistd.h>
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"
 #include "core/ezlib.h"
-#include "core/file.h"
 #include "core/hashmap.h"
 #include "core/fa.h"
 #include "core/ma.h"

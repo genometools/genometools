@@ -18,15 +18,11 @@
 */
 
 #include <string.h>
-#include "core/assert_api.h"
-#include "core/class_alloc.h"
 #include "core/codon.h"
 #include "core/codon_iterator_simple.h"
 #include "core/ensure.h"
 #include "core/ma.h"
-#include "core/log.h"
 #include "core/translator.h"
-#include "core/unused_api.h"
 
 struct GtTranslator {
   GtTransTable *transtable;

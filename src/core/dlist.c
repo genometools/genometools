@@ -16,13 +16,11 @@
 */
 
 #include <limits.h>
-#include "core/assert_api.h"
 #include "core/dlist.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
-#include "core/xansi_api.h"
 
 #define NUM_OF_TESTS  100
 #define MAX_SIZE      1024

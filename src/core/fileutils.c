@@ -20,15 +20,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "core/assert_api.h"
-#include "core/array.h"
 #include "core/cstr_api.h"
 #include "core/fileutils_api.h"
-#include "core/file.h"
 #include "core/ma.h"
 #include "core/sequence_buffer.h"
 #include "core/splitter.h"
-#include "core/types_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"
 

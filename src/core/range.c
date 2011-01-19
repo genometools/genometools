@@ -15,9 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/ensure.h"
-#include "core/fptr_api.h"
 #include "core/minmax.h"
 #include "core/msort.h"
 #include "core/range.h"

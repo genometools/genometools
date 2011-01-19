@@ -14,11 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <errno.h>
 #include <string.h>
-#include "core/array_api.h"
-#include "core/assert_api.h"
-#include "core/error_api.h"
 #include "core/ma_api.h"
 #include "core/thread.h"
 #include "core/unused_api.h"

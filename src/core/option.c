@@ -16,21 +16,15 @@
 */
 
 #include <ctype.h>
-#include <limits.h>
 #include <stdio.h>
 #include <string.h>
-#include "core/assert_api.h"
-#include "core/array.h"
 #include "core/cstr_api.h"
-#include "core/error.h"
 #include "core/fa.h"
 #include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/mailaddress.h"
-#include "core/minmax.h"
 #include "core/option.h"
 #include "core/parseutils.h"
-#include "core/str.h"
 #include "core/undef.h"
 #include "core/xansi_api.h"
 

@@ -16,12 +16,10 @@
 */
 
 #include <string.h>
-#include "core/assert_api.h"
 #include "core/countingsort.h"
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "core/xansi_api.h"
 
 void gt_countingsort(void *out, const void *in, size_t elem_size,
                      unsigned long size, unsigned long max_elemvalue,

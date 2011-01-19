@@ -16,13 +16,8 @@
 */
 
 #include <string.h>
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
 #include "core/assert_api.h"
-#include "core/cstr_api.h"
 #include "core/fileutils_api.h"
-#include "core/splitter.h"
 #include "core/gtdatapath.h"
 
 #define GTDATADIR "/gtdata"

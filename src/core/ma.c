@@ -15,9 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <sys/mman.h>
 #include <errno.h>
-#include <stdbool.h>
 #include <string.h>
 #include "core/array_api.h"
 #include "core/hashmap.h"

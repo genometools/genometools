@@ -17,9 +17,7 @@
 */
 
 #include <ctype.h>
-#include <string.h>
 #include "core/cstr_api.h"
-#include "core/error.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_inline.h"

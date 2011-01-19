@@ -17,10 +17,7 @@
 */
 
 #include "core/arraydef.h"
-#include "core/chardef.h"
 #include "core/class_alloc.h"
-#include "core/minmax.h"
-#include "core/str_array.h"
 #include "core/types_api.h"
 #include "core/seqiterator_rep.h"
 #include "core/unused_api.h"

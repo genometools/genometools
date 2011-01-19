@@ -21,7 +21,6 @@
 #include <stdio.h>
 #endif
 #include <string.h>
-#include "core/assert_api.h"
 #include "core/array.h"
 #include "core/cstr_api.h"
 #include "core/hashtable.h"

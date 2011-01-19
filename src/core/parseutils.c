@@ -19,7 +19,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
-#include "core/assert_api.h"
 #include "core/cstr_api.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"

@@ -15,10 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/seq.h"
-#include "core/xansi_api.h"
 
 struct GtSeq {
   char *seq, *description;

@@ -18,7 +18,6 @@
 #include <limits.h>
 #include <string.h>
 #include "core/array.h"
-#include "core/assert_api.h"
 #include "core/dynalloc.h"
 #include "core/ensure.h"
 #include "core/ma.h"
@@ -27,7 +26,6 @@
 #include "core/qsort_r.h"
 #include "core/range.h"
 #include "core/unused_api.h"
-#include "core/xansi_api.h"
 
 #define ARRAY_NUM_OF_TESTS  100
 #define ARRAY_MAX_SIZE      1024

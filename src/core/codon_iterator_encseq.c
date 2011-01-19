@@ -21,7 +21,6 @@
 #include "core/codon.h"
 #include "core/codon_iterator_encseq.h"
 #include "core/codon_iterator_rep.h"
-#include "core/unused_api.h"
 
 struct GtCodonIteratorEncseq {
   const GtCodonIterator parent_instance;

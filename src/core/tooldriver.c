@@ -16,9 +16,7 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include "core/init.h"
-#include "core/error.h"
 #include "core/tooldriver.h"
 
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[])

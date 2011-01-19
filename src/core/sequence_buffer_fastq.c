@@ -24,7 +24,6 @@
 #include "core/sequence_buffer_fastq.h"
 #include "core/seqiterator_fastq.h"
 #include "core/undef.h"
-#include "core/unused_api.h"
 
 #define FASTQ_START_SYMBOL '@'
 

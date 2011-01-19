@@ -16,7 +16,6 @@
 */
 
 #include "core/array.h"
-#include "core/cstr_api.h"
 #include "core/ma.h"
 #include "core/str_array.h"
 
