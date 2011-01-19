@@ -412,7 +412,8 @@ struct GtEncseqReader
   GtEncseq *encseq;
   GtReadmode readmode,
              originalreadmode;   /* only important for mirroring */
-  unsigned long currentpos;
+  unsigned long currentpos,
+                nextseparatorpos; /* only for equallength */
   bool startedonmiddle;
   GtEncseqReaderViatablesinfo *wildcardrangestate,
                               *ssptabnewstate;
@@ -1821,13 +1822,38 @@ static bool issinglepositioninspecialrangeViaequallength(const GtEncseq *encseq,
   return true;
 }
 
+static bool issinglepositioninseparatorViaequallength(GtEncseqReader *esr)
+{
+  if (esr->currentpos != esr->nextseparatorpos)
+  {
+   return false;
+  }
+  if (!GT_ISDIRREVERSE(esr->readmode))
+  {
+    esr->nextseparatorpos += (esr->encseq->equallength.valueunsignedlong + 1);
+    return true;
+  }
+  if (esr->nextseparatorpos > esr->encseq->equallength.valueunsignedlong)
+  {
+    esr->nextseparatorpos -= (esr->encseq->equallength.valueunsignedlong+1);
+    return true;
+  }
+  if (esr->nextseparatorpos == esr->encseq->equallength.valueunsignedlong)
+  {
+    esr->nextseparatorpos = 0;
+    return true;
+  }
+  gt_assert(esr->nextseparatorpos == 0);
+  return false;
+}
+
 static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
 {
   unsigned long twobits = EXTRACTENCODEDCHAR(esr->encseq->twobitencoding,
                                              esr->currentpos);
+
   if (twobits != (unsigned long) esr->encseq->leastprobablecharacter ||
-      !issinglepositioninspecialrangeViaequallength(esr->encseq,
-                                                    esr->currentpos))
+      !issinglepositioninseparatorViaequallength(esr))
   {
     return (GtUchar) twobits;
   }
@@ -1838,11 +1864,7 @@ static unsigned long gt_encseq_seqnum_Viaequallength(const GtEncseq *encseq,
                                                      unsigned long pos)
 {
   gt_assert(!issinglepositioninspecialrangeViaequallength(encseq,pos));
-  if (pos >= encseq->equallength.valueunsignedlong)
-  {
-    return (pos + 1)/(encseq->equallength.valueunsignedlong + 1);
-  }
-  return 0;
+  return (pos + 1)/(encseq->equallength.valueunsignedlong + 1);
 }
 
 static unsigned long gt_encseq_seqstartpos_Viaequallength(
@@ -2152,7 +2174,6 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
                                            GtReadmode readmode,
                                            unsigned long startpos)
 {
-
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq)
   {
@@ -2165,9 +2186,10 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   gt_assert(esr->encseq);
 
   /* translate reverse positions into forward positions */
-  startpos = GT_ISDIRREVERSE(readmode)
-               ? GT_REVERSEPOS(encseq->logicaltotallength, startpos)
-               : startpos;
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    startpos = GT_REVERSEPOS(encseq->logicaltotallength, startpos);
+  }
 
   /* if inside virtual mirror sequence, adjust start position and reading
      direction */
@@ -2267,6 +2289,34 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
     {
       gt_free(esr->ssptabnewstate);
       esr->ssptabnewstate = NULL;
+    }
+    if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+    {
+      if (issinglepositioninspecialrangeViaequallength(esr->encseq,startpos))
+      {
+        esr->nextseparatorpos = startpos;
+      } else
+      {
+        unsigned long seqnum = (startpos + 1)/
+                               (encseq->equallength.valueunsignedlong + 1);
+        if (!GT_ISDIRREVERSE(esr->readmode))
+        {
+          esr->nextseparatorpos = encseq->equallength.valueunsignedlong +
+                                  seqnum *
+                                  (encseq->equallength.valueunsignedlong + 1);
+        } else
+        {
+          if (seqnum > 0)
+          {
+            esr->nextseparatorpos = encseq->equallength.valueunsignedlong +
+                                    (seqnum-1) *
+                                    (encseq->equallength.valueunsignedlong + 1);
+          } else
+          {
+            esr->nextseparatorpos = 0;
+          }
+        }
+      }
     }
   }
 }
