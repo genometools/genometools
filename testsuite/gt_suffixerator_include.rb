@@ -99,9 +99,9 @@ all_fastafiles = ["Atinsert.fna",
                   "RandomN.fna",
                   "TTT-small.fna",
                   "trna_glutamine.fna",
-                  "awkward.fna",
-                  "awkward-small.fna",
-                  "atC99826.fna"]
+                  "Small.fna",
+                  "Verysmall.fna",
+                  "Arabidopsis-C99826.fna"]
 
 allfiles += all_fastafiles
 allfiles += (all_genbankfiles = all_fastafiles.collect{ |f|
@@ -114,8 +114,8 @@ allfiles += (all_emblfiles = all_fastafiles.collect{ |f|
 allmultifiles = []
 all_multifastafiles = ["Atinsert.fna",
                        "Duplicate.fna",
-                       "awkward.fna",
-                       "awkward-small.fna",
+                       "Small.fna",
+                       "Verysmall.fna",
                        "Random159.fna",
                        "Random160.fna"]
 

@@ -6194,6 +6194,67 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
   return haserr ? NULL : encseq;
 }
 
+static uint64_t encseq2pairbitsum(const GtEncseq *encseq)
+{
+  unsigned int idx, numofchars = gt_alphabet_num_of_chars(encseq->alpha);
+  uint64_t pairbitsum = 0;
+
+  for (idx = 0; idx < numofchars; idx++)
+  {
+    printf("idx=%u,add=%lu\n",idx,encseq->characterdistribution[idx]);
+    pairbitsum += (uint64_t) encseq->characterdistribution[idx] *
+                  (uint64_t) idx;
+  }
+  if (encseq->sat == GT_ACCESS_TYPE_BITACCESS)
+  {
+    printf("numofseparators=%lu\n",encseq->numofdbsequences - 1);
+    pairbitsum += (uint64_t) (encseq->numofdbsequences - 1) *
+                  (uint64_t) GT_TWOBITS_FOR_SEPARATOR;
+  } else
+  {
+    printf("specials=%lu,leastprob=%u\n",
+                gt_encseq_specialcharacters(encseq),
+                encseq->leastprobablecharacter);
+    pairbitsum += (uint64_t) gt_encseq_specialcharacters(encseq) *
+                  (uint64_t) encseq->leastprobablecharacter;
+  }
+  return pairbitsum;
+}
+
+void gt_encseq_faststream(const GtEncseq *encseq)
+{
+  if (encseq->twobitencoding != NULL)
+  {
+    GtTwobitencoding currentencoding = 0, mask = 0;
+    int shiftright = 0;
+    unsigned long pos, wordindex = 0;
+    uint64_t pairbitsum = 0, pairbitsumBF;
+
+    for (pos = 0; pos < encseq->totallength; pos++)
+    {
+      if (mask == 0)
+      {
+        currentencoding = encseq->twobitencoding[wordindex++];
+        mask = GT_FIRSTTWOBITS;
+        shiftright = GT_INTWORDSIZE-2;
+      }
+      pairbitsum += (uint64_t) ((currentencoding & mask) >> shiftright);
+      mask >>= 2;
+      shiftright -= 2;
+    }
+    printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
+    pairbitsumBF = encseq2pairbitsum(encseq);
+    if (pairbitsum != pairbitsumBF)
+    {
+      fprintf(stderr,"pairbitsum=" Formatuint64_t "!=" Formatuint64_t
+                     "=pairbitsumBF\n",
+                     PRINTuint64_tcast(pairbitsum),
+                     PRINTuint64_tcast(pairbitsumBF));
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+}
+
 static void runscanatpostrial(const GtEncseq *encseq,
                               GtEncseqReader *esr,
                               GtReadmode readmode,unsigned long startpos)
