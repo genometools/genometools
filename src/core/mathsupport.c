@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #include "core/ensure.h"
 #include "core/mathsupport.h"
-#include "core/yarandom.h"
+#include "core/yarandom.h" /* necessary to define random() correctly */
 
 #define GT_DBL_MAX_ABS_ERROR 1.0E-100
 #define GT_DBL_MAX_REL_ERROR 1.0E-8
