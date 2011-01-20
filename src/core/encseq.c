@@ -6225,25 +6225,32 @@ void gt_encseq_faststream(const GtEncseq *encseq)
 {
   if (encseq->twobitencoding != NULL)
   {
-    GtTwobitencoding currentencoding = 0, mask = 0;
-    int shiftright = 0;
+    GtTwobitencoding currentencoding = 0;
+    int shiftright = -2;
     unsigned long pos, wordindex = 0;
     uint64_t pairbitsum = 0, pairbitsumBF;
+    GtUchar cc, ccesr;
+    GtEncseqReader *esr;
 
+    esr = gt_encseq_create_reader_with_readmode(encseq,
+                                                GT_READMODE_FORWARD,
+                                                0);
     for (pos = 0; pos < encseq->totallength; pos++)
     {
-      if (mask == 0)
+      if (shiftright == -2)
       {
         currentencoding = encseq->twobitencoding[wordindex++];
-        mask = GT_FIRSTTWOBITS;
         shiftright = GT_INTWORDSIZE-2;
       }
-      pairbitsum += (uint64_t) ((currentencoding & mask) >> shiftright);
-      mask >>= 2;
+      cc = (GtUchar) (currentencoding >> shiftright) & 3;
+      ccesr = gt_encseq_reader_next_encoded_char(esr);
+      gt_assert(cc == ccesr || ISSPECIAL(ccesr));
       shiftright -= 2;
+      pairbitsum += (uint64_t) cc;
     }
     printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
     pairbitsumBF = encseq2pairbitsum(encseq);
+    gt_encseq_reader_delete(esr);
     if (pairbitsum != pairbitsumBF)
     {
       fprintf(stderr,"pairbitsum=" Formatuint64_t "!=" Formatuint64_t

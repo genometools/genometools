@@ -150,7 +150,6 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                          arguments->streamesq, NULL);
   gt_option_parser_add_option(op, optionstreamesq);
 
-
   gt_option_is_mandatory_either_3(optionesaindex,optionpckindex,
                                   optionstreamesq);
 
