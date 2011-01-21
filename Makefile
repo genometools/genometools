@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2011 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,13 @@
 #
 
 INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
+            -I$(CURDIR)/src/external/zlib-1.2.3 \
             -I$(CURDIR)/src/external/md5-1.1.2/src \
             -I$(CURDIR)/src/external/lua-5.1.4/src \
             -I$(CURDIR)/src/external/luafilesystem-1.4.1/src \
             -I$(CURDIR)/src/external/lpeg-0.9 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
+            -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/libtecla-1.6.1
 # these variables are exported by the configuration script
 ifndef CC
@@ -33,7 +35,7 @@ EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
-EXP_LDLIBS:=$(LIBS) -lm -lz -lbz2
+EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
@@ -77,6 +79,10 @@ else
   SHARED_OBJ_NAME_EXT:=.so
   SHARED:=-shared
 endif
+
+# libraries for which we build replacements (that also appear in dependencies)
+EXP_LDLIBS+=-lz -lbz2
+OVERRIDELIBS:=lib/libbz2.a
 
 # compiled executables
 GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
@@ -141,6 +147,13 @@ RNVMAIN_SRC:=$(RNV_DIR)/xcl.c
 RNVMAIN_OBJ:=$(RNVMAIN_SRC:%.c=obj/%.o)
 RNVMAIN_DEP:=$(RNVMAIN_SRC:%.c=obj/%.d)
 
+BZ2_DIR:=src/external/bzip2-1.0.6
+LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
+            $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
+            $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
+LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
+LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
+
 HMMER_BASE:=src/external/hmmer-3.0
 HMMER_DIR:=$(HMMER_BASE)/src
 HMMER_SRC:=$(HMMER_DIR)/emit.c $(HMMER_DIR)/build.c \
@@ -197,6 +210,14 @@ EASEL_SRC:=$(EASEL_DIR)/easel.c $(EASEL_DIR)/esl_randomseq.c \
            $(EASEL_DIR)/esl_normal.c $(EASEL_DIR)/esl_paml.c \
            $(EASEL_DIR)/esl_random.c
 EASEL_OBJ:=$(EASEL_SRC:%.c=%.o)
+
+ZLIB_DIR:=src/external/zlib-1.2.3
+ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
+          $(ZLIB_DIR)/gzio.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
+          $(ZLIB_DIR)/trees.c $(ZLIB_DIR)/zutil.c $(ZLIB_DIR)/inflate.c \
+          $(ZLIB_DIR)/infback.c $(ZLIB_DIR)/inftrees.c $(ZLIB_DIR)/inffast.c
+ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
+ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
 # the objects which are included into the single GenomeTools shared library
 GTSHAREDLIB_LIBDEP:=-lbz2 -lz
@@ -354,6 +375,7 @@ ifneq ($(cairo),no)
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
   STATIC_CAIRO_LIBS := -pthread -lfreetype -lpixman-1 -lpng -static -o $$@
 else
+  OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
 endif
@@ -407,6 +429,14 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libbz2.a: $(LIBBZ2_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBBZ2_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 $(HMMER_OBJ) $(EASEL_OBJ): hmmerlibs
 
 # HMMER libs must be built with -fPIC to support shared libs on AMD64
@@ -415,6 +445,14 @@ hmmerlibs: hmmer_get
 	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fomit-frame-pointer\ -fPIC\ $(HMMER_CFLAGS) \
 	   ./configure -q --enable-threads > /dev/null)
 	@$(MAKE) -s -C $(HMMER_BASE) > /dev/null
+
+lib/libz.a: $(ZLIB_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(ZLIB_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
 
 lib/libgenometools.a: obj/gt_config.h  $(LIBGENOMETOOLS_OBJ)
 	@echo "[link $(@F)]"
@@ -425,7 +463,8 @@ ifdef RANLIB
 endif
 
 lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
-                                          $(LIBGENOMETOOLS_OBJ)
+                                          $(LIBGENOMETOOLS_OBJ) lib/libbz2.a \
+                                          lib/libz.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
@@ -451,49 +490,57 @@ define PROGRAM_template
 $(1): $(2)
 	@echo "[link $$(@F)]"
 	@test -d $$(@D) || mkdir -p $$(@D)
-	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$^ $$(EXP_LDLIBS) -o $$@
+	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
+	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
 
 $(1)_static: $(2)
 	@echo "[link $$(@F)]"
 	@test -d $$(@D) || mkdir -p $$(@D)
-	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$^ $$(EXP_LDLIBS) \
-          $$(STATIC_CAIRO_LIBS) -static -o $$@
+	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
+	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) $$(STATIC_CAIRO_LIBS) -static -o $$@
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
-                                             lib/libgenometools.a))
+                                             lib/libgenometools.a\
+                                             $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
-                                        $(GTLIBS)))
+                                        $(GTLIBS) \
+                                        $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/custom_stream, \
                                 obj/src/examples/custom_stream.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3validator, \
                                 obj/src/examples/gff3validator.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/noop, \
                                 obj/src/examples/noop.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a \
+                                $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
                                 obj/src/examples/sketch_constructed.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
                                 obj/src/examples/sketch_parsed.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
                                 obj/src/examples/sketch_parsed_with_ctrack.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
                                 obj/src/examples/sketch_parsed_with_ordering.o \
-                                lib/libgenometools.a))
+                                lib/libgenometools.a $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
@@ -596,7 +643,7 @@ $(1): $(2)
 	@echo "[compile $$(@F)]"
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
-	  $$(GT_CFLAGS) $(3)
+	  $$(GT_CFLAGS) $(3) 
 	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) \
         $(3) -MM -MP -MT $$@
 endef
@@ -630,7 +677,9 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 	 $(LIBTECLA_DEP) \
 	 $(LIBRNV_DEP) \
 	 $(RNVMAIN_DEP) \
+	 $(LIBBZ2_DEP) \
          $(HMMER_DEP) \
+	 $(ZLIB_DEP) \
          $(LIBGENOMETOOLS_DEP) \
          obj/src/examples/custom_stream.d \
          obj/src/examples/gff3validator.d \
