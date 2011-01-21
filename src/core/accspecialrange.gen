@@ -781,11 +781,11 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
 
 static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
 {
-  GtUchar cc;
+  GtUchar cc = 0;
   bool defined = false;
 
   /* it is important that both calls of checknextSW are done to
-     correctly maintan the corresponding swstates */
+     correctly maintain the corresponding swstates */
 
   if (esr->encseq->numofdbsequences > 1UL &&
       GT_APPENDINT(checknextSW)(esr,SWtable_ssptabnew))
