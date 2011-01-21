@@ -6221,43 +6221,93 @@ static uint64_t encseq2pairbitsum(const GtEncseq *encseq)
   return pairbitsum;
 }
 
-void gt_encseq_faststream(const GtEncseq *encseq)
+typedef struct
+{
+  int shiftright;
+  unsigned long wordindex;
+  GtTwobitencoding currentencoding;
+} Bitstreamreadstate;
+
+#define BSRS_INIT(BSRS)\
+        (BSRS).shiftright = -2;\
+        (BSRS).wordindex = 0;\
+        (BSRS).currentencoding = 0
+
+#define BSRS_NEXT(CC,BSRS)\
+        if ((BSRS).shiftright == -2)\
+        {\
+          (BSRS).currentencoding = encseq->twobitencoding[(BSRS).wordindex++];\
+          (BSRS).shiftright = GT_INTWORDSIZE-2;\
+        }\
+        (CC) = (GtUchar) ((BSRS).currentencoding >> (BSRS).shiftright) & 3;\
+        (BSRS).shiftright -= 2
+
+typedef enum
+{
+  BSRS_onlystream,
+  BSRS_onlyencseqreader,
+  BSRS_stream_encseqreader
+} Bitstreamreadmode;
+
+void gt_encseq_faststream(const GtEncseq *encseq,int mode)
 {
   if (encseq->twobitencoding != NULL)
   {
-    GtTwobitencoding currentencoding = 0;
-    int shiftright = -2;
-    unsigned long pos, wordindex = 0;
+    unsigned long pos;
     uint64_t pairbitsum = 0, pairbitsumBF;
     GtUchar cc, ccesr;
-    GtEncseqReader *esr;
+    GtEncseqReader *esr = NULL;
+    Bitstreamreadstate bsrs;
+    Bitstreamreadmode bsrsmode;
 
-    esr = gt_encseq_create_reader_with_readmode(encseq,
-                                                GT_READMODE_FORWARD,
-                                                0);
-    for (pos = 0; pos < encseq->totallength; pos++)
+    gt_assert(mode >= 0 && mode <= 2);
+    bsrsmode = (Bitstreamreadmode) mode;
+    BSRS_INIT(bsrs);
+    if (bsrsmode == BSRS_onlyencseqreader ||
+        bsrsmode == BSRS_stream_encseqreader)
     {
-      if (shiftright == -2)
-      {
-        currentencoding = encseq->twobitencoding[wordindex++];
-        shiftright = GT_INTWORDSIZE-2;
-      }
-      cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      ccesr = gt_encseq_reader_next_encoded_char(esr);
-      gt_assert(cc == ccesr || ISSPECIAL(ccesr));
-      shiftright -= 2;
-      pairbitsum += (uint64_t) cc;
+      esr = gt_encseq_create_reader_with_readmode(encseq,
+                                                  GT_READMODE_FORWARD,
+                                                  0);
     }
-    printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
-    pairbitsumBF = encseq2pairbitsum(encseq);
-    gt_encseq_reader_delete(esr);
-    if (pairbitsum != pairbitsumBF)
+    switch (bsrsmode)
     {
-      fprintf(stderr,"pairbitsum=" Formatuint64_t "!=" Formatuint64_t
-                     "=pairbitsumBF\n",
-                     PRINTuint64_tcast(pairbitsum),
-                     PRINTuint64_tcast(pairbitsumBF));
-      exit(GT_EXIT_PROGRAMMING_ERROR);
+      case BSRS_onlystream:
+        for (pos = 0; pos < encseq->totallength; pos++)
+        {
+          BSRS_NEXT(cc,bsrs);
+          pairbitsum += (uint64_t) cc;
+        }
+        break;
+      case BSRS_onlyencseqreader:
+        for (pos = 0; pos < encseq->totallength; pos++)
+        {
+          ccesr = gt_encseq_reader_next_encoded_char(esr);
+        }
+        break;
+      case BSRS_stream_encseqreader:
+        for (pos = 0; pos < encseq->totallength; pos++)
+        {
+          BSRS_NEXT(cc,bsrs);
+          pairbitsum += (uint64_t) cc;
+          ccesr = gt_encseq_reader_next_encoded_char(esr);
+          gt_assert(cc == ccesr || ISSPECIAL(ccesr));
+        }
+        break;
+    }
+    gt_encseq_reader_delete(esr);
+    if (bsrsmode == BSRS_onlystream)
+    {
+      printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
+      pairbitsumBF = encseq2pairbitsum(encseq);
+      if (pairbitsum != pairbitsumBF)
+      {
+        fprintf(stderr,"pairbitsum=" Formatuint64_t "!=" Formatuint64_t
+                       "=pairbitsumBF\n",
+                       PRINTuint64_tcast(pairbitsum),
+                       PRINTuint64_tcast(pairbitsumBF));
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
     }
   }
 }

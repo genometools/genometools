@@ -19,6 +19,7 @@
 #include "core/logger.h"
 #include "core/option.h"
 #include "core/encseq_metadata.h"
+#include "core/str_array_api.h"
 #include "match/echoseq.h"
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
@@ -45,8 +46,8 @@ typedef struct
                 multicharcmptrials,
                 delspranges;
   GtStr *esaindexname,
-        *pckindexname,
-        *streamesq;
+        *pckindexname;
+  GtStrArray *streamesq;
 } Sfxmapoptions;
 
 static void deletethespranges(const GtEncseq *encseq,
@@ -103,7 +104,7 @@ static void *gt_sfxmap_arguments_new(void)
   arguments = gt_malloc(sizeof (*arguments));
   arguments->esaindexname = gt_str_new();
   arguments->pckindexname = gt_str_new();
-  arguments->streamesq = gt_str_new();
+  arguments->streamesq = gt_str_array_new();
   return arguments;
 }
 
@@ -115,7 +116,7 @@ static void gt_sfxmap_arguments_delete(void *tool_arguments)
   {
     gt_str_delete(arguments->esaindexname);
     gt_str_delete(arguments->pckindexname);
-    gt_str_delete(arguments->streamesq);
+    gt_str_array_delete(arguments->streamesq);
     gt_free(arguments);
   }
 }
@@ -145,9 +146,9 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                         arguments->pckindexname, NULL);
   gt_option_parser_add_option(op, optionpckindex);
 
-  optionstreamesq = gt_option_new_string("stream-esq",
-                                         "Stream the encoded sequence",
-                                         arguments->streamesq, NULL);
+  optionstreamesq = gt_option_new_stringarray("stream-esq",
+                                              "Stream the encoded sequence",
+                                              arguments->streamesq);
   gt_option_parser_add_option(op, optionstreamesq);
 
   gt_option_is_mandatory_either_3(optionesaindex,optionpckindex,
@@ -752,19 +753,42 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtError *err)
   return haserr ? -1 : 0;
 }
 
-static int stream_esq(GT_UNUSED const Sfxmapoptions *arguments,
-                      GT_UNUSED GtError *err)
+static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
 {
-  GtEncseqLoader *el = gt_encseq_loader_new();
-  GtEncseq *encseq;
+  GtEncseqLoader *el = NULL;
+  GtEncseq *encseq = NULL;
   bool haserr = false;
+  int mode = 0;
 
-  encseq = gt_encseq_loader_load(el, gt_str_get(arguments->streamesq),err);
-  if (encseq == NULL)
+  if (gt_str_array_size(arguments->streamesq) != 2UL)
   {
+    gt_error_set(err,"option -streamesq requires exaclty two arguments");
     haserr = true;
   }
-  gt_encseq_faststream(encseq);
+  if (!haserr)
+  {
+    if (sscanf(gt_str_array_get(arguments->streamesq,1UL),"%d",&mode) != 1 ||
+        mode < 0 || mode >= 3)
+    {
+      gt_error_set(err,"option -streamesq requires second argument to be "
+                       "either 0, 1, 2");
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    el = gt_encseq_loader_new();
+    encseq = gt_encseq_loader_load(el, gt_str_array_get(arguments->streamesq,0),
+                                   err);
+    if (encseq == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    gt_encseq_faststream(encseq,mode);
+  }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
   return haserr ? -1 : 0;
@@ -793,7 +817,7 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  if (!haserr && gt_str_length(arguments->streamesq) > 0)
+  if (!haserr && gt_str_array_size(arguments->streamesq) > 0)
   {
     if (stream_esq(arguments,err) != 0)
     {
