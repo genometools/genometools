@@ -1579,7 +1579,8 @@ static void gt_ltrharvest_stream_free(GtNodeStream *gs)
 {
   GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(gs);
   GT_FREEARRAY(&ltrh_stream->arrayLTRboundaries, LTRboundaries);
-  gt_freeSequentialsuffixarrayreader(&ltrh_stream->ssar);
+  if (ltrh_stream->ssar != NULL)
+    gt_freeSequentialsuffixarrayreader(&ltrh_stream->ssar);
   if (ltrh_stream->bdptrtab != NULL)
     gt_free(ltrh_stream->bdptrtab);
 }
@@ -1647,6 +1648,8 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
   ltrh_stream->vicinityforcorrectboundaries = vicinity;
   ltrh_stream->cur_elem_index = 0;
   ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_START;
+  /* init array for maximal repeats */
+  GT_INITARRAY(&ltrh_stream->arrayLTRboundaries, LTRboundaries);
 
   ltrh_stream->ssar =
     gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(str_indexname),
@@ -1655,6 +1658,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                                 SARR_SSPTAB | SARR_SDSTAB,
                                                 SEQ_mappedboth,
                                                 err);
+
   if (ltrh_stream->ssar == NULL)
   {
     gt_node_stream_delete(gs);
@@ -1669,9 +1673,6 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
     gt_node_stream_delete(gs);
     return NULL;
   }
-
-  /* init array for maximal repeats */
-  GT_INITARRAY(&ltrh_stream->arrayLTRboundaries, LTRboundaries);
 
   return had_err ? NULL : gs;
 }

@@ -268,6 +268,31 @@ Test do
            " -gff3 out.gff3"
 end
 
+Name "gt ltrharvest missing tables (lcp)"
+Keywords "gt_ltrharvest"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -sds -tis -des -ssp"
+  run_test "#{$bin}gt ltrharvest -index Random.fna", :retval => 1
+  grep($last_stderr, "cannot open file \"Random.fna.lcp\"")
+end
+
+Name "gt ltrharvest missing tables (suf)"
+Keywords "gt_ltrharvest"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random159.fna -dna -ssp -sds -tis -des -lcp"
+  run_test "#{$bin}gt ltrharvest -index Random159.fna", :retval => 1
+  grep($last_stderr, "cannot open file \"Random159.fna.suf\"")
+end
+
+Name "gt ltrharvest missing tables (des)"
+Keywords "gt_ltrharvest"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random159.fna -dna -ssp -sds -tis -lcp -suf -des"
+  File.unlink("Random159.fna.des")
+  run_test "#{$bin}gt ltrharvest -index Random159.fna", :retval => 1
+  grep($last_stderr, "cannot open file \"Random159.fna.des\"")
+end
+
 # test all combinations of options, test only some of them
 outlist = (["-seed 100",
             "-minlenltr 100",# "-maxlenltr 1000",
