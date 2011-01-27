@@ -30,7 +30,7 @@
   the actual strand). The elements of the tree rooted at <rootEST> are
   primarily ordered according to their reference ids. This tree is used to
   ensure that no alignment which ``spans'' another alignment (according to the
-  function spancheckGthSA()) is inserted into the trees.
+  function spancheckSA()) is inserted into the trees.
 */
 struct GthSACollection {
   GtRBTnode *rootlist,
@@ -67,7 +67,7 @@ typedef enum
   The other way around REPLACE is returned. If none of the both spans the other
   NOSPAN is returned;
 */
-static Spancheck spancheckGthSA(GthSA *saA, GthSA *saB)
+static Spancheck spancheckSA(GthSA *saA, GthSA *saB)
 {
   GtRange rangeA, rangeB;
 
@@ -169,7 +169,7 @@ static int compareGthSA(const GtKeytype dataA, const GtKeytype dataB,
       (rval == 0) &&
       (gth_sa_gen_strand_forward(saA) == gth_sa_gen_strand_forward(saB)) &&
       (gth_sa_ref_strand_forward(saA) == gth_sa_ref_strand_forward(saB))) {
-    action = spancheckGthSA(saA, saB);
+    action = spancheckSA(saA, saB);
     if (action == DISCARD)
       return 0;
     gt_assert(action != REPLACE);
@@ -282,7 +282,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     alignmentstodelete = gt_array_new(sizeof (GthSA*));
 
     /* check the actual one */
-    action = spancheckGthSA(saA, saB);
+    action = spancheckSA(saA, saB);
     switch (action) {
       case NOSPAN:
         /* nothing to do */
@@ -306,7 +306,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
            (!compareaccordingtoreferenceid(saB, spliced_alignmentptr, NULL))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
          check if it spans saB */
-      action = spancheckGthSA(spliced_alignmentptr, saB);
+      action = spancheckSA(spliced_alignmentptr, saB);
       switch (action) {
         case NOSPAN:
           /* nothing to do */
@@ -336,7 +336,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
            (!compareaccordingtoreferenceid(saB, spliced_alignmentptr, NULL))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
          check if it spans saB */
-      action = spancheckGthSA(spliced_alignmentptr, saB);
+      action = spancheckSA(spliced_alignmentptr, saB);
       switch (action) {
         case NOSPAN:
           /* nothing to do */
