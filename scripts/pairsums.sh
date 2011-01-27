@@ -7,7 +7,7 @@ suffixerator()
 
 allmodes()
 {
-  for mode in 0 1 2
+  for mode in stream_single reader_single stream_reader_single
   do
     bin/gt dev sfxmap -stream-esq esa ${mode}
   done

@@ -6229,27 +6229,66 @@ typedef struct
 } Bitstreamreadstate;
 
 #define BSRS_INIT(BSRS)\
-        (BSRS).shiftright = -2;\
+        (BSRS).shiftright = 0;\
         (BSRS).wordindex = 0;\
         (BSRS).currentencoding = 0
 
 #define BSRS_NEXT(CC,BSRS)\
-        if ((BSRS).shiftright == -2)\
+        if ((BSRS).shiftright > 0)\
+        {\
+          (BSRS).shiftright -= 2;\
+        } else\
         {\
           (BSRS).currentencoding = encseq->twobitencoding[(BSRS).wordindex++];\
           (BSRS).shiftright = GT_INTWORDSIZE-2;\
         }\
-        (CC) = (GtUchar) ((BSRS).currentencoding >> (BSRS).shiftright) & 3;\
-        (BSRS).shiftright -= 2
+        (CC) = (GtUchar) ((BSRS).currentencoding >> (BSRS).shiftright) & 3
 
-typedef enum
+void gt_encseq_faststream_kmers(const GtEncseq *encseq,
+                                unsigned int prefixlength)
 {
-  BSRS_onlystream,
-  BSRS_onlyencseqreader,
-  BSRS_stream_encseqreader
-} Bitstreamreadmode;
+  unsigned long pos, wordindex;
+  GtTwobitencoding currentencoding;
+  unsigned int unitoffset = 0, shiftleft;
+  GtCodetype kmer;
+  const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(prefixlength))-1;
 
-void gt_encseq_faststream(const GtEncseq *encseq,int mode)
+  gt_assert(prefixlength < (unsigned int) GT_UNITSIN2BITENC );
+  if (encseq->totallength < (unsigned long) prefixlength)
+  {
+    return;
+  }
+  currentencoding = encseq->twobitencoding[0];
+  wordindex = 0;
+  for (pos = 0; pos < encseq->totallength - (unsigned long) prefixlength + 1;
+       pos++)
+  {
+    if (unitoffset < (unsigned int) GT_UNITSIN2BITENC - prefixlength)
+    {
+      kmer = (GtCodetype)
+             (currentencoding >>
+              GT_MULT2(GT_UNITSIN2BITENC-prefixlength-unitoffset)) & maskright;
+    } else
+    {
+      shiftleft = unitoffset + prefixlength - (unsigned int) GT_UNITSIN2BITENC;
+      kmer = (GtCodetype)
+             ((currentencoding << GT_MULT2(shiftleft)) |
+              (encseq->twobitencoding[wordindex] >>
+               GT_MULT2(GT_UNITSIN2BITENC-shiftleft))) & maskright;
+    }
+    if (unitoffset < (unsigned int) GT_UNITSIN2BITENC-1)
+    {
+      unitoffset++;
+    } else
+    {
+      unitoffset = 0;
+      currentencoding = encseq->twobitencoding[wordindex++];
+    }
+  }
+}
+
+void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
+                          unsigned int multiarg)
 {
   if (encseq->twobitencoding != NULL)
   {
@@ -6258,13 +6297,10 @@ void gt_encseq_faststream(const GtEncseq *encseq,int mode)
     GtUchar cc, ccesr;
     GtEncseqReader *esr = NULL;
     Bitstreamreadstate bsrs;
-    Bitstreamreadmode bsrsmode;
 
-    gt_assert(mode >= 0 && mode <= 2);
-    bsrsmode = (Bitstreamreadmode) mode;
     BSRS_INIT(bsrs);
-    if (bsrsmode == BSRS_onlyencseqreader ||
-        bsrsmode == BSRS_stream_encseqreader)
+    if (bsrsmode == BSRS_reader_single ||
+        bsrsmode == BSRS_stream_reader_single)
     {
       esr = gt_encseq_create_reader_with_readmode(encseq,
                                                   GT_READMODE_FORWARD,
@@ -6272,20 +6308,20 @@ void gt_encseq_faststream(const GtEncseq *encseq,int mode)
     }
     switch (bsrsmode)
     {
-      case BSRS_onlystream:
+      case BSRS_stream_single:
         for (pos = 0; pos < encseq->totallength; pos++)
         {
           BSRS_NEXT(cc,bsrs);
           pairbitsum += (uint64_t) cc;
         }
         break;
-      case BSRS_onlyencseqreader:
+      case BSRS_reader_single:
         for (pos = 0; pos < encseq->totallength; pos++)
         {
           ccesr = gt_encseq_reader_next_encoded_char(esr);
         }
         break;
-      case BSRS_stream_encseqreader:
+      case BSRS_stream_reader_single:
         for (pos = 0; pos < encseq->totallength; pos++)
         {
           BSRS_NEXT(cc,bsrs);
@@ -6294,9 +6330,12 @@ void gt_encseq_faststream(const GtEncseq *encseq,int mode)
           gt_assert(cc == ccesr || ISSPECIAL(ccesr));
         }
         break;
+      case BSRS_stream_multi:
+        gt_encseq_faststream_kmers(encseq,multiarg);
+        break;
     }
     gt_encseq_reader_delete(esr);
-    if (bsrsmode == BSRS_onlystream)
+    if (bsrsmode == BSRS_stream_single)
     {
       printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
       pairbitsumBF = encseq2pairbitsum(encseq);

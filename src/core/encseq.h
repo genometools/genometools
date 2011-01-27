@@ -409,6 +409,15 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
 /* the following function returns a count value */
 unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
 
-void gt_encseq_faststream(const GtEncseq *encseq,int mode);
+typedef enum
+{
+  BSRS_stream_single,
+  BSRS_reader_single,
+  BSRS_stream_reader_single,
+  BSRS_stream_multi
+} Bitstreamreadmode;
+
+void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
+                          unsigned int multiarg);
 
 #endif

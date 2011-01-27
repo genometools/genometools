@@ -758,20 +758,61 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
   bool haserr = false;
-  int mode = 0;
+  Bitstreamreadmode brsmode = BSRS_stream_single;
+  int multiarg = 0;
+  unsigned long streamesq_size = gt_str_array_size(arguments->streamesq);
 
-  if (gt_str_array_size(arguments->streamesq) != 2UL)
+  if (streamesq_size == 2UL)
   {
-    gt_error_set(err,"option -streamesq requires exaclty two arguments");
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    if (sscanf(gt_str_array_get(arguments->streamesq,1UL),"%d",&mode) != 1 ||
-        mode < 0 || mode >= 3)
+    if (strcmp(gt_str_array_get(arguments->streamesq,1UL),"stream_single") == 0)
     {
-      gt_error_set(err,"option -streamesq requires second argument to be "
-                       "either 0, 1, 2");
+      brsmode = BSRS_stream_single;
+    } else
+    {
+      if (strcmp(gt_str_array_get(arguments->streamesq,1UL),"reader_single")
+          == 0)
+      {
+        brsmode = BSRS_reader_single;
+      } else
+      {
+        if (strcmp(gt_str_array_get(arguments->streamesq,1UL),
+                   "stream_reader_single") == 0)
+        {
+          brsmode = BSRS_stream_reader_single;
+        } else
+        {
+          gt_error_set(err,"if option -streamesq has two arguments then "
+                           "these must be one of stream_single reader_single "
+                           "stream_reader_single");
+          haserr = true;
+        }
+      }
+    }
+  } else
+  {
+    if (streamesq_size == 3UL)
+    {
+      if (strcmp(gt_str_array_get(arguments->streamesq,1UL),
+                 "stream_multi") == 0)
+      {
+        brsmode = BSRS_stream_multi;
+        if (sscanf(gt_str_array_get(arguments->streamesq,2UL),"%d",&multiarg)
+            != 1 || multiarg < 1)
+        {
+          gt_error_set(err,"if option -streamesq has second argument "
+                           "stream_multi, then third argument must be "
+                           "positive integer");
+          haserr = true;
+        }
+      } else
+      {
+        gt_error_set(err,"if option -streamesq has two arguments then the "
+                         "second must be stream_multi");
+        haserr = true;
+      }
+    } else
+    {
+      gt_error_set(err,"option -streamesq must have two or three arguments");
       haserr = true;
     }
   }
@@ -787,7 +828,8 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
   }
   if (!haserr)
   {
-    gt_encseq_faststream(encseq,mode);
+    gt_assert(multiarg >= 0);
+    gt_encseq_faststream(encseq,brsmode,(unsigned int) multiarg);
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
