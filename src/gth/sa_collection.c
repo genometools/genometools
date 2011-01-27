@@ -63,9 +63,8 @@ typedef enum
 /*
   The following function checks if one of the two GthSA
   structures spans the other. This is checked on the basis of the left and
-  right genomic border. If <saA> is included in
-  <saB>, DISCARD is returned. The other way
-  around REPLACE is returned. If none of the both spans the other
+  right genomic border. If <saB> is included in <saA>, DISCARD is returned.
+  The other way around REPLACE is returned. If none of the both spans the other
   NOSPAN is returned;
 */
 static Spancheck spancheckGthSA(GthSA *saA, GthSA *saB)
@@ -75,11 +74,11 @@ static Spancheck spancheckGthSA(GthSA *saA, GthSA *saB)
   rangeA = gth_sa_range_forward(saA);
   rangeB = gth_sa_range_forward(saB);
 
-  if ((rangeA.start  <= rangeB.start) && (rangeA.end >= rangeB.end)) {
+  if ((rangeA.start <= rangeB.start) && (rangeA.end >= rangeB.end)) {
     /* discard saB */
     return DISCARD;
   }
-  if ((rangeA.start  >= rangeB.start) && (rangeA.end <= rangeB.end)) {
+  if ((rangeA.start >= rangeB.start) && (rangeA.end <= rangeB.end)) {
     /* replace saA by saB */
     return REPLACE;
   }
@@ -254,8 +253,7 @@ static void insertalignmentintobothtrees(GthSACollection *sa_collection,
 bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
                                  GthSAFilter *sa_filter, GthStat *stat)
 {
-  GthSA *saA   = NULL,
-                      *spliced_alignmentptr = NULL, *satodel;
+  GthSA *saA = NULL, *spliced_alignmentptr = NULL, *satodel;
   Spancheck action;
   GtArray *alignmentstodelete;
   bool discard = false,
