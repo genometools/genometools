@@ -26,6 +26,6 @@ typedef struct GtMD5ToSeqidsVisitor GtMD5ToSeqidsVisitor;
 const GtNodeVisitorClass* gt_md5_to_id_visitor_class(void);
 /* Takes ownership of <region_mapping>. */
 GtNodeVisitor*            gt_md5_to_id_visitor_new(GtRegionMapping
-                                                       *region_mapping);
+                                                   *region_mapping);
 
 #endif
