@@ -1,6 +1,7 @@
 changes in version 1.3.7 (2011-01-27)
 
 - bugfixes and cleanup
+- `gt suffixerator` now creates ssp/des/sds tables by default
 
 
 changes in version 1.3.6 (2011-01-07)
