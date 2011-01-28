@@ -193,6 +193,46 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
+<h2>Sole functions</h2>
+<a name="gt_lib_init"></a>
+
+<code>void  gt_lib_init(void)</code>
+<p>
+Initialize this GenomeTools instance.
+   This has to be called before the library is used!
+</p>
+<hr>
+<a name="gt_lib_reg_atexit_func"></a>
+
+<code>void  gt_lib_reg_atexit_func(void)</code>
+<p>
+registers exit function which calls <code>gt_lib_clean()</code>
+</p>
+<hr>
+<a name="gt_lib_clean"></a>
+
+<code>int   gt_lib_clean(void)</code>
+<p>
+returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise
+</p>
+<hr>
+<a name="gt_readmode_show"></a>
+
+<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
+<p>
+Returns the descriptive string for the readmode <code>readmode</code>.
+</p>
+<hr>
+<a name="gt_readmode_parse"></a>
+
+<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
+<p>
+Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
+   -1 is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
 <a name="GtAlphabet"></a>
 <h2>Class GtAlphabet</h2>
 
@@ -1938,6 +1978,13 @@ Sets <code>pt</code> to be the progress timer for <code>ee</code>. Default is NU
    reporting).
 </p>
 <hr>
+<a name="gt_encseq_encoder_get_progresstimer"></a>
+
+<code>GtProgressTimer*  gt_encseq_encoder_get_progresstimer(const GtEncseqEncoder *ee)</code>
+<p>
+Returns the progress timer set for <code>ee</code>.
+</p>
+<hr>
 <a name="gt_encseq_encoder_use_representation"></a>
 
 <code>int               gt_encseq_encoder_use_representation(GtEncseqEncoder *ee,
@@ -1947,6 +1994,13 @@ Sets <code>pt</code> to be the progress timer for <code>ee</code>. Default is NU
 Sets the representation of <code>ee</code> to <code>sat</code> which must be one of 'direct',
    'bytecompress', 'bit', 'uchar', 'ushort' or 'uint32'. Returns 0 on success,
    and a negative value on error (<code>err</code> is set accordingly).
+</p>
+<hr>
+<a name="gt_encseq_encoder_representation"></a>
+
+<code>GtStr*            gt_encseq_encoder_representation(const GtEncseqEncoder *ee)</code>
+<p>
+Returns the representation requested for <code>ee</code>.
 </p>
 <hr>
 <a name="gt_encseq_encoder_use_symbolmap_file"></a>
@@ -1959,6 +2013,13 @@ Sets the symbol map file to use in <code>ee</code> to <code>smap</code> which mu
    alphabet description file. Returns 0 on success, and a negative value on
    error (<code>err</code> is set accordingly). Default is NULL (no alphabet
    transformation).
+</p>
+<hr>
+<a name="gt_encseq_encoder_symbolmap_file"></a>
+
+<code>const char*       gt_encseq_encoder_symbolmap_file(const GtEncseqEncoder *ee)</code>
+<p>
+Returns the symbol map file requested for <code>ee</code>.
 </p>
 <hr>
 <a name="gt_encseq_encoder_set_logger"></a>
@@ -2015,6 +2076,26 @@ Disables support for random access to multiple sequences in the encoded
    <code>gt_encseq_loader_require_multiseq_support()</code> enabled.
 </p>
 <hr>
+<a name="gt_encseq_encoder_enable_lossless_support"></a>
+
+<code>void  gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee)</code>
+<p>
+Enables support for lossless reproduction of the original sequence,
+   regardless of alphabet transformations that may apply. Deactivated by
+   default.
+</p>
+<hr>
+<a name="gt_encseq_encoder_disable_lossless_support"></a>
+
+<code>void  gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder *ee)</code>
+<p>
+Enables support for lossless reproduction of the original sequence,
+   regardless of alphabet transformations that may apply. Encoded sequences
+   created without this support will not be able to be loaded via a
+   <code>GtEncseqLoader</code> with <code>gt_encseq_loader_require_lossless_support()</code>
+   enabled.
+</p>
+<hr>
 <a name="gt_encseq_encoder_create_des_tab"></a>
 
 <code>void              gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee)</code>
@@ -2028,6 +2109,14 @@ Enables creation of the .des table containing sequence descriptions.
 <code>void              gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee)</code>
 <p>
 Disables creation of the .des table.
+</p>
+<hr>
+<a name="gt_encseq_encoder_des_tab_requested"></a>
+
+<code>bool              gt_encseq_encoder_des_tab_requested(const GtEncseqEncoder *ee)</code>
+<p>
+Returns TRUE if the creation of the .des table has been requested,
+   FALSE otherwise.
 </p>
 <hr>
 <a name="gt_encseq_encoder_create_ssp_tab"></a>
@@ -2045,6 +2134,14 @@ Enables creation of the .ssp table containing indexes for multiple sequences.
 Disables creation of the .ssp table.
 </p>
 <hr>
+<a name="gt_encseq_encoder_ssp_tab_requested"></a>
+
+<code>bool              gt_encseq_encoder_ssp_tab_requested(const GtEncseqEncoder *ee)</code>
+<p>
+Returns TRUE if the creation of the .ssp table has been requested,
+   FALSE otherwise.
+</p>
+<hr>
 <a name="gt_encseq_encoder_create_sds_tab"></a>
 
 <code>void              gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee)</code>
@@ -2060,6 +2157,14 @@ Enables creation of the .sds table containing indexes for sequence
 Disables creation of the .sds table.
 </p>
 <hr>
+<a name="gt_encseq_encoder_sds_tab_requested"></a>
+
+<code>bool              gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee)</code>
+<p>
+Returns TRUE if the creation of the .sds table has been requested,
+   FALSE otherwise.
+</p>
+<hr>
 <a name="gt_encseq_encoder_set_input_dna"></a>
 
 <code>void              gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee)</code>
@@ -2067,11 +2172,25 @@ Disables creation of the .sds table.
 Sets the sequence input type for <code>ee</code> to DNA.
 </p>
 <hr>
+<a name="gt_encseq_encoder_is_input_dna"></a>
+
+<code>bool              gt_encseq_encoder_is_input_dna(GtEncseqEncoder *ee)</code>
+<p>
+Returns TRUE if the input sequence has been defined as being DNA.
+</p>
+<hr>
 <a name="gt_encseq_encoder_set_input_protein"></a>
 
 <code>void              gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee)</code>
 <p>
 Sets the sequence input type for <code>ee</code> to protein/amino acids.
+</p>
+<hr>
+<a name="gt_encseq_encoder_is_input_protein"></a>
+
+<code>bool              gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee)</code>
+<p>
+Returns TRUE if the input sequence has been defined as being protein.
 </p>
 <hr>
 <a name="gt_encseq_encoder_encode"></a>
@@ -2152,6 +2271,29 @@ Disables support for random access to multiple sequences in the encoded
    the <code>GtEncseq</code> object created by <code>el</code>.
 </p>
 <hr>
+<a name="gt_encseq_loader_require_lossless_support"></a>
+
+<code>void  gt_encseq_loader_require_lossless_support(GtEncseqLoader *el)</code>
+<p>
+Enables support for lossless reproduction of the original sequence
+   in the encoded sequence to be loaded by <code>el</code>. That is, the .ois table
+   must be present.
+   For example, this table is created by having enabled the
+   <code>gt_encseq_encoder_enable_lossless_support()</code> option when encoding.
+   Deactivated by default.
+</p>
+<hr>
+<a name="gt_encseq_loader_drop_lossless_support"></a>
+
+<code>void  gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el)</code>
+<p>
+Disables support for lossless reproduction of the original sequence
+   in the encoded sequence to be loaded by <code>el</code>. That is, the .ois table
+   needs not be present.
+   However, disabling this support may result in a reduced alphabet
+   representation when accessing decoded characters.
+</p>
+<hr>
 <a name="gt_encseq_loader_require_des_tab"></a>
 
 <code>void              gt_encseq_loader_require_des_tab(GtEncseqLoader *el)</code>
@@ -2166,6 +2308,13 @@ Requires presence of the .des table containing sequence descriptions.
 <p>
 Disables requirement of the .des table for loading a <code>GtEncseq</code>
    using <code>el</code>.
+</p>
+<hr>
+<a name="gt_encseq_loader_des_tab_required"></a>
+
+<code>bool              gt_encseq_loader_des_tab_required(const GtEncseqLoader *el)</code>
+<p>
+Returns TRUE if a .des table must be present for loading to succeed.
 </p>
 <hr>
 <a name="gt_encseq_loader_require_ssp_tab"></a>
@@ -2184,6 +2333,13 @@ Disables requirement of the .ssp table for loading a <code>GtEncseq</code>
    using <code>el</code>.
 </p>
 <hr>
+<a name="gt_encseq_loader_ssp_tab_required"></a>
+
+<code>bool              gt_encseq_loader_ssp_tab_required(const GtEncseqLoader *el)</code>
+<p>
+Returns TRUE if a .ssp table must be present for loading to succeed.
+</p>
+<hr>
 <a name="gt_encseq_loader_require_sds_tab"></a>
 
 <code>void              gt_encseq_loader_require_sds_tab(GtEncseqLoader *el)</code>
@@ -2198,6 +2354,13 @@ Requires presence of the .sds table containing indexes for sequence
 <p>
 Disables requirement of the .sds table for loading a <code>GtEncseq</code>
    using <code>el</code>.
+</p>
+<hr>
+<a name="gt_encseq_loader_sds_tab_required"></a>
+
+<code>bool              gt_encseq_loader_sds_tab_required(const GtEncseqLoader *el)</code>
+<p>
+Returns TRUE if a .sds table must be present for loading to succeed.
 </p>
 <hr>
 <a name="gt_encseq_loader_set_logger"></a>
@@ -4847,22 +5010,6 @@ Removes all occurrences of <code>remove</code> from the right end of <code>cstr<
 Returns <code>true</code> if host CPU is little-endian, <code>false</code> otherwise.
 </p>
 <hr>
-<a name="gt_readmode_show"></a>
-
-<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
-<p>
-Returns the descriptive string for the readmode <code>readmode</code>.
-</p>
-<hr>
-<a name="gt_readmode_parse"></a>
-
-<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
-<p>
-Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
-   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
-   -1 is returned and <code>err</code> is set accordingly.
-</p>
-<hr>
 <a name="Fileutils"></a>
 <h2>Module Fileutils</h2>
 <a name="gt_file_exists"></a>
@@ -4979,29 +5126,6 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
 <code>int   gt_grep(bool *match, const char *pattern, const char *line, GtError*)</code>
 <p>
 Sets <code>match</code> to <code>true</code> if <code>pattern</code> matches <code>line</code>, to <code>false</code> otherwise.
-</p>
-<hr>
-<a name="gt_lib_init"></a>
-
-<code>void  gt_lib_init(void)</code>
-<p>
-Initialize this GenomeTools instance.
-   This has to be called before the library is used!
-</p>
-<hr>
-<a name="gt_lib_reg_atexit_func"></a>
-
-<code>void  gt_lib_reg_atexit_func(void)</code>
-<p>
-registers exit function which calls <code>gt_lib_clean()</code>
-</p>
-<hr>
-<a name="gt_lib_clean"></a>
-
-<code>int   gt_lib_clean(void)</code>
-<p>
-returns 0 if no memory map, file pointer, or memory has been leaked and a
-   value != 0 otherwise
 </p>
 <hr>
 <a name="Log"></a>
@@ -5826,7 +5950,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_encoder_delete"><code>gt_encseq_encoder_delete</code></a><br>
 
+  <a href="#gt_encseq_encoder_des_tab_requested"><code>gt_encseq_encoder_des_tab_requested</code></a><br>
+
   <a href="#gt_encseq_encoder_disable_description_support"><code>gt_encseq_encoder_disable_description_support</code></a><br>
+
+  <a href="#gt_encseq_encoder_disable_lossless_support"><code>gt_encseq_encoder_disable_lossless_support</code></a><br>
 
   <a href="#gt_encseq_encoder_disable_multiseq_support"><code>gt_encseq_encoder_disable_multiseq_support</code></a><br>
 
@@ -5838,11 +5966,23 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_encoder_enable_description_support"><code>gt_encseq_encoder_enable_description_support</code></a><br>
 
+  <a href="#gt_encseq_encoder_enable_lossless_support"><code>gt_encseq_encoder_enable_lossless_support</code></a><br>
+
   <a href="#gt_encseq_encoder_enable_multiseq_support"><code>gt_encseq_encoder_enable_multiseq_support</code></a><br>
 
   <a href="#gt_encseq_encoder_encode"><code>gt_encseq_encoder_encode</code></a><br>
 
+  <a href="#gt_encseq_encoder_get_progresstimer"><code>gt_encseq_encoder_get_progresstimer</code></a><br>
+
+  <a href="#gt_encseq_encoder_is_input_dna"><code>gt_encseq_encoder_is_input_dna</code></a><br>
+
+  <a href="#gt_encseq_encoder_is_input_protein"><code>gt_encseq_encoder_is_input_protein</code></a><br>
+
   <a href="#gt_encseq_encoder_new"><code>gt_encseq_encoder_new</code></a><br>
+
+  <a href="#gt_encseq_encoder_representation"><code>gt_encseq_encoder_representation</code></a><br>
+
+  <a href="#gt_encseq_encoder_sds_tab_requested"><code>gt_encseq_encoder_sds_tab_requested</code></a><br>
 
   <a href="#gt_encseq_encoder_set_input_dna"><code>gt_encseq_encoder_set_input_dna</code></a><br>
 
@@ -5851,6 +5991,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_encoder_set_logger"><code>gt_encseq_encoder_set_logger</code></a><br>
 
   <a href="#gt_encseq_encoder_set_progresstimer"><code>gt_encseq_encoder_set_progresstimer</code></a><br>
+
+  <a href="#gt_encseq_encoder_ssp_tab_requested"><code>gt_encseq_encoder_ssp_tab_requested</code></a><br>
+
+  <a href="#gt_encseq_encoder_symbolmap_file"><code>gt_encseq_encoder_symbolmap_file</code></a><br>
 
   <a href="#gt_encseq_encoder_use_representation"><code>gt_encseq_encoder_use_representation</code></a><br>
 
@@ -5874,6 +6018,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_loader_delete"><code>gt_encseq_loader_delete</code></a><br>
 
+  <a href="#gt_encseq_loader_des_tab_required"><code>gt_encseq_loader_des_tab_required</code></a><br>
+
   <a href="#gt_encseq_loader_do_not_require_des_tab"><code>gt_encseq_loader_do_not_require_des_tab</code></a><br>
 
   <a href="#gt_encseq_loader_do_not_require_sds_tab"><code>gt_encseq_loader_do_not_require_sds_tab</code></a><br>
@@ -5881,6 +6027,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_loader_do_not_require_ssp_tab"><code>gt_encseq_loader_do_not_require_ssp_tab</code></a><br>
 
   <a href="#gt_encseq_loader_drop_description_support"><code>gt_encseq_loader_drop_description_support</code></a><br>
+
+  <a href="#gt_encseq_loader_drop_lossless_support"><code>gt_encseq_loader_drop_lossless_support</code></a><br>
 
   <a href="#gt_encseq_loader_drop_multiseq_support"><code>gt_encseq_loader_drop_multiseq_support</code></a><br>
 
@@ -5892,13 +6040,19 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_loader_require_description_support"><code>gt_encseq_loader_require_description_support</code></a><br>
 
+  <a href="#gt_encseq_loader_require_lossless_support"><code>gt_encseq_loader_require_lossless_support</code></a><br>
+
   <a href="#gt_encseq_loader_require_multiseq_support"><code>gt_encseq_loader_require_multiseq_support</code></a><br>
 
   <a href="#gt_encseq_loader_require_sds_tab"><code>gt_encseq_loader_require_sds_tab</code></a><br>
 
   <a href="#gt_encseq_loader_require_ssp_tab"><code>gt_encseq_loader_require_ssp_tab</code></a><br>
 
+  <a href="#gt_encseq_loader_sds_tab_required"><code>gt_encseq_loader_sds_tab_required</code></a><br>
+
   <a href="#gt_encseq_loader_set_logger"><code>gt_encseq_loader_set_logger</code></a><br>
+
+  <a href="#gt_encseq_loader_ssp_tab_required"><code>gt_encseq_loader_ssp_tab_required</code></a><br>
 
   <a href="#gt_encseq_mirror"><code>gt_encseq_mirror</code></a><br>
 
@@ -6551,7 +6705,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2010
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-01-07
+Last update: 2011-01-28
 </div>
 </div>
 <script type="text/javascript">
