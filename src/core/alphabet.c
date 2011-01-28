@@ -59,7 +59,7 @@ struct GtAlphabet {
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINALPHASIZE             20U
 #define MAPSIZEPROTEIN               (PROTEINALPHASIZE+1U)
-#define PROTEINWILDCARDS             "XUBZO*-"
+#define PROTEINWILDCARDS             "XUBZJO*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 
 /*
@@ -467,7 +467,7 @@ static void assignproteinsymbolmap(GtUchar *symbolmap)
   H
   M
   C
-  XUBZO*-
+  XUBZJO*-
   \end{alltt}
   If the argument \texttt{wildcard} is 0, then the wildcard characters
   in the last line are mapped to 20. Otherwise they are mapped to
