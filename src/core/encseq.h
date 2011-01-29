@@ -160,25 +160,33 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         unsigned long depth,
                                         unsigned long maxdepth);
 
-/* XXX the following needs to be documented */
+/* The following type is used for computing stoppositions when
+   the twobitencoding is used */
 
-typedef struct
-{
-  unsigned long pos,
-                currentpos,
-                endpos,
-                twobitencodingstoppos;
-} GtViatwobitkeyvalues;
+typedef struct GtViatwobitkeyvalues GtViatwobitkeyvalues;
+
+/* The following is the constructor for the latter type */
+
+GtViatwobitkeyvalues *gt_Viatwobitkeyvalues_new(void);
+
+/* The following reinitializes the latter type */
+
+void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
+                                  const GtEncseq *encseq,
+                                  GtReadmode readmode,
+                                  GtEncseqReader *esr,
+                                  unsigned long pos,
+                                  unsigned long depth,
+                                  unsigned long maxdepth,
+                                  unsigned long stoppos);
+
+/* The following is the destructor for the latter type */
+
+void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk);
+
+/* The following is used to flag a stoppos as being undefined */
 
 #define GT_TWOBITENCODINGSTOPPOSUNDEF(PTR) ((PTR)->totallength)
-
-void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtEncseqReader *esr,
-                                 unsigned long pos,
-                                 unsigned long depth,
-                                 unsigned long maxdepth);
 
 int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
                                         const GtEncseq *encseq,

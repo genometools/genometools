@@ -5075,16 +5075,28 @@ unsigned long countgt_encseq_compare_viatwobitencoding_get(void)
   return countgt_encseq_compare_viatwobitencoding;
 }
 
-void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtEncseqReader *esr,
-                                 unsigned long pos,
-                                 unsigned long depth,
-                                 unsigned long maxdepth)
+struct GtViatwobitkeyvalues
 {
-  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+  unsigned long pos,
+                currentpos,
+                endpos,
+                twobitencodingstoppos;
+};
 
+GtViatwobitkeyvalues *gt_Viatwobitkeyvalues_new(void)
+{
+  return gt_malloc(sizeof(GtViatwobitkeyvalues));
+}
+
+static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
+                                         GtViatwobitkeyvalues *vtk,
+                                         const GtEncseq *encseq,
+                                         GtReadmode readmode,
+                                         GtEncseqReader *esr,
+                                         unsigned long pos,
+                                         unsigned long depth,
+                                         unsigned long maxdepth)
+{
   if (maxdepth == 0)
   {
     vtk->endpos = encseq->totallength;
@@ -5103,6 +5115,8 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
                                /* to have a defined value */
   if (vtk->pos < vtk->endpos)
   {
+    bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+
     if (esr != NULL && gt_has_twobitencoding_stoppos_support(encseq))
     {
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
@@ -5110,6 +5124,33 @@ void gt_assignvittwobitkeyvalues(GtViatwobitkeyvalues *vtk,
     }
     vtk->currentpos = fwd ? vtk->pos
                           : GT_REVERSEPOS(encseq->totallength,vtk->pos);
+  }
+}
+
+void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
+                                  const GtEncseq *encseq,
+                                  GtReadmode readmode,
+                                  GtEncseqReader *esr,
+                                  unsigned long pos,
+                                  unsigned long depth,
+                                  unsigned long maxdepth,
+                                  unsigned long stoppos)
+{
+  gt_Viatwobitkeyvalues_reinit_without_stoppos(vtk,
+                                               encseq,
+                                               readmode,
+                                               esr,
+                                               pos,
+                                               depth,
+                                               maxdepth);
+  vtk->twobitencodingstoppos = stoppos;
+}
+
+void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk)
+{
+  if (vtk != NULL)
+  {
+    gt_free(vtk);
   }
 }
 
@@ -5200,8 +5241,10 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
   GtViatwobitkeyvalues vtk1, vtk2;
 
   gt_assert(pos1 != pos2);
-  gt_assignvittwobitkeyvalues(&vtk1,encseq,readmode,esr1,pos1,depth,maxdepth);
-  gt_assignvittwobitkeyvalues(&vtk2,encseq,readmode,esr2,pos2,depth,maxdepth);
+  gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk1,encseq,readmode,esr1,
+                                               pos1,depth,maxdepth);
+  gt_Viatwobitkeyvalues_reinit_without_stoppos(&vtk2,encseq,readmode,esr2,
+                                               pos2,depth,maxdepth);
   return gt_encseq_process_viatwobitencoding(commonunits,
                                              encseq,
                                              readmode,

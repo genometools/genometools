@@ -94,6 +94,7 @@ struct Blindtrie
   bool cmpcharbychar,
        has_twobitencoding_stoppos_support;
   unsigned int nodenumberincrement;
+  GtViatwobitkeyvalues *vtk1, *vtk2;
   GtSuffixsortspace *sssp;
 };
 
@@ -646,25 +647,32 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                  unsigned long currenttwobitencodingstoppos)
 {
   GtCommonunits commonunits;
-  GtViatwobitkeyvalues vtk1, vtk2;
   const unsigned long depth = 0;
 
   gt_assert(leafpos != currentstartpos);
-  gt_assignvittwobitkeyvalues(&vtk1,blindtrie->encseq,blindtrie->readmode,
-                              NULL,leafpos,depth,
-                              blindtrie->maxdepthminusoffset);
-  gt_assignvittwobitkeyvalues(&vtk2,blindtrie->encseq,blindtrie->readmode,
-                              NULL,currentstartpos,depth,
-                              blindtrie->maxdepthminusoffset);
-  vtk1.twobitencodingstoppos = leaftwobitencodingstoppos;
-  vtk2.twobitencodingstoppos = currenttwobitencodingstoppos;
+  gt_Viatwobitkeyvalues_reinit(blindtrie->vtk1,
+                               blindtrie->encseq,
+                               blindtrie->readmode,
+                               NULL,
+                               leafpos,
+                               depth,
+                               blindtrie->maxdepthminusoffset,
+                               leaftwobitencodingstoppos);
+  gt_Viatwobitkeyvalues_reinit(blindtrie->vtk2,
+                               blindtrie->encseq,
+                               blindtrie->readmode,
+                               NULL,
+                               currentstartpos,
+                               depth,
+                               blindtrie->maxdepthminusoffset,
+                               currenttwobitencodingstoppos);
   (void) gt_encseq_process_viatwobitencoding(&commonunits,
                                              blindtrie->encseq,
                                              blindtrie->readmode,
                                              depth,
                                              blindtrie->maxdepthminusoffset,
-                                             &vtk1,
-                                             &vtk2);
+                                             blindtrie->vtk1,
+                                             blindtrie->vtk2);
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
       !commonunits.leftspecial)
   {
@@ -909,6 +917,14 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   blindtrie->totallength = gt_encseq_total_length(encseq);
   blindtrie->cmpcharbychar = cmpcharbychar;
   blindtrie->sssp = suffixsortspace;
+  if (cmpcharbychar)
+  {
+    blindtrie->vtk1 = blindtrie->vtk2 = NULL;
+  } else
+  {
+    blindtrie->vtk1 = gt_Viatwobitkeyvalues_new();
+    blindtrie->vtk2 = gt_Viatwobitkeyvalues_new();
+  }
   return blindtrie;
 }
 
@@ -924,6 +940,8 @@ void gt_blindtrie_delete(Blindtrie *blindtrie)
   {
     return;
   }
+  gt_Viatwobitkeyvalues_delete(blindtrie->vtk1);
+  gt_Viatwobitkeyvalues_delete(blindtrie->vtk2);
   gt_free(blindtrie->spaceBlindtrienode);
   GT_FREEARRAY(&blindtrie->overflowsuffixes, GtUlong);
   GT_FREEARRAY(&blindtrie->stack, Blindtrienodeptr);

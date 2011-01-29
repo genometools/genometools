@@ -377,8 +377,7 @@ static void newcode(GtKmercode *kmercode, Kmerstream *spwp)
   }
 }
 
-static void shiftrightwithchar(Kmerstream *spwp,
-                                      GtUchar charcode)
+static void shiftrightwithchar(Kmerstream *spwp,GtUchar charcode)
 {
   gt_assert(spwp->windowwidth == spwp->kmersize);
   updatespecialpositions(spwp,charcode,true,
