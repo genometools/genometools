@@ -752,10 +752,13 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
   MCBS_INIT(mcbs);
   if (bsrsmode == BSRS_stream_multi)
   {
+    uint64_t kmersum = 0;
     for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
     {
       MCBS_NEXT(kmer,mcbs);
+      kmersum += (uint64_t) kmer;
     }
+    printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
   } else
   {
     if (bsrsmode == BSRS_reader_multi)
