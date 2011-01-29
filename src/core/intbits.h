@@ -175,6 +175,26 @@ typedef GtBitsequence GtTwobitencoding;
   buffer[GT_INTWORDSIZE] = '\0';
 }
 
+/*@unused@*/ static inline void gt_bitsequence_tostring_units(char *buffer,
+                                                        GtBitsequence bs,
+                                                        unsigned int units)
+{
+  unsigned int idx, unit = 0;
+  GtBitsequence mask;
+
+  for (idx=0, unit = 0, mask = GT_FIRSTBIT;
+       mask > 0;
+       unit++, mask >>= 1)
+  {
+    buffer[idx++] = (bs & mask) ? '1' : '0';
+    if (unit % units > 0)
+    {
+      buffer[idx++] = ' ';
+    }
+  }
+  buffer[idx] = '\0';
+}
+
 /*@unused@*/ static inline unsigned long gt_unitsoftwobitencoding(unsigned long
                                                                     totallength)
 {

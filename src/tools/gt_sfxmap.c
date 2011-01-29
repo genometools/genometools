@@ -25,6 +25,7 @@
 #include "match/esa-map.h"
 #include "match/eis-voiditf.h"
 #include "match/pckdfs.h"
+#include "match/sfx-mappedstr.h"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
 
@@ -796,18 +797,32 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
                  "stream_multi") == 0)
       {
         brsmode = BSRS_stream_multi;
-        if (sscanf(gt_str_array_get(arguments->streamesq,2UL),"%d",&multiarg)
-            != 1 || multiarg < 1)
-        {
-          gt_error_set(err,"if option -streamesq has second argument "
-                           "stream_multi, then third argument must be "
-                           "positive integer");
-          haserr = true;
-        }
       } else
       {
-        gt_error_set(err,"if option -streamesq has two arguments then the "
-                         "second must be stream_multi");
+        if (strcmp(gt_str_array_get(arguments->streamesq,1UL),
+                   "reader_multi") == 0)
+        {
+          brsmode = BSRS_reader_multi;
+        } else
+        {
+          if (strcmp(gt_str_array_get(arguments->streamesq,1UL),
+                     "stream_reader_multi") == 0)
+          {
+            brsmode = BSRS_stream_reader_multi;
+          } else
+          {
+            gt_error_set(err,"if option -streamesq has three arguments then "
+                             "the second must be one of stream_multi "
+                             "reader_multi stream_reader_multi");
+            haserr = true;
+          }
+        }
+      }
+      if (sscanf(gt_str_array_get(arguments->streamesq,2UL),"%d",&multiarg)
+          != 1 || multiarg < 1)
+      {
+        gt_error_set(err,"if option -streamesq has three arguments, "
+                         "then third argument must be positive integer");
         haserr = true;
       }
     } else

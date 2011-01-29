@@ -11,6 +11,12 @@ allmodes()
   do
     bin/gt dev sfxmap -stream-esq esa ${mode}
   done
+  for kmersize in 2 3 4 5 6 7 8 9 10 11 12 13
+  do
+    bin/gt dev sfxmap -stream-esq esa stream_multi ${kmersize}
+    bin/gt dev sfxmap -stream-esq esa reader_multi ${kmersize}
+    bin/gt dev sfxmap -stream-esq esa stream_reader_multi ${kmersize}
+  done
 }
 
 set -e -x

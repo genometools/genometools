@@ -478,8 +478,8 @@ static void getencseqkmersupdatekmercount(const GtEncseq *encseq,
     {
       updatekmercount(sfi,position++,kmercodeptr);
     }
-    gt_kmercodeiterator_delete(kmercodeiterator);
   }
+  gt_kmercodeiterator_delete(kmercodeiterator);
 }
 
 void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
