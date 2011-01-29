@@ -1140,11 +1140,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
   dcov->multimappower = NULL;
   gt_free(dcov->filltable);
   dcov->filltable = NULL;
-  if (dcov->esr != NULL)
-  {
-    gt_encseq_reader_delete(dcov->esr);
-    dcov->esr = NULL;
-  }
+  gt_encseq_reader_delete(dcov->esr);
+  dcov->esr = NULL;
   gt_assert(posinserted == dcov->effectivesamplesize);
 #ifdef WITHCHECK
   if (withcheck)

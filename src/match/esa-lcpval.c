@@ -97,6 +97,7 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
 
 void gt_freeLcpvalueiterator(Lcpvalueiterator **lvi)
 {
+  gt_assert((*lvi) != NULL);
   gt_encseq_reader_delete((*lvi)->esr1);
   gt_encseq_reader_delete((*lvi)->esr2);
   FREESPACE(*lvi);

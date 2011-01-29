@@ -1879,14 +1879,8 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
       compressedtable_free(lcptab,true);
     }
   }
-  if (bsr->esr1 != NULL)
-  {
-    gt_encseq_reader_delete(bsr->esr1);
-  }
-  if (bsr->esr2 != NULL)
-  {
-    gt_encseq_reader_delete(bsr->esr2);
-  }
+  gt_encseq_reader_delete(bsr->esr1);
+  gt_encseq_reader_delete(bsr->esr2);
   gt_free(bsr->equalwithprevious);
   GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
   gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);

@@ -291,6 +291,7 @@ bool gt_identicalmmsearchiterators(const MMsearchiterator *mmsi1,
 
 void gt_freemmsearchiterator(MMsearchiterator **mmsi)
 {
+  gt_assert((*mmsi) != NULL);
   gt_encseq_reader_delete((*mmsi)->esr);
   FREESPACE(*mmsi);
 }

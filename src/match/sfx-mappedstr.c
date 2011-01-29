@@ -665,10 +665,7 @@ void getencseqkmers(const GtEncseq *encseq,
     processkmercode(processkmercodeinfo,currentposition + 1 - spwp->kmersize,
                     &spwp->currentkmercode);
   }
-  if (esr != NULL)
-  {
-    gt_encseq_reader_delete(esr);
-  }
+  gt_encseq_reader_delete(esr);
   for (overshoot=0; overshoot<kmersize; overshoot++)
   {
     shiftrightwithchar(spwp,(GtUchar) WILDCARD);

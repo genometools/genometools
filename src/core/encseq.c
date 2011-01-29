@@ -2902,10 +2902,7 @@ void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
   {
     return;
   }
-  if (sri->esr != NULL)
-  {
-    gt_encseq_reader_delete(sri->esr);
-  }
+  gt_encseq_reader_delete(sri->esr);
   gt_free(sri);
 }
 
