@@ -13,7 +13,7 @@ allmodes()
   done
   for kmersize in 2 3 4 5 6 7 8 9 10 11 12 13
   do
-    for mode in stream_multi reader_multi stream_reader_multi
+    for mode in stream_multi stream_multi2 reader_multi stream_reader_multi stream_reader_multi2
     do
       bin/gt dev sfxmap -stream-esq esa ${mode} ${kmersize}
     done
