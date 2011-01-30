@@ -678,48 +678,93 @@ void getencseqkmers(const GtEncseq *encseq,
 
 typedef struct
 {
-  unsigned long wordindex;
+  int shiftright;
+  const GtTwobitencoding *tbptr;
+  GtTwobitencoding currentencoding;
+} Singlecharacterbitstreamstate;
+
+static void scbs_init(Singlecharacterbitstreamstate *scbs,
+                      const GtTwobitencoding *twobitencoding,
+                      int shiftright)
+{
+  scbs->shiftright = shiftright;
+  scbs->currentencoding = 0;
+  scbs->tbptr = twobitencoding;
+}
+
+static inline GtUchar scbs_next(Singlecharacterbitstreamstate *scbs)
+{
+
+  if (scbs->shiftright > 0)
+  {
+    scbs->shiftright -= 2;
+  } else
+  {
+    scbs->currentencoding = *(scbs->tbptr++);
+    scbs->shiftright = GT_INTWORDSIZE-2;
+  }
+  return (GtUchar) (scbs->currentencoding >> scbs->shiftright) & 3;
+}
+
+typedef struct
+{
+  const GtTwobitencoding *tbptr;
   GtTwobitencoding currentencoding;
   unsigned int unitoffset, shiftleft, shiftright;
   GtCodetype maskright;
 } Multicharacterbitstreamstate;
 
-#define MCBS_INIT(MCBS)\
-        (MCBS).wordindex = 1UL;\
-        (MCBS).unitoffset = 0;\
-        (MCBS).shiftleft = 2U;\
-        (MCBS).shiftright \
-          = (unsigned int) GT_MULT2(GT_UNITSIN2BITENC - kmersize);\
-        (MCBS).maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;\
-        (MCBS).currentencoding = twobitencoding[0]
+static void mcbs_init(Multicharacterbitstreamstate *mcbs,
+                      const GtTwobitencoding *twobitencoding,
+                      unsigned int kmersize)
+{
+  mcbs->tbptr = twobitencoding;
+  mcbs->unitoffset = 0;
+  mcbs->shiftleft = 2U;
+  mcbs->shiftright = (unsigned int) GT_MULT2(GT_UNITSIN2BITENC - kmersize);
+  mcbs->maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+  mcbs->currentencoding = *(mcbs->tbptr++);
+}
 
-#define MCBS_NEXT(KMER,MCBS)\
-        if ((MCBS).unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)\
-        {\
-          KMER = (GtCodetype)\
-                   ((MCBS).currentencoding >> (MCBS).shiftright)\
-                   & (MCBS).maskright;\
-          (MCBS).shiftright-=2U;\
-        } else\
-        {\
-          KMER = (GtCodetype)\
-                   (((MCBS).currentencoding << (MCBS).shiftleft) |\
-                    (twobitencoding[(MCBS).wordindex] >>\
-                     (GT_MULT2(GT_UNITSIN2BITENC)-(MCBS).shiftleft)))\
-                    & (MCBS).maskright;\
-          (MCBS).shiftleft+=2;\
-        }\
-        if ((MCBS).unitoffset < (unsigned int) GT_UNITSIN2BITENC-1)\
-        {\
-          (MCBS).unitoffset++;\
-        } else\
-        {\
-          (MCBS).unitoffset = 0;\
-          (MCBS).shiftleft = 2U;\
-          (MCBS).shiftright = (unsigned int) GT_MULT2(GT_UNITSIN2BITENC\
-                                                    - kmersize);\
-          (MCBS).currentencoding = twobitencoding[mcbs.wordindex++];\
-        }
+static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
+                                   unsigned int kmersize)
+{
+  GtCodetype kmer;
+
+  if (mcbs->unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)
+  {
+    kmer = (GtCodetype) (mcbs->currentencoding >> mcbs->shiftright)
+                        & mcbs->maskright;
+    mcbs->shiftright-=2U;
+  } else
+  {
+    kmer = (GtCodetype)
+             ((mcbs->currentencoding << mcbs->shiftleft) |
+              (*(mcbs->tbptr) >>
+               (GT_MULT2(GT_UNITSIN2BITENC)-mcbs->shiftleft)))
+              & mcbs->maskright;
+    mcbs->shiftleft+=2;
+  }
+  if (mcbs->unitoffset < (unsigned int) GT_UNITSIN2BITENC-1)
+  {
+    mcbs->unitoffset++;
+  } else
+  {
+    mcbs->unitoffset = 0;
+    mcbs->shiftleft = 2U;
+    mcbs->shiftright = (unsigned int) GT_MULT2(GT_UNITSIN2BITENC - kmersize);
+    mcbs->currentencoding = *(mcbs->tbptr++);
+  }
+  return kmer;
+}
+
+static GtCodetype gt_firstkmercode(const GtTwobitencoding *twobitencoding,
+                                   unsigned int kmersize)
+{
+  return (GtCodetype) (twobitencoding[0] >>
+                       GT_MULT2(GT_UNITSIN2BITENC - kmersize))
+                       & ((GtCodetype) (1 << GT_MULT2(kmersize))-1);
+}
 
 static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
                                        Bitstreamreadmode bsrsmode,
@@ -746,35 +791,60 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
                                                       GT_READMODE_FORWARD,
                                                       kmersize);
   }
-  MCBS_INIT(mcbs);
-  if (bsrsmode == BSRS_stream_multi)
+  switch (bsrsmode)
   {
-    uint64_t kmersum = 0;
-    for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
-    {
-      MCBS_NEXT(kmer,mcbs);
-      kmersum += (uint64_t) kmer;
-    }
-    printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
-  } else
-  {
-    if (bsrsmode == BSRS_reader_multi)
-    {
+    case BSRS_stream_multi:
+      {
+        uint64_t kmersum = 0;
+        mcbs_init(&mcbs,twobitencoding,kmersize);
+        for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
+        {
+          kmer = mcbs_next(&mcbs,kmersize);
+          kmersum += (uint64_t) kmer;
+        }
+        printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
+      }
+      break;
+    case BSRS_stream_multi2:
+      {
+        Singlecharacterbitstreamstate scbs;
+        GtUchar cc;
+        const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+        uint64_t kmersum = 0;
+
+        kmer = gt_firstkmercode(twobitencoding,kmersize);
+        scbs_init(&scbs,twobitencoding,(int) kmersize);
+        for (pos = (unsigned long) kmersize;
+             pos <= totallength - (unsigned long) kmersize;
+             pos++)
+        {
+          cc = scbs_next(&scbs);
+          kmer <<= 2;
+          kmer |= cc;
+          kmer &= maskright;
+          kmersum += (uint64_t) kmer;
+        }
+        printf("kmersum2=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
+        break;
+      }
+    case BSRS_reader_multi:
       for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
       {
         kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
       }
-    } else
-    {
+      break;
+    case BSRS_stream_reader_multi:
+      mcbs_init(&mcbs,twobitencoding,kmersize);
       for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
       {
-        MCBS_NEXT(kmer,mcbs);
+        kmer = mcbs_next(&mcbs,kmersize);
         kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
         gt_assert(kmercodeptr != NULL);
         if (!kmercodeptr->definedspecialpos && kmer != kmercodeptr->code)
         {
           char buffer[2*GT_INTWORDSIZE+1];
           gt_bitsequence_tostring_units(buffer,(GtBitsequence) kmer,2U);
+          fprintf(stderr,"pos=%lu\n",pos);
           fprintf(stderr,"stream.kmer    =%s\n",buffer);
           gt_bitsequence_tostring_units(buffer,
                                         (GtBitsequence) kmercodeptr->code,
@@ -785,33 +855,12 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
           exit(EXIT_FAILURE);
         }
       }
-    }
+      break;
+     default:
+      break;
   }
   gt_kmercodeiterator_delete(kmercodeiterator);
 }
-
-typedef struct
-{
-  int shiftright;
-  unsigned long wordindex;
-  GtTwobitencoding currentencoding;
-} Singlecharacterbitstreamstate;
-
-#define SCBS_INIT(SCBS)\
-        (SCBS).shiftright = 0;\
-        (SCBS).wordindex = 0;\
-        (SCBS).currentencoding = 0
-
-#define SCBS_NEXT(CC,SCBS)\
-        if ((SCBS).shiftright > 0)\
-        {\
-          (SCBS).shiftright -= 2;\
-        } else\
-        {\
-          (SCBS).currentencoding = twobitencoding[(SCBS).wordindex++];\
-          (SCBS).shiftright = GT_INTWORDSIZE-2;\
-        }\
-        (CC) = (GtUchar) ((SCBS).currentencoding >> (SCBS).shiftright) & 3
 
 void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
                           unsigned int multiarg)
@@ -821,13 +870,13 @@ void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
   twobitencoding = gt_encseq_twobitencoding_export(encseq);
   if (twobitencoding != NULL)
   {
-    unsigned long totallength, pos;
+    unsigned long idx, totallength, pos;
     uint64_t pairbitsum = 0, pairbitsumBF;
     GtUchar cc, ccesr;
     GtEncseqReader *esr = NULL;
     Singlecharacterbitstreamstate scbs;
 
-    SCBS_INIT(scbs);
+    scbs_init(&scbs,twobitencoding,0);
     if (bsrsmode == BSRS_reader_single ||
         bsrsmode == BSRS_stream_reader_single)
     {
@@ -838,47 +887,53 @@ void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
     totallength = gt_encseq_total_length(encseq);
     switch (bsrsmode)
     {
+      case BSRS_stream_words:
+        for (idx = 0; idx < gt_unitsoftwobitencoding(totallength); idx++)
+        {
+          pairbitsum += twobitencoding[idx];
+        }
+        break;
       case BSRS_stream_single:
         for (pos = 0; pos < totallength; pos++)
         {
-          SCBS_NEXT(cc,scbs);
+          cc = scbs_next(&scbs);
           pairbitsum += (uint64_t) cc;
+        }
+        pairbitsumBF = gt_encseq_pairbitsum(encseq);
+        if (pairbitsum != pairbitsumBF)
+        {
+          fprintf(stderr,"pairbitsum=" Formatuint64_t "!=" Formatuint64_t
+                         "=pairbitsumBF\n",
+                         PRINTuint64_tcast(pairbitsum),
+                         PRINTuint64_tcast(pairbitsumBF));
+          exit(GT_EXIT_PROGRAMMING_ERROR);
         }
         break;
       case BSRS_reader_single:
         for (pos = 0; pos < totallength; pos++)
         {
           ccesr = gt_encseq_reader_next_encoded_char(esr);
+          pairbitsum += (uint64_t) ccesr;
         }
         break;
       case BSRS_stream_reader_single:
         for (pos = 0; pos < totallength; pos++)
         {
-          SCBS_NEXT(cc,scbs);
+          cc = scbs_next(&scbs);
           pairbitsum += (uint64_t) cc;
           ccesr = gt_encseq_reader_next_encoded_char(esr);
+          pairbitsum += (uint64_t) ccesr;
           gt_assert(cc == ccesr || ISSPECIAL(ccesr));
         }
         break;
       case BSRS_stream_multi:
+      case BSRS_stream_multi2:
       case BSRS_reader_multi:
       case BSRS_stream_reader_multi:
         gt_encseq_faststream_kmers(encseq,bsrsmode,multiarg);
         break;
     }
+    printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
     gt_encseq_reader_delete(esr);
-    if (bsrsmode == BSRS_stream_single)
-    {
-      printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
-      pairbitsumBF = gt_encseq_pairbitsum(encseq);
-      if (pairbitsum != pairbitsumBF)
-      {
-        fprintf(stderr,"pairbitsum=" Formatuint64_t "!=" Formatuint64_t
-                       "=pairbitsumBF\n",
-                       PRINTuint64_tcast(pairbitsum),
-                       PRINTuint64_tcast(pairbitsumBF));
-        exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-    }
   }
 }

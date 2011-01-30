@@ -53,9 +53,9 @@ static void *gt_tagerator_arguments_new(void)
   arguments->numberofmodedescentries = sizeof (outputmodedesctable)/
                                        sizeof (outputmodedesctable[0]);
   arguments->outputhelp
-    = getargmodekeywords(outputmodedesctable,
-                         arguments->numberofmodedescentries,
-                         "output");
+    = gt_getargmodekeywords(outputmodedesctable,
+                            arguments->numberofmodedescentries,
+                            "output");
   arguments->modedesc = outputmodedesctable;
   return arguments;
 }

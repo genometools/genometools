@@ -67,10 +67,12 @@ void getencseqkmers(const GtEncseq *encseq,
 
 typedef enum
 {
+  BSRS_stream_words,
   BSRS_stream_single,
   BSRS_reader_single,
   BSRS_stream_reader_single,
   BSRS_stream_multi,
+  BSRS_stream_multi2,
   BSRS_reader_multi,
   BSRS_stream_reader_multi
 } Bitstreamreadmode;

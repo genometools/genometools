@@ -670,9 +670,9 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                            dfst);
     }
     printf("# for each match show: ");
-    getsetargmodekeywords(tageratoroptions->modedesc,
-                          tageratoroptions->numberofmodedescentries,
-                          tageratoroptions->outputmode);
+    gt_getsetargmodekeywords(tageratoroptions->modedesc,
+                             tageratoroptions->numberofmodedescentries,
+                             tageratoroptions->outputmode);
     seqit = gt_seqiterator_sequence_buffer_new(tageratoroptions->tagfiles, err);
     if (!seqit)
     {

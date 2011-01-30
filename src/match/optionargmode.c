@@ -16,15 +16,14 @@
 */
 
 #include <string.h>
-#include "core/option.h"
 #include "optionargmode.h"
 
 int gt_optionargaddbitmask(const Optionargmodedesc *modedesc,
-                        size_t numberofentries,
-                        unsigned int *mode,
-                        const char *optname,
-                        const char *optionargument,
-                        GtError *err)
+                           size_t numberofentries,
+                           unsigned int *mode,
+                           const char *optname,
+                           const char *optionargument,
+                           GtError *err)
 {
   size_t modecount;
 
@@ -48,9 +47,30 @@ int gt_optionargaddbitmask(const Optionargmodedesc *modedesc,
   return -2;
 }
 
-GtStr *getargmodekeywords(const Optionargmodedesc *modedesc,
+int gt_optionargsetsingle(const Optionargmodedesc *modedesc,
                           size_t numberofentries,
-                          const char *what)
+                          const char *optname,
+                          const char *optionargument,
+                          GtError *err)
+{
+  size_t modecount;
+
+  gt_error_check(err);
+  for (modecount=0; modecount < numberofentries; modecount++)
+  {
+    if (strcmp(optionargument,modedesc[modecount].name) == 0)
+    {
+      return (int) modedesc[modecount].bitmask;
+    }
+  }
+  gt_error_set(err,"illegal argument \"%s\" to option %s",
+                optionargument,optname);
+  return -1;
+}
+
+GtStr *gt_getargmodekeywords(const Optionargmodedesc *modedesc,
+                             size_t numberofentries,
+                             const char *what)
 {
   GtStr *helpstring;
   size_t idx, modecount, len, maxlen = 0, spacelen;
@@ -85,9 +105,9 @@ GtStr *getargmodekeywords(const Optionargmodedesc *modedesc,
   return helpstring;
 }
 
-void getsetargmodekeywords(const Optionargmodedesc *modedesc,
-                           size_t numberofentries,
-                           unsigned int bitfield)
+void gt_getsetargmodekeywords(const Optionargmodedesc *modedesc,
+                              size_t numberofentries,
+                              unsigned int bitfield)
 {
   size_t modecount;
 
