@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,9 +22,9 @@
 #include "gth/pgl_collection.h"
 #include "gth/gthassemblebuildags.h"
 #include "gth/gthassemblecluster.h"
-#include "gth/gthassemblesort.h"
 #include "gth/gthcluster.h"
 #include "gth/gthsortags.h"
+#include "gth/sa_cmp.h"
 
 #define PGLS_DELIMITERCHAR  '-'
 
@@ -112,7 +112,8 @@ GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
   for (i = 0; i < gt_array_size(pgl_collection->pgls); i++) {
     pgl = *(GthPGL**) gt_array_get(pgl_collection->pgls, i);
     /* sort the spliced alignments */
-    gthassemblesort(pgl->alignments);
+    qsort(gt_array_get_space(pgl->alignments), gt_array_size(pgl->alignments),
+          sizeof (GthSA*), gth_sa_cmp_genomic_actual);
 
     /* cluster spliced alignments which are equal on the genomic sequence.
        this way we only have to consider one spliced alignment for each cluster
