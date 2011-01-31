@@ -786,14 +786,44 @@ static GtCodetype gt_firstkmercode(const GtTwobitencoding *twobitencoding,
                        & ((GtCodetype) (1 << GT_MULT2(kmersize))-1);
 }
 
-#define READNEXTCODEANDCHECK\
+#define READNEXTCODEANDCHECK(POS)\
         kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);\
         gt_assert(kmercodeptr != NULL);\
         if (!kmercodeptr->definedspecialpos && kmer != kmercodeptr->code)\
         {\
-          showdifferentkmers(pos,kmer,kmercodeptr->code);\
+          showdifferentkmers(POS,kmer,kmercodeptr->code);\
           exit(EXIT_FAILURE);\
         }
+
+static void getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                          unsigned int kmersize)
+{
+  unsigned long pos;
+  GtCodetype kmer;
+  Singlecharacterbitstreamstate scbs;
+  GtUchar cc;
+  const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+  uint64_t kmersum = 0;
+  const GtTwobitencoding *twobitencoding;
+  unsigned long totallength;
+
+  twobitencoding = gt_encseq_twobitencoding_export(encseq);
+  totallength = gt_encseq_total_length(encseq);
+  kmer = gt_firstkmercode(twobitencoding,kmersize);
+  kmersum += (uint64_t) kmer;
+  scbs_init(&scbs,twobitencoding,kmersize);
+  for (pos = 1UL;
+       pos <= totallength - (unsigned long) kmersize;
+       pos++)
+  {
+    cc = scbs_next(&scbs);
+    kmer <<= 2;
+    kmer |= cc;
+    kmer &= maskright;
+    kmersum += (uint64_t) kmer;
+  }
+  printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
+}
 
 static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
                                        Bitstreamreadmode bsrsmode,
@@ -835,28 +865,6 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
         printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
       }
       break;
-    case BSRS_stream_multi2:
-      {
-        Singlecharacterbitstreamstate scbs;
-        GtUchar cc;
-        const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
-        uint64_t kmersum = 0;
-
-        kmer = gt_firstkmercode(twobitencoding,kmersize);
-        scbs_init(&scbs,twobitencoding,kmersize);
-        for (pos = (unsigned long) kmersize;
-             pos <= totallength - (unsigned long) kmersize;
-             pos++)
-        {
-          cc = scbs_next(&scbs);
-          kmer <<= 2;
-          kmer |= cc;
-          kmer &= maskright;
-          kmersum += (uint64_t) kmer;
-        }
-        printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
-        break;
-      }
     case BSRS_reader_multi:
       {
         uint64_t kmersum = 0;
@@ -875,8 +883,11 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
       for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
       {
         kmer = mcbs_next(&mcbs,kmersize);
-        READNEXTCODEANDCHECK
+        READNEXTCODEANDCHECK(pos);
       }
+      break;
+    case BSRS_stream_multi2:
+      getencseqkmers_twobitencoding(encseq,kmersize);
       break;
     case BSRS_stream_reader_multi2:
       {
@@ -885,20 +896,20 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
         const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
         uint64_t kmersum = 0;
 
-        mcbs_init(&mcbs,twobitencoding,kmersize);
         kmer = gt_firstkmercode(twobitencoding,kmersize);
+        kmersum += (uint64_t) kmer;
         scbs_init(&scbs,twobitencoding,kmersize);
-        READNEXTCODEANDCHECK
+        READNEXTCODEANDCHECK(0);
         for (pos = 1UL; pos <= totallength - (unsigned long) kmersize; pos++)
         {
           cc = scbs_next(&scbs);
           kmer <<= 2;
           kmer |= cc;
           kmer &= maskright;
-          READNEXTCODEANDCHECK
+          READNEXTCODEANDCHECK(pos);
           kmersum += (uint64_t) kmer;
         }
-        printf("kmersum2=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
+        printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
         break;
       }
      default:
