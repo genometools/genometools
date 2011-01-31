@@ -472,9 +472,9 @@ static void character_data_handler(void *data, const XML_Char *string, int len)
 }
 
 int gt_parse_intermediate_output(GthInput *input,
-                              GthSAProcessFunc saprocessfunc, void *data,
-                              const char *outputfilename,
-                              GtFile *intermediate_fp, GtError *err)
+                                 GthSAProcessFunc saprocessfunc, void *data,
+                                 const char *outputfilename,
+                                 GtFile *intermediate_fp, GtError *err)
 {
   GtStr *line;
   XML_Parser parser;
@@ -497,7 +497,7 @@ int gt_parse_intermediate_output(GthInput *input,
   parseinfo.referencefilename = gt_str_new();
   parseinfo.linenumber        = 0;
   parseinfo.outputfilename    = outputfilename;
-  parseinfo.input         = input;
+  parseinfo.input             = input;
   parseinfo.saprocessfunc     = saprocessfunc;
   parseinfo.data              = data;
   parseinfo.err               = err;
@@ -520,7 +520,7 @@ int gt_parse_intermediate_output(GthInput *input,
       error = XML_GetErrorCode(parser);
       gt_error_set(err, "an error occured parsing line %lu of file \"%s\": %s",
                    parseinfo.linenumber, outputfilename,
-                    XML_ErrorString(error));
+                   XML_ErrorString(error));
       had_err = -1;
     }
 
@@ -658,8 +658,8 @@ int gth_process_intermediate_files(GthInput *input, GtStrArray *consensusfiles,
   }
   else {
     genfile = gt_file_new_from_fileptr(stdin);
-    had_err = gt_parse_intermediate_output(input, saprocessfunc, data,
-                                        "stdin", genfile, err);
+    had_err = gt_parse_intermediate_output(input, saprocessfunc, data, "stdin",
+                                           genfile, err);
     gt_file_delete_without_handle(genfile);
   }
 

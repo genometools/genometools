@@ -141,7 +141,7 @@ static int compareaccordingtorefidandgenomicpos(const GtKeytype dataA,
   rval = compareaccordingtoreferenceid(dataA, dataB, NULL);
   EVALRVAL(rval);
 
-  return  gt_compareaccordingtogenomicposforward(dataA, dataB);
+  return gt_compareaccordingtogenomicposforward(dataA, dataB);
 }
 
 /*
@@ -507,7 +507,7 @@ struct GthSACollectionIterator {
 };
 
 GthSACollectionIterator* gth_sa_collection_iterator_new(const GthSACollection
-                                                 *sa_collection)
+                                                        *sa_collection)
 {
   GthSACollectionIterator *iterator;
   gt_assert(sa_collection);
