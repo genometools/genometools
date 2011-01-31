@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gth/gthassemblebuildags.h"
+#include "gth/ags_build.h"
 
 typedef struct {
   GthDbl exonscore;        /* the score of this exonnode */
@@ -136,6 +136,7 @@ static Leftsidestatus getleftsidestatus(Exonnode *nodeA, Exonnode *nodeB)
   return NON_MERGEABLE_LEFTSIDE;
 }
 
+#ifndef NDEBUG
 static bool leftsideismergeable(Exonnode *nodeA, Exonnode *nodeB)
 {
   switch (getleftsidestatus(nodeA, nodeB))
@@ -151,6 +152,7 @@ static bool leftsideismergeable(Exonnode *nodeA, Exonnode *nodeB)
       return false;
   }
 }
+#endif
 
 static Rightsidestatus getrightsidestatus(Exonnode *nodeA, Exonnode *nodeB)
 {
@@ -172,6 +174,7 @@ static Rightsidestatus getrightsidestatus(Exonnode *nodeA, Exonnode *nodeB)
   return NON_MERGEABLE_RIGHTSIDE;
 }
 
+#ifndef NDEBUG
 static bool rightsideismergeable(Exonnode *nodeA, Exonnode *nodeB)
 {
   switch (getrightsidestatus(nodeA, nodeB)) {
@@ -186,7 +189,9 @@ static bool rightsideismergeable(Exonnode *nodeA, Exonnode *nodeB)
       return false;
   }
 }
+#endif
 
+#ifndef NDEBUG
 static bool nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB)
 {
   if (gt_range_overlap(&nodeA->range, &nodeB->range) &&
@@ -196,6 +201,7 @@ static bool nodesaremergeable(Exonnode *nodeA, Exonnode *nodeB)
   }
   return false;
 }
+#endif
 
 static void mergeleftside(Exonnode *nodeA, Exonnode *nodeB)
 {
