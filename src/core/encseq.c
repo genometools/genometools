@@ -7703,6 +7703,17 @@ unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq)
   return encseq->sizeofrep;
 }
 
+GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq)
+{
+  return encseq->sat;
+}
+
+unsigned long gt_encseq_equallength(const GtEncseq *encseq)
+{
+  gt_assert(encseq->equallength.defined);
+  return encseq->equallength.valueunsignedlong;
+}
+
 void gt_encseq_mirror(GtEncseq *encseq)
 {
   gt_assert(encseq && !encseq->hasmirror);
