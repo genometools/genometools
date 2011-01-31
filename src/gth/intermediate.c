@@ -111,9 +111,9 @@ typedef struct {
   GthStat *stat;
 } SACollectionData;
 
-static int store_in_GthGthSACollection(void *data, GthSA *sa,
-                                    GT_UNUSED const char *outputfilename,
-                                    GT_UNUSED GtError *err)
+static int store_in_sa_collection(void *data, GthSA *sa,
+                                  GT_UNUSED const char *outputfilename,
+                                  GT_UNUSED GtError *err)
 {
   SACollectionData *sa_collection_data = (SACollectionData*) data;
   bool inserted;
@@ -586,9 +586,9 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
   gt_assert(*outfp);
 
   /* read in the intermediate output */
-  if (gt_parse_intermediate_output(input, store_in_GthGthSACollection,
-                                &sa_collection_data, outputfilename, *outfp,
-                                err)) {
+  if (gt_parse_intermediate_output(input, store_in_sa_collection,
+                                   &sa_collection_data, outputfilename, *outfp,
+                                   err)) {
     fprintf(stderr, "error: %s\n", gt_error_get(err));
     exit(EXIT_FAILURE);
   }
@@ -678,7 +678,6 @@ int gth_build_sa_collection(GthSACollection *sa_collection, GthInput *input,
   sa_collection_data.stat = stat;
 
   return gth_process_intermediate_files(input, consensusfiles,
-                                        store_in_GthGthSACollection,
-                                        &sa_collection_data,
-                                        showverbose, err);
+                                        store_in_sa_collection,
+                                        &sa_collection_data, showverbose, err);
 }
