@@ -123,7 +123,7 @@ void assemble_cluster(GthPGL *pgl, bool disableclustersas)
 }
 
 GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
-                                  bool disableclustersas)
+                                         bool disableclustersas)
 {
   GthPGLCollection *pgl_collection;
   GthPGL *pgl;
