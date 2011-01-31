@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,5 +21,5 @@
 void gthassemblesort(GtArray *alignments)
 {
   qsort(gt_array_get_space(alignments), gt_array_size(alignments),
-        sizeof (GthSA*), gt_compareaccordingtogenomicposactual);
+        sizeof (GthSA*), gth_sa_cmp_genomic_actual);
 }

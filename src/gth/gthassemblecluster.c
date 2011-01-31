@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,8 +23,8 @@ static bool spliced_alignments_are_sorted(GtArray *alignments)
 {
   unsigned long i;
   for (i = 1; i < gt_array_size(alignments); i++) {
-    if (gt_compareaccordingtogenomicposactual(gt_array_get(alignments, i - 1),
-                                           gt_array_get(alignments, i)) == 1) {
+    if (gth_sa_cmp_genomic_actual(gt_array_get(alignments, i - 1),
+                                  gt_array_get(alignments, i)) == 1) {
       return false;
     }
   }
@@ -41,15 +41,13 @@ void gthassemblecluster(GthPGL *pgl, bool disableclustersas)
   gt_assert(spliced_alignments_are_sorted(pgl->alignments));
 
   sacluster = gt_malloc(sizeof (GthSACluster));
-  sacluster->representative = *(GthSA**)
-                             gt_array_get_first(pgl->alignments);
+  sacluster->representative = *(GthSA**) gt_array_get_first(pgl->alignments);
   sacluster->members = gt_array_new(sizeof (GthSA*));
 
   for (i = 1; i < gt_array_size(pgl->alignments); i++) {
     sa = *(GthSA**) gt_array_get(pgl->alignments, i);
     if (disableclustersas ||
-        gt_compareaccordingtogenomicposactual(&sacluster->representative,
-                                              &sa)) {
+        gth_sa_cmp_genomic_actual(&sacluster->representative, &sa)) {
       /* spliced alignments differ -> create a new cluster */
       gt_array_add(pgl->saclusters, sacluster);
       sacluster = gt_malloc(sizeof (GthSACluster));

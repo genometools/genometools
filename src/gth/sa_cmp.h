@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,9 +18,7 @@
 #ifndef SA_CMP_H
 #define SA_CMP_H
 
-int gt_compareaccordingtogenomicposforward(const void *dataA,
-                                           const void *dataB);
-int gt_compareaccordingtogenomicposactual(const void *dataA,
-                                          const void *dataB);
+int gth_sa_cmp_genomic_forward(const void *dataA, const void *dataB);
+int gth_sa_cmp_genomic_actual(const void *dataA, const void *dataB);
 
 #endif

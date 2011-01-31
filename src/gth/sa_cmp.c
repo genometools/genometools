@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 #include "gth/sa_cmp.h"
 
 /* is different from gt_range_compare()! */
-static int compareranges(GtRange *rangeA, GtRange *rangeB)
+static int compare_ranges(GtRange *rangeA, GtRange *rangeB)
 {
   if ((rangeA->start  == rangeB->start) && (rangeA->end == rangeB->end))
     return 0;
@@ -37,7 +37,7 @@ static int compareranges(GtRange *rangeA, GtRange *rangeB)
   genomic positions. Thereby, the positions refering to the forward strand
   are considered.
 */
-int gt_compareaccordingtogenomicposforward(const void *dataA, const void *dataB)
+int gth_sa_cmp_genomic_forward(const void *dataA, const void *dataB)
 {
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
@@ -52,7 +52,7 @@ int gt_compareaccordingtogenomicposforward(const void *dataA, const void *dataB)
   rangeA = gth_sa_range_forward(saA);
   rangeB = gth_sa_range_forward(saB);
 
-  return compareranges(&rangeA, &rangeB);
+  return compare_ranges(&rangeA, &rangeB);
 }
 
 /*
@@ -60,7 +60,7 @@ int gt_compareaccordingtogenomicposforward(const void *dataA, const void *dataB)
   their genomic positions. Thereby, the positions refering to the actual strand
   are considered.
 */
-int gt_compareaccordingtogenomicposactual(const void *dataA, const void *dataB)
+int gth_sa_cmp_genomic_actual(const void *dataA, const void *dataB)
 {
   GthSA *saA= *(GthSA**) dataA;
   GthSA *saB= *(GthSA**) dataB;
@@ -75,5 +75,5 @@ int gt_compareaccordingtogenomicposactual(const void *dataA, const void *dataB)
   rangeA = gth_sa_range_actual(saA);
   rangeB = gth_sa_range_actual(saB);
 
-  return compareranges(&rangeA, &rangeB);
+  return compare_ranges(&rangeA, &rangeB);
 }

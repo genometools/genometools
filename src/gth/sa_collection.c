@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -141,7 +141,7 @@ static int compareaccordingtorefidandgenomicpos(const GtKeytype dataA,
   rval = compareaccordingtoreferenceid(dataA, dataB, NULL);
   EVALRVAL(rval);
 
-  return gt_compareaccordingtogenomicposforward(dataA, dataB);
+  return gth_sa_cmp_genomic_forward(dataA, dataB);
 }
 
 /*
