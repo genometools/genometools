@@ -209,4 +209,69 @@ typedef GtBitsequence GtTwobitencoding;
   return CALLCASTFUNC(uint64_t,unsigned_long,unitsoftwobitencoding);
 }
 
+static const unsigned char ReversedByte[256] =
+{
+#   define R2(n)    n,     n + 2*64U,     n + 1*64U,     n + 3*64U
+#   define R4(n) R2(n), R2(n + 2*16U), R2(n + 1*16U), R2(n + 3*16U)
+#   define R6(n) R4(n), R4(n + 2* 4U), R4(n + 1* 4U), R4(n + 3* 4U)
+    R6(0U), R6(2U), R6(1U), R6(3U)
+};
+
+/*@unused@*/ static inline GtBitsequence gt_intbits_reverse(GtBitsequence bs)
+{
+  GtBitsequence out;
+  unsigned char *q = (unsigned char*) &out;
+  unsigned char *p = (unsigned char*) &bs;
+#ifdef _LP64
+  q[7] = ReversedByte[p[0]];
+  q[6] = ReversedByte[p[1]];
+  q[5] = ReversedByte[p[2]];
+  q[4] = ReversedByte[p[3]];
+  q[3] = ReversedByte[p[4]];
+  q[2] = ReversedByte[p[5]];
+  q[1] = ReversedByte[p[6]];
+  q[0] = ReversedByte[p[7]];
+#else
+  q[3] = ReversedByte[p[0]];
+  q[2] = ReversedByte[p[1]];
+  q[1] = ReversedByte[p[2]];
+  q[0] = ReversedByte[p[3]];
+#endif
+  return out;
+}
+
+#define GT_INTBITS_SWAPBITPAIRS(bs,L1,L2,D) ((bs & (3UL << L1)) >> D) |\
+                                    ((bs & (3UL << L2)) << D)
+
+/*@unused@*/
+static inline GtBitsequence gt_intbits_reverse_unitwise(GtBitsequence bs)
+{
+#ifdef _LP64
+  return (GtBitsequence) (GT_INTBITS_SWAPBITPAIRS(bs, 62, 0,62) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 60, 2,58) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 58, 4,54) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 56, 6,50) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 54, 8,46) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 52,10,42) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 50,12,38) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 48,14,34) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 46,16,30) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 44,18,26) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 42,20,22) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 40,22,18) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 38,24,14) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 36,26,10) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 34,28, 6) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 32,30, 2));
+#else
+  return (GtBitsequence) (GT_INTBITS_SWAPBITPAIRS(bs, 30, 0,30) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 28, 2,26) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 26, 4,22) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 24, 6,18) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 22, 8,14) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 20,10,10) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 18,12, 6) |
+                          GT_INTBITS_SWAPBITPAIRS(bs, 16,14, 2));
+#endif
+}
 #endif

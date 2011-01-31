@@ -431,6 +431,9 @@ static void advancerangeGtEncseqReader(GtEncseqReader *esr,
 static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
                                               KindofSWtable kindsw);
 
+static void singlepositioninseparatorViaequallength_updatestate(
+                                   GtEncseqReader *esr);
+
 #ifndef INLINEDENCSEQ
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
@@ -443,14 +446,12 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
     if (!esr->startedonmiddle) {
       /* only turn around if we arrived from complementary side */
       gt_readmode_invert(esr->readmode);
+      /* from now on, we can only go backwards on the original sequence! */
+      gt_assert(GT_ISDIRREVERSE(esr->readmode));
     }
-    /* from now on, we can only go backwards on the original sequence! */
-    gt_assert(GT_ISDIRREVERSE(esr->readmode));
     /* go back */
     esr->currentpos--;
-    /* XXX: replace this with gt_encseq_access_type_isviatables() */
-    if (esr->encseq->sat >= GT_ACCESS_TYPE_UCHARTABLES
-          && esr->encseq->sat != GT_ACCESS_TYPE_UNDEFINED) {
+    if (gt_encseq_access_type_isviautables(esr->encseq->sat)) {
       /* prepare esr for directional change */
       if (esr->encseq->has_wildcardranges) {
         gt_assert(esr->wildcardrangestate != NULL);
@@ -461,6 +462,14 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
         gt_assert(esr->ssptabnewstate != NULL);
         binpreparenextrangeGtEncseqReader(esr, SWtable_ssptabnew);
         advancerangeGtEncseqReader(esr, SWtable_ssptabnew);
+      }
+    } else
+    {
+      if (esr->encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+      {
+        esr->currentpos++;
+        singlepositioninseparatorViaequallength_updatestate(esr);
+        esr->currentpos--;
       }
     }
     return (GtUchar) SEPARATOR;
@@ -1819,7 +1828,7 @@ static bool issinglepositioninspecialrangeViaequallength(const GtEncseq *encseq,
 {
   gt_assert(encseq != NULL);
   gt_assert(encseq->equallength.defined);
-  gt_assert(pos < encseq->totallength);
+  gt_assert(pos <= encseq->totallength);
   if (pos < encseq->equallength.valueunsignedlong ||
       (pos - encseq->equallength.valueunsignedlong) %
       (encseq->equallength.valueunsignedlong + 1) > 0)
@@ -1829,29 +1838,38 @@ static bool issinglepositioninspecialrangeViaequallength(const GtEncseq *encseq,
   return true;
 }
 
+static void singlepositioninseparatorViaequallength_updatestate(
+                                   GtEncseqReader *esr)
+{
+  if (!GT_ISDIRREVERSE(esr->readmode))
+  {
+    esr->nextseparatorpos += (esr->encseq->equallength.valueunsignedlong + 1);
+  } else
+  {
+    if (esr->nextseparatorpos > esr->encseq->equallength.valueunsignedlong)
+    {
+      esr->nextseparatorpos -= (esr->encseq->equallength.valueunsignedlong+1);
+    }  else
+    {
+      if (esr->nextseparatorpos == esr->encseq->equallength.valueunsignedlong)
+      {
+        esr->nextseparatorpos = 0;
+      } else
+      {
+        gt_assert(esr->nextseparatorpos == 0);
+      }
+    }
+  }
+}
+
 static bool issinglepositioninseparatorViaequallength(GtEncseqReader *esr)
 {
   if (esr->currentpos != esr->nextseparatorpos)
   {
    return false;
   }
-  if (!GT_ISDIRREVERSE(esr->readmode))
-  {
-    esr->nextseparatorpos += (esr->encseq->equallength.valueunsignedlong + 1);
-    return true;
-  }
-  if (esr->nextseparatorpos > esr->encseq->equallength.valueunsignedlong)
-  {
-    esr->nextseparatorpos -= (esr->encseq->equallength.valueunsignedlong+1);
-    return true;
-  }
-  if (esr->nextseparatorpos == esr->encseq->equallength.valueunsignedlong)
-  {
-    esr->nextseparatorpos = 0;
-    return true;
-  }
-  gt_assert(esr->nextseparatorpos == 0);
-  return false;
+  singlepositioninseparatorViaequallength_updatestate(esr);
+  return true;
 }
 
 static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
@@ -1860,7 +1878,7 @@ static GtUchar seqdelivercharViaequallength(GtEncseqReader *esr)
                                              esr->currentpos);
 
   if (twobits != (unsigned long) esr->encseq->leastprobablecharacter ||
-      !issinglepositioninseparatorViaequallength(esr))
+      !issinglepositioninseparatorViaequallength(esr) || esr->currentpos == 0)
   {
     return (GtUchar) twobits;
   }
@@ -2177,9 +2195,9 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
 }
 
 void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
-                                           const GtEncseq *encseq,
-                                           GtReadmode readmode,
-                                           unsigned long startpos)
+                                                   const GtEncseq *encseq,
+                                                   GtReadmode readmode,
+                                                   unsigned long startpos)
 {
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq)
@@ -2197,9 +2215,10 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   {
     startpos = GT_REVERSEPOS(encseq->logicaltotallength, startpos);
   }
+  esr->originalreadmode = readmode;
 
   /* if inside virtual mirror sequence, adjust start position and reading
-     direction */
+     direction. XXX: optimize and condense this */
   if (encseq->hasmirror) {
     if (startpos >= encseq->totallength) {
       switch (readmode) {
@@ -2246,8 +2265,10 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
       }
     }
   }
+  /* printf("final startpos of reader: %lu readmode %s\n",
+            startpos, gt_readmode_show(readmode)); */
   gt_assert(startpos <= encseq->totallength);
-  esr->readmode = esr->originalreadmode = readmode;
+  esr->readmode = readmode;
   esr->currentpos = startpos;
   if (gt_encseq_access_type_isviautables(encseq->sat))
   {
@@ -2458,9 +2479,8 @@ typedef struct
 
 struct GtSpecialrangeiterator
 {
-  DefinedGtRange previous, wildcard, ssptab;
-  bool moveforward,
-       exhausted;
+  DefinedGtRange previous, wildcard, ssptab, queued;
+  bool moveforward, exhausted, reflected, skipnext, originalmoveforward;
   GtEncseqReader *esr;
   unsigned long lengthofspecialrange,
                 jumppos; /* position jumping along the sequence to find the
@@ -2468,29 +2488,39 @@ struct GtSpecialrangeiterator
                             !gt_encseq_access_type_isviautables(encseq->sat) */
 };
 
-GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
-                                                    bool moveforward)
+void gt_specialrangeiterator_reinit_with_startpos(GtSpecialrangeiterator *sri,
+                                                  const GtEncseq *encseq,
+                                                  bool moveforward,
+                                                  unsigned long startpos)
 {
-  GtSpecialrangeiterator *sri;
-
-  gt_assert(encseq->has_specialranges);
-  sri = gt_malloc(sizeof (*sri));
-  sri->moveforward = moveforward;
+  gt_assert(sri != NULL && encseq->has_specialranges);
   sri->exhausted = false;
   sri->previous.defined = false;
   sri->wildcard.defined = false;
+  sri->queued.defined = false;
   sri->ssptab.defined = false;
   sri->lengthofspecialrange = 0;
-  sri->esr = gt_encseq_create_reader_with_readmode(encseq,
+  if (sri->esr != NULL)
+    gt_encseq_reader_delete(sri->esr);
+    sri->esr = gt_encseq_create_reader_with_readmode(encseq,
                                                    moveforward
                                                      ? GT_READMODE_FORWARD
                                                      : GT_READMODE_REVERSE,
-                                                   0);
+                                                   startpos);
+
+  /* the reader initialization may have changed the direction! so reevaluate. */
+  sri->moveforward = !GT_ISDIRREVERSE(sri->esr->readmode);
+
+  if (sri->esr->readmode == GT_READMODE_COMPL)
+    sri->esr->readmode = GT_READMODE_FORWARD;
+  if (sri->esr->readmode == GT_READMODE_REVCOMPL)
+    sri->esr->readmode = GT_READMODE_REVERSE;
+
   /* for satviautables we do not need sri->jumppos and therefore we do not
      initialize it. */
   if (!gt_encseq_access_type_isviautables(encseq->sat))
   {
-    if (moveforward)
+    if (sri->moveforward)
     {
       sri->jumppos = 0;
     } else
@@ -2503,6 +2533,27 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
       }
     }
   }
+}
+
+void gt_specialrangeiterator_reinit(GtSpecialrangeiterator *sri,
+                                    const GtEncseq *encseq,
+                                    bool moveforward)
+{
+  gt_specialrangeiterator_reinit_with_startpos(sri, encseq, moveforward, 0);
+}
+
+GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
+                                                    bool moveforward)
+{
+  GtSpecialrangeiterator *sri;
+
+  gt_assert(encseq->has_specialranges);
+  sri = gt_malloc(sizeof (*sri));
+  sri->esr = NULL;
+  sri->originalmoveforward = moveforward;
+  gt_specialrangeiterator_reinit(sri, encseq, moveforward);
+  sri->reflected = false;
+  sri->skipnext = false;
   gt_assert(sri != NULL);
   return sri;
 }
@@ -2584,7 +2635,7 @@ static bool gt_dabc_specialrangeiterator_next(bool directaccess,
 }
 
 static bool gt_equallength_specialrangeiterator_next(GtRange *range,
-                                                   GtSpecialrangeiterator *sri)
+                                                    GtSpecialrangeiterator *sri)
 {
   if (sri->exhausted)
   {
@@ -2760,6 +2811,7 @@ static bool mergeWildcardssptab(GtSpecialrangeiterator *sri, GtRange *range)
                                                   sri->esr,
                                                   SWtable_wildcardrange))
       {
+
         sri->wildcard.defined = true;
       }
     }
@@ -2840,7 +2892,6 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
   while (true)
   {
     GtRange current;
-
     if (mergeWildcardssptab(sri, &current))
     {
       if (sri->previous.defined)
@@ -2882,12 +2933,10 @@ static bool gt_viautables_specialrangeiterator_next(GtRange *range,
   }
 }
 
-bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
+static inline bool gt_specialrangeiterator_deliver_range(
+                                                    GtSpecialrangeiterator *sri,
+                                                    GtRange *range)
 {
-  if (!sri->esr->encseq->has_specialranges)
-  {
-    return false;
-  }
   switch (sri->esr->encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
@@ -2901,6 +2950,86 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
     default:
       return gt_viautables_specialrangeiterator_next(range,sri);
   }
+}
+
+static inline void gt_specialrangeiterator_invert_range(GtEncseq *encseq,
+                                                        GtRange *range)
+{
+  gt_assert(encseq && range);
+  range->start = GT_REVERSEPOS(encseq->logicaltotallength,
+                               range->start);
+  range->end = GT_REVERSEPOS(encseq->logicaltotallength,
+                             range->end);
+  if (range->end <= range->start) {
+    unsigned long tmp;
+    tmp = ++range->end;
+    range->end = ++range->start;
+    range->start = tmp;
+  }
+}
+
+bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
+{
+  bool retval;
+
+  if (!sri->esr->encseq->has_specialranges)
+  {
+    return false;
+  }
+  if (sri->queued.defined) {
+    *range = sri->queued.rng;
+    sri->queued.defined = false;
+    if ((sri->reflected && sri->originalmoveforward)
+         || (!sri->reflected && !sri->originalmoveforward)) {
+      gt_specialrangeiterator_invert_range(sri->esr->encseq,
+                                           range);
+    }
+    return true;
+  }
+  retval = gt_specialrangeiterator_deliver_range(sri, range);
+
+  if (sri->esr->encseq->hasmirror) {
+    if (!sri->reflected) {
+      if (retval && range->end == sri->esr->encseq->totallength) {
+        /* the last range was at end of sequence -> in the mirrored version we
+           will have a separator plus the wildcard complement */
+        range->end += gt_range_length(range);
+        sri->skipnext = true;
+        return true;
+      }
+
+      if (!retval) {
+        /* turn around */
+        sri->moveforward = !sri->moveforward;
+        gt_specialrangeiterator_reinit_with_startpos(sri, sri->esr->encseq,
+                                                 sri->moveforward,
+                                                 sri->esr->encseq->totallength);
+        if (sri->skipnext) {
+          retval = gt_specialrangeiterator_deliver_range(sri, range);
+          gt_assert(retval);
+        }
+        retval = gt_specialrangeiterator_deliver_range(sri, range);
+
+        if (!sri->skipnext) {
+          sri->queued.defined = true;
+          /* the virtual separator is isolated */
+          sri->queued.rng = *range;
+          range->start = sri->esr->encseq->totallength;
+          range->end = range->start + 1;
+          sri->skipnext = false;
+          retval = true;
+        }
+        sri->reflected = true;
+      }
+    }
+    if ((sri->reflected && sri->originalmoveforward)
+         || (!sri->reflected && !sri->originalmoveforward)) {
+      gt_specialrangeiterator_invert_range(sri->esr->encseq,
+                                           range);
+    }
+  }
+
+  return retval;
 }
 
 void gt_specialrangeiterator_delete(GtSpecialrangeiterator *sri)
@@ -3914,17 +4043,26 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
 
 unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq)
 {
-  return encseq->specialcharinfo.specialcharacters;
+  if (encseq->hasmirror)
+    return (encseq->specialcharinfo.specialcharacters*2)+1;
+  else
+    return encseq->specialcharinfo.specialcharacters;
 }
 
 unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
 {
-  return encseq->specialcharinfo.specialranges;
+  if (encseq->hasmirror)
+    return (encseq->specialcharinfo.specialranges*2)+1;
+  else
+    return encseq->specialcharinfo.specialranges;
 }
 
 unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq)
 {
-  return encseq->specialcharinfo.realspecialranges;
+  if (encseq->hasmirror)
+    return (encseq->specialcharinfo.realspecialranges*2)+1;
+  else
+    return encseq->specialcharinfo.realspecialranges;
 }
 
 unsigned long gt_encseq_lengthofspecialprefix(const GtEncseq *encseq)
@@ -3939,17 +4077,26 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq)
 
 unsigned long gt_encseq_wildcards(const GtEncseq *encseq)
 {
-  return encseq->specialcharinfo.wildcards;
+  if (encseq->hasmirror)
+    return (encseq->specialcharinfo.wildcards*2)+1;
+  else
+    return encseq->specialcharinfo.wildcards;
 }
 
 unsigned long gt_encseq_wildcardranges(const GtEncseq *encseq)
 {
-  return encseq->specialcharinfo.wildcardranges;
+  if (encseq->hasmirror)   /* XXX: check for possible end merge! */
+    return (encseq->specialcharinfo.wildcardranges*2)+1;
+  else
+    return encseq->specialcharinfo.wildcardranges;
 }
 
 unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq)
 {
-  return encseq->specialcharinfo.realwildcardranges;
+  if (encseq->hasmirror)
+    return (encseq->specialcharinfo.realwildcardranges*2)+1;
+  else
+    return encseq->specialcharinfo.realwildcardranges;
 }
 
 unsigned long gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq)
@@ -4807,12 +4954,6 @@ static unsigned long revgetnexttwobitencodingstoppos(GtEncseqReader *esr)
   }
 }
 
-unsigned long gt_getnexttwobitencodingstoppos(bool fwd,GtEncseqReader *esr)
-{
-  return (fwd ? fwdgetnexttwobitencodingstoppos
-              : revgetnexttwobitencodingstoppos) (esr);
-}
-
 static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        const GtEncseq *encseq,
                                        unsigned long currentpos,
@@ -4868,39 +5009,113 @@ static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
   }
 }
 
+unsigned long gt_getnexttwobitencodingstoppos(GT_UNUSED bool fwd,
+                                              GtEncseqReader *esr)
+{
+  unsigned long rawstoppos;
+
+  if (esr->currentpos == esr->encseq->totallength) {
+    return esr->currentpos + (GT_ISDIRREVERSE(esr->originalreadmode) ? 1 : 0);
+  }
+  rawstoppos = (!GT_ISDIRREVERSE(esr->readmode)
+                                      ? fwdgetnexttwobitencodingstoppos
+                                      : revgetnexttwobitencodingstoppos) (esr);
+
+  if (GT_ISDIRREVERSE(esr->readmode) != GT_ISDIRREVERSE(esr->originalreadmode))
+    rawstoppos = GT_REVERSEPOS(esr->encseq->logicaltotallength, rawstoppos) + 1;
+
+  return rawstoppos;
+}
+
 static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
                                               const GtEncseq *encseq,
                                               bool fwd,
                                               unsigned long currentpos,
                                               unsigned long
-                                                twobitencodingstoppos)
+                                                          twobitencodingstoppos)
 {
-  return (fwd ? fwdextract2bitenc
-              : revextract2bitenc) (ptbe,encseq,currentpos,
-                                    twobitencodingstoppos);
+  bool mirrored = false;
+  unsigned long pos;
+  gt_assert(currentpos < encseq->logicaltotallength);
+
+  if (encseq->hasmirror && currentpos >= encseq->totallength) {
+    unsigned long disttostoppos = (twobitencodingstoppos >= currentpos
+                                    ? twobitencodingstoppos - currentpos
+                                    : currentpos - twobitencodingstoppos);
+    if (currentpos == encseq->totallength) {
+      /* handle special case where we start on the virtual separator */
+      pos = currentpos + GT_UNITSIN2BITENC;
+      ptbe->tbe = 0;
+      ptbe->position = currentpos;
+      ptbe->unitsnotspecial = 0;
+      return pos;
+    }
+    mirrored = true;
+    /* invert coordinates */
+    currentpos = GT_REVERSEPOS(encseq->logicaltotallength, currentpos);
+    fwd = !fwd;
+    if (!fwd)
+      twobitencodingstoppos = currentpos - disttostoppos + 1;
+  }
+
+  /* run extraction */
+  pos = (fwd ?
+            fwdextract2bitenc :
+            revextract2bitenc)(ptbe, encseq, currentpos, twobitencodingstoppos);
+
+  if (mirrored) {
+    /* reverse */
+    ptbe->tbe = gt_intbits_reverse_unitwise(ptbe->tbe);
+    /* complement */
+    if (ptbe->unitsnotspecial > 0)
+      ptbe->tbe ^= ~0;
+    /* mangle coordinates */
+    ptbe->position = GT_REVERSEPOS(encseq->logicaltotallength, currentpos);
+    /* handle the fact that the position returned by (fwd|rev)extract2bitenc()
+       cannot be negative */
+    if (pos == 0 && currentpos < (unsigned long) GT_UNITSIN2BITENC) {
+      pos = GT_REVERSEPOS(encseq->logicaltotallength, currentpos)
+              + GT_UNITSIN2BITENC;
+    } else {
+      pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+    }
+  }
+
+  return pos;
 }
 
-void gt_encseq_extract2bitencwithtwobitencodingstoppos(
+unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
                                          const GtEncseq *encseq,
                                          GtReadmode readmode,
                                          unsigned long pos)
 {
-  unsigned long twobitencodingstoppos;
-  bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+  unsigned long twobitencodingstoppos, ret;
+  bool fwd;
+
+  gt_assert(pos < encseq->logicaltotallength);
+  fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
   if (gt_has_twobitencoding_stoppos_support(encseq))
   {
-    twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
+    twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
   } else
   {
     twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
-  esr->currentpos = gt_encseq_extract2bitenc(ptbe,encseq,fwd,
-                                             esr->currentpos,
-                                             twobitencodingstoppos);
+
+  if (GT_ISDIRREVERSE(readmode))
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+
+  ret = gt_encseq_extract2bitenc(ptbe,encseq, fwd, pos, twobitencodingstoppos);
+  /* XXX: may be lessefficient, but just assigning ret to esr->currentpos may
+     not reflect the real reading direction! */
+
+  if (ret < encseq->logicaltotallength)
+    gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,ret);
+  return ret;
 }
 
 #define MASKPREFIX(PREFIX)\
@@ -5103,18 +5318,18 @@ static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
 {
   if (maxdepth == 0)
   {
-    vtk->endpos = encseq->totallength;
+    vtk->endpos = encseq->logicaltotallength;
   } else
   {
     gt_assert(depth < maxdepth);
     vtk->endpos = pos + maxdepth;
-    if (vtk->endpos > encseq->totallength)
+    if (vtk->endpos > encseq->logicaltotallength)
     {
-      vtk->endpos = encseq->totallength;
+      vtk->endpos = encseq->logicaltotallength;
     }
   }
   vtk->pos = pos + depth;
-  vtk->currentpos = encseq->totallength; /* to have a defined value */
+  vtk->currentpos = encseq->logicaltotallength; /* to have a defined value */
   vtk->twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
                                /* to have a defined value */
   if (vtk->pos < vtk->endpos)
@@ -5124,10 +5339,10 @@ static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
     if (esr != NULL && gt_has_twobitencoding_stoppos_support(encseq))
     {
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
-      vtk->twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
+      vtk->twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
     }
     vtk->currentpos = fwd ? vtk->pos
-                          : GT_REVERSEPOS(encseq->totallength,vtk->pos);
+                          : GT_REVERSEPOS(encseq->logicaltotallength,vtk->pos);
   }
 }
 
@@ -5156,6 +5371,19 @@ void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk)
   {
     gt_free(vtk);
   }
+}
+
+void printptbe(GtEndofTwobitencoding *ptbe)
+{
+  char buffer[BUFSIZ];
+  gt_assert(ptbe);
+  gt_bitsequence_tostring(buffer, ptbe->tbe);
+      printf("Twobitencoding   %s\n"
+             "unitsnotspecial  %u\n"
+             "position         %lu\n",
+             buffer,
+             ptbe->unitsnotspecial,
+             ptbe->position);
 }
 
 int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
@@ -5682,7 +5910,7 @@ static void checkextractunitatpos(const GtEncseq *encseq,
     }
     if (gt_has_twobitencoding_stoppos_support(encseq))
     {
-      twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
+      twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
     } else
     {
       twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
@@ -5791,7 +6019,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   esr1 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos1);
   if (gt_has_twobitencoding_stoppos_support(encseq))
   {
-    twobitencodingstoppos1 = gt_getnexttwobitencodingstoppos (fwd,esr1);
+    twobitencodingstoppos1 = gt_getnexttwobitencodingstoppos (fwd, esr1);
   } else
   {
     twobitencodingstoppos1 = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
@@ -5802,7 +6030,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   esr2 = gt_encseq_create_reader_with_readmode(encseq,readmode,pos2);
   if (gt_has_twobitencoding_stoppos_support(encseq))
   {
-    twobitencodingstoppos2 = gt_getnexttwobitencodingstoppos (fwd,esr2);
+    twobitencodingstoppos2 = gt_getnexttwobitencodingstoppos (fwd, esr2);
   } else
   {
     twobitencodingstoppos2 = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
@@ -6912,7 +7140,8 @@ struct GtEncseqLoader {
   bool destab,
        ssptab,
        oistab,
-       sdstab;
+       sdstab,
+       mirrored;
   GtLogger *logger;
 };
 
@@ -6922,6 +7151,7 @@ GtEncseqLoader* gt_encseq_loader_new()
   gt_encseq_loader_require_multiseq_support(el);
   gt_encseq_loader_drop_lossless_support(el);
   gt_encseq_loader_require_description_support(el);
+  gt_encseq_loader_do_not_mirror(el);
   return el;
 }
 
@@ -6938,6 +7168,8 @@ GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
   /* set options according to options */
   if (gt_encseq_options_lossless_value(opts))
     gt_encseq_loader_require_lossless_support(el);
+  if (gt_encseq_options_mirrored_value(opts))
+    gt_encseq_loader_mirror(el);
   return el;
 }
 
@@ -7061,6 +7293,18 @@ void gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)
   el->logger = l;
 }
 
+void gt_encseq_loader_mirror(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->mirrored = true;
+}
+
+void gt_encseq_loader_do_not_mirror(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->mirrored = false;
+}
+
 GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
                                 GtError *err)
 {
@@ -7073,6 +7317,8 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
                                     el->oistab,
                                     el->logger,
                                     err);
+  if (encseq && el->mirrored)
+    gt_encseq_mirror(encseq);
   return encseq;
 }
 

@@ -435,3 +435,18 @@ SATTESTFILES.each do |file|
     end
   end
 end  
+
+[EQLENDNAFILE, DNAFILE].each do |file|
+  (SATS-(file[:msgs].keys)).each do |sat|
+    Name "gt suffixerator mirror #{sat} #{file[:desc]}"
+    Keywords "gt_suffixerator mirror #{sat}"
+    Test do
+      run_test "#{$bin}/gt suffixerator -mirrored -sat #{sat} -v -suf -lcp " + \
+               "-db #{file[:filename]} -indexname myidx"
+      run      "#{$scriptsdir}/add_revcmp.rb #{file[:filename]} > reverse.fna"
+      run_test "#{$bin}/gt suffixerator -sat #{sat} -v -suf -lcp " + \
+               "-db reverse.fna -indexname myidx_r"
+      run      "diff myidx.suf myidx_r.suf"
+    end
+  end
+end

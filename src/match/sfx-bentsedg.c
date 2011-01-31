@@ -990,6 +990,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
+GT_UNUSED
 static void sarrcountingsort(Bentsedgresources *bsr,
                              unsigned long subbucketleft,
                              unsigned long width,
@@ -1203,6 +1204,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                                  width,
                                  depth,
                                  bsr->sfxstrategy->maxwidthrealmedian);
+#ifdef GT_SARRCOUNTINGSORT
       if (width <= bsr->sfxstrategy->maxcountingsort &&
           width >= MINMEDIANOF9WIDTH)
       {
@@ -1217,6 +1219,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         /* new values for subbucketleft, bucketright, depth */
         continue;
       }
+#endif
       BS_SWAPARRAY(temp, subbucketleft, 0, pm);
       PTR2INT(pivotcmpbits,subbucketleft,0);
     }
