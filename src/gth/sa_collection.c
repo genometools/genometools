@@ -85,7 +85,7 @@ static Spancheck span_check(GthSA *saA, GthSA *saB)
   return NOSPAN;
 }
 
-static int comparestrandsigns(bool strandsignA, bool strandsignB)
+static int compare_strands(bool strandsignA, bool strandsignB)
 {
   if (strandsignA && !strandsignB)
     return -1;
@@ -113,15 +113,15 @@ static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
   rval = gt_str_cmp(gth_sa_gen_id_str(saA), gth_sa_gen_id_str(saB));
   EVALRVAL(rval);
 
-  rval = comparestrandsigns(gth_sa_gen_strand_forward(saA),
-                            gth_sa_gen_strand_forward(saB));
+  rval = compare_strands(gth_sa_gen_strand_forward(saA),
+                         gth_sa_gen_strand_forward(saB));
   EVALRVAL(rval);
 
   rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB));
   EVALRVAL(rval);
 
-  rval = comparestrandsigns(gth_sa_ref_strand_forward(saA),
-                            gth_sa_ref_strand_forward(saB));
+  rval = compare_strands(gth_sa_ref_strand_forward(saA),
+                         gth_sa_ref_strand_forward(saB));
   EVALRVAL(rval);
 
   return 0;
