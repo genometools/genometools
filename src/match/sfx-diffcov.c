@@ -358,10 +358,10 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
   for (prefixindex=1U; prefixindex < dcov->prefixlength; prefixindex++)
   {
     /* XXX use one structure and reinit it */
-    ecp = gt_newEnumcodeatposition(dcov->encseq,dcov->readmode,
-                                   dcov->prefixlength,
-                                   dcov->numofchars);
-    while (gt_nextEnumcodeatposition(&specialcontext,ecp))
+    ecp = gt_Enumcodeatposition_new(dcov->encseq,dcov->readmode,
+                                    dcov->prefixlength,
+                                    dcov->numofchars);
+    while (gt_Enumcodeatposition_next(&specialcontext,ecp))
     {
       if (prefixindex <= specialcontext.maxprefixindex)
       {
@@ -404,7 +404,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
         }
       }
     }
-    gt_freeEnumcodeatposition(ecp);
+    gt_Enumcodeatposition_delete(ecp);
     ecp = NULL;
   }
   if (codelist != NULL)

@@ -495,9 +495,9 @@ void checkcountspecialcodes(const Bcktab *bcktab)
 #endif
 
 GtCodetype gt_codedownscale(const Bcktab *bcktab,
-                       GtCodetype code,
-                       unsigned int prefixindex,
-                       unsigned int maxprefixlen)
+                            GtCodetype code,
+                            unsigned int prefixindex,
+                            unsigned int maxprefixlen)
 {
   unsigned int remain;
 

@@ -100,22 +100,22 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
     unsigned long insertindex;
     Specialcontext specialcontext;
 
-    ecp = gt_newEnumcodeatposition(encseq,
-                                readmode,
-                                prefixlength,
-                                numofchars);
-    for (insertindex = 0; gt_nextEnumcodeatposition(&specialcontext,ecp);
+    ecp = gt_Enumcodeatposition_new(encseq,
+                                    readmode,
+                                    prefixlength,
+                                    numofchars);
+    for (insertindex = 0; gt_Enumcodeatposition_next(&specialcontext,ecp);
          insertindex++)
     {
       codelist[insertindex].maxprefixindex = specialcontext.maxprefixindex;
       codelist[insertindex].position = specialcontext.position;
       codelist[insertindex].code
-        = gt_computefilledqgramcode(ecp,
-                                 specialcontext.maxprefixindex,
-                                 specialcontext.position -
-                                 specialcontext.maxprefixindex);
+        = gt_Enumcodeatposition_filledqgramcode(ecp,
+                                                specialcontext.maxprefixindex,
+                                                specialcontext.position -
+                                                specialcontext.maxprefixindex);
     }
-    gt_freeEnumcodeatposition(ecp);
+    gt_Enumcodeatposition_delete(ecp);
     ecp = NULL;
     return insertindex;
   }
@@ -383,14 +383,15 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
 
   for (prefixindex=1U; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    ecp = gt_newEnumcodeatposition(sfi->encseq,sfi->readmode,
-                                   sfi->prefixlength,
-                                   sfi->numofchars);
-    while (gt_nextEnumcodeatposition(&specialcontext,ecp))
+    ecp = gt_Enumcodeatposition_new(sfi->encseq,sfi->readmode,
+                                    sfi->prefixlength,
+                                    sfi->numofchars);
+    while (gt_Enumcodeatposition_next(&specialcontext,ecp))
     {
       if (prefixindex <= specialcontext.maxprefixindex)
       {
-        if (gt_computefilledqgramcodestopatmax(&code,
+        if (gt_Enumcodeatposition_filledqgramcodestopatmax(
+                                            &code,
                                             ecp,
                                             prefixindex,
                                             specialcontext.position-prefixindex,
@@ -409,7 +410,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
         }
       }
     }
-    gt_freeEnumcodeatposition(ecp);
+    gt_Enumcodeatposition_delete(ecp);
     ecp = NULL;
   }
 }

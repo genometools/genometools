@@ -29,21 +29,22 @@ typedef struct
   unsigned long position;
 } Specialcontext;
 
-Enumcodeatposition *gt_newEnumcodeatposition(const GtEncseq *encseq,
-                                             GtReadmode readmode,
-                                             unsigned int prefixlength,
-                                             unsigned int numofchars);
+Enumcodeatposition *gt_Enumcodeatposition_new(const GtEncseq *encseq,
+                                              GtReadmode readmode,
+                                              unsigned int prefixlength,
+                                              unsigned int numofchars);
 
-bool gt_nextEnumcodeatposition(Specialcontext *specialcontext,
-                               Enumcodeatposition *ecp);
+bool gt_Enumcodeatposition_next(Specialcontext *specialcontext,
+                                Enumcodeatposition *ecp);
 
-void gt_freeEnumcodeatposition(Enumcodeatposition *ecp);
+void gt_Enumcodeatposition_delete(Enumcodeatposition *ecp);
 
-GtCodetype gt_computefilledqgramcode(const Enumcodeatposition *ecp,
-                                     unsigned int prefixindex,
-                                     unsigned long pos);
+GtCodetype gt_Enumcodeatposition_filledqgramcode(const Enumcodeatposition *ecp,
+                                                 unsigned int prefixindex,
+                                                 unsigned long pos);
 
-bool gt_computefilledqgramcodestopatmax(GtCodetype *code,
+bool gt_Enumcodeatposition_filledqgramcodestopatmax(
+                                     GtCodetype *code,
                                      const Enumcodeatposition *ecp,
                                      unsigned int prefixindex,
                                      unsigned long pos,
