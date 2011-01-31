@@ -101,9 +101,8 @@ static int comparestrandsigns(bool strandsignA, bool strandsignB)
   compareaccordingtorefidandgenomicpos() given below.
 */
 
-static int compareaccordingtoreferenceid(const GtKeytype dataA,
-                                         const GtKeytype dataB,
-                                         GT_UNUSED void *cmpinfo)
+static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
+                             GT_UNUSED void *cmpinfo)
 {
   int rval;
   GthSA *saA = (GthSA*) dataA;
@@ -138,7 +137,7 @@ static int compareaccordingtorefidandgenomicpos(const GtKeytype dataA,
 {
   int rval;
 
-  rval = compareaccordingtoreferenceid(dataA, dataB, NULL);
+  rval = compare_duplicate(dataA, dataB, NULL);
   EVALRVAL(rval);
 
   return gth_sa_cmp_genomic_forward(dataA, dataB);
@@ -268,8 +267,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     }
   }
 
-  saA = (GthSA*) gt_rbt_find(saB, sa_collection->rootEST,
-                             compareaccordingtoreferenceid, NULL);
+  saA = (GthSA*) gt_rbt_find(saB, sa_collection->rootEST, compare_duplicate,
+                             NULL);
   if (saA == NULL) {
     /* no alignment with the same ids and strand orientations is in the tree,
        insert saB into both trees. */
@@ -302,7 +301,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
                                               NULL);
 
     while ((spliced_alignmentptr) &&
-           (!compareaccordingtoreferenceid(saB, spliced_alignmentptr, NULL))) {
+           (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
          check if it spans saB */
       action = span_check(spliced_alignmentptr, saB);
@@ -332,7 +331,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
                                           compareaccordingtorefidandgenomicpos,
                                           NULL);
     while ((spliced_alignmentptr) &&
-           (!compareaccordingtoreferenceid(saB, spliced_alignmentptr, NULL))) {
+           (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
          check if it spans saB */
       action = span_check(spliced_alignmentptr, saB);
