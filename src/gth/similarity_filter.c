@@ -478,15 +478,15 @@ static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
         if (rval == GTH_ERROR_SA_COULD_NOT_BE_DETERMINED ||
             isunsuccessfulalignment(saB, call_info->out->comments, outfp) ||
             !gth_sa_B_is_better_than_A(saA, saB)) {
-          /* insert first GthSA */
+          /* insert first SA */
           save_sa(sa_collection, saA, call_info->sa_filter, match_info, stat);
-          /* discard second GthSA */
+          /* discard second SA */
           gth_sa_delete(saB);
         }
         else {
-          /* insert second GthSA */
+          /* insert second SA */
           save_sa(sa_collection, saB, call_info->sa_filter, match_info, stat);
-          /* free first GthSA */
+          /* free first SA */
           gth_sa_delete(saA);
         }
       }
