@@ -229,8 +229,7 @@ static int compareGthSA(const GtKeytype dataA, const GtKeytype dataB,
   return  1;
 }
 
-static void insertalignmentintobothtrees(GthSACollection *sa_collection,
-                                         GthSA *saB)
+static void insert_alignment(GthSACollection *sa_collection, GthSA *saB)
 {
   GthSA *saA = NULL;
   bool nodecreated;
@@ -273,8 +272,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
                              compareaccordingtoreferenceid, NULL);
   if (saA == NULL) {
     /* no alignment with the same ids and strand orientations is in the tree,
-       insert gthsplicedalignmenB into both trees. */
-    insertalignmentintobothtrees(sa_collection, saB);
+       insert saB into both trees. */
+    insert_alignment(sa_collection, saB);
   }
   else {
     /* one or more alignments with the same ids and strand orientations exist
@@ -387,7 +386,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     gt_array_delete(alignmentstodelete);
 
     /* insert saB */
-    insertalignmentintobothtrees(sa_collection, saB);
+    insert_alignment(sa_collection, saB);
   }
 
   /* returning true to indicate that an element has been inserted */
