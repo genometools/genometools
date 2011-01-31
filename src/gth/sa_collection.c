@@ -147,8 +147,8 @@ static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
   The following function is used as ordering for the tree rooted at <rootlist>.
 */
 
-static int compareGthSA(const GtKeytype dataA, const GtKeytype dataB,
-                        GT_UNUSED void *cmpinfo)
+static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
+                      GT_UNUSED void *cmpinfo)
 {
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
@@ -237,7 +237,7 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB)
 
   /* insert spliced alignment into tree rooted at <rootlist> */
   saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootlist,
-                               compareGthSA, NULL);
+                               compare_sa, NULL);
   /* insertion into binary tree succeeded */
   gt_assert(saA && nodecreated);
 
@@ -370,7 +370,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
          saA */
       for (i = 0; i < gt_array_size(alignmentstodelete); i++) {
         satodel = *(GthSA**) gt_array_get(alignmentstodelete, i);
-        (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compareGthSA,
+        (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compare_sa,
                              NULL);
         (void) gt_rbt_delete(satodel, &sa_collection->rootEST,
                              compare_duplicate_and_genomic_pos, NULL);
