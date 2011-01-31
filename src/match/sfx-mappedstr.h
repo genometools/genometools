@@ -25,8 +25,8 @@
 
 typedef struct
 {
-  bool definedspecialpos;
-  unsigned int specialpos;
+  bool definedspecialposition;
+  unsigned int specialposition;
   GtCodetype code;
 } GtKmercode;
 

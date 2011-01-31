@@ -225,11 +225,11 @@ static void updatekmercount(void *processinfo,
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (kmercode->definedspecialpos)
+  if (kmercode->definedspecialposition)
   {
     if (sfi->storespecials)
     {
-      if (kmercode->specialpos > 0)
+      if (kmercode->specialposition > 0)
       {
         if (sfi->sfxstrategy.storespecialcodes)
         {
@@ -238,9 +238,9 @@ static void updatekmercount(void *processinfo,
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
           gt_assert(kmercode->code <= (GtCodetype) MAXCODEVALUE);
           cp->code = (unsigned int) kmercode->code;
-          gt_assert(kmercode->specialpos <= MAXPREFIXLENGTH);
-          cp->maxprefixindex = kmercode->specialpos;
-          cp->position = position + kmercode->specialpos;
+          gt_assert(kmercode->specialposition <= MAXPREFIXLENGTH);
+          cp->maxprefixindex = kmercode->specialposition;
+          cp->position = position + kmercode->specialposition;
         }
         sfi->storespecials = false;
         gt_assert(kmercode->code > 0);
@@ -248,7 +248,7 @@ static void updatekmercount(void *processinfo,
       }
     } else
     {
-      if (kmercode->specialpos > 0)
+      if (kmercode->specialposition > 0)
       {
         gt_assert(kmercode->code > 0);
         sfi->leftborder[kmercode->code]++;
@@ -289,7 +289,7 @@ static void updatekmercount(void *processinfo,
   previouscode = kmercode->code;
   previouskmercodedefined = kmercode->defined;
   previousstorespecials = sfi->storespecials;
-  previousspecialpos = kmercode->specialpos;
+  previousspecialpos = kmercode->specialposition;
 #endif
 }
 
@@ -297,7 +297,7 @@ static void insertwithoutspecial(void *processinfo,
                                  unsigned long position,
                                  const GtKmercode *kmercode)
 {
-  if (!kmercode->definedspecialpos)
+  if (!kmercode->definedspecialposition)
   {
     Sfxiterator *sfi = (Sfxiterator *) processinfo;
 

@@ -363,16 +363,16 @@ static void newcode(GtKmercode *kmercode, Kmerstream *spwp)
 #endif
     if (specialqueueisempty(&spwp->spos))
     {
-      kmercode->definedspecialpos = false;
-      kmercode->specialpos = 0;
+      kmercode->definedspecialposition = false;
+      kmercode->specialposition = 0;
       kmercode->code = spwp->codewithoutspecial;
     } else
     {
       Specialitem *head = specialheadofqueue(&spwp->spos);
       kmercode->code = head->codeforleftcontext +
                        spwp->filltable[head->distvalue];
-      kmercode->definedspecialpos = true;
-      kmercode->specialpos = head->distvalue;
+      kmercode->definedspecialposition = true;
+      kmercode->specialposition = head->distvalue;
     }
 #ifdef SKDEBUG
     gt_assert(wcode == kmercode->code);
@@ -789,7 +789,7 @@ static GtCodetype gt_firstkmercode(const GtTwobitencoding *twobitencoding,
 #define READNEXTCODEANDCHECKNOSPECIAL(POS)\
         kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);\
         gt_assert(kmercodeptr != NULL);\
-        if (!kmercodeptr->definedspecialpos && kmer != kmercodeptr->code)\
+        if (!kmercodeptr->definedspecialposition && kmer != kmercodeptr->code)\
         {\
           showdifferentkmers(POS,kmer,kmercodeptr->code);\
           exit(EXIT_FAILURE);\
