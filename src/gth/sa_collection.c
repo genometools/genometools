@@ -98,7 +98,7 @@ static int comparestrandsigns(bool strandsignA, bool strandsignB)
   This function is used to check if the tree rooted at <rootEST>
   contains an alignment with the same ids and strand orientations.
   But the tree is ordered according to the function
-  compareaccordingtorefidandgenomicpos() given below.
+  compare_duplicate_and_genomic_pos() given below.
 */
 
 static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
@@ -131,9 +131,9 @@ static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
   This function is used as ordering for the tree rooted at <rootEST>.
 */
 
-static int compareaccordingtorefidandgenomicpos(const GtKeytype dataA,
-                                                const GtKeytype dataB,
-                                                GT_UNUSED void *cmpinfo)
+static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
+                                             const GtKeytype dataB,
+                                             GT_UNUSED void *cmpinfo)
 {
   int rval;
 
@@ -243,7 +243,7 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB)
 
   /* insert spliced alignment into tree rooted at <rootEST> */
   saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootEST,
-                               compareaccordingtorefidandgenomicpos, NULL);
+                               compare_duplicate_and_genomic_pos, NULL);
   /* insertion into binary tree succeeded */
   gt_assert(saA && nodecreated);
 }
@@ -297,7 +297,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
 
     /* going to the left */
     spliced_alignmentptr = gt_rbt_previouskey(saA, sa_collection->rootEST,
-                                           compareaccordingtorefidandgenomicpos,
+                                              compare_duplicate_and_genomic_pos,
                                               NULL);
 
     while ((spliced_alignmentptr) &&
@@ -322,13 +322,13 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       /* retrieving next alignment */
       spliced_alignmentptr = gt_rbt_previouskey(spliced_alignmentptr,
                                                 sa_collection->rootEST,
-                                           compareaccordingtorefidandgenomicpos,
+                                              compare_duplicate_and_genomic_pos,
                                                 NULL);
     }
 
     /* going to right */
     spliced_alignmentptr = gt_rbt_nextkey(saA, sa_collection->rootEST,
-                                          compareaccordingtorefidandgenomicpos,
+                                          compare_duplicate_and_genomic_pos,
                                           NULL);
     while ((spliced_alignmentptr) &&
            (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
@@ -352,7 +352,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       /* retrieving next alignment */
       spliced_alignmentptr = gt_rbt_nextkey(spliced_alignmentptr,
                                             sa_collection->rootEST,
-                                           compareaccordingtorefidandgenomicpos,
+                                            compare_duplicate_and_genomic_pos,
                                             NULL);
     }
 
@@ -373,7 +373,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
         (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compareGthSA,
                              NULL);
         (void) gt_rbt_delete(satodel, &sa_collection->rootEST,
-                             compareaccordingtorefidandgenomicpos, NULL);
+                             compare_duplicate_and_genomic_pos, NULL);
 
         /* the ith spliced alignment has been removed from the tree now,
            but the memory still needs to be freed */
