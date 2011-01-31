@@ -21,7 +21,6 @@
 #include "extended/consensus_sa.h"
 #include "gth/pgl_collection.h"
 #include "gth/gthassemblebuildags.h"
-#include "gth/gthassemblecluster.h"
 #include "gth/gthcluster.h"
 #include "gth/gthsortags.h"
 #include "gth/sa_cmp.h"
@@ -93,6 +92,36 @@ static void process_splice_form_func(GtArray *spliced_alignments_in_form,
   gt_array_add(pgl->assemblies, ags);
 }
 
+void assemble_cluster(GthPGL *pgl, bool disableclustersas)
+{
+  GthSACluster *sacluster;
+  GthSA *sa;
+  unsigned long i;
+
+  sacluster = gt_malloc(sizeof (GthSACluster));
+  sacluster->representative = *(GthSA**) gt_array_get_first(pgl->alignments);
+  sacluster->members = gt_array_new(sizeof (GthSA*));
+
+  for (i = 1; i < gt_array_size(pgl->alignments); i++) {
+    sa = *(GthSA**) gt_array_get(pgl->alignments, i);
+    if (disableclustersas ||
+        gth_sa_cmp_genomic_actual(&sacluster->representative, &sa)) {
+      /* spliced alignments differ -> create a new cluster */
+      gt_array_add(pgl->saclusters, sacluster);
+      sacluster = gt_malloc(sizeof (GthSACluster));
+      sacluster->representative = sa;
+      sacluster->members = gt_array_new(sizeof (GthSA*));
+    }
+    else {
+      /* spliced alignments are equal -> store new sa also in current cluster */
+      gt_array_add(sacluster->members, sa);
+    }
+  }
+
+  /* store last cluster */
+  gt_array_add(pgl->saclusters, sacluster);
+}
+
 GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
                                   bool disableclustersas)
 {
@@ -118,7 +147,7 @@ GthPGLCollection* gth_pgl_collection_new(GthSACollection *sacollection,
     /* cluster spliced alignments which are equal on the genomic sequence.
        this way we only have to consider one spliced alignment for each cluster
        later on */
-    gthassemblecluster(pgl, disableclustersas);
+    assemble_cluster(pgl, disableclustersas);
 
     /* call consensus phase */
     gt_consensus_sa(gt_array_get_space(pgl->saclusters),
