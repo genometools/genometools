@@ -26,15 +26,7 @@ typedef struct GthSAFilter GthSAFilter;
 
 GthSAFilter* gth_sa_filter_new(void);
 void         gth_sa_filter_register_options(GtOptionParser*, GthSAFilter*,
-                                        bool extended_options);
-void         gth_sa_filter_set_min_alignmentscore(GthSAFilter*, double);
-void         gth_sa_filter_set_max_alignmentscore(GthSAFilter*, double);
-void         gth_sa_filter_set_min_coverage(GthSAFilter*, double);
-void         gth_sa_filter_set_max_coverage(GthSAFilter*, double);
-double       gth_sa_filter_get_min_alignmentscore(const GthSAFilter*);
-double       gth_sa_filter_get_max_alignmentscore(const GthSAFilter*);
-double       gth_sa_filter_get_min_coverage(const GthSAFilter*);
-double       gth_sa_filter_get_max_coverage(const GthSAFilter*);
+                                            bool extended_options);
 bool         gth_sa_filter_filter_sa(const GthSAFilter*, GthSA*);
 void         gth_sa_filter_delete(GthSAFilter*);
 

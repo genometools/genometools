@@ -130,56 +130,6 @@ void gth_sa_filter_register_options(GtOptionParser *op, GthSAFilter *sa_filter,
   gt_option_parser_register_hook(op, sa_filter_check_arguments, sa_filter);
 }
 
-void gth_sa_filter_set_min_alignmentscore(GthSAFilter *sa_filter,
-                                          double min_alignmentscore)
-{
-  gt_assert(sa_filter);
-  sa_filter->min_alignmentscore = min_alignmentscore;
-}
-
-void gth_sa_filter_set_max_alignmentscore(GthSAFilter *sa_filter,
-                                          double max_alignmentscore)
-{
-  gt_assert(sa_filter);
-  sa_filter->max_alignmentscore = max_alignmentscore;
-}
-
-void gth_sa_filter_set_min_coverage(GthSAFilter *sa_filter, double min_coverage)
-{
-  gt_assert(sa_filter);
-  sa_filter->min_coverage = min_coverage;
-}
-
-void gth_sa_filter_set_max_coverage(GthSAFilter *sa_filter, double max_coverage)
-{
-  gt_assert(sa_filter);
-  sa_filter->max_coverage = max_coverage;
-}
-
-double gth_sa_filter_get_min_alignmentscore(const GthSAFilter *sa_filter)
-{
-  gt_assert(sa_filter);
-  return sa_filter->min_alignmentscore;
-}
-
-double gth_sa_filter_get_max_alignmentscore(const GthSAFilter *sa_filter)
-{
-  gt_assert(sa_filter);
-  return sa_filter->max_alignmentscore;
-}
-
-double gth_sa_filter_get_min_coverage(const GthSAFilter *sa_filter)
-{
-  gt_assert(sa_filter);
-  return sa_filter->min_coverage;
-}
-
-double gth_sa_filter_get_max_coverage(const GthSAFilter *sa_filter)
-{
-  gt_assert(sa_filter);
-  return sa_filter->max_coverage;
-}
-
 bool gth_sa_filter_filter_sa(const GthSAFilter *sa_filter, GthSA *sa)
 {
   gt_assert(sa_filter && sa);
