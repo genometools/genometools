@@ -42,16 +42,6 @@ GthSACollection* gth_sa_collection_new(void)
   return gt_calloc(1, sizeof (GthSACollection));
 }
 
-#define EVALRVAL(R)\
-        if ((R) < 0)\
-        {\
-          return -1;\
-        }\
-        if ((R) > 0)\
-        {\
-          return  1;\
-        }
-
 typedef enum
 {
   NOSPAN = 0,
@@ -110,19 +100,21 @@ static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
 
   gt_assert(!cmpinfo);
 
-  rval = gt_str_cmp(gth_sa_gen_id_str(saA), gth_sa_gen_id_str(saB));
-  EVALRVAL(rval);
+  if ((rval = gt_str_cmp(gth_sa_gen_id_str(saA), gth_sa_gen_id_str(saB))))
+    return rval;
 
-  rval = compare_strands(gth_sa_gen_strand_forward(saA),
-                         gth_sa_gen_strand_forward(saB));
-  EVALRVAL(rval);
+  if ((rval = compare_strands(gth_sa_gen_strand_forward(saA),
+                              gth_sa_gen_strand_forward(saB)))) {
+    return rval;
+  }
 
-  rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB));
-  EVALRVAL(rval);
+  if ((rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB))))
+    return rval;
 
-  rval = compare_strands(gth_sa_ref_strand_forward(saA),
-                         gth_sa_ref_strand_forward(saB));
-  EVALRVAL(rval);
+  if ((rval = compare_strands(gth_sa_ref_strand_forward(saA),
+                              gth_sa_ref_strand_forward(saB)))) {
+    return rval;
+  }
 
   return 0;
 }
@@ -137,8 +129,8 @@ static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
 {
   int rval;
 
-  rval = compare_duplicate(dataA, dataB, NULL);
-  EVALRVAL(rval);
+  if ((rval = compare_duplicate(dataA, dataB, NULL)))
+    return rval;
 
   return gth_sa_cmp_genomic_forward(dataA, dataB);
 }
