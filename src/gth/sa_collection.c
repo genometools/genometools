@@ -366,8 +366,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       return false;
     }
     if (replace) {
-      /* deleting all alignments which need to be replaced by
-         saA */
+      /* deleting all alignments which need to be replaced by saA */
       for (i = 0; i < gt_array_size(alignmentstodelete); i++) {
         satodel = *(GthSA**) gt_array_get(alignmentstodelete, i);
         (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compare_sa,
