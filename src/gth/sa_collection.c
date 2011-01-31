@@ -17,7 +17,7 @@
 
 #include "core/unused_api.h"
 #include "extended/redblack.h"
-#include "gth/gthcmpfuncgenomic.h"
+#include "gth/sa_cmp.h"
 #include "gth/sa_collection.h"
 
 /*

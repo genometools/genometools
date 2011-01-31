@@ -16,7 +16,7 @@
 */
 
 #include "gth/gthassemblesort.h"
-#include "gth/gthcmpfuncgenomic.h"
+#include "gth/sa_cmp.h"
 
 void gthassemblesort(GtArray *alignments)
 {

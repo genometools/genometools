@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gth/gthcmpfuncgenomic.h"
 #include "gth/sa.h"
+#include "gth/sa_cmp.h"
 
 /* is different from gt_range_compare()! */
 static int compareranges(GtRange *rangeA, GtRange *rangeB)

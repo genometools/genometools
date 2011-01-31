@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTHCMPFUNCGENOMIC_H
-#define GTHCMPFUNCGENOMIC_H
+#ifndef SA_CMP_H
+#define SA_CMP_H
 
 int gt_compareaccordingtogenomicposforward(const void *dataA,
                                            const void *dataB);

@@ -16,7 +16,7 @@
 */
 
 #include "gth/gthassemblecluster.h"
-#include "gth/gthcmpfuncgenomic.h"
+#include "gth/sa_cmp.h"
 
 #ifndef NDEBUG
 static bool spliced_alignments_are_sorted(GtArray *alignments)
