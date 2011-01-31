@@ -27,7 +27,7 @@ typedef struct GthSACollection GthSACollection;
 
 GthSACollection* gth_sa_collection_new(void);
 /* Returns true, if <sa> has passed the <sa_filter> and has been inserted into
-   <sa_collectionand>, false otherwise. <stat> is optional. */
+   <sa_collection>, otherwise false is returned. <stat> is optional. */
 bool          gth_sa_collection_insert_sa(GthSACollection*, GthSA *sa,
                                           GthSAFilter *sa_filter,
                                           GthStat *stat);
