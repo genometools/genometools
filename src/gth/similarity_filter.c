@@ -910,7 +910,7 @@ int gth_similarity_filter(GthCallInfo *call_info, GthInput *input,
   gt_error_check(err);
 
   /* initialization */
-  sa_collection = gth_sa_collection_new();
+  sa_collection = gth_sa_collection_new(call_info->duplicate_check);
 
   /* compute the spliced alignments */
   if (compute_sa_collection(sa_collection, call_info, input, stat, plugins)) {

@@ -33,13 +33,16 @@
   function span_check()) is inserted into the trees.
 */
 struct GthSACollection {
+  GthDuplicateCheck duplicate_check;
   GtRBTnode *rootlist,
             *rootEST;
 };
 
-GthSACollection* gth_sa_collection_new(void)
+GthSACollection* gth_sa_collection_new(GthDuplicateCheck duplicate_check)
 {
-  return gt_calloc(1, sizeof (GthSACollection));
+  GthSACollection *sa_collection= gt_calloc(1, sizeof *sa_collection);
+  sa_collection->duplicate_check = duplicate_check;
+  return sa_collection;
 }
 
 typedef enum
@@ -97,6 +100,7 @@ static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
   int rval;
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
+  /* GthDuplicateCheck duplicate_check = *(GthDuplicateCheck*) cmpinfo; */
 
   gt_assert(!cmpinfo);
 
@@ -125,11 +129,11 @@ static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
 
 static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
                                              const GtKeytype dataB,
-                                             GT_UNUSED void *cmpinfo)
+                                             void *cmpinfo)
 {
   int rval;
 
-  if ((rval = compare_duplicate(dataA, dataB, NULL)))
+  if ((rval = compare_duplicate(dataA, dataB, cmpinfo)))
     return rval;
 
   return gth_sa_cmp_genomic_forward(dataA, dataB);
@@ -235,7 +239,8 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB)
 
   /* insert spliced alignment into tree rooted at <rootEST> */
   saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootEST,
-                               compare_duplicate_and_genomic_pos, NULL);
+                               compare_duplicate_and_genomic_pos,
+                               &sa_collection->duplicate_check);
   /* insertion into binary tree succeeded */
   gt_assert(saA && nodecreated);
 }
@@ -260,10 +265,10 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
   }
 
   saA = (GthSA*) gt_rbt_find(saB, sa_collection->rootEST, compare_duplicate,
-                             NULL);
-  if (saA == NULL) {
-    /* no alignment with the same ids and strand orientations is in the tree,
-       insert saB into both trees. */
+                             &sa_collection->duplicate_check);
+  if (saA == NULL || sa_collection->duplicate_check == GTH_DC_NONE) {
+    /* no alignment with the same ids and strand orientations is in the tree or
+       the duplicate check has been disabled, insert saB into both trees. */
     insert_alignment(sa_collection, saB);
   }
   else {
@@ -290,7 +295,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     /* going to the left */
     spliced_alignmentptr = gt_rbt_previouskey(saA, sa_collection->rootEST,
                                               compare_duplicate_and_genomic_pos,
-                                              NULL);
+                                              &sa_collection->duplicate_check);
 
     while ((spliced_alignmentptr) &&
            (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
@@ -315,13 +320,13 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       spliced_alignmentptr = gt_rbt_previouskey(spliced_alignmentptr,
                                                 sa_collection->rootEST,
                                               compare_duplicate_and_genomic_pos,
-                                                NULL);
+                                               &sa_collection->duplicate_check);
     }
 
     /* going to right */
     spliced_alignmentptr = gt_rbt_nextkey(saA, sa_collection->rootEST,
                                           compare_duplicate_and_genomic_pos,
-                                          NULL);
+                                          &sa_collection->duplicate_check);
     while ((spliced_alignmentptr) &&
            (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
@@ -345,7 +350,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       spliced_alignmentptr = gt_rbt_nextkey(spliced_alignmentptr,
                                             sa_collection->rootEST,
                                             compare_duplicate_and_genomic_pos,
-                                            NULL);
+                                            &sa_collection->duplicate_check);
     }
 
     /* DISCARD and REPLACE are not true at the same time */
@@ -364,7 +369,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
         (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compare_sa,
                              NULL);
         (void) gt_rbt_delete(satodel, &sa_collection->rootEST,
-                             compare_duplicate_and_genomic_pos, NULL);
+                             compare_duplicate_and_genomic_pos,
+                             &sa_collection->duplicate_check);
 
         /* the ith spliced alignment has been removed from the tree now,
            but the memory still needs to be freed */

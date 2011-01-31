@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -52,6 +52,9 @@ static int findspeciesnum(char *specname, GtError *err)
 
 static const char *cutoff_modes[] = { "RELAXED", "STRICT", "MINIMAL" };
 
+static const char *duplicate_check_modes[] = { "none", "id", "desc", "seq",
+                                               "both" };
+
 static int get_cutoffs_mode_from_table(char *searchstring)
 {
   unsigned int i;
@@ -61,6 +64,17 @@ static int get_cutoffs_mode_from_table(char *searchstring)
   }
   gt_assert(0); /* cannot happen */
   return NUMOFCUTOFFMODES; /* shut up compiler */
+}
+
+static int get_duplicate_check_mode_from_table(char *searchstring)
+{
+  unsigned int i;
+  for (i = 0; i < GTH_NUM_OF_DC_MODES; i++) {
+    if (!strcmp(searchstring, duplicate_check_modes[i]))
+      return i;
+  }
+  gt_assert(0); /* cannot happen */
+  return GTH_NUM_OF_DC_MODES; /* shut up compiler */
 }
 
 static int show_gth_help_trailer(GT_UNUSED const char *progname,
@@ -86,7 +100,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   double u12donorprob, u12donorprob1mism;
   GtStrArray *genomic_files, *cdna_files, *protein_files;
   GtStr *specbuf, *parsed_species, *chaining_param, *leadcutoffsmode,
-        *termcutoffsmode;
+        *termcutoffsmode, *duplicatecheck;
   bool forward = false, reverse = false, verbose, mincutoffs = false,
        nou12intronmodel, exondistri, introndistri, refseqcovdistri = false,
        matchnumdistri = false;
@@ -185,8 +199,8 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                              alignments */
          *optscoreminexonlength = NULL,   /* proc. of `raw' spliced
                                              alignments */
-         *optminaveragessp = NULL,        /* advanced similarity filter option
-                                           */
+         *optminaveragessp = NULL,        /* advanced similarity filter */
+         *optduplicatecheck= NULL,        /* advanced similarity filter */
          *optintermediate = NULL,         /* stop after SA computation */
          *optsortags = NULL,              /* postproc. of PGLs, sorting of
                                              AGSs */
@@ -231,6 +245,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   chaining_param  = gt_str_new();
   leadcutoffsmode = gt_str_new();
   termcutoffsmode = gt_str_new();
+  duplicatecheck  = gt_str_new();
 
   /* -genomic */
   if (!gthconsensus_parsing) {
@@ -1080,6 +1095,18 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_parser_add_option(op, optminaveragessp);
   }
 
+  /* -duplicationcheck */
+  optduplicatecheck = gt_option_new_choice("duplicatecheck", "criterion used "
+                                           "to check for spliced alignment "
+                                           "duplicates, choose from "
+                                           "none|id|desc|seq|both",
+                                           duplicatecheck,
+                                           duplicate_check_modes[1],
+                                           duplicate_check_modes);
+  gt_option_is_extended_option(optduplicatecheck);
+  gt_option_is_development_option(optduplicatecheck);
+  gt_option_parser_add_option(op, optduplicatecheck);
+
   /* add spliced alignment filter options */
   gth_sa_filter_register_options(op, call_info->sa_filter,
                                  !gthconsensus_parsing);
@@ -1471,6 +1498,12 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     }
   }
 
+  /* post-process duplicate check option */
+  if (oprval == GT_OPTION_PARSER_OK) {
+    call_info->duplicate_check =
+      get_duplicate_check_mode_from_table(gt_str_get(duplicatecheck));
+  }
+
   /* assertions */
 #ifndef NDEBUG
   if (oprval == GT_OPTION_PARSER_OK && !gthconsensus_parsing) {
@@ -1507,6 +1540,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   /* free */
   gt_str_delete(parsed_species);
   gt_str_delete(specbuf);
+  gt_str_delete(duplicatecheck);
   gt_str_delete(termcutoffsmode);
   gt_str_delete(leadcutoffsmode);
   gt_str_delete(chaining_param);

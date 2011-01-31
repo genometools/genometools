@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,6 +27,15 @@
 #include "gth/gthsimfilterparam.h"
 #include "gth/sa_filter.h"
 #include "gth/splice_site_model.h"
+
+typedef enum {
+  GTH_DC_NONE,
+  GTH_DC_ID,
+  GTH_DC_DESC,
+  GTH_DC_SEQ,
+  GTH_DC_BOTH,
+  GTH_NUM_OF_DC_MODES
+} GthDuplicateCheck;
 
 /* contains the all the parameters, which are passed to the program */
 typedef struct {
@@ -58,6 +67,7 @@ typedef struct {
                                         consensus phase */
        cdnaforwardonly;
   GthSAFilter *sa_filter;            /* the spliced alignment filter */
+  GthDuplicateCheck duplicate_check; /* the modus use for duplicate checks */
   GthSpliceSiteModel *splice_site_model; /* the splice site model */
   GthOutput *out;                    /* bundles all output related variables */
 } GthCallInfo;

@@ -34,7 +34,7 @@ static int process_consensus_files(GtStrArray *consensusfiles,
   gt_error_check(err);
 
   /* initialization */
-  sa_collection = gth_sa_collection_new();
+  sa_collection = gth_sa_collection_new(call_info->duplicate_check);
 
   if (call_info->out->showverbose)
     call_info->out->showverbose("process all intermediate output files");

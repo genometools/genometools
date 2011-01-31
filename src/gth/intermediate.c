@@ -570,7 +570,7 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
 #endif
 
   /* init */
-  read_sa_collection = gth_sa_collection_new();
+  read_sa_collection = gth_sa_collection_new(GTH_DC_NONE);
   sa_collection_data.sa_collection = read_sa_collection;
   sa_collection_data.sa_filter = NULL;
   sa_collection_data.stat = NULL;
