@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,18 +30,13 @@
 #include "core/gc_content.h"
 #include "core/hashmap_api.h"
 #include "core/ma.h"
-#include "core/md5_fingerprint.h"
+#include "core/md5tab.h"
 #include "core/parseutils.h"
 #include "core/sig.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/xposix.h"
-
-typedef struct {
-  GtStrArray *md5_fingerprints;
-  GtHashmap *md5map; /* maps md5 to index */
-} BioseqFingerprints;
 
 struct GtBioseq {
   bool use_stdin;
@@ -54,145 +49,8 @@ struct GtBioseq {
   size_t raw_sequence_length,
          allocated;
   GtAlphabet *alphabet;
-  BioseqFingerprints *fingerprints;
+  GtMD5Tab *md5tab;
 };
-
-static bool read_fingerprints(GtStrArray *md5_fingerprints,
-                              GtStr *fingerprints_filename,
-                              unsigned long num_of_seqs)
-{
-  bool reading_succeeded = true;
-  FILE *fingerprint_file = NULL;
-  gt_assert(md5_fingerprints && fingerprints_filename);
-  /* open file */
-  if (gt_file_exists(gt_str_get(fingerprints_filename))) {
-    fingerprint_file = gt_fa_xfopen(gt_str_get(fingerprints_filename), "r");
-    gt_fa_lock_shared(fingerprint_file);
-  }
-  else
-    reading_succeeded = false;
-  /* reading file (each line contains a single MD5 sum) */
-  if (reading_succeeded) {
-    GtStr *line = gt_str_new();
-    while (gt_str_read_next_line(line, fingerprint_file) != EOF) {
-      gt_str_array_add(md5_fingerprints, line);
-      gt_str_reset(line);
-    }
-    gt_str_delete(line);
-    if (gt_str_array_size(md5_fingerprints) < num_of_seqs) {
-      /* premature end of file (e.g., due to aborted construction) */
-      reading_succeeded = false;
-      gt_str_array_set_size(md5_fingerprints, 0);
-    }
-    else
-      gt_assert(gt_str_array_size(md5_fingerprints) == num_of_seqs);
-  }
-  gt_fa_unlock(fingerprint_file);
-  gt_fa_xfclose(fingerprint_file);
-  return reading_succeeded;
-}
-
-static void add_fingerprints(GtStrArray *md5_fingerprints, GtBioseq *bs)
-{
-  unsigned long i;
-  gt_assert(md5_fingerprints && bs);
-  for (i = 0; i < gt_bioseq_number_of_sequences(bs); i++) {
-    char *md5 = gt_md5_fingerprint(gt_bioseq_get_sequence(bs, i),
-                                   gt_bioseq_get_sequence_length(bs, i));
-    gt_str_array_add_cstr(md5_fingerprints, md5);
-    gt_free(md5);
-  }
-}
-
-static void strarray_dump_to_file(GtStrArray *sa, FILE *outfp)
-{
-  unsigned long i;
-  gt_assert(sa && outfp);
-  for (i = 0; i < gt_str_array_size(sa); i++) {
-    gt_xfputs(gt_str_array_get(sa, i), outfp);
-    gt_xfputc('\n', outfp);
-  }
-}
-
-static void write_fingerprints(GtStrArray *md5_fingerprints,
-                               GtStr *fingerprints_filename)
-{
-  FILE *fingerprints_file;
-  gt_assert(md5_fingerprints && fingerprints_filename);
-  fingerprints_file = gt_fa_xfopen(gt_str_get(fingerprints_filename), "w");
-  gt_fa_lock_exclusive(fingerprints_file);
-  strarray_dump_to_file(md5_fingerprints, fingerprints_file);
-  gt_fa_unlock(fingerprints_file);
-  gt_fa_xfclose(fingerprints_file);
-}
-
-static BioseqFingerprints* bioseq_fingerprints_new(GtBioseq *bs)
-{
-  BioseqFingerprints *bsf;
-  bool reading_succeeded = false;
-  GtStr *fingerprints_filename;
-  unsigned long i;
-  gt_assert(bs);
-  bsf = gt_calloc(1, sizeof *bsf);
-  bsf->md5_fingerprints = gt_str_array_new();
-  fingerprints_filename = gt_str_clone(bs->sequence_file);
-  gt_str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
-  if (!bs->use_stdin && gt_file_exists(gt_str_get(fingerprints_filename)) &&
-      !gt_file_is_newer(gt_str_get(bs->sequence_file),
-                        gt_str_get(fingerprints_filename))) {
-    /* only try to read the fingerprint file if the sequence file was not
-       modified in the meantime */
-    reading_succeeded = read_fingerprints(bsf->md5_fingerprints,
-                                          fingerprints_filename,
-                                          gt_bioseq_number_of_sequences(bs));
-  }
-  if (!reading_succeeded) {
-    add_fingerprints(bsf->md5_fingerprints, bs);
-    if (!bs->use_stdin)
-      write_fingerprints(bsf->md5_fingerprints, fingerprints_filename);
-  }
-  gt_str_delete(fingerprints_filename);
-  /* fill md5 map */
-  bsf->md5map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
-  for (i = 0; i < gt_str_array_size(bsf->md5_fingerprints); i++) {
-    gt_hashmap_add(bsf->md5map,
-                   (void*) gt_str_array_get(bsf->md5_fingerprints,i),
-                   (void*) (i + 1));
-  }
-  return bsf;
-}
-
-static void gt_bioseq_fingerprints_delete(BioseqFingerprints *bsf)
-{
-  if (!bsf) return;
-  gt_hashmap_delete(bsf->md5map);
-  gt_str_array_delete(bsf->md5_fingerprints);
-  gt_free(bsf);
-}
-
-static const char* bioseq_fingerprints_get(BioseqFingerprints *bsf,
-                                           unsigned long idx)
-{
-  gt_assert(bsf);
-  return gt_str_array_get(bsf->md5_fingerprints, idx);
-}
-
-static GtStrArray* bioseq_fingerprints_get_all(BioseqFingerprints *bsf)
-{
-  gt_assert(bsf);
-  return bsf->md5_fingerprints;
-}
-
-static unsigned long bioseq_fingerprints_map(BioseqFingerprints *bsf,
-                                             const char *md5)
-{
-  const char *value;
-  gt_assert(bsf && md5);
-  value = gt_hashmap_get(bsf->md5map, md5);
-  if (value)
-    return ((unsigned long) value) - 1;
-  return GT_UNDEF_ULONG;
-}
 
 typedef struct {
   FILE *bioseq_index,
@@ -533,7 +391,7 @@ void gt_bioseq_delete(GtBioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
-  gt_bioseq_fingerprints_delete(bs->fingerprints);
+  gt_md5tab_delete(bs->md5tab);
   gt_str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < gt_array_size(bs->descriptions); i++)
@@ -594,7 +452,7 @@ const char* gt_bioseq_get_description(GtBioseq *bs, unsigned long idx)
   return *(char**) gt_array_get(bs->descriptions, idx);
 }
 
-const char* gt_bioseq_get_sequence(GtBioseq *bs, unsigned long idx)
+const char* gt_bioseq_get_sequence(const GtBioseq *bs, unsigned long idx)
 {
   GtRange sequence_range;
   gt_assert(bs);
@@ -608,21 +466,43 @@ const char* gt_bioseq_get_raw_sequence(GtBioseq *bs)
   return bs->raw_sequence;
 }
 
+static const char* bioseq_get_seq(const void *seqs, unsigned long idx)
+{
+  const GtBioseq *bs = seqs;
+  gt_assert(bs);
+  return gt_bioseq_get_sequence(bs, idx);
+}
+
+static unsigned long bioseq_get_seq_len(const void *seqs, unsigned long idx)
+{
+  const GtBioseq *bs = seqs;
+  gt_assert(bs);
+  return gt_bioseq_get_sequence_length(bs, idx);
+}
+
 const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
 {
   gt_assert(bs && idx < gt_bioseq_number_of_sequences(bs));
-  if (!bs->fingerprints)
-    bs->fingerprints = bioseq_fingerprints_new(bs);
-  gt_assert(bioseq_fingerprints_get(bs->fingerprints, idx));
-  return bioseq_fingerprints_get(bs->fingerprints, idx);
+  if (!bs->md5tab) {
+    bs->md5tab = gt_md5tab_new(gt_str_get(bs->sequence_file), bs,
+                               bioseq_get_seq, bioseq_get_seq_len,
+                               gt_bioseq_number_of_sequences(bs),
+                               !bs->use_stdin, true);
+  }
+  gt_assert(gt_md5tab_get(bs->md5tab, idx));
+  return gt_md5tab_get(bs->md5tab, idx);
 }
 
 GtStrArray* gt_bioseq_get_md5_fingerprints(GtBioseq *bs)
 {
   gt_assert(bs);
-  if (!bs->fingerprints)
-    bs->fingerprints = bioseq_fingerprints_new(bs);
-  return bioseq_fingerprints_get_all(bs->fingerprints);
+  if (!bs->md5tab) {
+    bs->md5tab = gt_md5tab_new(gt_str_get(bs->sequence_file), bs,
+                               bioseq_get_seq, bioseq_get_seq_len,
+                               gt_bioseq_number_of_sequences(bs),
+                               !bs->use_stdin, true);
+  }
+  return gt_md5tab_get_all(bs->md5tab);
 }
 
 const char* gt_bioseq_filename(const GtBioseq *bs)
@@ -631,7 +511,8 @@ const char* gt_bioseq_filename(const GtBioseq *bs)
   return gt_str_get(bs->sequence_file);
 }
 
-unsigned long gt_bioseq_get_sequence_length(GtBioseq *bs, unsigned long idx)
+unsigned long gt_bioseq_get_sequence_length(const GtBioseq *bs,
+                                            unsigned long idx)
 {
   gt_assert(bs);
   return gt_range_length(gt_array_get(bs->sequence_ranges, idx));
@@ -652,9 +533,13 @@ unsigned long gt_bioseq_number_of_sequences(GtBioseq *bs)
 unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
 {
   gt_assert(bs && md5);
-  if (!bs->fingerprints)
-    bs->fingerprints = bioseq_fingerprints_new(bs);
-  return bioseq_fingerprints_map(bs->fingerprints, md5);
+  if (!bs->md5tab) {
+    bs->md5tab = gt_md5tab_new(gt_str_get(bs->sequence_file), bs,
+                               bioseq_get_seq, bioseq_get_seq_len,
+                               gt_bioseq_number_of_sequences(bs),
+                               !bs->use_stdin, true);
+  }
+  return gt_md5tab_map(bs->md5tab, md5);
 }
 
 void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)

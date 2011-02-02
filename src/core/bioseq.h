@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,7 +27,6 @@
 /* GtBioseq file endings */
 #define GT_BIOSEQ_INDEX        ".gt_bsi"
 #define GT_BIOSEQ_RAW          ".gt_bsr"
-#define GT_BIOSEQ_FINGERPRINTS ".gt_bsf"
 
 typedef struct GtBioseq GtBioseq;
 
@@ -46,7 +45,7 @@ GtAlphabet*   gt_bioseq_get_alphabet(GtBioseq*);
 GtSeq*        gt_bioseq_get_seq(GtBioseq*, unsigned long);
 const char*   gt_bioseq_get_description(GtBioseq*, unsigned long);
 /* Return sequence with given <index> (not '\0' terminated). */
-const char*   gt_bioseq_get_sequence(GtBioseq*, unsigned long index);
+const char*   gt_bioseq_get_sequence(const GtBioseq*, unsigned long index);
 const char*   gt_bioseq_get_raw_sequence(GtBioseq*);
 /* Return MD5 fingerprint of sequence with given <index>. */
 const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
@@ -54,7 +53,8 @@ const char*   gt_bioseq_get_md5_fingerprint(GtBioseq*, unsigned long index);
 GtStrArray*   gt_bioseq_get_md5_fingerprints(GtBioseq *bioseq);
 /* Return filename of sequence file underlying <bioseq>. */
 const char*   gt_bioseq_filename(const GtBioseq *bioseq);
-unsigned long gt_bioseq_get_sequence_length(GtBioseq*, unsigned long index);
+unsigned long gt_bioseq_get_sequence_length(const GtBioseq*,
+                                            unsigned long index);
 unsigned long gt_bioseq_get_raw_sequence_length(GtBioseq*);
 unsigned long gt_bioseq_number_of_sequences(GtBioseq*);
 /* Return the index of the (first) sequence with given <MD5> contained in
