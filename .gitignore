@@ -3,6 +3,8 @@
 *.bak
 *.bck
 *.bdx
+*.bsi
+*.bsr
 *.bwt
 *.core
 *.csv
@@ -13,8 +15,6 @@
 *.fsp
 *.fsp
 *.gcov
-*.gt_bsi
-*.gt_bsr
 *.kys
 *.kys
 *.lcp

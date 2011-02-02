@@ -25,18 +25,18 @@ Name "gt seq test 1"
 Keywords "gt_seq"
 Test do
   run_test "#{$bin}gt seq -recreate #{$testdata}gt_bioseq_succ_1.fas"
-  if not File.exists?("#{$testdata}gt_bioseq_succ_1.fas.gt_bsi") then
-    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_1.fas.gt_bsi\" does not exist"
+  if not File.exists?("#{$testdata}gt_bioseq_succ_1.fas.bsi") then
+    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_1.fas.bsi\" does not exist"
   end
-  if not File.exists?("#{$testdata}gt_bioseq_succ_1.fas.gt_bsr") then
-    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_1.fas.gt_bsr\" does not exist"
+  if not File.exists?("#{$testdata}gt_bioseq_succ_1.fas.bsr") then
+    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_1.fas.bsr\" does not exist"
   end
-  old_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.gt_bsi")
-  old_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.gt_bsr")
+  old_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.bsi")
+  old_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.bsr")
   sleep(1)
   run_test "#{$bin}gt seq #{$testdata}gt_bioseq_succ_1.fas"
-  new_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.gt_bsi")
-  new_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.gt_bsr")
+  new_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.bsi")
+  new_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.bsr")
   # make sure the index file have not been recreated
   if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then
     raise TestFailed, "index files have been recreated"
@@ -53,18 +53,18 @@ Name "gt seq test 2"
 Keywords "gt_seq"
 Test do
   run_test "#{$bin}gt seq -recreate #{$testdata}gt_bioseq_succ_2.fas"
-  if not File.exists?("#{$testdata}gt_bioseq_succ_2.fas.gt_bsi") then
-    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_2.fas.gt_bsi\" does not exist"
+  if not File.exists?("#{$testdata}gt_bioseq_succ_2.fas.bsi") then
+    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_2.fas.bsi\" does not exist"
   end
-  if not File.exists?("#{$testdata}gt_bioseq_succ_2.fas.gt_bsr") then
-    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_2.fas.gt_bsr\" does not exist"
+  if not File.exists?("#{$testdata}gt_bioseq_succ_2.fas.bsr") then
+    raise TestFailed, "file \"#{$testdata}gt_bioseq_succ_2.fas.bsr\" does not exist"
   end
-  old_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.gt_bsi")
-  old_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.gt_bsr")
+  old_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.bsi")
+  old_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.bsr")
   sleep(1)
   run_test "#{$bin}gt seq #{$testdata}gt_bioseq_succ_2.fas"
-  new_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.gt_bsi")
-  new_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.gt_bsr")
+  new_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.bsi")
+  new_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.bsr")
   # make sure the index file have not been recreated
   if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then
     raise TestFailed, "index files have been recreated"

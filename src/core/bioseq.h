@@ -25,8 +25,8 @@
 #include "core/str.h"
 
 /* GtBioseq file endings */
-#define GT_BIOSEQ_INDEX        ".gt_bsi"
-#define GT_BIOSEQ_RAW          ".gt_bsr"
+#define GT_BIOSEQ_INDEX        ".bsi"
+#define GT_BIOSEQ_RAW          ".bsr"
 
 typedef struct GtBioseq GtBioseq;
 
