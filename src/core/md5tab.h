@@ -18,8 +18,7 @@
 #ifndef MD5TAB_H
 #define MD5TAB_H
 
-/* XXX: change to ".md5" */
-#define GT_BIOSEQ_FINGERPRINTS ".gt_bsf"
+#define GT_MD5TAB_FILE_SUFFIX ".md5"
 
 typedef struct GtMD5Tab GtMD5Tab;
 

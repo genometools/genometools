@@ -13,7 +13,6 @@
 *.fsp
 *.fsp
 *.gcov
-*.gt_bsf
 *.gt_bsi
 *.gt_bsr
 *.kys
@@ -22,6 +21,7 @@
 *.llv
 *.mbd
 *.mct
+*.md5
 *.mem
 *.mer
 *.ois

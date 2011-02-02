@@ -113,7 +113,7 @@ GtMD5Tab* gt_md5tab_new(const char *sequence_file, const void *seqs,
   md5tab = gt_calloc(1, sizeof *md5tab);
   md5tab->md5_fingerprints = gt_str_array_new();
   fingerprints_filename = gt_str_new_cstr(sequence_file);
-  gt_str_append_cstr(fingerprints_filename, GT_BIOSEQ_FINGERPRINTS);
+  gt_str_append_cstr(fingerprints_filename, GT_MD5TAB_FILE_SUFFIX);
   if (use_cache_file && gt_file_exists(gt_str_get(fingerprints_filename)) &&
       !gt_file_is_newer(sequence_file, gt_str_get(fingerprints_filename))) {
     /* only try to read the fingerprint file if the sequence file was not

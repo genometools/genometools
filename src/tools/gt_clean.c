@@ -84,8 +84,8 @@ int gt_clean(int argc, const char **argv, GtError *err)
   /* remove GT_BIOSEQ_RAW files */
   remove_pattern_in_current_dir(GT_BIOSEQ_RAW);
 
-  /* remove GT_BIOSEQ_FINGERPRINTS files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_FINGERPRINTS);
+  /* remove MD5 table files */
+  remove_pattern_in_current_dir(GT_MD5TAB_FILE_SUFFIX);
 
   return 0;
 }
