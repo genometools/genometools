@@ -38,7 +38,7 @@
    table with the '.ssp' suffix is required. If support for sequence
    descriptions is required, two additional tables are needed: a __description__
    table with the suffix '.des' and a __description separator__ table with the
-   file suffix '.sds.'. Creation and requirement of these tables can be switched
+   file suffix '.sds'. Creation and requirement of these tables can be switched
    on and off using API functions as outlined below.
    The <GtEncseq> represents the stored sequences as one concatenated string.
    It allows access to the sequences by providing start positions and lengths
