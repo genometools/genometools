@@ -174,3 +174,9 @@ unsigned long gt_md5_tab_map(GtMD5Tab *md5_tab, const char *md5)
     return ((unsigned long) value) - 1;
   return GT_UNDEF_ULONG;
 }
+
+unsigned long gt_md5_tab_size(const GtMD5Tab *md5_tab)
+{
+  gt_assert(md5_tab);
+  return md5_tab->num_of_md5s;
+}

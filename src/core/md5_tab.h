@@ -40,5 +40,6 @@ void          gt_md5_tab_delete(GtMD5Tab *md5_tab);
 const char*   gt_md5_tab_get(const GtMD5Tab*, unsigned long index);
 /* Map <md5> back to sequence index. */
 unsigned long gt_md5_tab_map(GtMD5Tab*, const char *md5);
+unsigned long gt_md5_tab_size(const GtMD5Tab*);
 
 #endif
