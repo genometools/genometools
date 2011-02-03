@@ -38,7 +38,7 @@ static unsigned long seq_col_get_seq_len(void *seqs, unsigned long index)
   return gth_seq_col_get_length(seq_col, index);
 }
 
-static GtStr* get_md5_str(const void *str_source, unsigned long index)
+static GtStr* get_md5_str(void *str_source, unsigned long index)
 {
   const GtMD5Tab *md5_tab = str_source;
   gt_assert(md5_tab);

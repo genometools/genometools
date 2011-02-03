@@ -21,8 +21,7 @@
 
 typedef struct GtStrCache GtStrCache;
 
-typedef GtStr* (*GtStrConstructorFunc)(const void *str_source,
-                                       unsigned long index);
+typedef GtStr* (*GtStrConstructorFunc)(void *str_source, unsigned long index);
 
 /* Create a new string cache object for <num_of_strings> many strings creatable
    from <str_source> with the function <str_constructor>.
@@ -30,7 +29,7 @@ typedef GtStr* (*GtStrConstructorFunc)(const void *str_source,
    <gt_str_cache_get()>, a new string object is created via <str_constructor>
    and then cached and returned. Subsequent calls to <gt_str_cache_get()> for
    the same string return a new reference made from the cached string. */
-GtStrCache* gt_str_cache_new(const void *str_source,
+GtStrCache* gt_str_cache_new(void *str_source,
                              GtStrConstructorFunc str_constructor,
                              unsigned long num_of_strings);
 void        gt_str_cache_delete(GtStrCache*);

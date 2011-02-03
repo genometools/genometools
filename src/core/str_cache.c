@@ -19,12 +19,12 @@
 
 struct GtStrCache {
   GtStr **cache;
-  const void *source;
+  void *source;
   GtStrConstructorFunc constructor;
   unsigned long num_of_strings;
 };
 
-GtStrCache* gt_str_cache_new(const void *str_source,
+GtStrCache* gt_str_cache_new(void *str_source,
                              GtStrConstructorFunc str_constructor,
                              unsigned long num_of_strings)
 {
