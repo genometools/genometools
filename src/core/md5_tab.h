@@ -18,12 +18,14 @@
 #ifndef MD5_TAB_H
 #define MD5_TAB_H
 
+#include <stdbool.h>
+
 #define GT_MD5_TAB_FILE_SUFFIX ".md5"
 
 typedef struct GtMD5Tab GtMD5Tab;
 
-typedef const char*   (*GtGetSeqFunc)(const void *seqs, unsigned long index);
-typedef unsigned long (*GtGetSeqLenFunc)(const void *seqs, unsigned long index);
+typedef const char*   (*GtGetSeqFunc)(void *seqs, unsigned long index);
+typedef unsigned long (*GtGetSeqLenFunc)(void *seqs, unsigned long index);
 
 /* Create a new MD5 table object for sequences contained in <sequence_file>.
    The sequences have to be stored in <seqs> (<num_of_seqs> many) and have to be
@@ -32,7 +34,7 @@ typedef unsigned long (*GtGetSeqLenFunc)(const void *seqs, unsigned long index);
    "<sequence_file><GT_MD5TAB_FILE_SUFFIX>"), if it exists or written to it, if
    it doesn't exist. If <use_cache_file> is <false>, no cache file is read or
    written. */
-GtMD5Tab*     gt_md5_tab_new(const char *sequence_file, const void *seqs,
+GtMD5Tab*     gt_md5_tab_new(const char *sequence_file, void *seqs,
                              GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
                              unsigned long num_of_seqs, bool use_cache_file);
 void          gt_md5_tab_delete(GtMD5Tab *md5_tab);

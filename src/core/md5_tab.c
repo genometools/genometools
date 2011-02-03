@@ -59,7 +59,7 @@ static bool read_fingerprints(GtMD5Tab *md5_tab, GtStr *fingerprints_filename)
   return reading_succeeded;
 }
 
-static void add_fingerprints(char **md5_fingerprints, const void *seqs,
+static void add_fingerprints(char **md5_fingerprints, void *seqs,
                              GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
                              unsigned long num_of_seqs)
 {
@@ -95,7 +95,7 @@ static void write_fingerprints(char **md5_fingerprints,
   gt_fa_xfclose(fingerprints_file);
 }
 
-GtMD5Tab* gt_md5_tab_new(const char *sequence_file, const void *seqs,
+GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
                          GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
                          unsigned long num_of_seqs, bool use_cache_file)
 {

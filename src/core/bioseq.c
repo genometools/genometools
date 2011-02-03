@@ -466,14 +466,14 @@ const char* gt_bioseq_get_raw_sequence(GtBioseq *bs)
   return bs->raw_sequence;
 }
 
-static const char* bioseq_get_seq(const void *seqs, unsigned long idx)
+static const char* bioseq_get_seq(void *seqs, unsigned long idx)
 {
   const GtBioseq *bs = seqs;
   gt_assert(bs);
   return gt_bioseq_get_sequence(bs, idx);
 }
 
-static unsigned long bioseq_get_seq_len(const void *seqs, unsigned long idx)
+static unsigned long bioseq_get_seq_len(void *seqs, unsigned long idx)
 {
   const GtBioseq *bs = seqs;
   gt_assert(bs);
