@@ -156,12 +156,6 @@ const char* gt_md5tab_get(const GtMD5Tab *md5tab, unsigned long idx)
   return gt_str_array_get(md5tab->md5_fingerprints, idx);
 }
 
-GtStrArray* gt_md5tab_get_all(const GtMD5Tab *md5tab)
-{
-  gt_assert(md5tab);
-  return md5tab->md5_fingerprints;
-}
-
 unsigned long gt_md5tab_map(const GtMD5Tab *md5tab, const char *md5)
 {
   const char *value;

@@ -40,8 +40,6 @@ GtMD5Tab*     gt_md5tab_new(const char *sequence_file, const void *seqs,
 void          gt_md5tab_delete(GtMD5Tab *md5tab);
 /* Return the MD5 sum for sequence <index>. */
 const char*   gt_md5tab_get(const GtMD5Tab*, unsigned long index);
-/* Return all MD5 sums as a <GtStrArray>. */
-GtStrArray*   gt_md5tab_get_all(const GtMD5Tab*);
 /* Map <md5> back to sequence index. <gt_md5tab_new()> must have been called
    with <build_map> set to <true>! */
 unsigned long gt_md5tab_map(const GtMD5Tab*, const char *md5);

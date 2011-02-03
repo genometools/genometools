@@ -89,6 +89,7 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   return input;
 }
 
+#if 0
 static int fillMD5s_for_filenames(GtStrArray **md5s, GtStrArray *filenames,
                                   GtError *err)
 {
@@ -124,6 +125,7 @@ static int fillMD5s(GthInput *input, GtError *err)
   }
   return had_err;
 }
+#endif
 
 int gth_input_preprocess(GthInput *input,
                          bool gthconsensus,
@@ -148,7 +150,10 @@ int gth_input_preprocess(GthInput *input,
     had_err = gth_input_load_scorematrix(input, scorematrixfile, out, err);
   if (!had_err && out->md5ids) {
     input->md5ids = out->md5ids;
+    gt_assert(0);
+#if 0
     had_err = fillMD5s(input, err);
+#endif
   }
   return had_err;
 }
@@ -348,12 +353,15 @@ void gth_input_save_gen_id(GthInput *input, GtStr *id,
 {
   gt_assert(input && id);
   gt_assert(input->gen_file_num == file_num);
+  /* XXX */
+#if 0
   if (input->md5ids) {
     gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
     gt_str_append_cstr(id, gt_str_array_get(input->genomicMD5s[file_num],
                                             seq_num));
   }
   else
+#endif
     save_sequenceid(id, input->genomic_seq_col, seq_num);
 }
 
@@ -362,12 +370,15 @@ void gth_input_save_ref_id(GthInput *input, GtStr *id,
 {
   gt_assert(input && id);
   gt_assert(input->ref_file_num == file_num);
+  /* XXX */
+#if 0
   if (input->md5ids) {
     gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
     gt_str_append_cstr(id, gt_str_array_get(input->referenceMD5s[file_num],
                                             seq_num));
   }
   else
+#endif
     save_sequenceid(id, input->reference_seq_col, seq_num);
 }
 

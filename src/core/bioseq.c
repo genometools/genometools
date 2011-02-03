@@ -493,18 +493,6 @@ const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
   return gt_md5tab_get(bs->md5tab, idx);
 }
 
-GtStrArray* gt_bioseq_get_md5_fingerprints(GtBioseq *bs)
-{
-  gt_assert(bs);
-  if (!bs->md5tab) {
-    bs->md5tab = gt_md5tab_new(gt_str_get(bs->sequence_file), bs,
-                               bioseq_get_seq, bioseq_get_seq_len,
-                               gt_bioseq_number_of_sequences(bs),
-                               !bs->use_stdin, true);
-  }
-  return gt_md5tab_get_all(bs->md5tab);
-}
-
 const char* gt_bioseq_filename(const GtBioseq *bs)
 {
   gt_assert(bs);
