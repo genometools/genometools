@@ -31,17 +31,14 @@ typedef unsigned long (*GtGetSeqLenFunc)(const void *seqs, unsigned long index);
    is <true>, the MD5 sums are read from a cache file (named
    "<sequence_file><GT_MD5TAB_FILE_SUFFIX>"), if it exists or written to it, if
    it doesn't exist. If <use_cache_file> is <false>, no cache file is read or
-   written. If <build_map> is <true>, an MD5 sum to sequence index map is build
-   in memory which can later be queried with <gt_md5tab_map()>. */
+   written. */
 GtMD5Tab*     gt_md5tab_new(const char *sequence_file, const void *seqs,
                             GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                            unsigned long num_of_seqs, bool use_cache_file,
-                            bool build_map);
+                            unsigned long num_of_seqs, bool use_cache_file);
 void          gt_md5tab_delete(GtMD5Tab *md5tab);
 /* Return the MD5 sum for sequence <index>. */
 const char*   gt_md5tab_get(const GtMD5Tab*, unsigned long index);
-/* Map <md5> back to sequence index. <gt_md5tab_new()> must have been called
-   with <build_map> set to <true>! */
-unsigned long gt_md5tab_map(const GtMD5Tab*, const char *md5);
+/* Map <md5> back to sequence index. */
+unsigned long gt_md5tab_map(GtMD5Tab*, const char *md5);
 
 #endif
