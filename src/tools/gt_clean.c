@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/bioseq.h"
-#include "core/md5tab.h"
+#include "core/md5_tab.h"
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"
@@ -85,7 +85,7 @@ int gt_clean(int argc, const char **argv, GtError *err)
   remove_pattern_in_current_dir(GT_BIOSEQ_RAW);
 
   /* remove MD5 table files */
-  remove_pattern_in_current_dir(GT_MD5TAB_FILE_SUFFIX);
+  remove_pattern_in_current_dir(GT_MD5_TAB_FILE_SUFFIX);
 
   return 0;
 }

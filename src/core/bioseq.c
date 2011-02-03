@@ -30,7 +30,7 @@
 #include "core/gc_content.h"
 #include "core/hashmap_api.h"
 #include "core/ma.h"
-#include "core/md5tab.h"
+#include "core/md5_tab.h"
 #include "core/parseutils.h"
 #include "core/sig.h"
 #include "core/undef.h"
@@ -49,7 +49,7 @@ struct GtBioseq {
   size_t raw_sequence_length,
          allocated;
   GtAlphabet *alphabet;
-  GtMD5Tab *md5tab;
+  GtMD5Tab *md5_tab;
 };
 
 typedef struct {
@@ -391,7 +391,7 @@ void gt_bioseq_delete(GtBioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
-  gt_md5tab_delete(bs->md5tab);
+  gt_md5_tab_delete(bs->md5_tab);
   gt_str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < gt_array_size(bs->descriptions); i++)
@@ -483,14 +483,14 @@ static unsigned long bioseq_get_seq_len(const void *seqs, unsigned long idx)
 const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
 {
   gt_assert(bs && idx < gt_bioseq_number_of_sequences(bs));
-  if (!bs->md5tab) {
-    bs->md5tab = gt_md5tab_new(gt_str_get(bs->sequence_file), bs,
-                               bioseq_get_seq, bioseq_get_seq_len,
-                               gt_bioseq_number_of_sequences(bs),
-                               !bs->use_stdin);
+  if (!bs->md5_tab) {
+    bs->md5_tab = gt_md5_tab_new(gt_str_get(bs->sequence_file), bs,
+                                 bioseq_get_seq, bioseq_get_seq_len,
+                                 gt_bioseq_number_of_sequences(bs),
+                                 !bs->use_stdin);
   }
-  gt_assert(gt_md5tab_get(bs->md5tab, idx));
-  return gt_md5tab_get(bs->md5tab, idx);
+  gt_assert(gt_md5_tab_get(bs->md5_tab, idx));
+  return gt_md5_tab_get(bs->md5_tab, idx);
 }
 
 const char* gt_bioseq_filename(const GtBioseq *bs)
@@ -521,13 +521,13 @@ unsigned long gt_bioseq_number_of_sequences(GtBioseq *bs)
 unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
 {
   gt_assert(bs && md5);
-  if (!bs->md5tab) {
-    bs->md5tab = gt_md5tab_new(gt_str_get(bs->sequence_file), bs,
-                               bioseq_get_seq, bioseq_get_seq_len,
-                               gt_bioseq_number_of_sequences(bs),
-                               !bs->use_stdin);
+  if (!bs->md5_tab) {
+    bs->md5_tab = gt_md5_tab_new(gt_str_get(bs->sequence_file), bs,
+                                 bioseq_get_seq, bioseq_get_seq_len,
+                                 gt_bioseq_number_of_sequences(bs),
+                                 !bs->use_stdin);
   }
-  return gt_md5tab_map(bs->md5tab, md5);
+  return gt_md5_tab_map(bs->md5_tab, md5);
 }
 
 void gt_bioseq_show_as_fasta(GtBioseq *bs, unsigned long width, GtFile *outfp)

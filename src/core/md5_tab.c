@@ -20,7 +20,7 @@
 #include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
-#include "core/md5tab.h"
+#include "core/md5_tab.h"
 #include "core/undef.h"
 #include "core/xansi_api.h"
 
@@ -33,25 +33,24 @@ struct GtMD5Tab{
   GtHashmap *md5map; /* maps md5 to index */
 };
 
-static bool read_fingerprints(GtMD5Tab *md5tab,
-                              GtStr *fingerprints_filename)
+static bool read_fingerprints(GtMD5Tab *md5_tab, GtStr *fingerprints_filename)
 {
   bool reading_succeeded = true;
   size_t len;
-  gt_assert(md5tab && fingerprints_filename);
+  gt_assert(md5_tab && fingerprints_filename);
   /* open file */
   if (gt_file_exists(gt_str_get(fingerprints_filename))) {
-    md5tab->fingerprints_file = gt_fa_xfopen(gt_str_get(fingerprints_filename),
-                                             "r");
-    gt_fa_lock_shared(md5tab->fingerprints_file);
-    md5tab->fingerprints = gt_fa_xmmap_read(gt_str_get(fingerprints_filename),
-                                            &len);
-    if (len != md5tab->num_of_md5s * 33) {
-      gt_fa_xmunmap(md5tab->fingerprints);
-      md5tab->fingerprints = NULL;
-      gt_fa_unlock(md5tab->fingerprints_file);
-      gt_fa_xfclose(md5tab->fingerprints_file);
-      md5tab->fingerprints_file = NULL;
+    md5_tab->fingerprints_file = gt_fa_xfopen(gt_str_get(fingerprints_filename),
+                                              "r");
+    gt_fa_lock_shared(md5_tab->fingerprints_file);
+    md5_tab->fingerprints = gt_fa_xmmap_read(gt_str_get(fingerprints_filename),
+                                             &len);
+    if (len != md5_tab->num_of_md5s * 33) {
+      gt_fa_xmunmap(md5_tab->fingerprints);
+      md5_tab->fingerprints = NULL;
+      gt_fa_unlock(md5_tab->fingerprints_file);
+      gt_fa_xfclose(md5_tab->fingerprints_file);
+      md5_tab->fingerprints_file = NULL;
       reading_succeeded = false;
     }
   }
@@ -96,81 +95,81 @@ static void write_fingerprints(char **md5_fingerprints,
   gt_fa_xfclose(fingerprints_file);
 }
 
-GtMD5Tab* gt_md5tab_new(const char *sequence_file, const void *seqs,
-                        GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                        unsigned long num_of_seqs, bool use_cache_file)
+GtMD5Tab* gt_md5_tab_new(const char *sequence_file, const void *seqs,
+                         GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
+                         unsigned long num_of_seqs, bool use_cache_file)
 {
-  GtMD5Tab *md5tab;
+  GtMD5Tab *md5_tab;
   bool reading_succeeded = false;
   GtStr *fingerprints_filename;
   gt_assert(sequence_file && seqs && get_seq && get_seq_len);
-  md5tab = gt_calloc(1, sizeof *md5tab);
-  md5tab->num_of_md5s = num_of_seqs;
+  md5_tab = gt_calloc(1, sizeof *md5_tab);
+  md5_tab->num_of_md5s = num_of_seqs;
   fingerprints_filename = gt_str_new_cstr(sequence_file);
-  gt_str_append_cstr(fingerprints_filename, GT_MD5TAB_FILE_SUFFIX);
+  gt_str_append_cstr(fingerprints_filename, GT_MD5_TAB_FILE_SUFFIX);
   if (use_cache_file && gt_file_exists(gt_str_get(fingerprints_filename)) &&
       !gt_file_is_newer(sequence_file, gt_str_get(fingerprints_filename))) {
     /* only try to read the fingerprint file if the sequence file was not
        modified in the meantime */
-    reading_succeeded = read_fingerprints(md5tab, fingerprints_filename);
+    reading_succeeded = read_fingerprints(md5_tab, fingerprints_filename);
   }
   if (!reading_succeeded) {
-    md5tab->md5_fingerprints = gt_calloc(num_of_seqs, sizeof (char*));
-    add_fingerprints(md5tab->md5_fingerprints, seqs, get_seq, get_seq_len,
+    md5_tab->md5_fingerprints = gt_calloc(num_of_seqs, sizeof (char*));
+    add_fingerprints(md5_tab->md5_fingerprints, seqs, get_seq, get_seq_len,
                      num_of_seqs);
-    md5tab->owns_md5s = true;
+    md5_tab->owns_md5s = true;
     if (use_cache_file) {
-      write_fingerprints(md5tab->md5_fingerprints, md5tab->num_of_md5s,
+      write_fingerprints(md5_tab->md5_fingerprints, md5_tab->num_of_md5s,
                          fingerprints_filename);
     }
   }
   gt_str_delete(fingerprints_filename);
-  return md5tab;
+  return md5_tab;
 }
 
-void gt_md5tab_delete(GtMD5Tab *md5tab)
+void gt_md5_tab_delete(GtMD5Tab *md5_tab)
 {
   unsigned long i;
-  if (!md5tab) return;
-  gt_fa_xmunmap(md5tab->fingerprints);
-  gt_fa_unlock(md5tab->fingerprints_file);
-  gt_fa_xfclose(md5tab->fingerprints_file);
-  gt_hashmap_delete(md5tab->md5map);
-  if (md5tab->owns_md5s) {
-    for (i = 0; i < md5tab->num_of_md5s; i++)
-      gt_free(md5tab->md5_fingerprints[i]);
-    gt_free(md5tab->md5_fingerprints);
+  if (!md5_tab) return;
+  gt_fa_xmunmap(md5_tab->fingerprints);
+  gt_fa_unlock(md5_tab->fingerprints_file);
+  gt_fa_xfclose(md5_tab->fingerprints_file);
+  gt_hashmap_delete(md5_tab->md5map);
+  if (md5_tab->owns_md5s) {
+    for (i = 0; i < md5_tab->num_of_md5s; i++)
+      gt_free(md5_tab->md5_fingerprints[i]);
+    gt_free(md5_tab->md5_fingerprints);
   }
-  gt_free(md5tab);
+  gt_free(md5_tab);
 }
 
-const char* gt_md5tab_get(const GtMD5Tab *md5tab, unsigned long idx)
+const char* gt_md5_tab_get(const GtMD5Tab *md5_tab, unsigned long idx)
 {
-  gt_assert(md5tab && idx < md5tab->num_of_md5s);
-  if (md5tab->owns_md5s)
-    return md5tab->md5_fingerprints[idx];
- return md5tab->fingerprints + idx * 33;
+  gt_assert(md5_tab && idx < md5_tab->num_of_md5s);
+  if (md5_tab->owns_md5s)
+    return md5_tab->md5_fingerprints[idx];
+ return md5_tab->fingerprints + idx * 33;
 }
 
-static void build_md5map(GtMD5Tab *md5tab)
+static void build_md5map(GtMD5Tab *md5_tab)
 {
   unsigned long i;
-  gt_assert(md5tab);
-  md5tab->md5map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
-  for (i = 0; i < md5tab->num_of_md5s; i++) {
-    gt_hashmap_add(md5tab->md5map, (void*) gt_md5tab_get(md5tab, i),
+  gt_assert(md5_tab);
+  md5_tab->md5map = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  for (i = 0; i < md5_tab->num_of_md5s; i++) {
+    gt_hashmap_add(md5_tab->md5map, (void*) gt_md5_tab_get(md5_tab, i),
                    (void*) (i + 1));
   }
 }
 
-unsigned long gt_md5tab_map(GtMD5Tab *md5tab, const char *md5)
+unsigned long gt_md5_tab_map(GtMD5Tab *md5_tab, const char *md5)
 {
   const char *value;
-  gt_assert(md5tab && md5);
-  if (!md5tab->md5map)
-    build_md5map(md5tab);
-  gt_assert(md5tab->md5map);
-  value = gt_hashmap_get(md5tab->md5map, md5);
+  gt_assert(md5_tab && md5);
+  if (!md5_tab->md5map)
+    build_md5map(md5_tab);
+  gt_assert(md5_tab->md5map);
+  value = gt_hashmap_get(md5_tab->md5map, md5);
   if (value)
     return ((unsigned long) value) - 1;
   return GT_UNDEF_ULONG;

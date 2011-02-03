@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MD5TAB_H
-#define MD5TAB_H
+#ifndef MD5_TAB_H
+#define MD5_TAB_H
 
-#define GT_MD5TAB_FILE_SUFFIX ".md5"
+#define GT_MD5_TAB_FILE_SUFFIX ".md5"
 
 typedef struct GtMD5Tab GtMD5Tab;
 
@@ -32,13 +32,13 @@ typedef unsigned long (*GtGetSeqLenFunc)(const void *seqs, unsigned long index);
    "<sequence_file><GT_MD5TAB_FILE_SUFFIX>"), if it exists or written to it, if
    it doesn't exist. If <use_cache_file> is <false>, no cache file is read or
    written. */
-GtMD5Tab*     gt_md5tab_new(const char *sequence_file, const void *seqs,
-                            GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                            unsigned long num_of_seqs, bool use_cache_file);
-void          gt_md5tab_delete(GtMD5Tab *md5tab);
+GtMD5Tab*     gt_md5_tab_new(const char *sequence_file, const void *seqs,
+                             GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
+                             unsigned long num_of_seqs, bool use_cache_file);
+void          gt_md5_tab_delete(GtMD5Tab *md5_tab);
 /* Return the MD5 sum for sequence <index>. */
-const char*   gt_md5tab_get(const GtMD5Tab*, unsigned long index);
+const char*   gt_md5_tab_get(const GtMD5Tab*, unsigned long index);
 /* Map <md5> back to sequence index. */
-unsigned long gt_md5tab_map(GtMD5Tab*, const char *md5);
+unsigned long gt_md5_tab_map(GtMD5Tab*, const char *md5);
 
 #endif
