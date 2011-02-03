@@ -322,7 +322,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
                                               &sa_collection->duplicate_check);
 
     while ((spliced_alignmentptr) &&
-           (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
+           (!compare_duplicate(saB, spliced_alignmentptr,
+                               &sa_collection->duplicate_check))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
          check if it spans saB */
       action = span_check(spliced_alignmentptr, saB);
@@ -352,7 +353,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
                                           compare_duplicate_and_genomic_pos,
                                           &sa_collection->duplicate_check);
     while ((spliced_alignmentptr) &&
-           (!compare_duplicate(saB, spliced_alignmentptr, NULL))) {
+           (!compare_duplicate(saB, spliced_alignmentptr,
+                               &sa_collection->duplicate_check))) {
       /* spliced_alignmentptr has the same ids and strand orientations:
          check if it spans saB */
       action = span_check(spliced_alignmentptr, saB);
