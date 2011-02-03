@@ -78,7 +78,9 @@ int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)
                                    call_info->simfilterparam.inverse,
                                    call_info->progname,
                                    gt_str_get(call_info->scorematrixfile),
-                                   call_info->translationtable, call_info->out,
+                                   call_info->translationtable,
+                                   call_info->duplicate_check,
+                                   call_info->out,
                                    err);
   }
 

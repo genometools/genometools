@@ -28,15 +28,6 @@
 #include "gth/sa_filter.h"
 #include "gth/splice_site_model.h"
 
-typedef enum {
-  GTH_DC_NONE,
-  GTH_DC_ID,
-  GTH_DC_DESC,
-  GTH_DC_SEQ,
-  GTH_DC_BOTH,
-  GTH_NUM_OF_DC_MODES
-} GthDuplicateCheck;
-
 /* contains the all the parameters, which are passed to the program */
 typedef struct {
   unsigned int translationtable,     /* translation table used at various places

@@ -22,6 +22,7 @@
 #include "core/range.h"
 #include "core/score_matrix.h"
 #include "core/str_array.h"
+#include "gth/duplicate_check.h"
 #include "gth/gthoutput.h"
 #include "gth/gthalphatype.h"
 #include "gth/seq_col.h"
@@ -51,6 +52,7 @@ int            gth_input_preprocess(GthInput*,
                                     const char *progname,
                                     char *scorematrixfile,
                                     unsigned int translationtable,
+                                    GthDuplicateCheck duplicate_check,
                                     GthOutput *out, GtError*);
 void           gth_input_add_genomic_file(GthInput*, const char *filename);
 void           gth_input_add_cdna_file(GthInput*, const char *filename);
