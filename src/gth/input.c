@@ -321,16 +321,7 @@ void gth_input_save_gen_id(GthInput *input, GtStr *id,
 {
   gt_assert(input && id);
   gt_assert(input->gen_file_num == file_num);
-  /* XXX */
-#if 0
-  if (input->md5ids) {
-    gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
-    gt_str_append_cstr(id, gt_str_array_get(input->genomicMD5s[file_num],
-                                            seq_num));
-  }
-  else
-#endif
-    save_sequenceid(id, input->gen_seq_col, seq_num);
+  save_sequenceid(id, input->gen_seq_col, seq_num);
 }
 
 void gth_input_save_ref_id(GthInput *input, GtStr *id,
@@ -338,16 +329,43 @@ void gth_input_save_ref_id(GthInput *input, GtStr *id,
 {
   gt_assert(input && id);
   gt_assert(input->ref_file_num == file_num);
-  /* XXX */
-#if 0
-  if (input->md5ids) {
-    gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
-    gt_str_append_cstr(id, gt_str_array_get(input->referenceMD5s[file_num],
-                                            seq_num));
-  }
-  else
-#endif
-    save_sequenceid(id, input->ref_seq_col, seq_num);
+  save_sequenceid(id, input->ref_seq_col, seq_num);
+}
+
+void gth_input_save_gen_md5(GthInput *input, GtStr **md5,
+                            unsigned long file_num, unsigned long seq_num)
+{
+  gt_assert(input && input->gen_file_num == file_num);
+  gt_assert(md5 && !*md5);
+  if (input->use_md5_cache)
+    *md5 = gth_md5_cache_get(input->gen_md5_cache, seq_num);
+}
+
+void gth_input_save_ref_md5(GthInput *input, GtStr **md5,
+                            unsigned long file_num, unsigned long seq_num)
+{
+  gt_assert(input && input->ref_file_num == file_num);
+  gt_assert(md5 && !*md5);
+  if (input->use_md5_cache)
+    *md5 = gth_md5_cache_get(input->gen_md5_cache, seq_num);
+}
+
+void gth_input_save_gen_desc(GthInput *input, GtStr **desc,
+                             unsigned long file_num, unsigned long seq_num)
+{
+  gt_assert(input && input->gen_file_num == file_num);
+  gt_assert(desc && !*desc);
+  if (input->use_desc_cache)
+    *desc = gth_desc_cache_get(input->gen_desc_cache, seq_num);
+}
+
+void gth_input_save_ref_desc(GthInput *input, GtStr **desc,
+                             unsigned long file_num, unsigned long seq_num)
+{
+  gt_assert(input && input->ref_file_num == file_num);
+  gt_assert(desc && !*desc);
+  if (input->use_desc_cache)
+    *desc = gth_desc_cache_get(input->ref_desc_cache, seq_num);
 }
 
 unsigned long gth_input_num_of_gen_files(const GthInput *input)

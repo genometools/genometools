@@ -91,6 +91,18 @@ void           gth_input_save_gen_id(GthInput*, GtStr *id,
 void           gth_input_save_ref_id(GthInput*, GtStr *id,
                                      unsigned long file_num,
                                      unsigned long seq_num);
+void           gth_input_save_gen_md5(GthInput*, GtStr **md5,
+                                      unsigned long file_num,
+                                      unsigned long seq_num);
+void           gth_input_save_ref_md5(GthInput*, GtStr **md5,
+                                      unsigned long file_num,
+                                      unsigned long seq_num);
+void           gth_input_save_gen_desc(GthInput*, GtStr **desc,
+                                       unsigned long file_num,
+                                       unsigned long seq_num);
+void           gth_input_save_ref_desc(GthInput*, GtStr **desc,
+                                       unsigned long file_num,
+                                       unsigned long seq_num);
 unsigned long  gth_input_num_of_gen_files(const GthInput*);
 unsigned long  gth_input_num_of_ref_files(const GthInput*);
 unsigned long  gth_input_num_of_gen_seqs(GthInput*, unsigned long filenum);

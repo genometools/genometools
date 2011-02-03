@@ -39,7 +39,15 @@ struct GthSA {
                 ref_file_num,        /* reference file number */
                 ref_seq_num;         /* reference sequence number */
   GtStr *gen_id,                     /* contains id of genomic sequence */
-        *ref_id;                     /* contains id of reference sequence */
+        *ref_id,                     /* contains id of reference sequence */
+        *gen_md5,                    /* contains MD5 of genomic sequence, if
+                                        necessary */
+        *ref_md5,                    /* contains MD5 of reference sequence, if
+                                        necessary */
+        *gen_desc,                   /* contains description of genomic
+                                        sequence, if necessary */
+        *ref_desc;                   /* contains description of reference
+                                        sequence, if necessary */
   bool gen_strand_forward,           /* equals true, iff the alignment relates
                                         to the forward strand of the genomic
                                         sequence */
@@ -116,6 +124,14 @@ GthSA* gth_sa_new_and_set(bool gen_strand_forward,
   gth_input_save_gen_id(input, sa->gen_id, gen_file_num, gen_seq_num);
   gth_input_save_ref_id(input, sa->ref_id, ref_file_num, ref_seq_num);
 
+  /* saving MD5s, if necessary */
+  gth_input_save_gen_md5(input, &sa->gen_md5, gen_file_num, gen_seq_num);
+  gth_input_save_ref_md5(input, &sa->ref_md5, ref_file_num, ref_seq_num);
+
+  /* saving descriptions, if necessary */
+  gth_input_save_gen_desc(input, &sa->gen_desc, gen_file_num, gen_seq_num);
+  gth_input_save_ref_desc(input, &sa->ref_desc, ref_file_num, ref_seq_num);
+
   /* save the consecutive call number */
   sa->call_number = call_number;
 
@@ -169,6 +185,10 @@ void gth_sa_delete(GthSA *sa)
   gt_array_delete(sa->introns);
   gt_str_delete(sa->gen_id);
   gt_str_delete(sa->ref_id);
+  gt_str_delete(sa->gen_md5);
+  gt_str_delete(sa->ref_md5);
+  gt_str_delete(sa->gen_desc);
+  gt_str_delete(sa->ref_desc);
   gt_str_delete(sa->gff3_target_attribute);
   gt_free(sa);
 }
@@ -615,6 +635,30 @@ void gth_sa_set_ref_id(GthSA *sa, const char *id)
 {
   gt_assert(sa);
   gt_str_set(sa->ref_id, id);
+}
+
+GtStr* gth_sa_gen_md5(const GthSA *sa)
+{
+  gt_assert(sa && sa->gen_md5);
+  return sa->gen_md5;
+}
+
+GtStr* gth_sa_ref_md5(const GthSA *sa)
+{
+  gt_assert(sa && sa->ref_md5);
+  return sa->ref_md5;
+}
+
+GtStr* gth_sa_gen_desc(const GthSA *sa)
+{
+  gt_assert(sa && sa->gen_desc);
+  return sa->gen_desc;
+}
+
+GtStr* gth_sa_ref_desc(const GthSA *sa)
+{
+  gt_assert(sa && sa->ref_desc);
+  return sa->ref_desc;
 }
 
 GtStrand gth_sa_gen_strand(const GthSA *sa)

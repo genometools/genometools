@@ -95,25 +95,49 @@ static int compare_strands(bool strandsignA, bool strandsignB)
 */
 
 static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
-                             GT_UNUSED void *cmpinfo)
+                             void *cmpinfo)
 {
   int rval;
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
-  /* GthDuplicateCheck duplicate_check = *(GthDuplicateCheck*) cmpinfo; */
+  GthDuplicateCheck duplicate_check = *(GthDuplicateCheck*) cmpinfo;
 
-  gt_assert(!cmpinfo);
+  gt_assert(duplicate_check && duplicate_check != GTH_DC_NONE);
 
-  if ((rval = gt_str_cmp(gth_sa_gen_id_str(saA), gth_sa_gen_id_str(saB))))
+  if (duplicate_check == GTH_DC_ID &&
+      (rval = gt_str_cmp(gth_sa_gen_id_str(saA), gth_sa_gen_id_str(saB)))) {
     return rval;
+  }
+
+  if ((duplicate_check == GTH_DC_DESC || duplicate_check == GTH_DC_BOTH) &&
+      (rval = gt_str_cmp(gth_sa_gen_desc(saA), gth_sa_gen_desc(saB)))) {
+    return rval;
+  }
+
+  if ((duplicate_check == GTH_DC_SEQ || duplicate_check == GTH_DC_BOTH) &&
+      (rval = gt_str_cmp(gth_sa_gen_md5(saA), gth_sa_gen_md5(saB)))) {
+    return rval;
+  }
 
   if ((rval = compare_strands(gth_sa_gen_strand_forward(saA),
                               gth_sa_gen_strand_forward(saB)))) {
     return rval;
   }
 
-  if ((rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB))))
+  if (duplicate_check == GTH_DC_ID &&
+      (rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB)))) {
     return rval;
+  }
+
+  if ((duplicate_check == GTH_DC_DESC || duplicate_check == GTH_DC_BOTH) &&
+      (rval = gt_str_cmp(gth_sa_ref_desc(saA), gth_sa_ref_desc(saB)))) {
+    return rval;
+  }
+
+  if ((duplicate_check == GTH_DC_SEQ || duplicate_check == GTH_DC_BOTH) &&
+      (rval = gt_str_cmp(gth_sa_ref_md5(saA), gth_sa_ref_md5(saB)))) {
+    return rval;
+  }
 
   if ((rval = compare_strands(gth_sa_ref_strand_forward(saA),
                               gth_sa_ref_strand_forward(saB)))) {
