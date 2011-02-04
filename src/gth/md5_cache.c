@@ -27,8 +27,11 @@ struct GthMD5Cache {
 static const char* seq_col_get_seq(void *seqs, unsigned long index)
 {
   GthSeqCol *seq_col = seqs;
+  const char *seq;
   gt_assert(seq_col);
-  return (const char*) gth_seq_col_get_orig_seq(seq_col, index);
+  seq = (const char*) gth_seq_col_get_orig_seq(seq_col, index);
+  gt_assert(seq);
+  return seq;
 }
 
 static unsigned long seq_col_get_seq_len(void *seqs, unsigned long index)
@@ -48,7 +51,7 @@ static GtStr* get_md5_str(void *str_source, unsigned long index)
 GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCol *seq_col)
 {
   GthMD5Cache *md5_cache;
-  gt_assert(seq_col);
+  gt_assert(indexname && seq_col);
   md5_cache = gt_malloc(sizeof *md5_cache);
   md5_cache->md5_tab = gt_md5_tab_new(indexname, seq_col, seq_col_get_seq,
                                       seq_col_get_seq_len,
