@@ -60,7 +60,7 @@ static int get_cutoffs_mode_from_table(char *searchstring)
   unsigned int i;
   for (i = 0; i < NUMOFCUTOFFMODES; i++) {
     if (!strcmp(searchstring, cutoff_modes[i]))
-      return  i;
+      return i;
   }
   gt_assert(0); /* cannot happen */
   return NUMOFCUTOFFMODES; /* shut up compiler */

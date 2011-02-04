@@ -221,7 +221,7 @@ static int extractkeyfromcurrentline(Fastakeyquery *fastakeyptr,
       haserr = true;
     }
   }
-  return  haserr ? -1 : 0;
+  return haserr ? -1 : 0;
 }
 
 static Fastakeyquery *readfileofkeystoextract(bool verbose,

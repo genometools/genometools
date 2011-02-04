@@ -444,7 +444,7 @@ static unsigned long totallengthoffragments(GtChain *chain,
 
   gt_assert(totallength > 0);
 
-  return  totallength;
+  return totallength;
 }
 
 static bool globalchainislongenough(GtChain *chain, GtFragment *fragments,

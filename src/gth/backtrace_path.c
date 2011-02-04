@@ -177,7 +177,7 @@ unsigned long gth_backtrace_path_indelcount(const GthBacktracePath *bp)
 unsigned long gth_backtrace_path_genomiccutoff_start(const GthBacktracePath *bt)
 {
   gt_assert(bt);
-  return  bt->cutoffs.start.genomiccutoff;
+  return bt->cutoffs.start.genomiccutoff;
 }
 
 unsigned long gth_backtrace_path_referencecutoff_start(const

@@ -5375,7 +5375,7 @@ static unsigned long derefcharboundaries(const GtEncseq *encseq,
     }
     return (unsigned long) cc;
   }
-  return  start + GT_COMPAREOFFSET;
+  return start + GT_COMPAREOFFSET;
 }
 
 /* The following function compares the two suffixes
