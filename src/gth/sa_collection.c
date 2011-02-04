@@ -168,16 +168,22 @@ static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
 */
 
 static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
-                      GT_UNUSED void *cmpinfo)
+                      void *cmpinfo)
 {
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
   GtRange rangeA, rangeB;
-
-  gt_assert(cmpinfo == NULL);
+  GthDuplicateCheck duplicate_check = *(GthDuplicateCheck*) cmpinfo;
 
   rangeA = gth_sa_range_forward(saA);
   rangeB = gth_sa_range_forward(saB);
+
+  if (duplicate_check != GTH_DC_NONE && !compare_duplicate(saA, saB, cmpinfo)) {
+    Spancheck action = span_check(saA, saB);
+    if (action == DISCARD)
+      return 0;
+    gt_assert(action != REPLACE);
+  }
 
   /* genomic file number comparison */
   if (gth_sa_gen_file_num(saA) < gth_sa_gen_file_num(saB))
@@ -240,7 +246,7 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB,
 
   /* insert spliced alignment into tree rooted at <rootlist> */
   saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootlist,
-                               compare_sa, NULL);
+                               compare_sa, &sa_collection->duplicate_check);
   /* insertion into binary tree succeeded */
   gt_assert(saA && nodecreated);
 
@@ -382,7 +388,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       for (i = 0; i < gt_array_size(alignmentstodelete); i++) {
         satodel = *(GthSA**) gt_array_get(alignmentstodelete, i);
         (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compare_sa,
-                             NULL);
+                             &sa_collection->duplicate_check);
         (void) gt_rbt_delete(satodel, &sa_collection->rootEST,
                              compare_duplicate_and_genomic_pos,
                              &sa_collection->duplicate_check);
