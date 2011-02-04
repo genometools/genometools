@@ -984,12 +984,6 @@ unsigned long gth_sa_call_number(const GthSA *sa)
   return sa->call_number;
 }
 
-void gth_sa_set_call_number(GthSA *sa, unsigned long call_number)
-{
-  gt_assert(sa);
-  sa->call_number = call_number;
-}
-
 static void set_gff3_target_attribute(GthSA *sa)
 {
   gt_assert(sa);
