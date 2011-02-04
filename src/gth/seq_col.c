@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 
 struct GthSeqColClass {
   size_t size;
+  GthSeqColDemandOrigSeqFunc demand_orig_seq;
   GthSeqColGetOrigSeqFunc get_orig_seq;
   GthSeqColGetTranSeqFunc get_tran_seq;
   GthSeqColGetOrigSeqRCFunc get_orig_seq_rc;
@@ -35,6 +36,8 @@ struct GthSeqColClass {
 };
 
 const GthSeqColClass* gth_seq_col_class_new(size_t size,
+                                            GthSeqColDemandOrigSeqFunc
+                                            demand_orig_seq,
                                             GthSeqColGetOrigSeqFunc
                                             get_orig_seq,
                                             GthSeqColGetTranSeqFunc
@@ -57,6 +60,7 @@ const GthSeqColClass* gth_seq_col_class_new(size_t size,
 {
   GthSeqColClass *c_class = gt_class_alloc(sizeof *c_class);
   c_class->size = size;
+  c_class->demand_orig_seq = demand_orig_seq;
   c_class->get_orig_seq = get_orig_seq;
   c_class->get_tran_seq = get_tran_seq;
   c_class->get_orig_seq_rc = get_orig_seq_rc;
@@ -96,6 +100,11 @@ void gth_seq_col_delete(GthSeqCol *sc)
   gt_free(sc);
 }
 
+void gth_seq_col_demand_orig_seq(GthSeqCol *seq_col)
+{
+  gt_assert(seq_col && seq_col->c_class && seq_col->c_class->demand_orig_seq);
+  seq_col->c_class->demand_orig_seq(seq_col);
+}
 GtUchar* gth_seq_col_get_orig_seq(GthSeqCol *seq_col, unsigned long seq_num)
 {
   gt_assert(seq_col && seq_col->c_class && seq_col->c_class->get_orig_seq);

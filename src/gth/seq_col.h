@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +31,7 @@ typedef GthSeqCol* (*GthSeqColConstructor)(const char *indexname,
                                            bool tran_seq);
 
 void          gth_seq_col_delete(GthSeqCol*);
+void          gth_seq_col_demand_orig_seq(GthSeqCol *seq_col);
 GtUchar*      gth_seq_col_get_orig_seq(GthSeqCol *seq_col,
                                        unsigned long seq_num);
 GtUchar*      gth_seq_col_get_tran_seq(GthSeqCol *seq_col,

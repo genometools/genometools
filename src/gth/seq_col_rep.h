@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,6 +19,7 @@
 
 #include "gth/seq_col.h"
 
+typedef void     (*GthSeqColDemandOrigSeqFunc)(GthSeqCol*);
 typedef GtUchar* (*GthSeqColGetOrigSeqFunc)(GthSeqCol*, unsigned long seq_num);
 typedef GtUchar* (*GthSeqColGetTranSeqFunc)(GthSeqCol*, unsigned long seq_num);
 typedef GtUchar* (*GthSeqColGetOrigSeqRCFunc)(GthSeqCol*,
@@ -46,6 +47,8 @@ struct GthSeqCol {
 };
 
 const GthSeqColClass* gth_seq_col_class_new(size_t size,
+                                            GthSeqColDemandOrigSeqFunc
+                                            demand_orig_seq,
                                             GthSeqColGetOrigSeqFunc
                                             get_orig_seq,
                                             GthSeqColGetTranSeqFunc

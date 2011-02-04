@@ -351,7 +351,7 @@ void gth_input_save_ref_md5(GthInput *input, GtStr **md5,
   gt_assert(input && input->ref_file_num == file_num);
   gt_assert(md5 && !*md5);
   if (input->use_md5_cache)
-    *md5 = gth_md5_cache_get(input->gen_md5_cache, seq_num);
+    *md5 = gth_md5_cache_get(input->ref_md5_cache, seq_num);
 }
 
 void gth_input_save_gen_desc(GthInput *input, GtStr **desc,
@@ -481,8 +481,11 @@ void gth_input_load_genomic_file_func(GthInput *input,
     input->gen_file_num = gen_file_num;
 
     /* load caches, if necessary */
-    if (input->use_md5_cache)
-      input->gen_md5_cache = gth_md5_cache_new(indexname, input->gen_seq_col);
+    if (input->use_md5_cache) {
+      input->gen_md5_cache =
+        gth_md5_cache_new(gth_input_get_genomic_filename(input, gen_file_num),
+                          input->gen_seq_col);
+    }
     if (input->use_desc_cache)
       input->gen_desc_cache = gth_desc_cache_new(input->gen_seq_col);
   }
@@ -547,8 +550,11 @@ void gth_input_load_reference_file_func(GthInput *input,
     input->ref_file_num = ref_file_num;
 
     /* load caches, if necessary */
-    if (input->use_md5_cache)
-      input->ref_md5_cache = gth_md5_cache_new(indexname, input->ref_seq_col);
+    if (input->use_md5_cache) {
+      input->ref_md5_cache =
+        gth_md5_cache_new(gth_input_get_reference_filename(input, ref_file_num),
+                          input->ref_seq_col);
+    }
     if (input->use_desc_cache)
       input->ref_desc_cache = gth_desc_cache_new(input->ref_seq_col);
   }

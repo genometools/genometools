@@ -30,7 +30,11 @@ static const char* seq_col_get_seq(void *seqs, unsigned long index)
   const char *seq;
   gt_assert(seq_col);
   seq = (const char*) gth_seq_col_get_orig_seq(seq_col, index);
-  gt_assert(seq);
+  if (!seq) {
+    gth_seq_col_demand_orig_seq(seq_col);
+    seq = (const char*) gth_seq_col_get_orig_seq(seq_col, index);
+    gt_assert(seq);
+  }
   return seq;
 }
 
