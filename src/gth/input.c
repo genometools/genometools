@@ -457,6 +457,8 @@ void gth_input_load_genomic_file_func(GthInput *input,
 #endif
 
   if (input->gen_file_num != gen_file_num) {
+    const char *genomic_filename;
+
     /* free old genomic file */
     if (input->gen_file_num != GT_UNDEF_ULONG) {
       /* in this case a sequence collection has been loaded -> free it */
@@ -467,8 +469,8 @@ void gth_input_load_genomic_file_func(GthInput *input,
     }
 
     /* map genomic file */
-    sprintf(indexname, "%s.%s",
-            gth_input_get_genomic_filename(input, gen_file_num), DNASUFFIX);
+    genomic_filename = gth_input_get_genomic_filename(input, gen_file_num);
+    sprintf(indexname, "%s.%s", genomic_filename, DNASUFFIX);
     input->gen_seq_col =
       input->seq_col_constructor(indexname, input->searchmode & GTHREVERSE,
                                  !translate, translate);
@@ -482,9 +484,8 @@ void gth_input_load_genomic_file_func(GthInput *input,
 
     /* load caches, if necessary */
     if (input->use_md5_cache) {
-      input->gen_md5_cache =
-        gth_md5_cache_new(gth_input_get_genomic_filename(input, gen_file_num),
-                          input->gen_seq_col);
+      input->gen_md5_cache = gth_md5_cache_new(genomic_filename,
+                                               input->gen_seq_col);
     }
     if (input->use_desc_cache)
       input->gen_desc_cache = gth_desc_cache_new(input->gen_seq_col);
@@ -512,6 +513,8 @@ void gth_input_load_reference_file_func(GthInput *input,
 #endif
 
   if (input->ref_file_num != ref_file_num) {
+    const char *reference_filename;
+
     /* free old reference file */
     if (input->ref_file_num != GT_UNDEF_ULONG) {
       /* in this case a sequence collection has been loaded -> free it */
@@ -528,8 +531,8 @@ void gth_input_load_reference_file_func(GthInput *input,
     gt_assert(alphatype == DNA_ALPHA || alphatype == PROTEIN_ALPHA);
 
     /* loading reference sequence */
-    sprintf(indexname, "%s.%s",
-            gth_input_get_reference_filename(input, ref_file_num),
+    reference_filename = gth_input_get_reference_filename(input, ref_file_num);
+    sprintf(indexname, "%s.%s", reference_filename,
             alphatype == DNA_ALPHA ? DNASUFFIX
                                    : gt_str_get(input->proteinsmap));
     if (alphatype == DNA_ALPHA) {
@@ -551,9 +554,8 @@ void gth_input_load_reference_file_func(GthInput *input,
 
     /* load caches, if necessary */
     if (input->use_md5_cache) {
-      input->ref_md5_cache =
-        gth_md5_cache_new(gth_input_get_reference_filename(input, ref_file_num),
-                          input->ref_seq_col);
+      input->ref_md5_cache = gth_md5_cache_new(reference_filename,
+                                               input->ref_seq_col);
     }
     if (input->use_desc_cache)
       input->ref_desc_cache = gth_desc_cache_new(input->ref_seq_col);
