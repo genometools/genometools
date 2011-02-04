@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -108,6 +108,9 @@ static void evalsplicesiteprobformodel(GthFlt *prob, bool donorsite,
       pval = Tv[0] + Tv[1] + Tv[2];
       pval = pval / (pval + Fv[0] + Fv[1] + Fv[2] + Fv[3]);
     }
+    /* XXX: prevents problem with fission_yeast.bssm file */
+    if (isnan(pval))
+      pval = 0.0;
     /* pval is a valid probability */
     gt_assert(pval >= 0.0 && pval <= 1.0);
     pval = 2.0 * (pval - 0.5); /* XXX: ? */
