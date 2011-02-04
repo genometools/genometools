@@ -33,29 +33,25 @@ struct GtMD5Tab{
   GtHashmap *md5map; /* maps md5 to index */
 };
 
-static bool read_fingerprints(GtMD5Tab *md5_tab, GtStr *fingerprints_filename)
+static bool read_fingerprints(GtMD5Tab *md5_tab,
+                              const char *fingerprints_filename)
 {
   bool reading_succeeded = true;
   size_t len;
   gt_assert(md5_tab && fingerprints_filename);
   /* open file */
-  if (gt_file_exists(gt_str_get(fingerprints_filename))) {
-    md5_tab->fingerprints_file = gt_fa_xfopen(gt_str_get(fingerprints_filename),
-                                              "r");
-    gt_fa_lock_shared(md5_tab->fingerprints_file);
-    md5_tab->fingerprints = gt_fa_xmmap_read(gt_str_get(fingerprints_filename),
-                                             &len);
-    if (len != md5_tab->num_of_md5s * 33) {
-      gt_fa_xmunmap(md5_tab->fingerprints);
-      md5_tab->fingerprints = NULL;
-      gt_fa_unlock(md5_tab->fingerprints_file);
-      gt_fa_xfclose(md5_tab->fingerprints_file);
-      md5_tab->fingerprints_file = NULL;
-      reading_succeeded = false;
-    }
-  }
-  else
+  gt_assert(gt_file_exists(fingerprints_filename));
+  md5_tab->fingerprints_file = gt_fa_xfopen(fingerprints_filename, "r");
+  gt_fa_lock_shared(md5_tab->fingerprints_file);
+  md5_tab->fingerprints = gt_fa_xmmap_read(fingerprints_filename, &len);
+  if (len != md5_tab->num_of_md5s * 33) {
+    gt_fa_xmunmap(md5_tab->fingerprints);
+    md5_tab->fingerprints = NULL;
+    gt_fa_unlock(md5_tab->fingerprints_file);
+    gt_fa_xfclose(md5_tab->fingerprints_file);
+    md5_tab->fingerprints_file = NULL;
     reading_succeeded = false;
+  }
   return reading_succeeded;
 }
 
@@ -111,7 +107,8 @@ GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
       !gt_file_is_newer(sequence_file, gt_str_get(fingerprints_filename))) {
     /* only try to read the fingerprint file if the sequence file was not
        modified in the meantime */
-    reading_succeeded = read_fingerprints(md5_tab, fingerprints_filename);
+    reading_succeeded = read_fingerprints(md5_tab,
+                                          gt_str_get(fingerprints_filename));
   }
   if (!reading_succeeded) {
     md5_tab->md5_fingerprints = gt_calloc(num_of_seqs, sizeof (char*));
