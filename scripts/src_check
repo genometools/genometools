@@ -1,6 +1,6 @@
 #!/usr/bin/env lua
 --[[
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -108,6 +108,9 @@ for _, fn in ipairs(arg) do -- iterate over all files
     if string.find(l, " for%(")    then err(fn, ln, "missing blanks") end
     if string.find(l, " do%(")     then err(fn, ln, "missing blanks") end
     if string.find(l, "%){")       then err(fn, ln, "missing blanks") end
+
+    -- check for superfluous blanks
+    if string.find(l, "return  ") then err(fn, ln, "superfluous blank") end
 
     -- check line length
     if #l > 80 then err(fn, ln, "line longer than 80 characters") end
