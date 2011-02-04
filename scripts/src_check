@@ -101,13 +101,13 @@ for _, fn in ipairs(arg) do -- iterate over all files
     end
 
     -- check for missing blanks
-    if string.find(l, " if%(")     then err(fn, ln, "missing blanks") end
-    if string.find(l, " sizeof%(") then err(fn, ln, "missing blanks") end
-    if string.find(l, " switch%(") then err(fn, ln, "missing blanks") end
-    if string.find(l, " while%(")  then err(fn, ln, "missing blanks") end
-    if string.find(l, " for%(")    then err(fn, ln, "missing blanks") end
-    if string.find(l, " do%(")     then err(fn, ln, "missing blanks") end
-    if string.find(l, "%){")       then err(fn, ln, "missing blanks") end
+    if string.find(l, " if%(")     then err(fn, ln, "missing blank") end
+    if string.find(l, " sizeof%(") then err(fn, ln, "missing blank") end
+    if string.find(l, " switch%(") then err(fn, ln, "missing blank") end
+    if string.find(l, " while%(")  then err(fn, ln, "missing blank") end
+    if string.find(l, " for%(")    then err(fn, ln, "missing blank") end
+    if string.find(l, " do%(")     then err(fn, ln, "missing blank") end
+    if string.find(l, "%){")       then err(fn, ln, "missing blank") end
 
     -- check for superfluous blanks
     if string.find(l, "return  ") then err(fn, ln, "superfluous blank") end
