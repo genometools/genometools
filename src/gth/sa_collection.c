@@ -172,27 +172,12 @@ static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
 {
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
-  Spancheck action;
   GtRange rangeA, rangeB;
-  int rval = 0;
 
   gt_assert(cmpinfo == NULL);
 
   rangeA = gth_sa_range_forward(saA);
   rangeB = gth_sa_range_forward(saB);
-
-  /* save the return value to be able to reuse it */
-  rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB));
-
-  if (!(gt_str_cmp(gth_sa_gen_id_str(saA), gth_sa_gen_id_str(saB))) &&
-      (rval == 0) &&
-      (gth_sa_gen_strand_forward(saA) == gth_sa_gen_strand_forward(saB)) &&
-      (gth_sa_ref_strand_forward(saA) == gth_sa_ref_strand_forward(saB))) {
-    action = span_check(saA, saB);
-    if (action == DISCARD)
-      return 0;
-    gt_assert(action != REPLACE);
-  }
 
   /* genomic file number comparison */
   if (gth_sa_gen_file_num(saA) < gth_sa_gen_file_num(saB))
@@ -207,23 +192,19 @@ static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
     return -1;
   }
   else if (rangeA.start == rangeB.start && rangeA.end == rangeB.end) {
-    /* XXX: check if this stuff is still necessary (MPI has been removed)
-       some additional sorting criteria for the case when the two ranges are the
-       same, this helps preventing ``random'' order of spliced alignments in an
-       MPI run */
+    int rval;
+    /* some additional sorting criteria for the case when the two ranges are the
+       same, this helps preventing ``random'' order of spliced alignments in a
+       parallelized run */
     if (gth_sa_score(saA) < gth_sa_score(saB))
       return -1;
     if (gth_sa_score(saA) > gth_sa_score(saB))
       return 1;
 
-    if (gth_sa_cumlen_scored_exons(saA) <
-        gth_sa_cumlen_scored_exons(saB)) {
+    if (gth_sa_cumlen_scored_exons(saA) < gth_sa_cumlen_scored_exons(saB))
       return -1;
-    }
-    if (gth_sa_cumlen_scored_exons(saA) >
-        gth_sa_cumlen_scored_exons(saB)) {
+    if (gth_sa_cumlen_scored_exons(saA) > gth_sa_cumlen_scored_exons(saB))
       return 1;
-    }
 
     if (gth_sa_gen_strand_forward(saA) < gth_sa_gen_strand_forward(saB))
       return -1;
@@ -235,20 +216,22 @@ static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
     if (gth_sa_ref_strand_forward(saA) > gth_sa_ref_strand_forward(saB))
       return 1;
 
-    /* rval contains the value of a string comparison between the two reference
-       ids */
-    if (rval < 0)
+    if ((rval = gt_str_cmp(gth_sa_ref_id_str(saA), gth_sa_ref_id_str(saB))))
+      return rval;
+
+    if (gth_sa_call_number(saA) < gth_sa_call_number(saB))
       return -1;
-    else if (rval > 0)
-      return  1;
+    if (gth_sa_call_number(saA) > gth_sa_call_number(saB))
+      return 1;
     gt_assert(0);
   }
 
   /* saA '>' saB */
-  return  1;
+  return 1;
 }
 
-static void insert_alignment(GthSACollection *sa_collection, GthSA *saB)
+static void insert_alignment(GthSACollection *sa_collection, GthSA *saB,
+                             bool use_rootEST)
 {
   GthSA *saA = NULL;
   bool nodecreated;
@@ -261,12 +244,14 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB)
   /* insertion into binary tree succeeded */
   gt_assert(saA && nodecreated);
 
-  /* insert spliced alignment into tree rooted at <rootEST> */
-  saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootEST,
-                               compare_duplicate_and_genomic_pos,
-                               &sa_collection->duplicate_check);
-  /* insertion into binary tree succeeded */
-  gt_assert(saA && nodecreated);
+  if (use_rootEST) {
+    /* insert spliced alignment into tree rooted at <rootEST> */
+    saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootEST,
+                                 compare_duplicate_and_genomic_pos,
+                                 &sa_collection->duplicate_check);
+    /* insertion into binary tree succeeded */
+    gt_assert(saA && nodecreated);
+  }
 }
 
 bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
@@ -288,12 +273,16 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     }
   }
 
-  saA = (GthSA*) gt_rbt_find(saB, sa_collection->rootEST, compare_duplicate,
-                             &sa_collection->duplicate_check);
-  if (saA == NULL || sa_collection->duplicate_check == GTH_DC_NONE) {
+  if (sa_collection->duplicate_check != GTH_DC_NONE) {
+    saA = (GthSA*) gt_rbt_find(saB, sa_collection->rootEST, compare_duplicate,
+                               &sa_collection->duplicate_check);
+  }
+
+  if (saA == NULL) {
     /* no alignment with the same ids and strand orientations is in the tree or
        the duplicate check has been disabled, insert saB into both trees. */
-    insert_alignment(sa_collection, saB);
+    insert_alignment(sa_collection, saB,
+                     sa_collection->duplicate_check != GTH_DC_NONE);
   }
   else {
     /* one or more alignments with the same ids and strand orientations exist
@@ -408,7 +397,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     gt_array_delete(alignmentstodelete);
 
     /* insert saB */
-    insert_alignment(sa_collection, saB);
+    gt_assert(sa_collection->duplicate_check != GTH_DC_NONE);
+    insert_alignment(sa_collection, saB, true);
   }
 
   /* returning true to indicate that an element has been inserted */
