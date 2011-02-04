@@ -317,7 +317,8 @@ static void save_sequenceid(GtStr *sequenceid, GthSeqCol *seqcol,
 }
 
 void gth_input_save_gen_id(GthInput *input, GtStr *id,
-                           unsigned long file_num, unsigned long seq_num)
+                           GT_UNUSED unsigned long file_num,
+                           unsigned long seq_num)
 {
   gt_assert(input && id);
   gt_assert(input->gen_file_num == file_num);
@@ -325,7 +326,8 @@ void gth_input_save_gen_id(GthInput *input, GtStr *id,
 }
 
 void gth_input_save_ref_id(GthInput *input, GtStr *id,
-                           unsigned long file_num, unsigned long seq_num)
+                           GT_UNUSED unsigned long file_num,
+                           unsigned long seq_num)
 {
   gt_assert(input && id);
   gt_assert(input->ref_file_num == file_num);
@@ -333,7 +335,8 @@ void gth_input_save_ref_id(GthInput *input, GtStr *id,
 }
 
 void gth_input_save_gen_md5(GthInput *input, GtStr **md5,
-                            unsigned long file_num, unsigned long seq_num)
+                            GT_UNUSED unsigned long file_num,
+                            unsigned long seq_num)
 {
   gt_assert(input && input->gen_file_num == file_num);
   gt_assert(md5 && !*md5);
@@ -342,7 +345,8 @@ void gth_input_save_gen_md5(GthInput *input, GtStr **md5,
 }
 
 void gth_input_save_ref_md5(GthInput *input, GtStr **md5,
-                            unsigned long file_num, unsigned long seq_num)
+                            GT_UNUSED unsigned long file_num,
+                            unsigned long seq_num)
 {
   gt_assert(input && input->ref_file_num == file_num);
   gt_assert(md5 && !*md5);
@@ -351,7 +355,8 @@ void gth_input_save_ref_md5(GthInput *input, GtStr **md5,
 }
 
 void gth_input_save_gen_desc(GthInput *input, GtStr **desc,
-                             unsigned long file_num, unsigned long seq_num)
+                             GT_UNUSED unsigned long file_num,
+                             unsigned long seq_num)
 {
   gt_assert(input && input->gen_file_num == file_num);
   gt_assert(desc && !*desc);
@@ -360,7 +365,8 @@ void gth_input_save_gen_desc(GthInput *input, GtStr **desc,
 }
 
 void gth_input_save_ref_desc(GthInput *input, GtStr **desc,
-                             unsigned long file_num, unsigned long seq_num)
+                             GT_UNUSED unsigned long file_num,
+                             unsigned long seq_num)
 {
   gt_assert(input && input->ref_file_num == file_num);
   gt_assert(desc && !*desc);
