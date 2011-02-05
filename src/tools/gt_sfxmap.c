@@ -767,8 +767,6 @@ static const Optionargmodedesc stream_esq_operation[] =
                    (unsigned int) BSRS_stream_reader_single},
   {"stream_multi","read kmers from word stream",
                    (unsigned int) BSRS_stream_multi},
-  {"stream_multi2","read kmers from word stream",
-                   (unsigned int) BSRS_stream_multi2},
   {"reader_multi","read kmers with encseq reader",
                    (unsigned int) BSRS_reader_multi},
   {"stream_reader_multi","read kmers with encseq reader and from word stream",
@@ -818,9 +816,10 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
       } else
       {
         if ((brsmode == BSRS_stream_multi ||
-             brsmode == BSRS_stream_multi2 ||
              brsmode == BSRS_reader_multi ||
-             brsmode == BSRS_stream_reader_multi) &&
+             brsmode == BSRS_stream_reader_multi ||
+             brsmode == BSRS_stream_reader_multi2 ||
+             brsmode == BSRS_stream_reader_multi3) &&
              streamesq_size != 3UL)
         {
           gt_error_set(err,"if option -streamesq has one of the arguments "

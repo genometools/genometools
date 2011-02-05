@@ -66,6 +66,13 @@ void getencseqkmers(const GtEncseq *encseq,
                                            const GtKmercode *),
                     void *processkmercodeinfo);
 
+void getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                   unsigned int kmersize,
+                                   void(*processkmercode)(void *,
+                                                          unsigned long,
+                                                          const GtKmercode *),
+                                   void *processkmercodeinfo);
+
 typedef enum
 {
   BSRS_stream_words,
@@ -73,7 +80,6 @@ typedef enum
   BSRS_reader_single,
   BSRS_stream_reader_single,
   BSRS_stream_multi,
-  BSRS_stream_multi2,
   BSRS_reader_multi,
   BSRS_stream_reader_multi,
   BSRS_stream_reader_multi2,
