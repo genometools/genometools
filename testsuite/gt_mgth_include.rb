@@ -69,7 +69,7 @@ Keywords "gt_mgth"
 Test do
   run_test "#{$bin}gt mgth -o Metagenome_454 -s 1.17 -n 3 -b -9.10 -q -3.0 -h -3.98 -l -1.3 -p 368 -f 217.0 -t yes -g yes -m no -x yes -r 2 -e 3 -d 0.05  #{$gttestdata}mgth/Metagenome_NTo1_454.xml.gz #{$gttestdata}mgth/Metagenome_454.txt.gz #{$gttestdata}mgth/Hits_NTo1_Metagenome_454.txt.gz", :maxtime => 3200
   run "diff Metagenome_454.html #{$gttestdata}mgth/Metagenome_454_ori_4.html"
-  run "rm #{$gttestdata}mgth/*.gt_bsi #{$gttestdata}mgth/*.gt_bsr"
+  run "rm #{$gttestdata}mgth/*.bsi #{$gttestdata}mgth/*.bsr"
 end
 
 end
