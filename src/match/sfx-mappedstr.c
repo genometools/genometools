@@ -36,6 +36,7 @@
 #include "intcode-def.h"
 #include "initbasepower.h"
 #include "sfx-mappedstr.h"
+#include "stamp.h"
 #undef SKDEBUG
 #ifdef SKDEBUG
 #include "sfx-nextchar.h"
@@ -405,7 +406,7 @@ static void kmerstream_delete(Kmerstream *spwp)
 
 struct GtKmercodeiterator
 {
-  unsigned long totallength;
+  unsigned long totallength, startpos;
   const GtEncseq *encseq;
   GtEncseqReader *esr;
   GtReadmode readmode;
@@ -419,7 +420,8 @@ struct GtKmercodeiterator
 /*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
                                             const GtEncseq *encseq,
                                             GtReadmode readmode,
-                                            unsigned int kmersize)
+                                            unsigned int kmersize,
+                                            unsigned long startpos)
 {
   GtKmercodeiterator *kmercodeiterator;
   unsigned int numofchars;
@@ -427,7 +429,9 @@ struct GtKmercodeiterator
 
   kmercodeiterator = gt_malloc(sizeof (*kmercodeiterator));
   kmercodeiterator->totallength = gt_encseq_total_length(encseq);
-  if (kmercodeiterator->totallength < (unsigned long) kmersize)
+  kmercodeiterator->startpos = startpos;
+  gt_assert(startpos < kmercodeiterator->totallength);
+  if (kmercodeiterator->totallength - startpos < (unsigned long) kmersize)
   {
     kmercodeiterator->inputexhausted = true;
     kmercodeiterator->fb = NULL;
@@ -442,12 +446,12 @@ struct GtKmercodeiterator
     kmercodeiterator->readmode = readmode;
     kmercodeiterator->esr = gt_encseq_create_reader_with_readmode(encseq,
                                                                   readmode,
-                                                                  0);
+                                                                  startpos);
     numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
     kmercodeiterator->spwp = kmerstream_new(numofchars,kmersize);
     kmercodeiterator->hasprocessedfirst = false;
-    for (kmercodeiterator->currentposition = 0;
-         kmercodeiterator->currentposition < (unsigned long) kmersize;
+    for (kmercodeiterator->currentposition = startpos;
+         kmercodeiterator->currentposition < startpos+(unsigned long) kmersize;
          kmercodeiterator->currentposition++)
     {
       charcode = gt_encseq_reader_next_encoded_char(kmercodeiterator->esr);
@@ -463,22 +467,22 @@ struct GtKmercodeiterator
 const GtKmercode *gt_kmercodeiterator_encseq_next(
                              GtKmercodeiterator *kmercodeiterator)
 {
+  if (!kmercodeiterator->hasprocessedfirst)
+  {
+    gt_assert(kmercodeiterator->currentposition
+              == kmercodeiterator->startpos +
+                   (unsigned long) kmercodeiterator->spwp->kmersize);
+    newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
+    kmercodeiterator->hasprocessedfirst = true;
+    return &kmercodeiterator->kmercode;
+  }
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength)
   {
-    if (kmercodeiterator->hasprocessedfirst)
-    {
-      GtUchar charcode = gt_encseq_reader_next_encoded_char(
-                                                         kmercodeiterator->esr);
-      shiftrightwithchar(kmercodeiterator->spwp,charcode);
-      newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
-      kmercodeiterator->currentposition++;
-    } else
-    {
-      gt_assert(kmercodeiterator->currentposition
-                == (unsigned long) kmercodeiterator->spwp->kmersize);
-      newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
-      kmercodeiterator->hasprocessedfirst = true;
-    }
+    GtUchar charcode
+      = gt_encseq_reader_next_encoded_char(kmercodeiterator->esr);
+    shiftrightwithchar(kmercodeiterator->spwp,charcode);
+    newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
+    kmercodeiterator->currentposition++;
     return &kmercodeiterator->kmercode;
   }
   if (kmercodeiterator->currentposition < kmercodeiterator->totallength +
@@ -687,10 +691,10 @@ static void scbs_init(Singlecharacterbitstreamstate *scbs,
                       const GtTwobitencoding *twobitencoding,
                       unsigned int kmersize)
 {
-  scbs->currentencoding = 0;
   scbs->tbptr = twobitencoding;
   if (kmersize == 0)
   {
+    scbs->currentencoding = 0;
     scbs->shiftright = 0;
   } else
   {
@@ -778,6 +782,30 @@ static void showdifferentkmers(unsigned long pos,GtCodetype kmer1,
   fprintf(stderr,"kmer1=%lu != %lu= kmer2\n",kmer1,kmer2);
 }
 
+static GtCodetype gt_kmercodeatpos(const GtTwobitencoding *twobitencoding,
+                                   unsigned int kmersize,
+                                   unsigned long pos,
+                                   GtCodetype maskright)
+{
+  unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
+  unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
+
+  if (unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)
+  {
+    return (GtCodetype) (twobitencoding[unitindex]
+            >> GT_MULT2(GT_UNITSIN2BITENC - kmersize - unitoffset))
+           & maskright;
+  } else
+  {
+    unsigned int shiftleft = GT_MULT2(unitoffset+kmersize-GT_UNITSIN2BITENC);
+    return (GtCodetype)
+           ((twobitencoding[unitindex] << shiftleft) |
+            (twobitencoding[unitindex+1] >> (GT_MULT2(GT_UNITSIN2BITENC) -
+                                             shiftleft)))
+           & maskright;
+  }
+}
+
 static GtCodetype gt_firstkmercode(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize)
 {
@@ -809,6 +837,101 @@ static GtCodetype gt_firstkmercode(const GtTwobitencoding *twobitencoding,
         kmer |= cc;\
         kmer &= maskright
 
+static uint64_t getencseqkmers_anypostwobitencoding(const GtEncseq *encseq,
+                                                    unsigned int kmersize,
+                                                    unsigned long startpos,
+                                                    unsigned long endpos)
+{
+  unsigned long pos, unitindex, totallength;
+  GtCodetype kmer;
+  GtUchar cc;
+  uint64_t kmersum = 0;
+  const GtTwobitencoding *twobitencoding;
+  GtTwobitencoding currentencoding;
+  unsigned int shiftright;
+  const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+  const GtKmercode *kmercodeptr;
+  GtKmercodeiterator *kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,
+                                                      GT_READMODE_FORWARD,
+                                                      kmersize,startpos);
+
+  twobitencoding = gt_encseq_twobitencoding_export(encseq);
+  totallength = gt_encseq_total_length(encseq);
+  kmer = gt_kmercodeatpos(twobitencoding,kmersize,startpos,maskright);
+  kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
+  gt_assert(kmercodeptr != NULL);
+  gt_assert(!kmercodeptr->definedspecialposition);
+  if (kmer != kmercodeptr->code)
+  {
+    showdifferentkmers(pos,kmer,kmercodeptr->code);
+    exit(EXIT_FAILURE);
+  }
+  kmersum += (uint64_t) kmer;
+  unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
+  currentencoding = twobitencoding[unitindex];
+  shiftright = (unsigned int)
+               GT_MULT2(GT_UNITSIN2BITENC - 1 -
+                        GT_MODBYUNITSIN2BITENC(startpos+kmersize));
+  gt_assert(endpos >= (unsigned long) kmersize);
+  for (pos = startpos + 1; pos <= endpos - (unsigned long) kmersize; pos++)
+  {
+    cc = (GtUchar) (currentencoding >> shiftright) & 3;
+    UPDATEKMER(kmer,cc);
+    kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
+    gt_assert(kmercodeptr != NULL);
+    gt_assert(!kmercodeptr->definedspecialposition);
+    if (kmer != kmercodeptr->code)
+    {
+      showdifferentkmers(pos,kmer,kmercodeptr->code);
+      exit(EXIT_FAILURE);
+    }
+    if (shiftright > 0)
+    {
+      shiftright -= 2;
+    } else
+    {
+      currentencoding = twobitencoding[++unitindex];
+      shiftright = (unsigned int) (GT_INTWORDSIZE-2);
+    }
+    kmersum += (uint64_t) kmer;
+  }
+  gt_kmercodeiterator_delete(kmercodeiterator);
+  return kmersum;
+}
+
+void getencseqkmers_overnonspecialstwobitencoding(const GtEncseq *encseq,
+                                                  unsigned int kmersize)
+{
+  uint64_t kmersum = 0;
+  unsigned long lastpos = 0, totallength = gt_encseq_total_length(encseq);
+
+  if (gt_encseq_has_specialranges(encseq))
+  {
+    GtSpecialrangeiterator *sri;
+    GtRange range;
+
+    sri = gt_specialrangeiterator_new(encseq,true);
+    while (gt_specialrangeiterator_next(sri,&range))
+    {
+      if (range.start - lastpos >= (unsigned long) kmersize)
+      {
+        gt_assert(range.start > 0);
+        kmersum += getencseqkmers_anypostwobitencoding(encseq,kmersize,
+                                                       lastpos,range.start);
+      }
+      lastpos = range.end;
+    }
+    gt_specialrangeiterator_delete(sri);
+  }
+  gt_assert(totallength >= lastpos);
+  if (totallength - lastpos >= (unsigned long) kmersize)
+  {
+    kmersum += getencseqkmers_anypostwobitencoding(encseq,kmersize,
+                                                   lastpos,totallength);
+  }
+  printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
+}
+
 static void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                           unsigned int kmersize)
 {
@@ -824,7 +947,7 @@ static void getencseqkmers_twobitencoding(const GtEncseq *encseq,
   const GtKmercode *kmercodeptr;
   GtKmercodeiterator *kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,
                                                       GT_READMODE_FORWARD,
-                                                      kmersize);
+                                                      kmersize,0);
 
   twobitencoding = gt_encseq_twobitencoding_export(encseq);
   totallength = gt_encseq_total_length(encseq);
@@ -888,17 +1011,27 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
   {
     kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,
                                                       GT_READMODE_FORWARD,
-                                                      kmersize);
+                                                      kmersize,0);
   }
   switch (bsrsmode)
   {
     case BSRS_stream_multi:
       {
         uint64_t kmersum = 0;
+        GtCodetype kmer2;
         mcbs_init(&mcbs,twobitencoding,kmersize);
         for (pos = 0; pos <= totallength - (unsigned long) kmersize; pos++)
         {
           kmer = mcbs_next(&mcbs,kmersize);
+          kmer2 = gt_kmercodeatpos(twobitencoding,
+                                   kmersize,
+                                   pos,
+                                   mcbs.maskright);
+          if (kmer != kmer2)
+          {
+            showdifferentkmers(pos,kmer,kmer2);
+          }
+          gt_assert(kmer == kmer2);
           kmersum += (uint64_t) kmer;
         }
         printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
@@ -949,7 +1082,10 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
         printf("kmersum=" Formatuint64_t "\n",PRINTuint64_tcast(kmersum));
         break;
       }
-     default:
+    case BSRS_stream_reader_multi3:
+      getencseqkmers_overnonspecialstwobitencoding(encseq,kmersize);
+      break;
+    default:
       break;
   }
   gt_kmercodeiterator_delete(kmercodeiterator);
@@ -1024,6 +1160,7 @@ void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
       case BSRS_reader_multi:
       case BSRS_stream_reader_multi:
       case BSRS_stream_reader_multi2:
+      case BSRS_stream_reader_multi3:
         gt_encseq_faststream_kmers(encseq,bsrsmode,multiarg);
         break;
     }

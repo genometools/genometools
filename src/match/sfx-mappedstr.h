@@ -35,7 +35,8 @@ typedef struct GtKmercodeiterator GtKmercodeiterator;
 /*@notnull@*/ GtKmercodeiterator *gt_kmercodeiterator_encseq_new(
                                             const GtEncseq *encseq,
                                             GtReadmode readmode,
-                                            unsigned int kmersize);
+                                            unsigned int kmersize,
+                                            unsigned long startpos);
 
 const GtKmercode *gt_kmercodeiterator_encseq_next(
                        GtKmercodeiterator *kmercodeiterator);
@@ -75,7 +76,8 @@ typedef enum
   BSRS_stream_multi2,
   BSRS_reader_multi,
   BSRS_stream_reader_multi,
-  BSRS_stream_reader_multi2
+  BSRS_stream_reader_multi2,
+  BSRS_stream_reader_multi3
 } Bitstreamreadmode;
 
 void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,

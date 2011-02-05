@@ -469,7 +469,7 @@ static void getencseqkmersupdatekmercount(const GtEncseq *encseq,
   GtKmercodeiterator *kmercodeiterator;
   const GtKmercode *kmercodeptr;
 
-  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
+  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize,0);
   if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
     unsigned long position = 0;
@@ -491,7 +491,7 @@ void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
   GtKmercodeiterator *kmercodeiterator;
   const GtKmercode *kmercodeptr;
 
-  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize);
+  kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize,0);
   if (!gt_kmercodeiterator_inputexhausted(kmercodeiterator))
   {
     unsigned long position = 0;

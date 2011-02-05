@@ -774,7 +774,9 @@ static const Optionargmodedesc stream_esq_operation[] =
   {"stream_reader_multi","read kmers with encseq reader and from word stream",
                    (unsigned int) BSRS_stream_reader_multi},
   {"stream_reader_multi2","read kmers with encseq reader and from word stream",
-                   (unsigned int) BSRS_stream_reader_multi2}
+                   (unsigned int) BSRS_stream_reader_multi2},
+  {"stream_reader_multi3","read kmers with encseq reader and from word stream",
+                   (unsigned int) BSRS_stream_reader_multi3}
 };
 
 static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
