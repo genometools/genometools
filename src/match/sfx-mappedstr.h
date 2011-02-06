@@ -22,6 +22,7 @@
 #include "core/str_array_api.h"
 #include "core/encseq_api.h"
 #include "core/codetype.h"
+#include "intcode-def.h"
 
 typedef struct
 {
@@ -66,12 +67,14 @@ void getencseqkmers(const GtEncseq *encseq,
                                            const GtKmercode *),
                     void *processkmercodeinfo);
 
-void getencseqkmers_twobitencoding(const GtEncseq *encseq,
+unsigned long getencseqkmers_twobitencoding(
+                                   const GtEncseq *encseq,
                                    unsigned int kmersize,
                                    void(*processkmercode)(void *,
                                                           unsigned long,
                                                           const GtKmercode *),
-                                   void *processkmercodeinfo);
+                                   void *processkmercodeinfo,
+                                   Codeatposition *codelist);
 
 typedef enum
 {

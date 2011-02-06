@@ -198,6 +198,8 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
                                         GtViatwobitkeyvalues *vtk1,
                                         GtViatwobitkeyvalues *vtk2);
 
+bool gt_has_twobitencoding(const GtEncseq *encseq);
+
 bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq);
 
 unsigned long gt_getnexttwobitencodingstoppos(bool fwd,GtEncseqReader *esr);

@@ -121,6 +121,7 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
   }
   return 0;
 }
+#endif
 
 static void compareCodeatpositionlists(const Codeatposition *codelist1,
                                        unsigned long len1,
@@ -138,10 +139,18 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
   {
     if (codelist1[idx].position != codelist2[idx].position)
     {
-      fprintf(stderr,"idx %lu, codelist1.position = %lu != %lu"
-                     " = codelist2.position\n",idx,
+      fprintf(stderr,"listlength = %lu,idx %lu, codelist1.position = %lu != %lu"
+                     " = codelist2.position\n",len1,idx,
                       codelist1[idx].position,
                       codelist2[idx].position);
+      fprintf(stderr,"codelist1.maxprefixindex = %u,%u="
+                     "codelist2.maxprefixindex\n",
+                      codelist1[idx].maxprefixindex,
+                      codelist2[idx].maxprefixindex);
+      fprintf(stderr,"codelist1.code = %u,%u = "
+                     "codelist2.code\n",
+                      codelist1[idx].code,
+                      codelist2[idx].code);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (codelist1[idx].maxprefixindex != codelist2[idx].maxprefixindex)
@@ -163,6 +172,7 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
   }
 }
 
+#ifdef SKDEBUG
 static void verifycodelistcomputation(
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -241,6 +251,10 @@ static void updatekmercount(void *processinfo,
           gt_assert(kmercode->specialposition <= MAXPREFIXLENGTH);
           cp->maxprefixindex = kmercode->specialposition;
           cp->position = position + kmercode->specialposition;
+          /*
+          printf("store(code=%u,maxprefixindex=%u,pos=%lu)\n",
+                  cp->code,cp->maxprefixindex,cp->position);
+          */
         }
         sfi->storespecials = false;
         gt_assert(kmercode->code > 0);
@@ -582,6 +596,13 @@ static void verifyestimatedspace(size_t estimatedspace)
 }
 #endif
 
+static void gt_swallowkmercode(GT_UNUSED void *processinfo,
+                               GT_UNUSED unsigned long pos,
+                               GT_UNUSED const GtKmercode *kmer)
+{
+  return;
+}
+
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
@@ -758,7 +779,28 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
     } else
     {
+
       getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
+      if (prefixlength > 1U &&
+          readmode == GT_READMODE_FORWARD && gt_has_twobitencoding(encseq) &&
+          sfi->sfxstrategy.storespecialcodes)
+      {
+        unsigned long nextspecialcode;
+        Codeatposition *codelist;
+        codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
+        nextspecialcode = getencseqkmers_twobitencoding(
+                                   encseq,
+                                   prefixlength,
+                                   gt_swallowkmercode,
+                                   NULL,
+                                   codelist);
+        compareCodeatpositionlists(sfi->spaceCodeatposition,
+                                   sfi->nextfreeCodeatposition,
+                                   codelist,
+                                   nextspecialcode);
+        printf("# compared codes\n");
+        gt_free(codelist);
+      }
     }
     if (sfi->sfxstrategy.storespecialcodes)
     {

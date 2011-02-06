@@ -661,6 +661,13 @@ static int getsatforcevalue(const char *str,GtError *err)
   }
 }
 
+bool gt_has_twobitencoding(const GtEncseq *encseq)
+{
+  return (gt_encseq_access_type_isviautables(encseq->sat) ||
+          encseq->sat >= GT_ACCESS_TYPE_EQUALLENGTH ||
+          encseq->sat == GT_ACCESS_TYPE_BITACCESS) ? true : false;
+}
+
 bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
 {
   gt_assert(encseq->sat != GT_ACCESS_TYPE_UNDEFINED);
