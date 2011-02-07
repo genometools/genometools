@@ -117,7 +117,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                                            "File should contain comment lines "
                                            "with names for the units (# NAME) "
                                            "followed by lines containing the "
-                                           "filenames for that genome/unit",  
+                                           "filenames for that genome/unit",
                                            arguments->unitfile);
   gt_option_is_development_option(option_unitfile);
   gt_option_exclude(optionesaindex,option_unitfile);
@@ -133,6 +133,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                                        "shustring search will be used." ,
                                        arguments->queryname);
   gt_option_is_extended_option(optionquery);
+  gt_option_exclude(optionquery, option_unitfile);
   gt_option_parser_add_option(op, optionquery);
 
   /* ref query */
@@ -210,7 +211,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(optiontraverse);
   gt_option_parser_add_option(op, optiontraverse);
   /* mail */
-  gt_option_parser_set_mailaddress(op, "<dwillrodt@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mailaddress(op, "<willrodt@zbh.uni-hamburg.de>");
   return op;
 }
 
