@@ -807,8 +807,8 @@ static GtCodetype gt_kmercodeatpos(const GtTwobitencoding *twobitencoding,
   }
 }
 
-static GtCodetype gt_firstkmercode(const GtTwobitencoding *twobitencoding,
-                                   unsigned int kmersize)
+static GtCodetype gt_kmercodefirstpos(const GtTwobitencoding *twobitencoding,
+                                      unsigned int kmersize)
 {
   return (GtCodetype) (twobitencoding[0] >>
                        GT_MULT2(GT_UNITSIN2BITENC - kmersize))
@@ -1088,7 +1088,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
         const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
         uint64_t kmersum = 0;
 
-        kmer = gt_firstkmercode(twobitencoding,kmersize);
+        kmer = gt_kmercodefirstpos(twobitencoding,kmersize);
         kmersum += (uint64_t) kmer;
         scbs_init(&scbs,twobitencoding,kmersize);
         READNEXTCODEANDCHECKNOSPECIAL(0);

@@ -20,7 +20,7 @@
 
 #define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((1U << PREFIXLENBITS) - 1)
+#define MAXPREFIXLENGTH (CODEBITS>>1)
 #define MAXCODEVALUE    ((1U << CODEBITS) - 1)
 
 typedef struct
