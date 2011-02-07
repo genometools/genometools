@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2009-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2009-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
