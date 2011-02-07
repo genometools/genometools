@@ -29,10 +29,11 @@
 #include "match/esa-seqread.h"
 #include "match/esa-shulen.h"
 #include "match/idx-limdfs.h"
+#include "match/sarr-def.h"
 #include "match/shu-dfs.h"
 #include "match/shu-divergence.h"
 #include "match/shu-encseq-gc.h"
-#include "match/sarr-def.h"
+#include "match/shu_unitfile.h"
 
 #include "match/shu-genomediff.h"
 
@@ -48,7 +49,7 @@ int gt_genomediff_shu(GtLogger *logger,
                 *genome_length = NULL,
                 i_idx, j_idx;
   uint64_t **shulen = NULL;
-  const GtStrArray *filenames = NULL;
+  const GtStrArray *genome_names = NULL;
   const GtEncseq *encseq = NULL;
   Genericindex *genericindexSubject = NULL;
   Sequentialsuffixarrayreader *ssar = NULL;
@@ -121,6 +122,7 @@ int gt_genomediff_shu(GtLogger *logger,
     } else
     {
       encseq = genericindex_getencseq(genericindexSubject);
+      /* TODO add function to fill num_of_genomes and genome_names */
       num_of_genomes = gt_encseq_num_of_files(encseq);
       gt_array2dim_calloc(shulen,
                           num_of_genomes,
@@ -175,7 +177,8 @@ int gt_genomediff_shu(GtLogger *logger,
   if (!had_err)
   {
     gt_assert(genome_length);
-    filenames = gt_encseq_filenames(encseq);
+    /* TODO check if not NULL (if set bevor during reading of unitfile) */
+    genome_names = gt_encseq_filenames(encseq);
     for (i_idx = 0UL; i_idx < num_of_genomes && !had_err; i_idx++)
     {
       genome_length[i_idx] =
@@ -200,7 +203,7 @@ int gt_genomediff_shu(GtLogger *logger,
       unsigned long length_i;
       length_i = genome_length[i_idx];
       if (arguments->shulen_only)
-        printf("%s\t", gt_str_array_get(filenames, i_idx));
+        printf("%s\t", gt_str_array_get(genome_names, i_idx));
       for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
       {
         if (j_idx == i_idx)
@@ -242,7 +245,7 @@ int gt_genomediff_shu(GtLogger *logger,
     {
       for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
       {
-        printf("# %s\t", gt_str_array_get(filenames, i_idx));
+        printf("# %s\t", gt_str_array_get(genome_names, i_idx));
         for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
         {
           if (i_idx == j_idx)
@@ -328,7 +331,7 @@ int gt_genomediff_shu(GtLogger *logger,
       gt_assert(div);
       for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
       {
-        printf("# %s\t", gt_str_array_get(filenames, i_idx));
+        printf("# %s\t", gt_str_array_get(genome_names, i_idx));
         for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
         {
           if (i_idx == j_idx)
@@ -351,7 +354,7 @@ int gt_genomediff_shu(GtLogger *logger,
       printf("# Table of Kr\n%lu\n", num_of_genomes);
       for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
       {
-        printf("%s\t", gt_str_array_get(filenames, i_idx));
+        printf("%s\t", gt_str_array_get(genome_names, i_idx));
         for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
         {
           if ( i_idx == j_idx )

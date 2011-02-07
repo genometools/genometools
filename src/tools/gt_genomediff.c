@@ -308,6 +308,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     gt_timer_start(timer);
     gt_assert(timer);
   }
+  /* TODO remomve this if it works */
   if (arguments->with_units)
     printf ("unitfile option set, filename is %s\n",
        gt_str_get(arguments->unitfile));
