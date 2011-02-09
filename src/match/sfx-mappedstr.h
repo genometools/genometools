@@ -69,6 +69,7 @@ void getencseqkmers(const GtEncseq *encseq,
 
 unsigned long getencseqkmers_twobitencoding(
                                    const GtEncseq *encseq,
+                                   GtReadmode readmode,
                                    unsigned int kmersize,
                                    void(*processkmercode)(void *,
                                                           unsigned long,
@@ -89,7 +90,8 @@ typedef enum
   BSRS_stream_reader_multi3
 } Bitstreamreadmode;
 
-void gt_encseq_faststream(const GtEncseq *encseq,Bitstreamreadmode bsrsmode,
+void gt_encseq_faststream(const GtEncseq *encseq,
+                          Bitstreamreadmode bsrsmode,
                           unsigned int multiarg);
 
 #endif

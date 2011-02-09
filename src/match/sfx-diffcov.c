@@ -1063,7 +1063,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
             codeptr->position = pos;
             gt_assert(code <= (GtCodetype) MAXCODEVALUE);
             codeptr->code = (unsigned int) code;
-            gt_assert(unitsnotspecial <= MAXPREFIXLENGTH);
+            gt_assert(unitsnotspecial <= (unsigned int) MAXPREFIXLENGTH);
             codeptr->maxprefixindex = unitsnotspecial;
           }
           specials++;

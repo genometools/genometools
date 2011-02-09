@@ -248,7 +248,8 @@ static void updatekmercount(void *processinfo,
           cp = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
           gt_assert(kmercode->code <= (GtCodetype) MAXCODEVALUE);
           cp->code = (unsigned int) kmercode->code;
-          gt_assert(kmercode->specialposition <= MAXPREFIXLENGTH);
+          gt_assert(kmercode->specialposition
+                    <= (unsigned int) MAXPREFIXLENGTH);
           cp->maxprefixindex = kmercode->specialposition;
           cp->position = position + kmercode->specialposition;
           /*
@@ -630,7 +631,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   specialcharacters = gt_encseq_specialcharacters(encseq);
   gt_assert(prefixlength > 0);
   if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
-      prefixlength > MAXPREFIXLENGTH)
+      prefixlength > (unsigned int) MAXPREFIXLENGTH)
   {
     gt_error_set(err,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
@@ -781,23 +782,33 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     {
 
       getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
-      if (prefixlength > 1U &&
-          readmode == GT_READMODE_FORWARD && gt_has_twobitencoding(encseq) &&
+      if (readmode == GT_READMODE_FORWARD && gt_has_twobitencoding(encseq) &&
           sfi->sfxstrategy.storespecialcodes)
       {
         unsigned long nextspecialcode;
-        Codeatposition *codelist;
-        codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
+        Codeatposition *codelist = NULL;
+        if (prefixlength > 1U)
+        {
+          codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
+        }
         nextspecialcode = getencseqkmers_twobitencoding(
                                    encseq,
+                                   readmode,
                                    prefixlength,
                                    gt_swallowkmercode,
                                    NULL,
                                    codelist);
-        compareCodeatpositionlists(sfi->spaceCodeatposition,
-                                   sfi->nextfreeCodeatposition,
-                                   codelist,
-                                   nextspecialcode);
+        if (codelist != NULL)
+        {
+          gt_assert(sfi->spaceCodeatposition != NULL);
+          compareCodeatpositionlists(sfi->spaceCodeatposition,
+                                     sfi->nextfreeCodeatposition,
+                                     codelist,
+                                     nextspecialcode);
+        } else
+        {
+          gt_assert(codelist == NULL);
+        }
         printf("# compared codes\n");
         gt_free(codelist);
       }
