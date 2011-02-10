@@ -20,9 +20,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/mman.h>
 #include "core/xposix.h"
 

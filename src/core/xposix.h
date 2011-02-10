@@ -20,6 +20,8 @@
 
 #include <glob.h>
 #include <stdio.h>
+#include <time.h>
+#include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
 
