@@ -1553,7 +1553,7 @@ Create a new <code>GtEOFNode*</code> representing an EOF marker.
    table with the '.ssp' suffix is required. If support for sequence
    descriptions is required, two additional tables are needed: a <em>description</em>
    table with the suffix '.des' and a <em>description separator</em> table with the
-   file suffix '.sds.'. Creation and requirement of these tables can be switched
+   file suffix '.sds'. Creation and requirement of these tables can be switched
    on and off using API functions as outlined below.
    The <code>GtEncseq</code> represents the stored sequences as one concatenated string.
    It allows access to the sequences by providing start positions and lengths
@@ -6703,19 +6703,25 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_xvsnprintf"><code>gt_xvsnprintf</code></a><br>
 
 <div id="footer">
-Copyright &copy; 2008-2010
+Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-01-28
+Last update: 2011-02-11
 </div>
 </div>
+<!-- Piwik -->
 <script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ?
+"https://gremme.org/piwik/" : "http://gremme.org/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js'
+type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
 try {
-var pageTracker = _gat._getTracker("UA-301256-4");
-pageTracker._trackPageview();
-} catch(err) {}</script>
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 5);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://gremme.org/piwik/piwik.php?idsite=5"
+style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Tag -->
 </body>
 </html>
