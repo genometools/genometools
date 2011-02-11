@@ -427,6 +427,7 @@ struct GtKmercodeiterator
   unsigned int numofchars;
   GtUchar charcode;
 
+  gt_assert(!GT_ISDIRREVERSE(readmode) || startpos == 0);
   kmercodeiterator = gt_malloc(sizeof (*kmercodeiterator));
   kmercodeiterator->totallength = gt_encseq_total_length(encseq);
   kmercodeiterator->startpos = startpos;
@@ -492,6 +493,44 @@ const GtKmercode *gt_kmercodeiterator_encseq_next(
     newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
     kmercodeiterator->currentposition++;
     return &kmercodeiterator->kmercode;
+  }
+  return NULL;
+}
+
+const GtKmercode *gt_kmercodeiterator_encseq_nonspecial_next(
+                             GtKmercodeiterator *kmercodeiterator)
+{
+  while (true)
+  {
+    if (!kmercodeiterator->hasprocessedfirst)
+    {
+      gt_assert(kmercodeiterator->currentposition
+                == kmercodeiterator->startpos +
+                     (unsigned long) kmercodeiterator->spwp->kmersize);
+      newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
+      kmercodeiterator->hasprocessedfirst = true;
+      if (!kmercodeiterator->kmercode.definedspecialposition)
+      {
+        return &kmercodeiterator->kmercode;
+      }
+    } else
+    {
+      if (kmercodeiterator->currentposition < kmercodeiterator->totallength)
+      {
+        GtUchar charcode
+          = gt_encseq_reader_next_encoded_char(kmercodeiterator->esr);
+        shiftrightwithchar(kmercodeiterator->spwp,charcode);
+        newcode(&kmercodeiterator->kmercode, kmercodeiterator->spwp);
+        kmercodeiterator->currentposition++;
+        if (!kmercodeiterator->kmercode.definedspecialposition)
+        {
+          return &kmercodeiterator->kmercode;
+        }
+      } else
+      {
+        break;
+      }
+    }
   }
   return NULL;
 }
@@ -770,12 +809,12 @@ static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
   return kmer;
 }
 
-static void showdifferentkmers(unsigned long pos,GtCodetype kmer1,
+static void showdifferentkmers(int line,unsigned long pos,GtCodetype kmer1,
                                GtCodetype kmer2)
 {
   char buffer[2*GT_INTWORDSIZE+1];
 
-  fprintf(stderr,"pos=%lu\n",pos);
+  fprintf(stderr,"line %d: pos=%lu\n",line,pos);
   gt_bitsequence_tostring_units(buffer,(GtBitsequence) kmer1,2U);
   fprintf(stderr,"kmer1=%s\n",buffer);
   gt_bitsequence_tostring_units(buffer,(GtBitsequence) kmer2,2U);
@@ -820,7 +859,7 @@ static GtCodetype gt_kmercodefirstpos(const GtTwobitencoding *twobitencoding,
         gt_assert(kmercodeptr != NULL);\
         if (!kmercodeptr->definedspecialposition && kmer != kmercodeptr->code)\
         {\
-          showdifferentkmers(POS,kmer,kmercodeptr->code);\
+          showdifferentkmers(__LINE__,POS,kmer,kmercodeptr->code);\
           exit(EXIT_FAILURE);\
         }
 
@@ -829,7 +868,7 @@ static GtCodetype gt_kmercodefirstpos(const GtTwobitencoding *twobitencoding,
         gt_assert(kmercodeptr != NULL);\
         if (kmer != kmercodeptr->code)\
         {\
-          showdifferentkmers(POS,kmer,kmercodeptr->code);\
+          showdifferentkmers(__LINE__,POS,kmer,kmercodeptr->code);\
           exit(EXIT_FAILURE);\
         }
 
@@ -946,7 +985,9 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                                            const GtKmercode *),
                                             void *processkmercodeinfo,
                                             unsigned long startpos,
-                                            unsigned long endpos)
+                                            unsigned long endpos,
+                                            GtKmercodeiterator
+                                              *kmercodeiterator)
 {
   unsigned long pos, unitindex, totallength;
   GtKmercode kmer;
@@ -956,7 +997,6 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   unsigned int shiftright;
   const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
   const GtKmercode *kmercodeptr;
-  GtKmercodeiterator *kmercodeiterator;
 
   gt_assert(readmode == GT_READMODE_FORWARD  ||
             readmode == GT_READMODE_REVERSE);
@@ -976,28 +1016,23 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       unitindex = 0;
     }
-    kmercodeiterator = NULL;
     kmer.code = gt_reversekmer(gt_kmercodeatpos(twobitencoding,pos,kmersize),
                                kmersize);
   } else
   {
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
-    kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,readmode,
-                                                      kmersize,pos);
     kmer.code = gt_kmercodeatpos(twobitencoding,pos,kmersize);
   }
   processkmercode(processkmercodeinfo,pos,&kmer);
-  if (kmercodeiterator != NULL)
+  gt_assert(kmercodeiterator != NULL);
+  kmercodeptr = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
+  gt_assert(kmercodeptr != NULL);
+  gt_assert(!kmercodeptr->definedspecialposition);
+  if (kmer.code != kmercodeptr->code)
   {
-    kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
-    gt_assert(kmercodeptr != NULL);
-    gt_assert(!kmercodeptr->definedspecialposition);
-    if (kmer.code != kmercodeptr->code)
-    {
-      showdifferentkmers(pos,kmer.code,kmercodeptr->code);
-      exit(EXIT_FAILURE);
-    }
+    showdifferentkmers(__LINE__,pos,kmer.code,kmercodeptr->code);
+    exit(EXIT_FAILURE);
   }
   currentencoding = twobitencoding[unitindex];
   if (GT_ISDIRREVERSE(readmode))
@@ -1010,6 +1045,16 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(kmer.code,cc);
+      processkmercode(processkmercodeinfo,pos,&kmer);
+      kmercodeptr
+        = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
+      gt_assert(kmercodeptr != NULL);
+      gt_assert(!kmercodeptr->definedspecialposition);
+      if (kmer.code != kmercodeptr->code)
+      {
+        showdifferentkmers(__LINE__,pos,kmer.code,kmercodeptr->code);
+        exit(EXIT_FAILURE);
+      }
       if (shiftright < (unsigned int) (GT_INTWORDSIZE-2))
       {
         shiftright += 2;
@@ -1034,12 +1079,13 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(kmer.code,cc);
       processkmercode(processkmercodeinfo,pos,&kmer);
-      kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator);
+      kmercodeptr
+        = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
       gt_assert(kmercodeptr != NULL);
       gt_assert(!kmercodeptr->definedspecialposition);
       if (kmer.code != kmercodeptr->code)
       {
-        showdifferentkmers(pos,kmer.code,kmercodeptr->code);
+        showdifferentkmers(__LINE__,pos,kmer.code,kmercodeptr->code);
         exit(EXIT_FAILURE);
       }
       if (shiftright > 0)
@@ -1055,7 +1101,6 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       }
     }
   }
-  gt_kmercodeiterator_delete(kmercodeiterator);
   return kmer.code;
 }
 
@@ -1069,7 +1114,9 @@ static unsigned long getencseqkmers_rangetwobitencoding(const GtEncseq *encseq,
                                                Codeatposition *codelist,
                                                unsigned long nextspecialcode,
                                                unsigned long startpos,
-                                               unsigned long endpos)
+                                               unsigned long endpos,
+                                               GtKmercodeiterator
+                                                 *kmercodeiterator)
 {
   GtCodetype lastcode;
   const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
@@ -1082,7 +1129,8 @@ static unsigned long getencseqkmers_rangetwobitencoding(const GtEncseq *encseq,
                                                       processkmercode,
                                                       processkmercodeinfo,
                                                       startpos,
-                                                      endpos);
+                                                      endpos,
+                                                      kmercodeiterator);
     if (codelist != NULL)
     {
       codelist[nextspecialcode].maxprefixindex = kmersize - 1;
@@ -1128,6 +1176,8 @@ unsigned long getencseqkmers_twobitencoding(
                                    Codeatposition *codelist)
 {
   unsigned long nextspecialcode = 0, laststart = 0, lastend, totallength;
+  GtKmercodeiterator *kmercodeiterator
+    = gt_kmercodeiterator_encseq_new(encseq,readmode,kmersize,0);
 
   lastend = totallength = gt_encseq_total_length(encseq);
   if (gt_encseq_has_specialranges(encseq))
@@ -1150,7 +1200,8 @@ unsigned long getencseqkmers_twobitencoding(
                                                codelist,
                                                nextspecialcode,
                                                range.end,
-                                               lastend);
+                                               lastend,
+                                               kmercodeiterator);
         lastend = range.start;
       }
     } else
@@ -1168,7 +1219,8 @@ unsigned long getencseqkmers_twobitencoding(
                                                codelist,
                                                nextspecialcode,
                                                laststart,
-                                               range.start);
+                                               range.start,
+                                               kmercodeiterator);
         laststart = range.end;
       }
     }
@@ -1185,7 +1237,8 @@ unsigned long getencseqkmers_twobitencoding(
                                                          codelist,
                                                          nextspecialcode,
                                                          0,
-                                                         lastend);
+                                                         lastend,
+                                                         kmercodeiterator);
   } else
   {
     nextspecialcode = getencseqkmers_rangetwobitencoding(encseq,
@@ -1196,8 +1249,10 @@ unsigned long getencseqkmers_twobitencoding(
                                                          codelist,
                                                          nextspecialcode,
                                                          laststart,
-                                                         totallength);
+                                                         totallength,
+                                                         kmercodeiterator);
   }
+  gt_kmercodeiterator_delete(kmercodeiterator);
   return nextspecialcode;
 }
 
@@ -1247,7 +1302,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
           kmer2 = gt_kmercodeatpos(twobitencoding, pos, kmersize);
           if (kmer != kmer2)
           {
-            showdifferentkmers(pos,kmer,kmer2);
+            showdifferentkmers(__LINE__,pos,kmer,kmer2);
           }
           gt_assert(kmer == kmer2);
           kmersum += (uint64_t) kmer;
