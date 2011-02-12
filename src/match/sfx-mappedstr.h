@@ -73,7 +73,7 @@ unsigned long getencseqkmers_twobitencoding(
                                    unsigned int kmersize,
                                    void(*processkmercode)(void *,
                                                           unsigned long,
-                                                          const GtKmercode *),
+                                                          GtCodetype),
                                    void *processkmercodeinfo,
                                    Codeatposition *codelist);
 

@@ -599,7 +599,7 @@ static void verifyestimatedspace(size_t estimatedspace)
 
 static void gt_swallowkmercode(GT_UNUSED void *processinfo,
                                GT_UNUSED unsigned long pos,
-                               GT_UNUSED const GtKmercode *kmer)
+                               GT_UNUSED GtCodetype code)
 {
   return;
 }
@@ -812,11 +812,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 sfi->nextfreeCodeatposition,
                                 sfi->spaceCodeatposition);
 #endif
-      if (gt_has_twobitencoding(encseq)
-          && sfi->sfxstrategy.storespecialcodes
-          && (readmode == GT_READMODE_FORWARD  ||
-              readmode == GT_READMODE_REVERSE ||
-              readmode == GT_READMODE_COMPL))
+      if (gt_has_twobitencoding(encseq) && sfi->sfxstrategy.storespecialcodes)
       {
         unsigned long nextspecialcode;
         Codeatposition *codelist = NULL;
