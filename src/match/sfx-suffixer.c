@@ -775,60 +775,72 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                         "counting prefix distribution",
                                         stdout);
     }
-    if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+    gt_assert(sfi->leftborder != NULL);
+    if (prefixlength == 1U)
     {
-      getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
+      unsigned int charidx;
+
+      for (charidx=0; charidx<sfi->numofchars; charidx++)
+      {
+        sfi->leftborder[GT_ISDIRCOMPLEMENT(readmode) ?
+                        GT_COMPLEMENTBASE(charidx) :
+                        charidx]
+          = gt_encseq_charcount(encseq,(GtUchar) charidx);
+      }
     } else
     {
-
-      getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
-      if (readmode == GT_READMODE_FORWARD && gt_has_twobitencoding(encseq) &&
-          sfi->sfxstrategy.storespecialcodes)
+      if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+      {
+        getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
+      } else
+      {
+        getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
+      }
+      if (sfi->sfxstrategy.storespecialcodes)
+      {
+        gt_assert(realspecialranges+1
+                  >= (unsigned long) sfi->nextfreeCodeatposition);
+        reversespecialcodes(sfi->spaceCodeatposition,
+                            sfi->nextfreeCodeatposition);
+      }
+#ifdef SKDEBUG
+      verifycodelistcomputation(encseq,
+                                readmode,
+                                realspecialranges,
+                                prefixlength,
+                                sfi->numofchars,
+                                sfi->nextfreeCodeatposition,
+                                sfi->spaceCodeatposition);
+#endif
+      if (gt_has_twobitencoding(encseq)
+          && sfi->sfxstrategy.storespecialcodes
+          && (readmode == GT_READMODE_FORWARD  ||
+              readmode == GT_READMODE_REVERSE))
       {
         unsigned long nextspecialcode;
         Codeatposition *codelist = NULL;
-        if (prefixlength > 1U)
-        {
-          codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
-        }
-        nextspecialcode = getencseqkmers_twobitencoding(
-                                   encseq,
-                                   readmode,
-                                   prefixlength,
-                                   gt_swallowkmercode,
-                                   NULL,
-                                   codelist);
+        codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
+        nextspecialcode = getencseqkmers_twobitencoding(encseq,
+                                                        readmode,
+                                                        prefixlength,
+                                                        gt_swallowkmercode,
+                                                        NULL,
+                                                        codelist);
         if (codelist != NULL)
         {
           gt_assert(sfi->spaceCodeatposition != NULL);
+          reversespecialcodes(codelist,nextspecialcode);
           compareCodeatpositionlists(sfi->spaceCodeatposition,
                                      sfi->nextfreeCodeatposition,
                                      codelist,
                                      nextspecialcode);
         } else
         {
-          gt_assert(codelist == NULL);
+          gt_assert(sfi->spaceCodeatposition == NULL);
         }
-        printf("# compared codes\n");
         gt_free(codelist);
       }
     }
-    if (sfi->sfxstrategy.storespecialcodes)
-    {
-      gt_assert(realspecialranges+1
-                >= (unsigned long) sfi->nextfreeCodeatposition);
-      reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
-    }
-#ifdef SKDEBUG
-    verifycodelistcomputation(encseq,
-                              readmode,
-                              realspecialranges,
-                              prefixlength,
-                              sfi->numofchars,
-                              sfi->nextfreeCodeatposition,
-                              sfi->spaceCodeatposition);
-#endif
-    gt_assert(sfi->leftborder != NULL);
 #ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif

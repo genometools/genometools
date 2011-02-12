@@ -36,8 +36,8 @@ if test $runtestsuite -eq 1
 then
   cd testsuite
   for keyword in gt_chain2dim gt_greedyfwdmat gt_idxlocali \
-                 gt_ltrharvest gt_paircmp gt_patternmatch \
-                 gt_repfind gt_tallymer gt_uniquesub
+                 gt_paircmp gt_patternmatch \
+                 gt_repfind gt_tallymer gt_uniquesub # gt_ltrharvest 
   do
     env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
          ${MC} -keywords ${keyword} \
