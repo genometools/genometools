@@ -815,7 +815,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (gt_has_twobitencoding(encseq)
           && sfi->sfxstrategy.storespecialcodes
           && (readmode == GT_READMODE_FORWARD  ||
-              readmode == GT_READMODE_REVERSE))
+              readmode == GT_READMODE_REVERSE ||
+              readmode == GT_READMODE_COMPL))
       {
         unsigned long nextspecialcode;
         Codeatposition *codelist = NULL;
@@ -834,6 +835,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                      sfi->nextfreeCodeatposition,
                                      codelist,
                                      nextspecialcode);
+          /*printf("# compared codelist\n");*/
         } else
         {
           gt_assert(sfi->spaceCodeatposition == NULL);
