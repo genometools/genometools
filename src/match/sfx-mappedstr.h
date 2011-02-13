@@ -42,6 +42,9 @@ typedef struct GtKmercodeiterator GtKmercodeiterator;
 const GtKmercode *gt_kmercodeiterator_encseq_next(
                        GtKmercodeiterator *kmercodeiterator);
 
+const GtKmercode *gt_kmercodeiterator_encseq_nonspecial_next(
+                             GtKmercodeiterator *kmercodeiterator);
+
 GtKmercodeiterator *gt_kmercodeiterator_filetab_new(
         const GtStrArray *filenametab,
         unsigned int numofchars,

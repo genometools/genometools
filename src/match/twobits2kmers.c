@@ -134,11 +134,41 @@ static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
   return kmer;
 }
 
-static void swallowkmercode(GT_UNUSED void *processinfo,
-                            GT_UNUSED unsigned long pos,
-                            GT_UNUSED GtCodetype code)
+static void gt_checkkmercode(void *processinfo,
+                             GT_UNUSED unsigned long pos,
+                             GtCodetype code)
 {
-  return;
+  GtKmercodeiterator *kmercodeiterator = (GtKmercodeiterator *) processinfo;
+  const GtKmercode *kmercodeptr;
+
+  gt_assert(kmercodeiterator != NULL);
+  kmercodeptr = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
+  gt_assert(kmercodeptr != NULL && !kmercodeptr->definedspecialposition);
+  gt_assert(code == kmercodeptr->code);
+}
+
+static void multireadmode_getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                                        unsigned int kmersize)
+{
+  GtKmercodeiterator *kmercodeiterator;
+  int readmode_int;
+
+  for (readmode_int = 0; readmode_int < 4; readmode_int++)
+  {
+    printf("getencseqkmers_twobitencoding(kmersize=%u,%s)\n",
+                         kmersize,
+                         gt_readmode_show((GtReadmode) readmode_int));
+    kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,
+                                                      (GtReadmode) readmode_int,
+                                                      kmersize,0);
+    (void) getencseqkmers_twobitencoding(encseq,
+                                         (GtReadmode) readmode_int,
+                                         kmersize,
+                                         gt_checkkmercode,
+                                         kmercodeiterator,NULL);
+    gt_kmercodeiterator_delete(kmercodeiterator);
+    kmercodeiterator = NULL;
+  }
 }
 
 static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
@@ -190,30 +220,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
       }
       break;
     case BSRS_stream_reader_multi3:
-      printf("getencseqkmers_twobitencoding(kmersize=%u,forward)\n",kmersize);
-      (void) getencseqkmers_twobitencoding(encseq,
-                                           GT_READMODE_FORWARD,
-                                           kmersize,
-                                           swallowkmercode,
-                                           NULL,NULL);
-      printf("getencseqkmers_twobitencoding(kmersize=%u,reverse)\n",kmersize);
-      (void) getencseqkmers_twobitencoding(encseq,
-                                           GT_READMODE_REVERSE,
-                                           kmersize,
-                                           swallowkmercode,
-                                           NULL,NULL);
-      printf("getencseqkmers_twobitencoding(kmersize=%u,compl)\n",kmersize);
-      (void) getencseqkmers_twobitencoding(encseq,
-                                           GT_READMODE_COMPL,
-                                           kmersize,
-                                           swallowkmercode,
-                                           NULL,NULL);
-      printf("getencseqkmers_twobitencoding(kmersize=%u,revcompl)\n",kmersize);
-      (void) getencseqkmers_twobitencoding(encseq,
-                                           GT_READMODE_REVCOMPL,
-                                           kmersize,
-                                           swallowkmercode,
-                                           NULL,NULL);
+      multireadmode_getencseqkmers_twobitencoding(encseq,kmersize);
       break;
     default:
       break;

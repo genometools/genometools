@@ -597,11 +597,17 @@ static void verifyestimatedspace(size_t estimatedspace)
 }
 #endif
 
-static void gt_swallowkmercode(GT_UNUSED void *processinfo,
-                               GT_UNUSED unsigned long pos,
-                               GT_UNUSED GtCodetype code)
+static void gt_checkkmercode(void *processinfo,
+                             GT_UNUSED unsigned long pos,
+                             GtCodetype code)
 {
-  return;
+  GtKmercodeiterator *kmercodeiterator = (GtKmercodeiterator *) processinfo;
+  const GtKmercode *kmercodeptr;
+
+  gt_assert(kmercodeiterator != NULL);
+  kmercodeptr = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
+  gt_assert(kmercodeptr != NULL && !kmercodeptr->definedspecialposition);
+  gt_assert(code == kmercodeptr->code);
 }
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
@@ -816,13 +822,17 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       {
         unsigned long nextspecialcode;
         Codeatposition *codelist = NULL;
+        GtKmercodeiterator *kmercodeiterator
+          = gt_kmercodeiterator_encseq_new(encseq,readmode,prefixlength,0);
+
         codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
         nextspecialcode = getencseqkmers_twobitencoding(encseq,
                                                         readmode,
                                                         prefixlength,
-                                                        gt_swallowkmercode,
-                                                        NULL,
+                                                        gt_checkkmercode,
+                                                        kmercodeiterator,
                                                         codelist);
+        gt_kmercodeiterator_delete(kmercodeiterator);
         if (codelist != NULL)
         {
           gt_assert(sfi->spaceCodeatposition != NULL);
