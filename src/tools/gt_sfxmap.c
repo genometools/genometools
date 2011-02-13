@@ -25,7 +25,7 @@
 #include "match/esa-map.h"
 #include "match/eis-voiditf.h"
 #include "match/pckdfs.h"
-#include "match/sfx-mappedstr.h"
+#include "match/twobits2kmers.h"
 #include "match/optionargmode.h"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
@@ -765,14 +765,10 @@ static const Optionargmodedesc stream_esq_operation[] =
   {"stream_reader_single","read single characters with encseq reader and "
                           "from word stream",
                    (unsigned int) BSRS_stream_reader_single},
-  {"stream_multi","read kmers from word stream",
-                   (unsigned int) BSRS_stream_multi},
   {"reader_multi","read kmers with encseq reader",
                    (unsigned int) BSRS_reader_multi},
   {"stream_reader_multi","read kmers with encseq reader and from word stream",
                    (unsigned int) BSRS_stream_reader_multi},
-  {"stream_reader_multi2","read kmers with encseq reader and from word stream",
-                   (unsigned int) BSRS_stream_reader_multi2},
   {"stream_reader_multi3","read kmers with encseq reader and from word stream",
                    (unsigned int) BSRS_stream_reader_multi3}
 };
@@ -815,10 +811,8 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
         haserr = true;
       } else
       {
-        if ((brsmode == BSRS_stream_multi ||
-             brsmode == BSRS_reader_multi ||
+        if ((brsmode == BSRS_reader_multi ||
              brsmode == BSRS_stream_reader_multi ||
-             brsmode == BSRS_stream_reader_multi2 ||
              brsmode == BSRS_stream_reader_multi3) &&
              streamesq_size != 3UL)
         {

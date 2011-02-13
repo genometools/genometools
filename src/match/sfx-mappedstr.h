@@ -67,6 +67,17 @@ void getencseqkmers(const GtEncseq *encseq,
                                            const GtKmercode *),
                     void *processkmercodeinfo);
 
+GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
+                                   unsigned long pos,
+                                   unsigned int kmersize);
+
+GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
+                                   unsigned int kmersize);
+
+GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize);
+
+GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright);
+
 unsigned long getencseqkmers_twobitencoding(
                                    const GtEncseq *encseq,
                                    GtReadmode readmode,
@@ -76,22 +87,5 @@ unsigned long getencseqkmers_twobitencoding(
                                                           GtCodetype),
                                    void *processkmercodeinfo,
                                    Codeatposition *codelist);
-
-typedef enum
-{
-  BSRS_stream_words,
-  BSRS_stream_single,
-  BSRS_reader_single,
-  BSRS_stream_reader_single,
-  BSRS_stream_multi,
-  BSRS_reader_multi,
-  BSRS_stream_reader_multi,
-  BSRS_stream_reader_multi2,
-  BSRS_stream_reader_multi3
-} Bitstreamreadmode;
-
-void gt_encseq_faststream(const GtEncseq *encseq,
-                          Bitstreamreadmode bsrsmode,
-                          unsigned int multiarg);
 
 #endif
