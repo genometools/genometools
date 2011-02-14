@@ -858,7 +858,7 @@ static void checkallreversebitpairs(void)
 
 #define UPDATEKMER(KMER,CC)\
         KMER <<= 2;\
-        KMER |= cc;\
+        KMER |= CC;\
         KMER &= maskright
 
 static GtCodetype getencseqkmers_nospecialtwobitencoding(
@@ -875,36 +875,30 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     unsigned long endpos)
 {
   unsigned long pos, unitindex;
-  GtKmercode kmer;
+  unsigned int shiftright;
+  GtCodetype code;
   GtUchar cc;
   GtTwobitencoding currentencoding;
-  unsigned int shiftright;
 
   gt_assert(kmersize > 1U);
-  kmer.definedspecialposition = false;
-  kmer.specialposition = 0;
   if (GT_ISDIRREVERSE(readmode))
   {
     gt_assert(endpos >= (unsigned long) kmersize);
     pos = endpos - (unsigned long) kmersize;
     unitindex = (pos > 0) ? GT_DIVBYUNITSIN2BITENC(pos-1) : 0;
-    kmer.code = gt_kmercode_reverse(
-                        gt_kmercode_at_position(twobitencoding,pos,kmersize),
-                        kmersize);
+    code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
+                                                       kmersize),
+                               kmersize);
   } else
   {
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
-    kmer.code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
+    code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
   }
-  if (GT_ISDIRCOMPLEMENT(readmode))
-  {
-    processkmercode(processkmercodeinfo,pos,
-                    gt_kmercode_complement(kmer.code,maskright));
-  } else
-  {
-    processkmercode(processkmercodeinfo,pos,kmer.code);
-  }
+  processkmercode(processkmercodeinfo,pos,
+                  GT_ISDIRCOMPLEMENT(readmode)
+                    ? gt_kmercode_complement(code,maskright)
+                    : code);
   currentencoding = twobitencoding[unitindex];
   if (GT_ISDIRREVERSE(readmode))
   {
@@ -915,15 +909,11 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      UPDATEKMER(kmer.code,cc);
-      if (readmode == GT_READMODE_REVCOMPL)
-      {
-        processkmercode(processkmercodeinfo,pos,
-                        gt_kmercode_complement(kmer.code,maskright));
-      } else
-      {
-        processkmercode(processkmercodeinfo,pos,kmer.code);
-      }
+      UPDATEKMER(code,cc);
+      processkmercode(processkmercodeinfo,pos,
+                       (readmode == GT_READMODE_REVCOMPL)
+                          ? gt_kmercode_complement(code,maskright)
+                          : code);
       if (shiftright < (unsigned int) (GT_INTWORDSIZE-2))
       {
         shiftright += 2;
@@ -947,15 +937,11 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      UPDATEKMER(kmer.code,cc);
-      if (readmode == GT_READMODE_COMPL)
-      {
-        processkmercode(processkmercodeinfo,pos,
-                        gt_kmercode_complement(kmer.code,maskright));
-      } else
-      {
-        processkmercode(processkmercodeinfo,pos,kmer.code);
-      }
+      UPDATEKMER(code,cc);
+      processkmercode(processkmercodeinfo,pos,
+                       (readmode == GT_READMODE_COMPL)
+                         ? gt_kmercode_complement(code,maskright)
+                         : code);
       if (shiftright > 0)
       {
         shiftright -= 2;
@@ -969,7 +955,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       }
     }
   }
-  return kmer.code;
+  return code;
 }
 
 static unsigned long getencseqkmers_rangetwobitencoding(
