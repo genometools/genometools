@@ -1101,10 +1101,9 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                            "duplicates, choose from "
                                            "none|id|desc|seq|both",
                                            duplicatecheck,
-                                           duplicate_check_modes[1],
+                                           duplicate_check_modes[4],
                                            duplicate_check_modes);
   gt_option_is_extended_option(optduplicatecheck);
-  gt_option_is_development_option(optduplicatecheck);
   gt_option_parser_add_option(op, optduplicatecheck);
 
   /* add spliced alignment filter options */
