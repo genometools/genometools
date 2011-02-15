@@ -1095,7 +1095,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_parser_add_option(op, optminaveragessp);
   }
 
-  /* -duplicationcheck */
+  /* -duplicatecheck */
   optduplicatecheck = gt_option_new_choice("duplicatecheck", "criterion used "
                                            "to check for spliced alignment "
                                            "duplicates, choose from "
