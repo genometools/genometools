@@ -81,14 +81,17 @@ GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize);
 
 GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright);
 
-unsigned long getencseqkmers_twobitencoding(
-                                   const GtEncseq *encseq,
+void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    unsigned int kmersize,
                                    void(*processkmercode)(void *,
                                                           unsigned long,
                                                           GtCodetype),
                                    void *processkmercodeinfo,
-                                   Codeatposition *codelist);
+                                   void(*processkmerspecial)(void *,
+                                                             unsigned int,
+                                                             unsigned int,
+                                                             unsigned long),
+                                   void *processkmerspecialinfo);
 
 #endif

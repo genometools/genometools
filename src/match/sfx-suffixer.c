@@ -597,9 +597,9 @@ static void verifyestimatedspace(size_t estimatedspace)
 }
 #endif
 
-static void gt_checkkmercode(void *processinfo,
-                             GT_UNUSED unsigned long pos,
-                             GtCodetype code)
+static void gt_sfxcheckkmercode(void *processinfo,
+                                GT_UNUSED unsigned long pos,
+                                GtCodetype code)
 {
   GtKmercodeiterator *kmercodeiterator = (GtKmercodeiterator *) processinfo;
   const GtKmercode *kmercodeptr;
@@ -608,6 +608,26 @@ static void gt_checkkmercode(void *processinfo,
   kmercodeptr = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
   gt_assert(kmercodeptr != NULL && !kmercodeptr->definedspecialposition);
   gt_assert(code == kmercodeptr->code);
+}
+
+typedef struct
+{
+  unsigned long nextfreeCodeatposition;
+  Codeatposition *spaceCodeatposition;
+} GtArrayCodeatposition;
+
+static void gt_storespecialcode(void *info,
+                                unsigned int maxprefixindex,
+                                unsigned int code,
+                                unsigned long position)
+{
+  GtArrayCodeatposition *arrspca = (GtArrayCodeatposition *) info;
+  Codeatposition *spcaptr;
+
+  spcaptr = arrspca->spaceCodeatposition + arrspca->nextfreeCodeatposition++;
+  spcaptr->maxprefixindex = maxprefixindex;
+  spcaptr->code = code;
+  spcaptr->position = position;
 }
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
@@ -820,33 +840,31 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 #endif
       if (gt_has_twobitencoding(encseq) && sfi->sfxstrategy.storespecialcodes)
       {
-        unsigned long nextspecialcode;
-        Codeatposition *codelist = NULL;
+        GtArrayCodeatposition codelist;
         GtKmercodeiterator *kmercodeiterator
           = gt_kmercodeiterator_encseq_new(encseq,readmode,prefixlength,0);
 
-        codelist = gt_malloc(sizeof (*codelist) * (realspecialranges+1));
-        nextspecialcode = getencseqkmers_twobitencoding(encseq,
-                                                        readmode,
-                                                        prefixlength,
-                                                        gt_checkkmercode,
-                                                        kmercodeiterator,
-                                                        codelist);
+        codelist.nextfreeCodeatposition = 0;
+        codelist.spaceCodeatposition
+          = gt_malloc(sizeof (*codelist.spaceCodeatposition) *
+                      (realspecialranges+1));
+        getencseqkmers_twobitencoding(encseq,
+                                      readmode,
+                                      prefixlength,
+                                      gt_sfxcheckkmercode,
+                                      kmercodeiterator,
+                                      gt_storespecialcode,
+                                      &codelist);
         gt_kmercodeiterator_delete(kmercodeiterator);
-        if (codelist != NULL)
-        {
-          gt_assert(sfi->spaceCodeatposition != NULL);
-          reversespecialcodes(codelist,nextspecialcode);
-          compareCodeatpositionlists(sfi->spaceCodeatposition,
-                                     sfi->nextfreeCodeatposition,
-                                     codelist,
-                                     nextspecialcode);
+        gt_assert(sfi->spaceCodeatposition != NULL);
+        reversespecialcodes(codelist.spaceCodeatposition,
+                            codelist.nextfreeCodeatposition);
+        compareCodeatpositionlists(sfi->spaceCodeatposition,
+                                   sfi->nextfreeCodeatposition,
+                                   codelist.spaceCodeatposition,
+                                   codelist.nextfreeCodeatposition);
           /*printf("# compared codelist\n");*/
-        } else
-        {
-          gt_assert(sfi->spaceCodeatposition == NULL);
-        }
-        gt_free(codelist);
+        gt_free(codelist.spaceCodeatposition);
       }
     }
 #ifdef SKDEBUG

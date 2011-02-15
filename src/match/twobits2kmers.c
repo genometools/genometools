@@ -161,11 +161,13 @@ static void multireadmode_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     kmercodeiterator = gt_kmercodeiterator_encseq_new(encseq,
                                                       (GtReadmode) readmode_int,
                                                       kmersize,0);
-    (void) getencseqkmers_twobitencoding(encseq,
-                                         (GtReadmode) readmode_int,
-                                         kmersize,
-                                         gt_checkkmercode,
-                                         kmercodeiterator,NULL);
+    getencseqkmers_twobitencoding(encseq,
+                                  (GtReadmode) readmode_int,
+                                  kmersize,
+                                  gt_checkkmercode,
+                                  kmercodeiterator,
+                                  NULL,
+                                  NULL);
     gt_kmercodeiterator_delete(kmercodeiterator);
     kmercodeiterator = NULL;
   }
