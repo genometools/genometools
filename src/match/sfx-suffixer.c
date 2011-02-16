@@ -81,6 +81,8 @@ struct Sfxiterator
   unsigned long *leftborder; /* points to bcktab->leftborder */
   unsigned long long bucketiterstep; /* for progressbar */
   unsigned long *leftborder2;
+  unsigned long nextfreeCodeatposition2;
+  Codeatposition *spaceCodeatposition2;
   unsigned int maskright;
   Sfxstrategy sfxstrategy;
   GtLogger *logger;
@@ -612,21 +614,15 @@ static void gt_sfxcheckkmercode(void *processinfo,
   gt_assert(code == kmercodeptr->code);
 }
 
-typedef struct
-{
-  unsigned long nextfreeCodeatposition;
-  Codeatposition *spaceCodeatposition;
-} GtArrayCodeatposition;
-
 static void gt_storespecialcode(void *processinfo,
                                 unsigned int maxprefixindex,
                                 unsigned int code,
                                 unsigned long position)
 {
-  GtArrayCodeatposition *arrspca = (GtArrayCodeatposition *) processinfo;
+  Sfxiterator *sfi = (Sfxiterator *) processinfo;
   Codeatposition *spcaptr;
 
-  spcaptr = arrspca->spaceCodeatposition + arrspca->nextfreeCodeatposition++;
+  spcaptr = sfi->spaceCodeatposition2 + sfi->nextfreeCodeatposition2++;
   spcaptr->maxprefixindex = maxprefixindex;
   spcaptr->code = code;
   spcaptr->position = position;
@@ -867,13 +863,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (gt_has_twobitencoding(encseq) && sfi->sfxstrategy.storespecialcodes)
       {
         unsigned long idx, numofallcodes;
-        GtArrayCodeatposition codelist;
         GtKmercodeiterator *kmercodeiterator
           = gt_kmercodeiterator_encseq_new(encseq,readmode,prefixlength,0);
 
-        codelist.nextfreeCodeatposition = 0;
-        codelist.spaceCodeatposition
-          = gt_malloc(sizeof (*codelist.spaceCodeatposition) *
+        sfi->nextfreeCodeatposition2 = 0;
+        sfi->spaceCodeatposition2
+          = gt_malloc(sizeof (*sfi->spaceCodeatposition2) *
                       (realspecialranges+1));
         getencseqkmers_twobitencoding(encseq,
                                       readmode,
@@ -881,16 +876,16 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                       gt_sfxcheckkmercode,
                                       kmercodeiterator,
                                       gt_storespecialcode,
-                                      &codelist);
+                                      sfi);
         gt_kmercodeiterator_delete(kmercodeiterator);
         gt_assert(sfi->spaceCodeatposition != NULL);
-        reversespecialcodes(codelist.spaceCodeatposition,
-                            codelist.nextfreeCodeatposition);
+        reversespecialcodes(sfi->spaceCodeatposition2,
+                            sfi->nextfreeCodeatposition2);
         compareCodeatpositionlists(sfi->spaceCodeatposition,
                                    sfi->nextfreeCodeatposition,
-                                   codelist.spaceCodeatposition,
-                                   codelist.nextfreeCodeatposition);
-        gt_free(codelist.spaceCodeatposition);
+                                   sfi->spaceCodeatposition2,
+                                   sfi->nextfreeCodeatposition2);
+        gt_free(sfi->spaceCodeatposition2);
 
         numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
         sfi->leftborder2 = gt_malloc(sizeof (*sfi->leftborder2) *
