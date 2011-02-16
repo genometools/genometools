@@ -171,7 +171,7 @@ void              gt_encseq_mirror(GtEncseq *encseq);
 void              gt_encseq_unmirror(GtEncseq *encseq);
 /* Returns TRUE if <encseq> contains virtual reverse complement sequences as
    added by <gt_encseq_mirror()>. */
-bool              gt_encseq_is_mirrored(GtEncseq *encseq);
+bool              gt_encseq_is_mirrored(const GtEncseq *encseq);
 /* Deletes <encseq> and frees all associated space. */
 void              gt_encseq_delete(GtEncseq *encseq);
 

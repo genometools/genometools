@@ -7737,7 +7737,7 @@ void gt_encseq_unmirror(GtEncseq *encseq)
   encseq->logicaltotallength = encseq->totallength;
 }
 
-bool gt_encseq_is_mirrored(GtEncseq *encseq)
+bool gt_encseq_is_mirrored(const GtEncseq *encseq)
 {
   gt_assert(encseq);
   return encseq->hasmirror;

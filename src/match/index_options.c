@@ -416,8 +416,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   idxo->optionstorespecialcodes
     = gt_option_new_bool("storespecialcodes",
                          "store special codes (this may speed up the program)",
-                         &idxo->sfxstrategy.storespecialcodes,true);/* XXX */
-                         /* set last arg back to false */
+                         &idxo->sfxstrategy.storespecialcodes,false);
 
   gt_option_is_development_option(idxo->optionstorespecialcodes);
   gt_option_parser_add_option(op, idxo->optionstorespecialcodes);

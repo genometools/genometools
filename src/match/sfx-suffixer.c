@@ -80,9 +80,6 @@ struct Sfxiterator
   GtCodetype numofallcodes;
   unsigned long *leftborder; /* points to bcktab->leftborder */
   unsigned long long bucketiterstep; /* for progressbar */
-  unsigned long *leftborder2;
-  unsigned long nextfreeCodeatposition2;
-  Codeatposition *spaceCodeatposition2;
   unsigned int maskright;
   Sfxstrategy sfxstrategy;
   GtLogger *logger;
@@ -125,7 +122,6 @@ static unsigned long iterproduceCodeatposition(Codeatposition *codelist,
   }
   return 0;
 }
-#endif
 
 static void compareCodeatpositionlists(const Codeatposition *codelist1,
                                        unsigned long len1,
@@ -176,7 +172,6 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
   }
 }
 
-#ifdef SKDEBUG
 static void verifycodelistcomputation(
                        const GtEncseq *encseq,
                        GtReadmode readmode,
@@ -601,53 +596,34 @@ static void verifyestimatedspace(size_t estimatedspace)
 }
 #endif
 
-static void gt_sfxcheckkmercode(void *processinfo,
-                                GT_UNUSED unsigned long pos,
-                                GtCodetype code)
-{
-  GtKmercodeiterator *kmercodeiterator = (GtKmercodeiterator *) processinfo;
-  const GtKmercode *kmercodeptr;
-
-  gt_assert(kmercodeiterator != NULL);
-  kmercodeptr = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
-  gt_assert(kmercodeptr != NULL && !kmercodeptr->definedspecialposition);
-  gt_assert(code == kmercodeptr->code);
-}
-
-static void gt_storespecialcode(void *processinfo,
-                                unsigned int maxprefixindex,
-                                unsigned int code,
-                                unsigned long position)
-{
-  Sfxiterator *sfi = (Sfxiterator *) processinfo;
-  Codeatposition *spcaptr;
-
-  spcaptr = sfi->spaceCodeatposition2 + sfi->nextfreeCodeatposition2++;
-  spcaptr->maxprefixindex = maxprefixindex;
-  spcaptr->code = code;
-  spcaptr->position = position;
-}
-
 static void gt_updateleftborderforkmer(void *processinfo,
                                        GT_UNUSED unsigned long pos,
                                        GtCodetype code)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  sfi->leftborder2[code]++;
+  sfi->leftborder[code]++;
 }
 
 static void gt_updateleftborderforspecialkmer(void *processinfo,
                                               unsigned int maxprefixindex,
                                               unsigned int code,
-                                              GT_UNUSED unsigned long position)
+                                              unsigned long position)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
   unsigned int idx;
 
+  if (sfi->sfxstrategy.storespecialcodes)
+  {
+    Codeatposition *spcaptr;
+    spcaptr = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
+    spcaptr->maxprefixindex = maxprefixindex;
+    spcaptr->code = code;
+    spcaptr->position = position;
+  }
   for (idx=maxprefixindex; idx>=1U; idx--)
   {
-    sfi->leftborder2[code]++;
+    sfi->leftborder[code]++;
     code = ((code << 2) | 3U) & sfi->maskright;
   }
 }
@@ -709,6 +685,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->readmode = readmode;
     sfi->numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
     sfi->prefixlength = prefixlength;
+    sfi->maskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->dcov = NULL;
     sfi->withprogressbar = withprogressbar;
     if (sfxstrategy != NULL)
@@ -837,12 +814,24 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
     } else
     {
-      if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+      if (gt_has_twobitencoding(encseq) && !gt_encseq_is_mirrored(encseq))
       {
-        getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
+        getencseqkmers_twobitencoding(encseq,
+                                      readmode,
+                                      prefixlength,
+                                      gt_updateleftborderforkmer,
+                                      sfi,
+                                      gt_updateleftborderforspecialkmer,
+                                      sfi);
       } else
       {
-        getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
+        if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+        {
+          getencseqkmersupdatekmercount(encseq, readmode, prefixlength, sfi);
+        } else
+        {
+          getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
+        }
       }
       if (sfi->sfxstrategy.storespecialcodes)
       {
@@ -860,53 +849,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 sfi->nextfreeCodeatposition,
                                 sfi->spaceCodeatposition);
 #endif
-      if (gt_has_twobitencoding(encseq) && sfi->sfxstrategy.storespecialcodes)
-      {
-        unsigned long idx, numofallcodes;
-        GtKmercodeiterator *kmercodeiterator
-          = gt_kmercodeiterator_encseq_new(encseq,readmode,prefixlength,0);
-
-        sfi->nextfreeCodeatposition2 = 0;
-        sfi->spaceCodeatposition2
-          = gt_malloc(sizeof (*sfi->spaceCodeatposition2) *
-                      (realspecialranges+1));
-        getencseqkmers_twobitencoding(encseq,
-                                      readmode,
-                                      prefixlength,
-                                      gt_sfxcheckkmercode,
-                                      kmercodeiterator,
-                                      gt_storespecialcode,
-                                      sfi);
-        gt_kmercodeiterator_delete(kmercodeiterator);
-        gt_assert(sfi->spaceCodeatposition != NULL);
-        reversespecialcodes(sfi->spaceCodeatposition2,
-                            sfi->nextfreeCodeatposition2);
-        compareCodeatpositionlists(sfi->spaceCodeatposition,
-                                   sfi->nextfreeCodeatposition,
-                                   sfi->spaceCodeatposition2,
-                                   sfi->nextfreeCodeatposition2);
-        gt_free(sfi->spaceCodeatposition2);
-
-        numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
-        sfi->leftborder2 = gt_malloc(sizeof (*sfi->leftborder2) *
-                                          (numofallcodes+1));
-        memset(sfi->leftborder2,0,
-               sizeof (*sfi->leftborder2) * (size_t) (numofallcodes+1));
-        sfi->maskright = (1U << GT_MULT2(prefixlength))-1;
-        getencseqkmers_twobitencoding(encseq,
-                                      readmode,
-                                      prefixlength,
-                                      gt_updateleftborderforkmer,
-                                      sfi,
-                                      gt_updateleftborderforspecialkmer,
-                                      sfi);
-        for (idx = 0; idx<numofallcodes; idx++)
-        {
-          gt_assert(sfi->leftborder[idx] == sfi->leftborder2[idx]);
-        }
-        printf("# compared codelist\n");
-        gt_free(sfi->leftborder2);
-      }
     }
 #ifdef SKDEBUG
     showleftborder(sfi->leftborder,sfi->numofallcodes);
