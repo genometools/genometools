@@ -919,6 +919,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
         shiftright += 2;
       } else
       {
+        gt_assert(unitindex > 0 || pos == startpos);
         if (unitindex > 0)
         {
           currentencoding = twobitencoding[--unitindex];
@@ -947,6 +948,8 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
         shiftright -= 2;
       } else
       {
+        gt_assert(unitindex < maxunitindex-1 ||
+                  pos == endpos - (unsigned long) kmersize);
         if (unitindex < maxunitindex-1)
         {
           currentencoding = twobitencoding[++unitindex];
@@ -997,7 +1000,8 @@ static void getencseqkmers_rangetwobitencoding(
     newcode = ((lastcode << 2) | 3UL) & maskright;
     if (processkmerspecial != NULL)
     {
-      processkmerspecial(processkmerspecialinfo,kmersize-1,
+      processkmerspecial(processkmerspecialinfo,
+                         kmersize-1,
                          (unsigned int) newcode,
                          GT_ISDIRREVERSE(readmode) ? (totallength - startpos)
                                                    : endpos);

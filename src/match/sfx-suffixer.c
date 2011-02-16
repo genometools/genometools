@@ -616,18 +616,50 @@ typedef struct
   Codeatposition *spaceCodeatposition;
 } GtArrayCodeatposition;
 
-static void gt_storespecialcode(void *info,
+static void gt_storespecialcode(void *processinfo,
                                 unsigned int maxprefixindex,
                                 unsigned int code,
                                 unsigned long position)
 {
-  GtArrayCodeatposition *arrspca = (GtArrayCodeatposition *) info;
+  GtArrayCodeatposition *arrspca = (GtArrayCodeatposition *) processinfo;
   Codeatposition *spcaptr;
 
   spcaptr = arrspca->spaceCodeatposition + arrspca->nextfreeCodeatposition++;
   spcaptr->maxprefixindex = maxprefixindex;
   spcaptr->code = code;
   spcaptr->position = position;
+}
+
+typedef struct
+{
+  unsigned long *leftborder, numofallcodes;
+  unsigned int maskright;
+} Blowupinfo;
+
+static void gt_updateleftborderforkmer(void *processinfo,
+                                       GT_UNUSED unsigned long pos,
+                                       GtCodetype code)
+{
+  Blowupinfo *blowupinfo = (Blowupinfo *) processinfo;
+
+  gt_assert(code < blowupinfo->numofallcodes);
+  blowupinfo->leftborder[code]++;
+}
+
+static void gt_updateleftborderforspecialkmer(void *processinfo,
+                                              unsigned int maxprefixindex,
+                                              unsigned int code,
+                                              GT_UNUSED unsigned long position)
+{
+  Blowupinfo *blowupinfo = (Blowupinfo *) processinfo;
+  unsigned int idx;
+
+  for (idx=maxprefixindex; idx>=1U; idx--)
+  {
+    gt_assert((unsigned long) code < blowupinfo->numofallcodes);
+    blowupinfo->leftborder[code]++;
+    code = ((code << 2) | 3U) & blowupinfo->maskright;
+  }
 }
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
@@ -840,6 +872,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 #endif
       if (gt_has_twobitencoding(encseq) && sfi->sfxstrategy.storespecialcodes)
       {
+        Blowupinfo blowupinfo;
+        unsigned long idx;
         GtArrayCodeatposition codelist;
         GtKmercodeiterator *kmercodeiterator
           = gt_kmercodeiterator_encseq_new(encseq,readmode,prefixlength,0);
@@ -863,8 +897,28 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                    sfi->nextfreeCodeatposition,
                                    codelist.spaceCodeatposition,
                                    codelist.nextfreeCodeatposition);
-          /*printf("# compared codelist\n");*/
         gt_free(codelist.spaceCodeatposition);
+
+        blowupinfo.numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
+        blowupinfo.leftborder = gt_malloc(sizeof (*blowupinfo.leftborder) *
+                                          (blowupinfo.numofallcodes+1));
+        memset(blowupinfo.leftborder,0,
+               sizeof (*blowupinfo.leftborder) *
+               (size_t) (blowupinfo.numofallcodes+1));
+        blowupinfo.maskright = (1U << GT_MULT2(prefixlength))-1;
+        getencseqkmers_twobitencoding(encseq,
+                                      readmode,
+                                      prefixlength,
+                                      gt_updateleftborderforkmer,
+                                      &blowupinfo,
+                                      gt_updateleftborderforspecialkmer,
+                                      &blowupinfo);
+        for (idx = 0; idx<blowupinfo.numofallcodes; idx++)
+        {
+          gt_assert(sfi->leftborder[idx] == blowupinfo.leftborder[idx]);
+        }
+        printf("# compared codelist\n");
+        gt_free(blowupinfo.leftborder);
       }
     }
 #ifdef SKDEBUG
