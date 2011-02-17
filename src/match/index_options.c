@@ -492,6 +492,20 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
+  idxo->option = gt_option_new_bool("onlybucketinsertion",
+                              "perform only bucket insertion",
+                              &idxo->sfxstrategy.onlybucketinsertion,
+                              false);
+  gt_option_is_development_option(idxo->option);
+  gt_option_parser_add_option(op, idxo->option);
+
+  idxo->option = gt_option_new_bool("kmerswithencseqreader",
+                              "always perform kmerscanning with encseq-reader",
+                              &idxo->sfxstrategy.kmerswithencseqreader,
+                              false);
+  gt_option_is_development_option(idxo->option);
+  gt_option_parser_add_option(op, idxo->option);
+
   gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
   if (idxo->optionmaxdepth != NULL)
   {

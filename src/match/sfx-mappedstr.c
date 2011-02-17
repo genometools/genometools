@@ -861,6 +861,8 @@ static void checkallreversebitpairs(void)
         KMER |= CC;\
         KMER &= maskright
 
+#define ADJUSTREVERSEPOS(POS) (rightbound - (POS))
+
 static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     const GtTwobitencoding *twobitencoding,
                                     unsigned long totallength,
@@ -879,6 +881,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   GtCodetype code;
   GtUchar cc;
   GtTwobitencoding currentencoding;
+  unsigned long rightbound = totallength - kmersize;
 
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
@@ -889,16 +892,21 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
                                                        kmersize),
                                kmersize);
+    processkmercode(processkmercodeinfo,
+                    ADJUSTREVERSEPOS(pos),
+                    GT_ISDIRCOMPLEMENT(readmode)
+                      ? gt_kmercode_complement(code,maskright)
+                      : code);
   } else
   {
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
     code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
+    processkmercode(processkmercodeinfo,pos,
+                    GT_ISDIRCOMPLEMENT(readmode)
+                      ? gt_kmercode_complement(code,maskright)
+                      : code);
   }
-  processkmercode(processkmercodeinfo,pos,
-                  GT_ISDIRCOMPLEMENT(readmode)
-                    ? gt_kmercode_complement(code,maskright)
-                    : code);
   currentencoding = twobitencoding[unitindex];
   if (GT_ISDIRREVERSE(readmode))
   {
@@ -910,7 +918,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
-      processkmercode(processkmercodeinfo,pos,
+      processkmercode(processkmercodeinfo,ADJUSTREVERSEPOS(pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);

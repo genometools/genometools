@@ -307,22 +307,28 @@ static void updatekmercount(void *processinfo,
 #endif
 }
 
-static void insertwithoutspecial(void *processinfo,
-                                 unsigned long position,
-                                 const GtKmercode *kmercode)
+static void insertkmerwithoutspecial1(void *processinfo,
+                                      unsigned long position,
+                                      GtCodetype code)
+{
+  Sfxiterator *sfi = (Sfxiterator *) processinfo;
+
+  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
+  {
+    unsigned long stidx = --sfi->leftborder[code];
+    gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
+                                           position);
+    /* from right to left */
+  }
+}
+
+static void insertkmerwithoutspecial(void *processinfo,
+                                     unsigned long position,
+                                     const GtKmercode *kmercode)
 {
   if (!kmercode->definedspecialposition)
   {
-    Sfxiterator *sfi = (Sfxiterator *) processinfo;
-
-    if (kmercode->code >= sfi->currentmincode &&
-        kmercode->code <= sfi->currentmaxcode)
-    {
-      unsigned long stidx = --sfi->leftborder[kmercode->code];
-      gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
-                                             position);
-      /* from right to left */
-    }
+    insertkmerwithoutspecial1(processinfo, position, kmercode->code);
   }
 }
 
@@ -497,10 +503,10 @@ static void getencseqkmersupdatekmercount(const GtEncseq *encseq,
   gt_kmercodeiterator_delete(kmercodeiterator);
 }
 
-void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
-                                        GtReadmode readmode,
-                                        unsigned int kmersize,
-                                        Sfxiterator *sfi)
+void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
+                                            GtReadmode readmode,
+                                            unsigned int kmersize,
+                                            Sfxiterator *sfi)
 {
   GtKmercodeiterator *kmercodeiterator;
   const GtKmercode *kmercodeptr;
@@ -513,7 +519,7 @@ void getencseqkmersinsertwithoutspecial(const GtEncseq *encseq,
     while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
                           != NULL)
     {
-      insertwithoutspecial(sfi,position++,kmercodeptr);
+      insertkmerwithoutspecial(sfi,position++,kmercodeptr);
     }
     gt_kmercodeiterator_delete(kmercodeiterator);
   }
@@ -949,16 +955,31 @@ static void preparethispart(Sfxiterator *sfi)
                                       "inserting suffixes into buckets",
                                       stdout);
   }
-  if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+  if (sfi->prefixlength > 1U
+      && gt_has_twobitencoding(sfi->encseq)
+      && !gt_encseq_is_mirrored(sfi->encseq)
+      && !sfi->sfxstrategy.kmerswithencseqreader)
   {
-    getencseqkmersinsertwithoutspecial(sfi->encseq,
-                                       sfi->readmode,
-                                       sfi->prefixlength,
-                                       sfi);
+    getencseqkmers_twobitencoding(sfi->encseq,
+                                  sfi->readmode,
+                                  sfi->prefixlength,
+                                  insertkmerwithoutspecial1,
+                                  sfi,
+                                  NULL,
+                                  NULL);
   } else
   {
-    getencseqkmers(sfi->encseq,sfi->readmode,sfi->prefixlength,
-                   insertwithoutspecial,sfi);
+    if (sfi->sfxstrategy.iteratorbasedkmerscanning)
+    {
+      getencseqkmersinsertkmerwithoutspecial(sfi->encseq,
+                                             sfi->readmode,
+                                             sfi->prefixlength,
+                                             sfi);
+    } else
+    {
+      getencseqkmers(sfi->encseq,sfi->readmode,sfi->prefixlength,
+                     insertkmerwithoutspecial,sfi);
+    }
   }
   if (sfi->sfxprogress != NULL)
   {

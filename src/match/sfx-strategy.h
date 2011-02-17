@@ -40,8 +40,10 @@ typedef struct
        streamsuftab,
        absoluteinversesuftab,
        hashexceptions,
+       iteratorbasedkmerscanning,
        suftabasulongarray,
-       iteratorbasedkmerscanning;
+       onlybucketinsertion,
+       kmerswithencseqreader;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
@@ -60,6 +62,8 @@ typedef struct
   sfxstrategy->hashexceptions = false;
   sfxstrategy->iteratorbasedkmerscanning = false;
   sfxstrategy->suftabasulongarray = false;
+  sfxstrategy->onlybucketinsertion = false;
+  sfxstrategy->kmerswithencseqreader = false;
 }
 
 #endif
