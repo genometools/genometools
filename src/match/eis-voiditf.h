@@ -165,4 +165,10 @@ unsigned long gt_pck_get_nonspecial_count(const FMindex *index);
 /* returns occurrences of special chars in the intervals of non special chars,
  * that is the number of rows that would be extended with a special. */
 unsigned long gt_pck_special_occ_in_nonspecial_intervals(const FMindex *index);
+
+/* counts the exact occurences of pattern in index returns 0 if pattern is not
+ found */
+unsigned long gt_pck_exact_pattern_count(const FMindex *index,
+                                         const GtUchar *pattern,
+                                         unsigned long patternlength);
 #endif

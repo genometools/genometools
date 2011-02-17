@@ -580,3 +580,15 @@ unsigned long gt_pck_special_occ_in_nonspecial_intervals(const FMindex *index)
   gt_free(rangeOccs);
   return count;
 }
+
+unsigned long gt_pck_exact_pattern_count(const FMindex *index,
+                                         const GtUchar *pattern,
+                                         unsigned long patternlength) {
+  unsigned long count = 0;
+
+  count = gt_BWTSeqMatchCount((const BWTSeq *) index,
+                              pattern,
+                              (size_t) patternlength,
+                              true); /* XXX check if this is right! */
+  return count;
+}
