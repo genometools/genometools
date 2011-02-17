@@ -1439,3 +1439,42 @@ unsigned long genericindex_get_totallength(const Genericindex *genericindex)
   gt_assert(genericindex && genericindex->totallength != 0);
   return genericindex->totallength;
 }
+
+unsigned long esa_exact_pattern_count(const Suffixarray *suffixarray,
+                                      const GtUchar *pattern,
+                                      unsigned long patternlength) {
+  MMsearchiterator *mmsi;
+  unsigned long count,
+                totallength = gt_encseq_total_length(suffixarray->encseq);
+
+  mmsi = gt_newmmsearchiteratorcomplete_plain(suffixarray->encseq,
+                                           suffixarray->suftab,
+                                           0,  /* leftbound */
+                                           totallength, /* rightbound */
+                                           0, /* offset */
+                                           suffixarray->readmode,
+                                           pattern,
+                                           patternlength);
+
+  count = gt_countmmsearchiterator(mmsi);
+  gt_freemmsearchiterator(&mmsi);
+  return count;
+}
+
+unsigned long gt_indexbased_exact_pattern_count(
+                                              const Genericindex *genericindex,
+                                              const GtUchar *pattern,
+                                              unsigned long patternlength) {
+  unsigned long count = 0;
+  if (genericindex->withesa) {
+    count = esa_exact_pattern_count(genericindex->suffixarray,
+                                    pattern,
+                                    patternlength);
+  }
+  else {
+    count = gt_pck_exact_pattern_count(genericindex->packedindex,
+                                       pattern,
+                                       patternlength);
+  }
+  return count;
+}

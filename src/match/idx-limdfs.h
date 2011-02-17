@@ -113,4 +113,9 @@ const FMindex *genericindex_get_packedindex(const Genericindex *genericindex);
 
 unsigned long genericindex_get_totallength(const Genericindex *genericindex);
 
+unsigned long gt_indexbased_exact_pattern_count(
+                                              const Genericindex *genericindex,
+                                              const GtUchar *pattern,
+                                              unsigned long patternlength);
+
 #endif
