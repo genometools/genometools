@@ -175,10 +175,8 @@ static unsigned long process_file(GthInput *input, char *filename,
   long fileindex;
   FILE *fp;
 
-  if (isreferencefile) {
-    fileindex = gth_input_determine_reference_file_index(input,
-                                                            filename);
-  }
+  if (isreferencefile)
+    fileindex = gth_input_determine_reference_file_index(input, filename);
   else
     fileindex = gth_input_determine_genomic_file_index(input, filename);
 
