@@ -136,7 +136,7 @@ static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
 
 static void gt_checkkmercode(void *processinfo,
                              GT_UNUSED unsigned long pos,
-                             GtCodetype code)
+                             GT_UNUSED GtCodetype code)
 {
   GtKmercodeiterator *kmercodeiterator = (GtKmercodeiterator *) processinfo;
   const GtKmercode *kmercodeptr;
