@@ -17,7 +17,6 @@
 
 #include "core/unused_api.h"
 #include "extended/cds_visitor.h"
-#include "extended/gff3_visitor.h"
 #include "gth/ags.h"
 #include "gth/gff3_pgl_visitor.h"
 #include "gth/pgl_visitor_rep.h"
@@ -201,19 +200,8 @@ static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
 static void gff3_pgl_visitor_trailer(GthPGLVisitor *pgl_visitor)
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
-  GtNodeVisitor *gff3_visitor;
-  unsigned long i;
-  gt_assert(visitor);
-  gff3_visitor = gt_gff3_visitor_new(visitor->outfp);
   gt_genome_nodes_sort_stable(visitor->dags);
-  for (i = 0; i < gt_array_size(visitor->dags); i++) {
-    int had_err;
-    had_err = gt_genome_node_accept(*(GtGenomeNode**)
-                                    gt_array_get(visitor->dags, i),
-                                    gff3_visitor, NULL);
-    gt_assert(!had_err); /* should not happen */
-  }
-  gt_node_visitor_delete(gff3_visitor);
+  gt_genome_nodes_show(visitor->dags, visitor->outfp);
 }
 
 const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()

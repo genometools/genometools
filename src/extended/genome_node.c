@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,6 +26,7 @@
 #include "core/unused_api.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"
+#include "extended/gff3_visitor.h"
 #include "extended/region_node_api.h"
 
 typedef struct {
@@ -308,6 +309,21 @@ void gt_genome_nodes_sort_stable(GtArray *nodes)
 {
   gt_msort(gt_array_get_space(nodes), gt_array_size(nodes),
            sizeof (GtGenomeNode*), (GtCompare) gt_genome_node_compare);
+}
+
+void gt_genome_nodes_show(GtArray *nodes, GtFile *outfp)
+{
+  GtNodeVisitor *gff3_visitor;
+  unsigned long i;
+  gt_assert(nodes);
+  gff3_visitor = gt_gff3_visitor_new(outfp);
+  for (i = 0; i < gt_array_size(nodes); i++) {
+    int had_err;
+    had_err = gt_genome_node_accept(*(GtGenomeNode**) gt_array_get(nodes, i),
+                                    gff3_visitor, NULL);
+    gt_assert(!had_err); /* should not happen */
+  }
+  gt_node_visitor_delete(gff3_visitor);
 }
 
 bool gt_genome_nodes_are_equal_region_nodes(GtGenomeNode *gn_a,
