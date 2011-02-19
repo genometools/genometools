@@ -26,9 +26,9 @@ typedef struct GthRegionFactory GthRegionFactory;
 GthRegionFactory* gth_region_factory_new(bool use_desc_ranges);
 void              gth_region_factory_delete(GthRegionFactory*);
 /* Use <region_factory> to produce sequence regions for each genomic sequence in
-   <input> and save them in the array <dags>. */
+   <input> and save them in the array <nodes>. */
 void              gth_region_factory_save(GthRegionFactory *region_factory,
-                                          GtArray *dags, GthInput *input);
+                                          GtArray *nodes, GthInput *input);
 GtStr*            gth_region_factory_get_seqid(GthRegionFactory*,
                                                unsigned long filenum,
                                                unsigned long seqnum);

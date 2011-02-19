@@ -27,7 +27,7 @@ struct GthGFF3SAVisitor {
   GthInput *input;
   GthRegionFactory *region_factory;
   GtStr *gthsourcetag;
-  GtArray *dags;
+  GtArray *nodes;
   GtFile *outfp;
 };
 
@@ -38,9 +38,9 @@ static void gff3_sa_visitor_free(GthSAVisitor *sa_visitor)
 {
   unsigned long i;
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
-  for (i = 0; i < gt_array_size(visitor->dags); i++)
-    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(visitor->dags, i));
-  gt_array_delete(visitor->dags);
+  for (i = 0; i < gt_array_size(visitor->nodes); i++)
+    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(visitor->nodes, i));
+  gt_array_delete(visitor->nodes);
   gt_str_delete(visitor->gthsourcetag);
   gth_region_factory_delete(visitor->region_factory);
 }
@@ -48,12 +48,12 @@ static void gff3_sa_visitor_free(GthSAVisitor *sa_visitor)
 static void gff3_sa_visitor_preface(GthSAVisitor *sa_visitor)
 {
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
-  gth_region_factory_save(visitor->region_factory, visitor->dags,
+  gth_region_factory_save(visitor->region_factory, visitor->nodes,
                           visitor->input);
 }
 
 static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
-                            GtArray *dags, GtStr *gthsourcetag)
+                            GtArray *nodes, GtStr *gthsourcetag)
 {
   GtFeatureNode *gene_feature, *exon_feature;
   GtRange range;
@@ -61,7 +61,7 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
   unsigned long i;
   long offset;
 
-  gt_assert(sa && region_factory && dags);
+  gt_assert(sa && region_factory && nodes);
 
   seqid = gth_region_factory_get_seqid(region_factory, gth_sa_gen_file_num(sa),
                                        gth_sa_gen_seq_num(sa));
@@ -124,14 +124,14 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
                               gth_sa_exon_score(sa, i));
     gt_feature_node_add_child(gene_feature, exon_feature);
   }
-  gt_array_add(dags, gene_feature);
+  gt_array_add(nodes, gene_feature);
 }
 
 static void gff3_sa_visitor_visit_sa(GthSAVisitor *sa_visitor, GthSA *sa)
 {
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   gt_assert(sa);
-  save_sa_in_gff3(sa, visitor->region_factory, visitor->dags,
+  save_sa_in_gff3(sa, visitor->region_factory, visitor->nodes,
                   visitor->gthsourcetag);
 }
 
@@ -139,8 +139,8 @@ static void gff3_sa_visitor_trailer(GthSAVisitor *sa_visitor,
                                     GT_UNUSED unsigned long num_of_sas)
 {
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
-  gt_genome_nodes_sort_stable(visitor->dags);
-  gt_genome_nodes_show(visitor->dags, visitor->outfp);
+  gt_genome_nodes_sort_stable(visitor->nodes);
+  gt_genome_nodes_show(visitor->nodes, visitor->outfp);
 }
 
 const GthSAVisitorClass* gth_gff3_sa_visitor_class()
@@ -161,7 +161,7 @@ GthSAVisitor* gth_gff3_sa_visitor_new(GthInput *input, bool use_desc_ranges,
   visitor->input = input;
   visitor->region_factory = gth_region_factory_new(use_desc_ranges);
   visitor->gthsourcetag = gt_str_new_cstr(GTHSOURCETAG);
-  visitor->dags = gt_array_new(sizeof (GtGenomeNode*));
+  visitor->nodes = gt_array_new(sizeof (GtGenomeNode*));
   visitor->outfp = outfp;
   return sa_visitor;
 }

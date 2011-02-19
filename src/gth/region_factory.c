@@ -222,21 +222,21 @@ static int save_sequence_region(GT_UNUSED void *key, void *value, void *data,
                                 GT_UNUSED GtError *err)
 {
   GtGenomeNode *sr = value;
-  GtArray *dags = data;
+  GtArray *nodes = data;
   gt_error_check(err);
-  gt_assert(sr && dags);
-  gt_array_add(dags, sr);
+  gt_assert(sr && nodes);
+  gt_array_add(nodes, sr);
   return 0;
 }
 
-void gth_region_factory_save(GthRegionFactory *rf, GtArray *dags,
+void gth_region_factory_save(GthRegionFactory *rf, GtArray *nodes,
                              GthInput *input)
 {
   GtHashmap *sequence_regions;
   unsigned long i, j;
   GtStr *sequenceid;
   int had_err;
-  gt_assert(rf && dags && input);
+  gt_assert(rf && nodes && input);
   gt_assert(!rf->factory_was_used);
   rf->seqid_store = seqid_store_new(input);
   sequence_regions = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
@@ -251,7 +251,7 @@ void gth_region_factory_save(GthRegionFactory *rf, GtArray *dags,
   }
   gt_str_delete(sequenceid);
   had_err = gt_hashmap_foreach_in_key_order(sequence_regions,
-                                            save_sequence_region, dags, NULL);
+                                            save_sequence_region, nodes, NULL);
   gt_assert(!had_err); /* should not happen */
   gt_hashmap_delete(sequence_regions);
   rf->factory_was_used = true;

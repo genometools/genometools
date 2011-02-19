@@ -26,7 +26,7 @@ struct GtSortStream {
   const GtNodeStream parent_instance;
   GtNodeStream *in_stream;
   unsigned long idx;
-  GtArray *dags;
+  GtArray *nodes;
   bool sorted;
 };
 
@@ -48,24 +48,25 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       if ((eofn = gt_eof_node_try_cast(node)))
         gt_genome_node_delete(eofn); /* get rid of EOF nodes */
       else
-        gt_array_add(sort_stream->dags, node);
+        gt_array_add(sort_stream->nodes, node);
     }
     if (!had_err) {
-      gt_genome_nodes_sort_stable(sort_stream->dags);
+      gt_genome_nodes_sort_stable(sort_stream->nodes);
       sort_stream->sorted = true;
     }
   }
 
   if (!had_err) {
     gt_assert(sort_stream->sorted);
-    if (sort_stream->idx < gt_array_size(sort_stream->dags)) {
-      *gn = *(GtGenomeNode**) gt_array_get(sort_stream->dags, sort_stream->idx);
+    if (sort_stream->idx < gt_array_size(sort_stream->nodes)) {
+      *gn = *(GtGenomeNode**) gt_array_get(sort_stream->nodes,
+                                           sort_stream->idx);
       sort_stream->idx++;
       /* join region nodes with the same sequence ID */
       if (gt_region_node_try_cast(*gn)) {
         GtRange range_a, range_b;
-        while (sort_stream->idx < gt_array_size(sort_stream->dags)) {
-          node = *(GtGenomeNode**) gt_array_get(sort_stream->dags,
+        while (sort_stream->idx < gt_array_size(sort_stream->nodes)) {
+          node = *(GtGenomeNode**) gt_array_get(sort_stream->nodes,
                                                 sort_stream->idx);
           if (!gt_region_node_try_cast(node) ||
               gt_str_cmp(gt_genome_node_get_seqid(*gn),
@@ -86,7 +87,7 @@ static int gt_sort_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   }
 
   if (!had_err) {
-    gt_array_reset(sort_stream->dags);
+    gt_array_reset(sort_stream->nodes);
     *gn = NULL;
   }
 
@@ -97,9 +98,11 @@ static void gt_sort_stream_free(GtNodeStream *gs)
 {
   unsigned long i;
   GtSortStream *sort_stream = gt_sort_stream_cast(gs);
-  for (i = sort_stream->idx; i < gt_array_size(sort_stream->dags); i++)
-    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(sort_stream->dags, i));
-  gt_array_delete(sort_stream->dags);
+  for (i = sort_stream->idx; i < gt_array_size(sort_stream->nodes); i++) {
+    gt_genome_node_delete(*(GtGenomeNode**)
+                          gt_array_get(sort_stream->nodes, i));
+  }
+  gt_array_delete(sort_stream->nodes);
   gt_node_stream_delete(sort_stream->in_stream);
 }
 
@@ -122,6 +125,6 @@ GtNodeStream* gt_sort_stream_new(GtNodeStream *in_stream)
   sort_stream->in_stream = gt_node_stream_ref(in_stream);
   sort_stream->sorted = false;
   sort_stream->idx = 0;
-  sort_stream->dags = gt_array_new(sizeof (GtGenomeNode*));
+  sort_stream->nodes = gt_array_new(sizeof (GtGenomeNode*));
   return gs;
 }
