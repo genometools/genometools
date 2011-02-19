@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -28,8 +28,9 @@ struct GthGFF3PGLVisitor {
   GthInput *input;
   GthRegionFactory *region_factory;
   GtStr *gthsourcetag;
-  GtNodeVisitor *cds_visitor,
-                *gff3_visitor;
+  GtNodeVisitor *cds_visitor;
+  GtArray *dags;
+  GtFile *outfp;
 };
 
 #define gff3_pgl_visitor_cast(GV)\
@@ -37,8 +38,11 @@ struct GthGFF3PGLVisitor {
 
 static void gff3_pgl_visitor_free(GthPGLVisitor *pgl_visitor)
 {
+  unsigned long i;
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
-  gt_node_visitor_delete(visitor->gff3_visitor);
+  for (i = 0; i < gt_array_size(visitor->dags); i++)
+    gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(visitor->dags, i));
+  gt_array_delete(visitor->dags);
   gt_node_visitor_delete(visitor->cds_visitor);
   gt_str_delete(visitor->gthsourcetag);
   gth_region_factory_delete(visitor->region_factory);
@@ -48,7 +52,7 @@ static void gff3_pgl_visitor_preface(GthPGLVisitor *pgl_visitor,
                                      GT_UNUSED unsigned long num_of_pgls)
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
-  gth_region_factory_make(visitor->region_factory, visitor->gff3_visitor,
+  gth_region_factory_save(visitor->region_factory, visitor->dags,
                           visitor->input);
 }
 
@@ -84,9 +88,9 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
   gt_str_delete(target_attribute);
 }
 
-static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
-                          GtNodeVisitor *cds_visitor,
-                          GtNodeVisitor *gff3_visitor, GtStr *gthsourcetag)
+static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
+                             GtNodeVisitor *cds_visitor, GtArray *dags,
+                             GtStr *gthsourcetag)
 {
   GthExonAGS *exon, *first_exon, *last_exon;
   GtFeatureNode *gene_feature, *mrna_feature, *exon_feature;
@@ -97,7 +101,7 @@ static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
   struct GthAGS *ags;
   long offset;
 
-  gt_assert(pgl && region_factory && cds_visitor && gff3_visitor);
+  gt_assert(pgl && region_factory && cds_visitor && dags);
 
   seqid = gth_region_factory_get_seqid(region_factory, gth_pgl_filenum(pgl),
                                        gth_pgl_seqnum(pgl));
@@ -181,10 +185,7 @@ static void showPGLinGFF3(GthPGL *pgl, GthRegionFactory *region_factory,
   had_err = gt_genome_node_accept((GtGenomeNode*) gene_feature, cds_visitor,
                                   NULL);
   gt_assert(!had_err); /* should not happen */
-  had_err = gt_genome_node_accept((GtGenomeNode*) gene_feature, gff3_visitor,
-                                  NULL);
-  gt_assert(!had_err); /* should not happen */
-  gt_genome_node_delete((GtGenomeNode*) gene_feature);
+  gt_array_add(dags, gene_feature);
 }
 
 static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
@@ -193,8 +194,26 @@ static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
 {
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
-  showPGLinGFF3(pgl, visitor->region_factory, visitor->cds_visitor,
-                visitor->gff3_visitor, visitor->gthsourcetag);
+  save_pgl_in_gff3(pgl, visitor->region_factory, visitor->cds_visitor,
+                   visitor->dags, visitor->gthsourcetag);
+}
+
+static void gff3_pgl_visitor_trailer(GthPGLVisitor *pgl_visitor)
+{
+  GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
+  GtNodeVisitor *gff3_visitor;
+  unsigned long i;
+  gt_assert(visitor);
+  gff3_visitor = gt_gff3_visitor_new(visitor->outfp);
+  gt_genome_nodes_sort_stable(visitor->dags);
+  for (i = 0; i < gt_array_size(visitor->dags); i++) {
+    int had_err;
+    had_err = gt_genome_node_accept(*(GtGenomeNode**)
+                                    gt_array_get(visitor->dags, i),
+                                    gff3_visitor, NULL);
+    gt_assert(!had_err); /* should not happen */
+  }
+  gt_node_visitor_delete(gff3_visitor);
 }
 
 const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
@@ -204,7 +223,7 @@ const GthPGLVisitorClass* gth_gff3_pgl_visitor_class()
                                             gff3_pgl_visitor_preface,
                                             gff3_pgl_visitor_set_region_mapping,
                                             gff3_pgl_visitor_visit_pgl,
-                                            NULL };
+                                            gff3_pgl_visitor_trailer };
   return &pglvc;
 }
 
@@ -222,6 +241,7 @@ GthPGLVisitor* gth_gff3_pgl_visitor_new(GthInput *input, bool use_desc_ranges,
   visitor->cds_visitor = gt_cds_visitor_new(NULL, minORFlength,
                                             visitor->gthsourcetag, start_codon,
                                             final_stop_codon, false /* XXX */);
-  visitor->gff3_visitor = gt_gff3_visitor_new(outfp);
+  visitor->dags = gt_array_new(sizeof (GtGenomeNode*));
+  visitor->outfp = outfp;
   return pgl_visitor;
 }
