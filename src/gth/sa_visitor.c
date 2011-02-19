@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -47,12 +47,11 @@ void gth_sa_visitor_visit_sa(GthSAVisitor *sav, GthSA *sa)
   sav->c_class->visit_sa(sav, sa);
 }
 
-void gth_sa_visitor_proc_number_of_sas(GthSAVisitor *sav,
-                                       unsigned long num_of_sas)
+void gth_sa_visitor_trailer(GthSAVisitor *sav, unsigned long num_of_sas)
 {
   gt_assert(sav && sav->c_class);
-  if (sav->c_class->proc_number_of_sas)
-    sav->c_class->proc_number_of_sas(sav, num_of_sas);
+  if (sav->c_class->trailer)
+    sav->c_class->trailer(sav, num_of_sas);
 }
 
 void gth_sa_visitor_delete(GthSAVisitor *sav)

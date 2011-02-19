@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,7 +26,7 @@ typedef struct GthSAVisitor GthSAVisitor;
 
 void gth_sa_visitor_preface(GthSAVisitor*);
 void gth_sa_visitor_visit_sa(GthSAVisitor*, GthSA*);
-void gth_sa_visitor_proc_number_of_sas(GthSAVisitor*, unsigned long);
+void gth_sa_visitor_trailer(GthSAVisitor*, unsigned long num_of_sas);
 void gth_sa_visitor_delete(GthSAVisitor*);
 
 #endif

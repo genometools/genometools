@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -432,8 +432,8 @@ static void xml_final_sa_visitor_visit_sa(GthSAVisitor *sa_visitor,
                                    visitor->indentlevel, visitor->outfp);
 }
 
-static void  xml_final_sa_visitor_proc_number_of_sas(GthSAVisitor *sa_visitor,
-                                                     unsigned long num_of_sas)
+static void  xml_final_sa_visitor_trailer(GthSAVisitor *sa_visitor,
+                                          unsigned long num_of_sas)
 {
   GthXMLFinalSAVisitor *visitor = xml_final_sa_visitor_cast(sa_visitor);
   visitor->indentlevel++;
@@ -451,7 +451,7 @@ const GthSAVisitorClass* gth_xml_final_sa_visitor_class()
                                           NULL,
                                           xml_final_sa_visitor_preface,
                                           xml_final_sa_visitor_visit_sa,
-                                         xml_final_sa_visitor_proc_number_of_sas
+                                          xml_final_sa_visitor_trailer
                                         };
   return &savc;
 }

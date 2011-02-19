@@ -505,7 +505,7 @@ void gth_sa_collection_traverse(const GthSACollection *sa_collection,
     num_of_sas++;
   }
   gth_sa_collection_iterator_delete(iterator);
-  gth_sa_visitor_proc_number_of_sas(sa_visitor, num_of_sas);
+  gth_sa_visitor_trailer(sa_visitor, num_of_sas);
 }
 
 void gth_sa_collection_delete(GthSACollection *sa_collection)
