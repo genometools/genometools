@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -231,16 +231,16 @@ static int accept_visitor(GT_UNUSED void *key, void *value, void *data,
   return 0;
 }
 
-void gth_region_factory_make(GthRegionFactory *srf, GtNodeVisitor *visitor,
+void gth_region_factory_make(GthRegionFactory *rf, GtNodeVisitor *visitor,
                              GthInput *input)
 {
   GtHashmap *sequence_regions;
   unsigned long i, j;
   GtStr *sequenceid;
   int had_err;
-  gt_assert(srf && visitor && input);
-  gt_assert(!srf->factory_was_used);
-  srf->seqid_store = seqid_store_new(input);
+  gt_assert(rf && visitor && input);
+  gt_assert(!rf->factory_was_used);
+  rf->seqid_store = seqid_store_new(input);
   sequence_regions = gt_hashmap_new(GT_HASH_STRING, NULL,
                                     (GtFree) gt_genome_node_delete);
   sequenceid = gt_str_new();
@@ -249,7 +249,7 @@ void gth_region_factory_make(GthRegionFactory *srf, GtNodeVisitor *visitor,
     for (j = 0; j < gth_input_num_of_gen_seqs(input, i); j++) {
       gt_str_reset(sequenceid);
       gth_input_save_gen_id(input, sequenceid, i, j);
-      make_sequence_region(sequence_regions, sequenceid, srf, input, i, j);
+      make_sequence_region(sequence_regions, sequenceid, rf, input, i, j);
     }
   }
   gt_str_delete(sequenceid);
@@ -257,7 +257,46 @@ void gth_region_factory_make(GthRegionFactory *srf, GtNodeVisitor *visitor,
                                             visitor, NULL);
   gt_assert(!had_err); /* should not happen */
   gt_hashmap_delete(sequence_regions);
-  srf->factory_was_used = true;
+  rf->factory_was_used = true;
+}
+
+static int save_sequence_region(GT_UNUSED void *key, void *value, void *data,
+                                GT_UNUSED GtError *err)
+{
+  GtGenomeNode *sr = value;
+  GtArray *dags = data;
+  gt_error_check(err);
+  gt_assert(sr && dags);
+  gt_array_add(dags, sr);
+  return 0;
+}
+
+void gth_region_factory_save(GthRegionFactory *rf, GtArray *dags,
+                             GthInput *input)
+{
+  GtHashmap *sequence_regions;
+  unsigned long i, j;
+  GtStr *sequenceid;
+  int had_err;
+  gt_assert(rf && dags && input);
+  gt_assert(!rf->factory_was_used);
+  rf->seqid_store = seqid_store_new(input);
+  sequence_regions = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
+  sequenceid = gt_str_new();
+  for (i = 0; i < gth_input_num_of_gen_files(input); i++) {
+    gth_input_load_genomic_file(input, i, false);
+    for (j = 0; j < gth_input_num_of_gen_seqs(input, i); j++) {
+      gt_str_reset(sequenceid);
+      gth_input_save_gen_id(input, sequenceid, i, j);
+      make_sequence_region(sequence_regions, sequenceid, rf, input, i, j);
+    }
+  }
+  gt_str_delete(sequenceid);
+  had_err = gt_hashmap_foreach_in_key_order(sequence_regions,
+                                            save_sequence_region, dags, NULL);
+  gt_assert(!had_err); /* should not happen */
+  gt_hashmap_delete(sequence_regions);
+  rf->factory_was_used = true;
 }
 
 GtStr* gth_region_factory_get_seqid(GthRegionFactory *srf,
