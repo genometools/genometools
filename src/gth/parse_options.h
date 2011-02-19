@@ -30,9 +30,8 @@
    length <argc>. */
 GtOPrval gth_parse_options(GthCallInfo*, GthInput*, int *parsed_args, int argc,
                            const char **argv, bool gthconsensus_parsing,
-                           GtStrArray *consensusfiles, GthStat*,
-                           void(*showverbose)(const char *),
-                           void(*showverboseVM)(char *),
-                           GtShowVersionFunc, GthJumpTableNew, GtError*);
+                           GtStrArray *consensusfiles, GthStat*, GthShowVerbose,
+                           GthShowVerboseVM, GtShowVersionFunc, GthJumpTableNew,
+                           GtError*);
 
 #endif

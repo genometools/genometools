@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -605,7 +605,7 @@ bool gth_intermediate_output_is_correct(char *outputfilename,
   return rval;
 }
 
-static void show_parse_file_status(void (*showverbose)(const char*),
+static void show_parse_file_status(GthShowVerbose showverbose,
                                    unsigned long filenum,
                                    unsigned long numoffiles,
                                    const char *filename)
@@ -625,8 +625,7 @@ static void show_parse_file_status(void (*showverbose)(const char*),
 
 int gth_process_intermediate_files(GthInput *input, GtStrArray *consensusfiles,
                                    GthSAProcessFunc saprocessfunc, void *data,
-                                   void (*showverbose)(const char*),
-                                   GtError *err)
+                                   GthShowVerbose showverbose, GtError *err)
 {
   unsigned long i;
   GtFile *fp, *genfile;
@@ -666,7 +665,7 @@ int gth_process_intermediate_files(GthInput *input, GtStrArray *consensusfiles,
 
 int gth_build_sa_collection(GthSACollection *sa_collection, GthInput *input,
                             GtStrArray *consensusfiles, GthSAFilter *sa_filter,
-                            GthStat *stat, void (*showverbose)(const char*),
+                            GthStat *stat, GthShowVerbose showverbose,
                             GtError *err)
 {
   SACollectionData sa_collection_data;

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -271,7 +271,7 @@ static void gthinitfragments(GtFragment *fragments,
   gt_assert(*num_of_fragments <= numofmatches);
 }
 
-static void show_chain_calc_status(void (*showverbose)(const char *),
+static void show_chain_calc_status(GthShowVerbose showverbose,
                                    unsigned long chainnum,
                                    unsigned long numofchains,
                                    unsigned long numofmatches,

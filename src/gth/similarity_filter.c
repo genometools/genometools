@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -39,7 +39,7 @@ typedef struct {
        stop_amino_acid_warning;
 } GthMatchInfo;
 
-static void show_matrix_calculation_status(void (*showverbose)(const char*),
+static void show_matrix_calculation_status(GthShowVerbose showverbose,
                                            bool gen_strand_forward,
                                            bool ref_strand_forward,
                                            bool introncutout,
@@ -791,8 +791,7 @@ static int calc_spliced_alignments(GthSACollection *sa_collection,
   return 0;
 }
 
-static void show_compute_matches_status(bool direct,
-                                        void (*showverbose)(const char*),
+static void show_compute_matches_status(bool direct, GthShowVerbose showverbose,
                                         unsigned long gen_file_num,
                                         unsigned long num_of_gen_files,
                                         unsigned long ref_file_num,

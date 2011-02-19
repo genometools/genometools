@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -24,7 +24,7 @@ typedef struct {
   GtFileMode file_mode;
   GtStrArray *consensusfiles;
   GthSAFilter *sa_filter;
-  void (*showverbose)(const char*);
+  GthShowVerbose showverbose;
 } GthFileStatInfo;
 
 static void gth_file_stat_info_new(GthFileStatInfo *file_stat_info)

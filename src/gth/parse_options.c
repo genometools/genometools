@@ -90,8 +90,8 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                            int *parsed_args, int argc, const char **argv,
                            bool gthconsensus_parsing,
                            GtStrArray *consensusfiles, GthStat *stat,
-                           void(*showverbose)(const char *),
-                           void(*showverboseVM)(char *),
+                           GthShowVerbose showverbose,
+                           GthShowVerboseVM showverboseVM,
                            GtShowVersionFunc show_version,
                            GthJumpTableNew jump_table_new, GtError *err)
 {
