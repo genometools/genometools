@@ -1096,15 +1096,17 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   }
 
   /* -duplicatecheck */
-  optduplicatecheck = gt_option_new_choice("duplicatecheck", "criterion used "
-                                           "to check for spliced alignment "
-                                           "duplicates, choose from "
-                                           "none|id|desc|seq|both",
-                                           duplicatecheck,
-                                           duplicate_check_modes[4],
-                                           duplicate_check_modes);
-  gt_option_is_extended_option(optduplicatecheck);
-  gt_option_parser_add_option(op, optduplicatecheck);
+  if (!gthconsensus_parsing) {
+    optduplicatecheck = gt_option_new_choice("duplicatecheck", "criterion used "
+                                             "to check for spliced alignment "
+                                             "duplicates, choose from "
+                                             "none|id|desc|seq|both",
+                                             duplicatecheck,
+                                             duplicate_check_modes[4],
+                                             duplicate_check_modes);
+    gt_option_is_extended_option(optduplicatecheck);
+    gt_option_parser_add_option(op, optduplicatecheck);
+  }
 
   /* add spliced alignment filter options */
   gth_sa_filter_register_options(op, call_info->sa_filter,
@@ -1498,9 +1500,11 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   }
 
   /* post-process duplicate check option */
-  if (oprval == GT_OPTION_PARSER_OK) {
-    call_info->duplicate_check =
-      get_duplicate_check_mode_from_table(gt_str_get(duplicatecheck));
+  if (!gthconsensus_parsing) {
+    if (oprval == GT_OPTION_PARSER_OK) {
+      call_info->duplicate_check =
+        get_duplicate_check_mode_from_table(gt_str_get(duplicatecheck));
+    }
   }
 
   /* assertions */
