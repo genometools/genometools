@@ -124,6 +124,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optxmlout = NULL,               /* output */
          *optgff3out = NULL,              /* output */
          *optgff3descranges = NULL,       /* output */
+         *optmd5ids = NULL,               /* output */
          *optskipalignmentout = NULL,     /* output */
          *optmincutoffs = NULL,           /* output */
          *optshowintronmaxlen = NULL,     /* output */
@@ -133,7 +134,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optfinalstopcodon = NULL,       /* output */
          *optshowseqnums = NULL,          /* output */
          *optgs2out = NULL,               /* output */
-         *optmd5ids = NULL,               /* output */
          *optmaskpolyatails = NULL,       /* data preprocessing */
          *optproteinsmap = NULL,          /* data preprocessing */
          *optnoautoindex = NULL,          /* data preprocessing */
@@ -387,7 +387,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   /* -gff3out */
   optgff3out = gt_option_new_bool("gff3out" , "show output in GFF3 format",
                                &call_info->out->gff3out, false);
-  gt_option_is_development_option(optgff3out);
   gt_option_parser_add_option(op, optgff3out);
 
   /* -gff3descrange */
@@ -397,6 +396,12 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                          false);
   gt_option_is_development_option(optgff3descranges);
   gt_option_parser_add_option(op, optgff3descranges);
+
+  /* -md5ids */
+  optmd5ids = gt_option_new_bool("md5ids", "show MD5 fingerprints as sequence "
+                                 "IDs", &call_info->out->md5ids,
+                                 GTH_DEFAULT_MD5IDS);
+  gt_option_parser_add_option(op, optmd5ids);
 
   /* output file options */
   gt_outputfile_register_options(op, &call_info->out->outfp, ofi);
@@ -474,13 +479,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   optgs2out = gt_option_new_bool("gs2out", "output in old GeneSeqer2 format",
                                  &call_info->out->gs2out, GTH_DEFAULT_GS2OUT);
   gt_option_parser_add_option(op, optgs2out);
-
-  /* -md5ids */
-  optmd5ids = gt_option_new_bool("md5ids", "show MD5 fingerprints as sequence "
-                                 "IDs", &call_info->out->md5ids,
-                                 GTH_DEFAULT_MD5IDS);
-  gt_option_is_development_option(optmd5ids);
-  gt_option_parser_add_option(op, optmd5ids);
 
   /* -maskpolyatails */
   call_info->simfilterparam.maskpolyAtails = false;
