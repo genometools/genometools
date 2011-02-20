@@ -1269,6 +1269,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (optsortagswf && optsortags)
     gt_option_imply(optsortagswf, optsortags);
   gt_option_imply(optgff3descranges, optgff3out);
+  gt_option_imply(optmd5ids, optgff3out);
 
   /* option implications (either 2) */
   if (optgff3out && optskipalignmentout && optintermediate)
