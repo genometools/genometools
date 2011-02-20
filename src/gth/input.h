@@ -65,6 +65,7 @@ const char*    gth_input_get_reference_filename(const GthInput*,
                                                 unsigned long ref_file_num);
 GthAlphatype   gth_input_get_alphatype(const GthInput*, unsigned long);
 bool           gth_input_ref_file_is_dna(const GthInput*, unsigned long);
+bool           gth_input_md5ids(const GthInput*);
 const
 unsigned char* gth_input_original_genomic_sequence(GthInput*,
                                                    unsigned long filenum,
@@ -88,6 +89,10 @@ void           gth_input_get_genomic_description(GthInput*, GtStr *desc,
 void           gth_input_save_gen_id(GthInput*, GtStr *id,
                                      unsigned long file_num,
                                      unsigned long seq_num);
+/* save the genomic identifier used for output */
+void           gth_input_save_gen_identifier(GthInput*, GtStr *id,
+                                             unsigned long file_num,
+                                             unsigned long seq_num);
 void           gth_input_save_ref_id(GthInput*, GtStr *id,
                                      unsigned long file_num,
                                      unsigned long seq_num);

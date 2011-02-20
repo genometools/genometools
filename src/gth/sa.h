@@ -222,7 +222,7 @@ void            gth_sa_set_highest_cov(GthSA*, bool genomic);
 unsigned long   gth_sa_cumlen_scored_exons(const GthSA*);
 void            gth_sa_set_cumlen_scored_exons(GthSA*, unsigned long);
 unsigned long   gth_sa_call_number(const GthSA*);
-const char*     gth_sa_gff3_target_attribute(GthSA*);
+const char*     gth_sa_gff3_target_attribute(GthSA*, bool md5ids);
 void            gth_sa_determine_cutoffs(GthSA*, GthCutoffmode leadcutoffsmode,
                                          GthCutoffmode termcutoffsmode,
                                          unsigned long cutoffsminexonlen);
@@ -255,6 +255,7 @@ unsigned long   gth_sa_get_alignment_lines(const GthSA *sa,
                                            GthInput *input);
 bool            gth_sa_is_valid(const GthSA*);
 void            gth_sa_show(GthSA*, GthInput*, GtFile*);
+void            gth_sa_save_ref_md5(GthSA*, GthInput*);
 
 bool            gth_sas_are_equal(const GthSA*, const GthSA*);
 

@@ -508,6 +508,22 @@ void gth_sa_collection_traverse(const GthSACollection *sa_collection,
   gth_sa_visitor_trailer(sa_visitor, num_of_sas);
 }
 
+void gth_sa_collection_set_md5s(GthSACollection *sa_collection, GthInput *input)
+{
+  gt_assert(sa_collection && input);
+  if (gth_input_md5ids(input)) {
+    GthSACollectionIterator *iterator;
+    GthSA *sa;
+    iterator = gth_sa_collection_iterator_new(sa_collection);
+    while ((sa = gth_sa_collection_iterator_next(iterator))) {
+      gth_input_load_genomic_file(input, gth_sa_gen_file_num(sa), false);
+      gth_input_load_reference_file(input, gth_sa_ref_file_num(sa), false);
+      gth_sa_save_ref_md5(sa, input);
+    }
+    gth_sa_collection_iterator_delete(iterator);
+  }
+}
+
 void gth_sa_collection_delete(GthSACollection *sa_collection)
 {
   if (!sa_collection) return;

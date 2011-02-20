@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -58,6 +58,9 @@ static int process_consensus_files(GtStrArray *consensusfiles,
                                    call_info->duplicate_check, call_info->out,
                                    err);
   }
+
+  /* set reference MD5s, if necessary */
+  gth_sa_collection_set_md5s(sa_collection, input);
 
   /* process the alignments */
   if (!had_err)

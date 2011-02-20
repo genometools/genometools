@@ -40,6 +40,7 @@ bool          gth_sa_collections_are_equal(const GthSACollection*,
 bool          gth_sa_collection_contains_sa(const GthSACollection*);
 void          gth_sa_collection_traverse(const GthSACollection*, GthSAVisitor*,
                                          GthInput*);
+void          gth_sa_collection_set_md5s(GthSACollection*, GthInput*);
 void          gth_sa_collection_delete(GthSACollection*);
 
 typedef struct GthSACollectionIterator GthSACollectionIterator;

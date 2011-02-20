@@ -245,7 +245,7 @@ void gth_region_factory_save(GthRegionFactory *rf, GtArray *nodes,
     gth_input_load_genomic_file(input, i, false);
     for (j = 0; j < gth_input_num_of_gen_seqs(input, i); j++) {
       gt_str_reset(sequenceid);
-      gth_input_save_gen_id(input, sequenceid, i, j);
+      gth_input_save_gen_identifier(input, sequenceid, i, j);
       make_sequence_region(sequence_regions, sequenceid, rf, input, i, j);
     }
   }

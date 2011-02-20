@@ -188,6 +188,12 @@ bool gth_input_ref_file_is_dna(const GthInput *input,
   return false;
 }
 
+bool gth_input_md5ids(const GthInput *input)
+{
+  gt_assert(input);
+  return input->md5ids;
+}
+
 const unsigned char* gth_input_original_genomic_sequence(GthInput *input,
                                                          GT_UNUSED
                                                          unsigned long filenum,
@@ -323,6 +329,23 @@ void gth_input_save_gen_id(GthInput *input, GtStr *id,
   gt_assert(input && id);
   gt_assert(input->gen_file_num == file_num);
   save_sequenceid(id, input->gen_seq_col, seq_num);
+}
+
+void gth_input_save_gen_identifier(GthInput *input, GtStr *id,
+                                   GT_UNUSED unsigned long file_num,
+                                   unsigned long seq_num)
+{
+  gt_assert(input && id);
+  gt_assert(input->gen_file_num == file_num);
+  if (input->md5ids) {
+    GtStr *md5;
+    gt_str_append_cstr(id, GT_MD5_SEQID_PREFIX);
+    md5 = gth_md5_cache_get(input->gen_md5_cache, seq_num);
+    gt_str_append_str(id, md5);
+    gt_str_delete(md5);
+  }
+  else
+    save_sequenceid(id, input->gen_seq_col, seq_num);
 }
 
 void gth_input_save_ref_id(GthInput *input, GtStr *id,

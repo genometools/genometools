@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -16,6 +16,7 @@
 */
 
 #include "core/mathsupport.h"
+#include "core/md5_seqid.h"
 #include "core/safearith.h"
 #include "core/undef.h"
 #include "extended/gff3_escaping.h"
@@ -984,12 +985,19 @@ unsigned long gth_sa_call_number(const GthSA *sa)
   return sa->call_number;
 }
 
-static void set_gff3_target_attribute(GthSA *sa)
+static void set_gff3_target_attribute(GthSA *sa, bool md5ids)
 {
-  gt_assert(sa);
+  gt_assert(sa && !sa->gff3_target_attribute);
   sa->gff3_target_attribute = gt_str_new();
-  gt_gff3_escape(sa->gff3_target_attribute, gt_str_get(sa->ref_id),
-                 gt_str_length(sa->ref_id));
+  if (md5ids) {
+    gt_assert(sa->ref_md5);
+    gt_str_append_cstr(sa->gff3_target_attribute, GT_MD5_SEQID_PREFIX);
+    gt_str_append_str(sa->gff3_target_attribute, sa->ref_md5);
+  }
+  else {
+    gt_gff3_escape(sa->gff3_target_attribute, gt_str_get(sa->ref_id),
+                   gt_str_length(sa->ref_id));
+  }
   gt_str_append_char(sa->gff3_target_attribute, ' ');
   gt_str_append_ulong(sa->gff3_target_attribute,
                       gth_sa_referencecutoff_start(sa) + 1); /* XXX: use
@@ -1010,11 +1018,11 @@ static void set_gff3_target_attribute(GthSA *sa)
   }
 }
 
-const char* gth_sa_gff3_target_attribute(GthSA *sa)
+const char* gth_sa_gff3_target_attribute(GthSA *sa, bool md5ids)
 {
   gt_assert(sa);
-  if (!sa->gff3_target_attribute && gt_str_length(sa->ref_id))
-    set_gff3_target_attribute(sa);
+  if (!sa->gff3_target_attribute && (md5ids || gt_str_length(sa->ref_id)))
+    set_gff3_target_attribute(sa, md5ids);
   return gt_str_get(sa->gff3_target_attribute);
 }
 
@@ -1303,6 +1311,13 @@ void gth_sa_show(GthSA *sa, GthInput *input, GtFile *outfp)
                                       outfp);
   gth_sa_visitor_visit_sa(sa_visitor, sa);
   gth_sa_visitor_delete(sa_visitor);
+}
+
+void gth_sa_save_ref_md5(GthSA *sa, GthInput *input)
+{
+  gt_assert(sa && input);
+  gth_input_save_ref_md5(input, &sa->ref_md5, sa->ref_file_num,
+                         sa->ref_seq_num);
 }
 
 bool gth_sas_are_equal(const GthSA *saA, const GthSA *saB)

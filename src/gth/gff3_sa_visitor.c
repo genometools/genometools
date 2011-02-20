@@ -53,7 +53,7 @@ static void gff3_sa_visitor_preface(GthSAVisitor *sa_visitor)
 }
 
 static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
-                            GtArray *nodes, GtStr *gthsourcetag)
+                            GtArray *nodes, GtStr *gthsourcetag, bool md5ids)
 {
   GtFeatureNode *gene_feature, *exon_feature;
   GtRange range;
@@ -79,9 +79,9 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
   gt_feature_node_set_source(gene_feature, gthsourcetag);
   gt_feature_node_set_score(gene_feature, gth_sa_score(sa));
   /* set target attribute, if possible */
-  if (strlen(gth_sa_gff3_target_attribute(sa))) {
+  if (strlen(gth_sa_gff3_target_attribute(sa, md5ids))) {
     gt_feature_node_add_attribute(gene_feature, "Target",
-                                  gth_sa_gff3_target_attribute(sa));
+                                  gth_sa_gff3_target_attribute(sa, md5ids));
   }
 
   for (i = 0; i < gth_sa_num_of_exons(sa); i++) {
@@ -132,7 +132,7 @@ static void gff3_sa_visitor_visit_sa(GthSAVisitor *sa_visitor, GthSA *sa)
   GthGFF3SAVisitor *visitor = gff3_sa_visitor_cast(sa_visitor);
   gt_assert(sa);
   save_sa_in_gff3(sa, visitor->region_factory, visitor->nodes,
-                  visitor->gthsourcetag);
+                  visitor->gthsourcetag, gth_input_md5ids(visitor->input));
 }
 
 static void gff3_sa_visitor_trailer(GthSAVisitor *sa_visitor,

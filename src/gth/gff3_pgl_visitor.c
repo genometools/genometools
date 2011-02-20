@@ -65,7 +65,8 @@ static void gff3_pgl_visitor_set_region_mapping(GthPGLVisitor *pgl_visitor,
                                     region_mapping);
 }
 
-static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
+static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags,
+                                  bool md5ids)
 {
   GtStr *target_attribute;
   GthSA *sa;
@@ -74,10 +75,11 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
   target_attribute = gt_str_new();
   for (i = 0; i < gt_array_size(ags->alignments); i++) {
     sa = *(GthSA**) gt_array_get(ags->alignments, i);
-    if (strlen(gth_sa_gff3_target_attribute(sa))) {
+    if (strlen(gth_sa_gff3_target_attribute(sa, md5ids))) {
       if (gt_str_length(target_attribute))
         gt_str_append_char(target_attribute, ',');
-      gt_str_append_cstr(target_attribute, gth_sa_gff3_target_attribute(sa));
+      gt_str_append_cstr(target_attribute,
+                         gth_sa_gff3_target_attribute(sa, md5ids));
     }
   }
   if (gt_str_length(target_attribute)) {
@@ -89,7 +91,7 @@ static void add_target_attributes(GtFeatureNode *mrna_feature, GthAGS *ags)
 
 static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
                              GtNodeVisitor *cds_visitor, GtArray *nodes,
-                             GtStr *gthsourcetag)
+                             GtStr *gthsourcetag, bool md5ids)
 {
   GthExonAGS *exon, *first_exon, *last_exon;
   GtFeatureNode *gene_feature, *mrna_feature, *exon_feature;
@@ -132,7 +134,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
                    gt_feature_node_new(seqid, gt_ft_mRNA, range.start,
                                        range.end, gth_ags_genomic_strand(ags));
     gt_feature_node_set_source(mrna_feature, gthsourcetag);
-    add_target_attributes(mrna_feature, ags);
+    add_target_attributes(mrna_feature, ags, md5ids);
     gt_feature_node_add_child(gene_feature, mrna_feature);
 
     for (j = 0; j < gt_array_size(ags->exons); j++) {
@@ -194,7 +196,8 @@ static void gff3_pgl_visitor_visit_pgl(GthPGLVisitor *pgl_visitor,
   GthGFF3PGLVisitor *visitor = gff3_pgl_visitor_cast(pgl_visitor);
   gt_assert(pgl);
   save_pgl_in_gff3(pgl, visitor->region_factory, visitor->cds_visitor,
-                   visitor->nodes, visitor->gthsourcetag);
+                   visitor->nodes, visitor->gthsourcetag,
+                   gth_input_md5ids(visitor->input));
 }
 
 static void gff3_pgl_visitor_trailer(GthPGLVisitor *pgl_visitor)
