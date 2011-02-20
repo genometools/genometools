@@ -237,8 +237,15 @@ static int suffixeratorwithoutput(const GtStr *indexname,
       outfileinfo->pageoffset += numberofsuffixes;
     }
   }
-  outfileinfo->longest.defined = true;
-  outfileinfo->longest.valueunsignedlong = gt_Sfxiterator_longest(sfi);
+  if (haserr)
+  {
+    outfileinfo->longest.defined = false;
+    outfileinfo->longest.valueunsignedlong = 0;
+  } else
+  {
+    outfileinfo->longest.defined = true;
+    outfileinfo->longest.valueunsignedlong = gt_Sfxiterator_longest(sfi);
+  }
   if (!haserr && sfxstrategy->streamsuftab)
   {
     gt_fa_fclose(outfileinfo->outfpsuftab);

@@ -431,7 +431,6 @@ static void backwardderive(const GtBucketspec2 *bucketspec2,
   unsigned long startpos;
   GtUchar cc;
 
-  gt_assert (idx > targetoffset[source]);
   for (; idx + 1 > targetoffset[source] + 1; idx--)
   {
     startpos = gt_suffixsortspace_getdirect(suffixsortspace,idx);
