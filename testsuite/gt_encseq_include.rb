@@ -174,3 +174,42 @@ AATESTSEQS.each do |s|
     testformirrored(s, readmode)
   end
 end
+
+
+fastafiles = ["Atinsert.fna",
+              "Duplicate.fna",
+              "Random-Small.fna",
+              "Random.fna",
+              "Copysorttest.fna",
+              "Random159.fna",
+              "Random160.fna",
+              "RandomN.fna",
+              "TTT-small.fna",
+              "trna_glutamine.fna",
+              "Small.fna",
+              "Verysmall.fna",
+              "Arabidopsis-C99826.fna"]
+genbankfiles = fastafiles.collect{ |f| f.gsub(".fna",".gbk") }
+emblfiles = fastafiles.collect{ |f| f.gsub(".fna",".embl") }
+
+[genbankfiles, emblfiles].each do |formatfiles|
+  formatfiles.each do |formatfile|
+    Name "gt sequence formats (#{formatfile})"
+    Keywords "gt_suffixerator formats"
+    Test do
+      fasta = formatfile.gsub(/\.[a-z]+$/, ".fna")
+      if File.exists?("#{$testdata}#{fasta}") then
+        run "cp #{$testdata}#{formatfile} infile"
+        run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
+        run_test "#{$bin}gt encseq decode -output concat sfx > sfx.seq"
+        run_test "#{$bin}gt encseq info sfx > sfx.info"
+        run "cp #{$testdata}#{fasta} infile"
+        run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
+        run_test "#{$bin}gt encseq decode -output concat sfx > sfx2.seq"
+        run_test "#{$bin}gt encseq info sfx > sfx2.info"
+        run_test "diff sfx.seq sfx2.seq"
+        run_test "diff sfx.info sfx2.info"
+      end
+    end
+  end
+end

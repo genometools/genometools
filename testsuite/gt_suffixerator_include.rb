@@ -100,12 +100,6 @@ all_fastafiles = ["Atinsert.fna",
                   "Arabidopsis-C99826.fna"]
 
 allfiles += all_fastafiles
-allfiles += (all_genbankfiles = all_fastafiles.collect{ |f|
-                                                        f.gsub(".fna",".gbk")
-                                                      })
-allfiles += (all_emblfiles = all_fastafiles.collect{ |f|
-                                                     f.gsub(".fna",".embl")
-                                                   })
 
 allmultifiles = []
 all_multifastafiles = ["Atinsert.fna",
@@ -116,12 +110,6 @@ all_multifastafiles = ["Atinsert.fna",
                        "Random160.fna"]
 
 allmultifiles += all_multifastafiles
-allmultifiles += (all_multigenbankfiles = all_multifastafiles.collect{ |f|
-                                                         f.gsub(".fna",".gbk")
-                                                                     })
-allmultifiles += (all_multiemblfiles = all_multifastafiles.collect{ |f|
-                                                         f.gsub(".fna",".embl")
-                                                                  })
 
 all_fastqfiles = ["fastq_long.fastq",
                   "test10_multiline.fastq",
@@ -133,13 +121,10 @@ allfiles += all_fastqfiles
 
 alldir = ["fwd","cpl","rev","rcl"]
 
-{"FASTA" => all_fastafiles,
- "EMBL" => all_emblfiles,
- "GenBank" => all_genbankfiles,
- "FastQ" => all_fastqfiles}.each do |k,filelist|
-    Name "gt suffixerator (#{k})"
-    Keywords "gt_suffixerator tis"
-    Test do
+all_fastafiles.each do |filelist|
+  Name "gt suffixerator + sfxmap"
+  Keywords "gt_suffixerator tis"
+  Test do
     run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
              flattenfilelist(filelist)
     run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
@@ -151,8 +136,8 @@ alldir = ["fwd","cpl","rev","rcl"]
   end
 end
 
-allfiles.each do |filename|
-  Name "gt suffixerator #{filename}"
+all_fastafiles.each do |filename|
+  Name "gt suffixerator #{filename} all accesstypes"
   Keywords "gt_suffixerator tis"
   Test do
     ["direct", "bit", "uchar", "ushort", "uint32"].each do |sat|
@@ -192,20 +177,17 @@ Test do
 end
 
 alldir.each do |dir|
-  {"FASTA" => all_fastafiles,
-   "EMBL" => all_emblfiles,
-   "GenBank" => all_genbankfiles,
-   "FastQ" => all_fastqfiles}.each do |k,filelist|
-    Name "gt suffixerator #{dir} (#{k})"
+  all_fastafiles.each do |filelist|
+    Name "gt suffixerator #{dir}"
     Keywords "gt_suffixerator"
     Test do
-       run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
-                "-indexname sfx -pl -db " +
-                flattenfilelist(filelist)
-       run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
-                "-suf -lcp -indexname sfx -pl -db " +
-                flattenfilelist(filelist)
-       run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
+      run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
+               "-indexname sfx -pl -db " +
+               flattenfilelist(filelist)
+      run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
+               "-suf -lcp -indexname sfx -pl -db " +
+               flattenfilelist(filelist)
+      run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
     end
   end
 end
@@ -231,7 +213,6 @@ allmultifiles.each do |filename|
   Name "gt suffixerator sfxmap-failure #{filename}"
   Keywords "gt_suffixerator"
   Test do
-
     run_test "#{$bin}gt suffixerator -tis -dna -des no -sds no -ssp no " + 
              "-indexname localidx  -sat direct " +
              "-db #{$testdata}#{filename}"
