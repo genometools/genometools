@@ -85,7 +85,7 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
 }
 
 void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
-                                              GtFeatureNode *gf)
+                                              GtFeatureNode *fn)
 {
   GtGenomeNode *gn;
   char* seqid;
@@ -93,10 +93,10 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   GtRange node_range;
   RegionInfo *info;
   GtIntervalTreeNode *new_node;
-  gt_assert(gfi && gf);
+  gt_assert(gfi && fn);
 
   fi = gt_feature_index_memory_cast(gfi);
-  gn = gt_genome_node_ref((GtGenomeNode*) gf);
+  gn = gt_genome_node_ref((GtGenomeNode*) fn);
   /* assign id number as 'primary key' */
   gt_hashmap_add(fi->nodes_in_index, gn, gn);
   /* get information about seqid and range */

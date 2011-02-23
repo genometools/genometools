@@ -145,17 +145,17 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
     GtRange pdom_rng;
     GtStr *ali,
           *aaseq;
-    GtFeatureNode *gf;
+    GtFeatureNode *fn;
     char *tmpstr = NULL;
 
-    gf = *(GtFeatureNode**) gt_array_get(pdoms, i);
+    fn = *(GtFeatureNode**) gt_array_get(pdoms, i);
 
-    ali = gt_genome_node_get_user_data((GtGenomeNode*) gf, "pdom_alignment");
-    aaseq = gt_genome_node_get_user_data((GtGenomeNode*) gf, "pdom_aaseq");
-    pdom_rng = gt_genome_node_get_range((GtGenomeNode*) gf);
+    ali = gt_genome_node_get_user_data((GtGenomeNode*) fn, "pdom_alignment");
+    aaseq = gt_genome_node_get_user_data((GtGenomeNode*) fn, "pdom_aaseq");
+    pdom_rng = gt_genome_node_get_range((GtGenomeNode*) fn);
     tmpstr =  gt_ltrelement_get_sequence(pdom_rng.start-1,
                                          pdom_rng.end-1,
-                                         gt_feature_node_get_strand(gf),
+                                         gt_feature_node_get_strand(fn),
                                          seq, startpos, err);
     if (!tmpstr)
     {
@@ -180,8 +180,8 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
       /* append amino acid sequence */
       gt_str_append_str(pdom_aaseq, aaseq);
     }
-    gt_genome_node_release_user_data((GtGenomeNode*) gf, "pdom_alignment");
-    gt_genome_node_release_user_data((GtGenomeNode*) gf, "pdom_aaseq");
+    gt_genome_node_release_user_data((GtGenomeNode*) fn, "pdom_alignment");
+    gt_genome_node_release_user_data((GtGenomeNode*) fn, "pdom_aaseq");
     seq_length += gt_range_length(&pdom_rng);
     gt_free(tmpstr);
   }

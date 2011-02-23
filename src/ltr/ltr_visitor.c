@@ -33,71 +33,71 @@ struct GtLTRVisitor {
 #define gt_ltr_visitor_cast(GV)\
         gt_node_visitor_cast(gt_ltr_visitor_class(), GV)
 
-static int gt_ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
-                                    GT_UNUSED GtError *err)
+static int gt_ltr_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
+                                       GT_UNUSED GtError *err)
 {
   GtLTRVisitor *lv;
   GtRange node_range;
   GtArray *pdomarr = NULL;
   const char *pfamname;
-  const char *gft;
-  lv = gt_ltr_visitor_cast(gv);
+  const char *fnt;
+  lv = gt_ltr_visitor_cast(nv);
   gt_assert(lv);
   gt_error_check(err);
 
-  gft = gt_feature_node_get_type(gf);
+  fnt = gt_feature_node_get_type(fn);
 
-  if (strcmp(gft, "LTR_retrotransposon") == 0)
+  if (strcmp(fnt, "LTR_retrotransposon") == 0)
   {
-    lv->element->mainnode = gf;
-  } else if (strcmp(gft, "long_terminal_repeat") == 0)
+    lv->element->mainnode = fn;
+  } else if (strcmp(fnt, "long_terminal_repeat") == 0)
   {
     if (lv->element->leftLTR == NULL)
     {
-      node_range = gt_genome_node_get_range((GtGenomeNode*) gf);
-      lv->element->leftLTR = gf;
+      node_range = gt_genome_node_get_range((GtGenomeNode*) fn);
+      lv->element->leftLTR = fn;
       /* compensate for 1-based node coords */
       lv->element->leftLTR_5 = node_range.start - 1;
       lv->element->leftLTR_3 = node_range.end - 1;
     }
     else
     {
-      node_range = gt_genome_node_get_range((GtGenomeNode*) gf);
-      lv->element->rightLTR = gf;
+      node_range = gt_genome_node_get_range((GtGenomeNode*) fn);
+      lv->element->rightLTR = fn;
       /* compensate for 1-based node coords */
       lv->element->rightLTR_5 = node_range.start - 1;
       lv->element->rightLTR_3 = node_range.end - 1;
     }
-  } else if (strcmp(gft, "target_site_duplication") == 0)
+  } else if (strcmp(fnt, "target_site_duplication") == 0)
   {
     if (lv->element->leftTSD == NULL)
     {
-      lv->element->leftTSD = gf;
+      lv->element->leftTSD = fn;
     }
     else
     {
-      lv->element->rightTSD = gf;
+      lv->element->rightTSD = fn;
     }
-  } else if (strcmp(gft, "RR_tract") == 0)
+  } else if (strcmp(fnt, "RR_tract") == 0)
   {
     if (lv->element->ppt == NULL)
     {
-      lv->element->ppt = gf;
+      lv->element->ppt = fn;
     }
-  } else if (strcmp(gft, "primer_binding_site") == 0)
+  } else if (strcmp(fnt, "primer_binding_site") == 0)
   {
     if (lv->element->pbs == NULL)
     {
-      lv->element->pbs = gf;
+      lv->element->pbs = fn;
     }
-  } else if (strcmp(gft,"protein_match") == 0)
+  } else if (strcmp(fnt,"protein_match") == 0)
   {
     if (!lv->element->pdoms)
     {
       lv->element->pdoms = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
                                           (GtFree) gt_array_delete);
     }
-    pfamname = gt_feature_node_get_attribute(gf, "name");
+    pfamname = gt_feature_node_get_attribute(fn, "name");
     if (!(pdomarr = (GtArray*) gt_hashmap_get(lv->element->pdoms, pfamname)))
     {
       char *pfamcpy = gt_cstr_dup(pfamname);
@@ -106,16 +106,16 @@ static int gt_ltr_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *gf,
       if (lv->element->pdomorder != NULL)
         gt_array_add(lv->element->pdomorder, pfamcpy);
     }
-    gt_array_add(pdomarr, gf);
+    gt_array_add(pdomarr, fn);
   }
   return 0;
 }
 
 const GtNodeVisitorClass* gt_ltr_visitor_class(void)
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (GtLTRVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtLTRVisitor),
                                     NULL,
                                     NULL,
                                     gt_ltr_visitor_feature_node,
@@ -123,17 +123,17 @@ const GtNodeVisitorClass* gt_ltr_visitor_class(void)
                                     NULL,
                                     NULL);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_ltr_visitor_new(GtLTRElement *element)
 {
-  GtNodeVisitor *gv;
+  GtNodeVisitor *nv;
   GtLTRVisitor *lv;
   gt_assert(element);
-  gv = gt_node_visitor_create(gt_ltr_visitor_class());
-  lv = gt_ltr_visitor_cast(gv);
+  nv = gt_node_visitor_create(gt_ltr_visitor_class());
+  lv = gt_ltr_visitor_cast(nv);
   lv->element = element;
   gt_assert(lv);
-  return gv;
+  return nv;
 }

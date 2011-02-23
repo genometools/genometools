@@ -42,12 +42,12 @@ struct GtLTRharvestFastaOutVisitor {
 #define gt_ltrharvest_fasta_out_visitor_cast(GV)\
         gt_node_visitor_cast(gt_ltrharvest_fasta_out_visitor_class(), GV)
 
-static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *gv,
-                                                     GtFeatureNode *gf,
-                                                     GT_UNUSED GtError *err)
+static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
+                                                        GtFeatureNode *fn,
+                                                        GT_UNUSED GtError *err)
 {
   GtLTRharvestFastaOutVisitor *lv;
-  GtFeatureNodeIterator *gfi;
+  GtFeatureNodeIterator *fni;
   GtFeatureNode *curnode = NULL,
                 *leftltr = NULL,
                 *rightltr = NULL,
@@ -57,17 +57,17 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *gv,
   GtRange rng,
           outrng;
   unsigned long seqnum = GT_UNDEF_ULONG;
-  const char *gft;
-  lv = gt_ltrharvest_fasta_out_visitor_cast(gv);
+  const char *fnt;
+  lv = gt_ltrharvest_fasta_out_visitor_cast(nv);
   gt_assert(lv);
   gt_error_check(err);
 
   /* traverse annotation subgraph and collect info */
-  gfi = gt_feature_node_iterator_new(gf);
-  while (!had_err && (curnode = gt_feature_node_iterator_next(gfi))) {
-    gft = gt_feature_node_get_type(curnode);
+  fni = gt_feature_node_iterator_new(fn);
+  while (!had_err && (curnode = gt_feature_node_iterator_next(fni))) {
+    fnt = gt_feature_node_get_type(curnode);
 
-    if (strcmp(gft, "LTR_retrotransposon") == 0)
+    if (strcmp(fnt, "LTR_retrotransposon") == 0)
     {
       const char *val;
       ltr_retrotrans = curnode;
@@ -80,7 +80,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *gv,
         (void) gt_parse_ulong(&seqnum, val);
       }
     }
-    if (strcmp(gft, "long_terminal_repeat") == 0)
+    if (strcmp(fnt, "long_terminal_repeat") == 0)
     {
       switch (added_ltr) {
         case 0:
@@ -97,7 +97,7 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *gv,
       added_ltr++;
     }
   }
-  gt_feature_node_iterator_delete(gfi);
+  gt_feature_node_iterator_delete(fni);
 
   /* check for invalid annotations */
   if (!had_err && (!leftltr || !rightltr)) {
@@ -153,9 +153,9 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *gv,
 
 const GtNodeVisitorClass* gt_ltrharvest_fasta_out_visitor_class(void)
 {
-  static const GtNodeVisitorClass *gvc = NULL;
-  if (!gvc) {
-    gvc = gt_node_visitor_class_new(sizeof (GtLTRharvestFastaOutVisitor),
+  static const GtNodeVisitorClass *nvc = NULL;
+  if (!nvc) {
+    nvc = gt_node_visitor_class_new(sizeof (GtLTRharvestFastaOutVisitor),
                                    NULL,
                                    NULL,
                                    gt_ltrharvest_fasta_out_visitor_feature_node,
@@ -163,7 +163,7 @@ const GtNodeVisitorClass* gt_ltrharvest_fasta_out_visitor_class(void)
                                    NULL,
                                    NULL);
   }
-  return gvc;
+  return nvc;
 }
 
 GtNodeVisitor* gt_ltrharvest_fasta_out_visitor_new(const GtEncseq *encseq,
@@ -171,15 +171,15 @@ GtNodeVisitor* gt_ltrharvest_fasta_out_visitor_new(const GtEncseq *encseq,
                                                    unsigned long width,
                                                    GtFile *outfp)
 {
-  GtNodeVisitor *gv;
+  GtNodeVisitor *nv;
   GtLTRharvestFastaOutVisitor *lv;
   gt_assert(encseq && outfp);
-  gv = gt_node_visitor_create(gt_ltrharvest_fasta_out_visitor_class());
-  lv = gt_ltrharvest_fasta_out_visitor_cast(gv);
+  nv = gt_node_visitor_create(gt_ltrharvest_fasta_out_visitor_class());
+  lv = gt_ltrharvest_fasta_out_visitor_cast(nv);
   gt_assert(lv);
   lv->inner = inner;
   lv->outfp = outfp;
   lv->width = width;
   lv->encseq = encseq;
-  return gv;
+  return nv;
 }

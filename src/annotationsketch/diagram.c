@@ -121,14 +121,14 @@ static inline NodeInfoElement* nodeinfo_get(GtDiagram *d,
 
 static inline GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
                                            const char *gft,
-                                           GtFeatureNode *gf)
+                                           GtFeatureNode *fn)
 {
   PerTypeInfo *type_struc = NULL;
   GtBlockTuple *bt = NULL;
   gt_assert(ni);
   if (!(type_struc = gt_hashmap_get(ni->type_index, gft)))
     return NULL;
-  if (!(bt = gt_hashmap_get(type_struc->rep_index, gf)))
+  if (!(bt = gt_hashmap_get(type_struc->rep_index, fn)))
     return NULL;
   gt_assert(bt);
   return bt->block;

@@ -68,18 +68,18 @@ static int feature_index_lua_add_feature_node(lua_State *L)
 {
   GtFeatureIndex **fi;
   GtGenomeNode **gn;
-  GtFeatureNode *gf;
+  GtFeatureNode *fn;
   GtStr *seqid;
   gt_assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  gf = gt_genome_node_cast(gt_feature_node_class(), *gn);
-  luaL_argcheck(L, gf, 2, "not a feature node");
+  fn = gt_genome_node_cast(gt_feature_node_class(), *gn);
+  luaL_argcheck(L, fn, 2, "not a feature node");
   seqid = gt_genome_node_get_seqid(*gn);
   luaL_argcheck(L, seqid, 2, "feature does not have a sequence id");
   luaL_argcheck(L, gt_feature_index_has_seqid(*fi, gt_str_get(seqid)), 2,
                 "feature index does not contain corresponding sequence region");
-  gt_feature_index_add_feature_node(*fi, gf);
+  gt_feature_index_add_feature_node(*fi, fn);
   return 0;
 }
 
