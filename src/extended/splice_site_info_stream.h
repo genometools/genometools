@@ -29,7 +29,7 @@ const GtNodeStreamClass* gt_splice_site_info_stream_class(void);
 
 /* create a GtSpliceSiteInfoStream, takes ownership of GtRegionMapping  */
 GtNodeStream*            gt_splice_site_info_stream_new(GtNodeStream*,
-                                                     GtRegionMapping*);
+                                                        GtRegionMapping*);
 /* returns if an intron has been processed, false otherwise */
 bool                     gt_splice_site_info_stream_show(GtNodeStream*);
 
