@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -34,7 +34,9 @@ struct GtGFF3InStream {
 static int gff3_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                GtError *err)
 {
-  GtGFF3InStream *is = gff3_in_stream_cast(ns);
+  GtGFF3InStream *is;
+  gt_error_check(err);
+  is = gff3_in_stream_cast(ns);
   return gt_node_stream_next(is->cds_check_stream, gn, err);
 }
 
