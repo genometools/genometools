@@ -45,7 +45,7 @@ static int change_sequence_id(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+static int chseqids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                 GtError *err)
 {
   GtChseqidsStream *cs;
@@ -55,7 +55,7 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   unsigned long i;
   int rval, had_err = 0;
   gt_error_check(err);
-  cs = chseqids_stream_cast(gs);
+  cs = chseqids_stream_cast(ns);
 
   if (!cs->sequence_regions_processed) {
     while (!had_err) {
@@ -140,11 +140,11 @@ static int chseqids_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void chseqids_stream_free(GtNodeStream *gs)
+static void chseqids_stream_free(GtNodeStream *ns)
 {
   GtChseqidsStream *cs;
   unsigned long i;
-  cs = chseqids_stream_cast(gs);
+  cs = chseqids_stream_cast(ns);
   gt_mapping_delete(cs->chseqids_mapping);
   for (i = cs->buffer_index; i < gt_array_size(cs->node_buffer); i++)
     gt_genome_node_delete(*(GtGenomeNode**) gt_array_get(cs->node_buffer, i));
@@ -166,20 +166,20 @@ const GtNodeStreamClass* gt_chseqids_stream_class(void)
 GtNodeStream* gt_chseqids_stream_new(GtNodeStream *in_stream,
                                      GtStr *chseqids_file, GtError *err)
 {
-  GtNodeStream *gs;
+  GtNodeStream *ns;
   GtChseqidsStream *cs;
   gt_error_check(err);
   gt_assert(in_stream && chseqids_file);
   gt_assert(gt_node_stream_is_sorted(in_stream));
-  gs = gt_node_stream_create(gt_chseqids_stream_class(), false);
-  cs = chseqids_stream_cast(gs);
+  ns = gt_node_stream_create(gt_chseqids_stream_class(), false);
+  cs = chseqids_stream_cast(ns);
   cs->in_stream = gt_node_stream_ref(in_stream);
   cs->chseqids_mapping = gt_mapping_new(chseqids_file, "chseqids",
                                         GT_MAPPINGTYPE_STRING, err);
   if (!cs->chseqids_mapping) {
-    gt_node_stream_delete(gs);
+    gt_node_stream_delete(ns);
     return NULL;
   }
   cs->node_buffer = gt_array_new(sizeof (GtGenomeNode*));
-  return gs;
+  return ns;
 }

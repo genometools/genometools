@@ -17,9 +17,9 @@
 
 #include "core/complement.h"
 
-int gt_complement(char *reverse_char, char dna_char, GtError *e)
+int gt_complement(char *reverse_char, char dna_char, GtError *err)
 {
-  gt_error_check(e);
+  gt_error_check(err);
   switch (dna_char) {
     case 'A': *reverse_char = 'T'; return 0; /* adenine */
     case 'T': *reverse_char = 'A'; return 0; /* thymine */
@@ -54,7 +54,8 @@ int gt_complement(char *reverse_char, char dna_char, GtError *e)
     case 'v': *reverse_char = 'b'; return 0; /* not T/U */
     case 'n': *reverse_char = 'n'; return 0; /* any */
     default:
-      gt_error_set(e, "complement of DNA character '%c' not defined", dna_char);
+      gt_error_set(err, "complement of DNA character '%c' not defined",
+                   dna_char);
       return -1;
   }
 }

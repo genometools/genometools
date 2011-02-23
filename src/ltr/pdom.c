@@ -996,7 +996,7 @@ static ESL_OPTIONS gt_pdom_hmmer3_options[] = {
 
 GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
                                  unsigned int chain_max_gap_length,
-                                 GtPdomCutoff cutoff, GtError *e)
+                                 GtPdomCutoff cutoff, GtError *err)
 {
   int had_err = 0;
   GtPdomFinder *gpf;

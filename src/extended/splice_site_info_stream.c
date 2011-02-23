@@ -29,13 +29,13 @@ struct GtSpliceSiteInfoStream {
 #define gt_splice_site_info_stream_cast(GS)\
         gt_node_stream_cast(gt_splice_site_info_stream_class(), GS)
 
-static int gt_splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
-                                        GtError *err)
+static int gt_splice_site_info_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
+                                           GtError *err)
 {
   GtSpliceSiteInfoStream *ssis;
   int had_err;
   gt_error_check(err);
-  ssis = gt_splice_site_info_stream_cast(gs);
+  ssis = gt_splice_site_info_stream_cast(ns);
   had_err = gt_node_stream_next(ssis->in_stream, gn, err);
   if (!had_err) {
     gt_assert(ssis->splice_site_info_visitor);
@@ -51,9 +51,9 @@ static int gt_splice_site_info_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gt_splice_site_info_stream_free(GtNodeStream *gs)
+static void gt_splice_site_info_stream_free(GtNodeStream *ns)
 {
-  GtSpliceSiteInfoStream *ssis = gt_splice_site_info_stream_cast(gs);
+  GtSpliceSiteInfoStream *ssis = gt_splice_site_info_stream_cast(ns);
   gt_node_visitor_delete(ssis->splice_site_info_visitor);
   gt_node_stream_delete(ssis->in_stream);
 }
@@ -70,20 +70,20 @@ const GtNodeStreamClass* gt_splice_site_info_stream_class(void)
 }
 
 GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
-                                          GtRegionMapping *rm)
+                                             GtRegionMapping *rm)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_splice_site_info_stream_class(),
-                                          false);
-  GtSpliceSiteInfoStream *ssis = gt_splice_site_info_stream_cast(gs);
+  GtNodeStream *ns = gt_node_stream_create(gt_splice_site_info_stream_class(),
+                                           false);
+  GtSpliceSiteInfoStream *ssis = gt_splice_site_info_stream_cast(ns);
   ssis->in_stream = gt_node_stream_ref(in_stream);
   ssis->splice_site_info_visitor = gt_splice_site_info_visitor_new(rm);
-  return gs;
+  return ns;
 }
 
-bool gt_splice_site_info_stream_show(GtNodeStream *gs)
+bool gt_splice_site_info_stream_show(GtNodeStream *ns)
 {
   GtSpliceSiteInfoStream *ssis;
-  gt_assert(gs);
-  ssis = gt_splice_site_info_stream_cast(gs);
+  gt_assert(ns);
+  ssis = gt_splice_site_info_stream_cast(ns);
   return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor);
 }

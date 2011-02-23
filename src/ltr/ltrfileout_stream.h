@@ -41,7 +41,7 @@ GtNodeStream* gt_ltr_fileout_stream_new(GtNodeStream *in_stream,
                                         const char *seqfilename,
                                         const char *gfffilename,
                                         unsigned int seqnamelen,
-                                        GtError *e);
+                                        GtError *err);
 
 void          gt_ltr_fileout_stream_enable_pdom_alignment_output(GtNodeStream*);
 void          gt_ltr_fileout_stream_enable_aa_sequence_output(GtNodeStream*);

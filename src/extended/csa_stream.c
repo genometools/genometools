@@ -30,12 +30,12 @@ struct GtCSAStream {
 #define csa_stream_cast(GS)\
         gt_node_stream_cast(gt_csa_stream_class(), GS)
 
-static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int csa_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtCSAStream *cs;
   int had_err;
   gt_error_check(err);
-  cs = csa_stream_cast(gs);
+  cs = csa_stream_cast(ns);
 
   /* we have still nodes in the buffer */
   if (gt_csa_visitor_node_buffer_size(cs->csa_visitor)) {
@@ -69,9 +69,9 @@ static int csa_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void csa_stream_free(GtNodeStream *gs)
+static void csa_stream_free(GtNodeStream *ns)
 {
-  GtCSAStream *cs = csa_stream_cast(gs);
+  GtCSAStream *cs = csa_stream_cast(ns);
   gt_node_visitor_delete(cs->csa_visitor);
   gt_node_stream_delete(cs->in_stream);
 }
@@ -90,10 +90,10 @@ const GtNodeStreamClass* gt_csa_stream_class(void)
 GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
                                 unsigned long join_length)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_csa_stream_class(),
+  GtNodeStream *ns = gt_node_stream_create(gt_csa_stream_class(),
                                           gt_node_stream_is_sorted(in_stream));
-  GtCSAStream *cs = csa_stream_cast(gs);
+  GtCSAStream *cs = csa_stream_cast(ns);
   cs->in_stream = gt_node_stream_ref(in_stream);
   cs->csa_visitor = gt_csa_visitor_new(join_length);
-  return gs;
+  return ns;
 }

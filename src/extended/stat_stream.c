@@ -31,12 +31,12 @@ struct GtStatStream {
 #define stat_stream_cast(GS)\
         gt_node_stream_cast(gt_stat_stream_class(), GS)
 
-static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int stat_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtStatStream *stat_stream;
   int had_err;
   gt_error_check(err);
-  stat_stream = stat_stream_cast(gs);
+  stat_stream = stat_stream_cast(ns);
   had_err = gt_node_stream_next(stat_stream->in_stream, gn, err);
   if (!had_err) {
     gt_assert(stat_stream->stat_visitor);
@@ -50,9 +50,9 @@ static int stat_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void stat_stream_free(GtNodeStream *gs)
+static void stat_stream_free(GtNodeStream *ns)
 {
-  GtStatStream *stat_stream = stat_stream_cast(gs);
+  GtStatStream *stat_stream = stat_stream_cast(ns);
   gt_node_visitor_delete(stat_stream->stat_visitor);
   gt_node_stream_delete(stat_stream->in_stream);
 }
@@ -77,19 +77,19 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
                                  bool cds_length_distri,
                                  bool used_sources)
 {
-  GtNodeStream *gs = gt_node_stream_create(gt_stat_stream_class(), false);
-  GtStatStream *ss = stat_stream_cast(gs);
+  GtNodeStream *ns = gt_node_stream_create(gt_stat_stream_class(), false);
+  GtStatStream *ss = stat_stream_cast(ns);
   ss->in_stream = gt_node_stream_ref(in_stream);
   ss->stat_visitor = gt_stat_visitor_new(gene_length_distri, gene_score_distri,
                                          exon_length_distri, exon_number_distri,
                                          intron_length_distri,
                                          cds_length_distri, used_sources);
-  return gs;
+  return ns;
 }
 
-void gt_stat_stream_show_stats(GtNodeStream *gs, GtFile *outfp)
+void gt_stat_stream_show_stats(GtNodeStream *ns, GtFile *outfp)
 {
-  GtStatStream *ss = stat_stream_cast(gs);
+  GtStatStream *ss = stat_stream_cast(ns);
   gt_file_xprintf(outfp, "parsed feature trees: %lu\n", ss->number_of_DAGs);
   gt_stat_visitor_show_stats(ss->stat_visitor, outfp);
 }

@@ -299,21 +299,21 @@ static int run_ltrdigest(GtLTRElement *element, char *seq,
   return had_err;
 }
 
-static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
-                                    GtError *e)
+static int gt_ltrdigest_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
+                                    GtError *err)
 {
   GtLTRdigestStream *ls;
   GtFeatureNode *fn;
   int had_err;
 
-  gt_error_check(e);
-  ls = gt_ltrdigest_stream_cast(gs);
+  gt_error_check(err);
+  ls = gt_ltrdigest_stream_cast(ns);
 
   /* initialize this element */
   memset(&ls->element, 0, sizeof (GtLTRElement));
 
   /* get annotations from parser */
-  had_err = gt_node_stream_next(ls->in_stream, gn, e);
+  had_err = gt_node_stream_next(ls->in_stream, gn, err);
   if (!had_err && *gn)
   {
     GtFeatureNodeIterator *gni;
@@ -328,7 +328,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     for (mygn = fn; mygn != NULL; mygn = gt_feature_node_iterator_next(gni))
       (void) gt_genome_node_accept((GtGenomeNode*) mygn,
                                    (GtNodeVisitor*) ls->lv,
-                                   e);
+                                   err);
     gt_feature_node_iterator_delete(gni);
   }
 
@@ -344,22 +344,21 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
     /* we assume that this is the correct numbering! */
     if (!sscanf(sreg,"seq%lu", &seqid))
     {
-      gt_error_set(e, "Feature '%s' on line %u has invalid region identifier,"
-                      "must be 'seqX' with X being a sequence number, but was "
-                      "'%s'!",
-                      gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-                      gt_genome_node_get_line_number((GtGenomeNode*)
-                                                      ls->element.mainnode),
-                      gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
-                                                      ls->element.mainnode)));
-
+      gt_error_set(err, "Feature '%s' on line %u has invalid region identifier,"
+                   "must be 'seqX' with X being a sequence number, but was "
+                   "'%s'!",
+                   gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
+                   gt_genome_node_get_line_number((GtGenomeNode*)
+                                                  ls->element.mainnode),
+                   gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)
+                                                       ls->element.mainnode)));
       had_err = -1;
     }
     if (!had_err)
     {
       if (seqid > gt_encseq_num_of_sequences(ls->encseq)-1) {
-        gt_error_set(e, "Sequence region number exceeds number of sequences in "
-                        "encoded sequence file: 'seq%lu'!", seqid);
+        gt_error_set(err, "Sequence region number exceeds number of sequences "
+                          "in encoded sequence file: 'seq%lu'!", seqid);
         had_err = -1;
       }
     }
@@ -387,7 +386,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
         gt_free(symbolstring);
 
         /* run LTRdigest core routine */
-        had_err = run_ltrdigest(&ls->element, seq, ls, e);
+        had_err = run_ltrdigest(&ls->element, seq, ls, err);
 
         gt_free(seq);
       }
@@ -395,9 +394,10 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
       {
         /* do not process elements whose positions exceed sequence boundaries
          (obviously annotation and sequence do not match!) */
-        gt_error_set(e, "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
-          gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
-          ls->element.rightLTR_3, seqlength);
+        gt_error_set(err,
+                     "Element '%s' exceeds sequence boundaries! (%lu > %lu)",
+                     gt_feature_node_get_attribute(ls->element.mainnode, "ID"),
+                     ls->element.rightLTR_3, seqlength);
         had_err = -1;
       }
     }
@@ -409,9 +409,9 @@ static int gt_ltrdigest_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gt_ltrdigest_stream_free(GtNodeStream *gs)
+static void gt_ltrdigest_stream_free(GtNodeStream *ns)
 {
-  GtLTRdigestStream *ls = gt_ltrdigest_stream_cast(gs);
+  GtLTRdigestStream *ls = gt_ltrdigest_stream_cast(ns);
   gt_node_visitor_delete((GtNodeVisitor*) ls->lv);
   gt_str_delete(ls->ltrdigest_tag);
   gt_node_stream_delete(ls->in_stream);
@@ -422,12 +422,12 @@ static void gt_ltrdigest_stream_free(GtNodeStream *gs)
 
 const GtNodeStreamClass* gt_ltrdigest_stream_class(void)
 {
-  static const GtNodeStreamClass *gsc;
-  if (!gsc)
-    gsc = gt_node_stream_class_new(sizeof (GtLTRdigestStream),
+  static const GtNodeStreamClass *nsc;
+  if (!nsc)
+    nsc = gt_node_stream_class_new(sizeof (GtLTRdigestStream),
                                    gt_ltrdigest_stream_free,
                                    gt_ltrdigest_stream_next );
-  return gsc;
+  return nsc;
 }
 
 GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
@@ -442,10 +442,10 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
                                       GT_UNUSED GtError *err)
 #endif
 {
-  GtNodeStream *gs;
+  GtNodeStream *ns;
   GtLTRdigestStream *ls;
-  gs = gt_node_stream_create(gt_ltrdigest_stream_class(), true);
-  ls = gt_ltrdigest_stream_cast(gs);
+  ns = gt_node_stream_create(gt_ltrdigest_stream_class(), true);
+  ls = gt_ltrdigest_stream_cast(ns);
   ls->in_stream = gt_node_stream_ref(in_stream);
   ls->ppt_opts = ppt_opts;
   ls->pbs_opts = pbs_opts;
@@ -466,9 +466,9 @@ GtNodeStream* gt_ltrdigest_stream_new(GtNodeStream *in_stream,
   {
     /* An error occurred, do not return a stream.
        We assume that the error message has been set. */
-    gt_node_stream_delete(gs);
+    gt_node_stream_delete(ns);
     return NULL;
   } else
 #endif
-  return gs;
+  return ns;
 }

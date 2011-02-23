@@ -116,14 +116,14 @@ static void filter_targetbest(GtFeatureNode *current_feature,
   gt_str_delete(first_target_id);
 }
 
-static int targetbest_filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
+static int targetbest_filter_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                          GtError *err)
 {
   GtTargetbestFilterStream *tfs;
   GtGenomeNode *node;
   int had_err = 0;
   gt_error_check(err);
-  tfs = targetbest_filter_stream_cast(gs);
+  tfs = targetbest_filter_stream_cast(ns);
 
   if (!tfs->in_stream_processed) {
     while (!(had_err = gt_node_stream_next(tfs->in_stream, &node, err)) &&
@@ -154,9 +154,9 @@ static int targetbest_filter_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void targetbest_filter_stream_free(GtNodeStream *gs)
+static void targetbest_filter_stream_free(GtNodeStream *ns)
 {
-  GtTargetbestFilterStream *tfs = targetbest_filter_stream_cast(gs);
+  GtTargetbestFilterStream *tfs = targetbest_filter_stream_cast(ns);
   for (; tfs->next != NULL; tfs->next = gt_dlistelem_next(tfs->next))
     gt_genome_node_delete(gt_dlistelem_get_data(tfs->next));
   gt_dlist_delete(tfs->trees);
@@ -178,14 +178,14 @@ const GtNodeStreamClass* gt_targetbest_filter_stream_class(void)
 GtNodeStream* gt_targetbest_filter_stream_new(GtNodeStream *in_stream)
 {
   GtTargetbestFilterStream *tfs;
-  GtNodeStream *gs;
+  GtNodeStream *ns;
   gt_assert(in_stream);
-  gs = gt_node_stream_create(gt_targetbest_filter_stream_class(),
+  ns = gt_node_stream_create(gt_targetbest_filter_stream_class(),
                              gt_node_stream_is_sorted(in_stream));
-  tfs = targetbest_filter_stream_cast(gs);
+  tfs = targetbest_filter_stream_cast(ns);
   tfs->in_stream = gt_node_stream_ref(in_stream);
   tfs->in_stream_processed = false;
   tfs->trees = gt_dlist_new(NULL);
   tfs->target_to_elem = gt_hashmap_new(GT_HASH_STRING, gt_free_func, NULL);
-  return gs;
+  return ns;
 }

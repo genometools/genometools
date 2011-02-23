@@ -1318,14 +1318,14 @@ static void gt_removeoverlapswithlowersimilarity(
   }
 }
 
-static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *gs,
+static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
                                      GtGenomeNode **gn,
                                      GtError *err)
 {
   GtLTRharvestStream *ltrh_stream;
   int had_err = 0;
   gt_error_check(err);
-  ltrh_stream = gt_ltrharvest_stream_cast(gs);
+  ltrh_stream = gt_ltrharvest_stream_cast(ns);
 
   /* LTRharvest run */
   if (ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_START) {
@@ -1575,9 +1575,9 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *gs,
   return had_err;
 }
 
-static void gt_ltrharvest_stream_free(GtNodeStream *gs)
+static void gt_ltrharvest_stream_free(GtNodeStream *ns)
 {
-  GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(gs);
+  GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(ns);
   GT_FREEARRAY(&ltrh_stream->arrayLTRboundaries, LTRboundaries);
   if (ltrh_stream->ssar != NULL)
     gt_freeSequentialsuffixarrayreader(&ltrh_stream->ssar);
@@ -1625,8 +1625,8 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                        GtError *err)
 {
   int had_err = 0;
-  GtNodeStream *gs = gt_node_stream_create(gt_ltrharvest_stream_class(), false);
-  GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(gs);
+  GtNodeStream *ns = gt_node_stream_create(gt_ltrharvest_stream_class(), false);
+  GtLTRharvestStream *ltrh_stream = gt_ltrharvest_stream_cast(ns);
 
   ltrh_stream->str_indexname = str_indexname;
   ltrh_stream->minseedlength = minseedlength;
@@ -1661,7 +1661,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
 
   if (ltrh_stream->ssar == NULL)
   {
-    gt_node_stream_delete(gs);
+    gt_node_stream_delete(ns);
     return NULL;
   }
   /* get encseq associated with suffix array */
@@ -1670,9 +1670,9 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
   /* encode motif according to encseq alphabet */
   had_err = gt_ltr_four_char_motif_encode(motif, ltrh_stream->encseq, err);
   if (had_err) {
-    gt_node_stream_delete(gs);
+    gt_node_stream_delete(ns);
     return NULL;
   }
 
-  return had_err ? NULL : gs;
+  return had_err ? NULL : ns;
 }

@@ -97,12 +97,12 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
   return false;
 }
 
-static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
+static int uniq_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 {
   GtUniqStream *us;
   int had_err;
   gt_error_check(err);
-  us = uniq_stream_cast(gs);
+  us = uniq_stream_cast(ns);
 
   gt_assert(!us->second_node); /* the second buffer is always empty when this
                                function is called */
@@ -140,9 +140,9 @@ static int uniq_stream_next(GtNodeStream *gs, GtGenomeNode **gn, GtError *err)
   return had_err;
 }
 
-static void uniq_stream_free(GtNodeStream *gs)
+static void uniq_stream_free(GtNodeStream *ns)
 {
-  GtUniqStream *us = uniq_stream_cast(gs);
+  GtUniqStream *us = uniq_stream_cast(ns);
   gt_genome_node_delete(us->first_node);
   gt_genome_node_delete(us->second_node);
   gt_node_stream_delete(us->in_stream);
@@ -161,11 +161,11 @@ const GtNodeStreamClass* gt_uniq_stream_class(void)
 
 GtNodeStream* gt_uniq_stream_new(GtNodeStream *in_stream)
 {
-  GtNodeStream *gs;
+  GtNodeStream *ns;
   GtUniqStream *us;
   gt_assert(in_stream && gt_node_stream_is_sorted(in_stream));
-  gs = gt_node_stream_create(gt_uniq_stream_class(), true);
-  us = uniq_stream_cast(gs);
+  ns = gt_node_stream_create(gt_uniq_stream_class(), true);
+  us = uniq_stream_cast(ns);
   us->in_stream = gt_node_stream_ref(in_stream);
-  return gs;
+  return ns;
 }

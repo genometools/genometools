@@ -20,6 +20,6 @@
 
 #include "core/error_api.h"
 
-int gt_complement(char *reverse_char, char dna_char, GtError *e);
+int gt_complement(char *reverse_char, char dna_char, GtError*);
 
 #endif

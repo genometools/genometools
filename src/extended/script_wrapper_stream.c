@@ -28,23 +28,23 @@ struct GtScriptWrapperStream {
 #define script_wrapper_stream_cast(GS)\
         gt_node_stream_cast(gt_script_wrapper_stream_class(), GS)
 
-static int script_wrapper_stream_next(GtNodeStream *gs,
+static int script_wrapper_stream_next(GtNodeStream *ns,
                                       GtGenomeNode **gn,
                                       GtError *err)
 {
   GtScriptWrapperStream *script_wrapper_stream;
   int had_err = 0;
   gt_error_check(err);
-  script_wrapper_stream = script_wrapper_stream_cast(gs);
+  script_wrapper_stream = script_wrapper_stream_cast(ns);
   had_err = script_wrapper_stream->next_func(gn, err);
   return had_err;
 }
 
-static void script_wrapper_stream_free(GtNodeStream *gs)
+static void script_wrapper_stream_free(GtNodeStream *ns)
 {
   GtScriptWrapperStream *script_wrapper_stream;
-  if (!gs) return;
-  script_wrapper_stream = script_wrapper_stream_cast(gs);
+  if (!ns) return;
+  script_wrapper_stream = script_wrapper_stream_cast(ns);
   if (script_wrapper_stream->free_func)
     script_wrapper_stream->free_func(NULL);
 }
@@ -63,12 +63,12 @@ const GtNodeStreamClass* gt_script_wrapper_stream_class(void)
 GtNodeStream* gt_script_wrapper_stream_new(GtScriptWrapperStreamNextFunc next,
                                            GtScriptWrapperStreamFreeFunc free)
 {
-  GtNodeStream *gs;
+  GtNodeStream *ns;
   GtScriptWrapperStream *script_wrapper_stream;
   gt_assert(next);
-  gs = gt_node_stream_create(gt_script_wrapper_stream_class(), true);
-  script_wrapper_stream = script_wrapper_stream_cast(gs);
+  ns = gt_node_stream_create(gt_script_wrapper_stream_class(), true);
+  script_wrapper_stream = script_wrapper_stream_cast(ns);
   script_wrapper_stream->next_func = next;
   script_wrapper_stream->free_func = free;
-  return gs;
+  return ns;
 }
