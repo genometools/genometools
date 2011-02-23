@@ -44,7 +44,7 @@ struct GtStyle
   char *filename;
 };
 
-static inline void style_lua_new_table(lua_State *L, const char *key)
+static void style_lua_new_table(lua_State *L, const char *key)
 {
   lua_pushstring(L, key);
   lua_newtable(L);
@@ -221,8 +221,7 @@ void gt_style_reload(GtStyle *sty)
 /* Searches for <section> inside the style table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
-static inline int style_find_section_for_setting(GtStyle* sty,
-                                                 const char *section)
+static int style_find_section_for_setting(GtStyle* sty, const char *section)
 {
   int depth = 0;
   gt_assert(sty && section);
@@ -246,8 +245,8 @@ static inline int style_find_section_for_setting(GtStyle* sty,
 
 /* Searches for <section> inside the style table, returning -1 if it is not
    found. Otherwise the number of items pushed onto the stack is returned. */
-static inline int style_find_section_for_getting(const GtStyle *sty,
-                                                 const char *section)
+static int style_find_section_for_getting(const GtStyle *sty,
+                                          const char *section)
 {
   int depth = 0;
   gt_assert(sty && section);

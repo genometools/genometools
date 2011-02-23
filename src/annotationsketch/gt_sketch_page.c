@@ -170,7 +170,7 @@ static GtOptionParser* gt_sketch_page_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static inline double mm_to_pt(double mm)
+static double mm_to_pt(double mm)
 {
   return 2.8457598*mm;
 }

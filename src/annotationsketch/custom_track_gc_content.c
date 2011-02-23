@@ -40,8 +40,7 @@ struct GtCustomTrackGcContent {
 #define gt_custom_track_gc_content_cast(ct)\
         gt_custom_track_cast(gt_custom_track_gc_content_class(), ct)
 
-static inline double get_val_for_pos(GtCustomTrackGcContent *ctgc,
-                                     unsigned long pos)
+static double get_val_for_pos(GtCustomTrackGcContent *ctgc, unsigned long pos)
 {
   unsigned long i,
                 gc_count = 0,

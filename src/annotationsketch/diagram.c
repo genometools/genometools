@@ -92,9 +92,8 @@ typedef struct {
   GtDiagram *diagram;
 } NodeTraverseInfo;
 
-static inline GtBlockTuple* blocktuple_new(const char *gft,
-                                           GtFeatureNode *rep,
-                                           GtBlock *block)
+static GtBlockTuple* blocktuple_new(const char *gft, GtFeatureNode *rep,
+                                    GtBlock *block)
 {
   GtBlockTuple *bt;
   gt_assert(block);
@@ -105,8 +104,7 @@ static inline GtBlockTuple* blocktuple_new(const char *gft,
   return bt;
 }
 
-static inline NodeInfoElement* nodeinfo_get(GtDiagram *d,
-                                            GtFeatureNode *node)
+static NodeInfoElement* nodeinfo_get(GtDiagram *d, GtFeatureNode *node)
 {
   NodeInfoElement *ni;
   gt_assert(d && node);
@@ -119,9 +117,8 @@ static inline NodeInfoElement* nodeinfo_get(GtDiagram *d,
   return ni;
 }
 
-static inline GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
-                                           const char *gft,
-                                           GtFeatureNode *fn)
+static GtBlock* nodeinfo_find_block(NodeInfoElement* ni, const char *gft,
+                                    GtFeatureNode *fn)
 {
   PerTypeInfo *type_struc = NULL;
   GtBlockTuple *bt = NULL;
@@ -134,10 +131,8 @@ static inline GtBlock* nodeinfo_find_block(NodeInfoElement* ni,
   return bt->block;
 }
 
-static inline void nodeinfo_add_block(NodeInfoElement *ni,
-                                      const char *gft,
-                                      GtFeatureNode *rep,
-                                      GtBlock *block)
+static void nodeinfo_add_block(NodeInfoElement *ni, const char *gft,
+                               GtFeatureNode *rep, GtBlock *block)
 {
   GtBlockTuple *bt;
   PerTypeInfo *type_struc = NULL;
@@ -161,7 +156,7 @@ static inline void nodeinfo_add_block(NodeInfoElement *ni,
   gt_array_add(type_struc->blocktuples, bt);
 }
 
-static inline const char* get_node_name_or_id(GtFeatureNode *gn)
+static const char* get_node_name_or_id(GtFeatureNode *gn)
 {
   const char *ret;
   if (!gn) return NULL;
@@ -172,8 +167,8 @@ static inline const char* get_node_name_or_id(GtFeatureNode *gn)
   return ret;
 }
 
-static inline int get_caption_display_status(GtDiagram *d, const char *gft,
-                                             bool *result, GtError *err)
+static int get_caption_display_status(GtDiagram *d, const char *gft,
+                                      bool *result, GtError *err)
 {
   bool *status;
   gt_assert(d && gft);
@@ -218,11 +213,11 @@ static inline int get_caption_display_status(GtDiagram *d, const char *gft,
   return 0;
 }
 
-static inline int assign_block_caption(GtDiagram *d,
-                                       GtFeatureNode *node,
-                                       GtFeatureNode *parent,
-                                       GtBlock *block,
-                                       GtError *err)
+static int assign_block_caption(GtDiagram *d,
+                                GtFeatureNode *node,
+                                GtFeatureNode *parent,
+                                GtBlock *block,
+                                GtError *err)
 {
   const char *nnid_p = NULL, *nnid_n = NULL;
   GtStr *caption = NULL;
@@ -251,8 +246,8 @@ static inline int assign_block_caption(GtDiagram *d,
   return 0;
 }
 
-static inline int add_to_current(GtDiagram *d, GtFeatureNode *node,
-                                  GtFeatureNode *parent, GtError *err)
+static int add_to_current(GtDiagram *d, GtFeatureNode *node,
+                          GtFeatureNode *parent, GtError *err)
 {
   GtBlock *block;
   NodeInfoElement *ni;
@@ -306,8 +301,8 @@ static inline int add_to_current(GtDiagram *d, GtFeatureNode *node,
   return 0;
 }
 
-static inline int add_to_parent(GtDiagram *d, GtFeatureNode *node,
-                                 GtFeatureNode *parent, GtError *err)
+static int add_to_parent(GtDiagram *d, GtFeatureNode *node,
+                         GtFeatureNode *parent, GtError *err)
 {
   GtBlock *block = NULL;
   NodeInfoElement *par_ni, *ni;
@@ -338,8 +333,8 @@ static inline int add_to_parent(GtDiagram *d, GtFeatureNode *node,
   return 0;
 }
 
-static inline int add_to_rep(GtDiagram *d, GtFeatureNode *node,
-                              GtFeatureNode* parent, GtError *err)
+static int add_to_rep(GtDiagram *d, GtFeatureNode *node, GtFeatureNode* parent,
+                      GtError *err)
 {
   GtBlock *block = NULL;
   GtFeatureNode *rep = GT_UNDEF_REPR;
@@ -422,8 +417,8 @@ static void add_recursive(GtDiagram *d, GtFeatureNode *node,
   }
 }
 
-static inline int process_node(GtDiagram *d, GtFeatureNode *node,
-                               GtFeatureNode *parent, GtError *err)
+static int process_node(GtDiagram *d, GtFeatureNode *node,
+                        GtFeatureNode *parent, GtError *err)
 {
   GtRange elem_range;
   bool *collapse;

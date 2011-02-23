@@ -167,9 +167,7 @@ static int render_custom_tracks(GT_UNUSED void *key, void *value, void *data,
   return had_err;
 }
 
-static inline int check_width(unsigned int width,
-                       GtStyle *style,
-                       GtError *err)
+static int check_width(unsigned int width, GtStyle *style, GtError *err)
 {
   int had_err = 0;
   double margins = MARGINS_DEFAULT;
