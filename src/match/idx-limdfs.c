@@ -1465,16 +1465,14 @@ unsigned long gt_indexbased_exact_pattern_count(
                                               const Genericindex *genericindex,
                                               const GtUchar *pattern,
                                               unsigned long patternlength) {
-  unsigned long count = 0;
   if (genericindex->withesa) {
-    count = esa_exact_pattern_count(genericindex->suffixarray,
+    return esa_exact_pattern_count(genericindex->suffixarray,
                                     pattern,
                                     patternlength);
   }
   else {
-    count = gt_pck_exact_pattern_count(genericindex->packedindex,
+    return gt_pck_exact_pattern_count(genericindex->packedindex,
                                        pattern,
                                        patternlength);
   }
-  return count;
 }
