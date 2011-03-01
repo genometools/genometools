@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -64,7 +64,7 @@ void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
   gt_assert(op && s2fi);
 
   /* -seqfile */
-  seqfile_option = gt_option_new_string("seqfile", "set the sequence files "
+  seqfile_option = gt_option_new_string("seqfile", "set the sequence file "
                                         "from which to extract the features",
                                         s2fi->seqfile, NULL);
   gt_option_parser_add_option(op, seqfile_option);
