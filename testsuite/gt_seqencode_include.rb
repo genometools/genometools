@@ -1,25 +1,25 @@
-Name "gt seqencode|seqdecode simple test"
+Name "gt encseq encode|decode simple"
 Keywords "gt_seqencode gt_seqdecode"
 Test do
-  run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
-  run "#{$bin}gt dev seqdecode foobar.fas"
+  run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
+  run "#{$bin}gt encseq decode foobar.fas"
   run "diff #{$last_stdout} #{$testdata}foobar.fas"
 end
 
-Name "gt seqencode multiple files without indexname"
+Name "gt encseq encode multiple files without indexname"
 Keywords "gt_seqencode"
 Test do
-  run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
-  run_test "#{$bin}gt dev seqencode #{$testdata}foobar.fas " + \
+  run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
+  run_test "#{$bin}gt encseq encode #{$testdata}foobar.fas " + \
            "#{$testdata}foobar.fas", :retval => 1
   grep($last_stderr, /if more than one input file is given/)
 end
 
-Name "gt seqdecode lossless without ois"
+Name "gt encseq decode lossless without ois"
 Keywords "gt_seqdecode lossless"
 Test do
-  run "#{$bin}gt dev seqencode #{$testdata}foobar.fas"
-  run_test "#{$bin}gt dev seqdecode -lossless foobar.fas", \
+  run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
+  run_test "#{$bin}gt encseq decode -lossless foobar.fas", \
            :retval => 1
   grep($last_stderr, /cannot open file.*ois/)
 end
@@ -89,7 +89,7 @@ def run_encseq_comparison(filename, mirrored, lossless, readmode, singlechars,
   end
 
   ranges.each do |rng|
-    line = "#{$bin}gt dev seqdecode -output concat " + \
+    line = "#{$bin}gt encseq decode -output concat " + \
            "-range #{rng[0]} #{rng[1]} " + \
            "#{"-lossless" if lossless} " + \
            "-dir #{readmode} #{"-mirrored" if mirrored} " + \
@@ -116,26 +116,26 @@ def testformirrored(s, readmode)
   [false, true].each do |lossless|
     [false, true].each do |mirrored|
       [false, true].each do |singlechars|
-        Name "gt seqdecode #{s.split('/').last} cc " + \
+        Name "gt encseq decode #{s.split('/').last} cc " + \
              "#{"m " if mirrored}#{"s " if singlechars}#{"l " if lossless}#{readmode}"
         Keywords "gt_seqdecode #{" mirroring" if mirrored}#{" lossless" if lossless}"
         Test do
-          run "#{$bin}gt dev seqencode -des -ssp -sds " + \
+          run "#{$bin}gt encseq encode -des -ssp -sds " + \
               "#{"-lossless" if lossless} " + \
               "#{s}"
           run_encseq_comparison(s, mirrored, lossless, readmode, singlechars)
         end
 
-        Name "gt seqdecode #{s.split('/').last} cc " + \
+        Name "gt encseq decode #{s.split('/').last} cc " + \
              "#{"m " if mirrored}#{"s " if singlechars}#{"l " if lossless}#{readmode} " + \
              "whole seq"
         Keywords "gt_seqdecode#{" mirroring" if mirrored}#{" lossless" if lossless}"
         Test do
-          run_test "#{$bin}gt dev seqencode -des -ssp -sds " + \
+          run_test "#{$bin}gt encseq encode -des -ssp -sds " + \
                    "#{"-lossless" if lossless} " + \
                    "#{s}"
           seq = getseq(s, mirrored, readmode)
-          line = "#{$bin}gt dev seqdecode -output concat -dir #{readmode} " + \
+          line = "#{$bin}gt encseq decode -output concat -dir #{readmode} " + \
                  "#{"-mirrored" if mirrored} " + \
                  "#{"-lossless" if lossless} " + \
                  "#{"-singlechars" if singlechars} ./#{s.split('/').last}"
@@ -170,4 +170,3 @@ AATESTSEQS.each do |s|
     testformirrored(s, readmode)
   end
 end
-

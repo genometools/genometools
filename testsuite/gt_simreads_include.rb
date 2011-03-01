@@ -26,7 +26,7 @@ Name "gt simreads -num -len test"
 Keywords "gt_simreads"
 Test do
   fas = "#{$testdata}U89959_genomic.fas"
-  run_test "#{$bin}gt dev seqencode #{fas}"
+  run_test "#{$bin}gt encseq encode #{fas}"
 
   run_test "#{$bin}gt simreads -num 100 -len 100 "+
                    "-force -o reads #{File.basename(fas)}"
@@ -40,7 +40,7 @@ Name "gt simreads test -minlen/-maxlen"
 Keywords "gt_simreads"
 Test do
   fas = "#{$testdata}U89959_genomic.fas"
-  run_test "#{$bin}gt dev seqencode #{fas}"
+  run_test "#{$bin}gt encseq encode #{fas}"
 
   run_test "#{$bin}gt simreads -num 100 -minlen 10 -maxlen 100 "+
                    "-force -o reads #{File.basename(fas)}"
@@ -53,7 +53,7 @@ Name "gt simreads -coverage test"
 Keywords "gt_simreads"
 Test do
   fas = "#{$testdata}U89959_genomic.fas"
-  run_test "#{$bin}gt dev seqencode #{fas}"
+  run_test "#{$bin}gt encseq encode #{fas}"
 
   cov = 5
   len = 100
@@ -72,7 +72,7 @@ Name "gt simreads grep test"
 Keywords "gt_simreads"
 Test do
   fas = "#{$testdata}U89959_genomic.fas"
-  run_test "#{$bin}gt dev seqencode #{fas}"
+  run_test "#{$bin}gt encseq encode #{fas}"
 
   cov = 3
   len = 100
@@ -119,7 +119,7 @@ Name "gt simreads -ds test"
 Keywords "gt_simreads"
 Test do
   fas = "#{$testdata}U89959_genomic.fas"
-  run_test "#{$bin}gt dev seqencode #{fas}"
+  run_test "#{$bin}gt encseq encode #{fas}"
 
   cov = 10
   len = 10
@@ -132,7 +132,7 @@ Name "gt simreads -dl test"
 Keywords "gt_simreads"
 Test do
   fas = "#{$testdata}U89959_genomic.fas"
-  run_test "#{$bin}gt dev seqencode #{fas}"
+  run_test "#{$bin}gt encseq encode #{fas}"
 
   cov = 10
   minlen = 10
