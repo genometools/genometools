@@ -21,6 +21,7 @@
 #include "extended/toolbox.h"
 #include "tools/gt_bitextract.h"
 #include "tools/gt_einfo.h"
+#include "tools/gt_encseq_check_tool.h"
 #include "tools/gt_seqdecode.h"
 #include "tools/gt_seqencode.h"
 
@@ -28,6 +29,7 @@ static void* gt_encseq_arguments_new(void)
 {
   GtToolbox *encseq_toolbox = gt_toolbox_new();
   gt_toolbox_add_tool(encseq_toolbox, "bitextract", gt_bitextract());
+  gt_toolbox_add_tool(encseq_toolbox, "check", gt_encseq_check_tool());
   gt_toolbox_add_tool(encseq_toolbox, "info", gt_einfo());
   gt_toolbox_add_tool(encseq_toolbox, "decode", gt_seqdecode());
   gt_toolbox_add_tool(encseq_toolbox, "encode", gt_seqencode());

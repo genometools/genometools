@@ -49,9 +49,7 @@ typedef struct
        inputlcp,
        inputbck,
        inputssp;
-  unsigned long scantrials,
-                multicharcmptrials,
-                delspranges;
+  unsigned long delspranges;
   GtStr *esaindexname,
         *pckindexname;
   unsigned int sortmaxdepth;
@@ -136,8 +134,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
 {
   Sfxmapoptions *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *optionstream, *optionverbose, *optionscantrials,
-         *optionmulticharcmptrials, *optionbck, *optionsuf,
+  GtOption *optionstream, *optionverbose, *optionbck, *optionsuf,
          *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
@@ -183,17 +180,6 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
   optionstream = gt_option_new_bool("stream","stream the index",
                                     &arguments->usestream,false);
   gt_option_parser_add_option(op, optionstream);
-
-  optionscantrials = gt_option_new_ulong("scantrials",
-                                         "specify number of scan trials",
-                                         &arguments->scantrials,0);
-  gt_option_parser_add_option(op, optionscantrials);
-
-  optionmulticharcmptrials
-    = gt_option_new_ulong("multicharcmptrials",
-                          "specify number of multichar cmp trials",
-                          &arguments->multicharcmptrials,0);
-  gt_option_parser_add_option(op, optionmulticharcmptrials);
 
   optiondelspranges = gt_option_new_ulong("delspranges",
                                           "delete ranges of special values",
@@ -502,54 +488,6 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       deletethespranges(suffixarray.encseq,arguments->delspranges);
     } else
     {
-      if (!haserr && arguments->inputtis)
-      {
-        int readmode;
-
-        for (readmode = 0; readmode < 4; readmode++)
-        {
-          if (gt_alphabet_is_dna(
-            gt_encseq_alphabet(suffixarray.encseq)) ||
-               ((GtReadmode) readmode) == GT_READMODE_FORWARD ||
-               ((GtReadmode) readmode) == GT_READMODE_REVERSE)
-          {
-            gt_logger_log(logger, "testencseq(readmode=%s)",
-                                   gt_readmode_show((GtReadmode) readmode));
-            if (gt_encseq_check_consistency(suffixarray.encseq,
-                               gt_encseq_filenames(suffixarray.encseq),
-                               (GtReadmode) readmode,
-                               arguments->scantrials,
-                               arguments->multicharcmptrials,
-                               arguments->inputssp,
-                               err) != 0)
-            {
-              haserr = true;
-              break;
-            }
-          }
-        }
-      }
-      if (!haserr && arguments->inputtis)
-      {
-        gt_logger_log(logger, "checkspecialrangesfast");
-        gt_encseq_check_specialranges(suffixarray.encseq);
-      }
-      if (!haserr && arguments->inputtis)
-      {
-        gt_logger_log(logger, "gt_encseq_check_markpos");
-        gt_encseq_check_markpos(suffixarray.encseq);
-      }
-      if (!haserr && arguments->inputtis &&
-          suffixarray.readmode == GT_READMODE_FORWARD &&
-          suffixarray.prefixlength > 0)
-      {
-        gt_logger_log(logger, "verifymappedstr");
-        if (gt_verifymappedstr(suffixarray.encseq,suffixarray.prefixlength,
-                               err) != 0)
-        {
-          haserr = true;
-        }
-      }
       if (!haserr && arguments->inputsuf && !arguments->usestream)
       {
         Sequentialsuffixarrayreader *ssar;

@@ -277,10 +277,16 @@ static int inputsuffixarray(bool map,
   el = gt_encseq_loader_new();
   if (!(demand & SARR_DESTAB))
     gt_encseq_loader_do_not_require_des_tab(el);
+  else
+    gt_encseq_loader_require_des_tab(el);
   if (!(demand & SARR_SDSTAB))
     gt_encseq_loader_do_not_require_sds_tab(el);
+  else
+    gt_encseq_loader_require_sds_tab(el);
   if (!(demand & SARR_SSPTAB))
     gt_encseq_loader_do_not_require_ssp_tab(el);
+  else
+    gt_encseq_loader_require_ssp_tab(el);
   gt_encseq_loader_set_logger(el, logger);
   suffixarray->encseq = gt_encseq_loader_load(el, indexname, err);
   gt_encseq_loader_delete(el);
