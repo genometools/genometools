@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,10 +27,13 @@ typedef struct GtSpliceSiteInfoStream GtSpliceSiteInfoStream;
 
 const GtNodeStreamClass* gt_splice_site_info_stream_class(void);
 
-/* create a GtSpliceSiteInfoStream, takes ownership of GtRegionMapping  */
-GtNodeStream*            gt_splice_site_info_stream_new(GtNodeStream*,
-                                                        GtRegionMapping*);
-/* returns if an intron has been processed, false otherwise */
-bool                     gt_splice_site_info_stream_show(GtNodeStream*);
+/* Create a GtSpliceSiteInfoStream, takes ownership of <region_mapping>. */
+GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
+                                             GtRegionMapping *region_mapping);
+/* Returns <true> if an intron has been processed, <false> otherwise */
+bool          gt_splice_site_info_stream_show(GtNodeStream*);
+
+bool          gt_splice_site_info_stream_intron_processed(GtNodeStream*);
+bool          gt_splice_site_info_stream_show_canonical(GtNodeStream*);
 
 #endif

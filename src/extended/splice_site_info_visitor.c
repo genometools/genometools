@@ -193,7 +193,7 @@ bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv)
     /* show splice sites */
     printf("splice site distribution (for introns >= 4bp)\n");
     gt_string_distri_foreach(ssiv->splicesites, showsplicesite, NULL);
-    gt_xputchar('\n');
+   gt_xputchar('\n');
 
     /* show donor sites */
     printf("donor site distribution (for introns >= 4bp)\n");
@@ -205,4 +205,36 @@ bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv)
     gt_string_distri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
   }
   return ssiv->intron_processed;
+}
+
+bool gt_splice_site_info_visitor_intron_processed(GtNodeVisitor *nv)
+{
+  GtSpliceSiteInfoVisitor *ssiv;
+  gt_assert(nv);
+  ssiv = splice_site_info_visitor_cast(nv);
+  return ssiv->intron_processed;
+}
+
+bool gt_splice_site_info_visitor_show_canonical(GtNodeVisitor *nv)
+{
+  GtSpliceSiteInfoVisitor *ssiv;
+  bool canonical_shown = false;
+  gt_assert(nv);
+  ssiv = splice_site_info_visitor_cast(nv);
+
+  if (ssiv->show) {
+    unsigned long occ;
+    if ((occ = gt_string_distri_get(ssiv->splicesites, "gtag"))) {
+      printf("gt-ag: %6.2f%% (n=%lu)\n",
+             gt_string_distri_get_prob(ssiv->splicesites, "gtag") * 100.0, occ);
+      canonical_shown = true;
+    }
+    if ((occ = gt_string_distri_get(ssiv->splicesites, "gcag"))) {
+      printf("gc-ag: %6.2f%% (n=%lu)\n",
+             gt_string_distri_get_prob(ssiv->splicesites, "gcag") * 100.0, occ);
+      canonical_shown = true;
+    }
+  }
+
+  return canonical_shown;
 }

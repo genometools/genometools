@@ -76,6 +76,15 @@ unsigned long gt_string_distri_get(const GtStringDistri *sd, const char *key)
     return 0;
 }
 
+double gt_string_distri_get_prob(const GtStringDistri *sd, const char *key)
+{
+  unsigned long occ;
+  gt_assert(sd && key);
+  if ((occ = gt_string_distri_get(sd, key)))
+    return (double) occ / sd->num_of_occurrences;
+  return 0.0;
+}
+
 typedef struct {
   GtStringDistriIterFunc func;
   void *data;
@@ -105,7 +114,7 @@ void gt_string_distri_foreach(const GtStringDistri *sd,
     info.func = func;
     info.data = data;
     info.num_of_occurrences = sd->num_of_occurrences;
-    rval =cstr_ul_gt_hashmap_foreach_in_default_order(
+    rval = cstr_ul_gt_hashmap_foreach_in_default_order(
       sd->hashdist, string_distri_foreach_iterfunc, &info, NULL);
     gt_assert(!rval); /* string_distri_foreach_iterfunc() is sane */
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,8 +25,8 @@
 typedef struct GtStringDistri GtStringDistri;
 
 typedef void (*GtStringDistriIterFunc)(const char *string,
-                                     unsigned long occurrences,
-                                     double probability, void *data);
+                                       unsigned long occurrences,
+                                       double probability, void *data);
 
 GtStringDistri* gt_string_distri_new(void);
 void            gt_string_distri_add(GtStringDistri*, const char*);
@@ -34,6 +34,8 @@ void            gt_string_distri_add(GtStringDistri*, const char*);
 void            gt_string_distri_sub(GtStringDistri *string_distri,
                                      const char *key);
 unsigned long   gt_string_distri_get(const GtStringDistri*, const char*);
+/* return probability */
+double          gt_string_distri_get_prob(const GtStringDistri*, const char*);
 void            gt_string_distri_foreach(const GtStringDistri*,
                                          GtStringDistriIterFunc, void *data);
 void            gt_string_distri_delete(GtStringDistri*);

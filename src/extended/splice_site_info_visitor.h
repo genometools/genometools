@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -27,7 +27,9 @@ typedef struct GtSpliceSiteInfoVisitor GtSpliceSiteInfoVisitor;
 
 const GtNodeVisitorClass* gt_splice_site_info_visitor_class(void);
 /* takes ownership of <rm> */
-GtNodeVisitor*            gt_splice_site_info_visitor_new(GtRegionMapping *rm);
-bool                      gt_splice_site_info_visitor_show(GtNodeVisitor*);
+GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm);
+bool           gt_splice_site_info_visitor_show(GtNodeVisitor*);
+bool           gt_splice_site_info_visitor_intron_processed(GtNodeVisitor*);
+bool           gt_splice_site_info_visitor_show_canonical(GtNodeVisitor*);
 
 #endif

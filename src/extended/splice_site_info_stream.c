@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -86,4 +86,22 @@ bool gt_splice_site_info_stream_show(GtNodeStream *ns)
   gt_assert(ns);
   ssis = gt_splice_site_info_stream_cast(ns);
   return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor);
+}
+
+bool gt_splice_site_info_stream_intron_processed(GtNodeStream *ns)
+{
+  GtSpliceSiteInfoStream *ssis;
+  gt_assert(ns);
+  ssis = gt_splice_site_info_stream_cast(ns);
+  return gt_splice_site_info_visitor_intron_processed(ssis
+                                                    ->splice_site_info_visitor);
+}
+
+bool gt_splice_site_info_stream_show_canonical(GtNodeStream *ns)
+{
+  GtSpliceSiteInfoStream *ssis;
+  gt_assert(ns);
+  ssis = gt_splice_site_info_stream_cast(ns);
+  return gt_splice_site_info_visitor_show_canonical(ssis
+                                                    ->splice_site_info_visitor);
 }
