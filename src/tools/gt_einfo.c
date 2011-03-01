@@ -128,8 +128,13 @@ static int gt_einfo_runner(GT_UNUSED int argc, const char **argv,
     gt_file_xprintf(arguments->outfp, "alphabet size: ");
     gt_file_xprintf(arguments->outfp, "%u\n", gt_alphabet_num_of_chars(alpha));
     gt_file_xprintf(arguments->outfp, "alphabet characters: ");
-    gt_file_xprintf(arguments->outfp, "%.*s\n", gt_alphabet_num_of_chars(alpha),
+    gt_file_xprintf(arguments->outfp, "%.*s", gt_alphabet_num_of_chars(alpha),
                                       (char*) chars);
+    if (gt_alphabet_is_dna(alpha))
+      gt_file_xprintf(arguments->outfp, " (DNA)");
+    if (gt_alphabet_is_protein(alpha))
+      gt_file_xprintf(arguments->outfp, " (Protein)");
+    gt_file_xprintf(arguments->outfp, "\n");
 
     gt_file_xprintf(arguments->outfp, "character distribution:\n");
     for (i = 0; i < gt_alphabet_num_of_chars(alpha); i++) {
