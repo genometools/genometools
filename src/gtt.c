@@ -63,7 +63,6 @@
 #include "ltr/ppt.h"
 #include "match/shu-encseq-gc.h"
 #include "tools/gt_bed_to_gff3.h"
-#include "tools/gt_bitextract.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chain2dim.h"
 #include "tools/gt_chseqids.h"
@@ -134,7 +133,6 @@ GtToolbox* gtt_tools(void)
   /* add tools */
   gt_toolbox_add_tool(tools, "bed_to_gff3", gt_bed_to_gff3());
   gt_toolbox_add_tool(tools, "cds", gt_cds());
-  gt_toolbox_add_tool(tools, "bitextract", gt_bitextract());
   gt_toolbox_add(tools, "chseqids", gt_chseqids);
   gt_toolbox_add_tool(tools, "chain2dim", gt_chain2dim());
   gt_toolbox_add(tools, "clean", gt_clean);
