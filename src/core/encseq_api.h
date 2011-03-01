@@ -133,6 +133,10 @@ void              gt_encseq_extract_decoded(const GtEncseq *encseq,
    Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
                                       unsigned long seqnum);
+/* Returns TRUE if <encseq> has multiple sequence support. */
+bool              gt_encseq_has_multiseq_support(const GtEncseq *encseq);
+/* Returns TRUE if <encseq> has description support. */
+bool              gt_encseq_has_description_support(const GtEncseq *encseq);
 /* Returns the start position of the <seqnum>-th sequence in the <encseq>.
    Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqstartpos(const GtEncseq *encseq,

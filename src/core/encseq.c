@@ -4041,6 +4041,20 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
   gt_free(copydestab);
 }
 
+bool gt_encseq_has_multiseq_support(const GtEncseq *encseq)
+{
+  bool ret =  encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH ||
+              encseq->has_ssptabnew ||
+              gt_encseq_access_type_isviautables(encseq->sat);
+  return ret;
+}
+
+bool gt_encseq_has_description_support(const GtEncseq *encseq)
+{
+  bool ret = (encseq->destab != NULL && encseq->sdstab != NULL);
+  return ret;
+}
+
 unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
