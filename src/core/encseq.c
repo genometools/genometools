@@ -6636,7 +6636,7 @@ static int testfullscan(const GtStrArray *filenametab,
 
   gt_error_check(err);
   totallength = encseq->logicaltotallength;
-  gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength);
+  /* gt_progressbar_start(&fullscanpbar,(unsigned long long) totallength); */
   if (filenametab != NULL)
   {
     fb = gt_sequence_buffer_new_guess_type(filenametab, err);
@@ -6700,7 +6700,7 @@ static int testfullscan(const GtStrArray *filenametab,
       }
       fullscanpbar++;
     }
-    gt_progressbar_stop();
+    /* gt_progressbar_stop(); */
   }
   if (!haserr)
   {
