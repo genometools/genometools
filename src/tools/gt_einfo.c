@@ -165,6 +165,18 @@ static int gt_einfo_runner(GT_UNUSED int argc, const char **argv,
                                       gt_encseq_has_specialranges(encseq)
                                         ? "yes"
                                         : "no");
+
+    gt_file_xprintf(arguments->outfp, "has description support: ");
+    gt_file_xprintf(arguments->outfp, "%s\n",
+                                      gt_encseq_has_description_support(encseq)
+                                        ? "yes"
+                                        : "no");
+
+    gt_file_xprintf(arguments->outfp, "has multiple sequence support: ");
+    gt_file_xprintf(arguments->outfp, "%s\n",
+                                      gt_encseq_has_multiseq_support(encseq)
+                                        ? "yes"
+                                        : "no");
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(encseq_loader);

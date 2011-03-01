@@ -307,6 +307,13 @@ void             gt_encseq_encoder_delete(GtEncseqEncoder *ee);
 
 /* Creates a new <GtEncseqLoader>. */
 GtEncseqLoader*  gt_encseq_loader_new(void);
+/* Enables auto-discovery of supported features when loading an encoded
+   sequence. That is, if a file with <indexname>.<suffix> exists which
+   is named like a table file, it is loaded automatically.
+   Use gt_encseq_has_multiseq_support() etc. to query for these capabilities. */
+void gt_encseq_loader_enable_autosupport(GtEncseqLoader *el);
+/* Disables auto-discovery of supported features. */
+void gt_encseq_loader_disable_autosupport(GtEncseqLoader *el);
 /* Enables support for retrieving descriptions from the encoded sequence
    to be loaded by <el>. That is, the .des and .sds tables must be present.
    For example, these tables are created by having enabled the

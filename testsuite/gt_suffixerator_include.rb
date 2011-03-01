@@ -6,10 +6,6 @@ def outoptions
   return outoptionsnobck + " -bck"
 end
 
-def trials()
-  return "-scantrials 10 -multicharcmptrials 1000"
-end
-
 def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
   filearg=""
   filelist.each do |filename|
@@ -32,7 +28,7 @@ def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
              "-algbds 10 31 80 #{extra} #{outoptions} " +
              "-indexname esa -dir " + dirarg + " -db " + filearg
     if dirarg == "cpl" or dirarg = "rcl"
-      run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
+      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
                "-esa esa",
                :maxtime => 600
     else
@@ -47,10 +43,10 @@ def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
                " -db " + filearg
       run_test "#{$bin}gt packedindex mkindex -indexname pck -dir " + dirarg +
                " -db " + filearg
-      run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
+      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
                "-esa esa -pck pck -cmpsuf",
                :maxtime => 600
-      run_test "#{$bin}gt dev sfxmap #{trials()} #{outoptions} -v " +
+      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
                "-esa esa-#{dirarg_rev} -pck pck -cmplcp",
                :maxtime => 600
     end
@@ -64,7 +60,7 @@ def checkdc(filelist)
   end
   run_test "#{$bin}gt suffixerator -v -pl -dc 64 -suf -ssp -tis " +
            "-indexname sfx -db " + filearg
-  run_test "#{$bin}gt dev sfxmap #{trials()} -suf -tis -ssp -v -esa sfx",
+  run_test "#{$bin}gt dev sfxmap -suf -tis -ssp -v -esa sfx",
            :maxtime => 600
   run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -suf -tis " +
            "-indexname sfx3 -db " + filearg
@@ -341,7 +337,7 @@ def checkmapped(keyword,args)
     run_test "#{$bin}gt suffixerator #{outoptions} -algbds 3 34 90 " +
              "-indexname sfxidx #{args}",
              :maxtime => 1200
-    run_test "#{$bin}gt dev sfxmap #{outoptions} #{trials()} -v -esa sfxidx",
+    run_test "#{$bin}gt dev sfxmap #{outoptions} -v -esa sfxidx",
              :maxtime => 2400
     run_test "#{$bin}gt dev sfxmap #{outoptionsnobck} -stream -v -esa sfxidx",
              :maxtime => 2400

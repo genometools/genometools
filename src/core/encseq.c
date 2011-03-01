@@ -7155,16 +7155,18 @@ struct GtEncseqLoader {
        ssptab,
        oistab,
        sdstab,
-       mirrored;
+       mirrored,
+       autodiscover;
   GtLogger *logger;
 };
 
 GtEncseqLoader* gt_encseq_loader_new()
 {
   GtEncseqLoader *el = gt_calloc((size_t) 1, sizeof (GtEncseqLoader));
-  gt_encseq_loader_require_multiseq_support(el);
+  gt_encseq_loader_drop_multiseq_support(el);
   gt_encseq_loader_drop_lossless_support(el);
-  gt_encseq_loader_require_description_support(el);
+  gt_encseq_loader_drop_description_support(el);
+  gt_encseq_loader_enable_autosupport(el);
   gt_encseq_loader_do_not_mirror(el);
   return el;
 }
@@ -7185,6 +7187,18 @@ GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
   if (gt_encseq_options_mirrored_value(opts))
     gt_encseq_loader_mirror(el);
   return el;
+}
+
+void gt_encseq_loader_enable_autosupport(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->autodiscover = true;
+}
+
+void gt_encseq_loader_disable_autosupport(GtEncseqLoader *el)
+{
+  gt_assert(el);
+  el->autodiscover = false;
 }
 
 void gt_encseq_loader_require_esq_tab(GT_UNUSED GtEncseqLoader *el)
@@ -7324,6 +7338,25 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
 {
   GtEncseq *encseq = NULL;
   gt_assert(el && indexname);
+
+  if (el->autodiscover) {
+    char buf[BUFSIZ];
+    (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_DESTABFILESUFFIX);
+    if (gt_file_exists(buf))
+      el->destab = true;
+    (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_SDSTABFILESUFFIX);
+    if (gt_file_exists(buf))
+      el->sdstab = true;
+    (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_SSPTABFILESUFFIX);
+    if (gt_file_exists(buf))
+      el->ssptab = true;
+    (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_OISTABFILESUFFIX);
+    if (gt_file_exists(buf))
+      el->oistab = true;
+  }
+  gt_log_log("loading encseq %s with des: %d, sds: %d, ssp: %d, ois: %d",
+             indexname, el->destab, el->sdstab, el->ssptab, el->oistab);
+
   encseq = gt_encseq_new_from_index(indexname,
                                     el->destab,
                                     el->sdstab,
