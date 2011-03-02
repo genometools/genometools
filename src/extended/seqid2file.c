@@ -88,7 +88,7 @@ void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
                                       "description contains a sequence range "
                                       "(e.g., III:1000001..2000000), the first "
                                       " part is used as sequence ID ('III') "
-                                      "and the first range as offset "
+                                      "and the first range position as offset "
                                       "('1000001')", &s2fi->usedesc, false);
   gt_option_parser_add_option(op, usedesc_option);
 
