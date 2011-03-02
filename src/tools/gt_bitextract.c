@@ -56,7 +56,7 @@ static GtOptionParser* gt_bitextract_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] [indexname]",
-                            "Outputs details of encoded sequence metadata.");
+                            "Extracts internal data from encoded sequences.");
 
   option = gt_option_new_bool("mirrored", "mirror sequence",
                                &arguments->mirror, false);
