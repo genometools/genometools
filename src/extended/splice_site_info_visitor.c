@@ -215,7 +215,7 @@ bool gt_splice_site_info_visitor_intron_processed(GtNodeVisitor *nv)
   return ssiv->intron_processed;
 }
 
-bool gt_splice_site_info_visitor_show_canonical(GtNodeVisitor *nv)
+bool gt_splice_site_info_visitor_show_canonical(GtNodeVisitor *nv, bool show_gc)
 {
   GtSpliceSiteInfoVisitor *ssiv;
   bool canonical_shown = false;
@@ -229,7 +229,7 @@ bool gt_splice_site_info_visitor_show_canonical(GtNodeVisitor *nv)
              gt_string_distri_get_prob(ssiv->splicesites, "gtag") * 100.0, occ);
       canonical_shown = true;
     }
-    if ((occ = gt_string_distri_get(ssiv->splicesites, "gcag"))) {
+    if (show_gc && (occ = gt_string_distri_get(ssiv->splicesites, "gcag"))) {
       printf("gc-ag: %6.2f%% (n=%lu)\n",
              gt_string_distri_get_prob(ssiv->splicesites, "gcag") * 100.0, occ);
       canonical_shown = true;

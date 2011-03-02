@@ -30,6 +30,7 @@ const GtNodeVisitorClass* gt_splice_site_info_visitor_class(void);
 GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm);
 bool           gt_splice_site_info_visitor_show(GtNodeVisitor*);
 bool           gt_splice_site_info_visitor_intron_processed(GtNodeVisitor*);
-bool           gt_splice_site_info_visitor_show_canonical(GtNodeVisitor*);
+bool           gt_splice_site_info_visitor_show_canonical(GtNodeVisitor*,
+                                                          bool show_gc);
 
 #endif

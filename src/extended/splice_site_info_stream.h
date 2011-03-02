@@ -34,6 +34,7 @@ GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
 bool          gt_splice_site_info_stream_show(GtNodeStream*);
 
 bool          gt_splice_site_info_stream_intron_processed(GtNodeStream*);
-bool          gt_splice_site_info_stream_show_canonical(GtNodeStream*);
+bool          gt_splice_site_info_stream_show_canonical(GtNodeStream*,
+                                                        bool show_gc);
 
 #endif
