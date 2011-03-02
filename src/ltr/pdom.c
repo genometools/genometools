@@ -1002,14 +1002,14 @@ GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
   GtPdomFinder *gpf;
   GtStr *cmd;   /* for HMMER3 paramaterisation, we need to construct a
                    virtual command line for Easel to parse, see below */
-  gt_assert(hmmfiles && e);
+  gt_assert(hmmfiles && err);
   gpf = gt_calloc(1, sizeof (GtPdomFinder));
   gpf->getopts = esl_getopts_Create(gt_pdom_hmmer3_options);
   gpf->hmm_files = gt_str_array_ref(hmmfiles);
   gpf->chain_max_gap_length = chain_max_gap_length;
   gpf->models = gt_array_new(sizeof (struct GtPdomModel*));
   gpf->glob_eval_cutoff = eval_cutoff;
-  had_err = gt_pdom_finder_load_files(gpf, hmmfiles, e);
+  had_err = gt_pdom_finder_load_files(gpf, hmmfiles, err);
 
   if (!had_err) {
     cmd = gt_str_new_cstr("--noali ");
