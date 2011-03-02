@@ -19,19 +19,18 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "match/test-mappedstr.pr"  /* XXX */
+#include "match/intcode-def.h"  /* XXX */
 #include "tools/gt_encseq_check_tool.h"
 
 typedef struct {
-  bool bool_option_encseq_check_tool;
-  GtStr  *str_option_encseq_check_tool;
   unsigned long scantrials,
-                multicharcmptrials;
+                multicharcmptrials,
+                prefixlength;
 } GtEncseqCheckToolArguments;
 
 static void* gt_encseq_check_tool_arguments_new(void)
 {
   GtEncseqCheckToolArguments *arguments = gt_calloc(1, sizeof *arguments);
-  arguments->str_option_encseq_check_tool = gt_str_new();
   return arguments;
 }
 
@@ -39,7 +38,6 @@ static void gt_encseq_check_tool_arguments_delete(void *tool_arguments)
 {
   GtEncseqCheckToolArguments *arguments = tool_arguments;
   if (!arguments) return;
-  gt_str_delete(arguments->str_option_encseq_check_tool);
   gt_free(arguments);
 }
 
@@ -63,6 +61,12 @@ static GtOptionParser* gt_encseq_check_tool_option_parser_new(void
   option = gt_option_new_ulong("multicharcmptrials",
                                "specify number of multicharacter trials",
                                &arguments->multicharcmptrials, 0);
+  gt_option_parser_add_option(op, option);
+
+  option = gt_option_new_ulong_min_max("prefixlength",
+                                       "prefix length",
+                                       &arguments->prefixlength, 0,
+                                       0, MAXPREFIXLENGTH);
   gt_option_parser_add_option(op, option);
 
   gt_option_parser_set_min_args(op, 1);
@@ -100,7 +104,7 @@ static int gt_encseq_check_tool_runner(GT_UNUSED int argc, const char **argv,
                            gt_encseq_has_multiseq_support(encseq),
                            err) != 0)
         {
-          had_err = true;
+          had_err = -1;
           break;
         }
       }
@@ -113,17 +117,16 @@ static int gt_encseq_check_tool_runner(GT_UNUSED int argc, const char **argv,
     {
       gt_encseq_check_markpos(encseq);
     }
-    /* if (!had_err &&
-        readmode == GT_READMODE_FORWARD &&
-        suffixarray.prefixlength > 0)
+    if (!had_err &&
+           arguments->prefixlength > 0)
     {
       if (gt_verifymappedstr(encseq,
-                             prefixlength,
+                             arguments->prefixlength,
                              err) != 0)
       {
-        had_err = true;
+        had_err = -1;
       }
-    } */
+    }
   }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(encseq_loader);
