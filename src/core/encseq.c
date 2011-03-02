@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
   Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
