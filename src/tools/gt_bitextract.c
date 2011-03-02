@@ -123,7 +123,7 @@ static int gt_bitextract_runner(GT_UNUSED int argc, const char **argv,
     had_err = -1;
 
   if (!had_err && arguments->mirror) {
-    gt_encseq_mirror(encseq);
+    had_err = gt_encseq_mirror(encseq, err);
   }
 
   if (!had_err) {

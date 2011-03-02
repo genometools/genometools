@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -172,8 +172,10 @@ unsigned long     gt_encseq_filenum(const GtEncseq *encseq,
                                     unsigned long position);
 /* Returns the <GtAlphabet> associated with <encseq>. */
 GtAlphabet*       gt_encseq_alphabet(const GtEncseq *encseq);
-/* Extends <encseq>  by virtual reverse complement sequences. */
-void              gt_encseq_mirror(GtEncseq *encseq);
+/* Extends <encseq>  by virtual reverse complement sequences.
+   Returns 0 if mirroring has been successfully enabled, otherwise -1.
+   <err> is set accordingly. */
+int              gt_encseq_mirror(GtEncseq *encseq, GtError *err);
 /* Removes virtual reverse complement sequences added by
    <gt_encseq_mirror()>. */
 void              gt_encseq_unmirror(GtEncseq *encseq);

@@ -245,7 +245,7 @@ static int decode_sequence_file(const char *seqfile, GtSeqdecodeArguments *args,
       had_err = -1;
     }
     if (!had_err)
-      gt_encseq_mirror(encseq);
+      had_err = gt_encseq_mirror(encseq, err);
   }
   if (!had_err)
     had_err = output_sequence(encseq, args, err);

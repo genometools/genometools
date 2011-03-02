@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c)      2010 Dirk Willrodt <dwillrodt@zbh.uni-hamburg.de>
+  Copyright (c)      2010 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -3492,7 +3492,10 @@ unsigned long gt_encseq_charcount(const GtEncseq *encseq, GtUchar cc)
 {
   gt_assert(encseq != NULL &&
             (unsigned int) cc < gt_alphabet_num_of_chars(encseq->alpha));
-  return encseq->characterdistribution[cc];
+  if (encseq->hasmirror) {
+    return encseq->characterdistribution[cc]
+             + encseq->characterdistribution[GT_COMPLEMENTBASE(cc)];
+  } else return encseq->characterdistribution[cc];
 }
 
 typedef struct
@@ -6128,20 +6131,17 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
   return code;
 }
 
-static void showcharacterdistribution(
-                   const GtAlphabet *alpha,
-                   const unsigned long *characterdistribution,
-                   GtLogger *logger)
+static void showcharacterdistribution(const GtEncseq *encseq, GtLogger *logger)
 {
   unsigned int numofchars, idx;
 
-  numofchars = gt_alphabet_num_of_chars(alpha);
-  gt_assert(characterdistribution != NULL);
+  numofchars = gt_alphabet_num_of_chars(encseq->alpha);
+  gt_assert(encseq->characterdistribution != NULL);
   for (idx=0; idx<numofchars; idx++)
   {
     gt_logger_log(logger,"occurrences(%c)=%lu",
-                (int) gt_alphabet_pretty_symbol(alpha,idx),
-                characterdistribution[idx]);
+                (int) gt_alphabet_pretty_symbol(encseq->alpha,idx),
+                gt_encseq_charcount(encseq, idx));
   }
 }
 
@@ -6149,7 +6149,6 @@ void gt_encseq_show_features(const GtEncseq *encseq,
                              GtLogger *logger,
                              bool withfilenames)
 {
-  const GtAlphabet *alpha = gt_encseq_alphabet(encseq);
   unsigned long idx;
 
   if (withfilenames)
@@ -6165,7 +6164,7 @@ void gt_encseq_show_features(const GtEncseq *encseq,
     }
   }
   gt_logger_log(logger,"totallength=%lu",
-                       encseq->totallength);
+                       gt_encseq_total_length(encseq));
   gt_logger_log(logger,"numofsequences=%lu",encseq->logicalnumofdbsequences);
   gt_logger_log(logger,"specialcharacters=%lu",
                        gt_encseq_specialcharacters(encseq));
@@ -6181,7 +6180,7 @@ void gt_encseq_show_features(const GtEncseq *encseq,
                        gt_encseq_realwildcardranges(encseq));
 
   gt_assert(encseq->characterdistribution != NULL);
-  showcharacterdistribution(alpha,encseq->characterdistribution,logger);
+  showcharacterdistribution(encseq,logger);
 }
 
 int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
@@ -7178,9 +7177,6 @@ GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
   gt_assert(opts);
 
   el = gt_encseq_loader_new();
-  /* reset table requests */
-  gt_encseq_loader_drop_lossless_support(el);
-
   /* set options according to options */
   if (gt_encseq_options_lossless_value(opts))
     gt_encseq_loader_require_lossless_support(el);
@@ -7354,8 +7350,10 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
     if (gt_file_exists(buf))
       el->oistab = true;
   }
-  gt_log_log("loading encseq %s with des: %d, sds: %d, ssp: %d, ois: %d",
-             indexname, el->destab, el->sdstab, el->ssptab, el->oistab);
+  gt_log_log("loading encseq %s with des: %d, sds: %d, ssp: %d, ois: %d, "
+             "mirr: %d",
+             indexname, el->destab, el->sdstab, el->ssptab, el->oistab,
+             el->mirrored);
 
   encseq = gt_encseq_new_from_index(indexname,
                                     el->destab,
@@ -7364,8 +7362,12 @@ GtEncseq* gt_encseq_loader_load(GtEncseqLoader *el, const char *indexname,
                                     el->oistab,
                                     el->logger,
                                     err);
-  if (encseq && el->mirrored)
-    gt_encseq_mirror(encseq);
+  if (encseq && el->mirrored) {
+    if (gt_encseq_mirror(encseq, err) != 0) {
+      gt_encseq_delete(encseq);
+      encseq = NULL;
+    }
+  }
   return encseq;
 }
 
@@ -8014,12 +8016,43 @@ unsigned long gt_encseq_equallength(const GtEncseq *encseq)
   return encseq->equallength.valueunsignedlong;
 }
 
-void gt_encseq_mirror(GtEncseq *encseq)
+static void gt_encseq_overflow_abort(GT_UNUSED const char *f, GT_UNUSED int l,
+                                     GT_UNUSED void *data)
 {
+  fprintf(stderr, "error: overflow detected: "
+                  "length or number of mirrored sequences are too large for "
+                  "the current platform. Please recompile GenomeTools with "
+                  "support for a larger address space to prevent this (e.g. "
+                  "64 bit instead of 32 bit). Alternatively disable "
+                  "mirroring.\n");
+  exit(EXIT_FAILURE);
+}
+
+int gt_encseq_mirror(GtEncseq *encseq, GtError *err)
+{
+  int had_err = 0;
   gt_assert(encseq && !encseq->hasmirror);
-  encseq->hasmirror = true;
-  encseq->logicalnumofdbsequences = 2 * encseq->numofdbsequences;
-  encseq->logicaltotallength = 2 * encseq->totallength + 1;
+  gt_error_check(err);
+  if (!gt_alphabet_is_dna(encseq->alpha)) {
+    gt_error_set(err, "mirroring can only be enabled for DNA sequences, "
+                      "this encoded sequence has alphabet: %.*s",
+                      gt_alphabet_num_of_chars(encseq->alpha),
+                      gt_alphabet_characters(encseq->alpha));
+    had_err = -1;
+  }
+  if (!had_err) {
+    encseq->hasmirror = true;
+    encseq->logicalnumofdbsequences = gt_safe_mult_ulong_check(2,
+                                                     encseq->numofdbsequences,
+                                                     gt_encseq_overflow_abort,
+                                                     &encseq->numofdbsequences);
+    encseq->logicaltotallength = gt_safe_mult_ulong_check(2,
+                                                       encseq->totallength,
+                                                       gt_encseq_overflow_abort,
+                                                       &encseq->totallength)
+                                  + 1;
+  }
+  return had_err;
 }
 
 void gt_encseq_unmirror(GtEncseq *encseq)
