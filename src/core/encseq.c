@@ -6140,8 +6140,8 @@ static void showcharacterdistribution(const GtEncseq *encseq, GtLogger *logger)
   for (idx=0; idx<numofchars; idx++)
   {
     gt_logger_log(logger,"occurrences(%c)=%lu",
-                (int) gt_alphabet_pretty_symbol(encseq->alpha,idx),
-                gt_encseq_charcount(encseq, idx));
+                         (int) gt_alphabet_pretty_symbol(encseq->alpha,idx),
+                         gt_encseq_charcount(encseq, (GtUchar) idx));
   }
 }
 
