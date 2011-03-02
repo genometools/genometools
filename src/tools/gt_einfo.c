@@ -65,18 +65,6 @@ static GtOptionParser* gt_einfo_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_einfo_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
-{
-  GtEinfoArguments *arguments = tool_arguments;
-  int had_err = 0;
-  gt_error_check(err);
-  gt_assert(arguments);
-
-  return had_err;
-}
-
 static int gt_einfo_runner(GT_UNUSED int argc, const char **argv,
                            int parsed_args, void *tool_arguments,
                            GtError *err)
@@ -194,6 +182,6 @@ GtTool* gt_einfo(void)
   return gt_tool_new(gt_einfo_arguments_new,
                   gt_einfo_arguments_delete,
                   gt_einfo_option_parser_new,
-                  gt_einfo_arguments_check,
+                  NULL,
                   gt_einfo_runner);
 }

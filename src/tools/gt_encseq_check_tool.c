@@ -70,18 +70,6 @@ static GtOptionParser* gt_encseq_check_tool_option_parser_new(void
   return op;
 }
 
-static int gt_encseq_check_tool_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
-{
-  GtEncseqCheckToolArguments *arguments = tool_arguments;
-  int had_err = 0;
-  gt_error_check(err);
-  gt_assert(arguments);
-
-  return had_err;
-}
-
 static int gt_encseq_check_tool_runner(GT_UNUSED int argc, const char **argv,
                                        int parsed_args, void *tool_arguments,
                                        GtError *err)
@@ -147,6 +135,6 @@ GtTool* gt_encseq_check_tool(void)
   return gt_tool_new(gt_encseq_check_tool_arguments_new,
                   gt_encseq_check_tool_arguments_delete,
                   gt_encseq_check_tool_option_parser_new,
-                  gt_encseq_check_tool_arguments_check,
+                  NULL,
                   gt_encseq_check_tool_runner);
 }
