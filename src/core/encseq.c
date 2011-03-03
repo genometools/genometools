@@ -2195,9 +2195,9 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
 }
 
 void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
-                                                   const GtEncseq *encseq,
-                                                   GtReadmode readmode,
-                                                   unsigned long startpos)
+                                           const GtEncseq *encseq,
+                                           GtReadmode readmode,
+                                           unsigned long startpos)
 {
   gt_assert(esr != NULL && encseq != NULL);
   if (encseq != esr->encseq)
@@ -2218,55 +2218,31 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   esr->originalreadmode = readmode;
 
   /* if inside virtual mirror sequence, adjust start position and reading
-     direction. XXX: optimize and condense this */
+     direction */
   if (encseq->hasmirror) {
     if (startpos >= encseq->totallength) {
+      esr->startedonmiddle = (startpos == encseq->totallength);
+      startpos = GT_REVERSEPOS(encseq->totallength,
+                               startpos - encseq->totallength - 1);
       switch (readmode) {
-        case GT_READMODE_FORWARD:
-          if (startpos != encseq->totallength) {
-            readmode = GT_READMODE_REVCOMPL;
-            startpos = GT_REVERSEPOS(encseq->totallength,
-                                     startpos - encseq->totallength - 1);
-          } else {
-            readmode = GT_READMODE_REVCOMPL;
-            esr->startedonmiddle = true;
-          }
-          break;
         case GT_READMODE_REVERSE:
-          if (startpos != encseq->totallength) {
-            readmode = GT_READMODE_COMPL;
-            startpos = GT_REVERSEPOS(encseq->totallength,
-                                     startpos - encseq->totallength - 1);
-          }  else {
+          if (esr->startedonmiddle)
             readmode = GT_READMODE_REVERSE;
-            esr->startedonmiddle = true;
-          }
-          break;
-        case GT_READMODE_COMPL:
-          if (startpos != encseq->totallength) {
-            readmode = GT_READMODE_REVERSE;
-            startpos = GT_REVERSEPOS(encseq->totallength,
-                                     startpos - encseq->totallength - 1);
-          } else {
-            readmode = GT_READMODE_REVERSE;
-            esr->startedonmiddle = true;
-          }
+          else
+            gt_readmode_invert(readmode);
           break;
         case GT_READMODE_REVCOMPL:
-          if (startpos != encseq->totallength) {
-            readmode = GT_READMODE_FORWARD;
-            startpos = GT_REVERSEPOS(encseq->totallength,
-                                     startpos - encseq->totallength - 1);
-          } else {
+          if (esr->startedonmiddle)
             readmode = GT_READMODE_REVCOMPL;
-            esr->startedonmiddle = true;
-          }
+          else
+            gt_readmode_invert(readmode);
+          break;
+        default:
+          gt_readmode_invert(readmode);
           break;
       }
     }
   }
-  /* printf("final startpos of reader: %lu readmode %s\n",
-            startpos, gt_readmode_show(readmode)); */
   gt_assert(startpos <= encseq->totallength);
   esr->readmode = readmode;
   esr->currentpos = startpos;
