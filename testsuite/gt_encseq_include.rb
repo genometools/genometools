@@ -207,9 +207,33 @@ emblfiles = fastafiles.collect{ |f| f.gsub(".fna",".embl") }
         run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
         run_test "#{$bin}gt encseq decode -output concat sfx > sfx2.seq"
         run_test "#{$bin}gt encseq info sfx > sfx2.info"
-        run_test "diff sfx.seq sfx2.seq"
-        run_test "diff sfx.info sfx2.info"
+        run "diff sfx.seq sfx2.seq"
+        run "diff sfx.info sfx2.info"
       end
     end
   end
+end
+
+Name "gt encseq mirrored trailing wildcard"
+Keywords "encseq gt_encseq_encode wildcards mirror"
+Test do
+  run "cp #{$testdata}wildcardatend.fna infile"
+  run_test "#{$bin}gt encseq encode infile"
+  run_test "#{$bin}gt encseq info -mirrored infile | grep range > mirr.info"
+  run "cp #{$testdata}wildcardatend_rev.fna infile"
+  run_test "#{$bin}gt encseq encode infile"
+  run_test "#{$bin}gt encseq info infile | grep range > rev.info"
+  run "diff mirr.info rev.info"
+end
+
+Name "gt encseq mirrored no trailing wildcard"
+Keywords "encseq gt_encseq_encode wildcards mirror"
+Test do
+  run "cp #{$testdata}nowildcardatend.fna infile"
+  run_test "#{$bin}gt encseq encode infile"
+  run_test "#{$bin}gt encseq info -mirrored infile | grep range > mirr.info"
+  run "cp #{$testdata}nowildcardatend_rev.fna infile"
+  run_test "#{$bin}gt encseq encode infile"
+  run_test "#{$bin}gt encseq info infile | grep range > rev.info"
+  run "diff mirr.info rev.info"
 end
