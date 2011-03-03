@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_MATCHINGSTATISTICS_H
-#define GT_MATCHINGSTATISTICS_H
+#ifndef GT_MATSTAT_H
+#define GT_MATSTAT_H
 
-/* the matchingstatistics tool */
-int gt_matchingstatistics(int argc, const char **argv, GtError*);
+/* the matstat tool */
+int gt_matstat(int argc, const char **argv, GtError*);
 
 #endif

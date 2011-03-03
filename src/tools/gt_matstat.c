@@ -20,15 +20,15 @@
 #include "core/option.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
-#include "match/fmindex.h"
-#include "match/sarr-def.h"
-#include "match/optionargmode.h"
-#include "match/greedyfwdmat.h"
-#include "match/esa-map.h"
-#include "match/stamp.h"
 #include "match/eis-voiditf.h"
+#include "match/esa-map.h"
+#include "match/fmindex.h"
+#include "match/greedyfwdmat.h"
+#include "match/optionargmode.h"
+#include "match/sarr-def.h"
+#include "match/stamp.h"
+#include "tools/gt_matstat.h"
 #include "tools/gt_uniquesub.h"
-#include "tools/gt_matchingstatistics.h"
 
 #include "match/fmi-fwduni.pr"
 #include "match/fmi-map.pr"
@@ -466,7 +466,7 @@ int gt_uniquesub(int argc, const char **argv, GtError *err)
   return gt_greedyfwdmat(false,argc, argv, err);
 }
 
-int gt_matchingstatistics(int argc, const char **argv, GtError *err)
+int gt_matstat(int argc, const char **argv, GtError *err)
 {
   return gt_greedyfwdmat(true,argc, argv, err);
 }

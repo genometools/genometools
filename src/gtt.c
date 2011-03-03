@@ -85,7 +85,7 @@
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_id_to_md5.h"
 #include "tools/gt_interfeat.h"
-#include "tools/gt_matchingstatistics.h"
+#include "tools/gt_matstat.h"
 #include "tools/gt_maxpairs.h"
 #include "tools/gt_merge.h"
 #include "tools/gt_mergefeat.h"
@@ -157,7 +157,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
-  gt_toolbox_add(tools, "matstat", gt_matchingstatistics);
+  gt_toolbox_add(tools, "matstat", gt_matstat);
   gt_toolbox_add_tool(tools, "md5_to_id", gt_md5_to_id());
   gt_toolbox_add(tools, "merge", gt_merge);
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
