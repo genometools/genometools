@@ -19,9 +19,7 @@
 #define SHU_DFS_H
 
 #include <stdbool.h>
-
 #include "core/stack-inlined.h"
-
 #include "match/eis-voiditf.h"
 
 typedef struct {
@@ -41,7 +39,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             unsigned long numofchars,
                             unsigned long totallength,
                             bool calculate,
-                            GtProgressTimer *timer,
+                            GtTimer *timer,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err);
 

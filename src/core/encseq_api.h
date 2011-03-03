@@ -22,7 +22,7 @@
 
 #include "core/alphabet_api.h"
 #include "core/logger_api.h"
-#include "core/progress_timer_api.h"
+#include "core/timer_api.h"
 #include "core/readmode_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
@@ -202,12 +202,11 @@ void            gt_encseq_reader_delete(GtEncseqReader *esr);
 
 /* Creates a new <GtEncseqEncoder>. */
 GtEncseqEncoder* gt_encseq_encoder_new(void);
-/* Sets <pt> to be the progress timer for <ee>. Default is NULL (no progress
-   reporting). */
-void             gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
-                                                     GtProgressTimer *pt);
-/* Returns the progress timer set for <ee>. */
-GtProgressTimer* gt_encseq_encoder_get_progresstimer(const GtEncseqEncoder *ee);
+/* Sets <t> to be the timer for <ee>. Default is NULL (no progress
+reporting). */
+void             gt_encseq_encoder_set_timer(GtEncseqEncoder *ee, GtTimer *t);
+/* Returns the timer set for <ee>. */
+GtTimer*         gt_encseq_encoder_get_timer(const GtEncseqEncoder *ee);
 /* Sets the representation of <ee> to <sat> which must be one of 'direct',
    'bytecompress', 'bit', 'uchar', 'ushort' or 'uint32'. Returns 0 on success,
    and a negative value on error (<err> is set accordingly). */
@@ -347,13 +346,13 @@ void             gt_encseq_loader_drop_multiseq_support(GtEncseqLoader *el);
    For example, this table is created by having enabled the
    <gt_encseq_encoder_enable_lossless_support()> option when encoding.
    Deactivated by default. */
-void gt_encseq_loader_require_lossless_support(GtEncseqLoader *el);
+void             gt_encseq_loader_require_lossless_support(GtEncseqLoader *el);
 /* Disables support for lossless reproduction of the original sequence
    in the encoded sequence to be loaded by <el>. That is, the .ois table
    needs not be present.
    However, disabling this support may result in a reduced alphabet
    representation when accessing decoded characters. */
-void gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el);
+void             gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el);
 /* Requires presence of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_loader_require_des_tab(GtEncseqLoader *el);

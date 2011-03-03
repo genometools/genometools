@@ -29,7 +29,7 @@
 #include "core/progressbar.h"
 #include "core/minmax.h"
 #include "core/fa.h"
-#include "core/progress_timer_api.h"
+#include "core/timer_api.h"
 #include "core/encseq.h"
 #include "core/safecast-gen.h"
 #include "core/log_api.h"
@@ -83,7 +83,7 @@ struct Sfxiterator
   unsigned int maskright;
   Sfxstrategy sfxstrategy;
   GtLogger *logger;
-  GtProgressTimer *sfxprogress;
+  GtTimer *sfxprogress;
   bool withprogressbar;
   Differencecover *dcov;
 };
@@ -638,7 +638,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 unsigned long maximumspace,
                                 void *voidoutlcpinfo,
                                 const Sfxstrategy *sfxstrategy,
-                                GtProgressTimer *sfxprogress,
+                                GtTimer *sfxprogress,
                                 bool withprogressbar,
                                 GtLogger *logger,
                                 GtError *err)
@@ -784,9 +784,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->storespecials = true;
     if (sfxprogress != NULL)
     {
-      gt_progress_timer_start_new_state(sfxprogress,
-                                        "counting prefix distribution",
-                                        stdout);
+      gt_timer_show_progress(sfxprogress, "counting prefix distribution",
+                             stdout);
     }
     gt_assert(sfi->leftborder != NULL);
     if (prefixlength == 1U)
@@ -933,9 +932,8 @@ static void preparethispart(Sfxiterator *sfi)
   }
   if (sfi->sfxprogress != NULL)
   {
-    gt_progress_timer_start_new_state(sfi->sfxprogress,
-                                      "inserting suffixes into buckets",
-                                      stdout);
+    gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
+                           stdout);
   }
   if (sfi->prefixlength > 1U
       && gt_has_twobitencoding(sfi->encseq)
@@ -965,9 +963,7 @@ static void preparethispart(Sfxiterator *sfi)
   }
   if (sfi->sfxprogress != NULL)
   {
-    gt_progress_timer_start_new_state(sfi->sfxprogress,
-                                      "sorting the buckets",
-                                      stdout);
+    gt_timer_show_progress(sfi->sfxprogress, "sorting the buckets", stdout);
   }
   /* exit(0); just for testing */
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);

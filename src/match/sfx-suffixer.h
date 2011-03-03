@@ -18,13 +18,13 @@
 #ifndef SFX_SUFFIXER_H
 #define SFX_SUFFIXER_H
 
-#include "core/error.h"
-#include "core/readmode.h"
-#include "core/progress_timer_api.h"
-#include "core/logger.h"
 #include "core/encseq_api.h"
-#include "sfx-strategy.h"
+#include "core/error.h"
+#include "core/logger.h"
+#include "core/readmode.h"
+#include "core/timer_api.h"
 #include "sfx-suffixgetset.h"
+#include "sfx-strategy.h"
 
 typedef struct Sfxiterator Sfxiterator;
 
@@ -37,7 +37,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 unsigned long maximumspace,
                                 void *voidoutlcpinfo,
                                 const Sfxstrategy *sfxstrategy,
-                                GtProgressTimer *sfxprogress,
+                                GtTimer *sfxprogress,
                                 bool withprogressbar,
                                 GtLogger *logger,
                                 GtError *err);

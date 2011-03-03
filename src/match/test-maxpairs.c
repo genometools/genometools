@@ -43,7 +43,7 @@ int gt_testmaxpairs(GT_UNUSED const char *indexname,
 #include "core/encseq.h"
 #include "core/format64.h"
 #include "core/logger.h"
-#include "core/progress_timer_api.h"
+#include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
 #include "esa-mmsearch.h"
@@ -67,7 +67,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  unsigned long maximumspace,
-                 GtProgressTimer *sfxprogress,
+                 GtTimer *sfxprogress,
                  bool withprogressbar,
                  GtLogger *logger,
                  GtError *err)

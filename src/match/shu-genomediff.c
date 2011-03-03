@@ -38,7 +38,7 @@
 
 int gt_genomediff_shu(GtLogger *logger,
                       const GtGenomediffArguments *arguments,
-                      GtProgressTimer *timer,
+                      GtTimer *timer,
                       GtError *err)
 {
   int had_err = 0;
@@ -58,9 +58,7 @@ int gt_genomediff_shu(GtLogger *logger,
     gt_error_check(err);
     if (timer != NULL)
     {
-      gt_progress_timer_start_new_state(timer,
-                                        "load sequential sa reader",
-                                        stdout);
+      gt_timer_show_progress(timer, "load sequential sa reader", stdout);
     }
     ssar =
       gt_newSequentialsuffixarrayreaderfromfile(gt_str_get(
@@ -84,9 +82,7 @@ int gt_genomediff_shu(GtLogger *logger,
       filelength = gt_calloc((size_t) numoffiles, sizeof (unsigned long));
       if (timer != NULL)
       {
-        gt_progress_timer_start_new_state(timer,
-                                          "dfs esa index",
-                                          stdout);
+        gt_timer_show_progress(timer, "dfs esa index", stdout);
       }
       if (gt_get_multiesashulengthdist(ssar,
                                        encseq,
@@ -106,9 +102,7 @@ int gt_genomediff_shu(GtLogger *logger,
 
     if (timer != NULL)
     {
-      gt_progress_timer_start_new_state(timer,
-                                        "map generic index",
-                                        stdout);
+      gt_timer_show_progress(timer, "map generic index", stdout);
     }
     gt_assert(!arguments->withesa);
     genericindexSubject = genericindex_new(gt_str_get(arguments->indexname),
@@ -189,9 +183,7 @@ int gt_genomediff_shu(GtLogger *logger,
     gt_assert(shulen);
     if (timer != NULL)
     {
-      gt_progress_timer_start_new_state(timer,
-                                        "calculate avg",
-                                        stdout);
+      gt_timer_show_progress(timer, "calculate avg", stdout);
     }
     if (arguments->shulen_only)
     {
@@ -232,9 +224,7 @@ int gt_genomediff_shu(GtLogger *logger,
     gt_assert(div);
     if (timer != NULL)
     {
-      gt_progress_timer_start_new_state(timer,
-                                        "calculate gc",
-                                        stdout);
+      gt_timer_show_progress(timer, "calculate gc", stdout);
     }
     gc_contents = gt_encseq_get_gc(encseq,
                                   true,
@@ -269,16 +259,12 @@ int gt_genomediff_shu(GtLogger *logger,
 
       if (timer != NULL)
       {
-        gt_progress_timer_start_new_state(timer,
-                                          "precalculate ln_n_fac",
-                                          stdout);
+        gt_timer_show_progress(timer, "precalculate ln_n_fac", stdout);
       }
       ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
       if (timer != NULL)
       {
-        gt_progress_timer_start_new_state(timer,
-                                          "calculate divergence",
-                                          stdout);
+        gt_timer_show_progress(timer, "calculate divergence", stdout);
       }
       for (i_idx = 0; i_idx < numoffiles; i_idx++)
       {
@@ -356,9 +342,7 @@ int gt_genomediff_shu(GtLogger *logger,
       gt_assert(div);
       if (timer != NULL)
       {
-        gt_progress_timer_start_new_state(timer,
-                                          "calculate kr",
-                                          stdout);
+        gt_timer_show_progress(timer, "calculate kr", stdout);
       }
       printf("# Table of Kr\n%lu\n", numoffiles);
       for (i_idx = 0; i_idx < numoffiles; i_idx++)

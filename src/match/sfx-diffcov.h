@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "core/readmode.h"
 #include "core/logger.h"
-#include "core/progress_timer_api.h"
+#include "core/timer_api.h"
 #include "core/error_api.h"
 #include "match/sfx-strategy.h"
 
@@ -46,7 +46,7 @@ Differencecover *gt_differencecover_prepare_sample(
                                         unsigned int prefixlength,
                                         const Sfxstrategy *sfxstrategy,
                                         GtLogger *logger,
-                                        GtProgressTimer *sfxprogress,
+                                        GtTimer *sfxprogress,
                                         GtError *err);
 
 void gt_differencecover_delete(Differencecover *dcov);

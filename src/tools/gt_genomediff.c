@@ -22,7 +22,7 @@
 #include "core/encseq_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
-#include "core/progress_timer_api.h"
+#include "core/timer_api.h"
 #include "core/showtime.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
@@ -273,7 +273,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   GtGenomediffArguments *arguments = tool_arguments;
   int had_err = 0;
   GtLogger *logger;
-  GtProgressTimer *timer = NULL;
+  GtTimer *timer = NULL;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -285,7 +285,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
 
   if (gt_showtime_enabled())
   {
-    timer = gt_progress_timer_new("start");
+    timer = gt_timer_new_with_progress_description("start");
+    gt_timer_start(timer);
     gt_assert(timer);
   }
   if (!had_err)
@@ -294,9 +295,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     {
       if (timer != NULL)
       {
-        gt_progress_timer_start_new_state(timer,
-                                          "run simple search",
-                                          stdout);
+        gt_timer_show_progress(timer, "run simple search", stdout);
       }
       if (arguments->withesa)
       {
@@ -314,9 +313,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
     {
       if (timer != NULL)
       {
-        gt_progress_timer_start_new_state(timer,
-                                          "start shu search",
-                                          stdout);
+        gt_timer_show_progress(timer, "start shu search", stdout);
       }
       had_err = gt_genomediff_shu(logger,
                                   arguments,
@@ -327,10 +324,8 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
 
   if (timer != NULL)
   {
-    gt_progress_timer_start_new_state(timer,
-                                      NULL,
-                                      stdout);
-    gt_progress_timer_delete(timer);
+    gt_timer_show_progress_final(timer, stdout);
+    gt_timer_delete(timer);
   }
   gt_logger_delete(logger);
 

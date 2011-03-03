@@ -1265,7 +1265,7 @@ Differencecover *gt_differencecover_prepare_sample(
                                         unsigned int prefixlength,
                                         const Sfxstrategy *sfxstrategy,
                                         GtLogger *logger,
-                                        GtProgressTimer *sfxprogress,
+                                        GtTimer *sfxprogress,
                                         GtError *err)
 {
   Differencecover *dcov = NULL;
@@ -1273,9 +1273,8 @@ Differencecover *gt_differencecover_prepare_sample(
   gt_assert(vparam > 0);
   if (sfxprogress != NULL)
   {
-    gt_progress_timer_start_new_state(sfxprogress,
-                                      "sorting difference cover sample",
-                                      stdout);
+    gt_timer_show_progress(sfxprogress, "sorting difference cover sample",
+                           stdout);
   }
   dcov = gt_differencecover_new(vparam,encseq,readmode,
                                 prefixlength,logger);

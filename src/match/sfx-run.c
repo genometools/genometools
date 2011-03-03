@@ -26,9 +26,9 @@
 #include "core/encseq.h"
 #include "core/fa.h"
 #include "core/logger.h"
-#include "core/progress_timer_api.h"
 #include "core/readmode.h"
 #include "core/showtime.h"
+#include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/encseq_metadata.h"
 #include "esa-fileend.h"
@@ -183,7 +183,7 @@ static int suffixeratorwithoutput(const GtStr *indexname,
                                   unsigned int numofparts,
                                   unsigned long maximumspace,
                                   const Sfxstrategy *sfxstrategy,
-                                  GtProgressTimer *sfxprogress,
+                                  GtTimer *sfxprogress,
                                   bool withprogressbar,
                                   GtLogger *logger,
                                   GtError *err)
@@ -338,7 +338,7 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
 
 #ifndef S_SPLINT_S
 static int run_packedindexconstruction(GtLogger *logger,
-                                       GtProgressTimer *sfxprogress,
+                                       GtTimer *sfxprogress,
                                        bool withprogressbar,
                                        FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
@@ -415,7 +415,7 @@ static int runsuffixerator(bool doesa,
                            GtLogger *logger,
                            GtError *err)
 {
-  GtProgressTimer *sfxprogress = NULL;
+  GtTimer *sfxprogress = NULL;
   Outfileinfo outfileinfo;
   bool haserr = false;
   unsigned int prefixlength;
@@ -428,8 +428,9 @@ static int runsuffixerator(bool doesa,
 
   if (gt_showtime_enabled())
   {
-    sfxprogress = gt_progress_timer_new("determining sequence length and "
-                                        "number of special symbols");
+    sfxprogress = gt_timer_new_with_progress_description("determining sequence "
+                                        "length and number of special symbols");
+    gt_timer_start(sfxprogress);
   }
 
   if (gt_str_length(so->inputindex) > 0)
@@ -481,7 +482,7 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     if (!haserr) {
       int rval;
-      gt_encseq_encoder_set_progresstimer(ee, sfxprogress);
+      gt_encseq_encoder_set_timer(ee, sfxprogress);
       gt_encseq_encoder_set_logger(ee, logger);
       rval = gt_encseq_encoder_encode(ee, so->db, gt_str_get(so->indexname),
                                       err);
@@ -670,8 +671,8 @@ static int runsuffixerator(bool doesa,
   }
   if (sfxprogress != NULL)
   {
-    gt_progress_timer_start_new_state(sfxprogress,NULL,stdout);
-    gt_progress_timer_delete(sfxprogress);
+    gt_timer_show_progress_final(sfxprogress, stdout);
+    gt_timer_delete(sfxprogress);
   }
   gt_encseq_encoder_delete(ee);
   return haserr ? -1 : 0;

@@ -23,7 +23,7 @@
 
 int gt_genomediff_shu(GtLogger *logger,
                       const GtGenomediffArguments *arguments,
-                      GtProgressTimer *timer,
+                      GtTimer *timer,
                       GtError *err);
 
 #endif

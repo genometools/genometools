@@ -25,7 +25,7 @@
 
 #include "spacedef.h"
 #include "esa-mmsearch.h"
-#include "core/progress_timer_api.h"
+#include "core/timer_api.h"
 #include "core/format64.h"
 #include "stamp.h"
 #include "esa-map.h"
@@ -611,7 +611,7 @@ static int constructsarrandrunmmsearch(
                  unsigned int minlength,
                  Processquerymatch processquerymatch,
                  void *processquerymatchinfo,
-                 GtProgressTimer *sfxprogress,
+                 GtTimer *sfxprogress,
                  bool withprogressbar,
                  GtError *err)
 {

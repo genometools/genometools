@@ -52,12 +52,12 @@
 #include "core/ma_api.h"
 #include "core/mapspec-gen.h"
 #include "core/minmax.h"
-#include "core/progress_timer_api.h"
 #include "core/progressbar.h"
 #include "core/safecast-gen.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"
+#include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "core/defined-types.h"
@@ -6279,7 +6279,7 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 }
 
 static GtEncseq*
-gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
+gt_encseq_new_from_files(GtTimer *sfxprogress,
                          const char *indexname,
                          const GtStr *str_smap,
                          const GtStr *str_sat,
@@ -6375,9 +6375,8 @@ gt_encseq_new_from_files(GtProgressTimer *sfxprogress,
 
     if (sfxprogress != NULL)
     {
-      gt_progress_timer_start_new_state(sfxprogress,
-                                        "computing sequence encoding",
-                                        stdout);
+      gt_timer_show_progress(sfxprogress, "computing sequence encoding",
+                             stdout);
     }
     retcode
       = gt_encseq_access_type_determine(
@@ -6817,7 +6816,7 @@ struct GtEncseqEncoder {
   GtStr *sat,
         *smapfile;
   GtLogger *logger;
-  GtProgressTimer *pt;
+  GtTimer *pt;
 };
 
 GtEncseqEncoder* gt_encseq_encoder_new()
@@ -6871,14 +6870,13 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
   return ee;
 }
 
-void gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
-                                         GtProgressTimer *pt)
+void gt_encseq_encoder_set_timer(GtEncseqEncoder *ee, GtTimer *t)
 {
   gt_assert(ee);
-  ee->pt = pt;
+  ee->pt = t;
 }
 
-GtProgressTimer* gt_encseq_encoder_get_progresstimer(const GtEncseqEncoder *ee)
+GtTimer* gt_encseq_encoder_get_timer(const GtEncseqEncoder *ee)
 {
   gt_assert(ee);
   return ee->pt;

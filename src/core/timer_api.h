@@ -26,19 +26,29 @@ typedef struct GtTimer GtTimer;
 
 /* Creates a new <GtTimer> object. */
 GtTimer* gt_timer_new(void);
+/* Creates a new <GtTimer> object and stores the first description. */
+GtTimer* gt_timer_new_with_progress_description(const char* desc);
 /* Starts the time measurement on <t>. */
 void     gt_timer_start(GtTimer *t);
 /* Stops the time measurement on <t>. */
 void     gt_timer_stop(GtTimer *t);
 /* Outputs the current state of <t> in the format
    "%ld.%06lds real %lds user %lds system" to file
-   pointer <fp> (see <gt_timer_show_formatted>). */
+   pointer <fp> (see <gt_timer_show_formatted>).
+   The timer is then stopped. */
 void     gt_timer_show(GtTimer *t, FILE *fp);
 /* Outputs the current state of <t> in a user-defined format given by <fmt>.
    <fmt> must be a format string for four %ld numbers, which are filled with:
    elapsed seconds, elapsed microseconds, used usertime in seconds,
    system time in seconds. The output is written to <fp>. */
 void     gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp);
+/* Outputs the current state of <t> on <fp> since the last call of
+   <gt_timer_show_progress()> or the last start of <t>, along with the current
+   description. The timer is not stopped, but updated with <desc> to be the
+   next description. */
+void     gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp);
+/* Outputs the overall time measured with <t> from start to now on <fp>. */
+void     gt_timer_show_progress_final(GtTimer *t, FILE *fp);
 /* Deletes <t>. */
 void     gt_timer_delete(GtTimer *t);
 

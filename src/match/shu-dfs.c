@@ -375,7 +375,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
                             unsigned long numofchars,
                             unsigned long totallength,
                             bool calculate,
-                            GtProgressTimer *timer,
+                            GtTimer *timer,
                             GtLogger *logger,
                             GtError *err)
 {
@@ -400,9 +400,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
   positext = gt_newBwtSeqpositionextractor(index, totallength + 1);
   if (timer != NULL)
   {
-    gt_progress_timer_start_new_state(timer,
-                                      "obtain special pos",
-                                      stdout);
+    gt_timer_show_progress(timer, "obtain special pos", stdout);
   }
   special_char_rows_and_pos = get_special_pos(index, positext);
   GT_STACK_NEXT_FREE(&stack,root);
@@ -415,9 +413,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
 
   if (timer != NULL)
   {
-    gt_progress_timer_start_new_state(timer,
-                                      "traverse virtual tree",
-                                      stdout);
+    gt_timer_show_progress(timer, "traverse virtual tree", stdout);
   }
   stackdepth = 1UL;
   maxdepth = 0;
