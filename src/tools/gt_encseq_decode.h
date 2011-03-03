@@ -14,12 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_SEQENCODE_H
-#define GT_SEQENCODE_H
+#ifndef GT_ENCSEQ_DECODE_H
+#define GT_ENCSEQ_DECODE_H
 
 #include "core/tool.h"
 
-/* the seqencode tool */
-GtTool* gt_seqencode(void);
+/* the encseq decode tool */
+GtTool* gt_encseq_decode(void);
 
 #endif

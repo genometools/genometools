@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +14,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_EINFO_H
-#define GT_EINFO_H
+#ifndef GT_ENCSEQ_ENCODE_H
+#define GT_ENCSEQ_ENCODE_H
 
 #include "core/tool.h"
 
-/* the einfo tool */
-GtTool* gt_einfo(void);
+/* the encseq encode tool */
+GtTool* gt_encseq_encode(void);
 
 #endif

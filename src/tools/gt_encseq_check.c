@@ -20,31 +20,30 @@
 #include "core/unused_api.h"
 #include "match/test-mappedstr.pr"  /* XXX */
 #include "match/intcode-def.h"  /* XXX */
-#include "tools/gt_encseq_check_tool.h"
+#include "tools/gt_encseq_check.h"
 
 typedef struct {
   unsigned long scantrials,
                 multicharcmptrials,
                 prefixlength;
-} GtEncseqCheckToolArguments;
+} GtEncseqCheckArguments;
 
-static void* gt_encseq_check_tool_arguments_new(void)
+static void* gt_encseq_check_arguments_new(void)
 {
-  GtEncseqCheckToolArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtEncseqCheckArguments *arguments = gt_calloc(1, sizeof *arguments);
   return arguments;
 }
 
-static void gt_encseq_check_tool_arguments_delete(void *tool_arguments)
+static void gt_encseq_check_arguments_delete(void *tool_arguments)
 {
-  GtEncseqCheckToolArguments *arguments = tool_arguments;
+  GtEncseqCheckArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_encseq_check_tool_option_parser_new(void
-                                                                *tool_arguments)
+static GtOptionParser* gt_encseq_check_option_parser_new(void *tool_arguments)
 {
-  GtEncseqCheckToolArguments *arguments = tool_arguments;
+  GtEncseqCheckArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GT_UNUSED GtOption *option;
   gt_assert(arguments);
@@ -74,11 +73,11 @@ static GtOptionParser* gt_encseq_check_tool_option_parser_new(void
   return op;
 }
 
-static int gt_encseq_check_tool_runner(GT_UNUSED int argc, const char **argv,
-                                       int parsed_args, void *tool_arguments,
-                                       GtError *err)
+static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
+                                  int parsed_args, void *tool_arguments,
+                                  GtError *err)
 {
-  GtEncseqCheckToolArguments *arguments = tool_arguments;
+  GtEncseqCheckArguments *arguments = tool_arguments;
   int had_err = 0;
   GtEncseqLoader *encseq_loader;
   GtEncseq *encseq;
@@ -133,11 +132,11 @@ static int gt_encseq_check_tool_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_encseq_check_tool(void)
+GtTool* gt_encseq_check(void)
 {
-  return gt_tool_new(gt_encseq_check_tool_arguments_new,
-                  gt_encseq_check_tool_arguments_delete,
-                  gt_encseq_check_tool_option_parser_new,
-                  NULL,
-                  gt_encseq_check_tool_runner);
+  return gt_tool_new(gt_encseq_check_arguments_new,
+                     gt_encseq_check_arguments_delete,
+                     gt_encseq_check_option_parser_new,
+                     NULL,
+                     gt_encseq_check_runner);
 }

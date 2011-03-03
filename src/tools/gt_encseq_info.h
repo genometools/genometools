@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_ENCSEQ_CHECK_TOOL_H
-#define GT_ENCSEQ_CHECK_TOOL_H
+#ifndef GT_ENCSEQ_INFO_H
+#define GT_ENCSEQ_INFO_H
 
 #include "core/tool.h"
 
-/* the encseq_check_tool tool */
-GtTool* gt_encseq_check_tool(void);
+/* the encseq info tool */
+GtTool* gt_encseq_info(void);
 
 #endif

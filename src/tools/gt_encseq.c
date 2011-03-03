@@ -19,20 +19,20 @@
 #include "core/option.h"
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
-#include "tools/gt_bitextract.h"
-#include "tools/gt_einfo.h"
-#include "tools/gt_encseq_check_tool.h"
-#include "tools/gt_seqdecode.h"
-#include "tools/gt_seqencode.h"
+#include "tools/gt_encseq_bitextract.h"
+#include "tools/gt_encseq_check.h"
+#include "tools/gt_encseq_decode.h"
+#include "tools/gt_encseq_encode.h"
+#include "tools/gt_encseq_info.h"
 
 static void* gt_encseq_arguments_new(void)
 {
   GtToolbox *encseq_toolbox = gt_toolbox_new();
-  gt_toolbox_add_tool(encseq_toolbox, "bitextract", gt_bitextract());
-  gt_toolbox_add_tool(encseq_toolbox, "check", gt_encseq_check_tool());
-  gt_toolbox_add_tool(encseq_toolbox, "info", gt_einfo());
-  gt_toolbox_add_tool(encseq_toolbox, "decode", gt_seqdecode());
-  gt_toolbox_add_tool(encseq_toolbox, "encode", gt_seqencode());
+  gt_toolbox_add_tool(encseq_toolbox, "bitextract", gt_encseq_bitextract());
+  gt_toolbox_add_tool(encseq_toolbox, "check", gt_encseq_check());
+  gt_toolbox_add_tool(encseq_toolbox, "info", gt_encseq_info());
+  gt_toolbox_add_tool(encseq_toolbox, "decode", gt_encseq_decode());
+  gt_toolbox_add_tool(encseq_toolbox, "encode", gt_encseq_encode());
   return encseq_toolbox;
 }
 
@@ -49,8 +49,8 @@ static GtOptionParser* gt_encseq_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   gt_assert(encseq_toolbox);
   op = gt_option_parser_new("[option ...] tool [argument ...]",
-                            "Call encseq manipulation tool <tool> and "
-                            "pass argument(s) to it.");
+                            "Call encoded sequence manipulation tool <tool> "
+                            "and pass argument(s) to it.");
   gt_option_parser_set_comment_func(op, gt_toolbox_show, encseq_toolbox);
   gt_option_parser_set_min_args(op, 1);
   return op;

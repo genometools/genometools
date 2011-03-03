@@ -20,33 +20,33 @@
 #include "core/ma.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
-#include "tools/gt_einfo.h"
+#include "tools/gt_encseq_info.h"
 
 typedef struct {
   bool nomap;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-} GtEinfoArguments;
+} GtEncseqInfoArguments;
 
-static void* gt_einfo_arguments_new(void)
+static void* gt_encseq_info_arguments_new(void)
 {
-  GtEinfoArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtEncseqInfoArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
-static void gt_einfo_arguments_delete(void *tool_arguments)
+static void gt_encseq_info_arguments_delete(void *tool_arguments)
 {
-  GtEinfoArguments *arguments = tool_arguments;
+  GtEncseqInfoArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_einfo_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
 {
-  GtEinfoArguments *arguments = tool_arguments;
+  GtEncseqInfoArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GT_UNUSED GtOption *option;
   gt_assert(arguments);
@@ -68,11 +68,11 @@ static GtOptionParser* gt_einfo_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_einfo_runner(GT_UNUSED int argc, const char **argv,
+static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                            int parsed_args, void *tool_arguments,
                            GtError *err)
 {
-  GtEinfoArguments *arguments = tool_arguments;
+  GtEncseqInfoArguments *arguments = tool_arguments;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(arguments);
@@ -213,11 +213,11 @@ static int gt_einfo_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_einfo(void)
+GtTool* gt_encseq_info(void)
 {
-  return gt_tool_new(gt_einfo_arguments_new,
-                  gt_einfo_arguments_delete,
-                  gt_einfo_option_parser_new,
+  return gt_tool_new(gt_encseq_info_arguments_new,
+                  gt_encseq_info_arguments_delete,
+                  gt_encseq_info_option_parser_new,
                   NULL,
-                  gt_einfo_runner);
+                  gt_encseq_info_runner);
 }

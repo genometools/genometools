@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_BITEXTRACT_H
-#define GT_BITEXTRACT_H
+#ifndef GT_ENCSEQ_BITEXTRACT_H
+#define GT_ENCSEQ_BITEXTRACT_H
 
 #include "core/tool.h"
 
-/* the bitextract tool */
-GtTool* gt_bitextract(void);
+/* the encseq bitextract tool */
+GtTool* gt_encseq_bitextract(void);
 
 #endif

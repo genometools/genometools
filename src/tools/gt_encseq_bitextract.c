@@ -22,7 +22,7 @@
 #include "core/readmode_api.h"
 #include "core/unused_api.h"
 #include "core/undef.h"
-#include "tools/gt_bitextract.h"
+#include "tools/gt_encseq_bitextract.h"
 
 typedef struct {
   bool mirror,
@@ -31,26 +31,27 @@ typedef struct {
   GtStr *readmode;
   unsigned long bitpos,
                 iterations;
-} GtBitextractArguments;
+} GtEncseqBitextractArguments;
 
-static void* gt_bitextract_arguments_new(void)
+static void* gt_encseq_bitextract_arguments_new(void)
 {
-  GtBitextractArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtEncseqBitextractArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->readmode = gt_str_new();
   return arguments;
 }
 
-static void gt_bitextract_arguments_delete(void *tool_arguments)
+static void gt_encseq_bitextract_arguments_delete(void *tool_arguments)
 {
-  GtBitextractArguments *arguments = tool_arguments;
+  GtEncseqBitextractArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->readmode);
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_bitextract_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
+                                                                *tool_arguments)
 {
-  GtBitextractArguments *arguments = tool_arguments;
+  GtEncseqBitextractArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
   gt_assert(arguments);
@@ -86,23 +87,12 @@ static GtOptionParser* gt_bitextract_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_bitextract_arguments_check(GT_UNUSED int rest_argc,
+static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
+                                       GT_UNUSED int parsed_args,
                                        void *tool_arguments,
                                        GT_UNUSED GtError *err)
 {
-  GT_UNUSED GtBitextractArguments *arguments = tool_arguments;
-  int had_err = 0;
-  gt_error_check(err);
-  gt_assert(arguments);
-
-  return had_err;
-}
-
-static int gt_bitextract_runner(GT_UNUSED int argc, const char **argv,
-                                GT_UNUSED int parsed_args,
-                                void *tool_arguments, GT_UNUSED GtError *err)
-{
-  GtBitextractArguments *arguments = tool_arguments;
+  GtEncseqBitextractArguments *arguments = tool_arguments;
   GtEncseqLoader *el;
   GtEncseq *encseq;
   int had_err = 0;
@@ -189,11 +179,11 @@ static int gt_bitextract_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_bitextract(void)
+GtTool* gt_encseq_bitextract(void)
 {
-  return gt_tool_new(gt_bitextract_arguments_new,
-                  gt_bitextract_arguments_delete,
-                  gt_bitextract_option_parser_new,
-                  gt_bitextract_arguments_check,
-                  gt_bitextract_runner);
+  return gt_tool_new(gt_encseq_bitextract_arguments_new,
+                  gt_encseq_bitextract_arguments_delete,
+                  gt_encseq_bitextract_option_parser_new,
+                  NULL,
+                  gt_encseq_bitextract_runner);
 }

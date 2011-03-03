@@ -25,36 +25,37 @@
 #include "core/logger_api.h"
 #include "core/str_array_api.h"
 #include "core/unused_api.h"
-#include "tools/gt_seqencode.h"
+#include "tools/gt_encseq_encode.h"
 
 typedef struct {
   GtEncseqOptions *eopts;
   bool showstats,
        verbose;
   GtStr *indexname;
-} GtSeqencodeArguments;
+} GtEncseqEncodeArguments;
 
-static void* gt_seqencode_arguments_new(void)
+static void* gt_encseq_encode_arguments_new(void)
 {
-  GtSeqencodeArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtEncseqEncodeArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->indexname = gt_str_new();
   return arguments;
 }
 
-static void gt_seqencode_arguments_delete(void *tool_arguments)
+static void gt_encseq_encode_arguments_delete(void *tool_arguments)
 {
-  GtSeqencodeArguments *arguments = tool_arguments;
+  GtEncseqEncodeArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_encseq_options_delete(arguments->eopts);
   gt_str_delete(arguments->indexname);
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_seqencode_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_encseq_encode_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option;
-  GtSeqencodeArguments *arguments = (GtSeqencodeArguments*) tool_arguments;
+  GtEncseqEncodeArguments *arguments =
+                                      (GtEncseqEncodeArguments*) tool_arguments;
 
   /* init */
   op = gt_option_parser_new("sequence_file [sequence_file "
@@ -136,13 +137,14 @@ static void show_encoded_statistics(GtStrArray *infiles, const char *indexname)
          ((double) enc_size / orig_size) * 100.0);
 }
 
-static int gt_seqencode_runner(GT_UNUSED int argc, const char **argv,
+static int gt_encseq_encode_runner(GT_UNUSED int argc, const char **argv,
                                int parsed_args, GT_UNUSED void *tool_arguments,
                                GtError *err)
 {
   int had_err = 0,
       i;
-  GtSeqencodeArguments *arguments = (GtSeqencodeArguments*) tool_arguments;
+  GtEncseqEncodeArguments *arguments =
+                                      (GtEncseqEncodeArguments*) tool_arguments;
   GtStrArray *infiles;
   gt_error_check(err);
 
@@ -180,11 +182,11 @@ static int gt_seqencode_runner(GT_UNUSED int argc, const char **argv,
   return had_err;
 }
 
-GtTool* gt_seqencode(void)
+GtTool* gt_encseq_encode(void)
 {
-  return gt_tool_new(gt_seqencode_arguments_new,
-                     gt_seqencode_arguments_delete,
-                     gt_seqencode_option_parser_new,
+  return gt_tool_new(gt_encseq_encode_arguments_new,
+                     gt_encseq_encode_arguments_delete,
+                     gt_encseq_encode_option_parser_new,
                      NULL,
-                     gt_seqencode_runner);
+                     gt_encseq_encode_runner);
 }

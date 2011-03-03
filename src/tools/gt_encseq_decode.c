@@ -27,7 +27,7 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "tools/gt_seqdecode.h"
+#include "tools/gt_encseq_decode.h"
 
 typedef struct {
   bool singlechars;
@@ -37,20 +37,20 @@ typedef struct {
   GtEncseqOptions *eopts;
   GtReadmode rm;
   GtStr *dir;
-} GtSeqdecodeArguments;
+} GtEncseqDecodeArguments;
 
-static void* gt_seqdecode_arguments_new(void)
+static void* gt_encseq_decode_arguments_new(void)
 {
-  GtSeqdecodeArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtEncseqDecodeArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->mode = gt_str_new();
   arguments->sepchar = gt_str_new();
   arguments->dir = gt_str_new();
   return arguments;
 }
 
-static void gt_seqdecode_arguments_delete(void *tool_arguments)
+static void gt_encseq_decode_arguments_delete(void *tool_arguments)
 {
-  GtSeqdecodeArguments *arguments = tool_arguments;
+  GtEncseqDecodeArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->mode);
   gt_str_delete(arguments->sepchar);
@@ -59,13 +59,14 @@ static void gt_seqdecode_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_seqdecode_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option,
            *optionsep,
            *optionmode;
-  GtSeqdecodeArguments *arguments = (GtSeqdecodeArguments*) tool_arguments;
+  GtEncseqDecodeArguments *arguments =
+                                      (GtEncseqDecodeArguments*) tool_arguments;
   static const char *modes[] = {"fasta", "concat", NULL};
 
   /* init */
@@ -114,10 +115,11 @@ static GtOptionParser* gt_seqdecode_option_parser_new(void *tool_arguments)
   return op;
 }
 
-int gt_seqdecode_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
-                                 GtError* err)
+int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
+                                     void *tool_arguments,
+                                     GtError* err)
 {
-  GtSeqdecodeArguments *args = (GtSeqdecodeArguments*) tool_arguments;
+  GtEncseqDecodeArguments *args = (GtEncseqDecodeArguments*) tool_arguments;
   int had_err = 0;
   int rval;
 
@@ -132,7 +134,7 @@ int gt_seqdecode_arguments_check(GT_UNUSED int rest_argc, void *tool_arguments,
   return had_err;
 }
 
-static int output_sequence(GtEncseq *encseq, GtSeqdecodeArguments *args,
+static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
                            GtError *err)
 {
   unsigned long i, j;
@@ -225,7 +227,8 @@ static int output_sequence(GtEncseq *encseq, GtSeqdecodeArguments *args,
   return had_err;
 }
 
-static int decode_sequence_file(const char *seqfile, GtSeqdecodeArguments *args,
+static int decode_sequence_file(const char *seqfile,
+                                GtEncseqDecodeArguments *args,
                                 GtError *err)
 {
   GtEncseqLoader *encseq_loader;
@@ -254,7 +257,7 @@ static int decode_sequence_file(const char *seqfile, GtSeqdecodeArguments *args,
   return had_err;
 }
 
-static int gt_seqdecode_runner(GT_UNUSED int argc, const char **argv,
+static int gt_encseq_decode_runner(GT_UNUSED int argc, const char **argv,
                                int parsed_args, void *tool_arguments,
                                GtError *err)
 {
@@ -262,11 +265,11 @@ static int gt_seqdecode_runner(GT_UNUSED int argc, const char **argv,
   return decode_sequence_file(argv[parsed_args], tool_arguments, err);
 }
 
-GtTool* gt_seqdecode(void)
+GtTool* gt_encseq_decode(void)
 {
-  return gt_tool_new(gt_seqdecode_arguments_new,
-                     gt_seqdecode_arguments_delete,
-                     gt_seqdecode_option_parser_new,
-                     gt_seqdecode_arguments_check,
-                     gt_seqdecode_runner);
+  return gt_tool_new(gt_encseq_decode_arguments_new,
+                     gt_encseq_decode_arguments_delete,
+                     gt_encseq_decode_option_parser_new,
+                     gt_encseq_decode_arguments_check,
+                     gt_encseq_decode_runner);
 }
