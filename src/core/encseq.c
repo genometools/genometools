@@ -5390,19 +5390,6 @@ void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk)
   }
 }
 
-void printptbe(GtEndofTwobitencoding *ptbe)
-{
-  char buffer[BUFSIZ];
-  gt_assert(ptbe);
-  gt_bitsequence_tostring(buffer, ptbe->tbe);
-      printf("Twobitencoding   %s\n"
-             "unitsnotspecial  %u\n"
-             "position         %lu\n",
-             buffer,
-             ptbe->unitsnotspecial,
-             ptbe->position);
-}
-
 int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
