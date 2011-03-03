@@ -545,19 +545,16 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
     switch (esr->readmode)
     {
       case GT_READMODE_FORWARD:
-        /* XXX: seqdeliverchar() call kept around to update state, remove? */
         (void) esr->encseq->seqdeliverchar(esr);
         cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos++;
         return cc;
       case GT_READMODE_REVERSE:
-        /* XXX: seqdeliverchar() call kept around to update state, remove? */
         (void) esr->encseq->seqdeliverchar(esr);
         cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos--;
         return cc;
       case GT_READMODE_COMPL: /* only works with dna */
-        /* XXX: seqdeliverchar() call kept around to update state, remove? */
         (void) esr->encseq->seqdeliverchar(esr);
         cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos++;
@@ -565,7 +562,6 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
           (void) gt_complement(&cc, cc, NULL);
         return cc;
       case GT_READMODE_REVCOMPL: /* only works with dna */
-        /* XXX: seqdeliverchar() call kept around to update state, remove? */
         (void) esr->encseq->seqdeliverchar(esr);
         cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos--;
@@ -5111,9 +5107,9 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
 
   ret = gt_encseq_extract2bitenc(ptbe,encseq, fwd, pos, twobitencodingstoppos);
+
   /* XXX: may be lessefficient, but just assigning ret to esr->currentpos may
      not reflect the real reading direction! */
-
   if (ret < encseq->logicaltotallength)
     gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,ret);
   return ret;
