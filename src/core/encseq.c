@@ -4062,24 +4062,35 @@ unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
     return (encseq->specialcharinfo.specialcharacters*2)+1;
-  else
-    return encseq->specialcharinfo.specialcharacters;
+  return encseq->specialcharinfo.specialcharacters;
 }
 
 unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
 {
-  if (encseq->hasmirror)
-    return (encseq->specialcharinfo.specialranges*2)+1;
-  else
-    return encseq->specialcharinfo.specialranges;
+  if (encseq->hasmirror) {
+    /* check whether central specialranges can be merged */
+    if (gt_encseq_get_encoded_char(encseq, encseq->totallength-1,
+                                   GT_READMODE_FORWARD) == (GtUchar) WILDCARD) {
+      return (encseq->specialcharinfo.specialranges*2)-1;
+    } else {
+      return (encseq->specialcharinfo.specialranges*2)+1;
+    }
+  }
+  return encseq->specialcharinfo.specialranges;
 }
 
 unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq)
 {
-  if (encseq->hasmirror)
-    return (encseq->specialcharinfo.realspecialranges*2)+1;
-  else
-    return encseq->specialcharinfo.realspecialranges;
+  if (encseq->hasmirror) {
+    /* check whether central specialranges can be merged */
+    if (gt_encseq_get_encoded_char(encseq, encseq->totallength-1,
+                                   GT_READMODE_FORWARD) == (GtUchar) WILDCARD) {
+      return (encseq->specialcharinfo.realspecialranges*2)-1;
+    } else {
+      return (encseq->specialcharinfo.realspecialranges*2)+1;
+    }
+  }
+  return encseq->specialcharinfo.realspecialranges;
 }
 
 unsigned long gt_encseq_lengthofspecialprefix(const GtEncseq *encseq)
@@ -4095,25 +4106,22 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq)
 unsigned long gt_encseq_wildcards(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
-    return (encseq->specialcharinfo.wildcards*2)+1;
-  else
-    return encseq->specialcharinfo.wildcards;
+    return (encseq->specialcharinfo.wildcards*2);
+  return encseq->specialcharinfo.wildcards;
 }
 
 unsigned long gt_encseq_wildcardranges(const GtEncseq *encseq)
 {
-  if (encseq->hasmirror)   /* XXX: check for possible end merge! */
-    return (encseq->specialcharinfo.wildcardranges*2)+1;
-  else
-    return encseq->specialcharinfo.wildcardranges;
+  if (encseq->hasmirror)
+    return (encseq->specialcharinfo.wildcardranges*2);
+  return encseq->specialcharinfo.wildcardranges;
 }
 
 unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq)
 {
   if (encseq->hasmirror)
-    return (encseq->specialcharinfo.realwildcardranges*2)+1;
-  else
-    return encseq->specialcharinfo.realwildcardranges;
+    return (encseq->specialcharinfo.realwildcardranges*2);
+  return encseq->specialcharinfo.realwildcardranges;
 }
 
 unsigned long gt_encseq_lengthofwildcardprefix(const GtEncseq *encseq)
