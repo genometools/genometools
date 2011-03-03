@@ -23,7 +23,8 @@
 #include "tools/gt_encseq_info.h"
 
 typedef struct {
-  bool nomap;
+  bool nomap,
+       mirror;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtEncseqInfoArguments;
@@ -48,7 +49,7 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
 {
   GtEncseqInfoArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GT_UNUSED GtOption *option;
+  GtOption *option, *optionnomap;
   gt_assert(arguments);
 
   /* init */
@@ -56,10 +57,16 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
                             "Display meta-information about an "
                             "encoded sequence.");
 
-  option = gt_option_new_bool("nomap", "do not map encoded sequence "
-                                       "(gives less information)",
-                              &arguments->nomap, false);
+  optionnomap = gt_option_new_bool("nomap", "do not map encoded sequence "
+                                            "(gives less information)",
+                                   &arguments->nomap, false);
+  gt_option_parser_add_option(op, optionnomap);
+
+  option = gt_option_new_bool("mirrored", "use mirrored encoded sequence "
+                                          "(DNA only)",
+                              &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
+  gt_option_exclude(optionnomap, option);
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
@@ -107,6 +114,8 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
     GtEncseq *encseq;
 
     encseq_loader = gt_encseq_loader_new();
+    if (arguments->mirror)
+      gt_encseq_loader_mirror(encseq_loader);
     if (!(encseq = gt_encseq_loader_load(encseq_loader,
                                          argv[parsed_args], err)))
       had_err = -1;
