@@ -1,5 +1,5 @@
 Name "gt encseq encode|decode simple"
-Keywords "gt_seqencode gt_seqdecode"
+Keywords "gt_encseq_encode encseq gt_encseq_decode"
 Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run "#{$bin}gt encseq decode foobar.fas"
@@ -7,7 +7,7 @@ Test do
 end
 
 Name "gt encseq encode multiple files without indexname"
-Keywords "gt_seqencode"
+Keywords "encseq gt_encseq_encode"
 Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run_test "#{$bin}gt encseq encode #{$testdata}foobar.fas " + \
@@ -16,7 +16,7 @@ Test do
 end
 
 Name "gt encseq decode lossless without ois"
-Keywords "gt_seqdecode lossless"
+Keywords "encseq gt_encseq_decode lossless"
 Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run_test "#{$bin}gt encseq decode -lossless foobar.fas", \
@@ -117,8 +117,10 @@ def testformirrored(s, readmode)
     [false, true].each do |mirrored|
       [false, true].each do |singlechars|
         Name "gt encseq decode #{s.split('/').last} cc " + \
-             "#{"m " if mirrored}#{"s " if singlechars}#{"l " if lossless}#{readmode}"
-        Keywords "gt_seqdecode #{" mirroring" if mirrored}#{" lossless" if lossless}"
+             "#{"m " if mirrored}#{"s " if singlechars}" + \
+             "#{"l " if lossless}#{readmode}"
+        Keywords "encseq gt_encseq_decode #{" mirroring" if mirrored}" + \
+                 "#{" lossless" if lossless}"
         Test do
           run "#{$bin}gt encseq encode -des -ssp -sds " + \
               "#{"-lossless" if lossless} " + \
@@ -127,9 +129,11 @@ def testformirrored(s, readmode)
         end
 
         Name "gt encseq decode #{s.split('/').last} cc " + \
-             "#{"m " if mirrored}#{"s " if singlechars}#{"l " if lossless}#{readmode} " + \
+             "#{"m " if mirrored}#{"s " if singlechars}" + \
+             "#{"l " if lossless}#{readmode} " + \
              "whole seq"
-        Keywords "gt_seqdecode#{" mirroring" if mirrored}#{" lossless" if lossless}"
+        Keywords "encseq gt_encseq_decode#{" mirroring" if mirrored}" + \
+                 "#{" lossless" if lossless}"
         Test do
           run_test "#{$bin}gt encseq encode -des -ssp -sds " + \
                    "#{"-lossless" if lossless} " + \
