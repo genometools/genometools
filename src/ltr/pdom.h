@@ -38,7 +38,8 @@ typedef struct GtPdomOptions {
   GtStrArray *hmm_files;
   unsigned int chain_max_gap_length;
   bool write_alignments,
-       write_aaseqs;
+       write_aaseqs,
+       output_all_chains;
   GtPdomCutoff cutoff;
 } GtPdomOptions;
 
@@ -83,8 +84,8 @@ const char*      gt_pdom_model_get_name(const GtPdomModel*);
 const char*      gt_pdom_model_get_acc(const GtPdomModel*);
 
 /* holds hits for a single domain model */
-unsigned long    gt_pdom_model_hit_best_chain_length(const GtPdomModelHit*);
-GtPdomSingleHit* gt_pdom_model_hit_best_single_hit(const GtPdomModelHit*,
+unsigned long    gt_pdom_model_hit_num_of_single_hits(const GtPdomModelHit*);
+GtPdomSingleHit* gt_pdom_model_hit_single_hit(const GtPdomModelHit*,
                                                    unsigned long i);
 GtStrand         gt_pdom_model_hit_get_best_strand(const GtPdomModelHit*);
 
@@ -97,6 +98,8 @@ void             gt_pdom_single_hit_format_alignment(const GtPdomSingleHit*,
                                                      GtStr *dest);
 void             gt_pdom_single_hit_get_aaseq(const GtPdomSingleHit*,
                                               GtStr *dest);
+bool             gt_pdom_single_hit_is_chained(GtPdomSingleHit *singlehit);
+GtArray*         gt_pdom_single_hit_get_chains(GtPdomSingleHit *singlehit);
 
 #endif
 #endif

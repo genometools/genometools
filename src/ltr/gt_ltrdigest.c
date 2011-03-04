@@ -287,6 +287,14 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_imply(o, oh);
   gt_option_imply(o, oto);
 
+  o = gt_option_new_bool("allchains",
+                           "output features from all chains and unchained "
+                           "features, labeled with chain numbers",
+                           &arguments->pdom_opts.output_all_chains,
+                           false);
+  gt_option_parser_add_option(op, o);
+  gt_option_imply(o, oh);
+
   o = gt_option_new_uint("maxgaplen",
                          "maximal allowed gap size between fragments (in amino "
                          "acids) when chaining pHMM hits for a protein domain",

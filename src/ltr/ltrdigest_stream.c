@@ -67,7 +67,7 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
   if (strand != gt_feature_node_get_strand(ls->element.mainnode))
     return 0;
 
-  for (i=0;i<gt_pdom_model_hit_best_chain_length(hit);i++)
+  for (i=0;i<gt_pdom_model_hit_num_of_single_hits(hit);i++)
   {
     GtGenomeNode *gf;
     GtStr *alignmentstring,
@@ -75,7 +75,7 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
     GtPdomSingleHit *singlehit;
     GtPhase frame;
 
-    singlehit = gt_pdom_model_hit_best_single_hit(hit, i);
+    singlehit = gt_pdom_model_hit_single_hit(hit, i);
     alignmentstring = gt_str_new();
     aastring = gt_str_new();
     frame = gt_pdom_single_hit_get_phase(singlehit);
@@ -86,29 +86,52 @@ static int pdom_hit_attach_gff3(GtPdomModel *model, GtPdomModelHit *hit,
     gt_pdom_single_hit_get_aaseq(singlehit, aastring);
 
     rng.start++; rng.end++;  /* GFF3 is 1-based */
-    gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
-                                                      ls->element.mainnode),
-                             GT_PDOM_TYPE,
-                             rng.start,
-                             rng.end,
-                             strand);
-    gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_alignment",
-                                 alignmentstring, (GtFree) gt_str_delete);
-    gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_aaseq",
-                                 aastring, (GtFree) gt_str_delete);
-    gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
-    gt_feature_node_set_score((GtFeatureNode*) gf,
-                              gt_pdom_single_hit_get_evalue(singlehit));
-    gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
-    if (gt_pdom_model_get_name(model)) {
-      gt_feature_node_add_attribute((GtFeatureNode*) gf, "name",
-                                    gt_pdom_model_get_name(model));
+    if (gt_pdom_single_hit_is_chained(singlehit)
+          || ls->pdom_opts->output_all_chains) {
+      gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
+                                                        ls->element.mainnode),
+                               GT_PDOM_TYPE,
+                               rng.start,
+                               rng.end,
+                               strand);
+      gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_alignment",
+                                   alignmentstring, (GtFree) gt_str_delete);
+      gt_genome_node_add_user_data((GtGenomeNode*) gf, "pdom_aaseq",
+                                   aastring, (GtFree) gt_str_delete);
+      gt_feature_node_set_source((GtFeatureNode*) gf, ls->ltrdigest_tag);
+      gt_feature_node_set_score((GtFeatureNode*) gf,
+                                gt_pdom_single_hit_get_evalue(singlehit));
+      gt_feature_node_set_phase((GtFeatureNode*) gf, frame);
+      if (gt_pdom_model_get_name(model)) {
+        gt_feature_node_add_attribute((GtFeatureNode*) gf, "name",
+                                      gt_pdom_model_get_name(model));
+      }
+      if (gt_pdom_model_get_acc(model)) {
+        gt_feature_node_add_attribute((GtFeatureNode*) gf, "id",
+                                      gt_pdom_model_get_acc(model));
+      }
+      if (gt_pdom_single_hit_is_chained(singlehit)
+            && ls->pdom_opts->output_all_chains) {
+        GtStr *buffer;
+        unsigned long i;
+        GtArray *chains = gt_pdom_single_hit_get_chains(singlehit);
+        gt_assert(chains != NULL);
+        buffer = gt_str_new();
+        for (i = 0; i < gt_array_size(chains); i++) {
+          gt_str_append_cstr(buffer, gt_pdom_model_get_name(model));
+          gt_str_append_char(buffer, ':');
+          gt_str_append_ulong(buffer,
+                              *(unsigned long*) gt_array_get(chains, i));
+          if (i != gt_array_size(chains) - 1) {
+            gt_str_append_char(buffer, ',');
+          }
+        }
+        gt_feature_node_add_attribute((GtFeatureNode*) gf, "chains",
+                                      gt_str_get(buffer));
+        gt_str_delete(buffer);
+      }
+      gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
     }
-    if (gt_pdom_model_get_acc(model)) {
-      gt_feature_node_add_attribute((GtFeatureNode*) gf, "id",
-                                    gt_pdom_model_get_acc(model));
-    }
-    gt_feature_node_add_child(ls->element.mainnode, (GtFeatureNode*) gf);
   }
   return 0;
 }

@@ -60,6 +60,7 @@ struct GtPdomFinder {
   GtLTRElement *elem;
   ESL_GETOPTS *getopts;
   double glob_eval_cutoff;
+  bool reportall;
   unsigned int chain_max_gap_length;
 };
 
@@ -76,14 +77,16 @@ struct GtPdomSingleHit {
         *mline,
         *aa_seq_matched;
   double eval;
+  bool chained;
   GtPdomModelHit *mhit;
   unsigned long reference_count;
+  GtArray *chains;
 };
 
 struct GtPdomModelHit {
   P7_TOPHITS *hits_fwd, *hits_rev;
   GtStrand strand;
-  GtArray *best_chain;
+  GtArray *members;
   unsigned long reference_count;
   GtLTRElement *elem;
 };
@@ -214,6 +217,7 @@ static GtPdomSingleHit* gt_pdom_single_hit_new(P7_DOMAIN *singlehit,
   hit->phase = gt_phase_get(singlehit->ad->sqname[0]);
   hit->range.start = singlehit->ad->sqfrom-1;
   hit->range.end = singlehit->ad->sqto-1;
+  gt_log_log("create single hit %lu-%lu", hit->range.start, hit->range.end);
   gt_assert(gt_range_length(&(hit->range)) > 0);
   hit->mhit = mhit;
   hit->eval = singlehit->pvalue;
@@ -224,7 +228,8 @@ static GtPdomSingleHit* gt_pdom_single_hit_new(P7_DOMAIN *singlehit,
   if (singlehit->ad && singlehit->ad->mline)
     hit->mline = gt_str_new_cstr(singlehit->ad->mline);
   gt_assert(hit->range.start <= hit->range.end);
-
+  hit->chains = gt_array_new(sizeof (unsigned long));
+  hit->chained = false;
   return hit;
 }
 
@@ -279,6 +284,29 @@ double gt_pdom_single_hit_get_evalue(const GtPdomSingleHit *singlehit)
   return singlehit->eval;
 }
 
+void gt_pdom_single_hit_set_chained(GtPdomSingleHit *singlehit,
+                                    unsigned long cno)
+{
+  gt_assert(singlehit);
+  gt_array_add(singlehit->chains, cno);
+  gt_log_log("adding single hit %lu-%lu to chain %lu", singlehit->range.start,
+                                                       singlehit->range.end,
+                                                       cno);
+  singlehit->chained = true;
+}
+
+bool gt_pdom_single_hit_is_chained(GtPdomSingleHit *singlehit)
+{
+  gt_assert(singlehit);
+  return singlehit->chained;
+}
+
+GtArray* gt_pdom_single_hit_get_chains(GtPdomSingleHit *singlehit)
+{
+  gt_assert(singlehit);
+  return singlehit->chains;
+}
+
 void gt_pdom_single_hit_delete(void *value)
 {
   GtPdomSingleHit *sh;
@@ -291,6 +319,7 @@ void gt_pdom_single_hit_delete(void *value)
   gt_str_delete(sh->aa_seq_matched);
   gt_str_delete(sh->aa_seq_model);
   gt_str_delete(sh->mline);
+  gt_array_delete(sh->chains);
   gt_free(sh);
 }
 
@@ -304,7 +333,7 @@ static GtPdomModelHit* gt_pdom_model_hit_new(GtLTRElement *elem)
   hit->hits_rev   = p7_tophits_Create();
   hit->strand     = GT_STRAND_UNKNOWN;
   hit->elem       = elem;
-  hit->best_chain = gt_array_new(sizeof (GtPdomSingleHit*));
+  hit->members = gt_array_new(sizeof (GtPdomSingleHit*));
   return hit;
 }
 
@@ -318,8 +347,8 @@ GtPdomModelHit *gt_pdom_model_hit_ref(GtPdomModelHit *mh)
 void gt_pdom_model_hit_add_single_hit(GtPdomModelHit *mh,
                                       GtPdomSingleHit *sh)
 {
-  gt_assert(mh && mh->best_chain && sh);
-  gt_array_add(mh->best_chain, sh);
+  gt_assert(mh && mh->members && sh);
+  gt_array_add(mh->members, sh);
 }
 
 GtStrand gt_pdom_model_hit_get_best_strand(const GtPdomModelHit *h)
@@ -328,17 +357,17 @@ GtStrand gt_pdom_model_hit_get_best_strand(const GtPdomModelHit *h)
   return h->strand;
 }
 
-unsigned long gt_pdom_model_hit_best_chain_length(const GtPdomModelHit *h)
+unsigned long gt_pdom_model_hit_num_of_single_hits(const GtPdomModelHit *h)
 {
   gt_assert(h);
-  return gt_array_size(h->best_chain);
+  return gt_array_size(h->members);
 }
 
-GtPdomSingleHit* gt_pdom_model_hit_best_single_hit(const GtPdomModelHit *h,
-                                                   unsigned long nth)
+GtPdomSingleHit* gt_pdom_model_hit_single_hit(const GtPdomModelHit *h,
+                                          unsigned long nth)
 {
   gt_assert(h);
-  return *(GtPdomSingleHit**) gt_array_get(h->best_chain, nth);
+  return *(GtPdomSingleHit**) gt_array_get(h->members, nth);
 }
 
 void gt_pdom_model_hit_delete(void *value)
@@ -354,15 +383,15 @@ void gt_pdom_model_hit_delete(void *value)
     p7_tophits_Destroy(hit->hits_fwd);
   if (hit->hits_rev)
     p7_tophits_Destroy(hit->hits_rev);
-  if (hit->best_chain)
+  if (hit->members)
   {
     unsigned long i;
-    for (i=0;i<gt_array_size(hit->best_chain);i++)
+    for (i=0;i<gt_array_size(hit->members);i++)
     {
       gt_pdom_single_hit_delete(*(GtPdomSingleHit**)
-                                 gt_array_get(hit->best_chain, i));
+                                 gt_array_get(hit->members, i));
     }
-    gt_array_delete(hit->best_chain);
+    gt_array_delete(hit->members);
   }
   gt_free(hit);
 }
@@ -503,24 +532,21 @@ static void chainproc(GtChain *c, GtFragment *f,
                       GT_UNUSED unsigned long nof_frags,
                       GT_UNUSED unsigned long gap_length, void *data)
 {
-  unsigned long i;
-  GtPdomModelHit *hit;
-  hit = (GtPdomModelHit*) data;
+  unsigned long i,
+                *chainno = (unsigned long*) data;
 
   gt_log_log("resulting chain has %ld GtFragments, score %ld",
              gt_chain_size(c),
              gt_chain_get_score(c));
   for (i = 0; i < gt_chain_size(c); i++)
   {
-    GtPdomSingleHit *sh;
     GtFragment frag;
     frag = f[gt_chain_get_fragnum(c, i)];
-    gt_log_log("(%lu %lu) (%lu %lu), %p", frag.startpos1, frag.endpos1,
-                                          frag.startpos2, frag.endpos2,
-                                          frag.data);
-    sh = gt_pdom_single_hit_new(frag.data, hit);
-    gt_pdom_model_hit_add_single_hit(hit, sh);
+    gt_log_log("(%lu %lu) (%lu %lu)", frag.startpos1, frag.endpos1,
+                                          frag.startpos2, frag.endpos2);
+    gt_pdom_single_hit_set_chained((GtPdomSingleHit*) frag.data, *chainno);
   }
+  (*chainno)++;
   gt_log_log("\n");
 }
 
@@ -702,6 +728,8 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
             for (d = 0; d < hits->hit[h]->ndom; d++) {
               if (hits->hit[h]->dcl[d].is_reported) {
                 P7_DOMAIN *dom = &(hits->hit[h]->dcl[d]);
+                GtPdomSingleHit *sh = gt_pdom_single_hit_new(dom, hit);
+                gt_pdom_model_hit_add_single_hit(hit, sh);
                 frags[i].startpos1 = dom->ad->hmmfrom;
                 frags[i].endpos1   = dom->ad->hmmto;
                 frags[i].startpos2 = dom->ad->sqfrom;
@@ -709,7 +737,7 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
                 /* let weight(f) be targetlength(f) multiplied by bitscore(f) */
                 frags[i].weight    = (dom->ad->sqto - dom->ad->sqfrom + 1)
                                          * dom->bitscore;
-                frags[i].data      = dom;
+                frags[i].data      = sh;
                 i++;
               }
             }
@@ -720,18 +748,18 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
         qsort(frags, nof_domains, sizeof (GtFragment), gt_fragcmp);
         for (i=0;i<nof_domains;i++)
         {
-          gt_log_log("(%lu %lu) (%lu %lu) %p", frags[i].startpos1,
+          gt_log_log("(%lu %lu) (%lu %lu)", frags[i].startpos1,
                                                frags[i].endpos1,
                                                frags[i].startpos2,
-                                               frags[i].endpos2,
-                                               frags[i].data);
+                                               frags[i].endpos2);
         }
         gt_log_log("chaining %lu frags", nof_domains);
 
+        unsigned long chainno = 0;
         /* do chaining */
         gt_globalchaining_max(frags, nof_domains,
                               shared->gpf->chain_max_gap_length,
-                              chainproc, hit);
+                              chainproc, &chainno);
         gt_free(frags);
       }
       else
@@ -741,6 +769,7 @@ static void* gt_pdom_per_domain_worker_thread(void *data)
           GtPdomSingleHit *sh;
           sh = gt_pdom_single_hit_new(lastdom, hit);
           gt_pdom_model_hit_add_single_hit(hit, sh);
+          gt_pdom_single_hit_set_chained(sh, 0UL);
         }
       }
 
