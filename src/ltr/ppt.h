@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -42,13 +42,14 @@ typedef struct {
          bkg_t_prob,
          bkg_c_prob,
          ubox_u_prob;
-  unsigned int radius;
+  unsigned int radius,
+               max_ubox_dist;
 } GtPPTOptions;
 
 typedef struct GtPPTHit GtPPTHit;
 typedef struct GtPPTResults GtPPTResults;
 
-GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts);
+GtHMM*          gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts);
 
 GtPPTResults*   gt_ppt_find(const char *seq,
                             const char *rev_seq,

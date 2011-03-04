@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "core/ensure.h"
+#include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
@@ -211,10 +212,11 @@ GtHMM* gt_ppt_hmm_new(const GtAlphabet *alpha, GtPPTOptions *opts)
   {
     gt_hmm_delete(hmm);
     return NULL;
-  } else  return hmm;
+  } else
+    return hmm;
 }
 
-static double gt_ppt_score(unsigned long radius, unsigned long end)
+static inline double gt_ppt_score(unsigned long radius, unsigned long end)
 {
   double ret;
   unsigned long r2;
@@ -249,31 +251,31 @@ static bool gt_ppt_ok(GtPPTHit *hit, GtRange pptlen)
 }
 
 static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
-                          unsigned long radius, GtStrand strand)
+                          unsigned long radius, GT_UNUSED const char *seq,
+                          GtStrand strand)
 {
   GtPPTHit *cur_hit = NULL,
-           *tmp = NULL;
+           *potential_ubox = NULL;
   unsigned long i = 0;
 
   gt_assert(decoded && results && strand != GT_STRAND_UNKNOWN);
 
   /* group hits into stretches */
   cur_hit = gt_ppt_hit_new(strand, results);
-  for (i=0;i<2*radius-1;i++)
+  for (i = 0; i < 2 * radius - 1; i++)
   {
     cur_hit->state = (GtPPTStates) decoded[i];
     cur_hit->rng.end = i;
-    if (decoded[i+1] != decoded[i] || i+2==2*radius)
+    if (decoded[i+1] != decoded[i] || i + 2 == 2 * radius)
     {
       switch (cur_hit->state)
       {
         case PPT_UBOX:
-          if (gt_ubox_ok(cur_hit, results->opts->ubox_len))
-            tmp = cur_hit;
+          if (gt_ubox_ok(cur_hit, results->opts->ubox_len)) {
+            potential_ubox = cur_hit;
+          }
           else
           {
-            gt_free(tmp);
-            tmp = NULL;
             gt_free(cur_hit);
             cur_hit = NULL;
           }
@@ -283,24 +285,24 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
           {
             cur_hit->score = gt_ppt_score(radius, cur_hit->rng.end);
             gt_array_add(results->hits, cur_hit);
-            if (tmp != NULL)
+            if (potential_ubox != NULL)
             {
-              /* this PPT has a U-box, handle accordingly */
-              cur_hit->ubox = tmp;
-              tmp = NULL;
+              if (cur_hit->rng.start - potential_ubox->rng.end
+                    <= (unsigned long) results->opts->max_ubox_dist)
+              {
+                /* this PPT has a U-box, handle accordingly */
+                cur_hit->ubox = potential_ubox;
+              }
+              potential_ubox = NULL;
             }
           }
           else
           {
-            gt_free(tmp);
-            tmp = NULL;
             gt_free(cur_hit);
             cur_hit = NULL;
           }
           break;
         default:
-          gt_free(tmp);
-          tmp = NULL;
           gt_free(cur_hit);
           cur_hit = NULL;
           break;
@@ -314,7 +316,7 @@ static void gt_group_hits(unsigned int *decoded, GtPPTResults *results,
   }
   if (cur_hit != NULL)
     cur_hit->rng.end++;
-  gt_free(tmp);
+  gt_free(potential_ubox);
 }
 
 GtPPTResults* gt_ppt_find(const char *seq,
@@ -355,7 +357,9 @@ GtPPTResults* gt_ppt_find(const char *seq,
   gt_hmm_decode(hmm, decoded,
                 encoded_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
                 (unsigned int) (2*radius+1));
-  gt_group_hits(decoded, results, radius, GT_STRAND_FORWARD);
+  gt_group_hits(decoded, results, radius,
+                seq + (seqlen-1) - (ltrlen-1) - radius - 1,
+                GT_STRAND_FORWARD);
   /* radius length may change in the next strand, so reallocate */
   gt_free(decoded);
 
@@ -374,7 +378,9 @@ GtPPTResults* gt_ppt_find(const char *seq,
   gt_hmm_decode(hmm, decoded,
                 encoded_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
                 (unsigned int) (2*radius+1));
-  gt_group_hits(decoded, results, radius, GT_STRAND_REVERSE);
+  gt_group_hits(decoded, results, radius,
+                rev_seq + (seqlen-1) - (ltrlen-1) - radius - 1,
+                GT_STRAND_REVERSE);
 
   /* rank hits by descending score */
   gt_array_sort(results->hits, gt_ppt_hit_cmp);

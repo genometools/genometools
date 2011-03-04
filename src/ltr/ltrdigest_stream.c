@@ -174,7 +174,8 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   GtRange ppt_range;
   unsigned long i = 0;
   GtGenomeNode *gf;
-  GtPPTHit* hit = gt_ppt_results_get_ranked_hit(results, i++);
+  GtPPTHit *hit = gt_ppt_results_get_ranked_hit(results, i++),
+           *ubox;
   if (*canonical_strand == GT_STRAND_UNKNOWN)
     *canonical_strand = gt_ppt_hit_get_strand(hit);
   else
@@ -202,6 +203,19 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   gt_feature_node_set_source((GtFeatureNode*) gf, tag);
   gt_feature_node_set_strand(element->mainnode, gt_ppt_hit_get_strand(hit));
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
+  if ((ubox = gt_ppt_hit_get_ubox(hit))) {
+    GtRange ubox_range = gt_ppt_hit_get_coords(ubox);
+    ubox_range.start++; ubox_range.end++;
+    gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
+                                                      element->mainnode),
+                             GT_UBOX_TYPE,
+                             ubox_range.start,
+                             ubox_range.end,
+                             gt_ppt_hit_get_strand(ubox));
+    gt_feature_node_set_source((GtFeatureNode*) gf, tag);
+    gt_feature_node_set_strand(element->mainnode, gt_ppt_hit_get_strand(ubox));
+    gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
+  }
 }
 
 static int run_ltrdigest(GtLTRElement *element, char *seq,

@@ -29,8 +29,9 @@ enum GtLTRdigestRunScans {
 };
 
 #define GT_LTRDIGEST_TAG "LTRdigest"
-#define GT_PPT_TYPE      "RR_tract"
 #define GT_PBS_TYPE      "primer_binding_site"
 #define GT_PDOM_TYPE     "protein_match"
+#define GT_PPT_TYPE      "RR_tract"
+#define GT_UBOX_TYPE     "U_box"
 
 #endif

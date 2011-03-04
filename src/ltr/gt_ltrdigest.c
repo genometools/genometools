@@ -132,6 +132,11 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
                           &uboxlen_defaults);
   gt_option_parser_add_option(op, o);
 
+  o = gt_option_new_uint("uboxdist",
+                         "allowed U-box distance range from PPT",
+                         &arguments->ppt_opts.max_ubox_dist, 0);
+  gt_option_parser_add_option(op, o);
+
   o = gt_option_new_uint("pptradius",
                          "radius around beginning of 3' LTR "
                          "to search for PPT",
