@@ -460,10 +460,7 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_suffixsortspace_delete(sfi->suffixsortspace,true);
   gt_freesuftabparts(sfi->suftabparts);
   gt_bcktab_delete(sfi->bcktab);
-  if (sfi->dcov != NULL)
-  {
-    gt_differencecover_delete(sfi->dcov);
-  }
+  gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
 }
 
@@ -739,39 +736,24 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->sfxprogress = sfxprogress;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
-        gt_encseq_specialcharacters(encseq)
-          < gt_encseq_total_length(encseq))
+        gt_encseq_specialcharacters(encseq) < gt_encseq_total_length(encseq))
     {
-      if (sfxprogress != NULL)
-      {
-        gt_progress_timer_start_new_state(sfxprogress,
-                                          "sorting difference cover sample",
-                                          stdout);
-      }
-      sfi->dcov = gt_differencecover_new(sfi->sfxstrategy.differencecover,
-                                         encseq,readmode,prefixlength,logger);
+      /* the following function only has an effect differencecover > 0 */
+      sfi->dcov = gt_differencecover_prepare_sample(
+                                        sfi->sfxstrategy.differencecover,
+                                        sfi->encseq,
+                                        sfi->readmode,
+                                        sfi->prefixlength,
+                                        &sfi->sfxstrategy,
+                                        sfi->logger,
+                                        sfi->sfxprogress,
+                                        err);
       if (sfi->dcov == NULL)
       {
-        gt_error_set(err,"no difference cover modulo %u found",
-                     sfi->sfxstrategy.differencecover);
         haserr = true;
       } else
       {
-        if (gt_differencecover_vparamverify(sfi->dcov,err) != 0)
-        {
-          haserr = true;
-          gt_differencecover_delete(sfi->dcov);
-          sfi->dcov = NULL;
-        } else
-        {
-          gt_logger_log(logger,"presorting sample suffixes according to "
-                                  "difference cover modulo %u",
-                                  sfi->sfxstrategy.differencecover);
-          gt_differencecover_sortsample(sfi->dcov,
-                                        &sfi->sfxstrategy,
-                                        /*XXXwithcheck*/ true);
-          estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
-        }
+        estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
       }
     }
   }

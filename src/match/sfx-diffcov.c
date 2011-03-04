@@ -37,10 +37,7 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-bentsedg.h"
 #include "sfx-apfxlen.h"
-#define WITHCHECK
-#ifdef WITHCHECK
 #include "sfx-suftaborder.h"
-#endif
 #include "sfx-enumcodes.h"
 #include "stamp.h"
 
@@ -220,7 +217,8 @@ void dc_setsuffixsortspace(void *voiddcov,GtSuffixsortspace *sssp)
   dcov->sssp = sssp;
 }
 
-int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err)
+static int gt_differencecover_vparamverify(const Differencecover *dcov,
+                                           GtError *err)
 {
   if (dcov->vparam < dcov->prefixlength)
   {
@@ -322,19 +320,22 @@ static unsigned int differencecover_offset(const Differencecover *dcov,
 
 void gt_differencecover_delete(Differencecover *dcov)
 {
-  gt_assert(dcov->bcktab == NULL);
-  gt_assert(dcov->sortedsample == NULL);
-  gt_assert(dcov->filltable == NULL);
-  gt_assert(dcov->multimappower == NULL);
-  gt_assert(dcov->esr == NULL);
+  if (dcov != NULL)
+  {
+    gt_assert(dcov->bcktab == NULL);
+    gt_assert(dcov->sortedsample == NULL);
+    gt_assert(dcov->filltable == NULL);
+    gt_assert(dcov->multimappower == NULL);
+    gt_assert(dcov->esr == NULL);
 
-  gt_free(dcov->coverrank);
-  dcov->coverrank = NULL;
-  gt_free(dcov->diff2pos);
-  dcov->diff2pos = NULL;
-  gt_free(dcov->inversesuftab);
-  dcov->inversesuftab = NULL;
-  gt_free(dcov);
+    gt_free(dcov->coverrank);
+    dcov->coverrank = NULL;
+    gt_free(dcov->diff2pos);
+    dcov->diff2pos = NULL;
+    gt_free(dcov->inversesuftab);
+    dcov->inversesuftab = NULL;
+    gt_free(dcov);
+  }
 }
 
 static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
@@ -944,10 +945,8 @@ void gt_differencecover_sortunsortedbucket(void *data,
 {
   Differencecover *dcov = (Differencecover *) data;
 
-#ifdef WITHCHECK
   gt_assert(depth >= (unsigned long) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
-#endif
   gt_assert(width >= 2UL);
   gt_assert(dcov->sssp != NULL);
   gt_assert(subbucketleft >= gt_suffixsortspace_offset_get(dcov->sssp));
@@ -1008,9 +1007,9 @@ static void dc_sortremainingsamples(Differencecover *dcov)
   dcov->rangestobesorted = NULL;
 }
 
-void gt_differencecover_sortsample(Differencecover *dcov,
-                                   const Sfxstrategy *mainsfxstrategy,
-                                   bool withcheck)
+static void gt_differencecover_sortsample(Differencecover *dcov,
+                                          const Sfxstrategy *mainsfxstrategy,
+                                          bool withcheck)
 {
   unsigned long pos, sampleindex, posinserted, fullspecials = 0, specials = 0;
   unsigned int modvalue, unitsnotspecial;
@@ -1148,7 +1147,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
   gt_encseq_reader_delete(dcov->esr);
   dcov->esr = NULL;
   gt_assert(posinserted == dcov->effectivesamplesize);
-#ifdef WITHCHECK
   if (withcheck)
   {
     gt_checksortedsuffixes(__FILE__,
@@ -1162,7 +1160,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                            false,  /* specialsareequalatdepth0 */
                            (unsigned long) dcov->prefixlength);
   }
-#endif
   if (dcov->vparam == dcov->prefixlength)
   {
     dc_initinversesuftabspecials(dcov);
@@ -1171,13 +1168,14 @@ void gt_differencecover_sortsample(Differencecover *dcov,
   } else
   {
     Sfxstrategy sfxstrategy;
-    double sampledproportion
-      = (double) dcov->effectivesamplesize/dcov->totallength;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
     if (mainsfxstrategy != NULL)
     {
+      double sampledproportion
+        = (double) dcov->effectivesamplesize/dcov->totallength;
       sfxstrategy = *mainsfxstrategy;
+
 #define SETMAXCOUNT(COMP)\
       if (mainsfxstrategy->COMP >= 1UL)\
       {\
@@ -1191,13 +1189,12 @@ void gt_differencecover_sortsample(Differencecover *dcov,
       defaultsfxstrategy(&sfxstrategy,
                          gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
-    gt_logger_log(dcov->logger,"maxinsertionsort=%lu",
+    gt_logger_log(dcov->logger,"samplesort.maxinsertionsort=%lu",
                   sfxstrategy.maxinsertionsort);
-    gt_logger_log(dcov->logger,"maxbltriesort=%lu",
+    gt_logger_log(dcov->logger,"samplesort.maxbltriesort=%lu",
                   sfxstrategy.maxbltriesort);
-    gt_logger_log(dcov->logger,"maxcountingsort=%lu",
+    gt_logger_log(dcov->logger,"samplesort.maxcountingsort=%lu",
                   sfxstrategy.maxcountingsort);
-    sfxstrategy.differencecover = dcov->vparam;
     gt_sortbucketofsuffixes(false,
                             dcov->sortedsample,
                             dcov->effectivesamplesize,
@@ -1214,7 +1211,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                             (void *) dcov,
                             dc_addunsortedrange,
                             dcov->logger);
-#ifdef WITHCHECK
     if (withcheck)
     {
       gt_checksortedsuffixes(__FILE__,
@@ -1228,15 +1224,14 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                              false,  /* specialsareequalatdepth0 */
                              (unsigned long) dcov->vparam);
     }
-#endif
   }
   gt_bcktab_delete(dcov->bcktab);
   dcov->bcktab = NULL;
   dc_sortremainingsamples(dcov);
   if (withcheck)
   {
-#ifdef WITHCHECK
     unsigned long idx;
+
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
                            dcov->encseq,
@@ -1252,12 +1247,51 @@ void gt_differencecover_sortsample(Differencecover *dcov,
       unsigned long idx2 = inversesuftab_get(dcov,suffixptrgetdcov(dcov,idx));
       gt_assert(idx == idx2);
     }
-#endif
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
   gt_assert(dcov->diff2pos == NULL);
   filldiff2pos(dcov);
+}
+
+Differencecover *gt_differencecover_prepare_sample(
+                                        unsigned int vparam,
+                                        const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned int prefixlength,
+                                        const Sfxstrategy *sfxstrategy,
+                                        GtLogger *logger,
+                                        GtProgressTimer *sfxprogress,
+                                        GtError *err)
+{
+  Differencecover *dcov = NULL;
+
+  gt_assert(vparam > 0);
+  if (sfxprogress != NULL)
+  {
+    gt_progress_timer_start_new_state(sfxprogress,
+                                      "sorting difference cover sample",
+                                      stdout);
+  }
+  dcov = gt_differencecover_new(vparam,encseq,readmode,
+                                prefixlength,logger);
+  if (dcov == NULL)
+  {
+    gt_error_set(err,"no difference cover modulo %u found",vparam);
+  } else
+  {
+    if (gt_differencecover_vparamverify(dcov,err) != 0)
+    {
+      gt_differencecover_delete(dcov);
+      dcov = NULL;
+    } else
+    {
+      gt_logger_log(logger,"presorting sample suffixes according to "
+                           "difference cover modulo %u",vparam);
+      gt_differencecover_sortsample(dcov,sfxstrategy,false);
+    }
+  }
+  return dcov;
 }
 
 void gt_differencecovers_check(const GtEncseq *encseq,

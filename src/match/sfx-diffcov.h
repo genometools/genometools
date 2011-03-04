@@ -21,8 +21,10 @@
 #include "core/encseq.h"
 #include "core/unused_api.h"
 #include "core/readmode.h"
-#include "match/sfx-strategy.h"
 #include "core/logger.h"
+#include "core/progress_timer_api.h"
+#include "core/error_api.h"
+#include "match/sfx-strategy.h"
 
 typedef struct Differencecover Differencecover;
 
@@ -37,11 +39,15 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
                                         unsigned int outerprefixlength,
                                         GtLogger *logger);
 
-int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err);
-
-void gt_differencecover_sortsample(Differencecover *dcov,
-                                   const Sfxstrategy *mainsfxstrategy,
-                                   bool withcheck);
+Differencecover *gt_differencecover_prepare_sample(
+                                        unsigned int vparam,
+                                        const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned int prefixlength,
+                                        const Sfxstrategy *sfxstrategy,
+                                        GtLogger *logger,
+                                        GtProgressTimer *sfxprogress,
+                                        GtError *err);
 
 void gt_differencecover_delete(Differencecover *dcov);
 
