@@ -1245,7 +1245,11 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
     for (idx=0; idx < dcov->effectivesamplesize; idx++)
     {
       unsigned long idx2 = inversesuftab_get(dcov,suffixptrgetdcov(dcov,idx));
-      gt_assert(idx == idx2);
+      if (idx != idx2)
+      {
+        fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      } 
     }
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
