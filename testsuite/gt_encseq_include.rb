@@ -28,7 +28,7 @@ STDREADMODES  = ["fwd", "rev"]
 DNAREADMODES  = STDREADMODES + ["cpl", "rcl"]
 DNATESTSEQS   = ["#{$testdata}foobar.fas",
                  "#{$testdata}gt_bioseq_succ_3.fas",
-                 "#{$testdata}at1MB"]
+                 "#{$testdata}at100K1"]
 AATESTSEQS    = ["#{$testdata}trembl-eqlen.faa"]
 NUMSAMPLES    = 5
 
