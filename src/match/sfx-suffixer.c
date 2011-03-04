@@ -749,7 +749,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                           stdout);
       }
       sfi->dcov = gt_differencecover_new(sfi->sfxstrategy.differencecover,
-                                         encseq,readmode,logger);
+                                         encseq,readmode,prefixlength,logger);
       if (sfi->dcov == NULL)
       {
         gt_error_set(err,"no difference cover modulo %u found",
@@ -769,7 +769,10 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                   sfi->sfxstrategy.differencecover);
           gt_differencecover_sortsample(sfi->dcov,
                                         sfi->sfxstrategy.cmpcharbychar,
-                                        false);
+                                        sfi->sfxstrategy.maxcountingsort,
+                                        sfi->sfxstrategy.maxbltriesort,
+                                        sfi->sfxstrategy.maxinsertionsort,
+                                        /*XXXwithcheck*/ true);
           estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
         }
       }

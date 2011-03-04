@@ -33,12 +33,16 @@ void gt_differencecovers_check(const GtEncseq *encseq,
 Differencecover *gt_differencecover_new(unsigned int vparam,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
+                                        unsigned int outerprefixlength,
                                         GtLogger *logger);
 
 int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err);
 
 void gt_differencecover_sortsample(Differencecover *dcov,
                                    bool cmpcharbychar,
+                                   unsigned long maxcountingsort,
+                                   unsigned long maxbltriesort,
+                                   unsigned long maxinsertionsort,
                                    bool withcheck);
 
 void gt_differencecover_delete(Differencecover *dcov);

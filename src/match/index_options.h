@@ -38,6 +38,10 @@ GtIndexOptions* gt_index_options_register_packedidx_create(GtOptionParser *op,
 
 void            gt_index_options_delete(GtIndexOptions *oi);
 
+int gt_parse_algbounds(Sfxstrategy *sfxstrategy,
+                       const GtStrArray *algbounds,
+                       GtError *err);
+
 /* XXX: clean this up */
 #ifndef GT_INDEX_OPTS_GETTER_DECLS_DEFINED
 #define GT_INDEX_OPTS_GETTER_DECL_OPT(VARNAME) \

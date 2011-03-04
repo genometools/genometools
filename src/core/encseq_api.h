@@ -88,8 +88,12 @@ typedef struct GtEncseqReader GtEncseqReader;
 unsigned long     gt_encseq_total_length(const GtEncseq *encseq);
 /* Returns the total number of sequences contained in <encseq>. */
 unsigned long     gt_encseq_num_of_sequences(const GtEncseq *encseq);
+/* Returns number of characters in the alphabet which is part
+   <encseq>. The number does not include the wildcards. */
+unsigned int gt_encseq_alphabetnumofchars(const GtEncseq *encseq);
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
+
 GtUchar           gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode);

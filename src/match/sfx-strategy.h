@@ -30,8 +30,8 @@ typedef struct
   Definedunsignedint ssortmaxdepth;
   unsigned long maxwidthrealmedian,
                 maxcountingsort,
-                maxinsertionsort,
-                maxbltriesort;
+                maxbltriesort,
+                maxinsertionsort;
   unsigned int differencecover;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit

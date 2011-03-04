@@ -124,17 +124,48 @@ static GtIndexOptions* gt_index_options_new(void)
 }
 
 #define GT_IDXOPTS_READMAXBOUND(COMP,IDX)\
-        if (had_err == 0)\
+        if (!haserr)\
         {\
-          arg = gt_str_array_get(oi->algbounds, IDX);\
+          arg = gt_str_array_get(algbounds, IDX);\
           if (sscanf(arg,"%ld", &readint) != 1 || readint <= 0)\
           {\
             gt_error_set(err,"option -algbds: all arguments must be positive " \
                              "numbers");\
-            had_err = -1;\
+            haserr = true;\
           }\
-          oi->sfxstrategy.COMP = (unsigned long) readint;\
+          sfxstrategy->COMP = (unsigned long) readint;\
         }
+
+int gt_parse_algbounds(Sfxstrategy *sfxstrategy,
+                       const GtStrArray *algbounds,
+                       GtError *err)
+{
+  bool haserr = false;
+  const char *arg;
+  long readint;
+
+  if (gt_str_array_size(algbounds) != 3UL)
+  {
+    gt_error_set(err,"option -algbds must have exactly 3 arguments");
+    haserr = true;
+  }
+  GT_IDXOPTS_READMAXBOUND(maxinsertionsort, 0);
+  GT_IDXOPTS_READMAXBOUND(maxbltriesort, 1UL);
+  if (sfxstrategy->maxinsertionsort > sfxstrategy->maxbltriesort)
+  {
+    gt_error_set(err,"first argument of option -algbds must not be larger "
+                     "than second argument");
+    haserr = true;
+  }
+  GT_IDXOPTS_READMAXBOUND(maxcountingsort, 2UL);
+  if (sfxstrategy->maxbltriesort > sfxstrategy->maxcountingsort)
+  {
+    gt_error_set(err,"second argument of option -algbds must not be larger "
+                     "than third argument");
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
 
 static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
 {
@@ -234,22 +265,18 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
     }
   }
 
-  if (gt_option_is_set(oi->optionalgbounds)) {
-    const char *arg;
-    long readint;
-    if (gt_str_array_size(oi->algbounds) != 3UL) {
-      gt_error_set(err,"option -algbds must have exactly 3 arguments");
+  if (gt_option_is_set(oi->optionalgbounds))
+  {
+    if (gt_parse_algbounds(&oi->sfxstrategy,oi->algbounds,err) != 0)
+    {
       had_err = -1;
     }
-    GT_IDXOPTS_READMAXBOUND(maxinsertionsort, 0);
-    GT_IDXOPTS_READMAXBOUND(maxbltriesort, 1UL);
-    GT_IDXOPTS_READMAXBOUND(maxcountingsort, 2UL);
-  } else {
+  } else
+  {
     oi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
     oi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
-
   if (!had_err && gt_option_is_set(oi->optionparts)) {
     if (gt_str_array_size(oi->parts) == 1UL) {
       int readint;

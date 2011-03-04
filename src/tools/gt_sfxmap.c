@@ -27,6 +27,11 @@
 #include "match/pckdfs.h"
 #include "match/twobits2kmers.h"
 #include "match/optionargmode.h"
+#include "match/sfx-strategy.h"
+#include "match/sfx-suffixgetset.h"
+#include "match/sfx-bentsedg.h"
+#include "match/sfx-suftaborder.h"
+#include "match/index_options.h"
 #include "match/test-mappedstr.pr"
 #include "tools/gt_sfxmap.h"
 
@@ -49,7 +54,9 @@ typedef struct
                 delspranges;
   GtStr *esaindexname,
         *pckindexname;
-  GtStrArray *streamesq;
+  unsigned int sortmaxdepth;
+  GtStrArray *algbounds,
+             *streamesq;
 } Sfxmapoptions;
 
 static void deletethespranges(const GtEncseq *encseq,
@@ -105,6 +112,7 @@ static void *gt_sfxmap_arguments_new(void)
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->esaindexname = gt_str_new();
+  arguments->algbounds = gt_str_array_new();
   arguments->pckindexname = gt_str_new();
   arguments->streamesq = gt_str_array_new();
   return arguments;
@@ -119,6 +127,7 @@ static void gt_sfxmap_arguments_delete(void *tool_arguments)
     gt_str_delete(arguments->esaindexname);
     gt_str_delete(arguments->pckindexname);
     gt_str_array_delete(arguments->streamesq);
+    gt_str_array_delete(arguments->algbounds);
     gt_free(arguments);
   }
 }
@@ -131,7 +140,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optionmulticharcmptrials, *optionbck, *optionsuf,
          *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges, *optionpckindex, *optionesaindex,
-         *optioncmpsuf, *optioncmplcp, *optionstreamesq;
+         *optioncmpsuf, *optioncmplcp, *optionstreamesq,
+         *optionsortmaxdepth, *optionalgbounds;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -152,6 +162,20 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                               "Stream the encoded sequence",
                                               arguments->streamesq);
   gt_option_parser_add_option(op, optionstreamesq);
+
+  optionsortmaxdepth = gt_option_new_uint("sortmaxdepth",
+                                          "sort suffixes up to some depth",
+                                          &arguments->sortmaxdepth,0);
+  gt_option_parser_add_option(op, optionsortmaxdepth);
+
+  optionalgbounds = gt_option_new_stringarray("algbds",
+                                "length boundaries for the different "
+                                "algorithms to sort buckets of suffixes\n"
+                                "first number: maxbound for insertion sort\n"
+                                "second number: maxbound for blindtrie sort\n"
+                                "third number: maxbound for counting sort\n",
+                                arguments->algbounds);
+  gt_option_parser_add_option(op, optionalgbounds);
 
   gt_option_is_mandatory_either_3(optionesaindex,optionpckindex,
                                   optionstreamesq);
@@ -235,6 +259,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionverbose);
 
   gt_option_imply(optionlcp,optionsuf);
+  gt_option_imply(optionsortmaxdepth,optionesaindex);
+  gt_option_imply(optionalgbounds,optionsortmaxdepth);
   return op;
 }
 
@@ -420,14 +446,13 @@ static void gt_checkentiresuftab(const char *filename,
   */
 }
 
-static int sfxmap_esa(const Sfxmapoptions *arguments,GtError *err)
+static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
+                      GtError *err)
 {
   bool haserr = false;
   Suffixarray suffixarray;
-  GtLogger *logger;
   unsigned int demand = 0;
 
-  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (arguments->inputtis || arguments->delspranges > 0 || arguments->inputsuf)
   {
     demand |= SARR_ESQTAB;
@@ -606,7 +631,6 @@ static int sfxmap_esa(const Sfxmapoptions *arguments,GtError *err)
     gt_encseq_check_descriptions(suffixarray.encseq);
   }
   gt_freesuffixarray(&suffixarray);
-  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 
@@ -634,7 +658,8 @@ static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
   return 0;
 }
 
-static int sfxmap_pck(const Sfxmapoptions *arguments,GtError *err)
+static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
+                      GtError *err)
 {
   bool haserr = false;
   FMindex *fmindex;
@@ -642,9 +667,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtError *err)
   unsigned int numofchars = 0;
   GtEncseqMetadata *encseqmetadata = NULL;
   Sequentialsuffixarrayreader *ssar;
-  GtLogger *logger;
 
-  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   gt_assert(gt_str_length(arguments->pckindexname) > 0);
   fmindex = gt_loadvoidBWTSeqForSA(gt_str_get(arguments->pckindexname),false,
                                    err);
@@ -751,7 +774,6 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtError *err)
     gt_freeSequentialsuffixarrayreader(&ssar);
   }
   gt_encseq_metadata_delete(encseqmetadata);
-  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 
@@ -859,6 +881,97 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
   return haserr ? -1 : 0;
 }
 
+typedef struct
+{
+  GtEncseq *encseq;
+  GtReadmode readmode;
+  unsigned int sortmaxdepth;
+  GtSuffixsortspace *sssp;
+} Checkunsortedrangeinfo;
+
+static void sortmaxdepth_processunsortedrange(void *voiddcov,
+                                              unsigned long subbucketleft,
+                                              unsigned long width,
+                                              GT_UNUSED unsigned long depth)
+{
+  Checkunsortedrangeinfo *curi = voiddcov;
+
+  gt_checkifprefixesareidentical(__FILE__,
+                                 __LINE__,
+                                 curi->encseq,
+                                 curi->readmode,
+                                 curi->sssp,
+                                 subbucketleft,
+                                 width,
+                                 (unsigned long) curi->sortmaxdepth);
+}
+
+static int performsortmaxdepth(const Sfxmapoptions *arguments,
+                               GtLogger *logger,GtError *err)
+{
+  bool haserr = false;
+  GtEncseqLoader *el = NULL;
+  Checkunsortedrangeinfo curi;
+  Sfxstrategy sfxstrategy;
+  const char *indexname;
+
+  indexname = gt_str_get(arguments->esaindexname);
+  el = gt_encseq_loader_new();
+  curi.encseq = gt_encseq_loader_load(el, indexname, err);
+  if (curi.encseq == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    gt_logger_log(logger,"performsortmaxdepth(%s,%u)",
+                  indexname,arguments->sortmaxdepth);
+    defaultsfxstrategy(&sfxstrategy,
+                       gt_encseq_bitwise_cmp_ok(curi.encseq) ? false : true);
+    if (gt_str_array_size(arguments->algbounds) > 0 &&
+        gt_parse_algbounds(&sfxstrategy,arguments->algbounds,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    unsigned long idx, totallength = gt_encseq_total_length(curi.encseq);
+
+    curi.sssp = gt_suffixsortspace_new(totallength+1, totallength, true);
+    for (idx=0; idx<=totallength; idx++)
+    {
+      gt_suffixsortspace_setdirect(curi.sssp,idx,idx);
+    }
+    curi.readmode = GT_READMODE_FORWARD;
+    curi.sortmaxdepth = arguments->sortmaxdepth;
+    gt_sortallsuffixesfromstart(curi.sssp,
+                                totallength+1,
+                                curi.encseq,
+                                curi.readmode,
+                                gt_encseq_alphabetnumofchars(curi.encseq),
+                                arguments->sortmaxdepth,
+                                &sfxstrategy,
+                                &curi, /* voiddcov */
+                                sortmaxdepth_processunsortedrange,
+                                logger);
+    gt_checksortedsuffixes(__FILE__,
+                           __LINE__,
+                           curi.encseq,
+                           curi.readmode,
+                           curi.sssp,
+                           0,
+                           totallength+1,
+                           false, /* specialsareequal  */
+                           false,  /* specialsareequalatdepth0 */
+                           (unsigned long) curi.sortmaxdepth);
+    gt_suffixsortspace_delete(curi.sssp,false);
+  }
+  gt_encseq_delete(curi.encseq);
+  gt_encseq_loader_delete(el);
+  return haserr ? -1 : 0;
+}
+
 static int gt_sfxmap_runner(GT_UNUSED int argc,
                             GT_UNUSED const char **argv,
                             GT_UNUSED int parsed_args,
@@ -866,18 +979,20 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
 {
   bool haserr = false;
   Sfxmapoptions *arguments = tool_arguments;
+  GtLogger *logger;
 
   gt_error_check(err);
+  logger = gt_logger_new(arguments->verbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (gt_str_length(arguments->esaindexname) > 0)
   {
-    if (sfxmap_esa(arguments,err) != 0)
+    if (sfxmap_esa(arguments,logger,err) != 0)
     {
       haserr = true;
     }
   }
   if (!haserr && gt_str_length(arguments->pckindexname) > 0)
   {
-    if (sfxmap_pck(arguments,err) != 0)
+    if (sfxmap_pck(arguments,logger,err) != 0)
     {
       haserr = true;
     }
@@ -889,6 +1004,14 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
+  if (!haserr && arguments->sortmaxdepth > 0)
+  {
+    if (performsortmaxdepth(arguments,logger,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 

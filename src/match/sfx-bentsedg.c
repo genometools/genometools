@@ -37,6 +37,7 @@
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
+#include "sfx-suftaborder.h"
 #include "stamp.h"
 
 #define ACCESSCHARRAND(POS)    gt_encseq_get_encoded_char(bsr->encseq,\
@@ -125,23 +126,44 @@ struct Outlcpinfo
 
 typedef GtEndofTwobitencoding Sfxcmp;
 
-#define PTR2INT(VAR,SUBBUCKETLEFT,IDX)\
+#define PTR2INT(TMPVAR,SUBBUCKETLEFT,IDX)\
         {\
           unsigned long pos\
             = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
           if (pos + depth < bsr->totallength)\
           {\
             pos += depth;\
-            gt_encseq_extract2bitencwithtwobitencodingstoppos(&(VAR),\
+            gt_encseq_extract2bitencwithtwobitencodingstoppos(&(TMPVAR),\
                                                               bsr->esr1,\
                                                               bsr->encseq,\
                                                               bsr->readmode,\
                                                               pos);\
           } else\
           {\
-            VAR.tbe = 0;\
-            VAR.unitsnotspecial = 0;\
-            VAR.position = pos;\
+            TMPVAR.tbe = 0;\
+            TMPVAR.unitsnotspecial = 0;\
+            TMPVAR.position = pos;\
+          }\
+        }
+
+#define PTR2INTSTOREPOS(POSVAR,TMPVAR,SUBBUCKETLEFT,IDX)\
+        {\
+          unsigned long pos\
+            = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
+          POSVAR = pos;\
+          if (pos + depth < bsr->totallength)\
+          {\
+            pos += depth;\
+            gt_encseq_extract2bitencwithtwobitencodingstoppos(&(TMPVAR),\
+                                                              bsr->esr1,\
+                                                              bsr->encseq,\
+                                                              bsr->readmode,\
+                                                              pos);\
+          } else\
+          {\
+            TMPVAR.tbe = 0;\
+            TMPVAR.unitsnotspecial = 0;\
+            TMPVAR.position = pos;\
           }\
         }
 
@@ -191,6 +213,7 @@ typedef struct
   Medianinfo *medianinfospace;
   Countingsortinfo *countingsortinfo;
   const Sfxstrategy *sfxstrategy;
+  unsigned int sortmaxdepth;
   Blindtrie *blindtrie;
   Rmnsufinfo *rmnsufinfo;
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
@@ -866,24 +889,28 @@ static void showcountingsortinfo(const Countingsortinfo *countingsortinfo,
 }
 */
 
-static bool comparisonsort(Bentsedgresources *bsr,
-                           unsigned long subbucketleft,
-                           unsigned long width,
-                           unsigned long depth)
+static bool multistrategysort(Bentsedgresources *bsr,
+                              unsigned long subbucketleft,
+                              unsigned long width,
+                              unsigned long depth,
+                              unsigned long maxdepth)
 {
   gt_assert(width > 1UL);
-  gt_assert(bsr->sfxstrategy->maxinsertionsort <=
-            bsr->sfxstrategy->maxbltriesort);
   if (width <= bsr->sfxstrategy->maxinsertionsort)
   {
-    bs_insertionsort(bsr,subbucketleft,width,depth);
+    if (maxdepth == 0)
+    {
+      bs_insertionsort(bsr,subbucketleft,width,depth);
+    } else
+    {
+      bs_insertionsortmaxdepth(bsr,subbucketleft,width,depth,maxdepth);
+    }
     return true;
   }
   if (width <= bsr->sfxstrategy->maxbltriesort)
   {
     unsigned long numoflargelcpvalues;
 
-    gt_assert(bsr->sfxstrategy->differencecover == 0);
     numoflargelcpvalues
       = gt_blindtrie_suffixsort(bsr->blindtrie,
                                 subbucketleft,
@@ -893,10 +920,9 @@ static bool comparisonsort(Bentsedgresources *bsr,
                                     subbucketleft,
                                 width,
                                 depth,
-                                (unsigned long)
-                                   bsr->sfxstrategy->differencecover,
-                                NULL,
-                                NULL);
+                                maxdepth,
+                                bsr->voiddcov,
+                                bsr->dc_processunsortedrange);
     if (bsr->lcpsubtab != NULL)
     {
       bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
@@ -914,6 +940,18 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
 {
   if (width > 1UL)
   {
+    /* XXX remove this check later */
+    if (depth > 0)
+    {
+      gt_checkifprefixesareidentical(__FILE__,
+                                     __LINE__,
+                                     bsr->encseq,
+                                     bsr->readmode,
+                                     bsr->sssp,
+                                     subbucketleft,
+                                     width,
+                                     depth);
+    }
     if (bsr->sfxstrategy->ssortmaxdepth.defined)
     {
       if (depth >=
@@ -929,50 +967,18 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       }
     } else
     {
-      if (bsr->sfxstrategy->differencecover > 0)
+      if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
       {
-        if (depth >= (unsigned long) bsr->sfxstrategy->differencecover)
-        {
-          bsr->dc_processunsortedrange(bsr->voiddcov,subbucketleft,width,depth);
-          return;
-        }
-        if (width <= bsr->sfxstrategy->maxinsertionsort)
-        {
-          bs_insertionsortmaxdepth(bsr,subbucketleft,width,depth,
-                                   (unsigned long)
-                                   bsr->sfxstrategy->differencecover);
-          return;
-        }
-        if (width <= bsr->sfxstrategy->maxbltriesort)
-        {
-          unsigned long numoflargelcpvalues;
-
-          numoflargelcpvalues
-            = gt_blindtrie_suffixsort(bsr->blindtrie,
-                                      subbucketleft,
-                                      bsr->lcpsubtab == NULL
-                                        ? NULL
-                                        : bsr->lcpsubtab->bucketoflcpvalues +
-                                          subbucketleft,
-                                      width,
-                                      depth,
-                                      (unsigned long)
-                                        bsr->sfxstrategy->differencecover,
-                                      bsr->voiddcov,
-                                      bsr->dc_processunsortedrange);
-          if (bsr->lcpsubtab != NULL)
-          {
-            bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
-          }
-          bsr->countbltriesort++;
-          return;
-        }
-      } else
+        bsr->dc_processunsortedrange(
+                           bsr->voiddcov,
+                           gt_suffixsortspace_bucketleftidx_get(bsr->sssp) +
+                           subbucketleft,width,depth);
+        return;
+      }
+      if (multistrategysort(bsr,subbucketleft,width,depth,
+                            (unsigned long) bsr->sortmaxdepth))
       {
-        if (comparisonsort(bsr,subbucketleft,width,depth))
-        {
-          return;
-        }
+        return;
       }
     }
     /* push */
@@ -1005,14 +1011,13 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   {
     if (idx != pivotidx)
     {
-      PTR2INT(etbecurrent,subbucketleft,idx);
+      PTR2INTSTOREPOS(bsr->countingsortinfo[idx].suffix,
+                      etbecurrent,subbucketleft,idx);
       cmp = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,
                                                      bsr->complement,
                                                      &commonunits,
                                                      &etbecurrent,
                                                      pivotcmpbits);
-      bsr->countingsortinfo[idx].suffix
-        = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
       gt_assert(commonunits.common <= (unsigned int) GT_UNITSIN2BITENC);
       bsr->countingsortinfo[idx].lcpwithpivot = commonunits.common;
       if (cmp > 0)
@@ -1129,6 +1134,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     {
       currentwidth = end - bsr->rightlcpdist[idx];
       subsort_bentleysedgewick(bsr,
+                               /* for largest idx use first bucket */
                                subbucketleft + width - end,
                                currentwidth,
                                depth + idx);
@@ -1201,6 +1207,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           width >= MINMEDIANOF9WIDTH)
       {
         PTR2INT(pivotcmpbits,subbucketleft,pm);
+        gt_assert(width >= bsr->sfxstrategy->maxbltriesort);
         sarrcountingsort(bsr,
                          subbucketleft,
                          width,
@@ -1723,6 +1730,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   unsigned long partwidth,
                                   unsigned int numofchars,
                                   unsigned int prefixlength,
+                                  unsigned int sortmaxdepth,
                                   Outlcpinfo *outlcpinfo,
                                   const Sfxstrategy *sfxstrategy)
 {
@@ -1835,8 +1843,8 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   bsr->voiddcov = NULL;
   bsr->dc_processunsortedrange = NULL;
-  if (bsr->sfxstrategy->ssortmaxdepth.defined ||
-      bsr->sfxstrategy->differencecover > 0)
+  bsr->sortmaxdepth = sortmaxdepth;
+  if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
   {
     bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
                                        bsr->sfxstrategy->maxinsertionsort);
@@ -1976,6 +1984,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         partwidth,
                         numofchars,
                         prefixlength,
+                        sfxstrategy->differencecover,
                         outlcpinfo,
                         sfxstrategy);
   for (code = mincode; code <= maxcode; code++)
@@ -2203,6 +2212,7 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
                         0,    /* partwidth unused */
                         numofchars,
                         prefixlength,
+                        sfxstrategy->differencecover,
                         NULL,  /* outlcpinfo unused */
                         sfxstrategy);
   bsr.voiddcov = voiddcov;
@@ -2241,5 +2251,45 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
                         NULL,
                         NULL,
                         NULL,
+                        logger);
+}
+
+void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
+                                 unsigned long numberofsuffixes,
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 unsigned int numofchars,
+                                 unsigned int sortmaxdepth,
+                                 const Sfxstrategy *sfxstrategy,
+                                 void *voiddcov,
+                                 Dc_processunsortedrange
+                                   dc_processunsortedrange,
+                                 GtLogger *logger)
+{
+  Bentsedgresources bsr;
+
+  initBentsedgresources(&bsr,
+                        suffixsortspace,
+                        encseq,
+                        readmode,
+                        NULL, /* bcktab unused */
+                        0,    /* mincode unused */
+                        0,    /* maxcode unused */
+                        0,    /* partwidth unused */
+                        numofchars,
+                        0,    /* prefixlength */
+                        sortmaxdepth,
+                        NULL, /* outlcpinfo unused */
+                        sfxstrategy);
+  bsr.voiddcov = voiddcov;
+  bsr.dc_processunsortedrange = dc_processunsortedrange;
+  gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
+  bentleysedgewick(&bsr,numberofsuffixes,0);
+  gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
+  wrapBentsedgresources(&bsr,
+                        0, /* partwidth value unused because lcptab == NULL */
+                        NULL, /* lcpsubtab */
+                        NULL, /* FILE *outfplcptab */
+                        NULL, /* FILE *outfpllvtab */
                         logger);
 }

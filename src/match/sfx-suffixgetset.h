@@ -40,6 +40,10 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
                                bool checklongestdefined);
 
+void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
+                                  unsigned long subbucketleft,
+                                  unsigned long width);
+
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx);
 

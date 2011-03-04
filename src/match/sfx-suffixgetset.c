@@ -276,13 +276,26 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
     sssp->longestidx.valueunsignedlong = idx + sssp->offset;
   }
 #ifdef GT_SUFTABASULONGARRAY
-  /*
-  printf("setdirect(%lu)=%lu\n",idx,value);
-  */
   sssp->ulongtab[idx] = value;
 #else
   sssp->setdirect(sssp,idx,value);
 #endif
+}
+
+void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
+                                  unsigned long subbucketleft,
+                                  unsigned long width)
+{
+  unsigned long idx;
+
+  printf("%lu,%lu=",sssp->bucketleftidx+subbucketleft-sssp->offset,
+                    sssp->bucketleftidx+subbucketleft+width-1-sssp->offset);
+  for (idx=sssp->bucketleftidx+subbucketleft-sssp->offset;
+       idx<sssp->bucketleftidx+subbucketleft+width-sssp->offset;
+       idx++)
+  {
+    printf(" %lu",sssp->ulongtab[idx]);
+  }
 }
 
 unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,

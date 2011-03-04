@@ -51,7 +51,8 @@ static void showcomparisonfailure(const char *filename,
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,pos1,depth);
   fprintf(stderr,"\",\"");
   gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,pos2,depth);
-  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",pos2,cmp,maxlcp);
+  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu,depth=%lu\n",pos2,cmp,
+          maxlcp,depth);
 }
 
 void gt_checkifprefixesareidentical(const char *filename,
@@ -60,35 +61,31 @@ void gt_checkifprefixesareidentical(const char *filename,
                                     GtReadmode readmode,
                                     const GtSuffixsortspace *suffixsortspace,
                                     unsigned long subbucketleft,
-                                    unsigned int prefixlength,
-                                    unsigned long depth,
-                                    unsigned long left,
-                                    unsigned long right)
+                                    unsigned long width,
+                                    unsigned long depth)
 {
-  unsigned long idx, maxlcp;
+  unsigned long idx, maxlcp, pos1, pos2;
   int cmp;
   GtEncseqReader *esr1, *esr2;
-  bool haserr = false;
 
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  for (idx = left; idx < right; idx++)
+  gt_assert(depth > 0);
+  for (idx = 0; idx < width-1; idx++)
   {
+    pos1 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx);
+    pos2 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx+1);
     cmp = gt_encseq_check_comparetwosuffixes(encseq,
                                              readmode,
                                              &maxlcp,
                                              false, /* specialsareequal */
                                              true,/* specialsareequalatdepth0 */
-                                             depth,
-                                             gt_suffixsortspace_get(
-                                                          suffixsortspace,
-                                                          subbucketleft,idx),
-                                             gt_suffixsortspace_get(
-                                                          suffixsortspace,
-                                                          subbucketleft,idx+1),
+                                             depth,pos1,
+                                             pos2,
                                              esr1,
                                              esr2);
-    if (cmp != 0 || maxlcp != (unsigned long) prefixlength)
+    gt_assert(maxlcp <= depth);
+    if (cmp != 0 || maxlcp < depth)
     {
       showcomparisonfailure(filename,
                             line,
@@ -99,16 +96,11 @@ void gt_checkifprefixesareidentical(const char *filename,
                             subbucketleft,
                             depth,
                             idx,idx+1,cmp,maxlcp);
-      haserr = true;
-      break;
+      exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
-  if (haserr)
-  {
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
 }
 
 void gt_showentiresuftab(const GtEncseq *encseq,
@@ -153,10 +145,8 @@ void gt_checksortedsuffixes(const char *filename,
   for (idx = 1UL; idx < numberofsuffixes; idx++)
   {
     pos2 = gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx);
-    if (idx < numberofsuffixes - 1)
+    if (pos2 < totallength)
     {
-      gt_assert(gt_suffixsortspace_get(suffixsortspace,subbucketleft,idx)
-                < totallength);
       cmp = gt_encseq_check_comparetwosuffixes(encseq,
                                                readmode,
                                                &maxlcp,
@@ -182,12 +172,6 @@ void gt_checksortedsuffixes(const char *filename,
                               cmp,
                               maxlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-    } else
-    {
-      if (numberofsuffixes == totallength+1)
-      {
-        gt_assert(pos2 == totallength);
       }
     }
     pos1 = pos2;

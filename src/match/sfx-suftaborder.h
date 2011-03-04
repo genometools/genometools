@@ -34,4 +34,12 @@ void gt_checksortedsuffixes(const char *filename,
                             bool specialsareequalatdepth0,
                             unsigned long depth);
 
+void gt_checkifprefixesareidentical(const char *filename,
+                                    int line,
+                                    const GtEncseq *encseq,
+                                    GtReadmode readmode,
+                                    const GtSuffixsortspace *suffixsortspace,
+                                    unsigned long subbucketleft,
+                                    unsigned long width,
+                                    unsigned long depth);
 #endif

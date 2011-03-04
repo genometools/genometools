@@ -37,7 +37,7 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-bentsedg.h"
 #include "sfx-apfxlen.h"
-#undef WITHCHECK
+#define WITHCHECK
 #ifdef WITHCHECK
 #include "sfx-suftaborder.h"
 #endif
@@ -232,9 +232,10 @@ int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err)
 }
 
 Differencecover *gt_differencecover_new(unsigned int vparam,
-                                     const GtEncseq *encseq,
-                                     GtReadmode readmode,
-                                     GtLogger *logger)
+                                        const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned int outerprefixlength,
+                                        GtLogger *logger)
 {
   unsigned int offset = 0, v = 1U;
   Differencecover *dcov;
@@ -270,6 +271,10 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
                                          dcov->size;
   dcov->prefixlength = gt_recommendedprefixlength(dcov->numofchars,
                                                   dcov->maxsamplesize);
+  if (outerprefixlength > 0 && dcov->prefixlength > outerprefixlength)
+  {
+    dcov->prefixlength = outerprefixlength;
+  }
   dcov->vparam = 1U << (dcov->logmod);
   dcov->vmodmask = dcov->vparam-1;
 #ifdef WITHcomputehvalue
@@ -773,9 +778,9 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
       = inversesuftab_get(dcov,startpos + dcov->currentdepth);
     /*
     printf("key=%lu,startpos=%lu,currentdepth=%lu\n",
-                    (unsigned long) dcov->itvinfo[idx].key,
-                    (unsigned long) startpos,
-                    (unsigned long) dcov->currentdepth);
+                    dcov->itvinfo[idx].key,
+                    startpos,
+                    dcov->currentdepth);
     */
   }
   qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dcov_compareitv);
@@ -1005,6 +1010,9 @@ static void dc_sortremainingsamples(Differencecover *dcov)
 
 void gt_differencecover_sortsample(Differencecover *dcov,
                                    bool cmpcharbychar,
+                                   unsigned long maxcountingsort,
+                                   unsigned long maxbltriesort,
+                                   unsigned long maxinsertionsort,
                                    bool withcheck)
 {
   unsigned long pos, sampleindex, posinserted, fullspecials = 0, specials = 0;
@@ -1151,7 +1159,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                            dcov->encseq,
                            dcov->readmode,
                            dcov->sortedsample,
-                           dcov->sortedsample,
                            0,
                            dcov->effectivesamplesize,
                            false, /* specialsareequal  */
@@ -1167,6 +1174,8 @@ void gt_differencecover_sortsample(Differencecover *dcov,
   } else
   {
     Sfxstrategy sfxstrategy;
+    double sampledproportion
+      = (double) dcov->effectivesamplesize/dcov->totallength;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
     if (cmpcharbychar)
@@ -1177,6 +1186,20 @@ void gt_differencecover_sortsample(Differencecover *dcov,
       defaultsfxstrategy(&sfxstrategy,
                          gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
+#define SETMAXCOUNT(COMP)\
+    if (COMP >= 1UL)\
+    {\
+      sfxstrategy.COMP = MAX(1UL,COMP * sampledproportion);\
+    }
+    SETMAXCOUNT(maxcountingsort);
+    SETMAXCOUNT(maxbltriesort);
+    SETMAXCOUNT(maxinsertionsort);
+    gt_logger_log(dcov->logger,"maxinsertionsort=%lu",
+                  sfxstrategy.maxinsertionsort);
+    gt_logger_log(dcov->logger,"maxbltriesort=%lu",
+                  sfxstrategy.maxbltriesort);
+    gt_logger_log(dcov->logger,"maxcountingsort=%lu",
+                  sfxstrategy.maxcountingsort);
     sfxstrategy.differencecover = dcov->vparam;
     gt_sortbucketofsuffixes(false,
                             dcov->sortedsample,
@@ -1192,7 +1215,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                             &sfxstrategy,
                             (void *) dcov,
                             dc_addunsortedrange,
-                            NULL);
+                            dcov->logger);
 #ifdef WITHCHECK
     if (withcheck)
     {
@@ -1200,7 +1223,6 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                              __LINE__,
                              dcov->encseq,
                              dcov->readmode,
-                             dcov->sortedsample,
                              dcov->sortedsample,
                              0,
                              dcov->effectivesamplesize,
@@ -1215,23 +1237,18 @@ void gt_differencecover_sortsample(Differencecover *dcov,
   dc_sortremainingsamples(dcov);
   if (withcheck)
   {
-#ifndef NDEBUG
-    unsigned long idx;
-#endif
 #ifdef WITHCHECK
+    unsigned long idx;
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
                            dcov->encseq,
                            dcov->readmode,
-                           dcov->sortedsample,
                            dcov->sortedsample,
                            0,
                            dcov->effectivesamplesize,
                            false, /* specialsareequal  */
                            false,  /* specialsareequalatdepth0 */
                            0);
-#endif
-#ifndef NDEBUG
     for (idx=0; idx < dcov->effectivesamplesize; idx++)
     {
       unsigned long idx2 = inversesuftab_get(dcov,suffixptrgetdcov(dcov,idx));
@@ -1260,7 +1277,7 @@ void gt_differencecovers_check(const GtEncseq *encseq,
        logmod++)
   {
     vparam = 1U << logmod;
-    dcov = gt_differencecover_new(vparam,encseq,readmode,NULL);
+    dcov = gt_differencecover_new(vparam,encseq,readmode,0,NULL);
     if (dcov == NULL)
     {
       fprintf(stderr,"no difference cover for v=%u\n",vparam);
@@ -1271,7 +1288,7 @@ void gt_differencecovers_check(const GtEncseq *encseq,
     {
       validate_samplepositons(dcov);
     }
-    gt_differencecover_sortsample(dcov,false,withcheck);
+    gt_differencecover_sortsample(dcov,false,0,0,0,withcheck);
     gt_differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);
