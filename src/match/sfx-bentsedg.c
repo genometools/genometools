@@ -1984,7 +1984,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         partwidth,
                         numofchars,
                         prefixlength,
-                        sfxstrategy->differencecover,
+                        0,
                         outlcpinfo,
                         sfxstrategy);
   for (code = mincode; code <= maxcode; code++)
@@ -2188,6 +2188,7 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
                              const Bcktab *bcktab,
                              unsigned int numofchars,
                              unsigned int prefixlength,
+                             unsigned int sortmaxdepth,
                              const Sfxstrategy *sfxstrategy,
                              void *voiddcov,
                              Dc_processunsortedrange dc_processunsortedrange,
@@ -2212,7 +2213,7 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
                         0,    /* partwidth unused */
                         numofchars,
                         prefixlength,
-                        sfxstrategy->differencecover,
+                        sortmaxdepth,
                         NULL,  /* outlcpinfo unused */
                         sfxstrategy);
   bsr.voiddcov = voiddcov;

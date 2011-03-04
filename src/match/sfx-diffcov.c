@@ -1009,10 +1009,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
 }
 
 void gt_differencecover_sortsample(Differencecover *dcov,
-                                   bool cmpcharbychar,
-                                   unsigned long maxcountingsort,
-                                   unsigned long maxbltriesort,
-                                   unsigned long maxinsertionsort,
+                                   const Sfxstrategy *mainsfxstrategy,
                                    bool withcheck)
 {
   unsigned long pos, sampleindex, posinserted, fullspecials = 0, specials = 0;
@@ -1178,22 +1175,22 @@ void gt_differencecover_sortsample(Differencecover *dcov,
       = (double) dcov->effectivesamplesize/dcov->totallength;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
-    if (cmpcharbychar)
+    if (mainsfxstrategy != NULL)
     {
-      defaultsfxstrategy(&sfxstrategy,true);
+      sfxstrategy = *mainsfxstrategy;
+#define SETMAXCOUNT(COMP)\
+      if (mainsfxstrategy->COMP >= 1UL)\
+      {\
+        sfxstrategy.COMP = MAX(1UL,mainsfxstrategy->COMP * sampledproportion);\
+      }
+      SETMAXCOUNT(maxcountingsort);
+      SETMAXCOUNT(maxbltriesort);
+      SETMAXCOUNT(maxinsertionsort);
     } else
     {
       defaultsfxstrategy(&sfxstrategy,
                          gt_encseq_bitwise_cmp_ok(dcov->encseq) ? false : true);
     }
-#define SETMAXCOUNT(COMP)\
-    if (COMP >= 1UL)\
-    {\
-      sfxstrategy.COMP = MAX(1UL,COMP * sampledproportion);\
-    }
-    SETMAXCOUNT(maxcountingsort);
-    SETMAXCOUNT(maxbltriesort);
-    SETMAXCOUNT(maxinsertionsort);
     gt_logger_log(dcov->logger,"maxinsertionsort=%lu",
                   sfxstrategy.maxinsertionsort);
     gt_logger_log(dcov->logger,"maxbltriesort=%lu",
@@ -1212,6 +1209,7 @@ void gt_differencecover_sortsample(Differencecover *dcov,
                             dcov->bcktab,
                             dcov->numofchars,
                             dcov->prefixlength,
+                            dcov->vparam,
                             &sfxstrategy,
                             (void *) dcov,
                             dc_addunsortedrange,
@@ -1288,7 +1286,7 @@ void gt_differencecovers_check(const GtEncseq *encseq,
     {
       validate_samplepositons(dcov);
     }
-    gt_differencecover_sortsample(dcov,false,0,0,0,withcheck);
+    gt_differencecover_sortsample(dcov,NULL,withcheck);
     gt_differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);

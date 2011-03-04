@@ -21,6 +21,7 @@
 #include "core/encseq.h"
 #include "core/unused_api.h"
 #include "core/readmode.h"
+#include "match/sfx-strategy.h"
 #include "core/logger.h"
 
 typedef struct Differencecover Differencecover;
@@ -39,10 +40,7 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
 int gt_differencecover_vparamverify(const Differencecover *dcov,GtError *err);
 
 void gt_differencecover_sortsample(Differencecover *dcov,
-                                   bool cmpcharbychar,
-                                   unsigned long maxcountingsort,
-                                   unsigned long maxbltriesort,
-                                   unsigned long maxinsertionsort,
+                                   const Sfxstrategy *mainsfxstrategy,
                                    bool withcheck);
 
 void gt_differencecover_delete(Differencecover *dcov);

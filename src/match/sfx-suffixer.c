@@ -710,19 +710,19 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                          gt_encseq_bitwise_cmp_ok(encseq) ? false : true);
     }
     gt_logger_log(logger,"maxinsertionsort=%lu",
-                sfi->sfxstrategy.maxinsertionsort);
+                  sfi->sfxstrategy.maxinsertionsort);
     gt_logger_log(logger,"maxbltriesort=%lu",
-                sfi->sfxstrategy.maxbltriesort);
+                  sfi->sfxstrategy.maxbltriesort);
     gt_logger_log(logger,"maxcountingsort=%lu",
-                sfi->sfxstrategy.maxcountingsort);
+                  sfi->sfxstrategy.maxcountingsort);
     gt_logger_log(logger,"storespecialcodes=%s",
-                sfi->sfxstrategy.storespecialcodes ? "true" : "false");
+                  sfi->sfxstrategy.storespecialcodes ? "true" : "false");
     gt_logger_log(logger,"cmpcharbychar=%s",
-                sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
+                  sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
     if (sfi->sfxstrategy.ssortmaxdepth.defined)
     {
       gt_logger_log(logger,"ssortmaxdepth=%u",
-                               sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
+                           sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
     } else
     {
       gt_logger_log(logger,"ssortmaxdepth=undefined");
@@ -768,10 +768,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                   "difference cover modulo %u",
                                   sfi->sfxstrategy.differencecover);
           gt_differencecover_sortsample(sfi->dcov,
-                                        sfi->sfxstrategy.cmpcharbychar,
-                                        sfi->sfxstrategy.maxcountingsort,
-                                        sfi->sfxstrategy.maxbltriesort,
-                                        sfi->sfxstrategy.maxinsertionsort,
+                                        &sfi->sfxstrategy,
                                         /*XXXwithcheck*/ true);
           estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
         }
@@ -1035,6 +1032,7 @@ static void preparethispart(Sfxiterator *sfi)
                               sfi->bcktab,
                               sfi->numofchars,
                               sfi->prefixlength,
+                              sfi->sfxstrategy.differencecover,
                               &sfi->sfxstrategy,
                               (void *) sfi->dcov,
                               gt_differencecover_sortunsortedbucket,
