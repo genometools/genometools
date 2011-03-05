@@ -1249,7 +1249,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
       {
         fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
         exit(GT_EXIT_PROGRAMMING_ERROR);
-      } 
+      }
     }
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
