@@ -92,12 +92,12 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   if (gt_index_options_outlcptab_value(so->idxopts))
   {
     outfileinfo->outlcpinfo
-      = gt_newOutlcpinfo(outlcptab ? gt_str_get(so->indexname) : NULL,
-                         gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
-                         prefixlength,
-                         gt_encseq_total_length(encseq),
-                         strategy.ssortmaxdepth.defined ? false : true,
-                         err);
+      = gt_Outlcpinfo_new(outlcptab ? gt_str_get(so->indexname) : NULL,
+                          gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
+                          prefixlength,
+                          gt_encseq_total_length(encseq),
+                          strategy.ssortmaxdepth.defined ? false : true,
+                          err);
     if (outfileinfo->outlcpinfo == NULL)
     {
       haserr = true;
@@ -631,16 +631,16 @@ static int runsuffixerator(bool doesa,
   gt_fa_fclose(outfileinfo.outfpbcktab);
   if (!haserr)
   {
-    unsigned long numoflargelcpvalues,
-          maxbranchdepth;
+    unsigned long numoflargelcpvalues, maxbranchdepth;
 
     if (outfileinfo.outlcpinfo == NULL)
     {
       numoflargelcpvalues = maxbranchdepth = 0;
     } else
     {
-      numoflargelcpvalues = getnumoflargelcpvalues(outfileinfo.outlcpinfo);
-      maxbranchdepth = getmaxbranchdepth(outfileinfo.outlcpinfo);
+      numoflargelcpvalues
+        = gt_Outlcpinfo_numoflargelcpvalues(outfileinfo.outlcpinfo);
+      maxbranchdepth = gt_Outlcpinfo_maxbranchdepth(outfileinfo.outlcpinfo);
     }
     if (gt_outprjfile(gt_str_get(so->indexname),
                       readmode,
@@ -655,7 +655,7 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-  gt_freeOutlcptab(outfileinfo.outlcpinfo);
+  gt_Outlcpinfo_delete(outfileinfo.outlcpinfo);
   gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr

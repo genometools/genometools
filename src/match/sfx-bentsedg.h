@@ -30,18 +30,18 @@
 
 typedef struct Outlcpinfo Outlcpinfo;
 
-Outlcpinfo *gt_newOutlcpinfo(const char *indexname,
-                             unsigned int numofchars,
-                             unsigned int prefixlength,
-                             unsigned long totallength,
-                             bool assideeffect,
-                             GtError *err);
+Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
+                              unsigned int numofchars,
+                              unsigned int prefixlength,
+                              unsigned long totallength,
+                              bool assideeffect,
+                              GtError *err);
 
-void gt_freeOutlcptab(Outlcpinfo *outlcpinfo);
+void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
 
-unsigned long getnumoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
-unsigned long getmaxbranchdepth(const Outlcpinfo *outlcpinfo);
+unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
                  unsigned long partwidth,
