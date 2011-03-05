@@ -220,7 +220,7 @@ typedef struct
                 rightlcpdist[GT_UNITSIN2BITENC];
   GtSuffixsortspace *sssp;
   GtProcessunsortedsuffixrange processunsortedsuffixrange;
-  void *voiddcov;
+  void *processunsortedsuffixrangeinfo;
   bool *equalwithprevious;
   unsigned long countinsertionsort,
                 countqsort,
@@ -616,7 +616,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
                  equalsrangewidth + 1);
 #endif
           bsr->processunsortedsuffixrange(
-                              bsr->voiddcov,
+                              bsr->processunsortedsuffixrangeinfo,
                               bucketleftidx + subbucketleft + idx - 1
                                             - equalsrangewidth,
                               equalsrangewidth + 1, maxdepth);
@@ -631,7 +631,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
              equalsrangewidth + 1);
 #endif
       bsr->processunsortedsuffixrange(
-                           bsr->voiddcov,
+                           bsr->processunsortedsuffixrangeinfo,
                            bucketleftidx + subbucketleft + width - 1
                                          - equalsrangewidth,
                            equalsrangewidth + 1, maxdepth);
@@ -923,7 +923,7 @@ static bool multistrategysort(Bentsedgresources *bsr,
                                 width,
                                 depth,
                                 maxdepth,
-                                bsr->voiddcov,
+                                bsr->processunsortedsuffixrangeinfo,
                                 bsr->processunsortedsuffixrange);
     if (bsr->lcpsubtab != NULL)
     {
@@ -973,7 +973,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
       {
         bsr->processunsortedsuffixrange(
-                           bsr->voiddcov,
+                           bsr->processunsortedsuffixrangeinfo,
                            gt_suffixsortspace_bucketleftidx_get(bsr->sssp) +
                            subbucketleft,width,depth);
         return;
@@ -1847,7 +1847,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                       bsr->esr2,
                                       readmode);
   }
-  bsr->voiddcov = NULL;
+  bsr->processunsortedsuffixrangeinfo = NULL;
   bsr->processunsortedsuffixrange = NULL;
   bsr->sortmaxdepth = sortmaxdepth;
   if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
@@ -2188,7 +2188,7 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                              unsigned int prefixlength,
                              unsigned int sortmaxdepth,
                              const Sfxstrategy *sfxstrategy,
-                             void *voiddcov,
+                             void *processunsortedsuffixrangeinfo,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange,
                              GtLogger *logger)
@@ -2211,7 +2211,7 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                         sortmaxdepth,
                         NULL,  /* outlcpinfo unused */
                         sfxstrategy);
-  bsr.voiddcov = voiddcov;
+  bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
   for (code = mincode; code <= maxcode; code++)
   {
@@ -2257,7 +2257,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  unsigned int numofchars,
                                  unsigned int sortmaxdepth,
                                  const Sfxstrategy *sfxstrategy,
-                                 void *voiddcov,
+                                 void *processunsortedsuffixrangeinfo,
                                  GtProcessunsortedsuffixrange
                                    processunsortedsuffixrange,
                                  GtLogger *logger)
@@ -2277,7 +2277,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                         sortmaxdepth,
                         NULL, /* outlcpinfo unused */
                         sfxstrategy);
-  bsr.voiddcov = voiddcov;
+  bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
   gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
   bentleysedgewick(&bsr,numberofsuffixes,0);

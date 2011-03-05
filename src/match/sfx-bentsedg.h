@@ -86,7 +86,7 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                              unsigned int prefixlength,
                              unsigned int sortmaxdepth,
                              const Sfxstrategy *sfxstrategy,
-                             void *voiddcov,
+                             void *processunsortedsuffixrangeinfo,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange,
                              GtLogger *logger);
@@ -98,7 +98,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  unsigned int numofchars,
                                  unsigned int sortmaxdepth,
                                  const Sfxstrategy *sfxstrategy,
-                                 void *voiddcov,
+                                 void *processunsortedsuffixrangeinfo,
                                  GtProcessunsortedsuffixrange
                                    processunsortedsuffixrange,
                                  GtLogger *logger);
