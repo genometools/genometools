@@ -22,7 +22,7 @@
 #include "core/readmode.h"
 #include "sfx-suffixgetset.h"
 
-typedef void (*Dc_processunsortedrange)(void *,
+typedef void (*GtProcessunsortedsuffixrange)(void *,
                                         unsigned long,
                                         unsigned long,
                                         unsigned long);
@@ -48,7 +48,8 @@ unsigned long gt_blindtrie_suffixsort(
                             unsigned long offset,
                             unsigned long maxdepth,
                             void *voiddcov,
-                            Dc_processunsortedrange dc_processunsortedrange);
+                            GtProcessunsortedsuffixrange
+                              processunsortedsuffixrange);
 
 void gt_blindtrie_delete(Blindtrie *blindtrie);
 
