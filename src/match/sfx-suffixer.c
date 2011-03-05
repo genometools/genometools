@@ -999,8 +999,8 @@ static void preparethispart(Sfxiterator *sfi)
     }
     if (sfi->sfxstrategy.differencecover > 0)
     {
-      gt_sortbucketofsuffixes(true,
-                              sfi->suffixsortspace,
+      gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
+      gt_sortbucketofsuffixes(sfi->suffixsortspace,
                               partwidth,
                               bucketspec2,
                               sfi->encseq,

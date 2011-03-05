@@ -22,6 +22,11 @@
 #include "core/readmode.h"
 #include "sfx-suffixgetset.h"
 
+typedef void (*Dc_processunsortedrange)(void *,
+                                        unsigned long,
+                                        unsigned long,
+                                        unsigned long);
+
 typedef struct Blindtrie Blindtrie;
 
 Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,

@@ -25,6 +25,7 @@
 #include "core/timer_api.h"
 #include "core/error_api.h"
 #include "match/sfx-strategy.h"
+#include "match/sfx-suffixgetset.h"
 
 typedef struct Differencecover Differencecover;
 
@@ -61,5 +62,8 @@ void gt_differencecover_sortunsortedbucket(void *data,
 int gt_differencecover_compare (const Differencecover *dcov,
                                 unsigned long suffixpos1,
                                 unsigned long suffixpos2);
+
+void gt_differencecoversetsuffixsortspace(Differencecover *dcov,
+                                          GtSuffixsortspace *sssp);
 
 #endif

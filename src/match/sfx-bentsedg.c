@@ -243,10 +243,12 @@ static void showsuffixrange(const Bentsedgresources *bsr,
     printf("of %lu suffixes at depth %lu:\n",width,depth);
   } else
   {
+    unsigned long bucketleftidx
+      = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
     printf("of %lu suffixes [%lu,%lu] at depth %lu:\n",
            width,
-           bsr->sssp->bucketleftidx + subbucketleft,
-           bsr->sssp->bucketleftidx + subbucketleft + width,
+           bucketleftidx + subbucketleft,
+           bucketleftidx + subbucketleft + width,
            depth);
   }
   for (pi = 0; pi <= width; pi++)
@@ -2170,19 +2172,11 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 }
 
 /*
-  The following function is from match/sfx-diffcov.c, but we do not want to
-  include match/sfx-diffcov.h here, as this would result into
-  cyclic dependencies. So we directly put the forward declaration here */
-
-void dc_setsuffixsortspace(void *voiddcov,GtSuffixsortspace *sssp);
-
-/*
    The following function is used for sorting the sample making up the
    difference cover and for sorting with the difference cover.
 */
 
-void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
-                             GtSuffixsortspace *suffixsortspace,
+void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,
@@ -2203,10 +2197,6 @@ void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   GtCodetype code;
 
-  if (setdcovsuffixsortspace)
-  {
-    dc_setsuffixsortspace(voiddcov,suffixsortspace);
-  }
   initBentsedgresources(&bsr,
                         suffixsortspace,
                         encseq,

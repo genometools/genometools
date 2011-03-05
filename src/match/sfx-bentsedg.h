@@ -26,6 +26,7 @@
 #include "bcktab.h"
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
+#include "sfx-bltrie.h"
 #include "sfx-suffixgetset.h"
 
 typedef struct Outlcpinfo Outlcpinfo;
@@ -73,8 +74,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger);
 
-void gt_sortbucketofsuffixes(bool setdcovsuffixsortspace,
-                             GtSuffixsortspace *suffixsortspace,
+void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                              unsigned long numberofsuffixes,
                              GtBucketspec2 *bucketspec2,
                              const GtEncseq *encseq,

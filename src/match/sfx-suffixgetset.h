@@ -23,11 +23,6 @@
 
 typedef struct GtSuffixsortspace GtSuffixsortspace;
 
-typedef void (*Dc_processunsortedrange)(void *,
-                                        unsigned long,
-                                        unsigned long,
-                                        unsigned long);
-
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
                                           unsigned long maxvalue,
                                           bool suftabasulongarray);
