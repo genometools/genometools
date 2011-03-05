@@ -940,7 +940,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
 {
   if (width > 1UL)
   {
-    /* XXX remove this check later */
+#ifdef SKDEBUG
     if (depth > 0)
     {
       gt_checkifprefixesareidentical(__FILE__,
@@ -952,6 +952,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                      width,
                                      depth);
     }
+#endif
     if (bsr->sfxstrategy->ssortmaxdepth.defined)
     {
       if (depth >=
