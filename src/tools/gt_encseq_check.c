@@ -18,8 +18,8 @@
 #include "core/encseq.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "match/test-mappedstr.pr"  /* XXX */
 #include "match/intcode-def.h"  /* XXX */
+#include "match/test-mappedstr.pr"  /* XXX */
 #include "tools/gt_encseq_check.h"
 
 typedef struct {

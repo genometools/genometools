@@ -15,24 +15,25 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/encseq_metadata.h"
 #include "core/error.h"
 #include "core/logger.h"
 #include "core/option.h"
-#include "core/encseq_metadata.h"
 #include "core/str_array_api.h"
 #include "match/echoseq.h"
 #include "match/esa-seqread.h"
 #include "match/esa-map.h"
 #include "match/eis-voiditf.h"
-#include "match/pckdfs.h"
-#include "match/twobits2kmers.h"
+#include "match/index_options.h"
 #include "match/optionargmode.h"
+#include "match/pckdfs.h"
+#include "match/sfx-bentsedg.h"
+#include "match/sfx-diffcov.h"
 #include "match/sfx-strategy.h"
 #include "match/sfx-suffixgetset.h"
-#include "match/sfx-bentsedg.h"
 #include "match/sfx-suftaborder.h"
-#include "match/index_options.h"
 #include "match/test-mappedstr.pr"
+#include "match/twobits2kmers.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -48,7 +49,8 @@ typedef struct
        inputbwt,
        inputlcp,
        inputbck,
-       inputssp;
+       inputssp,
+       diffcovercheck;
   unsigned long delspranges;
   GtStr *esaindexname,
         *pckindexname;
@@ -138,7 +140,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
-         *optionsortmaxdepth, *optionalgbounds;
+         *optionsortmaxdepth, *optionalgbounds, *optiondiffcov;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -240,6 +242,10 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                  &arguments->inputssp,
                                  false);
   gt_option_parser_add_option(op, optionssp);
+
+  optiondiffcov = gt_option_new_bool("diffcover","check difference covers",
+                                     &arguments->diffcovercheck,false);
+  gt_option_parser_add_option(op, optiondiffcov);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
@@ -910,6 +916,31 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
   return haserr ? -1 : 0;
 }
 
+static int run_diffcover_check(const Sfxmapoptions *arguments, GtError *err)
+{
+  bool had_err = 0;
+  GtEncseqLoader *el = NULL;
+  GtEncseq *encseq = NULL;
+  const char *indexname;
+
+  indexname = gt_str_get(arguments->esaindexname);
+  el = gt_encseq_loader_new();
+  encseq = gt_encseq_loader_load(el, indexname, err);
+  if (!encseq)
+    had_err = -1;
+
+  if (!had_err) {
+    GtReadmode readmode;
+    for (readmode = GT_READMODE_FORWARD;
+         readmode <= GT_READMODE_REVCOMPL; readmode++) {
+      gt_differencecovers_check(encseq, readmode);
+    }
+  }
+  gt_encseq_delete(encseq);
+  gt_encseq_loader_delete(el);
+  return had_err;
+}
+
 static int gt_sfxmap_runner(GT_UNUSED int argc,
                             GT_UNUSED const char **argv,
                             GT_UNUSED int parsed_args,
@@ -948,6 +979,11 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
     {
       haserr = true;
     }
+  }
+  if (!haserr && arguments->diffcovercheck)
+  {
+    if (run_diffcover_check(arguments, err) != 0)
+      haserr = true;
   }
   gt_logger_delete(logger);
   return haserr ? -1 : 0;
