@@ -38,7 +38,11 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               bool assideeffect,
                               GtError *err);
 
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
+void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
+                          unsigned int numofchars,
+                          unsigned int prefixlength);
+
+void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,bool withdiffcover);
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
@@ -81,11 +85,12 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                              GtReadmode readmode,
                              GtCodetype mincode,
                              GtCodetype maxcode,
-                             const Bcktab *bcktab,
+                             Bcktab *bcktab,
                              unsigned int numofchars,
                              unsigned int prefixlength,
                              unsigned int sortmaxdepth,
                              const Sfxstrategy *sfxstrategy,
+                             Outlcpinfo *outlcpinfo,
                              void *processunsortedsuffixrangeinfo,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange,

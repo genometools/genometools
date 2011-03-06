@@ -173,6 +173,7 @@ void gt_checksortedsuffixes(const char *filename,
                               maxlcp);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
+      gt_assert(depth == 0 || maxlcp <= depth);
     }
     pos1 = pos2;
   }

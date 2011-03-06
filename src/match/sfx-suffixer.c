@@ -68,7 +68,7 @@ struct Sfxiterator
   Suftabparts *suftabparts;
   const GtEncseq *encseq;
   GtReadmode readmode;
-  Outlcpinfo *outlcpinfo;
+  Outlcpinfo *outlcpinfo, *outlcpinfoforsample;
   unsigned int part,
                numofchars,
                prefixlength;
@@ -460,6 +460,7 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_suffixsortspace_delete(sfi->suffixsortspace,true);
   gt_freesuftabparts(sfi->suftabparts);
   gt_bcktab_delete(sfi->bcktab);
+  gt_Outlcpinfo_delete(sfi->outlcpinfoforsample,true);
   gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
 }
@@ -686,7 +687,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->suftabparts = NULL;
     sfi->encseq = encseq;
     sfi->readmode = readmode;
-    sfi->numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
+    sfi->numofchars = gt_encseq_alphabetnumofchars(encseq);
     sfi->prefixlength = prefixlength;
     sfi->maskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->dcov = NULL;
@@ -728,6 +729,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     gt_logger_log(logger,"totallength=%lu",sfi->totallength);
     sfi->specialcharacters = specialcharacters;
     sfi->outlcpinfo = (Outlcpinfo *) voidoutlcpinfo;
+    sfi->outlcpinfoforsample = NULL;
     sfi->sri = NULL;
     sfi->part = 0;
     sfi->exhausted = false;
@@ -738,22 +740,40 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     if (sfi->sfxstrategy.differencecover > 0 &&
         gt_encseq_specialcharacters(encseq) < gt_encseq_total_length(encseq))
     {
-      /* the following function only has an effect differencecover > 0 */
-      sfi->dcov = gt_differencecover_prepare_sample(
-                                        sfi->sfxstrategy.differencecover,
-                                        sfi->encseq,
-                                        sfi->readmode,
-                                        sfi->prefixlength,
-                                        &sfi->sfxstrategy,
-                                        sfi->logger,
-                                        sfi->sfxprogress,
-                                        err);
-      if (sfi->dcov == NULL)
+      if (sfi->outlcpinfo != NULL)
       {
-        haserr = true;
-      } else
+        sfi->outlcpinfoforsample
+          = gt_Outlcpinfo_new(NULL,
+                              sfi->numofchars,
+                              0, /* as this is not know yet */
+                              sfi->totallength,
+                              true,
+                              err);
+        if (sfi->outlcpinfo == NULL)
+        {
+          haserr = true;
+        }
+      }
+      if (!haserr)
       {
-        estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
+        /* the following function only has an effect differencecover > 0 */
+        sfi->dcov = gt_differencecover_prepare_sample(
+                                          sfi->sfxstrategy.differencecover,
+                                          sfi->encseq,
+                                          sfi->readmode,
+                                          sfi->prefixlength,
+                                          &sfi->sfxstrategy,
+                                          sfi->outlcpinfoforsample,
+                                          sfi->logger,
+                                          sfi->sfxprogress,
+                                          err);
+        if (sfi->dcov == NULL)
+        {
+          haserr = true;
+        } else
+        {
+          estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
+        }
       }
     }
   }
@@ -1012,6 +1032,7 @@ static void preparethispart(Sfxiterator *sfi)
                               sfi->prefixlength,
                               sfi->sfxstrategy.differencecover,
                               &sfi->sfxstrategy,
+                              NULL, /* outlcpinfo */
                               (void *) sfi->dcov,
                               gt_differencecover_sortunsortedbucket,
                               sfi->logger);

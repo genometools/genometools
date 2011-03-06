@@ -367,6 +367,12 @@ static void updatelcpvalue(Bentsedgresources *bsr,
   bsr->lcpsubtab->bucketoflcpvalues[idx] = value;
 }
 
+static unsigned long lcpsubtab_getvalue(const Lcpsubtab *lcpsubtab,
+                                        unsigned long idx)
+{
+  return lcpsubtab->bucketoflcpvalues[idx];
+}
+
 static void bs_insertionsort(Bentsedgresources *bsr,
                              unsigned long subbucketleft,
                              unsigned long width,
@@ -453,7 +459,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
-                         bsr->lcpsubtab->bucketoflcpvalues[lcpindex]);
+                         lcpsubtab_getvalue(bsr->lcpsubtab,lcpindex));
         }
         updatelcpvalue(bsr,lcpindex,lcplen);
       }
@@ -566,7 +572,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
         if (pj < pi && retval > 0)
         {
           updatelcpvalue(bsr,lcpindex+1,
-                         bsr->lcpsubtab->bucketoflcpvalues[lcpindex]);
+                         lcpsubtab_getvalue(bsr->lcpsubtab,lcpindex));
         }
         updatelcpvalue(bsr,lcpindex,lcplen);
       }
@@ -1474,11 +1480,14 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
     outlcpinfo->lcpsubtab.maxbranchdepth = lcpvalue;
   }
   outlcpinfo->lcpsubtab.smalllcpvalues[0] = (uint8_t) lcpvalue;
-  outlcpinfo->lcpsubtab.countoutputlcpvalues += specialsinbucket;
-  gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
-             sizeof (*outlcpinfo->lcpsubtab.smalllcpvalues),
-             (size_t) specialsinbucket,
-             outlcpinfo->outfplcptab);
+  if (outlcpinfo->outfplcptab != NULL)
+  {
+    outlcpinfo->lcpsubtab.countoutputlcpvalues += specialsinbucket;
+    gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
+               sizeof (*outlcpinfo->lcpsubtab.smalllcpvalues),
+               (size_t) specialsinbucket,
+               outlcpinfo->outfplcptab);
+  }
   return minprefixindex;
 }
 
@@ -1525,7 +1534,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   GT_INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->minchanged = 0;
-  if (assideeffect)
+  if (assideeffect && prefixlength > 0)
   {
     outlcpinfo->tw = gt_newTurningwheel(prefixlength,numofchars);
   } else
@@ -1545,6 +1554,16 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
     return NULL;
   }
   return outlcpinfo;
+}
+
+void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
+                          unsigned int numofchars,
+                          unsigned int prefixlength)
+{
+  if (outlcpinfo != NULL)
+  {
+    outlcpinfo->tw = gt_newTurningwheel(prefixlength,numofchars);
+  }
 }
 
 static void outlcpvalues(Lcpsubtab *lcpsubtab,
@@ -1573,7 +1592,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   {
     if (lcpsubtab->bucketoflcpvalues != NULL)
     {
-      lcpvalue = lcpsubtab->bucketoflcpvalues[idx];
+      lcpvalue = lcpsubtab_getvalue(lcpsubtab,idx);
     } else
     {
       lcpvalue = compressedtable_get(lcpsubtab->completelcpvalues,idx);
@@ -1596,11 +1615,15 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
   }
-  lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
-  gt_xfwrite(lcpsubtab->smalllcpvalues,
-             sizeof (*lcpsubtab->smalllcpvalues),
-             (size_t) (bucketright - bucketleft + 1),fplcptab);
-  if (lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
+  if (fplcptab != NULL)
+  {
+    lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
+    gt_xfwrite(lcpsubtab->smalllcpvalues,
+               sizeof (*lcpsubtab->smalllcpvalues),
+               (size_t) (bucketright - bucketleft + 1),
+               fplcptab);
+  }
+  if (fpllvtab != NULL && lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     lcpsubtab->totalnumoflargelcpvalues
       += lcpsubtab->largelcpvalues.nextfreeLargelcpvalue;
@@ -1639,8 +1662,8 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
                               FILE *fplcptab,
                               FILE *fpllvtab)
 {
-  unsigned long buffersize = 512UL, sizeforsmalllcpvalues;
-  unsigned long remaining, left, width;
+  unsigned long buffersize = 512UL, sizeforsmalllcpvalues,
+                remaining, left, width;
   bool mallocsmalllcpvalues;
 
   if (buffersize > totallength + 1)
@@ -1685,7 +1708,8 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   lcpsubtab->countoutputlcpvalues = bucketsize;
 }
 
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
+void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
+                          /*XXX remove this later*/ bool withdiffcover)
 {
   if (outlcpinfo == NULL)
   {
@@ -1701,14 +1725,18 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
       gt_freeTurningwheel(&outlcpinfo->tw);
     }
   }
-  if (outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength+1)
+  if (outlcpinfo->outfplcptab != NULL &&
+      !withdiffcover &&
+      outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength+1)
   {
     outlcpinfo->lcpsubtab.countoutputlcpvalues
       += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
                            outlcpinfo->totallength,
                            outlcpinfo->outfplcptab);
   }
-  gt_assert(outlcpinfo->lcpsubtab.countoutputlcpvalues ==
+  gt_assert(outlcpinfo->outfplcptab == NULL ||
+            withdiffcover ||
+            outlcpinfo->lcpsubtab.countoutputlcpvalues ==
             outlcpinfo->totallength + 1);
   GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   gt_fa_fclose(outlcpinfo->outfplcptab);
@@ -1779,9 +1807,6 @@ static void initBentsedgresources(Bentsedgresources *bsr,
       size_t sizeforlcpvalues; /* in bytes */
 
       gt_assert(bsr->lcpsubtab != NULL);
-      gt_assert(sizeof (*bsr->lcpsubtab->smalllcpvalues) == sizeof (uint8_t));
-      gt_assert(sizeof (*bsr->lcpsubtab->bucketoflcpvalues) ==
-                sizeof (unsigned long));
       sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
       if (bsr->lcpsubtab->sizereservoir < sizeforlcpvalues)
       {
@@ -1793,7 +1818,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
         bsr->lcpsubtab->smalllcpvalues = (uint8_t *) bsr->lcpsubtab->reservoir;
         bsr->lcpsubtab->bucketoflcpvalues
           = (unsigned long *) bsr->lcpsubtab->reservoir;
-      }
+     }
     }
   }
   GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
@@ -2183,11 +2208,12 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                              GtReadmode readmode,
                              GtCodetype mincode,
                              GtCodetype maxcode,
-                             const Bcktab *bcktab,
+                             Bcktab *bcktab,
                              unsigned int numofchars,
                              unsigned int prefixlength,
                              unsigned int sortmaxdepth,
                              const Sfxstrategy *sfxstrategy,
+                             Outlcpinfo *outlcpinfo,
                              void *processunsortedsuffixrangeinfo,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange,
@@ -2202,14 +2228,14 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                         suffixsortspace,
                         encseq,
                         readmode,
-                        NULL, /* bcktab unused */
-                        0,    /* mincode unused */
-                        0,    /* maxcode unused */
-                        0,    /* partwidth unused */
+                        outlcpinfo == NULL ? NULL : bcktab,
+                        outlcpinfo == NULL ? 0    : mincode,
+                        outlcpinfo == NULL ? 0    : maxcode,
+                        outlcpinfo == NULL ? 0    : numberofsuffixes,
                         numofchars,
                         prefixlength,
                         sortmaxdepth,
-                        NULL,  /* outlcpinfo unused */
+                        outlcpinfo,
                         sfxstrategy);
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;

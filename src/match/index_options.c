@@ -227,9 +227,9 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
   }
   if (!had_err && oi->sfxstrategy.differencecover > 0
       && oi->optionoutlcptab != NULL
-      && gt_option_is_set(oi->optionoutlcptab)) {
-    gt_error_set(err,"option -dc cannot be combined with option -lcp");
-    had_err = -1;
+      && gt_option_is_set(oi->optionoutlcptab))
+  {
+    printf("# WARNING: lcp table is not yet correct if option -dc is used\n");
   }
   if (!had_err && oi->type == GT_INDEX_OPTIONS_PACKED) {
 #ifndef S_SPLINT_S
@@ -538,10 +538,12 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   {
     gt_option_exclude(idxo->optionmaxdepth, idxo->optiondifferencecover);
   }
+  /* XXX
   if (idxo->optionoutlcptab != NULL)
   {
     gt_option_exclude(idxo->optionoutlcptab, idxo->optiondifferencecover);
   }
+  */
 
   gt_option_parser_register_hook(op, gt_index_options_checkandsetoptions, idxo);
 

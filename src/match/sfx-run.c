@@ -74,10 +74,10 @@ typedef struct
 } Outfileinfo;
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
-                          unsigned int prefixlength,
-                          const GtEncseq *encseq,
-                          const Suffixeratoroptions *so,
-                          GtError *err)
+                           unsigned int prefixlength,
+                           const GtEncseq *encseq,
+                           const Suffixeratoroptions *so,
+                           GtError *err)
 {
   bool haserr = false,
        outlcptab = gt_index_options_outlcptab_value(so->idxopts);
@@ -93,7 +93,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   {
     outfileinfo->outlcpinfo
       = gt_Outlcpinfo_new(outlcptab ? gt_str_get(so->indexname) : NULL,
-                          gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq)),
+                          gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_encseq_total_length(encseq),
                           strategy.ssortmaxdepth.defined ? false : true,
@@ -655,7 +655,8 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-  gt_Outlcpinfo_delete(outfileinfo.outlcpinfo);
+  gt_Outlcpinfo_delete(outfileinfo.outlcpinfo,
+                       sfxstrategy.differencecover > 0 ? true : false);
   gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr

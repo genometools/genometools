@@ -24,8 +24,9 @@
 #include "core/logger.h"
 #include "core/timer_api.h"
 #include "core/error_api.h"
-#include "match/sfx-strategy.h"
-#include "match/sfx-suffixgetset.h"
+#include "sfx-strategy.h"
+#include "sfx-suffixgetset.h"
+#include "sfx-bentsedg.h"
 
 typedef struct Differencecover Differencecover;
 
@@ -46,6 +47,7 @@ Differencecover *gt_differencecover_prepare_sample(
                                         GtReadmode readmode,
                                         unsigned int prefixlength,
                                         const Sfxstrategy *sfxstrategy,
+                                        Outlcpinfo *outlcpinfosample,
                                         GtLogger *logger,
                                         GtTimer *sfxprogress,
                                         GtError *err);

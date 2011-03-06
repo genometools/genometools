@@ -523,12 +523,12 @@ static void gt_bcktab_showleftborder(const Bcktab *bcktab)
 #endif
 
 unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
-                                   const Bcktab *bcktab,
-                                   GtCodetype code,
-                                   GtCodetype maxcode,
-                                   unsigned long totalwidth,
-                                   unsigned int rightchar,
-                                   unsigned int numofchars)
+                                      const Bcktab *bcktab,
+                                      GtCodetype code,
+                                      GtCodetype maxcode,
+                                      unsigned long totalwidth,
+                                      unsigned int rightchar,
+                                      unsigned int numofchars)
 {
   bucketspec->left = bcktab->leftborder[code];
   if (code == maxcode)

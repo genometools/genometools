@@ -1004,6 +1004,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
 }
 
 static void gt_differencecover_sortsample(Differencecover *dcov,
+                                          Outlcpinfo *outlcpinfosample,
                                           const Sfxstrategy *mainsfxstrategy,
                                           bool withcheck)
 {
@@ -1191,6 +1192,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                   sfxstrategy.maxbltriesort);
     gt_logger_log(dcov->logger,"samplesort.maxcountingsort=%lu",
                   sfxstrategy.maxcountingsort);
+    gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength);
     gt_sortbucketofsuffixes(dcov->sortedsample,
                             dcov->effectivesamplesize,
                             NULL,
@@ -1203,6 +1205,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                             dcov->prefixlength,
                             dcov->vparam,
                             &sfxstrategy,
+                            outlcpinfosample,
                             (void *) dcov,
                             dc_addunsortedrange,
                             dcov->logger);
@@ -1259,6 +1262,7 @@ Differencecover *gt_differencecover_prepare_sample(
                                         GtReadmode readmode,
                                         unsigned int prefixlength,
                                         const Sfxstrategy *sfxstrategy,
+                                        Outlcpinfo *outlcpinfosample,
                                         GtLogger *logger,
                                         GtTimer *sfxprogress,
                                         GtError *err)
@@ -1268,7 +1272,11 @@ Differencecover *gt_differencecover_prepare_sample(
   gt_assert(vparam > 0);
   if (sfxprogress != NULL)
   {
-    gt_timer_show_progress(sfxprogress, "sorting difference cover sample",
+    gt_timer_show_progress(sfxprogress,
+                           (outlcpinfosample == NULL)
+                           ? "sorting difference cover sample"
+                           : ("sorting difference cover sample " 
+                             "and determine their lcp values"),
                            stdout);
   }
   dcov = gt_differencecover_new(vparam,encseq,readmode,
@@ -1286,7 +1294,8 @@ Differencecover *gt_differencecover_prepare_sample(
     {
       gt_logger_log(logger,"presorting sample suffixes according to "
                            "difference cover modulo %u",vparam);
-      gt_differencecover_sortsample(dcov,sfxstrategy,false);
+      gt_differencecover_sortsample(dcov,outlcpinfosample,sfxstrategy,
+                                    /*XXX set back to false*/ true );
     }
   }
   return dcov;
@@ -1318,7 +1327,7 @@ void gt_differencecover_check(const GtEncseq *encseq,
     {
       validate_samplepositons(dcov);
     }
-    gt_differencecover_sortsample(dcov,NULL,withcheck);
+    gt_differencecover_sortsample(dcov,NULL,NULL,withcheck);
     gt_differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",(unsigned int) logmod);

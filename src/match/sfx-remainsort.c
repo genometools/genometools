@@ -553,13 +553,13 @@ static void inversesuftabrel_get(RmsItvfullentry *itvfullentry,
     return;
   }
   code = gt_encseq_extractprefixcode(&itvfullentry->unitsnotspecial,
-                           rmnsufinfo->encseq,
-                           rmnsufinfo->filltable,
-                           rmnsufinfo->readmode,
-                           rmnsufinfo->esr,
-                           rmnsufinfo->multimappower,
-                           startpos,
-                           rmnsufinfo->prefixlength);
+                                     rmnsufinfo->encseq,
+                                     rmnsufinfo->filltable,
+                                     rmnsufinfo->readmode,
+                                     rmnsufinfo->esr,
+                                     rmnsufinfo->multimappower,
+                                     startpos,
+                                     rmnsufinfo->prefixlength);
   /*
   printf("startpos=%lu,unitsnotspecial=%u,code=%u\n",
           (unsigned long) startpos,
