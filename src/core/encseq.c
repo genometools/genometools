@@ -1111,11 +1111,9 @@ typedef struct
   GtEncseqAccessType satsep;
   unsigned long nextcheckpos, nextcheckincrement, pagenumber, fillpos,
                 numofpages;
-  /* FILE *fp; */
 } Gtssptaboutinfo;
 
-static Gtssptaboutinfo *ssptaboutinfo_new(/* GT_UNUSED const char *indexname, */
-                                          GtEncseqAccessType sat,
+static Gtssptaboutinfo *ssptaboutinfo_new(GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
                                           GtSWtable *ssptabnew,
@@ -1173,14 +1171,6 @@ static Gtssptaboutinfo *ssptaboutinfo_new(/* GT_UNUSED const char *indexname, */
   }
   ssptaboutinfo->nextcheckpos = ssptaboutinfo->nextcheckincrement - 1;
   ssptaboutinfo->pagenumber = ssptaboutinfo->fillpos = 0;
-  /*
-  ssptaboutinfo->fp = gt_fa_fopen_with_suffix(indexname,GT_SSPTABFILESUFFIX,
-                                              "wb",err);
-  if (ssptaboutinfo->fp == NULL)
-  {
-    gt_free(ssptaboutinfo);
-    return NULL;
-  } */
   return ssptaboutinfo;
 }
 
@@ -1188,7 +1178,6 @@ static void ssptaboutinfo_delete(Gtssptaboutinfo *ssptaboutinfo)
 {
   if (ssptaboutinfo != NULL)
   {
-    /* gt_fa_fclose(ssptaboutinfo->fp); */
     gt_free(ssptaboutinfo);
   }
 }
@@ -1198,9 +1187,6 @@ static void ssptaboutinfo_processseppos(Gtssptaboutinfo *ssptaboutinfo,
 {
   if (ssptaboutinfo != NULL)
   {
-    /*
-    gt_assert(ssptaboutinfo->fp != NULL);
-    gt_xfwrite(&seppos,sizeof (seppos), (size_t) 1, ssptaboutinfo->fp); */
     switch (ssptaboutinfo->satsep)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
@@ -1895,25 +1881,6 @@ static unsigned long gt_encseq_seqstartpos_Viaequallength(
   gt_assert(encseq != NULL && seqnum < encseq->logicalnumofdbsequences);
   return seqnum * (encseq->equallength.valueunsignedlong + 1);
 }
-
-/*
-static bool checkspecialbruteforce(const GtEncseq *encseq,
-                                   GtReadmode readmode,
-                                   unsigned long startpos,
-                                   unsigned long len)
-{
-  unsigned long idx;
-
-  for (idx=startpos; idx < startpos + len; idx++)
-  {
-    if (ISSPECIAL(gt_encseq_get_encoded_char(encseq,idx,readmode)))
-    {
-      return true;
-    }
-  }
-  return false;
-}
-*/
 
 static bool containsspecialViaequallength(const GtEncseq *encseq,
                                           GtReadmode readmode,
@@ -4503,15 +4470,6 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   gt_fa_xfclose(oisfp);
   gt_sequence_buffer_delete(fb);
   gt_queue_delete_with_contents(descqueue);
-  /*
-  if (equallength->defined)
-  {
-    printf("equallength=%lu\n",equallength->valueunsignedlong);
-  } else
-  {
-    printf("different length\n");
-  }
-  */
 #ifndef NDEBUG
   gt_GtSpecialcharinfo_check(specialcharinfo,*numofseparators);
 #endif
@@ -6307,7 +6265,7 @@ gt_encseq_new_from_files(GtTimer *sfxprogress,
   unsigned long specialranges, wildcardranges;
   Definedunsignedlong equallength; /* is defined of all sequences are of equal
                                       length and no WILDCARD appears in the
-                                      * sequence */
+                                      sequence */
   GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
 
   gt_error_check(err);
@@ -7142,7 +7100,7 @@ GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
   gt_assert(opts);
 
   el = gt_encseq_loader_new();
-  /* set options according to options */
+  /* set options according to option object */
   if (gt_encseq_options_lossless_value(opts))
     gt_encseq_loader_require_lossless_support(el);
   if (gt_encseq_options_mirrored_value(opts))
