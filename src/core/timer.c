@@ -134,7 +134,7 @@ void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
   fprintf(fp,"# TIME %s %ld.%02ld\n",
           t->statedesc,
           (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec));
+          (long)(elapsed_tv.tv_usec)/10000);
   t->statedesc = desc;
   gettimeofday(&t->start_tv, NULL);
 }
@@ -143,10 +143,15 @@ void gt_timer_show_progress_final(GtTimer *t, FILE *fp)
 {
   struct timeval elapsed_tv;
   gt_timer_stop(t);
+  timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
+  fprintf(fp,"# TIME %s %ld.%02ld\n",
+          t->statedesc,
+          (long)(elapsed_tv.tv_sec),
+          (long)(elapsed_tv.tv_usec)/10000);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->gstart_tv);
   fprintf(fp,"# TIME overall %ld.%02ld\n",
           (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec));
+          (long)(elapsed_tv.tv_usec)/10000);
 }
 
 void gt_timer_delete(GtTimer *t)
