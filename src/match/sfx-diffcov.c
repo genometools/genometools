@@ -1275,7 +1275,7 @@ Differencecover *gt_differencecover_prepare_sample(
     gt_timer_show_progress(sfxprogress,
                            (outlcpinfosample == NULL)
                            ? "sorting difference cover sample"
-                           : ("sorting difference cover sample " 
+                           : ("sorting difference cover sample "
                              "and determine their lcp values"),
                            stdout);
   }
@@ -1306,12 +1306,13 @@ void gt_differencecover_check(const GtEncseq *encseq,
 {
   Differencecover *dcov;
   size_t logmod;
+  const size_t startlogmod = (size_t) 4;
   unsigned int vparam;
   bool withcheck = true;
 
   printf("sizeof (differencecovertab)=%lu\n",
           (unsigned long) sizeof (differencecovertab));
-  for (logmod = (size_t) 4;
+  for (logmod = startlogmod;
        logmod < sizeof (differencecoversizes)/sizeof (differencecoversizes[0]);
        logmod++)
   {
@@ -1322,7 +1323,7 @@ void gt_differencecover_check(const GtEncseq *encseq,
       fprintf(stderr,"no difference cover for v=%u\n",vparam);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    printf("v=%u (size=%u): ",dcov->vparam,dcov->size);
+    printf("v=%u (size=%u)\n",dcov->vparam,dcov->size);
     if (withcheck)
     {
       validate_samplepositons(dcov);
@@ -1330,5 +1331,6 @@ void gt_differencecover_check(const GtEncseq *encseq,
     gt_differencecover_sortsample(dcov,NULL,NULL,withcheck);
     gt_differencecover_delete(dcov);
   }
-  printf("# %u difference covers checked\n",(unsigned int) logmod);
+  printf("# %u difference covers checked\n",
+          (unsigned int) (logmod - startlogmod));
 }
