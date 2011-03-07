@@ -918,7 +918,7 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
 
 static int run_diffcover_check(const Sfxmapoptions *arguments, GtError *err)
 {
-  bool had_err = 0;
+  int had_err = 0;
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
   const char *indexname;
