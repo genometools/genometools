@@ -1295,7 +1295,7 @@ Differencecover *gt_differencecover_prepare_sample(
       gt_logger_log(logger,"presorting sample suffixes according to "
                            "difference cover modulo %u",vparam);
       gt_differencecover_sortsample(dcov,outlcpinfosample,sfxstrategy,
-                                    /*XXX set back to false*/ true );
+                                    sfxstrategy->dccheck);
     }
   }
   return dcov;

@@ -58,12 +58,12 @@ def checkdc(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -v -pl -dc 64 -lcp -suf -ssp -tis " +
-           "-indexname sfx -db " + filearg
+  run_test "#{$bin}gt suffixerator -v -pl -dc 64 -dccheck " +
+           "-lcp -suf -ssp -tis -indexname sfx -db " + filearg
   run_test "#{$bin}gt dev sfxmap -suf -tis -ssp -v -esa sfx",
            :maxtime => 600
-  run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -lcp -suf -tis " +
-           "-indexname sfx3 -db " + filearg
+  run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -dccheck " +
+           "-lcp -suf -tis -indexname sfx3 -db " + filearg
   run "diff sfx3.suf sfx.suf"
 end
 
@@ -163,14 +163,14 @@ Test do
 end
 
 all_fastafiles.each do |filename|
-  Name "gt suffixerator -dc 64 -lcp -parts 1+3 #{filename}"
+  Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 #{filename}"
   Keywords "gt_suffixerator dc"
   Test do
     checkdc([filename])
   end
 end
 
-Name "gt suffixerator -dc 64 -lcp -parts 1+3 all-fastafiles"
+Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 all-fastafiles"
 Keywords "gt_suffixerator dc"
 Test do
   checkdc(all_fastafiles)

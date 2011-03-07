@@ -43,7 +43,8 @@ typedef struct
        iteratorbasedkmerscanning,
        suftabasulongarray,
        onlybucketinsertion,
-       kmerswithencseqreader;
+       kmerswithencseqreader,
+       dccheck;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
@@ -64,6 +65,7 @@ typedef struct
   sfxstrategy->suftabasulongarray = false;
   sfxstrategy->onlybucketinsertion = false;
   sfxstrategy->kmerswithencseqreader = false;
+  sfxstrategy->dccheck = false;
 }
 
 #endif
