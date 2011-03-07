@@ -427,3 +427,33 @@ end
     end
   end
 end
+
+small_fastafiles = ["Duplicate.fna",
+                    "Random-Small.fna",
+                    "Copysorttest.fna",
+                    "Random159.fna",
+                    "Random160.fna",
+                    "TTT-small.fna",
+                    "trna_glutamine.fna",
+                    "Small.fna",
+                    "Verysmall.fna",
+                    "Arabidopsis-C99826.fna"]
+small_fastafiles.each do |file|
+  Name "differencecover sortmaxdepth #{file}"
+  Keywords "differencecover sortmaxdepth"
+  Test do
+    file = "#{$testdata}/#{file}"
+    run "#{$bin}/gt suffixerator -tis -db #{file} -indexname esa"
+    [2, 10].each do |maxinsertionsort|
+      [10, 30, 100].each do |maxbltriesort|
+        [2, 7, 13].each do |maxdepth|
+          run_test "#{$bin}/gt dev sfxmap -sortmaxdepth #{maxdepth} -esa " + \
+                   "esa -v -algbds #{maxinsertionsort} #{maxbltriesort} 1000"
+        end
+        run_test "#{$bin}/gt suffixerator -db #{file} -indexname esa2 " + \
+                 "-suf -v -algbds #{maxinsertionsort} #{maxbltriesort} 1000"
+        run_test "#{$bin}/gt dev sfxmap -suf -esa esa2"
+      end
+    end
+  end
+end
