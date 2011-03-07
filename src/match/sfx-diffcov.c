@@ -1297,7 +1297,7 @@ Differencecover *gt_differencecover_prepare_sample(
   return dcov;
 }
 
-void gt_differencecovers_check(const GtEncseq *encseq,
+void gt_differencecover_check(const GtEncseq *encseq,
                                GtReadmode readmode)
 {
   Differencecover *dcov;

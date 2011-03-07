@@ -30,7 +30,7 @@ typedef struct Differencecover Differencecover;
 
 /* The following function is used for test purposes only */
 
-void gt_differencecovers_check(const GtEncseq *encseq,
+void gt_differencecover_check(const GtEncseq *encseq,
                                GtReadmode readmode);
 
 Differencecover *gt_differencecover_new(unsigned int vparam,

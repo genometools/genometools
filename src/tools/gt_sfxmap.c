@@ -933,7 +933,7 @@ static int run_diffcover_check(const Sfxmapoptions *arguments, GtError *err)
     GtReadmode readmode;
     for (readmode = GT_READMODE_FORWARD;
          readmode <= GT_READMODE_REVCOMPL; readmode++) {
-      gt_differencecovers_check(encseq, readmode);
+      gt_differencecover_check(encseq, readmode);
     }
   }
   gt_encseq_delete(encseq);
