@@ -765,7 +765,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
                            unsigned long subbucketleft,
                            unsigned long offset,
                            unsigned long maxdepth,
-                           unsigned long *lcpsubtab,
+                           unsigned long *lcptabspace,
                            unsigned long *numoflargelcpvalues,
                            void *voiddcov,
                            GtProcessunsortedsuffixrange
@@ -789,9 +789,9 @@ static unsigned long blindtrie_enumeratetrieleaves (
     {
       if (nextfree > 0)
       {
-        if (lcpsubtab != NULL)
+        if (lcptabspace != NULL)
         {
-          lcpsubtab[nextfree] = lcpnodedepth + offset;
+          lcptabspace[nextfree] = lcpnodedepth + offset;
           if (lcpnodedepth + offset >= (unsigned long) LCPOVERFLOW)
           {
             (*numoflargelcpvalues)++;
@@ -862,10 +862,10 @@ static unsigned long blindtrie_enumeratetrieleaves (
   if (nextfree > 0 && equalsrangewidth > 0)
   {
     processunsortedsuffixrange(voiddcov,
-                            bucketleftidxplussubbucketleft
-                              + nextfree - 1 - equalsrangewidth,
-                            equalsrangewidth + 1,
-                            maxdepth);
+                               bucketleftidxplussubbucketleft
+                                 + nextfree - 1 - equalsrangewidth,
+                               equalsrangewidth + 1,
+                               maxdepth);
     equalsrangewidth = 0;
   }
   return nextfree;
@@ -1113,7 +1113,7 @@ static int blindtrie_compare_ascending(const void *a,const void *b)
 
 static void processoverflowsuffixes(Blindtrie *blindtrie,
                                     unsigned long offset,
-                                    unsigned long *lcpsubtab,
+                                    unsigned long *bucketoflcpvalues,
                                     unsigned long subbucketleft,
                                     unsigned long nextsuffixtooutput)
 {
@@ -1130,9 +1130,9 @@ static void processoverflowsuffixes(Blindtrie *blindtrie,
     }
     for (idx = 0; idx < blindtrie->overflowsuffixes.nextfreeGtUlong; idx++)
     {
-      if (lcpsubtab != NULL)
+      if (bucketoflcpvalues != NULL)
       {
-        lcpsubtab[nextsuffixtooutput] = offset;
+        bucketoflcpvalues[nextsuffixtooutput] = offset;
       }
       blindtrie_suffixout(blindtrie,subbucketleft,offset,nextsuffixtooutput,
                           blindtrie->overflowsuffixes.spaceGtUlong[idx]);
@@ -1143,7 +1143,7 @@ static void processoverflowsuffixes(Blindtrie *blindtrie,
 
 static unsigned long gt_blindtrie2sorting(Blindtrie *blindtrie,
                                           unsigned long subbucketleft,
-                                          unsigned long *lcpsubtab,
+                                          unsigned long *bucketoflcpvalues,
                                           unsigned long offset,
                                           unsigned long maxdepth,
                                           void *voiddcov,
@@ -1154,14 +1154,15 @@ static unsigned long gt_blindtrie2sorting(Blindtrie *blindtrie,
 
   nextsuffixtosort
     = blindtrie_enumeratetrieleaves (blindtrie,subbucketleft,offset,maxdepth,
-                                     lcpsubtab,&numoflargelcpvalues,
+                                     bucketoflcpvalues,&numoflargelcpvalues,
                                      voiddcov,processunsortedsuffixrange);
   processoverflowsuffixes(blindtrie,
                           offset,
-                          lcpsubtab,
+                          bucketoflcpvalues,
                           subbucketleft,
                           nextsuffixtosort);
-  if (lcpsubtab != NULL && blindtrie->overflowsuffixes.nextfreeGtUlong > 0 &&
+  if (bucketoflcpvalues != NULL &&
+      blindtrie->overflowsuffixes.nextfreeGtUlong > 0 &&
       offset >= (unsigned long) LCPOVERFLOW)
   {
     numoflargelcpvalues += blindtrie->overflowsuffixes.nextfreeGtUlong;
@@ -1172,13 +1173,13 @@ static unsigned long gt_blindtrie2sorting(Blindtrie *blindtrie,
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             unsigned long subbucketleft,
-                            unsigned long *lcpsubtab,
+                            unsigned long *lcptabspace,
                             unsigned long numberofsuffixes,
                             unsigned long offset,
                             unsigned long maxdepth,
                             void *voiddcov,
                             GtProcessunsortedsuffixrange
-processunsortedsuffixrange)
+                              processunsortedsuffixrange)
 {
   unsigned long idx, currentstartpos;
 
@@ -1199,7 +1200,7 @@ processunsortedsuffixrange)
   }
   return gt_blindtrie2sorting(blindtrie,
                               subbucketleft,
-                              lcpsubtab,
+                              lcptabspace,
                               offset,
                               maxdepth,
                               voiddcov,

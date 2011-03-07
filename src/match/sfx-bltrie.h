@@ -43,7 +43,7 @@ void gt_blindtrie_reset(Blindtrie *blindtrie);
 unsigned long gt_blindtrie_suffixsort(
                             Blindtrie *blindtrie,
                             unsigned long subbucketleft,
-                            unsigned long *lcpsubtab,
+                            unsigned long *lcptabspace,
                             unsigned long numberofsuffixes,
                             unsigned long offset,
                             unsigned long maxdepth,
