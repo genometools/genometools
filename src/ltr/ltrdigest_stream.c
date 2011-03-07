@@ -203,7 +203,7 @@ static void ppt_attach_results_to_gff3(GtPPTResults *results,
   gt_feature_node_set_source((GtFeatureNode*) gf, tag);
   gt_feature_node_set_strand(element->mainnode, gt_ppt_hit_get_strand(hit));
   gt_feature_node_add_child(element->mainnode, (GtFeatureNode*) gf);
-  if ((ubox = gt_ppt_hit_get_ubox(hit))) {
+  if ((ubox = gt_ppt_hit_get_ubox(hit)) != NULL) {
     GtRange ubox_range = gt_ppt_hit_get_coords(ubox);
     ubox_range.start++; ubox_range.end++;
     gf = gt_feature_node_new(gt_genome_node_get_seqid((GtGenomeNode*)
