@@ -60,6 +60,7 @@
 #include "core/timer_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "core/xposix.h"
 #include "core/defined-types.h"
 #include "match/stamp.h"
 
@@ -4323,7 +4324,19 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   specialcharinfo->lengthofwildcardprefix = 0;
   specialcharinfo->lengthofwildcardsuffix = 0;
 
-  if (outdestab)
+  if (plainformat)
+  {
+    fb = gt_sequence_buffer_plain_new(filenametab);
+    equallength->defined = false;
+  } else
+  {
+    fb = gt_sequence_buffer_new_guess_type(filenametab, err);
+  }
+  if (!fb)
+  {
+    haserr = true;
+  }
+  if (!haserr && outdestab)
   {
     descqueue = gt_queue_new();
     desfp = gt_fa_fopen_with_suffix(indexname,GT_DESTABFILESUFFIX,"wb",err);
@@ -4332,7 +4345,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       haserr = true;
     }
   }
-  if (outsdstab)
+  if (!haserr && outsdstab)
   {
     sdsfp = gt_fa_fopen_with_suffix(indexname,GT_SDSTABFILESUFFIX,"wb",err);
     if (sdsfp == NULL)
@@ -4340,7 +4353,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       haserr = true;
     }
   }
-  if (outoistab)
+  if (!haserr && outoistab)
   {
     oisfp = gt_fa_fopen_with_suffix(indexname,GT_OISTABFILESUFFIX,"w",err);
     if (oisfp == NULL)
@@ -4350,71 +4363,56 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   }
   if (!haserr)
   {
-    if (plainformat)
+    char cc;
+    gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
+    *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
+                               sizeof (GtFilelengthvalues));
+    gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
+    if (descqueue != NULL)
     {
-      fb = gt_sequence_buffer_plain_new(filenametab);
-      equallength->defined = false;
-    } else
-    {
-      fb = gt_sequence_buffer_new_guess_type(filenametab, err);
+      gt_sequence_buffer_set_desc_queue(fb, descqueue);
     }
-    if (!fb)
+    gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
+    distspecialrangelength = gt_disc_distri_new();
+    distwildcardrangelength = gt_disc_distri_new();
+    for (currentpos = 0; /* Nothing */; currentpos++)
     {
-      haserr = true;
-    }
-    if (!haserr)
-    {
-      char cc;
-      gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
-      *filelengthtab = gt_calloc((size_t) gt_str_array_size(filenametab),
-                                 sizeof (GtFilelengthvalues));
-      gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
-      if (descqueue != NULL)
-      {
-        gt_sequence_buffer_set_desc_queue(fb, descqueue);
-      }
-      gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
-      distspecialrangelength = gt_disc_distri_new();
-      distwildcardrangelength = gt_disc_distri_new();
-      for (currentpos = 0; /* Nothing */; currentpos++)
-      {
 #ifndef _LP64
 #define MAXSFXLENFOR32BIT 4294000000UL
-        if (currentpos > MAXSFXLENFOR32BIT)
-        {
-          gt_error_set(err,"input sequence must not be longer than %lu",
-                       MAXSFXLENFOR32BIT);
-          haserr = true;
-          break;
-        }
+      if (currentpos > MAXSFXLENFOR32BIT)
+      {
+        gt_error_set(err,"input sequence must not be longer than %lu",
+                     MAXSFXLENFOR32BIT);
+        haserr = true;
+        break;
+      }
 #endif
-        retval = gt_sequence_buffer_next_with_original(fb,&charcode,&cc,err);
-        if (retval > 0)
-        {
+      retval = gt_sequence_buffer_next_with_original(fb,&charcode,&cc,err);
+      if (retval > 0)
+      {
 #define WITHEQUALLENGTH_DES_SSP
 #define WITHOISTAB
 #include "encseq_charproc.gen"
 
-        } else
+      } else
+      {
+        if (retval == 0)
         {
-          if (retval == 0)
+          if (lastspecialrangelength > 0)
           {
-            if (lastspecialrangelength > 0)
-            {
-              gt_disc_distri_add(distspecialrangelength,
-                                 lastspecialrangelength);
-            }
-            if (lastwildcardrangelength > 0)
-            {
-              gt_disc_distri_add(distwildcardrangelength,
-                                 lastwildcardrangelength);
-            }
-          } else /* retval < 0 */
-          {
-            haserr = true;
+            gt_disc_distri_add(distspecialrangelength,
+                               lastspecialrangelength);
           }
-          break;
+          if (lastwildcardrangelength > 0)
+          {
+            gt_disc_distri_add(distwildcardrangelength,
+                               lastwildcardrangelength);
+          }
+        } else /* retval < 0 */
+        {
+          haserr = true;
         }
+        break;
       }
     }
   }
@@ -6324,6 +6322,9 @@ gt_encseq_new_from_files(GtTimer *sfxprogress,
                                         logger,
                                         err) != 0)
     {
+      char buf[BUFSIZ];
+      (void) snprintf(buf, BUFSIZ, "%s%s", indexname, GT_ALPHABETFILESUFFIX);
+      gt_xunlink(buf);
       haserr = true;
     }
   }
@@ -6337,8 +6338,7 @@ gt_encseq_new_from_files(GtTimer *sfxprogress,
                              stdout);
     }
     retcode
-      = gt_encseq_access_type_determine(
-                                      &specialranges,
+      = gt_encseq_access_type_determine(&specialranges,
                                       &wildcardranges,
                                       totallength,
                                       numofseparators+1,
