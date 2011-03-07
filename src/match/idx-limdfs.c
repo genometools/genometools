@@ -68,6 +68,13 @@ const GtEncseq *genericindex_getencseq(const Genericindex *genericindex)
   return genericindex->suffixarray->encseq;
 }
 
+const Suffixarray *genericindex_getsuffixarray(const Genericindex
+                                                *genericindex)
+{
+  gt_assert(genericindex->suffixarray != NULL);
+  return genericindex->suffixarray;
+}
+
 Genericindex *genericindex_new(const char *indexname,
                                bool withesa,
                                bool withencseq,

@@ -26,12 +26,16 @@
 #include "absdfstrans-def.h"
 #include "core/intbits.h"
 #include "match/eis-voiditf.h"
+#include "match/sarr-def.h"
 
 typedef struct Genericindex Genericindex;
 
 void genericindex_delete(Genericindex *genericindex);
 
 const GtEncseq *genericindex_getencseq(const Genericindex
+                                                *genericindex);
+
+const Suffixarray *genericindex_getsuffixarray(const Genericindex
                                                 *genericindex);
 
 Genericindex *genericindex_new(const char *indexname,
