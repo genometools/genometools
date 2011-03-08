@@ -150,15 +150,11 @@ static int gt_sequence_buffer_fastq_advance(GtSequenceBuffer *sb, GtError *err)
 
     /* enqueue description */
     if (pvt->descptr) {
-      if (!desc)
-        gt_queue_add(pvt->descptr, gt_cstr_dup(""));
-      else {
-        char *h;
-        h = gt_cstr_rtrim(desc, ' ');
-        gt_queue_add(pvt->descptr, h);
+      int i;
+      for (i = 0; i < strlen(desc); i++) {
+        gt_desc_buffer_append_char(pvt->descptr, desc[i]);
       }
-    } else {  /* or free it if not needed */
-      gt_free(desc);
+      gt_desc_buffer_finish(pvt->descptr);
     }
 
     /* if buffer is full, return it */

@@ -187,7 +187,6 @@ int gt_echodescriptionandsequence(const GtStrArray *filenametab,GtError *err)
       break;
     }
     gt_symbolstring2fasta(stdout,desc,NULL,sequence,seqlen,70UL);
-    FREESPACE(desc);
   }
   gt_seqiterator_delete(seqit);
   return haserr ? -1 : 0;

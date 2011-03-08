@@ -337,7 +337,7 @@ int gt_seqiterator_fastq_next(GtSeqIterator *seqit,
   if (!errstatus) {
     *sequence = (GtUchar*) gt_str_get(seqitf->sequencebuffer);
     *len = gt_str_length(seqitf->sequencebuffer);
-    *desc = gt_cstr_dup(gt_str_get(seqitf->descbuffer));
+    *desc = gt_str_get(seqitf->descbuffer);
     if (seqitf->qualities)
       *seqitf->qualities = (GtUchar*) gt_str_get(seqitf->qualsbuffer);
     errstatus = 1;
@@ -356,7 +356,7 @@ int gt_seqiterator_fastq_next(GtSeqIterator *seqit,
         if (!errstatus) {
           *sequence = (GtUchar*) gt_str_get(seqitf->sequencebuffer);
           *len = gt_str_length(seqitf->sequencebuffer);
-          *desc = gt_cstr_dup(gt_str_get(seqitf->descbuffer));
+          *desc = gt_str_get(seqitf->descbuffer);
           if (seqitf->qualities)
             *seqitf->qualities = (GtUchar*) gt_str_get(seqitf->qualsbuffer);
           errstatus = 1;

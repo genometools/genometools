@@ -32,6 +32,7 @@
 #include "core/codetype.h"
 #include "core/complement.h"
 #include "core/cstr_api.h"
+#include "core/desc_buffer.h"
 #include "core/divmodmul.h"
 #include "core/encseq.h"
 #include "core/encseq_access_type.h"
@@ -4310,7 +4311,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                 lengthofcurrentsequence = 0;
   bool specialprefix = true, wildcardprefix = true, haserr = false;
   GtDiscDistri *distspecialrangelength = NULL, *distwildcardrangelength = NULL;
-  GtQueue *descqueue = NULL;
+  GtDescBuffer *descqueue = NULL;
   char *desc;
   FILE *desfp = NULL, *sdsfp = NULL, *oisfp = NULL;
 
@@ -4338,7 +4339,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   }
   if (!haserr && outdestab)
   {
-    descqueue = gt_queue_new();
+    descqueue = gt_desc_buffer_new();
     desfp = gt_fa_fopen_with_suffix(indexname,GT_DESTABFILESUFFIX,"wb",err);
     if (desfp == NULL)
     {
@@ -4370,7 +4371,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     gt_sequence_buffer_set_filelengthtab(fb, *filelengthtab);
     if (descqueue != NULL)
     {
-      gt_sequence_buffer_set_desc_queue(fb, descqueue);
+      gt_sequence_buffer_set_desc_buffer(fb, descqueue);
     }
     gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
     distspecialrangelength = gt_disc_distri_new();
@@ -4420,11 +4421,9 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   {
     if (desfp != NULL)
     {
-      desc = gt_queue_get(descqueue);
+      desc = (char*) gt_desc_buffer_get_next(descqueue);
       gt_xfputs(desc,desfp);
       gt_xfputc((int) '\n',desfp);
-      gt_free(desc);
-      desc = NULL;
     }
     *totallength = currentpos;
     specialcharinfo->lengthofspecialsuffix = lastspecialrangelength;
@@ -4467,7 +4466,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   gt_disc_distri_delete(distwildcardrangelength);
   gt_fa_xfclose(oisfp);
   gt_sequence_buffer_delete(fb);
-  gt_queue_delete_with_contents(descqueue);
+  gt_desc_buffer_delete(descqueue);
 #ifndef NDEBUG
   gt_GtSpecialcharinfo_check(specialcharinfo,*numofseparators);
 #endif

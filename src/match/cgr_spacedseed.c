@@ -274,7 +274,6 @@ int gt_matchspacedseed(bool withesa,
                                    query,
                                    querylen,
                                    spse);
-        gt_free(desc);
       }
       if (limdfsresources != NULL)
       {

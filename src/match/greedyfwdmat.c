@@ -275,7 +275,6 @@ int gt_findsubquerygmatchforward(const GtEncseq *encseq,
                                 query,
                                 querylen,
                                 desc);
-      FREESPACE(desc);
     }
     gt_seqiterator_delete(seqit);
   }
@@ -411,7 +410,6 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
     {
       break;
     }
-    FREESPACE(desc);
   }
   gt_seqiterator_delete(seqit);
   return haserr ? -1 : 0;

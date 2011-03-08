@@ -181,7 +181,6 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
       printf("\n%s\n\n", gt_str_get(scores));
       gt_free(lens);
     }
-    gt_free(desc);
   }
   if (opts->verbose)
     gt_progressbar_stop();

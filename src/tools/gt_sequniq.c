@@ -158,7 +158,6 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
         else
           duplicates++;
         num_of_sequences++;
-        gt_free(desc);
         gt_free(md5);
       }
       if (arguments->verbose)

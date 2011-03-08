@@ -28,6 +28,7 @@
 #include "core/codon_iterator_simple.h"
 #include "core/countingsort.h"
 #include "core/cstr_table.h"
+#include "core/desc_buffer.h"
 #include "core/disc_distri.h"
 #include "core/dlist.h"
 #include "core/dynbittab.h"
@@ -216,6 +217,8 @@ GtHashmap* gtt_unit_tests(void)
                                             gt_codon_iterator_encseq_unit_test);
   gt_hashmap_add(unit_tests, "countingsort module", gt_countingsort_unit_test);
   gt_hashmap_add(unit_tests, "cstr table class", gt_cstr_table_unit_test);
+  gt_hashmap_add(unit_tests, "description buffer class",
+                 gt_desc_buffer_unit_test);
   gt_hashmap_add(unit_tests, "disc distri class", gt_disc_distri_unit_test);
   gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);

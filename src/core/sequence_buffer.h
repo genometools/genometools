@@ -21,7 +21,7 @@
 #include "core/chardef.h"
 #include "core/error_api.h"
 #include "core/filelengthvalues.h"
-#include "core/queue.h"
+#include "core/desc_buffer.h"
 #include "core/str_array.h"
 
 /* A <GtSequenceBuffer> represents a group of sequence files of a certain type.
@@ -74,11 +74,11 @@ void          gt_sequence_buffer_set_symbolmap(GtSequenceBuffer*,
 void          gt_sequence_buffer_set_filelengthtab(GtSequenceBuffer*,
                                                    GtFilelengthvalues*);
 
-/* Assigns a <GtQueue> in which for each sequence file, the respective
+/* Assigns a <GtDescBuffer> in which for each sequence file, the respective
    description string is written. If this is not set, or set to NULL,
    then descriptions are ignored in the input files. */
-void          gt_sequence_buffer_set_desc_queue(GtSequenceBuffer *si,
-                                                GtQueue *dq);
+void          gt_sequence_buffer_set_desc_buffer(GtSequenceBuffer *si,
+                                                 GtDescBuffer *db);
 
 /* Assigns an array which counts the occurrences of each alphabet character in
    the read sequence. It must have at least as many elements as the number of

@@ -451,7 +451,6 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
         break;
       }
       *totalgmatchlength += gt_esa2shulengthquery(suffixarray,query,querylen);
-      gt_free(desc);
     }
     gt_seqiterator_delete(seqit);
   }

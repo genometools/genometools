@@ -303,7 +303,6 @@ int gt_tyrsearch(const char *tyrindexname,
                            query,
                            querylen,
                            desc);
-        gt_free(desc);
       }
       gt_seqiterator_delete(seqit);
     }

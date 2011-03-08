@@ -75,14 +75,11 @@
               }
               if (desfp != NULL)
               {
-                desc = gt_queue_get(descqueue);
+                desc = (char*) gt_desc_buffer_get_next(descqueue);
                 gt_xfputs(desc,desfp);
-                gt_free(desc);
-                desc = NULL;
                 if (sdsfp != NULL)
                 {
                   unsigned long desoffset;
-
                   desoffset = (unsigned long) ftello(desfp);
                   gt_xfwrite(&desoffset,sizeof desoffset,(size_t) 1,sdsfp);
                 }

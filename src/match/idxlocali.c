@@ -298,7 +298,6 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
           gt_checkandresetstorematch(showmatchinfo.queryunit,
                                   &storeonline,&storeoffline);
         }
-        gt_free(desc);
       }
       if (limdfsresources != NULL)
       {

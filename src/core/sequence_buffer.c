@@ -121,10 +121,10 @@ void gt_sequence_buffer_set_symbolmap(GtSequenceBuffer *si, const GtUchar *m)
   si->pvt->symbolmap = m;
 }
 
-void gt_sequence_buffer_set_desc_queue(GtSequenceBuffer *si, GtQueue *dq)
+void gt_sequence_buffer_set_desc_buffer(GtSequenceBuffer *si, GtDescBuffer *db)
 {
-  gt_assert(si && si->pvt && dq);
-  si->pvt->descptr = dq;
+  gt_assert(si && si->pvt && db);
+  si->pvt->descptr = db;
 }
 
 void gt_sequence_buffer_set_filelengthtab(GtSequenceBuffer *si,
@@ -165,6 +165,8 @@ int gt_sequence_buffer_next(GtSequenceBuffer *sb, GtUchar *val,
     {
       return 0;
     }
+    if (pvt->descptr && pvt->nextread > 0)
+      gt_desc_buffer_reset(pvt->descptr);
     if (gt_sequence_buffer_advance(sb, err) != 0)
     {
       return -1;
@@ -191,6 +193,8 @@ int gt_sequence_buffer_next_with_original(GtSequenceBuffer *sb,
     {
       return 0;
     }
+    if (pvt->descptr && pvt->nextread > 0)
+      gt_desc_buffer_reset(pvt->descptr);
     if (gt_sequence_buffer_advance(sb, err) != 0)
     {
       return -1;

@@ -163,7 +163,6 @@ int gt_convertseq(int argc, const char **argv, GtError *err)
         }
         gt_file_xprintf(opts.outfp, "\n");
       }
-      gt_free(desc);
       if (opts.revcomp) {
         gt_free(seq);
       }

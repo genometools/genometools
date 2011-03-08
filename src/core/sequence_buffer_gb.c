@@ -141,8 +141,8 @@ static inline int get_description(GtSequenceBuffer *sb,
       return EOF;
   (*currentfileread)++;
   while (currentchar != NEWLINESYMBOL) {
-    gt_str_append_char(((GtSequenceBufferGB*) sb)->headerbuffer,
-                       currentchar);
+    if (sb->pvt->descptr)
+      gt_desc_buffer_append_char(sb->pvt->descptr, currentchar);
     currentchar = inlinebuf_getchar(sb, sb->pvt->inputstream);
     if (currentchar == EOF)
       return EOF;
@@ -270,9 +270,8 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
       currentfileadd++;
       pvt->lastspeciallength++;
       if (!sbe->description_set && pvt->descptr)
-          gt_queue_add(pvt->descptr, gt_cstr_dup(""));
+          gt_desc_buffer_finish(pvt->descptr);
       sbe->description_set = false;
-      gt_str_reset(sbe->headerbuffer);
       if ((eat_line(sb, &currentfileread)) == EOF)
         break;
       sbe->state = GB_OUT_OF_ENTRY;
@@ -311,7 +310,8 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
         if (gt_str_length(sbe->keywordbuffer) == 0)
         {
           had_err = eat_whitespace(sb, &currentfileread);
-          gt_str_append_char(sbe->headerbuffer, ' ');
+          if (pvt->descptr)
+            gt_desc_buffer_append_char(pvt->descptr, ' ');
           if (!had_err)
             had_err = get_description(sb, &currentfileread);
         } else {
@@ -325,13 +325,9 @@ static int gt_sequence_buffer_gb_advance(GtSequenceBuffer *sb, GtError *err)
             return -1;
           } else {
             if (pvt->descptr) {
-              char *h;
-              h = gt_cstr_rtrim(gt_cstr_dup(gt_str_get(sbe->headerbuffer)),
-                                ' ');
-              gt_queue_add(pvt->descptr, h);
+              gt_desc_buffer_finish(pvt->descptr);
             }
             sbe->description_set = true;
-            gt_str_reset(sbe->headerbuffer);
             if (strcmp(gt_str_get(sbe->keywordbuffer),
                        GB_ORIGIN_STRING) == 0) {
               had_err = eat_line(sb, &currentfileread);

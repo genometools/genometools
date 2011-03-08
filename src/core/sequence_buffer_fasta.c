@@ -113,12 +113,12 @@ static int gt_sequence_buffer_fasta_advance(GtSequenceBuffer *sb, GtError *err)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              gt_queue_add(pvt->descptr,
-                           gt_cstr_dup(gt_str_get(sbf->headerbuffer)));
-              gt_str_reset(sbf->headerbuffer);
+              /* gt_queue_add(pvt->descptr,
+                           gt_cstr_dup(gt_str_get(sbf->headerbuffer))); */
+              gt_desc_buffer_finish(pvt->descptr);
             } else
             {
-              gt_str_append_char(sbf->headerbuffer, currentchar);
+              gt_desc_buffer_append_char(pvt->descptr, currentchar);
             }
           }
         } else

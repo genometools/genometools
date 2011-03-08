@@ -18,6 +18,7 @@
 
 #include "core/arraydef.h"
 #include "core/chardef.h"
+#include "core/desc_buffer.h"
 #include "core/minmax.h"
 #include "core/seqiterator_rep.h"
 #include "core/seqiterator_sequence_buffer.h"
@@ -28,7 +29,7 @@ struct GtSeqIteratorSequenceBuffer
   GtSequenceBuffer *fb;
   const GtStrArray *filenametab;
   const GtUchar *symbolmap;
-  GtQueue *descptr;
+  GtDescBuffer *descptr;
   GtArrayGtUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
@@ -61,9 +62,9 @@ GtSeqIterator* gt_seqiterator_sequence_buffer_new_with_buffer(
   si = gt_seqiterator_create(gt_seqiterator_sequence_buffer_class());
   seqit = gt_seqiterator_sequence_buffer_cast(si);
   GT_INITARRAY(&seqit->sequencebuffer, GtUchar);
-  seqit->descptr = gt_queue_new();
+  seqit->descptr = gt_desc_buffer_new();
   seqit->fb = gt_sequence_buffer_ref(buffer);
-  gt_sequence_buffer_set_desc_queue(seqit->fb, seqit->descptr);
+  gt_sequence_buffer_set_desc_buffer(seqit->fb, seqit->descptr);
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = true;
@@ -137,7 +138,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
         haserr = true;
         break;
       }
-      *desc = gt_queue_get(seqit->descptr);
+      *desc = (char*) gt_desc_buffer_get_next(seqit->descptr);
       *len = seqit->sequencebuffer.nextfreeGtUchar;
       if (seqit->withsequence)
       {
@@ -163,7 +164,7 @@ static int gt_seqiterator_sequence_buffer_next(GtSeqIterator *si,
   }
   if (!haserr && seqit->sequencebuffer.nextfreeGtUchar > 0)
   {
-    *desc = gt_queue_get(seqit->descptr);
+    *desc = (char*) gt_desc_buffer_get_next(seqit->descptr);
     if (seqit->withsequence)
     {
       /* make sure the outgoing sequence is '\0' terminated */
@@ -202,7 +203,7 @@ static void gt_seqiterator_sequence_buffer_delete(GtSeqIterator *si)
   GtSeqIteratorSequenceBuffer *seqit;
   if (!si) return;
   seqit = gt_seqiterator_sequence_buffer_cast(si);
-  gt_queue_delete_with_contents(seqit->descptr);
+  gt_desc_buffer_delete(seqit->descptr);
   gt_sequence_buffer_delete(seqit->fb);
   GT_FREEARRAY(&seqit->sequencebuffer, GtUchar);
   seqit->currentread = seqit->maxread;

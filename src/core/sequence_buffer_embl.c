@@ -150,8 +150,8 @@ parse_next_line(GtSequenceBuffer *sb, GtEMBLParserLineCode *lc,
         break;
       case DESCRIPTION:
         /* write description into buffer */
-        gt_str_append_char(((GtSequenceBufferEMBL*) sb)->headerbuffer,
-                           currentchar);
+        if (pvt->descptr)
+          gt_desc_buffer_append_char(pvt->descptr, currentchar);
         break;
       default:
         break;
@@ -232,7 +232,7 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
       pvt->lastspeciallength++;
       sbe->state = EMBL_UNDEFINED;
       if (!sbe->description_set && pvt->descptr)
-          gt_queue_add(pvt->descptr, gt_cstr_dup(""));
+          gt_desc_buffer_finish(pvt->descptr);
       sbe->description_set = false;
     }
     /* FSM transitions begin here */
@@ -241,12 +241,10 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         if (lc != DESCRIPTION) {
           /* save description */
           if (pvt->descptr) {
-            char *h;
-            h = gt_cstr_rtrim(gt_cstr_dup(gt_str_get(sbe->headerbuffer)), ' ');
-            gt_queue_add(pvt->descptr, h);
+            gt_desc_buffer_finish(pvt->descptr);
           }
           sbe->description_set = true;
-          gt_str_reset(sbe->headerbuffer);
+          /* gt_str_reset(sbe->headerbuffer); */
           sbe->state = EMBL_UNDEFINED;
         }
         break;
@@ -264,7 +262,9 @@ static int gt_sequence_buffer_embl_advance(GtSequenceBuffer *sb, GtError *err)
         switch (lc) {
           case DESCRIPTION:
             sbe->state = EMBL_IN_DESCRIPTION;
-            gt_str_append_char(sbe->headerbuffer, ' ');
+            if (pvt->descptr) {
+              gt_desc_buffer_append_char(pvt->descptr, ' ');
+            }
             break;
           case SEQUENCE:
             sbe->state = EMBL_IN_SEQUENCE;

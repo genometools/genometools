@@ -686,10 +686,6 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                                      err);
         if (retval != 1)
         {
-          if (retval < 0)
-          {
-            gt_free(desc);
-          }
           break;
         }
         if (dotransformtag(twl.transformedtag,
@@ -754,7 +750,6 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
                           &showmatchinfo,
                           &storeonline,
                           &storeoffline);
-        gt_free(desc);
       }
       gt_seqiterator_delete(seqit);
     }

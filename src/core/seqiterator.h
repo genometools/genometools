@@ -39,14 +39,15 @@ void           gt_seqiterator_set_symbolmap(GtSeqIterator*,
 void           gt_seqiterator_set_sequence_output(GtSeqIterator*, bool);
 
 /* Get next <sequence> (of length <len>) and <description> from <seqit>.
-   The caller is responsible to free the received <description>.
-   Returns 1, if another sequence could be parsed. 0, if all given sequence
-   files are exhausted. And -1, if an error occured (<err> is set
+   Note that <seqit> retains ownership of the <sequence> and <description>.
+   Returns 1 if another sequence could be parsed, 0 if all given sequence
+   files are exhausted, And -1 if an error occured (<err> is set
    accordingly). */
 int            gt_seqiterator_next(GtSeqIterator *seqit,
                                    const GtUchar **sequence,
                                    unsigned long *len,
-                                   char **description, GtError*);
+                                   char **description,
+                                   GtError *err);
 
 /* Returns a pointer to the current total number of read characters. */
 const unsigned

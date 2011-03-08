@@ -524,7 +524,6 @@ int gt_callenumquerymatches(const char *indexname,
             break;
           }
         }
-        gt_free(desc);
       }
       gt_seqiterator_delete(seqit);
     }

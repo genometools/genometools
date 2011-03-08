@@ -111,8 +111,6 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
                                  err);
     if ( retval != 1)
     {
-      if (retval < 0)
-        gt_free(description);
       break;
     }
     gt_logger_log(logger,
@@ -171,7 +169,6 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
         printf("# Kr:\n%f\n", kr);
       }
     }
-    gt_free(description);
   }
   gt_free(ln_n_fac);
   gt_seqiterator_delete(queries);

@@ -959,7 +959,6 @@ int gt_extractkeysfromfastafile(bool verbose,
       printf("%s 1 %lu\n",keyspace, len);
 #endif
     }
-    gt_free(desc);
   }
   gt_free(headerbufferspace);
   gt_free(keyspace);
