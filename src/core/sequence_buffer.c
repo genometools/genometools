@@ -77,7 +77,8 @@ GtSequenceBuffer* gt_sequence_buffer_new_guess_type(const GtStrArray *seqs,
   }
 
   memset(firstcontents, 0, BUFSIZ);
-  file = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, gt_str_array_get(seqs, 0),
+  file = gt_file_open(gt_file_mode_determine(gt_str_array_get(seqs, 0)),
+                      gt_str_array_get(seqs, 0),
                       "rb", err);
   if (!file)
     return NULL;
