@@ -501,8 +501,9 @@ unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
                                        const GtUchar *suffix,
                                        unsigned long suffixLength)
 {
-  const GtUchar *qptr, *qend;
+  GtUlongPair occPair;
   Symbol curChar;
+  const GtUchar *qptr, *qend;
   const MRAEnc *alphabet;
   unsigned long start, end;
 
@@ -519,7 +520,6 @@ unsigned long gt_pck_getShuStringLength(const FMindex *bwtSubject,
   end = ((const BWTSeq *) bwtSubject)->count[curChar + 1];
   for (/* Nothing */; start < end && qptr < qend; qptr++)
   {
-    GtUlongPair occPair;
     curChar = MRAEncMapSymbol(alphabet, *qptr);
     occPair = BWTSeqTransformedPosPairOcc((const BWTSeq *) bwtSubject,
                                           curChar,
