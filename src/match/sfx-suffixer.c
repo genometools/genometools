@@ -821,7 +821,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
     } else
     {
-      if (gt_has_twobitencoding(encseq) && !gt_encseq_is_mirrored(encseq))
+      if (gt_has_twobitencoding(encseq))
       {
         getencseqkmers_twobitencoding(encseq,
                                       readmode,

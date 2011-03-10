@@ -366,7 +366,7 @@ EQLENDNAFILE = {:filename => "#{$testdata}test1.fasta",
                 :desc => "equal length DNA",
                 :msgs => {
                   "bytecompress" => "cannot use bytecompress on DNA sequences"}}
-DNAFILE   = {:filename => "#{$testdata}at1MB",
+DNAFILE   = {:filename => "#{$testdata}Atinsert.fna",
              :desc => "non-equal length DNA",
              :msgs => {
                 "bytecompress" => "cannot use bytecompress on DNA sequences",
@@ -418,12 +418,16 @@ end
     Name "gt suffixerator mirror #{sat} #{file[:desc]}"
     Keywords "gt_suffixerator mirror #{sat}"
     Test do
-      run_test "#{$bin}/gt suffixerator -mirrored -sat #{sat} -v -suf -lcp " + \
-               "-db #{file[:filename]} -indexname myidx"
-      run      "#{$scriptsdir}/add_revcmp.rb #{file[:filename]} > reverse.fna"
-      run_test "#{$bin}/gt suffixerator -sat #{sat} -v -suf -lcp " + \
-               "-db reverse.fna -indexname myidx_r"
-      run      "diff myidx.suf myidx_r.suf"
+      alldir.each do |dir|
+        run_test "#{$bin}/gt suffixerator -mirrored -sat #{sat} -v -suf -lcp " + \
+                 "-bwt -dir #{dir} -db #{file[:filename]} -indexname myidx"
+        run      "#{$scriptsdir}/add_revcmp.rb #{file[:filename]} > reverse.fna"
+        run_test "#{$bin}/gt suffixerator -sat #{sat} -v -suf -lcp " + \
+                 "-bwt -dir #{dir} -db reverse.fna -indexname myidx_r"
+        run      "diff myidx.suf myidx_r.suf"
+        run      "diff myidx.lcp myidx_r.lcp"
+        run      "diff myidx.bwt myidx_r.bwt"
+      end
     end
   end
 end

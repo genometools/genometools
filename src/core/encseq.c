@@ -351,19 +351,22 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
                                              GtReadmode readmode)
 {
   gt_assert(pos < encseq->logicaltotallength);
+  /* translate into forward coords */
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+  }
+  /* handle virtual coordinates */
   if (encseq->hasmirror) {
     if (pos > encseq->totallength) {
+      /* invert coordinates and readmode */
       gt_readmode_invert(readmode);
-      pos -= encseq->totallength + 1;
+      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
     } else if (pos == encseq->totallength) {
       return (GtUchar) SEPARATOR;
     }
   }
   gt_assert(pos < encseq->totallength);
-  if (GT_ISDIRREVERSE(readmode))
-  {
-    pos = GT_REVERSEPOS(encseq->totallength,pos);
-  }
   if (encseq->twobitencoding != NULL)
   {
     unsigned long twobits;
@@ -380,7 +383,6 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   } else
   {
     GtUchar cc;
-
     gt_assert(encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
     cc = encseq->plainseq[pos];
     gt_assert(ISNOTSPECIAL(cc));
@@ -4991,12 +4993,9 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
   gt_assert(currentpos < encseq->logicaltotallength);
 
   if (encseq->hasmirror && currentpos >= encseq->totallength) {
-    unsigned long disttostoppos = (twobitencodingstoppos >= currentpos
-                                    ? twobitencodingstoppos - currentpos
-                                    : currentpos - twobitencodingstoppos);
     if (currentpos == encseq->totallength) {
       /* handle special case where we start on the virtual separator */
-      pos = currentpos + GT_UNITSIN2BITENC;
+      pos = currentpos + (fwd ? GT_UNITSIN2BITENC : -GT_UNITSIN2BITENC);
       ptbe->tbe = 0;
       ptbe->position = currentpos;
       ptbe->unitsnotspecial = 0;
@@ -5004,10 +5003,12 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
     }
     mirrored = true;
     /* invert coordinates */
-    currentpos = GT_REVERSEPOS(encseq->logicaltotallength, currentpos);
     fwd = !fwd;
-    if (!fwd)
-      twobitencodingstoppos = currentpos - disttostoppos + 1;
+    currentpos = GT_REVERSEPOS(encseq->totallength,
+                               currentpos - encseq->totallength - 1);
+    twobitencodingstoppos = GT_REVERSEPOS(encseq->totallength,
+                                          twobitencodingstoppos -
+                                            encseq->totallength - 2);
   }
 
   /* run extraction */
