@@ -27,6 +27,8 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 
+#define GT_DESC_BUFFER_INIT_SIZE 8192
+
 struct GtDescBuffer {
   char *buf;
   unsigned long length;
@@ -40,9 +42,9 @@ struct GtDescBuffer {
 GtDescBuffer* gt_desc_buffer_new(void)
 {
   GtDescBuffer *db = gt_malloc(sizeof *db);
-  db->buf = gt_calloc(1, sizeof (char));
+  db->buf = gt_calloc(GT_DESC_BUFFER_INIT_SIZE, sizeof (char));
   db->length = 0;
-  db->allocated = 1;
+  db->allocated = GT_DESC_BUFFER_INIT_SIZE;
   db->finished = false;
   db->dirty = true;
   db->reference_count = 0;
@@ -76,7 +78,7 @@ const char* gt_desc_buffer_get_next(GtDescBuffer *db)
 void gt_desc_buffer_finish(GtDescBuffer *db)
 {
   gt_assert(db);
-  /* XXX: maybe do a gt_cstr_rtrim(..,' ') equivalent? */
+  /* XXX: maybe do a gt_cstr_rtrim(..., ' ') equivalent? */
   gt_desc_buffer_append_char(db, '\0');
   db->finished = true;
 }
@@ -101,7 +103,13 @@ void gt_desc_buffer_reset(GtDescBuffer *db)
   if (laststartpos != 0) {
     laststartpos = (unsigned long) gt_queue_get(db->startqueue);
     db->length = db->length - laststartpos;
-    memcpy(db->buf, db->buf + laststartpos, db->length * sizeof (char));
+    if (db->length >= laststartpos) {
+      /* strings overlap */
+      memmove(db->buf, db->buf + laststartpos, db->length * sizeof (char));
+    } else {
+      /* no overlap */
+      memcpy(db->buf, db->buf + laststartpos, db->length * sizeof (char));
+    }
     gt_queue_add(db->startqueue, (void*) 0);
   }
   db->dirty = false;
