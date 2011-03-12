@@ -83,14 +83,13 @@ typedef struct
 {
   void *reservoir;
   size_t sizereservoir;
-  unsigned long *bucketoflcpvalues, /* pointer into reservoir */
-                maxbranchdepth,
-                numoflargelcpvalues,
+  unsigned long maxbranchdepth,
                 totalnumoflargelcpvalues,
                 countoutputlcpvalues;
   uint8_t *smalllcpvalues; /* pointer into reservoir */
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
+  GtLcpvalues tableoflcpvalues;
 } Lcpsubtab;
 
 typedef struct
@@ -354,23 +353,12 @@ static unsigned long medianof3(const Bentsedgresources *bsr,
       : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
 }
 
-static void updatelcpvalue(Bentsedgresources *bsr,
-                           unsigned long idx,
-                           unsigned long value)
-{
-  if (value >= (unsigned long) LCPOVERFLOW)
-  {
-    bsr->lcpsubtab->numoflargelcpvalues++; /* this may overcount as
-                                              there may be some value
-                                              which was already overflowing */
-  }
-  bsr->lcpsubtab->bucketoflcpvalues[idx] = value;
-}
-
-static unsigned long lcpsubtab_getvalue(const Lcpsubtab *lcpsubtab,
+static unsigned long lcpsubtab_getvalue(const GtLcpvalues *tableoflcpvalues,
                                         unsigned long idx)
 {
-  return lcpsubtab->bucketoflcpvalues[idx];
+  gt_assert(tableoflcpvalues != NULL &&
+            tableoflcpvalues->bucketoflcpvalues != NULL);
+  return tableoflcpvalues->bucketoflcpvalues[idx];
 }
 
 static void bs_insertionsort(Bentsedgresources *bsr,
@@ -458,10 +446,11 @@ static void bs_insertionsort(Bentsedgresources *bsr,
         lcpindex = subbucketleft+pj;
         if (pj < pi && retval > 0)
         {
-          updatelcpvalue(bsr,lcpindex+1,
-                         lcpsubtab_getvalue(bsr->lcpsubtab,lcpindex));
+          lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex+1,
+                        lcpsubtab_getvalue(&bsr->lcpsubtab->tableoflcpvalues,
+                                           lcpindex));
         }
-        updatelcpvalue(bsr,lcpindex,lcplen);
+        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex,lcplen);
       }
       if (retval < 0)
       {
@@ -571,10 +560,11 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
         lcpindex = subbucketleft + pj;
         if (pj < pi && retval > 0)
         {
-          updatelcpvalue(bsr,lcpindex+1,
-                         lcpsubtab_getvalue(bsr->lcpsubtab,lcpindex));
+          lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex+1,
+                        lcpsubtab_getvalue(&bsr->lcpsubtab->tableoflcpvalues,
+                                           lcpindex));
         }
-        updatelcpvalue(bsr,lcpindex,lcplen);
+        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex,lcplen);
       }
       if (retval < 0)
       {
@@ -917,24 +907,16 @@ static bool multistrategysort(Bentsedgresources *bsr,
   }
   if (width <= bsr->sfxstrategy->maxbltriesort)
   {
-    unsigned long numoflargelcpvalues;
-
-    numoflargelcpvalues
-      = gt_blindtrie_suffixsort(bsr->blindtrie,
-                                subbucketleft,
-                                bsr->lcpsubtab == NULL
-                                  ? NULL
-                                  : bsr->lcpsubtab->bucketoflcpvalues +
-                                    subbucketleft,
-                                width,
-                                depth,
-                                maxdepth,
-                                bsr->processunsortedsuffixrangeinfo,
-                                bsr->processunsortedsuffixrange);
-    if (bsr->lcpsubtab != NULL)
-    {
-      bsr->lcpsubtab->numoflargelcpvalues += numoflargelcpvalues;
-    }
+    gt_blindtrie_suffixsort(bsr->blindtrie,
+                            subbucketleft,
+                            bsr->lcpsubtab != NULL
+                              ? &bsr->lcpsubtab->tableoflcpvalues
+                              : NULL,
+                            width,
+                            depth,
+                            maxdepth,
+                            bsr->processunsortedsuffixrangeinfo,
+                            bsr->processunsortedsuffixrange);
     bsr->countbltriesort++;
     return true;
   }
@@ -1119,7 +1101,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,subbucketleft+end,depth + idx);
+      lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
+                    subbucketleft+end,depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -1152,7 +1135,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
     if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
         bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      updatelcpvalue(bsr,subbucketleft + width - end,depth + idx);
+      lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
+                    subbucketleft + width - end,depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
   }
@@ -1369,7 +1353,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        updatelcpvalue(bsr,subbucketleft + leftplusw,depth + smallermaxlcp);
+        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
+                      subbucketleft + leftplusw,
+                      depth + smallermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
                                subbucketleft,
@@ -1400,8 +1386,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        updatelcpvalue(bsr,subbucketleft + bucketright - wtmp + 1,
-                       depth + greatermaxlcp);
+        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
+                      subbucketleft + bucketright - wtmp + 1,
+                      depth + greatermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
                                subbucketleft + bucketright - wtmp + 1,
@@ -1450,10 +1437,10 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   if (specialsinbucket > 1UL)
   {
     maxprefixindex = gt_pfxidx2lcpvalues(&minprefixindex,
-                                      outlcpinfo->lcpsubtab.smalllcpvalues,
-                                      specialsinbucket,
-                                      bcktab,
-                                      code);
+                                         outlcpinfo->lcpsubtab.smalllcpvalues,
+                                         specialsinbucket,
+                                         bcktab,
+                                         code);
     if (outlcpinfo->lcpsubtab.maxbranchdepth < (unsigned long) maxprefixindex)
     {
       outlcpinfo->lcpsubtab.maxbranchdepth = (unsigned long) maxprefixindex;
@@ -1578,21 +1565,22 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   Largelcpvalue *largelcpvalueptr;
 
   lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
-  if (lcpsubtab->numoflargelcpvalues > 0 &&
-      lcpsubtab->numoflargelcpvalues >=
+  if (lcpsubtab->tableoflcpvalues.numoflargelcpvalues > 0 &&
+      lcpsubtab->tableoflcpvalues.numoflargelcpvalues >=
       lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
   {
     lcpsubtab->largelcpvalues.spaceLargelcpvalue
       = gt_realloc(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
-                   sizeof (Largelcpvalue) * lcpsubtab->numoflargelcpvalues);
+                   sizeof (Largelcpvalue) *
+                   lcpsubtab->tableoflcpvalues.numoflargelcpvalues);
     lcpsubtab->largelcpvalues.allocatedLargelcpvalue
-      = lcpsubtab->numoflargelcpvalues;
+      = lcpsubtab->tableoflcpvalues.numoflargelcpvalues;
   }
   for (idx=bucketleft; idx<=bucketright; idx++)
   {
-    if (lcpsubtab->bucketoflcpvalues != NULL)
+    if (lcpsubtab->tableoflcpvalues.bucketoflcpvalues != NULL)
     {
-      lcpvalue = lcpsubtab_getvalue(lcpsubtab,idx);
+      lcpvalue = lcpsubtab_getvalue(&lcpsubtab->tableoflcpvalues,idx);
     } else
     {
       lcpvalue = compressedtable_get(lcpsubtab->completelcpvalues,idx);
@@ -1670,8 +1658,8 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   {
     buffersize = totallength+1;
   }
-  lcpsubtab->numoflargelcpvalues = buffersize;
-  lcpsubtab->bucketoflcpvalues = NULL;
+  lcpsubtab->tableoflcpvalues.numoflargelcpvalues = buffersize;
+  lcpsubtab->tableoflcpvalues.bucketoflcpvalues = NULL;
   lcpsubtab->completelcpvalues = lcptab;
   sizeforsmalllcpvalues = (unsigned long)
                           sizeof (*lcpsubtab->smalllcpvalues) * buffersize;
@@ -1816,7 +1804,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
         /* point to the same area, since this is not used simultaneously */
         /* be careful for the parallel version */
         bsr->lcpsubtab->smalllcpvalues = (uint8_t *) bsr->lcpsubtab->reservoir;
-        bsr->lcpsubtab->bucketoflcpvalues
+        bsr->lcpsubtab->tableoflcpvalues.bucketoflcpvalues
           = (unsigned long *) bsr->lcpsubtab->reservoir;
      }
     }
@@ -2040,7 +2028,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                          numofchars);
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
-      bsr.lcpsubtab->numoflargelcpvalues = 0;
+      bsr.lcpsubtab->tableoflcpvalues.numoflargelcpvalues = 0;
       if (code > 0)
       {
         (void) gt_nextTurningwheel(outlcpinfo->tw);
@@ -2097,7 +2085,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 #ifdef SKDEBUG
         baseptr = bucketspec.left;
 #endif
-        updatelcpvalue(&bsr,0,lcpvalue);
+        lcptab_update(&bsr.lcpsubtab->tableoflcpvalues,0,lcpvalue);
         /* all other lcp-values are computed and they can be output */
         outlcpvalues(&outlcpinfo->lcpsubtab,
                      0,

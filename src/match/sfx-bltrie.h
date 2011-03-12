@@ -20,7 +20,31 @@
 
 #include "core/encseq.h"
 #include "core/readmode.h"
+#include "lcpoverflow.h"
 #include "sfx-suffixgetset.h"
+
+typedef struct
+{
+  unsigned long *bucketoflcpvalues,
+                numoflargelcpvalues;
+} GtLcpvalues;
+
+static inline void lcptab_update(GtLcpvalues *tableoflcpvalues,
+                                 unsigned long idx,
+                                 unsigned long value)
+{
+  if (tableoflcpvalues != NULL)
+  {
+    if (value >= (unsigned long) LCPOVERFLOW)
+    {
+      tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as
+                                                  there may be some value
+                                                  which was already
+                                                  overflowing */
+    }
+    tableoflcpvalues->bucketoflcpvalues[idx] = value;
+  }
+}
 
 typedef void (*GtProcessunsortedsuffixrange)(void *,
                                         unsigned long,
@@ -40,16 +64,15 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
 
 void gt_blindtrie_reset(Blindtrie *blindtrie);
 
-unsigned long gt_blindtrie_suffixsort(
-                            Blindtrie *blindtrie,
-                            unsigned long subbucketleft,
-                            unsigned long *lcptabspace,
-                            unsigned long numberofsuffixes,
-                            unsigned long offset,
-                            unsigned long maxdepth,
-                            void *voiddcov,
-                            GtProcessunsortedsuffixrange
-                              processunsortedsuffixrange);
+void gt_blindtrie_suffixsort(Blindtrie *blindtrie,
+                             unsigned long subbucketleft,
+                             GtLcpvalues *tableoflcpvalues,
+                             unsigned long numberofsuffixes,
+                             unsigned long offset,
+                             unsigned long maxdepth,
+                             void *voiddcov,
+                             GtProcessunsortedsuffixrange
+                               processunsortedsuffixrange);
 
 void gt_blindtrie_delete(Blindtrie *blindtrie);
 
