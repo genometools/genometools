@@ -42,6 +42,8 @@ fi
 #          -select 253 (run testcase 253)
 
 cd testsuite
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_encseq'
+
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
 
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \

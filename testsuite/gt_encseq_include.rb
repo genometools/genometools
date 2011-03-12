@@ -195,7 +195,7 @@ emblfiles = fastafiles.collect{ |f| f.gsub(".fna",".embl") }
 [genbankfiles, emblfiles].each do |formatfiles|
   formatfiles.each do |formatfile|
     Name "gt sequence formats (#{formatfile})"
-    Keywords "gt_suffixerator formats"
+    Keywords "gt_encseq formats"
     Test do
       fasta = formatfile.gsub(/\.[a-z]+$/, ".fna")
       if File.exists?("#{$testdata}#{fasta}") then
