@@ -208,7 +208,7 @@ typedef struct
   bool fwd, complement, assideeffect;
   unsigned long totallength;
   GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
-  Lcpsubtab *lcpsubtab;
+  GtLcpvalues *tableoflcpvalues;
   Medianinfo *medianinfospace;
   Countingsortinfo *countingsortinfo;
   const Sfxstrategy *sfxstrategy;
@@ -237,7 +237,7 @@ static void showsuffixrange(const Bentsedgresources *bsr,
 {
   unsigned long pi;
 
-  if (bsr->lcpsubtab == NULL)
+  if (bsr->tableoflcpvalues == NULL)
   {
     printf("of %lu suffixes at depth %lu:\n",width,depth);
   } else
@@ -441,16 +441,15 @@ static void bs_insertionsort(Bentsedgresources *bsr,
         lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
-      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
+      if (bsr->tableoflcpvalues != NULL && bsr->assideeffect)
       {
         lcpindex = subbucketleft+pj;
         if (pj < pi && retval > 0)
         {
-          lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex+1,
-                        lcpsubtab_getvalue(&bsr->lcpsubtab->tableoflcpvalues,
-                                           lcpindex));
+          lcptab_update(bsr->tableoflcpvalues,lcpindex+1,
+                        lcpsubtab_getvalue(bsr->tableoflcpvalues,lcpindex));
         }
-        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex,lcplen);
+        lcptab_update(bsr->tableoflcpvalues,lcpindex,lcplen);
       }
       if (retval < 0)
       {
@@ -555,16 +554,15 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
       printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
              sval1, sval2, retval, (unsigned long) lcplen);
 #endif
-      if (retval != 0 && bsr->lcpsubtab != NULL && bsr->assideeffect)
+      if (retval != 0 && bsr->tableoflcpvalues != NULL && bsr->assideeffect)
       {
         lcpindex = subbucketleft + pj;
         if (pj < pi && retval > 0)
         {
-          lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex+1,
-                        lcpsubtab_getvalue(&bsr->lcpsubtab->tableoflcpvalues,
-                                           lcpindex));
+          lcptab_update(bsr->tableoflcpvalues,lcpindex+1,
+                        lcpsubtab_getvalue(bsr->tableoflcpvalues,lcpindex));
         }
-        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,lcpindex,lcplen);
+        lcptab_update(bsr->tableoflcpvalues,lcpindex,lcplen);
       }
       if (retval < 0)
       {
@@ -909,9 +907,7 @@ static bool multistrategysort(Bentsedgresources *bsr,
   {
     gt_blindtrie_suffixsort(bsr->blindtrie,
                             subbucketleft,
-                            bsr->lcpsubtab != NULL
-                              ? &bsr->lcpsubtab->tableoflcpvalues
-                              : NULL,
+                            bsr->tableoflcpvalues,
                             width,
                             depth,
                             maxdepth,
@@ -1098,11 +1094,10 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                                currentwidth,
                                depth + idx);
     }
-    if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
+    if (bsr->tableoflcpvalues != NULL && bsr->assideeffect &&
         bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
-                    subbucketleft+end,depth + idx);
+      lcptab_update(bsr->tableoflcpvalues,subbucketleft+end,depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -1132,11 +1127,11 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                                currentwidth,
                                depth + idx);
     }
-    if (bsr->lcpsubtab != NULL && bsr->assideeffect &&
+    if (bsr->tableoflcpvalues != NULL && bsr->assideeffect &&
         bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
-                    subbucketleft + width - end,depth + idx);
+      lcptab_update(bsr->tableoflcpvalues,subbucketleft + width - end,
+                    depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
   }
@@ -1345,7 +1340,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     if ((wtmp = pb-pa) > 0)
     {
       leftplusw = wtmp;
-      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
+      if (bsr->tableoflcpvalues != NULL && bsr->assideeffect)
       {
         /*
           left part has suffix with lcp up to length smallermaxlcp w.r.t.
@@ -1353,8 +1348,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
-                      subbucketleft + leftplusw,
+        lcptab_update(bsr->tableoflcpvalues,subbucketleft + leftplusw,
                       depth + smallermaxlcp);
       }
       subsort_bentleysedgewick(bsr,
@@ -1378,7 +1372,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     gt_assert(pd >= pc);
     if ((wtmp = (unsigned long) (pd-pc)) > 0)
     {
-      if (bsr->lcpsubtab != NULL && bsr->assideeffect)
+      if (bsr->tableoflcpvalues != NULL && bsr->assideeffect)
       {
         /*
           right part has suffix with lcp up to length largermaxlcp w.r.t.
@@ -1386,7 +1380,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the first part of the right side.
         */
-        lcptab_update(&bsr->lcpsubtab->tableoflcpvalues,
+        lcptab_update(bsr->tableoflcpvalues,
                       subbucketleft + bucketright - wtmp + 1,
                       depth + greatermaxlcp);
       }
@@ -1772,11 +1766,11 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   if (outlcpinfo != NULL)
   {
-    bsr->lcpsubtab = &outlcpinfo->lcpsubtab;
+    bsr->tableoflcpvalues = &outlcpinfo->lcpsubtab.tableoflcpvalues;
     bsr->assideeffect = outlcpinfo->assideeffect;
   } else
   {
-    bsr->lcpsubtab = NULL;
+    bsr->tableoflcpvalues = NULL;
   }
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
@@ -1794,18 +1788,19 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     {
       size_t sizeforlcpvalues; /* in bytes */
 
-      gt_assert(bsr->lcpsubtab != NULL);
       sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
-      if (bsr->lcpsubtab->sizereservoir < sizeforlcpvalues)
+      if (outlcpinfo->lcpsubtab.sizereservoir < sizeforlcpvalues)
       {
-        bsr->lcpsubtab->sizereservoir = sizeforlcpvalues;
-        bsr->lcpsubtab->reservoir = gt_realloc(bsr->lcpsubtab->reservoir,
-                                               bsr->lcpsubtab->sizereservoir);
+        outlcpinfo->lcpsubtab.sizereservoir = sizeforlcpvalues;
+        outlcpinfo->lcpsubtab.reservoir
+          = gt_realloc(outlcpinfo->lcpsubtab.reservoir,
+                       outlcpinfo->lcpsubtab.sizereservoir);
         /* point to the same area, since this is not used simultaneously */
         /* be careful for the parallel version */
-        bsr->lcpsubtab->smalllcpvalues = (uint8_t *) bsr->lcpsubtab->reservoir;
-        bsr->lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-          = (unsigned long *) bsr->lcpsubtab->reservoir;
+        outlcpinfo->lcpsubtab.smalllcpvalues
+          = (uint8_t *) outlcpinfo->lcpsubtab.reservoir;
+        outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
+          = (unsigned long *) outlcpinfo->lcpsubtab.reservoir;
      }
     }
   }
@@ -1898,7 +1893,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
     Compressedtable *lcptab;
 
     lcptab = gt_rmnsufinfo_delete(&bsr->rmnsufinfo,
-                                  bsr->lcpsubtab == NULL ? false : true);
+                                  bsr->tableoflcpvalues == NULL ? false : true);
     if (lcptab != NULL)
     {
       multioutlcpvalues(lcpsubtab,bsr->totallength,lcptab,partwidth,
@@ -2028,7 +2023,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                          numofchars);
     if (outlcpinfo != NULL && outlcpinfo->assideeffect)
     {
-      bsr.lcpsubtab->tableoflcpvalues.numoflargelcpvalues = 0;
+      outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
       if (code > 0)
       {
         (void) gt_nextTurningwheel(outlcpinfo->tw);
@@ -2048,7 +2043,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
       {
         if (outlcpinfo != NULL && outlcpinfo->assideeffect)
         {
-          gt_assert(bsr.lcpsubtab != NULL);
+          gt_assert(bsr.tableoflcpvalues != NULL);
         }
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,bucketspec.left);
         bentleysedgewick(&bsr,
@@ -2081,11 +2076,11 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
           /* first part first code */
           lcpvalue = 0;
         }
-        gt_assert(bsr.lcpsubtab != NULL);
+        gt_assert(bsr.tableoflcpvalues != NULL);
 #ifdef SKDEBUG
         baseptr = bucketspec.left;
 #endif
-        lcptab_update(&bsr.lcpsubtab->tableoflcpvalues,0,lcpvalue);
+        lcptab_update(bsr.tableoflcpvalues,0,lcpvalue);
         /* all other lcp-values are computed and they can be output */
         outlcpvalues(&outlcpinfo->lcpsubtab,
                      0,
