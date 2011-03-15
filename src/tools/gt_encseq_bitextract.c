@@ -26,11 +26,10 @@
 
 typedef struct {
   bool mirror,
-       stoppos,
        specialranges;
   GtStr *readmode;
   unsigned long bitpos,
-                iterations;
+                stoppos;
 } GtEncseqBitextractArguments;
 
 static void* gt_encseq_bitextract_arguments_new(void)
@@ -63,8 +62,8 @@ static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
                                &arguments->mirror, false);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_bool("stoppos", "output stop positions",
-                               &arguments->stoppos, false);
+  option = gt_option_new_ulong("stoppos", "output stop positions",
+                               &arguments->stoppos, GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("specialranges", "output special ranges",
@@ -74,10 +73,6 @@ static GtOptionParser* gt_encseq_bitextract_option_parser_new(void
   option = gt_option_new_ulong("bitpos", "extract and display "
                                          "two bit encoding for position",
                                &arguments->bitpos, GT_UNDEF_ULONG);
-  gt_option_parser_add_option(op, option);
-
-  option = gt_option_new_ulong("iterations", "number of test iterations",
-                               &arguments->iterations, 10);
   gt_option_parser_add_option(op, option);
 
   gt_encseq_options_add_readmode_option(op, arguments->readmode);
@@ -148,17 +143,13 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
     }
   }
 
-  if (!had_err && arguments->stoppos) {
-    unsigned long i, stoppos;
+  if (!had_err && arguments->stoppos != GT_UNDEF_ULONG) {
     esr = gt_encseq_create_reader_with_readmode(encseq, rm, 0);
     /* check stoppos stuff */
-    for (i=0;i<arguments->iterations;i++) {
-      unsigned long pos;
-      pos = gt_rand_max(gt_encseq_total_length(encseq) - 1);
-      gt_encseq_reader_reinit_with_readmode(esr, encseq, rm, pos);
-      stoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
-      printf("%lu: %lu\n", pos, stoppos);
-    }
+    gt_encseq_reader_reinit_with_readmode(esr, encseq, rm,
+                                          arguments->stoppos);
+    printf("%lu: %lu\n", arguments->stoppos,
+                         gt_getnexttwobitencodingstoppos(fwd, esr));
     gt_encseq_reader_delete(esr);
   }
 
