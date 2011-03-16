@@ -24,7 +24,6 @@
 #include "core/unused_api.h"
 
 double *gt_encseq_get_gc(const GtEncseq *encseq,
-                         bool per_file,
                          bool with_special,
                          GT_UNUSED GtError *err);
 

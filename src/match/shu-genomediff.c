@@ -264,7 +264,6 @@ int gt_genomediff_shu(GtLogger *logger,
       gt_timer_show_progress(timer, "calculate gc", stdout);
     }
     gc_contents = gt_encseq_get_gc(encseq,
-                                  true,
                                   false,
                                   err);
     if (gc_contents == NULL)
