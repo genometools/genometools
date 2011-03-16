@@ -2965,8 +2965,8 @@ bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
         sri->reflected = true;
       }
     }
-    if ((sri->reflected && sri->originalmoveforward)
-         || (!sri->reflected && !sri->originalmoveforward)) {
+    if (retval && ((sri->reflected && sri->originalmoveforward)
+         || (!sri->reflected && !sri->originalmoveforward))) {
       gt_specialrangeiterator_invert_range(sri->esr->encseq,
                                            range);
     }
