@@ -7906,6 +7906,16 @@ unsigned long gt_encseq_filenum(const GtEncseq *encseq,
                                 unsigned long position)
 {
   gt_assert(encseq->numofdbfiles == 1UL || encseq->fsptab != NULL);
+
+  /* handle virtual coordinates */
+  if (encseq->hasmirror) {
+    if (position > encseq->totallength) {
+      /* invert coordinates */
+      position = GT_REVERSEPOS(encseq->totallength,
+                               position - encseq->totallength - 1);
+    }
+  }
+  gt_assert(position < encseq->totallength);
   return gt_encseq_sep2seqnum(encseq->fsptab,
                               encseq->numofdbfiles,
                               encseq->totallength,
