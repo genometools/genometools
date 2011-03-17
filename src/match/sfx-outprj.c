@@ -81,6 +81,7 @@ static void showprjinfo(FILE *outprj,
                   (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",gt_is_little_endian() ? '1' : '0');
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
+  fprintf(outprj,"mirrored=%c\n", gt_encseq_is_mirrored(encseq) ? '1' : '0');
 }
 
 int gt_outprjfile(const char *indexname,

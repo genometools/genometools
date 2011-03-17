@@ -102,6 +102,7 @@ typedef struct
   Definedunsignedlong numoflargelcpvalues; /* only in esa-map.c */
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
+  bool mirroredencseq;
   /* either with mapped input */
   const ESASuffixptr *suftab;
   const GtUchar *lcptab;

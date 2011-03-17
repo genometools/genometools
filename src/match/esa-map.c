@@ -55,7 +55,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                                          FILE *fpin,
                                          GtError *err)
 {
-  uint32_t integersize, littleendian, readmodeint;
+  uint32_t integersize, littleendian, readmodeint, mirrored;
   unsigned int linenum;
   unsigned long currentlinelength;
   Definedunsignedlong maxbranchdepth;
@@ -108,6 +108,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
   SETREADINTKEYS("readmode",&readmodeint,NULL);
+  SETREADINTKEYS("mirrored",&mirrored,NULL);
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
   {
@@ -161,7 +162,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       if (littleendian != (uint32_t) 1)
       {
         gt_error_set(err,"computer has little endian byte order, while index "
-                      "was build on computer with big endian byte order");
+                         "was built on computer with big endian byte order");
         haserr = true;
       }
     } else
@@ -169,8 +170,8 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       if (littleendian == (uint32_t) 1)
       {
         gt_error_set(err,"computer has big endian byte order, while index "
-                      "was build on computer with little endian byte "
-                      "order");
+                         "was built on computer with little endian byte "
+                         "order");
         haserr = true;
       }
     }
@@ -183,6 +184,17 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       haserr = true;
     }
     suffixarray->readmode = (GtReadmode) readmodeint;
+  }
+  if (!haserr)
+  {
+    if (mirrored > (uint32_t) 1)
+    {
+      gt_error_set(err,"illegal mirroring flag: only 0(=no mirroring) and "
+                       "1 (=mirroring) is supported, but read %u",
+                       (unsigned int) mirrored);
+      haserr = true;
+    }
+    suffixarray->mirroredencseq = (mirrored == (uint32_t) 1);
   }
   gt_array_delete(riktab);
   return haserr ? -1 : 0;
@@ -293,13 +305,21 @@ static int inputsuffixarray(bool map,
   if (suffixarray->encseq == NULL)
   {
     haserr = true;
-  } else
-  {
-    totallength = gt_encseq_total_length(suffixarray->encseq);
   }
   if (!haserr)
   {
     haserr = scanprjfileuintkeys(suffixarray,indexname,logger,err);
+  }
+  if (!haserr
+        && suffixarray->mirroredencseq
+        && !gt_encseq_is_mirrored(suffixarray->encseq))
+  {
+    if (gt_encseq_mirror(suffixarray->encseq, err) != 0)
+      haserr = true;
+  }
+  if (!haserr)
+  {
+    totallength = gt_encseq_total_length(suffixarray->encseq);
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
