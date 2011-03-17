@@ -3965,14 +3965,14 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
   const char *desptr;
   char *copydestab;
 
-  totaldesclength = encseq->logicalnumofdbsequences; /* for each new line */
-  for (seqnum = 0; seqnum < encseq->logicalnumofdbsequences; seqnum++)
+  totaldesclength = encseq->numofdbsequences; /* for each new line */
+  for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
     desptr = gt_encseq_description(encseq,&desclen,seqnum);
     totaldesclength += desclen;
   }
   copydestab = gt_malloc(sizeof (*copydestab) * totaldesclength);
-  for (seqnum = 0; seqnum < encseq->logicalnumofdbsequences; seqnum++)
+  for (seqnum = 0; seqnum < encseq->numofdbsequences; seqnum++)
   {
     desptr = gt_encseq_description(encseq,&desclen,seqnum);
     strncpy(copydestab + offset,desptr,(size_t) desclen);
