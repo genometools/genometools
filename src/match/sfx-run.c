@@ -95,7 +95,6 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
       = gt_Outlcpinfo_new(outlcptab ? gt_str_get(so->indexname) : NULL,
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
-                          gt_encseq_total_length(encseq),
                           strategy.ssortmaxdepth.defined ? false : true,
                           err);
     if (outfileinfo->outlcpinfo == NULL)
@@ -656,6 +655,7 @@ static int runsuffixerator(bool doesa,
     }
   }
   gt_Outlcpinfo_delete(outfileinfo.outlcpinfo,
+                       gt_encseq_total_length(encseq),
                        sfxstrategy.differencecover > 0 ? true : false);
   gt_encseq_delete(encseq);
   encseq = NULL;

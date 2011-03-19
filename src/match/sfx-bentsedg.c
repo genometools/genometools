@@ -108,7 +108,6 @@ struct Outlcpinfo
 {
   FILE *outfplcptab,
        *outfpllvtab;
-  unsigned long totallength;
   Turningwheel *tw;
   unsigned int minchanged;
   Lcpsubtab lcpsubtab;
@@ -1481,7 +1480,6 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
-                              unsigned long totallength,
                               bool assideeffect,
                               GtError *err)
 {
@@ -1512,7 +1510,6 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
     }
   }
   outlcpinfo->lcpsubtab.assideeffect = assideeffect;
-  outlcpinfo->totallength = totallength;
   outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
   outlcpinfo->lcpsubtab.totalnumoflargelcpvalues = 0;
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
@@ -1690,6 +1687,7 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
 }
 
 void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
+                          unsigned long totallength,
                           /*XXX remove this later*/ bool withdiffcover)
 {
   if (outlcpinfo == NULL)
@@ -1708,17 +1706,17 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
   }
   if (outlcpinfo->outfplcptab != NULL &&
       !withdiffcover &&
-      outlcpinfo->lcpsubtab.countoutputlcpvalues < outlcpinfo->totallength+1)
+      outlcpinfo->lcpsubtab.countoutputlcpvalues < totallength+1)
   {
     outlcpinfo->lcpsubtab.countoutputlcpvalues
       += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
-                           outlcpinfo->totallength,
+                           totallength,
                            outlcpinfo->outfplcptab);
   }
   gt_assert(outlcpinfo->outfplcptab == NULL ||
             withdiffcover ||
             outlcpinfo->lcpsubtab.countoutputlcpvalues ==
-            outlcpinfo->totallength + 1);
+            totallength + 1);
   GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   gt_fa_fclose(outlcpinfo->outfplcptab);
   gt_fa_fclose(outlcpinfo->outfpllvtab);
@@ -1885,6 +1883,14 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
   gt_free(bsr->medianinfospace);
   bsr->medianinfospace = NULL;
   gt_blindtrie_delete(bsr->blindtrie);
+  gt_encseq_reader_delete(bsr->esr1);
+  gt_encseq_reader_delete(bsr->esr2);
+  gt_free(bsr->equalwithprevious);
+  GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
+  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
+  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
+  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
+  gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
   if (bsr->rmnsufinfo != NULL)
   {
     Compressedtable *lcptab;
@@ -1898,14 +1904,6 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
       compressedtable_free(lcptab,true);
     }
   }
-  gt_encseq_reader_delete(bsr->esr1);
-  gt_encseq_reader_delete(bsr->esr2);
-  gt_free(bsr->equalwithprevious);
-  GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
-  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
-  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
-  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
-  gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
 }
 
 void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
