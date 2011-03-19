@@ -29,21 +29,19 @@ typedef struct
                 numoflargelcpvalues;
 } GtLcpvalues;
 
-static inline void lcptab_update(GtLcpvalues *tableoflcpvalues,
-                                 unsigned long idx,
-                                 unsigned long value)
+/*@unused@*/ static inline void lcptab_update(GtLcpvalues *tableoflcpvalues,
+                                              unsigned long idx,
+                                              unsigned long value)
 {
-  if (tableoflcpvalues != NULL)
+  gt_assert (tableoflcpvalues != NULL);
+  if (value >= (unsigned long) LCPOVERFLOW)
   {
-    if (value >= (unsigned long) LCPOVERFLOW)
-    {
-      tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as
-                                                  there may be some value
-                                                  which was already
-                                                  overflowing */
-    }
-    tableoflcpvalues->bucketoflcpvalues[idx] = value;
+    tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as
+                                                there may be some value
+                                                which was already
+                                                overflowing */
   }
+  tableoflcpvalues->bucketoflcpvalues[idx] = value;
 }
 
 typedef void (*GtProcessunsortedsuffixrange)(void *,

@@ -90,6 +90,7 @@ typedef struct
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
   GtLcpvalues tableoflcpvalues;
+  bool assideeffect;
 } Lcpsubtab;
 
 typedef struct
@@ -112,8 +113,7 @@ struct Outlcpinfo
   unsigned int minchanged;
   Lcpsubtab lcpsubtab;
   Suffixwithcode previoussuffix;
-  bool previousbucketwasempty,
-       assideeffect;
+  bool previousbucketwasempty;
 };
 
 #define CMPCHARBYCHARPTR2INT(VAR,SUBBUCKETLEFT,TMPVAR,IDX)\
@@ -1505,9 +1505,9 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
       }
     }
   }
-  outlcpinfo->assideeffect = assideeffect;
-  outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
+  outlcpinfo->lcpsubtab.assideeffect = assideeffect;
   outlcpinfo->totallength = totallength;
+  outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
   outlcpinfo->lcpsubtab.totalnumoflargelcpvalues = 0;
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
@@ -1658,8 +1658,7 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   sizeforsmalllcpvalues = (unsigned long)
                           sizeof (*lcpsubtab->smalllcpvalues) * buffersize;
   lcpsubtab->smalllcpvalues
-    = compressedtable_unusedmem(lcptab,
-                                (size_t) sizeforsmalllcpvalues);
+    = compressedtable_unusedmem(lcptab,(size_t) sizeforsmalllcpvalues);
   if (lcpsubtab->smalllcpvalues == NULL)
   {
     lcpsubtab->smalllcpvalues = gt_malloc((size_t) sizeforsmalllcpvalues);
@@ -1697,7 +1696,7 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
   {
     return;
   }
-  if (outlcpinfo->assideeffect)
+  if (outlcpinfo->lcpsubtab.assideeffect)
   {
     gt_free(outlcpinfo->lcpsubtab.reservoir);
     outlcpinfo->lcpsubtab.reservoir = NULL;
@@ -1747,7 +1746,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   unsigned int numofchars,
                                   unsigned int prefixlength,
                                   unsigned int sortmaxdepth,
-                                  Outlcpinfo *outlcpinfo,
+                                  Lcpsubtab *lcpsubtab,
                                   const Sfxstrategy *sfxstrategy)
 {
   unsigned long idx;
@@ -1764,10 +1763,10 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   {
     bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
   }
-  if (outlcpinfo != NULL)
+  if (lcpsubtab != NULL)
   {
-    bsr->tableoflcpvalues = &outlcpinfo->lcpsubtab.tableoflcpvalues;
-    bsr->assideeffect = outlcpinfo->assideeffect;
+    bsr->tableoflcpvalues = &lcpsubtab->tableoflcpvalues;
+    bsr->assideeffect = lcpsubtab->assideeffect;
   } else
   {
     bsr->tableoflcpvalues = NULL;
@@ -1784,23 +1783,21 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                               false,
                               0); /* not necesarry as hashexceptions = false */
     /* gt_bcktab_showlog2info(bcktab,logger); */
-    if (outlcpinfo != NULL && outlcpinfo->assideeffect)
+    if (lcpsubtab != NULL && lcpsubtab->assideeffect)
     {
       size_t sizeforlcpvalues; /* in bytes */
 
       sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
-      if (outlcpinfo->lcpsubtab.sizereservoir < sizeforlcpvalues)
+      if (lcpsubtab->sizereservoir < sizeforlcpvalues)
       {
-        outlcpinfo->lcpsubtab.sizereservoir = sizeforlcpvalues;
-        outlcpinfo->lcpsubtab.reservoir
-          = gt_realloc(outlcpinfo->lcpsubtab.reservoir,
-                       outlcpinfo->lcpsubtab.sizereservoir);
+        lcpsubtab->sizereservoir = sizeforlcpvalues;
+        lcpsubtab->reservoir = gt_realloc(lcpsubtab->reservoir,
+                                          lcpsubtab->sizereservoir);
         /* point to the same area, since this is not used simultaneously */
         /* be careful for the parallel version */
-        outlcpinfo->lcpsubtab.smalllcpvalues
-          = (uint8_t *) outlcpinfo->lcpsubtab.reservoir;
-        outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
-          = (unsigned long *) outlcpinfo->lcpsubtab.reservoir;
+        lcpsubtab->smalllcpvalues = (uint8_t *) lcpsubtab->reservoir;
+        lcpsubtab->tableoflcpvalues.bucketoflcpvalues
+          = (unsigned long *) lcpsubtab->reservoir;
      }
     }
   }
@@ -1999,7 +1996,9 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         numofchars,
                         prefixlength,
                         0,
-                        outlcpinfo,
+                        outlcpinfo != NULL
+                          ? &outlcpinfo->lcpsubtab
+                          : NULL,
                         sfxstrategy);
   for (code = mincode; code <= maxcode; code++)
   {
@@ -2021,7 +2020,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                          partwidth,
                                          rightchar,
                                          numofchars);
-    if (outlcpinfo != NULL && outlcpinfo->assideeffect)
+    if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
     {
       outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
       if (code > 0)
@@ -2029,8 +2028,9 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
         (void) gt_nextTurningwheel(outlcpinfo->tw);
         if (outlcpinfo->previousbucketwasempty)
         {
-          outlcpinfo->minchanged = MIN(outlcpinfo->minchanged,
-                                     gt_minchangedTurningwheel(outlcpinfo->tw));
+          outlcpinfo->minchanged
+            = MIN(outlcpinfo->minchanged,
+                  gt_minchangedTurningwheel(outlcpinfo->tw));
         } else
         {
           outlcpinfo->minchanged = gt_minchangedTurningwheel(outlcpinfo->tw);
@@ -2041,7 +2041,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     {
       if (bucketspec.nonspecialsinbucket > 1UL)
       {
-        if (outlcpinfo != NULL && outlcpinfo->assideeffect)
+        if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
         {
           gt_assert(bsr.tableoflcpvalues != NULL);
         }
@@ -2051,7 +2051,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                          (unsigned long) prefixlength);
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
       }
-      if (outlcpinfo != NULL && outlcpinfo->assideeffect)
+      if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
       {
         if (outlcpinfo->previoussuffix.defined)
         {
@@ -2076,7 +2076,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
           /* first part first code */
           lcpvalue = 0;
         }
-        gt_assert(bsr.tableoflcpvalues != NULL);
 #ifdef SKDEBUG
         baseptr = bucketspec.left;
 #endif
@@ -2104,7 +2103,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 #endif
       }
     }
-    if (outlcpinfo != NULL && outlcpinfo->assideeffect)
+    if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
     {
       if (bucketspec.specialsinbucket > 0)
       {
@@ -2218,7 +2217,9 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                         numofchars,
                         prefixlength,
                         sortmaxdepth,
-                        outlcpinfo,
+                        outlcpinfo != NULL
+                          ? &outlcpinfo->lcpsubtab
+                          : NULL,
                         sfxstrategy);
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
