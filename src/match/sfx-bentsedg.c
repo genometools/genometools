@@ -1411,7 +1411,21 @@ static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
   return (unsigned long) lcpvalue;
 }
 
-static unsigned int bucketends(Outlcpinfo *outlcpinfo,
+static void outsmalllcpvalues(FILE *outfp,
+                              Lcpsubtab *lcpsubtab,
+                              unsigned long numoflcps)
+{
+  if (outfp != NULL)
+  {
+    lcpsubtab->countoutputlcpvalues += numoflcps;
+    gt_xfwrite(lcpsubtab->smalllcpvalues,
+               sizeof (*lcpsubtab->smalllcpvalues),
+               (size_t) numoflcps,
+               outfp);
+  }
+}
+
+static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                                Suffixwithcode *previoussuffix,
                                GT_UNUSED unsigned long firstspecialsuffix,
                                unsigned int minchanged,
@@ -1431,13 +1445,13 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   if (specialsinbucket > 1UL)
   {
     maxprefixindex = gt_pfxidx2lcpvalues(&minprefixindex,
-                                         outlcpinfo->lcpsubtab.smalllcpvalues,
+                                         lcpsubtab->smalllcpvalues,
                                          specialsinbucket,
                                          bcktab,
                                          code);
-    if (outlcpinfo->lcpsubtab.maxbranchdepth < (unsigned long) maxprefixindex)
+    if (lcpsubtab->maxbranchdepth < (unsigned long) maxprefixindex)
     {
-      outlcpinfo->lcpsubtab.maxbranchdepth = (unsigned long) maxprefixindex;
+      lcpsubtab->maxbranchdepth = (unsigned long) maxprefixindex;
     }
   } else
   {
@@ -1456,19 +1470,11 @@ static unsigned int bucketends(Outlcpinfo *outlcpinfo,
   lcpvalue = computelocallcpvalue(previoussuffix,
                                   &firstspecialsuffixwithcode,
                                   minchanged);
-  if (outlcpinfo->lcpsubtab.maxbranchdepth < lcpvalue)
+  if (lcpsubtab->maxbranchdepth < lcpvalue)
   {
-    outlcpinfo->lcpsubtab.maxbranchdepth = lcpvalue;
+    lcpsubtab->maxbranchdepth = lcpvalue;
   }
-  outlcpinfo->lcpsubtab.smalllcpvalues[0] = (uint8_t) lcpvalue;
-  if (outlcpinfo->outfplcptab != NULL)
-  {
-    outlcpinfo->lcpsubtab.countoutputlcpvalues += specialsinbucket;
-    gt_xfwrite(outlcpinfo->lcpsubtab.smalllcpvalues,
-               sizeof (*outlcpinfo->lcpsubtab.smalllcpvalues),
-               (size_t) specialsinbucket,
-               outlcpinfo->outfplcptab);
-  }
+  lcpsubtab->smalllcpvalues[0] = (uint8_t) lcpvalue;
   return minprefixindex;
 }
 
@@ -1597,22 +1603,16 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
   }
-  if (fplcptab != NULL)
-  {
-    lcpsubtab->countoutputlcpvalues += (bucketright - bucketleft + 1);
-    gt_xfwrite(lcpsubtab->smalllcpvalues,
-               sizeof (*lcpsubtab->smalllcpvalues),
-               (size_t) (bucketright - bucketleft + 1),
-               fplcptab);
-  }
+  outsmalllcpvalues(fplcptab,
+                    lcpsubtab,
+                    (unsigned long) (bucketright - bucketleft + 1));
   if (fpllvtab != NULL && lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     lcpsubtab->totalnumoflargelcpvalues
       += lcpsubtab->largelcpvalues.nextfreeLargelcpvalue;
     gt_xfwrite(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
                sizeof (Largelcpvalue),
-               (size_t)
-               lcpsubtab->largelcpvalues.nextfreeLargelcpvalue,
+               (size_t) lcpsubtab->largelcpvalues.nextfreeLargelcpvalue,
                fpllvtab);
   }
 }
@@ -1945,9 +1945,6 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);
-    gt_assert(outlcpinfo->outfplcptab != NULL);
-    gt_assert(outlcpinfo->outfpllvtab != NULL);
-
     multioutlcpvalues(&outlcpinfo->lcpsubtab,gt_encseq_total_length(encseq),
                       lcptab,partwidth,outlcpinfo->outfplcptab,
                       outlcpinfo->outfpllvtab);
@@ -2112,7 +2109,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                    0,
                                    bucketspec.left
                                      + bucketspec.nonspecialsinbucket);
-        minprefixindex = bucketends(outlcpinfo,
+        minprefixindex = bucketends(&outlcpinfo->lcpsubtab,
                                     &outlcpinfo->previoussuffix,
                                     /* first special element in bucket */
                                     suffixvalue,
@@ -2120,6 +2117,9 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                     bucketspec.specialsinbucket,
                                     code,
                                     bcktab);
+        outsmalllcpvalues(outlcpinfo->outfplcptab,
+                          &outlcpinfo->lcpsubtab,
+                          bucketspec.specialsinbucket);
         /* there is at least one special element: this is the last element
            in the bucket, and thus the previoussuffix for the next round */
         outlcpinfo->previoussuffix.defined = true;
