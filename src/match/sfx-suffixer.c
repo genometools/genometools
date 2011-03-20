@@ -1011,6 +1011,7 @@ static void preparethispart(Sfxiterator *sfi)
   } else
   {
     GtBucketspec2 *bucketspec2 = NULL;
+
     gt_assert(!sfi->sfxstrategy.streamsuftab);
     if (numofparts == 1U && sfi->outlcpinfo == NULL && sfi->prefixlength >= 2U)
     {
@@ -1020,39 +1021,27 @@ static void preparethispart(Sfxiterator *sfi)
     if (sfi->sfxstrategy.differencecover > 0)
     {
       gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
-      gt_sortbucketofsuffixes(sfi->suffixsortspace,
-                              partwidth,
-                              bucketspec2,
-                              sfi->encseq,
-                              sfi->readmode,
-                              sfi->currentmincode,
-                              sfi->currentmaxcode,
-                              sfi->bcktab,
-                              sfi->numofchars,
-                              sfi->prefixlength,
-                              sfi->sfxstrategy.differencecover,
-                              &sfi->sfxstrategy,
-                              NULL, /* outlcpinfo */
-                              (void *) sfi->dcov,
-                              gt_differencecover_sortunsortedbucket,
-                              sfi->logger);
-    } else
-    {
-      gt_sortallbuckets (sfi->suffixsortspace,
-                         bucketspec2,
-                         sfi->encseq,
-                         sfi->readmode,
-                         sfi->currentmincode,
-                         sfi->currentmaxcode,
-                         partwidth,
-                         sfi->bcktab,
-                         sfi->numofchars,
-                         sfi->prefixlength,
-                         sfi->outlcpinfo,
-                         &sfi->sfxstrategy,
-                         &sfi->bucketiterstep,
-                         sfi->logger);
     }
+    gt_sortallbuckets(sfi->suffixsortspace,
+                      partwidth,
+                      bucketspec2,
+                      sfi->encseq,
+                      sfi->readmode,
+                      sfi->currentmincode,
+                      sfi->currentmaxcode,
+                      sfi->bcktab,
+                      sfi->numofchars,
+                      sfi->prefixlength,
+                      sfi->sfxstrategy.differencecover == 0
+                        ? sfi->outlcpinfo : NULL,
+                      sfi->sfxstrategy.differencecover,
+                      &sfi->sfxstrategy,
+                      sfi->sfxstrategy.differencecover == 0
+                        ? NULL : gt_differencecover_sortunsortedbucket,
+                      sfi->sfxstrategy.differencecover == 0
+                        ? NULL : (void *) sfi->dcov,
+                      &sfi->bucketiterstep,
+                      sfi->logger);
     if (bucketspec2 != NULL)
     {
       gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace,sfi->logger);

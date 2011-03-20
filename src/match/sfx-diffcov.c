@@ -1165,6 +1165,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   } else
   {
     Sfxstrategy sfxstrategy;
+    unsigned long long bucketiterstep = 0;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
     if (mainsfxstrategy != NULL)
@@ -1193,22 +1194,23 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
     gt_logger_log(dcov->logger,"samplesort.maxcountingsort=%lu",
                   sfxstrategy.maxcountingsort);
     gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength);
-    gt_sortbucketofsuffixes(dcov->sortedsample,
-                            dcov->effectivesamplesize,
-                            NULL,
-                            dcov->encseq,
-                            dcov->readmode,
-                            0, /* mincode */
-                            dcov->maxcode,
-                            dcov->bcktab,
-                            dcov->numofchars,
-                            dcov->prefixlength,
-                            dcov->vparam,
-                            &sfxstrategy,
-                            outlcpinfosample,
-                            (void *) dcov,
-                            dc_addunsortedrange,
-                            dcov->logger);
+    gt_sortallbuckets(dcov->sortedsample,
+                      dcov->effectivesamplesize,
+                      NULL,
+                      dcov->encseq,
+                      dcov->readmode,
+                      0, /* mincode */
+                      dcov->maxcode,
+                      dcov->bcktab,
+                      dcov->numofchars,
+                      dcov->prefixlength,
+                      outlcpinfosample,
+                      dcov->vparam,
+                      &sfxstrategy,
+                      dc_addunsortedrange,
+                      (void *) dcov,
+                      &bucketiterstep,
+                      dcov->logger);
     if (withcheck)
     {
       gt_checksortedsuffixes(__FILE__,

@@ -2021,24 +2021,105 @@ static void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
   }
 }
 
+static void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
+                                     unsigned int prefixlength,
+                                     Bentsedgresources *bsr,
+                                     Bcktab *bcktab,
+                                     const Bucketspecification *bucketspec,
+                                     GtCodetype code)
+{
+  if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
+  {
+    unsigned int minprefixindex;
+
+    if (bucketspec->specialsinbucket > 0)
+    {
+      unsigned long suffixvalue
+        = gt_suffixsortspace_get(bsr->sssp,
+                                 0,
+                                 bucketspec->left
+                                   + bucketspec->nonspecialsinbucket);
+      minprefixindex = bucketends(&outlcpinfo->lcpsubtab,
+                                  &outlcpinfo->previoussuffix,
+                                  /* first special element in bucket */
+                                  suffixvalue,
+                                  outlcpinfo->minchanged,
+                                  bucketspec->specialsinbucket,
+                                  code,
+                                  bcktab);
+      outsmalllcpvalues(&outlcpinfo->lcpsubtab,bucketspec->specialsinbucket);
+      /* there is at least one special element: this is the last element
+         in the bucket, and thus the previoussuffix for the next round */
+      outlcpinfo->previoussuffix.defined = true;
+      outlcpinfo->previoussuffix.code = code;
+      outlcpinfo->previoussuffix.prefixindex = minprefixindex;
+#ifdef SKDEBUG
+      outlcpinfo->previoussuffix.startpos
+        = gt_suffixsortspace_get(bsr->sssp,
+                                 0,
+                                 bucketspec->left
+                                   + bucketspec->nonspecialsinbucket +
+                                     bucketspec->specialsinbucket - 1);
+      /*
+        consistencyofsuffix(__LINE__,
+                            encseq,readmode,bcktab,numofchars,
+                            &outlcpinfo->previoussuffix);
+      */
+#endif
+    } else
+    {
+      if (bucketspec->nonspecialsinbucket > 0)
+      {
+        /* if there is at least one element in the bucket, then the last
+           one becomes the next previous suffix */
+        outlcpinfo->previoussuffix.defined = true;
+        outlcpinfo->previoussuffix.code = code;
+        outlcpinfo->previoussuffix.prefixindex = prefixlength;
+#ifdef SKDEBUG
+        outlcpinfo->previoussuffix.startpos
+          = gt_suffixsortspace_get(bsr->sssp,
+                                   0,
+                                   bucketspec.left
+                                     + bucketspec.nonspecialsinbucket-1);
+        /*
+        consistencyofsuffix(__LINE__,
+                            encseq,readmode,bcktab,numofchars,
+                            &outlcpinfo->previoussuffix);
+        */
+#endif
+      }
+    }
+    if (bucketspec->nonspecialsinbucket + bucketspec->specialsinbucket == 0)
+    {
+      outlcpinfo->previousbucketwasempty = true;
+    } else
+    {
+      outlcpinfo->previousbucketwasempty = false;
+    }
+  }
+}
+
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       unsigned long numberofsuffixes,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
                        GtCodetype mincode,
                        GtCodetype maxcode,
-                       unsigned long partwidth,
                        Bcktab *bcktab,
                        unsigned int numofchars,
                        unsigned int prefixlength,
                        Outlcpinfo *outlcpinfo,
+                       unsigned int sortmaxdepth,
                        const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange
+                         processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger)
 {
   GtCodetype code;
-  unsigned int rightchar = (unsigned int) (mincode % numofchars),
-               minprefixindex;
+  unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
   Bentsedgresources bsr;
 
@@ -2049,14 +2130,14 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         bcktab,
                         mincode,
                         maxcode,
-                        partwidth,
+                        numberofsuffixes,
                         numofchars,
                         prefixlength,
-                        0,
-                        outlcpinfo != NULL
-                          ? &outlcpinfo->lcpsubtab
-                          : NULL,
+                        sortmaxdepth,
+                        outlcpinfo != NULL ? &outlcpinfo->lcpsubtab : NULL,
                         sfxstrategy);
+  bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+  bsr.processunsortedsuffixrange = processunsortedsuffixrange;
   for (code = mincode; code <= maxcode; code++)
   {
     if (bucketspec2 != NULL)
@@ -2074,7 +2155,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                          bcktab,
                                          code,
                                          maxcode,
-                                         partwidth,
+                                         numberofsuffixes,
                                          rightchar,
                                          numofchars);
     gt_Outlcpinfo_prebucket(outlcpinfo,code);
@@ -2082,13 +2163,8 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
     {
       if (bucketspec.nonspecialsinbucket > 1UL)
       {
-        if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
-        {
-          gt_assert(bsr.tableoflcpvalues != NULL);
-        }
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,bucketspec.left);
-        bentleysedgewick(&bsr,
-                         bucketspec.nonspecialsinbucket,
+        bentleysedgewick(&bsr,bucketspec.nonspecialsinbucket,
                          (unsigned long) prefixlength);
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
       }
@@ -2098,156 +2174,16 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                       &bucketspec,
                                       code);
     }
-    if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
-    {
-      if (bucketspec.specialsinbucket > 0)
-      {
-        unsigned long suffixvalue
-          = gt_suffixsortspace_get(suffixsortspace,
-                                   0,
-                                   bucketspec.left
-                                     + bucketspec.nonspecialsinbucket);
-        minprefixindex = bucketends(&outlcpinfo->lcpsubtab,
-                                    &outlcpinfo->previoussuffix,
-                                    /* first special element in bucket */
-                                    suffixvalue,
-                                    outlcpinfo->minchanged,
-                                    bucketspec.specialsinbucket,
-                                    code,
-                                    bcktab);
-        outsmalllcpvalues(&outlcpinfo->lcpsubtab,bucketspec.specialsinbucket);
-        /* there is at least one special element: this is the last element
-           in the bucket, and thus the previoussuffix for the next round */
-        outlcpinfo->previoussuffix.defined = true;
-        outlcpinfo->previoussuffix.code = code;
-        outlcpinfo->previoussuffix.prefixindex = minprefixindex;
-#ifdef SKDEBUG
-        outlcpinfo->previoussuffix.startpos
-          = gt_suffixsortspace_get(suffixsortspace,
-                                   0,
-                                   bucketspec.left
-                                     + bucketspec.nonspecialsinbucket +
-                                       bucketspec.specialsinbucket - 1);
-        /*
-         consistencyofsuffix(__LINE__,
-                             encseq,readmode,bcktab,numofchars,
-                             &outlcpinfo->previoussuffix);
-        */
-#endif
-      } else
-      {
-        if (bucketspec.nonspecialsinbucket > 0)
-        {
-          /* if there is at least one element in the bucket, then the last
-             one becomes the next previous suffix */
-          outlcpinfo->previoussuffix.defined = true;
-          outlcpinfo->previoussuffix.code = code;
-          outlcpinfo->previoussuffix.prefixindex = prefixlength;
-#ifdef SKDEBUG
-          outlcpinfo->previoussuffix.startpos
-            = gt_suffixsortspace_get(suffixsortspace,
-                                     0,
-                                     bucketspec.left
-                                       + bucketspec.nonspecialsinbucket-1);
-          /*
-          consistencyofsuffix(__LINE__,
-                              encseq,readmode,bcktab,numofchars,
-                              &outlcpinfo->previoussuffix);
-          */
-#endif
-        }
-      }
-      if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
-      {
-        outlcpinfo->previousbucketwasempty = true;
-      } else
-      {
-        outlcpinfo->previousbucketwasempty = false;
-      }
-    }
+    gt_Outlcpinfo_postbucket(outlcpinfo,
+                             prefixlength,
+                             &bsr,
+                             bcktab,
+                             &bucketspec,
+                             code);
   }
   wrapBentsedgresources(&bsr,
-                        partwidth,
-                        outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,
-                        logger);
-}
-
-/*
-   The following function is used for sorting the sample making up the
-   difference cover and for sorting with the difference cover.
-*/
-
-void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
-                             unsigned long numberofsuffixes,
-                             GtBucketspec2 *bucketspec2,
-                             const GtEncseq *encseq,
-                             GtReadmode readmode,
-                             GtCodetype mincode,
-                             GtCodetype maxcode,
-                             Bcktab *bcktab,
-                             unsigned int numofchars,
-                             unsigned int prefixlength,
-                             unsigned int sortmaxdepth,
-                             const Sfxstrategy *sfxstrategy,
-                             Outlcpinfo *outlcpinfo,
-                             void *processunsortedsuffixrangeinfo,
-                             GtProcessunsortedsuffixrange
-                               processunsortedsuffixrange,
-                             GtLogger *logger)
-{
-  Bentsedgresources bsr;
-  Bucketspecification bucketspec;
-  unsigned int rightchar = (unsigned int) (mincode % numofchars);
-  GtCodetype code;
-
-  initBentsedgresources(&bsr,
-                        suffixsortspace,
-                        encseq,
-                        readmode,
-                        outlcpinfo == NULL ? NULL : bcktab,
-                        outlcpinfo == NULL ? 0    : mincode,
-                        outlcpinfo == NULL ? 0    : maxcode,
-                        outlcpinfo == NULL ? 0    : numberofsuffixes,
-                        numofchars,
-                        prefixlength,
-                        sortmaxdepth,
-                        outlcpinfo != NULL ? &outlcpinfo->lcpsubtab
-                                           : NULL,
-                        sfxstrategy);
-  bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
-  bsr.processunsortedsuffixrange = processunsortedsuffixrange;
-  for (code = mincode; code <= maxcode; code++)
-  {
-    if (bucketspec2 != NULL)
-    {
-      if (gt_copysort_checkhardwork(bucketspec2,code))
-      {
-        rightchar = (unsigned int) (code % numofchars);
-      } else
-      {
-        continue;
-      }
-    }
-    rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                         bcktab,
-                                         code,
-                                         maxcode,
-                                         numberofsuffixes,
-                                         rightchar,
-                                         numofchars);
-    if (bucketspec.nonspecialsinbucket > 1UL)
-    {
-      /*fprintf(stderr,"set bucketleftidx = %lu\n",bsr.sssp->bucketleftidx);*/
-      gt_suffixsortspace_bucketleftidx_set(bsr.sssp,bucketspec.left);
-      bentleysedgewick(&bsr,
-                       bucketspec.nonspecialsinbucket,
-                       (unsigned long) prefixlength);
-      gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
-    }
-  }
-  wrapBentsedgresources(&bsr,
-                        0, /* partwidth value unused because lcptab == NULL */
-                        NULL,
+                        numberofsuffixes,
+                        outlcpinfo != NULL ? &outlcpinfo->lcpsubtab : NULL,
                         logger);
 }
 

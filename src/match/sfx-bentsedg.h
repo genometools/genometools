@@ -64,37 +64,23 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
                  Outlcpinfo *outlcpinfo);
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
+                       unsigned long numberofsuffixes,
                        GtBucketspec2 *bucketspec2,
                        const GtEncseq *encseq,
                        GtReadmode readmode,
                        GtCodetype mincode,
                        GtCodetype maxcode,
-                       unsigned long partwidth,
                        Bcktab *bcktab,
                        unsigned int numofchars,
                        unsigned int prefixlength,
                        Outlcpinfo *outlcpinfo,
+                       unsigned int sortmaxdepth,
                        const Sfxstrategy *sfxstrategy,
+                       GtProcessunsortedsuffixrange
+                         processunsortedsuffixrange,
+                       void *processunsortedsuffixrangeinfo,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger);
-
-void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
-                             unsigned long numberofsuffixes,
-                             GtBucketspec2 *bucketspec2,
-                             const GtEncseq *encseq,
-                             GtReadmode readmode,
-                             GtCodetype mincode,
-                             GtCodetype maxcode,
-                             Bcktab *bcktab,
-                             unsigned int numofchars,
-                             unsigned int prefixlength,
-                             unsigned int sortmaxdepth,
-                             const Sfxstrategy *sfxstrategy,
-                             Outlcpinfo *outlcpinfo,
-                             void *processunsortedsuffixrangeinfo,
-                             GtProcessunsortedsuffixrange
-                               processunsortedsuffixrange,
-                             GtLogger *logger);
 
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  unsigned long numberofsuffixes,
