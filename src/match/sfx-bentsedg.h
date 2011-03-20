@@ -34,6 +34,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
+                              unsigned long totallength,
                               bool assideeffect,
                               GtError *err);
 
@@ -41,8 +42,7 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength);
 
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
-                          unsigned long totallength,bool withdiffcover);
+void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,bool withdiffcover);
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 

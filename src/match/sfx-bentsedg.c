@@ -91,6 +91,9 @@ typedef struct
   GtArrayLargelcpvalue largelcpvalues;
   GtLcpvalues tableoflcpvalues;
   bool assideeffect;
+  unsigned long totallength;
+  FILE *outfplcptab,
+       *outfpllvtab;
 } Lcpsubtab;
 
 typedef struct
@@ -106,13 +109,11 @@ typedef struct
 
 struct Outlcpinfo
 {
-  FILE *outfplcptab,
-       *outfpllvtab;
   Turningwheel *tw;
   unsigned int minchanged;
-  Lcpsubtab lcpsubtab;
   Suffixwithcode previoussuffix;
   bool previousbucketwasempty;
+  Lcpsubtab lcpsubtab;
 };
 
 #define CMPCHARBYCHARPTR2INT(VAR,SUBBUCKETLEFT,TMPVAR,IDX)\
@@ -227,8 +228,6 @@ typedef struct
 } Bentsedgresources;
 
 #ifdef SKDEBUG
-static unsigned long baseptr;
-
 static void showsuffixrange(const Bentsedgresources *bsr,
                             unsigned long subbucketleft,
                             unsigned long width,
@@ -1410,17 +1409,16 @@ static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
   return (unsigned long) lcpvalue;
 }
 
-static void outsmalllcpvalues(FILE *outfp,
-                              Lcpsubtab *lcpsubtab,
+static void outsmalllcpvalues(Lcpsubtab *lcpsubtab,
                               unsigned long numoflcps)
 {
-  if (outfp != NULL)
+  if (lcpsubtab->outfplcptab != NULL)
   {
     lcpsubtab->countoutputlcpvalues += numoflcps;
     gt_xfwrite(lcpsubtab->smalllcpvalues,
                sizeof (*lcpsubtab->smalllcpvalues),
                (size_t) numoflcps,
-               outfp);
+               lcpsubtab->outfplcptab);
   }
 }
 
@@ -1480,6 +1478,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
+                              unsigned long totallength,
                               bool assideeffect,
                               GtError *err)
 {
@@ -1489,21 +1488,21 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   if (indexname == NULL)
   {
-    outlcpinfo->outfplcptab = NULL;
-    outlcpinfo->outfpllvtab = NULL;
+    outlcpinfo->lcpsubtab.outfplcptab = NULL;
+    outlcpinfo->lcpsubtab.outfpllvtab = NULL;
   } else
   {
-    outlcpinfo->outfplcptab = gt_fa_fopen_with_suffix(indexname,LCPTABSUFFIX,
-                                                      "wb",err);
-    if (outlcpinfo->outfplcptab == NULL)
+    outlcpinfo->lcpsubtab.outfplcptab
+      = gt_fa_fopen_with_suffix(indexname,LCPTABSUFFIX,"wb",err);
+    if (outlcpinfo->lcpsubtab.outfplcptab == NULL)
     {
       haserr = true;
     }
     if (!haserr)
     {
-      outlcpinfo->outfpllvtab
+      outlcpinfo->lcpsubtab.outfpllvtab
         = gt_fa_fopen_with_suffix(indexname,LARGELCPTABSUFFIX,"wb",err);
-      if (outlcpinfo->outfpllvtab == NULL)
+      if (outlcpinfo->lcpsubtab.outfpllvtab == NULL)
       {
         haserr = true;
       }
@@ -1515,10 +1514,11 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
   outlcpinfo->lcpsubtab.sizereservoir = 0;
+  outlcpinfo->lcpsubtab.totallength = totallength;
   GT_INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->minchanged = 0;
-  if (assideeffect && prefixlength > 0)
+  if (!haserr && assideeffect && prefixlength > 0)
   {
     outlcpinfo->tw = gt_newTurningwheel(prefixlength,numofchars);
   } else
@@ -1553,12 +1553,9 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
 static void outlcpvalues(Lcpsubtab *lcpsubtab,
                          unsigned long bucketleft,
                          unsigned long bucketright,
-                         unsigned long posoffset,
-                         FILE *fplcptab,
-                         FILE *fpllvtab)
+                         unsigned long posoffset)
 {
-  unsigned long idx;
-  unsigned long lcpvalue;
+  unsigned long idx, lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
   lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
@@ -1600,17 +1597,16 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
   }
-  outsmalllcpvalues(fplcptab,
-                    lcpsubtab,
-                    (unsigned long) (bucketright - bucketleft + 1));
-  if (fpllvtab != NULL && lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
+  outsmalllcpvalues(lcpsubtab,(unsigned long) (bucketright - bucketleft + 1));
+  if (lcpsubtab->outfpllvtab != NULL &&
+      lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     lcpsubtab->totalnumoflargelcpvalues
       += lcpsubtab->largelcpvalues.nextfreeLargelcpvalue;
     gt_xfwrite(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
                sizeof (Largelcpvalue),
                (size_t) lcpsubtab->largelcpvalues.nextfreeLargelcpvalue,
-               fpllvtab);
+               lcpsubtab->outfpllvtab);
   }
 }
 
@@ -1637,9 +1633,7 @@ static unsigned long outmany0lcpvalues(unsigned long countoutputlcpvalues,
 static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
                               unsigned long totallength,
                               const Compressedtable *lcptab,
-                              unsigned long bucketsize,
-                              FILE *fplcptab,
-                              FILE *fpllvtab)
+                              unsigned long bucketsize)
 {
   unsigned long buffersize = 512UL, sizeforsmalllcpvalues,
                 remaining, left, width;
@@ -1666,16 +1660,10 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
   }
   remaining = bucketsize;
   left = 0;
-  gt_assert(fplcptab != NULL && fpllvtab != NULL);
   while (remaining > 0)
   {
     width = MIN(remaining, buffersize);
-    outlcpvalues(lcpsubtab,
-                 left,
-                 left + width - 1,
-                 0,
-                 fplcptab,
-                 fpllvtab);
+    outlcpvalues(lcpsubtab, left, left + width - 1, 0);
     remaining -= width;
     left += width;
   }
@@ -1687,7 +1675,6 @@ static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
 }
 
 void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
-                          unsigned long totallength,
                           /*XXX remove this later*/ bool withdiffcover)
 {
   if (outlcpinfo == NULL)
@@ -1704,22 +1691,23 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
       gt_freeTurningwheel(&outlcpinfo->tw);
     }
   }
-  if (outlcpinfo->outfplcptab != NULL &&
+  if (outlcpinfo->lcpsubtab.outfplcptab != NULL &&
       !withdiffcover &&
-      outlcpinfo->lcpsubtab.countoutputlcpvalues < totallength+1)
+      outlcpinfo->lcpsubtab.countoutputlcpvalues <
+      outlcpinfo->lcpsubtab.totallength+1)
   {
     outlcpinfo->lcpsubtab.countoutputlcpvalues
       += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
-                           totallength,
-                           outlcpinfo->outfplcptab);
+                           outlcpinfo->lcpsubtab.totallength,
+                           outlcpinfo->lcpsubtab.outfplcptab);
   }
-  gt_assert(outlcpinfo->outfplcptab == NULL ||
+  gt_assert(outlcpinfo->lcpsubtab.outfplcptab == NULL ||
             withdiffcover ||
             outlcpinfo->lcpsubtab.countoutputlcpvalues ==
-            totallength + 1);
+            outlcpinfo->lcpsubtab.totallength + 1);
   GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
-  gt_fa_fclose(outlcpinfo->outfplcptab);
-  gt_fa_fclose(outlcpinfo->outfpllvtab);
+  gt_fa_fclose(outlcpinfo->lcpsubtab.outfplcptab);
+  gt_fa_fclose(outlcpinfo->lcpsubtab.outfpllvtab);
   gt_free(outlcpinfo);
 }
 
@@ -1874,8 +1862,6 @@ static void initBentsedgresources(Bentsedgresources *bsr,
 static void wrapBentsedgresources(Bentsedgresources *bsr,
                                   unsigned long partwidth,
                                   Lcpsubtab *lcpsubtab,
-                                  FILE *outfplcptab,
-                                  FILE *outfpllvtab,
                                   GtLogger *logger)
 {
   gt_free(bsr->countingsortinfo);
@@ -1899,8 +1885,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
                                   bsr->tableoflcpvalues == NULL ? false : true);
     if (lcptab != NULL)
     {
-      multioutlcpvalues(lcpsubtab,bsr->totallength,lcptab,partwidth,
-                        outfplcptab,outfpllvtab);
+      multioutlcpvalues(lcpsubtab,bsr->totallength,lcptab,partwidth);
       compressedtable_free(lcptab,true);
     }
   }
@@ -1944,8 +1929,7 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
   {
     gt_assert(outlcpinfo != NULL);
     multioutlcpvalues(&outlcpinfo->lcpsubtab,gt_encseq_total_length(encseq),
-                      lcptab,partwidth,outlcpinfo->outfplcptab,
-                      outlcpinfo->outfpllvtab);
+                      lcptab,partwidth);
     compressedtable_free(lcptab,true);
   }
 }
@@ -1956,6 +1940,86 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
   information. GtSuffixsortspace contains the sortspace which is accessed
   by some negative offset.
 */
+
+static void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
+                                    GtCodetype code)
+{
+  if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
+  {
+    outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
+    if (code > 0)
+    {
+      (void) gt_nextTurningwheel(outlcpinfo->tw);
+      if (outlcpinfo->previousbucketwasempty)
+      {
+        outlcpinfo->minchanged
+          = MIN(outlcpinfo->minchanged,
+                gt_minchangedTurningwheel(outlcpinfo->tw));
+      } else
+      {
+        outlcpinfo->minchanged = gt_minchangedTurningwheel(outlcpinfo->tw);
+      }
+    }
+  }
+}
+
+static void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
+                                         unsigned int prefixlength,
+                                         Bentsedgresources *bsr,
+                                         const Bucketspecification *bucketspec,
+                                         GtCodetype code)
+{
+  if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
+  {
+    unsigned long lcpvalue;
+    Suffixwithcode firstsuffixofbucket;
+
+    if (outlcpinfo->previoussuffix.defined)
+    {
+
+      /* compute lcpvalue of first element of bucket with
+         last element of previous bucket */
+      firstsuffixofbucket.code = code;
+      firstsuffixofbucket.prefixindex = prefixlength;
+#ifdef SKDEBUG
+      firstsuffixofbucket.startpos
+        = gt_suffixsortspace_get(bsr->sssp,0,bucketspec->left);
+      /*
+      consistencyofsuffix(__LINE__,
+                          encseq,readmode,bcktab,numofchars,
+                          &firstsuffixofbucket);
+      */
+#endif
+      lcpvalue = computelocallcpvalue(&outlcpinfo->previoussuffix,
+                                      &firstsuffixofbucket,
+                                      outlcpinfo->minchanged);
+    } else
+    {
+      /* first part first code */
+      lcpvalue = 0;
+    }
+    lcptab_update(bsr->tableoflcpvalues,0,lcpvalue);
+    /* all other lcp-values are computed and they can be output */
+    outlcpvalues(&outlcpinfo->lcpsubtab,
+                 0,
+                 bucketspec->nonspecialsinbucket-1,
+                 bucketspec->left);
+    /* previoussuffix becomes last nonspecial element in current bucket */
+    outlcpinfo->previoussuffix.code = code;
+    outlcpinfo->previoussuffix.prefixindex = prefixlength;
+#ifdef SKDEBUG
+    outlcpinfo->previoussuffix.startpos
+      = gt_suffixsortspace_get(bsr->sssp,0,
+                               bucketspec->left
+                                 + bucketspec->nonspecialsinbucket - 1);
+    /*
+    consistencyofsuffix(__LINE__,
+                        encseq,readmode,bcktab,numofchars,
+                        &outlcpinfo->previoussuffix);
+    */
+#endif
+  }
+}
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtBucketspec2 *bucketspec2,
@@ -1976,8 +2040,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   unsigned int rightchar = (unsigned int) (mincode % numofchars),
                minprefixindex;
   Bucketspecification bucketspec;
-  unsigned long lcpvalue;
-  Suffixwithcode firstsuffixofbucket;
   Bentsedgresources bsr;
 
   initBentsedgresources(&bsr,
@@ -2015,23 +2077,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                          partwidth,
                                          rightchar,
                                          numofchars);
-    if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
-    {
-      outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
-      if (code > 0)
-      {
-        (void) gt_nextTurningwheel(outlcpinfo->tw);
-        if (outlcpinfo->previousbucketwasempty)
-        {
-          outlcpinfo->minchanged
-            = MIN(outlcpinfo->minchanged,
-                  gt_minchangedTurningwheel(outlcpinfo->tw));
-        } else
-        {
-          outlcpinfo->minchanged = gt_minchangedTurningwheel(outlcpinfo->tw);
-        }
-      }
-    }
+    gt_Outlcpinfo_prebucket(outlcpinfo,code);
     if (bucketspec.nonspecialsinbucket > 0)
     {
       if (bucketspec.nonspecialsinbucket > 1UL)
@@ -2046,57 +2092,11 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                          (unsigned long) prefixlength);
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
       }
-      if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
-      {
-        if (outlcpinfo->previoussuffix.defined)
-        {
-          /* compute lcpvalue of first element of bucket with
-             last element of previous bucket */
-          firstsuffixofbucket.code = code;
-          firstsuffixofbucket.prefixindex = prefixlength;
-#ifdef SKDEBUG
-          firstsuffixofbucket.startpos
-            = gt_suffixsortspace_get(bsr.sssp,0,bucketspec.left);
-          /*
-          consistencyofsuffix(__LINE__,
-                              encseq,readmode,bcktab,numofchars,
-                              &firstsuffixofbucket);
-          */
-#endif
-          lcpvalue = computelocallcpvalue(&outlcpinfo->previoussuffix,
-                                          &firstsuffixofbucket,
-                                          outlcpinfo->minchanged);
-        } else
-        {
-          /* first part first code */
-          lcpvalue = 0;
-        }
-#ifdef SKDEBUG
-        baseptr = bucketspec.left;
-#endif
-        lcptab_update(bsr.tableoflcpvalues,0,lcpvalue);
-        /* all other lcp-values are computed and they can be output */
-        outlcpvalues(&outlcpinfo->lcpsubtab,
-                     0,
-                     bucketspec.nonspecialsinbucket-1,
-                     bucketspec.left,
-                     outlcpinfo->outfplcptab,
-                     outlcpinfo->outfpllvtab);
-        /* previoussuffix becomes last nonspecial element in current bucket */
-        outlcpinfo->previoussuffix.code = code;
-        outlcpinfo->previoussuffix.prefixindex = prefixlength;
-#ifdef SKDEBUG
-        outlcpinfo->previoussuffix.startpos
-          = gt_suffixsortspace_get(bsr.sssp,0,
-                                   bucketspec.left
-                                     + bucketspec.nonspecialsinbucket - 1);
-        /*
-        consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,
-                            &outlcpinfo->previoussuffix);
-        */
-#endif
-      }
+      gt_Outlcpinfo_nonspecialsbucket(outlcpinfo,
+                                      prefixlength,
+                                      &bsr,
+                                      &bucketspec,
+                                      code);
     }
     if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
     {
@@ -2115,9 +2115,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                     bucketspec.specialsinbucket,
                                     code,
                                     bcktab);
-        outsmalllcpvalues(outlcpinfo->outfplcptab,
-                          &outlcpinfo->lcpsubtab,
-                          bucketspec.specialsinbucket);
+        outsmalllcpvalues(&outlcpinfo->lcpsubtab,bucketspec.specialsinbucket);
         /* there is at least one special element: this is the last element
            in the bucket, and thus the previoussuffix for the next round */
         outlcpinfo->previoussuffix.defined = true;
@@ -2171,8 +2169,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   wrapBentsedgresources(&bsr,
                         partwidth,
                         outlcpinfo == NULL ? NULL : &outlcpinfo->lcpsubtab,
-                        outlcpinfo == NULL ? NULL : outlcpinfo->outfplcptab,
-                        outlcpinfo == NULL ? NULL : outlcpinfo->outfpllvtab,
                         logger);
 }
 
@@ -2215,9 +2211,8 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
                         numofchars,
                         prefixlength,
                         sortmaxdepth,
-                        outlcpinfo != NULL
-                          ? &outlcpinfo->lcpsubtab
-                          : NULL,
+                        outlcpinfo != NULL ? &outlcpinfo->lcpsubtab
+                                           : NULL,
                         sfxstrategy);
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
@@ -2252,8 +2247,6 @@ void gt_sortbucketofsuffixes(GtSuffixsortspace *suffixsortspace,
   }
   wrapBentsedgresources(&bsr,
                         0, /* partwidth value unused because lcptab == NULL */
-                        NULL,
-                        NULL,
                         NULL,
                         logger);
 }
@@ -2293,7 +2286,5 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
   wrapBentsedgresources(&bsr,
                         0, /* partwidth value unused because lcptab == NULL */
                         NULL, /* lcpsubtab */
-                        NULL, /* FILE *outfplcptab */
-                        NULL, /* FILE *outfpllvtab */
                         logger);
 }
