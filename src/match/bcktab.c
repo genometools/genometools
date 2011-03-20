@@ -882,10 +882,10 @@ unsigned long gt_distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
 }
 
 unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
-                              uint8_t *lcpsubtab,
-                              unsigned long specialsinbucket,
-                              const Bcktab *bcktab,
-                              GtCodetype code)
+                                 uint8_t *lcpsubtab,
+                                 unsigned long specialsinbucket,
+                                 const Bcktab *bcktab,
+                                 GtCodetype code)
 {
   unsigned int prefixindex, maxprefixindex = 0;
   GtCodetype ordercode, divisor;

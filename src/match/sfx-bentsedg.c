@@ -2030,10 +2030,9 @@ static void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
 {
   if (outlcpinfo != NULL && outlcpinfo->lcpsubtab.assideeffect)
   {
-    unsigned int minprefixindex;
-
     if (bucketspec->specialsinbucket > 0)
     {
+      unsigned int minprefixindex;
       unsigned long suffixvalue
         = gt_suffixsortspace_get(bsr->sssp,
                                  0,
