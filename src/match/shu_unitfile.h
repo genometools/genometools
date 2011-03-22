@@ -21,17 +21,29 @@
 #include "core/encseq_api.h"
 #include "core/str_array_api.h"
 
+struct GtShuUnitFileInfo_tag {
+  unsigned long num_of_genomes,
+                num_of_files;
+  GtStrArray *genome_names;
+  const GtStrArray *file_names;
+  /*array holding the mapping of file to genome*/
+  unsigned long *map_files;
+};
+
 /*
-  reads the Unitfile and collects the names of the Genomes, also compares the
-  number of files and order of files with the files within the encseq.
-  Genomenames and number of genes will be changed, sets err and returns 1 on
-  error
+  reads the Unitfile and collects the names of the Genomes, and mapping of
+  file number to genome, file_names and num_of_files has to be set befor
+  calling this function. will allocate space for genome_names and map_files
+  use gt_delete_unit_file_info to free unit_info.
+  sets err and returns 1 on error
 */
 int gt_read_genomediff_unitfile(GtStr *unitfile,
-                                const GtEncseq *encseq,
-                                GtStrArray *genome_names,
-                                unsigned long *num_of_genomes,
-                                GtLogger *logger,
+                                struct GtShuUnitFileInfo_tag *unit_info,
+                                GT_UNUSED GtLogger *logger,
                                 GtError *err);
+/*
+  frees memory of unit_info struct
+*/
+void gt_delete_unit_file_info(struct GtShuUnitFileInfo_tag *unit_info);
 
 #endif

@@ -20,7 +20,9 @@
 
 #include <stdbool.h>
 #include "core/stack-inlined.h"
+
 #include "match/eis-voiditf.h"
+#include "match/shu_unitfile.h"
 
 typedef struct ShuNode_tag {
   bool process;
@@ -35,9 +37,10 @@ GT_STACK_DECLARESTRUCT(ShuNode, 256UL);
 
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
+                            struct GtShuUnitFileInfo_tag *unit_info,
                             uint64_t **shulen,
                             unsigned long numofchars,
-                            unsigned long totallength,
+                            unsigned long total_length,
                             bool calculate,
                             GtTimer *timer,
                             GT_UNUSED GtLogger *logger,

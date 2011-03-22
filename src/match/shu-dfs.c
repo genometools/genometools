@@ -29,15 +29,16 @@
 #include "core/unused_api.h"
 
 #include "match/eis-voiditf.h"
+#include "match/shu_unitfile.h"
 
 #include "match/shu-dfs.h"
 
 static inline void add_filenum_count(unsigned long lower,
                                      unsigned long upper,
                                      ShuNode *parent,
-                                     BwtSeqpositionextractor *positext,
-                                     unsigned long totallength,
-                                     unsigned long numoffiles,
+                                     BwtSeqpositionextractor *pos_extractor,
+                                     unsigned long total_length,
+                                     struct GtShuUnitFileInfo_tag *unit_info,
                                      const GtEncseq *encseq)
 {
   long unsigned row;
@@ -46,23 +47,31 @@ static inline void add_filenum_count(unsigned long lower,
   {
     unsigned long filenum, position;
 
-    position = gt_BwtSeqpositionextractor_extract(positext, row);
-    if (totallength <= position)
+    position = gt_BwtSeqpositionextractor_extract(pos_extractor, row);
+    if (total_length <= position)
     {
-      filenum = numoffiles - 1;
+      filenum = unit_info->num_of_files - 1;
     }
     else
     {
-      gt_assert((position + 1) <= totallength);
-      position = totallength - (position + 1);
+      gt_assert((position + 1) <= total_length);
+      position = total_length - (position + 1);
       filenum = gt_encseq_filenum(encseq, position);
     }
-    parent->countTermSubtree[0][filenum]++;
+    /*mapping to genome_num*/
+    if (unit_info->map_files != NULL)
+    {
+      parent->countTermSubtree[0][unit_info->map_files[filenum]]++;
+    }
+    else
+    {
+      parent->countTermSubtree[0][filenum]++;
+    }
   }
 }
 
 static inline unsigned long **get_special_pos(const FMindex *index,
-                                             BwtSeqpositionextractor *positext)
+                                         BwtSeqpositionextractor *pos_extractor)
 {
   unsigned long row_idx, special_idx = 0,
                 **special_char_rows_and_pos,
@@ -84,7 +93,7 @@ static inline unsigned long **get_special_pos(const FMindex *index,
     {
       special_char_rows_and_pos[0][special_idx] = row_idx;
       special_char_rows_and_pos[1][special_idx] =
-        gt_BwtSeqpositionextractor_extract(positext, row_idx);
+        gt_BwtSeqpositionextractor_extract(pos_extractor, row_idx);
       special_idx++;
     }
   }
@@ -146,12 +155,12 @@ static int visit_shu_children(const FMindex *index,
                               GtStackShuNode *stack,
                               const GtEncseq *encseq,
                               Mbtab *tmpmbtab,
-                              BwtSeqpositionextractor *positext,
+                              BwtSeqpositionextractor *pos_extractor,
                               unsigned long *rangeOccs,
                               unsigned long **special_pos,
                               GT_UNUSED unsigned long numofchars,
-                              unsigned long numoffiles,
-                              unsigned long totallength,
+                              struct GtShuUnitFileInfo_tag *unit_info,
+                              unsigned long total_length,
                               unsigned long max_idx,
                               unsigned long *stackdepth,
                               bool calculate,
@@ -190,9 +199,9 @@ static int visit_shu_children(const FMindex *index,
           add_filenum_count(tmpmbtab[idx].lowerbound,
                             tmpmbtab[idx].upperbound,
                             parent,
-                            positext,
-                            totallength,
-                            numoffiles,
+                            pos_extractor,
+                            total_length,
+                            unit_info,
                             encseq);
         }
       }
@@ -213,14 +222,16 @@ static int visit_shu_children(const FMindex *index,
           {
             gt_array2dim_calloc(child->countTermSubtree,
                                 numofchars+1UL,
-                                numoffiles);
+                                unit_info->num_of_genomes);
           }
           else
           {
             unsigned long y_idx, file_idx;
             for (y_idx = 0; y_idx < numofchars+1UL; y_idx++)
             {
-              for (file_idx = 0; file_idx < numoffiles; file_idx++)
+              for (file_idx = 0;
+                   file_idx < unit_info->num_of_genomes;
+                   file_idx++)
               {
                 child->countTermSubtree[y_idx][file_idx] = 0;
               }
@@ -262,17 +273,25 @@ static int visit_shu_children(const FMindex *index,
 
       num_of_rows--;
 
-      if (totallength <= position)
+      if (total_length <= position)
       {
-        filenum = numoffiles - 1;
+        filenum = unit_info->num_of_files - 1;
       }
       else
       {
-        gt_assert((position + 1) <= totallength);
-        position = totallength - (position + 1);
+        gt_assert((position + 1) <= total_length);
+        position = total_length - (position + 1);
         filenum = gt_encseq_filenum(encseq, position);
       }
-      parent->countTermSubtree[0][filenum]++;
+      /*mapping to genome_num*/
+      if (unit_info->map_files != NULL)
+      {
+        parent->countTermSubtree[0][unit_info->map_files[filenum]]++;
+      }
+      else
+      {
+        parent->countTermSubtree[0][filenum]++;
+      }
     }
     gt_assert(num_of_rows==0);
   }
@@ -283,7 +302,7 @@ static int visit_shu_children(const FMindex *index,
 static int process_shu_node(ShuNode *node,
                             GtStackShuNode *stack,
                             uint64_t **shulen,
-                            unsigned long numoffiles,
+                            unsigned long num_of_genomes,
                             unsigned long numofchars,
                             GT_UNUSED GtLogger *logger,
                             GT_UNUSED GtError *err)
@@ -301,7 +320,7 @@ static int process_shu_node(ShuNode *node,
     parent = stack->space + stack->nextfree - node->parentOffset;
   }
 
-  for (idx_i = 0; idx_i < numoffiles; idx_i++)
+  for (idx_i = 0; idx_i < num_of_genomes; idx_i++)
   {
     if (!had_err && node->countTermSubtree[0][idx_i] > 0)
     {
@@ -314,7 +333,7 @@ static int process_shu_node(ShuNode *node,
       }
       if (termChild_x_i > 0)
       {
-        for (idx_j = 0; idx_j < numoffiles; idx_j++)
+        for (idx_j = 0; idx_j < num_of_genomes; idx_j++)
         {
           if (node->countTermSubtree[0][idx_j] > 0 &&
                  idx_j != idx_i)
@@ -339,7 +358,7 @@ static int process_shu_node(ShuNode *node,
       {
         if (!had_err && node->countTermSubtree[child_c][idx_i] > 0)
         {
-          for (idx_j = 0; idx_j < numoffiles; idx_j++)
+          for (idx_j = 0; idx_j < num_of_genomes; idx_j++)
           {
             /* idx_j elem seqIds[x] \ seqIds[child_c] */
             if (node->countTermSubtree[0][idx_j] > 0 &&
@@ -385,9 +404,10 @@ static int initialise_node(void *node)
 
 int gt_pck_calculate_shulen(const FMindex *index,
                             const GtEncseq *encseq,
+                            struct GtShuUnitFileInfo_tag *unit_info,
                             uint64_t **shulen,
                             unsigned long numofchars,
-                            unsigned long totallength,
+                            unsigned long total_length,
                             bool calculate,
                             GtTimer *timer,
                             GtLogger *logger,
@@ -399,30 +419,31 @@ int gt_pck_calculate_shulen(const FMindex *index,
   Mbtab *tmpmbtab;
   unsigned long *rangeOccs, **special_char_rows_and_pos;
   unsigned long resize = 64UL;
-  unsigned long numoffiles, stackdepth, maxdepth, depth_idx,
+  unsigned long stackdepth, maxdepth, depth_idx,
                 processed_nodes,
                 max_idx = gt_pck_special_occ_in_nonspecial_intervals(index)
                           - 1;
-  BwtSeqpositionextractor *positext;
+  BwtSeqpositionextractor *pos_extractor;
 
-  gt_assert(max_idx < totallength);
+  gt_assert(max_idx < total_length);
   rangeOccs = gt_calloc((size_t) GT_MULT2(numofchars), sizeof (*rangeOccs));
   tmpmbtab = gt_calloc((size_t) (numofchars + 3), sizeof (*tmpmbtab ));
-  numoffiles = gt_encseq_num_of_files(encseq);
   GT_STACK_INIT_WITH_INITFUNC(&stack, resize, initialise_node);
-  positext = gt_newBwtSeqpositionextractor(index, totallength + 1);
+  pos_extractor = gt_newBwtSeqpositionextractor(index, total_length + 1);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "obtain special pos", stdout);
   }
-  special_char_rows_and_pos = get_special_pos(index, positext);
+  special_char_rows_and_pos = get_special_pos(index, pos_extractor);
   GT_STACK_NEXT_FREE(&stack,root);
-  gt_array2dim_calloc(root->countTermSubtree, numofchars+1UL, numoffiles);
+  gt_array2dim_calloc(root->countTermSubtree,
+                      numofchars+1UL,
+                      unit_info->num_of_genomes);
   root->process = false;
   root->parentOffset = 0;
   root->depth = 0;
   root->lower = 0;
-  root->upper = totallength + 1;
+  root->upper = total_length + 1;
 
   if (timer != NULL)
   {
@@ -447,7 +468,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
         had_err = process_shu_node(current,
                                    &stack,
                                    shulen,
-                                   numoffiles,
+                                   unit_info->num_of_genomes,
                                    numofchars,
                                    logger,
                                    err);
@@ -461,12 +482,12 @@ int gt_pck_calculate_shulen(const FMindex *index,
                                    &stack,
                                    encseq,
                                    tmpmbtab,
-                                   positext,
+                                   pos_extractor,
                                    rangeOccs,
                                    special_char_rows_and_pos,
                                    numofchars,
-                                   numoffiles,
-                                   totallength,
+                                   unit_info,
+                                   total_length,
                                    max_idx,
                                    &stackdepth,
                                    calculate,
@@ -483,7 +504,7 @@ int gt_pck_calculate_shulen(const FMindex *index,
   GT_STACK_DELETE(&stack);
   gt_free(rangeOccs);
   gt_free(tmpmbtab);
-  gt_freeBwtSeqpositionextractor(positext);
+  gt_freeBwtSeqpositionextractor(pos_extractor);
   gt_array2dim_delete(special_char_rows_and_pos);
   return had_err;
 }

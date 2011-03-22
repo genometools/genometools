@@ -44,19 +44,18 @@ kr_testable_files = []
 smallfilecodes = []
 bigfilecodes = []
 
-allfiles = ["Atinsert.fna",
-            "Duplicate.fna",
-            "Random.fna",
+allfiles = ["Duplicate.fna",
             "Random159.fna",
             "Random160.fna",
             "TTT-small.fna",
             "trna_glutamine.fna"]
 
 bigfiles = ["U89959_genomic.fas",
+            "Random.fna",
             "Atinsert.fna"]
 
 # do not run the big tests with valgrind
-if $gttestdata and ($memcheck.nil? or !$memcheck.length == 0)
+if $gttestdata and not $arguments["memcheck"]
   bigfiles.push "at1MB"
 end
 
@@ -69,7 +68,7 @@ smallfilecodes.collect! do |filecode|
 end
 
 # do not run the big tests with valgrind
-if $gttestdata and ($memcheck.nil? or !$memcheck.length == 0)
+if $gttestdata and not $arguments["memcheck"]
   fp = File.open("#{$gttestdata}genomediff/codelist", 'r')
   bigfilecodes = fp.readlines
   fp.close
@@ -146,6 +145,74 @@ allfilecodes.each do |code|
   Keywords "gt_genomediff esa fullrun"
   Test do
     test_esa("#{code}*.fas", "")
+  end
+end
+
+smallfilecodes.each do |code|
+  Name "gt genomediff pck fullrun unitfile correct #{code.split('/').last}"
+  Keywords "gt_genomediff pck fullrun unitfile"
+  Test do
+    test_pck("#{code}*fas", "-unitfile #{$testdata}genomediff/unitfile1.lua")
+  end
+
+  Name "gt genomediff pck fullrun unitfile failure1 #{code.split('/').last}"
+  Keywords "gt_genomediff pck fullrun unitfile"
+  Test do
+  run_test("#{$bin}gt       " +
+           "packedindex mkindex " +
+           "-db #{code}*fas     " +
+           "-dna                " +
+           "-dir rev            " +
+           "-ssp                " +
+           "-dc 64              " +
+           "-bsize 8            " +
+           "-sprank             " +
+           "-pl                 " +
+           "-indexname pck")
+  run_test(
+    "#{$bin}gt genomediff -pck pck " +
+    "-unitfile #{$testdata}genomediff/unitfile2.lua",
+    :maxtime => 720, :retval=>1)
+  end
+
+  Name "gt genomediff pck fullrun unitfile failure2 #{code.split('/').last}"
+  Keywords "gt_genomediff pck fullrun unitfile"
+  Test do
+  run_test("#{$bin}gt       " +
+           "packedindex mkindex " +
+           "-db #{code}*fas     " +
+           "-dna                " +
+           "-dir rev            " +
+           "-ssp                " +
+           "-dc 64              " +
+           "-bsize 8            " +
+           "-sprank             " +
+           "-pl                 " +
+           "-indexname pck")
+  run_test(
+    "#{$bin}gt genomediff -pck pck " +
+    "-unitfile #{$testdata}genomediff/unitfile3.lua",
+    :maxtime => 720, :retval=>1)
+  end
+
+  Name "gt genomediff pck fullrun unitfile failure3 #{code.split('/').last}"
+  Keywords "gt_genomediff pck fullrun unitfile"
+  Test do
+  run_test("#{$bin}gt       " +
+           "packedindex mkindex " +
+           "-db #{code}*fas     " +
+           "-dna                " +
+           "-dir rev            " +
+           "-ssp                " +
+           "-dc 64              " +
+           "-bsize 8            " +
+           "-sprank             " +
+           "-pl                 " +
+           "-indexname pck")
+  run_test(
+    "#{$bin}gt genomediff -pck pck " +
+    "-unitfile #{$testdata}genomediff/unitfile4.lua",
+    :maxtime => 720, :retval=>1)
   end
 end
 
@@ -306,8 +373,9 @@ kr_testable_files.each do |code|
 end
 
 def check_shulen_for_list_pairwise(list)
+  start_idx = 1
   list.each do |file1|
-    list.each do |file2|
+    list[start_idx..-1].each do |file2|
       if file1 != file2
         Name "gt genomediff pairwise test #{file1} #{file2}"
         Keywords "gt_genomediff pairwise esa pck check_shulen"
@@ -355,6 +423,7 @@ def check_shulen_for_list_pairwise(list)
         end
       end
     end
+    start_idx += 1
   end
 end
 

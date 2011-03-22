@@ -44,17 +44,24 @@ int gt_genomediff_shu(GtLogger *logger,
 {
   int had_err = 0;
   double **div = NULL,
-         *gc_contents = NULL;
-  unsigned long num_of_genomes = 0,
-                *genome_length = NULL,
+         *seq_gc_content = NULL,
+         *gc_content = NULL;
+  unsigned long *genome_length = NULL,
                 i_idx, j_idx;
   uint64_t **shulen = NULL;
-  GtStrArray *genome_names = NULL;
-  const GtStrArray *file_names = NULL;
   const GtEncseq *encseq = NULL;
   Genericindex *genericindexSubject = NULL;
   Sequentialsuffixarrayreader *ssar = NULL;
+  struct GtShuUnitFileInfo_tag *unit_info;
 
+  unit_info = gt_malloc(sizeof(*unit_info));
+  unit_info->map_files = NULL;
+  unit_info->genome_names = NULL;
+  unit_info->num_of_genomes = 0;
+  unit_info->num_of_files = 0;
+  unit_info->file_names = NULL;
+
+  /*XXX change esa-functions so that unitfile can be used*/
   if (arguments->with_esa)
   {
     gt_error_check(err);
@@ -79,9 +86,19 @@ int gt_genomediff_shu(GtLogger *logger,
     if (!had_err)
     {
       encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-      num_of_genomes = gt_encseq_num_of_files(encseq);
-      gt_array2dim_calloc(shulen, num_of_genomes, num_of_genomes);
-      genome_length = gt_calloc((size_t) num_of_genomes,
+      unit_info->num_of_genomes = gt_encseq_num_of_files(encseq);
+      unit_info->num_of_files = unit_info->num_of_genomes;
+      unit_info->file_names = gt_encseq_filenames(encseq);
+      unit_info->genome_names = gt_str_array_new();
+      for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
+      {
+        gt_str_array_add_cstr(unit_info->genome_names,
+                              gt_str_array_get(unit_info->file_names, i_idx));
+      }
+      gt_array2dim_calloc(shulen,
+                          unit_info->num_of_genomes,
+                          unit_info->num_of_genomes);
+      genome_length = gt_calloc((size_t) unit_info->num_of_genomes,
                                 sizeof (unsigned long));
       if (timer != NULL)
       {
@@ -99,10 +116,7 @@ int gt_genomediff_shu(GtLogger *logger,
   }
   else
   {
-    unsigned long numofchars = 0,
-                  totallength = 0;
     const GtAlphabet *alphabet;
-    const FMindex *subjectindex = NULL;
 
     if (timer != NULL)
     {
@@ -121,32 +135,44 @@ int gt_genomediff_shu(GtLogger *logger,
       gt_assert(gt_error_is_set(err));
       had_err = -1;
     }
-    else
+    /*get num of genomes from unitfile or encseq and allocate shulen-matrix*/
+    if (!had_err)
     {
       encseq = genericindex_getencseq(genericindexSubject);
-      /* TODO add function to fill num_of_genomes and genome_names */
-      genome_names = gt_str_array_new();
+      unit_info->file_names = gt_encseq_filenames(encseq);
+      unit_info->num_of_files = gt_str_array_size(unit_info->file_names);
       if (arguments->with_units)
       {
+        if (timer != NULL)
+        {
+          gt_timer_show_progress(timer, "parse unitfile", stdout);
+        }
         had_err = gt_read_genomediff_unitfile(arguments->unitfile,
-                                    encseq,
-                                    genome_names,
-                                    &num_of_genomes,
-                                    logger,
-                                    err);
+                                              unit_info,
+                                              logger,
+                                              err);
         if (!had_err)
         {
-          fprintf(stderr, "successfully loaded unitfile\n");
+          gt_logger_log(logger, "successfully loaded unitfile");
         }
       }
-      num_of_genomes = gt_encseq_num_of_files(encseq);
+      else
+      {
+        unit_info->num_of_genomes = unit_info->num_of_files;
+        unit_info->genome_names = gt_str_array_new();
+        for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
+        {
+          gt_str_array_add_cstr(unit_info->genome_names,
+                                gt_str_array_get(unit_info->file_names, i_idx));
+        }
+      }
       gt_array2dim_calloc(shulen,
-                          num_of_genomes,
-                          num_of_genomes);
-      genome_length = gt_calloc((size_t) num_of_genomes,
+                          unit_info->num_of_genomes,
+                          unit_info->num_of_genomes);
+      genome_length = gt_calloc((size_t) unit_info->num_of_genomes,
                                 sizeof (unsigned long));
     }
-
+    /*check if alphabet is DNA, which is presumed for gc-calculation*/
     if (!had_err)
     {
       alphabet = gt_encseq_alphabet(encseq);
@@ -157,23 +183,24 @@ int gt_genomediff_shu(GtLogger *logger,
         gt_error_set(err,"error: sequences need to be dna to calculate gc!");
         had_err = -1;
       }
-      else
-      {
-        numofchars = (unsigned long) gt_alphabet_num_of_chars(alphabet);
-        totallength = genericindex_get_totallength(genericindexSubject);
-        subjectindex = genericindex_get_packedindex(genericindexSubject);
-      }
     }
-
+    /*calculate shulens*/
     if (!had_err)
     {
+      const FMindex *subjectindex = NULL;
+      unsigned long num_of_chars,
+                    total_length;
+      num_of_chars = (unsigned long) gt_alphabet_num_of_chars(alphabet);
+      total_length = genericindex_get_totallength(genericindexSubject);
+      subjectindex = genericindex_get_packedindex(genericindexSubject);
       gt_assert(shulen);
       gt_assert(subjectindex);
       had_err = gt_pck_calculate_shulen(subjectindex,
                                         encseq,
+                                        unit_info,
                                         shulen,
-                                        numofchars,
-                                        totallength,
+                                        num_of_chars,
+                                        total_length,
                                         !arguments->traverse_only,
                                         timer,
                                         logger,
@@ -181,51 +208,68 @@ int gt_genomediff_shu(GtLogger *logger,
     }
     if (!had_err && arguments->traverse_only)
     {
+      gt_assert(timer != NULL);
       gt_logger_log(logger, "stopping after traversal");
       genericindex_delete(genericindexSubject);
       gt_free(genome_length);
+      gt_delete_unit_file_info(unit_info);
       if (shulen != NULL)
       {
         gt_array2dim_delete(shulen);
       }
-      gt_assert(timer != NULL);
       return had_err;
     }
   }
-
+   /*get file respective genome length*/
   if (!had_err)
   {
     gt_assert(genome_length);
-    /* TODO check if not NULL (if set bevor during reading of unitfile) */
-    file_names = gt_encseq_filenames(encseq);
-    for (i_idx = 0UL; i_idx < num_of_genomes && !had_err; i_idx++)
+    for (i_idx = 0UL; i_idx < unit_info->num_of_files && !had_err; i_idx++)
     {
-      genome_length[i_idx] =
-        (unsigned long) gt_encseq_effective_filelength(encseq, i_idx) - 1;
+      if (unit_info->map_files != NULL)
+      {
+        genome_length[unit_info->map_files[i_idx]] +=
+          gt_encseq_effective_filelength(encseq, i_idx) - 1;
+      }
+      else
+      {
+        genome_length[i_idx] =
+          (unsigned long) gt_encseq_effective_filelength(encseq, i_idx) - 1;
+      }
     }
   }
+  /*calculate avg shulen or print sum shulen*/
   if (!had_err)
   {
     gt_assert(shulen);
     if (timer != NULL)
     {
-      gt_timer_show_progress(timer, "calculate avg", stdout);
+      if (arguments->shulen_only)
+      {
+        gt_timer_show_progress(timer, "print sums", stdout);
+      }
+      else
+      {
+        gt_timer_show_progress(timer, "calculate avg", stdout);
+      }
     }
     if (arguments->shulen_only)
     {
-      printf("# sum of shulen\n%lu\n", num_of_genomes);
+      printf("# sum of shulen\n%lu\n", unit_info->num_of_genomes);
     }
-    gt_array2dim_calloc(div, num_of_genomes, num_of_genomes);
+    gt_array2dim_calloc(div,
+                        unit_info->num_of_genomes,
+                        unit_info->num_of_genomes);
     gt_assert(genome_length);
-    for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
+    for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++)
     {
       unsigned long length_i;
       length_i = genome_length[i_idx];
       if (arguments->shulen_only)
       {
-        printf("%s\t", gt_str_array_get(file_names, i_idx));
+        printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
       }
-      for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
+      for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++)
       {
         if (j_idx == i_idx)
         {
@@ -263,20 +307,72 @@ int gt_genomediff_shu(GtLogger *logger,
     {
       gt_timer_show_progress(timer, "calculate gc", stdout);
     }
-    gc_contents = gt_encseq_get_gc(encseq,
+    /*count gc, do not calculate ratio*/
+    seq_gc_content = gt_encseq_get_gc(encseq,
+                                  false,
                                   false,
                                   err);
-    if (gc_contents == NULL)
+
+    if (seq_gc_content != NULL)
+    {
+      uint64_t file_sep;
+      unsigned long file_idx = 0UL,
+                    seq_idx,
+                    genome_idx,
+                    num_of_seq;
+      gc_content = gt_calloc((size_t)unit_info->num_of_genomes,
+                             sizeof (*gc_content));
+      num_of_seq = gt_encseq_num_of_sequences(encseq);
+      file_sep = gt_encseq_effective_filelength(encseq, file_idx);
+      for (seq_idx = 0; seq_idx < num_of_seq; seq_idx++)
+      {
+        if ((uint64_t) gt_encseq_seqstartpos(encseq, seq_idx) < file_sep)
+        {
+          if (unit_info->map_files != NULL)
+          {
+            gc_content[unit_info->map_files[file_idx]] +=
+                                                    seq_gc_content[seq_idx];
+          }
+          else
+          {
+            gc_content[file_idx] += seq_gc_content[seq_idx];
+          }
+        }
+        else
+        {
+          file_idx++;
+          gt_assert(file_idx < unit_info->num_of_files);
+          file_sep = (uint64_t) gt_encseq_filestartpos(encseq, file_idx) +
+                     gt_encseq_effective_filelength(encseq, file_idx);
+          if (unit_info->map_files != NULL)
+          {
+            gc_content[unit_info->map_files[file_idx]] +=
+                                                    seq_gc_content[seq_idx];
+          }
+          else
+          {
+            gc_content[file_idx] += seq_gc_content[seq_idx];
+          }
+        }
+      }
+      for (genome_idx = 0; genome_idx < unit_info->num_of_genomes; genome_idx++)
+      {
+        gt_assert(genome_length != NULL);
+        gc_content[genome_idx] /= (double) genome_length[genome_idx];
+      }
+      gt_free(seq_gc_content);
+    }
+    else
     {
       had_err = -1;
     }
-    gt_logger_log(logger, "table of avg shulens");
     if (!had_err && gt_logger_enabled(logger))
     {
-      for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
+      gt_logger_log(logger, "table of avg shulens");
+      for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++)
       {
-        printf("# %s\t", gt_str_array_get(file_names, i_idx));
-        for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
+        printf("# %s\t", gt_str_array_get(unit_info->genome_names, i_idx));
+        for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++)
         {
           if (i_idx == j_idx)
           {
@@ -290,33 +386,34 @@ int gt_genomediff_shu(GtLogger *logger,
         printf("\n");
       }
     }
+    /* calculation of divergence and ln_n_fac */
     if (!had_err)
     {
       double *ln_n_fac;
 
       gt_assert(div);
       gt_assert(genome_length);
-      gt_assert(gc_contents);
+      gt_assert(gc_content);
 
       if (timer != NULL)
       {
-        gt_timer_show_progress(timer, "precalculate ln_n_fac", stdout);
+        gt_timer_show_progress(timer, "pre calculate ln_n_fac", stdout);
       }
       ln_n_fac = gt_get_ln_n_fac(arguments->max_ln_n_fac);
       if (timer != NULL)
       {
         gt_timer_show_progress(timer, "calculate divergence", stdout);
       }
-      for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
+      for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++)
       {
-        for (j_idx = i_idx+1; j_idx < num_of_genomes; j_idx++)
+        for (j_idx = i_idx+1; j_idx < unit_info->num_of_genomes; j_idx++)
         {
           double query_gc, query_shulen;
           unsigned long subject_len;
           if (gt_double_smaller_double(div[i_idx][j_idx],
                                        div[j_idx][i_idx]))
           { /* S=j_idx Q=i_idx */
-            query_gc = gc_contents[i_idx];
+            query_gc = gc_content[i_idx];
             query_shulen = div[i_idx][j_idx];
             subject_len = genome_length[j_idx];
           }
@@ -325,22 +422,22 @@ int gt_genomediff_shu(GtLogger *logger,
             if (gt_double_smaller_double(div[j_idx][i_idx],
                                          div[i_idx][j_idx]))
             { /* S=i_idx Q=j_idx */
-              query_gc = gc_contents[j_idx];
+              query_gc = gc_content[j_idx];
               query_shulen = div[j_idx][i_idx];
               subject_len = genome_length[i_idx];
             }
             else
             {
-              if (gt_double_smaller_double(fabs(gc_contents[i_idx]-0.5),
-                                           fabs(gc_contents[j_idx]-0.5)))
+              if (gt_double_smaller_double(fabs(gc_content[i_idx]-0.5),
+                                           fabs(gc_content[j_idx]-0.5)))
               { /* S=i_idx Q=j_idx XXX check this if right*/
-                query_gc = gc_contents[j_idx];
+                query_gc = gc_content[j_idx];
                 query_shulen = div[j_idx][i_idx];
                 subject_len = genome_length[i_idx];
               }
               else
               { /* S=j_idx Q=i_idx */
-                query_gc = gc_contents[i_idx];
+                query_gc = gc_content[i_idx];
                 query_shulen = div[i_idx][j_idx];
                 subject_len = genome_length[j_idx];
               }
@@ -362,14 +459,14 @@ int gt_genomediff_shu(GtLogger *logger,
       }
       gt_free(ln_n_fac);
     }
-    gt_logger_log(logger, "table of divergences");
     if (!had_err && gt_logger_enabled(logger))
     {
+      gt_logger_log(logger, "table of divergences");
       gt_assert(div);
-      for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
+      for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++)
       {
-        printf("# %s\t", gt_str_array_get(file_names, i_idx));
-        for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
+        printf("# %s\t", gt_str_array_get(unit_info->genome_names, i_idx));
+        for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++)
         {
           if (i_idx == j_idx)
           {
@@ -388,11 +485,11 @@ int gt_genomediff_shu(GtLogger *logger,
       {
         gt_timer_show_progress(timer, "calculate kr", stdout);
       }
-      printf("# Table of Kr\n%lu\n", num_of_genomes);
-      for (i_idx = 0; i_idx < num_of_genomes; i_idx++)
+      printf("# Table of Kr\n%lu\n", unit_info->num_of_genomes);
+      for (i_idx = 0; i_idx < unit_info->num_of_genomes; i_idx++)
       {
-        printf("%s\t", gt_str_array_get(file_names, i_idx));
-        for (j_idx = 0; j_idx < num_of_genomes; j_idx++)
+        printf("%s\t", gt_str_array_get(unit_info->genome_names, i_idx));
+        for (j_idx = 0; j_idx < unit_info->num_of_genomes; j_idx++)
         {
           if ( i_idx == j_idx )
           {
@@ -420,7 +517,8 @@ int gt_genomediff_shu(GtLogger *logger,
   }
 
   gt_free(genome_length);
-  gt_free(gc_contents);
+  gt_free(gc_content);
+  gt_delete_unit_file_info(unit_info);
   if (shulen != NULL)
   {
     gt_array2dim_delete(shulen);

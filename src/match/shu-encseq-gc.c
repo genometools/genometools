@@ -18,6 +18,7 @@
 #include <stdbool.h>
 
 #include "core/alphabet_api.h"
+#include "core/divmodmul.h"
 #include "core/encseq_api.h"
 #include "core/ensure.h"
 #include "core/ma_api.h"
@@ -27,7 +28,7 @@
 #include "match/shu-encseq-gc.h"
 
 static inline void calculate_gc(const GtEncseq *encseq,
-                                double *gc_contens,
+                                double *gc_content,
                                 bool with_special,
                                 unsigned long seq_idx,
                                 unsigned long gc_count,
@@ -36,22 +37,23 @@ static inline void calculate_gc(const GtEncseq *encseq,
   if (with_special)
   {
     gt_assert(seq_idx < gt_encseq_num_of_sequences(encseq));
-    gc_contens[seq_idx] =
+    gc_content[seq_idx] =
       (double) gc_count / (double) gt_encseq_seqlength(encseq, seq_idx);
   }
   else
   {
-    gc_contens[seq_idx] = (double) gc_count / (double) (gc_count + at_count);
+    gc_content[seq_idx] = (double) gc_count / (double) (gc_count + at_count);
   }
 }
 
 double *gt_encseq_get_gc(const GtEncseq *encseq,
                          bool with_special,
+                         bool calculate,
                          GT_UNUSED GtError *err)
 {
   GtEncseqReader *reader;
   GtAlphabet *alphabet;
-  double *gc_contens;
+  double *gc_content;
   /* unit = file or sequence depending on per_file */
   unsigned long char_idx, totallength, max_unit,
                 seq_idx = 0,
@@ -59,6 +61,7 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
                 at_count = 0,
                 gc_count = 0,
                 default_count = 0;
+  bool is_mirrored_encseq;
   GtUchar acgt[8], current_c;
 
   alphabet = gt_encseq_alphabet(encseq);
@@ -69,9 +72,17 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
   reader = gt_encseq_create_reader_with_readmode(encseq,
                                                  GT_READMODE_FORWARD,
                                                  0);
-  max_unit = gt_encseq_num_of_sequences(encseq);
-
-  gc_contens = gt_calloc((size_t) max_unit, sizeof (double));
+  is_mirrored_encseq = gt_encseq_is_mirrored(encseq);
+  if (is_mirrored_encseq)
+  {
+    max_unit = GT_DIV2(gt_encseq_num_of_sequences(encseq));
+    gc_content = gt_calloc((size_t) GT_MULT2(max_unit), sizeof (double));
+  }
+  else
+  {
+    max_unit = gt_encseq_num_of_sequences(encseq);
+    gc_content = gt_calloc((size_t) max_unit, sizeof (double));
+  }
 
   nextsep = gt_encseq_seqstartpos(encseq, seq_idx) +
             gt_encseq_seqlength(encseq, seq_idx);
@@ -80,12 +91,19 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
   {
     if (nextsep == char_idx)
     {
-      calculate_gc(encseq,
-                   gc_contens,
-                   with_special,
-                   seq_idx,
-                   gc_count,
-                   at_count);
+      if (calculate)
+      {
+        calculate_gc(encseq,
+                     gc_content,
+                     with_special,
+                     seq_idx,
+                     gc_count,
+                     at_count);
+      }
+      else
+      {
+        gc_content[seq_idx] = (double) gc_count;
+      }
 
       seq_idx++;
 
@@ -122,14 +140,30 @@ double *gt_encseq_get_gc(const GtEncseq *encseq,
       }
     }
   }
-  calculate_gc(encseq,
-               gc_contens,
-               with_special,
-               seq_idx,
-               gc_count,
-               at_count);
+  if (calculate)
+  {
+    calculate_gc(encseq,
+                 gc_content,
+                 with_special,
+                 seq_idx,
+                 gc_count,
+                 at_count);
+  }
+  else
+  {
+    gc_content[seq_idx] = (double) gc_count;
+  }
   gt_encseq_reader_delete(reader);
-  return gc_contens;
+  if (is_mirrored_encseq)
+  {
+    unsigned long double_max_unit = GT_MULT2(max_unit);
+    for (seq_idx = 0; seq_idx < max_unit; seq_idx++)
+    {
+      gc_content[double_max_unit - seq_idx - 1] =
+        gc_content[seq_idx];
+    }
+  }
+  return gc_content;
 }
 
 int gt_encseq_gc_unit_test(GtError *err)
@@ -158,6 +192,7 @@ int gt_encseq_gc_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   if ((results = gt_encseq_get_gc(encseq,
                                   false,
+                                  true,
                                   err)) != NULL)
   {
     ensure(had_err, gt_double_equals_double(results[0], 0.0));
@@ -180,6 +215,7 @@ int gt_encseq_gc_unit_test(GtError *err)
     encseq = gt_encseq_builder_build(eb, err);
     if ((results = gt_encseq_get_gc(encseq,
                                     false,
+                                    true,
                                     err)) != NULL)
     {
       ensure(had_err, gt_double_equals_one(results[0]));
@@ -204,6 +240,7 @@ int gt_encseq_gc_unit_test(GtError *err)
     encseq = gt_encseq_builder_build(eb, err);
     if ((results = gt_encseq_get_gc(encseq,
                                     false,
+                                    true,
                                     err)) != NULL)
     {
       ensure(had_err, gt_double_equals_double(results[0], 0.5));
@@ -219,6 +256,7 @@ int gt_encseq_gc_unit_test(GtError *err)
     {
       /* count special chars */
       if ((results = gt_encseq_get_gc(encseq,
+                                      true,
                                       true,
                                       err)) != NULL)
       {
@@ -250,6 +288,7 @@ int gt_encseq_gc_unit_test(GtError *err)
       /* sequence wise */
       if ((results = gt_encseq_get_gc(encseq,
                                       false,
+                                      true,
                                       err)) != NULL)
       {
         ensure(had_err, gt_double_equals_double(results[0], 0.5));
@@ -267,6 +306,7 @@ int gt_encseq_gc_unit_test(GtError *err)
       {
         /* count special chars */
         if ((results = gt_encseq_get_gc(encseq,
+                                        true,
                                         true,
                                         err)) != NULL)
         {

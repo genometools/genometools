@@ -113,13 +113,19 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 
   /*-unitfile*/
   option_unitfile = gt_option_new_filename("unitfile",
-                                           "specifies genomic units "
-                                           "File should contain comment lines "
-                                           "with names for the units (# NAME) "
-                                           "followed by lines containing the "
-                                           "filenames for that genome/unit",
+                                           "specifies genomic units, "
+                                           "File is in lua-format like this:\n"
+                                           "units = {\n"
+                                           "  genome1 = { \"file1\", \"file2\""
+                                           " },\n"
+                                           "  genome2 = { \"file3\", \"file4\""
+                                           " }\n"
+                                           "}\n"
+                                           "only give basenames of the files!"
+                                           " comment lines start with '--' and"
+                                           " will be ignored.\n"
+                                           "currently works only with -pck",
                                            arguments->unitfile);
-  gt_option_is_development_option(option_unitfile);
   gt_option_exclude(optionesaindex,option_unitfile);
   gt_option_parser_add_option(op, option_unitfile);
 
@@ -322,7 +328,7 @@ static int gt_genomediff_runner(GT_UNUSED int argc,
   }
   if (arguments->with_units)
   {
-    printf ("unitfile option set, filename is %s\n",
+    gt_logger_log(logger, "unitfile option set, filename is %s\n",
        gt_str_get(arguments->unitfile));
   }
   if (!had_err)
