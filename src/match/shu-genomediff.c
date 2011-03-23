@@ -37,6 +37,45 @@
 
 #include "match/shu-genomediff.h"
 
+static inline int parse_unit(const GtEncseq *encseq,
+                             struct GtShuUnitFileInfo_tag *unit_info,
+                             const GtGenomediffArguments *arguments,
+                             GtTimer *timer,
+                             GtLogger *logger,
+                             GtError *err)
+{
+  int had_err = 0;
+  unsigned long i_idx;
+  unit_info->num_of_files = gt_encseq_num_of_files(encseq);
+  unit_info->file_names = gt_encseq_filenames(encseq);
+  if (arguments->with_units)
+  {
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "parse unitfile", stdout);
+    }
+    had_err = gt_read_genomediff_unitfile(arguments->unitfile,
+                                          unit_info,
+                                          logger,
+                                          err);
+    if (!had_err)
+    {
+      gt_logger_log(logger, "successfully loaded unitfile");
+    }
+  }
+  else
+  {
+    unit_info->num_of_genomes = unit_info->num_of_files;
+    unit_info->genome_names = gt_str_array_new();
+    for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
+    {
+      gt_str_array_add_cstr(unit_info->genome_names,
+                            gt_str_array_get(unit_info->file_names, i_idx));
+    }
+  }
+  return had_err;
+}
+
 int gt_genomediff_shu(GtLogger *logger,
                       const GtGenomediffArguments *arguments,
                       GtTimer *timer,
@@ -86,20 +125,20 @@ int gt_genomediff_shu(GtLogger *logger,
     if (!had_err)
     {
       encseq = gt_encseqSequentialsuffixarrayreader(ssar);
-      unit_info->num_of_genomes = gt_encseq_num_of_files(encseq);
-      unit_info->num_of_files = unit_info->num_of_genomes;
-      unit_info->file_names = gt_encseq_filenames(encseq);
-      unit_info->genome_names = gt_str_array_new();
-      for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
-      {
-        gt_str_array_add_cstr(unit_info->genome_names,
-                              gt_str_array_get(unit_info->file_names, i_idx));
-      }
+      had_err = parse_unit(encseq,
+                           unit_info,
+                           arguments,
+                           timer,
+                           logger,
+                           err);
       gt_array2dim_calloc(shulen,
                           unit_info->num_of_genomes,
                           unit_info->num_of_genomes);
       genome_length = gt_calloc((size_t) unit_info->num_of_genomes,
                                 sizeof (unsigned long));
+    }
+    if (!had_err)
+    {
       if (timer != NULL)
       {
         gt_timer_show_progress(timer, "dfs esa index", stdout);
@@ -139,33 +178,12 @@ int gt_genomediff_shu(GtLogger *logger,
     if (!had_err)
     {
       encseq = genericindex_getencseq(genericindexSubject);
-      unit_info->file_names = gt_encseq_filenames(encseq);
-      unit_info->num_of_files = gt_str_array_size(unit_info->file_names);
-      if (arguments->with_units)
-      {
-        if (timer != NULL)
-        {
-          gt_timer_show_progress(timer, "parse unitfile", stdout);
-        }
-        had_err = gt_read_genomediff_unitfile(arguments->unitfile,
-                                              unit_info,
-                                              logger,
-                                              err);
-        if (!had_err)
-        {
-          gt_logger_log(logger, "successfully loaded unitfile");
-        }
-      }
-      else
-      {
-        unit_info->num_of_genomes = unit_info->num_of_files;
-        unit_info->genome_names = gt_str_array_new();
-        for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
-        {
-          gt_str_array_add_cstr(unit_info->genome_names,
-                                gt_str_array_get(unit_info->file_names, i_idx));
-        }
-      }
+      had_err = parse_unit(encseq,
+                           unit_info,
+                           arguments,
+                           timer,
+                           logger,
+                           err);
       gt_array2dim_calloc(shulen,
                           unit_info->num_of_genomes,
                           unit_info->num_of_genomes);
