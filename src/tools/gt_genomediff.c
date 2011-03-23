@@ -69,8 +69,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] -pck|-esa indexname "
-                            "[-query sequencefile(s)]",
+  op = gt_option_parser_new("[option ...] -pck|-esa indexname ",
                             "Calculates shulens of Genomes and the Kr.");
 
   /* -maxdepth */
@@ -123,10 +122,8 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                                            "}\n"
                                            "only give basenames of the files!"
                                            " comment lines start with '--' and"
-                                           " will be ignored.\n"
-                                           "currently works only with -pck",
+                                           " will be ignored.",
                                            arguments->unitfile);
-  gt_option_exclude(optionesaindex,option_unitfile);
   gt_option_parser_add_option(op, option_unitfile);
 
   /*ref unitfile*/
@@ -194,6 +191,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
                               "prints sum of shulen and stops",
                               &arguments->shulen_only,
                               false);
+  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* scan */

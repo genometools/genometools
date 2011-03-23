@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
   Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,6 +23,7 @@
 #include "core/format64.h"
 #include "esa-seqread.h"
 #include "esa-splititv.h"
+#include "shu_unitfile.h"
 #undef SKDEBUG
 #ifdef SKDEBUG
 #include "core/encseq.h"
@@ -43,6 +45,7 @@ typedef struct  /* global information */
                 currentleafcount;
   uint64_t **shulengthdist;
   const GtEncseq *encseq;
+  unsigned long *file_to_genome_map;
 #ifdef SKDEBUG
   unsigned long nextid;
 #endif
@@ -147,6 +150,10 @@ static int shulen_processleafedge(bool firstsucc,
   printf("\n");
 #endif
   filenum = gt_encseq_filenum(state->encseq,leafnumber);
+  if (state->file_to_genome_map != NULL)
+  {
+    filenum = state->file_to_genome_map[filenum];
+  }
   if (firstsucc)
   {
     if (father->filenumdist == NULL)
@@ -460,6 +467,7 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
 int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                 const GtEncseq *encseq,
                                 uint64_t **shulen,
+                                struct GtShuUnitFileInfo_tag *unit_info,
                                 GtLogger *logger,
                                 GtError *err)
 {
@@ -467,7 +475,8 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
-  state->numofdbfiles = gt_encseq_num_of_files(encseq);
+  state->numofdbfiles = unit_info->num_of_genomes;
+  state->file_to_genome_map = unit_info->map_files;
   state->encseq = encseq;
 #ifdef SKDEBUG
   state->nextid = 0;

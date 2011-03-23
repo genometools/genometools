@@ -146,6 +146,7 @@ int gt_genomediff_shu(GtLogger *logger,
       if (gt_get_multiesashulengthdist(ssar,
                                        encseq,
                                        shulen,
+                                       unit_info,
                                        logger,
                                        err) != 0)
       {

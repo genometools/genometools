@@ -19,11 +19,12 @@
 #ifndef ESA_SHULEN_H
 #define ESA_SHULEN_H
 
+#include "core/encseq_api.h"
 #include "core/error_api.h"
 #include "core/logger.h"
-#include "core/encseq_api.h"
-#include "match/esa-seqread.h"
 #include "core/str_array.h"
+#include "match/esa-seqread.h"
+#include "match/shu_unitfile.h"
 
 int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
@@ -38,6 +39,7 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
 int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                 const GtEncseq *encseq,
                                 uint64_t **shulen,
+                                struct GtShuUnitFileInfo_tag *unit_info,
                                 GtLogger *logger,
                                 GtError *err);
 #endif
