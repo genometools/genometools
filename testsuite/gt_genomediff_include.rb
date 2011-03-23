@@ -149,14 +149,24 @@ allfilecodes.each do |code|
 end
 
 smallfilecodes.each do |code|
-  Name "gt genomediff pck fullrun unitfile correct #{code.split('/').last}"
-  Keywords "gt_genomediff pck fullrun unitfile"
+  Name "gt genomediff pck unitfile correct #{code.split('/').last}"
+  Keywords "gt_genomediff pck unitfile"
   Test do
     test_pck("#{code}*fas", "-unitfile #{$testdata}genomediff/unitfile1.lua")
   end
 
-  Name "gt genomediff pck fullrun unitfile failure1 #{code.split('/').last}"
-  Keywords "gt_genomediff pck fullrun unitfile"
+  Name "gt genomediff esa unitfile failure #{code.split('/').last}"
+  Keywords "gt_genomediff esa unitfile"
+  Test do
+    run_test "#{$bin}gt suffixerator -db #{code}*fas -indexname esa " +
+             "-dna -suf -tis -lcp -ssp"
+    run_test "#{$bin}gt genomediff " +
+             "-unitfile #{$testdata}genomediff/unitfile1.lua " +
+             "-esa esa", :retval=>1
+  end
+
+  Name "gt genomediff pck unitfile failure1 #{code.split('/').last}"
+  Keywords "gt_genomediff pck unitfile"
   Test do
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
@@ -175,8 +185,8 @@ smallfilecodes.each do |code|
     :maxtime => 720, :retval=>1)
   end
 
-  Name "gt genomediff pck fullrun unitfile failure2 #{code.split('/').last}"
-  Keywords "gt_genomediff pck fullrun unitfile"
+  Name "gt genomediff pck unitfile failure2 #{code.split('/').last}"
+  Keywords "gt_genomediff pck unitfile"
   Test do
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
@@ -195,8 +205,8 @@ smallfilecodes.each do |code|
     :maxtime => 720, :retval=>1)
   end
 
-  Name "gt genomediff pck fullrun unitfile failure3 #{code.split('/').last}"
-  Keywords "gt_genomediff pck fullrun unitfile"
+  Name "gt genomediff pck unitfile failure3 #{code.split('/').last}"
+  Keywords "gt_genomediff pck unitfile"
   Test do
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
