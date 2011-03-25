@@ -1024,9 +1024,9 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                                                     0);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
-  gt_assert(dcov->bcktab != NULL);
   dcov->filltable = gt_filllargestchartable(dcov->numofchars,
                                             dcov->prefixlength);
+  gt_assert(dcov->bcktab != NULL);
   dcov->leftborder = gt_bcktab_leftborder(dcov->bcktab);
   GT_INITARRAY(&codelist,Codeatposition);
   diffptr = dcov->diffvalues;

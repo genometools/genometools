@@ -219,7 +219,7 @@ typedef struct
   GtEncseqReader *esr1, /* XXX be carefull with threads */
                  *esr2;
   GtReadmode readmode;
-  bool fwd, complement, assideeffect;
+  bool fwd, complement;
   unsigned long totallength;
   GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
   GtLcpvalues *tableoflcpvalues;
@@ -453,7 +453,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
         lcplen = commonunits.finaldepth;
       }
       gt_assert(retval != 0);
-      if (bsr->tableoflcpvalues != NULL && bsr->assideeffect)
+      if (bsr->tableoflcpvalues != NULL)
       {
         lcpindex = subbucketleft+pj;
         if (pj < pi && retval > 0)
@@ -566,7 +566,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
       printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
              sval1, sval2, retval, (unsigned long) lcplen);
 #endif
-      if (retval != 0 && bsr->tableoflcpvalues != NULL && bsr->assideeffect)
+      if (retval != 0 && bsr->tableoflcpvalues != NULL)
       {
         lcpindex = subbucketleft + pj;
         if (pj < pi && retval > 0)
@@ -1106,8 +1106,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                                currentwidth,
                                depth + idx);
     }
-    if (bsr->tableoflcpvalues != NULL && bsr->assideeffect &&
-        bsr->leftlcpdist[idx] < end)
+    if (bsr->tableoflcpvalues != NULL && bsr->leftlcpdist[idx] < end)
     { /* at least one element */
       lcptab_update(bsr->tableoflcpvalues,subbucketleft+end,depth + idx);
     }
@@ -1139,8 +1138,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
                                currentwidth,
                                depth + idx);
     }
-    if (bsr->tableoflcpvalues != NULL && bsr->assideeffect &&
-        bsr->rightlcpdist[idx] < end)
+    if (bsr->tableoflcpvalues != NULL && bsr->rightlcpdist[idx] < end)
     { /* at least one element */
       lcptab_update(bsr->tableoflcpvalues,subbucketleft + width - end,
                     depth + idx);
@@ -1352,7 +1350,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     if ((wtmp = pb-pa) > 0)
     {
       leftplusw = wtmp;
-      if (bsr->tableoflcpvalues != NULL && bsr->assideeffect)
+      if (bsr->tableoflcpvalues != NULL)
       {
         /*
           left part has suffix with lcp up to length smallermaxlcp w.r.t.
@@ -1384,7 +1382,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
     gt_assert(pd >= pc);
     if ((wtmp = (unsigned long) (pd-pc)) > 0)
     {
-      if (bsr->tableoflcpvalues != NULL && bsr->assideeffect)
+      if (bsr->tableoflcpvalues != NULL)
       {
         /*
           right part has suffix with lcp up to length largermaxlcp w.r.t.
@@ -1759,17 +1757,10 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->encseq = encseq;
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
+  bsr->tableoflcpvalues = NULL;
   for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
   {
     bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
-  }
-  if (lcpsubtab != NULL)
-  {
-    bsr->tableoflcpvalues = &lcpsubtab->tableoflcpvalues;
-    bsr->assideeffect = lcpsubtab->assideeffect;
-  } else
-  {
-    bsr->tableoflcpvalues = NULL;
   }
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
@@ -1783,22 +1774,26 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                               false,
                               0); /* not necesarry as hashexceptions = false */
     /* gt_bcktab_showlog2info(bcktab,logger); */
-    if (lcpsubtab != NULL && lcpsubtab->assideeffect)
+    if (lcpsubtab != NULL)
     {
-      size_t sizeforlcpvalues; /* in bytes */
-
-      sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
-      if (lcpsubtab->sizereservoir < sizeforlcpvalues)
+      if (lcpsubtab->assideeffect)
       {
-        lcpsubtab->sizereservoir = sizeforlcpvalues;
-        lcpsubtab->reservoir = gt_realloc(lcpsubtab->reservoir,
-                                          lcpsubtab->sizereservoir);
-        /* point to the same area, since this is not used simultaneously */
-        /* be careful for the parallel version */
-        lcpsubtab->smalllcpvalues = (uint8_t *) lcpsubtab->reservoir;
-        lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-          = (unsigned long *) lcpsubtab->reservoir;
+        size_t sizeforlcpvalues; /* in bytes */
+
+        sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
+        if (lcpsubtab->sizereservoir < sizeforlcpvalues)
+        {
+          lcpsubtab->sizereservoir = sizeforlcpvalues;
+          lcpsubtab->reservoir = gt_realloc(lcpsubtab->reservoir,
+                                            lcpsubtab->sizereservoir);
+          /* point to the same area, since this is not used simultaneously */
+          /* be careful for the parallel version */
+          lcpsubtab->smalllcpvalues = (uint8_t *) lcpsubtab->reservoir;
+          lcpsubtab->tableoflcpvalues.bucketoflcpvalues
+            = (unsigned long *) lcpsubtab->reservoir;
+        }
       }
+      bsr->tableoflcpvalues = &lcpsubtab->tableoflcpvalues;
     }
   }
   GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
