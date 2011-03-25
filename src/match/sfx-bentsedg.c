@@ -40,6 +40,20 @@
 #include "sfx-suftaborder.h"
 #include "stamp.h"
 
+/*
+  sideeffect is true iff the lcpvalues are computed along with the suffix
+  sorting.
+  outputtofile is true iff the lcpvalues are output to a file
+
+  Lcps are only computed if the lcpoption is on
+  Option rmnsufinfo=false and differencecover=false:
+          sideeffect = true and outputtofile = true
+  Option rmnsufinfo=true and differencecover=false
+          sideeffect = false and outputtofile = true
+  Option rmnsufinfo=false and differencecover=true and
+          sideeffect = true and outputtofile = false
+*/
+
 #define ACCESSCHARRAND(POS)    gt_encseq_get_encoded_char(bsr->encseq,\
                                                           POS,bsr->readmode)
 #define ACCESSCHARSEQ(ESR)     gt_encseq_reader_next_encoded_char(ESR)
@@ -89,11 +103,10 @@ typedef struct
   uint8_t *smalllcpvalues; /* pointer into reservoir */
   const Compressedtable *completelcpvalues;
   GtArrayLargelcpvalue largelcpvalues;
-  GtLcpvalues tableoflcpvalues;
-  bool assideeffect;
-  unsigned long totallength;
   FILE *outfplcptab,
        *outfpllvtab;
+  GtLcpvalues tableoflcpvalues;
+  bool assideeffect;
 } Lcpsubtab;
 
 typedef struct
@@ -109,6 +122,7 @@ typedef struct
 
 struct Outlcpinfo
 {
+  unsigned long totallength;
   Turningwheel *tw;
   unsigned int minchanged;
   Suffixwithcode previoussuffix;
@@ -1442,7 +1456,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   if (specialsinbucket > 1UL)
   {
     maxprefixindex = gt_pfxidx2lcpvalues(&minprefixindex,
-                                         lcpsubtab->smalllcpvalues,
+                                         lcpsubtab->smalllcpvalues,/*XXX*/
                                          specialsinbucket,
                                          bcktab,
                                          code);
@@ -1471,7 +1485,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   {
     lcpsubtab->maxbranchdepth = lcpvalue;
   }
-  lcpsubtab->smalllcpvalues[0] = (uint8_t) lcpvalue;
+  lcpsubtab->smalllcpvalues[0] = (uint8_t) lcpvalue;/*XXX*/
   return minprefixindex;
 }
 
@@ -1514,7 +1528,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo->lcpsubtab.maxbranchdepth = 0;
   outlcpinfo->lcpsubtab.reservoir = NULL;
   outlcpinfo->lcpsubtab.sizereservoir = 0;
-  outlcpinfo->lcpsubtab.totallength = totallength;
+  outlcpinfo->totallength = totallength;
   GT_INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->minchanged = 0;
@@ -1585,7 +1599,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
     }
     if (lcpvalue < (unsigned long) LCPOVERFLOW)
     {
-      lcpsubtab->smalllcpvalues[idx-bucketleft] = (uint8_t) lcpvalue;
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = (uint8_t) lcpvalue;/*XXX*/
     } else
     {
       gt_assert(lcpsubtab->largelcpvalues.nextfreeLargelcpvalue <
@@ -1594,7 +1608,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
                          lcpsubtab->largelcpvalues.nextfreeLargelcpvalue++;
       largelcpvalueptr->position = posoffset+idx;
       largelcpvalueptr->value = lcpvalue;
-      lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
+      lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;/*XXX*/
     }
   }
   outsmalllcpvalues(lcpsubtab,(unsigned long) (bucketright - bucketleft + 1));
@@ -1630,10 +1644,10 @@ static unsigned long outmany0lcpvalues(unsigned long countoutputlcpvalues,
   return many;
 }
 
-static void multioutlcpvalues(Lcpsubtab *lcpsubtab,
-                              unsigned long totallength,
-                              const Compressedtable *lcptab,
-                              unsigned long bucketsize)
+static void rmnsufinfo_multioutlcpvalues(Lcpsubtab *lcpsubtab,
+                                         unsigned long totallength,
+                                         const Compressedtable *lcptab,
+                                         unsigned long bucketsize)
 {
   unsigned long buffersize = 512UL, sizeforsmalllcpvalues,
                 remaining, left, width;
@@ -1694,17 +1708,17 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
   if (outlcpinfo->lcpsubtab.outfplcptab != NULL &&
       !withdiffcover &&
       outlcpinfo->lcpsubtab.countoutputlcpvalues <
-      outlcpinfo->lcpsubtab.totallength+1)
+      outlcpinfo->totallength+1)
   {
     outlcpinfo->lcpsubtab.countoutputlcpvalues
       += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
-                           outlcpinfo->lcpsubtab.totallength,
+                           outlcpinfo->totallength,
                            outlcpinfo->lcpsubtab.outfplcptab);
   }
   gt_assert(outlcpinfo->lcpsubtab.outfplcptab == NULL ||
             withdiffcover ||
             outlcpinfo->lcpsubtab.countoutputlcpvalues ==
-            outlcpinfo->lcpsubtab.totallength + 1);
+            outlcpinfo->totallength + 1);
   GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
   gt_fa_fclose(outlcpinfo->lcpsubtab.outfplcptab);
   gt_fa_fclose(outlcpinfo->lcpsubtab.outfpllvtab);
@@ -1784,7 +1798,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
         lcpsubtab->smalllcpvalues = (uint8_t *) lcpsubtab->reservoir;
         lcpsubtab->tableoflcpvalues.bucketoflcpvalues
           = (unsigned long *) lcpsubtab->reservoir;
-     }
+      }
     }
   }
   GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
@@ -1885,7 +1899,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr,
                                   bsr->tableoflcpvalues == NULL ? false : true);
     if (lcptab != NULL)
     {
-      multioutlcpvalues(lcpsubtab,bsr->totallength,lcptab,partwidth);
+      rmnsufinfo_multioutlcpvalues(lcpsubtab,bsr->totallength,lcptab,partwidth);
       compressedtable_free(lcptab,true);
     }
   }
@@ -1928,8 +1942,9 @@ void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
   if (lcptab != NULL)
   {
     gt_assert(outlcpinfo != NULL);
-    multioutlcpvalues(&outlcpinfo->lcpsubtab,gt_encseq_total_length(encseq),
-                      lcptab,partwidth);
+    rmnsufinfo_multioutlcpvalues(&outlcpinfo->lcpsubtab,
+                                 gt_encseq_total_length(encseq),
+                                 lcptab,partwidth);
     compressedtable_free(lcptab,true);
   }
 }

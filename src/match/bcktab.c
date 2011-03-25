@@ -888,12 +888,11 @@ unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
                                  GtCodetype code)
 {
   unsigned int prefixindex, maxprefixindex = 0;
+  unsigned long idx, insertpos;
   GtCodetype ordercode, divisor;
-  unsigned long idx;
-  uint8_t *insertptr;
 
   *minprefixindex = bcktab->prefixlength;
-  insertptr = lcpsubtab + specialsinbucket - 1;
+  insertpos = specialsinbucket;
   for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
   {
     if (code >= bcktab->filltable[prefixindex])
@@ -912,23 +911,23 @@ unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
           }
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
-            gt_assert(insertptr >= lcpsubtab);
-            *insertptr-- = (uint8_t) prefixindex;
+            gt_assert(insertpos > 0);
+            lcpsubtab[--insertpos] = (uint8_t) prefixindex;
           }
         }
       }
     }
   }
-  if (insertptr >= lcpsubtab)
+  if (insertpos > 0)
   {
     maxprefixindex = bcktab->prefixlength-1;
     if (*minprefixindex == bcktab->prefixlength)
     {
       *minprefixindex = bcktab->prefixlength-1;
     }
-    while (insertptr >= lcpsubtab)
+    while (insertpos > 0)
     {
-      *insertptr-- = (uint8_t) (bcktab->prefixlength-1);
+      lcpsubtab[--insertpos] = (uint8_t) (bcktab->prefixlength-1);
     }
   }
   return maxprefixindex;
