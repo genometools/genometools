@@ -27,7 +27,6 @@
 
 typedef struct
 {
-  Definedunsignedint ssortmaxdepth;
   unsigned long maxwidthrealmedian,
                 maxcountingsort,
                 maxbltriesort,
@@ -37,9 +36,6 @@ typedef struct
                          of comparing entire words (only for two bit
                          encoding) */
        storespecialcodes,
-       streamsuftab,
-       absoluteinversesuftab,
-       hashexceptions,
        iteratorbasedkmerscanning,
        suftabasulongarray,
        onlybucketinsertion,
@@ -50,7 +46,6 @@ typedef struct
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
                                                     bool cmpcharbychar)
 {
-  sfxstrategy->ssortmaxdepth.defined = false;
   sfxstrategy->maxwidthrealmedian = 1UL;
   sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   sfxstrategy->maxinsertionsort = MAXINSERTIONSORTDEFAULT;
@@ -58,9 +53,6 @@ typedef struct
   sfxstrategy->differencecover = 0;
   sfxstrategy->cmpcharbychar = cmpcharbychar;
   sfxstrategy->storespecialcodes = false;
-  sfxstrategy->streamsuftab = false;
-  sfxstrategy->absoluteinversesuftab = false;
-  sfxstrategy->hashexceptions = false;
   sfxstrategy->iteratorbasedkmerscanning = false;
   sfxstrategy->suftabasulongarray = false;
   sfxstrategy->onlybucketinsertion = false;

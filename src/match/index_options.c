@@ -57,7 +57,6 @@ struct GtIndexOptions
        outkystab,
        outkyssort;
   GtStr *kysargumentstring,
-        *maxdepth,
         *indexname,
         *dir;
   Sfxstrategy sfxstrategy;
@@ -69,7 +68,6 @@ struct GtIndexOptions
            *optionoutbwttab,
            *optionoutbcktab,
            *optionprefixlength,
-           *optionmaxdepth,
            *optioncmpcharbychar,
            *optionstorespecialcodes,
            *optionmaxwidthrealmedian,
@@ -87,7 +85,6 @@ struct GtIndexOptions
 static GtIndexOptions* gt_index_options_new(void)
 {
   GtIndexOptions *oi = gt_malloc(sizeof *oi);
-  oi->maxdepth = gt_str_new();
   oi->kysargumentstring = gt_str_new();
   oi->dir = gt_str_new();
   oi->outkystab = false;
@@ -97,10 +94,6 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->algbounds = gt_str_array_new();
   oi->parts = gt_str_array_new();
   oi->prefixlength = GT_PREFIXLENGTH_AUTOMATIC;
-  oi->sfxstrategy.ssortmaxdepth.defined = false;
-  oi->sfxstrategy.ssortmaxdepth.valueunsignedint = GT_MAXDEPTH_AUTOMATIC;
-  oi->sfxstrategy.streamsuftab = false;
-  oi->sfxstrategy.hashexceptions = false;
   oi->outsuftab = false; /* only defined for GT_INDEX_OPTIONS_ESA */
   oi->outlcptab = false;
   oi->outbwttab = false;
@@ -112,7 +105,6 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->optionoutbwttab = NULL;
   oi->optionoutbcktab = NULL;
   oi->optionprefixlength = NULL;
-  oi->optionmaxdepth = NULL;
   oi->optioncmpcharbychar = NULL;
   oi->optionstorespecialcodes = NULL;
   oi->optionmaxwidthrealmedian = NULL;
@@ -171,60 +163,9 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
 {
   int had_err = 0;
   GtIndexOptions *oi = (GtIndexOptions*) oip;
-  const char *maxdepthmsg = "option of -maxdepth must be the keyword 'abs', "
-                            "the keyword 'he' or an integer";
   gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
   gt_error_check(err);
 
-  oi->sfxstrategy.absoluteinversesuftab = false;
-  if (oi->type == GT_INDEX_OPTIONS_ESA) {
-    gt_assert(oi->optionmaxdepth != NULL);
-    if (gt_option_is_set(oi->optionmaxdepth)) {
-      if (gt_str_length(oi->maxdepth) > 0) {
-        if (strcmp(gt_str_get(oi->maxdepth), "abs") == 0) {
-          oi->sfxstrategy.absoluteinversesuftab = true;
-        } else {
-          if (strcmp(gt_str_get(oi->maxdepth), "he") == 0) {
-            oi->sfxstrategy.hashexceptions = true;
-          } else {
-            long readint;
-            oi->sfxstrategy.hashexceptions = true;
-            if (sscanf(gt_str_get(oi->maxdepth), "%ld", &readint) == 1 &&
-                readint >= 1L) {
-              oi->sfxstrategy.ssortmaxdepth.defined = true;
-              oi->sfxstrategy.ssortmaxdepth.valueunsignedint
-                                                       = (unsigned int) readint;
-            } else {
-              gt_error_set(err, "%s", maxdepthmsg);
-              had_err = -1;;
-            }
-          }
-        }
-      }
-      if (!had_err && oi->numofparts > 1U)
-      {
-        if (oi->sfxstrategy.ssortmaxdepth.valueunsignedint
-                               == GT_MAXDEPTH_AUTOMATIC) { /* undefined value */
-          oi->sfxstrategy.streamsuftab = true;
-        } else {
-          gt_error_set(err,"option -maxdepth with argument can only be used "
-                           "either without -parts or with option -parts 1");
-          had_err = -1;
-        }
-      }
-      if (!had_err)
-      {
-        if (oi->sfxstrategy.differencecover == 0)
-        {
-          oi->sfxstrategy.ssortmaxdepth.defined = true;
-          if (oi->sfxstrategy.ssortmaxdepth.valueunsignedint !=
-                                                        GT_MAXDEPTH_AUTOMATIC) {
-            oi->sfxstrategy.cmpcharbychar = true;
-          }
-        }
-      }
-    }
-  }
   if (!had_err && oi->sfxstrategy.differencecover > 0
       && oi->optionoutlcptab != NULL
       && gt_option_is_set(oi->optionoutlcptab))
@@ -396,21 +337,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_argument_is_optional(idxo->optiondifferencecover);
   gt_option_parser_add_option(op, idxo->optiondifferencecover);
 
-  if (t == GT_INDEX_OPTIONS_ESA)
-  {
-    idxo->optionmaxdepth = gt_option_new_string("maxdepth",
-                                          "stop shallow suffix sorting "
-                                          "at prefixes of the given length",
-                                          idxo->maxdepth,
-                                          NULL);
-    gt_option_is_development_option(idxo->optionmaxdepth);
-    gt_option_argument_is_optional(idxo->optionmaxdepth);
-    gt_option_parser_add_option(op, idxo->optionmaxdepth);
-
-  } else
-  {
-    idxo->optionmaxdepth = NULL;
-  }
   idxo->optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
                                            "compare suffixes character "
                                            "by character",
@@ -541,10 +467,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_parser_add_option(op, idxo->option);
 
   gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
-  if (idxo->optionmaxdepth != NULL)
-  {
-    gt_option_exclude(idxo->optionmaxdepth, idxo->optiondifferencecover);
-  }
   /* XXX
   if (idxo->optionoutlcptab != NULL)
   {
@@ -583,7 +505,6 @@ void gt_index_options_delete(GtIndexOptions *oi)
   if (oi == NULL) return;
   gt_str_delete(oi->kysargumentstring);
   gt_str_delete(oi->indexname);
-  gt_str_delete(oi->maxdepth);
   gt_str_delete(oi->dir);
   gt_str_array_delete(oi->algbounds);
   gt_str_array_delete(oi->parts);
@@ -616,7 +537,6 @@ GT_INDEX_OPTS_GETTER_DEF(outlcptab, bool);
 GT_INDEX_OPTS_GETTER_DEF(outbwttab, bool);
 GT_INDEX_OPTS_GETTER_DEF(outbcktab, bool);
 GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
-GT_INDEX_OPTS_GETTER_DEF(maxdepth, GtStr*);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
 GT_INDEX_OPTS_GETTER_DEF(parts, GtStrArray*);
 /* these are available as options only, values are not to be used directly */

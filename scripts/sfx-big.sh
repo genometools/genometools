@@ -6,7 +6,7 @@ DATA="/local/kurtz/sfx-test/data"
 
 run()
 {
-  gt suffixerator $1 -tis -suf -pl -maxdepth -showtime -db $2
+  gt suffixerator $1 -tis -suf -pl -showtime -db $2
 }
 
 for filename in `ls ${DATA}/fib*.fas.gz`

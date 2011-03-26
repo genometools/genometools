@@ -35,7 +35,6 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
                               unsigned long totallength,
-                              bool assideeffect,
                               GtError *err);
 
 void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
@@ -47,21 +46,6 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,bool withdiffcover);
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
 unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo);
-
-void gt_qsufsort(GtSuffixsortspace *suffixsortspace,
-                 unsigned long partwidth,
-                 int mmapfiledesc,
-                 GtStr *mmapfilename,
-                 const GtEncseq *encseq,
-                 GtReadmode readmode,
-                 GtCodetype mincode,
-                 GtCodetype maxcode,
-                 Bcktab *bcktab,
-                 unsigned int numofchars,
-                 unsigned int prefixlength,
-                 bool hashexceptions,
-                 bool absoluteinversesuftab,
-                 Outlcpinfo *outlcpinfo);
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        unsigned long numberofsuffixes,

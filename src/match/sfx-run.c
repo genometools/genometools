@@ -39,7 +39,7 @@
 #include "sfx-suffixer.h"
 #include "sfx-run.h"
 #include "sfx-opt.pr"
-#include "sfx-outprj.pr"
+#include "sfx-outprj.h"
 #include "sfx-apfxlen.h"
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
@@ -81,7 +81,6 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 {
   bool haserr = false,
        outlcptab = gt_index_options_outlcptab_value(so->idxopts);
-  Sfxstrategy strategy = gt_index_options_sfxstrategy_value(so->idxopts);
 
   outfileinfo->outfpsuftab = NULL;
   outfileinfo->outfpbwttab = NULL;
@@ -96,7 +95,6 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_encseq_total_length(encseq),
-                          strategy.ssortmaxdepth.defined ? false : true,
                           err);
     if (outfileinfo->outlcpinfo == NULL)
     {
@@ -175,8 +173,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int suffixeratorwithoutput(const GtStr *indexname,
-                                  Outfileinfo *outfileinfo,
+static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned int prefixlength,
@@ -227,7 +224,6 @@ static int suffixeratorwithoutput(const GtStr *indexname,
           break;
         }
       }
-      /* XXX be careful: postpone not output bwtab if streamsuftab is true */
       if (bwttab2file(outfileinfo,suffixsortspace,readmode,numberofsuffixes,
                       err) != 0)
       {
@@ -246,15 +242,6 @@ static int suffixeratorwithoutput(const GtStr *indexname,
     outfileinfo->longest.defined = true;
     outfileinfo->longest.valueunsignedlong = gt_Sfxiterator_longest(sfi);
   }
-  if (!haserr && sfxstrategy->streamsuftab)
-  {
-    gt_fa_fclose(outfileinfo->outfpsuftab);
-    outfileinfo->outfpsuftab = NULL;
-    if (gt_Sfxiterator_postsortfromstream(sfi,indexname,err) != 0)
-    {
-      haserr = true;
-    }
-  }
   if (!haserr && outfileinfo->outfpbcktab != NULL)
   {
     if (gt_Sfxiterator_bcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
@@ -266,13 +253,12 @@ static int suffixeratorwithoutput(const GtStr *indexname,
   return haserr ? -1 : 0;
 }
 
-static int detpfxlenandmaxdepth(unsigned int *prefixlength,
-                                Definedunsignedint *maxdepth,
-                                const Suffixeratoroptions *so,
-                                unsigned int numofchars,
-                                unsigned long totallength,
-                                GtLogger *logger,
-                                GtError *err)
+static int detpfxlen(unsigned int *prefixlength,
+                     const Suffixeratoroptions *so,
+                     unsigned int numofchars,
+                     unsigned long totallength,
+                     GtLogger *logger,
+                     GtError *err)
 {
   bool haserr = false;
   Sfxstrategy strategy = gt_index_options_sfxstrategy_value(so->idxopts);
@@ -289,12 +275,11 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
     unsigned int maxprefixlen;
 
     *prefixlength = gt_index_options_prefixlength_value(so->idxopts);
-    maxprefixlen
-            = gt_whatisthemaximalprefixlength(numofchars,
-                                              totallength,
-                                              strategy.storespecialcodes
-                                              ? (unsigned int) PREFIXLENBITS
-                                              : 0);
+    maxprefixlen = gt_whatisthemaximalprefixlength(numofchars,
+                                                   totallength,
+                                                   strategy.storespecialcodes
+                                                  ? (unsigned int) PREFIXLENBITS
+                                                  : 0);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
@@ -305,32 +290,6 @@ static int detpfxlenandmaxdepth(unsigned int *prefixlength,
                                  gt_recommendedprefixlength(
                                  numofchars,
                                  totallength));
-    }
-  }
-  if (!haserr && strategy.ssortmaxdepth.defined)
-  {
-    if (strategy.ssortmaxdepth.valueunsignedint == GT_MAXDEPTH_AUTOMATIC)
-    {
-      maxdepth->defined = true;
-      maxdepth->valueunsignedint = *prefixlength;
-      gt_logger_log(logger,
-                    "automatically determined maxdepth=%u",
-                    maxdepth->valueunsignedint);
-    } else
-    {
-      if (strategy.ssortmaxdepth.valueunsignedint < *prefixlength)
-      {
-        maxdepth->defined = true;
-        maxdepth->valueunsignedint = *prefixlength;
-        gt_logger_log(logger,
-                      "set maxdepth=%u",maxdepth->valueunsignedint);
-      } else
-      {
-        maxdepth->defined = true;
-        maxdepth->valueunsignedint = strategy.ssortmaxdepth.valueunsignedint;
-        gt_logger_log(logger,
-                      "use maxdepth=%u",maxdepth->valueunsignedint);
-      }
     }
   }
   return haserr ? -1 : 0;
@@ -537,7 +496,6 @@ static int runsuffixerator(bool doesa,
   }
   prefixlength = gt_index_options_prefixlength_value(so->idxopts);
   sfxstrategy = gt_index_options_sfxstrategy_value(so->idxopts);
-  sfxstrategy.ssortmaxdepth.defined = false;
   if (!haserr)
   {
     if (gt_index_options_outsuftab_value(so->idxopts)
@@ -549,13 +507,12 @@ static int runsuffixerator(bool doesa,
       unsigned int numofchars = gt_alphabet_num_of_chars(
                                           gt_encseq_alphabet(encseq));
 
-      if (detpfxlenandmaxdepth(&prefixlength,
-                              &sfxstrategy.ssortmaxdepth,
-                              so,
-                              numofchars,
-                              gt_encseq_total_length(encseq),
-                              logger,
-                              err) != 0)
+      if (detpfxlen(&prefixlength,
+                    so,
+                    numofchars,
+                    gt_encseq_total_length(encseq),
+                    logger,
+                    err) != 0)
       {
         haserr = true;
       }
@@ -592,7 +549,6 @@ static int runsuffixerator(bool doesa,
       if (doesa)
       {
         if (suffixeratorwithoutput(
-                               so->indexname,
                                &outfileinfo,
                                encseq,
                                readmode,
@@ -646,7 +602,6 @@ static int runsuffixerator(bool doesa,
                       readmode,
                       encseq,
                       prefixlength,
-                      &sfxstrategy.ssortmaxdepth,
                       numoflargelcpvalues,
                       maxbranchdepth,
                       &outfileinfo.longest,

@@ -717,14 +717,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                   sfi->sfxstrategy.storespecialcodes ? "true" : "false");
     gt_logger_log(logger,"cmpcharbychar=%s",
                   sfi->sfxstrategy.cmpcharbychar ? "true" : "false");
-    if (sfi->sfxstrategy.ssortmaxdepth.defined)
-    {
-      gt_logger_log(logger,"ssortmaxdepth=%u",
-                           sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
-    } else
-    {
-      gt_logger_log(logger,"ssortmaxdepth=undefined");
-    }
     sfi->totallength = gt_encseq_total_length(encseq);
     gt_logger_log(logger,"totallength=%lu",sfi->totallength);
     sfi->specialcharacters = specialcharacters;
@@ -747,7 +739,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                               sfi->numofchars,
                               0, /* as this is not know yet */
                               sfi->totallength,
-                              true,
                               err);
         if (sfi->outlcpinfo == NULL)
         {
@@ -931,6 +922,7 @@ static void preparethispart(Sfxiterator *sfi)
 {
   unsigned long partwidth;
   unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
+  GtBucketspec2 *bucketspec2 = NULL;
 
   if (sfi->part == 0 && sfi->withprogressbar)
   {
@@ -987,147 +979,43 @@ static void preparethispart(Sfxiterator *sfi)
   }
   /* exit(0); just for testing */
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
-  if (sfi->sfxstrategy.ssortmaxdepth.defined &&
-      sfi->prefixlength == sfi->sfxstrategy.ssortmaxdepth.valueunsignedint)
-  {
-    if (!sfi->sfxstrategy.streamsuftab)
-    {
-      /* option -maxdepth with argument */
-      gt_qsufsort(sfi->suffixsortspace,
-                  partwidth,
-                  -1,
-                  NULL,
-                  sfi->encseq,
-                  sfi->readmode,
-                  sfi->currentmincode,
-                  sfi->currentmaxcode,
-                  sfi->bcktab,
-                  sfi->numofchars,
-                  sfi->prefixlength,
-                  false,
-                  true,
-                  sfi->outlcpinfo);
-    }
-  } else
-  {
-    GtBucketspec2 *bucketspec2 = NULL;
 
-    gt_assert(!sfi->sfxstrategy.streamsuftab);
-    if (numofparts == 1U && sfi->outlcpinfo == NULL && sfi->prefixlength >= 2U)
-    {
-      bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
-                                    partwidth,sfi->numofchars);
-    }
-    if (sfi->sfxstrategy.differencecover > 0)
-    {
-      gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
-    }
-    gt_sortallbuckets(sfi->suffixsortspace,
-                      partwidth,
-                      bucketspec2,
-                      sfi->encseq,
-                      sfi->readmode,
-                      sfi->currentmincode,
-                      sfi->currentmaxcode,
-                      sfi->bcktab,
-                      sfi->numofchars,
-                      sfi->prefixlength,
-                      sfi->sfxstrategy.differencecover == 0
-                        ? sfi->outlcpinfo : NULL,
-                      sfi->sfxstrategy.differencecover,
-                      &sfi->sfxstrategy,
-                      sfi->sfxstrategy.differencecover == 0
-                        ? NULL : gt_differencecover_sortunsortedbucket,
-                      sfi->sfxstrategy.differencecover == 0
-                        ? NULL : (void *) sfi->dcov,
-                      &sfi->bucketiterstep,
-                      sfi->logger);
-    if (bucketspec2 != NULL)
-    {
-      gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace,sfi->logger);
-      gt_copysort_delete(bucketspec2);
-      bucketspec2 = NULL;
-    }
+  if (numofparts == 1U && sfi->outlcpinfo == NULL && sfi->prefixlength >= 2U)
+  {
+    bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
+                                  partwidth,sfi->numofchars);
+  }
+  if (sfi->sfxstrategy.differencecover > 0)
+  {
+    gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
+  }
+  gt_sortallbuckets(sfi->suffixsortspace,
+                    partwidth,
+                    bucketspec2,
+                    sfi->encseq,
+                    sfi->readmode,
+                    sfi->currentmincode,
+                    sfi->currentmaxcode,
+                    sfi->bcktab,
+                    sfi->numofchars,
+                    sfi->prefixlength,
+                    sfi->sfxstrategy.differencecover == 0
+                      ? sfi->outlcpinfo : NULL,
+                    sfi->sfxstrategy.differencecover,
+                    &sfi->sfxstrategy,
+                    sfi->sfxstrategy.differencecover == 0
+                      ? NULL : gt_differencecover_sortunsortedbucket,
+                    sfi->sfxstrategy.differencecover == 0
+                      ? NULL : (void *) sfi->dcov,
+                    &sfi->bucketiterstep,
+                    sfi->logger);
+  if (bucketspec2 != NULL)
+  {
+    gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace,sfi->logger);
+    gt_copysort_delete(bucketspec2);
+    bucketspec2 = NULL;
   }
   sfi->part++;
-}
-
-int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi, const GtStr *indexname,
-                                      GtError *err)
-{
-  int mmapfiledesc = -1;
-  GtStr *tmpfilename;
-  struct stat sb;
-  bool haserr = false;
-
-  if (sfi->totallength == sfi->specialcharacters)
-  {
-    return 0;
-  }
-  gt_suffixsortspace_sortspace_delete(sfi->suffixsortspace);
-  if (sfi->sfxstrategy.streamsuftab)
-  {
-    gt_assert(sfi->sfxstrategy.ssortmaxdepth.defined &&
-              sfi->prefixlength ==
-              sfi->sfxstrategy.ssortmaxdepth.valueunsignedint);
-  }
-  tmpfilename = gt_str_clone(indexname);
-  gt_str_append_cstr(tmpfilename,SUFTABSUFFIX);
-  mmapfiledesc = open(gt_str_get(tmpfilename), O_RDWR, 0);
-  if (mmapfiledesc == -1)
-  {
-    gt_error_set(err,"cannot open file \"%s\": %s",gt_str_get(tmpfilename),
-                 strerror(errno));
-    haserr = true;
-  }
-  if (!haserr && fstat(mmapfiledesc, &sb) == -1)
-  {
-    gt_error_set(err,"cannot fstat file \"%s\": %s",gt_str_get(tmpfilename),
-                 strerror(errno));
-    haserr = true;
-  }
-  if (!haserr && sizeof (off_t) > sizeof (size_t) && sb.st_size > SIZE_MAX)
-  {
-    gt_error_set(err,"file \"%s\" of size %llu is too large to map",
-                 gt_str_get(tmpfilename),(unsigned long long) sb.st_size);
-    haserr = true;
-  }
-  if (!haserr
-        && (size_t) sb.st_size != sizeof (unsigned long) * (sfi->totallength+1))
-  {
-    gt_error_set(err,"mapping file %s: file size "
-                     " = %lu != %lu = expected number of units",
-                 gt_str_get(tmpfilename),
-                 (unsigned long) sb.st_size,
-                 (unsigned long) (sfi->totallength+1) * sizeof (unsigned long));
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    gt_assert(sfi->totallength >= sfi->specialcharacters);
-    gt_qsufsort(NULL,
-                sfi->totallength - sfi->specialcharacters,
-                mmapfiledesc,
-                tmpfilename,
-                sfi->encseq,
-                sfi->readmode,
-                0,
-                sfi->currentmaxcode,
-                sfi->bcktab,
-                sfi->numofchars,
-                sfi->prefixlength,
-                sfi->sfxstrategy.hashexceptions,
-                sfi->sfxstrategy.absoluteinversesuftab,
-                sfi->outlcpinfo);
-  }
-  gt_str_delete(tmpfilename);
-  if (close(mmapfiledesc) == -1)
-  {
-    gt_error_set(err,"cannot close file \"%s\": %s",gt_str_get(tmpfilename),
-                 strerror(errno));
-    haserr = true;
-  }
-  return haserr ? -1 : 0;
 }
 
 static void insertfullspecialrange(Sfxiterator *sfi,

@@ -6,7 +6,7 @@ def outoptions
   return outoptionsnobck + " -bck"
 end
 
-def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
+def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
   filearg=""
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
@@ -20,9 +20,6 @@ def checksfx(parts,withsmap,cmp,doubling,filelist,alldirs=true)
     extra=""
     if cmp
       extra=extra + " -cmpcharbychar"
-      if dirarg == "fwd" and doubling
-        extra=extra + " -maxdepth"
-      end
     end
     run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
              "-algbds 10 31 80 #{extra} #{outoptions} " +
@@ -251,16 +248,10 @@ end
       extra="-smap TransProt11"
       extraname="TransProt11"
     end
-    if parts == 1
-     doubling=true
-    else
-     doubling=false
-    end
     Name "gt suffixerator+map protein filelist #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
-      checksfx(parts,extra,true,doubling,
-               ["sw100K1.fsa","sw100K2.fsa"],false)
+      checksfx(parts,extra,true,["sw100K1.fsa","sw100K2.fsa"],false)
     end
   end
 end
@@ -276,36 +267,25 @@ end
 	extra="-smap TransDNA"
 	extraname=" trans"
       end
-      doublingname=""
       if cmpval == 0
 	cmp=false
-	doubling=false
       elsif cmpval == 1
 	cmp=true
-	doubling=false
       else
 	cmp=true
-	if parts == 1
-	  doubling=true
-	  doublingname=" doubling "
-	else
-	  doubling=false
-	end
       end
       all_fastafiles.each do |filename|
-	Name "gt suffixerator+map #{filename}#{extraname} #{parts} parts " +
-             "#{doubling}"
+	Name "gt suffixerator+map #{filename}#{extraname} #{parts} parts"
 	Keywords "gt_suffixerator"
 	Test do
-	  checksfx(parts,extra,cmp,doubling,[filename])
+	  checksfx(parts,extra,cmp,[filename])
 	end
       end
       filelist=["RandomN.fna","Random.fna","Atinsert.fna"]
-      Name "gt suffixerator+map dna filelist#{extraname} " +
-	     "#{parts} parts #{doubling}"
+      Name "gt suffixerator+map dna filelist#{extraname} #{parts} parts"
       Keywords "gt_suffixerator"
       Test do
-	checksfx(parts,extra,cmp,doubling,filelist)
+	checksfx(parts,extra,cmp,filelist)
       end
     end
   end

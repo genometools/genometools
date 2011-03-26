@@ -10,5 +10,3 @@ fi
 
 gt suffixerator -db $1  -dna -suf -tis -lcp -indexname sideeff
 gt dev sfxmap -lcp -tis -suf -esa sideeff
-gt suffixerator -db $1  -dna -suf -tis -lcp -maxdepth -indexname linear
-gt dev sfxmap -lcp -tis -suf -esa linear

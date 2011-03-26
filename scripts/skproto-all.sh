@@ -60,6 +60,7 @@ esa-map.c
 esa-mmsearch.c
 esa-ppbuckwid.c
 esa-seqread.c
+esa-shulen.c
 esa-splititv.c
 giextract.c
 greedyfwdmat.c
@@ -67,6 +68,7 @@ idx-limdfs.c
 idxlocali.c
 idxlocalidp.c
 idxlocalisw.c
+index_options.c
 initbasepower.c
 initeqsvec.c
 inl-encseq.c
@@ -80,6 +82,7 @@ myersapm.c
 nullcols.c
 opensfxfile.c
 optionargmode.c
+pck-count-nodes.c
 pckbucket.c
 pckdfs.c
 pos2seqnum.c
@@ -96,6 +99,7 @@ sfx-enumcodes.c
 sfx-input.c
 sfx-linlcp.c
 sfx-mappedstr.c
+sfx-outprj.c
 sfx-partssuf.c
 sfx-progress.c
 sfx-readint.c
@@ -105,6 +109,12 @@ sfx-run.c
 sfx-suffixer.c
 sfx-suffixgetset.c
 sfx-suftaborder.c
+shu-dfs.c
+shu-divergence.c
+shu-encseq-gc.c
+shu-genomediff-pck-simple.c
+shu-genomediff.c
+twobits2kmers.c
 spaced-seeds.c
 specialrank.c
 substriter.c

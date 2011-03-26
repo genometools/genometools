@@ -43,9 +43,7 @@ typedef struct
 {
   unsigned long nonspecialsmaxbucketsize,
                 specialsmaxbucketsize,
-                maxbucketsize,
-                log2nonspecialbucketsizedist[GT_MAXLOG2VALUE+1],
-                log2specialbucketsizedist[GT_MAXLOG2VALUE+1];
+                maxbucketsize;
 } Maxbucketinfo;
 
 struct Bcktab
@@ -595,99 +593,11 @@ unsigned long gt_calcbucketrightbounds(const Bcktab *bcktab,
   return bcktab->leftborder[code+1];
 }
 
-static void updatelog2values(unsigned long *tab,unsigned long maxvalue)
-{
-  unsigned long multi = 1UL, idx, sum = 1UL;
-
-  for (idx = 0; /* Nothing */; idx++)
-  {
-    tab[idx] += multi;
-    multi *= 2;
-    if (sum+multi > maxvalue)
-    {
-      tab[idx+1] += maxvalue - sum;
-      break;
-    }
-    sum += multi;
-  }
-}
-
-static unsigned int calc_optimalnumofbits(unsigned short *logofremaining,
-                                          const unsigned long *log2tab,
-                                          unsigned long totallength)
-{
-  unsigned int lastbitset = 0, maxbits, optbits = 0;
-  unsigned long currentsum = 0, total = 0, optcurrentsum = 0;
-  unsigned short tmplogofremaining;
-  const size_t size_entry = sizeof (uint32_t) +
-                            sizeof (unsigned long) +
-                            sizeof (unsigned long);
-  size_t savedbitsinbytes,
-         hashtablesize, saved, maxsaved = 0;
-
-  for (maxbits = 0; maxbits <= (unsigned int) GT_MAXLOG2VALUE; maxbits++)
-  {
-    if (log2tab[maxbits] > 0)
-    {
-      total += log2tab[maxbits];
-      lastbitset = maxbits;
-    }
-  }
-#ifdef WITHsave
-  printf("lastbitset=%u\n",lastbitset);
-#endif
-  for (maxbits = 0; maxbits <= lastbitset; maxbits++)
-  {
-    if (log2tab[maxbits] > 0)
-    {
-      currentsum += log2tab[maxbits];
-      tmplogofremaining = (unsigned short) gt_determinebitspervalue(
-                                           (uint64_t) (total - currentsum));
-      hashtablesize = ((1 << tmplogofremaining)-1) * size_entry;
-      savedbitsinbytes =
-                   (size_t) (totallength/CHAR_BIT) * (lastbitset - maxbits + 1);
-#ifdef WITHsave
-      printf("savedbitsintbytes=%lu,hashtablesize=%lu\n",
-              (unsigned long) savedbitsinbytes,(unsigned long) hashtablesize);
-#endif
-      if (savedbitsinbytes > hashtablesize)
-      {
-        saved = savedbitsinbytes - hashtablesize;
-#ifdef WITHsave
-        printf("saved=%lu\n",(unsigned long) saved);
-#endif
-        if (saved > maxsaved)
-        {
-          maxsaved = saved;
-#ifdef WITHsave
-          printf("maxsaved=%lu\n",(unsigned long) maxsaved);
-#endif
-          optcurrentsum = currentsum;
-          optbits = maxbits;
-        }
-      }
-    }
-  }
-  *logofremaining = (unsigned short)
-                    gt_determinebitspervalue((uint64_t)
-                                             (total - optcurrentsum));
-#ifdef WITHsave
-  printf("store %lu values in hashtable (%lu>=%lu bytes)\n",
-         (unsigned long) (total - optcurrentsum),
-         (unsigned long) ((1 << (*logofremaining))-1) * size_entry,
-         (total - optcurrentsum) * size_entry);
-#endif
-  return optbits;
-}
-
 void gt_determinemaxbucketsize(Bcktab *bcktab,
                                const GtCodetype mincode,
                                const GtCodetype maxcode,
                                unsigned long partwidth,
-                               unsigned int numofchars,
-                               bool hashexceptions,
-                               /* relevant for hashexception */
-                               unsigned long totallength)
+                               unsigned int numofchars)
 {
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   Bucketspecification bucketspec;
@@ -702,15 +612,6 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.maxbucketsize = 1UL;
-  if (hashexceptions)
-  {
-    memset(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,0,
-           sizeof (*bcktab->maxbucketinfo.log2nonspecialbucketsizedist) *
-           (GT_MAXLOG2VALUE+1));
-    memset(bcktab->maxbucketinfo.log2specialbucketsizedist,0,
-           sizeof (*bcktab->maxbucketinfo.log2specialbucketsizedist) *
-           (GT_MAXLOG2VALUE+1));
-  }
   for (code = mincode; code <= maxcode; code++)
   {
     rightchar = gt_calcbucketboundsparts(&bucketspec,
@@ -737,31 +638,6 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
       bcktab->maxbucketinfo.maxbucketsize = bucketspec.nonspecialsinbucket +
                                             bucketspec.specialsinbucket;
     }
-    if (hashexceptions)
-    {
-      if (bucketspec.nonspecialsinbucket >= 1UL)
-      {
-        updatelog2values(bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
-                         bucketspec.nonspecialsinbucket);
-      }
-      if (bucketspec.specialsinbucket > 1UL)
-      {
-        updatelog2values(bcktab->maxbucketinfo.log2specialbucketsizedist,
-                         bucketspec.specialsinbucket);
-      }
-    }
-  }
-  if (hashexceptions)
-  {
-    bcktab->optimalnumofbits
-      = calc_optimalnumofbits(&bcktab->logofremaining,
-                              bcktab->maxbucketinfo.
-                                      log2nonspecialbucketsizedist,
-                              totallength);
-  } else
-  {
-    bcktab->optimalnumofbits = 0;
-    bcktab->logofremaining = 0;
   }
   /*
   gt_logger_log(logger,"maxbucket (specials)=%lu",
@@ -771,40 +647,6 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
   gt_logger_log(logger,"maxbucket (all)=%lu",
               bcktab->maxbucketinfo.maxbucketsize);
   */
-}
-
-static void showlog2info(const char *tag,const unsigned long *log2tab,
-                         GtLogger *logger)
-{
-  if (logger != NULL)
-  {
-    int maxbits;
-    unsigned long currentsum = 0, total = 0;
-    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
-    {
-      total += log2tab[maxbits];
-    }
-    for (maxbits = 0; maxbits <= GT_MAXLOG2VALUE; maxbits++)
-    {
-      if (log2tab[maxbits] > 0)
-      {
-        currentsum += log2tab[maxbits];
-        gt_logger_log(logger,"%s[%d]=%lu (%.4f)",tag,maxbits,
-                                 log2tab[maxbits],(double) currentsum/total);
-      }
-    }
-    gt_logger_log(logger,"total=%lu",total);
-  }
-}
-
-void gt_bcktab_showlog2info(const Bcktab *bcktab,GtLogger *logger)
-{
-  showlog2info("log2nonspecialbucketsizedist",
-                bcktab->maxbucketinfo.log2nonspecialbucketsizedist,
-                logger);
-  showlog2info("log2specialbucketsizedist",
-                bcktab->maxbucketinfo.log2specialbucketsizedist,
-                logger);
 }
 
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab)

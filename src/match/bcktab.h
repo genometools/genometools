@@ -85,10 +85,7 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
                             const GtCodetype mincode,
                             const GtCodetype maxcode,
                             unsigned long partwidth,
-                            unsigned int numofchars,
-                            bool hashexceptions,
-                            /* relevant for hashexception */
-                            unsigned long totallength);
+                            unsigned int numofchars);
 
 void gt_bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
 

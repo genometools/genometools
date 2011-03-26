@@ -40,7 +40,6 @@ static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
                         const GtEncseq *encseq,
                         unsigned int prefixlength,
-                        GT_UNUSED const Definedunsignedint *maxdepth,
                         unsigned long numoflargelcpvalues,
                         unsigned long maxbranchdepth,
                         const Definedunsignedlong *longest)
@@ -69,12 +68,6 @@ static void showprjinfo(FILE *outprj,
     fprintf(outprj,"longest=%lu\n",longest->valueunsignedlong);
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
-  /*
-  if (maxdepth->defined)
-  {
-    fprintf(outprj,"maxdepth=%u\n",maxdepth->valueunsignedint);
-  }
-  */
   fprintf(outprj,"largelcpvalues=%lu\n",numoflargelcpvalues);
   fprintf(outprj,"maxbranchdepth=%lu\n",maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
@@ -88,7 +81,6 @@ int gt_outprjfile(const char *indexname,
                   GtReadmode readmode,
                   const GtEncseq *encseq,
                   unsigned int prefixlength,
-                  const Definedunsignedint *maxdepth,
                   unsigned long numoflargelcpvalues,
                   unsigned long maxbranchdepth,
                   const Definedunsignedlong *longest,
@@ -109,7 +101,6 @@ int gt_outprjfile(const char *indexname,
                 readmode,
                 encseq,
                 prefixlength,
-                maxdepth,
                 numoflargelcpvalues,
                 maxbranchdepth,
                 longest);
