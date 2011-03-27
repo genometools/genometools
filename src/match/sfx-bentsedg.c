@@ -80,16 +80,21 @@ GT_DECLAREARRAYSTRUCT(Largelcpvalue);
 
 typedef struct
 {
-  void *reservoir;
-  size_t sizereservoir;
+  FILE *outfplcptab,
+       *outfpllvtab;
+  GtArrayLargelcpvalue largelcpvalues;
   unsigned long maxbranchdepth,
                 totalnumoflargelcpvalues,
                 countoutputlcpvalues;
+  void *reservoir;
+  size_t sizereservoir;
   uint8_t *smalllcpvalues; /* pointer into reservoir */
-  GtArrayLargelcpvalue largelcpvalues;
-  FILE *outfplcptab,
-       *outfpllvtab;
+} Lcpoutput2file;
+
+typedef struct
+{
   GtLcpvalues tableoflcpvalues;
+  Lcpoutput2file *lcp2file;
 } Lcpsubtab;
 
 typedef struct
@@ -1383,16 +1388,17 @@ static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
   return (unsigned long) lcpvalue;
 }
 
-static void outsmalllcpvalues(Lcpsubtab *lcpsubtab,
+static void outsmalllcpvalues(Lcpoutput2file *lcp2file,
                               unsigned long numoflcps)
 {
-  if (lcpsubtab->outfplcptab != NULL)
+  if (lcp2file != NULL)
   {
-    lcpsubtab->countoutputlcpvalues += numoflcps;
-    gt_xfwrite(lcpsubtab->smalllcpvalues,
-               sizeof (*lcpsubtab->smalllcpvalues),
+    lcp2file->countoutputlcpvalues += numoflcps;
+    gt_assert(lcp2file->outfplcptab != NULL);
+    gt_xfwrite(lcp2file->smalllcpvalues,
+               sizeof (*lcp2file->smalllcpvalues),
                (size_t) numoflcps,
-               lcpsubtab->outfplcptab);
+               lcp2file->outfplcptab);
   }
 }
 
@@ -1416,13 +1422,20 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   if (specialsinbucket > 1UL)
   {
     maxprefixindex = gt_pfxidx2lcpvalues(&minprefixindex,
-                                         lcpsubtab->smalllcpvalues,/*XXX*/
+                                         lcpsubtab->lcp2file != NULL
+                                           ? lcpsubtab->lcp2file->smalllcpvalues
+                                           : NULL,
+                                         lcpsubtab->lcp2file != NULL
+                                           ? NULL
+                                           : lcpsubtab->tableoflcpvalues.
+                                                        bucketoflcpvalues,
                                          specialsinbucket,
                                          bcktab,
                                          code);
-    if (lcpsubtab->maxbranchdepth < (unsigned long) maxprefixindex)
+    if (lcpsubtab->lcp2file != NULL &&
+        lcpsubtab->lcp2file->maxbranchdepth < (unsigned long) maxprefixindex)
     {
-      lcpsubtab->maxbranchdepth = (unsigned long) maxprefixindex;
+      lcpsubtab->lcp2file->maxbranchdepth = (unsigned long) maxprefixindex;
     }
   } else
   {
@@ -1441,11 +1454,18 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   lcpvalue = computelocallcpvalue(previoussuffix,
                                   &firstspecialsuffixwithcode,
                                   minchanged);
-  if (lcpsubtab->maxbranchdepth < lcpvalue)
+  if (lcpsubtab->lcp2file != NULL &&
+      lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
   {
-    lcpsubtab->maxbranchdepth = lcpvalue;
+    lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
   }
-  lcpsubtab->smalllcpvalues[0] = (uint8_t) lcpvalue;/*XXX*/
+  if (lcpsubtab->lcp2file != NULL)
+  {
+    lcpsubtab->lcp2file->smalllcpvalues[0] = (uint8_t) lcpvalue;
+  } else
+  {
+    lcpsubtab->tableoflcpvalues.bucketoflcpvalues[0] = lcpvalue;/*XXX*/
+  }
   return minprefixindex;
 }
 
@@ -1461,34 +1481,36 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   if (indexname == NULL)
   {
-    outlcpinfo->lcpsubtab.outfplcptab = NULL;
-    outlcpinfo->lcpsubtab.outfpllvtab = NULL;
+    outlcpinfo->lcpsubtab.lcp2file = NULL;
   } else
   {
-    outlcpinfo->lcpsubtab.outfplcptab
+    outlcpinfo->lcpsubtab.lcp2file
+      = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.lcp2file));
+    outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues = 0;
+    outlcpinfo->lcpsubtab.lcp2file->maxbranchdepth = 0;
+    outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues = 0;
+    outlcpinfo->lcpsubtab.lcp2file->reservoir = NULL;
+    outlcpinfo->lcpsubtab.lcp2file->sizereservoir = 0;
+    outlcpinfo->lcpsubtab.lcp2file->smalllcpvalues = NULL;
+    GT_INITARRAY(&outlcpinfo->lcpsubtab.lcp2file->largelcpvalues,
+                 Largelcpvalue);
+    outlcpinfo->lcpsubtab.lcp2file->outfplcptab
       = gt_fa_fopen_with_suffix(indexname,LCPTABSUFFIX,"wb",err);
-    if (outlcpinfo->lcpsubtab.outfplcptab == NULL)
+    if (outlcpinfo->lcpsubtab.lcp2file->outfplcptab == NULL)
     {
       haserr = true;
     }
     if (!haserr)
     {
-      outlcpinfo->lcpsubtab.outfpllvtab
+      outlcpinfo->lcpsubtab.lcp2file->outfpllvtab
         = gt_fa_fopen_with_suffix(indexname,LARGELCPTABSUFFIX,"wb",err);
-      if (outlcpinfo->lcpsubtab.outfpllvtab == NULL)
+      if (outlcpinfo->lcpsubtab.lcp2file->outfpllvtab == NULL)
       {
         haserr = true;
       }
     }
   }
-  outlcpinfo->lcpsubtab.countoutputlcpvalues = 0;
-  outlcpinfo->lcpsubtab.totalnumoflargelcpvalues = 0;
-  outlcpinfo->lcpsubtab.maxbranchdepth = 0;
-  outlcpinfo->lcpsubtab.reservoir = NULL;
-  outlcpinfo->lcpsubtab.sizereservoir = 0;
   outlcpinfo->totallength = totallength;
-  GT_INITARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
-  outlcpinfo->lcpsubtab.smalllcpvalues = NULL;
   outlcpinfo->minchanged = 0;
   if (!haserr && prefixlength > 0)
   {
@@ -1514,11 +1536,16 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
 
 void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
                           unsigned int numofchars,
-                          unsigned int prefixlength)
+                          unsigned int prefixlength,
+                          unsigned long numoflcpvalues)
 {
   if (outlcpinfo != NULL)
   {
     outlcpinfo->tw = gt_newTurningwheel(prefixlength,numofchars);
+    outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
+      = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.tableoflcpvalues.
+                          bucketoflcpvalues) * numoflcpvalues);
+    outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
   }
 }
 
@@ -1530,49 +1557,60 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   unsigned long idx, lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
-  lcpsubtab->largelcpvalues.nextfreeLargelcpvalue = 0;
+  if (lcpsubtab->lcp2file == NULL)
+  {
+    return;
+  }
+  lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue = 0;
   if (lcpsubtab->tableoflcpvalues.numoflargelcpvalues > 0 &&
       lcpsubtab->tableoflcpvalues.numoflargelcpvalues >=
-      lcpsubtab->largelcpvalues.allocatedLargelcpvalue)
+      lcpsubtab->lcp2file->largelcpvalues.allocatedLargelcpvalue)
   {
-    lcpsubtab->largelcpvalues.spaceLargelcpvalue
-      = gt_realloc(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
-                   sizeof (Largelcpvalue) *
+    lcpsubtab->lcp2file->largelcpvalues.spaceLargelcpvalue
+      = gt_realloc(lcpsubtab->lcp2file->largelcpvalues.spaceLargelcpvalue,
+                   sizeof (*lcpsubtab->lcp2file->largelcpvalues.
+                           spaceLargelcpvalue) *
                    lcpsubtab->tableoflcpvalues.numoflargelcpvalues);
-    lcpsubtab->largelcpvalues.allocatedLargelcpvalue
+    lcpsubtab->lcp2file->largelcpvalues.allocatedLargelcpvalue
       = lcpsubtab->tableoflcpvalues.numoflargelcpvalues;
   }
   for (idx=bucketleft; idx<=bucketright; idx++)
   {
     lcpvalue = lcpsubtab_getvalue(&lcpsubtab->tableoflcpvalues,idx);
-    if (lcpsubtab->maxbranchdepth < lcpvalue)
+    if (lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
     {
-      lcpsubtab->maxbranchdepth = lcpvalue;
+      lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
     }
     if (lcpvalue < (unsigned long) LCPOVERFLOW)
     {
-      lcpsubtab->smalllcpvalues[idx-bucketleft] = (uint8_t) lcpvalue;/*XXX*/
+      lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft]
+        = (uint8_t) lcpvalue;/*XXX*/
     } else
     {
-      gt_assert(lcpsubtab->largelcpvalues.nextfreeLargelcpvalue <
-                lcpsubtab->largelcpvalues.allocatedLargelcpvalue);
-      largelcpvalueptr = lcpsubtab->largelcpvalues.spaceLargelcpvalue +
-                         lcpsubtab->largelcpvalues.nextfreeLargelcpvalue++;
+      gt_assert(lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue
+                < lcpsubtab->lcp2file->largelcpvalues.
+                                             allocatedLargelcpvalue);
+      largelcpvalueptr
+        = lcpsubtab->lcp2file->largelcpvalues.spaceLargelcpvalue +
+          lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue++;
       largelcpvalueptr->position = posoffset+idx;
       largelcpvalueptr->value = lcpvalue;
-      lcpsubtab->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;/*XXX*/
+      lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;/*XXX*/
     }
   }
-  outsmalllcpvalues(lcpsubtab,(unsigned long) (bucketright - bucketleft + 1));
-  if (lcpsubtab->outfpllvtab != NULL &&
-      lcpsubtab->largelcpvalues.nextfreeLargelcpvalue > 0)
+  outsmalllcpvalues(lcpsubtab->lcp2file,
+                    (unsigned long) (bucketright - bucketleft + 1));
+  if (lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
-    lcpsubtab->totalnumoflargelcpvalues
-      += lcpsubtab->largelcpvalues.nextfreeLargelcpvalue;
-    gt_xfwrite(lcpsubtab->largelcpvalues.spaceLargelcpvalue,
-               sizeof (Largelcpvalue),
-               (size_t) lcpsubtab->largelcpvalues.nextfreeLargelcpvalue,
-               lcpsubtab->outfpllvtab);
+    lcpsubtab->lcp2file->totalnumoflargelcpvalues
+      += lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue;
+    gt_assert(lcpsubtab->lcp2file->outfpllvtab != NULL);
+    gt_xfwrite(lcpsubtab->lcp2file->largelcpvalues.spaceLargelcpvalue,
+               sizeof (*lcpsubtab->lcp2file->largelcpvalues.
+                                   spaceLargelcpvalue),
+               (size_t) lcpsubtab->lcp2file->largelcpvalues.
+                                   nextfreeLargelcpvalue,
+               lcpsubtab->lcp2file->outfpllvtab);
   }
 }
 
@@ -1596,48 +1634,78 @@ static unsigned long outmany0lcpvalues(unsigned long countoutputlcpvalues,
   return many;
 }
 
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,
-                          /*XXX remove this later*/ bool withdiffcover)
+void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
 {
   if (outlcpinfo == NULL)
   {
     return;
   }
-  gt_free(outlcpinfo->lcpsubtab.reservoir);
-  outlcpinfo->lcpsubtab.reservoir = NULL;
-  outlcpinfo->lcpsubtab.sizereservoir = 0;
   if (outlcpinfo->tw != NULL)
   {
     gt_freeTurningwheel(&outlcpinfo->tw);
   }
-  if (outlcpinfo->lcpsubtab.outfplcptab != NULL &&
-      !withdiffcover &&
-      outlcpinfo->lcpsubtab.countoutputlcpvalues <
-      outlcpinfo->totallength+1)
+  if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
-    outlcpinfo->lcpsubtab.countoutputlcpvalues
-      += outmany0lcpvalues(outlcpinfo->lcpsubtab.countoutputlcpvalues,
-                           outlcpinfo->totallength,
-                           outlcpinfo->lcpsubtab.outfplcptab);
+    if (outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues <
+        outlcpinfo->totallength+1)
+    {
+      outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues
+        += outmany0lcpvalues(outlcpinfo->lcpsubtab.lcp2file
+                                                  ->countoutputlcpvalues,
+                             outlcpinfo->totallength,
+                             outlcpinfo->lcpsubtab.lcp2file->outfplcptab);
+    }
+    gt_assert(outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues ==
+              outlcpinfo->totallength + 1);
+    GT_FREEARRAY(&outlcpinfo->lcpsubtab.lcp2file->largelcpvalues,
+                 Largelcpvalue);
+    gt_fa_fclose(outlcpinfo->lcpsubtab.lcp2file->outfplcptab);
+    gt_fa_fclose(outlcpinfo->lcpsubtab.lcp2file->outfpllvtab);
+    gt_free(outlcpinfo->lcpsubtab.lcp2file->reservoir);
+    outlcpinfo->lcpsubtab.lcp2file->reservoir = NULL;
+    outlcpinfo->lcpsubtab.lcp2file->sizereservoir = 0;
+    gt_free(outlcpinfo->lcpsubtab.lcp2file);
+  } else
+  {
+    gt_free(outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues);
   }
-  gt_assert(outlcpinfo->lcpsubtab.outfplcptab == NULL ||
-            withdiffcover ||
-            outlcpinfo->lcpsubtab.countoutputlcpvalues ==
-            outlcpinfo->totallength + 1);
-  GT_FREEARRAY(&outlcpinfo->lcpsubtab.largelcpvalues,Largelcpvalue);
-  gt_fa_fclose(outlcpinfo->lcpsubtab.outfplcptab);
-  gt_fa_fclose(outlcpinfo->lcpsubtab.outfpllvtab);
   gt_free(outlcpinfo);
 }
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 {
-  return outlcpinfo->lcpsubtab.totalnumoflargelcpvalues;
+  gt_assert(outlcpinfo->lcpsubtab.lcp2file != NULL);
+  return outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues;
 }
 
 unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo)
 {
-  return outlcpinfo->lcpsubtab.maxbranchdepth;
+  gt_assert(outlcpinfo->lcpsubtab.lcp2file != NULL);
+  return outlcpinfo->lcpsubtab.lcp2file->maxbranchdepth;
+}
+
+static GtLcpvalues *resizereservoir(Lcpsubtab *lcpsubtab,const Bcktab *bcktab)
+{
+  if (lcpsubtab->lcp2file != NULL)
+  {
+    size_t sizeforlcpvalues; /* in bytes */
+
+    sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
+    if (lcpsubtab->lcp2file->sizereservoir < sizeforlcpvalues)
+    {
+      lcpsubtab->lcp2file->sizereservoir = sizeforlcpvalues;
+      lcpsubtab->lcp2file->reservoir
+        = gt_realloc(lcpsubtab->lcp2file->reservoir,
+                     lcpsubtab->lcp2file->sizereservoir);
+          /* point to the same area, since this is not used simultaneously */
+          /* be careful for the parallel version */
+      lcpsubtab->lcp2file->smalllcpvalues
+        = (uint8_t *) lcpsubtab->lcp2file->reservoir;
+      lcpsubtab->tableoflcpvalues.bucketoflcpvalues
+        = (unsigned long *) lcpsubtab->lcp2file->reservoir;
+    }
+  }
+  return &lcpsubtab->tableoflcpvalues;
 }
 
 static void initBentsedgresources(Bentsedgresources *bsr,
@@ -1677,24 +1745,9 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                               maxcode,
                               partwidth,
                               numofchars);
-    /* gt_bcktab_showlog2info(bcktab,logger); */
     if (lcpsubtab != NULL)
     {
-      size_t sizeforlcpvalues; /* in bytes */
-
-      sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
-      if (lcpsubtab->sizereservoir < sizeforlcpvalues)
-      {
-        lcpsubtab->sizereservoir = sizeforlcpvalues;
-        lcpsubtab->reservoir = gt_realloc(lcpsubtab->reservoir,
-                                          lcpsubtab->sizereservoir);
-        /* point to the same area, since this is not used simultaneously */
-        /* be careful for the parallel version */
-        lcpsubtab->smalllcpvalues = (uint8_t *) lcpsubtab->reservoir;
-        lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-          = (unsigned long *) lcpsubtab->reservoir;
-      }
-      bsr->tableoflcpvalues = &lcpsubtab->tableoflcpvalues;
+      bsr->tableoflcpvalues = resizereservoir(lcpsubtab,bcktab);
     }
   }
   GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
@@ -1873,7 +1926,8 @@ static void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                                   bucketspec->specialsinbucket,
                                   code,
                                   bcktab);
-      outsmalllcpvalues(&outlcpinfo->lcpsubtab,bucketspec->specialsinbucket);
+      outsmalllcpvalues(outlcpinfo->lcpsubtab.lcp2file,
+                        bucketspec->specialsinbucket);
       /* there is at least one special element: this is the last element
          in the bucket, and thus the previoussuffix for the next round */
       outlcpinfo->previoussuffix.defined = true;

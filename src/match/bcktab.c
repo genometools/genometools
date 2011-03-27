@@ -61,7 +61,6 @@ struct Bcktab
   GtUchar *qgrambuffer;
   Maxbucketinfo maxbucketinfo;
   unsigned int optimalnumofbits;
-  unsigned short logofremaining;
   bool allocated;
   void *mappedptr;
 };
@@ -654,13 +653,6 @@ unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab)
   return bcktab->maxbucketinfo.nonspecialsmaxbucketsize;
 }
 
-unsigned int gt_bcktab_optimalnumofbits(unsigned short *logofremaining,
-                                     const Bcktab *bcktab)
-{
-  *logofremaining = bcktab->logofremaining;
-  return bcktab->optimalnumofbits;
-}
-
 unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab)
 {
   return bcktab->prefixlength;
@@ -724,7 +716,8 @@ unsigned long gt_distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
 }
 
 unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
-                                 uint8_t *lcpsubtab,
+                                 uint8_t *smalllcpvalues,
+                                 unsigned long *bucketoflcpvalues,
                                  unsigned long specialsinbucket,
                                  const Bcktab *bcktab,
                                  GtCodetype code)
@@ -754,7 +747,16 @@ unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
             gt_assert(insertpos > 0);
-            lcpsubtab[--insertpos] = (uint8_t) prefixindex;
+            --insertpos;
+            if (smalllcpvalues != NULL)
+            {
+              gt_assert(bucketoflcpvalues == NULL);
+              smalllcpvalues[insertpos] = (uint8_t) prefixindex;
+            } else
+            {
+              gt_assert(bucketoflcpvalues != NULL);
+              bucketoflcpvalues[insertpos] = (unsigned long) prefixindex;
+            }
           }
         }
       }
@@ -769,7 +771,16 @@ unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
     }
     while (insertpos > 0)
     {
-      lcpsubtab[--insertpos] = (uint8_t) (bcktab->prefixlength-1);
+      --insertpos;
+      if (smalllcpvalues != NULL)
+      {
+        gt_assert(bucketoflcpvalues == NULL);
+        smalllcpvalues[insertpos] = (uint8_t) (bcktab->prefixlength-1);
+      } else
+      {
+        gt_assert(bucketoflcpvalues != NULL);
+        bucketoflcpvalues[insertpos] = (unsigned long) (bcktab->prefixlength-1);
+      }
     }
   }
   return maxprefixindex;

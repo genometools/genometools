@@ -1193,7 +1193,8 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                   sfxstrategy.maxbltriesort);
     gt_logger_log(dcov->logger,"samplesort.maxcountingsort=%lu",
                   sfxstrategy.maxcountingsort);
-    gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength);
+    gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength,
+                         dcov->effectivesamplesize);
     gt_sortallbuckets(dcov->sortedsample,
                       dcov->effectivesamplesize,
                       NULL,

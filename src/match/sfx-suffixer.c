@@ -460,7 +460,7 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_suffixsortspace_delete(sfi->suffixsortspace,true);
   gt_freesuftabparts(sfi->suftabparts);
   gt_bcktab_delete(sfi->bcktab);
-  gt_Outlcpinfo_delete(sfi->outlcpinfoforsample,true);
+  gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
 }
@@ -730,14 +730,14 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->sfxprogress = sfxprogress;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
-        gt_encseq_specialcharacters(encseq) < gt_encseq_total_length(encseq))
+        specialcharacters < sfi->totallength)
     {
       if (sfi->outlcpinfo != NULL)
       {
         sfi->outlcpinfoforsample
           = gt_Outlcpinfo_new(NULL,
                               sfi->numofchars,
-                              0, /* as this is not know yet */
+                              0,
                               sfi->totallength,
                               err);
         if (sfi->outlcpinfo == NULL)

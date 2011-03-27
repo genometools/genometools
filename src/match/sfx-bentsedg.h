@@ -39,9 +39,10 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
 
 void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
                           unsigned int numofchars,
-                          unsigned int prefixlength);
+                          unsigned int prefixlength,
+                          unsigned long numoflcpvalues);
 
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo,bool withdiffcover);
+void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 

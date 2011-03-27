@@ -37,7 +37,7 @@ typedef struct
   if (value >= (unsigned long) LCPOVERFLOW)
   {
     tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as
-                                                there may be some value
+                                                there may be some values
                                                 which was already
                                                 overflowing */
   }

@@ -87,17 +87,13 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
                             unsigned long partwidth,
                             unsigned int numofchars);
 
-void gt_bcktab_showlog2info(const Bcktab *bcktab, GtLogger *logger);
-
 unsigned int gt_singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
 
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
-unsigned int gt_bcktab_optimalnumofbits(unsigned short *logofremaining,
-                                        const Bcktab *bcktab);
-
 unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
-                                 uint8_t *lcpsubtab,
+                                 uint8_t *smalllcpvalues,
+                                 unsigned long *bucketoflcpvalues,
                                  unsigned long specialsinbucket,
                                  const Bcktab *bcktab,
                                  GtCodetype code);

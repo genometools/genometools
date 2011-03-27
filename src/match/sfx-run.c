@@ -79,8 +79,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                            const Suffixeratoroptions *so,
                            GtError *err)
 {
-  bool haserr = false,
-       outlcptab = gt_index_options_outlcptab_value(so->idxopts);
+  bool haserr = false;
 
   outfileinfo->outfpsuftab = NULL;
   outfileinfo->outfpbwttab = NULL;
@@ -90,8 +89,9 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->longest.valueunsignedlong = 0;
   if (gt_index_options_outlcptab_value(so->idxopts))
   {
+    gt_assert(gt_str_get(so->indexname) != NULL);
     outfileinfo->outlcpinfo
-      = gt_Outlcpinfo_new(outlcptab ? gt_str_get(so->indexname) : NULL,
+      = gt_Outlcpinfo_new(gt_str_get(so->indexname),
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_encseq_total_length(encseq),
@@ -610,8 +610,7 @@ static int runsuffixerator(bool doesa,
       haserr = true;
     }
   }
-  gt_Outlcpinfo_delete(outfileinfo.outlcpinfo,
-                       sfxstrategy.differencecover > 0 ? true : false);
+  gt_Outlcpinfo_delete(outfileinfo.outlcpinfo);
   gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr
