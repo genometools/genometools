@@ -1409,19 +1409,8 @@ void gt_encseq_delete(GtEncseq *encseq)
 static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
                                                   KindofSWtable kindsw)
 {
-  switch (kindsw)
-  {
-    case SWtable_wildcardrange:
-      gt_assert(esr->wildcardrangestate != NULL);
-      return esr->wildcardrangestate;
-    case SWtable_ssptabnew:
-      gt_assert(esr->ssptabnewstate != NULL);
-      return esr->ssptabnewstate;
-  }
-#ifndef S_SPLINT_S
-  gt_assert(false);
-  return NULL;
-#endif
+  return (kindsw == SWtable_wildcardrange) ? esr->wildcardrangestate
+                                           : esr->ssptabnewstate;
 }
 
 #define GT_APPENDINT(V)          V##_uchar
@@ -2323,7 +2312,6 @@ void gt_encseq_reader_delete(GtEncseqReader *esr)
   gt_free(esr);
 }
 
-GT_UNUSED
 static unsigned long gt_encseq_seqstartpos_viautables(const GtEncseq *encseq,
                                                       unsigned long seqnum)
 {
@@ -3143,7 +3131,7 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
     wasmirrored = true;
   }
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH) {
-    pos = (seqnum > 0 ? gt_encseq_seqstartpos_viautables(encseq, seqnum) : 0);
+    pos = gt_encseq_seqstartpos_viautables(encseq, seqnum);
     if (wasmirrored) {
       if (pos == 0) {
         if (encseq->numofdbsequences > 1UL)
@@ -3152,16 +3140,14 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
         else
           pos = encseq->totallength + 1;
       } else {
-        unsigned long val;
         if (seqnum == encseq->numofdbsequences - 1)
-          val = encseq->totallength - 1;
+          pos = encseq->logicaltotallength - encseq->totallength;
         else
-          val = gt_encseq_seqstartpos_viautables(encseq, seqnum) -1 ;
-        pos = encseq->logicaltotallength - val - 1;
+          pos = encseq->logicaltotallength - pos;
       }
     }
   } else {
-    pos = seqnum > 0 ? gt_encseq_seqstartpos_Viaequallength(encseq, seqnum) : 0;
+    pos = gt_encseq_seqstartpos_Viaequallength(encseq, seqnum);
     if (wasmirrored) {
       if (pos == 0) {
         pos = encseq->logicaltotallength + 1
