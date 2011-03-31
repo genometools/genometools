@@ -715,17 +715,17 @@ unsigned long gt_distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
   return sum;
 }
 
-unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
-                                 uint8_t *smalllcpvalues,
-                                 unsigned long *bucketoflcpvalues,
-                                 unsigned long specialsinbucket,
-                                 const Bcktab *bcktab,
-                                 GtCodetype code)
+unsigned int gt_pfxidx2lcpvalues_uint8(unsigned int *minprefixindex,
+                                       uint8_t *smalllcpvalues,
+                                       unsigned long specialsinbucket,
+                                       const Bcktab *bcktab,
+                                       GtCodetype code)
 {
   unsigned int prefixindex, maxprefixindex = 0;
   unsigned long idx, insertpos;
   GtCodetype ordercode, divisor;
 
+  gt_assert(smalllcpvalues != NULL);
   *minprefixindex = bcktab->prefixlength;
   insertpos = specialsinbucket;
   for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
@@ -747,16 +747,7 @@ unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
           for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
           {
             gt_assert(insertpos > 0);
-            --insertpos;
-            if (smalllcpvalues != NULL)
-            {
-              gt_assert(bucketoflcpvalues == NULL);
-              smalllcpvalues[insertpos] = (uint8_t) prefixindex;
-            } else
-            {
-              gt_assert(bucketoflcpvalues != NULL);
-              bucketoflcpvalues[insertpos] = (unsigned long) prefixindex;
-            }
+            smalllcpvalues[--insertpos] = (uint8_t) prefixindex;
           }
         }
       }
@@ -771,16 +762,60 @@ unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
     }
     while (insertpos > 0)
     {
-      --insertpos;
-      if (smalllcpvalues != NULL)
+      smalllcpvalues[--insertpos] = (uint8_t) (bcktab->prefixlength-1);
+    }
+  }
+  return maxprefixindex;
+}
+
+unsigned int gt_pfxidx2lcpvalues_ulong(unsigned int *minprefixindex,
+                                       unsigned long *bucketoflcpvalues,
+                                       unsigned long specialsinbucket,
+                                       const Bcktab *bcktab,
+                                       GtCodetype code)
+{
+  unsigned int prefixindex, maxprefixindex = 0;
+  unsigned long idx, insertpos;
+  GtCodetype ordercode, divisor;
+
+  gt_assert(bucketoflcpvalues != NULL);
+  *minprefixindex = bcktab->prefixlength;
+  insertpos = specialsinbucket;
+  for (prefixindex=1U; prefixindex<bcktab->prefixlength-1; prefixindex++)
+  {
+    if (code >= bcktab->filltable[prefixindex])
+    {
+      ordercode = code - bcktab->filltable[prefixindex];
+      divisor = bcktab->filltable[prefixindex] + 1;
+      if (ordercode % divisor == 0)
       {
-        gt_assert(bucketoflcpvalues == NULL);
-        smalllcpvalues[insertpos] = (uint8_t) (bcktab->prefixlength-1);
-      } else
-      {
-        gt_assert(bucketoflcpvalues != NULL);
-        bucketoflcpvalues[insertpos] = (unsigned long) (bcktab->prefixlength-1);
+        ordercode /= divisor;
+        if (bcktab->distpfxidx[prefixindex-1][ordercode] > 0)
+        {
+          maxprefixindex = prefixindex;
+          if (*minprefixindex > prefixindex)
+          {
+            *minprefixindex = prefixindex;
+          }
+          for (idx=0; idx < bcktab->distpfxidx[prefixindex-1][ordercode]; idx++)
+          {
+            gt_assert(insertpos > 0);
+            bucketoflcpvalues[--insertpos] = (unsigned long) prefixindex;
+          }
+        }
       }
+    }
+  }
+  if (insertpos > 0)
+  {
+    maxprefixindex = bcktab->prefixlength-1;
+    if (*minprefixindex == bcktab->prefixlength)
+    {
+      *minprefixindex = bcktab->prefixlength-1;
+    }
+    while (insertpos > 0)
+    {
+      bucketoflcpvalues[--insertpos] = (unsigned long) (bcktab->prefixlength-1);
     }
   }
   return maxprefixindex;

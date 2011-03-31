@@ -35,7 +35,7 @@ runtestsuite=1
 if test $runtestsuite -eq 1
 then
   cd testsuite
-  for keyword in gt_chain2dim gt_greedyfwdmat gt_idxlocali \
+  for keyword in gt_idxlocali gt_chain2dim gt_greedyfwdmat \
                  gt_ltrharvest gt_paircmp gt_patternmatch \
                  gt_repfind gt_tallymer gt_uniquesub
   do

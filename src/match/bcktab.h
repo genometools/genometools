@@ -91,12 +91,17 @@ unsigned int gt_singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
 
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab);
 
-unsigned int gt_pfxidx2lcpvalues(unsigned int *minprefixindex,
-                                 uint8_t *smalllcpvalues,
-                                 unsigned long *bucketoflcpvalues,
-                                 unsigned long specialsinbucket,
-                                 const Bcktab *bcktab,
-                                 GtCodetype code);
+unsigned int gt_pfxidx2lcpvalues_uint8(unsigned int *minprefixindex,
+                                       uint8_t *smalllcpvalues,
+                                       unsigned long specialsinbucket,
+                                       const Bcktab *bcktab,
+                                       GtCodetype code);
+
+unsigned int gt_pfxidx2lcpvalues_ulong(unsigned int *minprefixindex,
+                                       unsigned long *bucketoflcpvalues,
+                                       unsigned long specialsinbucket,
+                                       const Bcktab *bcktab,
+                                       GtCodetype code);
 
 const GtCodetype **gt_bcktab_multimappower(const Bcktab *bcktab);
 
