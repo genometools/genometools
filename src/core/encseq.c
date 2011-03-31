@@ -3130,35 +3130,35 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
     seqnum = encseq->logicalnumofdbsequences - 1 - seqnum;
     wasmirrored = true;
   }
+  gt_assert(seqnum < encseq->numofdbsequences);
+  if (encseq->numofdbsequences == 1) {
+    gt_assert(seqnum == 0);
+    return (wasmirrored ? encseq->totallength + 1 : 0);
+  }
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH) {
     pos = gt_encseq_seqstartpos_viautables(encseq, seqnum);
     if (wasmirrored) {
-      if (pos == 0) {
-        if (encseq->numofdbsequences > 1UL)
-          pos = encseq->logicaltotallength
-                  - (gt_encseq_seqstartpos_viautables(encseq, seqnum + 1) - 1);
-        else
-          pos = encseq->totallength + 1;
+      if (seqnum == encseq->numofdbsequences - 1) {
+        pos = encseq->totallength + 1;
       } else {
-        if (seqnum == encseq->numofdbsequences - 1)
-          pos = encseq->logicaltotallength - encseq->totallength;
-        else
-          pos = encseq->logicaltotallength - pos;
+        gt_assert(seqnum + 1 < encseq->numofdbsequences);
+        pos = encseq->totallength
+                + (encseq->totallength
+                    - (gt_encseq_seqstartpos_viautables(encseq,
+                                                        seqnum + 1) - 2));
       }
     }
   } else {
     pos = gt_encseq_seqstartpos_Viaequallength(encseq, seqnum);
     if (wasmirrored) {
-      if (pos == 0) {
-        pos = encseq->logicaltotallength + 1
-                - gt_encseq_seqstartpos_Viaequallength(encseq, 1UL);
+      if (seqnum == encseq->numofdbsequences - 1) {
+        pos = encseq->totallength + 1;
       } else {
-        unsigned long val;
-        if (seqnum == encseq->numofdbsequences - 1)
-          val = encseq->totallength - 1;
-        else
-          val = gt_encseq_seqstartpos_Viaequallength(encseq, seqnum + 1) - 2;
-        pos = encseq->logicaltotallength - val - 1;
+        gt_assert(seqnum + 1 < encseq->numofdbsequences);
+        pos = encseq->totallength
+                + (encseq->totallength
+                    - (gt_encseq_seqstartpos_Viaequallength(encseq,
+                                                            seqnum + 1) - 2));
       }
     }
   }
@@ -7614,9 +7614,9 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
   ALLASSIGNAPPENDFUNC(sat,encseq->satsep);
   encseq->mappedptr = NULL;
   encseq->ssptabmappedptr = NULL;
+  encseq->accesstype_via_utables = false;
   eb->created_encseq = true;
   gt_encseq_builder_reset(eb);
-  encseq->accesstype_via_utables = false;
   return encseq;
 }
 
