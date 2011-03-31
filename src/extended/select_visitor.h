@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,18 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FILTER_VISITOR_H
-#define FILTER_VISITOR_H
+#ifndef SELECT_VISITOR_H
+#define SELECT_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct GtFilterVisitor GtFilterVisitor;
+typedef struct GtSelectVisitor GtSelectVisitor;
 
 #include "extended/node_visitor.h"
 
-const GtNodeVisitorClass* gt_filter_visitor_class(void);
+const GtNodeVisitorClass* gt_select_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have
    strand <strand>. */
-GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid,
+GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      GtStr *source,
                                      GtStr *typefilter,
                                      GtRange contain_range,
@@ -40,7 +40,7 @@ GtNodeVisitor* gt_filter_visitor_new(GtStr *seqid,
                                      double max_gene_score,
                                      double min_average_splice_site_prob,
                                      unsigned long feature_num);
-unsigned long  gt_filter_visitor_node_buffer_size(GtNodeVisitor*);
-GtGenomeNode*  gt_filter_visitor_get_node(GtNodeVisitor*);
+unsigned long  gt_select_visitor_node_buffer_size(GtNodeVisitor*);
+GtGenomeNode*  gt_select_visitor_get_node(GtNodeVisitor*);
 
 #endif

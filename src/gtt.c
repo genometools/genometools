@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -77,7 +77,6 @@
 #include "tools/gt_eval.h"
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
-#include "tools/gt_filter.h"
 #include "tools/gt_fingerprint.h"
 #include "tools/gt_genomediff.h"
 #include "tools/gt_gff3.h"
@@ -97,6 +96,7 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
+#include "tools/gt_select.h"
 #include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
 #include "tools/gt_seqstat.h"
@@ -147,7 +147,8 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "eval", gt_eval);
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
-  gt_toolbox_add_tool(tools, "filter", gt_filter());
+  /* hidden "link" from filter to the select tool for backward compatibility */
+  gt_toolbox_add_hidden_tool(tools, "filter", gt_select());
   gt_toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
   gt_toolbox_add_tool(tools, "genomediff", gt_genomediff());
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
@@ -169,6 +170,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "repfind", gt_repfind());
+  gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());

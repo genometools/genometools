@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,17 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FILTER_STREAM_H
-#define FILTER_STREAM_H
+#ifndef SELECT_STREAM_H
+#define SELECT_STREAM_H
 
 #include "core/strand_api.h"
 #include "extended/node_stream_api.h"
 
 /* implements the ``genome stream'' interface */
-typedef struct GtFilterStream GtFilterStream;
+typedef struct GtSelectStream GtSelectStream;
 
-const GtNodeStreamClass* gt_filter_stream_class(void);
-GtNodeStream*            gt_filter_stream_new(GtNodeStream*,
+const GtNodeStreamClass* gt_select_stream_class(void);
+GtNodeStream*            gt_select_stream_new(GtNodeStream*,
                                               GtStr *seqid, GtStr *source,
                                               GtStr *typefilter,
                                               GtRange contain_range,

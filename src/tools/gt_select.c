@@ -20,12 +20,12 @@
 #include "core/outputfile.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "extended/filter_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/targetbest_filter_stream.h"
-#include "tools/gt_filter.h"
+#include "extended/select_stream.h"
+#include "extended/targetbest_select_stream.h"
+#include "tools/gt_select.h"
 
 #define GT_STRAND_OPT  "strand"
 #define TARGETGT_STRAND_OPT  "targetstrand"
@@ -51,11 +51,11 @@ typedef struct {
          min_average_splice_site_prob;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
-} FilterArguments;
+} SelectArguments;
 
-static void* gt_filter_arguments_new(void)
+static void* gt_select_arguments_new(void)
 {
-  FilterArguments *arguments = gt_calloc(1, sizeof *arguments);
+  SelectArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqid = gt_str_new();
   arguments->source = gt_str_new();
   arguments->typefilter = gt_str_new();
@@ -67,9 +67,9 @@ static void* gt_filter_arguments_new(void)
   return arguments;
 }
 
-static void gt_filter_arguments_delete(void *tool_arguments)
+static void gt_select_arguments_delete(void *tool_arguments)
 {
-  FilterArguments *arguments = tool_arguments;
+  SelectArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_file_delete(arguments->outfp);
   gt_outputfileinfo_delete(arguments->ofi);
@@ -81,16 +81,16 @@ static void gt_filter_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 {
-  FilterArguments *arguments = tool_arguments;
+  SelectArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *contain_option, *overlap_option;
   gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
-                            "Filter GFF3 files.");
+                            "Select GFF3 files.");
 
   /* -seqid */
   option = gt_option_new_string("seqid", "seqid a feature must have to pass "
@@ -234,15 +234,15 @@ static int process_gt_strand_arg(GtStr *gt_strand_char, GtStrand *strand,
   return had_err;
 }
 
-static int gt_filter_arguments_check(GT_UNUSED int rest_argc,
+static int gt_select_arguments_check(GT_UNUSED int rest_argc,
                                      void *tool_arguments, GtError *err)
 {
-  FilterArguments *arguments = tool_arguments;
+  SelectArguments *arguments = tool_arguments;
   int had_err;
   gt_error_check(err);
   gt_assert(arguments);
   had_err = process_gt_strand_arg(arguments->gt_strand_char, &arguments->strand,
-                               GT_STRAND_OPT, err);
+                                  GT_STRAND_OPT, err);
   if (!had_err) {
     had_err = process_gt_strand_arg(arguments->targetgt_strand_char,
                                  &arguments->targetstrand, TARGETGT_STRAND_OPT,
@@ -251,12 +251,12 @@ static int gt_filter_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_filter_runner(int argc, const char **argv, int parsed_args,
+static int gt_select_runner(int argc, const char **argv, int parsed_args,
                            void *tool_arguments, GtError *err)
 {
-  FilterArguments *arguments = tool_arguments;
-  GtNodeStream *gff3_in_stream, *filter_stream,
-               *targetbest_filter_stream = NULL, *gff3_out_stream;
+  SelectArguments *arguments = tool_arguments;
+  GtNodeStream *gff3_in_stream, *select_stream,
+               *targetbest_select_stream = NULL, *gff3_out_stream;
   int had_err;
 
   gt_error_check(err);
@@ -269,7 +269,7 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) gff3_in_stream);
 
   /* create a filter stream */
-  filter_stream = gt_filter_stream_new(gff3_in_stream, arguments->seqid,
+  select_stream = gt_select_stream_new(gff3_in_stream, arguments->seqid,
                                        arguments->source, arguments->typefilter,
                                        arguments->contain_range,
                                        arguments->overlap_range,
@@ -284,12 +284,12 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
                                        arguments->feature_num);
 
   if (arguments->targetbest)
-    targetbest_filter_stream = gt_targetbest_filter_stream_new(filter_stream);
+    targetbest_select_stream = gt_targetbest_select_stream_new(select_stream);
 
   /* create a gff3 output stream */
   gff3_out_stream = gt_gff3_out_stream_new(arguments->targetbest
-                                           ? targetbest_filter_stream
-                                           : filter_stream,
+                                           ? targetbest_select_stream
+                                           : select_stream,
                                            arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
@@ -297,18 +297,18 @@ static int gt_filter_runner(int argc, const char **argv, int parsed_args,
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
-  gt_node_stream_delete(filter_stream);
-  gt_node_stream_delete(targetbest_filter_stream);
+  gt_node_stream_delete(select_stream);
+  gt_node_stream_delete(targetbest_select_stream);
   gt_node_stream_delete(gff3_in_stream);
 
   return had_err;
 }
 
-GtTool* gt_filter(void)
+GtTool* gt_select(void)
 {
-  return gt_tool_new(gt_filter_arguments_new,
-                  gt_filter_arguments_delete,
-                  gt_filter_option_parser_new,
-                  gt_filter_arguments_check,
-                  gt_filter_runner);
+  return gt_tool_new(gt_select_arguments_new,
+                     gt_select_arguments_delete,
+                     gt_select_option_parser_new,
+                     gt_select_arguments_check,
+                     gt_select_runner);
 }

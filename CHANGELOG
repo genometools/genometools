@@ -3,6 +3,8 @@ changes in version 1.3.8 (2011-02-02)
 - file suffix of fingerprint tables has been changed from ".gt_bsf" to ".md5"
 - file suffix of bioseq index files has been changed from ".gt_bsi" to ".bsi"
 - file suffix of bioseq raw files has been changed from ".gt_bsr" to ".bsr"
+- the tool `gt filter` has been renamed to `gt select`. The same functionality
+  is still available with `gt filter` in order not to break existing scripts
 
 
 changes in version 1.3.7 (2011-01-28)

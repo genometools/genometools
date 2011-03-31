@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,12 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_FILTER_H
-#define GT_FILTER_H
+#ifndef TARGETBEST_SELECT_STREAM_H
+#define TARGETBEST_SELECT_STREAM_H
 
-#include "core/tool.h"
+#include "extended/node_stream_api.h"
 
-/* the filter tool */
-GtTool* gt_filter(void);
+/* implements the ``genome stream'' interface */
+typedef struct GtTargetbestSelectStream GtTargetbestSelectStream;
+
+const GtNodeStreamClass* gt_targetbest_select_stream_class(void);
+GtNodeStream*            gt_targetbest_select_stream_new(GtNodeStream*);
 
 #endif
