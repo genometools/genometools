@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,6 +29,7 @@ struct GtToolbox {
 typedef struct {
   GtTool *tool;
   GtToolfunc toolfunc;
+  bool hidden;
 } GtToolinfo;
 
 GtToolinfo* gt_toolinfo_new(void)
@@ -57,6 +58,17 @@ void gt_toolbox_add_tool(GtToolbox *tb, const char *toolname, GtTool *tool)
   gt_assert(tb && tb->tools);
   toolinfo = gt_toolinfo_new();
   toolinfo->tool= tool;
+  gt_hashmap_add(tb->tools, (char*) toolname, toolinfo);
+}
+
+void gt_toolbox_add_hidden_tool(GtToolbox *tb, const char *toolname,
+                                GtTool *tool)
+{
+  GtToolinfo *toolinfo;
+  gt_assert(tb && tb->tools);
+  toolinfo = gt_toolinfo_new();
+  toolinfo->tool= tool;
+  toolinfo->hidden = true;
   gt_hashmap_add(tb->tools, (char*) toolname, toolinfo);
 }
 
@@ -97,12 +109,13 @@ GtToolfunc gt_toolbox_get(const GtToolbox *tb, const char *toolname)
   return NULL;
 }
 
-static int show_tool_name(void *key, GT_UNUSED void *value,
-                          GT_UNUSED void *data, GT_UNUSED GtError *err)
+static int show_tool_name(void *key, void *value, GT_UNUSED void *data,
+                          GT_UNUSED GtError *err)
 {
+  GtToolinfo *toolinfo = value;
   gt_error_check(err);
   gt_assert(key && value);
-  if (strcmp(key, "dev") && strcmp(key, "template"))
+  if (!toolinfo->hidden)
     gt_xputs(key);
   return 0;
 }

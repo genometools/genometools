@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -30,15 +30,19 @@ GtToolbox* gt_toolbox_new(void);
 
 /* Add <tool> with name <toolname> to <toolbox>. Takes ownership of <tool>. */
 void       gt_toolbox_add_tool(GtToolbox*, const char *toolname, GtTool *tool);
+/* Add (hidden) <tool> with name <toolname> to <toolbox>. Hidden tools are not
+   shown in the output of <gt_toolbox_show()>. Takes ownership of <tool>. */
+void       gt_toolbox_add_hidden_tool(GtToolbox*, const char *toolname,
+                                      GtTool *tool);
 /* Get GtTool with name <toolname> from <toolbox>. */
 GtTool*    gt_toolbox_get_tool(GtToolbox*, const char *toolname);
-/*deprecated */
+/* deprecated */
 bool       gt_toolbox_has_tool(const GtToolbox*, const char *toolname);
 /* deprecated */
 void       gt_toolbox_add(GtToolbox*, const char *toolname, GtToolfunc);
 /* deprecated */
 GtToolfunc gt_toolbox_get(const GtToolbox*, const char *toolname);
-/* shows all tools except tools with toolname ``dev'' */
+/* Show all tools except the hidden ones. */
 int        gt_toolbox_show(const char *progname, void *toolbox, GtError*);
 void       gt_toolbox_delete(GtToolbox*);
 

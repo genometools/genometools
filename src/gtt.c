@@ -141,7 +141,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "csa", gt_csa());
   gt_toolbox_add_tool(tools, "congruence", gt_congruence());
   gt_toolbox_add(tools, "convertseq", gt_convertseq);
-  gt_toolbox_add_tool(tools, "dev", gt_dev());
+  gt_toolbox_add_hidden_tool(tools, "dev", gt_dev());
   gt_toolbox_add_tool(tools, "dupfeat", gt_dupfeat());
   gt_toolbox_add_tool(tools, "encseq", gt_encseq());
   gt_toolbox_add(tools, "eval", gt_eval);
@@ -183,7 +183,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add(tools, "suffixerator", gt_suffixerator);
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
-  gt_toolbox_add_tool(tools, "template", gt_template());
+  gt_toolbox_add_hidden_tool(tools, "template", gt_template());
   gt_toolbox_add(tools, "uniq", gt_uniq);
   gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifndef WITHOUT_CAIRO
