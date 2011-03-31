@@ -239,7 +239,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
     unsigned long twobits;
 
     twobits = EXTRACTENCODEDCHAR(encseq->twobitencoding,pos);
-    if (gt_encseq_access_type_isviautables(encseq->sat))
+    if (encseq->accesstype_via_utables)
     {
       if (!encseq->has_specialranges ||
           twobits != (unsigned long) encseq->leastprobablecharacter)
@@ -455,7 +455,7 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
     }
     /* go back */
     esr->currentpos--;
-    if (gt_encseq_access_type_isviautables(esr->encseq->sat)) {
+    if (esr->encseq->accesstype_via_utables) {
       /* prepare esr for directional change */
       if (esr->encseq->has_wildcardranges) {
         gt_assert(esr->wildcardrangestate != NULL);
@@ -530,7 +530,7 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
       gt_assert(GT_ISDIRREVERSE(esr->readmode));
       /* go back */
       esr->currentpos--;
-      if (gt_encseq_access_type_isviautables(esr->encseq->sat)) {
+      if (esr->encseq->accesstype_via_utables) {
         /* prepare esr for directional change */
         if (esr->encseq->has_wildcardranges) {
           gt_assert(esr->wildcardrangestate != NULL);
@@ -672,7 +672,7 @@ static int getsatforcevalue(const char *str,GtError *err)
 
 bool gt_has_twobitencoding(const GtEncseq *encseq)
 {
-  return (gt_encseq_access_type_isviautables(encseq->sat) ||
+  return (encseq->accesstype_via_utables ||
           encseq->sat >= GT_ACCESS_TYPE_EQUALLENGTH ||
           encseq->sat == GT_ACCESS_TYPE_BITACCESS) ? true : false;
 }
@@ -680,7 +680,7 @@ bool gt_has_twobitencoding(const GtEncseq *encseq)
 bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
 {
   gt_assert(encseq->sat != GT_ACCESS_TYPE_UNDEFINED);
-  return (gt_encseq_access_type_isviautables(encseq->sat) ||
+  return (encseq->accesstype_via_utables ||
           encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) ? true : false;
 }
 
@@ -1481,7 +1481,7 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
 
 static void showallSWtables(const GtEncseq *encseq)
 {
-  if (gt_encseq_access_type_isviautables(encseq->sat))
+  if (encseq->accesstype_via_utables)
   {
     if (encseq->has_wildcardranges)
     {
@@ -2202,7 +2202,7 @@ void gt_encseq_reader_reinit_with_readmode(GtEncseqReader *esr,
   gt_assert(startpos <= encseq->totallength);
   esr->readmode = readmode;
   esr->currentpos = startpos;
-  if (gt_encseq_access_type_isviautables(encseq->sat))
+  if (encseq->accesstype_via_utables)
   {
     /* Do not need this in once all is done by wildcards */
     if (encseq->has_wildcardranges)
@@ -2449,7 +2449,7 @@ void gt_specialrangeiterator_reinit_with_startpos(GtSpecialrangeiterator *sri,
 
   /* for satviautables we do not need sri->jumppos and therefore we do not
      initialize it. */
-  if (!gt_encseq_access_type_isviautables(encseq->sat))
+  if (!encseq->accesstype_via_utables)
   {
     if (sri->moveforward)
     {
@@ -2700,7 +2700,7 @@ static bool gt_viautables_specialrangeiterator_next_withkind(
 {
   GtEncseqReaderViatablesinfo *swstate = assignSWstate(esr,kindsw);
 
-  gt_assert(gt_encseq_access_type_isviautables(esr->encseq->sat));
+  gt_assert(esr->encseq->accesstype_via_utables);
   if (swstate->exhausted)
   {
     return false;
@@ -3893,6 +3893,11 @@ gt_encseq_new_from_index(const char *indexname,
     }
   }
   gt_encseq_metadata_delete(emd);
+  if (!haserr) {
+    gt_assert(encseq != NULL);
+    encseq->accesstype_via_utables =
+                                gt_encseq_access_type_isviautables(encseq->sat);
+  }
   if (haserr)
   {
     gt_alphabet_delete((GtAlphabet*) alpha);
@@ -3977,7 +3982,7 @@ bool gt_encseq_has_multiseq_support(const GtEncseq *encseq)
 {
   bool ret =  encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH ||
               encseq->has_ssptabnew ||
-              gt_encseq_access_type_isviautables(encseq->sat);
+              encseq->accesstype_via_utables;
   return ret;
 }
 
@@ -6384,6 +6389,10 @@ gt_encseq_new_from_files(GtTimer *sfxprogress,
       haserr = true;
     }
   }
+  if (!haserr) {
+    gt_assert(encseq != NULL);
+    encseq->accesstype_via_utables = gt_encseq_access_type_isviautables(sat);
+  }
   if (haserr)
   {
     gt_free(characterdistribution);
@@ -7607,6 +7616,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
   encseq->ssptabmappedptr = NULL;
   eb->created_encseq = true;
   gt_encseq_builder_reset(eb);
+  encseq->accesstype_via_utables = false;
   return encseq;
 }
 

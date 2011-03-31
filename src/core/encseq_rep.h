@@ -171,7 +171,8 @@ struct GtEncseq
   unsigned long reference_count;
   GtMutex *refcount_lock;
 
-  bool hasmirror;
+  bool hasmirror,
+       accesstype_via_utables;
   char *oistab;  /* original input sequence(s) */
 };
 #endif
