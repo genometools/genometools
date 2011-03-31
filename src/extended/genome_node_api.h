@@ -29,7 +29,7 @@ typedef struct GtGenomeNode GtGenomeNode;
 
 /* Increase the reference count for <genome_node> and return it.
    <genome_node> cannot be <NULL>.*/
-GtGenomeNode*  gt_genome_node_ref(GtGenomeNode *genome_node);
+GtGenomeNode* gt_genome_node_ref(GtGenomeNode *genome_node);
 
 /* Decrease the reference count for <genome_node> or delete it, if this was the
    last reference. */
