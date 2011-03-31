@@ -29,8 +29,7 @@ struct GtSelectVisitor {
   const GtNodeVisitor parent_instance;
   GtQueue *node_buffer;
   GtStr *seqid,
-        *source,
-        *typefilter;
+        *source;
   GtRange contain_range,
           overlap_range;
   GtStrand strand,
@@ -52,7 +51,6 @@ struct GtSelectVisitor {
 static void select_visitor_free(GtNodeVisitor *nv)
 {
   GtSelectVisitor *select_visitor = select_visitor_cast(nv);
-  gt_str_delete(select_visitor->typefilter);
   gt_str_delete(select_visitor->source);
   gt_str_delete(select_visitor->seqid);
   gt_queue_delete(select_visitor->node_buffer);
@@ -284,7 +282,6 @@ const GtNodeVisitorClass* gt_select_visitor_class()
 
 GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      GtStr *source,
-                                     GtStr *typefilter,
                                      GtRange contain_range,
                                      GtRange overlap_range,
                                      GtStrand strand, GtStrand targetstrand,
@@ -301,7 +298,6 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
   select_visitor->node_buffer = gt_queue_new();
   select_visitor->seqid = gt_str_ref(seqid);
   select_visitor->source = gt_str_ref(source);
-  select_visitor->typefilter = gt_str_ref(typefilter);
   select_visitor->contain_range = contain_range;
   select_visitor->overlap_range = overlap_range;
   select_visitor->strand = strand;

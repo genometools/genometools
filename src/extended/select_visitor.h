@@ -28,7 +28,6 @@ const GtNodeVisitorClass* gt_select_visitor_class(void);
    strand <strand>. */
 GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      GtStr *source,
-                                     GtStr *typefilter,
                                      GtRange contain_range,
                                      GtRange overlap_range,
                                      GtStrand strand,

@@ -36,7 +36,6 @@ typedef struct {
        targetbest;
   GtStr *seqid,
         *source,
-        *typefilter,
         *gt_strand_char,
         *targetgt_strand_char;
   GtRange contain_range,
@@ -58,7 +57,6 @@ static void* gt_select_arguments_new(void)
   SelectArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->seqid = gt_str_new();
   arguments->source = gt_str_new();
-  arguments->typefilter = gt_str_new();
   arguments->gt_strand_char = gt_str_new();
   arguments->strand = GT_NUM_OF_STRAND_TYPES;
   arguments->targetgt_strand_char = gt_str_new();
@@ -75,7 +73,6 @@ static void gt_select_arguments_delete(void *tool_arguments)
   gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->targetgt_strand_char);
   gt_str_delete(arguments->gt_strand_char);
-  gt_str_delete(arguments->typefilter);
   gt_str_delete(arguments->source);
   gt_str_delete(arguments->seqid);
   gt_free(arguments);
@@ -102,13 +99,6 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   /* -source */
   option = gt_option_new_string("source", "source a feature must have to pass "
                                 "the filter", arguments->source, NULL);
-  gt_option_parser_add_option(op, option);
-
-  /* -typefilter */
-  option = gt_option_new_string("typefilter", "filter out all features of the "
-                                "given type", arguments->typefilter, NULL);
-  /* XXX */
-  gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
   /* -contain */
@@ -270,7 +260,7 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
 
   /* create a filter stream */
   select_stream = gt_select_stream_new(gff3_in_stream, arguments->seqid,
-                                       arguments->source, arguments->typefilter,
+                                       arguments->source,
                                        arguments->contain_range,
                                        arguments->overlap_range,
                                        arguments->strand,

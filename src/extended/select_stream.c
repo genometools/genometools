@@ -85,10 +85,10 @@ const GtNodeStreamClass* gt_select_stream_class(void)
 }
 
 GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream, GtStr *seqid,
-                                   GtStr *source, GtStr *typefilter,
-                                   GtRange contain_range, GtRange overlap_range,
-                                   GtStrand strand, GtStrand targetstrand,
-                                   bool has_CDS, unsigned long max_gene_length,
+                                   GtStr *source, GtRange contain_range,
+                                   GtRange overlap_range, GtStrand strand,
+                                   GtStrand targetstrand, bool has_CDS,
+                                   unsigned long max_gene_length,
                                    unsigned long max_gene_num,
                                    double min_gene_score, double max_gene_score,
                                    double min_average_splice_site_prob,
@@ -100,10 +100,9 @@ GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream, GtStr *seqid,
   gt_assert(in_stream);
   select_stream->in_stream = gt_node_stream_ref(in_stream);
   select_stream->select_visitor =
-    gt_select_visitor_new(seqid, source, typefilter, contain_range,
-                          overlap_range, strand, targetstrand, has_CDS,
-                          max_gene_length, max_gene_num, min_gene_score,
-                          max_gene_score, min_average_splice_site_prob,
-                          feature_num);
+    gt_select_visitor_new(seqid, source, contain_range, overlap_range, strand,
+                          targetstrand, has_CDS, max_gene_length, max_gene_num,
+                          min_gene_score, max_gene_score,
+                          min_average_splice_site_prob, feature_num);
   return ns;
 }

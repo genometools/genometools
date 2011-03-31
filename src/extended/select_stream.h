@@ -27,7 +27,6 @@ typedef struct GtSelectStream GtSelectStream;
 const GtNodeStreamClass* gt_select_stream_class(void);
 GtNodeStream*            gt_select_stream_new(GtNodeStream*,
                                               GtStr *seqid, GtStr *source,
-                                              GtStr *typefilter,
                                               GtRange contain_range,
                                               GtRange overlap_range,
                                               GtStrand strand,
