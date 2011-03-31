@@ -101,8 +101,8 @@ static GtOptionParser* gt_stat_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -source */
-  option = gt_option_new_bool("source", "show used source tags (column 2 in "
-                              "regular GFF3 lines)",
+  option = gt_option_new_bool("source", "show the set of used source tags "
+                              "(column 2 in regular GFF3 lines)",
                               &arguments->used_sources, false);
   gt_option_parser_add_option(op, option);
 

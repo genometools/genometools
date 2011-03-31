@@ -72,13 +72,16 @@ void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
   /* -seqfiles */
   seqfiles_option = gt_option_new_stringarray("seqfiles", "set the sequence "
                                               "files from which to extract "
-                                              "the features", s2fi->seqfiles);
+                                              "the features\nuse '--' to "
+                                              "terminate the list of sequence "
+                                              "files ", s2fi->seqfiles);
   gt_option_parser_add_option(op, seqfiles_option);
 
   /* -matchdesc */
   matchdesc_option = gt_option_new_bool("matchdesc", "match the sequence "
-                                        "descriptions for the desired sequence "
-                                        "IDs", &s2fi->matchdesc, false);
+                                        "descriptions from the input files for "
+                                        "the desired sequence IDs (in GFF3)",
+                                        &s2fi->matchdesc, false);
   gt_option_parser_add_option(op, matchdesc_option);
 
   /* -usedesc */

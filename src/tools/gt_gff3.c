@@ -85,7 +85,8 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 
   /* -sort */
   sort_option = gt_option_new_bool("sort", "sort the GFF3 features (memory "
-                                   "consumption is O(file_size))",
+                                   "consumption is proportional to the input "
+                                   "file size(s))",
                                    &arguments->sort, false);
   gt_option_parser_add_option(op, sort_option);
 
@@ -98,8 +99,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("retainids",
                               "when available, use the original IDs provided "
                               "in the source file\n"
-                              "(memory consumption is O(file_size))",
-                              &arguments->retainids, false);
+                              "(memory consumption is proportional to the "
+                              "input file size(s))", &arguments->retainids,
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -checkids */
@@ -107,8 +109,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                               "make sure the ID attributes are unique "
                               "within the scope of each GFF3_file, as required "
                               "by GFF3 specification\n"
-                              "(memory consumption is O(file_size))",
-                              &arguments->checkids, false);
+                              "(memory consumption is proportional to the "
+                              "input file size(s))", &arguments->checkids,
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -addids */

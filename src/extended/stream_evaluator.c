@@ -36,7 +36,7 @@ typedef struct {
 } NucEval;
 
 struct GtStreamEvaluator {
-  GtNodeStream *reality,
+  GtNodeStream *reference,
                *prediction;
   bool nuceval, evalLTR;
   unsigned long LTRdelta;
@@ -231,13 +231,13 @@ static void slot_delete(Slot *s)
   gt_free(s);
 }
 
-GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reality,
+GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reference,
                                            GtNodeStream *prediction,
                                            bool nuceval, bool evalLTR,
                                            unsigned long LTRdelta)
 {
   GtStreamEvaluator *evaluator = gt_calloc(1, sizeof (GtStreamEvaluator));
-  evaluator->reality = gt_node_stream_ref(reality);
+  evaluator->reference = gt_node_stream_ref(reference);
   evaluator->prediction = gt_node_stream_ref(prediction);
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
@@ -1286,7 +1286,7 @@ static void add_nucleotide_values(NucEval *nucleotides, GtBittab *real,
   gt_assert(nucleotides && real && pred && tmp);
   if (gt_log_enabled()) {
     gt_log_log("%s", level);
-    gt_log_log("reality:");
+    gt_log_log("reference:");
     gt_bittab_show(real, gt_log_fp());
     gt_log_log("prediction:");
     gt_bittab_show(pred, gt_log_fp());
@@ -1376,8 +1376,8 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
   predicted_info.wrong_mRNAs = &se->wrong_mRNAs;
   predicted_info.wrong_LTRs  = &se->wrong_LTRs;
 
-  /* process the reality stream completely */
-  while (!(had_err = gt_node_stream_next(se->reality, &gn, err)) && gn) {
+  /* process the reference stream completely */
+  while (!(had_err = gt_node_stream_next(se->reference, &gn, err)) && gn) {
     if (gt_region_node_try_cast(gn)) {
       /* each sequence region gets its own ``slot'' */
       if (!(slot = gt_hashmap_get(se->slots,
@@ -1436,7 +1436,7 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
         else {
           /* we got no (real) slot */
           gt_warning("sequence id \"%s\" (with predictions) not given in "
-                     "``reality''", gt_str_get(gt_genome_node_get_seqid(gn)));
+                     "reference", gt_str_get(gt_genome_node_get_seqid(gn)));
         }
       }
       if (nv)
@@ -1617,7 +1617,7 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, FILE *outfp)
 void gt_stream_evaluator_delete(GtStreamEvaluator *se)
 {
   if (!se) return;
-  gt_node_stream_delete(se->reality);
+  gt_node_stream_delete(se->reference);
   gt_node_stream_delete(se->prediction);
   gt_hashmap_delete(se->slots);
   gt_evaluator_delete(se->mRNA_gene_evaluator);

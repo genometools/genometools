@@ -29,3 +29,11 @@ Test do
   run_test "#{$bin}gt csa #{$testdata}U89959_sas.gff3"
   run "diff #{$last_stdout} #{$testdata}U89959_csas.gff3"
 end
+
+Name "gt csa example"
+Keywords "gt_csa"
+Test do
+  run_test "#{$bin}gt csa #{$testdata}csa_example_spliced_alignments.gff3"
+  run "diff #{$last_stdout} " +
+      "#{$testdata}csa_example_consensus_spliced_alignments.gff3"
+end

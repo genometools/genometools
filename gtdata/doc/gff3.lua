@@ -12,4 +12,7 @@ offsets = {
 }
 
 When this example is used, all features with seqid ``chr1'' will be offset by
-1000 and all features with seqid ``chr2'' by 500.]])
+1000 and all features with seqid ``chr2'' by 500.
+
+If -offsetfile is used, offsets for all sequence-regions contained in the given
+GFF3 files must be defined.]])

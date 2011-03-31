@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -53,7 +53,7 @@ static GtOPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
   option = gt_option_new_bool("sort",
                               "sort the GFF3 features after changing the "
                               "sequence ids\n(memory consumption is "
-                              "O(file_size))",
+                              "proportional to the input file size)",
                               &arguments->sort, false);
   gt_option_parser_add_option(op, option);
 

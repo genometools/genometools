@@ -61,5 +61,4 @@ header must satisfy the following constraints:
 
   - they all have to be of the same length, not longer than 128, and not shorter
     than 1
-  - they have to appear in lexicographic order
-]])
+  - they have to appear in lexicographic order]])

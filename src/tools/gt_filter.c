@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -151,8 +151,8 @@ static GtOptionParser* gt_filter_option_parser_new(void *tool_arguments)
                            "-"TARGETGT_STRAND_OPT" is used at the same time, "
                            "this option is applied after "
                            "-"TARGETGT_STRAND_OPT".\n"
-                           "Memory consumption is O(file_size).",
-                           &arguments->targetbest, false);
+                           "Memory consumption is proportional to the input "
+                           "file size(s).", &arguments->targetbest, false);
   gt_option_parser_add_option(op, option);
 
   /* -hascds */

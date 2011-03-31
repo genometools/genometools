@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,11 +23,11 @@
 
 typedef struct GtStreamEvaluator GtStreamEvaluator;
 
-GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reality,
+GtStreamEvaluator* gt_stream_evaluator_new(GtNodeStream *reference,
                                            GtNodeStream *prediction,
                                            bool nuceval, bool evalLTR,
                                            unsigned long LTRdelta);
-/* if <nv> is not NULL, it visits all nodes from reality and the prediction */
+/* if <nv> is not NULL, it visits all nodes from reference and the prediction */
 int                gt_stream_evaluator_evaluate(GtStreamEvaluator*,
                                                 bool verbose, bool exondiff,
                                                 bool exondiffcollapsed,

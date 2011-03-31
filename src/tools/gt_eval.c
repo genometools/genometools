@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -38,9 +38,9 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
   GtOption *option, *ltroption, *ltrdeltaoption;
   GtOPrval oprval;
   gt_error_check(err);
-  op = gt_option_parser_new("reality_file prediction_file ",
-                            "Evaluate a gene prediction against a given "
-                            "``reality'' file (both in GFF3).");
+  op = gt_option_parser_new("reference_file prediction_file ",
+                            "Compare annotation files and show "
+                            "accuracy measures (prediction vs. reference).");
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -61,7 +61,8 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
 
   /* -nuc */
   option = gt_option_new_bool("nuc",
-                              "evaluate nucleotide level (memory intense)",
+                              "evaluate nucleotide level (memory consumption "
+                              "is proportional to the input file sizes)",
                               &arguments->nuceval, true);
   gt_option_parser_add_option(op, option);
 
@@ -93,7 +94,7 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
 
 int gt_eval(int argc, const char **argv, GtError *err)
 {
-  GtNodeStream *reality_stream,
+  GtNodeStream *reference_stream,
                *prediction_stream;
   GtStreamEvaluator *evaluator;
   EvalArguments arguments;
@@ -107,10 +108,10 @@ int gt_eval(int argc, const char **argv, GtError *err)
     case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
   }
 
-  /* create the reality stream */
-  reality_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
+  /* create the reference stream */
+  reference_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
   if (arguments.verbose)
-    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) reality_stream);
+    gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) reference_stream);
 
   /* create the prediction stream */
   prediction_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
@@ -118,7 +119,7 @@ int gt_eval(int argc, const char **argv, GtError *err)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) prediction_stream);
 
   /* create the stream evaluator */
-  evaluator = gt_stream_evaluator_new(reality_stream, prediction_stream,
+  evaluator = gt_stream_evaluator_new(reference_stream, prediction_stream,
                                       arguments.nuceval, arguments.evalLTR,
                                       arguments.LTRdelta);
 
@@ -135,7 +136,7 @@ int gt_eval(int argc, const char **argv, GtError *err)
   /* free */
   gt_stream_evaluator_delete(evaluator);
   gt_node_stream_delete(prediction_stream);
-  gt_node_stream_delete(reality_stream);
+  gt_node_stream_delete(reference_stream);
 
   return had_err;
 }
