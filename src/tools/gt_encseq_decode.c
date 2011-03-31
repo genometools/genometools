@@ -167,7 +167,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
       gt_xfputc(GT_FASTA_SEPARATOR, stdout);
       gt_xfwrite(desc, 1, desclen, stdout);
       gt_xfputc('\n', stdout);
-      /* XXX: make this more efficient by writing in a buffer first and the
+      /* XXX: make this more efficient by writing in a buffer first and then
          showing the result */
       if (args->singlechars) {
         for (j = 0; j < len; j++) {
