@@ -3131,7 +3131,7 @@ unsigned long gt_encseq_seqstartpos(const GtEncseq *encseq,
     wasmirrored = true;
   }
   gt_assert(seqnum < encseq->numofdbsequences);
-  if (encseq->numofdbsequences == 1) {
+  if (encseq->numofdbsequences == 1UL) {
     gt_assert(seqnum == 0);
     return (wasmirrored ? encseq->totallength + 1 : 0);
   }
