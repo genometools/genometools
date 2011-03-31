@@ -87,94 +87,91 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]",
-                            "Select GFF3 files.");
+                            "Select certain features (specified by the used "
+                            "options) from given GFF3 file(s).");
 
   /* -seqid */
-  option = gt_option_new_string("seqid", "seqid a feature must have to pass "
-                                "the filter (excluding comments)",
-                                arguments->seqid,
-                                NULL);
+  option = gt_option_new_string("seqid", "select feature with the given "
+                                "sequence ID (all comments are selected). ",
+                                arguments->seqid, NULL);
   gt_option_parser_add_option(op, option);
 
   /* -source */
-  option = gt_option_new_string("source", "source a feature must have to pass "
-                                "the filter", arguments->source, NULL);
+  option = gt_option_new_string("source", "select feature with the given "
+                                "source (the source is column 2 in regular "
+                                "GFF3 lines)" , arguments->source, NULL);
   gt_option_parser_add_option(op, option);
 
   /* -contain */
-  contain_option = gt_option_new_range("contain", "filter out all features "
-                                       "which are not contained in the given "
-                                       "range",
+  contain_option = gt_option_new_range("contain", "select all features which "
+                                       "are contained in the given range",
                                        &arguments->contain_range, NULL);
   gt_option_parser_add_option(op, contain_option);
 
   /* -overlap */
-  overlap_option = gt_option_new_range("overlap", "filter out all features "
-                                       "which do not overlap with the given "
-                                       "range",
+  overlap_option = gt_option_new_range("overlap", "select all features which "
+                                       "do overlap with the given range",
                                        &arguments->overlap_range, NULL);
   gt_option_parser_add_option(op, overlap_option);
 
   /* -strand */
-  option = gt_option_new_string(GT_STRAND_OPT, "filter out all top-level "
-                                "features (i.e., features without parents) "
-                                "whose strand is different from the given one "
-                                "(must be one of '"
+  option = gt_option_new_string(GT_STRAND_OPT, "select all top-level features"
+                                "(i.e., features without parents) whose strand "
+                                "equals the given one (must be one of '"
                                 GT_STRAND_CHARS"')", arguments->gt_strand_char,
                                 NULL);
   gt_option_parser_add_option(op, option);
 
   /* -targetstrand */
-  option = gt_option_new_string(TARGETGT_STRAND_OPT, "filter out all top-level "
-                             "features (i.e., features without parents) which "
-                             "have exactly one target attribute whose strand "
-                             "is different from the given one (must be one of '"
-                             GT_STRAND_CHARS"')",
-                             arguments->targetgt_strand_char, NULL);
+  option = gt_option_new_string(TARGETGT_STRAND_OPT, "select all top-level "
+                                "features (i.e., features without parents) "
+                                "which have exactly one target attribute whose "
+                                "strand equals the given one (must be one of '"
+                                GT_STRAND_CHARS"')",
+                                arguments->targetgt_strand_char, NULL);
   gt_option_parser_add_option(op, option);
 
   /* -targetbest */
   option = gt_option_new_bool("targetbest", "if multiple top-level features "
-                           "(i.e., features without parents) with exactly one "
-                           "target attribute have the same target_id, keep "
-                           "only the feature with the best score. If "
-                           "-"TARGETGT_STRAND_OPT" is used at the same time, "
-                           "this option is applied after "
-                           "-"TARGETGT_STRAND_OPT".\n"
-                           "Memory consumption is proportional to the input "
-                           "file size(s).", &arguments->targetbest, false);
+                             "(i.e., features without parents) with exactly "
+                             "one target attribute have the same target_id, "
+                             "keep only the feature with the best score. If "
+                             "-"TARGETGT_STRAND_OPT" is used at the same time, "
+                             "this option is applied after "
+                             "-"TARGETGT_STRAND_OPT".\n"
+                             "Memory consumption is proportional to the input "
+                             "file size(s).", &arguments->targetbest, false);
   gt_option_parser_add_option(op, option);
 
   /* -hascds */
-  option = gt_option_new_bool("hascds", "filter out all top-level features "
-                              "which do not have a CDS child",
-                              &arguments->has_CDS,
+  option = gt_option_new_bool("hascds", "select all top-level features which "
+                              "do have a CDS child", &arguments->has_CDS,
                               false);
   gt_option_parser_add_option(op, option);
 
   /* -maxgenelength */
-  option = gt_option_new_ulong_min("maxgenelength", "the maximum length a gene "
-                                "can have to pass the filter",
-                                &arguments->max_gene_length, GT_UNDEF_ULONG, 1);
+  option = gt_option_new_ulong_min("maxgenelength", "select genes up to the "
+                                   "given maximum length",
+                                   &arguments->max_gene_length, GT_UNDEF_ULONG,
+                                   1);
   gt_option_parser_add_option(op, option);
 
   /* -maxgenenum */
-  option = gt_option_new_ulong("maxgenenum", "the maximum number of genes "
-                               "which can pass the filter",
-                               &arguments->max_gene_num,
+  option = gt_option_new_ulong("maxgenenum", "select the first genes up to the "
+                               "given maximum number", &arguments->max_gene_num,
                                GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -mingenescore */
-  option = gt_option_new_double("mingenescore", "the minimum score a gene must "
-                                "have to pass the filter",
-                                &arguments->min_gene_score, GT_UNDEF_DOUBLE);
+  option = gt_option_new_double("mingenescore", "select genes with the given "
+                                "minimum score", &arguments->min_gene_score,
+                                GT_UNDEF_DOUBLE);
   gt_option_parser_add_option(op, option);
 
   /* -maxgenescore */
-  option = gt_option_new_double("maxgenescore", "the maximum score a gene can "
-                                "have to pass the filter",
-                                &arguments->max_gene_score, GT_UNDEF_DOUBLE);
+  option = gt_option_new_double("maxgenescore", "select genes with the given "
+                                "maximum score", &arguments->max_gene_score,
+                                GT_UNDEF_DOUBLE);
   gt_option_parser_add_option(op, option);
 
   /* -minaveragessp */
@@ -206,7 +203,7 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 }
 
 static int process_gt_strand_arg(GtStr *gt_strand_char, GtStrand *strand,
-                              const char *optstr, GtError *err)
+                                 const char *optstr, GtError *err)
 {
   int had_err = 0;
   gt_error_check(err);
@@ -235,14 +232,14 @@ static int gt_select_arguments_check(GT_UNUSED int rest_argc,
                                   GT_STRAND_OPT, err);
   if (!had_err) {
     had_err = process_gt_strand_arg(arguments->targetgt_strand_char,
-                                 &arguments->targetstrand, TARGETGT_STRAND_OPT,
-                                 err);
+                                    &arguments->targetstrand,
+                                    TARGETGT_STRAND_OPT, err);
   }
   return had_err;
 }
 
 static int gt_select_runner(int argc, const char **argv, int parsed_args,
-                           void *tool_arguments, GtError *err)
+                            void *tool_arguments, GtError *err)
 {
   SelectArguments *arguments = tool_arguments;
   GtNodeStream *gff3_in_stream, *select_stream,
