@@ -37,7 +37,6 @@
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-suftaborder.h"
-#include "stamp.h"
 
 #define ACCESSCHARRAND(POS)    gt_encseq_get_encoded_char(bsr->encseq,\
                                                           POS,bsr->readmode)
@@ -1394,15 +1393,13 @@ static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
 static void outsmalllcpvalues(Lcpoutput2file *lcp2file,
                               unsigned long numoflcps)
 {
-  if (lcp2file != NULL)
-  {
-    lcp2file->countoutputlcpvalues += numoflcps;
-    gt_assert(lcp2file->outfplcptab != NULL);
-    gt_xfwrite(lcp2file->smalllcpvalues,
-               sizeof (*lcp2file->smalllcpvalues),
-               (size_t) numoflcps,
-               lcp2file->outfplcptab);
-  }
+  gt_assert (lcp2file != NULL);
+  lcp2file->countoutputlcpvalues += numoflcps;
+  gt_assert(lcp2file->outfplcptab != NULL);
+  gt_xfwrite(lcp2file->smalllcpvalues,
+             sizeof (*lcp2file->smalllcpvalues),
+             (size_t) numoflcps,
+             lcp2file->outfplcptab);
 }
 
 static unsigned int bucketends(Lcpsubtab *lcpsubtab,
@@ -1432,6 +1429,10 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                           specialsinbucket,
                           bcktab,
                           code);
+      if (lcpsubtab->lcp2file->maxbranchdepth < (unsigned long) maxprefixindex)
+      {
+        lcpsubtab->lcp2file->maxbranchdepth = (unsigned long) maxprefixindex;
+      }
     } else
     {
       maxprefixindex = gt_pfxidx2lcpvalues_ulong(
@@ -1441,11 +1442,6 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                           specialsinbucket,
                           bcktab,
                           code);
-    }
-    if (lcpsubtab->lcp2file != NULL &&
-        lcpsubtab->lcp2file->maxbranchdepth < (unsigned long) maxprefixindex)
-    {
-      lcpsubtab->lcp2file->maxbranchdepth = (unsigned long) maxprefixindex;
     }
   } else
   {
@@ -1464,13 +1460,12 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   lcpvalue = computelocallcpvalue(previoussuffix,
                                   &firstspecialsuffixwithcode,
                                   minchanged);
-  if (lcpsubtab->lcp2file != NULL &&
-      lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
-  {
-    lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
-  }
   if (lcpsubtab->lcp2file != NULL)
   {
+    if (lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
+    {
+      lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
+    }
     lcpsubtab->lcp2file->smalllcpvalues[0] = (uint8_t) lcpvalue;
   } else
   {
@@ -1951,8 +1946,11 @@ static void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                                   bucketspec->specialsinbucket,
                                   code,
                                   bcktab);
-      outsmalllcpvalues(outlcpinfo->lcpsubtab.lcp2file,
-                        bucketspec->specialsinbucket);
+      if (outlcpinfo->lcpsubtab.lcp2file != NULL)
+      {
+        outsmalllcpvalues(outlcpinfo->lcpsubtab.lcp2file,
+                          bucketspec->specialsinbucket);
+      }
       /* there is at least one special element: this is the last element
          in the bucket, and thus the previoussuffix for the next round */
       outlcpinfo->previoussuffix.defined = true;
