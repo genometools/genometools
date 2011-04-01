@@ -30,6 +30,7 @@ def parseargs(argv)
   options.m64 = false
   options.speed = false
   options.prof = false
+  options.jobs = 4
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -40,6 +41,10 @@ def parseargs(argv)
   opts.on("--prof","compile for profiling") do |x|
     options.prof = true
   end
+  opts.on("-j","--j NUM","run jobs in given number of threads") do |x|
+    options.jobs = x.to_i
+  end
+  rest = opts.parse(argv)
   rest = opts.parse(argv)
   if not rest.empty?
     usage(opts,"unnecessary arguments: #{rest}")
@@ -49,7 +54,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} -j 4 curses=no cairo=no"
+  fp.print "all:\n\t\${MAKE} -j #{options.jobs} curses=no cairo=no"
   # fp.print " threads=yes"
   # fp.print " CFLAGS+=-fstrict-aliasing"
   # fp.print " CFLAGS+=-DINLINEDSequentialsuffixarrayreader"

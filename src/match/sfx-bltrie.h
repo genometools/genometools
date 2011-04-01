@@ -20,34 +20,8 @@
 
 #include "core/encseq.h"
 #include "core/readmode.h"
-#include "lcpoverflow.h"
 #include "sfx-suffixgetset.h"
-
-typedef struct
-{
-  unsigned long *bucketoflcpvalues,
-                numofentries,
-                numoflargelcpvalues,
-                subbucketleft;
-} GtLcpvalues;
-
-/*@unused@*/ static inline void lcptab_update(GtLcpvalues *tableoflcpvalues,
-                                              unsigned long idx,
-                                              unsigned long value)
-{
-  gt_assert (tableoflcpvalues != NULL &&
-             tableoflcpvalues->bucketoflcpvalues != NULL &&
-             tableoflcpvalues->subbucketleft+idx <
-             tableoflcpvalues->numofentries);
-  tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->subbucketleft+idx]
-    = value;
-  if (value >= (unsigned long) LCPOVERFLOW)
-  {
-    tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as there may
-                                                be some value at index <idx>
-                                                which was already overflowing */
-  }
-}
+#include "sfx-lcpvalues.h"
 
 typedef void (*GtProcessunsortedsuffixrange)(void *,
                                         unsigned long,

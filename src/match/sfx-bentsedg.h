@@ -20,33 +20,15 @@
 #include <stdio.h>
 #include "core/error_api.h"
 #include "core/str.h"
-#include "core/defined-types.h"
 #include "core/codetype.h"
+#include "core/logger_api.h"
 #include "core/encseq.h"
 #include "bcktab.h"
+#include "sfx-bltrie.h"
 #include "sfx-strategy.h"
 #include "sfx-copysort.h"
-#include "sfx-bltrie.h"
+#include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
-
-typedef struct Outlcpinfo Outlcpinfo;
-
-Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
-                              unsigned int numofchars,
-                              unsigned int prefixlength,
-                              unsigned long totallength,
-                              GtError *err);
-
-void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
-                          unsigned int numofchars,
-                          unsigned int prefixlength,
-                          unsigned long numoflcpvalues);
-
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
-
-unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
-
-unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        unsigned long numberofsuffixes,
