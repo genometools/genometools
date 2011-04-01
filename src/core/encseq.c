@@ -3098,18 +3098,23 @@ unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
   gt_assert(position < encseq->totallength);
   if (encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
-    if (encseq->numofdbsequences == 1UL)
-      return 0;
-    switch (encseq->satsep) {
-      case GT_ACCESS_TYPE_UCHARTABLES:
-        return gt_encseq_seqnum_uchar(&encseq->ssptabnew.st_uchar,position);
-      case GT_ACCESS_TYPE_USHORTTABLES:
-        return gt_encseq_seqnum_ushort(&encseq->ssptabnew.st_ushort,position);
-      case GT_ACCESS_TYPE_UINT32TABLES:
-        return gt_encseq_seqnum_uint32(&encseq->ssptabnew.st_uint32,position);
-      default:
-        fprintf(stderr,"%s(%d) undefined\n",__func__,(int) encseq->satsep);
-        exit(GT_EXIT_PROGRAMMING_ERROR);
+    if (encseq->numofdbsequences == 1UL) {
+      num = 0;
+    } else {
+      switch (encseq->satsep) {
+        case GT_ACCESS_TYPE_UCHARTABLES:
+          num = gt_encseq_seqnum_uchar(&encseq->ssptabnew.st_uchar,position);
+          break;
+        case GT_ACCESS_TYPE_USHORTTABLES:
+          num = gt_encseq_seqnum_ushort(&encseq->ssptabnew.st_ushort,position);
+          break;
+        case GT_ACCESS_TYPE_UINT32TABLES:
+          num = gt_encseq_seqnum_uint32(&encseq->ssptabnew.st_uint32,position);
+          break;
+        default:
+          fprintf(stderr,"%s(%d) undefined\n",__func__,(int) encseq->satsep);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
     }
   } else {
     num = gt_encseq_seqnum_Viaequallength(encseq,position);
