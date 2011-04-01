@@ -3092,7 +3092,7 @@ unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
   unsigned long num;
   bool wasmirrored = false;
   if (encseq->hasmirror && position >= encseq->totallength) {
-    position = encseq->totallength - position;
+    position = encseq->logicaltotallength - position;
     wasmirrored = true;
   }
   gt_assert(position < encseq->totallength);
@@ -3115,7 +3115,7 @@ unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
     num = gt_encseq_seqnum_Viaequallength(encseq,position);
   }
   if (wasmirrored) {
-    num = encseq->logicalnumofdbsequences - num;
+    num = encseq->logicalnumofdbsequences - 1 - num;
   }
   return num;
 }
