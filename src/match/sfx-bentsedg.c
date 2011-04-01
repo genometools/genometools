@@ -1727,13 +1727,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
                                   GtSuffixsortspace *suffixsortspace,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
-                                  Bcktab *bcktab,
-                                  GtCodetype mincode,
-                                  GtCodetype maxcode,
-                                  unsigned long partwidth,
-                                  unsigned int numofchars,
                                   unsigned int sortmaxdepth,
-                                  Lcpsubtab *lcpsubtab,
                                   const Sfxstrategy *sfxstrategy)
 {
   unsigned long idx;
@@ -1753,18 +1747,6 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  if (bcktab != NULL)
-  {
-    gt_determinemaxbucketsize(bcktab,
-                              mincode,
-                              maxcode,
-                              partwidth,
-                              numofchars);
-    if (lcpsubtab != NULL)
-    {
-      bsr->tableoflcpvalues = resizereservoir(lcpsubtab,bcktab);
-    }
-  }
   GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
   if (sfxstrategy->cmpcharbychar)
   {
@@ -2030,14 +2012,14 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         suffixsortspace,
                         encseq,
                         readmode,
-                        bcktab,
-                        mincode,
-                        maxcode,
-                        numberofsuffixes,
-                        numofchars,
                         sortmaxdepth,
-                        outlcpinfo != NULL ? &outlcpinfo->lcpsubtab : NULL,
                         sfxstrategy);
+  gt_determinemaxbucketsize(bcktab, mincode, maxcode, numberofsuffixes,
+                            numofchars);
+  if (outlcpinfo != NULL)
+  {
+    bsr.tableoflcpvalues = resizereservoir(&outlcpinfo->lcpsubtab,bcktab);
+  }
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
   for (code = mincode; code <= maxcode; code++)
@@ -2090,7 +2072,6 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  unsigned long numberofsuffixes,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
-                                 unsigned int numofchars,
                                  unsigned int sortmaxdepth,
                                  const Sfxstrategy *sfxstrategy,
                                  void *processunsortedsuffixrangeinfo,
@@ -2104,13 +2085,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                         suffixsortspace,
                         encseq,
                         readmode,
-                        NULL, /* bcktab unused */
-                        0,    /* mincode unused */
-                        0,    /* maxcode unused */
-                        0,    /* partwidth unused */
-                        numofchars,
                         sortmaxdepth,
-                        NULL, /* outlcpinfo unused */
                         sfxstrategy);
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;

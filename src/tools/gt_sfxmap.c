@@ -893,7 +893,6 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
                                 totallength+1,
                                 curi.encseq,
                                 curi.readmode,
-                                gt_encseq_alphabetnumofchars(curi.encseq),
                                 arguments->sortmaxdepth,
                                 &sfxstrategy,
                                 &curi, /* voiddcov */
