@@ -555,7 +555,7 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
       printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
              sval1, sval2, retval, (unsigned long) lcplen);
 #endif
-      if (retval != 0 && bsr->tableoflcpvalues != NULL)
+      if (bsr->tableoflcpvalues != NULL && retval != 0)
       {
         lcpindex = subbucketleft + pj;
         if (pj < pi && retval > 0)
@@ -1371,6 +1371,96 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
+static void initBentsedgresources(Bentsedgresources *bsr,
+                                  GtSuffixsortspace *suffixsortspace,
+                                  const GtEncseq *encseq,
+                                  GtReadmode readmode,
+                                  unsigned int sortmaxdepth,
+                                  const Sfxstrategy *sfxstrategy)
+{
+  unsigned long idx;
+
+  bsr->readmode = readmode;
+  bsr->totallength = gt_encseq_total_length(encseq);
+  bsr->sfxstrategy = sfxstrategy;
+  bsr->sssp = suffixsortspace;
+  gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
+  bsr->encseq = encseq;
+  bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
+  bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
+  bsr->tableoflcpvalues = NULL;
+  for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
+  {
+    bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
+  }
+  bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
+  if (sfxstrategy->cmpcharbychar)
+  {
+    bsr->countingsortinfo = NULL;
+    bsr->medianinfospace = NULL;
+  } else
+  {
+    bsr->countingsortinfo = gt_malloc(sizeof (*bsr->countingsortinfo) *
+                                      sfxstrategy->maxcountingsort);
+    if (sfxstrategy->maxwidthrealmedian >= MINMEDIANOF9WIDTH)
+    {
+      bsr->medianinfospace = gt_malloc(sizeof (*bsr->medianinfospace) *
+                                       sfxstrategy->maxwidthrealmedian);
+    } else
+    {
+      bsr->medianinfospace = NULL;
+    }
+  }
+  bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
+                                    sfxstrategy->maxbltriesort,
+                                    0, /* the nodenumberincrement */
+                                    encseq,
+                                    sfxstrategy->cmpcharbychar,
+                                    bsr->esr1,
+                                    bsr->esr2,
+                                    readmode);
+  bsr->processunsortedsuffixrangeinfo = NULL;
+  bsr->processunsortedsuffixrange = NULL;
+  bsr->sortmaxdepth = sortmaxdepth;
+  if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
+  {
+    bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
+                                       bsr->sfxstrategy->maxinsertionsort);
+    for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
+    {
+      bsr->equalwithprevious[idx] = false;
+    }
+  } else
+  {
+    bsr->equalwithprevious = NULL;
+  }
+  bsr->countinsertionsort = 0;
+  bsr->countqsort = 0;
+  bsr->countcountingsort = 0;
+  bsr->countbltriesort = 0;
+}
+
+static void wrapBentsedgresources(Bentsedgresources *bsr, GtLogger *logger)
+{
+  gt_free(bsr->countingsortinfo);
+  bsr->countingsortinfo = NULL;
+  gt_free(bsr->medianinfospace);
+  bsr->medianinfospace = NULL;
+  gt_blindtrie_delete(bsr->blindtrie);
+  gt_encseq_reader_delete(bsr->esr1);
+  gt_encseq_reader_delete(bsr->esr2);
+  gt_free(bsr->equalwithprevious);
+  GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
+  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
+  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
+  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
+  gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
+}
+
+/* Now some functions related to the computation of lcp values follows */
+
 static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
                                           const Suffixwithcode *currentsuffix,
                                           unsigned int minchanged)
@@ -1695,129 +1785,6 @@ unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo)
   return outlcpinfo->lcpsubtab.lcp2file->maxbranchdepth;
 }
 
-static GtLcpvalues *resizereservoir(Lcpsubtab *lcpsubtab,const Bcktab *bcktab)
-{
-  if (lcpsubtab->lcp2file != NULL)
-  {
-    size_t sizeforlcpvalues; /* in bytes */
-
-    sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
-    if (lcpsubtab->lcp2file->sizereservoir < sizeforlcpvalues)
-    {
-      lcpsubtab->lcp2file->sizereservoir = sizeforlcpvalues;
-      lcpsubtab->lcp2file->reservoir
-        = gt_realloc(lcpsubtab->lcp2file->reservoir,
-                     lcpsubtab->lcp2file->sizereservoir);
-          /* point to the same area, since this is not used simultaneously */
-          /* be careful for the parallel version */
-      lcpsubtab->lcp2file->smalllcpvalues
-        = (uint8_t *) lcpsubtab->lcp2file->reservoir;
-      lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-        = (unsigned long *) lcpsubtab->lcp2file->reservoir;
-      lcpsubtab->tableoflcpvalues.subbucketleft = 0;
-      lcpsubtab->tableoflcpvalues.numofentries
-        = (unsigned long) lcpsubtab->lcp2file->sizereservoir/
-          sizeof (*lcpsubtab->tableoflcpvalues.bucketoflcpvalues);
-    }
-  }
-  return &lcpsubtab->tableoflcpvalues;
-}
-
-static void initBentsedgresources(Bentsedgresources *bsr,
-                                  GtSuffixsortspace *suffixsortspace,
-                                  const GtEncseq *encseq,
-                                  GtReadmode readmode,
-                                  unsigned int sortmaxdepth,
-                                  const Sfxstrategy *sfxstrategy)
-{
-  unsigned long idx;
-
-  bsr->readmode = readmode;
-  bsr->totallength = gt_encseq_total_length(encseq);
-  bsr->sfxstrategy = sfxstrategy;
-  bsr->sssp = suffixsortspace;
-  gt_suffixsortspace_bucketleftidx_set(bsr->sssp,0);
-  bsr->encseq = encseq;
-  bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
-  bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
-  bsr->tableoflcpvalues = NULL;
-  for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
-  {
-    bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
-  }
-  bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
-  if (sfxstrategy->cmpcharbychar)
-  {
-    bsr->countingsortinfo = NULL;
-    bsr->medianinfospace = NULL;
-  } else
-  {
-    bsr->countingsortinfo = gt_malloc(sizeof (*bsr->countingsortinfo) *
-                                      sfxstrategy->maxcountingsort);
-    if (sfxstrategy->maxwidthrealmedian >= MINMEDIANOF9WIDTH)
-    {
-      bsr->medianinfospace = gt_malloc(sizeof (*bsr->medianinfospace) *
-                                       sfxstrategy->maxwidthrealmedian);
-    } else
-    {
-      bsr->medianinfospace = NULL;
-    }
-  }
-  bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
-                                    sfxstrategy->maxbltriesort,
-                                    0, /* the nodenumberincrement */
-                                    encseq,
-                                    sfxstrategy->cmpcharbychar,
-                                    bsr->esr1,
-                                    bsr->esr2,
-                                    readmode);
-  bsr->processunsortedsuffixrangeinfo = NULL;
-  bsr->processunsortedsuffixrange = NULL;
-  bsr->sortmaxdepth = sortmaxdepth;
-  if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
-  {
-    bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
-                                       bsr->sfxstrategy->maxinsertionsort);
-    for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
-    {
-      bsr->equalwithprevious[idx] = false;
-    }
-  } else
-  {
-    bsr->equalwithprevious = NULL;
-  }
-  bsr->countinsertionsort = 0;
-  bsr->countqsort = 0;
-  bsr->countcountingsort = 0;
-  bsr->countbltriesort = 0;
-}
-
-static void wrapBentsedgresources(Bentsedgresources *bsr, GtLogger *logger)
-{
-  gt_free(bsr->countingsortinfo);
-  bsr->countingsortinfo = NULL;
-  gt_free(bsr->medianinfospace);
-  bsr->medianinfospace = NULL;
-  gt_blindtrie_delete(bsr->blindtrie);
-  gt_encseq_reader_delete(bsr->esr1);
-  gt_encseq_reader_delete(bsr->esr2);
-  gt_free(bsr->equalwithprevious);
-  GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
-  gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
-  gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
-  gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
-  gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
-}
-
-/*
-  The following function is called  in sfxsuffixer.c sorts all buckets by
-  different suffix comparison methods without the help of other sorting
-  information. GtSuffixsortspace contains the sortspace which is accessed
-  by some negative offset.
-*/
-
 static void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
                                     GtCodetype code,
                                     unsigned long subbucketleft)
@@ -1983,6 +1950,41 @@ static void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
     }
   }
 }
+
+static GtLcpvalues *resizereservoir(Lcpsubtab *lcpsubtab,const Bcktab *bcktab)
+{
+  if (lcpsubtab->lcp2file != NULL)
+  {
+    size_t sizeforlcpvalues; /* in bytes */
+
+    sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
+    if (lcpsubtab->lcp2file->sizereservoir < sizeforlcpvalues)
+    {
+      lcpsubtab->lcp2file->sizereservoir = sizeforlcpvalues;
+      lcpsubtab->lcp2file->reservoir
+        = gt_realloc(lcpsubtab->lcp2file->reservoir,
+                     lcpsubtab->lcp2file->sizereservoir);
+          /* point to the same area, since this is not used simultaneously */
+          /* be careful for the parallel version */
+      lcpsubtab->lcp2file->smalllcpvalues
+        = (uint8_t *) lcpsubtab->lcp2file->reservoir;
+      lcpsubtab->tableoflcpvalues.bucketoflcpvalues
+        = (unsigned long *) lcpsubtab->lcp2file->reservoir;
+      lcpsubtab->tableoflcpvalues.subbucketleft = 0;
+      lcpsubtab->tableoflcpvalues.numofentries
+        = (unsigned long) lcpsubtab->lcp2file->sizereservoir/
+          sizeof (*lcpsubtab->tableoflcpvalues.bucketoflcpvalues);
+    }
+  }
+  return &lcpsubtab->tableoflcpvalues;
+}
+
+/*
+  The following function is called  in sfxsuffixer.c sorts all buckets by
+  different suffix comparison methods without the help of other sorting
+  information. GtSuffixsortspace contains the sortspace which is accessed
+  by some negative offset.
+*/
 
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        unsigned long numberofsuffixes,
