@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,8 +19,11 @@
 #include "extended/visitor_stream.h"
 
 GtNodeStream* gt_id_to_md5_stream_new(GtNodeStream *in_stream,
-                                      GtRegionMapping *rm)
+                                      GtRegionMapping *rm,
+                                      bool substitute_target_ids)
 {
   gt_assert(in_stream && rm);
-  return gt_visitor_stream_new(in_stream, gt_id_to_md5_visitor_new(rm));
+  return gt_visitor_stream_new(in_stream,
+                               gt_id_to_md5_visitor_new(rm,
+                                                        substitute_target_ids));
 }

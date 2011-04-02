@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,7 +25,7 @@ typedef struct GtSeqidsToMD5Visitor GtSeqidsToMD5Visitor;
 
 const GtNodeVisitorClass* gt_id_to_md5_visitor_class(void);
 /* Takes ownership of <region_mapping>. */
-GtNodeVisitor*            gt_id_to_md5_visitor_new(GtRegionMapping
-                                                       *region_mapping);
+GtNodeVisitor* gt_id_to_md5_visitor_new(GtRegionMapping *region_mapping,
+                                        bool subsitute_target_ids);
 
 #endif

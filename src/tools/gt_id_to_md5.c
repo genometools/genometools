@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,7 +28,8 @@
 #include "tools/gt_id_to_md5.h"
 
 typedef struct {
-  bool verbose;
+  bool verbose,
+       substitute_target_ids;
   GtSeqid2FileInfo *s2fi;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -65,6 +66,12 @@ static GtOptionParser* gt_id_to_md5_option_parser_new(void *tool_arguments)
 
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
+
+  /* -subtargetids */
+  option = gt_option_new_bool("subtargetids", "substitute the target IDs with "
+                              "MD5 sums", &arguments->substitute_target_ids,
+                              true);
+  gt_option_parser_add_option(op, option);
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
@@ -104,7 +111,9 @@ static int gt_id_to_md5_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create seqid to md5 stream */
-    id_to_md5_stream = gt_id_to_md5_stream_new(gff3_in_stream, region_mapping);
+    id_to_md5_stream =
+      gt_id_to_md5_stream_new(gff3_in_stream, region_mapping,
+                              arguments->substitute_target_ids);
 
     /* create add IDs stream */
     add_ids_stream = gt_add_ids_stream_new(id_to_md5_stream);
