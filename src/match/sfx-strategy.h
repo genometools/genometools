@@ -40,7 +40,8 @@ typedef struct
        suftabasulongarray,
        onlybucketinsertion,
        kmerswithencseqreader,
-       dccheck;
+       dccheck,
+       samplewithprefixlengthnull;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
@@ -57,6 +58,7 @@ typedef struct
   sfxstrategy->suftabasulongarray = false;
   sfxstrategy->onlybucketinsertion = false;
   sfxstrategy->kmerswithencseqreader = false;
+  sfxstrategy->samplewithprefixlengthnull = false;
   sfxstrategy->dccheck = false;
 }
 

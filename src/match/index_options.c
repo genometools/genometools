@@ -438,6 +438,13 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
+  idxo->option = gt_option_new_bool("samplewithprefixlengthnull",
+                              "sort sample with prefixlength=0",
+                              &idxo->sfxstrategy.samplewithprefixlengthnull,
+                              false);
+  gt_option_is_development_option(idxo->option);
+  gt_option_parser_add_option(op, idxo->option);
+
   idxo->option = gt_option_new_bool("suftabasarray",
                               "use unsigned long array for suftab",
                               &idxo->sfxstrategy.suftabasulongarray,

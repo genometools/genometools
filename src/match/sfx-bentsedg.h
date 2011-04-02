@@ -53,11 +53,12 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  unsigned long numberofsuffixes,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
+                                 Outlcpinfo *outlcpinfo,
                                  unsigned int sortmaxdepth,
                                  const Sfxstrategy *sfxstrategy,
-                                 void *processunsortedsuffixrangeinfo,
                                  GtProcessunsortedsuffixrange
                                    processunsortedsuffixrange,
+                                 void *processunsortedsuffixrangeinfo,
                                  GtLogger *logger);
 
 #endif

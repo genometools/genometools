@@ -749,15 +749,16 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       {
         /* the following function only has an effect differencecover > 0 */
         sfi->dcov = gt_differencecover_prepare_sample(
-                                          sfi->sfxstrategy.differencecover,
-                                          sfi->encseq,
-                                          sfi->readmode,
-                                          sfi->prefixlength,
-                                          &sfi->sfxstrategy,
-                                          sfi->outlcpinfoforsample,
-                                          sfi->logger,
-                                          sfi->sfxprogress,
-                                          err);
+                                     sfi->sfxstrategy.differencecover,
+                                     sfi->encseq,
+                                     sfi->readmode,
+                                     sfi->sfxstrategy.samplewithprefixlengthnull
+                                       ? 0 : sfi->prefixlength,
+                                     &sfi->sfxstrategy,
+                                     sfi->outlcpinfoforsample,
+                                     sfi->logger,
+                                     sfi->sfxprogress,
+                                     err);
         if (sfi->dcov == NULL)
         {
           haserr = true;

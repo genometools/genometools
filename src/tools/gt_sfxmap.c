@@ -893,10 +893,11 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
                                 totallength+1,
                                 curi.encseq,
                                 curi.readmode,
+                                NULL,
                                 arguments->sortmaxdepth,
                                 &sfxstrategy,
-                                &curi, /* voiddcov */
                                 sortmaxdepth_processunsortedrange,
+                                &curi, /* voiddcov */
                                 logger);
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,

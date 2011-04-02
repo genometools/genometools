@@ -59,7 +59,7 @@ typedef struct
 struct Outlcpinfo
 {
   unsigned long totallength;
-  Turningwheel *tw;
+  Turningwheel *turnwheel;
   unsigned int minchanged;
   Suffixwithcode previoussuffix;
   bool previousbucketwasempty;
@@ -217,10 +217,10 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo->minchanged = 0;
   if (!haserr && prefixlength > 0)
   {
-    outlcpinfo->tw = gt_newTurningwheel(prefixlength,numofchars);
+    outlcpinfo->turnwheel = gt_newTurningwheel(prefixlength,numofchars);
   } else
   {
-    outlcpinfo->tw = NULL;
+    outlcpinfo->turnwheel = NULL;
   }
 #ifdef SKDEBUG
   outlcpinfo->previoussuffix.startpos = 0;
@@ -244,7 +244,13 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
 {
   if (outlcpinfo != NULL)
   {
-    outlcpinfo->tw = gt_newTurningwheel(prefixlength,numofchars);
+    if (prefixlength > 0)
+    {
+      outlcpinfo->turnwheel = gt_newTurningwheel(prefixlength,numofchars);
+    } else
+    {
+      outlcpinfo->turnwheel = NULL;
+    }
     outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
       = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.tableoflcpvalues.
                           bucketoflcpvalues) * numoflcpvalues);
@@ -345,9 +351,9 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   {
     return;
   }
-  if (outlcpinfo->tw != NULL)
+  if (outlcpinfo->turnwheel != NULL)
   {
-    gt_freeTurningwheel(&outlcpinfo->tw);
+    gt_freeTurningwheel(&outlcpinfo->turnwheel);
   }
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
@@ -405,15 +411,16 @@ void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
     }
     if (code > 0)
     {
-      (void) gt_nextTurningwheel(outlcpinfo->tw);
+      (void) gt_nextTurningwheel(outlcpinfo->turnwheel);
       if (outlcpinfo->previousbucketwasempty)
       {
         outlcpinfo->minchanged
           = MIN(outlcpinfo->minchanged,
-                gt_minchangedTurningwheel(outlcpinfo->tw));
+                gt_minchangedTurningwheel(outlcpinfo->turnwheel));
       } else
       {
-        outlcpinfo->minchanged = gt_minchangedTurningwheel(outlcpinfo->tw);
+        outlcpinfo->minchanged
+          = gt_minchangedTurningwheel(outlcpinfo->turnwheel);
       }
     }
   }
@@ -568,6 +575,7 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
   {
     size_t sizeforlcpvalues; /* in bytes */
 
+    gt_assert(bcktab != NULL);
     sizeforlcpvalues = gt_bcktab_sizeforlcpvalues(bcktab);
     if (lcpsubtab->lcp2file->sizereservoir < sizeforlcpvalues)
     {

@@ -1498,11 +1498,12 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  unsigned long numberofsuffixes,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
+                                 Outlcpinfo *outlcpinfo,
                                  unsigned int sortmaxdepth,
                                  const Sfxstrategy *sfxstrategy,
-                                 void *processunsortedsuffixrangeinfo,
                                  GtProcessunsortedsuffixrange
                                    processunsortedsuffixrange,
+                                 void *processunsortedsuffixrangeinfo,
                                  GtLogger *logger)
 {
   Bentsedgresources bsr;
@@ -1513,6 +1514,10 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                         readmode,
                         sortmaxdepth,
                         sfxstrategy);
+  if (outlcpinfo != NULL)
+  {
+    bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,NULL);
+  }
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
   gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
