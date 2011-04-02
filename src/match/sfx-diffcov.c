@@ -269,6 +269,7 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   {
     dcov->prefixlength = outerprefixlength;
   }
+  gt_assert(dcov->prefixlength > 0);
   dcov->vparam = 1U << (dcov->logmod);
   dcov->vmodmask = dcov->vparam-1;
 #ifdef WITHcomputehvalue
@@ -996,7 +997,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
                                thispairptr->width);
     gt_free(thispairptr);
   }
-  gt_logger_log(dcov->logger,"maxqueuesize = %lu",dcov->maxqueuesize);
+  gt_logger_log(dcov->logger,"maxqueuesize=%lu",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);
   dcov->itvinfo = NULL;
   gt_inl_queue_delete(dcov->rangestobesorted);
@@ -1092,7 +1093,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
               dcov->samplesize,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
-  gt_logger_log(dcov->logger,"specials = %lu, fullspecials=%lu",
+  gt_logger_log(dcov->logger,"specials=%lu, fullspecials=%lu",
               specials,fullspecials);
   if (withcheck)
   {
