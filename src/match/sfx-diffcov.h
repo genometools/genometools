@@ -25,8 +25,8 @@
 #include "core/timer_api.h"
 #include "core/error_api.h"
 #include "sfx-strategy.h"
+#include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
-#include "sfx-bentsedg.h"
 
 typedef struct Differencecover Differencecover;
 

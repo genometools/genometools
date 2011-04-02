@@ -41,8 +41,8 @@
 #include "sfx-opt.pr"
 #include "sfx-outprj.h"
 #include "sfx-apfxlen.h"
-#include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
+#include "sfx-lcpvalues.h"
 
 #ifndef S_SPLINT_S
 #include "eis-encidxseq.h"
