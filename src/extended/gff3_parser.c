@@ -912,10 +912,17 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
       gt_splitter_reset(tmp_splitter);
       gt_splitter_split(tmp_splitter, token, strlen(token), '=');
       if (gt_splitter_size(tmp_splitter) != 2) {
-        gt_error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
+        if (parser->tidy && gt_splitter_size(tmp_splitter) == 1) {
+          gt_warning("token \"%s\" on line %u in file \"%s\" does not "
                      "contain exactly one '='", token, line_number, filename);
-        had_err = -1;
-        break;
+          continue;
+        }
+        else {
+          gt_error_set(err, "token \"%s\" on line %u in file \"%s\" does not "
+                       "contain exactly one '='", token, line_number, filename);
+          had_err = -1;
+          break;
+        }
       }
       else {
         attr_tag = gt_splitter_get_token(tmp_splitter, 0);
