@@ -20,6 +20,7 @@
 #include "core/error_api.h"
 #include "core/codetype.h"
 #include "core/unused_api.h"
+#include "core/encseq.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
@@ -101,5 +102,13 @@ void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
 
 GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
                                            const Bcktab *bcktab);
+
+void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
+                                   GtReadmode readmode,
+                                   const GtSuffixsortspace *sortedsample,
+                                   unsigned long effectivesamplesize,
+                                   unsigned long maxdepth,
+                                   GT_UNUSED const Outlcpinfo
+                                     *outlcpinfosample);
 
 #endif

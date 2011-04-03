@@ -1468,6 +1468,10 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                          rightchar,
                                          numofchars);
     gt_Outlcpinfo_prebucket(outlcpinfo,code,bucketspec.left);
+    /*
+    printf("bucket=(%lu,%lu)\n",bucketspec.nonspecialsinbucket,
+                                bucketspec.specialsinbucket);
+    */
     if (bucketspec.nonspecialsinbucket > 0)
     {
       if (bucketspec.nonspecialsinbucket > 1UL)

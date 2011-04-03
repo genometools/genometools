@@ -1127,7 +1127,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   (void) gt_bcktab_leftborderpartialsums(dcov->bcktab,
                                          dcov->effectivesamplesize);
   gt_logger_log(dcov->logger,
-              "%lu positions are sampled (%.2f) pl=%u",
+              "%lu positions are sampled (%.2f%%) pl=%u",
               dcov->samplesize,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
@@ -1272,6 +1272,15 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
         fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
+    }
+    if (outlcpinfosample != NULL)
+    {
+      gt_Outlcpinfo_check_lcpvalues(dcov->encseq,
+                                    dcov->readmode,
+                                    dcov->sortedsample,
+                                    dcov->effectivesamplesize,
+                                    (unsigned long) dcov->vparam,
+                                    outlcpinfosample);
     }
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);

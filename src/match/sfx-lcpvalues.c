@@ -168,6 +168,8 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   {
     lcpsubtab->tableoflcpvalues.bucketoflcpvalues
                [lcpsubtab->tableoflcpvalues.subbucketleft] = lcpvalue;/*XXX*/
+    printf("set lcp[%lu]=%lu\n",
+           lcpsubtab->tableoflcpvalues.subbucketleft,lcpvalue);
   }
   return minprefixindex;
 }
@@ -384,6 +386,50 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues = NULL;
   outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = 0;
   gt_free(outlcpinfo);
+}
+
+void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
+                                   GtReadmode readmode,
+                                   const GtSuffixsortspace *sortedsample,
+                                   unsigned long effectivesamplesize,
+                                   unsigned long maxdepth,
+                                   const Outlcpinfo *outlcpinfosample)
+{
+  int cmp;
+  unsigned long idx, lcpvalue, startpos1, startpos2, currentlcp;
+
+  startpos1 = gt_suffixsortspace_getdirect(sortedsample,0);
+  for (idx=1UL; idx<effectivesamplesize; idx++)
+  {
+    startpos2 = gt_suffixsortspace_getdirect(sortedsample,idx);
+    cmp = gt_encseq_check_comparetwosuffixes(encseq,
+                                             readmode,
+                                             &lcpvalue,
+                                             false,
+                                             false,
+                                             maxdepth,
+                                             startpos1,
+                                             startpos2,
+                                             NULL,
+                                             NULL);
+    currentlcp = outlcpinfosample->lcpsubtab.tableoflcpvalues
+                                            .bucketoflcpvalues[idx];
+    gt_assert(cmp <= 0);
+    gt_assert(lcpvalue <= maxdepth);
+    gt_assert(currentlcp <= maxdepth);
+    if (lcpvalue != currentlcp)
+    {
+      fprintf(stderr,"idx=%lu,suffixpair=%lu,%lu: "
+                     "lcpvalue = %lu != %lu = currentlcp\n",
+                      idx,startpos1,startpos2,lcpvalue,currentlcp);
+      gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos1,20UL);
+      fprintf(stderr,"\n");
+      gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos2,20UL);
+      fprintf(stderr,"\n");
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    startpos1 = startpos2;
+  }
 }
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo)
