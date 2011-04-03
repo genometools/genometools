@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,6 +29,7 @@ struct GtStatVisitor {
                 number_of_genes,
                 number_of_protein_coding_genes,
                 number_of_mRNAs,
+                number_of_protein_coding_mRNAs,
                 number_of_exons,
                 number_of_CDSs,
                 number_of_LTR_retrotransposons,
@@ -104,6 +105,8 @@ static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
   }
   else if (gt_feature_node_has_type(fn, gt_ft_mRNA)) {
     sv->number_of_mRNAs++;
+    if (gt_feature_node_has_CDS(fn))
+      sv->number_of_protein_coding_mRNAs++;
   }
   else if (gt_feature_node_has_type(fn, gt_ft_exon)) {
     sv->number_of_exons++;
@@ -247,6 +250,10 @@ void gt_stat_visitor_show_stats(GtNodeVisitor *nv, GtFile *outfp)
   }
   if (sv->number_of_mRNAs)
     gt_file_xprintf(outfp, "mRNAs: %lu\n", sv->number_of_mRNAs);
+  if (sv->number_of_protein_coding_mRNAs) {
+    gt_file_xprintf(outfp, "protein-coding mRNAs: %lu\n",
+                    sv->number_of_protein_coding_mRNAs);
+  }
   if (sv->number_of_exons)
     gt_file_xprintf(outfp, "exons: %lu\n", sv->number_of_exons);
   if (sv->number_of_CDSs)
