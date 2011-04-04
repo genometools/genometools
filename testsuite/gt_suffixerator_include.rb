@@ -160,14 +160,14 @@ Test do
 end
 
 all_fastafiles.each do |filename|
-  Name "gt suffixerator -dc 64 -lcp -parts 1+3 #{filename}"
+  Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 #{filename}"
   Keywords "gt_suffixerator dc"
   Test do
     checkdc([filename])
   end
 end
 
-Name "gt suffixerator -dc 64 -lcp -parts 1+3 all-fastafiles"
+Name "gt suffixerator -dc 64 -dccheck -lcp -parts 1+3 all-fastafiles"
 Keywords "gt_suffixerator dc"
 Test do
   checkdc(all_fastafiles)

@@ -29,6 +29,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct
 {
+  unsigned long *isset;
   unsigned long *bucketoflcpvalues,
                 numofentries,
                 numoflargelcpvalues,
@@ -43,6 +44,7 @@ typedef struct
              tableoflcpvalues->bucketoflcpvalues != NULL &&
              tableoflcpvalues->subbucketleft+idx <
              tableoflcpvalues->numofentries);
+  GT_SETIBIT(tableoflcpvalues->isset,tableoflcpvalues->subbucketleft+idx);
   tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->subbucketleft+idx]
     = value;
   if (value >= (unsigned long) LCPOVERFLOW)
@@ -61,6 +63,8 @@ typedef struct
              tableoflcpvalues->bucketoflcpvalues != NULL &&
              tableoflcpvalues->subbucketleft+idx <
              tableoflcpvalues->numofentries);
+  gt_assert(GT_ISIBITSET(tableoflcpvalues->isset,
+                         tableoflcpvalues->subbucketleft+idx));
   return tableoflcpvalues->bucketoflcpvalues
                            [tableoflcpvalues->subbucketleft+idx];
 }

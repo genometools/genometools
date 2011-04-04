@@ -132,6 +132,8 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
       }
     } else
     {
+      unsigned long idx;
+
       maxprefixindex = gt_pfxidx2lcpvalues_ulong(
                           &minprefixindex,
                           lcpsubtab->tableoflcpvalues.bucketoflcpvalues +
@@ -139,6 +141,11 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                           specialsinbucket,
                           bcktab,
                           code);
+      for (idx=0; idx<specialsinbucket; idx++)
+      {
+        GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
+                   lcpsubtab->tableoflcpvalues.subbucketleft+idx);
+      }
     }
   } else
   {
@@ -167,9 +174,9 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   } else
   {
     lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-               [lcpsubtab->tableoflcpvalues.subbucketleft] = lcpvalue;/*XXX*/
-    printf("set lcp[%lu]=%lu\n",
-           lcpsubtab->tableoflcpvalues.subbucketleft,lcpvalue);
+               [lcpsubtab->tableoflcpvalues.subbucketleft] = lcpvalue;
+    GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
+               lcpsubtab->tableoflcpvalues.subbucketleft);
   }
   return minprefixindex;
 }
@@ -256,6 +263,8 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
     outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
       = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.tableoflcpvalues.
                           bucketoflcpvalues) * numoflcpvalues);
+    GT_INITBITTAB(outlcpinfo->lcpsubtab.tableoflcpvalues.isset,
+                  numoflcpvalues);
     outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
     outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = numoflcpvalues;
     outlcpinfo->lcpsubtab.tableoflcpvalues.subbucketleft = 0;
@@ -297,7 +306,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
     if (lcpvalue < (unsigned long) LCPOVERFLOW)
     {
       lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft]
-        = (uint8_t) lcpvalue;/*XXX*/
+        = (uint8_t) lcpvalue;
     } else
     {
       gt_assert(lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue
@@ -308,7 +317,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
           lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue++;
       largelcpvalueptr->position = posoffset+idx;
       largelcpvalueptr->value = lcpvalue;
-      lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;/*XXX*/
+      lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
   }
   outsmalllcpvalues(lcpsubtab->lcp2file,
@@ -382,8 +391,10 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   } else
   {
     gt_free(outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues);
+    gt_free(outlcpinfo->lcpsubtab.tableoflcpvalues.isset);
   }
   outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues = NULL;
+  outlcpinfo->lcpsubtab.tableoflcpvalues.isset = NULL;
   outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = 0;
   gt_free(outlcpinfo);
 }
@@ -396,7 +407,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    const Outlcpinfo *outlcpinfosample)
 {
   int cmp;
-  unsigned long idx, lcpvalue, startpos1, startpos2, currentlcp;
+  unsigned long idx, reallcp, startpos1, startpos2, currentlcp;
 
   startpos1 = gt_suffixsortspace_getdirect(sortedsample,0);
   for (idx=1UL; idx<effectivesamplesize; idx++)
@@ -404,7 +415,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
     startpos2 = gt_suffixsortspace_getdirect(sortedsample,idx);
     cmp = gt_encseq_check_comparetwosuffixes(encseq,
                                              readmode,
-                                             &lcpvalue,
+                                             &reallcp,
                                              false,
                                              false,
                                              maxdepth,
@@ -412,16 +423,17 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                              startpos2,
                                              NULL,
                                              NULL);
-    currentlcp = outlcpinfosample->lcpsubtab.tableoflcpvalues
-                                            .bucketoflcpvalues[idx];
+    gt_assert(GT_ISIBITSET(outlcpinfosample->lcpsubtab.tableoflcpvalues
+                                                      .isset,idx));
+    currentlcp
+      = outlcpinfosample->lcpsubtab.tableoflcpvalues.bucketoflcpvalues[idx];
     gt_assert(cmp <= 0);
-    gt_assert(lcpvalue <= maxdepth);
-    gt_assert(currentlcp <= maxdepth);
-    if (lcpvalue != currentlcp)
+    gt_assert(reallcp <= maxdepth);
+    if (currentlcp > maxdepth || reallcp < currentlcp)
     {
       fprintf(stderr,"idx=%lu,suffixpair=%lu,%lu: "
-                     "lcpvalue = %lu != %lu = currentlcp\n",
-                      idx,startpos1,startpos2,lcpvalue,currentlcp);
+                     "reallcp = %lu != %lu = currentlcp\n",
+                      idx,startpos1,startpos2,reallcp,currentlcp);
       gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos1,20UL);
       fprintf(stderr,"\n");
       gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos2,20UL);
@@ -633,6 +645,7 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
           /* be careful for the parallel version */
       lcpsubtab->lcp2file->smalllcpvalues
         = (uint8_t *) lcpsubtab->lcp2file->reservoir;
+      lcpsubtab->tableoflcpvalues.isset = NULL;
       lcpsubtab->tableoflcpvalues.bucketoflcpvalues
         = (unsigned long *) lcpsubtab->lcp2file->reservoir;
       lcpsubtab->tableoflcpvalues.subbucketleft = 0;
