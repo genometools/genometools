@@ -420,6 +420,7 @@ static int runsuffixerator(bool doesa,
        stored in the .esq file. It would be better to use the
        in memory constructed encseq rather than the one mapped into
        memory. This would require to free the des, sds, and ssptable. */
+    gt_encseq_loader_disable_autosupport(el);
     gt_encseq_loader_do_not_require_des_tab(el);
     gt_encseq_loader_do_not_require_sds_tab(el);
     gt_encseq_loader_do_not_require_ssp_tab(el);
@@ -456,6 +457,7 @@ static int runsuffixerator(bool doesa,
            stored in the .esq file. It would be better to use the
            in memory constructed encseq rather than the one mapped into
            memory. This would require to free the des, sds, and ssptable. */
+        gt_encseq_loader_disable_autosupport(el);
         gt_encseq_loader_do_not_require_des_tab(el);
         gt_encseq_loader_do_not_require_sds_tab(el);
         gt_encseq_loader_do_not_require_ssp_tab(el);
