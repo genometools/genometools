@@ -37,6 +37,7 @@ typedef struct {
   GtEncseqOptions *eopts;
   GtReadmode rm;
   GtStr *dir;
+  unsigned long seq;
 } GtEncseqDecodeArguments;
 
 static void* gt_encseq_decode_arguments_new(void)
@@ -83,6 +84,13 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
                               "sequence character separately",
                               &arguments->singlechars,
                               false);
+  gt_option_parser_add_option(op, option);
+
+  /* -seq */
+  option = gt_option_new_ulong("seq",
+                               "extract sequence with number",
+                               &arguments->seq,
+                               GT_UNDEF_ULONG);
   gt_option_parser_add_option(op, option);
 
   /* -output */
@@ -137,13 +145,26 @@ int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
 static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
                            GtError *err)
 {
-  unsigned long i, j;
+  unsigned long i, j, sfrom, sto;
   int had_err = 0;
   GtEncseqReader *esr;
   gt_assert(encseq);
 
   if (strcmp(gt_str_get(args->mode), "fasta") == 0) {
-    for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
+    if (args->seq != GT_UNDEF_ULONG) {
+      if (args->seq >= gt_encseq_num_of_sequences(encseq)) {
+        gt_error_set(err, "requested sequence %lu exceeds number of sequences "
+                          "(%lu)", args->seq,
+                          gt_encseq_num_of_sequences(encseq));
+        return -1;
+      }
+      sfrom = args->seq;
+      sto = args->seq + 1;
+    } else {
+      sfrom = 0;
+      sto = gt_encseq_num_of_sequences(encseq);
+    }
+    for (i = sfrom; i < sto; i++) {
       unsigned long desclen, startpos, len;
       const char *desc;
       /* XXX: maybe make this distinction in the functions via readmode? */
@@ -156,9 +177,9 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
         len = gt_encseq_seqlength(encseq,
                                   gt_encseq_num_of_sequences(encseq)-1-i);
         startpos = gt_encseq_total_length(encseq)
-                     -(gt_encseq_seqstartpos(encseq,
-                                             gt_encseq_num_of_sequences(
-                                               encseq)-1-i) + len);
+                     - (gt_encseq_seqstartpos(encseq,
+                                              gt_encseq_num_of_sequences(
+                                                encseq)-1-i) + len);
         desc = gt_encseq_description(encseq,
                                      &desclen,
                                      gt_encseq_num_of_sequences(encseq)-1-i);
