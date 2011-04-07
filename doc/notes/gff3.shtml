@@ -1,80 +1,220 @@
-<html><head><title>GFF3</title>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 
-<link rel="stylesheet" type="text/css" href="stylesheet.css"></head>
-<body bgcolor="white">
-<!-- include this into .shtml files -->
+<head>
 
-<table  width="100%" cellspacing="3" cellpadding="3"
-  summary="Site navigation links"> 
+<!-- Meta Data -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="keywords" content="biomedical, sequence, ontology, resources, gff3" />
+<meta name="description" content="Sequence Ontology - Resources - Gff3" />
 
-  <tr>
-    <th bgcolor="99ccff" align="LEFT" valign="TOP" width="25%">
-	<img src="images/black_so_logo.gif" border="0" align="CENTER" alt="SO">
-    <p>
-    <b><a href="http://www.sequenceontology.org">Home Page</a></b><BR>
-    <b><a href="http://www.sequenceontology.org/so.shtml">Description of SO</a></b>
-<b><BR><a href="view_SO.shtml">Views of SO</a></b>
- 
-   <p>
-    Resources
-    <ul>
-	<li><a href="http://sourceforge.net/project/showfiles.php?group_id=72703&package_id=118027">Releases</a></li>
-	<li><a href="http://sourceforge.net/mail/?group_id=72703">Mailing List</a></li>
-	<li><a href="http://sourceforge.net/projects/song">Developers Pages</a></li>
-	<li><a href="http://sourceforge.net/tracker/?group_id=72703&atid=810408">Request a term</a></li>      
-	<li><a href="cvs.shtml">Anonymous CVS download</a></li>
-	<li><a href="http://song.cvs.sourceforge.net">Browse CVS directories</a></li>	   
-	<li><a href="SoStyleGuide.shtml">SO Style Guide</a></li> 
-	<li><a href="SOPresentations.shtml">SO presentations</a></li>
-	<li><a href="so_publications.shtml">SO publications</a></li>
-	<li><a href="SO_meeting.shtml">SO meetings</a></li>
-			
-	<li><a href="so_groups.shtml">Groups using SO</a></li>			
-	<li><a href="so_compliant_formats.shtml">SO Compliant formats</a></li>
-	<ul>
-		<li><a href = "gff3.shtml">GFF3</a></li>
-		<li><a href = "http://www.gmod.org/schema">Chado</a></li>
-		<li><a href = "http://www.fruitfly.org/chaos-xml">Chaos</a></li>
-	</ul>
-	<li><a href="so_compliant_software.shtml">SO Compliant Software</a></li>
-	<li><a href="so_mappings.shtml">SO mappings</a></li>
-	<li><a href="so_how_to.shtml">How to...</a></li>
-	<li><a href="SOFAQ.shtml">FAQ</a></li>
-	<li><a href="credits.shtml">Acknowledgements</a></li>
-		
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="/img/so_icon.png" />
+
+<!-- Stylesheet -->
+<style type="text/css" media="all">@import "css/so_style.css";</style>
+
+<!-- JavaScript -->
+<script src="/js/jquery-1.2.6.min.js" type="text/javascript"></script>
+<script src="/js/jquery-equal_heights.js" type="text/javascript"></script>
+
+
+
+<script type="text/javascript">
+//When the document is ready
+$(document).ready(function(){
+
+  // Toggle Menus
+
+  //First hide the ul elements
+  $('#left_column ul').hide();
+  //If the Header is clicked toggle display
+  //of the following ul
+  $('#left_column h4').not('.toggle_menu').click(
+    function() {
+      $(this).next('ul').toggle();
+    });
+  //If the link with class='toggle_menu'
+  //is clicked, alternate between showing
+  //and hiding all of the ul elements.
+  $('a.toggle_menu').toggle(
+    function(){
+      $('#left_column ul').show();
+    },
+    function(){
+      $('#left_column ul').hide();
+    });
+
+  // Solve the problem of unequal height columns.
+  // Thanks to the Filament Group 
+  // http://www.filamentgroup.com/lab/setting_equal_heights_with_jquery
+
+  $('#content_wrapper').equalHeights();
+
+// jQuery Suckerfish Drop Downs
+
+$("#navlist li").hover(
+    function(){ $("ul", this).fadeIn("fast"); },
+    function() { }
+);
+if (document.all) {
+    $("#navlist li").hoverClass ("sfHover");
+}
+
+$.fn.hoverClass = function(c) {
+    return this.each(function(){
+        $(this).hover(
+            function() { $(this).addClass(c);  },
+            function() { $(this).removeClass(c); }
+        );
+    });
+};
+
+});
+</script>
+
+<!-- Site Title -->
+<title>The Sequence Ontology - Resources - GFF3</title>
+
+</head>
+
+<body>
+
+<div id="page_wrapper">
+
+<div id="header">
+
+<div id="header_left">
+
+</div>
+
+</div>
+
+<div id="menu_bar">
+<div id="navcontainer">
+
+<ul id="navlist" class="nav">
+    <li><a href="/index.html">Home</a></li>
+    <li><a href="/cgi-bin/miso.cgi">Browser</a></li>
+    <li><a href="/wiki">Wiki</a></li>
+    <li><a href="/resources/gff3.html">GFF3</a></li>
+    <li><a href="/resources/gvf.html">GVF</a></li>
+    <li><a href="/resources/index.html">Resources</a></li>
+    <li><a href="/about/index.html">About</a></li>
+    <li><a href="http://sourceforge.net/tracker/?group_id=72703&atid=810408">Request A Term</a></li>
+    <li><a href="/site_map/index.html">Site Map</a></li>
 </ul>
 
 
-    <p>
-    Related Projects
-    </p>
-    <ul>
-      <li><a href="http://www.geneontology.org">Gene Ontology Consortium</a></li>      
-			<li><a href="http://obo.sourceforge.net">Open Biomedical Ontologies</a></li>
-      <li><a href="http://gmod.sourceforge.net/">Generic Model Organism Databases</a></li>
-    </ul>
-
-    <p>
-    Project Members
-    </p>
-    <ul>
-      <li><a href="http://www.wormbase.org">WormBase</a></li>
-      <li><a href="http://www.fruitfly.org">BDGP</a></li>
-      <li><a href="http://www.flybase.org">FlyBase</a></li>
-      <li><a href="http://www.informatics.jax.org">MGI</a></li>
-      <li><a href="http://www.sanger.ac.uk">Sanger Institute</a></li>
-    </ul>
-    
-<td width="75%" valign="TOP">
-
-<div align="center">
-<h1>GENERIC FEATURE FORMAT VERSION 3</h1>
 </div>
-<dl>
-<dt></dt><h3>SUMMARY</h3>
-<pre>Author:  Lincoln Stein
-Date:    23 May 2007
-Version: 1.13
+</div>
+
+<div id="breadcrumb">
+<p>
+     <a href="/">Home</a>  > <a href="/resources/">Resources</a>  > GFF3
+</p>
+</div>
+
+<div id="content_wrapper">
+
+<!-- ====================== BEGIN RIGHT COLUMN ======================== -->
+
+<div id="right_column">
+<div class="column_padding">
+
+<h3>News</h3>
+
+<ul>
+     <li>
+     <b>March 2011</b> SOBA workshop presented at <a href="http://gmod.org/wiki/2011_GMOD_Spring_Training">GMOD Spring Training</a>.
+     </li>
+     <li>
+     <b>Feb 11th 2011</b> The CVS repository on <a href="http://sourceforge.net/blog/2011/01/">sourceforge</a> is back online after the hacking incident. 
+     </li>
+     <li>
+        <b>January 2011</b> SO presented at Synthetic Biology Workshop.
+     </li><li>
+        <b>December 2010</b> <a href="http://www.sequenceontology.org/resources/10Gen.html">10Gen Data Set v1.04 </a>available.
+    </li><b>  
+     </b><li>
+        <b>December 2010</b> <a href="http://www.sequenceontology.org/resources/gvf.html">GVF Specification v1.04 </a>available.
+    </li><b>  
+     </b><li>
+        <b>November 2010</b> <a href="https://sourceforge.net/projects/song/files/">Release 2.4.4 </a>available.
+    </li><b>  
+</b><li>
+<b>September 2010</b>
+<a href="http://genomebiology.com/2010/11/8/R88/abstract">A standard variation file format for human genome sequences</a> in Genome Biology.
+</li>
+<li>
+      <b>August 2010</b>
+'Toward a Richer Representation of Sequence Variation in the Sequence Ontology' with Mike Bada accepted by <a href="http://www.unbsj.ca/sase/csas/data/aimm2010/"> AIMM Workshop.</a>
+</li>
+<b>    </b><li>
+<b>        <b>June 2010</b> <a href="https://sourceforge.net/projects/song/files/">Release 2.4.3 </a>available.
+    </b></li>
+<b>    </b><li>
+        <b>May 2010 </b><a href="http://nar.oxfordjournals.org/cgi/content/abstract/gkq426?%0D%0Aijkey=EfNVVtN85AhQkRu&amp;keytype=ref">SOBA paper</a> available from Nucleic Acids Research.
+    </li>
+<b>    </b><li>
+       <b>April 2010</b> <a href="https://sourceforge.net/projects/song/files/">Release 2.4.2 </a>available.
+    </li><b> 
+    </b><li>
+       <b>March 2010</b> New SO paper out: 'Evolution of the Sequence Ontology terms and relationships' in the <a href="http://dx.doi.org/10.1016/j.jbi.2010.03.002"> Journal of Biomedical Informatics.</a> A pre-print of this paper is available <a href="http://www.sequenceontology.org/resources/pre-prints/jbi-preprint.pdf"> here.</a>
+    </li>
+<b>    </b><li>
+      <b>February 2010:</b> Sequence Ontology Bioinformatics Analysis <a href="http://www.sequenceontology.org/cgi-bin/soba.cgi">(SOBA)</a> is available. Genome annotations in GFF3 can be uploaded and analysed. 
+    </li>
+<b>    </b><li>
+        <b>2009 December</b> Release 2.4.1 available.
+    </li>
+<b>    </b><li>
+       <b>2009 October</b> Release 2.4 available.
+    </li>
+<b>    </b><li>
+        <b>2009 July</b> SO presented at the International Conference of Biomedical Ontology.
+    </li>
+<b>    </b><li>
+        <b>2009 June</b> Chris Conley -Undergrad from BYU joins SO for the summer
+    </li>
+<b>    </b><li>
+       <b>2009 May</b> Graduate student, John Naylor joins SO.
+    </li>
+<b>    </b><li>
+       <b>2009 February 22:</b> A new SO related paper <a href="http://www.biomedcentral.com/1471-2105/10/67"> Quantitative
+        Measures for the Management and Comparison of Annotated Genomes</a> K Eilbeck
+        <i>et. al.</i>
+    </li>
+<b>    </b><li>
+        <b>2009 January 4-6:</b> SO represented at the <a href="http://roc.bgsu.edu/ROC_Cambridge/ROC_Cambridge_2009.html">RNA
+        Ontology consortium meeting</a> in Cambridge UK.
+    </li>
+<b>    </b><li>
+       <b>2008 December 1:</b> A paper from the <a href="http://www.biosapiens.info/page.php?page=home%3E">BioSapiens
+        project</a> describing protein features in SO is published.<a href="http://bioinformatics.oxfordjournals.org/cgi/content/full/24/23/2767">
+        The Protein Feature Ontology: A tool for the unification of
+        protein feature annotations.</a> GA Reeves <i>et. al.</i>
+    </li>
+</ul>
+
+</div> <!-- inner_padding -->
+</div> <!-- right_column -->
+
+<!-- ======================= END RIGHT COLUMN ======================== -->
+
+<div id="main_content">
+<div class="main_padding">
+
+<!-- ==================== BEGIN MAIN CONTENT AREA ====================== -->
+
+<h3>GENERIC FEATURE FORMAT VERSION 3</h3>
+
+<br />
+<h4>SUMMARY</h4>
+
+<div class='code'>Author:  Lincoln Stein
+Date:    15 December 2010
+Version: 1.20
 
 Although there are many richer ways of representing genomic features
 via XML, the stubborn persistence of a variety of ad-hoc tab-delimited
@@ -88,7 +228,7 @@ and they needed to extend it.  The proposed GFF3 format addresses the
 most common extensions to GFF, while preserving backward compatibility
 with previous formats. The new format:
 
-    1) adds a mechanism for representing more than one level 
+    1) adds a mechanism for representing more than one level
        of hierarchical grouping of features and subfeatures.
     2) separates the ideas of group membership and feature name/id
     3) constrains the feature type field to be taken from a controlled
@@ -98,25 +238,26 @@ with previous formats. The new format:
     5) provides an explicit convention for pairwise alignments
     6) provides an explicit convention for features that occupy disjunct regions
 
-</pre>
+</div>
 
-<dd>
+<br />
+<h4>Online Validator</h4>
 
-</dd><dt></dt><h3>Online Validator</h3>
-
-<pre>
+<div class='code'>
     An online GFF3 validator is available at
-    http://dev.wormbase.org/db/validate_gff3/validate_gff3_online. It
-    is limited to files of 3,000,000 lines or less. If you wish to
+    http://modencode.oicr.on.ca/cgi-bin/validate_gff3_online
+    It is limited to files of 3,000,000 lines or less. If you wish to
     validate larger files, please use the command-line version which
     can be downloaded from the same site.
-    
-</pre>
 
-<dd></dd>
+</div>
 
-<dt></dt><h3>DESCRIPTION OF THE FORMAT</h3>
-<pre>
+
+
+<br />
+<h4>DESCRIPTION OF THE FORMAT</h4>
+
+<div class='code'>
 The format consists of 9 columns, separated by tabs (NOT spaces).  The
 following characters must be escaped using URL escaping conventions
 (%XX hex codes):
@@ -128,7 +269,7 @@ following characters must be escaped using URL escaping conventions
 
 The following characters have reserved meanings and must be escaped
 when used in other contexts:
-    
+
     ;  (semicolon)
     =  (equals)
     %  (percent)
@@ -138,7 +279,7 @@ when used in other contexts:
 Unescaped quotation marks, backslashes and other ad-hoc escaping
 conventions that have been added to the GFF format are explicitly
 forbidden
-    
+
 Note that unescaped spaces are allowed within fields, meaning that
 parsers must split on tabs, not spaces.
 
@@ -164,16 +305,20 @@ composite type that is a subclass of the type in the type column.
 
 Column 3: "type"
 
-The type of the feature (previously called the "method").  This is
-constrained to be either: (a) a term from the "lite" sequence
-ontology, SOFA; or (b) a SOFA accession number.  The latter
-alternative is distinguished using the syntax SO:000000.
+The type of the feature (previously called the "method").  This is constrained
+to be either: (a)a term from the "lite" version of the Sequence Ontology -
+SOFA, a term from the full Sequence Ontology - it must be an is_a child of
+sequence_feature (SO:0000110) or (c) a SOFA or SO accession number.  The
+latter alternative is distinguished using the syntax SO:000000.
 
 Columns 4 &amp; 5: "start" and "end"
 
 The start and end of the feature, in 1-based integer coordinates,
 relative to the landmark given in column 1.  Start is always less than
-or equal to end.
+or equal to end.  For features that cross the origin of a circular feature 
+(e.g. most bacterial genomes, plasmids, and some viral genomes), the 
+requirement for start to be less than or equal to end is satisfied by
+making end = the position of the end + the length of the landmark feature.
 
 For zero-length features, such as insertion sites, start equals end
 and the implied site is to the right of the indicated base in the
@@ -223,11 +368,15 @@ Spaces are allowed in this field, but tabs must be replaced with the
 
 These tags have predefined meanings:
 
-    ID	   Indicates the name of the feature.  IDs must be unique
-	   within the scope of the GFF file.
+    ID	   Indicates the ID of the feature.  IDs for each feature 
+           must be unique within the scope of the GFF file.  In the
+           case of discontinuous features (i.e. a single feature that
+           exists over multiple genomic locations) the same ID may
+           appear on multiple lines.  All lines that share an ID 
+           collectively represent a single feature.
 
     Name   Display name for the feature.  This is the name to be
-           displayed to the user.  Unlike IDs, there is no requirement
+	   displayed to the user.  Unlike IDs, there is no requirement
 	   that the Name be unique within the file.
 
     Alias  A secondary name for the feature.  It is suggested that
@@ -239,28 +388,28 @@ These tags have predefined meanings:
     Parent Indicates the parent of the feature.  A parent ID can be
 	   used to group exons into transcripts, transcripts into
 	   genes, an so forth.  A feature may have multiple parents.
-	   Parent can *only* be used to indicate a partof 
+	   Parent can *only* be used to indicate a partof
 	   relationship.
 
     Target Indicates the target of a nucleotide-to-nucleotide or
 	   protein-to-nucleotide alignment.  The format of the
 	   value is "target_id start end [strand]", where strand
-	   is optional and may be "+" or "-".  If the target_id 
+	   is optional and may be "+" or "-".  If the target_id
 	   contains spaces, they must be escaped as hex escape %20.
 
     Gap   The alignment of the feature to the target if the two are
-          not collinear (e.g. contain gaps).  The alignment format is
-	  taken from the CIGAR format described in the 
+	  not collinear (e.g. contain gaps).  The alignment format is
+	  taken from the CIGAR format described in the
 	  Exonerate documentation.
 	  (http://cvsweb.sanger.ac.uk/cgi-bin/cvsweb.cgi/exonerate
-          ?cvsroot=Ensembl).  See "THE GAP ATTRIBUTE" for a description
+	  ?cvsroot=Ensembl).  See "THE GAP ATTRIBUTE" for a description
 	  of this format.
 
-    Derives_from  
-          Used to disambiguate the relationship between one
-          feature and another when the relationship is a temporal
-          one rather than a purely structural "part of" one.  This
-          is needed for polycistronic genes.  See "PATHOLOGICAL CASES"
+    Derives_from
+	  Used to disambiguate the relationship between one
+	  feature and another when the relationship is a temporal
+	  one rather than a purely structural "part of" one.  This
+	  is needed for polycistronic genes.  See "PATHOLOGICAL CASES"
 	  for further discussion.
 
     Note   A free text note.
@@ -270,13 +419,18 @@ These tags have predefined meanings:
 	   details on the format.
 
     Ontology_term  A cross reference to an ontology term.  See
-           the section "Ontology Associations and Db Cross References"
+	   the section "Ontology Associations and Db Cross References"
 	   for details.
+
+    Is_circular  A flag to indicate whether a feature is circular.
 
 Multiple attributes of the same type are indicated by separating the
 values with the comma "," character, as in:
 
        Parent=AF2312,AB2812,abc-3
+
+In addition to Parent, the Alias, Note, DBxref and Ontology_term
+attributes can have multiple values.
 
 Note that attribute names are case sensitive.  "Parent" is not the
 same as "parent".
@@ -285,11 +439,17 @@ All attributes that begin with an uppercase letter are reserved for
 later use.  Attributes that begin with a lowercase letter can be used
 freely by applications.
 
-</pre>
-<dd>
-</dd><dt></dt><h3>THE CANONICAL GENE</h3>
-<img src="gff3_files/figure1.png" alt="Figure1" align="middle" border="1">FIGURE 1<p>
-</p><pre>This section describes the representation of a protein-coding gene in
+</div>
+
+<br />
+<h4>THE CANONICAL GENE</h4>
+
+<img src="/img/figure1.png" alt="Figure1" style="padding: 5px; border: 1px solid" />
+<p>FIGURE 1</p>
+
+<br />
+
+<div class='code'>This section describes the representation of a protein-coding gene in
 GFF3. To illustrate how a canonical gene is represented, consider
 Figure 1 (figure1.png).  This indicates a gene named EDEN
 extending from position 1000 to position 9000.  It encodes three
@@ -329,12 +489,13 @@ Here is how this gene should be described using GFF3:
 18  ctg123 . CDS	     7000  7600	 .  +  0  ID=cds00002;Parent=mRNA00002;Name=edenprotein.2
 
 19  ctg123 . CDS             3301  3902  .  +  0  ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
-20  ctg123 . CDS	     5000  5500	 .  +  2  ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
-21  ctg123 . CDS	     7000  7600	 .  +  2  ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
+20  ctg123 . CDS	     5000  5500	 .  +  1  ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
+21  ctg123 . CDS	     7000  7600	 .  +  1  ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
 22  ctg123 . CDS             3391  3902  .  +  0  ID=cds00004;Parent=mRNA00003;Name=edenprotein.4
-23  ctg123 . CDS	     5000  5500	 .  +  2  ID=cds00004;Parent=mRNA00003;Name=edenprotein.4
-24  Ctg123 . CDS	     7000  7600	 .  +  2  ID=cds00004;Parent=mRNA00003;Name=edenprotein.4
+23  ctg123 . CDS	     5000  5500	 .  +  1  ID=cds00004;Parent=mRNA00003;Name=edenprotein.4
+24  ctg123 . CDS	     7000  7600	 .  +  1  ID=cds00004;Parent=mRNA00003;Name=edenprotein.4
+
 
 Lines beginning with ## are pragmas that provide meta-information
 about the document.  Blank lines and lines beginning with a single #
@@ -376,7 +537,7 @@ meaning outside the file in which they reside.  Hence, a slightly
 simplified version of this file would look like this:
 
   ##gff-version   3
-  ##sequence-region   ctg123 1 1497228       
+  ##sequence-region   ctg123 1 1497228
   ctg123 . gene            1000  9000  .  +  .  ID=gene00001;Name=EDEN
   ctg123 . TF_binding_site 1000  1012  .  +  .  Parent=gene00001
   ctg123 . mRNA            1050  9000  .  +  .  ID=mRNA00001;Parent=gene00001
@@ -395,13 +556,13 @@ simplified version of this file would look like this:
   ctg123 . CDS             5000  5500  .  +  0  ID=cds00002;Parent=mRNA00002
   ctg123 . CDS		   7000  7600  .  +  0  ID=cds00002;Parent=mRNA00002
   ctg123 . CDS             3301  3902  .  +  0  ID=cds00003;Parent=mRNA00003
-  ctg123 . CDS		   5000  5500  .  +  2  ID=cds00003;Parent=mRNA00003
-  ctg123 . CDS		   7000  7600  .  +  2  ID=cds00003;Parent=mRNA00003
+  ctg123 . CDS		   5000  5500  .  +  1  ID=cds00003;Parent=mRNA00003
+  ctg123 . CDS		   7000  7600  .  +  1  ID=cds00003;Parent=mRNA00003
   ctg123 . CDS             3391  3902  .  +  0  ID=cds00004;Parent=mRNA00003
-  ctg123 . CDS		   5000  5500  .  +  2  ID=cds00004;Parent=mRNA00003
-  ctg123 . CDS		   7000  7600  .  +  2  ID=cds00004;Parent=mRNA00003
+  ctg123 . CDS		   5000  5500  .  +  1  ID=cds00004;Parent=mRNA00003
+  ctg123 . CDS		   7000  7600  .  +  1  ID=cds00004;Parent=mRNA00003
 
-NOTE 1 - SOFA IDs: If using the SOFA IDs rather than the short names
+NOTE 1 - SO or SOFA IDs: If using the SO (or SOFA) IDs rather than the short names1
 ("mRNA" etc), use the following mappings:
 
     gene		SO:0000704
@@ -412,10 +573,10 @@ NOTE 1 - SOFA IDs: If using the SOFA IDs rather than the short names
 Other mRNA parts that you might wish to use are
 
     intron	        SO:0000188 (redundant with exon)
-    polyA_sequence	SO:0000610 (part of the three_prime_utr)
+    polyA_sequence	SO:0000610 (part of the three_prime_UTR)
     polyA_site		SO:0000553 (part of the gene)
-    five_prime_utr	SO:0000204
-    three_prime_utr	SO:0000205
+    five_prime_UTR	SO:0000204
+    three_prime_UTR	SO:0000205
 
 NOTE 2 - "Orphan" exons CDSs, and other features.  Ab initio gene
 prediction programs call hypothetical exons and CDS's that are
@@ -443,19 +604,39 @@ if the locations of the start and stop codons are known, the first
 three base pairs of the CDS should correspond to the start codon and
 the last three correspond the stop codon.
 
-</pre>
-<dd>
+</div>
 
-</dd><dt></dt><h3>REPRESENTING SPLICED NON-CODING TRANSCRIPTS</h3>
-<pre>For spliced non-coding transcripts, such as those produced by some
+<br />
+
+<h4>CIRCULAR GENOMES</h4>
+<div class='code'>For a circular genome, the landmark feature should include
+Is_circular=true in column 9.  In the example below, from bacteriophage f1, 
+gene II extends across the origin from positions 6477-831.  The feature 
+end is given as length of the landmark feature, J02448, plus the distance 
+from the origin to the end of gene II (6407 + 831 = 7238).
+
+
+    ##gff-version 3
+    # organism Enterobacteria phage f1
+    # Note Bacteriophage f1, complete genome.
+    J02448	GenBank	region	1   	6407	.	+	.	ID=J02448;Name=J02448;Is_circular=true;
+    J02448	GenBank	CDS	    6006	7238	.	+	0	ID=geneII;Name=II;Note=protein II;
+
+</div>
+
+<br />
+<h4>REPRESENTING SPLICED NON-CODING TRANSCRIPTS</h4>
+
+<div class='code'>For spliced non-coding transcripts, such as those produced by some
 processed snRNAs and viruses, use a parent feature of
 "noncoding_transcript" and a child of "exon."
-</pre>
-<dd>
+</div>
 
-</dd><dt></dt><h3>PARENT (PART-OF) RELATIONSHIPS</h3>
-<dd>
-<pre>The reserved Parent attribute can be used to establish a part-of
+
+<br />
+<h4>PARENT (PART-OF) RELATIONSHIPS</h4>
+
+<div class='code'>The reserved Parent attribute can be used to establish a part-of
 relationship between two features.  A feature that has the Parent
 attribute set is interpreted as asserting that it is a part of the
 specified Parent feature.
@@ -470,18 +651,20 @@ The GFF3 format does not enforce a rule in which features must be
 wholly contained within the location of their parents, since some
 elements of the Sequence Ontology (e.g. enhancers in genes) allow for
 distant cis relationships.
-</pre>
-</dd>
+</div>
 
-<dt></dt><h3>THE GAP ATTRIBUTE</h3>
-<dd>
-<pre>Protein and nucleotide alignment features typically consist of two
+
+<br />
+<h4>THE GAP ATTRIBUTE</h4>
+
+<div class='code'>
+Protein and nucleotide alignment features typically consist of two
 sequences, the reference sequence and the "target", and are not always
 colinear.  For example, consider the following alignment between an
 EST ("EST23") and a segment of the genome ("Chr3"):
 
-        Chr3  (reference)  1 CAAGACCTAAACTGGAT-TCCAAT  23
-        EST23 (target)     1 CAAGACCT---CTGGATATCCAAT  21
+	Chr3  (reference)  1 CAAGACCTAAACTGGAT-TCCAAT  23
+	EST23 (target)     1 CAAGACCT---CTGGATATCCAAT  21
 
 Previous versions of the GFF format would represent this alignment as
 three colinear segments, but this made it difficult to reconstruct the
@@ -494,18 +677,18 @@ code:
        Code      Operation
        ----      ---------
 
-        M        match
-        I        insert a gap into the reference sequence
-        D        insert a gap into the target (delete from reference)
-        F        frameshift forward in the reference sequence
-        R        frameshift reverse in the reference sequence
+	M        match
+	I        insert a gap into the reference sequence
+	D        insert a gap into the target (delete from reference)
+	F        frameshift forward in the reference sequence
+	R        frameshift reverse in the reference sequence
 
 In the alignment between EST23 and Chr3 shown above, Chr3 is the
 reference sequence referred to in the first column of the GFF3 file,
 and EST23 is the sequence referred to by the Target attribute.  This
 gives a Gap string of "M8 D3 M6 I1 M6". The full GFF match line will
 read:
-          
+
    Chr3 . Match 1 23 . . . ID=Match1;Target=EST23 1 21;Gap=M8 D3 M6 I1 M6
 
 For protein to nucleotide matches, the M, I and D operations apply to
@@ -530,16 +713,18 @@ backwards.  Examples:
 
  100 atgaaggag---gttattgaatgtcggcggt     Gap=M3 I1 M2 F1 M4
    1 M..K..E..V..V..I...
-                        N..V..G..G
+			N..V..G..G
 
 
  100 atgaaggag---gttataatgtcggcggt        Gap=M3 I1 M2 R1 M4
    1 M..K..E..V..V..I.
-                      N..V..G..G
-</pre>
-</dd><dt></dt><h3>ALIGNMENTS</h3>
-<dd>
-<pre>
+		      N..V..G..G
+</div>
+
+<br />
+<h4>ALIGNMENTS</h4>
+
+<div class='code'>
 In the SO, an alignment between the reference sequence and another
 sequence is called a "match".  In addition to the generic "match"
 type, there are the subclasses "cDNA_match," "EST_match,"
@@ -557,14 +742,19 @@ on the reference sequence.  Figure 2 shows the same gene as before,
 but with a new track added showing an alignment of a sequenced cDNA to
 the genome.  For the purposes of illustration, we have shown the
 regions of alignment to be exact across the three exons of the second
-spliced transcript (EDEN.2).  
-<img src="gff3_files/figure2.png" alt="Figure2" align="middle" border="1">FIGURE 2<p>
+spliced transcript (EDEN.2).
 
+</div>
+
+<img src="/img/figure2.png" alt="Figure2" style="padding: 5px; border: 1px solid" />
+<p>FIGURE 2</p>
+
+<div class='code'>
 The recommended way to represent this alignment is with a single
 feature of type "cDNA_match" and a Gap attribute that indicates that
 the alignment is in three segments:
 
- ctg123 . cDNA_match 1050  9000  6.2e-45  +  . 
+ ctg123 . cDNA_match 1050  9000  6.2e-45  +  .
     ID=match00001;Target=cdna0123 12 2964;Gap=M451 D3499 M501 D1499 M2001
 
 Parsed out, the Target attribute indicates that the sequence named
@@ -614,11 +804,11 @@ to the annotation.  The two ESTs, mjm1123.5 and mum1123.3 correspond
 to 5' and 3' EST reads from the same cDNA clone.  The following GFF3
 lines describe them:
 
- ctg123 . EST_match 1200  3200  2.2e-30  +  . 
-     ID=match00002;Target=mjm1123.5 5 106;Gap=M301 I1499 M201
+ ctg123 . EST_match 1200  3200  2.2e-30  +  .
+     ID=match00002;Target=mjm1123.5 5 506;Gap=M301 D1499 M201
 
- ctg123 . EST_match 5400  9000  7.4e-32  -  . 
-     ID=match00003;Target=mjm1123.3 1 502;Gap=M101 I1499 M401
+ ctg123 . EST_match 7000  9000  7.4e-32  -  . 
+     ID=match00003;Target=mjm1123.3 1 502;Gap=M101 D1499 M401 
 
 Please note that the subsequence indicated by the Target always uses
 the coordinate system of the EST, regardless of the direction of the
@@ -636,18 +826,21 @@ match_part can be used as a subpart of any type of match.
 
  ctg123 . cDNA_match 1200  9000  .        .  . ID=cDNA00001
 
- ctg123 . match_part  1200  3200  2.2e-30  +  . 
-      ID=match00002;Parent=cDNA00001;Target=mjm1123.5 5 106;Gap=M301 I1499 M201
+ ctg123 . match_part  1200  3200  2.2e-30  +  .
+      ID=match00002;Parent=cDNA00001;Target=mjm1123.5 5 506;Gap=M301 D1499 M201
 
- ctg123 . match_part  5400  9000  7.4e-32  -  . 
-      ID=match00003;Parent=cDNA00001;Target=mjm1123.3 1 502;Gap=M101 I1499 M401
+ ctg123 . match_part  7000  9000  7.4e-32  -  .
+      ID=match00003;Parent=cDNA00001;Target=mjm1123.3 1 502;Gap=M101 D1499 M401 
 
-</p></pre>
-<img src="gff3_files/figure3.png" alt="Figure3" align="middle" border="1">FIGURE 3<p>
+</div>
 
-</p></dd><dt></dt><h3>TRANSCRIPT-RELATIVE ALIGNMENTS</h3>
-<dd>
-<pre>The representation of strandedness in nucleotide-to-nucleotide and
+<img src="/img/figure3.png" alt="Figure3" style="padding: 5px; border: 1px solid" />
+<p>FIGURE 3</p>
+
+<br />
+<h4>TRANSCRIPT-RELATIVE ALIGNMENTS</h4>
+
+<div class='code'>The representation of strandedness in nucleotide-to-nucleotide and
 protein-to-nucleotide alignments is a common source of confusion in
 GFF files.  This section will attempt to explain it.
 
@@ -657,7 +850,7 @@ Consider a pair of EST matches to the genome:
 
  =============================  genome
      -------------------&gt;       transcript
-     ------&gt;        &lt;----       
+     ------&gt;        &lt;----
       EST_A (5')    EST_B (3')
 
 EST_A is a 5' EST and its sequence (as represented in a FASTA file,
@@ -688,7 +881,7 @@ Here is the opposite case:
 
  =============================  genome
      &lt;--------------------      transcript
-      ------&gt;        &lt;----       
+      ------&gt;        &lt;----
       EST_D (3')  EST_C (5')
 
 In this case, the 5' EST_C aligns to the reverse complement of the
@@ -710,7 +903,7 @@ EST_D aligns to the minus strand of the transcript.
   alignment indicates that the reference sequence and the target
   sequence can be aligned directly.  A +/- or -/+ alignment indicates
   that the target must be reverse complemented in order to align to
-  the plus strand of the reference sequence.  
+  the plus strand of the reference sequence.
   ===================================================================
 
 A similar rule applies to TBLASTX alignments, which rely on matching
@@ -753,11 +946,13 @@ aligns to a minus strand feature of genome Y.  The second match
 indicates that a minus strand feature of genome X aligns to a plus
 strand feature of genome Y.  In both cases, the result is to align the
 plus strand of genome X to the minus strand of genome Y.
-</pre>
-</dd>
+</div>
 
-<dt></dt><h3>ONTOLOGY ASSOCIATIONS AND DB CROSS REFERENCES</h3>
-<pre>Two reserved attributes, Ontology_term and Dbxref, can be used to
+
+<br />
+<h4>ONTOLOGY ASSOCIATIONS AND DB CROSS REFERENCES</h4>
+
+<div class='code'>Two reserved attributes, Ontology_term and Dbxref, can be used to
 establish links between a GFF3 feature and a data record contained in
 another database.  Ontology_term is reserved for associations to
 ontologies, such as the Gene Ontology.  Dbxref is used for all other
@@ -797,100 +992,134 @@ Here are some common examples:
 * a Ontology_term referring to a GO association
 
   Ontology_term="GO:0046703"
-</pre>
+</div>
 
-<dt></dt><h3>OTHER SYNTAX</h3>
-<pre>
+<br />
+<h4>OTHER SYNTAX</h4>
+
+<div class='code'>
 Comments are preceded by the # symbol.  Meta-data and directives are
 preceded by ##.  The following directives are recognized:
 
   ##gff-version 3
 	The GFF version, always 3 in this spec.  This directive must
- 	be present, and must be the topmost line of the file.
+	be present, and must be the topmost line of the file.
 
   ##sequence-region seqid start end
-        The sequence segment referred to by this file, in the format
-        "seqid start end".  This element is optional, but strongly
-        encouraged because it allows parsers to perform bounds
-        checking on features. There may be multiple ##sequence-region
-        directives, each corresponding to one of the reference
-        sequences referred to in the body of the file.
+	The sequence segment referred to by this file, in the format
+	"seqid start end".  This element is optional, but strongly
+	encouraged because it allows parsers to perform bounds
+	checking on features. There may be multiple ##sequence-region
+	directives, each corresponding to one of the reference
+	sequences referred to in the body of the file.
 
   ##feature-ontology URI
-        This directive indicates that the GFF3 file uses the ontology 
-        of feature types located at the indicated URI or URL.
-        Multiple URIs may be added, in which case they are
-        merged (or raise an exception if they cannot be merged).  The
-        URIs for the released sequence ontologies are:
+	This directive indicates that the GFF3 file uses the ontology
+	of feature types located at the indicated URI or URL.
+	Multiple URIs may be added, in which case they are
+	merged (or raise an exception if they cannot be merged).  The
+	URIs for the released sequence ontologies are:
 
-        Release 1: 5/12/2004
-        http://song.cvs.sourceforge.net/*checkout*/song/ontology/sofa.obo?revision=1.6
+	Release 1: 5/12/2004
+	http://song.cvs.sourceforge.net/*checkout*/song/ontology/sofa.obo?revision=1.6
 
-        Release 2: 5/16/2005
-        http://song.cvs.sourceforge.net/*checkout*/song/ontology/sofa.obo?revision=1.12
+	Release 2: 5/16/2005
+	http://song.cvs.sourceforge.net/*checkout*/song/ontology/sofa.obo?revision=1.12i
+    Release 2.4.3 06/01/2010
+    SO:
+    http://song.cvs.sourceforge.net/viewvc/*checkout*/song/ontology/so.obo?revision=1.263
+    SOFA:
+    http://song.cvs.sourceforge.net/viewvc/*checkout*/song/ontology/sofa.obo?revision=1.217
 
-        This directive may occur several times per file.  If no
-        feature ontology is specified, then the most recent release of the
-        Sequence Ontology is assumed.
-				
-        If multiple directives are given and a feature type is matched
-        by multiple ontologies, the matching ontology included by the
-        directive highest in the file wins the reference.  The Sequence
-        Ontology itself is always referenced last.
+    Releases occur every two months for SO and SOFA. 
 
-        The content referenced by URI must be in OBO or DAG-Edit
-        format.
+    The repository for SO releases is here:
+    http://sourceforge.net/projects/song/files/Sequence%20Ontology/
+
+    The repository for SOFA releases is here:
+    http://sourceforge.net/projects/song/files/SO_Feature_Annotation/
+
+	This directive may occur several times per file.  If no
+	feature ontology is specified, then the most recent release of the
+	Sequence Ontology is assumed.
+
+	If multiple directives are given and a feature type is matched
+	by multiple ontologies, the matching ontology included by the
+	directive highest in the file wins the reference.  The Sequence
+	Ontology itself is always referenced last.
+
+	The content referenced by URI must be in OBO or DAG-Edit
+	format.
 
 
   ##attribute-ontology URI
-        This directive indicates that the GFF3 uses the ontology of
-        attribute names located at the indicated URI or URL.  This
-        directive may appear multiple times to load multiple URIs, in
-        which case they are merged (or raise an exception if merging
-        is not possible).  Currently no formal attribute ontologies
-        exist, so this attribute is for future extension.
+	This directive indicates that the GFF3 uses the ontology of
+	attribute names located at the indicated URI or URL.  This
+	directive may appear multiple times to load multiple URIs, in
+	which case they are merged (or raise an exception if merging
+	is not possible).  Currently no formal attribute ontologies
+	exist, so this attribute is for future extension.
 
   ##source-ontology URI
-        This directive indicates that the GFF3 uses the ontology of
-        source names located at the indicated URI or URL.  This
-        directive may appear multiple times to load multiple URIs, in
-        which case they are merged (or raise an exception if merging
-        is not possible).  Currently no formal source ontologies
-        exist, so this attribute is for future extension.
+	This directive indicates that the GFF3 uses the ontology of
+	source names located at the indicated URI or URL.  This
+	directive may appear multiple times to load multiple URIs, in
+	which case they are merged (or raise an exception if merging
+	is not possible).  Currently no formal source ontologies
+	exist, so this attribute is for future extension.
+
+  ##species NCBI_Taxonomy_URI
+
+	This directive indicates the species that the annotations
+	apply to. The preferred format is a NCBI URL that points to
+	the relevant species page in either of the following formats:
+
+	http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=6239
+	http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?name=Caenorhabditis+elegans
+
+  ##genome-build source buildName
+
+	The genome assembly build name used for the coordinates given
+	in the file. Please specify the source of the assembly as well
+	as its name. Examples (the parentheses are comments).
+
+	##genome-build NCBI B36           (human)
+	##genome-build WormBase ws110     (worm)
+	##genome-build FlyBase  r4.1      (drosophila)
 
   ###
-        This directive (three # signs in a row) indicates that all
-        forward references to feature IDs that have been seen to this
-        point have been resolved.  After seeing this directive, a
-        program that is processing the file serially can close off any
-        open objects that it has created and return them, thereby
-        allowing iterative access to the file.  Otherwise, software
-        cannot know that a feature has been fully populated by its
-        subfeatures until the end of the file has been reached.  It
-        is recommended that complex features, such as the canonical
-        gene, be terminated with the ### notation.
+	This directive (three # signs in a row) indicates that all
+	forward references to feature IDs that have been seen to this
+	point have been resolved.  After seeing this directive, a
+	program that is processing the file serially can close off any
+	open objects that it has created and return them, thereby
+	allowing iterative access to the file.  Otherwise, software
+	cannot know that a feature has been fully populated by its
+	subfeatures until the end of the file has been reached.  It
+	is recommended that complex features, such as the canonical
+	gene, be terminated with the ### notation.
 
    ##FASTA
-        This notation indicates that the annotation portion of the
-        file is at an end and that the remainder of the file
-        contains one or more sequences (nucleotide or protein)
-        in FASTA format.  This allows features and sequences to
-        be bundled together.  Example:
+	This notation indicates that the annotation portion of the
+	file is at an end and that the remainder of the file
+	contains one or more sequences (nucleotide or protein)
+	in FASTA format.  This allows features and sequences to
+	be bundled together.  Example:
 
    ##gff-version   3
    ##sequence-region   ctg123 1 1497228
    ctg123 . gene            1000  9000  .  +  .  ID=gene00001;Name=EDEN
    ctg123 . TF_binding_site 1000  1012  .  +  .  ID=tfbs00001;Parent=gene00001
    ctg123 . mRNA            1050  9000  .  +  .  ID=mRNA00001;Parent=gene00001;Name=EDEN.1
-   ctg123 . 5'-UTR          1050  1200  .  +  .  Parent=mRNA00001
-   ctg123 . CDS             1201  1500  .  +  0  Parent=mRNA00001
-   ctg123 . CDS             3000  3902  .  +  0  Parent=mRNA00001
-   ctg123 . CDS             5000  5500  .  +  0  Parent=mRNA00001
-   ctg123 . CDS             7000  7600  .  +  0  Parent=mRNA00001
-   ctg123 . 3'-UTR          7601  9000  .  +  .  Parent=mRNA00001
-   ctg123 . cDNA_match 1050  1500  5.8e-42  +  . ID=match00001;Target=cdna0123+12+462
-   ctg123 . cDNA_match 5000  5500  8.1e-43  +  . ID=match00001;Target=cdna0123+463+963
-   ctg123 . cDNA_match 7000  9000  1.4e-40  +  . ID=match00001;Target=cdna0123+964+2964
+   ctg123 . five_prime_UTR  1050  1200  .  +  .  Parent=mRNA00001
+   ctg123 . CDS             1201  1500  .  +  0  ID=cds00001;Parent=mRNA00001
+   ctg123 . CDS             3000  3902  .  +  0  ID=cds00001;Parent=mRNA00001
+   ctg123 . CDS             5000  5500  .  +  0  ID=cds00001;Parent=mRNA00001
+   ctg123 . CDS             7000  7600  .  +  0  ID=cds00001;Parent=mRNA00001
+   ctg123 . three_prime_UTR 7601  9000  .  +  .  Parent=mRNA00001
+   ctg123 . cDNA_match 	    1050  1500  5.8e-42  +  . ID=match00001;Target=cdna0123+12+462
+   ctg123 . cDNA_match 	    5000  5500  8.1e-43  +  . ID=match00001;Target=cdna0123+463+963
+   ctg123 . cDNA_match 	    7000  9000  1.4e-40  +  . ID=match00001;Target=cdna0123+964+2964
    ##FASTA
    &gt;ctg123
    cttctgggcgtacccgattctcggagaacttgccgcaccattccgccttg
@@ -915,11 +1144,12 @@ preceded by ##.  The following directives are recognized:
        For backward-compatibility with the GFF version output by the
       Artemis tool, a GFF line that begins with the character &gt;
        creates an implied ##FASTA directive.
-</pre>
+</div>
 
+<br />
+<h4>PATHOLOGICAL CASES</h4>
 
-<dt></dt><h3>PATHOLOGICAL CASES</h3>
-<pre>The following section discusses how to represent "pathological" cases
+<div class='code'>The following section discusses how to represent "pathological" cases
 that arise in prokaryotic and eukaryotic genetics. Most of these have
 to do with organisms' endlessly creative ways of processing
 transcripts.
@@ -927,7 +1157,7 @@ transcripts.
 a) Single exon genes
 
 This is the case in which a single unspliced transcript encodes a
-single CDS. 
+single CDS.
 
    -----&gt;XXXXXXX*------&gt;
 
@@ -1079,7 +1309,7 @@ frameshift may occur forward or backward.
 
  -------------------------&gt; mRNA
   ==========
-           ============*  CDS
+	   ============*  CDS
 
 The representation of this is to make the CDS discontinuous:
 
@@ -1132,17 +1362,42 @@ elements cannot be part_of an operon, but this restriction is being
 reconsidered.
 
 
-</pre></dl>
+</div>
 
-</td>
-</tr>
+<hr />
 
+<div class='code'>Change Log:
 
-</tbody></table>
+1.20 Wed Dec 15 12:35:10 MST 2010
+    -Added language to the description of the ID attribute to
+     clarify that discontinuous features can exist on
+     multiple lines and share the same ID.    
 
-<hr>
+1.19 Tue Jul  6 12:51:26 MDT 2010
+    -Fixed coordinate errors in the EST_match and match_part examples
+     in the 'Alignments' section.
+    -Constrained multiple attribute values to the Parent, Alias,
+     Note, DBxref and Ontology_term attributes.
 
-<pre>Change Log:
+1.18 June 24 2010
+     -Added the sections regarding circular genomes to the spec.
+
+1.17 Wed June 2 2010
+     -Changed the spec to include Sequence Ontology (SO) sequence_feature
+      terms in column 3 as well as SOFA terms. (SOFA is a subset of SO).
+     
+1.16 Tue May 25 10:06:38 MDT 2010
+     -Fixed more incorrect CDS phases throughout.
+     -Changed (three|five)_prime_utr to (three|five)_prime_UTR throughout.
+     -Changed (3'|5')-UTR to (three|five)_prime_UTR throughout.
+     -Added ID attributes to CDS features (required for multiline features)
+      in the FASTA pragma example.
+
+1.15 Mon Aug 31 12:59:26 EDT 2009
+     -Fixed incorrect CDS phases in the canonical gene example.
+
+1.14 Mon Aug 25 10:24:02 EDT 2008
+     -Add meta-directives for species and build number.
 
 1.13 Wed May 23 10:31:01 EDT 2007
      -Insist that CDS include the start and end codon.
@@ -1175,36 +1430,64 @@ reconsidered.
       some examples did not validate because of inconsistent numbers of zeroes in
       the identifiers (mRNA00001 vs mRNA0001).
 
-</pre>
-
-<hr>
-
-<table summary="Standard bottom of page footer" border="0" width="100%">
-
-<tbody><tr>
-  <td align="center" valign="CENTER">
-    <a href="http://sourceforge.net/"> <img
-    src="http://sourceforge.net/sflogo.php?group_id=72703" alt="SourceForge Logo" align="middle" border="0" height="31" width="88"></a>
-    <p>Maintained on SourceForge.
-  </p></td>
-  <td align="center" valign="CENTER">
-    <a href="http://www.genome.gov/"><img src="images/nihlogo.gif" al="" ign="CENTER" alt="National Human Genome Research Institute" border="0"></a>
-    <br>Supported by a grant from the <br>National Human Genome Research Institute. 
-  </td>
-  <td align="center" valign="CENTER">
-    <a href="http://www.geneontology.org/"><img src="images/go-logo.gif" alt="Gene Ontology Consortium" align="middle" border="0"></a>
-      <p>Member of the Gene Ontology Consortium.
-  </p></td>
-</tr>
-<tr>
-<td colspan="3" align="right" valign="CENTER">
-<a href="http://sourceforge.net/mail/?group_id=72703">Contact SO</a>
-</td>
-</tr>
-</tbody></table>
+</div>
 
 
+<!-- ==================== END MAIN CONTENT AREA ====================== -->
+
+</div> <!-- inner_padding -->
+</div> <!-- main_content -->
+</div> <!-- content_wrapper -->
+
+<div class="spacer"></div>
+
+<div id="footer">
+
+<div class="footer_left">
+  <a href="http://sourceforge.net/"><img class="logo" alt="SourceForge Logo" src="/img/sf-logo.gif" /></a>
+  <a href="http://www.genome.gov/"><img class="logo" alt="NHGRI Logo" src="/img/nhgri-logo.png" /></a>
+</div>
+<div class="footer_center">
+  <p>
+    Copyright &copy; 2009 Sequence Ontology. All rights reserved.<br />
+<!--	   Template based on Garden Gate from <a href="http://www.designsbydarren.com">DesignsByDarren</a><br /> -->
+     <span style='font-size: xx-small'>
+       <a href="http://sourceforge.net/tracker2/?func=add&amp;group_id=72703&amp;atid=535339">Report Page Errors</a> - 
+       <a href="http://validator.w3.org/check?uri=referer&amp;doctype=XHTML+1.0+Transitional">Valid XHTML 1.0 Transitional</a> - 
+       <a href="http://jigsaw.w3.org/css-validator/?uri=referer">CSS</a></span>
+  </p>
+</div>
+<div class="footer_right">
+  <a href="http://www.geneontology.org/"><img class="logo" alt="GO Logo" src="/img/go-logo.gif" /></a>
+  <a href="http://www.obofoundry.org/"><img class="logo" alt="OBO Logo" src="/img/obo-logo.gif" /></a>
+</div>
+
+<div class="spacer"/>
+
+<!-- Start of StatCounter Code -->
+<script type="text/javascript">
+var sc_project=5316362; 
+var sc_invisible=1; 
+var sc_partition=59; 
+var sc_click_stat=1; 
+var sc_security="b1f38ead"; 
+</script>
+
+<script type="text/javascript"
+src="http://www.statcounter.com/counter/counter_xhtml.js"></script><noscript><div
+class="statcounter"><a title="blogspot visit counter"
+class="statcounter"
+href="http://www.statcounter.com/blogger/"><img
+class="statcounter"
+src="http://c.statcounter.com/5316362/0/b1f38ead/1/"
+alt="blogspot visit counter" /></a></div></noscript>
+<!-- End of StatCounter Code -->
 
 
-</body></html>
+</div> <!-- footer -->
 
+</div> <!-- page_wrapper -->
+
+</body>
+
+</html>
