@@ -1,0 +1,452 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en" dir="ltr">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+				<meta name="keywords" content="GFF2,BioPerl,BioSQL,Chado,GBrowse,GBrowse Adaptors,GFF3,Visualization" />
+		<link rel="stylesheet" type="text/css" href="/mediawiki/extensions/SelectCategoryTagCloud/SelectCategoryTagCloud.css" />
+		<link rel="alternate" type="application/rss+xml" title="GMOD News - RSS 2.0" href="/mediawiki/index.php?title=Special:NewsChannel&amp;format=rss20" />
+		<link rel="alternate" type="application/atom+xml" title="GMOD News - Atom 1.0" href="/mediawiki/index.php?title=Special:NewsChannel&amp;format=atom10" />
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="search" type="application/opensearchdescription+xml" href="/mediawiki/opensearch_desc.php" title="GMOD (English)" />
+		<link rel="copyright" href="http://www.gnu.org/copyleft/fdl.html" />
+<link rel="alternate" type="application/rss+xml" title="GMOD RSS Feed" href="http://gmod.org/mediawiki/index.php?title=Special:Recentchanges&amp;feed=rss" />
+<link rel="alternate" type="application/atom+xml" title="GMOD Atom Feed" href="http://gmod.org/mediawiki/index.php?title=Special:Recentchanges&amp;feed=atom" />
+		<title>GFF2 - GMOD</title>
+		<style type="text/css" media="screen, projection">/*<![CDATA[*/
+			@import "/mediawiki/skins/common/shared.css?116";
+			@import "/mediawiki/skins/monobook/main.css?116";
+		/*]]>*/</style>
+		<link rel="stylesheet" type="text/css" media="print" href="/mediawiki/skins/common/commonPrint.css?116" />
+		<!--[if lt IE 5.5000]><style type="text/css">@import "/mediawiki/skins/monobook/IE50Fixes.css?116";</style><![endif]-->
+		<!--[if IE 5.5000]><style type="text/css">@import "/mediawiki/skins/monobook/IE55Fixes.css?116";</style><![endif]-->
+		<!--[if IE 6]><style type="text/css">@import "/mediawiki/skins/monobook/IE60Fixes.css?116";</style><![endif]-->
+		<!--[if IE 7]><style type="text/css">@import "/mediawiki/skins/monobook/IE70Fixes.css?116";</style><![endif]-->
+		<!--[if lt IE 7]><script type="text/javascript" src="/mediawiki/skins/common/IEFixes.js?116"></script>
+		<meta http-equiv="imagetoolbar" content="no" /><![endif]-->
+		
+		<script type= "text/javascript">/*<![CDATA[*/
+var skin = "monobook";
+var stylepath = "/mediawiki/skins";
+var wgArticlePath = "/wiki/$1";
+var wgScriptPath = "/mediawiki";
+var wgScript = "/mediawiki/index.php";
+var wgServer = "http://gmod.org";
+var wgCanonicalNamespace = "";
+var wgCanonicalSpecialPageName = false;
+var wgNamespaceNumber = 0;
+var wgPageName = "GFF2";
+var wgTitle = "GFF2";
+var wgAction = "view";
+var wgRestrictionEdit = [];
+var wgRestrictionMove = [];
+var wgArticleId = "1010";
+var wgIsArticle = true;
+var wgUserName = null;
+var wgUserGroups = null;
+var wgUserLanguage = "en";
+var wgContentLanguage = "en";
+var wgBreakFrames = false;
+var wgCurRevisionId = "15120";
+var wgVersion = "1.12.0";
+var wgEnableAPI = true;
+var wgEnableWriteAPI = false;
+/*]]>*/</script>
+                
+		<script type="text/javascript" src="/mediawiki/skins/common/wikibits.js?116"><!-- wikibits js --></script>
+		<!-- Head Scripts -->
+		<style  type="text/css">/**
+ * @package TableEdit
+ * @author Daniel Renfro < bluecurio@gmail.com >
+ *
+ * TableEdit CSS file. 
+ */
+ 
+ .TableEditClass {
+  
+ }
+ 
+ .TableEditNote {
+ 	font-size: smaller;
+ 	text-align: center;
+ }</style>
+		<script type="text/javascript">/*
+ * TableEdit JavaScript functions for EcoliWiki.net
+ *  -Daniel Renfro <bluecurio@gmail.com>
+ */
+ 
+$(document).ready(function() {
+	$("div .table_wrapper_master").addClass("button");
+
+	$("div .table_wrapper_master").click(function() {
+        $("div .table_wrapper").slideToggle("slow");            
+	});	
+	auto_collapse_long_tables(4);
+	
+});
+
+function auto_collapse_long_tables( max_rows ){
+	$("div .table_wrapper").each(function(){
+		var table = $(this);
+		if($('tr', table).size() > max_rows){
+			
+		}
+	});
+}
+
+function createExpandContractTab(){
+	
+
+}</script>
+		<script type="text/javascript" src="/mediawiki/extensions/balloons/js/yahoo-dom-event.js"></script><script type="text/javascript" src="/mediawiki/extensions/balloons/js/balloon.js"></script><script type="text/javascript">var balloon = new Balloon;balloon.images = "/mediawiki/extensions/balloons/images";balloon.parentID = "content";</script>		<script type="text/javascript" src="/mediawiki/skins/common/ajax.js?116"></script>
+		<script type="text/javascript" src="/mediawiki/index.php?title=-&amp;action=raw&amp;gen=js&amp;useskin=monobook"><!-- site js --></script>
+		<style type="text/css">/*<![CDATA[*/
+@import "/mediawiki/index.php?title=MediaWiki:Common.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+@import "/mediawiki/index.php?title=MediaWiki:Monobook.css&usemsgcache=yes&action=raw&ctype=text/css&smaxage=18000";
+@import "/mediawiki/index.php?title=-&action=raw&gen=css&maxage=18000&useskin=monobook";
+/*]]>*/</style>
+	</head>
+<body class="mediawiki ns-0 ltr page-GFF2">
+	<div id="globalWrapper">
+		<div id="column-content">
+	<div id="content"><!--
+          <div style="padding-top: 0.5em;"><center>
+            <strong><em><a href="/wiki/2011_GMOD_Spring_Training"><span style="color: #660000">Apply by January 7 for GMOD Spring Training!</span></a></em></strong>
+          </center> </div>-->
+		<a name="top" id="top"></a>
+				<h1 class="firstHeading">GFF2</h1>
+		<div id="bodyContent">
+			<h3 id="siteSub">From GMOD</h3>
+			<div id="contentSub"></div>
+									<div id="jump-to-nav">Jump to: <a href="#column-one">navigation</a>, <a href="#searchInput">search</a></div>			<!-- start content -->
+			<p><a href="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml" class="external text" title="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml" rel="nofollow">GFF2</a> is a supported format in GMOD, <b>but it is now deprecated and if you have a choice you should use <a href="/wiki/GFF3" class="mw-redirect" title="GFF3">GFF3</a></b>.  Unfortunately, data is sometimes only available in GFF2 format.  GFF2 has a number of shortcomings compared to GFF3.  GFF2 can only represent 2 level feature hierarchies, while GFF3 can support arbitrary levels.  GFF2 also does not require that column 3, the feature type, be part of the sequence ontology.  It can be any string.  This often led to quality control and data exchange problems.
+</p><p><br />
+</p>
+<table id="toc" class="toc" summary="Contents"><tr><td><div id="toctitle"><h2>Contents</h2></div>
+<ul>
+<li class="toclevel-1"><a href="#GFF2_is_Deprecated.21"><span class="tocnumber">1</span> <span class="toctext">GFF2 is Deprecated!</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Why_GFF2_is_harmful_to_your_health"><span class="tocnumber">1.1</span> <span class="toctext">Why GFF2 is harmful to your health</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#The_GFF2_File_Format"><span class="tocnumber">2</span> <span class="toctext">The GFF2 File Format</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Creating_a_GFF2_table"><span class="tocnumber">2.1</span> <span class="toctext">Creating a GFF2 table</span></a>
+<ul>
+<li class="toclevel-3"><a href="#Using_the_Group_field_for_simple_features"><span class="tocnumber">2.1.1</span> <span class="toctext">Using the Group field for simple features</span></a></li>
+<li class="toclevel-3"><a href="#Using_the_Group_field_to_group_features_that_belong_together"><span class="tocnumber">2.1.2</span> <span class="toctext">Using the Group field to group features that belong together</span></a></li>
+<li class="toclevel-3"><a href="#Using_the_Group_field_to_add_a_note"><span class="tocnumber">2.1.3</span> <span class="toctext">Using the Group field to add a note</span></a></li>
+<li class="toclevel-3"><a href="#Using_the_Group_field_to_add_an_alternative_name"><span class="tocnumber">2.1.4</span> <span class="toctext">Using the Group field to add an alternative name</span></a></li>
+</ul>
+</li>
+<li class="toclevel-2"><a href="#Identifying_the_reference_sequence"><span class="tocnumber">2.2</span> <span class="toctext">Identifying the reference sequence</span></a></li>
+<li class="toclevel-2"><a href="#Sequence_alignments"><span class="tocnumber">2.3</span> <span class="toctext">Sequence alignments</span></a></li>
+<li class="toclevel-2"><a href="#Dense_quantitative_data"><span class="tocnumber">2.4</span> <span class="toctext">Dense quantitative data</span></a></li>
+<li class="toclevel-2"><a href="#Loading_the_GFF_file_into_the_database"><span class="tocnumber">2.5</span> <span class="toctext">Loading the GFF file into the database</span></a></li>
+<li class="toclevel-2"><a href="#Aggregators"><span class="tocnumber">2.6</span> <span class="toctext">Aggregators</span></a></li>
+</ul>
+</li>
+<li class="toclevel-1"><a href="#Converting_GFF2_to_GFF3"><span class="tocnumber">3</span> <span class="toctext">Converting GFF2 to GFF3</span></a>
+<ul>
+<li class="toclevel-2"><a href="#Column_3:_Feature_Type"><span class="tocnumber">3.1</span> <span class="toctext">Column 3: Feature Type</span></a></li>
+<li class="toclevel-2"><a href="#Column_9:_Group_.2F_Attributes"><span class="tocnumber">3.2</span> <span class="toctext">Column 9: Group / Attributes</span></a></li>
+</ul>
+</li>
+</ul>
+</td></tr></table><script type="text/javascript"> if (window.showTocToggle) { var tocShowText = "show"; var tocHideText = "hide"; showTocToggle(); } </script>
+<a name="GFF2_is_Deprecated.21"></a><h2> <span class="mw-headline"> GFF2 is Deprecated! </span></h2>
+<p>The GFF file format stands for "Gene Finding Format" and was invented at the Sanger Centre. It is easy to use, but it suffers from two main limitations (see the box).
+</p>
+<div class="emphasisbox">
+<a name="Why_GFF2_is_harmful_to_your_health"></a><h3> <span class="mw-headline"> Why GFF2 is harmful to your health </span></h3>
+<p>One of GFF2's problems is that it is only able to represent one level of nesting of features. This is mainly a problem when dealing with genes that have multiple alternatively-spliced transcripts. GFF2 is unable to deal with the three-level hierarchy of <i>gene &rarr; transcript &rarr; exon</i>. Most people get around this by declaring a series of transcripts and giving them similar names to indicate that they come from the same gene. The second limitation is that while GFF2 allows you to create two-level hierarchies, such as <i>transcript &rarr; exon</i>, it doesn't have any concept of the direction of the hierarchy. So it doesn't know whether the exon is a subfeature of the transcript, or vice-versa. This means you have to use "aggregators" to sort out the relationships. This is a major pain in the neck. For this reason, GFF2 format has been deprecated in favor of <a href="/wiki/GFF3" class="mw-redirect" title="GFF3">GFF3</a> format databases.
+</p>
+</div>
+<p>See <a href="/wiki/GFF3" class="mw-redirect" title="GFF3">GFF3</a> for more on the current version of GFF.
+</p>
+<a name="The_GFF2_File_Format"></a><h2> <span class="mw-headline"> The GFF2 File Format </span></h2>
+<p>The GFF format is a flat tab-delimited file, each line of which corresponds to an annotation, or feature. Each line has nine columns and looks like this:
+</p>
+<pre>Chr1  curated  CDS 365647  365963  .  +  1  Transcript "R119.7"
+</pre>
+<p>The 9 columns are as follows:
+</p>
+<dl><dt>reference sequence
+</dt><dd>This is the ID of the sequence that is used to establish the coordinate system of the annotation. In the example above, the reference sequence is "Chr1".
+</dd><dt>source
+</dt><dd>The source of the annotation. This field describes how the annotation was derived. In the example above, the source is "curated" to indicate that the feature is the result of human curation. The names and versions of software programs are often used for the source field, as in "tRNAScan-SE/1.2".
+</dd><dt>method
+</dt><dd>The annotation method, also known as type. This field describes the type of the annotation, such as "CDS". Together the method and source describe the annotation type.
+</dd><dt>start position
+</dt><dd>The start of the annotation relative to the reference sequence.
+</dd><dt>stop position
+</dt><dd>The stop of the annotation relative to the reference sequence. Start is always less than or equal to stop.
+</dd><dt>score
+</dt><dd>For annotations that are associated with a numeric score (for example, a sequence similarity), this field describes the score. The score units are completely unspecified, but for sequence similarities, it is typically percent identity. Annotations that do not have a score can use "."
+</dd><dt>strand
+</dt><dd>For those annotations which are strand-specific, this field is the strand on which the annotation resides. It is "+" for the forward strand, "-" for the reverse strand, or "." for annotations that are not stranded.
+</dd><dt>phase
+</dt><dd>For annotations that are linked to proteins, this field describes the phase of the annotation on the codons. It is a number from 0 to 2, or "." for features that have no phase.
+</dd><dt>group
+</dt><dd>GFF provides a simple way of generating annotation hierarchies ("is composed of" relationships) by providing a group field. The group field contains the class and ID of an annotation which is the logical parent of the current one. In the example given above, the group is the Transcript named "R119.7".
+</dd></dl>
+<p>The group field is also used to store information about the target of sequence similarity hits, and miscellaneous notes. See the next section for a description of how to describe similarity targets.
+</p><p>The sequences used to establish the coordinate system for annotations can correspond to sequenced clones, clone fragments, contigs or super-contigs.
+</p><p>In addition to a group ID, the GFF format allows annotations to have a group class. This makes sure that all groups are unique even if they happen to share the same name. For example, you can have a GenBank accession named AP001234 and a clone named AP001234 and distinguish between them by giving the first one a class of Accession and the second a class of Clone.
+</p><p>You should use double-quotes around the group name or class if it contains white space.
+</p>
+<a name="Creating_a_GFF2_table"></a><h3> <span class="mw-headline">Creating a GFF2 table</span></h3>
+<p>The first 8 fields of the GFF2 format are easy to understand. The group field is a challenge. It is used in several distinct ways:
+</p>
+<ul><li> to group together a single sequence feature that spans a discontinuous range, such as a gapped alignment.
+</li><li> to name a feature, allowing it to be retrieved by name.
+</li><li> to add one or more notes to the annotation.
+</li><li> to add an alternative name
+</li></ul>
+<a name="Using_the_Group_field_for_simple_features"></a><h4> <span class="mw-headline"> Using the Group field for simple features </span></h4>
+<p>For a simple feature that spans a single continuous range, choose a name and class for the object and give it a line in the GFF2 file that refers to its start and stop positions.
+</p>
+<pre>Chr3   giemsa heterochromatin  4500000 6000000 . . .   Band 3q12.1
+</pre>
+<a name="Using_the_Group_field_to_group_features_that_belong_together"></a><h4> <span class="mw-headline"> Using the Group field to group features that belong together </span></h4>
+<p>For a group of features that belong together, such as the exons in a transcript, choose a name and class for the object. Give each segment a separate line in the GFF2 file but use the same name for each line. For example:
+</p>
+<pre>IV     curated exon    5506900 5506996 . + .   Transcript B0273.1
+IV     curated exon    5506026 5506382 . + .   Transcript B0273.1
+IV     curated exon    5506558 5506660 . + .   Transcript B0273.1
+IV     curated exon    5506738 5506852 . + .   Transcript B0273.1
+</pre>
+<p>These four lines refer to a biological object of class "Transcript" and name B0273.1. Each of its parts uses the method "exon", source "curated". Once loaded, the user will be able to search the genome for this object by asking the browser to retrieve "Transcript:B0273.1". The browser can also be configured to allow the Transcript: prefix to be omitted.
+</p><p>You can extend the idiom for objects that have heterogeneous parts, such as a transcript that has 5' and 3' UTRs
+</p>
+<pre>IV     curated  mRNA   5506800 5508917 . + .   Transcript B0273.1; Note "Zn-Finger"
+IV     curated  5'UTR  5506800 5508999 . + .   Transcript B0273.1
+IV     curated  exon   5506900 5506996 . + .   Transcript B0273.1
+IV     curated  exon   5506026 5506382 . + .   Transcript B0273.1
+IV     curated  exon   5506558 5506660 . + .   Transcript B0273.1
+IV     curated  exon   5506738 5506852 . + .   Transcript B0273.1
+IV     curated  3'UTR  5506852 5508917 . + .   Transcript B0273.1
+</pre>
+<p>In this example, there is a single feature with method "mRNA" that spans the entire range. It is grouped with subparts of type 5'UTR, 3'UTR and exon. They are all grouped together into a Transcript named B0273.1. Furthermore the mRNA feature has a note attached to it.
+</p><p><b>NOTE:</b> The subparts of a feature are in absolute (chromosomal or contig) coordinates. It is not currently possible to define a feature in absolute coordinates and then to load its subparts using coordinates that are relative to the start of the feature.
+</p><p>Some annotations do not need to be individually named. For example, it is probably not useful to assign a unique name to each ALU repeat in a vertebrate genome. For these, just leave the Group field empty.
+</p>
+<a name="Using_the_Group_field_to_add_a_note"></a><h4> <span class="mw-headline"> Using the Group field to add a note </span></h4>
+<p>The group field can be used to add one or more notes to an annotation. To do this, place a semicolon after the group name and add a Note field:
+</p>
+<pre>Chr3 giemsa heterochromatin 4500000 6000000 . . . Band 3q12.1&nbsp;; Note "Marfan's syndrome"
+</pre>
+<p>You can add multiple Notes. Just separate them by semicolons:
+</p>
+<pre> Band 3q12.1&nbsp;; Note "Marfan's syndrome"&nbsp;; Note "dystrophic dysplasia"
+</pre>
+<p>The Note should come AFTER the group type and name.
+</p>
+<a name="Using_the_Group_field_to_add_an_alternative_name"></a><h4> <span class="mw-headline"> Using the Group field to add an alternative name </span></h4>
+<p>If you want the feature to be quickly searchable by an alternative name, you can add one or more Alias tags. A feature can have multiple aliases, and multiple features can share the same alias:
+</p>
+<pre>Chr3 giemsa heterochromatin 4500000 6000000 . . . Band 3q12.1&nbsp;; Alias MFX
+</pre>
+<p>Searches for aliases will be both faster and more reliable than searches for keywords in notes, since the latter relies on whole-text search methods that vary somewhat from DBMS to DBMS.
+</p>
+<a name="Identifying_the_reference_sequence"></a><h3> <span class="mw-headline">Identifying the reference sequence</span></h3>
+<p>Each reference sequence in the GFF table must itself have an entry. This is necessary so that the length of the reference sequence is known.
+</p><p>For example, if "Chr1" is used as a reference sequence, then the GFF file should have an entry for it similar to this one:
+</p>
+<pre>Chr1 assembly chromosome 1 14972282 . + . Sequence Chr1
+</pre>
+<p>This indicates that the reference sequence named "Chr1" has length 14972282 bp, method "chromosome" and source "assembly". In addition, as indicated by the group field, Chr1 has class "Sequence" and name "Chr1".
+</p><p>It is suggested that you use "Sequence" as the class name for all reference sequences, since this is the default class used by the Bio::DB::GFF module when no more specific class is requested. If you use a different class name, then be sure to indicate that fact with the "reference class" option (see below).
+</p><p><br />
+</p>
+<a name="Sequence_alignments"></a><h3> <span class="mw-headline">Sequence alignments</span></h3>
+<p>There are several cases in which an annotation indicates the relationship between two sequences. One common one is a similarity hit, where the annotation indicates an alignment. A second common case is a map assembly, in which the annotation indicates that a portion of a larger sequence is built up from one or more smaller ones.
+</p><p>Both cases are indicated by using the Target tag in the group field. For example, a typical similarity hit will look like this:
+</p>
+<pre>Chr1 BLASTX similarity 76953 77108 132 + 0 Target Protein:SW:ABL_DROME 493 544
+</pre>
+<p>Here, the group field contains the Target tag, followed by an identifier for the biological object. The GFF format uses the notation Class:Name for the biological object, and even though this is stylistically inconsistent, that's the way it's done. The object identifier is followed by two integers indicating the start and stop of the alignment on the target sequence.
+</p><p>Unlike the main start and stop columns, it is possible for the target start to be greater than the target end. The previous example indicates that the the section of Chr1 from 76,953 to 77,108 aligns to the protein SW:ABL_DROME starting at position 493 and extending to position 544.
+</p><p>A similar notation is used for sequence assembly information as shown in this example:
+</p>
+<pre>Chr1        assembly Link   10922906 11177731 . . . Target Sequence:LINK_H06O01 1 254826
+LINK_H06O01 assembly Cosmid 32386    64122    . . . Target Sequence:F49B2       6 31742
+</pre>
+<p>This indicates that the region between bases 10922906 and 11177731 of Chr1 are composed of LINK_H06O01 from bp 1 to bp 254826. The region of LINK_H0601 between 32386 and 64122 is, in turn, composed of the bases 5 to 31742 of cosmid F49B2.
+</p><p><br />
+</p>
+<a name="Dense_quantitative_data"></a><h3> <span class="mw-headline">Dense quantitative data</span></h3>
+<p>If you have dense quantitative data, such as tiling array data,
+microarray expression data, ChIP-chip or ChIP-seq chromatin
+immunoprecipitation data, then you will probably want to create
+"Wiggle" format binary files, which represent the quantitative data in
+a compact format in external files. Use the <tt>wiggle2gff3.pl</tt> script,
+included in this distribution, to format and load this data. Run
+<tt>wiggle2gff3.pl -h</tt> for instructions.
+</p>
+<a name="Loading_the_GFF_file_into_the_database"></a><h3> <span class="mw-headline">Loading the GFF file into the database</span></h3>
+<p>Use the <a href="/wiki/BioPerl" title="BioPerl">BioPerl</a> script utilities <tt>bp_bulk_load_gff.pl</tt>, <tt>bp_load_gff.pl</tt> or (if you are brave) <tt>bp_fast_load_gff.pl</tt> to load the GFF file into the database. For example, if your database is a MySQL database on the local host named "dicty", you can load it into an empty database using <tt>bp_bulk_load_gff.pl</tt> like this:
+</p>
+<pre> bp_bulk_load_gff.pl -c -d dicty my_data.gff
+</pre>
+<p>To update existing databases, use either <tt>bp_load_gff.pl</tt> or <tt>bp_fast_load_gff.pl</tt>. The latter is somewhat experimental, so use with care.
+</p>
+<a name="Aggregators"></a><h3> <span class="mw-headline">Aggregators</span></h3>
+<div class="emphasisbox">
+<p>It is not necessary to use aggregators with the <a href="/wiki/Chado" class="mw-redirect" title="Chado">Chado</a>, <a href="/wiki/BioSQL" title="BioSQL">BioSQL</a>, or Bio::DB::SeqFeature::Store <a href="/wiki/GBrowse_Adaptors" title="GBrowse Adaptors">GBrowse Adaptors</a>, or any other adaptor that is based on <a href="/wiki/GFF3" class="mw-redirect" title="GFF3">GFF3</a>.
+</p>
+</div>
+<p>The Bio::DB::GFF adaptor (and only Bio::DB::GFF!) has a feature known as "aggregators". These are small software packages that recognize certain common feature types and convert them into complex biological objects. These aggregators make it possible to develop intelligent graphical representations of annotations, such as a gene that draws confirmed exons differently from predicted ones.
+</p><p>An aggregator typically creates a new composite feature with a different method than any of its components. For example, the standard "alignment" aggregator takes multiple alignments of method "similarity", groups them by their name, and returns a single feature of method "alignment".
+</p><p>The various aggregators are described in detail in the Bio::DB::GFF perldoc page. It is easy to write new aggregators, and also possible to define aggregators on the fly in the GBrowse configuration file. It is suggested that you use the sample GFF2 files from the yeast, <i>drosophila</i> and <i>C. elegans</i> projects to see what methods to use to achieve the desired results.
+</p><p>In addition to the standard aggregators that are distributed with <a href="/wiki/BioPerl" title="BioPerl">BioPerl</a>, <a href="/wiki/GBrowse" title="GBrowse">GBrowse</a> distributes several experimental and/or special-purpose aggregators:
+</p>
+<dl><dt> match_gap</dt><dd>
+</dd><dd> This aggregator is used for GFF3 style gapped alignments, in which there is a single feature of method 'match' with a 'Gap' attribute. This aggregator was contributed by Dmitri Bichko.
+</dd><dt> orf</dt><dd>
+</dd><dd> This aggregator aggregates raw "ORF" features into "coding" features. It is basically identical to the "coding" aggregator, except that it looks for features of type "ORF" rather than "cds".
+</dd><dt> reftranscript</dt><dd>
+</dd><dd> This aggregator was written to make the compound feature, "reftranscript" for use with GBrowse editing software developed outside of the GMOD development group. It can be used to aggregate "reftranscripts" from "refexons", loaded as second copy features. These features, in contrast to "transcripts", are usually implemented as features which cannot be edited and serve as starting point references for annotations added using <a href="/wiki/GBrowse" title="GBrowse">GBrowse</a> for feature <a href="/wiki/Visualization" title="Visualization">visualization</a>.  Adding features to the compound feature, "reftranscript", can be done by adding to the "part_names" call (i.e. "refCDS").
+</dd><dt> waba_alignment</dt><dd>
+</dd><dd> This aggregator handles the type of alignments produced by Jim Kent's WABA program, and was written to be compatible with the <i>C. elegans</i> GFF2 files. It aggregates the following feature types into an aggregate type of "waba_alignment":
+<ul><li>   nucleotide_match:waba_weak
+</li><li>   nucleotide_match:waba_strong
+</li><li>   nucleotide_match:waba_coding
+</li></ul>
+</dd></dl>
+<dl><dt> wormbase_gene</dt><dd>
+</dd><dd> This aggregator was written to be compatible with the <i>C. elegans</i> GFF2 files distributed by the Sanger Institute. It aggregates raw "CDS", "5'UTR", "3'UTR", "polyA" and "TSS" features into "transcript" features. For compatibility with the idiosyncrasies of the Sanger GFF2 format, it expects that the full range of the transcript is contained in a main feature of type "Sequence".
+</dd><dd> It is strongly recommended that for mirroring <i>C. elegans</i> annotations, you use the "processed_transcript" aggregator in conjunction with the <a href="/wiki/GFF3" class="mw-redirect" title="GFF3">GFF3</a> files found at:
+<dl><dd> <a href="ftp://ftp.wormbase.org/pub/wormbase/genomes/elegans/genome_feature_tables/GFF3" class="external free" title="ftp://ftp.wormbase.org/pub/wormbase/genomes/elegans/genome_feature_tables/GFF3" rel="nofollow">ftp://ftp.wormbase.org/pub/wormbase/genomes/elegans/genome_feature_tables/GFF3</a>
+</dd></dl>
+</dd></dl>
+<a name="Converting_GFF2_to_GFF3"></a><h2> <span class="mw-headline"> Converting GFF2 to GFF3 </span></h2>
+<p>Converting a file from GFF2 to <a href="/wiki/GFF3" class="mw-redirect" title="GFF3">GFF3</a> format is problematic for several reasons.  However, there are several GFF2 to GFF3 converters available on the web, but each makes specific assumptions about the GFF2 data that limit its applicability.  GMOD does not endorse (or disparage) any particular converter.  If you have GFF2 data from an external source, and they don't also provide it in GFF3 format, then you may be stuck with GFF2.
+</p><p>Some areas that need to be addressed by any GFF2 to GFF3 converter:
+</p>
+<a name="Column_3:_Feature_Type"></a><h3> <span class="mw-headline"> Column 3: Feature Type </span></h3>
+<p>If the GFF2 file does not use Sequence Ontology terms in column 3 then some sort of translation will need to be done on the types in the GFF2 to convert them to be SO terms.
+</p>
+<a name="Column_9:_Group_.2F_Attributes"></a><h3> <span class="mw-headline"> Column 9: Group / Attributes </span></h3>
+<p>Column 9 has a slightly different format and is much more tightly defined in GFF3 than GFF2.  Both require attention.  GFF2 does not have any reserved attribute names, uses C style encoding/escaping of special characters, and has many other small differences.
+</p><p>Another big problem is that GFF2 supports only one level of feature nesting.  While you can certainly reproduce this minimal nesting in GFF3, it would be better to also convert your feature representations to be multi-level at the time you migrate the data to GFF3.  This is non-trivial.
+</p>
+<!-- 
+NewPP limit report
+Preprocessor node count: 27/1000000
+Post-expand include size: 0/2097152 bytes
+Template argument size: 0/2097152 bytes
+-->
+
+<!-- Saved in parser cache with key wikidb:pcache:idhash:1010-0!1!0!!en!2!edit=0 and timestamp 20110406232014 -->
+<div class="printfooter">
+Retrieved from "<a href="http://gmod.org/wiki/GFF2">http://gmod.org/wiki/GFF2</a>"</div>
+			<div id="catlinks"><p class='catlinks'><a href="/wiki/Special:Categories" title="Special:Categories">Categories</a>: <span dir='ltr'><a href="/wiki/Category:Annotation" title="Category:Annotation">Annotation</a></span> | <span dir='ltr'><a href="/wiki/Category:Computing" title="Category:Computing">Computing</a></span></p></div>			<!-- end content -->
+			<div class="visualClear"></div>
+		</div>
+	</div>
+		</div>
+		<div id="column-one">
+	<div id="p-cactions" class="portlet">
+		<h5>Views</h5>
+		<div class="pBody">
+			<ul>
+					 <li id="ca-nstab-main" class="selected"><a href="/wiki/GFF2" title="View the content page [c]" accesskey="c">Page</a></li>
+					 <li id="ca-talk" class="new"><a href="/mediawiki/index.php?title=Talk:GFF2&amp;action=edit" title="Discussion about the content page [t]" accesskey="t">Discussion</a></li>
+					 <li id="ca-viewsource"><a href="/mediawiki/index.php?title=GFF2&amp;action=edit" title="This page is protected. You can view its source. [e]" accesskey="e">View source</a></li>
+					 <li id="ca-history"><a href="/mediawiki/index.php?title=GFF2&amp;action=history" title="Past versions of this page. [h]" accesskey="h">History</a></li>
+				</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-personal">
+		<h5>Personal tools</h5>
+		<div class="pBody">
+			<ul>
+				<li id="pt-login"><a href="/mediawiki/index.php?title=Special:Userlogin&amp;returnto=GFF2" title="You are encouraged to log in, it is not mandatory however. [o]" accesskey="o">Log in / create account</a></li>
+			</ul>
+		</div>
+	</div>
+	<div class="portlet" id="p-logo">
+		<a style="background-image: url(/mediawiki/images/4/48/Gmod-gears.png);" href="/wiki/Main_Page" title="Visit the Main Page [z]" accesskey="z"></a>
+	</div>
+	<script type="text/javascript"> if (window.isMSIE55) fixalpha(); </script>
+		<div class='portlet' id='p-Navigation'>
+		<h5>Navigation</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-GMOD-Home"><a href="/wiki/Main_Page">GMOD Home</a></li>
+				<li id="n-Categories-.2F-Tags"><a href="/wiki/Categories">Categories / Tags</a></li>
+				<li id="n-Downloads"><a href="/wiki/Downloads">Downloads</a></li>
+				<li id="n-View-all-pages"><a href="/wiki/Special:Allpages">View all pages</a></li>
+			</ul>
+		</div>
+	</div>
+		<div class='portlet' id='p-Documentation'>
+		<h5>Documentation</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-Overview"><a href="/wiki/Overview">Overview</a></li>
+				<li id="n-FAQs"><a href="/wiki/Category:FAQ">FAQs</a></li>
+				<li id="n-HOWTOs"><a href="/wiki/Category:HOWTO">HOWTOs</a></li>
+				<li id="n-Glossary"><a href="/wiki/Glossary">Glossary</a></li>
+			</ul>
+		</div>
+	</div>
+		<div class='portlet' id='p-Community'>
+		<h5>Community</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-GMOD-News"><a href="/wiki/GMOD_News">GMOD News</a></li>
+				<li id="n-Support-.2F-Training"><a href="/wiki/Support">Support / Training</a></li>
+				<li id="n-Calendar"><a href="/wiki/Calendar">Calendar</a></li>
+				<li id="n-Outreach-.2F-Promotion"><a href="/wiki/GMOD_Promotion">Outreach / Promotion</a></li>
+			</ul>
+		</div>
+	</div>
+		<div class='portlet' id='p-Developers'>
+		<h5>Developers</h5>
+		<div class='pBody'>
+			<ul>
+				<li id="n-SVN"><a href="/wiki/SVN">SVN</a></li>
+				<li id="n-SourceForge-Site"><a href="http://sourceforge.net/projects/gmod">SourceForge Site</a></li>
+			</ul>
+		</div>
+	</div>
+		<div id="p-search" class="portlet">
+		<h5><label for="searchInput">Search</label></h5>
+		<div id="searchBody" class="pBody">
+			<form action="/wiki/Special:Search" id="searchform"><div>
+				<input id="searchInput" name="search" type="text" title="Search GMOD [f]" accesskey="f" value="" />
+				<input type='submit' name="go" class="searchButton" id="searchGoButton"	value="Go" title="Go to a page with this exact name if exists" />&nbsp;
+				<input type='submit' name="fulltext" class="searchButton" id="mw-searchButton" value="Search" title="Search the pages for this text" />
+			</div></form>
+		</div>
+	</div>
+	<div class="portlet" id="p-tb">
+		<h5>Toolbox</h5>
+		<div class="pBody">
+			<ul>
+				<li id="t-whatlinkshere"><a href="/wiki/Special:Whatlinkshere/GFF2" title="List of all wiki pages that link here [j]" accesskey="j">What links here</a></li>
+				<li id="t-recentchangeslinked"><a href="/wiki/Special:Recentchangeslinked/GFF2" title="Recent changes in pages linked from this page [k]" accesskey="k">Related changes</a></li>
+<li id="t-upload"><a href="/wiki/Special:Upload" title="Upload files [u]" accesskey="u">Upload file</a></li>
+<li id="t-specialpages"><a href="/wiki/Special:Specialpages" title="List of all special pages [q]" accesskey="q">Special pages</a></li>
+				<li id="t-print"><a href="/mediawiki/index.php?title=GFF2&amp;printable=yes" title="Printable version of this page [p]" accesskey="p">Printable version</a></li>				<li id="t-permalink"><a href="/mediawiki/index.php?title=GFF2&amp;oldid=15120" title="Permanent link to this version of the page">Permanent link</a></li><li id="t-pdf"><a href="/mediawiki/index.php?title=Special:PdfPrint&amp;page=GFF2">Print as PDF</a></li>			</ul>
+		</div>
+	</div>
+		</div><!-- end of the left (by default at least) column -->
+			<div class="visualClear"></div>
+			<div id="footer">
+				<div id="f-poweredbyico"><a href="http://www.mediawiki.org/"><img src="/mediawiki/skins/common/images/poweredby_mediawiki_88x31.png" alt="Powered by MediaWiki" /></a></div>
+				<div id="f-copyrightico"><a href="http://www.gnu.org/copyleft/fdl.html"><img src="/mediawiki/skins/common/images/gnu-fdl.png" alt='GNU Free Documentation License 1.2' /></a></div>
+                        <p><table><tr><td><img src="/mediawiki/images/e/ef/Nihlogo.gif" alt="National Institutes of Health"></td><td>GMOD is supported by a specific cooperative agreement from the USDA Agricultural Research Service, and by NIH grants co-funded from the National Human Genome Research Institute and the National Institute of General Medical Sciences.</td><td><img src="/mediawiki/images/7/7e/ARSlogo.jpg" alt="USDA Agricultural Research Service"></td></tr></table><hr /></p> 
+
+			<ul id="f-list">
+				<li id="lastmod"> This page was last modified 00:49, 18 November 2010.</li>
+				<li id="viewcount">This page has been accessed 5,335 times.</li>
+				<li id="copyright">Content is available under <a href="http://www.gnu.org/copyleft/fdl.html" class="external " title="http://www.gnu.org/copyleft/fdl.html" rel="nofollow">GNU Free Documentation License 1.2</a>.</li>
+			</ul>
+		</div>
+		
+	
+		<script type="text/javascript">if (window.runOnloadHook) runOnloadHook();</script>
+</div>
+<!-- Served in 0.181 secs. --></body></html>
