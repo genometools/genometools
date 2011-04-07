@@ -59,11 +59,16 @@ database.
 <p>CDS represents the coding sequence starting with the first translated
 codon and proceeding to the last translated codon. Unlike Genbank annotation,
 the stop codon is not included in the CDS for the terminal exon.
-The optional feature "5UTR" represents regions from the transcription start site or beginning of the known 5' UTR to the base before the start codon of the transcript.  If this region is interrupted by introns then each exon or partial exon is annotated as a separate 5UTR feature.  Similarly, "3UTR" represents regions after the stop codon and before the polyadenylation site or end of the known 3' untranslated region.  Note that the UTR features can only be used to annotate portions of mRNA genes, not non-coding RNA genes.</p>
+The optional feature "5UTR" represents regions from the transcription start site or beginning of the known 5' UTR to the base before the start codon of the transcript.  If this region is interrupted by introns 
+then 
+each exon or partial exon is annotated as a separate 5UTR feature.  Similarly, "3UTR" represents regions after the stop codon and before the polyadenylation site or end of the known 3' untranslated region.  
+Note that the UTR features can only be used to annotate portions of mRNA genes, not non-coding RNA genes.</p>
 
-<p>The feature "exon" more generically describes any transcribed exon.  Therefore, exon boundaries will be the transcription start site, splice donor, splice acceptor and poly-adenylation site.  The start or stop codon will not necessarily lie on an exon boundary.</p>
+<p>The feature "exon" more generically describes any transcribed exon.  Therefore, exon boundaries will be the transcription start site, splice donor, splice acceptor and poly-adenylation site.  The start or 
+stop codon will not necessarily lie on an exon boundary.</p>
 
-<p>The "start_codon" feature is up to 3bp long in total and is included in the coordinates for the "CDS" features.  The "stop_codon" feature similarly is up to 3bp long and is included in the coordinates for the "3UTR" features, if used.
+<p>The "start_codon" feature is up to 3bp long in total and is included in the coordinates for the "CDS" features.  The "stop_codon" feature similarly is up to 3bp long and is excluded from the coordinates for the 
+"3UTR" features, if used.
 
 <p>The "start_codon" and "stop_codon" features are not required to be atomic; they may be interrupted by valid splice sites.  A split start or stop codon appears as two distinct features.  All "start_codon" and "stop_codon" features must have a 0,1,2 in the &lt;frame> field indicating which part of the codon is represented by this feature. Contiguous start and stop codons will always have frame 0.
 
@@ -133,13 +138,14 @@ a tab character).
 
 <a name="examples" /><h3> Examples </h3>
 
-<p>Here is an example of a gene on the negative strand including UTR regions.  Larger coordinates are 5' of smaller coordinates. Thus, the start codon is 3 bp with largest coordinates among all those bp that fall within the CDS regions. Similarly, the stop codon is the 3 bp with coordinates just less than the smallest coordinates within the CDS regions and the largest coordenates among all those within the 3UTR regions.
+<p>Here is an example of a gene on the negative strand including UTR regions.  Larger coordinates are 5' of smaller coordinates. Thus, the start codon is 3 bp with largest coordinates among all those bp that fall within the CDS regions. 
+Note that the stop codon lies between the 3UTR and the CDS
 <p><tt>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;inter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8522&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"";&nbsp;transcript_id&nbsp;"";<br>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;inter_CNS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8523&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9711&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"";&nbsp;transcript_id&nbsp;"";<br>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;inter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9712&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13182&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"";&nbsp;transcript_id&nbsp;"";<br>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;3UTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;65149&nbsp;&nbsp;&nbsp;&nbsp;65487&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
-140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;3UTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;66823&nbsp;&nbsp;&nbsp;&nbsp;66995&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;3UTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;66823&nbsp;&nbsp;&nbsp;&nbsp;66992&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;stop_codon&nbsp;&nbsp;&nbsp;&nbsp;66993&nbsp;&nbsp;&nbsp;&nbsp;66995&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;66996&nbsp;&nbsp;&nbsp;&nbsp;66999&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
 140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;intron_CNS&nbsp;&nbsp;&nbsp;&nbsp;70103&nbsp;&nbsp;&nbsp;&nbsp;70151&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
