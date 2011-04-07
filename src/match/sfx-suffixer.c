@@ -949,7 +949,6 @@ static void preparethispart(Sfxiterator *sfi)
   }
   if (sfi->prefixlength > 1U
       && gt_has_twobitencoding(sfi->encseq)
-      && !gt_encseq_is_mirrored(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
   {
     getencseqkmers_twobitencoding(sfi->encseq,
