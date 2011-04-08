@@ -1273,6 +1273,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     }
+    /*
     if (outlcpinfosample != NULL)
     {
       gt_Outlcpinfo_check_lcpvalues(dcov->encseq,
@@ -1282,6 +1283,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                                     (unsigned long) dcov->vparam,
                                     outlcpinfosample);
     }
+    */
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;

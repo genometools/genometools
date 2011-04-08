@@ -198,9 +198,7 @@ static void verifycodelistcomputation(
                              nextfreeCodeatposition2);
   gt_free(spaceCodeatposition2);
 }
-#endif
 
-#ifdef SKDEBUG
 static GtCodetype getencseqcode(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned long totallength,

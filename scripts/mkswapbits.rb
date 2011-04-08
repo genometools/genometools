@@ -45,7 +45,7 @@ puts "static unsigned int gt_reversekmer(unsigned int kmer,unsigned int kmersize
 puts "{"
 puts "  switch(kmersize)"
 puts "  {"
-2.upto(14) do |len|
+2.upto(20) do |len|
   puts "    case #{len}:"
   puts "      return #{mkswapbits(len)};"
 end

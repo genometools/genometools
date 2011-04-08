@@ -44,7 +44,10 @@ typedef struct
              tableoflcpvalues->bucketoflcpvalues != NULL &&
              tableoflcpvalues->subbucketleft+idx <
              tableoflcpvalues->numofentries);
-  GT_SETIBIT(tableoflcpvalues->isset,tableoflcpvalues->subbucketleft+idx);
+  if (tableoflcpvalues->isset != NULL)
+  {
+    GT_SETIBIT(tableoflcpvalues->isset,tableoflcpvalues->subbucketleft+idx);
+  }
   tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->subbucketleft+idx]
     = value;
   if (value >= (unsigned long) LCPOVERFLOW)
@@ -63,7 +66,8 @@ typedef struct
              tableoflcpvalues->bucketoflcpvalues != NULL &&
              tableoflcpvalues->subbucketleft+idx <
              tableoflcpvalues->numofentries);
-  gt_assert(GT_ISIBITSET(tableoflcpvalues->isset,
+  gt_assert(tableoflcpvalues->isset == NULL ||
+            GT_ISIBITSET(tableoflcpvalues->isset,
                          tableoflcpvalues->subbucketleft+idx));
   return tableoflcpvalues->bucketoflcpvalues
                            [tableoflcpvalues->subbucketleft+idx];
