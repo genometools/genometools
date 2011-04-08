@@ -20,6 +20,7 @@
 #include "core/encseq.h"
 #include "core/format64.h"
 #include "sfx-mappedstr.h"
+#include "sfx-suffixer.h"
 #include "twobits2kmers.h"
 
 #define READNEXTCODEANDCHECKIGNORESPECIAL(POS)\

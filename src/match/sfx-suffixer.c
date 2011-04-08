@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include "core/arraydef.h"
 #include "core/assert_api.h"
+#include "core/chardef.h"
 #include "core/error_api.h"
 #include "core/unused_api.h"
 #include "core/progressbar.h"
@@ -35,6 +36,7 @@
 #include "core/log_api.h"
 #include "core/mathsupport.h"
 #include "core/spacecalc.h"
+#include "core/divmodmul.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -598,21 +600,18 @@ static void verifyestimatedspace(size_t estimatedspace)
 }
 #endif
 
-static void gt_updateleftborderforkmer(void *processinfo,
+static void gt_updateleftborderforkmer(Sfxiterator *sfi,
                                        GT_UNUSED unsigned long pos,
                                        GtCodetype code)
 {
-  Sfxiterator *sfi = (Sfxiterator *) processinfo;
-
   sfi->leftborder[code]++;
 }
 
-static void gt_updateleftborderforspecialkmer(void *processinfo,
+static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                               unsigned int maxprefixindex,
                                               unsigned int code,
                                               unsigned long position)
 {
-  Sfxiterator *sfi = (Sfxiterator *) processinfo;
   unsigned int idx;
 
   if (sfi->sfxstrategy.storespecialcodes)
@@ -629,6 +628,28 @@ static void gt_updateleftborderforspecialkmer(void *processinfo,
     code = ((code << 2) | 3U) & sfi->maskright;
   }
 }
+
+#define PROCESSKMERTYPE        Sfxiterator
+#define PROCESSKMERSPECIALTYPE Sfxiterator
+#define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
+#define PROCESSKMERCODE        gt_updateleftborderforkmer
+#define PROCESSKMERCODESPECIAL gt_updateleftborderforspecialkmer
+
+#include "sfx-mapped4.gen"
+
+#undef PROCESSKMERPREFIX
+#undef PROCESSKMERTYPE
+#undef PROCESSKMERSPECIALTYPE
+#undef PROCESSKMERCODE
+#undef PROCESSKMERCODESPECIAL
+
+#define PROCESSKMERTYPE                 void
+#define PROCESSKMERSPECIALTYPE          GT_UNUSED Sfxiterator
+#define PROCESSKMERPREFIX(FUN)          insertsuffix_##FUN
+#define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
+#define PROCESSKMERCODESPECIAL(A,B,C,D) /* Nothing */
+
+#include "sfx-mapped4.gen"
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -814,12 +835,11 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (gt_has_twobitencoding(encseq) &&
           !sfi->sfxstrategy.kmerswithencseqreader)
       {
-        getencseqkmers_twobitencoding(encseq,
+        updateleftborder_getencseqkmers_twobitencoding(
+                                      encseq,
                                       readmode,
                                       prefixlength,
-                                      gt_updateleftborderforkmer,
                                       sfi,
-                                      gt_updateleftborderforspecialkmer,
                                       sfi);
       } else
       {
@@ -951,12 +971,11 @@ static void preparethispart(Sfxiterator *sfi)
       && gt_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
   {
-    getencseqkmers_twobitencoding(sfi->encseq,
+    insertsuffix_getencseqkmers_twobitencoding(
+                                  sfi->encseq,
                                   sfi->readmode,
                                   sfi->prefixlength,
-                                  gt_insertkmerwithoutspecial1,
                                   sfi,
-                                  NULL,
                                   NULL);
   } else
   {
