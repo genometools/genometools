@@ -305,9 +305,9 @@ static void updatekmercount(void *processinfo,
 #endif
 }
 
-static void insertkmerwithoutspecial1(void *processinfo,
-                                      unsigned long position,
-                                      GtCodetype code)
+static void gt_insertkmerwithoutspecial1(void *processinfo,
+                                         unsigned long position,
+                                         GtCodetype code)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
@@ -320,13 +320,13 @@ static void insertkmerwithoutspecial1(void *processinfo,
   }
 }
 
-static void insertkmerwithoutspecial(void *processinfo,
-                                     unsigned long position,
-                                     const GtKmercode *kmercode)
+static void gt_insertkmerwithoutspecial(void *processinfo,
+                                        unsigned long position,
+                                        const GtKmercode *kmercode)
 {
   if (!kmercode->definedspecialposition)
   {
-    insertkmerwithoutspecial1(processinfo, position, kmercode->code);
+    gt_insertkmerwithoutspecial1(processinfo, position, kmercode->code);
   }
 }
 
@@ -515,7 +515,7 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
     while ((kmercodeptr = gt_kmercodeiterator_encseq_next(kmercodeiterator))
                           != NULL)
     {
-      insertkmerwithoutspecial(sfi,position++,kmercodeptr);
+      gt_insertkmerwithoutspecial(sfi,position++,kmercodeptr);
     }
     gt_kmercodeiterator_delete(kmercodeiterator);
   }
@@ -954,7 +954,7 @@ static void preparethispart(Sfxiterator *sfi)
     getencseqkmers_twobitencoding(sfi->encseq,
                                   sfi->readmode,
                                   sfi->prefixlength,
-                                  insertkmerwithoutspecial1,
+                                  gt_insertkmerwithoutspecial1,
                                   sfi,
                                   NULL,
                                   NULL);
@@ -969,7 +969,7 @@ static void preparethispart(Sfxiterator *sfi)
     } else
     {
       getencseqkmers(sfi->encseq,sfi->readmode,sfi->prefixlength,
-                     insertkmerwithoutspecial,sfi);
+                     gt_insertkmerwithoutspecial,sfi);
     }
   }
   if (sfi->sfxprogress != NULL)
