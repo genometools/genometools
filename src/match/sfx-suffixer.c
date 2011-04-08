@@ -811,7 +811,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
     } else
     {
-      if (gt_has_twobitencoding(encseq))
+      if (gt_has_twobitencoding(encseq) &&
+          !sfi->sfxstrategy.kmerswithencseqreader)
       {
         getencseqkmers_twobitencoding(encseq,
                                       readmode,
