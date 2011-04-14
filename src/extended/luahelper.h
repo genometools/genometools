@@ -28,6 +28,8 @@ void gt_lua_set_arg(lua_State*, const char *argv_0, const char **argv);
 void gt_lua_export_metatable(lua_State*, const char *metatable_desc);
 
 void gt_lua_push_strarray_as_table(lua_State*, GtStrArray*);
+int  gt_lua_get_table_as_strarray(lua_State *L, int index, GtStrArray *outarray,
+                                  GtError *err);
 
 /* Propagate the error given in <err> (which must be set) to <L>.
    Takes ownership of the error and deletes it. */
