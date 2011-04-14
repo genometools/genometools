@@ -19,11 +19,15 @@
 #define ALPHABET_LUA_H
 
 #include "lua.h"
+#include "core/alphabet.h"
 
 /* exports the Alphabet class to Lua:
 
    -- Return a new protein alphabet.
    function alphabet_new_protein()
+
+   -- Return a new DNA alphabet.
+   function alphabet_new_dna()
 
    -- Return an empty alphabet.
    function alphabet_new_empty()
@@ -42,6 +46,9 @@
    function alphabet:size()
 */
 int gt_lua_open_alphabet(lua_State*);
+
+/* Push a <GtAlphabet*> to Lua, takes ownership! */
+void gt_lua_alphabet_push(lua_State*, GtAlphabet*);
 
 #define ALPHABET_METATABLE  "GenomeTools.alphabet"
 #define check_alphabet(L, POS) \

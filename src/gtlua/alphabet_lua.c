@@ -1,4 +1,4 @@
-/*
+ /*
   Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
@@ -41,6 +41,19 @@ static int alphabet_lua_new_empty(lua_State *L)
   alpha = lua_newuserdata(L, sizeof *alpha);
   gt_assert(alpha);
   *alpha = gt_alphabet_new_empty();
+  gt_assert(*alpha);
+  luaL_getmetatable(L, ALPHABET_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static int alphabet_lua_new_dna(lua_State *L)
+{
+  GtAlphabet **alpha;
+  gt_assert(L);
+  alpha = lua_newuserdata(L, sizeof *alpha);
+  gt_assert(alpha);
+  *alpha = gt_alphabet_new_dna();
   gt_assert(*alpha);
   luaL_getmetatable(L, ALPHABET_METATABLE);
   lua_setmetatable(L, -2);
@@ -104,6 +117,7 @@ static int alphabet_lua_delete(lua_State *L)
 }
 
 static const struct luaL_Reg alphabet_lib_f [] = {
+  { "alphabet_new_dna", alphabet_lua_new_dna },
   { "alphabet_new_protein", alphabet_lua_new_protein },
   { "alphabet_new_empty", alphabet_lua_new_empty },
   { NULL, NULL }
@@ -141,4 +155,14 @@ int gt_lua_open_alphabet(lua_State *L)
   lua_pop(L, 1);
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
+}
+
+void gt_lua_alphabet_push(lua_State *L, GtAlphabet *alpha)
+{
+  GtAlphabet **alphaptr;
+  gt_assert(L && alpha);
+  alphaptr = lua_newuserdata(L, sizeof (*alphaptr));
+  *alphaptr = alpha;
+  luaL_getmetatable(L, ALPHABET_METATABLE);
+  lua_setmetatable(L, -2);
 }
