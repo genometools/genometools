@@ -237,3 +237,9 @@ Test do
   run_test "#{$bin}gt encseq info infile | grep range > rev.info"
   run "diff mirr.info rev.info"
 end
+
+Name "gt encseq Lua bindings"
+Keywords "encseq gt_scripts "
+Test do
+  run_test "#{$bin}gt #{$testdata}gtscripts/encseq.lua #{$testdata}"
+end

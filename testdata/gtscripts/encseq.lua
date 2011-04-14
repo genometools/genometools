@@ -17,8 +17,8 @@
 
 -- testing the Lua bindings for the Encseq class
 
-dnaseqfile = "testdata/lua_dnaseq.fas"
-aaseqfile = "testdata/lua_aaseq.fas"
+dnaseqfile = arg[1].."/lua_dnaseq.fas"
+aaseqfile = arg[1].."/lua_aaseq.fas"
 dseq1 = "agtccagctgtcagctagcgggcccgatgatatttt"
 dseq2 = "gtgctgtac"
 aaseq1 = "MVHFTAEEKAAVTSLWSKMNVEEAGGEALG"
