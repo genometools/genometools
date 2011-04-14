@@ -18,6 +18,7 @@
 #include "core/assert_api.h"
 #include "gtlua/alphabet_lua.h"
 #include "gtlua/bittab_lua.h"
+#include "gtlua/encseq_lua.h"
 #include "gtlua/gtcore_lua.h"
 #include "gtlua/range_lua.h"
 #include "gtlua/score_matrix_lua.h"
@@ -35,6 +36,7 @@ int gt_lua_open_core(lua_State *L)
   gt_lua_open_alphabet(L);
   gt_lua_open_bittab(L);
   gt_lua_open_range(L);
+  gt_lua_open_encseq(L);
   gt_lua_open_score_matrix(L);
   gt_lua_open_translate(L);
   gt_assert(lua_gettop(L) == stack_size);
