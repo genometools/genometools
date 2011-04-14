@@ -7453,17 +7453,25 @@ void gt_encseq_builder_add_str(GtEncseqBuilder *eb, GtStr *str,
   gt_encseq_builder_add_cstr(eb, gt_str_get(str), gt_str_length(str), desc);
 }
 
-void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
-                                   const GtUchar *str,
-                                   unsigned long strlen,
-                                   const char *desc)
+static void gt_encseq_builder_add_encoded_generic(GtEncseqBuilder *eb,
+                                                  const GtUchar *str,
+                                                  unsigned long strlen,
+                                                  const char *desc,
+                                                  bool copy)
 {
   unsigned long i, offset;
   gt_assert(eb && str);
   if (eb->plainseq == NULL) {
-    eb->plainseq = (GtUchar*) str;
+    if (!copy) {
+      eb->plainseq = (GtUchar*) str;
+      eb->own = false;
+    } else {
+      eb->plainseq = gt_malloc((size_t) strlen * sizeof (GtUchar));
+      eb->allocated = (size_t) (strlen * sizeof (GtUchar));
+      memcpy(eb->plainseq, str, (size_t) strlen * sizeof (GtUchar));
+      eb->own = true;
+    }
     eb->seqlen = strlen;
-    eb->own = false;
     eb->firstseq = false;
     eb->nof_seqs++;
     if (eb->wdestab) {
@@ -7521,6 +7529,22 @@ void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
     eb->nof_seqs++;
     eb->own = true;
   }
+}
+
+void gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
+                                   const GtUchar *str,
+                                   unsigned long strlen,
+                                   const char *desc)
+{
+  gt_encseq_builder_add_encoded_generic(eb, str, strlen, desc, false);
+}
+
+void gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
+                                       const GtUchar *str,
+                                       unsigned long strlen,
+                                       const char *desc)
+{
+  gt_encseq_builder_add_encoded_generic(eb, str, strlen, desc, true);
 }
 
 void gt_encseq_builder_set_logger(GtEncseqBuilder *eb, GtLogger *l)

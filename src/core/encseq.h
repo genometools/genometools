@@ -299,6 +299,10 @@ unsigned long gt_encseq_lengthofspecialsuffix(const GtEncseq *encseq);
   wildcards only. */
 unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq);
 
+/* Returns number of characters in the alphabet which is part of the
+   <encseq>. The number does not include the wildcards. */
+unsigned int  gt_encseq_alphabetnumofchars(const GtEncseq *encseq);
+
 /* Sets <specialcharinfo> to point to a <GtSpecialcharinfo> for the index
   files specified by <indexname>, even if the encoded sequence is not mapped.
   Returns 0 on success, -1 otherwise. */

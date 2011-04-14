@@ -88,9 +88,6 @@ typedef struct GtEncseqReader GtEncseqReader;
 unsigned long     gt_encseq_total_length(const GtEncseq *encseq);
 /* Returns the total number of sequences contained in <encseq>. */
 unsigned long     gt_encseq_num_of_sequences(const GtEncseq *encseq);
-/* Returns number of characters in the alphabet which is part
-   <encseq>. The number does not include the wildcards. */
-unsigned int gt_encseq_alphabetnumofchars(const GtEncseq *encseq);
 /* Returns the encoded representation of the character at position <pos> of
    <encseq> read in the direction as indicated by <readmode>. */
 
@@ -256,14 +253,14 @@ void             gt_encseq_encoder_disable_multiseq_support(
 /* Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Deactivated by
    default. */
-void gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee);
+void             gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee);
 /* Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Encoded sequences
    created without this support will not be able to be loaded via a
    <GtEncseqLoader> with <gt_encseq_loader_require_lossless_support()>
    enabled. */
-void gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder *ee);
-
+void             gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder
+                                                                           *ee);
 /* Enables creation of the .des table containing sequence descriptions.
    Enabled by default. */
 void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
@@ -312,9 +309,9 @@ GtEncseqLoader*  gt_encseq_loader_new(void);
    sequence. That is, if a file with <indexname>.<suffix> exists which
    is named like a table file, it is loaded automatically.
    Use gt_encseq_has_multiseq_support() etc. to query for these capabilities. */
-void gt_encseq_loader_enable_autosupport(GtEncseqLoader *el);
+void             gt_encseq_loader_enable_autosupport(GtEncseqLoader *el);
 /* Disables auto-discovery of supported features. */
-void gt_encseq_loader_disable_autosupport(GtEncseqLoader *el);
+void             gt_encseq_loader_disable_autosupport(GtEncseqLoader *el);
 /* Enables support for retrieving descriptions from the encoded sequence
    to be loaded by <el>. That is, the .des and .sds tables must be present.
    For example, these tables are created by having enabled the
@@ -424,18 +421,17 @@ void             gt_encseq_builder_disable_multiseq_support(
 void             gt_encseq_builder_create_esq_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .esq table. */
 void             gt_encseq_builder_do_not_create_esq_tab(GtEncseqBuilder *eb);
-/* Enables creation of the .des table containing sequence descriptions.
-   Not enabled by default. */
+/* Enables creation of the .des table containing sequence descriptions. */
 void             gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .des table. */
 void             gt_encseq_builder_do_not_create_des_tab(GtEncseqBuilder *eb);
 /* Enables creation of the .ssp table containing indexes for multiple sequences.
-   Not enabled by default. */
+   */
 void             gt_encseq_builder_create_ssp_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .ssp table. */
 void             gt_encseq_builder_do_not_create_ssp_tab(GtEncseqBuilder *eb);
 /* Enables creation of the .sds table containing indexes for sequence
-   descriptions. Not enabled by default. */
+   descriptions. */
 void             gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb);
 /* Disables creation of the .sds table. */
 void             gt_encseq_builder_do_not_create_sds_tab(GtEncseqBuilder *eb);
@@ -467,6 +463,17 @@ void             gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
                                                const GtUchar *str,
                                                unsigned long strlen,
                                                const char *desc);
+/* Adds a sequence given as a pre-encoded string  <str> of length <strlen> to
+   the encoded sequence to be built by <eb>. <str> must be encoded using the
+   alphabet set at the construction time of <eb>.
+   Always creates a copy of <str>, so it can be used with memory that is to be
+   freed immediately after adding.
+   Additionally, a description <desc> can be given. If description support
+   is enabled, this must not be NULL. */
+void             gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
+                                                   const GtUchar *str,
+                                                   unsigned long strlen,
+                                                   const char *desc);
 /* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
    logging). */
 void             gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l);
