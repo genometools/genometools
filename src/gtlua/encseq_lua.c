@@ -157,7 +157,7 @@ static int encseq_lua_push_buffer(lua_State *L, unsigned char *arr,
   GtEncseqExtractedBuffer** buf;
   buf = lua_newuserdata(L, sizeof (GtEncseqExtractedBuffer*));
   gt_assert(buf);
-  *buf = gt_malloc(sizeof (GtEncseqExtractedBuffer*));
+  *buf = gt_malloc(sizeof (GtEncseqExtractedBuffer));
   gt_assert(*buf);
   (*buf)->buf = arr;
   (*buf)->length = len;
