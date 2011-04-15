@@ -377,7 +377,7 @@ static int gt_ltrdigest_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
         length       = gt_ltrelement_length(&ls->element);
         seq          = gt_malloc((size_t) (length+1) * sizeof (char));
         symbolstring = gt_malloc((size_t) (length+1) * sizeof (GtUchar));
-        gt_encseq_extract_substring(ls->encseq,
+        gt_encseq_extract_encoded(ls->encseq,
                                   symbolstring,
                                   seqstartpos + (ls->element.leftLTR_5),
                                   seqstartpos + (ls->element.leftLTR_5)

@@ -160,58 +160,60 @@ class EncodedsequenceTest(unittest.TestCase):
             self.assertEquals(a.decode(encchar), c)
 
     def run_test_seq_startpos(self, es):
-        self.assertEquals(es.seq_startpos(0), 0)
-        self.assertEquals(es.seq_startpos(1), 37)
+        self.assertEquals(es.seqstartpos(0), 0)
+        self.assertEquals(es.seqstartpos(1), 37)
 
     def run_test_seq_startpos_protein(self, es):
-        self.assertEquals(es.seq_startpos(0), 0)
-        self.assertEquals(es.seq_startpos(1), 31)
+        self.assertEquals(es.seqstartpos(0), 0)
+        self.assertEquals(es.seqstartpos(1), 31)
 
     def run_test_seq_length(self, es):
-        self.assertEquals(es.seq_length(0), 36)
-        self.assertEquals(es.seq_length(1), 9)
+        self.assertEquals(es.seqlength(0), 36)
+        self.assertEquals(es.seqlength(1), 9)
 
     def run_test_file_length(self, es):
-        self.assertEquals(es.file_effective_length(0), 46)
+        self.assertEquals(es.effective_filelength(0), 46)
 
     def run_test_seq_length_protein(self, es):
-        self.assertEquals(es.seq_length(0), 30)
-        self.assertEquals(es.seq_length(1), 6)
+        self.assertEquals(es.seqlength(0), 30)
+        self.assertEquals(es.seqlength(1), 6)
 
     def run_test_file_length_protein(self, es):
-        self.assertEquals(es.file_effective_length(0), 37)
+        self.assertEquals(es.effective_filelength(0), 37)
         
     def run_test_seq_substr_encoded(self, es, seq1, seq2):
         start = 3
         end = 13
-        res = es.seq_encoded(0, start, end)
+        res = es.extract_encoded(start, end)
         a = es.alphabet()
         for i in range(start, end):
             self.assertEquals(a.decode(res[i-start]), seq1[i])
         start = 0
         end = 5
-        res = es.seq_encoded(1, start, end)
+        ssp = es.seqstartpos(1)
+        res = es.extract_encoded(ssp+start, ssp+end)
         for i in range(start, end):
             self.assertEquals(a.decode(res[i-start]), seq2[i])
 
     def run_test_seq_substr_plain(self, es, seq1, seq2):
         start = 3
         end = 13
-        self.assertEquals(es.seq_plain(0, start, end), seq1[start:end+1])
+        self.assertEquals(es.extract_decoded(start, end), seq1[start:end+1])
         start = 0
         end = 5
-        self.assertEquals(es.seq_plain(1, start, end), seq2[start:end+1])
+        ssp = es.seqstartpos(1)
+        self.assertEquals(es.extract_decoded(ssp+start, ssp+end), seq2[start:end+1])
 
     def run_test_seq_substr_sequential(self, es, seq1, seq2):
         start = 3
         end = 13
-        er = es.create_reader(readmode.FORWARD, start)
+        er = es.create_reader_with_readmode(readmode.FORWARD, start)
         a = es.alphabet()
         for i in range(start, end):
             self.assertEquals(a.decode(er.next_encoded_char()), seq1[i])
-        start = es.seq_startpos(1)
+        start = es.seqstartpos(1)
         end = start + 5
-        er = es.create_reader(readmode.FORWARD, start)
+        er = es.create_reader_with_readmode(readmode.FORWARD, start)
         for i in range(start-start, end-start):
             self.assertEquals(a.decode(er.next_encoded_char()), seq2[i])
 

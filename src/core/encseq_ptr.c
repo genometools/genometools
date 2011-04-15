@@ -37,11 +37,11 @@ char gt_encseq_get_decoded_char_p(const GtEncseq *encseq,
   return gt_encseq_get_decoded_char(encseq, *pos, readmode);
 }
 
-void gt_encseq_extract_substring_p(const GtEncseq *encseq,
+void gt_encseq_extract_encoded_p(const GtEncseq *encseq,
                                    GtUchar *buffer,
                                    GtRange *rng)
 {
-  gt_encseq_extract_substring(encseq, buffer, rng->start, rng->end);
+  gt_encseq_extract_encoded(encseq, buffer, rng->start, rng->end);
 }
 
 void gt_encseq_extract_decoded_p(const GtEncseq *encseq,

@@ -115,7 +115,7 @@ GtEncseqReader*   gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
 /* Returns the encoded representation of the substring from position <frompos>
    to position <topos> of <encseq>. The result is written to the location
    pointed to by <buffer>, which must be large enough to hold the result. */
-void              gt_encseq_extract_substring(const GtEncseq *encseq,
+void              gt_encseq_extract_encoded(const GtEncseq *encseq,
                                               GtUchar *buffer,
                                               unsigned long frompos,
                                               unsigned long topos);

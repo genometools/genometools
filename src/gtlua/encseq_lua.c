@@ -186,7 +186,7 @@ static int encseq_lua_delete_buffer(lua_State *L)
   return 0;
 }
 
-static int encseq_lua_extract_substring(lua_State *L)
+static int encseq_lua_extract_encoded(lua_State *L)
 {
   GtEncseq **encseq;
   unsigned long from, to;
@@ -198,7 +198,7 @@ static int encseq_lua_extract_substring(lua_State *L)
   luaL_argcheck(L, to < gt_encseq_total_length(*encseq), 3,
                 "cannot exceed total length of encoded sequence");
   string = gt_malloc((to - from + 1) * sizeof (unsigned char));
-  gt_encseq_extract_substring(*encseq, string, from, to);
+  gt_encseq_extract_encoded(*encseq, string, from, to);
   encseq_lua_push_buffer(L, string, (to - from + 1));
   return 1;
 }
@@ -956,7 +956,7 @@ static const struct luaL_Reg encseq_lib_m [] = {
   { "get_encoded_char", encseq_lua_get_encoded_char },
   { "get_decoded_char", encseq_lua_get_decoded_char },
   { "create_reader_with_readmode", encseq_lua_create_reader_with_readmode },
-  { "extract_substring", encseq_lua_extract_substring },
+  { "extract_encoded", encseq_lua_extract_encoded },
   { "extract_decoded", encseq_lua_extract_decoded },
   { "seqlength", encseq_lua_seqlength },
   { "seqstartpos", encseq_lua_seqstartpos },

@@ -860,8 +860,8 @@ static int searchforTSDandorMotifoutside(
     ALLOCASSIGNSPACE(dbseq,NULL,GtUchar,leftlen);
     ALLOCASSIGNSPACE(query,NULL,GtUchar,rightlen);
 
-    gt_encseq_extract_substring(encseq,dbseq,startleftLTR,endleftLTR);
-    gt_encseq_extract_substring(encseq,query,startrightLTR,
+    gt_encseq_extract_encoded(encseq,dbseq,startleftLTR,endleftLTR);
+    gt_encseq_extract_encoded(encseq,query,startrightLTR,
                                          endrightLTR);
     GT_INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
@@ -1179,10 +1179,10 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
       ALLOCASSIGNSPACE(vseq, vseq, GtUchar, maxvlen);
     }
 
-    gt_encseq_extract_substring(encseq, useq,
+    gt_encseq_extract_encoded(encseq, useq,
                                          boundaries->leftLTR_5,
                                          boundaries->leftLTR_3);
-    gt_encseq_extract_substring(encseq, vseq,
+    gt_encseq_extract_encoded(encseq, vseq,
                                          boundaries->rightLTR_5,
                                          boundaries->rightLTR_3);
     edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */

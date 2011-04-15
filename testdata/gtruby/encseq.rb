@@ -131,44 +131,47 @@ def run_test_get_encoded_char(es, seq1, seq2)
 end
 
 def run_test_seq_startpos(es)
-  raise unless es.seq_startpos(0) == 0
-  raise unless es.seq_startpos(1) == 37
+  raise unless es.seqstartpos(0) == 0
+  raise unless es.seqstartpos(1) == 37
 end
 
 def run_test_seq_startpos_protein(es)
-  raise unless es.seq_startpos(0) == 0
-  raise unless es.seq_startpos(1) == 31
+  raise unless es.seqstartpos(0) == 0
+  raise unless es.seqstartpos(1) == 31
 end
 
 def run_test_seq_length(es)
-  raise unless es.seq_length(0) == 36
-  raise unless es.seq_length(1) == 9
+  raise unless es.seqlength(0) == 36
+  raise unless es.seqlength(1) == 9
 end
 
 def run_test_file_length(es)
-  raise "#{es.file_effective_length(0)} != 46" unless es.file_effective_length(0) == 46
+  raise "#{es.effective_filelength(0)} != 46" \
+    unless es.effective_filelength(0) == 46
 end
 
 def run_test_seq_length_protein(es)
-  raise unless es.seq_length(0) == 30
-  raise unless es.seq_length(1) == 6
+  raise unless es.seqlength(0) == 30
+  raise unless es.seqlength(1) == 6
 end
 
 def run_test_file_length_protein(es)
-  raise "#{es.file_effective_length(0)} != 37" unless es.file_effective_length(0) == 37
+  raise "#{es.effective_filelength(0)} != 37" \
+    unless es.effective_filelength(0) == 37
 end
   
 def run_test_seq_substr_encoded(es, seq1, seq2)
   start = 3
   stop = 13
-  res = es.seq_encoded(0, start, stop)
+  res = es.extract_encoded(start, stop)
   a = es.alphabet()
   start.upto(stop) do |i|
     raise unless a.decode(res[i-start]) == seq1[i].chr
   end
   start = 0
   stop = 5
-  res = es.seq_encoded(1, start, stop)
+  spos = es.seqstartpos(1)
+  res = es.extract_encoded(start+spos, stop+spos)
   start.upto(stop) do |i|
     raise unless a.decode(res[i-start]) == seq2[i].chr
   end
@@ -177,23 +180,24 @@ end
 def run_test_seq_substr_plain(es, seq1, seq2)
   start = 3
   stop = 13
-  raise unless es.seq_plain(0, start, stop) == seq1[start..(stop)]
+  raise unless es.extract_decoded(start, stop) == seq1[start..(stop)]
   start = 0
   stop = 5
-  raise unless es.seq_plain(1, start, stop) == seq2[start..(stop)]
+  spos = es.seqstartpos(1)
+  raise unless es.extract_decoded(spos+start, spos+stop) == seq2[start..(stop)]
 end
 
 def run_test_seq_substr_sequential(es, seq1, seq2)
   start = 3
   stop = 13
-  er = es.create_reader(GT::READMODE_FORWARD, start)
+  er = es.create_reader_with_readmode(GT::READMODE_FORWARD, start)
   a = es.alphabet()
   start.upto(stop) do |i|
     raise unless a.decode(er.next_encoded_char) == seq1[i].chr
   end
-  start = es.seq_startpos(1)
+  start = es.seqstartpos(1)
   stop = start + 5
-  er = es.create_reader(GT::READMODE_FORWARD, start)
+  er = es.create_reader_with_readmode(GT::READMODE_FORWARD, start)
   0.upto(stop-start) do |i|
     encchar = a.decode(er.next_encoded_char)
     seqchar = seq2[i].chr

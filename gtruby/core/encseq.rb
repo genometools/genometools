@@ -92,7 +92,7 @@ module GT
   extern "char gt_encseq_get_decoded_char_p(const GtEncseq*,
                                             unsigned long*,
                                             GtReadmode)"
-  extern "void gt_encseq_extract_substring_p(const GtEncseq*, GtUchar*,
+  extern "void gt_encseq_extract_encoded_p(const GtEncseq*, GtUchar*,
                                            GtRange*)"
   extern "void gt_encseq_extract_decoded_p(const GtEncseq*, void*,
                                          GtRange*)"
@@ -378,14 +378,6 @@ module GT
       GT.gt_encseq_builder_do_not_create_sds_tab(@ebld)
     end
 
-    def enable_range_iterator
-      GT.gt_encseq_builder_enable_range_iterator(@eldr)
-    end
-
-    def disable_range_iterator
-      GT.gt_encseq_builder_disable_range_iterator(@eldr)
-    end
-
     def add_string(string, desc = '')
       str = string.to_s
       GT.gt_encseq_builder_add_cstr(@ebld, str, str.length, desc)
@@ -415,8 +407,13 @@ module GT
   ]
 
   class Encseq
+    attr_reader :num_of_sequences, :num_of_files, :total_length
+
     def initialize(encseq, own = true)
       @encseq = encseq
+      @num_of_sequences = self._num_of_sequences
+      @num_of_files = self._num_of_files
+      @total_length = self._total_length
       if own then
         @encseq.free = GT::symbol("gt_encseq_delete", "0P")
       end
@@ -426,13 +423,13 @@ module GT
       @encseq
     end
 
-    def num_of_sequences
+    def _num_of_sequences
       n = DL::malloc(GT::NATIVEULONGSIZE)
       GT.gt_encseq_num_of_sequences_p(@encseq, n)
       return n[0, n.size].unpack("L!")[0]
     end
 
-    def num_of_files
+    def _num_of_files
       n = DL::malloc(GT::NATIVEULONGSIZE)
       GT.gt_encseq_num_of_files_p(@encseq, n)
       return  n[0, n.size].unpack("L!")[0]
@@ -440,11 +437,11 @@ module GT
 
     def description(num)
       num = num.to_i
-      if num >= self.num_of_sequences then
+      if num >= @num_of_sequences then
         GT.gterror("invalid sequence number #{num}")
       end
       len = DL::malloc(GT::NATIVEULONGSIZE)
-      n = [num.to_i].pack("L!")
+      n = [num].pack("L!")
       charptr = GT.gt_encseq_description_p(@encseq, len, n)
       lval = len[0, len.size].unpack("L!")[0]
       if lval > 0 and charptr != GT::NULL then
@@ -470,7 +467,7 @@ module GT
       return GT.gt_encseq_get_decoded_char_p(@encseq, p, readmode)
     end
 
-    def total_length
+    def _total_length
       n = DL::malloc(GT::NATIVEULONGSIZE)
       GT.gt_encseq_total_length_p(@encseq, n)
       return n[0, n.size].unpack("L!")[0]
@@ -485,8 +482,8 @@ module GT
       end
     end
 
-    def seq_length(num)
-      if num >= self.num_of_sequences then
+    def seqlength(num)
+      if num >= @num_of_sequences then
         GT.gterror("invalid sequence number #{num}")
       end
       n = [num.to_i].pack("L!")
@@ -495,8 +492,8 @@ module GT
       return l[0, l.size].unpack("L!")[0]
     end
 
-    def file_effective_length(num)
-      if num >= self.num_of_files then
+    def effective_filelength(num)
+      if num >= @num_of_files then
         GT.gterror("invalid file number #{num}")
       end
       n = UlongParam.malloc
@@ -508,8 +505,8 @@ module GT
       res[0, 8].unpack("Q")[0]
     end
 
-    def seq_startpos(num)
-      if num >= self.num_of_sequences then
+    def seqstartpos(num)
+      if num >= @num_of_sequences then
         GT.gterror("invalid sequence number #{num}")
       end
       n = [num.to_i].pack("L!")
@@ -518,11 +515,11 @@ module GT
       return l[0, l.size].unpack("L!")[0]
     end
 
-    def create_reader(readmode, startpos)
+    def create_reader_with_readmode(readmode, startpos)
       if readmode < 0 or readmode > 3 then
           GT.gterror("invalid readmode!")
       end
-      if startpos < 0 or startpos >= total_length then
+      if startpos < 0 or startpos >= @total_length then
         gterror("invalid start position: #{startpos} " + \
                 "(allowed: 0-#{total_length-1})")
       end
@@ -531,34 +528,24 @@ module GT
       return EncseqReader.new(er_ptr)
     end
 
-    def seq_encoded(num, start, stop)
-      if num >= self.num_of_sequences then
-        GT.gterror("invalid sequence number #{num}")
-      end
-      seqlength = self.seq_length(num)
-      seqstartpos = self.seq_startpos(num)
-      if start < 0 or stop >= seqlength then
+    def extract_encoded(start, stop)
+      if start < 0 or stop >= @total_length then
         gterror("invalid coordinates: #{start}-#{stop} " + \
-                "(allowed: #{0}-#{seqlength-1})")
+                "(allowed: 0-#{@total_length-1})")
       end
       buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
-      r = GT::Range.new(seqstartpos+start, seqstartpos+stop)
-      GT.gt_encseq_extract_substring_p(@encseq, buf, r)
+      r = GT::Range.new(start, stop)
+      GT.gt_encseq_extract_encoded_p(@encseq, buf, r)
       buf.to_a('C')
     end
 
-    def seq_plain(num, start, stop)
-      if num >= self.num_of_sequences then
-        GT.gterror("invalid sequence number #{num}")
-      end
-      seqlength = self.seq_length(num)
-      seqstartpos = self.seq_startpos(num)
-      if start < 0 or stop >= seqlength then
+    def extract_decoded(start, stop)
+      if start < 0 or stop >= @total_length then
         gterror("invalid coordinates: #{start}-#{stop} " + \
-                "(allowed: #{0}-#{seqlength-1})")
+                "(allowed: 0-#{@total_length-1})")
       end
       buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
-      r = GT::Range.new(seqstartpos+start, seqstartpos+stop)
+      r = GT::Range.new(start, stop)
       GT.gt_encseq_extract_decoded_p(@encseq, buf, r)
       buf.to_s(stop-start+1)
     end

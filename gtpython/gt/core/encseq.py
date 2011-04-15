@@ -182,12 +182,6 @@ class EncseqLoader:
         self.sdstab = False
         gtlib.gt_encseq_loader_do_not_require_sds_tab(self.el)
 
-    def enable_range_iterator(self):
-        gtlib.gt_encseq_loader_enable_range_iterator(self.el)
-
-    def disable_range_iterator(self):
-        gtlib.gt_encseq_loader_disable_range_iterator(self.el)
-
     def load(self, indexname):
         if not os.path.exists(indexname+".esq"):
             raise IOError, ("file not found: %s" % indexname+".esq")
@@ -364,17 +358,17 @@ class Encseq:
             return None
         return Alphabet(a)
 
-    def seq_startpos(self, num):
+    def seqstartpos(self, num):
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
         return gtlib.gt_encseq_seqstartpos(self.encseq, num)
 
-    def seq_length(self, num):
+    def seqlength(self, num):
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
         return gtlib.gt_encseq_seqlength(self.encseq, num)
 
-    def file_effective_length(self, num):
+    def effective_filelength(self, num):
         if not num < self.num_of_files():
             gterror("invalid file number %d" % num)
         return gtlib.gt_encseq_effective_filelength(self.encseq, num)
@@ -383,7 +377,7 @@ class Encseq:
         arr = StrArray(gtlib.gt_encseq_filenames(seld.encseq))
         return arr.to_list()
 
-    def create_reader(self, readmode, startpos):
+    def create_reader_with_readmode(self, readmode, startpos):
         if readmode < 0 or readmode > 3:
             gterror("invalid readmode!")
         if startpos < 0 or startpos >= self.total_length():
@@ -394,26 +388,20 @@ class Encseq:
                                                          startpos)
         return EncseqReader(er, True)
 
-    def seq_encoded(self, num, start, end):
-        seqstartpos = self.seq_startpos(num)
-        seqlength = self.seq_length(num)
-        if start < 0 or end >= seqlength:
+    def extract_encoded(self, start, end):
+        if start < 0 or end >= self.total_length():
             gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
-                                                                0, seqlength-1))
+                                                      0, self.total_length()-1))
         buf = (c_ubyte * (end-start+1))()
-        gtlib.gt_encseq_extract_substring(self.encseq, buf, seqstartpos+start,
-                                          seqstartpos+end)
+        gtlib.gt_encseq_extract_encoded(self.encseq, buf, start, end)
         return buf
 
-    def seq_plain(self, num, start, end):
-        seqstartpos = self.seq_startpos(num)
-        seqlength = self.seq_length(num)
-        if start < 0 or end >= seqlength:
+    def extract_decoded(self, start, end):
+        if start < 0 or end >= self.total_length():
             gterror("invalid coordinates: %d-%d (allowed: %d-%d)" % (start, end,
-                                                                0, seqlength-1))
+                                                      0, self.total_length()-1))
         buf = (c_char * (end-start+1))()
-        gtlib.gt_encseq_extract_decoded(self.encseq, buf, seqstartpos+start,
-                                        seqstartpos+end)
+        gtlib.gt_encseq_extract_decoded(self.encseq, buf, start, end)
         return string_at(buf, end-start+1)
 
     def register(cls, gtlib):
@@ -437,7 +425,7 @@ class Encseq:
         gtlib.gt_encseq_seqlength.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_effective_filelength.restype = c_uint64
         gtlib.gt_encseq_effective_filelength.argtypes = [c_void_p, c_ulong]
-        gtlib.gt_encseq_extract_substring.argtypes = [c_void_p, POINTER(c_ubyte), c_ulong, c_ulong]
+        gtlib.gt_encseq_extract_encoded.argtypes = [c_void_p, POINTER(c_ubyte), c_ulong, c_ulong]
         gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p, c_ulong, c_ulong]
 
     register = classmethod(register)

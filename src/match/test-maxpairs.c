@@ -200,7 +200,7 @@ static unsigned long samplesubstring(GtUchar *seqspace,
     substringlength = totallength - start;
   }
   gt_assert(substringlength > 0);
-  gt_encseq_extract_substring(encseq,seqspace,start,
+  gt_encseq_extract_encoded(encseq,seqspace,start,
                                        start+substringlength-1);
   return substringlength;
 }

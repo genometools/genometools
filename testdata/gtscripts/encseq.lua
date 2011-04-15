@@ -111,21 +111,21 @@ end
 function run_test_seq_substr_encoded(es, seq1, seq2)
   start = 3
   stop = 13
-  res = es:extract_substring(start, stop)
+  res = es:extract_encoded(start, stop)
   a = es:alphabet()
   for i=start,stop do
     assert(a:decode(res[i-start+1]) == seq1:sub(i+1,i+1))
   end
   start = es:seqstartpos(1)
   stop = start + 4
-  res = es:extract_substring(start, stop)
+  res = es:extract_encoded(start, stop)
   for i=start,stop do
     assert(a:decode(res[i-start+1]) == seq2:sub(i-start+1,i-start+1))
   end
-  rval, err = pcall(GenomeTools_encseq.extract_substring, es, 3, 1)
+  rval, err = pcall(GenomeTools_encseq.extract_encoded, es, 3, 1)
   assert(not rval)
   assert(string.find(err, "range endposition"))
-  rval, err = pcall(GenomeTools_encseq.extract_substring, es, 300, 500)
+  rval, err = pcall(GenomeTools_encseq.extract_encoded, es, 300, 500)
   assert(not rval)
   assert(string.find(err, "cannot exceed"))
   

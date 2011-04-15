@@ -606,7 +606,7 @@ static void showGtRange(const GtRange *range)
 
 #endif
 
-void gt_encseq_extract_substring(const GtEncseq *encseq,
+void gt_encseq_extract_encoded(const GtEncseq *encseq,
                                  GtUchar *buffer,
                                  unsigned long frompos,
                                  unsigned long topos)
@@ -5545,7 +5545,7 @@ void gt_encseq_showatstartpos(FILE *fp,
   if (fwd)
   {
     endpos = MIN(startpos + GT_UNITSIN2BITENC - 1,encseq->totallength-1);
-    gt_encseq_extract_substring(encseq,buffer,startpos,endpos);
+    gt_encseq_extract_encoded(encseq,buffer,startpos,endpos);
     for (pos=0; pos<endpos - startpos + 1; pos++)
     {
       showbufchar(fp,complement,buffer[pos]);
@@ -5559,7 +5559,7 @@ void gt_encseq_showatstartpos(FILE *fp,
     {
       endpos = 0;
     }
-    gt_encseq_extract_substring(encseq,buffer,endpos,startpos);
+    gt_encseq_extract_encoded(encseq,buffer,endpos,startpos);
     for (pos=0; pos < startpos - endpos + 1; pos++)
     {
       showbufchar(fp,complement,buffer[pos]);
@@ -7690,7 +7690,7 @@ int gt_encseq_builder_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, err);
   ensure(had_err, gt_encseq_total_length(encseq) == 12UL);
   ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
-  gt_encseq_extract_substring(encseq, buffer, 0,
+  gt_encseq_extract_encoded(encseq, buffer, 0,
                               gt_encseq_total_length(encseq)-1);
   ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
   ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
