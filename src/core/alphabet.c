@@ -738,30 +738,15 @@ void gt_alphabet_printf_symbolstring(const GtAlphabet *alphabet,
   gt_alphabet_decode_seq_to_fp(alphabet, stdout, w, len);
 }
 
-static char converttoprettysymbol(const GtAlphabet *alphabet,
-                                  GtUchar currentchar)
+static inline char converttoprettysymbol(const GtAlphabet *alphabet,
+                                         GtUchar currentchar)
 {
-  char ret = '\0';
-  if (alphabet == NULL)
+  gt_assert(alphabet != NULL && currentchar != (GtUchar) SEPARATOR);
+  if (currentchar < (GtUchar) WILDCARD)
   {
-    ret = (char) currentchar;
-  } else
-  {
-
-    if (currentchar == (GtUchar) WILDCARD)
-    {
-      ret = (char) alphabet->wildcardshow;
-    } else
-    {
-      if (currentchar != (GtUchar) SEPARATOR)
-      {
-        gt_assert((unsigned int) currentchar < alphabet->mapsize-1);
-        ret = (char) alphabet->characters[(int) currentchar];
-      }
-    }
-  }
-  gt_assert(ret != '\0');
-  return ret;
+    gt_assert((unsigned int) currentchar < alphabet->mapsize-1);
+    return (char) alphabet->characters[(int) currentchar];
+  } else return (char) alphabet->wildcardshow;
 }
 
 void gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet, char *dest,
