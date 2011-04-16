@@ -569,7 +569,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   return -1;
 }
 
-#define DEBUGSIZEESTIMATION
+#undef DEBUGSIZEESTIMATION
 #ifdef DEBUGSIZEESTIMATION
 static void verifyestimatedspace(size_t estimatedspace)
 {
