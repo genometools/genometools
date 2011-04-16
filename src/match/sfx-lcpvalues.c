@@ -64,6 +64,7 @@ struct Outlcpinfo
   Suffixwithcode previoussuffix;
   bool previousbucketwasempty;
   Lcpsubtab lcpsubtab;
+  size_t sizeofinfo;
 };
 
 /* Now some functions related to the computation of lcp values follows */
@@ -191,6 +192,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   Outlcpinfo *outlcpinfo;
 
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
+  outlcpinfo->sizeofinfo = sizeof (*outlcpinfo);
   if (indexname == NULL)
   {
     outlcpinfo->lcpsubtab.lcp2file = NULL;
@@ -198,6 +200,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   {
     outlcpinfo->lcpsubtab.lcp2file
       = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.lcp2file));
+    outlcpinfo->sizeofinfo += sizeof (*outlcpinfo->lcpsubtab.lcp2file);
     outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues = 0;
     outlcpinfo->lcpsubtab.lcp2file->maxbranchdepth = 0;
     outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues = 0;
@@ -226,7 +229,8 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo->minchanged = 0;
   if (!haserr && prefixlength > 0)
   {
-    outlcpinfo->turnwheel = gt_newTurningwheel(prefixlength,numofchars);
+    outlcpinfo->turnwheel = gt_turningwheel_new(prefixlength,numofchars);
+    outlcpinfo->sizeofinfo += gt_turningwheel_size();
   } else
   {
     outlcpinfo->turnwheel = NULL;
@@ -246,6 +250,11 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   return outlcpinfo;
 }
 
+size_t gt_Outlcpinfo_size(const Outlcpinfo *outlcpinfo)
+{
+  return outlcpinfo->sizeofinfo;
+}
+
 void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength,
@@ -253,18 +262,24 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
 {
   if (outlcpinfo != NULL)
   {
+    size_t sizeofbucketoflcpvalues;
     if (prefixlength > 0)
     {
-      outlcpinfo->turnwheel = gt_newTurningwheel(prefixlength,numofchars);
+      outlcpinfo->turnwheel = gt_turningwheel_new(prefixlength,numofchars);
+      outlcpinfo->sizeofinfo += gt_turningwheel_size();
     } else
     {
       outlcpinfo->turnwheel = NULL;
     }
+    sizeofbucketoflcpvalues = sizeof (*outlcpinfo->lcpsubtab.tableoflcpvalues.
+                                      bucketoflcpvalues) * numoflcpvalues;
     outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
-      = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.tableoflcpvalues.
-                          bucketoflcpvalues) * numoflcpvalues);
+      = gt_malloc(sizeofbucketoflcpvalues);
+    outlcpinfo->sizeofinfo += sizeofbucketoflcpvalues;
     GT_INITBITTAB(outlcpinfo->lcpsubtab.tableoflcpvalues.isset,
                   numoflcpvalues);
+    outlcpinfo->sizeofinfo += GT_NUMOFINTSFORBITS(numoflcpvalues) *
+                              sizeof (GtBitsequence);
     outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
     outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = numoflcpvalues;
     outlcpinfo->lcpsubtab.tableoflcpvalues.subbucketleft = 0;
@@ -362,10 +377,7 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   {
     return;
   }
-  if (outlcpinfo->turnwheel != NULL)
-  {
-    gt_freeTurningwheel(&outlcpinfo->turnwheel);
-  }
+  gt_turningwheel_delete(outlcpinfo->turnwheel);
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
     if (outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues <
@@ -469,16 +481,16 @@ void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
     }
     if (code > 0)
     {
-      (void) gt_nextTurningwheel(outlcpinfo->turnwheel);
+      (void) gt_turningwheel_next(outlcpinfo->turnwheel);
       if (outlcpinfo->previousbucketwasempty)
       {
         outlcpinfo->minchanged
           = MIN(outlcpinfo->minchanged,
-                gt_minchangedTurningwheel(outlcpinfo->turnwheel));
+                gt_turningwheel_minchanged(outlcpinfo->turnwheel));
       } else
       {
         outlcpinfo->minchanged
-          = gt_minchangedTurningwheel(outlcpinfo->turnwheel);
+          = gt_turningwheel_minchanged(outlcpinfo->turnwheel);
       }
     }
   }

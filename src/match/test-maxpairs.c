@@ -425,27 +425,27 @@ int gt_testmaxpairs(const char *indexname,
     dblen = samplesubstring(dbseq,encseq,substringlength);
     querylen = samplesubstring(query,encseq,substringlength);
     gt_logger_log(logger,"run query match for dblen=%lu"
-                            ",querylen= %lu, minlength=%u",
+                         ",querylen= %lu, minlength=%u",
                          dblen,
                          querylen,
                          minlength);
     tabmaxquerymatches = gt_array_new(sizeof (Substringmatch));
     if (gt_sarrquerysubstringmatch(dbseq,
-                                dblen,
-                                query,
-                                (unsigned long) querylen,
-                                minlength,
-                                gt_encseq_alphabet(encseq),
-                                storemaxmatchquery,
-                                tabmaxquerymatches,
-                                logger,
-                                err) != 0)
+                                   dblen,
+                                   query,
+                                   (unsigned long) querylen,
+                                   minlength,
+                                   gt_encseq_alphabet(encseq),
+                                   storemaxmatchquery,
+                                   tabmaxquerymatches,
+                                   logger,
+                                   err) != 0)
     {
       haserr = true;
       break;
     }
     gt_logger_log(logger,"run self match for dblen=%lu"
-                            ",querylen= %lu, minlength=%u",
+                         ",querylen= %lu, minlength=%u",
                          dblen,
                          querylen,
                          minlength);

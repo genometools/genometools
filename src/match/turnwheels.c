@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "spacedef.h"
+#include "core/ma.h"
 #include "turnwheels.h"
 
 #define MAXNUMOFWHEELS 18
@@ -29,13 +29,13 @@ struct Turningwheel
                minchanged;
 };
 
-Turningwheel *gt_newTurningwheel(unsigned int numofwheels,
-                              unsigned int asize)
+Turningwheel *gt_turningwheel_new(unsigned int numofwheels,
+                                  unsigned int asize)
 {
   unsigned int i;
   Turningwheel *tw;
 
-  ALLOCASSIGNSPACE(tw,NULL,Turningwheel,1);
+  tw = gt_malloc(sizeof (*tw));
   gt_assert(numofwheels < (unsigned int) MAXNUMOFWHEELS);
   gt_assert(numofwheels > 0);
   gt_assert(asize > 0);
@@ -50,7 +50,12 @@ Turningwheel *gt_newTurningwheel(unsigned int numofwheels,
   return tw;
 }
 
-bool gt_nextTurningwheel(Turningwheel *tw)
+size_t gt_turningwheel_size(void)
+{
+  return sizeof (Turningwheel);
+}
+
+bool gt_turningwheel_next(Turningwheel *tw)
 {
   while (true)
   {
@@ -73,12 +78,12 @@ bool gt_nextTurningwheel(Turningwheel *tw)
   return true;
 }
 
-unsigned int gt_minchangedTurningwheel(const Turningwheel *tw)
+unsigned int gt_turningwheel_minchanged(const Turningwheel *tw)
 {
   return tw->minchanged;
 }
 
-void gt_outputTurningwheel(const Turningwheel *tw)
+void gt_turningwheel_output(const Turningwheel *tw)
 {
   unsigned int i;
 
@@ -88,7 +93,10 @@ void gt_outputTurningwheel(const Turningwheel *tw)
   }
 }
 
-void gt_freeTurningwheel(Turningwheel **tw)
+void gt_turningwheel_delete(Turningwheel *tw)
 {
-  FREESPACE(*tw);
+  if (tw != NULL)
+  {
+    gt_free(tw);
+  }
 }

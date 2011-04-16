@@ -624,6 +624,7 @@ static int constructsarrandrunmmsearch(
   defaultsfxstrategy(&sfxstrategy,
                      gt_encseq_bitwise_cmp_ok(dbencseq) ? false : true);
   sfxstrategy.suftabasulongarray = true;
+  sfxstrategy.outsuftabonfile = false;
   sfi = gt_Sfxiterator_new(dbencseq,
                            readmode,
                            prefixlength,

@@ -206,9 +206,11 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   } else
   {
     const GtSuffixsortspace *suffixsortspace;
+
     while (true)
     {
-      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
+      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,
+                                            &specialsuffixes,
                                             sfi);
       if (suffixsortspace == NULL)
       {
@@ -217,7 +219,8 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       if (outfileinfo->outfpsuftab != NULL)
       {
         if (gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,
-                                        suffixsortspace,numberofsuffixes,
+                                        suffixsortspace,
+                                        numberofsuffixes,
                                         err) != 0)
         {
           haserr = true;
@@ -241,12 +244,12 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   {
     outfileinfo->longest.defined = true;
     outfileinfo->longest.valueunsignedlong = gt_Sfxiterator_longest(sfi);
-  }
-  if (!haserr && outfileinfo->outfpbcktab != NULL)
-  {
-    if (gt_Sfxiterator_bcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
+    if (outfileinfo->outfpbcktab != NULL)
     {
-      haserr = true;
+      if (gt_Sfxiterator_bcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   gt_Sfxiterator_delete(sfi);

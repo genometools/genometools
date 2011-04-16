@@ -569,6 +569,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   return -1;
 }
 
+#define DEBUGSIZEESTIMATION
 #ifdef DEBUGSIZEESTIMATION
 static void verifyestimatedspace(size_t estimatedspace)
 {
@@ -651,6 +652,13 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 
 #include "sfx-mapped4.gen"
 
+/*
+#define SHOWCURRENTSPACE\
+        printf("spacepeak at line %d: %.2f\n",__LINE__,\
+          GT_MEGABYTES(gt_ma_get_space_current() + gt_fa_get_space_current()))
+*/
+#define SHOWCURRENTSPACE /* Nothing */
+
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
@@ -669,9 +677,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   bool haserr = false;
 
   gt_error_check(err);
-  /*
-  printf("spacepeak at start of gt_Sfxiterator_new = %lu\n",
-          gt_ma_get_space_peak());*/ /* in bytes */
+  SHOWCURRENTSPACE;
   gt_assert(encseq != NULL);
   estimatedspace = (size_t) gt_encseq_sizeofrep(encseq);
   realspecialranges = gt_encseq_realspecialranges(encseq);
@@ -687,6 +693,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   if (!haserr)
   {
     sfi = gt_malloc(sizeof (*sfi));
+    estimatedspace += sizeof (*sfi);
     if (sfxstrategy != NULL && sfxstrategy->storespecialcodes)
     {
       sfi->spaceCodeatposition
@@ -759,7 +766,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                               0,
                               sfi->totallength,
                               err);
-        if (sfi->outlcpinfo == NULL)
+        if (sfi->outlcpinfoforsample == NULL)
         {
           haserr = true;
         }
@@ -788,6 +795,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
     }
   }
+  SHOWCURRENTSPACE;
   if (!haserr)
   {
     gt_assert(sfi != NULL);
@@ -795,8 +803,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                  prefixlength,
                                  sfi->sfxstrategy.storespecialcodes,
                                  err);
-    estimatedspace
-      += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength);
     if (sfi->bcktab == NULL)
     {
       haserr = true;
@@ -806,8 +812,11 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
+      estimatedspace
+        += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength);
     }
   }
+  SHOWCURRENTSPACE;
   if (!haserr)
   {
     unsigned long largestbucketsize;
@@ -835,12 +844,11 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (gt_has_twobitencoding(encseq) &&
           !sfi->sfxstrategy.kmerswithencseqreader)
       {
-        updateleftborder_getencseqkmers_twobitencoding(
-                                      encseq,
-                                      readmode,
-                                      prefixlength,
-                                      sfi,
-                                      sfi);
+        updateleftborder_getencseqkmers_twobitencoding(encseq,
+                                                       readmode,
+                                                       prefixlength,
+                                                       sfi,
+                                                       sfi);
       } else
       {
         if (sfi->sfxstrategy.iteratorbasedkmerscanning)
@@ -875,8 +883,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       = gt_bcktab_leftborderpartialsums(sfi->bcktab,
                                         sfi->totallength - specialcharacters);
     estimatedspace += sizeof (uint8_t) * largestbucketsize;
+    SHOWCURRENTSPACE;
 #ifdef DEBUGSIZEESTIMATION
-    verifyestimatedspace(estimatedspace);
+    if (sfi->sfxstrategy.outsuftabonfile)
+    {
+      verifyestimatedspace(estimatedspace);
+    }
 #endif
     if (maximumspace > 0)
     {

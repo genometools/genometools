@@ -19,7 +19,6 @@
 #define SFX_STRATEGY_H
 
 #include <stdbool.h>
-#include "core/defined-types.h"
 
 #define MAXINSERTIONSORTDEFAULT  3UL
 #define MAXBLTRIESORTDEFAULT     1000UL
@@ -28,9 +27,9 @@
 typedef struct
 {
   unsigned long maxwidthrealmedian,
-                maxcountingsort,
+                maxinsertionsort,
                 maxbltriesort,
-                maxinsertionsort;
+                maxcountingsort;
   unsigned int differencecover;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
@@ -41,16 +40,17 @@ typedef struct
        onlybucketinsertion,
        kmerswithencseqreader,
        dccheck,
-       samplewithprefixlengthnull;
+       samplewithprefixlengthnull,
+       outsuftabonfile;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
                                                     bool cmpcharbychar)
 {
   sfxstrategy->maxwidthrealmedian = 1UL;
-  sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   sfxstrategy->maxinsertionsort = MAXINSERTIONSORTDEFAULT;
   sfxstrategy->maxbltriesort = MAXBLTRIESORTDEFAULT;
+  sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   sfxstrategy->differencecover = 0;
   sfxstrategy->cmpcharbychar = cmpcharbychar;
   sfxstrategy->storespecialcodes = false;
@@ -58,8 +58,9 @@ typedef struct
   sfxstrategy->suftabasulongarray = false;
   sfxstrategy->onlybucketinsertion = false;
   sfxstrategy->kmerswithencseqreader = false;
-  sfxstrategy->samplewithprefixlengthnull = false;
   sfxstrategy->dccheck = false;
+  sfxstrategy->samplewithprefixlengthnull = false;
+  sfxstrategy->outsuftabonfile = true;
 }
 
 #endif

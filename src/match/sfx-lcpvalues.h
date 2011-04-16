@@ -79,6 +79,8 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned long totallength,
                               GtError *err);
 
+size_t gt_Outlcpinfo_size(const Outlcpinfo *outlcpinfo);
+
 void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength,
