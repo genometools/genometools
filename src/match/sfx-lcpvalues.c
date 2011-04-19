@@ -252,6 +252,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
 
 size_t gt_Outlcpinfo_size(const Outlcpinfo *outlcpinfo)
 {
+  gt_assert(outlcpinfo != NULL);
   return outlcpinfo->sizeofinfo;
 }
 

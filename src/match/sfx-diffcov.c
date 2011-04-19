@@ -1216,7 +1216,10 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                                 dcov->logger);
     gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength,
                          dcov->effectivesamplesize);
-    dcov->requiredspace += gt_Outlcpinfo_size(outlcpinfosample);
+    if (outlcpinfosample != NULL)
+    {
+      dcov->requiredspace += gt_Outlcpinfo_size(outlcpinfosample);
+    }
     gt_sortallbuckets(dcov->sortedsample,
                       dcov->effectivesamplesize,
                       NULL,
