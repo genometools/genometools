@@ -49,6 +49,10 @@ void     gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp);
 void     gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp);
 /* Outputs the overall time measured with <t> from start to now on <fp>. */
 void     gt_timer_show_progress_final(GtTimer *t, FILE *fp);
+/* Show also user and sys time in output of gt_timer_show_progress[_final] */
+void     gt_timer_show_cpu_time_by_progress(GtTimer *t);
+/* Hide output of last stage time in gt_timer_show_progress_final */
+void     gt_timer_omit_last_stage(GtTimer *t);
 /* Deletes <t>. */
 void     gt_timer_delete(GtTimer *t);
 

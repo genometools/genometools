@@ -36,6 +36,8 @@ struct GtTimer {
   Timerstate state;
   const char *statedesc;
   bool has_desc;
+  bool omit_last_stage;
+  bool show_cpu_time;
 };
 
 GtTimer* gt_timer_new(void)
@@ -44,6 +46,8 @@ GtTimer* gt_timer_new(void)
   t->state = TIMER_RUNNING;
   t->statedesc = NULL;
   t->has_desc = false;
+  t->omit_last_stage = false;
+  t->show_cpu_time = false;
   return t;
 }
 
@@ -61,6 +65,7 @@ void gt_timer_start(GtTimer *t)
   gettimeofday(&t->gstart_tv, NULL);
   gettimeofday(&t->start_tv, NULL);
   gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
+  gt_xgetrusage(RUSAGE_SELF, &t->gstart_ru);
   t->state = TIMER_RUNNING;
 }
 
@@ -117,8 +122,8 @@ void gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)
   fprintf(fp, fmt,
           (long)(elapsed_tv.tv_sec),
           (long)(elapsed_tv.tv_usec),
-          (long)(t->stop_ru.ru_utime.tv_sec - t->stop_ru.ru_utime.tv_sec),
-          (long)(t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec));
+          (long)(t->stop_ru.ru_utime.tv_sec - t->start_ru.ru_utime.tv_sec),
+          (long)(t->stop_ru.ru_stime.tv_sec - t->start_ru.ru_stime.tv_sec));
 }
 
 void gt_timer_show(GtTimer *t, FILE *fp)
@@ -126,32 +131,75 @@ void gt_timer_show(GtTimer *t, FILE *fp)
   gt_timer_show_formatted(t, "%ld.%06lds real %lds user %lds system\n", fp);
 }
 
+static void gt_timer_print_progress_report(GtTimer *t,
+    struct timeval *elapsed_tv, struct timeval *elapsed_user_tv,
+    struct timeval *elapsed_sys_tv, const char *desc, FILE *fp)
+{
+  fprintf(fp,"# TIME %s %ld.%02ld",
+          desc,
+          (long)(elapsed_tv->tv_sec),
+          (long)(elapsed_tv->tv_usec)/10000);
+  if (t->show_cpu_time) {
+    fprintf(fp, " (user: %ld.%02ld; sys: %ld.%02ld)\n",
+            (long)(elapsed_user_tv->tv_sec),
+            (long)(elapsed_user_tv->tv_usec)/10000,
+            (long)(elapsed_sys_tv->tv_sec),
+            (long)(elapsed_sys_tv->tv_usec)/10000);
+  }
+  else {
+    fprintf(fp, "\n");
+  }
+}
+
 void gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)
 {
-  struct timeval elapsed_tv;
+  struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;
   gettimeofday(&t->stop_tv, NULL);
+  gt_xgetrusage(RUSAGE_SELF, &t->stop_ru);
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
-  fprintf(fp,"# TIME %s %ld.%02ld\n",
-          t->statedesc,
-          (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec)/10000);
+  timeval_subtract(&elapsed_user_tv, &t->stop_ru.ru_utime,
+    &t->start_ru.ru_utime);
+  timeval_subtract(&elapsed_sys_tv, &t->stop_ru.ru_stime,
+    &t->start_ru.ru_stime);
+  gt_timer_print_progress_report(t, &elapsed_tv, &elapsed_user_tv,
+    &elapsed_sys_tv, t->statedesc, fp);
   t->statedesc = desc;
   gettimeofday(&t->start_tv, NULL);
+  gt_xgetrusage(RUSAGE_SELF, &t->start_ru);
 }
 
 void gt_timer_show_progress_final(GtTimer *t, FILE *fp)
 {
-  struct timeval elapsed_tv;
+  struct timeval elapsed_tv, elapsed_user_tv, elapsed_sys_tv;
+  const char overall_desc[] = "overall";
+
   gt_timer_stop(t);
-  timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
-  fprintf(fp,"# TIME %s %ld.%02ld\n",
-          t->statedesc,
-          (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec)/10000);
+  if (!t->omit_last_stage) {
+    timeval_subtract(&elapsed_tv, &t->stop_tv, &t->start_tv);
+    timeval_subtract(&elapsed_user_tv, &t->stop_ru.ru_utime,
+      &t->start_ru.ru_utime);
+    timeval_subtract(&elapsed_sys_tv, &t->stop_ru.ru_stime,
+      &t->start_ru.ru_stime);
+    gt_timer_print_progress_report(t, &elapsed_tv, &elapsed_user_tv,
+      &elapsed_sys_tv, t->statedesc, fp);
+  }
   timeval_subtract(&elapsed_tv, &t->stop_tv, &t->gstart_tv);
-  fprintf(fp,"# TIME overall %ld.%02ld\n",
-          (long)(elapsed_tv.tv_sec),
-          (long)(elapsed_tv.tv_usec)/10000);
+  timeval_subtract(&elapsed_user_tv, &t->stop_ru.ru_utime,
+    &t->gstart_ru.ru_utime);
+  timeval_subtract(&elapsed_sys_tv, &t->stop_ru.ru_stime,
+    &t->gstart_ru.ru_stime);
+  gt_timer_print_progress_report(t, &elapsed_tv, &elapsed_user_tv,
+    &elapsed_sys_tv, overall_desc, fp);
+}
+
+void gt_timer_show_cpu_time_by_progress(GtTimer *t)
+{
+  t->show_cpu_time = true;
+}
+
+void gt_timer_omit_last_stage(GtTimer *t)
+{
+  t->omit_last_stage = true;
 }
 
 void gt_timer_delete(GtTimer *t)
