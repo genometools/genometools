@@ -23,6 +23,7 @@
 #include "core/basename_api.h"
 #include "core/encseq_options.h"
 #include "core/error.h"
+#include "core/grep_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/option.h"
@@ -47,8 +48,7 @@ struct GtIndexOptions
   unsigned int numofparts,
                prefixlength;
   unsigned long maximumspace;
-  GtStrArray *algbounds,
-             *parts;
+  GtStrArray *algbounds;
   GtReadmode readmode;
   bool outsuftab,
        outlcptab,
@@ -58,7 +58,8 @@ struct GtIndexOptions
        outkyssort;
   GtStr *kysargumentstring,
         *indexname,
-        *dir;
+        *dir,
+        *memlimit;
   Sfxstrategy sfxstrategy;
   GtEncseqOptions *encopts;
   GtIndexOptionsIndexType type;
@@ -73,6 +74,7 @@ struct GtIndexOptions
            *optionmaxwidthrealmedian,
            *optionalgbounds,
            *optionparts,
+           *optionmemlimit,
            *optiondir,
            *optiondifferencecover,
            *optionkys;
@@ -91,8 +93,8 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->outkyssort = false;
   oi->numofparts = 1U;
   oi->maximumspace = 0UL; /* in bytes */
+  oi->memlimit = gt_str_new();
   oi->algbounds = gt_str_array_new();
-  oi->parts = gt_str_array_new();
   oi->prefixlength = GT_PREFIXLENGTH_AUTOMATIC;
   oi->outsuftab = false; /* only defined for GT_INDEX_OPTIONS_ESA */
   oi->outlcptab = false;
@@ -218,67 +220,48 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
     oi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
-  if (!had_err && gt_option_is_set(oi->optionparts)) {
-    if (gt_str_array_size(oi->parts) == 1UL) {
-      int readint;
-      if (sscanf(gt_str_array_get(oi->parts, 0), "%d", &readint) != 1
-            || readint <= 0) {
-        gt_error_set(err,"option -parts must have one positive "
-                         "integer argument optionally followed by one of "
-                         "the keywords MB and GB");
-        had_err = -1;
-      }
-      oi->numofparts = (unsigned int) readint;
-    } else {
-      if (gt_str_array_size(oi->parts) == 2UL) {
-        int readint;
-        const int maxpartsarg = (1 << 22) - 1;
-        if (sscanf(gt_str_array_get(oi->parts, 0), "%d", &readint) != 1
-              || readint <= 0 || readint >= maxpartsarg)
+
+  if (!had_err && gt_option_is_set(oi->optionmemlimit)) {
+    int readint;
+    char buffer[3];
+    bool match = false;
+    const int maxpartsarg = (1 << 22) - 1;
+    had_err = gt_grep(&match, "^[0-9]+(MB|GB)?$", gt_str_get(oi->memlimit),
+                      err);
+    if (had_err || !match)
+    {
+      gt_error_set(err,"option -memlimit must have one positive "
+                       "integer argument optionally followed by one of "
+                       "the keywords MB and GB; the integer must be "
+                       "smaller than %d", maxpartsarg);
+      had_err = -1;
+    }
+    if (!had_err)
+    {
+      (void) sscanf(gt_str_get(oi->memlimit), "%d%s", &readint, buffer);
+      oi->maximumspace = (unsigned long) readint;
+      if (strcmp(buffer, "GB") == 0)
+      {
+        if (sizeof (unsigned long) == (size_t) 4 && oi->maximumspace > 3UL)
         {
-          gt_error_set(err,"option -parts must have one positive "
-                           "integer argument optionally followed by one of "
-                           "the keywords MB and GB; the integer must be "
-                           "smaller than %d", maxpartsarg);
+          gt_error_set(err,"for 32bit binaries one cannot specify more "
+                           "than 3 GB as maximum space");
+          had_err = -1;
+        }
+        if (had_err != 1)
+        {
+          oi->maximumspace <<= 30;
+        }
+      } else if (strcmp(buffer, "MB") == 0) {
+        if (sizeof (unsigned long) == (size_t) 4 && oi->maximumspace > 4095UL)
+        {
+          gt_error_set(err,"for 32bit binaries one cannot specify more "
+                           "than 4095 MB as maximum space");
           had_err = -1;
         }
         if (!had_err)
         {
-          oi->maximumspace = (unsigned long) readint;
-          if (strcmp(gt_str_array_get(oi->parts, 1UL), "GB") == 0)
-          {
-            if (sizeof (unsigned long) == (size_t) 4 && oi->maximumspace > 3UL)
-            {
-              gt_error_set(err,"for 32bit binaries one cannot specify more "
-                               "than 3 GB as maximum space");
-              had_err = -1;
-            }
-            if (had_err != 1)
-            {
-              oi->maximumspace <<= 30;
-            }
-          } else
-          {
-            if (strcmp(gt_str_array_get(oi->parts, 1UL), "MB") != 0)
-            {
-              gt_error_set(err,"option -parts must have one positive "
-                               "integer argument optionally followed by one of "
-                               "the keywords MB and GB; the integer must be "
-                               "smaller than %d", maxpartsarg);
-              had_err = -1;
-            }
-            if (sizeof (unsigned long) == (size_t) 4 &&
-                oi->maximumspace > 4095UL)
-            {
-              gt_error_set(err,"for 32bit binaries one cannot specify more "
-                               "than 4095 MB as maximum space");
-              had_err = -1;
-            }
-            if (!had_err)
-            {
-              oi->maximumspace <<= 20;
-            }
-          }
+          oi->maximumspace <<= 20;
         }
       }
     }
@@ -375,14 +358,24 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_parser_add_option(op, idxo->optionstorespecialcodes);
 
   idxo->optionparts
-    = gt_option_new_stringarray("parts",
-                                "specify number of parts in which the suffix "
-                                "array construction is performed;\n"
-                                "alternatively specify the maximimum space "
-                                "allowed for the construction",
-                                idxo->parts);
+    = gt_option_new_uint("parts",
+                         "specify number of parts in which the index "
+                         "construction is performed",
+                         &idxo->numofparts, 1U);
   gt_option_is_development_option(idxo->optionparts);
   gt_option_parser_add_option(op, idxo->optionparts);
+
+  idxo->optionmemlimit
+    = gt_option_new_string("memlimit",
+                           "specify maximal amount of memory to be used during "
+                           "index construction (in bytes, the keywords 'MB' "
+                           "and 'GB' are allowed)",
+                           idxo->memlimit, NULL);
+  gt_option_is_development_option(idxo->optionmemlimit);
+  gt_option_parser_add_option(op, idxo->optionmemlimit);
+
+  gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
+  gt_option_exclude(idxo->optionparts, idxo->optionmemlimit);
 
   idxo->optionkys = gt_option_new_string("kys",
                                    "output/sort according to keys of the form "
@@ -513,8 +506,8 @@ void gt_index_options_delete(GtIndexOptions *oi)
   gt_str_delete(oi->kysargumentstring);
   gt_str_delete(oi->indexname);
   gt_str_delete(oi->dir);
+  gt_str_delete(oi->memlimit);
   gt_str_array_delete(oi->algbounds);
-  gt_str_array_delete(oi->parts);
   gt_free(oi);
 }
 
@@ -545,7 +538,6 @@ GT_INDEX_OPTS_GETTER_DEF(outbwttab, bool);
 GT_INDEX_OPTS_GETTER_DEF(outbcktab, bool);
 GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
-GT_INDEX_OPTS_GETTER_DEF(parts, GtStrArray*);
 /* these are available as options only, values are not to be used directly */
 GT_INDEX_OPTS_GETTER_DEF_OPT(cmpcharbychar);
 GT_INDEX_OPTS_GETTER_DEF_OPT(storespecialcodes);

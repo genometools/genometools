@@ -61,7 +61,6 @@ GT_INDEX_OPTS_GETTER_DECL(outbcktab, bool);
 GT_INDEX_OPTS_GETTER_DECL(outkystab, bool);
 GT_INDEX_OPTS_GETTER_DECL(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DECL(algbounds, GtStrArray*);
-GT_INDEX_OPTS_GETTER_DECL(parts, GtStrArray*);
 GT_INDEX_OPTS_GETTER_DECL_OPT(cmpcharbychar);
 GT_INDEX_OPTS_GETTER_DECL_OPT(storespecialcodes);
 GT_INDEX_OPTS_GETTER_DECL_OPT(maxwidthrealmedian);

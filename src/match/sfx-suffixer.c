@@ -537,9 +537,9 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
 
   if (estimatedspace >= (size_t) maximumspace)
   {
-    gt_error_set(err,"already used %.2f MB of memory cannot compute "
-                     "enhanced suffix array in at most %lu MB",
-                     GT_MEGABYTES(estimatedspace),maximumspace);
+    gt_error_set(err,"already used %.2f MB of memory, cannot compute "
+                     "enhanced suffix array in at most %lu bytes",
+                     GT_MEGABYTES(estimatedspace), maximumspace);
     return -1;
   }
   for (parts = 1U; parts <= 100U; parts++)
@@ -564,7 +564,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     }
     gt_freesuftabparts(suftabparts);
   }
-  gt_error_set(err,"cannot compute enhanced suffix array in at most %lu MB",
+  gt_error_set(err,"cannot compute enhanced suffix array in at most %lu bytes",
                    maximumspace);
   return -1;
 }

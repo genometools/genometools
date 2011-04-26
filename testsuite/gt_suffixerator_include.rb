@@ -446,3 +446,64 @@ small_fastafiles.each do |file|
     end
   end
 end
+
+if $gttestdata then
+  ["2L", "2R", "3L", "3R"].each do |chr|
+    Name "gt suffixerator -memlimit D. mel #{chr}"
+    Keywords "gt_suffixerator memlimit"
+    Test do
+      size = nil
+      run "#{$bin}/gt encseq encode -indexname dmel " + \
+          "#{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
+          :maxtime => 600
+      out = `env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak #{$bin}/gt suffixerator -v -suf -ii dmel`
+      if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
+        size = m[1].to_f
+      else
+          raise "could not get normal space peak"
+      end
+      [0.25, 0.5, 0.75].each do |frac|
+        limit = size * frac
+        run_test "env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak " + \
+                 "#{$bin}/gt suffixerator -suf -v -memlimit #{limit.floor}MB " + \
+                 "-ii dmel", :maxtime => 600
+        lastout = nil
+        File.open($last_stdout) do |f|
+          out = f.read
+          if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
+            mysize = m[1].to_f
+          else
+            raise "could not get actual space peak!"
+          end
+          if mysize > limit and mysize - limit > (mysize/10) then
+            raise "required size (#{mysize}) was higher than limit (#{limit})"
+          end
+        end
+      end
+    end
+  end
+end
+
+Name "differencecover -memlimit excludes -parts"
+Keywords "differencecover memlimit"
+Test do
+  run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
+      "-parts 3 -memlimit 2MB", :retval => 1
+  grep($last_stderr, /exclude each other/)
+end
+
+Name "differencecover -memlimit invalid size"
+Keywords "differencecover memlimit"
+Test do
+  run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
+      "-memlimit 2TB", :retval => 1
+  grep($last_stderr, /one of the keywords MB and GB/)
+end
+
+Name "differencecover -memlimit invalid size"
+Keywords "differencecover memlimit"
+Test do
+  run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
+      "-memlimit -2GB", :retval => 1
+  grep($last_stderr, /one of the keywords MB and GB/)
+end
