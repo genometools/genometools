@@ -238,6 +238,79 @@ Test do
   run "diff mirr.info rev.info"
 end
 
+Name "gt encseq decode single sequence"
+Keywords "encseq gt_encseq_decode single"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -seq 3 foo"
+  run "diff #{$last_stdout} #{$testdata}Atinsert_single_3.fna"
+end
+
+Name "gt encseq decode single sequence (reverse)"
+Keywords "encseq gt_encseq_decode single"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -dir rev -seq 17 foo"
+  run "diff #{$last_stdout} #{$testdata}Atinsert_single_3_rev.fna"
+end
+
+Name "gt encseq decode single sequence (invalid seqnumber)"
+Keywords "encseq gt_encseq_decode single"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -seq 36 foo", :retval => 1
+  grep $last_stderr, /exceeds/
+end
+
+Name "gt encseq decode single sequence (with -output concat)"
+Keywords "encseq gt_encseq_decode single"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -output concat -seq 36 foo", :retval => 1
+  grep $last_stderr, /can only be used with the/
+end
+
+Name "gt encseq decode sequence range"
+Keywords "encseq gt_encseq_decode seqrange"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -seqrange 3 7 foo"
+  run "diff #{$last_stdout} #{$testdata}Atinsert_seqrange_3-7.fna"
+end
+
+Name "gt encseq decode sequence range (reverse)"
+Keywords "encseq gt_encseq_decode seqrange"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -dir rev -seqrange 13 17 foo"
+  run "diff #{$last_stdout} #{$testdata}Atinsert_seqrange_13-17_rev.fna"
+end
+
+Name "gt encseq decode sequence range (invalid range start)"
+Keywords "encseq gt_encseq_decode seqrange"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -seqrange 37 49 foo", :retval => 1
+  grep $last_stderr, /exceeding/
+end
+
+Name "gt encseq decode sequence range (invalid range end)"
+Keywords "encseq gt_encseq_decode seqrange"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -seqrange 3 49 foo", :retval => 1
+  grep $last_stderr, /exceeding/
+end
+
+Name "gt encseq decode sequence range (with -output concat)"
+Keywords "encseq gt_encseq_decode seqrange"
+Test do
+  run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
+  run_test "#{$bin}gt encseq decode -output concat -seqrange 3 49 foo", \
+           :retval => 1
+  grep $last_stderr, /can only be used with the/
+end
+
 Name "gt encseq Lua bindings"
 Keywords "encseq gt_scripts "
 Test do
