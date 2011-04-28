@@ -33,7 +33,8 @@ typedef struct {
   bool singlechars;
   GtStr *mode,
         *sepchar;
-  GtRange rng;
+  GtRange rng,
+          seqrng;
   GtEncseqOptions *eopts;
   GtReadmode rm;
   GtStr *dir;
@@ -46,6 +47,8 @@ static void* gt_encseq_decode_arguments_new(void)
   arguments->mode = gt_str_new();
   arguments->sepchar = gt_str_new();
   arguments->dir = gt_str_new();
+  arguments->seqrng.start = arguments->seqrng.end = GT_UNDEF_ULONG;
+  arguments->rng.start = arguments->rng.end = GT_UNDEF_ULONG;
   return arguments;
 }
 
@@ -65,6 +68,8 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option,
            *optionsep,
+           *optionseq,
+           *optionseqrange,
            *optionmode;
   GtEncseqDecodeArguments *arguments =
                                       (GtEncseqDecodeArguments*) tool_arguments;
@@ -87,11 +92,20 @@ static GtOptionParser* gt_encseq_decode_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -seq */
-  option = gt_option_new_ulong("seq",
-                               "extract sequence with number",
-                               &arguments->seq,
-                               GT_UNDEF_ULONG);
-  gt_option_parser_add_option(op, option);
+  optionseq = gt_option_new_ulong("seq",
+                                  "extract sequence identified by its number",
+                                  &arguments->seq,
+                                  GT_UNDEF_ULONG);
+  gt_option_parser_add_option(op, optionseq);
+
+  /* -seqrange */
+  optionseqrange = gt_option_new_range("seqrange",
+                                       "extract multiple consecutive sequences",
+                                       &arguments->seqrng,
+                                       NULL);
+  gt_option_parser_add_option(op, optionseqrange);
+  gt_option_exclude(optionseqrange, optionseq);
+  gt_option_exclude(optionseq, optionseqrange);
 
   /* -output */
   optionmode = gt_option_new_choice("output",
@@ -132,12 +146,23 @@ int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
   int rval;
 
   if (gt_str_length(args->dir) > 0) {
-    rval =
-         gt_readmode_parse(gt_str_get(args->dir), err);
+    rval = gt_readmode_parse(gt_str_get(args->dir), err);
     if (rval < 0)
       had_err = -1;
     else
       args->rm = (GtReadmode) rval;
+  }
+  if (!had_err && args->seqrng.start != GT_UNDEF_ULONG &&
+        args->seqrng.end != GT_UNDEF_ULONG && args->seq != GT_UNDEF_ULONG) {
+    gt_error_set(err, "'-seq' and '-seqrange' cannot be used together");
+    had_err = -1;
+  }
+  if (!had_err && (args->seqrng.start != GT_UNDEF_ULONG ||
+        args->seqrng.end != GT_UNDEF_ULONG || args->seq != GT_UNDEF_ULONG)
+        && strcmp(gt_str_get(args->mode), "fasta") != 0) {
+    gt_error_set(err, "'-seq' and '-seqrange' can only be used with the "
+                      "'-output fasta' option");
+    had_err = -1;
   }
   return had_err;
 }
@@ -151,6 +176,7 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
   gt_assert(encseq);
 
   if (strcmp(gt_str_get(args->mode), "fasta") == 0) {
+    /* specify a single sequence to extract */
     if (args->seq != GT_UNDEF_ULONG) {
       if (args->seq >= gt_encseq_num_of_sequences(encseq)) {
         gt_error_set(err, "requested sequence %lu exceeds number of sequences "
@@ -160,7 +186,22 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
       }
       sfrom = args->seq;
       sto = args->seq + 1;
+    } else if (args->seqrng.start != GT_UNDEF_ULONG
+                 && args->seqrng.end != GT_UNDEF_ULONG) {
+      /* specify a sequence range to extract */
+      if (args->seqrng.start >= gt_encseq_num_of_sequences(encseq)
+            || args->seqrng.end >= gt_encseq_num_of_sequences(encseq)) {
+        gt_error_set(err, "range %lu-%lu includes a sequence number exceeding "
+                          "the total number of sequences (%lu)",
+                          args->seqrng.start,
+                          args->seqrng.end,
+                          gt_encseq_num_of_sequences(encseq));
+        return -1;
+      }
+      sfrom = args->seqrng.start;
+      sto = args->seqrng.end + 1;
     } else {
+      /* extract all sequences */
       sfrom = 0;
       sto = gt_encseq_num_of_sequences(encseq);
     }
