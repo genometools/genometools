@@ -113,36 +113,21 @@ def run_encseq_comparison(filename, mirrored, lossless, readmode, singlechars,
 end
 
 def testformirrored(s, readmode)
-  [false, true].each do |lossless|
-    [false, true].each do |mirrored|
-      [false, true].each do |singlechars|
-        Name "gt encseq decode #{s.split('/').last} cc " + \
-             "#{"m " if mirrored}#{"s " if singlechars}" + \
-             "#{"l " if lossless}#{readmode}"
-        Keywords "encseq gt_encseq_decode #{" mirroring" if mirrored}" + \
-                 "#{" lossless" if lossless}"
-        Test do
-          run "#{$bin}gt encseq encode -des -ssp -sds " + \
+  Name "gt encseq decode #{s.split('/').last} #{readmode}"
+  Keywords "encseq gt_encseq_decode mirroring lossless"
+  Test do
+    [false, true].each do |lossless|
+      run "#{$bin}gt encseq encode -des -ssp -sds " + \
               "#{"-lossless" if lossless} " + \
               "#{s}"
+      [false, true].each do |mirrored|
+        [false, true].each do |singlechars|
           run_encseq_comparison(s, mirrored, lossless, readmode, singlechars)
-        end
-
-        Name "gt encseq decode #{s.split('/').last} cc " + \
-             "#{"m " if mirrored}#{"s " if singlechars}" + \
-             "#{"l " if lossless}#{readmode} " + \
-             "whole seq"
-        Keywords "encseq gt_encseq_decode#{" mirroring" if mirrored}" + \
-                 "#{" lossless" if lossless}"
-        Test do
-          run_test "#{$bin}gt encseq encode -des -ssp -sds " + \
-                   "#{"-lossless" if lossless} " + \
-                   "#{s}"
           seq = getseq(s, mirrored, readmode)
           line = "#{$bin}gt encseq decode -output concat -dir #{readmode} " + \
-                 "#{"-mirrored" if mirrored} " + \
-                 "#{"-lossless" if lossless} " + \
-                 "#{"-singlechars" if singlechars} ./#{s.split('/').last}"
+                  "#{"-mirrored" if mirrored} " + \
+                  "#{"-lossless" if lossless} " + \
+                  "#{"-singlechars" if singlechars} ./#{s.split('/').last}"
           if mirrored and AATESTSEQS.include?(s)
             # -mirroring should fail on proteins
             run_test(line, :retval => 1)
