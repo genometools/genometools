@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,17 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "gtlua/alphabet_lua.h"
-#include "gtlua/bittab_lua.h"
-#include "gtlua/encseq_lua.h"
-#include "gtlua/gtcore_lua.h"
+#include "lauxlib.h"
+#include "core/mathsupport.h"
 #include "gtlua/mathsupport_lua.h"
-#include "gtlua/range_lua.h"
-#include "gtlua/score_matrix_lua.h"
-#include "gtlua/translate_lua.h"
 
-int gt_lua_open_core(lua_State *L)
+static int gt_lua_mathsupport_rand_max(lua_State *L)
+{
+  unsigned long max = luaL_checknumber(L, 1);
+
+  lua_pushnumber(L, gt_rand_max(max));
+  return 1;
+}
+
+static const struct luaL_Reg mathsupport_lib_f [] = {
+  { "rand_max", gt_lua_mathsupport_rand_max },
+  { NULL, NULL }
+};
+
+int gt_lua_open_mathsupport(lua_State *L)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -34,13 +41,8 @@ int gt_lua_open_core(lua_State *L)
 #ifndef NDEBUG
   stack_size = lua_gettop(L);
 #endif
-  gt_lua_open_alphabet(L);
-  gt_lua_open_bittab(L);
-  gt_lua_open_encseq(L);
-  gt_lua_open_mathsupport(L);
-  gt_lua_open_range(L);
-  gt_lua_open_score_matrix(L);
-  gt_lua_open_translate(L);
+  luaL_register(L, "gt", mathsupport_lib_f);
+  lua_pop(L, 1);
   gt_assert(lua_gettop(L) == stack_size);
   return 1;
 }
