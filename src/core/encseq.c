@@ -3951,7 +3951,7 @@ const char *gt_encseq_description(const GtEncseq *encseq,
 
 const GtStrArray *gt_encseq_filenames(const GtEncseq *encseq)
 {
-  gt_assert(encseq);
+  gt_assert(encseq != NULL);
   return encseq->filenametab;
 }
 
@@ -3981,6 +3981,31 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_free(copydestab);
+}
+
+void gt_encseq_check_startpositions(const GtEncseq *encseq)
+{
+  unsigned long *startpostable, i, pos = 0;
+  GtEncseqReader *r;
+  gt_assert(encseq != NULL);
+  startpostable = gt_malloc(sizeof (unsigned long)
+                        * gt_encseq_num_of_sequences(encseq));
+  r = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
+  startpostable[pos++] = 0;
+  for (i = 0; i < gt_encseq_total_length(encseq); i++) {
+    if (gt_encseq_reader_next_encoded_char(r) == (GtUchar) SEPARATOR) {
+      startpostable[pos++] = i+1;
+    }
+  }
+  for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
+    unsigned long ssp1 = gt_encseq_seqstartpos(encseq, i),
+                  ssp2 = startpostable[i];
+    if (ssp1 != ssp2) {
+      fprintf(stderr, "startpos of seq %lu, %lu != %lu! difference %lu\n", i,
+                      ssp1, ssp2, ssp2-ssp1);
+    }
+  }
+  gt_free(startpostable);
 }
 
 bool gt_encseq_has_multiseq_support(const GtEncseq *encseq)

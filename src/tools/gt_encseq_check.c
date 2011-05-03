@@ -89,6 +89,7 @@ static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
     had_err = -1;
   if (!had_err) {
     int readmode;
+    gt_encseq_check_startpositions(encseq);
     for (readmode = 0; readmode < 4; readmode++)
     {
       if (gt_alphabet_is_dna(gt_encseq_alphabet(encseq)) ||

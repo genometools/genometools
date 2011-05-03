@@ -414,6 +414,10 @@ void gt_encseq_check_markpos(const GtEncseq *encseq);
   in reverse directions. */
 void gt_encseq_check_specialranges(const GtEncseq *encseq);
 
+/* Checks whether the information given by gt_encseq_seqstartpos() agrees
+   with the actual positions of separators in the encoded sequence. */
+void gt_encseq_check_startpositions(const GtEncseq *encseq);
+
 /* The following checks if the encoded sequence <encseq> for consistency.
   It does so by scanning the files given in <filenametab> and comparing
   the extracted symbols to those obtained by directly reading the files.
