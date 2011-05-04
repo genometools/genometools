@@ -614,7 +614,7 @@ void gt_encseq_extract_encoded(const GtEncseq *encseq,
   GtEncseqReader *esr;
   unsigned long idx, pos;
 
-  gt_assert(frompos <= topos && topos < encseq->totallength);
+  gt_assert(frompos <= topos && topos < encseq->logicaltotallength);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
@@ -633,7 +633,7 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
   GtEncseqReader *esr;
   unsigned long idx, pos;
 
-  gt_assert(frompos <= topos && topos < encseq->totallength);
+  gt_assert(frompos <= topos && topos < encseq->logicaltotallength);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
