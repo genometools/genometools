@@ -65,7 +65,7 @@
 #include "core/defined-types.h"
 #include "match/stamp.h"
 
-#undef GT_RANGEDEBUG
+#define GT_RANGEDEBUG
 
 /* The following implements the access functions to the bit encoding */
 
@@ -1075,6 +1075,7 @@ static GtEncseqAccessType determineoptimalsssptablerep(
     satmin = GT_ACCESS_TYPE_UINT32TABLES;
   }
   return satmin;
+  /*return GT_ACCESS_TYPE_UCHARTABLES;*/
 }
 
 static void initSWtable(GtSWtable *swtable,
@@ -1472,9 +1473,7 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
               swtable->st_uint32.maxrangevalue);
       showallSWtablewithpages_uint32(&swtable->st_uint32);
       break;
-    default: fprintf(stderr,
-                     "showallSWtablewithpage(sat=%d is undefined)\n",
-                     (int) sat);
+    default: fprintf(stderr,"%s(sat=%d is undefined)\n",__func__,(int) sat);
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
@@ -2416,7 +2415,7 @@ struct GtSpecialrangeiterator
   unsigned long lengthofspecialrange,
                 jumppos; /* position jumping along the sequence to find the
                             special ranges, only need when
-                            !gt_encseq_access_type_isviautables(encseq->sat) */
+                            !encseq->accesstype_via_utables */
 };
 
 void gt_specialrangeiterator_reinit_with_startpos(GtSpecialrangeiterator *sri,
@@ -3272,9 +3271,10 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
+  encseq->accesstype_via_utables = gt_encseq_access_type_isviautables(sat);
   encseq->satsep = determineoptimalsssptablerep(sat,totallength,
                                                 numofsequences-1);
-  if (gt_encseq_access_type_isviautables(sat))
+  if (encseq->accesstype_via_utables)
   {
     initSWtable(&encseq->wildcardrangetable,totallength,sat,wildcardranges);
   }
@@ -3282,6 +3282,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   {
     initSWtable(&encseq->ssptabnew,totallength,encseq->satsep,numofsequences-1);
   }
+  STAMP;
   encseq->has_wildcardranges = (wildcardranges > 0) ? true : false;
   encseq->has_specialranges
     = (wildcardranges > 0 || numofsequences > 1UL) ? true : false;
@@ -3694,7 +3695,7 @@ static GtEncseq *files2encodedsequence(
     gt_assert(encseq != NULL);
     if (numofsequences > 1UL &&
         sat != GT_ACCESS_TYPE_EQUALLENGTH &&
-        (outssptab || gt_encseq_access_type_isviautables(sat)))
+        (outssptab || encseq->accesstype_via_utables))
     {
       ssptaboutinfo = ssptaboutinfo_new(sat,totallength,
                                         numofsequences,&encseq->ssptabnew,
@@ -3850,7 +3851,7 @@ gt_encseq_new_from_index(const char *indexname,
     }
   }
   if (!haserr && encseq != NULL &&
-      (withssptab || gt_encseq_access_type_isviautables(encseq->sat)) &&
+      (withssptab || encseq->accesstype_via_utables) &&
       encseq->sat != GT_ACCESS_TYPE_EQUALLENGTH)
   {
     gt_assert(encseq != NULL);
@@ -3898,11 +3899,6 @@ gt_encseq_new_from_index(const char *indexname,
     }
   }
   gt_encseq_metadata_delete(emd);
-  if (!haserr) {
-    gt_assert(encseq != NULL);
-    encseq->accesstype_via_utables =
-                                gt_encseq_access_type_isviautables(encseq->sat);
-  }
   if (haserr)
   {
     gt_alphabet_delete((GtAlphabet*) alpha);
@@ -6418,10 +6414,6 @@ gt_encseq_new_from_files(GtTimer *sfxprogress,
     {
       haserr = true;
     }
-  }
-  if (!haserr) {
-    gt_assert(encseq != NULL);
-    encseq->accesstype_via_utables = gt_encseq_access_type_isviautables(sat);
   }
   if (haserr)
   {
