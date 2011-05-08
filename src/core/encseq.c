@@ -65,7 +65,7 @@
 #include "core/defined-types.h"
 #include "match/stamp.h"
 
-#define GT_RANGEDEBUG
+#undef GT_RANGEDEBUG
 
 /* The following implements the access functions to the bit encoding */
 
@@ -1074,8 +1074,8 @@ static GtEncseqAccessType determineoptimalsssptablerep(
     sepsizemin = sepsize;
     satmin = GT_ACCESS_TYPE_UINT32TABLES;
   }
-  return satmin;
-  /*return GT_ACCESS_TYPE_UCHARTABLES;*/
+  /*return satmin;*/
+  return GT_ACCESS_TYPE_USHORTTABLES;
 }
 
 static void initSWtable(GtSWtable *swtable,
@@ -3282,7 +3282,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   {
     initSWtable(&encseq->ssptabnew,totallength,encseq->satsep,numofsequences-1);
   }
-  STAMP;
   encseq->has_wildcardranges = (wildcardranges > 0) ? true : false;
   encseq->has_specialranges
     = (wildcardranges > 0 || numofsequences > 1UL) ? true : false;
@@ -3982,22 +3981,24 @@ void gt_encseq_check_descriptions(const GtEncseq *encseq)
 void gt_encseq_check_startpositions(const GtEncseq *encseq)
 {
   unsigned long *startpostable, i, pos = 0;
-  GtEncseqReader *r;
+  GtEncseqReader *esr;
   gt_assert(encseq != NULL);
   startpostable = gt_malloc(sizeof (unsigned long)
                         * gt_encseq_num_of_sequences(encseq));
-  r = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
+  esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD, 0);
   startpostable[pos++] = 0;
   for (i = 0; i < gt_encseq_total_length(encseq); i++) {
-    if (gt_encseq_reader_next_encoded_char(r) == (GtUchar) SEPARATOR) {
+    if (gt_encseq_reader_next_encoded_char(esr) == (GtUchar) SEPARATOR) {
       startpostable[pos++] = i+1;
     }
   }
+  gt_encseq_reader_delete(esr);
   for (i = 0; i < gt_encseq_num_of_sequences(encseq); i++) {
     unsigned long ssp1 = gt_encseq_seqstartpos(encseq, i),
                   ssp2 = startpostable[i];
     if (ssp1 != ssp2) {
-      fprintf(stderr, "startpos of seq %lu, %lu != %lu! difference %lu\n", i,
+      fprintf(stderr, "startpos of seq %lu, (wrong) %lu != %lu "
+                      " (correct)! difference %lu\n", i,
                       ssp1, ssp2, ssp2-ssp1);
     }
   }

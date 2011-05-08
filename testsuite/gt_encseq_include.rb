@@ -188,6 +188,7 @@ emblfiles = fastafiles.collect{ |f| f.gsub(".fna",".embl") }
         run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
         run_test "#{$bin}gt encseq decode -output concat sfx > sfx.seq"
         run_test "#{$bin}gt encseq info sfx > sfx.info"
+        run_test "#{$bin}gt encseq check sfx"
         run "cp #{$testdata}#{fasta} infile"
         run_test "#{$bin}gt encseq encode -v -indexname sfx infile"
         run_test "#{$bin}gt encseq decode -output concat sfx > sfx2.seq"

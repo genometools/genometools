@@ -201,7 +201,6 @@ static void GT_APPENDINT(showSWtablewithpages)
     range.end = range.start + ((swtable->rangelengths == NULL)
                                 ? 0
                                 : swtable->rangelengths[idx]) + 1;
-    printf("%lu: start = %lu ",idx,startpos);
     showGtRange(&range);
     printf("\n");
   }
