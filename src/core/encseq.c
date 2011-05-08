@@ -1074,8 +1074,7 @@ static GtEncseqAccessType determineoptimalsssptablerep(
     sepsizemin = sepsize;
     satmin = GT_ACCESS_TYPE_UINT32TABLES;
   }
-  /*return satmin;*/
-  return GT_ACCESS_TYPE_USHORTTABLES;
+  return satmin;
 }
 
 static void initSWtable(GtSWtable *swtable,
