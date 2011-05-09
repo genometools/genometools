@@ -377,9 +377,11 @@ bool             gt_encseq_loader_sds_tab_required(const GtEncseqLoader *el);
 /* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
    logging). */
 void             gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l);
-/* XXX: document me */
+/* Enables loading of a sequence using <el> with mirroring enabled from the
+   start. Identical to invoking <gt_encseq_mirror()> directly after loading. */
 void             gt_encseq_loader_mirror(GtEncseqLoader *el);
-/* XXX: document me */
+/* Disables loading of a sequence using <el> with mirroring enabled right from
+   the start. */
 void             gt_encseq_loader_do_not_mirror(GtEncseqLoader *el);
 /* Attempts to map the index files as specified by <indexname> using the options
    set in <el> using this interface. Returns a <GtEncseq> instance
