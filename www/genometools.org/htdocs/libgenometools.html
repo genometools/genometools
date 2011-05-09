@@ -120,8 +120,6 @@ interfaces.
 
   <li><a href="#GtPhase">GtPhase</a>
 
-  <li><a href="#GtProgressTimer">GtProgressTimer</a>
-
   <li><a href="#GtRange">GtRange</a>
 
   <li><a href="#GtRecMap">GtRecMap</a>
@@ -215,22 +213,6 @@ registers exit function which calls <code>gt_lib_clean()</code>
 <p>
 returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise
-</p>
-<hr>
-<a name="gt_readmode_show"></a>
-
-<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
-<p>
-Returns the descriptive string for the readmode <code>readmode</code>.
-</p>
-<hr>
-<a name="gt_readmode_parse"></a>
-
-<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
-<p>
-Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
-   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
-   -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="GtAlphabet"></a>
@@ -1650,6 +1632,20 @@ Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</c
    Requires multiple sequence support enabled in <code>encseq</code>.
 </p>
 <hr>
+<a name="gt_encseq_has_multiseq_support"></a>
+
+<code>bool               gt_encseq_has_multiseq_support(const GtEncseq *encseq)</code>
+<p>
+Returns TRUE if <code>encseq</code> has multiple sequence support.
+</p>
+<hr>
+<a name="gt_encseq_has_description_support"></a>
+
+<code>bool               gt_encseq_has_description_support(const GtEncseq *encseq)</code>
+<p>
+Returns TRUE if <code>encseq</code> has description support.
+</p>
+<hr>
 <a name="gt_encseq_seqstartpos"></a>
 
 <code>unsigned long      gt_encseq_seqstartpos(const GtEncseq *encseq,
@@ -1732,9 +1728,11 @@ Returns the <code>GtAlphabet</code> associated with <code>encseq</code>.
 <hr>
 <a name="gt_encseq_mirror"></a>
 
-<code>void               gt_encseq_mirror(GtEncseq *encseq)</code>
+<code>int               gt_encseq_mirror(GtEncseq *encseq, GtError *err)</code>
 <p>
 Extends <code>encseq</code>  by virtual reverse complement sequences.
+   Returns 0 if mirroring has been successfully enabled, otherwise -1.
+   <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="gt_encseq_unmirror"></a>
@@ -1747,7 +1745,7 @@ Removes virtual reverse complement sequences added by
 <hr>
 <a name="gt_encseq_is_mirrored"></a>
 
-<code>bool               gt_encseq_is_mirrored(GtEncseq *encseq)</code>
+<code>bool               gt_encseq_is_mirrored(const GtEncseq *encseq)</code>
 <p>
 Returns TRUE if <code>encseq</code> contains virtual reverse complement sequences as
    added by <code>gt_encseq_mirror()</code>.
@@ -1837,7 +1835,6 @@ Disables creation of the .esq table.
 <code>void              gt_encseq_builder_create_des_tab(GtEncseqBuilder *eb)</code>
 <p>
 Enables creation of the .des table containing sequence descriptions.
-   Not enabled by default.
 </p>
 <hr>
 <a name="gt_encseq_builder_do_not_create_des_tab"></a>
@@ -1852,7 +1849,6 @@ Disables creation of the .des table.
 <code>void              gt_encseq_builder_create_ssp_tab(GtEncseqBuilder *eb)</code>
 <p>
 Enables creation of the .ssp table containing indexes for multiple sequences.
-   Not enabled by default.
 </p>
 <hr>
 <a name="gt_encseq_builder_do_not_create_ssp_tab"></a>
@@ -1867,7 +1863,7 @@ Disables creation of the .ssp table.
 <code>void              gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb)</code>
 <p>
 Enables creation of the .sds table containing indexes for sequence
-   descriptions. Not enabled by default.
+   descriptions.
 </p>
 <hr>
 <a name="gt_encseq_builder_do_not_create_sds_tab"></a>
@@ -1916,6 +1912,22 @@ Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>
    the encoded sequence to be built by <code>eb</code>. <code>str</code> must be encoded using the
    alphabet set at the construction time of <code>eb</code>.
    Does not take ownership of <code>str</code>.
+   Additionally, a description <code>desc</code> can be given. If description support
+   is enabled, this must not be NULL.
+</p>
+<hr>
+<a name="gt_encseq_builder_add_encoded_own"></a>
+
+<code>void              gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
+                                                   const GtUchar *str,
+                                                   unsigned long strlen,
+                                                   const char *desc)</code>
+<p>
+Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>strlen</code> to
+   the encoded sequence to be built by <code>eb</code>. <code>str</code> must be encoded using the
+   alphabet set at the construction time of <code>eb</code>.
+   Always creates a copy of <code>str</code>, so it can be used with memory that is to be
+   freed immediately after adding.
    Additionally, a description <code>desc</code> can be given. If description support
    is enabled, this must not be NULL.
 </p>
@@ -1969,20 +1981,19 @@ Deletes <code>eb</code>.
 Creates a new <code>GtEncseqEncoder</code>.
 </p>
 <hr>
-<a name="gt_encseq_encoder_set_progresstimer"></a>
+<a name="gt_encseq_encoder_set_timer"></a>
 
-<code>void              gt_encseq_encoder_set_progresstimer(GtEncseqEncoder *ee,
-                                                     GtProgressTimer *pt)</code>
+<code>void              gt_encseq_encoder_set_timer(GtEncseqEncoder *ee, GtTimer *t)</code>
 <p>
-Sets <code>pt</code> to be the progress timer for <code>ee</code>. Default is NULL (no progress
-   reporting).
+Sets <code>t</code> to be the timer for <code>ee</code>. Default is NULL (no progress
+reporting).
 </p>
 <hr>
-<a name="gt_encseq_encoder_get_progresstimer"></a>
+<a name="gt_encseq_encoder_get_timer"></a>
 
-<code>GtProgressTimer*  gt_encseq_encoder_get_progresstimer(const GtEncseqEncoder *ee)</code>
+<code>GtTimer*          gt_encseq_encoder_get_timer(const GtEncseqEncoder *ee)</code>
 <p>
-Returns the progress timer set for <code>ee</code>.
+Returns the timer set for <code>ee</code>.
 </p>
 <hr>
 <a name="gt_encseq_encoder_use_representation"></a>
@@ -2078,7 +2089,7 @@ Disables support for random access to multiple sequences in the encoded
 <hr>
 <a name="gt_encseq_encoder_enable_lossless_support"></a>
 
-<code>void  gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee)</code>
+<code>void              gt_encseq_encoder_enable_lossless_support(GtEncseqEncoder *ee)</code>
 <p>
 Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Deactivated by
@@ -2087,7 +2098,8 @@ Enables support for lossless reproduction of the original sequence,
 <hr>
 <a name="gt_encseq_encoder_disable_lossless_support"></a>
 
-<code>void  gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder *ee)</code>
+<code>void              gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder
+                                                                           *ee)</code>
 <p>
 Enables support for lossless reproduction of the original sequence,
    regardless of alphabet transformations that may apply. Encoded sequences
@@ -2226,6 +2238,23 @@ Deletes <code>ee</code>.
 Creates a new <code>GtEncseqLoader</code>.
 </p>
 <hr>
+<a name="gt_encseq_loader_enable_autosupport"></a>
+
+<code>void              gt_encseq_loader_enable_autosupport(GtEncseqLoader *el)</code>
+<p>
+Enables auto-discovery of supported features when loading an encoded
+   sequence. That is, if a file with <code>indexname</code>.<code>suffix</code> exists which
+   is named like a table file, it is loaded automatically.
+   Use <code>gt_encseq_has_multiseq_support()</code> etc. to query for these capabilities.
+</p>
+<hr>
+<a name="gt_encseq_loader_disable_autosupport"></a>
+
+<code>void              gt_encseq_loader_disable_autosupport(GtEncseqLoader *el)</code>
+<p>
+Disables auto-discovery of supported features.
+</p>
+<hr>
 <a name="gt_encseq_loader_require_description_support"></a>
 
 <code>void              gt_encseq_loader_require_description_support(
@@ -2273,7 +2302,7 @@ Disables support for random access to multiple sequences in the encoded
 <hr>
 <a name="gt_encseq_loader_require_lossless_support"></a>
 
-<code>void  gt_encseq_loader_require_lossless_support(GtEncseqLoader *el)</code>
+<code>void              gt_encseq_loader_require_lossless_support(GtEncseqLoader *el)</code>
 <p>
 Enables support for lossless reproduction of the original sequence
    in the encoded sequence to be loaded by <code>el</code>. That is, the .ois table
@@ -2285,7 +2314,7 @@ Enables support for lossless reproduction of the original sequence
 <hr>
 <a name="gt_encseq_loader_drop_lossless_support"></a>
 
-<code>void  gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el)</code>
+<code>void              gt_encseq_loader_drop_lossless_support(GtEncseqLoader *el)</code>
 <p>
 Disables support for lossless reproduction of the original sequence
    in the encoded sequence to be loaded by <code>el</code>. That is, the .ois table
@@ -2369,6 +2398,22 @@ Returns TRUE if a .sds table must be present for loading to succeed.
 <p>
 Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is NULL (no
    logging).
+</p>
+<hr>
+<a name="gt_encseq_loader_mirror"></a>
+
+<code>void              gt_encseq_loader_mirror(GtEncseqLoader *el)</code>
+<p>
+Enables loading of a sequence using <code>el</code> with mirroring enabled from the
+   start. Identical to invoking <code>gt_encseq_mirror()</code> directly after loading.
+</p>
+<hr>
+<a name="gt_encseq_loader_do_not_mirror"></a>
+
+<code>void              gt_encseq_loader_do_not_mirror(GtEncseqLoader *el)</code>
+<p>
+Disables loading of a sequence using <code>el</code> with mirroring enabled right from
+   the start.
 </p>
 <hr>
 <a name="gt_encseq_loader_load"></a>
@@ -3883,42 +3928,6 @@ Map <code>phase_char</code> to the corresponding phase enum type.
    An assertion will fail if <code>phase_char</code> is not a valid one.
 </p>
 <hr>
-<a name="GtProgressTimer"></a>
-<h2>Class GtProgressTimer</h2>
-
-<p> The <code>GtProgressTimer</code> class implements a timer which can be used to
-   measure the time needed for several consecutive steps.  </p>
-
-<hr>
-<a name="gt_progress_timer_new"></a>
-
-<code>GtProgressTimer*  gt_progress_timer_new(const char *desc)</code>
-<p>
-Creates a new <code>GtProgressTimer</code> with the intitial state <code>desc</code>.
-   Optionally, a flag <code>with_bar</code> can be set describing the use of a progress
-   bar, so the progress timer will not interfere in that case.
-</p>
-<hr>
-<a name="gt_progress_timer_start_new_state"></a>
-
-<code>void              gt_progress_timer_start_new_state(GtProgressTimer *pt,
-                                                   const char *newevent,
-                                                   FILE *fp)</code>
-<p>
-Announce the end of the current state and the beginning of the new state
-   to <code>pt</code>. The new state will be described by <code>newevent</code>. The time needed for
-   the now completed state is written to <code>fp</code>.
-   To announce the end of timing and print the overall-time use
-   <code>newevent</code> = NULL
-</p>
-<hr>
-<a name="gt_progress_timer_delete"></a>
-
-<code>void              gt_progress_timer_delete(GtProgressTimer *pt)</code>
-<p>
-Deletes <code>pt</code> and frees all associated space.
-</p>
-<hr>
 <a name="GtRange"></a>
 <h2>Class GtRange</h2>
 
@@ -4630,6 +4639,13 @@ Creates a new <code>GtTextWidthCalculatorCairo</code> object for the given conte
 Creates a new <code>GtTimer</code> object.
 </p>
 <hr>
+<a name="gt_timer_new_with_progress_description"></a>
+
+<code>GtTimer*  gt_timer_new_with_progress_description(const char* desc)</code>
+<p>
+Creates a new <code>GtTimer</code> object and stores the first description.
+</p>
+<hr>
 <a name="gt_timer_start"></a>
 
 <code>void      gt_timer_start(GtTimer *t)</code>
@@ -4651,6 +4667,7 @@ Stops the time measurement on <code>t</code>.
 Outputs the current state of <code>t</code> in the format
    "%ld.%06lds real %lds user %lds system" to file
    pointer <code>fp</code> (see <code>gt_timer_show_formatted</code>).
+   The timer is then stopped.
 </p>
 <hr>
 <a name="gt_timer_show_formatted"></a>
@@ -4661,6 +4678,37 @@ Outputs the current state of <code>t</code> in a user-defined format given by <c
    <code>fmt</code> must be a format string for four %ld numbers, which are filled with:
    elapsed seconds, elapsed microseconds, used usertime in seconds,
    system time in seconds. The output is written to <code>fp</code>.
+</p>
+<hr>
+<a name="gt_timer_show_progress"></a>
+
+<code>void      gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)</code>
+<p>
+Outputs the current state of <code>t</code> on <code>fp</code> since the last call of
+   <code>gt_timer_show_progress()</code> or the last start of <code>t</code>, along with the current
+   description. The timer is not stopped, but updated with <code>desc</code> to be the
+   next description.
+</p>
+<hr>
+<a name="gt_timer_show_progress_final"></a>
+
+<code>void      gt_timer_show_progress_final(GtTimer *t, FILE *fp)</code>
+<p>
+Outputs the overall time measured with <code>t</code> from start to now on <code>fp</code>.
+</p>
+<hr>
+<a name="gt_timer_show_cpu_time_by_progress"></a>
+
+<code>void      gt_timer_show_cpu_time_by_progress(GtTimer *t)</code>
+<p>
+Show also user and sys time in output of gt_timer_show_progress[_final]
+</p>
+<hr>
+<a name="gt_timer_omit_last_stage"></a>
+
+<code>void      gt_timer_omit_last_stage(GtTimer *t)</code>
+<p>
+Hide output of last stage time in gt_timer_show_progress_final
 </p>
 <hr>
 <a name="gt_timer_delete"></a>
@@ -5008,6 +5056,22 @@ Removes all occurrences of <code>remove</code> from the right end of <code>cstr<
 <code>bool  gt_is_little_endian(void)</code>
 <p>
 Returns <code>true</code> if host CPU is little-endian, <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_readmode_show"></a>
+
+<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
+<p>
+Returns the descriptive string for the readmode <code>readmode</code>.
+</p>
+<hr>
+<a name="gt_readmode_parse"></a>
+
+<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
+<p>
+Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
+   -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="Fileutils"></a>
@@ -5898,6 +5962,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_builder_add_encoded"><code>gt_encseq_builder_add_encoded</code></a><br>
 
+  <a href="#gt_encseq_builder_add_encoded_own"><code>gt_encseq_builder_add_encoded_own</code></a><br>
+
   <a href="#gt_encseq_builder_add_str"><code>gt_encseq_builder_add_str</code></a><br>
 
   <a href="#gt_encseq_builder_build"><code>gt_encseq_builder_build</code></a><br>
@@ -5972,7 +6038,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_encoder_encode"><code>gt_encseq_encoder_encode</code></a><br>
 
-  <a href="#gt_encseq_encoder_get_progresstimer"><code>gt_encseq_encoder_get_progresstimer</code></a><br>
+  <a href="#gt_encseq_encoder_get_timer"><code>gt_encseq_encoder_get_timer</code></a><br>
 
   <a href="#gt_encseq_encoder_is_input_dna"><code>gt_encseq_encoder_is_input_dna</code></a><br>
 
@@ -5990,7 +6056,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_encoder_set_logger"><code>gt_encseq_encoder_set_logger</code></a><br>
 
-  <a href="#gt_encseq_encoder_set_progresstimer"><code>gt_encseq_encoder_set_progresstimer</code></a><br>
+  <a href="#gt_encseq_encoder_set_timer"><code>gt_encseq_encoder_set_timer</code></a><br>
 
   <a href="#gt_encseq_encoder_ssp_tab_requested"><code>gt_encseq_encoder_ssp_tab_requested</code></a><br>
 
@@ -6014,11 +6080,19 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_get_encoded_char"><code>gt_encseq_get_encoded_char</code></a><br>
 
+  <a href="#gt_encseq_has_description_support"><code>gt_encseq_has_description_support</code></a><br>
+
+  <a href="#gt_encseq_has_multiseq_support"><code>gt_encseq_has_multiseq_support</code></a><br>
+
   <a href="#gt_encseq_is_mirrored"><code>gt_encseq_is_mirrored</code></a><br>
 
   <a href="#gt_encseq_loader_delete"><code>gt_encseq_loader_delete</code></a><br>
 
   <a href="#gt_encseq_loader_des_tab_required"><code>gt_encseq_loader_des_tab_required</code></a><br>
+
+  <a href="#gt_encseq_loader_disable_autosupport"><code>gt_encseq_loader_disable_autosupport</code></a><br>
+
+  <a href="#gt_encseq_loader_do_not_mirror"><code>gt_encseq_loader_do_not_mirror</code></a><br>
 
   <a href="#gt_encseq_loader_do_not_require_des_tab"><code>gt_encseq_loader_do_not_require_des_tab</code></a><br>
 
@@ -6032,7 +6106,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_loader_drop_multiseq_support"><code>gt_encseq_loader_drop_multiseq_support</code></a><br>
 
+  <a href="#gt_encseq_loader_enable_autosupport"><code>gt_encseq_loader_enable_autosupport</code></a><br>
+
   <a href="#gt_encseq_loader_load"><code>gt_encseq_loader_load</code></a><br>
+
+  <a href="#gt_encseq_loader_mirror"><code>gt_encseq_loader_mirror</code></a><br>
 
   <a href="#gt_encseq_loader_new"><code>gt_encseq_loader_new</code></a><br>
 
@@ -6438,12 +6516,6 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_phase_get"><code>gt_phase_get</code></a><br>
 
-  <a href="#gt_progress_timer_delete"><code>gt_progress_timer_delete</code></a><br>
-
-  <a href="#gt_progress_timer_new"><code>gt_progress_timer_new</code></a><br>
-
-  <a href="#gt_progress_timer_start_new_state"><code>gt_progress_timer_start_new_state</code></a><br>
-
   <a href="#gt_qsort_r"><code>gt_qsort_r</code></a><br>
 
   <a href="#gt_range_compare"><code>gt_range_compare</code></a><br>
@@ -6612,9 +6684,19 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_timer_new"><code>gt_timer_new</code></a><br>
 
+  <a href="#gt_timer_new_with_progress_description"><code>gt_timer_new_with_progress_description</code></a><br>
+
+  <a href="#gt_timer_omit_last_stage"><code>gt_timer_omit_last_stage</code></a><br>
+
   <a href="#gt_timer_show"><code>gt_timer_show</code></a><br>
 
+  <a href="#gt_timer_show_cpu_time_by_progress"><code>gt_timer_show_cpu_time_by_progress</code></a><br>
+
   <a href="#gt_timer_show_formatted"><code>gt_timer_show_formatted</code></a><br>
+
+  <a href="#gt_timer_show_progress"><code>gt_timer_show_progress</code></a><br>
+
+  <a href="#gt_timer_show_progress_final"><code>gt_timer_show_progress_final</code></a><br>
 
   <a href="#gt_timer_start"><code>gt_timer_start</code></a><br>
 
@@ -6705,7 +6787,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-02-11
+Last update: 2011-05-09
 </div>
 </div>
 <!-- Piwik -->
