@@ -447,7 +447,9 @@ small_fastafiles.each do |file|
   end
 end
 
-if ["str"].pack("p").size != 8 then   # check pointer size for word size
+# check whether -memlimit is available as an option to enable
+# conditional tests
+if !`#{$bin}/gt suffixerator -helpdev`.match(/memlimit/).nil? then
   if $gttestdata then
     ["2L", "2R", "3L", "3R"].each do |chr|
       Name "gt suffixerator -memlimit D. mel #{chr}"
