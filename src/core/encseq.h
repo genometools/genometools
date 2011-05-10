@@ -230,9 +230,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
 
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.
-  <esr> refers to a memory area for storing a GtEncseqReader.
-  <moveforward> is true if and only if the scanning is done in forward
-  direction. */
+  <esr> refers to a memory area for storing a GtEncseqReader. */
 bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
