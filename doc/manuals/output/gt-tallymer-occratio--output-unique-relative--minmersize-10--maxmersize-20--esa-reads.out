@@ -1,4 +1,4 @@
-$ gt tallymer occratio -output unique relative -minmersize 10 -maxmersize 20 -esa reads
+$ gt tallymer occratio -scan -output unique relative -minmersize 10 -maxmersize 20 -esa reads
 # distribution of unique mers
 10 223755 0.623
 11 373775 0.802

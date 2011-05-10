@@ -1,4 +1,4 @@
-$ gt tallymer mkindex -mersize 19 -minocc 40 -esa reads
+$ gt tallymer mkindex -scan -mersize 19 -minocc 40 -esa reads
 1 444720
 2 30886
 3 3909

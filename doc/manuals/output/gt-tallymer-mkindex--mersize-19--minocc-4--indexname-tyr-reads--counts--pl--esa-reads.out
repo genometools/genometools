@@ -1,4 +1,4 @@
-$ gt tallymer mkindex -mersize 19 -minocc 4 -indexname tyr-reads -counts -pl -esa reads
+$ gt tallymer mkindex -scan -mersize 19 -minocc 4 -indexname tyr-reads -counts -pl -esa reads
 # construct mer buckets for prefixlength 4
 # numofcodes = 256
 # indexfilename = tyr-reads

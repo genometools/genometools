@@ -61,7 +61,14 @@ than 4~GB. When using this option, the \textsf{lcp}-table and the
 sequentially scanned, so that only a small part of these tables reside
 in memory. This, of course, reduces the memory requirement of
 the program. Note that the sequence is still mapped completely into main
-memory as it is accessed in random order.}
+memory as it is accessed in random order. This option is higly recommended
+for large data sizes. If you ever get an error like
+
+\texttt{gt tallymer occratio: error: fopen(): cannot open file 'reads.prj': No
+such file or directory}
+}
+
+then you should add this option.
 }
 
 \newcommand{\Standardoptions}[0]{
@@ -428,7 +435,8 @@ for the entire sequence set. I have tried this for a set of
 ESTs (total length 3.2 GB) and it works well.
 \item
 For very large enhanced suffix arrays (which do not fit into main
-memory) use the option -scan for tallymer mkindex and tallymer occratio.
+memory) use the option \Showoption{scan} for \texttt{tallymer mkindex} and 
+\texttt{tallymer occratio}.
 \item 
 For tallymer occratio use the option -esa to specify the enhanced suffix
 array.
