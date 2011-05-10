@@ -351,12 +351,12 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long wildcardranges,
                                   unsigned int numofchars,
                                   unsigned int bitspersymbol);
+
 /* The following function returns the size of the encoded sequence in bytes. */
 unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
 
 /* The following function delivers the accesstype of a given encoded
    sequence. */
-
 GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq);
 
 /* The following function delivers the encseq->equallength.valueunsignedlong
@@ -437,5 +437,10 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
 unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
 
 uint64_t gt_encseq_pairbitsum(const GtEncseq *encseq);
+
+/* for a position outside the range from 0 to totallength -1 deliver a
+   unique integer */
+#define GT_UNIQUEINT(POS)        ((unsigned long) ((POS) + GT_COMPAREOFFSET))
+#define GT_ISUNIQUEINT(POS)      ((POS) >= GT_COMPAREOFFSET)
 
 #endif
