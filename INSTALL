@@ -49,20 +49,24 @@ append the with-hmmer=yes option to the make call. This option will make sure
 that a HMMER source package is downloaded and compiled along with the gt binary.
 Note that the wget executable must be available in the current PATH to do so
 (alternatively, you can download HMMER 2.3.2 manually from
-ftp://selab.janelia.org/pub/software/hmmer/CURRENT/ and untar it in the src/external/
-subdirectory).
+ftp://selab.janelia.org/pub/software/hmmer/CURRENT/ and untar it in the
+src/external/ subdirectory).
 
 $ make with-hmmer=yes
 
 
-Building GenomeTools as a Universal Binary (on Mac OS X):
---------------------------------------------------------
+Building GenomeTools as a Universal Binary (on Mac OS X < v10.6):
+-----------------------------------------------------------------
 
-invoke make as above with the argument universal=yes
+Invoke make as above with the argument universal=yes.
+Note that on later Mac OS X systems (those with an Intel CPU) the universal=yes
+option is not required. Also, do not use it on Mac OS X 10.6 (Snow Leopard) or
+later as PowerPC support has since been discontinued. Thus trying to build a
+universal binary may lead to problems.
 
 
 Building GenomeTools on Windows (using Cygwin):
---------------------------------------------------------
+-----------------------------------------------
 
 Building GenomeTools with gcc on Windows occasionally results a warning
 regarding the '-fPIC' parameter. This can be ignored without problems.
