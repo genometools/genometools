@@ -26,6 +26,7 @@
 
 void          gt_ma_init(bool bookkeeping);
 unsigned long gt_ma_get_space_peak(void); /* in bytes */
+void          gt_ma_currentstatus(void);
 unsigned long gt_ma_get_space_current(void);
 void          gt_ma_show_space_peak(FILE*);
 /* check if all allocated memory has been freed, prints to stderr */

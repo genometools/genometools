@@ -355,6 +355,11 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
 /* The following function returns the size of the encoded sequence in bytes. */
 unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);
 
+/* The following function returns the size of the GtEncseq-structure
+   in bytes. */
+
+unsigned long gt_encseq_sizeofstructure(void);
+
 /* The following function delivers the accesstype of a given encoded
    sequence. */
 GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq);

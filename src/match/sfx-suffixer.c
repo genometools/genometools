@@ -591,8 +591,8 @@ static void verifyestimatedspace(size_t estimatedspace)
     if (usedspace_ma_fa > 100000UL &&
         gt_double_larger_double(relativedifference,0.1))
     {
-      fprintf(stderr, "relativedifference %.2f too large: estimatedspace=%.2f, "
-                      "usedspace_ma_fa=%.2f\n",relativedifference,
+      fprintf(stderr, "relativedifference %.4f too large: estimatedspace=%.4f, "
+                      "usedspace_ma_fa=%.4f\n",relativedifference,
                                                GT_MEGABYTES(estimatedspace),
                                                GT_MEGABYTES(usedspace_ma_fa));
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -657,6 +657,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
         printf("spacepeak at line %d: %.2f\n",__LINE__,\
           GT_MEGABYTES(gt_ma_get_space_current() + gt_fa_get_space_current()))
 */
+
 #define SHOWCURRENTSPACE /* Nothing */
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
@@ -673,13 +674,18 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 {
   Sfxiterator *sfi = NULL;
   unsigned long realspecialranges, specialcharacters;
-  size_t estimatedspace;
   bool haserr = false;
+#ifdef _LP64
+  size_t estimatedspace = (size_t) 13131;
+#else
+  size_t estimatedspace = (size_t) 7968;
+#endif
 
   gt_error_check(err);
   SHOWCURRENTSPACE;
   gt_assert(encseq != NULL);
-  estimatedspace = (size_t) gt_encseq_sizeofrep(encseq);
+  estimatedspace += (size_t) gt_encseq_sizeofrep(encseq) +
+                             gt_encseq_sizeofstructure();
   realspecialranges = gt_encseq_realspecialranges(encseq);
   specialcharacters = gt_encseq_specialcharacters(encseq);
   gt_assert(prefixlength > 0);
@@ -813,7 +819,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
       estimatedspace
-        += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength);
+        += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength) +
+                    gt_sizeofbucketworkspace(prefixlength);
     }
   }
   SHOWCURRENTSPACE;

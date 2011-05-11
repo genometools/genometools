@@ -108,6 +108,15 @@ uint64_t gt_sizeofbuckettable(unsigned int numofchars,
   return sizeofrep;
 }
 
+unsigned long gt_sizeofbucketworkspace(unsigned int prefixlength)
+{
+  size_t size = sizeof (GtCodetype) * (prefixlength+1);
+  size += sizeof (GtCodetype) * prefixlength;
+  size += sizeof (Bcktab);
+  size += prefixlength;
+  return (unsigned long) size;
+}
+
 static void setdistpfxidxptrs(unsigned long **distpfxidx,
                               unsigned long *ptr,
                               const GtCodetype *basepower,

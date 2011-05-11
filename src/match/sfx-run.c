@@ -571,6 +571,7 @@ static int runsuffixerator(bool doesa,
       } else
       {
 #ifndef S_SPLINT_S
+        sfxstrategy.outsuftabonfile = false;
         if (run_packedindexconstruction(logger,
                                         sfxprogress,
                                         so->showprogress,

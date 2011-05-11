@@ -114,6 +114,8 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab);
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
                               unsigned int prefixlength);
 
+unsigned long gt_sizeofbucketworkspace(unsigned int prefixlength);
+
 unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
 unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,

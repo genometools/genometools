@@ -276,6 +276,26 @@ int gt_ma_check_space_leak(void)
   return 0;
 }
 
+static int ma_outcurrentstatus(GT_UNUSED void *key, void *value,
+                               GT_UNUSED void *data, GT_UNUSED GtError *err)
+{
+  MAInfo *mainfo = (MAInfo*) value;
+  gt_error_check(err);
+  gt_assert(key && value);
+  printf("%zu bytes memory allocated on line %d in file \"%s\")\n",
+          mainfo->size, mainfo->src_line, mainfo->src_file);
+  return 0;
+}
+
+void gt_ma_currentstatus(void)
+{
+  int had_err;
+  gt_assert(ma);
+  had_err = gt_hashmap_foreach(ma->allocated_pointer, ma_outcurrentstatus,
+                               NULL, NULL);
+  gt_assert(!had_err); /* cannot happen, check_space_leak() is sane */
+}
+
 void gt_ma_clean(void)
 {
   gt_assert(ma);

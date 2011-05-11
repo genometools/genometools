@@ -7980,6 +7980,11 @@ unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq)
   return encseq->sizeofrep;
 }
 
+unsigned long gt_encseq_sizeofstructure(void)
+{
+  return (unsigned long) sizeof (GtEncseq);
+}
+
 GtEncseqAccessType gt_encseq_accesstype_get(const GtEncseq *encseq)
 {
   return encseq->sat;
