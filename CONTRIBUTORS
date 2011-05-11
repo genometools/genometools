@@ -3,10 +3,10 @@ gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 
 - Stefan Bienert (patches)
 - David Ellinghaus (ltr/, ltrharvest tool)
+- Giorgio Gonnella (codegen, simreads tool, patches)
 - Thomas Jahns (BitPackArray and BitPackString class, block-compressed fm-index)
 - Malte Mader (AnnotationSketch, sketch tool)
 - Brent Pedersen (python bindings, patches)
 - Christin Schaerfer (AnnotationSketch, sketch tool)
 - David Schmitz-Huebsch (mgth/, mgth tool)
 - Dirk Willrodt (genomediff tool, patches)
-- Giorgio Gonnella (codegen, simreads tool, patches)
