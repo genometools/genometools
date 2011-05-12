@@ -27,6 +27,7 @@ end
 
 def parseargs(argv)
   options = OpenStruct.new
+  options.optimize = true
   options.m64 = false
   options.speed = false
   options.prof = false
@@ -41,10 +42,12 @@ def parseargs(argv)
   opts.on("--prof","compile for profiling") do |x|
     options.prof = true
   end
+  opts.on("--noopt","no optimization") do |x|
+    options.optimize = false
+  end
   opts.on("-j","--j NUM","run jobs in given number of threads") do |x|
     options.jobs = x.to_i
   end
-  rest = opts.parse(argv)
   rest = opts.parse(argv)
   if not rest.empty?
     usage(opts,"unnecessary arguments: #{rest}")
@@ -66,6 +69,9 @@ def makecompilerflags(fp,options)
   end
   if options.prof
     fp.print " prof=yes"
+  end
+  if not options.optimize
+    fp.print " opt=no"
   end
   fp.puts " CC='ccache #{ENV["CC"]}'"
 end

@@ -34,6 +34,7 @@
 #include "match/sfx-suftaborder.h"
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
+#include "match/esa-lcpintervals.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -50,6 +51,7 @@ typedef struct
        inputlcp,
        inputbck,
        inputssp,
+       enumlcpitvs,
        diffcovercheck;
   unsigned long delspranges;
   GtStr *esaindexname,
@@ -140,7 +142,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondes, *optionsds, *optionbwt, *optionlcp, *optiontis, *optionssp,
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
-         *optionsortmaxdepth, *optionalgbounds, *optiondiffcov;
+         *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
+         *optionenumlcpitvs;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -247,10 +250,16 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                      &arguments->diffcovercheck,false);
   gt_option_parser_add_option(op, optiondiffcov);
 
+  optionenumlcpitvs = gt_option_new_bool("enumlcpintervals",
+                                         "enumerate the lcp-intervals",
+                                         &arguments->enumlcpitvs,false);
+  gt_option_parser_add_option(op, optionenumlcpitvs);
+
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
 
   gt_option_imply(optionlcp,optionsuf);
+  gt_option_imply(optionenumlcpitvs,optionesaindex);
   gt_option_imply(optionsortmaxdepth,optionesaindex);
   gt_option_imply(optionalgbounds,optionsortmaxdepth);
   return op;
@@ -983,7 +992,17 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   if (!haserr && arguments->diffcovercheck)
   {
     if (run_diffcover_check(arguments, err) != 0)
+    {
       haserr = true;
+    }
+  }
+  if (!haserr && arguments->enumlcpitvs)
+  {
+    if (gt_runenumlcpvalues(gt_str_get(arguments->esaindexname),
+                            logger, err) != 0)
+    {
+      haserr = true;
+    }
   }
   gt_logger_delete(logger);
   return haserr ? -1 : 0;

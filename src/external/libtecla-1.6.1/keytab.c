@@ -755,7 +755,7 @@ static void _kt_assign_action(KeySym *sym, KtBinder binder, KtKeyFn *keyfn,
 /*
  * Unknown binding source?
  */
-  if(binder < 0 || binder >= KTB_NBIND)
+  if(binder >= KTB_NBIND)
     return;
 /*
  * Record the action according to its source.

@@ -81,7 +81,7 @@ static Dfsinfo *shulen_allocateDfsinfo(GT_UNUSED Dfsstate *astate)
 
 static void shulen_freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
 {
-  ShulengthdistDfsinfo *dfsinfo = (ShulengthdistDfsinfo*) adfsinfo;;
+  ShulengthdistDfsinfo *dfsinfo = (ShulengthdistDfsinfo*) adfsinfo;
   gt_free(dfsinfo->filenumdist);
   gt_free(dfsinfo);
 }
