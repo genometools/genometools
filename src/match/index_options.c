@@ -74,9 +74,7 @@ struct GtIndexOptions
            *optionmaxwidthrealmedian,
            *optionalgbounds,
            *optionparts,
-#ifndef _LP64
            *optionmemlimit,
-#endif
            *optiondir,
            *optiondifferencecover,
            *optionkys;
@@ -223,7 +221,6 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
     oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
 
-#ifndef _LP64
   if (!had_err && gt_option_is_set(oi->optionmemlimit)) {
     int readint;
     char buffer[3];
@@ -269,7 +266,6 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
       }
     }
   }
-#endif
   if (!had_err)
   {
     if (oi->sfxstrategy.maxinsertionsort > oi->sfxstrategy.maxbltriesort)
@@ -369,7 +365,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->optionparts);
   gt_option_parser_add_option(op, idxo->optionparts);
 
-#ifndef _LP64
   idxo->optionmemlimit
     = gt_option_new_string("memlimit",
                            "specify maximal amount of memory to be used during "
@@ -381,7 +376,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
 
   gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
   gt_option_exclude(idxo->optionparts, idxo->optionmemlimit);
-#endif
 
   idxo->optionkys = gt_option_new_string("kys",
                                    "output/sort according to keys of the form "
@@ -444,9 +438,9 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
-  idxo->option = gt_option_new_bool("suftabasarray",
-                              "use unsigned long array for suftab",
-                              &idxo->sfxstrategy.suftabasulongarray,
+  idxo->option = gt_option_new_bool("suftabcompressedbytes",
+                              "use compressed bytes for suftab",
+                              &idxo->sfxstrategy.suftabcompressedbytes,
                               false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);

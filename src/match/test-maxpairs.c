@@ -82,7 +82,6 @@ static int constructsarrandrunmaxpairs(
 
   defaultsfxstrategy(&sfxstrategy,
                      gt_encseq_bitwise_cmp_ok(ssi->encseq) ? false : true);
-  sfxstrategy.suftabasulongarray = true;
   sfi = gt_Sfxiterator_new(ssi->encseq,
                            readmode,
                            prefixlength,

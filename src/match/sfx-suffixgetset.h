@@ -25,7 +25,7 @@ typedef struct GtSuffixsortspace GtSuffixsortspace;
 
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
                                           unsigned long maxvalue,
-                                          bool suftabasulongarray);
+                                          bool suftabcompressedbytes);
 
 GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
                                                    const char *filename,
@@ -78,7 +78,7 @@ unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp);
 
 size_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
                                         unsigned long maxvalue,
-                                        bool suftabasulongarray);
+                                        bool suftabcompressedbytes);
 
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                 const GtSuffixsortspace *sssp,
