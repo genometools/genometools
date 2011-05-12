@@ -1,8 +1,9 @@
-changes in version 1.3.9 (2011-05-12)
+changes in version 1.3.9 (2011-05-13)
 
 - bugfixes and cleanups
 - GtEncseq completed, Lua bindings added
 - `gt encseq` toolbox added for encoded sequence handling
+- `gt suffixerator` and `gt packedindex mkindex` have new option -memlimit
 
 
 changes in version 1.3.8 (2011-02-02)

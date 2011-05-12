@@ -371,9 +371,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                            "index construction (in bytes, the keywords 'MB' "
                            "and 'GB' are allowed)",
                            idxo->memlimit, NULL);
-  gt_option_is_development_option(idxo->optionmemlimit);
   gt_option_parser_add_option(op, idxo->optionmemlimit);
-
   gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
   gt_option_exclude(idxo->optionparts, idxo->optionmemlimit);
 
