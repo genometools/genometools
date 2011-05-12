@@ -11,7 +11,7 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  if alldirs 
+  if alldirs
     dirlist=["fwd","rev","cpl ","rcl "]
   else
     dirlist=["fwd ","rev"]
@@ -36,7 +36,7 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
       end
       run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
                "-algbds 10 31 80 #{extra} #{outoptions} " +
-               "-indexname esa-#{dirarg_rev} -dir " + dirarg_rev + 
+               "-indexname esa-#{dirarg_rev} -dir " + dirarg_rev +
                " -db " + filearg
       run_test "#{$bin}gt packedindex mkindex -indexname pck -dir " + dirarg +
                " -db " + filearg
@@ -210,7 +210,7 @@ allmultifiles.each do |filename|
   Name "gt suffixerator sfxmap-failure #{filename}"
   Keywords "gt_suffixerator"
   Test do
-    run_test "#{$bin}gt suffixerator -tis -dna -des no -sds no -ssp no " + 
+    run_test "#{$bin}gt suffixerator -tis -dna -des no -sds no -ssp no " +
              "-indexname localidx  -sat direct " +
              "-db #{$testdata}#{filename}"
     run_test "#{$bin}gt suffixerator -suf -lcp -pl -dir rev -ii localidx"
@@ -391,7 +391,7 @@ SATTESTFILES.each do |file|
                :retval => retval
     end
   end
-end  
+end
 
 [EQLENDNAFILE, DNAFILE].each do |file|
   (SATS-(file[:msgs].keys)).each do |sat|
@@ -411,7 +411,7 @@ end
                  :maxtime => 600
         run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa " + \
                  "myidx_r", :maxtime => 600
-        
+
       end
     end
   end
@@ -449,65 +449,69 @@ end
 
 # check whether -memlimit is available as an option to enable
 # conditional tests
-if !`#{$bin}/gt suffixerator -helpdev`.match(/memlimit/).nil? then
-  if $gttestdata then
-    ["2L", "2R", "3L", "3R"].each do |chr|
-      Name "gt suffixerator -memlimit D. mel #{chr}"
-      Keywords "gt_suffixerator memlimit"
-      Test do
-        size = nil
-        run "#{$bin}/gt encseq encode -indexname dmel " + \
-            "#{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
-            :maxtime => 600
-        out = `env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak #{$bin}/gt suffixerator -v -suf -ii dmel`
-        if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
-          size = m[1].to_f
-        else
-            raise "could not get normal space peak"
-        end
-        [0.25, 0.5, 0.75].each do |frac|
-          limit = size * frac
-          run_test "env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak " + \
-                   "#{$bin}/gt suffixerator -suf -v -memlimit #{limit.floor}MB " + \
-                   "-ii dmel", :maxtime => 600
-          lastout = nil
-          File.open($last_stdout) do |f|
-            out = f.read
-            if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
-              mysize = m[1].to_f
-            else
-              raise "could not get actual space peak!"
-            end
-            if mysize > limit and mysize - limit > (mysize/10) then
-              raise "required size (#{mysize}) was higher than limit (#{limit})"
+['suffixerator', 'packedindex mkindex'].each do |toolname|
+  if !`#{$bin}/gt #{toolname} -help`.match(/memlimit/).nil? then
+    if $gttestdata then
+      ["2L", "2R", "3L", "3R"].each do |chr|
+        Name "gt #{toolname} -memlimit D. mel #{chr}"
+        Keywords "gt_suffixerator gt_packedindex memlimit"
+        Test do
+          size = nil
+          run "#{$bin}/gt encseq encode -indexname dmel " + \
+              "#{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
+              :maxtime => 600
+          out = `env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak #{$bin}/gt #{toolname} -v #{"-suf" if toolname=="suffixerator"} -ii dmel`
+          if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
+            size = m[1].to_f
+          else
+              raise "could not get normal space peak"
+          end
+          [0.25, 0.5, 0.75].each do |frac|
+            limit = size * frac
+            run_test "env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak " + \
+                     "#{$bin}/gt #{toolname} " + \
+                     "#{"-suf" if toolname=="suffixerator"} -v " + \
+                     "-memlimit #{limit.floor}MB " + \
+                     "-ii dmel", :maxtime => 600
+            lastout = nil
+            File.open($last_stdout) do |f|
+              out = f.read
+              if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
+                mysize = m[1].to_f
+              else
+                raise "could not get actual space peak!"
+              end
+              if mysize > limit and mysize - limit > (mysize/10) then
+                raise "required size (#{mysize}) was higher than limit (#{limit})"
+              end
             end
           end
         end
       end
     end
-  end
 
-  Name "suffixerator -memlimit excludes -parts"
-  Keywords "suffixerator memlimit"
-  Test do
-    run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
-        "-parts 3 -memlimit 2MB", :retval => 1
-    grep($last_stderr, /exclude each other/)
-  end
+    Name "gt #{toolname} -memlimit excludes -parts"
+    Keywords "gt_suffixerator gt_packedindex memlimit"
+    Test do
+      run "#{$bin}/gt #{toolname} -db #{$testdata}/at1MB -indexname foo " + \
+          "-parts 3 -memlimit 2MB", :retval => 1
+      grep($last_stderr, /exclude each other/)
+    end
 
-  Name "suffixerator -memlimit invalid size"
-  Keywords "suffixerator memlimit"
-  Test do
-    run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
-        "-memlimit 2TB", :retval => 1
-    grep($last_stderr, /one of the keywords MB and GB/)
-  end
+    Name "gt #{toolname} -memlimit invalid size"
+    Keywords "gt_suffixerator gt_packedindex memlimit"
+    Test do
+      run "#{$bin}/gt #{toolname} -db #{$testdata}/at1MB -indexname foo " + \
+          "-memlimit 2TB", :retval => 1
+      grep($last_stderr, /one of the keywords MB and GB/)
+    end
 
-  Name "suffixerator -memlimit invalid size"
-  Keywords "suffixerator memlimit"
-  Test do
-    run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
-        "-memlimit 2.2GB", :retval => 1
-    grep($last_stderr, /one of the keywords MB and GB/)
+    Name "gt #{toolname} -memlimit invalid size"
+    Keywords "gt_suffixerator gt_packedindex memlimit"
+    Test do
+      run "#{$bin}/gt #{toolname} -db #{$testdata}/at1MB -indexname foo " + \
+          "-memlimit 2.2GB", :retval => 1
+      grep($last_stderr, /one of the keywords MB and GB/)
+    end
   end
 end
