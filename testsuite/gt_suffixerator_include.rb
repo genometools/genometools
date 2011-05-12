@@ -507,7 +507,7 @@ if !`#{$bin}/gt suffixerator -helpdev`.match(/memlimit/).nil? then
   Keywords "suffixerator memlimit"
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
-        "-memlimit -2GB", :retval => 1
+        "-memlimit 2.2GB", :retval => 1
     grep($last_stderr, /one of the keywords MB and GB/)
   end
 end

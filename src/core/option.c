@@ -444,6 +444,19 @@ static int check_missing_argument(int argnum, int argc, GtStr *option,
   return 0;
 }
 
+static int check_missing_argument_and_minus_sign(int argnum, int argc,
+                                                 GtStr *option,
+                                                 const char **argv,
+                                                 GtError *err)
+{
+  gt_error_check(err);
+  if (argnum + 1 >= argc || argv[argnum+1][0] == '-') {
+    gt_error_set(err, "missing argument to option \"-%s\"", gt_str_get(option));
+    return -1;
+  }
+  return 0;
+}
+
 static int check_mandatory_options(GtOptionParser *op, GtError *err)
 {
   unsigned long i;
@@ -713,8 +726,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 break;
               }
               gt_assert(option->domain[0]);
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               if (!had_err) {
                 argnum++;
                 if (strcmp(argv[argnum], option->domain[0])) {
@@ -801,8 +815,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 return GT_OPTION_PARSER_ERROR;
               return GT_OPTION_PARSER_REQUESTS_EXIT;
             case OPTION_OUTPUTFILE:
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               if (!had_err) {
                 argnum++;
                 *(FILE**) option->value = gt_fa_xfopen(argv[argnum], "w");
@@ -849,8 +864,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
                 break;
               }
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               if (!had_err) {
                 argnum++;
                 if (gt_parse_uint(&uint_value, argv[argnum])) {
@@ -907,8 +923,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
                 break;
               }
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               if (!had_err) {
                 argnum++;
                 if (gt_parse_long(&long_value, argv[argnum]) ||
@@ -952,8 +969,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 break;
               }
               /* parse first argument */
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               if (!had_err) {
                 argnum++;
                 if (gt_parse_long(&long_value, argv[argnum]) ||
@@ -979,8 +997,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               /* parse second argument */
               if (!had_err) {
-                had_err = check_missing_argument(argnum, argc,
-                                                 option->option_str, err);
+                had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               }
               if (!had_err) {
                 argnum++;
@@ -1023,8 +1042,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
                 break;
               }
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               if (!had_err) {
                 argnum++;
                 gt_str_set(option->value, argv[argnum]);
@@ -1036,8 +1056,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
                 break;
               }
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                                               err);
+              had_err = check_missing_argument_and_minus_sign(argnum, argc,
+                                                             option->option_str,
+                                                             argv, err);
               while (!had_err) {
                 if (argnum + 1 < argc && argv[argnum+1][0] != '-') {
                   argnum++;
