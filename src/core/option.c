@@ -450,7 +450,8 @@ static int check_missing_argument_and_minus_sign(int argnum, int argc,
                                                  GtError *err)
 {
   gt_error_check(err);
-  if (argnum + 1 >= argc || argv[argnum+1][0] == '-') {
+  if (argnum + 1 >= argc || (argv[argnum+1][0] == '-'
+                               && argv[argnum+1][1] != '\0')) {
     gt_error_set(err, "missing argument to option \"-%s\"", gt_str_get(option));
     return -1;
   }
