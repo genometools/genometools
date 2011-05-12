@@ -276,24 +276,25 @@ int gt_ma_check_space_leak(void)
   return 0;
 }
 
-static int ma_outcurrentstatus(GT_UNUSED void *key, void *value,
-                               GT_UNUSED void *data, GT_UNUSED GtError *err)
+static int print_allocation(GT_UNUSED void *key, void *value,
+                            void *data, GT_UNUSED GtError *err)
 {
   MAInfo *mainfo = (MAInfo*) value;
+  FILE *outfp = (FILE*) data;
   gt_error_check(err);
-  gt_assert(key && value);
-  printf("%zu bytes memory allocated on line %d in file \"%s\")\n",
+  gt_assert(outfp && key && value);
+  fprintf(outfp, "%zu bytes memory allocated on line %d in file \"%s\")\n",
           mainfo->size, mainfo->src_line, mainfo->src_file);
   return 0;
 }
 
-void gt_ma_currentstatus(void)
+void gt_ma_show_allocations(FILE *outfp)
 {
   int had_err;
   gt_assert(ma);
-  had_err = gt_hashmap_foreach(ma->allocated_pointer, ma_outcurrentstatus,
-                               NULL, NULL);
-  gt_assert(!had_err); /* cannot happen, check_space_leak() is sane */
+  had_err = gt_hashmap_foreach(ma->allocated_pointer, print_allocation,
+                               outfp, NULL);
+  gt_assert(!had_err); /* cannot happen, print_allocation() is sane */
 }
 
 void gt_ma_clean(void)
