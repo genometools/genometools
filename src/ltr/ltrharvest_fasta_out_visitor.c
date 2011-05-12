@@ -26,6 +26,7 @@
 #include "core/str_api.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
@@ -120,32 +121,43 @@ static int gt_ltrharvest_fasta_out_visitor_feature_node(GtNodeVisitor *nv,
 
   /* output FASTA sequences */
   if (!had_err && ltr_retrotrans != NULL) {
-    char *buf;
-    const char *seqdesc;
-    GtStr *desc;
-    unsigned long startpos,
-                  seqdesclen;
-    gt_assert(seqnum != GT_UNDEF_ULONG
-                && seqnum < gt_encseq_num_of_sequences(lv->encseq));
-    seqdesc = gt_encseq_description(lv->encseq, &seqdesclen, seqnum);
-    desc = gt_str_new();
-    gt_str_append_cstr_nt(desc, seqdesc, seqdesclen);
-    gt_str_append_cstr(desc, " (dbseq-nr ");
-    gt_str_append_ulong(desc, seqnum);
-    gt_str_append_cstr(desc, ") [");
-    gt_str_append_ulong(desc, outrng.start);
-    gt_str_append_cstr(desc, ",");
-    gt_str_append_ulong(desc, outrng.end);
-    gt_str_append_cstr(desc, "]");
-    buf = gt_calloc((size_t) gt_range_length(&outrng) + 1, sizeof (char));
-    startpos = gt_encseq_seqstartpos(lv->encseq, seqnum);
-    gt_encseq_extract_decoded(lv->encseq, buf,
-                              startpos + outrng.start - 1,
-                              startpos + outrng.end - 1);
-    gt_fasta_show_entry(gt_str_get(desc), buf, gt_range_length(&outrng),
-                        lv->width, lv->outfp);
-    gt_free(buf);
-    gt_str_delete(desc);
+    if (outrng.start < outrng.end) {
+      char *buf;
+      const char *seqdesc;
+      GtStr *desc;
+      unsigned long startpos,
+                    seqdesclen;
+      gt_assert(seqnum != GT_UNDEF_ULONG
+                  && seqnum < gt_encseq_num_of_sequences(lv->encseq));
+      seqdesc = gt_encseq_description(lv->encseq, &seqdesclen, seqnum);
+      desc = gt_str_new();
+      gt_str_append_cstr_nt(desc, seqdesc, seqdesclen);
+      gt_str_append_cstr(desc, " (dbseq-nr ");
+      gt_str_append_ulong(desc, seqnum);
+      gt_str_append_cstr(desc, ") [");
+      gt_str_append_ulong(desc, outrng.start);
+      gt_str_append_cstr(desc, ",");
+      gt_str_append_ulong(desc, outrng.end);
+      gt_str_append_cstr(desc, "]");
+      buf = gt_calloc((size_t) gt_range_length(&outrng) + 1, sizeof (char));
+      startpos = gt_encseq_seqstartpos(lv->encseq, seqnum);
+      gt_encseq_extract_decoded(lv->encseq, buf,
+                                startpos + outrng.start - 1,
+                                startpos + outrng.end - 1);
+      gt_fasta_show_entry(gt_str_get(desc), buf, gt_range_length(&outrng),
+                          lv->width, lv->outfp);
+      gt_free(buf);
+      gt_str_delete(desc);
+    } else {
+      GtRange rootrng;
+      rootrng = gt_genome_node_get_range((GtGenomeNode*) ltr_retrotrans);
+      gt_warning("trying to output empty%s sequence for candidate at "
+                 "%lu-%lu on sequence %lu",
+                 (lv->inner ? " inner" : ""),
+                 rootrng.start,
+                 rootrng.end,
+                 seqnum);
+    }
   }
 
   return had_err;
