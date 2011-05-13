@@ -365,16 +365,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->optionparts);
   gt_option_parser_add_option(op, idxo->optionparts);
 
-  idxo->optionmemlimit
-    = gt_option_new_string("memlimit",
-                           "specify maximal amount of memory to be used during "
-                           "index construction (in bytes, the keywords 'MB' "
-                           "and 'GB' are allowed)",
-                           idxo->memlimit, NULL);
-  gt_option_parser_add_option(op, idxo->optionmemlimit);
-  gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
-  gt_option_exclude(idxo->optionparts, idxo->optionmemlimit);
-
   idxo->optionkys = gt_option_new_string("kys",
                                    "output/sort according to keys of the form "
                                    "|key| in fasta header",
@@ -409,6 +399,15 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                 &idxo->outbcktab,
                                 false);
     gt_option_parser_add_option(op, idxo->optionoutbcktab);
+
+      idxo->optionmemlimit = gt_option_new_string("memlimit",
+                           "specify maximal amount of memory to be used during "
+                           "index construction (in bytes, the keywords 'MB' "
+                           "and 'GB' are allowed)",
+                           idxo->memlimit, NULL);
+    gt_option_parser_add_option(op, idxo->optionmemlimit);
+    gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
+    gt_option_exclude(idxo->optionparts, idxo->optionmemlimit);
   } else {
     idxo->optionoutsuftab
       = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
