@@ -52,6 +52,7 @@ typedef struct
        inputbck,
        inputssp,
        enumlcpitvs,
+       enumlcpitvtree,
        diffcovercheck;
   unsigned long delspranges;
   GtStr *esaindexname,
@@ -143,7 +144,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
-         *optionenumlcpitvs;
+         *optionenumlcpitvs, *optionenumlcpitvtree;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -255,9 +256,15 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                          &arguments->enumlcpitvs,false);
   gt_option_parser_add_option(op, optionenumlcpitvs);
 
+  optionenumlcpitvtree = gt_option_new_bool("enumlcpintervaltree",
+                                            "enumerate the lcp-interval tree",
+                                            &arguments->enumlcpitvtree,false);
+  gt_option_parser_add_option(op, optionenumlcpitvtree);
+
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
 
+  gt_option_exclude(optionenumlcpitvs,optionenumlcpitvtree);
   gt_option_imply(optionlcp,optionsuf);
   gt_option_imply(optionenumlcpitvs,optionesaindex);
   gt_option_imply(optionsortmaxdepth,optionesaindex);
@@ -996,9 +1003,10 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  if (!haserr && arguments->enumlcpitvs)
+  if (!haserr && (arguments->enumlcpitvs || arguments->enumlcpitvtree))
   {
     if (gt_runenumlcpvalues(gt_str_get(arguments->esaindexname),
+                            arguments->enumlcpitvs ? false : true,
                             logger, err) != 0)
     {
       haserr = true;

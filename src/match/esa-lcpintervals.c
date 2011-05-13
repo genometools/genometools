@@ -22,7 +22,8 @@
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long leftmostleaf,
+  unsigned long depth,
+                leftmostleaf,
                 rightmostleaf;
 } Elcpinfo;
 
@@ -33,7 +34,7 @@ typedef struct
 
 typedef struct  /* global information */
 {
-  int (*processlcpinterval)(void *,Lcpinterval *);
+  int (*processlcpinterval)(void *,const Lcpinterval *);
   void *processinfo;
 } Elcpstate;
 
@@ -49,6 +50,21 @@ static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
   gt_free((Elcpinfo *) adfsinfo);
 }
 
+static int elcp_processbranchedge(GT_UNUSED bool firstsucc,
+                                  unsigned long fatherdepth,
+                                  Dfsinfo *afather,
+                                  Dfsinfo *ason,
+                                  GT_UNUSED Dfsstate *astate,
+                                  GT_UNUSED GtError *err)
+{
+  Elcpinfo *father = (Elcpinfo *) afather;
+  Elcpinfo *son = (Elcpinfo *) ason;
+
+  printf("%lu %lu -> %lu %lu\n",fatherdepth,father->leftmostleaf,
+                                son->depth,son->leftmostleaf);
+  return 0;
+}
+
 static int elcp_processcompletenode(
                           unsigned long nodeptrdepth,
                           Dfsinfo *anodeptr,
@@ -62,7 +78,7 @@ static int elcp_processcompletenode(
 
   gt_assert(state != NULL);
   gt_assert(nodeptr != NULL);
-  lcpinterval.lcpvalue = nodeptrdepth;
+  nodeptr->depth = lcpinterval.lcpvalue = nodeptrdepth;
   lcpinterval.lb = nodeptr->leftmostleaf;
   lcpinterval.rb = nodeptr->rightmostleaf;
   if (state->processlcpinterval != NULL)
@@ -91,8 +107,10 @@ static void elcp_assignrightmostleaf(Dfsinfo *adfsinfo,
   ((Elcpinfo *) adfsinfo)->rightmostleaf = currentindex;
 }
 
-static int gt_enumlcpvalues(Sequentialsuffixarrayreader *ssar,
-                            int (*processlcpinterval)(void *,Lcpinterval *),
+static int gt_enumlcpvalues(bool outedges,
+                            Sequentialsuffixarrayreader *ssar,
+                            int (*processlcpinterval)(void *,
+                                                      const Lcpinterval *),
                             void *processinfo,
                             GtLogger *logger,
                             GtError *err)
@@ -107,7 +125,7 @@ static int gt_enumlcpvalues(Sequentialsuffixarrayreader *ssar,
                        elcp_allocateDfsinfo,
                        elcp_freeDfsinfo,
                        NULL,
-                       NULL,
+                       outedges ? elcp_processbranchedge : NULL,
                        elcp_processcompletenode,
                        elcp_assignleftmostleaf,
                        elcp_assignrightmostleaf,
@@ -121,13 +139,14 @@ static int gt_enumlcpvalues(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-static int showlcpinterval(GT_UNUSED void *data,Lcpinterval *lcpinterval)
+static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
 {
   printf("%lu %lu %lu\n",lcpinterval->lcpvalue,lcpinterval->lb,lcpinterval->rb);
   return 0;
 }
 
 int gt_runenumlcpvalues(const char *inputindex,
+                        bool outedges,
                         GtLogger *logger,
                         GtError *err)
 {
@@ -147,7 +166,8 @@ int gt_runenumlcpvalues(const char *inputindex,
   }
   if (!haserr)
   {
-    if (gt_enumlcpvalues(ssar, showlcpinterval, NULL, logger, err) != 0)
+    if (gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,
+                         logger, err) != 0)
     {
       haserr = true;
     }
