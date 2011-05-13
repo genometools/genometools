@@ -22,13 +22,23 @@ do
   ${cmd}
   checkerror
   cmd="scripts/lcpintervals.rb itv sfx"
-  ${cmd} > tmp1.result
+  ${cmd} > itvs.result1
   checkerror
   cmd="env -i bin/gt dev sfxmap -enumlcpintervals -esa sfx"
-  ${cmd} > tmp2.result
+  ${cmd} > itvs.result2
   checkerror
-  cmd="cmp -s tmp1.result tmp2.result"
+  cmd="cmp -s itvs.result1 itvs.result2"
+  ${cmd}
+  checkerror
+  cmd="scripts/lcpintervals.rb tree sfx"
+  ${cmd} > itvtree.result1
+  checkerror
+  cmd="env -i bin/gt dev sfxmap -enumlcpintervaltree -esa sfx"
+  ${cmd} > itvtree.result2
+  checkerror
+  cmd="cmp -s itvtree.result1 itvtree.result2"
   ${cmd}
   checkerror
 done
-rm -f tmp1.result tmp2.result
+rm -f itvs.result1 itvs.result2
+rm -f itvtree.result1 itvtree.result2

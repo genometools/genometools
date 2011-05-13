@@ -34,6 +34,7 @@ typedef struct
 
 typedef struct  /* global information */
 {
+  Lcpinterval lastcompletenode;
   int (*processlcpinterval)(void *,const Lcpinterval *);
   void *processinfo;
 } Elcpstate;
@@ -50,18 +51,34 @@ static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
   gt_free((Elcpinfo *) adfsinfo);
 }
 
-static int elcp_processbranchedge(GT_UNUSED bool firstsucc,
+static int elcp_processbranchedge(bool firstsucc,
                                   unsigned long fatherdepth,
                                   Dfsinfo *afather,
                                   Dfsinfo *ason,
-                                  GT_UNUSED Dfsstate *astate,
+                                  Dfsstate *astate,
                                   GT_UNUSED GtError *err)
 {
   Elcpinfo *father = (Elcpinfo *) afather;
   Elcpinfo *son = (Elcpinfo *) ason;
+  Elcpstate *state = (Elcpstate *) astate;
 
-  printf("%lu %lu -> %lu %lu\n",fatherdepth,father->leftmostleaf,
-                                son->depth,son->leftmostleaf);
+  if (!firstsucc)
+  {
+    gt_assert(son != NULL);
+    printf("%lu %lu -> %lu %lu\n",fatherdepth,father->leftmostleaf,
+                                  son->depth,son->leftmostleaf);
+  } else
+  {
+    if (son != NULL)
+    {
+      printf("0 0 -> %lu %lu\n",son->depth,son->leftmostleaf);
+    } else
+    {
+      printf("%lu %lu -> %lu %lu\n",fatherdepth,father->leftmostleaf,
+                                    state->lastcompletenode.lcpvalue,
+                                    state->lastcompletenode.lb);
+    }
+  }
   return 0;
 }
 
@@ -74,16 +91,16 @@ static int elcp_processcompletenode(
 {
   Elcpinfo *nodeptr = (Elcpinfo *) anodeptr;
   Elcpstate *state = (Elcpstate *) astate;
-  Lcpinterval lcpinterval;
 
   gt_assert(state != NULL);
   gt_assert(nodeptr != NULL);
-  nodeptr->depth = lcpinterval.lcpvalue = nodeptrdepth;
-  lcpinterval.lb = nodeptr->leftmostleaf;
-  lcpinterval.rb = nodeptr->rightmostleaf;
+  nodeptr->depth = state->lastcompletenode.lcpvalue = nodeptrdepth;
+  state->lastcompletenode.lb = nodeptr->leftmostleaf;
+  state->lastcompletenode.rb = nodeptr->rightmostleaf;
   if (state->processlcpinterval != NULL)
   {
-    if (state->processlcpinterval(state->processinfo,&lcpinterval) != 0)
+    if (state->processlcpinterval(state->processinfo,
+                                  &state->lastcompletenode) != 0)
     {
       return -1;
     }
@@ -119,8 +136,15 @@ static int gt_enumlcpvalues(bool outedges,
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
-  state->processlcpinterval = processlcpinterval;
-  state->processinfo = processinfo;
+  if (outedges)
+  {
+    state->processlcpinterval = NULL;
+    state->processinfo = NULL;
+  } else
+  {
+    state->processlcpinterval = processlcpinterval;
+    state->processinfo = processinfo;
+  }
   if (gt_depthfirstesa(ssar,
                        elcp_allocateDfsinfo,
                        elcp_freeDfsinfo,
