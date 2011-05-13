@@ -21,7 +21,7 @@ do
   cmd="env -i bin/gt suffixerator -db ${filename} -tis -suf -lcp -dna -indexname sfx"
   ${cmd}
   checkerror
-  cmd="scripts/lcpintervals.rb sfx"
+  cmd="scripts/lcpintervals.rb itv sfx"
   ${cmd} > tmp1.result
   checkerror
   cmd="env -i bin/gt dev sfxmap -enumlcpintervals -esa sfx"

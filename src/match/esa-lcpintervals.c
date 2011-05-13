@@ -22,8 +22,7 @@
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long depth,
-                leftmostleaf,
+  unsigned long leftmostleaf,
                 rightmostleaf;
 } Elcpinfo;
 
@@ -34,7 +33,6 @@ typedef struct
 
 typedef struct  /* global information */
 {
-  Lcpinterval lcpinterval;
   int (*processlcpinterval)(void *,Lcpinterval *);
   void *processinfo;
 } Elcpstate;
@@ -43,19 +41,12 @@ typedef struct  /* global information */
 
 static Dfsinfo *elcp_allocateDfsinfo(GT_UNUSED Dfsstate *astate)
 {
-  Elcpinfo *dfsinfo;
-
-  dfsinfo = gt_malloc(sizeof (*dfsinfo));
-
-  return (Dfsinfo*) dfsinfo;
+  return (Dfsinfo *) gt_malloc(sizeof (Elcpinfo));
 }
 
-static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,
-                             GT_UNUSED Dfsstate *state)
+static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
 {
-  Elcpinfo *dfsinfo = (Elcpinfo *) adfsinfo;
-
-  gt_free(dfsinfo);
+  gt_free((Elcpinfo *) adfsinfo);
 }
 
 static int elcp_processcompletenode(
@@ -67,15 +58,16 @@ static int elcp_processcompletenode(
 {
   Elcpinfo *nodeptr = (Elcpinfo *) anodeptr;
   Elcpstate *state = (Elcpstate *) astate;
+  Lcpinterval lcpinterval;
 
   gt_assert(state != NULL);
   gt_assert(nodeptr != NULL);
-  state->lcpinterval.lcpvalue = nodeptrdepth;
-  state->lcpinterval.lb = nodeptr->leftmostleaf;
-  state->lcpinterval.rb = nodeptr->rightmostleaf;
+  lcpinterval.lcpvalue = nodeptrdepth;
+  lcpinterval.lb = nodeptr->leftmostleaf;
+  lcpinterval.rb = nodeptr->rightmostleaf;
   if (state->processlcpinterval != NULL)
   {
-    if (state->processlcpinterval(state->processinfo,&state->lcpinterval) != 0)
+    if (state->processlcpinterval(state->processinfo,&lcpinterval) != 0)
     {
       return -1;
     }
@@ -87,21 +79,16 @@ static void elcp_assignleftmostleaf(Dfsinfo *adfsinfo,
                                     unsigned long leftmostleaf,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
-  Elcpinfo *dfsinfo = (Elcpinfo *) adfsinfo;
-
-  dfsinfo->leftmostleaf = leftmostleaf;
+  ((Elcpinfo *) adfsinfo)->leftmostleaf = leftmostleaf;
 }
 
 static void elcp_assignrightmostleaf(Dfsinfo *adfsinfo,
                                      unsigned long currentindex,
                                      GT_UNUSED unsigned long previoussuffix,
-                                     unsigned long currentlcp,
+                                     GT_UNUSED unsigned long currentlcp,
                                      GT_UNUSED Dfsstate *dfsstate)
 {
-  Elcpinfo *dfsinfo = (Elcpinfo *) adfsinfo;
-
-  dfsinfo->depth = currentlcp;
-  dfsinfo->rightmostleaf = currentindex;
+  ((Elcpinfo *) adfsinfo)->rightmostleaf = currentindex;
 }
 
 static int gt_enumlcpvalues(Sequentialsuffixarrayreader *ssar,
@@ -116,8 +103,6 @@ static int gt_enumlcpvalues(Sequentialsuffixarrayreader *ssar,
   state = gt_malloc(sizeof (*state));
   state->processlcpinterval = processlcpinterval;
   state->processinfo = processinfo;
-  state->lcpinterval.lcpvalue = 0;
-  state->lcpinterval.lb = state->lcpinterval.rb = 0;
   if (gt_depthfirstesa(ssar,
                        elcp_allocateDfsinfo,
                        elcp_freeDfsinfo,
