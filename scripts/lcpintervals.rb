@@ -1,12 +1,5 @@
 #!/usr/bin/env ruby
 
-def checkemtptystack(stack)
-  if stack.empty?
-    STDERR.puts "access to empty stack"
-    exit 1
-  end
-end
-
 Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :childlist)
 
 def showlcpinterval(itv)
@@ -15,19 +8,12 @@ end
 
 def showleaves(flag,fatherlcp,fatherlb,startpos,endpos)
   startpos.upto(endpos) do |idx|
-    puts "L #{fatherlcp} #{fatherlb} #{idx}"
+    puts "L#{flag} #{fatherlcp} #{fatherlb} #{idx}"
   end
 end
 
 def showbranchingedge(fromitv,toitv)
   puts "B #{fromitv.lcp} #{fromitv.lb} #{toitv.lcp} #{toitv.lb}"
-end
-
-def replace_top_rb(stack,rb)
-  checkemtptystack(stack)
-  topelem = stack.pop
-  topelem.rb = rb
-  stack.push(topelem)
 end
 
 def enumlcpintervals(lcpfile,llvfile)
@@ -46,29 +32,27 @@ def enumlcpintervals(lcpfile,llvfile)
     if idx > 0
       lb = idx - 1
       loop do
-        checkemtptystack(stack)
         if lcpvalue < stack.last.lcp
-          replace_top_rb(stack,idx-1)
           interval = stack.pop
+          interval.rb = idx-1
           showlcpinterval(interval)
           lb = interval.lb
         else
           break
         end
       end
-      checkemtptystack(stack)
       if lcpvalue > stack.last.lcp
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
       end
     end
     idx += 1
   end
-  replace_top_rb(stack,idx-1)
-  showlcpinterval(stack.pop) 
+  interval = stack.pop
+  interval.rb = idx-1
+  showlcpinterval(interval) 
 end
 
 def add_top_childlist(stack,itv)
-  checkemtptystack(stack)
   topelem = stack.pop
   if topelem.childlist.empty?
     showleaves(1,topelem.lcp,topelem.lb,topelem.lb,itv.lb-1)
@@ -106,12 +90,10 @@ def enumlcpintervaltree(lcpfile,llvfile)
     if idx > 0
       lb = idx - 1
       loop do
-        checkemtptystack(stack)
         if lcpvalue < stack.last.lcp
-          replace_top_rb(stack,idx-1)
           lastInterval = stack.pop
+          lastInterval.rb = idx - 1
           lb = lastInterval.lb
-          checkemtptystack(stack)
           if lcpvalue <= stack.last.lcp
             add_top_childlist(stack,lastInterval)
             addtail(lastInterval)
@@ -124,13 +106,12 @@ def enumlcpintervaltree(lcpfile,llvfile)
           break
         end
       end
-      checkemtptystack(stack)
       if lcpvalue > stack.last.lcp
         if lastInterval.nil? 
           stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
         else
-          stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastInterval]))
           showleaves(4,lcpvalue,lb,lb,lastInterval.lb-1)
+          stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastInterval]))
           showbranchingedge(stack.last,lastInterval)
           lastInterval = nil
         end
@@ -138,8 +119,9 @@ def enumlcpintervaltree(lcpfile,llvfile)
     end
     idx += 1
   end
-  replace_top_rb(stack,idx-1)
-  addtail(stack.pop)
+  lastInterval = stack.pop
+  lastInterval.rb = idx - 1
+  addtail(lastInterval)
 end
 
 if ARGV.length != 2
