@@ -34,6 +34,7 @@ typedef struct
 
 typedef struct  /* global information */
 {
+  unsigned long leafindex;
   Lcpinterval lastcompletenode;
   int (*processlcpinterval)(void *,const Lcpinterval *);
   void *processinfo;
@@ -51,6 +52,26 @@ static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
   gt_free((Elcpinfo *) adfsinfo);
 }
 
+static void showbranchingedges(unsigned long fd,unsigned long flb,
+                               unsigned long sd,unsigned long slb)
+{
+  printf("B %lu %lu %lu %lu\n",fd,flb,sd,slb);
+}
+
+static int elcp_processleafedge(GT_UNUSED bool firstsucc,
+                                unsigned long fatherdepth,
+                                Dfsinfo *afather,
+                                GT_UNUSED unsigned long leafnumber,
+                                Dfsstate *astate,
+                                GT_UNUSED GtError *err)
+{
+  Elcpinfo *father = (Elcpinfo *) afather;
+  Elcpstate *state = (Elcpstate *) astate;
+
+  printf("L %lu %lu %lu\n",fatherdepth,father->leftmostleaf,state->leafindex++);
+  return 0;
+}
+
 static int elcp_processbranchedge(bool firstsucc,
                                   unsigned long fatherdepth,
                                   Dfsinfo *afather,
@@ -65,18 +86,18 @@ static int elcp_processbranchedge(bool firstsucc,
   if (!firstsucc)
   {
     gt_assert(son != NULL);
-    printf("%lu %lu -> %lu %lu\n",fatherdepth,father->leftmostleaf,
-                                  son->depth,son->leftmostleaf);
+    showbranchingedges(fatherdepth,father->leftmostleaf,
+                       son->depth,son->leftmostleaf);
   } else
   {
     if (son != NULL)
     {
-      printf("0 0 -> %lu %lu\n",son->depth,son->leftmostleaf);
+      showbranchingedges(0,0,son->depth,son->leftmostleaf);
     } else
     {
-      printf("%lu %lu -> %lu %lu\n",fatherdepth,father->leftmostleaf,
-                                    state->lastcompletenode.lcpvalue,
-                                    state->lastcompletenode.lb);
+      showbranchingedges(fatherdepth,father->leftmostleaf,
+                         state->lastcompletenode.lcpvalue,
+                         state->lastcompletenode.lb);
     }
   }
   return 0;
@@ -136,6 +157,7 @@ static int gt_enumlcpvalues(bool outedges,
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
+  state->leafindex = 0;
   if (outedges)
   {
     state->processlcpinterval = NULL;
@@ -148,7 +170,7 @@ static int gt_enumlcpvalues(bool outedges,
   if (gt_depthfirstesa(ssar,
                        elcp_allocateDfsinfo,
                        elcp_freeDfsinfo,
-                       NULL,
+                       outedges ? elcp_processleafedge : NULL,
                        outedges ? elcp_processbranchedge : NULL,
                        elcp_processcompletenode,
                        elcp_assignleftmostleaf,
@@ -165,7 +187,9 @@ static int gt_enumlcpvalues(bool outedges,
 
 static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
 {
-  printf("%lu %lu %lu\n",lcpinterval->lcpvalue,lcpinterval->lb,lcpinterval->rb);
+  printf("N %lu %lu %lu\n",lcpinterval->lcpvalue,
+                           lcpinterval->lb,
+                           lcpinterval->rb);
   return 0;
 }
 

@@ -10,11 +10,17 @@ end
 Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :childlist)
 
 def showlcpinterval(itv)
-  puts "#{itv.lcp} #{itv.lb} #{itv.rb}"
+  puts "N #{itv.lcp} #{itv.lb} #{itv.rb}"
 end
 
-def showedge(fromitv,toitv)
-  puts "#{fromitv.lcp} #{fromitv.lb} -> #{toitv.lcp} #{toitv.lb}"
+def showleaves(flag,fatherlcp,fatherlb,startpos,endpos)
+  startpos.upto(endpos) do |idx|
+    puts "L #{fatherlcp} #{fatherlb} #{idx}"
+  end
+end
+
+def showbranchingedge(fromitv,toitv)
+  puts "B #{fromitv.lcp} #{fromitv.lb} #{toitv.lcp} #{toitv.lb}"
 end
 
 def replace_top_rb(stack,rb)
@@ -57,15 +63,30 @@ def enumlcpintervals(lcpfile,llvfile)
     end
     idx += 1
   end
-  interval = Lcpinterval.new(0,0,idx-1,[])
-  showlcpinterval(interval) 
+  replace_top_rb(stack,idx-1)
+  showlcpinterval(stack.pop) 
 end
 
 def add_top_childlist(stack,itv)
   checkemtptystack(stack)
   topelem = stack.pop
+  if topelem.childlist.empty?
+    showleaves(1,topelem.lcp,topelem.lb,topelem.lb,itv.lb-1)
+  else
+    showleaves(2,topelem.lcp,topelem.lb,topelem.childlist.last.rb+1,itv.lb-1)
+  end
   topelem.childlist.push(itv)
   stack.push(topelem)
+end
+
+def addtail(itv)
+  startpos = nil
+  if itv.childlist.empty?
+    startpos = itv.lb
+  else
+    startpos = itv.childlist.last.rb+1
+  end
+  showleaves(3,itv.lcp,itv.lb,startpos,itv.rb)
 end
 
 def enumlcpintervaltree(lcpfile,llvfile)
@@ -93,8 +114,11 @@ def enumlcpintervaltree(lcpfile,llvfile)
           checkemtptystack(stack)
           if lcpvalue <= stack.last.lcp
             add_top_childlist(stack,lastInterval)
-            showedge(stack.last,lastInterval)
+            addtail(lastInterval)
+            showbranchingedge(stack.last,lastInterval)
             lastInterval = nil
+          else
+            addtail(lastInterval)
           end
         else
           break
@@ -106,14 +130,16 @@ def enumlcpintervaltree(lcpfile,llvfile)
           stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
         else
           stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastInterval]))
-          showedge(stack.last,lastInterval)
+          showleaves(4,lcpvalue,lb,lb,lastInterval.lb-1)
+          showbranchingedge(stack.last,lastInterval)
           lastInterval = nil
         end
       end
     end
     idx += 1
   end
-  interval = Lcpinterval.new(0,0,idx-1,[])
+  replace_top_rb(stack,idx-1)
+  addtail(stack.pop)
 end
 
 if ARGV.length != 2
