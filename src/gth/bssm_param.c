@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2005 Michael E Sparks <mespar1@iastate.edu>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
@@ -721,6 +721,7 @@ static void build_bssm(GtBioseq *bioseq, GthBSSMModel *bssm_model,
     for (j = 0; j < num_entries; j++) {
       seq = gt_bioseq_get_seq(bioseq, j);
       encoded_seq = gt_seq_get_encoded(seq);
+      gt_assert(encoded_seq[i] < ALPHSIZE);
       mono_ct[i][encoded_seq[i]]++;
     }
   }
