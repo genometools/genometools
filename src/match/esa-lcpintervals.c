@@ -59,7 +59,7 @@ static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,
 }
 
 static int elcp_processcompletenode(
-                          GT_UNUSED unsigned long nodeptrdepth,
+                          unsigned long nodeptrdepth,
                           Dfsinfo *anodeptr,
                           GT_UNUSED unsigned long nodeptrminusonedepth,
                           Dfsstate *astate,
@@ -70,7 +70,7 @@ static int elcp_processcompletenode(
 
   gt_assert(state != NULL);
   gt_assert(nodeptr != NULL);
-  state->lcpinterval.lcpvalue = nodeptr->depth;
+  state->lcpinterval.lcpvalue = nodeptrdepth;
   state->lcpinterval.lb = nodeptr->leftmostleaf;
   state->lcpinterval.rb = nodeptr->rightmostleaf;
   if (state->processlcpinterval != NULL)

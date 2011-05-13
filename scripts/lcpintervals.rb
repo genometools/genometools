@@ -10,7 +10,7 @@ end
 Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb)
 
 def showlcpinterval(itv)
-  puts "#{itv.lb} #{itv.rb}"
+  puts "#{itv.lcp} #{itv.lb} #{itv.rb}"
 end
 
 def replace_top_rb(stack,rb)
@@ -20,11 +20,19 @@ def replace_top_rb(stack,rb)
   stack.push(topelem)
 end
 
-def enumlcpintervals(file)
+def enumlcpintervals(lcpfile,llvfile)
   stack = Array.new()
   stack.push(Lcpinterval.new(0,0,nil))
   idx=0
-  file.each_byte do |lcpvalue|
+  lcpvalue=0
+  lcpfile.each_byte do |cc|
+    if cc == 255
+      contents = llvfile.read(4)
+      contents = llvfile.read(4)
+      lcpvalue = contents.unpack("L")[0]
+    else
+      lcpvalue = cc
+    end
     if idx > 0
       lb = idx - 1
       loop do
@@ -54,6 +62,7 @@ if ARGV.length != 1
   exit 1
 end
 
-file = File.new(ARGV[0] + ".lcp","r")
+lcpfile = File.new(ARGV[0] + ".lcp","r")
+llvfile = File.new(ARGV[0] + ".llv","r")
 
-enumlcpintervals(file)
+enumlcpintervals(lcpfile,llvfile)
