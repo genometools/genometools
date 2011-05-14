@@ -21,6 +21,7 @@
 
 #include "core/alphabet_api.h"
 
+#define GT_DNABASES             "aAcCgGtTuU"
 #define GT_MAXALPHABETCHARACTER UCHAR_MAX
 #define GT_COMPAREOFFSET        (GT_MAXALPHABETCHARACTER + 1)
 

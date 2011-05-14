@@ -52,10 +52,9 @@ struct GtAlphabet {
   Some constants for the standard alphabet used. The name says it all.
 */
 
-#define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
 #define MAPSIZEDNA                   (GT_DNAALPHASIZE+1U)
-#define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
+#define DNAALPHABETDOMAIN            GT_DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINALPHASIZE             20U
 #define MAPSIZEPROTEIN               (PROTEINALPHASIZE+1U)
