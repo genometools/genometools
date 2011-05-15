@@ -58,36 +58,44 @@ typedef struct
 
 struct Sfxiterator
 {
-  bool storespecials;
-  GtCodetype currentmincode,
-           currentmaxcode;
-  unsigned long specialcharacters,
-                widthofpart,
-                totallength;
-  GtSuffixsortspace *suffixsortspace;
-  unsigned long nextfreeCodeatposition;
-  Codeatposition *spaceCodeatposition;
-  Suftabparts *suftabparts;
+  /* globally constant */
   const GtEncseq *encseq;
   GtReadmode readmode;
-  Outlcpinfo *outlcpinfo, *outlcpinfoforsample;
-  unsigned int part,
-               numofchars,
+  unsigned long specialcharacters,
+                totallength;
+  unsigned int numofchars,
                prefixlength;
-  GtSuffixposbuffer fusp;
-  GtSpecialrangeiterator *sri;
-  GtRange overhang;
-  bool exhausted;
+  Sfxstrategy sfxstrategy;
+  bool withprogressbar;
+
+  /* invariant for each part */
+  Suftabparts *suftabparts;
+  Outlcpinfo *outlcpinfoforsample;
   Bcktab *bcktab;
   GtCodetype numofallcodes;
   unsigned long *leftborder; /* points to bcktab->leftborder */
+  Differencecover *dcov;
+
+  /* changed in each part */
+  GtSuffixsortspace *suffixsortspace;
+  GtCodetype currentmincode,
+             currentmaxcode;
+  unsigned long widthofpart;
+  unsigned int part;
+  Outlcpinfo *outlcpinfo;
+  GtSuffixposbuffer fusp;
+  GtRange overhang;
+  bool exhausted;
   unsigned long long bucketiterstep; /* for progressbar */
-  unsigned int maskright;
-  Sfxstrategy sfxstrategy;
   GtLogger *logger;
   GtTimer *sfxprogress;
-  bool withprogressbar;
-  Differencecover *dcov;
+  GtSpecialrangeiterator *sri; /* refers to space used in each part */
+
+  /* use for generating k-mer codes */
+  bool storespecials;
+  unsigned long nextfreeCodeatposition;
+  Codeatposition *spaceCodeatposition;
+  unsigned int kmerfastmaskright;
 };
 
 #ifdef SKDEBUG
@@ -193,7 +201,7 @@ static void verifycodelistcomputation(
                                                       readmode,
                                                       prefixlength,
                                                       numofchars);
-  gt_assert(realspecialranges+1 >= (unsigned long) nextfreeCodeatposition2);
+  gt_assert(realspecialranges+1 >= nextfreeCodeatposition2);
   compareCodeatpositionlists(spaceCodeatposition1,
                              nextfreeCodeatposition1,
                              spaceCodeatposition2,
@@ -626,7 +634,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
   for (idx=maxprefixindex; idx>=1U; idx--)
   {
     sfi->leftborder[code]++;
-    code = ((code << 2) | 3U) & sfi->maskright;
+    code = ((code << 2) | 3U) & sfi->kmerfastmaskright;
   }
 }
 
@@ -721,7 +729,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->readmode = readmode;
     sfi->numofchars = gt_encseq_alphabetnumofchars(encseq);
     sfi->prefixlength = prefixlength;
-    sfi->maskright = (1U << GT_MULT2(prefixlength))-1;
+    sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->dcov = NULL;
     sfi->withprogressbar = withprogressbar;
     if (sfxstrategy != NULL)
@@ -868,8 +876,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
       if (sfi->sfxstrategy.storespecialcodes)
       {
-        gt_assert(realspecialranges+1
-                  >= (unsigned long) sfi->nextfreeCodeatposition);
+        gt_assert(realspecialranges+1 >= sfi->nextfreeCodeatposition);
         reversespecialcodes(sfi->spaceCodeatposition,
                             sfi->nextfreeCodeatposition);
       }
@@ -1074,7 +1081,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
     if (GT_ISDIRREVERSE(sfi->readmode))
     {
       gt_assert(pos < sfi->totallength);
-      gt_suffixsortspace_setdirect(sfi->fusp.sssp,sfi->fusp.nextfreeSuffixptr,
+      gt_suffixsortspace_setdirect(sfi->fusp.sssp,
+                                   sfi->fusp.nextfreeSuffixptr,
                                    GT_REVERSEPOS(sfi->totallength,pos));
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == leftpos)
@@ -1085,7 +1093,8 @@ static void insertfullspecialrange(Sfxiterator *sfi,
     } else
     {
       gt_suffixsortspace_setdirect(sfi->fusp.sssp,
-                                   sfi->fusp.nextfreeSuffixptr,pos);
+                                   sfi->fusp.nextfreeSuffixptr,
+                                   pos);
       sfi->fusp.nextfreeSuffixptr++;
       if (pos == rightpos-1)
       {
@@ -1120,21 +1129,19 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         } else
         {
           insertfullspecialrange(sfi,sfi->overhang.start,
-                                     sfi->overhang.end - rest);
+                                 sfi->overhang.end - rest);
           sfi->overhang.start = sfi->overhang.end - rest;
         }
         break;
       }
       if (sfi->fusp.nextfreeSuffixptr + width == sfi->fusp.allocatedSuffixptr)
       { /* overhang fits into the buffer and buffer is full */
-        insertfullspecialrange(sfi,sfi->overhang.start,
-                               sfi->overhang.end);
+        insertfullspecialrange(sfi,sfi->overhang.start,sfi->overhang.end);
         sfi->overhang.start = sfi->overhang.end = 0;
         break;
       }
       /* overhang fits into the buffer and buffer is not full */
-      insertfullspecialrange(sfi,sfi->overhang.start,
-                             sfi->overhang.end);
+      insertfullspecialrange(sfi,sfi->overhang.start,sfi->overhang.end);
       sfi->overhang.start = sfi->overhang.end = 0;
     } else
     {
@@ -1148,8 +1155,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
                                width - sfi->fusp.allocatedSuffixptr;
           if (GT_ISDIRREVERSE(sfi->readmode))
           {
-            insertfullspecialrange(sfi,range.start + rest,
-                                   range.end);
+            insertfullspecialrange(sfi,range.start + rest, range.end);
             sfi->overhang.start = range.start;
             sfi->overhang.end = range.start + rest;
           } else
