@@ -6,10 +6,11 @@ def showlcpinterval(itv)
   puts "N #{itv.lcp} #{itv.lb} #{itv.rb}"
 end
 
-def showleaves(flag,fatherlcp,fatherlb,startpos,endpos)
+def showleaves(flag,nextleaf,fatherlcp,fatherlb,startpos,endpos)
   startpos.upto(endpos) do |idx|
-    puts "L#{flag} #{fatherlcp} #{fatherlb} #{idx}"
+    puts "L #{fatherlcp} #{fatherlb} #{idx}"
   end
+  return [endpos+1,nextleaf].max
 end
 
 def showbranchingedge(fromitv,toitv)
@@ -54,29 +55,25 @@ end
 
 def add_top_childlist(stack,itv)
   topelem = stack.pop
-  if topelem.childlist.empty?
-    showleaves(1,topelem.lcp,topelem.lb,topelem.lb,itv.lb-1)
-  else
-    showleaves(2,topelem.lcp,topelem.lb,topelem.childlist.last.rb+1,itv.lb-1)
-  end
   topelem.childlist.push(itv)
   stack.push(topelem)
 end
 
-def addtail(itv)
+def addtail(nextleaf,itv)
   startpos = nil
   if itv.childlist.empty?
     startpos = itv.lb
   else
     startpos = itv.childlist.last.rb+1
   end
-  showleaves(3,itv.lcp,itv.lb,startpos,itv.rb)
+  return showleaves(1,nextleaf,itv.lcp,itv.lb,startpos,itv.rb)
 end
 
 def enumlcpintervaltree(lcpfile,llvfile)
   stack = Array.new()
   lastInterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[]))
+  nextleaf = 0
   idx=0
   lcpvalue=0
   lcpfile.each_byte do |cc|
@@ -88,6 +85,10 @@ def enumlcpintervaltree(lcpfile,llvfile)
       lcpvalue = cc
     end
     if idx > 0
+      if not lastInterval.nil?
+        STDERR.puts "assert lastInterval.nil? failed"
+        exit 1
+      end
       lb = idx - 1
       loop do
         if lcpvalue < stack.last.lcp
@@ -96,11 +97,11 @@ def enumlcpintervaltree(lcpfile,llvfile)
           lb = lastInterval.lb
           if lcpvalue <= stack.last.lcp
             add_top_childlist(stack,lastInterval)
-            addtail(lastInterval)
+            nextleaf = addtail(nextleaf,lastInterval)
             showbranchingedge(stack.last,lastInterval)
             lastInterval = nil
           else
-            addtail(lastInterval)
+            nextleaf = addtail(nextleaf,lastInterval)
           end
         else
           break
@@ -108,9 +109,10 @@ def enumlcpintervaltree(lcpfile,llvfile)
       end
       if lcpvalue > stack.last.lcp
         if lastInterval.nil? 
+          nextleaf = showleaves(2,nextleaf,stack.last.lcp,stack.last.lb,
+                                nextleaf,lb-1)
           stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
         else
-          showleaves(4,lcpvalue,lb,lb,lastInterval.lb-1)
           stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastInterval]))
           showbranchingedge(stack.last,lastInterval)
           lastInterval = nil
@@ -121,7 +123,7 @@ def enumlcpintervaltree(lcpfile,llvfile)
   end
   lastInterval = stack.pop
   lastInterval.rb = idx - 1
-  addtail(lastInterval)
+  nextleaf = addtail(nextleaf,lastInterval)
 end
 
 if ARGV.length != 2
