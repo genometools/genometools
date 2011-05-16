@@ -256,7 +256,7 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
       PUSHDFS(currentlcp,true,stackspace);
       if (BELOWTOP.lastisleafedge)
       {
-       if (assignleftmostleaf != NULL)
+        if (assignleftmostleaf != NULL)
         {
           assignleftmostleaf(TOP.dfsinfo,currentindex,state);
         }
