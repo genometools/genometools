@@ -33,10 +33,10 @@ def enumlcpintervals(lcpfile,llvfile)
     if idx > 0
       lb = idx - 1
       while lcpvalue < stack.last.lcp
-        interval = stack.pop
-        interval.rb = idx-1
-        showlcpinterval(interval)
-        lb = interval.lb
+        lastinterval = stack.pop
+        lastinterval.rb = idx-1
+        showlcpinterval(lastinterval)
+        lb = lastinterval.lb
       end
       if lcpvalue > stack.last.lcp
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
@@ -44,9 +44,9 @@ def enumlcpintervals(lcpfile,llvfile)
     end
     idx += 1
   end
-  interval = stack.pop
-  interval.rb = idx-1
-  showlcpinterval(interval) 
+  lastinterval = stack.pop
+  lastinterval.rb = idx-1
+  showlcpinterval(lastinterval) 
 end
 
 def add_to_top_childlist(stack,itv)
@@ -55,19 +55,16 @@ def add_to_top_childlist(stack,itv)
   stack.push(topelem)
 end
 
-def addtail(nextleaf,itv)
-  startpos = nil
-  if itv.childlist.empty?
-    startpos = itv.lb
-  else
-    startpos = itv.childlist.last.rb+1
-  end
-  return showleaves(nextleaf,itv.lcp,itv.lb,startpos,itv.rb)
+def addleaftail(nextleaf,itv)
+  return showleaves(nextleaf,itv.lcp,itv.lb,
+                    if itv.childlist.empty? then itv.lb
+                                            else itv.childlist.last.rb+1 end,
+                    itv.rb)
 end
 
 def enumlcpintervaltree(lcpfile,llvfile)
   stack = Array.new()
-  lastInterval = nil
+  lastinterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[]))
   nextleaf = 0
   idx=0
@@ -81,41 +78,37 @@ def enumlcpintervaltree(lcpfile,llvfile)
       lcpvalue = cc
     end
     if idx > 0
-      if not lastInterval.nil?
-        STDERR.puts "assert lastInterval.nil? failed"
-        exit 1
-      end
       lb = idx - 1
       while lcpvalue < stack.last.lcp
-        lastInterval = stack.pop
-        lastInterval.rb = idx - 1
-        lb = lastInterval.lb
+        lastinterval = stack.pop
+        lastinterval.rb = idx - 1
+        lb = lastinterval.lb
         if lcpvalue <= stack.last.lcp
-          add_to_top_childlist(stack,lastInterval)
-          nextleaf = addtail(nextleaf,lastInterval)
-          showbranchingedge(stack.last,lastInterval)
-          lastInterval = nil
+          add_to_top_childlist(stack,lastinterval)
+          nextleaf = addleaftail(nextleaf,lastinterval)
+          showbranchingedge(stack.last,lastinterval)
+          lastinterval = nil
         else
-          nextleaf = addtail(nextleaf,lastInterval)
+          nextleaf = addleaftail(nextleaf,lastinterval)
         end
       end
       if lcpvalue > stack.last.lcp
-        if lastInterval.nil? 
+        if lastinterval.nil? 
           nextleaf = showleaves(nextleaf,stack.last.lcp,stack.last.lb,
                                 nextleaf,lb-1)
           stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
         else
-          stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastInterval]))
-          showbranchingedge(stack.last,lastInterval)
-          lastInterval = nil
+          stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
+          showbranchingedge(stack.last,lastinterval)
+          lastinterval = nil
         end
       end
     end
     idx += 1
   end
-  lastInterval = stack.pop
-  lastInterval.rb = idx - 1
-  nextleaf = addtail(nextleaf,lastInterval)
+  lastinterval = stack.pop
+  lastinterval.rb = idx - 1
+  nextleaf = addleaftail(nextleaf,lastinterval)
 end
 
 if ARGV.length != 2
