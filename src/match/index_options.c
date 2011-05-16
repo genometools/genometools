@@ -103,6 +103,7 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->option = NULL;
   oi->optiondir = NULL;
   oi->optionoutsuftab = NULL;
+  oi->optionmemlimit = NULL;
   oi->optionoutlcptab = NULL;
   oi->optionoutbwttab = NULL;
   oi->optionoutbcktab = NULL;
@@ -221,7 +222,9 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
     oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   }
 
-  if (!had_err && gt_option_is_set(oi->optionmemlimit)) {
+  if (!had_err
+        && oi->optionmemlimit != NULL
+        && gt_option_is_set(oi->optionmemlimit)) {
     int readint;
     char buffer[3];
     bool match = false;
