@@ -82,14 +82,12 @@ def enumlcpintervaltree(lcpfile,llvfile)
       while lcpvalue < stack.last.lcp
         lastinterval = stack.pop
         lastinterval.rb = idx - 1
+        nextleaf = addleaftail(nextleaf,lastinterval)
         lb = lastinterval.lb
         if lcpvalue <= stack.last.lcp
           add_to_top_childlist(stack,lastinterval)
-          nextleaf = addleaftail(nextleaf,lastinterval)
           showbranchingedge(stack.last,lastinterval)
           lastinterval = nil
-        else
-          nextleaf = addleaftail(nextleaf,lastinterval)
         end
       end
       if lcpvalue > stack.last.lcp
