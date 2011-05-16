@@ -109,6 +109,62 @@ def enumlcpintervaltree(lcpfile,llvfile)
   nextleaf = addleaftail(nextleaf,lastinterval)
 end
 
+def enumlcpintervaltree2(lcpfile,llvfile)
+  stack = Array.new()
+  lastinterval = nil
+  stack.push(Lcpinterval.new(0,0,nil,[]))
+  nextleaf = 0
+  idx=0
+  lcpvalue=0
+  lcpfile.each_byte do |cc|
+    if cc == 255
+      contents = llvfile.read(4)
+      contents = llvfile.read(4)
+      lcpvalue = contents.unpack("L")[0]
+    else
+      lcpvalue = cc
+    end
+    if idx > 0
+      # puts "# idx=#{idx}"
+      lb = idx - 1
+      while lcpvalue < stack.last.lcp
+        # puts "# case 1"
+        puts "L #{stack.last.lcp} #{stack.last.lb} #{nextleaf}"
+        nextleaf+=1
+        lastinterval = stack.pop
+        lastinterval.rb = idx - 1
+        # nextleaf = addleaftail(nextleaf,lastinterval)
+        lb = lastinterval.lb
+        if lcpvalue <= stack.last.lcp
+          # puts "# case 2"
+          add_to_top_childlist(stack,lastinterval)
+          showbranchingedge(stack.last,lastinterval)
+          lastinterval = nil
+        end
+      end
+      if lcpvalue > stack.last.lcp
+        if lastinterval.nil? 
+          # puts "# case 3"
+          # nextleaf = showleaves(nextleaf,stack.last.lcp,stack.last.lb,
+                                # nextleaf,lb-1)
+          stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
+          puts "L #{lcpvalue} #{lb} #{nextleaf}"
+          nextleaf+=1
+        else
+          # puts "# case 4"
+          stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
+          showbranchingedge(stack.last,lastinterval)
+          lastinterval = nil
+        end
+      end
+    end
+    idx += 1
+  end
+  lastinterval = stack.pop
+  lastinterval.rb = idx - 1
+  nextleaf = addleaftail(nextleaf,lastinterval)
+end
+
 if ARGV.length != 2
   STDERR.puts "Usage: #{$0} (itv|tree) <indexname>"
   exit 1
