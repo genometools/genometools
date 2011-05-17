@@ -30,9 +30,10 @@ do
   cmd="cmp -s itvs.result1 itvs.result2"
   ${cmd}
   checkerror
-  cmd="scripts/lcpintervals.rb tree sfx"
-  ${cmd} > itvtree.result1
+  cmd="scripts/lcpintervals.rb debugtree sfx"
+  ${cmd} > tmp.result
   checkerror
+  grep -v '^#' tmp.result > itvtree.result1
   cmd="env -i bin/gt dev sfxmap -enumlcpintervaltree -esa sfx"
   ${cmd} > itvtree.result2
   checkerror

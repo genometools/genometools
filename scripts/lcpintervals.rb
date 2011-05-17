@@ -10,15 +10,13 @@ class Lcpstream
   end
   def nextlcp()
     @lcpfile.each_byte do |cc|
-      lcpvalue = nil
       if cc == 255
         contents = @llvfile.read(4)
         contents = @llvfile.read(4)
-        lcpvalue = contents.unpack("L")[0]
+        yield contents.unpack("L")[0]
       else
-        lcpvalue = cc
+        yield cc
       end
-      yield lcpvalue
     end
   end
 end
@@ -32,6 +30,18 @@ def showleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
     puts "L #{fatherlcp} #{fatherlb} #{idx}"
   end
   return [endpos+1,nextleaf].max
+end
+
+def showleavesfromqueue(fatherlcp,fatherlb,queue,endpos)
+  while not queue.empty?
+    idx = queue.shift
+    if idx <= endpos
+      puts "L #{fatherlcp} #{fatherlb} #{idx}"
+    else
+      queue.unshift(idx)
+      break
+    end
+  end
 end
 
 def showbranchingedge(fromitv,toitv)
@@ -112,23 +122,22 @@ end
 
 def enumlcpintervaltree2(filename,withdebug)
   stack = Array.new()
+  queue = Array.new()
   lastinterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[]))
-  nextleaf = 0
   idx=1
+  sumsize = 0
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
-    puts "# idx=#{idx}" if withdebug
     lb = idx - 1
+    queue.push(lb)
+    sumsize += queue.length
     while lcpvalue < stack.last.lcp
-      puts "# case 1" if withdebug
-      puts "L #{stack.last.lcp} #{stack.last.lb} #{nextleaf}"
-      nextleaf+=1
       lastinterval = stack.pop
       lastinterval.rb = idx - 1
-      # nextleaf = addleaftail(nextleaf,lastinterval)
+      showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,
+                          lastinterval.rb)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
-        puts "# case 2" if withdebug
         add_to_top_childlist(stack,lastinterval)
         showbranchingedge(stack.last,lastinterval)
         lastinterval = nil
@@ -136,14 +145,9 @@ def enumlcpintervaltree2(filename,withdebug)
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil? 
-        puts "# case 3" if withdebug
-        # nextleaf = showleaves(nextleaf,stack.last.lcp,stack.last.lb,
-                              # nextleaf,lb-1)
+        showleavesfromqueue(stack.last.lcp,stack.last.lb,queue,lb-1)
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
-        puts "L #{lcpvalue} #{lb} #{nextleaf}"
-        nextleaf+=1
       else
-        puts "# case 4" if withdebug
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
         showbranchingedge(stack.last,lastinterval)
         lastinterval = nil
@@ -153,7 +157,9 @@ def enumlcpintervaltree2(filename,withdebug)
   end
   lastinterval = stack.pop
   lastinterval.rb = idx - 1
-  nextleaf = addleaftail(nextleaf,lastinterval)
+  queue.push(idx-1)
+  showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  puts "# average queue size #{sumsize.to_f/idx.to_f}"
 end
 
 if ARGV.length != 2
