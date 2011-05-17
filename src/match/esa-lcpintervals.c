@@ -17,20 +17,10 @@
 
 #include "core/logger.h"
 #include "core/unused_api.h"
+#include "lcpinterval.h"
 #include "esa-seqread.h"
 #include "esa-lcpintervals.h"
-
-typedef struct /* information stored for each node of the lcp interval tree */
-{
-  unsigned long depth,
-                leftmostleaf,
-                rightmostleaf;
-} Elcpinfo;
-
-typedef struct
-{
-  unsigned long lcpvalue, lb, rb;
-} Lcpinterval;
+#include "esa-dfs.h"
 
 typedef struct  /* global information */
 {
@@ -40,16 +30,14 @@ typedef struct  /* global information */
   void *processinfo;
 } Elcpstate;
 
-#include "esa-dfs.h"
-
 static Dfsinfo *elcp_allocateDfsinfo(GT_UNUSED Dfsstate *astate)
 {
-  return (Dfsinfo *) gt_malloc(sizeof (Elcpinfo));
+  return (Dfsinfo *) gt_malloc(sizeof (Lcpinterval));
 }
 
 static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
 {
-  gt_free((Elcpinfo *) adfsinfo);
+  gt_free((Lcpinterval *) adfsinfo);
 }
 
 static void showbranchingedges(unsigned long fd,unsigned long flb,
@@ -65,10 +53,10 @@ static int elcp_processleafedge(GT_UNUSED bool firstsucc,
                                 Dfsstate *astate,
                                 GT_UNUSED GtError *err)
 {
-  Elcpinfo *father = (Elcpinfo *) afather;
+  Lcpinterval *father = (Lcpinterval *) afather;
   Elcpstate *state = (Elcpstate *) astate;
 
-  printf("L %lu %lu %lu\n",fatherdepth,father->leftmostleaf,state->leafindex++);
+  printf("L %lu %lu %lu\n",fatherdepth,father->left,state->leafindex++);
   return 0;
 }
 
@@ -79,25 +67,24 @@ static int elcp_processbranchedge(bool firstsucc,
                                   Dfsstate *astate,
                                   GT_UNUSED GtError *err)
 {
-  Elcpinfo *father = (Elcpinfo *) afather;
-  Elcpinfo *son = (Elcpinfo *) ason;
+  Lcpinterval *father = (Lcpinterval *) afather;
+  Lcpinterval *son = (Lcpinterval *) ason;
   Elcpstate *state = (Elcpstate *) astate;
 
   if (!firstsucc)
   {
     gt_assert(son != NULL);
-    showbranchingedges(fatherdepth,father->leftmostleaf,
-                       son->depth,son->leftmostleaf);
+    showbranchingedges(fatherdepth,father->left,son->offset,son->left);
   } else
   {
     if (son != NULL)
     {
-      showbranchingedges(0,0,son->depth,son->leftmostleaf);
+      showbranchingedges(0,0,son->offset,son->left);
     } else
     {
-      showbranchingedges(fatherdepth,father->leftmostleaf,
-                         state->lastcompletenode.lcpvalue,
-                         state->lastcompletenode.lb);
+      showbranchingedges(fatherdepth,father->left,
+                         state->lastcompletenode.offset,
+                         state->lastcompletenode.left);
     }
   }
   return 0;
@@ -110,14 +97,14 @@ static int elcp_processcompletenode(
                           Dfsstate *astate,
                           GT_UNUSED GtError *err)
 {
-  Elcpinfo *nodeptr = (Elcpinfo *) anodeptr;
+  Lcpinterval *nodeptr = (Lcpinterval *) anodeptr;
   Elcpstate *state = (Elcpstate *) astate;
 
   gt_assert(state != NULL);
   gt_assert(nodeptr != NULL);
-  nodeptr->depth = state->lastcompletenode.lcpvalue = nodeptrdepth;
-  state->lastcompletenode.lb = nodeptr->leftmostleaf;
-  state->lastcompletenode.rb = nodeptr->rightmostleaf;
+  nodeptr->offset = state->lastcompletenode.offset = nodeptrdepth;
+  state->lastcompletenode.left = nodeptr->left;
+  state->lastcompletenode.right = nodeptr->right;
   if (state->processlcpinterval != NULL)
   {
     if (state->processlcpinterval(state->processinfo,
@@ -133,7 +120,7 @@ static void elcp_assignleftmostleaf(Dfsinfo *adfsinfo,
                                     unsigned long leftmostleaf,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
-  ((Elcpinfo *) adfsinfo)->leftmostleaf = leftmostleaf;
+  ((Lcpinterval *) adfsinfo)->left = leftmostleaf;
 }
 
 static void elcp_assignrightmostleaf(Dfsinfo *adfsinfo,
@@ -142,7 +129,7 @@ static void elcp_assignrightmostleaf(Dfsinfo *adfsinfo,
                                      GT_UNUSED unsigned long currentlcp,
                                      GT_UNUSED Dfsstate *dfsstate)
 {
-  ((Elcpinfo *) adfsinfo)->rightmostleaf = currentindex;
+  ((Lcpinterval *) adfsinfo)->right = currentindex;
 }
 
 static int gt_enumlcpvalues(bool outedges,
@@ -187,9 +174,9 @@ static int gt_enumlcpvalues(bool outedges,
 
 static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
 {
-  printf("N %lu %lu %lu\n",lcpinterval->lcpvalue,
-                           lcpinterval->lb,
-                           lcpinterval->rb);
+  printf("N %lu %lu %lu\n",lcpinterval->offset,
+                           lcpinterval->left,
+                           lcpinterval->right);
   return 0;
 }
 

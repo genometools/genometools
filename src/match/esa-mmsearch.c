@@ -17,12 +17,12 @@
 
 #include "core/chardef.h"
 #include "core/divmodmul.h"
-#include "core/lcpinterval.h"
 #include "core/minmax.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/types_api.h"
-#include "sarr-def.h"
 
+#include "sarr-def.h"
+#include "lcpinterval.h"
 #include "spacedef.h"
 #include "esa-mmsearch.h"
 #include "core/timer_api.h"
