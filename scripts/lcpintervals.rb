@@ -25,37 +25,37 @@ class Lcpstream
   end
 end
 
-def showlcpinterval(itv)
+def processlcpinterval(itv)
   puts "N #{itv.lcp} #{itv.lb} #{itv.rb}"
 end
 
-def showbranchingedge(fromitv,toitv)
+def processbranchingedge(fromitv,toitv)
   puts "B #{fromitv.lcp} #{fromitv.lb} #{toitv.lcp} #{toitv.lb}"
 end
 
-def showleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
+def processleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   startpos.upto(endpos) do |idx|
     puts "L #{fatherlcp} #{fatherlb} #{idx}"
   end
   return [endpos+1,nextleaf].max
 end
 
-class Queue 
+class Queuearray 
   def initialize()
     @space = Array.new()
-    @maxsize = 0
-    @dist = Array.new()
-    @dist[0] = @dist[1] = @dist[2] = 0
+    @dist1 = @dist2 = 0
   end
   def delete()
-    puts "# dist=#{@dist[0]},#{@dist[1]},#{@dist[2]}"
-    puts "# maximum size of queue #{@maxsize}"
+    puts "# dist: 1=#{@dist1},2=#{@dist2}"
   end
   def add(elem)
     assert {@space.length < 2}
     @space.push(elem)
-    @maxsize = @space.length if @space.length > @maxsize
-    @dist[@space.length] += 1
+    if @space.length == 1
+      @dist1 += 1
+    else
+      @dist2 += 1
+    end
   end
   def enumleaves(endpos)
     while not @space.empty?
@@ -70,7 +70,40 @@ class Queue
   end
 end
 
-def showleavesfromqueue(fatherlcp,fatherlb,queue,endpos)
+class Queuepair 
+  def initialize()
+    @rightelem = nil
+    @leftelem = nil
+  end
+  def delete()
+    return
+  end
+  def add(elem)
+    assert {@leftelem.nil?}
+    @leftelem = @rightelem
+    @rightelem = elem
+  end
+  def enumleaves(endpos)
+    if not @leftelem.nil?
+      if @leftelem <= endpos
+        yield @leftelem
+        @leftelem = nil
+      else
+        return
+      end
+    end
+    if not @rightelem.nil?
+      if @rightelem <= endpos
+        yield @rightelem
+        @rightelem = nil
+      else
+        return
+      end
+    end
+  end
+end
+
+def processleavesfromqueue(fatherlcp,fatherlb,queue,endpos)
   queue.enumleaves(endpos) do |leaf| 
     puts "L #{fatherlcp} #{fatherlb} #{leaf}"
   end
@@ -85,7 +118,7 @@ def enumlcpintervals(filename)
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx-1
-      showlcpinterval(lastinterval)
+      processlcpinterval(lastinterval)
       lb = lastinterval.lb
     end
     if lcpvalue > stack.last.lcp
@@ -95,7 +128,7 @@ def enumlcpintervals(filename)
   end
   lastinterval = stack.pop
   lastinterval.rb = idx-1
-  showlcpinterval(lastinterval) 
+  processlcpinterval(lastinterval) 
 end
 
 def add_to_top_childlist(stack,itv)
@@ -105,7 +138,7 @@ def add_to_top_childlist(stack,itv)
 end
 
 def addleaftail(nextleaf,itv)
-  return showleaves(nextleaf,itv.lcp,itv.lb,
+  return processleaves(nextleaf,itv.lcp,itv.lb,
                     if itv.childlist.empty? then itv.lb
                                             else itv.childlist.last.rb+1 end,
                     itv.rb)
@@ -126,18 +159,18 @@ def enumlcpintervaltree(filename)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         add_to_top_childlist(stack,lastinterval)
-        showbranchingedge(stack.last,lastinterval)
+        processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil? 
-        nextleaf = showleaves(nextleaf,stack.last.lcp,stack.last.lb,
+        nextleaf = processleaves(nextleaf,stack.last.lcp,stack.last.lb,
                               nextleaf,lb-1)
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
       else
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
-        showbranchingedge(stack.last,lastinterval)
+        processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
     end
@@ -148,9 +181,9 @@ def enumlcpintervaltree(filename)
   nextleaf = addleaftail(nextleaf,lastinterval)
 end
 
-def enumlcpintervaltree3(filename)
+def enumlcpintervaltreewithqueue(filename)
   stack = Array.new()
-  queue = Queue.new()
+  queue = Queuearray.new()
   lastinterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[]))
   idx=1
@@ -160,32 +193,32 @@ def enumlcpintervaltree3(filename)
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx - 1
-      showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx - 1)
+      processleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx - 1)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         add_to_top_childlist(stack,lastinterval)
-        showbranchingedge(stack.last,lastinterval)
+        processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil? 
-        showleavesfromqueue(stack.last.lcp,stack.last.lb,queue,lb-1)
+        processleavesfromqueue(stack.last.lcp,stack.last.lb,queue,lb-1)
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
       else
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
-        showbranchingedge(stack.last,lastinterval)
+        processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
     else
-      showleavesfromqueue(stack.last.lcp,stack.last.lb,queue,idx-1)
+      processleavesfromqueue(stack.last.lcp,stack.last.lb,queue,idx-1)
     end
     idx += 1
   end
   lastinterval = stack.pop
   lastinterval.rb = idx - 1
   queue.add(idx-1)
-  showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  processleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx-1)
   queue.delete()
 end
 
@@ -199,5 +232,5 @@ if ARGV[0] == 'itv'
 elsif ARGV[0] == 'tree'
   enumlcpintervaltree(ARGV[1])
 elsif ARGV[0] == 'debugtree'
-  enumlcpintervaltree3(ARGV[1])
+  enumlcpintervaltreewithqueue(ARGV[1])
 end
