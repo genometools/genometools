@@ -46,7 +46,7 @@ static void showbranchingedges(unsigned long fd,unsigned long flb,
   printf("B %lu %lu %lu %lu\n",fd,flb,sd,slb);
 }
 
-static int elcp_processleafedge(GT_UNUSED bool firstsucc,
+static int elcp_processleafedge(bool firstsucc,
                                 unsigned long fatherdepth,
                                 Dfsinfo *afather,
                                 GT_UNUSED unsigned long leafnumber,
@@ -56,7 +56,8 @@ static int elcp_processleafedge(GT_UNUSED bool firstsucc,
   Lcpinterval *father = (Lcpinterval *) afather;
   Elcpstate *state = (Elcpstate *) astate;
 
-  printf("L %lu %lu %lu\n",fatherdepth,father->left,state->leafindex++);
+  printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',
+                              fatherdepth,father->left,state->leafindex++);
   return 0;
 }
 

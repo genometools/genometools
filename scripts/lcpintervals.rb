@@ -4,7 +4,7 @@ def assert
   raise "Assertion failed !" unless yield
 end
 
-Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist)
+Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist, :hasedge)
 
 class Lcpstream
   def initialize(filename)
@@ -31,7 +31,7 @@ end
 
 def enumlcpintervals(filename)
   stack = Array.new()
-  stack.push(Lcpinterval.new(0,0,nil,[]))
+  stack.push(Lcpinterval.new(0,0,nil,[],false))
   idx = 1
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
     lb = idx - 1
@@ -42,7 +42,7 @@ def enumlcpintervals(filename)
       lb = lastinterval.lb
     end
     if lcpvalue > stack.last.lcp
-      stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
+      stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
     end
     idx += 1
   end
@@ -62,15 +62,32 @@ def processleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   return [endpos+1,nextleaf].max
 end
 
-def processleavesfromqueue(fatherlcp,fatherlb,queue,endpos)
-  queue.enumleaves(endpos) do |leaf|
-    puts "L #{fatherlcp} #{fatherlb} #{leaf}"
+def showbool(b)
+  if b
+    return "1"
+  else
+    return "0"
   end
+end
+
+def processleavesfromqueue(hasedge,fatherlcp,fatherlb,queue,endpos)
+  out = false
+  firstedge = true 
+  if hasedge 
+    firstedge = false 
+  end
+  queue.enumleaves(endpos) do |leaf|
+    puts "L #{showbool(firstedge)} #{fatherlcp} #{fatherlb} #{leaf}"
+    firstedge = false
+    out = true
+  end
+  return out
 end
 
 def add_to_top_brchildlist(stack,itv)
   topelem = stack.pop
   topelem.brchildlist.push(itv)
+  topelem.hasedge = true
   stack.push(topelem)
 end
 
@@ -87,7 +104,7 @@ end
 def enumlcpintervaltree(filename)
   stack = Array.new()
   lastinterval = nil
-  stack.push(Lcpinterval.new(0,0,nil,[]))
+  stack.push(Lcpinterval.new(0,0,nil,[],false))
   nextleaf = 0
   idx = 1
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
@@ -107,9 +124,9 @@ def enumlcpintervaltree(filename)
       if lastinterval.nil?
         nextleaf = processleaves(nextleaf,stack.last.lcp,stack.last.lb,
                               nextleaf,lb-1)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
       else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
         processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
@@ -188,7 +205,7 @@ def enumlcpintervaltreewithqueue(filename)
   stack = Array.new()
   queue = Queuearray.new()
   lastinterval = nil
-  stack.push(Lcpinterval.new(0,0,nil,[]))
+  stack.push(Lcpinterval.new(0,0,nil,[],false))
   idx=1
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
     lb = idx - 1
@@ -196,7 +213,9 @@ def enumlcpintervaltreewithqueue(filename)
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx - 1
-      processleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx - 1)
+      out = processleavesfromqueue(lastinterval.hasedge,
+                                   lastinterval.lcp,lastinterval.lb,queue,idx-1)
+      lastinterval.hasedge = true if out
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         add_to_top_brchildlist(stack,lastinterval)
@@ -206,22 +225,28 @@ def enumlcpintervaltreewithqueue(filename)
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil?
-        processleavesfromqueue(stack.last.lcp,stack.last.lb,queue,lb-1)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
+        out = processleavesfromqueue(stack.last.hasedge,
+                                     stack.last.lcp,stack.last.lb,queue,lb-1)
+        stack.last.hasedge = true if out
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
       else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],true))
         processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
     else
-      processleavesfromqueue(stack.last.lcp,stack.last.lb,queue,idx-1)
+      out = processleavesfromqueue(stack.last.hasedge,
+                                   stack.last.lcp,stack.last.lb,queue,idx-1)
+      stack.last.hasedge = true if out
     end
     idx += 1
   end
   lastinterval = stack.pop
   lastinterval.rb = idx - 1
   queue.add(idx-1)
-  processleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  out = processleavesfromqueue(lastinterval.hasedge,
+                               lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  lastinterval.hasedge = true if out
   queue.delete()
 end
 
