@@ -32,16 +32,19 @@ def showleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   return [endpos+1,nextleaf].max
 end
 
-def showleavesfromqueue(fatherlcp,fatherlb,queue,endpos)
+def showleavesfromqueue(flag,fatherlcp,fatherlb,queue,endpos)
+  count=0
   while not queue.empty?
     idx = queue.shift
     if idx <= endpos
       puts "L #{fatherlcp} #{fatherlb} #{idx}"
+      count+=1
     else
       queue.unshift(idx)
       break
     end
   end
+  puts "# OUT #{flag} #{count}"
 end
 
 def showbranchingedge(fromitv,toitv)
@@ -127,14 +130,17 @@ def enumlcpintervaltree2(filename,withdebug)
   stack.push(Lcpinterval.new(0,0,nil,[]))
   idx=1
   sumsize = 0
+  maxsize = 0
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
     lb = idx - 1
     queue.push(lb)
+    puts "# #{queue}"
     sumsize += queue.length
+    maxsize = [queue.length,maxsize].max
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx - 1
-      showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,
+      showleavesfromqueue(1,lastinterval.lcp,lastinterval.lb,queue,
                           lastinterval.rb)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
@@ -145,20 +151,25 @@ def enumlcpintervaltree2(filename,withdebug)
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil? 
-        showleavesfromqueue(stack.last.lcp,stack.last.lb,queue,lb-1)
+        showleavesfromqueue(2,stack.last.lcp,stack.last.lb,queue,lb-1)
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
       else
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
         showbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
+    else
+      showleavesfromqueue(3,stack.last.lcp,stack.last.lb,queue,lb)
     end
     idx += 1
   end
   lastinterval = stack.pop
   lastinterval.rb = idx - 1
   queue.push(idx-1)
-  showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  sumsize += queue.length
+  maxsize = [queue.length,maxsize].max
+  showleavesfromqueue(4,lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  puts "# maximum size of queue #{maxsize}"
   puts "# average queue size #{sumsize.to_f/idx.to_f}"
 end
 

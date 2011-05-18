@@ -18,7 +18,7 @@ fi
 for filename in ${filenamelist}
 do
   echo "${filename}"
-  cmd="env -i bin/gt suffixerator -db ${filename} -tis -suf -lcp -dna -indexname sfx"
+  cmd="env -i bin/gt suffixerator -tis -suf -lcp -dna -indexname sfx -db ${filename}"
   ${cmd}
   checkerror
   cmd="scripts/lcpintervals.rb itv sfx"
