@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 
+def assert
+  raise "Assertion failed !" unless yield
+end
+
 Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :childlist)
 
 class Lcpstream
@@ -25,6 +29,10 @@ def showlcpinterval(itv)
   puts "N #{itv.lcp} #{itv.lb} #{itv.rb}"
 end
 
+def showbranchingedge(fromitv,toitv)
+  puts "B #{fromitv.lcp} #{fromitv.lb} #{toitv.lcp} #{toitv.lb}"
+end
+
 def showleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   startpos.upto(endpos) do |idx|
     puts "L #{fatherlcp} #{fatherlb} #{idx}"
@@ -32,23 +40,40 @@ def showleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   return [endpos+1,nextleaf].max
 end
 
-def showleavesfromqueue(flag,fatherlcp,fatherlb,queue,endpos)
-  count=0
-  while not queue.empty?
-    idx = queue.shift
-    if idx <= endpos
-      puts "L #{fatherlcp} #{fatherlb} #{idx}"
-      count+=1
-    else
-      queue.unshift(idx)
-      break
+class Queue 
+  def initialize()
+    @space = Array.new()
+    @maxsize = 0
+    @dist = Array.new()
+    @dist[0] = @dist[1] = @dist[2] = 0
+  end
+  def delete()
+    puts "# dist=#{@dist[0]},#{@dist[1]},#{@dist[2]}"
+    puts "# maximum size of queue #{@maxsize}"
+  end
+  def add(elem)
+    assert {@space.length < 2}
+    @space.push(elem)
+    @maxsize = @space.length if @space.length > @maxsize
+    @dist[@space.length] += 1
+  end
+  def enumleaves(endpos)
+    while not @space.empty?
+      idx = @space.shift
+      if idx <= endpos
+        yield idx
+      else
+        @space.unshift(idx)
+        break
+      end
     end
   end
-  puts "# OUT #{flag} #{count}"
 end
 
-def showbranchingedge(fromitv,toitv)
-  puts "B #{fromitv.lcp} #{fromitv.lb} #{toitv.lcp} #{toitv.lb}"
+def showleavesfromqueue(fatherlcp,fatherlb,queue,endpos)
+  queue.enumleaves(endpos) do |leaf| 
+    puts "L #{fatherlcp} #{fatherlb} #{leaf}"
+  end
 end
 
 def enumlcpintervals(filename)
@@ -123,25 +148,19 @@ def enumlcpintervaltree(filename)
   nextleaf = addleaftail(nextleaf,lastinterval)
 end
 
-def enumlcpintervaltree2(filename,withdebug)
+def enumlcpintervaltree3(filename)
   stack = Array.new()
-  queue = Array.new()
+  queue = Queue.new()
   lastinterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[]))
   idx=1
-  sumsize = 0
-  maxsize = 0
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
     lb = idx - 1
-    queue.push(lb)
-    puts "# #{queue}"
-    sumsize += queue.length
-    maxsize = [queue.length,maxsize].max
+    queue.add(idx - 1)
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx - 1
-      showleavesfromqueue(1,lastinterval.lcp,lastinterval.lb,queue,
-                          lastinterval.rb)
+      showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx - 1)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         add_to_top_childlist(stack,lastinterval)
@@ -151,7 +170,7 @@ def enumlcpintervaltree2(filename,withdebug)
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil? 
-        showleavesfromqueue(2,stack.last.lcp,stack.last.lb,queue,lb-1)
+        showleavesfromqueue(stack.last.lcp,stack.last.lb,queue,lb-1)
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[]))
       else
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval]))
@@ -159,18 +178,15 @@ def enumlcpintervaltree2(filename,withdebug)
         lastinterval = nil
       end
     else
-      showleavesfromqueue(3,stack.last.lcp,stack.last.lb,queue,lb)
+      showleavesfromqueue(stack.last.lcp,stack.last.lb,queue,idx-1)
     end
     idx += 1
   end
   lastinterval = stack.pop
   lastinterval.rb = idx - 1
-  queue.push(idx-1)
-  sumsize += queue.length
-  maxsize = [queue.length,maxsize].max
-  showleavesfromqueue(4,lastinterval.lcp,lastinterval.lb,queue,idx-1)
-  puts "# maximum size of queue #{maxsize}"
-  puts "# average queue size #{sumsize.to_f/idx.to_f}"
+  queue.add(idx-1)
+  showleavesfromqueue(lastinterval.lcp,lastinterval.lb,queue,idx-1)
+  queue.delete()
 end
 
 if ARGV.length != 2
@@ -183,5 +199,5 @@ if ARGV[0] == 'itv'
 elsif ARGV[0] == 'tree'
   enumlcpintervaltree(ARGV[1])
 elsif ARGV[0] == 'debugtree'
-  enumlcpintervaltree2(ARGV[1],true)
+  enumlcpintervaltree3(ARGV[1])
 end
