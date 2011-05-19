@@ -73,13 +73,6 @@ def processbranchingedgewithfirst(firstedge,fromitv,toitv)
   puts  "#{toitv.lcp} #{toitv.lb}"
 end
 
-def processleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
-  startpos.upto(endpos) do |idx|
-    puts "L #{fatherlcp} #{fatherlb} #{idx}"
-  end
-  return [endpos+1,nextleaf].max
-end
-
 def processleavesfromqueue(parent,queue,endpos)
   firstedge = if parent.rmostbd.nil? then true else false end
   queue.enumleaves(endpos) do |leaf|
@@ -95,53 +88,6 @@ def add_to_top_brchildlist(stack,itv)
   assert {not itv.rb.nil?}
   topelem.rmostbd = itv.rb
   stack.push(topelem)
-end
-
-def addleaftail(nextleaf,itv)
-  return processleaves(
-               nextleaf,
-               itv.lcp,
-               itv.lb,
-               if itv.brchildlist.empty? then itv.lb
-                                         else itv.brchildlist.last.rb+1 end,
-               itv.rb)
-end
-
-def enumlcpintervaltree(filename)
-  stack = Array.new()
-  lastinterval = nil
-  stack.push(Lcpinterval.new(0,0,nil,[],nil))
-  nextleaf = 0
-  idx = 1
-  Lcpstream.new(filename).nextlcp() do |lcpvalue|
-    lb = idx - 1
-    while lcpvalue < stack.last.lcp
-      lastinterval = stack.pop
-      lastinterval.rb = idx - 1
-      nextleaf = addleaftail(nextleaf,lastinterval)
-      lb = lastinterval.lb
-      if lcpvalue <= stack.last.lcp
-        add_to_top_brchildlist(stack,lastinterval)
-        processbranchingedge(stack.last,lastinterval)
-        lastinterval = nil
-      end
-    end
-    if lcpvalue > stack.last.lcp
-      if lastinterval.nil?
-        nextleaf = processleaves(nextleaf,stack.last.lcp,stack.last.lb,
-                              nextleaf,lb-1)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],nil))
-      else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],nil))
-        processbranchingedge(stack.last,lastinterval)
-        lastinterval = nil
-      end
-    end
-    idx += 1
-  end
-  lastinterval = stack.pop
-  lastinterval.rb = idx - 1
-  nextleaf = addleaftail(nextleaf,lastinterval)
 end
 
 class Queuearray
@@ -258,7 +204,5 @@ end
 if ARGV[0] == 'itv'
   enumlcpintervals(ARGV[1])
 elsif ARGV[0] == 'tree'
-  enumlcpintervaltree(ARGV[1])
-elsif ARGV[0] == 'debugtree'
   enumlcpintervaltreewithqueue(ARGV[1])
 end

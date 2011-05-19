@@ -30,7 +30,7 @@ do
   cmd="cmp -s itvs.result1 itvs.result2"
   ${cmd}
   checkerror
-  cmd="scripts/lcpintervals.rb debugtree sfx"
+  cmd="scripts/lcpintervals.rb tree sfx"
   ${cmd} > tmp.result
   checkerror
   grep -v '^#' tmp.result > itvtree.result1
