@@ -40,10 +40,11 @@ static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
   gt_free((Lcpinterval *) adfsinfo);
 }
 
-static void showbranchingedges(unsigned long fd,unsigned long flb,
+static void showbranchingedges(bool firstsucc,unsigned long fd,
+                               unsigned long flb,
                                unsigned long sd,unsigned long slb)
 {
-  printf("B %lu %lu %lu %lu\n",fd,flb,sd,slb);
+  printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
 
 static int elcp_processleafedge(bool firstsucc,
@@ -72,21 +73,15 @@ static int elcp_processbranchedge(bool firstsucc,
   Lcpinterval *son = (Lcpinterval *) ason;
   Elcpstate *state = (Elcpstate *) astate;
 
-  if (!firstsucc)
+  if (son != NULL)
   {
-    gt_assert(son != NULL);
-    showbranchingedges(fatherdepth,father->left,son->offset,son->left);
+    showbranchingedges(firstsucc,fatherdepth,father->left,son->offset,
+                       son->left);
   } else
   {
-    if (son != NULL)
-    {
-      showbranchingedges(0,0,son->offset,son->left);
-    } else
-    {
-      showbranchingedges(fatherdepth,father->left,
-                         state->lastcompletenode.offset,
-                         state->lastcompletenode.left);
-    }
+    showbranchingedges(firstsucc,fatherdepth,father->left,
+                       state->lastcompletenode.offset,
+                       state->lastcompletenode.left);
   }
   return 0;
 }

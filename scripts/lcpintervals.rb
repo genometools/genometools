@@ -55,6 +55,16 @@ def processbranchingedge(fromitv,toitv)
   puts "B #{fromitv.lcp} #{fromitv.lb} #{toitv.lcp} #{toitv.lb}"
 end
 
+def processbranchingedge(firstedge,fromitv,toitv)
+  print "B #{showbool(firstedge)} #{fromitv.lcp} #{fromitv.lb} "
+  puts  "#{toitv.lcp} #{toitv.lb}"
+end
+
+def processbranchingedgewithfirst(firstedge,fromitv,toitv)
+  print "B #{showbool(firstedge)} #{fromitv.lcp} #{fromitv.lb} "
+  puts  "#{toitv.lcp} #{toitv.lb}"
+end
+
 def processleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   startpos.upto(endpos) do |idx|
     puts "L #{fatherlcp} #{fatherlb} #{idx}"
@@ -70,12 +80,17 @@ def showbool(b)
   end
 end
 
+def negate(b)
+  if b
+    return false
+  else
+    return true
+  end
+end
+
 def processleavesfromqueue(hasedge,fatherlcp,fatherlb,queue,endpos)
   out = false
-  firstedge = true 
-  if hasedge 
-    firstedge = false 
-  end
+  firstedge = negate(hasedge)
   queue.enumleaves(endpos) do |leaf|
     puts "L #{showbool(firstedge)} #{fatherlcp} #{fatherlb} #{leaf}"
     firstedge = false
@@ -218,8 +233,9 @@ def enumlcpintervaltreewithqueue(filename)
       lastinterval.hasedge = true if out
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
+        firstedge = negate(stack.last.hasedge)
         add_to_top_brchildlist(stack,lastinterval)
-        processbranchingedge(stack.last,lastinterval)
+        processbranchingedgewithfirst(firstedge,stack.last,lastinterval)
         lastinterval = nil
       end
     end
@@ -230,8 +246,9 @@ def enumlcpintervaltreewithqueue(filename)
         stack.last.hasedge = true if out
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
       else
+        
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],true))
-        processbranchingedge(stack.last,lastinterval)
+        processbranchingedgewithfirst(true,stack.last,lastinterval)
         lastinterval = nil
       end
     else
