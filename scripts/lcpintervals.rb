@@ -4,7 +4,7 @@ def assert
   raise "Assertion failed !" unless yield
 end
 
-Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist, :hasedge)
+Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist, :rmostbd)
 
 class Lcpstream
   def initialize(filename)
@@ -31,7 +31,7 @@ end
 
 def enumlcpintervals(filename)
   stack = Array.new()
-  stack.push(Lcpinterval.new(0,0,nil,[],false))
+  stack.push(Lcpinterval.new(0,0,nil,[],nil))
   idx = 1
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
     lb = idx - 1
@@ -42,13 +42,21 @@ def enumlcpintervals(filename)
       lb = lastinterval.lb
     end
     if lcpvalue > stack.last.lcp
-      stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
+      stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],nil))
     end
     idx += 1
   end
   lastinterval = stack.pop
   lastinterval.rb = idx-1
   processlcpinterval(lastinterval)
+end
+
+def showbool(b)
+  if b
+    return "1"
+  else
+    return "0"
+  end
 end
 
 def processbranchingedge(fromitv,toitv)
@@ -72,37 +80,20 @@ def processleaves(nextleaf,fatherlcp,fatherlb,startpos,endpos)
   return [endpos+1,nextleaf].max
 end
 
-def showbool(b)
-  if b
-    return "1"
-  else
-    return "0"
-  end
-end
-
-def negate(b)
-  if b
-    return false
-  else
-    return true
-  end
-end
-
 def processleavesfromqueue(parent,queue,endpos)
-  out = false
-  firstedge = negate(parent.hasedge)
+  firstedge = if parent.rmostbd.nil? then true else false end
   queue.enumleaves(endpos) do |leaf|
     puts "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} #{leaf}"
     firstedge = false
-    out = true
+    parent.rmostbd = leaf
   end
-  parent.hasedge = true if out
 end
 
 def add_to_top_brchildlist(stack,itv)
   topelem = stack.pop
   topelem.brchildlist.push(itv)
-  topelem.hasedge = true
+  assert {not itv.rb.nil?}
+  topelem.rmostbd = itv.rb
   stack.push(topelem)
 end
 
@@ -119,7 +110,7 @@ end
 def enumlcpintervaltree(filename)
   stack = Array.new()
   lastinterval = nil
-  stack.push(Lcpinterval.new(0,0,nil,[],false))
+  stack.push(Lcpinterval.new(0,0,nil,[],nil))
   nextleaf = 0
   idx = 1
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
@@ -139,9 +130,9 @@ def enumlcpintervaltree(filename)
       if lastinterval.nil?
         nextleaf = processleaves(nextleaf,stack.last.lcp,stack.last.lb,
                               nextleaf,lb-1)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],nil))
       else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],nil))
         processbranchingedge(stack.last,lastinterval)
         lastinterval = nil
       end
@@ -220,7 +211,7 @@ def enumlcpintervaltreewithqueue(filename)
   stack = Array.new()
   queue = Queuearray.new()
   lastinterval = nil
-  stack.push(Lcpinterval.new(0,0,nil,[],false))
+  stack.push(Lcpinterval.new(0,0,nil,[],nil))
   idx=1
   Lcpstream.new(filename).nextlcp() do |lcpvalue|
     lb = idx - 1
@@ -231,7 +222,7 @@ def enumlcpintervaltreewithqueue(filename)
       processleavesfromqueue(lastinterval,queue,idx-1)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
-        firstedge = negate(stack.last.hasedge)
+        firstedge = if stack.last.rmostbd.nil? then true else false end
         add_to_top_brchildlist(stack,lastinterval)
         processbranchingedgewithfirst(firstedge,stack.last,lastinterval)
         lastinterval = nil
@@ -240,9 +231,10 @@ def enumlcpintervaltreewithqueue(filename)
     if lcpvalue > stack.last.lcp
       if lastinterval.nil?
         processleavesfromqueue(stack.last,queue,lb-1)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],false))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],nil))
       else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],true))
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],
+                                   lastinterval.rb))
         processbranchingedgewithfirst(true,stack.last,lastinterval)
         lastinterval = nil
       end
