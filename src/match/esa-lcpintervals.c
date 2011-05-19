@@ -24,7 +24,6 @@
 
 typedef struct  /* global information */
 {
-  unsigned long leafindex;
   Lcpinterval lastcompletenode;
   int (*processlcpinterval)(void *,const Lcpinterval *);
   void *processinfo;
@@ -50,15 +49,14 @@ static void showbranchingedges(bool firstsucc,unsigned long fd,
 static int elcp_processleafedge(bool firstsucc,
                                 unsigned long fatherdepth,
                                 Dfsinfo *afather,
-                                GT_UNUSED unsigned long leafnumber,
-                                Dfsstate *astate,
+                                unsigned long leafnumber,
+                                GT_UNUSED Dfsstate *astate,
                                 GT_UNUSED GtError *err)
 {
   Lcpinterval *father = (Lcpinterval *) afather;
-  Elcpstate *state = (Elcpstate *) astate;
 
   printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',
-                              fatherdepth,father->left,state->leafindex++);
+                              fatherdepth,father->left,leafnumber);
   return 0;
 }
 
@@ -140,7 +138,6 @@ static int gt_enumlcpvalues(bool outedges,
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
-  state->leafindex = 0;
   if (outedges)
   {
     state->processlcpinterval = NULL;
