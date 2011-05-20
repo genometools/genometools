@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -16,7 +16,7 @@
 */
 
 #include <stdio.h>
-#include "core/init.h"
+#include "core/init_api.h"
 #include "core/tooldriver.h"
 
 int gt_tooldriver(GtToolFunc tool, int argc, char *argv[])

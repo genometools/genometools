@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,7 +19,7 @@
 #include <fontconfig.h>
 #endif
 #include <string.h>
-#include "core/init.h"
+#include "core/init_api.h"
 #include "core/class_alloc.h"
 #include "core/class_prealloc.h"
 #include "core/cstr_api.h"
