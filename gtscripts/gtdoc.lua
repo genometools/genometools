@@ -28,10 +28,19 @@ end
 local be_verbose    = false
 local in_mode       = "C"
 local out_mode      = "txt"
+local file_mode     = false
+local file_list     = {}
 
 if #arg >= 1 then
   while #arg >= 1 and string.match(arg[1], "^-") do
-    if string.match(arg[1], "^-h") then
+    if string.match(arg[1], "^-f") then
+      file_mode = true
+      table.remove(arg, 1)
+      while #arg > 1 and not string.match(arg[1], "^-") do
+        file_list[#file_list+1] = arg[1]
+        table.remove(arg, 1)
+      end
+    elseif string.match(arg[1], "^-h") then
       out_mode = "html"
       table.remove(arg, 1)
     elseif string.match(arg[1], "^-t") then
@@ -107,15 +116,22 @@ end
 
 assert(export)
 
-for _, v in ipairs(export) do
-  local filename = gt_home .. "/" .. v
-  if is_dir(filename) then
-    for f in lfs.dir(filename) do
-      local filename = filename .. "/" .. f
+if file_mode then
+  for _, f in ipairs(file_list) do
+    local filename = gt_home .. "/" .. f
+    process_file(filename, be_verbose, is_lua)
+  end
+else
+  for _, v in ipairs(export) do
+    local filename = gt_home .. "/" .. v
+    if is_dir(filename) then
+      for f in lfs.dir(filename) do
+        local filename = filename .. "/" .. f
+        process_file(filename, be_verbose, is_lua)
+      end
+    else
       process_file(filename, be_verbose, is_lua)
     end
-  else
-    process_file(filename, be_verbose, is_lua)
   end
 end
 
