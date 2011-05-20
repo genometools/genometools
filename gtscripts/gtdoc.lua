@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,10 @@
 require 'gtdoclib'
 
 function usage()
-  io.stderr:write(string.format("Usage: [-html] [-lua] [-v] %s gt_home\n",
-                  arg[0]))
-  io.stderr:write("Generate documentation for the GenomeTools home directory " ..
-                  "gt_home.\n")
+  io.stderr:write(string.format("Usage: [-html] [-lua] [-tex] [-v] %s " ..
+                                "gt_home\n", arg[0]))
+  io.stderr:write("Generate documentation for the GenomeTools home " ..
+                  "directory gt_home.\n")
   os.exit(1)
 end
 
