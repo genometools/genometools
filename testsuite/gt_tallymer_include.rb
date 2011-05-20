@@ -10,7 +10,6 @@ def runtyrmkifail(args)
 end
 
 def checktallymer(reffile,mersize)
-  vstreebin="/Users/kurtz/bin-ops/i686-apple-darwin"
   reffilepath="#{$testdata}#{reffile}"
   if reffile == 'at1MB'
     query="#{$testdata}U89959_genomic.fas"
@@ -19,20 +18,13 @@ def checktallymer(reffile,mersize)
   end
   reftestdir="#{$gttestdata}tallymer"
   outoptions="-counts -pl -mersize #{mersize} -minocc 2 -maxocc 30"
-  run_test "#{$bin}gt suffixerator -db #{reffilepath} -pl -dna " +
-           "-tis -suf -lcp -indexname sfxidx", :maxtime => 360
+  run_test "#{$bin}gt suffixerator -pl -dna -tis -suf -lcp " +
+           "-indexname sfxidx -db #{reffilepath}", :maxtime => 360
   run_test("#{$bin}gt tallymer mkindex -test -mersize #{mersize} -esa sfxidx",
            :maxtime => 360)
   suffix="tyrmkiout"
   run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
-  #run "#{vstreebin}/mkvtree.x -indexname mkvidx -allout -pl -dna " +
-  #    "-db #{reffilepath}"
-  #run "#{vstreebin}/tallymer-mkindex -mersize #{mersize} mkvidx" 
-  #run "sed -e '/^#/d' #{$last_stdout}"
-  #run "mv #{$last_stdout} #{reffile}.#{suffix}"
   run "cmp -s #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
-  #run "#{vstreebin}/tallymer-mkindex #{outoptions} " +
-      #"-indexname mkv-tyr-index mkvidx"
   run_test "#{$bin}gt tallymer mkindex #{outoptions} " + 
            "-indexname tyr-index -esa sfxidx", :maxtime => 360
   if not File.zero?("tyr-index.mct")
@@ -40,10 +32,6 @@ def checktallymer(reffile,mersize)
     run_test "#{$bin}gt tallymer search -strand fp -output qseqnum qpos " + 
              "counts sequence -test -tyr tyr-index -q #{query}", :maxtime => 360
     run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
-    #run "#{vstreebin}/tallymer-search -strand fp " +
-        #"-output qseqnum qpos counts sequence mkv-tyr-index #{query}"
-    #run "sed -e '/^#/d' #{$last_stdout}"
-    #run "mv #{$last_stdout} #{reffile}.#{suffix}"
     run "cmp -s #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
   end
 end

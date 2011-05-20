@@ -25,9 +25,8 @@
 typedef struct /* information stored for each node of the lcp interval tree */
 {
   unsigned long leftmostleaf,
-         rightmostleaf,
-         suftabrightmostleaf,
-         lcptabrightmostleafplus1;
+                rightmostleaf,
+                lcptabrightmostleafplus1;
 } OccDfsinfo;
 
 typedef struct /* global information */
@@ -185,13 +184,12 @@ static void occ_assignleftmostleaf(Dfsinfo *adfsinfo,unsigned long leftmostleaf,
 
 static void occ_assignrightmostleaf(Dfsinfo *adfsinfo,
                                     unsigned long currentindex,
-                                    unsigned long previoussuffix,
+                                    GT_UNUSED unsigned long previoussuffix,
                                     unsigned long currentlcp,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
   OccDfsinfo *dfsinfo = (OccDfsinfo*) adfsinfo;
   dfsinfo->rightmostleaf = currentindex;
-  dfsinfo->suftabrightmostleaf = previoussuffix;
   dfsinfo->lcptabrightmostleafplus1 = currentlcp;
 }
 
