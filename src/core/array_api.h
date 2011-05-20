@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include "core/fptr_api.h"
 
-/* <GtArray*> objects are generic arrays for elements of a certain size which
+/* <GtArray> objects are generic arrays for elements of a certain size which
    grow on demand. */
 typedef struct GtArray GtArray;
 
