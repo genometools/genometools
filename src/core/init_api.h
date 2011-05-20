@@ -18,15 +18,17 @@
 #ifndef INIT_API_H
 #define INIT_API_H
 
+/* Init module */
+
 /* Initialize this GenomeTools instance.
    This has to be called before the library is used! */
 void gt_lib_init(void);
 
-/* registers exit function which calls gt_lib_clean() */
+/* Registers exit function which calls <gt_lib_clean()>. */
 void gt_lib_reg_atexit_func(void);
 
-/* returns 0 if no memory map, file pointer, or memory has been leaked and a
-   value != 0 otherwise */
+/* Returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise. */
 int  gt_lib_clean(void);
 
 #endif

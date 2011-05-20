@@ -170,6 +170,8 @@ interfaces.
 
   <li><a href="#Grep">Grep</a>
 
+  <li><a href="#Init">Init</a>
+
   <li><a href="#Log">Log</a>
 
   <li><a href="#MemoryAllocation">MemoryAllocation</a>
@@ -192,27 +194,20 @@ interfaces.
 
 </ul>
 <h2>Sole functions</h2>
-<a name="gt_lib_init"></a>
+<a name="gt_readmode_show"></a>
 
-<code>void  gt_lib_init(void)</code>
+<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
 <p>
-Initialize this GenomeTools instance.
-   This has to be called before the library is used!
+Returns the descriptive string for the readmode <code>readmode</code>.
 </p>
 <hr>
-<a name="gt_lib_reg_atexit_func"></a>
+<a name="gt_readmode_parse"></a>
 
-<code>void  gt_lib_reg_atexit_func(void)</code>
+<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
 <p>
-registers exit function which calls <code>gt_lib_clean()</code>
-</p>
-<hr>
-<a name="gt_lib_clean"></a>
-
-<code>int   gt_lib_clean(void)</code>
-<p>
-returns 0 if no memory map, file pointer, or memory has been leaked and a
-   value != 0 otherwise
+Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
+   -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="GtAlphabet"></a>
@@ -3055,7 +3050,7 @@ Create a <code>GtGTFInStream*</code> which subsequently reads the GTF file with 
 <hr>
 <a name="gt_genome_node_ref"></a>
 
-<code>GtGenomeNode*   gt_genome_node_ref(GtGenomeNode *genome_node)</code>
+<code>GtGenomeNode*  gt_genome_node_ref(GtGenomeNode *genome_node)</code>
 <p>
 Increase the reference count for <code>genome_node</code> and return it.
    <code>genome_node</code> cannot be <code>NULL</code>.
@@ -5058,22 +5053,6 @@ Removes all occurrences of <code>remove</code> from the right end of <code>cstr<
 Returns <code>true</code> if host CPU is little-endian, <code>false</code> otherwise.
 </p>
 <hr>
-<a name="gt_readmode_show"></a>
-
-<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
-<p>
-Returns the descriptive string for the readmode <code>readmode</code>.
-</p>
-<hr>
-<a name="gt_readmode_parse"></a>
-
-<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
-<p>
-Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
-   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
-   -1 is returned and <code>err</code> is set accordingly.
-</p>
-<hr>
 <a name="Fileutils"></a>
 <h2>Module Fileutils</h2>
 <a name="gt_file_exists"></a>
@@ -5190,6 +5169,31 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
 <code>int   gt_grep(bool *match, const char *pattern, const char *line, GtError*)</code>
 <p>
 Sets <code>match</code> to <code>true</code> if <code>pattern</code> matches <code>line</code>, to <code>false</code> otherwise.
+</p>
+<hr>
+<a name="Init"></a>
+<h2>Module Init</h2>
+<a name="gt_lib_init"></a>
+
+<code>void  gt_lib_init(void)</code>
+<p>
+Initialize this GenomeTools instance.
+   This has to be called before the library is used!
+</p>
+<hr>
+<a name="gt_lib_reg_atexit_func"></a>
+
+<code>void  gt_lib_reg_atexit_func(void)</code>
+<p>
+Registers exit function which calls <code>gt_lib_clean()</code>.
+</p>
+<hr>
+<a name="gt_lib_clean"></a>
+
+<code>int   gt_lib_clean(void)</code>
+<p>
+Returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise.
 </p>
 <hr>
 <a name="Log"></a>
@@ -6787,7 +6791,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-09
+Last update: 2011-05-20
 </div>
 </div>
 <!-- Piwik -->
