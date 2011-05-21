@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +22,7 @@
 #include "core/unused_api.h"
 #include "extended/node_visitor_rep.h"
 
-/* the ``genome visitor'' interface */
+/* the <GtNodeVisitor> interface */
 struct GtNodeVisitorClass {
   size_t size;
   GtNodeVisitorFreeFunc free;
