@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -329,19 +329,19 @@ void gt_file_xfputc(int c, GtFile *file)
   }
 }
 
-void gt_file_xfputs(const char *str, GtFile *file)
+void gt_file_xfputs(const char *cstr, GtFile *file)
 {
   if (!file)
-    return gt_xfputs(str, stdout);
+    return gt_xfputs(cstr, stdout);
   switch (file->mode) {
     case GT_FILE_MODE_UNCOMPRESSED:
-      gt_xfputs(str, file->fileptr.file);
+      gt_xfputs(cstr, file->fileptr.file);
       break;
     case GT_FILE_MODE_GZIP:
-      gt_xgzfputs(str, file->fileptr.gzfile);
+      gt_xgzfputs(cstr, file->fileptr.gzfile);
       break;
     case GT_FILE_MODE_BZIP2:
-      gt_xbzfputs(str, file->fileptr.bzfile);
+      gt_xbzfputs(cstr, file->fileptr.bzfile);
       break;
     default: gt_assert(0);
   }
