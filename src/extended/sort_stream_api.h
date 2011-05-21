@@ -15,11 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SORT_STREAM_H
-#define SORT_STREAM_H
+#ifndef SORT_STREAM_API_H
+#define SORT_STREAM_API_H
 
-#include "extended/sort_stream_api.h"
+#include "extended/node_stream_api.h"
 
-const GtNodeStreamClass* gt_sort_stream_class(void);
+/* Implements the <GtNodeStream> interface. */
+typedef struct GtSortStream GtSortStream;
+
+/* Create a <GtSortStream*> which sorts the genome nodes it retrieves from
+   <in_stream> and returns them unmodified, but in sorted order. */
+GtNodeStream* gt_sort_stream_new(GtNodeStream *in_stream);
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 #include "extended/add_introns_stream.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/sort_stream.h"
+#include "extended/sort_stream_api.h"
 #include "extended/stat_stream.h"
 #include "tools/gt_stat.h"
 

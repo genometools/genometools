@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -28,7 +28,7 @@
 #include "extended/gff3_parser.h"
 #include "extended/gtdatahelp.h"
 #include "extended/merge_feature_stream.h"
-#include "extended/sort_stream.h"
+#include "extended/sort_stream_api.h"
 #include "extended/type_checker_builtin.h"
 #include "extended/type_checker_obo.h"
 #include "tools/gt_gff3.h"

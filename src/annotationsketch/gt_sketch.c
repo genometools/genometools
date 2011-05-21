@@ -34,7 +34,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gtf_in_stream.h"
-#include "extended/sort_stream.h"
+#include "extended/sort_stream_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/canvas_api.h"
 #include "annotationsketch/canvas_cairo_file.h"

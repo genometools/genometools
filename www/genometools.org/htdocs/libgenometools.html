@@ -128,6 +128,8 @@ interfaces.
 
   <li><a href="#GtSequenceNode">GtSequenceNode</a>
 
+  <li><a href="#GtSortStream">GtSortStream</a>
+
   <li><a href="#GtSplitter">GtSplitter</a>
 
   <li><a href="#GtStr">GtStr</a>
@@ -476,7 +478,7 @@ Analog to <code>gt_alphabet_decode_seq_to_fp()</code> writing the output to
 <a name="GtArray"></a>
 <h2>Class GtArray</h2>
 
-<p> <code>GtArray*</code> objects are generic arrays for elements of a certain size which
+<p> <code>GtArray</code> objects are generic arrays for elements of a certain size which
    grow on demand. </p>
 
 <hr>
@@ -4118,6 +4120,20 @@ Return the sequence of <code>sequence_node</code>.
 Return the sequence length of <code>sequence_node</code>.
 </p>
 <hr>
+<a name="GtSortStream"></a>
+<h2>Class GtSortStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. </p>
+
+<hr>
+<a name="gt_sort_stream_new"></a>
+
+<code>GtNodeStream*  gt_sort_stream_new(GtNodeStream *in_stream)</code>
+<p>
+Create a <code>GtSortStream*</code> which sorts the genome nodes it retrieves from
+   <code>in_stream</code> and returns them unmodified, but in sorted order.
+</p>
+<hr>
 <a name="GtSplitter"></a>
 <h2>Class GtSplitter</h2>
 
@@ -6568,6 +6584,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_sequence_node_new"><code>gt_sequence_node_new</code></a><br>
 
+  <a href="#gt_sort_stream_new"><code>gt_sort_stream_new</code></a><br>
+
   <a href="#gt_splitter_delete"><code>gt_splitter_delete</code></a><br>
 
   <a href="#gt_splitter_get_token"><code>gt_splitter_get_token</code></a><br>
@@ -6791,7 +6809,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-20
+Last update: 2011-05-21
 </div>
 </div>
 <!-- Piwik -->

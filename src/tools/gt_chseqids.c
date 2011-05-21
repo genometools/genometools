@@ -23,7 +23,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gtdatahelp.h"
-#include "extended/sort_stream.h"
+#include "extended/sort_stream_api.h"
 #include "tools/gt_chseqids.h"
 
 #define DEFAULT_JOINLENGTH 300
