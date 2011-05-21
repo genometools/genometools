@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,9 +18,10 @@
 #ifndef GFF3_PARSER_H
 #define GFF3_PARSER_H
 
-#include "core/cstr_table.h"
+#include "core/cstr_table_api.h"
+#include "core/file_api.h"
 #include "core/queue.h"
-#include "core/range.h"
+#include "core/range_api.h"
 #include "core/strand_api.h"
 #include "extended/type_checker_api.h"
 
@@ -64,7 +65,7 @@ int           gt_gff3_parser_parse_genome_nodes(GtGFF3Parser*,
                                                 GtStr *filenamestr,
                                                 unsigned long long *line_number,
                                                 GtFile *fpin,
-                                                GtError*);
+                                                GtError *err);
 /* Reset the GFF3 parser (necessary if the processed input file is switched). */
 void          gt_gff3_parser_reset(GtGFF3Parser*);
 void          gt_gff3_parser_delete(GtGFF3Parser*);
