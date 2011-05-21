@@ -3126,7 +3126,7 @@ Reset the <code>gff3_parser</code> (necessary if the input file is switched).
 
 <code>void           gt_gff3_parser_delete(GtGFF3Parser *gff3_parser)</code>
 <p>
-Delete the <code>gff3_parser</code> and free all allocated space.
+Delete the <code>gff3_parser</code>.
 </p>
 <hr>
 <a name="GtGFF3Visitor"></a>
@@ -4108,7 +4108,7 @@ Visit <code>sequence_node</code> with <code>node_visitor</code>.
 
 <code>void   gt_node_visitor_delete(GtNodeVisitor *node_visitor)</code>
 <p>
-Delete <code>node_visitor</code> and free all allocated space.
+Delete <code>node_visitor</code>.
 </p>
 <hr>
 <a name="GtPhase"></a>
@@ -4915,35 +4915,35 @@ Creates a new <code>GtTextWidthCalculatorCairo</code> object for the given conte
 
 <code>GtTimer*  gt_timer_new(void)</code>
 <p>
-Creates a new <code>GtTimer</code> object.
+Return a new <code>GtTimer</code> object.
 </p>
 <hr>
 <a name="gt_timer_new_with_progress_description"></a>
 
-<code>GtTimer*  gt_timer_new_with_progress_description(const char* desc)</code>
+<code>GtTimer*  gt_timer_new_with_progress_description(const char* description)</code>
 <p>
-Creates a new <code>GtTimer</code> object and stores the first description.
+Return a new <code>GtTimer</code> object with the first <code>description</code>.
 </p>
 <hr>
 <a name="gt_timer_start"></a>
 
 <code>void      gt_timer_start(GtTimer *t)</code>
 <p>
-Starts the time measurement on <code>t</code>.
+Start the time measurement on <code>t</code>.
 </p>
 <hr>
 <a name="gt_timer_stop"></a>
 
 <code>void      gt_timer_stop(GtTimer *t)</code>
 <p>
-Stops the time measurement on <code>t</code>.
+Stop the time measurement on <code>t</code>.
 </p>
 <hr>
 <a name="gt_timer_show"></a>
 
 <code>void      gt_timer_show(GtTimer *t, FILE *fp)</code>
 <p>
-Outputs the current state of <code>t</code> in the format
+Output the current state of <code>t</code> in the format
    "%ld.%06lds real %lds user %lds system" to file
    pointer <code>fp</code> (see <code>gt_timer_show_formatted</code>).
    The timer is then stopped.
@@ -4953,7 +4953,7 @@ Outputs the current state of <code>t</code> in the format
 
 <code>void      gt_timer_show_formatted(GtTimer *t, const char *fmt, FILE *fp)</code>
 <p>
-Outputs the current state of <code>t</code> in a user-defined format given by <code>fmt</code>.
+Output the current state of <code>t</code> in a user-defined format given by <code>fmt</code>.
    <code>fmt</code> must be a format string for four %ld numbers, which are filled with:
    elapsed seconds, elapsed microseconds, used usertime in seconds,
    system time in seconds. The output is written to <code>fp</code>.
@@ -4963,7 +4963,7 @@ Outputs the current state of <code>t</code> in a user-defined format given by <c
 
 <code>void      gt_timer_show_progress(GtTimer *t, const char *desc, FILE *fp)</code>
 <p>
-Outputs the current state of <code>t</code> on <code>fp</code> since the last call of
+Output the current state of <code>t</code> on <code>fp</code> since the last call of
    <code>gt_timer_show_progress()</code> or the last start of <code>t</code>, along with the current
    description. The timer is not stopped, but updated with <code>desc</code> to be the
    next description.
@@ -4973,7 +4973,7 @@ Outputs the current state of <code>t</code> on <code>fp</code> since the last ca
 
 <code>void      gt_timer_show_progress_final(GtTimer *t, FILE *fp)</code>
 <p>
-Outputs the overall time measured with <code>t</code> from start to now on <code>fp</code>.
+Output the overall time measured with <code>t</code> from start to now on <code>fp</code>.
 </p>
 <hr>
 <a name="gt_timer_show_cpu_time_by_progress"></a>
@@ -4994,7 +4994,7 @@ Hide output of last stage time in gt_timer_show_progress_final
 
 <code>void      gt_timer_delete(GtTimer *t)</code>
 <p>
-Deletes <code>t</code>.
+Delete <code>t</code>.
 </p>
 <hr>
 <a name="GtTransTable"></a>
@@ -5165,7 +5165,7 @@ Moves the <code>translator</code> to the beginning of the first codon in <code>d
 
 <code>void                gt_translator_delete(GtTranslator *translator)</code>
 <p>
-Deletes <code>translator</code> and frees all associated memory.
+Delete <code>translator</code>.
 </p>
 <hr>
 <a name="GtTypeChecker"></a>
