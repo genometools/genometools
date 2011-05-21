@@ -28,7 +28,7 @@ typedef struct GtSpliceSiteInfoVisitor GtSpliceSiteInfoVisitor;
 const GtNodeVisitorClass* gt_splice_site_info_visitor_class(void);
 /* takes ownership of <rm> */
 GtNodeVisitor* gt_splice_site_info_visitor_new(GtRegionMapping *rm);
-bool           gt_splice_site_info_visitor_show(GtNodeVisitor*);
+bool           gt_splice_site_info_visitor_show(GtNodeVisitor*, GtFile*);
 bool           gt_splice_site_info_visitor_intron_processed(GtNodeVisitor*);
 bool           gt_splice_site_info_visitor_show_canonical(GtNodeVisitor*,
                                                           bool show_gc);

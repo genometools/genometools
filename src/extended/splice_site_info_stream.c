@@ -80,12 +80,13 @@ GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
   return ns;
 }
 
-bool gt_splice_site_info_stream_show(GtNodeStream *ns)
+bool gt_splice_site_info_stream_show(GtNodeStream *ns, GtFile *outfp)
 {
   GtSpliceSiteInfoStream *ssis;
   gt_assert(ns);
   ssis = gt_splice_site_info_stream_cast(ns);
-  return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor);
+  return gt_splice_site_info_visitor_show(ssis->splice_site_info_visitor,
+                                          outfp);
 }
 
 bool gt_splice_site_info_stream_intron_processed(GtNodeStream *ns)

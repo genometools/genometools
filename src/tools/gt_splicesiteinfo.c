@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,6 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
 #include "extended/add_introns_stream.h"
@@ -30,12 +31,15 @@
 typedef struct {
   bool addintrons;
   GtSeqid2FileInfo *s2fi;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } SpliceSiteInfoArguments;
 
 static void* gt_splicesiteinfo_arguments_new(void)
 {
   SpliceSiteInfoArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->s2fi = gt_seqid2file_info_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -43,6 +47,8 @@ static void gt_splicesiteinfo_arguments_delete(void *tool_arguments)
 {
   SpliceSiteInfoArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_seqid2file_info_delete(arguments->s2fi);
   gt_free(arguments);
 }
@@ -54,7 +60,7 @@ static GtOptionParser* gt_splicesiteinfo_option_parser_new(void *tool_arguments)
   GtOption *option;
 
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
-                         "about splice sites given in GFF3 files.");
+                            "about splice sites given in GFF3 files.");
 
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
@@ -65,6 +71,9 @@ static GtOptionParser* gt_splicesiteinfo_option_parser_new(void *tool_arguments)
                            "exon features\n(before computing the information "
                            "to be shown)", &arguments->addintrons, false);
   gt_option_parser_add_option(op, option);
+
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 
@@ -111,7 +120,8 @@ static int gt_splicesiteinfo_runner(int argc, const char **argv,
   }
 
   if (!had_err) {
-    if (!gt_splice_site_info_stream_show(splice_site_info_stream)) {
+    if (!gt_splice_site_info_stream_show(splice_site_info_stream,
+                                         arguments->outfp)) {
       gt_warning("input file(s) contained no intron, use option -addintrons to "
                  "add introns automatically");
     }

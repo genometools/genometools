@@ -31,7 +31,7 @@ const GtNodeStreamClass* gt_splice_site_info_stream_class(void);
 GtNodeStream* gt_splice_site_info_stream_new(GtNodeStream *in_stream,
                                              GtRegionMapping *region_mapping);
 /* Returns <true> if an intron has been processed, <false> otherwise */
-bool          gt_splice_site_info_stream_show(GtNodeStream*);
+bool          gt_splice_site_info_stream_show(GtNodeStream*, GtFile*);
 
 bool          gt_splice_site_info_stream_intron_processed(GtNodeStream*);
 bool          gt_splice_site_info_stream_show_canonical(GtNodeStream*,

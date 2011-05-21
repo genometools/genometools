@@ -183,7 +183,7 @@ static void showsinglesite(const char *string, unsigned long occurrences,
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
-bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv)
+bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv, GtFile *outfp)
 {
   GtSpliceSiteInfoVisitor *ssiv;
   gt_assert(nv);
@@ -191,18 +191,18 @@ bool gt_splice_site_info_visitor_show(GtNodeVisitor *nv)
 
   if (ssiv->show) {
     /* show splice sites */
-    printf("splice site distribution (for introns >= 4bp)\n");
-    gt_string_distri_foreach(ssiv->splicesites, showsplicesite, NULL);
-   gt_xputchar('\n');
+    gt_file_xprintf(outfp, "splice site distribution (for introns >= 4bp)\n");
+    gt_string_distri_foreach(ssiv->splicesites, showsplicesite, outfp);
+    gt_xputchar('\n');
 
     /* show donor sites */
-    printf("donor site distribution (for introns >= 4bp)\n");
-    gt_string_distri_foreach(ssiv->donorsites, showsinglesite, NULL);
+    gt_file_xprintf(outfp, "donor site distribution (for introns >= 4bp)\n");
+    gt_string_distri_foreach(ssiv->donorsites, showsinglesite, outfp);
     gt_xputchar('\n');
 
     /* show acceptor sites */
-    printf("acceptor site distribution (for introns >= 4bp)\n");
-    gt_string_distri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
+    gt_file_xprintf(outfp, "acceptor site distribution (for introns >= 4bp)\n");
+    gt_string_distri_foreach(ssiv->acceptorsites, showsinglesite, outfp);
   }
   return ssiv->intron_processed;
 }
