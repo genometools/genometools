@@ -103,7 +103,7 @@ static bool select_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
   const char *target;
   gt_assert(fn);
   if (targetstrand != GT_NUM_OF_STRAND_TYPES &&
-      (target = gt_feature_node_get_attribute(fn, TARGET_STRING))) {
+      (target = gt_feature_node_get_attribute(fn, GT_GFF_TARGET))) {
     unsigned long num_of_targets;
     GtStrand parsed_strand;
     int had_err;

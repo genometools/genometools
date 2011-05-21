@@ -83,7 +83,7 @@ static void select_targetbest(GtFeatureNode *current_feature,
   const char *target;
   int had_err;
   gt_assert(current_feature && trees);
-  target = gt_feature_node_get_attribute(current_feature, TARGET_STRING);
+  target = gt_feature_node_get_attribute(current_feature, GT_GFF_TARGET);
   gt_assert(target);
   first_target_id = gt_str_new();
   had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,

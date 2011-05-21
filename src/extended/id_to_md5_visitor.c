@@ -109,7 +109,7 @@ static int i2m_change_target_seqids(GtGenomeNode *gn, const char *target,
   if (!had_err) {
     GtStr *new_target = gt_str_new();
     i2m_build_new_target(new_target, target_ids, target_ranges, target_strands);
-    gt_feature_node_set_attribute((GtFeatureNode*) gn, TARGET_STRING,
+    gt_feature_node_set_attribute((GtFeatureNode*) gn, GT_GFF_TARGET,
                                   gt_str_get(new_target));
     gt_str_delete(new_target);
   }
@@ -133,7 +133,7 @@ static int i2m_change_seqid(GtGenomeNode *gn, void *data, GtError *err)
     gt_genome_node_set_range(gn, &new_range);
   }
   if ((target = gt_feature_node_get_attribute((GtFeatureNode*) gn,
-                                              TARGET_STRING)) &&
+                                              GT_GFF_TARGET)) &&
       info->substitute_target_ids) {
     return i2m_change_target_seqids(gn, target, info->region_mapping, err);
   }

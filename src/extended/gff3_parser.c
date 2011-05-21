@@ -378,7 +378,7 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
   gt_assert(child && !gt_feature_node_is_pseudo((GtFeatureNode*) child));
   gt_assert(feature_info);
   gt_feature_node_add_child(pseudo_node, child);
-  id = gt_feature_node_get_attribute(child, ID_STRING);
+  id = gt_feature_node_get_attribute(child, GT_GFF_ID);
   gt_assert(id);
   gt_feature_info_add_pseudo_parent(feature_info, id, pseudo_node);
 }
@@ -400,9 +400,9 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
         parser->last_terminator) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                    "\"%s\" is separated from its counterpart on line %u by "
-                   "terminator %s on line %u", ID_STRING, id, line_number,
+                   "terminator %s on line %u", GT_GFF_ID, id, line_number,
                    filename, gt_genome_node_get_line_number((GtGenomeNode*) fn),
-                   GFF_TERMINATOR, parser->last_terminator);
+                   GT_GFF_TERMINATOR, parser->last_terminator);
       had_err = -1;
     }
     /* check seqid */
@@ -411,13 +411,13 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
                    gt_genome_node_get_seqid((GtGenomeNode*) fn))) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                    "\"%s\" has a different sequence id than its counterpart on "
-                   "line %u", ID_STRING, id, line_number, filename,
+                   "line %u", GT_GFF_ID, id, line_number, filename,
                    gt_genome_node_get_line_number((GtGenomeNode*) fn));
       had_err = -1;
     }
     if (!had_err) {
       GtFeatureNode *pseudo_parent;
-      bool has_parent = gt_feature_node_get_attribute(fn, PARENT_STRING)
+      bool has_parent = gt_feature_node_get_attribute(fn, GT_GFF_PARENT)
                         ? true : false;
       gt_assert(!gt_feature_node_is_pseudo(fn));
       pseudo_parent = gt_feature_info_get_pseudo_parent(parser->feature_info,
@@ -610,14 +610,14 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
     if (!parent_gf) {
       if (!parser->tidy) {
         gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
-                     "previously defined (via \"%s=\")", PARENT_STRING, parent,
-                     line_number, filename, ID_STRING);
+                     "previously defined (via \"%s=\")", GT_GFF_PARENT, parent,
+                     line_number, filename, GT_GFF_ID);
         had_err = -1;
       }
       else {
         gt_warning("%s \"%s\" on line %u in file \"%s\" has not been "
-                   "previously defined (via \"%s=\")", PARENT_STRING, parent,
-                   line_number, filename, ID_STRING);
+                   "previously defined (via \"%s=\")", GT_GFF_PARENT, parent,
+                   line_number, filename, GT_GFF_ID);
       }
     }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
@@ -686,7 +686,7 @@ static int check_missing_attributes(GtGenomeNode *this_feature,
                                       gt_str_array_get(this_attributes, i))) {
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                    "\"%s\" does not have a '%s' attribute which is present in "
-                   "its counterpart on line %u", ID_STRING, id,
+                   "its counterpart on line %u", GT_GFF_ID, id,
                    gt_genome_node_get_line_number((GtGenomeNode*)
                                                   other_feature),
                    filename, gt_str_array_get(this_attributes, i),
@@ -708,8 +708,8 @@ static int compare_target_attribute(GtFeatureNode *new_gf,
   int had_err;
   gt_error_check(err);
   gt_assert(new_gf && old_gf);
-  new_target = gt_feature_node_get_attribute(new_gf, TARGET_STRING);
-  old_target = gt_feature_node_get_attribute(old_gf, TARGET_STRING);
+  new_target = gt_feature_node_get_attribute(new_gf, GT_GFF_TARGET);
+  old_target = gt_feature_node_get_attribute(old_gf, GT_GFF_TARGET);
   new_target_str = gt_str_new();
   old_target_str = gt_str_new();
   had_err = gt_gff3_parser_parse_target_attributes(new_target, &new_target_num,
@@ -723,10 +723,10 @@ static int compare_target_attribute(GtFeatureNode *new_gf,
   if (gt_str_cmp(new_target_str, old_target_str)) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                  "\"%s\" has a different %s name than its counterpart on line "
-                 "%u", ID_STRING, id,
+                 "%u", GT_GFF_ID, id,
                  gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
                  gt_genome_node_get_filename((GtGenomeNode*) new_gf),
-                 TARGET_STRING,
+                 GT_GFF_TARGET,
                  gt_genome_node_get_line_number((GtGenomeNode*) old_gf));
     had_err = -1;
   }
@@ -745,12 +745,12 @@ static void tidy_multi_feature_with_different_parent(GtFeatureNode *new_gf,
   gt_assert(new_gf && old_gf && id && feature_info);
   gt_warning("the multi-feature with %s \"%s\" on line %u in file \"%s\" has a "
              "different attribute '%s' than its counterpart on line %u "
-             "('%s' vs. '%s') -> tidy this as normal feature", ID_STRING, id,
+             "('%s' vs. '%s') -> tidy this as normal feature", GT_GFF_ID, id,
              gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
-             gt_genome_node_get_filename((GtGenomeNode*) new_gf), PARENT_STRING,
+             gt_genome_node_get_filename((GtGenomeNode*) new_gf), GT_GFF_PARENT,
              gt_genome_node_get_line_number((GtGenomeNode*) old_gf),
-             gt_feature_node_get_attribute(new_gf, PARENT_STRING),
-             gt_feature_node_get_attribute(old_gf, PARENT_STRING));
+             gt_feature_node_get_attribute(new_gf, GT_GFF_PARENT),
+             gt_feature_node_get_attribute(old_gf, GT_GFF_PARENT));
   /* the new feature is not a multi-feature anymore */
   gt_feature_node_unset_multi(new_gf);
   /* unset multi-feature status of the old feature, if it is the only child of
@@ -758,7 +758,7 @@ static void tidy_multi_feature_with_different_parent(GtFeatureNode *new_gf,
   parent = (GtGenomeNode*)
            gt_feature_info_get(feature_info,
                                gt_feature_node_get_attribute(old_gf,
-                                                             PARENT_STRING));
+                                                             GT_GFF_PARENT));
   if (gt_genome_node_number_of_children_of_type(parent, (GtGenomeNode*) old_gf)
       == 1) {
     gt_feature_node_unset_multi(old_gf);
@@ -773,7 +773,7 @@ static int compare_other_attribute(const char *attr_name, GtFeatureNode *new_gf,
   gt_assert(attr_name && new_gf && old_gf && parser);
   if (strcmp(gt_feature_node_get_attribute(new_gf, attr_name),
              gt_feature_node_get_attribute(old_gf, attr_name))) {
-    if (parser->tidy && !strcmp(attr_name, PARENT_STRING)) {
+    if (parser->tidy && !strcmp(attr_name, GT_GFF_PARENT)) {
       tidy_multi_feature_with_different_parent(new_gf, old_gf, id,
                                                parser->feature_info);
     }
@@ -781,7 +781,7 @@ static int compare_other_attribute(const char *attr_name, GtFeatureNode *new_gf,
       gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                    "\"%s\" has a different attribute '%s' than its counterpart "
                    "on line %u ('%s' vs. '%s')",
-                   ID_STRING, id,
+                   GT_GFF_ID, id,
                    gt_genome_node_get_line_number((GtGenomeNode*) new_gf),
                    gt_genome_node_get_filename((GtGenomeNode*) new_gf),
                    attr_name,
@@ -815,7 +815,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
              gt_feature_node_get_source((GtFeatureNode*) old_gf))) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                  "\"%s\" has a different source than its counterpart on line "
-                 "%u", ID_STRING, id, line_number, filename,
+                 "%u", GT_GFF_ID, id, line_number, filename,
                  gt_genome_node_get_line_number(old_gf));
     had_err = -1;
   }
@@ -824,7 +824,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
                   gt_feature_node_get_type((GtFeatureNode*) old_gf)) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                  "\"%s\" has a different type than its counterpart on line %u",
-                 ID_STRING, id, line_number, filename,
+                 GT_GFF_ID, id, line_number, filename,
                  gt_genome_node_get_line_number(old_gf));
     had_err = -1;
   }
@@ -833,7 +833,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
                   gt_feature_node_get_strand((GtFeatureNode*) old_gf)) {
     gt_error_set(err, "the multi-feature with %s \"%s\" on line %u in file "
                  "\"%s\" has a different strand than its counterpart on line "
-                 "%u", ID_STRING, id, line_number, filename,
+                 "%u", GT_GFF_ID, id, line_number, filename,
                  gt_genome_node_get_line_number(old_gf));
     had_err = -1;
   }
@@ -845,8 +845,8 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
     old_attributes =
       gt_feature_node_get_attribute_list((GtFeatureNode*) old_gf);
     had_err = check_missing_attributes(new_gf, new_attributes,
-                                       (GtFeatureNode*) old_gf, id,
-                                       filename, err);
+                                       (GtFeatureNode*) old_gf, id, filename,
+                                       err);
     if (!had_err) {
       had_err = check_missing_attributes(old_gf, old_attributes,
                                          (GtFeatureNode*) new_gf, id, filename,
@@ -858,7 +858,7 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
              gt_str_array_size(old_attributes));
       for (i = 0; !had_err && i < gt_str_array_size(new_attributes); i++) {
         const char *attr_name = gt_str_array_get(new_attributes, i);
-        if (!strcmp(attr_name, TARGET_STRING)) {
+        if (!strcmp(attr_name, GT_GFF_TARGET)) {
           had_err = compare_target_attribute((GtFeatureNode*) new_gf,
                                              (GtFeatureNode*) old_gf, id, err);
         }
@@ -995,17 +995,17 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
     /* some attributes require special care */
     if (!had_err && attr_valid) {
-      if (!strcmp(attr_tag, ID_STRING)) {
+      if (!strcmp(attr_tag, GT_GFF_ID)) {
         had_err = store_id(attr_value, (GtFeatureNode*) feature_node,
                            is_child, parser, genome_nodes, filename,
                            line_number, err);
       }
-      else if (!strcmp(attr_tag, PARENT_STRING)) {
+      else if (!strcmp(attr_tag, GT_GFF_PARENT)) {
         had_err = process_parent_attr(attr_value, feature_node, is_child,
                                       parser, genome_nodes, filename,
                                       line_number, err);
       }
-      else if (!strcmp(attr_tag, TARGET_STRING)) {
+      else if (!strcmp(attr_tag, GT_GFF_TARGET)) {
         /* the value of ``Target'' attributes have a special syntax which is
            checked here */
         had_err = gt_gff3_parser_parse_target_attributes(attr_value, NULL, NULL,
@@ -1021,7 +1021,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                     gt_feature_node_get_multi_representative((GtFeatureNode*)
                                                              feature_node),
                     gt_feature_node_get_attribute((GtFeatureNode*) feature_node,
-                                                  ID_STRING),
+                                                  GT_GFF_ID),
                                      parser, filename, line_number, err);
   }
 
@@ -1196,29 +1196,29 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   int version, had_err = 0;
   gt_error_check(err);
   gt_assert(line && filename);
-  if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
+  if (strncmp(line, GT_GFF_VERSION_PREFIX, strlen(GT_GFF_VERSION_PREFIX))) {
     if (tidy) {
       gt_warning("line 1 in file \"%s\" does not begin with \"%s\", create "
-                 "\"%s %d\" line automaticallly", filename, GFF_VERSION_PREFIX,
-                 GFF_VERSION_PREFIX, GFF_VERSION);
+                 "\"%s %d\" line automaticallly", filename,
+                 GT_GFF_VERSION_PREFIX, GT_GFF_VERSION_PREFIX, GT_GFF_VERSION);
       return 0;
     }
     else {
       gt_error_set(err, "line 1 in file \"%s\" does not begin with \"%s\"",
-                   filename, GFF_VERSION_PREFIX);
+                   filename, GT_GFF_VERSION_PREFIX);
       had_err = -1;
     }
   }
   if (!had_err) {
-    line += strlen(GFF_VERSION_PREFIX);
+    line += strlen(GT_GFF_VERSION_PREFIX);
     /* skip blanks */
     while (line[0] == ' ')
       line++;
     had_err = gt_parse_int_line(&version, line, 1, filename, err);
   }
-  if (!had_err && version != GFF_VERSION) {
+  if (!had_err && version != GT_GFF_VERSION) {
     gt_error_set(err, "GFF version %d does not equal required version %u ",
-              version, GFF_VERSION);
+                 version, GT_GFF_VERSION);
     had_err = -1;
   }
   if (!had_err)
@@ -1283,12 +1283,12 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     gt_genome_node_set_origin(gn, filenamestr, line_number);
     gt_queue_add(genome_nodes, gn);
   }
-  else if (strcmp(line, GFF_FASTA_DIRECTIVE) == 0)
+  else if (strcmp(line, GT_GFF_FASTA_DIRECTIVE) == 0)
     parser->fasta_parsing = true;
-  else if ((strncmp(line, GFF_SEQUENCE_REGION,
-                    strlen(GFF_SEQUENCE_REGION)) == 0)) {
+  else if ((strncmp(line, GT_GFF_SEQUENCE_REGION,
+                    strlen(GT_GFF_SEQUENCE_REGION)) == 0)) {
     /* we are in a line starting with "##sequence-region" */
-    tmpline = line + strlen(GFF_SEQUENCE_REGION);
+    tmpline = line + strlen(GT_GFF_SEQUENCE_REGION);
     tmplineend = line + line_length - 1;
 
     /* skip blanks */
@@ -1375,7 +1375,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       gt_queue_add(genome_nodes, gn);
     }
   }
-  else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
+  else if (strcmp(line, GT_GFF_TERMINATOR) == 0) { /* terminator */
     /* now all nodes are complete */
     parser->incomplete_node = false;
     if (!parser->checkids)

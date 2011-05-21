@@ -90,7 +90,7 @@ void gt_feature_info_replace_pseudo_parent(GtFeatureInfo *fi,
   const char *id;
   gt_assert(fi && child && new_pseudo_parent);
   gt_assert(gt_feature_node_is_pseudo((GtFeatureNode*) new_pseudo_parent));
-  id = gt_feature_node_get_attribute(child, ID_STRING);
+  id = gt_feature_node_get_attribute(child, GT_GFF_ID);
   gt_assert(id);
   gt_hashmap_remove(fi->id_to_pseudo_parent, id);
   gt_feature_info_add_pseudo_parent(fi, id, new_pseudo_parent);
@@ -116,7 +116,7 @@ static GtFeatureNode* find_root(const GtFeatureInfo *fi, const char *id)
   }
   gt_assert(this_feature);
   /* recursion */
-  parents = gt_feature_node_get_attribute(this_feature, PARENT_STRING);
+  parents = gt_feature_node_get_attribute(this_feature, GT_GFF_PARENT);
   if (parents)
     return find_root(fi, parents);
   else if (parent_pseudo_feature)

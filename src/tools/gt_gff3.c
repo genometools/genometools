@@ -115,8 +115,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -addids */
-  option = gt_option_new_bool("addids", "add missing \""GFF_SEQUENCE_REGION"\" "
-                              "lines automatically", &arguments->addids, true);
+  option = gt_option_new_bool("addids", "add missing \""
+                              GT_GFF_SEQUENCE_REGION"\" lines automatically",
+                              &arguments->addids, true);
   gt_option_parser_add_option(op, option);
 
   /* -mergefeat */

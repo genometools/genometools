@@ -25,15 +25,15 @@
 #include "core/strand_api.h"
 #include "extended/type_checker_api.h"
 
-#define GFF_VERSION         3
-#define GFF_VERSION_PREFIX  "##gff-version"
-#define GFF_FASTA_DIRECTIVE "##FASTA"
-#define GFF_SEQUENCE_REGION "##sequence-region"
-#define GFF_TERMINATOR      "###"
+#define GT_GFF_VERSION         3
+#define GT_GFF_VERSION_PREFIX  "##gff-version"
+#define GT_GFF_FASTA_DIRECTIVE "##FASTA"
+#define GT_GFF_SEQUENCE_REGION "##sequence-region"
+#define GT_GFF_TERMINATOR      "###"
 
-#define ID_STRING           "ID"
-#define PARENT_STRING       "Parent"
-#define TARGET_STRING       "Target"
+#define GT_GFF_ID              "ID"
+#define GT_GFF_PARENT          "Parent"
+#define GT_GFF_TARGET          "Target"
 
 typedef struct GtGFF3Parser GtGFF3Parser;
 

@@ -112,7 +112,7 @@ static int add_ids_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                  "automatically", seqid,
                  gt_genome_node_get_line_number((GtGenomeNode*) fn),
                  gt_genome_node_get_filename((GtGenomeNode*) fn),
-                 GFF_SEQUENCE_REGION);
+                 GT_GFF_SEQUENCE_REGION);
       auto_sr = automatic_sequence_region_new();
       seqid_str = gt_genome_node_get_seqid((GtGenomeNode*) fn);
       auto_sr->sequence_region = gt_region_node_new(seqid_str, range.start,
@@ -146,7 +146,7 @@ static int add_ids_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   if (gt_hashmap_get(aiv->undefined_sequence_regions, seqid)) {
     gt_error_set(err, "genome feature with id \"%s\" has been defined before "
                  "the corresponding \"%s\" definition on line %u in file "
-                 "\"%s\"", seqid, GFF_SEQUENCE_REGION,
+                 "\"%s\"", seqid, GT_GFF_SEQUENCE_REGION,
                  gt_genome_node_get_line_number((GtGenomeNode*) rn),
                  gt_genome_node_get_filename((GtGenomeNode*) rn));
     had_err = -1;

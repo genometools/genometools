@@ -99,7 +99,7 @@ static int m2i_change_target_seqids(GtGenomeNode *gn, const char *target,
   if (!had_err) {
     GtStr *new_target = gt_str_new();
     m2i_build_new_target(new_target, target_ids, target_ranges, target_strands);
-    gt_feature_node_set_attribute((GtFeatureNode*) gn, TARGET_STRING,
+    gt_feature_node_set_attribute((GtFeatureNode*) gn, GT_GFF_TARGET,
                                   gt_str_get(new_target));
     gt_str_delete(new_target);
   }
@@ -119,7 +119,7 @@ static int m2i_change_seqid(GtGenomeNode *gn, void *data, GtError *err)
   gt_assert(gn && info);
   gt_genome_node_change_seqid(gn, info->new_seqid);
   if ((target = gt_feature_node_get_attribute((GtFeatureNode*) gn,
-                                              TARGET_STRING))) {
+                                              GT_GFF_TARGET))) {
     return m2i_change_target_seqids(gn, target, info->region_mapping, err);
   }
   return 0;
