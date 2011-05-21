@@ -26,45 +26,45 @@
 typedef struct GtDlist GtDlist;
 typedef struct GtDlistelem GtDlistelem;
 
-/* Creates a new <GtDlist> sorted according to the <GtCompare> function. If it
-   is NULL, no sorting is enforced. */
-GtDlist*      gt_dlist_new(GtCompare);
+/* Return a new <GtDlist> sorted according to <compar> function. If <compar>
+   equals <NULL>, no sorting is enforced. */
+GtDlist*      gt_dlist_new(GtCompare compar);
 
-/* Returns the first <GtDlistelem> in a <GtDlist>. */
-GtDlistelem*  gt_dlist_first(const GtDlist*);
+/* Return the first <GtDlistelem> in <dlist>. */
+GtDlistelem*  gt_dlist_first(const GtDlist *dlist);
 
-/* Returns the last <GtDlistelem> in a <GtDlist>. */
-GtDlistelem*  gt_dlist_last(const GtDlist*);
+/* Return the last <GtDlistelem> in <dlist>. */
+GtDlistelem*  gt_dlist_last(const GtDlist *dlist);
 
-/* Returns the first <GtDlistelem> in a <GtDlist> which contains data identical
+/* Return the first <GtDlistelem> in <dlist> which contains data identical
    to <data>. Takes O(n) time. */
-GtDlistelem*  gt_dlist_find(const GtDlist*, void *data);
+GtDlistelem*  gt_dlist_find(const GtDlist *dlist, void *data);
 
-/* Returns the number of <GtDlistelem>s in a <GtDlist>. */
-unsigned long gt_dlist_size(const GtDlist*);
+/* Return the number of <GtDlistelem>s in <dlist>. */
+unsigned long gt_dlist_size(const GtDlist *dlist);
 
-/* Adds a new <GtDlistelem> containing <data> to a <GtDlist>. Usually O(n), but
+/* Add a new <GtDlistelem> containing <data> to <dlist>. Usually O(n), but
    O(1) if data is added in sorted order. */
-void          gt_dlist_add(GtDlist*, void *data);
+void          gt_dlist_add(GtDlist *dlist, void *data);
 
 /* Remove <dlistelem> from <dlist> and free it. */
 void          gt_dlist_remove(GtDlist *dlist, GtDlistelem *dlistelem);
 
 /* Example for usage of the <GtDlist> class. */
-int           gt_dlist_example(GtError*);
+int           gt_dlist_example(GtError *err);
 
-/* Deletes a <GtDlist>. */
-void          gt_dlist_delete(GtDlist*);
+/* Delete <dlist>. */
+void          gt_dlist_delete(GtDlist *dlist);
 
-/* Returns the successor of a <GtDlistelem>, or NULL if the element is the last
+/* Return the successor of <dlistelem>, or <NULL> if the element is the last
    one in the <GtDlist>. */
-GtDlistelem*  gt_dlistelem_next(const GtDlistelem*);
+GtDlistelem*  gt_dlistelem_next(const GtDlistelem *dlistelem);
 
-/* Returns the predecessor of a <GtDlistelem>, or NULL if the element is the
+/* Return the predecessor of <dlistelem>, or <NULL> if the element is the
    first one in the <GtDlist>. */
-GtDlistelem*  gt_dlistelem_previous(const GtDlistelem*);
+GtDlistelem*  gt_dlistelem_previous(const GtDlistelem *dlistelem);
 
-/* Returns the data pointer attached to a <GtDlistelem>. */
-void*         gt_dlistelem_get_data(const GtDlistelem*);
+/* Return the data pointer attached to <dlistelem>. */
+void*         gt_dlistelem_get_data(const GtDlistelem *dlistelem);
 
 #endif
