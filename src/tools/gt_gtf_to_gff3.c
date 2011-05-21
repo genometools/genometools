@@ -25,7 +25,7 @@
 #include "tools/gt_gtf_to_gff3.h"
 
 typedef struct {
-  bool be_tolerant;
+  bool tidy;
 } GTFToGFF3Arguments;
 
 static void* gt_gtf_to_gff3_arguments_new(void)
@@ -48,18 +48,17 @@ static GtOptionParser* gt_gtf_to_gff3_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
   op = gt_option_parser_new("[gtf_file]",
                             "Parse GTF2.2 file and convert it to GFF3.");
-  /* -tolerant */
-  option = gt_option_new_bool("tolerant",
-                              "be tolerant when parsing the GTF file",
-                              &arguments->be_tolerant, false);
+  /* -tidy */
+  option = gt_option_new_bool("tidy", "try to tidy the GTF file up during "
+                              "parsing", &arguments->tidy, false);
   gt_option_parser_add_option(op, option);
   gt_option_parser_set_max_args(op, 1);
   return op;
 }
 
 static int gt_gtf_to_gff3_runner(GT_UNUSED int argc, const char **argv,
-                                 int parsed_args,
-                                 void *tool_arguments, GtError *err)
+                                 int parsed_args, void *tool_arguments,
+                                 GtError *err)
 {
   GTFToGFF3Arguments *arguments = tool_arguments;
   GtNodeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
@@ -70,7 +69,7 @@ static int gt_gtf_to_gff3_runner(GT_UNUSED int argc, const char **argv,
 
   /* create a GTF input stream */
   gtf_in_stream = gt_gtf_in_stream_new(argv[parsed_args]);
-  if (arguments->be_tolerant)
+  if (arguments->tidy)
     gt_gtf_in_stream_enable_tidy_mode(gtf_in_stream);
 
   /* create a GFF3 output stream */
