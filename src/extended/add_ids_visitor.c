@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -19,7 +19,7 @@
 #include "core/hashmap.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"

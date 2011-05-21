@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,8 +17,8 @@
 #ifndef REGION_NODE_BUILDER_H
 #define REGION_NODE_BUILDER_H
 
-#include "core/queue.h"
-#include "core/range.h"
+#include "core/queue_api.h"
+#include "core/range_api.h"
 
 typedef struct GtRegionNodeBuilder GtRegionNodeBuilder;
 

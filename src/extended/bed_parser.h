@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 #ifndef BED_PARSER_H
 #define BED_PARSER_H
 
-#include "core/queue.h"
+#include "core/queue_api.h"
 
 #define BED_FEATURE_TYPE        "BED_feature"
 #define BED_THICK_FEATURE_TYPE  "BED_thick_feature"

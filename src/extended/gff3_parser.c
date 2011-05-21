@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,6 +25,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/parseutils.h"
+#include "core/queue.h"
 #include "core/splitter.h"
 #include "core/undef.h"
 #include "core/unused_api.h"

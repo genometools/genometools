@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/log.h"
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/csa_variable_strands.h"

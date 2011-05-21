@@ -22,7 +22,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/msort.h"
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "core/unused_api.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"

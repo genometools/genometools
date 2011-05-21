@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "extended/buffer_stream.h"
 #include "extended/node_stream_api.h"
 

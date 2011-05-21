@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/minmax.h"
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/select_visitor.h"

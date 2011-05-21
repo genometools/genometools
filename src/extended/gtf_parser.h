@@ -18,7 +18,7 @@
 #ifndef GTF_PARSER_H
 #define GTF_PARSER_H
 
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "extended/type_checker_api.h"
 
 /* This is a parser for gth GTF2.2 Gene Annotation Format as described at

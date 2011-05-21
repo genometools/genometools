@@ -20,7 +20,7 @@
 
 #include "core/cstr_table_api.h"
 #include "core/file_api.h"
-#include "core/queue.h"
+#include "core/queue_api.h"
 #include "core/range_api.h"
 #include "core/strand_api.h"
 #include "extended/type_checker_api.h"

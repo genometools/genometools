@@ -124,6 +124,8 @@ interfaces.
 
   <li><a href="#GtPhase">GtPhase</a>
 
+  <li><a href="#GtQueue">GtQueue</a>
+
   <li><a href="#GtRange">GtRange</a>
 
   <li><a href="#GtRecMap">GtRecMap</a>
@@ -2941,9 +2943,9 @@ Close the underlying file handle and destroy the <code>file</code> object.
 <hr>
 <a name="gt_file_xfputs"></a>
 
-<code>void     gt_file_xfputs(const char *str, GtFile *file)</code>
+<code>void     gt_file_xfputs(const char *cstr, GtFile *file)</code>
 <p>
-Write <code>\0</code>-terminated string <code>str</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
+Write <code>\0</code>-terminated string <code>cstr</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
    terminates on error.
 </p>
 <hr>
@@ -3994,6 +3996,66 @@ Use this string to map phase enum types to their corresponding character.
 <p>
 Map <code>phase_char</code> to the corresponding phase enum type.
    An assertion will fail if <code>phase_char</code> is not a valid one.
+</p>
+<hr>
+<a name="GtQueue"></a>
+<h2>Class GtQueue</h2>
+
+<p> <code>GtQueue</code> objects are generic queues which can be used to process objects of
+   any type in an First-In-First-Out (FIFO) fashion. </p>
+
+<hr>
+<a name="gt_queue_new"></a>
+
+<code>GtQueue*       gt_queue_new(void)</code>
+<p>
+Return a new <code>GtQueue*</code> object.
+</p>
+<hr>
+<a name="gt_queue_delete"></a>
+
+<code>void           gt_queue_delete(GtQueue *queue)</code>
+<p>
+Delete <code>queue</code> and free all allocated space. Elements contained in <code>queue</code>
+   are not freed!
+</p>
+<hr>
+<a name="gt_queue_add"></a>
+
+<code>void           gt_queue_add(GtQueue *queue, void *elem)</code>
+<p>
+Add <code>elem</code> to <code>queue</code> (<em>enqueue</em> in computer science lingo).
+</p>
+<hr>
+<a name="gt_queue_get"></a>
+
+<code>void*          gt_queue_get(GtQueue *queue)</code>
+<p>
+Remove the first element from non-empty <code>queue</code> and return it (<em>dequeue</em> in
+   computer science lingo).
+</p>
+<hr>
+<a name="gt_queue_head"></a>
+
+<code>void*          gt_queue_head(GtQueue *queue)</code>
+<p>
+Return the first element in non-empty <code>queue</code> without removing it.
+</p>
+<hr>
+<a name="gt_queue_remove"></a>
+
+<code>void           gt_queue_remove(GtQueue *queue, void *elem)</code>
+<p>
+Remove <code>elem</code> from <code>queue</code> (<code>elem</code> has to be in <code>queue</code>).
+   Thereby <code>queue</code> is traversed in reverse order, leading to
+   O(<code>gt_queue_size(queue)</code>) worst-case running time.
+</p>
+<hr>
+<a name="gt_queue_size"></a>
+
+<code>unsigned long  gt_queue_size(const GtQueue *queue)</code>
+<p>
+Return the number of elements in <code>queue</code>.
 </p>
 <hr>
 <a name="GtRange"></a>
@@ -6666,6 +6728,20 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_phase_get"><code>gt_phase_get</code></a><br>
 
   <a href="#gt_qsort_r"><code>gt_qsort_r</code></a><br>
+
+  <a href="#gt_queue_add"><code>gt_queue_add</code></a><br>
+
+  <a href="#gt_queue_delete"><code>gt_queue_delete</code></a><br>
+
+  <a href="#gt_queue_get"><code>gt_queue_get</code></a><br>
+
+  <a href="#gt_queue_head"><code>gt_queue_head</code></a><br>
+
+  <a href="#gt_queue_new"><code>gt_queue_new</code></a><br>
+
+  <a href="#gt_queue_remove"><code>gt_queue_remove</code></a><br>
+
+  <a href="#gt_queue_size"><code>gt_queue_size</code></a><br>
 
   <a href="#gt_range_compare"><code>gt_range_compare</code></a><br>
 

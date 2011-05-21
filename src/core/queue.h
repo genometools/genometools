@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,23 +18,11 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
-#include <stdio.h>
-#include "core/error.h"
-
-typedef struct GtQueue GtQueue;
+#include "core/queue_api.h"
 
 typedef int (*GtQueueProcessor)(void **elem, void *info, GtError*);
 
-GtQueue*      gt_queue_new(void);
-void          gt_queue_delete(GtQueue*);
 void          gt_queue_delete_with_contents(GtQueue*);
-void          gt_queue_add(GtQueue*, void*);
-void*         gt_queue_get(GtQueue*);
-void*         gt_queue_head(GtQueue*);
-/* Remove <elem> from <queue> (<elem> has to be in <queue>).
-   Thereby <queue> is traversed in reverse order, leading to O(gt_queue_size)
-   worst-case running time. */
-void          gt_queue_remove(GtQueue *queue, void *elem);
 /* Iterate over all elements in <queue> and call <gt_queue_processor> with them.
    <info> and <err> are passed to <queue_processor>.
    If <queue_processor> returns a value != 0, the iteration is stopped and the
@@ -46,7 +34,6 @@ int           gt_queue_iterate(GtQueue *queue, GtQueueProcessor queue_processor,
 int           gt_queue_iterate_reverse(GtQueue *queue,
                                        GtQueueProcessor queue_processor,
                                        void *info, GtError *err);
-unsigned long gt_queue_size(const GtQueue*);
 int           gt_queue_unit_test(GtError*);
 
 #endif
