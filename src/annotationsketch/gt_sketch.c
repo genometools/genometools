@@ -92,10 +92,6 @@ static GtOPrval sketch_parse_options(int *parsed_args,
                             "Create graphical representation of GFF3 "
                             "annotation files.");
 
-  /* -v */
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
-
   /* -pipe */
   option = gt_option_new_bool("pipe", "use pipe mode (i.e., show all gff3 "
                            "features on stdout)", &arguments->pipe, false);
@@ -105,11 +101,6 @@ static GtOPrval sketch_parse_options(int *parsed_args,
   option = gt_option_new_bool("flattenfiles", "do not group tracks by source "
                               "file name and remove file names from track "
                               "description", &arguments->flattenfiles, false);
-  gt_option_parser_add_option(op, option);
-
-  /* -force */
-  option = gt_option_new_bool(GT_FORCE_OPT_CSTR, "force writing to output file",
-                              &force, false);
   gt_option_parser_add_option(op, option);
 
   /* -seqid */
@@ -184,6 +175,15 @@ static GtOPrval sketch_parse_options(int *parsed_args,
                               "show RecMaps after image creation",
                               &arguments->showrecmaps, false);
   gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -v */
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
+  /* -force */
+  option = gt_option_new_bool(GT_FORCE_OPT_CSTR, "force writing to output file",
+                              &force, false);
   gt_option_parser_add_option(op, option);
 
   /* parse options */
