@@ -43,7 +43,7 @@ int   gt_node_visitor_visit_region_node(GtNodeVisitor *node_visitor,
 int   gt_node_visitor_visit_sequence_node(GtNodeVisitor *node_visitor,
                                           GtSequenceNode *sequence_node,
                                           GtError *err);
-/* Delete <node_visitor> and free all allocated space. */
+/* Delete <node_visitor>. */
 void  gt_node_visitor_delete(GtNodeVisitor *node_visitor);
 
 #endif

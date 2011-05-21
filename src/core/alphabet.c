@@ -343,18 +343,6 @@ GtAlphabet* gt_alphabet_ref(GtAlphabet *alphabet)
   return alphabet;
 }
 
-void gt_alphabet_delete(GtAlphabet *alphabet)
-{
-  if (!alphabet) return;
-  if (alphabet->reference_count) {
-    alphabet->reference_count--;
-    return;
-  }
-  gt_free(alphabet->mapdomain);
-  gt_free(alphabet->characters);
-  gt_free(alphabet);
-}
-
 void gt_alphabet_add_mapping(GtAlphabet *alphabet, const char *characters)
 {
   size_t i, num_of_characters;
@@ -972,4 +960,16 @@ int gt_alphabet_to_file(const GtAlphabet *alpha, const char *indexname,
     gt_fa_xfclose(al1fp);
   }
   return haserr ? -1 : 0;
+}
+
+void gt_alphabet_delete(GtAlphabet *alphabet)
+{
+  if (!alphabet) return;
+  if (alphabet->reference_count) {
+    alphabet->reference_count--;
+    return;
+  }
+  gt_free(alphabet->mapdomain);
+  gt_free(alphabet->characters);
+  gt_free(alphabet);
 }

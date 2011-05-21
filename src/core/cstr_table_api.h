@@ -24,10 +24,8 @@
 /* Implements a table of C-strings. */
 typedef struct GtCstrTable GtCstrTable;
 
-/* Creates a new <GtCstrTable> object. */
+/* Return a new <GtCstrTable> object. */
 GtCstrTable*  gt_cstr_table_new(void);
-/* Deletes <table>. */
-void          gt_cstr_table_delete(GtCstrTable *table);
 /* Add <cstr> to <table>. <table> must not already contain <cstr>! */
 void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
 /* If a C-string equal to <cstr> is contained in <table>, it is returned.
@@ -36,5 +34,7 @@ const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
 GtStrArray*   gt_cstr_table_get_all(const GtCstrTable *table);
+/* Delete <table>. */
+void          gt_cstr_table_delete(GtCstrTable *table);
 
 #endif

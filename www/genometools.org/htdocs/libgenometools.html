@@ -304,14 +304,6 @@ Return a clone of <code>alphabet</code>.
 Increase the reference count for <code>alphabet</code> and return it.
 </p>
 <hr>
-<a name="gt_alphabet_delete"></a>
-
-<code>void            gt_alphabet_delete(GtAlphabet *alphabet)</code>
-<p>
-Decrease the reference count for <code>alphabet</code> or delete it, if this was the
-   last reference.
-</p>
-<hr>
 <a name="gt_alphabet_add_mapping"></a>
 
 <code>void            gt_alphabet_add_mapping(GtAlphabet *alphabet,
@@ -489,6 +481,14 @@ Analog to <code>gt_alphabet_decode_seq_to_fp()</code> but writing the output to
 <p>
 Analog to <code>gt_alphabet_decode_seq_to_fp()</code> writing the output to
    a new <code>GtStr</code>.
+</p>
+<hr>
+<a name="gt_alphabet_delete"></a>
+
+<code>void            gt_alphabet_delete(GtAlphabet *alphabet)</code>
+<p>
+Decrease the reference count for <code>alphabet</code> or delete it, if this was the
+   last reference.
 </p>
 <hr>
 <a name="GtArray"></a>
@@ -746,162 +746,167 @@ Create BED blocks parsed by <code>bed_in_stream</code> with given <code>type</co
 
 <code>GtBittab*      gt_bittab_new(unsigned long num_of_bits)</code>
 <p>
-Creates a new <code>GtBittab</code> of length <code>num_of_bits</code>, initialised to 0
+Return a new <code>GtBittab</code> of length <code>num_of_bits</code>, initialised to 0.
 </p>
 <hr>
 <a name="gt_bittab_set_bit"></a>
 
-<code>void           gt_bittab_set_bit(GtBittab *b, unsigned long i)</code>
+<code>void           gt_bittab_set_bit(GtBittab *bittab, unsigned long i)</code>
 <p>
-Sets bit <code>i</code> in <code>b</code> to 1.
+Set bit <code>i</code> in <code>bittab</code> to 1.
 </p>
 <hr>
 <a name="gt_bittab_unset_bit"></a>
 
-<code>void           gt_bittab_unset_bit(GtBittab *b, unsigned long i)</code>
+<code>void           gt_bittab_unset_bit(GtBittab *bittab, unsigned long i)</code>
 <p>
-Sets bit <code>i</code> in <code>b</code> to 0.
+Set bit <code>i</code> in <code>bittab</code> to 0.
 </p>
 <hr>
 <a name="gt_bittab_complement"></a>
 
-<code>void           gt_bittab_complement(GtBittab *a, const GtBittab *b)</code>
+<code>void           gt_bittab_complement(GtBittab *bittab_a,
+                                   const GtBittab *bittab_b)</code>
 <p>
-Sets <code>a</code> to be the complement of <code>b</code>.
+Set <code>bittab_a</code> to be the complement of <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_equal"></a>
 
-<code>void           gt_bittab_equal(GtBittab *a, const GtBittab *b)</code>
+<code>void           gt_bittab_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
-Sets <code>a</code> to be equal to <code>b</code>.
+Set <code>bittab_a</code> to be equal to <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_and"></a>
 
-<code>void           gt_bittab_and(GtBittab *a, const GtBittab *b, const GtBittab *c)</code>
+<code>void           gt_bittab_and(GtBittab *bittab_a, const GtBittab *bittab_b,
+                            const GtBittab *bittab_c)</code>
 <p>
-Sets <code>a</code> to be the bitwise AND of <code>b</code> and <code>c</code>.
+Set <code>bittab_a</code> to be the bitwise AND of <code>bittab_b</code> and <code>bittab_c</code>.
 </p>
 <hr>
 <a name="gt_bittab_or"></a>
 
-<code>void           gt_bittab_or(GtBittab *a, const GtBittab *b, const GtBittab *c)</code>
+<code>void           gt_bittab_or(GtBittab *bittab_a, const GtBittab *bittab_b,
+                           const GtBittab *bittab_c)</code>
 <p>
-Sets <code>a</code> to be the bitwise OR of <code>b</code> and <code>c</code>.
+Set <code>bittab_a</code> to be the bitwise OR of <code>bittab_b</code> and <code>bittab_c</code>.
 </p>
 <hr>
 <a name="gt_bittab_nand"></a>
 
-<code>void           gt_bittab_nand(GtBittab *a, const GtBittab *b, const GtBittab *c)</code>
+<code>void           gt_bittab_nand(GtBittab *bittab_a, const GtBittab *bittab_b,
+                             const GtBittab *bittab_c)</code>
 <p>
-Sets <code>a</code> to be <code>b</code> NAND <code>c</code>.
+Set <code>bittab_a</code> to be <code>bittab_b</code> NAND <code>bittab_c</code>.
 </p>
 <hr>
 <a name="gt_bittab_and_equal"></a>
 
-<code>void           gt_bittab_and_equal(GtBittab *a, const GtBittab *b)</code>
+<code>void           gt_bittab_and_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
-Sets <code>a</code> to be the bitwise AND of <code>a</code> and <code>b</code>.
+Set <code>bittab_a</code> to be the bitwise AND of <code>bittab_a</code> and <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_or_equal"></a>
 
-<code>void           gt_bittab_or_equal(GtBittab *a, const GtBittab *b)</code>
+<code>void           gt_bittab_or_equal(GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
-Sets <code>a</code> to be the bitwise OR of <code>a</code> and <code>b</code>.
+Set <code>bittab_a</code> to be the bitwise OR of <code>bittab_a</code> and <code>bittab_b</code>.
 </p>
 <hr>
 <a name="gt_bittab_shift_left_equal"></a>
 
-<code>void           gt_bittab_shift_left_equal(GtBittab *b)</code>
+<code>void           gt_bittab_shift_left_equal(GtBittab *bittab)</code>
 <p>
-Shifts <code>b</code> by one position to the left.
+Shift <code>bittab</code> by one position to the left.
 </p>
 <hr>
 <a name="gt_bittab_shift_right_equal"></a>
 
-<code>void           gt_bittab_shift_right_equal(GtBittab *b)</code>
+<code>void           gt_bittab_shift_right_equal(GtBittab *bittab)</code>
 <p>
-Shifts <code>b</code> by one position to the right.
+Shift <code>bittab</code> by one position to the right.
 </p>
 <hr>
 <a name="gt_bittab_unset"></a>
 
-<code>void           gt_bittab_unset(GtBittab *b)</code>
+<code>void           gt_bittab_unset(GtBittab *bittab)</code>
 <p>
-Sets all bits in <code>b</code> to 0.
+Set all bits in <code>bittab</code> to 0.
 </p>
 <hr>
 <a name="gt_bittab_show"></a>
 
-<code>void           gt_bittab_show(const GtBittab *b, FILE *fp)</code>
+<code>void           gt_bittab_show(const GtBittab *bittab, FILE *fp)</code>
 <p>
-Outputs a representation of <code>b</code> to <code>fp</code>.
+Output a representation of <code>bittab</code> to <code>fp</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_all_bitnums"></a>
 
-<code>void           gt_bittab_get_all_bitnums(const GtBittab *b, GtArray *a)</code>
+<code>void           gt_bittab_get_all_bitnums(const GtBittab *bittab, GtArray *array)</code>
 <p>
-Fills <code>a</code> with the indices of all set bits in <code>b</code>.
+Fill <code>array</code> with the indices of all set bits in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_bit_is_set"></a>
 
-<code>bool           gt_bittab_bit_is_set(const GtBittab *b, unsigned long i)</code>
+<code>bool           gt_bittab_bit_is_set(const GtBittab *bittab, unsigned long i)</code>
 <p>
-Returns <code>true</code> if bit <code>i</code> is set in <code>b</code>.
+Return <code>true</code> if bit <code>i</code> is set in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_cmp"></a>
 
-<code>bool           gt_bittab_cmp(const GtBittab *a, const GtBittab *b)</code>
+<code>bool           gt_bittab_cmp(const GtBittab *bittab_a, const GtBittab *bittab_b)</code>
 <p>
-Returns <code>true</code> if bittabs <code>a</code> and <code>b</code> are identical.
+Return <code>true</code> if <code>bittab_a</code> and <code>bittab_b</code> are identical.
 </p>
 <hr>
 <a name="gt_bittab_get_first_bitnum"></a>
 
-<code>unsigned long  gt_bittab_get_first_bitnum(const GtBittab *b)</code>
+<code>unsigned long  gt_bittab_get_first_bitnum(const GtBittab *bittab)</code>
 <p>
-Returns the index of the first set bit in <code>b</code>.
+Return the index of the first set bit in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_last_bitnum"></a>
 
-<code>unsigned long  gt_bittab_get_last_bitnum(const GtBittab *b)</code>
+<code>unsigned long  gt_bittab_get_last_bitnum(const GtBittab *bittab)</code>
 <p>
-Returns the index of the last set bit in <code>b</code>.
+Return the index of the last set bit in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_get_next_bitnum"></a>
 
-<code>unsigned long  gt_bittab_get_next_bitnum(const GtBittab *b, unsigned long i)</code>
+<code>unsigned long  gt_bittab_get_next_bitnum(const GtBittab *bittab,
+                                        unsigned long i)</code>
 <p>
-Returns the index of the next set bit in <code>b</code> with an index greater
+Return the index of the next set bit in <code>bittab</code> with an index greater
    than <code>i</code>.
 </p>
 <hr>
 <a name="gt_bittab_count_set_bits"></a>
 
-<code>unsigned long  gt_bittab_count_set_bits(const GtBittab *b)</code>
+<code>unsigned long  gt_bittab_count_set_bits(const GtBittab *bittab)</code>
 <p>
-Returns the number of set bits in <code>b</code>.
+Return the number of set bits in <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_size"></a>
 
-<code>unsigned long  gt_bittab_size(GtBittab *b)</code>
+<code>unsigned long  gt_bittab_size(GtBittab *bittab)</code>
 <p>
-Returns the total number of bits of <code>b</code>.
+Return the total number of bits of <code>bittab</code>.
 </p>
 <hr>
 <a name="gt_bittab_delete"></a>
 
-<code>void           gt_bittab_delete(GtBittab *b)</code>
+<code>void           gt_bittab_delete(GtBittab *bittab)</code>
 <p>
-Deletes <code>b</code> and frees all allocated space.
+Delete <code>bittab</code>.
 </p>
 <hr>
 <a name="GtBlock"></a>
@@ -1129,7 +1134,7 @@ Append rendered <code>canvas</code> image data to given <code>stream</code>.
 
 <code>unsigned long           gt_codon_iterator_current_position(GtCodonIterator *ci)</code>
 <p>
-Returns the current reading offset of <code>ci</code>, starting from the position
+Return the current reading offset of <code>ci</code>, starting from the position
    in the sequence given at iterator instantiation time.
 </p>
 <hr>
@@ -1137,14 +1142,14 @@ Returns the current reading offset of <code>ci</code>, starting from the positio
 
 <code>unsigned long           gt_codon_iterator_length(GtCodonIterator *ci)</code>
 <p>
-Returns the length of the substring to scan, given at instantiation time.
+Return the length of the substring to scan, given at instantiation time.
 </p>
 <hr>
 <a name="gt_codon_iterator_rewind"></a>
 
 <code>void                    gt_codon_iterator_rewind(GtCodonIterator *ci)</code>
 <p>
-Rewinds the iterator to point again to the  position in the sequence given
+Rewind the iterator to point again to the  position in the sequence given
    at iterator instantiation time.
 </p>
 <hr>
@@ -1171,7 +1176,7 @@ Sets the values of <code>n1</code>, <code>n2</code> and <code>n3</code> to the c
 
 <code>void                    gt_codon_iterator_delete(GtCodonIterator *ci)</code>
 <p>
-Deletes <code>ci</code>.
+Delete <code>ci</code>.
 </p>
 <hr>
 <a name="GtColor"></a>
@@ -1247,14 +1252,7 @@ Return the comment stored in <code>comment_node</code>.
 
 <code>GtCstrTable*   gt_cstr_table_new(void)</code>
 <p>
-Creates a new <code>GtCstrTable</code> object.
-</p>
-<hr>
-<a name="gt_cstr_table_delete"></a>
-
-<code>void           gt_cstr_table_delete(GtCstrTable *table)</code>
-<p>
-Deletes <code>table</code>.
+Return a new <code>GtCstrTable</code> object.
 </p>
 <hr>
 <a name="gt_cstr_table_add"></a>
@@ -1278,6 +1276,13 @@ If a C-string equal to <code>cstr</code> is contained in <code>table</code>, it 
 <p>
 Return a <code>GtStrArray*</code> which contains all <code>cstr</code>s added to <code>table</code> in
    alphabetical order. The caller is responsible to free it!
+</p>
+<hr>
+<a name="gt_cstr_table_delete"></a>
+
+<code>void           gt_cstr_table_delete(GtCstrTable *table)</code>
+<p>
+Delete <code>table</code>.
 </p>
 <hr>
 <a name="GtCustomTrack"></a>
@@ -1431,46 +1436,46 @@ Delete the <code>diagram</code> and all its components.
 <hr>
 <a name="gt_dlist_new"></a>
 
-<code>GtDlist*       gt_dlist_new(GtCompare)</code>
+<code>GtDlist*       gt_dlist_new(GtCompare compar)</code>
 <p>
-Creates a new <code>GtDlist</code> sorted according to the <code>GtCompare</code> function. If it
-   is NULL, no sorting is enforced.
+Return a new <code>GtDlist</code> sorted according to <code>compar</code> function. If <code>compar</code>
+   equals <code>NULL</code>, no sorting is enforced.
 </p>
 <hr>
 <a name="gt_dlist_first"></a>
 
-<code>GtDlistelem*   gt_dlist_first(const GtDlist*)</code>
+<code>GtDlistelem*   gt_dlist_first(const GtDlist *dlist)</code>
 <p>
-Returns the first <code>GtDlistelem</code> in a <code>GtDlist</code>.
+Return the first <code>GtDlistelem</code> in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_last"></a>
 
-<code>GtDlistelem*   gt_dlist_last(const GtDlist*)</code>
+<code>GtDlistelem*   gt_dlist_last(const GtDlist *dlist)</code>
 <p>
-Returns the last <code>GtDlistelem</code> in a <code>GtDlist</code>.
+Return the last <code>GtDlistelem</code> in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_find"></a>
 
-<code>GtDlistelem*   gt_dlist_find(const GtDlist*, void *data)</code>
+<code>GtDlistelem*   gt_dlist_find(const GtDlist *dlist, void *data)</code>
 <p>
-Returns the first <code>GtDlistelem</code> in a <code>GtDlist</code> which contains data identical
+Return the first <code>GtDlistelem</code> in <code>dlist</code> which contains data identical
    to <code>data</code>. Takes O(n) time.
 </p>
 <hr>
 <a name="gt_dlist_size"></a>
 
-<code>unsigned long  gt_dlist_size(const GtDlist*)</code>
+<code>unsigned long  gt_dlist_size(const GtDlist *dlist)</code>
 <p>
-Returns the number of <code>GtDlistelem</code>s in a <code>GtDlist</code>.
+Return the number of <code>GtDlistelem</code>s in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_add"></a>
 
-<code>void           gt_dlist_add(GtDlist*, void *data)</code>
+<code>void           gt_dlist_add(GtDlist *dlist, void *data)</code>
 <p>
-Adds a new <code>GtDlistelem</code> containing <code>data</code> to a <code>GtDlist</code>. Usually O(n), but
+Add a new <code>GtDlistelem</code> containing <code>data</code> to <code>dlist</code>. Usually O(n), but
    O(1) if data is added in sorted order.
 </p>
 <hr>
@@ -1483,41 +1488,41 @@ Remove <code>dlistelem</code> from <code>dlist</code> and free it.
 <hr>
 <a name="gt_dlist_example"></a>
 
-<code>int            gt_dlist_example(GtError*)</code>
+<code>int            gt_dlist_example(GtError *err)</code>
 <p>
 Example for usage of the <code>GtDlist</code> class.
 </p>
 <hr>
 <a name="gt_dlist_delete"></a>
 
-<code>void           gt_dlist_delete(GtDlist*)</code>
+<code>void           gt_dlist_delete(GtDlist *dlist)</code>
 <p>
-Deletes a <code>GtDlist</code>.
+Delete <code>dlist</code>.
 </p>
 <hr>
 <a name="GtDlistelem"></a>
 <h2>Class GtDlistelem</h2>
 <a name="gt_dlistelem_next"></a>
 
-<code>GtDlistelem*   gt_dlistelem_next(const GtDlistelem*)</code>
+<code>GtDlistelem*   gt_dlistelem_next(const GtDlistelem *dlistelem)</code>
 <p>
-Returns the successor of a <code>GtDlistelem</code>, or NULL if the element is the last
+Return the successor of <code>dlistelem</code>, or <code>NULL</code> if the element is the last
    one in the <code>GtDlist</code>.
 </p>
 <hr>
 <a name="gt_dlistelem_previous"></a>
 
-<code>GtDlistelem*   gt_dlistelem_previous(const GtDlistelem*)</code>
+<code>GtDlistelem*   gt_dlistelem_previous(const GtDlistelem *dlistelem)</code>
 <p>
-Returns the predecessor of a <code>GtDlistelem</code>, or NULL if the element is the
+Return the predecessor of <code>dlistelem</code>, or <code>NULL</code> if the element is the
    first one in the <code>GtDlist</code>.
 </p>
 <hr>
 <a name="gt_dlistelem_get_data"></a>
 
-<code>void*          gt_dlistelem_get_data(const GtDlistelem*)</code>
+<code>void*          gt_dlistelem_get_data(const GtDlistelem *dlistelem)</code>
 <p>
-Returns the data pointer attached to a <code>GtDlistelem</code>.
+Return the data pointer attached to <code>dlistelem</code>.
 </p>
 <hr>
 <a name="GtEOFNode"></a>
@@ -2940,19 +2945,19 @@ Create a new GtFile object and open the underlying file handle with given
    and uncompressed otherwise).
 </p>
 <hr>
-<a name="gt_file_delete"></a>
-
-<code>void     gt_file_delete(GtFile *file)</code>
-<p>
-Close the underlying file handle and destroy the <code>file</code> object.
-</p>
-<hr>
 <a name="gt_file_xfputs"></a>
 
 <code>void     gt_file_xfputs(const char *cstr, GtFile *file)</code>
 <p>
 Write <code>\0</code>-terminated string <code>cstr</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
    terminates on error.
+</p>
+<hr>
+<a name="gt_file_delete"></a>
+
+<code>void     gt_file_delete(GtFile *file)</code>
+<p>
+Close the underlying file handle and destroy the <code>file</code> object.
 </p>
 <hr>
 <a name="GtGFF3InStream"></a>
@@ -3589,14 +3594,14 @@ Creates a new <code>GtHashmap</code> of type <code>keyhashtype</code>. If <code>
 
 <code>void*       gt_hashmap_get(GtHashmap *hm, const void *key)</code>
 <p>
-Returns the value stored in <code>hm</code> for <code>key</code> or NULL if no such key exists.
+Return the value stored in <code>hm</code> for <code>key</code> or NULL if no such key exists.
 </p>
 <hr>
 <a name="gt_hashmap_add"></a>
 
 <code>void        gt_hashmap_add(GtHashmap *hm, void *key, void *value)</code>
 <p>
-Sets the value stored in <code>hm</code> for <code>key</code> to <code>value</code>, overwriting the prior
+Set the value stored in <code>hm</code> for <code>key</code> to <code>value</code>, overwriting the prior
    value for that key if present.
 </p>
 <hr>
@@ -3604,7 +3609,7 @@ Sets the value stored in <code>hm</code> for <code>key</code> to <code>value</co
 
 <code>void        gt_hashmap_remove(GtHashmap *hm, const void *key)</code>
 <p>
-Removes the member with key <code>key</code> from <code>hm</code>.
+Remove the member with key <code>key</code> from <code>hm</code>.
 </p>
 <hr>
 <a name="gt_hashmap_foreach_ordered"></a>
@@ -3640,7 +3645,7 @@ Iterate over <code>hm</code> in either alphabetical order (if GtHashType was spe
 
 <code>void        gt_hashmap_reset(GtHashmap *hm)</code>
 <p>
-Resets <code>hm</code> by unsetting values for all keys, calling the free function if
+Reset <code>hm</code> by unsetting values for all keys, calling the free function if
    necessary.
 </p>
 <hr>
@@ -3648,7 +3653,7 @@ Resets <code>hm</code> by unsetting values for all keys, calling the free functi
 
 <code>void        gt_hashmap_delete(GtHashmap *hm)</code>
 <p>
-Deletes <code>hm</code>, calling the free function if necessary.
+Delete <code>hm</code>, calling the free function if necessary.
 </p>
 <hr>
 <a name="GtImageInfo"></a>
@@ -3895,14 +3900,14 @@ Disable logging on <code>logger</code>.
 
 <code>bool       gt_logger_enabled(GtLogger *logger)</code>
 <p>
-Returns true if logging is enabled on <code>logger</code>, false otherwise.
+Return <code>true</code> if logging is enabled on <code>logger</code>, false otherwise.
 </p>
 <hr>
 <a name="gt_logger_target"></a>
 
 <code>FILE*      gt_logger_target(GtLogger *logger)</code>
 <p>
-Returns logging target of <code>logger</code>.
+Return logging target of <code>logger</code>.
 </p>
 <hr>
 <a name="gt_logger_set_target"></a>
@@ -3938,6 +3943,13 @@ Log to target regardless of logging status, using a va_list argument.
 <code>void       gt_logger_log_va(GtLogger *logger, const char *format, va_list)</code>
 <p>
 Log to target depending on logging status, using a va_list argument.
+</p>
+<hr>
+<a name="gt_logger_delete"></a>
+
+<code>void       gt_logger_delete(GtLogger *logger)</code>
+<p>
+Delete <code>logger</code>.
 </p>
 <hr>
 <a name="GtMergeStream"></a>
@@ -4135,14 +4147,6 @@ Map <code>phase_char</code> to the corresponding phase enum type.
 Return a new <code>GtQueue*</code> object.
 </p>
 <hr>
-<a name="gt_queue_delete"></a>
-
-<code>void           gt_queue_delete(GtQueue *queue)</code>
-<p>
-Delete <code>queue</code> and free all allocated space. Elements contained in <code>queue</code>
-   are not freed!
-</p>
-<hr>
 <a name="gt_queue_add"></a>
 
 <code>void           gt_queue_add(GtQueue *queue, void *elem)</code>
@@ -4179,6 +4183,13 @@ Remove <code>elem</code> from <code>queue</code> (<code>elem</code> has to be in
 <code>unsigned long  gt_queue_size(const GtQueue *queue)</code>
 <p>
 Return the number of elements in <code>queue</code>.
+</p>
+<hr>
+<a name="gt_queue_delete"></a>
+
+<code>void           gt_queue_delete(GtQueue *queue)</code>
+<p>
+Delete <code>queue</code>. Elements contained in <code>queue</code> are not freed!
 </p>
 <hr>
 <a name="GtRange"></a>
@@ -4407,46 +4418,47 @@ Create a new <code>GtSplitter</code> object.
 <hr>
 <a name="gt_splitter_split"></a>
 
-<code>void           gt_splitter_split(GtSplitter*, char *string, unsigned long length,
-                                char delimiter)</code>
+<code>void           gt_splitter_split(GtSplitter *splitter, char *string,
+                                unsigned long length, char delimiter)</code>
 <p>
-Split <code>string</code> of given <code>length</code> into tokens delimited by 'delimiter'.
-   Note that <code>string</code> is modified in the splitting process!
+Use <code>splitter</code> to split <code>string</code> of given <code>length</code> into tokens delimited by
+   <code>delimiter</code>. Note that <code>string</code> is modified in the splitting process!
 </p>
 <hr>
 <a name="gt_splitter_get_tokens"></a>
 
-<code>char**         gt_splitter_get_tokens(GtSplitter*)</code>
+<code>char**         gt_splitter_get_tokens(GtSplitter *splitter)</code>
 <p>
-Get all tokens in an array.
+Return all tokens split by <code>splitter</code> in an array.
 </p>
 <hr>
 <a name="gt_splitter_get_token"></a>
 
-<code>char*          gt_splitter_get_token(GtSplitter*, unsigned long token_num)</code>
+<code>char*          gt_splitter_get_token(GtSplitter *splitter,
+                                    unsigned long token_num)</code>
 <p>
-Get token with number <code>token_num</code>.
+Return token with number <code>token_num</code> from <code>splitter</code>.
 </p>
 <hr>
 <a name="gt_splitter_reset"></a>
 
-<code>void           gt_splitter_reset(GtSplitter*)</code>
+<code>void           gt_splitter_reset(GtSplitter *splitter)</code>
 <p>
-Reset the splitter.
+Reset the <code>splitter</code>.
 </p>
 <hr>
 <a name="gt_splitter_size"></a>
 
-<code>unsigned long  gt_splitter_size(GtSplitter*)</code>
+<code>unsigned long  gt_splitter_size(GtSplitter *splitter)</code>
 <p>
-Returns the number of tokens.
+Return the number of tokens in <code>splitter</code>.
 </p>
 <hr>
 <a name="gt_splitter_delete"></a>
 
-<code>void           gt_splitter_delete(GtSplitter*)</code>
+<code>void           gt_splitter_delete(GtSplitter *splitter)</code>
 <p>
-Delete the <code>GtSplitter</code> object.
+Delete the <code>splitter</code>.
 </p>
 <hr>
 <a name="GtStr"></a>
@@ -5502,7 +5514,7 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
 
 <code>int   gt_grep(bool *match, const char *pattern, const char *line, GtError*)</code>
 <p>
-Sets <code>match</code> to <code>true</code> if <code>pattern</code> matches <code>line</code>, to <code>false</code> otherwise.
+Set <code>match</code> to <code>true</code> if <code>pattern</code> matches <code>line</code>, to <code>false</code> otherwise.
 </p>
 <hr>
 <a name="Init"></a>
@@ -6816,6 +6828,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_log_vlog"><code>gt_log_vlog</code></a><br>
 
+  <a href="#gt_logger_delete"><code>gt_logger_delete</code></a><br>
+
   <a href="#gt_logger_disable"><code>gt_logger_disable</code></a><br>
 
   <a href="#gt_logger_enable"><code>gt_logger_enable</code></a><br>
@@ -7183,7 +7197,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-21
+Last update: 2011-05-22
 </div>
 </div>
 <!-- Piwik -->

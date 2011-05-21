@@ -64,7 +64,7 @@ int           gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *gff3_parser,
                                                 GtError *err);
 /* Reset the <gff3_parser> (necessary if the input file is switched). */
 void          gt_gff3_parser_reset(GtGFF3Parser *gff3_parser);
-/* Delete the <gff3_parser> and free all allocated space. */
+/* Delete the <gff3_parser>. */
 void          gt_gff3_parser_delete(GtGFF3Parser *gff3_parser);
 
 #endif

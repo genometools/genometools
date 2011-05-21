@@ -48,12 +48,12 @@ typedef int (*GtHashmapVisitFunc)(void *key, void *value, void *data, GtError*);
 GtHashmap* gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
                           GtFree valuefree);
 
-/* Returns the value stored in <hm> for <key> or NULL if no such key exists. */
+/* Return the value stored in <hm> for <key> or NULL if no such key exists. */
 void*      gt_hashmap_get(GtHashmap *hm, const void *key);
-/* Sets the value stored in <hm> for <key> to <value>, overwriting the prior
+/* Set the value stored in <hm> for <key> to <value>, overwriting the prior
    value for that key if present. */
 void       gt_hashmap_add(GtHashmap *hm, void *key, void *value);
-/* Removes the member with key <key> from <hm>. */
+/* Remove the member with key <key> from <hm>. */
 void       gt_hashmap_remove(GtHashmap *hm, const void *key);
 /* Iterate over <hm> in order given by compare function <cmp>.
    For each member, <func> is called (see interface). */
@@ -69,10 +69,10 @@ int        gt_hashmap_foreach(GtHashmap *hm, GtHashmapVisitFunc func,
 int        gt_hashmap_foreach_in_key_order(GtHashmap *hm,
                                            GtHashmapVisitFunc func,
                                            void *data, GtError*);
-/* Resets <hm> by unsetting values for all keys, calling the free function if
+/* Reset <hm> by unsetting values for all keys, calling the free function if
    necessary. */
 void       gt_hashmap_reset(GtHashmap *hm);
-/* Deletes <hm>, calling the free function if necessary. */
+/* Delete <hm>, calling the free function if necessary. */
 void       gt_hashmap_delete(GtHashmap *hm);
 
 #endif

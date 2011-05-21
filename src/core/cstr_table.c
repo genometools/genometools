@@ -41,13 +41,6 @@ GtCstrTable* gt_cstr_table_new()
   return table;
 }
 
-void gt_cstr_table_delete(GtCstrTable *table)
-{
-  if (!table) return;
-  gt_hashtable_delete(table->strings);
-  gt_free(table);
-}
-
 void gt_cstr_table_add(GtCstrTable *table, const char *cstr)
 {
   char *dup;
@@ -106,4 +99,11 @@ int gt_cstr_table_unit_test(GtError *err)
   gt_str_array_delete(sta);
   gt_cstr_table_delete(table);
   return had_err;
+}
+
+void gt_cstr_table_delete(GtCstrTable *table)
+{
+  if (!table) return;
+  gt_hashtable_delete(table->strings);
+  gt_free(table);
 }

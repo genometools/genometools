@@ -23,7 +23,7 @@
 
 /* Grep module */
 
-/* Sets <match> to <true> if <pattern> matches <line>, to <false> otherwise. */
+/* Set <match> to <true> if <pattern> matches <line>, to <false> otherwise. */
 int  gt_grep(bool *match, const char *pattern, const char *line, GtError*);
 int  gt_grep_unit_test(GtError*);
 

@@ -59,9 +59,6 @@ GtAlphabet*    gt_alphabet_guess(const char *sequence, unsigned long seqlen);
 GtAlphabet*    gt_alphabet_clone(const GtAlphabet *alphabet);
 /* Increase the reference count for <alphabet> and return it. */
 GtAlphabet*    gt_alphabet_ref(GtAlphabet *alphabet);
-/* Decrease the reference count for <alphabet> or delete it, if this was the
-   last reference. */
-void           gt_alphabet_delete(GtAlphabet *alphabet);
 /* Add the mapping of all given <characters> to the given <alphabet>. The first
    character is the result of subsequent <gt_alphabet_decode()> calls. */
 void           gt_alphabet_add_mapping(GtAlphabet *alphabet,
@@ -136,4 +133,8 @@ void           gt_alphabet_decode_seq_to_cstr(const GtAlphabet *alphabet,
 GtStr*         gt_alphabet_decode_seq_to_str(const GtAlphabet *alphabet,
                                              const GtUchar *src,
                                              unsigned long len);
+/* Decrease the reference count for <alphabet> or delete it, if this was the
+   last reference. */
+void           gt_alphabet_delete(GtAlphabet *alphabet);
+
 #endif

@@ -104,7 +104,7 @@ GtTranslatorStatus gt_translator_find_codon(GtTranslator *translator,
                                             unsigned long *pos,
                                             GtError *err);
 
-/* Deletes <translator> and frees all associated memory. */
+/* Delete <translator>. */
 void               gt_translator_delete(GtTranslator *translator);
 
 #endif

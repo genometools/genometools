@@ -32,11 +32,11 @@ typedef struct GtFile GtFile;
    and uncompressed otherwise). */
 GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
-/* Close the underlying file handle and destroy the <file> object. */
-void    gt_file_delete(GtFile *file);
-
 /* Write <\0>-terminated string <cstr> to <file>. Similar to <fputs(3)>, but
    terminates on error. */
 void    gt_file_xfputs(const char *cstr, GtFile *file);
+
+/* Close the underlying file handle and destroy the <file> object. */
+void    gt_file_delete(GtFile *file);
 
 #endif

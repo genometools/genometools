@@ -27,9 +27,6 @@ typedef struct GtQueue GtQueue;
 
 /* Return a new <GtQueue*> object. */
 GtQueue*      gt_queue_new(void);
-/* Delete <queue> and free all allocated space. Elements contained in <queue>
-   are not freed! */
-void          gt_queue_delete(GtQueue *queue);
 /* Add <elem> to <queue> (__enqueue__ in computer science lingo). */
 void          gt_queue_add(GtQueue *queue, void *elem);
 /* Remove the first element from non-empty <queue> and return it (__dequeue__ in
@@ -43,5 +40,7 @@ void*         gt_queue_head(GtQueue *queue);
 void          gt_queue_remove(GtQueue *queue, void *elem);
 /* Return the number of elements in <queue>. */
 unsigned long gt_queue_size(const GtQueue *queue);
+/* Delete <queue>. Elements contained in <queue> are not freed! */
+void          gt_queue_delete(GtQueue *queue);
 
 #endif

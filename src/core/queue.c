@@ -22,8 +22,7 @@
 #include "core/queue.h"
 #include "core/unused_api.h"
 
-struct GtQueue
-{
+struct GtQueue {
   void **contents;
   long front, /* f */
        back,  /* b */
@@ -62,29 +61,6 @@ struct GtQueue
 GtQueue* gt_queue_new(void)
 {
   return gt_calloc(1, sizeof (GtQueue));
-}
-
-static void queue_wrap(GtQueue *q, bool free_contents)
-{
-  gt_assert(q);
-  if (free_contents) {
-    while (gt_queue_size(q))
-      gt_free(gt_queue_get(q));
-  }
-  gt_free(q->contents);
-  gt_free(q);
-}
-
-void gt_queue_delete(GtQueue *q)
-{
-  if (!q) return;
-  queue_wrap(q, false);
-}
-
-void gt_queue_delete_with_contents(GtQueue *q)
-{
-  if (!q) return;
-  queue_wrap(q, true);
 }
 
 static void check_space(GtQueue *q)
@@ -256,6 +232,29 @@ unsigned long gt_queue_size(const GtQueue *q)
   if ((q->front < q->back) || ((q->front == 0) && (q->back == 0)))
     return q->back - q->front; /* no wraparound */
   return q->size - (q->front - q->back); /* wraparound */
+}
+
+static void queue_wrap(GtQueue *q, bool free_contents)
+{
+  gt_assert(q);
+  if (free_contents) {
+    while (gt_queue_size(q))
+      gt_free(gt_queue_get(q));
+  }
+  gt_free(q->contents);
+  gt_free(q);
+}
+
+void gt_queue_delete(GtQueue *q)
+{
+  if (!q) return;
+  queue_wrap(q, false);
+}
+
+void gt_queue_delete_with_contents(GtQueue *q)
+{
+  if (!q) return;
+  queue_wrap(q, true);
 }
 
 static int check_queue(void **elem, void *info, GtError *err)

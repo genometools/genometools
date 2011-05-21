@@ -34,9 +34,9 @@ GtLogger* gt_logger_new(bool enabled, const char *prefix, FILE *target);
 void      gt_logger_enable(GtLogger *logger);
 /* Disable logging on <logger>. */
 void      gt_logger_disable(GtLogger *logger);
-/* Returns true if logging is enabled on <logger>, false otherwise. */
+/* Return <true> if logging is enabled on <logger>, false otherwise. */
 bool      gt_logger_enabled(GtLogger *logger);
-/* Returns logging target of <logger>. */
+/* Return logging target of <logger>. */
 FILE*     gt_logger_target(GtLogger *logger);
 /* Set logging target of <logger> to <fp>. */
 void      gt_logger_set_target(GtLogger *logger, FILE *fp);
@@ -50,6 +50,7 @@ void      gt_logger_log(GtLogger *logger, const char *format, ...)
 void      gt_logger_log_va_force(GtLogger *logger, const char *format, va_list);
 /* Log to target depending on logging status, using a va_list argument. */
 void      gt_logger_log_va(GtLogger *logger, const char *format, va_list);
-
+/* Delete <logger>. */
 void      gt_logger_delete(GtLogger *logger);
+
 #endif
