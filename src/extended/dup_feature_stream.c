@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
 #include "core/assert_api.h"
 #include "extended/dup_feature_stream.h"
 #include "extended/dup_feature_visitor.h"
-#include "extended/visitor_stream.h"
+#include "extended/visitor_stream_api.h"
 
 GtNodeStream* gt_dup_feature_stream_new(GtNodeStream *in_stream,
                                         const char *dest_type,

@@ -1,6 +1,5 @@
 /*
-  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +14,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/assert_api.h"
-#include "extended/inter_feature_stream.h"
-#include "extended/inter_feature_visitor.h"
-#include "extended/visitor_stream_api.h"
+#ifndef VISITOR_STREAM_API_H
+#define VISITOR_STREAM_API_H
 
-GtNodeStream* gt_inter_feature_stream_new(GtNodeStream *in_stream,
-                                          const char *outside_type,
-                                          const char *inter_type)
-{
-  GtNodeVisitor *nv = gt_inter_feature_visitor_new(outside_type, inter_type);
-  return gt_visitor_stream_new(in_stream, nv);
-}
+#include <stdio.h>
+#include "extended/node_stream_api.h"
+#include "extended/node_visitor.h"
+
+/* Implements the <GtNodeStream> interface. */
+typedef struct GtVisitorStream GtVisitorStream;
+
+/* Create a new <GtVisitorStream*>, takes ownership of <node_visitor>.
+   This stream applies <node_visitor> to each node which passes through it.
+   Can be used to implement all streams with such a functionality. */
+GtNodeStream* gt_visitor_stream_new(GtNodeStream *in_stream,
+                                    GtNodeVisitor *node_visitor);
+
+#endif

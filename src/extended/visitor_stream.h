@@ -17,19 +17,8 @@
 #ifndef VISITOR_STREAM_H
 #define VISITOR_STREAM_H
 
-#include <stdio.h>
-#include "extended/node_stream_api.h"
-#include "extended/node_visitor.h"
-
-/* Implements the <GtNodeStream> interface. */
-typedef struct GtVisitorStream GtVisitorStream;
+#include "extended/visitor_stream_api.h"
 
 const GtNodeStreamClass* gt_visitor_stream_class(void);
-
-/* Create a GtVisitorStream, takes ownership of <node_visitor>.
-   This stream applies <node_visitor> to each node which passes through it.
-   Can be used to implement all streams with such a functionality. */
-GtNodeStream*            gt_visitor_stream_new(GtNodeStream *in_stream,
-                                               GtNodeVisitor *node_visitor);
 
 #endif

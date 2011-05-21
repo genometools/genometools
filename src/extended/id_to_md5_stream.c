@@ -16,7 +16,7 @@
 
 #include "extended/id_to_md5_stream.h"
 #include "extended/id_to_md5_visitor.h"
-#include "extended/visitor_stream.h"
+#include "extended/visitor_stream_api.h"
 
 GtNodeStream* gt_id_to_md5_stream_new(GtNodeStream *in_stream,
                                       GtRegionMapping *rm,

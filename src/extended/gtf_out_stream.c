@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,7 +17,7 @@
 
 #include "extended/gtf_out_stream.h"
 #include "extended/gtf_visitor.h"
-#include "extended/visitor_stream.h"
+#include "extended/visitor_stream_api.h"
 
 GtNodeStream* gt_gtf_out_stream_new(GtNodeStream *in_stream, GtFile *outfp)
 {

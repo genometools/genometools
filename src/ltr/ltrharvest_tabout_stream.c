@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/visitor_stream.h"
+#include "extended/visitor_stream_api.h"
 #include "ltr/ltrharvest_tabout_stream.h"
 #include "ltr/ltrharvest_tabout_visitor.h"
 

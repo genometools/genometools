@@ -162,6 +162,8 @@ interfaces.
 
   <li><a href="#GtTypeCheckerOBO">GtTypeCheckerOBO</a>
 
+  <li><a href="#GtVisitorStream">GtVisitorStream</a>
+
 </ul>
 <h2>Modules</h2>
 <ul>
@@ -5160,6 +5162,22 @@ Create a new <code>GtTypeChecker*</code> for OBO file with given <code>obo_file_
    set correspondingly.
 </p>
 <hr>
+<a name="GtVisitorStream"></a>
+<h2>Class GtVisitorStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. </p>
+
+<hr>
+<a name="gt_visitor_stream_new"></a>
+
+<code>GtNodeStream*  gt_visitor_stream_new(GtNodeStream *in_stream,
+                                    GtNodeVisitor *node_visitor)</code>
+<p>
+Create a new <code>GtVisitorStream*</code>, takes ownership of <code>node_visitor</code>.
+   This stream applies <code>node_visitor</code> to each node which passes through it.
+   Can be used to implement all streams with such a functionality.
+</p>
+<hr>
 <a name="Array2dim"></a>
 <h2>Module Array2dim</h2>
 <a name="gt_array2dim_malloc"></a>
@@ -7063,6 +7081,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_type_checker_ref"><code>gt_type_checker_ref</code></a><br>
 
   <a href="#gt_version_check"><code>gt_version_check</code></a><br>
+
+  <a href="#gt_visitor_stream_new"><code>gt_visitor_stream_new</code></a><br>
 
   <a href="#gt_warning"><code>gt_warning</code></a><br>
 

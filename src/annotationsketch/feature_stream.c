@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,7 +18,7 @@
 #include "annotationsketch/feature_stream.h"
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/feature_index.h"
-#include "extended/visitor_stream.h"
+#include "extended/visitor_stream_api.h"
 
 GtNodeStream* gt_feature_stream_new(GtNodeStream *in_stream, GtFeatureIndex *fi)
 {
