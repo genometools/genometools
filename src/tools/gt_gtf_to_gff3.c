@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2009, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/genome_node.h"
@@ -26,17 +27,23 @@
 
 typedef struct {
   bool tidy;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } GTFToGFF3Arguments;
 
 static void* gt_gtf_to_gff3_arguments_new(void)
 {
-  return gt_calloc(1, sizeof (GTFToGFF3Arguments));
+  GTFToGFF3Arguments *arguments =  gt_calloc(1, sizeof *arguments);
+  arguments->ofi = gt_outputfileinfo_new();
+  return arguments;
 }
 
 static void gt_gtf_to_gff3_arguments_delete(void *tool_arguments)
 {
   GTFToGFF3Arguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -46,13 +53,20 @@ static GtOptionParser* gt_gtf_to_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *option;
   gt_assert(arguments);
+
   op = gt_option_parser_new("[gtf_file]",
                             "Parse GTF2.2 file and convert it to GFF3.");
+
   /* -tidy */
   option = gt_option_new_bool("tidy", "try to tidy the GTF file up during "
                               "parsing", &arguments->tidy, false);
   gt_option_parser_add_option(op, option);
+
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   gt_option_parser_set_max_args(op, 1);
+
   return op;
 }
 
@@ -73,8 +87,7 @@ static int gt_gtf_to_gff3_runner(GT_UNUSED int argc, const char **argv,
     gt_gtf_in_stream_enable_tidy_mode(gtf_in_stream);
 
   /* create a GFF3 output stream */
-  /* XXX: use proper genfile */
-  gff3_out_stream = gt_gff3_out_stream_new(gtf_in_stream, NULL);
+  gff3_out_stream = gt_gff3_out_stream_new(gtf_in_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   had_err = gt_node_stream_pull(gff3_out_stream, err);
