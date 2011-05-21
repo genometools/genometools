@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,7 @@
 
 #include "core/ma.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/bed_parser.h"
@@ -27,14 +28,17 @@ typedef struct {
   GtStr *feature_type,
         *thick_feature_type,
         *block_type;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } BEDToGFF3Arguments;
 
 static void *gt_bed_to_gff3_arguments_new(void)
 {
-  BEDToGFF3Arguments *arguments = gt_malloc(sizeof *arguments);
+  BEDToGFF3Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->feature_type = gt_str_new();
   arguments->thick_feature_type = gt_str_new();
   arguments->block_type = gt_str_new();
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -42,6 +46,8 @@ static void gt_bed_to_gff3_arguments_delete(void *tool_arguments)
 {
   BEDToGFF3Arguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_str_delete(arguments->block_type);
   gt_str_delete(arguments->thick_feature_type);
   gt_str_delete(arguments->feature_type);
@@ -53,19 +59,28 @@ static GtOptionParser* gt_bed_to_gff3_option_parser_new(void *tool_arguments)
   BEDToGFF3Arguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *o;
+
   op = gt_option_parser_new("[bed_file]",
                             "Parse BED file and convert it to GFF3.");
+
   o = gt_option_new_string("featuretype", "Set type of parsed BED features",
                            arguments->feature_type, BED_FEATURE_TYPE);
   gt_option_parser_add_option(op, o);
+
   o = gt_option_new_string("thicktype", "Set type of parsed thick BED features",
                            arguments->thick_feature_type,
                            BED_THICK_FEATURE_TYPE);
   gt_option_parser_add_option(op, o);
+
   o = gt_option_new_string("blocktype", "Set type of parsed BED blocks",
                            arguments->block_type, BED_BLOCK_TYPE);
   gt_option_parser_add_option(op, o);
+
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   gt_option_parser_set_max_args(op, 1);
+
   return op;
 }
 
@@ -90,8 +105,7 @@ static int gt_bed_to_gff3_runner(GT_UNUSED int argc, const char **argv,
                                   gt_str_get(arguments->block_type));
 
   /* create a GFF3 output stream */
-  /* XXX: use proper genfile */
-  gff3_out_stream = gt_gff3_out_stream_new(bed_in_stream, NULL);
+  gff3_out_stream = gt_gff3_out_stream_new(bed_in_stream, arguments->outfp);
 
   /* pull the features through the stream and free them afterwards */
   had_err = gt_node_stream_pull(gff3_out_stream, err);
