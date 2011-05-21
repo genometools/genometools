@@ -182,6 +182,7 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                           void *tool_arguments, GtError *err)
 {
+  GFF3Arguments *arguments = tool_arguments;
   GtTypeChecker *type_checker = NULL;
   GtNodeStream *gff3_in_stream,
                *sort_stream = NULL,
@@ -189,7 +190,6 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                *add_introns_stream = NULL,
                *gff3_out_stream = NULL,
                *last_stream;
-  GFF3Arguments *arguments = tool_arguments;
   int had_err = 0;
 
   gt_error_check(err);
