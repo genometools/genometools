@@ -89,8 +89,8 @@ static GtOPrval sketch_parse_options(int *parsed_args,
 
   /* init */
   op = gt_option_parser_new("[option ...] image_file [GFF3_file ...]",
-                         "Create graphical representations of "
-                         "GFF3 annotation files.");
+                            "Create graphical representation of GFF3 "
+                            "annotation files.");
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
