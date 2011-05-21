@@ -96,6 +96,8 @@ interfaces.
 
   <li><a href="#GtGFF3OutStream">GtGFF3OutStream</a>
 
+  <li><a href="#GtGFF3Parser">GtGFF3Parser</a>
+
   <li><a href="#GtGTFInStream">GtGTFInStream</a>
 
   <li><a href="#GtGenomeNode">GtGenomeNode</a>
@@ -3037,6 +3039,85 @@ If this method is called upon <code>gff3_out_stream</code>, use the original ID
    is the default). Memory consumption for <code>gff3_out_stream</code> is raised from O(1)
    to O(<code>input_size</code>), because bookkeeping of used IDs becomes necessary to
    avoid ID collisions.
+</p>
+<hr>
+<a name="GtGFF3Parser"></a>
+<h2>Class GtGFF3Parser</h2>
+
+<p> A <code>GtGFF3Parser</code> can be used to parse GFF3 files and convert them into
+   <code>GtGenomeNode</code>s. This is a low-level class and is usually not used directly.
+   Normally, a <code>GtGFF3InStream</code> is used to parse GFF3 files. </p>
+
+<hr>
+<a name="gt_gff3_parser_new"></a>
+
+<code>GtGFF3Parser*  gt_gff3_parser_new(GtTypeChecker *type_checker)</code>
+<p>
+Create a new <code>GtGFF3Parser*</code> with optional <code>type_checker</code>. If a
+   <code>type_checker</code> was given, the <code>GtGFF3Parser*</code> stores a new reference to it
+   internally and uses the <code>type_checker</code> to check types during parsing.
+</p>
+<hr>
+<a name="gt_gff3_parser_check_id_attributes"></a>
+
+<code>void           gt_gff3_parser_check_id_attributes(GtGFF3Parser *gff3_parser)</code>
+<p>
+Enable ID attribute checking in <code>gff3_parser</code>. Thereby, the memory
+   consumption of the <code>gff3_parser</code> becomes proportional to the input file
+   size(s).
+</p>
+<hr>
+<a name="gt_gff3_parser_set_offset"></a>
+
+<code>void           gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser, long offset)</code>
+<p>
+Transform all features parsed by <code>gff3_parser</code> by the given <code>offset</code>.
+</p>
+<hr>
+<a name="gt_gff3_parser_enable_tidy_mode"></a>
+
+<code>void           gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *gff3_parser)</code>
+<p>
+Enable the tidy mode in <code>gff3_parser</code>. In tidy mode the <code>gff3_parser</code> parser
+   tries to tidy up features which would normally lead to a parse error.
+</p>
+<hr>
+<a name="gt_gff3_parser_parse_genome_nodes"></a>
+
+<code>int            gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *gff3_parser,
+                                                int *status_code,
+                                                GtQueue *genome_nodes,
+                                                GtCstrTable *used_types,
+                                                GtStr *filenamestr,
+                                                unsigned long long *line_number,
+                                                GtFile *fpin,
+                                                GtError *err)</code>
+<p>
+Use <code>gff3_parser</code> to parse genome nodes from file pointer <code>fpin</code>.
+   <code>status_code</code> is set to 0 if at least one genome node was created (and stored
+   in <code>genome_nodes</code>) and to <code>EOF</code> if no further genome nodes could be parsed
+   from <code>fpin</code>. Every encountered (genome feature) type is recorded in the
+   C-string table <code>used_types</code>. The parser uses the given <code>filenamestr</code> to
+   store the file name of <code>fpin</code> in the created genome nodes or to give the
+   correct filename in error messages, if necessary.
+   <code>line_number</code> is increased accordingly during parsing and has to be set to 0
+   before parsing a new <code>fpin</code>.
+   If an error occurs during parsing this method returns -1 and sets <code>err</code>
+   accordingly.
+</p>
+<hr>
+<a name="gt_gff3_parser_reset"></a>
+
+<code>void           gt_gff3_parser_reset(GtGFF3Parser *gff3_parser)</code>
+<p>
+Reset the <code>gff3_parser</code> (necessary if the input file is switched).
+</p>
+<hr>
+<a name="gt_gff3_parser_delete"></a>
+
+<code>void           gt_gff3_parser_delete(GtGFF3Parser *gff3_parser)</code>
+<p>
+Delete the <code>gff3_parser</code> and free all allocated space.
 </p>
 <hr>
 <a name="GtGTFInStream"></a>
@@ -6520,6 +6601,20 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_gff3_out_stream_retain_id_attributes"><code>gt_gff3_out_stream_retain_id_attributes</code></a><br>
 
   <a href="#gt_gff3_out_stream_set_fasta_width"><code>gt_gff3_out_stream_set_fasta_width</code></a><br>
+
+  <a href="#gt_gff3_parser_check_id_attributes"><code>gt_gff3_parser_check_id_attributes</code></a><br>
+
+  <a href="#gt_gff3_parser_delete"><code>gt_gff3_parser_delete</code></a><br>
+
+  <a href="#gt_gff3_parser_enable_tidy_mode"><code>gt_gff3_parser_enable_tidy_mode</code></a><br>
+
+  <a href="#gt_gff3_parser_new"><code>gt_gff3_parser_new</code></a><br>
+
+  <a href="#gt_gff3_parser_parse_genome_nodes"><code>gt_gff3_parser_parse_genome_nodes</code></a><br>
+
+  <a href="#gt_gff3_parser_reset"><code>gt_gff3_parser_reset</code></a><br>
+
+  <a href="#gt_gff3_parser_set_offset"><code>gt_gff3_parser_set_offset</code></a><br>
 
   <a href="#gt_graphics_delete"><code>gt_graphics_delete</code></a><br>
 

@@ -1404,6 +1404,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
   int rval, had_err = 0;
 
   gt_error_check(err);
+  gt_assert(status_code && genome_nodes && used_types);
 
   filename = gt_str_get(filenamestr);
 
