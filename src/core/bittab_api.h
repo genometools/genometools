@@ -25,74 +25,79 @@
 /* Implements arbitrary-length bit arrays and various operations on them. */
 typedef struct GtBittab GtBittab;
 
-/* Creates a new <GtBittab> of length <num_of_bits>, initialised to 0 */
+/* Return a new <GtBittab> of length <num_of_bits>, initialised to 0. */
 GtBittab*     gt_bittab_new(unsigned long num_of_bits);
 
-/* Sets bit <i> in <b> to 1. */
-void          gt_bittab_set_bit(GtBittab *b, unsigned long i);
+/* Set bit <i> in <bittab> to 1. */
+void          gt_bittab_set_bit(GtBittab *bittab, unsigned long i);
 
-/* Sets bit <i> in <b> to 0. */
-void          gt_bittab_unset_bit(GtBittab *b, unsigned long i);
+/* Set bit <i> in <bittab> to 0. */
+void          gt_bittab_unset_bit(GtBittab *bittab, unsigned long i);
 
-/* Sets <a> to be the complement of <b>. */
-void          gt_bittab_complement(GtBittab *a, const GtBittab *b);
+/* Set <bittab_a> to be the complement of <bittab_b>. */
+void          gt_bittab_complement(GtBittab *bittab_a,
+                                   const GtBittab *bittab_b);
 
-/* Sets <a> to be equal to <b>. */
-void          gt_bittab_equal(GtBittab *a, const GtBittab *b);
+/* Set <bittab_a> to be equal to <bittab_b>. */
+void          gt_bittab_equal(GtBittab *bittab_a, const GtBittab *bittab_b);
 
-/* Sets <a> to be the bitwise AND of <b> and <c>. */
-void          gt_bittab_and(GtBittab *a, const GtBittab *b, const GtBittab *c);
+/* Set <bittab_a> to be the bitwise AND of <bittab_b> and <bittab_c>. */
+void          gt_bittab_and(GtBittab *bittab_a, const GtBittab *bittab_b,
+                            const GtBittab *bittab_c);
 
-/* Sets <a> to be the bitwise OR of <b> and <c>. */
-void          gt_bittab_or(GtBittab *a, const GtBittab *b, const GtBittab *c);
+/* Set <bittab_a> to be the bitwise OR of <bittab_b> and <bittab_c>. */
+void          gt_bittab_or(GtBittab *bittab_a, const GtBittab *bittab_b,
+                           const GtBittab *bittab_c);
 
-/* Sets <a> to be <b> NAND <c>. */
-void          gt_bittab_nand(GtBittab *a, const GtBittab *b, const GtBittab *c);
+/* Set <bittab_a> to be <bittab_b> NAND <bittab_c>. */
+void          gt_bittab_nand(GtBittab *bittab_a, const GtBittab *bittab_b,
+                             const GtBittab *bittab_c);
 
-/* Sets <a> to be the bitwise AND of <a> and <b>. */
-void          gt_bittab_and_equal(GtBittab *a, const GtBittab *b);
+/* Set <bittab_a> to be the bitwise AND of <bittab_a> and <bittab_b>. */
+void          gt_bittab_and_equal(GtBittab *bittab_a, const GtBittab *bittab_b);
 
-/* Sets <a> to be the bitwise OR of <a> and <b>. */
-void          gt_bittab_or_equal(GtBittab *a, const GtBittab *b);
+/* Set <bittab_a> to be the bitwise OR of <bittab_a> and <bittab_b>. */
+void          gt_bittab_or_equal(GtBittab *bittab_a, const GtBittab *bittab_b);
 
-/* Shifts <b> by one position to the left. */
-void          gt_bittab_shift_left_equal(GtBittab *b);
+/* Shift <bittab> by one position to the left. */
+void          gt_bittab_shift_left_equal(GtBittab *bittab);
 
-/* Shifts <b> by one position to the right. */
-void          gt_bittab_shift_right_equal(GtBittab *b);
+/* Shift <bittab> by one position to the right. */
+void          gt_bittab_shift_right_equal(GtBittab *bittab);
 
-/* Sets all bits in <b> to 0. */
-void          gt_bittab_unset(GtBittab *b);
+/* Set all bits in <bittab> to 0. */
+void          gt_bittab_unset(GtBittab *bittab);
 
-/* Outputs a representation of <b> to <fp>. */
-void          gt_bittab_show(const GtBittab *b, FILE *fp);
+/* Output a representation of <bittab> to <fp>. */
+void          gt_bittab_show(const GtBittab *bittab, FILE *fp);
 
-/* Fills <a> with the indices of all set bits in <b>. */
-void          gt_bittab_get_all_bitnums(const GtBittab *b, GtArray *a);
+/* Fill <array> with the indices of all set bits in <bittab>. */
+void          gt_bittab_get_all_bitnums(const GtBittab *bittab, GtArray *array);
 
-/* Returns <true> if bit <i> is set in <b>. */
-bool          gt_bittab_bit_is_set(const GtBittab *b, unsigned long i);
+/* Return <true> if bit <i> is set in <bittab>. */
+bool          gt_bittab_bit_is_set(const GtBittab *bittab, unsigned long i);
 
-/* Returns <true> if bittabs <a> and <b> are identical. */
-bool          gt_bittab_cmp(const GtBittab *a, const GtBittab *b);
+/* Return <true> if <bittab_a> and <bittab_b> are identical. */
+bool          gt_bittab_cmp(const GtBittab *bittab_a, const GtBittab *bittab_b);
 
-/* Returns the index of the first set bit in <b>. */
-unsigned long gt_bittab_get_first_bitnum(const GtBittab *b);
+/* Return the index of the first set bit in <bittab>. */
+unsigned long gt_bittab_get_first_bitnum(const GtBittab *bittab);
 
-/* Returns the index of the last set bit in <b>. */
-unsigned long gt_bittab_get_last_bitnum(const GtBittab *b);
+/* Return the index of the last set bit in <bittab>. */
+unsigned long gt_bittab_get_last_bitnum(const GtBittab *bittab);
 
-/* Returns the index of the next set bit in <b> with an index greater
+/* Return the index of the next set bit in <bittab> with an index greater
    than <i>. */
-unsigned long gt_bittab_get_next_bitnum(const GtBittab *b, unsigned long i);
+unsigned long gt_bittab_get_next_bitnum(const GtBittab *bittab,
+                                        unsigned long i);
 
-/* Returns the number of set bits in <b>. */
-unsigned long gt_bittab_count_set_bits(const GtBittab *b);
+/* Return the number of set bits in <bittab>. */
+unsigned long gt_bittab_count_set_bits(const GtBittab *bittab);
 
-/* Returns the total number of bits of <b>. */
-unsigned long gt_bittab_size(GtBittab *b);
+/* Return the total number of bits of <bittab>. */
+unsigned long gt_bittab_size(GtBittab *bittab);
 
-/* Deletes <b> and frees all allocated space. */
-void          gt_bittab_delete(GtBittab *b);
+/* Delete <bittab>. */
+void          gt_bittab_delete(GtBittab *bittab);
 
 #endif
