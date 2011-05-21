@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -65,7 +65,7 @@ static void gff3_version_string(GtNodeVisitor *nv)
   gt_assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
     gt_file_xprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX,
-                       GFF_VERSION);
+                    GFF_VERSION);
     gff3_visitor->version_string_shown = true;
   }
 }
@@ -327,11 +327,10 @@ static int gff3_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && rn);
   gff3_version_string(nv);
-  gt_file_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n",
-                     GFF_SEQUENCE_REGION,
-                     gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
-                     gt_genome_node_get_start((GtGenomeNode*) rn),
-                     gt_genome_node_get_end((GtGenomeNode*) rn));
+  gt_file_xprintf(gff3_visitor->outfp, "%s   %s %lu %lu\n", GFF_SEQUENCE_REGION,
+                  gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) rn)),
+                  gt_genome_node_get_start((GtGenomeNode*) rn),
+                  gt_genome_node_get_end((GtGenomeNode*) rn));
   return 0;
 }
 
