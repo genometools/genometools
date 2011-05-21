@@ -30,12 +30,12 @@ typedef enum {
 typedef struct GtCodonIterator GtCodonIterator;
 typedef struct GtCodonIteratorClass GtCodonIteratorClass;
 
-/* Returns the current reading offset of <ci>, starting from the position
+/* Return the current reading offset of <ci>, starting from the position
    in the sequence given at iterator instantiation time. */
 unsigned long          gt_codon_iterator_current_position(GtCodonIterator *ci);
-/* Returns the length of the substring to scan, given at instantiation time. */
+/* Return the length of the substring to scan, given at instantiation time. */
 unsigned long          gt_codon_iterator_length(GtCodonIterator *ci);
-/* Rewinds the iterator to point again to the  position in the sequence given
+/* Rewind the iterator to point again to the  position in the sequence given
    at iterator instantiation time. */
 void                   gt_codon_iterator_rewind(GtCodonIterator *ci);
 /* Sets the values of <n1>, <n2> and <n3> to the codon beginning at the current
@@ -52,7 +52,7 @@ GtCodonIteratorStatus  gt_codon_iterator_next(GtCodonIterator *ci,
                                               char *n1, char *n2, char *n3,
                                               unsigned int *frame,
                                               GtError *err);
-/* Deletes <ci>. */
+/* Delete <ci>. */
 void                   gt_codon_iterator_delete(GtCodonIterator *ci);
 
 #endif
