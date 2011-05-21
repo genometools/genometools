@@ -26,8 +26,8 @@
 #include "extended/type_checker_api.h"
 
 /* A <GtGFF3Parser> can be used to parse GFF3 files and convert them into
-   <GtGenomeNode>s. This is a low-level class and is usually not used directly.
-   Normally, a <GtGFF3InStream> is used to parse GFF3 files. */
+   <GtGenomeNode>s. This is a low-level class and it is usually not used
+   directly. Normally, a <GtGFF3InStream> is used to parse GFF3 files. */
 typedef struct GtGFF3Parser GtGFF3Parser;
 
 /* Create a new <GtGFF3Parser*> with optional <type_checker>. If a
