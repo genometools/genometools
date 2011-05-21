@@ -4,7 +4,7 @@ def assert
   raise "Assertion failed !" unless yield
 end
 
-Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist, :rmostbd)
+Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist, :noedge)
 Suftabvalue = Struct.new("Suftabvalue",:index,:previoussuffix)
 
 class LcpSufstream
@@ -62,26 +62,25 @@ def showbool(b)
   end
 end
 
-def processbranchingedge(firstedge,fromitv,toitv)
+def processbranchedge(firstedge,fromitv,toitv)
   print "B #{showbool(firstedge)} #{fromitv.lcp} #{fromitv.lb} "
   puts  "#{toitv.lcp} #{toitv.lb}"
 end
 
-def processleavesfromqueue(parent,queue,endpos)
-  firstedge = if parent.rmostbd.nil? then true else false end
+def processleaves(parent,queue,endpos)
+  firstedge = parent.noedge
   queue.enumleaves(endpos) do |leaf|
     print "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} "
     puts  "#{leaf.previoussuffix}"
     firstedge = false
-    parent.rmostbd = leaf
+    parent.noedge = false
   end
 end
 
 def add_to_top_brchildlist(stack,itv)
   topelem = stack.pop
   topelem.brchildlist.push(itv)
-  assert {not itv.rb.nil?}
-  topelem.rmostbd = itv.rb
+  topelem.noedge = false
   stack.push(topelem)
 end
 
@@ -152,42 +151,41 @@ def enumlcpintervaltreewithqueue(filename)
   stack = Array.new()
   queue = Queuepair.new()
   lastinterval = nil
-  stack.push(Lcpinterval.new(0,0,nil,[],nil))
-  idx=1
+  stack.push(Lcpinterval.new(0,0,nil,[],true))
+  idx=0
   LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
-    lb = idx - 1
-    queue.add(idx - 1,previoussuffix)
+    lb = idx
+    queue.add(idx,previoussuffix)
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
-      lastinterval.rb = idx - 1
-      processleavesfromqueue(lastinterval,queue,idx-1)
+      lastinterval.rb = idx
+      processleaves(lastinterval,queue,idx)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
-        firstedge = if stack.last.rmostbd.nil? then true else false end
+        firstedge = stack.last.noedge
         add_to_top_brchildlist(stack,lastinterval)
-        processbranchingedge(firstedge,stack.last,lastinterval)
+        processbranchedge(firstedge,stack.last,lastinterval)
         lastinterval = nil
       end
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil?
-        processleavesfromqueue(stack.last,queue,lb-1)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],nil))
+        processleaves(stack.last,queue,lb-1)
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],true))
       else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],
-                                   lastinterval.rb))
-        processbranchingedge(true,stack.last,lastinterval)
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
+        processbranchedge(true,stack.last,lastinterval)
         lastinterval = nil
       end
     else
-      processleavesfromqueue(stack.last,queue,idx-1)
+      processleaves(stack.last,queue,idx)
     end
     idx += 1
   end
   lastinterval = stack.pop
-  lastinterval.rb = idx - 1
-  queue.add(idx-1,idx-1)
-  processleavesfromqueue(lastinterval,queue,idx-1)
+  lastinterval.rb = idx
+  queue.add(idx,idx)
+  processleaves(lastinterval,queue,idx)
   queue.delete()
 end
 

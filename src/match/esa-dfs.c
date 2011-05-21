@@ -30,17 +30,18 @@
 
 #define INCSTACKSIZE  32
 
-#define PUSHDFS(D,B,PREVIOUSPTR)\
+#define PUSHDFS(D,B)\
         if (nextfreeItvinfo >= allocatedItvinfo)\
         {\
           gt_assert(nextfreeItvinfo == allocatedItvinfo);\
-          stackspace = allocItvinfo(PREVIOUSPTR,\
+          stackspace = allocItvinfo(stackspace,\
                                     allocatedItvinfo,\
                                     allocatedItvinfo+INCSTACKSIZE,\
                                     allocateDfsinfo,\
                                     state);\
           allocatedItvinfo += INCSTACKSIZE;\
         }\
+        gt_assert(stackspace != NULL);\
         stackspace[nextfreeItvinfo].depth = D;\
         stackspace[nextfreeItvinfo].lastisleafedge = B;\
         nextfreeItvinfo++
@@ -121,7 +122,7 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
                             outer while loop */
   unsigned long allocatedItvinfo = 0,
                 nextfreeItvinfo = 0;
-  Itvinfo *stackspace;
+  Itvinfo *stackspace = NULL;
   bool haserr = false;
 
 #ifdef INLINEDSequentialsuffixarrayreader
@@ -131,7 +132,7 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
   int retval;
 #endif
   firstrootedge = true;
-  PUSHDFS(0,true,NULL);
+  PUSHDFS(0,true);
   if (assignleftmostleaf != NULL)
   {
     assignleftmostleaf(TOP.dfsinfo,0,state);
@@ -253,7 +254,7 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
       }
     } else
     {
-      PUSHDFS(currentlcp,true,stackspace);
+      PUSHDFS(currentlcp,true);
       if (BELOWTOP.lastisleafedge)
       {
         if (assignleftmostleaf != NULL)
