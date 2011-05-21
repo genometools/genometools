@@ -17,6 +17,7 @@
 
 #include "core/ma_api.h"
 #include "core/option.h"
+#include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/gff3_in_stream.h"
@@ -31,11 +32,14 @@ typedef struct {
        nuceval,
        evalLTR;
   unsigned long LTRdelta;
+  GtOutputFileInfo *ofi;
+  GtFile *outfp;
 } EvalArguments;
 
 static void* gt_eval_arguments_new(void)
 {
   EvalArguments *arguments = gt_calloc(1, sizeof *arguments);
+  arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
@@ -43,6 +47,8 @@ static void gt_eval_arguments_delete(void *tool_arguments)
 {
   EvalArguments *arguments = tool_arguments;
   if (!arguments) return;
+  gt_file_delete(arguments->outfp);
+  gt_outputfileinfo_delete(arguments->ofi);
   gt_free(arguments);
 }
 
@@ -95,6 +101,9 @@ static GtOptionParser* gt_eval_option_parser_new(void *tool_arguments)
                                        &arguments->LTRdelta, 20);
   gt_option_parser_add_option(op, ltrdeltaoption);
 
+  /* output file options */
+  gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
   /* option implications */
   gt_option_imply(ltrdeltaoption, ltroption);
 
@@ -142,7 +151,7 @@ int gt_eval_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
 
   /* show the evaluation */
   if (!had_err)
-    gt_stream_evaluator_show(evaluator, stdout);
+    gt_stream_evaluator_show(evaluator, arguments->outfp);
 
   /* free */
   gt_stream_evaluator_delete(evaluator);

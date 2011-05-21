@@ -67,7 +67,7 @@ static int stream_evaluator_lua_evaluate(lua_State *L)
 static int stream_evaluator_lua_show(lua_State *L)
 {
   GtStreamEvaluator **stream_evaluator = check_stream_evaluator(L);
-  gt_stream_evaluator_show(*stream_evaluator, stdout);
+  gt_stream_evaluator_show(*stream_evaluator, NULL);
   return 0;
 }
 

@@ -32,7 +32,7 @@ int                gt_stream_evaluator_evaluate(GtStreamEvaluator*,
                                                 bool verbose, bool exondiff,
                                                 bool exondiffcollapsed,
                                                 GtNodeVisitor *nv, GtError*);
-void               gt_stream_evaluator_show(GtStreamEvaluator*, FILE*);
+void               gt_stream_evaluator_show(GtStreamEvaluator*, GtFile*);
 void               gt_stream_evaluator_delete(GtStreamEvaluator*);
 
 #endif

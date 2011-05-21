@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,8 +18,8 @@
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
 
-#include <stdio.h>
-#include "core/error.h"
+#include "core/error_api.h"
+#include "core/file.h"
 
 typedef struct GtEvaluator GtEvaluator;
 
@@ -29,8 +29,8 @@ void         gt_evaluator_add_actual(GtEvaluator*, unsigned long);
 void         gt_evaluator_add_predicted(GtEvaluator*, unsigned long);
 double       gt_evaluator_get_sensitivity(const GtEvaluator*);
 double       gt_evaluator_get_specificity(const GtEvaluator*);
-void         gt_evaluator_show_sensitivity(const GtEvaluator*, FILE*);
-void         gt_evaluator_show_specificity(const GtEvaluator*, FILE*);
+void         gt_evaluator_show_sensitivity(const GtEvaluator*, GtFile*);
+void         gt_evaluator_show_specificity(const GtEvaluator*, GtFile*);
 void         gt_evaluator_reset(GtEvaluator*);
 int          gt_evaluator_unit_test(GtError*);
 void         gt_evaluator_delete(GtEvaluator*);

@@ -1463,70 +1463,70 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
 }
 
 static void show_transcript_values(GtTranscriptEvaluators *te,
-                                      const char *level,
-                                      const char *additional_info, FILE *outfp)
+                                   const char *level,
+                                   const char *additional_info, GtFile *outfp)
 {
   gt_assert(te);
 
-  fprintf(outfp, "exon sensitivity (%s level, all%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon sensitivity (%s level, all%s): ", level,
+                  additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_all(te), outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon specificity (%s level, all%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon specificity (%s level, all%s): ", level,
+                  additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_all(te), outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon sensitivity (%s level, single%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon sensitivity (%s level, single%s): ", level,
+                  additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_single(te), outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon specificity (%s level, single%s): ", level,
-          additional_info );
+  gt_file_xprintf(outfp, "exon specificity (%s level, single%s): ", level,
+                  additional_info );
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_single(te), outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon sensitivity (%s level, initial%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon sensitivity (%s level, initial%s): ", level,
+                  additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_initial(te),
                                 outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon specificity (%s level, initial%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon specificity (%s level, initial%s): ", level,
+                  additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_initial(te),
                                 outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon sensitivity (%s level, internal%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon sensitivity (%s level, internal%s): ", level,
+                  additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_internal(te),
                                 outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon specificity (%s level, internal%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon specificity (%s level, internal%s): ", level,
+                  additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_internal(te),
                                 outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon sensitivity (%s level, terminal%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon sensitivity (%s level, terminal%s): ", level,
+                  additional_info);
   gt_evaluator_show_sensitivity(gt_transcript_evaluators_get_terminal(te),
                                 outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 
-  fprintf(outfp, "exon specificity (%s level, terminal%s): ", level,
-          additional_info);
+  gt_file_xprintf(outfp, "exon specificity (%s level, terminal%s): ", level,
+                  additional_info);
   gt_evaluator_show_specificity(gt_transcript_evaluators_get_terminal(te),
                                 outfp);
-  gt_xfputc('\n', outfp);
+  gt_file_xfputc('\n', outfp);
 }
 
 static void show_nucleotide_values(NucEval *nucleotides, const char *level,
-                                   FILE *outfp)
+                                   GtFile *outfp)
 {
   double sensitivity = 1.0, specificity = 1.0;
   gt_assert(nucleotides && level);
@@ -1538,52 +1538,52 @@ static void show_nucleotide_values(NucEval *nucleotides, const char *level,
     specificity = (double) nucleotides->TP /
                   (nucleotides->TP + nucleotides->FP);
   }
-  fprintf(outfp, "nucleotide sensitivity (%s level): %6.2f%% "
-          "(TP=%lu/(TP=%lu + FN=%lu))\n", level, sensitivity * 100.0,
-          nucleotides->TP, nucleotides->TP, nucleotides->FN);
-  fprintf(outfp, "nucleotide specificity (%s level): %6.2f%% "
-          "(TP=%lu/(TP=%lu + FP=%lu))\n", level, specificity * 100.0,
-          nucleotides->TP, nucleotides->TP, nucleotides->FP);
+  gt_file_xprintf(outfp, "nucleotide sensitivity (%s level): %6.2f%% "
+                  "(TP=%lu/(TP=%lu + FN=%lu))\n", level, sensitivity * 100.0,
+                  nucleotides->TP, nucleotides->TP, nucleotides->FN);
+  gt_file_xprintf(outfp, "nucleotide specificity (%s level): %6.2f%% "
+                  "(TP=%lu/(TP=%lu + FP=%lu))\n", level, specificity * 100.0,
+                  nucleotides->TP, nucleotides->TP, nucleotides->FP);
 }
 
-void gt_stream_evaluator_show(GtStreamEvaluator *se, FILE *outfp)
+void gt_stream_evaluator_show(GtStreamEvaluator *se, GtFile *outfp)
 {
   gt_assert(se);
 
   if (!se->evalLTR) {
     /* gene level */
-    fprintf(outfp, "gene sensitivity (mRNA level): ");
+    gt_file_xprintf(outfp, "gene sensitivity (mRNA level): ");
     gt_evaluator_show_sensitivity(se->mRNA_gene_evaluator, outfp);
-    fprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+    gt_file_xprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
 
-    fprintf(outfp, "gene specificity (mRNA level): ");
+    gt_file_xprintf(outfp, "gene specificity (mRNA level): ");
     gt_evaluator_show_specificity(se->mRNA_gene_evaluator, outfp);
-    fprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    gt_file_xprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
 
-    fprintf(outfp, "gene sensitivity (CDS level): ");
+    gt_file_xprintf(outfp, "gene sensitivity (CDS level): ");
     gt_evaluator_show_sensitivity(se->CDS_gene_evaluator, outfp);
-    fprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+    gt_file_xprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
 
-    fprintf(outfp, "gene specificity (CDS level): ");
+    gt_file_xprintf(outfp, "gene specificity (CDS level): ");
     gt_evaluator_show_specificity(se->CDS_gene_evaluator, outfp);
-    fprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    gt_file_xprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
 
     /* mRNA level */
-    fprintf(outfp, "mRNA sensitivity (mRNA level): ");
+    gt_file_xprintf(outfp, "mRNA sensitivity (mRNA level): ");
     gt_evaluator_show_sensitivity(se->mRNA_mRNA_evaluator, outfp);
-    fprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    gt_file_xprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
 
-    fprintf(outfp, "mRNA specificity (mRNA level): ");
+    gt_file_xprintf(outfp, "mRNA specificity (mRNA level): ");
     gt_evaluator_show_specificity(se->mRNA_mRNA_evaluator, outfp);
-    fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    gt_file_xprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
 
-    fprintf(outfp, "mRNA sensitivity (CDS level): ");
+    gt_file_xprintf(outfp, "mRNA sensitivity (CDS level): ");
     gt_evaluator_show_sensitivity(se->CDS_mRNA_evaluator, outfp);
-    fprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    gt_file_xprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
 
-    fprintf(outfp, "mRNA specificity (CDS level): ");
+    gt_file_xprintf(outfp, "mRNA specificity (CDS level): ");
     gt_evaluator_show_specificity(se->CDS_mRNA_evaluator, outfp);
-    fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    gt_file_xprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
 
     /* mRNA exon level */
     show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
@@ -1604,13 +1604,13 @@ void gt_stream_evaluator_show(GtStreamEvaluator *se, FILE *outfp)
   }
   else {
     /* LTR_retrotransposon prediction */
-    fprintf(outfp, "LTR_retrotransposon sensitivity: ");
+    gt_file_xprintf(outfp, "LTR_retrotransposon sensitivity: ");
     gt_evaluator_show_sensitivity(se->LTR_evaluator, outfp);
-    fprintf(outfp, " (missing LTRs: %lu)\n", se->missing_LTRs);
+    gt_file_xprintf(outfp, " (missing LTRs: %lu)\n", se->missing_LTRs);
 
-    fprintf(outfp, "LTR_retrotransposon specificity: ");
+    gt_file_xprintf(outfp, "LTR_retrotransposon specificity: ");
     gt_evaluator_show_specificity(se->LTR_evaluator, outfp);
-    fprintf(outfp, " (wrong LTRs: %lu)\n", se->wrong_LTRs);
+    gt_file_xprintf(outfp, " (wrong LTRs: %lu)\n", se->wrong_LTRs);
   }
 }
 

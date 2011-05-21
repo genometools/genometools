@@ -73,20 +73,20 @@ double gt_evaluator_get_specificity(const GtEvaluator *evaluator)
   return specificity;
 }
 
-void gt_evaluator_show_sensitivity(const GtEvaluator *evaluator, FILE *outfp)
+void gt_evaluator_show_sensitivity(const GtEvaluator *evaluator, GtFile *outfp)
 {
-  gt_assert(evaluator && outfp);
-  fprintf(outfp, "%6.2f%% (%lu/%lu)",
-          gt_evaluator_get_sensitivity(evaluator) * 100.0,
-          evaluator->T, evaluator->A);
+  gt_assert(evaluator);
+  gt_file_xprintf(outfp, "%6.2f%% (%lu/%lu)",
+                  gt_evaluator_get_sensitivity(evaluator) * 100.0,
+                  evaluator->T, evaluator->A);
 }
 
-void gt_evaluator_show_specificity(const GtEvaluator *evaluator, FILE *outfp)
+void gt_evaluator_show_specificity(const GtEvaluator *evaluator, GtFile *outfp)
 {
-  gt_assert(evaluator && outfp);
-  fprintf(outfp, "%6.2f%% (%lu/%lu)",
-          gt_evaluator_get_specificity(evaluator) * 100.0,
-          evaluator->T, evaluator->P);
+  gt_assert(evaluator);
+  gt_file_xprintf(outfp, "%6.2f%% (%lu/%lu)",
+                  gt_evaluator_get_specificity(evaluator) * 100.0,
+                  evaluator->T, evaluator->P);
 }
 void gt_evaluator_reset(GtEvaluator *evaluator)
 {
