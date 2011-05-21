@@ -166,7 +166,7 @@ static GtOPrval sketch_parse_options(int *parsed_args,
   gt_option_parser_add_option(op, option);
 
     /* -unsafe */
-  option = gt_option_new_bool("unsafe", "enable unsafe mode",
+  option = gt_option_new_bool("unsafe", "enable unsafe mode for style file",
                               &arguments->unsafe, false);
   gt_option_parser_add_option(op, option);
 
