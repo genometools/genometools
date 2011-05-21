@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/ma_api.h"
 #include "core/option.h"
+#include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtdatahelp.h"
@@ -31,13 +33,26 @@ typedef struct {
   unsigned long LTRdelta;
 } EvalArguments;
 
-static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
-                              int argc, const char **argv, GtError *err)
+static void* gt_eval_arguments_new(void)
 {
+  EvalArguments *arguments = gt_calloc(1, sizeof *arguments);
+  return arguments;
+}
+
+static void gt_eval_arguments_delete(void *tool_arguments)
+{
+  EvalArguments *arguments = tool_arguments;
+  if (!arguments) return;
+  gt_free(arguments);
+}
+
+static GtOptionParser* gt_eval_option_parser_new(void *tool_arguments)
+{
+  EvalArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *ltroption, *ltrdeltaoption;
-  GtOPrval oprval;
-  gt_error_check(err);
+  gt_assert(arguments);
+
   op = gt_option_parser_new("reference_file prediction_file ",
                             "Compare annotation files and show "
                             "accuracy measures (prediction vs. reference).");
@@ -83,50 +98,46 @@ static GtOPrval parse_options(int *parsed_args, EvalArguments *arguments,
   /* option implications */
   gt_option_imply(ltrdeltaoption, ltroption);
 
-  /* parse */
+  /* set comment function */
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
+
+  /* set minimum and maximum number of arguments */
   gt_option_parser_set_min_max_args(op, 2, 2);
-  oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
-                                  err);
-  gt_option_parser_delete(op);
-  return oprval;
+
+  return op;
 }
 
-int gt_eval(int argc, const char **argv, GtError *err)
+int gt_eval_runner(GT_UNUSED int argc, const char **argv, int parsed_args,
+                   void *tool_arguments, GtError *err)
 {
+  EvalArguments *arguments = tool_arguments;
   GtNodeStream *reference_stream,
                *prediction_stream;
   GtStreamEvaluator *evaluator;
-  EvalArguments arguments;
-  int had_err, parsed_args;
-  gt_error_check(err);
+  int had_err;
 
-  /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR: return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT: return 0;
-  }
+  gt_error_check(err);
+  gt_assert(arguments);
 
   /* create the reference stream */
   reference_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args]);
-  if (arguments.verbose)
+  if (arguments->verbose)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) reference_stream);
 
   /* create the prediction stream */
   prediction_stream = gt_gff3_in_stream_new_sorted(argv[parsed_args + 1]);
-  if (arguments.verbose)
+  if (arguments->verbose)
     gt_gff3_in_stream_show_progress_bar((GtGFF3InStream*) prediction_stream);
 
   /* create the stream evaluator */
   evaluator = gt_stream_evaluator_new(reference_stream, prediction_stream,
-                                      arguments.nuceval, arguments.evalLTR,
-                                      arguments.LTRdelta);
+                                      arguments->nuceval, arguments->evalLTR,
+                                      arguments->LTRdelta);
 
   /* compute the evaluation */
-  had_err = gt_stream_evaluator_evaluate(evaluator, arguments.verbose,
-                                         arguments.exondiff,
-                                         arguments.exondiffcollapsed, NULL,
+  had_err = gt_stream_evaluator_evaluate(evaluator, arguments->verbose,
+                                         arguments->exondiff,
+                                         arguments->exondiffcollapsed, NULL,
                                          err);
 
   /* show the evaluation */
@@ -139,4 +150,13 @@ int gt_eval(int argc, const char **argv, GtError *err)
   gt_node_stream_delete(reference_stream);
 
   return had_err;
+}
+
+GtTool* gt_eval(void)
+{
+  return gt_tool_new(gt_eval_arguments_new,
+                     gt_eval_arguments_delete,
+                     gt_eval_option_parser_new,
+                     NULL,
+                     gt_eval_runner);
 }

@@ -144,7 +144,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_hidden_tool(tools, "dev", gt_dev());
   gt_toolbox_add_tool(tools, "dupfeat", gt_dupfeat());
   gt_toolbox_add_tool(tools, "encseq", gt_encseq());
-  gt_toolbox_add(tools, "eval", gt_eval);
+  gt_toolbox_add_tool(tools, "eval", gt_eval());
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
   /* hidden "link" from filter to the select tool for backward compatibility */
