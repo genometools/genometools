@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/merge_stream.h"
+#include "extended/merge_stream_api.h"
 #include "tools/gt_merge.h"
 
 static GtOPrval parse_options(int *parsed_args, GtFile **outfp, int argc,

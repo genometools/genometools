@@ -15,11 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MERGE_STREAM_H
-#define MERGE_STREAM_H
+#ifndef MERGE_STREAM_API_H
+#define MERGE_STREAM_API_H
 
-#include "extended/merge_stream_api.h"
+#include <stdio.h>
+#include "core/array.h"
+#include "extended/node_stream_api.h"
 
-const GtNodeStreamClass* gt_merge_stream_class(void);
+/* Implements the <GtNodeStream> interface. */
+typedef struct GtMergeStream GtMergeStream;
+
+/* Create a <GtMergeStream*> which merges the given (sorted) <node_streams> in a
+   sorted fashion. */
+GtNodeStream* gt_merge_stream_new(const GtArray *node_streams);
 
 #endif

@@ -114,6 +114,8 @@ interfaces.
 
   <li><a href="#GtLogger">GtLogger</a>
 
+  <li><a href="#GtMergeStream">GtMergeStream</a>
+
   <li><a href="#GtNodeStream">GtNodeStream</a>
 
   <li><a href="#GtNodeStreamClass">GtNodeStreamClass</a>
@@ -3807,6 +3809,20 @@ Log to target regardless of logging status, using a va_list argument.
 Log to target depending on logging status, using a va_list argument.
 </p>
 <hr>
+<a name="GtMergeStream"></a>
+<h2>Class GtMergeStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. </p>
+
+<hr>
+<a name="gt_merge_stream_new"></a>
+
+<code>GtNodeStream*  gt_merge_stream_new(const GtArray *node_streams)</code>
+<p>
+Create a <code>GtMergeStream*</code> which merges the given (sorted) <code>node_streams</code> in a
+   sorted fashion.
+</p>
+<hr>
 <a name="GtNodeStream"></a>
 <h2>Class GtNodeStream</h2>
 
@@ -6499,6 +6515,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_logger_target"><code>gt_logger_target</code></a><br>
 
   <a href="#gt_malloc"><code>gt_malloc</code></a><br>
+
+  <a href="#gt_merge_stream_new"><code>gt_merge_stream_new</code></a><br>
 
   <a href="#gt_msort"><code>gt_msort</code></a><br>
 
