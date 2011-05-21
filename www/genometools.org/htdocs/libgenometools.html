@@ -3146,8 +3146,9 @@ Create a new <code>GtNodeVisitor*</code> which writes the output it produces to 
 <code>void            gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
                                                unsigned long fasta_width)</code>
 <p>
-Set the <code>fasta_width</code> used by <code>gff3_visitor</code> to write embedded FASTA
-   sequences.
+Set the width with which the FASTA sequences of <code>GtSequenceNode</code>s visited
+   by <code>gff3_visitor</code> are shown to <code>fasta_width</code>.
+   Per default, each FASTA entry is shown on a single line.
 </p>
 <hr>
 <a name="gt_gff3_visitor_retain_id_attributes"></a>

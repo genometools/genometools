@@ -29,8 +29,9 @@ typedef struct GtGFF3Visitor GtGFF3Visitor;
    given output file pointer <outfp>. If <outfp> is <NULL>, the output is
    written to <stdout>. */
 GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp);
-/* Set the <fasta_width> used by <gff3_visitor> to write embedded FASTA
-   sequences. */
+/* Set the width with which the FASTA sequences of <GtSequenceNode>s visited
+   by <gff3_visitor> are shown to <fasta_width>.
+   Per default, each FASTA entry is shown on a single line. */
 void           gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
                                                unsigned long fasta_width);
 /* Retain the original ID attributes (instead of creating new ones), if
