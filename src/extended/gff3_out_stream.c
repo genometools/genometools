@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -16,7 +16,7 @@
 */
 
 #include "extended/gff3_out_stream_api.h"
-#include "extended/gff3_visitor.h"
+#include "extended/gff3_visitor_api.h"
 #include "extended/node_stream_api.h"
 #include "core/cstr_table.h"
 
@@ -74,11 +74,13 @@ void gt_gff3_out_stream_set_fasta_width(GtGFF3OutStream *gff3_out_stream,
                                         unsigned long fasta_width)
 {
   gt_assert(gff3_out_stream);
-  gt_gff3_visitor_set_fasta_width(gff3_out_stream->gff3_visitor, fasta_width);
+  gt_gff3_visitor_set_fasta_width((GtGFF3Visitor*)
+                                  gff3_out_stream->gff3_visitor, fasta_width);
 }
 
 void gt_gff3_out_stream_retain_id_attributes(GtGFF3OutStream *gff3_out_stream)
 {
   gt_assert(gff3_out_stream);
-  gt_gff3_visitor_retain_id_attributes(gff3_out_stream->gff3_visitor);
+  gt_gff3_visitor_retain_id_attributes((GtGFF3Visitor*)
+                                       gff3_out_stream->gff3_visitor);
 }

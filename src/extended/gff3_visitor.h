@@ -18,15 +18,8 @@
 #ifndef GFF3_VISITOR_H
 #define GFF3_VISITOR_H
 
-/* Implements the <GtNodeVisitor> interface. */
-typedef struct GtGFF3Visitor GtGFF3Visitor;
-
-#include "extended/node_visitor_api.h"
+#include "extended/gff3_visitor_api.h"
 
 const GtNodeVisitorClass* gt_gff3_visitor_class(void);
-GtNodeVisitor*            gt_gff3_visitor_new(GtFile*);
-void                      gt_gff3_visitor_set_fasta_width(GtNodeVisitor*,
-                                                          unsigned long);
-void                      gt_gff3_visitor_retain_id_attributes(GtNodeVisitor *);
 
 #endif

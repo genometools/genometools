@@ -26,7 +26,7 @@
 #include "core/unused_api.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"
-#include "extended/gff3_visitor.h"
+#include "extended/gff3_visitor_api.h"
 #include "extended/region_node_api.h"
 
 typedef struct {

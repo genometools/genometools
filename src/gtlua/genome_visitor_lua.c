@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "extended/gff3_visitor.h"
+#include "extended/gff3_visitor_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_visitor_lua.h"
 

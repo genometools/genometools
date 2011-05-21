@@ -386,16 +386,15 @@ GtNodeVisitor* gt_gff3_visitor_new(GtFile *outfp)
   return nv;
 }
 
-void gt_gff3_visitor_retain_id_attributes(GtNodeVisitor *nv)
+void gt_gff3_visitor_retain_id_attributes(GtGFF3Visitor *gff3_visitor)
 {
-    GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
-    gff3_visitor->retain_ids = true;
+  gt_assert(gff3_visitor);
+  gff3_visitor->retain_ids = true;
 }
 
-void gt_gff3_visitor_set_fasta_width(GtNodeVisitor *nv,
+void gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
                                      unsigned long fasta_width)
 {
-  GtGFF3Visitor *gff3_visitor = gff3_visitor_cast(nv);
-  gt_assert(nv);
+  gt_assert(gff3_visitor);
   gff3_visitor->fasta_width = fasta_width;
 }

@@ -98,6 +98,8 @@ interfaces.
 
   <li><a href="#GtGFF3Parser">GtGFF3Parser</a>
 
+  <li><a href="#GtGFF3Visitor">GtGFF3Visitor</a>
+
   <li><a href="#GtGTFInStream">GtGTFInStream</a>
 
   <li><a href="#GtGenomeNode">GtGenomeNode</a>
@@ -3047,8 +3049,8 @@ If this method is called upon <code>gff3_out_stream</code>, use the original ID
 <h2>Class GtGFF3Parser</h2>
 
 <p> A <code>GtGFF3Parser</code> can be used to parse GFF3 files and convert them into
-   <code>GtGenomeNode</code>s. This is a low-level class and is usually not used directly.
-   Normally, a <code>GtGFF3InStream</code> is used to parse GFF3 files. </p>
+   <code>GtGenomeNode</code>s. This is a low-level class and it is usually not used
+   directly. Normally, a <code>GtGFF3InStream</code> is used to parse GFF3 files. </p>
 
 <hr>
 <a name="gt_gff3_parser_new"></a>
@@ -3120,6 +3122,43 @@ Reset the <code>gff3_parser</code> (necessary if the input file is switched).
 <code>void           gt_gff3_parser_delete(GtGFF3Parser *gff3_parser)</code>
 <p>
 Delete the <code>gff3_parser</code> and free all allocated space.
+</p>
+<hr>
+<a name="GtGFF3Visitor"></a>
+<h2>Class GtGFF3Visitor</h2>
+
+<p> Implements the <code>GtNodeVisitor</code> interface with a visitor that produces GFF3
+   output. This is a low-level class and it is usually not used directly.
+   Normally, a <code>GtGFF3OutStream</code> is used to produce GFF3 output. </p>
+
+<hr>
+<a name="gt_gff3_visitor_new"></a>
+
+<code>GtNodeVisitor*  gt_gff3_visitor_new(GtFile *outfp)</code>
+<p>
+Create a new <code>GtNodeVisitor*</code> which writes the output it produces to the
+   given output file pointer <code>outfp</code>. If <code>outfp</code> is <code>NULL</code>, the output is
+   written to <code>stdout</code>.
+</p>
+<hr>
+<a name="gt_gff3_visitor_set_fasta_width"></a>
+
+<code>void            gt_gff3_visitor_set_fasta_width(GtGFF3Visitor *gff3_visitor,
+                                               unsigned long fasta_width)</code>
+<p>
+Set the <code>fasta_width</code> used by <code>gff3_visitor</code> to write embedded FASTA
+   sequences.
+</p>
+<hr>
+<a name="gt_gff3_visitor_retain_id_attributes"></a>
+
+<code>void            gt_gff3_visitor_retain_id_attributes(GtGFF3Visitor
+                                                    *gff3_visitor)</code>
+<p>
+Retain the original ID attributes (instead of creating new ones), if
+   possible.  Memory consumption for <code>gff3_visitor</code> is raised from O(1) to
+   O(<code>input_size</code>), because bookkeeping of used IDs becomes necessary to avoid
+   ID collisions.
 </p>
 <hr>
 <a name="GtGTFInStream"></a>
@@ -6633,6 +6672,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_gff3_parser_reset"><code>gt_gff3_parser_reset</code></a><br>
 
   <a href="#gt_gff3_parser_set_offset"><code>gt_gff3_parser_set_offset</code></a><br>
+
+  <a href="#gt_gff3_visitor_new"><code>gt_gff3_visitor_new</code></a><br>
+
+  <a href="#gt_gff3_visitor_retain_id_attributes"><code>gt_gff3_visitor_retain_id_attributes</code></a><br>
+
+  <a href="#gt_gff3_visitor_set_fasta_width"><code>gt_gff3_visitor_set_fasta_width</code></a><br>
 
   <a href="#gt_graphics_delete"><code>gt_graphics_delete</code></a><br>
 
