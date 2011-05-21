@@ -30,7 +30,7 @@
 #include "extended/merge_feature_stream.h"
 #include "extended/sort_stream_api.h"
 #include "extended/type_checker_builtin.h"
-#include "extended/type_checker_obo.h"
+#include "extended/type_checker_obo_api.h"
 #include "tools/gt_gff3.h"
 
 typedef struct {

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,12 +15,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_CHECKER_OBO_H
-#define TYPE_CHECKER_OBO_H
+#ifndef TYPE_CHECKER_OBO_API_H
+#define TYPE_CHECKER_OBO_API_H
 
-#include "extended/type_checker_obo_api.h"
-#include "extended/type_checker.h"
+#include "extended/type_checker_api.h"
 
-const GtTypeCheckerClass* gt_type_checker_obo_class(void);
+/* Implements the <GtTypeChecker> interface with types from an OBO file. */
+typedef struct GtTypeCheckerOBO GtTypeCheckerOBO;
+
+/* Create a new <GtTypeChecker*> for OBO file with given <obo_file_path>.
+   If the OBO file cannot be parsed correctly, <NULL> is returned and <err> is
+   set correspondingly. */
+GtTypeChecker* gt_type_checker_obo_new(const char *obo_file_path, GtError *err);
 
 #endif

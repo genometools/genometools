@@ -28,7 +28,7 @@ GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker);
    otherwise. */
 bool           gt_type_checker_is_valid(GtTypeChecker *type_checker,
                                         const char *type);
-/* Decreate the reference count for <type_checker> or delete it, if this was the
+/* Decrease the reference count for <type_checker> or delete it, if this was the
    last reference. */
 void           gt_type_checker_delete(GtTypeChecker *type_checker);
 

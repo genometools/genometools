@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2009, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008            Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,7 +18,7 @@
 #include "core/ma.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/type_checker_obo.h"
+#include "extended/type_checker_obo_api.h"
 #include "tools/gt_gff3validator.h"
 
 typedef struct {
