@@ -18,7 +18,7 @@
 #ifndef TYPE_CHECKER_H
 #define TYPE_CHECKER_H
 
-/* The GtTypeChecker interface. */
+/* The <GtTypeChecker> interface. */
 
 typedef struct GtTypeCheckerClass GtTypeCheckerClass;
 typedef struct GtTypeChecker GtTypeChecker;
@@ -29,7 +29,7 @@ typedef struct GtTypeChecker GtTypeChecker;
 /* Return a new reference to <type_checker>. */
 GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker);
 /* Returns <true> if <type> is a valid type, <false> otherwise. */
-bool            gt_type_checker_is_valid(GtTypeChecker*, const char *type);
-void            gt_type_checker_delete(GtTypeChecker*);
+bool           gt_type_checker_is_valid(GtTypeChecker*, const char *type);
+void           gt_type_checker_delete(GtTypeChecker*);
 
 #endif
