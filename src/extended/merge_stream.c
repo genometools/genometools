@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -26,7 +26,7 @@
 
 struct GtMergeStream {
   const GtNodeStream parent_instance;
-  GtArray *genome_streams;
+  GtArray *node_streams;
   GtGenomeNode **buffer;
 };
 
@@ -46,11 +46,11 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   ms = gt_merge_stream_cast(ns);
 
   /* fill buffers */
-  for (i = 0; !had_err && i < gt_array_size(ms->genome_streams); i++) {
+  for (i = 0; !had_err && i < gt_array_size(ms->node_streams); i++) {
     while (!ms->buffer[i]) {
       had_err = gt_node_stream_next(*(GtNodeStream**)
-                                        gt_array_get(ms->genome_streams, i),
-                                        ms->buffer + i, err);
+                                    gt_array_get(ms->node_streams, i),
+                                    ms->buffer + i, err);
       if (had_err || !ms->buffer[i])
         break;
       /* remove EOF nodes */
@@ -65,8 +65,8 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
   if (!had_err) {
     for (;;) {
       gt_genome_node_consolidated = 0;
-      for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
-        for (j = i+1; j < gt_array_size(ms->genome_streams); j++) {
+      for (i = 0; i < gt_array_size(ms->node_streams); i++) {
+        for (j = i+1; j < gt_array_size(ms->node_streams); j++) {
           gt_assert(i != j);
           if (gt_genome_nodes_are_equal_region_nodes(ms->buffer[i],
                                                      ms->buffer[j])) {
@@ -84,7 +84,7 @@ static int merge_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 
   /* find minimal node */
   if (!had_err) {
-    for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
+    for (i = 0; i < gt_array_size(ms->node_streams); i++) {
       if (ms->buffer[i]) {
         if (min_i != GT_UNDEF_ULONG) {
           if (gt_genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
@@ -107,11 +107,9 @@ static void merge_stream_free(GtNodeStream *ns)
 {
   GtMergeStream *ms = gt_merge_stream_cast(ns);
   unsigned long i;
-  for (i = 0; i < gt_array_size(ms->genome_streams); i++) {
-    gt_node_stream_delete(*(GtNodeStream**)
-                          gt_array_get(ms->genome_streams, i));
-  }
-  gt_array_delete(ms->genome_streams);
+  for (i = 0; i < gt_array_size(ms->node_streams); i++)
+    gt_node_stream_delete(*(GtNodeStream**) gt_array_get(ms->node_streams, i));
+  gt_array_delete(ms->node_streams);
   gt_free(ms->buffer);
 }
 
@@ -126,27 +124,26 @@ const GtNodeStreamClass* gt_merge_stream_class(void)
   return nsc;
 }
 
-GtNodeStream* gt_merge_stream_new(const GtArray *genome_streams)
+GtNodeStream* gt_merge_stream_new(const GtArray *node_streams)
 {
   GtNodeStream *in_stream,
                *ns = gt_node_stream_create(gt_merge_stream_class(), true);
   GtMergeStream *ms = gt_merge_stream_cast(ns);
   unsigned long i;
 #ifndef NDEBUG
-  gt_assert(gt_array_size(genome_streams)); /* at least on input stream given */
+  gt_assert(gt_array_size(node_streams)); /* at least on input stream given */
   /* each input stream is sorted */
-  for (i = 0; i < gt_array_size(genome_streams); i++) {
+  for (i = 0; i < gt_array_size(node_streams); i++) {
     gt_assert(gt_node_stream_is_sorted(*(GtNodeStream**)
-                                   gt_array_get(genome_streams, i)));
+                                       gt_array_get(node_streams, i)));
   }
 #endif
-  ms->genome_streams = gt_array_new(sizeof (GtNodeStream*));
-  for (i = 0; i < gt_array_size(genome_streams); i++) {
+  ms->node_streams = gt_array_new(sizeof (GtNodeStream*));
+  for (i = 0; i < gt_array_size(node_streams); i++) {
     in_stream = gt_node_stream_ref(*(GtNodeStream**)
-                                  gt_array_get(genome_streams, i));
-    gt_array_add(ms->genome_streams, in_stream);
+                                   gt_array_get(node_streams, i));
+    gt_array_add(ms->node_streams, in_stream);
   }
-  ms->buffer = gt_calloc(gt_array_size(genome_streams),
-                         sizeof (GtGenomeNode*));
+  ms->buffer = gt_calloc(gt_array_size(node_streams), sizeof (GtGenomeNode*));
   return ns;
 }
