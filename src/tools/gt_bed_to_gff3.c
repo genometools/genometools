@@ -54,7 +54,7 @@ static GtOptionParser* gt_bed_to_gff3_option_parser_new(void *tool_arguments)
   GtOptionParser *op;
   GtOption *o;
   op = gt_option_parser_new("[bed_file]",
-                            "Parse BED file and show it as GFF3.");
+                            "Parse BED file and convert it to GFF3.");
   o = gt_option_new_string("featuretype", "Set type of parsed BED features",
                            arguments->feature_type, BED_FEATURE_TYPE);
   gt_option_parser_add_option(op, o);
