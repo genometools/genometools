@@ -22,7 +22,7 @@
 #include "core/queue.h"
 #include "core/range.h"
 #include "core/strand_api.h"
-#include "extended/type_checker.h"
+#include "extended/type_checker_api.h"
 
 #define GFF_VERSION         3
 #define GFF_VERSION_PREFIX  "##gff-version"

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,9 +19,10 @@
 #define GFF3_IN_STREAM_H
 
 #include <stdio.h>
+#include "core/str_array_api.h"
 #include "extended/gff3_in_stream_api.h"
 #include "extended/node_stream_api.h"
-#include "extended/type_checker.h"
+#include "extended/type_checker_api.h"
 
 const GtNodeStreamClass* gt_gff3_in_stream_class(void);
 void                     gt_gff3_in_stream_set_type_checker(GtNodeStream*,

@@ -154,6 +154,8 @@ interfaces.
 
   <li><a href="#GtTranslator">GtTranslator</a>
 
+  <li><a href="#GtTypeChecker">GtTypeChecker</a>
+
 </ul>
 <h2>Modules</h2>
 <ul>
@@ -4967,6 +4969,37 @@ Moves the <code>translator</code> to the beginning of the first codon in <code>d
 Deletes <code>translator</code> and frees all associated memory.
 </p>
 <hr>
+<a name="GtTypeChecker"></a>
+<h2>Class GtTypeChecker</h2>
+
+<p> The <code>GtTypeChecker</code> interface, allows to check the validity of (genome
+   feature) types. </p>
+
+<hr>
+<a name="gt_type_checker_ref"></a>
+
+<code>GtTypeChecker*  gt_type_checker_ref(GtTypeChecker *type_checker)</code>
+<p>
+Increase the reference count for <code>type_checker</code> and return it.
+</p>
+<hr>
+<a name="gt_type_checker_is_valid"></a>
+
+<code>bool            gt_type_checker_is_valid(GtTypeChecker *type_checker,
+                                        const char *type)</code>
+<p>
+Return <code>true</code> if <code>type</code> is a valid type for the given <code>type_checker</code>, <code>false</code>
+   otherwise.
+</p>
+<hr>
+<a name="gt_type_checker_delete"></a>
+
+<code>void            gt_type_checker_delete(GtTypeChecker *type_checker)</code>
+<p>
+Decreate the reference count for <code>type_checker</code> or delete it, if this was the
+   last reference.
+</p>
+<hr>
 <a name="Array2dim"></a>
 <h2>Module Array2dim</h2>
 <a name="gt_array2dim_malloc"></a>
@@ -6832,6 +6865,12 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_translator_set_codon_iterator"><code>gt_translator_set_codon_iterator</code></a><br>
 
   <a href="#gt_translator_set_translation_table"><code>gt_translator_set_translation_table</code></a><br>
+
+  <a href="#gt_type_checker_delete"><code>gt_type_checker_delete</code></a><br>
+
+  <a href="#gt_type_checker_is_valid"><code>gt_type_checker_is_valid</code></a><br>
+
+  <a href="#gt_type_checker_ref"><code>gt_type_checker_ref</code></a><br>
 
   <a href="#gt_version_check"><code>gt_version_check</code></a><br>
 

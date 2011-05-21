@@ -18,7 +18,6 @@
 #define BED_PARSER_H
 
 #include "core/queue.h"
-#include "extended/type_checker.h"
 
 #define BED_FEATURE_TYPE        "BED_feature"
 #define BED_THICK_FEATURE_TYPE  "BED_thick_feature"

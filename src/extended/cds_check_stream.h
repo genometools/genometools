@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include "extended/gff3_in_stream_api.h"
 #include "extended/node_stream_api.h"
-#include "extended/type_checker.h"
 
 /* Implements the <GtNodeStream> interface. */
 typedef struct GtCDSCheckStream GtCDSCheckStream;

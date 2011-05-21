@@ -35,7 +35,6 @@ struct GtTypeChecker {
 };
 
 GtTypeChecker* gt_type_checker_create(const GtTypeCheckerClass*);
-void*           gt_type_checker_cast(const GtTypeCheckerClass*,
-                                     GtTypeChecker*);
+void*          gt_type_checker_cast(const GtTypeCheckerClass*, GtTypeChecker*);
 
 #endif

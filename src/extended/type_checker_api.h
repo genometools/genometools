@@ -15,11 +15,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef TYPE_CHECKER_H
-#define TYPE_CHECKER_H
+#ifndef TYPE_CHECKER_API_H
+#define TYPE_CHECKER_API_H
 
-#include "extended/type_checker_api.h"
+/* The <GtTypeChecker> interface, allows to check the validity of (genome
+   feature) types. */
+typedef struct GtTypeChecker GtTypeChecker;
 
-typedef struct GtTypeCheckerClass GtTypeCheckerClass;
+/* Increase the reference count for <type_checker> and return it. */
+GtTypeChecker* gt_type_checker_ref(GtTypeChecker *type_checker);
+/* Return <true> if <type> is a valid type for the given <type_checker>, <false>
+   otherwise. */
+bool           gt_type_checker_is_valid(GtTypeChecker *type_checker,
+                                        const char *type);
+/* Decreate the reference count for <type_checker> or delete it, if this was the
+   last reference. */
+void           gt_type_checker_delete(GtTypeChecker *type_checker);
 
 #endif

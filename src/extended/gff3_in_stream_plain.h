@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "extended/gff3_in_stream_plain.h"
 #include "extended/node_stream_api.h"
-#include "extended/type_checker.h"
+#include "extended/type_checker_api.h"
 
 /* Implements the <GtNodeStream> interface. */
 typedef struct GtGFF3InStreamPlain GtGFF3InStreamPlain;
