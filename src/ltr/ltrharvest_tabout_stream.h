@@ -18,8 +18,8 @@
 #ifndef LTRHARVEST_TABOUT_STREAM_H
 #define LTRHARVEST_TABOUT_STREAM_H
 
-#include "extended/node_visitor.h"
 #include "extended/node_stream_api.h"
+#include "extended/node_visitor_api.h"
 
 /* Takes ownership of <v>. */
 GtNodeStream* gt_ltrharvest_tabout_stream_new(GtNodeStream *in_stream,

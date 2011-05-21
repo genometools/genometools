@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,10 +17,10 @@
 #ifndef MD5_TO_ID_VISITOR_H
 #define MD5_TO_ID_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtMD5ToSeqidsVisitor GtMD5ToSeqidsVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_md5_to_id_visitor_class(void);

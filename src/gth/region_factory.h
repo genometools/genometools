@@ -18,7 +18,7 @@
 #ifndef REGION_FACTORY_H
 #define REGION_FACTORY_H
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "gth/input.h"
 
 typedef struct GthRegionFactory GthRegionFactory;

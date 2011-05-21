@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@
 #include "extended/node_stream_api.h"
 #include "extended/node_visitor.h"
 
-/* Implements the ``genome_stream'' interface. */
+/* Implements the <GtNodeStream> interface. */
 typedef struct GtVisitorStream GtVisitorStream;
 
 const GtNodeStreamClass* gt_visitor_stream_class(void);

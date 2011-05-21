@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,26 +18,11 @@
 #ifndef NODE_VISITOR_H
 #define NODE_VISITOR_H
 
-/* the ``genome visitor'' interface, a visitor for genome nodes */
-typedef struct GtNodeVisitorClass GtNodeVisitorClass;
-typedef struct GtNodeVisitor GtNodeVisitor;
+#include "extended/node_visitor_api.h"
 
-#include "extended/comment_node_api.h"
-#include "extended/eof_node_api.h"
-#include "extended/feature_node.h"
-#include "extended/region_node.h"
-#include "extended/sequence_node_api.h"
+typedef struct GtNodeVisitorClass GtNodeVisitorClass;
 
 void* gt_node_visitor_cast(const GtNodeVisitorClass*, GtNodeVisitor*);
-int   gt_node_visitor_visit_comment_node(GtNodeVisitor*, GtCommentNode*,
-                                         GtError*);
-int   gt_node_visitor_visit_feature_node(GtNodeVisitor*, GtFeatureNode*,
-                                         GtError*);
-int   gt_node_visitor_visit_region_node(GtNodeVisitor*, GtRegionNode*,
-                                        GtError*);
-int   gt_node_visitor_visit_sequence_node(GtNodeVisitor*, GtSequenceNode*,
-                                          GtError*);
 int   gt_node_visitor_visit_eof_node(GtNodeVisitor*, GtEOFNode*, GtError*);
-void  gt_node_visitor_delete(GtNodeVisitor *nv);
 
 #endif

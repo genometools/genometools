@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "extended/visitor_stream.h"
 #include "ltr/ltrharvest_fasta_out_stream.h"
 #include "ltr/ltrharvest_fasta_out_visitor.h"

@@ -18,11 +18,11 @@
 #ifndef SPLICE_SITE_INFO_VISITOR_H
 #define SPLICE_SITE_INFO_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtSpliceSiteInfoVisitor GtSpliceSiteInfoVisitor;
 
 #include <stdbool.h>
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_splice_site_info_visitor_class(void);

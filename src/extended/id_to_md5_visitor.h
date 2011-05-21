@@ -17,10 +17,10 @@
 #ifndef ID_TO_MD5_VISITOR_H
 #define ID_TO_MD5_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtSeqidsToMD5Visitor GtSeqidsToMD5Visitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_id_to_md5_visitor_class(void);

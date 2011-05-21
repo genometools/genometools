@@ -18,11 +18,11 @@
 #ifndef FEATURE_VISITOR_H
 #define FEATURE_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtFeatureVisitor GtFeatureVisitor;
 
 #include "annotationsketch/feature_index.h"
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 const GtNodeVisitorClass* gt_feature_visitor_class(void);
 GtNodeVisitor*            gt_feature_visitor_new(GtFeatureIndex*);

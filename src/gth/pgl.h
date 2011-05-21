@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +20,7 @@
 
 #include "core/array.h"
 #include "core/error.h"
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "gth/sa.h"
 
 typedef struct {

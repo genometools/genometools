@@ -19,7 +19,7 @@
 #define STREAM_EVALUATOR_H
 
 #include "extended/node_stream_api.h"
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 typedef struct GtStreamEvaluator GtStreamEvaluator;
 

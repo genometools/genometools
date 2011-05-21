@@ -18,10 +18,10 @@
 #ifndef SCRIPT_WRAPPER_VISITOR_H
 #define SCRIPT_WRAPPER_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtScriptWrapperVisitor GtScriptWrapperVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 typedef void (*GtScriptWrapperVisitorFreeFunc)(GtNodeVisitor*);
 typedef int  (*GtScriptWrapperVisitorCommentNodeFunc)(GtCommentNode*,

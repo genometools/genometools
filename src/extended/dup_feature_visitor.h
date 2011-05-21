@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,10 +17,10 @@
 #ifndef DUP_FEATURE_VISITOR_H
 #define DUP_FEATURE_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtDupFeatureVisitor GtDupFeatureVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 const GtNodeVisitorClass* gt_dup_feature_visitor_class(void);
 /* Duplicate internal feature nodes of type <source_type> as features with type

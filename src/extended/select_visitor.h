@@ -18,10 +18,10 @@
 #ifndef SELECT_VISITOR_H
 #define SELECT_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtSelectVisitor GtSelectVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 const GtNodeVisitorClass* gt_select_visitor_class(void);
 /* If <strand> is != NUM_OF_GT_STRAND_TYPES, then each genome feature must have

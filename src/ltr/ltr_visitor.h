@@ -18,10 +18,10 @@
 #ifndef LTR_VISITOR_H
 #define LTR_VISITOR_H
 
-/* implements the ``node visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtLTRVisitor GtLTRVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "ltr/ltrelement.h"
 
 const GtNodeVisitorClass* gt_ltr_visitor_class(void);

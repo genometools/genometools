@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,10 +18,10 @@
 #ifndef STAT_VISITOR_H
 #define STAT_VISITOR_H
 
-/* implements the ``genome visitor'' interface, gathers statistics */
+/* Implements the <GtNodeVisitor> interface, gathers statistics. */
 typedef struct GtStatVisitor GtStatVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 const GtNodeVisitorClass* gt_stat_visitor_class(void);
 GtNodeVisitor*            gt_stat_visitor_new(bool gene_length_distri,

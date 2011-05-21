@@ -120,6 +120,8 @@ interfaces.
 
   <li><a href="#GtNodeStreamClass">GtNodeStreamClass</a>
 
+  <li><a href="#GtNodeVisitor">GtNodeVisitor</a>
+
   <li><a href="#GtPhase">GtPhase</a>
 
   <li><a href="#GtRange">GtRange</a>
@@ -3919,6 +3921,55 @@ Create a new node stream class (that is, a class which implements the node
    <code>gt_node_stream_next()</code> semantic for the new class.
 </p>
 <hr>
+<a name="GtNodeVisitor"></a>
+<h2>Class GtNodeVisitor</h2>
+
+<p> The <code>GtNodeVisitor</code> interface, a visitor for <code>GtGenomeNode</code>s. </p>
+
+<hr>
+<a name="gt_node_visitor_visit_comment_node"></a>
+
+<code>int    gt_node_visitor_visit_comment_node(GtNodeVisitor *node_visitor,
+                                         GtCommentNode *comment_node,
+                                         GtError *err)</code>
+<p>
+Visit <code>comment_node</code> with <code>node_visitor</code>.
+</p>
+<hr>
+<a name="gt_node_visitor_visit_feature_node"></a>
+
+<code>int    gt_node_visitor_visit_feature_node(GtNodeVisitor *node_visitor,
+                                         GtFeatureNode *feature_node,
+                                         GtError *err)</code>
+<p>
+Visit <code>feature_node</code> with <code>node_visitor</code>.
+</p>
+<hr>
+<a name="gt_node_visitor_visit_region_node"></a>
+
+<code>int    gt_node_visitor_visit_region_node(GtNodeVisitor *node_visitor,
+                                        GtRegionNode *region_node,
+                                        GtError *err)</code>
+<p>
+Visit <code>region_node</code> with <code>node_visitor</code>.
+</p>
+<hr>
+<a name="gt_node_visitor_visit_sequence_node"></a>
+
+<code>int    gt_node_visitor_visit_sequence_node(GtNodeVisitor *node_visitor,
+                                          GtSequenceNode *sequence_node,
+                                          GtError *err)</code>
+<p>
+Visit <code>sequence_node</code> with <code>node_visitor</code>.
+</p>
+<hr>
+<a name="gt_node_visitor_delete"></a>
+
+<code>void   gt_node_visitor_delete(GtNodeVisitor *node_visitor)</code>
+<p>
+Delete <code>node_visitor</code> and free all allocated space.
+</p>
+<hr>
 <a name="GtPhase"></a>
 <h2>Class GtPhase</h2>
 
@@ -6537,6 +6588,16 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_node_stream_pull"><code>gt_node_stream_pull</code></a><br>
 
   <a href="#gt_node_stream_ref"><code>gt_node_stream_ref</code></a><br>
+
+  <a href="#gt_node_visitor_delete"><code>gt_node_visitor_delete</code></a><br>
+
+  <a href="#gt_node_visitor_visit_comment_node"><code>gt_node_visitor_visit_comment_node</code></a><br>
+
+  <a href="#gt_node_visitor_visit_feature_node"><code>gt_node_visitor_visit_feature_node</code></a><br>
+
+  <a href="#gt_node_visitor_visit_region_node"><code>gt_node_visitor_visit_region_node</code></a><br>
+
+  <a href="#gt_node_visitor_visit_sequence_node"><code>gt_node_visitor_visit_sequence_node</code></a><br>
 
   <a href="#gt_parse_double"><code>gt_parse_double</code></a><br>
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,11 +18,11 @@
 #ifndef EXTRACT_FEAT_VISITOR_H
 #define EXTRACT_FEAT_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtExtractFeatVisitor GtExtractFeatVisitor;
 
 #include <stdbool.h>
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_extract_feat_visitor_class(void);

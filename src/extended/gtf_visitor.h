@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,10 @@
 #ifndef GTF_VISITOR_H
 #define GTF_VISITOR_H
 
-/* implements the ``genome visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtGTFVisitor GtGTFVisitor;
 
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 const GtNodeVisitorClass* gt_gtf_visitor_class(void);
 GtNodeVisitor*            gt_gtf_visitor_new(GtFile*);

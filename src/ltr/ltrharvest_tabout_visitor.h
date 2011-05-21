@@ -18,11 +18,11 @@
 #ifndef LTRHARVEST_TABOUT_VISITOR_H
 #define LTRHARVEST_TABOUT_VISITOR_H
 
-/* implements the ``node visitor'' interface */
+/* Implements the <GtNodeVisitor> interface. */
 typedef struct GtLTRharvestTaboutVisitor GtLTRharvestTaboutVisitor;
 
 #include "core/encseq_api.h"
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 const GtNodeVisitorClass* gt_ltrharvest_tabout_visitor_class(void);
 GtNodeVisitor*            gt_ltrharvest_tabout_visitor_new(void);
