@@ -63,10 +63,6 @@ static GtOptionParser* gt_eval_option_parser_new(void *tool_arguments)
                             "Compare annotation files and show "
                             "accuracy measures (prediction vs. reference).");
 
-  /* -v */
-  option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_parser_add_option(op, option);
-
   /* -exondiff */
   option = gt_option_new_bool("exondiff", "show a diff for the exons",
                               &arguments->exondiff, false);
@@ -100,6 +96,10 @@ static GtOptionParser* gt_eval_option_parser_new(void *tool_arguments)
                                        "borders to be considered equal",
                                        &arguments->LTRdelta, 20);
   gt_option_parser_add_option(op, ltrdeltaoption);
+
+  /* -v */
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
