@@ -184,8 +184,8 @@ GtGenomeNode* gt_genome_node_create(const GtGenomeNodeClass *gnc)
   return gn;
 }
 
-void gt_genome_node_set_origin(GtGenomeNode *gn,
-                               GtStr *filename, unsigned int line_number)
+void gt_genome_node_set_origin(GtGenomeNode *gn, GtStr *filename,
+                               unsigned int line_number)
 {
   gt_assert(gn && filename && line_number);
   gt_str_delete(gn->filename);
@@ -286,13 +286,13 @@ int gt_genome_node_compare(GtGenomeNode **gn_a, GtGenomeNode **gn_b)
 }
 
 int gt_genome_node_compare_with_data(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
-                                  GT_UNUSED void *unused)
+                                     GT_UNUSED void *unused)
 {
   return gt_genome_node_cmp(*gn_a, *gn_b);
 }
 
 int gt_genome_node_compare_delta(GtGenomeNode **gn_a, GtGenomeNode **gn_b,
-                              void *delta)
+                                 void *delta)
 {
   unsigned long *deltaptr = delta;
   gt_assert(delta);
