@@ -59,26 +59,27 @@ unsigned long gt_genome_node_get_length(GtGenomeNode *genome_node);
 const char*   gt_genome_node_get_filename(const GtGenomeNode* genome_node);
 
 /* Return the line of the source file the <genome_node> was encountered on
-   (if the node was read from a file) */
+   (if the node was read from a file, otherwise 0 is returned). */
 unsigned int  gt_genome_node_get_line_number(const GtGenomeNode*);
 
 /* Set the genomic range of <genome_node> to given <range>. */
 void          gt_genome_node_set_range(GtGenomeNode *genome_node,
                                        const GtRange *range);
 
-/* Attaches a pointer to <data> to the <node> using a given string as <key>. */
-void          gt_genome_node_add_user_data(GtGenomeNode *node,
-                                           const char *key,
-                                           void *data,
+/* Attach a pointer to <data> to the <genome_node> using a given string as
+   <key>. <free_func> is the optional destructor for <data>. */
+void          gt_genome_node_add_user_data(GtGenomeNode *genome_node,
+                                           const char *key, void *data,
                                            GtFree free_func);
 
-/* Returns the pointer attached to the node for a given <key>. */
-void*         gt_genome_node_get_user_data(const GtGenomeNode*,
+/* Return the pointer attached to the <genome_node> for a given <key>. */
+void*         gt_genome_node_get_user_data(const GtGenomeNode *genome_node,
                                            const char *key);
 
-/* Calls the destructor function associated with the user data attached under
-   the <key> on the attached data. */
-void          gt_genome_node_release_user_data(GtGenomeNode*, const char *key);
+/* Call the destructor function associated with the user data attached to
+   <genome_node> under the <key> on the attached data. */
+void          gt_genome_node_release_user_data(GtGenomeNode *genome_node,
+                                               const char *key);
 
 /* Compare <genome_node_a> with <genome_node_b> and return the result (similar
    to <strcmp(3)>). This method is the criterion used to sort genome nodes. */

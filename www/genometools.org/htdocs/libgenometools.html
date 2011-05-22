@@ -3377,7 +3377,7 @@ Return the filename the <code>genome_node</code> was read from.
 <code>unsigned int   gt_genome_node_get_line_number(const GtGenomeNode*)</code>
 <p>
 Return the line of the source file the <code>genome_node</code> was encountered on
-   (if the node was read from a file)
+   (if the node was read from a file, otherwise 0 is returned).
 </p>
 <hr>
 <a name="gt_genome_node_set_range"></a>
@@ -3390,28 +3390,29 @@ Set the genomic range of <code>genome_node</code> to given <code>range</code>.
 <hr>
 <a name="gt_genome_node_add_user_data"></a>
 
-<code>void           gt_genome_node_add_user_data(GtGenomeNode *node,
-                                           const char *key,
-                                           void *data,
+<code>void           gt_genome_node_add_user_data(GtGenomeNode *genome_node,
+                                           const char *key, void *data,
                                            GtFree free_func)</code>
 <p>
-Attaches a pointer to <code>data</code> to the <code>node</code> using a given string as <code>key</code>.
+Attach a pointer to <code>data</code> to the <code>genome_node</code> using a given string as
+   <code>key</code>. <code>free_func</code> is the optional destructor for <code>data</code>.
 </p>
 <hr>
 <a name="gt_genome_node_get_user_data"></a>
 
-<code>void*          gt_genome_node_get_user_data(const GtGenomeNode*,
+<code>void*          gt_genome_node_get_user_data(const GtGenomeNode *genome_node,
                                            const char *key)</code>
 <p>
-Returns the pointer attached to the node for a given <code>key</code>.
+Return the pointer attached to the <code>genome_node</code> for a given <code>key</code>.
 </p>
 <hr>
 <a name="gt_genome_node_release_user_data"></a>
 
-<code>void           gt_genome_node_release_user_data(GtGenomeNode*, const char *key)</code>
+<code>void           gt_genome_node_release_user_data(GtGenomeNode *genome_node,
+                                               const char *key)</code>
 <p>
-Calls the destructor function associated with the user data attached under
-   the <code>key</code> on the attached data.
+Call the destructor function associated with the user data attached to
+   <code>genome_node</code> under the <code>key</code> on the attached data.
 </p>
 <hr>
 <a name="gt_genome_node_cmp"></a>
