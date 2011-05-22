@@ -18,7 +18,14 @@
 #ifndef ESA_BOTTOMUP_H
 #define ESA_BOTTOMUP_H
 
+#include "core/logger_api.h"
+#include "core/error_api.h"
+
 typedef struct GtBUinfo GtBUinfo;
 typedef struct GtBUstate GtBUstate;
+
+int gt_runenumlcpvaluesBU(const char *inputindex,
+                          GtLogger *logger,
+                          GtError *err);
 
 #endif

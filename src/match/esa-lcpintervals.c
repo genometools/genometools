@@ -173,10 +173,10 @@ static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
   return 0;
 }
 
-int gt_runenumlcpvalues(const char *inputindex,
-                        bool outedges,
-                        GtLogger *logger,
-                        GtError *err)
+int gt_runenumlcpvaluesDFS(const char *inputindex,
+                           bool outedges,
+                           GtLogger *logger,
+                           GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
@@ -192,13 +192,10 @@ int gt_runenumlcpvalues(const char *inputindex,
   {
     haserr = true;
   }
-  if (!haserr)
+  if (!haserr && gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,
+                                  logger, err) != 0)
   {
-    if (gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,
-                         logger, err) != 0)
-    {
-      haserr = true;
-    }
+    haserr = true;
   }
   if (ssar != NULL)
   {

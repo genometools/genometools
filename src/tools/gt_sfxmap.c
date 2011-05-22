@@ -35,6 +35,7 @@
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
 #include "match/esa-lcpintervals.h"
+#include "match/esa-bottomup.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -53,6 +54,7 @@ typedef struct
        inputssp,
        enumlcpitvs,
        enumlcpitvtree,
+       enumlcpitvtreeBU,
        diffcovercheck;
   unsigned long delspranges;
   GtStr *esaindexname,
@@ -144,7 +146,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
-         *optionenumlcpitvs, *optionenumlcpitvtree;
+         *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -251,20 +253,28 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                      &arguments->diffcovercheck,false);
   gt_option_parser_add_option(op, optiondiffcov);
 
-  optionenumlcpitvs = gt_option_new_bool("enumlcpintervals",
+  optionenumlcpitvs = gt_option_new_bool("enumlcpitvs",
                                          "enumerate the lcp-intervals",
                                          &arguments->enumlcpitvs,false);
   gt_option_parser_add_option(op, optionenumlcpitvs);
 
-  optionenumlcpitvtree = gt_option_new_bool("enumlcpintervaltree",
+  optionenumlcpitvtree = gt_option_new_bool("enumlcpitvtree",
                                             "enumerate the lcp-interval tree",
                                             &arguments->enumlcpitvtree,false);
   gt_option_parser_add_option(op, optionenumlcpitvtree);
+
+  optionenumlcpitvtreeBU = gt_option_new_bool("enumlcpitvtreeBU",
+                                      "enumerate the lcp-interval tree "
+                                      "(using a bottom-up strategy)",
+                                       &arguments->enumlcpitvtreeBU,false);
+  gt_option_parser_add_option(op, optionenumlcpitvtreeBU);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
 
   gt_option_exclude(optionenumlcpitvs,optionenumlcpitvtree);
+  gt_option_exclude(optionenumlcpitvs,optionenumlcpitvtreeBU);
+  gt_option_exclude(optionenumlcpitvtree,optionenumlcpitvtreeBU);
   gt_option_imply(optionlcp,optionsuf);
   gt_option_imply(optionenumlcpitvs,optionesaindex);
   gt_option_imply(optionsortmaxdepth,optionesaindex);
@@ -1005,9 +1015,17 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   }
   if (!haserr && (arguments->enumlcpitvs || arguments->enumlcpitvtree))
   {
-    if (gt_runenumlcpvalues(gt_str_get(arguments->esaindexname),
-                            arguments->enumlcpitvs ? false : true,
-                            logger, err) != 0)
+    if (gt_runenumlcpvaluesDFS(gt_str_get(arguments->esaindexname),
+                               arguments->enumlcpitvs ? false : true,
+                               logger, err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && arguments->enumlcpitvtreeBU)
+  {
+    if (gt_runenumlcpvaluesBU(gt_str_get(arguments->esaindexname),
+                              logger, err) != 0)
     {
       haserr = true;
     }

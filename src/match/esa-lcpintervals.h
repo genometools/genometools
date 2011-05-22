@@ -18,9 +18,12 @@
 #ifndef ESA_LCPINTERVALS_H
 #define ESA_LCPINTERVALS_H
 
-int gt_runenumlcpvalues(const char *inputindex,
-                        bool outedges,
-                        GtLogger *logger,
-                        GtError *err);
+#include "core/logger_api.h"
+#include "core/error_api.h"
+
+int gt_runenumlcpvaluesDFS(const char *inputindex,
+                           bool outedges,
+                           GtLogger *logger,
+                           GtError *err);
 
 #endif

@@ -24,7 +24,7 @@ do
   cmd="scripts/lcpintervals.rb itv sfx"
   ${cmd} > itvs.result1
   checkerror
-  cmd="env -i bin/gt dev sfxmap -enumlcpintervals -esa sfx"
+  cmd="env -i bin/gt dev sfxmap -enumlcpitvs -esa sfx"
   ${cmd} > itvs.result2
   checkerror
   cmd="cmp -s itvs.result1 itvs.result2"
@@ -34,7 +34,7 @@ do
   ${cmd} > tmp.result
   checkerror
   grep -v '^#' tmp.result > itvtree.result1
-  cmd="env -i bin/gt dev sfxmap -enumlcpintervaltree -esa sfx"
+  cmd="env -i bin/gt dev sfxmap -enumlcpitvtree -esa sfx"
   ${cmd} > itvtree.result2
   checkerror
   cmd="cmp -s itvtree.result1 itvtree.result2"

@@ -55,16 +55,19 @@ static GtBUItvinfo *allocBUItvinfo(GtBUItvinfo *ptr,
                                    GtBUinfo *(*allocateBUinfo)(GtBUstate *),
                                    GtBUstate *state)
 {
-  unsigned long i;
+  unsigned long idx;
   GtBUItvinfo *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof(*itvinfo) * allocated);
-  if (allocateBUinfo != NULL)
+  gt_assert(allocated > currentallocated);
+  for (idx=currentallocated; idx<allocated; idx++)
   {
-    gt_assert(allocated > currentallocated);
-    for (i=currentallocated; i<allocated; i++)
+    if (allocateBUinfo == NULL)
     {
-      itvinfo[i].info = allocateBUinfo(state);
+      itvinfo[idx].info = NULL;
+    } else
+    {
+      itvinfo[idx].info = allocateBUinfo(state);
     }
   }
   gt_assert(itvinfo != NULL);
@@ -80,19 +83,24 @@ static void freeBUItvinfo(GtBUItvinfo *ptr,
 
   for (idx=0; idx<allocated; idx++)
   {
-    freeBUinfo(ptr[idx].info,state);
+    if (freeBUinfo != NULL)
+    {
+      freeBUinfo(ptr[idx].info,state);
+    }
   }
   gt_free(ptr);
 }
 
 typedef struct
 {
-  unsigned long index, suffix;
+  unsigned long index,
+                suffix;
 } GtSuftabelem;
 
 typedef struct
 {
-  GtSuftabelem leftelem, rightelem;
+  GtSuftabelem leftelem,
+               rightelem;
 } GtQueuepair;
 
 #define GT_SUFTABELEMUNDEFFLAG  ULONG_MAX
@@ -114,6 +122,7 @@ static void GtQueuepair_add(GtQueuepair *queuepair,unsigned long index,
   gt_assert(GT_SUFTABELEMISUNDEF(queuepair->leftelem));
   queuepair->leftelem = queuepair->rightelem;
   queuepair->rightelem.index = index;
+  gt_assert(suffix != GT_SUFTABELEMUNDEFFLAG);
   queuepair->rightelem.suffix = suffix;
 }
 
@@ -129,7 +138,7 @@ static void GtQueuepair_enumleaves(GtBUItvinfo *parent,
   {
     if (queuepair->leftelem.index <= endpos)
     {
-      printf("L %s %lu %lu %lu\n",firstedge ? "true" : "false",
+      printf("L %c %lu %lu %lu\n",firstedge ? '1' : '0',
              parent->lcp,parent->lb,queuepair->leftelem.suffix);
       GT_SUFTABELEMSETUNDEF(queuepair->leftelem);
       firstedge = false;
@@ -143,9 +152,12 @@ static void GtQueuepair_enumleaves(GtBUItvinfo *parent,
   {
     if (queuepair->rightelem.index <= endpos)
     {
-      printf("L %s %lu %lu %lu\n",firstedge ? "true" : "false",
-             parent->lcp,parent->lb,queuepair->rightelem.suffix);
+      printf("L %c %lu %lu %lu\n",firstedge ? '1' : '0',
+             parent->lcp,
+             parent->lb,
+             queuepair->rightelem.suffix);
       GT_SUFTABELEMSETUNDEF(queuepair->rightelem);
+      parent->noedge = false;
     }
   }
 }
@@ -237,5 +249,34 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
   GtQueuepair_add(&queuepair,idx,idx);
   GtQueuepair_enumleaves(&lastinterval,&queuepair,idx);
   freeBUItvinfo(stackspace, allocatedItvinfo, freeBUinfo, state);
+  return haserr ? -1 : 0;
+}
+
+int gt_runenumlcpvaluesBU(const char *inputindex,
+                          GtLogger *logger,
+                          GtError *err)
+{
+  bool haserr = false;
+  Sequentialsuffixarrayreader *ssar;
+
+  gt_error_check(err);
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(inputindex,
+                                                   SARR_LCPTAB |
+                                                   SARR_SUFTAB |
+                                                   SARR_ESQTAB,
+                                                   SEQ_scan,
+                                                   err);
+  if (ssar == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr && gt_esa_bottomup(ssar, NULL, NULL, NULL, logger, err) != 0)
+  {
+    haserr = true;
+  }
+  if (ssar != NULL)
+  {
+    gt_freeSequentialsuffixarrayreader(&ssar);
+  }
   return haserr ? -1 : 0;
 }
