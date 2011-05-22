@@ -32,9 +32,26 @@ typedef struct GtFile GtFile;
    and uncompressed otherwise). */
 GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
+/* <printf(3)> for generic <file>. */
+void    gt_file_xprintf(GtFile *file, const char *format, ...)
+  __attribute__ ((format (printf, 2, 3)));
+
 /* Write <\0>-terminated string <cstr> to <file>. Similar to <fputs(3)>, but
    terminates on error. */
 void    gt_file_xfputs(const char *cstr, GtFile *file);
+
+/* Return next character from <file> or <EOF>, if end-of-file is reached. */
+int     gt_file_xfgetc(GtFile *file);
+
+/* Read up to <nbytes> from generic <file> and store result in <buf>, returns
+   bytes read. */
+int     gt_file_xread(GtFile *file, void *buf, size_t nbytes);
+
+/* Write <nbytes> from <buf> to given generic <file>. */
+void    gt_file_xwrite(GtFile *file, void *buf, size_t nbytes);
+
+/* Rewind the generic <file>. */
+void    gt_file_xrewind(GtFile *file);
 
 /* Close the underlying file handle and destroy the <file> object. */
 void    gt_file_delete(GtFile *file);

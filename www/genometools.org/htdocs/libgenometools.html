@@ -2945,12 +2945,48 @@ Return a new <code>GtFile</code> object and open the underlying file handle with
    and uncompressed otherwise).
 </p>
 <hr>
+<a name="gt_file_xprintf"></a>
+
+<code>void     gt_file_xprintf(GtFile *file, const char *format, ...)</code>
+<p>
+<code>printf(3)</code> for generic <code>file</code>.
+</p>
+<hr>
 <a name="gt_file_xfputs"></a>
 
 <code>void     gt_file_xfputs(const char *cstr, GtFile *file)</code>
 <p>
 Write <code>\0</code>-terminated string <code>cstr</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
    terminates on error.
+</p>
+<hr>
+<a name="gt_file_xfgetc"></a>
+
+<code>int      gt_file_xfgetc(GtFile *file)</code>
+<p>
+Return next character from <code>file</code> or <code>EOF</code>, if end-of-file is reached.
+</p>
+<hr>
+<a name="gt_file_xread"></a>
+
+<code>int      gt_file_xread(GtFile *file, void *buf, size_t nbytes)</code>
+<p>
+Read up to <code>nbytes</code> from generic <code>file</code> and store result in <code>buf</code>, returns
+   bytes read.
+</p>
+<hr>
+<a name="gt_file_xwrite"></a>
+
+<code>void     gt_file_xwrite(GtFile *file, void *buf, size_t nbytes)</code>
+<p>
+Write <code>nbytes</code> from <code>buf</code> to given generic <code>file</code>.
+</p>
+<hr>
+<a name="gt_file_xrewind"></a>
+
+<code>void     gt_file_xrewind(GtFile *file)</code>
+<p>
+Rewind the generic <code>file</code>.
 </p>
 <hr>
 <a name="gt_file_delete"></a>
@@ -6627,7 +6663,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_file_suffix"><code>gt_file_suffix</code></a><br>
 
+  <a href="#gt_file_xfgetc"><code>gt_file_xfgetc</code></a><br>
+
   <a href="#gt_file_xfputs"><code>gt_file_xfputs</code></a><br>
+
+  <a href="#gt_file_xprintf"><code>gt_file_xprintf</code></a><br>
+
+  <a href="#gt_file_xread"><code>gt_file_xread</code></a><br>
+
+  <a href="#gt_file_xrewind"><code>gt_file_xrewind</code></a><br>
+
+  <a href="#gt_file_xwrite"><code>gt_file_xwrite</code></a><br>
 
   <a href="#gt_files_estimate_total_size"><code>gt_files_estimate_total_size</code></a><br>
 

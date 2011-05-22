@@ -28,8 +28,9 @@ typedef enum {
   GT_FILE_MODE_BZIP2
 } GtFileMode;
 
-/* Returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
-   with '.bz2', and GFM_UNCOMPRESSED otherwise. */
+/* Returns <GT_FILE_MODE_GZIP> if file with <path> ends with '.gz',
+   <GT_FILE_MODE_BZIP2> if it ends with '.bz2', and <GT_FILE_MODE_UNCOMPRESSED>
+   otherwise. */
 GtFileMode  gt_file_mode_determine(const char *path);
 
 /* Returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
@@ -61,27 +62,11 @@ GtFile*     gt_file_new_from_fileptr(FILE*);
 
 GtFileMode  gt_file_mode(const GtFile*);
 
-/* Return next character from <file> of EOF, if end-of-file is reached. */
-int         gt_file_xfgetc(GtFile *file);
-
-/* Unget character <c> to <file> (which obviously cannot be NULL).
+/* Unget character <c> to <file> (which obviously cannot be <NULL>).
    Can only be used once at a time. */
 void        gt_file_unget_char(GtFile *file, char c);
 
-/* printf(3) for generic files */
-void        gt_file_xprintf(GtFile*, const char *format, ...)
-  __attribute__ ((format (printf, 2, 3)));
-
 void        gt_file_xfputc(int c, GtFile*);
-
-/* Read up to <nbytes> and store result in <buf>, returns bytes read. */
-int         gt_file_xread(GtFile*, void *buf, size_t nbytes);
-
-/* Write <nbytes> from <buf> to given generic file. */
-void        gt_file_xwrite(GtFile*, void *buf, size_t nbytes);
-
-/* Rewind the file. */
-void        gt_file_xrewind(GtFile*);
 
 /* Destroy the file handle object, but do not close the underlying handle. */
 void        gt_file_delete_without_handle(GtFile*);
