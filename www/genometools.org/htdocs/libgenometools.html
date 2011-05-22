@@ -2702,14 +2702,27 @@ Creates a new <code>GtFeatureIndexMemory</code> object.
    to a GFF3 feature line (i.e., a line which does not start with <code>#</code>).
    Part-of relationships (which are realised in GFF3 with the <code>Parent</code> and <code>ID</code>
    attributes) are realised in the C API with the
-   <code>gt_feature_node_add_child()</code> method. </p>
+   <code>gt_feature_node_add_child()</code> method.</p><p>   Besides the ``mere'' feature nodes two ``special'' feature nodes exist:
+   multi-features and pseudo-features.</p><p>   Multi-features represent features which span multiple lines (it is indicated
+   in GFF3 files by the fact, that each line has the same ID attribute).</p><p>   To check if a feature is a multi-feature use the method
+   <code>gt_feature_node_is_multi()</code>.
+   Multi-features are connected via a ``representative''. That is, two features
+   are part of the same multi-feature if they have the same representative
+   (which can be retrieved via  <code>gt_feature_node_get_multi_representative()</code>).</p><p>   Pseudo-features became a technical necessity to be able to pass related
+   top-level features as a single entity through the streaming machinery.
+   There are two cases in which a pseudo-feature has to be introduced.</p><p>   First, if a multi-feature has no parent. In this case all features which
+   comprise the multi-feature become the children of a pseudo-feature.</p><p>   Second, if two or more top-level features have the same children (and are
+   thereby connected). In this case all these top-level features become the
+   children of a pseudo-feature.</p><p>   It should be clear from the explanation above that pseudo-features make only
+   sense as top-level features (a fact which is enforced in the code).</p><p>   Pseudo-features are typically ignored during a traversal to give the illusion
+   that they do not exist. </p>
 
 <hr>
 <a name="gt_feature_node_new"></a>
 
-<code>GtGenomeNode*  gt_feature_node_new(GtStr *seqid, const char *type,
-                                  unsigned long start, unsigned long end,
-                                  GtStrand strand)</code>
+<code>GtGenomeNode*   gt_feature_node_new(GtStr *seqid, const char *type,
+                                   unsigned long start, unsigned long end,
+                                   GtStrand strand)</code>
 <p>
 Return an new <code>GtFeatureNode</code> object on sequence with ID <code>seqid</code> and type
    <code>type</code> which lies from <code>start</code> to <code>end</code> on strand <code>strand</code>.
@@ -2719,24 +2732,46 @@ Return an new <code>GtFeatureNode</code> object on sequence with ID <code>seqid<
    to be smaller or equal than <code>end</code>.
 </p>
 <hr>
+<a name="gt_feature_node_new_pseudo"></a>
+
+<code>GtGenomeNode*   gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
+                                          unsigned long end, GtStrand strand)</code>
+<p>
+Return a new pseudo-<code>GtFeatureNode </code> on sequence with ID <code>seqid</code> which lies
+   from <code>start</code> to <code>end</code> on strand <code>strand</code>. Pseudo-features do not have a type.
+   The <code>GtFeatureNode </code> stores a new reference to <code>seqid</code>, so make sure you do
+   not modify the original <code>seqid</code> afterwards.
+   <code>start</code> and <code>end</code> always refer to the forward strand, therefore <code>start</code> has
+   to be smaller or equal than <code>end</code>.
+</p>
+<hr>
+<a name="gt_feature_node_new_pseudo_template"></a>
+
+<code>GtGenomeNode*   gt_feature_node_new_pseudo_template(GtFeatureNode *feature_node)</code>
+<p>
+Return a new pseudo-<code>GtFeatureNode </code> node which uses <code>feature_node</code> as
+   template.  That is, the sequence ID, range, strand, and source are taken from
+   <code>feature_node</code>.
+</p>
+<hr>
 <a name="gt_feature_node_new_standard_gene"></a>
 
-<code>GtGenomeNode*  gt_feature_node_new_standard_gene(void)</code>
+<code>GtGenomeNode*   gt_feature_node_new_standard_gene(void)</code>
 <p>
 Return the ``standard gene'' (mainly for testing purposes).
 </p>
 <hr>
 <a name="gt_feature_node_add_child"></a>
 
-<code>void           gt_feature_node_add_child(GtFeatureNode *parent,
-                                        GtFeatureNode *child)</code>
+<code>void            gt_feature_node_add_child(GtFeatureNode *parent,
+                                         GtFeatureNode *child)</code>
 <p>
 Add <code>child</code> node to <code>parent</code> node. <code>parent</code> takes ownership of <code>child</code>.
 </p>
 <hr>
 <a name="gt_feature_node_get_source"></a>
 
-<code>const char*    gt_feature_node_get_source(const GtFeatureNode *feature_node)</code>
+<code>const char*     gt_feature_node_get_source(const GtFeatureNode *feature_node)</code>
 <p>
 Return the source of <code>feature_node</code>. If no source has been set, "." is
    returned. Corresponds to column 2 of GFF3 feature lines.
@@ -2744,8 +2779,8 @@ Return the source of <code>feature_node</code>. If no source has been set, "." i
 <hr>
 <a name="gt_feature_node_set_source"></a>
 
-<code>void           gt_feature_node_set_source(GtFeatureNode *feature_node,
-                                         GtStr *source)</code>
+<code>void            gt_feature_node_set_source(GtFeatureNode *feature_node,
+                                          GtStr *source)</code>
 <p>
 Set the <code>source</code> of <code>feature_node</code>. Stores a new reference to <code>source</code>.
    Corresponds to column 2 of GFF3 feature lines.
@@ -2753,7 +2788,7 @@ Set the <code>source</code> of <code>feature_node</code>. Stores a new reference
 <hr>
 <a name="gt_feature_node_has_source"></a>
 
-<code>bool           gt_feature_node_has_source(const GtFeatureNode *feature_node)</code>
+<code>bool            gt_feature_node_has_source(const GtFeatureNode *feature_node)</code>
 <p>
 Return <code>true</code> if <code>feature_node</code> has a defined source (i.e., on different
    from "."). <code>false</code> otherwise.
@@ -2761,7 +2796,7 @@ Return <code>true</code> if <code>feature_node</code> has a defined source (i.e.
 <hr>
 <a name="gt_feature_node_get_type"></a>
 
-<code>const char*    gt_feature_node_get_type(const GtFeatureNode *feature_node)</code>
+<code>const char*     gt_feature_node_get_type(const GtFeatureNode *feature_node)</code>
 <p>
 Return the type of <code>feature_node</code>.
    Corresponds to column 3 of GFF3 feature lines.
@@ -2769,24 +2804,24 @@ Return the type of <code>feature_node</code>.
 <hr>
 <a name="gt_feature_node_set_type"></a>
 
-<code>void           gt_feature_node_set_type(GtFeatureNode *feature_node,
-                                       const char *type)</code>
+<code>void            gt_feature_node_set_type(GtFeatureNode *feature_node,
+                                        const char *type)</code>
 <p>
 Set the type of <code>feature_node</code> to <code>type</code>.
 </p>
 <hr>
 <a name="gt_feature_node_has_type"></a>
 
-<code>bool           gt_feature_node_has_type(GtFeatureNode *feature_node,
-                                       const char *type)</code>
+<code>bool            gt_feature_node_has_type(GtFeatureNode *feature_node,
+                                        const char *type)</code>
 <p>
 Return <code>true</code> if <code>feature_node</code> has given <code>type</code>, <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_feature_node_score_is_defined"></a>
 
-<code>bool           gt_feature_node_score_is_defined(const GtFeatureNode
-                                               *feature_node)</code>
+<code>bool            gt_feature_node_score_is_defined(const GtFeatureNode
+                                                *feature_node)</code>
 <p>
 Return <code>true</code> if the score of <code>feature_node</code> is defined, <code>false</code>
    otherwise.
@@ -2794,7 +2829,7 @@ Return <code>true</code> if the score of <code>feature_node</code> is defined, <
 <hr>
 <a name="gt_feature_node_get_score"></a>
 
-<code>float          gt_feature_node_get_score(const GtFeatureNode *feature_node)</code>
+<code>float           gt_feature_node_get_score(const GtFeatureNode *feature_node)</code>
 <p>
 Return the score of <code>feature_node</code>. The score has to be defined.
    Corresponds to column 6 of GFF3 feature lines.
@@ -2802,22 +2837,22 @@ Return the score of <code>feature_node</code>. The score has to be defined.
 <hr>
 <a name="gt_feature_node_set_score"></a>
 
-<code>void           gt_feature_node_set_score(GtFeatureNode *feature_node,
-                                        float score)</code>
+<code>void            gt_feature_node_set_score(GtFeatureNode *feature_node,
+                                         float score)</code>
 <p>
 Set the score of <code>feature_node</code> to <code>score</code>.
 </p>
 <hr>
 <a name="gt_feature_node_unset_score"></a>
 
-<code>void           gt_feature_node_unset_score(GtFeatureNode *feature_node)</code>
+<code>void            gt_feature_node_unset_score(GtFeatureNode *feature_node)</code>
 <p>
 Unset the score of <code>feature_node</code>.
 </p>
 <hr>
 <a name="gt_feature_node_get_strand"></a>
 
-<code>GtStrand       gt_feature_node_get_strand(const GtFeatureNode *feature_node)</code>
+<code>GtStrand        gt_feature_node_get_strand(const GtFeatureNode *feature_node)</code>
 <p>
 Return the strand of <code>feature_node</code>.
    Corresponds to column 7 of GFF3 feature lines.
@@ -2825,15 +2860,15 @@ Return the strand of <code>feature_node</code>.
 <hr>
 <a name="gt_feature_node_set_strand"></a>
 
-<code>void           gt_feature_node_set_strand(GtFeatureNode *feature_node,
-                                         GtStrand strand)</code>
+<code>void            gt_feature_node_set_strand(GtFeatureNode *feature_node,
+                                          GtStrand strand)</code>
 <p>
 Set the strand of <code>feature_node</code> to <code>strand</code>.
 </p>
 <hr>
 <a name="gt_feature_node_get_phase"></a>
 
-<code>GtPhase        gt_feature_node_get_phase(const GtFeatureNode *feature_node)</code>
+<code>GtPhase         gt_feature_node_get_phase(const GtFeatureNode *feature_node)</code>
 <p>
 Return the phase of <code>feature_node</code>.
    Corresponds to column 8 of GFF3 feature lines.
@@ -2841,16 +2876,16 @@ Return the phase of <code>feature_node</code>.
 <hr>
 <a name="gt_feature_node_set_phase"></a>
 
-<code>void           gt_feature_node_set_phase(GtFeatureNode *feature_node,
-                                        GtPhase phase)</code>
+<code>void            gt_feature_node_set_phase(GtFeatureNode *feature_node,
+                                         GtPhase phase)</code>
 <p>
 Set the phase of <code>feature_node</code> to <code>phase</code>.
 </p>
 <hr>
 <a name="gt_feature_node_get_attribute"></a>
 
-<code>const char*    gt_feature_node_get_attribute(const GtFeatureNode *feature_node,
-                                            const char *name)</code>
+<code>const char*     gt_feature_node_get_attribute(const GtFeatureNode *feature_node,
+                                             const char *name)</code>
 <p>
 Return the attribute of <code>feature_node</code> with the given <code>name</code>.
    If no such attribute has been added, <code>NULL</code> is returned.
@@ -2859,8 +2894,8 @@ Return the attribute of <code>feature_node</code> with the given <code>name</cod
 <hr>
 <a name="gt_feature_node_get_attribute_list"></a>
 
-<code>GtStrArray*    gt_feature_node_get_attribute_list(const GtFeatureNode
-                                                 *feature_node)</code>
+<code>GtStrArray*     gt_feature_node_get_attribute_list(const GtFeatureNode
+                                                  *feature_node)</code>
 <p>
 Return a string array containing the used attribute names of <code>feature_node</code>.
    The caller is responsible to free the returned <code>GtStrArray*</code>.
@@ -2868,8 +2903,9 @@ Return a string array containing the used attribute names of <code>feature_node<
 <hr>
 <a name="gt_feature_node_add_attribute"></a>
 
-<code>void           gt_feature_node_add_attribute(GtFeatureNode *feature_node,
-                                            const char *tag, const char *value)</code>
+<code>void            gt_feature_node_add_attribute(GtFeatureNode *feature_node,
+                                             const char *tag,
+                                             const char *value)</code>
 <p>
 Add attribute <code>tag</code>=<code>value</code> to <code>feature_node</code>. <code>tag</code> and <code>value</code> must at
    least have length 1. <code>feature_node</code> must not contain an attribute with the
@@ -2879,14 +2915,65 @@ Add attribute <code>tag</code>=<code>value</code> to <code>feature_node</code>. 
 <hr>
 <a name="gt_feature_node_set_attribute"></a>
 
-<code>void           gt_feature_node_set_attribute(GtFeatureNode* feature_node,
-                                            const char *tag, const char *value)</code>
+<code>void            gt_feature_node_set_attribute(GtFeatureNode* feature_node,
+                                             const char *tag,
+                                             const char *value)</code>
 <p>
 Set attribute <code>tag</code> to new <code>value</code> in <code>feature_node</code>, if it exists already.
    Otherwise the attribute <code>tag</code>=<code>value</code> is added to <code>feature_node</code>.
    <code>tag</code> and <code>value</code> must at least have length 1.
    You should not set Parent and ID attributes, use
    <code>gt_feature_node_add_child()</code> to denote part-of relationships.
+</p>
+<hr>
+<a name="gt_feature_node_is_multi"></a>
+
+<code>bool            gt_feature_node_is_multi(const GtFeatureNode *feature_node)</code>
+<p>
+Return <code>true</code> if <code>feature_node</code> is a multi-feature, <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_feature_node_is_pseudo"></a>
+
+<code>bool            gt_feature_node_is_pseudo(const GtFeatureNode *feature_node)</code>
+<p>
+Return <code>true</code> if <code>feature_node</code> is a pseudo-feature, <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_feature_node_make_multi_representative"></a>
+
+<code>void            gt_feature_node_make_multi_representative(GtFeatureNode
+                                                         *feature_node)</code>
+<p>
+Make <code>feature_node</code> the representative of a multi-feature.
+   Thereby <code>feature_node</code> becomes a multi-feature.
+</p>
+<hr>
+<a name="gt_feature_node_set_multi_representative"></a>
+
+<code>void            gt_feature_node_set_multi_representative(GtFeatureNode
+                                                        *feature_node,
+                                                        GtFeatureNode
+                                                        *representative)</code>
+<p>
+Set the multi-feature representative of <code>feature_node</code> to <code>representative</code>.
+   Thereby <code>feature_node</code> becomes a multi-feature.
+</p>
+<hr>
+<a name="gt_feature_node_unset_multi"></a>
+
+<code>void            gt_feature_node_unset_multi(GtFeatureNode *feature_node)</code>
+<p>
+Unset the multi-feature status of <code>feature_node</code> and remove its multi-feature
+   representative.
+</p>
+<hr>
+<a name="gt_feature_node_get_multi_representative"></a>
+
+<code>GtFeatureNode*  gt_feature_node_get_multi_representative(GtFeatureNode
+                                                        *feature_node)</code>
+<p>
+Return the representative of the multi-feature <code>feature_node</code>.
 </p>
 <hr>
 <a name="GtFeatureNodeIterator"></a>
@@ -6601,6 +6688,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_get_attribute_list"><code>gt_feature_node_get_attribute_list</code></a><br>
 
+  <a href="#gt_feature_node_get_multi_representative"><code>gt_feature_node_get_multi_representative</code></a><br>
+
   <a href="#gt_feature_node_get_phase"><code>gt_feature_node_get_phase</code></a><br>
 
   <a href="#gt_feature_node_get_score"><code>gt_feature_node_get_score</code></a><br>
@@ -6615,6 +6704,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_has_type"><code>gt_feature_node_has_type</code></a><br>
 
+  <a href="#gt_feature_node_is_multi"><code>gt_feature_node_is_multi</code></a><br>
+
+  <a href="#gt_feature_node_is_pseudo"><code>gt_feature_node_is_pseudo</code></a><br>
+
   <a href="#gt_feature_node_iterator_delete"><code>gt_feature_node_iterator_delete</code></a><br>
 
   <a href="#gt_feature_node_iterator_new"><code>gt_feature_node_iterator_new</code></a><br>
@@ -6623,13 +6716,21 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_iterator_next"><code>gt_feature_node_iterator_next</code></a><br>
 
+  <a href="#gt_feature_node_make_multi_representative"><code>gt_feature_node_make_multi_representative</code></a><br>
+
   <a href="#gt_feature_node_new"><code>gt_feature_node_new</code></a><br>
+
+  <a href="#gt_feature_node_new_pseudo"><code>gt_feature_node_new_pseudo</code></a><br>
+
+  <a href="#gt_feature_node_new_pseudo_template"><code>gt_feature_node_new_pseudo_template</code></a><br>
 
   <a href="#gt_feature_node_new_standard_gene"><code>gt_feature_node_new_standard_gene</code></a><br>
 
   <a href="#gt_feature_node_score_is_defined"><code>gt_feature_node_score_is_defined</code></a><br>
 
   <a href="#gt_feature_node_set_attribute"><code>gt_feature_node_set_attribute</code></a><br>
+
+  <a href="#gt_feature_node_set_multi_representative"><code>gt_feature_node_set_multi_representative</code></a><br>
 
   <a href="#gt_feature_node_set_phase"><code>gt_feature_node_set_phase</code></a><br>
 
@@ -6640,6 +6741,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_feature_node_set_strand"><code>gt_feature_node_set_strand</code></a><br>
 
   <a href="#gt_feature_node_set_type"><code>gt_feature_node_set_type</code></a><br>
+
+  <a href="#gt_feature_node_unset_multi"><code>gt_feature_node_unset_multi</code></a><br>
 
   <a href="#gt_feature_node_unset_score"><code>gt_feature_node_unset_score</code></a><br>
 
