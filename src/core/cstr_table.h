@@ -20,6 +20,6 @@
 
 #include "core/cstr_table_api.h"
 
-int           gt_cstr_table_unit_test(GtError*);
+int gt_cstr_table_unit_test(GtError*);
 
 #endif
