@@ -20,7 +20,6 @@
 
 #include "extended/region_node_api.h"
 
-void                     gt_region_node_consolidate(GtRegionNode*,
-                                                    GtRegionNode*);
+void gt_region_node_consolidate(GtRegionNode*, GtRegionNode*);
 
 #endif
