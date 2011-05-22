@@ -76,7 +76,7 @@ GtNodeStreamClass* gt_node_stream_class_new(size_t size,
 /* Create a new object of the given <node_stream_class>. If <ensure_sorting> is
    <true>, it is enforced that all genome node objects pulled from this class
    are sorted. That is, for consecutive nodes <a> and <b> obtained from the
-   given <node_stream_class> the return code of <gt_genome_node_compare(a, b)>
+   given <node_stream_class> the return code of <gt_genome_node_compare(a,b)>
    has to be smaller or equal than 0. If this condition is not met, an assertion
    fails. */
 GtNodeStream*      gt_node_stream_create(const GtNodeStreamClass
