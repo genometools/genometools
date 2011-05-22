@@ -19,7 +19,7 @@
 #define SEQUENCE_NODE_API_H
 
 /* Implements the <GtGenomeNode> interface. Sequence nodes correspond to
-   embedded FASTA sequences in GFF3 files. */
+   singular embedded FASTA sequences in GFF3 files. */
 typedef struct GtSequenceNode GtSequenceNode;
 
 #include "core/str_api.h"
