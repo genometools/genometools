@@ -3422,6 +3422,15 @@ Calls the destructor function associated with the user data attached under
    the <code>key</code> on the attached data.
 </p>
 <hr>
+<a name="gt_genome_node_cmp"></a>
+
+<code>int            gt_genome_node_cmp(GtGenomeNode *genome_node_a,
+                                 GtGenomeNode *genome_node_b)</code>
+<p>
+Compare <code>genome_node_a</code> with <code>genome_node_b</code> and return the result (similar
+   to <code>strcmp(3)</code>). This method is the criterion used to sort genome nodes.
+</p>
+<hr>
 <a name="GtGraphics"></a>
 <h2>Class GtGraphics</h2>
 
@@ -6788,6 +6797,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_genome_node_add_user_data"><code>gt_genome_node_add_user_data</code></a><br>
 
+  <a href="#gt_genome_node_cmp"><code>gt_genome_node_cmp</code></a><br>
+
   <a href="#gt_genome_node_delete"><code>gt_genome_node_delete</code></a><br>
 
   <a href="#gt_genome_node_get_end"><code>gt_genome_node_get_end</code></a><br>
@@ -7353,7 +7364,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-22
+Last update: 2011-05-23
 </div>
 </div>
 <!-- Piwik -->

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -83,5 +83,10 @@ void*         gt_genome_node_get_user_data(const GtGenomeNode*,
 /* Calls the destructor function associated with the user data attached under
    the <key> on the attached data. */
 void          gt_genome_node_release_user_data(GtGenomeNode*, const char *key);
+
+/* Compare <genome_node_a> with <genome_node_b> and return the result (similar
+   to <strcmp(3)>). This method is the criterion used to sort genome nodes. */
+int           gt_genome_node_cmp(GtGenomeNode *genome_node_a,
+                                 GtGenomeNode *genome_node_b);
 
 #endif

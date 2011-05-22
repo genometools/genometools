@@ -33,7 +33,6 @@ void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
 void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
 int           gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
-int           gt_genome_node_cmp(GtGenomeNode*, GtGenomeNode*);
 int           gt_genome_node_compare(GtGenomeNode**, GtGenomeNode**);
 int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
                                                void *unused);
