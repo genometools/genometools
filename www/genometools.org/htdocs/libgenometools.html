@@ -3323,14 +3323,6 @@ Increase the reference count for <code>genome_node</code> and return it.
    <code>genome_node</code> cannot be <code>NULL</code>.
 </p>
 <hr>
-<a name="gt_genome_node_delete"></a>
-
-<code>void           gt_genome_node_delete(GtGenomeNode *genome_node)</code>
-<p>
-Decrease the reference count for <code>genome_node</code> or delete it, if this was the
-   last reference.
-</p>
-<hr>
 <a name="gt_genome_node_get_seqid"></a>
 
 <code>GtStr*         gt_genome_node_get_seqid(GtGenomeNode *genome_node)</code>
@@ -3429,6 +3421,14 @@ Calls the destructor function associated with the user data attached under
 <p>
 Compare <code>genome_node_a</code> with <code>genome_node_b</code> and return the result (similar
    to <code>strcmp(3)</code>). This method is the criterion used to sort genome nodes.
+</p>
+<hr>
+<a name="gt_genome_node_delete"></a>
+
+<code>void           gt_genome_node_delete(GtGenomeNode *genome_node)</code>
+<p>
+Decrease the reference count for <code>genome_node</code> or delete it, if this was the
+   last reference.
 </p>
 <hr>
 <a name="GtGraphics"></a>

@@ -43,28 +43,6 @@ GtGenomeNode* gt_genome_node_ref(GtGenomeNode *gn)
   return gn;
 }
 
-void gt_genome_node_delete(GtGenomeNode *gn)
-{
-  if (!gn) return;
-  gt_rwlock_wrlock(gn->lock);
-  if (gn->reference_count) {
-    gn->reference_count--;
-    gt_rwlock_unlock(gn->lock);
-    return;
-  }
-  gt_assert(gn->c_class);
-  if (gn->c_class->free)
-    gn->c_class->free(gn);
-  gt_str_delete(gn->filename);
-  if (gn->userdata)
-    gt_hashmap_delete(gn->userdata);
-  gt_rwlock_unlock(gn->lock);
-#ifdef GT_THREADS_ENABLED
-  gt_rwlock_delete(gn->lock);
-#endif
-  gt_free(gn);
-}
-
 const GtGenomeNodeClass*
 gt_genome_node_class_new(size_t size,
                          GtGenomeNodeFreeFunc free,
@@ -448,4 +426,26 @@ int gt_genome_node_unit_test(GtError *err)
   gt_free(gnc);
 
   return had_err;
+}
+
+void gt_genome_node_delete(GtGenomeNode *gn)
+{
+  if (!gn) return;
+  gt_rwlock_wrlock(gn->lock);
+  if (gn->reference_count) {
+    gn->reference_count--;
+    gt_rwlock_unlock(gn->lock);
+    return;
+  }
+  gt_assert(gn->c_class);
+  if (gn->c_class->free)
+    gn->c_class->free(gn);
+  gt_str_delete(gn->filename);
+  if (gn->userdata)
+    gt_hashmap_delete(gn->userdata);
+  gt_rwlock_unlock(gn->lock);
+#ifdef GT_THREADS_ENABLED
+  gt_rwlock_delete(gn->lock);
+#endif
+  gt_free(gn);
 }
