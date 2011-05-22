@@ -25,8 +25,7 @@
    grow on demand. */
 typedef struct GtArray GtArray;
 
-/* Return a new <GtArray*> object whose elements have the size
-   <size_of_elem>. */
+/* Return a new <GtArray> object whose elements have the size <size_of_elem>. */
 GtArray*      gt_array_new(size_t size_of_elem);
 /* Increase the reference count for <array> and return it.
    If <array> is <NULL>, <NULL> is returned without any side effects. */

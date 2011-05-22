@@ -28,9 +28,9 @@ typedef struct GtCommentNode GtCommentNode;
 
 const GtGenomeNodeClass* gt_comment_node_class(void);
 
-/* Create a new <GtCommentNode*> representing a <comment>. Please note that the
-   single leading <#> which denotes comment lines in GFF3 files should not be
-   part of <comment>. */
+/* Return a new <GtCommentNode> object representing a <comment>. Please note
+   that the single leading <#> which denotes comment lines in GFF3 files should
+   not be part of <comment>. */
 GtGenomeNode*            gt_comment_node_new(const char *comment);
 
 /* Return the comment stored in <comment_node>. */

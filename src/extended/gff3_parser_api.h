@@ -30,8 +30,8 @@
    directly. Normally, a <GtGFF3InStream> is used to parse GFF3 files. */
 typedef struct GtGFF3Parser GtGFF3Parser;
 
-/* Create a new <GtGFF3Parser*> with optional <type_checker>. If a
-   <type_checker> was given, the <GtGFF3Parser*> stores a new reference to it
+/* Return a new <GtGFF3Parser> object with optional <type_checker>. If a
+   <type_checker> was given, the <GtGFF3Parser> stores a new reference to it
    internally and uses the <type_checker> to check types during parsing. */
 GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker);
 /* Enable ID attribute checking in <gff3_parser>. Thereby, the memory

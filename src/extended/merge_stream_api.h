@@ -22,7 +22,8 @@
 #include "core/array.h"
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* Implements the <GtNodeStream> interface. A <GtMergeStream> allows to merge a
+   set of sorted streams in a sorted fashion. */
 typedef struct GtMergeStream GtMergeStream;
 
 /* Create a <GtMergeStream*> which merges the given (sorted) <node_streams> in a

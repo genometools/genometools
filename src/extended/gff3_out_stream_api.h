@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -21,7 +21,8 @@
 #include "core/file_api.h"
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* Implements the <GtNodeStream> interface. A <GtGFF3OutStream> produces GFF3
+   output. */
 typedef struct GtGFF3OutStream GtGFF3OutStream;
 
 const GtNodeStreamClass* gt_gff3_out_stream_class(void);

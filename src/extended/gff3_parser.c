@@ -1046,7 +1046,7 @@ static void set_source(GtFeatureNode *feature_node, const char *source,
   gt_feature_node_set_source(feature_node, source_str);
 }
 
-static int parse_regular_gff3_line(GtGFF3Parser *parser,
+static int parse_gff3_feature_line(GtGFF3Parser *parser,
                                    GtQueue *genome_nodes,
                                    GtCstrTable *used_types, char *line,
                                    size_t line_length, GtStr *filenamestr,
@@ -1446,7 +1446,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
       }
     }
     else {
-      had_err = parse_regular_gff3_line(parser, genome_nodes, used_types, line,
+      had_err = parse_gff3_feature_line(parser, genome_nodes, used_types, line,
                                         line_length, filenamestr, *line_number,
                                         err);
       if (had_err || (!parser->incomplete_node && gt_queue_size(genome_nodes)))

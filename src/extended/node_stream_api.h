@@ -24,7 +24,8 @@
 
 typedef struct GtNodeStreamClass GtNodeStreamClass;
 
-/* The <GtNodeStream> interface. */
+/* The <GtNodeStream> interface. <GtNodeStream>s process <GtGenomeNode>s in a
+   pull-based architecture and can be chained together. */
 typedef struct GtNodeStream GtNodeStream;
 
 /* Increase the reference count for <node_stream> and return it. */

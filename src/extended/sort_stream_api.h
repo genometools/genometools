@@ -20,7 +20,8 @@
 
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* Implements the <GtNodeStream> interface. A <GtSortStream> sorts the
+   <GtGenomeNode>s it retrieves from its node source. */
 typedef struct GtSortStream GtSortStream;
 
 /* Create a <GtSortStream*> which sorts the genome nodes it retrieves from

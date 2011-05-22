@@ -25,7 +25,7 @@
    A <NULL>-pointer as generic file implies stdout. */
 typedef struct GtFile GtFile;
 
-/* Create a new GtFile object and open the underlying file handle with given
+/* Return a new <GtFile> object and open the underlying file handle with given
    <mode>. Returns NULL and sets <err> accordingly, if the file <path> could not
    be opened. The compression mode is determined by the ending of <path> (gzip
    compression if it ends with '.gz', bzip2 compression if it ends with '.bz2',

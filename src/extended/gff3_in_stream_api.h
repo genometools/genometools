@@ -21,13 +21,14 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* Implements the <GtNodeStream> interface. A <GtGFF3InStream> parses GFF3 files
+   and returns them as a stream of <GtGenomeNode>s. */
 typedef struct GtGFF3InStream GtGFF3InStream;
 
-/* Create a <GtGFF3InStream*> which subsequently reads the <num_of_files> many
-   GFF3 files denoted in <filenames>. The GFF3 files do not have to be sorted.
-   If <num_of_files> is 0 or a file name is "-", it is read from <stdin>.
-   The memory footprint is O(file size) in the worst-case. */
+/* Return a <GtGFF3InStream> object which subsequently reads the <num_of_files>
+   many GFF3 files denoted in <filenames>. The GFF3 files do not have to be
+   sorted. If <num_of_files> is 0 or a file name is "-", it is read from
+   <stdin>. The memory footprint is O(file size) in the worst-case. */
 GtNodeStream*            gt_gff3_in_stream_new_unsorted(int num_of_files,
                                                         const char **filenames);
 /* Create a <GtGFF3InStream*> which reads the sorted GFF3 file denoted by

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -20,11 +20,12 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* Implements the <GtNodeStream> interface. A <GtBEDInStream> allows to parse
+   BED files. */
 typedef struct GtBEDInStream GtBEDInStream;
 
-/* Create a <GtBEDInStream*> which subsequently reads the BED file with the
-   given <filename>. If <filename> equals <NULL>, the BED data is read from
+/* Return a <GtBEDInStream> object which subsequently reads the BED file with
+   the given <filename>. If <filename> equals <NULL>, the BED data is read from
    <stdin>. */
 GtNodeStream* gt_bed_in_stream_new(const char *filename);
 

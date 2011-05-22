@@ -502,8 +502,7 @@ Decrease the reference count for <code>alphabet</code> or delete it, if this was
 
 <code>GtArray*       gt_array_new(size_t size_of_elem)</code>
 <p>
-Return a new <code>GtArray*</code> object whose elements have the size
-   <code>size_of_elem</code>.
+Return a new <code>GtArray</code> object whose elements have the size <code>size_of_elem</code>.
 </p>
 <hr>
 <a name="gt_array_ref"></a>
@@ -696,15 +695,16 @@ Decrease the reference count for <code>array</code> or delete it, if this was th
 <a name="GtBEDInStream"></a>
 <h2>Class GtBEDInStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtBEDInStream</code> allows to parse
+   BED files. </p>
 
 <hr>
 <a name="gt_bed_in_stream_new"></a>
 
 <code>GtNodeStream*  gt_bed_in_stream_new(const char *filename)</code>
 <p>
-Create a <code>GtBEDInStream*</code> which subsequently reads the BED file with the
-   given <code>filename</code>. If <code>filename</code> equals <code>NULL</code>, the BED data is read from
+Return a <code>GtBEDInStream</code> object which subsequently reads the BED file with
+   the given <code>filename</code>. If <code>filename</code> equals <code>NULL</code>, the BED data is read from
    <code>stdin</code>.
 </p>
 <hr>
@@ -1229,9 +1229,9 @@ Delete the <code>color</code> object.
 
 <code>GtGenomeNode*             gt_comment_node_new(const char *comment)</code>
 <p>
-Create a new <code>GtCommentNode*</code> representing a <code>comment</code>. Please note that the
-   single leading <code>#</code> which denotes comment lines in GFF3 files should not be
-   part of <code>comment</code>.
+Return a new <code>GtCommentNode</code> object representing a <code>comment</code>. Please note
+   that the single leading <code>#</code> which denotes comment lines in GFF3 files should
+   not be part of <code>comment</code>.
 </p>
 <hr>
 <a name="gt_comment_node_get_comment"></a>
@@ -1282,7 +1282,7 @@ Return a <code>GtStrArray*</code> which contains all <code>cstr</code>s added to
 
 <code>void           gt_cstr_table_delete(GtCstrTable *table)</code>
 <p>
-Delete <code>table</code>.
+Delete C-string <code>table</code>.
 </p>
 <hr>
 <a name="GtCustomTrack"></a>
@@ -2499,14 +2499,14 @@ Deletes <code>esr</code>, freeing all associated space.
 
 <p>
    This class is used for the handling of <strong>user errors</strong> in <em>GenomeTools</em>.
-   Thereby, the actual <code>GtError*</code> object is used to store the <em>error message</em>
+   Thereby, the actual <code>GtError</code> object is used to store the <em>error message</em>
    while it is signaled by the return value of the called function, if an error
-   occured.</p><p>   By convention in <em>GenomeTools</em>, the <code>GtError*</code> object is always passed
-   into a function as the last parameter and -1 (or <code>NULL</code> for constructors) is
-   used as return value to indicate that an error occurred.
+   occured.</p><p>   By convention in <em>GenomeTools</em>, the <code>GtError</code> object is always passed into
+   a function as the last parameter and -1 (or <code>NULL</code> for constructors) is used
+   as return value to indicate that an error occurred.
    Success is usually indicated by 0 as return value or via a non-<code>NULL</code> object
-   pointer for constructors.</p><p>   It is possible to use <code>NULL</code> as an <code>GtError*</code> object, if one is not
-   interested in the actual error message.</p><p>   Functions which do not get an <code>GtError*</code> object cannot fail due to a user
+   pointer for constructors.</p><p>   It is possible to use <code>NULL</code> as an <code>GtError</code> object, if one is not interested
+   in the actual error message.</p><p>   Functions which do not get an <code>GtError</code> object cannot fail due to a user
    error and it is not necessary to check their return code for an error
    condition.
 </p>
@@ -2516,7 +2516,7 @@ Deletes <code>esr</code>, freeing all associated space.
 
 <code>GtError*    gt_error_new(void)</code>
 <p>
-Return a new <code>GtError*</code> object
+Return a new <code>GtError</code> object
 </p>
 <hr>
 <a name="gt_error_check"></a>
@@ -2699,7 +2699,7 @@ Creates a new <code>GtFeatureIndexMemory</code> object.
 <h2>Class GtFeatureNode</h2>
 
 <p> Implements the <code>GtGenomeNode</code> interface. A single feature node corresponds
-   to a regular GFF3 line (i.e., a line which does not start with <code>#</code>).
+   to a GFF3 feature line (i.e., a line which does not start with <code>#</code>).
    Part-of relationships (which are realised in GFF3 with the <code>Parent</code> and <code>ID</code>
    attributes) are realised in the C API with the
    <code>gt_feature_node_add_child()</code> method. </p>
@@ -2711,8 +2711,8 @@ Creates a new <code>GtFeatureIndexMemory</code> object.
                                   unsigned long start, unsigned long end,
                                   GtStrand strand)</code>
 <p>
-Create an new <code>GtFeatureNode*</code> on sequence with ID <code>seqid</code> and type <code>type</code>
-   which lies from <code>start</code> to <code>end</code> on strand <code>strand</code>.
+Return an new <code>GtFeatureNode</code> object on sequence with ID <code>seqid</code> and type
+   <code>type</code> which lies from <code>start</code> to <code>end</code> on strand <code>strand</code>.
    The <code>GtFeatureNode*</code> stores a new reference to <code>seqid</code>, so make sure you do
    not modify the original <code>seqid</code> afterwards!
    <code>start</code> and <code>end</code> always refer to the forward strand, therefore <code>start</code> has
@@ -2739,7 +2739,7 @@ Add <code>child</code> node to <code>parent</code> node. <code>parent</code> tak
 <code>const char*    gt_feature_node_get_source(const GtFeatureNode *feature_node)</code>
 <p>
 Return the source of <code>feature_node</code>. If no source has been set, "." is
-   returned. Corresponds to column 2 of regular GFF3 lines.
+   returned. Corresponds to column 2 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_source"></a>
@@ -2748,7 +2748,7 @@ Return the source of <code>feature_node</code>. If no source has been set, "." i
                                          GtStr *source)</code>
 <p>
 Set the <code>source</code> of <code>feature_node</code>. Stores a new reference to <code>source</code>.
-   Corresponds to column 2 of regular GFF3 lines.
+   Corresponds to column 2 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_has_source"></a>
@@ -2764,7 +2764,7 @@ Return <code>true</code> if <code>feature_node</code> has a defined source (i.e.
 <code>const char*    gt_feature_node_get_type(const GtFeatureNode *feature_node)</code>
 <p>
 Return the type of <code>feature_node</code>.
-   Corresponds to column 3 of regular GFF3 lines.
+   Corresponds to column 3 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_type"></a>
@@ -2797,7 +2797,7 @@ Return <code>true</code> if the score of <code>feature_node</code> is defined, <
 <code>float          gt_feature_node_get_score(const GtFeatureNode *feature_node)</code>
 <p>
 Return the score of <code>feature_node</code>. The score has to be defined.
-   Corresponds to column 6 of regular GFF3 lines.
+   Corresponds to column 6 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_score"></a>
@@ -2820,7 +2820,7 @@ Unset the score of <code>feature_node</code>.
 <code>GtStrand       gt_feature_node_get_strand(const GtFeatureNode *feature_node)</code>
 <p>
 Return the strand of <code>feature_node</code>.
-   Corresponds to column 7 of regular GFF3 lines.
+   Corresponds to column 7 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_strand"></a>
@@ -2836,7 +2836,7 @@ Set the strand of <code>feature_node</code> to <code>strand</code>.
 <code>GtPhase        gt_feature_node_get_phase(const GtFeatureNode *feature_node)</code>
 <p>
 Return the phase of <code>feature_node</code>.
-   Corresponds to column 8 of regular GFF3 lines.
+   Corresponds to column 8 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_set_phase"></a>
@@ -2854,7 +2854,7 @@ Set the phase of <code>feature_node</code> to <code>phase</code>.
 <p>
 Return the attribute of <code>feature_node</code> with the given <code>name</code>.
    If no such attribute has been added, <code>NULL</code> is returned.
-   The attributes are stored in column 9 of regular GFF3 lines.
+   The attributes are stored in column 9 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_feature_node_get_attribute_list"></a>
@@ -2938,7 +2938,7 @@ Delete <code>feature_node_iterator</code>.
 
 <code>GtFile*  gt_file_new(const char *path, const char *mode, GtError *err)</code>
 <p>
-Create a new GtFile object and open the underlying file handle with given
+Return a new <code>GtFile</code> object and open the underlying file handle with given
    <code>mode</code>. Returns NULL and sets <code>err</code> accordingly, if the file <code>path</code> could not
    be opened. The compression mode is determined by the ending of <code>path</code> (gzip
    compression if it ends with '.gz', bzip2 compression if it ends with '.bz2',
@@ -2963,7 +2963,8 @@ Close the underlying file handle and destroy the <code>file</code> object.
 <a name="GtGFF3InStream"></a>
 <h2>Class GtGFF3InStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtGFF3InStream</code> parses GFF3 files
+   and returns them as a stream of <code>GtGenomeNode</code>s. </p>
 
 <hr>
 <a name="gt_gff3_in_stream_new_unsorted"></a>
@@ -2971,10 +2972,10 @@ Close the underlying file handle and destroy the <code>file</code> object.
 <code>GtNodeStream*             gt_gff3_in_stream_new_unsorted(int num_of_files,
                                                         const char **filenames)</code>
 <p>
-Create a <code>GtGFF3InStream*</code> which subsequently reads the <code>num_of_files</code> many
-   GFF3 files denoted in <code>filenames</code>. The GFF3 files do not have to be sorted.
-   If <code>num_of_files</code> is 0 or a file name is "-", it is read from <code>stdin</code>.
-   The memory footprint is O(file size) in the worst-case.
+Return a <code>GtGFF3InStream</code> object which subsequently reads the <code>num_of_files</code>
+   many GFF3 files denoted in <code>filenames</code>. The GFF3 files do not have to be
+   sorted. If <code>num_of_files</code> is 0 or a file name is "-", it is read from
+   <code>stdin</code>. The memory footprint is O(file size) in the worst-case.
 </p>
 <hr>
 <a name="gt_gff3_in_stream_new_sorted"></a>
@@ -3016,7 +3017,8 @@ Show progress bar on <code>stdout</code> to convey the progress of parsing the G
 <a name="GtGFF3OutStream"></a>
 <h2>Class GtGFF3OutStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtGFF3OutStream</code> produces GFF3
+   output. </p>
 
 <hr>
 <a name="gt_gff3_out_stream_new"></a>
@@ -3062,8 +3064,8 @@ If this method is called upon <code>gff3_out_stream</code>, use the original ID
 
 <code>GtGFF3Parser*  gt_gff3_parser_new(GtTypeChecker *type_checker)</code>
 <p>
-Create a new <code>GtGFF3Parser*</code> with optional <code>type_checker</code>. If a
-   <code>type_checker</code> was given, the <code>GtGFF3Parser*</code> stores a new reference to it
+Return a new <code>GtGFF3Parser</code> object with optional <code>type_checker</code>. If a
+   <code>type_checker</code> was given, the <code>GtGFF3Parser</code> stores a new reference to it
    internally and uses the <code>type_checker</code> to check types during parsing.
 </p>
 <hr>
@@ -3185,7 +3187,9 @@ Create a <code>GtGTFInStream*</code> which subsequently reads the GTF file with 
 <a name="GtGenomeNode"></a>
 <h2>Class GtGenomeNode</h2>
 
-<p> The <code>GtGenomeNode</code> interface. </p>
+<p> The <code>GtGenomeNode</code> interface. The different implementation of the
+   <code>GtGenomeNode</code> interface represent different parts of genome annotations (as
+   they are usually found in GFF3 files). </p>
 
 <hr>
 <a name="gt_genome_node_ref"></a>
@@ -3209,7 +3213,7 @@ Decrease the reference count for <code>genome_node</code> or delete it, if this 
 <code>GtStr*         gt_genome_node_get_seqid(GtGenomeNode *genome_node)</code>
 <p>
 Return the sequence ID of <code>genome_node</code>.
-   Corresponds to column 1 of regular GFF3 lines.
+   Corresponds to column 1 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_genome_node_get_range"></a>
@@ -3217,7 +3221,7 @@ Return the sequence ID of <code>genome_node</code>.
 <code>GtRange        gt_genome_node_get_range(GtGenomeNode *genome_node)</code>
 <p>
 Return the genomic range of of <code>genome_node</code>.
-   Corresponds to columns 4 and 5 of regular GFF3 lines.
+   Corresponds to columns 4 and 5 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_genome_node_get_start"></a>
@@ -3225,7 +3229,7 @@ Return the genomic range of of <code>genome_node</code>.
 <code>unsigned long  gt_genome_node_get_start(GtGenomeNode *genome_node)</code>
 <p>
 Return the start of <code>genome_node</code>.
-   Corresponds to column 4 of regular GFF3 lines.
+   Corresponds to column 4 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_genome_node_get_end"></a>
@@ -3233,7 +3237,7 @@ Return the start of <code>genome_node</code>.
 <code>unsigned long  gt_genome_node_get_end(GtGenomeNode *genome_node)</code>
 <p>
 Return the end of <code>genome_node</code>.
-   Corresponds to column 5 of regular GFF3 lines.
+   Corresponds to column 5 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_genome_node_get_length"></a>
@@ -3241,7 +3245,7 @@ Return the end of <code>genome_node</code>.
 <code>unsigned long  gt_genome_node_get_length(GtGenomeNode *genome_node)</code>
 <p>
 Return the length of <code>genome_node</code>.
-   Computed from column 4 and 5 of regular GFF3 lines.
+   Computed from column 4 and 5 of GFF3 feature lines.
 </p>
 <hr>
 <a name="gt_genome_node_get_filename"></a>
@@ -3955,7 +3959,8 @@ Delete <code>logger</code>.
 <a name="GtMergeStream"></a>
 <h2>Class GtMergeStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtMergeStream</code> allows to merge a
+   set of sorted streams in a sorted fashion. </p>
 
 <hr>
 <a name="gt_merge_stream_new"></a>
@@ -3969,7 +3974,8 @@ Create a <code>GtMergeStream*</code> which merges the given (sorted) <code>node_
 <a name="GtNodeStream"></a>
 <h2>Class GtNodeStream</h2>
 
-<p> The <code>GtNodeStream</code> interface. </p>
+<p> The <code>GtNodeStream</code> interface. <code>GtNodeStream</code>s process <code>GtGenomeNode</code>s in a
+   pull-based architecture and can be chained together. </p>
 
 <hr>
 <a name="gt_node_stream_ref"></a>
@@ -4390,7 +4396,8 @@ Return the sequence length of <code>sequence_node</code>.
 <a name="GtSortStream"></a>
 <h2>Class GtSortStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtSortStream</code> sorts the
+   <code>GtGenomeNode</code>s it retrieves from its node source. </p>
 
 <hr>
 <a name="gt_sort_stream_new"></a>
@@ -5523,7 +5530,7 @@ Set <code>match</code> to <code>true</code> if <code>pattern</code> matches <cod
 
 <code>void  gt_lib_init(void)</code>
 <p>
-Initialize this GenomeTools instance.
+Initialize this <em>GenomeTools</em> library instance.
    This has to be called before the library is used!
 </p>
 <hr>
@@ -5531,7 +5538,7 @@ Initialize this GenomeTools instance.
 
 <code>void  gt_lib_reg_atexit_func(void)</code>
 <p>
-Registers exit function which calls <code>gt_lib_clean()</code>.
+Registers exit function which calls <code>gt_lib_clean()</code> at exit.
 </p>
 <hr>
 <a name="gt_lib_clean"></a>

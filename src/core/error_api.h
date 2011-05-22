@@ -24,26 +24,26 @@
 
 /*
    This class is used for the handling of ___user errors___ in __GenomeTools__.
-   Thereby, the actual <GtError*> object is used to store the __error message__
+   Thereby, the actual <GtError> object is used to store the __error message__
    while it is signaled by the return value of the called function, if an error
    occured.
 
-   By convention in __GenomeTools__, the <GtError*> object is always passed
-   into a function as the last parameter and -1 (or <NULL> for constructors) is
-   used as return value to indicate that an error occurred.
+   By convention in __GenomeTools__, the <GtError> object is always passed into
+   a function as the last parameter and -1 (or <NULL> for constructors) is used
+   as return value to indicate that an error occurred.
    Success is usually indicated by 0 as return value or via a non-<NULL> object
    pointer for constructors.
 
-   It is possible to use <NULL> as an <GtError*> object, if one is not
-   interested in the actual error message.
+   It is possible to use <NULL> as an <GtError> object, if one is not interested
+   in the actual error message.
 
-   Functions which do not get an <GtError*> object cannot fail due to a user
+   Functions which do not get an <GtError> object cannot fail due to a user
    error and it is not necessary to check their return code for an error
    condition.
 */
 typedef struct GtError GtError;
 
-/* Return a new <GtError*> object */
+/* Return a new <GtError> object */
 GtError*   gt_error_new(void);
 /* Insert an assertion to check that the error <err> is not set or is <NULL>.
    This macro should be used at the beginning of every routine which has an

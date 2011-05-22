@@ -20,11 +20,11 @@
 
 /* Init module */
 
-/* Initialize this GenomeTools instance.
+/* Initialize this __GenomeTools__ library instance.
    This has to be called before the library is used! */
 void gt_lib_init(void);
 
-/* Registers exit function which calls <gt_lib_clean()>. */
+/* Registers exit function which calls <gt_lib_clean()> at exit. */
 void gt_lib_reg_atexit_func(void);
 
 /* Returns 0 if no memory map, file pointer, or memory has been leaked and a

@@ -24,7 +24,9 @@
 
 typedef struct GtGenomeNodeClass GtGenomeNodeClass;
 
-/* The <GtGenomeNode> interface. */
+/* The <GtGenomeNode> interface. The different implementation of the
+   <GtGenomeNode> interface represent different parts of genome annotations (as
+   they are usually found in GFF3 files). */
 typedef struct GtGenomeNode GtGenomeNode;
 
 /* Increase the reference count for <genome_node> and return it.
@@ -36,23 +38,23 @@ GtGenomeNode* gt_genome_node_ref(GtGenomeNode *genome_node);
 void          gt_genome_node_delete(GtGenomeNode *genome_node);
 
 /* Return the sequence ID of <genome_node>.
-   Corresponds to column 1 of regular GFF3 lines. */
+   Corresponds to column 1 of GFF3 feature lines. */
 GtStr*        gt_genome_node_get_seqid(GtGenomeNode *genome_node);
 
 /* Return the genomic range of of <genome_node>.
-   Corresponds to columns 4 and 5 of regular GFF3 lines. */
+   Corresponds to columns 4 and 5 of GFF3 feature lines. */
 GtRange       gt_genome_node_get_range(GtGenomeNode *genome_node);
 
 /* Return the start of <genome_node>.
-   Corresponds to column 4 of regular GFF3 lines. */
+   Corresponds to column 4 of GFF3 feature lines. */
 unsigned long gt_genome_node_get_start(GtGenomeNode *genome_node);
 
 /* Return the end of <genome_node>.
-   Corresponds to column 5 of regular GFF3 lines. */
+   Corresponds to column 5 of GFF3 feature lines. */
 unsigned long gt_genome_node_get_end(GtGenomeNode *genome_node);
 
 /* Return the length of <genome_node>.
-   Computed from column 4 and 5 of regular GFF3 lines. */
+   Computed from column 4 and 5 of GFF3 feature lines. */
 unsigned long gt_genome_node_get_length(GtGenomeNode *genome_node);
 
 /* Return the filename the <genome_node> was read from.
