@@ -174,21 +174,27 @@ static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
   return 0;
 }
 
-static int showleafedge(bool firstsucc,unsigned long fd,
-                        unsigned long flb,unsigned long leafnumber,
+static int showleafedge(bool firstsucc,
+                        unsigned long fd,
+                        unsigned long flb,
                         GT_UNUSED GtBUinfo *info,
-                        GT_UNUSED GtBUstate *bustate)
+                        unsigned long leafnumber,
+                        GT_UNUSED GtBUstate *bustate,
+                        GT_UNUSED GtError *err)
 
 {
   printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,leafnumber);
   return 0;
 }
 
-static int showbranchingedge(bool firstsucc,unsigned long fd,
+static int showbranchingedge(bool firstsucc,
+                             unsigned long fd,
                              unsigned long flb,
-                             unsigned long sd,unsigned long slb,
-                             GT_UNUSED GtBUinfo *info,
-                             GT_UNUSED GtBUstate *bustate)
+                             GT_UNUSED GtBUinfo *finfo,
+                             unsigned long sd,
+                             unsigned long slb,
+                             GT_UNUSED GtBUstate *bustate,
+                             GT_UNUSED GtError *err)
 {
   printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
   return 0;

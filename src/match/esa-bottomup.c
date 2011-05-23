@@ -146,21 +146,23 @@ static void GtQueuepair_add(GtQueuepair *queuepair,unsigned long index,
 static int GtQueuepair_enumleaves(GtBUItvinfo *parent,
                                   GtQueuepair *queuepair,
                                   unsigned long endpos,
-                                  int (*processleafedge)(bool,unsigned long,
+                                  int (*processleafedge)(bool,
                                                          unsigned long,
                                                          unsigned long,
                                                          GtBUinfo *info,
-                                                         GtBUstate *bustate),
-                                  GtBUstate *bustate)
+                                                         unsigned long,
+                                                         GtBUstate *bustate,
+                                                         GtError *err),
+                                  GtBUstate *bustate,
+                                  GtError *err)
 {
   gt_assert(parent != NULL);
   if (!GT_SUFTABELEMISUNDEF(queuepair->leftelem))
   {
     if (queuepair->leftelem.index < endpos)
     {
-      if (processleafedge(parent->noedge,
-                          parent->lcp,parent->lb,queuepair->leftelem.suffix,
-                          parent->info,bustate) != 0)
+      if (processleafedge(parent->noedge,parent->lcp,parent->lb,parent->info,
+                          queuepair->leftelem.suffix,bustate,err) != 0)
       {
         return -1;
       }
@@ -175,9 +177,8 @@ static int GtQueuepair_enumleaves(GtBUItvinfo *parent,
   {
     if (queuepair->rightelem.index < endpos)
     {
-      if (processleafedge(parent->noedge,
-                          parent->lcp,parent->lb,queuepair->rightelem.suffix,
-                          parent->info,bustate) != 0)
+      if (processleafedge(parent->noedge,parent->lcp,parent->lb,parent->info,
+                          queuepair->rightelem.suffix,bustate,err) != 0)
       {
         return -1;
       }
@@ -191,16 +192,21 @@ static int GtQueuepair_enumleaves(GtBUItvinfo *parent,
 int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
                     void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
-                    int (*processleafedge)(bool,unsigned long,
+                    int (*processleafedge)(bool,
                                            unsigned long,
                                            unsigned long,
-                                           GtBUinfo *info,
-                                           GtBUstate *bustate),
-                    int (*processbranchingedge)(bool firstsucc,unsigned long,
+                                           GtBUinfo *,
+                                           unsigned long,
+                                           GtBUstate *,
+                                           GtError *err),
+                    int (*processbranchingedge)(bool firstsucc,
                                                 unsigned long,
-                                                unsigned long,unsigned long,
-                                                GtBUinfo *info,
-                                                GtBUstate *bustate),
+                                                unsigned long,
+                                                GtBUinfo *,
+                                                unsigned long,
+                                                unsigned long,
+                                                GtBUstate *,
+                                                GtError *),
                     GtBUstate *bustate,
                     GtError *err)
 {
@@ -246,7 +252,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       lastinterval.rb = idx;
       lastintervaldefined = true;
       if (GtQueuepair_enumleaves(&lastinterval,&queuepair,idx+1,processleafedge,
-                                 bustate) != 0)
+                                 bustate,err) != 0)
       {
         haserr = true;
         break;
@@ -254,11 +260,14 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       lb = lastinterval.lb;
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
-        if (processbranchingedge(TOP_ESA_BOTTOMUP.noedge,TOP_ESA_BOTTOMUP.lcp,
-                                 TOP_ESA_BOTTOMUP.lb,lastinterval.lcp,
-                                 lastinterval.lb,
+        if (processbranchingedge(TOP_ESA_BOTTOMUP.noedge,
+                                 TOP_ESA_BOTTOMUP.lcp,
+                                 TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,
-                                 bustate) != 0)
+                                 lastinterval.lcp,
+                                 lastinterval.lb,
+                                 bustate,
+                                 err) != 0)
         {
           haserr = true;
           break;
@@ -276,7 +285,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       if (!lastintervaldefined)
       {
         if (GtQueuepair_enumleaves(&TOP_ESA_BOTTOMUP,&queuepair,lb,
-                                   processleafedge,bustate) != 0)
+                                   processleafedge,bustate,err) != 0)
         {
           haserr = true;
           break;
@@ -285,9 +294,13 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       } else
       {
         PUSH_ESA_BOTTOMUP(lcpvalue,lb,false);
-        if (processbranchingedge(true,TOP_ESA_BOTTOMUP.lcp,TOP_ESA_BOTTOMUP.lb,
-                                 lastinterval.lcp,lastinterval.lb,
-                                 TOP_ESA_BOTTOMUP.info,bustate) != 0)
+        if (processbranchingedge(true,
+                                 TOP_ESA_BOTTOMUP.lcp,
+                                 TOP_ESA_BOTTOMUP.lb,
+                                 TOP_ESA_BOTTOMUP.info,
+                                 lastinterval.lcp,
+                                 lastinterval.lb,
+                                 bustate,err) != 0)
         {
           haserr = true;
           break;
@@ -297,7 +310,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     } else
     {
       if (GtQueuepair_enumleaves(&TOP_ESA_BOTTOMUP,&queuepair,idx+1,
-                                 processleafedge,bustate) != 0)
+                                 processleafedge,bustate,err) != 0)
       {
         haserr = true;
         break;
@@ -311,7 +324,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     lastintervaldefined = true;
     GtQueuepair_add(&queuepair,idx,idx);
     if (GtQueuepair_enumleaves(&lastinterval,&queuepair,idx+1,processleafedge,
-                               bustate) != 0)
+                               bustate,err) != 0)
     {
       haserr = true;
     }

@@ -22,6 +22,7 @@
 #include "esa-seqread.h"
 #include "core/logger.h"
 #include "esa-maxpairs.h"
+#include "esa-dfs.h"
 
 #define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
 #define INITIALCHAR     (GtUchar) (state->alphabetsize+1)
@@ -67,8 +68,6 @@ typedef struct  /* global information */
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
 } MaxpairsDfsstate;
-
-#include "esa-dfs.h"
 
 static Dfsinfo *allocateDfsinfo(Dfsstate *astate)
 {
