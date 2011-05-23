@@ -17,7 +17,6 @@
 
 #include "core/arraydef.h"
 #include "core/unused_api.h"
-#include "spacedef.h"
 #include "esa-seqread.h"
 #include "esa-maxpairs.h"
 #include "esa-bottomup.h"
@@ -72,16 +71,18 @@ static GtBUinfo *allocateBUinfo(GtBUstate *astate)
   MaxpairsBUinfo *buinfo;
   MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
 
-  ALLOCASSIGNSPACE(buinfo,NULL,MaxpairsBUinfo,1);
-  ALLOCASSIGNSPACE(buinfo->nodeposlist,NULL,Listtype,state->alphabetsize);
+  buinfo = gt_malloc(sizeof(*buinfo));
+  buinfo->nodeposlist = gt_malloc(sizeof(*buinfo->nodeposlist) *
+                                  state->alphabetsize);
   return (GtBUinfo*) buinfo;
 }
 
 static void freeBUinfo(GtBUinfo *abuinfo, GT_UNUSED GtBUstate *state)
 {
-  MaxpairsBUinfo *buinfo = (MaxpairsBUinfo*) abuinfo;;
-  FREESPACE(buinfo->nodeposlist);
-  FREESPACE(buinfo);
+  MaxpairsBUinfo *buinfo = (MaxpairsBUinfo*) abuinfo;
+
+  gt_free(buinfo->nodeposlist);
+  gt_free(buinfo);
 }
 
 static void add2poslist(GtBUstate *astate,GtBUinfo *aninfo,unsigned int base,
@@ -387,7 +388,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state->readmode = readmode;
 
   GT_INITARRAY(&state->uniquechar,GtUlong);
-  ALLOCASSIGNSPACE(state->poslist,NULL,GtArrayGtUlong,state->alphabetsize);
+  state->poslist = gt_malloc(sizeof(*state->poslist) * state->alphabetsize);
   for (base = 0; base < state->alphabetsize; base++)
   {
     ptr = &state->poslist[base];
@@ -409,7 +410,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state->poslist[base];
     GT_FREEARRAY(ptr,GtUlong);
   }
-  FREESPACE(state->poslist);
+  gt_free(state->poslist);
   gt_free(state);
   return haserr ? -1 : 0;
 }
