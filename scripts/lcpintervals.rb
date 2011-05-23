@@ -129,7 +129,7 @@ class Queuepair
   end
   def enumleaves(endpos)
     if not @leftelem.nil?
-      if @leftelem.index <= endpos
+      if @leftelem.index < endpos
         yield @leftelem
         @leftelem = nil
       else
@@ -137,7 +137,7 @@ class Queuepair
       end
     end
     if not @rightelem.nil?
-      if @rightelem.index <= endpos
+      if @rightelem.index < endpos
         yield @rightelem
         @rightelem = nil
       else
@@ -159,7 +159,7 @@ def enumlcpintervaltreewithqueue(filename)
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx
-      processleaves(lastinterval,queue,idx)
+      processleaves(lastinterval,queue,idx+1)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         firstedge = stack.last.noedge
@@ -170,7 +170,7 @@ def enumlcpintervaltreewithqueue(filename)
     end
     if lcpvalue > stack.last.lcp
       if lastinterval.nil?
-        processleaves(stack.last,queue,lb-1)
+        processleaves(stack.last,queue,lb)
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],true))
       else
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
@@ -178,14 +178,14 @@ def enumlcpintervaltreewithqueue(filename)
         lastinterval = nil
       end
     else
-      processleaves(stack.last,queue,idx)
+      processleaves(stack.last,queue,idx+1)
     end
     idx += 1
   end
   lastinterval = stack.pop
   lastinterval.rb = idx
   queue.add(idx,idx)
-  processleaves(lastinterval,queue,idx)
+  processleaves(lastinterval,queue,idx+1)
   queue.delete()
 end
 

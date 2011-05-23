@@ -21,19 +21,19 @@
 #include "esa-bottomup.h"
 #include "esa-seqread.h"
 
-#define TOP           stackspace[nextfreeItvinfo-1]
-#define INCSTACKSIZE  32
+#define TOP_ESA_BOTTOMUP   stackspace[nextfreeItvinfo-1]
+#define POP_ESA_BOTTOMUP   stackspace[--nextfreeItvinfo]
 
-#define PUSHBOTTOMUP(LCP,LB,NOEDGE)\
+#define PUSH_ESA_BOTTOMUP(LCP,LB,NOEDGE)\
         if (nextfreeItvinfo >= allocatedItvinfo)\
         {\
           gt_assert(nextfreeItvinfo == allocatedItvinfo);\
           stackspace = allocBUItvinfo(stackspace,\
                                       allocatedItvinfo,\
-                                      allocatedItvinfo+INCSTACKSIZE,\
+                                      allocatedItvinfo+incrementstacksize,\
                                       allocateBUinfo,\
                                       state);\
-          allocatedItvinfo += INCSTACKSIZE;\
+          allocatedItvinfo += incrementstacksize;\
         }\
         gt_assert(stackspace != NULL);\
         stackspace[nextfreeItvinfo].lcp = LCP;\
@@ -42,12 +42,31 @@
         stackspace[nextfreeItvinfo].noedge = NOEDGE;\
         nextfreeItvinfo++
 
+#define SHOWBOOL_ESA_BOTTOMUP(B) ((B) ? '1' : '0')
+
 typedef struct
 {
   unsigned long lcp, lb, rb;
   bool noedge;
   GtBUinfo *info;
 } GtBUItvinfo;
+
+#ifdef SKDEBUG
+static void showstack(const GtBUItvinfo *stackspace,
+                      unsigned long nextfreeItvinfo)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<nextfreeItvinfo; idx++)
+  {
+    printf("# stack %lu: lcp=%lu,lb=%lu,noedge=%c\n",
+            idx,
+            stackspace[idx].lcp,
+            stackspace[idx].lb,
+            SHOWBOOL_ESA_BOTTOMUP(stackspace[idx].noedge));
+  }
+}
+#endif
 
 static GtBUItvinfo *allocBUItvinfo(GtBUItvinfo *ptr,
                                    unsigned long currentallocated,
@@ -136,9 +155,9 @@ static void GtQueuepair_enumleaves(GtBUItvinfo *parent,
   firstedge = parent->noedge;
   if (!GT_SUFTABELEMISUNDEF(queuepair->leftelem))
   {
-    if (queuepair->leftelem.index <= endpos)
+    if (queuepair->leftelem.index < endpos)
     {
-      printf("L %c %lu %lu %lu\n",firstedge ? '1' : '0',
+      printf("L %c %lu %lu %lu\n",SHOWBOOL_ESA_BOTTOMUP(firstedge),
              parent->lcp,parent->lb,queuepair->leftelem.suffix);
       GT_SUFTABELEMSETUNDEF(queuepair->leftelem);
       firstedge = false;
@@ -150,9 +169,9 @@ static void GtQueuepair_enumleaves(GtBUItvinfo *parent,
   }
   if (!GT_SUFTABELEMISUNDEF(queuepair->rightelem))
   {
-    if (queuepair->rightelem.index <= endpos)
+    if (queuepair->rightelem.index < endpos)
     {
-      printf("L %c %lu %lu %lu\n",firstedge ? '1' : '0',
+      printf("L %c %lu %lu %lu\n",SHOWBOOL_ESA_BOTTOMUP(firstedge),
              parent->lcp,
              parent->lb,
              queuepair->rightelem.suffix);
@@ -165,7 +184,7 @@ static void GtQueuepair_enumleaves(GtBUItvinfo *parent,
 static void processbranchedge(bool firstedge,const GtBUItvinfo *fromitv,
                               const GtBUItvinfo *toitv)
 {
-  printf("B %c %lu %lu %lu %lu\n",firstedge ? '1' : '0',
+  printf("B %c %lu %lu %lu %lu\n",SHOWBOOL_ESA_BOTTOMUP(firstedge),
          fromitv->lcp,fromitv->lb,toitv->lcp,toitv->lb);
 }
 
@@ -182,12 +201,13 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                 idx,
                 allocatedItvinfo = 0,
                 nextfreeItvinfo = 0;
-  GtBUItvinfo lastinterval, *stackspace = NULL;
+  const unsigned long incrementstacksize = 32UL;
   GtQueuepair queuepair;
-  bool firstedge, lastintervaldefined = false, haserr = false;
+  GtBUItvinfo lastinterval, *stackspace = NULL;
+  bool lastintervaldefined = false, firstedge, haserr = false;
   int retval;
 
-  PUSHBOTTOMUP(0,0,true);
+  PUSH_ESA_BOTTOMUP(0,0,true);
   GtQueuepair_init(&queuepair);
   for (idx = 0; !haserr; idx++)
   {
@@ -211,43 +231,43 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     }
     lb = idx;
     GtQueuepair_add(&queuepair,idx,previoussuffix);
-    while (lcpvalue < TOP.lcp)
+    while (lcpvalue < TOP_ESA_BOTTOMUP.lcp)
     {
-      lastinterval = stackspace[nextfreeItvinfo--];
+      lastinterval = POP_ESA_BOTTOMUP;
       lastinterval.rb = idx;
       lastintervaldefined = true;
-      GtQueuepair_enumleaves(&lastinterval,&queuepair,idx);
+      GtQueuepair_enumleaves(&lastinterval,&queuepair,idx+1);
       lb = lastinterval.lb;
-      if (lcpvalue <= TOP.lcp)
+      if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
-        firstedge = TOP.noedge;
-        TOP.noedge = false;
-        processbranchedge(firstedge,&TOP,&lastinterval);
+        firstedge = TOP_ESA_BOTTOMUP.noedge;
+        TOP_ESA_BOTTOMUP.noedge = false;
+        processbranchedge(firstedge,&TOP_ESA_BOTTOMUP,&lastinterval);
         lastintervaldefined = false;
       }
     }
-    if (lcpvalue > TOP.lcp)
+    if (lcpvalue > TOP_ESA_BOTTOMUP.lcp)
     {
       if (!lastintervaldefined)
       {
-        GtQueuepair_enumleaves(&TOP,&queuepair,lb-1);
-        PUSHBOTTOMUP(lcpvalue,lb,true);
+        GtQueuepair_enumleaves(&TOP_ESA_BOTTOMUP,&queuepair,lb);
+        PUSH_ESA_BOTTOMUP(lcpvalue,lb,true);
       } else
       {
-        PUSHBOTTOMUP(lcpvalue,lb,false);
-        processbranchedge(true,&TOP,&lastinterval);
+        PUSH_ESA_BOTTOMUP(lcpvalue,lb,false);
+        processbranchedge(true,&TOP_ESA_BOTTOMUP,&lastinterval);
         lastintervaldefined = false;
       }
     } else
     {
-      GtQueuepair_enumleaves(&TOP,&queuepair,idx);
+      GtQueuepair_enumleaves(&TOP_ESA_BOTTOMUP,&queuepair,idx+1);
     }
   }
-  lastinterval = stackspace[nextfreeItvinfo--];
+  lastinterval = POP_ESA_BOTTOMUP;
   lastinterval.rb = idx;
   lastintervaldefined = true;
   GtQueuepair_add(&queuepair,idx,idx);
-  GtQueuepair_enumleaves(&lastinterval,&queuepair,idx);
+  GtQueuepair_enumleaves(&lastinterval,&queuepair,idx+1);
   freeBUItvinfo(stackspace, allocatedItvinfo, freeBUinfo, state);
   return haserr ? -1 : 0;
 }
