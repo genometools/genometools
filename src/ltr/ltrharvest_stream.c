@@ -1338,7 +1338,6 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
                       (unsigned int) ltrh_stream->minseedlength,
                       gt_simpleexactselfmatchstore,
                       &ltrh_stream->repeatinfo,
-                      NULL,
                       err) != 0)
     {
       had_err = -1;

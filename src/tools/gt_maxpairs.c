@@ -78,7 +78,7 @@ static int callenummaxpairs(const char *indexname,
                             bool scanfile,
                             Processmaxpairs processmaxpairs,
                             void *processmaxpairsinfo,
-                            GtLogger *logger,
+                            GT_UNUSED GtLogger *logger,
                             GtError *err)
 {
   bool haserr = false;
@@ -99,13 +99,12 @@ static int callenummaxpairs(const char *indexname,
   }
   if (!haserr &&
       gt_enumeratemaxpairs(ssar,
-                        gt_encseqSequentialsuffixarrayreader(ssar),
-                        gt_readmodeSequentialsuffixarrayreader(ssar),
-                        userdefinedleastlength,
-                        processmaxpairs,
-                        processmaxpairsinfo,
-                        logger,
-                        err) != 0)
+                           gt_encseqSequentialsuffixarrayreader(ssar),
+                           gt_readmodeSequentialsuffixarrayreader(ssar),
+                           userdefinedleastlength,
+                           processmaxpairs,
+                           processmaxpairsinfo,
+                           err) != 0)
   {
     haserr = true;
   }

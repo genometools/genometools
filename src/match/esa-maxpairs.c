@@ -18,11 +18,9 @@
 #include "core/arraydef.h"
 #include "core/unused_api.h"
 #include "spacedef.h"
-
 #include "esa-seqread.h"
-#include "core/logger.h"
 #include "esa-maxpairs.h"
-#include "esa-dfs.h"
+#include "esa-bottomup.h"
 
 #define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
 #define INITIALCHAR     (GtUchar) (state->alphabetsize+1)
@@ -54,7 +52,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
-} MaxpairsDfsinfo;
+} MaxpairsBUinfo;
 
 typedef struct  /* global information */
 {
@@ -67,31 +65,31 @@ typedef struct  /* global information */
   GtReadmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
-} MaxpairsDfsstate;
+} MaxpairsBUstate;
 
-static Dfsinfo *allocateDfsinfo(Dfsstate *astate)
+static GtBUinfo *allocateBUinfo(GtBUstate *astate)
 {
-  MaxpairsDfsinfo *dfsinfo;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsBUinfo *buinfo;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
 
-  ALLOCASSIGNSPACE(dfsinfo,NULL,MaxpairsDfsinfo,1);
-  ALLOCASSIGNSPACE(dfsinfo->nodeposlist,NULL,Listtype,state->alphabetsize);
-  return (Dfsinfo*) dfsinfo;
+  ALLOCASSIGNSPACE(buinfo,NULL,MaxpairsBUinfo,1);
+  ALLOCASSIGNSPACE(buinfo->nodeposlist,NULL,Listtype,state->alphabetsize);
+  return (GtBUinfo*) buinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *adfsinfo, GT_UNUSED Dfsstate *state)
+static void freeBUinfo(GtBUinfo *abuinfo, GT_UNUSED GtBUstate *state)
 {
-  MaxpairsDfsinfo *dfsinfo = (MaxpairsDfsinfo*) adfsinfo;;
-  FREESPACE(dfsinfo->nodeposlist);
-  FREESPACE(dfsinfo);
+  MaxpairsBUinfo *buinfo = (MaxpairsBUinfo*) abuinfo;;
+  FREESPACE(buinfo->nodeposlist);
+  FREESPACE(buinfo);
 }
 
-static void add2poslist(Dfsstate *astate,Dfsinfo *aninfo,unsigned int base,
+static void add2poslist(GtBUstate *astate,GtBUinfo *aninfo,unsigned int base,
                         unsigned long leafnumber)
 {
   GtArrayGtUlong *ptr;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
-  MaxpairsDfsinfo *ninfo = (MaxpairsDfsinfo*) aninfo;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  MaxpairsBUinfo *ninfo = (MaxpairsBUinfo*) aninfo;
 
   if (base >= state->alphabetsize)
   {
@@ -105,12 +103,12 @@ static void add2poslist(Dfsstate *astate,Dfsinfo *aninfo,unsigned int base,
   }
 }
 
-static void concatlists(Dfsstate *astate,Dfsinfo *afather,Dfsinfo *ason)
+static void concatlists(GtBUstate *astate,GtBUinfo *afather,GtBUinfo *ason)
 {
   unsigned int base;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
-  MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
-  MaxpairsDfsinfo *son = (MaxpairsDfsinfo*) ason;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
+  MaxpairsBUinfo *son = (MaxpairsBUinfo*) ason;
 
   for (base = 0; base < state->alphabetsize; base++)
   {
@@ -119,14 +117,14 @@ static void concatlists(Dfsstate *astate,Dfsinfo *afather,Dfsinfo *ason)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(Dfsstate *astate,unsigned long fatherdepth,
-                        const Dfsinfo *aninfo,unsigned int base,
+static int cartproduct1(GtBUstate *astate,unsigned long fatherdepth,
+                        const GtBUinfo *aninfo,unsigned int base,
                         unsigned long leafnumber,GtError *err)
 {
   Listtype *pl;
   unsigned long *spptr, *start;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
-  MaxpairsDfsinfo *ninfo = (MaxpairsDfsinfo*) aninfo;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  MaxpairsBUinfo *ninfo = (MaxpairsBUinfo*) aninfo;
 
   pl = &NODEPOSLISTENTRY(ninfo,base);
   start = state->poslist[base].spaceGtUlong + pl->start;
@@ -141,19 +139,19 @@ static int cartproduct1(Dfsstate *astate,unsigned long fatherdepth,
   return 0;
 }
 
-static int cartproduct2(Dfsstate *astate,
+static int cartproduct2(GtBUstate *astate,
                         unsigned long fatherdepth,
-                        const Dfsinfo *aninfo1,
+                        const GtBUinfo *aninfo1,
                         unsigned int base1,
-                        const Dfsinfo *aninfo2,
+                        const GtBUinfo *aninfo2,
                         unsigned int base2,
                         GtError *err)
 {
   Listtype *pl1, *pl2;
   unsigned long *start1, *start2, *spptr1, *spptr2;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
-  MaxpairsDfsinfo *ninfo1 = (MaxpairsDfsinfo*) aninfo1;
-  MaxpairsDfsinfo *ninfo2 = (MaxpairsDfsinfo*) aninfo2;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  MaxpairsBUinfo *ninfo1 = (MaxpairsBUinfo*) aninfo1;
+  MaxpairsBUinfo *ninfo2 = (MaxpairsBUinfo*) aninfo2;
 
   pl1 = &NODEPOSLISTENTRY(ninfo1,base1);
   start1 = state->poslist[base1].spaceGtUlong + pl1->start;
@@ -173,10 +171,10 @@ static int cartproduct2(Dfsstate *astate,
   return 0;
 }
 
-static void setpostabto0(Dfsstate *astate)
+static void setpostabto0(GtBUstate *astate)
 {
   unsigned int base;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
 
   if (!state->initialized)
   {
@@ -191,16 +189,17 @@ static void setpostabto0(Dfsstate *astate)
 
 static int processleafedge(bool firstsucc,
                            unsigned long fatherdepth,
-                           Dfsinfo *afather,
+                           GT_UNUSED unsigned long fatherlb,
+                           GtBUinfo *afather,
                            unsigned long leafnumber,
-                           Dfsstate *astate,
+                           GtBUstate *astate,
                            GtError *err)
 {
   unsigned int base;
   unsigned long *start, *spptr;
   GtUchar leftchar;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
-  MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
 
 #ifdef SKDEBUG
   printf("processleafedge %lu firstsucc=%s, "
@@ -274,16 +273,19 @@ static int processleafedge(bool firstsucc,
 
 static int processbranchedge(bool firstsucc,
                              unsigned long fatherdepth,
-                             Dfsinfo *afather,
-                             Dfsinfo *ason,
-                             Dfsstate *astate,
+                             GT_UNUSED unsigned long fatherlb,
+                             GtBUinfo *afather,
+                             GT_UNUSED unsigned long sondepth,
+                             GT_UNUSED unsigned long sonlb,
+                             GtBUinfo *ason,
+                             GtBUstate *astate,
                              GtError *err)
 {
   unsigned int chfather, chson;
   unsigned long *start, *spptr, *fptr, *fstart;
-  MaxpairsDfsstate *state = (MaxpairsDfsstate*) astate;
-  MaxpairsDfsinfo *son = (MaxpairsDfsinfo*) ason;
-  MaxpairsDfsinfo *father = (MaxpairsDfsinfo*) afather;
+  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  MaxpairsBUinfo *son = (MaxpairsBUinfo*) ason;
+  MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
 
 #ifdef SKDEBUG
   printf("processbranchedge firstsucc=%s, depth(father)= %lu\n",
@@ -363,17 +365,16 @@ static int processbranchedge(bool firstsucc,
 }
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      const GtEncseq *encseq,
-                      GtReadmode readmode,
-                      unsigned int searchlength,
-                      Processmaxpairs processmaxpairs,
-                      void *processmaxpairsinfo,
-                      GtLogger *logger,
-                      GtError *err)
+                         const GtEncseq *encseq,
+                         GtReadmode readmode,
+                         unsigned int searchlength,
+                         Processmaxpairs processmaxpairs,
+                         void *processmaxpairsinfo,
+                         GtError *err)
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
-  MaxpairsDfsstate *state;
+  MaxpairsBUstate *state;
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
@@ -392,17 +393,13 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state->poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
-  if (gt_depthfirstesa(ssar,
-                       allocateDfsinfo,
-                       freeDfsinfo,
-                       processleafedge,
-                       processbranchedge,
-                       NULL,
-                       NULL,
-                       NULL,
-                       (Dfsstate*) state,
-                       logger,
-                       err) != 0)
+  if (gt_esa_bottomup(ssar,
+                      allocateBUinfo,
+                      freeBUinfo,
+                      processleafedge,
+                      processbranchedge,
+                      (GtBUstate*) state,
+                      err) != 0)
   {
     haserr = true;
   }

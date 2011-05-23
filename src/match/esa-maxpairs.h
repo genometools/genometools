@@ -20,7 +20,6 @@
 
 #include "core/error_api.h"
 #include "core/encseq.h"
-#include "core/logger.h"
 #include "esa-seqread.h"
 
 typedef int (*Processmaxpairs)(void *,
@@ -36,7 +35,6 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                          unsigned int searchlength,
                          Processmaxpairs processmaxpairs,
                          void *processmaxpairsinfo,
-                         GtLogger *logger,
                          GtError *err);
 
 #endif

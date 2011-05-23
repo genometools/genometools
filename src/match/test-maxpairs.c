@@ -69,7 +69,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned long maximumspace,
                  GtTimer *sfxprogress,
                  bool withprogressbar,
-                 GtLogger *logger,
+                 GT_UNUSED GtLogger *logger,
                  GtError *err)
 {
   const GtSuffixsortspace *suffixsortspace;
@@ -124,7 +124,6 @@ static int constructsarrandrunmaxpairs(
                                ssi->minlength,
                                ssi->processmaxpairs,
                                ssi->processmaxpairsinfo,
-                               logger,
                                err) != 0)
       {
         haserr = true;
