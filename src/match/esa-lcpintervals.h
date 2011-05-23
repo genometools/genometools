@@ -21,9 +21,10 @@
 #include "core/logger_api.h"
 #include "core/error_api.h"
 
-int gt_runenumlcpvaluesDFS(const char *inputindex,
-                           bool outedges,
-                           GtLogger *logger,
-                           GtError *err);
+int gt_runenumlcpvalues(const char *inputindex,
+                        bool outedges,
+                        bool bottomup,
+                        GtLogger *logger,
+                        GtError *err);
 
 #endif

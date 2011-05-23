@@ -35,7 +35,6 @@
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
 #include "match/esa-lcpintervals.h"
-#include "match/esa-bottomup.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -1013,19 +1012,13 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  if (!haserr && (arguments->enumlcpitvs || arguments->enumlcpitvtree))
+  if (!haserr && (arguments->enumlcpitvs || arguments->enumlcpitvtree ||
+                  arguments->enumlcpitvtreeBU))
   {
-    if (gt_runenumlcpvaluesDFS(gt_str_get(arguments->esaindexname),
-                               arguments->enumlcpitvs ? false : true,
-                               logger, err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr && arguments->enumlcpitvtreeBU)
-  {
-    if (gt_runenumlcpvaluesBU(gt_str_get(arguments->esaindexname),
-                              logger, err) != 0)
+    if (gt_runenumlcpvalues(gt_str_get(arguments->esaindexname),
+                            arguments->enumlcpitvs ? false : true,
+                            arguments->enumlcpitvtreeBU,
+                            logger, err) != 0)
     {
       haserr = true;
     }

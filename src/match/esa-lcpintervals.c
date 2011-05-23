@@ -21,6 +21,7 @@
 #include "esa-seqread.h"
 #include "esa-lcpintervals.h"
 #include "esa-dfs.h"
+#include "esa-bottomup.h"
 
 typedef struct  /* global information */
 {
@@ -173,10 +174,31 @@ static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
   return 0;
 }
 
-int gt_runenumlcpvaluesDFS(const char *inputindex,
-                           bool outedges,
-                           GtLogger *logger,
-                           GtError *err)
+static int showleafedge(bool firstsucc,unsigned long fd,
+                        unsigned long flb,unsigned long leafnumber,
+                        GT_UNUSED GtBUinfo *info,
+                        GT_UNUSED GtBUstate *bustate)
+
+{
+  printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,leafnumber);
+  return 0;
+}
+
+static int showbranchingedge(bool firstsucc,unsigned long fd,
+                             unsigned long flb,
+                             unsigned long sd,unsigned long slb,
+                             GT_UNUSED GtBUinfo *info,
+                             GT_UNUSED GtBUstate *bustate)
+{
+  printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
+  return 0;
+}
+
+int gt_runenumlcpvalues(const char *inputindex,
+                        bool outedges,
+                        bool bottomup,
+                        GtLogger *logger,
+                        GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
@@ -192,10 +214,23 @@ int gt_runenumlcpvaluesDFS(const char *inputindex,
   {
     haserr = true;
   }
-  if (!haserr && gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,
-                                  logger, err) != 0)
+  if (!haserr)
   {
-    haserr = true;
+    if (bottomup)
+    {
+      if (gt_esa_bottomup(ssar, NULL, NULL, showleafedge, showbranchingedge,
+                          NULL, err) != 0)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      if (gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,
+                           logger, err) != 0)
+      {
+        haserr = true;
+      }
+    }
   }
   if (ssar != NULL)
   {

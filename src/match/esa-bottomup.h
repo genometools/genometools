@@ -20,12 +20,25 @@
 
 #include "core/logger_api.h"
 #include "core/error_api.h"
+#include "match/esa-seqread.h"
 
 typedef struct GtBUinfo GtBUinfo;
 typedef struct GtBUstate GtBUstate;
 
-int gt_runenumlcpvaluesBU(const char *inputindex,
-                          GtLogger *logger,
-                          GtError *err);
+int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
+                    GtBUinfo *(*allocateBUinfo)(GtBUstate *),
+                    void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
+                    int (*processleafedge)(bool,unsigned long,
+                                           unsigned long,
+                                           unsigned long,
+                                           GtBUinfo *info,
+                                           GtBUstate *bustate),
+                    int (*processbranchingedge)(bool firstsucc,unsigned long,
+                                                unsigned long,
+                                                unsigned long,unsigned long,
+                                                GtBUinfo *info,
+                                                GtBUstate *bustate),
+                    GtBUstate *bustate,
+                    GtError *err);
 
 #endif
