@@ -205,6 +205,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                                 GtBUinfo *,
                                                 unsigned long,
                                                 unsigned long,
+                                                GtBUinfo *,
                                                 GtBUstate *,
                                                 GtError *),
                     GtBUstate *bustate,
@@ -266,6 +267,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                  TOP_ESA_BOTTOMUP.info,
                                  lastinterval.lcp,
                                  lastinterval.lb,
+                                 lastinterval.info,
                                  bustate,
                                  err) != 0)
         {
@@ -300,6 +302,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                  TOP_ESA_BOTTOMUP.info,
                                  lastinterval.lcp,
                                  lastinterval.lb,
+                                 lastinterval.info,
                                  bustate,err) != 0)
         {
           haserr = true;

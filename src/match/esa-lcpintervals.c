@@ -40,9 +40,9 @@ static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
   gt_free((Lcpinterval *) adfsinfo);
 }
 
-static void showbranchingedges(bool firstsucc,unsigned long fd,
-                               unsigned long flb,
-                               unsigned long sd,unsigned long slb)
+static void showbranchingedgeDFS(bool firstsucc,unsigned long fd,
+                                 unsigned long flb,
+                                 unsigned long sd,unsigned long slb)
 {
   printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
@@ -74,11 +74,11 @@ static int elcp_processbranchedge(bool firstsucc,
 
   if (son != NULL)
   {
-    showbranchingedges(firstsucc,fatherdepth,father->left,son->offset,
+    showbranchingedgeDFS(firstsucc,fatherdepth,father->left,son->offset,
                        son->left);
   } else
   {
-    showbranchingedges(firstsucc,fatherdepth,father->left,
+    showbranchingedgeDFS(firstsucc,fatherdepth,father->left,
                        state->lastcompletenode.offset,
                        state->lastcompletenode.left);
   }
@@ -174,27 +174,28 @@ static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
   return 0;
 }
 
-static int showleafedge(bool firstsucc,
-                        unsigned long fd,
-                        unsigned long flb,
-                        GT_UNUSED GtBUinfo *info,
-                        unsigned long leafnumber,
-                        GT_UNUSED GtBUstate *bustate,
-                        GT_UNUSED GtError *err)
+static int showleafedgeBU(bool firstsucc,
+                          unsigned long fd,
+                          unsigned long flb,
+                          GT_UNUSED GtBUinfo *info,
+                          unsigned long leafnumber,
+                          GT_UNUSED GtBUstate *bustate,
+                          GT_UNUSED GtError *err)
 
 {
   printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,leafnumber);
   return 0;
 }
 
-static int showbranchingedge(bool firstsucc,
-                             unsigned long fd,
-                             unsigned long flb,
-                             GT_UNUSED GtBUinfo *finfo,
-                             unsigned long sd,
-                             unsigned long slb,
-                             GT_UNUSED GtBUstate *bustate,
-                             GT_UNUSED GtError *err)
+static int showbranchingedgeBU(bool firstsucc,
+                               unsigned long fd,
+                               unsigned long flb,
+                               GT_UNUSED GtBUinfo *finfo,
+                               unsigned long sd,
+                               unsigned long slb,
+                               GT_UNUSED GtBUinfo *sinfo,
+                               GT_UNUSED GtBUstate *bustate,
+                               GT_UNUSED GtError *err)
 {
   printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
   return 0;
@@ -224,7 +225,7 @@ int gt_runenumlcpvalues(const char *inputindex,
   {
     if (bottomup)
     {
-      if (gt_esa_bottomup(ssar, NULL, NULL, showleafedge, showbranchingedge,
+      if (gt_esa_bottomup(ssar, NULL, NULL, showleafedgeBU, showbranchingedgeBU,
                           NULL, err) != 0)
       {
         haserr = true;

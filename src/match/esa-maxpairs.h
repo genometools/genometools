@@ -19,22 +19,24 @@
 #define ESA_MAXPAIRS_H
 
 #include "core/error_api.h"
-
 #include "core/encseq.h"
-#include "esa-seqread.h"
 #include "core/logger.h"
+#include "esa-seqread.h"
 
-typedef int (*Processmaxpairs)(void *,const GtEncseq *,
-                               unsigned long,unsigned long,unsigned long,
+typedef int (*Processmaxpairs)(void *,
+                               const GtEncseq *,
+                               unsigned long,
+                               unsigned long,
+                               unsigned long,
                                GtError *);
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      const GtEncseq *encseq,
-                      GtReadmode readmode,
-                      unsigned int searchlength,
-                      Processmaxpairs processmaxpairs,
-                      void *processmaxpairsinfo,
-                      GtLogger *logger,
-                      GtError *err);
+                         const GtEncseq *encseq,
+                         GtReadmode readmode,
+                         unsigned int searchlength,
+                         Processmaxpairs processmaxpairs,
+                         void *processmaxpairsinfo,
+                         GtLogger *logger,
+                         GtError *err);
 
 #endif
