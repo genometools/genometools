@@ -188,13 +188,13 @@ static void setpostabto0(GtBUstate *astate)
   }
 }
 
-static int processleafedge(bool firstsucc,
-                           unsigned long fatherdepth,
-                           GT_UNUSED unsigned long fatherlb,
-                           GtBUinfo *afather,
-                           unsigned long leafnumber,
-                           GtBUstate *astate,
-                           GtError *err)
+static int maxpairs_processleafedge(bool firstsucc,
+                                    unsigned long fatherdepth,
+                                    GT_UNUSED unsigned long fatherlb,
+                                    GtBUinfo *afather,
+                                    unsigned long leafnumber,
+                                    GtBUstate *astate,
+                                    GtError *err)
 {
   unsigned int base;
   unsigned long *start, *spptr;
@@ -203,8 +203,7 @@ static int processleafedge(bool firstsucc,
   MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
 
 #ifdef SKDEBUG
-  printf("processleafedge %lu firstsucc=%s, "
-         " depth(father)= %lu\n",
+  printf("%s %lu firstsucc=%s, __func__," " depth(father)= %lu\n",
          leafnumber,
          firstsucc ? "true" : "false",
          fatherdepth);
@@ -226,7 +225,7 @@ static int processleafedge(bool firstsucc,
   }
   state->initialized = false;
 #ifdef SKDEBUG
-  printf("processleafedge: leftchar %u\n",(unsigned int) leftchar);
+  printf("%s: leftchar %u\n",__func__,(unsigned int) leftchar);
 #endif
   if (firstsucc)
   {
@@ -272,15 +271,15 @@ static int processleafedge(bool firstsucc,
   return 0;
 }
 
-static int processbranchedge(bool firstsucc,
-                             unsigned long fatherdepth,
-                             GT_UNUSED unsigned long fatherlb,
-                             GtBUinfo *afather,
-                             GT_UNUSED unsigned long sondepth,
-                             GT_UNUSED unsigned long sonlb,
-                             GtBUinfo *ason,
-                             GtBUstate *astate,
-                             GtError *err)
+static int maxpairs_processbranchedge(bool firstsucc,
+                                      unsigned long fatherdepth,
+                                      GT_UNUSED unsigned long fatherlb,
+                                      GtBUinfo *afather,
+                                      GT_UNUSED unsigned long sondepth,
+                                      GT_UNUSED unsigned long sonlb,
+                                      GtBUinfo *ason,
+                                      GtBUstate *astate,
+                                      GtError *err)
 {
   unsigned int chfather, chson;
   unsigned long *start, *spptr, *fptr, *fstart;
@@ -289,8 +288,8 @@ static int processbranchedge(bool firstsucc,
   MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
 
 #ifdef SKDEBUG
-  printf("processbranchedge firstsucc=%s, depth(father)= %lu\n",
-          firstsucc ? "true" : "false",fatherdepth);
+  printf("%s firstsucc=%s, depth(father)= %lu\n",
+          __func__,firstsucc ? "true" : "false",fatherdepth);
 #endif
   if (fatherdepth < (unsigned long) state->searchlength)
   {
@@ -397,8 +396,8 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   if (gt_esa_bottomup(ssar,
                       allocateBUinfo,
                       freeBUinfo,
-                      processleafedge,
-                      processbranchedge,
+                      maxpairs_processleafedge,
+                      maxpairs_processbranchedge,
                       (GtBUstate*) state,
                       err) != 0)
   {
