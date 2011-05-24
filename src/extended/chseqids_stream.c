@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -77,9 +77,10 @@ static int chseqids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
                                      gt_str_get(gt_genome_node_get_seqid(node)),
                                                  err))) {
           if ((feature_node = gt_feature_node_try_cast(node))) {
-            rval = gt_genome_node_traverse_children(node, changed_seqid,
-                                                    change_sequence_id, true,
-                                                    err);
+            rval = gt_feature_node_traverse_children(feature_node,
+                                                     changed_seqid,
+                                                     change_sequence_id, true,
+                                                     err);
             gt_assert(!rval); /* change_sequence_id() is sane */
           }
           else
@@ -127,8 +128,8 @@ static int chseqids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
       gt_assert(changed_seqid); /* is always defined, because an undefined
                                    mapping would be catched earlier */
       if ((feature_node = gt_feature_node_try_cast(*gn))) {
-        rval = gt_genome_node_traverse_children(*gn, changed_seqid,
-                                                change_sequence_id, true, err);
+        rval = gt_feature_node_traverse_children(feature_node, changed_seqid,
+                                                 change_sequence_id, true, err);
         gt_assert(!rval); /* change_sequence_id() is sane */
       }
       else

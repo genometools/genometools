@@ -167,8 +167,9 @@ static int seqid_to_md5(GtGenomeNode *gn, GtRegionMapping *region_mapping,
         info.substitute_target_ids = substitute_target_ids;
         gt_assert(offset);
         info.offset = offset - 1;
-        had_err = gt_genome_node_traverse_children(gn, &info, i2m_change_seqid,
-                                                   true, err);
+        had_err = gt_feature_node_traverse_children((GtFeatureNode*) gn, &info,
+                                                    i2m_change_seqid, true,
+                                                    err);
       }
       else
         gt_genome_node_change_seqid(gn, new_seqid);

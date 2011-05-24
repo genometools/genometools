@@ -211,9 +211,9 @@ static void get_exons(GtArray *exon_ranges, const void *sa)
   GtFeatureNode *fn = *(GtFeatureNode**) sa;
   int had_err;
   gt_assert(exon_ranges && fn && gt_feature_node_has_type(fn, gt_ft_gene));
-  had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn, exon_ranges,
-                                             csa_visitor_save_exon, false,
-                                             NULL);
+  had_err = gt_feature_node_traverse_children(fn, exon_ranges,
+                                              csa_visitor_save_exon, false,
+                                              NULL);
   gt_assert(!had_err); /* csa_visitor_save_exon() is sane */
   /* we got at least one exon */
   gt_assert(gt_array_size(exon_ranges));

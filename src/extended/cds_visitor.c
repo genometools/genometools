@@ -302,8 +302,8 @@ static int cds_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 {
   GtCDSVisitor *v = gt_cds_visitor_cast(nv);
   gt_error_check(err);
-  return gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
-                                          add_cds_if_necessary, false, err);
+  return gt_feature_node_traverse_children(fn, v, add_cds_if_necessary, false,
+                                           err);
 }
 
 const GtNodeVisitorClass* gt_cds_visitor_class()

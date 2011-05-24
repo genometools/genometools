@@ -172,8 +172,8 @@ static int stat_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   GtStatVisitor *sv;
   gt_error_check(err);
   sv = stat_visitor_cast(nv);
-  return gt_genome_node_traverse_children((GtGenomeNode*) fn, sv,
-                                          compute_statistics, false, err);
+  return gt_feature_node_traverse_children(fn, sv, compute_statistics, false,
+                                           err);
 }
 
 static int stat_visitor_region_node(GtNodeVisitor *nv, GtRegionNode *rn,

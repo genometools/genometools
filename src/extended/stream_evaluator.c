@@ -600,12 +600,12 @@ static bool mRNAs_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2,
   /* get exon ranges */
   info.exons = exons_1;
   info.feature_type = feature_type;
-  had_err = gt_genome_node_traverse_children(gn_1, &info, store_exon, false,
-                                             NULL);
+  had_err = gt_feature_node_traverse_children(gt_feature_node_cast(gn_1), &info,
+                                              store_exon, false, NULL);
   gt_assert(!had_err); /* cannot happen, store_exon() is sane */
   info.exons = exons_2;
-  had_err = gt_genome_node_traverse_children(gn_2, &info, store_exon, false,
-                                             NULL);
+  had_err = gt_feature_node_traverse_children(gt_feature_node_cast(gn_2), &info,
+                                              store_exon, false, NULL);
   gt_assert(!had_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
@@ -1400,9 +1400,9 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
       /* store the exons */
       real_info.slot = slot;
       gt_feature_node_determine_transcripttypes(fn);
-      had_err = gt_genome_node_traverse_children(gn, &real_info,
-                                                 process_real_feature, false,
-                                                 NULL);
+      had_err = gt_feature_node_traverse_children(fn, &real_info,
+                                                  process_real_feature, false,
+                                                  NULL);
       gt_assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     if (nv)
@@ -1429,9 +1429,9 @@ int gt_stream_evaluator_evaluate(GtStreamEvaluator *se, bool verbose,
         if (slot) {
           predicted_info.slot = slot;
           gt_feature_node_determine_transcripttypes(fn);
-          had_err = gt_genome_node_traverse_children(gn, &predicted_info,
-                                                  process_predicted_feature,
-                                                  false, NULL);
+          had_err = gt_feature_node_traverse_children(fn, &predicted_info,
+                                                      process_predicted_feature,
+                                                      false, NULL);
           gt_assert(!had_err); /* cannot happen, process_predicted_feature() is
                                sane */
         }

@@ -50,10 +50,10 @@ bool           gt_feature_nodes_are_similar(GtFeatureNode*, GtFeatureNode*);
 int            gt_feature_node_unit_test(GtError*);
 
 /* perform depth first traversal of the given genome node */
-int            gt_genome_node_traverse_children(GtGenomeNode*, void*,
-                                                GtGenomeNodeTraverseFunc,
-                                                bool traverse_only_once,
-                                                GtError*);
+int            gt_feature_node_traverse_children(GtFeatureNode*, void*,
+                                                 GtGenomeNodeTraverseFunc,
+                                                 bool traverse_only_once,
+                                                 GtError*);
 /* perform breadth first traversal of the given genome node  */
 int            gt_feature_node_traverse_children_breadth(GtFeatureNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
@@ -68,14 +68,14 @@ unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           const GtFeatureNode
                                                           *node);
 /* does not free the leaf, do not use during traversal! */
-void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
-                                          GtGenomeNode *leafn);
+void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
+                                           GtFeatureNode *leafn);
 void           gt_genome_node_mark(GtGenomeNode*);
 /* returns true if the (top-level) node is marked */
 bool           gt_genome_node_is_marked(const GtGenomeNode*);
 
 /* returns true if the given node graph contains a marked node */
-bool           gt_genome_node_contains_marked(GtGenomeNode*);
+bool           gt_feature_node_contains_marked(GtFeatureNode*);
 bool           gt_genome_node_has_children(GtGenomeNode*);
 bool           gt_genome_node_direct_children_do_not_overlap(GtGenomeNode*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as

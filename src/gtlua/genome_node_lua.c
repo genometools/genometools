@@ -249,7 +249,8 @@ static int genome_node_lua_contains_marked(lua_State *L)
 {
   GtGenomeNode **gn;
   gn = check_genome_node(L, 1);
-  lua_pushboolean(L, gt_genome_node_contains_marked(*gn));
+  lua_pushboolean(L,
+                  gt_feature_node_contains_marked(gt_feature_node_cast(*gn)));
   return 1;
 }
 

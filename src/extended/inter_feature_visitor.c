@@ -114,15 +114,13 @@ static void inter_feature_visitor_free(GtNodeVisitor *nv)
 }
 
 static int inter_feature_visitor_feature_node(GtNodeVisitor *nv,
-                                                 GtFeatureNode *fn,
-                                                 GtError *err)
+                                              GtFeatureNode *fn, GtError *err)
 {
   GtInterFeatureVisitor *v;
   gt_error_check(err);
   v = gt_inter_feature_visitor_cast(nv);
-  return gt_genome_node_traverse_children((GtGenomeNode*) fn, v,
-                                          inter_feature_if_necessary, false,
-                                          err);
+  return gt_feature_node_traverse_children(fn, v, inter_feature_if_necessary,
+                                           false, err);
 }
 
 const GtNodeVisitorClass* gt_inter_feature_visitor_class()

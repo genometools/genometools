@@ -152,8 +152,9 @@ static int gtf_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   int had_err;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(nv);
-  had_err = gt_genome_node_traverse_children((GtGenomeNode*) fn, gtf_visitor,
-                                             gtf_show_feature_node, false, err);
+  had_err = gt_feature_node_traverse_children(fn, gtf_visitor,
+                                              gtf_show_feature_node, false,
+                                              err);
   return had_err;
 }
 
