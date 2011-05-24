@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -668,13 +668,15 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2,
   info.exons = exons_1;
   info.mRNAs = mRNAs_1;
   info.feature_type = feature_type;
-  had_err = gt_genome_node_traverse_direct_children(gn_1, &info,
-                                                    store_gene_feature, NULL);
+  had_err = gt_feature_node_traverse_direct_children(gt_feature_node_cast(gn_1),
+                                                     &info, store_gene_feature,
+                                                     NULL);
   gt_assert(!had_err); /* cannot happen, store_gene_feature() is sane */
   info.exons = exons_2;
   info.mRNAs = mRNAs_2;
-  had_err = gt_genome_node_traverse_direct_children(gn_2, &info,
-                                                    store_gene_feature, NULL);
+  had_err = gt_feature_node_traverse_direct_children(gt_feature_node_cast(gn_2),
+                                                     &info, store_gene_feature,
+                                                     NULL);
   gt_assert(!had_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */

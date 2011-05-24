@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -83,12 +83,12 @@ static int mergefeat_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   GtMergeFeatureVisitor *v = (GtMergeFeatureVisitor*) data;
   GtFeatureNode *fn;
   gt_error_check(err);
-  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  fn = gt_feature_node_cast(gn);
   gt_assert(fn);
   v->current_tree = gn;
   gt_hashmap_reset(v->hm);
-  return gt_genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
-                                                 err);
+  return gt_feature_node_traverse_direct_children(fn, v, mergefeat_in_children,
+                                                  err);
 }
 
 static int merge_feature_visitor_feature_node(GtNodeVisitor *nv,

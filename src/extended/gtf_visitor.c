@@ -81,8 +81,9 @@ static int gtf_show_transcript(GtGenomeNode *gn, GtGTFVisitor *gtf_visitor,
   gt_assert(gn && gtf_visitor);
   gt_array_reset(gtf_visitor->exon_features);
   gt_array_reset(gtf_visitor->CDS_features);
-  had_err = gt_genome_node_traverse_direct_children(gn, gtf_visitor,
-                                                 save_exon_node, err);
+  had_err = gt_feature_node_traverse_direct_children((GtFeatureNode*) gn,
+                                                     gtf_visitor,
+                                                     save_exon_node, err);
   if (gt_array_size(gtf_visitor->exon_features)) {
     /* sort exon features */
     qsort(gt_array_get_space(gtf_visitor->exon_features),

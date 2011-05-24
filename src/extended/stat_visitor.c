@@ -150,8 +150,9 @@ static int compute_statistics(GtGenomeNode *gn, void *data, GtError *err)
   if (sv->exon_number_distribution || sv->cds_length_distribution) {
     sv->exon_number_for_distri = 0;
     sv->cds_length_for_distri = 0;
-    rval = gt_genome_node_traverse_direct_children(gn, sv,
-                                                   add_exon_or_cds_number, err);
+    rval = gt_feature_node_traverse_direct_children(fn, sv,
+                                                    add_exon_or_cds_number,
+                                                    err);
     gt_assert(!rval); /* add_exon_or_cds_number() is sane */
     if (sv->exon_number_distribution && sv->exon_number_for_distri) {
       gt_disc_distri_add(sv->exon_number_distribution,

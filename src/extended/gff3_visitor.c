@@ -270,8 +270,8 @@ static int store_ids(GtGenomeNode *gn, void *data, GtError *err)
     add_id_info.gt_feature_node_to_id_array =
       gff3_visitor->feature_node_to_id_array,
     add_id_info.id = gt_str_get(id);
-    had_err = gt_genome_node_traverse_direct_children(gn, &add_id_info, add_id,
-                                                      err);
+    had_err = gt_feature_node_traverse_direct_children(fn, &add_id_info, add_id,
+                                                       err);
   }
   return had_err;
 }

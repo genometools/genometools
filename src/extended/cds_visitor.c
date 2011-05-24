@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -95,15 +95,16 @@ static int extract_cds_if_necessary(GtGenomeNode *gn, void *data,
   return had_err;
 }
 
-static int extract_spliced_seq(GtGenomeNode *gn, GtCDSVisitor *visitor,
+static int extract_spliced_seq(GtFeatureNode *fn, GtCDSVisitor *visitor,
                                GtError *err)
 {
   gt_error_check(err);
-  gt_assert(gn && visitor);
+  gt_assert(fn && visitor);
   /* traverse the direct children */
   gt_splicedseq_reset(visitor->splicedseq);
-  return gt_genome_node_traverse_direct_children(gn, visitor,
-                                                 extract_cds_if_necessary, err);
+  return gt_feature_node_traverse_direct_children(fn, visitor,
+                                                  extract_cds_if_necessary,
+                                                  err);
 }
 
 static void save_orf(void *data, GtRange *orf, GT_UNUSED unsigned long framenum,
@@ -277,7 +278,7 @@ static int add_cds_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
   fn = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(fn);
 
-  had_err = extract_spliced_seq(gn, v, err);
+  had_err = extract_spliced_seq(fn, v, err);
   if (!had_err && gt_splicedseq_length(v->splicedseq) > 2) {
     GtArray *orfs;
 

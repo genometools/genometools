@@ -59,14 +59,14 @@ int            gt_feature_node_traverse_children_breadth(GtFeatureNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
                                                         bool traverse_only_once,
                                                         GtError*);
-int            gt_genome_node_traverse_direct_children(GtGenomeNode*, void*,
+int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
-                                                       GtError*);
+                                                        GtError*);
 unsigned long  gt_genome_node_number_of_children(const GtGenomeNode*);
-unsigned long  gt_genome_node_number_of_children_of_type(const GtGenomeNode
-                                                         *parent,
-                                                         const GtGenomeNode
-                                                         *node);
+unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
+                                                          *parent,
+                                                          const GtFeatureNode
+                                                          *node);
 /* does not free the leaf, do not use during traversal! */
 void           gt_genome_node_remove_leaf(GtGenomeNode *tree,
                                           GtGenomeNode *leafn);

@@ -624,10 +624,10 @@ static int visit_child(GtGenomeNode* gn, void *nti,
                            gt_genome_node_info->parent, err);
     if (!had_err) {
       gt_genome_node_info->parent = (GtFeatureNode*) gn;
-      had_err = gt_genome_node_traverse_direct_children(gn,
-                                                        gt_genome_node_info,
-                                                        visit_child,
-                                                        err);
+      had_err = gt_feature_node_traverse_direct_children((GtFeatureNode*) gn,
+                                                         gt_genome_node_info,
+                                                         visit_child,
+                                                         err);
     }
     if (!had_err) {
       gt_genome_node_info->parent = oldparent;
@@ -726,22 +726,22 @@ static int collect_blocks(GT_UNUSED void *key, void *value, void *data,
 }
 
 /* Traverse a genome node graph with depth first search. */
-static int traverse_genome_nodes(GtFeatureNode *gn,
-                                 void *nti)
+static int traverse_genome_nodes(GtFeatureNode *fn, void *nti)
 {
   NodeTraverseInfo* gt_genome_node_info;
   int had_err = 0;
   gt_assert(nti);
   gt_genome_node_info = (NodeTraverseInfo*) nti;
-  gt_genome_node_info->parent = gn;
+  gt_genome_node_info->parent = fn;
   /* handle root nodes */
-  had_err = process_node(gt_genome_node_info->diagram, (GtFeatureNode*)gn,
-                         NULL, gt_genome_node_info->err);
-  if (!had_err && gt_genome_node_has_children((GtGenomeNode*) gn)) {
-    had_err = gt_genome_node_traverse_direct_children((GtGenomeNode*)gn,
-                                                      gt_genome_node_info,
-                                                      visit_child,
-                                                      gt_genome_node_info->err);
+  had_err = process_node(gt_genome_node_info->diagram, fn, NULL,
+                         gt_genome_node_info->err);
+  if (!had_err && gt_genome_node_has_children((GtGenomeNode*) fn)) {
+    had_err = gt_feature_node_traverse_direct_children(fn,
+                                                       gt_genome_node_info,
+                                                       visit_child,
+                                                       gt_genome_node_info
+                                                       ->err);
   }
   return had_err;
 }

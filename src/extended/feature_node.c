@@ -505,8 +505,8 @@ static int determine_transcripttypes(GtGenomeNode *gn, void *data,
   gt_array_reset(info->exon_features);
   gt_array_reset(info->cds_features);
   /* collect all direct children exons */
-  had_err = gt_genome_node_traverse_direct_children(gn, info,
-                                                    save_exons_and_cds, NULL);
+  had_err = gt_feature_node_traverse_direct_children(fn, info,
+                                                     save_exons_and_cds, NULL);
   gt_assert(!had_err); /* cannot happen, because save_exons_and_cds() is sane */
   /* set transcript feature type, if necessary */
   set_transcript_types(info->exon_features, gt_feature_node_get_strand(fn));
@@ -906,19 +906,16 @@ static int count_types(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
   return had_err;
 }
 
-int gt_genome_node_traverse_direct_children(GtGenomeNode *gn,
-                                            void *traverse_func_data,
-                                            GtGenomeNodeTraverseFunc traverse,
-                                            GtError *err)
+int gt_feature_node_traverse_direct_children(GtFeatureNode *fn,
+                                             void *traverse_func_data,
+                                             GtGenomeNodeTraverseFunc traverse,
+                                             GtError *err)
 {
-  GtFeatureNode *fn;
   GtDlistelem *dlistelem;
   int had_err = 0;
   gt_error_check(err);
-  if (!gn || !traverse)
+  if (!fn || !traverse)
     return 0;
-  /* XXX */
-  fn = gt_feature_node_cast(gn);
   if (fn->children) {
     for (dlistelem = gt_dlist_first(fn->children); dlistelem != NULL;
          dlistelem = gt_dlistelem_next(dlistelem)) {
@@ -931,21 +928,19 @@ int gt_genome_node_traverse_direct_children(GtGenomeNode *gn,
   return had_err;
 }
 
-unsigned long gt_genome_node_number_of_children_of_type(const GtGenomeNode
-                                                          *parent,
-                                                        const GtGenomeNode
-                                                          *node)
+unsigned long gt_feature_node_number_of_children_of_type(const GtFeatureNode
+                                                         *parent,
+                                                         const GtFeatureNode
+                                                         *node)
 {
-  GtFeatureNode *fn_node;
   int had_err = 0;
   GtTypeTraverseInfo traverseinfo;
   gt_assert(parent && node);
-  fn_node = gt_feature_node_cast((GtGenomeNode*) node);
-  traverseinfo.type = gt_feature_node_get_type(fn_node);
+  traverseinfo.type = gt_feature_node_get_type(node);
   traverseinfo.number = 0;
-  had_err = gt_genome_node_traverse_direct_children((GtGenomeNode*) parent,
-                                                    &traverseinfo, count_types,
-                                                    NULL);
+  had_err = gt_feature_node_traverse_direct_children((GtFeatureNode*) parent,
+                                                     &traverseinfo, count_types,
+                                                     NULL);
   return traverseinfo.number;
 }
 

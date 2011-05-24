@@ -741,7 +741,7 @@ static void tidy_multi_feature_with_different_parent(GtFeatureNode *new_gf,
                                                      GtFeatureInfo
                                                      *feature_info)
 {
-  GtGenomeNode *parent;
+  GtFeatureNode *parent;
   gt_assert(new_gf && old_gf && id && feature_info);
   gt_warning("the multi-feature with %s \"%s\" on line %u in file \"%s\" has a "
              "different attribute '%s' than its counterpart on line %u "
@@ -755,14 +755,11 @@ static void tidy_multi_feature_with_different_parent(GtFeatureNode *new_gf,
   gt_feature_node_unset_multi(new_gf);
   /* unset multi-feature status of the old feature, if it is the only child of
      its parent (with the given type) */
-  parent = (GtGenomeNode*)
-           gt_feature_info_get(feature_info,
+  parent = gt_feature_info_get(feature_info,
                                gt_feature_node_get_attribute(old_gf,
                                                              GT_GFF_PARENT));
-  if (gt_genome_node_number_of_children_of_type(parent, (GtGenomeNode*) old_gf)
-      == 1) {
+  if (gt_feature_node_number_of_children_of_type(parent, old_gf) == 1)
     gt_feature_node_unset_multi(old_gf);
-  }
 }
 
 static int compare_other_attribute(const char *attr_name, GtFeatureNode *new_gf,

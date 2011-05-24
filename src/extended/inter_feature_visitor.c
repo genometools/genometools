@@ -97,13 +97,13 @@ static int inter_feature_if_necessary(GtGenomeNode *gn, void *data,
   GtInterFeatureVisitor *aiv = (GtInterFeatureVisitor*) data;
   GtFeatureNode *fn;
   gt_error_check(err);
-  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  fn = gt_feature_node_cast(gn);
   gt_assert(fn);
   aiv->parent_feature = fn;
   aiv->previous_feature = NULL;
-  return gt_genome_node_traverse_direct_children(gn, aiv,
-                                                 inter_feature_in_children,
-                                                 err);
+  return gt_feature_node_traverse_direct_children(fn, aiv,
+                                                  inter_feature_in_children,
+                                                  err);
 }
 
 static void inter_feature_visitor_free(GtNodeVisitor *nv)
