@@ -23,7 +23,7 @@
 
 struct color_state {
   char self;
-  struct color_state *links[4];
+  struct color_state *links[5];
 };
 
 struct GtColorSpaceDecoder {
@@ -31,7 +31,8 @@ struct GtColorSpaceDecoder {
                      state_A,
                      state_C,
                      state_G,
-                     state_T;
+                     state_T,
+                     state_N;
 };
 
 static GtColorSpaceDecoder *gt_colorspace_decoder_new(void)
@@ -42,22 +43,32 @@ static GtColorSpaceDecoder *gt_colorspace_decoder_new(void)
   cd->state_C.self = 'c';
   cd->state_G.self = 'g';
   cd->state_T.self = 't';
+  cd->state_N.self = 'n';
   cd->state_A.links[0] = &(cd->state_A);
   cd->state_A.links[1] = &(cd->state_C);
   cd->state_A.links[2] = &(cd->state_G);
   cd->state_A.links[3] = &(cd->state_T);
+  cd->state_A.links[4] = &(cd->state_N);
   cd->state_C.links[0] = &(cd->state_C);
   cd->state_C.links[1] = &(cd->state_A);
   cd->state_C.links[2] = &(cd->state_T);
   cd->state_C.links[3] = &(cd->state_G);
+  cd->state_C.links[4] = &(cd->state_N);
   cd->state_G.links[0] = &(cd->state_G);
   cd->state_G.links[1] = &(cd->state_T);
   cd->state_G.links[2] = &(cd->state_A);
   cd->state_G.links[3] = &(cd->state_C);
+  cd->state_G.links[4] = &(cd->state_N);
   cd->state_T.links[0] = &(cd->state_T);
   cd->state_T.links[1] = &(cd->state_G);
   cd->state_T.links[2] = &(cd->state_C);
   cd->state_T.links[3] = &(cd->state_A);
+  cd->state_T.links[4] = &(cd->state_N);
+  cd->state_N.links[0] =
+  cd->state_N.links[1] =
+  cd->state_N.links[2] =
+  cd->state_N.links[3] =
+  cd->state_N.links[4] = &(cd->state_N);
   return cd;
 }
 
@@ -110,6 +121,11 @@ static inline int set_next_state(GtColorSpaceDecoder *cd,
     case '2':
     case '3':
       cd->current = cd->current->links[next - 48];
+      break;
+    case '.':
+    case '4':
+    case '5':
+      cd->current = cd->current->links[4];
       break;
     default:
       gt_error_set(err, "encountered wrong character while encoding color "
