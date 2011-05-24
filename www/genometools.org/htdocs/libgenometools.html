@@ -211,23 +211,6 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
-<h2>Sole functions</h2>
-<a name="gt_readmode_show"></a>
-
-<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
-<p>
-Returns the descriptive string for the readmode <code>readmode</code>.
-</p>
-<hr>
-<a name="gt_readmode_parse"></a>
-
-<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
-<p>
-Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
-   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
-   -1 is returned and <code>err</code> is set accordingly.
-</p>
-<hr>
 <a name="GtAlphabet"></a>
 <h2>Class GtAlphabet</h2>
 
@@ -5731,6 +5714,22 @@ Return logging file pointer.
 Set logging file pointer to <code>fp</code>.
 </p>
 <hr>
+<a name="gt_readmode_show"></a>
+
+<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
+<p>
+Returns the descriptive string for the readmode <code>readmode</code>.
+</p>
+<hr>
+<a name="gt_readmode_parse"></a>
+
+<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
+<p>
+Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
+   -1 is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
 <a name="MemoryAllocation"></a>
 <h2>Module MemoryAllocation</h2>
 <a name="gt_malloc"></a>
@@ -7365,7 +7364,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-23
+Last update: 2011-05-24
 </div>
 </div>
 <!-- Piwik -->
