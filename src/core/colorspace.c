@@ -26,7 +26,7 @@ struct color_state {
   struct color_state *links[4];
 };
 
-struct GtColorSpaceDecoder_t {
+struct GtColorSpaceDecoder {
   struct color_state *current,
                      state_A,
                      state_C,
@@ -34,7 +34,7 @@ struct GtColorSpaceDecoder_t {
                      state_T;
 };
 
-static GtColorSpaceDecoder *initialise_decoder(void)
+static GtColorSpaceDecoder *gt_colorspace_decoder_new(void)
 {
   GtColorSpaceDecoder *cd = gt_malloc(sizeof(*cd));
   cd->current = NULL;
@@ -100,7 +100,7 @@ static inline int set_next_state(GtColorSpaceDecoder *cd,
                                  GtError *err)
 {
   int had_err = 0;
-  
+
   gt_assert(cd->current != NULL);
 
   switch (next)
@@ -119,21 +119,21 @@ static inline int set_next_state(GtColorSpaceDecoder *cd,
   return had_err;
 }
 
-int gt_colorspace_translate_string(GtStr *color_string,
-                                   GtStr *fasta_string,
-                                   GtError *err)
+int gt_colorspace_decode_string(GtStr *color_string,
+                                GtStr *fasta_string,
+                                GtError *err)
 {
   int had_err = 0;
   unsigned long str_len, idx;
   char *input;
   GtColorSpaceDecoder *cd;
 
-  cd = initialise_decoder();
+  cd = gt_colorspace_decoder_new();
 
   gt_assert(cd);
   gt_assert(color_string && fasta_string);
   gt_assert(gt_str_length(fasta_string) == 0);
-  
+
   input = gt_str_get(color_string);
   str_len = gt_str_length(color_string);
 
@@ -161,9 +161,9 @@ int gt_colorspace_unit_test(GtError *err)
         *con_gt = gt_str_new_cstr("AACAGATACTCGCAGTGCGATGTCGA"),
         *output = gt_str_new();
 
-  had_err = gt_colorspace_translate_string(in_gt,
-                                           output,
-                                           err);
+  had_err = gt_colorspace_decode_string(in_gt,
+                                        output,
+                                        err);
   ensure(had_err, gt_str_cmp(con_gt, output));
 
   if (!had_err)
@@ -174,9 +174,9 @@ int gt_colorspace_unit_test(GtError *err)
     gt_str_reset(output);
     in_gt = gt_str_new_cstr("X0011");
 
-    test_err = gt_colorspace_translate_string(in_gt,
-                                              output,
-                                              my_err);
+    test_err = gt_colorspace_decode_string(in_gt,
+                                           output,
+                                           my_err);
 
     ensure(had_err, test_err);
     ensure(had_err, gt_error_is_set(my_err));
@@ -192,9 +192,9 @@ int gt_colorspace_unit_test(GtError *err)
     gt_str_reset(output);
     in_gt = gt_str_new_cstr("a0011a");
 
-    test_err = gt_colorspace_translate_string(in_gt,
-                                              output,
-                                              my_err);
+    test_err = gt_colorspace_decode_string(in_gt,
+                                           output,
+                                           my_err);
 
     ensure(had_err, test_err);
     ensure(had_err, gt_error_is_set(my_err));

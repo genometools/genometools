@@ -21,11 +21,12 @@
 #include "core/error_api.h"
 #include "core/str_api.h"
 
-typedef struct GtColorSpaceDecoder_t GtColorSpaceDecoder;
+typedef struct GtColorSpaceDecoder GtColorSpaceDecoder;
 
-int gt_colorspace_translate_string(GtStr *color_string,
-                                   GtStr *fasta_string,
-                                   GtError *err);
+/*decode a color space coded string, writes the decoded string to fasta_string*/
+int gt_colorspace_decode_string(GtStr *color_string,
+                                GtStr *fasta_string,
+                                GtError *err);
 
 int gt_colorspace_unit_test(GtError *err);
 #endif

@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009      Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c)      2011 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,14 +32,15 @@
 typedef struct {
   bool verbose,
        showseq,
-       fasta;
+       fasta,
+       colorspace;
   GtStr *qualformat;
   unsigned long fastawidth;
 } GtReadreads;
 
 static void* gt_readreads_arguments_new(void)
 {
-  GtReadreads *arguments = gt_calloc(1, sizeof *arguments);
+  GtReadreads *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->qualformat = gt_str_new();
   return arguments;
 }
@@ -58,11 +60,13 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
   GtOption *option, *fasta;
   gt_assert(opts);
 
+#ifndef S_SPLINT_S
   static const char *qualformats[] = {
     "phred",
     "solexa",
     NULL
   };
+#endif
 
   /* init */
   op = gt_option_parser_new("[option ...] file [...]",
@@ -83,7 +87,7 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, fasta);
 
   option = gt_option_new_ulong("fastawidth","fasta output line width",
-                               &opts->fastawidth, 60);
+                               &opts->fastawidth, 60UL);
   gt_option_imply(option, fasta);
   gt_option_parser_add_option(op, option);
 
@@ -94,7 +98,12 @@ static GtOptionParser* gt_readreads_option_parser_new(void *tool_arguments)
                                 qualformats);
   gt_option_parser_add_option(op, option);
 
-  gt_option_parser_set_min_args(op, 1);
+  option = gt_option_new_bool("colorspace", "reads are color space coded",
+                              &opts->colorspace,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  gt_option_parser_set_min_args(op, 1U);
   return op;
 }
 
@@ -129,13 +138,20 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
   gt_assert(opts);
 
   files = gt_str_array_new();
-  for (i = parsed_args; i < argc; i++)
+  for (i = (unsigned long) parsed_args; i < (unsigned long) argc; i++)
   {
     gt_str_array_add_cstr(files, argv[i]);
   }
-  totalsize = gt_files_estimate_total_size(files);
+  totalsize = (unsigned long) gt_files_estimate_total_size(files);
 
-  siq = gt_seqiterator_fastq_new(files, err);
+  if (opts->colorspace)
+  {
+    siq = gt_seqiterator_colorspace_fastq_new(files, err);
+  }
+  else
+  {
+    siq = gt_seqiterator_fastq_new(files, err);
+  }
   gt_seqiterator_set_quality_buffer(siq, &qual);
 
   if (opts->verbose)
@@ -161,11 +177,13 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
         unsigned long l;
         if (strcmp(gt_str_get(opts->qualformat), "phred") == 0) {
           l = gt_str_length(scores);
+          gt_assert(qual);
           gt_str_append_uint(scores,
                              gt_quality_fastq_to_phred(qual[i]));
           lens[i] = gt_str_length(scores) - l;
         } else if (strcmp(gt_str_get(opts->qualformat), "solexa") == 0) {
           l = gt_str_length(scores);
+          gt_assert(qual);
           gt_str_append_int(scores,
                             gt_quality_fastq_to_solexa(qual[i]));
           lens[i] = gt_str_length(scores) - l;
@@ -174,7 +192,7 @@ static int gt_readreads_runner(int argc, const char **argv, int parsed_args,
           gt_str_append_char(scores, SEQUENCE_CHAR_SEPARATOR);
       }
       for (i=0;i<len;i++) {
-        printf("%*c", (int) lens[i], seq[i]);
+        printf("%*c", (int) lens[i], (int) seq[i]);
         if (i != len-1)
           printf("%c", SEQUENCE_CHAR_SEPARATOR);
       }

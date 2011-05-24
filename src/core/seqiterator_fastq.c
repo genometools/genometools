@@ -15,11 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/colorspace.h"
 #include "core/cstr_api.h"
 #include "core/file.h"
-#include "core/str_array.h"
 #include "core/seqiterator_fastq.h"
 #include "core/seqiterator_rep.h"
+#include "core/str_array.h"
 #include "core/unused_api.h"
 
 #define GT_SEQIT_QUAL_INBUFSIZE  8192
@@ -31,7 +32,8 @@ struct GtSeqIteratorFastQ
   uint64_t linenum;
   GtFilelengthvalues *filelengthtab;
   bool complete,
-       use_ungetchar;
+       use_ungetchar,
+       is_color_space;
   GtStr *sequencebuffer,
         *descbuffer,
         *qualsbuffer;
@@ -120,25 +122,64 @@ static inline int parse_fastq_seqname(GtSeqIteratorFastQ *seqit,
 static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
                                 GtError *err)
 {
+  int had_err = 0;
   char currentchar;
+  GtStr *tmp_str = gt_str_new();
+
   gt_error_check(err);
   gt_assert(seqit);
   gt_assert(gt_str_length(seqit->sequencebuffer) == 0);
   /* read sequence */
-  if ((currentchar = fastq_buf_getchar(seqit)) == EOF)
+  if ((currentchar = fastq_buf_getchar(seqit)) == EOF) {
+    gt_str_delete(tmp_str);
     return EOF;
+  }
   while (currentchar != GT_FASTQ_QUAL_SEPARATOR_CHAR) {
     if (currentchar != '\n' && currentchar != ' ') {
-      if (seqit->symbolmap) {
-        int charcode;
-        charcode = seqit->symbolmap[(unsigned int) currentchar];
+      gt_str_append_char(tmp_str, currentchar);
+    } else if (currentchar == '\n') {
+      seqit->curline++;
+    }
+    if ((currentchar = fastq_buf_getchar(seqit)) == EOF) {
+      gt_str_delete(tmp_str);
+      return EOF;
+    }
+    seqit->currentread++;
+  }
+  if (!gt_str_length(tmp_str)) {
+    gt_error_set(err, "empty sequence given in file '%s', line %lu",
+                      gt_str_array_get(seqit->filenametab,
+                                       seqit->filenum),
+                      seqit->curline-1);
+    had_err = -2;
+  }
+  if (!had_err && seqit->is_color_space)
+  {
+    GtStr *translated = gt_str_new();
+    had_err = gt_colorspace_decode_string(tmp_str,
+                                          translated,
+                                          err);
+    gt_str_delete(tmp_str);
+    tmp_str = translated;
+  }
+  if (!had_err)
+  {
+    if (seqit->symbolmap)
+    {
+      int charcode;
+      char *input_str = gt_str_get(tmp_str);
+      unsigned long str_len = gt_str_length(tmp_str),
+                    idx;
+      for (idx = 0; !had_err && idx < str_len; idx++)
+      {
+        charcode = seqit->symbolmap[(unsigned int) input_str[idx]];
         if (charcode == UNDEFCHAR) {
           gt_error_set(err, "illegal character '%c': file \"%s\", line %lu",
-                            currentchar,
+                            input_str[idx],
                             gt_str_array_get(seqit->filenametab,
                                              seqit->filenum),
                             (unsigned long) seqit->curline);
-          return -2;
+          had_err = -2;
         }
         if (ISSPECIAL(charcode)) {
           seqit->lastspeciallength++;
@@ -149,25 +190,14 @@ static int parse_fastq_sequence(GtSeqIteratorFastQ *seqit,
             seqit->chardisttab[(int) charcode]++;
         }
         gt_str_append_char(seqit->sequencebuffer, charcode);
-      } else {
-        gt_str_append_char(seqit->sequencebuffer, currentchar);
       }
-    } else if (currentchar == '\n') {
-      seqit->curline++;
+    } else {
+      gt_str_set(seqit->sequencebuffer, gt_str_get(tmp_str));
     }
-    if ((currentchar = fastq_buf_getchar(seqit)) == EOF)
-      return EOF;
-    seqit->currentread++;
-  }
-  if (!gt_str_length(seqit->sequencebuffer)) {
-    gt_error_set(err, "empty sequence given in file '%s', line %lu",
-                      gt_str_array_get(seqit->filenametab,
-                                       seqit->filenum),
-                      seqit->curline-1);
-    return -2;
   }
   fastq_buf_ungetchar(seqit);
-  return 0;
+  gt_str_delete(tmp_str);
+  return had_err;
 }
 
 static inline int parse_fastq_qualities(GtSeqIteratorFastQ *seqit,
@@ -414,8 +444,9 @@ const GtSeqIteratorClass* gt_seqiterator_fastq_class(void)
   return sic;
 }
 
-GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
-                                        GT_UNUSED GtError *err)
+static GtSeqIterator* seqiterator_fastq_new_gen(const GtStrArray *filenametab,
+                                                bool is_color_space,
+                                                GT_UNUSED GtError *err)
 {
   GtSeqIterator *seqit;
   GtSeqIteratorFastQ *seqitf;
@@ -429,5 +460,23 @@ GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
   seqitf->sequencebuffer = gt_str_new();
   seqitf->qualsbuffer = gt_str_new();
   seqitf->descbuffer = gt_str_new();
+  seqitf->is_color_space = is_color_space;
   return seqit;
+}
+
+GtSeqIterator* gt_seqiterator_fastq_new(const GtStrArray *filenametab,
+                                     GtError *err)
+{
+  return seqiterator_fastq_new_gen(filenametab,
+                                   false,
+                                   err);
+}
+
+GtSeqIterator* gt_seqiterator_colorspace_fastq_new(
+                                                const GtStrArray *filenametab,
+                                                GtError *err)
+{
+  return seqiterator_fastq_new_gen(filenametab,
+                                   true,
+                                   err);
 }
