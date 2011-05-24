@@ -874,14 +874,12 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
 }
 
 int gt_feature_node_traverse_children_breadth(GtFeatureNode *feature_node,
-                                             void *data,
-                                             GtGenomeNodeTraverseFunc traverse,
-                                             bool traverse_only_once,
-                                             GtError *err)
+                                              void *data,
+                                              GtGenomeNodeTraverseFunc traverse,
+                                              GtError *err)
 {
-  return feature_node_traverse_children_generic(feature_node,
-                                                data, traverse,
-                                                traverse_only_once, false, err);
+  return feature_node_traverse_children_generic(feature_node, data, traverse,
+                                                true, false, err);
 }
 
 static int count_types(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)

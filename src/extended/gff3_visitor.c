@@ -300,8 +300,7 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
          'Parent' attributes are shown in correct order */
       had_err =
         gt_feature_node_traverse_children_breadth(fn, gff3_visitor,
-                                                  gff3_show_feature_node, true,
-                                                  err);
+                                                  gff3_show_feature_node, err);
     }
   }
 

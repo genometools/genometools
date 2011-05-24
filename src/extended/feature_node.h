@@ -57,8 +57,7 @@ int            gt_feature_node_traverse_children(GtFeatureNode*, void*,
 /* perform breadth first traversal of the given genome node  */
 int            gt_feature_node_traverse_children_breadth(GtFeatureNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
-                                                        bool traverse_only_once,
-                                                        GtError*);
+                                                         GtError*);
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
                                                         GtError*);
