@@ -1046,7 +1046,7 @@ static int process_predicted_feature(GtFeatureNode *fn, void *data,
         else {
           /* no gene with the same range found -> check if this is a wrong
              gene */
-          if (!gt_genome_node_overlaps_nodes_mark((GtGenomeNode*) fn,
+          if (!gt_feature_node_overlaps_nodes_mark(fn,
                                     predicted_strand == GT_STRAND_FORWARD
                                     ? info->slot->genes_forward
                                     : info->slot->genes_reverse,
@@ -1105,7 +1105,7 @@ static int process_predicted_feature(GtFeatureNode *fn, void *data,
         else {
           /* no mRNA with the same range found -> check if this is a wrong
              mRNA */
-          if (!gt_genome_node_overlaps_nodes_mark((GtGenomeNode*) fn,
+          if (!gt_feature_node_overlaps_nodes_mark(fn,
                                     predicted_strand == GT_STRAND_FORWARD
                                     ? info->slot->mRNAs_forward
                                     : info->slot->mRNAs_reverse,
@@ -1150,9 +1150,8 @@ static int process_predicted_feature(GtFeatureNode *fn, void *data,
     }
     else {
       /* no LTR with the same range found -> check if this is a wrong LTR */
-      if (!gt_genome_node_overlaps_nodes_mark((GtGenomeNode*) fn,
-                                              info->slot->LTRs,
-                                              info->slot->overlapped_LTRs)) {
+      if (!gt_feature_node_overlaps_nodes_mark(fn, info->slot->LTRs,
+                                               info->slot->overlapped_LTRs)) {
         (*info->wrong_LTRs)++;
       }
     }

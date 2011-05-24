@@ -1090,31 +1090,31 @@ bool gt_feature_node_is_tree(GtFeatureNode *fn)
   return status;
 }
 
-bool gt_genome_node_overlaps_nodes(GtGenomeNode *gn, GtArray *nodes)
+bool gt_feature_node_overlaps_nodes(GtFeatureNode *fn, GtArray *nodes)
 {
-  return gt_genome_node_overlaps_nodes_mark(gn, nodes, NULL);
+  return gt_feature_node_overlaps_nodes_mark(fn, nodes, NULL);
 }
 
-bool gt_genome_node_overlaps_nodes_mark(GtGenomeNode *gn, GtArray *nodes,
-                                             GtBittab *b)
+bool gt_feature_node_overlaps_nodes_mark(GtFeatureNode *fn, GtArray *nodes,
+                                         GtBittab *b)
 {
   unsigned long i;
   GtGenomeNode *node;
-  GtRange gn_range, node_range;
+  GtRange fn_range, node_range;
   bool rval = false;
 #ifndef NDEBUG
-  GtStr *gn_id;
-  gt_assert(gn && nodes);
+  GtStr *fn_id;
+  gt_assert(fn && nodes);
   gt_assert(!b || gt_bittab_size(b) == gt_array_size(nodes));
-  gn_id = gt_genome_node_get_idstr(gn);
+  fn_id = gt_genome_node_get_idstr((GtGenomeNode*) fn);
 #endif
-  gn_range = gt_genome_node_get_range(gn);
+  fn_range = gt_genome_node_get_range((GtGenomeNode*) fn);
 
   for (i = 0; i < gt_array_size(nodes); i++) {
     node = *(GtGenomeNode**) gt_array_get(nodes, i);
-    gt_assert(!gt_str_cmp(gn_id, gt_genome_node_get_idstr(node)));
+    gt_assert(!gt_str_cmp(fn_id, gt_genome_node_get_idstr(node)));
     node_range = gt_genome_node_get_range(node);
-    if (gt_range_overlap(&gn_range, &node_range)) {
+    if (gt_range_overlap(&fn_range, &node_range)) {
       rval = true;
       if (b)
         gt_bittab_set_bit(b, i);

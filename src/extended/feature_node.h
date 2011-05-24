@@ -86,12 +86,12 @@ bool           gt_feature_node_direct_children_do_not_overlap_st(GtFeatureNode
 bool           gt_feature_node_is_tree(GtFeatureNode*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(gt_array_size) */
-bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);
+bool           gt_feature_node_overlaps_nodes(GtFeatureNode*, GtArray*);
 /* similar interface to gt_genome_node_overlaps_nodes(). Aditionally, if a
    bittab is given (which must have the same size as the array), the bits
    corresponding to overlapped nodes are marked (i.e., set) */
-bool           gt_genome_node_overlaps_nodes_mark(GtGenomeNode*, GtArray*,
-                                                  GtBittab*);
+bool           gt_feature_node_overlaps_nodes_mark(GtFeatureNode*, GtArray*,
+                                                   GtBittab*);
 
 #define gt_feature_node_cast(genome_node) \
         gt_genome_node_cast(gt_feature_node_class(), genome_node)
