@@ -877,13 +877,14 @@ int gt_genome_node_traverse_children(GtGenomeNode *genome_node, void *data,
                                                 traverse_only_once, true, err);
 }
 
-int gt_genome_node_traverse_children_breadth(GtGenomeNode *genome_node,
+int gt_feature_node_traverse_children_breadth(GtFeatureNode *feature_node,
                                              void *data,
                                              GtGenomeNodeTraverseFunc traverse,
                                              bool traverse_only_once,
                                              GtError *err)
 {
-  return feature_node_traverse_children_generic(genome_node, data, traverse,
+  return feature_node_traverse_children_generic((GtGenomeNode*) feature_node,
+                                                data, traverse,
                                                 traverse_only_once, false, err);
 }
 
