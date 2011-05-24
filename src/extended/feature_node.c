@@ -928,6 +928,12 @@ int gt_feature_node_traverse_direct_children(GtFeatureNode *fn,
   return had_err;
 }
 
+unsigned long gt_feature_node_number_of_children(const GtFeatureNode *fn)
+{
+  gt_assert(fn);
+  return gt_dlist_size(fn->children);
+}
+
 unsigned long gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                          *parent,
                                                          const GtFeatureNode
@@ -942,14 +948,6 @@ unsigned long gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                      &traverseinfo, count_types,
                                                      NULL);
   return traverseinfo.number;
-}
-
-unsigned long gt_genome_node_number_of_children(const GtGenomeNode *gn)
-{
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast((GtGenomeNode*) gn); /* XXX */
-  return gt_dlist_size(fn->children);
 }
 
 void gt_feature_node_add_child(GtFeatureNode *parent, GtFeatureNode *child)
@@ -994,7 +992,7 @@ void gt_genome_node_remove_leaf(GtGenomeNode *tree, GtGenomeNode *leafn)
 {
   int had_err;
   gt_assert(tree && leafn);
-  gt_assert(!gt_genome_node_number_of_children(leafn));
+  gt_assert(!gt_feature_node_number_of_children((GtFeatureNode*) leafn));
   had_err = gt_genome_node_traverse_children(tree, leafn, remove_leaf, true,
                                              NULL);
   gt_assert(!had_err); /* cannot happen, remove_leaf() is sane */

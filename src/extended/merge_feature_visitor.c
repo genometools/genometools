@@ -65,8 +65,7 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
       gt_feature_node_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
       gt_feature_node_unset_score(previous_feature);
-      gt_assert(!gt_genome_node_number_of_children((GtGenomeNode*)
-                                                current_feature));
+      gt_assert(!gt_feature_node_number_of_children(current_feature));
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */

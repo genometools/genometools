@@ -62,7 +62,7 @@ int            gt_feature_node_traverse_children_breadth(GtFeatureNode*, void*,
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
                                                        GtGenomeNodeTraverseFunc,
                                                         GtError*);
-unsigned long  gt_genome_node_number_of_children(const GtGenomeNode*);
+unsigned long  gt_feature_node_number_of_children(const GtFeatureNode*);
 unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           *parent,
                                                           const GtFeatureNode

@@ -572,7 +572,7 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
             return -1;
           }
         } else if
-            (gt_genome_node_number_of_children((GtGenomeNode*) parent) > 1)
+            (gt_feature_node_number_of_children(parent) > 1)
         {
           if (add_to_parent(d, node, parent, err) < 0) {
             return -1;
