@@ -777,7 +777,7 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
         gt_array_add(list_of_children, child_feature);
       }
     }
-    /* store the implications of <gn> to the tree status of <feature_node> */
+    /* store the implications of <fn> to the tree status of <feature_node> */
     if (multiple_parents(fn->bit_field))
       has_node_with_multiple_parents = true;
     /* call traverse function */
