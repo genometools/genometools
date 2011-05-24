@@ -233,7 +233,7 @@ static int assign_block_caption(GtDiagram *d,
     caption = gt_str_new();
     if (parent)
     {
-      if (nnid_p && gt_genome_node_has_children((GtGenomeNode*) parent))
+      if (nnid_p && gt_feature_node_has_children(parent))
         gt_str_append_cstr(caption, nnid_p);
       else
         gt_str_append_cstr(caption, "-");
@@ -282,7 +282,7 @@ static int add_to_current(GtDiagram *d, GtFeatureNode *node,
     if ((nnid_p || nnid_n) && status)
     {
       if (parent) {
-        if (nnid_p && gt_genome_node_has_children((GtGenomeNode*) parent))
+        if (nnid_p && gt_feature_node_has_children(parent))
           gt_str_append_cstr(caption, nnid_p);
         else
           gt_str_append_cstr(caption, "-");
@@ -616,7 +616,7 @@ static int visit_child(GtFeatureNode* fn, void *nti, GtError *err)
   gt_genome_node_info = (NodeTraverseInfo*) nti;
   gt_error_check(err);
 
-  if (gt_genome_node_has_children((GtGenomeNode*) fn))
+  if (gt_feature_node_has_children(fn))
   {
     GtFeatureNode *oldparent = gt_genome_node_info->parent;
     had_err = process_node(gt_genome_node_info->diagram, fn,
@@ -734,7 +734,7 @@ static int traverse_genome_nodes(GtFeatureNode *fn, void *nti)
   /* handle root nodes */
   had_err = process_node(gt_genome_node_info->diagram, fn, NULL,
                          gt_genome_node_info->err);
-  if (!had_err && gt_genome_node_has_children((GtGenomeNode*) fn)) {
+  if (!had_err && gt_feature_node_has_children(fn)) {
     had_err = gt_feature_node_traverse_direct_children(fn,
                                                        gt_genome_node_info,
                                                        visit_child,

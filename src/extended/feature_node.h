@@ -75,7 +75,7 @@ bool           gt_feature_node_is_marked(const GtFeatureNode*);
 
 /* returns true if the given node graph contains a marked node */
 bool           gt_feature_node_contains_marked(GtFeatureNode*);
-bool           gt_genome_node_has_children(GtGenomeNode*);
+bool           gt_feature_node_has_children(GtFeatureNode*);
 bool           gt_genome_node_direct_children_do_not_overlap(GtGenomeNode*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as
    <child> do not overlap */

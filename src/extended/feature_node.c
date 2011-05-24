@@ -1011,11 +1011,9 @@ bool gt_feature_node_contains_marked(GtFeatureNode *fn)
   return contains_marked;
 }
 
-bool gt_genome_node_has_children(GtGenomeNode *gn)
+bool gt_feature_node_has_children(GtFeatureNode *fn)
 {
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast((GtGenomeNode*) gn); /* XXX */
+  gt_assert(fn);
   if (!fn->children || gt_dlist_size(fn->children) == 0)
     return false;
   return true;

@@ -240,8 +240,7 @@ static int store_ids(GtFeatureNode *fn, void *data, GtError *err)
   gt_error_check(err);
   gt_assert(fn && gff3_visitor);
 
-  if (gt_genome_node_has_children((GtGenomeNode*) fn) ||
-      gt_feature_node_is_multi(fn) ||
+  if (gt_feature_node_has_children(fn) || gt_feature_node_is_multi(fn) ||
       (gff3_visitor->retain_ids && gt_feature_node_get_attribute(fn, "ID"))) {
     if (gt_feature_node_is_multi(fn)) {
       id = gt_hashmap_get(gff3_visitor->feature_node_to_unique_id_str,
@@ -309,7 +308,7 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
 
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
-  if (gt_genome_node_has_children((GtGenomeNode*) fn) ||
+  if (gt_feature_node_has_children(fn) ||
       (gff3_visitor->retain_ids && gt_feature_node_get_attribute(fn, "ID"))) {
     gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_TERMINATOR);
   }
