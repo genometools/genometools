@@ -559,9 +559,8 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
   {
     if (parent) {
       bool do_not_overlap = false;
-      do_not_overlap =
-        gt_genome_node_direct_children_do_not_overlap_st((GtGenomeNode*) parent,
-                                                         (GtGenomeNode*) node);
+      do_not_overlap = gt_feature_node_direct_children_do_not_overlap_st(parent,
+                                                                         node);
       if (*group == GT_GROUP_BY_PARENT
           || (do_not_overlap && *group == GT_UNDEFINED_GROUPING))
       {

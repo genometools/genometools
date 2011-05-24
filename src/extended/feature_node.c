@@ -1019,37 +1019,31 @@ bool gt_feature_node_has_children(GtFeatureNode *fn)
   return true;
 }
 
-bool gt_genome_node_direct_children_do_not_overlap_generic(GtGenomeNode
-                                                           *parent,
-                                                           GtGenomeNode
-                                                           *child)
+bool gt_feature_node_direct_children_do_not_overlap_generic(GtFeatureNode
+                                                            *parent,
+                                                            GtFeatureNode
+                                                            *child)
 {
-  GtFeatureNode *parent_node;
   GtArray *children_ranges;
   GtDlistelem *dlistelem;
-  GtFeatureNode *fn = NULL, *child_fn;
+  GtFeatureNode *child_fn;
   GtRange range;
   bool rval;
 
   gt_assert(parent);
 
-  if (child)
-    fn = gt_feature_node_try_cast(child);
-
-  parent_node = gt_feature_node_cast(parent); /* XXX */
-
-  if (!parent_node->children)
+  if (!parent->children)
     return true;
 
   /* get children ranges */
   children_ranges = gt_array_new(sizeof (GtRange));
-  gt_assert(parent_node->children);
-  for (dlistelem = gt_dlist_first(parent_node->children); dlistelem != NULL;
+  gt_assert(parent->children);
+  for (dlistelem = gt_dlist_first(parent->children); dlistelem != NULL;
        dlistelem = gt_dlistelem_next(dlistelem)) {
-    if (!fn ||
+    if (!child ||
         ((child_fn =
             gt_feature_node_try_cast(gt_dlistelem_get_data(dlistelem))) &&
-         gt_feature_node_get_type(fn) ==
+         gt_feature_node_get_type(child) ==
          gt_feature_node_get_type(child_fn))) {
       range = gt_genome_node_get_range((GtGenomeNode*)
                                     gt_dlistelem_get_data(dlistelem));
@@ -1066,15 +1060,15 @@ bool gt_genome_node_direct_children_do_not_overlap_generic(GtGenomeNode
   return rval;
 }
 
-bool gt_genome_node_direct_children_do_not_overlap(GtGenomeNode *gn)
+bool gt_feature_node_direct_children_do_not_overlap(GtFeatureNode *fn)
 {
-  return gt_genome_node_direct_children_do_not_overlap_generic(gn, NULL);
+  return gt_feature_node_direct_children_do_not_overlap_generic(fn, NULL);
 }
 
-bool gt_genome_node_direct_children_do_not_overlap_st(GtGenomeNode *parent,
-                                                   GtGenomeNode *child)
+bool gt_feature_node_direct_children_do_not_overlap_st(GtFeatureNode *parent,
+                                                       GtFeatureNode *child)
 {
-  return gt_genome_node_direct_children_do_not_overlap_generic(parent, child);
+  return gt_feature_node_direct_children_do_not_overlap_generic(parent, child);
 }
 
 bool gt_genome_node_is_tree(GtGenomeNode *gn)

@@ -76,13 +76,13 @@ bool           gt_feature_node_is_marked(const GtFeatureNode*);
 /* returns true if the given node graph contains a marked node */
 bool           gt_feature_node_contains_marked(GtFeatureNode*);
 bool           gt_feature_node_has_children(GtFeatureNode*);
-bool           gt_genome_node_direct_children_do_not_overlap(GtGenomeNode*);
+bool           gt_feature_node_direct_children_do_not_overlap(GtFeatureNode*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as
    <child> do not overlap */
-bool           gt_genome_node_direct_children_do_not_overlap_st(GtGenomeNode
-                                                                *parent,
-                                                                GtGenomeNode
-                                                                *child);
+bool           gt_feature_node_direct_children_do_not_overlap_st(GtFeatureNode
+                                                                 *parent,
+                                                                 GtFeatureNode
+                                                                 *child);
 bool           gt_genome_node_is_tree(GtGenomeNode*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(gt_array_size) */
