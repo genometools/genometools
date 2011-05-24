@@ -26,6 +26,7 @@
 #include "core/bsearch.h"
 #include "core/codon_iterator_encseq.h"
 #include "core/codon_iterator_simple.h"
+#include "core/colorspace.h"
 #include "core/countingsort.h"
 #include "core/cstr_table.h"
 #include "core/desc_buffer.h"
@@ -87,9 +88,9 @@
 #include "tools/gt_interfeat.h"
 #include "tools/gt_matstat.h"
 #include "tools/gt_maxpairs.h"
+#include "tools/gt_md5_to_id.h"
 #include "tools/gt_merge.h"
 #include "tools/gt_mergefeat.h"
-#include "tools/gt_md5_to_id.h"
 #include "tools/gt_mgth.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
@@ -265,6 +266,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "tokenizer class", gt_tokenizer_unit_test);
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
   gt_hashmap_add(unit_tests, "encseq gc module", gt_encseq_gc_unit_test);
+  gt_hashmap_add(unit_tests, "color space module", gt_colorspace_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
