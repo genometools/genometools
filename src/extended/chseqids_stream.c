@@ -35,13 +35,13 @@ struct GtChseqidsStream {
 #define chseqids_stream_cast(GS)\
         gt_node_stream_cast(gt_chseqids_stream_class(), GS)
 
-static int change_sequence_id(GtGenomeNode *gn, void *data,
+static int change_sequence_id(GtFeatureNode *fn, void *data,
                               GT_UNUSED GtError *err)
 {
   GtStr *changed_seqid = data;
   gt_error_check(err);
   gt_assert(changed_seqid);
-  gt_genome_node_change_seqid(gn, changed_seqid);
+  gt_genome_node_change_seqid((GtGenomeNode*) fn, changed_seqid);
   return 0;
 }
 

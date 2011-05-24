@@ -29,7 +29,7 @@
 
 typedef void (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                   void *data);
-typedef int (*GtGenomeNodeTraverseFunc)(GtGenomeNode*, void*, GtError*);
+typedef int (*GtFeatureNodeTraverseFunc)(GtFeatureNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
 
@@ -51,15 +51,15 @@ int            gt_feature_node_unit_test(GtError*);
 
 /* perform depth first traversal of the given genome node */
 int            gt_feature_node_traverse_children(GtFeatureNode*, void*,
-                                                 GtGenomeNodeTraverseFunc,
+                                                 GtFeatureNodeTraverseFunc,
                                                  bool traverse_only_once,
                                                  GtError*);
 /* perform breadth first traversal of the given genome node  */
 int            gt_feature_node_traverse_children_breadth(GtFeatureNode*, void*,
-                                                       GtGenomeNodeTraverseFunc,
+                                                      GtFeatureNodeTraverseFunc,
                                                          GtError*);
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
-                                                       GtGenomeNodeTraverseFunc,
+                                                      GtFeatureNodeTraverseFunc,
                                                         GtError*);
 unsigned long  gt_feature_node_number_of_children(const GtFeatureNode*);
 unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode

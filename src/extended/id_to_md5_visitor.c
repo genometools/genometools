@@ -71,7 +71,7 @@ static void i2m_build_new_target(GtStr *target, GtStrArray *target_ids,
   }
 }
 
-static int i2m_change_target_seqids(GtGenomeNode *gn, const char *target,
+static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
                                     GtRegionMapping *region_mapping,
                                     GtError *err)
 {
@@ -80,7 +80,7 @@ static int i2m_change_target_seqids(GtGenomeNode *gn, const char *target,
   unsigned long i;
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(gn && target && region_mapping);
+  gt_assert(fn && target && region_mapping);
   target_ids = gt_str_array_new();
   target_ranges = gt_array_new(sizeof (GtRange));
   target_strands = gt_array_new(sizeof (GtStrand));
@@ -109,8 +109,7 @@ static int i2m_change_target_seqids(GtGenomeNode *gn, const char *target,
   if (!had_err) {
     GtStr *new_target = gt_str_new();
     i2m_build_new_target(new_target, target_ids, target_ranges, target_strands);
-    gt_feature_node_set_attribute((GtFeatureNode*) gn, GT_GFF_TARGET,
-                                  gt_str_get(new_target));
+    gt_feature_node_set_attribute(fn, GT_GFF_TARGET, gt_str_get(new_target));
     gt_str_delete(new_target);
   }
   gt_array_delete(target_strands);
@@ -119,23 +118,22 @@ static int i2m_change_target_seqids(GtGenomeNode *gn, const char *target,
   return had_err;
 }
 
-static int i2m_change_seqid(GtGenomeNode *gn, void *data, GtError *err)
+static int i2m_change_seqid(GtFeatureNode *fn, void *data, GtError *err)
 {
   I2MChangeSeqidInfo *info = (I2MChangeSeqidInfo*) data;
   const char *target;
   gt_error_check(err);
-  gt_assert(gn && info);
-  gt_genome_node_change_seqid(gn, info->new_seqid);
+  gt_assert(fn && info);
+  gt_genome_node_change_seqid((GtGenomeNode*) fn, info->new_seqid);
   if (info->offset) {
     GtRange old_range, new_range;
-    old_range = gt_genome_node_get_range(gn);
+    old_range = gt_genome_node_get_range((GtGenomeNode*) fn);
     new_range = gt_range_offset(&old_range, -info->offset);
-    gt_genome_node_set_range(gn, &new_range);
+    gt_genome_node_set_range((GtGenomeNode*) fn, &new_range);
   }
-  if ((target = gt_feature_node_get_attribute((GtFeatureNode*) gn,
-                                              GT_GFF_TARGET)) &&
+  if ((target = gt_feature_node_get_attribute(fn, GT_GFF_TARGET)) &&
       info->substitute_target_ids) {
-    return i2m_change_target_seqids(gn, target, info->region_mapping, err);
+    return i2m_change_target_seqids(fn, target, info->region_mapping, err);
   }
   return 0;
 }

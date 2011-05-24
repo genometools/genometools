@@ -24,7 +24,7 @@
 
 struct GtMergeFeatureVisitor {
   const GtNodeVisitor parent_instance;
-  GtGenomeNode *current_tree;
+  GtFeatureNode *current_tree;
   GtHashmap *hm; /* type -> previous node */
   GtArray *nodes_to_remove;
 };
@@ -41,14 +41,13 @@ static void merge_feature_visitor_free(GtNodeVisitor *nv)
   gt_array_delete(merge_feature_visitor->nodes_to_remove);
 }
 
-static int mergefeat_in_children(GtGenomeNode *gn, void *data,
+static int mergefeat_in_children(GtFeatureNode *current_feature, void *data,
                                  GT_UNUSED GtError *err)
 {
   GtMergeFeatureVisitor *v = (GtMergeFeatureVisitor*) data;
-  GtFeatureNode *previous_feature, *current_feature;
+  GtFeatureNode *previous_feature;
   GtRange previous_range, current_range;
   gt_error_check(err);
-  current_feature = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(current_feature);
   if ((previous_feature =
         gt_hashmap_get(v->hm, gt_feature_node_get_type(current_feature)))) {
@@ -77,14 +76,12 @@ static int mergefeat_in_children(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-static int mergefeat_if_necessary(GtGenomeNode *gn, void *data, GtError *err)
+static int mergefeat_if_necessary(GtFeatureNode *fn, void *data, GtError *err)
 {
   GtMergeFeatureVisitor *v = (GtMergeFeatureVisitor*) data;
-  GtFeatureNode *fn;
   gt_error_check(err);
-  fn = gt_feature_node_cast(gn);
   gt_assert(fn);
-  v->current_tree = gn;
+  v->current_tree = fn;
   gt_hashmap_reset(v->hm);
   return gt_feature_node_traverse_direct_children(fn, v, mergefeat_in_children,
                                                   err);

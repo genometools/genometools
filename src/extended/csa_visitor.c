@@ -191,16 +191,15 @@ static GtStrand get_strand(const void *sa)
   return gt_feature_node_get_strand(fn);
 }
 
-static int csa_visitor_save_exon(GtGenomeNode *gn, void *data,
+static int csa_visitor_save_exon(GtFeatureNode *fn, void *data,
                                  GT_UNUSED GtError *err)
 {
-  GtFeatureNode *fn = (GtFeatureNode*) gn;
   GtArray *exon_ranges = (GtArray*) data;
   GtRange range;
   gt_error_check(err);
   gt_assert(fn && exon_ranges);
   if (gt_feature_node_has_type(fn, gt_ft_exon)) {
-    range = gt_genome_node_get_range(gn);
+    range = gt_genome_node_get_range((GtGenomeNode*) fn);
     gt_array_add(exon_ranges, range);
   }
   return 0;

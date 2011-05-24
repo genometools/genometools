@@ -57,32 +57,31 @@ static int gtf_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
   return 0;
 }
 
-static int save_exon_node(GtGenomeNode *gn, void *data,
+static int save_exon_node(GtFeatureNode *fn, void *data,
                           GT_UNUSED GtError *err)
 {
   GtGTFVisitor *gtf_visitor;
   gt_error_check(err);
-  gt_assert(gn && data);
+  gt_assert(fn && data);
   gtf_visitor = (GtGTFVisitor*) data;
-  if (gt_feature_node_has_type((GtFeatureNode*) gn, gt_ft_exon))
-    gt_array_add(gtf_visitor->exon_features, gn);
-  else if (gt_feature_node_has_type((GtFeatureNode*) gn, gt_ft_CDS))
-    gt_array_add(gtf_visitor->CDS_features, gn);
+  if (gt_feature_node_has_type(fn, gt_ft_exon))
+    gt_array_add(gtf_visitor->exon_features, fn);
+  else if (gt_feature_node_has_type(fn, gt_ft_CDS))
+    gt_array_add(gtf_visitor->CDS_features, fn);
   return 0;
 }
 
-static int gtf_show_transcript(GtGenomeNode *gn, GtGTFVisitor *gtf_visitor,
-                               GtError *err)
+static int gtf_show_transcript(GtFeatureNode *feature_node,
+                               GtGTFVisitor *gtf_visitor, GtError *err)
 {
   GtFeatureNode *fn;
   unsigned long i;
   int had_err;
   gt_error_check(err);
-  gt_assert(gn && gtf_visitor);
+  gt_assert(feature_node && gtf_visitor);
   gt_array_reset(gtf_visitor->exon_features);
   gt_array_reset(gtf_visitor->CDS_features);
-  had_err = gt_feature_node_traverse_direct_children((GtFeatureNode*) gn,
-                                                     gtf_visitor,
+  had_err = gt_feature_node_traverse_direct_children(feature_node, gtf_visitor,
                                                      save_exon_node, err);
   if (gt_array_size(gtf_visitor->exon_features)) {
     /* sort exon features */
@@ -121,26 +120,25 @@ static int gtf_show_transcript(GtGenomeNode *gn, GtGTFVisitor *gtf_visitor,
   return had_err;
 }
 
-static int gtf_show_feature_node(GtGenomeNode *gn, void *data, GtError *err)
+static int gtf_show_feature_node(GtFeatureNode *fn, void *data, GtError *err)
 {
   GtGTFVisitor *gtf_visitor = (GtGTFVisitor*) data;
-  GtFeatureNode *fn = (GtFeatureNode*) gn;
   int had_err = 0;
   if (gt_feature_node_has_type(fn, gt_ft_gene)) {
       gtf_visitor->gene_id++;
       gtf_visitor->transcript_id = 0;
-      had_err = gtf_show_transcript(gn, gtf_visitor, err);
+      had_err = gtf_show_transcript(fn, gtf_visitor, err);
   }
   else if (gt_feature_node_has_type(fn, gt_ft_mRNA)) {
-    had_err = gtf_show_transcript(gn, gtf_visitor, err);
+    had_err = gtf_show_transcript(fn, gtf_visitor, err);
   }
   else if (!(gt_feature_node_has_type(fn, gt_ft_CDS) ||
              gt_feature_node_has_type(fn, gt_ft_exon))) {
       gt_warning("skipping GFF3 feature of type \"%s\" (from line %u in file "
                  "\"%s\")",
                  gt_feature_node_get_type(fn),
-                 gt_genome_node_get_line_number(gn),
-                 gt_genome_node_get_filename(gn));
+                 gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                 gt_genome_node_get_filename((GtGenomeNode*) fn));
   }
   return had_err;
 }

@@ -35,23 +35,22 @@ struct GtInterFeatureVisitor {
 #define gt_inter_feature_visitor_cast(GV)\
         gt_node_visitor_cast(gt_inter_feature_visitor_class(), GV)
 
-static int inter_feature_in_children(GtGenomeNode *gn, void *data,
-                                        GT_UNUSED GtError *err)
+static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
+                                     GT_UNUSED GtError *err)
 {
   GtInterFeatureVisitor *aiv = (GtInterFeatureVisitor*) data;
-  GtFeatureNode *current_feature, *inter_node;
+  GtFeatureNode *inter_node;
   GtRange previous_range, current_range, inter_range;
   GtStrand previous_strand, current_strand, inter_strand;
   GtStr *parent_seqid;
   gt_error_check(err);
-  current_feature = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(current_feature);
   if (gt_feature_node_has_type(current_feature, aiv->outside_type)) {
     if (aiv->previous_feature) {
       /* determine inter range */
       previous_range = gt_genome_node_get_range((GtGenomeNode*)
                                                 aiv->previous_feature);
-      current_range = gt_genome_node_get_range(gn);
+      current_range = gt_genome_node_get_range((GtGenomeNode*) current_feature);
       gt_assert(previous_range.end < current_range.start);
       if (current_range.start - previous_range.end < 2) {
         gt_warning("no space for inter-feature '%s' between %lu and %lu",
@@ -91,13 +90,11 @@ static int inter_feature_in_children(GtGenomeNode *gn, void *data,
   return 0;
 }
 
-static int inter_feature_if_necessary(GtGenomeNode *gn, void *data,
-                                    GtError *err)
+static int inter_feature_if_necessary(GtFeatureNode *fn, void *data,
+                                      GtError *err)
 {
   GtInterFeatureVisitor *aiv = (GtInterFeatureVisitor*) data;
-  GtFeatureNode *fn;
   gt_error_check(err);
-  fn = gt_feature_node_cast(gn);
   gt_assert(fn);
   aiv->parent_feature = fn;
   aiv->previous_feature = NULL;

@@ -427,13 +427,11 @@ GtPhase gt_feature_node_get_phase(const GtFeatureNode *fn)
   return (fn->bit_field >> PHASE_OFFSET) & PHASE_MASK;
 }
 
-static int feature_node_save_exon(GtGenomeNode *gn, void *data,
+static int feature_node_save_exon(GtFeatureNode *fn, void *data,
                                   GT_UNUSED GtError *err)
 {
-  GtFeatureNode *fn;
   GtArray *exon_features = (GtArray*) data;
   gt_error_check(err);
-  fn = (GtFeatureNode*) gn;
   gt_assert(fn && exon_features);
   if (gt_feature_node_has_type(fn, gt_ft_exon)) {
     gt_array_add(exon_features, fn);
@@ -451,13 +449,11 @@ void gt_feature_node_get_exons(GtFeatureNode *fn, GtArray *exon_features)
   gt_assert(!had_err); /* feature_node_save_exon() is sane */
 }
 
-static int save_exons_and_cds(GtGenomeNode *gn, void *data,
+static int save_exons_and_cds(GtFeatureNode *fn, void *data,
                               GT_UNUSED GtError *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
-  GtFeatureNode *fn;
   gt_error_check(err);
-  fn = (GtFeatureNode*) gn;
   gt_assert(fn && info);
   if (gt_feature_node_has_type(fn, gt_ft_exon))
     gt_array_add(info->exon_features, fn);
@@ -493,14 +489,13 @@ static void set_transcript_types(GtArray *features, GtStrand parent_strand)
   }
 }
 
-static int determine_transcripttypes(GtGenomeNode *gn, void *data,
+static int determine_transcripttypes(GtFeatureNode *fn, void *data,
                                      GT_UNUSED GtError *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
-  GtFeatureNode *fn = gt_feature_node_cast(gn);
   int had_err;
   gt_error_check(err);
-  gt_assert(gn && info);
+  gt_assert(fn && info);
   /* reset exon_features and cds_features */
   gt_array_reset(info->exon_features);
   gt_array_reset(info->cds_features);
@@ -731,7 +726,7 @@ static void add_parent(unsigned int *bit_field)
 
 static int feature_node_traverse_children_generic(GtFeatureNode *feature_node,
                                                   void *data,
-                                                  GtGenomeNodeTraverseFunc
+                                                  GtFeatureNodeTraverseFunc
                                                   traverse,
                                                   bool traverse_only_once,
                                                   bool depth_first,
@@ -815,7 +810,8 @@ static int feature_node_traverse_children_generic(GtFeatureNode *feature_node,
       has_node_with_multiple_parents = true;
     /* call traverse function */
     if (traverse) {
-      had_err = traverse(gn, data, err);
+      /* XXX */
+      had_err = traverse(gt_feature_node_cast(gn), data, err);
       if (had_err)
         break;
     }
@@ -866,7 +862,7 @@ static int feature_node_traverse_children_generic(GtFeatureNode *feature_node,
 }
 
 int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
-                                      GtGenomeNodeTraverseFunc traverse,
+                                      GtFeatureNodeTraverseFunc traverse,
                                       bool traverse_only_once, GtError *err)
 {
   return feature_node_traverse_children_generic(feature_node, data, traverse,
@@ -875,34 +871,27 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
 
 int gt_feature_node_traverse_children_breadth(GtFeatureNode *feature_node,
                                               void *data,
-                                              GtGenomeNodeTraverseFunc traverse,
+                                              GtFeatureNodeTraverseFunc
+                                              traverse,
                                               GtError *err)
 {
   return feature_node_traverse_children_generic(feature_node, data, traverse,
                                                 true, false, err);
 }
 
-static int count_types(GtGenomeNode *gn, void *data, GT_UNUSED GtError *err)
+static int count_types(GtFeatureNode *fn, void *data, GT_UNUSED GtError *err)
 {
-  GtFeatureNode *fn;
   int had_err = 0;
   GtTypeTraverseInfo *traverseinfo = (GtTypeTraverseInfo*) data;
   gt_error_check(err);
-  fn = gt_feature_node_cast(gn);  /* XXX */
-  /* if (!fn) {
-    gt_error_set(err, "only feature nodes can be children of feature nodes!");
-    had_err = -1;
-  } */
-  /* if (!had_err) { */
-    if (strcmp(traverseinfo->type, gt_feature_node_get_type(fn)) == 0)
-      traverseinfo->number++;
-  /* } */
+  if (strcmp(traverseinfo->type, gt_feature_node_get_type(fn)) == 0)
+    traverseinfo->number++;
   return had_err;
 }
 
 int gt_feature_node_traverse_direct_children(GtFeatureNode *fn,
                                              void *traverse_func_data,
-                                             GtGenomeNodeTraverseFunc traverse,
+                                             GtFeatureNodeTraverseFunc traverse,
                                              GtError *err)
 {
   GtDlistelem *dlistelem;
@@ -913,7 +902,7 @@ int gt_feature_node_traverse_direct_children(GtFeatureNode *fn,
   if (fn->children) {
     for (dlistelem = gt_dlist_first(fn->children); dlistelem != NULL;
          dlistelem = gt_dlistelem_next(dlistelem)) {
-      had_err = traverse((GtGenomeNode*) gt_dlistelem_get_data(dlistelem),
+      had_err = traverse((GtFeatureNode*) gt_dlistelem_get_data(dlistelem),
                           traverse_func_data, err);
       if (had_err)
         break;
@@ -962,19 +951,17 @@ void gt_feature_node_add_child(GtFeatureNode *parent, GtFeatureNode *child)
   add_parent(&child->bit_field);
 }
 
-static int remove_leaf(GtGenomeNode *node, void *data, GT_UNUSED GtError *err)
+static int remove_leaf(GtFeatureNode *node, void *data, GT_UNUSED GtError *err)
 {
-  GtFeatureNode *node_feature;
+  GtFeatureNode *child, *leaf = (GtFeatureNode*) data;
   GtDlistelem *dlistelem;
-  GtGenomeNode *child, *leaf = (GtGenomeNode*) data;
   gt_error_check(err);
-  node_feature = gt_feature_node_cast(node); /* XXX */
-  if (node != leaf && node_feature->children) {
-    for (dlistelem = gt_dlist_first(node_feature->children); dlistelem != NULL;
+  if (node != leaf && node->children) {
+    for (dlistelem = gt_dlist_first(node->children); dlistelem != NULL;
          dlistelem = gt_dlistelem_next(dlistelem)) {
-      child = (GtGenomeNode*) gt_dlistelem_get_data(dlistelem);
+      child = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
       if (child == leaf) {
-        gt_dlist_remove(node_feature->children, dlistelem);
+        gt_dlist_remove(node->children, dlistelem);
         break;
       }
     }
@@ -1008,11 +995,11 @@ bool gt_genome_node_is_marked(const GtGenomeNode *gn)
   return fn->bit_field & 1 ? true : false;
 }
 
-static int check_marked_status(GtGenomeNode *gn, void *data,
+static int check_marked_status(GtFeatureNode *fn, void *data,
                                GT_UNUSED GtError *err)
 {
   bool *marked = data;
-  if (gt_genome_node_is_marked(gn))
+  if (gt_genome_node_is_marked((GtGenomeNode*) fn))
     *marked = true;
   return 0;
 }

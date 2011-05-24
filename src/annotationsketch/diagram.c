@@ -609,25 +609,23 @@ static int process_node(GtDiagram *d, GtFeatureNode *node,
   return 0;
 }
 
-static int visit_child(GtGenomeNode* gn, void *nti,
-                       GtError *err)
+static int visit_child(GtFeatureNode* fn, void *nti, GtError *err)
 {
   NodeTraverseInfo* gt_genome_node_info;
   int had_err;
   gt_genome_node_info = (NodeTraverseInfo*) nti;
   gt_error_check(err);
 
-  if (gt_genome_node_has_children(gn))
+  if (gt_genome_node_has_children((GtGenomeNode*) fn))
   {
     GtFeatureNode *oldparent = gt_genome_node_info->parent;
-    had_err = process_node(gt_genome_node_info->diagram, (GtFeatureNode*) gn,
+    had_err = process_node(gt_genome_node_info->diagram, fn,
                            gt_genome_node_info->parent, err);
     if (!had_err) {
-      gt_genome_node_info->parent = (GtFeatureNode*) gn;
-      had_err = gt_feature_node_traverse_direct_children((GtFeatureNode*) gn,
+      gt_genome_node_info->parent = fn;
+      had_err = gt_feature_node_traverse_direct_children(fn,
                                                          gt_genome_node_info,
-                                                         visit_child,
-                                                         err);
+                                                         visit_child, err);
     }
     if (!had_err) {
       gt_genome_node_info->parent = oldparent;
@@ -635,7 +633,7 @@ static int visit_child(GtGenomeNode* gn, void *nti,
   }
   else
   {
-    had_err = process_node(gt_genome_node_info->diagram, (GtFeatureNode*)gn,
+    had_err = process_node(gt_genome_node_info->diagram, fn,
                            gt_genome_node_info->parent, err);
   }
   return had_err;
