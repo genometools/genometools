@@ -4,6 +4,13 @@ Test do
   run_test "#{$bin}gt dev readreads -showseq #{$testdata}test1.fastq"
 end
 
+Name "gt readreads colorspace (success)"
+Keywords "gt_readreads"
+Test do
+  run_test "#{$bin}gt dev readreads -colorspace -showseq "+
+    "#{$testdata}solid_color_reads.fastq"
+end
+
 Name "gt readreads (non-FASTQ file)"
 Keywords "gt_readreads"
 Test do
