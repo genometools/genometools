@@ -219,7 +219,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                 nextfreeItvinfo = 0;
   const unsigned long incrementstacksize = 32UL;
   GtQueuepair queuepair;
-  GtBUItvinfo lastinterval, *stackspace = NULL;
+  GtBUItvinfo lastinterval = {0,0,0,true,NULL}, *stackspace = NULL;
   bool lastintervaldefined = false, haserr = false;
   int retval;
 
