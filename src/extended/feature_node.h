@@ -83,7 +83,7 @@ bool           gt_feature_node_direct_children_do_not_overlap_st(GtFeatureNode
                                                                  *parent,
                                                                  GtFeatureNode
                                                                  *child);
-bool           gt_genome_node_is_tree(GtGenomeNode*);
+bool           gt_feature_node_is_tree(GtFeatureNode*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(gt_array_size) */
 bool           gt_genome_node_overlaps_nodes(GtGenomeNode*, GtArray*);

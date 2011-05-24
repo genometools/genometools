@@ -1071,12 +1071,10 @@ bool gt_feature_node_direct_children_do_not_overlap_st(GtFeatureNode *parent,
   return gt_feature_node_direct_children_do_not_overlap_generic(parent, child);
 }
 
-bool gt_genome_node_is_tree(GtGenomeNode *gn)
+bool gt_feature_node_is_tree(GtFeatureNode *fn)
 {
-  GtFeatureNode *fn;
   bool status = false;
-  fn = gt_feature_node_cast(gn); /* XXX */
-  gt_assert(gn);
+  gt_assert(fn);
   switch (get_tree_status(fn->bit_field)) {
     case IS_TREE:
       status = true;

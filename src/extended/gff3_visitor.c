@@ -287,9 +287,8 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   had_err = gt_feature_node_traverse_children(fn, gff3_visitor, store_ids, true,
                                               err);
   if (!had_err) {
-    if (gt_genome_node_is_tree((GtGenomeNode*) fn)) {
-      had_err = gt_feature_node_traverse_children(fn,
-                                                  gff3_visitor,
+    if (gt_feature_node_is_tree(fn)) {
+      had_err = gt_feature_node_traverse_children(fn, gff3_visitor,
                                                   gff3_show_feature_node, true,
                                                   err);
     }
