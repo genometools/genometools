@@ -43,7 +43,7 @@ GtElement* gt_element_new(GtFeatureNode *node)
   gt_element_set_type(element, gt_feature_node_get_type(node));
   gt_element_set_range(element, gt_genome_node_get_range((GtGenomeNode*) node));
   element->strand = gt_feature_node_get_strand(node);
-  element->mark = gt_genome_node_is_marked((GtGenomeNode*) node);
+  element->mark = gt_feature_node_is_marked(node);
   element->gn = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) node);
   return element;
 }

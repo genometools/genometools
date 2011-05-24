@@ -786,7 +786,7 @@ static void store_predicted_exon_collapsed(GtTranscriptUsedExons *used_exons,
 
 static void mark_and_show_false_exon(GtFeatureNode *fn, bool exondiff)
 {
-  gt_genome_node_mark((GtGenomeNode*) fn); /* mark false exons */
+  gt_feature_node_mark(fn); /* mark false exons */
   if (exondiff) {
     gt_gff3_output_leading(fn, NULL);
     printf(".\n");

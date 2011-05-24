@@ -979,19 +979,15 @@ void gt_feature_node_remove_leaf(GtFeatureNode *tree, GtFeatureNode *leafn)
   gt_assert(!had_err); /* cannot happen, remove_leaf() is sane */
 }
 
-void gt_genome_node_mark(GtGenomeNode *gn)
+void gt_feature_node_mark(GtFeatureNode *fn)
 {
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast(gn); /* XXX */
+  gt_assert(fn);
   fn->bit_field |= 1;
 }
 
-bool gt_genome_node_is_marked(const GtGenomeNode *gn)
+bool gt_feature_node_is_marked(const GtFeatureNode *fn)
 {
-  GtFeatureNode *fn;
-  gt_assert(gn);
-  fn = gt_feature_node_cast((GtGenomeNode*) gn); /* XXX */
+  gt_assert(fn);
   return fn->bit_field & 1 ? true : false;
 }
 
@@ -999,7 +995,7 @@ static int check_marked_status(GtFeatureNode *fn, void *data,
                                GT_UNUSED GtError *err)
 {
   bool *marked = data;
-  if (gt_genome_node_is_marked((GtGenomeNode*) fn))
+  if (gt_feature_node_is_marked(fn))
     *marked = true;
   return 0;
 }

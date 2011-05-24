@@ -234,14 +234,14 @@ static int genome_node_lua_add_child(lua_State *L)
 static int genome_node_lua_mark(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
-  gt_genome_node_mark(*gn);
+  gt_feature_node_mark(gt_feature_node_cast(*gn));
   return 0;
 }
 
 static int genome_node_lua_is_marked(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
-  lua_pushboolean(L, gt_genome_node_is_marked(*gn));
+  lua_pushboolean(L, gt_feature_node_is_marked(gt_feature_node_cast(*gn)));
   return 1;
 }
 
