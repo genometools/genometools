@@ -44,18 +44,20 @@ void           gt_feature_node_foreach_attribute(GtFeatureNode*,
 bool           gt_feature_node_has_CDS(const GtFeatureNode*);
 bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
 double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*);
-/* Returns true, if the given features have the same seqid, feature type, range,
-   strand, and phase. */
+/* Returns <true>, if the given features have the same seqid, feature type,
+   range, strand, and phase. */
 bool           gt_feature_nodes_are_similar(GtFeatureNode*, GtFeatureNode*);
 int            gt_feature_node_unit_test(GtError*);
 
-/* perform depth first traversal of the given genome node */
-int            gt_feature_node_traverse_children(GtFeatureNode*, void*,
+/* Perform depth first traversal of the given <feature_node>. */
+int            gt_feature_node_traverse_children(GtFeatureNode *feature_node,
+                                                 void*,
                                                  GtFeatureNodeTraverseFunc,
                                                  bool traverse_only_once,
                                                  GtError*);
-/* perform breadth first traversal of the given genome node  */
-int            gt_feature_node_traverse_children_breadth(GtFeatureNode*, void*,
+/* Perform breadth first traversal of the given <feature_node>. */
+int            gt_feature_node_traverse_children_breadth(GtFeatureNode
+                                                         *feature_node, void*,
                                                       GtFeatureNodeTraverseFunc,
                                                          GtError*);
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
@@ -66,32 +68,34 @@ unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                           *parent,
                                                           const GtFeatureNode
                                                           *node);
-/* does not free the leaf, do not use during traversal! */
+/* Does not free the leaf, do not use during traversal! */
 void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
                                            GtFeatureNode *leafn);
 void           gt_feature_node_mark(GtFeatureNode*);
-/* returns true if the (top-level) node is marked */
-bool           gt_feature_node_is_marked(const GtFeatureNode*);
+/* Returns <true> if the (top-level) <feature_node> is marked. */
+bool           gt_feature_node_is_marked(const GtFeatureNode *feature_node);
 
-/* returns true if the given node graph contains a marked node */
-bool           gt_feature_node_contains_marked(GtFeatureNode*);
+/* Returns <true> if the given <feature_node> graph contains a marked node. */
+bool           gt_feature_node_contains_marked(GtFeatureNode *feature_node);
 bool           gt_feature_node_has_children(GtFeatureNode*);
 bool           gt_feature_node_direct_children_do_not_overlap(GtFeatureNode*);
-/* returns true if all direct childred of <parent> with the same type (s.t.) as
-   <child> do not overlap */
+/* Returns <true> if all direct childred of <parent> with the same type (s.t.)
+   as <child> do not overlap. */
 bool           gt_feature_node_direct_children_do_not_overlap_st(GtFeatureNode
                                                                  *parent,
                                                                  GtFeatureNode
                                                                  *child);
 bool           gt_feature_node_is_tree(GtFeatureNode*);
-/* returns true if the genome node overlaps at least one of the nodes given in
-   the array. O(gt_array_size) */
-bool           gt_feature_node_overlaps_nodes(GtFeatureNode*, GtArray*);
-/* similar interface to gt_genome_node_overlaps_nodes(). Aditionally, if a
-   bittab is given (which must have the same size as the array), the bits
-   corresponding to overlapped nodes are marked (i.e., set) */
-bool           gt_feature_node_overlaps_nodes_mark(GtFeatureNode*, GtArray*,
-                                                   GtBittab*);
+/* Returns <true> if the <feature_node> overlaps at least one of the nodes given
+   in the <array>. O(<gt_array_size(array)>). */
+bool           gt_feature_node_overlaps_nodes(GtFeatureNode *feature_node,
+                                              GtArray *array);
+/* Similar interface to <gt_genome_node_overlaps_nodes()>. Aditionally, if a
+   <bittab> is given (which must have the same size as the <array>), the bits
+   corresponding to overlapped nodes are marked (i.e., set). */
+bool           gt_feature_node_overlaps_nodes_mark(GtFeatureNode *feature_node,
+                                                   GtArray *array,
+                                                   GtBittab *bttab);
 
 #define gt_feature_node_cast(genome_node) \
         gt_genome_node_cast(gt_feature_node_class(), genome_node)
