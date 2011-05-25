@@ -317,7 +317,7 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
   }
   if (argc == 0 && !gtr->interactive) {
     gt_error_set(err, "neither tool nor script specified; option -help lists "
-                   "possible tools");
+                      "possible tools");
     had_err = -1;
   }
   if (!had_err && argc) {
@@ -331,7 +331,7 @@ int gtr_run(GtR *gtr, int argc, const char **argv, GtError *err)
           /* error */
           gt_assert(lua_isstring(gtr->L, -1)); /* error message on top */
           gt_error_set(err, "could not execute script %s",
-                    lua_tostring(gtr->L, -1));
+                       lua_tostring(gtr->L, -1));
           had_err = -1;
           lua_pop(gtr->L, 1); /* pop error message */
         }
