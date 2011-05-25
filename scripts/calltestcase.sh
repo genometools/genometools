@@ -8,6 +8,9 @@ fi
 
 cd testsuite
 
+env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
+       -keywords gt_${1}
+
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb -gttestdata ${GTTESTDATA} \
        -keywords gt_${1}
 

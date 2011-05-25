@@ -147,7 +147,6 @@ int gt_genomediff_shu(GtLogger *logger,
                                        encseq,
                                        shulen,
                                        unit_info,
-                                       logger,
                                        err) != 0)
       {
         had_err = -1;

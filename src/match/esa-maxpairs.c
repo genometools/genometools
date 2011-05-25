@@ -66,7 +66,7 @@ typedef struct  /* global information */
   void *processmaxpairsinfo;
 } MaxpairsBUstate;
 
-static GtBUinfo *allocateBUinfo(GtBUstate *astate)
+static GtBUinfo *maxpairs_allocateBUinfo(GtBUstate *astate)
 {
   MaxpairsBUinfo *buinfo;
   MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
@@ -77,7 +77,7 @@ static GtBUinfo *allocateBUinfo(GtBUstate *astate)
   return (GtBUinfo*) buinfo;
 }
 
-static void freeBUinfo(GtBUinfo *abuinfo, GT_UNUSED GtBUstate *state)
+static void maxpairs_freeBUinfo(GtBUinfo *abuinfo, GT_UNUSED GtBUstate *state)
 {
   MaxpairsBUinfo *buinfo = (MaxpairsBUinfo*) abuinfo;
 
@@ -394,8 +394,8 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     GT_INITARRAY(ptr,GtUlong);
   }
   if (gt_esa_bottomup(ssar,
-                      allocateBUinfo,
-                      freeBUinfo,
+                      maxpairs_allocateBUinfo,
+                      maxpairs_freeBUinfo,
                       maxpairs_processleafedge,
                       maxpairs_processbranchedge,
                       (GtBUstate*) state,

@@ -22,17 +22,17 @@
 #include "esa-seqread.h"
 
 #define TOP_ESA_BOTTOMUP   stackspace[nextfreeItvinfo-1]
-#define POP_ESA_BOTTOMUP   stackspace[--nextfreeItvinfo]
+#define POP_ESA_BOTTOMUP   (stackspace + (--nextfreeItvinfo))
 
 #define PUSH_ESA_BOTTOMUP(LCP,LB,NOEDGE)\
         if (nextfreeItvinfo >= allocatedItvinfo)\
         {\
           gt_assert(nextfreeItvinfo == allocatedItvinfo);\
-          stackspace = allocBUItvinfo(stackspace,\
-                                      allocatedItvinfo,\
-                                      allocatedItvinfo+incrementstacksize,\
-                                      allocateBUinfo,\
-                                      bustate);\
+          stackspace = allocateBUstack(stackspace,\
+                                       allocatedItvinfo,\
+                                       allocatedItvinfo+incrementstacksize,\
+                                       allocateBUinfo,\
+                                       bustate);\
           allocatedItvinfo += incrementstacksize;\
         }\
         gt_assert(stackspace != NULL);\
@@ -66,7 +66,7 @@ static void showstack(const GtBUItvinfo *stackspace,
 }
 #endif
 
-static GtBUItvinfo *allocBUItvinfo(GtBUItvinfo *ptr,
+static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
                                    unsigned long currentallocated,
                                    unsigned long allocated,
                                    GtBUinfo *(*allocateBUinfo)(GtBUstate *),
@@ -219,8 +219,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                 nextfreeItvinfo = 0;
   const unsigned long incrementstacksize = 32UL;
   GtQueuepair queuepair;
-  GtBUItvinfo lastinterval = {0,0,0,true,NULL}, *stackspace = NULL;
-  bool lastintervaldefined = false, haserr = false;
+  GtBUItvinfo *lastinterval = NULL, *stackspace = NULL;
+  bool haserr = false;
   int retval;
 
   PUSH_ESA_BOTTOMUP(0,0,true);
@@ -250,24 +250,25 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     while (lcpvalue < TOP_ESA_BOTTOMUP.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP;
-      lastinterval.rb = idx;
-      lastintervaldefined = true;
-      if (GtQueuepair_enumleaves(&lastinterval,&queuepair,idx+1,processleafedge,
+      lastinterval->rb = idx;
+      if (GtQueuepair_enumleaves(lastinterval,&queuepair,idx+1,processleafedge,
                                  bustate,err) != 0)
       {
         haserr = true;
         break;
       }
-      lb = lastinterval.lb;
+      lb = lastinterval->lb;
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
+        gt_assert(lastinterval->info == NULL ||
+                  lastinterval->info != TOP_ESA_BOTTOMUP.info);
         if (processbranchingedge(TOP_ESA_BOTTOMUP.noedge,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,
-                                 lastinterval.lcp,
-                                 lastinterval.lb,
-                                 lastinterval.info,
+                                 lastinterval->lcp,
+                                 lastinterval->lb,
+                                 lastinterval->info,
                                  bustate,
                                  err) != 0)
         {
@@ -275,7 +276,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
           break;
         }
         TOP_ESA_BOTTOMUP.noedge = false;
-        lastintervaldefined = false;
+        lastinterval = NULL;
       }
     }
     if (haserr)
@@ -284,7 +285,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     }
     if (lcpvalue > TOP_ESA_BOTTOMUP.lcp)
     {
-      if (!lastintervaldefined)
+      if (lastinterval == NULL)
       {
         if (GtQueuepair_enumleaves(&TOP_ESA_BOTTOMUP,&queuepair,lb,
                                    processleafedge,bustate,err) != 0)
@@ -295,20 +296,22 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
         PUSH_ESA_BOTTOMUP(lcpvalue,lb,true);
       } else
       {
+        unsigned long lastintervallcp = lastinterval->lcp,
+                      lastintervallb = lastinterval->lb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lb,false);
         if (processbranchingedge(true,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,
-                                 lastinterval.lcp,
-                                 lastinterval.lb,
-                                 lastinterval.info,
+                                 lastintervallcp,
+                                 lastintervallb,
+                                 NULL,
                                  bustate,err) != 0)
         {
           haserr = true;
           break;
         }
-        lastintervaldefined = false;
+        lastinterval = NULL;
       }
     } else
     {
@@ -323,10 +326,9 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
   if (!haserr)
   {
     lastinterval = POP_ESA_BOTTOMUP;
-    lastinterval.rb = idx;
-    lastintervaldefined = true;
+    lastinterval->rb = idx;
     GtQueuepair_add(&queuepair,idx,idx);
-    if (GtQueuepair_enumleaves(&lastinterval,&queuepair,idx+1,processleafedge,
+    if (GtQueuepair_enumleaves(lastinterval,&queuepair,idx+1,processleafedge,
                                bustate,err) != 0)
     {
       haserr = true;
