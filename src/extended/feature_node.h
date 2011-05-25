@@ -55,11 +55,12 @@ int            gt_feature_node_traverse_children(GtFeatureNode *feature_node,
                                                  GtFeatureNodeTraverseFunc,
                                                  bool traverse_only_once,
                                                  GtError*);
-/* Perform breadth first traversal of the given <feature_node>. */
-int            gt_feature_node_traverse_children_breadth(GtFeatureNode
-                                                         *feature_node, void*,
-                                                      GtFeatureNodeTraverseFunc,
-                                                         GtError*);
+/* Perform topological-sorted depth first traversal of the given <feature_node>.
+   Currently, this method can only be used once (for performance reasons)! */
+int            gt_feature_node_traverse_children_top(GtFeatureNode
+                                                     *feature_node, void*,
+                                                     GtFeatureNodeTraverseFunc,
+                                                     GtError*);
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
                                                       GtFeatureNodeTraverseFunc,
                                                         GtError*);

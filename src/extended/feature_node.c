@@ -49,6 +49,8 @@
 #define MULTI_FEATURE_MASK              0x1
 #define PSEUDO_FEATURE_OFFSET           15
 #define PSEUDO_FEATURE_MASK             0x1
+#define DFS_STATUS_OFFSET               16
+#define DFS_STATUS_MASK                 0x3
 
 typedef enum {
   NO_PARENT,
@@ -61,6 +63,12 @@ typedef enum {
   IS_TREE,
   IS_NOT_A_TREE
 } TreeStatus;
+
+typedef enum {
+  DFS_WHITE,
+  DFS_GRAY,
+  DFS_BLACK
+} DFSStatus;
 
 typedef struct {
   GtArray *exon_features,
@@ -215,6 +223,7 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   gt_feature_node_set_phase(fn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   set_tree_status(&fn->bit_field, IS_TREE);
+  /* the DFS status is set to DFS_WHITE already */
   fn->representative = NULL;
   return gn;
 }
@@ -822,79 +831,74 @@ int gt_feature_node_traverse_children(GtFeatureNode *feature_node, void *data,
   return had_err;
 }
 
-int gt_feature_node_traverse_children_breadth(GtFeatureNode *feature_node,
-                                              void *data,
-                                              GtFeatureNodeTraverseFunc
-                                              traverse,
-                                              GtError *err)
+DFSStatus feature_node_get_dfs_status(const GtFeatureNode *fn)
 {
-  GtArray *list_of_children;
-  GtQueue *node_queue = NULL;
-  GtFeatureNode *fn, *fn_ref, *child_feature;
+  gt_assert(fn);
+  return (fn->bit_field >> DFS_STATUS_OFFSET) & DFS_STATUS_MASK;
+}
+
+void feature_node_set_dfs_status(GtFeatureNode *fn, DFSStatus status)
+{
+  gt_assert(fn);
+  fn->bit_field &= ~(DFS_STATUS_MASK << DFS_STATUS_OFFSET);
+  fn->bit_field |= status << DFS_STATUS_OFFSET;
+}
+
+static void dfs_visit(GtFeatureNode *u, GtArray *toplist)
+{
   GtDlistelem *dlistelem;
-  unsigned long i;
-  GtHashtable *traversed_nodes = NULL;
+  gt_assert(u && toplist);
+  feature_node_set_dfs_status(u, DFS_GRAY);
+  if (u->children) {
+    for (dlistelem = gt_dlist_last(u->children);
+         dlistelem != NULL;
+         dlistelem = gt_dlistelem_previous(dlistelem)) {
+      GtFeatureNode *v = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
+      if (feature_node_get_dfs_status(v) == DFS_WHITE)
+        dfs_visit(v, toplist);
+    }
+  }
+  feature_node_set_dfs_status(u, DFS_BLACK);
+  if (!gt_feature_node_is_pseudo(u))
+    gt_array_add(toplist, u);
+}
+
+/* Implements topologically sorted depth-first search on directed graphs.
+   For a description see for example chapter 23 of the book:
+
+   T.H. Cormen, C.E. Leiserson and R.L. Rivest. __Introduction to Algorithms__.
+   MIT Press: Cambridge, MA, 1990. */
+int gt_feature_node_traverse_children_top(GtFeatureNode *feature_node,
+                                          void *data,
+                                          GtFeatureNodeTraverseFunc traverse,
+                                          GtError *err)
+{
+  GtArray *toplist;
   int had_err = 0;
 
   if (!feature_node)
     return 0;
 
-  /* create additional reference to <feature_node> (necessary if feature_node is
-     freed by <traverse>) */
-  fn_ref = (GtFeatureNode*) gt_genome_node_ref((GtGenomeNode*) feature_node);
+  /* this is the first traversal */
+  gt_assert(feature_node_get_dfs_status(feature_node) == DFS_WHITE);
 
-  node_queue = gt_queue_new();
-  if (gt_feature_node_is_pseudo(feature_node)) {
-    for (dlistelem = gt_dlist_first(feature_node->children);
-         dlistelem != NULL;
-         dlistelem = gt_dlistelem_next(dlistelem)) {
-      child_feature = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
-      gt_queue_add(node_queue, child_feature);
-    }
-  }
-  else
-    gt_queue_add(node_queue, feature_node);
-  gt_assert(gt_queue_size(node_queue));
+  /* initialization */
+  toplist = gt_array_new(sizeof (GtFeatureNode*));
 
-  list_of_children = gt_array_new(sizeof (GtFeatureNode*));
+  /* process queue */
+  dfs_visit(feature_node, toplist);
 
-  static const HashElemInfo node_hashtype
-    = { gt_ht_ptr_elem_hash, { NULL }, sizeof (GtFeatureNode *),
-        gt_ht_ptr_elem_cmp, NULL, NULL };
-  traversed_nodes = gt_hashtable_new(node_hashtype);
-
-  while (gt_queue_size(node_queue)) {
-    fn = gt_queue_get(node_queue);
-    gt_array_reset(list_of_children);
-    if (fn->children) {
-      /* a backup of the children array is necessary if traverse() frees the
-         node */
-      for (dlistelem = gt_dlist_first(fn->children); dlistelem != NULL;
-           dlistelem = gt_dlistelem_next(dlistelem)) {
-        child_feature = (GtFeatureNode*) gt_dlistelem_get_data(dlistelem);
-        gt_array_add(list_of_children, child_feature);
-      }
-    }
-    /* call traverse function */
-    if (traverse) {
+  /* process topologically sorted feature node list */
+  if (traverse) {
+    while (gt_array_size(toplist)) {
+      GtFeatureNode *fn = *(GtFeatureNode**) gt_array_pop(toplist);
       if ((had_err = traverse(fn, data, err)))
         break;
-    }
-    for (i = 0; i < gt_array_size(list_of_children); i++) {
-      child_feature = *(GtFeatureNode**) gt_array_get(list_of_children, i);
-      if (!gt_hashtable_get(traversed_nodes, &child_feature)) {
-        /* feature has not been traversed */
-        gt_queue_add(node_queue, child_feature);
-        gt_hashtable_add(traversed_nodes, &child_feature);
-      }
     }
   }
 
   /* free */
-  gt_genome_node_delete((GtGenomeNode*) fn_ref);
-  gt_hashtable_delete(traversed_nodes);
-  gt_array_delete(list_of_children);
-  gt_queue_delete(node_queue);
+  gt_array_delete(toplist);
 
   return had_err;
 }

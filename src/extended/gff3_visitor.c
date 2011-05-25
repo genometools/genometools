@@ -293,11 +293,11 @@ static int gff3_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                                                   err);
     }
     else {
-      /* got a DAG -> traverse bin breadth first fashion to make sure that the
-         'Parent' attributes are shown in correct order */
+      /* got a DAG -> traverse in topologically sorted depth first fashion to
+         make sure that the 'Parent' attributes are shown in correct order */
       had_err =
-        gt_feature_node_traverse_children_breadth(fn, gff3_visitor,
-                                                  gff3_show_feature_node, err);
+        gt_feature_node_traverse_children_top(fn, gff3_visitor,
+                                              gff3_show_feature_node, err);
     }
   }
 

@@ -124,6 +124,13 @@ Test do
   grep $last_stderr, "is separated from its counterpart on line 5 by terminator"
 end
 
+Name "gt gff3 prob 13 (DAG)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -sort -tidy #{$testdata}gt_gff3_prob_13.gff3"
+  run_test "#{$bin}gt gff3 #{$last_stdout}"
+end
+
 Name "gt gff3 test 1.1"
 Keywords "gt_gff3"
 Test do
