@@ -30,8 +30,8 @@ typedef unsigned long (*GtGetElemvalue)(const void *elem, void *data);
    <max_elemvalue> denotes the maximum value an element can have.
    <get_elemvalue> should return an integer value for the given element <elem>.
 
-   Implements the counting sort algorithm. For a description
-   see example page 175 to page 177 of the book:
+   Implements the counting sort algorithm.
+   For a description see for example page 175 to page 177 of the book:
 
    T.H. Cormen, C.E. Leiserson and R.L. Rivest. __Introduction to Algorithms__.
    MIT Press: Cambridge, MA, 1990.
