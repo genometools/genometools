@@ -21,6 +21,8 @@
 #include "core/ma_api.h"
 #include "core/str_api.h"
 
+typedef struct GtColorSpaceDecoder GtColorSpaceDecoder;
+
 struct color_state {
   char self;
   struct color_state *links[5];
@@ -72,9 +74,13 @@ static GtColorSpaceDecoder *gt_colorspace_decoder_new(void)
   return cd;
 }
 
-static inline int set_first_state(GtColorSpaceDecoder *cd,
-                                  char start,
-                                  GtError *err)
+static void gt_colorspace_decoder_delete(GtColorSpaceDecoder *cd)
+{
+  if (!cd) return;
+  gt_free(cd);
+}
+
+static int set_first_state(GtColorSpaceDecoder *cd, char start, GtError *err)
 {
   int had_err = 0;
 
@@ -106,9 +112,7 @@ static inline int set_first_state(GtColorSpaceDecoder *cd,
   return had_err;
 }
 
-static inline int set_next_state(GtColorSpaceDecoder *cd,
-                                 char next,
-                                 GtError *err)
+static int set_next_state(GtColorSpaceDecoder *cd, char next, GtError *err)
 {
   int had_err = 0;
 
@@ -135,8 +139,7 @@ static inline int set_next_state(GtColorSpaceDecoder *cd,
   return had_err;
 }
 
-int gt_colorspace_decode_string(GtStr *color_string,
-                                GtStr *fasta_string,
+int gt_colorspace_decode_string(GtStr *color_string, GtStr *result,
                                 GtError *err)
 {
   int had_err = 0;
@@ -147,8 +150,8 @@ int gt_colorspace_decode_string(GtStr *color_string,
   cd = gt_colorspace_decoder_new();
 
   gt_assert(cd);
-  gt_assert(color_string && fasta_string);
-  gt_assert(gt_str_length(fasta_string) == 0);
+  gt_assert(color_string && result);
+  gt_assert(gt_str_length(result) == 0);
 
   input = gt_str_get(color_string);
   str_len = gt_str_length(color_string);
@@ -156,16 +159,16 @@ int gt_colorspace_decode_string(GtStr *color_string,
   had_err = set_first_state(cd, input[0], err);
   if (!had_err)
   {
-    gt_str_append_char(fasta_string, cd->current->self);
+    gt_str_append_char(result, cd->current->self);
 
     for (idx = 1; !had_err && idx < str_len; idx++)
     {
       had_err = set_next_state(cd, input[idx], err);
-      gt_str_append_char(fasta_string, cd->current->self);
+      gt_str_append_char(result, cd->current->self);
     }
-    gt_assert(gt_str_length(fasta_string) == str_len);
+    gt_assert(gt_str_length(result) == str_len);
   }
-  gt_free(cd);
+  gt_colorspace_decoder_delete(cd);
   return had_err;
 }
 
