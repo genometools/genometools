@@ -210,7 +210,7 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   fn->range.end   = end;
   fn->attributes  = NULL;
   fn->bit_field   = 0;
-  fn->bit_field |= strand << STRAND_OFFSET;
+  fn->bit_field  |= strand << STRAND_OFFSET;
   fn->children    = NULL; /* the children list is create on demand */
   gt_feature_node_set_phase(fn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
