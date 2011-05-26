@@ -58,6 +58,7 @@ static GtOptionParser* gt_splicesiteinfo_option_parser_new(void *tool_arguments)
   SpliceSiteInfoArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option;
+  gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Show information "
                             "about splice sites given in GFF3 files.");
@@ -90,7 +91,9 @@ static int gt_splicesiteinfo_runner(int argc, const char **argv,
                *splice_site_info_stream = NULL;
   GtRegionMapping *region_mapping;
   int had_err = 0;
+
   gt_error_check(err);
+  gt_assert(arguments);
 
   if (!had_err) {
     /* create gff3 input stream */
