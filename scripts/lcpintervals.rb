@@ -67,21 +67,20 @@ def processbranchedge(firstedge,fromitv,toitv)
   puts  "#{toitv.lcp} #{toitv.lb}"
 end
 
+def processleaf(parent,suffix)
+  puts "L #{showbool(parent.noedge)} #{parent.lcp} #{parent.lb} #{suffix}"
+  parent.noedge = false
+end
+
 def processleaves(parent,queue,endpos)
-  firstedge = parent.noedge
   queue.enumleaves(endpos) do |leaf|
-    print "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} "
-    puts  "#{leaf.previoussuffix}"
-    firstedge = false
-    parent.noedge = false
+    processleaf(parent,leaf.previoussuffix)
   end
 end
 
 def add_to_top_brchildlist(stack,itv)
-  topelem = stack.pop
-  topelem.brchildlist.push(itv)
-  topelem.noedge = false
-  stack.push(topelem)
+  stack.last.brchildlist.push(itv)
+  stack.last.noedge = false
 end
 
 class Queuearray
@@ -122,6 +121,23 @@ class Queuepair
   def delete()
     return
   end
+  def empty?()
+    if @leftelem.nil? and @rightelem.nil?
+      return true
+    else
+      return false
+    end
+  end
+  def size()
+    count = 0
+    if not @leftelem.nil?
+      count +=1
+    end
+    if not @rightelem.nil?
+      count +=1
+    end
+    return count
+  end
   def add(index,previoussuffix)
     assert {@leftelem.nil?}
     @leftelem = @rightelem
@@ -155,11 +171,19 @@ def enumlcpintervaltreewithqueue(filename)
   idx=0
   LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
     lb = idx
-    queue.add(idx,previoussuffix)
+    if lcpvalue <= stack.last.lcp
+      queue.add(idx,previoussuffix)
+      processleaves(stack.last,queue,idx+1)
+      assert {queue.empty?}
+    else
+      assert{queue.size() <= 1}
+      processleaves(stack.last,queue,lb)
+      queue.add(idx,previoussuffix)
+    end
+    assert {lastinterval.nil?}
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx
-      processleaves(lastinterval,queue,idx+1)
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         firstedge = stack.last.noedge
@@ -168,17 +192,20 @@ def enumlcpintervaltreewithqueue(filename)
         lastinterval = nil
       end
     end
+    if not lastinterval.nil?
+      assert{lcpvalue > stack.last.lcp}
+    end
+    if lastinterval.nil?
+      assert{lcpvalue>=stack.last.lcp}
+    end
     if lcpvalue > stack.last.lcp
-      if lastinterval.nil?
-        processleaves(stack.last,queue,lb)
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],true))
-      else
+      if not lastinterval.nil?
         stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
         processbranchedge(true,stack.last,lastinterval)
         lastinterval = nil
+      else
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],true))
       end
-    else
-      processleaves(stack.last,queue,idx+1)
     end
     idx += 1
   end
@@ -189,6 +216,60 @@ def enumlcpintervaltreewithqueue(filename)
   queue.delete()
 end
 
+def enumlcpintervaltree(filename)
+  stack = Array.new()
+  prevprevsuffix = nil
+  lastinterval = nil
+  stack.push(Lcpinterval.new(0,0,nil,[],true))
+  idx=0
+  LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
+    if not prevprevsuffix.nil?
+      processleaf(stack.last,prevprevsuffix)
+      prevprevsuffix = nil
+    end
+    if lcpvalue <= stack.last.lcp
+      processleaf(stack.last,previoussuffix)
+    else
+      prevprevsuffix = previoussuffix
+    end
+    lb = idx
+    assert {lastinterval.nil?}
+    while lcpvalue < stack.last.lcp
+      lastinterval = stack.pop
+      lastinterval.rb = idx
+      lb = lastinterval.lb
+      if lcpvalue <= stack.last.lcp
+        firstedge = stack.last.noedge
+        add_to_top_brchildlist(stack,lastinterval)
+        processbranchedge(firstedge,stack.last,lastinterval)
+        lastinterval = nil
+      end
+    end
+    if not lastinterval.nil?
+      assert{lcpvalue > stack.last.lcp}
+    end
+    if lastinterval.nil?
+      assert{lcpvalue>=stack.last.lcp}
+    end
+    if lcpvalue > stack.last.lcp
+      if not lastinterval.nil?
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
+        processbranchedge(true,stack.last,lastinterval)
+        lastinterval = nil
+      else
+        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],true))
+      end
+    end
+    idx += 1
+  end
+  lastinterval = stack.pop
+  lastinterval.rb = idx
+  if not prevprevsuffix.nil?
+    processleaf(lastinterval,prevprevsuffix)
+  end
+  processleaf(lastinterval,idx)
+end
+
 if ARGV.length != 2
   STDERR.puts "Usage: #{$0} (itv|tree|debugtree) <indexname>"
   exit 1
@@ -196,6 +277,8 @@ end
 
 if ARGV[0] == 'itv'
   enumlcpintervals(ARGV[1])
-elsif ARGV[0] == 'tree'
+elsif ARGV[0] == 'treequeue'
   enumlcpintervaltreewithqueue(ARGV[1])
+elsif ARGV[0] == 'tree'
+  enumlcpintervaltree(ARGV[1])
 end
