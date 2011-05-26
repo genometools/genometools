@@ -73,7 +73,9 @@ int dxl_equal(char *typ,char *val,char *s,int n) {
 
 #else
 
-int dxl_allows(char *typ,char *ps,char *s,int n) {return 0;}
-int dxl_equal(char *typ,char *val,char *s,int n) {return 0;}
+int dxl_allows(__attribute__ ((unused))char *typ,__attribute__ ((unused))char
+    *ps,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 0;}
+int dxl_equal(__attribute__ ((unused))char *typ,__attribute__ ((unused))char
+    *val,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 0;}
 
 #endif

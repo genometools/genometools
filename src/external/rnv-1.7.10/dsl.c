@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "dsl.h"
 
-static char *dsl_scm=NULL;
+__attribute__ ((unused)) static char *dsl_scm=NULL;
 
 #if DSL_SCM
 
@@ -100,8 +100,10 @@ int dsl_equal(char *typ,char *val,char *s,int n) {
 
 #else
 
-void dsl_ld(char *dl) {}
-int dsl_allows(char *typ,char *ps,char *s,int n) {return 0;}
-int dsl_equal(char *typ,char *val,char *s,int n) {return 0;}
+void dsl_ld(__attribute__ ((unused))char *dl) {}
+int dsl_allows(__attribute__ ((unused))char *typ,__attribute__ ((unused))char
+    *ps,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 0;}
+int dsl_equal(__attribute__ ((unused))char *typ,__attribute__ ((unused))char
+    *val,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 0;}
 
 #endif

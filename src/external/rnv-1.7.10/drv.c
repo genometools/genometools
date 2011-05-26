@@ -118,8 +118,10 @@ static void accept_m(void) {
   if(i_m==len_m) memo=(int(*)[M_SIZE])m_stretch(memo,len_m=2*i_m,i_m,sizeof(int[M_SIZE]));
 }
 
-static int fallback_equal(char *typ,char *val,char *s,int n) {return 1;}
-static int fallback_allows(char *typ,char *ps,char *s,int n) {return 1;}
+static int fallback_equal(__attribute__ ((unused))char *typ,__attribute__
+    ((unused))char *val,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 1;}
+static int fallback_allows(__attribute__ ((unused))char *typ,__attribute__
+    ((unused))char *ps,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 1;}
 
 static int builtin_equal(char *typ,char *val,char *s,int n) {
   int dt=rn_newDatatype(0,typ-rn_string);
@@ -129,7 +131,8 @@ static int builtin_equal(char *typ,char *val,char *s,int n) {
   return 0;
 }
 
-static int builtin_allows(char *typ,char *ps,char *s,int n) {return 1;}
+static int builtin_allows(__attribute__ ((unused))char *typ,__attribute__
+    ((unused))char *ps,__attribute__ ((unused))char *s,__attribute__ ((unused))int n) {return 1;}
 
 static void windup(void);
 
@@ -288,7 +291,8 @@ static int attribute_open(int p,int uri,int name) {
 }
 
 int drv_attribute_open(int p,char *suri,char *sname) {return attribute_open(p,rn_newString(suri),rn_newString(sname));}
-int drv_attribute_open_recover(int p,char *suri,char *sname) {return p;}
+int drv_attribute_open_recover(int p,__attribute__ ((unused))char
+    *suri,__attribute__ ((unused))char *sname) {return p;}
 
 extern int drv_attribute_close(int p) {return drv_end_tag(p);}
 extern int drv_attribute_close_recover(int p) {return drv_end_tag_recover(p);}
@@ -398,7 +402,8 @@ static int textws(int p,char *s,int n) {
   return ws?rn_choice(p,p1):p1;
 }
 int drv_text(int p,char *s,int n) {return textws(p,s,n);}
-int drv_text_recover(int p,char *s,int n) {return p;}
+int drv_text_recover(int p,__attribute__ ((unused))char *s,__attribute__
+    ((unused))int n) {return p;}
 
 static int mixed_text(int p) { /* matches text in mixed context */
   int p1,p2,ret=0,m;

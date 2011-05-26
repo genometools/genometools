@@ -122,7 +122,7 @@ static void flush_text(void) {
   text[n_txt=0]='\0';
 }
 
-static void start_element(void *userData,const char *name,const char **attrs) {
+static void start_element(__attribute__ ((unused))void *userData,const char *name,const char **attrs) {
   if(current!=rn_notAllowed) {
     mixed=1;
     flush_text();
@@ -133,7 +133,7 @@ static void start_element(void *userData,const char *name,const char **attrs) {
   }
 }
 
-static void end_element(void *userData,const char *name) {
+static void end_element(__attribute__ ((unused))void *userData,const char *name) {
   if(current!=rn_notAllowed) {
     flush_text();
     ok=rnv_end_tag(&current,&previous,(char*)name)&&ok;
@@ -143,7 +143,7 @@ static void end_element(void *userData,const char *name) {
   }
 }
 
-static void characters(void *userData,const char *s,int len) {
+static void characters(__attribute__ ((unused))void *userData,const char *s,int len) {
   if(current!=rn_notAllowed) {
     int newlen_txt=n_txt+len+1;
     if(newlen_txt<=LIM_T&&LIM_T<len_txt) newlen_txt=LIM_T;
@@ -153,7 +153,7 @@ static void characters(void *userData,const char *s,int len) {
   }
 }
 
-static void processingInstruction(void *userData,
+static void processingInstruction(__attribute__ ((unused))void *userData,
     const char *target,const char *data) {
   if(strcmp(PIXGFILE,target)==0) {
     if(xgfile) m_free(xgfile); 
@@ -195,8 +195,11 @@ ERROR:
   return 0;
 }
 
-static int externalEntityRef(XML_Parser p,const char *context,
-    const char *base,const char *systemId,const char *publicId) {
+static int externalEntityRef(__attribute__ ((unused)) XML_Parser p,
+                             __attribute__ ((unused)) const char *context,
+                             __attribute__ ((unused)) const char *base,
+                             __attribute__ ((unused)) const char *systemId,
+                             __attribute__ ((unused)) const char *publicId) {
   error_handler(XCL_ER_XENT);
   return 1;
 }
@@ -223,7 +226,7 @@ static void usage(void) {(*er_printf)("usage: rnv {-[qnspc"
 #endif
 "vh?]} schema.rnc {document.xml}\n");}
 
-int main(int argc,char **argv) {
+int main(__attribute__ ((unused)) int argc,char **argv) {
   init();
 
   peipe=0; verbose=1; nexp=NEXP; rnck=0;

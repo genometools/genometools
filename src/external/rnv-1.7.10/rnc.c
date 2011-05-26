@@ -635,7 +635,7 @@ static int nsuri(struct rnc_source *sp) {
   return uri;
 }
 
-static void open_scope(struct rnc_source *sp) {
+static void open_scope(__attribute__ ((unused)) struct rnc_source *sp) {
   sc_open(&defs);
   sc_open(&refs);
   sc_open(&prefs);
@@ -673,11 +673,11 @@ static void fold_efs(struct rnc_source *sp,struct sc_stack *stp,void (*fold)(str
 
 static void adddef(struct rnc_source *sp,int name,int pat,int flags);
 
-static void folddef(struct rnc_source *sp,struct sc_stack *rp,int key,int val,int flags) {
+static void folddef(struct rnc_source *sp,__attribute__ ((unused))struct sc_stack *rp,int key,int val,int flags) {
   adddef(sp,key,val,flags);
 }
 
-static void foldref(struct rnc_source *sp,struct sc_stack *rp,int key,int val,int flags) {
+static void foldref(__attribute__ ((unused))struct rnc_source *sp,struct sc_stack *rp,int key,int val,int flags) {
   sc_add(rp,key,val,flags);
 }
 
