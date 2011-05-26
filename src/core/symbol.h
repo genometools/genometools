@@ -20,7 +20,7 @@
 
 void        gt_symbol_init(void);
 
-/* Return a symbol (a canonical representation) for <cstr>.  An advantage of
+/* Return a symbol (a canonical representation) for <cstr>. An advantage of
    symbols is that they can be compared for equality by a simple pointer
    comparison, rather than using <strcmp()> (as it is done in <gt_strcmp()>).
    Furthermore, a symbol is stored only once in memory for equal <cstr>s, but
