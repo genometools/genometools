@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,17 +19,15 @@
 #define GENOMETOOLS_H
 
 /* The GenomeTools ``all-in-one'' header.
-   Include only this header if you program against the libgenometools.
-*/
+   Include only this header if you program against the libgenometools. */
 
 /* the generated config header (includes version information) */
 #include "gt_config.h"
 
 /* the core module */
-#include "core/init_api.h"
 #include "core/alphabet_api.h"
-#include "core/array_api.h"
 #include "core/array2dim_api.h"
+#include "core/array_api.h"
 #include "core/assert_api.h"
 #include "core/basename_api.h"
 #include "core/bittab_api.h"
@@ -46,20 +44,25 @@
 #include "core/fptr_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
+#include "core/init_api.h"
 #include "core/interval_tree_api.h"
 #include "core/log_api.h"
+#include "core/logger_api.h"
 #include "core/ma_api.h"
 #include "core/msort_api.h"
 #include "core/parseutils_api.h"
 #include "core/phase_api.h"
 #include "core/qsort_r_api.h"
+#include "core/queue_api.h"
 #include "core/range_api.h"
+#include "core/readmode_api.h"
 #include "core/splitter_api.h"
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "core/strand_api.h"
 #include "core/timer_api.h"
 #include "core/translator_api.h"
+#include "core/types_api.h"
 #include "core/unused_api.h"
 #include "core/version_api.h"
 #include "core/warning_api.h"
@@ -68,15 +71,23 @@
 /* the extended module */
 #include "extended/bed_in_stream_api.h"
 #include "extended/comment_node_api.h"
+#include "extended/eof_node_api.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node_api.h"
 #include "extended/gff3_in_stream_api.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/gff3_parser_api.h"
+#include "extended/gff3_visitor_api.h"
 #include "extended/gtf_in_stream_api.h"
 #include "extended/node_stream_api.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_node_api.h"
 #include "extended/sequence_node_api.h"
+#include "extended/sort_stream_api.h"
+#include "extended/type_checker_api.h"
+#include "extended/type_checker_obo_api.h"
+#include "extended/visitor_stream_api.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
@@ -87,6 +98,7 @@
 #include "annotationsketch/color_api.h"
 #include "annotationsketch/custom_track_api.h"
 #include "annotationsketch/custom_track_gc_content_api.h"
+#include "annotationsketch/custom_track_script_wrapper_api.h"
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/feature_index_memory_api.h"
