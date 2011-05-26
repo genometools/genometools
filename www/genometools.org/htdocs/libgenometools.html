@@ -219,6 +219,89 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
+<h2>Sole functions</h2>
+<a name="GtTagValueMap;
+
+/* Iterator function used to iterate over tag/value maps. A <tag>/<value> pair
+   and user <data> are given as arguments. */
+typedef void "></a>
+
+<code>typedef char*  GtTagValueMap;
+
+/* Iterator function used to iterate over tag/value maps. A <tag>/<value> pair
+   and user <data> are given as arguments. */
+typedef void (*GtTagValueMapIteratorFunc)</code>
+<p>
+A very simple tag/value map absolutely optimized for space (i.e., memory
+   consumption) on the cost of time. Basically, each read/write access costs
+   O(n) time, whereas n denotes the accumulated length of all tags and values
+   contained in the map. Tags and values cannot have length 0.
+
+   The implementation as a char* shines through (also to save one additional
+   memory allocation), therefore the usage is a little bit different compared
+   to other <em>GenomeTools</em> classes.
+   See the implementation of <code>gt_tag_value_map_example()</code> for an example.
+</p>
+<hr>
+<a name="gt_tag_value_map_new"></a>
+
+<code>GtTagValueMap  gt_tag_value_map_new(const char *tag, const char *value)</code>
+<p>
+Return a new <code>GtTagValueMap</code> object which stores the given <code>tag</code>/<code>value</code>
+   pair.
+</p>
+<hr>
+<a name="gt_tag_value_map_add"></a>
+
+<code>void           gt_tag_value_map_add(GtTagValueMap *tag_value_map,
+                                   const char *tag,
+                                   const char *value)</code>
+<p>
+Add <code>tag</code>/<code>value</code> pair to <code>tag_value_map</code>. <code>tag_value_map</code> must not contain
+   the given <code>tag</code> already!
+</p>
+<hr>
+<a name="gt_tag_value_map_set"></a>
+
+<code>void           gt_tag_value_map_set(GtTagValueMap *tag_value_map,
+                                   const char *tag, const char *value)</code>
+<p>
+Set the given <code>tag</code> in <code>tag_value_map</code> to <code>value</code>.
+</p>
+<hr>
+<a name="gt_tag_value_map_get"></a>
+
+<code>const char*    gt_tag_value_map_get(const GtTagValueMap tag_value_map,
+                                   const char *tag)</code>
+<p>
+Return value corresponding to <code>tag</code> from <code>tag_value_map</code>. If <code>tag_value_map</code>
+   does not contain such a value, <code>NULL</code> is returned.
+</p>
+<hr>
+<a name="gt_tag_value_map_foreach"></a>
+
+<code>void           gt_tag_value_map_foreach(const GtTagValueMap tag_value_map,
+                                       GtTagValueMapIteratorFunc iterator_func,
+                                       void *data)</code>
+<p>
+Apply <code>iterator_func</code> to each tag/value pair contained in <code>tag_value_map</code> and
+   pass <code>data</code> along.
+</p>
+<hr>
+<a name="gt_tag_value_map_example"></a>
+
+<code>int            gt_tag_value_map_example(GtError *err)</code>
+<p>
+Implements an example use of a tag/value map.
+</p>
+<hr>
+<a name="gt_tag_value_map_delete"></a>
+
+<code>void           gt_tag_value_map_delete(GtTagValueMap tag_value_map)</code>
+<p>
+Delete <code>tag_value_map</code>.
+</p>
+<hr>
 <a name="GtAlphabet"></a>
 <h2>Class GtAlphabet</h2>
 
@@ -6194,6 +6277,16 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#GT_UNUSED"><code>GT_UNUSED</code></a><br>
 
+  <a href="#GtTagValueMap;
+
+/* Iterator function used to iterate over tag/value maps. A <tag>/<value> pair
+   and user <data> are given as arguments. */
+typedef void "><code>GtTagValueMap;
+
+/* Iterator function used to iterate over tag/value maps. A <tag>/<value> pair
+   and user <data> are given as arguments. */
+typedef void </code></a><br>
+
   <a href="#gt_alphabet_add_mapping"><code>gt_alphabet_add_mapping</code></a><br>
 
   <a href="#gt_alphabet_add_wildcard"><code>gt_alphabet_add_wildcard</code></a><br>
@@ -7315,6 +7408,20 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_style_unset"><code>gt_style_unset</code></a><br>
 
   <a href="#gt_symbol"><code>gt_symbol</code></a><br>
+
+  <a href="#gt_tag_value_map_add"><code>gt_tag_value_map_add</code></a><br>
+
+  <a href="#gt_tag_value_map_delete"><code>gt_tag_value_map_delete</code></a><br>
+
+  <a href="#gt_tag_value_map_example"><code>gt_tag_value_map_example</code></a><br>
+
+  <a href="#gt_tag_value_map_foreach"><code>gt_tag_value_map_foreach</code></a><br>
+
+  <a href="#gt_tag_value_map_get"><code>gt_tag_value_map_get</code></a><br>
+
+  <a href="#gt_tag_value_map_new"><code>gt_tag_value_map_new</code></a><br>
+
+  <a href="#gt_tag_value_map_set"><code>gt_tag_value_map_set</code></a><br>
 
   <a href="#gt_text_width_calculator_cairo_new"><code>gt_text_width_calculator_cairo_new</code></a><br>
 

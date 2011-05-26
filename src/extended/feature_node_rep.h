@@ -19,7 +19,7 @@
 #define FEATURE_NODE_REP_H
 
 #include "extended/genome_node_rep.h"
-#include "extended/tag_value_map.h"
+#include "extended/tag_value_map_api.h"
 
 struct GtFeatureNode {
   GtGenomeNode parent_instance;

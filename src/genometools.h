@@ -87,6 +87,7 @@
 #include "extended/region_node_api.h"
 #include "extended/sequence_node_api.h"
 #include "extended/sort_stream_api.h"
+#include "extended/tag_value_map_api.h"
 #include "extended/type_checker_api.h"
 #include "extended/type_checker_obo_api.h"
 #include "extended/uniq_stream_api.h"

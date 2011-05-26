@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,36 +18,9 @@
 #ifndef TAG_VALUE_MAP_H
 #define TAG_VALUE_MAP_H
 
-#include "core/error.h"
+#include "extended/tag_value_map_api.h"
 
-/* A very simple tag/value map absolutely optimized for space (i.e., memory
-   consumption) on the cost of time. Basically, each read/write access costs
-   O(n) time, whereas n denotes the accumulated length of all tags and values
-   contained in the map. Tags and values cannot have length 0.
-
-   The implementation as a char* shines through (also to save one additional
-   memory allocation), therefore the usage is a little bit different compared
-   to other GenomeTools classes.
-   See the implementation of gt_tag_value_map_example() for an example.
-*/
-
-typedef char* GtTagValueMap;
-
-typedef void (*GtTagValueMapIteratorFunc)(const char *tag, const char *value,
-                                          void *data);
-
-GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value);
-void          gt_tag_value_map_delete(GtTagValueMap);
-void          gt_tag_value_map_add(GtTagValueMap*, const char *tag,
-                                                   const char *value);
-void          gt_tag_value_map_set(GtTagValueMap*, const char *tag,
-                                                   const char *value);
-const char*   gt_tag_value_map_get(const GtTagValueMap, const char *tag);
-void          gt_tag_value_map_foreach(const GtTagValueMap,
-                                       GtTagValueMapIteratorFunc,
-                                       void *data);
 void          gt_tag_value_map_show(const GtTagValueMap);
-int           gt_tag_value_map_example(GtError*);
 int           gt_tag_value_map_unit_test(GtError*);
 
 #endif

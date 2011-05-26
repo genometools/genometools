@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -42,12 +42,6 @@ GtTagValueMap gt_tag_value_map_new(const char *tag, const char *value)
   memcpy(map + tag_len + 1, value, value_len + 1);
   map[tag_len + 1 + value_len + 1] = '\0';
   return map;
-}
-
-void gt_tag_value_map_delete(GtTagValueMap map)
-{
-  if (!map) return;
-  gt_free(map);
 }
 
 /* Stores map length in <map_len> if the return value equals NULL (i.e., if not
@@ -267,4 +261,10 @@ int gt_tag_value_map_unit_test(GtError *err)
   }
 
   return had_err;
+}
+
+void gt_tag_value_map_delete(GtTagValueMap map)
+{
+  if (!map) return;
+  gt_free(map);
 }
