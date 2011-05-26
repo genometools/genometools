@@ -15,16 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SYMBOL_H
-#define SYMBOL_H
+#ifndef SYMBOL_API_H
+#define SYMBOL_API_H
 
-#include "core/symbol_api.h"
+/* Symbol module */
 
-void        gt_symbol_init(void);
-
-/* Free (and thereby invalidate) all created symbols! */
-void        gt_symbol_clean(void);
-
-int         gt_symbol_unit_test(GtError*);
+/* Return a symbol (a canonical representation) for <cstr>. An advantage of
+   symbols is that they can be compared for equality by a simple pointer
+   comparison, rather than using <strcmp()> (as it is done in <gt_strcmp()>).
+   Furthermore, a symbol is stored only once in memory for equal <cstr>s, but
+   keep in mind that this memory can never be freed safely during the lifetime
+   of the calling program. Therefore, it should only be used for a small set of
+   <cstr>s. */
+const char* gt_symbol(const char *cstr);
 
 #endif

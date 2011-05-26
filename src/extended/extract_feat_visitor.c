@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/codon_iterator_simple.h"
 #include "core/fasta.h"
-#include "core/symbol.h"
+#include "core/symbol_api.h"
 #include "core/translator.h"
 #include "extended/extract_feat_sequence.h"
 #include "extended/extract_feat_visitor.h"
