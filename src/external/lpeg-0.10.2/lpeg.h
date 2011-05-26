@@ -10,6 +10,7 @@
 
 #include "lua.h"
 
+int luaopen_lpeg (lua_State *L);
 
 #define KEYNEWPATT	"lpeg.newpf"
 
