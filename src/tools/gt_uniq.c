@@ -41,7 +41,7 @@ static GtOPrval parse_options(int *parsed_args, UniqArguments *arguments,
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
-                         "feature not graphs in a sorted GFF3_file.");
+                            "feature node graphs in a sorted GFF3_file.");
   ofi = gt_outputfileinfo_new();
 
   /* -v */
