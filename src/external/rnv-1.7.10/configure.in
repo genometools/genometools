@@ -1,0 +1,147 @@
+# Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.61)
+AC_INIT(rnv.c)
+AM_INIT_AUTOMAKE(rnv, 1.7.10)
+
+# Checks for programs.
+AC_PROG_INSTALL
+AC_PROG_CC
+AC_PROG_RANLIB
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([fcntl.h limits.h stdlib.h string.h])
+
+UNISTD_MISSING="Neither <unistd.h> nor <io.h> could be found."
+AC_CHECK_HEADER(unistd.h,[
+  ## unistd.h found
+  CPPFLAGS="${CPPFLAGS} -DUNISTD_H=\<unistd.h\>"
+], [
+  AC_CHECK_HEADER(io.h,[
+    ## io.h found
+    CPPFLAGS="${CPPFLAGS} -DUNISTD_H=\<io.h\>"
+  ], [
+    ## both headers missing
+    AC_MSG_ERROR($UNISTD_MISSING)
+  ])
+])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_STRUCT_TM
+
+# Checks for library functions.
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_FUNC_MALLOC
+AC_FUNC_STRTOD
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS([dup2 strchr strerror strrchr strtol])
+
+
+
+# DXL_EXC
+AC_ARG_ENABLE(dxl, [
+Extra options:
+  --enable-dxl            enable pluggable datatypes for RNV and RVP], [
+	CPPFLAGS="${CPPFLAGS} -DDXL_EXC=1"
+], [])
+
+dnl // M_STATIC
+AC_ARG_ENABLE(mem-static, [  --enable-mem-static=N   work with static memory of N bytes size], [
+	CPPFLAGS="${CPPFLAGS} -DM_STATIC=${enableval}"
+], [])
+
+dnl // M_FILL
+AC_ARG_ENABLE(mem-fill, [  --enable-mem-fill=C     specify memory fill character, e.g. 'X'], [
+	CPPFLAGS="${CPPFLAGS} -DM_FILL=${enableval}"
+], [])
+
+
+
+# Expat
+AC_ARG_WITH(expat, [
+Dependency locations:
+  --with-expat            specify path of Expat
+                          ("/lib" or "/include" is appended)], [
+	LDFLAGS="${LDFLAGS} -L${withval}/lib"
+	CPPFLAGS="${CPPFLAGS} -I${withval}/include"
+], [])
+
+AC_ARG_WITH(expat-inc, [  --with-expat-inc        specify include path of Expat], [
+	CPPFLAGS="${CPPFLAGS} -I${withval}"
+], [])
+
+AC_ARG_WITH(expat-lib, [  --with-expat-lib        specify library path of Expat], [
+	LDFLAGS="${LDFLAGS} -L${withval}"
+], [])
+
+
+
+# SCM
+RNV_WITH_SCM=0
+AC_ARG_WITH(scm, [  --with-scm              specify path of SCM
+                          ("/lib" or "/include" is appended)], [
+	LDFLAGS="${LDFLAGS} -L${withval}/lib"
+	CPPFLAGS="${CPPFLAGS} -I${withval}/include"
+	RNV_WITH_SCM=1
+], [])
+
+AC_ARG_WITH(scm-inc, [  --with-scm-inc          specify include path of SCM], [
+	CPPFLAGS="${CPPFLAGS} -I${withval}"
+	RNV_WITH_SCM=1
+], [])
+
+AC_ARG_WITH(scm-lib, [  --with-scm-lib          specify library path of SCM], [
+	LDFLAGS="${LDFLAGS} -L${withval}"
+	RNV_WITH_SCM=1
+], [])
+
+
+
+# Append $prefix, must come after custom paths
+if test "x${prefix}" != "xNONE"; then
+	WORKING_PREFIX=${prefix}
+else
+	WORKING_PREFIX=${ac_default_prefix}
+fi
+LDFLAGS="${LDFLAGS} -L${WORKING_PREFIX}/lib"
+CPPFLAGS="${CPPFLAGS} -I${WORKING_PREFIX}/include"
+
+
+
+# Test Expat
+EXPAT_MISSING="Please install expat 1.2 or later.
+   On a Debian-based system enter 'sudo apt-get install libexpat-dev'."
+AC_CHECK_LIB(expat, XML_SetDoctypeDeclHandler,, AC_MSG_ERROR($EXPAT_MISSING))
+AC_CHECK_HEADER(xmlparse.h,[
+  ## xmlparse.h found
+  CPPFLAGS="${CPPFLAGS} -DEXPAT_H=\<xmlparse.h\>"
+], [
+  AC_CHECK_HEADER(expat.h,[
+    ## expat.h found
+    CPPFLAGS="${CPPFLAGS} -DEXPAT_H=\<expat.h\>"
+  ], [
+    ## both headers missing
+    AC_MSG_ERROR($EXPAT_MISSING)
+  ])
+])
+
+
+
+# Test SCM
+if test "${RNV_WITH_SCM}" == "1"; then
+	SCM_MISSING="Please install scm.
+   On a Debian-based system enter 'sudo apt-get install libscm-dev'."
+	AC_CHECK_LIB(scm, main,, AC_MSG_ERROR($SCM_MISSING))
+	AC_CHECK_HEADER(scm.h,, AC_MSG_ERROR($SCM_MISSING))
+	
+	CPPFLAGS="${CPPFLAGS} -DDSL_SCM=1 -DSCM_H=\<scm.h\>"
+	LDFLAGS="$LDFLAGS -lncurses -lreadline -lX11 -lm"
+fi
+
+
+
+AC_OUTPUT(Makefile)
+

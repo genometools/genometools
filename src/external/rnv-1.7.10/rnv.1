@@ -1,0 +1,49 @@
+.TH RNV 1 "2008-01-12"
+.\"--------------------------------------------------------------
+.SH NAME
+rnv \- Relax NG Compact Syntax validator
+.\"--------------------------------------------------------------
+.SH SYNOPSIS
+\fBrnv\fP [\fIOPTIONS\fP] \fIgrammar.rnc\fP [\fIdocument_1.xml\fP ..]
+.\"--------------------------------------------------------------
+.SH DESCRIPTION
+\fBRNV\fP uses Relax NG compact syntax schemas to check if a give XML file is valid in respect to the language defined by the Relax NG schema. \fBRNV\fP uses Expat for XML parsing.
+
+If you intend to validate against Relax NG schemas in XML syntax instead have a look at \fBxmllint\fP (of libxml2) or \fBxmlstarlet\fP. Also \fBtrang\fP can convert Relax NG schemas from XML to compact syntax and back.
+.\"--------------------------------------------------------------
+.SH OPTIONS
+If no documents are specified, \fBRNV\fP attempts to read the XML document from the standard input. The options are:
+.TP
+.B -q
+names of files being processed are not printed; in error messages, expected elements and attributes are not listed;
+.TP
+.B -n \fInumber\fP
+sets the maximum number of reported expected elements and attributes, \fB-q\fP sets this to 0 and can be overriden;
+.TP
+.B -p
+copies the input to the output;
+.TP
+.B -c
+if the only argument is a grammar, checks the grammar and exits;
+.TP
+.B -s
+uses less memory and runs slower;
+.TP
+.B -e \fIlibrary.scm\fP
+uses Scheme datatype library from file \fIlibrary.scm\fP;
+.TP
+.B -v
+prints version number;
+.TP
+.B -h
+displays usage summary and exits.
+.\"--------------------------------------------------------------
+.SH HOMEPAGE
+http://sourceforge.net/projects/rnv/
+.\"--------------------------------------------------------------
+.SH AUTHOR
+Sebastian\ Pipping\ <webmaster@hartwork.org>. This man page was made from the readme written by \fBRNV\fP's author David Tolpin <dvd@davidashen.net>.
+.\"--------------------------------------------------------------
+.SH "SEE ALSO"
+xmllint(1), xmlstarlet(1), trang(1)
+

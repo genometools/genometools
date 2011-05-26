@@ -133,7 +133,7 @@ LIBTECLA_SRC:=$(TECLA_DIR)/chrqueue.c $(TECLA_DIR)/cplfile.c \
 LIBTECLA_OBJ:=$(LIBTECLA_SRC:%.c=obj/%.o)
 LIBTECLA_DEP:=$(LIBTECLA_SRC:%.c=obj/%.d)
 
-RNV_DIR:=src/external/rnv-1.7.8
+RNV_DIR:=src/external/rnv-1.7.10
 LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
             $(RNV_DIR)/rnv.c $(RNV_DIR)/rnx.c $(RNV_DIR)/drv.c \
             $(RNV_DIR)/ary.c $(RNV_DIR)/xsd.c $(RNV_DIR)/xsd_tm.c \
