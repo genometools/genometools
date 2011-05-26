@@ -66,10 +66,10 @@ static GtOptionParser* gt_splicesiteinfo_option_parser_new(void *tool_arguments)
   gt_seqid2file_register_options(op, arguments->s2fi);
 
   /* -addintrons */
-  option = gt_option_new_bool("addintrons",
-                           "add intron features between existing "
-                           "exon features\n(before computing the information "
-                           "to be shown)", &arguments->addintrons, false);
+  option = gt_option_new_bool("addintrons", "add intron features between "
+                              "existing exon features\n(before computing the "
+                              "information to be shown)",
+                              &arguments->addintrons, false);
   gt_option_parser_add_option(op, option);
 
   /* output file options */
