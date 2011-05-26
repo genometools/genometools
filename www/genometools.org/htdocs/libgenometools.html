@@ -211,6 +211,23 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
+<h2>Sole functions</h2>
+<a name="gt_readmode_show"></a>
+
+<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
+<p>
+Returns the descriptive string for the readmode <code>readmode</code>.
+</p>
+<hr>
+<a name="gt_readmode_parse"></a>
+
+<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
+<p>
+Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
+   -1 is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
 <a name="GtAlphabet"></a>
 <h2>Class GtAlphabet</h2>
 
@@ -2959,6 +2976,16 @@ Unset the multi-feature status of <code>feature_node</code> and remove its multi
 Return the representative of the multi-feature <code>feature_node</code>.
 </p>
 <hr>
+<a name="gt_feature_node_is_similar"></a>
+
+<code>bool            gt_feature_node_is_similar(GtFeatureNode *feature_node_a,
+                                          GtFeatureNode *feature_node_b)</code>
+<p>
+Returns <code>true</code>, if the given <code>feature_node_a</code> has the same seqid, feature
+   type, range, strand, and phase as <code>feature_node_b</code>.
+   Returns <code>false</code> otherwise.
+</p>
+<hr>
 <a name="GtFeatureNodeIterator"></a>
 <h2>Class GtFeatureNodeIterator</h2>
 <a name="gt_feature_node_iterator_new"></a>
@@ -5449,8 +5476,8 @@ Sort the array of elements pointed to by <code>in</code> containing <code>size</
    <code>max_elemvalue</code> denotes the maximum value an element can have.
    <code>get_elemvalue</code> should return an integer value for the given element <code>elem</code>.
 
-   Implements the counting sort algorithm. For a description
-   see example page 175 to page 177 of the book:
+   Implements the counting sort algorithm.
+   For a description see for example page 175 to page 177 of the book:
 
    T.H. Cormen, C.E. Leiserson and R.L. Rivest. <em>Introduction to Algorithms</em>.
    MIT Press: Cambridge, MA, 1990.
@@ -5712,22 +5739,6 @@ Return logging file pointer.
 <code>void   gt_log_set_fp(FILE *fp)</code>
 <p>
 Set logging file pointer to <code>fp</code>.
-</p>
-<hr>
-<a name="gt_readmode_show"></a>
-
-<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
-<p>
-Returns the descriptive string for the readmode <code>readmode</code>.
-</p>
-<hr>
-<a name="gt_readmode_parse"></a>
-
-<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
-<p>
-Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
-   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
-   -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="MemoryAllocation"></a>
@@ -6717,6 +6728,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_feature_node_is_pseudo"><code>gt_feature_node_is_pseudo</code></a><br>
 
+  <a href="#gt_feature_node_is_similar"><code>gt_feature_node_is_similar</code></a><br>
+
   <a href="#gt_feature_node_iterator_delete"><code>gt_feature_node_iterator_delete</code></a><br>
 
   <a href="#gt_feature_node_iterator_new"><code>gt_feature_node_iterator_new</code></a><br>
@@ -7364,7 +7377,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-24
+Last update: 2011-05-26
 </div>
 </div>
 <!-- Piwik -->

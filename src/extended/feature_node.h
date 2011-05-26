@@ -44,9 +44,6 @@ void           gt_feature_node_foreach_attribute(GtFeatureNode*,
 bool           gt_feature_node_has_CDS(const GtFeatureNode*);
 bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
 double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*);
-/* Returns <true>, if the given features have the same seqid, feature type,
-   range, strand, and phase. */
-bool           gt_feature_nodes_are_similar(GtFeatureNode*, GtFeatureNode*);
 int            gt_feature_node_unit_test(GtError*);
 
 /* Perform depth first traversal of the given <feature_node>. */

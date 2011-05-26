@@ -200,4 +200,10 @@ void           gt_feature_node_unset_multi(GtFeatureNode *feature_node);
 GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
                                                         *feature_node);
 
+/* Returns <true>, if the given <feature_node_a> has the same seqid, feature
+   type, range, strand, and phase as <feature_node_b>.
+   Returns <false> otherwise. */
+bool           gt_feature_node_is_similar(GtFeatureNode *feature_node_a,
+                                          GtFeatureNode *feature_node_b);
+
 #endif
