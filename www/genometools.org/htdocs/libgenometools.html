@@ -5918,8 +5918,9 @@ Parse double from <code>nptr</code> and store result in <code>out</code>.
                    unsigned int line_number, const char *filename, GtError*)</code>
 <p>
 Parse a range given by <code>start</code> and <code>end</code>, writing the result into <code>rng</code>.
-   <code>Enforces that <start</code> <code>= <end</code>. Give <code>filename</code> and <code>line_number</code> for
-   error reporting. Returns 0 upon success and -1 upon failure.
+   Enforces that <code>start</code> is smaller or equal than <code>end</code>. Give <code>filename</code> and
+   <code>line_number</code> for error reporting. Returns 0 upon success and -1 upon
+   failure.
 </p>
 <hr>
 <a name="gt_parse_range_tidy"></a>

@@ -46,8 +46,9 @@ int gt_parse_ulong(unsigned long *out, const char *nptr);
 int gt_parse_double(double *out, const char *nptr);
 
 /* Parse a range given by <start> and <end>, writing the result into <rng>.
-   <Enforces that <start> <= <end>. Give <filename> and <line_number> for
-   error reporting. Returns 0 upon success and -1 upon failure. */
+   Enforces that <start> is smaller or equal than <end>. Give <filename> and
+   <line_number> for error reporting. Returns 0 upon success and -1 upon
+   failure. */
 int gt_parse_range(GtRange *rng, const char *start, const char *end,
                    unsigned int line_number, const char *filename, GtError*);
 
