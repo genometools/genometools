@@ -1,8 +1,20 @@
 #!/usr/bin/env lua5.1
 
--- $Id: test.lua,v 1.70 2008/10/09 20:16:45 roberto Exp $
+-- $Id: test.lua,v 1.82 2010/12/03 14:49:54 roberto Exp $
+
+require"strict"    -- just to be pedantic
 
 local m = require"lpeg"
+
+local debug = require"debug"
+
+
+-- compatibility with Lua 5.2
+local unpack = table.unpack or unpack
+
+
+-- most tests here do not need much stack space
+m.setmaxstack(5)
 
 any = m.P(1)
 space = m.S" \t\n"^0
@@ -62,6 +74,8 @@ assert(m.match("a" * #m.P(true), "a") == 2)
 -- tests for locale
 do
   assert(m.locale(m) == m)
+  local t = {}
+  assert(m.locale(t, m) == t)
   local x = m.locale()
   for n,v in pairs(x) do
     assert(type(n) == "string")
@@ -301,11 +315,14 @@ local function checkerr (msg, ...)
   assert(m.match({ m.P(msg) + 1 * m.V(1) }, select(2, pcall(...))))
 end
 
-checkerr("rule '1' is left recursive", m.match, { m.V(1) * 'a' }, "a")
-checkerr("stack overflow", m.match, m.C('a')^0, string.rep("a", 50000))
+-- checkerr("rule '1' is left recursive", m.match, { m.V(1) * 'a' }, "a")
 checkerr("rule '1' outside a grammar", m.match, m.V(1), "")
 checkerr("rule 'hiii' outside a grammar", m.match, m.V('hiii'), "")
 checkerr("rule 'hiii' is not defined", m.match, { m.V('hiii') }, "")
+checkerr("rule <a table> is not defined", m.match, { m.V{} }, "")
+
+checkerr("rule 'A' is not a pattern", m.P, { A = {} })
+checkerr("rule <a function> is not a pattern", m.P, { [print] = {} })
 
 -- test for non-pattern as arguments to pattern functions
 
@@ -323,7 +340,6 @@ local function checkerr (msg, ...)
 end
 
 checkerr("rule '1' is left recursive", m.match, { m.V(1) * 'a' }, "a")
-checkerr("stack overflow", m.match, m.C('a')^0, string.rep("a", 50000))
 checkerr("rule '1' outside a grammar", m.match, m.V(1), "")
 checkerr("rule 'hiii' outside a grammar", m.match, m.V('hiii'), "")
 checkerr("rule 'hiii' is not defined", m.match, { m.V('hiii') }, "")
@@ -331,6 +347,9 @@ checkerr("rule <a table> is not defined", m.match, { m.V({}) }, "")
 
 print('+')
 
+
+-- bug in 0.10 (rechecking a grammar, after tail-call optimization)
+m.P{ m.P { (m.P(3) + "xuxu")^0 * m.V"xuxu", xuxu = m.P(1) } }
 
 local V = m.V
 
@@ -403,6 +422,39 @@ assert(m.match(m.Cs((- -m.P("a") * 1 + m.P(1)/".")^0), "aloal") == "a..a.")
 assert(m.match(m.Cs((-((-m.P"a")/"") * 1 + m.P(1)/".")^0), "aloal") == "a..a.")
 
 
+-- look-behind predicate
+assert(not m.match(m.B'a', 'a'))
+assert(m.match(1 * m.B'a', 'a') == 2)
+assert(not m.match(m.B(1), 'a'))
+assert(m.match(1 * m.B(1), 'a') == 2)
+assert(m.match(-m.B(1), 'a') == 1)
+
+B = #letter * -m.B(letter) + -letter * m.B(letter)
+x = m.Ct({ (B * m.Cp())^-1 * (1 * m.V(1) + m.P(true)) })
+checkeq(m.match(x, 'ar cal  c'), {1,3,4,7,9,10})
+checkeq(m.match(x, ' ar cal  '), {2,4,5,8})
+checkeq(m.match(x, '   '), {})
+checkeq(m.match(x, 'aloalo'), {1,7})
+
+assert(m.match(B, "a") == 1)
+assert(m.match(1 * B, "a") == 2)
+assert(not m.B(-letter):match(""))
+assert((-m.B(letter)):match("") == 1)
+
+assert((4 * m.B(letter, 4)):match("aaaaaaaa") == 5)
+assert(not (4 * m.B(letter, 5)):match("aaaaaaaa"))
+assert((4 * -m.B(letter, 5)):match("aaaaaaaa") == 5)
+
+assert((3 * m.B(m.C(1))):match("12345") == 4)
+
+
+-- bug in 0.9
+assert(m.match(('a' * #m.P'b'), "ab") == 2)
+assert(not m.match(('a' * #m.P'b'), "a"))
+
+assert(not m.match(#m.S'567', ""))
+assert(m.match(#m.S'567' * 1, "6") == 2)
+
 
 -- tests for Tail Calls
 
@@ -432,6 +484,14 @@ assert(p:match(string.rep("011", 10000) .. "$"))
 assert(not p:match(string.rep("011", 10001) .. "$"))
 
 
+-- this grammar does need backtracking info.
+local lim = 10000
+p = m.P{ '0' * m.V(1) + '0' }
+assert(not pcall(m.match, p, string.rep("0", lim)))
+m.setmaxstack(2*lim)
+assert(not pcall(m.match, p, string.rep("0", lim)))
+m.setmaxstack(2*lim + 2)
+assert(pcall(m.match, p, string.rep("0", lim)))
 
 -- tests for optional start position
 assert(m.match("a", "abc", 1))
@@ -448,13 +508,6 @@ assert(m.match("", "", 10))
 assert(not m.match(1, "", 1))
 assert(not m.match(1, "", -1))
 assert(not m.match(1, "", 0))
-
-
--- basic tests for external C function
-
-assert(m.match(m.span("abcd"), "abbbacebb") == 7)
-assert(m.match(m.span("abcd"), "0abbbacebb") == 1)
-assert(m.match(m.span("abcd"), "") == 1)
 
 print("+")
 
@@ -697,13 +750,13 @@ badgrammar({[1] = -m.P("a") * m.V(1)}, "rule '1'")
 badgrammar({[1] = -1 * m.V(1)}, "rule '1'")
 badgrammar({[1] = 1 * m.V(2), [2] = m.V(2)}, "rule '2'")
 badgrammar({[1] = m.P(0), [2] = 1 * m.V(1)^0}, "loop in rule '2'")
-badgrammar({ lpeg.V(2), lpeg.V(3)^0, lpeg.P"" }, "rule '2'")
-badgrammar({ lpeg.V(2) * lpeg.V(3)^0, lpeg.V(3)^0, lpeg.P"" }, "rule '1'")
-badgrammar({ #(lpeg.V(1) * 'a') }, "rule '1'")
-badgrammar({ -(lpeg.V(1) * 'a') }, "rule '1'")
+badgrammar({ m.V(2), m.V(3)^0, m.P"" }, "rule '2'")
+badgrammar({ m.V(2) * m.V(3)^0, m.V(3)^0, m.P"" }, "rule '1'")
+badgrammar({ #(m.V(1) * 'a') }, "rule '1'")
+badgrammar({ -(m.V(1) * 'a') }, "rule '1'")
 
-assert(m.match({'a' * -lpeg.V(1)}, "aaa") == 2)
-assert(m.match({'a' * -lpeg.V(1)}, "aaaa") == nil)
+assert(m.match({'a' * -m.V(1)}, "aaa") == 2)
+assert(m.match({'a' * -m.V(1)}, "aaaa") == nil)
 
 
 -- simple tests for maximum sizes:
@@ -783,7 +836,6 @@ checkeq(x, {'a', 'g', {}, {{'b'}, 'c'}, {'d', {'e'}}});
 
 x = {(m.Cmt(1, id)^0):match(string.rep('a', 500))}
 assert(#x == 500)
-assert(not pcall(m.match, m.Cmt(1, id)^0, string.rep('a', 50000)))
 
 local function id(s, i, x)
   if x == 'a' then return i + 1, 1, 3, 7
@@ -833,13 +885,15 @@ assert(not c:match'[[]=]====]=]=]==]===[]')
 -- Tests for 're' module
 -------------------------------------------------------------------
 
-require "re"
+local re = require "re"
 
 local match, compile = re.match, re.compile
 
+
+
 assert(match("a", ".") == 2)
 assert(match("a", "''") == 1)
-assert(match("", "!.") == 1)
+assert(match("", " ! . ") == 1)
 assert(not match("a", " ! . "))
 assert(match("abcde", "  ( . . ) * ") == 5)
 assert(match("abbcde", " [a-c] +") == 5)
@@ -850,42 +904,42 @@ assert(match("abbc--", " [ac-] +") == 2)
 assert(match("abbc--", " [-acb] + ") == 7)
 assert(not match("abbcde", " [b-z] + "))
 assert(match("abb\"de", '"abb"["]"de"') == 7)
-assert(match("abceeef", "'ac'? 'ab'* 'c' {'e'*} / 'abceeef' ") == "eee")
+assert(match("abceeef", "'ac' ? 'ab' * 'c' { 'e' * } / 'abceeef' ") == "eee")
 assert(match("abceeef", "'ac'? 'ab'* 'c' { 'f'+ } / 'abceeef' ") == 8)
-local t = {match("abceefe", "((&'e' {})? .)*")}
+local t = {match("abceefe", "( ( & 'e' {} ) ? . ) * ")}
 checkeq(t, {4, 5, 7})
 local t = {match("abceefe", "((&&'e' {})? .)*")}
 checkeq(t, {4, 5, 7})
 local t = {match("abceefe", "( ( ! ! 'e' {} ) ? . ) *")}
 checkeq(t, {4, 5, 7})
-local t = {match("abceefe", "((&!&!'e' {})? .)*")}
+local t = {match("abceefe", "(( & ! & ! 'e' {})? .)*")}
 checkeq(t, {4, 5, 7})
 
 assert(match("cccx" , "'ab'? ('ccc' / ('cde' / 'cd'*)? / 'ccc') 'x'+") == 5)
 assert(match("cdx" , "'ab'? ('ccc' / ('cde' / 'cd'*)? / 'ccc') 'x'+") == 4)
 assert(match("abcdcdx" , "'ab'? ('ccc' / ('cde' / 'cd'*)? / 'ccc') 'x'+") == 8)
 
-assert(match("abc", "a <- (. <a>)?") == 4)
-b = "balanced <- '(' ([^()] / <balanced>)* ')'"
+assert(match("abc", "a <- (. a)?") == 4)
+b = "balanced <- '(' ([^()] / balanced)* ')'"
 assert(match("(abc)", b))
 assert(match("(a(b)((c) (d)))", b))
 assert(not match("(a(b ((c) (d)))", b))
 
-b = compile[[  balanced <- "(" ([^()] / <balanced>)* ")" ]]
+b = compile[[  balanced <- "(" ([^()] / balanced)* ")" ]]
 assert(b == m.P(b))
 assert(b:match"((((a))(b)))")
 
 local g = [[
-  S <- "0" <B> / "1" <A> / ""   -- balanced strings
-  A <- "0" <S> / "1" <A> <A>      -- one more 0
-  B <- "1" <S> / "0" <B> <B>      -- one more 1
+  S <- "0" B / "1" A / ""   -- balanced strings
+  A <- "0" S / "1" A A      -- one more 0
+  B <- "1" S / "0" B B      -- one more 1
 ]]
 assert(match("00011011", g) == 9)
 
 local g = [[
-  S <- ("0" <B> / "1" <A>)*
-  A <- "0" / "1" <A> <A>
-  B <- "1" / "0" <B> <B>
+  S <- ("0" B / "1" A)*
+  A <- "0" / "1" A A
+  B <- "1" / "0" B B
 ]]
 assert(match("00011011", g) == 9)
 assert(match("000110110", g) == 9)
@@ -931,6 +985,11 @@ eqcharset(compile"[^-az]", any - m.S"a-z")
 eqcharset(compile"[^a-z]", any - m.R"az")
 eqcharset(compile"[^]['\"]", any - m.S[[]['"]])
 
+-- tests for comments in 're'
+e = compile[[
+A <- B   -- \t	\n %nl .<> <- -> --
+B <- 'x'  --]]
+assert(e:match'xy' == 2)
 
 -- tests for 're' with pre-definitions
 defs = {digits = m.R"09", letters = m.R"az"}
@@ -938,8 +997,8 @@ e = compile("%letters (%letters / %digits)*", defs)
 assert(e:match"x123" == 5)
 
 e = compile([[
-  S <- <A>+
-  A <- %letters+ <B>
+  S <- A+
+  A <- %letters+ B
   B <- %digits+
 ]], defs)
 
@@ -950,9 +1009,9 @@ assert(e:match("2.34") == math.sin(2.34))
 function eq (_, _, a, b) return a == b end
 
 c = re.compile([[
-  longstring <- '[' {:init: '='* :} '[' <close>
-  close <- ']' =init ']' / . <close>
-]], {void = void})
+  longstring <- '[' {:init: '='* :} '[' close
+  close <- ']' =init ']' / . close
+]])
 
 assert(c:match'[==[]]===]]]]==]===[]' == 17)
 assert(c:match'[[]=]====]=]]]==]===[]' == 14)
@@ -988,8 +1047,8 @@ assert(re.find("alo", "!.") == 4)
 function addtag (s, i, t, tag) t.tag = tag; return i, t end
 
 c = re.compile([[
-  doc <- <block> !.
-  block <- (<start> (<block> / { [^<]+ })* -> {} <end>?) => addtag
+  doc <- block !.
+  block <- (start (block / { [^<]+ })* -> {} end?) => addtag
   start <- '<' {:tag: [a-z]+ :} '>'
   end <- '</' { =tag } '>'
 ]], {addtag = addtag})
@@ -1005,14 +1064,26 @@ assert(not pcall(compile, "'x' -> x", {x = 3}))
 
 -- tests for look-ahead captures
 x = {re.match("alo", "&(&{.}) !{'b'} {&(...)} &{..} {...} {!.}")}
-checkeq(x, {"a", "", "al", "alo", ""})
+checkeq(x, {"", "alo", ""})
 
-assert(re.match("aloalo", "{~ (((&{'al'}) -> 'A' / (&{%l}) -> '%1')? .)* ~}")
+assert(re.match("aloalo",
+   "{~ (((&'al' {.}) -> 'A%1' / (&%l {.}) -> '%1%1') / .)* ~}")
        == "AallooAalloo")
 
+-- bug in 0.9 (and older versions), due to captures in look-aheads
+x = re.compile[[   {~ (&(. ([a-z]* -> '*')) ([a-z]+ -> '+') ' '*)* ~}  ]]
+assert(x:match"alo alo" == "+ +")
+
+-- valid capture in look-ahead (used inside the look-ahead itself)
+x = re.compile[[
+      S <- &({:two: .. :} . =two) {[a-z]+} / . S
+]]
+assert(x:match("hello aloaLo aloalo xuxu") == "aloalo")
+
+
 p = re.compile[[
-  block <- ({:ident:' '*:} <line>
-           ((=ident !' ' <line>) / &(=ident ' ') <block>)*) -> {}
+  block <- ({:ident:' '*:} line
+           ((=ident !' ' line) / &(=ident ' ') block)*) -> {}
   line <- {[^%nl]*} %nl
 ]]
 
@@ -1031,9 +1102,9 @@ checkeq(t, {"1", {"1.1", "1.2", {"1.2.1", "", ident = "    "}, ident = "  "},
 
 -- nested grammars
 p = re.compile[[
-       s <- <a> <b> !.
-       b <- ( x <- ('b' <x>)? )
-       a <- ( x <- 'a' <x>? )
+       s <- a b !.
+       b <- ( x <- ('b' x)? )
+       a <- ( x <- 'a' x? )
 ]]
 
 assert(p:match'aaabbb')
@@ -1042,7 +1113,7 @@ assert(not p:match'bbb')
 assert(not p:match'aaabbba')
 
 -- testing groups
-t = {re.match("abc", "{:S <- {:.:} {<S>} / '':}")}
+t = {re.match("abc", "{:S <- {:.:} {S} / '':}")}
 checkeq(t, {"a", "bc", "b", "c", "c", ""})
 
 t = re.match("1234", "({:a:.:} {:b:.:} {:c:.{.}:}) -> {}")
@@ -1087,7 +1158,7 @@ eqlpeggsub("%X", "%X")
 eqlpeggsub("%S", "%S")
 
 eqlpeggsub("[%w]", "%w")
-eqlpeggsub("[%w_]", "_%w")
+eqlpeggsub("[_%w]", "_%w")
 eqlpeggsub("[^%w]", "%W")
 eqlpeggsub("[%W%S]", "%W%S")
 
@@ -1097,21 +1168,20 @@ re.updatelocale()
 -- testing nested substitutions x string captures
 
 p = re.compile[[
-      text <- {~ <item>* ~}
-      item <- <macro> / [^()] / '(' <item>* ')'
-      arg <- ' '* {~ (!',' <item>)* ~}
-      args <- '(' <arg> (',' <arg>)* ')'
-      macro <- ('apply' <args>) -> '%1(%2)'
-             / ('add' <args>) -> '%1 + %2'
-             / ('mul' <args>) -> '%1 * %2'
+      text <- {~ item* ~}
+      item <- macro / [^()] / '(' item* ')'
+      arg <- ' '* {~ (!',' item)* ~}
+      args <- '(' arg (',' arg)* ')'
+      macro <- ('apply' args) -> '%1(%2)'
+             / ('add' args) -> '%1 + %2'
+             / ('mul' args) -> '%1 * %2'
 ]]
 
 assert(p:match"add(mul(a,b), apply(f,x))" == "a * b + f(x)")
 
-rev = re.compile[[ R <- (!.) -> '' / ({.} <R>) -> '%2%1']]
+rev = re.compile[[ R <- (!.) -> '' / ({.} R) -> '%2%1']]
 
 assert(rev:match"0123456789" == "9876543210")
-
 
 print"OK"
 

@@ -1,3 +1,4 @@
+LIBNAME = lpeg
 LUADIR = /usr/include/lua5.1/
 
 COPT = -O2 -DNDEBUG
@@ -21,13 +22,21 @@ CWARNS = -Wall -Wextra -pedantic \
 
 
 CFLAGS = $(CWARNS) $(COPT) -ansi -I$(LUADIR)
-DLLFLAGS = -shared
 CC = gcc
 
-lpeg.so: lpeg.o
-	$(CC) $(DLLFLAGS) lpeg.o -o lpeg.so
+# For Linux
+DLLFLAGS = -shared -fpic
+ENV = 
 
-lpeg.o:	makefile lpeg.c
+# For Mac OS
+# ENV = MACOSX_DEPLOYMENT_TARGET=10.4
+# DLLFLAGS = -bundle -undefined dynamic_lookup
+
+lpeg.so: lpeg.o
+	env $(ENV) $(CC) $(DLLFLAGS) lpeg.o -o lpeg.so
+
+lpeg.o:		makefile lpeg.c lpeg.h
 
 test: test.lua re.lua lpeg.so
 	test.lua
+
