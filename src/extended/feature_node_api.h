@@ -203,7 +203,7 @@ GtFeatureNode* gt_feature_node_get_multi_representative(GtFeatureNode
 /* Returns <true>, if the given <feature_node_a> has the same seqid, feature
    type, range, strand, and phase as <feature_node_b>.
    Returns <false> otherwise. */
-bool           gt_feature_node_is_similar(GtFeatureNode *feature_node_a,
-                                          GtFeatureNode *feature_node_b);
+bool           gt_feature_node_is_similar(const GtFeatureNode *feature_node_a,
+                                          const GtFeatureNode *feature_node_b);
 
 #endif

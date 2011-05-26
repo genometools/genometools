@@ -2965,8 +2965,8 @@ Return the representative of the multi-feature <code>feature_node</code>.
 <hr>
 <a name="gt_feature_node_is_similar"></a>
 
-<code>bool            gt_feature_node_is_similar(GtFeatureNode *feature_node_a,
-                                          GtFeatureNode *feature_node_b)</code>
+<code>bool            gt_feature_node_is_similar(const GtFeatureNode *feature_node_a,
+                                          const GtFeatureNode *feature_node_b)</code>
 <p>
 Returns <code>true</code>, if the given <code>feature_node_a</code> has the same seqid, feature
    type, range, strand, and phase as <code>feature_node_b</code>.
