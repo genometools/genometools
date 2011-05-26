@@ -1,6 +1,6 @@
 --[[
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -83,10 +83,12 @@ local Include = lpeg.P("#include") * (Any - Newline)^1 * Newline
 local ClassTypedef = lpeg.Ct(lpeg.Cc("class") *
                              (CCommentStart * lpeg.C((Any - CCommentEnd)^0) *
                                CCommentEnd)^0 * Newline^0 *
-                             lpeg.P("typedef") * Space *
-                             (lpeg.P("struct") + lpeg.P("enum")) * Space *
-                             Character^1 * Space * lpeg.C(Character^1) *
-                             OptionalSpace * Semicolon)
+                             ((lpeg.P("typedef") * Space *
+                               (lpeg.P("struct") + lpeg.P("enum")) * Space *
+                               Character^1 * Space * lpeg.C(Character^1)) +
+                              (lpeg.P("typedef") * Space * lpeg.P("char*") *
+                               Space * lpeg.C(lpeg.P("GtTagValueMap")))) *
+                              OptionalSpace * Semicolon)
 local FunctionTypedef = lpeg.Ct(lpeg.Cc("funcdef") *
                                 (CCommentStart * lpeg.C((Any - CCommentEnd)^0) *
                                 CCommentEnd) * Newline^0 *
