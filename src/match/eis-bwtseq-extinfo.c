@@ -757,6 +757,7 @@ gt_BWTSeqLocateMatch(const BWTSeq *bwtSeq, unsigned long pos,
     {
       nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, extBits);
       ++locateOffset;
+      gt_assert(locateOffset <= BWTSeqLength(bwtSeq));
     }
     matchPos = gt_bsGetUlong(extBits->varPart, markOffset, bitsPerOrigPos);
     if (bwtSeq->featureToggles & BWTReversiblySorted)

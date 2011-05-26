@@ -193,7 +193,7 @@ static int visit_shu_children(const FMindex *index,
     {
       if (tmpmbtab[idx].lowerbound + 1 ==
           tmpmbtab[idx].upperbound)
-      { /* we found a leave on parent */
+      { /* we found a leaf on parent */
         if (calculate)
         {
           add_filenum_count(tmpmbtab[idx].lowerbound,
