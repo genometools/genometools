@@ -187,7 +187,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
   gt_toolbox_add_hidden_tool(tools, "template", gt_template());
-  gt_toolbox_add(tools, "uniq", gt_uniq);
+  gt_toolbox_add_tool(tools, "uniq", gt_uniq());
   gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifndef WITHOUT_CAIRO
   gt_toolbox_add(tools, "sketch", gt_sketch);

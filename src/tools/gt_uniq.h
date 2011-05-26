@@ -18,7 +18,9 @@
 #ifndef GT_UNIQ_H
 #define GT_UNIQ_H
 
+#include "core/tool.h"
+
 /* the uniq tool */
-int gt_uniq(int argc, const char **argv, GtError*);
+GtTool* gt_uniq(void);
 
 #endif
