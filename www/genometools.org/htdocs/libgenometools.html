@@ -206,6 +206,8 @@ interfaces.
 
   <li><a href="#Qsort">Qsort</a>
 
+  <li><a href="#Strcmp">Strcmp</a>
+
   <li><a href="#Unused">Unused</a>
 
   <li><a href="#Version">Version</a>
@@ -5939,6 +5941,15 @@ Like <code>qsort(3)</code>, but allows an additional <code>data</code> pointer p
    <code>GtCompareWithData</code> comparison function <code>cmp</code>.
 </p>
 <hr>
+<a name="Strcmp"></a>
+<h2>Module Strcmp</h2>
+<a name="gt_strcmp"></a>
+
+<code>int  gt_strcmp(const char *s1, const char *s2)</code>
+<p>
+Returns 0 if <code>s1</code> == <code>s2</code>, otherwise the equivalent of <code>strcmp(s1, s2)</code>.
+</p>
+<hr>
 <a name="Unused"></a>
 <h2>Module Unused</h2>
 <a name="GT_UNUSED"></a>
@@ -7250,6 +7261,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_str_set_length"><code>gt_str_set_length</code></a><br>
 
   <a href="#gt_strand_get"><code>gt_strand_get</code></a><br>
+
+  <a href="#gt_strcmp"><code>gt_strcmp</code></a><br>
 
   <a href="#gt_style_clone"><code>gt_style_clone</code></a><br>
 

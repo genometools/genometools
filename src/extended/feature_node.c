@@ -23,7 +23,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/queue_api.h"
-#include "core/strcmp.h"
+#include "core/strcmp_api.h"
 #include "core/symbol.h"
 #include "core/undef.h"
 #include "core/unused_api.h"

@@ -60,6 +60,7 @@
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 #include "core/strand_api.h"
+#include "core/strcmp_api.h"
 #include "core/timer_api.h"
 #include "core/translator_api.h"
 #include "core/types_api.h"
