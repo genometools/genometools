@@ -166,6 +166,8 @@ interfaces.
 
   <li><a href="#GtTypeCheckerOBO">GtTypeCheckerOBO</a>
 
+  <li><a href="#GtUniqStream">GtUniqStream</a>
+
   <li><a href="#GtVisitorStream">GtVisitorStream</a>
 
 </ul>
@@ -5372,6 +5374,27 @@ Create a new <code>GtTypeChecker*</code> for OBO file with given <code>obo_file_
    set correspondingly.
 </p>
 <hr>
+<a name="GtUniqStream"></a>
+<h2>Class GtUniqStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtUniqStream</code> filters out
+   repeated features it retrieves from its node source. </p>
+
+<hr>
+<a name="gt_uniq_stream_new"></a>
+
+<code>GtNodeStream*  gt_uniq_stream_new(GtNodeStream*)</code>
+<p>
+Create a <code>GtUniqStream*</code> which filters out repeated feature node graphs it
+   retrieves from the sorted <code>in_stream</code> and return all other nodes.
+   Two feature node graphs are considered to be <em>repeated</em> if they have the
+   same depth-first traversal and each corresponding feature node pair is
+   similar according to the <code>gt_feature_node_is_similar()</code> method. For such a
+   repeated feature node graph the one with the higher score (of the top-level
+   feature) is kept. If only one of the feature node graphs has a defined score,
+   this one is kept.
+</p>
+<hr>
 <a name="GtVisitorStream"></a>
 <h2>Class GtVisitorStream</h2>
 
@@ -7327,6 +7350,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_type_checker_obo_new"><code>gt_type_checker_obo_new</code></a><br>
 
   <a href="#gt_type_checker_ref"><code>gt_type_checker_ref</code></a><br>
+
+  <a href="#gt_uniq_stream_new"><code>gt_uniq_stream_new</code></a><br>
 
   <a href="#gt_version_check"><code>gt_version_check</code></a><br>
 

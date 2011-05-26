@@ -21,7 +21,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/uniq_stream.h"
+#include "extended/uniq_stream_api.h"
 #include "tools/gt_uniq.h"
 
 typedef struct {

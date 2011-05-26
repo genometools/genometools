@@ -87,6 +87,7 @@
 #include "extended/sort_stream_api.h"
 #include "extended/type_checker_api.h"
 #include "extended/type_checker_obo_api.h"
+#include "extended/uniq_stream_api.h"
 #include "extended/visitor_stream_api.h"
 
 #ifndef WITHOUT_CAIRO
