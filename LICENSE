@@ -140,7 +140,7 @@ of the copyright holder.
 
 --------------------------------------------------------------------------------
 
-The source in src/external/lua-5.1.4/*, src/external/cgilua-5.1.2/*,
+The source in src/external/lua-5.1.4/*, src/external/cgilua-5.1.3/*,
 src/external/luafilesystem-1.5.0/*, src/external/lpeg-0.9/*, and
 src/external/md5-1.1.2/src/* (except des56.[ch]) is covered by the following
 license:

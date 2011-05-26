@@ -3,7 +3,7 @@ package = "CGILua"
 version = "5.1.2-1"
 
 source = {
-   url = ""
+   url = "http://luaforge.net/frs/download.php/3398/cgilua-5.1.2.tar.gz"
 }
 
 description = {
@@ -20,7 +20,7 @@ description = {
 
 dependencies = {
    "lua >= 5.1",
-   "luafilesystem 1.4.1",
+   "luafilesystem >= 1.4.1",
 }
 
 build = {

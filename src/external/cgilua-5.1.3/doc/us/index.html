@@ -85,11 +85,6 @@ the generation of pages, making it easy to develop web applications with Lua.
 
 <p>
 One of advantages of CGILua is its abstraction of the underlying Web server.
-You can develop a CGILua application for one Web server and run it on any other
-Web server that supports CGILua, even if using a different launching model.
-</p>
-
-<p>
 CGILua can be used with a variety of Web servers and, for each server, with
 different launchers. A launcher is responsible for the interaction of CGILua
 and the Web server, for example using ISAPI on IIS or mod_lua on Apache.
@@ -104,7 +99,7 @@ as Lua 5.1.
 
 <h2><a name="status"></a>Status</h2>
 
-<p>Current version is 5.1.2</p>
+<p>Current version is 5.1.3</p>
 
 <h2><a name="download"></a>Download</h2>
 
@@ -120,6 +115,13 @@ luarocks install cgilua
 <h2><a name="history"></a>History</h2>
 
 <dl>
+    <dt><strong>Version 5.1.2</strong> [9/Mar/2009]</dt>
+	<dd><ul>
+		<li>Strips utf-8 BOM from templates in lp.include</li>
+		<li>Fixed reentrancy bug</li>
+		<li>Fixed reset of cgilua.urlpath</li>
+	</ul></dd>
+	
     <dt><strong>Version 5.1.2</strong> [19/May/2008]</dt>
 	<dd>
 	<ul>
@@ -313,7 +315,7 @@ Project <a href="http://luaforge.net/mail/?group_id=104">mailing list</a>.
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: index.html,v 1.66 2008/05/19 18:13:36 carregal Exp $</small></p>
+	<p><small>$Id: index.html,v 1.67 2009/03/09 22:02:56 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->

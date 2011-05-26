@@ -78,21 +78,15 @@
 
 <h2>Server API</h2>
 
-<p>The Server API (SAPI) is a set of functions that encapsulate the web server
-and the used launcher. A SAPI launcher is the mechanism that allows a Web server
-to execute and communicate with CGILua and its Web applications. SAPI allows the
-abstraction of a series of internal details and allows CGILua to be a lot more
-portable, since porting CGILua to a new platform means simply writing a SAPI Launcher
-for the target platform.</p>
-
-<p>
-Kepler is the reference implementation of SAPI launchers and currently supports
-Apache, Microsoft IIS and Xavante as Web servers, and CGI, FastCGI, mod_lua and ISAPI
-as Launchers. Xavante has a native SAPI launcher.
+<p>The Server API (SAPI) allows the abstraction of a series of internal web server details
+and allows CGILua to be used over <a href="http://wsapi.luaforge.net/">WSAPI</a>.
+Kepler is the reference implementation of WSAPI and currently supports Apache,
+Microsoft IIS and Xavante as Web servers, and CGI, FastCGI, as WSAPI connectors.
+Xavante has a native WSAPI connector.
 </p>
 
 <p>
-The functions implemented by launchers are separated into two packages:
+The SAPI API is separated into two packages:
 <code>SAPI.Request</code> and <code>SAPI.Response</code>.
 </p>
 
@@ -233,7 +227,7 @@ And the <code>SAPI.Response</code> package offers five functions:
 
 <div id="about">
 	<p><a href="http://validator.w3.org/check?uri=referer">Valid XHTML 1.0!</a></p>
-	<p><small>$Id: sapi.html,v 1.32 2007/12/05 19:41:13 carregal Exp $</small></p>
+	<p><small>$Id: sapi.html,v 1.33 2009/02/06 00:56:06 carregal Exp $</small></p>
 </div> <!-- id="about" -->
 
 </div> <!-- id="container" -->
