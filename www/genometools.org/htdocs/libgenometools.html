@@ -132,6 +132,8 @@ interfaces.
 
   <li><a href="#GtRange">GtRange</a>
 
+  <li><a href="#GtReadmode">GtReadmode</a>
+
   <li><a href="#GtRecMap">GtRecMap</a>
 
   <li><a href="#GtRegionNode">GtRegionNode</a>
@@ -211,23 +213,6 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
-<h2>Sole functions</h2>
-<a name="gt_readmode_show"></a>
-
-<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
-<p>
-Returns the descriptive string for the readmode <code>readmode</code>.
-</p>
-<hr>
-<a name="gt_readmode_parse"></a>
-
-<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
-<p>
-Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
-   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
-   -1 is returned and <code>err</code> is set accordingly.
-</p>
-<hr>
 <a name="GtAlphabet"></a>
 <h2>Class GtAlphabet</h2>
 
@@ -4420,6 +4405,29 @@ Transform start and end of <code>range</code> by <code>offset</code> and return 
 <code>unsigned long  gt_range_length(const GtRange *range)</code>
 <p>
 Returns the length of the given <code>range</code>.
+</p>
+<hr>
+<a name="GtReadmode"></a>
+<h2>Class GtReadmode</h2>
+
+<p> This enum type defines the possible reamodes, namely <code>GT_READMODE_FORWARD</code>,
+   <code>GT_READMODE_REVERSE</code>, <code>GT_READMODE_COMPL</code>, and <code>GT_READMODE_REVCOMPL</code>. </p>
+
+<hr>
+<a name="gt_readmode_show"></a>
+
+<code>const char*  gt_readmode_show(GtReadmode readmode)</code>
+<p>
+Returns the descriptive string for <code>readmode</code>.
+</p>
+<hr>
+<a name="gt_readmode_parse"></a>
+
+<code>int          gt_readmode_parse(const char *string, GtError *err)</code>
+<p>
+Returns the <code>GtReadmode</code> for the description <code>string</code>, which must be one
+   of "fwd","rev","cpl" or "rcl". If <code>string</code> does not equal any of them,
+   -1 is returned and <code>err</code> is set accordingly.
 </p>
 <hr>
 <a name="GtRecMap"></a>
