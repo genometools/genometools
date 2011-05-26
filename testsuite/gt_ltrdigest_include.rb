@@ -221,7 +221,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest -trnas -outfileprefix foo #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /superfluous argument/)
+    grep($last_stderr, /missing argument to option/)
   end
 
   Name "gt ltrdigest corrupt tRNA library"
