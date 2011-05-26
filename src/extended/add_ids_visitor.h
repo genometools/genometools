@@ -20,7 +20,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtAddIDsVisitor GtAddIDsVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_add_ids_visitor_class(void);
 GtNodeVisitor* gt_add_ids_visitor_new(void);

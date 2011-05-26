@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
-#include "extended/node_visitor.h"
+#include "extended/node_visitor_api.h"
 
 /* Implements the <GtNodeStream> interface. */
 typedef struct GtVisitorStream GtVisitorStream;

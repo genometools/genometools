@@ -23,8 +23,8 @@ typedef struct GtNodeVisitor GtNodeVisitor;
 
 #include "extended/comment_node_api.h"
 #include "extended/eof_node_api.h"
-#include "extended/feature_node.h"
-#include "extended/region_node.h"
+#include "extended/feature_node_api.h"
+#include "extended/region_node_api.h"
 #include "extended/sequence_node_api.h"
 
 /* Visit <comment_node> with <node_visitor>. */

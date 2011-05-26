@@ -18,6 +18,7 @@
 #ifndef GFF3_VISITOR_API_H
 #define GFF3_VISITOR_API_H
 
+#include "core/file_api.h"
 #include "extended/node_visitor_api.h"
 
 /* Implements the <GtNodeVisitor> interface with a visitor that produces GFF3

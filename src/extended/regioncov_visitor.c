@@ -20,6 +20,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/minmax.h"
+#include "core/range.h"
 #include "core/unused_api.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/regioncov_visitor.h"

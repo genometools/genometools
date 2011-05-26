@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtMergeFeatureVisitor GtMergeFeatureVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_merge_feature_visitor_class(void);
 GtNodeVisitor*            gt_merge_feature_visitor_new(void);

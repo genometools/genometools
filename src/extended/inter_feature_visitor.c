@@ -21,6 +21,7 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
+#include "extended/feature_node.h"
 #include "extended/inter_feature_visitor.h"
 #include "extended/node_visitor_rep.h"
 

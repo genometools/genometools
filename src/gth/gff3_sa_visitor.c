@@ -16,6 +16,8 @@
 */
 
 #include "core/unused_api.h"
+#include "extended/feature_type.h"
+#include "extended/genome_node.h"
 #include "gth/gff3_sa_visitor.h"
 #include "gth/sa_visitor_rep.h"
 #include "gth/region_factory.h"

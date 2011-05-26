@@ -32,6 +32,7 @@
 #include "core/range.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node.h"
 
 struct GtFeatureIndexMemory {

@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtInterFeatureVisitor GtInterFeatureVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_inter_feature_visitor_class(void);
 /* Adds features of type <inter_type> between features of type

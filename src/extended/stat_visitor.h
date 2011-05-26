@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface, gathers statistics. */
 typedef struct GtStatVisitor GtStatVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_stat_visitor_class(void);
 GtNodeVisitor*            gt_stat_visitor_new(bool gene_length_distri,

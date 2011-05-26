@@ -21,9 +21,10 @@
 #include "core/queue_api.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
-#include "extended/select_visitor.h"
+#include "extended/feature_node.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_visitor_rep.h"
+#include "extended/select_visitor.h"
 
 struct GtSelectVisitor {
   const GtNodeVisitor parent_instance;

@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtRegionCovVisitor GtRegionCovVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_regioncov_visitor_class(void);
 GtNodeVisitor*            gt_regioncov_visitor_new(unsigned long

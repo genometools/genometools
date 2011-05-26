@@ -6,6 +6,7 @@ GT_CFLAGS:=-Wall -Werror -Wunused-parameter -g -Os -pipe \
            -I$(prefix)/include/genometools \
            -I/usr/include/cairo \
            -I/usr/local/include/cairo \
+           -I/sw/include/cairo \
            -I/opt/local/include/cairo
 LD:=$(CC)
 GT_LDFLAGS:=-L$(prefix)/lib \

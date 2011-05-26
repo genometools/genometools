@@ -24,6 +24,8 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "extended/cds_visitor.h"
+#include "extended/feature_node.h"
+#include "extended/feature_type.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/splicedseq.h"
 

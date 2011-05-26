@@ -18,7 +18,7 @@
 #ifndef TAG_VALUE_MAP_API_H
 #define TAG_VALUE_MAP_API_H
 
-#include "core/error.h"
+#include "core/error_api.h"
 
 /* A very simple tag/value map absolutely optimized for space (i.e., memory
    consumption) on the cost of time. Basically, each read/write access costs

@@ -22,6 +22,8 @@
 #include "core/unused_api.h"
 #include "extended/csa_variable_strands.h"
 #include "extended/csa_visitor.h"
+#include "extended/feature_node.h"
+#include "extended/feature_type.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_visitor_rep.h"
 

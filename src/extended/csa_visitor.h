@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct CSAVisitor CSAVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_csa_visitor_class(void);
 GtNodeVisitor*            gt_csa_visitor_new(unsigned long join_length);

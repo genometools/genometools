@@ -19,6 +19,7 @@
 #include "core/warning_api.h"
 #include "extended/cds_check_visitor.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_type.h"
 #include "extended/node_visitor_rep.h"
 
 struct GtCDSCheckVisitor {

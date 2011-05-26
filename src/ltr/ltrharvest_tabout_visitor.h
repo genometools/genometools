@@ -22,7 +22,7 @@
 typedef struct GtLTRharvestTaboutVisitor GtLTRharvestTaboutVisitor;
 
 #include "core/encseq_api.h"
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_ltrharvest_tabout_visitor_class(void);
 GtNodeVisitor*            gt_ltrharvest_tabout_visitor_new(void);

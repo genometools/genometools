@@ -19,6 +19,7 @@
 #include "core/hashmap.h"
 #include "core/undef.h"
 #include "core/unused_api.h"
+#include "extended/feature_node.h"
 #include "extended/merge_feature_visitor.h"
 #include "extended/node_visitor_rep.h"
 

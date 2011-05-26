@@ -20,7 +20,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtSeqidsToMD5Visitor GtSeqidsToMD5Visitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_id_to_md5_visitor_class(void);

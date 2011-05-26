@@ -17,6 +17,7 @@
 
 #include "core/assert_api.h"
 #include "extended/eof_node.h"
+#include "extended/genome_node.h"
 #include "extended/stat_stream.h"
 #include "extended/stat_visitor.h"
 #include "extended/node_stream_api.h"

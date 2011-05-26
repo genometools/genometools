@@ -19,6 +19,7 @@
 #include "core/cstr_table_api.h"
 #include "core/disc_distri.h"
 #include "core/unused_api.h"
+#include "extended/feature_node.h"
 #include "extended/node_visitor_rep.h"
 #include "extended/stat_visitor.h"
 

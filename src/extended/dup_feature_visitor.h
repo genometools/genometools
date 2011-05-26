@@ -20,7 +20,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtDupFeatureVisitor GtDupFeatureVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_dup_feature_visitor_class(void);
 /* Duplicate internal feature nodes of type <source_type> as features with type

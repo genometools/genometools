@@ -19,6 +19,7 @@
 
 #include "lauxlib.h"
 #include "annotationsketch/feature_index_memory_api.h"
+#include "extended/feature_node.h"
 #include "extended/luahelper.h"
 #include "gtlua/feature_index_lua.h"
 #include "gtlua/genome_node_lua.h"
@@ -73,7 +74,7 @@ static int feature_index_lua_add_feature_node(lua_State *L)
   gt_assert(L);
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
-  fn = gt_genome_node_cast(gt_feature_node_class(), *gn);
+  fn = gt_feature_node_cast(*gn);
   luaL_argcheck(L, fn, 2, "not a feature node");
   seqid = gt_genome_node_get_seqid(*gn);
   luaL_argcheck(L, seqid, 2, "feature does not have a sequence id");

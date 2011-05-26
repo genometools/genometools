@@ -20,7 +20,7 @@
 
 #include "core/encseq_api.h"
 #include "core/file.h"
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtLTRharvestFastaOutVisitor GtLTRharvestFastaOutVisitor;

@@ -27,6 +27,7 @@
 #include "core/undef.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/gtf_parser.h"
 #include "extended/region_node_builder.h"

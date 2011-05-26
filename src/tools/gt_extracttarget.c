@@ -23,6 +23,7 @@
 #include "core/option.h"
 #include "core/splitter.h"
 #include "core/unused_api.h"
+#include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_escaping.h"
@@ -151,6 +152,7 @@ static int extracttarget_from_node(GtGenomeNode *gn, GtStrArray *seqfiles,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(gn && seqfiles);
+  /* XXX */
   if (gt_genome_node_cast(gt_feature_node_class(), gn)) {
     const char *target;
     GtFeatureNode *child;

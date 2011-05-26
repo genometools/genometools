@@ -22,7 +22,7 @@
 typedef struct GtFeatureVisitor GtFeatureVisitor;
 
 #include "annotationsketch/feature_index.h"
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_feature_visitor_class(void);
 GtNodeVisitor*            gt_feature_visitor_new(GtFeatureIndex*);

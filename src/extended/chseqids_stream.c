@@ -19,9 +19,11 @@
 #include "core/assert_api.h"
 #include "core/unused_api.h"
 #include "extended/chseqids_stream.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 #include "extended/mapping.h"
+#include "extended/region_node.h"
 
 struct GtChseqidsStream {
   const GtNodeStream parent_instance;

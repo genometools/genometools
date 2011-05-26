@@ -17,6 +17,7 @@
 
 #include "core/option.h"
 #include "core/versionfunc.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/regioncov_visitor.h"
 #include "tools/gt_regioncov.h"

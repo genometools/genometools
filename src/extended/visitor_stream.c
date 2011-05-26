@@ -14,8 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/visitor_stream.h"
+#include "extended/feature_node.h"
 #include "extended/node_stream_api.h"
+#include "extended/visitor_stream.h"
 
 struct GtVisitorStream {
   const GtNodeStream parent_instance;

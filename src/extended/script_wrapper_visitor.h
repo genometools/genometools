@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtScriptWrapperVisitor GtScriptWrapperVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 typedef void (*GtScriptWrapperVisitorFreeFunc)(GtNodeVisitor*);
 typedef int  (*GtScriptWrapperVisitorCommentNodeFunc)(GtCommentNode*,

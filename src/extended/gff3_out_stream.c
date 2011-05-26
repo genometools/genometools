@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "extended/genome_node.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_visitor_api.h"
 #include "extended/node_stream_api.h"

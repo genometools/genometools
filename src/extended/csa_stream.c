@@ -19,6 +19,7 @@
 #include "extended/csa_stream.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"
+#include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 
 struct GtCSAStream {

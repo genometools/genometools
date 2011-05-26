@@ -16,7 +16,10 @@
 
 #include "core/assert_api.h"
 #include "core/md5_seqid.h"
+#include "core/str_array.h"
 #include "core/undef.h"
+#include "extended/feature_node.h"
+#include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
 #include "extended/md5_to_id_visitor.h"
 #include "extended/node_visitor_rep.h"

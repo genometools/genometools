@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtCDSVisitor GtCDSVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 #include "extended/region_mapping.h"
 
 const GtNodeVisitorClass* gt_cds_visitor_class(void);

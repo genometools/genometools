@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtGTFVisitor GtGTFVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_gtf_visitor_class(void);
 GtNodeVisitor*            gt_gtf_visitor_new(GtFile*);

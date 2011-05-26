@@ -16,6 +16,7 @@
 
 #include "extended/cds_check_stream.h"
 #include "extended/cds_check_visitor.h"
+#include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 
 struct GtCDSCheckStream {

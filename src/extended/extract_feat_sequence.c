@@ -16,6 +16,7 @@
 */
 
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/region_mapping.h"
 #include "extended/reverse.h"
@@ -32,7 +33,7 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
   int had_err = 0;
 
   gt_error_check(err);
-  fn = gt_genome_node_cast(gt_feature_node_class(), gn);
+  fn = gt_feature_node_cast(gn);
   gt_assert(fn);
 
   if (gt_feature_node_has_type(fn, type)) {
