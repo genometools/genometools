@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2009, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/gtdatahelp.h"
 #include "extended/uniq_stream_api.h"
 #include "tools/gt_uniq.h"
 
@@ -40,7 +41,7 @@ static GtOPrval parse_options(int *parsed_args, UniqArguments *arguments,
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
-                         "features in a sorted GFF3_file.");
+                         "feature not graphs in a sorted GFF3_file.");
   ofi = gt_outputfileinfo_new();
 
   /* -v */
@@ -49,6 +50,8 @@ static GtOPrval parse_options(int *parsed_args, UniqArguments *arguments,
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, ofi);
+
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 
   /* parse options */
   gt_option_parser_set_max_args(op, 1);
