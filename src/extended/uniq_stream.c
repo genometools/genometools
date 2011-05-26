@@ -68,16 +68,12 @@ static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
   gt_assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
-           gt_feature_node_score_is_defined((GtFeatureNode*)
-                                              *first_node))) {
-      first_score = gt_feature_node_get_score((GtFeatureNode*)
-                                                *first_node);
+           gt_feature_node_score_is_defined((GtFeatureNode*) *first_node))) {
+      first_score = gt_feature_node_get_score((GtFeatureNode*) *first_node);
     }
     if ((second_score_is_defined =
-           gt_feature_node_score_is_defined((GtFeatureNode*)
-                                              *second_node))) {
-      second_score = gt_feature_node_get_score((GtFeatureNode*)
-                                                 *second_node);
+           gt_feature_node_score_is_defined((GtFeatureNode*) *second_node))) {
+      second_score = gt_feature_node_get_score((GtFeatureNode*) *second_node);
     }
     if ((!first_score_is_defined && !second_score_is_defined) ||
         (first_score_is_defined && !second_score_is_defined) ||
