@@ -30,7 +30,7 @@ struct GtFeatureNode {
   float score;
   GtTagValueMap attributes; /* stores the attributes; created on demand */
   unsigned int bit_field;
-  GtDlist *children;
+  GtDlist *children; /* created on demand */
   GtFeatureNode *representative;
 };
 
