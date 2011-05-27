@@ -134,7 +134,6 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
   unsigned long lcpvalue,
                 prevprevsuffix,
                 previoussuffix,
-                lb,
                 idx,
                 nonspecials,
                 allocatedItvinfo = 0,
@@ -197,13 +196,11 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       gt_assert(previoussuffix != suftabelemundefflag);
       prevprevsuffix = previoussuffix;
     }
-    lb = idx;
     gt_assert(lastinterval == NULL);
     while (lcpvalue < TOP_ESA_BOTTOMUP.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
-      lb = lastinterval->lb;
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
         gt_assert(lastinterval->info == NULL ||
@@ -235,7 +232,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       {
         unsigned long lastintervallcp = lastinterval->lcp,
                       lastintervallb = lastinterval->lb;
-        PUSH_ESA_BOTTOMUP(lcpvalue,lb,false);
+        PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb,false);
         if (processbranchingedge(true,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
@@ -251,7 +248,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
         lastinterval = NULL;
       } else
       {
-        PUSH_ESA_BOTTOMUP(lcpvalue,lb,true);
+        PUSH_ESA_BOTTOMUP(lcpvalue,idx,true);
       }
     }
   }

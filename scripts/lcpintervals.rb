@@ -251,12 +251,10 @@ def enumlcpintervaltree(filename)
     else
       prevprevsuffix = previoussuffix
     end
-    lb = idx
     assert {lastinterval.nil?}
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
       lastinterval.rb = idx
-      lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
         processbranchedge(stack.last.noedge,stack.last,lastinterval)
         add_to_top_brchildlist(stack,lastinterval)
@@ -271,11 +269,12 @@ def enumlcpintervaltree(filename)
     end
     if lcpvalue > stack.last.lcp
       if not lastinterval.nil?
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[lastinterval],false))
+        stack.push(Lcpinterval.new(lcpvalue,lastinterval.lb,nil,
+                                   [lastinterval],false))
         processbranchedge(true,stack.last,lastinterval)
         lastinterval = nil
       else
-        stack.push(Lcpinterval.new(lcpvalue,lb,nil,[],true))
+        stack.push(Lcpinterval.new(lcpvalue,idx,nil,[],true))
       end
     end
     idx += 1
