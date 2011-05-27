@@ -19,7 +19,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
-#include "extended/csa_stream.h"
+#include "extended/csa_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
@@ -64,7 +64,7 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
   /* -join-length */
   option = gt_option_new_ulong("join-length", "set join length for the spliced "
                                "alignment clustering", &arguments->join_length,
-                               DEFAULT_JOIN_LENGTH);
+                               GT_DEFAULT_JOIN_LENGTH);
   gt_option_parser_add_option(op, option);
 
   /* -v */

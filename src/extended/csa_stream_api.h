@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +15,22 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef CSA_STREAM_H
-#define CSA_STREAM_H
+#ifndef CSA_STREAM_API_H
+#define CSA_STREAM_API_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-#define DEFAULT_JOIN_LENGTH 300
+#define GT_DEFAULT_JOIN_LENGTH 300
 
-/* implements the ``genome_stream'' interface */
+/* Implements the <GtNodeStream> interface. A <GtCSAStream> takes spliced
+   alignments and transforms them into consensus spliced alignments. */
 typedef struct GtCSAStream GtCSAStream;
 
-const GtNodeStreamClass* gt_csa_stream_class(void);
-GtNodeStream*            gt_csa_stream_new(GtNodeStream*,
-                                           unsigned long join_length);
+/* Create a <GtCSAStream*> which takes spliced alignments from its (which are at
+   most <join_length> many bases apart), tranforms them into consensus spliced
+   alignments, and returns them. */
+GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
+                                unsigned long join_length);
 
 #endif

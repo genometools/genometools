@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "extended/csa_stream.h"
+#include "extended/csa_stream_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_stream_lua.h"
 #include "gtlua/csa_stream_lua.h"
@@ -31,7 +31,7 @@ static int csa_stream_lua_new(lua_State *L)
     luaL_argcheck(L, join_length >= 0, 2, "must be >= 0");
   }
   else
-    join_length = DEFAULT_JOIN_LENGTH;
+    join_length = GT_DEFAULT_JOIN_LENGTH;
   csa_stream = lua_newuserdata(L, sizeof (GtNodeStream*));
   gt_assert(csa_stream);
   *csa_stream = gt_csa_stream_new(*in_stream, join_length);

@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "extended/csa_stream.h"
+#include "extended/csa_stream_api.h"
 #include "extended/csa_visitor.h"
 #include "extended/consensus_sa.h"
 #include "extended/genome_node.h"
@@ -27,6 +27,8 @@ struct GtCSAStream {
   GtNodeStream *in_stream;
   GtNodeVisitor *csa_visitor; /* the actual work is done in the visitor */
 };
+
+const GtNodeStreamClass* gt_csa_stream_class(void);
 
 #define csa_stream_cast(GS)\
         gt_node_stream_cast(gt_csa_stream_class(), GS)
@@ -92,7 +94,7 @@ GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
                                 unsigned long join_length)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_csa_stream_class(),
-                                          gt_node_stream_is_sorted(in_stream));
+                                           gt_node_stream_is_sorted(in_stream));
   GtCSAStream *cs = csa_stream_cast(ns);
   cs->in_stream = gt_node_stream_ref(in_stream);
   cs->csa_visitor = gt_csa_visitor_new(join_length);

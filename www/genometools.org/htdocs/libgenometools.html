@@ -46,6 +46,8 @@ interfaces.
 
   <li><a href="#GtCDSStream">GtCDSStream</a>
 
+  <li><a href="#GtCSAStream">GtCSAStream</a>
+
   <li><a href="#GtCanvas">GtCanvas</a>
 
   <li><a href="#GtCanvasCairoContext">GtCanvasCairoContext</a>
@@ -1083,6 +1085,23 @@ Create a <code>GtCDSStream*</code> which determins the coding sequence (CDS) for
    <code>true</code> the final ORF must end with a stop codon. If <code>generic_start_codons</code>
    equals <code>true</code>, the start codons of the standard translation scheme are used
    as start codons (otherwise the amino acid 'M' is regarded as a start codon).
+</p>
+<hr>
+<a name="GtCSAStream"></a>
+<h2>Class GtCSAStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtCSAStream</code> takes spliced
+   alignments and transforms them into consensus spliced alignments. </p>
+
+<hr>
+<a name="gt_csa_stream_new"></a>
+
+<code>GtNodeStream*  gt_csa_stream_new(GtNodeStream *in_stream,
+                                unsigned long join_length)</code>
+<p>
+Create a <code>GtCSAStream*</code> which takes spliced alignments from its (which are at
+   most <code>join_length</code> many bases apart), tranforms them into consensus spliced
+   alignments, and returns them.
 </p>
 <hr>
 <a name="GtCanvas"></a>
@@ -6698,6 +6717,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_countingsort"><code>gt_countingsort</code></a><br>
 
   <a href="#gt_countingsort_get_max"><code>gt_countingsort_get_max</code></a><br>
+
+  <a href="#gt_csa_stream_new"><code>gt_csa_stream_new</code></a><br>
 
   <a href="#gt_cstr_dup"><code>gt_cstr_dup</code></a><br>
 
