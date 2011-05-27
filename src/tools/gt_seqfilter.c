@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/outputfile.h"
 #include "core/option.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "tools/gt_seqfilter.h"
 
 typedef struct {

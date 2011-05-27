@@ -27,7 +27,7 @@
 #include "core/parseutils.h"
 #include "core/queue.h"
 #include "core/splitter.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/comment_node_api.h"

@@ -25,7 +25,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/splitter.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"

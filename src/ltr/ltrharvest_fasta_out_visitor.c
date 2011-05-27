@@ -24,7 +24,7 @@
 #include "core/parseutils.h"
 #include "core/range.h"
 #include "core/str_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/node_visitor_rep.h"

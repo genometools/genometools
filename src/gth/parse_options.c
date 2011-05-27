@@ -16,7 +16,7 @@
 */
 
 #include "core/outputfile.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "gth/default.h"
 #include "gth/gthdef.h"
 #include "gth/gthspeciestab.h"

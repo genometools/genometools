@@ -20,7 +20,7 @@
 #include "core/assert_api.h"
 #include "core/chardef.h"
 #include "core/minmax.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/swalign.h"
 
 typedef struct {

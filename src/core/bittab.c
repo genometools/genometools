@@ -20,7 +20,7 @@
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 

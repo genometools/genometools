@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/hashmap_api.h"
 #include "core/parseutils.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/region_factory.h"
 

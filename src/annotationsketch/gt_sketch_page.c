@@ -36,7 +36,7 @@
 #include "core/option.h"
 #include "core/str.h"
 #include "core/unused_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
 #include "annotationsketch/canvas_cairo_context.h"

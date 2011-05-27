@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "core/log.h"
 #include "core/queue_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/csa_variable_strands.h"
 #include "extended/csa_visitor.h"

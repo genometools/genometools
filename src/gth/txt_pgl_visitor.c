@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "gth/indent.h"
 #include "gth/gthtrans.h"
 #include "gth/pgl_visitor_rep.h"

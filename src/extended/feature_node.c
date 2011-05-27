@@ -25,7 +25,7 @@
 #include "core/queue_api.h"
 #include "core/strcmp_api.h"
 #include "core/symbol_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_rep.h"

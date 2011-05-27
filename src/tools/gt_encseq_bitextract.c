@@ -21,7 +21,7 @@
 #include "core/parseutils_api.h"
 #include "core/readmode_api.h"
 #include "core/unused_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "tools/gt_encseq_bitextract.h"
 
 typedef struct {

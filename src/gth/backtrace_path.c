@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/safearith.h"
 #include "gth/backtrace_path.h"
 #include "gth/gthcutoffsminimal.h"

@@ -18,7 +18,7 @@
 #ifndef PBS_H
 #define PBS_H
 
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/bioseq.h"
 #include "core/dlist.h"
 #include "core/seq.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/chardef.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "gth/indent.h"
 #include "gth/sa_visitor_rep.h"
 #include "gth/xml_final_sa_visitor.h"

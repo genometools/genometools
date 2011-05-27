@@ -18,7 +18,7 @@
 #include "core/ma_api.h"
 #include "core/range.h"
 #include "core/safearith.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/gthoutput.h"
 #include "gth/gthchain.h"

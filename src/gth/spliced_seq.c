@@ -17,7 +17,7 @@
 
 #include "core/ma.h"
 #include "core/range.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/gthoutput.h"
 #include "gth/spliced_seq.h"

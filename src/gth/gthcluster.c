@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "gth/gthcluster.h"
 
 static void storeSAinnewPGL(GtArray *pgls, unsigned long *currentPGLindex,

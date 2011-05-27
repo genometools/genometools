@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "gth/proc_sa_collection.h"
 #include "gth/gthsadistri.h"
 #include "gth/pgl_collection.h"

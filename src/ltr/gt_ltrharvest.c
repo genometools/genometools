@@ -20,7 +20,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/versionfunc.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_out_stream_api.h"

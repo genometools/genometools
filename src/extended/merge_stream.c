@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/ma.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node.h"
 #include "extended/merge_stream.h"

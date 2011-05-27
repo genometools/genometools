@@ -19,7 +19,7 @@
 #include "core/grep_api.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 
 struct GtBioseqCollection {
   GtBioseq **bioseqs;

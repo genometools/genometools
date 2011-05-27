@@ -22,7 +22,7 @@
 #include "core/cstr_api.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/warning_api.h"
 
 int gt_parse_int(int *out, const char *nptr)

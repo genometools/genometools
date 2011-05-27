@@ -20,7 +20,7 @@
 #include "core/msort.h"
 #include "core/range.h"
 #include "core/safearith.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 
 int gt_range_compare(const GtRange *range_a, const GtRange *range_b)
 {

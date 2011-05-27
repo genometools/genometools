@@ -19,7 +19,7 @@
 #include "core/hashmap.h"
 #include "core/ma_api.h"
 #include "core/parseutils.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/seqid2seqnum_mapping.h"
 
 typedef GtArray SeqidInfo;

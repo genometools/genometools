@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/log.h"
 #include "core/safearith.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/globalchaining.h"
 
 #define UNDEFPREVIOUS           num_of_fragments

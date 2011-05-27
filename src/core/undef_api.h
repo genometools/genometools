@@ -15,20 +15,48 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef UNDEF_H
-#define UNDEF_H
+#ifndef UNDEF_API_H
+#define UNDEF_API_H
 
 #include <float.h>
 #include <limits.h>
 
-#define GT_UNDEF_BOOL         (bool) ~0
-#define GT_UNDEF_CHAR         CHAR_MAX
-#define GT_UNDEF_DOUBLE       DBL_MAX
-#define GT_UNDEF_FLOAT        FLT_MAX
-#define GT_UNDEF_INT          ~0
-#define GT_UNDEF_UCHAR        UCHAR_MAX
-#define GT_UNDEF_UINT         ~0U
-#define GT_UNDEF_LONG         LONG_MIN
-#define GT_UNDEF_ULONG        ~0UL
+/* Undef module */
+
+/* The undefined <bool> value. */
+#define GT_UNDEF_BOOL \
+        (bool) ~0
+
+/* The undefined <char> value. */
+#define GT_UNDEF_CHAR \
+        CHAR_MAX
+
+/* The undefined <double> value. */
+#define GT_UNDEF_DOUBLE \
+        DBL_MAX
+
+/* The undefined <float> value. */
+#define GT_UNDEF_FLOAT \
+        FLT_MAX
+
+/* The undefined <int> value. */
+#define GT_UNDEF_INT \
+        ~0
+
+/* The undefined <long> value. */
+#define GT_UNDEF_LONG \
+        LONG_MIN
+
+/* The undefined <unsigned char> value. */
+#define GT_UNDEF_UCHAR \
+        UCHAR_MAX
+
+/* The undefined <unsigned int> value. */
+#define GT_UNDEF_UINT \
+        ~0U
+
+/* The undefined <unsigned long> value. */
+#define GT_UNDEF_ULONG \
+        ~0UL
 
 #endif

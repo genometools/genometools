@@ -18,7 +18,7 @@
 #include <math.h>
 #include "core/codon.h"
 #include "core/safearith.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/default.h"
 #include "gth/align_protein.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/parseutils.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/consensus_sa.h"
 #include "gth/ags_build.h"

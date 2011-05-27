@@ -21,7 +21,7 @@
 #include "core/orf.h"
 #include "core/translator.h"
 #include "core/trans_table.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/cds_visitor.h"
 #include "extended/feature_node.h"

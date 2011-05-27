@@ -26,7 +26,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 
 struct GtBlock {
   GtArray *elements;

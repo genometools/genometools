@@ -18,7 +18,7 @@
 #include "core/codon.h"
 #include "core/divmodmul.h"
 #include "core/safearith.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/gthenum.h"
 #include "gth/gtherror.h"

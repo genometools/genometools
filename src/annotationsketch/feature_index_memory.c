@@ -30,7 +30,7 @@
 #include "core/ma.h"
 #include "core/minmax.h"
 #include "core/range.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"

@@ -24,7 +24,7 @@
 #include "core/fasta_separator.h"
 #include "core/log_api.h"
 #include "core/readmode.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "tools/gt_encseq_decode.h"

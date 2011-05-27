@@ -20,7 +20,7 @@
 #include "core/dlist.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_parser.h"

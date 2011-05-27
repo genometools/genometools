@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "gth/sa_visitor_rep.h"
 #include "gth/txt_sa_visitor.h"
 

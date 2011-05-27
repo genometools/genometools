@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_stream_api.h"

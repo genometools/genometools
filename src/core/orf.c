@@ -20,7 +20,7 @@
 #include "core/orf.h"
 #include "core/range.h"
 #include "core/trans_table.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 
 void gt_determine_ORFs(GtORFProcessor orf_processor, void *data,
                        unsigned int framenum, const char *frame,

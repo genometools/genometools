@@ -19,7 +19,7 @@
 #include "core/ensure.h"
 #include "core/hashtable.h"
 #include "core/ma.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/line.h"

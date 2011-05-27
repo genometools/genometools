@@ -26,7 +26,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/progressbar.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "tools/gt_simreads.h"
 

@@ -21,7 +21,7 @@
 #include "core/alphabet.h"
 #include "core/range.h"
 #include "core/strand.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/hmm.h"
 #include "ltr/ltrelement.h"
 

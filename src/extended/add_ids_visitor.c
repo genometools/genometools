@@ -20,7 +20,7 @@
 #include "core/ma_api.h"
 #include "core/minmax.h"
 #include "core/queue_api.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/add_ids_visitor.h"

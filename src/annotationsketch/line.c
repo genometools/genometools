@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "annotationsketch/block.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/line.h"

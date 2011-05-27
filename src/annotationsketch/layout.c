@@ -36,7 +36,7 @@
 #include "core/msort.h"
 #include "core/str.h"
 #include "core/thread.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"

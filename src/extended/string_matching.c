@@ -22,7 +22,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "extended/string_matching.h"
 
 #define STRING_MATCHING_NUM_OF_TESTS        256

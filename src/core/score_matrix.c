@@ -24,7 +24,7 @@
 #include "core/score_matrix.h"
 #include "core/str.h"
 #include "core/tokenizer.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/xansi_api.h"
 
 struct GtScoreMatrix {

@@ -23,7 +23,7 @@
 #include "core/sequence_buffer_rep.h"
 #include "core/sequence_buffer_fastq.h"
 #include "core/seqiterator_fastq.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 
 #define FASTQ_START_SYMBOL '@'
 

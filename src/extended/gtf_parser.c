@@ -24,7 +24,7 @@
 #include "core/splitter.h"
 #include "core/strand.h"
 #include "core/strcmp.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/feature_node.h"

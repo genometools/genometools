@@ -16,7 +16,7 @@
 
 #include "core/assert_api.h"
 #include "core/md5_seqid.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/str_array.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"

@@ -16,7 +16,7 @@
 */
 
 #include "core/trans_table.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/warning_api.h"
 #include "gth/gtherror.h"
 #include "gth/gthxml.h"

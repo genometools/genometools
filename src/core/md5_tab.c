@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
 #include "core/md5_tab.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/xansi_api.h"
 
 struct GtMD5Tab{

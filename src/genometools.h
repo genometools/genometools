@@ -65,6 +65,7 @@
 #include "core/timer_api.h"
 #include "core/translator_api.h"
 #include "core/types_api.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/version_api.h"
 #include "core/warning_api.h"
