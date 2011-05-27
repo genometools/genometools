@@ -44,6 +44,8 @@ interfaces.
 
   <li><a href="#GtBlock">GtBlock</a>
 
+  <li><a href="#GtCDSStream">GtCDSStream</a>
+
   <li><a href="#GtCanvas">GtCanvas</a>
 
   <li><a href="#GtCanvasCairoContext">GtCanvasCairoContext</a>
@@ -1050,6 +1052,35 @@ Returns the number of elements in the <code>GtBlock</code>.
 <code>void                   gt_block_delete(GtBlock*)</code>
 <p>
 Deletes a <code>GtBlock</code>.
+</p>
+<hr>
+<a name="GtCDSStream"></a>
+<h2>Class GtCDSStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtCDSStream</code> determines the
+   coding sequence (CDS) for sequences determined by feature nodes of type
+   <em>exon</em> and adds them a feature nodes of type <em>CDS</em>. </p>
+
+<hr>
+<a name="gt_cds_stream_new"></a>
+
+<code>GtNodeStream*  gt_cds_stream_new(GtNodeStream *in_stream,
+                                GtRegionMapping *region_mapping,
+                                unsigned int minorflen, const char *source,
+                                bool start_codon, bool final_stop_codon,
+                                bool generic_star_codons)</code>
+<p>
+Create a <code>GtCDSStream*</code> which determins the coding sequence (CDS) for
+   sequences determined feature nodes of type <em>exon</em> it retrieves from
+   <code>in_stream</code>, adds them as feature nodes of type <em>CDS</em> and returns all
+   nodes. <code>region_mapping</code> is used to map the sequence IDs of the feature nodes
+   to the regions of the actual sequences. <code>minorflen</code> is the minimum length an
+   ORF must have in order to be added. The CDS features are created with the
+   given <code>source</code>. If <code>start_codon</code> equals <code>true</code> an ORF must begin with a start
+   codon, otherwise it can start at any position. If <code>final_stop_codon</code> equals
+   <code>true</code> the final ORF must end with a stop codon. If <code>generic_start_codons</code>
+   equals <code>true</code>, the start codons of the standard translation scheme are used
+   as start codons (otherwise the amino acid 'M' is regarded as a start codon).
 </p>
 <hr>
 <a name="GtCanvas"></a>
@@ -6535,6 +6566,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_canvas_delete"><code>gt_canvas_delete</code></a><br>
 
   <a href="#gt_canvas_get_height"><code>gt_canvas_get_height</code></a><br>
+
+  <a href="#gt_cds_stream_new"><code>gt_cds_stream_new</code></a><br>
 
   <a href="#gt_codon_iterator_current_position"><code>gt_codon_iterator_current_position</code></a><br>
 

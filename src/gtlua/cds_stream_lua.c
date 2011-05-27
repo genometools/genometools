@@ -16,7 +16,7 @@
 */
 
 #include "lauxlib.h"
-#include "extended/cds_stream.h"
+#include "extended/cds_stream_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/cds_stream_lua.h"
 #include "gtlua/genome_stream_lua.h"

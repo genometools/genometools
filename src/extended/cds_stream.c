@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/cds_stream.h"
+#include "extended/cds_stream_api.h"
 #include "extended/cds_visitor.h"
 #include "extended/visitor_stream_api.h"
 
