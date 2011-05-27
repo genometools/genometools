@@ -1699,14 +1699,14 @@ Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</c
 
 <code>bool               gt_encseq_has_multiseq_support(const GtEncseq *encseq)</code>
 <p>
-Returns TRUE if <code>encseq</code> has multiple sequence support.
+Returns <code>true</code> if <code>encseq</code> has multiple sequence support.
 </p>
 <hr>
 <a name="gt_encseq_has_description_support"></a>
 
 <code>bool               gt_encseq_has_description_support(const GtEncseq *encseq)</code>
 <p>
-Returns TRUE if <code>encseq</code> has description support.
+Returns <code>true</code> if <code>encseq</code> has description support.
 </p>
 <hr>
 <a name="gt_encseq_seqstartpos"></a>
@@ -1810,7 +1810,7 @@ Removes virtual reverse complement sequences added by
 
 <code>bool               gt_encseq_is_mirrored(const GtEncseq *encseq)</code>
 <p>
-Returns TRUE if <code>encseq</code> contains virtual reverse complement sequences as
+Returns <code>true</code> if <code>encseq</code> contains virtual reverse complement sequences as
    added by <code>gt_encseq_mirror()</code>.
 </p>
 <hr>
@@ -1945,7 +1945,7 @@ Disables creation of the .sds table.
 <p>
 Adds a sequence given as a C string <code>str</code> of length <code>strlen</code> to the
    encoded sequence to be built by <code>eb</code>. Additionally, a description can be
-   given (<code>desc</code>). If description support is enabled, this must not be NULL.
+   given (<code>desc</code>). If description support is enabled, this must not be <code>NULL</code>.
    A copy will be made during the addition process and the sequence will
    be encoded using the alphabet set at the construction time of <code>eb</code>. Thus it
    must only contain symbols compatible with the alphabet.
@@ -1958,7 +1958,7 @@ Adds a sequence given as a C string <code>str</code> of length <code>strlen</cod
 <p>
 Adds a sequence given as a GtStr <code>str</code> to the encoded sequence to be built
    by <code>eb</code>. Additionally, a description can be given. If description support
-   is enabled, <code>desc</code> must not be NULL.
+   is enabled, <code>desc</code> must not be <code>NULL</code>.
    A copy will be made during the addition process and the sequence will
    be encoded using the alphabet set at the construction time of <code>eb</code>. Thus it
    must only contain symbols compatible with the alphabet.
@@ -1976,7 +1976,7 @@ Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>
    alphabet set at the construction time of <code>eb</code>.
    Does not take ownership of <code>str</code>.
    Additionally, a description <code>desc</code> can be given. If description support
-   is enabled, this must not be NULL.
+   is enabled, this must not be <code>NULL</code>.
 </p>
 <hr>
 <a name="gt_encseq_builder_add_encoded_own"></a>
@@ -1992,14 +1992,14 @@ Adds a sequence given as a pre-encoded string  <code>str</code> of length <code>
    Always creates a copy of <code>str</code>, so it can be used with memory that is to be
    freed immediately after adding.
    Additionally, a description <code>desc</code> can be given. If description support
-   is enabled, this must not be NULL.
+   is enabled, this must not be <code>NULL</code>.
 </p>
 <hr>
 <a name="gt_encseq_builder_set_logger"></a>
 
 <code>void              gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l)</code>
 <p>
-Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is NULL (no
+Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is <code>NULL</code> (no
    logging).
 </p>
 <hr>
@@ -2008,7 +2008,7 @@ Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Def
 <code>GtEncseq*         gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)</code>
 <p>
 Creates a new <code>GtEncseq</code> from the sequences added to <code>eb</code>.
-   Returns a <code>GtEncseq</code> instance on success, or NULL on error.
+   Returns a <code>GtEncseq</code> instance on success, or <code>NULL</code> on error.
    If an error occurred, <code>err</code> is set accordingly.
    The state of <code>eb</code> is reset to empty after successful creation of a new
    <code>GtEncseq</code> (like having called <code>gt_encseq_builder_reset()</code>).
@@ -2048,7 +2048,7 @@ Creates a new <code>GtEncseqEncoder</code>.
 
 <code>void              gt_encseq_encoder_set_timer(GtEncseqEncoder *ee, GtTimer *t)</code>
 <p>
-Sets <code>t</code> to be the timer for <code>ee</code>. Default is NULL (no progress
+Sets <code>t</code> to be the timer for <code>ee</code>. Default is <code>NULL</code> (no progress
 reporting).
 </p>
 <hr>
@@ -2085,7 +2085,7 @@ Returns the representation requested for <code>ee</code>.
 <p>
 Sets the symbol map file to use in <code>ee</code> to <code>smap</code> which must a valid
    alphabet description file. Returns 0 on success, and a negative value on
-   error (<code>err</code> is set accordingly). Default is NULL (no alphabet
+   error (<code>err</code> is set accordingly). Default is <code>NULL</code> (no alphabet
    transformation).
 </p>
 <hr>
@@ -2101,7 +2101,7 @@ Returns the symbol map file requested for <code>ee</code>.
 <code>void              gt_encseq_encoder_set_logger(GtEncseqEncoder *ee,
                                               GtLogger *l)</code>
 <p>
-Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is NULL (no
+Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is <code>NULL</code> (no
    logging).
 </p>
 <hr>
@@ -2190,8 +2190,8 @@ Disables creation of the .des table.
 
 <code>bool              gt_encseq_encoder_des_tab_requested(const GtEncseqEncoder *ee)</code>
 <p>
-Returns TRUE if the creation of the .des table has been requested,
-   FALSE otherwise.
+Returns <code>true</code> if the creation of the .des table has been requested,
+   <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_encseq_encoder_create_ssp_tab"></a>
@@ -2213,8 +2213,8 @@ Disables creation of the .ssp table.
 
 <code>bool              gt_encseq_encoder_ssp_tab_requested(const GtEncseqEncoder *ee)</code>
 <p>
-Returns TRUE if the creation of the .ssp table has been requested,
-   FALSE otherwise.
+Returns <code>true</code> if the creation of the .ssp table has been requested,
+   <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_encseq_encoder_create_sds_tab"></a>
@@ -2236,8 +2236,8 @@ Disables creation of the .sds table.
 
 <code>bool              gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee)</code>
 <p>
-Returns TRUE if the creation of the .sds table has been requested,
-   FALSE otherwise.
+Returns <code>true</code> if the creation of the .sds table has been requested,
+   <code>false</code> otherwise.
 </p>
 <hr>
 <a name="gt_encseq_encoder_set_input_dna"></a>
@@ -2251,7 +2251,7 @@ Sets the sequence input type for <code>ee</code> to DNA.
 
 <code>bool              gt_encseq_encoder_is_input_dna(GtEncseqEncoder *ee)</code>
 <p>
-Returns TRUE if the input sequence has been defined as being DNA.
+Returns <code>true</code> if the input sequence has been defined as being DNA.
 </p>
 <hr>
 <a name="gt_encseq_encoder_set_input_protein"></a>
@@ -2265,7 +2265,7 @@ Sets the sequence input type for <code>ee</code> to protein/amino acids.
 
 <code>bool              gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee)</code>
 <p>
-Returns TRUE if the input sequence has been defined as being protein.
+Returns <code>true</code> if the input sequence has been defined as being protein.
 </p>
 <hr>
 <a name="gt_encseq_encoder_encode"></a>
@@ -2406,7 +2406,7 @@ Disables requirement of the .des table for loading a <code>GtEncseq</code>
 
 <code>bool              gt_encseq_loader_des_tab_required(const GtEncseqLoader *el)</code>
 <p>
-Returns TRUE if a .des table must be present for loading to succeed.
+Returns <code>true</code> if a .des table must be present for loading to succeed.
 </p>
 <hr>
 <a name="gt_encseq_loader_require_ssp_tab"></a>
@@ -2429,7 +2429,7 @@ Disables requirement of the .ssp table for loading a <code>GtEncseq</code>
 
 <code>bool              gt_encseq_loader_ssp_tab_required(const GtEncseqLoader *el)</code>
 <p>
-Returns TRUE if a .ssp table must be present for loading to succeed.
+Returns <code>true</code> if a .ssp table must be present for loading to succeed.
 </p>
 <hr>
 <a name="gt_encseq_loader_require_sds_tab"></a>
@@ -2452,14 +2452,14 @@ Disables requirement of the .sds table for loading a <code>GtEncseq</code>
 
 <code>bool              gt_encseq_loader_sds_tab_required(const GtEncseqLoader *el)</code>
 <p>
-Returns TRUE if a .sds table must be present for loading to succeed.
+Returns <code>true</code> if a .sds table must be present for loading to succeed.
 </p>
 <hr>
 <a name="gt_encseq_loader_set_logger"></a>
 
 <code>void              gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l)</code>
 <p>
-Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is NULL (no
+Sets the logger to use by <code>ee</code> during encoding to <code>l</code>. Default is <code>NULL</code> (no
    logging).
 </p>
 <hr>
@@ -2487,7 +2487,7 @@ Disables loading of a sequence using <code>el</code> with mirroring enabled righ
 <p>
 Attempts to map the index files as specified by <code>indexname</code> using the options
    set in <code>el</code> using this interface. Returns a <code>GtEncseq</code> instance
-   on success, or NULL on error. If an error occurred, <code>err</code> is set
+   on success, or <code>NULL</code> on error. If an error occurred, <code>err</code> is set
    accordingly.
 </p>
 <hr>

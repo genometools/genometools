@@ -125,9 +125,9 @@ void              gt_encseq_extract_decoded(const GtEncseq *encseq,
    Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
                                       unsigned long seqnum);
-/* Returns TRUE if <encseq> has multiple sequence support. */
+/* Returns <true> if <encseq> has multiple sequence support. */
 bool              gt_encseq_has_multiseq_support(const GtEncseq *encseq);
-/* Returns TRUE if <encseq> has description support. */
+/* Returns <true> if <encseq> has description support. */
 bool              gt_encseq_has_description_support(const GtEncseq *encseq);
 /* Returns the start position of the <seqnum>-th sequence in the <encseq>.
    Requires multiple sequence support enabled in <encseq>. */
@@ -171,7 +171,7 @@ int              gt_encseq_mirror(GtEncseq *encseq, GtError *err);
 /* Removes virtual reverse complement sequences added by
    <gt_encseq_mirror()>. */
 void              gt_encseq_unmirror(GtEncseq *encseq);
-/* Returns TRUE if <encseq> contains virtual reverse complement sequences as
+/* Returns <true> if <encseq> contains virtual reverse complement sequences as
    added by <gt_encseq_mirror()>. */
 bool              gt_encseq_is_mirrored(const GtEncseq *encseq);
 /* Deletes <encseq> and frees all associated space. */
@@ -194,7 +194,7 @@ void            gt_encseq_reader_delete(GtEncseqReader *esr);
 
 /* Creates a new <GtEncseqEncoder>. */
 GtEncseqEncoder* gt_encseq_encoder_new(void);
-/* Sets <t> to be the timer for <ee>. Default is NULL (no progress
+/* Sets <t> to be the timer for <ee>. Default is <NULL> (no progress
 reporting). */
 void             gt_encseq_encoder_set_timer(GtEncseqEncoder *ee, GtTimer *t);
 /* Returns the timer set for <ee>. */
@@ -209,14 +209,14 @@ int              gt_encseq_encoder_use_representation(GtEncseqEncoder *ee,
 GtStr*           gt_encseq_encoder_representation(const GtEncseqEncoder *ee);
 /* Sets the symbol map file to use in <ee> to <smap> which must a valid
    alphabet description file. Returns 0 on success, and a negative value on
-   error (<err> is set accordingly). Default is NULL (no alphabet
+   error (<err> is set accordingly). Default is <NULL> (no alphabet
    transformation). */
 int              gt_encseq_encoder_use_symbolmap_file(GtEncseqEncoder *ee,
                                                       const char *smap,
                                                       GtError *err);
 /* Returns the symbol map file requested for <ee>. */
 const char*      gt_encseq_encoder_symbolmap_file(const GtEncseqEncoder *ee);
-/* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
+/* Sets the logger to use by <ee> during encoding to <l>. Default is <NULL> (no
    logging). */
 void             gt_encseq_encoder_set_logger(GtEncseqEncoder *ee,
                                               GtLogger *l);
@@ -261,32 +261,32 @@ void             gt_encseq_encoder_disable_lossless_support(GtEncseqEncoder
 void             gt_encseq_encoder_create_des_tab(GtEncseqEncoder *ee);
 /* Disables creation of the .des table. */
 void             gt_encseq_encoder_do_not_create_des_tab(GtEncseqEncoder *ee);
-/* Returns TRUE if the creation of the .des table has been requested,
-   FALSE otherwise. */
+/* Returns <true> if the creation of the .des table has been requested,
+   <false> otherwise. */
 bool             gt_encseq_encoder_des_tab_requested(const GtEncseqEncoder *ee);
 /* Enables creation of the .ssp table containing indexes for multiple sequences.
    Enabled by default. */
 void             gt_encseq_encoder_create_ssp_tab(GtEncseqEncoder *ee);
 /* Disables creation of the .ssp table. */
 void             gt_encseq_encoder_do_not_create_ssp_tab(GtEncseqEncoder *ee);
-/* Returns TRUE if the creation of the .ssp table has been requested,
-   FALSE otherwise. */
+/* Returns <true> if the creation of the .ssp table has been requested,
+   <false> otherwise. */
 bool             gt_encseq_encoder_ssp_tab_requested(const GtEncseqEncoder *ee);
 /* Enables creation of the .sds table containing indexes for sequence
    descriptions. Enabled by default. */
 void             gt_encseq_encoder_create_sds_tab(GtEncseqEncoder *ee);
 /* Disables creation of the .sds table. */
 void             gt_encseq_encoder_do_not_create_sds_tab(GtEncseqEncoder *ee);
-/* Returns TRUE if the creation of the .sds table has been requested,
-   FALSE otherwise. */
+/* Returns <true> if the creation of the .sds table has been requested,
+   <false> otherwise. */
 bool             gt_encseq_encoder_sds_tab_requested(const GtEncseqEncoder *ee);
 /* Sets the sequence input type for <ee> to DNA. */
 void             gt_encseq_encoder_set_input_dna(GtEncseqEncoder *ee);
-/* Returns TRUE if the input sequence has been defined as being DNA. */
+/* Returns <true> if the input sequence has been defined as being DNA. */
 bool             gt_encseq_encoder_is_input_dna(GtEncseqEncoder *ee);
 /* Sets the sequence input type for <ee> to protein/amino acids. */
 void             gt_encseq_encoder_set_input_protein(GtEncseqEncoder *ee);
-/* Returns TRUE if the input sequence has been defined as being protein. */
+/* Returns <true> if the input sequence has been defined as being protein. */
 bool             gt_encseq_encoder_is_input_protein(GtEncseqEncoder *ee);
 /* Encodes the sequence files given in <seqfiles> using the settings in <ee>
    and <indexname> as the prefix for the index tables. Returns 0 on success, or
@@ -351,7 +351,7 @@ void             gt_encseq_loader_require_des_tab(GtEncseqLoader *el);
 /* Disables requirement of the .des table for loading a <GtEncseq>
    using <el>. */
 void             gt_encseq_loader_do_not_require_des_tab(GtEncseqLoader *el);
-/* Returns TRUE if a .des table must be present for loading to succeed. */
+/* Returns <true> if a .des table must be present for loading to succeed. */
 bool             gt_encseq_loader_des_tab_required(const GtEncseqLoader *el);
 /* Requires presence of the .ssp table containing indexes for multiple
    sequences. Enabled by default. */
@@ -359,7 +359,7 @@ void             gt_encseq_loader_require_ssp_tab(GtEncseqLoader *el);
 /* Disables requirement of the .ssp table for loading a <GtEncseq>
    using <el>. */
 void             gt_encseq_loader_do_not_require_ssp_tab(GtEncseqLoader *el);
-/* Returns TRUE if a .ssp table must be present for loading to succeed. */
+/* Returns <true> if a .ssp table must be present for loading to succeed. */
 bool             gt_encseq_loader_ssp_tab_required(const GtEncseqLoader *el);
 /* Requires presence of the .sds table containing indexes for sequence
    descriptions. Enabled by default. */
@@ -367,9 +367,9 @@ void             gt_encseq_loader_require_sds_tab(GtEncseqLoader *el);
 /* Disables requirement of the .sds table for loading a <GtEncseq>
    using <el>. */
 void             gt_encseq_loader_do_not_require_sds_tab(GtEncseqLoader *el);
-/* Returns TRUE if a .sds table must be present for loading to succeed. */
+/* Returns <true> if a .sds table must be present for loading to succeed. */
 bool             gt_encseq_loader_sds_tab_required(const GtEncseqLoader *el);
-/* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
+/* Sets the logger to use by <ee> during encoding to <l>. Default is <NULL> (no
    logging). */
 void             gt_encseq_loader_set_logger(GtEncseqLoader *el, GtLogger *l);
 /* Enables loading of a sequence using <el> with mirroring enabled from the
@@ -380,7 +380,7 @@ void             gt_encseq_loader_mirror(GtEncseqLoader *el);
 void             gt_encseq_loader_do_not_mirror(GtEncseqLoader *el);
 /* Attempts to map the index files as specified by <indexname> using the options
    set in <el> using this interface. Returns a <GtEncseq> instance
-   on success, or NULL on error. If an error occurred, <err> is set
+   on success, or <NULL> on error. If an error occurred, <err> is set
    accordingly. */
 GtEncseq*        gt_encseq_loader_load(GtEncseqLoader *el,
                                        const char *indexname,
@@ -434,7 +434,7 @@ void             gt_encseq_builder_create_sds_tab(GtEncseqBuilder *eb);
 void             gt_encseq_builder_do_not_create_sds_tab(GtEncseqBuilder *eb);
 /* Adds a sequence given as a C string <str> of length <strlen> to the
    encoded sequence to be built by <eb>. Additionally, a description can be
-   given (<desc>). If description support is enabled, this must not be NULL.
+   given (<desc>). If description support is enabled, this must not be <NULL>.
    A copy will be made during the addition process and the sequence will
    be encoded using the alphabet set at the construction time of <eb>. Thus it
    must only contain symbols compatible with the alphabet. */
@@ -444,7 +444,7 @@ void             gt_encseq_builder_add_cstr(GtEncseqBuilder *eb,
                                             const char *desc);
 /* Adds a sequence given as a GtStr <str> to the encoded sequence to be built
    by <eb>. Additionally, a description can be given. If description support
-   is enabled, <desc> must not be NULL.
+   is enabled, <desc> must not be <NULL>.
    A copy will be made during the addition process and the sequence will
    be encoded using the alphabet set at the construction time of <eb>. Thus it
    must only contain symbols compatible with the alphabet. */
@@ -455,7 +455,7 @@ void             gt_encseq_builder_add_str(GtEncseqBuilder *eb, GtStr *str,
    alphabet set at the construction time of <eb>.
    Does not take ownership of <str>.
    Additionally, a description <desc> can be given. If description support
-   is enabled, this must not be NULL. */
+   is enabled, this must not be <NULL>. */
 void             gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
                                                const GtUchar *str,
                                                unsigned long strlen,
@@ -466,16 +466,16 @@ void             gt_encseq_builder_add_encoded(GtEncseqBuilder *eb,
    Always creates a copy of <str>, so it can be used with memory that is to be
    freed immediately after adding.
    Additionally, a description <desc> can be given. If description support
-   is enabled, this must not be NULL. */
+   is enabled, this must not be <NULL>. */
 void             gt_encseq_builder_add_encoded_own(GtEncseqBuilder *eb,
                                                    const GtUchar *str,
                                                    unsigned long strlen,
                                                    const char *desc);
-/* Sets the logger to use by <ee> during encoding to <l>. Default is NULL (no
+/* Sets the logger to use by <ee> during encoding to <l>. Default is <NULL> (no
    logging). */
 void             gt_encseq_builder_set_logger(GtEncseqBuilder*, GtLogger *l);
 /* Creates a new <GtEncseq> from the sequences added to <eb>.
-   Returns a <GtEncseq> instance on success, or NULL on error.
+   Returns a <GtEncseq> instance on success, or <NULL> on error.
    If an error occurred, <err> is set accordingly.
    The state of <eb> is reset to empty after successful creation of a new
    <GtEncseq> (like having called <gt_encseq_builder_reset()>). */

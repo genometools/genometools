@@ -39,13 +39,13 @@
           ((TOTALLENGTH) - 1 - (POS))
 
 /* Creates a new <GtEncseqEncoder> using the options given in <opts>.
-   If no encoder could be created using the given options, NULL is
+   If no encoder could be created using the given options, <NULL> is
    returned and <err> is set accordingly. */
 GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
                                                     GtError *err);
 
 /* Creates a new <GtEncseqLoader> using the options given in <opts>.
-   If no loader could be created using the given options, NULL is
+   If no loader could be created using the given options, <NULL> is
    returned and <err> is set accordingly. */
 GtEncseqLoader* gt_encseq_loader_new_from_options(GtEncseqOptions *opts,
                                                   GtError *err);
@@ -311,7 +311,8 @@ int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
    use. */
 void  gt_encseq_encoder_set_input_preencoded(GtEncseqEncoder *ee);
 
-/* Returns TRUE if the input sequence has been defined as being pre-encoded. */
+/* Returns <true> if the input sequence has been defined as being pre-encoded.
+ */
 bool gt_encseq_encoder_is_input_preencoded(GtEncseqEncoder *ee);
 
 /* The following function shows the encoded sequence at position <startpos>.
