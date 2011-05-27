@@ -20,8 +20,8 @@
 #include <stdbool.h>
 #include "core/str.h"
 #include "core/error.h"
-
 #include "core/encseq.h"
+
 #include "sarr-def.h"
 #include "lcpoverflow.h"
 
@@ -37,7 +37,8 @@ typedef enum
 typedef struct
 {
   Suffixarray *suffixarray;
-  unsigned long numberofsuffixes,
+  unsigned long nonspecials,
+         numberofsuffixes,
          nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
          nextlcptabindex, /* for SEQ_mappedboth */
          largelcpindex;   /* SEQ_mappedboth */
@@ -105,10 +106,16 @@ const GtEncseq *gt_encseqSequentialsuffixarrayreader(
 GtReadmode gt_readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar);
 
+unsigned long gt_Sequentialsuffixarrayreader_nonspecials(
+                          const Sequentialsuffixarrayreader *ssar);
+
 const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
                         const Sequentialsuffixarrayreader *ssar);
 
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *ssar);
+
+unsigned long gt_Sequentialsuffixarrayreader_totallength(
               const Sequentialsuffixarrayreader *ssar);
 
 #endif

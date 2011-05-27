@@ -13,6 +13,18 @@ class LcpSufstream
     @lcpfile.read(1)
     @llvfile = File.new(filename + ".llv","r")
     @suffile = File.new(filename + ".suf","r")
+    @totallength = nil
+    @specialcharacters = nil
+    File.new(filename + ".prj","r").each_line do |line|
+      m = line.match(/^totallength=(\d+)/)
+      if m
+        @totallength=m[1].to_i
+      end
+      m = line.match(/^specialcharacters=(\d+)/)
+      if m
+        @specialcharacters=m[1].to_i
+      end
+    end
   end
   def next()
     @lcpfile.each_byte do |cc|
@@ -25,6 +37,9 @@ class LcpSufstream
         yield cc,suftabvalue
       end
     end
+  end
+  def numofnonspecials()
+    return @totallength - @specialcharacters
   end
 end
 
@@ -168,8 +183,13 @@ def enumlcpintervaltreewithqueue(filename)
   queue = Queuepair.new()
   lastinterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[],true))
+  lcpsufstream = LcpSufstream.new(filename)
+  nonspecials = lcpsufstream.numofnonspecials()
   idx=0
-  LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
+  lcpsufstream.next() do |lcpvalue,previoussuffix|
+    if idx >= nonspecials
+      break
+    end
     lb = idx
     if lcpvalue <= stack.last.lcp
       queue.add(idx,previoussuffix)
@@ -208,11 +228,6 @@ def enumlcpintervaltreewithqueue(filename)
     end
     idx += 1
   end
-  lastinterval = stack.pop
-  lastinterval.rb = idx
-  queue.add(idx,idx)
-  processleaves(lastinterval,queue,idx+1)
-  queue.delete()
 end
 
 def enumlcpintervaltree(filename)
@@ -220,8 +235,13 @@ def enumlcpintervaltree(filename)
   prevprevsuffix = nil
   lastinterval = nil
   stack.push(Lcpinterval.new(0,0,nil,[],true))
+  lcpsufstream = LcpSufstream.new(filename)
+  nonspecials = lcpsufstream.numofnonspecials()
   idx=0
-  LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
+  lcpsufstream.next() do |lcpvalue,previoussuffix|
+    if idx >= nonspecials
+      break
+    end
     if not prevprevsuffix.nil?
       processleaf(stack.last,prevprevsuffix)
       prevprevsuffix = nil
@@ -260,12 +280,6 @@ def enumlcpintervaltree(filename)
     end
     idx += 1
   end
-  lastinterval = stack.pop
-  lastinterval.rb = idx
-  if not prevprevsuffix.nil?
-    processleaf(lastinterval,prevprevsuffix)
-  end
-  processleaf(lastinterval,idx)
 end
 
 if ARGV.length != 2

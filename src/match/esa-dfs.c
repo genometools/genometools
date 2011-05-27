@@ -118,10 +118,11 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
   unsigned long previoussuffix = 0,
          previouslcp,
          currentindex,
-         currentlcp = 0; /* May be necessary if currentlcp is used after the
+         currentlcp = 0, /* May be necessary if currentlcp is used after the
                             outer while loop */
-  unsigned long allocatedItvinfo = 0,
-                nextfreeItvinfo = 0;
+         nonspecials,
+         allocatedItvinfo = 0,
+         nextfreeItvinfo = 0;
   Itvinfo *stackspace = NULL;
   bool haserr = false;
 
@@ -137,7 +138,8 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
   {
     assignleftmostleaf(TOP.dfsinfo,0,state);
   }
-  for (currentindex = 0; !haserr; currentindex++)
+  nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  for (currentindex = 0; currentindex < nonspecials; currentindex++)
   {
 #ifdef INLINEDSequentialsuffixarrayreader
     NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
@@ -289,52 +291,7 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
         }
       }
     }
-  }
-  if (!haserr && TOP.lastisleafedge)
-  {
-#ifdef INLINEDSequentialsuffixarrayreader
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-#else
-    retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
-    gt_assert(retval >= 0);
-    if (retval == 0)
-    {
-      gt_error_set(err,"Missing value in suftab");
-      haserr = true;
-    }
-#endif
-    if (!haserr)
-    {
-      if (processleafedge != NULL &&
-          processleafedge(false,
-                          TOP.depth,
-                          TOP.dfsinfo,
-                          previoussuffix,
-                          state,
-                          err) != 0)
-      {
-        haserr = true;
-      }
-    }
-    if (!haserr)
-    {
-      if (assignrightmostleaf != NULL)
-      {
-        assignrightmostleaf(TOP.dfsinfo,
-                            currentindex,
-                            previoussuffix,
-                            currentlcp,
-                            state);
-      }
-      if (processcompletenode != NULL &&
-          processcompletenode(TOP.depth,TOP.dfsinfo,
-                              nextfreeItvinfo >= 2UL ? BELOWTOP.depth
-                                                     : 0,
-                              state,err) != 0)
-      {
-        haserr = true;
-      }
-    }
+    gt_assert(!haserr);
   }
   freeItvinfo(stackspace,
               allocatedItvinfo,

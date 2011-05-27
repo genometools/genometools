@@ -136,6 +136,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                 previoussuffix,
                 lb,
                 idx,
+                nonspecials,
                 allocatedItvinfo = 0,
                 nextfreeItvinfo = 0;
   GtBUItvinfo *lastinterval = NULL, *stackspace = NULL;
@@ -144,7 +145,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
 
   PUSH_ESA_BOTTOMUP(0,0,true);
   prevprevsuffix = suftabelemundefflag;
-  for (idx = 0; !haserr; idx++)
+  nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  for (idx = 0; idx < nonspecials; idx++)
   {
     retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
     if (retval < 0)
@@ -252,35 +254,6 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
         PUSH_ESA_BOTTOMUP(lcpvalue,lb,true);
       }
     }
-  }
-  if (!haserr)
-  {
-    lastinterval = POP_ESA_BOTTOMUP;
-    lastinterval->rb = idx;
-    if (prevprevsuffix != suftabelemundefflag)
-    {
-      if (processleafedge(lastinterval->noedge,
-                          lastinterval->lcp,
-                          lastinterval->lb,
-                          lastinterval->info,
-                          prevprevsuffix,bustate,err) != 0)
-      {
-        haserr = true;
-      }
-      lastinterval->noedge = false;
-    }
-  }
-  if (!haserr)
-  {
-    if (processleafedge(lastinterval->noedge,
-                        lastinterval->lcp,
-                        lastinterval->lb,
-                        lastinterval->info,
-                        idx,bustate,err) != 0)
-    {
-      haserr = true;
-    }
-    lastinterval->noedge = false;
   }
   freeBUItvinfo(stackspace, allocatedItvinfo, freeBUinfo, bustate);
   return haserr ? -1 : 0;

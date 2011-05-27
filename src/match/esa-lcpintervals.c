@@ -162,6 +162,18 @@ static int gt_enumlcpvalues(bool outedges,
   {
     haserr = true;
   }
+  if (!haserr && state->processlcpinterval != NULL)
+  {
+    state->lastcompletenode.offset = 0;
+    state->lastcompletenode.left = 0;
+    state->lastcompletenode.right
+      = gt_Sequentialsuffixarrayreader_totallength(ssar);
+    if (state->processlcpinterval(state->processinfo,
+                                  &state->lastcompletenode) != 0)
+    {
+      haserr = true;
+    }
+  }
   gt_free(state);
   return haserr ? -1 : 0;
 }
