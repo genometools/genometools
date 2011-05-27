@@ -116,6 +116,8 @@ interfaces.
 
   <li><a href="#GtHashmap">GtHashmap</a>
 
+  <li><a href="#GtIDToMD5Stream">GtIDToMD5Stream</a>
+
   <li><a href="#GtImageInfo">GtImageInfo</a>
 
   <li><a href="#GtInterFeatureStream">GtInterFeatureStream</a>
@@ -127,6 +129,8 @@ interfaces.
   <li><a href="#GtLayout">GtLayout</a>
 
   <li><a href="#GtLogger">GtLogger</a>
+
+  <li><a href="#GtMD5ToIDStream">GtMD5ToIDStream</a>
 
   <li><a href="#GtMergeStream">GtMergeStream</a>
 
@@ -3895,6 +3899,26 @@ Reset <code>hm</code> by unsetting values for all keys, calling the free functio
 Delete <code>hm</code>, calling the free function if necessary.
 </p>
 <hr>
+<a name="GtIDToMD5Stream"></a>
+<h2>Class GtIDToMD5Stream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtIDToMD5Stream</code> converts
+   ``regular'' sequence IDs to MD5 fingerprints. </p>
+
+<hr>
+<a name="gt_id_to_md5_stream_new"></a>
+
+<code>GtNodeStream*  gt_id_to_md5_stream_new(GtNodeStream *in_stream,
+                                      GtRegionMapping *region_mapping,
+                                      bool substitute_target_ids)</code>
+<p>
+Create a <code>GtIDToMD5Stream*</code> which converts ``regular'' sequence IDs from
+   nodes it retrievs from its <code>in_stream</code> to MD5 fingerprints (with the help of
+   the given <code>region_mapping). If <substitute_target_ids</code> is true, the IDs of
+   Target attributes are also converted to MD5 fingerprints.
+   Takes ownership of <code>region_mapping</code>!
+</p>
+<hr>
 <a name="GtImageInfo"></a>
 <h2>Class GtImageInfo</h2>
 
@@ -4207,6 +4231,23 @@ Log to target depending on logging status, using a va_list argument.
 <code>void       gt_logger_delete(GtLogger *logger)</code>
 <p>
 Delete <code>logger</code>.
+</p>
+<hr>
+<a name="GtMD5ToIDStream"></a>
+<h2>Class GtMD5ToIDStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtMD5ToIDStream</code> converts MD5
+   fingerprints used as sequence IDs to ``regular'' ones. </p>
+
+<hr>
+<a name="gt_md5_to_id_stream_new"></a>
+
+<code>GtNodeStream*  gt_md5_to_id_stream_new(GtNodeStream *in_stream,
+                                      GtRegionMapping *region_mapping)</code>
+<p>
+Create a <code>GtMD5toIDStream*</code> which converts MD5 sequence IDs from nodes it
+   retrieves from its <code>in_stream</code> to ``regular'' ones (with the help of the
+   given <code>region_mapping</code>). Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
 <a name="GtMergeStream"></a>
@@ -7308,6 +7349,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_hashmap_reset"><code>gt_hashmap_reset</code></a><br>
 
+  <a href="#gt_id_to_md5_stream_new"><code>gt_id_to_md5_stream_new</code></a><br>
+
   <a href="#gt_image_info_delete"><code>gt_image_info_delete</code></a><br>
 
   <a href="#gt_image_info_get_height"><code>gt_image_info_get_height</code></a><br>
@@ -7393,6 +7436,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_logger_target"><code>gt_logger_target</code></a><br>
 
   <a href="#gt_malloc"><code>gt_malloc</code></a><br>
+
+  <a href="#gt_md5_to_id_stream_new"><code>gt_md5_to_id_stream_new</code></a><br>
 
   <a href="#gt_merge_stream_new"><code>gt_merge_stream_new</code></a><br>
 

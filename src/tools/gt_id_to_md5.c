@@ -23,7 +23,7 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/seqid2file.h"
-#include "extended/id_to_md5_stream.h"
+#include "extended/id_to_md5_stream_api.h"
 #include "tools/gt_id_to_md5.h"
 
 typedef struct {

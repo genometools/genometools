@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/md5_to_id_stream.h"
+#include "extended/md5_to_id_stream_api.h"
 #include "extended/md5_to_id_visitor.h"
 #include "extended/visitor_stream_api.h"
 

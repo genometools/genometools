@@ -14,16 +14,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/id_to_md5_stream_api.h"
-#include "extended/id_to_md5_visitor.h"
-#include "extended/visitor_stream_api.h"
+#ifndef ID_TO_MD5_STREAM_API_H
+#define ID_TO_MD5_STREAM_API_H
 
+#include <stdio.h>
+#include "extended/node_stream_api.h"
+#include "extended/region_mapping_api.h"
+
+/* Implements the <GtNodeStream> interface. A <GtIDToMD5Stream> converts
+   ``regular'' sequence IDs to MD5 fingerprints. */
+typedef struct GtIDToMD5Stream GtIDToMD5Stream;
+
+/* Create a <GtIDToMD5Stream*> which converts ``regular'' sequence IDs from
+   nodes it retrievs from its <in_stream> to MD5 fingerprints (with the help of
+   the given <region_mapping). If <substitute_target_ids> is true, the IDs of
+   Target attributes are also converted to MD5 fingerprints.
+   Takes ownership of <region_mapping>! */
 GtNodeStream* gt_id_to_md5_stream_new(GtNodeStream *in_stream,
-                                      GtRegionMapping *rm,
-                                      bool substitute_target_ids)
-{
-  gt_assert(in_stream && rm);
-  return gt_visitor_stream_new(in_stream,
-                               gt_id_to_md5_visitor_new(rm,
-                                                        substitute_target_ids));
-}
+                                      GtRegionMapping *region_mapping,
+                                      bool substitute_target_ids);
+
+#endif
