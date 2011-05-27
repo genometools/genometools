@@ -19,6 +19,7 @@
 #define EXTRACT_FEAT_STREAM_H
 
 #include <stdio.h>
+#include "core/file_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/region_mapping.h"
 

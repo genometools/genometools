@@ -19,7 +19,7 @@
 #define REGION_MAPPING_H
 
 #include "core/range_api.h"
-#include "core/str.h"
+#include "core/str_api.h"
 #include "core/str_array_api.h"
 
 /* maps a sequence-region to a sequence file */
