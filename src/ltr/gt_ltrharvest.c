@@ -513,9 +513,9 @@ static int gt_ltrharvest_arguments_check(GT_UNUSED int rest_argc,
     else
     {
       /* default is "best" */
-      arguments->bestoverlaps = true;     /* take best prediction
-                                             if overlap occurs, default */
-      arguments->nooverlaps = false; /* overlapping predictions (not)allowed*/
+      arguments->bestoverlaps = true;  /* take best prediction
+                                          if overlap occurs, default */
+      arguments->nooverlaps = false; /* overlapping predictions (not) allowed*/
     }
     /* if FASTA output is set */
     if (gt_option_is_set(arguments->optionout))

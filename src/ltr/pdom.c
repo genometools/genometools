@@ -1000,7 +1000,7 @@ GtPdomFinder* gt_pdom_finder_new(GtStrArray *hmmfiles, double eval_cutoff,
 {
   int had_err = 0;
   GtPdomFinder *gpf;
-  GtStr *cmd;   /* for HMMER3 paramaterisation, we need to construct a
+  GtStr *cmd;   /* for HMMER3 parameterization, we need to construct a
                    virtual command line for Easel to parse, see below */
   gt_assert(hmmfiles && err);
   gpf = gt_calloc(1, sizeof (GtPdomFinder));
