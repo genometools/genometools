@@ -2,7 +2,7 @@
 
 -- $Id: test.lua,v 1.82 2010/12/03 14:49:54 roberto Exp $
 
-require"strict"    -- just to be pedantic
+--require"strict"    -- just to be pedantic
 
 local m = require"lpeg"
 
