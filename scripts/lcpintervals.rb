@@ -186,9 +186,8 @@ def enumlcpintervaltreewithqueue(filename)
       lastinterval.rb = idx
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
-        firstedge = stack.last.noedge
+        processbranchedge(stack.last.noedge,stack.last,lastinterval)
         add_to_top_brchildlist(stack,lastinterval)
-        processbranchedge(firstedge,stack.last,lastinterval)
         lastinterval = nil
       end
     end
@@ -239,9 +238,8 @@ def enumlcpintervaltree(filename)
       lastinterval.rb = idx
       lb = lastinterval.lb
       if lcpvalue <= stack.last.lcp
-        firstedge = stack.last.noedge
+        processbranchedge(stack.last.noedge,stack.last,lastinterval)
         add_to_top_brchildlist(stack,lastinterval)
-        processbranchedge(firstedge,stack.last,lastinterval)
         lastinterval = nil
       end
     end
