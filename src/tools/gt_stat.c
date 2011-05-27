@@ -18,7 +18,7 @@
 #include "core/ma.h"
 #include "core/option.h"
 #include "core/outputfile.h"
-#include "extended/add_introns_stream.h"
+#include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/sort_stream_api.h"

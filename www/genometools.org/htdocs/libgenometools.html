@@ -32,6 +32,8 @@ interfaces.
 <h2>Classes</h2>
 <ul>
 
+  <li><a href="#GtAddIntronsStream">GtAddIntronsStream</a>
+
   <li><a href="#GtAlphabet">GtAlphabet</a>
 
   <li><a href="#GtArray">GtArray</a>
@@ -223,6 +225,23 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
+<a name="GtAddIntronsStream"></a>
+<h2>Class GtAddIntronsStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtAddIntronsStream</code> inserts new
+   feature nodes with type <em>intron</em> between existing feature nodes with type
+   <em>exon</em>. This is a special case of the <code>GtInterFeatureStream</code>. </p>
+
+<hr>
+<a name="gt_add_introns_stream_new"></a>
+
+<code>GtNodeStream*  gt_add_introns_stream_new(GtNodeStream *in_stream)</code>
+<p>
+Create a <code>GtAddIntronsStream*</code> which inserts feature nodes of type <em>intron</em>
+   between feature nodes of type <em>exon</em> it retrieves from <code>in_stream</code> and
+   returns them.
+</p>
+<hr>
 <a name="GtAlphabet"></a>
 <h2>Class GtAlphabet</h2>
 
@@ -6286,6 +6305,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#GT_STRAND_CHARS"><code>GT_STRAND_CHARS</code></a><br>
 
   <a href="#GT_UNUSED"><code>GT_UNUSED</code></a><br>
+
+  <a href="#gt_add_introns_stream_new"><code>gt_add_introns_stream_new</code></a><br>
 
   <a href="#gt_alphabet_add_mapping"><code>gt_alphabet_add_mapping</code></a><br>
 

@@ -20,7 +20,7 @@
 #include "core/outputfile.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
-#include "extended/add_introns_stream.h"
+#include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/splice_site_info_stream.h"

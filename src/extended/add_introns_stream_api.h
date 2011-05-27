@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2009-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -14,14 +14,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ADD_INTRONS_STREAM_H
-#define ADD_INTRONS_STREAM_H
+#ifndef ADD_INTRONS_STREAM_API_H
+#define ADD_INTRONS_STREAM_API_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* Adds features of type <inter_type> between features of type
-   <outside_type>. */
-GtNodeStream* gt_add_introns_stream_new(GtNodeStream*);
+/* Implements the <GtNodeStream> interface. A <GtAddIntronsStream> inserts new
+   feature nodes with type __intron__ between existing feature nodes with type
+   __exon__. This is a special case of the <GtInterFeatureStream>. */
+typedef struct GtAddIntronsStream GtAddIntronsStream;
+
+/* Create a <GtAddIntronsStream*> which inserts feature nodes of type __intron__
+   between feature nodes of type __exon__ it retrieves from <in_stream> and
+   returns them. */
+GtNodeStream* gt_add_introns_stream_new(GtNodeStream *in_stream);
 
 #endif

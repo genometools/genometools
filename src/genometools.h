@@ -71,6 +71,7 @@
 #include "core/xansi_api.h"
 
 /* the extended module */
+#include "extended/add_introns_stream_api.h"
 #include "extended/bed_in_stream_api.h"
 #include "extended/comment_node_api.h"
 #include "extended/eof_node_api.h"

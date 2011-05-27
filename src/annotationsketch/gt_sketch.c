@@ -29,7 +29,7 @@
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"
-#include "extended/add_introns_stream.h"
+#include "extended/add_introns_stream_api.h"
 #include "extended/bed_in_stream.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
