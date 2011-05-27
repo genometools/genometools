@@ -51,7 +51,7 @@ struct GtGenomeNode
 {
   const GtGenomeNodeClass *c_class;
   GtStr *filename;
-  GtHashmap *userdata;
+  GtHashmap *userdata; /* created on demand */
   /* GtGenomeNodes are very space critical, therefore we can justify a bit
      ifdef-hell here... */
 #ifdef GT_THREADS_ENABLED
