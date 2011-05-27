@@ -79,7 +79,7 @@ static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
                             gt_genome_node_get_seqid((GtGenomeNode*)
                                                      current_feature)));
 
-      /* create inter */
+      /* create inter feature */
       inter_node = (GtFeatureNode*)
                    gt_feature_node_new(parent_seqid, aiv->inter_type,
                                        inter_range.start, inter_range.end,
