@@ -15,7 +15,7 @@
 */
 
 #include "extended/add_introns_stream.h"
-#include "extended/inter_feature_stream.h"
+#include "extended/inter_feature_stream_api.h"
 #include "extended/feature_type.h"
 
 GtNodeStream* gt_add_introns_stream_new(GtNodeStream *in_stream)

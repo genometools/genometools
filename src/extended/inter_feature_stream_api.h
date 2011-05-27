@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,15 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef INTER_FEATURE_STREAM_H
-#define INTER_FEATURE_STREAM_H
+#ifndef INTER_FEATURE_STREAM_API_H
+#define INTER_FEATURE_STREAM_API_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* Adds features of type <inter_type> between features of type
-   <outside_type>. */
-GtNodeStream* gt_inter_feature_stream_new(GtNodeStream*,
+/* Implements the <GtNodeStream> interface. A <GtInterFeatureStream> inserts new
+   feature nodes between existing feature nodes of a certain type. */
+typedef struct GtInterFeatureStream GtInterFeatureStream;
+
+/* Create a <GtInterFeatureStream*> which inserts feature nodes of type
+   <inter_type> between the feature nodes of type <outside_type> it retrieves
+   from <in_stream> and returns them. */
+GtNodeStream* gt_inter_feature_stream_new(GtNodeStream *in_stream,
                                           const char *outside_type,
                                           const char *inter_type);
 

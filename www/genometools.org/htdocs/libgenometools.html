@@ -110,6 +110,8 @@ interfaces.
 
   <li><a href="#GtImageInfo">GtImageInfo</a>
 
+  <li><a href="#GtInterFeatureStream">GtInterFeatureStream</a>
+
   <li><a href="#GtIntervalTree">GtIntervalTree</a>
 
   <li><a href="#GtIntervalTreeNode">GtIntervalTreeNode</a>
@@ -3844,6 +3846,24 @@ Returns the <code>i</code>-th <code>GtRecMap</code> mapping in <code>image_info<
 Deletes <code>image_info</code> and all the <code>GtRecMap</code> objects created by it.
 </p>
 <hr>
+<a name="GtInterFeatureStream"></a>
+<h2>Class GtInterFeatureStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtInterFeatureStream</code> inserts new
+   feature nodes between existing feature nodes of a certain type. </p>
+
+<hr>
+<a name="gt_inter_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_inter_feature_stream_new(GtNodeStream *in_stream,
+                                          const char *outside_type,
+                                          const char *inter_type)</code>
+<p>
+Create a <code>GtInterFeatureStream*</code> which inserts feature nodes of type
+   <code>inter_type</code> between the feature nodes of type <code>outside_type</code> it retrieves
+   from <code>in_stream</code> and returns them.
+</p>
+<hr>
 <a name="GtIntervalTree"></a>
 <h2>Class GtIntervalTree</h2>
 
@@ -7091,6 +7111,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_image_info_num_of_rec_maps"><code>gt_image_info_num_of_rec_maps</code></a><br>
 
+  <a href="#gt_inter_feature_stream_new"><code>gt_inter_feature_stream_new</code></a><br>
+
   <a href="#gt_interval_tree_delete"><code>gt_interval_tree_delete</code></a><br>
 
   <a href="#gt_interval_tree_find_all_overlapping"><code>gt_interval_tree_find_all_overlapping</code></a><br>
@@ -7530,7 +7552,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-26
+Last update: 2011-05-27
 </div>
 </div>
 <!-- Piwik -->

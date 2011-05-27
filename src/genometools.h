@@ -82,6 +82,7 @@
 #include "extended/gff3_parser_api.h"
 #include "extended/gff3_visitor_api.h"
 #include "extended/gtf_in_stream_api.h"
+#include "extended/inter_feature_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/region_node_api.h"

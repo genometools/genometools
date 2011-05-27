@@ -16,7 +16,7 @@
 */
 
 #include "core/assert_api.h"
-#include "extended/inter_feature_stream.h"
+#include "extended/inter_feature_stream_api.h"
 #include "extended/inter_feature_visitor.h"
 #include "extended/visitor_stream_api.h"
 
