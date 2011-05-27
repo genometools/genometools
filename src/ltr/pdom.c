@@ -250,19 +250,26 @@ GtRange gt_pdom_single_hit_get_range(const GtPdomSingleHit *singlehit)
     case GT_STRAND_FORWARD:
     default:
       retrng.start = singlehit->mhit->elem->leftLTR_5
-                        + (singlehit->range.start)*GT_CODON_LENGTH
+                        + (singlehit->range.start) * GT_CODON_LENGTH
                         + (unsigned long) singlehit->phase;
       retrng.end   =  retrng.start
-                        + gt_range_length(&singlehit->range)*GT_CODON_LENGTH;
+                        + (gt_range_length(&singlehit->range) - 1)
+                           * GT_CODON_LENGTH;
       break;
     case GT_STRAND_REVERSE:
       retrng.start = singlehit->mhit->elem->rightLTR_3
-                        - (singlehit->range.end+1)*GT_CODON_LENGTH
+                        - (singlehit->range.end+1) * GT_CODON_LENGTH
                         - (unsigned long) singlehit->phase;
       retrng.end   =  retrng.start
-                        + gt_range_length(&singlehit->range)*GT_CODON_LENGTH;
+                        + (gt_range_length(&singlehit->range) - 1)
+                           * GT_CODON_LENGTH;
       break;
   }
+  gt_log_log("range: (%lu-%lu, phase %d) -> %lu-%lu (len %lu) strand: %c\n",
+             singlehit->range.start, singlehit->range.end,
+             singlehit->phase, retrng.start, retrng.end,
+             gt_range_length(&retrng),
+             GT_STRAND_CHARS[singlehit->mhit->strand]);
   return retrng;
 }
 
