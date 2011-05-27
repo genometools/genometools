@@ -1,7 +1,7 @@
 /*
-  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007      David Ellinghaus <d.ellinghaus@ikmb.uni-kiel.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -29,6 +29,7 @@
 #include "core/minmax.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
+#include "core/undef.h"
 #include "extended/genome_node.h"
 #include "extended/node_stream_api.h"
 #include "match/esa-seqread.h"
@@ -122,6 +123,7 @@ struct GtLTRharvestStream
                maxlengthTSD;
   unsigned long numofboundaries;
   unsigned long vicinityforcorrectboundaries;
+  unsigned long prevseqnum;
   const LTRboundaries **bdptrtab;
   GtArrayLTRboundaries arrayLTRboundaries;
   const GtEncseq *encseq;
@@ -991,7 +993,6 @@ static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
   /* right alignment */
   boundaries->leftLTR_3  = seed1_endpos + xdropbest_right.ivalue;
   boundaries->rightLTR_3 = seed2_endpos + xdropbest_right.jvalue;
-
 }
 
 /*
@@ -1332,6 +1333,7 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
 
     GT_INITARRAY(&ltrh_stream->repeatinfo.repeats, Repeat);
     ltrh_stream->repeatinfo.encseq = ltrh_stream->encseq;
+    ltrh_stream->prevseqnum = GT_UNDEF_ULONG;
     if (!had_err && gt_enumeratemaxpairs(ltrh_stream->ssar,
                       ltrh_stream->encseq,
                       gt_readmodeSequentialsuffixarrayreader(ltrh_stream->ssar),
@@ -1380,17 +1382,24 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
 
   /* first stream out the region nodes */
   if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_REGIONS) {
-    if (ltrh_stream->cur_elem_index
-          < gt_encseq_num_of_sequences(ltrh_stream->encseq)) {
-      unsigned long seqstartpos, seqlength;
+    if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries) {
+      unsigned long seqnum, seqlength;
       GtGenomeNode *rn;
       GtStr *seqid;
-      seqstartpos = gt_encseq_seqstartpos(ltrh_stream->encseq,
-                                          ltrh_stream->cur_elem_index);
-      seqlength = gt_encseq_seqlength(ltrh_stream->encseq,
-                                      ltrh_stream->cur_elem_index);
+      seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
+      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG) {
+        ltrh_stream->prevseqnum = seqnum;
+      } else {
+        while (ltrh_stream->prevseqnum == seqnum) {
+          ltrh_stream->cur_elem_index++;
+          seqnum =
+               ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
+        }
+      }
+      ltrh_stream->prevseqnum = seqnum;
+      seqlength = gt_encseq_seqlength(ltrh_stream->encseq, seqnum);
       seqid = gt_str_new_cstr("seq");
-      gt_str_append_ulong(seqid, ltrh_stream->cur_elem_index);
+      gt_str_append_ulong(seqid, seqnum);
       rn = gt_region_node_new(seqid,
                               1 + (unsigned long) ltrh_stream->offset,
                               seqlength + (unsigned long) ltrh_stream->offset);
@@ -1406,16 +1415,25 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
 
   /* then stream out the comment nodes */
   if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_COMMENTS) {
-    if (ltrh_stream->cur_elem_index
-          < gt_encseq_num_of_sequences(ltrh_stream->encseq)) {
+    if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries) {
       const char *desc;
       char buf[BUFSIZ];
-      unsigned long desclen;
+      unsigned long desclen, seqnum;
       GtGenomeNode *cn;
-      memset(buf, 0, BUFSIZ);
-      desc = gt_encseq_description(ltrh_stream->encseq, &desclen,
-                                   ltrh_stream->cur_elem_index);
+      seqnum = ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
+      if (ltrh_stream->prevseqnum == GT_UNDEF_ULONG) {
+        ltrh_stream->prevseqnum = seqnum;
+      } else {
+        while (ltrh_stream->prevseqnum == seqnum) {
+          ltrh_stream->cur_elem_index++;
+          seqnum =
+               ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
+        }
+      }
+      ltrh_stream->prevseqnum = seqnum;
+      desc = gt_encseq_description(ltrh_stream->encseq, &desclen, seqnum);
       (void) strncpy(buf, desc, (size_t) (desclen * sizeof (char)));
+      buf[desclen] = '\0';
       cn = gt_comment_node_new(buf);
       *gn = cn;
       ltrh_stream->cur_elem_index++;
