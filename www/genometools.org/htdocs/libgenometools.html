@@ -162,6 +162,8 @@ interfaces.
 
   <li><a href="#GtSplitter">GtSplitter</a>
 
+  <li><a href="#GtStatStream">GtStatStream</a>
+
   <li><a href="#GtStr">GtStr</a>
 
   <li><a href="#GtStrArray">GtStrArray</a>
@@ -4943,6 +4945,43 @@ Return the number of tokens in <code>splitter</code>.
 Delete the <code>splitter</code>.
 </p>
 <hr>
+<a name="GtStatStream"></a>
+<h2>Class GtStatStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtStatStream</code> gathers statistics
+   about the <code>GtGenomeNode</code>s it retrieves from its node source and passes them
+   along unmodified.  </p>
+
+<hr>
+<a name="gt_stat_stream_new"></a>
+
+<code>GtNodeStream*  gt_stat_stream_new(GtNodeStream *in_stream,
+                                 bool gene_length_distribution,
+                                 bool gene_score_distribution,
+                                 bool exon_length_distribution,
+                                 bool exon_number_distribution,
+                                 bool intron_length_distribution,
+                                 bool cds_length_distribution,
+                                 bool used_sources)</code>
+<p>
+Create a <code>GtStatStream*</code> which gathers statistics about the <code>GtGenomeNode</code>s
+   it retrieves from its <code>in_stream</code> and returns them unmodified.
+   Besides the basic statistics, statistics about the following distributions
+   can be gathered, if the corresponding argument equals <code>true</code>:
+   <code>gene_length_distribution</code>, <code>gene_score_distribution</code>,
+   <code>exon_length_distribution</code>, <code>exon_number_distribution</code>,
+   <code>intron_length_distribution</code>, <code>cds_length_distribution</code>. If <code>used_sources</code>
+   equals <code>true</code>, it is recorded which source tags have been encountered.
+</p>
+<hr>
+<a name="gt_stat_stream_show_stats"></a>
+
+<code>void           gt_stat_stream_show_stats(GtStatStream *stat_stream,
+                                        GtFile *outfp)</code>
+<p>
+Write the statistics gathered by <code>stat_stream</code> to <code>outfp</code>.
+</p>
+<hr>
 <a name="GtStr"></a>
 <h2>Class GtStr</h2>
 
@@ -7721,6 +7760,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_splitter_size"><code>gt_splitter_size</code></a><br>
 
   <a href="#gt_splitter_split"><code>gt_splitter_split</code></a><br>
+
+  <a href="#gt_stat_stream_new"><code>gt_stat_stream_new</code></a><br>
+
+  <a href="#gt_stat_stream_show_stats"><code>gt_stat_stream_show_stats</code></a><br>
 
   <a href="#gt_str_append_char"><code>gt_str_append_char</code></a><br>
 

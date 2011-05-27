@@ -22,7 +22,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/sort_stream_api.h"
-#include "extended/stat_stream.h"
+#include "extended/stat_stream_api.h"
 #include "tools/gt_stat.h"
 
 typedef struct {
@@ -160,7 +160,7 @@ static int gt_stat_runner(int argc, const char **argv, int parsed_args,
 
   /* show statistics */
   if (!had_err)
-    gt_stat_stream_show_stats(stat_stream, arguments->outfp);
+    gt_stat_stream_show_stats((GtStatStream*) stat_stream, arguments->outfp);
 
   /* free */
   gt_node_stream_delete(stat_stream);

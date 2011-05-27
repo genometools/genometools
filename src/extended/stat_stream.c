@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "extended/eof_node.h"
 #include "extended/genome_node.h"
-#include "extended/stat_stream.h"
+#include "extended/stat_stream_api.h"
 #include "extended/stat_visitor.h"
 #include "extended/node_stream_api.h"
 
@@ -28,6 +28,8 @@ struct GtStatStream {
   GtNodeVisitor *stat_visitor;
   unsigned long number_of_DAGs;
 };
+
+const GtNodeStreamClass* gt_stat_stream_class(void);
 
 #define stat_stream_cast(GS)\
         gt_node_stream_cast(gt_stat_stream_class(), GS)
@@ -88,9 +90,8 @@ GtNodeStream* gt_stat_stream_new(GtNodeStream *in_stream,
   return ns;
 }
 
-void gt_stat_stream_show_stats(GtNodeStream *ns, GtFile *outfp)
+void gt_stat_stream_show_stats(GtStatStream *ss, GtFile *outfp)
 {
-  GtStatStream *ss = stat_stream_cast(ns);
   gt_file_xprintf(outfp, "parsed feature trees: %lu\n", ss->number_of_DAGs);
   gt_stat_visitor_show_stats(ss->stat_visitor, outfp);
 }
