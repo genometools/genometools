@@ -85,15 +85,15 @@ static const char* obo_header_get(OBOHeader *obo_header, const char *tag)
   return NULL;
 }
 
-static int obo_header_validate(OBOHeader *obo_header, const char *obo_file_name,
+static int obo_header_validate(OBOHeader *obo_header, const char *obo_filename,
                                GtError *err)
 {
   gt_error_check(err);
-  gt_assert(obo_header && obo_file_name);
+  gt_assert(obo_header && obo_filename);
   /* make sure header contains the required tag */
   if (!obo_header_get(obo_header, "format-version")) {
     gt_error_set(err, "the header of OBO-file \"%s\" does not contain "
-              "\"format-version\" tag", obo_file_name);
+              "\"format-version\" tag", obo_filename);
     return -1;
   }
   return 0;

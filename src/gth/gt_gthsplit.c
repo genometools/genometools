@@ -51,7 +51,7 @@ typedef struct {
   Gthsplitinfo *gthsplitinfo;
   char *current_outputfilename;
   GtFile **subset_files;
-  GtStr **subset_file_names;
+  GtStr **subset_filenames;
   unsigned long *subset_file_sa_counter,
                 num_of_subset_files;
   GthSAFilter *sa_filter; /* reference only */
@@ -71,16 +71,16 @@ static void close_output_files(Store_in_subset_file_data
         rval = snprintf(buf, (size_t) SHOW_SPLIT_FILE_BUF_SIZE,
                         "split file created: %s (size=%lu)",
                         gt_str_get(store_in_subset_file_data
-                                ->subset_file_names[i]),
+                                   ->subset_filenames[i]),
                         store_in_subset_file_data->subset_file_sa_counter[i]);
         gt_assert(rval <  SHOW_SPLIT_FILE_BUF_SIZE);
         store_in_subset_file_data->gthsplitinfo->showverbose(buf);
       }
-      gt_assert(store_in_subset_file_data->subset_file_names[i]);
+      gt_assert(store_in_subset_file_data->subset_filenames[i]);
       /* put XML trailer in file before closing it */
       gth_xml_show_trailer(true, store_in_subset_file_data->subset_files[i]);
       gt_file_delete(store_in_subset_file_data->subset_files[i]);
-      gt_str_delete(store_in_subset_file_data->subset_file_names[i]);
+      gt_str_delete(store_in_subset_file_data->subset_filenames[i]);
       store_in_subset_file_data->subset_files[i]           = NULL;
       store_in_subset_file_data->subset_file_sa_counter[i] = 0;
     }
@@ -146,37 +146,37 @@ static int store_in_subset_file(void *data, GthSA *sa,
 
   /* make sure the file exists and is open */
   if (!store_in_subset_file_data->subset_files[filenum]) {
-    gt_assert(store_in_subset_file_data->subset_file_names[filenum] == NULL);
-    store_in_subset_file_data->subset_file_names[filenum] = gt_str_new();
-    gt_str_append_cstr_nt(store_in_subset_file_data->subset_file_names[filenum],
+    gt_assert(store_in_subset_file_data->subset_filenames[filenum] == NULL);
+    store_in_subset_file_data->subset_filenames[filenum] = gt_str_new();
+    gt_str_append_cstr_nt(store_in_subset_file_data->subset_filenames[filenum],
                           outputfilename,
                           gt_file_basename_length(outputfilename));
-    gt_str_append_char(store_in_subset_file_data->subset_file_names[filenum],
+    gt_str_append_char(store_in_subset_file_data->subset_filenames[filenum],
                        '.');
-    gt_str_append_cstr(store_in_subset_file_data->subset_file_names[filenum],
-                    filenamesuffix);
-    gt_str_append_ulong(store_in_subset_file_data->subset_file_names[filenum],
+    gt_str_append_cstr(store_in_subset_file_data->subset_filenames[filenum],
+                       filenamesuffix);
+    gt_str_append_ulong(store_in_subset_file_data->subset_filenames[filenum],
                         filenum *
                         store_in_subset_file_data->gthsplitinfo->range);
-    gt_str_append_char(store_in_subset_file_data->subset_file_names[filenum],
+    gt_str_append_char(store_in_subset_file_data->subset_filenames[filenum],
                        '-');
-    gt_str_append_ulong(store_in_subset_file_data->subset_file_names[filenum],
+    gt_str_append_ulong(store_in_subset_file_data->subset_filenames[filenum],
                      (filenum + 1) *
                      store_in_subset_file_data->gthsplitinfo->range);
-    gt_str_append_cstr(store_in_subset_file_data->subset_file_names[filenum],
+    gt_str_append_cstr(store_in_subset_file_data->subset_filenames[filenum],
                        gt_file_mode_suffix(store_in_subset_file_data
-                                             ->gthsplitinfo->file_mode));
+                                           ->gthsplitinfo->file_mode));
 
     /* if not disabled by -force, check if file already exists */
     if (!store_in_subset_file_data->gthsplitinfo->force) {
       store_in_subset_file_data->subset_files[filenum] =
         gt_file_open(store_in_subset_file_data->gthsplitinfo->file_mode,
                      gt_str_get(store_in_subset_file_data
-                             ->subset_file_names[filenum]), "r", NULL);
+                                ->subset_filenames[filenum]), "r", NULL);
       if (store_in_subset_file_data->subset_files[filenum]) {
         gt_error_set(err, "file \"%s\" exists already. use option -%s to "
                      "overwrite", gt_str_get(store_in_subset_file_data
-                                             ->subset_file_names[filenum]),
+                                             ->subset_filenames[filenum]),
                      GT_FORCE_OPT_CSTR);
         had_err = -1;
       }
@@ -187,8 +187,7 @@ static int store_in_subset_file(void *data, GthSA *sa,
           gt_file_xopen_file_mode(store_in_subset_file_data->gthsplitinfo
                                   ->file_mode,
                                   gt_str_get(store_in_subset_file_data
-                                             ->subset_file_names[filenum]),
-                                  "w");
+                                             ->subset_filenames[filenum]), "w");
       /* store XML header in file */
       gth_xml_show_leader(true,
                           store_in_subset_file_data->subset_files[filenum]);
@@ -346,7 +345,7 @@ static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
   store_in_subset_file_data.subset_files =
     gt_malloc(sizeof (GtFile*) *
               store_in_subset_file_data.num_of_subset_files);
-  store_in_subset_file_data.subset_file_names =
+  store_in_subset_file_data.subset_filenames =
     gt_malloc(sizeof (GtStr*) *
               store_in_subset_file_data.num_of_subset_files);
   store_in_subset_file_data.subset_file_sa_counter =
@@ -354,7 +353,7 @@ static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
               store_in_subset_file_data.num_of_subset_files);
   for (i = 0; i < store_in_subset_file_data.num_of_subset_files; i++) {
     store_in_subset_file_data.subset_files[i]           = NULL;
-    store_in_subset_file_data.subset_file_names[i]      = NULL;
+    store_in_subset_file_data.subset_filenames[i]       = NULL;
     store_in_subset_file_data.subset_file_sa_counter[i] = 0;
   }
   store_in_subset_file_data.sa_visitor = gth_xml_inter_sa_visitor_new(inputinfo,
@@ -378,7 +377,7 @@ static int gthsplit_process_files(Gthsplitinfo *gthsplitinfo,
   gth_input_delete_complete(inputinfo);
   gt_free(store_in_subset_file_data.current_outputfilename);
   gt_free(store_in_subset_file_data.subset_files);
-  gt_free(store_in_subset_file_data.subset_file_names);
+  gt_free(store_in_subset_file_data.subset_filenames);
   gt_free(store_in_subset_file_data.subset_file_sa_counter);
 
   return had_err;
