@@ -400,7 +400,7 @@ static void cdatas(void) {
     changed=0;
     for(i=0;i!=n_f;++i) {
       p=flat[i];
-      if(!rn_cdata(p)) {
+      if(!(rn_cdata(p))) {
 	switch(RN_P_TYP(p)) {
 	case RN_P_NOT_ALLOWED: case RN_P_EMPTY:
 	case RN_P_ATTRIBUTE: case RN_P_ELEMENT:
