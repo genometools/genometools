@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct GtSpliceSiteInfoStream GtSpliceSiteInfoStream;

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -25,7 +25,7 @@
 #include "core/md5_seqid.h"
 #include "core/str_array.h"
 #include "extended/mapping.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 #include "extended/seqid2seqnum_mapping.h"
 
 struct GtRegionMapping {
@@ -61,11 +61,12 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
   return rm;
 }
 
-GtRegionMapping* gt_region_mapping_new_seqfile(GtStrArray *sequence_filenames,
-                                               bool matchdesc, bool usedesc)
+GtRegionMapping* gt_region_mapping_new_seqfiles(GtStrArray *sequence_filenames,
+                                                bool matchdesc, bool usedesc)
 {
   GtRegionMapping *rm;
   gt_assert(sequence_filenames);
+  gt_assert(!(matchdesc && usedesc));
   rm = gt_calloc(1, sizeof (GtRegionMapping));
   rm->sequence_filenames = gt_str_array_ref(sequence_filenames);
   rm->matchdesc = matchdesc;

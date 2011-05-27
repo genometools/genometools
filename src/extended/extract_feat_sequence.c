@@ -18,7 +18,7 @@
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 #include "extended/reverse.h"
 
 static int extract_join_feature(GtGenomeNode *gn, const char *type,

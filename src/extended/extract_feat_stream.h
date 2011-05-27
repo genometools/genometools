@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "core/file_api.h"
 #include "extended/node_stream_api.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 
 /* create a GtExtractFeatStream, takes ownership of GtRegionMapping  */
 GtNodeStream* gt_extract_feat_stream_new(GtNodeStream*, GtRegionMapping*,

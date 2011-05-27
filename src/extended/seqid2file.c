@@ -135,8 +135,8 @@ GtRegionMapping* gt_seqid2file_region_mapping_new(GtSeqid2FileInfo *s2fi,
   gt_assert(s2fi);
   /* create region mapping */
   if (gt_str_array_size(s2fi->seqfiles)) {
-    return gt_region_mapping_new_seqfile(s2fi->seqfiles, s2fi->matchdesc,
-                                         s2fi->usedesc);
+    return gt_region_mapping_new_seqfiles(s2fi->seqfiles, s2fi->matchdesc,
+                                          s2fi->usedesc);
   }
   else
     return gt_region_mapping_new_mapping(s2fi->region_mapping, err);

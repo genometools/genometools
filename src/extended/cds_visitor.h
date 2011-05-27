@@ -22,7 +22,7 @@
 typedef struct GtCDSVisitor GtCDSVisitor;
 
 #include "extended/node_visitor.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 
 const GtNodeVisitorClass* gt_cds_visitor_class(void);
 /* Takes ownership of <region_mapping>. */

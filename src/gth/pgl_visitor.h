@@ -18,7 +18,7 @@
 #ifndef PGL_VISITOR_H
 #define PGL_VISITOR_H
 
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 #include "gth/pgl.h"
 
 /* the ``predicted gene location visitor'' interface */

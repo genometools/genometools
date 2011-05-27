@@ -17,7 +17,7 @@
 
 #include "lauxlib.h"
 #include "extended/luahelper.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 #include "gtlua/region_mapping_lua.h"
 #include "gtlua/gtcore_lua.h"
 
@@ -32,8 +32,8 @@ static int region_mapping_lua_new_seqfile(lua_State *L)
   gt_assert(region_mapping);
   seqfile = gt_str_array_new();
   gt_str_array_add_cstr(seqfile, seqfilename);
-  /* XXX: make second parameter available */
-  *region_mapping = gt_region_mapping_new_seqfile(seqfile, false, false);
+  /* XXX: make second and third parameter available */
+  *region_mapping = gt_region_mapping_new_seqfiles(seqfile, false, false);
   gt_str_array_delete(seqfile);
   luaL_getmetatable(L, REGION_MAPPING_METATABLE);
   lua_setmetatable(L, -2);

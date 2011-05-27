@@ -23,7 +23,7 @@ typedef struct GtExtractFeatVisitor GtExtractFeatVisitor;
 
 #include <stdbool.h>
 #include "extended/node_visitor.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 
 const GtNodeVisitorClass* gt_extract_feat_visitor_class(void);
 /* takes ownership of <rm> */

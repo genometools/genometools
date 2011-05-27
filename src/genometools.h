@@ -87,6 +87,7 @@
 #include "extended/inter_feature_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/node_visitor_api.h"
+#include "extended/region_mapping_api.h"
 #include "extended/region_node_api.h"
 #include "extended/sequence_node_api.h"
 #include "extended/sort_stream_api.h"

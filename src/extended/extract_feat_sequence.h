@@ -19,7 +19,7 @@
 #define EXTRACT_FEAT_SEQUENCE_H
 
 #include "extended/genome_node.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 
 int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode*, const char *type,
                           bool join, GtRegionMapping*, GtError*);

@@ -142,6 +142,8 @@ interfaces.
 
   <li><a href="#GtRecMap">GtRecMap</a>
 
+  <li><a href="#GtRegionMapping">GtRegionMapping</a>
+
   <li><a href="#GtRegionNode">GtRegionNode</a>
 
   <li><a href="#GtSequenceNode">GtSequenceNode</a>
@@ -4561,6 +4563,108 @@ Returns <code>true</code> if the rectangle represents a block root whose element
    have not been drawn due to size restrictions.
 </p>
 <hr>
+<a name="GtRegionMapping"></a>
+<h2>Class GtRegionMapping</h2>
+
+<p> A <code>GtRegionMapping</code> objects map sequence-regions to sequence files. </p>
+
+<hr>
+<a name="gt_region_mapping_new_mapping"></a>
+
+<code>GtRegionMapping*  gt_region_mapping_new_mapping(GtStr *mapping_filename,
+                                               GtError *err)</code>
+<p>
+Return a new <code>GtRegionMapping</code> object for the mapping file with the given
+   <code>mapping_filename</code>. In the case of an error, <code>NULL</code> is returned and <code>err</code> is
+   set accordingly.
+</p>
+<hr>
+<a name="gt_region_mapping_new_seqfiles"></a>
+
+<code>GtRegionMapping*  gt_region_mapping_new_seqfiles(GtStrArray *sequence_filenames,
+                                                bool matchdesc, bool usedesc)</code>
+<p>
+Return a new <code>GtRegionMapping</code> object for the sequence files given in
+   <code>sequence_filenames</code>. If <code>matcdesc</code> is <code>true</code>, the sequence descriptions from
+   the input files are matched for the desired sequence IDs (in GFF3).
+
+   If <code>usedesc</code> is <code>true</code>, the sequence descriptions are used to map the
+   sequence IDs (in GFF3) to actual sequence entries. If a description contains
+   a sequence range (e.g., III:1000001..2000000), the first part is used as
+   sequence ID ('III') and the first range position as offset ('1000001').
+
+   <code>matchdesc</code> and <code>usedesc</code> cannot be <code>true</code> at the same time.
+</p>
+<hr>
+<a name="gt_region_mapping_new_rawseq"></a>
+
+<code>GtRegionMapping*  gt_region_mapping_new_rawseq(const char *rawseq,
+                                              unsigned long length,
+                                              unsigned long offset)</code>
+<p>
+Return a new <code>GtRegionMapping</code> object which maps to the given sequence
+   <code>rawseq</code> with the corresponding <code>length</code> and <code>offset</code>.
+</p>
+<hr>
+<a name="gt_region_mapping_ref"></a>
+
+<code>GtRegionMapping*  gt_region_mapping_ref(GtRegionMapping *region_mapping)</code>
+<p>
+Increase the reference count for <code>region_mapping</code> and return it.
+</p>
+<hr>
+<a name="gt_region_mapping_get_raw_sequence"></a>
+
+<code>int               gt_region_mapping_get_raw_sequence(GtRegionMapping
+                                                    *region_mapping,
+                                                    const char **rawseq,
+                                                    unsigned long *length,
+                                                    unsigned long *offset,
+                                                    GtStr *seqid,
+                                                    const GtRange *range,
+                                                    GtError *err)</code>
+<p>
+Use <code>region_mapping</code> to map the given sequence ID <code>seqid</code> and its
+   corresponding <code>range</code> to an actual sequence. The sequence is returned in
+   <code>rawseq</code>, its length and offset in <code>length</code> and <code>offset</code>.
+   In the case of an error, -1 is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_region_mapping_get_description"></a>
+
+<code>int               gt_region_mapping_get_description(GtRegionMapping
+                                                   *region_mapping,
+                                                   GtStr *desc,
+                                                   GtStr *seqid,
+                                                   GtError *err)</code>
+<p>
+Use <code>region_mapping</code> to get the description of the MD5 sequence ID <code>seqid</code>.
+   The description is appended to <code>desc</code>.
+   In the case of an error, -1 is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_region_mapping_get_md5_fingerprint"></a>
+
+<code>const char*       gt_region_mapping_get_md5_fingerprint(GtRegionMapping
+                                                       *region_mapping,
+                                                       GtStr *seqid,
+                                                       const GtRange *range,
+                                                       unsigned long *offset,
+                                                       GtError *err)</code>
+<p>
+Use <code>region_mapping</code> to return the MD5 fingerprint of the sequence with the
+   sequence ID <code>seqid</code> and its corresponding <code>range</code>. The offset of the sequence
+   is stored in <code>offset</code>.
+   In the case of an error, <code>NULL</code> is returned and <code>err</code> is set accordingly.
+</p>
+<hr>
+<a name="gt_region_mapping_delete"></a>
+
+<code>void              gt_region_mapping_delete(GtRegionMapping *region_mapping)</code>
+<p>
+Delete <code>region_mapping</code>.
+</p>
+<hr>
 <a name="GtRegionNode"></a>
 <h2>Class GtRegionNode</h2>
 
@@ -7340,6 +7444,22 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_rec_map_get_southeast_y"><code>gt_rec_map_get_southeast_y</code></a><br>
 
   <a href="#gt_rec_map_has_omitted_children"><code>gt_rec_map_has_omitted_children</code></a><br>
+
+  <a href="#gt_region_mapping_delete"><code>gt_region_mapping_delete</code></a><br>
+
+  <a href="#gt_region_mapping_get_description"><code>gt_region_mapping_get_description</code></a><br>
+
+  <a href="#gt_region_mapping_get_md5_fingerprint"><code>gt_region_mapping_get_md5_fingerprint</code></a><br>
+
+  <a href="#gt_region_mapping_get_raw_sequence"><code>gt_region_mapping_get_raw_sequence</code></a><br>
+
+  <a href="#gt_region_mapping_new_mapping"><code>gt_region_mapping_new_mapping</code></a><br>
+
+  <a href="#gt_region_mapping_new_rawseq"><code>gt_region_mapping_new_rawseq</code></a><br>
+
+  <a href="#gt_region_mapping_new_seqfiles"><code>gt_region_mapping_new_seqfiles</code></a><br>
+
+  <a href="#gt_region_mapping_ref"><code>gt_region_mapping_ref</code></a><br>
 
   <a href="#gt_region_node_new"><code>gt_region_node_new</code></a><br>
 

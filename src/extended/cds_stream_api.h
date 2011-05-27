@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
-#include "extended/region_mapping.h"
+#include "extended/region_mapping_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtCDSStream> determines the
    coding sequence (CDS) for sequences determined by feature nodes of type
