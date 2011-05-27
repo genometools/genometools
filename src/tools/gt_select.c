@@ -23,7 +23,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/select_stream.h"
+#include "extended/select_stream_api.h"
 #include "extended/targetbest_select_stream.h"
 #include "tools/gt_select.h"
 
@@ -258,8 +258,8 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
   /* create a filter stream */
   select_stream = gt_select_stream_new(gff3_in_stream, arguments->seqid,
                                        arguments->source,
-                                       arguments->contain_range,
-                                       arguments->overlap_range,
+                                       &arguments->contain_range,
+                                       &arguments->overlap_range,
                                        arguments->strand,
                                        arguments->targetstrand,
                                        arguments->has_CDS,

@@ -67,7 +67,7 @@ static int select_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
   return 0;
 }
 
-static bool select_contain_range(GtFeatureNode *fn, GtRange contain_range)
+static bool filter_contain_range(GtFeatureNode *fn, GtRange contain_range)
 {
   GtRange range;
   gt_assert(fn);
@@ -79,7 +79,7 @@ static bool select_contain_range(GtFeatureNode *fn, GtRange contain_range)
   return false;
 }
 
-static bool select_overlap_range(GtFeatureNode *fn, GtRange overlap_range)
+static bool filter_overlap_range(GtFeatureNode *fn, GtRange overlap_range)
 {
   GtRange feature_range;
   gt_assert(fn);
@@ -90,7 +90,7 @@ static bool select_overlap_range(GtFeatureNode *fn, GtRange overlap_range)
   return false;
 }
 
-static bool select_strand(GtFeatureNode *fn, GtStrand strand)
+static bool filter_strand(GtFeatureNode *fn, GtStrand strand)
 {
   gt_assert(fn);
   if (strand != GT_NUM_OF_STRAND_TYPES &&
@@ -99,7 +99,7 @@ static bool select_strand(GtFeatureNode *fn, GtStrand strand)
   return false;
 }
 
-static bool select_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
+static bool filter_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
 {
   const char *target;
   gt_assert(fn);
@@ -120,7 +120,7 @@ static bool select_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
   return false;
 }
 
-static bool select_has_CDS(GtFeatureNode *fn, bool has_CDS)
+static bool filter_has_CDS(GtFeatureNode *fn, bool has_CDS)
 {
   gt_assert(fn);
   if (has_CDS && !gt_feature_node_has_CDS(fn))
@@ -128,7 +128,7 @@ static bool select_has_CDS(GtFeatureNode *fn, bool has_CDS)
   return false;
 }
 
-static bool select_min_average_ssp(GtFeatureNode *fn, double minaveragessp)
+static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp)
 {
   gt_assert(fn);
   if (minaveragessp != GT_UNDEF_DOUBLE &&
@@ -144,7 +144,7 @@ static int select_visitor_feature_node(GtNodeVisitor *nv,
                                        GT_UNUSED GtError *err)
 {
   GtSelectVisitor *fv;
-  bool select_node = false;
+  bool filter_node = false;
   gt_error_check(err);
   fv = select_visitor_cast(nv);
   fv->current_feature++;
@@ -160,50 +160,50 @@ static int select_visitor_feature_node(GtNodeVisitor *nv,
     if (fn && gt_feature_node_has_type(fn, gt_ft_gene)) {
       if (fv->max_gene_length != GT_UNDEF_ULONG &&
           gt_range_length(&range) > fv->max_gene_length) {
-        select_node = true;
+        filter_node = true;
       }
       else if (fv->max_gene_num != GT_UNDEF_ULONG &&
                fv->gene_num >= fv->max_gene_num) {
-        select_node = true;
+        filter_node = true;
       }
       else if (fv->min_gene_score != GT_UNDEF_DOUBLE &&
                gt_feature_node_get_score(fn) < fv->min_gene_score) {
-        select_node = true;
+        filter_node = true;
       }
       else if (fv->max_gene_score != GT_UNDEF_DOUBLE &&
                gt_feature_node_get_score(fn) > fv->max_gene_score) {
-        select_node = true;
+        filter_node = true;
       }
       else if (fv->feature_num != GT_UNDEF_ULONG &&
                fv->feature_num != fv->current_feature) {
-        select_node = true;
+        filter_node = true;
       }
-      if (!select_node)
+      if (!filter_node)
         fv->gene_num++; /* gene passed filter */
     }
   }
   else
-    select_node = true;
+    filter_node = true;
 
-  if (!select_node)
-    select_node = select_contain_range(fn, fv->contain_range);
+  if (!filter_node)
+    filter_node = filter_contain_range(fn, fv->contain_range);
 
-  if (!select_node)
-    select_node = select_overlap_range(fn, fv->overlap_range);
+  if (!filter_node)
+    filter_node = filter_overlap_range(fn, fv->overlap_range);
 
-  if (!select_node)
-    select_node = select_strand(fn, fv->strand);
+  if (!filter_node)
+    filter_node = filter_strand(fn, fv->strand);
 
-  if (!select_node)
-    select_node = select_targetstrand(fn, fv->targetstrand);
+  if (!filter_node)
+    filter_node = filter_targetstrand(fn, fv->targetstrand);
 
-  if (!select_node)
-    select_node = select_has_CDS(fn, fv->has_CDS);
+  if (!filter_node)
+    filter_node = filter_has_CDS(fn, fv->has_CDS);
 
-  if (!select_node)
-    select_node = select_min_average_ssp(fn, fv->min_average_splice_site_prob);
+  if (!filter_node)
+    filter_node = filter_min_average_ssp(fn, fv->min_average_splice_site_prob);
 
-  if (select_node)
+  if (filter_node)
     gt_genome_node_delete((GtGenomeNode*) fn);
   else
     gt_queue_add(fv->node_buffer, fn);
@@ -283,8 +283,8 @@ const GtNodeVisitorClass* gt_select_visitor_class()
 
 GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      GtStr *source,
-                                     GtRange contain_range,
-                                     GtRange overlap_range,
+                                     const GtRange *contain_range,
+                                     const GtRange *overlap_range,
                                      GtStrand strand, GtStrand targetstrand,
                                      bool has_CDS,
                                      unsigned long max_gene_length,
@@ -299,8 +299,18 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
   select_visitor->node_buffer = gt_queue_new();
   select_visitor->seqid = gt_str_ref(seqid);
   select_visitor->source = gt_str_ref(source);
-  select_visitor->contain_range = contain_range;
-  select_visitor->overlap_range = overlap_range;
+  if (contain_range)
+    select_visitor->contain_range = *contain_range;
+  else {
+    select_visitor->contain_range.start = GT_UNDEF_ULONG;
+    select_visitor->contain_range.end   = GT_UNDEF_ULONG;
+  }
+  if (overlap_range)
+    select_visitor->overlap_range = *overlap_range;
+  else {
+    select_visitor->overlap_range.start = GT_UNDEF_ULONG;
+    select_visitor->overlap_range.end   = GT_UNDEF_ULONG;
+  }
   select_visitor->strand = strand;
   select_visitor->targetstrand = targetstrand;
   select_visitor->has_CDS = has_CDS;

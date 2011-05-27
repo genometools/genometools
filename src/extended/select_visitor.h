@@ -28,8 +28,8 @@ const GtNodeVisitorClass* gt_select_visitor_class(void);
    strand <strand>. */
 GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      GtStr *source,
-                                     GtRange contain_range,
-                                     GtRange overlap_range,
+                                     const GtRange *contain_range,
+                                     const GtRange *overlap_range,
                                      GtStrand strand,
                                      GtStrand targetstrand,
                                      bool has_CDS,

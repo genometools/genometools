@@ -27,7 +27,7 @@ typedef struct GtIDToMD5Stream GtIDToMD5Stream;
 
 /* Create a <GtIDToMD5Stream*> which converts ``regular'' sequence IDs from
    nodes it retrievs from its <in_stream> to MD5 fingerprints (with the help of
-   the given <region_mapping). If <substitute_target_ids> is true, the IDs of
+   the given <region_mapping>). If <substitute_target_ids> is true, the IDs of
    Target attributes are also converted to MD5 fingerprints.
    Takes ownership of <region_mapping>! */
 GtNodeStream* gt_id_to_md5_stream_new(GtNodeStream *in_stream,

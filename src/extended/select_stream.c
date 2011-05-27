@@ -18,7 +18,7 @@
 #include "core/assert_api.h"
 #include "extended/feature_node.h"
 #include "extended/node_stream_api.h"
-#include "extended/select_stream.h"
+#include "extended/select_stream_api.h"
 #include "extended/select_visitor.h"
 
 struct GtSelectStream
@@ -27,6 +27,8 @@ struct GtSelectStream
   GtNodeStream *in_stream;
   GtNodeVisitor *select_visitor; /* the actual work is done in the visitor */
 };
+
+const GtNodeStreamClass* gt_select_stream_class(void);
 
 #define gt_select_stream_cast(GS)\
         gt_node_stream_cast(gt_select_stream_class(), GS);
@@ -85,10 +87,10 @@ const GtNodeStreamClass* gt_select_stream_class(void)
 }
 
 GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream, GtStr *seqid,
-                                   GtStr *source, GtRange contain_range,
-                                   GtRange overlap_range, GtStrand strand,
-                                   GtStrand targetstrand, bool has_CDS,
-                                   unsigned long max_gene_length,
+                                   GtStr *source, const GtRange *contain_range,
+                                   const GtRange *overlap_range,
+                                   GtStrand strand, GtStrand targetstrand,
+                                   bool has_CDS, unsigned long max_gene_length,
                                    unsigned long max_gene_num,
                                    double min_gene_score, double max_gene_score,
                                    double min_average_splice_site_prob,

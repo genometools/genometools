@@ -154,6 +154,8 @@ interfaces.
 
   <li><a href="#GtRegionNode">GtRegionNode</a>
 
+  <li><a href="#GtSelectStream">GtSelectStream</a>
+
   <li><a href="#GtSequenceNode">GtSequenceNode</a>
 
   <li><a href="#GtSortStream">GtSortStream</a>
@@ -3914,7 +3916,7 @@ Delete <code>hm</code>, calling the free function if necessary.
 <p>
 Create a <code>GtIDToMD5Stream*</code> which converts ``regular'' sequence IDs from
    nodes it retrievs from its <code>in_stream</code> to MD5 fingerprints (with the help of
-   the given <code>region_mapping). If <substitute_target_ids</code> is true, the IDs of
+   the given <code>region_mapping</code>). If <code>substitute_target_ids</code> is true, the IDs of
    Target attributes are also converted to MD5 fingerprints.
    Takes ownership of <code>region_mapping</code>!
 </p>
@@ -4768,6 +4770,58 @@ Create a new <code>GtRegionNode*</code> representing sequence with ID <code>seqi
    <code>start</code> has to be smaller or equal than <code>end</code>.
    The <code>GtRegionNode*</code> stores a new reference to <code>seqid</code>, so make sure you do
    not modify the original <code>seqid</code> afterwards!
+</p>
+<hr>
+<a name="GtSelectStream"></a>
+<h2>Class GtSelectStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtSelectStream</code> selects certain
+   nodes it retrieves from its node source and passes them along. </p>
+
+<hr>
+<a name="gt_select_stream_new"></a>
+
+<code>GtNodeStream*  gt_select_stream_new(GtNodeStream *in_stream,
+                                   GtStr *seqid,
+                                   GtStr *source,
+                                   const GtRange *contain_range,
+                                   const GtRange *overlap_range,
+                                   GtStrand strand,
+                                   GtStrand targetstrand,
+                                   bool has_CDS,
+                                   unsigned long max_gene_length,
+                                   unsigned long max_gene_num,
+                                   double min_gene_score,
+                                   double max_gene_score,
+                                   double min_average_splice_site_prob,
+                                   unsigned long feature_num)</code>
+<p>
+Create a <code>GtSelectStream*</code> which selects genome nodes it retrieves from its
+   <code>in_stream</code> and passes them along if they meet the criteria defined by the
+   other arguments. All comment nodes are selected.
+   If <code>seqid</code> is defined, a genome node must have it to be selected.
+   If <code>source</code> is defined, a genome node must have it to be selected.
+   If <code>contain_range</code> is defined, a genome node must be contained in it to be
+   selected.
+   If <code>overlap_range</code> is defined, a genome node must overlap it to be selected.
+   If <code>strand</code> is defined, a (top-level) genome node must have it to be
+   selected.
+   If <code>targetstrand</code> is defined, a feature with a target attribute must have
+   exactly one of it and its strand must equal <code>targetstrand</code>.
+   If <code>had_cds</code> is <code>true</code>, all top-level features are selected which have a
+   child with type <em>CDS</em>.
+   If <code>max_gene_length</code> is defined, only genes up to the this length are
+   selected.
+   If <code>max_gene_num</code> is defined, only so many genes are selected.
+   If <code>min_gene_score</code> is defined, only genes with at least this score are
+   selected.
+   If <code>max_gene_score</code> is defined, only genes with at most this score are
+   selcected.
+   If <code>min_average_splice_site_prob</code> is defined, feature nodes which have
+   splice sites must have at least this average splice site score to be
+   selected.
+   If <code>feature_num</code> is defined, just the <code>feature_num</code>th feature node occuring
+   in the <code>in_stream</code> is selected.
 </p>
 <hr>
 <a name="GtSequenceNode"></a>
@@ -7557,6 +7611,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_region_node_new"><code>gt_region_node_new</code></a><br>
 
+  <a href="#gt_select_stream_new"><code>gt_select_stream_new</code></a><br>
+
   <a href="#gt_sequence_node_get_description"><code>gt_sequence_node_get_description</code></a><br>
 
   <a href="#gt_sequence_node_get_sequence"><code>gt_sequence_node_get_sequence</code></a><br>
@@ -7820,7 +7876,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-27
+Last update: 2011-05-28
 </div>
 </div>
 <!-- Piwik -->
