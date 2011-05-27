@@ -1207,7 +1207,7 @@ static int gt_searchforLTRs(GtLTRharvestStream *lo,
 
 /*
  The following function removes exact duplicates from the array of
- predicted LTR elements. Exact duplicates occur, when
+ predicted LTR elements. Exact duplicates occur when
  different seeds are extended to same boundary coordinates.
  */
 static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
@@ -1247,7 +1247,7 @@ static void gt_removeduplicates(GtArrayLTRboundaries *arrayLTRboundaries)
 
 /* The following function removes overlaps and deletes the prediction with
    a lower similarity value. If "nooverlapallowed" is set, then all
-   overlapping predicitions are deleted completely.
+   overlapping predictions are deleted completely.
  */
 static void gt_removeoverlapswithlowersimilarity(
   GtArrayLTRboundaries *arrayLTRboundaries,
@@ -1657,7 +1657,6 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                                 SARR_SSPTAB | SARR_SDSTAB,
                                                 SEQ_mappedboth,
                                                 err);
-
   if (ltrh_stream->ssar == NULL)
   {
     gt_node_stream_delete(ns);
