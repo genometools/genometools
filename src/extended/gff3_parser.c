@@ -374,7 +374,7 @@ static void feature_node_is_part_of_pseudo_node(GtFeatureNode *pseudo_node,
 {
   const char *id;
   gt_assert(pseudo_node &&
-         gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_node));
+            gt_feature_node_is_pseudo((GtFeatureNode*) pseudo_node));
   gt_assert(child && !gt_feature_node_is_pseudo((GtFeatureNode*) child));
   gt_assert(feature_info);
   gt_feature_node_add_child(pseudo_node, child);
