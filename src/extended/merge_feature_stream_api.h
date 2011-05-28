@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,12 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MERGE_FEATURE_STREAM_H
-#define MERGE_FEATURE_STREAM_H
+#ifndef MERGE_FEATURE_STREAM_API_H
+#define MERGE_FEATURE_STREAM_API_H
 
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-GtNodeStream* gt_merge_feature_stream_new(GtNodeStream*);
+/* Implements the <GtNodeStream> interface. A <GtMergeFeatureStream> merges
+   adjacent features of the same type. */
+typedef struct GtMergeFeatureStream GtMergeFeatureStream;
+
+/* Create a <GtMergeFeatureStream*> which merges adjacent features of the same
+   type it retrieves from <in_stream> and returns them (and all other unmodified
+   features). */
+GtNodeStream* gt_merge_feature_stream_new(GtNodeStream *in_stream);
 
 #endif

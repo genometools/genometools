@@ -19,7 +19,7 @@
 #include "extended/feature_type.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/merge_feature_stream.h"
+#include "extended/merge_feature_stream_api.h"
 #include "tools/gt_mergefeat.h"
 
 typedef struct {

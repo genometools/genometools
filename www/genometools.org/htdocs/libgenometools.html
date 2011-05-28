@@ -132,6 +132,8 @@ interfaces.
 
   <li><a href="#GtMD5ToIDStream">GtMD5ToIDStream</a>
 
+  <li><a href="#GtMergeFeatureStream">GtMergeFeatureStream</a>
+
   <li><a href="#GtMergeStream">GtMergeStream</a>
 
   <li><a href="#GtNodeStream">GtNodeStream</a>
@@ -4256,6 +4258,22 @@ Create a <code>GtMD5toIDStream*</code> which converts MD5 sequence IDs from node
    given <code>region_mapping</code>). Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
+<a name="GtMergeFeatureStream"></a>
+<h2>Class GtMergeFeatureStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtMergeFeatureStream</code> merges
+   adjacent features of the same type. </p>
+
+<hr>
+<a name="gt_merge_feature_stream_new"></a>
+
+<code>GtNodeStream*  gt_merge_feature_stream_new(GtNodeStream *in_stream)</code>
+<p>
+Create a <code>GtMergeFeatureStream*</code> which merges adjacent features of the same
+   type it retrieves from <code>in_stream</code> and returns them (and all other unmodified
+   features).
+</p>
+<hr>
 <a name="GtMergeStream"></a>
 <h2>Class GtMergeStream</h2>
 
@@ -7616,6 +7634,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_malloc"><code>gt_malloc</code></a><br>
 
   <a href="#gt_md5_to_id_stream_new"><code>gt_md5_to_id_stream_new</code></a><br>
+
+  <a href="#gt_merge_feature_stream_new"><code>gt_merge_feature_stream_new</code></a><br>
 
   <a href="#gt_merge_stream_new"><code>gt_merge_stream_new</code></a><br>
 

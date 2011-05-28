@@ -19,7 +19,7 @@
 #define MERGE_STREAM_API_H
 
 #include <stdio.h>
-#include "core/array.h"
+#include "core/array_api.h"
 #include "extended/node_stream_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtMergeStream> allows to merge a

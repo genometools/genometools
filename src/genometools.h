@@ -90,6 +90,8 @@
 #include "extended/id_to_md5_stream_api.h"
 #include "extended/inter_feature_stream_api.h"
 #include "extended/md5_to_id_stream_api.h"
+#include "extended/merge_feature_stream_api.h"
+#include "extended/merge_stream.h"
 #include "extended/node_stream_api.h"
 #include "extended/node_visitor_api.h"
 #include "extended/region_mapping_api.h"

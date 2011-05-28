@@ -27,7 +27,7 @@
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_parser.h"
 #include "extended/gtdatahelp.h"
-#include "extended/merge_feature_stream.h"
+#include "extended/merge_feature_stream_api.h"
 #include "extended/sort_stream_api.h"
 #include "extended/type_checker_builtin.h"
 #include "extended/type_checker_obo_api.h"
