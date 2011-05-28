@@ -19,7 +19,7 @@
 #define STAT_STREAM_API_H
 
 #include <stdio.h>
-#include "core/file.h"
+#include "core/file_api.h"
 #include "extended/node_stream_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtStatStream> gathers statistics
