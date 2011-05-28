@@ -32,7 +32,7 @@
 #include "core/minmax.h"
 #include "core/thread.h"
 #include "core/translator.h"
-#include "core/undef.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/globalchaining.h"
 #include "extended/reverse.h"
