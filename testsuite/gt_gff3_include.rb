@@ -937,4 +937,12 @@ if $gttestdata then
   large_gff3_test("Saccharomyces cerevisiae", "saccharomyces_cerevisiae.gff")
   large_gff3_test("Drosophila melanogaster",
                   "Drosophila_melanogaster.BDGP5.4.50.gff3")
+
+  Name "gt gff3 TAIR10"
+  Keywords "gt_gff3"
+  Test do
+    run_test "#{$bin}gt gff3 -tidy -sort " +
+             "#{$gttestdata}gff3/TAIR10_GFF3_genes.gff"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3/tair10.gff3"
+  end
 end
