@@ -58,7 +58,7 @@ void            gt_option_parser_set_comment_func(GtOptionParser*,
                                                   GtShowCommentFunc,
                                                   void* data);
 /* Set the version function used by <option_parser> to <version_func>.
-   This version function takes precedens to the one supplied to
+   This version function takes precedence to the one supplied to
    <gt_option_parser_parse()>. */
 void            gt_option_parser_set_version_func(GtOptionParser *option_parser,
                                                   GtShowVersionFunc
