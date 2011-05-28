@@ -28,13 +28,13 @@
 struct GtDlist {
   GtCompare cmp_func;
   GtDlistelem *first,
-            *last;
+              *last;
   unsigned long size;
 };
 
 struct GtDlistelem {
   GtDlistelem *previous,
-            *next;
+              *next;
   void *data;
 };
 
