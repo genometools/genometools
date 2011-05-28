@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,13 +15,18 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EXTRACT_FEAT_SEQUENCE_H
-#define EXTRACT_FEAT_SEQUENCE_H
+#include "core/assert_api.h"
+#include "extended/extract_feature_stream_api.h"
+#include "extended/extract_feature_visitor.h"
+#include "extended/visitor_stream_api.h"
 
-#include "extended/genome_node.h"
-#include "extended/region_mapping_api.h"
-
-int gt_extract_feat_sequence(GtStr *sequence, GtGenomeNode*, const char *type,
-                          bool join, GtRegionMapping*, GtError*);
-
-#endif
+GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
+                                            GtRegionMapping *rm,
+                                            const char *type, bool join,
+                                            bool translate, unsigned long width,
+                                            GtFile *outfp)
+{
+  GtNodeVisitor *nv = gt_extract_feature_visitor_new(rm, type, join, translate,
+                                                     width, outfp);
+  return gt_visitor_stream_new(in_stream, nv);
+}

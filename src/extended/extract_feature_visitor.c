@@ -20,12 +20,12 @@
 #include "core/fasta.h"
 #include "core/symbol_api.h"
 #include "core/translator.h"
-#include "extended/extract_feat_sequence.h"
-#include "extended/extract_feat_visitor.h"
+#include "extended/extract_feature_sequence.h"
+#include "extended/extract_feature_visitor.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/node_visitor_rep.h"
 
-struct GtExtractFeatVisitor {
+struct GtExtractFeatureVisitor {
   const GtNodeVisitor parent_instance;
   const char *type;
   bool join,
@@ -36,14 +36,14 @@ struct GtExtractFeatVisitor {
   GtFile *outfp;
 };
 
-#define gt_extract_feat_visitor_cast(GV)\
-        gt_node_visitor_cast(gt_extract_feat_visitor_class(), GV)
+#define gt_extract_feature_visitor_cast(GV)\
+        gt_node_visitor_cast(gt_extract_feature_visitor_class(), GV)
 
-static void extract_feat_visitor_free(GtNodeVisitor *nv)
+static void extract_feature_visitor_free(GtNodeVisitor *nv)
 {
-  GtExtractFeatVisitor *extract_feat_visitor = gt_extract_feat_visitor_cast(nv);
-  gt_assert(extract_feat_visitor);
-  gt_region_mapping_delete(extract_feat_visitor->region_mapping);
+  GtExtractFeatureVisitor *efv = gt_extract_feature_visitor_cast(nv);
+  gt_assert(efv);
+  gt_region_mapping_delete(efv->region_mapping);
 }
 
 static void construct_description(GtStr *description, const char *type,
@@ -90,24 +90,24 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
   }
 }
 
-static int extract_feat_visitor_feature_node(GtNodeVisitor *nv,
-                                             GtFeatureNode *fn, GtError *err)
+static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
+                                                GtFeatureNode *fn, GtError *err)
 {
-  GtExtractFeatVisitor *efv;
+  GtExtractFeatureVisitor *efv;
   GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
   GtStr *description,
-      *sequence;
+        *sequence;
   int had_err = 0;
   gt_error_check(err);
-  efv = gt_extract_feat_visitor_cast(nv);
+  efv = gt_extract_feature_visitor_cast(nv);
   gt_assert(efv->region_mapping);
   fni = gt_feature_node_iterator_new(fn);
   description = gt_str_new();
   sequence = gt_str_new();
   while (!had_err && (child = gt_feature_node_iterator_next(fni))) {
-    if (gt_extract_feat_sequence(sequence, (GtGenomeNode*) child, efv->type,
-                                 efv->join, efv->region_mapping, err)) {
+    if (gt_extract_feature_sequence(sequence, (GtGenomeNode*) child, efv->type,
+                                    efv->join, efv->region_mapping, err)) {
       had_err = -1;
     }
 
@@ -126,14 +126,14 @@ static int extract_feat_visitor_feature_node(GtNodeVisitor *nv,
   return had_err;
 }
 
-const GtNodeVisitorClass* gt_extract_feat_visitor_class()
+const GtNodeVisitorClass* gt_extract_feature_visitor_class()
 {
   static const GtNodeVisitorClass *nvc = NULL;
   if (!nvc) {
-    nvc = gt_node_visitor_class_new(sizeof (GtExtractFeatVisitor),
-                                    extract_feat_visitor_free,
+    nvc = gt_node_visitor_class_new(sizeof (GtExtractFeatureVisitor),
+                                    extract_feature_visitor_free,
                                     NULL,
-                                    extract_feat_visitor_feature_node,
+                                    extract_feature_visitor_feature_node,
                                     NULL,
                                     NULL,
                                     NULL);
@@ -141,16 +141,17 @@ const GtNodeVisitorClass* gt_extract_feat_visitor_class()
   return nvc;
 }
 
-GtNodeVisitor* gt_extract_feat_visitor_new(GtRegionMapping *rm,
-                                           const char *type, bool join,
-                                           bool translate, unsigned long width,
-                                           GtFile *outfp)
+GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
+                                              const char *type, bool join,
+                                              bool translate,
+                                              unsigned long width,
+                                              GtFile *outfp)
 {
   GtNodeVisitor *nv;
-  GtExtractFeatVisitor *efv;
+  GtExtractFeatureVisitor *efv;
   gt_assert(rm);
-  nv = gt_node_visitor_create(gt_extract_feat_visitor_class());
-  efv= gt_extract_feat_visitor_cast(nv);
+  nv = gt_node_visitor_create(gt_extract_feature_visitor_class());
+  efv= gt_extract_feature_visitor_cast(nv);
   efv->type = gt_symbol(type);
   efv->join = join;
   efv->translate = translate;

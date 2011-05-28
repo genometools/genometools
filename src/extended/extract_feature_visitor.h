@@ -15,22 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef EXTRACT_FEAT_VISITOR_H
-#define EXTRACT_FEAT_VISITOR_H
+#ifndef EXTRACT_FEATURE_VISITOR_H
+#define EXTRACT_FEATURE_VISITOR_H
 
 /* Implements the <GtNodeVisitor> interface. */
-typedef struct GtExtractFeatVisitor GtExtractFeatVisitor;
+typedef struct GtExtractFeatureVisitor GtExtractFeatureVisitor;
 
 #include <stdbool.h>
 #include "extended/node_visitor.h"
 #include "extended/region_mapping_api.h"
 
-const GtNodeVisitorClass* gt_extract_feat_visitor_class(void);
+const GtNodeVisitorClass* gt_extract_feature_visitor_class(void);
 /* takes ownership of <rm> */
-GtNodeVisitor*            gt_extract_feat_visitor_new(GtRegionMapping *rm,
-                                                   const char*, bool join,
-                                                   bool translate,
-                                                   unsigned long width,
-                                                   GtFile *outfp);
+GtNodeVisitor*            gt_extract_feature_visitor_new(GtRegionMapping *rm,
+                                                         const char*,
+                                                         bool join,
+                                                         bool translate,
+                                                         unsigned long width,
+                                                         GtFile *outfp);
 
 #endif

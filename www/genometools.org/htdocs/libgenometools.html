@@ -88,7 +88,7 @@ interfaces.
 
   <li><a href="#GtError">GtError</a>
 
-  <li><a href="#GtExtractFeatStream">GtExtractFeatStream</a>
+  <li><a href="#GtExtractFeatureStream">GtExtractFeatureStream</a>
 
   <li><a href="#GtFeatureIndex">GtFeatureIndex</a>
 
@@ -2658,27 +2658,27 @@ Return the error string stored in <code>err</code> (the error must be set).
 Delete the error object <code>err</code>.
 </p>
 <hr>
-<a name="GtExtractFeatStream"></a>
-<h2>Class GtExtractFeatStream</h2>
+<a name="GtExtractFeatureStream"></a>
+<h2>Class GtExtractFeatureStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. A <code>GtExtractFeatStream</code> extract the
-   sequences of features. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtExtractFeatureStream</code> extract
+   the sequences of features. </p>
 
 <hr>
-<a name="gt_extract_feat_stream_new"></a>
+<a name="gt_extract_feature_stream_new"></a>
 
-<code>GtNodeStream*  gt_extract_feat_stream_new(GtNodeStream *in_stream,
-                                         GtRegionMapping *region_Mapping,
-                                         const char *type, bool join,
-                                         bool translate, unsigned long width,
-                                         GtFile *outfp)</code>
+<code>GtNodeStream*  gt_extract_feature_stream_new(GtNodeStream *in_stream,
+                                            GtRegionMapping *region_Mapping,
+                                            const char *type, bool join,
+                                            bool translate, unsigned long width,
+                                            GtFile *outfp)</code>
 <p>
-Create a <code>GtExtractFeatStream*</code> which extracts the sequences of feature nodes
-   (of the given <code>type</code>) it retrieves from <code>in_stream</code> and writes them in FASTA
-   format (with the given <code>width</code>) to <code>outfp</code>. If <code>join</code> is true, features of
-   the given <code>type</code> are joined together before the sequence is extracted.
-   If <code>translate</code> is true, the sequences are translated into amino acid
-   sequences before they are written to <code>outfp</code>.
+Create a <code>GtExtractFeatureStream*</code> which extracts the sequences of feature
+   nodes (of the given <code>type</code>) it retrieves from <code>in_stream</code> and writes them in
+   FASTA format (with the given <code>width</code>) to <code>outfp</code>. If <code>join</code> is <code>true</code>,
+   features of the given <code>type</code> are joined together before the sequence is
+   extracted. If <code>translate</code> is <code>true</code>, the sequences are translated into amino
+   acid sequences before they are written to <code>outfp</code>.
    Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
@@ -7255,7 +7255,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_error_vset"><code>gt_error_vset</code></a><br>
 
-  <a href="#gt_extract_feat_stream_new"><code>gt_extract_feat_stream_new</code></a><br>
+  <a href="#gt_extract_feature_stream_new"><code>gt_extract_feature_stream_new</code></a><br>
 
   <a href="#gt_feature_index_add_feature_node"><code>gt_feature_index_add_feature_node</code></a><br>
 

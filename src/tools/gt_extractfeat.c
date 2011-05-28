@@ -19,7 +19,7 @@
 #include "core/option.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
-#include "extended/extract_feat_stream_api.h"
+#include "extended/extract_feature_stream_api.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gtdatahelp.h"
@@ -110,7 +110,7 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                  int parsed_args, void *tool_arguments,
                                  GtError *err)
 {
-  GtNodeStream *gff3_in_stream = NULL, *extract_feat_stream = NULL;
+  GtNodeStream *gff3_in_stream = NULL, *extract_feature_stream = NULL;
   GtExtractFeatArguments *arguments = tool_arguments;
   GtRegionMapping *region_mapping;
   int had_err = 0;
@@ -132,20 +132,21 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
 
   if (!had_err) {
     /* create extract feature stream */
-    extract_feat_stream = gt_extract_feat_stream_new(gff3_in_stream,
-                                                     region_mapping,
-                                                    gt_str_get(arguments->type),
-                                                     arguments->join,
-                                                     arguments->translate,
-                                                     arguments->width,
-                                                     arguments->outfp);
+    extract_feature_stream =
+      gt_extract_feature_stream_new(gff3_in_stream,
+                                    region_mapping,
+                                    gt_str_get(arguments->type),
+                                    arguments->join,
+                                    arguments->translate,
+                                    arguments->width,
+                                    arguments->outfp);
 
     /* pull the features through the stream and free them afterwards */
-    had_err = gt_node_stream_pull(extract_feat_stream, err);
+    had_err = gt_node_stream_pull(extract_feature_stream, err);
   }
 
   /* free */
-  gt_node_stream_delete(extract_feat_stream);
+  gt_node_stream_delete(extract_feature_stream);
   gt_node_stream_delete(gff3_in_stream);
 
   return had_err;

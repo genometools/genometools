@@ -78,7 +78,7 @@
 #include "extended/csa_stream_api.h"
 #include "extended/cds_stream_api.h"
 #include "extended/eof_node_api.h"
-#include "extended/extract_feat_stream_api.h"
+#include "extended/extract_feature_stream_api.h"
 #include "extended/feature_node_api.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/genome_node_api.h"
