@@ -49,12 +49,12 @@ end
 def enumlcpintervals(filename)
   stack = Array.new()
   stack.push(Lcpinterval.new(0,0,nil,[]))
-  idx = 1
+  idx = 0
   LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
-    lb = idx - 1
+    lb = idx
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
-      lastinterval.rb = idx-1
+      lastinterval.rb = idx
       processlcpinterval(lastinterval)
       lb = lastinterval.lb
     end
@@ -64,7 +64,7 @@ def enumlcpintervals(filename)
     idx += 1
   end
   lastinterval = stack.pop
-  lastinterval.rb = idx-1
+  lastinterval.rb = idx
   processlcpinterval(lastinterval)
 end
 
