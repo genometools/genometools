@@ -277,6 +277,7 @@ static int maxpairs_processbranchedge(bool firstsucc,
                                       GtBUinfo *afather,
                                       GT_UNUSED unsigned long sondepth,
                                       GT_UNUSED unsigned long sonlb,
+                                      GT_UNUSED unsigned long sonrb,
                                       GtBUinfo *ason,
                                       GtBUstate *astate,
                                       GtError *err)

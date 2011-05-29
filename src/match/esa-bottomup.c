@@ -120,6 +120,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                                 GtBUinfo *,
                                                 unsigned long,
                                                 unsigned long,
+                                                unsigned long,
                                                 GtBUinfo *,
                                                 GtBUstate *,
                                                 GtError *),
@@ -202,6 +203,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                  TOP_ESA_BOTTOMUP.info,
                                  lastinterval->lcp,
                                  lastinterval->lb,
+                                 lastinterval->rb,
                                  lastinterval->info,
                                  bustate,
                                  err) != 0)
@@ -221,7 +223,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       if (lastinterval != NULL)
       {
         unsigned long lastintervallcp = lastinterval->lcp,
-                      lastintervallb = lastinterval->lb;
+                      lastintervallb = lastinterval->lb,
+                      lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
         if (processbranchingedge(true,
                                  TOP_ESA_BOTTOMUP.lcp,
@@ -229,6 +232,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                  TOP_ESA_BOTTOMUP.info,
                                  lastintervallcp,
                                  lastintervallb,
+                                 lastintervalrb,
                                  NULL,
                                  bustate,err) != 0)
         {

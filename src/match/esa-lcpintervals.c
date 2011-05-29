@@ -205,6 +205,7 @@ static int showbranchingedgeBU(bool firstsucc,
                                GT_UNUSED GtBUinfo *finfo,
                                unsigned long sd,
                                unsigned long slb,
+                               GT_UNUSED unsigned long srb,
                                GT_UNUSED GtBUinfo *sinfo,
                                GT_UNUSED GtBUstate *bustate,
                                GT_UNUSED GtError *err)
