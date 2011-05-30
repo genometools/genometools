@@ -249,14 +249,6 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
-<h2>Sole functions</h2>
-<a name="GT_TERMINAL_WIDTH"></a>
-
-<code>#define GT_TERMINAL_WIDTH</code>
-<p>
-The default terminal width used in the output of the <code>GtOptionParser</code>.
-</p>
-<hr>
 <a name="GtAddIntronsStream"></a>
 <h2>Class GtAddIntronsStream</h2>
 
@@ -4452,9 +4444,9 @@ Delete <code>node_visitor</code>.
 
 <p> <code>GtOption</code> objects represent command line options (which are used in
    a <code>GtOptionParser</code>).
-   Option descriptions are automatically formatted to <code>GT_TERMINAL_WIDTH</code>, but
-   it is possible to embed newlines into the descriptions to manually affect the
-   formating. </p>
+   Option descriptions are automatically formatted to
+   <code>GT_OPTION_PARSER_TERMINAL_WIDTH</code>, but it is possible to embed newlines into
+   the descriptions to manually affect the formating. </p>
 
 <hr>
 <a name="gt_option_new_probability"></a>
@@ -4622,6 +4614,13 @@ Delete <code>option</code>.
 
 <p> <code>GtOptionParser</code> objects can be used to parse command line options. </p>
 
+<hr>
+<a name="GT_OPTION_PARSER_TERMINAL_WIDTH"></a>
+
+<code>#define GT_OPTION_PARSER_TERMINAL_WIDTH</code>
+<p>
+The default terminal width used in the output of the <code>GtOptionParser</code>.
+</p>
 <hr>
 <a name="gt_option_parser_new"></a>
 
@@ -7002,11 +7001,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <a name="Index"></a>
 <h2>Index</h2>
 
+  <a href="#GT_OPTION_PARSER_TERMINAL_WIDTH"><code>GT_OPTION_PARSER_TERMINAL_WIDTH</code></a><br>
+
   <a href="#GT_PHASE_CHARS"><code>GT_PHASE_CHARS</code></a><br>
 
   <a href="#GT_STRAND_CHARS"><code>GT_STRAND_CHARS</code></a><br>
-
-  <a href="#GT_TERMINAL_WIDTH"><code>GT_TERMINAL_WIDTH</code></a><br>
 
   <a href="#GT_UNDEF_BOOL"><code>GT_UNDEF_BOOL</code></a><br>
 

@@ -27,9 +27,9 @@
 typedef struct GtOptionParser GtOptionParser;
 /* <GtOption> objects represent command line options (which are used in
    a <GtOptionParser>).
-   Option descriptions are automatically formatted to <GT_TERMINAL_WIDTH>, but
-   it is possible to embed newlines into the descriptions to manually affect the
-   formating. */
+   Option descriptions are automatically formatted to
+   <GT_OPTION_PARSER_TERMINAL_WIDTH>, but it is possible to embed newlines into
+   the descriptions to manually affect the formating. */
 typedef struct GtOption GtOption;
 
 /* Possible option parser return values. <GT_OPTION_PARSER_OK> denotes that
@@ -52,7 +52,7 @@ typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);
 typedef int  (*GtOptionParserHookFunc)(void *data, GtError*);
 
 /* The default terminal width used in the output of the <GtOptionParser>. */
-#define GT_TERMINAL_WIDTH \
+#define GT_OPTION_PARSER_TERMINAL_WIDTH \
         80
 
 /* Return a new <GtOptionParser> object. The <synopsis> should summarize the

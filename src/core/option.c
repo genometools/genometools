@@ -245,13 +245,13 @@ void gt_option_parser_set_mailaddress(GtOptionParser *op, const char *address)
 static void show_description(unsigned long initial_space, const char *desc,
                              unsigned long len)
 {
-  const unsigned long width = GT_TERMINAL_WIDTH - initial_space;
+  const unsigned long width = GT_OPTION_PARSER_TERMINAL_WIDTH - initial_space;
   const char *tmp_ptr, *desc_ptr = desc;
   unsigned long i;
   bool continue_while = false;
 
   /* got space to show option */
-  gt_assert(initial_space < GT_TERMINAL_WIDTH);
+  gt_assert(initial_space < GT_OPTION_PARSER_TERMINAL_WIDTH);
 
   while (desc_ptr < desc + len) {
     /* break, if the rest of the description fits on one line */
