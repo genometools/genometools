@@ -17,7 +17,7 @@
 #ifndef EIS_ENCIDXSEQ_PARAM_H
 #define EIS_ENCIDXSEQ_PARAM_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 
 /**
  * @file eis-encidxseq-param.h

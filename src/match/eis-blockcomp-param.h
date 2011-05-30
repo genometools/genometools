@@ -22,7 +22,7 @@
  * @brief Call gt_registerBlockEncOptions to add options for construction
  * of a block-compressed index to the option parser.
  */
-#include "core/option.h"
+#include "core/option_api.h"
 #include "match/eis-encidxseq.h"
 
 /**

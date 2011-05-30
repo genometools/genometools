@@ -20,7 +20,7 @@
 #include <limits.h>
 
 #include "core/minmax.h"
-#include "core/option.h"
+#include "core/option_api.h"
 
 /* #include "core/bitpackstring.h" Not necessary. Stefan */
 #include "match/eis-bitpackseqpos.h"

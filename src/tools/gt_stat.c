@@ -16,7 +16,7 @@
 */
 
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"

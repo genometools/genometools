@@ -19,7 +19,7 @@
 #define INDEX_OPTIONS_H
 
 #include "core/encseq_options.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/readmode.h"
 #include "match/sfx-strategy.h"
 

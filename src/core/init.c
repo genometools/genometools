@@ -27,7 +27,7 @@
 #include "core/fa.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/showtime.h"
 #include "core/splitter.h"
 #include "core/symbol.h"

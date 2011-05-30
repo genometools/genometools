@@ -18,7 +18,7 @@
 #ifndef SA_FILTER_H
 #define SA_FILTER_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "gth/sa.h"
 
 /* a filter for spliced alignments */

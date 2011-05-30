@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/undef_api.h"
 #include "tools/gt_seq.h"

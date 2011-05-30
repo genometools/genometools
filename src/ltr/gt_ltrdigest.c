@@ -21,7 +21,7 @@
 #include "core/log.h"
 #include "core/logger.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"

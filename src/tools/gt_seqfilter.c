@@ -20,7 +20,7 @@
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/outputfile.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/undef_api.h"
 #include "tools/gt_seqfilter.h"
 

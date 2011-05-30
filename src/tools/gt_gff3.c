@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/undef_api.h"
 #include "core/versionfunc.h"
@@ -80,8 +80,8 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...] [GFF3_file ...]",
-                         "Parse, possibly transform, and output GFF3 files.");
+  op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Parse, possibly "
+                            "transform, and output GFF3 files.");
 
   /* -sort */
   sort_option = gt_option_new_bool("sort", "sort the GFF3 features (memory "

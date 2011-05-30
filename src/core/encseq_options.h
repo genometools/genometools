@@ -18,7 +18,7 @@
 #ifndef ENCSEQ_OPTIONS_H
 #define ENCSEQ_OPTIONS_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/str_api.h"
 #include "core/str_array.h"
 

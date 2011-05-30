@@ -18,7 +18,7 @@
 #ifndef TOOL_H
 #define TOOL_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 
 /* the tool class */
 typedef struct GtTool GtTool;

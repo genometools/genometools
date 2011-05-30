@@ -16,7 +16,7 @@
 */
 
 #include "core/cstr_array.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "extended/toolbox.h"
 #include "tools/gt_encseq_bitextract.h"

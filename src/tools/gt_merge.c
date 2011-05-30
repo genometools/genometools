@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/versionfunc.h"
 #include "extended/genome_node.h"

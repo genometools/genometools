@@ -36,7 +36,7 @@
     0 -> C O | D
 */
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmbuild.h"
 

@@ -16,7 +16,7 @@
 
 #include <limits.h>
 #include "core/error.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-param.h"
 #include "match/eis-bwtseq-context-param.h"

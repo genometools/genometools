@@ -51,6 +51,7 @@
 #include "core/ma_api.h"
 #include "core/msort_api.h"
 #include "core/parseutils_api.h"
+#include "core/option_api.h"
 #include "core/phase_api.h"
 #include "core/qsort_r_api.h"
 #include "core/queue_api.h"

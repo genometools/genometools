@@ -142,6 +142,10 @@ interfaces.
 
   <li><a href="#GtNodeVisitor">GtNodeVisitor</a>
 
+  <li><a href="#GtOption">GtOption</a>
+
+  <li><a href="#GtOptionParser">GtOptionParser</a>
+
   <li><a href="#GtPhase">GtPhase</a>
 
   <li><a href="#GtQueue">GtQueue</a>
@@ -245,6 +249,14 @@ interfaces.
   <li><a href="#XANSI">XANSI</a>
 
 </ul>
+<h2>Sole functions</h2>
+<a name="GT_TERMINAL_WIDTH"></a>
+
+<code>#define GT_TERMINAL_WIDTH</code>
+<p>
+The default terminal width used in the output of the <code>GtOptionParser</code>.
+</p>
+<hr>
 <a name="GtAddIntronsStream"></a>
 <h2>Class GtAddIntronsStream</h2>
 
@@ -4435,6 +4447,297 @@ Visit <code>sequence_node</code> with <code>node_visitor</code>.
 Delete <code>node_visitor</code>.
 </p>
 <hr>
+<a name="GtOption"></a>
+<h2>Class GtOption</h2>
+
+<p> <code>GtOption</code> objects represent command line options (which are used in
+   a <code>GtOptionParser</code>).
+   Option descriptions are automatically formatted to <code>GT_TERMINAL_WIDTH</code>, but
+   it is possible to embed newlines into the descriptions to manually affect the
+   formating. </p>
+
+<hr>
+<a name="gt_option_new_probability"></a>
+
+<code>GtOption*        gt_option_new_probability(const char *option_str,
+                                          const char *description,
+                                          double *value,
+                                          double default_value)</code>
+<p>
+Enforces that the given argument is >= 0.0 and <= 1.0.
+</p>
+<hr>
+<a name="gt_option_new_range"></a>
+
+<code>GtOption*        gt_option_new_range(const char *option_str,
+                                    const char *description,
+                                    GtRange *value, GtRange *default_value)</code>
+<p>
+If <code>default_value</code> equals <code>NULL</code>, <code>GT_UNDEF_LONG</code> will be used as default for
+   range->start and range->end.
+</p>
+<hr>
+<a name="gt_option_new_choice"></a>
+
+<code>GtOption*        gt_option_new_choice(const char *option_str,
+                                     const char *description, GtStr *value,
+                                     const char *default_value,
+                                     const char **domain)</code>
+<p>
+Add an option which allows only arguments given in the <code>NULL</code> terminated
+   <code>domain</code> (<code>default_value</code> must be an entry of <code>domain</code> or <code>NULL</code>)
+</p>
+<hr>
+<a name="gt_option_new_debug"></a>
+
+<code>GtOption*        gt_option_new_debug(bool *value)</code>
+<p>
+Return a new debug <code>GtOption</code> object: <code>-debug</code>, "enable debugging output",
+   default is <code>false</code>. The result of the option parsing is stored in <code>value</code>
+</p>
+<hr>
+<a name="gt_option_new_verbose"></a>
+
+<code>GtOption*        gt_option_new_verbose(bool *value)</code>
+<p>
+Return a new verbose <code>GtOption</code> object: <code>-v</code>, "be verbose",
+   default is <code>false</code>. The result of the option parsing is stored in <code>value</code>
+</p>
+<hr>
+<a name="gt_option_new_width"></a>
+
+<code>GtOption*        gt_option_new_width(unsigned long *value)</code>
+<p>
+Return a new widht <code>GtOption</code> object: <code>-width</code>, "set output width for FASTA
+   sequence printing (0 disables formatting)", default is 0.
+   The result of the option parsing is stored in <code>value</code>
+</p>
+<hr>
+<a name="gt_option_ref"></a>
+
+<code>GtOption*        gt_option_ref(GtOption *option)</code>
+<p>
+Increate the reference count for <code>option</code> and return it.
+</p>
+<hr>
+<a name="gt_option_get_name"></a>
+
+<code>const char*      gt_option_get_name(const GtOption * option)</code>
+<p>
+Return the name of <code>option</code>
+</p>
+<hr>
+<a name="gt_option_is_mandatory"></a>
+
+<code>void             gt_option_is_mandatory(GtOption *option)</code>
+<p>
+Make <code>option</code> mandatory.
+</p>
+<hr>
+<a name="gt_option_is_mandatory_either"></a>
+
+<code>void             gt_option_is_mandatory_either(GtOption *option_a,
+                                              const GtOption *option_b)</code>
+<p>
+Make it mandatory, that either <code>option_a</code> or <code>option_b</code> is used.
+</p>
+<hr>
+<a name="gt_option_is_mandatory_either_3"></a>
+
+<code>void             gt_option_is_mandatory_either_3(GtOption *option_a,
+                                                const GtOption *option_b,
+                                                const GtOption *option_c)</code>
+<p>
+Make it mandatory, that one of the options <code>option_a</code>, <code>option_b</code>, or
+   <code>option_c</code> is used.
+</p>
+<hr>
+<a name="gt_option_is_extended_option"></a>
+
+<code>void             gt_option_is_extended_option(GtOption *option)</code>
+<p>
+Set that <code>option</code> is only shown in the output of <code>-help+</code>.
+</p>
+<hr>
+<a name="gt_option_is_development_option"></a>
+
+<code>void             gt_option_is_development_option(GtOption *option)</code>
+<p>
+Set that <code>option</code> is only shown in the output of <code>-helpdev</code>.
+</p>
+<hr>
+<a name="gt_option_imply"></a>
+
+<code>void             gt_option_imply(GtOption *option_a, const GtOption *option_b)</code>
+<p>
+Make <code>option_a</code> imply <code>option_b</code>.
+</p>
+<hr>
+<a name="gt_option_imply_either_2"></a>
+
+<code>void             gt_option_imply_either_2(GtOption *option_a,
+                                         const GtOption *option_b,
+                                         const GtOption *option_c)</code>
+<p>
+Make <code>option_b</code> imply either <code>option_b</code> or <code>option_c</code>
+</p>
+<hr>
+<a name="gt_option_exclude"></a>
+
+<code>void             gt_option_exclude(GtOption *option_a, GtOption *option_b)</code>
+<p>
+Set that the options <code>option_a</code> and <code>option_b</code> exclude each other.
+</p>
+<hr>
+<a name="gt_option_hide_default"></a>
+
+<code>void             gt_option_hide_default(GtOption *option)</code>
+<p>
+Hide the default value of <code>option</code> in help output.
+</p>
+<hr>
+<a name="gt_option_argument_is_optional"></a>
+
+<code>void             gt_option_argument_is_optional(GtOption *option)</code>
+<p>
+Set that the argument to <code>option</code> is optional
+</p>
+<hr>
+<a name="gt_option_is_set"></a>
+
+<code>bool             gt_option_is_set(const GtOption *option)</code>
+<p>
+Return <code>true</code> if <code>option</code> was set, <code>false</code> otherwise.
+</p>
+<hr>
+<a name="gt_option_delete"></a>
+
+<code>void             gt_option_delete(GtOption*)</code>
+<p>
+Delete <code>option</code>.
+</p>
+<hr>
+<a name="GtOptionParser"></a>
+<h2>Class GtOptionParser</h2>
+
+<p> <code>GtOptionParser</code> objects can be used to parse command line options. </p>
+
+<hr>
+<a name="gt_option_parser_new"></a>
+
+<code>GtOptionParser*  gt_option_parser_new(const char *synopsis,
+                                     const char *one_liner)</code>
+<p>
+Return a new <code>GtOptionParser</code> object. The <code>synopsis</code> should summarize the
+   command line arguments and mandatory arguments in a single line.
+   The <code>one_liner</code> should describe the program for which the <code>GtOptionParser</code> is
+   used in a single line and must have an upper case letter at the start and a
+   '.' at the end.
+</p>
+<hr>
+<a name="gt_option_parser_add_option"></a>
+
+<code>void             gt_option_parser_add_option(GtOptionParser *option_parser,
+                                            GtOption *option)</code>
+<p>
+Add <code>option</code> to <code>option_parser</code>. Takes ownership of <code>option</code>.
+</p>
+<hr>
+<a name="gt_option_parser_get_option"></a>
+
+<code>GtOption*        gt_option_parser_get_option(GtOptionParser *option_parser,
+                                            const char *option_str)</code>
+<p>
+Return the <code>GtOption</code> object if an option named <code>option_str</code> is present in
+   <code>option_parser</code>, and <code>NULL</code> if no such option exists in <code>option_parser</code>.
+</p>
+<hr>
+<a name="gt_option_parser_refer_to_manual"></a>
+
+<code>void             gt_option_parser_refer_to_manual(GtOptionParser *option_parser)</code>
+<p>
+Refer to manual at the end of <code>-help</code> output of <code>opion_parser</code>.
+</p>
+<hr>
+<a name="gt_option_parser_set_comment_func"></a>
+
+<code>void             gt_option_parser_set_comment_func(GtOptionParser *option_parser,
+                                                  GtShowCommentFunc
+                                                  comment_func,
+                                                  void *data)</code>
+<p>
+Set <code>comment_func</code> in <code>option_parser</code> (<code>data</code> is passed along).
+</p>
+<hr>
+<a name="gt_option_parser_set_version_func"></a>
+
+<code>void             gt_option_parser_set_version_func(GtOptionParser *option_parser,
+                                                  GtShowVersionFunc
+                                                  version_func)</code>
+<p>
+Set the version function used by <code>option_parser</code> to <code>version_func</code>.
+   This version function takes precedence to the one supplied to
+   <code>gt_option_parser_parse()</code>.
+</p>
+<hr>
+<a name="gt_option_parser_set_mailaddress"></a>
+
+<code>void             gt_option_parser_set_mailaddress(GtOptionParser*,
+                                                 const char *address)</code>
+<p>
+Set the mailadress used in the final ``Report bugs to'' line of the -help
+   output to <code>address</code>. It should be of the form "<code>bill@microsoft.com</code>".
+</p>
+<hr>
+<a name="gt_option_parser_register_hook"></a>
+
+<code>void             gt_option_parser_register_hook(GtOptionParser *option_parser,
+                                               GtOptionParserHookFunc
+                                               hook_function,
+                                               void *data)</code>
+<p>
+Register a <code>hook_function</code> with <code>option_parser</code>. All registered hook
+   functions are called at the end of <code>gt_option_parser_parse(</code>).
+   This allows to have a module which registers a bunch of options in the option
+   parser and automatically performs necessary postprocessing after the option
+   parsing has been done via a hook function.
+</p>
+<hr>
+<a name="gt_option_parser_set_min_args"></a>
+
+<code>void             gt_option_parser_set_min_args(GtOptionParser *option_parser,
+                                              unsigned int minimum)</code>
+<p>
+The the <code>minimum</code> number of additional command line arguments <code>option_parser</code>
+   must parse in order to succeed.
+</p>
+<hr>
+<a name="gt_option_parser_set_max_args"></a>
+
+<code>void             gt_option_parser_set_max_args(GtOptionParser *option_parser,
+                                              unsigned int maximum)</code>
+<p>
+The the <code>maximum</code> number of additional command line arguments <code>option_parser</code>
+   must parse in order to succeed.
+</p>
+<hr>
+<a name="gt_option_parser_set_min_max_args"></a>
+
+<code>void             gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
+                                                  unsigned int minumum,
+                                                  unsigned int maximum)</code>
+<p>
+The the <code>minimum</code> and <code>maximum</code> number of additional command line arguments
+   <code>option_parser</code> must parse in order to succeed.
+</p>
+<hr>
+<a name="gt_option_parser_delete"></a>
+
+<code>void             gt_option_parser_delete(GtOptionParser *option_parser)</code>
+<p>
+Delete <code>option_parser</code>.
+</p>
+<hr>
 <a name="GtPhase"></a>
 <h2>Class GtPhase</h2>
 
@@ -6703,6 +7006,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#GT_STRAND_CHARS"><code>GT_STRAND_CHARS</code></a><br>
 
+  <a href="#GT_TERMINAL_WIDTH"><code>GT_TERMINAL_WIDTH</code></a><br>
+
   <a href="#GT_UNDEF_BOOL"><code>GT_UNDEF_BOOL</code></a><br>
 
   <a href="#GT_UNDEF_CHAR"><code>GT_UNDEF_CHAR</code></a><br>
@@ -7669,6 +7974,70 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_node_visitor_visit_sequence_node"><code>gt_node_visitor_visit_sequence_node</code></a><br>
 
+  <a href="#gt_option_argument_is_optional"><code>gt_option_argument_is_optional</code></a><br>
+
+  <a href="#gt_option_delete"><code>gt_option_delete</code></a><br>
+
+  <a href="#gt_option_exclude"><code>gt_option_exclude</code></a><br>
+
+  <a href="#gt_option_get_name"><code>gt_option_get_name</code></a><br>
+
+  <a href="#gt_option_hide_default"><code>gt_option_hide_default</code></a><br>
+
+  <a href="#gt_option_imply"><code>gt_option_imply</code></a><br>
+
+  <a href="#gt_option_imply_either_2"><code>gt_option_imply_either_2</code></a><br>
+
+  <a href="#gt_option_is_development_option"><code>gt_option_is_development_option</code></a><br>
+
+  <a href="#gt_option_is_extended_option"><code>gt_option_is_extended_option</code></a><br>
+
+  <a href="#gt_option_is_mandatory"><code>gt_option_is_mandatory</code></a><br>
+
+  <a href="#gt_option_is_mandatory_either"><code>gt_option_is_mandatory_either</code></a><br>
+
+  <a href="#gt_option_is_mandatory_either_3"><code>gt_option_is_mandatory_either_3</code></a><br>
+
+  <a href="#gt_option_is_set"><code>gt_option_is_set</code></a><br>
+
+  <a href="#gt_option_new_choice"><code>gt_option_new_choice</code></a><br>
+
+  <a href="#gt_option_new_debug"><code>gt_option_new_debug</code></a><br>
+
+  <a href="#gt_option_new_probability"><code>gt_option_new_probability</code></a><br>
+
+  <a href="#gt_option_new_range"><code>gt_option_new_range</code></a><br>
+
+  <a href="#gt_option_new_verbose"><code>gt_option_new_verbose</code></a><br>
+
+  <a href="#gt_option_new_width"><code>gt_option_new_width</code></a><br>
+
+  <a href="#gt_option_parser_add_option"><code>gt_option_parser_add_option</code></a><br>
+
+  <a href="#gt_option_parser_delete"><code>gt_option_parser_delete</code></a><br>
+
+  <a href="#gt_option_parser_get_option"><code>gt_option_parser_get_option</code></a><br>
+
+  <a href="#gt_option_parser_new"><code>gt_option_parser_new</code></a><br>
+
+  <a href="#gt_option_parser_refer_to_manual"><code>gt_option_parser_refer_to_manual</code></a><br>
+
+  <a href="#gt_option_parser_register_hook"><code>gt_option_parser_register_hook</code></a><br>
+
+  <a href="#gt_option_parser_set_comment_func"><code>gt_option_parser_set_comment_func</code></a><br>
+
+  <a href="#gt_option_parser_set_mailaddress"><code>gt_option_parser_set_mailaddress</code></a><br>
+
+  <a href="#gt_option_parser_set_max_args"><code>gt_option_parser_set_max_args</code></a><br>
+
+  <a href="#gt_option_parser_set_min_args"><code>gt_option_parser_set_min_args</code></a><br>
+
+  <a href="#gt_option_parser_set_min_max_args"><code>gt_option_parser_set_min_max_args</code></a><br>
+
+  <a href="#gt_option_parser_set_version_func"><code>gt_option_parser_set_version_func</code></a><br>
+
+  <a href="#gt_option_ref"><code>gt_option_ref</code></a><br>
+
   <a href="#gt_parse_double"><code>gt_parse_double</code></a><br>
 
   <a href="#gt_parse_int"><code>gt_parse_int</code></a><br>
@@ -8024,7 +8393,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-28
+Last update: 2011-05-30
 </div>
 </div>
 <!-- Piwik -->

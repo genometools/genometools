@@ -16,7 +16,7 @@
 */
 
 #include "core/error.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "match/test-mtrieins.pr"
 #include "tools/gt_trieins.h"

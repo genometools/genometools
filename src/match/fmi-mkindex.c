@@ -17,7 +17,7 @@
 
 #include "core/basename_api.h"
 #include "core/divmodmul.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "fmindex.h"
 #include "core/logger.h"

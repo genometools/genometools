@@ -18,7 +18,7 @@
 #ifndef SEQID2FILE_H
 #define SEQID2FILE_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "extended/region_mapping_api.h"
 
 typedef struct GtSeqid2FileInfo GtSeqid2FileInfo;

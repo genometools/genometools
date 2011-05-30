@@ -19,7 +19,7 @@
 #include "core/error.h"
 #include "core/logger.h"
 #include "core/minmax.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/str.h"
 #include "core/versionfunc.h"
 #include "match/eis-bwtseq.h"

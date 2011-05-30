@@ -18,7 +18,7 @@
 #include "core/bioseq_iterator.h"
 #include "core/fasta.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "extended/gtdatahelp.h"
 #include "extended/mutate.h"

@@ -22,7 +22,7 @@
 #include "core/intbits.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/str.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"

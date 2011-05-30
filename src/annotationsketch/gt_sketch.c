@@ -22,7 +22,7 @@
 #include "core/cstr_api.h"
 #include "core/fileutils_api.h"
 #include "core/gtdatapath.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/splitter.h"
 #include "core/undef_api.h"

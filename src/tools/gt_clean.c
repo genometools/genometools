@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/bioseq.h"
 #include "core/md5_tab.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"
 #include "tools/gt_clean.h"

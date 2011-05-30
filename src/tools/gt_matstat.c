@@ -17,7 +17,7 @@
 
 #include "core/defined-types.h"
 #include "core/error.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "match/eis-voiditf.h"

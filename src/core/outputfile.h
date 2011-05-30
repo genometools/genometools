@@ -18,7 +18,7 @@
 #ifndef OUTPUTFILE_H
 #define OUTPUTFILE_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 
 #define GT_FORCE_OPT_CSTR  "force"
 

@@ -18,7 +18,7 @@
 #ifndef PARSE_OPTIONS_H
 #define PARSE_OPTIONS_H
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "gth/call_info.h"
 #include "gth/input.h"
 #include "gth/jump_table.h"

@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include "core/fileutils_api.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/seqiterator_fastq.h"
 #include "core/unused_api.h"

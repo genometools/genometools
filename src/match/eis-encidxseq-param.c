@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "match/eis-encidxseq-param.h"
 #include "match/eis-blockcomp-param.h"
 

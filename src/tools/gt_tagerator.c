@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/ma.h"
 #include "core/str_array.h"
 #include "core/unused_api.h"

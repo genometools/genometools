@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/tool.h"
 #include "core/str_array_api.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "match/chain2dim.h"
 
 /* the chain2dim tool */

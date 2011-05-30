@@ -20,7 +20,7 @@
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/splitter.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"

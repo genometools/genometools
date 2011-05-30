@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include "core/str_array.h"
 #include "core/str.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/error_api.h"
 
 typedef struct

@@ -20,7 +20,7 @@
 #include <string.h>
 #include "core/fa.h"
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/unused_api.h"
 #include "core/versionfunc.h"
 #include "core/warning_api.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,48 +15,67 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef OPTION_H
-#define OPTION_H
+#ifndef OPTION_API_H
+#define OPTION_API_H
 
 #include <stdbool.h>
 #include "core/range.h"
 #include "core/str.h"
 #include "core/str_array.h"
 
-#define GT_TERMINAL_WIDTH  80
-
-/* The option parser class. */
+/* <GtOptionParser> objects can be used to parse command line options. */
 typedef struct GtOptionParser GtOptionParser;
-/* The option class. */
+/* <GtOption> objects represent command line options (which are used in
+   a <GtOptionParser>).
+   Option descriptions are automatically formatted to <GT_TERMINAL_WIDTH>, but
+   it is possible to embed newlines into the descriptions to manually affect the
+   formating. */
 typedef struct GtOption GtOption;
 
-/* Possible option parser return values. */
-typedef enum {
+/* Possible option parser return values. <GT_OPTION_PARSER_OK> denotes that
+   everything went fine, <GT_OPTION_PARSER_ERROR> that an error occured during
+   option parsing, and <GT_OPTION_PARSER_REQUESTS_EXIT> that the option parser
+   requests an exit, because option <-help>, <-help+>, <-helpdev> or <-version>
+   was used. */
+typedef enum GtOPrval GtOPrval;
+
+enum GtOPrval{
   GT_OPTION_PARSER_OK,           /* Everything went fine. */
   GT_OPTION_PARSER_ERROR,        /* An error occured during option parsing. */
   GT_OPTION_PARSER_REQUESTS_EXIT /* The option parser requests an exit, because
-                                    option -help, -helpdev, or -version was
-                                    used. */
-} GtOPrval;
+                                    option -help, -help+, -helpdev, or -version
+                                    was used. */
+};
 
 typedef void (*GtShowVersionFunc)(const char *progname);
 typedef int  (*GtShowCommentFunc)(const char *progname, void *data, GtError*);
 typedef int  (*GtOptionParserHookFunc)(void *data, GtError*);
 
-/* The option parser. */
+/* The default terminal width used in the output of the <GtOptionParser>. */
+#define GT_TERMINAL_WIDTH \
+        80
+
+/* Return a new <GtOptionParser> object. The <synopsis> should summarize the
+   command line arguments and mandatory arguments in a single line.
+   The <one_liner> should describe the program for which the <GtOptionParser> is
+   used in a single line and must have an upper case letter at the start and a
+   '.' at the end. */
 GtOptionParser* gt_option_parser_new(const char *synopsis,
                                      const char *one_liner);
-/* Takes ownership of <option>. */
-void            gt_option_parser_add_option(GtOptionParser*, GtOption *option);
-/* Return the option object if an option named <option_str> is present in <op>,
-   and NULL if no such option exists in <op>. */
-GtOption*       gt_option_parser_get_option(GtOptionParser *op,
+/* Add <option> to <option_parser>. Takes ownership of <option>. */
+void            gt_option_parser_add_option(GtOptionParser *option_parser,
+                                            GtOption *option);
+/* Return the <GtOption> object if an option named <option_str> is present in
+   <option_parser>, and <NULL> if no such option exists in <option_parser>. */
+GtOption*       gt_option_parser_get_option(GtOptionParser *option_parser,
                                             const char *option_str);
-/* Refer to manual at the end of help output. */
-void            gt_option_parser_refer_to_manual(GtOptionParser*);
-void            gt_option_parser_set_comment_func(GtOptionParser*,
-                                                  GtShowCommentFunc,
-                                                  void* data);
+/* Refer to manual at the end of <-help> output of <opion_parser>. */
+void            gt_option_parser_refer_to_manual(GtOptionParser *option_parser);
+/* Set <comment_func> in <option_parser> (<data> is passed along). */
+void            gt_option_parser_set_comment_func(GtOptionParser *option_parser,
+                                                  GtShowCommentFunc
+                                                  comment_func,
+                                                  void *data);
 /* Set the version function used by <option_parser> to <version_func>.
    This version function takes precedence to the one supplied to
    <gt_option_parser_parse()>. */
@@ -67,34 +86,36 @@ void            gt_option_parser_set_version_func(GtOptionParser *option_parser,
    output to <address>. It should be of the form "<bill@microsoft.com>". */
 void            gt_option_parser_set_mailaddress(GtOptionParser*,
                                                  const char *address);
-/* Register a hook function. All registered hook functions are called at the end
-   of gt_option_parser_parse().
+/* Register a <hook_function> with <option_parser>. All registered hook
+   functions are called at the end of <gt_option_parser_parse(>).
    This allows to have a module which registers a bunch of options in the option
    parser and automatically performs necessary postprocessing after the option
-   parsing has been done via a hook function (see outputfile.[ch] for an
-   example). */
-void            gt_option_parser_register_hook(GtOptionParser*,
-                                               GtOptionParserHookFunc,
+   parsing has been done via a hook function. */
+void            gt_option_parser_register_hook(GtOptionParser *option_parser,
+                                               GtOptionParserHookFunc
+                                               hook_function,
                                                void *data);
-void            gt_option_parser_set_min_args(GtOptionParser*, unsigned int);
-void            gt_option_parser_set_max_args(GtOptionParser*, unsigned int);
-void            gt_option_parser_set_min_max_args(GtOptionParser*, unsigned int,
-                                                  unsigned int);
-GtOPrval        gt_option_parser_parse(GtOptionParser*, int *parsed_args,
+/* The the <minimum> number of additional command line arguments <option_parser>
+   must parse in order to succeed. */
+void            gt_option_parser_set_min_args(GtOptionParser *option_parser,
+                                              unsigned int minimum);
+/* The the <maximum> number of additional command line arguments <option_parser>
+   must parse in order to succeed. */
+void            gt_option_parser_set_max_args(GtOptionParser *option_parser,
+                                              unsigned int maximum);
+/* The the <minimum> and <maximum> number of additional command line arguments
+   <option_parser> must parse in order to succeed. */
+void            gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
+                                                  unsigned int minumum,
+                                                  unsigned int maximum);
+GtOPrval        gt_option_parser_parse(GtOptionParser *option_parser,
+                                       int *parsed_args,
                                        int argc, const char **argv,
                                        GtShowVersionFunc version_func,
-                                       GtError*);
-void            gt_option_parser_delete(GtOptionParser*);
+                                       GtError *err);
+/* Delete <option_parser>. */
+void            gt_option_parser_delete(GtOptionParser *option_parser);
 
-/* The options:
-
-   Option descriptions are automatically formatted to GT_TERMINAL_WIDTH, but it
-   is possible to embed newlines into the descriptions to manually affect the
-   formating. */
-GtOption*       gt_option_new_outputfile(FILE**);
-GtOption*       gt_option_new_verbose(bool *value);
-GtOption*       gt_option_new_width(unsigned long *value);
-GtOption*       gt_option_new_debug(bool *value);
 GtOption*       gt_option_new_bool(const char *option_str,
                                    const char *description,
                                    bool *value, bool default_value);
@@ -193,24 +214,50 @@ GtOption*       gt_option_new_filename(const char *option_str,
                                        const char *description, GtStr*);
 GtOption*       gt_option_new_filenamearray(const char *option_str,
                                             const char *description,
-                                            GtStrArray*);
-GtOption*       gt_option_ref(GtOption*);
-const char*     gt_option_get_name(const GtOption *o);
-void            gt_option_is_mandatory(GtOption*);
-void            gt_option_is_mandatory_either(GtOption*, const GtOption*);
-void            gt_option_is_mandatory_either_3(GtOption*, const GtOption*,
-                                                const GtOption*);
-/* Set that <option> is only shown in the output of -help+. */
+                                           GtStrArray*);
+/* Return a new debug <GtOption> object: <-debug>, "enable debugging output",
+   default is <false>. The result of the option parsing is stored in <value> */
+GtOption*       gt_option_new_debug(bool *value);
+/* Return a new verbose <GtOption> object: <-v>, "be verbose",
+   default is <false>. The result of the option parsing is stored in <value> */
+GtOption*       gt_option_new_verbose(bool *value);
+/* Return a new widht <GtOption> object: <-width>, "set output width for FASTA
+   sequence printing (0 disables formatting)", default is 0.
+   The result of the option parsing is stored in <value> */
+GtOption*       gt_option_new_width(unsigned long *value);
+/* Increate the reference count for <option> and return it. */
+GtOption*       gt_option_ref(GtOption *option);
+/* Return the name of <option> */
+const char*     gt_option_get_name(const GtOption * option);
+/* Make <option> mandatory. */
+void            gt_option_is_mandatory(GtOption *option);
+/* Make it mandatory, that either <option_a> or <option_b> is used. */
+void            gt_option_is_mandatory_either(GtOption *option_a,
+                                              const GtOption *option_b);
+/* Make it mandatory, that one of the options <option_a>, <option_b>, or
+   <option_c> is used. */
+void            gt_option_is_mandatory_either_3(GtOption *option_a,
+                                                const GtOption *option_b,
+                                                const GtOption *option_c);
+/* Set that <option> is only shown in the output of <-help+>. */
 void            gt_option_is_extended_option(GtOption *option);
-/* Set that <option> is only shown in the output of -helpdev. */
+/* Set that <option> is only shown in the output of <-helpdev>. */
 void            gt_option_is_development_option(GtOption *option);
-void            gt_option_imply(GtOption*, const GtOption*);
-void            gt_option_imply_either_2(GtOption*, const GtOption*,
-                                         const GtOption*);
-void            gt_option_exclude(GtOption*, GtOption*);
-void            gt_option_hide_default(GtOption*);
-void            gt_option_argument_is_optional(GtOption*);
-bool            gt_option_is_set(const GtOption*);
+/* Make <option_a> imply <option_b>. */
+void            gt_option_imply(GtOption *option_a, const GtOption *option_b);
+/* Make <option_b> imply either <option_b> or <option_c> */
+void            gt_option_imply_either_2(GtOption *option_a,
+                                         const GtOption *option_b,
+                                         const GtOption *option_c);
+/* Set that the options <option_a> and <option_b> exclude each other. */
+void            gt_option_exclude(GtOption *option_a, GtOption *option_b);
+/* Hide the default value of <option> in help output. */
+void            gt_option_hide_default(GtOption *option);
+/* Set that the argument to <option> is optional */
+void            gt_option_argument_is_optional(GtOption *option);
+/* Return <true> if <option> was set, <false> otherwise. */
+bool            gt_option_is_set(const GtOption *option);
+/* Delete <option>. */
 void            gt_option_delete(GtOption*);
 
 #endif

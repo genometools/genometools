@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmfileinfo.h"
 

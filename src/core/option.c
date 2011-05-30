@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,7 +23,7 @@
 #include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/mailaddress.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"
 #include "core/xansi_api.h"
@@ -35,7 +35,6 @@ typedef enum {
   OPTION_HELP,
   OPTION_HELPPLUS,
   OPTION_HELPDEV,
-  OPTION_OUTPUTFILE,
   OPTION_INT,
   OPTION_UINT,
   OPTION_LONG,
@@ -76,7 +75,6 @@ struct GtOption {
   union {
     bool b;
     double d;
-    FILE *fp;
     int i;
     unsigned int ui;
     long l;
@@ -527,10 +525,12 @@ static int check_option_implications(GtOptionParser *op, GtError *err)
                 gt_str_append_char(gt_error_str, ',');
             }
             gt_str_append_cstr(gt_error_str, " or \"-");
-            gt_str_append_str(gt_error_str, (*(GtOption**)
-                           gt_array_get(implied_option_array,
-                                     gt_array_size(implied_option_array) - 1))
-                                     ->option_str);
+            gt_str_append_str(gt_error_str,
+                              (*(GtOption**)
+                               gt_array_get(implied_option_array,
+                                            gt_array_size(implied_option_array)
+                                            - 1))
+                              ->option_str);
             gt_str_append_cstr(gt_error_str, "\"");
             gt_error_set(err, "%s", gt_str_get(gt_error_str));
             gt_str_delete(gt_error_str);
@@ -618,22 +618,22 @@ static bool has_extended_option(GtArray *options)
 }
 
 void gt_option_parser_set_min_args(GtOptionParser *op,
-                                unsigned int min_additional_arguments)
+                                   unsigned int min_additional_arguments)
 {
   gt_assert(op);
   op->min_additional_arguments = min_additional_arguments;
 }
 
 void gt_option_parser_set_max_args(GtOptionParser *op,
-                                unsigned int max_additional_arguments)
+                                   unsigned int max_additional_arguments)
 {
   gt_assert(op);
   op->max_additional_arguments = max_additional_arguments;
 }
 
 void gt_option_parser_set_min_max_args(GtOptionParser *op,
-                                    unsigned int min_additional_arguments,
-                                    unsigned int max_additional_arguments)
+                                       unsigned int min_additional_arguments,
+                                       unsigned int max_additional_arguments)
 {
   gt_assert(op);
   op->min_additional_arguments = min_additional_arguments;
@@ -694,7 +694,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
         /* make sure option has not been used before */
         if (option->is_set) {
           gt_error_set(err, "option \"%s\" already set",
-                    gt_str_get(option->option_str));
+                       gt_str_get(option->option_str));
           had_err = -1;
         }
         else
@@ -728,8 +728,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               gt_assert(option->domain[0]);
               had_err = check_missing_argument_and_minus_sign(argnum, argc,
-                                                             option->option_str,
-                                                             argv, err);
+                                                              option
+                                                              ->option_str,
+                                                              argv, err);
               if (!had_err) {
                 argnum++;
                 if (strcmp(argv[argnum], option->domain[0])) {
@@ -746,8 +747,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                   }
                   if (option->domain[i] == NULL) {
                     gt_error_set(err, "argument to option \"-%s\" must be one "
-                                   "of: %s", gt_str_get(option->option_str),
-                              gt_str_get(gt_error_str));
+                                      "of: %s", gt_str_get(option->option_str),
+                                 gt_str_get(gt_error_str));
                     had_err = -1;
                   }
                   gt_str_delete(gt_error_str);
@@ -771,7 +772,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (gt_parse_double(&double_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be "
-                                 "floating-point number",
+                                    "floating-point number",
                             gt_str_get(option->option_str));
                   had_err = -1;
                 }
@@ -781,9 +782,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     double_value < option->min_value.d) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
-                                 "floating point value >= %f",
-                            gt_str_get(option->option_str),
-                                option->min_value.d);
+                                    "floating point value >= %f",
+                               gt_str_get(option->option_str),
+                               option->min_value.d);
                   had_err = -1;
                 }
               }
@@ -792,9 +793,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     double_value > option->max_value.d) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
-                                 "floating point value <= %f",
-                            gt_str_get(option->option_str),
-                            option->max_value.d);
+                                    "floating point value <= %f",
+                               gt_str_get(option->option_str),
+                               option->max_value.d);
                   had_err = -1;
                 }
               }
@@ -815,16 +816,6 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               if (show_help(op, OPTION_HELPDEV, err))
                 return GT_OPTION_PARSER_ERROR;
               return GT_OPTION_PARSER_REQUESTS_EXIT;
-            case OPTION_OUTPUTFILE:
-              had_err = check_missing_argument_and_minus_sign(argnum, argc,
-                                                             option->option_str,
-                                                             argv, err);
-              if (!had_err) {
-                argnum++;
-                *(FILE**) option->value = gt_fa_xfopen(argv[argnum], "w");
-                option_parsed = true;
-              }
-              break;
             case OPTION_INT:
               gt_assert(!option->argument_is_optional);
               had_err = check_missing_argument(argnum, argc, option->option_str,
@@ -833,7 +824,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (gt_parse_int(&int_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer", gt_str_get(option->option_str));
+                                    "integer", gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -872,8 +863,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (gt_parse_uint(&uint_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be a "
-                                 "non-negative integer <= %u",
-                            gt_str_get(option->option_str), UINT_MAX);
+                                    "non-negative integer <= %u",
+                               gt_str_get(option->option_str), UINT_MAX);
                   had_err = -1;
                 }
               }
@@ -893,7 +884,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                     && uint_value > option->max_value.ui) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                "integer <= %u", gt_str_get(option->option_str),
-                            option->max_value.ui);
+                               option->max_value.ui);
                   had_err = -1;
                 }
               }
@@ -910,7 +901,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (gt_parse_long(&long_value, argv[argnum])) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                                 "integer", gt_str_get(option->option_str));
+                                    "integer", gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -925,8 +916,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument_and_minus_sign(argnum, argc,
-                                                             option->option_str,
-                                                             argv, err);
+                                                              option
+                                                              ->option_str,
+                                                              argv, err);
               if (!had_err) {
                 argnum++;
                 if (gt_parse_long(&long_value, argv[argnum]) ||
@@ -942,8 +934,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer >= %lu",
-                               gt_str_get(option->option_str),
+                               "integer >= %lu", gt_str_get(option->option_str),
                                option->min_value.ul);
                   had_err = -1;
                 }
@@ -953,8 +944,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
-                               "integer <= %lu",
-                               gt_str_get(option->option_str),
+                               "integer <= %lu", gt_str_get(option->option_str),
                                option->max_value.ul);
                   had_err = -1;
                 }
@@ -971,8 +961,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               }
               /* parse first argument */
               had_err = check_missing_argument_and_minus_sign(argnum, argc,
-                                                             option->option_str,
-                                                             argv, err);
+                                                              option
+                                                              ->option_str,
+                                                              argv, err);
               if (!had_err) {
                 argnum++;
                 if (gt_parse_long(&long_value, argv[argnum]) ||
@@ -999,8 +990,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               /* parse second argument */
               if (!had_err) {
                 had_err = check_missing_argument_and_minus_sign(argnum, argc,
-                                                             option->option_str,
-                                                             argv, err);
+                                                                option
+                                                                ->option_str,
+                                                                argv, err);
               }
               if (!had_err) {
                 argnum++;
@@ -1044,8 +1036,9 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 break;
               }
               had_err = check_missing_argument_and_minus_sign(argnum, argc,
-                                                             option->option_str,
-                                                             argv, err);
+                                                              option
+                                                              ->option_str,
+                                                              argv, err);
               if (!had_err) {
                 argnum++;
                 gt_str_set(option->value, argv[argnum]);
@@ -1095,7 +1088,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
     /* no matching option found -> error */
     gt_assert(!had_err);
     gt_error_set(err, "unknown option: %s (-help shows possible options)",
-              argv[argnum]);
+                 argv[argnum]);
     had_err = -1;
     break;
   }
@@ -1108,7 +1101,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   if (!had_err && op->min_additional_arguments != GT_UNDEF_UINT &&
       argc - argnum < op->min_additional_arguments) {
     gt_error_set(err, "missing argument\nUsage: %s %s", op->progname,
-              op->synopsis);
+                 op->synopsis);
     had_err = -1;
   }
 
@@ -1116,8 +1109,8 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   if (!had_err && op->max_additional_arguments != GT_UNDEF_UINT &&
       argc - argnum > op->max_additional_arguments) {
     gt_error_set(err, "superfluous argument \"%s\"\nUsage: %s %s",
-              argv[argnum + op->max_additional_arguments], op->progname,
-              op->synopsis);
+                 argv[argnum + op->max_additional_arguments], op->progname,
+                 op->synopsis);
     had_err = -1;
   }
 
@@ -1160,13 +1153,11 @@ void gt_option_parser_delete(GtOptionParser *op)
   gt_free(op);
 }
 
-GtOption* gt_option_new_outputfile(FILE **outfp)
+GtOption* gt_option_new_debug(bool *value)
 {
-  GtOption *o = gt_option_new("o", "redirect output to specified file (will "
-                         "overwrite existing file!)", outfp);
-  o->option_type = OPTION_OUTPUTFILE;
-  o->default_value.fp = stdout;
-  *outfp = stdout;
+  GtOption *o = gt_option_new_bool("debug", "enable debugging output", value,
+                                   false);
+  o->is_development_option = true;
   return o;
 }
 
@@ -1179,14 +1170,6 @@ GtOption* gt_option_new_width(unsigned long *value)
 {
   return gt_option_new_ulong("width", "set output width for FASTA sequence "
                              "printing\n(0 disables formatting)", value, 0);
-}
-
-GtOption* gt_option_new_debug(bool *value)
-{
-  GtOption *o = gt_option_new_bool("debug", "enable debugging output", value,
-                                   false);
-  o->is_development_option = true;
-  return o;
 }
 
 GtOption* gt_option_new_bool(const char *option_str, const char *description,
@@ -1340,7 +1323,7 @@ GtOption *gt_option_new_uint_min_max(const char *option_str,
 }
 
 GtOption* gt_option_new_long(const char *option_str, const char *description,
-                        long *value, long default_value)
+                             long *value, long default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_LONG;
@@ -1350,7 +1333,7 @@ GtOption* gt_option_new_long(const char *option_str, const char *description,
 }
 
 GtOption* gt_option_new_ulong(const char *option_str, const char *description,
-                         unsigned long *value, unsigned long default_value)
+                              unsigned long *value, unsigned long default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_ULONG;
@@ -1373,10 +1356,11 @@ GtOption* gt_option_new_ulong_min(const char *option_str,
 }
 
 GtOption *gt_option_new_ulong_min_max(const char *option_str,
-                                 const char *description, unsigned long *value,
-                                 unsigned long default_value,
-                                 unsigned long min_value,
-                                 unsigned long max_value)
+                                      const char *description,
+                                      unsigned long *value,
+                                      unsigned long default_value,
+                                      unsigned long min_value,
+                                      unsigned long max_value)
 {
   GtOption *o = gt_option_new_ulong(option_str, description, value,
                                     default_value);
@@ -1388,7 +1372,7 @@ GtOption *gt_option_new_ulong_min_max(const char *option_str,
 }
 
 GtOption* gt_option_new_range(const char *option_str, const char *description,
-                         GtRange *value, GtRange *default_value)
+                              GtRange *value, GtRange *default_value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
   o->option_type = OPTION_RANGE;

@@ -22,7 +22,7 @@
 #include "core/ma.h"
 #include "core/md5_fingerprint.h"
 #include "core/outputfile.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/progressbar.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/string_distri.h"

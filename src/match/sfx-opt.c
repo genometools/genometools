@@ -22,7 +22,7 @@
 #include "core/error.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/readmode.h"
 #include "core/spacecalc.h"
 #include "core/str.h"

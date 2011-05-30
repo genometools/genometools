@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/str_array.h"
 #include "core/error.h"
-#include "core/option.h"
+#include "core/option_api.h"
 
 typedef struct GtGenomediffArguments_tag {
   GtOption *ref_esaindex,

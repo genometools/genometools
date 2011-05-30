@@ -20,7 +20,7 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/unused_api.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/tool.h"
 #include "core/versionfunc.h"
 #include "match/esa-seqread.h"

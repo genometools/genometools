@@ -18,7 +18,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include "core/error.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/progressbar.h"
 #include "core/versionfunc.h"
 #include "core/xposix.h"

@@ -15,7 +15,7 @@
 */
 
 #include "core/ma.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/unused_api.h"
 #include "extended/add_ids_stream.h"

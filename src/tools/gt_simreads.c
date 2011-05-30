@@ -23,7 +23,7 @@
 #include "core/logger.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
-#include "core/option.h"
+#include "core/option_api.h"
 #include "core/outputfile.h"
 #include "core/progressbar.h"
 #include "core/undef_api.h"

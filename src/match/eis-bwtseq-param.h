@@ -24,7 +24,7 @@
  * constant values.
  */
 
-#include "core/option.h"
+#include "core/option_api.h"
 
 #include "match/eis-encidxseq-param.h"
 /* #include "match/eis-bwtseq-context-param.h" not neccessary remove

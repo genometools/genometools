@@ -26,7 +26,7 @@
   would be used in GeneSeqer, for example.)
 */
 
-#include "core/option.h"
+#include "core/option_api.h"
 #include "gth/bssm_param.h"
 #include "gth/gt_gthbssmprint.h"
 
