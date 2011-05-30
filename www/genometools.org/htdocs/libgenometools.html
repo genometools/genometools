@@ -4679,13 +4679,14 @@ Set the version function used by <code>option_parser</code> to <code>version_fun
    <code>gt_option_parser_parse()</code>.
 </p>
 <hr>
-<a name="gt_option_parser_set_mailaddress"></a>
+<a name="gt_option_parser_set_mail_address"></a>
 
-<code>void             gt_option_parser_set_mailaddress(GtOptionParser*,
-                                                 const char *address)</code>
+<code>void             gt_option_parser_set_mail_address(GtOptionParser*,
+                                                  const char *mail_address)</code>
 <p>
-Set the mailadress used in the final ``Report bugs to'' line of the -help
-   output to <code>address</code>. It should be of the form "<code>bill@microsoft.com</code>".
+Set the <code>mail_address</code> used in the final "Report bugs to" line of the <code>-help</code>
+   output. It should be of the form <code><bill@microsoft.com></code> (email address
+   enclosed in one pair of angle brackets).
 </p>
 <hr>
 <a name="gt_option_parser_register_hook"></a>
@@ -8025,7 +8026,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_option_parser_set_comment_func"><code>gt_option_parser_set_comment_func</code></a><br>
 
-  <a href="#gt_option_parser_set_mailaddress"><code>gt_option_parser_set_mailaddress</code></a><br>
+  <a href="#gt_option_parser_set_mail_address"><code>gt_option_parser_set_mail_address</code></a><br>
 
   <a href="#gt_option_parser_set_max_args"><code>gt_option_parser_set_max_args</code></a><br>
 

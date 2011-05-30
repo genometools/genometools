@@ -45,7 +45,9 @@ end
 
 local function codify(str)
   assert(str)
-  local res = string.gsub(str, "<(.-)>", "<code>%1</code>")
+  local res = string.gsub(str, "<<(.-)>>", "@@%1@@")
+  res = string.gsub(res, "<(.-)>", "<code>%1</code>")
+  res = string.gsub(res, "@@(.-)@@", "<code><%1></code>")
   res = string.gsub(res, " ([%a_][%a%d_%.]-%(%))", " <code>%1</code>")
   res = string.gsub(res, "___(.-)___", "<strong>%1</strong>")
   return string.gsub(res, "__(.-)__", "<em>%1</em>")

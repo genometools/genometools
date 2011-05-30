@@ -82,8 +82,9 @@ void            gt_option_parser_set_comment_func(GtOptionParser *option_parser,
 void            gt_option_parser_set_version_func(GtOptionParser *option_parser,
                                                   GtShowVersionFunc
                                                   version_func);
-/* Set the <mail_address used> in the final "Report bugs to" line of the <-help>
-   output. It should be of the form "<bill@microsoft.com>". */
+/* Set the <mail_address> used in the final "Report bugs to" line of the <-help>
+   output. It should be of the form <<bill@microsoft.com>> (email address
+   enclosed in one pair of angle brackets). */
 void            gt_option_parser_set_mail_address(GtOptionParser*,
                                                   const char *mail_address);
 /* Register a <hook_function> with <option_parser>. All registered hook
