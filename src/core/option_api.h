@@ -19,8 +19,8 @@
 #define OPTION_API_H
 
 #include <stdbool.h>
-#include "core/range.h"
-#include "core/str.h"
+#include "core/range_api.h"
+#include "core/str_api.h"
 #include "core/str_array.h"
 
 /* <GtOptionParser> objects can be used to parse command line options. */
@@ -214,7 +214,7 @@ GtOption*       gt_option_new_filename(const char *option_str,
                                        const char *description, GtStr*);
 GtOption*       gt_option_new_filenamearray(const char *option_str,
                                             const char *description,
-                                           GtStrArray*);
+                                            GtStrArray*);
 /* Return a new debug <GtOption> object: <-debug>, "enable debugging output",
    default is <false>. The result of the option parsing is stored in <value> */
 GtOption*       gt_option_new_debug(bool *value);
