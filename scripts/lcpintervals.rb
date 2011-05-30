@@ -89,6 +89,7 @@ def enumlcpintervaltree(filename)
   stack = Array.new()
   lastinterval = nil
   firstedgefromroot = true
+  firstedge = false
   prevlcpvalue = 0
   stack.push(Lcpinterval.new(0,0,nil,[]))
   lcpsufstream = LcpSufstream.new(filename)
@@ -99,9 +100,10 @@ def enumlcpintervaltree(filename)
       break
     end
     if lcpvalue <= stack.last.lcp
-      firstedge = false
-      if stack.last.lcp == 0
-        firstedge = firstedgefromroot
+      if stack.last.lcp > 0 or not firstedgefromroot
+        firstedge = false
+      else
+        firstedge = true
         firstedgefromroot = false
       end
       assert{stack.last.lcp == [prevlcpvalue,lcpvalue].max}
@@ -113,8 +115,10 @@ def enumlcpintervaltree(filename)
       lastinterval.rb = idx
       if lcpvalue <= stack.last.lcp
         firstedge = false
-        if stack.last.lcp == 0
-          firstedge = firstedgefromroot
+        if stack.last.lcp > 0 or not firstedgefromroot
+          firstedge = false
+        else
+          firstedge = true
           firstedgefromroot = false
         end
         processbranchedge(firstedge,stack.last,lastinterval)

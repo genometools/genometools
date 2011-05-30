@@ -162,13 +162,13 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     }
     if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
     {
-      if (TOP_ESA_BOTTOMUP.lcp == 0)
-      {
-        firstedge = firstedgefromroot;
-        firstedgefromroot = false;
-      } else
+      if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)
       {
         firstedge = false;
+      } else
+      {
+        firstedge = true;
+        firstedgefromroot = false;
       }
       if (processleafedge(firstedge,
                           TOP_ESA_BOTTOMUP.lcp,
@@ -189,13 +189,13 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       {
         gt_assert(lastinterval->info == NULL ||
                   lastinterval->info != TOP_ESA_BOTTOMUP.info);
-        if (TOP_ESA_BOTTOMUP.lcp == 0)
-        {
-          firstedge = firstedgefromroot;
-          firstedgefromroot = false;
-        } else
+        if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;
+        } else
+        {
+          firstedge = true;
+          firstedgefromroot = false;
         }
         if (processbranchingedge(firstedge,
                                  TOP_ESA_BOTTOMUP.lcp,
