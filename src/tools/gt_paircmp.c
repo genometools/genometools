@@ -21,6 +21,7 @@
 #include "core/versionfunc.h"
 #include "core/option_api.h"
 #include "core/str.h"
+#include "core/str_array.h"
 #include "core/types_api.h"
 #include "match/spacedef.h"
 #include "match/test-pairwise.h"

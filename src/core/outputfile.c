@@ -16,6 +16,7 @@
 */
 
 #include <string.h>
+#include "core/file.h"
 #include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/outputfile.h"

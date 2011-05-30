@@ -21,7 +21,7 @@
 #include <stdbool.h>
 #include "core/range_api.h"
 #include "core/str_api.h"
-#include "core/str_array.h"
+#include "core/str_array_api.h"
 
 /* <GtOptionParser> objects can be used to parse command line options. */
 typedef struct GtOptionParser GtOptionParser;
