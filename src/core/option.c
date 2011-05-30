@@ -61,7 +61,7 @@ struct GtOptionParser {
   GtShowCommentFunc comment_func;
   void *comment_func_data;
   GtShowVersionFunc version_func;
-  const char *mailaddress;
+  const char *mail_address;
   unsigned int min_additional_arguments,
                max_additional_arguments;
   GtHashmap *optionindex;
@@ -236,10 +236,10 @@ void gt_option_parser_register_hook(GtOptionParser *op,
   gt_array_add(op->hooks, hookinfo);
 }
 
-void gt_option_parser_set_mailaddress(GtOptionParser *op, const char *address)
+void gt_option_parser_set_mail_address(GtOptionParser *op, const char *address)
 {
   gt_assert(op && address);
-  op->mailaddress = address;
+  op->mail_address = address;
 }
 
 static void show_description(unsigned long initial_space, const char *desc,
@@ -415,7 +415,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
              op->progname + gt_cstr_length_up_to_char(op->progname, ' '));
     }
     printf("\nReport bugs to %s.\n",
-           op->mailaddress ? op->mailaddress : MAILADDRESS);
+           op->mail_address ? op->mail_address : MAILADDRESS);
   }
   return had_err;
 }

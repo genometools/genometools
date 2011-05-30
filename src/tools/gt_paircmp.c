@@ -87,7 +87,7 @@ static GtOPrval parse_options(int *parsed_args,
   pw->text = gt_str_new();
   pw->charlistlen = NULL;
   op = gt_option_parser_new("options","Apply function to pairs of strings.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionstrings = gt_option_new_stringarray("ss","use two strings",
                                          pw->strings);

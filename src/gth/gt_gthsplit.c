@@ -285,7 +285,7 @@ static GtOPrval gthsplit_parse_options(int *parsed_args,
   gt_option_exclude(optgzip, optbzip2);
   gt_option_is_mandatory_either(optalignmentscore, optcoverage);
 
-  gt_option_parser_set_mailaddress(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
                                   plugins->gth_version_func, err);
 

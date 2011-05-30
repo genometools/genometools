@@ -113,7 +113,7 @@ static GtOPrval gthbssmbuild_parse_options(int *parsed_args,
   gt_option_is_mandatory(optdatapath);
 
   gt_option_parser_set_max_args(op, 0);
-  gt_option_parser_set_mailaddress(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gth_version_func,
                                   err);
 

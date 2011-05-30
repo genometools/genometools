@@ -215,7 +215,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(optiontraverse);
   gt_option_parser_add_option(op, optiontraverse);
   /* mail */
-  gt_option_parser_set_mailaddress(op, "<willrodt@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<willrodt@zbh.uni-hamburg.de>");
   return op;
 }
 

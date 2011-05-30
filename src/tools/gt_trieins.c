@@ -31,7 +31,7 @@ static GtOPrval parse_options(bool *onlyins,int *parsed_args,
   gt_error_check(err);
   op = gt_option_parser_new("[options] indexname",
                          "Perform trie insertions and check consistency.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
   option= gt_option_new_bool("ins","perform only insertions",onlyins,false);
   gt_option_parser_add_option(op, option);
   gt_option_parser_set_min_max_args(op, 1U, 1U);

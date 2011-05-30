@@ -1295,7 +1295,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   }
 
   /* set mail addresse */
-  gt_option_parser_set_mailaddress(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
 
   /* set comment function */
   gt_option_parser_set_comment_func(op, show_gth_help_trailer, NULL);

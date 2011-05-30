@@ -58,12 +58,12 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   op = gt_option_parser_new("[options] -m matchfile",
                             "Chain pairwise matches.");
 
-  gt_option_parser_set_mailaddress (op, "<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
   option = gt_option_new_filename("m","Specify file containing the matches\n"
                                   "mandatory option",
                                   arguments->matchfile);
   gt_option_parser_add_option(op, option);
-  gt_option_is_mandatory (option);
+  gt_option_is_mandatory(option);
 
   optionglobal = gt_option_new_stringarray("global",
                    "perform global chaining\n"
@@ -93,7 +93,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
                    arguments->localargs);
   gt_option_argument_is_optional(optionlocal);
   gt_option_parser_add_option(op, optionlocal);
-  arguments->refoptionlocal = gt_option_ref (optionlocal);
+  arguments->refoptionlocal = gt_option_ref(optionlocal);
   gt_option_exclude(optionlocal,optionglobal);
   option = gt_option_new_double("wf","specify weight factor > 0.0 to obtain "
                                      "score of a fragment\nrequires one of "
@@ -104,7 +104,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   gt_option_parser_add_option(op, option);
   option = gt_option_new_ulong("maxgap","specify maximal width of gap in chain",
                                          &arguments->maxgap,0);
-  arguments->refoptionmaxgap = gt_option_ref (option);
+  arguments->refoptionmaxgap = gt_option_ref(option);
   gt_option_parser_add_option(op, option);
   option = gt_option_new_bool("silent","do not output the chains but only "
                                        "report their lengths and scores",

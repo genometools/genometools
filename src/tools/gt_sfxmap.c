@@ -150,7 +150,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
                             "Map or Stream <indexname> and check consistency.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionesaindex = gt_option_new_string("esa",
                                         "Specify index (enhanced suffix array)",

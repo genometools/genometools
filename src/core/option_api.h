@@ -82,10 +82,10 @@ void            gt_option_parser_set_comment_func(GtOptionParser *option_parser,
 void            gt_option_parser_set_version_func(GtOptionParser *option_parser,
                                                   GtShowVersionFunc
                                                   version_func);
-/* Set the mailadress used in the final ``Report bugs to'' line of the -help
-   output to <address>. It should be of the form "<bill@microsoft.com>". */
-void            gt_option_parser_set_mailaddress(GtOptionParser*,
-                                                 const char *address);
+/* Set the <mail_address used> in the final "Report bugs to" line of the <-help>
+   output. It should be of the form "<bill@microsoft.com>". */
+void            gt_option_parser_set_mail_address(GtOptionParser*,
+                                                  const char *mail_address);
 /* Register a <hook_function> with <option_parser>. All registered hook
    functions are called at the end of <gt_option_parser_parse(>).
    This allows to have a module which registers a bunch of options in the option

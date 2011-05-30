@@ -93,7 +93,7 @@ static GtOPrval parsegfmsub(bool doms,
                          ? "Compute matching statistics."
                          : "Compute length of minumum unique prefixes."
                          );
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionfmindex = gt_option_new_string("fmi", "specify fmindex",
                                     gfmsubcallinfo->indexname,NULL);

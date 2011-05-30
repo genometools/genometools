@@ -138,7 +138,7 @@ static GtOptionParser *gt_shulengthdist_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] -ii indexname",
                             "Compute distribution of pairwise "
                             "shustring lengths.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   option = gt_option_new_string("ii",
                                 "Specify input index",

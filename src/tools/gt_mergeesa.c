@@ -33,7 +33,7 @@ static GtOPrval parse_options(GtStr *indexname,GtStrArray *indexnametab,
   gt_error_check(err);
   op = gt_option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
                          "Merge indexes into one index.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
   option = gt_option_new_filenamearray("ii",
                                     "specify input index files (mandatory)",
                                     indexnametab);

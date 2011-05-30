@@ -65,7 +65,7 @@ static GtOPrval gthfilestat_parse_options(int *parsed_args,
   o = gt_option_new_verbose(&verbose);
   gt_option_parser_add_option(op, o);
 
-  gt_option_parser_set_mailaddress(op, "<gremme@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<gremme@zbh.uni-hamburg.de>");
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv,
                                   plugins->gth_version_func, err);
 

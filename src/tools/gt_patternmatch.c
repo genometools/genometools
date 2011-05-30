@@ -253,7 +253,7 @@ static GtOPrval parse_options(Pmatchoptions *pmopt,
   gt_error_check(err);
   op = gt_option_parser_new("[options] -ii indexname",
                          "Perform pattern matches.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   option = gt_option_new_ulong("minpl","Specify minimum length of pattern",
                            &pmopt->minpatternlen,

@@ -70,7 +70,7 @@ static GtOptionParser
 
   op = gt_option_parser_new("[options]",
                             "Match spaced seeds.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
   optionesaindex = gt_option_new_string("esa",
                                      "Specify index (enhanced suffix array)",

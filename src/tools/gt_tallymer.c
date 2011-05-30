@@ -104,7 +104,7 @@ static GtOptionParser *gt_tyr_mkindex_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] -esa suffixerator-index [options]",
                             "Count and index k-mers in the given enhanced "
                             "suffix array for a fixed value of k.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   optionesa = gt_option_new_string("esa","specify suffixerator-index\n"
                                    "(mandatory option)",
@@ -353,7 +353,7 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] -esa suffixerator-index [options]",
                             "Compute occurrence ratio for a set of sequences "
                             "represented by an enhanced suffix array.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   optionesa = gt_option_new_string("esa","specify suffixerator-index\n"
                                    "(mandatory option)",
@@ -838,7 +838,7 @@ static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
                             "[queryfile1..] [options]",
                             "Search a set of k-mers in an index constructed "
                             "by \"gt tyr mkindex\".");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   optiontyr = gt_option_new_string("tyr","specify tallymer-index",
                                    arguments->str_inputindex,

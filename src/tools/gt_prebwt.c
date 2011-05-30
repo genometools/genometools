@@ -56,7 +56,7 @@ static GtOptionParser* gt_prebwt_option_parser_new(void *tool_arguments)
   arguments->indexname = gt_str_new();
   op = gt_option_parser_new("[options] -pck indexname",
                             "Precompute bwt-bounds for some prefix length.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   optionpck = gt_option_new_string("pck","Specify index (packed index)",
                              arguments->indexname, NULL);

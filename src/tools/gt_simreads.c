@@ -144,7 +144,7 @@ static GtOptionParser* gt_simreads_option_parser_new(void *tool_arguments)
 
   gt_option_parser_set_min_max_args(op, 1, 1);
 
-  gt_option_parser_set_mailaddress(op,"<gonnella@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op,"<gonnella@zbh.uni-hamburg.de>");
 
   return op;
 }

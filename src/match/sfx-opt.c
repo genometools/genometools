@@ -47,7 +47,7 @@ static GtOPrval parse_options(int *parsed_args,
   op = gt_option_parser_new("[option ...] (-db file [...] | -ii index)",
                             doesa ? "Compute enhanced suffix array."
                                   : "Compute packed index.");
-  gt_option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  gt_option_parser_set_mail_address(op, "<kurtz@zbh.uni-hamburg.de>");
 
   /* input info */
   so->indexname = gt_str_new();
