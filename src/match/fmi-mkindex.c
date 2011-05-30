@@ -75,8 +75,8 @@ static GtOPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              mkfmcallinfo->outfmindex, NULL);
   gt_option_parser_add_option(op, optionfmout);
 
-  option = gt_option_new_filenamearray("ii", "specify indices to be used",
-                                    mkfmcallinfo->indexnametab);
+  option = gt_option_new_filename_array("ii", "specify indices to be used",
+                                        mkfmcallinfo->indexnametab);
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 

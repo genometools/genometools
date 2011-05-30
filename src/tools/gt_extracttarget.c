@@ -63,10 +63,10 @@ static GtOptionParser* gt_extracttarget_option_parser_new(void *tool_arguments)
                          "sequence_file.");
 
   /* -seqfile */
-  o = gt_option_new_filenamearray("seqfiles",
-                                  "set the sequence file from which "
-                                  "to extract the features",
-                                  arguments->seqfiles);
+  o = gt_option_new_filename_array("seqfiles",
+                                   "set the sequence file from which "
+                                   "to extract the features",
+                                   arguments->seqfiles);
   gt_option_is_mandatory(o);
   gt_option_parser_add_option(op, o);
 

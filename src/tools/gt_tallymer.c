@@ -382,7 +382,7 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
                               &arguments->stepmersize,1UL,1UL);
   gt_option_parser_add_option(op, optionstep);
 
-  optionmersizes = gt_option_new_stringarray(
+  optionmersizes = gt_option_new_string_array(
                           "mersizes",
                           "specify mer sizes as non-empty sequence of "
                           "non decreasing positive integers",
@@ -390,7 +390,7 @@ static GtOptionParser *gt_tyr_occratio_option_parser_new(void *tool_arguments)
   arguments->refoptionmersizes = gt_option_ref(optionmersizes);
   gt_option_parser_add_option(op, optionmersizes);
 
-  optionoutput = gt_option_new_stringarray(
+  optionoutput = gt_option_new_string_array(
                           "output",
                           "use combination of the following keywords: "
                           "unique nonunique nonuniquemulti relative total "
@@ -846,8 +846,8 @@ static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(optiontyr);
   gt_option_parser_add_option(op, optiontyr);
 
-  optionqueries = gt_option_new_filenamearray("q","specify query file names",
-                                              arguments->queryfilenames);
+  optionqueries = gt_option_new_filename_array("q","specify query file names",
+                                               arguments->queryfilenames);
   gt_option_is_mandatory(optionqueries);
   gt_option_parser_add_option(op, optionqueries);
 
@@ -860,10 +860,10 @@ static GtOptionParser *gt_tyr_search_option_parser_new(void *tool_arguments)
                                 "f");
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_stringarray("output",
-                                     "specify output flags "
-                                     "(qseqnum, qpos, counts, sequence)",
-                                     arguments->showmodespec);
+  option = gt_option_new_string_array("output",
+                                      "specify output flags "
+                                      "(qseqnum, qpos, counts, sequence)",
+                                      arguments->showmodespec);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("test", "perform tests to verify program "

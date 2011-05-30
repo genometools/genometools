@@ -342,13 +342,13 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_parser_add_option(op, idxo->optionmaxwidthrealmedian);
 
   idxo->optionalgbounds
-    = gt_option_new_stringarray("algbds",
-                                "length boundaries for the different "
-                                "algorithms to sort buckets of suffixes\n"
-                                "first number: maxbound for insertion sort\n"
-                                "second number: maxbound for blindtrie sort\n"
-                                "third number: maxbound for counting sort\n",
-                                idxo->algbounds);
+    = gt_option_new_string_array("algbds",
+                                 "length boundaries for the different "
+                                 "algorithms to sort buckets of suffixes\n"
+                                 "first number: maxbound for insertion sort\n"
+                                 "second number: maxbound for blindtrie sort\n"
+                                 "third number: maxbound for counting sort\n",
+                                 idxo->algbounds);
   gt_option_is_development_option(idxo->optionalgbounds);
   gt_option_parser_add_option(op, idxo->optionalgbounds);
 

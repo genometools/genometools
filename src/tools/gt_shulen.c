@@ -152,9 +152,9 @@ static GtOptionParser *gt_shulengthdist_option_parser_new(void *tool_arguments)
                                   false);
   gt_option_parser_add_option(op, scanoption);
 
-  queryoption = gt_option_new_filenamearray("q",
-                                            "Specify query files",
-                                            arguments->queryfilenames);
+  queryoption = gt_option_new_filename_array("q",
+                                             "Specify query files",
+                                             arguments->queryfilenames);
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 

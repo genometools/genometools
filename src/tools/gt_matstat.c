@@ -111,8 +111,8 @@ static GtOPrval parsegfmsub(bool doms,
   gt_option_exclude(optionpckindex,optionesaindex);
   gt_option_exclude(optionpckindex,optionfmindex);
 
-  optionquery = gt_option_new_filenamearray("query", "specify queryfiles",
-                                         gfmsubcallinfo->queryfilenames);
+  optionquery = gt_option_new_filename_array("query", "specify queryfiles",
+                                             gfmsubcallinfo->queryfilenames);
   gt_option_is_mandatory(optionquery);
   gt_option_parser_add_option(op, optionquery);
 
@@ -132,7 +132,7 @@ static GtOPrval parsegfmsub(bool doms,
                                    0,(unsigned long) 1);
   gt_option_parser_add_option(op, optionmax);
 
-  optionoutput = gt_option_new_stringarray("output",
+  optionoutput = gt_option_new_string_array("output",
                    doms
                      ? "set output flags (sequence, querypos, subjectpos)"
                      : "set output flags (sequence, querypos)",

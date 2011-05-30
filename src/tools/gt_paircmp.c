@@ -89,15 +89,15 @@ static GtOPrval parse_options(int *parsed_args,
   op = gt_option_parser_new("options","Apply function to pairs of strings.");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionstrings = gt_option_new_stringarray("ss","use two strings",
-                                         pw->strings);
+  optionstrings = gt_option_new_string_array("ss","use two strings",
+                                             pw->strings);
   gt_option_parser_add_option(op, optionstrings);
 
-  optionfiles = gt_option_new_filenamearray("ff","use two files",
-                                         pw->files);
+  optionfiles = gt_option_new_filename_array("ff","use two files",
+                                             pw->files);
   gt_option_parser_add_option(op, optionfiles);
 
-  optioncharlistlen = gt_option_new_stringarray("a",
+  optioncharlistlen = gt_option_new_string_array("a",
                                              "use character list and length",
                                              charlistlen);
   gt_option_parser_add_option(op, optioncharlistlen);

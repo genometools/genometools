@@ -249,25 +249,26 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -genomic */
   if (!gthconsensus_parsing) {
-    optgenomic = gt_option_new_filenamearray("genomic", "specify input files "
-                                          "containing genomic sequences\n"
-                                          "mandatory option", genomic_files);
+    optgenomic = gt_option_new_filename_array("genomic", "specify input files "
+                                              "containing genomic sequences\n"
+                                              "mandatory option",
+                                              genomic_files);
     gt_option_parser_add_option(op, optgenomic);
   }
 
   /* -cdna */
   if (!gthconsensus_parsing) {
-    optcdna = gt_option_new_filenamearray("cdna", "specifiy input files "
-                                       "containing cDNA/EST sequences",
-                                       cdna_files);
+    optcdna = gt_option_new_filename_array("cdna", "specifiy input files "
+                                           "containing cDNA/EST sequences",
+                                           cdna_files);
     gt_option_parser_add_option(op, optcdna);
   }
 
   /* -protein */
   if (!gthconsensus_parsing) {
-    optprotein = gt_option_new_filenamearray("protein", "specify input files "
-                                          "containing protein sequences",
-                                          protein_files);
+    optprotein = gt_option_new_filename_array("protein", "specify input files "
+                                              "containing protein sequences",
+                                              protein_files);
     gt_option_parser_add_option(op, optprotein);
   }
 

@@ -86,7 +86,7 @@ static GtOptionParser
   gt_option_exclude(optionesaindex,optionpckindex);
   gt_option_is_mandatory_either(optionesaindex,optionpckindex);
 
-  option = gt_option_new_filenamearray("q",
+  option = gt_option_new_filename_array("q",
                                     "Specify files containing the "
                                     "query sequences",
                                     arguments->queryfilenames);

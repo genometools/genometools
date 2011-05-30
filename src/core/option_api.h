@@ -65,10 +65,10 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
 /* Add <option> to <option_parser>. Takes ownership of <option>. */
 void            gt_option_parser_add_option(GtOptionParser *option_parser,
                                             GtOption *option);
-/* Return the <GtOption> object if an option named <option_str> is present in
+/* Return the <GtOption> object if an option named <option_string> is present in
    <option_parser>, and <NULL> if no such option exists in <option_parser>. */
 GtOption*       gt_option_parser_get_option(GtOptionParser *option_parser,
-                                            const char *option_str);
+                                            const char *option_string);
 /* Refer to manual at the end of <-help> output of <opion_parser>. */
 void            gt_option_parser_refer_to_manual(GtOptionParser *option_parser);
 /* Set <comment_func> in <option_parser> (<data> is passed along). */
@@ -109,6 +109,11 @@ void            gt_option_parser_set_max_args(GtOptionParser *option_parser,
 void            gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
                                                   unsigned int minumum,
                                                   unsigned int maximum);
+/* Use <option_parser> to parse options given in argument vector <argv> (with
+   <argc> many arguments). The number of parsed arguments ist stored in
+   <parsed_args>. <version_func> is used for the output of option <-version>.
+   In case of error, GT_OPTION_PARSER_ERROR is returned and <err> is set
+   accordingly. */
 GtOPrval        gt_option_parser_parse(GtOptionParser *option_parser,
                                        int *parsed_args,
                                        int argc, const char **argv,
@@ -117,105 +122,172 @@ GtOPrval        gt_option_parser_parse(GtOptionParser *option_parser,
 /* Delete <option_parser>. */
 void            gt_option_parser_delete(GtOptionParser *option_parser);
 
-GtOption*       gt_option_new_bool(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_bool(const char *option_string,
                                    const char *description,
                                    bool *value, bool default_value);
-GtOption*       gt_option_new_double(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_double(const char *option_string,
                                      const char *description, double *value,
                                      double default_value);
-GtOption*       gt_option_new_double_min(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value>. */
+GtOption*       gt_option_new_double_min(const char *option_string,
                                          const char *description, double *value,
                                          double default_value,
-                                         double min_value);
-GtOption*       gt_option_new_double_min_max(const char *option_str,
+                                         double minimum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value> and at most
+  the <maximum_value>. */
+GtOption*       gt_option_new_double_min_max(const char *option_string,
                                              const char *description,
                                              double *value,
                                              double default_value,
-                                             double min_value,
-                                             double max_value);
-/* Enforces that the given argument is >= 0.0 and <= 1.0. */
-GtOption*       gt_option_new_probability(const char *option_str,
+                                             double minimum_value,
+                                             double maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at larger or equal than 0.0 and smaller or
+  equal than 1.0. */
+GtOption*       gt_option_new_probability(const char *option_string,
                                           const char *description,
                                           double *value,
                                           double default_value);
-GtOption*       gt_option_new_int(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_int(const char *option_string,
                                   const char *description,
                                   int *value, int default_value);
-GtOption*       gt_option_new_int_min(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value>. */
+GtOption*       gt_option_new_int_min(const char *option_string,
                                       const char *description, int *value,
-                                      int default_value, int min_value);
-GtOption*       gt_option_new_int_max(const char *option_str,
+                                      int default_value, int minimum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at most have the <maximum_value>. */
+GtOption*       gt_option_new_int_max(const char *option_string,
                                       const char *description, int *value,
-                                      int default_value, int max_value);
-GtOption*       gt_option_new_int_min_max(const char *option_str,
+                                      int default_value, int maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value> and at most
+  the <maximum_value>. */
+GtOption*       gt_option_new_int_min_max(const char *option_string,
                                           const char *description,
                                           int *value, int default_value,
-                                          int min_value, int max_value);
-GtOption*       gt_option_new_uint(const char *option_str,
+                                          int minimum_value, int maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_uint(const char *option_string,
                                    const char *description,
                                    unsigned int *value,
                                    unsigned int default_value);
-GtOption*       gt_option_new_uint_min(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value>. */
+GtOption*       gt_option_new_uint_min(const char *option_string,
                                        const char *description,
                                        unsigned int *value,
                                        unsigned int default_value,
-                                       unsigned int min_value);
-GtOption*       gt_option_new_uint_max(const char *option_str,
+                                       unsigned int minimum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at most have the <maximum_value>. */
+GtOption*       gt_option_new_uint_max(const char *option_string,
                                        const char *description,
                                        unsigned int *value,
                                        unsigned int default_value,
-                                       unsigned int max_value);
-GtOption*       gt_option_new_uint_min_max(const char *option_str,
+                                       unsigned int maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value> and at most
+  the <maximum_value>. */
+GtOption*       gt_option_new_uint_min_max(const char *option_string,
                                            const char *description,
                                            unsigned int *value,
                                            unsigned int default_value,
-                                           unsigned int min_value,
-                                           unsigned int max_value);
-GtOption*       gt_option_new_long(const char *option_str,
+                                           unsigned int minimum_value,
+                                           unsigned int maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_long(const char *option_string,
                                    const char *description,
                                    long *value, long default_value);
-GtOption*       gt_option_new_ulong(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_ulong(const char *option_string,
                                     const char *description,
                                     unsigned long *value,
                                     unsigned long default_value);
-GtOption*       gt_option_new_ulong_min(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value>. */
+GtOption*       gt_option_new_ulong_min(const char *option_string,
                                         const char *description,
                                         unsigned long *value,
                                         unsigned long default_value,
-                                        unsigned long min_value);
-GtOption*       gt_option_new_ulong_min_max(const char *option_str,
+                                        unsigned long minimum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The argument to this option must at least have the <minimum_value> and at most
+  the <maximum_value>. */
+GtOption*       gt_option_new_ulong_min_max(const char *option_string,
                                             const char *description,
                                             unsigned long *value,
                                             unsigned long default_value,
-                                            unsigned long min_value,
-                                            unsigned long max_value);
-/* If <default_value> equals <NULL>, <GT_UNDEF_LONG> will be used as default for
-   range->start and range->end. */
-GtOption*       gt_option_new_range(const char *option_str,
+                                            unsigned long minimum_value,
+                                            unsigned long maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+   If <default_value> equals <NULL>, <GT_UNDEF_LONG> will be used as the default
+   start and end point of <value>. */
+GtOption*       gt_option_new_range(const char *option_string,
                                     const char *description,
                                     GtRange *value, GtRange *default_value);
-GtOption*       gt_option_new_range_min_max(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>.
+  The first argument to this option (which will be used as the start) must at
+  least have the <minimum_value> and the second argument (which will be used as
+  the end) at most the <maximum_value>. */
+GtOption*       gt_option_new_range_min_max(const char *option_string,
                                             const char *description,
                                             GtRange *value,
                                             GtRange *default_value,
-                                            unsigned long min_value,
-                                            unsigned long max_value);
-GtOption*       gt_option_new_string(const char *option_str,
+                                            unsigned long minimum_value,
+                                            unsigned long maximum_value);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing is stored in <value>. */
+GtOption*       gt_option_new_string(const char *option_string,
                                      const char *description,
                                      GtStr *value, const char *default_value);
-GtOption*       gt_option_new_stringarray(const char *option_str,
-                                          const char *description, GtStrArray*);
-/* Add an option which allows only arguments given in the <NULL> terminated
-   <domain> (<default_value> must be an entry of <domain> or <NULL>) */
-GtOption*       gt_option_new_choice(const char *option_str,
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing are stored in <value>. */
+GtOption*       gt_option_new_string_array(const char *option_string,
+                                           const char *description,
+                                           GtStrArray *value);
+/* Return a <GtOption> with the given <option_string>, <description>, and
+   <default_value> which allows only arguments given in the <NULL>-terminated
+   <domain> (<default_value> must be an entry of <domain> or <NULL>). */
+GtOption*       gt_option_new_choice(const char *option_string,
                                      const char *description, GtStr *value,
                                      const char *default_value,
                                      const char **domain);
-GtOption*       gt_option_new_filename(const char *option_str,
-                                       const char *description, GtStr*);
-GtOption*       gt_option_new_filenamearray(const char *option_str,
-                                            const char *description,
-                                            GtStrArray*);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The result of the option parsing are stored in <value>. */
+GtOption*       gt_option_new_filename(const char *option_string,
+                                       const char *description,
+                                       GtStr *filename);
+/* Return a new <GtOption> with the given <option_string>, <description>, and
+   <default_value>. The results of the option parsing are stored in <value>. */
+GtOption*       gt_option_new_filename_array(const char *option_string,
+                                             const char *description,
+                                             GtStrArray *filename_array);
 /* Return a new debug <GtOption> object: <-debug>, "enable debugging output",
    default is <false>. The result of the option parsing is stored in <value> */
 GtOption*       gt_option_new_debug(bool *value);

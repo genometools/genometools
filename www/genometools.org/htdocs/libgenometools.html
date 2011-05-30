@@ -4449,35 +4449,290 @@ Delete <code>node_visitor</code>.
    the descriptions to manually affect the formating. </p>
 
 <hr>
+<a name="gt_option_new_bool"></a>
+
+<code>GtOption*        gt_option_new_bool(const char *option_string,
+                                   const char *description,
+                                   bool *value, bool default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_double"></a>
+
+<code>GtOption*        gt_option_new_double(const char *option_string,
+                                     const char *description, double *value,
+                                     double default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_double_min"></a>
+
+<code>GtOption*        gt_option_new_double_min(const char *option_string,
+                                         const char *description, double *value,
+                                         double default_value,
+                                         double minimum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_double_min_max"></a>
+
+<code>GtOption*        gt_option_new_double_min_max(const char *option_string,
+                                             const char *description,
+                                             double *value,
+                                             double default_value,
+                                             double minimum_value,
+                                             double maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code> and at most
+  the <code>maximum_value</code>.
+</p>
+<hr>
 <a name="gt_option_new_probability"></a>
 
-<code>GtOption*        gt_option_new_probability(const char *option_str,
+<code>GtOption*        gt_option_new_probability(const char *option_string,
                                           const char *description,
                                           double *value,
                                           double default_value)</code>
 <p>
-Enforces that the given argument is >= 0.0 and <= 1.0.
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at larger or equal than 0.0 and smaller or
+  equal than 1.0.
+</p>
+<hr>
+<a name="gt_option_new_int"></a>
+
+<code>GtOption*        gt_option_new_int(const char *option_string,
+                                  const char *description,
+                                  int *value, int default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_int_min"></a>
+
+<code>GtOption*        gt_option_new_int_min(const char *option_string,
+                                      const char *description, int *value,
+                                      int default_value, int minimum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_int_max"></a>
+
+<code>GtOption*        gt_option_new_int_max(const char *option_string,
+                                      const char *description, int *value,
+                                      int default_value, int maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at most have the <code>maximum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_int_min_max"></a>
+
+<code>GtOption*        gt_option_new_int_min_max(const char *option_string,
+                                          const char *description,
+                                          int *value, int default_value,
+                                          int minimum_value, int maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code> and at most
+  the <code>maximum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_uint"></a>
+
+<code>GtOption*        gt_option_new_uint(const char *option_string,
+                                   const char *description,
+                                   unsigned int *value,
+                                   unsigned int default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_uint_min"></a>
+
+<code>GtOption*        gt_option_new_uint_min(const char *option_string,
+                                       const char *description,
+                                       unsigned int *value,
+                                       unsigned int default_value,
+                                       unsigned int minimum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_uint_max"></a>
+
+<code>GtOption*        gt_option_new_uint_max(const char *option_string,
+                                       const char *description,
+                                       unsigned int *value,
+                                       unsigned int default_value,
+                                       unsigned int maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at most have the <code>maximum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_uint_min_max"></a>
+
+<code>GtOption*        gt_option_new_uint_min_max(const char *option_string,
+                                           const char *description,
+                                           unsigned int *value,
+                                           unsigned int default_value,
+                                           unsigned int minimum_value,
+                                           unsigned int maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code> and at most
+  the <code>maximum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_long"></a>
+
+<code>GtOption*        gt_option_new_long(const char *option_string,
+                                   const char *description,
+                                   long *value, long default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_ulong"></a>
+
+<code>GtOption*        gt_option_new_ulong(const char *option_string,
+                                    const char *description,
+                                    unsigned long *value,
+                                    unsigned long default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_ulong_min"></a>
+
+<code>GtOption*        gt_option_new_ulong_min(const char *option_string,
+                                        const char *description,
+                                        unsigned long *value,
+                                        unsigned long default_value,
+                                        unsigned long minimum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_ulong_min_max"></a>
+
+<code>GtOption*        gt_option_new_ulong_min_max(const char *option_string,
+                                            const char *description,
+                                            unsigned long *value,
+                                            unsigned long default_value,
+                                            unsigned long minimum_value,
+                                            unsigned long maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The argument to this option must at least have the <code>minimum_value</code> and at most
+  the <code>maximum_value</code>.
 </p>
 <hr>
 <a name="gt_option_new_range"></a>
 
-<code>GtOption*        gt_option_new_range(const char *option_str,
+<code>GtOption*        gt_option_new_range(const char *option_string,
                                     const char *description,
                                     GtRange *value, GtRange *default_value)</code>
 <p>
-If <code>default_value</code> equals <code>NULL</code>, <code>GT_UNDEF_LONG</code> will be used as default for
-   range->start and range->end.
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+   If <code>default_value</code> equals <code>NULL</code>, <code>GT_UNDEF_LONG</code> will be used as the default
+   start and end point of <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_range_min_max"></a>
+
+<code>GtOption*        gt_option_new_range_min_max(const char *option_string,
+                                            const char *description,
+                                            GtRange *value,
+                                            GtRange *default_value,
+                                            unsigned long minimum_value,
+                                            unsigned long maximum_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+  The first argument to this option (which will be used as the start) must at
+  least have the <code>minimum_value</code> and the second argument (which will be used as
+  the end) at most the <code>maximum_value</code>.
+</p>
+<hr>
+<a name="gt_option_new_string"></a>
+
+<code>GtOption*        gt_option_new_string(const char *option_string,
+                                     const char *description,
+                                     GtStr *value, const char *default_value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing is stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_string_array"></a>
+
+<code>GtOption*        gt_option_new_string_array(const char *option_string,
+                                           const char *description,
+                                           GtStrArray *value)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing are stored in <code>value</code>.
 </p>
 <hr>
 <a name="gt_option_new_choice"></a>
 
-<code>GtOption*        gt_option_new_choice(const char *option_str,
+<code>GtOption*        gt_option_new_choice(const char *option_string,
                                      const char *description, GtStr *value,
                                      const char *default_value,
                                      const char **domain)</code>
 <p>
-Add an option which allows only arguments given in the <code>NULL</code> terminated
-   <code>domain</code> (<code>default_value</code> must be an entry of <code>domain</code> or <code>NULL</code>)
+Return a <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code> which allows only arguments given in the <code>NULL</code>-terminated
+   <code>domain</code> (<code>default_value</code> must be an entry of <code>domain</code> or <code>NULL</code>).
+</p>
+<hr>
+<a name="gt_option_new_filename"></a>
+
+<code>GtOption*        gt_option_new_filename(const char *option_string,
+                                       const char *description,
+                                       GtStr *filename)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The result of the option parsing are stored in <code>value</code>.
+</p>
+<hr>
+<a name="gt_option_new_filename_array"></a>
+
+<code>GtOption*        gt_option_new_filename_array(const char *option_string,
+                                             const char *description,
+                                             GtStrArray *filename_array)</code>
+<p>
+Return a new <code>GtOption</code> with the given <code>option_string</code>, <code>description</code>, and
+   <code>default_value</code>. The results of the option parsing are stored in <code>value</code>.
 </p>
 <hr>
 <a name="gt_option_new_debug"></a>
@@ -4645,9 +4900,9 @@ Add <code>option</code> to <code>option_parser</code>. Takes ownership of <code>
 <a name="gt_option_parser_get_option"></a>
 
 <code>GtOption*        gt_option_parser_get_option(GtOptionParser *option_parser,
-                                            const char *option_str)</code>
+                                            const char *option_string)</code>
 <p>
-Return the <code>GtOption</code> object if an option named <code>option_str</code> is present in
+Return the <code>GtOption</code> object if an option named <code>option_string</code> is present in
    <code>option_parser</code>, and <code>NULL</code> if no such option exists in <code>option_parser</code>.
 </p>
 <hr>
@@ -4729,6 +4984,21 @@ The the <code>maximum</code> number of additional command line arguments <code>o
 <p>
 The the <code>minimum</code> and <code>maximum</code> number of additional command line arguments
    <code>option_parser</code> must parse in order to succeed.
+</p>
+<hr>
+<a name="gt_option_parser_parse"></a>
+
+<code>GtOPrval         gt_option_parser_parse(GtOptionParser *option_parser,
+                                       int *parsed_args,
+                                       int argc, const char **argv,
+                                       GtShowVersionFunc version_func,
+                                       GtError *err)</code>
+<p>
+Use <code>option_parser</code> to parse options given in argument vector <code>argv</code> (with
+   <code>argc</code> many arguments). The number of parsed arguments ist stored in
+   <code>parsed_args</code>. <code>version_func</code> is used for the output of option <code>-version</code>.
+   In case of error, GT_OPTION_PARSER_ERROR is returned and <code>err</code> is set
+   accordingly.
 </p>
 <hr>
 <a name="gt_option_parser_delete"></a>
@@ -8000,13 +8270,55 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_option_is_set"><code>gt_option_is_set</code></a><br>
 
+  <a href="#gt_option_new_bool"><code>gt_option_new_bool</code></a><br>
+
   <a href="#gt_option_new_choice"><code>gt_option_new_choice</code></a><br>
 
   <a href="#gt_option_new_debug"><code>gt_option_new_debug</code></a><br>
 
+  <a href="#gt_option_new_double"><code>gt_option_new_double</code></a><br>
+
+  <a href="#gt_option_new_double_min"><code>gt_option_new_double_min</code></a><br>
+
+  <a href="#gt_option_new_double_min_max"><code>gt_option_new_double_min_max</code></a><br>
+
+  <a href="#gt_option_new_filename"><code>gt_option_new_filename</code></a><br>
+
+  <a href="#gt_option_new_filename_array"><code>gt_option_new_filename_array</code></a><br>
+
+  <a href="#gt_option_new_int"><code>gt_option_new_int</code></a><br>
+
+  <a href="#gt_option_new_int_max"><code>gt_option_new_int_max</code></a><br>
+
+  <a href="#gt_option_new_int_min"><code>gt_option_new_int_min</code></a><br>
+
+  <a href="#gt_option_new_int_min_max"><code>gt_option_new_int_min_max</code></a><br>
+
+  <a href="#gt_option_new_long"><code>gt_option_new_long</code></a><br>
+
   <a href="#gt_option_new_probability"><code>gt_option_new_probability</code></a><br>
 
   <a href="#gt_option_new_range"><code>gt_option_new_range</code></a><br>
+
+  <a href="#gt_option_new_range_min_max"><code>gt_option_new_range_min_max</code></a><br>
+
+  <a href="#gt_option_new_string"><code>gt_option_new_string</code></a><br>
+
+  <a href="#gt_option_new_string_array"><code>gt_option_new_string_array</code></a><br>
+
+  <a href="#gt_option_new_uint"><code>gt_option_new_uint</code></a><br>
+
+  <a href="#gt_option_new_uint_max"><code>gt_option_new_uint_max</code></a><br>
+
+  <a href="#gt_option_new_uint_min"><code>gt_option_new_uint_min</code></a><br>
+
+  <a href="#gt_option_new_uint_min_max"><code>gt_option_new_uint_min_max</code></a><br>
+
+  <a href="#gt_option_new_ulong"><code>gt_option_new_ulong</code></a><br>
+
+  <a href="#gt_option_new_ulong_min"><code>gt_option_new_ulong_min</code></a><br>
+
+  <a href="#gt_option_new_ulong_min_max"><code>gt_option_new_ulong_min_max</code></a><br>
 
   <a href="#gt_option_new_verbose"><code>gt_option_new_verbose</code></a><br>
 
@@ -8019,6 +8331,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_option_parser_get_option"><code>gt_option_parser_get_option</code></a><br>
 
   <a href="#gt_option_parser_new"><code>gt_option_parser_new</code></a><br>
+
+  <a href="#gt_option_parser_parse"><code>gt_option_parser_parse</code></a><br>
 
   <a href="#gt_option_parser_refer_to_manual"><code>gt_option_parser_refer_to_manual</code></a><br>
 

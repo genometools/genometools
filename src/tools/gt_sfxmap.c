@@ -162,9 +162,9 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                         arguments->pckindexname, NULL);
   gt_option_parser_add_option(op, optionpckindex);
 
-  optionstreamesq = gt_option_new_stringarray("stream-esq",
-                                              "Stream the encoded sequence",
-                                              arguments->streamesq);
+  optionstreamesq = gt_option_new_string_array("stream-esq",
+                                               "Stream the encoded sequence",
+                                               arguments->streamesq);
   gt_option_parser_add_option(op, optionstreamesq);
 
   optionsortmaxdepth = gt_option_new_uint("sortmaxdepth",
@@ -172,7 +172,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                           &arguments->sortmaxdepth,0);
   gt_option_parser_add_option(op, optionsortmaxdepth);
 
-  optionalgbounds = gt_option_new_stringarray("algbds",
+  optionalgbounds = gt_option_new_string_array("algbds",
                                 "length boundaries for the different "
                                 "algorithms to sort buckets of suffixes\n"
                                 "first number: maxbound for insertion sort\n"

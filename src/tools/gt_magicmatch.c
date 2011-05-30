@@ -56,14 +56,14 @@ static GtOptionParser* gt_magicmatch_option_parser_new(void *tool_arguments)
                          "sequence_file(s).");
 
   /* -f */
-  o = gt_option_new_filenamearray("f", "fasta file names (at least one file is "
-                               "required)", arguments->seqfiles);
+  o = gt_option_new_filename_array("f", "fasta file names (at least one file "
+                                   "is required)", arguments->seqfiles);
   gt_option_is_mandatory(o);
   gt_option_parser_add_option(op, o);
 
   /* -t */
   o = gt_option_new_bool("t", "translate the sequences of the files",
-                      &arguments->translate, false);
+                         &arguments->translate, false);
   gt_option_is_mandatory(o);
   gt_option_parser_add_option(op, o);
 

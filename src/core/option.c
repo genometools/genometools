@@ -41,7 +41,7 @@ typedef enum {
   OPTION_ULONG,
   OPTION_RANGE,
   OPTION_STRING,
-  OPTION_STRINGARRAY,
+  OPTION_STRING_ARRAY,
   OPTION_VERSION,
 } GtOptionType;
 
@@ -1045,7 +1045,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
               }
               break;
-            case OPTION_STRINGARRAY:
+            case OPTION_STRING_ARRAY:
               if (optional_arg(option, argnum, argc, argv)) {
                 option_parsed = true;
                 break;
@@ -1410,11 +1410,11 @@ GtOption* gt_option_new_string(const char *option_str, const char *description,
   return o;
 }
 
-GtOption* gt_option_new_stringarray(const char *option_str,
-                                    const char *description, GtStrArray *value)
+GtOption* gt_option_new_string_array(const char *option_str,
+                                     const char *description, GtStrArray *value)
 {
   GtOption *o = gt_option_new(option_str, description, value);
-  o->option_type = OPTION_STRINGARRAY;
+  o->option_type = OPTION_STRING_ARRAY;
   return o;
 }
 
@@ -1431,11 +1431,11 @@ GtOption* gt_option_new_filename(const char *option_str,
 /* the following function would allow to handle file arrays differently from
    string arrays later on (e.g., for CGI scripts) , but for now the are
    implemented in the same way */
-GtOption* gt_option_new_filenamearray(const char *option_str,
-                                      const char *description,
-                                      GtStrArray *filenames)
+GtOption* gt_option_new_filename_array(const char *option_str,
+                                       const char *description,
+                                       GtStrArray *filenames)
 {
-  return gt_option_new_stringarray(option_str, description, filenames);
+  return gt_option_new_string_array(option_str, description, filenames);
 }
 
 GtOption* gt_option_new_choice(const char *option_str, const char *description,

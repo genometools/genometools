@@ -186,9 +186,9 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
-  queryoption = gt_option_new_filenamearray("q",
-                                            "Specify query files",
-                                            arguments->queryfiles);
+  queryoption = gt_option_new_filename_array("q",
+                                             "Specify query files",
+                                             arguments->queryfiles);
   gt_option_is_development_option(queryoption);
   gt_option_parser_add_option(op, queryoption);
 

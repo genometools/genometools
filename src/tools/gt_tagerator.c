@@ -88,7 +88,7 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[options] -q tagfile [-esa|-pck] indexname",
                          "Map short sequence tags in given index.");
   gt_option_parser_set_mail_address(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = gt_option_new_filenamearray("q",
+  option = gt_option_new_filename_array("q",
                                     "Specify files containing the short "
                                     "sequence tags",
                                     arguments->tagfiles);
@@ -173,9 +173,9 @@ static GtOptionParser* gt_tagerator_option_parser_new(void *tool_arguments)
                               &arguments->nowildcards, true);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_stringarray("output",
-                                     gt_str_get(arguments->outputhelp),
-                                     arguments->outputspec);
+  option = gt_option_new_string_array("output",
+                                      gt_str_get(arguments->outputhelp),
+                                      arguments->outputspec);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_verbose(&arguments->verbose);

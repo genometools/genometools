@@ -130,7 +130,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   arguments->ref_unitfile = gt_option_ref(option_unitfile);
 
   /* -query */
-  optionquery = gt_option_new_filenamearray("query",
+  optionquery = gt_option_new_filename_array("query",
                                        "Files containing the query sequences "
                                        "if this option is set a simple "
                                        "shustring search will be used." ,

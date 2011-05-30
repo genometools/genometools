@@ -219,8 +219,8 @@ gt_encseq_options_register_generic(GtOptionParser *op,
     gt_option_parser_add_option(op, oi->optionplain);
     gt_option_is_extended_option(oi->optionplain);
 
-    oi->optiondb = gt_option_new_filenamearray("db","specify database files",
-                                               oi->db);
+    oi->optiondb = gt_option_new_filename_array("db","specify database files",
+                                                oi->db);
 
     oi->optionsmap = gt_option_new_string("smap",
                                           "specify file containing a "

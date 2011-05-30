@@ -65,7 +65,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
 
-  optionglobal = gt_option_new_stringarray("global",
+  optionglobal = gt_option_new_string_array("global",
                    "perform global chaining\n"
                    "optional parameter gc switches\n"
                    "on gap costs (according to L1-model)\n"
@@ -76,7 +76,7 @@ static GtOptionParser *gt_chain2dim_option_parser_new (void *tool_arguments)
   arguments->refoptionglobal = gt_option_ref (optionglobal);
   gt_option_parser_add_option(op, optionglobal);
 
-  optionlocal = gt_option_new_stringarray("local",
+  optionlocal = gt_option_new_string_array("local",
                    "perform local chaining\n"
                    "compute local chains (according to L1-model).\n"
                    "If no parameter is given, compute local chains with\n"

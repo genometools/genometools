@@ -64,17 +64,18 @@ void gt_seqid2file_register_options(GtOptionParser *op, GtSeqid2FileInfo *s2fi)
   gt_assert(op && s2fi);
 
   /* -seqfile */
-  seqfile_option = gt_option_new_string("seqfile", "set the sequence file "
-                                        "from which to extract the features",
-                                        s2fi->seqfile, NULL);
+  seqfile_option = gt_option_new_filename("seqfile", "set the sequence file "
+                                          "from which to extract the features",
+                                          s2fi->seqfile);
   gt_option_parser_add_option(op, seqfile_option);
 
   /* -seqfiles */
-  seqfiles_option = gt_option_new_stringarray("seqfiles", "set the sequence "
-                                              "files from which to extract "
-                                              "the features\nuse '--' to "
-                                              "terminate the list of sequence "
-                                              "files ", s2fi->seqfiles);
+  seqfiles_option = gt_option_new_filename_array("seqfiles", "set the sequence "
+                                                 "files from which to extract "
+                                                 "the features\nuse '--' to "
+                                                 "terminate the list of "
+                                                 "sequence files ",
+                                                 s2fi->seqfiles);
   gt_option_parser_add_option(op, seqfiles_option);
 
   /* -matchdesc */
