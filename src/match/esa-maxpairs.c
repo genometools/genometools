@@ -19,7 +19,6 @@
 #include "core/unused_api.h"
 #include "esa-seqread.h"
 #include "esa-maxpairs.h"
-#include "esa-bottomup.h"
 
 #define ISLEFTDIVERSE   (GtUchar) (state->alphabetsize)
 #define INITIALCHAR     (GtUchar) (state->alphabetsize+1)
@@ -51,7 +50,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
-} MaxpairsBUinfo;
+} BUinfo_Maxpairs;
 
 typedef struct  /* global information */
 {
@@ -64,33 +63,29 @@ typedef struct  /* global information */
   GtReadmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
-} MaxpairsBUstate;
+} BUstate_Maxpairs;
 
-static GtBUinfo *maxpairs_allocateBUinfo(GtBUstate *astate)
+static BUinfo_Maxpairs *allocateBUinfo_maxpairs(BUstate_Maxpairs *state)
 {
-  MaxpairsBUinfo *buinfo;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
+  BUinfo_Maxpairs *buinfo;
 
   buinfo = gt_malloc(sizeof(*buinfo));
   buinfo->nodeposlist = gt_malloc(sizeof(*buinfo->nodeposlist) *
                                   state->alphabetsize);
-  return (GtBUinfo*) buinfo;
+  return buinfo;
 }
 
-static void maxpairs_freeBUinfo(GtBUinfo *abuinfo, GT_UNUSED GtBUstate *state)
+static void freeBUinfo_maxpairs(BUinfo_Maxpairs *buinfo, 
+                                GT_UNUSED BUstate_Maxpairs *state)
 {
-  MaxpairsBUinfo *buinfo = (MaxpairsBUinfo*) abuinfo;
-
   gt_free(buinfo->nodeposlist);
   gt_free(buinfo);
 }
 
-static void add2poslist(GtBUstate *astate,GtBUinfo *aninfo,unsigned int base,
-                        unsigned long leafnumber)
+static void add2poslist_maxpairs(BUstate_Maxpairs *state,BUinfo_Maxpairs *ninfo,
+                                 unsigned int base,unsigned long leafnumber)
 {
   GtArrayGtUlong *ptr;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
-  MaxpairsBUinfo *ninfo = (MaxpairsBUinfo*) aninfo;
 
   if (base >= state->alphabetsize)
   {
@@ -104,12 +99,11 @@ static void add2poslist(GtBUstate *astate,GtBUinfo *aninfo,unsigned int base,
   }
 }
 
-static void concatlists(GtBUstate *astate,GtBUinfo *afather,GtBUinfo *ason)
+static void concatlists_maxpairs(BUstate_Maxpairs *state,
+                                 BUinfo_Maxpairs *father,
+                                 BUinfo_Maxpairs *son)
 {
   unsigned int base;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
-  MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
-  MaxpairsBUinfo *son = (MaxpairsBUinfo*) ason;
 
   for (base = 0; base < state->alphabetsize; base++)
   {
@@ -118,14 +112,14 @@ static void concatlists(GtBUstate *astate,GtBUinfo *afather,GtBUinfo *ason)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(GtBUstate *astate,unsigned long fatherdepth,
-                        const GtBUinfo *aninfo,unsigned int base,
-                        unsigned long leafnumber,GtError *err)
+static int cartproduct1_maxpairs(BUstate_Maxpairs *state,
+                                 unsigned long fatherdepth,
+                                 const BUinfo_Maxpairs *ninfo,
+                                 unsigned int base,
+                                 unsigned long leafnumber,GtError *err)
 {
   Listtype *pl;
   unsigned long *spptr, *start;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
-  MaxpairsBUinfo *ninfo = (MaxpairsBUinfo*) aninfo;
 
   pl = &NODEPOSLISTENTRY(ninfo,base);
   start = state->poslist[base].spaceGtUlong + pl->start;
@@ -140,19 +134,16 @@ static int cartproduct1(GtBUstate *astate,unsigned long fatherdepth,
   return 0;
 }
 
-static int cartproduct2(GtBUstate *astate,
-                        unsigned long fatherdepth,
-                        const GtBUinfo *aninfo1,
-                        unsigned int base1,
-                        const GtBUinfo *aninfo2,
-                        unsigned int base2,
-                        GtError *err)
+static int cartproduct2_maxpairs(BUstate_Maxpairs *state,
+                                 unsigned long fatherdepth,
+                                 const BUinfo_Maxpairs *ninfo1,
+                                 unsigned int base1,
+                                 const BUinfo_Maxpairs *ninfo2,
+                                 unsigned int base2,
+                                 GtError *err)
 {
   Listtype *pl1, *pl2;
   unsigned long *start1, *start2, *spptr1, *spptr2;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
-  MaxpairsBUinfo *ninfo1 = (MaxpairsBUinfo*) aninfo1;
-  MaxpairsBUinfo *ninfo2 = (MaxpairsBUinfo*) aninfo2;
 
   pl1 = &NODEPOSLISTENTRY(ninfo1,base1);
   start1 = state->poslist[base1].spaceGtUlong + pl1->start;
@@ -172,10 +163,9 @@ static int cartproduct2(GtBUstate *astate,
   return 0;
 }
 
-static void setpostabto0(GtBUstate *astate)
+static void setpostabto0_maxpairs(BUstate_Maxpairs *state)
 {
   unsigned int base;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
 
   if (!state->initialized)
   {
@@ -188,19 +178,17 @@ static void setpostabto0(GtBUstate *astate)
   }
 }
 
-static int maxpairs_processleafedge(bool firstsucc,
+static int processleafedge_maxpairs(bool firstsucc,
                                     unsigned long fatherdepth,
                                     GT_UNUSED unsigned long fatherlb,
-                                    GtBUinfo *afather,
+                                    BUinfo_Maxpairs *father,
                                     unsigned long leafnumber,
-                                    GtBUstate *astate,
+                                    BUstate_Maxpairs *state,
                                     GtError *err)
 {
   unsigned int base;
   unsigned long *start, *spptr;
   GtUchar leftchar;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
-  MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
 
 #ifdef SKDEBUG
   printf("%s %lu firstsucc=%s, __func__," " depth(father)= %lu\n",
@@ -210,7 +198,7 @@ static int maxpairs_processleafedge(bool firstsucc,
 #endif
   if (fatherdepth < (unsigned long) state->searchlength)
   {
-    setpostabto0(astate);
+    setpostabto0_maxpairs(state);
     return 0;
   }
   if (leafnumber == 0)
@@ -220,8 +208,8 @@ static int maxpairs_processleafedge(bool firstsucc,
   {
     /* Random access */
     leftchar = gt_encseq_get_encoded_char(state->encseq,
-                                                 leafnumber-1,
-                                                 state->readmode);
+                                          leafnumber-1,
+                                          state->readmode);
   }
   state->initialized = false;
 #ifdef SKDEBUG
@@ -237,7 +225,7 @@ static int maxpairs_processleafedge(bool firstsucc,
       NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeGtUlong;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
-    add2poslist(astate,afather,(unsigned int) leftchar,leafnumber);
+    add2poslist_maxpairs(state,father,(unsigned int) leftchar,leafnumber);
     return 0;
   }
   if (father->commonchar != ISLEFTDIVERSE)
@@ -250,7 +238,8 @@ static int maxpairs_processleafedge(bool firstsucc,
     {
       if (leftchar != (GtUchar) base)
       {
-        if (cartproduct1(astate,fatherdepth,afather,base,leafnumber,err) != 0)
+        if (cartproduct1_maxpairs(state,fatherdepth,father,base,leafnumber,
+                                  err) != 0)
         {
           return -1;
         }
@@ -267,26 +256,23 @@ static int maxpairs_processleafedge(bool firstsucc,
       }
     }
   }
-  add2poslist(astate,afather,(unsigned int) leftchar,leafnumber);
+  add2poslist_maxpairs(state,father,(unsigned int) leftchar,leafnumber);
   return 0;
 }
 
-static int maxpairs_processbranchedge(bool firstsucc,
-                                      unsigned long fatherdepth,
-                                      GT_UNUSED unsigned long fatherlb,
-                                      GtBUinfo *afather,
-                                      GT_UNUSED unsigned long sondepth,
-                                      GT_UNUSED unsigned long sonlb,
-                                      GT_UNUSED unsigned long sonrb,
-                                      GtBUinfo *ason,
-                                      GtBUstate *astate,
-                                      GtError *err)
+static int processbranchingedge_maxpairs(bool firstsucc,
+                                         unsigned long fatherdepth,
+                                         GT_UNUSED unsigned long fatherlb,
+                                         BUinfo_Maxpairs *father,
+                                         GT_UNUSED unsigned long sondepth,
+                                         GT_UNUSED unsigned long sonlb,
+                                         GT_UNUSED unsigned long sonrb,
+                                         BUinfo_Maxpairs *son,
+                                         BUstate_Maxpairs *state,
+                                         GtError *err)
 {
   unsigned int chfather, chson;
   unsigned long *start, *spptr, *fptr, *fstart;
-  MaxpairsBUstate *state = (MaxpairsBUstate*) astate;
-  MaxpairsBUinfo *son = (MaxpairsBUinfo*) ason;
-  MaxpairsBUinfo *father = (MaxpairsBUinfo*) afather;
 
 #ifdef SKDEBUG
   printf("%s firstsucc=%s, depth(father)= %lu\n",
@@ -294,7 +280,7 @@ static int maxpairs_processbranchedge(bool firstsucc,
 #endif
   if (fatherdepth < (unsigned long) state->searchlength)
   {
-    setpostabto0(astate);
+    setpostabto0_maxpairs(state);
     return 0;
   }
   state->initialized = false;
@@ -325,8 +311,8 @@ static int maxpairs_processbranchedge(bool firstsucc,
       {
         if (chson != chfather)
         {
-          if (cartproduct2(astate,fatherdepth,afather,chfather,
-                           ason,chson,err) != 0)
+          if (cartproduct2_maxpairs(state,fatherdepth,father,chfather,
+                                    son,chson,err) != 0)
           {
             return -1;
           }
@@ -334,7 +320,8 @@ static int maxpairs_processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (cartproduct1(astate,fatherdepth,afather,chfather,*spptr,err) != 0)
+        if (cartproduct1_maxpairs(state,fatherdepth,father,chfather,*spptr,
+                                  err) != 0)
         {
           return -2;
         }
@@ -346,7 +333,7 @@ static int maxpairs_processbranchedge(bool firstsucc,
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
       {
-        if (cartproduct1(astate,fatherdepth,ason,chson,*fptr,err) != 0)
+        if (cartproduct1_maxpairs(state,fatherdepth,son,chson,*fptr,err) != 0)
         {
           return -3;
         }
@@ -361,9 +348,11 @@ static int maxpairs_processbranchedge(bool firstsucc,
       }
     }
   }
-  concatlists(astate,afather,ason);
+  concatlists_maxpairs(state,father,son);
   return 0;
 }
+
+#include "esa-bottomup-maxpairs.inc"
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                          const GtEncseq *encseq,
@@ -375,7 +364,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
-  MaxpairsBUstate *state;
+  BUstate_Maxpairs *state;
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
@@ -394,13 +383,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state->poslist[base];
     GT_INITARRAY(ptr,GtUlong);
   }
-  if (gt_esa_bottomup(ssar,
-                      maxpairs_allocateBUinfo,
-                      maxpairs_freeBUinfo,
-                      maxpairs_processleafedge,
-                      maxpairs_processbranchedge,
-                      (GtBUstate*) state,
-                      err) != 0)
+  if (gt_esa_bottomup_maxpairs(ssar, state, err) != 0)
   {
     haserr = true;
   }
