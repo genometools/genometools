@@ -75,7 +75,7 @@ static BUinfo_Maxpairs *allocateBUinfo_maxpairs(BUstate_Maxpairs *state)
   return buinfo;
 }
 
-static void freeBUinfo_maxpairs(BUinfo_Maxpairs *buinfo, 
+static void freeBUinfo_maxpairs(BUinfo_Maxpairs *buinfo,
                                 GT_UNUSED BUstate_Maxpairs *state)
 {
   gt_free(buinfo->nodeposlist);
