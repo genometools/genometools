@@ -89,6 +89,7 @@ def enumlcpintervaltree(filename)
   stack = Array.new()
   lastinterval = nil
   firstedgefromroot = true
+  prevlcpvalue = 0
   stack.push(Lcpinterval.new(0,0,nil,[]))
   lcpsufstream = LcpSufstream.new(filename)
   nonspecials = lcpsufstream.numofnonspecials()
@@ -103,6 +104,7 @@ def enumlcpintervaltree(filename)
         firstedge = firstedgefromroot
         firstedgefromroot = false
       end
+      assert{stack.last.lcp == [prevlcpvalue,lcpvalue].max}
       processleafedge(firstedge,stack.last,previoussuffix)
     end
     assert {lastinterval.nil?}
@@ -136,6 +138,8 @@ def enumlcpintervaltree(filename)
         processleafedge(true,stack.last,previoussuffix)
       end
     end
+    assert {lcpvalue == stack.last.lcp}
+    prevlcpvalue = lcpvalue
     idx += 1
   end
 end
@@ -148,5 +152,5 @@ end
 if ARGV[0] == 'itv'
   enumlcpintervals(ARGV[1])
 elsif ARGV[0] == 'tree'
-  enumlcpintervaltree(ARGV[1])
-end
+enumlcpintervaltree(ARGV[1])
+ end
