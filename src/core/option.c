@@ -22,7 +22,7 @@
 #include "core/fa.h"
 #include "core/hashmap_api.h"
 #include "core/ma.h"
-#include "core/mailaddress.h"
+#include "core/mail_address.h"
 #include "core/option_api.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"
@@ -415,7 +415,7 @@ static int show_help(GtOptionParser *op, GtOptionType optiontype, GtError *err)
              op->progname + gt_cstr_length_up_to_char(op->progname, ' '));
     }
     printf("\nReport bugs to %s.\n",
-           op->mail_address ? op->mail_address : MAILADDRESS);
+           op->mail_address ? op->mail_address : GT_MAIL_ADDRESS);
   }
   return had_err;
 }

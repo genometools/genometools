@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MAILADDRESS_H
-#define MAILADDRESS_H
+#ifndef MAIL_ADDRESS_H
+#define MAIL_ADDRESS_H
 
-#define MAILADDRESS "<gt-users@genometools.org>"
+#define GT_MAIL_ADDRESS "<gt-users@genometools.org>"
 
 #endif
