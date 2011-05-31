@@ -236,12 +236,12 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
  /* Protein domain search options */
 
 #ifdef HAVE_HMMER
-  oh = gt_option_new_filenamearray("hmms",
-                                   "profile HMM models for domain detection "
-                                   "(separate by spaces, finish with --) in "
-                                   "HMMER3 format\n"
-                                   "Omit this option to disable pHMM search.",
-                                   arguments->pdom_opts.hmm_files);
+  oh = gt_option_new_filename_array("hmms",
+                                    "profile HMM models for domain detection "
+                                    "(separate by spaces, finish with --) in "
+                                    "HMMER3 format\n"
+                                    "Omit this option to disable pHMM search.",
+                                    arguments->pdom_opts.hmm_files);
   gt_option_parser_add_option(op, oh);
 
   oeval = gt_option_new_probability("pdomevalcutoff",
@@ -264,18 +264,18 @@ static GtOptionParser* gt_ltrdigest_option_parser_new(void *tool_arguments)
   gt_option_imply(oeval, oh);
 
   o = gt_option_new_bool("aliout",
-                           "output pHMM to amino acid sequence alignments",
-                           &arguments->pdom_opts.write_alignments,
-                           false);
+                         "output pHMM to amino acid sequence alignments",
+                         &arguments->pdom_opts.write_alignments,
+                         false);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, oh);
   gt_option_imply(o, oto);
 
   o = gt_option_new_bool("aaout",
-                           "output amino acid sequences for protein domain "
-                           "hits",
-                           &arguments->pdom_opts.write_aaseqs,
-                           false);
+                         "output amino acid sequences for protein domain "
+                         "hits",
+                         &arguments->pdom_opts.write_aaseqs,
+                         false);
   gt_option_parser_add_option(op, o);
   gt_option_imply(o, oh);
   gt_option_imply(o, oto);
