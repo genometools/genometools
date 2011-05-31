@@ -943,34 +943,22 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt gff3 -tidy -sort " +
              "#{$gttestdata}gff3testruns/TAIR10_GFF3_genes.gff"
-    run      "diff #{$last_stdout} #{$gttestdata}gff3testruns/tair10.gff3"
-  end
-
-  Name "gt gff3 TAIR10"
-  Keywords "gt_gff3"
-  Test do
-    run_test "#{$bin}gt gff3 -tidy -sort " +
-             "#{$gttestdata}gff3testruns/tair10_genes_unsorted.gff"
-    run      "diff #{$last_stdout} " +
-             "#{$gttestdata}gff3testruns/tair10_genes_sorted.gff3"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3testruns/tair.gff3"
   end
 
   Name "gt gff3 Fruitfly ESTs"
   Keywords "gt_gff3"
   Test do
-    run_test "#{$bin}gt gff3 -sort " +
-             "#{$gttestdata}gff3testruns/fruitfly_ests_unsorted.gff"
-    run      "diff #{$last_stdout} " +
-             "#{$gttestdata}gff3testruns/fruitfly_est_sorted.gff3"
+    run_test "#{$bin}gt gff3 -sort #{$gttestdata}gff3testruns/EST.gff"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3testruns/fruitfly.gff3"
   end
 
   Name "gt gff3 Homo sapiens ENSEMBL"
   Keywords "gt_gff3"
   Test do
     run_test "#{$bin}gt gff3 -sort " +
-             "#{$gttestdata}gff3testruns/hs_ensembl_unsorted.gff3",
+             "#{$gttestdata}gff3testruns/Homo_sapiens_ENSEMBL.gff3",
              :maxtime => 300
-    run      "diff #{$last_stdout} " +
-             "#{$gttestdata}gff3testruns/hs_ensembl_sorted.gff3"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3testruns/hs_ensembl.gff3"
   end
 end
