@@ -35,6 +35,8 @@ options.parts = 1
 options.parts_set = false
 options.name = "esa"
 options.prepare_only = false
+options.idxopts = ""
+options.diffopts = ""
 
 opt= OptionParser.new do |opt|
   opt.banner = "USAGE: #$0 [options] <files>\n
@@ -82,6 +84,12 @@ opt= OptionParser.new do |opt|
   opt.on("--nodiff", "Do not calculate Kr, just prepare the data") do |val|
     options.prepare_only = val
   end
+  opt.on("--idxopts OPT", String,  "additional options for index construction") do |val|
+    options.idxopts += val
+  end
+  opt.on("--diffopts OPT", String,  "additional options for genomediff") do |val|
+    options.diffopts += val
+  end
   opt.on_tail("-h", "--help", "prints this help and exits") do
     puts opt
     exit 0
@@ -90,6 +98,11 @@ end
 
 opt.parse!(ARGV)
 
+if ARGV.length == 0
+  STDERR.puts "no files given"
+  STDERR.puts opt
+  exit 1
+end
 files = ""
 ARGV.each do |file|
   unless File.exist?(file)
@@ -109,10 +122,10 @@ end
 
 if options.esa
   puts "***ESA***"
-  puts Genomediff.esa_index(files, options.parts, options.name)
-  puts Genomediff.esa_genomediff(options.name,"")
+  puts Genomediff.esa_index(files, options.parts, options.name, options.idxopts)
+  puts Genomediff.esa_genomediff(options.name,options.diffopts)
 else
   puts "***FM-INDEX***"
-  puts Genomediff.pck_index(files, 8, options.parts, options.name)
-  puts Genomediff.pck_genomediff(options.name,"")
+  puts Genomediff.pck_index(files, 8, options.parts, options.name, options.idxopts)
+  puts Genomediff.pck_genomediff(options.name, options.diffopts)
 end

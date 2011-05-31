@@ -103,25 +103,27 @@ module Genomediff
     exit 1 unless File.exist?(newfile)
     return newfile
   end
-  def Genomediff.pck_index(files,bsize,parts,idxname)
-    return `$GTDIR/bin/gt       \
-            packedindex mkindex \
-            -db #{files}        \
-            -dna                \
-            -dir rev            \
-            -ssp                \
-            -bsize #{bsize}     \
-            -sprank             \
-            -pl                 \
-            -parts #{parts}     \
-            -indexname #{idxname}`
+  def Genomediff.pck_index(files,bsize,parts,idxname,parameter)
+    return `$GTDIR/bin/gt        \
+            packedindex mkindex  \
+            -db #{files}         \
+            -dna                 \
+            -dir rev             \
+            -ssp                 \
+            -bsize #{bsize}      \
+            -sprank              \
+            -pl                  \
+            -parts #{parts}      \
+            -indexname #{idxname}\
+            #{parameter}`
   end
-  def Genomediff.esa_index(files,parts,idxname)
+  def Genomediff.esa_index(files,parts,idxname,parameter)
     return `$GTDIR/bin/gt suffixerator \
             -db #{files}               \
             -indexname #{idxname}      \
             -parts #{parts}            \
-            -dna -suf -tis -lcp -ssp`
+            -dna -suf -tis -lcp -ssp   \
+            #{parameter}`
   end
   def Genomediff.pck_genomediff(idxname,parameter)
     return `$GTDIR/bin/gt genomediff \
