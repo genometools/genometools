@@ -19,34 +19,31 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static BUinfo_Maxpairs *allocateBUinfo(BUstate_Maxpairs *);
-static void freeBUinfo(BUinfo_Maxpairs *,BUstate_Maxpairs *);
+static BUinfo *allocateBUinfo(BUstate *);
+static void freeBUinfo(BUinfo *,BUstate *);
 static int processleafedge(bool,
     unsigned long,
     unsigned long,
-    BUinfo_Maxpairs *,
+    BUinfo *,
     unsigned long,
-    BUstate_Maxpairs *,
+    BUstate *,
     GtError *err);
 static int processbranchingedge(bool firstsucc,
     unsigned long,
     unsigned long,
-    BUinfo_Maxpairs *,
+    BUinfo *,
     unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo_Maxpairs *,
-    BUstate_Maxpairs *,
+    BUinfo *,
+    BUstate *,
     GtError *);
 
-/* if processcompletenode_maxpairs is required, define the following
-   macro and undefine it after the inclusion */
-#ifdef USE_PROCESSCOMPLETENODE_ESA_BOTTOMUP
 static int processcompletenode(unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo_Maxpairs *);
-#endif
+    BUinfo *,
+    GtError *err);
 
 #define TOP_ESA_BOTTOMUP   stackspace[nextfreeItvinfo-1]
 #define POP_ESA_BOTTOMUP   (stackspace + (--nextfreeItvinfo))
@@ -70,29 +67,13 @@ static int processcompletenode(unsigned long,
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  BUinfo_Maxpairs *info;
+  BUinfo *info;
 } GtBUItvinfo;
-
-#ifdef SKDEBUG
-static void showstack(const GtBUItvinfo *stackspace,
-                      unsigned long nextfreeItvinfo)
-{
-  unsigned long idx;
-
-  for (idx=0; idx<nextfreeItvinfo; idx++)
-  {
-    printf("# stack %lu: lcp=%lu,lb=%lu\n",
-            idx,
-            stackspace[idx].lcp,
-            stackspace[idx].lb);
-  }
-}
-#endif
 
 static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
                                    unsigned long currentallocated,
                                    unsigned long allocated,
-                                   GtBUstate *state)
+                                   BUstate *state)
 {
   unsigned long idx;
   GtBUItvinfo *itvinfo;
@@ -109,7 +90,7 @@ static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
 
 static void freeBUItvinfo(GtBUItvinfo *ptr,
                           unsigned long allocated,
-                          GtBUstate *state)
+                          BUstate *state)
 {
   unsigned long idx;
 
@@ -121,7 +102,7 @@ static void freeBUItvinfo(GtBUItvinfo *ptr,
 }
 
 int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
-                    GtBUstate *bustate,
+                    BUstate *bustate,
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -182,12 +163,15 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
-#ifdef USE_PROCESSCOMPLETENODE_ESA_BOTTOMUP
-      processcompletenode(lastinterval->lcp,
-                          lastinterval->lb,
-                          lastinterval->rb,
-                          lastinterval->info);
-#endif
+      if (processcompletenode(lastinterval->lcp,
+                              lastinterval->lb,
+                              lastinterval->rb,
+                              lastinterval->info,
+                              err) != 0)
+      {
+        haserr = true;
+        break;
+      }
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
         gt_assert(lastinterval->info == NULL ||

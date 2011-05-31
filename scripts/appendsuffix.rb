@@ -1,19 +1,33 @@
 #!/usr/bin/env ruby
 
+#
+# Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+# Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
 usage = <<-end_usage
 Usage:
-  #$0 <templatefilename> <suffix>
+  #$0 <templatefilename> <suffix> [<identifier>+]
 
-Find macros, functions and typedefs in a C file (templatefilename)
-and append the given suffix according to the following rules:
-
-  <MACRONAME>_SUFFIX
-  <typename>Suffix
-  <function_name>_suffix
+Find macro names, function names and typedefs in a C file (templatefilename)
+and append "_" followed by the specified suffix to these identifiers and to
+further identifiers specified as optional arguments.
 
 end_usage
 
-if ARGV.size != 2 || !File.exists?(ARGV[0])
+if ARGV.size < 2 || !File.exists?(ARGV[0])
   puts usage
   exit
 end
@@ -104,15 +118,13 @@ class CCode
     @ids = IdentifiersCollection.new(c_code)
   end
 
-  def append_suffix!(suffix)
-    suf = {}
-    suf[:macros] = "_#{suffix.upcase}"
-    suf[:functions] = "_#{suffix.downcase}"
-    suf[:types] = suffix.gsub(/^(.)/){$1.upcase}
+  def append_suffix!(suffix, more_identifiers = [])
+    ids = more_identifiers
     [:macros, :functions, :types].each do |idtype|
-      @ids.send(idtype).each do |id|
-        @code.gsub!(/(\W*)(#{id})(\W*)/) {"#$1#$2#{suf[idtype]}#$3"}
-      end
+      ids += @ids.send(idtype)
+    end
+    ids.each do |id|
+      @code.gsub!(/(\W+)(#{id})(\W+)/m) {"#$1#$2_#{suffix}#$3"}
     end
   end
 
@@ -124,7 +136,8 @@ end
 
 input = IO.read(ARGV.shift)
 suffix = ARGV.shift
+more_identifiers = ARGV
 
 code = CCode.new(input)
-code.append_suffix!(suffix)
+code.append_suffix!(suffix, more_identifiers)
 print code
