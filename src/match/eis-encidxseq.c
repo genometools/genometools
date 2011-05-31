@@ -16,6 +16,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "core/log_api.h"
 #include "core/yarandom.h"
 #include "match/eis-encidxseq.h"
 #include "match/eis-encidxseq-priv.h"
@@ -83,7 +84,8 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
                       GtLogger *verbosity, GtError *err)
 {
   FILE *bwtFP;
-  unsigned long pos = 0;
+  unsigned long pos = 0,
+                length = EISLength(seqIdx);
   Suffixarray suffixArray;
   Symbol symOrig;
   unsigned symEnc;
@@ -117,13 +119,12 @@ gt_EISVerifyIntegrity(EISeq *seqIdx, const char *projectName,
     memset(rangeRanks, 0, sizeof (rangeRanks));
     if (skip > 0)
     {
-      unsigned long len = EISLength(seqIdx);
       unsigned sym;
-      if (skip >= len)
+      if (skip >= length)
       {
         gt_logger_log(verbosity, "Invalid skip request: %lld,"
                     " too large for sequence length: %lu",
-                    (long long)skip, len);
+                    (long long)skip, length);
         return -1;
       }
       fseeko(bwtFP, skip, SEEK_SET);
