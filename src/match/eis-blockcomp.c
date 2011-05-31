@@ -2535,7 +2535,7 @@ static int
 printBucket(const struct blockCompositionSeq *seqIdx, unsigned long bucketNum,
             int flags, FILE *fp, union EISHint *hint)
 {
-  unsigned long lastBucket = blockNumFromPos(seqIdx,
+  unsigned long lastBucket = bucketNumFromPos(seqIdx,
                                              EISLength(&seqIdx->baseClass)),
                 start, end;
   AlphabetRangeSize i, blockMapAlphabetSize = seqIdx->blockMapAlphabetSize;
