@@ -352,9 +352,9 @@ static int processbranchingedge_maxpairs(bool firstsucc,
   return 0;
 }
 
-static int processcompletenode_maxpairs(GT_UNUSED unsigned long lcp, 
+static int processcompletenode_maxpairs(GT_UNUSED unsigned long lcp,
                                         GT_UNUSED unsigned long lb,
-                                        GT_UNUSED unsigned long rb, 
+                                        GT_UNUSED unsigned long rb,
                                         GT_UNUSED BUinfo_maxpairs *info,
                                         GT_UNUSED GtError *err)
 {
