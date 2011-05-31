@@ -959,6 +959,6 @@ if $gttestdata then
     run_test "#{$bin}gt gff3 -sort " +
              "#{$gttestdata}gff3testruns/Homo_sapiens_ENSEMBL.gff3",
              :maxtime => 300
-    run      "diff #{$last_stdout} #{$gttestdata}gff3testruns/hs_ensembl.gff3"
+    run      "diff #{$last_stdout} #{$gttestdata}gff3testruns/ensembl.gff3"
   end
 end
