@@ -42,7 +42,8 @@ typedef struct {
        addintrons,
        verbose,
        typecheck_built_in,
-       tidy;
+       tidy,
+       show;
   long offset;
   GtStr *offsetfile,
         *typecheck;
@@ -162,6 +163,11 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, built_in_option);
   gt_option_exclude(typecheck_option, built_in_option);
 
+  /* -show */
+  option = gt_option_new_bool("show", "show GFF3 output", &arguments->show,
+                              true);
+  gt_option_parser_add_option(op, option);
+
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
@@ -256,18 +262,18 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   }
 
   /* create gff3 output stream */
-  if (!had_err) {
+  if (!had_err && arguments->show) {
     gff3_out_stream = gt_gff3_out_stream_new(last_stream, arguments->outfp);
-    gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) gff3_out_stream,
+    last_stream = gff3_out_stream;
+    gt_gff3_out_stream_set_fasta_width((GtGFF3OutStream*) last_stream,
                                        arguments->width);
+    if (arguments->retainids)
+      gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) last_stream);
   }
-
-  if (!had_err && arguments->retainids)
-    gt_gff3_out_stream_retain_id_attributes((GtGFF3OutStream*) gff3_out_stream);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err)
-    had_err = gt_node_stream_pull(gff3_out_stream, err);
+    had_err = gt_node_stream_pull(last_stream, err);
 
   /* free */
   gt_node_stream_delete(gff3_out_stream);
