@@ -20,7 +20,9 @@
 #include "esa-seqread.h"
 
 static void initBUinfo(BUinfo *,BUstate *);
+
 static void freeBUinfo(BUinfo *,BUstate *);
+
 static int processleafedge(bool,
     unsigned long,
     unsigned long,
@@ -28,6 +30,7 @@ static int processleafedge(bool,
     unsigned long,
     BUstate *,
     GtError *err);
+
 static int processbranchingedge(bool firstsucc,
     unsigned long,
     unsigned long,
@@ -39,7 +42,7 @@ static int processbranchingedge(bool firstsucc,
     BUstate *,
     GtError *);
 
-static int processcompletenode(unsigned long,
+static int processlcpinterval(unsigned long,
     unsigned long,
     unsigned long,
     BUinfo *,
@@ -164,12 +167,12 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
-      if (processcompletenode(lastinterval->lcp,
-                              lastinterval->lb,
-                              lastinterval->rb,
-                              &lastinterval->info,
-                              bustate,
-                              err) != 0)
+      if (processlcpinterval(lastinterval->lcp,
+                             lastinterval->lb,
+                             lastinterval->rb,
+                             &lastinterval->info,
+                             bustate,
+                             err) != 0)
       {
         haserr = true;
         break;
