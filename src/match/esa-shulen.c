@@ -27,7 +27,6 @@
 #endif
 #include "esa-seqread.h"
 #include "esa-splititv.h"
-#include "esa-bottomup.h"
 #include "shu_unitfile.h"
 #include "esa-shulen.h"
 #include "stamp.h"
@@ -38,7 +37,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
 #ifdef SHUDEBUG
   unsigned long id;
 #endif
-} ShulengthdistBUinfo;
+} BUinfo_shulen;
 
 typedef struct  /* global information */
 {
@@ -52,9 +51,9 @@ typedef struct  /* global information */
 #ifdef SHUDEBUG
   unsigned long nextid;
 #endif
-} Shulengthdiststate;
+} BUstate_shulen;
 
-static void shulen_resetfilenumdist(ShulengthdistBUinfo *father,
+static void resetfilenumdist_shulen(BUinfo_shulen *father,
                                     unsigned long numofdbfiles)
 {
   unsigned long idx;
@@ -68,29 +67,26 @@ static void shulen_resetfilenumdist(ShulengthdistBUinfo *father,
   }
 }
 
-static GtBUinfo *shulen_allocateBUinfo(GT_UNUSED GtBUstate *astate)
+static BUinfo_shulen *allocateBUinfo_shulen(GT_UNUSED BUstate_shulen *state)
 {
-  ShulengthdistBUinfo *dfsinfo;
-#ifdef SHUDEBUG
-  Shulengthdiststate *state = (Shulengthdiststate*) astate;
-#endif
+  BUinfo_shulen *buinfo;
 
-  dfsinfo = gt_malloc(sizeof (*dfsinfo));
+  buinfo = gt_malloc(sizeof (*buinfo));
 #ifdef SHUDEBUG
-  dfsinfo->id = state->nextid++;
+  buinfo->id = state->nextid++;
 #endif
-  dfsinfo->filenumdist = NULL;
-  return (GtBUinfo*) dfsinfo;
+  buinfo->filenumdist = NULL;
+  return buinfo;
 }
 
-static void shulen_freeBUinfo(GtBUinfo *adfsinfo, GT_UNUSED GtBUstate *state)
+static void freeBUinfo_shulen(BUinfo_shulen *buinfo,
+                              GT_UNUSED BUstate_shulen *state)
 {
-  ShulengthdistBUinfo *dfsinfo = (ShulengthdistBUinfo*) adfsinfo;
-  gt_free(dfsinfo->filenumdist);
-  gt_free(dfsinfo);
+  gt_free(buinfo->filenumdist);
+  gt_free(buinfo);
 }
 
-static void shulen_contribute(GT_UNUSED int line,
+static void contribute_shulen(GT_UNUSED int line,
                               uint64_t **shulengthdist,
                               unsigned long referidx,
                               unsigned long shulenidx,
@@ -105,9 +101,9 @@ static void shulen_contribute(GT_UNUSED int line,
 }
 
 #ifdef SHUDEBUG
-static void shownode(int line,const Shulengthdiststate *state,
+static void shownode(int line,const BUstate_shulen *state,
                      const char *kind,
-                     const ShulengthdistBUinfo *node)
+                     const BUinfo_shulen *node)
 {
   unsigned long idx;
 
@@ -124,16 +120,14 @@ static void shownode(int line,const Shulengthdiststate *state,
 }
 #endif
 
-static int shulen_processleafedge(bool firstsucc,
+static int processleafedge_shulen(bool firstsucc,
                                   unsigned long fatherdepth,
                                   GT_UNUSED unsigned long fatherlb,
-                                  GtBUinfo *afather,
+                                  BUinfo_shulen *father,
                                   unsigned long leafnumber,
-                                  GtBUstate *astate,
+                                  BUstate_shulen *state,
                                   GT_UNUSED GtError *err)
 {
-  Shulengthdiststate *state = (Shulengthdiststate*) astate;
-  ShulengthdistBUinfo *father = (ShulengthdistBUinfo*) afather;
   unsigned long idx, filenum;
 
   if (state->currentleafcount >= state->firstleafcount2omit)
@@ -169,7 +163,7 @@ static int shulen_processleafedge(bool firstsucc,
       father->filenumdist
         = gt_malloc(sizeof (*father->filenumdist) * state->numofdbfiles);
     }
-    shulen_resetfilenumdist(father,state->numofdbfiles);
+    resetfilenumdist_shulen(father,state->numofdbfiles);
 #ifdef SHUDEBUG
     shownode(__LINE__,state,"father",father);
 #endif
@@ -184,13 +178,12 @@ static int shulen_processleafedge(bool firstsucc,
       {
         if (father->filenumdist[idx] > 0)
         {
-          shulen_contribute(__LINE__,state->shulengthdist,idx,filenum,
+          contribute_shulen(__LINE__,state->shulengthdist,idx,filenum,
                             1UL,fatherdepth+1);
           if (father->filenumdist[filenum] == 0)
           {
-            shulen_contribute(__LINE__,state->shulengthdist,filenum,idx,
-                              father->filenumdist[idx],
-                              fatherdepth + 1);
+            contribute_shulen(__LINE__,state->shulengthdist,filenum,idx,
+                              father->filenumdist[idx],fatherdepth + 1);
           }
         }
       }
@@ -206,10 +199,10 @@ static int shulen_processleafedge(bool firstsucc,
   return 0;
 }
 
-static void shulen_cartproduct(Shulengthdiststate *state,
+static void cartproduct_shulen(BUstate_shulen *state,
                                unsigned long depth,
-                               const ShulengthdistBUinfo *node1,
-                               const ShulengthdistBUinfo *node2)
+                               const BUinfo_shulen *node1,
+                               const BUinfo_shulen *node2)
 {
   unsigned long referidx, shulenidx;
 
@@ -222,7 +215,7 @@ static void shulen_cartproduct(Shulengthdiststate *state,
         if (node2->filenumdist[shulenidx] > 0)
         {
           gt_assert(referidx != shulenidx);
-          shulen_contribute(__LINE__,state->shulengthdist,referidx,shulenidx,
+          contribute_shulen(__LINE__,state->shulengthdist,referidx,shulenidx,
                             node2->filenumdist[shulenidx],depth + 1);
         }
       }
@@ -230,24 +223,21 @@ static void shulen_cartproduct(Shulengthdiststate *state,
   }
 }
 
-static int shulen_processbranchedge(bool firstsucc,
-                                    unsigned long fatherdepth,
-                                    GT_UNUSED unsigned long fatherlp,
-                                    GtBUinfo *afather,
-                                    GT_UNUSED unsigned long sondepth,
-                                    GT_UNUSED unsigned long sonlb,
-                                    GT_UNUSED unsigned long sonrb,
-                                    GtBUinfo *ason,
-                                    GtBUstate *astate,
-                                    GT_UNUSED GtError *err)
+static int processbranchingedge_shulen(bool firstsucc,
+                                       unsigned long fatherdepth,
+                                       GT_UNUSED unsigned long fatherlp,
+                                       BUinfo_shulen *father,
+                                       GT_UNUSED unsigned long sondepth,
+                                       GT_UNUSED unsigned long sonlb,
+                                       GT_UNUSED unsigned long sonrb,
+                                       BUinfo_shulen *son,
+                                       BUstate_shulen *state,
+                                       GT_UNUSED GtError *err)
 {
-  Shulengthdiststate *state = (Shulengthdiststate*) astate;
-  ShulengthdistBUinfo *father = (ShulengthdistBUinfo*) afather;
-  ShulengthdistBUinfo *son = (ShulengthdistBUinfo*) ason;
   unsigned long idx;
 
 #ifdef SHUDEBUG
-  printf("processbranchedge firstsucc=%s, depth(father)=%lu,path=",
+  printf("%s firstsucc=%s, depth(father)=%lu,path=",__func__,
          firstsucc ? "true" : "false",fatherdepth);
   if (fatherdepth > 0)
   {
@@ -266,7 +256,7 @@ static int shulen_processbranchedge(bool firstsucc,
     {
       father->filenumdist
         = gt_malloc(sizeof (*father->filenumdist) * state->numofdbfiles);
-      shulen_resetfilenumdist(father,state->numofdbfiles);
+      resetfilenumdist_shulen(father,state->numofdbfiles);
     }
 #ifdef SHUDEBUG
     shownode(__LINE__,state,"father",father);
@@ -279,8 +269,8 @@ static int shulen_processbranchedge(bool firstsucc,
     gt_assert(son != NULL);
     shownode(__LINE__,state,"son",son);
 #endif
-    shulen_cartproduct(state, fatherdepth, father, son);
-    shulen_cartproduct(state, fatherdepth, son, father);
+    cartproduct_shulen(state, fatherdepth, father, son);
+    cartproduct_shulen(state, fatherdepth, son, father);
   }
   if (son != NULL)
   {
@@ -298,11 +288,22 @@ static int shulen_processbranchedge(bool firstsucc,
   return 0;
 }
 
+static int processcompletenode_shulen(GT_UNUSED unsigned long lcp,
+                                      GT_UNUSED unsigned long lb,
+                                      GT_UNUSED unsigned long rb,
+                                      GT_UNUSED BUinfo_shulen *info,
+                                      GT_UNUSED GtError *err)
+{
+  return 0;
+}
+
+#include "esa-bottomup-shulen.inc"
+
 int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
                               GtError *err)
 {
-  Shulengthdiststate *state;
+  BUstate_shulen *state;
   bool haserr = false;
   unsigned long referidx, shulenidx;
 
@@ -324,13 +325,7 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
       state->shulengthdist[referidx][shulenidx] = 0;
     }
   }
-  if (gt_esa_bottomup(ssar,
-                      shulen_allocateBUinfo,
-                      shulen_freeBUinfo,
-                      shulen_processleafedge,
-                      shulen_processbranchedge,
-                      (GtBUstate*) state,
-                      err) != 0)
+  if (gt_esa_bottomup_shulen(ssar, state, err) != 0)
   {
     haserr = true;
   }
@@ -487,7 +482,7 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                  struct GtShuUnitFileInfo_tag *unit_info,
                                  GtError *err)
 {
-  Shulengthdiststate *state;
+  BUstate_shulen *state;
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));
@@ -501,13 +496,7 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                gt_encseq_specialcharacters(encseq);
   state->currentleafcount = 0;
   state->shulengthdist = shulen;
-  if (gt_esa_bottomup(ssar,
-                      shulen_allocateBUinfo,
-                      shulen_freeBUinfo,
-                      shulen_processleafedge,
-                      shulen_processbranchedge,
-                      (GtBUstate*) state,
-                      err) != 0)
+  if (gt_esa_bottomup_shulen(ssar, state, err) != 0)
   {
     haserr = true;
   }

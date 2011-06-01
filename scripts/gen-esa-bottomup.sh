@@ -9,7 +9,7 @@ msg=\
   Manual edits will be lost.
 */"
 
-for suffix in maxpairs
+for suffix in maxpairs shulen
 do
   file=${TEMPLATE}-${suffix}.inc
   rm -f $file
