@@ -24,7 +24,7 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static BUinfo_maxpairs *allocateBUinfo_maxpairs(BUstate_maxpairs *);
+static void initBUinfo_maxpairs(BUinfo_maxpairs *,BUstate_maxpairs *);
 static void freeBUinfo_maxpairs(BUinfo_maxpairs *,BUstate_maxpairs *);
 static int processleafedge_maxpairs(bool,
     unsigned long,
@@ -72,7 +72,7 @@ static int processcompletenode_maxpairs(unsigned long,
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  BUinfo_maxpairs *info;
+  BUinfo_maxpairs info;
 } GtBUItvinfo_maxpairs;
 
 static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
@@ -87,7 +87,7 @@ static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {
-    itvinfo[idx].info = allocateBUinfo_maxpairs(state);
+    initBUinfo_maxpairs(&itvinfo[idx].info,state);
   }
   gt_assert(itvinfo != NULL);
   return itvinfo;
@@ -101,7 +101,7 @@ static void freeBUItvinfo_maxpairs(GtBUItvinfo_maxpairs *ptr,
 
   for (idx=0; idx<allocated; idx++)
   {
-    freeBUinfo_maxpairs(ptr[idx].info,state);
+    freeBUinfo_maxpairs(&ptr[idx].info,state);
   }
   gt_free(ptr);
 }
@@ -156,7 +156,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
       if (processleafedge_maxpairs(firstedge,
                           TOP_ESA_BOTTOMUP_maxpairs.lcp,
                           TOP_ESA_BOTTOMUP_maxpairs.lb,
-                          TOP_ESA_BOTTOMUP_maxpairs.info,
+                          &TOP_ESA_BOTTOMUP_maxpairs.info,
                           previoussuffix,bustate,err) != 0)
       {
         haserr = true;
@@ -171,7 +171,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
       if (processcompletenode_maxpairs(lastinterval->lcp,
                               lastinterval->lb,
                               lastinterval->rb,
-                              lastinterval->info,
+                              &lastinterval->info,
                               err) != 0)
       {
         haserr = true;
@@ -179,8 +179,6 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
       }
       if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
       {
-        gt_assert(lastinterval->info == NULL ||
-                  lastinterval->info != TOP_ESA_BOTTOMUP_maxpairs.info);
         if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;
@@ -192,11 +190,11 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
         if (processbranchingedge_maxpairs(firstedge,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
-                                 TOP_ESA_BOTTOMUP_maxpairs.info,
+                                 &TOP_ESA_BOTTOMUP_maxpairs.info,
                                  lastinterval->lcp,
                                  lastinterval->lb,
                                  lastinterval->rb,
-                                 lastinterval->info,
+                                 &lastinterval->info,
                                  bustate,
                                  err) != 0)
         {
@@ -221,7 +219,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
         if (processbranchingedge_maxpairs(true,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
-                                 TOP_ESA_BOTTOMUP_maxpairs.info,
+                                 &TOP_ESA_BOTTOMUP_maxpairs.info,
                                  lastintervallcp,
                                  lastintervallb,
                                  lastintervalrb,
@@ -238,7 +236,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
         if (processleafedge_maxpairs(true,
                             TOP_ESA_BOTTOMUP_maxpairs.lcp,
                             TOP_ESA_BOTTOMUP_maxpairs.lb,
-                            TOP_ESA_BOTTOMUP_maxpairs.info,
+                            &TOP_ESA_BOTTOMUP_maxpairs.info,
                             previoussuffix,bustate,err) != 0)
         {
           haserr = true;

@@ -65,21 +65,16 @@ typedef struct  /* global information */
   void *processmaxpairsinfo;
 } BUstate_maxpairs;
 
-static BUinfo_maxpairs *allocateBUinfo_maxpairs(BUstate_maxpairs *state)
+static void initBUinfo_maxpairs(BUinfo_maxpairs *buinfo,BUstate_maxpairs *state)
 {
-  BUinfo_maxpairs *buinfo;
-
-  buinfo = gt_malloc(sizeof(*buinfo));
   buinfo->nodeposlist = gt_malloc(sizeof(*buinfo->nodeposlist) *
                                   state->alphabetsize);
-  return buinfo;
 }
 
 static void freeBUinfo_maxpairs(BUinfo_maxpairs *buinfo,
                                 GT_UNUSED BUstate_maxpairs *state)
 {
   gt_free(buinfo->nodeposlist);
-  gt_free(buinfo);
 }
 
 static void add2poslist_maxpairs(BUstate_maxpairs *state,BUinfo_maxpairs *ninfo,

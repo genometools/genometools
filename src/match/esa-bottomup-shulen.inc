@@ -24,7 +24,7 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static BUinfo_shulen *allocateBUinfo_shulen(BUstate_shulen *);
+static void initBUinfo_shulen(BUinfo_shulen *,BUstate_shulen *);
 static void freeBUinfo_shulen(BUinfo_shulen *,BUstate_shulen *);
 static int processleafedge_shulen(bool,
     unsigned long,
@@ -72,7 +72,7 @@ static int processcompletenode_shulen(unsigned long,
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  BUinfo_shulen *info;
+  BUinfo_shulen info;
 } GtBUItvinfo_shulen;
 
 static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
@@ -87,7 +87,7 @@ static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {
-    itvinfo[idx].info = allocateBUinfo_shulen(state);
+    initBUinfo_shulen(&itvinfo[idx].info,state);
   }
   gt_assert(itvinfo != NULL);
   return itvinfo;
@@ -101,7 +101,7 @@ static void freeBUItvinfo_shulen(GtBUItvinfo_shulen *ptr,
 
   for (idx=0; idx<allocated; idx++)
   {
-    freeBUinfo_shulen(ptr[idx].info,state);
+    freeBUinfo_shulen(&ptr[idx].info,state);
   }
   gt_free(ptr);
 }
@@ -156,7 +156,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       if (processleafedge_shulen(firstedge,
                           TOP_ESA_BOTTOMUP_shulen.lcp,
                           TOP_ESA_BOTTOMUP_shulen.lb,
-                          TOP_ESA_BOTTOMUP_shulen.info,
+                          &TOP_ESA_BOTTOMUP_shulen.info,
                           previoussuffix,bustate,err) != 0)
       {
         haserr = true;
@@ -171,7 +171,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       if (processcompletenode_shulen(lastinterval->lcp,
                               lastinterval->lb,
                               lastinterval->rb,
-                              lastinterval->info,
+                              &lastinterval->info,
                               err) != 0)
       {
         haserr = true;
@@ -179,8 +179,6 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       }
       if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
       {
-        gt_assert(lastinterval->info == NULL ||
-                  lastinterval->info != TOP_ESA_BOTTOMUP_shulen.info);
         if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;
@@ -192,11 +190,11 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         if (processbranchingedge_shulen(firstedge,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
-                                 TOP_ESA_BOTTOMUP_shulen.info,
+                                 &TOP_ESA_BOTTOMUP_shulen.info,
                                  lastinterval->lcp,
                                  lastinterval->lb,
                                  lastinterval->rb,
-                                 lastinterval->info,
+                                 &lastinterval->info,
                                  bustate,
                                  err) != 0)
         {
@@ -221,7 +219,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         if (processbranchingedge_shulen(true,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
-                                 TOP_ESA_BOTTOMUP_shulen.info,
+                                 &TOP_ESA_BOTTOMUP_shulen.info,
                                  lastintervallcp,
                                  lastintervallb,
                                  lastintervalrb,
@@ -238,7 +236,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         if (processleafedge_shulen(true,
                             TOP_ESA_BOTTOMUP_shulen.lcp,
                             TOP_ESA_BOTTOMUP_shulen.lb,
-                            TOP_ESA_BOTTOMUP_shulen.info,
+                            &TOP_ESA_BOTTOMUP_shulen.info,
                             previoussuffix,bustate,err) != 0)
         {
           haserr = true;

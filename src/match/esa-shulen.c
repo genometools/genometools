@@ -67,23 +67,19 @@ static void resetfilenumdist_shulen(BUinfo_shulen *father,
   }
 }
 
-static BUinfo_shulen *allocateBUinfo_shulen(GT_UNUSED BUstate_shulen *state)
+static void initBUinfo_shulen(BUinfo_shulen *buinfo,
+                              GT_UNUSED BUstate_shulen *state)
 {
-  BUinfo_shulen *buinfo;
-
-  buinfo = gt_malloc(sizeof (*buinfo));
 #ifdef SHUDEBUG
   buinfo->id = state->nextid++;
 #endif
   buinfo->filenumdist = NULL;
-  return buinfo;
 }
 
 static void freeBUinfo_shulen(BUinfo_shulen *buinfo,
                               GT_UNUSED BUstate_shulen *state)
 {
   gt_free(buinfo->filenumdist);
-  gt_free(buinfo);
 }
 
 static void contribute_shulen(GT_UNUSED int line,
