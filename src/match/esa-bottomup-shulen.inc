@@ -48,6 +48,7 @@ static int processcompletenode_shulen(unsigned long,
     unsigned long,
     unsigned long,
     BUinfo_shulen *,
+    BUstate_shulen *,
     GtError *err);
 
 #define TOP_ESA_BOTTOMUP_shulen   stackspace[nextfreeItvinfo-1]
@@ -172,6 +173,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                               lastinterval->lb,
                               lastinterval->rb,
                               &lastinterval->info,
+                              bustate,
                               err) != 0)
       {
         haserr = true;

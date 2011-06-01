@@ -43,6 +43,7 @@ static int processcompletenode(unsigned long,
     unsigned long,
     unsigned long,
     BUinfo *,
+    BUstate *,
     GtError *err);
 
 #define TOP_ESA_BOTTOMUP   stackspace[nextfreeItvinfo-1]
@@ -167,6 +168,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                               lastinterval->lb,
                               lastinterval->rb,
                               &lastinterval->info,
+                              bustate,
                               err) != 0)
       {
         haserr = true;

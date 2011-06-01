@@ -48,6 +48,7 @@ static int processcompletenode_maxpairs(unsigned long,
     unsigned long,
     unsigned long,
     BUinfo_maxpairs *,
+    BUstate_maxpairs *,
     GtError *err);
 
 #define TOP_ESA_BOTTOMUP_maxpairs   stackspace[nextfreeItvinfo-1]
@@ -172,6 +173,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                               lastinterval->lb,
                               lastinterval->rb,
                               &lastinterval->info,
+                              bustate,
                               err) != 0)
       {
         haserr = true;
