@@ -29,11 +29,10 @@
 #include "esa-splititv.h"
 #include "shu_unitfile.h"
 #include "esa-shulen.h"
-#include "stamp.h"
 
 typedef struct /* information stored for each node of the lcp interval tree */
 {
-  unsigned long *filenumdist;
+  unsigned long *gnumdist;
 #ifdef SHUDEBUG
   unsigned long id;
 #endif
@@ -42,9 +41,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
 typedef struct  /* global information */
 {
   unsigned long numofdbfiles,
-                lastleafnumber,
-                firstleafcount2omit,
-                currentleafcount;
+                lastleafnumber;
   uint64_t **shulengthdist;
   const GtEncseq *encseq;
   unsigned long *file_to_genome_map;
@@ -53,7 +50,7 @@ typedef struct  /* global information */
 #endif
 } BUstate_shulen;
 
-static void resetfilenumdist_shulen(BUinfo_shulen *father,
+static void resetgnumdist_shulen(BUinfo_shulen *father,
                                     unsigned long numofdbfiles)
 {
   unsigned long idx;
@@ -63,7 +60,7 @@ static void resetfilenumdist_shulen(BUinfo_shulen *father,
 #endif
   for (idx = 0; idx < numofdbfiles; idx++)
   {
-    father->filenumdist[idx] = 0;
+    father->gnumdist[idx] = 0;
   }
 }
 
@@ -73,13 +70,13 @@ static void initBUinfo_shulen(BUinfo_shulen *buinfo,
 #ifdef SHUDEBUG
   buinfo->id = state->nextid++;
 #endif
-  buinfo->filenumdist = NULL;
+  buinfo->gnumdist = NULL;
 }
 
 static void freeBUinfo_shulen(BUinfo_shulen *buinfo,
                               GT_UNUSED BUstate_shulen *state)
 {
-  gt_free(buinfo->filenumdist);
+  gt_free(buinfo->gnumdist);
 }
 
 static void contribute_shulen(GT_UNUSED int line,
@@ -107,9 +104,9 @@ static void shownode(int line,const BUstate_shulen *state,
                                                  state->numofdbfiles);
   for (idx=0; idx < state->numofdbfiles; idx++)
   {
-    if (node->filenumdist[idx] > 0)
+    if (node->gnumdist[idx] > 0)
     {
-      printf(" %lu->%lu",idx,node->filenumdist[idx]);
+      printf(" %lu->%lu",idx,node->gnumdist[idx]);
     }
   }
   printf("\n");
@@ -124,12 +121,8 @@ static int processleafedge_shulen(bool firstsucc,
                                   BUstate_shulen *state,
                                   GT_UNUSED GtError *err)
 {
-  unsigned long idx, filenum;
+  unsigned long idx, gnum;
 
-  if (state->currentleafcount >= state->firstleafcount2omit)
-  {
-    return 0;
-  }
 #ifdef SHUDEBUG
   printf("processleafedge %lu firstsucc=%s, "
          " depth(father)=%lu, path=",
@@ -146,20 +139,23 @@ static int processleafedge_shulen(bool firstsucc,
   }
   printf("\n");
 #endif
-  filenum = gt_encseq_filenum(state->encseq,leafnumber);
   if (state->file_to_genome_map != NULL)
   {
-    filenum = state->file_to_genome_map[filenum];
+    gnum = state->file_to_genome_map[gt_encseq_filenum(state->encseq,
+                                                       leafnumber)];
+  } else
+  {
+    gnum = gt_encseq_filenum(state->encseq,leafnumber);
   }
   if (firstsucc)
   {
     gt_assert(father != NULL);
-    if (father->filenumdist == NULL)
+    if (father->gnumdist == NULL)
     {
-      father->filenumdist
-        = gt_malloc(sizeof (*father->filenumdist) * state->numofdbfiles);
+      father->gnumdist
+        = gt_malloc(sizeof (*father->gnumdist) * state->numofdbfiles);
     }
-    resetfilenumdist_shulen(father,state->numofdbfiles);
+    resetgnumdist_shulen(father,state->numofdbfiles);
 #ifdef SHUDEBUG
     shownode(__LINE__,state,"father",father);
 #endif
@@ -170,27 +166,26 @@ static int processleafedge_shulen(bool firstsucc,
 #endif
     for (idx = 0; idx < state->numofdbfiles; idx++)
     {
-      if (idx != filenum)
+      if (idx != gnum)
       {
-        if (father->filenumdist[idx] > 0)
+        if (father->gnumdist[idx] > 0)
         {
-          contribute_shulen(__LINE__,state->shulengthdist,idx,filenum,
+          contribute_shulen(__LINE__,state->shulengthdist,idx,gnum,
                             1UL,fatherdepth+1);
-          if (father->filenumdist[filenum] == 0)
+          if (father->gnumdist[gnum] == 0)
           {
-            contribute_shulen(__LINE__,state->shulengthdist,filenum,idx,
-                              father->filenumdist[idx],fatherdepth + 1);
+            contribute_shulen(__LINE__,state->shulengthdist,gnum,idx,
+                              father->gnumdist[idx],fatherdepth + 1);
           }
         }
       }
     }
   }
-  father->filenumdist[filenum]++;
+  father->gnumdist[gnum]++;
 #ifdef SHUDEBUG
-  printf("filenumdist[id=%lu,filenum=%lu]=%lu\n",father->id,filenum,
-                                                 father->filenumdist[filenum]);
+  printf("gnumdist[id=%lu,filenum=%lu]=%lu\n",father->id,gnum,
+                                              father->gnumdist[gnum]);
 #endif
-  state->currentleafcount++;
   state->lastleafnumber = leafnumber;
   return 0;
 }
@@ -204,15 +199,15 @@ static void cartproduct_shulen(BUstate_shulen *state,
 
   for (referidx=0; referidx < state->numofdbfiles; referidx++)
   {
-    if (node1->filenumdist[referidx] > 0 && node2->filenumdist[referidx] == 0)
+    if (node1->gnumdist[referidx] > 0 && node2->gnumdist[referidx] == 0)
     {
       for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
       {
-        if (node2->filenumdist[shulenidx] > 0)
+        if (node2->gnumdist[shulenidx] > 0)
         {
           gt_assert(referidx != shulenidx);
           contribute_shulen(__LINE__,state->shulengthdist,referidx,shulenidx,
-                            node2->filenumdist[shulenidx],depth + 1);
+                            node2->gnumdist[shulenidx],depth + 1);
         }
       }
     }
@@ -248,11 +243,11 @@ static int processbranchingedge_shulen(bool firstsucc,
   if (firstsucc)
   {
     gt_assert(father != NULL);
-    if (father->filenumdist == NULL)
+    if (father->gnumdist == NULL)
     {
-      father->filenumdist
-        = gt_malloc(sizeof (*father->filenumdist) * state->numofdbfiles);
-      resetfilenumdist_shulen(father,state->numofdbfiles);
+      father->gnumdist
+        = gt_malloc(sizeof (*father->gnumdist) * state->numofdbfiles);
+      resetgnumdist_shulen(father,state->numofdbfiles);
     }
 #ifdef SHUDEBUG
     shownode(__LINE__,state,"father",father);
@@ -272,12 +267,12 @@ static int processbranchingedge_shulen(bool firstsucc,
   {
     for (idx = 0; idx < state->numofdbfiles; idx++)
     {
-      father->filenumdist[idx] += son->filenumdist[idx];
-      son->filenumdist[idx] = 0;
+      father->gnumdist[idx] += son->gnumdist[idx];
+      son->gnumdist[idx] = 0;
 #ifdef SHUDEBUG
-      printf("filenumdist[id=%lu,filenum=%lu]=%lu\n",father->id,idx,
-                                                father->filenumdist[idx]);
-      printf("filenumdist[id=%lu,filenum=%lu]=0\n",son->id,idx);
+      printf("gnumdist[id=%lu,filenum=%lu]=%lu\n",father->id,idx,
+                                                father->gnumdist[idx]);
+      printf("gnumdist[id=%lu,filenum=%lu]=0\n",son->id,idx);
 #endif
     }
   }
@@ -309,9 +304,6 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
 #ifdef SHUDEBUG
   state->nextid = 0;
 #endif
-  state->firstleafcount2omit = gt_encseq_total_length(encseq) -
-                               gt_encseq_specialcharacters(encseq);
-  state->currentleafcount = 0;
   gt_array2dim_malloc(state->shulengthdist,state->numofdbfiles,
                       state->numofdbfiles);
   for (referidx=0; referidx < state->numofdbfiles; referidx++)
@@ -488,9 +480,6 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
 #ifdef SHUDEBUG
   state->nextid = 0;
 #endif
-  state->firstleafcount2omit = gt_encseq_total_length(encseq) -
-                               gt_encseq_specialcharacters(encseq);
-  state->currentleafcount = 0;
   state->shulengthdist = shulen;
   if (gt_esa_bottomup_shulen(ssar, state, err) != 0)
   {
