@@ -82,19 +82,31 @@ def checkbwt(filelist)
 end
 
 allfiles = []
-all_fastafiles = ["Atinsert.fna",
+all_fastafiles = ["Arabidopsis-C99826.fna",
+                  "Atinsert.fna",
+                  "Atinsert_seqrange_13-17_rev.fna",
+                  "Atinsert_seqrange_3-7.fna",
+                  "Atinsert_single_3.fna",
+                  "Atinsert_single_3_rev.fna",
+                  "Copysorttest.fna",
                   "Duplicate.fna",
+                  "Ecoli-section1.fna",
+                  "Ecoli-section2.fna",
                   "Random-Small.fna",
                   "Random.fna",
-                  "Copysorttest.fna",
                   "Random159.fna",
                   "Random160.fna",
                   "RandomN.fna",
+                  "Reads1.fna",
+                  "Reads2.fna",
+                  "Reads3.fna",
+                  "Repfind-example.fna",
+                  "TTTN.fna",
+                  "Small.fna",
+                  "Smalldup.fna",
                   "TTT-small.fna",
                   "trna_glutamine.fna",
-                  "Small.fna",
-                  "Verysmall.fna",
-                  "Arabidopsis-C99826.fna"]
+                  "Verysmall.fna"]
 
 allfiles += all_fastafiles
 

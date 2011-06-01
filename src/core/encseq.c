@@ -5244,9 +5244,8 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
   return 0;
 }
 
-#define GT_ENCSEQ_DEREFSTOPPOS(VAR,SPECIAL,TMPVAR,ENCSEQ,READMODE,CURRENTPOS,\
-                               POS)\
-        TMPVAR = gt_encseq_get_encoded_char(ENCSEQ,CURRENTPOS,READMODE);\
+#define GT_ENCSEQ_DEREFSTOPPOS(VAR,SPECIAL,TMPVAR,ENCSEQ,READMODE,POS)\
+        TMPVAR = gt_encseq_get_encoded_char(ENCSEQ,POS,READMODE);\
         if (ISNOTSPECIAL(TMPVAR))\
         {\
           VAR = (unsigned long) TMPVAR;\
@@ -5267,7 +5266,7 @@ unsigned long countgt_encseq_compare_viatwobitencoding_get(void)
 struct GtViatwobitkeyvalues
 {
   unsigned long pos,
-                currentpos,
+                twobitcurrentpos,
                 endpos,
                 twobitencodingstoppos;
 };
@@ -5299,9 +5298,10 @@ static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
     }
   }
   vtk->pos = pos + depth;
-  vtk->currentpos = encseq->logicaltotallength; /* to have a defined value */
+  /* to have a defined value: */
+  vtk->twobitcurrentpos = encseq->logicaltotallength;
+  /* to have a defined value: */
   vtk->twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
-                               /* to have a defined value */
   if (vtk->pos < vtk->endpos)
   {
     bool fwd = GT_ISDIRREVERSE(readmode) ? false : true;
@@ -5311,8 +5311,8 @@ static void gt_Viatwobitkeyvalues_reinit_without_stoppos(
       gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,vtk->pos);
       vtk->twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
     }
-    vtk->currentpos = fwd ? vtk->pos
-                          : GT_REVERSEPOS(encseq->logicaltotallength,vtk->pos);
+    vtk->twobitcurrentpos
+      = fwd ? vtk->pos : GT_REVERSEPOS(encseq->logicaltotallength,vtk->pos);
   }
 }
 
@@ -5365,11 +5365,11 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
     {
       if (vtk2->pos < vtk2->endpos)
       {
-        vtk1->currentpos
-           = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,vtk1->currentpos,
+        vtk1->twobitcurrentpos
+           = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,vtk1->twobitcurrentpos,
                                       vtk1->twobitencodingstoppos);
-        vtk2->currentpos
-           = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,vtk2->currentpos,
+        vtk2->twobitcurrentpos
+           = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,vtk2->twobitcurrentpos,
                                       vtk2->twobitencodingstoppos);
         retval = gt_encseq_compare_pairof_twobitencodings(fwd,complement,
                                                           commonunits,
@@ -5388,7 +5388,7 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
       } else
       {
         GT_ENCSEQ_DEREFSTOPPOS(cc1,commonunits->leftspecial,tmp,encseq,readmode,
-                               vtk1->currentpos,vtk1->pos);
+                               vtk1->pos);
         cc2 = GT_UNIQUEINT(vtk2->pos);
         commonunits->rightspecial = true;
         gt_assert(cc1 != cc2);
@@ -5402,7 +5402,7 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
       if (vtk2->pos < vtk2->endpos)
       {
         GT_ENCSEQ_DEREFSTOPPOS(cc2,commonunits->rightspecial,tmp,encseq,
-                               readmode,vtk2->currentpos,vtk2->pos);
+                               readmode,vtk2->pos);
       } else
       {
         cc2 = GT_UNIQUEINT(vtk2->pos);

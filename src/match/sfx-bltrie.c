@@ -883,8 +883,6 @@ Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
     return NULL;
   }
   blindtrie = gt_malloc(sizeof (*blindtrie));
-  /*printf("sizeof (Blindtrienode)=%lu\n",
-           (unsigned long) sizeof (Blindtrienode));*/
   if (nodenumberincrement == 0)
   {
     gt_assert(maxnumofsuffixes >= 2UL);
