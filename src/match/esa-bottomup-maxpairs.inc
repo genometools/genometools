@@ -118,12 +118,20 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                 nextfreeItvinfo = 0;
   GtBUItvinfo_maxpairs *lastinterval = NULL, *stackspace = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
+#ifdef INLINEDSequentialsuffixarrayreader
+  GtUchar tmpsmalllcpvalue;
+#else
   int retval;
+#endif
 
   PUSH_ESA_BOTTOMUP_maxpairs(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
   {
+#ifdef INLINEDSequentialsuffixarrayreader
+    NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
+    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+#else
     retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
     if (retval < 0)
     {
@@ -142,6 +150,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
       haserr = true;
       break;
     }
+#endif
     if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {
       if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)

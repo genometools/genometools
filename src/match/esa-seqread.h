@@ -47,7 +47,8 @@ typedef struct
 #define NEXTSEQUENTIALLCPTABVALUE(VALUE,SSAR)\
         if ((SSAR)->nextlcptabindex >= (SSAR)->numberofsuffixes)\
         {\
-          break;\
+          gt_error_set(err,"missing lcpvalue value");\
+          return -1;\
         } else\
         {\
           tmpsmalllcpvalue\

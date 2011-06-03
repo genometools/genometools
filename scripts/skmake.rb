@@ -32,6 +32,7 @@ def parseargs(argv)
   options.speed = false
   options.prof = false
   options.jobs = 4
+  options.fileargs = nil
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -50,8 +51,7 @@ def parseargs(argv)
   end
   rest = opts.parse(argv)
   if not rest.empty?
-    usage(opts,"unnecessary arguments: #{rest}")
-    exit 1
+    options.fileargs = rest
   end
   return options
 end
@@ -73,7 +73,13 @@ def makecompilerflags(fp,options)
   if not options.optimize
     fp.print " opt=no"
   end
-  fp.puts " CC='ccache #{ENV["CC"]}'"
+  fp.print " CC='ccache #{ENV["CC"]}'"
+  if not options.fileargs.nil?
+    filenames=options.fileargs.join(" ")
+    fp.puts " #{filenames}"
+  else
+    fp.puts ""
+  end
 end
 
 if File.exists?('LocalMakefile')

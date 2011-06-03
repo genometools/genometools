@@ -317,17 +317,17 @@ static void showcomparisonfailureESA(const char *filename,
                                                 maxlcp);
 }
 
-static void gt_checkentiresuftab(const char *filename,
-                                 int line,
-                                 const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 const ESASuffixptr *suftab,
-                                 unsigned long numberofsuffixes,
-                                 Sequentialsuffixarrayreader *ssar,
-                                 bool specialsareequal,
-                                 bool specialsareequalatdepth0,
-                                 unsigned long depth,
-                                 GT_UNUSED GtError *err)
+static int gt_checkentiresuftab(const char *filename,
+                                int line,
+                                const GtEncseq *encseq,
+                                GtReadmode readmode,
+                                const ESASuffixptr *suftab,
+                                unsigned long numberofsuffixes,
+                                Sequentialsuffixarrayreader *ssar,
+                                bool specialsareequal,
+                                bool specialsareequalatdepth0,
+                                unsigned long depth,
+                                GT_UNUSED GtError *err)
 {
   unsigned long idx, maxlcp,
                 currentlcp = 0,
@@ -453,10 +453,7 @@ static void gt_checkentiresuftab(const char *filename,
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
-  if (haserr)
-  {
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
+  return haserr ? -1 : 0;
   /*
   printf("# gt_checkentiresuftab with mode 'specials are %s'\n",
                specialsareequal ? "equal" : "different");
@@ -535,7 +532,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           ssar = NULL;
         }
         gt_logger_log(logger, "checkentiresuftab");
-        gt_checkentiresuftab(__FILE__,
+        if (gt_checkentiresuftab(__FILE__,
                              __LINE__,
                              suffixarray.encseq,
                              suffixarray.readmode,
@@ -545,7 +542,11 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
                              false, /* specialsareequal  */
                              false,  /* specialsareequalatdepth0 */
                              0,
-                             err);
+                             err) != 0)
+        {
+          fprintf(stderr,"gt_checkentiresuftab failed\n");
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
         if (ssar != NULL)
         {
           gt_freeSequentialsuffixarrayreader(&ssar);
@@ -605,10 +606,17 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
 
 static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
 {
-  int retval;
   unsigned long currentlcpvalue;
   Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
+#ifdef INLINEDSequentialsuffixarrayreader
+  GtUchar tmpsmalllcpvalue;
+#else
+  int retval;
+#endif
 
+#ifdef INLINEDSequentialsuffixarrayreader
+  NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
+#else
   retval = gt_nextSequentiallcpvalue(&currentlcpvalue,ssar,err);
   if (retval < 0)
   {
@@ -619,6 +627,7 @@ static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
     gt_error_set(err,"missing lcpvalue value");
     return -1;
   }
+#endif
   if (lcp != currentlcpvalue)
   {
     fprintf(stderr,"lcp = %lu != %lu = currentlcpvalue\n",lcp,currentlcpvalue);
@@ -678,7 +687,9 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
     unsigned long idx, pos, numofnonspecials, currentsuffix;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
+#ifndef INLINEDSequentialsuffixarrayreader
     int retval;
+#endif
 
     gt_assert(encseqmetadata != NULL);
     totallength = gt_encseq_metadata_total_length(encseqmetadata);
@@ -697,6 +708,9 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
       }
       if (arguments->cmpsuf && ssar != NULL)
       {
+#ifdef INLINEDSequentialsuffixarrayreader
+        NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
+#else
         retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
         gt_assert(retval >= 0);
         if (retval == 0)
@@ -705,6 +719,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
           haserr = true;
           break;
         }
+#endif
         gt_assert(pos == currentsuffix);
       }
       /*printf("%lu: pos = %lu\n",idx,pos);*/
