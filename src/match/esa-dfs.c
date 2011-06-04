@@ -22,7 +22,6 @@
 #include "spacedef.h"
 #include "esa-seqread.h"
 #include "esa-dfs.h"
-#include "stamp.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -126,12 +125,6 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
   Itvinfo *stackspace = NULL;
   bool haserr = false;
 
-#ifdef INLINEDSequentialsuffixarrayreader
-  GtUchar tmpsmalllcpvalue;
-  gt_logger_log(logger,"# inlined Sequentialsuffixarrayreader\n");
-#else
-  int retval;
-#endif
   firstrootedge = true;
   PUSHDFS(0,true);
   if (assignleftmostleaf != NULL)
@@ -141,29 +134,8 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (currentindex = 0; currentindex < nonspecials; currentindex++)
   {
-#ifdef INLINEDSequentialsuffixarrayreader
     NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-#else
-    retval = gt_nextSequentiallcpvalue(&currentlcp,ssar,err);
-    if (retval < 0)
-    {
-      haserr = true;
-      break;
-    }
-    if (retval == 0)
-    {
-      break;
-    }
-    retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
-    gt_assert(retval >= 0);
-    if (retval == 0)
-    {
-      gt_error_set(err,"Missing value in suftab");
-      haserr = true;
-      break;
-    }
-#endif
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)

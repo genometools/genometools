@@ -336,12 +336,6 @@ static int gt_checkentiresuftab(const char *filename,
   GtEncseqReader *esr1, *esr2;
   bool haserr = false;
 
-#ifdef INLINEDSequentialsuffixarrayreader
-  GtUchar tmpsmalllcpvalue;
-#else
-  int retval;
-#endif
-
   gt_error_check(err);
   gt_assert(!specialsareequal || specialsareequalatdepth0);
   if (numberofsuffixes == totallength+1)
@@ -414,20 +408,7 @@ static int gt_checkentiresuftab(const char *filename,
     }
     if (ssar != NULL)
     {
-#ifdef INLINEDSequentialsuffixarrayreader
       NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
-#else
-      retval = gt_nextSequentiallcpvalue(&currentlcp,ssar,err);
-      if (retval < 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        break;
-      }
-#endif
       if (maxlcp != currentlcp)
       {
         fprintf(stderr,"%lu: startpos=%lu, firstchar=%u, "
@@ -608,32 +589,20 @@ static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
 {
   unsigned long currentlcpvalue;
   Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
-#ifdef INLINEDSequentialsuffixarrayreader
-  GtUchar tmpsmalllcpvalue;
-#else
-  int retval;
-#endif
+  bool haserr = false;
 
-#ifdef INLINEDSequentialsuffixarrayreader
-  NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
-#else
-  retval = gt_nextSequentiallcpvalue(&currentlcpvalue,ssar,err);
-  if (retval < 0)
+  do /* fake lookp to allow for the use of a break statement */
   {
-    return -1;
-  }
-  if (retval == 0)
-  {
-    gt_error_set(err,"missing lcpvalue value");
-    return -1;
-  }
-#endif
-  if (lcp != currentlcpvalue)
-  {
-    fprintf(stderr,"lcp = %lu != %lu = currentlcpvalue\n",lcp,currentlcpvalue);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  return 0;
+    NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
+    if (lcp != currentlcpvalue)
+    {
+      gt_error_set(err,"lcp=%lu != %lu=currentlcpvalue\n",lcp,currentlcpvalue);
+      haserr = true;
+      break;
+    }
+    break;
+  } while (true);
+  return haserr ? -1 : 0;
 }
 
 static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
@@ -687,9 +656,6 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
     unsigned long idx, pos, numofnonspecials, currentsuffix;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
-#ifndef INLINEDSequentialsuffixarrayreader
-    int retval;
-#endif
 
     gt_assert(encseqmetadata != NULL);
     totallength = gt_encseq_metadata_total_length(encseqmetadata);
@@ -708,18 +674,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
       }
       if (arguments->cmpsuf && ssar != NULL)
       {
-#ifdef INLINEDSequentialsuffixarrayreader
         NEXTSEQUENTIALSUFTABVALUE(currentsuffix,ssar);
-#else
-        retval = gt_nextSequentialsuftabvalue(&currentsuffix,ssar);
-        gt_assert(retval >= 0);
-        if (retval == 0)
-        {
-          gt_error_set(err,"missing suftab value");
-          haserr = true;
-          break;
-        }
-#endif
         gt_assert(pos == currentsuffix);
       }
       /*printf("%lu: pos = %lu\n",idx,pos);*/

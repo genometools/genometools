@@ -48,10 +48,11 @@ typedef struct
         if ((SSAR)->nextlcptabindex >= (SSAR)->numberofsuffixes)\
         {\
           gt_error_set(err,"missing lcpvalue value");\
-          return -1;\
+          haserr = true;\
+          break;\
         } else\
         {\
-          tmpsmalllcpvalue\
+          GtUchar tmpsmalllcpvalue\
             = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
           if (tmpsmalllcpvalue == LCPOVERFLOW)\
           {\
@@ -70,13 +71,12 @@ typedef struct
 
 typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
-/* The following only can be used for this case */
+/* The following four function can only can be used if
+   INLINEDSequentialsuffixarrayreader is not set */
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
                                         const GtEncseq *encseq,
                                         GtReadmode readmode);
-
-/* The following can only be used for this case */
 
 void gt_updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
@@ -89,7 +89,33 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
                            GtError *err);
 
 int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar);
+                                 Sequentialsuffixarrayreader *ssar);
+
+#define NEXTSEQUENTIALLCPTABVALUE(VALUE,SSAR)\
+        {\
+          int retval = gt_nextSequentiallcpvalue(&(VALUE),SSAR,err);\
+          if (retval < 0)\
+          {\
+            haserr = true;\
+            break;\
+          }\
+          if (retval == 0)\
+          {\
+            break;\
+          }\
+        }
+
+#define NEXTSEQUENTIALSUFTABVALUE(VALUE,SSAR)\
+        {\
+          int retval = gt_nextSequentialsuftabvalue(&(VALUE),SSAR);\
+          gt_assert(retval >= 0);\
+          if (retval == 0)\
+          {\
+            gt_error_set(err,"Missing value in suftab");\
+            haserr = true;\
+            break;\
+          }\
+        }
 
 #endif /* INLINEDSequentialsuffixarrayreader */
 

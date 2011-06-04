@@ -33,6 +33,7 @@ def parseargs(argv)
   options.prof = false
   options.jobs = 4
   options.fileargs = nil
+  options.inlsarr = false
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -45,6 +46,9 @@ def parseargs(argv)
   end
   opts.on("--noopt","no optimization") do |x|
     options.optimize = false
+  end
+  opts.on("--inlsarr","use inlined suffixarray reader") do |x|
+    options.inlsarr = true
   end
   opts.on("-j","--j NUM","run jobs in given number of threads") do |x|
     options.jobs = x.to_i
@@ -60,7 +64,9 @@ def makecompilerflags(fp,options)
   fp.print "all:\n\t\${MAKE} -j #{options.jobs} curses=no cairo=no"
   # fp.print " threads=yes"
   # fp.print " CFLAGS+=-fstrict-aliasing"
-  # fp.print " CFLAGS+=-DINLINEDSequentialsuffixarrayreader"
+  if options.inlsarr
+    fp.print " CFLAGS+=-DINLINEDSequentialsuffixarrayreader"
+  end
   if options.speed
     fp.print " assert=no amalgamation=yes"
   end

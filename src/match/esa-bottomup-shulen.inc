@@ -118,39 +118,13 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                 nextfreeItvinfo = 0;
   GtBUItvinfo_shulen *lastinterval = NULL, *stackspace = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
-#ifdef INLINEDSequentialsuffixarrayreader
-  GtUchar tmpsmalllcpvalue;
-#else
-  int retval;
-#endif
 
   PUSH_ESA_BOTTOMUP_shulen(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
   {
-#ifdef INLINEDSequentialsuffixarrayreader
     NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-#else
-    retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
-    if (retval < 0)
-    {
-      haserr = true;
-      break;
-    }
-    if (retval == 0)
-    {
-      break;
-    }
-    retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
-    gt_assert(retval >= 0);
-    if (retval == 0)
-    {
-      gt_error_set(err,"Missing value in suftab");
-      haserr = true;
-      break;
-    }
-#endif
     if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
     {
       if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)

@@ -68,16 +68,6 @@ void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
   FREESPACE(*ssar);
 }
 
-int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar,
-                              GT_UNUSED GtError *err)
-{
-  gt_assert(ssar != NULL && ssar->suffixarray != NULL &&
-            ssar->suffixarray->suftab != NULL);
-  *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
-  return 1;
-}
-
 const GtEncseq *gt_encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *ssar)
 {
