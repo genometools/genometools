@@ -27,8 +27,8 @@
 
 typedef enum
 {
-  SEQ_mappedboth,
   SEQ_scan,
+  SEQ_mappedboth,
   SEQ_suftabfrommemory
 } Sequentialaccesstype;
 
@@ -54,13 +54,13 @@ typedef struct
         {\
           GtUchar tmpsmalllcpvalue\
             = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-          if (tmpsmalllcpvalue == LCPOVERFLOW)\
+          if (tmpsmalllcpvalue < LCPOVERFLOW)\
+          {\
+            VALUE = (unsigned long) tmpsmalllcpvalue;\
+          } else\
           {\
             VALUE = (SSAR)->suffixarray->llvtab[\
                     (SSAR)->largelcpindex++].value;\
-          } else\
-          {\
-            VALUE = (unsigned long) tmpsmalllcpvalue;\
           }\
         }
 
@@ -68,6 +68,23 @@ typedef struct
         VALUE = (SSAR)->suffixarray->suftab[(SSAR)->nextsuftabindex++]
 
 #else
+
+#include "esa-lcpval.h"
+
+struct Sequentialsuffixarrayreader
+{
+  Suffixarray *suffixarray;
+  unsigned long nonspecials,
+         numberofsuffixes,
+         nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
+         nextlcptabindex, /* for SEQ_mappedboth */
+         largelcpindex;   /* SEQ_mappedboth */
+  Sequentialaccesstype seqactype;
+  Lcpvalueiterator *lvi;
+  const ESASuffixptr *suftab;
+  const GtEncseq *encseq;
+  GtReadmode readmode;
+};
 
 typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
@@ -93,28 +110,112 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
 
 #define NEXTSEQUENTIALLCPTABVALUE(VALUE,SSAR)\
         {\
-          int retval = gt_nextSequentiallcpvalue(&(VALUE),SSAR,err);\
-          if (retval < 0)\
+          GtUchar tmpsmalllcpvalue;\
+          if ((SSAR)->seqactype == SEQ_scan)\
           {\
-            haserr = true;\
-            break;\
-          }\
-          if (retval == 0)\
+            int retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,\
+                                        &(SSAR)->suffixarray->lcptabstream);\
+            if (retval > 0)\
+            {\
+              if (tmpsmalllcpvalue == LCPOVERFLOW)\
+              {\
+                Largelcpvalue tmpexception;\
+                retval = readnextLargelcpvaluefromstream(&tmpexception,\
+                                        &(SSAR)->suffixarray->llvtabstream);\
+                if (retval == 0)\
+                {\
+                  gt_error_set(err,"file %s: line %d: unexpected end "\
+                                   "of file when reading llvtab",\
+                                   __FILE__,__LINE__);\
+                  haserr = true;\
+                  break;\
+                }\
+                VALUE = tmpexception.value;\
+              } else\
+              {\
+                VALUE = (unsigned long) tmpsmalllcpvalue;\
+              }\
+            } else\
+            {\
+              break;\
+            }\
+          } else\
           {\
-            break;\
+            if ((SSAR)->seqactype == SEQ_mappedboth)\
+            {\
+              if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
+              {\
+                tmpsmalllcpvalue\
+                  = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
+                if (tmpsmalllcpvalue == LCPOVERFLOW)\
+                {\
+                  gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
+                             .position == (SSAR)->nextlcptabindex-1);\
+                  VALUE = (SSAR)->suffixarray->llvtab\
+                                      [(SSAR)->largelcpindex++].value;\
+                } else\
+                {\
+                  VALUE = (unsigned long) tmpsmalllcpvalue;\
+                }\
+              } else\
+              {\
+                break;\
+              }\
+            } else\
+            {\
+              if ((SSAR)->nextlcptabindex < (SSAR)->numberofsuffixes)\
+              {\
+                VALUE = gt_nextLcpvalueiterator((SSAR)->lvi,\
+                                                true,\
+                                                (SSAR)->suftab,\
+                                                (SSAR)->numberofsuffixes);\
+                (SSAR)->nextlcptabindex++;\
+              } else\
+              {\
+                break;\
+              }\
+            }\
           }\
         }
 
 #define NEXTSEQUENTIALSUFTABVALUE(VALUE,SSAR)\
+        switch ((SSAR)->seqactype)\
         {\
-          int retval = gt_nextSequentialsuftabvalue(&(VALUE),SSAR);\
-          gt_assert(retval >= 0);\
-          if (retval == 0)\
-          {\
-            gt_error_set(err,"Missing value in suftab");\
-            haserr = true;\
+          case SEQ_scan:\
+            {\
+              GtUlongBufferedfile *buf = &(SSAR)->suffixarray->suftabstream;\
+              if (buf->nextread >= buf->nextfree)\
+              {\
+                buf->nextfree = (unsigned int) fread(buf->bufferedfilespace,\
+                                                     sizeof (GtUlong),\
+                                                     (size_t) FILEBUFFERSIZE,\
+                                                     buf->fp);\
+                if (ferror(buf->fp))\
+                {\
+                  gt_error_set(err,"error when trying to read next GtUlong");\
+                  haserr = true;\
+                } else\
+                {\
+                  buf->nextread = 0;\
+                  if (buf->nextfree == 0)\
+                  {\
+                    gt_error_set(err,"Missing value in suftab");\
+                    haserr = true;\
+                    break;\
+                  }\
+                }\
+              }\
+              VALUE = buf->bufferedfilespace[buf->nextread++];\
+            }\
             break;\
-          }\
+          case SEQ_mappedboth:\
+            VALUE = ESASUFFIXPTRGET((SSAR)->suffixarray->suftab,\
+                                    (SSAR)->nextsuftabindex++);\
+            break;\
+          case SEQ_suftabfrommemory:\
+            VALUE = ESASUFFIXPTRGET((SSAR)->suftab,\
+                                    (SSAR)->nextsuftabindex++);\
+          break;\
         }
 
 #endif /* INLINEDSequentialsuffixarrayreader */

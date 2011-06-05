@@ -91,21 +91,6 @@ const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
 
 #else
 
-struct Sequentialsuffixarrayreader
-{
-  Suffixarray *suffixarray;
-  unsigned long nonspecials,
-         numberofsuffixes,
-         nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
-         nextlcptabindex, /* for SEQ_mappedboth */
-         largelcpindex;   /* SEQ_mappedboth */
-  Sequentialaccesstype seqactype;
-  Lcpvalueiterator *lvi;
-  const ESASuffixptr *suftab;
-  const GtEncseq *encseq;
-  GtReadmode readmode;
-};
-
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,
                                         unsigned int demand,
@@ -196,67 +181,72 @@ void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
 }
 
 int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
-                           Sequentialsuffixarrayreader *ssar,
-                           GtError *err)
+                              Sequentialsuffixarrayreader *ssar,
+                              GtError *err)
 {
   GtUchar tmpsmalllcpvalue;
   int retval;
 
-  if (ssar->seqactype == SEQ_suftabfrommemory)
+  switch (ssar->seqactype)
   {
-    if (ssar->nextlcptabindex >= ssar->numberofsuffixes)
-    {
-      return 0;
-    }
-    *currentlcp = gt_nextLcpvalueiterator(ssar->lvi,
-                                       true,
-                                       ssar->suftab,
-                                       ssar->numberofsuffixes);
-    ssar->nextlcptabindex++;
-  } else
-  {
-    if (ssar->seqactype == SEQ_mappedboth)
-    {
-      if (ssar->nextlcptabindex >= ssar->numberofsuffixes)
-      {
-        return 0;
-      }
-      tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
-    } else
-    {
+    case SEQ_scan:
       retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,
-                                       &ssar->suffixarray->lcptabstream);
-      if (retval == 0)
+                                         &ssar->suffixarray->lcptabstream);
+      if (retval > 0)
       {
-        return 0;
-      }
-    }
-    if (tmpsmalllcpvalue == LCPOVERFLOW)
-    {
-      Largelcpvalue tmpexception;
+        if (tmpsmalllcpvalue == LCPOVERFLOW)
+        {
+          Largelcpvalue tmpexception;
 
-      if (ssar->seqactype == SEQ_mappedboth)
-      {
-        gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
-               ssar->nextlcptabindex-1);
-        *currentlcp = ssar->suffixarray->llvtab[ssar->largelcpindex++].value;
+          retval = readnextLargelcpvaluefromstream(&tmpexception,
+                                            &ssar->suffixarray->llvtabstream);
+          if (retval == 0)
+          {
+            gt_error_set(err,"file %s: line %d: unexpected end of file when "
+                             "reading llvtab",__FILE__,__LINE__);
+            return -1;
+          }
+          *currentlcp = tmpexception.value;
+        } else
+        {
+          *currentlcp = (unsigned long) tmpsmalllcpvalue;
+        }
       } else
       {
-        retval = readnextLargelcpvaluefromstream(
-                                          &tmpexception,
-                                          &ssar->suffixarray->llvtabstream);
-        if (retval == 0)
-        {
-          gt_error_set(err,"file %s: line %d: unexpected end of file when "
-                        "reading llvtab",__FILE__,__LINE__);
-          return -1;
-        }
-        *currentlcp = tmpexception.value;
+        return 0;
       }
-    } else
-    {
-      *currentlcp = (unsigned long) tmpsmalllcpvalue;
-    }
+      break;
+    case SEQ_mappedboth:
+      if (ssar->nextlcptabindex < ssar->numberofsuffixes)
+      {
+        tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
+        if (tmpsmalllcpvalue == LCPOVERFLOW)
+        {
+          gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
+                 ssar->nextlcptabindex-1);
+          *currentlcp = ssar->suffixarray->llvtab[ssar->largelcpindex++].value;
+        } else
+        {
+          *currentlcp = (unsigned long) tmpsmalllcpvalue;
+        }
+      } else
+      {
+        return 0;
+      }
+      break;
+    case SEQ_suftabfrommemory:
+      if (ssar->nextlcptabindex < ssar->numberofsuffixes)
+      {
+        *currentlcp = gt_nextLcpvalueiterator(ssar->lvi,
+                                              true,
+                                              ssar->suftab,
+                                              ssar->numberofsuffixes);
+        ssar->nextlcptabindex++;
+      } else
+      {
+        return 0;
+      }
+      break;
   }
   return 1;
 }

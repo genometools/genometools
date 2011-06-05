@@ -58,7 +58,8 @@ typedef struct
   unsigned long delspranges;
   GtStr *esaindexname,
         *pckindexname;
-  unsigned int sortmaxdepth;
+  unsigned int sortmaxdepth,
+               scanesa;
   GtStrArray *algbounds,
              *streamesq;
 } Sfxmapoptions;
@@ -145,7 +146,8 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
-         *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU;
+         *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
+         *optionscanesa;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -267,6 +269,11 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                       "(using a bottom-up strategy)",
                                        &arguments->enumlcpitvtreeBU,false);
   gt_option_parser_add_option(op, optionenumlcpitvtreeBU);
+
+  optionscanesa = gt_option_new_uint("scanesa",
+                                     "scan suftab and lcptab",
+                                     &arguments->scanesa,0);
+  gt_option_parser_add_option(op, optionscanesa);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
@@ -653,7 +660,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   }
   if (!haserr)
   {
-    unsigned long idx, pos, numofnonspecials, currentsuffix;
+    unsigned long idx, pos, numofnonspecials, currentsuffix = 0;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
 
@@ -989,6 +996,14 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
                             arguments->enumlcpitvs ? false : true,
                             arguments->enumlcpitvtreeBU,
                             logger, err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && arguments->scanesa > 0)
+  {
+    if (gt_runscanesa(gt_str_get(arguments->esaindexname),arguments->scanesa,
+                      err) != 0)
     {
       haserr = true;
     }

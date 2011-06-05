@@ -111,7 +111,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
 {
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
-                previoussuffix,
+                previoussuffix = 0,
                 idx,
                 nonspecials,
                 allocatedItvinfo = 0,

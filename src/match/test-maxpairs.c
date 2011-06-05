@@ -18,9 +18,7 @@
 #ifdef INLINEDSequentialsuffixarrayreader
 
 #include "core/error.h"
-#include "core/str.h"
 #include "core/logger.h"
-#include "core/yarandom.h"
 #include "core/unused_api.h"
 
 int gt_testmaxpairs(GT_UNUSED const char *indexname,

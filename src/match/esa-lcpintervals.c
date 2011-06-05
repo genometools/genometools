@@ -258,3 +258,90 @@ int gt_runenumlcpvalues(const char *inputindex,
   }
   return haserr ? -1 : 0;
 }
+
+static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
+                             unsigned int mode,GtError *err)
+{
+  unsigned long lcpvalue,
+                previoussuffix = 0,
+                idx,
+                nonspecials,
+                sumsuftab = 0,
+                sumlcptab = 0;
+  bool haserr = false;
+
+  nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  if (mode == 1U)
+  {
+#ifndef INLINEDSequentialsuffixarrayreader
+    for (idx = 0; idx < nonspecials; idx++)
+    {
+      int retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
+
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      sumlcptab += lcpvalue; /* silly but guarantees that loop is
+                                not eliminated by compiler */
+      retval = gt_nextSequentialsuftabvalue(&previoussuffix,ssar);
+      gt_assert(retval >= 0);
+      if (retval == 0)
+      {
+        break;
+      }
+      sumsuftab += previoussuffix; /* silly but guarantees that loop is
+                                      not eliminated by compiler */
+    }
+#endif
+  } else
+  {
+    if (mode == 2U)
+    {
+      for (idx = 0; idx < nonspecials; idx++)
+      {
+        NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
+        sumlcptab += lcpvalue; /* silly but guarantees that loop is
+                                  not eliminated by compiler */
+        NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+        sumsuftab += previoussuffix; /* silly but guarantees that loop is
+                                        not eliminated by compiler */
+      }
+    }
+  }
+  printf("sumsuftab=%lu\n",sumsuftab);
+  printf("sumlcptab=%lu\n",sumlcptab);
+  return haserr ? -1 : 0;
+}
+
+int gt_runscanesa(const char *inputindex, unsigned int mode, GtError *err)
+{
+  bool haserr = false;
+  Sequentialsuffixarrayreader *ssar;
+
+  gt_error_check(err);
+  ssar = gt_newSequentialsuffixarrayreaderfromfile(inputindex,
+                                                   SARR_LCPTAB |
+                                                   SARR_SUFTAB |
+                                                   SARR_ESQTAB,
+                                                   SEQ_scan,
+                                                   err);
+  if (ssar == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr && gt_esa_scantables(ssar, mode, err) != 0)
+  {
+    haserr = true;
+  }
+  if (ssar != NULL)
+  {
+    gt_freeSequentialsuffixarrayreader(&ssar);
+  }
+  return haserr ? -1 : 0;
+}
