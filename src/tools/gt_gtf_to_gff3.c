@@ -33,7 +33,7 @@ typedef struct {
 
 static void* gt_gtf_to_gff3_arguments_new(void)
 {
-  GTFToGFF3Arguments *arguments =  gt_calloc(1, sizeof *arguments);
+  GTFToGFF3Arguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
