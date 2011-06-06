@@ -154,7 +154,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "genomediff", gt_genomediff());
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
   gt_toolbox_add_tool(tools, "gff3validator", gt_gff3validator());
-  gt_toolbox_add(tools, "gff3_to_gtf", gt_gff3_to_gtf);
+  gt_toolbox_add_tool(tools, "gff3_to_gtf", gt_gff3_to_gtf());
   gt_toolbox_add_tool(tools, "ltrdigest", gt_ltrdigest());
   gt_toolbox_add_tool(tools, "gtf_to_gff3", gt_gtf_to_gff3());
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
