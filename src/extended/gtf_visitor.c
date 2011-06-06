@@ -31,7 +31,7 @@ struct GtGTFVisitor {
   unsigned long gene_id,
                 transcript_id;
   GtArray *exon_features,
-        *CDS_features;
+          *CDS_features;
   GtFile *outfp;
 };
 
@@ -52,13 +52,11 @@ static int gtf_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
   GtGTFVisitor *gtf_visitor;
   gt_error_check(err);
   gtf_visitor = gtf_visitor_cast(nv);
-  gt_file_xprintf(gtf_visitor->outfp, "#%s\n",
-                     gt_comment_node_get_comment(c));
+  gt_file_xprintf(gtf_visitor->outfp, "#%s\n", gt_comment_node_get_comment(c));
   return 0;
 }
 
-static int save_exon_node(GtFeatureNode *fn, void *data,
-                          GT_UNUSED GtError *err)
+static int save_exon_node(GtFeatureNode *fn, void *data, GT_UNUSED GtError *err)
 {
   GtGTFVisitor *gtf_visitor;
   gt_error_check(err);
