@@ -27,11 +27,13 @@
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
+#include "extended/reverse.h"
 #include "tools/gt_sequniq.h"
 
 typedef struct {
   bool seqit,
-       verbose;
+       verbose,
+       r;
   unsigned long width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -57,7 +59,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
   GtSequniqArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *seqit_option, *verbose_option, *width_option;
+  GtOption *seqit_option, *verbose_option, *width_option, *r_option;
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
@@ -69,6 +71,14 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
                                     &arguments->seqit, false);
   gt_option_is_development_option(seqit_option);
   gt_option_parser_add_option(op, seqit_option);
+
+  /* -r */
+  r_option = gt_option_new_bool("r", "filter out also sequences whose"
+      "reverse complement is identical to sequence already output",
+      &arguments->r, false);
+  gt_option_is_development_option(r_option);
+  gt_option_imply(r_option, seqit_option);
+  gt_option_parser_add_option(op, r_option);
 
   /* -v */
   verbose_option = gt_option_new_verbose(&arguments->verbose);
@@ -131,6 +141,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   }
   else {
     int i;
+    char *revcompl = NULL;
+    unsigned long revcompl_alloc = 0;
     files = gt_str_array_new();
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
@@ -146,20 +158,42 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              (unsigned long long) totalsize);
       }
       for (;;) {
-        char *md5;
+        char *md5, *md5rc = NULL;
         if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
           break;
         md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
-        if (!gt_string_distri_get(sd, md5)) {
+        if (arguments->r)
+        {
+          if (revcompl == NULL)
+            revcompl = gt_malloc(len + 1);
+          else if (revcompl_alloc < len + 1)
+            revcompl = gt_realloc(revcompl, len + 1);
+          (void)memcpy(revcompl, sequence, len);
+          had_err = gt_reverse_complement(revcompl, len, err);
+          if (had_err)
+            break;
+          md5rc = gt_md5_fingerprint(revcompl, (unsigned long) len);
+        }
+        if (!gt_string_distri_get(sd, md5) &&
+            (!arguments->r || !gt_string_distri_get(sd, md5rc)))
+        {
           gt_string_distri_add(sd, md5);
+          if (arguments->r)
+            gt_string_distri_add(sd, md5rc);
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
         }
         else
           duplicates++;
         num_of_sequences++;
+        if (arguments->r)
+        {
+          gt_free(md5rc);
+        }
         gt_free(md5);
       }
+      if (arguments->r)
+        gt_free(revcompl);
       if (arguments->verbose)
         gt_progressbar_stop();
       gt_seqiterator_delete(seqit);
