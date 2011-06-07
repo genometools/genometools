@@ -1382,6 +1382,7 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
 
   /* first stream out the region nodes */
   if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_REGIONS) {
+    bool skip = false;
     if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries) {
       unsigned long seqnum, seqlength;
       GtGenomeNode *rn;
@@ -1392,20 +1393,31 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       } else {
         while (ltrh_stream->prevseqnum == seqnum) {
           ltrh_stream->cur_elem_index++;
+          if (ltrh_stream->cur_elem_index >= ltrh_stream->numofboundaries) {
+            skip = true;
+            break;
+          }
           seqnum =
                ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
         }
       }
-      ltrh_stream->prevseqnum = seqnum;
-      seqlength = gt_encseq_seqlength(ltrh_stream->encseq, seqnum);
-      seqid = gt_str_new_cstr("seq");
-      gt_str_append_ulong(seqid, seqnum);
-      rn = gt_region_node_new(seqid,
-                              1 + (unsigned long) ltrh_stream->offset,
-                              seqlength + (unsigned long) ltrh_stream->offset);
-      gt_str_delete(seqid);
-      *gn = rn;
-      ltrh_stream->cur_elem_index++;
+      if (!skip) {
+        ltrh_stream->prevseqnum = seqnum;
+        seqlength = gt_encseq_seqlength(ltrh_stream->encseq, seqnum);
+        seqid = gt_str_new_cstr("seq");
+        gt_str_append_ulong(seqid, seqnum);
+        rn = gt_region_node_new(seqid,
+                                1 + (unsigned long) ltrh_stream->offset,
+                                seqlength
+                                  + (unsigned long) ltrh_stream->offset);
+        gt_str_delete(seqid);
+        *gn = rn;
+        ltrh_stream->cur_elem_index++;
+      } else {
+        ltrh_stream->cur_elem_index = 0;
+        ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_COMMENTS;
+        *gn = NULL;
+      }
     } else {
       ltrh_stream->cur_elem_index = 0;
       ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_COMMENTS;
@@ -1415,6 +1427,7 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
 
   /* then stream out the comment nodes */
   if (!had_err && ltrh_stream->state == GT_LTRHARVEST_STREAM_STATE_COMMENTS) {
+    bool skip = false;
     if (ltrh_stream->cur_elem_index < ltrh_stream->numofboundaries) {
       const char *desc;
       char buf[BUFSIZ];
@@ -1426,17 +1439,27 @@ static int gt_ltrharvest_stream_next(GT_UNUSED GtNodeStream *ns,
       } else {
         while (ltrh_stream->prevseqnum == seqnum) {
           ltrh_stream->cur_elem_index++;
+          if (ltrh_stream->cur_elem_index >= ltrh_stream->numofboundaries) {
+            skip = true;
+            break;
+          }
           seqnum =
                ltrh_stream->bdptrtab[ltrh_stream->cur_elem_index]->contignumber;
         }
       }
-      ltrh_stream->prevseqnum = seqnum;
-      desc = gt_encseq_description(ltrh_stream->encseq, &desclen, seqnum);
-      (void) strncpy(buf, desc, (size_t) (desclen * sizeof (char)));
-      buf[desclen] = '\0';
-      cn = gt_comment_node_new(buf);
-      *gn = cn;
-      ltrh_stream->cur_elem_index++;
+      if (!skip) {
+        ltrh_stream->prevseqnum = seqnum;
+        desc = gt_encseq_description(ltrh_stream->encseq, &desclen, seqnum);
+        (void) strncpy(buf, desc, (size_t) (desclen * sizeof (char)));
+        buf[desclen] = '\0';
+        cn = gt_comment_node_new(buf);
+        *gn = cn;
+        ltrh_stream->cur_elem_index++;
+      } else {
+        ltrh_stream->cur_elem_index = 0;
+        ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_FEATURES;
+        *gn = NULL;
+      }
     } else {
       ltrh_stream->cur_elem_index = 0;
       ltrh_stream->state = GT_LTRHARVEST_STREAM_STATE_FEATURES;
