@@ -20,7 +20,7 @@
 #include "core/outputfile.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
-#include "extended/gtf_out_stream.h"
+#include "extended/gtf_out_stream_api.h"
 #include "tools/gt_gff3_to_gtf.h"
 
 typedef struct {

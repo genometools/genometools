@@ -110,6 +110,8 @@ interfaces.
 
   <li><a href="#GtGTFInStream">GtGTFInStream</a>
 
+  <li><a href="#GtGTFOutStream">GtGTFOutStream</a>
+
   <li><a href="#GtGenomeNode">GtGenomeNode</a>
 
   <li><a href="#GtGraphics">GtGraphics</a>
@@ -3423,6 +3425,21 @@ Retain the original ID attributes (instead of creating new ones), if
 Create a <code>GtGTFInStream*</code> which subsequently reads the GTF file with the
    given <code>filename</code>. If <code>filename</code> equals <code>NULL</code>, the GTF data is read from
    <code>stdin</code>.
+</p>
+<hr>
+<a name="GtGTFOutStream"></a>
+<h2>Class GtGTFOutStream</h2>
+
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtGTFOutStream</code> produces GTF2.2
+   output. </p>
+
+<hr>
+<a name="gt_gtf_out_stream_new"></a>
+
+<code>GtNodeStream*  gt_gtf_out_stream_new(GtNodeStream *in_stream, GtFile *outfp)</code>
+<p>
+Create a <code>GtNodeStream*</code> which uses <code>in_stream</code> as input.
+   It shows the nodes passed through it as GTF2.2 on <code>outfp</code>.
 </p>
 <hr>
 <a name="GtGenomeNode"></a>
@@ -8102,6 +8119,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_gtf_in_stream_new"><code>gt_gtf_in_stream_new</code></a><br>
 
+  <a href="#gt_gtf_out_stream_new"><code>gt_gtf_out_stream_new</code></a><br>
+
   <a href="#gt_hashmap_add"><code>gt_hashmap_add</code></a><br>
 
   <a href="#gt_hashmap_delete"><code>gt_hashmap_delete</code></a><br>
@@ -8707,7 +8726,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-05-30
+Last update: 2011-06-07
 </div>
 </div>
 <!-- Piwik -->

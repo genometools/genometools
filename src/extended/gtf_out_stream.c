@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "extended/gtf_out_stream.h"
+#include "extended/gtf_out_stream_api.h"
 #include "extended/gtf_visitor.h"
 #include "extended/visitor_stream_api.h"
 
