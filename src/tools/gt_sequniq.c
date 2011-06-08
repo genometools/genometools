@@ -16,14 +16,17 @@
 */
 
 #include <string.h>
+#include <ctype.h>
+#include "md5.h"
 #include "core/bioseq.h"
 #include "core/fasta.h"
 #include "core/fileutils_api.h"
+#include "core/hashtable.h"
 #include "core/ma.h"
-#include "core/md5_fingerprint.h"
 #include "core/outputfile.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
+#include "core/safearith.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
@@ -98,6 +101,16 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   return op;
 }
 
+htsize_t gt_md5set_md5_hash(const void *md5)
+{
+  return gt_uint32_data_hash(md5, sizeof (uint32_t) / sizeof (unsigned char));
+}
+
+int gt_md5set_md5_cmp(const void *md5A, const void *md5B)
+{
+  return memcmp(md5A, md5B, sizeof (unsigned char) * 16);
+}
+
 static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
@@ -141,8 +154,15 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   }
   else {
     int i;
-    char *revcompl = NULL;
+    char *revcompl = NULL, *upper = NULL;
     unsigned long revcompl_alloc = 0;
+    GtHashtable *md5set;
+    static const HashElemInfo hashtype =
+        {gt_md5set_md5_hash, {NULL}, 16, gt_md5set_md5_cmp, NULL, NULL};
+    char md5hash[16], md5hash_rc[16];
+    unsigned long j;
+
+    md5set = gt_hashtable_new(hashtype);
     files = gt_str_array_new();
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
@@ -158,46 +178,56 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              (unsigned long long) totalsize);
       }
       for (;;) {
-        char *md5, *md5rc = NULL;
         if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
           break;
-        md5 = gt_md5_fingerprint((const char*) sequence, (unsigned long) len);
+
+        /* check size of necessary buffers */
+        if (upper == NULL)
+          upper = gt_malloc(sizeof (char) * len);
+        else if (revcompl_alloc < len)
+          upper = gt_realloc(upper, sizeof (char) * len);
         if (arguments->r)
         {
           if (revcompl == NULL)
-            revcompl = gt_malloc(len + 1);
+            revcompl = gt_malloc(sizeof (char) * len);
           else if (revcompl_alloc < len + 1)
-            revcompl = gt_realloc(revcompl, len + 1);
-          (void)memcpy(revcompl, sequence, len);
+            revcompl = gt_realloc(revcompl, sizeof (char) * len);
+        }
+
+        for (j = 0; j < len; j++)
+          upper[j] = toupper(sequence[j]);
+
+        md5(upper, gt_safe_cast2long(len), md5hash);
+
+        if (arguments->r)
+        {
+          (void)memcpy(revcompl, upper, len);
           had_err = gt_reverse_complement(revcompl, len, err);
           if (had_err)
             break;
-          md5rc = gt_md5_fingerprint(revcompl, (unsigned long) len);
+          md5(revcompl, gt_safe_cast2long(len), md5hash_rc);
         }
-        if (!gt_string_distri_get(sd, md5) &&
-            (!arguments->r || !gt_string_distri_get(sd, md5rc)))
+        if (!gt_hashtable_get(md5set, md5hash) &&
+            (!arguments->r || !gt_hashtable_get(md5set, md5hash_rc)))
         {
-          gt_string_distri_add(sd, md5);
+          gt_hashtable_add(md5set, md5hash);
           if (arguments->r)
-            gt_string_distri_add(sd, md5rc);
+            gt_hashtable_add(md5set, md5hash_rc);
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
         }
         else
           duplicates++;
         num_of_sequences++;
-        if (arguments->r)
-        {
-          gt_free(md5rc);
-        }
-        gt_free(md5);
       }
+      gt_free(upper);
       if (arguments->r)
         gt_free(revcompl);
       if (arguments->verbose)
         gt_progressbar_stop();
       gt_seqiterator_delete(seqit);
     }
+    gt_hashtable_delete(md5set);
     gt_str_array_delete(files);
   }
 
