@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2011      Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,22 +16,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <string.h>
-#include <ctype.h>
-#include "md5.h"
 #include "core/bioseq.h"
 #include "core/fasta.h"
 #include "core/fileutils_api.h"
-#include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/outputfile.h"
 #include "core/option_api.h"
 #include "core/progressbar.h"
-#include "core/safearith.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
-#include "extended/reverse.h"
+#include "extended/md5set.h"
 #include "tools/gt_sequniq.h"
 
 typedef struct {
@@ -101,16 +97,6 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   return op;
 }
 
-htsize_t gt_md5set_md5_hash(const void *md5)
-{
-  return gt_uint32_data_hash(md5, sizeof (uint32_t) / sizeof (unsigned char));
-}
-
-int gt_md5set_md5_cmp(const void *md5A, const void *md5B)
-{
-  return memcmp(md5A, md5B, sizeof (unsigned char) * 16);
-}
-
 static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
@@ -154,15 +140,10 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   }
   else {
     int i;
-    char *revcompl = NULL, *upper = NULL;
-    unsigned long revcompl_alloc = 0;
-    GtHashtable *md5set;
-    static const HashElemInfo hashtype =
-        {gt_md5set_md5_hash, {NULL}, 16, gt_md5set_md5_cmp, NULL, NULL};
-    char md5hash[16], md5hash_rc[16];
-    unsigned long j;
+    GtMd5set *md5set;
+    int found;
 
-    md5set = gt_hashtable_new(hashtype);
+    md5set = gt_md5set_new();
     files = gt_str_array_new();
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
@@ -181,51 +162,29 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
         if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
           break;
 
-        /* check size of necessary buffers */
-        if (upper == NULL)
-          upper = gt_malloc(sizeof (char) * len);
-        else if (revcompl_alloc < len)
-          upper = gt_realloc(upper, sizeof (char) * len);
-        if (arguments->r)
+        found = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
+            arguments->r, err);
+        if (found == 0)
         {
-          if (revcompl == NULL)
-            revcompl = gt_malloc(sizeof (char) * len);
-          else if (revcompl_alloc < len + 1)
-            revcompl = gt_realloc(revcompl, sizeof (char) * len);
-        }
-
-        for (j = 0; j < len; j++)
-          upper[j] = toupper(sequence[j]);
-
-        md5(upper, gt_safe_cast2long(len), md5hash);
-
-        if (arguments->r)
-        {
-          (void)memcpy(revcompl, upper, len);
-          had_err = gt_reverse_complement(revcompl, len, err);
-          if (had_err)
-            break;
-          md5(revcompl, gt_safe_cast2long(len), md5hash_rc);
-        }
-        if (!gt_hashtable_get(md5set, md5hash) &&
-            (!arguments->r || !gt_hashtable_get(md5set, md5hash_rc)))
-        {
-          gt_hashtable_add(md5set, md5hash);
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
         }
-        else
+        else if (found > 0)
+        {
           duplicates++;
+        }
+        else
+        {
+          had_err = found;
+          break;
+        }
         num_of_sequences++;
       }
-      gt_free(upper);
-      if (arguments->r)
-        gt_free(revcompl);
       if (arguments->verbose)
         gt_progressbar_stop();
       gt_seqiterator_delete(seqit);
     }
-    gt_hashtable_delete(md5set);
+    gt_md5set_delete(md5set);
     gt_str_array_delete(files);
   }
 
