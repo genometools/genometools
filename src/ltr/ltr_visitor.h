@@ -21,7 +21,7 @@
 /* Implements the <GtNodeVisitor> interface. */
 typedef struct GtLTRVisitor GtLTRVisitor;
 
-#include "extended/node_visitor_api.h"
+#include "extended/node_visitor.h"
 #include "ltr/ltrelement.h"
 
 const GtNodeVisitorClass* gt_ltr_visitor_class(void);

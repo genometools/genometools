@@ -19,6 +19,7 @@
 #define GFF3_VISITOR_H
 
 #include "extended/gff3_visitor_api.h"
+#include "extended/node_visitor.h"
 
 const GtNodeVisitorClass* gt_gff3_visitor_class(void);
 

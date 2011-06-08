@@ -23,7 +23,6 @@
 #include "core/range.h"
 #include "core/str.h"
 #include "extended/genome_node_api.h"
-#include "extended/node_visitor.h"
 
 void          gt_genome_node_set_origin(GtGenomeNode*, GtStr *filename,
                                         unsigned int line_number);
@@ -32,7 +31,6 @@ void*         gt_genome_node_try_cast(const GtGenomeNodeClass*, GtGenomeNode*);
 /* Used to sort nodes. */
 GtStr*        gt_genome_node_get_idstr(GtGenomeNode*);
 void          gt_genome_node_change_seqid(GtGenomeNode*, GtStr*);
-int           gt_genome_node_accept(GtGenomeNode*, GtNodeVisitor*, GtError*);
 int           gt_genome_node_compare(GtGenomeNode**, GtGenomeNode**);
 int           gt_genome_node_compare_with_data(GtGenomeNode**, GtGenomeNode**,
                                                void *unused);

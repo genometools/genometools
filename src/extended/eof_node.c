@@ -16,6 +16,7 @@
 
 #include "extended/eof_node.h"
 #include "extended/genome_node_rep.h"
+#include "extended/node_visitor.h"
 
 struct GtEOFNode {
   const GtGenomeNode parent_instance;

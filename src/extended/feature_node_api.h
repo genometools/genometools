@@ -22,7 +22,6 @@
 #include "core/str_api.h"
 #include "core/strand_api.h"
 #include "core/str_array_api.h"
-#include "extended/genome_node_api.h"
 
 /* Implements the <GtGenomeNode> interface. A single feature node corresponds
    to a GFF3 feature line (i.e., a line which does not start with <#>).
@@ -59,6 +58,8 @@
    Pseudo-features are typically ignored during a traversal to give the illusion
    that they do not exist. */
 typedef struct GtFeatureNode GtFeatureNode;
+
+#include "extended/genome_node_api.h"
 
 /* Return an new <GtFeatureNode> object on sequence with ID <seqid> and type
    <type> which lies from <start> to <end> on strand <strand>.

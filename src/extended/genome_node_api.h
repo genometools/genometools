@@ -29,6 +29,8 @@ typedef struct GtGenomeNodeClass GtGenomeNodeClass;
    they are usually found in GFF3 files). */
 typedef struct GtGenomeNode GtGenomeNode;
 
+#include "extended/node_visitor_api.h"
+
 /* Increase the reference count for <genome_node> and return it.
    <genome_node> cannot be <NULL>.*/
 GtGenomeNode* gt_genome_node_ref(GtGenomeNode *genome_node);
@@ -85,6 +87,11 @@ void          gt_genome_node_release_user_data(GtGenomeNode *genome_node,
    to <strcmp(3)>). This method is the criterion used to sort genome nodes. */
 int           gt_genome_node_cmp(GtGenomeNode *genome_node_a,
                                  GtGenomeNode *genome_node_b);
+
+/* Let <genome_node> accept the <node_visitor>.
+   In the case of an error, -1 is returned and <err> is set accordingly. */
+int           gt_genome_node_accept(GtGenomeNode *genome_node,
+                                    GtNodeVisitor *node_visitor, GtError *err);
 
 /* Decrease the reference count for <genome_node> or delete it, if this was the
    last reference. */
