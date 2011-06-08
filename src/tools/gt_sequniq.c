@@ -211,8 +211,6 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
             (!arguments->r || !gt_hashtable_get(md5set, md5hash_rc)))
         {
           gt_hashtable_add(md5set, md5hash);
-          if (arguments->r)
-            gt_hashtable_add(md5set, md5hash_rc);
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
         }
