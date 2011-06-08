@@ -154,7 +154,7 @@ Keywords "gt_select"
 Test do
   run_test("#{$bin}gt select -hascds " +
            "#{$testdata}encode_known_genes_Mar07.gff3 | " +
-           "#{$memcheck} #{$bin}gt stat", :maxtime => 80)
+           "#{$memcheck} #{$bin}gt stat", :maxtime => 120)
   run "diff #{$last_stdout} #{$testdata}gt_select_encode.out"
 end
 
