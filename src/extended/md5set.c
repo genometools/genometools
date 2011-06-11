@@ -93,7 +93,7 @@ static void gt_md5set_prepare_buffer(GtMd5set *md5set, unsigned long bufsize)
 int gt_md5set_add_sequence(GtMd5set *md5set, const char* seq,
     unsigned long seqlen, bool double_strand, GtError *err)
 {
-  char md5hash[16], md5hash_rc[16];
+  char md5sum[16], md5sum_rc[16];
   unsigned long i;
   int retval = 0;
 
@@ -104,30 +104,29 @@ int gt_md5set_add_sequence(GtMd5set *md5set, const char* seq,
   for (i = 0; i < seqlen; i++)
     md5set->buffer[i] = toupper(seq[i]);
 
-  md5(md5set->buffer, gt_safe_cast2long(seqlen), md5hash);
+  md5(md5set->buffer, gt_safe_cast2long(seqlen), md5sum);
 
-  if (double_strand)
-  {
-    retval = gt_reverse_complement(md5set->buffer, seqlen, err);
-    if (retval != 0)
-    {
-      gt_assert(retval < 0);
-      return retval;
-    }
-    md5(md5set->buffer, gt_safe_cast2long(seqlen), md5hash_rc);
-  }
-
-  if (gt_hashtable_get(md5set->ht, md5hash))
+  if (gt_hashtable_get(md5set->ht, md5sum))
   {
     return GT_MD5SET_FOUND;
   }
-  else if (double_strand && gt_hashtable_get(md5set->ht, md5hash_rc))
-  {
-    return GT_MD5SET_RC_FOUND;
-  }
   else
   {
-    gt_hashtable_add(md5set->ht, md5hash);
+    gt_hashtable_add(md5set->ht, md5sum);
+    if (double_strand)
+    {
+      retval = gt_reverse_complement(md5set->buffer, seqlen, err);
+      if (retval != 0)
+      {
+        gt_assert(retval < 0);
+        return retval;
+      }
+      md5(md5set->buffer, gt_safe_cast2long(seqlen), md5sum_rc);
+      if (gt_hashtable_get(md5set->ht, md5sum_rc))
+      {
+        return GT_MD5SET_RC_FOUND;
+      }
+    }
     return GT_MD5SET_NOT_FOUND;
   }
 }
