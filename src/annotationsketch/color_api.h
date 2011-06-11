@@ -24,7 +24,7 @@
 typedef struct GtColor GtColor;
 
 struct GtColor {
-    double red, green, blue, alpha;
+  double red, green, blue, alpha;
 };
 
 /* Create a new <GtColor> object with the color given by the <red>, <green>,
