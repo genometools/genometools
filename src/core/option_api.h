@@ -29,7 +29,7 @@ typedef struct GtOptionParser GtOptionParser;
    a <GtOptionParser>).
    Option descriptions are automatically formatted to
    <GT_OPTION_PARSER_TERMINAL_WIDTH>, but it is possible to embed newlines into
-   the descriptions to manually affect the formating. */
+   the descriptions to manually affect the formatting. */
 typedef struct GtOption GtOption;
 
 /* Possible option parser return values. <GT_OPTION_PARSER_OK> denotes that
@@ -107,10 +107,10 @@ void            gt_option_parser_set_max_args(GtOptionParser *option_parser,
 /* The the <minimum> and <maximum> number of additional command line arguments
    <option_parser> must parse in order to succeed. */
 void            gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
-                                                  unsigned int minumum,
+                                                  unsigned int minimum,
                                                   unsigned int maximum);
 /* Use <option_parser> to parse options given in argument vector <argv> (with
-   <argc> many arguments). The number of parsed arguments ist stored in
+   <argc> many arguments). The number of parsed arguments is stored in
    <parsed_args>. <version_func> is used for the output of option <-version>.
    In case of error, GT_OPTION_PARSER_ERROR is returned and <err> is set
    accordingly. */
@@ -294,11 +294,11 @@ GtOption*       gt_option_new_debug(bool *value);
 /* Return a new verbose <GtOption> object: <-v>, "be verbose",
    default is <false>. The result of the option parsing is stored in <value> */
 GtOption*       gt_option_new_verbose(bool *value);
-/* Return a new widht <GtOption> object: <-width>, "set output width for FASTA
+/* Return a new width <GtOption> object: <-width>, "set output width for FASTA
    sequence printing (0 disables formatting)", default is 0.
    The result of the option parsing is stored in <value> */
 GtOption*       gt_option_new_width(unsigned long *value);
-/* Increate the reference count for <option> and return it. */
+/* Increase the reference count for <option> and return it. */
 GtOption*       gt_option_ref(GtOption *option);
 /* Return the name of <option> */
 const char*     gt_option_get_name(const GtOption * option);

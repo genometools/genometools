@@ -45,11 +45,11 @@ typedef struct GtSelectStream GtSelectStream;
    If <min_gene_score> is defined, only genes with at least this score are
    selected.
    If <max_gene_score> is defined, only genes with at most this score are
-   selcected.
+   selected.
    If <min_average_splice_site_prob> is defined, feature nodes which have
    splice sites must have at least this average splice site score to be
    selected.
-   If <feature_num> is defined, just the <feature_num>th feature node occuring
+   If <feature_num> is defined, just the <feature_num>th feature node occurring
    in the <in_stream> is selected.
 */
 GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream,

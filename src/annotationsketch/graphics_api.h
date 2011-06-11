@@ -168,7 +168,7 @@ void   gt_graphics_draw_rectangle(GtGraphics*, double x, double y,
                                   double stroke_width, double width,
                                   double height);
 /* Draws an arrowhead at (<x>,<y>) where these are the top left coordinates.
-   The direction ais determined by the <arrow_status> parameter. */
+   The direction is determined by the <arrow_status> parameter. */
 void   gt_graphics_draw_arrowhead(GtGraphics*, double x, double y, GtColor,
                                   ArrowStatus arrow_status);
 /* Draws a curve over the full visible image width (without margins) at

@@ -27,7 +27,7 @@
    __exon__ and adds them a feature nodes of type __CDS__. */
 typedef struct GtCDSStream GtCDSStream;
 
-/* Create a <GtCDSStream*> which determins the coding sequence (CDS) for
+/* Create a <GtCDSStream*> which determines the coding sequence (CDS) for
    sequences determined feature nodes of type __exon__ it retrieves from
    <in_stream>, adds them as feature nodes of type __CDS__ and returns all
    nodes. <region_mapping> is used to map the sequence IDs of the feature nodes

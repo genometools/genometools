@@ -32,8 +32,8 @@ GtRegionMapping* gt_region_mapping_new_mapping(GtStr *mapping_filename,
                                                GtError *err);
 
 /* Return a new <GtRegionMapping> object for the sequence files given in
-   <sequence_filenames>. If <matcdesc> is <true>, the sequence descriptions from
-   the input files are matched for the desired sequence IDs (in GFF3).
+   <sequence_filenames>. If <matchdesc> is <true>, the sequence descriptions
+   from the input files are matched for the desired sequence IDs (in GFF3).
 
    If <usedesc> is <true>, the sequence descriptions are used to map the
    sequence IDs (in GFF3) to actual sequence entries. If a description contains

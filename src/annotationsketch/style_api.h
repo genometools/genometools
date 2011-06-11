@@ -26,7 +26,7 @@
 
 /* Objects of the <GtStyle> class hold __AnnotationSketch__ style information
    like colors, margins, collapsing options, and others. The class provides
-   methods to set values of various types. Each value is organised into
+   methods to set values of various types. Each value is organized into
    a __section__ and is identified by a __key__. That is, a __section__, __key__
    pair must uniquely identify a value. */
 typedef struct GtStyle GtStyle;

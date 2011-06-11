@@ -21,7 +21,7 @@
 #include "annotationsketch/feature_index_api.h"
 
 /* The <GtFeatureIndexMemory> class implements a <GtFeatureIndex> in memory.
-   Features are organised by region node. Each region node collects its
+   Features are organized by region node. Each region node collects its
    feature nodes in an interval tree structure, which allows for efficient
    range queries. */
 typedef struct GtFeatureIndexMemory GtFeatureIndexMemory;

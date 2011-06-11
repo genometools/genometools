@@ -258,7 +258,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
 
   /* -cdna */
   if (!gthconsensus_parsing) {
-    optcdna = gt_option_new_filename_array("cdna", "specifiy input files "
+    optcdna = gt_option_new_filename_array("cdna", "specify input files "
                                            "containing cDNA/EST sequences",
                                            cdna_files);
     gt_option_parser_add_option(op, optcdna);

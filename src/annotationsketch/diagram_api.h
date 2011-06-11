@@ -55,10 +55,10 @@ GtDiagram* gt_diagram_new_from_array(GtArray *features, const GtRange *range,
 GtRange    gt_diagram_get_range(const GtDiagram *diagram);
 /* Assigns a GtTrackSelectorFunc to use to assign blocks to tracks.
    If none is set, or set to NULL, then track types are used as track keys
-   (default behaviour). */
+   (default behavior). */
 void       gt_diagram_set_track_selector_func(GtDiagram*, GtTrackSelectorFunc,
                                               void*);
-/* Resets the track selection behaviour of this <GtDiagram> back to the
+/* Resets the track selection behavior of this <GtDiagram> back to the
    default. */
 void       gt_diagram_reset_track_selector_func(GtDiagram *diagram);
 /* Registers a new custom track in the diagram. */
