@@ -119,9 +119,9 @@ static void *gt_sfxmap_arguments_new(void)
 
   arguments = gt_malloc(sizeof (*arguments));
   arguments->esaindexname = gt_str_new();
-  arguments->algbounds = gt_str_array_new();
   arguments->pckindexname = gt_str_new();
   arguments->streamesq = gt_str_array_new();
+  arguments->algbounds = gt_str_array_new();
   return arguments;
 }
 
@@ -282,8 +282,6 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                     "matches of given minimum length",
                                     &arguments->spmitv,0);
   gt_option_parser_add_option(op, optionspmitv);
-
-  optionverbose = gt_option_new_verbose(&arguments->verbose);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);

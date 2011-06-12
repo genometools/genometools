@@ -22,34 +22,60 @@
 
 typedef struct  /* global information */
 {
+  unsigned long unnecessaryleaves, totallength;
   const GtEncseq *encseq;
+  GtReadmode readmode;
 } Spmitv_state;
 
-static int processleafedge_spmitv(bool firstsucc,
-                          unsigned long fd,
-                          unsigned long flb,
-                          GT_UNUSED GtBUinfo *info,
-                          unsigned long leafnumber,
-                          GT_UNUSED GtBUstate *bustate,
-                          GT_UNUSED GtError *err)
+static bool gt_iswholeleaf(const GtEncseq *encseq,GtReadmode readmode,
+                           unsigned long leafnumber)
+{
+  if (leafnumber > 0)
+  {
+    GtUchar cc = gt_encseq_get_encoded_char(encseq,
+                                            leafnumber - 1,
+                                            readmode);
+    return (cc == SEPARATOR) ? true : false;
+  }
+  return true;
+}
+
+static int processleafedge_spmitv(GT_UNUSED bool firstsucc,
+                                  unsigned long fd,
+                                  GT_UNUSED unsigned long flb,
+                                  GT_UNUSED GtBUinfo *info,
+                                  unsigned long leafnumber,
+                                  GtBUstate *bustate,
+                                  GT_UNUSED GtError *err)
 
 {
-  printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,leafnumber);
+  Spmitv_state *spmitv_state = (Spmitv_state *) bustate;
+
+  if (leafnumber + fd < spmitv_state->totallength)
+  {
+    GtUchar cc = gt_encseq_get_encoded_char(spmitv_state->encseq,
+                                            leafnumber + fd,
+                                            spmitv_state->readmode);
+    if (cc != SEPARATOR &&
+        !gt_iswholeleaf(spmitv_state->encseq,spmitv_state->readmode,leafnumber))
+    {
+      spmitv_state->unnecessaryleaves++;
+    }
+  }
   return 0;
 }
 
-static int processbranchingedge_spmitv(bool firstsucc,
-                               unsigned long fd,
-                               unsigned long flb,
+static int processbranchingedge_spmitv(GT_UNUSED bool firstsucc,
+                               GT_UNUSED unsigned long fd,
+                               GT_UNUSED unsigned long flb,
                                GT_UNUSED GtBUinfo *finfo,
-                               unsigned long sd,
-                               unsigned long slb,
+                               GT_UNUSED unsigned long sd,
+                               GT_UNUSED unsigned long slb,
                                GT_UNUSED unsigned long srb,
                                GT_UNUSED GtBUinfo *sinfo,
                                GT_UNUSED GtBUstate *bustate,
                                GT_UNUSED GtError *err)
 {
-  printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
   return 0;
 }
 
@@ -72,10 +98,23 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
   }
   if (!haserr)
   {
+    Spmitv_state state;
+
+    state.unnecessaryleaves = 0;
+    state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
+    state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
+    state.totallength = gt_encseq_total_length(state.encseq);
     if (gt_esa_bottomup(ssar, NULL, NULL, processleafedge_spmitv,
-                        processbranchingedge_spmitv, NULL, err) != 0)
+                        processbranchingedge_spmitv, (GtBUstate *) &state,
+                        err) != 0)
     {
       haserr = true;
+    } else
+    {
+      printf("unnecessaryleaves=%lu (%.2f)\n",
+              state.unnecessaryleaves,
+              (double) state.unnecessaryleaves/(state.totallength -
+                                    gt_encseq_specialcharacters(state.encseq)));
     }
   }
   if (ssar != NULL)
