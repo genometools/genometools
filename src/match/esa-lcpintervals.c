@@ -30,12 +30,12 @@ typedef struct  /* global information */
   void *processinfo;
 } Elcpstate;
 
-static Dfsinfo *elcp_allocateDfsinfo(GT_UNUSED Dfsstate *astate)
+static Dfsinfo *allocateDfsinfo_elcp(GT_UNUSED Dfsstate *astate)
 {
   return (Dfsinfo *) gt_malloc(sizeof (Lcpinterval));
 }
 
-static void elcp_freeDfsinfo(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
+static void freeDfsinfo_elcp(Dfsinfo *adfsinfo,GT_UNUSED Dfsstate *state)
 {
   gt_free((Lcpinterval *) adfsinfo);
 }
@@ -47,7 +47,7 @@ static void showbranchingedgeDFS(bool firstsucc,unsigned long fd,
   printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
 }
 
-static int elcp_processleafedge(bool firstsucc,
+static int processleafedge_elcp(bool firstsucc,
                                 unsigned long fatherdepth,
                                 Dfsinfo *afather,
                                 unsigned long leafnumber,
@@ -61,7 +61,7 @@ static int elcp_processleafedge(bool firstsucc,
   return 0;
 }
 
-static int elcp_processbranchedge(bool firstsucc,
+static int processbranchedge_elcp(bool firstsucc,
                                   unsigned long fatherdepth,
                                   Dfsinfo *afather,
                                   Dfsinfo *ason,
@@ -85,7 +85,7 @@ static int elcp_processbranchedge(bool firstsucc,
   return 0;
 }
 
-static int elcp_processcompletenode(
+static int processcompletenode_elcp(
                           unsigned long nodeptrdepth,
                           Dfsinfo *anodeptr,
                           GT_UNUSED unsigned long nodeptrminusonedepth,
@@ -111,14 +111,14 @@ static int elcp_processcompletenode(
   return 0;
 }
 
-static void elcp_assignleftmostleaf(Dfsinfo *adfsinfo,
+static void assignleftmostleaf_elcp(Dfsinfo *adfsinfo,
                                     unsigned long leftmostleaf,
                                     GT_UNUSED Dfsstate *dfsstate)
 {
   ((Lcpinterval *) adfsinfo)->left = leftmostleaf;
 }
 
-static void elcp_assignrightmostleaf(Dfsinfo *adfsinfo,
+static void assignrightmostleaf_elcp(Dfsinfo *adfsinfo,
                                      unsigned long currentindex,
                                      GT_UNUSED unsigned long previoussuffix,
                                      GT_UNUSED unsigned long currentlcp,
@@ -149,13 +149,13 @@ static int gt_enumlcpvalues(bool outedges,
     state->processinfo = processinfo;
   }
   if (gt_depthfirstesa(ssar,
-                       elcp_allocateDfsinfo,
-                       elcp_freeDfsinfo,
-                       outedges ? elcp_processleafedge : NULL,
-                       outedges ? elcp_processbranchedge : NULL,
-                       elcp_processcompletenode,
-                       elcp_assignleftmostleaf,
-                       elcp_assignrightmostleaf,
+                       allocateDfsinfo_elcp,
+                       freeDfsinfo_elcp,
+                       outedges ? processleafedge_elcp : NULL,
+                       outedges ? processbranchedge_elcp : NULL,
+                       processcompletenode_elcp,
+                       assignleftmostleaf_elcp,
+                       assignrightmostleaf_elcp,
                        (Dfsstate *) state,
                        logger,
                        err) != 0)

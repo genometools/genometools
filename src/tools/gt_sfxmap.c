@@ -35,6 +35,7 @@
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
 #include "match/esa-lcpintervals.h"
+#include "match/esa-spmitvs.h"
 #include "tools/gt_sfxmap.h"
 
 typedef struct
@@ -59,7 +60,8 @@ typedef struct
   GtStr *esaindexname,
         *pckindexname;
   unsigned int sortmaxdepth,
-               scanesa;
+               scanesa,
+               spmitv;
   GtStrArray *algbounds,
              *streamesq;
 } Sfxmapoptions;
@@ -147,7 +149,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
          *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
-         *optionscanesa;
+         *optionscanesa, *optionspmitv;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -274,6 +276,14 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                      "scan suftab and lcptab",
                                      &arguments->scanesa,0);
   gt_option_parser_add_option(op, optionscanesa);
+
+  optionspmitv = gt_option_new_uint("spmitv",
+                                    "count intervals for suffix prefix "
+                                    "matches of given minimum length",
+                                    &arguments->spmitv,0);
+  gt_option_parser_add_option(op, optionspmitv);
+
+  optionverbose = gt_option_new_verbose(&arguments->verbose);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
@@ -1004,6 +1014,15 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   {
     if (gt_runscanesa(gt_str_get(arguments->esaindexname),arguments->scanesa,
                       err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && arguments->spmitv > 0)
+  {
+    if (gt_process_spmitv(gt_str_get(arguments->esaindexname),
+                          arguments->spmitv,
+                          err) != 0)
     {
       haserr = true;
     }
