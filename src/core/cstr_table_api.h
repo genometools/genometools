@@ -21,20 +21,20 @@
 #include "core/error_api.h"
 #include "core/str_array_api.h"
 
-/* Implements a table of C-strings. */
+/* Implements a table of C strings. */
 typedef struct GtCstrTable GtCstrTable;
 
 /* Return a new <GtCstrTable> object. */
 GtCstrTable*  gt_cstr_table_new(void);
 /* Add <cstr> to <table>. <table> must not already contain <cstr>! */
 void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
-/* If a C-string equal to <cstr> is contained in <table>, it is returned.
+/* If a C string equal to <cstr> is contained in <table>, it is returned.
    Otherwise NULL is returned. */
 const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
 GtStrArray*   gt_cstr_table_get_all(const GtCstrTable *table);
-/* Delete C-string <table>. */
+/* Delete C string <table>. */
 void          gt_cstr_table_delete(GtCstrTable *table);
 
 #endif

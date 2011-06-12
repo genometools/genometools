@@ -47,7 +47,7 @@ void          gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *gff3_parser);
    <status_code> is set to 0 if at least one genome node was created (and stored
    in <genome_nodes>) and to <EOF> if no further genome nodes could be parsed
    from <fpin>. Every encountered (genome feature) type is recorded in the
-   C-string table <used_types>. The parser uses the given <filenamestr> to
+   C string table <used_types>. The parser uses the given <filenamestr> to
    store the file name of <fpin> in the created genome nodes or to give the
    correct filename in error messages, if necessary.
    <line_number> is increased accordingly during parsing and has to be set to 0
