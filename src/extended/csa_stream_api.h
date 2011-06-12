@@ -27,9 +27,9 @@
    alignments and transforms them into consensus spliced alignments. */
 typedef struct GtCSAStream GtCSAStream;
 
-/* Create a <GtCSAStream*> which takes spliced alignments from its (which are at
-   most <join_length> many bases apart), transforms them into consensus spliced
-   alignments, and returns them. */
+/* Create a <GtCSAStream*> which takes spliced alignments from its <in_stream>
+   (which are at most <join_length> many bases apart), transforms them into
+   consensus spliced alignments, and returns them. */
 GtNodeStream* gt_csa_stream_new(GtNodeStream *in_stream,
                                 unsigned long join_length);
 

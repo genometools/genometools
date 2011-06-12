@@ -23,7 +23,7 @@
 /* <GtStrArray*> objects are arrays of string which grow on demand. */
 typedef struct GtStrArray GtStrArray;
 
-/* Return a new <GtStrArray*> object. */
+/* Return a new <GtStrArray> object. */
 GtStrArray*   gt_str_array_new(void);
 /* Increases the reference to a GtStrArray. */
 GtStrArray*   gt_str_array_ref(GtStrArray*);

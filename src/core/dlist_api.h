@@ -26,25 +26,25 @@
 typedef struct GtDlist GtDlist;
 typedef struct GtDlistelem GtDlistelem;
 
-/* Return a new <GtDlist> sorted according to <compar> function. If <compar>
-   equals <NULL>, no sorting is enforced. */
+/* Return a new <GtDlist> object sorted according to <compar> function. If
+   <compar> equals <NULL>, no sorting is enforced. */
 GtDlist*      gt_dlist_new(GtCompare compar);
 
-/* Return the first <GtDlistelem> in <dlist>. */
+/* Return the first <GtDlistelem> object in <dlist>. */
 GtDlistelem*  gt_dlist_first(const GtDlist *dlist);
 
-/* Return the last <GtDlistelem> in <dlist>. */
+/* Return the last <GtDlistelem> object in <dlist>. */
 GtDlistelem*  gt_dlist_last(const GtDlist *dlist);
 
-/* Return the first <GtDlistelem> in <dlist> which contains data identical
-   to <data>. Takes O(n) time. */
+/* Return the first <GtDlistelem> object in <dlist> which contains data
+   identical to <data>. Takes O(n) time. */
 GtDlistelem*  gt_dlist_find(const GtDlist *dlist, void *data);
 
-/* Return the number of <GtDlistelem>s in <dlist>. */
+/* Return the number of <GtDlistelem> objects in <dlist>. */
 unsigned long gt_dlist_size(const GtDlist *dlist);
 
-/* Add a new <GtDlistelem> containing <data> to <dlist>. Usually O(n), but
-   O(1) if data is added in sorted order. */
+/* Add a new <GtDlistelem> object containing <data> to <dlist>.
+   Usually O(n), but O(1) if data is added in sorted order. */
 void          gt_dlist_add(GtDlist *dlist, void *data);
 
 /* Remove <dlistelem> from <dlist> and free it. */

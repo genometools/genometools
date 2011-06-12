@@ -21,7 +21,7 @@
 #include "core/error_api.h"
 
 /* Implements the <GtGenomeNode> interface. Comment nodes correspond to comment
-   lines in GFF3 files (i.e., lines which start with a single <#>). */
+   lines in GFF3 files (i.e., lines which start with a single ``<#>''). */
 typedef struct GtCommentNode GtCommentNode;
 
 #include "extended/genome_node_api.h"
@@ -29,8 +29,8 @@ typedef struct GtCommentNode GtCommentNode;
 const GtGenomeNodeClass* gt_comment_node_class(void);
 
 /* Return a new <GtCommentNode> object representing a <comment>. Please note
-   that the single leading <#> which denotes comment lines in GFF3 files should
-   not be part of <comment>. */
+   that the single leading ``<#>'' which denotes comment lines in GFF3 files
+   should not be part of <comment>. */
 GtGenomeNode*            gt_comment_node_new(const char *comment);
 
 /* Return the comment stored in <comment_node>. */

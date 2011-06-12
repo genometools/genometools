@@ -2,11 +2,11 @@ The following contributors helped to develop GenomeTools. Please drop a note to
 gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 
 - Stefan Bienert (patches)
-- David Ellinghaus (parts of ltr/, ltrharvest tool)
+- David Ellinghaus (parts of ltr/ subdirectory, ltrharvest tool)
 - Giorgio Gonnella (codegen, simreads tool, patches)
 - Thomas Jahns (BitPackArray and BitPackString class, block-compressed FM-index)
 - Malte Mader (AnnotationSketch, sketch tool)
 - Brent Pedersen (python bindings, patches)
 - Christin Schaerfer (AnnotationSketch, sketch tool)
-- David Schmitz-Huebsch (mgth/, mgth tool)
+- David Schmitz-Huebsch (mgth/ subdirectory, mgth tool)
 - Dirk Willrodt (genomediff tool, patches)

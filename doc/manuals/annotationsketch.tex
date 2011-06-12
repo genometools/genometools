@@ -278,10 +278,10 @@ Using this track selector function would produce the desired result of separate 
 A track selector function can be set for a \emph{Diagram} object using the \texttt{diagram.set\_track\_se\-lec\-tor\_func()} method. In C, its argument is a pointer to a function of the signature
 \medskip
 \begin{verbatim}
-const char* (*GtTrackSelectorFunc)(GtBlock*, void*)
+void (*GtTrackSelectorFunc)(GtBlock*, GtStr*, void*)
 \end{verbatim}
 \medskip
-where arbitrary data can be passed via the second \texttt{void*} argument. The Python \texttt{set\_track\_se\-lec\-tor\_func()} method directly accepts a Python function as an argument, while the Ruby version takes a Proc object:
+where arbitrary data can be passed via the third \texttt{void*} argument. The Python \texttt{set\_track\_se\-lec\-tor\_func()} method directly accepts a Python function as an argument, while the Ruby version takes a Proc object:
 
 \begin{lstlisting}[language=Ruby, showstringspaces=false,numbers=none,frame=single]
 ...

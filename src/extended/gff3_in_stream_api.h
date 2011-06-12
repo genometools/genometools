@@ -22,7 +22,7 @@
 #include "extended/node_stream_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtGFF3InStream> parses GFF3 files
-   and returns them as a stream of <GtGenomeNode>s. */
+   and returns them as a stream of <GtGenomeNode> objects. */
 typedef struct GtGFF3InStream GtGFF3InStream;
 
 /* Return a <GtGFF3InStream> object which subsequently reads the <num_of_files>

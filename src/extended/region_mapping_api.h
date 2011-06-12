@@ -22,7 +22,8 @@
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 
-/* A <GtRegionMapping> objects map sequence-regions to sequence files. */
+/* A <GtRegionMapping> objects maps sequence-regions to the corresponding
+   entries of sequence files. */
 typedef struct GtRegionMapping GtRegionMapping;
 
 /* Return a new <GtRegionMapping> object for the mapping file with the given

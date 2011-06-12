@@ -21,7 +21,8 @@
 #include <stdio.h>
 #include "extended/node_stream_api.h"
 
-/* Implements the <GtNodeStream> interface. */
+/* Implements the <GtNodeStream> interface. A <GtGTFInStream> parses a GTF2.2
+   file and returns it as a stream of <GtGenomeNode> objects. */
 typedef struct GtGTFInStream GtGTFInStream;
 
 /* Create a <GtGTFInStream*> which subsequently reads the GTF file with the

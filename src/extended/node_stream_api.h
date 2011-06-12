@@ -24,8 +24,8 @@
 
 typedef struct GtNodeStreamClass GtNodeStreamClass;
 
-/* The <GtNodeStream> interface. <GtNodeStream>s process <GtGenomeNode>s in a
-   pull-based architecture and can be chained together. */
+/* The <GtNodeStream> interface. <GtNodeStream> objects process <GtGenomeNode>
+   objects in a pull-based architecture and can be chained together. */
 typedef struct GtNodeStream GtNodeStream;
 
 /* Increase the reference count for <node_stream> and return it. */
@@ -44,8 +44,8 @@ int           gt_node_stream_next(GtNodeStream *node_stream,
    and <err> is set). All retrieved <GtGenomeNode>s are deleted automatically
    with calls to <gt_genome_node_delete()>.
    This method is basically a convenience method which simplifies calls to
-   <gt_node_stream_next()> in a loop where retrieved <GtGenomeNode>s are not
-   processed any further. */
+   <gt_node_stream_next()> in a loop where the retrieved <GtGenomeNode> objects
+   are not processed any further. */
 int           gt_node_stream_pull(GtNodeStream *node_stream, GtError *err);
 /* Return <true> if <node_stream> is a sorted stream, <false> otherwise. */
 bool          gt_node_stream_is_sorted(GtNodeStream *node_stream);

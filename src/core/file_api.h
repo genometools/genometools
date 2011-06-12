@@ -22,21 +22,21 @@
 
 /* This class defines (generic) files in __GenomeTools__. A generic file is is a
    file which either uncompressed or compressed (with gzip or bzip2).
-   A <NULL>-pointer as generic file implies stdout. */
+   A <NULL>-pointer as generic file implies <stdout>. */
 typedef struct GtFile GtFile;
 
-/* Return a new <GtFile> object and open the underlying file handle with given
-   <mode>. Returns NULL and sets <err> accordingly, if the file <path> could not
-   be opened. The compression mode is determined by the ending of <path> (gzip
-   compression if it ends with '.gz', bzip2 compression if it ends with '.bz2',
-   and uncompressed otherwise). */
+/* Return a new <GtFile> object for the given <path> and open the underlying
+   file handle with given <mode>. Returns <NULL> and sets <err> accordingly, if
+   the file <path> could not be opened. The compression mode is determined by
+   the ending of <path> (gzip compression if it ends with '.gz', bzip2
+   compression if it ends with '.bz2', and uncompressed otherwise). */
 GtFile* gt_file_new(const char *path, const char *mode, GtError *err);
 
 /* <printf(3)> for generic <file>. */
 void    gt_file_xprintf(GtFile *file, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
 
-/* Write <\0>-terminated string <cstr> to <file>. Similar to <fputs(3)>, but
+/* Write <\0>-terminated C string <cstr> to <file>. Similar to <fputs(3)>, but
    terminates on error. */
 void    gt_file_xfputs(const char *cstr, GtFile *file);
 

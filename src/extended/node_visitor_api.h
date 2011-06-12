@@ -18,7 +18,7 @@
 #ifndef NODE_VISITOR_API_H
 #define NODE_VISITOR_API_H
 
-/* The <GtNodeVisitor> interface, a visitor for <GtGenomeNode>s. */
+/* The <GtNodeVisitor> interface, a visitor for <GtGenomeNode> objects. */
 typedef struct GtNodeVisitor GtNodeVisitor;
 
 #include "extended/comment_node_api.h"

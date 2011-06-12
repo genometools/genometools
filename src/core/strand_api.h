@@ -18,8 +18,9 @@
 #ifndef STRAND_API_H
 #define STRAND_API_H
 
-/* This enum type defines the possible strands, namely <GT_STRAND_FORWARD>,
-   <GT_STRAND_REVERSE>, <GT_STRAND_BOTH>, and <GT_STRAND_UNKNOWN>. */
+/* This enum type defines the possible strands. The following strands are
+   defined: <GT_STRAND_FORWARD>, <GT_STRAND_REVERSE>, <GT_STRAND_BOTH>, and
+   <GT_STRAND_UNKNOWN>. */
 typedef enum GtStrand GtStrand;
 
 enum GtStrand {

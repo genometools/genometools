@@ -66,7 +66,7 @@ GtOptionParser* gt_option_parser_new(const char *synopsis,
 void            gt_option_parser_add_option(GtOptionParser *option_parser,
                                             GtOption *option);
 /* Return the <GtOption> object if an option named <option_string> is present in
-   <option_parser>, and <NULL> if no such option exists in <option_parser>. */
+   <option_parser>, and <NULL> if no such option exists. */
 GtOption*       gt_option_parser_get_option(GtOptionParser *option_parser,
                                             const char *option_string);
 /* Refer to manual at the end of <-help> output of <opion_parser>. */
@@ -91,7 +91,7 @@ void            gt_option_parser_set_mail_address(GtOptionParser*,
    functions are called at the end of <gt_option_parser_parse(>).
    This allows to have a module which registers a bunch of options in the option
    parser and automatically performs necessary postprocessing after the option
-   parsing has been done via a hook function. */
+   parsing has been done via the hook function. */
 void            gt_option_parser_register_hook(GtOptionParser *option_parser,
                                                GtOptionParserHookFunc
                                                hook_function,
@@ -112,7 +112,7 @@ void            gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
 /* Use <option_parser> to parse options given in argument vector <argv> (with
    <argc> many arguments). The number of parsed arguments is stored in
    <parsed_args>. <version_func> is used for the output of option <-version>.
-   In case of error, GT_OPTION_PARSER_ERROR is returned and <err> is set
+   In case of error, <GT_OPTION_PARSER_ERROR> is returned and <err> is set
    accordingly. */
 GtOPrval        gt_option_parser_parse(GtOptionParser *option_parser,
                                        int *parsed_args,
@@ -318,13 +318,13 @@ void            gt_option_is_extended_option(GtOption *option);
 void            gt_option_is_development_option(GtOption *option);
 /* Make <option_a> imply <option_b>. */
 void            gt_option_imply(GtOption *option_a, const GtOption *option_b);
-/* Make <option_b> imply either <option_b> or <option_c> */
+/* Make <option_a> imply either <option_b> or <option_c> */
 void            gt_option_imply_either_2(GtOption *option_a,
                                          const GtOption *option_b,
                                          const GtOption *option_c);
 /* Set that the options <option_a> and <option_b> exclude each other. */
 void            gt_option_exclude(GtOption *option_a, GtOption *option_b);
-/* Hide the default value of <option> in help output. */
+/* Hide the default value of <option> in <-help> output. */
 void            gt_option_hide_default(GtOption *option);
 /* Set that the argument to <option> is optional */
 void            gt_option_argument_is_optional(GtOption *option);

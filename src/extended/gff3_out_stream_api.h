@@ -22,7 +22,8 @@
 #include "extended/node_stream_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtGFF3OutStream> produces GFF3
-   output. */
+   output.
+   It automatically inserts termination lines at the appropriate places. */
 typedef struct GtGFF3OutStream GtGFF3OutStream;
 
 const GtNodeStreamClass* gt_gff3_out_stream_class(void);

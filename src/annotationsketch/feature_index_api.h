@@ -26,7 +26,7 @@
 #include "extended/feature_node_api.h"
 #include "extended/region_node_api.h"
 
-/* This interface represents a searchable container for <FeatureNode> objects,
+/* This interface represents a searchable container for <GtFeatureNode> objects,
    typically root nodes of larger structures. How storage and searching takes
    place is left to the discretion of the implementing class.
 

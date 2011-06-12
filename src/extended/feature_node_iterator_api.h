@@ -23,7 +23,8 @@
 typedef struct GtFeatureNodeIterator GtFeatureNodeIterator;
 
 /* Return a new <GtFeatureNodeIterator*> which performs a depth-first
-   traversal of <feature_node> (including <feature_node> itself). */
+   traversal of <feature_node> (including <feature_node> itself).
+   It ignores pseudo-features. */
 GtFeatureNodeIterator* gt_feature_node_iterator_new(const GtFeatureNode
                                                     *feature_node);
 /* Return a new <GtFeatureNodeIterator*> which iterates over all direct

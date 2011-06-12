@@ -24,9 +24,9 @@
 /* Objects of the <GtStr> class are strings which grow on demand. */
 typedef struct GtStr GtStr;
 
-/* Return an empty <GtStr*> object. */
+/* Return an empty <GtStr> object. */
 GtStr*        gt_str_new(void);
-/* Return a new <GtStr*> object whose content is set to <cstr>. */
+/* Return a new <GtStr> object whose content is set to <cstr>. */
 GtStr*        gt_str_new_cstr(const char *cstr);
 /* Return a clone of <str>. */
 GtStr*        gt_str_clone(const GtStr *str);

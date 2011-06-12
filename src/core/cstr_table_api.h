@@ -29,7 +29,7 @@ GtCstrTable*  gt_cstr_table_new(void);
 /* Add <cstr> to <table>. <table> must not already contain <cstr>! */
 void          gt_cstr_table_add(GtCstrTable *table, const char *cstr);
 /* If a C string equal to <cstr> is contained in <table>, it is returned.
-   Otherwise NULL is returned. */
+   Otherwise <NULL> is returned. */
 const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */

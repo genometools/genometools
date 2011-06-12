@@ -28,7 +28,8 @@
    The implementation as a char* shines through (also to save one additional
    memory allocation), therefore the usage is a little bit different compared
    to other __GenomeTools__ classes.
-   See the implementation of <gt_tag_value_map_example()> for an example. */
+   See the implementation of <gt_tag_value_map_example()> for an ussage
+   example. */
 typedef char* GtTagValueMap;
 
 /* Iterator function used to iterate over tag/value maps. A <tag>/<value> pair
@@ -56,7 +57,7 @@ const char*   gt_tag_value_map_get(const GtTagValueMap tag_value_map,
 void          gt_tag_value_map_foreach(const GtTagValueMap tag_value_map,
                                        GtTagValueMapIteratorFunc iterator_func,
                                        void *data);
-/* Implements an example use of a tag/value map. */
+/* Implements an example useage of a tag/value map. */
 int           gt_tag_value_map_example(GtError *err);
 /* Delete <tag_value_map>. */
 void          gt_tag_value_map_delete(GtTagValueMap tag_value_map);

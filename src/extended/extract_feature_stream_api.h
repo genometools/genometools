@@ -23,17 +23,17 @@
 #include "extended/node_stream_api.h"
 #include "extended/region_mapping_api.h"
 
-/* Implements the <GtNodeStream> interface. A <GtExtractFeatureStream> extract
-   the sequences of features. */
+/* Implements the <GtNodeStream> interface. A <GtExtractFeatureStream> extracts
+   the corresponding sequences of features. */
 typedef struct GtExtractFeatureStream GtExtractFeatureStream;
 
-/* Create a <GtExtractFeatureStream*> which extracts the sequences of feature
-   nodes (of the given <type>) it retrieves from <in_stream> and writes them in
-   FASTA format (with the given <width>) to <outfp>. If <join> is <true>,
-   features of the given <type> are joined together before the sequence is
-   extracted. If <translate> is <true>, the sequences are translated into amino
-   acid sequences before they are written to <outfp>.
-   Takes ownership of <region_mapping>! */
+/* Create a <GtExtractFeatureStream*> which extracts the corresponding sequences
+   of feature nodes (of the given <type>) it retrieves from <in_stream> and
+   writes them in FASTA format (with the given <width>) to <outfp>. If <join> is
+   <true>, features of the given <type> are joined together before the sequence
+   is extracted. If <translate> is <true>, the sequences are translated into
+   amino acid sequences before they are written to <outfp>.  Takes ownership of
+   <region_mapping>! */
 GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *region_Mapping,
                                             const char *type, bool join,

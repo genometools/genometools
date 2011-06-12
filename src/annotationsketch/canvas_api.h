@@ -18,9 +18,9 @@
 #ifndef CANVAS_API_H
 #define CANVAS_API_H
 
-/* This class is an abstraction of a stateful drawing surface. Constructors
-   must be implemented in subclasses as different arguments are required for
-   drawing to specific graphics back-ends.  */
+/* The <GtCanvas> class is an abstraction of a stateful drawing surface.
+   Constructors must be implemented in subclasses as different arguments are
+   required for drawing to specific graphics back-ends. */
 typedef struct GtCanvas GtCanvas;
 
 /* Returns the height of the given <canvas>. */

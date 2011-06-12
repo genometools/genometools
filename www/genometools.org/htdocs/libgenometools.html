@@ -736,7 +736,7 @@ Decrease the reference count for <code>array</code> or delete it, if this was th
 <h2>Class GtBEDInStream</h2>
 
 <p> Implements the <code>GtNodeStream</code> interface. A <code>GtBEDInStream</code> allows to parse
-   BED files. </p>
+   a BED file and return it as a stream of <code>GtGenomeNode</code> objects. </p>
 
 <hr>
 <a name="gt_bed_in_stream_new"></a>
@@ -1083,7 +1083,7 @@ Deletes a <code>GtBlock</code>.
 
 <p> Implements the <code>GtNodeStream</code> interface. A <code>GtCDSStream</code> determines the
    coding sequence (CDS) for sequences determined by feature nodes of type
-   <em>exon</em> and adds them a feature nodes of type <em>CDS</em>. </p>
+   <em>exon</em> and adds them as feature nodes of type <em>CDS</em>. </p>
 
 <hr>
 <a name="gt_cds_stream_new"></a>
@@ -1094,8 +1094,8 @@ Deletes a <code>GtBlock</code>.
                                 bool start_codon, bool final_stop_codon,
                                 bool generic_star_codons)</code>
 <p>
-Create a <code>GtCDSStream*</code> which determins the coding sequence (CDS) for
-   sequences determined feature nodes of type <em>exon</em> it retrieves from
+Create a <code>GtCDSStream*</code> which determines the coding sequence (CDS) for
+   sequences determined by feature nodes of type <em>exon</em> it retrieves from
    <code>in_stream</code>, adds them as feature nodes of type <em>CDS</em> and returns all
    nodes. <code>region_mapping</code> is used to map the sequence IDs of the feature nodes
    to the regions of the actual sequences. <code>minorflen</code> is the minimum length an
@@ -1119,17 +1119,17 @@ Create a <code>GtCDSStream*</code> which determins the coding sequence (CDS) for
 <code>GtNodeStream*  gt_csa_stream_new(GtNodeStream *in_stream,
                                 unsigned long join_length)</code>
 <p>
-Create a <code>GtCSAStream*</code> which takes spliced alignments from its (which are at
-   most <code>join_length</code> many bases apart), tranforms them into consensus spliced
-   alignments, and returns them.
+Create a <code>GtCSAStream*</code> which takes spliced alignments from its <code>in_stream</code>
+   (which are at most <code>join_length</code> many bases apart), transforms them into
+   consensus spliced alignments, and returns them.
 </p>
 <hr>
 <a name="GtCanvas"></a>
 <h2>Class GtCanvas</h2>
 
-<p> This class is an abstraction of a stateful drawing surface. Constructors
-   must be implemented in subclasses as different arguments are required for
-   drawing to specific graphics back-ends.  </p>
+<p> The <code>GtCanvas</code> class is an abstraction of a stateful drawing surface.
+   Constructors must be implemented in subclasses as different arguments are
+   required for drawing to specific graphics back-ends. </p>
 
 <hr>
 <a name="gt_canvas_get_height"></a>
@@ -1150,7 +1150,7 @@ Delete the given <code>canvas</code>.
 <h2>Class GtCanvasCairoContext</h2>
 
 <p> Implements the <code>GtCanvas</code> interface using a Cairo context (<code>cairo_t</code>)
-   as input. This Canvas uses the GtGraphicsCairo class.</p><p>   Drawing to a <code>cairo_t</code> allows the use of the  <em>AnnotationSketch</em> engine
+   as input. This Canvas uses the <code>GtGraphicsCairo</code> class.</p><p>   Drawing to a <code>cairo_t</code> allows the use of the  <em>AnnotationSketch</em> engine
    in any Cairo-based graphical application. </p>
 
 <hr>
@@ -1163,9 +1163,9 @@ Delete the given <code>canvas</code>.
                                       GtImageInfo *image_info,
                                       GtError *err)</code>
 <p>
-Create a new Canvas object tied to the cairo_t <code>context</code>, <code>width</code> and
-   <code>height</code> using the style given in <code>style</code>. The optional <code>image_info</code> is
-   filled when the created Canvas object is used to render a Diagram object.
+Create a new <code>GtCanvas</code> object tied to the cairo_t <code>context</code>, <code>width</code> and
+   <code>height</code> using the given <code>style</code>. The optional <code>image_info</code> is
+   filled when the created Canvas object is used to render a <code>GtDiagram</code> object.
    <code>offsetpos</code> determines where to start drawing on the surface.
 </p>
 <hr>
@@ -1308,7 +1308,7 @@ Delete the <code>color</code> object.
 <h2>Class GtCommentNode</h2>
 
 <p> Implements the <code>GtGenomeNode</code> interface. Comment nodes correspond to comment
-   lines in GFF3 files (i.e., lines which start with a single <code>#</code>). </p>
+   lines in GFF3 files (i.e., lines which start with a single ``<code>#</code>''). </p>
 
 <hr>
 <a name="gt_comment_node_new"></a>
@@ -1316,8 +1316,8 @@ Delete the <code>color</code> object.
 <code>GtGenomeNode*             gt_comment_node_new(const char *comment)</code>
 <p>
 Return a new <code>GtCommentNode</code> object representing a <code>comment</code>. Please note
-   that the single leading <code>#</code> which denotes comment lines in GFF3 files should
-   not be part of <code>comment</code>.
+   that the single leading ``<code>#</code>'' which denotes comment lines in GFF3 files
+   should not be part of <code>comment</code>.
 </p>
 <hr>
 <a name="gt_comment_node_get_comment"></a>
@@ -1331,7 +1331,7 @@ Return the comment stored in <code>comment_node</code>.
 <a name="GtCstrTable"></a>
 <h2>Class GtCstrTable</h2>
 
-<p> Implements a table of C-strings. </p>
+<p> Implements a table of C strings. </p>
 
 <hr>
 <a name="gt_cstr_table_new"></a>
@@ -1352,8 +1352,8 @@ Add <code>cstr</code> to <code>table</code>. <code>table</code> must not already
 
 <code>const char*    gt_cstr_table_get(const GtCstrTable *table, const char *cstr)</code>
 <p>
-If a C-string equal to <code>cstr</code> is contained in <code>table</code>, it is returned.
-   Otherwise NULL is returned.
+If a C string equal to <code>cstr</code> is contained in <code>table</code>, it is returned.
+   Otherwise <code>NULL</code> is returned.
 </p>
 <hr>
 <a name="gt_cstr_table_get_all"></a>
@@ -1368,7 +1368,7 @@ Return a <code>GtStrArray*</code> which contains all <code>cstr</code>s added to
 
 <code>void           gt_cstr_table_delete(GtCstrTable *table)</code>
 <p>
-Delete C-string <code>table</code>.
+Delete C string <code>table</code>.
 </p>
 <hr>
 <a name="GtCustomTrack"></a>
@@ -1488,14 +1488,14 @@ Returns the sequence position range represented by the <code>diagram</code>.
 <p>
 Assigns a GtTrackSelectorFunc to use to assign blocks to tracks.
    If none is set, or set to NULL, then track types are used as track keys
-   (default behaviour).
+   (default behavior).
 </p>
 <hr>
 <a name="gt_diagram_reset_track_selector_func"></a>
 
 <code>void        gt_diagram_reset_track_selector_func(GtDiagram *diagram)</code>
 <p>
-Resets the track selection behaviour of this <code>GtDiagram</code> back to the
+Resets the track selection behavior of this <code>GtDiagram</code> back to the
    default.
 </p>
 <hr>
@@ -1524,45 +1524,45 @@ Delete the <code>diagram</code> and all its components.
 
 <code>GtDlist*       gt_dlist_new(GtCompare compar)</code>
 <p>
-Return a new <code>GtDlist</code> sorted according to <code>compar</code> function. If <code>compar</code>
-   equals <code>NULL</code>, no sorting is enforced.
+Return a new <code>GtDlist</code> object sorted according to <code>compar</code> function. If
+   <code>compar</code> equals <code>NULL</code>, no sorting is enforced.
 </p>
 <hr>
 <a name="gt_dlist_first"></a>
 
 <code>GtDlistelem*   gt_dlist_first(const GtDlist *dlist)</code>
 <p>
-Return the first <code>GtDlistelem</code> in <code>dlist</code>.
+Return the first <code>GtDlistelem</code> object in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_last"></a>
 
 <code>GtDlistelem*   gt_dlist_last(const GtDlist *dlist)</code>
 <p>
-Return the last <code>GtDlistelem</code> in <code>dlist</code>.
+Return the last <code>GtDlistelem</code> object in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_find"></a>
 
 <code>GtDlistelem*   gt_dlist_find(const GtDlist *dlist, void *data)</code>
 <p>
-Return the first <code>GtDlistelem</code> in <code>dlist</code> which contains data identical
-   to <code>data</code>. Takes O(n) time.
+Return the first <code>GtDlistelem</code> object in <code>dlist</code> which contains data
+   identical to <code>data</code>. Takes O(n) time.
 </p>
 <hr>
 <a name="gt_dlist_size"></a>
 
 <code>unsigned long  gt_dlist_size(const GtDlist *dlist)</code>
 <p>
-Return the number of <code>GtDlistelem</code>s in <code>dlist</code>.
+Return the number of <code>GtDlistelem</code> objects in <code>dlist</code>.
 </p>
 <hr>
 <a name="gt_dlist_add"></a>
 
 <code>void           gt_dlist_add(GtDlist *dlist, void *data)</code>
 <p>
-Add a new <code>GtDlistelem</code> containing <code>data</code> to <code>dlist</code>. Usually O(n), but
-   O(1) if data is added in sorted order.
+Add a new <code>GtDlistelem</code> object containing <code>data</code> to <code>dlist</code>.
+   Usually O(n), but O(1) if data is added in sorted order.
 </p>
 <hr>
 <a name="gt_dlist_remove"></a>
@@ -2669,8 +2669,8 @@ Delete the error object <code>err</code>.
 <a name="GtExtractFeatureStream"></a>
 <h2>Class GtExtractFeatureStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. A <code>GtExtractFeatureStream</code> extract
-   the sequences of features. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtExtractFeatureStream</code> extracts
+   the corresponding sequences of features. </p>
 
 <hr>
 <a name="gt_extract_feature_stream_new"></a>
@@ -2681,19 +2681,19 @@ Delete the error object <code>err</code>.
                                             bool translate, unsigned long width,
                                             GtFile *outfp)</code>
 <p>
-Create a <code>GtExtractFeatureStream*</code> which extracts the sequences of feature
-   nodes (of the given <code>type</code>) it retrieves from <code>in_stream</code> and writes them in
-   FASTA format (with the given <code>width</code>) to <code>outfp</code>. If <code>join</code> is <code>true</code>,
-   features of the given <code>type</code> are joined together before the sequence is
-   extracted. If <code>translate</code> is <code>true</code>, the sequences are translated into amino
-   acid sequences before they are written to <code>outfp</code>.
-   Takes ownership of <code>region_mapping</code>!
+Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding sequences
+   of feature nodes (of the given <code>type</code>) it retrieves from <code>in_stream</code> and
+   writes them in FASTA format (with the given <code>width</code>) to <code>outfp</code>. If <code>join</code> is
+   <code>true</code>, features of the given <code>type</code> are joined together before the sequence
+   is extracted. If <code>translate</code> is <code>true</code>, the sequences are translated into
+   amino acid sequences before they are written to <code>outfp</code>.  Takes ownership of
+   <code>region_mapping</code>!
 </p>
 <hr>
 <a name="GtFeatureIndex"></a>
 <h2>Class GtFeatureIndex</h2>
 
-<p> This interface represents a searchable container for <code>FeatureNode</code> objects,
+<p> This interface represents a searchable container for <code>GtFeatureNode</code> objects,
    typically root nodes of larger structures. How storage and searching takes
    place is left to the discretion of the implementing class.</p><p>   Output from a <code>gt_feature_index_get_features_*()</code> method should always
    be sorted by feature start position. </p>
@@ -2793,7 +2793,7 @@ Deletes the <code>feature_index</code> and all its referenced features.
 <h2>Class GtFeatureIndexMemory</h2>
 
 <p> The <code>GtFeatureIndexMemory</code> class implements a <code>GtFeatureIndex</code> in memory.
-   Features are organised by region node. Each region node collects its
+   Features are organized by region node. Each region node collects its
    feature nodes in an interval tree structure, which allows for efficient
    range queries. </p>
 
@@ -2817,8 +2817,9 @@ Creates a new <code>GtFeatureIndexMemory</code> object.
    in GFF3 files by the fact, that each line has the same ID attribute).</p><p>   To check if a feature is a multi-feature use the method
    <code>gt_feature_node_is_multi()</code>.
    Multi-features are connected via a ``representative''. That is, two features
-   are part of the same multi-feature if they have the same representative
-   (which can be retrieved via  <code>gt_feature_node_get_multi_representative()</code>).</p><p>   Pseudo-features became a technical necessity to be able to pass related
+   are part of the same multi-feature if they have the same representative.
+   The feature node representative can be be retrieved via the
+   <code>gt_feature_node_get_multi_representative()</code> method.</p><p>   Pseudo-features became a technical necessity to be able to pass related
    top-level features as a single entity through the streaming machinery.
    There are two cases in which a pseudo-feature has to be introduced.</p><p>   First, if a multi-feature has no parent. In this case all features which
    comprise the multi-feature become the children of a pseudo-feature.</p><p>   Second, if two or more top-level features have the same children (and are
@@ -2847,19 +2848,19 @@ Return an new <code>GtFeatureNode</code> object on sequence with ID <code>seqid<
 <code>GtGenomeNode*   gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
                                           unsigned long end, GtStrand strand)</code>
 <p>
-Return a new pseudo-<code>GtFeatureNode </code> on sequence with ID <code>seqid</code> which lies
-   from <code>start</code> to <code>end</code> on strand <code>strand</code>. Pseudo-features do not have a type.
-   The <code>GtFeatureNode </code> stores a new reference to <code>seqid</code>, so make sure you do
-   not modify the original <code>seqid</code> afterwards.
-   <code>start</code> and <code>end</code> always refer to the forward strand, therefore <code>start</code> has
-   to be smaller or equal than <code>end</code>.
+Return a new pseudo-<code>GtFeatureNode</code> object on sequence with ID <code>seqid</code> which
+   lies from <code>start</code> to <code>end</code> on strand <code>strand</code>. Pseudo-features do not have a
+   type.  The <code>GtFeatureNode </code> stores a new reference to <code>seqid</code>, so make sure
+   you do not modify the original <code>seqid</code> afterwards.  <code>start</code> and <code>end</code> always
+   refer to the forward strand, therefore <code>start</code> has to be smaller or equal
+   than <code>end</code>.
 </p>
 <hr>
 <a name="gt_feature_node_new_pseudo_template"></a>
 
 <code>GtGenomeNode*   gt_feature_node_new_pseudo_template(GtFeatureNode *feature_node)</code>
 <p>
-Return a new pseudo-<code>GtFeatureNode </code> node which uses <code>feature_node</code> as
+Return a new pseudo-<code>GtFeatureNode</code> object which uses <code>feature_node</code> as
    template.  That is, the sequence ID, range, strand, and source are taken from
    <code>feature_node</code>.
 </p>
@@ -2876,7 +2877,8 @@ Return the ``standard gene'' (mainly for testing purposes).
 <code>void            gt_feature_node_add_child(GtFeatureNode *parent,
                                          GtFeatureNode *child)</code>
 <p>
-Add <code>child</code> node to <code>parent</code> node. <code>parent</code> takes ownership of <code>child</code>.
+Add <code>child</code> feature node to <code>parent</code> feature node.
+   <code>parent</code> takes ownership of <code>child</code>.
 </p>
 <hr>
 <a name="gt_feature_node_get_source"></a>
@@ -3105,6 +3107,7 @@ Returns <code>true</code>, if the given <code>feature_node_a</code> has the same
 <p>
 Return a new <code>GtFeatureNodeIterator*</code> which performs a depth-first
    traversal of <code>feature_node</code> (including <code>feature_node</code> itself).
+   It ignores pseudo-features.
 </p>
 <hr>
 <a name="gt_feature_node_iterator_new_direct"></a>
@@ -3138,18 +3141,18 @@ Delete <code>feature_node_iterator</code>.
 
 <p> This class defines (generic) files in <em>GenomeTools</em>. A generic file is is a
    file which either uncompressed or compressed (with gzip or bzip2).
-   A <code>NULL</code>-pointer as generic file implies stdout. </p>
+   A <code>NULL</code>-pointer as generic file implies <code>stdout</code>. </p>
 
 <hr>
 <a name="gt_file_new"></a>
 
 <code>GtFile*  gt_file_new(const char *path, const char *mode, GtError *err)</code>
 <p>
-Return a new <code>GtFile</code> object and open the underlying file handle with given
-   <code>mode</code>. Returns NULL and sets <code>err</code> accordingly, if the file <code>path</code> could not
-   be opened. The compression mode is determined by the ending of <code>path</code> (gzip
-   compression if it ends with '.gz', bzip2 compression if it ends with '.bz2',
-   and uncompressed otherwise).
+Return a new <code>GtFile</code> object for the given <code>path</code> and open the underlying
+   file handle with given <code>mode</code>. Returns <code>NULL</code> and sets <code>err</code> accordingly, if
+   the file <code>path</code> could not be opened. The compression mode is determined by
+   the ending of <code>path</code> (gzip compression if it ends with '.gz', bzip2
+   compression if it ends with '.bz2', and uncompressed otherwise).
 </p>
 <hr>
 <a name="gt_file_xprintf"></a>
@@ -3163,7 +3166,7 @@ Return a new <code>GtFile</code> object and open the underlying file handle with
 
 <code>void     gt_file_xfputs(const char *cstr, GtFile *file)</code>
 <p>
-Write <code>\0</code>-terminated string <code>cstr</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
+Write <code>\0</code>-terminated C string <code>cstr</code> to <code>file</code>. Similar to <code>fputs(3)</code>, but
    terminates on error.
 </p>
 <hr>
@@ -3207,7 +3210,7 @@ Close the underlying file handle and destroy the <code>file</code> object.
 <h2>Class GtGFF3InStream</h2>
 
 <p> Implements the <code>GtNodeStream</code> interface. A <code>GtGFF3InStream</code> parses GFF3 files
-   and returns them as a stream of <code>GtGenomeNode</code>s. </p>
+   and returns them as a stream of <code>GtGenomeNode</code> objects. </p>
 
 <hr>
 <a name="gt_gff3_in_stream_new_unsorted"></a>
@@ -3261,7 +3264,8 @@ Show progress bar on <code>stdout</code> to convey the progress of parsing the G
 <h2>Class GtGFF3OutStream</h2>
 
 <p> Implements the <code>GtNodeStream</code> interface. A <code>GtGFF3OutStream</code> produces GFF3
-   output. </p>
+   output.
+   It automatically inserts termination lines at the appropriate places. </p>
 
 <hr>
 <a name="gt_gff3_out_stream_new"></a>
@@ -3299,8 +3303,10 @@ If this method is called upon <code>gff3_out_stream</code>, use the original ID
 <h2>Class GtGFF3Parser</h2>
 
 <p> A <code>GtGFF3Parser</code> can be used to parse GFF3 files and convert them into
-   <code>GtGenomeNode</code>s. This is a low-level class and it is usually not used
-   directly. Normally, a <code>GtGFF3InStream</code> is used to parse GFF3 files. </p>
+   <code>GtGenomeNode</code> objects. If the GFF3 files do not contain the encouraged
+   sequence-region meta directives, the GFF3 parser introduces the corresponding
+   region nodes automatically. This is a low-level class and it is usually not
+   used directly. Normally, a <code>GtGFF3InStream</code> is used to parse GFF3 files. </p>
 
 <hr>
 <a name="gt_gff3_parser_new"></a>
@@ -3351,7 +3357,7 @@ Use <code>gff3_parser</code> to parse genome nodes from file pointer <code>fpin<
    <code>status_code</code> is set to 0 if at least one genome node was created (and stored
    in <code>genome_nodes</code>) and to <code>EOF</code> if no further genome nodes could be parsed
    from <code>fpin</code>. Every encountered (genome feature) type is recorded in the
-   C-string table <code>used_types</code>. The parser uses the given <code>filenamestr</code> to
+   C string table <code>used_types</code>. The parser uses the given <code>filenamestr</code> to
    store the file name of <code>fpin</code> in the created genome nodes or to give the
    correct filename in error messages, if necessary.
    <code>line_number</code> is increased accordingly during parsing and has to be set to 0
@@ -3415,7 +3421,8 @@ Retain the original ID attributes (instead of creating new ones), if
 <a name="GtGTFInStream"></a>
 <h2>Class GtGTFInStream</h2>
 
-<p> Implements the <code>GtNodeStream</code> interface. </p>
+<p> Implements the <code>GtNodeStream</code> interface. A <code>GtGTFInStream</code> parses a GTF2.2
+   file and returns it as a stream of <code>GtGenomeNode</code> objects. </p>
 
 <hr>
 <a name="gt_gtf_in_stream_new"></a>
@@ -3810,7 +3817,7 @@ Draws a rectangle at (<code>x</code>,<code>y</code>) where these are the top lef
                                   ArrowStatus arrow_status)</code>
 <p>
 Draws an arrowhead at (<code>x</code>,<code>y</code>) where these are the top left coordinates.
-   The direction ais determined by the <code>arrow_status</code> parameter.
+   The direction is determined by the <code>arrow_status</code> parameter.
 </p>
 <hr>
 <a name="gt_graphics_draw_curve_data"></a>
@@ -3861,80 +3868,82 @@ Deletes the the <code>GtGraphics</code> object.
 <code>GtHashmap*  gt_hashmap_new(GtHashType keyhashtype, GtFree keyfree,
                           GtFree valuefree)</code>
 <p>
-Creates a new <code>GtHashmap</code> of type <code>keyhashtype</code>. If <code>keyfree</code> and/or
+Creates a new <code>GtHashmap</code> object of type <code>keyhashtype</code>. If <code>keyfree</code> and/or
    <code>valuefree</code> are given, they will be used to free the hashmap members
    when the <code>GtHashmap</code> is deleted. <code>keyhashtype</code> defines how to hash the
    keys given when using the <code>GtHashmap</code>.
-   GT_HASH_DIRECT uses the key pointer as a basis for the hash function.
-   Equal pointers will refer to the same value. If GT_HASH_STRING is used, the
+   <code>GT_HASH_DIRECT</code> uses the key pointer as a basis for the hash function.
+   Equal pointers will refer to the same value. If <code>GT_HASH_STRING</code> is used, the
    keys will be  evaluated as strings and keys will be considered equal if the
    strings are identical, regardless of their address in memory
 </p>
 <hr>
 <a name="gt_hashmap_get"></a>
 
-<code>void*       gt_hashmap_get(GtHashmap *hm, const void *key)</code>
+<code>void*       gt_hashmap_get(GtHashmap *hashmap, const void *key)</code>
 <p>
-Return the value stored in <code>hm</code> for <code>key</code> or NULL if no such key exists.
+Return the value stored in <code>hashmap</code> for <code>key</code> or <code>NULL</code> if no such key
+   exists.
 </p>
 <hr>
 <a name="gt_hashmap_add"></a>
 
-<code>void        gt_hashmap_add(GtHashmap *hm, void *key, void *value)</code>
+<code>void        gt_hashmap_add(GtHashmap *hashmap, void *key, void *value)</code>
 <p>
-Set the value stored in <code>hm</code> for <code>key</code> to <code>value</code>, overwriting the prior
+Set the value stored in <code>hashmap</code> for <code>key</code> to <code>value</code>, overwriting the prior
    value for that key if present.
 </p>
 <hr>
 <a name="gt_hashmap_remove"></a>
 
-<code>void        gt_hashmap_remove(GtHashmap *hm, const void *key)</code>
+<code>void        gt_hashmap_remove(GtHashmap *hashmap, const void *key)</code>
 <p>
-Remove the member with key <code>key</code> from <code>hm</code>.
+Remove the member with key <code>key</code> from <code>hashmap</code>.
 </p>
 <hr>
 <a name="gt_hashmap_foreach_ordered"></a>
 
-<code>int         gt_hashmap_foreach_ordered(GtHashmap *hm, GtHashmapVisitFunc func,
+<code>int         gt_hashmap_foreach_ordered(GtHashmap *hashmap,
+                                      GtHashmapVisitFunc func,
                                       void *data, GtCompare cmp, GtError*)</code>
 <p>
-Iterate over <code>hm</code> in order given by compare function <code>cmp</code>.
+Iterate over <code>hashmap</code> in order given by compare function <code>cmp</code>.
    For each member, <code>func</code> is called (see interface).
 </p>
 <hr>
 <a name="gt_hashmap_foreach"></a>
 
-<code>int         gt_hashmap_foreach(GtHashmap *hm, GtHashmapVisitFunc func,
+<code>int         gt_hashmap_foreach(GtHashmap *hashmap, GtHashmapVisitFunc func,
                               void *data, GtError*)</code>
 <p>
-Iterate over <code>hm</code> in arbitrary order given by compare function <code>cmp</code>.
+Iterate over <code>hashmap</code> in arbitrary order given by compare function <code>cmp</code>.
    For each member, <code>func</code> is called (see interface).
 </p>
 <hr>
 <a name="gt_hashmap_foreach_in_key_order"></a>
 
-<code>int         gt_hashmap_foreach_in_key_order(GtHashmap *hm,
+<code>int         gt_hashmap_foreach_in_key_order(GtHashmap *hashmap,
                                            GtHashmapVisitFunc func,
                                            void *data, GtError*)</code>
 <p>
-Iterate over <code>hm</code> in either alphabetical order (if GtHashType was specified
-   as GT_HASH_STRING) or numerical order (if GtHashType was specified as
-   GT_HASH_DIRECT).
+Iterate over <code>hashmap</code> in either alphabetical order (if <code>GtHashType</code> was
+   specified as <code>GT_HASH_STRING</code>) or numerical order (if <code>GtHashType</code> was
+   specified as <code>GT_HASH_DIRECT</code>).
 </p>
 <hr>
 <a name="gt_hashmap_reset"></a>
 
-<code>void        gt_hashmap_reset(GtHashmap *hm)</code>
+<code>void        gt_hashmap_reset(GtHashmap *hashmap)</code>
 <p>
-Reset <code>hm</code> by unsetting values for all keys, calling the free function if
-   necessary.
+Reset <code>hashmap</code> by unsetting values for all keys, calling the free function
+   if necessary.
 </p>
 <hr>
 <a name="gt_hashmap_delete"></a>
 
-<code>void        gt_hashmap_delete(GtHashmap *hm)</code>
+<code>void        gt_hashmap_delete(GtHashmap *hashmap)</code>
 <p>
-Delete <code>hm</code>, calling the free function if necessary.
+Delete <code>hashmap</code>, calling the free function if necessary.
 </p>
 <hr>
 <a name="GtIDToMD5Stream"></a>
@@ -3950,10 +3959,10 @@ Delete <code>hm</code>, calling the free function if necessary.
                                       GtRegionMapping *region_mapping,
                                       bool substitute_target_ids)</code>
 <p>
-Create a <code>GtIDToMD5Stream*</code> which converts ``regular'' sequence IDs from
-   nodes it retrievs from its <code>in_stream</code> to MD5 fingerprints (with the help of
-   the given <code>region_mapping</code>). If <code>substitute_target_ids</code> is true, the IDs of
-   Target attributes are also converted to MD5 fingerprints.
+Create a <code>GtIDToMD5Stream</code> object which converts ``regular'' sequence IDs
+   from nodes it retrieves from its <code>in_stream</code> to MD5 fingerprints (with the
+   help of the given <code>region_mapping</code>). If <code>substitute_target_ids</code> is true, the
+   IDs of Target attributes are also converted to MD5 fingerprints.
    Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
@@ -4322,8 +4331,8 @@ Create a <code>GtMergeStream*</code> which merges the given (sorted) <code>node_
 <a name="GtNodeStream"></a>
 <h2>Class GtNodeStream</h2>
 
-<p> The <code>GtNodeStream</code> interface. <code>GtNodeStream</code>s process <code>GtGenomeNode</code>s in a
-   pull-based architecture and can be chained together. </p>
+<p> The <code>GtNodeStream</code> interface. <code>GtNodeStream</code> objects process <code>GtGenomeNode</code>
+   objects in a pull-based architecture and can be chained together. </p>
 
 <hr>
 <a name="gt_node_stream_ref"></a>
@@ -4356,8 +4365,8 @@ Calls <code>gt_node_stream_next()</code> on <code>node_stream</code> repeatedly 
    and <code>err</code> is set). All retrieved <code>GtGenomeNode</code>s are deleted automatically
    with calls to <code>gt_genome_node_delete()</code>.
    This method is basically a convenience method which simplifies calls to
-   <code>gt_node_stream_next()</code> in a loop where retrieved <code>GtGenomeNode</code>s are not
-   processed any further.
+   <code>gt_node_stream_next()</code> in a loop where the retrieved <code>GtGenomeNode</code> objects
+   are not processed any further.
 </p>
 <hr>
 <a name="gt_node_stream_is_sorted"></a>
@@ -4419,7 +4428,7 @@ Create a new node stream class (that is, a class which implements the node
 <a name="GtNodeVisitor"></a>
 <h2>Class GtNodeVisitor</h2>
 
-<p> The <code>GtNodeVisitor</code> interface, a visitor for <code>GtGenomeNode</code>s. </p>
+<p> The <code>GtNodeVisitor</code> interface, a visitor for <code>GtGenomeNode</code> objects. </p>
 
 <hr>
 <a name="gt_node_visitor_visit_comment_node"></a>
@@ -4472,7 +4481,7 @@ Delete <code>node_visitor</code>.
    a <code>GtOptionParser</code>).
    Option descriptions are automatically formatted to
    <code>GT_OPTION_PARSER_TERMINAL_WIDTH</code>, but it is possible to embed newlines into
-   the descriptions to manually affect the formating. </p>
+   the descriptions to manually affect the formatting. </p>
 
 <hr>
 <a name="gt_option_new_bool"></a>
@@ -4781,7 +4790,7 @@ Return a new verbose <code>GtOption</code> object: <code>-v</code>, "be verbose"
 
 <code>GtOption*        gt_option_new_width(unsigned long *value)</code>
 <p>
-Return a new widht <code>GtOption</code> object: <code>-width</code>, "set output width for FASTA
+Return a new width <code>GtOption</code> object: <code>-width</code>, "set output width for FASTA
    sequence printing (0 disables formatting)", default is 0.
    The result of the option parsing is stored in <code>value</code>
 </p>
@@ -4790,7 +4799,7 @@ Return a new widht <code>GtOption</code> object: <code>-width</code>, "set outpu
 
 <code>GtOption*        gt_option_ref(GtOption *option)</code>
 <p>
-Increate the reference count for <code>option</code> and return it.
+Increase the reference count for <code>option</code> and return it.
 </p>
 <hr>
 <a name="gt_option_get_name"></a>
@@ -4852,7 +4861,7 @@ Make <code>option_a</code> imply <code>option_b</code>.
                                          const GtOption *option_b,
                                          const GtOption *option_c)</code>
 <p>
-Make <code>option_b</code> imply either <code>option_b</code> or <code>option_c</code>
+Make <code>option_a</code> imply either <code>option_b</code> or <code>option_c</code>
 </p>
 <hr>
 <a name="gt_option_exclude"></a>
@@ -4866,7 +4875,7 @@ Set that the options <code>option_a</code> and <code>option_b</code> exclude eac
 
 <code>void             gt_option_hide_default(GtOption *option)</code>
 <p>
-Hide the default value of <code>option</code> in help output.
+Hide the default value of <code>option</code> in <code>-help</code> output.
 </p>
 <hr>
 <a name="gt_option_argument_is_optional"></a>
@@ -4929,7 +4938,7 @@ Add <code>option</code> to <code>option_parser</code>. Takes ownership of <code>
                                             const char *option_string)</code>
 <p>
 Return the <code>GtOption</code> object if an option named <code>option_string</code> is present in
-   <code>option_parser</code>, and <code>NULL</code> if no such option exists in <code>option_parser</code>.
+   <code>option_parser</code>, and <code>NULL</code> if no such option exists.
 </p>
 <hr>
 <a name="gt_option_parser_refer_to_manual"></a>
@@ -4981,7 +4990,7 @@ Register a <code>hook_function</code> with <code>option_parser</code>. All regis
    functions are called at the end of <code>gt_option_parser_parse(</code>).
    This allows to have a module which registers a bunch of options in the option
    parser and automatically performs necessary postprocessing after the option
-   parsing has been done via a hook function.
+   parsing has been done via the hook function.
 </p>
 <hr>
 <a name="gt_option_parser_set_min_args"></a>
@@ -5005,7 +5014,7 @@ The the <code>maximum</code> number of additional command line arguments <code>o
 <a name="gt_option_parser_set_min_max_args"></a>
 
 <code>void             gt_option_parser_set_min_max_args(GtOptionParser *option_parser,
-                                                  unsigned int minumum,
+                                                  unsigned int minimum,
                                                   unsigned int maximum)</code>
 <p>
 The the <code>minimum</code> and <code>maximum</code> number of additional command line arguments
@@ -5021,9 +5030,9 @@ The the <code>minimum</code> and <code>maximum</code> number of additional comma
                                        GtError *err)</code>
 <p>
 Use <code>option_parser</code> to parse options given in argument vector <code>argv</code> (with
-   <code>argc</code> many arguments). The number of parsed arguments ist stored in
+   <code>argc</code> many arguments). The number of parsed arguments is stored in
    <code>parsed_args</code>. <code>version_func</code> is used for the output of option <code>-version</code>.
-   In case of error, GT_OPTION_PARSER_ERROR is returned and <code>err</code> is set
+   In case of error, <code>GT_OPTION_PARSER_ERROR</code> is returned and <code>err</code> is set
    accordingly.
 </p>
 <hr>
@@ -5037,8 +5046,9 @@ Delete <code>option_parser</code>.
 <a name="GtPhase"></a>
 <h2>Class GtPhase</h2>
 
-<p> This enum type defines the possible phases, namely <code>GT_PHASE_ZERO</code>,
-   <code>GT_PHASE_ONE</code>, <code>GT_PHASE_TWO</code>, and <code>GT_PHASE_UNDEFINED</code>. </p>
+<p> This enum type defines the possible phases. The following phases are
+   defined: <code>GT_PHASE_ZERO</code>, <code>GT_PHASE_ONE</code>, <code>GT_PHASE_TWO</code>, and
+   <code>GT_PHASE_UNDEFINED</code>. </p>
 
 <hr>
 <a name="GT_PHASE_CHARS"></a>
@@ -5067,7 +5077,7 @@ Map <code>phase_char</code> to the corresponding phase enum type.
 
 <code>GtQueue*       gt_queue_new(void)</code>
 <p>
-Return a new <code>GtQueue*</code> object.
+Return a new <code>GtQueue </code> object.
 </p>
 <hr>
 <a name="gt_queue_add"></a>
@@ -5275,7 +5285,8 @@ Returns <code>true</code> if the rectangle represents a block root whose element
 <a name="GtRegionMapping"></a>
 <h2>Class GtRegionMapping</h2>
 
-<p> A <code>GtRegionMapping</code> objects map sequence-regions to sequence files. </p>
+<p> A <code>GtRegionMapping</code> objects maps sequence-regions to the corresponding
+   entries of sequence files. </p>
 
 <hr>
 <a name="gt_region_mapping_new_mapping"></a>
@@ -5294,8 +5305,8 @@ Return a new <code>GtRegionMapping</code> object for the mapping file with the g
                                                 bool matchdesc, bool usedesc)</code>
 <p>
 Return a new <code>GtRegionMapping</code> object for the sequence files given in
-   <code>sequence_filenames</code>. If <code>matcdesc</code> is <code>true</code>, the sequence descriptions from
-   the input files are matched for the desired sequence IDs (in GFF3).
+   <code>sequence_filenames</code>. If <code>matchdesc</code> is <code>true</code>, the sequence descriptions
+   from the input files are matched for the desired sequence IDs (in GFF3).
 
    If <code>usedesc</code> is <code>true</code>, the sequence descriptions are used to map the
    sequence IDs (in GFF3) to actual sequence entries. If a description contains
@@ -5417,9 +5428,9 @@ Create a new <code>GtRegionNode*</code> representing sequence with ID <code>seqi
                                    double min_average_splice_site_prob,
                                    unsigned long feature_num)</code>
 <p>
-Create a <code>GtSelectStream*</code> which selects genome nodes it retrieves from its
-   <code>in_stream</code> and passes them along if they meet the criteria defined by the
-   other arguments. All comment nodes are selected.
+Create a <code>GtSelectStream</code> object which selects genome nodes it retrieves from
+   its <code>in_stream</code> and passes them along if they meet the criteria defined by
+   the other arguments. All comment nodes are selected.
    If <code>seqid</code> is defined, a genome node must have it to be selected.
    If <code>source</code> is defined, a genome node must have it to be selected.
    If <code>contain_range</code> is defined, a genome node must be contained in it to be
@@ -5437,11 +5448,11 @@ Create a <code>GtSelectStream*</code> which selects genome nodes it retrieves fr
    If <code>min_gene_score</code> is defined, only genes with at least this score are
    selected.
    If <code>max_gene_score</code> is defined, only genes with at most this score are
-   selcected.
+   selected.
    If <code>min_average_splice_site_prob</code> is defined, feature nodes which have
    splice sites must have at least this average splice site score to be
    selected.
-   If <code>feature_num</code> is defined, just the <code>feature_num</code>th feature node occuring
+   If <code>feature_num</code> is defined, just the <code>feature_num</code>th feature node occurring
    in the <code>in_stream</code> is selected.
 </p>
 <hr>
@@ -5491,7 +5502,7 @@ Return the sequence length of <code>sequence_node</code>.
 <h2>Class GtSortStream</h2>
 
 <p> Implements the <code>GtNodeStream</code> interface. A <code>GtSortStream</code> sorts the
-   <code>GtGenomeNode</code>s it retrieves from its node source. </p>
+   <code>GtGenomeNode</code> objects it retrieves from its node source. </p>
 
 <hr>
 <a name="gt_sort_stream_new"></a>
@@ -5566,8 +5577,8 @@ Delete the <code>splitter</code>.
 <h2>Class GtStatStream</h2>
 
 <p> Implements the <code>GtNodeStream</code> interface. A <code>GtStatStream</code> gathers statistics
-   about the <code>GtGenomeNode</code>s it retrieves from its node source and passes them
-   along unmodified.  </p>
+   about the <code>GtGenomeNode</code> objects it retrieves from its node source and passes
+   them along unmodified. </p>
 
 <hr>
 <a name="gt_stat_stream_new"></a>
@@ -5581,14 +5592,16 @@ Delete the <code>splitter</code>.
                                  bool cds_length_distribution,
                                  bool used_sources)</code>
 <p>
-Create a <code>GtStatStream*</code> which gathers statistics about the <code>GtGenomeNode</code>s
-   it retrieves from its <code>in_stream</code> and returns them unmodified.
-   Besides the basic statistics, statistics about the following distributions
-   can be gathered, if the corresponding argument equals <code>true</code>:
+Create a <code>GtStatStream</code> object which gathers statistics about the
+   <code>GtGenomeNode</code> objects it retrieves from its <code>in_stream</code> and returns them
+   unmodified. Besides the basic statistics, statistics about the following
+   distributions can be gathered, if the corresponding argument equals <code>true</code>:
    <code>gene_length_distribution</code>, <code>gene_score_distribution</code>,
    <code>exon_length_distribution</code>, <code>exon_number_distribution</code>,
-   <code>intron_length_distribution</code>, <code>cds_length_distribution</code>. If <code>used_sources</code>
-   equals <code>true</code>, it is recorded which source tags have been encountered.
+   <code>intron_length_distribution</code>, <code>cds_length_distribution</code>.
+
+   If <code>used_sources</code> equals <code>true</code>, it is recorded which source tags have been
+   encountered.
 </p>
 <hr>
 <a name="gt_stat_stream_show_stats"></a>
@@ -5609,14 +5622,14 @@ Write the statistics gathered by <code>stat_stream</code> to <code>outfp</code>.
 
 <code>GtStr*         gt_str_new(void)</code>
 <p>
-Return an empty <code>GtStr*</code> object.
+Return an empty <code>GtStr</code> object.
 </p>
 <hr>
 <a name="gt_str_new_cstr"></a>
 
 <code>GtStr*         gt_str_new_cstr(const char *cstr)</code>
 <p>
-Return a new <code>GtStr*</code> object whose content is set to <code>cstr</code>.
+Return a new <code>GtStr</code> object whose content is set to <code>cstr</code>.
 </p>
 <hr>
 <a name="gt_str_clone"></a>
@@ -5754,7 +5767,7 @@ Decrease the reference count for <code>str</code> or delete it, if this was the 
 
 <code>GtStrArray*    gt_str_array_new(void)</code>
 <p>
-Return a new <code>GtStrArray*</code> object.
+Return a new <code>GtStrArray</code> object.
 </p>
 <hr>
 <a name="gt_str_array_ref"></a>
@@ -5837,8 +5850,9 @@ Delete <code>str_array</code>.
 <a name="GtStrand"></a>
 <h2>Class GtStrand</h2>
 
-<p> This enum type defines the possible strands, namely <code>GT_STRAND_FORWARD</code>,
-   <code>GT_STRAND_REVERSE</code>, <code>GT_STRAND_BOTH</code>, and <code>GT_STRAND_UNKNOWN</code>. </p>
+<p> This enum type defines the possible strands. The following strands are
+   defined: <code>GT_STRAND_FORWARD</code>, <code>GT_STRAND_REVERSE</code>, <code>GT_STRAND_BOTH</code>, and
+   <code>GT_STRAND_UNKNOWN</code>. </p>
 
 <hr>
 <a name="GT_STRAND_CHARS"></a>
@@ -5861,7 +5875,7 @@ Map <code>strand_char</code> to the corresponding strand enum type.
 
 <p> Objects of the <code>GtStyle</code> class hold <em>AnnotationSketch</em> style information
    like colors, margins, collapsing options, and others. The class provides
-   methods to set values of various types. Each value is organised into
+   methods to set values of various types. Each value is organized into
    a <em>section</em> and is identified by a <em>key</em>. That is, a <em>section</em>, <em>key</em>
    pair must uniquely identify a value. </p>
 
@@ -5995,7 +6009,8 @@ Deletes this <code>style</code>.
    contained in the map. Tags and values cannot have length 0.</p><p>   The implementation as a char* shines through (also to save one additional
    memory allocation), therefore the usage is a little bit different compared
    to other <em>GenomeTools</em> classes.
-   See the implementation of <code>gt_tag_value_map_example()</code> for an example. </p>
+   See the implementation of <code>gt_tag_value_map_example()</code> for an ussage
+   example. </p>
 
 <hr>
 <a name="gt_tag_value_map_new"></a>
@@ -6047,7 +6062,7 @@ Apply <code>iterator_func</code> to each tag/value pair contained in <code>tag_v
 
 <code>int            gt_tag_value_map_example(GtError *err)</code>
 <p>
-Implements an example use of a tag/value map.
+Implements an example useage of a tag/value map.
 </p>
 <hr>
 <a name="gt_tag_value_map_delete"></a>
@@ -6434,14 +6449,14 @@ Create a new <code>GtTypeChecker*</code> for OBO file with given <code>obo_file_
 
 <code>GtNodeStream*  gt_uniq_stream_new(GtNodeStream*)</code>
 <p>
-Create a <code>GtUniqStream*</code> which filters out repeated feature node graphs it
-   retrieves from the sorted <code>in_stream</code> and return all other nodes.
-   Two feature node graphs are considered to be <em>repeated</em> if they have the
-   same depth-first traversal and each corresponding feature node pair is
-   similar according to the <code>gt_feature_node_is_similar()</code> method. For such a
-   repeated feature node graph the one with the higher score (of the top-level
-   feature) is kept. If only one of the feature node graphs has a defined score,
-   this one is kept.
+Create a <code>GtUniqStream</code> object which filters out repeated feature node graphs
+   it retrieves from the sorted <code>in_stream</code> and return all other nodes.  Two
+   feature node graphs are considered to be <em>repeated</em> if they have the same
+   depth-first traversal and each corresponding feature node pair is similar
+   according to the <code>gt_feature_node_is_similar()</code> method. For such a repeated
+   feature node graph the one with the higher score (of the top-level feature)
+   is kept. If only one of the feature node graphs has a defined score, this one
+   is kept.
 </p>
 <hr>
 <a name="GtVisitorStream"></a>
@@ -8737,7 +8752,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-06-08
+Last update: 2011-06-12
 </div>
 </div>
 <!-- Piwik -->

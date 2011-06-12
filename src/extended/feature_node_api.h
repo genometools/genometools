@@ -38,8 +38,9 @@
    To check if a feature is a multi-feature use the method
    <gt_feature_node_is_multi()>.
    Multi-features are connected via a ``representative''. That is, two features
-   are part of the same multi-feature if they have the same representative
-   (which can be retrieved via  <gt_feature_node_get_multi_representative()>).
+   are part of the same multi-feature if they have the same representative.
+   The feature node representative can be be retrieved via the
+   <gt_feature_node_get_multi_representative()> method.
 
    Pseudo-features became a technical necessity to be able to pass related
    top-level features as a single entity through the streaming machinery.
@@ -70,16 +71,16 @@ typedef struct GtFeatureNode GtFeatureNode;
 GtGenomeNode*  gt_feature_node_new(GtStr *seqid, const char *type,
                                    unsigned long start, unsigned long end,
                                    GtStrand strand);
-/* Return a new pseudo-<GtFeatureNode > on sequence with ID <seqid> which lies
-   from <start> to <end> on strand <strand>. Pseudo-features do not have a type.
-   The <GtFeatureNode > stores a new reference to <seqid>, so make sure you do
-   not modify the original <seqid> afterwards.
-   <start> and <end> always refer to the forward strand, therefore <start> has
-   to be smaller or equal than <end>. */
+/* Return a new pseudo-<GtFeatureNode> object on sequence with ID <seqid> which
+   lies from <start> to <end> on strand <strand>. Pseudo-features do not have a
+   type.  The <GtFeatureNode > stores a new reference to <seqid>, so make sure
+   you do not modify the original <seqid> afterwards.  <start> and <end> always
+   refer to the forward strand, therefore <start> has to be smaller or equal
+   than <end>. */
 GtGenomeNode*  gt_feature_node_new_pseudo(GtStr *seqid, unsigned long start,
                                           unsigned long end, GtStrand strand);
 
-/* Return a new pseudo-<GtFeatureNode > node which uses <feature_node> as
+/* Return a new pseudo-<GtFeatureNode> object which uses <feature_node> as
    template.  That is, the sequence ID, range, strand, and source are taken from
    <feature_node>. */
 GtGenomeNode*  gt_feature_node_new_pseudo_template(GtFeatureNode *feature_node);
@@ -87,7 +88,8 @@ GtGenomeNode*  gt_feature_node_new_pseudo_template(GtFeatureNode *feature_node);
 /* Return the ``standard gene'' (mainly for testing purposes). */
 GtGenomeNode*  gt_feature_node_new_standard_gene(void);
 
-/* Add <child> node to <parent> node. <parent> takes ownership of <child>.*/
+/* Add <child> feature node to <parent> feature node.
+   <parent> takes ownership of <child>.*/
 void           gt_feature_node_add_child(GtFeatureNode *parent,
                                          GtFeatureNode *child);
 

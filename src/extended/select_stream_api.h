@@ -25,9 +25,9 @@
    nodes it retrieves from its node source and passes them along. */
 typedef struct GtSelectStream GtSelectStream;
 
-/* Create a <GtSelectStream*> which selects genome nodes it retrieves from its
-   <in_stream> and passes them along if they meet the criteria defined by the
-   other arguments. All comment nodes are selected.
+/* Create a <GtSelectStream> object which selects genome nodes it retrieves from
+   its <in_stream> and passes them along if they meet the criteria defined by
+   the other arguments. All comment nodes are selected.
    If <seqid> is defined, a genome node must have it to be selected.
    If <source> is defined, a genome node must have it to be selected.
    If <contain_range> is defined, a genome node must be contained in it to be

@@ -21,7 +21,7 @@
 #include "extended/node_stream_api.h"
 
 /* Implements the <GtNodeStream> interface. A <GtBEDInStream> allows to parse
-   BED files. */
+   a BED file and return it as a stream of <GtGenomeNode> objects. */
 typedef struct GtBEDInStream GtBEDInStream;
 
 /* Return a <GtBEDInStream> object which subsequently reads the BED file with

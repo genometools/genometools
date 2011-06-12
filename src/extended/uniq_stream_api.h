@@ -24,13 +24,13 @@
    repeated features it retrieves from its node source. */
 typedef struct GtUniqStream GtUniqStream;
 
-/* Create a <GtUniqStream*> which filters out repeated feature node graphs it
-   retrieves from the sorted <in_stream> and return all other nodes.
-   Two feature node graphs are considered to be __repeated__ if they have the
-   same depth-first traversal and each corresponding feature node pair is
-   similar according to the <gt_feature_node_is_similar()> method. For such a
-   repeated feature node graph the one with the higher score (of the top-level
-   feature) is kept. If only one of the feature node graphs has a defined score,
-   this one is kept. */
+/* Create a <GtUniqStream> object which filters out repeated feature node graphs
+   it retrieves from the sorted <in_stream> and return all other nodes.  Two
+   feature node graphs are considered to be __repeated__ if they have the same
+   depth-first traversal and each corresponding feature node pair is similar
+   according to the <gt_feature_node_is_similar()> method. For such a repeated
+   feature node graph the one with the higher score (of the top-level feature)
+   is kept. If only one of the feature node graphs has a defined score, this one
+   is kept. */
 GtNodeStream* gt_uniq_stream_new(GtNodeStream*);
 #endif
