@@ -60,7 +60,7 @@ static GtOptionParser* gt_interfeat_option_parser_new(void *tool_arguments)
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Add intermediary "
                             "features between outside features in given "
-                            "GFF3_file(s).");
+                            "GFF3 file(s).");
 
   /* -outside */
   option = gt_option_new_string("outside", "set outside type",

@@ -54,7 +54,7 @@ static GtOptionParser* gt_gtf_to_gff3_option_parser_new(void *tool_arguments)
   GtOption *option;
   gt_assert(arguments);
 
-  op = gt_option_parser_new("[gtf_file]",
+  op = gt_option_parser_new("[GTF_file]",
                             "Parse GTF2.2 file and convert it to GFF3.");
 
   /* -tidy */

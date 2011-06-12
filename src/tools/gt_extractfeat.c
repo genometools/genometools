@@ -64,26 +64,26 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   GtOption *option;
   gt_assert(arguments);
 
-  op = gt_option_parser_new("[option ...] GFF3_file",
-                         "Extract features given in GFF3_file from "
-                         "sequence file.");
+  op = gt_option_parser_new("[option ...] [GFF3_file]",
+                            "Extract features given in GFF3 file from "
+                            "sequence file.");
 
   /* -type */
   option = gt_option_new_string("type", "set type of features to extract",
-                             arguments->type, NULL);
+                                arguments->type, NULL);
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 
   /* -join */
   option = gt_option_new_bool("join", "join feature sequences in the same "
-                           "subgraph into a single one", &arguments->join,
-                           false);
+                              "subgraph into a single one", &arguments->join,
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -translate */
   option = gt_option_new_bool("translate", "translate the features (of a DNA "
-                           "sequence) into protein", &arguments->translate,
-                           false);
+                              "sequence) into protein", &arguments->translate,
+                              false);
   gt_option_parser_add_option(op, option);
 
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
@@ -101,7 +101,7 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
   gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
-  gt_option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_max_args(op, 1);
 
   return op;
 }

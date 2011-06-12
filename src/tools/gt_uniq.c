@@ -58,7 +58,7 @@ static GtOptionParser* gt_uniq_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]", "Filter out repeated "
-                            "feature node graphs in a sorted GFF3_file.");
+                            "feature node graphs in a sorted GFF3 file.");
 
   /* -v */
   option = gt_option_new_verbose(&arguments->verbose);

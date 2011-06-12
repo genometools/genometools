@@ -58,8 +58,8 @@ static GtOptionParser* gt_csa_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file]",
-                            "Transform spliced alignments into consensus "
-                            "spliced alignments.");
+                            "Transform spliced alignments from GFF3 file into "
+                            "consensus spliced alignments.");
 
   /* -join-length */
   option = gt_option_new_ulong("join-length", "set join length for the spliced "

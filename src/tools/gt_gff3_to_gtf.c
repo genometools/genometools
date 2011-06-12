@@ -49,7 +49,7 @@ static GtOptionParser* gt_gff3_to_gtf_option_parser_new(void *tool_arguments)
   GFF3ToGTFArguments *arguments = tool_arguments;
   GtOptionParser *op;
   op = gt_option_parser_new("[GFF3_file ...]",
-                            "Parse GFF3 file(s) and show it as GTF2.2.");
+                            "Parse GFF3 file(s) and show them as GTF2.2.");
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
   return op;
 }

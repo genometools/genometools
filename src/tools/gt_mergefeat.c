@@ -52,7 +52,7 @@ static GtOptionParser* gt_mergefeat_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("[option ...] [GFF3_file ...]", "Merge adjacent "
-                            "features of the same type in given GFF3_file(s).");
+                            "features of the same type in given GFF3 file(s).");
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
