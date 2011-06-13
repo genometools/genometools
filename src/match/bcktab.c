@@ -41,7 +41,8 @@
 
 typedef struct
 {
-  unsigned long nonspecialsmaxbucketsize,
+  unsigned long emptybuckets,
+                nonspecialsmaxbucketsize,
                 specialsmaxbucketsize,
                 maxbucketsize;
 } Maxbucketinfo;
@@ -617,6 +618,7 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
           partwidth,totallength);
   gt_bcktab_showleftborder(bcktab);
 #endif
+  bcktab->maxbucketinfo.emptybuckets = 0;
   bcktab->maxbucketinfo.specialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.nonspecialsmaxbucketsize = 1UL;
   bcktab->maxbucketinfo.maxbucketsize = 1UL;
@@ -629,6 +631,10 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
                                          partwidth,
                                          rightchar,
                                          numofchars);
+    if (bucketspec.nonspecialsinbucket + bucketspec.specialsinbucket == 0)
+    {
+      bcktab->maxbucketinfo.emptybuckets++;
+    }
     if (bucketspec.nonspecialsinbucket >
         bcktab->maxbucketinfo.nonspecialsmaxbucketsize)
     {
@@ -660,6 +666,11 @@ void gt_determinemaxbucketsize(Bcktab *bcktab,
 unsigned long gt_bcktab_nonspecialsmaxbucketsize(const Bcktab *bcktab)
 {
   return bcktab->maxbucketinfo.nonspecialsmaxbucketsize;
+}
+
+unsigned long gt_bcktab_emptybuckets(const Bcktab *bcktab)
+{
+  return bcktab->maxbucketinfo.emptybuckets;
 }
 
 unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab)

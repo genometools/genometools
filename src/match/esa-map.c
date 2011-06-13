@@ -420,20 +420,13 @@ static int inputsuffixarray(bool map,
   }
   if (!haserr && (demand & SARR_BCKTAB))
   {
-    if (map)
-    {
-      suffixarray->bcktab = gt_mapbcktab(indexname,
-                     gt_alphabet_num_of_chars(
-                              gt_encseq_alphabet(suffixarray->encseq)),
+    suffixarray->bcktab
+      = gt_mapbcktab(indexname,
+                     gt_encseq_alphabetnumofchars(suffixarray->encseq),
                      suffixarray->prefixlength,
                      err);
-      if (suffixarray->bcktab == NULL)
-      {
-        haserr = true;
-      }
-    } else
+    if (suffixarray->bcktab == NULL)
     {
-      gt_error_set(err,"cannot stream bcktab");
       haserr = true;
     }
   }

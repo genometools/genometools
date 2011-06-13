@@ -239,7 +239,7 @@ int gt_runenumlcpvalues(const char *inputindex,
     if (bottomup)
     {
       if (gt_esa_bottomup(ssar, NULL, NULL, showleafedgeBU, showbranchingedgeBU,
-                          NULL, err) != 0)
+                          NULL,NULL, err) != 0)
       {
         haserr = true;
       }

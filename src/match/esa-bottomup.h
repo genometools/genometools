@@ -44,6 +44,12 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                                 GtBUinfo *,
                                                 GtBUstate *,
                                                 GtError *),
+                    int (*processlcpinterval)(unsigned long,
+                                              unsigned long,
+                                              unsigned long,
+                                              GtBUinfo *,
+                                              GtBUstate *,
+                                              GtError *err),
                     GtBUstate *bustate,
                     GtError *err);
 

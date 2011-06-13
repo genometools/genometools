@@ -118,6 +118,8 @@ unsigned long gt_sizeofbucketworkspace(unsigned int prefixlength);
 
 unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
+unsigned long gt_bcktab_emptybuckets(const Bcktab *bcktab);
+
 unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
                                              unsigned long numofsuffixestosort);
 

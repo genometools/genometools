@@ -124,6 +124,12 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                                                 GtBUinfo *,
                                                 GtBUstate *,
                                                 GtError *),
+                    int (*processlcpinterval)(unsigned long,
+                                              unsigned long,
+                                              unsigned long,
+                                              GtBUinfo *,
+                                              GtBUstate *,
+                                              GtError *err),
                     GtBUstate *bustate,
                     GtError *err)
 {
@@ -168,6 +174,17 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
+      if (processlcpinterval != NULL &&
+          processlcpinterval(lastinterval->lcp,
+                             lastinterval->lb,
+                             lastinterval->rb,
+                             lastinterval->info,
+                             bustate,
+                             err) != 0)
+      {
+        haserr = true;
+        break;
+      }
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
         gt_assert(lastinterval->info == NULL ||

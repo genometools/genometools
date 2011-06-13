@@ -311,3 +311,15 @@ unsigned long gt_Sequentialsuffixarrayreader_totallength(
   gt_assert(ssar->numberofsuffixes > 0);
   return ssar->numberofsuffixes - 1;
 }
+
+unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
+              const Sequentialsuffixarrayreader *ssar)
+{
+  return ssar->suffixarray->prefixlength;
+}
+
+Bcktab *gt_Sequentialsuffixarrayreader_bcktab(
+              const Sequentialsuffixarrayreader *ssar)
+{
+  return ssar->suffixarray->bcktab;
+}
