@@ -19,7 +19,6 @@
 #include "core/unused_api.h"
 #include "esa-seqread.h"
 #include "esa-spmitvs.h"
-#include "bcktab.h"
 #include "esa-bottomup.h"
 
 typedef struct  /* global information */
@@ -41,9 +40,19 @@ static bool gt_iswholeleaf(const GtEncseq *encseq,GtReadmode readmode,
 {
   if (leafnumber > 0)
   {
+    bool issep = gt_encseq_issinglepositionseparator(encseq,
+                                                     leafnumber - 1,
+                                                     readmode);
     GtUchar cc = gt_encseq_get_encoded_char(encseq,
                                             leafnumber - 1,
                                             readmode);
+    if (cc == (GtUchar) SEPARATOR)
+    {
+      gt_assert(issep);
+    } else
+    {
+      gt_assert(!issep);
+    }
     return (cc == (GtUchar) SEPARATOR) ? true : false;
   }
   return true;
@@ -69,12 +78,19 @@ static int processleafedge_spmitv(GT_UNUSED bool firstsucc,
       spmitv_state->lastwholeleaf = spmitv_state->currentleafindex;
     } else
     {
+      bool issep = gt_encseq_issinglepositionseparator(spmitv_state->encseq,
+                                                       leafnumber + fd,
+                                                       spmitv_state->readmode);
       GtUchar cc = gt_encseq_get_encoded_char(spmitv_state->encseq,
                                               leafnumber + fd,
                                               spmitv_state->readmode);
       if (cc != (GtUchar) SEPARATOR)
       {
+        gt_assert(!issep);
         spmitv_state->unnecessaryleaves++;
+      } else
+      {
+        gt_assert(issep);
       }
     }
   }
@@ -143,7 +159,6 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
   ssar = gt_newSequentialsuffixarrayreaderfromfile(inputindex,
                                                    SARR_LCPTAB |
                                                    SARR_SUFTAB |
-                                                   SARR_BCKTAB |
                                                    SARR_ESQTAB,
                                                    SEQ_scan,
                                                    err);
@@ -155,8 +170,7 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
   {
     Spmitv_state state;
     unsigned int numofchars;
-    unsigned long emptybuckets, nonspecials;
-    Bcktab *bcktab;
+    unsigned long nonspecials;
     GtCodetype numofallcodes;
 
     state.unnecessaryleaves = 0;
@@ -170,18 +184,10 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
     state.bucketwithwholeleaf = 0;
     state.bucketwithwholeleafwidth = 0;
     numofchars = gt_encseq_alphabetnumofchars(state.encseq);
-    bcktab = gt_Sequentialsuffixarrayreader_bcktab(ssar);
-    numofallcodes = gt_bcktab_numofallcodes(bcktab);
+    numofallcodes = (unsigned long) pow((double) numofchars,
+                                        (double) state.prefixlength);
     nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
 
-    gt_determinemaxbucketsize(bcktab,
-                              0,
-                              numofallcodes-1,
-                              nonspecials,
-                              numofchars);
-    emptybuckets = gt_bcktab_emptybuckets(bcktab);
-    printf("emptybuckets=%lu (%.2f)\n",emptybuckets,
-                                       (double) emptybuckets/numofallcodes);
     if (gt_esa_bottomup(ssar, NULL, NULL, processleafedge_spmitv,
                         processbranchingedge_spmitv,
                         processlcpinterval_spmitv,
@@ -193,12 +199,11 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
     {
       printf("unnecessaryleaves=%lu (%.2f)\n",
               state.unnecessaryleaves,
-              (double) state.unnecessaryleaves/(state.totallength -
-                                    gt_encseq_specialcharacters(state.encseq)));
+              (double) state.unnecessaryleaves/nonspecials);
       printf("allbuckets=%lu (%.2f)\n",state.allbuckets,
                                        (double) state.allbuckets/numofallcodes);
       printf("bucketwithwholeleaf=%lu (%.2f)\n",state.bucketwithwholeleaf,
-              (double) state.bucketwithwholeleaf/(numofallcodes-emptybuckets));
+              (double) state.bucketwithwholeleaf/numofallcodes);
       printf("bucketwithwholeleafwidth=%lu (%.2f)\n",
               state.bucketwithwholeleafwidth,
               (double) state.bucketwithwholeleafwidth/nonspecials);
