@@ -120,8 +120,7 @@ unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
 unsigned long gt_bcktab_emptybuckets(const Bcktab *bcktab);
 
-unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
-                                             unsigned long numofsuffixestosort);
+unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab);
 
 size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab);
 

@@ -243,8 +243,8 @@ static void domarkwholeleafbuckets(Sfxiterator *sfi,
 {
   if (sfi->markwholeleafbuckets != NULL &&
       (position == 0 ||
-       gt_encseq_get_encoded_char(sfi->encseq,position - 1,
-                                  sfi->readmode) == (GtUchar) SEPARATOR))
+       gt_encseq_issinglepositionseparator(sfi->encseq,position - 1,
+                                           sfi->readmode)))
   {
     GT_SETIBIT(sfi->markwholeleafbuckets,code);
   }
@@ -919,8 +919,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
     largestbucketsize
-      = gt_bcktab_leftborderpartialsums(sfi->bcktab,
-                                        sfi->totallength - specialcharacters);
+      = gt_bcktab_leftborderpartialsums(sfi->bcktab);
     estimatedspace += sizeof (uint8_t) * largestbucketsize;
     SHOWCURRENTSPACE;
 #ifdef DEBUGSIZEESTIMATION

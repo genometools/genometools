@@ -861,23 +861,25 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
-                                              unsigned long numofsuffixestosort)
+unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab)
 {
-  unsigned long *optr, largestbucketsize;
+  unsigned long *optr, largestbucketsize, sumbuckets;
 
+  gt_assert(bcktab->numofallcodes > 0);
   gt_assert(bcktab->leftborder != NULL);
   largestbucketsize = bcktab->leftborder[0];
+  sumbuckets = bcktab->leftborder[0];
   for (optr = bcktab->leftborder + 1;
        optr < bcktab->leftborder + bcktab->numofallcodes; optr++)
   {
+    sumbuckets += *optr;
     if (largestbucketsize < *optr)
     {
       largestbucketsize = *optr;
     }
     *optr += *(optr-1);
   }
-  bcktab->leftborder[bcktab->numofallcodes] = numofsuffixestosort;
+  bcktab->leftborder[bcktab->numofallcodes] = sumbuckets;
   return largestbucketsize;
 }
 
