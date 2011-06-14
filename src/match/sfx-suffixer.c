@@ -74,6 +74,7 @@ struct Sfxiterator
   Bcktab *bcktab;
   GtCodetype numofallcodes;
   unsigned long *leftborder; /* points to bcktab->leftborder */
+  GtBitsequence *markwholeleafbuckets;
   Differencecover *dcov;
 
   /* changed in each part */
@@ -236,6 +237,19 @@ static bool previouskmercodedefined = false,
 unsigned int previousspecialpos = 0;
 #endif
 
+static void domarkwholeleafbuckets(Sfxiterator *sfi,
+                                   unsigned long position,
+                                   GtCodetype code)
+{
+  if (sfi->markwholeleafbuckets != NULL &&
+      (position == 0 ||
+       gt_encseq_get_encoded_char(sfi->encseq,position - 1,
+                                  sfi->readmode) == (GtUchar) SEPARATOR))
+  {
+    GT_SETIBIT(sfi->markwholeleafbuckets,code);
+  }
+}
+
 static void updatekmercount(void *processinfo,
                             unsigned long position,
                             const GtKmercode *kmercode)
@@ -306,6 +320,7 @@ static void updatekmercount(void *processinfo,
     }
 #endif
     sfi->leftborder[kmercode->code]++;
+    domarkwholeleafbuckets(sfi,position,kmercode->code);
   }
 #ifdef SKDEBUG
   previouscode = kmercode->code;
@@ -469,6 +484,7 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_freesuftabparts(sfi->suftabparts);
   gt_bcktab_delete(sfi->bcktab);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
+  gt_free(sfi->markwholeleafbuckets);
   gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
 }
@@ -610,10 +626,11 @@ static void verifyestimatedspace(size_t estimatedspace)
 #endif
 
 static void gt_updateleftborderforkmer(Sfxiterator *sfi,
-                                       GT_UNUSED unsigned long pos,
+                                       unsigned long position,
                                        GtCodetype code)
 {
   sfi->leftborder[code]++;
+  domarkwholeleafbuckets(sfi,position,code);
 }
 
 static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
@@ -731,6 +748,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->prefixlength = prefixlength;
     sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->dcov = NULL;
+    sfi->markwholeleafbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
     if (sfxstrategy != NULL)
     {
@@ -826,6 +844,10 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
+      if (sfi->sfxstrategy.onlywholeleafbuckets)
+      {
+        GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->numofallcodes);
+      }
       estimatedspace
         += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength) +
                     gt_sizeofbucketworkspace(prefixlength);
@@ -849,10 +871,13 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 
       for (charidx=0; charidx<sfi->numofchars; charidx++)
       {
-        sfi->leftborder[GT_ISDIRCOMPLEMENT(readmode) ?
-                        GT_COMPLEMENTBASE(charidx) :
-                        charidx]
+        unsigned int updateindex = GT_ISDIRCOMPLEMENT(readmode) ?
+                                        GT_COMPLEMENTBASE(charidx) :
+                                        charidx;
+        sfi->leftborder[updateindex]
           = gt_encseq_charcount(encseq,(GtUchar) charidx);
+        domarkwholeleafbuckets(sfi,(unsigned long) charidx,
+                               (GtCodetype) updateindex);
       }
     } else
     {
