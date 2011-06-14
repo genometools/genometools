@@ -117,7 +117,10 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                                         &(SSAR)->suffixarray->lcptabstream);\
             if (retval > 0)\
             {\
-              if (tmpsmalllcpvalue == LCPOVERFLOW)\
+              if (tmpsmalllcpvalue < LCPOVERFLOW)\
+              {\
+                VALUE = (unsigned long) tmpsmalllcpvalue;\
+              } else\
               {\
                 Largelcpvalue tmpexception;\
                 retval = readnextLargelcpvaluefromstream(&tmpexception,\
@@ -131,9 +134,6 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                   break;\
                 }\
                 VALUE = tmpexception.value;\
-              } else\
-              {\
-                VALUE = (unsigned long) tmpsmalllcpvalue;\
               }\
             } else\
             {\
@@ -147,15 +147,15 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
               {\
                 tmpsmalllcpvalue\
                   = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-                if (tmpsmalllcpvalue == LCPOVERFLOW)\
+                if (tmpsmalllcpvalue < LCPOVERFLOW)\
+                {\
+                  VALUE = (unsigned long) tmpsmalllcpvalue;\
+                } else\
                 {\
                   gt_assert((SSAR)->suffixarray->llvtab[(SSAR)->largelcpindex]\
                              .position == (SSAR)->nextlcptabindex-1);\
                   VALUE = (SSAR)->suffixarray->llvtab\
                                       [(SSAR)->largelcpindex++].value;\
-                } else\
-                {\
-                  VALUE = (unsigned long) tmpsmalllcpvalue;\
                 }\
               } else\
               {\
