@@ -194,7 +194,10 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
                                          &ssar->suffixarray->lcptabstream);
       if (retval > 0)
       {
-        if (tmpsmalllcpvalue == LCPOVERFLOW)
+        if (tmpsmalllcpvalue < LCPOVERFLOW)
+        {
+          *currentlcp = (unsigned long) tmpsmalllcpvalue;
+        } else
         {
           Largelcpvalue tmpexception;
 
@@ -207,9 +210,6 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
             return -1;
           }
           *currentlcp = tmpexception.value;
-        } else
-        {
-          *currentlcp = (unsigned long) tmpsmalllcpvalue;
         }
       } else
       {
@@ -220,14 +220,14 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
       if (ssar->nextlcptabindex < ssar->numberofsuffixes)
       {
         tmpsmalllcpvalue = ssar->suffixarray->lcptab[ssar->nextlcptabindex++];
-        if (tmpsmalllcpvalue == LCPOVERFLOW)
+        if (tmpsmalllcpvalue < LCPOVERFLOW)
+        {
+          *currentlcp = (unsigned long) tmpsmalllcpvalue;
+        } else
         {
           gt_assert(ssar->suffixarray->llvtab[ssar->largelcpindex].position ==
                  ssar->nextlcptabindex-1);
           *currentlcp = ssar->suffixarray->llvtab[ssar->largelcpindex++].value;
-        } else
-        {
-          *currentlcp = (unsigned long) tmpsmalllcpvalue;
         }
       } else
       {
