@@ -21,16 +21,20 @@
 #include "esa-spmitvs.h"
 #include "esa-bottomup.h"
 
+typedef struct
+{
+  unsigned long wholeleaf, wholeleafwidth, nowholeleaf, nowholeleafwidth;
+} Lcpintervalcount;
+
 typedef struct  /* global information */
 {
   unsigned long unnecessaryleaves,
                 totallength,
                 currentleafindex,
-                lastwholeleaf,
-                bucketwithwholeleaf,
-                bucketwithwholeleafwidth,
-                allbuckets;
-  unsigned int prefixlength;
+                lastwholeleaf;
+  unsigned int prefixlength,
+               minlen;
+  Lcpintervalcount *wholeleafcount;
   const GtEncseq *encseq;
   GtReadmode readmode;
 } Spmitv_state;
@@ -38,24 +42,9 @@ typedef struct  /* global information */
 static bool gt_iswholeleaf(const GtEncseq *encseq,GtReadmode readmode,
                            unsigned long leafnumber)
 {
-  if (leafnumber > 0)
-  {
-    bool issep = gt_encseq_issinglepositionseparator(encseq,
-                                                     leafnumber - 1,
-                                                     readmode);
-    GtUchar cc = gt_encseq_get_encoded_char(encseq,
-                                            leafnumber - 1,
-                                            readmode);
-    if (cc == (GtUchar) SEPARATOR)
-    {
-      gt_assert(issep);
-    } else
-    {
-      gt_assert(!issep);
-    }
-    return (cc == (GtUchar) SEPARATOR) ? true : false;
-  }
-  return true;
+  return (leafnumber > 0)
+    ? gt_encseq_issinglepositionseparator(encseq,leafnumber - 1,readmode)
+    : true;
 }
 
 static int processleafedge_spmitv(GT_UNUSED bool firstsucc,
@@ -69,29 +58,19 @@ static int processleafedge_spmitv(GT_UNUSED bool firstsucc,
 {
   Spmitv_state *spmitv_state = (Spmitv_state *) bustate;
 
-  if (leafnumber + fd < spmitv_state->totallength)
+  if (gt_iswholeleaf(spmitv_state->encseq,
+                     spmitv_state->readmode,leafnumber))
   {
-    if (gt_iswholeleaf(spmitv_state->encseq,
-                       spmitv_state->readmode,leafnumber))
+    gt_assert(spmitv_state->currentleafindex != spmitv_state->totallength);
+    spmitv_state->lastwholeleaf = spmitv_state->currentleafindex;
+  } else
+  {
+    if (leafnumber + fd < spmitv_state->totallength &&
+        !gt_encseq_issinglepositionseparator(spmitv_state->encseq,
+                                             leafnumber + fd,
+                                             spmitv_state->readmode))
     {
-      gt_assert(spmitv_state->currentleafindex != spmitv_state->totallength);
-      spmitv_state->lastwholeleaf = spmitv_state->currentleafindex;
-    } else
-    {
-      bool issep = gt_encseq_issinglepositionseparator(spmitv_state->encseq,
-                                                       leafnumber + fd,
-                                                       spmitv_state->readmode);
-      GtUchar cc = gt_encseq_get_encoded_char(spmitv_state->encseq,
-                                              leafnumber + fd,
-                                              spmitv_state->readmode);
-      if (cc != (GtUchar) SEPARATOR)
-      {
-        gt_assert(!issep);
-        spmitv_state->unnecessaryleaves++;
-      } else
-      {
-        gt_assert(issep);
-      }
+      spmitv_state->unnecessaryleaves++;
     }
   }
   spmitv_state->currentleafindex++;
@@ -110,17 +89,23 @@ static int processbranchingedge_spmitv(GT_UNUSED bool firstsucc,
                                        GT_UNUSED GtError *err)
 {
   Spmitv_state *spmitv_state = (Spmitv_state *) bustate;
+  unsigned long idx;
 
-  if (fd < (unsigned long) spmitv_state->prefixlength &&
-      sd > (unsigned long) spmitv_state->prefixlength)
+  for (idx=fd+1; idx<sd; idx++)
   {
-    spmitv_state->allbuckets++;
-    if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
-        spmitv_state->lastwholeleaf >= slb)
+    if (idx <= (unsigned long) spmitv_state->minlen)
     {
-      gt_assert(spmitv_state->lastwholeleaf <= srb);
-      spmitv_state->bucketwithwholeleaf++;
-      spmitv_state->bucketwithwholeleafwidth += (srb - slb + 1);
+      if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
+          spmitv_state->lastwholeleaf >= slb)
+      {
+        gt_assert(spmitv_state->lastwholeleaf <= srb);
+        spmitv_state->wholeleafcount[idx].wholeleaf++;
+        spmitv_state->wholeleafcount[idx].wholeleafwidth += (srb - slb + 1);
+      } else
+      {
+        spmitv_state->wholeleafcount[idx].nowholeleaf++;
+        spmitv_state->wholeleafcount[idx].nowholeleafwidth += (srb - slb + 1);
+      }
     }
   }
   return 0;
@@ -135,21 +120,22 @@ static int processlcpinterval_spmitv(unsigned long lcp,
 {
   Spmitv_state *spmitv_state = (Spmitv_state *) bustate;
 
-  if (lcp == (unsigned long) spmitv_state->prefixlength)
+  if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
+      spmitv_state->lastwholeleaf >= lb &&
+      lcp <= (unsigned long) spmitv_state->minlen)
   {
-    spmitv_state->allbuckets++;
-    if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
-        spmitv_state->lastwholeleaf >= lb)
-    {
-      gt_assert(spmitv_state->lastwholeleaf <= rb);
-      spmitv_state->bucketwithwholeleaf++;
-      spmitv_state->bucketwithwholeleafwidth += (rb - lb + 1);
-    }
+    gt_assert(spmitv_state->lastwholeleaf <= rb);
+    spmitv_state->wholeleafcount[lcp].wholeleaf++;
+    spmitv_state->wholeleafcount[lcp].wholeleafwidth += (rb - lb + 1);
+  } else
+  {
+    spmitv_state->wholeleafcount[lcp].nowholeleaf++;
+    spmitv_state->wholeleafcount[lcp].nowholeleafwidth += (rb - lb + 1);
   }
   return 0;
 }
 
-int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
+int gt_process_spmitv(const char *inputindex, unsigned int minlen,
                       GtError *err)
 {
   bool haserr = false;
@@ -173,16 +159,18 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
     unsigned long nonspecials;
     GtCodetype numofallcodes;
 
+    state.minlen = minlen;
     state.unnecessaryleaves = 0;
     state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
     state.totallength = gt_encseq_total_length(state.encseq);
     state.currentleafindex = 0;
     state.lastwholeleaf = state.totallength; /* undefined */
-    state.allbuckets = 0;
     state.prefixlength = gt_Sequentialsuffixarrayreader_prefixlength(ssar);
-    state.bucketwithwholeleaf = 0;
-    state.bucketwithwholeleafwidth = 0;
+    state.wholeleafcount = gt_malloc(sizeof (*state.wholeleafcount) *
+                                     (minlen+1));
+    memset(state.wholeleafcount,0,
+           sizeof (*state.wholeleafcount) * (minlen+1));
     numofchars = gt_encseq_alphabetnumofchars(state.encseq);
     numofallcodes = (unsigned long) pow((double) numofchars,
                                         (double) state.prefixlength);
@@ -197,17 +185,30 @@ int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
       haserr = true;
     } else
     {
+      unsigned int idx;
+
       printf("unnecessaryleaves=%lu (%.2f)\n",
               state.unnecessaryleaves,
               (double) state.unnecessaryleaves/nonspecials);
-      printf("allbuckets=%lu (%.2f)\n",state.allbuckets,
-                                       (double) state.allbuckets/numofallcodes);
-      printf("bucketwithwholeleaf=%lu (%.2f)\n",state.bucketwithwholeleaf,
-              (double) state.bucketwithwholeleaf/numofallcodes);
-      printf("bucketwithwholeleafwidth=%lu (%.2f)\n",
-              state.bucketwithwholeleafwidth,
-              (double) state.bucketwithwholeleafwidth/nonspecials);
+      for (idx = 0; idx<= minlen; idx++)
+      {
+        if (state.wholeleafcount[idx].wholeleaf != 0 ||
+            state.wholeleafcount[idx].nowholeleaf != 0)
+        {
+          printf("wholeleaf[%u]:num=%lu (%.2f), ",idx,
+                 state.wholeleafcount[idx].wholeleaf,
+                 (double) state.wholeleafcount[idx].wholeleaf/
+                          (state.wholeleafcount[idx].wholeleaf+
+                           state.wholeleafcount[idx].nowholeleaf));
+          printf("width=%lu (%.2f)\n",
+                  state.wholeleafcount[idx].wholeleafwidth,
+                  (double) state.wholeleafcount[idx].wholeleafwidth/
+                          (state.wholeleafcount[idx].wholeleafwidth+
+                           state.wholeleafcount[idx].nowholeleafwidth));
+        }
+      }
     }
+    gt_free(state.wholeleafcount);
   }
   if (ssar != NULL)
   {
