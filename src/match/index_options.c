@@ -70,6 +70,7 @@ struct GtIndexOptions
            *optionoutbcktab,
            *optionprefixlength,
            *optioncmpcharbychar,
+           *optiononlywholeleafbuckets,
            *optionstorespecialcodes,
            *optionmaxwidthrealmedian,
            *optionalgbounds,
@@ -109,6 +110,7 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->optionoutbcktab = NULL;
   oi->optionprefixlength = NULL;
   oi->optioncmpcharbychar = NULL;
+  oi->optiononlywholeleafbuckets = NULL;
   oi->optionstorespecialcodes = NULL;
   oi->optionmaxwidthrealmedian = NULL;
   oi->optionalgbounds = NULL;
@@ -331,6 +333,13 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->optioncmpcharbychar);
   gt_option_parser_add_option(op, idxo->optioncmpcharbychar);
 
+  idxo->optioncmpcharbychar = gt_option_new_bool("onlywholeleafbuckets",
+                                        "only sort buckets containing "
+                                        "a whole leaf",
+                                        &idxo->sfxstrategy.onlywholeleafbuckets,
+                                        false);
+  gt_option_parser_add_option(op, idxo->optioncmpcharbychar);
+
   idxo->optionmaxwidthrealmedian = gt_option_new_ulong("maxwidthrealmedian",
                                                  "compute real median for "
                                                  "intervals of at most the "
@@ -540,6 +549,7 @@ GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
 /* these are available as options only, values are not to be used directly */
 GT_INDEX_OPTS_GETTER_DEF_OPT(cmpcharbychar);
+GT_INDEX_OPTS_GETTER_DEF_OPT(onlywholeleafbuckets);
 GT_INDEX_OPTS_GETTER_DEF_OPT(storespecialcodes);
 GT_INDEX_OPTS_GETTER_DEF_OPT(maxwidthrealmedian);
 GT_INDEX_OPTS_GETTER_DEF_OPT(differencecover);
