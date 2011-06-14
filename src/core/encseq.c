@@ -306,6 +306,29 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
+bool gt_encseq_issinglepositionseparator(const GtEncseq *encseq,
+                                         unsigned long pos,
+                                         GtReadmode readmode)
+{
+  gt_assert(pos < encseq->logicaltotallength);
+  /* translate into forward coords */
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+  }
+  /* handle virtual coordinates */
+  if (encseq->hasmirror) {
+    if (pos > encseq->totallength) {
+      /* invert coordinates and readmode */
+      gt_readmode_invert(readmode);
+      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
+    } else if (pos == encseq->totallength) {
+      return true;
+    }
+  }
+  return encseq->issinglepositionseparator(encseq,pos);
+}
+
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
