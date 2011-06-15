@@ -49,7 +49,6 @@ struct sfxInterface
   struct seqStats *stats;
   Sfxiterator *sfi;
   Definedunsignedlong rot0Pos;
-  bool specialsuffixes;
   /* data relevant to holding portions of the suffix array */
   unsigned long lastGeneratedLen, lastGeneratedStart;
   const GtSuffixsortspace *lastGeneratedSufTabSegment;
@@ -266,7 +265,6 @@ gt_newSfxInterfaceWithReaders(GtReadmode readmode,
     gt_newSfxInterfaceWithReadersErrRet();
   }
   sfxi->rot0Pos.defined = false;
-  sfxi->specialsuffixes = false;
 
   sfxi->lastGeneratedStart = sfxi->lastGeneratedLen = 0;
   sfxi->lastGeneratedSufTabSegment = NULL;
@@ -400,7 +398,7 @@ SfxIGenerate(void *iface,
       sfxi->lastGeneratedStart += sfxi->lastGeneratedLen;
       sfxi->lastGeneratedSufTabSegment
         = gt_Sfxiterator_next(&sfxi->lastGeneratedLen,
-                              &sfxi->specialsuffixes,
+                              NULL,
                               sfxi->sfi);
       if (sfxi->lastGeneratedSufTabSegment != NULL)
       {

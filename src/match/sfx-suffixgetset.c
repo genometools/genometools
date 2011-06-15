@@ -252,6 +252,12 @@ static void suffixptrassert(const GtSuffixsortspace *sssp,
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx)
 {
+  if (idx > sssp->maxindex)
+  {
+    fprintf(stderr,"line %d: idx=%lu > %lu = maxindex\n",__LINE__,
+                                                    idx,sssp->maxindex);
+    exit(EXIT_FAILURE);
+  }
   gt_assert(idx <= sssp->maxindex);
 #ifdef GT_SUFTABASULONGARRAY
   /*
@@ -267,6 +273,12 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   unsigned long idx,
                                   unsigned long value)
 {
+  if (idx > sssp->maxindex)
+  {
+    fprintf(stderr,"line %d: idx=%lu > %lu = maxindex\n",__LINE__,
+                                                    idx,sssp->maxindex);
+    exit(EXIT_FAILURE);
+  }
   gt_assert(idx <= sssp->maxindex);
   gt_assert(value <= sssp->maxvalue);
   /*printf("idx=%lu,value=%lu\n",idx,value);*/

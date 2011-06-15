@@ -615,7 +615,7 @@ static int constructsarrandrunmmsearch(
                  GtError *err)
 {
   unsigned long numofsuffixes;
-  bool haserr = false, specialsuffixes = false;
+  bool haserr = false;
   Sfxiterator *sfi;
   Queryrep queryrep;
   Querymatch *querymatchspaceptr = gt_querymatch_new();
@@ -648,8 +648,7 @@ static int constructsarrandrunmmsearch(
     queryrep.length = (unsigned long) querylen;
     while (true)
     {
-      suffixsortspace = gt_Sfxiterator_next(&numofsuffixes,&specialsuffixes,
-                                            sfi);
+      suffixsortspace = gt_Sfxiterator_next(&numofsuffixes,NULL,sfi);
       if (suffixsortspace == NULL)
       {
         break;

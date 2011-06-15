@@ -186,7 +186,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
                                   GtError *err)
 {
   unsigned long numberofsuffixes;
-  bool haserr = false, specialsuffixes = false;
+  bool haserr = false;
   Sfxiterator *sfi = NULL;
 
   sfi = gt_Sfxiterator_new(encseq,
@@ -209,9 +209,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
 
     while (true)
     {
-      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,
-                                            &specialsuffixes,
-                                            sfi);
+      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,NULL,sfi);
       if (suffixsortspace == NULL)
       {
         break;
