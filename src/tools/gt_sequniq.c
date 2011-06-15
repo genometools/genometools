@@ -30,9 +30,7 @@
 #include "tools/gt_sequniq.h"
 
 typedef struct {
-  bool seqit,
-       verbose,
-       r;
+  bool seqit, verbose, rev;
   unsigned long width;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
@@ -58,7 +56,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
   GtSequniqArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *seqit_option, *verbose_option, *width_option, *r_option;
+  GtOption *seqit_option, *verbose_option, *width_option, *rev_option;
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
@@ -71,12 +69,12 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(seqit_option);
   gt_option_parser_add_option(op, seqit_option);
 
-  /* -r */
-  r_option = gt_option_new_bool("r", "filter out also sequences whose"
-      "reverse complement is identical to sequence already output",
-      &arguments->r, false);
-  gt_option_is_development_option(r_option);
-  gt_option_parser_add_option(op, r_option);
+  /* -rev */
+  rev_option = gt_option_new_bool("rev", "filter out also sequences whose"
+      "reverse complement is identical to a sequence already output",
+      &arguments->rev, false);
+  gt_option_is_development_option(rev_option);
+  gt_option_parser_add_option(op, rev_option);
 
   /* -v */
   verbose_option = gt_option_new_verbose(&arguments->verbose);
@@ -117,7 +115,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
         had_err = gt_md5set_add_sequence(md5set,
             gt_bioseq_get_sequence(bs, j),
-            gt_bioseq_get_sequence_length(bs, j), arguments->r, err);
+            gt_bioseq_get_sequence_length(bs, j), arguments->rev, err);
         if (!had_err)
           gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
               gt_bioseq_get_sequence(bs, j),
@@ -160,7 +158,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
           break;
 
         had_err = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
-            arguments->r, err);
+            arguments->rev, err);
         if (!had_err)
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
