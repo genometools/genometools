@@ -1,4 +1,4 @@
-["", " -seqit", " -seqit -r"].each do |opt|
+["", " -r", " -seqit", " -seqit -r"].each do |opt|
   Name "gt sequniq#{opt} 2xfoo test"
   Keywords "gt_sequniq"
   Test do
@@ -14,30 +14,32 @@
   end
 end
 
-Name "gt sequniq -seqit foo + rc(foo) test "
-Keywords "gt_sequniq"
-Test do
-  run_test "#{$bin}gt sequniq -seqit #{$testdata}foorcfoo.fas"
-  run "diff #{$last_stdout} #{$testdata}foorcfoo.fas"
-end
+["", " -seqit"].each do |opt|
+  Name "gt sequniq#{opt} foo + rc(foo) test "
+  Keywords "gt_sequniq"
+  Test do
+    run_test "#{$bin}gt sequniq#{opt} #{$testdata}foorcfoo.fas"
+    run "diff #{$last_stdout} #{$testdata}foorcfoo.fas"
+  end
 
-Name "gt sequniq -seqit -r foo + rc(foo) test "
-Keywords "gt_sequniq"
-Test do
-  run_test "#{$bin}gt sequniq -seqit -r #{$testdata}foorcfoo.fas"
-  run "diff #{$last_stdout} #{$testdata}foo.fas"
-end
+  Name "gt sequniq#{opt} -r foo + rc(foo) test "
+  Keywords "gt_sequniq"
+  Test do
+    run_test "#{$bin}gt sequniq#{opt} -r #{$testdata}foorcfoo.fas"
+    run "diff #{$last_stdout} #{$testdata}foo.fas"
+  end
 
-Name "gt sequniq -seqit 2xfoo + rc(foo) test "
-Keywords "gt_sequniq"
-Test do
-  run_test "#{$bin}gt sequniq -seqit #{$testdata}foorcfoofoo.fas"
-  run "diff #{$last_stdout} #{$testdata}foorcfoo.fas"
-end
+  Name "gt sequniq#{opt} 2xfoo + rc(foo) test "
+  Keywords "gt_sequniq"
+  Test do
+    run_test "#{$bin}gt sequniq#{opt} #{$testdata}foorcfoofoo.fas"
+    run "diff #{$last_stdout} #{$testdata}foorcfoo.fas"
+  end
 
-Name "gt sequniq -seqit -r 2xfoo + rc(foo) test "
-Keywords "gt_sequniq"
-Test do
-  run_test "#{$bin}gt sequniq -seqit -r #{$testdata}foorcfoofoo.fas"
-  run "diff #{$last_stdout} #{$testdata}foo.fas"
+  Name "gt sequniq#{opt} -r 2xfoo + rc(foo) test "
+  Keywords "gt_sequniq"
+  Test do
+    run_test "#{$bin}gt sequniq#{opt} -r #{$testdata}foorcfoofoo.fas"
+    run "diff #{$last_stdout} #{$testdata}foo.fas"
+  end
 end

@@ -76,7 +76,6 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
       "reverse complement is identical to sequence already output",
       &arguments->r, false);
   gt_option_is_development_option(r_option);
-  gt_option_imply(r_option, seqit_option);
   gt_option_parser_add_option(op, r_option);
 
   /* -v */
@@ -101,49 +100,47 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              void *tool_arguments, GtError *err)
 {
   GtSequniqArguments *arguments = tool_arguments;
-  GtBioseq *bs;
-  GtStringDistri *sd;
   unsigned long long duplicates = 0, num_of_sequences = 0;
-  GtStrArray *files;
-  int had_err = 0;
-  GtSeqIterator *seqit;
-  const GtUchar *sequence;
-  char *desc;
-  unsigned long len;
-  off_t totalsize;
+  int i, had_err = 0;
+  GtMd5set *md5set;
 
   gt_error_check(err);
   gt_assert(arguments);
-  sd = gt_string_distri_new();
-
+  md5set = gt_md5set_new();
   if (!arguments->seqit) {
-    unsigned long i, j;
+    unsigned long j;
+    GtBioseq *bs;
+
     for (i = parsed_args; !had_err && i < argc; i++) {
       if (!(bs = gt_bioseq_new(argv[i], err)))
         had_err = -1;
-      if (!had_err) {
-        for (j = 0; j < gt_bioseq_number_of_sequences(bs); j++) {
-          if (!gt_string_distri_get(sd, gt_bioseq_get_md5_fingerprint(bs, j))) {
-            gt_string_distri_add(sd, gt_bioseq_get_md5_fingerprint(bs, j));
-            gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
-                                gt_bioseq_get_sequence(bs, j),
-                                gt_bioseq_get_sequence_length(bs, j),
-                                arguments->width, arguments->outfp);
-          }
-          else
-            duplicates++;
-          num_of_sequences++;
+      for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
+        had_err = gt_md5set_add_sequence(md5set,
+            gt_bioseq_get_sequence(bs, j),
+            gt_bioseq_get_sequence_length(bs, j), arguments->r, err);
+        if (!had_err)
+          gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
+              gt_bioseq_get_sequence(bs, j),
+              gt_bioseq_get_sequence_length(bs, j),
+              arguments->width, arguments->outfp);
+        else if (had_err > 0)
+        {
+          duplicates++;
+          had_err = 0;
         }
+        num_of_sequences++;
       }
       gt_bioseq_delete(bs);
     }
   }
   else {
-    int i;
-    GtMd5set *md5set;
-    int found;
+    GtSeqIterator *seqit;
+    GtStrArray *files;
+    off_t totalsize;
+    const GtUchar *sequence;
+    char *desc;
+    unsigned long len;
 
-    md5set = gt_md5set_new();
     files = gt_str_array_new();
     for (i = parsed_args; i < argc; i++)
       gt_str_array_add_cstr(files, argv[i]);
@@ -158,25 +155,19 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                                                             totalsize),
                              (unsigned long long) totalsize);
       }
-      for (;;) {
+      while (!had_err) {
         if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
           break;
 
-        found = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
+        had_err = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
             arguments->r, err);
-        if (found == 0)
-        {
+        if (!had_err)
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
-        }
-        else if (found > 0)
+        else if (had_err > 0)
         {
           duplicates++;
-        }
-        else
-        {
-          had_err = found;
-          break;
+          had_err = 0;
         }
         num_of_sequences++;
       }
@@ -184,7 +175,6 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
         gt_progressbar_stop();
       gt_seqiterator_delete(seqit);
     }
-    gt_md5set_delete(md5set);
     gt_str_array_delete(files);
   }
 
@@ -194,8 +184,8 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
             duplicates, num_of_sequences,
             ((double) duplicates / num_of_sequences) * 100.0);
   }
-  gt_string_distri_delete(sd);
 
+  gt_md5set_delete(md5set);
   return had_err;
 }
 
