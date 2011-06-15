@@ -24,7 +24,7 @@
 #include "core/safearith.h"
 #include "extended/md5set.h"
 
-#define GT_MD5SET_MD5SIZE 16
+#define GT_MD5SET_MD5SIZE (sizeof (unsigned char) * 16)
 
 struct GtMd5set
 {
@@ -36,12 +36,16 @@ struct GtMd5set
 
 htsize_t gt_md5set_md5_hash(const void *md5)
 {
-  return gt_uint32_data_hash(md5, sizeof (uint32_t) / sizeof (unsigned char));
+  htsize_t hash;
+
+  gt_assert(sizeof (htsize_t) < GT_MD5SET_MD5SIZE);
+  memcpy(&hash, md5, sizeof (htsize_t));
+  return hash;
 }
 
 int gt_md5set_md5_cmp(const void *md5A, const void *md5B)
 {
-  return memcmp(md5A, md5B, sizeof (unsigned char) * GT_MD5SET_MD5SIZE);
+  return memcmp(md5A, md5B, GT_MD5SET_MD5SIZE);
 }
 
 GtMd5set *gt_md5set_new(void)
