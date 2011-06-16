@@ -241,6 +241,7 @@ int gt_genomediff_shu(GtLogger *logger,
    /*get file respective genome length*/
   if (!had_err)
   {
+    bool mirrored = gt_encseq_is_mirrored(encseq);
     gt_assert(genome_length);
     for (i_idx = 0UL; i_idx < unit_info->num_of_files && !had_err; i_idx++)
     {
@@ -254,6 +255,9 @@ int gt_genomediff_shu(GtLogger *logger,
         genome_length[i_idx] =
           (unsigned long) gt_encseq_effective_filelength(encseq, i_idx) - 1;
       }
+    }
+    for (i_idx = 0UL; i_idx < unit_info->num_of_files && mirrored; i_idx++) {
+      genome_length[i_idx] += genome_length[i_idx];
     }
   }
   /*calculate avg shulen or print sum shulen*/
@@ -333,7 +337,7 @@ int gt_genomediff_shu(GtLogger *logger,
 
     if (seq_gc_content != NULL)
     {
-      uint64_t file_sep;
+      /*uint64_t file_sep;*/
       unsigned long file_idx = 0UL,
                     seq_idx,
                     genome_idx,
@@ -341,9 +345,22 @@ int gt_genomediff_shu(GtLogger *logger,
       gc_content = gt_calloc((size_t)unit_info->num_of_genomes,
                              sizeof (*gc_content));
       num_of_seq = gt_encseq_num_of_sequences(encseq);
-      file_sep = gt_encseq_effective_filelength(encseq, file_idx);
-      for (seq_idx = 0; seq_idx < num_of_seq; seq_idx++)
-      {
+      /*file_sep = gt_encseq_effective_filelength(encseq, file_idx);*/
+      for (seq_idx = 0; seq_idx < num_of_seq; seq_idx++) {
+        file_idx = gt_encseq_filenum(encseq,
+                                     gt_encseq_seqstartpos(encseq,
+                                                           seq_idx));
+        if (unit_info->map_files != NULL)
+        {
+          gc_content[unit_info->map_files[file_idx]] +=
+                                                  seq_gc_content[seq_idx];
+        }
+        else
+        {
+          gc_content[file_idx] += seq_gc_content[seq_idx];
+        }
+      }
+      /*{
         if ((uint64_t) gt_encseq_seqstartpos(encseq, seq_idx) < file_sep)
         {
           if (unit_info->map_files != NULL)
@@ -372,7 +389,7 @@ int gt_genomediff_shu(GtLogger *logger,
             gc_content[file_idx] += seq_gc_content[seq_idx];
           }
         }
-      }
+      }*/
       for (genome_idx = 0; genome_idx < unit_info->num_of_genomes; genome_idx++)
       {
         gt_assert(genome_length != NULL);
