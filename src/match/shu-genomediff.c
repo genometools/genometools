@@ -242,18 +242,38 @@ int gt_genomediff_shu(GtLogger *logger,
   if (!had_err)
   {
     bool mirrored = gt_encseq_is_mirrored(encseq);
+    unsigned long sep_per_file = 0,
+                  seqs_passed = 0,
+                  eff_file_length,
+                  seqs_upto_fileend,
+                  filestart;
     gt_assert(genome_length);
     for (i_idx = 0UL; i_idx < unit_info->num_of_files && !had_err; i_idx++)
     {
+      eff_file_length = gt_encseq_effective_filelength(encseq, i_idx);
+      filestart = gt_encseq_filestartpos(encseq,i_idx);
+      if (i_idx == unit_info->num_of_files - 1) {
+        if (mirrored) {
+          sep_per_file = GT_DIV2(gt_encseq_num_of_sequences(encseq))
+                         - seqs_passed - 1;
+        } else {
+          sep_per_file = gt_encseq_num_of_sequences(encseq) - seqs_passed - 1;
+        }
+      } else {
+        seqs_upto_fileend = gt_encseq_seqnum(encseq,
+            filestart +
+            eff_file_length - 1 ) + 1;
+        sep_per_file = seqs_upto_fileend - seqs_passed - 1;
+        seqs_passed = seqs_upto_fileend;
+      }
       if (unit_info->map_files != NULL)
       {
         genome_length[unit_info->map_files[i_idx]] +=
-          gt_encseq_effective_filelength(encseq, i_idx) - 1;
+          eff_file_length - sep_per_file;
       }
       else
       {
-        genome_length[i_idx] =
-          (unsigned long) gt_encseq_effective_filelength(encseq, i_idx) - 1;
+        genome_length[i_idx] = eff_file_length - sep_per_file;
       }
     }
     for (i_idx = 0UL; i_idx < unit_info->num_of_files && mirrored; i_idx++) {
