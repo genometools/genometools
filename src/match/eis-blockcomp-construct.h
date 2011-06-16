@@ -48,7 +48,7 @@ gt_newGenBlockEncIdxSeq(unsigned long totalLen, const char *projectName,
  * @return new encoded indexed sequence object reference
  */
 EISeq *
-gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
+gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet,
                       const char *projectName, int features, GtError *err);
 
 #endif

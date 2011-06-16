@@ -19,6 +19,7 @@
 #include "match/eis-encidxseq-construct.h"
 #include "match/sarr-def.h"
 #include "match/esa-map.h"
+#include "core/log_api.h"
 
 static EISeq *
 gt_createEncIdxSeqFromSASeqSrc(SASeqSrc *src,
@@ -186,7 +187,7 @@ gt_createEncIdxSeqGen(unsigned long totalLen, const char *projectName,
 }
 
 struct encIdxSeq *
-gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet, unsigned long totalLen,
+gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet,
                    const char *projectName,
                    enum seqBaseEncoding encType, int features, GtError *err)
 {
@@ -197,7 +198,7 @@ gt_loadEncIdxSeqForSA(const GtAlphabet *gtalphabet, unsigned long totalLen,
   switch (encType)
   {
   case BWT_ON_BLOCK_ENC:
-    seqIdx = gt_loadBlockEncIdxSeqGen(alphabet, totalLen, projectName, features,
+    seqIdx = gt_loadBlockEncIdxSeqGen(alphabet, projectName, features,
                                    err);
     break;
   default:
@@ -216,7 +217,6 @@ gt_loadEncIdxSeq(const char *projectName,
   struct encIdxSeq *newSeqIdx = NULL;
   GtEncseq *encseq = NULL;
   GtEncseqLoader *el = NULL;
-  unsigned long len;
   do
   {
     el = gt_encseq_loader_new();
@@ -227,9 +227,8 @@ gt_loadEncIdxSeq(const char *projectName,
     gt_encseq_loader_delete(el);
     if (encseq == NULL)
       break;
-    len = gt_encseq_total_length(encseq) + 1;
     newSeqIdx = gt_loadEncIdxSeqForSA(gt_encseq_alphabet(encseq),
-                                      len, projectName,
+                                      projectName,
                                       encType, features, err);
     gt_encseq_delete(encseq);
   } while (0);

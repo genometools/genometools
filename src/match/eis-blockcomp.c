@@ -24,7 +24,6 @@
  * TODO:
  * - normalize use  of  seqIdx variable naming (seq, bseq etc.)
  */
-
 #include <stddef.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -1927,6 +1926,7 @@ enum bdxHeader {
   BEFB_HEADER_FIELD = 0x42454642, /* block encoding fallback symbol */
   REFB_HEADER_FIELD = 0x52454642, /* range encoding fallback symbol */
   VDOB_HEADER_FIELD = 0x56444f42, /* bitsPerVarDiskOffset */
+  SELE_HEADER_FIELD = 0x53454c45, /* sequence length */
   EH_HEADER_PREFIX = 0x45480000,  /* extension headers */
 };
 
@@ -1963,7 +1963,9 @@ blockEncIdxSeqHeaderLength(const struct blockCompositionSeq *seqIdx,
   if (seqIdx->callBackDataOffsetBits)
     headerSize += 4 + 4         /* extra offset bits per constant block */
       + 4 + 8                   /* extension bits stored in constant block */
-      + 4 + 8;                  /* variable area bits added per bucket max */
+      + 4 + 8                   /* variable area bits added per bucket max */
+      + 4 + 8;                  /* length of sequence */
+
   headerSize += extHeadersSizeAggregate(numExtHeaders, extHeaderSizes);
   return headerSize;
 }
@@ -2040,6 +2042,9 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   offset += 12;
   *(uint32_t *)(buf + offset) = ROFF_HEADER_FIELD;
   *(uint64_t *)(buf + offset + 4) = seqIdx->externalData.rangeEncPos;
+  offset += 12;
+  *(uint32_t *)(buf + offset) = SELE_HEADER_FIELD;
+  *(uint64_t *)(buf + offset + 4) = seqIdx->baseClass.seqLen;
   offset += 12;
   *(uint32_t *)(buf + offset) = SPBT_HEADER_FIELD;
   *(uint32_t *)(buf + offset + 4) = seqIdx->bitsPerUlong;
@@ -2134,7 +2139,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   } while (0)
 
 struct encIdxSeq *
-gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
+gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet,
                          const char *projectName, int features, GtError *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
@@ -2145,29 +2150,41 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
   char *buf = NULL;
   gt_assert(projectName && err);
   newSeqIdx = gt_calloc(sizeof (struct blockCompositionSeq), 1);
-  newSeqIdx->baseClass.seqLen = totalLen;
   newSeqIdx->baseClass.alphabet = alphabet;
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
 
-  if (!openOnDiskData(projectName, &newSeqIdx->externalData, "rb",err))
+  if (!openOnDiskData(projectName, &newSeqIdx->externalData, "rb",err)) {
+    gt_error_set(err, "error reading data from disk");
     loadBlockEncIdxSeqErrRet();
+  }
   {
     size_t offset = HEADER_ID_BLOCK_LEN;
     buf = gt_malloc(HEADER_ID_BLOCK_LEN);
-    if (fread(buf, HEADER_ID_BLOCK_LEN, 1, newSeqIdx->externalData.idxFP) != 1)
+    if (fread(buf, HEADER_ID_BLOCK_LEN, 1,
+          newSeqIdx->externalData.idxFP) != 1) {
+      gt_error_set(err, "error reading header id");
       loadBlockEncIdxSeqErrRet();
-    if (strcmp(buf, bdxHeader)!= 0)
+    }
+    if (strcmp(buf, bdxHeader)!= 0) {
+      gt_error_set(err, "header is not BDX found %s instead", buf);
       loadBlockEncIdxSeqErrRet();
+    }
     newSeqIdx->externalData.cwDataPos = headerLen = *(uint32_t *)(buf + 4);
     buf = gt_realloc(buf, headerLen);
     if (fread(buf + HEADER_ID_BLOCK_LEN, headerLen - HEADER_ID_BLOCK_LEN,
-             1, newSeqIdx->externalData.idxFP) != 1)
+             1, newSeqIdx->externalData.idxFP) != 1) {
+      gt_error_set(err, "error reading header");
       loadBlockEncIdxSeqErrRet();
+    }
     while (offset < headerLen)
     {
       uint32_t currentHeader;
       switch (currentHeader = *(uint32_t *)(buf + offset))
       {
+      case SELE_HEADER_FIELD:
+        newSeqIdx->baseClass.seqLen = *(uint64_t *)(buf + offset + 4);
+        offset += 12;
+        break;
       case BKSZ_HEADER_FIELD:
         newSeqIdx->blockSize = *(uint32_t *)(buf + offset + 4);
         offset += 8;
@@ -2278,7 +2295,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
         }
         else
         {
-          gt_log_log("Unknown header field: %4s\n", buf + offset);
+          gt_error_set(err, "Unknown header field: %4s\n", buf + offset);
           loadBlockEncIdxSeqErrRet();
         }
       }
@@ -2292,8 +2309,12 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
       newSeqIdx->bitsPerUlong =
         requiredUlongBits(newSeqIdx->baseClass.seqLen - 1);
     else if (newSeqIdx->bitsPerUlong !=
-            requiredUlongBits(newSeqIdx->baseClass.seqLen - 1))
+            requiredUlongBits(newSeqIdx->baseClass.seqLen - 1)) {
+      gt_error_set(err, "bits per ulong wrong in header found %u, expected %u",
+                   newSeqIdx->bitsPerUlong,
+                   requiredUlongBits(newSeqIdx->baseClass.seqLen - 1));
       loadBlockEncIdxSeqErrRet();
+    }
   }
   {
     AlphabetRangeID range, numAlphabetRanges = newSeqIdx->numModes =
@@ -2314,7 +2335,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
         /*< FIXME: insert proper code to process ranges */
         break;
       default:
-        gt_log_log("Invalid encoding request.\n");
+        gt_error_set(err, "Invalid encoding request.");
         loadBlockEncIdxSeqErrRet();
         break;
       }
@@ -2339,8 +2360,10 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
   }
   if (!gt_initCompositionList(&newSeqIdx->compositionTable,
                               newSeqIdx->blockSize,
-                              blockMapAlphabetSize))
+                              blockMapAlphabetSize)) {
+    gt_error_set(err, "error initialising composition list");
     loadBlockEncIdxSeqErrRet();
+  }
   if (newSeqIdx->bitsPerVarDiskOffset == 0)
     newSeqIdx->bitsPerVarDiskOffset =
       gt_requiredUInt64Bits(
@@ -2350,16 +2373,20 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet, unsigned long totalLen,
                      newSeqIdx->maxVarExtBitsPerBucket));
 
   if (fseeko(newSeqIdx->externalData.idxFP,
-             newSeqIdx->externalData.rangeEncPos, SEEK_SET))
+             newSeqIdx->externalData.rangeEncPos, SEEK_SET)) {
+    gt_error_set(err, "error in fseeko");
     loadBlockEncIdxSeqErrRet();
+  }
   {
     int regionFeatures = SRL_NO_FEATURES;
     if (features & EIS_FEATURE_REGION_SUMS)
       regionFeatures |= SRL_PARTIAL_SYMBOL_SUMS;
     if (!(newSeqIdx->rangeEncs =
           gt_SRLReadFromStream(newSeqIdx->externalData.idxFP, rangeMapAlphabet,
-                            regionFeatures, err)))
+                            regionFeatures, err))) {
+      gt_error_set(err, "error creating rangeEncs");
       loadBlockEncIdxSeqErrRet();
+    }
   }
   tryMMapOfIndex(&newSeqIdx->externalData);
   gt_free(buf);

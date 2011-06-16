@@ -201,7 +201,6 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   BWTSeq *bwtseq = NULL;
   bool haserr = false;
   GtAlphabet *alphabet;
-  unsigned long totallength = 0;
 
   alphabet = gt_alphabet_new_from_file(indexname,err);
   if (alphabet == NULL)
@@ -211,24 +210,10 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
   }
   if (!haserr)
   {
-    GtEncseqMetadata *encseqmetadata;
-
-    encseqmetadata = gt_encseq_metadata_new(indexname,err);
-    if (encseqmetadata == NULL)
-    {
-      gt_assert(gt_error_is_set(err));
-      haserr = true;
-    }
-    totallength = gt_encseq_metadata_total_length(encseqmetadata);
-    gt_encseq_metadata_delete(encseqmetadata);
-  }
-  if (!haserr)
-  {
     bwtseq = gt_loadBWTSeqForSA(indexname,
                                 BWT_ON_BLOCK_ENC,
                                 BWTDEFOPT_MULTI_QUERY,
                                 alphabet,
-                                totallength+1,
                                 err);
     if (bwtseq == NULL)
     {
