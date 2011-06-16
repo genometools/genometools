@@ -37,6 +37,7 @@
 #include "match/esa-lcpintervals.h"
 #include "match/esa-spmitvs.h"
 #include "tools/gt_sfxmap.h"
+#include "match/stamp.h"
 
 typedef struct
 {
@@ -350,41 +351,40 @@ static int gt_checkentiresuftab(const char *filename,
   int cmp;
   GtEncseqReader *esr1, *esr2;
   bool haserr = false;
+  GtBitsequence *startposoccurs;
+  unsigned long countbitsset = 0;
 
   gt_error_check(err);
   gt_assert(!specialsareequal || specialsareequalatdepth0);
-  if (numberofsuffixes == totallength+1)
+  if (numberofsuffixes == 0)
   {
-    GtBitsequence *startposoccurs;
-    unsigned long countbitsset = 0;
-
-    GT_INITBITTAB(startposoccurs,totallength+1);
-    for (idx = 0; idx <= totallength; idx++)
+    return 0;
+  }
+  GT_INITBITTAB(startposoccurs,totallength+1);
+  for (idx = 0; idx < numberofsuffixes; idx++)
+  {
+    if (GT_ISIBITSET(startposoccurs,ESASUFFIXPTRGET(suftab,idx)))
     {
-      if (GT_ISIBITSET(startposoccurs,ESASUFFIXPTRGET(suftab,idx)))
-      {
-        fprintf(stderr,"ERROR: suffix with startpos %lu"
-                       " already occurs\n",
-                        ESASUFFIXPTRGET(suftab,idx));
-        exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-      GT_SETIBIT(startposoccurs,ESASUFFIXPTRGET(suftab,idx));
-      countbitsset++;
-    }
-    if (countbitsset != totallength+1)
-    {
-      fprintf(stderr,"ERROR: not all bits are set\n");
+      fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
+              ESASUFFIXPTRGET(suftab,idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    gt_free(startposoccurs);
+    GT_SETIBIT(startposoccurs,ESASUFFIXPTRGET(suftab,idx));
+    countbitsset++;
   }
+  if (numberofsuffixes == totallength + 1 && countbitsset != numberofsuffixes)
+  {
+    fprintf(stderr,"ERROR: not all bits are set\n");
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  }
+  gt_free(startposoccurs);
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
   gt_assert(ESASUFFIXPTRGET(suftab,0) < totallength);
   for (idx = 1UL; !haserr && idx < numberofsuffixes; idx++)
   {
-    if (idx < numberofsuffixes - 1)
+    if (idx < totallength)
     {
       gt_assert(ESASUFFIXPTRGET(suftab,idx) < totallength);
       cmp = gt_encseq_check_comparetwosuffixes(encseq,
@@ -400,16 +400,16 @@ static int gt_checkentiresuftab(const char *filename,
       if (cmp > 0)
       {
         showcomparisonfailureESA(filename,
-                              line,
-                              "checkentiresuftab",
-                              encseq,
-                              readmode,
-                              suftab,
-                              depth,
-                              idx-1,
-                              idx,
-                              cmp,
-                              maxlcp);
+                                 line,
+                                 "checkentiresuftab",
+                                 encseq,
+                                 readmode,
+                                 suftab,
+                                 depth,
+                                 idx-1,
+                                 idx,
+                                 cmp,
+                                 maxlcp);
         haserr = true;
         break;
       }
@@ -529,16 +529,16 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         }
         gt_logger_log(logger, "checkentiresuftab");
         if (gt_checkentiresuftab(__FILE__,
-                             __LINE__,
-                             suffixarray.encseq,
-                             suffixarray.readmode,
-                             suffixarray.suftab,
-                             gt_encseq_total_length(suffixarray.encseq)+1,
-                             ssar,
-                             false, /* specialsareequal  */
-                             false,  /* specialsareequalatdepth0 */
-                             0,
-                             err) != 0)
+                                 __LINE__,
+                                 suffixarray.encseq,
+                                 suffixarray.readmode,
+                                 suffixarray.suftab,
+                                 suffixarray.numberofallsortedsuffixes,
+                                 ssar,
+                                 false, /* specialsareequal  */
+                                 false,  /* specialsareequalatdepth0 */
+                                 0,
+                                 err) != 0)
         {
           fprintf(stderr,"gt_checkentiresuftab failed\n");
           exit(GT_EXIT_PROGRAMMING_ERROR);

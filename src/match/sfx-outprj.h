@@ -25,6 +25,7 @@
 int gt_outprjfile(const char *indexname,
                   GtReadmode readmode,
                   const GtEncseq *encseq,
+                  unsigned long numberofallsortedsuffixes,
                   unsigned int prefixlength,
                   unsigned long numoflargelcpvalues,
                   unsigned long maxbranchdepth,

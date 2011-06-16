@@ -378,7 +378,6 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   gt_turningwheel_delete(outlcpinfo->turnwheel);
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
-    gt_assert(outlcpinfo->numsuffixes2output > 0);
     if (outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues <
         outlcpinfo->numsuffixes2output)
     {

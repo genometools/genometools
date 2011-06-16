@@ -97,6 +97,8 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
   gt_setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
+  SETREADINTKEYS("numberofallsortedsuffixes",
+                 &suffixarray->numberofallsortedsuffixes,NULL);
   SETREADINTKEYS("longest",&suffixarray->longest.valueunsignedlong,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
@@ -216,6 +218,7 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptabstream.bufferedfilespace = NULL;
   suffixarray->llvtabstream.bufferedfilespace = NULL;
   suffixarray->bwttabstream.bufferedfilespace = NULL;
+  suffixarray->numberofallsortedsuffixes = 0;
 }
 
 static bool scanprjfileuintkeys(Suffixarray *suffixarray,
@@ -325,15 +328,18 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->suftab
-        = gt_mmap_check_size_with_suffix(indexname,
-                                         SUFTABSUFFIX,
-                                         totallength+1,
-                                         sizeof (*suffixarray->suftab),
-                                         err);
-      if (suffixarray->suftab == NULL)
+      if (suffixarray->numberofallsortedsuffixes > 0)
       {
-        haserr = true;
+        suffixarray->suftab
+          = gt_mmap_check_size_with_suffix(indexname,
+                                       SUFTABSUFFIX,
+                                       suffixarray->numberofallsortedsuffixes,
+                                       sizeof (*suffixarray->suftab),
+                                       err);
+        if (suffixarray->suftab == NULL)
+        {
+          haserr = true;
+        }
       }
     } else
     {
@@ -350,14 +356,18 @@ static int inputsuffixarray(bool map,
   {
     if (map)
     {
-      suffixarray->lcptab = gt_mmap_check_size_with_suffix(indexname,
-                                            LCPTABSUFFIX,
-                                            totallength+1,
-                                            sizeof (*suffixarray->lcptab),
-                                            err);
-      if (suffixarray->lcptab == NULL)
+      if (suffixarray->numberofallsortedsuffixes > 0)
       {
-        haserr = true;
+        suffixarray->lcptab
+          = gt_mmap_check_size_with_suffix(indexname,
+                                         LCPTABSUFFIX,
+                                         suffixarray->numberofallsortedsuffixes,
+                                         sizeof (*suffixarray->lcptab),
+                                         err);
+        if (suffixarray->lcptab == NULL)
+        {
+          haserr = true;
+        }
       }
     } else
     {

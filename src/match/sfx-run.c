@@ -67,7 +67,7 @@ typedef struct
   FILE *outfpsuftab,
        *outfpbwttab,
        *outfpbcktab;
-  unsigned long pageoffset;
+  unsigned long numberofallsortedsuffixes;
   const GtEncseq *encseq;
   Definedunsignedlong longest;
   Outlcpinfo *outlcpinfo;
@@ -84,7 +84,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->outfpsuftab = NULL;
   outfileinfo->outfpbwttab = NULL;
   outfileinfo->outfpbcktab = NULL;
-  outfileinfo->pageoffset = 0;
+  outfileinfo->numberofallsortedsuffixes = 0;
   outfileinfo->longest.defined = false;
   outfileinfo->longest.valueunsignedlong = 0;
   if (gt_index_options_outlcptab_value(so->idxopts))
@@ -184,7 +184,6 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
                                   GtLogger *logger,
                                   GtError *err)
 {
-  unsigned long numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi = NULL;
 
@@ -205,6 +204,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   } else
   {
     const GtSuffixsortspace *suffixsortspace;
+    unsigned long numberofsuffixes;
 
     while (true)
     {
@@ -230,7 +230,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
         haserr = true;
         break;
       }
-      outfileinfo->pageoffset += numberofsuffixes;
+      outfileinfo->numberofallsortedsuffixes += numberofsuffixes;
     }
   }
   if (haserr)
@@ -604,6 +604,7 @@ static int runsuffixerator(bool doesa,
     if (gt_outprjfile(gt_str_get(so->indexname),
                       readmode,
                       encseq,
+                      outfileinfo.numberofallsortedsuffixes,
                       prefixlength,
                       numoflargelcpvalues,
                       maxbranchdepth,

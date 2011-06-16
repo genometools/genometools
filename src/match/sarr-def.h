@@ -103,6 +103,7 @@ typedef struct
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
   bool mirroredencseq;
+  unsigned long numberofallsortedsuffixes;
   /* either with mapped input */
   const ESASuffixptr *suftab;
   const GtUchar *lcptab;

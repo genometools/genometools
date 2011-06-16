@@ -39,6 +39,7 @@
 static void showprjinfo(FILE *outprj,
                         GtReadmode readmode,
                         const GtEncseq *encseq,
+                        unsigned long numberofallsortedsuffixes,
                         unsigned int prefixlength,
                         unsigned long numoflargelcpvalues,
                         unsigned long maxbranchdepth,
@@ -63,6 +64,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
+  fprintf(outprj,"numberofallsortedsuffixes=%lu\n",numberofallsortedsuffixes);
   if (longest->defined)
   {
     fprintf(outprj,"longest=%lu\n",longest->valueunsignedlong);
@@ -80,6 +82,7 @@ static void showprjinfo(FILE *outprj,
 int gt_outprjfile(const char *indexname,
                   GtReadmode readmode,
                   const GtEncseq *encseq,
+                  unsigned long numberofallsortedsuffixes,
                   unsigned int prefixlength,
                   unsigned long numoflargelcpvalues,
                   unsigned long maxbranchdepth,
@@ -100,6 +103,7 @@ int gt_outprjfile(const char *indexname,
     showprjinfo(prjfp,
                 readmode,
                 encseq,
+                numberofallsortedsuffixes,
                 prefixlength,
                 numoflargelcpvalues,
                 maxbranchdepth,

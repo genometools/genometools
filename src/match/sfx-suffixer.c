@@ -489,7 +489,8 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   }
   gt_free(sfi->spaceCodeatposition);
   sfi->spaceCodeatposition = NULL;
-  gt_suffixsortspace_delete(sfi->suffixsortspace,true);
+  gt_suffixsortspace_delete(sfi->suffixsortspace,
+                            sfi->markwholeleafbuckets == NULL ? true : false);
   gt_freesuftabparts(sfi->suftabparts);
   gt_bcktab_delete(sfi->bcktab);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
@@ -1290,5 +1291,11 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi)
 {
   gt_assert(sfi != NULL);
-  return gt_suffixsortspace_longest(sfi->suffixsortspace);
+  if (sfi->markwholeleafbuckets == NULL)
+  {
+    return gt_suffixsortspace_longest(sfi->suffixsortspace);
+  } else
+  {
+    return 0;
+  }
 }
