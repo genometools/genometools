@@ -931,6 +931,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     largestbucketsize
       = gt_bcktab_leftborderpartialsums(sfi->bcktab);
     numofsuffixestosort = sfi->leftborder[sfi->numofallcodes];
+    if (sfi->markwholeleafbuckets != NULL)
+    {
+      gt_logger_log(logger, "relevant suffixes=%.2f%%",100.0 *
+                                      (double) numofsuffixestosort/
+                                      (sfi->totallength+1));
+    }
     if (sfi->outlcpinfo != NULL)
     {
       gt_Outlcpinfo_numsuffixes2output_set(sfi->outlcpinfo,
