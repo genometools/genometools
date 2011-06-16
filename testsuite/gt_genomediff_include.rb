@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'tempfile'
+require '../scripts/genomediff.rb'
 
 Name "gt genomediff pck <esa> failure"
 Keywords "gt_genomediff pck failure"
@@ -85,26 +86,27 @@ allfilecodes.each do |code|
   end
 end
 
-def test_pck(files, param)
+def test_pck(files, param, idxparam)
   run_test("#{$bin}gt       " +
            "packedindex mkindex " +
-           "-db #{files}        " +
-           "-dna                " +
-           "-dir rev            " +
-           "-ssp                " +
-           "-dc 64              " +
-           "-bsize 8            " +
-           "-sprank             " +
-           "-pl                 " +
+           "-db #{files} " +
+           "-dna " +
+           "-dir rev " +
+           "-ssp " +
+           "-dc 64 " +
+           "-bsize 8 " +
+           "-sprank " +
+           "-pl " +
+           "#{idxparam} " +
            "-indexname pck")
   run_test(
     "#{$bin}gt genomediff #{param} -pck pck",
     :maxtime => 720)
 end
 
-def test_esa(files, param)
+def test_esa(files, param, idxparam)
     run_test "#{$bin}gt suffixerator -db #{files} -indexname esa " +
-             "-dna -suf -tis -lcp -ssp"
+             "-dna -suf -tis -lcp -ssp #{idxparam}"
     run_test "#{$bin}gt genomediff #{param} -esa esa"
 end
 
@@ -124,27 +126,37 @@ allfilecodes.each do |code|
   Name "gt genomediff pck traverse #{code.split('/').last}"
   Keywords "gt_genomediff pck traverse"
   Test do
-    test_pck("#{code}*.fas", "-traverse")
+    test_pck("#{code}*.fas", "-traverse", "")
   end
   Name "gt genomediff pck shulen #{code.split('/').last}"
   Keywords "gt_genomediff pck shulen"
   Test do
-    test_pck("#{code}*.fas", "-shulen")
+    test_pck("#{code}*.fas", "-shulen", "")
   end
   Name "gt genomediff pck fullrun #{code.split('/').last}"
   Keywords "gt_genomediff pck fullrun"
   Test do
-    test_pck("#{code}*.fas", "")
+    test_pck("#{code}*.fas", "", "")
+  end
+  Name "gt genomediff pck fullrun mirrored #{code.split('/').last}"
+  Keywords "gt_genomediff pck fullrun"
+  Test do
+    test_pck("#{code}*.fas", "", "-mirrored")
   end
   Name "gt genomediff esa shulen #{code.split('/').last}"
   Keywords "gt_genomediff esa shulen"
   Test do
-    test_esa("#{code}*.fas", "-shulen")
+    test_esa("#{code}*.fas", "-shulen", "")
   end
   Name "gt genomediff esa fullrun #{code.split('/').last}"
   Keywords "gt_genomediff esa fullrun"
   Test do
-    test_esa("#{code}*.fas", "")
+    test_esa("#{code}*.fas", "", "")
+  end
+  Name "gt genomediff esa fullrun mirrored #{code.split('/').last}"
+  Keywords "gt_genomediff esa fullrun"
+  Test do
+    test_esa("#{code}*.fas", "", "-mirrored")
   end
 end
 
@@ -152,13 +164,16 @@ smallfilecodes.each do |code|
   Name "gt genomediff pck unitfile correct #{code.split('/').last}"
   Keywords "gt_genomediff pck unitfile"
   Test do
-    test_pck("#{code}*fas", "-unitfile #{$testdata}genomediff/unitfile1.lua")
+    test_pck("#{code}*fas",
+             "-unitfile #{$testdata}genomediff/unitfile1.lua", "")
   end
 
   Name "gt genomediff esa unitfile correct #{code.split('/').last}"
   Keywords "gt_genomediff esa unitfile"
   Test do
-    test_esa("#{code}*fas", "-unitfile #{$testdata}genomediff/unitfile1.lua")
+    test_esa("#{code}*fas",
+             "-unitfile #{$testdata}genomediff/unitfile1.lua",
+             "")
   end
 
   Name "gt genomediff compare esa pck unitfile #{code.split('/').last}"
@@ -168,8 +183,8 @@ smallfilecodes.each do |code|
     pck_out = []
     esa_out = []
 
-    test_pck("#{code}*fas", "-shulen " +
-                            "-unitfile #{$testdata}genomediff/unitfile1.lua")
+    test_pck("#{code}*fas",
+             "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -186,8 +201,9 @@ smallfilecodes.each do |code|
         failtest("can't parse output pck #{file1} #{file2}")
       end
     end
-    test_esa("#{code}*fas", "-shulen " +
-                            "-unitfile #{$testdata}genomediff/unitfile1.lua")
+    test_esa("#{code}*fas",
+             "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua ",
+             "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -280,7 +296,7 @@ kr_testable_files.each do |code|
     Dir.glob("#{code}*.fas").sort.each do |file|
       files += reverse_and_concat(file) + ' '
     end
-    test_pck("#{files}", "-shulen")
+    test_pck("#{files}", "-shulen", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -298,7 +314,7 @@ kr_testable_files.each do |code|
       end
     end
 
-    test_esa("#{files}", "-shulen")
+    test_esa("#{files}", "-shulen", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -353,7 +369,7 @@ kr_testable_files.each do |code|
       files += reverse_and_concat(file) + ' '
     end
 
-    test_pck("#{files}", "")
+    test_pck("#{files}", "", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -371,7 +387,7 @@ kr_testable_files.each do |code|
       end
     end
 
-    test_esa("#{files}", "")
+    test_esa("#{files}", "", "")
 
     File.open($last_stdout, 'r') do |outfile|
       while line = outfile.gets do
@@ -436,7 +452,7 @@ def check_shulen_for_list_pairwise(list)
           pck_out = []
           esa_out = []
 
-          test_pck("#{$testdata}#{file1} #{$testdata}#{file2}", "-shulen")
+          test_pck("#{$testdata}#{file1} #{$testdata}#{file2}", "-shulen", "")
 
           File.open($last_stdout, 'r') do |outfile|
             while line = outfile.gets do
@@ -454,7 +470,7 @@ def check_shulen_for_list_pairwise(list)
             end
           end
           test_esa("#{$testdata}#{file1} #{$testdata}#{file2}",
-                    "-shulen")
+                    "-shulen", "")
 
           File.open($last_stdout, 'r') do |outfile|
             while line = outfile.gets do
@@ -494,7 +510,7 @@ Test do
   pck_out = []
   esa_out =[]
 
-  test_pck(realfiles, "-shulen")
+  test_pck(realfiles, "-shulen", "")
 
   File.open($last_stdout, 'r') do |outfile|
     while line = outfile.gets do
@@ -511,7 +527,7 @@ Test do
       failtest("can't parse output")
     end
   end
-  test_esa(realfiles, "-shulen")
+  test_esa(realfiles, "-shulen", "")
 
   File.open($last_stdout, 'r') do |outfile|
     while line = outfile.gets do
