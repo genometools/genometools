@@ -1043,6 +1043,11 @@ static void preparethispart(Sfxiterator *sfi)
   gt_suffixsortspace_offset_set(sfi->suffixsortspace,
                                 stpgetcurrentsuftaboffset(sfi->part,
                                                           sfi->suftabparts));
+  if (sfi->sfxprogress != NULL)
+  {
+    gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
+                           stdout);
+  }
   if (sfi->markwholeleafbuckets == NULL)
   {
     if (sfi->sfxstrategy.storespecialcodes)
@@ -1052,11 +1057,6 @@ static void preparethispart(Sfxiterator *sfi)
     {
       sfx_derivespecialcodesonthefly(sfi);
     }
-  }
-  if (sfi->sfxprogress != NULL)
-  {
-    gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
-                           stdout);
   }
   if (sfi->prefixlength > 1U
       && gt_has_twobitencoding(sfi->encseq)
