@@ -23,6 +23,7 @@
 #include "core/str.h"
 #include "core/types_api.h"
 #include "core/logger.h"
+#include "core/intbits.h"
 #include "core/codetype.h"
 
 typedef struct
@@ -120,7 +121,9 @@ unsigned int gt_bcktab_prefixlength(const Bcktab *bcktab);
 
 unsigned long gt_bcktab_emptybuckets(const Bcktab *bcktab);
 
-unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab);
+unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
+                                              const GtBitsequence
+                                                *markwholeleafbuckets);
 
 size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab);
 

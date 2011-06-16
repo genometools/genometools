@@ -339,9 +339,9 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
-       /*&& (sfi->markwholeleafbuckets == NULL ||
-       GT_ISIBITSET(sfi->markwholeleafbuckets,code))) XXX */
+  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode
+       && (sfi->markwholeleafbuckets == NULL ||
+           GT_ISIBITSET(sfi->markwholeleafbuckets,code))) /*XXX */
   {
     unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
     gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
@@ -391,9 +391,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
                                 (GtCodetype) sfi->spaceCodeatposition[j].code,
                                 prefixindex,
                                 sfi->spaceCodeatposition[j].maxprefixindex);
-        if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
-            (sfi->markwholeleafbuckets == NULL ||
-             GT_ISIBITSET(sfi->markwholeleafbuckets,code)))
+        if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
           stidx = --sfi->leftborder[code];
@@ -448,9 +446,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
                                             sfi->currentmaxcode))
         {
           gt_assert(code <= sfi->currentmaxcode);
-          if (code >= sfi->currentmincode &&
-              (sfi->markwholeleafbuckets == NULL ||
-               GT_ISIBITSET(sfi->markwholeleafbuckets,code)))
+          if (code >= sfi->currentmincode)
           {
             gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
             gt_assert(code > 0);
@@ -929,7 +925,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
     largestbucketsize
-      = gt_bcktab_leftborderpartialsums(sfi->bcktab);
+      = gt_bcktab_leftborderpartialsums(sfi->bcktab,sfi->markwholeleafbuckets);
     numofsuffixestosort = sfi->leftborder[sfi->numofallcodes];
     if (sfi->markwholeleafbuckets != NULL)
     {

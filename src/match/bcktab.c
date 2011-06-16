@@ -861,23 +861,34 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab)
+unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
+                                              const GtBitsequence
+                                                *markwholeleafbuckets)
 {
-  unsigned long *optr, largestbucketsize, sumbuckets;
+  unsigned long code, largestbucketsize, sumbuckets;
 
   gt_assert(bcktab->numofallcodes > 0);
   gt_assert(bcktab->leftborder != NULL);
-  largestbucketsize = bcktab->leftborder[0];
-  sumbuckets = bcktab->leftborder[0];
-  for (optr = bcktab->leftborder + 1;
-       optr < bcktab->leftborder + bcktab->numofallcodes; optr++)
+  if (markwholeleafbuckets != NULL && !GT_ISIBITSET(markwholeleafbuckets,0))
   {
-    sumbuckets += *optr;
-    if (largestbucketsize < *optr)
+    bcktab->leftborder[0] = 0;
+  }
+  largestbucketsize = sumbuckets = bcktab->leftborder[0];
+  for (code = 1UL; code < bcktab->numofallcodes; code++)
+  {
+    if (markwholeleafbuckets != NULL &&
+        !GT_ISIBITSET(markwholeleafbuckets,code))
     {
-      largestbucketsize = *optr;
+      bcktab->leftborder[code] = bcktab->leftborder[code-1];
+    } else
+    {
+      sumbuckets += bcktab->leftborder[code];
+      if (largestbucketsize < bcktab->leftborder[code])
+      {
+        largestbucketsize = bcktab->leftborder[code];
+      }
+      bcktab->leftborder[code] += bcktab->leftborder[code-1];
     }
-    *optr += *(optr-1);
   }
   bcktab->leftborder[bcktab->numofallcodes] = sumbuckets;
   return largestbucketsize;
