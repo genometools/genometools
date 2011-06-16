@@ -288,6 +288,12 @@ int gt_genomediff_shu(GtLogger *logger,
     for (i_idx = 0UL; i_idx < unit_info->num_of_files && mirrored; i_idx++) {
       genome_length[i_idx] += genome_length[i_idx];
     }
+    if (gt_log_enabled()) {
+      for  (i_idx = 0UL; i_idx < unit_info->num_of_files; i_idx++) {
+        gt_log_log("file/genome %lu has length %lu",
+            i_idx, genome_length[i_idx]);
+      }
+    }
   }
   /*calculate avg shulen or print sum shulen*/
   if (!had_err)
