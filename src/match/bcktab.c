@@ -861,16 +861,18 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
-                                              const GtBitsequence
-                                                *markwholeleafbuckets)
+unsigned long gt_bcktab_leftborderpartialsums(
+                             unsigned long *saved_bucketswithoutwholeleaf,
+                             Bcktab *bcktab,
+                             const GtBitsequence *markwholeleafbuckets)
 {
-  unsigned long code, largestbucketsize, sumbuckets;
+  unsigned long code, largestbucketsize, sumbuckets, saved = 0;
 
   gt_assert(bcktab->numofallcodes > 0);
   gt_assert(bcktab->leftborder != NULL);
   if (markwholeleafbuckets != NULL && !GT_ISIBITSET(markwholeleafbuckets,0))
   {
+    saved += bcktab->leftborder[0];
     bcktab->leftborder[0] = 0;
   }
   largestbucketsize = sumbuckets = bcktab->leftborder[0];
@@ -879,6 +881,7 @@ unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
     if (markwholeleafbuckets != NULL &&
         !GT_ISIBITSET(markwholeleafbuckets,code))
     {
+      saved += bcktab->leftborder[code];
       bcktab->leftborder[code] = bcktab->leftborder[code-1];
     } else
     {
@@ -891,6 +894,10 @@ unsigned long gt_bcktab_leftborderpartialsums(Bcktab *bcktab,
     }
   }
   bcktab->leftborder[bcktab->numofallcodes] = sumbuckets;
+  if (saved_bucketswithoutwholeleaf != NULL)
+  {
+    *saved_bucketswithoutwholeleaf = saved;
+  }
   return largestbucketsize;
 }
 

@@ -62,7 +62,8 @@ struct Sfxiterator
   const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long specialcharacters,
-                totallength;
+                totallength,
+                saved_nonspecialsinbuckets;
   unsigned int numofchars,
                prefixlength;
   Sfxstrategy sfxstrategy;
@@ -339,13 +340,15 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode
-       && (sfi->markwholeleafbuckets == NULL ||
-           GT_ISIBITSET(sfi->markwholeleafbuckets,code))) /*XXX */
+  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
   {
-    unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
-    gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
-                                           position);
+    if (sfi->markwholeleafbuckets == NULL ||
+        GT_ISIBITSET(sfi->markwholeleafbuckets,code)) /*XXX */
+    {
+      unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
+      gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
+                                             position);
+    }
     /* from right to left */
   }
 }
@@ -662,6 +665,9 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
       sfi->leftborder[code]++; /* XXX */
       code = ((code << 2) | 3U) & sfi->kmerfastmaskright;
     }
+  } else
+  {
+    sfi->saved_nonspecialsinbuckets += maxprefixindex;
   }
 }
 
@@ -749,6 +755,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       sfi->spaceCodeatposition = NULL;
     }
     sfi->bcktab = NULL;
+    sfi->saved_nonspecialsinbuckets = 0;
     sfi->nextfreeCodeatposition = 0;
     sfi->suffixsortspace = NULL;
     sfi->suftabparts = NULL;
@@ -862,7 +869,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   SHOWCURRENTSPACE;
   if (!haserr)
   {
-    unsigned long largestbucketsize;
+    unsigned long largestbucketsize,
+                  saved_bucketswithoutwholeleaf;
     gt_assert(sfi != NULL);
     sfi->storespecials = true;
     if (sfxprogress != NULL)
@@ -925,13 +933,22 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     showleftborder(sfi->leftborder,sfi->numofallcodes);
 #endif
     largestbucketsize
-      = gt_bcktab_leftborderpartialsums(sfi->bcktab,sfi->markwholeleafbuckets);
+      = gt_bcktab_leftborderpartialsums(&saved_bucketswithoutwholeleaf,
+                                        sfi->bcktab,sfi->markwholeleafbuckets);
     numofsuffixestosort = sfi->leftborder[sfi->numofallcodes];
     if (sfi->markwholeleafbuckets != NULL)
     {
-      gt_logger_log(logger, "relevant suffixes=%.2f%%",100.0 *
-                                      (double) numofsuffixestosort/
-                                      (sfi->totallength+1));
+      gt_logger_log(sfi->logger, "relevant suffixes=%.2f%%",100.0 *
+                                        (double) numofsuffixestosort/
+                                        (sfi->totallength+1));
+      gt_logger_log(sfi->logger,"saved_bucketswithoutwholeleaf=%lu",
+                                   saved_bucketswithoutwholeleaf);
+      gt_logger_log(sfi->logger,"saved_nonspecialsinbuckets=%lu",
+                                   sfi->saved_nonspecialsinbuckets);
+      gt_assert(saved_bucketswithoutwholeleaf +
+                sfi->saved_nonspecialsinbuckets +
+                numofsuffixestosort ==
+                sfi->totallength - specialcharacters);
     }
     if (sfi->outlcpinfo != NULL)
     {
@@ -1045,12 +1062,11 @@ static void preparethispart(Sfxiterator *sfi)
       && gt_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
   {
-    insertsuffix_getencseqkmers_twobitencoding(
-                                  sfi->encseq,
-                                  sfi->readmode,
-                                  sfi->prefixlength,
-                                  sfi,
-                                  NULL);
+    insertsuffix_getencseqkmers_twobitencoding(sfi->encseq,
+                                               sfi->readmode,
+                                               sfi->prefixlength,
+                                               sfi,
+                                               NULL);
   } else
   {
     if (sfi->sfxstrategy.iteratorbasedkmerscanning)
