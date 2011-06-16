@@ -259,6 +259,12 @@ int gt_genomediff_shu(GtLogger *logger,
     for (i_idx = 0UL; i_idx < unit_info->num_of_files && mirrored; i_idx++) {
       genome_length[i_idx] += genome_length[i_idx];
     }
+    if (gt_log_enabled()) {
+      for  (i_idx = 0UL; i_idx < unit_info->num_of_files; i_idx++) {
+        gt_log_log("file/genome %lu has length %lu",
+            i_idx, genome_length[i_idx]);
+      }
+    }
   }
   /*calculate avg shulen or print sum shulen*/
   if (!had_err)
@@ -393,6 +399,8 @@ int gt_genomediff_shu(GtLogger *logger,
       for (genome_idx = 0; genome_idx < unit_info->num_of_genomes; genome_idx++)
       {
         gt_assert(genome_length != NULL);
+        gt_log_log("gc content of genome %lu: %f",
+                   genome_idx, gc_content[genome_idx]);
         gc_content[genome_idx] /= (double) genome_length[genome_idx];
       }
       gt_free(seq_gc_content);
