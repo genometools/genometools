@@ -806,11 +806,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (sfi->outlcpinfo != NULL)
       {
         sfi->outlcpinfoforsample
-          = gt_Outlcpinfo_new(NULL,
-                              sfi->numofchars,
-                              0,
-                              sfi->totallength,
-                              err);
+          = gt_Outlcpinfo_new(NULL,sfi->numofchars,0,err);
         if (sfi->outlcpinfoforsample == NULL)
         {
           haserr = true;
@@ -818,7 +814,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
       if (!haserr)
       {
-        /* the following function only has an effect differencecover > 0 */
+        /* the following function only has an effect for differencecover > 0 */
         sfi->dcov = gt_differencecover_prepare_sample(
                                      sfi->sfxstrategy.differencecover,
                                      sfi->encseq,
@@ -934,6 +930,13 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     largestbucketsize
       = gt_bcktab_leftborderpartialsums(sfi->bcktab);
     numofsuffixestosort = sfi->leftborder[sfi->numofallcodes];
+    if (sfi->outlcpinfo != NULL)
+    {
+      gt_Outlcpinfo_numsuffixes2output_set(sfi->outlcpinfo,
+                                           sfi->markwholeleafbuckets == NULL
+                                             ? sfi->totallength + 1
+                                             : numofsuffixestosort);
+    }
     estimatedspace += sizeof (uint8_t) * largestbucketsize;
     SHOWCURRENTSPACE;
 #ifdef DEBUGSIZEESTIMATION
@@ -1268,7 +1271,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
     gt_assert(sfi->fusp.nextfreeSuffixptr > 0);
   } else
   {
-    return NULL;
+    sfi->exhausted = true;
   }
   *numberofsuffixes = sfi->fusp.nextfreeSuffixptr;
   if (specialsuffixes != NULL)

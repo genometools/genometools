@@ -65,8 +65,8 @@
 typedef struct
 {
   FILE *outfpsuftab,
-      *outfpbwttab,
-      *outfpbcktab;
+       *outfpbwttab,
+       *outfpbcktab;
   unsigned long pageoffset;
   const GtEncseq *encseq;
   Definedunsignedlong longest;
@@ -94,7 +94,6 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
       = gt_Outlcpinfo_new(gt_str_get(so->indexname),
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
-                          gt_encseq_total_length(encseq),
                           err);
     if (outfileinfo->outlcpinfo == NULL)
     {

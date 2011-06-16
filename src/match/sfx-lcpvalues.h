@@ -29,7 +29,7 @@ typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct
 {
-  unsigned long *isset;
+  GtBitsequence *isset;
   unsigned long *bucketoflcpvalues,
                 numofentries,
                 numoflargelcpvalues,
@@ -76,7 +76,6 @@ typedef struct
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
-                              unsigned long totallength,
                               GtError *err);
 
 size_t gt_Outlcpinfo_size(const Outlcpinfo *outlcpinfo);
@@ -89,6 +88,9 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
 void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+
+void gt_Outlcpinfo_numsuffixes2output_set(Outlcpinfo *outlcpinfo,
+                                          unsigned long numsuffixes2output);
 
 unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo);
 

@@ -58,13 +58,13 @@ typedef struct
 
 struct Outlcpinfo
 {
-  unsigned long totallength;
   Turningwheel *turnwheel;
+  unsigned long numsuffixes2output;
   unsigned int minchanged;
+  size_t sizeofinfo;
   Suffixwithcode previoussuffix;
   bool previousbucketwasempty;
   Lcpsubtab lcpsubtab;
-  size_t sizeofinfo;
 };
 
 /* Now some functions related to the computation of lcp values follows */
@@ -185,7 +185,6 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
-                              unsigned long totallength,
                               GtError *err)
 {
   bool haserr = false;
@@ -225,7 +224,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
       }
     }
   }
-  outlcpinfo->totallength = totallength;
+  outlcpinfo->numsuffixes2output = 0;
   outlcpinfo->minchanged = 0;
   if (!haserr && prefixlength > 0)
   {
@@ -354,14 +353,12 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
 
 #define NUMBEROFZEROS 1024
 
-static unsigned long outmany0lcpvalues(unsigned long countoutputlcpvalues,
-                                       unsigned long totallength,
+static unsigned long outmany0lcpvalues(unsigned long many,
                                        FILE *outfplcptab)
 {
-  unsigned long i, countout, many;
+  unsigned long i, countout;
   uint8_t outvalues[NUMBEROFZEROS] = {0};
 
-  many = totallength + 1 - countoutputlcpvalues;
   countout = many/NUMBEROFZEROS;
   for (i=0; i<countout; i++)
   {
@@ -381,17 +378,18 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   gt_turningwheel_delete(outlcpinfo->turnwheel);
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
+    gt_assert(outlcpinfo->numsuffixes2output > 0);
     if (outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues <
-        outlcpinfo->totallength+1)
+        outlcpinfo->numsuffixes2output)
     {
       outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues
-        += outmany0lcpvalues(outlcpinfo->lcpsubtab.lcp2file
+        += outmany0lcpvalues(outlcpinfo->numsuffixes2output -
+                             outlcpinfo->lcpsubtab.lcp2file
                                                   ->countoutputlcpvalues,
-                             outlcpinfo->totallength,
                              outlcpinfo->lcpsubtab.lcp2file->outfplcptab);
     }
     gt_assert(outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues ==
-              outlcpinfo->totallength + 1);
+              outlcpinfo->numsuffixes2output);
     GT_FREEARRAY(&outlcpinfo->lcpsubtab.lcp2file->largelcpvalues,
                  Largelcpvalue);
     gt_fa_fclose(outlcpinfo->lcpsubtab.lcp2file->outfplcptab);
@@ -461,6 +459,12 @@ unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 {
   gt_assert(outlcpinfo->lcpsubtab.lcp2file != NULL);
   return outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues;
+}
+
+void gt_Outlcpinfo_numsuffixes2output_set(Outlcpinfo *outlcpinfo,
+                                          unsigned long numsuffixes2output)
+{
+  outlcpinfo->numsuffixes2output = numsuffixes2output;
 }
 
 unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo)
