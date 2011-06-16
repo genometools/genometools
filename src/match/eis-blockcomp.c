@@ -2123,6 +2123,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     if (newSeqIdx->rangeEncs)                                     \
       gt_deleteSeqRangeList(newSeqIdx->rangeEncs);                \
     gt_free(newSeqIdx->extHeaderPos);                             \
+    gt_free(newSeqIdx->partialSymSumBits);                        \
     gt_free(buf);                                                 \
     if (alphabet) gt_MRAEncDelete(alphabet);                      \
     gt_free(modesCopy);                                           \
