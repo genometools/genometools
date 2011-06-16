@@ -285,6 +285,9 @@ int gt_genomediff_shu(GtLogger *logger,
             i_idx, genome_length[i_idx]);
       }
     }
+    for (i_idx = 0UL; i_idx < unit_info->num_of_files && mirrored; i_idx++) {
+      genome_length[i_idx] += genome_length[i_idx];
+    }
   }
   /*calculate avg shulen or print sum shulen*/
   if (!had_err)
