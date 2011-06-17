@@ -29,12 +29,12 @@ typedef struct
   unsigned long maxwidthrealmedian,
                 maxinsertionsort,
                 maxbltriesort,
-                maxcountingsort;
+                maxcountingsort,
+                spmopt;
   unsigned int differencecover;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding) */
-       onlywholeleafbuckets,
        storespecialcodes,
        iteratorbasedkmerscanning,
        suftabcompressedbytes,
@@ -54,7 +54,7 @@ typedef struct
   sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
   sfxstrategy->differencecover = 0;
   sfxstrategy->cmpcharbychar = cmpcharbychar;
-  sfxstrategy->onlywholeleafbuckets = false;
+  sfxstrategy->spmopt = 0;
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->iteratorbasedkmerscanning = false;
   sfxstrategy->suftabcompressedbytes = false;

@@ -465,7 +465,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   if $gttestdata then
     ["2L", "2R", "3L", "3R"].each do |chr|
       Name "gt suffixerator -memlimit D. mel #{chr}"
-      Keywords "gt_suffixerator gt_packedindex memlimit"
+      Keywords "gt_suffixerator memlimit"
       Test do
         size = nil
         run "#{$bin}/gt encseq encode -indexname dmel " + \
@@ -502,7 +502,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   end
 
   Name "gt suffixerator -memlimit excludes -parts"
-  Keywords "gt_suffixerator gt_packedindex memlimit"
+  Keywords "gt_suffixerator memlimit"
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
         "-parts 3 -memlimit 2MB", :retval => 1
@@ -510,7 +510,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   end
 
   Name "gt suffixerator -memlimit invalid size"
-  Keywords "gt_suffixerator gt_packedindex memlimit"
+  Keywords "gt_suffixerator memlimit"
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
         "-memlimit 2TB", :retval => 1
@@ -518,7 +518,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   end
 
   Name "gt suffixerator -memlimit invalid size"
-  Keywords "gt_suffixerator gt_packedindex memlimit"
+  Keywords "gt_suffixerator memlimit"
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
         "-memlimit 2.2GB", :retval => 1

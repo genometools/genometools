@@ -70,7 +70,7 @@ struct GtIndexOptions
            *optionoutbcktab,
            *optionprefixlength,
            *optioncmpcharbychar,
-           *optiononlywholeleafbuckets,
+           *optionspmopt,
            *optionstorespecialcodes,
            *optionmaxwidthrealmedian,
            *optionalgbounds,
@@ -110,7 +110,7 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->optionoutbcktab = NULL;
   oi->optionprefixlength = NULL;
   oi->optioncmpcharbychar = NULL;
-  oi->optiononlywholeleafbuckets = NULL;
+  oi->optionspmopt = NULL;
   oi->optionstorespecialcodes = NULL;
   oi->optionmaxwidthrealmedian = NULL;
   oi->optionalgbounds = NULL;
@@ -333,12 +333,12 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->optioncmpcharbychar);
   gt_option_parser_add_option(op, idxo->optioncmpcharbychar);
 
-  idxo->optiononlywholeleafbuckets = gt_option_new_bool("onlywholeleafbuckets",
-                                        "only sort buckets containing "
-                                        "a whole leaf",
-                                        &idxo->sfxstrategy.onlywholeleafbuckets,
-                                        false);
-  gt_option_parser_add_option(op, idxo->optiononlywholeleafbuckets);
+  idxo->optionspmopt = gt_option_new_ulong_min("spmopt",
+                                           "optimize esa-construction for "
+                                           "suffix-prefix matching",
+                                           &idxo->sfxstrategy.spmopt,
+                                           0,1UL);
+  gt_option_parser_add_option(op, idxo->optionspmopt);
 
   idxo->optionmaxwidthrealmedian = gt_option_new_ulong("maxwidthrealmedian",
                                                  "compute real median for "
@@ -549,7 +549,7 @@ GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
 /* these are available as options only, values are not to be used directly */
 GT_INDEX_OPTS_GETTER_DEF_OPT(cmpcharbychar);
-GT_INDEX_OPTS_GETTER_DEF_OPT(onlywholeleafbuckets);
+GT_INDEX_OPTS_GETTER_DEF_OPT(spmopt);
 GT_INDEX_OPTS_GETTER_DEF_OPT(storespecialcodes);
 GT_INDEX_OPTS_GETTER_DEF_OPT(maxwidthrealmedian);
 GT_INDEX_OPTS_GETTER_DEF_OPT(differencecover);

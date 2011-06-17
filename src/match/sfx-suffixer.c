@@ -857,7 +857,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
-      if (sfi->sfxstrategy.onlywholeleafbuckets)
+      if (sfi->sfxstrategy.spmopt > 0)
       {
         GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->numofallcodes);
       }

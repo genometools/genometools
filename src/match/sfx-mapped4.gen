@@ -725,7 +725,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
   lastend = totallength = realtotallength = gt_encseq_total_length(encseq);
   if (mirrored) {
     gt_assert((totallength & 1) == 1UL);
-    realtotallength = ((realtotallength - 1) / 2);
+    realtotallength = (realtotallength - 1) / 2;
   }
   if (gt_encseq_has_specialranges(encseq))
   {
@@ -758,6 +758,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
       while (gt_specialrangeiterator_next(sri,&range))
       {
         gt_assert(range.start >= laststart);
+        /*printf("region of length %lu\n",range.start - laststart);*/
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            twobitencoding,
                                            totallength,
