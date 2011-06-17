@@ -386,36 +386,6 @@ int gt_genomediff_shu(GtLogger *logger,
           gc_content[file_idx] += seq_gc_content[seq_idx];
         }
       }
-      /*{
-        if ((uint64_t) gt_encseq_seqstartpos(encseq, seq_idx) < file_sep)
-        {
-          if (unit_info->map_files != NULL)
-          {
-            gc_content[unit_info->map_files[file_idx]] +=
-                                                    seq_gc_content[seq_idx];
-          }
-          else
-          {
-            gc_content[file_idx] += seq_gc_content[seq_idx];
-          }
-        }
-        else
-        {
-          file_idx++;
-          gt_assert(file_idx < unit_info->num_of_files);
-          file_sep = (uint64_t) gt_encseq_filestartpos(encseq, file_idx) +
-                     gt_encseq_effective_filelength(encseq, file_idx);
-          if (unit_info->map_files != NULL)
-          {
-            gc_content[unit_info->map_files[file_idx]] +=
-                                                    seq_gc_content[seq_idx];
-          }
-          else
-          {
-            gc_content[file_idx] += seq_gc_content[seq_idx];
-          }
-        }
-      }*/
       for (genome_idx = 0; genome_idx < unit_info->num_of_genomes; genome_idx++)
       {
         gt_assert(genome_length != NULL);
