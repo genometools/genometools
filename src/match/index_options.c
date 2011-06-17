@@ -300,10 +300,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   GtIndexOptions *idxo;
   gt_assert(op != NULL && t != GT_INDEX_OPTIONS_UNDEFINED && oi != NULL);
   idxo = gt_index_options_new();
-  if (indexname != NULL)
-    idxo->indexname = gt_str_ref(indexname);
-  else
-    idxo->indexname = NULL;
+  idxo->indexname =  indexname != NULL ? gt_str_ref(indexname) : NULL;
   idxo->encopts = oi;
   idxo->type = t;
   idxo->optionprefixlength = gt_option_new_uint_min("pl",
@@ -332,13 +329,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                            false);
   gt_option_is_development_option(idxo->optioncmpcharbychar);
   gt_option_parser_add_option(op, idxo->optioncmpcharbychar);
-
-  idxo->optionspmopt = gt_option_new_ulong_min("spmopt",
-                                           "optimize esa-construction for "
-                                           "suffix-prefix matching",
-                                           &idxo->sfxstrategy.spmopt,
-                                           0,1UL);
-  gt_option_parser_add_option(op, idxo->optionspmopt);
 
   idxo->optionmaxwidthrealmedian = gt_option_new_ulong("maxwidthrealmedian",
                                                  "compute real median for "
@@ -412,7 +402,14 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                 false);
     gt_option_parser_add_option(op, idxo->optionoutbcktab);
 
-      idxo->optionmemlimit = gt_option_new_string("memlimit",
+    idxo->optionspmopt = gt_option_new_ulong_min("spmopt",
+                                           "optimize esa-construction for "
+                                           "suffix-prefix matching",
+                                           &idxo->sfxstrategy.spmopt,
+                                           0,1UL);
+    gt_option_parser_add_option(op, idxo->optionspmopt);
+
+    idxo->optionmemlimit = gt_option_new_string("memlimit",
                            "specify maximal amount of memory to be used during "
                            "index construction (in bytes, the keywords 'MB' "
                            "and 'GB' are allowed)",
@@ -423,6 +420,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   } else {
     idxo->optionoutsuftab
       = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
+    idxo->sfxstrategy.spmopt = 0;
 #ifndef S_SPLINT_S
     gt_registerPackedIndexOptions(op,
                                   &idxo->bwtIdxParams,
@@ -548,11 +546,12 @@ GT_INDEX_OPTS_GETTER_DEF(outbcktab, bool);
 GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
 /* these are available as options only, values are not to be used directly */
+/* SK: removed these, as they do not seem to be used.
 GT_INDEX_OPTS_GETTER_DEF_OPT(cmpcharbychar);
-GT_INDEX_OPTS_GETTER_DEF_OPT(spmopt);
 GT_INDEX_OPTS_GETTER_DEF_OPT(storespecialcodes);
 GT_INDEX_OPTS_GETTER_DEF_OPT(maxwidthrealmedian);
 GT_INDEX_OPTS_GETTER_DEF_OPT(differencecover);
+*/
 /* these are available as values only, set _after_ option processing */
 GT_INDEX_OPTS_GETTER_DEF_VAL(numofparts, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF_VAL(maximumspace, unsigned long);

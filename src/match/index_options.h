@@ -61,10 +61,12 @@ GT_INDEX_OPTS_GETTER_DECL(outbcktab, bool);
 GT_INDEX_OPTS_GETTER_DECL(outkystab, bool);
 GT_INDEX_OPTS_GETTER_DECL(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DECL(algbounds, GtStrArray*);
+/* SK: removed these, as they do not seem to be used.
 GT_INDEX_OPTS_GETTER_DECL_OPT(cmpcharbychar);
 GT_INDEX_OPTS_GETTER_DECL_OPT(storespecialcodes);
 GT_INDEX_OPTS_GETTER_DECL_OPT(maxwidthrealmedian);
 GT_INDEX_OPTS_GETTER_DECL_OPT(differencecover);
+*/
 GT_INDEX_OPTS_GETTER_DECL_VAL(numofparts, unsigned int);
 GT_INDEX_OPTS_GETTER_DECL_VAL(maximumspace, unsigned long);
 GT_INDEX_OPTS_GETTER_DECL_VAL(outkyssort, bool);
