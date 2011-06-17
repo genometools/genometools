@@ -402,11 +402,11 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                 false);
     gt_option_parser_add_option(op, idxo->optionoutbcktab);
 
-    idxo->optionspmopt = gt_option_new_ulong_min("spmopt",
+    idxo->optionspmopt = gt_option_new_uint_min("spmopt",
                                            "optimize esa-construction for "
                                            "suffix-prefix matching",
                                            &idxo->sfxstrategy.spmopt,
-                                           0,1UL);
+                                           0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
 
     idxo->optionmemlimit = gt_option_new_string("memlimit",

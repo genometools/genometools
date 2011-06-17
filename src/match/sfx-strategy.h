@@ -29,9 +29,9 @@ typedef struct
   unsigned long maxwidthrealmedian,
                 maxinsertionsort,
                 maxbltriesort,
-                maxcountingsort,
-                spmopt;
-  unsigned int differencecover;
+                maxcountingsort;
+  unsigned int differencecover,
+               spmopt;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding) */
