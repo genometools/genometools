@@ -2386,6 +2386,11 @@ static bool containsspecialViatables(const GtEncseq *encseq,
 
 bool gt_encseq_has_specialranges(const GtEncseq *encseq)
 {
+  if (encseq->hasmirror && !encseq->has_specialranges) {
+    /* special case: in mirrored sequences, we have at least one
+       (virtual) separator */
+    return true;
+  }
   return encseq->has_specialranges;
 }
 
@@ -2409,7 +2414,8 @@ typedef struct
 struct GtSpecialrangeiterator
 {
   DefinedGtRange previous, wildcard, ssptab, queued;
-  bool moveforward, exhausted, reflected, skipnext, originalmoveforward;
+  bool moveforward, exhausted, reflected, skipnext, originalmoveforward,
+       middle_separator_emitted;
   GtEncseqReader *esr;
   unsigned long lengthofspecialrange,
                 jumppos; /* position jumping along the sequence to find the
@@ -2422,7 +2428,9 @@ void gt_specialrangeiterator_reinit_with_startpos(GtSpecialrangeiterator *sri,
                                                   bool moveforward,
                                                   unsigned long startpos)
 {
-  gt_assert(sri != NULL && encseq->has_specialranges);
+  gt_assert(sri != NULL && (encseq->has_specialranges
+              || (encseq->hasmirror
+                    && encseq->logicalnumofdbsequences == 2UL)));
   sri->exhausted = false;
   sri->previous.defined = false;
   sri->wildcard.defined = false;
@@ -2476,13 +2484,15 @@ GtSpecialrangeiterator* gt_specialrangeiterator_new(const GtEncseq *encseq,
 {
   GtSpecialrangeiterator *sri;
 
-  gt_assert(encseq->has_specialranges);
+  gt_assert(encseq->has_specialranges
+              || (encseq->hasmirror && encseq->logicalnumofdbsequences == 2UL));
   sri = gt_malloc(sizeof (*sri));
   sri->esr = NULL;
   sri->originalmoveforward = moveforward;
   gt_specialrangeiterator_reinit(sri, encseq, moveforward);
   sri->reflected = false;
   sri->skipnext = false;
+  sri->middle_separator_emitted = false;
   gt_assert(sri != NULL);
   return sri;
 }
@@ -2900,6 +2910,17 @@ static inline void gt_specialrangeiterator_invert_range(GtEncseq *encseq,
 bool gt_specialrangeiterator_next(GtSpecialrangeiterator *sri, GtRange *range)
 {
   bool retval;
+
+  /* handle special case where only one sequence is mirrored w/o wildcards  */
+  if (sri->esr->encseq->hasmirror
+        && !sri->esr->encseq->has_specialranges
+        && sri->esr->encseq->numofdbsequences == 1UL
+        && !sri->middle_separator_emitted) {
+    range->start = sri->esr->encseq->totallength;
+    range->end = range->start + 1;
+    sri->middle_separator_emitted = true;
+    return true;
+  }
 
   if (!sri->esr->encseq->has_specialranges)
   {
