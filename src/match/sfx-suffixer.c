@@ -259,7 +259,7 @@ static void updatekmercount(void *processinfo,
 
   if (kmercode->definedspecialposition)
   {
-    if (sfi->markwholeleafbuckets == NULL)
+    if (sfi->sfxstrategy.spmopt == 0)
     {
       if (sfi->storespecials)
       {
@@ -340,15 +340,13 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
+  if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
+      (sfi->markwholeleafbuckets == NULL ||
+       GT_ISIBITSET(sfi->markwholeleafbuckets,code))) /*XXX */
   {
-    if (sfi->markwholeleafbuckets == NULL ||
-        GT_ISIBITSET(sfi->markwholeleafbuckets,code)) /*XXX */
-    {
-      unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
-      gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
-                                             position);
-    }
+    unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
+    gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
+                                           position);
     /* from right to left */
   }
 }
@@ -489,7 +487,7 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_free(sfi->spaceCodeatposition);
   sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace,
-                            sfi->markwholeleafbuckets == NULL ? true : false);
+                            sfi->sfxstrategy.spmopt == 0 ? true : false);
   gt_freesuftabparts(sfi->suftabparts);
   gt_bcktab_delete(sfi->bcktab);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
@@ -648,7 +646,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                               unsigned int code,
                                               unsigned long position)
 {
-  if (sfi->markwholeleafbuckets == NULL)
+  if (sfi->sfxstrategy.spmopt == 0)
   {
     unsigned int idx;
 
@@ -860,6 +858,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (sfi->sfxstrategy.spmopt > 0)
       {
         GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->numofallcodes);
+        estimatedspace += sizeof (*sfi->markwholeleafbuckets *
+                                  GT_NUMOFINTSFORBITS(sfi->numofallcodes));
       }
       estimatedspace
         += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength) +
@@ -936,7 +936,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       = gt_bcktab_leftborderpartialsums(&saved_bucketswithoutwholeleaf,
                                         sfi->bcktab,sfi->markwholeleafbuckets);
     numofsuffixestosort = sfi->leftborder[sfi->numofallcodes];
-    if (sfi->markwholeleafbuckets != NULL)
+    if (sfi->sfxstrategy.spmopt > 0)
     {
       gt_logger_log(sfi->logger, "relevant suffixes=%.2f%%",100.0 *
                                         (double) numofsuffixestosort/
@@ -953,7 +953,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     if (sfi->outlcpinfo != NULL)
     {
       gt_Outlcpinfo_numsuffixes2output_set(sfi->outlcpinfo,
-                                           sfi->markwholeleafbuckets == NULL
+                                           sfi->sfxstrategy.spmopt == 0
                                              ? sfi->totallength + 1
                                              : numofsuffixestosort);
     }
@@ -1048,7 +1048,7 @@ static void preparethispart(Sfxiterator *sfi)
     gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
                            stdout);
   }
-  if (sfi->markwholeleafbuckets == NULL)
+  if (sfi->sfxstrategy.spmopt == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
     {
@@ -1089,7 +1089,7 @@ static void preparethispart(Sfxiterator *sfi)
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
 
   if (numofparts == 1U && sfi->outlcpinfo == NULL &&
-      sfi->prefixlength >= 2U && sfi->markwholeleafbuckets == NULL)
+      sfi->prefixlength >= 2U && sfi->sfxstrategy.spmopt == 0)
   {
     bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
                                   partwidth,sfi->numofchars);
@@ -1282,7 +1282,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
     return NULL;
   }
   sfi->fusp.nextfreeSuffixptr = 0;
-  if (sfi->markwholeleafbuckets == NULL)
+  if (sfi->sfxstrategy.spmopt == 0)
   {
     gt_suffixsortspace_offset_set(sfi->suffixsortspace,
                                   sfi->totallength - sfi->specialcharacters);
@@ -1309,7 +1309,7 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi)
 {
   gt_assert(sfi != NULL);
-  if (sfi->markwholeleafbuckets == NULL)
+  if (sfi->sfxstrategy.spmopt == 0)
   {
     return gt_suffixsortspace_longest(sfi->suffixsortspace);
   } else
