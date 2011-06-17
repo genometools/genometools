@@ -144,25 +144,34 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
   }
 
   if (!had_err && arguments->stoppos != GT_UNDEF_ULONG) {
-    esr = gt_encseq_create_reader_with_readmode(encseq, rm, 0);
-    /* check stoppos stuff */
-    gt_encseq_reader_reinit_with_readmode(esr, encseq, rm,
-                                          arguments->stoppos);
-    printf("%lu: %lu\n", arguments->stoppos,
-                         gt_getnexttwobitencodingstoppos(fwd, esr));
-    gt_encseq_reader_delete(esr);
+    if (arguments->stoppos >= gt_encseq_total_length(encseq)) {
+      gt_error_set(err, "position %lu exceeds encoded sequence length of %lu",
+                   arguments->stoppos, gt_encseq_total_length(encseq));
+      had_err = -1;
+    }
+    if (!had_err) {
+      esr = gt_encseq_create_reader_with_readmode(encseq, rm, 0);
+      /* check stoppos stuff */
+      gt_encseq_reader_reinit_with_readmode(esr, encseq, rm,
+                                            arguments->stoppos);
+      printf("%lu: %lu\n", arguments->stoppos,
+                           gt_getnexttwobitencodingstoppos(fwd, esr));
+      gt_encseq_reader_delete(esr);
+    }
   }
 
   if (!had_err && arguments->specialranges) {
     /* check specialrangeiterator stuff */
-    sri = gt_specialrangeiterator_new(encseq, fwd);
-    while (true) {
-      it1 = gt_specialrangeiterator_next(sri, &srng);
-      if (it1)
-        printf("%lu:%lu\n", srng.start, srng.end);
-      else break;
+    if (gt_encseq_has_specialranges(encseq)) {
+      sri = gt_specialrangeiterator_new(encseq, fwd);
+      while (true) {
+        it1 = gt_specialrangeiterator_next(sri, &srng);
+        if (it1)
+          printf("%lu:%lu\n", srng.start, srng.end);
+        else break;
+      }
+      gt_specialrangeiterator_delete(sri);
     }
-    gt_specialrangeiterator_delete(sri);
   }
 
   gt_encseq_delete(encseq);
