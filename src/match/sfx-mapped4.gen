@@ -21,6 +21,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                     GtCodetype maskright,
                                     GtReadmode readmode,
                                     unsigned int kmersize,
+                                    unsigned int upperkmersize,
                                     PROCESSKMERTYPE *processkmercodeinfo,
                                     unsigned long startpos,
                                     unsigned long endpos)
@@ -35,8 +36,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
   {
-    gt_assert(endpos >= (unsigned long) kmersize);
-    pos = endpos - (unsigned long) kmersize;
+    gt_assert(endpos >= (unsigned long) upperkmersize);
+    pos = endpos - (unsigned long) upperkmersize;
     unitindex = (pos > 0) ? GT_DIVBYUNITSIN2BITENC(pos-1) : 0;
     code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
                                                        kmersize),
@@ -91,7 +92,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(startpos+kmersize));
-    while (pos < endpos - (unsigned long) kmersize)
+    while (pos < endpos - (unsigned long) upperkmersize)
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
@@ -106,7 +107,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
       } else
       {
         gt_assert(unitindex < maxunitindex-1 ||
-                  pos == endpos - (unsigned long) kmersize);
+                  pos == endpos - (unsigned long) upperkmersize);
         if (unitindex < maxunitindex-1)
         {
           currentencoding = twobitencoding[++unitindex];
@@ -126,6 +127,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                              GtCodetype maskright,
                              GtReadmode readmode,
                              unsigned int kmersize,
+                             unsigned int upperkmersize,
                              PROCESSKMERTYPE *processkmercodeinfo,
                              PROCESSKMERSPECIALTYPE *processkmerspecialinfo,
                              unsigned long startpos,
@@ -148,7 +150,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
     gt_assert(startpos <= endpos);
     gt_assert(endpos <= realtotallength);
   }
-  if (endpos - startpos >= (unsigned long) kmersize)
+  if (endpos - startpos >= (unsigned long) upperkmersize)
   {
     gt_assert(endpos > 0);
     lastcode = PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
@@ -157,6 +159,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                                       maskright,
                                                       readmode,
                                                       kmersize,
+                                                      upperkmersize,
                                                       processkmercodeinfo,
                                                       startpos,
                                                       endpos);
@@ -176,7 +179,6 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
     {
       unsigned int fillpos;
 
-      gt_assert((unsigned long) kmersize > endpos - startpos);
       fillpos = (unsigned int) (kmersize - (endpos - startpos));
       lastcode = gt_kmercode_at_position(twobitencoding,startpos,
                                          (unsigned int) (endpos - startpos));
@@ -206,6 +208,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned int kmersize,
+                               unsigned int upperkmersize,
                                PROCESSKMERTYPE *processkmercodeinfo,
                                PROCESSKMERSPECIALTYPE *processkmerspecialinfo)
 {
@@ -241,6 +244,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                            maskright,
                                            readmode,
                                            kmersize,
+                                           upperkmersize,
                                            processkmercodeinfo,
                                            processkmerspecialinfo,
                                            range.end,
@@ -262,6 +266,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                            maskright,
                                            readmode,
                                            kmersize,
+                                           upperkmersize,
                                            processkmercodeinfo,
                                            processkmerspecialinfo,
                                            laststart,
@@ -279,6 +284,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                      maskright,
                                      readmode,
                                      kmersize,
+                                     upperkmersize,
                                      processkmercodeinfo,
                                      processkmerspecialinfo,
                                      GT_ISDIRREVERSE(readmode) ? 0

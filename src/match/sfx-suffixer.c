@@ -1410,11 +1410,15 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       if (gt_has_twobitencoding(encseq) &&
           !sfi->sfxstrategy.kmerswithencseqreader)
       {
-        updateleftborder_getencseqkmers_twobitencoding(encseq,
-                                                       readmode,
-                                                       prefixlength,
-                                                       sfi,
-                                                       sfi);
+        updateleftborder_getencseqkmers_twobitencoding(
+                                           encseq,
+                                           readmode,
+                                           prefixlength,
+                                           sfi->sfxstrategy.spmopt == 0
+                                             ? prefixlength
+                                             : sfi->sfxstrategy.spmopt,
+                                           sfi,
+                                           sfi);
       } else
       {
         if (sfi->sfxstrategy.iteratorbasedkmerscanning)
@@ -1576,11 +1580,15 @@ static void preparethispart(Sfxiterator *sfi)
       && gt_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
   {
-    insertsuffix_getencseqkmers_twobitencoding(sfi->encseq,
-                                               sfi->readmode,
-                                               sfi->prefixlength,
-                                               sfi,
-                                               NULL);
+    insertsuffix_getencseqkmers_twobitencoding(
+                                           sfi->encseq,
+                                           sfi->readmode,
+                                           sfi->prefixlength,
+                                           sfi->sfxstrategy.spmopt == 0
+                                             ? sfi->prefixlength
+                                             : sfi->sfxstrategy.spmopt,
+                                           sfi,
+                                           NULL);
   } else
   {
     if (sfi->sfxstrategy.iteratorbasedkmerscanning)
