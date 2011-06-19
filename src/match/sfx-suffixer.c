@@ -144,15 +144,16 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
 
   if (len1 != len2)
   {
-    fprintf(stderr,"len1 = %lu != %lu = len2\n",len1,len2);
+    fprintf(stderr,"%s: len1 = %lu != %lu = len2\n",__func__,len1,len2);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   for (idx=0; idx<len1; idx++)
   {
     if (codelist1[idx].position != codelist2[idx].position)
     {
-      fprintf(stderr,"listlength = %lu,idx %lu, codelist1.position = %lu != %lu"
-                     " = codelist2.position\n",len1,idx,
+      fprintf(stderr,"%s: listlength = %lu,idx %lu, codelist1.position "
+                     "= %lu != %lu = codelist2.position\n",
+                      __func__,len1,idx,
                       codelist1[idx].position,
                       codelist2[idx].position);
       fprintf(stderr,"codelist1.maxprefixindex = %u,%u="
@@ -167,16 +168,16 @@ static void compareCodeatpositionlists(const Codeatposition *codelist1,
     }
     if (codelist1[idx].maxprefixindex != codelist2[idx].maxprefixindex)
     {
-      fprintf(stderr,"idx %lu, codelist1.maxprefixindex = %u != %u = "
-                     "codelist2.maxprefixindex\n",idx,
+      fprintf(stderr,"%s: idx %lu, codelist1.maxprefixindex = %u != %u = "
+                     "codelist2.maxprefixindex\n",__func__,idx,
                       codelist1[idx].maxprefixindex,
                       codelist2[idx].maxprefixindex);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     if (codelist1[idx].code != codelist2[idx].code)
     {
-      fprintf(stderr,"idx %lu, codelist1.code = %u != %u = "
-                     "codelist2.code\n",idx,
+      fprintf(stderr,"%s: idx %lu, codelist1.code = %u != %u = "
+                     "codelist2.code\n",__func__,idx,
                       codelist1[idx].code,
                       codelist2[idx].code);
       exit(GT_EXIT_PROGRAMMING_ERROR);
@@ -310,7 +311,8 @@ static void updatekmercount(void *processinfo,
                                        position);
       if (code2 != 0)
       {
-        fprintf(stderr,"### position %lu, code2 = %lu != 0\n",position,code2);
+        fprintf(stderr,"%s: ### position %lu, code2 = %lu != 0\n",__func__,
+                       position,code2);
         fprintf(stderr,"previouscode = " FormatGtCodetype "\n",previouscode);
         if (previouskmercodedefined)
         {
@@ -623,10 +625,11 @@ static void verifyestimatedspace(size_t estimatedspace)
     if (usedspace_ma_fa > 100000UL &&
         gt_double_larger_double(relativedifference,0.1))
     {
-      fprintf(stderr, "relativedifference %.4f too large: estimatedspace=%.4f, "
-                      "usedspace_ma_fa=%.4f\n",relativedifference,
-                                               GT_MEGABYTES(estimatedspace),
-                                               GT_MEGABYTES(usedspace_ma_fa));
+      fprintf(stderr, "%s: relativedifference %.4f too large: "
+                      "estimatedspace=%.4f, usedspace_ma_fa=%.4f\n",
+                      __func__,relativedifference,
+                      GT_MEGABYTES(estimatedspace),
+                      GT_MEGABYTES(usedspace_ma_fa));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
   }
@@ -802,7 +805,7 @@ GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
              GT_SWAPBITPAIRS(22,16,6) |
              GT_SWAPBITPAIRS(20,18,2);
 #endif
-    default: fprintf(stderr,"illegal kmersize=%u\n",kmersize);
+    default: fprintf(stderr,"%s: illegal kmersize=%u\n",__func__,kmersize);
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }

@@ -120,7 +120,7 @@ static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
                   "64 bit instead of 32 bit) or use the `-parts' option.\n",
                   (unsigned long) sizeof (unsigned long),
                   *(unsigned long*) data);
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
@@ -256,7 +256,7 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
   {
     fprintf(stderr,"line %d: idx=%lu > %lu = maxindex\n",__LINE__,
                                                     idx,sssp->maxindex);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* XXX remove later */
   }
   gt_assert(idx <= sssp->maxindex);
 #ifdef GT_SUFTABASULONGARRAY
@@ -277,7 +277,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
   {
     fprintf(stderr,"line %d: idx=%lu > %lu = maxindex\n",__LINE__,
                                                     idx,sssp->maxindex);
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* XXX remove later */
   }
   gt_assert(idx <= sssp->maxindex);
   gt_assert(value <= sssp->maxvalue);

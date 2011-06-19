@@ -1858,7 +1858,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
             (unsigned long) (seqIdx->externalData.varDataPos +
                              aState->varDiskOffset/bitElemBits
                              * sizeof (BitElem)));
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
          < seqIdx->externalData.varDataPos

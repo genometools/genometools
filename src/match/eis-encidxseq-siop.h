@@ -100,7 +100,7 @@ EISSymTransformedPosPairRank(EISeq *seq, Symbol tSym, unsigned long posA,
     fprintf(stderr,"tsym=%lu,gt_MRAEncGetSize(EISGetAlphabet(seq)=%lu\n",
            (unsigned long) tSym,
            (unsigned long) gt_MRAEncGetSize(EISGetAlphabet(seq)));
-    exit(EXIT_FAILURE);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   }
   gt_assert(tSym < gt_MRAEncGetSize(EISGetAlphabet(seq)));
   return seq->classInfo->posPairRank(seq, tSym, posA, posB, hint);

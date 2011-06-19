@@ -30,7 +30,7 @@
         if (!kmercodeptr->definedspecialposition && kmer != kmercodeptr->code)\
         {\
           showdifferentkmers(__LINE__,POS,kmer,kmercodeptr->code);\
-          exit(EXIT_FAILURE);\
+          exit(GT_EXIT_PROGRAMMING_ERROR);\
         }
 
 typedef struct

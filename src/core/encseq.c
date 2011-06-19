@@ -8049,7 +8049,7 @@ static void gt_encseq_overflow_abort(GT_UNUSED const char *f, GT_UNUSED int l,
                   "support for a larger address space to prevent this (e.g. "
                   "64 bit instead of 32 bit). Alternatively disable "
                   "mirroring.\n");
-  exit(EXIT_FAILURE);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
 }
 
 int gt_encseq_mirror(GtEncseq *encseq, GtError *err)
