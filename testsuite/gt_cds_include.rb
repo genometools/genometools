@@ -101,6 +101,14 @@ Test do
   run "diff #{$last_stdout} #{$testdata}nGASP/resIIIcds.gff3"
 end
 
+Name "gt cds test (U89959)"
+Keywords "gt_cds"
+Test do
+  run_test "#{$bin}gt cds -seqfile #{$testdata}U89959_genomic.fas " +
+           "#{$testdata}U89959_csas.gff3"
+  run      "diff #{$last_stdout} #{$testdata}U89959_cds.gff3"
+end
+
 if $gttestdata then
   Name "gt cds bug"
   Keywords "gt_cds"
