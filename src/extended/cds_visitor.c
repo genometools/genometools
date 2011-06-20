@@ -122,11 +122,12 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
                                                     bool final_stop_codon,
                                                     bool generic_start_codons)
 {
+  GtTranslatorStatus status;
   GtStr *pr[3], *start_codons[3];
-  GtArray *orfs;
+  GtArray *orfs = NULL;
   GtTranslator *tr;
   char translated;
-  int rval;
+  int had_err = 0;
   unsigned int frame;
   GtCodonIterator *ci;
   bool start;
@@ -141,26 +142,35 @@ static GtArray* determine_ORFs_for_all_three_frames(Splicedseq *ss,
   start_codons[0] = generic_start_codons ? gt_str_new() : NULL;
   start_codons[1] = generic_start_codons ? gt_str_new() : NULL;
   start_codons[2] = generic_start_codons ? gt_str_new() : NULL;
-  orfs = gt_array_new(sizeof (GtRange));
 
   gt_assert(ci);
   tr = gt_translator_new(ci);
-  rval = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
-  while (!rval && translated) {
+  status = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
+  while (status == GT_TRANSLATOR_OK) {
     gt_str_append_char(pr[frame], translated);
     if (generic_start_codons)
       gt_str_append_char(start_codons[frame], start ? GT_START_AMINO : '-');
-    rval = gt_translator_next_with_start(tr, &translated, &frame, &start, NULL);
+    status = gt_translator_next_with_start(tr, &translated, &frame, &start,
+                                           NULL);
   }
-  gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]), gt_str_length(pr[0]),
-                    start_codon, final_stop_codon, false,
-                    generic_start_codons ? gt_str_get(start_codons[0]) : NULL);
-  gt_determine_ORFs(save_orf, orfs, 1, gt_str_get(pr[1]), gt_str_length(pr[1]),
-                    start_codon, final_stop_codon, false,
-                    generic_start_codons ? gt_str_get(start_codons[1]) : NULL);
-  gt_determine_ORFs(save_orf, orfs, 2, gt_str_get(pr[2]), gt_str_length(pr[2]),
-                    start_codon, final_stop_codon, false,
-                    generic_start_codons ? gt_str_get(start_codons[2]) : NULL);
+  if (status == GT_TRANSLATOR_ERROR)
+    had_err = -1;
+
+  if (!had_err) {
+    orfs = gt_array_new(sizeof (GtRange));
+    gt_determine_ORFs(save_orf, orfs, 0, gt_str_get(pr[0]),
+                      gt_str_length(pr[0]), start_codon, final_stop_codon,
+                      false, generic_start_codons ? gt_str_get(start_codons[0])
+                                                  : NULL);
+    gt_determine_ORFs(save_orf, orfs, 1, gt_str_get(pr[1]),
+                      gt_str_length(pr[1]), start_codon, final_stop_codon,
+                      false, generic_start_codons ? gt_str_get(start_codons[1])
+                                                  : NULL);
+    gt_determine_ORFs(save_orf, orfs, 2, gt_str_get(pr[2]),
+                      gt_str_length(pr[2]), start_codon, final_stop_codon,
+                      false, generic_start_codons ? gt_str_get(start_codons[2])
+                                                  : NULL);
+  }
 
   gt_str_delete(start_codons[2]);
   gt_str_delete(start_codons[1]);
@@ -290,8 +300,10 @@ static int add_cds_if_necessary(GtFeatureNode *fn, void *data, GtError *err)
     orfs = determine_ORFs_for_all_three_frames(v->splicedseq, v->start_codon,
                                                v->final_stop_codon,
                                                v->generic_start_codons);
-    create_CDS_features_for_longest_ORF(orfs, v, fn);
-
+    if (!orfs)
+      had_err = -1;
+    if (!had_err)
+      create_CDS_features_for_longest_ORF(orfs, v, fn);
     gt_array_delete(orfs);
   }
   return had_err;

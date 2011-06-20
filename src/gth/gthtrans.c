@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -303,13 +303,13 @@ void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
   const unsigned char *gen_seq_orig;
   GtStr *frame[3];
   char translated;
+  GtTranslatorStatus status;
   GtTranslator *translator;
   GtTransTable *transtable;
   GtCodonIterator *ci;
   GthSplicedSeq *spliced_seq;
   GtArray *ranges;
   GtFile *outfp = out->outfp;
-  int rval;
 
   /* output header */
   if (out->xmlout) {
@@ -355,11 +355,12 @@ void gt_outputtranslationandorf(unsigned long pglnum, const GthAGS *ags,
 
   /* translate the template in all three frames */
   translator = gt_translator_new_with_table(transtable, ci);
-  rval = gt_translator_next(translator, &translated, &nframe, NULL);
-  while (!rval && translated) {
+  status = gt_translator_next(translator, &translated, &nframe, NULL);
+  while (status == GT_TRANSLATOR_OK) {
     gt_str_append_char(frame[nframe], translated);
-    rval = gt_translator_next(translator, &translated, &nframe, NULL);
+    status = gt_translator_next(translator, &translated, &nframe, NULL);
   }
+  gt_assert(status != GT_TRANSLATOR_ERROR);
   gt_translator_delete(translator);
   gt_trans_table_delete(transtable);
   gt_codon_iterator_delete(ci);
