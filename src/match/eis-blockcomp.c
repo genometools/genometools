@@ -1958,13 +1958,13 @@ blockEncIdxSeqHeaderLength(const struct blockCompositionSeq *seqIdx,
     + 4 + 4                     /* block encoding fallback symbol */
     + 4 + 4                     /* range encoding fallback symbol */
     + 4 + 4                     /* num modes */
+    + 4 + 8                     /* length of sequence */
     + 4 * seqIdx->numModes      /* one uint32_t for every mode */
     ;
   if (seqIdx->callBackDataOffsetBits)
     headerSize += 4 + 4         /* extra offset bits per constant block */
       + 4 + 8                   /* extension bits stored in constant block */
-      + 4 + 8                   /* variable area bits added per bucket max */
-      + 4 + 8;                  /* length of sequence */
+      + 4 + 8;                  /* variable area bits added per bucket max */
 
   headerSize += extHeadersSizeAggregate(numExtHeaders, extHeaderSizes);
   return headerSize;
