@@ -6065,12 +6065,12 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
 
   gt_assert(prefixlength > 0);
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,frompos);
-  if (frompos + prefixlength - 1 < encseq->totallength)
+  if (frompos + prefixlength - 1 < encseq->logicaltotallength)
   {
     twobitencodingstoppos = frompos + prefixlength;
   } else
   {
-    twobitencodingstoppos = encseq->totallength;
+    twobitencodingstoppos = encseq->logicaltotallength;
   }
   *unitsnotspecial = 0;
   for (pos=frompos; pos < twobitencodingstoppos; pos++)
