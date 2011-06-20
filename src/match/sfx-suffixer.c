@@ -62,8 +62,7 @@ struct Sfxiterator
   const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long specialcharacters,
-                totallength,
-                saved_nonspecialsinbuckets;
+                totallength;
   unsigned int numofchars,
                prefixlength;
   Sfxstrategy sfxstrategy;
@@ -239,19 +238,6 @@ static bool previouskmercodedefined = false,
 unsigned int previousspecialpos = 0;
 #endif
 
-static void domarkwholeleafbuckets(Sfxiterator *sfi,
-                                   unsigned long position,
-                                   GtCodetype code)
-{
-  if (sfi->markwholeleafbuckets != NULL &&
-      (position == 0 ||
-       gt_encseq_issinglepositionseparator(sfi->encseq,position - 1,
-                                           sfi->readmode)))
-  {
-    GT_SETIBIT(sfi->markwholeleafbuckets,code);
-  }
-}
-
 static void updatekmercount(void *processinfo,
                             unsigned long position,
                             const GtKmercode *kmercode)
@@ -326,7 +312,13 @@ static void updatekmercount(void *processinfo,
     }
 #endif
     sfi->leftborder[kmercode->code]++;
-    domarkwholeleafbuckets(sfi,position,kmercode->code);
+    if (sfi->markwholeleafbuckets != NULL &&
+        (position == 0 || gt_encseq_issinglepositionseparator(sfi->encseq,
+                                                               position - 1,
+                                                               sfi->readmode)))
+    {
+      GT_SETIBIT(sfi->markwholeleafbuckets,kmercode->code);
+    }
   }
 #ifdef SKDEBUG
   previouscode = kmercode->code;
@@ -337,6 +329,7 @@ static void updatekmercount(void *processinfo,
 }
 
 static void gt_insertkmerwithoutspecial1(void *processinfo,
+                                         GT_UNUSED bool firstinrange,
                                          unsigned long position,
                                          GtCodetype code)
 {
@@ -344,7 +337,7 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
 
   if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
       (sfi->markwholeleafbuckets == NULL ||
-       GT_ISIBITSET(sfi->markwholeleafbuckets,code))) /*XXX */
+       GT_ISIBITSET(sfi->markwholeleafbuckets,code)))
   {
     unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
     gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
@@ -359,7 +352,7 @@ static void gt_insertkmerwithoutspecial(void *processinfo,
 {
   if (!kmercode->definedspecialposition)
   {
-    gt_insertkmerwithoutspecial1(processinfo, position, kmercode->code);
+    gt_insertkmerwithoutspecial1(processinfo,false, position, kmercode->code);
   }
 }
 
@@ -1138,11 +1131,12 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
 }
 
 static void gt_updateleftborderforkmer(Sfxiterator *sfi,
-                                       unsigned long position,
+                                       GT_UNUSED bool firstinrange,
+                                       GT_UNUSED unsigned long position,
                                        GtCodetype code)
 {
+  gt_assert(sfi->sfxstrategy.spmopt == 0);
   sfi->leftborder[code]++; /* XXX */
-  domarkwholeleafbuckets(sfi,position,code);
 }
 
 static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
@@ -1150,32 +1144,40 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                               unsigned int code,
                                               unsigned long position)
 {
-  if (sfi->sfxstrategy.spmopt == 0)
-  {
-    unsigned int idx;
+  unsigned int idx;
 
-    if (sfi->sfxstrategy.storespecialcodes)
-    {
-      Codeatposition *spcaptr;
-      spcaptr = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
-      spcaptr->maxprefixindex = maxprefixindex;
-      spcaptr->code = code;
-      spcaptr->position = position;
-    }
-    for (idx=maxprefixindex; idx>=1U; idx--)
-    {
-      sfi->leftborder[code]++; /* XXX */
-      code = ((code << 2) | 3U) & sfi->kmerfastmaskright;
-    }
-  } else
+  gt_assert(sfi->sfxstrategy.spmopt == 0);
+  if (sfi->sfxstrategy.storespecialcodes)
   {
-    sfi->saved_nonspecialsinbuckets += maxprefixindex;
+    Codeatposition *spcaptr;
+    spcaptr = sfi->spaceCodeatposition + sfi->nextfreeCodeatposition++;
+    spcaptr->maxprefixindex = maxprefixindex;
+    spcaptr->code = code;
+    spcaptr->position = position;
+  }
+  for (idx=maxprefixindex; idx>=1U; idx--)
+  {
+    sfi->leftborder[code]++;
+    code = ((code << 2) | 3U) & sfi->kmerfastmaskright;
   }
 }
 
-#define PROCESSKMERTYPE        Sfxiterator
-#define PROCESSKMERSPECIALTYPE Sfxiterator
+static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
+                                              bool firstinrange,
+                                              GT_UNUSED unsigned long position,
+                                              GtCodetype code)
+{
+  gt_assert(sfi->sfxstrategy.spmopt > 0);
+  sfi->leftborder[code]++; /* XXX */
+  if (firstinrange)
+  {
+    GT_SETIBIT(sfi->markwholeleafbuckets,code);
+  }
+}
+
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
+#define PROCESSKMERTYPE        Sfxiterator
+#define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
 #define PROCESSKMERCODE        gt_updateleftborderforkmer
 #define PROCESSKMERCODESPECIAL gt_updateleftborderforspecialkmer
 
@@ -1187,11 +1189,22 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 #undef PROCESSKMERCODE
 #undef PROCESSKMERCODESPECIAL
 
+#define PROCESSKMERPREFIX(FUN) spmopt_updateleftborder_##FUN
+#define PROCESSKMERTYPE        Sfxiterator
+#define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
+#define PROCESSKMERCODE        gt_spmopt_updateleftborderforkmer
+
+#include "sfx-mapped4.gen"
+
+#undef PROCESSKMERPREFIX
+#undef PROCESSKMERTYPE
+#undef PROCESSKMERSPECIALTYPE
+#undef PROCESSKMERCODE
+
+#define PROCESSKMERPREFIX(FUN)          insertsuffix_##FUN
 #define PROCESSKMERTYPE                 void
 #define PROCESSKMERSPECIALTYPE          GT_UNUSED Sfxiterator
-#define PROCESSKMERPREFIX(FUN)          insertsuffix_##FUN
 #define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
-#define PROCESSKMERCODESPECIAL(A,B,C,D) /* Nothing */
 
 #include "sfx-mapped4.gen"
 
@@ -1268,7 +1281,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       sfi->spaceCodeatposition = NULL;
     }
     sfi->bcktab = NULL;
-    sfi->saved_nonspecialsinbuckets = 0;
     sfi->nextfreeCodeatposition = 0;
     sfi->suffixsortspace = NULL;
     sfi->suftabparts = NULL;
@@ -1370,7 +1382,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
-      if (sfi->sfxstrategy.spmopt > 0)
+      if (sfi->sfxstrategy.spmopt > 0 && prefixlength > 1U)
       {
         GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->numofallcodes);
         estimatedspace += sizeof (*sfi->markwholeleafbuckets *
@@ -1405,23 +1417,30 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                         charidx;
         sfi->leftborder[updateindex]
           = gt_encseq_charcount(encseq,(GtUchar) charidx);
-        domarkwholeleafbuckets(sfi,(unsigned long) charidx,
-                               (GtCodetype) updateindex);
       }
     } else
     {
       if (gt_has_twobitencoding(encseq) &&
           !sfi->sfxstrategy.kmerswithencseqreader)
       {
-        updateleftborder_getencseqkmers_twobitencoding(
-                                           encseq,
-                                           readmode,
-                                           prefixlength,
-                                           sfi->sfxstrategy.spmopt == 0
-                                             ? prefixlength
-                                             : sfi->sfxstrategy.spmopt,
-                                           sfi,
-                                           sfi);
+        if (sfi->sfxstrategy.spmopt == 0)
+        {
+          updateleftborder_getencseqkmers_twobitencoding(encseq,
+                                                         readmode,
+                                                         prefixlength,
+                                                         prefixlength,
+                                                         sfi,
+                                                         sfi);
+        } else
+        {
+          spmopt_updateleftborder_getencseqkmers_twobitencoding(
+                                                        encseq,
+                                                        readmode,
+                                                        prefixlength,
+                                                        sfi->sfxstrategy.spmopt,
+                                                        sfi,
+                                                        NULL);
+        }
       } else
       {
         if (sfi->sfxstrategy.iteratorbasedkmerscanning)
@@ -1462,11 +1481,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                         (sfi->totallength+1));
       gt_logger_log(sfi->logger,"saved_bucketswithoutwholeleaf=%lu",
                                    saved_bucketswithoutwholeleaf);
-      gt_logger_log(sfi->logger,"saved_nonspecialsinbuckets=%lu",
-                                   sfi->saved_nonspecialsinbuckets);
       /*
       gt_assert(saved_bucketswithoutwholeleaf +
-                sfi->saved_nonspecialsinbuckets +
                 numofsuffixestosort ==
                 sfi->totallength - specialcharacters);
       */

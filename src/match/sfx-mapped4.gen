@@ -37,12 +37,13 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   if (GT_ISDIRREVERSE(readmode))
   {
     gt_assert(endpos >= (unsigned long) upperkmersize);
-    pos = endpos - (unsigned long) upperkmersize;
+    pos = endpos - (unsigned long) kmersize;
     unitindex = (pos > 0) ? GT_DIVBYUNITSIN2BITENC(pos-1) : 0;
     code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
                                                        kmersize),
                                kmersize);
     PROCESSKMERCODE(processkmercodeinfo,
+                    true,
                     ADJUSTREVERSEPOS(pos),
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
@@ -52,7 +53,9 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
     code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
-    PROCESSKMERCODE(processkmercodeinfo,pos,
+    PROCESSKMERCODE(processkmercodeinfo,
+                    true,
+                    pos,
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
@@ -60,15 +63,17 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   currentencoding = twobitencoding[unitindex];
   if (GT_ISDIRREVERSE(readmode))
   {
+    unsigned long startpos2 = startpos + (upperkmersize - kmersize);
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(pos-1));
-    while (pos > startpos)
+    while (pos > startpos2)
     {
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
-      PROCESSKMERCODE(processkmercodeinfo,ADJUSTREVERSEPOS(pos),
+      PROCESSKMERCODE(processkmercodeinfo,
+                      false,ADJUSTREVERSEPOS(pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);
@@ -77,7 +82,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
         shiftright += 2;
       } else
       {
-        gt_assert(unitindex > 0 || pos == startpos);
+        gt_assert(unitindex > 0 || pos == startpos2);
         if (unitindex > 0)
         {
           currentencoding = twobitencoding[--unitindex];
@@ -97,7 +102,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
-      PROCESSKMERCODE(processkmercodeinfo,pos,
+      PROCESSKMERCODE(processkmercodeinfo,false,pos,
                        (readmode == GT_READMODE_COMPL)
                          ? gt_kmercode_complement(code,maskright)
                          : code);
@@ -133,7 +138,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                              unsigned long startpos,
                              unsigned long endpos)
 {
-  GtCodetype lastcode, newcode;
+  GtCodetype lastcode;
 
   if (mirrored && startpos >= realtotallength) {
     gt_readmode_invert(readmode);
@@ -163,20 +168,28 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                                       processkmercodeinfo,
                                                       startpos,
                                                       endpos);
-    if (GT_ISDIRCOMPLEMENT(readmode))
+#ifdef PROCESSKMERCODESPECIAL
     {
-      lastcode = gt_kmercode_complement(lastcode,maskright);
+      GtCodetype newcode;
+      if (GT_ISDIRCOMPLEMENT(readmode))
+      {
+        lastcode = gt_kmercode_complement(lastcode,maskright);
+      }
+      newcode = ((lastcode << 2) | 3UL) & maskright;
+      PROCESSKMERCODESPECIAL(processkmerspecialinfo,
+                             kmersize-1,
+                             (unsigned int) newcode,
+                             GT_ISDIRREVERSE(readmode) ? (totallength-startpos)
+                                                       : endpos);
     }
-    newcode = ((lastcode << 2) | 3UL) & maskright;
-    PROCESSKMERCODESPECIAL(processkmerspecialinfo,
-                           kmersize-1,
-                           (unsigned int) newcode,
-                           GT_ISDIRREVERSE(readmode) ? (totallength - startpos)
-                                                     : endpos);
-  } else
+#endif
+  }
+#ifdef PROCESSKMERCODESPECIAL
+  else
   {
     if (startpos < endpos)
     {
+      GtCodetype newcode;
       unsigned int fillpos;
 
       fillpos = (unsigned int) (kmersize - (endpos - startpos));
@@ -202,9 +215,10 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                : endpos);
     }
   }
+#endif
 }
 
-void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
+static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned int kmersize,
