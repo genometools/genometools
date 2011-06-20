@@ -75,7 +75,7 @@ static int show_entry(GtStr *description, GtStr *sequence, bool translate,
                                                        NULL);
     GtTranslator* tr = gt_translator_new(ci);
     status = gt_translator_next(tr, &translated, &frame, NULL);
-    while (status == GT_TRANSLATOR_OK && translated) {
+    while (status == GT_TRANSLATOR_OK) {
       if (frame == 0)
         gt_str_append_char(protein, translated);
       status = gt_translator_next(tr, &translated, &frame, NULL);
