@@ -100,7 +100,6 @@ Name "gt extractfeat -regionmapping test 1 (mapping function)"
 Keywords "gt_extractfeat"
 Test do
   run "env GT_TESTDATA=#{$testdata} #{$memcheck} #{$bin}gt extractfeat -type gene -regionmapping #{$testdata}regionmapping_6.lua #{$testdata}gt_extractfeat_succ_1.gff3"
-  run "diff #{$last_stdout} #{$testdata}gt_extractfeat_succ_1.out"
 end
 
 Name "gt extractfeat error message"
@@ -110,6 +109,14 @@ Test do
       "#{$bin}gt extractfeat -type gene -seqfile " +
       "#{$testdata}gt_extractfeat_succ_1.fas -", :retval => 1
   grep $last_stderr, "Has the sequence-region to sequence mapping been defined correctly"
+end
+
+Name "gt extractfeat -translate"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
+      "-type CDS -join -translate #{$testdata}U89959_cds.gff3"
+  run "diff #{$last_stdout} #{$testdata}U89959_cds.fas"
 end
 
 Name "gt extractfeat -help"

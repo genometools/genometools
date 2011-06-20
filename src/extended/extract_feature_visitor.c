@@ -60,24 +60,28 @@ static void construct_description(GtStr *description, const char *type,
     gt_str_append_cstr(description, " (translated)");
 }
 
-static void show_entry(GtStr *description, GtStr *sequence, bool translate,
-                       unsigned long width, GtFile *outfp)
+static int show_entry(GtStr *description, GtStr *sequence, bool translate,
+                      unsigned long width, GtFile *outfp)
 {
+  int had_err = 0;
   if (translate) {
-    char translated;
-    int rval;
+    GtTranslatorStatus status;
     unsigned int frame;
+    char translated;
     GtStr *protein = gt_str_new();
 
     GtCodonIterator *ci = gt_codon_iterator_simple_new(gt_str_get(sequence),
                                                        gt_str_length(sequence),
                                                        NULL);
     GtTranslator* tr = gt_translator_new(ci);
-    rval = gt_translator_next(tr, &translated, &frame, NULL);
-    while (!rval && translated) {
-      gt_str_append_char(protein, translated);
-      rval = gt_translator_next(tr, &translated, &frame, NULL);
+    status = gt_translator_next(tr, &translated, &frame, NULL);
+    while (status == GT_TRANSLATOR_OK && translated) {
+      if (frame == 0)
+        gt_str_append_char(protein, translated);
+      status = gt_translator_next(tr, &translated, &frame, NULL);
     }
+    if (status == GT_TRANSLATOR_ERROR)
+      had_err = -1;
     gt_fasta_show_entry(gt_str_get(description), gt_str_get(protein),
                         gt_str_length(protein), width, outfp);
     gt_str_delete(protein);
@@ -88,6 +92,7 @@ static void show_entry(GtStr *description, GtStr *sequence, bool translate,
     gt_fasta_show_entry(gt_str_get(description), gt_str_get(sequence),
                         gt_str_length(sequence), width, outfp);
   }
+  return had_err;
 }
 
 static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
@@ -115,7 +120,8 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
       efv->fastaseq_counter++;
       construct_description(description, efv->type, efv->fastaseq_counter,
                             efv->join, efv->translate);
-      show_entry(description, sequence, efv->translate, efv->width, efv->outfp);
+      had_err = show_entry(description, sequence, efv->translate, efv->width,
+                           efv->outfp);
       gt_str_reset(description);
       gt_str_reset(sequence);
     }
