@@ -1,4 +1,4 @@
-changes in version 1.3.9 (2011-06-16)
+changes in version 1.3.8 (2011-06-16)
 
 - bugfixes and cleanups
 - GtEncseq completed, Lua bindings added
@@ -10,10 +10,6 @@ changes in version 1.3.9 (2011-06-16)
 - `gt eval` has new options -o, -gzip, -bzip2 and -force
 - `gt gff3` has new option -show
 - `gt gff3_to_gtf` has new options -o, -gzip, -bzip2 and -force
-
-
-changes in version 1.3.8 (2011-02-02)
-
 - file suffix of fingerprint tables has been changed from ".gt_bsf" to ".md5"
 - file suffix of bioseq index files has been changed from ".gt_bsi" to ".bsi"
 - file suffix of bioseq raw files has been changed from ".gt_bsr" to ".bsr"
