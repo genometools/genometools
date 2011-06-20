@@ -95,7 +95,7 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
     if (!had_err && gt_str_length(sequence)) {
       if (reverse_strand) {
         had_err = gt_reverse_complement(gt_str_get(sequence),
-                                     gt_str_length(sequence), err);
+                                        gt_str_length(sequence), err);
       }
     }
   }
