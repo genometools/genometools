@@ -24,6 +24,7 @@
 #include "core/logger.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/safearith.h"
 
 #include "match/eis-voiditf.h"
 #include "match/esa-seqread.h"
@@ -250,7 +251,8 @@ int gt_genomediff_shu(GtLogger *logger,
     gt_assert(genome_length);
     for (i_idx = 0UL; i_idx < unit_info->num_of_files && !had_err; i_idx++)
     {
-      eff_file_length = gt_encseq_effective_filelength(encseq, i_idx);
+      eff_file_length =
+           gt_safe_cast2ulong_64(gt_encseq_effective_filelength(encseq, i_idx));
       filestart = gt_encseq_filestartpos(encseq,i_idx);
       if (i_idx == unit_info->num_of_files - 1) {
         if (mirrored) {
