@@ -43,7 +43,7 @@ static bool gt_iswholeleaf(const GtEncseq *encseq,GtReadmode readmode,
                            unsigned long leafnumber)
 {
   return (leafnumber > 0)
-    ? gt_encseq_issinglepositionseparator(encseq,leafnumber - 1,readmode)
+    ? gt_encseq_position_is_separator(encseq,leafnumber - 1,readmode)
     : true;
 }
 
@@ -66,9 +66,9 @@ static int processleafedge_spmitv(GT_UNUSED bool firstsucc,
   } else
   {
     if (leafnumber + fd < spmitv_state->totallength &&
-        !gt_encseq_issinglepositionseparator(spmitv_state->encseq,
-                                             leafnumber + fd,
-                                             spmitv_state->readmode))
+        !gt_encseq_position_is_separator(spmitv_state->encseq,
+                                         leafnumber + fd,
+                                         spmitv_state->readmode))
     {
       spmitv_state->unnecessaryleaves++;
     }

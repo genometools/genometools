@@ -306,9 +306,9 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
-bool gt_encseq_issinglepositionseparator(const GtEncseq *encseq,
-                                         unsigned long pos,
-                                         GtReadmode readmode)
+bool gt_encseq_position_is_separator(const GtEncseq *encseq,
+                                     unsigned long pos,
+                                     GtReadmode readmode)
 {
   gt_assert(pos < encseq->logicaltotallength);
   /* translate into forward coords */

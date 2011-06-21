@@ -97,9 +97,9 @@ char              gt_encseq_get_decoded_char(const GtEncseq *encseq,
 
 /* Returns true iff <pos> is a separator position of <encseq>
    read in the direction as indicated by <readmode>. */
-bool           gt_encseq_issinglepositionseparator(const GtEncseq *encseq,
-                                                   unsigned long pos,
-                                                   GtReadmode readmode);
+bool              gt_encseq_position_is_separator(const GtEncseq *encseq,
+                                                  unsigned long pos,
+                                                  GtReadmode readmode);
 
 #endif
 

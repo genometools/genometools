@@ -839,9 +839,9 @@ static bool gt_containswholeleaf(const Bentsedgresources *bsr,
   for (idx = 0;  idx < width; idx++)
   {
     position = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
-    if (position == 0 || gt_encseq_issinglepositionseparator(bsr->encseq,
-                                                             position - 1,
-                                                             bsr->readmode))
+    if (position == 0 || gt_encseq_position_is_separator(bsr->encseq,
+                                                         position - 1,
+                                                         bsr->readmode))
     {
       return true;
     }

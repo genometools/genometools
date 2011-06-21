@@ -416,9 +416,9 @@ static int gt_checkentiresuftab(const char *filename,
     countbitsset++;
     if (wholeleafcheck)
     {
-      if (position == 0 || gt_encseq_issinglepositionseparator(encseq,
-                                                               position - 1,
-                                                               readmode))
+      if (position == 0 || gt_encseq_position_is_separator(encseq,
+                                                           position - 1,
+                                                           readmode))
       {
         wholeleafcount++;
       }

@@ -313,9 +313,9 @@ static void updatekmercount(void *processinfo,
 #endif
     sfi->leftborder[kmercode->code]++;
     if (sfi->markwholeleafbuckets != NULL &&
-        (position == 0 || gt_encseq_issinglepositionseparator(sfi->encseq,
-                                                               position - 1,
-                                                               sfi->readmode)))
+        (position == 0 || gt_encseq_position_is_separator(sfi->encseq,
+                                                          position - 1,
+                                                          sfi->readmode)))
     {
       GT_SETIBIT(sfi->markwholeleafbuckets,kmercode->code);
     }
