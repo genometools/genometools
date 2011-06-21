@@ -136,6 +136,15 @@ unsigned long gt_safe_cast2ulong_check_func(long, const char*, int,
 #define       gt_safe_cast2ulong_check(j, func, data) \
               gt_safe_cast2ulong_check_func(j, __FILE__, __LINE__, func, data)
 
+unsigned long gt_safe_cast2ulong_64_check_func(uint64_t, const char*, int,
+                                               GtOverflowHandlerFunc, void*);
+#define       gt_safe_cast2ulong_64(j) \
+              gt_safe_cast2ulong_64_check_func(j, __FILE__, __LINE__, \
+                                      gt_safe_default_overflow_handler, NULL)
+#define       gt_safe_cast2ulong_64_check(j, func, data) \
+              gt_safe_cast2ulong_64_check_func(j, __FILE__, __LINE__, func, \
+                                               data)
+
 int           gt_safearith_example(GtError*);
 int           gt_safearith_unit_test(GtError*);
 

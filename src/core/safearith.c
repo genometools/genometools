@@ -135,6 +135,18 @@ unsigned long gt_safe_cast2ulong_check_func(long value, const char *src_file,
   return value;
 }
 
+unsigned long gt_safe_cast2ulong_64_check_func(uint64_t value,
+                                             const char *src_file,
+                                             int src_line,
+                                             GtOverflowHandlerFunc handler_func,
+                                             void *data)
+{
+  if (value > (uint64_t) ULONG_MAX) {
+    handler_func(src_file, src_line, data);
+  }
+  return (unsigned long) value;
+}
+
 int gt_safearith_example(GT_UNUSED GtError *err)
 {
   unsigned long ulong;
