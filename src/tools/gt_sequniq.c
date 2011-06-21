@@ -107,7 +107,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
   GtSequniqArguments *arguments = tool_arguments;
   unsigned long long duplicates = 0, num_of_sequences = 0;
   int i, had_err = 0;
-  GtMd5set *md5set;
+  GtMD5Set *md5set;
 
   gt_error_check(err);
   gt_assert(arguments);

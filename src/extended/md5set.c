@@ -84,7 +84,7 @@ static unsigned long gt_md5set_get_size(unsigned long n)
   } while (1);
 }
 
-struct GtMd5set
+struct GtMD5Set
 {
   /* hash table */
   gt_md5_t       *table;
@@ -104,16 +104,16 @@ struct GtMd5set
         gt_md5set_get_size((SET)->alloc + 1));\
   gt_assert((SET)->fill <= (SET)->maxfill)
 
-static void gt_md5set_alloc_table(GtMd5set *set, unsigned long newsize);
+static void gt_md5set_alloc_table(GtMD5Set *set, unsigned long newsize);
 
-enum GtMd5setSearchResult
+enum GtMD5SetSearchResult
 {
   GT_MD5SET_EMPTY,
   GT_MD5SET_KEY_FOUND,
   GT_MD5SET_COLLISION
 };
 
-static inline enum GtMd5setSearchResult gt_md5set_search_pos(GtMd5set *set,
+static inline enum GtMD5SetSearchResult gt_md5set_search_pos(GtMD5Set *set,
     gt_md5_t k, bool insert_if_not_found, unsigned long i)
 {
   if (GT_MD5_T_IS_EMPTY(set->table[i]))
@@ -138,14 +138,14 @@ static inline enum GtMd5setSearchResult gt_md5set_search_pos(GtMd5set *set,
 #define GT_MD5SET_H2(MD5, TABLE_SIZE) \
   (((MD5).h % ((TABLE_SIZE) - 1)) + 1)
 
-static bool gt_md5set_search(GtMd5set *set, gt_md5_t k,
+static bool gt_md5set_search(GtMD5Set *set, gt_md5_t k,
     bool insert_if_not_found)
 {
   unsigned long i, c;
 #ifndef NDEBUG
   unsigned long first_i;
 #endif
-  enum GtMd5setSearchResult retval;
+  enum GtMD5SetSearchResult retval;
 
   i = GT_MD5SET_H1(k, set->alloc);
   retval = gt_md5set_search_pos(set, k, insert_if_not_found, i);
@@ -168,7 +168,7 @@ static bool gt_md5set_search(GtMd5set *set, gt_md5_t k,
   }
 }
 
-static void gt_md5set_rehash(GtMd5set *set, gt_md5_t *oldtable,
+static void gt_md5set_rehash(GtMD5Set *set, gt_md5_t *oldtable,
     unsigned long oldsize)
 {
   unsigned long i;
@@ -180,7 +180,7 @@ static void gt_md5set_rehash(GtMd5set *set, gt_md5_t *oldtable,
 
 #define GT_MD5SET_MAX_LOAD_FACTOR 0.8
 
-static void gt_md5set_alloc_table(GtMd5set *set, unsigned long newsize)
+static void gt_md5set_alloc_table(GtMD5Set *set, unsigned long newsize)
 {
   gt_md5_t *oldtable;
   unsigned long oldsize;
@@ -200,10 +200,10 @@ static void gt_md5set_alloc_table(GtMd5set *set, unsigned long newsize)
   }
 }
 
-GtMd5set *gt_md5set_new(unsigned long number_of_elements)
+GtMD5Set *gt_md5set_new(unsigned long number_of_elements)
 {
-  GtMd5set *md5set;
-  md5set = gt_malloc(sizeof (GtMd5set));
+  GtMD5Set *md5set;
+  md5set = gt_malloc(sizeof (GtMD5Set));
   md5set->fill = 0;
   md5set->alloc = 0;
   md5set->table = NULL;
@@ -215,7 +215,7 @@ GtMd5set *gt_md5set_new(unsigned long number_of_elements)
   return md5set;
 }
 
-void gt_md5set_delete(GtMd5set *md5set)
+void gt_md5set_delete(GtMD5Set *md5set)
 {
   if (md5set != NULL)
   {
@@ -225,7 +225,7 @@ void gt_md5set_delete(GtMd5set *md5set)
   }
 }
 
-static void gt_md5set_prepare_buffer(GtMd5set *md5set, unsigned long bufsize)
+static void gt_md5set_prepare_buffer(GtMD5Set *md5set, unsigned long bufsize)
 {
   gt_assert(md5set != NULL);
 
@@ -241,44 +241,41 @@ static void gt_md5set_prepare_buffer(GtMd5set *md5set, unsigned long bufsize)
   }
 }
 
-#define GT_MD5SET_NOT_FOUND  0
-#define GT_MD5SET_FOUND      1
-#define GT_MD5SET_RC_FOUND   2
-
 #define GT_MD5SET_HASH_STRING(BUF, LEN, MD5) \
   md5((BUF), gt_safe_cast2long(LEN), (char*)&(MD5))
 
-int gt_md5set_add_sequence(GtMd5set *md5set, const char* seq,
-    unsigned long seqlen, bool double_strand, GtError *err)
+int gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
+                           unsigned long seqlen, bool both_strands,
+                           GtError *err)
 {
   gt_md5_t md5sum, md5sum_rc;
   unsigned long i;
   int retval = 0;
   bool found;
 
-  gt_assert(md5set != NULL);
-  gt_assert(md5set->table != NULL);
+  gt_assert(set != NULL);
+  gt_assert(set->table != NULL);
 
-  gt_md5set_prepare_buffer(md5set, seqlen);
+  gt_md5set_prepare_buffer(set, seqlen);
   for (i = 0; i < seqlen; i++)
-    md5set->buffer[i] = toupper(seq[i]);
+    set->buffer[i] = toupper(seq[i]);
 
-  GT_MD5SET_HASH_STRING(md5set->buffer, seqlen, md5sum);
-  found = gt_md5set_search(md5set, md5sum, true);
+  GT_MD5SET_HASH_STRING(set->buffer, seqlen, md5sum);
+  found = gt_md5set_search(set, md5sum, true);
   if (found)
     return GT_MD5SET_FOUND;
 
-  if (double_strand)
+  if (both_strands)
   {
-    retval = gt_reverse_complement(md5set->buffer, seqlen, err);
+    retval = gt_reverse_complement(set->buffer, seqlen, err);
     if (retval != 0)
     {
       gt_assert(retval < 0);
       return retval;
     }
 
-    GT_MD5SET_HASH_STRING(md5set->buffer, seqlen, md5sum_rc);
-    found = gt_md5set_search(md5set, md5sum_rc, false);
+    GT_MD5SET_HASH_STRING(set->buffer, seqlen, md5sum_rc);
+    found = gt_md5set_search(set, md5sum_rc, false);
     if (found)
       return GT_MD5SET_RC_FOUND;
   }
