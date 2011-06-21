@@ -25,8 +25,7 @@ bool           gt_file_with_suffix_exists(const char *path, const char *suffix);
 
 /* Returns the size of the file whose name name is composed of the
   concatenation of <path> and <suffix>. */
-
-off_t gt_file_with_suffix_size(const char *path, const char *suffix);
+off_t          gt_file_with_suffix_size(const char *path, const char *suffix);
 
 /* Return the size of <file>. */
 off_t          gt_file_size(const char *file);
