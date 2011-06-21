@@ -829,6 +829,28 @@ static void showcountingsortinfo(const Countingsortinfo *countingsortinfo,
 }
 */
 
+#ifdef CHECKFORWHOLELEAFS
+static bool gt_containswholeleaf(const Bentsedgresources *bsr,
+                                 unsigned long subbucketleft,
+                                 unsigned long width)
+{
+  unsigned long position, idx;
+
+  for (idx = 0;  idx < width; idx++)
+  {
+    position = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
+    if (position == 0 || gt_encseq_issinglepositionseparator(bsr->encseq,
+                                                             position - 1,
+                                                             bsr->readmode))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+static unsigned long saved_intervals = 0, saved_width = 0;
+#endif
+
 static bool multistrategysort(Bentsedgresources *bsr,
                               unsigned long subbucketleft,
                               unsigned long width,
@@ -881,6 +903,15 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
                                      subbucketleft,
                                      width,
                                      depth);
+    }
+#endif
+#ifdef CHECKFORWHOLELEAFS
+    if (bsr->sfxstrategy->spmopt > 0 &&
+        !gt_containswholeleaf(bsr,subbucketleft,width))
+    {
+      saved_intervals++;
+      saved_width += width;
+      return;
     }
 #endif
     if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
@@ -1385,7 +1416,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   bsr->countbltriesort = 0;
 }
 
-static void wrapBentsedgresources(Bentsedgresources *bsr, GtLogger *logger)
+static void bentsedgresources_delete(Bentsedgresources *bsr, GtLogger *logger)
 {
   gt_free(bsr->countingsortinfo);
   bsr->countingsortinfo = NULL;
@@ -1403,7 +1434,7 @@ static void wrapBentsedgresources(Bentsedgresources *bsr, GtLogger *logger)
 }
 
 /*
-  The following function is called  in sfxsuffixer.c sorts all buckets by
+  The following function is called in sfx-suffixer.c and sorts all buckets by
   different suffix comparison methods without the help of other sorting
   information. GtSuffixsortspace contains the sortspace which is accessed
   by some negative offset.
@@ -1491,7 +1522,14 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                              &bucketspec,
                              code);
   }
-  wrapBentsedgresources(&bsr, logger);
+#ifdef CHECKFORWHOLELEAFS
+  printf("saved_intervals=%lu,saved_width=%lu (%.2f)\n",
+          saved_intervals,saved_width,100.0 *
+                                      (double) saved_width/numberofsuffixes);
+  saved_intervals = 0;
+  saved_width = 0;
+#endif
+  bentsedgresources_delete(&bsr, logger);
 }
 
 void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
@@ -1523,5 +1561,5 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
   gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
   bentleysedgewick(&bsr,numberofsuffixes,0);
   gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
-  wrapBentsedgresources(&bsr, logger);
+  bentsedgresources_delete(&bsr, logger);
 }

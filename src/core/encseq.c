@@ -317,15 +317,26 @@ bool gt_encseq_issinglepositionseparator(const GtEncseq *encseq,
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
   }
   /* handle virtual coordinates */
-  if (encseq->hasmirror) {
-    if (pos > encseq->totallength) {
+  if (encseq->hasmirror)
+  {
+    if (pos > encseq->totallength)
+    {
       /* invert coordinates and readmode */
       gt_readmode_invert(readmode);
       pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
-    } else if (pos == encseq->totallength) {
-      return true;
+    } else
+    {
+      if (pos == encseq->totallength)
+      {
+        return true;
+      }
     }
   }
+  if (encseq->numofdbsequences == 1UL)
+  {
+    return false;
+  }
+  gt_assert(encseq->issinglepositionseparator != NULL);
   return encseq->issinglepositionseparator(encseq,pos);
 }
 
@@ -3603,6 +3614,7 @@ static GtEncseqfunctions encodedseqfunctab[] =
           = encodedseqfunctab[(int) (SAT)].seqdeliverchar##NAME.funcname
 
 #define ALLASSIGNAPPENDFUNC(SAT,SATSEP)\
+        gt_assert((size_t) SAT < SIZEOFFUNCTAB);\
         if (encseq->has_specialranges)\
         {\
           SEQASSIGNAPPFUNC(SAT,special);\
@@ -3622,12 +3634,19 @@ static GtEncseqfunctions encodedseqfunctab[] =
                                           .funcname;\
         if (gt_encseq_access_type_isviautables(SAT))\
         {\
-          encseq->issinglepositionseparator\
-            = encodedseqfunctab[(int) (SATSEP)].issinglepositionseparator\
-                                               .function;\
-          encseq->issinglepositionseparatorname\
-            = encodedseqfunctab[(int) (SATSEP)].issinglepositionseparator\
-                                               .funcname;\
+          if ((size_t) SATSEP < SIZEOFFUNCTAB)\
+          {\
+            encseq->issinglepositionseparator\
+              = encodedseqfunctab[(int) (SATSEP)].issinglepositionseparator\
+                                                 .function;\
+            encseq->issinglepositionseparatorname\
+              = encodedseqfunctab[(int) (SATSEP)].issinglepositionseparator\
+                                                 .funcname;\
+          } else\
+          {\
+            encseq->issinglepositionseparator = NULL;\
+            encseq->issinglepositionseparatorname = NULL;\
+          }\
         } else\
         {\
           encseq->issinglepositionseparator\
@@ -3670,6 +3689,8 @@ static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
   }
   return minidx;
 }
+
+#define SIZEOFFUNCTAB sizeof (encodedseqfunctab)/sizeof (encodedseqfunctab[0])
 
 static GtEncseq *files2encodedsequence(
                                 const GtStrArray *filenametab,
@@ -7645,8 +7666,8 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
   Gtssptaboutinfo *ssptaboutinfo;
   unsigned long i;
   GtSpecialcharinfo samplespecialcharinfo;
-  gt_assert(eb->plainseq);
 
+  gt_assert(eb->plainseq);
   sequence2specialcharinfo(&samplespecialcharinfo,eb->plainseq,
                            eb->seqlen,eb->logger);
   encseq = determineencseqkeyvalues(sat,

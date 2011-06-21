@@ -56,7 +56,8 @@ typedef struct
        enumlcpitvs,
        enumlcpitvtree,
        enumlcpitvtreeBU,
-       diffcovercheck;
+       diffcovercheck,
+       wholeleafcheck;
   unsigned long delspranges;
   GtStr *esaindexname,
         *pckindexname;
@@ -149,6 +150,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optiondelspranges, *optionpckindex, *optionesaindex,
          *optioncmpsuf, *optioncmplcp, *optionstreamesq,
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
+         *optionwholeleafcheck,
          *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
          *optionscanesa, *optionspmitv;
 
@@ -257,6 +259,12 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                      &arguments->diffcovercheck,false);
   gt_option_parser_add_option(op, optiondiffcov);
 
+  optionwholeleafcheck = gt_option_new_bool("wholeleafcheck",
+                                            "check if all whole leaves are "
+                                            "present",
+                                            &arguments->wholeleafcheck,false);
+  gt_option_parser_add_option(op, optionwholeleafcheck);
+
   optionenumlcpitvs = gt_option_new_bool("enumlcpitvs",
                                          "enumerate the lcp-intervals",
                                          &arguments->enumlcpitvs,false);
@@ -333,12 +341,45 @@ static void showcomparisonfailureESA(const char *filename,
                                                 maxlcp);
 }
 
+static unsigned long determinenumberofwholeleaves(const GtEncseq *encseq,
+                                                  GtReadmode readmode)
+{
+  unsigned long idx, wholeleafcount = 0, totallength;
+  GtEncseqReader* esr;
+  GtUchar cc;
+  bool sequencestart = true;
+
+  esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
+  totallength = gt_encseq_total_length(encseq);
+  for (idx = 0; idx < totallength; idx++)
+  {
+    cc = gt_encseq_reader_next_encoded_char(esr);
+    if (cc == (GtUchar) SEPARATOR)
+    {
+      sequencestart = true;
+    } else
+    {
+      if (sequencestart)
+      {
+        if (cc != (GtUchar) WILDCARD)
+        {
+          wholeleafcount++;
+        }
+        sequencestart = false;
+      }
+    }
+  }
+  gt_encseq_reader_delete(esr);
+  return wholeleafcount;
+}
+
 static int gt_checkentiresuftab(const char *filename,
                                 int line,
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 const ESASuffixptr *suftab,
                                 unsigned long numberofsuffixes,
+                                bool wholeleafcheck,
                                 Sequentialsuffixarrayreader *ssar,
                                 bool specialsareequal,
                                 bool specialsareequalatdepth0,
@@ -347,12 +388,13 @@ static int gt_checkentiresuftab(const char *filename,
 {
   unsigned long idx, maxlcp,
                 currentlcp = 0,
+                countbitsset = 0,
+                wholeleafcount = 0,
                 totallength = gt_encseq_total_length(encseq);
   int cmp;
   GtEncseqReader *esr1, *esr2;
   bool haserr = false;
   GtBitsequence *startposoccurs;
-  unsigned long countbitsset = 0;
 
   gt_error_check(err);
   gt_assert(!specialsareequal || specialsareequalatdepth0);
@@ -363,21 +405,42 @@ static int gt_checkentiresuftab(const char *filename,
   GT_INITBITTAB(startposoccurs,totallength+1);
   for (idx = 0; idx < numberofsuffixes; idx++)
   {
-    if (GT_ISIBITSET(startposoccurs,ESASUFFIXPTRGET(suftab,idx)))
+    unsigned long position = ESASUFFIXPTRGET(suftab,idx);
+    if (GT_ISIBITSET(startposoccurs,position))
     {
       fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
               ESASUFFIXPTRGET(suftab,idx));
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    GT_SETIBIT(startposoccurs,ESASUFFIXPTRGET(suftab,idx));
+    GT_SETIBIT(startposoccurs,position);
     countbitsset++;
+    if (wholeleafcheck)
+    {
+      if (position == 0 || gt_encseq_issinglepositionseparator(encseq,
+                                                               position - 1,
+                                                               readmode))
+      {
+        wholeleafcount++;
+      }
+    }
+  }
+  gt_free(startposoccurs);
+  if (wholeleafcheck)
+  {
+    unsigned long expectednumofwholeleaves
+      = determinenumberofwholeleaves(encseq,readmode);
+    if (wholeleafcount != expectednumofwholeleaves)
+    {
+      fprintf(stderr,"wholeleafcount=%lu != %lu=expectednumofwholeleaves\n",
+                      wholeleafcount,expectednumofwholeleaves);
+      exit(EXIT_FAILURE);
+    }
   }
   if (numberofsuffixes == totallength + 1 && countbitsset != numberofsuffixes)
   {
     fprintf(stderr,"ERROR: not all bits are set\n");
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  gt_free(startposoccurs);
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
@@ -534,6 +597,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
                                  suffixarray.readmode,
                                  suffixarray.suftab,
                                  suffixarray.numberofallsortedsuffixes,
+                                 arguments->wholeleafcheck,
                                  ssar,
                                  false, /* specialsareequal  */
                                  false,  /* specialsareequalatdepth0 */
