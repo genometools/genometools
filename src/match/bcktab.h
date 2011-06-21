@@ -38,6 +38,7 @@ typedef struct Bcktab Bcktab;
 Bcktab *gt_mapbcktab(const char *indexname,
                   unsigned int numofchars,
                   unsigned int prefixlength,
+                  bool withspecialsuffixes,
                   GtError *err);
 
 void gt_bcktab_delete(Bcktab *bcktab);
@@ -45,6 +46,7 @@ void gt_bcktab_delete(Bcktab *bcktab);
 Bcktab *gt_allocBcktab(unsigned int numofchars,
                     unsigned int prefixlength,
                     bool storespecialcodes,
+                    bool withspecialsuffixes,
                     GtError *err);
 
 void gt_updatebckspecials(Bcktab *bcktab,
@@ -112,8 +114,11 @@ unsigned long *gt_bcktab_leftborder(Bcktab *bcktab);
 
 GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab);
 
+unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,unsigned long idx);
+
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
-                              unsigned int prefixlength);
+                              unsigned int prefixlength,
+                              bool withspecialsuffixes);
 
 unsigned long gt_sizeofbucketworkspace(unsigned int prefixlength);
 
@@ -123,10 +128,13 @@ unsigned long gt_bcktab_emptybuckets(const Bcktab *bcktab);
 
 unsigned long gt_bcktab_leftborderpartialsums(
                              unsigned long *saved_bucketswithoutwholeleaf,
+                             unsigned long *numofsuffixestosort,
                              Bcktab *bcktab,
                              const GtBitsequence *markwholeleafbuckets);
 
 size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab);
+
+void gt_bcktab_showleftborder(const Bcktab *bcktab);
 
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);

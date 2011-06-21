@@ -705,7 +705,8 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   numofchars = gt_alphabet_num_of_chars(alpha);
   if (constructsarrandrunmmsearch(dbencseq,
                                   GT_READMODE_FORWARD,
-                                  gt_recommendedprefixlength(numofchars,dblen),
+                                  gt_recommendedprefixlength(numofchars,dblen,
+                                                             true),
                                   1U, /* parts */
                                   0, /* maximumspace */
                                   query,

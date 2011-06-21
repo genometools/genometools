@@ -19,6 +19,7 @@
 #include "core/ma_api.h"
 #include "core/divmodmul.h"
 #include "core/codetype.h"
+#include "bcktab.h"
 #include "sfx-partssuf.h"
 
 typedef struct
@@ -36,20 +37,22 @@ typedef struct
   unsigned long largestwidth;
 };
 
-static GtCodetype findfirstlarger(const unsigned long *leftborder,
-                                  GtCodetype numofallcodes,
+static GtCodetype findfirstlarger(const Bcktab *bcktab,
+                                  unsigned long numofallcodes,
                                   unsigned long suftaboffset)
 {
   GtCodetype left = 0, right = numofallcodes, mid, found = numofallcodes;
+  unsigned long midval;
 
   while (left+1 < right)
   {
     mid = GT_DIV2(left+right);
-    if (suftaboffset == leftborder[mid])
+    midval = gt_bcktab_leftborder_get(bcktab,mid);
+    if (suftaboffset == midval)
     {
       return mid;
     }
-    if (suftaboffset < leftborder[mid])
+    if (suftaboffset < midval)
     {
       found = mid;
       right = mid - 1;
@@ -147,8 +150,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
 }
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
-                               const unsigned long *leftborder,
-                               GtCodetype numofallcodes,
+                               const Bcktab *bcktab,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger)
@@ -177,7 +179,8 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   } else
   {
     unsigned int part, remainder;
-    unsigned long widthofsuftabpart, suftaboffset = 0, sumofwidth = 0;
+    unsigned long widthofsuftabpart, suftaboffset = 0, sumofwidth = 0,
+                  numofallcodes = gt_bcktab_numofallcodes(bcktab);
 
     suftabparts->components
       = gt_malloc(sizeof (*suftabparts->components) * numofparts);
@@ -200,22 +203,26 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
         suftabparts->components[part].nextcode = numofallcodes;
       } else
       {
-        suftabparts->components[part].nextcode = findfirstlarger(leftborder,
+        suftabparts->components[part].nextcode = findfirstlarger(bcktab,
                                                                  numofallcodes,
                                                                  suftaboffset);
       }
       if (part == 0)
       {
         suftabparts->components[part].widthofpart
-          = leftborder[suftabparts->components[part].nextcode];
+          = gt_bcktab_leftborder_get(bcktab,
+                                     suftabparts->components[part].nextcode);
         suftabparts->components[part].suftaboffset = 0;
       } else
       {
         suftabparts->components[part].widthofpart
-          = leftborder[suftabparts->components[part].nextcode] -
-            leftborder[suftabparts->components[part-1].nextcode];
+          = gt_bcktab_leftborder_get(bcktab,
+                                     suftabparts->components[part].nextcode) -
+            gt_bcktab_leftborder_get(bcktab,suftabparts->
+                                            components[part-1].nextcode);
         suftabparts->components[part].suftaboffset
-          = leftborder[suftabparts->components[part-1].nextcode];
+          = gt_bcktab_leftborder_get(bcktab,suftabparts->
+                                            components[part-1].nextcode);
       }
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
@@ -233,7 +240,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 }
 
 GtCodetype stpgetcurrentmincode(unsigned int part,
-                              const Suftabparts *suftabparts)
+                                const Suftabparts *suftabparts)
 {
   if (part == 0)
   {

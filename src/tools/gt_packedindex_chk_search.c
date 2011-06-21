@@ -142,11 +142,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
           = gt_alphabet_num_of_chars(
                                gt_encseq_alphabet(suffixarray.encseq));
         if (params.minPatLen < 0)
-          params.minPatLen = gt_recommendedprefixlength(numofchars, totalLen);
+          params.minPatLen = gt_recommendedprefixlength(numofchars, totalLen,
+                                                        true);
         if (params.maxPatLen < 0)
           params.maxPatLen =
             MAX(params.minPatLen,
-                125 * gt_recommendedprefixlength(numofchars, totalLen) / 100);
+                125 * gt_recommendedprefixlength(numofchars,totalLen,true)/100);
         else
           params.maxPatLen = MAX(params.maxPatLen, params.minPatLen);
       }

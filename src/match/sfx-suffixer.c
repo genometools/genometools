@@ -37,6 +37,7 @@
 #include "core/mathsupport.h"
 #include "core/spacecalc.h"
 #include "core/divmodmul.h"
+#include "core/format64.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -311,7 +312,7 @@ static void updatekmercount(void *processinfo,
       }
     }
 #endif
-    sfi->leftborder[kmercode->code]++;
+    sfi->leftborder[kmercode->code]++; /* XXX */
     if (sfi->markwholeleafbuckets != NULL &&
         (position == 0 || gt_encseq_position_is_separator(sfi->encseq,
                                                           position - 1,
@@ -446,7 +447,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
           {
             gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
             gt_assert(code > 0);
-            stidx = --sfi->leftborder[code];
+            stidx = --sfi->leftborder[code]; /* XXX */
             /* from right to left */
             gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                           specialcontext.position - prefixindex);
@@ -490,20 +491,6 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
 }
-
-#ifdef SKDEBUG
-static void showleftborder(const unsigned long *leftborder,
-                           GtCodetype numofallcodes)
-{
-  GtCodetype i;
-
-  for (i=0; i<MIN(numofallcodes,(GtCodetype) 1024); i++)
-  {
-    printf("leftborder[" FormatGtCodetype "]=%lu\n",
-            i,leftborder[i]);
-  }
-}
-#endif
 
 static void getencseqkmersupdatekmercount(const GtEncseq *encseq,
                                           GtReadmode readmode,
@@ -551,8 +538,7 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
 
 static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            unsigned long maximumspace,
-                                           const unsigned long *leftborder,
-                                           unsigned long numofallcodes,
+                                           const Bcktab *bcktab,
                                            unsigned long totallength,
                                            unsigned long specialcharacters,
                                            unsigned long numofsuffixestosort,
@@ -574,8 +560,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     size_t suftabsize;
 
     suftabparts = gt_newsuftabparts(parts,
-                                    leftborder,
-                                    numofallcodes,
+                                    bcktab,
                                     numofsuffixestosort,
                                     specialcharacters + 1,
                                     NULL);
@@ -1267,7 +1252,8 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   {
     sfi = gt_malloc(sizeof (*sfi));
     estimatedspace += sizeof (*sfi);
-    if (sfxstrategy != NULL && sfxstrategy->storespecialcodes)
+    if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
+        sfxstrategy->spmopt == 0)
     {
       sfi->spaceCodeatposition
         = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
@@ -1368,10 +1354,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   SHOWCURRENTSPACE;
   if (!haserr)
   {
+    uint64_t sizeofbcktab;
     gt_assert(sfi != NULL);
     sfi->bcktab = gt_allocBcktab(sfi->numofchars,
                                  prefixlength,
                                  sfi->sfxstrategy.storespecialcodes,
+                                 sfi->sfxstrategy.spmopt == 0 ? true : false,
                                  err);
     if (sfi->bcktab == NULL)
     {
@@ -1388,9 +1376,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
         estimatedspace += sizeof (*sfi->markwholeleafbuckets *
                                   GT_NUMOFINTSFORBITS(sfi->numofallcodes));
       }
-      estimatedspace
-        += (size_t) gt_sizeofbuckettable(sfi->numofchars,prefixlength) +
-                    gt_sizeofbucketworkspace(prefixlength);
+      sizeofbcktab = gt_sizeofbuckettable(sfi->numofchars,prefixlength,
+                                          sfi->sfxstrategy.spmopt == 0
+                                            ? true : false);
+      estimatedspace += (size_t) sizeofbcktab +
+                        gt_sizeofbucketworkspace(prefixlength);
+      gt_logger_log(logger,"sizeof(bcktab)=" Formatuint64_t,sizeofbcktab);
     }
   }
   SHOWCURRENTSPACE;
@@ -1451,29 +1442,32 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
           getencseqkmers(encseq,readmode,prefixlength,updatekmercount,sfi);
         }
       }
-      if (sfi->sfxstrategy.storespecialcodes)
+      if (sfi->sfxstrategy.storespecialcodes &&
+          sfi->sfxstrategy.spmopt == 0)
       {
         gt_assert(realspecialranges+1 >= sfi->nextfreeCodeatposition);
         reversespecialcodes(sfi->spaceCodeatposition,
                             sfi->nextfreeCodeatposition);
-      }
 #ifdef SKDEBUG
-      verifycodelistcomputation(encseq,
-                                readmode,
-                                realspecialranges,
-                                prefixlength,
-                                sfi->numofchars,
-                                sfi->nextfreeCodeatposition,
-                                sfi->spaceCodeatposition);
+        verifycodelistcomputation(encseq,
+                                  readmode,
+                                  realspecialranges,
+                                  prefixlength,
+                                  sfi->numofchars,
+                                  sfi->nextfreeCodeatposition,
+                                  sfi->spaceCodeatposition);
 #endif
+      }
     }
 #ifdef SKDEBUG
-    showleftborder(sfi->leftborder,sfi->numofallcodes);
+    gt_bcktab_showleftborder(sfi->bcktab);
 #endif
     largestbucketsize
       = gt_bcktab_leftborderpartialsums(&saved_bucketswithoutwholeleaf,
-                                        sfi->bcktab,sfi->markwholeleafbuckets);
-    numofsuffixestosort = sfi->leftborder[sfi->numofallcodes];
+                                        &numofsuffixestosort,
+                                        sfi->bcktab,
+                                        sfi->markwholeleafbuckets);
+    gt_logger_log(sfi->logger, "largest bucket size=%lu",largestbucketsize);
     if (sfi->sfxstrategy.spmopt > 0)
     {
       gt_logger_log(sfi->logger, "relevant suffixes=%.2f%%",100.0 *
@@ -1510,8 +1504,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       retval = computepartsfittingmaximumspace(
                                        estimatedspace,
                                        maximumspace,
-                                       sfi->leftborder,
-                                       sfi->numofallcodes,
+                                       sfi->bcktab,
                                        sfi->totallength,
                                        specialcharacters,
                                        numofsuffixestosort,
@@ -1532,8 +1525,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   {
     gt_assert(sfi != NULL);
     sfi->suftabparts = gt_newsuftabparts(numofparts,
-                                         sfi->leftborder,
-                                         sfi->numofallcodes,
+                                         sfi->bcktab,
                                          numofsuffixestosort,
                                          specialcharacters + 1,
                                          logger);
@@ -1639,26 +1631,29 @@ static void preparethispart(Sfxiterator *sfi)
   {
     gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
   }
-  gt_sortallbuckets(sfi->suffixsortspace,
-                    partwidth,
-                    bucketspec2,
-                    sfi->encseq,
-                    sfi->readmode,
-                    sfi->currentmincode,
-                    sfi->currentmaxcode,
-                    sfi->bcktab,
-                    sfi->numofchars,
-                    sfi->prefixlength,
-                    sfi->sfxstrategy.differencecover == 0
-                      ? sfi->outlcpinfo : NULL,
-                    sfi->sfxstrategy.differencecover,
-                    &sfi->sfxstrategy,
-                    sfi->sfxstrategy.differencecover == 0
-                      ? NULL : gt_differencecover_sortunsortedbucket,
-                    sfi->sfxstrategy.differencecover == 0
-                      ? NULL : (void *) sfi->dcov,
-                    &sfi->bucketiterstep,
-                    sfi->logger);
+  if (!sfi->sfxstrategy.onlybucketinsertion)
+  {
+    gt_sortallbuckets(sfi->suffixsortspace,
+                      partwidth,
+                      bucketspec2,
+                      sfi->encseq,
+                      sfi->readmode,
+                      sfi->currentmincode,
+                      sfi->currentmaxcode,
+                      sfi->bcktab,
+                      sfi->numofchars,
+                      sfi->prefixlength,
+                      sfi->sfxstrategy.differencecover == 0
+                        ? sfi->outlcpinfo : NULL,
+                      sfi->sfxstrategy.differencecover,
+                      &sfi->sfxstrategy,
+                      sfi->sfxstrategy.differencecover == 0
+                        ? NULL : gt_differencecover_sortunsortedbucket,
+                      sfi->sfxstrategy.differencecover == 0
+                        ? NULL : (void *) sfi->dcov,
+                      &sfi->bucketiterstep,
+                      sfi->logger);
+  }
   if (bucketspec2 != NULL)
   {
     gt_copysort_derivesorting(bucketspec2,sfi->suffixsortspace,sfi->logger);

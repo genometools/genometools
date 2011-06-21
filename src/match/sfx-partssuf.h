@@ -20,15 +20,15 @@
 
 #include "core/logger.h"
 #include "core/codetype.h"
+#include "bcktab.h"
 
 typedef struct Suftabparts Suftabparts;
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
-                            const unsigned long *leftborder,
-                            GtCodetype numofallcodes,
-                            unsigned long numofsuffixestoinsert,
-                            unsigned long fullspecials,
-                            GtLogger *logger);
+                               const Bcktab *bcktab,
+                               unsigned long numofsuffixestoinsert,
+                               unsigned long fullspecials,
+                               GtLogger *logger);
 
 GtCodetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);

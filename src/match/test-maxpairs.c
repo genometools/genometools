@@ -168,7 +168,8 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   if (constructsarrandrunmaxpairs(&ssi,
                                   GT_READMODE_FORWARD,
                                   gt_recommendedprefixlength(numofchars,
-                                                          dblen+querylen+1),
+                                                          dblen+querylen+1,
+                                                          true),
                                   1U, /* parts */
                                   0, /* maximumspace */
                                   NULL,

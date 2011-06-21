@@ -257,6 +257,7 @@ static int detpfxlen(unsigned int *prefixlength,
                      const Suffixeratoroptions *so,
                      unsigned int numofchars,
                      unsigned long totallength,
+                     bool withspecialsuffixes,
                      GtLogger *logger,
                      GtError *err)
 {
@@ -266,7 +267,8 @@ static int detpfxlen(unsigned int *prefixlength,
   if (gt_index_options_prefixlength_value(so->idxopts)
                                                    == GT_PREFIXLENGTH_AUTOMATIC)
   {
-    *prefixlength = gt_recommendedprefixlength(numofchars,totallength);
+    *prefixlength = gt_recommendedprefixlength(numofchars,totallength,
+                                               withspecialsuffixes);
     gt_logger_log(logger,
                 "automatically determined prefixlength=%u",
                 *prefixlength);
@@ -279,7 +281,8 @@ static int detpfxlen(unsigned int *prefixlength,
                                                    totallength,
                                                    strategy.storespecialcodes
                                                   ? (unsigned int) PREFIXLENBITS
-                                                  : 0);
+                                                  : 0,
+                                                  withspecialsuffixes);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
@@ -287,9 +290,10 @@ static int detpfxlen(unsigned int *prefixlength,
     {
       gt_showmaximalprefixlength(logger,
                                  maxprefixlen,
-                                 gt_recommendedprefixlength(
-                                 numofchars,
-                                 totallength));
+                                 gt_recommendedprefixlength(numofchars,
+                                                            totallength,
+                                                            withspecialsuffixes)
+                                 );
     }
   }
   return haserr ? -1 : 0;
@@ -513,6 +517,7 @@ static int runsuffixerator(bool doesa,
                     so,
                     numofchars,
                     gt_encseq_total_length(encseq),
+                    sfxstrategy.spmopt == 0 ? true : false,
                     logger,
                     err) != 0)
       {

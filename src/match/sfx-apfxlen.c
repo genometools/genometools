@@ -48,7 +48,8 @@
 
 static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
                                              unsigned long maxbytes,
-                                             double factor)
+                                             double factor,
+                                             bool withspecialsuffixes)
 {
   unsigned int prefixlength;
   uint64_t sizeofrep;
@@ -58,7 +59,8 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 #endif
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
-    sizeofrep = gt_sizeofbuckettable(numofchars,prefixlength);
+    sizeofrep = gt_sizeofbuckettable(numofchars,prefixlength,
+                                     withspecialsuffixes);
 #ifdef WITHINFO
     printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
                                         (unsigned long) (sizeofrep/factor));
@@ -77,12 +79,14 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 }
 
 unsigned int gt_recommendedprefixlength(unsigned int numofchars,
-                                     unsigned long totallength)
+                                        unsigned long totallength,
+                                        bool withspecialsuffixes)
 {
   unsigned int prefixlength;
 
   prefixlength = prefixlengthwithmaxspace(numofchars,totallength,
-                                          RECOMMENDEDMULTIPLIER);
+                                          RECOMMENDEDMULTIPLIER,
+                                          withspecialsuffixes);
   if (prefixlength == 0)
   {
     return 1U;
@@ -101,12 +105,14 @@ unsigned int gt_recommendedprefixlength(unsigned int numofchars,
 
 unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                              unsigned long totallength,
-                                             unsigned int prefixlenbits)
+                                             unsigned int prefixlenbits,
+                                             bool withspecialsuffixes)
 {
   unsigned int maxprefixlen, mbp;
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
-                                          MAXMULTIPLIEROFTOTALLENGTH);
+                                          MAXMULTIPLIEROFTOTALLENGTH,
+                                          withspecialsuffixes);
   mbp = gt_maxbasepower(numofchars);
   maxprefixlen = MIN(mbp,maxprefixlen);
   if (prefixlenbits > 0)
@@ -116,7 +122,8 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
       = prefixlengthwithmaxspace(numofchars,
                                  (unsigned long)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
-                                 RECOMMENDEDMULTIPLIER);
+                                 RECOMMENDEDMULTIPLIER,
+                                 withspecialsuffixes);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;

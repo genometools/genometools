@@ -21,11 +21,13 @@
 #include "core/error_api.h"
 
 unsigned int gt_recommendedprefixlength(unsigned int numofchars,
-                                     unsigned long totallength);
+                                        unsigned long totallength,
+                                        bool withspecialsuffixes);
 
 unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                           unsigned long totallength,
-                                          unsigned int prefixlenbits);
+                                          unsigned int prefixlenbits,
+                                          bool withspecialsuffixes);
 
 int gt_checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,

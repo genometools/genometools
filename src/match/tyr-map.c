@@ -409,7 +409,7 @@ int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
     unsigned int maxprefixlen
       = gt_whatisthemaximalprefixlength(tyrindex->alphasize,
                                      (unsigned long) tyrindex->numofmers,
-                                     0);
+                                     0,true);
     if (maxprefixlen > (unsigned int) tyrindex->mersize)
     {
       maxprefixlen = (unsigned int) tyrindex->mersize;
@@ -423,7 +423,8 @@ int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
   } else
   {
     unsigned int recommended = gt_recommendedprefixlength(tyrindex->alphasize,
-                                           (unsigned long) tyrindex->numofmers);
+                                           (unsigned long) tyrindex->numofmers,
+                                           true);
     if (recommended > (unsigned int) tyrindex->mersize)
     {
       recommended = (unsigned int) tyrindex->mersize;

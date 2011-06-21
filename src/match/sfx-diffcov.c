@@ -269,7 +269,8 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   } else
   {
     dcov->prefixlength = gt_recommendedprefixlength(dcov->numofchars,
-                                                    dcov->maxsamplesize);
+                                                    dcov->maxsamplesize,
+                                                    true);
     if (outerprefixlength > 0 && dcov->prefixlength > outerprefixlength)
     {
       dcov->prefixlength = outerprefixlength;
@@ -1055,7 +1056,9 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   Codeatposition *codeptr;
 
   dcov->samplesize = 0;
-  dcov->bcktab = gt_allocBcktab(dcov->numofchars, dcov->prefixlength, true,
+  dcov->bcktab = gt_allocBcktab(dcov->numofchars, dcov->prefixlength,
+                                true, /* storespecialcodes */
+                                true, /* withspecialsuffixes */
                                 NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
@@ -1124,7 +1127,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
     }
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
-  (void) gt_bcktab_leftborderpartialsums(NULL,dcov->bcktab,NULL);
+  (void) gt_bcktab_leftborderpartialsums(NULL,NULL,dcov->bcktab,NULL);
   gt_logger_log(dcov->logger,
               "%lu positions are sampled (%.2f%%) pl=%u",
               dcov->samplesize,
