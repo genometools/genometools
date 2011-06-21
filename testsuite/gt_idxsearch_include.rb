@@ -44,23 +44,23 @@ def checktagerator(queryfile,ms)
       "sed -e \'s/^>.*/>/\' > patternfile"
   if File.size("patternfile") > 0
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -esa sfx -q patternfile",
-             :maxtime => 100)
+             :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -esa sfx -q patternfile " +
-             "-withwildcards",:maxtime => 100)
+             "-withwildcards",:maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -esa sfx -q patternfile " +
-             "-withwildcards",:maxtime => 100)
+             "-withwildcards",:maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
              " -maxocc 10",
-             :maxtime => 100)
+             :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
-             :maxtime => 100)
+             :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile",
-             :maxtime => 100)
+             :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -e 2 -pck pck -q patternfile",
              :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -pck pck -q patternfile " +
              "-maxocc 10",
-             :maxtime => 100)
+             :maxtime => 300)
   end
 end
 
