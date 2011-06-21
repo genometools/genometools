@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PRIMES=/projects/gi/primegen/primes
-OUTFILE=`dirname $0`/../src/extended/md5set.prtab
+OUTFILE=`dirname $0`/../src/extended/md5set_primes_table.h
 
 echo "outfile: $OUTFILE"
 
@@ -20,8 +20,13 @@ gb4=4294967296
 gb64=68719476736
 gb512=549755813888
 
-rm $OUTFILE
+rm -f $OUTFILE
 touch $OUTFILE
+
+echo "#ifndef MD5SET_PRIMES_TABLE_H" >> $OUTFILE
+echo "#define MD5SET_PRIMES_TABLE_H" >> $OUTFILE
+
+echo "static const unsigned long long gt_md5set_primes[] = {" >> $OUTFILE
 
 #           min    max    step
 printprimes $mb1   $gb4   $mb4   $OUTFILE
@@ -34,5 +39,9 @@ LARGEST_PRIME=${LARGEST_PRIME:0:${#LARGEST_PRIME}-1}
 
 NOFPRIMES=`cat $OUTFILE | wc -l`
 
+echo "}" >> $OUTFILE
+echo "" >> $OUTFILE
 echo "#define GT_MD5SET_NOFPRIMES $NOFPRIMES" >> $OUTFILE
 echo "#define GT_MD5SET_LARGEST_PRIME $LARGEST_PRIME" >> $OUTFILE
+echo "" >> $OUTFILE
+echo "#endif" >> $OUTFILE

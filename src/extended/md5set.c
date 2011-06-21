@@ -20,9 +20,10 @@
 #include "md5.h"
 #include "core/log.h"
 #include "core/ma.h"
-#include "extended/reverse.h"
 #include "core/safearith.h"
 #include "extended/md5set.h"
+#include "extended/md5set_primes_table.h"
+#include "extended/reverse.h"
 
 typedef struct {
   uint64_t l, h;
@@ -33,11 +34,6 @@ typedef struct {
 
 #define GT_MD5_T_IS_EMPTY(A) \
   ((A).l == 0 && (A).h == 0)
-
-static const unsigned long long gt_md5set_primes[] =
-{
-#include "extended/md5set.prtab"
-};
 
 #define GT_MD5SET_TOO_LARGE \
   "fatal: no prime number larger than %llu in lookup table\n" \
