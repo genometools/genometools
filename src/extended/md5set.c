@@ -200,7 +200,7 @@ static void gt_md5set_alloc_table(GtMd5set *set, unsigned long newsize)
   }
 }
 
-GtMd5set *gt_md5set_new_for_n_elements(unsigned long number_of_elements)
+GtMd5set *gt_md5set_new(unsigned long number_of_elements)
 {
   GtMd5set *md5set;
   md5set = gt_malloc(sizeof (GtMd5set));
@@ -213,11 +213,6 @@ GtMd5set *gt_md5set_new_for_n_elements(unsigned long number_of_elements)
   md5set->buffer = NULL;
   md5set->bufsize = 0;
   return md5set;
-}
-
-GtMd5set *gt_md5set_new(void)
-{
-  return gt_md5set_new_for_n_elements(0);
 }
 
 void gt_md5set_delete(GtMd5set *md5set)

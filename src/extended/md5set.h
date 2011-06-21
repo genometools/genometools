@@ -22,13 +22,19 @@ typedef struct GtMd5set GtMd5set;
 
 /* a set which represents set of sequences, and allows to check
  * if a sequence or its reverse complement belongs to the set;
- * only the md5 hashes are stored, not the sequence themselves */
-GtMd5set *gt_md5set_new(void);
+ * only 128bit md5 hashes are stored, not the sequence themselves
+ * (a low probability of failure due to collisions exists)
+ *
+ * parameter nof_elements: use 0 of a lower bound if unknown
+ * this parameter eliminates/reduces need to reallocate md5 table
+ * increasing efficiency
+ * */
+GtMd5set *gt_md5set_new(unsigned long nof_elements);
+
 void gt_md5set_delete(GtMd5set *md5set);
 
 /* calculate the md5 hash of an upper case copy of seq
- * and add it to the set if not present
- *
+ * and add it to the set if not present*
  * if double_strand is true, the md5 hash of the reverse
  * complement is calculated too; the direct md5 of set is added
  * only if both direct and reverse complement md5 are not present

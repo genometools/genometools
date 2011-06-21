@@ -31,7 +31,7 @@
 
 typedef struct {
   bool seqit, verbose, rev;
-  unsigned long width;
+  unsigned long width, nofseqs;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtSequniqArguments;
@@ -56,7 +56,8 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
 {
   GtSequniqArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *seqit_option, *verbose_option, *width_option, *rev_option;
+  GtOption *seqit_option, *verbose_option, *width_option, *rev_option,
+           *nofseqs_option;
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
@@ -69,16 +70,22 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(seqit_option);
   gt_option_parser_add_option(op, seqit_option);
 
+  /* -nofseqs */
+  nofseqs_option = gt_option_new_ulong("nofseqs", "number of sequences "
+      "(improves efficiency)\ndefault: unspecified",
+      &arguments->nofseqs, 0);
+  gt_option_is_development_option(nofseqs_option);
+  gt_option_hide_default(nofseqs_option);
+  gt_option_parser_add_option(op, nofseqs_option);
+
   /* -rev */
-  rev_option = gt_option_new_bool("rev", "filter out also sequences whose"
+  rev_option = gt_option_new_bool("rev", "filter out also sequences whose "
       "reverse complement is identical to a sequence already output",
       &arguments->rev, false);
-  gt_option_is_development_option(rev_option);
   gt_option_parser_add_option(op, rev_option);
 
   /* -v */
   verbose_option = gt_option_new_verbose(&arguments->verbose);
-  gt_option_is_development_option(verbose_option);
   gt_option_parser_add_option(op, verbose_option);
 
   /* -width */
@@ -104,7 +111,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
 
   gt_error_check(err);
   gt_assert(arguments);
-  md5set = gt_md5set_new();
+  md5set = gt_md5set_new(arguments->nofseqs);
   if (!arguments->seqit) {
     unsigned long j;
     GtBioseq *bs;
