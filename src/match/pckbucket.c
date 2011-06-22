@@ -259,7 +259,8 @@ Pckbuckettable *gt_pckbuckettable_map(const char *indexname,
   Pckbuckettable *pckbt;
 
   gt_error_check(err);
-  mapptr = gt_mmap_read_with_suffix(indexname,PCKBUCKETTABLE,&numofbytes,err);
+  mapptr = gt_fa_mmap_read_with_suffix(indexname,PCKBUCKETTABLE,
+                                       &numofbytes,err);
   if (mapptr == NULL)
   {
     return NULL;

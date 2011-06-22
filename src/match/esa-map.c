@@ -331,7 +331,7 @@ static int inputsuffixarray(bool map,
       if (suffixarray->numberofallsortedsuffixes > 0)
       {
         suffixarray->suftab
-          = gt_mmap_check_size_with_suffix(indexname,
+          = gt_fa_mmap_check_size_with_suffix(indexname,
                                        SUFTABSUFFIX,
                                        suffixarray->numberofallsortedsuffixes,
                                        sizeof (*suffixarray->suftab),
@@ -359,7 +359,7 @@ static int inputsuffixarray(bool map,
       if (suffixarray->numberofallsortedsuffixes > 0)
       {
         suffixarray->lcptab
-          = gt_mmap_check_size_with_suffix(indexname,
+          = gt_fa_mmap_check_size_with_suffix(indexname,
                                          LCPTABSUFFIX,
                                          suffixarray->numberofallsortedsuffixes,
                                          sizeof (*suffixarray->lcptab),
@@ -390,7 +390,7 @@ static int inputsuffixarray(bool map,
       if (map)
       {
         suffixarray->llvtab
-          = gt_mmap_check_size_with_suffix(indexname,
+          = gt_fa_mmap_check_size_with_suffix(indexname,
                                            LARGELCPTABSUFFIX,
                                            (unsigned long)
                                            suffixarray->numoflargelcpvalues.
@@ -413,7 +413,7 @@ static int inputsuffixarray(bool map,
     if (map)
     {
       suffixarray->bwttab
-        = gt_mmap_check_size_with_suffix(indexname,
+        = gt_fa_mmap_check_size_with_suffix(indexname,
                                          BWTTABSUFFIX,
                                          totallength+1,
                                          sizeof (*suffixarray->bwttab),

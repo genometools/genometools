@@ -3882,10 +3882,10 @@ gt_encseq_new_from_index(const char *indexname,
     size_t numofbytes;
 
     gt_assert(encseq != NULL);
-    encseq->destab = gt_mmap_read_with_suffix(indexname,
-                                              GT_DESTABFILESUFFIX,
-                                              &numofbytes,
-                                              err);
+    encseq->destab = gt_fa_mmap_read_with_suffix(indexname,
+                                                 GT_DESTABFILESUFFIX,
+                                                 &numofbytes,
+                                                 err);
     encseq->destablength = (unsigned long) numofbytes;
     if (encseq->destab == NULL)
     {
@@ -3898,11 +3898,11 @@ gt_encseq_new_from_index(const char *indexname,
     if (encseq->numofdbsequences > 1UL)
     {
       encseq->sdstab
-        = gt_mmap_check_size_with_suffix(indexname,
-                                         GT_SDSTABFILESUFFIX,
-                                         encseq->numofdbsequences - 1,
-                                         sizeof (*encseq->sdstab),
-                                         err);
+        = gt_fa_mmap_check_size_with_suffix(indexname,
+                                            GT_SDSTABFILESUFFIX,
+                                            encseq->numofdbsequences - 1,
+                                            sizeof (*encseq->sdstab),
+                                            err);
       if (encseq->sdstab == NULL)
       {
         haserr = true;
@@ -3928,11 +3928,11 @@ gt_encseq_new_from_index(const char *indexname,
   if (!haserr && withoistab)
   {
     gt_assert(encseq != NULL);
-    encseq->oistab = gt_mmap_check_size_with_suffix(indexname,
-                                                    GT_OISTABFILESUFFIX,
-                                                    encseq->totallength,
-                                                    sizeof (*encseq->oistab),
-                                                    err);
+    encseq->oistab = gt_fa_mmap_check_size_with_suffix(indexname,
+                                                       GT_OISTABFILESUFFIX,
+                                                       encseq->totallength,
+                                                       sizeof (*encseq->oistab),
+                                                       err);
     if (encseq->oistab == NULL)
     {
       haserr = true;

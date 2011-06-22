@@ -417,7 +417,7 @@ Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
   bool haserr = false;
 
   ALLOCASSIGNSPACE(tyrbckinfo,NULL,Tyrbckinfo,1);
-  tyrbckinfo->mappedmbdfileptr = gt_mmap_read_with_suffix(tyrindexname,
+  tyrbckinfo->mappedmbdfileptr = gt_fa_mmap_read_with_suffix(tyrindexname,
                                                           BUCKETSUFFIX,
                                                           &numofbytes,err);
   if (tyrbckinfo->mappedmbdfileptr == NULL)

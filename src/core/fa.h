@@ -123,15 +123,15 @@ void*   gt_fa_mmap_generic_fd_func(int fd, const char *filename, size_t len,
                                    bool hard_fail, const char *src_file,
                                    int src_line, GtError *err);
 
-#define gt_mmap_read_with_suffix(path, suffix, len, err)\
-        gt_mmap_read_with_suffix_func(path, suffix, len, __FILE__, __LINE__, \
+#define gt_fa_mmap_read_with_suffix(path, suffix, len, err)\
+        gt_fa_mmap_read_with_suffix_func(path, suffix, len,__FILE__, __LINE__, \
                                       err)
-void*   gt_mmap_read_with_suffix_func(const char *path, const char *suffix,
-                                      size_t *len, const char *src_file,
-                                      int src_line, GtError *err);
-void*   gt_mmap_check_size_with_suffix(const char *path, const char *suffix,
-                                       unsigned long expectedunits,
-                                       size_t sizeofunit, GtError *err);
+void*   gt_fa_mmap_read_with_suffix_func(const char *path, const char *suffix,
+                                         size_t *len, const char *src_file,
+                                         int src_line, GtError *err);
+void*   gt_fa_mmap_check_size_with_suffix(const char *path, const char *suffix,
+                                          unsigned long expectedunits,
+                                          size_t sizeofunit, GtError *err);
 
 /* check if all allocated file pointer have been released, prints to stderr */
 int     gt_fa_check_fptr_leak(void);

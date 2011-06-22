@@ -426,8 +426,8 @@ void* gt_fa_mmap_read_func(const char *path, size_t *len,
                                 err);
 }
 
-void* gt_mmap_write_func(const char *path, size_t *len,
-                         const char *src_file, int src_line, GtError *err)
+void* gt_fa_mmap_write_func(const char *path, size_t *len,
+                            const char *src_file, int src_line, GtError *err)
 {
   gt_assert(path);
   gt_assert(fa);
@@ -468,9 +468,9 @@ void gt_fa_xmunmap(void *addr)
   gt_mutex_unlock(fa->mmap_mutex);
 }
 
-void* gt_mmap_read_with_suffix_func(const char *path, const char *suffix,
-                                    size_t *len, const char *src_file,
-                                    int src_line, GtError *err)
+void* gt_fa_mmap_read_with_suffix_func(const char *path, const char *suffix,
+                                       size_t *len, const char *src_file,
+                                       int src_line, GtError *err)
 {
   GtStr *tmpfilename;
   void *ptr;
@@ -505,13 +505,13 @@ static int check_mapped_file_size(const char *path,
   return 0;
 }
 
-void* gt_mmap_check_size_with_suffix(const char *path, const char *suffix,
-                                     unsigned long expectedunits,
+void* gt_fa_mmap_check_size_with_suffix(const char *path, const char *suffix,
+                                        unsigned long expectedunits,
                                      size_t sizeofunit, GtError *err)
 {
   size_t numofbytes;
   void *ptr;
-  if (!(ptr = gt_mmap_read_with_suffix(path, suffix, &numofbytes, err)))
+  if (!(ptr = gt_fa_mmap_read_with_suffix(path, suffix, &numofbytes, err)))
     return NULL;
   if (check_mapped_file_size(path, suffix, numofbytes, expectedunits,
                              sizeofunit, err)) {
