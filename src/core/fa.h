@@ -100,18 +100,44 @@ FILE*   gt_xtmpfp_generic_func(GtStr *template, enum tmpfp_flags flags,
         gt_fa_mmap_read_func(path, len, __FILE__, __LINE__, err)
 void*   gt_fa_mmap_read_func(const char *path, size_t *len,
                              const char *src_file, int src_line, GtError *err);
+
+#define gt_fa_mmap_read_range(path, len, offset, err)\
+        gt_fa_mmap_read_func_range(path, len, offset, __FILE__, __LINE__, err)
+void*   gt_fa_mmap_read_func_range(const char *path, size_t len, size_t offset,
+                             const char *src_file, int src_line, GtError *err);
+
 #define gt_fa_mmap_write(path, len, err)\
         gt_fa_mmap_write_func(path, len, __FILE__, __LINE__, err)
 void*   gt_fa_mmap_write_func(const char *path, size_t *len,
                               const char *src_file, int src_line, GtError *err);
+
+#define gt_fa_mmap_write_range(path, len, offset, err)\
+        gt_fa_mmap_write_func_range(path, len, offset, __FILE__, __LINE__, err)
+void*   gt_fa_mmap_write_func_range(const char *path, size_t len, size_t offset,
+                                    const char *src_file, int src_line,
+                                    GtError *err);
+
 #define gt_fa_xmmap_read(path, len)\
         gt_fa_xmmap_read_func(path, len, __FILE__, __LINE__)
 void*   gt_fa_xmmap_read_func(const char *path, size_t *len,
                               const char *src_file, int src_line);
+
+#define gt_fa_xmmap_read_range(path, len, offset)\
+        gt_fa_xmmap_read_func_range(path, len, offset, __FILE__, __LINE__)
+void*   gt_fa_xmmap_read_func_range(const char *path, size_t len, size_t offset,
+                                    const char *src_file, int src_line);
+
 #define gt_fa_xmmap_write(path, len)\
         gt_fa_xmmap_write_func(path, len, __FILE__, __LINE__)
 void*   gt_fa_xmmap_write_func(const char *path, size_t *len,
                                const char *src_file, int src_line);
+
+#define gt_fa_xmmap_write_range(path, len, offset)\
+        gt_fa_xmmap_write_func_range(path, len, offset, __FILE__, __LINE__)
+void*   gt_fa_xmmap_write_func_range(const char *path, size_t len,
+                                     size_t offset,
+                                     const char *src_file, int src_line);
+
 void    gt_fa_xmunmap(void *addr);
 #define gt_fa_mmap_generic_fd(fd, filename_to_map, len, offset, mapwritable, \
                               hard_fail, err) \
