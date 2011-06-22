@@ -124,10 +124,10 @@ int gt_canvas_cairo_visit_track_pre(GtCanvas *canvas, GtTrack *track,
       red.green = LINE_EXCEEDED_MSG_G;
       red.blue  = LINE_EXCEEDED_MSG_B;
       red.alpha = 1.0;
-      if (exceeded == 1)
+      if (exceeded == 1) {
         msg = "(1 block not shown due to exceeded line limit)";
-      else
-      {
+        strncpy(buf, msg, BUFSIZ);
+      } else {
         msg = "(%lu blocks not shown due to exceeded line limit)";
         /*@ignore@*/
         snprintf(buf, BUFSIZ, msg, exceeded);
