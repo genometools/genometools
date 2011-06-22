@@ -463,11 +463,13 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
   }
 }
 
-void gt_Sfxiterator_delete(Sfxiterator *sfi)
+int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
 {
+  bool haserr = false;
+
   if (sfi == NULL)
   {
-    return;
+    return 0;
   }
 #ifdef SKDEBUG
   if (sfi->bcktab != NULL)
@@ -492,8 +494,29 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
   gt_differencecover_delete(sfi->dcov);
+  if (sfi->bcktmpfilename != NULL)
+  {
+    gt_logger_log(sfi->logger,"remove \"%s\"",gt_str_get(sfi->bcktmpfilename));
+    if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
+    {
+      if (err != NULL)
+      {
+        gt_error_set(err,"Cannot unlink file \"%s\": %s",
+                        gt_str_get(sfi->bcktmpfilename),
+                        strerror(errno));
+        haserr = true;
+      } else
+      {
+        fprintf(stderr,"Cannot unlink file \"%s\": %s",
+                        gt_str_get(sfi->bcktmpfilename),
+                        strerror(errno));
+        exit(EXIT_FAILURE);
+      }
+    }
+  }
   gt_str_delete(sfi->bcktmpfilename);
   gt_free(sfi);
+  return haserr ? -1 : 0;
 }
 
 static void getencseqkmersupdatekmercount(const GtEncseq *encseq,
@@ -1573,7 +1596,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   }
   if (haserr)
   {
-    gt_Sfxiterator_delete(sfi);
+    (void) gt_Sfxiterator_delete(sfi,NULL);
     return NULL;
   }
   return sfi;

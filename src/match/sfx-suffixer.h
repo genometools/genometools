@@ -30,7 +30,7 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void gt_Sfxiterator_delete(Sfxiterator *sfi);
+int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err);
 
 Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 GtReadmode readmode,

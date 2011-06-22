@@ -674,7 +674,10 @@ static int constructsarrandrunmmsearch(
     }
   }
   gt_querymatch_delete(querymatchspaceptr);
-  gt_Sfxiterator_delete(sfi);
+  if (gt_Sfxiterator_delete(sfi,err) != 0)
+  {
+    haserr = true;
+  }
   return haserr ? -1 : 0;
 }
 
