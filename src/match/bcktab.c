@@ -30,6 +30,7 @@
 #include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/log_api.h"
+#include "core/safecast-gen.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "bcktab.h"
@@ -84,22 +85,34 @@ static unsigned long numofdistpfxidxcounters(const GtCodetype *basepower,
   return 0;
 }
 
+static uint64_t gt_sizeofbuckettable_generic(unsigned int prefixlength,
+                                             uint64_t numofallcodes,
+                                             uint64_t numofspecialcodes,
+                                             size_t sizeofbasetype,
+                                             const GtCodetype *basepower,
+                                             bool withspecialsuffixes)
+{
+  uint64_t sizeofrep;
+
+  sizeofrep = numofallcodes + 1;
+  if (withspecialsuffixes)
+  {
+    sizeofrep += numofspecialcodes +
+                 numofdistpfxidxcounters(basepower,prefixlength);
+  }
+  return sizeofrep * sizeofbasetype;
+}
+
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
                               unsigned int prefixlength,
                               bool withspecialsuffixes)
 {
-  uint64_t sizeofrep;
-  double numofallcodes;
+  uint64_t numofallcodes, numofspecialcodes, sizeofbuckettable;
+  GtCodetype *basepower;
 
-  numofallcodes = pow((double) numofchars,(double) prefixlength);
-  sizeofrep
-    = (uint64_t)
-      sizeof (unsigned long) * (numofallcodes + 1.0) +
-      sizeof (unsigned long *) * (prefixlength-1);
+  numofallcodes = (uint64_t) pow((double) numofchars,(double) prefixlength);
   if (withspecialsuffixes)
   {
-    double numofspecialcodes;
-    GtCodetype *basepower;
 
     if (prefixlength >= 2U)
     {
@@ -108,14 +121,21 @@ uint64_t gt_sizeofbuckettable(unsigned int numofchars,
     {
       basepower = NULL;
     }
-    numofspecialcodes = pow((double) numofchars,(double) (prefixlength-1));
-    sizeofrep +=
-      (uint64_t)
-      sizeof (unsigned long) * numofspecialcodes +
-      sizeof (unsigned long) * numofdistpfxidxcounters(basepower,prefixlength);
-    gt_free(basepower);
+    numofspecialcodes = (uint64_t) pow((double) numofchars,
+                                       (double) (prefixlength-1));
+  } else
+  {
+    basepower = NULL;
+    numofspecialcodes = 0;
   }
-  return sizeofrep;
+  sizeofbuckettable = gt_sizeofbuckettable_generic(prefixlength,
+                                                   numofallcodes,
+                                                   numofspecialcodes,
+                                                   sizeof (unsigned long),
+                                                   basepower,
+                                                   withspecialsuffixes);
+  gt_free(basepower);
+  return sizeofbuckettable;
 }
 
 unsigned long gt_sizeofbucketworkspace(unsigned int prefixlength)
@@ -172,6 +192,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
                          bool withspecialsuffixes)
 {
   Bcktab *bcktab;
+  uint64_t sizeofrep_uint64_t;
 
   bcktab = gt_malloc(sizeof *bcktab);
   bcktab->leftborder.bounds = NULL;
@@ -187,17 +208,13 @@ static Bcktab *newBcktab(unsigned int numofchars,
   bcktab->multimappower = gt_initmultimappower(numofchars,prefixlength);
   bcktab->allocated = false;
   bcktab->qgrambuffer = gt_malloc(sizeof (*bcktab->qgrambuffer) * prefixlength);
-  bcktab->sizeofrep
-    = (unsigned long)
-      sizeof (*bcktab->leftborder.bounds) * (bcktab->numofallcodes + 1);
-  if (withspecialsuffixes)
-  {
-    bcktab->sizeofrep +=
-      (unsigned long)
-      sizeof (*bcktab->countspecialcodes) * bcktab->numofspecialcodes +
-      sizeof (unsigned long) * numofdistpfxidxcounters(bcktab->basepower,
-                                                       bcktab->prefixlength);
-  }
+  sizeofrep_uint64_t = gt_sizeofbuckettable_generic(prefixlength,
+                                          (uint64_t) bcktab->numofallcodes,
+                                          (uint64_t) bcktab->numofspecialcodes,
+                                          sizeof (unsigned long),
+                                          bcktab->basepower,
+                                          withspecialsuffixes);
+  bcktab->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
   return bcktab;
 }
 

@@ -54,7 +54,6 @@
 #include "core/mapspec-gen.h"
 #include "core/minmax.h"
 #include "core/progressbar.h"
-#include "core/safecast-gen.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_plain.h"
 #include "core/str.h"

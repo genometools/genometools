@@ -97,6 +97,7 @@ struct Sfxiterator
   bool storespecials;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
+  GtStr *bcktmpfilename;
   unsigned int kmerfastmaskright;
 };
 
@@ -491,6 +492,7 @@ void gt_Sfxiterator_delete(Sfxiterator *sfi)
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
   gt_differencecover_delete(sfi->dcov);
+  gt_str_delete(sfi->bcktmpfilename);
   gt_free(sfi);
 }
 
@@ -1470,6 +1472,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                         sfi->bcktab,
                                         sfi->markwholeleafbuckets);
     gt_logger_log(sfi->logger, "largest bucket size=%lu",largestbucketsize);
+
     if (sfi->sfxstrategy.spmopt > 0)
     {
       gt_logger_log(sfi->logger, "relevant suffixes=%.2f%%",100.0 *
@@ -1548,6 +1551,25 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->fusp.sssp = sfi->suffixsortspace;
     sfi->fusp.allocatedSuffixptr = stpgetlargestwidth(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
+    if (numofparts > 1U)
+    {
+      FILE *bcktmpfilefp;
+
+      gt_assert(sfi != NULL);
+      sfi->bcktmpfilename = gt_str_new();
+      bcktmpfilefp = gt_xtmpfp(sfi->bcktmpfilename);
+      gt_logger_log(logger, "store bcktab in \"%s\"",
+                    gt_str_get(sfi->bcktmpfilename));
+      if (gt_bcktab2file(bcktmpfilefp,sfi->bcktab,err) != 0)
+      {
+        haserr = true;
+      }
+      gt_fa_fclose(bcktmpfilefp);
+    } else
+    {
+      gt_assert(sfi != NULL);
+      sfi->bcktmpfilename = NULL;
+    }
   }
   if (haserr)
   {
