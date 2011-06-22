@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <unistd.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/divmodmul.h"
@@ -26,16 +27,17 @@ typedef struct
 {
   GtCodetype nextcode;
   unsigned long widthofpart,
-         suftaboffset,
-         sumofwidth;
+                suftaboffset,
+                sumofwidth;
 } Suftabpartcomponent;
 
- struct Suftabparts
+struct Suftabparts
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;
   unsigned long largestwidth,
-                numofsuffixestoinsert;
+                numofsuffixestoinsert,
+                pagesize;
 };
 
 #ifdef SKDEBUG
@@ -133,6 +135,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
+  suftabparts->pagesize = (unsigned long) sysconf(_SC_PAGESIZE);
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {

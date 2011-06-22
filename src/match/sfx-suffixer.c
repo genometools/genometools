@@ -1846,9 +1846,15 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
   {
     if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
-      gt_logger_log(sfi->logger,"compute part %u (%lu suffixes,%.2f%% of all)",
+      gt_logger_log(sfi->logger,"compute part %u "
+                                "(%lu suffixes,%lu buckets from %lu..%lu,"
+                                "%.2f%% of all)",
                     sfi->part,
                     stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
+                    stpgetcurrentmaxcode(sfi->part,sfi->suftabparts) - 
+                    stpgetcurrentmincode(sfi->part,sfi->suftabparts) + 1,
+                    stpgetcurrentmincode(sfi->part,sfi->suftabparts),
+                    stpgetcurrentmaxcode(sfi->part,sfi->suftabparts),
                     100.0 * (double)
                     stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts)/
                     stpnumofsuffixestoinsert(sfi->suftabparts));
