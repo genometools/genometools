@@ -1851,7 +1851,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
                                 "%.2f%% of all)",
                     sfi->part,
                     stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
-                    stpgetcurrentmaxcode(sfi->part,sfi->suftabparts) - 
+                    stpgetcurrentmaxcode(sfi->part,sfi->suftabparts) -
                     stpgetcurrentmincode(sfi->part,sfi->suftabparts) + 1,
                     stpgetcurrentmincode(sfi->part,sfi->suftabparts),
                     stpgetcurrentmaxcode(sfi->part,sfi->suftabparts),

@@ -135,7 +135,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
-  suftabparts->pagesize = (unsigned long) sysconf(_SC_PAGESIZE);
+  suftabparts->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
