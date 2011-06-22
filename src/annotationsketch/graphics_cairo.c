@@ -537,7 +537,6 @@ void gt_graphics_cairo_draw_rectangle(GtGraphics *gg, double x, double y,
   GtGraphicsCairo *g = gt_graphics_cairo_cast(gg);
   gt_assert(g);
 
-  printf("   drawing rectangle: %f-%f\n", x, y);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_new_path(g->cr);
