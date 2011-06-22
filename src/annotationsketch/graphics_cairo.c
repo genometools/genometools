@@ -110,7 +110,7 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
   g->margin_x = g->margin_y = 20;
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
-  cairo_select_font_face(g->cr, "sans", CAIRO_FONT_SLANT_NORMAL,
+  cairo_select_font_face(g->cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL,
                          CAIRO_FONT_WEIGHT_NORMAL);
   g->type = type;
 }
