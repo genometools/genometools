@@ -337,6 +337,8 @@ void gt_feature_node_set_type(GtFeatureNode *fn, const char *type)
 bool gt_feature_node_has_type(GtFeatureNode *fn, const char *type)
 {
   gt_assert(fn && type);
+  if (!fn->type) /* <fn> is pseudo-node */
+    return false;
   return gt_strcmp(fn->type, type) ? false : true;
 }
 
