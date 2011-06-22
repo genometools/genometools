@@ -34,35 +34,9 @@ typedef struct
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;
-  unsigned long largestwidth;
+  unsigned long largestwidth,
+                numofsuffixestoinsert;
 };
-
-static GtCodetype findfirstlarger(const Bcktab *bcktab,
-                                  unsigned long numofallcodes,
-                                  unsigned long suftaboffset)
-{
-  GtCodetype left = 0, right = numofallcodes, mid, found = numofallcodes;
-  unsigned long midval;
-
-  while (left+1 < right)
-  {
-    mid = GT_DIV2(left+right);
-    midval = gt_bcktab_leftborder_get(bcktab,mid);
-    if (suftaboffset == midval)
-    {
-      return mid;
-    }
-    if (suftaboffset < midval)
-    {
-      found = mid;
-      right = mid - 1;
-    } else
-    {
-      left = mid + 1;
-    }
-  }
-  return found;
-}
 
 #ifdef SKDEBUG
 static void showrecord(const Suftabpartcomponent *component)
@@ -158,6 +132,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   Suftabparts *suftabparts;
 
   suftabparts = gt_malloc(sizeof *suftabparts);
+  suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
@@ -179,8 +154,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   } else
   {
     unsigned int part, remainder;
-    unsigned long widthofsuftabpart, suftaboffset = 0, sumofwidth = 0,
-                  numofallcodes = gt_bcktab_numofallcodes(bcktab);
+    unsigned long widthofsuftabpart, suftaboffset = 0, sumofwidth = 0;
 
     suftabparts->components
       = gt_malloc(sizeof (*suftabparts->components) * numofparts);
@@ -200,12 +174,12 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
       }
       if (part == numofparts - 1)
       {
-        suftabparts->components[part].nextcode = numofallcodes;
+        suftabparts->components[part].nextcode
+          = gt_bcktab_numofallcodes(bcktab);
       } else
       {
-        suftabparts->components[part].nextcode = findfirstlarger(bcktab,
-                                                                 numofallcodes,
-                                                                 suftaboffset);
+        suftabparts->components[part].nextcode
+          = gt_bcktab_findfirstlarger(bcktab,suftaboffset);
       }
       if (part == 0)
       {
@@ -250,13 +224,13 @@ GtCodetype stpgetcurrentmincode(unsigned int part,
 }
 
 unsigned long stpgetcurrentsuftaboffset(unsigned int part,
-                                   const Suftabparts *suftabparts)
+                                        const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].suftaboffset;
 }
 
 GtCodetype stpgetcurrentmaxcode(unsigned int part,
-                              const Suftabparts *suftabparts)
+                                const Suftabparts *suftabparts)
 {
   if (part == suftabparts->numofparts - 1)
   {
@@ -266,13 +240,13 @@ GtCodetype stpgetcurrentmaxcode(unsigned int part,
 }
 
 unsigned long stpgetcurrentsumofwdith(unsigned int part,
-                                 const Suftabparts *suftabparts)
+                                      const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].sumofwidth;
 }
 
 unsigned long stpgetcurrentwidthofpart(unsigned int part,
-                                const Suftabparts *suftabparts)
+                                       const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].widthofpart;
 }
@@ -285,6 +259,11 @@ unsigned long stpgetlargestwidth(const Suftabparts *suftabparts)
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
 {
   return suftabparts->numofparts;
+}
+
+unsigned long stpnumofsuffixestoinsert(const Suftabparts *suftabparts)
+{
+  return suftabparts->numofsuffixestoinsert;
 }
 
 void gt_freesuftabparts(Suftabparts *suftabparts)

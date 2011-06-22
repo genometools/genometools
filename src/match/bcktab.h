@@ -145,6 +145,9 @@ size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab);
 
 void gt_bcktab_showleftborder(const Bcktab *bcktab);
 
+GtCodetype gt_bcktab_findfirstlarger(const Bcktab *bcktab,
+                                     unsigned long suftaboffset);
+
 #ifdef SKDEBUG
 void checkcountspecialcodes(const Bcktab *bcktab);
 

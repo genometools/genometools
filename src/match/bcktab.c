@@ -967,6 +967,33 @@ size_t gt_bcktab_sizeforlcpvalues(const Bcktab *bcktab)
   return MAX(sizelcps,sizespeciallcps);
 }
 
+GtCodetype gt_bcktab_findfirstlarger(const Bcktab *bcktab,
+                                     unsigned long suftaboffset)
+{
+  GtCodetype left = 0, right = bcktab->numofallcodes, mid,
+             found = bcktab->numofallcodes;
+  unsigned long midval;
+
+  while (left+1 < right)
+  {
+    mid = GT_DIV2(left+right);
+    midval = bcktab->leftborder.bounds[mid];
+    if (suftaboffset == midval)
+    {
+      return mid;
+    }
+    if (suftaboffset < midval)
+    {
+      found = mid;
+      right = mid - 1;
+    } else
+    {
+      left = mid + 1;
+    }
+  }
+  return found;
+}
+
 #ifdef SKDEBUG
 #include "qgram2code.h"
 void consistencyofsuffix(int line,
