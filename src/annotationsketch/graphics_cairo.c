@@ -76,24 +76,24 @@ void gt_graphics_cairo_initialize(GtGraphics *gg, GtGraphicsOutType type,
                                                     g->outbuf,
                                                     width,
                                                     height);
-#endif
       break;
+#endif
     case GT_GRAPHICS_PS:
 #ifdef CAIRO_HAS_PS_SURFACE
       g->surf = cairo_ps_surface_create_for_stream(str_write_func,
                                                    g->outbuf,
                                                    width,
                                                    height);
-#endif
       break;
+#endif
     case GT_GRAPHICS_SVG:
 #ifdef CAIRO_HAS_SVG_SURFACE
       g->surf = cairo_svg_surface_create_for_stream(str_write_func,
                                                     g->outbuf,
                                                     width,
                                                     height);
-#endif
       break;
+#endif
     case GT_GRAPHICS_PNG:
     default:
       g->surf = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
