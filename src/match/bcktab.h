@@ -26,12 +26,21 @@
 #include "core/intbits.h"
 #include "core/codetype.h"
 
+#define GT_BCKTABADDCODE(LB,CODE)                  (LB)->bounds[CODE]++
+#define GT_BCKTABASSIGNINSERTIONINDEX(VAR,LB,CODE) VAR = --(LB)->bounds[CODE]
+#define GT_BCKTABASSIGNLEFTBOUND(LB,IDX,VALUE)     (LB)->bounds[IDX] = VALUE
+
 typedef struct
 {
   unsigned long left,
                 nonspecialsinbucket,
                 specialsinbucket;
 } Bucketspecification;
+
+typedef struct
+{
+  unsigned long *bounds;
+} GtLeftborder;
 
 typedef struct Bcktab Bcktab;
 
@@ -110,7 +119,7 @@ const GtCodetype **gt_bcktab_multimappower(const Bcktab *bcktab);
 
 GtCodetype gt_bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 
-unsigned long *gt_bcktab_leftborder(Bcktab *bcktab);
+GtLeftborder *gt_bcktab_leftborder(Bcktab *bcktab);
 
 GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab);
 

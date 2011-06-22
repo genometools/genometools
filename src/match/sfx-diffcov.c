@@ -90,8 +90,8 @@ struct Differencecover
   Diffrank *coverrank;
   Diffvalue *diffvalues, *diff2pos;
   size_t requiredspace;
-  unsigned long totallength,
-                *leftborder; /* points to bcktab->leftborder */
+  unsigned long totallength;
+  GtLeftborder *leftborder; /* points to bcktab->leftborder */
   Bcktab *bcktab;
   const GtEncseq *encseq;
   GtReadmode readmode;
@@ -408,7 +408,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
           countderived++;
           gt_updatebckspecials(dcov->bcktab,code,dcov->numofchars,prefixindex);
           gt_assert(code > 0);
-          sampleindex = --dcov->leftborder[code];
+          GT_BCKTABASSIGNINSERTIONINDEX(sampleindex,dcov->leftborder,code);
           gt_assert(sampleindex < dcov->effectivesamplesize);
           suffixptrsetdcov(dcov,sampleindex,pos);
         }
@@ -1096,7 +1096,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
       dcov->samplesize++;
       if (unitsnotspecial > 0)
       {
-        dcov->leftborder[code]++;
+        GT_BCKTABADDCODE(dcov->leftborder,code);
         if (unitsnotspecial < dcov->prefixlength)
         {
           if (withcheck)
@@ -1163,7 +1163,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                                          dcov->prefixlength);
       if (unitsnotspecial == dcov->prefixlength)
       {
-        sampleindex = --dcov->leftborder[code];
+        GT_BCKTABASSIGNINSERTIONINDEX(sampleindex,dcov->leftborder,code);
         gt_assert(sampleindex < dcov->effectivesamplesize);
         suffixptrsetdcov(dcov,sampleindex,pos);
         posinserted++;

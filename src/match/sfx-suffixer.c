@@ -74,7 +74,7 @@ struct Sfxiterator
   Outlcpinfo *outlcpinfoforsample;
   Bcktab *bcktab;
   GtCodetype numofallcodes;
-  unsigned long *leftborder; /* points to bcktab->leftborder */
+  GtLeftborder *leftborder; /* points to bcktab->leftborder */
   GtBitsequence *markwholeleafbuckets;
   Differencecover *dcov;
 
@@ -271,14 +271,14 @@ static void updatekmercount(void *processinfo,
           }
           sfi->storespecials = false;
           gt_assert(kmercode->code > 0);
-          sfi->leftborder[kmercode->code]++; /*XXX*/
+          GT_BCKTABADDCODE(sfi->leftborder,kmercode->code);
         }
       } else
       {
         if (kmercode->specialposition > 0)
         {
           gt_assert(kmercode->code > 0);
-          sfi->leftborder[kmercode->code]++; /*XXX*/
+          GT_BCKTABADDCODE(sfi->leftborder,kmercode->code);
         } else
         {
           sfi->storespecials = true;
@@ -312,7 +312,7 @@ static void updatekmercount(void *processinfo,
       }
     }
 #endif
-    sfi->leftborder[kmercode->code]++; /* XXX */
+    GT_BCKTABADDCODE(sfi->leftborder,kmercode->code);
     if (sfi->markwholeleafbuckets != NULL &&
         (position == 0 || gt_encseq_position_is_separator(sfi->encseq,
                                                           position - 1,
@@ -340,7 +340,9 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
       (sfi->markwholeleafbuckets == NULL ||
        GT_ISIBITSET(sfi->markwholeleafbuckets,code)))
   {
-    unsigned long stidx = --sfi->leftborder[code]; /*XXX*/
+    unsigned long stidx;
+
+    GT_BCKTABASSIGNINSERTIONINDEX(stidx,sfi->leftborder,code);
     gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                                            position);
     /* from right to left */
@@ -391,7 +393,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
-          stidx = --sfi->leftborder[code];
+          GT_BCKTABASSIGNINSERTIONINDEX(stidx,sfi->leftborder,code);
           /* from right to left */
           gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                            sfi->spaceCodeatposition[j].position - prefixindex);
@@ -447,7 +449,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
           {
             gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
             gt_assert(code > 0);
-            stidx = --sfi->leftborder[code]; /* XXX */
+            GT_BCKTABASSIGNINSERTIONINDEX(stidx,sfi->leftborder,code);
             /* from right to left */
             gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                           specialcontext.position - prefixindex);
@@ -1121,7 +1123,7 @@ static void gt_updateleftborderforkmer(Sfxiterator *sfi,
                                        GtCodetype code)
 {
   gt_assert(sfi->sfxstrategy.spmopt == 0);
-  sfi->leftborder[code]++; /* XXX */
+  GT_BCKTABADDCODE(sfi->leftborder,code);
 }
 
 static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
@@ -1142,7 +1144,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
   }
   for (idx=maxprefixindex; idx>=1U; idx--)
   {
-    sfi->leftborder[code]++;
+    GT_BCKTABADDCODE(sfi->leftborder,code);
     code = ((code << 2) | 3U) & sfi->kmerfastmaskright;
   }
 }
@@ -1153,7 +1155,7 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
                                               GtCodetype code)
 {
   gt_assert(sfi->sfxstrategy.spmopt > 0);
-  sfi->leftborder[code]++; /* XXX */
+  GT_BCKTABADDCODE(sfi->leftborder,code);
   if (firstinrange)
   {
     GT_SETIBIT(sfi->markwholeleafbuckets,code);
@@ -1363,9 +1365,9 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                  err);
     if (sfi->bcktab == NULL)
     {
-      haserr = true;
       sfi->leftborder = NULL;
       sfi->numofallcodes = 0;
+      haserr = true;
     } else
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
@@ -1396,7 +1398,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       gt_timer_show_progress(sfxprogress, "counting prefix distribution",
                              stdout);
     }
-    gt_assert(sfi->leftborder != NULL);
     if (prefixlength == 1U)
     {
       unsigned int charidx;
@@ -1406,8 +1407,9 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
         unsigned int updateindex = GT_ISDIRCOMPLEMENT(readmode) ?
                                         GT_COMPLEMENTBASE(charidx) :
                                         charidx;
-        sfi->leftborder[updateindex]
-          = gt_encseq_charcount(encseq,(GtUchar) charidx);
+        gt_assert(sfi->leftborder != NULL && sfi->leftborder->bounds != NULL);
+        GT_BCKTABASSIGNLEFTBOUND(sfi->leftborder,updateindex,
+                                 gt_encseq_charcount(encseq,(GtUchar) charidx));
       }
     } else
     {
