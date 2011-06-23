@@ -45,59 +45,60 @@ typedef struct
 typedef struct Bcktab Bcktab;
 
 Bcktab *gt_mapbcktab(const char *indexname,
-                  unsigned int numofchars,
-                  unsigned int prefixlength,
-                  bool withspecialsuffixes,
-                  GtError *err);
+                     unsigned int numofchars,
+                     unsigned int prefixlength,
+                     bool withspecialsuffixes,
+                     GtError *err);
 
 void gt_bcktab_delete(Bcktab *bcktab);
 
 Bcktab *gt_allocBcktab(unsigned int numofchars,
-                    unsigned int prefixlength,
-                    bool storespecialcodes,
-                    bool withspecialsuffixes,
-                    GtError *err);
+                       unsigned int prefixlength,
+                       bool storespecialcodes,
+                       bool withspecialsuffixes,
+                       GtError *err);
 
 void gt_updatebckspecials(Bcktab *bcktab,
-                       GtCodetype code,
-                       unsigned int numofchars,
-                       unsigned int prefixindex);
+                          GtCodetype code,
+                          unsigned int numofchars,
+                          unsigned int prefixindex);
 
 GtCodetype gt_codedownscale(const Bcktab *bcktab,
-                       GtCodetype code,
-                       unsigned int prefixindex,
-                       unsigned int maxprefixlen);
+                            GtCodetype code,
+                            unsigned int prefixindex,
+                            unsigned int maxprefixlen);
 
-void gt_addfinalbckspecials(Bcktab *bcktab,unsigned int numofchars,
-                         unsigned long specialcharacters);
+void gt_addfinalbckspecials(Bcktab *bcktab,
+                            unsigned int numofchars,
+                            unsigned long specialcharacters);
 
 int gt_bcktab2file(FILE *fp,const Bcktab *bcktab,GtError *err);
 
 unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
-                                   const Bcktab *bcktab,
-                                   GtCodetype code,
-                                   GtCodetype maxcode,
-                                   unsigned long totalwidth,
-                                   unsigned int rightchar,
-                                   unsigned int numofchars);
+                                      const Bcktab *bcktab,
+                                      GtCodetype code,
+                                      GtCodetype maxcode,
+                                      unsigned long totalwidth,
+                                      unsigned int rightchar,
+                                      unsigned int numofchars);
 
 unsigned long gt_calcbucketrightbounds(const Bcktab *bcktab,
-                             GtCodetype code,
-                             GtCodetype maxcode,
-                             unsigned long totalwidth);
+                                       GtCodetype code,
+                                       GtCodetype maxcode,
+                                       unsigned long totalwidth);
 
 unsigned long gt_distpfxidxpartialsums(const Bcktab *bcktab,GtCodetype code,
-                                    unsigned int lowerbound);
+                                       unsigned int lowerbound);
 
 void gt_calcbucketboundaries(Bucketspecification *bucketspec,
-                          const Bcktab *bcktab,
-                          GtCodetype code);
+                             const Bcktab *bcktab,
+                             GtCodetype code);
 
 void gt_determinemaxbucketsize(Bcktab *bcktab,
-                            const GtCodetype mincode,
-                            const GtCodetype maxcode,
-                            unsigned long partwidth,
-                            unsigned int numofchars);
+                               const GtCodetype mincode,
+                               const GtCodetype maxcode,
+                               unsigned long partwidth,
+                               unsigned int numofchars);
 
 unsigned int gt_singletonmaxprefixindex(const Bcktab *bcktab,GtCodetype code);
 

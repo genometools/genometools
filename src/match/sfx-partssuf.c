@@ -219,11 +219,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 GtCodetype stpgetcurrentmincode(unsigned int part,
                                 const Suftabparts *suftabparts)
 {
-  if (part == 0)
-  {
-    return 0;
-  }
-  return suftabparts->components[part-1].nextcode + 1;
+  return (part == 0) ? 0 : suftabparts->components[part-1].nextcode + 1;
 }
 
 unsigned long stpgetcurrentsuftaboffset(unsigned int part,
@@ -232,14 +228,21 @@ unsigned long stpgetcurrentsuftaboffset(unsigned int part,
   return suftabparts->components[part].suftaboffset;
 }
 
+unsigned long stpgetcurrentleftborderoffset(unsigned int part,
+                                            const Suftabparts *suftabparts)
+{
+  unsigned long mincode = stpgetcurrentmincode(part,suftabparts);
+
+  return (mincode * sizeof (unsigned long) / suftabparts->pagesize)
+         * suftabparts->pagesize;
+}
+
 GtCodetype stpgetcurrentmaxcode(unsigned int part,
                                 const Suftabparts *suftabparts)
 {
-  if (part == suftabparts->numofparts - 1)
-  {
-    return suftabparts->components[part].nextcode - 1;
-  }
-  return suftabparts->components[part].nextcode;
+  return (part == suftabparts->numofparts - 1)
+           ? suftabparts->components[part].nextcode - 1
+           : suftabparts->components[part].nextcode;
 }
 
 unsigned long stpgetcurrentsumofwdith(unsigned int part,

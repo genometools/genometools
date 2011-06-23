@@ -92,15 +92,15 @@ static uint64_t gt_sizeofbuckettable_generic(unsigned int prefixlength,
                                              const GtCodetype *basepower,
                                              bool withspecialsuffixes)
 {
-  uint64_t sizeofrep;
+  uint64_t numofbasetypevalues;
 
-  sizeofrep = numofallcodes + 1;
+  numofbasetypevalues = numofallcodes + 1;
   if (withspecialsuffixes)
   {
-    sizeofrep += numofspecialcodes +
-                 numofdistpfxidxcounters(basepower,prefixlength);
+    numofbasetypevalues += numofspecialcodes +
+                           numofdistpfxidxcounters(basepower,prefixlength);
   }
-  return sizeofrep * sizeofbasetype;
+  return numofbasetypevalues * sizeofbasetype;
 }
 
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
@@ -593,8 +593,7 @@ unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
     if (bcktab->leftborder.bounds[code+1] > 0)
     {
       bucketspec->nonspecialsinbucket
-        = (unsigned long) (bcktab->leftborder.bounds[code+1]
-                           - bucketspec->left);
+        = (bcktab->leftborder.bounds[code+1] - bucketspec->left);
     } else
     {
       bucketspec->nonspecialsinbucket = 0;
@@ -637,9 +636,9 @@ void gt_calcbucketboundaries(Bucketspecification *bucketspec,
 }
 
 unsigned long gt_calcbucketrightbounds(const Bcktab *bcktab,
-                             GtCodetype code,
-                             GtCodetype maxcode,
-                             unsigned long totalwidth)
+                                       GtCodetype code,
+                                       GtCodetype maxcode,
+                                       unsigned long totalwidth)
 {
   if (code == maxcode)
   {
@@ -906,7 +905,8 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,unsigned long idx)
+unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,
+                                       unsigned long idx)
 {
   return bcktab->leftborder.bounds[idx];
 }
@@ -1011,7 +1011,7 @@ void consistencyofsuffix(int line,
   totallength = gt_encseq_total_length(encseq);
   for (idx=0; idx<bcktab->prefixlength; idx++)
   {
-    if ((unsigned long) (suffix->startpos + idx) >= totallength)
+    if (suffix->startpos + idx >= totallength)
     {
       firstspecial = idx;
       break;
