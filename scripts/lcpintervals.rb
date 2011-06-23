@@ -76,14 +76,7 @@ def showbool(b)
   end
 end
 
-def processbranchedge(firstedge,fromitv,toitv)
-  print "B #{showbool(firstedge)} #{fromitv.lcp} #{fromitv.lb} "
-  puts  "#{toitv.lcp} #{toitv.lb}"
-end
-
-def processleafedge(firstedge,parent,suffix)
-  puts "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} #{suffix}"
-end
+Edge = Struct.new("Edge",:isleaf,:firstedge,:parent,:goal)
 
 def enumlcpintervaltree(filename)
   stack = Array.new()
@@ -107,7 +100,7 @@ def enumlcpintervaltree(filename)
         firstedgefromroot = false
       end
       assert{stack.last.lcp == [prevlcpvalue,lcpvalue].max}
-      processleafedge(firstedge,stack.last,previoussuffix)
+      yield Edge.new(true,firstedge,stack.last,previoussuffix)
     end
     assert {lastinterval.nil?}
     while lcpvalue < stack.last.lcp
@@ -121,7 +114,7 @@ def enumlcpintervaltree(filename)
           firstedge = true
           firstedgefromroot = false
         end
-        processbranchedge(firstedge,stack.last,lastinterval)
+        yield Edge.new(false,firstedge,stack.last,lastinterval)
         stack.last.brchildlist.push(lastinterval)
         lastinterval = nil
       end
@@ -135,11 +128,11 @@ def enumlcpintervaltree(filename)
     if lcpvalue > stack.last.lcp
       if not lastinterval.nil?
         stack.push(Lcpinterval.new(lcpvalue,lastinterval.lb,nil,[lastinterval]))
-        processbranchedge(true,stack.last,lastinterval)
+        yield Edge.new(false,true,stack.last,lastinterval)
         lastinterval = nil
       else
         stack.push(Lcpinterval.new(lcpvalue,idx,nil,[]))
-        processleafedge(true,stack.last,previoussuffix)
+        yield Edge.new(true,true,stack.last,previoussuffix)
       end
     end
     assert {lcpvalue == stack.last.lcp}
@@ -153,8 +146,23 @@ if ARGV.length != 2
   exit 1
 end
 
+def showbranchedge(firstedge,parent,toitv)
+  print "B #{showbool(firstedge)} #{parent.lcp} #{parent.lb} "
+  puts  "#{toitv.lcp} #{toitv.lb}"
+end
+
+def showleafedge(firstedge,parent,suffix)
+  puts "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} #{suffix}"
+end
+
 if ARGV[0] == 'itv'
   enumlcpintervals(ARGV[1])
 elsif ARGV[0] == 'tree'
-enumlcpintervaltree(ARGV[1])
- end
+  enumlcpintervaltree(ARGV[1]) do |item|
+    if item.isleaf
+      showleafedge(item.firstedge,item.parent,item.goal)
+    else
+      showbranchedge(item.firstedge,item.parent,item.goal)
+    end
+  end
+end
