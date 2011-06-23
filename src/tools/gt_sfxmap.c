@@ -395,6 +395,11 @@ static int gt_checkentiresuftab(const char *filename,
   GtEncseqReader *esr1, *esr2;
   bool haserr = false;
   GtBitsequence *startposoccurs;
+  GtEncseqReader *esr;
+  /*
+#define MAXDIST 100
+  unsigned long countdist[MAXDIST+1] = {0};
+  */
 
   gt_error_check(err);
   gt_assert(!specialsareequal || specialsareequalatdepth0);
@@ -403,6 +408,7 @@ static int gt_checkentiresuftab(const char *filename,
     return 0;
   }
   GT_INITBITTAB(startposoccurs,totallength+1);
+  esr = gt_encseq_create_reader_with_readmode(encseq,readmode,0);
   for (idx = 0; idx < numberofsuffixes; idx++)
   {
     unsigned long position = ESASUFFIXPTRGET(suftab,idx);
@@ -420,10 +426,38 @@ static int gt_checkentiresuftab(const char *filename,
                                                            position - 1,
                                                            readmode))
       {
+        /*printf("whole %lu\n",position);*/
         wholeleafcount++;
       }
     }
+    /*
+    if (gt_has_twobitencoding_stoppos_support(encseq))
+    {
+      unsigned long stoppos;
+
+      gt_encseq_reader_reinit_with_readmode(esr,
+                                            encseq,
+                                            readmode,
+                                            position);
+      stoppos = gt_getnexttwobitencodingstoppos(true, esr);
+      gt_assert(position <= stoppos);
+      if (stoppos - position <= MAXDIST)
+      {
+        countdist[stoppos - position]++;
+      }
+    }
+    */
   }
+  /*
+  for (idx=0; idx<=MAXDIST; idx++)
+  {
+    if (countdist[idx] > 0)
+    {
+      printf("dist[%lu]=%lu\n",idx,countdist[idx]);
+    }
+  }
+  */
+  gt_encseq_reader_delete(esr);
   gt_free(startposoccurs);
   if (wholeleafcheck)
   {
