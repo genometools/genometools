@@ -109,11 +109,11 @@ module GT
       GT.gt_alphabet_valid_input(@alpha, char) != 0
     end
 
-    def is_dna(char)
+    def is_dna?
       GT.gt_alphabet_is_dna(@alpha) != 0
     end
 
-    def is_protein(char)
+    def is_protein?
       GT.gt_alphabet_is_protein(@alpha) != 0
     end
 
