@@ -122,13 +122,14 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       if (!had_err) {
         for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
           had_err = gt_md5set_add_sequence(md5set,
-              gt_bioseq_get_sequence(bs, j),
-              gt_bioseq_get_sequence_length(bs, j), arguments->rev, err);
+                                           gt_bioseq_get_sequence(bs, j),
+                                           gt_bioseq_get_sequence_length(bs, j),
+                                           arguments->rev, err);
           if (!had_err)
             gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
-                gt_bioseq_get_sequence(bs, j),
-                gt_bioseq_get_sequence_length(bs, j),
-                arguments->width, arguments->outfp);
+                                gt_bioseq_get_sequence(bs, j),
+                                gt_bioseq_get_sequence_length(bs, j),
+                                arguments->width, arguments->outfp);
           else if (had_err > 0)
           {
             duplicates++;
@@ -167,7 +168,7 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
           break;
 
         had_err = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
-            arguments->rev, err);
+                                         arguments->rev, err);
         if (!had_err)
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
