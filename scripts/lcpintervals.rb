@@ -2,6 +2,7 @@
 
 require 'ostruct'
 require 'optparse'
+require 'gtruby'
 
 def assert
   raise "Assertion failed !" unless yield
@@ -9,15 +10,22 @@ end
 
 Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist)
 
+def pos2readnum(encseq,pos)
+  
+end
+
 class LcpSufstream
-  def initialize(filename)
-    @lcpfile = File.new(filename + ".lcp","r")
+  def initialize(indexname)
+    @lcpfile = File.new(indexname + ".lcp","r")
     @lcpfile.read(1)
-    @llvfile = File.new(filename + ".llv","r")
-    @suffile = File.new(filename + ".suf","r")
+    @llvfile = File.new(indexname + ".llv","r")
+    @suffile = File.new(indexname + ".suf","r")
     @totallength = nil
     @specialcharacters = nil
-    File.new(filename + ".prj","r").each_line do |line|
+    @intbytes=nil
+    el = GT::EncseqLoader.new
+    @encseq = el.load(indexname)
+    File.new(indexname + ".prj","r").each_line do |line|
       m = line.match(/^totallength=(\d+)/)
       if m
         @totallength=m[1].to_i
@@ -26,14 +34,22 @@ class LcpSufstream
       if m
         @specialcharacters=m[1].to_i
       end
+      m = line.match(/^integersize=(\d+)/)
+      if m
+        if m[1].to_i == 64
+          @intbytes=8
+        else
+          @intbytes=4
+        end
+      end
     end
   end
   def next()
     @lcpfile.each_byte do |cc|
-      suftabvalue = @suffile.read(4).unpack("L")[0]
+      suftabvalue = @suffile.read(@intbytes).unpack("L")[0]
       if cc == 255
-        idxvalue = @llvfile.read(4)
-        lcpvalue = @llvfile.read(4)
+        idxvalue = @llvfile.read(@intbytes)
+        lcpvalue = @llvfile.read(@intbytes)
         yield lcpvalue.unpack("L")[0],suftabvalue
       else
         yield cc,suftabvalue
@@ -174,20 +190,33 @@ def parseargs(argv)
   return options
 end
 
+def showleafedge(firstedge,parent,suffix)
+  puts "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} #{suffix}"
+end
 
 def showbranchedge(firstedge,parent,toitv)
   print "B #{showbool(firstedge)} #{parent.lcp} #{parent.lb} "
   puts  "#{toitv.lcp} #{toitv.lb}"
 end
 
-def showleafedge(firstedge,parent,suffix)
-  puts "L #{showbool(firstedge)} #{parent.lcp} #{parent.lb} #{suffix}"
+Resource = Struct.new("Resource",:minlen,:firstinW,:wset)
+
+def itv2key(itv)
+  return "#{itv.lcp} #{itv.lb}"
+end
+
+def spmleafedge(res,firstedge,itv,pos)
+  if itv.lcp >= res.minlen
+    if firstedge 
+      res.firstinW[itv2key(itv)] = res.wset.length
+    end
+  end
 end
 
 def spmbranchedge(minlen,firstedge,parent,toitv)
 end
 
-def spmleafedge(minlen,firstedge,parent,suffix)
+def spmlcpinterval(minlen,lcpitv)
 end
 
 options = parseargs(ARGV)
@@ -203,13 +232,14 @@ elsif options.tree
     end
   end
 elsif not options.minlen.nil?
+  res = Resource.new(options.minlen,Hash.new(),Array.new())
   enumlcpintervaltree(options.indexname) do |item|
     if item.kind == 0
-      spmleafedge(option.minlen,item.firstedge,item.parent,item.goal)
+      spmleafedge(res,item.firstedge,item.parent,item.goal)
     elsif item.kind == 1
-      spmbranchedge(option.minlen,item.firstedge,item.parent,item.goal)
+      spmbranchedge(res,item.firstedge,item.parent,item.goal)
     else
-      spmlcpinterval(option.minlen,item.parent)
+      spmlcpinterval(res,item.parent)
     end
   end
 end
