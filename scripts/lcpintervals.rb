@@ -10,10 +10,6 @@ end
 
 Lcpinterval = Struct.new("Lcpinterval",:lcp, :lb, :rb, :brchildlist)
 
-def pos2readnum(encseq,pos)
-  
-end
-
 class LcpSufstream
   def initialize(indexname)
     @lcpfile = File.new(indexname + ".lcp","r")
@@ -248,7 +244,7 @@ def spmlcpinterval(res,itv)
     res.lset.each do |l|
       firstpos = res.firstinW[itv2key(itv)]
       firstpos.upto(res.wset.length-1) do |i|
-        puts "#{res.wset[i]} #{l} #{itv.lcp}"
+        puts "#{l} #{res.wset[i]} #{itv.lcp}"
       end
     end
     # puts "reset lset"
