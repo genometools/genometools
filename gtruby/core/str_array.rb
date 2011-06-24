@@ -28,9 +28,11 @@ module GT
 
   class StrArray
     attr_reader :str_array
-    def initialize(str_array_ptr = GT.gt_str_array_new())
+    def initialize(str_array_ptr = GT.gt_str_array_new(), own = true)
       @str_array = str_array_ptr
-      @str_array.free = GT::symbol("gt_str_array_delete", "0P")
+      if own != false then
+        @str_array.free = GT::symbol("gt_str_array_delete", "0P")
+      end
     end
 
     def add_list(list)

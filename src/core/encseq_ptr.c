@@ -71,11 +71,25 @@ void gt_encseq_seqnum_p(const GtEncseq *encseq,
   *seqnumber = gt_encseq_seqnum(encseq, *pos);
 }
 
+void gt_encseq_filenum_p(const GtEncseq *encseq,
+                         unsigned long *filenumber,
+                         unsigned long *pos)
+{
+  *filenumber = gt_encseq_filenum(encseq, *pos);
+}
+
 void gt_encseq_seqstartpos_p(const GtEncseq *encseq,
                              unsigned long *seqnumber,
                              unsigned long *startpos)
 {
   *startpos = gt_encseq_seqstartpos(encseq, *seqnumber);
+}
+
+void gt_encseq_filestartpos_p(const GtEncseq *encseq,
+                              unsigned long *filenumber,
+                              unsigned long *startpos)
+{
+  *startpos = gt_encseq_seqstartpos(encseq, *filenumber);
 }
 
 void gt_encseq_num_of_files_p(const GtEncseq *encseq,

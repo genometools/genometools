@@ -86,6 +86,7 @@ module GT
   typealias "GtReadmode", "int"
   extern "void gt_encseq_total_length_p(const GtEncseq*, unsigned long*)"
   extern "void gt_encseq_num_of_sequences_p(const GtEncseq*, unsigned long*)"
+  extern "void gt_encseq_num_of_files_p(const GtEncseq*, unsigned long*)"
   extern "GtUchar gt_encseq_get_encoded_char_p(const GtEncseq*,
                                                unsigned long*,
                                                GtReadmode)"
@@ -100,20 +101,23 @@ module GT
                                    unsigned long*)"
   extern "void gt_encseq_seqnum_p(const GtEncseq*, unsigned long*,
                                   unsigned long*)"
+  extern "void gt_encseq_filenum_p(const GtEncseq*, unsigned long*,
+                                   unsigned long*)"
   extern "void gt_encseq_seqstartpos_p(const GtEncseq *, unsigned long*,
                                      unsigned long*)"
+  extern "void gt_encseq_filestartpos_p(const GtEncseq *, unsigned long*,
+                                        unsigned long*)"
   extern "void* gt_encseq_description_p(const GtEncseq*, unsigned long*,
                                       unsigned long*)"
+  extern "void gt_encseq_effective_filelength_p(const GtEncseq*,
+                                                void*,
+                                                unsigned long*)"
   extern "GtEncseqReader*
             gt_encseq_create_reader_with_readmode_p(const GtEncseq*,
                                                     GtReadmode,
                                                     unsigned long*)"
-  extern "GtAlphabet* gt_encseq_alphabet(const GtEncseq*)"
   extern "const GtStrArray* gt_encseq_filenames(const GtEncseq*)"
-  extern "void gt_encseq_num_of_files_p(const GtEncseq*, unsigned long*)"
-  extern "void gt_encseq_effective_filelength_p(const GtEncseq*,
-                                                void*,
-                                                unsigned long*)"
+  extern "GtAlphabet* gt_encseq_alphabet(const GtEncseq*)"
   extern "int gt_encseq_mirror(GtEncseq*, GtError*)"
   extern "void gt_encseq_unmirror(GtEncseq*)"
   extern "int gt_encseq_is_mirrored(GtEncseq*)"
@@ -520,6 +524,16 @@ module GT
       return l[0, l.size].unpack("L!")[0]
     end
 
+    def filestartpos(num)
+      if num >= @num_of_files then
+        GT.gterror("invalid file number #{num}")
+      end
+      n = [num.to_i].pack("L!")
+      l = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_filestartpos_p(@encseq, n, l)
+      return l[0, l.size].unpack("L!")[0]
+    end
+
     def create_reader_with_readmode(readmode, startpos)
       if readmode < 0 or readmode > 3 then
           GT.gterror("invalid readmode!")
@@ -565,7 +579,7 @@ module GT
 
     def mirror
       if self.mirrored? then
-        gterror("Encseq is already mirrored")
+        gterror("encoded sequence is already mirrored")
       end
       err = Error.new
       rval = GT.gt_encseq_mirror(@encseq, err.to_ptr)
@@ -578,7 +592,7 @@ module GT
 
     def unmirror
       if !self.mirrored? then
-        gterror("Encseq is not mirrored")
+        gterror("encoded sequence is not mirrored")
       end
       GT.gt_encseq_unmirror(@encseq)
       @num_of_sequences = self._num_of_sequences
@@ -594,6 +608,22 @@ module GT
       l = DL::malloc(GT::NATIVEULONGSIZE)
       GT.gt_encseq_seqnum_p(@encseq, l, n)
       return l[0, l.size].unpack("L!")[0]
+    end
+
+    def filenum(pos)
+      if pos < 0 or pos >= @total_length then
+        gterror("invalid coordinates: #{start}-#{stop} " + \
+                "(allowed: 0-#{@total_length-1})")
+      end
+      n = [pos.to_i].pack("L!")
+      l = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_filenum_p(@encseq, l, n)
+      return l[0, l.size].unpack("L!")[0]
+    end
+
+    def filenames
+      sa = GT::StrArray.new(GT.gt_encseq_filenames(@encseq), false)
+      sa.to_a
     end
   end
 
