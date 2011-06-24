@@ -23,8 +23,7 @@ class LcpSufstream
     @totallength = nil
     @specialcharacters = nil
     @intbytes=nil
-    el = GT::EncseqLoader.new
-    @encseq = el.load(indexname)
+    @mirrored=nil
     File.new(indexname + ".prj","r").each_line do |line|
       m = line.match(/^totallength=(\d+)/)
       if m
@@ -42,7 +41,23 @@ class LcpSufstream
           @intbytes=4
         end
       end
+      m = line.match(/^mirrored=(\d+)/)
+      if m
+        if m[1].to_i == 0
+          @mirrored=false
+        else
+          @mirrored=true
+        end
+      end
     end
+    el = GT::EncseqLoader.new
+    @encseq = el.load(indexname)
+    if @mirrored
+      @encseq.mirror()
+    end
+  end
+  def getencseq()
+    return @encseq
   end
   def next()
     @lcpfile.each_byte do |cc|
@@ -65,11 +80,11 @@ def processlcpinterval(itv)
   puts "N #{itv.lcp} #{itv.lb} #{itv.rb}"
 end
 
-def enumlcpintervals(filename)
+def enumlcpintervals(lcpsufstream)
   stack = Array.new()
   stack.push(Lcpinterval.new(0,0,nil,[]))
   idx = 0
-  LcpSufstream.new(filename).next() do |lcpvalue,previoussuffix|
+  lcpsufstream.next() do |lcpvalue,previoussuffix|
     lb = idx
     while lcpvalue < stack.last.lcp
       lastinterval = stack.pop
@@ -97,14 +112,13 @@ end
 
 Edge = Struct.new("Edge",:kind,:firstedge,:parent,:goal)
 
-def enumlcpintervaltree(filename)
+def enumlcpintervaltree(lcpsufstream)
   stack = Array.new()
   lastinterval = nil
   firstedgefromroot = true
   firstedge = false
   prevlcpvalue = 0
   stack.push(Lcpinterval.new(0,0,nil,[]))
-  lcpsufstream = LcpSufstream.new(filename)
   nonspecials = lcpsufstream.numofnonspecials()
   idx=0
   lcpsufstream.next() do |lcpvalue,previoussuffix|
@@ -199,7 +213,7 @@ def showbranchedge(firstedge,parent,toitv)
   puts  "#{toitv.lcp} #{toitv.lb}"
 end
 
-Resource = Struct.new("Resource",:minlen,:firstinW,:wset)
+Resource = Struct.new("Resource",:encseq,:minlen,:firstinW,:wset,:lset)
 
 def itv2key(itv)
   return "#{itv.lcp} #{itv.lb}"
@@ -210,21 +224,48 @@ def spmleafedge(res,firstedge,itv,pos)
     if firstedge 
       res.firstinW[itv2key(itv)] = res.wset.length
     end
+    idx = res.encseq.seqnum(pos)
+    if pos == 0 or res.encseq.get_encoded_char(pos-1) == 255
+      # puts "wset.push(#{idx})"
+      res.wset.push(idx)
+    end
+    if pos + itv.lcp == res.encseq.total_length or
+       res.encseq.get_encoded_char(pos + itv.lcp) == 255
+      # puts "lset.push(#{idx})"
+      res.lset.push(idx)
+    end
   end
 end
 
-def spmbranchedge(minlen,firstedge,parent,toitv)
+def spmbranchedge(res,firstedge,itv,itvprime)
+  if itv.lcp >= res.minlen and firstedge
+    res.firstinW[itv2key(itv)] = res.firstinW[itv2key(itvprime)]
+  end
 end
 
-def spmlcpinterval(minlen,lcpitv)
+def spmlcpinterval(res,itv)
+  if itv.lcp >= res.minlen
+    res.lset.each do |l|
+      firstpos = res.firstinW[itv2key(itv)]
+      firstpos.upto(res.wset.length-1) do |i|
+        puts "#{res.wset[i]} #{l} #{itv.lcp}"
+      end
+    end
+    # puts "reset lset"
+    res.lset = []
+  else
+    # puts "reset wset"
+    res.wset = []
+  end
 end
 
 options = parseargs(ARGV)
 
+lcpsufstream = LcpSufstream.new(options.indexname)
 if options.itv
-  enumlcpintervals(options.indexname)
+  enumlcpintervals(lcpsufstream)
 elsif options.tree
-  enumlcpintervaltree(options.indexname) do |item|
+  enumlcpintervaltree(lcpsufstream) do |item|
     if item.kind == 0
       showleafedge(item.firstedge,item.parent,item.goal)
     elsif item.kind == 1
@@ -232,8 +273,9 @@ elsif options.tree
     end
   end
 elsif not options.minlen.nil?
-  res = Resource.new(options.minlen,Hash.new(),Array.new())
-  enumlcpintervaltree(options.indexname) do |item|
+  res = Resource.new(lcpsufstream.getencseq(),
+                     options.minlen,Hash.new(),Array.new(),Array.new())
+  enumlcpintervaltree(lcpsufstream) do |item|
     if item.kind == 0
       spmleafedge(res,item.firstedge,item.parent,item.goal)
     elsif item.kind == 1
