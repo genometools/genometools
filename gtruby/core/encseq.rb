@@ -549,8 +549,8 @@ module GT
 
     def extract_encoded(start, stop)
       if start < 0 or stop >= @total_length then
-        gterror("invalid coordinates: #{start}-#{stop} " + \
-                "(allowed: 0-#{@total_length-1})")
+        GT.gterror("invalid coordinates: #{start}-#{stop} " + \
+                   "(allowed: 0-#{@total_length-1})")
       end
       buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
       r = GT::Range.new(start, stop)
@@ -560,8 +560,8 @@ module GT
 
     def extract_decoded(start, stop)
       if start < 0 or stop >= @total_length then
-        gterror("invalid coordinates: #{start}-#{stop} " + \
-                "(allowed: 0-#{@total_length-1})")
+        GT.gterror("invalid coordinates: #{start}-#{stop} " + \
+                   "(allowed: 0-#{@total_length-1})")
       end
       buf = DL.malloc(DL::sizeof('C') * (stop-start+1))
       r = GT::Range.new(start, stop)
@@ -579,7 +579,7 @@ module GT
 
     def mirror
       if self.mirrored? then
-        gterror("encoded sequence is already mirrored")
+        GT.gterror("encoded sequence is already mirrored")
       end
       err = Error.new
       rval = GT.gt_encseq_mirror(@encseq, err.to_ptr)
@@ -592,7 +592,7 @@ module GT
 
     def unmirror
       if !self.mirrored? then
-        gterror("encoded sequence is not mirrored")
+        GT.gterror("encoded sequence is not mirrored")
       end
       GT.gt_encseq_unmirror(@encseq)
       @num_of_sequences = self._num_of_sequences
@@ -601,8 +601,8 @@ module GT
 
     def seqnum(pos)
       if pos < 0 or pos >= @total_length then
-        gterror("invalid coordinates: #{start}-#{stop} " + \
-                "(allowed: 0-#{@total_length-1})")
+        GT.gterror("invalid coordinates: #{start}-#{stop} " + \
+                   "(allowed: 0-#{@total_length-1})")
       end
       n = [pos.to_i].pack("L!")
       l = DL::malloc(GT::NATIVEULONGSIZE)
@@ -612,8 +612,8 @@ module GT
 
     def filenum(pos)
       if pos < 0 or pos >= @total_length then
-        gterror("invalid coordinates: #{start}-#{stop} " + \
-                "(allowed: 0-#{@total_length-1})")
+        GT.gterror("invalid coordinates: #{start}-#{stop} " + \
+                   "(allowed: 0-#{@total_length-1})")
       end
       n = [pos.to_i].pack("L!")
       l = DL::malloc(GT::NATIVEULONGSIZE)
