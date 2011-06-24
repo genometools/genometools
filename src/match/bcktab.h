@@ -26,8 +26,6 @@
 #include "core/intbits.h"
 #include "core/codetype.h"
 
-#define GT_BCKTABADDCODE(LB,CODE)                  (LB)->bounds[CODE]++
-#define GT_BCKTABASSIGNINSERTIONINDEX(VAR,LB,CODE) VAR = --(LB)->bounds[CODE]
 #define GT_BCKTABASSIGNLEFTBOUND(LB,IDX,VALUE)     (LB)->bounds[IDX] = VALUE
 
 typedef struct
@@ -37,12 +35,19 @@ typedef struct
                 specialsinbucket;
 } Bucketspecification;
 
-typedef struct
-{
-  unsigned long *bounds;
-} GtLeftborder;
+typedef struct GtLeftborder GtLeftborder;
 
 typedef struct Bcktab Bcktab;
+
+void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code);
+
+unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
+                                                  GtCodetype code);
+
+void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
+                                 unsigned long value);
+
+unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,GtCodetype code);
 
 Bcktab *gt_mapbcktab(const char *indexname,
                      unsigned int numofchars,
@@ -123,8 +128,6 @@ GtCodetype gt_bcktab_filltable(const Bcktab *bcktab,unsigned int idx);
 GtLeftborder *gt_bcktab_leftborder(Bcktab *bcktab);
 
 GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab);
-
-unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,unsigned long idx);
 
 uint64_t gt_sizeofbuckettable(unsigned int numofchars,
                               unsigned int prefixlength,

@@ -272,14 +272,14 @@ static void updatekmercount(void *processinfo,
           }
           sfi->storespecials = false;
           gt_assert(kmercode->code > 0);
-          GT_BCKTABADDCODE(sfi->leftborder,kmercode->code);
+          gt_bcktab_leftborder_addcode(sfi->leftborder,kmercode->code);
         }
       } else
       {
         if (kmercode->specialposition > 0)
         {
           gt_assert(kmercode->code > 0);
-          GT_BCKTABADDCODE(sfi->leftborder,kmercode->code);
+          gt_bcktab_leftborder_addcode(sfi->leftborder,kmercode->code);
         } else
         {
           sfi->storespecials = true;
@@ -313,7 +313,7 @@ static void updatekmercount(void *processinfo,
       }
     }
 #endif
-    GT_BCKTABADDCODE(sfi->leftborder,kmercode->code);
+    gt_bcktab_leftborder_addcode(sfi->leftborder,kmercode->code);
     if (sfi->markwholeleafbuckets != NULL &&
         (position == 0 || gt_encseq_position_is_separator(sfi->encseq,
                                                           position - 1,
@@ -343,7 +343,7 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
   {
     unsigned long stidx;
 
-    GT_BCKTABASSIGNINSERTIONINDEX(stidx,sfi->leftborder,code);
+    stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
     gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                                            position);
     /* from right to left */
@@ -394,7 +394,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
           gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
-          GT_BCKTABASSIGNINSERTIONINDEX(stidx,sfi->leftborder,code);
+          stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
           /* from right to left */
           gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                            sfi->spaceCodeatposition[j].position - prefixindex);
@@ -450,7 +450,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
           {
             gt_updatebckspecials(sfi->bcktab,code,sfi->numofchars,prefixindex);
             gt_assert(code > 0);
-            GT_BCKTABASSIGNINSERTIONINDEX(stidx,sfi->leftborder,code);
+            stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
             /* from right to left */
             gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
                           specialcontext.position - prefixindex);
@@ -1148,7 +1148,7 @@ static void gt_updateleftborderforkmer(Sfxiterator *sfi,
                                        GtCodetype code)
 {
   gt_assert(sfi->sfxstrategy.spmopt == 0);
-  GT_BCKTABADDCODE(sfi->leftborder,code);
+  gt_bcktab_leftborder_addcode(sfi->leftborder,code);
 }
 
 static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
@@ -1169,7 +1169,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
   }
   for (idx=maxprefixindex; idx>=1U; idx--)
   {
-    GT_BCKTABADDCODE(sfi->leftborder,code);
+    gt_bcktab_leftborder_addcode(sfi->leftborder,(GtCodetype) code);
     code = ((code << 2) | 3U) & sfi->kmerfastmaskright;
   }
 }
@@ -1180,7 +1180,7 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
                                               GtCodetype code)
 {
   gt_assert(sfi->sfxstrategy.spmopt > 0);
-  GT_BCKTABADDCODE(sfi->leftborder,code);
+  gt_bcktab_leftborder_addcode(sfi->leftborder,code);
   if (firstinrange)
   {
     GT_SETIBIT(sfi->markwholeleafbuckets,code);
@@ -1432,9 +1432,9 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
         unsigned int updateindex = GT_ISDIRCOMPLEMENT(readmode) ?
                                         GT_COMPLEMENTBASE(charidx) :
                                         charidx;
-        gt_assert(sfi->leftborder != NULL && sfi->leftborder->bounds != NULL);
-        GT_BCKTABASSIGNLEFTBOUND(sfi->leftborder,updateindex,
-                                 gt_encseq_charcount(encseq,(GtUchar) charidx));
+        gt_bcktab_leftborder_assign(sfi->leftborder,(GtCodetype) updateindex,
+                                    gt_encseq_charcount(encseq,
+                                                        (GtUchar) charidx));
       }
     } else
     {

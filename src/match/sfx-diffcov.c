@@ -408,7 +408,8 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
           countderived++;
           gt_updatebckspecials(dcov->bcktab,code,dcov->numofchars,prefixindex);
           gt_assert(code > 0);
-          GT_BCKTABASSIGNINSERTIONINDEX(sampleindex,dcov->leftborder,code);
+          sampleindex = gt_bcktab_leftborder_insertionindex(dcov->leftborder,
+                                                            code);
           gt_assert(sampleindex < dcov->effectivesamplesize);
           suffixptrsetdcov(dcov,sampleindex,pos);
         }
@@ -1096,7 +1097,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
       dcov->samplesize++;
       if (unitsnotspecial > 0)
       {
-        GT_BCKTABADDCODE(dcov->leftborder,code);
+        gt_bcktab_leftborder_addcode(dcov->leftborder,code);
         if (unitsnotspecial < dcov->prefixlength)
         {
           if (withcheck)
@@ -1163,7 +1164,8 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                                          dcov->prefixlength);
       if (unitsnotspecial == dcov->prefixlength)
       {
-        GT_BCKTABASSIGNINSERTIONINDEX(sampleindex,dcov->leftborder,code);
+        sampleindex = gt_bcktab_leftborder_insertionindex(dcov->leftborder,
+                                                          code);
         gt_assert(sampleindex < dcov->effectivesamplesize);
         suffixptrsetdcov(dcov,sampleindex,pos);
         posinserted++;

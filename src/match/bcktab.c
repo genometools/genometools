@@ -48,6 +48,11 @@ typedef struct
                 maxbucketsize;
 } Maxbucketinfo;
 
+struct GtLeftborder
+{
+  unsigned long *ulongbounds;
+};
+
 struct Bcktab
 {
   GtLeftborder leftborder;
@@ -67,6 +72,29 @@ struct Bcktab
        withspecialsuffixes;
   void *mappedptr;
 };
+
+void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code)
+{
+  lb->ulongbounds[code]++;
+}
+
+unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
+                                                  GtCodetype code)
+{
+  return --lb->ulongbounds[code];
+}
+
+void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
+                                 unsigned long value)
+{
+  gt_assert(lb != NULL && lb->ulongbounds != NULL);
+  lb->ulongbounds[code] = value;
+}
+
+unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,GtCodetype code)
+{
+  return bcktab->leftborder.ulongbounds[code];
+}
 
 static unsigned long numofdistpfxidxcounters(const GtCodetype *basepower,
                                              unsigned int prefixlength)
@@ -195,7 +223,7 @@ static Bcktab *newBcktab(unsigned int numofchars,
   uint64_t sizeofrep_uint64_t;
 
   bcktab = gt_malloc(sizeof *bcktab);
-  bcktab->leftborder.bounds = NULL;
+  bcktab->leftborder.ulongbounds = NULL;
   bcktab->countspecialcodes = NULL;
   bcktab->distpfxidx = NULL;
   bcktab->mappedptr = NULL;
@@ -241,13 +269,14 @@ Bcktab *gt_allocBcktab(unsigned int numofchars,
   }
   if (!haserr)
   {
-    bcktab->leftborder.bounds = gt_malloc(sizeof (*bcktab->leftborder.bounds) *
+    bcktab->leftborder.ulongbounds
+      = gt_malloc(sizeof (*bcktab->leftborder.ulongbounds) *
                                           (bcktab->numofallcodes+1));
     gt_log_log("sizeof (leftborder)=%lu bytes",
-               (unsigned long) sizeof (*bcktab->leftborder.bounds) *
+               (unsigned long) sizeof (*bcktab->leftborder.ulongbounds) *
                                (bcktab->numofallcodes+1));
-    memset(bcktab->leftborder.bounds,0,
-           sizeof (*bcktab->leftborder.bounds) *
+    memset(bcktab->leftborder.ulongbounds,0,
+           sizeof (*bcktab->leftborder.ulongbounds) *
            (size_t) (bcktab->numofallcodes+1));
     bcktab->countspecialcodes = gt_malloc(sizeof (*bcktab->countspecialcodes) *
                                           bcktab->numofspecialcodes);
@@ -280,7 +309,7 @@ static void assignbcktabmapspecification(
   GtMapspecification *mapspecptr;
   unsigned long numofcounters;
 
-  NEWMAPSPEC(bcktab->leftborder.bounds,GtUlong,
+  NEWMAPSPEC(bcktab->leftborder.ulongbounds,GtUlong,
              (unsigned long) (bcktab->numofallcodes+1));
   if (bcktab->withspecialsuffixes)
   {
@@ -387,7 +416,7 @@ void gt_bcktab_showleftborder(const Bcktab *bcktab)
   for (idx=0; idx<bcktab->numofallcodes; idx++)
   {
     printf("leftborder[" FormatGtCodetype "]=%lu\n",
-            idx,bcktab->leftborder.bounds[idx]);
+            idx,gt_bcktab_leftborder_get(bcktab,idx));
   }
 }
 
@@ -400,8 +429,8 @@ void gt_bcktab_delete(Bcktab *bcktab)
   /*showbcktab(bcktabptr);*/
   if (bcktab->allocated)
   {
-    gt_free(bcktab->leftborder.bounds);
-    bcktab->leftborder.bounds = NULL;
+    gt_free(bcktab->leftborder.ulongbounds);
+    bcktab->leftborder.ulongbounds = NULL;
     gt_free(bcktab->countspecialcodes);
     bcktab->countspecialcodes = NULL;
     if (bcktab->distpfxidx != NULL)
@@ -415,7 +444,7 @@ void gt_bcktab_delete(Bcktab *bcktab)
       gt_fa_xmunmap(bcktab->mappedptr);
     }
     bcktab->mappedptr = NULL;
-    bcktab->leftborder.bounds = NULL;
+    bcktab->leftborder.ulongbounds = NULL;
     bcktab->countspecialcodes = NULL;
     if (bcktab->distpfxidx != NULL)
     {
@@ -561,19 +590,6 @@ GtCodetype gt_codedownscale(const Bcktab *bcktab,
   return code;
 }
 
-#ifdef SKDEBUG
-static void gt_bcktab_showleftborder(const Bcktab *bcktab)
-{
-  GtCodetype code;
-
-  for (code = 0; code < bcktab->numofallcodes; code++)
-  {
-    printf("leftborder[%lu]=%lu\n",(unsigned long) code,
-                                   bcktab->leftborder.bounds[code]);
-  }
-}
-#endif
-
 unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
                                       const Bcktab *bcktab,
                                       GtCodetype code,
@@ -582,7 +598,7 @@ unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
                                       unsigned int rightchar,
                                       unsigned int numofchars)
 {
-  bucketspec->left = bcktab->leftborder.bounds[code];
+  bucketspec->left = gt_bcktab_leftborder_get(bcktab,code);
   if (code == maxcode)
   {
     gt_assert(totalwidth >= bucketspec->left);
@@ -590,10 +606,10 @@ unsigned int gt_calcbucketboundsparts(Bucketspecification *bucketspec,
       = (unsigned long) (totalwidth - bucketspec->left);
   } else
   {
-    if (bcktab->leftborder.bounds[code+1] > 0)
+    if (gt_bcktab_leftborder_get(bcktab,code+1) > 0)
     {
       bucketspec->nonspecialsinbucket
-        = (bcktab->leftborder.bounds[code+1] - bucketspec->left);
+        = gt_bcktab_leftborder_get(bcktab,code+1) - bucketspec->left;
     } else
     {
       bucketspec->nonspecialsinbucket = 0;
@@ -644,7 +660,7 @@ unsigned long gt_calcbucketrightbounds(const Bcktab *bcktab,
   {
     return totalwidth;
   }
-  return bcktab->leftborder.bounds[code+1];
+  return gt_bcktab_leftborder_get(bcktab,code+1);
 }
 
 void gt_determinemaxbucketsize(Bcktab *bcktab,
@@ -905,46 +921,44 @@ GtCodetype gt_bcktab_numofallcodes(const Bcktab *bcktab)
   return bcktab->numofallcodes;
 }
 
-unsigned long gt_bcktab_leftborder_get(const Bcktab *bcktab,
-                                       unsigned long idx)
-{
-  return bcktab->leftborder.bounds[idx];
-}
-
 unsigned long gt_bcktab_leftborderpartialsums(
                              unsigned long *saved_bucketswithoutwholeleaf,
                              unsigned long *numofsuffixestosort,
                              Bcktab *bcktab,
                              const GtBitsequence *markwholeleafbuckets)
 {
-  unsigned long code, largestbucketsize, sumbuckets, saved = 0;
+  unsigned long code, largestbucketsize, sumbuckets, saved = 0, currentsize;
 
   gt_assert(bcktab->numofallcodes > 0);
-  gt_assert(bcktab->leftborder.bounds != NULL);
   if (markwholeleafbuckets != NULL && !GT_ISIBITSET(markwholeleafbuckets,0))
   {
-    saved += bcktab->leftborder.bounds[0];
-    bcktab->leftborder.bounds[0] = 0;
+    saved += gt_bcktab_leftborder_get(bcktab,0);
+    gt_bcktab_leftborder_assign(&bcktab->leftborder,0,0);
   }
-  largestbucketsize = sumbuckets = bcktab->leftborder.bounds[0];
+  largestbucketsize = sumbuckets = gt_bcktab_leftborder_get(bcktab,0);
   for (code = 1UL; code < bcktab->numofallcodes; code++)
   {
+    currentsize = gt_bcktab_leftborder_get(bcktab,code);
     if (markwholeleafbuckets != NULL &&
         !GT_ISIBITSET(markwholeleafbuckets,code))
     {
-      saved += bcktab->leftborder.bounds[code];
-      bcktab->leftborder.bounds[code] = bcktab->leftborder.bounds[code-1];
+      saved += currentsize;
+      gt_bcktab_leftborder_assign(&bcktab->leftborder,code,
+                                  gt_bcktab_leftborder_get(bcktab,code-1));
     } else
     {
-      sumbuckets += bcktab->leftborder.bounds[code];
-      if (largestbucketsize < bcktab->leftborder.bounds[code])
+      sumbuckets += currentsize;
+      if (largestbucketsize < currentsize)
       {
-        largestbucketsize = bcktab->leftborder.bounds[code];
+        largestbucketsize = currentsize;
       }
-      bcktab->leftborder.bounds[code] += bcktab->leftborder.bounds[code-1];
+      gt_bcktab_leftborder_assign(&bcktab->leftborder,code,
+                                  gt_bcktab_leftborder_get(bcktab,code) +
+                                  gt_bcktab_leftborder_get(bcktab,code-1));
     }
   }
-  bcktab->leftborder.bounds[bcktab->numofallcodes] = sumbuckets;
+  gt_bcktab_leftborder_assign(&bcktab->leftborder,bcktab->numofallcodes,
+                              sumbuckets);
   if (saved_bucketswithoutwholeleaf != NULL)
   {
     *saved_bucketswithoutwholeleaf = saved;
@@ -977,7 +991,7 @@ GtCodetype gt_bcktab_findfirstlarger(const Bcktab *bcktab,
   while (left+1 < right)
   {
     mid = GT_DIV2(left+right);
-    midval = bcktab->leftborder.bounds[mid];
+    midval = gt_bcktab_leftborder_get(bcktab,mid);
     if (suftaboffset == midval)
     {
       return mid;
