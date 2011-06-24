@@ -115,7 +115,8 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                 idx,
                 nonspecials,
                 allocatedItvinfo = 0,
-                nextfreeItvinfo = 0;
+                nextfreeItvinfo = 0,
+                lastsuftabvalue = 0;
   GtBUItvinfo_maxpairs *lastinterval = NULL, *stackspace = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
 
@@ -123,7 +124,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
+    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {
@@ -225,6 +226,30 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           haserr = true;
           break;
         }
+      }
+    }
+  }
+  gt_assert(nextfreeItvinfo > 0);
+  if (!haserr && TOP_ESA_BOTTOMUP_maxpairs.lcp > 0)
+  {
+    if (processleafedge_maxpairs(false,
+                        TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                        TOP_ESA_BOTTOMUP_maxpairs.lb,
+                        &TOP_ESA_BOTTOMUP_maxpairs.info,
+                        lastsuftabvalue,bustate,err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      TOP_ESA_BOTTOMUP_maxpairs.rb = idx;
+      if (processlcpinterval_maxpairs(TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                             TOP_ESA_BOTTOMUP_maxpairs.lb,
+                             TOP_ESA_BOTTOMUP_maxpairs.rb,
+                             &TOP_ESA_BOTTOMUP_maxpairs.info,
+                             bustate,
+                             err) != 0)
+      {
+        haserr = true;
       }
     }
   }

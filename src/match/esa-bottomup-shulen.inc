@@ -115,7 +115,8 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                 idx,
                 nonspecials,
                 allocatedItvinfo = 0,
-                nextfreeItvinfo = 0;
+                nextfreeItvinfo = 0,
+                lastsuftabvalue = 0;
   GtBUItvinfo_shulen *lastinterval = NULL, *stackspace = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
 
@@ -123,7 +124,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
   {
-    NEXTSEQUENTIALLCPTABVALUE(lcpvalue,ssar);
+    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
     {
@@ -225,6 +226,30 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
           haserr = true;
           break;
         }
+      }
+    }
+  }
+  gt_assert(nextfreeItvinfo > 0);
+  if (!haserr && TOP_ESA_BOTTOMUP_shulen.lcp > 0)
+  {
+    if (processleafedge_shulen(false,
+                        TOP_ESA_BOTTOMUP_shulen.lcp,
+                        TOP_ESA_BOTTOMUP_shulen.lb,
+                        &TOP_ESA_BOTTOMUP_shulen.info,
+                        lastsuftabvalue,bustate,err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      TOP_ESA_BOTTOMUP_shulen.rb = idx;
+      if (processlcpinterval_shulen(TOP_ESA_BOTTOMUP_shulen.lcp,
+                             TOP_ESA_BOTTOMUP_shulen.lb,
+                             TOP_ESA_BOTTOMUP_shulen.rb,
+                             &TOP_ESA_BOTTOMUP_shulen.info,
+                             bustate,
+                             err) != 0)
+      {
+        haserr = true;
       }
     }
   }
