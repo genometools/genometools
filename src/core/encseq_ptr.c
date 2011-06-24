@@ -64,6 +64,13 @@ void gt_encseq_seqlength_p(const GtEncseq *encseq,
   *seqlength = gt_encseq_seqlength(encseq, *seqnumber);
 }
 
+void gt_encseq_seqnum_p(const GtEncseq *encseq,
+                        unsigned long *seqnumber,
+                        unsigned long *pos)
+{
+  *seqnumber = gt_encseq_seqnum(encseq, *pos);
+}
+
 void gt_encseq_seqstartpos_p(const GtEncseq *encseq,
                              unsigned long *seqnumber,
                              unsigned long *startpos)

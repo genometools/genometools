@@ -98,6 +98,8 @@ module GT
                                          GtRange*)"
   extern "void gt_encseq_seqlength_p(const GtEncseq*, unsigned long*,
                                    unsigned long*)"
+  extern "void gt_encseq_seqnum_p(const GtEncseq*, unsigned long*,
+                                  unsigned long*)"
   extern "void gt_encseq_seqstartpos_p(const GtEncseq *, unsigned long*,
                                      unsigned long*)"
   extern "void* gt_encseq_description_p(const GtEncseq*, unsigned long*,
@@ -112,6 +114,9 @@ module GT
   extern "void gt_encseq_effective_filelength_p(const GtEncseq*,
                                                 void*,
                                                 unsigned long*)"
+  extern "int gt_encseq_mirror(GtEncseq*, GtError*)"
+  extern "void gt_encseq_unmirror(GtEncseq*)"
+  extern "int gt_encseq_is_mirrored(GtEncseq*)"
   extern "void gt_encseq_delete(GtEncseq*)"
 
   extern "GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader*)"
@@ -548,6 +553,47 @@ module GT
       r = GT::Range.new(start, stop)
       GT.gt_encseq_extract_decoded_p(@encseq, buf, r)
       buf.to_s(stop-start+1)
+    end
+
+    def mirrored?
+      if GT.gt_encseq_is_mirrored(@encseq) == 1 then
+        true
+      else
+        false
+      end
+    end
+
+    def mirror
+      if self.mirrored? then
+        gterror("Encseq is already mirrored")
+      end
+      err = Error.new
+      rval = GT.gt_encseq_mirror(@encseq, err.to_ptr)
+      if rval < 0 then
+        GT.gterror(err)
+      end
+      @num_of_sequences = self._num_of_sequences
+      @total_length = self._total_length
+    end
+
+    def unmirror
+      if !self.mirrored? then
+        gterror("Encseq is not mirrored")
+      end
+      GT.gt_encseq_unmirror(@encseq)
+      @num_of_sequences = self._num_of_sequences
+      @total_length = self._total_length
+    end
+
+    def seqnum(pos)
+      if pos < 0 or pos >= @total_length then
+        gterror("invalid coordinates: #{start}-#{stop} " + \
+                "(allowed: 0-#{@total_length-1})")
+      end
+      n = [pos.to_i].pack("L!")
+      l = DL::malloc(GT::NATIVEULONGSIZE)
+      GT.gt_encseq_seqnum_p(@encseq, l, n)
+      return l[0, l.size].unpack("L!")[0]
     end
   end
 
