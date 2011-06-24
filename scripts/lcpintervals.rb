@@ -20,6 +20,7 @@ class LcpSufstream
     @specialcharacters = nil
     @intbytes=nil
     @mirrored=nil
+    @lastsuftabvalue = nil
     File.new(indexname + ".prj","r").each_line do |line|
       m = line.match(/^totallength=(\d+)/)
       if m
@@ -66,9 +67,13 @@ class LcpSufstream
         yield cc,suftabvalue
       end
     end
+    @lastsuftabvalue = @suffile.read(@intbytes).unpack("L")[0]
   end
   def numofnonspecials()
     return @totallength - @specialcharacters
+  end
+  def lastsuftabvalue_get()
+    return @lastsuftabvalue
   end
 end
 
@@ -114,10 +119,12 @@ def enumlcpintervaltree(lcpsufstream)
   firstedgefromroot = true
   firstedge = false
   prevlcpvalue = 0
+  storesuffix = nil
   stack.push(Lcpinterval.new(0,0,nil,[]))
   nonspecials = lcpsufstream.numofnonspecials()
   idx=0
   lcpsufstream.next() do |lcpvalue,previoussuffix|
+    storesuffix = previoussuffix
     if idx >= nonspecials
       break
     end
@@ -168,6 +175,11 @@ def enumlcpintervaltree(lcpsufstream)
     assert {lcpvalue == stack.last.lcp}
     prevlcpvalue = lcpvalue
     idx += 1
+  end
+  assert {stack.length > 0}
+  if stack.last.lcp > 0
+    yield Edge.new(0,false,stack.last,lcpsufstream.lastsuftabvalue_get())
+    yield Edge.new(2,nil,stack.last,nil)
   end
 end
 
@@ -222,12 +234,10 @@ def spmleafedge(res,firstedge,itv,pos)
     end
     idx = res.encseq.seqnum(pos)
     if pos == 0 or res.encseq.get_encoded_char(pos-1) == 255
-      # puts "wset.push(#{idx})"
       res.wset.push(idx)
     end
     if pos + itv.lcp == res.encseq.total_length or
        res.encseq.get_encoded_char(pos + itv.lcp) == 255
-      # puts "lset.push(#{idx})"
       res.lset.push(idx)
     end
   end
@@ -247,10 +257,8 @@ def spmlcpinterval(res,itv)
         puts "#{l} #{res.wset[i]} #{itv.lcp}"
       end
     end
-    # puts "reset lset"
     res.lset = []
   else
-    # puts "reset wset"
     res.wset = []
   end
 end
