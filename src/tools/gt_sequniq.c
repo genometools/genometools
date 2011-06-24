@@ -119,23 +119,25 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
     for (i = parsed_args; !had_err && i < argc; i++) {
       if (!(bs = gt_bioseq_new(argv[i], err)))
         had_err = -1;
-      for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
-        had_err = gt_md5set_add_sequence(md5set,
-            gt_bioseq_get_sequence(bs, j),
-            gt_bioseq_get_sequence_length(bs, j), arguments->rev, err);
-        if (!had_err)
-          gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
+      if (!had_err) {
+        for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
+          had_err = gt_md5set_add_sequence(md5set,
               gt_bioseq_get_sequence(bs, j),
-              gt_bioseq_get_sequence_length(bs, j),
-              arguments->width, arguments->outfp);
-        else if (had_err > 0)
-        {
-          duplicates++;
-          had_err = 0;
+              gt_bioseq_get_sequence_length(bs, j), arguments->rev, err);
+          if (!had_err)
+            gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
+                gt_bioseq_get_sequence(bs, j),
+                gt_bioseq_get_sequence_length(bs, j),
+                arguments->width, arguments->outfp);
+          else if (had_err > 0)
+          {
+            duplicates++;
+            had_err = 0;
+          }
+          num_of_sequences++;
         }
-        num_of_sequences++;
+        gt_bioseq_delete(bs);
       }
-      gt_bioseq_delete(bs);
     }
   }
   else {
