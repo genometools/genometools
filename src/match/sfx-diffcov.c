@@ -92,7 +92,7 @@ struct Differencecover
   size_t requiredspace;
   unsigned long totallength;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
-  Bcktab *bcktab;
+  GtBcktab *bcktab;
   const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long samplesize, effectivesamplesize, maxsamplesize;

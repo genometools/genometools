@@ -106,7 +106,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                                unsigned int minchanged,
                                unsigned long specialsinbucket,
                                GtCodetype code,
-                               const Bcktab *bcktab)
+                               const GtBcktab *bcktab)
 {
   unsigned long lcpvalue;
   unsigned int maxprefixindex, minprefixindex;
@@ -562,7 +562,7 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
 void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
                               GtSuffixsortspace *sssp,
-                              const Bcktab *bcktab,
+                              const GtBcktab *bcktab,
                               const Bucketspecification *bucketspec,
                               GtCodetype code)
 {
@@ -641,7 +641,7 @@ void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
 }
 
 GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
-                                           const Bcktab *bcktab)
+                                           const GtBcktab *bcktab)
 {
   Lcpsubtab *lcpsubtab = &outlcpinfo->lcpsubtab;
 

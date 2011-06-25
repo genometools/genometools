@@ -25,7 +25,7 @@
 typedef struct Suftabparts Suftabparts;
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
-                               const Bcktab *bcktab,
+                               const GtBcktab *bcktab,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger);

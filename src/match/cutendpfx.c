@@ -26,7 +26,7 @@
 
 struct Bucketenumerator
 {
-  const Bcktab *bcktab; /* only need multimappower and filltable */
+  const GtBcktab *bcktab; /* only need multimappower and filltable */
   unsigned int prefixlength,
                demandprefixlength;
   Bucketspecification bucketspec;
@@ -58,7 +58,7 @@ static inline unsigned int prefixqgram2code(GtCodetype *code,
   return qvalue;
 }
 
-Bucketenumerator *gt_newbucketenumerator(const Bcktab *bcktab,
+Bucketenumerator *gt_newbucketenumerator(const GtBcktab *bcktab,
                                       unsigned int prefixlength,
                                       const GtUchar *demandprefix,
                                       unsigned int demandprefixlength)

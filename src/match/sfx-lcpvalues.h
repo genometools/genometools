@@ -108,12 +108,12 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
 void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
                               GtSuffixsortspace *sssp,
-                              const Bcktab *bcktab,
+                              const GtBcktab *bcktab,
                               const Bucketspecification *bucketspec,
                               GtCodetype code);
 
 GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
-                                           const Bcktab *bcktab);
+                                           const GtBcktab *bcktab);
 
 void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,

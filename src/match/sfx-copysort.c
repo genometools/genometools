@@ -266,7 +266,7 @@ static void showexpandcode(const GtBucketspec2 *bucketspec2,
 }
 #endif
 
-static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
+static void fill2subbuckets(GtBucketspec2 *bucketspec2,const GtBcktab *bcktab)
 {
   GtCodetype code, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
@@ -302,7 +302,7 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const Bcktab *bcktab)
 }
 
 static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
-                              const Bcktab *bcktab)
+                              const GtBcktab *bcktab)
 {
   GtCodetype code2, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
@@ -349,7 +349,7 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
   gt_free(specialchardist);
 }
 
-GtBucketspec2 *gt_copysort_new(const Bcktab *bcktab,
+GtBucketspec2 *gt_copysort_new(const GtBcktab *bcktab,
                                const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned long partwidth,

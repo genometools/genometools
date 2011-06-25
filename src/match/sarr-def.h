@@ -110,7 +110,7 @@ typedef struct
   const Largelcpvalue *llvtab;
   const GtUchar *bwttab;
   unsigned int prefixlength;
-  Bcktab *bcktab;
+  GtBcktab *bcktab;
   /* or with streams */
   GtUlongBufferedfile suftabstream;
   GtUcharBufferedfile bwttabstream,

@@ -327,7 +327,7 @@ unsigned long gt_Sequentialsuffixarrayreader_totallength(
 unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
               const Sequentialsuffixarrayreader *ssar);
 
-Bcktab *gt_Sequentialsuffixarrayreader_bcktab(
+GtBcktab *gt_Sequentialsuffixarrayreader_bcktab(
               const Sequentialsuffixarrayreader *ssar);
 
 #endif

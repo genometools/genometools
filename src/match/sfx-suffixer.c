@@ -72,7 +72,7 @@ struct Sfxiterator
   /* invariant for each part */
   Suftabparts *suftabparts;
   Outlcpinfo *outlcpinfoforsample;
-  Bcktab *bcktab;
+  GtBcktab *bcktab;
   GtCodetype numofallcodes;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
   GtBitsequence *markwholeleafbuckets;
@@ -565,7 +565,7 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
 
 static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            unsigned long maximumspace,
-                                           const Bcktab *bcktab,
+                                           const GtBcktab *bcktab,
                                            unsigned long totallength,
                                            unsigned long specialcharacters,
                                            unsigned long numofsuffixestosort,

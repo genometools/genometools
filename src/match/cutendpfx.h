@@ -27,7 +27,7 @@
 
 typedef struct Bucketenumerator Bucketenumerator;
 
-Bucketenumerator *gt_newbucketenumerator(const Bcktab *bcktab,
+Bucketenumerator *gt_newbucketenumerator(const GtBcktab *bcktab,
                                       unsigned int prefixlength,
                                       const GtUchar *demandprefix,
                                       unsigned int demandprefixlength);

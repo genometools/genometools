@@ -318,7 +318,7 @@ unsigned int gt_Sequentialsuffixarrayreader_prefixlength(
   return ssar->suffixarray->prefixlength;
 }
 
-Bcktab *gt_Sequentialsuffixarrayreader_bcktab(
+GtBcktab *gt_Sequentialsuffixarrayreader_bcktab(
               const Sequentialsuffixarrayreader *ssar)
 {
   return ssar->suffixarray->bcktab;
