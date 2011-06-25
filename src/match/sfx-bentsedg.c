@@ -1461,7 +1461,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
 {
   GtCodetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
   Bentsedgresources bsr;
 
   initBentsedgresources(&bsr,
@@ -1470,8 +1470,8 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         readmode,
                         sortmaxdepth,
                         sfxstrategy);
-  gt_determinemaxbucketsize(bcktab, mincode, maxcode, numberofsuffixes,
-                            numofchars);
+  gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes,
+                             numofchars);
   if (outlcpinfo != NULL)
   {
     bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);
@@ -1491,13 +1491,13 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
       }
     }
     (*bucketiterstep)++;
-    rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                         bcktab,
-                                         code,
-                                         maxcode,
-                                         numberofsuffixes,
-                                         rightchar,
-                                         numofchars);
+    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
+                                          bcktab,
+                                          code,
+                                          maxcode,
+                                          numberofsuffixes,
+                                          rightchar,
+                                          numofchars);
     gt_Outlcpinfo_prebucket(outlcpinfo,code,bucketspec.left);
     if (bucketspec.nonspecialsinbucket > 0)
     {

@@ -299,7 +299,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   unsigned int numofchars;
   unsigned long gmatchlength, gmatchlength2;
   GtCodetype maxcode;
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
 
   substriter->seqit = gt_seqiterator_new(filenames,
                                       getsymbolmapAlphabet(alphabet),
@@ -329,14 +329,14 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
                                  substring.currentptr + substring.remaining);
     if (leftborder != NULL)
     {
-      gt_calcbucketboundaries(&bucketspec,
-                           leftborder,
-                           countspecialcodes,
-                           substring.currentcode,
-                           maxcode,
-                           totalwidth,
-                           substring.currentcode % numofchars,
-                           numofchars);
+      gt_bcktab_calcboundaries(&bucketspec,
+                               leftborder,
+                               countspecialcodes,
+                               substring.currentcode,
+                               maxcode,
+                               totalwidth,
+                               substring.currentcode % numofchars,
+                               numofchars);
       if (bucketspec.nonspecialsinbucket > 0)
       {
         gmatchlength2 = gmatchforward(genericindex,
@@ -389,7 +389,7 @@ int runsubstringiteration(Greedygmatchforwardfunction gmatchforward,
   unsigned int numofchars;
   unsigned long gmatchlength, gmatchlength2;
   GtCodetype maxcode;
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
   bool haserr = false;
 
   seqit = gt_seqiterator_new(queryfilenames,getsymbolmapAlphabet(alphabet),

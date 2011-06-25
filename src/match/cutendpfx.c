@@ -29,7 +29,7 @@ struct Bucketenumerator
   const GtBcktab *bcktab; /* only need multimappower and filltable */
   unsigned int prefixlength,
                demandprefixlength;
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
   GtCodetype currentcode, lastcode;
 };
 
@@ -91,9 +91,9 @@ bool gt_nextbucketenumerator(Lcpinterval *itv,
     {
       break;
     }
-    gt_calcbucketboundaries(&bucketenumerator->bucketspec,
-                         bucketenumerator->bcktab,
-                         bucketenumerator->currentcode);
+    gt_bcktab_calcboundaries(&bucketenumerator->bucketspec,
+                             bucketenumerator->bcktab,
+                             bucketenumerator->currentcode);
     bucketenumerator->currentcode++;
     if (bucketenumerator->bucketspec.nonspecialsinbucket > 0)
     {

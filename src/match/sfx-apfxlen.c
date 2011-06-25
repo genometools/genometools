@@ -18,11 +18,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <inttypes.h>
 #include "core/error.h"
 #include "core/minmax.h"
 #include "core/codetype.h"
 #include "core/logger.h"
-
 #include "bcktab.h"
 #include "initbasepower.h"
 
@@ -59,8 +59,8 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 #endif
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
-    sizeofrep = gt_sizeofbuckettable(numofchars,prefixlength,
-                                     withspecialsuffixes);
+    sizeofrep = gt_bcktab_sizeoftable(numofchars,prefixlength,
+                                      withspecialsuffixes);
 #ifdef WITHINFO
     printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
                                         (unsigned long) (sizeofrep/factor));

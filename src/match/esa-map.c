@@ -31,7 +31,6 @@
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
 #include "spacedef.h"
-#include "bcktab.h"
 
 #define DBFILEKEY "dbfile="
 
@@ -431,11 +430,11 @@ static int inputsuffixarray(bool map,
   if (!haserr && (demand & SARR_BCKTAB))
   {
     suffixarray->bcktab
-      = gt_mapbcktab(indexname,
-                     gt_encseq_alphabetnumofchars(suffixarray->encseq),
-                     suffixarray->prefixlength,
-                     true,
-                     err);
+      = gt_bcktab_map(indexname,
+                      gt_encseq_alphabetnumofchars(suffixarray->encseq),
+                      suffixarray->prefixlength,
+                      true,
+                      err);
     if (suffixarray->bcktab == NULL)
     {
       haserr = true;

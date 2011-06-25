@@ -406,7 +406,8 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
                             (specialcontext.position-prefixindex));
           */
           countderived++;
-          gt_updatebckspecials(dcov->bcktab,code,dcov->numofchars,prefixindex);
+          gt_bcktab_updatespecials(dcov->bcktab,code,dcov->numofchars,
+                                   prefixindex);
           gt_assert(code > 0);
           sampleindex = gt_bcktab_leftborder_insertionindex(dcov->leftborder,
                                                             code);
@@ -626,19 +627,19 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 {
   GtCodetype code;
   unsigned int rightchar = 0;
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
   unsigned long idx = 0;
   const GtCodetype mincode = 0;
 
   for (code = mincode; code <= dcov->maxcode; code++)
   {
-    rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                         dcov->bcktab,
-                                         code,
-                                         dcov->maxcode,
-                                         dcov->effectivesamplesize,
-                                         rightchar,
-                                         dcov->numofchars);
+    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
+                                          dcov->bcktab,
+                                          code,
+                                          dcov->maxcode,
+                                          dcov->effectivesamplesize,
+                                          rightchar,
+                                          dcov->numofchars);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),idx);
@@ -834,20 +835,20 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 {
   GtCodetype code;
   unsigned int rightchar;
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
   const GtCodetype mincode = 0;
 
   printf("# maxbucketsize=%lu\n",dcov->allocateditvinfo);
   rightchar = (unsigned int) (mincode % dcov->numofchars);
   for (code = 0; code <= dcov->maxcode; code++)
   {
-    rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                         dcov->bcktab,
-                                         code,
-                                         dcov->maxcode,
-                                         dcov->effectivesamplesize,
-                                         rightchar,
-                                         dcov->numofchars);
+    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
+                                          dcov->bcktab,
+                                          code,
+                                          dcov->maxcode,
+                                          dcov->effectivesamplesize,
+                                          rightchar,
+                                          dcov->numofchars);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       dc_sortsuffixesonthislevel(dcov,
@@ -1057,10 +1058,10 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   Codeatposition *codeptr;
 
   dcov->samplesize = 0;
-  dcov->bcktab = gt_allocBcktab(dcov->numofchars, dcov->prefixlength,
-                                true, /* storespecialcodes */
-                                true, /* withspecialsuffixes */
-                                NULL);
+  dcov->bcktab = gt_bcktab_alloc(dcov->numofchars, dcov->prefixlength,
+                                 true, /* storespecialcodes */
+                                 true, /* withspecialsuffixes */
+                                 NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->esr = gt_encseq_create_reader_with_readmode(dcov->encseq,

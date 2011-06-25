@@ -97,7 +97,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     Enumpatterniterator *epi;
     unsigned int firstspecial;
     MMsearchiterator *mmsibck, *mmsiimm;
-    Bucketspecification bucketspec;
+    GtBucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
     unsigned long refstart;
@@ -175,9 +175,9 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
                                     suffixarray.prefixlength,
                                     pptr);
           gt_assert(firstspecial == suffixarray.prefixlength);
-          gt_calcbucketboundaries(&bucketspec,
-                               suffixarray.bcktab,
-                               code);
+          gt_bcktab_calcboundaries(&bucketspec,
+                                   suffixarray.bcktab,
+                                   code);
           if (bucketspec.nonspecialsinbucket == 0)
           {
             mmsibck = NULL;

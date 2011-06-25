@@ -270,19 +270,19 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const GtBcktab *bcktab)
 {
   GtCodetype code, maxcode;
   unsigned int rightchar = 0, currentchar = 0;
-  Bucketspecification bucketspec;
+  GtBucketspecification bucketspec;
   unsigned long accubucketsize = 0;
 
   maxcode = gt_bcktab_numofallcodes(bcktab) - 1;
   for (code = 0; code <= maxcode; code++)
   {
-    rightchar = gt_calcbucketboundsparts(&bucketspec,
-                                         bcktab,
-                                         code,
-                                         maxcode,
-                                         bucketspec2->partwidth,
-                                         rightchar,
-                                         bucketspec2->numofchars);
+    rightchar = gt_bcktab_calcboundsparts(&bucketspec,
+                                          bcktab,
+                                          code,
+                                          maxcode,
+                                          bucketspec2->partwidth,
+                                          rightchar,
+                                          bucketspec2->numofchars);
     accubucketsize += bucketspec.nonspecialsinbucket;
     if (rightchar == 0)
     {
@@ -323,10 +323,10 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
   {
     GtCodetype ecode = expandtwocharcode(code2,bucketspec2);
     gt_assert(ecode / bucketspec2->expandfactor == code2);
-    rightbound = gt_calcbucketrightbounds(bcktab,
-                                          ecode,
-                                          maxcode,
-                                          bucketspec2->partwidth);
+    rightbound = gt_bcktab_calcrightbounds(bcktab,
+                                           ecode,
+                                           maxcode,
+                                           bucketspec2->partwidth);
     rightchar = (unsigned int) ((code2+1) % bucketspec2->numofchars);
     gt_assert((GtCodetype) currentchar == code2 / bucketspec2->numofchars);
     if (rightchar == 0)

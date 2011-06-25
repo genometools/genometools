@@ -121,7 +121,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   {
     if (lcpsubtab->lcp2file != NULL)
     {
-      maxprefixindex = gt_pfxidx2lcpvalues_uint8(
+      maxprefixindex = gt_bcktab_pfxidx2lcpvalues_uint8(
                           &minprefixindex,
                           lcpsubtab->lcp2file->smalllcpvalues,
                           specialsinbucket,
@@ -135,7 +135,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
     {
       unsigned long idx;
 
-      maxprefixindex = gt_pfxidx2lcpvalues_ulong(
+      maxprefixindex = gt_bcktab_pfxidx2lcpvalues_ulong(
                           &minprefixindex,
                           lcpsubtab->tableoflcpvalues.bucketoflcpvalues +
                           lcpsubtab->tableoflcpvalues.subbucketleft,
@@ -150,16 +150,17 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
     }
   } else
   {
-    minprefixindex = maxprefixindex = gt_singletonmaxprefixindex(bcktab,code);
+    minprefixindex = maxprefixindex = gt_bcktab_singletonmaxprefixindex(bcktab,
+                                                                        code);
   }
   firstspecialsuffixwithcode.code = code;
   firstspecialsuffixwithcode.prefixindex = maxprefixindex;
 #ifdef SKDEBUG
   firstspecialsuffixwithcode.startpos = firstspecialsuffix;
   /*
-  consistencyofsuffix(__LINE__,
-                      encseq,readmode,bcktab,numofchars,
-                      &firstspecialsuffixwithcode);
+  gt_bcktab_consistencyofsuffix(__LINE__,
+                                encseq,readmode,bcktab,numofchars,
+                                &firstspecialsuffixwithcode);
   */
 #endif
   lcpvalue = computelocallcpvalue(previoussuffix,
@@ -504,7 +505,7 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,
                                      GT_UNUSED GtSuffixsortspace *sssp,
                                      GtLcpvalues *tableoflcpvalues,
-                                     const Bucketspecification *bucketspec,
+                                     const GtBucketspecification *bucketspec,
                                      GtCodetype code)
 {
   if (outlcpinfo != NULL)
@@ -523,9 +524,9 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
       firstsuffixofbucket.startpos
         = gt_suffixsortspace_get(sssp,0,bucketspec->left);
       /*
-      consistencyofsuffix(__LINE__,
-                          encseq,readmode,bcktab,numofchars,
-                          &firstsuffixofbucket);
+      gt_bcktab_consistencyofsuffix(__LINE__,
+                                    encseq,readmode,bcktab,numofchars,
+                                    &firstsuffixofbucket);
       */
 #endif
       lcpvalue = computelocallcpvalue(&outlcpinfo->previoussuffix,
@@ -551,9 +552,9 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
                                bucketspec->left
                                  + bucketspec->nonspecialsinbucket - 1);
     /*
-    consistencyofsuffix(__LINE__,
-                        encseq,readmode,bcktab,numofchars,
-                        &outlcpinfo->previoussuffix);
+    gt_bcktab_consistencyofsuffix(__LINE__,
+                                  encseq,readmode,bcktab,numofchars,
+                                  &outlcpinfo->previoussuffix);
     */
 #endif
   }
@@ -563,7 +564,7 @@ void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
                               GtSuffixsortspace *sssp,
                               const GtBcktab *bcktab,
-                              const Bucketspecification *bucketspec,
+                              const GtBucketspecification *bucketspec,
                               GtCodetype code)
 {
   if (outlcpinfo != NULL)
@@ -602,9 +603,9 @@ void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                                    + bucketspec->nonspecialsinbucket +
                                      bucketspec->specialsinbucket - 1);
       /*
-        consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,
-                            &outlcpinfo->previoussuffix);
+        gt_bcktab_consistencyofsuffix(__LINE__,
+                                      encseq,readmode,bcktab,numofchars,
+                                      &outlcpinfo->previoussuffix);
       */
 #endif
     } else
@@ -623,9 +624,9 @@ void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                                    bucketspec.left
                                      + bucketspec.nonspecialsinbucket-1);
         /*
-        consistencyofsuffix(__LINE__,
-                            encseq,readmode,bcktab,numofchars,
-                            &outlcpinfo->previoussuffix);
+        gt_bcktab_consistencyofsuffix(__LINE__,
+                                      encseq,readmode,bcktab,numofchars,
+                                      &outlcpinfo->previoussuffix);
         */
 #endif
       }

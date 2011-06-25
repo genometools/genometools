@@ -102,14 +102,14 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,
                                      GT_UNUSED GtSuffixsortspace *sssp,
                                      GtLcpvalues *tableoflcpvalues,
-                                     const Bucketspecification *bucketspec,
+                                     const GtBucketspecification *bucketspec,
                                      GtCodetype code);
 
 void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
                               GtSuffixsortspace *sssp,
                               const GtBcktab *bcktab,
-                              const Bucketspecification *bucketspec,
+                              const GtBucketspecification *bucketspec,
                               GtCodetype code);
 
 GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,

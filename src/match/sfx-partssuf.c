@@ -187,19 +187,15 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
       if (part == 0)
       {
         suftabparts->components[part].widthofpart
-          = gt_bcktab_leftborder_get(bcktab,
-                                     suftabparts->components[part].nextcode);
+          = gt_bcktab_get(bcktab,suftabparts->components[part].nextcode);
         suftabparts->components[part].suftaboffset = 0;
       } else
       {
         suftabparts->components[part].widthofpart
-          = gt_bcktab_leftborder_get(bcktab,
-                                     suftabparts->components[part].nextcode) -
-            gt_bcktab_leftborder_get(bcktab,suftabparts->
-                                            components[part-1].nextcode);
+          = gt_bcktab_get(bcktab,suftabparts->components[part].nextcode) -
+            gt_bcktab_get(bcktab,suftabparts->components[part-1].nextcode);
         suftabparts->components[part].suftaboffset
-          = gt_bcktab_leftborder_get(bcktab,suftabparts->
-                                            components[part-1].nextcode);
+          = gt_bcktab_get(bcktab,suftabparts->components[part-1].nextcode);
       }
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
