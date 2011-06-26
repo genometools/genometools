@@ -46,16 +46,18 @@ unsigned long gt_bcktab_get(const GtBcktab *bcktab,GtCodetype code);
 GtBcktab *gt_bcktab_map(const char *indexname,
                         unsigned int numofchars,
                         unsigned int prefixlength,
+                        unsigned long maxvalue,
                         bool withspecialsuffixes,
                         GtError *err);
 
 void gt_bcktab_delete(GtBcktab *bcktab);
 
-GtBcktab *gt_bcktab_alloc(unsigned int numofchars,
-                          unsigned int prefixlength,
-                          bool storespecialcodes,
-                          bool withspecialsuffixes,
-                          GtError *err);
+GtBcktab *gt_bcktab_new(unsigned int numofchars,
+                        unsigned int prefixlength,
+                        unsigned long maxvalue,
+                        bool storespecialcodes,
+                        bool withspecialsuffixes,
+                        GtError *err);
 
 void gt_bcktab_updatespecials(GtBcktab *bcktab,
                               GtCodetype code,
@@ -125,6 +127,7 @@ GtCodetype gt_bcktab_numofallcodes(const GtBcktab *bcktab);
 
 uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
                                unsigned int prefixlength,
+                               unsigned long maxvalue,
                                bool withspecialsuffixes);
 
 unsigned long gt_bcktab_sizeofworkspace(unsigned int prefixlength);

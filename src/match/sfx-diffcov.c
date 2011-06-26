@@ -1058,10 +1058,12 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   Codeatposition *codeptr;
 
   dcov->samplesize = 0;
-  dcov->bcktab = gt_bcktab_alloc(dcov->numofchars, dcov->prefixlength,
-                                 true, /* storespecialcodes */
-                                 true, /* withspecialsuffixes */
-                                 NULL);
+  dcov->bcktab = gt_bcktab_new(dcov->numofchars,
+                               dcov->prefixlength,
+                               dcov->totallength+1,
+                               true, /* storespecialcodes */
+                               true, /* withspecialsuffixes */
+                               NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
   dcov->esr = gt_encseq_create_reader_with_readmode(dcov->encseq,

@@ -32,6 +32,8 @@
         mapspecptr->numofunits = ELEMS;\
         mapspecptr->name = #PTR
 
+typedef uint32_t Uint32;
+
 typedef enum
 {
   GtCharType, /* \0 terminated string */

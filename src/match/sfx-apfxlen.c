@@ -49,6 +49,7 @@
 static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
                                              unsigned long maxbytes,
                                              double factor,
+                                             unsigned long maxvalue,
                                              bool withspecialsuffixes)
 {
   unsigned int prefixlength;
@@ -60,7 +61,7 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
   for (prefixlength = 1U; /* Nothing */; prefixlength++)
   {
     sizeofrep = gt_bcktab_sizeoftable(numofchars,prefixlength,
-                                      withspecialsuffixes);
+                                      maxvalue,withspecialsuffixes);
 #ifdef WITHINFO
     printf("sizeofrep = %lu, after divide %lu\n",(unsigned long) sizeofrep,
                                         (unsigned long) (sizeofrep/factor));
@@ -86,6 +87,7 @@ unsigned int gt_recommendedprefixlength(unsigned int numofchars,
 
   prefixlength = prefixlengthwithmaxspace(numofchars,totallength,
                                           RECOMMENDEDMULTIPLIER,
+                                          totallength+1,
                                           withspecialsuffixes);
   if (prefixlength == 0)
   {
@@ -112,6 +114,7 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
                                           MAXMULTIPLIEROFTOTALLENGTH,
+                                          totallength+1,
                                           withspecialsuffixes);
   mbp = gt_maxbasepower(numofchars);
   maxprefixlen = MIN(mbp,maxprefixlen);
@@ -123,6 +126,7 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                  (unsigned long)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
                                  RECOMMENDEDMULTIPLIER,
+                                 totallength+1,
                                  withspecialsuffixes);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {

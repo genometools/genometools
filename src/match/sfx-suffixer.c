@@ -1388,11 +1388,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   {
     uint64_t sizeofbcktab;
     gt_assert(sfi != NULL);
-    sfi->bcktab = gt_bcktab_alloc(sfi->numofchars,
-                                  prefixlength,
-                                  sfi->sfxstrategy.storespecialcodes,
-                                  sfi->sfxstrategy.spmopt == 0 ? true : false,
-                                  err);
+    sfi->bcktab = gt_bcktab_new(sfi->numofchars,
+                                prefixlength,
+                                sfi->totallength+1,
+                                sfi->sfxstrategy.storespecialcodes,
+                                sfi->sfxstrategy.spmopt == 0 ? true : false,
+                                err);
     if (sfi->bcktab == NULL)
     {
       sfi->leftborder = NULL;
@@ -1409,6 +1410,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                   GT_NUMOFINTSFORBITS(sfi->numofallcodes));
       }
       sizeofbcktab = gt_bcktab_sizeoftable(sfi->numofchars,prefixlength,
+                                           sfi->totallength+1,
                                            sfi->sfxstrategy.spmopt == 0
                                              ? true : false);
       estimatedspace += (size_t) sizeofbcktab +

@@ -433,6 +433,7 @@ static int inputsuffixarray(bool map,
       = gt_bcktab_map(indexname,
                       gt_encseq_alphabetnumofchars(suffixarray->encseq),
                       suffixarray->prefixlength,
+                      totallength+1,
                       true,
                       err);
     if (suffixarray->bcktab == NULL)
