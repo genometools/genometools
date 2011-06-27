@@ -50,7 +50,9 @@ typedef struct
 struct GtLeftborder
 {
   uint32_t *uintbounds;
+  uint32_t *uintboundsforpart;
   unsigned long *ulongbounds;
+  unsigned long *ulongboundsforpart;
 };
 
 struct GtBcktab
@@ -73,6 +75,7 @@ struct GtBcktab
   bool allocated,
        withspecialsuffixes,
        useulong;
+  void *mappedleftborder;
   void *mappedptr;
 };
 
@@ -144,6 +147,36 @@ static void gt_bcktab_distpfxidx_increment(const GtBcktab *bcktab,
   } else
   {
     bcktab->uintdistpfxidx[prefixindex][ordercode]++;
+  }
+}
+
+size_t gt_bcktab_sizeofbasetype(const GtBcktab *bcktab)
+{
+  return bcktab->useulong ? sizeof (unsigned long) : sizeof (uint32_t);
+}
+
+void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
+                                   const char *bcktmpfilename,
+                                   GT_UNUSED unsigned int part,
+                                   unsigned long offset,
+                                   unsigned long end)
+{
+  if (bcktab->mappedleftborder != NULL)
+  {
+    gt_fa_xmunmap(bcktab->mappedleftborder);
+  }
+  /*printf("map for part %u\n",part);*/
+  bcktab->mappedleftborder
+    = gt_fa_xmmap_write_range(bcktmpfilename,(size_t) (end - offset + 1), 
+                             (size_t) offset);
+  if (bcktab->useulong)
+  {
+    bcktab->leftborder.ulongboundsforpart
+      = (unsigned long *) bcktab->mappedleftborder;
+  } else
+  {
+    bcktab->leftborder.uintboundsforpart
+      = (uint32_t *) bcktab->mappedleftborder;
   }
 }
 
@@ -311,6 +344,7 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->uintcountspecialcodes = NULL;
   bcktab->ulongdistpfxidx = NULL;
   bcktab->uintdistpfxidx = NULL;
+  bcktab->mappedleftborder = NULL;
   bcktab->mappedptr = NULL;
   bcktab->prefixlength = prefixlength;
   bcktab->withspecialsuffixes = withspecialsuffixes;
@@ -606,6 +640,10 @@ void gt_bcktab_delete(GtBcktab *bcktab)
     {
       bcktab->uintdistpfxidx[0] = NULL;
     }
+  }
+  if (bcktab->mappedleftborder != NULL)
+  {
+    gt_fa_xmunmap(bcktab->mappedleftborder);
   }
   gt_free(bcktab->ulongdistpfxidx);
   bcktab->ulongdistpfxidx = NULL;

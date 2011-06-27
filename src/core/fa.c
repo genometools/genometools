@@ -510,8 +510,8 @@ void* gt_fa_xmmap_read_func_range(const char *path, size_t len, size_t offset,
                                       src_file, src_line, NULL);
 }
 
-void* gt_xmmap_write_func(const char *path, size_t *len,
-                          const char *src_file, int src_line)
+void* gt_fa_xmmap_write_func(const char *path, size_t *len,
+                             const char *src_file, int src_line)
 {
   gt_assert(path);
   gt_assert(fa);
@@ -519,8 +519,8 @@ void* gt_xmmap_write_func(const char *path, size_t *len,
                                 NULL);
 }
 
-void* gt_xmmap_write_func_range(const char *path, size_t len, size_t offset,
-                                const char *src_file, int src_line)
+void* gt_fa_xmmap_write_func_range(const char *path, size_t len, size_t offset,
+                                   const char *src_file, int src_line)
 {
   gt_assert(path);
   gt_assert(fa);

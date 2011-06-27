@@ -1853,18 +1853,37 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
   {
     if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
+      unsigned long mincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
+      unsigned long maxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
+      unsigned long mapoffset
+        = stpgetcurrentleftborderoffset(sfi->part,sfi->suftabparts);
+      unsigned long mapend
+        = stpgetcurrentleftborderend(sfi->part,sfi->suftabparts);
+      gt_assert(mapoffset <= mincode * gt_bcktab_sizeofbasetype(sfi->bcktab));
+      gt_assert(maxcode * gt_bcktab_sizeofbasetype(sfi->bcktab)
+                <= mapend);
       gt_logger_log(sfi->logger,"compute part %u "
-                                "(%lu suffixes,%lu buckets from %lu..%lu,"
-                                "%.2f%% of all)",
+                                "(%lu suffixes,%lu buckets from "
+                                "%lu(%lu)..%lu(%lu),"
+                                "mapped from %lu to %lu (%.2f%% of all))",
                     sfi->part,
                     stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
-                    stpgetcurrentmaxcode(sfi->part,sfi->suftabparts) -
-                    stpgetcurrentmincode(sfi->part,sfi->suftabparts) + 1,
-                    stpgetcurrentmincode(sfi->part,sfi->suftabparts),
-                    stpgetcurrentmaxcode(sfi->part,sfi->suftabparts),
+                    maxcode - mincode + 1,
+                    mincode,
+                    mincode * gt_bcktab_sizeofbasetype(sfi->bcktab),
+                    maxcode,
+                    maxcode * gt_bcktab_sizeofbasetype(sfi->bcktab),
+                    mapoffset,
+                    mapend,
                     100.0 * (double)
                     stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts)/
                     stpnumofsuffixestoinsert(sfi->suftabparts));
+      gt_bcktab_assignboundsforpart(
+             sfi->bcktab,
+             gt_str_get(sfi->bcktmpfilename),
+             sfi->part,
+             stpgetcurrentleftborderoffset(sfi->part,sfi->suftabparts),
+             stpgetcurrentleftborderend(sfi->part,sfi->suftabparts));
     }
     preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;

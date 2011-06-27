@@ -33,11 +33,17 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 GtCodetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-unsigned long stpgetcurrentsuftaboffset(unsigned int part,
-                                 const Suftabparts *suftabparts);
-
 GtCodetype stpgetcurrentmaxcode(unsigned int part,
-                              const Suftabparts *suftabparts);
+                                const Suftabparts *suftabparts);
+
+unsigned long stpgetcurrentsuftaboffset(unsigned int part,
+                                        const Suftabparts *suftabparts);
+
+unsigned long stpgetcurrentleftborderend(unsigned int part,
+                                         const Suftabparts *suftabparts);
+
+unsigned long stpgetcurrentleftborderoffset(unsigned int part,
+                                            const Suftabparts *suftabparts);
 
 unsigned long stpgetcurrentsumofwdith(unsigned int part,
                                const Suftabparts *suftabparts);

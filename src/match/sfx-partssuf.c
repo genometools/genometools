@@ -20,6 +20,7 @@
 #include "core/ma_api.h"
 #include "core/divmodmul.h"
 #include "core/codetype.h"
+#include "core/fa.h"
 #include "bcktab.h"
 #include "sfx-partssuf.h"
 
@@ -34,6 +35,7 @@ typedef struct
 struct Suftabparts
 {
   Suftabpartcomponent *components;
+  size_t sizeofbcktabbasetype;
   unsigned int numofparts;
   unsigned long largestwidth,
                 numofsuffixestoinsert,
@@ -136,6 +138,8 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
   suftabparts->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
+  printf("pagesize=%lu\n",suftabparts->pagesize);
+  suftabparts->sizeofbcktabbasetype = gt_bcktab_sizeofbasetype(bcktab);
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
@@ -229,8 +233,17 @@ unsigned long stpgetcurrentleftborderoffset(unsigned int part,
 {
   unsigned long mincode = stpgetcurrentmincode(part,suftabparts);
 
-  return (mincode * sizeof (unsigned long) / suftabparts->pagesize)
+  return ((mincode * suftabparts->sizeofbcktabbasetype)/suftabparts->pagesize)
          * suftabparts->pagesize;
+}
+
+unsigned long stpgetcurrentleftborderend(unsigned int part,
+                                         const Suftabparts *suftabparts)
+{
+  unsigned long maxcode = stpgetcurrentmaxcode(part,suftabparts);
+
+  return ((maxcode * suftabparts->sizeofbcktabbasetype)/suftabparts->pagesize)
+         * suftabparts->pagesize + suftabparts->pagesize;
 }
 
 GtCodetype stpgetcurrentmaxcode(unsigned int part,

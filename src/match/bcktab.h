@@ -50,6 +50,12 @@ GtBcktab *gt_bcktab_map(const char *indexname,
                         bool withspecialsuffixes,
                         GtError *err);
 
+void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
+                                   const char *bcktmpfilename,
+                                   unsigned int part,
+                                   unsigned long offset,
+                                   unsigned long end);
+
 void gt_bcktab_delete(GtBcktab *bcktab);
 
 GtBcktab *gt_bcktab_new(unsigned int numofchars,
@@ -124,6 +130,8 @@ GtCodetype gt_bcktab_filltable(const GtBcktab *bcktab,unsigned int idx);
 GtLeftborder *gt_bcktab_leftborder(GtBcktab *bcktab);
 
 GtCodetype gt_bcktab_numofallcodes(const GtBcktab *bcktab);
+
+size_t gt_bcktab_sizeofbasetype(const GtBcktab *bcktab);
 
 uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
                                unsigned int prefixlength,
