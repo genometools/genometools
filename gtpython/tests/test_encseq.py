@@ -15,6 +15,8 @@ class EncodedsequenceTest(unittest.TestCase):
         self.dnaseqfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
         self.dseq1 = "agtccagctgtcagctagcgggcccgatgatatttt"
         self.dseq2 = "gtgctgtac"
+        self.dseq3 = "gtacagcac"
+        self.dseq4 = "aaaatatcatcgggcccgctagctgacagctggact"
         self.dnaseqfile.write(">seq1\n"+self.dseq1+"\n")
         self.dnaseqfile.write(">seq2\n"+self.dseq2+"\n")
         self.aaseqfile = tempfile.NamedTemporaryFile(mode="w", delete=False)
@@ -82,25 +84,25 @@ class EncodedsequenceTest(unittest.TestCase):
         el = EncseqLoader()
         es = el.load("foo")
         self.run_test_descriptions(es)
-        self.run_test_get_encoded_char(es, self.dseq1, self.dseq2)
+        self.run_test_get_encoded_char(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
         self.run_test_num_seqs(es)
         self.run_test_num_files(es)
         self.run_test_seq_length(es)
         self.run_test_seq_startpos(es)
-        self.run_test_seq_substr_encoded(es, self.dseq1, self.dseq2)
-        self.run_test_seq_substr_plain(es, self.dseq1, self.dseq2)
-        self.run_test_seq_substr_sequential(es, self.dseq1, self.dseq2)
+        self.run_test_seq_substr_encoded(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
+        self.run_test_seq_substr_plain(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
+        self.run_test_seq_substr_sequential(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
         self.run_test_total_length(es)
         self.delete_idx("foo")
         es = self.create_mem()
         self.run_test_descriptions(es)
-        self.run_test_get_encoded_char(es, self.dseq1, self.dseq2)
+        self.run_test_get_encoded_char(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
         self.run_test_num_seqs(es)
         self.run_test_num_files_mem(es)
         self.run_test_seq_length(es)
-        self.run_test_seq_substr_encoded(es, self.dseq1, self.dseq2)
-        self.run_test_seq_substr_plain(es, self.dseq1, self.dseq2)
-        self.run_test_seq_substr_sequential(es, self.dseq1, self.dseq2)
+        self.run_test_seq_substr_encoded(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
+        self.run_test_seq_substr_plain(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
+        self.run_test_seq_substr_sequential(es, self.dseq1, self.dseq2, self.dseq3, self.dseq4)
         self.run_test_total_length(es)
 
     def test_protein(self):
@@ -108,49 +110,71 @@ class EncodedsequenceTest(unittest.TestCase):
         el = EncseqLoader()
         es = el.load("foo")
         self.run_test_descriptions(es)
-        self.run_test_get_encoded_char(es, self.aaseq1, self.aaseq2)
+        self.run_test_get_encoded_char(es, self.aaseq1, self.aaseq2, None, None)
         self.run_test_num_seqs(es)
         self.run_test_num_files(es)
         self.run_test_seq_startpos_protein(es)
         self.run_test_seq_length_protein(es)
         self.run_test_file_length_protein(es)
-        self.run_test_seq_substr_encoded(es, self.aaseq1, self.aaseq2)
-        self.run_test_seq_substr_plain(es, self.aaseq1, self.aaseq2)
-        self.run_test_seq_substr_sequential(es, self.aaseq1, self.aaseq2)
+        self.run_test_seq_substr_encoded(es, self.aaseq1, self.aaseq2, None, None)
+        self.run_test_seq_substr_plain(es, self.aaseq1, self.aaseq2, None, None)
+        self.run_test_seq_substr_sequential(es, self.aaseq1, self.aaseq2, None, None)
         self.run_test_total_length_protein(es)
         self.delete_idx("foo")
         es = self.create_mem_protein()
         self.run_test_descriptions(es)
-        self.run_test_get_encoded_char(es, self.aaseq1, self.aaseq2)
+        self.run_test_get_encoded_char(es, self.aaseq1, self.aaseq2, None, None)
         self.run_test_num_seqs(es)
         self.run_test_num_files_mem(es)
         self.run_test_seq_length_protein(es)
-        self.run_test_seq_substr_encoded(es, self.aaseq1, self.aaseq2)
-        self.run_test_seq_substr_plain(es, self.aaseq1, self.aaseq2)
-        self.run_test_seq_substr_sequential(es, self.aaseq1, self.aaseq2)
+        self.run_test_seq_substr_encoded(es, self.aaseq1, self.aaseq2, None, None)
+        self.run_test_seq_substr_plain(es, self.aaseq1, self.aaseq2, None, None)
+        self.run_test_seq_substr_sequential(es, self.aaseq1, self.aaseq2, None, None)
         self.run_test_total_length_protein(es)
 
     def run_test_num_seqs(self, es):
         self.assertEquals(es.num_of_sequences(), 2)
+        if es.alphabet().is_dna():
+          es.mirror()
+          self.assertEquals(es.num_of_sequences(), 4)
+          es.unmirror()
 
     def run_test_num_files(self, es):
         self.assertEquals(es.num_of_files(), 1)
+        if es.alphabet().is_dna():
+          es.mirror()
+          self.assertEquals(es.num_of_files(), 1)
+          es.unmirror()
 
     def run_test_num_files_mem(self, es):
         self.assertEquals(es.num_of_files(), 1)
+        if es.alphabet().is_dna():
+          es.mirror()
+          self.assertEquals(es.num_of_files(), 1)
+          es.unmirror()
 
     def run_test_descriptions(self, es):
         self.assertRaises(GTError, es.description, 2)
         self.assertEquals(es.description(0), "seq1")
         self.assertEquals(es.description(1), "seq2")
+        if es.alphabet().is_dna():
+          es.mirror()
+          self.assertRaises(GTError, es.description, 5)
+          self.assertEquals(es.description(2), "seq2")
+          self.assertEquals(es.description(3), "seq1")
+          es.unmirror()
 
     def run_test_total_length(self, es):
         self.assertEquals(es.total_length(), 46)
+        if es.alphabet().is_dna():
+          es.mirror()
+          self.assertEquals(es.total_length(), 93)
+          es.unmirror()
 
     def run_test_total_length_protein(self, es):
         self.assertEquals(es.total_length(), 37)
 
-    def run_test_get_encoded_char(self, es, seq1, seq2):
+    def run_test_get_encoded_char(self, es, seq1, seq2, seq3, seq4):
         a = es.alphabet()
         for i, c in enumerate(seq1):
             encchar = es.get_encoded_char(i, readmode.FORWARD)
@@ -158,6 +182,15 @@ class EncodedsequenceTest(unittest.TestCase):
         for i, c in enumerate(seq2[::-1]):
             encchar = es.get_encoded_char(i, readmode.REVERSE)
             self.assertEquals(a.decode(encchar), c)
+        if es.alphabet().is_dna():
+            es.mirror()
+            for i, c in enumerate(seq3):
+                encchar = es.get_encoded_char(47+i, readmode.FORWARD)
+                self.assertEquals(a.decode(encchar), c)
+            for i, c in enumerate(seq4[::-1]):
+                encchar = es.get_encoded_char(i, readmode.REVERSE)
+                self.assertEquals(a.decode(encchar), c)
+            es.unmirror()
 
     def run_test_seq_startpos(self, es):
         self.assertEquals(es.seqstartpos(0), 0)
@@ -181,7 +214,7 @@ class EncodedsequenceTest(unittest.TestCase):
     def run_test_file_length_protein(self, es):
         self.assertEquals(es.effective_filelength(0), 37)
         
-    def run_test_seq_substr_encoded(self, es, seq1, seq2):
+    def run_test_seq_substr_encoded(self, es, seq1, seq2, seq3, seq4):
         start = 3
         end = 13
         res = es.extract_encoded(start, end)
@@ -194,17 +227,50 @@ class EncodedsequenceTest(unittest.TestCase):
         res = es.extract_encoded(ssp+start, ssp+end)
         for i in range(start, end):
             self.assertEquals(a.decode(res[i-start]), seq2[i])
+        if es.alphabet().is_dna():
+            es.mirror()
+            start = 3
+            end = 8
+            ssp = es.seqstartpos(2)
+            res = es.extract_encoded(ssp+start, ssp+end)
+            for i in range(start, end):
+                self.assertEquals(a.decode(res[i-start]), seq3[i])
+            start = 0
+            end = 5
+            ssp = es.seqstartpos(3)
+            res = es.extract_encoded(ssp+start, ssp+end)
+            for i in range(start, end):
+                self.assertEquals(a.decode(res[i-start]), seq4[i])
+            es.unmirror()
 
-    def run_test_seq_substr_plain(self, es, seq1, seq2):
+    def run_test_seq_substr_plain(self, es, seq1, seq2, seq3, seq4):
         start = 3
         end = 13
         self.assertEquals(es.extract_decoded(start, end), seq1[start:end+1])
         start = 0
         end = 5
         ssp = es.seqstartpos(1)
-        self.assertEquals(es.extract_decoded(ssp+start, ssp+end), seq2[start:end+1])
+        self.assertEquals(es.extract_decoded(ssp+start, ssp+end), \
+                          seq2[start:end+1])
+        if es.alphabet().is_dna():
+            es.mirror()
+            start = 3
+            end = 8
+            ssp = es.seqstartpos(2)
+            res = es.extract_encoded(ssp+start, ssp+end)
+            for i in range(start, end):
+                self.assertEquals(es.extract_decoded(ssp+start, ssp+end), \
+                                  seq3[start:end+1])
+            start = 0
+            end = 5
+            ssp = es.seqstartpos(3)
+            res = es.extract_encoded(ssp+start, ssp+end)
+            for i in range(start, end):
+                self.assertEquals(es.extract_decoded(ssp+start, ssp+end), \
+                                  seq4[start:end+1])
+            es.unmirror()
 
-    def run_test_seq_substr_sequential(self, es, seq1, seq2):
+    def run_test_seq_substr_sequential(self, es, seq1, seq2, seq3, seq4):
         start = 3
         end = 13
         er = es.create_reader_with_readmode(readmode.FORWARD, start)
@@ -216,6 +282,19 @@ class EncodedsequenceTest(unittest.TestCase):
         er = es.create_reader_with_readmode(readmode.FORWARD, start)
         for i in range(start-start, end-start):
             self.assertEquals(a.decode(er.next_encoded_char()), seq2[i])
+        if es.alphabet().is_dna():
+            es.mirror()
+            start = es.seqstartpos(2)
+            end = start + 5
+            er = es.create_reader_with_readmode(readmode.FORWARD, start)
+            for i in range(start-start, end-start):
+                self.assertEquals(a.decode(er.next_encoded_char()), seq3[i])
+            start = es.seqstartpos(3)
+            end = start + 5
+            er = es.create_reader_with_readmode(readmode.FORWARD, start)
+            for i in range(start-start, end-start):
+                self.assertEquals(a.decode(er.next_encoded_char()), seq4[i])
+            es.unmirror()
 
 if __name__ == "__main__":
     unittest.main()

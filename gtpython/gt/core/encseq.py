@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2010-2011 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -363,6 +363,11 @@ class Encseq:
             gterror("invalid sequence number %d" % num)
         return gtlib.gt_encseq_seqstartpos(self.encseq, num)
 
+    def filestartpos(self, num):
+        if not num < self.num_of_files():
+            gterror("invalid file number %d" % num)
+        return gtlib.gt_encseq_filestartpos(self.encseq, num)
+
     def seqlength(self, num):
         if not num < self.num_of_sequences():
             gterror("invalid sequence number %d" % num)
@@ -404,6 +409,35 @@ class Encseq:
         gtlib.gt_encseq_extract_decoded(self.encseq, buf, start, end)
         return string_at(buf, end-start+1)
 
+    def seqnum(self, pos):
+        if pos < 0 or pos >= self.total_length():
+            gterror("invalid position: %d (allowed: %d-%d)" % (pos,
+                                                      0, self.total_length()-1))
+        return gtlib.gt_encseq_seqnum(self.encseq, pos)
+
+    def filenum(self, pos):
+        if pos < 0 or pos >= self.total_length():
+            gterror("invalid position: %d (allowed: %d-%d)" % (pos,
+                                                      0, self.total_length()-1))
+        return gtlib.gt_encseq_filenum(self.encseq, pos)
+
+    def mirror(self):
+        if self.is_mirrored():
+            gterror("encoded sequence is already mirrored")
+        err = Error()
+        ret = gtlib.gt_encseq_mirror(self.encseq, err)
+        if ret < 0:
+            gterror(err)
+
+    def unmirror(self):
+        if not self.is_mirrored():
+            gterror("encoded sequence is not mirrored")
+        err = Error()
+        gtlib.gt_encseq_unmirror(self.encseq)
+
+    def is_mirrored(self):
+        return int2bool(gtlib.gt_encseq_is_mirrored(self.encseq))
+
     def register(cls, gtlib):
         gtlib.gt_encseq_num_of_sequences.restype = c_ulong
         gtlib.gt_encseq_num_of_sequences.argtypes = [c_void_p]
@@ -412,7 +446,8 @@ class Encseq:
         gtlib.gt_encseq_total_length.restype = c_ulong
         gtlib.gt_encseq_total_length.argtypes = [c_void_p]
         gtlib.gt_encseq_description.restype = c_char_p
-        gtlib.gt_encseq_description.argtypes = [c_void_p, POINTER(c_ulong), c_ulong]
+        gtlib.gt_encseq_description.argtypes = [c_void_p, POINTER(c_ulong), \
+                                                c_ulong]
         gtlib.gt_encseq_get_encoded_char.restype = c_ubyte
         gtlib.gt_encseq_get_encoded_char.argtypes = [c_void_p, c_ulong, c_int]
         gtlib.gt_encseq_get_decoded_char.restype = c_char
@@ -425,9 +460,25 @@ class Encseq:
         gtlib.gt_encseq_seqlength.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_effective_filelength.restype = c_uint64
         gtlib.gt_encseq_effective_filelength.argtypes = [c_void_p, c_ulong]
-        gtlib.gt_encseq_extract_encoded.argtypes = [c_void_p, POINTER(c_ubyte), c_ulong, c_ulong]
-        gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p, c_ulong, c_ulong]
-
+        gtlib.gt_encseq_extract_encoded.argtypes = [c_void_p, \
+                                                    POINTER(c_ubyte), \
+                                                    c_ulong, c_ulong]
+        gtlib.gt_encseq_extract_decoded.argtypes = [c_void_p, c_char_p, \
+                                                    c_ulong, c_ulong]
+        gtlib.gt_encseq_mirror.restype = c_int
+        gtlib.gt_encseq_mirror.argtypes = [c_void_p]
+        gtlib.gt_encseq_unmirror.argtypes = [c_void_p]
+        gtlib.gt_encseq_is_mirrored.restype = c_int
+        gtlib.gt_encseq_is_mirrored.argtypes = [c_void_p]
+        gtlib.gt_encseq_filestartpos.restype = c_ulong
+        gtlib.gt_encseq_filestartpos.argtypes = [c_void_p, c_ulong]
+        gtlib.gt_encseq_seqnum.restype = c_ulong
+        gtlib.gt_encseq_seqnum.argtypes = [c_void_p, c_ulong]
+        gtlib.gt_encseq_filenum.restype = c_ulong
+        gtlib.gt_encseq_filenum.argtypes = [c_void_p, c_ulong]
+        gtlib.gt_encseq_filenames.restype = c_void_p
+        gtlib.gt_encseq_filenames.argtypes = [c_void_p]
+        
     register = classmethod(register)
 
 

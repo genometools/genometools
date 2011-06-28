@@ -114,10 +114,22 @@ class Alphabet:
         return str(s)
 
     def valid_input(self, plainchar):
-        if gtlib.gt_alphabet_valid_input(self.alpha, plainchar) == 0:
-            return False
-        else:
+        if gtlib.gt_alphabet_valid_input(self.alpha, plainchar) == 1:
             return True
+        else:
+            return False
+
+    def is_dna(self):
+        if gtlib.gt_alphabet_is_dna(self.alpha) == 1:
+            return True
+        else:
+            return False
+
+    def is_protein(self):
+        if gtlib.gt_alphabet_is_protein(self.alpha) == 1:
+            return True
+        else:
+            return False
 
     def register(cls, gtlib):
         gtlib.gt_alphabet_new.restype = c_void_p
@@ -143,7 +155,10 @@ class Alphabet:
         gtlib.gt_alphabet_decode.argtypes = [c_void_p, c_ubyte]
         gtlib.gt_alphabet_valid_input.restype = c_int
         gtlib.gt_alphabet_valid_input.argtypes = [c_void_p, c_char]
-
+        gtlib.gt_alphabet_is_dna.restype = c_int
+        gtlib.gt_alphabet_is_dna.argtypes = [c_void_p]
+        gtlib.gt_alphabet_is_protein.restype = c_int
+        gtlib.gt_alphabet_is_protein.argtypes = [c_void_p]
 
     register = classmethod(register)
 

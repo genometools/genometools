@@ -110,6 +110,16 @@ class AlphabetTest(unittest.TestCase):
         a_protein = Alphabet.create_protein()
         self.protein_encodedecode(a_protein)
 
+    def test_aa_isdna(self):
+        a_protein = Alphabet.create_protein()
+        self.assertTrue(a_protein.is_protein())
+        self.assertFalse(a_protein.is_dna())
+
+    def test_isdna(self):
+        a_protein = Alphabet.create_dna()
+        self.assertFalse(a_protein.is_protein())
+        self.assertTrue(a_protein.is_dna())
+
     def test_aa_fromsequence(self):
         a_protein = Alphabet.create_from_sequence([self.aaseqfile.name])
         self.protein_encodedecode(a_protein)
