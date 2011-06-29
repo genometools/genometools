@@ -138,7 +138,8 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
   suftabparts->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
-  printf("pagesize=%lu\n",suftabparts->pagesize);
+  /*printf("pagesize=%lu\n",suftabparts->pagesize);*/
+  gt_assert(suftabparts->pagesize % sizeof (unsigned long) == 0);
   suftabparts->sizeofbcktabbasetype = gt_bcktab_sizeofbasetype(bcktab);
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
@@ -242,6 +243,11 @@ unsigned long stpgetcurrentleftborderend(unsigned int part,
 {
   unsigned long maxcode = stpgetcurrentmaxcode(part,suftabparts);
 
+  if ((maxcode * suftabparts->sizeofbcktabbasetype)
+      % suftabparts->pagesize  == 0)
+  {
+    return maxcode * suftabparts->sizeofbcktabbasetype;
+  }
   return ((maxcode * suftabparts->sizeofbcktabbasetype)/suftabparts->pagesize)
          * suftabparts->pagesize + suftabparts->pagesize;
 }

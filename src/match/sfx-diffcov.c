@@ -626,10 +626,10 @@ static void dc_updatewidth (Differencecover *dcov,unsigned long width,
 static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 {
   GtCodetype code;
-  unsigned int rightchar = 0;
   GtBucketspecification bucketspec;
   unsigned long idx = 0;
   const GtCodetype mincode = 0;
+  unsigned int rightchar = 0; /* as mincode is 0 */
 
   for (code = mincode; code <= dcov->maxcode; code++)
   {
