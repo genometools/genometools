@@ -83,6 +83,10 @@ void gt_bcktab_addfinalspecials(GtBcktab *bcktab,
                                 unsigned int numofchars,
                                 unsigned long specialcharacters);
 
+void gt_bcktab_excludedistpfxidx_out(GtBcktab *bcktab);
+
+void gt_bcktab_includedistpfxidx_out(GtBcktab *bcktab);
+
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
 unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,

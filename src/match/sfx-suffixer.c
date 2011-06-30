@@ -1591,10 +1591,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       bcktmpfilefp = gt_xtmpfp(sfi->bcktmpfilename);
       gt_logger_log(logger, "store bcktab in \"%s\"",
                     gt_str_get(sfi->bcktmpfilename));
+      gt_bcktab_excludedistpfxidx_out(sfi->bcktab);
       if (gt_bcktab_flush_to_file(bcktmpfilefp,sfi->bcktab,err) != 0)
       {
         haserr = true;
       }
+      gt_bcktab_includedistpfxidx_out(sfi->bcktab);
       gt_fa_fclose(bcktmpfilefp);
     } else
     {

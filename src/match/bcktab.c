@@ -74,7 +74,8 @@ struct GtBcktab
   GtMaxbucketinfo maxbucketinfo;
   bool allocated,
        withspecialsuffixes,
-       useulong;
+       useulong,
+       excludedistpfxidx;
   void *mappedleftborder,
        *mappedcountspecialcodes,
        *mappedptr;
@@ -468,6 +469,7 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab = gt_malloc(sizeof *bcktab);
   bcktab->mappedptr = NULL;
   bcktab->mappedleftborder = NULL;
+  bcktab->excludedistpfxidx = false;
   bcktab->leftborder.ulongbounds = NULL;
   bcktab->leftborder.ulongboundsforpart = NULL;
   bcktab->leftborder.uintbounds = NULL;
@@ -626,24 +628,45 @@ static void assignbcktabmapspecification(
                                              (bcktab->prefixlength-1));
         }
       }
-      if (bcktab->useulong)
+      if (!writemode || !bcktab->excludedistpfxidx)
       {
-        NEWMAPSPEC(bcktab->ulongdistpfxidx[0],GtUlong,numofcounters);
-      } else
-      {
-        NEWMAPSPEC(bcktab->uintdistpfxidx[0],Uint32,numofcounters);
+        if (bcktab->useulong)
+        {
+          NEWMAPSPEC(bcktab->ulongdistpfxidx[0],GtUlong,numofcounters);
+        } else
+        {
+          NEWMAPSPEC(bcktab->uintdistpfxidx[0],Uint32,numofcounters);
+        }
       }
     }
   }
 }
 
+void gt_bcktab_excludedistpfxidx_out(GtBcktab *bcktab)
+{
+  bcktab->excludedistpfxidx = true;
+}
+
+void gt_bcktab_includedistpfxidx_out(GtBcktab *bcktab)
+{
+  bcktab->excludedistpfxidx = false;
+}
+
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
 {
+  unsigned long sizeofrep = bcktab->sizeofrep;
+
   gt_error_check(err);
+  if (bcktab->excludedistpfxidx)
+  {
+    sizeofrep -= gt_bcktab_sizeofbasetype(bcktab) *
+                 numofdistpfxidxcounters(bcktab->basepower,
+                                         bcktab->prefixlength);
+  }
   return gt_mapspec_flushtheindex2file(fp,
                             assignbcktabmapspecification,
                             (GtBcktab *) bcktab,
-                            bcktab->sizeofrep,
+                            sizeofrep,
                             err);
 }
 
@@ -664,6 +687,7 @@ static int fillbcktabmapspecstartptr(GtBcktab *bcktab,
                           bcktab->sizeofrep,
                           err) != 0)
   {
+    STAMP;
     haserr = true;
   }
   gt_str_delete(tmpfilename);
