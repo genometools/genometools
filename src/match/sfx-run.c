@@ -54,8 +54,8 @@
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
         if (!haserr && (FLAG))\
         {\
-          PTR = gt_fa_fopen_with_suffix( \
-            gt_str_get(so->indexname), SUFFIX, "wb",err);\
+          PTR = gt_fa_fopen_with_suffix(gt_str_get(so->indexname),\
+                                        SUFFIX, "wb",err);\
           if ((PTR) == NULL)\
           {\
             haserr = true;\
@@ -172,7 +172,8 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
+static int suffixeratorwithoutput(const char *indexname,
+                                  Outfileinfo *outfileinfo,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned int prefixlength,
@@ -247,6 +248,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
       {
         haserr = true;
       }
+      gt_Sfxiterator_setbcktabfileprefix(sfi,indexname);
     }
   }
   if (gt_Sfxiterator_delete(sfi,err) != 0)
@@ -544,6 +546,7 @@ static int runsuffixerator(bool doesa,
       if (doesa)
       {
         if (suffixeratorwithoutput(
+                               gt_str_get(so->indexname),
                                &outfileinfo,
                                encseq,
                                readmode,

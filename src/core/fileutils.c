@@ -201,6 +201,33 @@ off_t gt_file_size(const char *file)
   return sb.st_size;
 }
 
+void gt_xfile_cmp(const char *file1,const char *file2)
+{
+  FILE *fp1, *fp2;
+  off_t offset;
+  int cc1, cc2;
+
+  fp1 = fopen(file1, "rb");
+  fp2 = fopen(file2, "rb");
+  for (offset = 0; /* Nothing */; offset++)
+  {
+    cc1 = fgetc(fp1);
+    cc2 = fgetc(fp2);
+    if (cc1 != cc2)
+    {
+      fprintf(stderr,"files %s and %s differ in byte %lu\n",file1,file2,
+                                                  (unsigned long) offset);
+      exit(EXIT_FAILURE);
+    }
+    if (cc1 == EOF)
+    {
+      break;
+    }
+  }
+  gt_xfclose(fp1);
+  gt_xfclose(fp2);
+}
+
 off_t gt_file_with_suffix_size(const char *path, const char *suffix)
 {
   GtStr *tmpfilename;

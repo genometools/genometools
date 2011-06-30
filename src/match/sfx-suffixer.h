@@ -56,6 +56,9 @@ int gt_Sfxiterator_bcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
 
+void gt_Sfxiterator_setbcktabfileprefix(Sfxiterator *sfi,
+                                        const char *bcktabfileprefix);
+
 GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
                                    unsigned long pos,
                                    unsigned int kmersize);

@@ -30,4 +30,8 @@ off_t          gt_file_with_suffix_size(const char *path, const char *suffix);
 /* Return the size of <file>. */
 off_t          gt_file_size(const char *file);
 
+/* Compare two files bytewise */
+
+void gt_xfile_cmp(const char *file1,const char *file2);
+
 #endif

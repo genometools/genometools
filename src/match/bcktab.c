@@ -612,8 +612,7 @@ static void assignbcktabmapspecification(
                  (unsigned long) bcktab->numofspecialcodes);
     }
     numofcounters
-      = numofdistpfxidxcounters((const GtCodetype *) bcktab->basepower,
-                                bcktab->prefixlength);
+      = numofdistpfxidxcounters(bcktab->basepower,bcktab->prefixlength);
     if (numofcounters > 0)
     {
       if (!writemode)
@@ -668,6 +667,69 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
                             (GtBcktab *) bcktab,
                             sizeofrep,
                             err);
+}
+
+int gt_bcktab_flush_remaining(GT_UNUSED const GtBcktab *bcktab,
+                              const char *bcktmpfilename,
+                              GtError *err)
+{
+  bool haserr = false;
+
+  if (bcktab->withspecialsuffixes  &&
+      (bcktab->ulongdistpfxidx != NULL || bcktab->uintdistpfxidx == NULL))
+  {
+    unsigned long byteswritten;
+    FILE *fp;
+
+    fp = gt_fa_fopen(bcktmpfilename,"ab",err);
+    if (fp == NULL)
+    {
+      haserr = true;
+    } else
+    {
+      if (gt_mapspec_addpadbytes(fp,&byteswritten,(unsigned long) ftello(fp),
+                                 err) != 0)
+      {
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      size_t numofcounters
+        = (size_t) numofdistpfxidxcounters(bcktab->basepower,
+                                           bcktab->prefixlength);
+      if (bcktab->useulong)
+      {
+        if (fwrite(bcktab->ulongdistpfxidx[0],sizeof (unsigned long),
+                   numofcounters,fp) != numofcounters)
+        {
+          gt_error_set(err,"cannot write %lu items of size %u: "
+                           "errormsg=\"%s\"",
+                         (unsigned long) numofcounters,
+                         (unsigned int) sizeof (unsigned long),
+                         strerror(errno));
+          haserr = true;
+        }
+      } else
+      {
+        if (fwrite(bcktab->uintdistpfxidx[0],sizeof (uint32_t),
+                   numofcounters,fp) != numofcounters)
+        {
+          gt_error_set(err,"cannot write %lu items of size %u: "
+                           "errormsg=\"%s\"",
+                         (unsigned long) numofcounters,
+                         (unsigned int) sizeof (uint32_t),
+                         strerror(errno));
+          haserr = true;
+        }
+      }
+    }
+    if (fp != NULL)
+    {
+      gt_fa_fclose(fp);
+    }
+  }
+  return haserr ? -1 : 0;
 }
 
 static int fillbcktabmapspecstartptr(GtBcktab *bcktab,

@@ -240,6 +240,33 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
   return haserr ? -1 : 0;
 }
 
+int gt_mapspec_addpadbytes(FILE *fp,unsigned long *byteswritten,
+                           unsigned long byteoffset,GtError *err)
+{
+  bool haserr = false;
+
+  if (byteoffset % (unsigned long) ALIGNSIZE > 0)
+  {
+    GtUchar padbuffer[ALIGNSIZE-1] = {0};
+
+    size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
+    if (fwrite(padbuffer,sizeof (GtUchar),padunits,fp) != padunits)
+    {
+      gt_error_set(err,"cannot write %lu items of size %u: "
+                       "errormsg=\"%s\"",
+                       (unsigned long) padunits,
+                       (unsigned int) sizeof (GtUchar),
+                       strerror(errno));
+      haserr = true;
+    }
+    *byteswritten = (unsigned long) padunits;
+  } else
+  {
+    *byteswritten = 0;
+  }
+  return haserr ? -1 : 0;
+}
+
 int gt_mapspec_flushtheindex2file(FILE *fp,
                        GtAssignmapspec assignmapspec,
                        void *assignmapinfo,
@@ -250,8 +277,8 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
   GtMapspecification *mapspecptr;
   unsigned long byteoffset = 0;
   bool haserr = false;
-  GtUchar padbuffer[ALIGNSIZE-1] = {0};
   unsigned long totalpadunits = 0;
+  unsigned long byteswritten;
 
   gt_error_check(err);
   GT_INITARRAY(&mapspectable,GtMapspecification);
@@ -324,6 +351,7 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
                               (uint64_t) (byteoffset +
                                           mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
+    /*
     if (byteoffset % (unsigned long) ALIGNSIZE > 0)
     {
       size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
@@ -340,6 +368,13 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
       byteoffset += (unsigned long) padunits;
       totalpadunits += (unsigned long) padunits;
     }
+    */
+    if (gt_mapspec_addpadbytes(fp,&byteswritten,byteoffset,err) != 0)
+    {
+      haserr = true;
+    }
+    byteoffset += byteswritten;
+    totalpadunits += byteswritten;
   }
   if (!haserr)
   {

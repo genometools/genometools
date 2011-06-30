@@ -71,6 +71,9 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
                                    unsigned long expectedsize,
                                    GtError *err);
 
+int gt_mapspec_addpadbytes(FILE *fp,unsigned long *byteswritten,
+                           unsigned long byteoffset,GtError *err);
+
 int gt_mapspec_flushtheindex2file(FILE *fp,
                                   GtAssignmapspec assignmapspec,
                                   void *assignmapinfo,

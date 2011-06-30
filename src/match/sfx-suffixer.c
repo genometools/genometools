@@ -38,6 +38,7 @@
 #include "core/spacecalc.h"
 #include "core/divmodmul.h"
 #include "core/format64.h"
+#include "core/fileutils.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -98,6 +99,7 @@ struct Sfxiterator
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   GtStr *bcktmpfilename;
+  const char *bcktabfileprefix;
   unsigned int kmerfastmaskright;
 };
 
@@ -494,31 +496,50 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace,
                             sfi->sfxstrategy.spmopt == 0 ? true : false);
-  gt_freesuftabparts(sfi->suftabparts);
-  gt_bcktab_delete(sfi->bcktab);
-  gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
-  gt_free(sfi->markwholeleafbuckets);
-  gt_differencecover_delete(sfi->dcov);
   if (sfi->bcktmpfilename != NULL)
   {
-    gt_logger_log(sfi->logger,"remove \"%s\"",gt_str_get(sfi->bcktmpfilename));
-    if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
+    gt_assert(stpgetnumofparts(sfi->suftabparts) > 1U);
+    if (gt_bcktab_flush_remaining(sfi->bcktab,gt_str_get(sfi->bcktmpfilename),
+                                  err) != 0)
     {
-      if (err != NULL)
+      haserr = true;
+    } else
+    {
+      /*
+      if (sfi->bcktabfileprefix != NULL)
       {
-        gt_error_set(err,"Cannot unlink file \"%s\": %s",
-                        gt_str_get(sfi->bcktmpfilename),
-                        strerror(errno));
-        haserr = true;
-      } else
+        GtStr *bcktabfile = gt_str_new_cstr(sfi->bcktabfileprefix);
+
+        gt_str_append_cstr(bcktabfile, BCKTABSUFFIX);
+        gt_xfile_cmp(gt_str_get(sfi->bcktmpfilename),gt_str_get(bcktabfile));
+        gt_str_delete(bcktabfile);
+      }
+      */
+      gt_logger_log(sfi->logger,"remove \"%s\"",
+                    gt_str_get(sfi->bcktmpfilename));
+      if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
       {
-        fprintf(stderr,"Cannot unlink file \"%s\": %s",
-                        gt_str_get(sfi->bcktmpfilename),
-                        strerror(errno));
-        exit(EXIT_FAILURE);
+        if (err != NULL)
+        {
+          gt_error_set(err,"Cannot unlink file \"%s\": %s",
+                          gt_str_get(sfi->bcktmpfilename),
+                          strerror(errno));
+          haserr = true;
+        } else
+        {
+          fprintf(stderr,"Cannot unlink file \"%s\": %s",
+                          gt_str_get(sfi->bcktmpfilename),
+                          strerror(errno));
+          exit(EXIT_FAILURE);
+        }
       }
     }
   }
+  gt_bcktab_delete(sfi->bcktab);
+  gt_freesuftabparts(sfi->suftabparts);
+  gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
+  gt_free(sfi->markwholeleafbuckets);
+  gt_differencecover_delete(sfi->dcov);
   gt_str_delete(sfi->bcktmpfilename);
   gt_free(sfi);
   return haserr ? -1 : 0;
@@ -1310,6 +1331,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->dcov = NULL;
     sfi->markwholeleafbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
+    sfi->bcktabfileprefix = NULL;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -1609,6 +1631,12 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     return NULL;
   }
   return sfi;
+}
+
+void gt_Sfxiterator_setbcktabfileprefix(Sfxiterator *sfi,
+                                        const char *bcktabfileprefix)
+{
+  sfi->bcktabfileprefix = bcktabfileprefix;
 }
 
 static void preparethispart(Sfxiterator *sfi)

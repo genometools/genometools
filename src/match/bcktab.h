@@ -89,6 +89,10 @@ void gt_bcktab_includedistpfxidx_out(GtBcktab *bcktab);
 
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
+int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
+                              const char *bcktmpfilename,
+                              GtError *err);
+
 unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
                                        const GtBcktab *bcktab,
                                        GtCodetype code,
