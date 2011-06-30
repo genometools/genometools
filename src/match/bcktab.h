@@ -53,8 +53,8 @@ GtBcktab *gt_bcktab_map(const char *indexname,
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    const char *bcktmpfilename,
                                    unsigned int part,
-                                   unsigned long offset,
-                                   unsigned long end);
+                                   GtCodetype mincode,
+                                   GtCodetype maxcode);
 
 void gt_bcktab_delete(GtBcktab *bcktab);
 

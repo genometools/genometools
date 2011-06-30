@@ -15,12 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <unistd.h>
 #include "core/assert_api.h"
 #include "core/ma_api.h"
-#include "core/divmodmul.h"
 #include "core/codetype.h"
-#include "core/fa.h"
 #include "bcktab.h"
 #include "sfx-partssuf.h"
 
@@ -35,11 +32,9 @@ typedef struct
 struct Suftabparts
 {
   Suftabpartcomponent *components;
-  size_t sizeofbcktabbasetype;
   unsigned int numofparts;
   unsigned long largestwidth,
-                numofsuffixestoinsert,
-                pagesize;
+                numofsuffixestoinsert;
 };
 
 #ifdef SKDEBUG
@@ -137,10 +132,6 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
-  suftabparts->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
-  /*printf("pagesize=%lu\n",suftabparts->pagesize);*/
-  gt_assert(suftabparts->pagesize % sizeof (unsigned long) == 0);
-  suftabparts->sizeofbcktabbasetype = gt_bcktab_sizeofbasetype(bcktab);
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
@@ -227,29 +218,6 @@ unsigned long stpgetcurrentsuftaboffset(unsigned int part,
                                         const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].suftaboffset;
-}
-
-unsigned long stpgetcurrentleftborderoffset(unsigned int part,
-                                            const Suftabparts *suftabparts)
-{
-  unsigned long mincode = stpgetcurrentmincode(part,suftabparts);
-
-  return ((mincode * suftabparts->sizeofbcktabbasetype)/suftabparts->pagesize)
-         * suftabparts->pagesize;
-}
-
-unsigned long stpgetcurrentleftborderend(unsigned int part,
-                                         const Suftabparts *suftabparts)
-{
-  unsigned long maxcode = stpgetcurrentmaxcode(part,suftabparts);
-
-  if ((maxcode * suftabparts->sizeofbcktabbasetype)
-      % suftabparts->pagesize  == 0)
-  {
-    return maxcode * suftabparts->sizeofbcktabbasetype;
-  }
-  return ((maxcode * suftabparts->sizeofbcktabbasetype)/suftabparts->pagesize)
-         * suftabparts->pagesize + suftabparts->pagesize;
 }
 
 GtCodetype stpgetcurrentmaxcode(unsigned int part,

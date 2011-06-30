@@ -1623,6 +1623,24 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
+  if (stpgetnumofparts(sfi->suftabparts) > 1U)
+  {
+    gt_logger_log(sfi->logger,"compute part %u: "
+                              "%lu suffixes,%lu buckets from "
+                              "%lu(%lu)..%lu(%lu)",
+                  sfi->part,
+                  stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
+                  sfi->currentmaxcode - sfi->currentmincode + 1,
+                  sfi->currentmincode,
+                  sfi->currentmincode * gt_bcktab_sizeofbasetype(sfi->bcktab),
+                  sfi->currentmaxcode,
+                  sfi->currentmaxcode * gt_bcktab_sizeofbasetype(sfi->bcktab));
+    gt_bcktab_assignboundsforpart(sfi->bcktab,
+                                  gt_str_get(sfi->bcktmpfilename),
+                                  sfi->part,
+                                  sfi->currentmincode,
+                                  sfi->currentmaxcode);
+  }
   gt_suffixsortspace_offset_set(sfi->suffixsortspace,
                                 stpgetcurrentsuftaboffset(sfi->part,
                                                           sfi->suftabparts));
@@ -1851,40 +1869,6 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    if (stpgetnumofparts(sfi->suftabparts) > 1U)
-    {
-      unsigned long mincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
-      unsigned long maxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
-      unsigned long mapoffset
-        = stpgetcurrentleftborderoffset(sfi->part,sfi->suftabparts);
-      unsigned long mapend
-        = stpgetcurrentleftborderend(sfi->part,sfi->suftabparts);
-      gt_assert(mapoffset <= mincode * gt_bcktab_sizeofbasetype(sfi->bcktab));
-      gt_assert(maxcode * gt_bcktab_sizeofbasetype(sfi->bcktab)
-                <= mapend);
-      gt_logger_log(sfi->logger,"compute part %u "
-                                "(%lu suffixes,%lu buckets from "
-                                "%lu(%lu)..%lu(%lu),"
-                                "mapped from %lu to %lu (%.2f%% of all))",
-                    sfi->part,
-                    stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
-                    maxcode - mincode + 1,
-                    mincode,
-                    mincode * gt_bcktab_sizeofbasetype(sfi->bcktab),
-                    maxcode,
-                    maxcode * gt_bcktab_sizeofbasetype(sfi->bcktab),
-                    mapoffset,
-                    mapend,
-                    100.0 * (double)
-                    stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts)/
-                    stpnumofsuffixestoinsert(sfi->suftabparts));
-      gt_bcktab_assignboundsforpart(
-             sfi->bcktab,
-             gt_str_get(sfi->bcktmpfilename),
-             sfi->part,
-             stpgetcurrentleftborderoffset(sfi->part,sfi->suftabparts),
-             stpgetcurrentleftborderend(sfi->part,sfi->suftabparts));
-    }
     preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
     if (specialsuffixes != NULL)

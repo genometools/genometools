@@ -18,6 +18,7 @@
 #include <string.h>
 #include <errno.h>
 #include <math.h>
+#include <unistd.h>
 #include "core/error.h"
 #include "core/str.h"
 #include "core/fa.h"
@@ -59,7 +60,8 @@ struct GtBcktab
            **uintdistpfxidx;
   unsigned long *ulongcountspecialcodes,
                 **ulongdistpfxidx,
-                sizeofrep;
+                sizeofrep,
+                pagesize;
   unsigned int prefixlength,
                optimalnumofbits;
   GtCodetype numofallcodes,
@@ -88,6 +90,8 @@ void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code)
   }
 }
 
+static unsigned long checkboundsinsert = 0, checkboundsget = 0;
+
 unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
                                                   GtCodetype code)
 {
@@ -99,6 +103,7 @@ unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
   if (lb->uintboundsforpart != NULL)
   {
     gt_assert(lb->uintboundsforpart[code] == lb->uintbounds[code]);
+    checkboundsinsert++;
     --lb->uintboundsforpart[code];
   }
   return (unsigned long) --lb->uintbounds[code];
@@ -133,6 +138,7 @@ unsigned long gt_bcktab_get(const GtBcktab *bcktab,GtCodetype code)
   {
     gt_assert(bcktab->leftborder.uintbounds[code] ==
               bcktab->leftborder.uintboundsforpart[code]);
+    checkboundsget++;
   }
   return (unsigned long) bcktab->leftborder.uintbounds[code];
 }
@@ -171,26 +177,49 @@ size_t gt_bcktab_sizeofbasetype(const GtBcktab *bcktab)
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    const char *bcktmpfilename,
                                    GT_UNUSED unsigned int part,
-                                   unsigned long offset,
-                                   unsigned long end)
+                                   GtCodetype mincode,
+                                   GtCodetype maxcode)
 {
+  unsigned long mapoffset, mapend, totalsizeofcodes;
+
   if (bcktab->mappedleftborder != NULL)
   {
     gt_fa_xmunmap(bcktab->mappedleftborder);
   }
   /*printf("map for part %u\n",part);*/
+  mapoffset = ((mincode * gt_bcktab_sizeofbasetype(bcktab))/bcktab->pagesize)
+              * bcktab->pagesize;
+  if ((maxcode * gt_bcktab_sizeofbasetype(bcktab)) % bcktab->pagesize  == 0)
+  {
+    mapend = maxcode * gt_bcktab_sizeofbasetype(bcktab);
+  } else
+  {
+    mapend = ((maxcode * gt_bcktab_sizeofbasetype(bcktab))/bcktab->pagesize)
+             * bcktab->pagesize + bcktab->pagesize;
+  }
+  totalsizeofcodes = bcktab->numofallcodes * gt_bcktab_sizeofbasetype(bcktab);
+  printf("part %u: mapped from %lu to %lu (%.2f of all)\n",part,
+                                      mapoffset,mapend,
+                                    (mapend - mapoffset + 1 >= totalsizeofcodes)
+                                    ? 100.0
+                                    : 100.0 * (mapend - mapoffset + 1)/
+                                      totalsizeofcodes);
+  gt_assert(mapoffset <= mapend);
+  gt_assert(mapoffset <= mincode * gt_bcktab_sizeofbasetype(bcktab));
+  gt_assert(maxcode * gt_bcktab_sizeofbasetype(bcktab) <= mapend);
   bcktab->mappedleftborder
-    = gt_fa_xmmap_write_range(bcktmpfilename,(size_t) (end - offset + 1),
-                             (size_t) offset);
+    = gt_fa_xmmap_write_range(bcktmpfilename,(size_t) (mapend - mapoffset + 1),
+                             (size_t) mapoffset);
   if (bcktab->useulong)
   {
     bcktab->leftborder.ulongboundsforpart
       = ((unsigned long *) bcktab->mappedleftborder) -
-        (offset / sizeof (unsigned long));
+        (mapoffset / sizeof (unsigned long));
   } else
   {
     bcktab->leftborder.uintboundsforpart
-      = ((uint32_t *) bcktab->mappedleftborder) - (offset / sizeof (uint32_t));
+      = ((uint32_t *) bcktab->mappedleftborder) -
+         (mapoffset / sizeof (uint32_t));
   }
 }
 
@@ -369,6 +398,8 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = gt_initmultimappower(numofchars,prefixlength);
+  bcktab->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
+  gt_assert(bcktab->pagesize % sizeof (unsigned long) == 0);
   bcktab->allocated = false;
   bcktab->useulong = false;
   bcktab->qgrambuffer = gt_malloc(sizeof (*bcktab->qgrambuffer) * prefixlength);
@@ -768,6 +799,10 @@ void gt_bcktab_delete(GtBcktab *bcktab)
   gt_free(bcktab->qgrambuffer);
   bcktab->qgrambuffer = NULL;
   gt_free(bcktab);
+  /*
+  printf("# checkboundsinsert=%lu\n",checkboundsinsert);
+  printf("# checkboundsget=%lu\n",checkboundsget);
+  */
 }
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
