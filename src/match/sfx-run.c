@@ -306,7 +306,6 @@ static int detpfxlen(unsigned int *prefixlength,
 static int run_packedindexconstruction(GtLogger *logger,
                                        GtTimer *sfxprogress,
                                        bool withprogressbar,
-                                       FILE *outfpbcktab,
                                        const Suffixeratoroptions *so,
                                        unsigned int prefixlength,
                                        const GtEncseq *encseq,
@@ -315,7 +314,6 @@ static int run_packedindexconstruction(GtLogger *logger,
 {
   sfxInterface *si;
   BWTSeq *bwtSeq;
-  const Sfxiterator *sfi;
   bool haserr = false;
   struct bwtParam finalcopy;
   struct bwtOptions bwtIdxParams =
@@ -352,25 +350,12 @@ static int run_packedindexconstruction(GtLogger *logger,
     bwtSeq = gt_createBWTSeqFromSfxI(&finalcopy, si, err);
     if (bwtSeq == NULL)
     {
-      gt_deleteSfxInterface(si);
       haserr = true;
     } else
     {
       gt_deleteBWTSeq(bwtSeq); /**< the actual object is not * used here */
-      /*
-        outfileinfo.longest = gt_SfxIGetRot0Pos(si);
-      */
-      sfi = gt_SfxInterface2Sfxiterator(si);
-      gt_assert(sfi != NULL);
-      if (outfpbcktab != NULL)
-      {
-        if (gt_Sfxiterator_bcktab2file(outfpbcktab,sfi,err) != 0)
-        {
-          haserr = true;
-        }
-      }
-      gt_deleteSfxInterface(si);
     }
+    gt_deleteSfxInterface(si);
   }
   return haserr ? -1 : 0;
 }
@@ -580,7 +565,6 @@ static int runsuffixerator(bool doesa,
         if (run_packedindexconstruction(logger,
                                         sfxprogress,
                                         so->showprogress,
-                                        outfileinfo.outfpbcktab,
                                         so,
                                         prefixlength,
                                         encseq,

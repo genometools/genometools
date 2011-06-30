@@ -81,6 +81,17 @@ def checkbwt(filelist)
            flattenfilelist(filelist)
 end
 
+Name "gt suffixerator spmopt"
+Keywords "gt_suffixerator spmopt"
+Test do
+  run_test "#{$bin}/gt suffixerator -des -tis -ssp -dna " +
+           "-db #{$testdata}/U89959_genomic.fas -indexname genome-idx"
+  run "#{$bin}/gt simreads -coverage 5 -len 100 -gzip -force " +
+      "-o genome-idx-100-5-reads.fna.gz genome-idx"
+  run_test "#{$bin}/gt suffixerator -mirrored -v -spmopt 45 -suf -lcp -dna " +
+           "-parts 4 -db genome-idx-100-5-reads.fna.gz"
+end
+
 allfiles = []
 all_fastafiles = ["Arabidopsis-C99826.fna",
                   "Atinsert.fna",
@@ -525,3 +536,4 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
     grep($last_stderr, /one of the keywords MB and GB/)
   end
 end
+

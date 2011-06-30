@@ -1416,7 +1416,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                              ? true : false);
       estimatedspace += (size_t) sizeofbcktab +
                         gt_bcktab_sizeofworkspace(prefixlength);
-      gt_logger_log(logger,"sizeof(bcktab)=" Formatuint64_t,sizeofbcktab);
     }
   }
   SHOWCURRENTSPACE;

@@ -657,7 +657,7 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
   unsigned long sizeofrep = bcktab->sizeofrep;
 
   gt_error_check(err);
-  if (bcktab->excludedistpfxidx)
+  if (bcktab->excludedistpfxidx && bcktab->withspecialsuffixes)
   {
     sizeofrep -= gt_bcktab_sizeofbasetype(bcktab) *
                  numofdistpfxidxcounters(bcktab->basepower,
