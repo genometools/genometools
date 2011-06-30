@@ -21,6 +21,7 @@
 #include "core/error.h"
 #include "core/intbits.h"
 #include "core/codetype.h"
+#include "core/logger_api.h"
 
 typedef struct
 {
@@ -53,8 +54,10 @@ GtBcktab *gt_bcktab_map(const char *indexname,
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    const char *bcktmpfilename,
                                    unsigned int part,
+                                   unsigned int numofchars,
                                    GtCodetype mincode,
-                                   GtCodetype maxcode);
+                                   GtCodetype maxcode,
+                                   GtLogger *logger);
 
 void gt_bcktab_delete(GtBcktab *bcktab);
 
@@ -63,6 +66,7 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
                         unsigned long maxvalue,
                         bool storespecialcodes,
                         bool withspecialsuffixes,
+                        GtLogger *logger,
                         GtError *err);
 
 void gt_bcktab_updatespecials(GtBcktab *bcktab,

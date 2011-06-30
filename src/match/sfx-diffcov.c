@@ -1063,6 +1063,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                                dcov->totallength+1,
                                true, /* storespecialcodes */
                                true, /* withspecialsuffixes */
+                               NULL,
                                NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;

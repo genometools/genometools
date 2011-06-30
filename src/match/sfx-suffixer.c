@@ -1289,7 +1289,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     {
       sfi->spaceCodeatposition
         = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
-      gt_log_log("sizeof (spaceCodeatposition)=%lu bytes",
+      gt_logger_log(logger,"sizeof (spaceCodeatposition)=%lu bytes",
                  (unsigned long) (sizeof (*sfi->spaceCodeatposition) *
                                           (realspecialranges+1)));
       estimatedspace += sizeof (*sfi->spaceCodeatposition) *
@@ -1393,6 +1393,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 sfi->totallength+1,
                                 sfi->sfxstrategy.storespecialcodes,
                                 sfi->sfxstrategy.spmopt == 0 ? true : false,
+                                sfi->logger,
                                 err);
     if (sfi->bcktab == NULL)
     {
@@ -1638,8 +1639,10 @@ static void preparethispart(Sfxiterator *sfi)
     gt_bcktab_assignboundsforpart(sfi->bcktab,
                                   gt_str_get(sfi->bcktmpfilename),
                                   sfi->part,
+                                  sfi->numofchars,
                                   sfi->currentmincode,
-                                  sfi->currentmaxcode);
+                                  sfi->currentmaxcode,
+                                  sfi->logger);
   }
   gt_suffixsortspace_offset_set(sfi->suffixsortspace,
                                 stpgetcurrentsuftaboffset(sfi->part,
