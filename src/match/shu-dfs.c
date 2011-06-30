@@ -71,15 +71,14 @@ static inline void add_filenum_count(unsigned long lower,
 }
 
 static inline unsigned long **get_special_pos(const FMindex *index,
-                                         BwtSeqpositionextractor *pos_extractor)
+                                         BwtSeqpositionextractor *pos_extractor,
+                                         unsigned long num_of_specials)
 {
   unsigned long row_idx, special_idx = 0,
                 **special_char_rows_and_pos,
-                num_of_specials,
                 first_special_row;
   GtUchar cc;
 
-  num_of_specials = gt_pck_special_occ_in_nonspecial_intervals(index);
   first_special_row = gt_pck_get_nonspecial_count(index);
 
   gt_array2dim_calloc(special_char_rows_and_pos,
@@ -97,7 +96,7 @@ static inline unsigned long **get_special_pos(const FMindex *index,
       special_idx++;
     }
   }
-  gt_assert(num_of_specials == special_idx);
+  gt_assert(special_idx == num_of_specials);
   return special_char_rows_and_pos;
 }
 
@@ -434,7 +433,9 @@ int gt_pck_calculate_shulen(const FMindex *index,
   {
     gt_timer_show_progress(timer, "obtain special pos", stdout);
   }
-  special_char_rows_and_pos = get_special_pos(index, pos_extractor);
+  special_char_rows_and_pos = get_special_pos(index,
+                                              pos_extractor,
+                                              max_idx + 1);
   GT_STACK_NEXT_FREE(&stack,root);
   gt_array2dim_calloc(root->countTermSubtree,
                       numofchars+1UL,
