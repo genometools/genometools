@@ -530,7 +530,7 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
   }
   if (!haserr)
   {
-    size_t allocsize_bounds, allocsize_countspecialcodes;
+    size_t allocsize_bounds, allocsize_countspecialcodes = 0;
     if (maxvalue <= (unsigned long) UINT_MAX)
     {
       allocsize_bounds = sizeof (*bcktab->leftborder.uintbounds) *
