@@ -500,38 +500,54 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
       haserr = true;
     } else
     {
-      gt_bcktab_delete(sfi->bcktab);
       if (sfi->bcktabfileprefix != NULL)
       {
         GtStr *bcktabfile = gt_str_new_cstr(sfi->bcktabfileprefix);
 
         gt_str_append_cstr(bcktabfile, BCKTABSUFFIX);
-        gt_xfile_cmp(gt_str_get(sfi->bcktmpfilename),gt_str_get(bcktabfile));
+        if (rename(gt_str_get(sfi->bcktmpfilename),gt_str_get(bcktabfile)) != 0)
+        {
+          if (err != NULL)
+          {
+            gt_error_set(err,"Cannot rename file \"%s\" to \"%s\": %s",
+                            gt_str_get(sfi->bcktmpfilename),
+                            gt_str_get(bcktabfile),
+                            strerror(errno));
+            haserr = true;
+          } else
+          {
+            fprintf(stderr,"Cannot rename file \"%s\" to \"%s\": %s",
+                            gt_str_get(sfi->bcktmpfilename),
+                            gt_str_get(bcktabfile),
+                            strerror(errno));
+            exit(EXIT_FAILURE);
+          }
+        }
         gt_str_delete(bcktabfile);
-      }
-      gt_logger_log(sfi->logger,"remove \"%s\"",
-                    gt_str_get(sfi->bcktmpfilename));
-      if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
+      } else
       {
-        if (err != NULL)
+        gt_logger_log(sfi->logger,"remove \"%s\"",
+                      gt_str_get(sfi->bcktmpfilename));
+        if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
         {
-          gt_error_set(err,"Cannot unlink file \"%s\": %s",
-                          gt_str_get(sfi->bcktmpfilename),
-                          strerror(errno));
-          haserr = true;
-        } else
-        {
-          fprintf(stderr,"Cannot unlink file \"%s\": %s",
-                          gt_str_get(sfi->bcktmpfilename),
-                          strerror(errno));
-          exit(EXIT_FAILURE);
+          if (err != NULL)
+          {
+            gt_error_set(err,"Cannot unlink file \"%s\": %s",
+                            gt_str_get(sfi->bcktmpfilename),
+                            strerror(errno));
+            haserr = true;
+          } else
+          {
+            fprintf(stderr,"Cannot unlink file \"%s\": %s",
+                            gt_str_get(sfi->bcktmpfilename),
+                            strerror(errno));
+            exit(EXIT_FAILURE);
+          }
         }
       }
     }
-  } else
-  {
-    gt_bcktab_delete(sfi->bcktab);
   }
+  gt_bcktab_delete(sfi->bcktab);
   gt_freesuftabparts(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
@@ -1934,7 +1950,11 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
 {
   gt_error_check(err);
   gt_assert(sfi != NULL && sfi->bcktab != NULL);
-  return gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
+  if (stpgetnumofparts(sfi->suftabparts) <= 1U)
+  {
+    return gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
+  }
+  return 0;
 }
 
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi)
