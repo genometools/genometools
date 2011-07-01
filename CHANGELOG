@@ -1,6 +1,8 @@
-changes in version 1.3.9 (2011-06-20)
+changes in version 1.3.9 (2011-07-01)
 
+- various bugfixes and cleanups
 - fix option -translate in `gt extractfeat` tool
+- mirroring and seqnum/filenum support added for gtruby/gtpython
 
 
 changes in version 1.3.8 (2011-06-16)
