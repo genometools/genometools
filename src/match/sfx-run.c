@@ -248,6 +248,8 @@ static int suffixeratorwithoutput(const char *indexname,
       {
         haserr = true;
       }
+      gt_fa_fclose(outfileinfo->outfpbcktab);
+      outfileinfo->outfpbcktab = NULL;
       gt_Sfxiterator_setbcktabfileprefix(sfi,indexname);
     }
   }

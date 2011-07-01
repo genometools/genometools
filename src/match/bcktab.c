@@ -35,7 +35,6 @@
 #include "esa-fileend.h"
 #include "bcktab.h"
 #include "initbasepower.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -254,14 +253,18 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
   if (bcktab->withspecialsuffixes)
   {
     GtCodetype firstcode, lastcode;
+    const size_t basesize = gt_bcktab_sizeofbasetype(bcktab);
+    unsigned int padoffset = 0;
 
+    firstcode = bcktab->numofallcodes + 1;
+    if (basesize < GT_WORDSIZE_INBYTES &&
+        (firstcode * basesize) % GT_WORDSIZE_INBYTES > 0)
+    {
+      padoffset = 1U;
+    }
     if (mincode >= (GtCodetype) (numofchars - 1))
     {
-      firstcode = bcktab->numofallcodes + 1 +
-                  FROMCODE2SPECIALCODE(mincode,numofchars);
-    } else
-    {
-      firstcode = bcktab->numofallcodes + 1;
+      firstcode += FROMCODE2SPECIALCODE(mincode,numofchars);
     }
     if (maxcode >= (GtCodetype) (numofchars - 1))
     {
@@ -271,13 +274,9 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
     {
       lastcode = bcktab->numofallcodes + 1;
     }
-    mapoffset = multipleofpagesize(firstcode,
-                                   true,
-                                   gt_bcktab_sizeofbasetype(bcktab),
+    mapoffset = multipleofpagesize(firstcode+padoffset, true, basesize,
                                    bcktab->pagesize);
-    mapend = multipleofpagesize(lastcode,
-                                false,
-                                gt_bcktab_sizeofbasetype(bcktab),
+    mapend = multipleofpagesize(lastcode+padoffset, false, basesize,
                                 bcktab->pagesize);
     gt_assert(mapoffset % bcktab->pagesize == 0);
     totalsizeofcodes
@@ -297,13 +296,13 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
       bcktab->ulongcountspecialcodesforpart
         = ((unsigned long *) bcktab->mappedcountspecialcodes) -
           (mapoffset / sizeof (unsigned long)) +
-          bcktab->numofallcodes + 1;
+          bcktab->numofallcodes + 1 + padoffset;
     } else
     {
       bcktab->uintcountspecialcodesforpart
         = ((uint32_t *) bcktab->mappedcountspecialcodes) -
            (mapoffset / sizeof (uint32_t)) +
-           bcktab->numofallcodes + 1;
+          bcktab->numofallcodes + 1 + padoffset;
     }
   }
 }
@@ -676,7 +675,7 @@ int gt_bcktab_flush_remaining(GT_UNUSED const GtBcktab *bcktab,
   bool haserr = false;
 
   if (bcktab->withspecialsuffixes  &&
-      (bcktab->ulongdistpfxidx != NULL || bcktab->uintdistpfxidx == NULL))
+      (bcktab->ulongdistpfxidx != NULL || bcktab->uintdistpfxidx != NULL))
   {
     unsigned long byteswritten;
     FILE *fp;
@@ -749,7 +748,6 @@ static int fillbcktabmapspecstartptr(GtBcktab *bcktab,
                           bcktab->sizeofrep,
                           err) != 0)
   {
-    STAMP;
     haserr = true;
   }
   gt_str_delete(tmpfilename);
@@ -1016,6 +1014,8 @@ void gt_bcktab_updatespecials(GtBcktab *bcktab,
     }
   }
 }
+
+/* The following function is not used anymore */
 
 void gt_bcktab_addfinalspecials(GtBcktab *bcktab,unsigned int numofchars,
                                 unsigned long specialcharacters)

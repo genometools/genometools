@@ -41,6 +41,8 @@ typedef uint32_t GtBitsequence;
 
 #endif
 
+#define GT_WORDSIZE_INBYTES (sizeof (void *))
+
 #define GT_INTWORDSIZE\
         (1 << GT_LOGWORDSIZE) /* # of bits in unsigned long = w */
 #define GT_LASTHALVEBITS\

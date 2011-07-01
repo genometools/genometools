@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -50,7 +50,6 @@
 #include "sfx-mappedstr.h"
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -473,6 +472,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
 {
   bool haserr = false;
 
+  gt_error_check(err);
   if (sfi == NULL)
   {
     return 0;
@@ -483,11 +483,6 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     gt_bcktab_checkcountspecialcodes(sfi->bcktab);
   }
 #endif
-  if (sfi->bcktab != NULL)
-  {
-    gt_bcktab_addfinalspecials(sfi->bcktab,sfi->numofchars,
-                               sfi->specialcharacters);
-  }
   if (sfi->sri != NULL)
   {
     gt_specialrangeiterator_delete(sfi->sri);
@@ -496,16 +491,16 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace,
                             sfi->sfxstrategy.spmopt == 0 ? true : false);
-  if (sfi->bcktmpfilename != NULL)
+  if (stpgetnumofparts(sfi->suftabparts) > 1U)
   {
-    gt_assert(stpgetnumofparts(sfi->suftabparts) > 1U);
+    gt_assert (sfi->bcktmpfilename != NULL);
     if (gt_bcktab_flush_remaining(sfi->bcktab,gt_str_get(sfi->bcktmpfilename),
                                   err) != 0)
     {
       haserr = true;
     } else
     {
-      /*
+      gt_bcktab_delete(sfi->bcktab);
       if (sfi->bcktabfileprefix != NULL)
       {
         GtStr *bcktabfile = gt_str_new_cstr(sfi->bcktabfileprefix);
@@ -514,7 +509,6 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
         gt_xfile_cmp(gt_str_get(sfi->bcktmpfilename),gt_str_get(bcktabfile));
         gt_str_delete(bcktabfile);
       }
-      */
       gt_logger_log(sfi->logger,"remove \"%s\"",
                     gt_str_get(sfi->bcktmpfilename));
       if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
@@ -534,8 +528,10 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
         }
       }
     }
+  } else
+  {
+    gt_bcktab_delete(sfi->bcktab);
   }
-  gt_bcktab_delete(sfi->bcktab);
   gt_freesuftabparts(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
@@ -601,6 +597,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   unsigned int parts;
   Suftabparts *suftabparts;
 
+  gt_error_check(err);
   if (estimatedspace >= (size_t) maximumspace)
   {
     gt_error_set(err,"already used %.2f MB of memory, cannot compute "
@@ -1368,6 +1365,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->bucketiterstep = 0;
     sfi->logger = logger;
     sfi->sfxprogress = sfxprogress;
+    sfi->bcktmpfilename = NULL;
 
     if (sfi->sfxstrategy.differencecover > 0 &&
         specialcharacters < sfi->totallength)
@@ -1603,7 +1601,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->fusp.sssp = sfi->suffixsortspace;
     sfi->fusp.allocatedSuffixptr = stpgetlargestwidth(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
-    if (numofparts > 1U)
+    if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
       FILE *bcktmpfilefp;
 
@@ -1619,10 +1617,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
       gt_bcktab_includedistpfxidx_out(sfi->bcktab);
       gt_fa_fclose(bcktmpfilefp);
-    } else
-    {
-      gt_assert(sfi != NULL);
-      sfi->bcktmpfilename = NULL;
     }
   }
   if (haserr)
@@ -1939,6 +1933,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
 int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
 {
   gt_error_check(err);
+  gt_assert(sfi != NULL && sfi->bcktab != NULL);
   return gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
 }
 

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -78,10 +78,6 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
                                    GtCodetype code,
                                    unsigned int prefixindex,
                                    unsigned int maxprefixlen);
-
-void gt_bcktab_addfinalspecials(GtBcktab *bcktab,
-                                unsigned int numofchars,
-                                unsigned long specialcharacters);
 
 void gt_bcktab_excludedistpfxidx_out(GtBcktab *bcktab);
 

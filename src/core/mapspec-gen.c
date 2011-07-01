@@ -41,8 +41,6 @@
           *((TYPE **) mapspec->startptr) = voidptr;\
         }
 
-#define ALIGNSIZE sizeof (void *)
-
 #define WRITEACTIONWITHTYPE(TYPE)\
         if (fwrite(*((TYPE **) mapspecptr->startptr),\
                    mapspecptr->sizeofunit,\
@@ -69,9 +67,9 @@ static uint64_t detexpectedaccordingtomapspec(const GtArrayGtMapspecification
   {
     sumup += (uint64_t) mapspecptr->sizeofunit *
              (uint64_t) mapspecptr->numofunits;
-    if (sumup % ALIGNSIZE > 0)
+    if (sumup % GT_WORDSIZE_INBYTES > 0)
     {
-      sumup += (ALIGNSIZE - (sumup % ALIGNSIZE));
+      sumup += (GT_WORDSIZE_INBYTES - (sumup % GT_WORDSIZE_INBYTES));
     }
   }
   return sumup;
@@ -199,9 +197,10 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    if (byteoffset % (unsigned long) ALIGNSIZE > 0)
+    if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
     {
-      size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
+      size_t padunits
+        = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
       byteoffset += (unsigned long) padunits;
       totalpadunits += (unsigned long) padunits;
     }
@@ -218,9 +217,10 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
                                 (uint64_t) (byteoffset +
                                             mapspecptr->sizeofunit *
                                             mapspecptr->numofunits));
-      if (byteoffset % (unsigned long) ALIGNSIZE > 0)
+      if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
       {
-        size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
+        size_t padunits
+          = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
         byteoffset += (unsigned long) padunits;
         totalpadunits += (unsigned long) padunits;
       }
@@ -245,11 +245,11 @@ int gt_mapspec_addpadbytes(FILE *fp,unsigned long *byteswritten,
 {
   bool haserr = false;
 
-  if (byteoffset % (unsigned long) ALIGNSIZE > 0)
+  if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
   {
-    GtUchar padbuffer[ALIGNSIZE-1] = {0};
+    GtUchar padbuffer[GT_WORDSIZE_INBYTES-1] = {0};
 
-    size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
+    size_t padunits = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
     if (fwrite(padbuffer,sizeof (GtUchar),padunits,fp) != padunits)
     {
       gt_error_set(err,"cannot write %lu items of size %u: "
@@ -351,24 +351,6 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
                               (uint64_t) (byteoffset +
                                           mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    /*
-    if (byteoffset % (unsigned long) ALIGNSIZE > 0)
-    {
-      size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
-      if (fwrite(padbuffer,
-                sizeof (GtUchar),padunits,fp) != padunits)
-      {
-        gt_error_set(err,"cannot write %lu items of size %u: "
-                          "errormsg=\"%s\"",
-                           (unsigned long) padunits,
-                           (unsigned int) sizeof (GtUchar),
-                           strerror(errno));
-        haserr = true;
-      }
-      byteoffset += (unsigned long) padunits;
-      totalpadunits += (unsigned long) padunits;
-    }
-    */
     if (gt_mapspec_addpadbytes(fp,&byteswritten,byteoffset,err) != 0)
     {
       haserr = true;

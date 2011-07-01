@@ -215,8 +215,8 @@ void gt_xfile_cmp(const char *file1,const char *file2)
     cc2 = fgetc(fp2);
     if (cc1 != cc2)
     {
-      fprintf(stderr,"files %s and %s differ in byte %lu\n",file1,file2,
-                                                  (unsigned long) offset);
+      fprintf(stderr,"files %s and %s differ in byte %lu: %d != %d\n",
+                      file1,file2,(unsigned long) offset,cc1,cc2);
       exit(EXIT_FAILURE);
     }
     if (cc1 == EOF)
