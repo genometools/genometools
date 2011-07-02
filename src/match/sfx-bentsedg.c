@@ -80,6 +80,7 @@
 
 typedef GtEndofTwobitencoding GtSfxcmp;
 
+/*
 #define PTR2INT(TMPVAR,SUBBUCKETLEFT,IDX)\
         {\
           unsigned long pos\
@@ -99,12 +100,13 @@ typedef GtEndofTwobitencoding GtSfxcmp;
             TMPVAR.position = pos;\
           }\
         }
+*/
 
-#define PTR2INTSTOREPOS(POSVAR,TMPVAR,SUBBUCKETLEFT,IDX)\
+#define PTR2INTSTOREPOS(TMPVAR,SUBBUCKETLEFT,IDX,POSASSIGNMENT)\
         {\
           unsigned long pos\
             = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
-          POSVAR = pos;\
+          POSASSIGNMENT;\
           if (pos + depth < bsr->totallength)\
           {\
             pos += depth;\
@@ -120,6 +122,9 @@ typedef GtEndofTwobitencoding GtSfxcmp;
             TMPVAR.position = pos;\
           }\
         }
+
+#define PTR2INT(TMPVAR,SUBBUCKETLEFT,IDX)\
+        PTR2INTSTOREPOS(TMPVAR,SUBBUCKETLEFT,IDX,/* Nothing */)
 
 #define Sfxdocompare(COMMONUNITS,X,Y)\
         ret##X##Y = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,\
@@ -143,7 +148,7 @@ typedef struct
   unsigned long suftaboffset;
 } GtMedianinfo;
 
-typedef GtMedianinfo MedianElem;
+typedef GtMedianinfo GtMedianElem;
 
 typedef struct
 {
@@ -176,13 +181,14 @@ typedef struct
   void *processunsortedsuffixrangeinfo;
   bool *equalwithprevious;
   unsigned long countinsertionsort,
-                countqsort,
+                counttqsort,
+                countquicksort,
                 countcountingsort,
                 countbltriesort;
-} Bentsedgresources;
+} GtBentsedgresources;
 
 #ifdef SKDEBUG
-static void showsuffixrange(const Bentsedgresources *bsr,
+static void showsuffixrange(const GtBentsedgresources *bsr,
                             unsigned long subbucketleft,
                             unsigned long width,
                             unsigned long depth)
@@ -245,7 +251,7 @@ static unsigned int checkstartpointorder(const unsigned long *left,
 }
 #endif
 
-static unsigned long medianof3cmpcharbychar(const Bentsedgresources *bsr,
+static unsigned long medianof3cmpcharbychar(const GtBentsedgresources *bsr,
                                             unsigned long subbucketleft,
                                             unsigned long depth,
                                             unsigned long a,
@@ -271,7 +277,7 @@ static unsigned long medianof3cmpcharbychar(const Bentsedgresources *bsr,
       : (valb > valc ? b : (vala < valc ? a : c));
 }
 
-static unsigned long medianof3(const Bentsedgresources *bsr,
+static unsigned long medianof3(const GtBentsedgresources *bsr,
                                unsigned long subbucketleft,
                                unsigned long depth,
                                unsigned long a,
@@ -305,7 +311,7 @@ static unsigned long medianof3(const Bentsedgresources *bsr,
       : (GtSfxcmpGREATER(valb,valc) ? b : (GtSfxcmpSMALLER(vala,valc) ? a : c));
 }
 
-static void bs_insertionsort(Bentsedgresources *bsr,
+static void bs_insertionsort(GtBentsedgresources *bsr,
                              unsigned long subbucketleft,
                              unsigned long width,
                              unsigned long offset)
@@ -404,7 +410,7 @@ static void bs_insertionsort(Bentsedgresources *bsr,
   }
 }
 
-static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
+static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                      unsigned long subbucketleft,
                                      unsigned long width,
                                      unsigned long offset,
@@ -581,10 +587,10 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
         gt_encseq_compare_pairof_twobitencodings(fwd,complement,&commonunits,\
                                                  &((A)->etbe),&((B)->etbe))
 
-#define MedianElemGREATER(A,B)  (DOMEDIANCOMPARE(A,B) > 0)
+#define GT_MedianElemGREATER(A,B)  (DOMEDIANCOMPARE(A,B) > 0)
 
-#define MedianElemSWAP(A,B)     {\
-                                  register MedianElem tmp = *(A);\
+#define GT_MedianElemSWAP(A,B)     {\
+                                  register GtMedianElem tmp = *(A);\
                                                       *(A) = *(B);\
                                                       *(B) = tmp;\
                                 }
@@ -596,10 +602,10 @@ static void bs_insertionsortmaxdepth(Bentsedgresources *bsr,
  *  This code by Nicolas Devillard - 1998. Public domain.
  */
 
-static MedianElem *quickmedian (bool fwd,bool complement,
-                                MedianElem *arr,unsigned long width)
+static GtMedianElem *quickmedian (bool fwd,bool complement,
+                                GtMedianElem *arr,unsigned long width)
 {
-  MedianElem *low, *high, *median, *middle, *ll, *hh;
+  GtMedianElem *low, *high, *median, *middle, *ll, *hh;
   GtCommonunits commonunits;
 
   gt_assert(width > 0);
@@ -614,29 +620,29 @@ static MedianElem *quickmedian (bool fwd,bool complement,
     }
     if (high == low + 1)
     {                                  /* Two elements only */
-      if (MedianElemGREATER(low,high))
+      if (GT_MedianElemGREATER(low,high))
       {
-        MedianElemSWAP (low, high);
+        GT_MedianElemSWAP (low, high);
       }
       return median;
     }
 
     /* Find median of low, middle and high items; swap into position low */
     middle = low + GT_DIV2(high - low + 1);
-    if (MedianElemGREATER(middle,high))
+    if (GT_MedianElemGREATER(middle,high))
     {
-      MedianElemSWAP (middle, high);
+      GT_MedianElemSWAP (middle, high);
     }
-    if (MedianElemGREATER(low,high))
+    if (GT_MedianElemGREATER(low,high))
     {
-      MedianElemSWAP (low, high);
+      GT_MedianElemSWAP (low, high);
     }
-    if (MedianElemGREATER(middle,low))
+    if (GT_MedianElemGREATER(middle,low))
     {
-      MedianElemSWAP (middle, low);
+      GT_MedianElemSWAP (middle, low);
     }
     /* Swap low item (now in position middle) into position (low+1) */
-    MedianElemSWAP (middle, low + 1);
+    GT_MedianElemSWAP (middle, low + 1);
 
     /* Nibble from each end towards middle, swapping items when stuck */
     ll = low + 1;
@@ -646,20 +652,20 @@ static MedianElem *quickmedian (bool fwd,bool complement,
       do
       {
         ll++;
-      } while (MedianElemGREATER(low,ll));
+      } while (GT_MedianElemGREATER(low,ll));
       do
       {
         hh--;
-      } while  (MedianElemGREATER(hh,low));
+      } while  (GT_MedianElemGREATER(hh,low));
       if (hh < ll)
       {
         break;
       }
-      MedianElemSWAP (ll, hh);
+      GT_MedianElemSWAP (ll, hh);
     }
 
     /* Swap middle item (in position low) back into correct position */
-    MedianElemSWAP (low, hh);
+    GT_MedianElemSWAP (low, hh);
 
     /* Re-set active partition */
     if (hh <= median)
@@ -736,7 +742,7 @@ static void checkmedian(bool fwd,
 }
 #endif
 
-static unsigned long realmedian(const Bentsedgresources *bsr,
+static unsigned long realmedian(const GtBentsedgresources *bsr,
                                 unsigned long subbucketleft,
                                 unsigned long width,
                                 unsigned long depth)
@@ -759,7 +765,7 @@ static unsigned long realmedian(const Bentsedgresources *bsr,
 
 #define MINMEDIANOF9WIDTH 31UL
 
-static unsigned long cmpcharbychardelivermedian(const Bentsedgresources *bsr,
+static unsigned long cmpcharbychardelivermedian(const GtBentsedgresources *bsr,
                                                 unsigned long subbucketleft,
                                                 unsigned long width,
                                                 unsigned long depth)
@@ -784,7 +790,7 @@ static unsigned long cmpcharbychardelivermedian(const Bentsedgresources *bsr,
   return medianof3cmpcharbychar(bsr,subbucketleft,depth,pl,pm,pr);
 }
 
-static unsigned long blockcmpdelivermedian(const Bentsedgresources *bsr,
+static unsigned long blockcmpdelivermedian(const GtBentsedgresources *bsr,
                                            unsigned long subbucketleft,
                                            unsigned long width,
                                            unsigned long depth,
@@ -830,7 +836,7 @@ static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
 */
 
 #ifdef CHECKFORWHOLELEAFS
-static bool gt_containswholeleaf(const Bentsedgresources *bsr,
+static bool gt_containswholeleaf(const GtBentsedgresources *bsr,
                                  unsigned long subbucketleft,
                                  unsigned long width)
 {
@@ -851,7 +857,7 @@ static bool gt_containswholeleaf(const Bentsedgresources *bsr,
 static unsigned long saved_intervals = 0, saved_width = 0;
 #endif
 
-static bool multistrategysort(Bentsedgresources *bsr,
+static bool multistrategysort(GtBentsedgresources *bsr,
                               unsigned long subbucketleft,
                               unsigned long width,
                               unsigned long depth,
@@ -885,7 +891,7 @@ static bool multistrategysort(Bentsedgresources *bsr,
   return false;
 }
 
-static void subsort_bentleysedgewick(Bentsedgresources *bsr,
+static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                                      unsigned long subbucketleft,
                                      unsigned long width,
                                      unsigned long depth)
@@ -935,7 +941,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
-static void sarrcountingsort(Bentsedgresources *bsr,
+static void sarrcountingsort(GtBentsedgresources *bsr,
                              unsigned long subbucketleft,
                              unsigned long width,
                              const GtSfxcmp *pivotcmpbits,
@@ -956,8 +962,8 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   {
     if (idx != pivotidx)
     {
-      PTR2INTSTOREPOS(bsr->countingsortinfo[idx].suffix,
-                      etbecurrent,subbucketleft,idx);
+      PTR2INTSTOREPOS(etbecurrent,subbucketleft,idx,
+                      bsr->countingsortinfo[idx].suffix = pos);
       cmp = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,
                                                      bsr->complement,
                                                      &commonunits,
@@ -1108,7 +1114,7 @@ static inline void vectorswap(GtSuffixsortspace *sssp,
   }
 }
 
-static void bentleysedgewick(Bentsedgresources *bsr,
+static void bentleysedgewick(GtBentsedgresources *bsr,
                              unsigned long width,
                              unsigned long depth)
 {
@@ -1164,7 +1170,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
       BS_SWAPARRAY(temp, subbucketleft, 0, pm);
       PTR2INT(pivotcmpbits,subbucketleft,0);
     }
-    bsr->countqsort++;
+    bsr->counttqsort++;
     /* now pivot element is at index subbucketleft */
     /* all elements to be compared are between pb and pc */
     /* pa is the position at which the next element smaller than the
@@ -1345,7 +1351,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
   }
 }
 
-static void initBentsedgresources(Bentsedgresources *bsr,
+static void initBentsedgresources(GtBentsedgresources *bsr,
                                   GtSuffixsortspace *suffixsortspace,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
@@ -1411,12 +1417,13 @@ static void initBentsedgresources(Bentsedgresources *bsr,
     bsr->equalwithprevious = NULL;
   }
   bsr->countinsertionsort = 0;
-  bsr->countqsort = 0;
+  bsr->counttqsort = 0;
   bsr->countcountingsort = 0;
   bsr->countbltriesort = 0;
+  bsr->countquicksort = 0;
 }
 
-static void bentsedgresources_delete(Bentsedgresources *bsr, GtLogger *logger)
+static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
 {
   gt_free(bsr->countingsortinfo);
   bsr->countingsortinfo = NULL;
@@ -1430,7 +1437,8 @@ static void bentsedgresources_delete(Bentsedgresources *bsr, GtLogger *logger)
   gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
   gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
   gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
-  gt_logger_log(logger,"countqsort=%lu",bsr->countqsort);
+  gt_logger_log(logger,"countquicksort=%lu",bsr->countquicksort);
+  gt_logger_log(logger,"counttqsort=%lu",bsr->counttqsort);
 }
 
 /*
@@ -1462,7 +1470,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   GtCodetype code;
   unsigned int rightchar = (unsigned int) (mincode % numofchars);
   GtBucketspecification bucketspec;
-  Bentsedgresources bsr;
+  GtBentsedgresources bsr;
 
   initBentsedgresources(&bsr,
                         suffixsortspace,
@@ -1542,7 +1550,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  void *processunsortedsuffixrangeinfo,
                                  GtLogger *logger)
 {
-  Bentsedgresources bsr;
+  GtBentsedgresources bsr;
 
   initBentsedgresources(&bsr,
                         suffixsortspace,
