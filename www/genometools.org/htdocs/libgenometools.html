@@ -1683,6 +1683,16 @@ Returns the decoded representation of the character at position <code>pos</code>
    <code>encseq</code> read in the direction as indicated by <code>readmode</code>.
 </p>
 <hr>
+<a name="gt_encseq_position_is_separator"></a>
+
+<code>bool               gt_encseq_position_is_separator(const GtEncseq *encseq,
+                                                  unsigned long pos,
+                                                  GtReadmode readmode)</code>
+<p>
+Returns true iff <code>pos</code> is a separator position of <code>encseq</code>
+   read in the direction as indicated by <code>readmode</code>.
+</p>
+<hr>
 <a name="gt_encseq_ref"></a>
 
 <code>GtEncseq*          gt_encseq_ref(GtEncseq *encseq)</code>
@@ -1801,8 +1811,8 @@ Returns the number of files contained in <code>encseq</code>.
 <code>uint64_t           gt_encseq_effective_filelength(const GtEncseq *encseq,
                                                  unsigned long filenum)</code>
 <p>
-Returns the effective length (sum of sequence lengths) of the <code>filenum</code>-th
-   file contained in <code>encseq</code>.
+Returns the effective length (sum of sequence lengths and separators
+   between them) of the <code>filenum</code>-th file contained in <code>encseq</code>.
 </p>
 <hr>
 <a name="gt_encseq_filestartpos"></a>
@@ -1811,7 +1821,7 @@ Returns the effective length (sum of sequence lengths) of the <code>filenum</cod
                                          unsigned long filenum)</code>
 <p>
 Returns the start position of the sequences of the  <code>filenum</code>-th file in the
- * <code>encseq</code>. Requires multiple file support enabled in <code>encseq</code>.
+   <code>encseq</code>. Requires multiple file support enabled in <code>encseq</code>.
 </p>
 <hr>
 <a name="gt_encseq_filenum"></a>
@@ -7849,6 +7859,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_num_of_sequences"><code>gt_encseq_num_of_sequences</code></a><br>
 
+  <a href="#gt_encseq_position_is_separator"><code>gt_encseq_position_is_separator</code></a><br>
+
   <a href="#gt_encseq_reader_delete"><code>gt_encseq_reader_delete</code></a><br>
 
   <a href="#gt_encseq_reader_next_decoded_char"><code>gt_encseq_reader_next_decoded_char</code></a><br>
@@ -8752,7 +8764,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-06-12
+Last update: 2011-07-02
 </div>
 </div>
 <!-- Piwik -->

@@ -158,11 +158,11 @@ const GtStrArray* gt_encseq_filenames(const GtEncseq *encseq);
 /* Returns the number of files contained in <encseq>. */
 unsigned long     gt_encseq_num_of_files(const GtEncseq *encseq);
 /* Returns the effective length (sum of sequence lengths and separators
- * between them) of the <filenum>-th file contained in <encseq>. */
+   between them) of the <filenum>-th file contained in <encseq>. */
 uint64_t          gt_encseq_effective_filelength(const GtEncseq *encseq,
                                                  unsigned long filenum);
 /* Returns the start position of the sequences of the  <filenum>-th file in the
- * <encseq>. Requires multiple file support enabled in <encseq>. */
+   <encseq>. Requires multiple file support enabled in <encseq>. */
 unsigned long     gt_encseq_filestartpos(const GtEncseq *encseq,
                                          unsigned long filenum);
 /* Returns the file number from the given <position> for a given
