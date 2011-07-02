@@ -150,7 +150,7 @@ typedef struct
   unsigned long suffix;
   unsigned char lcpwithpivot;
   char cmpresult;
-} Countingsortinfo;
+} GtCountingsortinfo;
 
 GT_DECLAREARRAYSTRUCT(MKVstack);
 
@@ -165,7 +165,7 @@ typedef struct
   GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
   GtLcpvalues *tableoflcpvalues;
   Medianinfo *medianinfospace;
-  Countingsortinfo *countingsortinfo;
+  GtCountingsortinfo *countingsortinfo;
   const Sfxstrategy *sfxstrategy;
   unsigned int sortmaxdepth;
   Blindtrie *blindtrie;
@@ -819,7 +819,7 @@ static unsigned long blockcmpdelivermedian(const Bentsedgresources *bsr,
 }
 
 /*
-static void showcountingsortinfo(const Countingsortinfo *countingsortinfo,
+static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
                               unsigned long idx)
 {
   printf("countingsortinfo[%lu]=(%lu,",idx,
@@ -948,7 +948,7 @@ static void sarrcountingsort(Bentsedgresources *bsr,
   GtEndofTwobitencoding etbecurrent;
   unsigned long idx, smaller = 0, larger = 0,
                 insertindex, end, equaloffset, currentwidth;
-  Countingsortinfo *csiptr;
+  GtCountingsortinfo *csiptr;
   /* const bool cmpcharbychar = false; */
 
   bsr->countcountingsort++;
