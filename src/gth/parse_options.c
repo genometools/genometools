@@ -457,7 +457,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                      &call_info->out->start_codon,
                                      GTH_DEFAULT_START_CODON);
   gt_option_is_extended_option(optstartcodon);
-  gt_option_is_development_option(optstartcodon);
   gt_option_parser_add_option(op, optstartcodon);
 
   /* -finalstopcodon */
@@ -466,7 +465,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                          &call_info->out->final_stop_codon,
                                          GTH_DEFAULT_FINAL_STOP_CODON);
   gt_option_is_extended_option(optfinalstopcodon);
-  gt_option_is_development_option(optfinalstopcodon);
   gt_option_parser_add_option(op, optfinalstopcodon);
 
   /* -showseqnums */
@@ -721,7 +719,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                          &call_info->simfilterparam
                                          .enrichchains,
                                          GTH_DEFAULT_ENRICHCHAINS);
-    gt_option_is_development_option(optenrichchains);
+    gt_option_is_extended_option(optenrichchains);
     gt_option_parser_add_option(op, optenrichchains);
   }
 
@@ -743,7 +741,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                    "of DP calculation",
                                    &call_info->simfilterparam.jump_table,
                                    GTH_DEFAULT_JUMPTABLE);
-    gt_option_is_development_option(optfastdp);
     gt_option_parser_add_option(op, optfastdp);
   }
 
