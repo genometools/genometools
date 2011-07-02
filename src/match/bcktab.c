@@ -87,6 +87,7 @@ void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code)
     lb->ulongbounds[code]++;
   } else
   {
+    gt_assert(lb->uintbounds[code] < (uint32_t) UINT_MAX);
     lb->uintbounds[code]++;
   }
 }
@@ -155,7 +156,7 @@ static void gt_bcktab_distpfxidx_increment(const GtBcktab *bcktab,
   }
 }
 
-size_t gt_bcktab_sizeofbasetype(const GtBcktab *bcktab)
+static size_t gt_bcktab_sizeofbasetype(const GtBcktab *bcktab)
 {
   return bcktab->useulong ? sizeof (unsigned long) : sizeof (uint32_t);
 }
@@ -520,7 +521,6 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->useulong = gt_bcktab_useulong(maxvalue);
   gt_assert(bcktab->pagesize % sizeof (unsigned long) == 0);
   bcktab->allocated = false;
-  bcktab->useulong = false;
   bcktab->qgrambuffer = gt_malloc(sizeof (*bcktab->qgrambuffer) * prefixlength);
   sizeofrep_uint64_t = gt_bcktab_sizeoftable_generic(
                                           prefixlength,
@@ -549,7 +549,7 @@ unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
   return CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
 }
 
-void gt_bcktab_deleteunused_memory(GtBcktab *bcktab,GtLogger *logger)
+void gt_bcktab_delete_unused_memory(GtBcktab *bcktab,GtLogger *logger)
 {
   if (bcktab->useulong)
   {
@@ -586,10 +586,10 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
       bcktab->numofallcodes-1 > (unsigned long) MAXCODEVALUE)
   {
     gt_error_set(err,"alphasize^prefixlength-1 = " FormatGtCodetype
-                  " does not fit into %u"
-                  " bits: choose smaller value for prefixlength",
-                  bcktab->numofallcodes-1,
-                  CODEBITS);
+                     " does not fit into %u"
+                     " bits: choose smaller value for prefixlength",
+                     bcktab->numofallcodes-1,
+                     CODEBITS);
     haserr = true;
   }
   if (!haserr)
@@ -942,7 +942,7 @@ GtBcktab *gt_bcktab_map(const char *indexname,
   return bcktab;
 }
 
-void gt_showbcktab(const GtBcktab *bcktab)
+void gt_bcktab_show(const GtBcktab *bcktab)
 {
   unsigned int prefixindex;
 
@@ -960,7 +960,7 @@ void gt_showbcktab(const GtBcktab *bcktab)
   }
 }
 
-void gt_bcktab_showleftborder(const GtBcktab *bcktab)
+void gt_bcktab_leftborder_show(const GtBcktab *bcktab)
 {
   GtCodetype idx;
 
@@ -1143,7 +1143,7 @@ unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
   {
     bucketspec->specialsinbucket = 0;
   }
-  return (rightchar == bcktab->numofchars - 1) ? 0 : (rightchar + 1);
+  return (rightchar < bcktab->numofchars - 1) ? (rightchar + 1) : 0;
 }
 
 void gt_bcktab_calcboundaries(GtBucketspecification *bucketspec,
@@ -1185,8 +1185,8 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
 }
 
 void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
-                                const GtCodetype mincode,
-                                const GtCodetype maxcode,
+                                GtCodetype mincode,
+                                GtCodetype maxcode,
                                 unsigned long partwidth)
 {
   unsigned int rightchar = (unsigned int) (mincode % bcktab->numofchars);

@@ -1541,7 +1541,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
     }
 #ifdef SKDEBUG
-    gt_bcktab_showleftborder(sfi->bcktab);
+    gt_bcktab_leftborder_show(sfi->bcktab);
 #endif
     largestbucketsize
       = gt_bcktab_leftborderpartialsums(&saved_bucketswithoutwholeleaf,
@@ -1628,7 +1628,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
       gt_bcktab_includedistpfxidx_out(sfi->bcktab);
       gt_fa_fclose(bcktmpfilefp);
-      gt_bcktab_deleteunused_memory(sfi->bcktab,logger);
+      gt_bcktab_delete_unused_memory(sfi->bcktab,logger);
     }
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),
@@ -1679,14 +1679,12 @@ static void preparethispart(Sfxiterator *sfi)
   {
     gt_logger_log(sfi->logger,"compute part %u: "
                               "%lu suffixes,%lu buckets from "
-                              "%lu(%lu)..%lu(%lu)",
+                              "%lu..%lu",
                   sfi->part,
                   stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
                   sfi->currentmaxcode - sfi->currentmincode + 1,
                   sfi->currentmincode,
-                  sfi->currentmincode * gt_bcktab_sizeofbasetype(sfi->bcktab),
-                  sfi->currentmaxcode,
-                  sfi->currentmaxcode * gt_bcktab_sizeofbasetype(sfi->bcktab));
+                  sfi->currentmaxcode);
     gt_bcktab_assignboundsforpart(sfi->bcktab,
                                   gt_str_get(sfi->bcktmpfilename),
                                   sfi->part,

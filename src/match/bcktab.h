@@ -89,7 +89,7 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
 unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab);
 
-void gt_bcktab_deleteunused_memory(GtBcktab *bcktab,GtLogger *logger);
+void gt_bcktab_delete_unused_memory(GtBcktab *bcktab,GtLogger *logger);
 
 int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
                               const char *bcktmpfilename,
@@ -143,8 +143,6 @@ GtLeftborder *gt_bcktab_leftborder(GtBcktab *bcktab);
 
 GtCodetype gt_bcktab_numofallcodes(const GtBcktab *bcktab);
 
-size_t gt_bcktab_sizeofbasetype(const GtBcktab *bcktab);
-
 uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
                                unsigned int prefixlength,
                                unsigned long maxvalue,
@@ -162,7 +160,7 @@ unsigned long gt_bcktab_leftborderpartialsums(
 
 size_t gt_bcktab_sizeforlcpvalues(const GtBcktab *bcktab);
 
-void gt_bcktab_showleftborder(const GtBcktab *bcktab);
+void gt_bcktab_leftborder_show(const GtBcktab *bcktab);
 
 GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
                                      unsigned long suftaboffset);
