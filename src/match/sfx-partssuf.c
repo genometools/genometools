@@ -33,7 +33,8 @@ struct Suftabparts
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;
-  unsigned long largestwidth,
+  unsigned long largestsizeforbucketsection,
+                largestsuftabwidth,
                 numofsuffixestoinsert;
 };
 
@@ -129,9 +130,11 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
                                GtLogger *logger)
 {
   Suftabparts *suftabparts;
+  unsigned long sizemapped;
 
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
+  suftabparts->largestsizeforbucketsection = 0;
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
@@ -148,7 +151,8 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   }
   if (suftabparts->numofparts == 0)
   {
-    suftabparts->largestwidth = fullspecials/numofparts+1;
+    suftabparts->largestsuftabwidth = fullspecials/numofparts+1;
+    suftabparts->largestsizeforbucketsection = gt_bcktab_size_lb_cs(bcktab);
     suftabparts->components = NULL;
   } else
   {
@@ -160,7 +164,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
     widthofsuftabpart = numofsuffixestoinsert/numofparts;
     remainder = (unsigned int) (numofsuffixestoinsert %
                                 (unsigned long) numofparts);
-    suftabparts->largestwidth = 0;
+    suftabparts->largestsuftabwidth = 0;
     for (part=0; part < numofparts; part++)
     {
       if (remainder > 0)
@@ -193,14 +197,22 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
         suftabparts->components[part].suftaboffset
           = gt_bcktab_get(bcktab,suftabparts->components[part-1].nextcode);
       }
-      if (suftabparts->largestwidth <
+      if (suftabparts->largestsuftabwidth <
          suftabparts->components[part].widthofpart)
       {
-        suftabparts->largestwidth
+        suftabparts->largestsuftabwidth
           = suftabparts->components[part].widthofpart;
       }
       sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
+      sizemapped
+        = gt_bcktab_mapped_range_size(bcktab,
+                                      stpgetcurrentmincode(part,suftabparts),
+                                      stpgetcurrentmaxcode(part,suftabparts));
+      if (suftabparts->largestsizeforbucketsection < sizemapped)
+      {
+        suftabparts->largestsizeforbucketsection = sizemapped;
+      }
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
@@ -240,9 +252,14 @@ unsigned long stpgetcurrentwidthofpart(unsigned int part,
   return suftabparts->components[part].widthofpart;
 }
 
-unsigned long stpgetlargestwidth(const Suftabparts *suftabparts)
+unsigned long stpgetlargestsuftabwidth(const Suftabparts *suftabparts)
 {
-  return suftabparts->largestwidth;
+  return suftabparts->largestsuftabwidth;
+}
+
+unsigned long stpgetlargestsizeforbucketsection(const Suftabparts *suftabparts)
+{
+  return suftabparts->largestsizeforbucketsection;
 }
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts)

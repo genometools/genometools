@@ -1470,8 +1470,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         readmode,
                         sortmaxdepth,
                         sfxstrategy);
-  gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes,
-                             numofchars);
+  gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes);
   if (outlcpinfo != NULL)
   {
     bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);
@@ -1496,8 +1495,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                                           code,
                                           maxcode,
                                           numberofsuffixes,
-                                          rightchar,
-                                          numofchars);
+                                          rightchar);
     gt_Outlcpinfo_prebucket(outlcpinfo,code,bucketspec.left);
     if (bucketspec.nonspecialsinbucket > 0)
     {

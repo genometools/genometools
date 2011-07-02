@@ -61,6 +61,7 @@ struct GtBcktab
                 pagesize,
                 numofdistpfxidxcounters;
   unsigned int prefixlength,
+               numofchars,
                optimalnumofbits;
   GtCodetype numofallcodes,
              numofspecialcodes,
@@ -175,20 +176,83 @@ static unsigned long multipleofpagesize(GtCodetype code,
   return ((code * sizeofbasetype)/pagesize) * pagesize + pagesize;
 }
 
+typedef struct
+{
+  unsigned long mapoffset, mapend;
+} GtMappedrange;
+
+static void gt_bcktab_mapped_lbrange_get(GtMappedrange *range,
+                                         const GtBcktab *bcktab,
+                                         GtCodetype mincode,
+                                         GtCodetype maxcode)
+{
+  const size_t basesize = gt_bcktab_sizeofbasetype(bcktab);
+
+  range->mapoffset = multipleofpagesize(mincode,true,basesize,bcktab->pagesize);
+  range->mapend = multipleofpagesize(maxcode,false,basesize,bcktab->pagesize);
+}
+
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((NUMOFCHARS) == 4U)\
                             ? ((CODE) >> 2)\
                             : (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS)))
 
+static unsigned int gt_bcktab_mapped_csrange_get(GtMappedrange *range,
+                                                 const GtBcktab *bcktab,
+                                                 GtCodetype mincode,
+                                                 GtCodetype maxcode)
+{
+  GtCodetype firstcode, lastcode;
+  unsigned int padoffset = 0;
+  const size_t basesize = gt_bcktab_sizeofbasetype(bcktab);
+
+  firstcode = bcktab->numofallcodes + 1;
+  if (basesize < GT_WORDSIZE_INBYTES &&
+      (firstcode * basesize) % GT_WORDSIZE_INBYTES > 0)
+  {
+    padoffset = 1U;
+  }
+  if (mincode >= (GtCodetype) (bcktab->numofchars - 1))
+  {
+    firstcode += FROMCODE2SPECIALCODE(mincode,bcktab->numofchars);
+  }
+  if (maxcode >= (GtCodetype) (bcktab->numofchars - 1))
+  {
+    lastcode = bcktab->numofallcodes + 1 +
+               FROMCODE2SPECIALCODE(maxcode,bcktab->numofchars);
+  } else
+  {
+    lastcode = bcktab->numofallcodes + 1;
+  }
+  range->mapoffset = multipleofpagesize(firstcode+padoffset, true, basesize,
+                                        bcktab->pagesize);
+  range->mapend = multipleofpagesize(lastcode+padoffset, false, basesize,
+                                     bcktab->pagesize);
+  return padoffset;
+}
+
+unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
+                                          GtCodetype mincode,
+                                          GtCodetype maxcode)
+{
+  GtMappedrange lbrange, csrange;
+
+  gt_bcktab_mapped_lbrange_get(&lbrange,bcktab,mincode,maxcode);
+  (void) gt_bcktab_mapped_csrange_get(&csrange,bcktab, mincode, maxcode);
+  return lbrange.mapend - lbrange.mapoffset + 1 +
+         csrange.mapend - csrange.mapoffset + 1;
+}
+
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    const char *bcktmpfilename,
                                    unsigned int part,
-                                   unsigned int numofchars,
                                    GtCodetype mincode,
                                    GtCodetype maxcode,
                                    GtLogger *logger)
 {
-  unsigned long mapoffset, mapend, totalsizeofcodes;
+  unsigned long totalsizeofcodes;
+  const size_t basesize = gt_bcktab_sizeofbasetype(bcktab);
+  GtMappedrange lbrange;
 
   if (bcktab->mappedleftborder != NULL)
   {
@@ -202,92 +266,65 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
     bcktab->uintcountspecialcodes = NULL;
     gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
   }
-  mapoffset = multipleofpagesize(mincode,
-                                 true,
-                                 gt_bcktab_sizeofbasetype(bcktab),
-                                 bcktab->pagesize);
-  mapend = multipleofpagesize(maxcode,
-                              false,
-                              gt_bcktab_sizeofbasetype(bcktab),
-                              bcktab->pagesize);
-  totalsizeofcodes
-    = (bcktab->numofallcodes+1) * gt_bcktab_sizeofbasetype(bcktab);
+  gt_bcktab_mapped_lbrange_get(&lbrange,bcktab,mincode,maxcode);
+  totalsizeofcodes = (bcktab->numofallcodes+1) * basesize;
   gt_logger_log(logger,
              "part %u: mapped leftborder from %lu to %lu (%.2f of all)",
-               part,mapoffset,mapend,
-                 (mapend - mapoffset + 1 >= totalsizeofcodes)
+               part,lbrange.mapoffset,lbrange.mapend,
+                 (lbrange.mapend - lbrange.mapoffset + 1 >= totalsizeofcodes)
                    ? 100.0
-                   : 100.0 * (mapend - mapoffset + 1)/totalsizeofcodes);
-  gt_assert(mapoffset <= mapend);
-  gt_assert(mapoffset <= mincode * gt_bcktab_sizeofbasetype(bcktab));
-  gt_assert(maxcode * gt_bcktab_sizeofbasetype(bcktab) <= mapend);
-  gt_assert(mapoffset % bcktab->pagesize == 0);
+                   : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
+                             totalsizeofcodes);
+  gt_assert(lbrange.mapoffset <= lbrange.mapend);
+  gt_assert(lbrange.mapoffset <= mincode * basesize);
+  gt_assert(maxcode * basesize <= lbrange.mapend);
+  gt_assert(lbrange.mapoffset % bcktab->pagesize == 0);
   bcktab->mappedleftborder
-    = gt_fa_xmmap_write_range(bcktmpfilename,(size_t) (mapend - mapoffset + 1),
-                             (size_t) mapoffset);
+    = gt_fa_xmmap_write_range(bcktmpfilename,
+                              (size_t) (lbrange.mapend - lbrange.mapoffset + 1),
+                              (size_t) lbrange.mapoffset);
   if (bcktab->useulong)
   {
     bcktab->leftborder.ulongbounds
       = ((unsigned long *) bcktab->mappedleftborder) -
-        (mapoffset / sizeof (unsigned long));
+        (lbrange.mapoffset / sizeof (unsigned long));
   } else
   {
     bcktab->leftborder.uintbounds
       = ((uint32_t *) bcktab->mappedleftborder) -
-         (mapoffset / sizeof (uint32_t));
+         (lbrange.mapoffset / sizeof (uint32_t));
   }
   if (bcktab->withspecialsuffixes)
   {
-    GtCodetype firstcode, lastcode;
-    const size_t basesize = gt_bcktab_sizeofbasetype(bcktab);
-    unsigned int padoffset = 0;
-
-    firstcode = bcktab->numofallcodes + 1;
-    if (basesize < GT_WORDSIZE_INBYTES &&
-        (firstcode * basesize) % GT_WORDSIZE_INBYTES > 0)
-    {
-      padoffset = 1U;
-    }
-    if (mincode >= (GtCodetype) (numofchars - 1))
-    {
-      firstcode += FROMCODE2SPECIALCODE(mincode,numofchars);
-    }
-    if (maxcode >= (GtCodetype) (numofchars - 1))
-    {
-      lastcode = bcktab->numofallcodes + 1 +
-                 FROMCODE2SPECIALCODE(maxcode,numofchars);
-    } else
-    {
-      lastcode = bcktab->numofallcodes + 1;
-    }
-    mapoffset = multipleofpagesize(firstcode+padoffset, true, basesize,
-                                   bcktab->pagesize);
-    mapend = multipleofpagesize(lastcode+padoffset, false, basesize,
-                                bcktab->pagesize);
-    gt_assert(mapoffset % bcktab->pagesize == 0);
-    totalsizeofcodes
-      = bcktab->numofspecialcodes * gt_bcktab_sizeofbasetype(bcktab);
+    GtMappedrange csrange;
+    unsigned int padoffset = gt_bcktab_mapped_csrange_get(&csrange,bcktab,
+                                                          mincode,
+                                                          maxcode);
+    gt_assert(csrange.mapoffset % bcktab->pagesize == 0);
+    totalsizeofcodes = bcktab->numofspecialcodes * basesize;
     gt_logger_log(logger,
                   "part %u: mapped countspecialcodes from %lu to %lu "
                   "(%.2f of all)",part,
-                  mapoffset,mapend,
-                  (mapend - mapoffset + 1 >= totalsizeofcodes)
+                  csrange.mapoffset,csrange.mapend,
+                  (csrange.mapend - csrange.mapoffset + 1 >= totalsizeofcodes)
                     ? 100.0
-                    : 100.0 * (mapend - mapoffset + 1)/totalsizeofcodes);
+                    : 100.0 * (csrange.mapend - csrange.mapoffset + 1)/
+                      totalsizeofcodes);
     bcktab->mappedcountspecialcodes
-    = gt_fa_xmmap_write_range(bcktmpfilename,(size_t) (mapend - mapoffset + 1),
-                             (size_t) mapoffset);
+      = gt_fa_xmmap_write_range(bcktmpfilename,
+                                (size_t) (csrange.mapend-csrange.mapoffset + 1),
+                                (size_t) csrange.mapoffset);
     if (bcktab->useulong)
     {
       bcktab->ulongcountspecialcodes
         = ((unsigned long *) bcktab->mappedcountspecialcodes) -
-          (mapoffset / sizeof (unsigned long)) +
+          (csrange.mapoffset / sizeof (unsigned long)) +
           bcktab->numofallcodes + 1 + padoffset;
     } else
     {
       bcktab->uintcountspecialcodes
         = ((uint32_t *) bcktab->mappedcountspecialcodes) -
-           (mapoffset / sizeof (uint32_t)) +
+           (csrange.mapoffset / sizeof (uint32_t)) +
           bcktab->numofallcodes + 1 + padoffset;
     }
   }
@@ -472,6 +509,7 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->prefixlength = prefixlength;
   bcktab->withspecialsuffixes = withspecialsuffixes;
   bcktab->basepower = gt_initbasepower(numofchars,prefixlength);
+  bcktab->numofchars = numofchars;
   bcktab->numofdistpfxidxcounters
     = gt_bcktab_numofdistpfxidxcounters(bcktab->basepower,prefixlength);
   bcktab->filltable = gt_initfilltable(numofchars,prefixlength);
@@ -496,21 +534,23 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   return bcktab;
 }
 
-uint64_t gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
+unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
 {
-  return gt_bcktab_sizeoftable_generic(bcktab->prefixlength,
-                                       (uint64_t) bcktab->numofallcodes,
-                                       (uint64_t) bcktab->numofspecialcodes,
-                                       bcktab->useulong,
-                                       bcktab->basepower,
-                                       false,
-                                       bcktab->withspecialsuffixes);
+  uint64_t sizeofrep_uint64_t;
+
+  sizeofrep_uint64_t
+    = gt_bcktab_sizeoftable_generic(bcktab->prefixlength,
+                                    (uint64_t) bcktab->numofallcodes,
+                                    (uint64_t) bcktab->numofspecialcodes,
+                                    bcktab->useulong,
+                                    bcktab->basepower,
+                                    false,
+                                    bcktab->withspecialsuffixes);
+  return CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
 }
 
 void gt_bcktab_deleteunused_memory(GtBcktab *bcktab,GtLogger *logger)
 {
-  uint64_t size_lb_cs;
-
   if (bcktab->useulong)
   {
     gt_free(bcktab->leftborder.ulongbounds);
@@ -524,8 +564,8 @@ void gt_bcktab_deleteunused_memory(GtBcktab *bcktab,GtLogger *logger)
     gt_free(bcktab->uintcountspecialcodes);
     bcktab->uintcountspecialcodes = NULL;
   }
-  size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
-  gt_logger_log(logger,"release %.2f MB of bcktab",GT_MEGABYTES(size_lb_cs));
+  gt_logger_log(logger,"release %.2f MB of bcktab",
+                GT_MEGABYTES(gt_bcktab_size_lb_cs(bcktab)));
 }
 
 GtBcktab *gt_bcktab_new(unsigned int numofchars,
@@ -1003,7 +1043,6 @@ void gt_bcktab_delete(GtBcktab *bcktab)
 
 void gt_bcktab_updatespecials(GtBcktab *bcktab,
                               GtCodetype code,
-                              unsigned int numofchars,
                               unsigned int prefixindex)
 {
   GtCodetype specialcode;
@@ -1017,8 +1056,8 @@ void gt_bcktab_updatespecials(GtBcktab *bcktab,
                            (bcktab->filltable[prefixindex]+1);
     gt_bcktab_distpfxidx_increment(bcktab,prefixindex-1,ordercode);
   }
-  gt_assert(code >= (GtCodetype) (numofchars-1));
-  specialcode = FROMCODE2SPECIALCODE(code,numofchars);
+  gt_assert(code >= (GtCodetype) (bcktab->numofchars-1));
+  specialcode = FROMCODE2SPECIALCODE(code,bcktab->numofchars);
   if (bcktab->ulongcountspecialcodes != NULL)
   {
     bcktab->ulongcountspecialcodes[specialcode]++;
@@ -1031,15 +1070,15 @@ void gt_bcktab_updatespecials(GtBcktab *bcktab,
 
 /* The following function is not used anymore */
 
-void gt_bcktab_addfinalspecials(GtBcktab *bcktab,unsigned int numofchars,
+void gt_bcktab_addfinalspecials(GtBcktab *bcktab,
                                 unsigned long specialcharacters)
 {
   if (bcktab->withspecialsuffixes)
   {
     GtCodetype specialcode;
 
-    gt_assert(bcktab->filltable[0] >= (GtCodetype) (numofchars-1));
-    specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],numofchars);
+    gt_assert(bcktab->filltable[0] >= (GtCodetype) (bcktab->numofchars-1));
+    specialcode = FROMCODE2SPECIALCODE(bcktab->filltable[0],bcktab->numofchars);
     if (bcktab->ulongcountspecialcodes != NULL)
     {
       bcktab->ulongcountspecialcodes[specialcode]
@@ -1058,8 +1097,7 @@ unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
                                        GtCodetype code,
                                        GtCodetype maxcode,
                                        unsigned long totalwidth,
-                                       unsigned int rightchar,
-                                       unsigned int numofchars)
+                                       unsigned int rightchar)
 {
   bucketspec->left = gt_bcktab_get(bcktab,code);
   if (code < maxcode)
@@ -1079,11 +1117,11 @@ unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
     bucketspec->nonspecialsinbucket
       = (unsigned long) (totalwidth - bucketspec->left);
   }
-  if (bcktab->withspecialsuffixes && rightchar == numofchars - 1)
+  if (bcktab->withspecialsuffixes && rightchar == bcktab->numofchars - 1)
   {
-    GtCodetype specialcode = FROMCODE2SPECIALCODE(code,numofchars);
+    GtCodetype specialcode = FROMCODE2SPECIALCODE(code,bcktab->numofchars);
 
-    gt_assert(code >= (GtCodetype) (numofchars-1));
+    gt_assert(code >= (GtCodetype) (bcktab->numofchars-1));
     if (bcktab->ulongcountspecialcodes != NULL)
     {
       bucketspec->specialsinbucket
@@ -1105,14 +1143,13 @@ unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
   {
     bucketspec->specialsinbucket = 0;
   }
-  return (rightchar == numofchars - 1) ? 0 : (rightchar + 1);
+  return (rightchar == bcktab->numofchars - 1) ? 0 : (rightchar + 1);
 }
 
 void gt_bcktab_calcboundaries(GtBucketspecification *bucketspec,
                               const GtBcktab *bcktab,
                               GtCodetype code)
 {
-  unsigned int numofchars = (unsigned int) bcktab->basepower[1];
   gt_assert(code != bcktab->numofallcodes);
   (void) gt_bcktab_calcboundsparts(bucketspec,
                                    bcktab,
@@ -1120,9 +1157,8 @@ void gt_bcktab_calcboundaries(GtBucketspecification *bucketspec,
                                    bcktab->numofallcodes, /*code<numofallcodes*/
                                    0,  /* not necessary */
                                    bcktab->withspecialsuffixes
-                                     ? (unsigned int) (code % numofchars)
-                                     : 0,
-                                   numofchars);
+                                    ? (unsigned int) (code % bcktab->numofchars)
+                                    : 0);
 }
 
 unsigned long gt_bcktab_calcrightbounds(const GtBcktab *bcktab,
@@ -1151,10 +1187,9 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
 void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
                                 const GtCodetype mincode,
                                 const GtCodetype maxcode,
-                                unsigned long partwidth,
-                                unsigned int numofchars)
+                                unsigned long partwidth)
 {
-  unsigned int rightchar = (unsigned int) (mincode % numofchars);
+  unsigned int rightchar = (unsigned int) (mincode % bcktab->numofchars);
   GtBucketspecification bucketspec;
   GtCodetype code;
 
@@ -1173,8 +1208,7 @@ void gt_bcktab_determinemaxsize(GtBcktab *bcktab,
                                           code,
                                           maxcode,
                                           partwidth,
-                                          rightchar,
-                                          numofchars);
+                                          rightchar);
     if (bucketspec.nonspecialsinbucket >
         bcktab->maxbucketinfo.nonspecialsmaxbucketsize)
     {
@@ -1496,7 +1530,6 @@ void gt_bcktab_consistencyofsuffix(int line,
                                    const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtBcktab *bcktab,
-                                   unsigned int numofchars,
                                    const Suffixwithcode *suffix)
 {
   unsigned int idx, firstspecial = bcktab->prefixlength, gramfirstspecial;
@@ -1523,7 +1556,7 @@ void gt_bcktab_consistencyofsuffix(int line,
   }
   for (idx=firstspecial; idx<bcktab->prefixlength; idx++)
   {
-    bcktab->qgrambuffer[idx] = (GtUchar) (numofchars-1);
+    bcktab->qgrambuffer[idx] = (GtUchar) (bcktab->numofchars-1);
   }
   gramfirstspecial = qgram2code(&qgramcode,
                                 (const GtCodetype **) bcktab->multimappower,

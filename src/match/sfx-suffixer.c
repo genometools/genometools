@@ -396,8 +396,7 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
                                             maxprefixindex);
         if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
         {
-          gt_bcktab_updatespecials(sfi->bcktab,code,sfi->numofchars,
-                                   prefixindex);
+          gt_bcktab_updatespecials(sfi->bcktab,code,prefixindex);
           stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
           /* from right to left */
           gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
@@ -452,8 +451,7 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
           gt_assert(code <= sfi->currentmaxcode);
           if (code >= sfi->currentmincode)
           {
-            gt_bcktab_updatespecials(sfi->bcktab,code,sfi->numofchars,
-                                     prefixindex);
+            gt_bcktab_updatespecials(sfi->bcktab,code,prefixindex);
             gt_assert(code > 0);
             stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
             /* from right to left */
@@ -612,13 +610,14 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
 {
   unsigned int parts;
   Suftabparts *suftabparts;
+  unsigned long size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
 
   gt_error_check(err);
   if (estimatedspace >= (size_t) maximumspace)
   {
     gt_error_set(err,"already used %.2f MB of memory, cannot compute "
-                     "enhanced suffix array in at most %lu bytes",
-                     GT_MEGABYTES(estimatedspace), maximumspace);
+                     "enhanced suffix array in at most %.2f MB",
+                     GT_MEGABYTES(estimatedspace), GT_MEGABYTES(maximumspace));
     return -1;
   }
   for (parts = 1U; parts <= 500U; parts++)
@@ -632,13 +631,25 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
                                     NULL);
     gt_assert(suftabparts != NULL);
     suftabsize = gt_suffixsortspace_requiredspace(
-                                              stpgetlargestwidth(suftabparts),
-                                              totallength,
-                                              suftabcompressedbytes);
-    if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
+                                         stpgetlargestsuftabwidth(suftabparts),
+                                         totallength,
+                                         suftabcompressedbytes);
+    if (parts == 1U)
     {
-      gt_freesuftabparts(suftabparts);
-      return (int) parts;
+      if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
+      {
+        gt_freesuftabparts(suftabparts);
+        return (int) parts;
+      }
+    } else
+    {
+      if ((unsigned long) (suftabsize +
+                           stpgetlargestsizeforbucketsection(suftabparts) +
+                           estimatedspace - size_lb_cs) <= maximumspace)
+      {
+        gt_freesuftabparts(suftabparts);
+        return (int) parts;
+      }
     }
     gt_freesuftabparts(suftabparts);
   }
@@ -1601,22 +1612,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
-    sfi->suffixsortspace
-      = gt_suffixsortspace_new(stpgetlargestwidth(sfi->suftabparts),
-                               sfi->totallength,
-                               sfi->sfxstrategy.suftabcompressedbytes);
-    if (gt_encseq_has_specialranges(sfi->encseq))
-    {
-      sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
-                                             GT_ISDIRREVERSE(sfi->readmode)
-                                               ? false : true);
-    } else
-    {
-      sfi->sri = NULL;
-    }
-    sfi->fusp.sssp = sfi->suffixsortspace;
-    sfi->fusp.allocatedSuffixptr = stpgetlargestwidth(sfi->suftabparts);
-    sfi->overhang.start = sfi->overhang.end = 0;
     if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
       FILE *bcktmpfilefp;
@@ -1635,6 +1630,22 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       gt_fa_fclose(bcktmpfilefp);
       gt_bcktab_deleteunused_memory(sfi->bcktab,logger);
     }
+    sfi->suffixsortspace
+      = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),
+                               sfi->totallength,
+                               sfi->sfxstrategy.suftabcompressedbytes);
+    if (gt_encseq_has_specialranges(sfi->encseq))
+    {
+      sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
+                                             GT_ISDIRREVERSE(sfi->readmode)
+                                               ? false : true);
+    } else
+    {
+      sfi->sri = NULL;
+    }
+    sfi->fusp.sssp = sfi->suffixsortspace;
+    sfi->fusp.allocatedSuffixptr = stpgetlargestsuftabwidth(sfi->suftabparts);
+    sfi->overhang.start = sfi->overhang.end = 0;
   }
   if (haserr)
   {
@@ -1679,7 +1690,6 @@ static void preparethispart(Sfxiterator *sfi)
     gt_bcktab_assignboundsforpart(sfi->bcktab,
                                   gt_str_get(sfi->bcktmpfilename),
                                   sfi->part,
-                                  sfi->numofchars,
                                   sfi->currentmincode,
                                   sfi->currentmaxcode,
                                   sfi->logger);

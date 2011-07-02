@@ -406,8 +406,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
                             (specialcontext.position-prefixindex));
           */
           countderived++;
-          gt_bcktab_updatespecials(dcov->bcktab,code,dcov->numofchars,
-                                   prefixindex);
+          gt_bcktab_updatespecials(dcov->bcktab,code,prefixindex);
           gt_assert(code > 0);
           sampleindex = gt_bcktab_leftborder_insertionindex(dcov->leftborder,
                                                             code);
@@ -638,8 +637,7 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                           code,
                                           dcov->maxcode,
                                           dcov->effectivesamplesize,
-                                          rightchar,
-                                          dcov->numofchars);
+                                          rightchar);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
       inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),idx);
@@ -847,8 +845,7 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
                                           code,
                                           dcov->maxcode,
                                           dcov->effectivesamplesize,
-                                          rightchar,
-                                          dcov->numofchars);
+                                          rightchar);
     if (bucketspec.nonspecialsinbucket > 1UL)
     {
       dc_sortsuffixesonthislevel(dcov,

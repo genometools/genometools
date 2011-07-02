@@ -281,8 +281,7 @@ static void fill2subbuckets(GtBucketspec2 *bucketspec2,const GtBcktab *bcktab)
                                           code,
                                           maxcode,
                                           bucketspec2->partwidth,
-                                          rightchar,
-                                          bucketspec2->numofchars);
+                                          rightchar);
     accubucketsize += bucketspec.nonspecialsinbucket;
     if (rightchar == 0)
     {

@@ -45,9 +45,11 @@ unsigned long stpgetcurrentsumofwdith(unsigned int part,
 unsigned long stpgetcurrentwidthofpart(unsigned int part,
                                 const Suftabparts *suftabparts);
 
-unsigned long stpgetlargestwidth(const Suftabparts *suftabparts);
+unsigned long stpgetlargestsuftabwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
+
+unsigned long stpgetlargestsizeforbucketsection(const Suftabparts *suftabparts);
 
 unsigned long stpnumofsuffixestoinsert(const Suftabparts *suftabparts);
 
