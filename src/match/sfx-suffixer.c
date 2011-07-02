@@ -1675,6 +1675,11 @@ static void preparethispart(Sfxiterator *sfi)
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
+  if (sfi->sfxprogress != NULL)
+  {
+    gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
+                           stdout);
+  }
   if (stpgetnumofparts(sfi->suftabparts) > 1U)
   {
     gt_logger_log(sfi->logger,"compute part %u: "
@@ -1695,11 +1700,6 @@ static void preparethispart(Sfxiterator *sfi)
   gt_suffixsortspace_offset_set(sfi->suffixsortspace,
                                 stpgetcurrentsuftaboffset(sfi->part,
                                                           sfi->suftabparts));
-  if (sfi->sfxprogress != NULL)
-  {
-    gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
-                           stdout);
-  }
   if (sfi->sfxstrategy.spmopt == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
