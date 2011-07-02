@@ -78,7 +78,7 @@
                 ISNOTSPECIAL(TMPVAR = ACCESSCHARRAND(cptr)))\
                     ? ((unsigned long) TMPVAR) : GT_UNIQUEINT(cptr))
 
-typedef GtEndofTwobitencoding Sfxcmp;
+typedef GtEndofTwobitencoding GtSfxcmp;
 
 #define PTR2INT(TMPVAR,SUBBUCKETLEFT,IDX)\
         {\
@@ -126,9 +126,9 @@ typedef GtEndofTwobitencoding Sfxcmp;
                                                              bsr->complement,\
                                                              COMMONUNITS,&X,&Y)
 
-#define SfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
-#define SfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
-#define SfxcmpGREATER(X,Y)    (ret##X##Y > 0)
+#define GtSfxcmpEQUAL(X,Y)      (ret##X##Y == 0)
+#define GtSfxcmpSMALLER(X,Y)    (ret##X##Y < 0)
+#define GtSfxcmpGREATER(X,Y)    (ret##X##Y > 0)
 
 typedef struct
 {
@@ -278,31 +278,31 @@ static unsigned long medianof3(const Bentsedgresources *bsr,
                                unsigned long b,
                                unsigned long c)
 {
-  Sfxcmp vala, valb, valc;
+  GtSfxcmp vala, valb, valc;
   GtCommonunits commonunits;
   int retvalavalb, retvalavalc, retvalbvalc;
 
   PTR2INT(vala,subbucketleft,a);
   PTR2INT(valb,subbucketleft,b);
   Sfxdocompare(&commonunits,vala,valb);
-  if (SfxcmpEQUAL(vala,valb))
+  if (GtSfxcmpEQUAL(vala,valb))
   {
     return a;
   }
   PTR2INT(valc,subbucketleft,c);
   Sfxdocompare(&commonunits,vala,valc);
-  if (SfxcmpEQUAL(vala,valc))
+  if (GtSfxcmpEQUAL(vala,valc))
   {
     return c;
   }
   Sfxdocompare(&commonunits,valb,valc);
-  if (SfxcmpEQUAL(valb,valc))
+  if (GtSfxcmpEQUAL(valb,valc))
   {
     return c;
   }
-  return SfxcmpSMALLER(vala,valb) ?
-        (SfxcmpSMALLER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? c : a))
-      : (SfxcmpGREATER(valb,valc) ? b : (SfxcmpSMALLER(vala,valc) ? a : c));
+  return GtSfxcmpSMALLER(vala,valb) ?
+        (GtSfxcmpSMALLER(valb,valc) ? b : (GtSfxcmpSMALLER(vala,valc) ? c : a))
+      : (GtSfxcmpGREATER(valb,valc) ? b : (GtSfxcmpSMALLER(vala,valc) ? a : c));
 }
 
 static void bs_insertionsort(Bentsedgresources *bsr,
@@ -938,7 +938,7 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
 static void sarrcountingsort(Bentsedgresources *bsr,
                              unsigned long subbucketleft,
                              unsigned long width,
-                             const Sfxcmp *pivotcmpbits,
+                             const GtSfxcmp *pivotcmpbits,
                              unsigned long pivotidx,
                              unsigned long depth)
 {
@@ -1120,7 +1120,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                   cptr, temp, pivotcmpcharbychar = 0, valcmpcharbychar,
                   wtmp, subbucketleft;
     unsigned int smallermaxlcp, greatermaxlcp, smallerminlcp, greaterminlcp;
-    Sfxcmp pivotcmpbits, val;
+    GtSfxcmp pivotcmpbits, val;
     int retvalpivotcmpbits;
     GtUchar tmpvar;
     GtCommonunits commonunits;
@@ -1226,12 +1226,12 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         {
           PTR2INT(val,subbucketleft,pb);
           Sfxdocompare(&commonunits,val,pivotcmpbits);
-          if (SfxcmpGREATER(val,pivotcmpbits))
+          if (GtSfxcmpGREATER(val,pivotcmpbits))
           { /* stop for elements val > pivot */
             UPDATELCP(greaterminlcp,greatermaxlcp);
             break;
           }
-          if (SfxcmpEQUAL(val,pivotcmpbits))
+          if (GtSfxcmpEQUAL(val,pivotcmpbits))
           {
             /* exchange equal element and element at index pa */
             BS_SWAPARRAY(temp, subbucketleft, pa, pb);
@@ -1247,12 +1247,12 @@ static void bentleysedgewick(Bentsedgresources *bsr,
         {
           PTR2INT(val,subbucketleft,pc);
           Sfxdocompare(&commonunits,val,pivotcmpbits);
-          if (SfxcmpSMALLER(val,pivotcmpbits))
+          if (GtSfxcmpSMALLER(val,pivotcmpbits))
           { /* stop for elements val < pivot */
             UPDATELCP(smallerminlcp,smallermaxlcp);
             break;
           }
-          if (SfxcmpEQUAL(val,pivotcmpbits))
+          if (GtSfxcmpEQUAL(val,pivotcmpbits))
           {
             /* exchange equal element and element at index pa */
             BS_SWAPARRAY(temp, subbucketleft, pc, pd);
