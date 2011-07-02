@@ -483,7 +483,8 @@ static void allocdistpfxidxcounts(GtBcktab *bcktab,unsigned int prefixlength,
         uint_setdistpfxidxptrs(bcktab->uintdistpfxidx,uintcounters,
                                bcktab->basepower,prefixlength);
       }
-      gt_logger_log(logger,"sizeof (distpfxidx)=%lu bytes",allocsize);
+      gt_logger_log(logger,"sizeof (distpfxidx)=%lu bytes",
+                            (unsigned long) allocsize);
     }
   }
 }
