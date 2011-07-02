@@ -32,7 +32,7 @@ typedef struct {
 
 static void* gt_seqorder_arguments_new(void)
 {
-  GtSeqorderArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtSeqorderArguments *arguments = gt_calloc((size_t)1, sizeof *arguments);
   return arguments;
 }
 
@@ -80,7 +80,7 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
   gt_option_exclude(shuffle_option, revsort_option);
   gt_option_parser_add_option(op, shuffle_option);
 
-  gt_option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1U, 1U);
 
   return op;
 }
@@ -126,7 +126,7 @@ static void gt_seqorder_get_shuffled_seqnums(unsigned long nofseqs,
 
   gt_assert(seqnums != NULL);
   seqnums[0] = 0;
-  for (i = 1; i < nofseqs; i++)
+  for (i = 1UL; i < nofseqs; i++)
   {
     j = gt_rand_max(i);
     seqnums[i] = seqnums[j];
@@ -145,7 +145,7 @@ static void gt_seqorder_output(unsigned long seqnum, GtEncseq *encseq)
   len = gt_encseq_seqlength(encseq, seqnum);
   desc = gt_encseq_description(encseq, &desclen, seqnum);
   gt_xfputc(GT_FASTA_SEPARATOR, stdout);
-  gt_xfwrite(desc, 1, desclen, stdout);
+  gt_xfwrite(desc, (size_t)1, (size_t)desclen, stdout);
   gt_xfputc('\n', stdout);
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
       startpos);
