@@ -163,8 +163,8 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optenrichchains = NULL,         /* sim. filter, global chaining */
          *optgcmincoverage = NULL,        /* sim. filter, gl. chaining filter */
          *optstopafterchaining = NULL,    /* sim. filter, gl. chaining filter */
-         *optfastdp = NULL,               /* sim. filter, after gl. chaining */
          *optintroncutout = NULL,         /* sim. filter, after gl. chaining */
+         *optfastdp = NULL,               /* sim. filter, after gl. chaining */
          *optautointroncutout = NULL,     /* sim. filter, after gl. chaining */
          *opticinitialdelta = NULL,       /* sim. filter, after gl. chaining */
          *opticiterations = NULL,         /* sim. filter, after gl. chaining */
@@ -735,15 +735,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_parser_add_option(op, optstopafterchaining);
   }
 
-  /* -fastdp */
-  if (jump_table_new && !gthconsensus_parsing) {
-    optfastdp = gt_option_new_bool("fastdp", "use jumptable to increase speed "
-                                   "of DP calculation",
-                                   &call_info->simfilterparam.jump_table,
-                                   GTH_DEFAULT_JUMPTABLE);
-    gt_option_parser_add_option(op, optfastdp);
-  }
-
   /* -introncutout */
   if (!gthconsensus_parsing) {
     optintroncutout = gt_option_new_bool("introncutout", "enable the intron "
@@ -752,6 +743,15 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                          .introncutoutinfo.introncutout,
                                          GTH_DEFAULT_INTRONCUTOUT);
     gt_option_parser_add_option(op, optintroncutout);
+  }
+
+  /* -fastdp */
+  if (jump_table_new && !gthconsensus_parsing) {
+    optfastdp = gt_option_new_bool("fastdp", "use jump table to increase speed "
+                                   "of DP calculation",
+                                   &call_info->simfilterparam.jump_table,
+                                   GTH_DEFAULT_JUMPTABLE);
+    gt_option_parser_add_option(op, optfastdp);
   }
 
   /* -autointroncutout */
