@@ -726,7 +726,7 @@ endif
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtruby $(GTDISTDIR)
 	@$(MAKE) prefix=$(GTDISTDIR) install
-	@cd $(DISTDIR) && tar cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
+	@cd $(DISTDIR) && tar --owner=root -cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
 	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
 
