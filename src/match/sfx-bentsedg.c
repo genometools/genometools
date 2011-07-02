@@ -58,7 +58,7 @@
         }
 
 #define STACKTOP\
-        bsr->mkvauxstack.spaceMKVstack[bsr->mkvauxstack.nextfreeMKVstack]
+        bsr->mkvauxstack.spaceGtMKVstack[bsr->mkvauxstack.nextfreeGtMKVstack]
 
 #define UPDATELCP(MINVAL,MAXVAL)\
         gt_assert(commonunits.common < (unsigned int) GT_UNITSIN2BITENC);\
@@ -135,15 +135,15 @@ typedef struct
   unsigned long subbucketleft,
                 width,
                 depth;
-} MKVstack;
+} GtMKVstack;
 
 typedef struct
 {
   GtEndofTwobitencoding etbe;
   unsigned long suftaboffset;
-} Medianinfo;
+} GtMedianinfo;
 
-typedef Medianinfo MedianElem;
+typedef GtMedianinfo MedianElem;
 
 typedef struct
 {
@@ -152,7 +152,7 @@ typedef struct
   char cmpresult;
 } GtCountingsortinfo;
 
-GT_DECLAREARRAYSTRUCT(MKVstack);
+GT_DECLAREARRAYSTRUCT(GtMKVstack);
 
 typedef struct
 {
@@ -162,9 +162,9 @@ typedef struct
   GtReadmode readmode;
   bool fwd, complement;
   unsigned long totallength;
-  GtArrayMKVstack mkvauxstack; /* XXX be carefull with treads */
+  GtArrayGtMKVstack mkvauxstack; /* XXX be carefull with treads */
   GtLcpvalues *tableoflcpvalues;
-  Medianinfo *medianinfospace;
+  GtMedianinfo *medianinfospace;
   GtCountingsortinfo *countingsortinfo;
   const Sfxstrategy *sfxstrategy;
   unsigned int sortmaxdepth;
@@ -677,8 +677,8 @@ static MedianElem *quickmedian (bool fwd,bool complement,
 
 static void checkmedian(bool fwd,
                         bool complement,
-                        const Medianinfo *median,
-                        const Medianinfo *space,
+                        const GtMedianinfo *median,
+                        const GtMedianinfo *space,
                         unsigned long width)
 {
   unsigned long sum1, sum2, idx, smaller = 0, larger = 0, equal = 0, equalpart;
@@ -741,7 +741,7 @@ static unsigned long realmedian(const Bentsedgresources *bsr,
                                 unsigned long width,
                                 unsigned long depth)
 {
-  Medianinfo *medianptr;
+  GtMedianinfo *medianptr;
   unsigned long idx;
 
   for (idx = 0; idx < width; idx++)
@@ -927,11 +927,11 @@ static void subsort_bentleysedgewick(Bentsedgresources *bsr,
       return;
     }
     /* push */
-    GT_CHECKARRAYSPACE(&bsr->mkvauxstack,MKVstack,1024);
+    GT_CHECKARRAYSPACE(&bsr->mkvauxstack,GtMKVstack,1024);
     STACKTOP.subbucketleft = subbucketleft;
     STACKTOP.width = width;
     STACKTOP.depth = depth;
-    bsr->mkvauxstack.nextfreeMKVstack++;
+    bsr->mkvauxstack.nextfreeGtMKVstack++;
   }
 }
 
@@ -1112,9 +1112,9 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                              unsigned long width,
                              unsigned long depth)
 {
-  bsr->mkvauxstack.nextfreeMKVstack = 0;
+  bsr->mkvauxstack.nextfreeGtMKVstack = 0;
   subsort_bentleysedgewick(bsr, 0, width, depth);
-  while (bsr->mkvauxstack.nextfreeMKVstack > 0)
+  while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
   {
     unsigned long leftplusw, pa, pb, pc, pd, pm, bucketright,
                   cptr, temp, pivotcmpcharbychar = 0, valcmpcharbychar,
@@ -1129,7 +1129,7 @@ static void bentleysedgewick(Bentsedgresources *bsr,
                                  : GT_UNITSIN2BITENC;
 
     /* pop */
-    bsr->mkvauxstack.nextfreeMKVstack--;
+    bsr->mkvauxstack.nextfreeGtMKVstack--;
     subbucketleft = STACKTOP.subbucketleft;
     width = STACKTOP.width;
     depth = STACKTOP.depth;
@@ -1369,7 +1369,7 @@ static void initBentsedgresources(Bentsedgresources *bsr,
   }
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  GT_INITARRAY(&bsr->mkvauxstack,MKVstack);
+  GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
   if (sfxstrategy->cmpcharbychar)
   {
     bsr->countingsortinfo = NULL;
@@ -1426,7 +1426,7 @@ static void bentsedgresources_delete(Bentsedgresources *bsr, GtLogger *logger)
   gt_encseq_reader_delete(bsr->esr1);
   gt_encseq_reader_delete(bsr->esr2);
   gt_free(bsr->equalwithprevious);
-  GT_FREEARRAY(&bsr->mkvauxstack,MKVstack);
+  GT_FREEARRAY(&bsr->mkvauxstack,GtMKVstack);
   gt_logger_log(logger,"countinsertionsort=%lu",bsr->countinsertionsort);
   gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
   gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
