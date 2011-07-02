@@ -58,7 +58,8 @@ struct GtBcktab
   unsigned long *ulongcountspecialcodes,
                 **ulongdistpfxidx,
                 sizeofrep,
-                pagesize;
+                pagesize,
+                numofdistpfxidxcounters;
   unsigned int prefixlength,
                optimalnumofbits;
   GtCodetype numofallcodes,
@@ -292,7 +293,8 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
   }
 }
 
-static unsigned long numofdistpfxidxcounters(const GtCodetype *basepower,
+static unsigned long gt_bcktab_numofdistpfxidxcounters(
+                                             const GtCodetype *basepower,
                                              unsigned int prefixlength)
 {
   if (prefixlength > 2U)
@@ -333,7 +335,8 @@ static uint64_t gt_bcktab_sizeoftable_generic(unsigned int prefixlength,
     if (countdistpfxidx)
     {
       sizeoftable += (uint64_t) sizeofbasetype *
-                                numofdistpfxidxcounters(basepower,prefixlength);
+                                gt_bcktab_numofdistpfxidxcounters(basepower,
+                                                                  prefixlength);
     }
   }
   return sizeoftable;
@@ -419,10 +422,7 @@ static void allocdistpfxidxcounts(GtBcktab *bcktab,unsigned int prefixlength,
   gt_assert(bcktab->withspecialsuffixes);
   if (prefixlength > 2U)
   {
-    unsigned long numofcounters;
-
-    numofcounters = numofdistpfxidxcounters(bcktab->basepower,prefixlength);
-    if (numofcounters > 0)
+    if (bcktab->numofdistpfxidxcounters > 0)
     {
       unsigned long *ulongcounters;
       uint32_t *uintcounters;
@@ -431,7 +431,7 @@ static void allocdistpfxidxcounts(GtBcktab *bcktab,unsigned int prefixlength,
       if (bcktab->useulong)
       {
         bcktab->ulongdistpfxidx = gt_malloc(sizeof (void *) * (prefixlength-1));
-        allocsize = sizeof (*ulongcounters) * numofcounters;
+        allocsize = sizeof (*ulongcounters) * bcktab->numofdistpfxidxcounters;
         ulongcounters = gt_malloc(allocsize);
         memset(ulongcounters,0,allocsize);
         ulong_setdistpfxidxptrs(bcktab->ulongdistpfxidx,ulongcounters,
@@ -439,7 +439,7 @@ static void allocdistpfxidxcounts(GtBcktab *bcktab,unsigned int prefixlength,
       } else
       {
         bcktab->uintdistpfxidx = gt_malloc(sizeof (void *) * (prefixlength-1));
-        allocsize = sizeof (*uintcounters) * numofcounters;
+        allocsize = sizeof (*uintcounters) * bcktab->numofdistpfxidxcounters;
         uintcounters = gt_malloc(allocsize);
         memset(uintcounters,0,allocsize);
         uint_setdistpfxidxptrs(bcktab->uintdistpfxidx,uintcounters,
@@ -472,6 +472,8 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->prefixlength = prefixlength;
   bcktab->withspecialsuffixes = withspecialsuffixes;
   bcktab->basepower = gt_initbasepower(numofchars,prefixlength);
+  bcktab->numofdistpfxidxcounters
+    = gt_bcktab_numofdistpfxidxcounters(bcktab->basepower,prefixlength);
   bcktab->filltable = gt_initfilltable(numofchars,prefixlength);
   bcktab->numofallcodes = bcktab->basepower[prefixlength];
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
@@ -609,7 +611,6 @@ static void assignbcktabmapspecification(
 {
   GtBcktab *bcktab = (GtBcktab *) voidinfo;
   GtMapspecification *mapspecptr;
-  unsigned long numofcounters;
 
   if (bcktab->useulong)
   {
@@ -631,9 +632,7 @@ static void assignbcktabmapspecification(
       NEWMAPSPEC(bcktab->uintcountspecialcodes,Uint32,
                  (unsigned long) bcktab->numofspecialcodes);
     }
-    numofcounters
-      = numofdistpfxidxcounters(bcktab->basepower,bcktab->prefixlength);
-    if (numofcounters > 0)
+    if (bcktab->numofdistpfxidxcounters > 0)
     {
       if (!writemode)
       {
@@ -651,10 +650,12 @@ static void assignbcktabmapspecification(
       {
         if (bcktab->useulong)
         {
-          NEWMAPSPEC(bcktab->ulongdistpfxidx[0],GtUlong,numofcounters);
+          NEWMAPSPEC(bcktab->ulongdistpfxidx[0],GtUlong,
+                     bcktab->numofdistpfxidxcounters);
         } else
         {
-          NEWMAPSPEC(bcktab->uintdistpfxidx[0],Uint32,numofcounters);
+          NEWMAPSPEC(bcktab->uintdistpfxidx[0],Uint32,
+                     bcktab->numofdistpfxidxcounters);
         }
       }
     }
@@ -679,8 +680,7 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
   if (bcktab->excludedistpfxidx && bcktab->withspecialsuffixes)
   {
     sizeofrep -= gt_bcktab_sizeofbasetype(bcktab) *
-                 numofdistpfxidxcounters(bcktab->basepower,
-                                         bcktab->prefixlength);
+                 bcktab->numofdistpfxidxcounters;
   }
   return gt_mapspec_flushtheindex2file(fp,
                             assignbcktabmapspecification,
@@ -689,7 +689,7 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
                             err);
 }
 
-int gt_bcktab_flush_remaining(GT_UNUSED const GtBcktab *bcktab,
+int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
                               const char *bcktmpfilename,
                               GtError *err)
 {
@@ -715,9 +715,7 @@ int gt_bcktab_flush_remaining(GT_UNUSED const GtBcktab *bcktab,
     }
     if (!haserr)
     {
-      size_t numofcounters
-        = (size_t) numofdistpfxidxcounters(bcktab->basepower,
-                                           bcktab->prefixlength);
+      size_t numofcounters = (size_t) bcktab->numofdistpfxidxcounters;
       if (bcktab->useulong)
       {
         if (fwrite(bcktab->ulongdistpfxidx[0],sizeof (unsigned long),
