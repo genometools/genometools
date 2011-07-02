@@ -445,9 +445,9 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
-  idxo->option = gt_option_new_bool("suftabcompressedbytes",
-                              "use compressed bytes for suftab",
-                              &idxo->sfxstrategy.suftabcompressedbytes,
+  idxo->option = gt_option_new_bool("suftabuint",
+                              "use uint32_t for suftab",
+                              &idxo->sfxstrategy.suftabuint,
                               false);
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);

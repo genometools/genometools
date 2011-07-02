@@ -605,7 +605,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            unsigned long totallength,
                                            unsigned long specialcharacters,
                                            unsigned long numofsuffixestosort,
-                                           bool suftabcompressedbytes,
+                                           bool suftabuint,
                                            GtError *err)
 {
   unsigned int parts;
@@ -633,7 +633,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     suftabsize = gt_suffixsortspace_requiredspace(
                                          stpgetlargestsuftabwidth(suftabparts),
                                          totallength,
-                                         suftabcompressedbytes);
+                                         suftabuint);
     if (parts == 1U)
     {
       if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
@@ -1590,7 +1590,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                        sfi->totallength,
                                        specialcharacters,
                                        numofsuffixestosort,
-                                       sfi->sfxstrategy.suftabcompressedbytes,
+                                       sfi->sfxstrategy.suftabuint,
                                        err);
       if (retval < 0)
       {
@@ -1633,7 +1633,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),
                                sfi->totallength,
-                               sfi->sfxstrategy.suftabcompressedbytes);
+                               sfi->sfxstrategy.suftabuint);
     if (gt_encseq_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,

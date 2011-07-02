@@ -37,7 +37,7 @@ typedef struct
                          encoding) */
        storespecialcodes,
        iteratorbasedkmerscanning,
-       suftabcompressedbytes,
+       suftabuint,
        onlybucketinsertion,
        kmerswithencseqreader,
        dccheck,
@@ -57,7 +57,7 @@ typedef struct
   sfxstrategy->spmopt = 0;
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->iteratorbasedkmerscanning = false;
-  sfxstrategy->suftabcompressedbytes = false;
+  sfxstrategy->suftabuint = false;
   sfxstrategy->onlybucketinsertion = false;
   sfxstrategy->kmerswithencseqreader = false;
   sfxstrategy->dccheck = false;
