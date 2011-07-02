@@ -1633,6 +1633,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
       }
       gt_bcktab_includedistpfxidx_out(sfi->bcktab);
       gt_fa_fclose(bcktmpfilefp);
+      gt_bcktab_deleteunused_memory(sfi->bcktab,logger);
     }
   }
   if (haserr)

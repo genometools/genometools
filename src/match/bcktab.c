@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +31,7 @@
 #include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/safecast-gen.h"
+#include "core/spacecalc.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "bcktab.h"
@@ -46,19 +47,15 @@ typedef struct
 struct GtLeftborder
 {
   uint32_t *uintbounds;
-  uint32_t *uintboundsforpart;
   unsigned long *ulongbounds;
-  unsigned long *ulongboundsforpart;
 };
 
 struct GtBcktab
 {
   GtLeftborder leftborder;
   uint32_t *uintcountspecialcodes,
-           *uintcountspecialcodesforpart,
            **uintdistpfxidx;
   unsigned long *ulongcountspecialcodes,
-                *ulongcountspecialcodesforpart,
                 **ulongdistpfxidx,
                 sizeofrep,
                 pagesize;
@@ -92,9 +89,6 @@ void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code)
   }
 }
 
-static unsigned long checkboundsinsert = 0, checkboundsget = 0,
-                     checkspecialcodesaccess = 0;
-
 unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
                                                   GtCodetype code)
 {
@@ -103,12 +97,7 @@ unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
   {
     return --lb->ulongbounds[code];
   }
-  if (lb->uintboundsforpart != NULL)
-  {
-    gt_assert(lb->uintboundsforpart[code] == lb->uintbounds[code]);
-    checkboundsinsert++;
-    --lb->uintboundsforpart[code];
-  }
+  gt_assert(lb->uintbounds != NULL);
   return (unsigned long) --lb->uintbounds[code];
 }
 
@@ -122,10 +111,7 @@ void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
   } else
   {
     gt_assert(value <= (unsigned long) UINT_MAX);
-    if (lb->uintboundsforpart != NULL)
-    {
-      lb->uintboundsforpart[code] = (uint32_t) value;
-    }
+    gt_assert(lb->uintbounds != NULL);
     lb->uintbounds[code] = (uint32_t) value;
   }
 }
@@ -137,12 +123,7 @@ unsigned long gt_bcktab_get(const GtBcktab *bcktab,GtCodetype code)
   {
     return bcktab->leftborder.ulongbounds[code];
   }
-  if (bcktab->leftborder.uintboundsforpart != NULL)
-  {
-    gt_assert(bcktab->leftborder.uintbounds[code] ==
-              bcktab->leftborder.uintboundsforpart[code]);
-    checkboundsget++;
-  }
+  gt_assert(bcktab->leftborder.uintbounds != NULL);
   return (unsigned long) bcktab->leftborder.uintbounds[code];
 }
 
@@ -210,10 +191,14 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
 
   if (bcktab->mappedleftborder != NULL)
   {
+    bcktab->leftborder.ulongbounds = NULL;
+    bcktab->leftborder.uintbounds = NULL;
     gt_fa_xmunmap(bcktab->mappedleftborder);
   }
   if (bcktab->mappedcountspecialcodes != NULL)
   {
+    bcktab->ulongcountspecialcodes = NULL;
+    bcktab->uintcountspecialcodes = NULL;
     gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
   }
   mapoffset = multipleofpagesize(mincode,
@@ -241,12 +226,12 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                              (size_t) mapoffset);
   if (bcktab->useulong)
   {
-    bcktab->leftborder.ulongboundsforpart
+    bcktab->leftborder.ulongbounds
       = ((unsigned long *) bcktab->mappedleftborder) -
         (mapoffset / sizeof (unsigned long));
   } else
   {
-    bcktab->leftborder.uintboundsforpart
+    bcktab->leftborder.uintbounds
       = ((uint32_t *) bcktab->mappedleftborder) -
          (mapoffset / sizeof (uint32_t));
   }
@@ -293,13 +278,13 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                              (size_t) mapoffset);
     if (bcktab->useulong)
     {
-      bcktab->ulongcountspecialcodesforpart
+      bcktab->ulongcountspecialcodes
         = ((unsigned long *) bcktab->mappedcountspecialcodes) -
           (mapoffset / sizeof (unsigned long)) +
           bcktab->numofallcodes + 1 + padoffset;
     } else
     {
-      bcktab->uintcountspecialcodesforpart
+      bcktab->uintcountspecialcodes
         = ((uint32_t *) bcktab->mappedcountspecialcodes) -
            (mapoffset / sizeof (uint32_t)) +
           bcktab->numofallcodes + 1 + padoffset;
@@ -324,25 +309,32 @@ static unsigned long numofdistpfxidxcounters(const GtCodetype *basepower,
   return 0;
 }
 
+static bool gt_bcktab_useulong(unsigned long maxvalue)
+{
+  return maxvalue <= (unsigned long) UINT_MAX ? false : true;
+}
+
 static uint64_t gt_bcktab_sizeoftable_generic(unsigned int prefixlength,
                                               uint64_t numofallcodes,
                                               uint64_t numofspecialcodes,
-                                              unsigned long maxvalue,
+                                              bool useulong,
                                               const GtCodetype *basepower,
+                                              bool countdistpfxidx,
                                               bool withspecialsuffixes)
 {
   uint64_t sizeoftable;
   size_t sizeofbasetype;
 
-  sizeofbasetype = maxvalue <= (unsigned long) UINT_MAX
-                                 ? sizeof (uint32_t)
-                                 : sizeof (unsigned long);
+  sizeofbasetype = useulong ? sizeof (unsigned long) : sizeof (uint32_t);
   sizeoftable = (uint64_t) sizeofbasetype * (numofallcodes + 1);
   if (withspecialsuffixes)
   {
     sizeoftable += sizeofbasetype * numofspecialcodes;
-    sizeoftable += (uint64_t) sizeofbasetype *
-                              numofdistpfxidxcounters(basepower,prefixlength);
+    if (countdistpfxidx)
+    {
+      sizeoftable += (uint64_t) sizeofbasetype *
+                                numofdistpfxidxcounters(basepower,prefixlength);
+    }
   }
   return sizeoftable;
 }
@@ -376,8 +368,9 @@ uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
     = gt_bcktab_sizeoftable_generic(prefixlength,
                                     numofallcodes,
                                     numofspecialcodes,
-                                    maxvalue,
+                                    gt_bcktab_useulong(maxvalue),
                                     basepower,
+                                    true,
                                     withspecialsuffixes);
   gt_free(basepower);
   return sizeofbuckettable;
@@ -467,17 +460,13 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
 
   bcktab = gt_malloc(sizeof *bcktab);
   bcktab->mappedptr = NULL;
-  bcktab->mappedleftborder = NULL;
   bcktab->excludedistpfxidx = false;
+  bcktab->mappedleftborder = NULL;
   bcktab->leftborder.ulongbounds = NULL;
-  bcktab->leftborder.ulongboundsforpart = NULL;
   bcktab->leftborder.uintbounds = NULL;
-  bcktab->leftborder.uintboundsforpart = NULL;
   bcktab->mappedcountspecialcodes = NULL;
   bcktab->ulongcountspecialcodes = NULL;
-  bcktab->ulongcountspecialcodesforpart = NULL;
   bcktab->uintcountspecialcodes = NULL;
-  bcktab->uintcountspecialcodesforpart = NULL;
   bcktab->ulongdistpfxidx = NULL;
   bcktab->uintdistpfxidx = NULL;
   bcktab->prefixlength = prefixlength;
@@ -488,6 +477,7 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->numofspecialcodes = bcktab->basepower[prefixlength-1];
   bcktab->multimappower = gt_initmultimappower(numofchars,prefixlength);
   bcktab->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
+  bcktab->useulong = gt_bcktab_useulong(maxvalue);
   gt_assert(bcktab->pagesize % sizeof (unsigned long) == 0);
   bcktab->allocated = false;
   bcktab->useulong = false;
@@ -496,11 +486,44 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
                                           prefixlength,
                                           (uint64_t) bcktab->numofallcodes,
                                           (uint64_t) bcktab->numofspecialcodes,
-                                          maxvalue,
+                                          bcktab->useulong,
                                           bcktab->basepower,
+                                          true,
                                           withspecialsuffixes);
   bcktab->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
   return bcktab;
+}
+
+uint64_t gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
+{
+  return gt_bcktab_sizeoftable_generic(bcktab->prefixlength,
+                                       (uint64_t) bcktab->numofallcodes,
+                                       (uint64_t) bcktab->numofspecialcodes,
+                                       bcktab->useulong,
+                                       bcktab->basepower,
+                                       false,
+                                       bcktab->withspecialsuffixes);
+}
+
+void gt_bcktab_deleteunused_memory(GtBcktab *bcktab,GtLogger *logger)
+{
+  uint64_t size_lb_cs;
+
+  if (bcktab->useulong)
+  {
+    gt_free(bcktab->leftborder.ulongbounds);
+    bcktab->leftborder.ulongbounds = NULL;
+    gt_free(bcktab->ulongcountspecialcodes);
+    bcktab->ulongcountspecialcodes = NULL;
+  } else
+  {
+    gt_free(bcktab->leftborder.uintbounds);
+    bcktab->leftborder.uintbounds = NULL;
+    gt_free(bcktab->uintcountspecialcodes);
+    bcktab->uintcountspecialcodes = NULL;
+  }
+  size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
+  gt_logger_log(logger,"release %.2f MB of bcktab",GT_MEGABYTES(size_lb_cs));
 }
 
 GtBcktab *gt_bcktab_new(unsigned int numofchars,
@@ -530,21 +553,7 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
   if (!haserr)
   {
     size_t allocsize_bounds, allocsize_countspecialcodes = 0;
-    if (maxvalue <= (unsigned long) UINT_MAX)
-    {
-      allocsize_bounds = sizeof (*bcktab->leftborder.uintbounds) *
-                         (bcktab->numofallcodes+1);
-      bcktab->leftborder.uintbounds = gt_malloc(allocsize_bounds);
-      memset(bcktab->leftborder.uintbounds,0,allocsize_bounds);
-      if (withspecialsuffixes)
-      {
-        allocsize_countspecialcodes = sizeof (*bcktab->uintcountspecialcodes) *
-                                      bcktab->numofspecialcodes;
-        bcktab->uintcountspecialcodes = gt_malloc(allocsize_countspecialcodes);
-        memset(bcktab->uintcountspecialcodes,0,allocsize_countspecialcodes);
-      }
-      bcktab->useulong = false;
-    } else
+    if (bcktab->useulong)
     {
       allocsize_bounds = sizeof (*bcktab->leftborder.ulongbounds) *
                          (bcktab->numofallcodes+1);
@@ -557,7 +566,19 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
         bcktab->ulongcountspecialcodes = gt_malloc(allocsize_countspecialcodes);
         memset(bcktab->ulongcountspecialcodes,0,allocsize_countspecialcodes);
       }
-      bcktab->useulong = true;
+    } else
+    {
+      allocsize_bounds = sizeof (*bcktab->leftborder.uintbounds) *
+                         (bcktab->numofallcodes+1);
+      bcktab->leftborder.uintbounds = gt_malloc(allocsize_bounds);
+      memset(bcktab->leftborder.uintbounds,0,allocsize_bounds);
+      if (withspecialsuffixes)
+      {
+        allocsize_countspecialcodes = sizeof (*bcktab->uintcountspecialcodes) *
+                                      bcktab->numofspecialcodes;
+        bcktab->uintcountspecialcodes = gt_malloc(allocsize_countspecialcodes);
+        memset(bcktab->uintcountspecialcodes,0,allocsize_countspecialcodes);
+      }
     }
     gt_logger_log(logger,"sizeof (leftborder)=%lu bytes",
                 (unsigned long) allocsize_bounds);
@@ -919,6 +940,18 @@ void gt_bcktab_delete(GtBcktab *bcktab)
     return;
   }
   /*showbcktab(bcktabptr);*/
+  if (bcktab->mappedleftborder != NULL)
+  {
+    gt_fa_xmunmap(bcktab->mappedleftborder);
+    bcktab->leftborder.ulongbounds = NULL;
+    bcktab->leftborder.uintbounds = NULL;
+  }
+  if (bcktab->mappedcountspecialcodes != NULL)
+  {
+    gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
+    bcktab->ulongcountspecialcodes = NULL;
+    bcktab->uintcountspecialcodes = NULL;
+  }
   if (bcktab->allocated)
   {
     gt_free(bcktab->leftborder.ulongbounds);
@@ -953,14 +986,6 @@ void gt_bcktab_delete(GtBcktab *bcktab)
   bcktab->leftborder.uintbounds = NULL;
   bcktab->ulongcountspecialcodes = NULL;
   bcktab->uintcountspecialcodes = NULL;
-  if (bcktab->mappedleftborder != NULL)
-  {
-    gt_fa_xmunmap(bcktab->mappedleftborder);
-  }
-  if (bcktab->mappedcountspecialcodes != NULL)
-  {
-    gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
-  }
   gt_free(bcktab->ulongdistpfxidx);
   bcktab->ulongdistpfxidx = NULL;
   gt_free(bcktab->uintdistpfxidx);
@@ -976,11 +1001,6 @@ void gt_bcktab_delete(GtBcktab *bcktab)
   gt_free(bcktab->qgrambuffer);
   bcktab->qgrambuffer = NULL;
   gt_free(bcktab);
-  /*
-  printf("# checkboundsinsert=%lu\n",checkboundsinsert);
-  printf("# checkboundsget=%lu\n",checkboundsget);
-  printf("# checkspecialcodesaccess=%lu\n",checkspecialcodesaccess);
-  */
 }
 
 void gt_bcktab_updatespecials(GtBcktab *bcktab,
@@ -1008,10 +1028,6 @@ void gt_bcktab_updatespecials(GtBcktab *bcktab,
   {
     gt_assert(bcktab->uintcountspecialcodes != NULL);
     bcktab->uintcountspecialcodes[specialcode]++;
-    if (bcktab->uintcountspecialcodesforpart != NULL)
-    {
-      bcktab->uintcountspecialcodesforpart[specialcode]++;
-    }
   }
 }
 
@@ -1035,11 +1051,6 @@ void gt_bcktab_addfinalspecials(GtBcktab *bcktab,unsigned int numofchars,
       gt_assert(bcktab->uintcountspecialcodes != NULL);
       bcktab->uintcountspecialcodes[specialcode]
         += (uint32_t) (specialcharacters + 1);
-      if (bcktab->uintcountspecialcodesforpart != NULL)
-      {
-        bcktab->uintcountspecialcodesforpart[specialcode]
-          += (uint32_t) (specialcharacters + 1);
-      }
     }
   }
 }
@@ -1084,13 +1095,6 @@ unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
       gt_assert(bcktab->uintcountspecialcodes != NULL);
       bucketspec->specialsinbucket
         = (unsigned long) bcktab->uintcountspecialcodes[specialcode];
-      if (bcktab->uintcountspecialcodesforpart != NULL)
-      {
-        gt_assert(bucketspec->specialsinbucket ==
-                  (unsigned long)
-                  bcktab->uintcountspecialcodesforpart[specialcode]);
-        checkspecialcodesaccess++;
-      }
     }
     if (bucketspec->nonspecialsinbucket >= bucketspec->specialsinbucket)
     {

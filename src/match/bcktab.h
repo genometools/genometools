@@ -85,6 +85,8 @@ void gt_bcktab_includedistpfxidx_out(GtBcktab *bcktab);
 
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
+void gt_bcktab_deleteunused_memory(GtBcktab *bcktab,GtLogger *logger);
+
 int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
                               const char *bcktmpfilename,
                               GtError *err);
