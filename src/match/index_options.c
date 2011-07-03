@@ -222,6 +222,7 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
     oi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
     oi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
     oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+    oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
   }
 
   if (!had_err

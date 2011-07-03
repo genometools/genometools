@@ -216,6 +216,14 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtReadmode readmode,
                                          unsigned long pos);
 
+/* The following function computes the longest common prefix of
+   two different 2bit encodings */
+
+unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
+                                                     GtTwobitencoding tbe2);
+
+/* The following function needs to be documented */
+
 unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
                                             const GtEncseq *encseq,
                                             GtEncseqReader *esr,

@@ -5162,6 +5162,10 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   unsigned long twobitencodingstoppos;
   bool fwd;
 
+  if (pos == encseq->totallength)
+  {
+    return 0;
+  }
   gt_assert(pos < encseq->logicaltotallength);
   fwd = GT_ISDIRREVERSE(readmode) ? false : true;
 
@@ -5174,14 +5178,27 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
     twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
   if (GT_ISDIRREVERSE(readmode))
+  {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
-
+  }
   (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
                                   twobitencodingstoppos);
-
-  gt_assert(etbecurrent.unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC);
   tbevector[0] = etbecurrent.tbe;
-
+  if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
+  {
+    return etbecurrent.unitsnotspecial;
+  }
+  if (pos + GT_UNITSIN2BITENC == twobitencodingstoppos)
+  {
+    return (unsigned int) GT_UNITSIN2BITENC;
+  }
+  if (pos + GT_UNITSIN2BITENC >= encseq->logicaltotallength)
+  {
+    fprintf(stderr,
+            "pos+GT_UNITSIN2BITENC=%lu>=%lu=encseq->logicaltotallength\n",
+            pos + GT_UNITSIN2BITENC,encseq->logicaltotallength);
+    fprintf(stderr,"stoppos=%lu\n",twobitencodingstoppos);
+  }
   (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
                                   pos + GT_UNITSIN2BITENC,
                                   twobitencodingstoppos);
@@ -5190,16 +5207,25 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
   {
     return etbecurrent.unitsnotspecial + (unsigned int) GT_UNITSIN2BITENC;
-  } else
-  {
-    (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
-                                    pos + GT_MULT2(GT_UNITSIN2BITENC),
-                                    twobitencodingstoppos);
-    tbevector[2] = etbecurrent.tbe;
-    gt_assert(etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
-    return etbecurrent.unitsnotspecial +
-           (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
   }
+  if (pos + GT_MULT2(GT_UNITSIN2BITENC) == twobitencodingstoppos)
+  {
+    return (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
+  }
+  if (pos + GT_MULT2(GT_UNITSIN2BITENC) >= encseq->logicaltotallength)
+  {
+    fprintf(stderr,
+            "pos+2*GT_UNITSIN2BITENC=%lu>=%lu=encseq->logicaltotallength\n",
+            pos + GT_MULT2(GT_UNITSIN2BITENC),encseq->logicaltotallength);
+    fprintf(stderr,"stoppos=%lu\n",twobitencodingstoppos);
+  }
+  (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
+                                  pos + GT_MULT2(GT_UNITSIN2BITENC),
+                                  twobitencodingstoppos);
+  tbevector[2] = etbecurrent.tbe;
+  gt_assert(etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
+  return etbecurrent.unitsnotspecial +
+         (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
 }
 
 #define MASKPREFIX(PREFIX)\
@@ -5212,10 +5238,10 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
 #define MASKEND(FWD,END)\
         (((END) == 0) ? 0 : ((FWD) ? MASKPREFIX(END) : MASKSUFFIX(END)))
 
-static int prefixofdifftbe(bool complement,
-                           GtCommonunits *commonunits,
-                           GtTwobitencoding tbe1,
-                           GtTwobitencoding tbe2)
+static int prefixofdifferenttwobitencodings(bool complement,
+                                            GtCommonunits *commonunits,
+                                            GtTwobitencoding tbe1,
+                                            GtTwobitencoding tbe2)
 {
   unsigned int tmplcpvalue = 0;
 
@@ -5236,8 +5262,18 @@ static int prefixofdifftbe(bool complement,
   return tbe1 < tbe2 ? -1 : 1;
 }
 
-static int suffixofdifftbe(bool complement,GtCommonunits *commonunits,
-                           GtTwobitencoding tbe1,GtTwobitencoding tbe2)
+unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
+                                                      GtTwobitencoding tbe2)
+{
+  gt_assert((tbe1 ^ tbe2) > 0);
+  return (unsigned int) GT_DIV2(GT_MULT2(GT_UNITSIN2BITENC) -
+                                requiredUIntBits(tbe1 ^ tbe2));
+}
+
+static int suffixofdifferenttwobitencodings(bool complement,
+                                            GtCommonunits *commonunits,
+                                            GtTwobitencoding tbe1,
+                                            GtTwobitencoding tbe2)
 {
   unsigned int tmplcsvalue = 0;
 
@@ -5260,13 +5296,14 @@ static int suffixofdifftbe(bool complement,GtCommonunits *commonunits,
          ? -1 : 1;
 }
 
-static int endofdifftbe(bool fwd,
-                        bool complement,
-                        GtCommonunits *commonunits,
-                        GtTwobitencoding tbe1,
-                        GtTwobitencoding tbe2)
+static int endofdifferenttwobitencodings(bool fwd,
+                                         bool complement,
+                                         GtCommonunits *commonunits,
+                                         GtTwobitencoding tbe1,
+                                         GtTwobitencoding tbe2)
 {
-  return (fwd ? prefixofdifftbe : suffixofdifftbe)
+  return (fwd ? prefixofdifferenttwobitencodings :
+                suffixofdifferenttwobitencodings)
          (complement,commonunits,tbe1,tbe2);
 }
 
@@ -5296,7 +5333,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
       commonunits->rightspecial = false;
       return 1;
     }
-    return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
+    return endofdifferenttwobitencodings(fwd,complement,commonunits,tbe1,tbe2);
   }
   if (ptbe1->unitsnotspecial > ptbe2->unitsnotspecial)
      /* ISSPECIAL(seq2[ptbe2->unitsnotspecial]) &&
@@ -5316,7 +5353,7 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
       commonunits->rightspecial = true;
       return -1;
     }
-    return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
+    return endofdifferenttwobitencodings(fwd,complement,commonunits,tbe1,tbe2);
   }
   gt_assert(ptbe1->unitsnotspecial == ptbe2->unitsnotspecial);
   if (ptbe1->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
@@ -5344,13 +5381,14 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
         return 0;
       }
     }
-    return endofdifftbe(fwd,complement,commonunits,tbe1,tbe2);
+    return endofdifferenttwobitencodings(fwd,complement,commonunits,tbe1,tbe2);
   }
   gt_assert(ptbe1->unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC &&
             ptbe2->unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC);
   if (ptbe1->tbe != ptbe2->tbe)
   {
-    return endofdifftbe(fwd,complement,commonunits,ptbe1->tbe,ptbe2->tbe);
+    return endofdifferenttwobitencodings(fwd,complement,commonunits,
+                                         ptbe1->tbe,ptbe2->tbe);
   }
   gt_assert(commonunits != NULL);
   commonunits->common = (unsigned int) GT_UNITSIN2BITENC;

@@ -23,13 +23,15 @@
 #define MAXINSERTIONSORTDEFAULT  3UL
 #define MAXBLTRIESORTDEFAULT     1000UL
 #define MAXCOUNTINGSORTDEFAULT   4000UL
+#define MAXSHORTREADSORTDEFAULT  30000UL
 
 typedef struct
 {
   unsigned long maxwidthrealmedian,
                 maxinsertionsort,
                 maxbltriesort,
-                maxcountingsort;
+                maxcountingsort,
+                maxshortreadsort;
   unsigned int differencecover,
                spmopt;
   bool cmpcharbychar, /* compare suffixes character by character instead
@@ -52,6 +54,7 @@ typedef struct
   sfxstrategy->maxinsertionsort = MAXINSERTIONSORTDEFAULT;
   sfxstrategy->maxbltriesort = MAXBLTRIESORTDEFAULT;
   sfxstrategy->maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+  sfxstrategy->maxshortreadsort = MAXSHORTREADSORTDEFAULT;
   sfxstrategy->differencecover = 0;
   sfxstrategy->cmpcharbychar = cmpcharbychar;
   sfxstrategy->spmopt = 0;
