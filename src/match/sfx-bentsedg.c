@@ -80,28 +80,6 @@
 
 typedef GtEndofTwobitencoding GtSfxcmp;
 
-/*
-#define PTR2INT(TMPVAR,SUBBUCKETLEFT,IDX)\
-        {\
-          unsigned long pos\
-            = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
-          if (pos + depth < bsr->totallength)\
-          {\
-            pos += depth;\
-            (void) gt_encseq_extract2bitencwithtwobitencodingstoppos(&(TMPVAR),\
-                                                                 bsr->esr1,\
-                                                                 bsr->encseq,\
-                                                                 bsr->readmode,\
-                                                                 pos);\
-          } else\
-          {\
-            TMPVAR.tbe = 0;\
-            TMPVAR.unitsnotspecial = 0;\
-            TMPVAR.position = pos;\
-          }\
-        }
-*/
-
 #define PTR2INTSTOREPOS(TMPVAR,SUBBUCKETLEFT,IDX,POSASSIGNMENT)\
         {\
           unsigned long pos\
@@ -157,6 +135,18 @@ typedef struct
   char cmpresult;
 } GtCountingsortinfo;
 
+#define WITHSARRQUICKSORT
+#ifdef WITHSARRQUICKSORT
+typedef struct
+{
+  unsigned long suffix;
+  GtTwobitencoding tbe[3];
+  unsigned int unitsnotspecial;
+} GtQuicksortinfo;
+
+#define MAXQUICKSORTINFO 3000
+#endif
+
 GT_DECLAREARRAYSTRUCT(GtMKVstack);
 
 typedef struct
@@ -171,6 +161,9 @@ typedef struct
   GtLcpvalues *tableoflcpvalues;
   GtMedianinfo *medianinfospace;
   GtCountingsortinfo *countingsortinfo;
+#ifdef WITHSARRQUICKSORT
+  GtQuicksortinfo quicksortinfo[MAXQUICKSORTINFO];
+#endif
   const Sfxstrategy *sfxstrategy;
   unsigned int sortmaxdepth;
   Blindtrie *blindtrie;
@@ -941,6 +934,185 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
   }
 }
 
+#ifdef WITHSARRQUICKSORT
+static int comparequicksortinfo(const void *a,const void *b)
+{
+  GtQuicksortinfo *aq = (GtQuicksortinfo *) a;
+  GtQuicksortinfo *bq = (GtQuicksortinfo *) b;
+
+  if (aq->tbe[0] < bq->tbe[0])
+  {
+    return -1;
+  }
+  if (aq->tbe[0] > bq->tbe[0])
+  {
+    return 1;
+  }
+  if (aq->unitsnotspecial >= (unsigned int) GT_MULT2(GT_UNITSIN2BITENC))
+  {
+    if (bq->unitsnotspecial >= (unsigned int) GT_MULT2(GT_UNITSIN2BITENC))
+    {
+      if (aq->tbe[1] < bq->tbe[1])
+      {
+        return -1;
+      }
+      if (aq->tbe[1] > bq->tbe[1])
+      {
+        return 1;
+      } else
+      {
+        GtEndofTwobitencoding tbe_a, tbe_b;
+        GtCommonunits commonunits;
+
+        tbe_a.tbe = aq->tbe[2];
+        tbe_b.tbe = bq->tbe[2];
+        tbe_a.unitsnotspecial
+          = aq->unitsnotspecial - (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
+        tbe_b.unitsnotspecial
+          = bq->unitsnotspecial - (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
+        tbe_a.position = aq->suffix;
+        tbe_b.position = bq->suffix;
+        return gt_encseq_compare_pairof_twobitencodings(true,
+                                                        false,
+                                                        &commonunits,
+                                                        &tbe_a,
+                                                        &tbe_b);
+      }
+    } else
+    {
+      GtEndofTwobitencoding tbe_a, tbe_b;
+      GtCommonunits commonunits;
+
+      tbe_a.tbe = aq->tbe[1];
+      tbe_b.tbe = bq->tbe[1];
+      tbe_a.unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
+      tbe_b.unitsnotspecial = bq->unitsnotspecial
+                              - (unsigned int) GT_UNITSIN2BITENC;
+      tbe_a.position = aq->suffix;
+      tbe_b.position = bq->suffix;
+      return gt_encseq_compare_pairof_twobitencodings(true,
+                                                      false,
+                                                      &commonunits,
+                                                      &tbe_a,
+                                                      &tbe_b);
+    }
+  } else
+  {
+    if (bq->unitsnotspecial >= (unsigned int) GT_MULT2(GT_UNITSIN2BITENC))
+    {
+      GtEndofTwobitencoding tbe_a, tbe_b;
+      GtCommonunits commonunits;
+
+      tbe_a.tbe = aq->tbe[1];
+      tbe_b.tbe = bq->tbe[1];
+      tbe_a.unitsnotspecial = aq->unitsnotspecial -
+                              (unsigned int) GT_UNITSIN2BITENC;
+      tbe_b.unitsnotspecial = (unsigned int) GT_UNITSIN2BITENC;
+      tbe_a.position = aq->suffix;
+      tbe_b.position = bq->suffix;
+      return gt_encseq_compare_pairof_twobitencodings(true,
+                                                      false,
+                                                      &commonunits,
+                                                      &tbe_a,
+                                                      &tbe_b);
+    } else
+    {
+      GtEndofTwobitencoding tbe_a, tbe_b;
+      GtCommonunits commonunits;
+
+      tbe_a.tbe = aq->tbe[1];
+      tbe_b.tbe = bq->tbe[1];
+      tbe_a.unitsnotspecial = aq->unitsnotspecial -
+                              (unsigned int) GT_UNITSIN2BITENC;
+      tbe_b.unitsnotspecial = bq->unitsnotspecial -
+                              (unsigned int) GT_UNITSIN2BITENC;
+      tbe_a.position = aq->suffix;
+      tbe_b.position = bq->suffix;
+      return gt_encseq_compare_pairof_twobitencodings(true,
+                                                      false,
+                                                      &commonunits,
+                                                      &tbe_a,
+                                                      &tbe_b);
+    }
+  }
+}
+
+unsigned int extracttbevector(GtTwobitencoding *tbevector,
+                                     const GtEncseq *encseq,
+                                     GtEncseqReader *esr,
+                                     GtReadmode readmode,
+                                     unsigned long offset)
+{
+  unsigned int unitsnotspecial;
+  GtEndofTwobitencoding etbecurrent;
+
+  (void) gt_encseq_extract2bitencwithtwobitencodingstoppos(&etbecurrent,
+                                                           esr,
+                                                           encseq,
+                                                           readmode,
+                                                           offset);
+  gt_assert(etbecurrent.unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC);
+  tbevector[0] = etbecurrent.tbe;
+  (void) gt_encseq_extract2bitencwithtwobitencodingstoppos(
+                                            &etbecurrent,
+                                            esr,
+                                            encseq,
+                                            readmode,
+                                            offset+GT_UNITSIN2BITENC);
+  tbevector[1] = etbecurrent.tbe;
+  if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
+  {
+    unitsnotspecial = etbecurrent.unitsnotspecial +
+                      (unsigned int) GT_UNITSIN2BITENC;
+  } else
+  {
+    (void) gt_encseq_extract2bitencwithtwobitencodingstoppos(
+                                                  &etbecurrent,
+                                                  esr,
+                                                  encseq,
+                                                  readmode,
+                                                  offset+
+                                                  GT_MULT2(GT_UNITSIN2BITENC));
+    tbevector[2] = etbecurrent.tbe;
+    gt_assert(etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
+    unitsnotspecial = etbecurrent.unitsnotspecial +
+                      (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
+  }
+  return unitsnotspecial;
+}
+
+static void sarrquicksort(GtBentsedgresources *bsr,
+                          unsigned long subbucketleft,
+                          unsigned long width,
+                          unsigned long depth)
+{
+  unsigned long idx, pos;
+
+  gt_assert(bsr->fwd && !bsr->complement);
+  gt_assert(width <= (unsigned long) MAXQUICKSORTINFO);
+  for (idx = 0; idx < width; idx++)
+  {
+    pos = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
+    bsr->quicksortinfo[idx].suffix = pos;
+    gt_assert(pos + depth < bsr->totallength);
+    bsr->quicksortinfo[idx].unitsnotspecial
+      = gt_encseq_extract2bitencvector(bsr->quicksortinfo[idx].tbe,
+                                       bsr->encseq,
+                                       bsr->esr1,
+                                       bsr->readmode,
+                                       pos+depth);
+  }
+  qsort(bsr->quicksortinfo,(size_t) width,sizeof(* bsr->quicksortinfo),
+        comparequicksortinfo);
+  for (idx = 0; idx < width; idx++)
+  {
+    gt_suffixsortspace_set(bsr->sssp,subbucketleft,idx,
+                           bsr->quicksortinfo[idx].suffix);
+  }
+  bsr->countquicksort++;
+}
+#endif
+
 static void sarrcountingsort(GtBentsedgresources *bsr,
                              unsigned long subbucketleft,
                              unsigned long width,
@@ -1114,10 +1286,17 @@ static inline void vectorswap(GtSuffixsortspace *sssp,
   }
 }
 
-static void bentleysedgewick(GtBentsedgresources *bsr,
-                             unsigned long width,
-                             unsigned long depth)
+static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
+                                     unsigned long width,
+                                     unsigned long depth)
 {
+#ifdef WITHSARRQUICKSORT
+  if (width <= (unsigned long) MAXQUICKSORTINFO)
+  {
+    sarrquicksort(bsr,0,width,depth);
+    return;
+  }
+#endif
   bsr->mkvauxstack.nextfreeGtMKVstack = 0;
   subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
@@ -1510,8 +1689,8 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
       if (bucketspec.nonspecialsinbucket > 1UL)
       {
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,bucketspec.left);
-        bentleysedgewick(&bsr,bucketspec.nonspecialsinbucket,
-                         (unsigned long) prefixlength);
+        gt_sort_bentleysedgewick(&bsr,bucketspec.nonspecialsinbucket,
+                                 (unsigned long) prefixlength);
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
       }
       gt_Outlcpinfo_nonspecialsbucket(outlcpinfo,
@@ -1552,20 +1731,23 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
 {
   GtBentsedgresources bsr;
 
-  initBentsedgresources(&bsr,
-                        suffixsortspace,
-                        encseq,
-                        readmode,
-                        sortmaxdepth,
-                        sfxstrategy);
-  if (outlcpinfo != NULL)
+  if (numberofsuffixes > 1UL)
   {
-    bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,NULL);
+    initBentsedgresources(&bsr,
+                          suffixsortspace,
+                          encseq,
+                          readmode,
+                          sortmaxdepth,
+                          sfxstrategy);
+    if (outlcpinfo != NULL)
+    {
+      bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,NULL);
+    }
+    bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
+    bsr.processunsortedsuffixrange = processunsortedsuffixrange;
+    gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
+    gt_sort_bentleysedgewick(&bsr,numberofsuffixes,0);
+    gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
+    bentsedgresources_delete(&bsr, logger);
   }
-  bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
-  bsr.processunsortedsuffixrange = processunsortedsuffixrange;
-  gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
-  bentleysedgewick(&bsr,numberofsuffixes,0);
-  gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
-  bentsedgresources_delete(&bsr, logger);
 }

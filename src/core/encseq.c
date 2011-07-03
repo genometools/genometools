@@ -5152,6 +5152,56 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
   return ret;
 }
 
+unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
+                                            const GtEncseq *encseq,
+                                            GtEncseqReader *esr,
+                                            GtReadmode readmode,
+                                            unsigned long pos)
+{
+  GtEndofTwobitencoding etbecurrent;
+  unsigned long twobitencodingstoppos;
+  bool fwd;
+
+  gt_assert(pos < encseq->logicaltotallength);
+  fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+
+  gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
+  if (gt_has_twobitencoding_stoppos_support(encseq))
+  {
+    twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
+  } else
+  {
+    twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
+  }
+  if (GT_ISDIRREVERSE(readmode))
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+
+  (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
+                                  twobitencodingstoppos);
+
+  gt_assert(etbecurrent.unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC);
+  tbevector[0] = etbecurrent.tbe;
+
+  (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
+                                  pos + GT_UNITSIN2BITENC,
+                                  twobitencodingstoppos);
+
+  tbevector[1] = etbecurrent.tbe;
+  if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
+  {
+    return etbecurrent.unitsnotspecial + (unsigned int) GT_UNITSIN2BITENC;
+  } else
+  {
+    (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
+                                    pos + GT_MULT2(GT_UNITSIN2BITENC),
+                                    twobitencodingstoppos);
+    tbevector[2] = etbecurrent.tbe;
+    gt_assert(etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
+    return etbecurrent.unitsnotspecial +
+           (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
+  }
+}
+
 #define MASKPREFIX(PREFIX)\
       (GtTwobitencoding)\
      (~((((GtTwobitencoding) 1) << GT_MULT2(GT_UNITSIN2BITENC - (PREFIX))) - 1))
