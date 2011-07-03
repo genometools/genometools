@@ -409,18 +409,20 @@ static int runsuffixerator(bool doesa,
       }
       gt_encseq_metadata_delete(emd);
     }
-    gt_encseq_loader_set_logger(el, logger);
-    /* as we only construct the des, sds, and ssptable, but do not
-       need it later during the construction of the enhanced suffix
-       array, we do not load it again: we just load the information
-       stored in the .esq file. It would be better to use the
-       in memory constructed encseq rather than the one mapped into
-       memory. This would require to free the des, sds, and ssptable. */
-    gt_encseq_loader_disable_autosupport(el);
-    gt_encseq_loader_do_not_require_des_tab(el);
-    gt_encseq_loader_do_not_require_sds_tab(el);
-    gt_encseq_loader_do_not_require_ssp_tab(el);
-    encseq = gt_encseq_loader_load(el, gt_str_get(so->inputindex), err);
+    if (!haserr) {
+      gt_encseq_loader_set_logger(el, logger);
+      /* as we only construct the des, sds, and ssptable, but do not
+         need it later during the construction of the enhanced suffix
+         array, we do not load it again: we just load the information
+         stored in the .esq file. It would be better to use the
+         in memory constructed encseq rather than the one mapped into
+         memory. This would require to free the des, sds, and ssptable. */
+      gt_encseq_loader_disable_autosupport(el);
+      gt_encseq_loader_do_not_require_des_tab(el);
+      gt_encseq_loader_do_not_require_sds_tab(el);
+      gt_encseq_loader_do_not_require_ssp_tab(el);
+      encseq = gt_encseq_loader_load(el, gt_str_get(so->inputindex), err);
+    }
     gt_encseq_loader_delete(el);
     if (encseq == NULL)
     {
