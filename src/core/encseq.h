@@ -225,6 +225,7 @@ unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
 /* The following function needs to be documented */
 
 unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
+                                            int sizeofvector,
                                             const GtEncseq *encseq,
                                             GtEncseqReader *esr,
                                             GtReadmode readmode,

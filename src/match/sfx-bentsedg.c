@@ -135,10 +135,16 @@ typedef struct
   char cmpresult;
 } GtCountingsortinfo;
 
+#ifdef _LP64
+#define GT_NUMOFTBEVALUEFOR100 3
+#else
+#define GT_NUMOFTBEVALUEFOR100 6
+#endif
+
 typedef struct
 {
   unsigned long suffix;
-  GtTwobitencoding tbe[3];
+  GtTwobitencoding tbe[GT_NUMOFTBEVALUEFOR100];
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
@@ -885,7 +891,8 @@ static int compareshortreadsortinfo(const void *a,const void *b)
   const GtShortreadsort *bq = (const GtShortreadsort *) b;
 
   for (idx=0, maxprefix = (unsigned int) GT_UNITSIN2BITENC;
-       idx<3; idx++, maxprefix+=(unsigned int) GT_UNITSIN2BITENC)
+       idx<GT_NUMOFTBEVALUEFOR100;
+       idx++, maxprefix+=(unsigned int) GT_UNITSIN2BITENC)
   {
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
@@ -933,7 +940,8 @@ static unsigned long lcpshortreadinfo(const GtShortreadsort *aq,
   unsigned int maxprefix;
 
   for (idx=0, maxprefix = (unsigned int) GT_UNITSIN2BITENC;
-       idx<3; idx++, maxprefix+=(unsigned int) GT_UNITSIN2BITENC)
+       idx<GT_NUMOFTBEVALUEFOR100;
+       idx++, maxprefix+=(unsigned int) GT_UNITSIN2BITENC)
   {
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
@@ -990,6 +998,7 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     bsr->shortreadsortinfo[idx].suffix = pos;
     bsr->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_extract2bitencvector(bsr->shortreadsortinfo[idx].tbe,
+                                       GT_NUMOFTBEVALUEFOR100,
                                        bsr->encseq,
                                        bsr->esr1,
                                        bsr->readmode,

@@ -5153,6 +5153,7 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
 }
 
 unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
+                                            int sizeofvector,
                                             const GtEncseq *encseq,
                                             GtEncseqReader *esr,
                                             GtReadmode readmode,
@@ -5161,6 +5162,8 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   GtEndofTwobitencoding etbecurrent;
   unsigned long twobitencodingstoppos;
   bool fwd;
+  unsigned int offset;
+  int idx;
 
   if (pos == encseq->totallength)
   {
@@ -5173,6 +5176,7 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   if (gt_has_twobitencoding_stoppos_support(encseq))
   {
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
+    gt_assert(pos < twobitencodingstoppos);
   } else
   {
     twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
@@ -5181,51 +5185,24 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
   }
-  (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
-                                  twobitencodingstoppos);
-  tbevector[0] = etbecurrent.tbe;
-  if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
+  for (idx = 0, offset = 0; idx <sizeofvector; idx++,
+       offset += (unsigned int) GT_UNITSIN2BITENC)
   {
-    return etbecurrent.unitsnotspecial;
+    if (pos == twobitencodingstoppos)
+    {
+      return offset;
+    }
+    (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
+                                    twobitencodingstoppos);
+    tbevector[idx] = etbecurrent.tbe;
+    if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
+    {
+      return offset + etbecurrent.unitsnotspecial;
+    }
+    pos += GT_UNITSIN2BITENC;
   }
-  if (pos + GT_UNITSIN2BITENC == twobitencodingstoppos)
-  {
-    return (unsigned int) GT_UNITSIN2BITENC;
-  }
-  if (pos + GT_UNITSIN2BITENC >= encseq->logicaltotallength)
-  {
-    fprintf(stderr,
-            "pos+GT_UNITSIN2BITENC=%lu>=%lu=encseq->logicaltotallength\n",
-            pos + GT_UNITSIN2BITENC,encseq->logicaltotallength);
-    fprintf(stderr,"stoppos=%lu\n",twobitencodingstoppos);
-  }
-  (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
-                                  pos + GT_UNITSIN2BITENC,
-                                  twobitencodingstoppos);
-
-  tbevector[1] = etbecurrent.tbe;
-  if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
-  {
-    return etbecurrent.unitsnotspecial + (unsigned int) GT_UNITSIN2BITENC;
-  }
-  if (pos + GT_MULT2(GT_UNITSIN2BITENC) == twobitencodingstoppos)
-  {
-    return (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
-  }
-  if (pos + GT_MULT2(GT_UNITSIN2BITENC) >= encseq->logicaltotallength)
-  {
-    fprintf(stderr,
-            "pos+2*GT_UNITSIN2BITENC=%lu>=%lu=encseq->logicaltotallength\n",
-            pos + GT_MULT2(GT_UNITSIN2BITENC),encseq->logicaltotallength);
-    fprintf(stderr,"stoppos=%lu\n",twobitencodingstoppos);
-  }
-  (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd,
-                                  pos + GT_MULT2(GT_UNITSIN2BITENC),
-                                  twobitencodingstoppos);
-  tbevector[2] = etbecurrent.tbe;
-  gt_assert(etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC);
-  return etbecurrent.unitsnotspecial +
-         (unsigned int) GT_MULT2(GT_UNITSIN2BITENC);
+  gt_assert(false);
+  return 0;
 }
 
 #define MASKPREFIX(PREFIX)\
