@@ -70,20 +70,13 @@ static void gt_codon_iterator_simple_rewind(GtCodonIterator *ci)
   ci->pvt->curpos = ci->pvt->startpos;
 }
 
-static void gt_codon_iterator_simple_delete(GtCodonIterator *ci)
-{
-  GtCodonIteratorSimple *cis;
-  if (!ci) return;
-  cis = gt_codon_iterator_simple_cast(ci);
-}
-
 const GtCodonIteratorClass* gt_codon_iterator_simple_class(void)
 {
   static const GtCodonIteratorClass *cic = NULL;
   if (!cic)
   {
     cic = gt_codon_iterator_class_new(sizeof (GtCodonIteratorSimple),
-                                      gt_codon_iterator_simple_delete,
+                                      NULL,
                                       gt_codon_iterator_simple_current_position,
                                       gt_codon_iterator_simple_length,
                                       gt_codon_iterator_simple_rewind,
