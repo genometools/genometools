@@ -18,9 +18,10 @@
 #ifndef ESA_SPMITVS_H
 #define ESA_SPMITVS_H
 
+#include "core/logger_api.h"
 #include "core/error_api.h"
 
 int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
-                      GtError *err);
+                      GtLogger *logger,GtError *err);
 
 #endif

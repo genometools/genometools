@@ -24,6 +24,7 @@
 #include "core/endianess_api.h"
 #include "core/error.h"
 #include "core/fa.h"
+#include "core/fileutils.h"
 #include "core/format64.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
@@ -31,6 +32,7 @@
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
 #include "spacedef.h"
+#include "stamp.h"
 
 #define DBFILEKEY "dbfile="
 
@@ -210,13 +212,17 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->bwttab = NULL;
   suffixarray->bcktab = NULL;
   suffixarray->bwttabstream.fp = NULL;
-  suffixarray->suftabstream.fp = NULL;
-  suffixarray->llvtabstream.fp = NULL;
-  suffixarray->lcptabstream.fp = NULL;
-  suffixarray->suftabstream.bufferedfilespace = NULL;
-  suffixarray->lcptabstream.bufferedfilespace = NULL;
-  suffixarray->llvtabstream.bufferedfilespace = NULL;
   suffixarray->bwttabstream.bufferedfilespace = NULL;
+  suffixarray->suftabstreamGtUlong.fp = NULL;
+  suffixarray->suftabstreamGtUlong.bufferedfilespace = NULL;
+#ifdef _LP64
+  suffixarray->suftabstreamGtUint.fp = NULL;
+  suffixarray->suftabstreamGtUint.bufferedfilespace = NULL;
+#endif
+  suffixarray->lcptabstream.fp = NULL;
+  suffixarray->lcptabstream.bufferedfilespace = NULL;
+  suffixarray->llvtabstream.fp = NULL;
+  suffixarray->llvtabstream.bufferedfilespace = NULL;
   suffixarray->numberofallsortedsuffixes = 0;
 }
 
@@ -254,9 +260,14 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   gt_fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  gt_fa_xfclose(suffixarray->suftabstream.fp);
-  suffixarray->suftabstream.fp = NULL;
-  FREESPACE(suffixarray->suftabstream.bufferedfilespace);
+  gt_fa_xfclose(suffixarray->suftabstreamGtUlong.fp);
+  suffixarray->suftabstreamGtUlong.fp = NULL;
+  FREESPACE(suffixarray->suftabstreamGtUlong.bufferedfilespace);
+#ifdef _LP64
+  gt_fa_xfclose(suffixarray->suftabstreamGtUint.fp);
+  suffixarray->suftabstreamGtUint.fp = NULL;
+  FREESPACE(suffixarray->suftabstreamGtUint.bufferedfilespace);
+#endif
   gt_fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
   FREESPACE(suffixarray->lcptabstream.bufferedfilespace);
@@ -342,8 +353,24 @@ static int inputsuffixarray(bool map,
       }
     } else
     {
-      INITBufferedfile(indexname,&suffixarray->suftabstream,unsigned long,
+#ifdef _LP64
+      off_t filesize = gt_file_with_suffix_size(indexname,SUFTABSUFFIX);
+
+      if (filesize / 4 == (off_t) (totallength+1))
+      {
+        gt_logger_log(logger,"read suftab in units of 4 bytes");
+        INITBufferedfile(indexname,&suffixarray->suftabstreamGtUint,uint32_t,
+                         SUFTABSUFFIX);
+      } else
+      {
+        gt_logger_log(logger,"read suftab in units of 8 bytes");
+        INITBufferedfile(indexname,&suffixarray->suftabstreamGtUlong,GtUlong,
+                         SUFTABSUFFIX);
+      }
+#else
+      INITBufferedfile(indexname,&suffixarray->suftabstreamGtUlong,GtUlong,
                        SUFTABSUFFIX);
+#endif
     }
     if (!haserr && !suffixarray->longest.defined)
     {

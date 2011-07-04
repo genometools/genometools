@@ -619,6 +619,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
                                         gt_str_get(arguments->esaindexname),
                                         SARR_LCPTAB | SARR_ESQTAB,
                                         SEQ_scan,
+                                        logger,
                                         err);
         } else
         {
@@ -754,6 +755,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
                                           arguments->cmpsuf ? SARR_SUFTAB
                                                             : SARR_LCPTAB,
                                           SEQ_scan,
+                                          logger,
                                           err);
       if (ssar == NULL)
       {
@@ -1109,7 +1111,7 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   if (!haserr && arguments->scanesa > 0)
   {
     if (gt_runscanesa(gt_str_get(arguments->esaindexname),arguments->scanesa,
-                      err) != 0)
+                      logger,err) != 0)
     {
       haserr = true;
     }
@@ -1118,7 +1120,7 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   {
     if (gt_process_spmitv(gt_str_get(arguments->esaindexname),
                           arguments->spmitv,
-                          err) != 0)
+                          logger,err) != 0)
     {
       haserr = true;
     }

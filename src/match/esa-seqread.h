@@ -108,15 +108,17 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
 int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                                  Sequentialsuffixarrayreader *ssar);
 
-#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
+#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,TYPE)\
         {\
-          GtUlongBufferedfile *buf = &(SSAR)->suffixarray->suftabstream;\
+          Bufferedfile_ ## TYPE *buf\
+            = &(SSAR)->suffixarray->suftabstream ## TYPE;\
           if (buf->nextread >= buf->nextfree)\
           {\
-            buf->nextfree = (unsigned int) fread(buf->bufferedfilespace,\
-                                                 sizeof (GtUlong),\
-                                                 (size_t) FILEBUFFERSIZE,\
-                                                 buf->fp);\
+            buf->nextfree\
+              = (unsigned int) fread(buf->bufferedfilespace,\
+                                     sizeof (*buf->bufferedfilespace),\
+                                     (size_t) FILEBUFFERSIZE,\
+                                     buf->fp);\
             if (ferror(buf->fp))\
             {\
               gt_error_set(err,"error when trying to read next GtUlong");\
@@ -132,8 +134,22 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
               }\
             }\
           }\
-          SUFTABVALUE = buf->bufferedfilespace[buf->nextread++];\
+          SUFTABVALUE = (unsigned long)buf->bufferedfilespace[buf->nextread++];\
         }
+
+#ifdef _LP64
+#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
+        if ((SSAR)->suffixarray->suftabstreamGtUlong.fp != NULL)\
+        {\
+          NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUlong);\
+        } else\
+        {\
+          NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUint);\
+        }
+#else
+#define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
+        NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUlong)
+#endif
 
 #define NEXTSEQUENTIALSUFTABVALUE(SUFTABVALUE,SSAR)\
         switch ((SSAR)->seqactype)\
@@ -302,6 +318,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
+                                        GtLogger *logger,
                                         GtError *err);
 
 void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar);

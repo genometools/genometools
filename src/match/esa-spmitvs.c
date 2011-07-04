@@ -136,6 +136,7 @@ static int processlcpinterval_spmitv(unsigned long lcp,
 }
 
 int gt_process_spmitv(const char *inputindex, unsigned int minlen,
+                      GtLogger *logger,
                       GtError *err)
 {
   bool haserr = false;
@@ -147,6 +148,7 @@ int gt_process_spmitv(const char *inputindex, unsigned int minlen,
                                                    SARR_SUFTAB |
                                                    SARR_ESQTAB,
                                                    SEQ_scan,
+                                                   logger,
                                                    err);
   if (ssar == NULL)
   {

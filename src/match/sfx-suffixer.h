@@ -66,7 +66,7 @@ int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi,
                                       const GtStr *indexname,
                                       GtError *err);
 
-int gt_Sfxiterator_bcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
+int gt_Sfxiterator_bcktab2file(FILE *fp,Sfxiterator *sfi,GtError *err);
 
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
 

@@ -27,6 +27,7 @@ int gt_runenumlcpvalues(const char *inputindex,
                         GtLogger *logger,
                         GtError *err);
 
-int gt_runscanesa(const char *inputindex, unsigned int mode, GtError *err);
+int gt_runscanesa(const char *inputindex, unsigned int mode,
+                  GtLogger *logger,GtError *err);
 
 #endif

@@ -53,17 +53,11 @@
                        nextread;\
           TYPE *bufferedfilespace;\
           FILE *fp;\
-        } TYPE ## Bufferedfile
-
-DECLAREBufferedfiletype(GtUlong);
-
-DECLAREBufferedfiletype(GtUchar);
-
-DECLAREBufferedfiletype(Largelcpvalue);
+        } Bufferedfile_ ## TYPE
 
 #define DECLAREREADFUNCTION(TYPE)\
         GT_UNUSED static int readnext ## TYPE ## fromstream(TYPE *val,\
-                                                  TYPE ## Bufferedfile *buf)\
+                                                  Bufferedfile_ ## TYPE *buf)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
@@ -86,10 +80,18 @@ DECLAREBufferedfiletype(Largelcpvalue);
           return 1;\
         }
 
+DECLAREBufferedfiletype(GtUlong);
 DECLAREREADFUNCTION(GtUlong);
 
+#ifdef _LP64
+DECLAREBufferedfiletype(GtUint);
+DECLAREREADFUNCTION(GtUint);
+#endif
+
+DECLAREBufferedfiletype(GtUchar);
 DECLAREREADFUNCTION(GtUchar);
 
+DECLAREBufferedfiletype(Largelcpvalue);
 DECLAREREADFUNCTION(Largelcpvalue);
 
 typedef unsigned long ESASuffixptr;
@@ -112,10 +114,13 @@ typedef struct
   unsigned int prefixlength;
   GtBcktab *bcktab;
   /* or with streams */
-  GtUlongBufferedfile suftabstream;
-  GtUcharBufferedfile bwttabstream,
-                    lcptabstream;
-  LargelcpvalueBufferedfile llvtabstream;
+#ifdef _LP64
+  Bufferedfile_GtUint suftabstreamGtUint;
+#endif
+  Bufferedfile_GtUlong suftabstreamGtUlong;
+  Bufferedfile_GtUchar bwttabstream,
+                       lcptabstream;
+  Bufferedfile_Largelcpvalue llvtabstream;
 } Suffixarray;
 
 /*@unused@*/ static inline const Largelcpvalue *getlargelcpvalue(

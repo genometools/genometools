@@ -395,7 +395,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
         if (storeindexpos)
         {
           retval = readnextGtUlongfromstream(&tmpsuftabvalue,
-                                            &suffixarray.suftabstream);
+                                            &suffixarray.suftabstreamGtUlong);
           if (retval == 0)
           {
             break;

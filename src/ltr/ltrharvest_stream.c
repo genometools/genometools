@@ -1697,6 +1697,7 @@ GtNodeStream* gt_ltrharvest_stream_new(GtStr *str_indexname,
                                                 SARR_ESQTAB | SARR_DESTAB |
                                                 SARR_SSPTAB | SARR_SDSTAB,
                                                 SEQ_mappedboth,
+                                                NULL,
                                                 err);
   if (ltrh_stream->ssar == NULL)
   {

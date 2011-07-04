@@ -95,6 +95,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,
                                         unsigned int demand,
                                         Sequentialaccesstype seqactype,
+                                        GtLogger *logger,
                                         GtError *err)
 {
   Sequentialsuffixarrayreader *ssar;
@@ -104,10 +105,10 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
   if (((seqactype == SEQ_mappedboth)
          ? gt_mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
-                                               demand,
-                                               indexname,
-                                               NULL,
-                                               err) != 0)
+                                                  demand,
+                                                  indexname,
+                                                  logger,
+                                                  err) != 0)
   {
     FREESPACE(ssar->suffixarray);
     FREESPACE(ssar);
@@ -257,7 +258,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
   if (ssar->seqactype == SEQ_scan)
   {
     return readnextGtUlongfromstream(currentsuffix,
-                                    &ssar->suffixarray->suftabstream);
+                                     &ssar->suffixarray->suftabstreamGtUlong);
   }
   if (ssar->seqactype == SEQ_mappedboth)
   {

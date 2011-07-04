@@ -704,6 +704,7 @@ int gt_merstatistics(const char *inputindex,
                                                 SARR_ESQTAB,
                                                 (scanfile && !performtest)
                                                   ? SEQ_scan : SEQ_mappedboth,
+                                                logger,
                                                 err);
   if (ssar == NULL)
   {

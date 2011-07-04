@@ -99,6 +99,7 @@ struct Sfxiterator
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
   FILE *outfpbcktab;
+  bool usebcktmpfile;
   GtStr *bcktabfilename;
   unsigned int kmerfastmaskright;
 };
@@ -498,12 +499,34 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     {
       haserr = true;
     }
+    if (sfi->usebcktmpfile)
+    {
+      gt_logger_log(sfi->logger,"remove \"%s\"",
+                      gt_str_get(sfi->bcktabfilename));
+      if (unlink(gt_str_get(sfi->bcktabfilename)) != 0)
+      {
+        if (err != NULL)
+        {
+          gt_error_set(err,"Cannot unlink file \"%s\": %s",
+                          gt_str_get(sfi->bcktabfilename),
+                          strerror(errno));
+          haserr = true;
+        } else
+        {
+          fprintf(stderr,"Cannot unlink file \"%s\": %s",
+                          gt_str_get(sfi->bcktabfilename),
+                          strerror(errno));
+          exit(EXIT_FAILURE);
+        }
+      }
+    }
   }
   gt_bcktab_delete(sfi->bcktab);
   gt_freesuftabparts(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
   gt_differencecover_delete(sfi->dcov);
+  gt_fa_fclose(sfi->outfpbcktab);
   gt_str_delete(sfi->bcktabfilename);
   gt_free(sfi);
   return haserr ? -1 : 0;
@@ -1316,11 +1339,23 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       sfi->bcktabfilename = gt_str_new_cstr(indexname);
       gt_str_append_cstr(sfi->bcktabfilename,BCKTABSUFFIX);
+      sfi->outfpbcktab = outfpbcktab;
+      sfi->usebcktmpfile = false;
     } else
     {
-      sfi->bcktabfilename = NULL;
+      if (numofparts > 1U || maximumspace > 0)
+      {
+        gt_assert(outfpbcktab == NULL);
+        sfi->bcktabfilename = gt_str_new();
+        sfi->outfpbcktab = gt_xtmpfp(sfi->bcktabfilename);
+        sfi->usebcktmpfile = true;
+      } else
+      {
+        sfi->bcktabfilename = NULL;
+        sfi->outfpbcktab = NULL;
+        sfi->usebcktmpfile = false;
+      }
     }
-    sfi->outfpbcktab = outfpbcktab;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -1934,7 +1969,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
   return sfi->suffixsortspace;
 }
 
-int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
+int gt_Sfxiterator_bcktab2file(FILE *fp, Sfxiterator *sfi, GtError *err)
 {
   gt_error_check(err);
   gt_assert(sfi != NULL && sfi->bcktab != NULL);
@@ -1942,6 +1977,7 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
   {
     int ret = gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
     gt_fa_fclose(fp);
+    sfi->outfpbcktab = NULL;
     return ret;
   }
   return 0;

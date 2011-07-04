@@ -118,6 +118,7 @@ int gt_genomediff_shu(GtLogger *logger,
                                                 SARR_SSPTAB,
                                                 arguments->scan
                                                 ? SEQ_scan : SEQ_mappedboth,
+                                                logger,
                                                 err);
     if (ssar == NULL)
     {

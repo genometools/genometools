@@ -37,6 +37,7 @@ typedef struct
 
 static int callmultishulengthdist(const char *indexname,
                                   bool scanfile,
+                                  GtLogger *logger,
                                   GtError *err)
 {
   bool haserr = false;
@@ -49,6 +50,7 @@ static int callmultishulengthdist(const char *indexname,
                                                    SARR_ESQTAB,
                                                    scanfile
                                                     ? SEQ_scan : SEQ_mappedboth,
+                                                   logger,
                                                    err);
   if (ssar == NULL)
   {
@@ -197,6 +199,7 @@ static int gt_shulengthdist_runner(GT_UNUSED int argc,
     {
       if (callmultishulengthdist(gt_str_get(arguments->indexname),
                                  arguments->scanfile,
+                                 logger,
                                  err) != 0)
       {
         haserr = true;
