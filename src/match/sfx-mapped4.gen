@@ -36,6 +36,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
   {
+    unsigned long startpos2;
+
     gt_assert(endpos >= (unsigned long) upperkmersize);
     pos = endpos - (unsigned long) kmersize;
     unitindex = (pos > 0) ? GT_DIVBYUNITSIN2BITENC(pos-1) : 0;
@@ -48,22 +50,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
-  } else
-  {
-    pos = startpos;
-    unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
-    code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
-    PROCESSKMERCODE(processkmercodeinfo,
-                    true,
-                    pos,
-                    GT_ISDIRCOMPLEMENT(readmode)
-                      ? gt_kmercode_complement(code,maskright)
-                      : code);
-  }
-  currentencoding = twobitencoding[unitindex];
-  if (GT_ISDIRREVERSE(readmode))
-  {
-    unsigned long startpos2 = startpos + (upperkmersize - kmersize);
+    currentencoding = twobitencoding[unitindex];
+    startpos2 = startpos + (upperkmersize - kmersize);
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(pos-1));
@@ -94,6 +82,16 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   {
     unsigned long maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
 
+    pos = startpos;
+    unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
+    code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
+    PROCESSKMERCODE(processkmercodeinfo,
+                    true,
+                    pos,
+                    GT_ISDIRCOMPLEMENT(readmode)
+                      ? gt_kmercode_complement(code,maskright)
+                      : code);
+    currentencoding = twobitencoding[unitindex];
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(startpos+kmersize));
