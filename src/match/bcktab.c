@@ -44,12 +44,6 @@ typedef struct
                 maxbucketsize;
 } GtMaxbucketinfo;
 
-struct GtLeftborder
-{
-  uint32_t *uintbounds;
-  unsigned long *ulongbounds;
-};
-
 struct GtBcktab
 {
   GtLeftborder leftborder;
@@ -78,31 +72,6 @@ struct GtBcktab
        *mappedcountspecialcodes,
        *mappedptr;
 };
-
-void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code)
-{
-  gt_assert(lb != NULL);
-  if (lb->ulongbounds != NULL)
-  {
-    lb->ulongbounds[code]++;
-  } else
-  {
-    gt_assert(lb->uintbounds[code] < (uint32_t) UINT_MAX);
-    lb->uintbounds[code]++;
-  }
-}
-
-unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
-                                                  GtCodetype code)
-{
-  gt_assert(lb != NULL);
-  if (lb->ulongbounds != NULL)
-  {
-    return --lb->ulongbounds[code];
-  }
-  gt_assert(lb->uintbounds != NULL);
-  return (unsigned long) --lb->uintbounds[code];
-}
 
 void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
                                  unsigned long value)

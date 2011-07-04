@@ -18,6 +18,7 @@
 #ifndef BCKTAB_H
 #define BCKTAB_H
 
+#include <limits.h>
 #include "core/error.h"
 #include "core/intbits.h"
 #include "core/codetype.h"
@@ -30,14 +31,40 @@ typedef struct
                 specialsinbucket;
 } GtBucketspecification;
 
-typedef struct GtLeftborder GtLeftborder;
+typedef struct
+{
+  uint32_t *uintbounds;
+  unsigned long *ulongbounds;
+} GtLeftborder;
 
 typedef struct GtBcktab GtBcktab;
 
-void gt_bcktab_leftborder_addcode(GtLeftborder *lb,GtCodetype code);
+static inline void gt_bcktab_leftborder_addcode(GtLeftborder *lb,
+                                                GtCodetype code)
+{
+  gt_assert(lb != NULL);
+  if (lb->ulongbounds != NULL)
+  {
+    lb->ulongbounds[code]++;
+  } else
+  {
+    gt_assert(lb->uintbounds[code] < (uint32_t) UINT_MAX);
+    lb->uintbounds[code]++;
+  }
+}
 
-unsigned long gt_bcktab_leftborder_insertionindex(GtLeftborder *lb,
-                                                  GtCodetype code);
+static inline unsigned long gt_bcktab_leftborder_insertionindex(
+                                                  GtLeftborder *lb,
+                                                  GtCodetype code)
+{
+  gt_assert(lb != NULL);
+  if (lb->ulongbounds != NULL)
+  {
+    return --lb->ulongbounds[code];
+  }
+  gt_assert(lb->uintbounds != NULL);
+  return (unsigned long) --lb->uintbounds[code];
+}
 
 void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
                                  unsigned long value);
