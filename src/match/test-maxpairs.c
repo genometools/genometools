@@ -85,11 +85,10 @@ static int constructsarrandrunmaxpairs(
                            prefixlength,
                            numofparts,
                            maximumspace,
-                           NULL, /* oulcpinfo */
                            &sfxstrategy,
                            sfxprogress,
                            withprogressbar,
-                           NULL, /* verbosinfo */
+                           NULL, /* logger */
                            err);
   if (sfi == NULL)
   {

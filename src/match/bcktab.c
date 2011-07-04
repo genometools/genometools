@@ -214,7 +214,7 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
 }
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
-                                   const char *bcktmpfilename,
+                                   const char *bcktabfilename,
                                    unsigned int part,
                                    GtCodetype mincode,
                                    GtCodetype maxcode,
@@ -250,7 +250,7 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
   gt_assert(maxcode * basesize <= lbrange.mapend);
   gt_assert(lbrange.mapoffset % bcktab->pagesize == 0);
   bcktab->mappedleftborder
-    = gt_fa_xmmap_write_range(bcktmpfilename,
+    = gt_fa_xmmap_write_range(bcktabfilename,
                               (size_t) (lbrange.mapend - lbrange.mapoffset + 1),
                               (size_t) lbrange.mapoffset);
   if (bcktab->useulong)
@@ -281,7 +281,7 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                     : 100.0 * (csrange.mapend - csrange.mapoffset + 1)/
                       totalsizeofcodes);
     bcktab->mappedcountspecialcodes
-      = gt_fa_xmmap_write_range(bcktmpfilename,
+      = gt_fa_xmmap_write_range(bcktabfilename,
                                 (size_t) (csrange.mapend-csrange.mapoffset + 1),
                                 (size_t) csrange.mapoffset);
     if (bcktab->useulong)
@@ -700,7 +700,7 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
 }
 
 int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
-                              const char *bcktmpfilename,
+                              const char *bcktabfilename,
                               GtError *err)
 {
   bool haserr = false;
@@ -711,7 +711,7 @@ int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
     unsigned long byteswritten;
     FILE *fp;
 
-    fp = gt_fa_fopen(bcktmpfilename,"ab",err);
+    fp = gt_fa_fopen(bcktabfilename,"ab",err);
     if (fp == NULL)
     {
       haserr = true;

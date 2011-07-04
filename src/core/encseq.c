@@ -5176,7 +5176,6 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   if (gt_has_twobitencoding_stoppos_support(encseq))
   {
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
-    gt_assert(pos < twobitencodingstoppos);
   } else
   {
     twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);

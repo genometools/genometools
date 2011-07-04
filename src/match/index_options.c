@@ -210,19 +210,25 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
       }
     }
   }
-
-  if (gt_option_is_set(oi->optionalgbounds))
+  if (!had_err && (oi->numofparts > 1U || gt_str_length(oi->memlimit) > 0))
   {
-    if (gt_parse_algbounds(&oi->sfxstrategy,oi->algbounds,err) != 0)
+    oi->outbcktab = true;
+  }
+  if (!had_err)
+  {
+    if (gt_option_is_set(oi->optionalgbounds))
     {
-      had_err = -1;
+      if (gt_parse_algbounds(&oi->sfxstrategy,oi->algbounds,err) != 0)
+      {
+        had_err = -1;
+      }
+    } else
+    {
+      oi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
+      oi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
+      oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
+      oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
     }
-  } else
-  {
-    oi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
-    oi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
-    oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
-    oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
   }
 
   if (!had_err

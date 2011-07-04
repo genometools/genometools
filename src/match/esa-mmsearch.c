@@ -629,7 +629,6 @@ static int constructsarrandrunmmsearch(
                            prefixlength,
                            numofparts,
                            maximumspace,
-                           NULL, /* outlcpinfo */
                            &sfxstrategy, /* sfxstrategy */
                            sfxprogress,
                            withprogressbar,

@@ -39,8 +39,8 @@ typedef struct
 
 typedef struct GtBcktab GtBcktab;
 
-static inline void gt_bcktab_leftborder_addcode(GtLeftborder *lb,
-                                                GtCodetype code)
+/*@unused@*/ static inline void gt_bcktab_leftborder_addcode(GtLeftborder *lb,
+                                                             GtCodetype code)
 {
   gt_assert(lb != NULL);
   if (lb->ulongbounds != NULL)
@@ -53,7 +53,7 @@ static inline void gt_bcktab_leftborder_addcode(GtLeftborder *lb,
   }
 }
 
-static inline unsigned long gt_bcktab_leftborder_insertionindex(
+/*@unused@*/ static inline unsigned long gt_bcktab_leftborder_insertionindex(
                                                   GtLeftborder *lb,
                                                   GtCodetype code)
 {
@@ -83,7 +83,7 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
                                           GtCodetype maxcode);
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
-                                   const char *bcktmpfilename,
+                                   const char *bcktabfilename,
                                    unsigned int part,
                                    GtCodetype mincode,
                                    GtCodetype maxcode,
@@ -119,7 +119,7 @@ unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab);
 void gt_bcktab_delete_unused_memory(GtBcktab *bcktab,GtLogger *logger);
 
 int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
-                              const char *bcktmpfilename,
+                              const char *bcktabfilename,
                               GtError *err);
 
 unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,

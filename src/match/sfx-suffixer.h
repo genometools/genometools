@@ -37,7 +37,21 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
                                 unsigned long maximumspace,
+                                const Sfxstrategy *sfxstrategy,
+                                GtTimer *sfxprogress,
+                                bool withprogressbar,
+                                GtLogger *logger,
+                                GtError *err);
+
+Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
+                                const GtEncseq *encseq,
+                                GtReadmode readmode,
+                                unsigned int prefixlength,
+                                unsigned int numofparts,
+                                unsigned long maximumspace,
                                 void *voidoutlcpinfo,
+                                const char *indexname,
+                                FILE *outfpbcktab,
                                 const Sfxstrategy *sfxstrategy,
                                 GtTimer *sfxprogress,
                                 bool withprogressbar,
@@ -55,9 +69,6 @@ int gt_Sfxiterator_postsortfromstream(Sfxiterator *sfi,
 int gt_Sfxiterator_bcktab2file(FILE *fp,const Sfxiterator *sfi,GtError *err);
 
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
-
-void gt_Sfxiterator_setbcktabfileprefix(Sfxiterator *sfi,
-                                        const char *bcktabfileprefix);
 
 GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
                                    unsigned long pos,

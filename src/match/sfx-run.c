@@ -188,12 +188,14 @@ static int suffixeratorwithoutput(const char *indexname,
   bool haserr = false;
   Sfxiterator *sfi = NULL;
 
-  sfi = gt_Sfxiterator_new(encseq,
+  sfi = gt_Sfxiterator_new_withadditionalvalues(encseq,
                            readmode,
                            prefixlength,
                            numofparts,
                            maximumspace,
                            outfileinfo->outlcpinfo,
+                           indexname,
+                           outfileinfo->outfpbcktab,
                            sfxstrategy,
                            sfxprogress,
                            withprogressbar,
@@ -248,9 +250,7 @@ static int suffixeratorwithoutput(const char *indexname,
       {
         haserr = true;
       }
-      gt_fa_fclose(outfileinfo->outfpbcktab);
       outfileinfo->outfpbcktab = NULL;
-      gt_Sfxiterator_setbcktabfileprefix(sfi,indexname);
     }
   }
   if (gt_Sfxiterator_delete(sfi,err) != 0)

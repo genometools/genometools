@@ -50,6 +50,7 @@
 #include "sfx-mappedstr.h"
 #include "sfx-bentsedg.h"
 #include "sfx-suffixgetset.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -97,8 +98,8 @@ struct Sfxiterator
   bool storespecials;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
-  GtStr *bcktmpfilename;
-  const char *bcktabfileprefix;
+  FILE *outfpbcktab;
+  GtStr *bcktabfilename;
   unsigned int kmerfastmaskright;
 };
 
@@ -491,58 +492,11 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
                             sfi->sfxstrategy.spmopt == 0 ? true : false);
   if (stpgetnumofparts(sfi->suftabparts) > 1U)
   {
-    gt_assert (sfi->bcktmpfilename != NULL);
-    if (gt_bcktab_flush_remaining(sfi->bcktab,gt_str_get(sfi->bcktmpfilename),
-                                  err) != 0)
+    gt_assert (sfi->bcktabfilename != NULL);
+    if (gt_bcktab_flush_remaining(sfi->bcktab,
+                                  gt_str_get(sfi->bcktabfilename),err) != 0)
     {
       haserr = true;
-    } else
-    {
-      if (sfi->bcktabfileprefix != NULL)
-      {
-        GtStr *bcktabfile = gt_str_new_cstr(sfi->bcktabfileprefix);
-
-        gt_str_append_cstr(bcktabfile, BCKTABSUFFIX);
-        if (rename(gt_str_get(sfi->bcktmpfilename),gt_str_get(bcktabfile)) != 0)
-        {
-          if (err != NULL)
-          {
-            gt_error_set(err,"Cannot rename file \"%s\" to \"%s\": %s",
-                            gt_str_get(sfi->bcktmpfilename),
-                            gt_str_get(bcktabfile),
-                            strerror(errno));
-            haserr = true;
-          } else
-          {
-            fprintf(stderr,"Cannot rename file \"%s\" to \"%s\": %s",
-                            gt_str_get(sfi->bcktmpfilename),
-                            gt_str_get(bcktabfile),
-                            strerror(errno));
-            exit(EXIT_FAILURE);
-          }
-        }
-        gt_str_delete(bcktabfile);
-      } else
-      {
-        gt_logger_log(sfi->logger,"remove \"%s\"",
-                      gt_str_get(sfi->bcktmpfilename));
-        if (unlink(gt_str_get(sfi->bcktmpfilename)) != 0)
-        {
-          if (err != NULL)
-          {
-            gt_error_set(err,"Cannot unlink file \"%s\": %s",
-                            gt_str_get(sfi->bcktmpfilename),
-                            strerror(errno));
-            haserr = true;
-          } else
-          {
-            fprintf(stderr,"Cannot unlink file \"%s\": %s",
-                            gt_str_get(sfi->bcktmpfilename),
-                            strerror(errno));
-            exit(EXIT_FAILURE);
-          }
-        }
-      }
     }
   }
   gt_bcktab_delete(sfi->bcktab);
@@ -550,7 +504,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
   gt_differencecover_delete(sfi->dcov);
-  gt_str_delete(sfi->bcktmpfilename);
+  gt_str_delete(sfi->bcktabfilename);
   gt_free(sfi);
   return haserr ? -1 : 0;
 }
@@ -1278,12 +1232,15 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 
 #define SHOWCURRENTSPACE /* Nothing */
 
-Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
+Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
+                                const GtEncseq *encseq,
                                 GtReadmode readmode,
                                 unsigned int prefixlength,
                                 unsigned int numofparts,
                                 unsigned long maximumspace,
                                 void *voidoutlcpinfo,
+                                const char *indexname,
+                                FILE *outfpbcktab,
                                 const Sfxstrategy *sfxstrategy,
                                 GtTimer *sfxprogress,
                                 bool withprogressbar,
@@ -1355,7 +1312,15 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->dcov = NULL;
     sfi->markwholeleafbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
-    sfi->bcktabfileprefix = NULL;
+    if (indexname != NULL)
+    {
+      sfi->bcktabfilename = gt_str_new_cstr(indexname);
+      gt_str_append_cstr(sfi->bcktabfilename,BCKTABSUFFIX);
+    } else
+    {
+      sfi->bcktabfilename = NULL;
+    }
+    sfi->outfpbcktab = outfpbcktab;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -1392,8 +1357,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     sfi->bucketiterstep = 0;
     sfi->logger = logger;
     sfi->sfxprogress = sfxprogress;
-    sfi->bcktmpfilename = NULL;
-
     if (sfi->sfxstrategy.differencecover > 0 &&
         specialcharacters < sfi->totallength)
     {
@@ -1614,20 +1577,15 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
     gt_assert(sfi->suftabparts != NULL);
     if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
-      FILE *bcktmpfilefp;
-
-      gt_assert(sfi != NULL);
-      sfi->bcktmpfilename = gt_str_new();
-      bcktmpfilefp = gt_xtmpfp(sfi->bcktmpfilename);
-      gt_logger_log(logger, "store bcktab in \"%s\"",
-                    gt_str_get(sfi->bcktmpfilename));
       gt_bcktab_excludedistpfxidx_out(sfi->bcktab);
-      if (gt_bcktab_flush_to_file(bcktmpfilefp,sfi->bcktab,err) != 0)
+      gt_assert(sfi->outfpbcktab != NULL);
+      if (gt_bcktab_flush_to_file(sfi->outfpbcktab,sfi->bcktab,err) != 0)
       {
         haserr = true;
       }
       gt_bcktab_includedistpfxidx_out(sfi->bcktab);
-      gt_fa_fclose(bcktmpfilefp);
+      gt_fa_fclose(sfi->outfpbcktab);
+      sfi->outfpbcktab = NULL;
       gt_bcktab_delete_unused_memory(sfi->bcktab,logger);
     }
     sfi->suffixsortspace
@@ -1655,10 +1613,31 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
   return sfi;
 }
 
-void gt_Sfxiterator_setbcktabfileprefix(Sfxiterator *sfi,
-                                        const char *bcktabfileprefix)
+Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
+                                GtReadmode readmode,
+                                unsigned int prefixlength,
+                                unsigned int numofparts,
+                                unsigned long maximumspace,
+                                const Sfxstrategy *sfxstrategy,
+                                GtTimer *sfxprogress,
+                                bool withprogressbar,
+                                GtLogger *logger,
+                                GtError *err)
 {
-  sfi->bcktabfileprefix = bcktabfileprefix;
+  return gt_Sfxiterator_new_withadditionalvalues(
+                                encseq,
+                                readmode,
+                                prefixlength,
+                                numofparts,
+                                maximumspace,
+                                NULL,
+                                NULL,
+                                NULL,
+                                sfxstrategy,
+                                sfxprogress,
+                                withprogressbar,
+                                logger,
+                                err);
 }
 
 static void preparethispart(Sfxiterator *sfi)
@@ -1691,7 +1670,7 @@ static void preparethispart(Sfxiterator *sfi)
                   sfi->currentmincode,
                   sfi->currentmaxcode);
     gt_bcktab_assignboundsforpart(sfi->bcktab,
-                                  gt_str_get(sfi->bcktmpfilename),
+                                  gt_str_get(sfi->bcktabfilename),
                                   sfi->part,
                                   sfi->currentmincode,
                                   sfi->currentmaxcode,
@@ -1961,7 +1940,9 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, const Sfxiterator *sfi, GtError *err)
   gt_assert(sfi != NULL && sfi->bcktab != NULL);
   if (stpgetnumofparts(sfi->suftabparts) <= 1U)
   {
-    return gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
+    int ret = gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
+    gt_fa_fclose(fp);
+    return ret;
   }
   return 0;
 }
