@@ -94,7 +94,7 @@ uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
     case GT_ACCESS_TYPE_UCHARTABLES:
       return SIZEOFSWTABLE(GtUchar,UCHAR_MAX);
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return SIZEOFSWTABLE(GtUshort,USHRT_MAX);
+      return SIZEOFSWTABLE(uint16_t,USHRT_MAX);
     case GT_ACCESS_TYPE_UINT32TABLES:
       return SIZEOFSWTABLE(uint32_t,UINT32_MAX);
     default:

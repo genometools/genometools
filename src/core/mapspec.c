@@ -1,6 +1,7 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,19 +18,45 @@
 
 #include <errno.h>
 #include <string.h>
-#include "core/bitpackarray.h"
-#include "core/chardef.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "core/format64.h"
 #include "core/intbits.h"
 #include "core/types_api.h"
-#include "core/mapspec-gen.h"
+#include "core/mapspec.h"
 #include "core/pairbwtidx.h"
 #include "core/safecast-gen.h"
 #include "core/str.h"
 #include "core/ulongbound.h"
+
+typedef enum
+{
+  GtCharType, /* \0 terminated string */
+  GtFilelengthvaluesType,
+  GtUcharType,
+  Uint16Type,
+  Uint32Type,
+  Uint64Type,
+  GtUlongType,
+  GtUlongBoundType,
+  GtBitsequenceType,
+  GtPairBwtidxType,
+  GtTwobitencodingType,
+  GtSpecialcharinfoType,
+  GtBitElemType
+} GtTypespec;
+
+typedef struct
+{
+  GtTypespec typespec;
+  char *name;
+  void *startptr;
+  size_t sizeofunit;
+  unsigned long numofunits;
+} GtMapspecification;
+
+GT_DECLAREARRAYSTRUCT(GtMapspecification);
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\
@@ -106,8 +133,8 @@ static int assigncorrecttype(GtMapspecification *mapspec,
     case GtUcharType:
       ASSIGNPTR2STARTPTR(GtUchar);
       break;
-    case GtUshortType:
-      ASSIGNPTR2STARTPTR(GtUshort);
+    case Uint16Type:
+      ASSIGNPTR2STARTPTR(uint16_t);
       break;
     case Uint32Type:
       ASSIGNPTR2STARTPTR(uint32_t);
@@ -133,7 +160,7 @@ static int assigncorrecttype(GtMapspecification *mapspec,
     case GtSpecialcharinfoType:
       ASSIGNPTR2STARTPTR(GtSpecialcharinfo);
       break;
-    case BitElemType:
+    case GtBitElemType:
       ASSIGNPTR2STARTPTR(BitElem);
       break;
     default:
@@ -144,34 +171,36 @@ static int assigncorrecttype(GtMapspecification *mapspec,
   return haserr ? -1 : 0;
 }
 
-int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
-                        void **mappeduserptr,
-                        void *assignmapinfo,
-                        const GtStr *tmpfilename,
-                        unsigned long expectedsize,
-                        GtError *err)
+struct GtMapspec {
+  GtArrayGtMapspecification mapspectable;
+};
+
+int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
+                     const GtStr *filename, unsigned long expectedsize,
+                     void **mapped, GtError *err)
 {
   void *mapptr;
   uint64_t expectedaccordingtomapspec;
   unsigned long byteoffset = 0;
   size_t numofbytes;
-  GtArrayGtMapspecification mapspectable;
+  GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
   GtMapspecification *mapspecptr;
   bool haserr = false;
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
-  GT_INITARRAY(&mapspectable,GtMapspecification);
-  assignmapspec(&mapspectable,assignmapinfo,false);
-  mapptr = gt_fa_mmap_read(gt_str_get(tmpfilename), &numofbytes, err);
+  GT_INITARRAY(&ms->mapspectable, GtMapspecification);
+  setup(ms, data, false);
+
+  mapptr = gt_fa_mmap_read(gt_str_get(filename), &numofbytes, err);
   if (mapptr == NULL)
   {
     haserr = true;
   }
-  *mappeduserptr = mapptr;
+  *mapped = mapptr;
   if (!haserr)
   {
-    if (assigncorrecttype(mapspectable.spaceGtMapspecification,
+    if (assigncorrecttype(ms->mapspectable.spaceGtMapspecification,
                           mapptr,0,err) != 0)
     {
       haserr = true;
@@ -179,20 +208,21 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
   }
   if (!haserr)
   {
-    expectedaccordingtomapspec = detexpectedaccordingtomapspec(&mapspectable);
+    expectedaccordingtomapspec =
+                               detexpectedaccordingtomapspec(&ms->mapspectable);
     if (expectedaccordingtomapspec != (uint64_t) numofbytes)
     {
       gt_error_set(err,"%lu bytes read from %s, but " Formatuint64_t
                          " expected",
                          (unsigned long) numofbytes,
-                         gt_str_get(tmpfilename),
+                         gt_str_get(filename),
                          PRINTuint64_tcast(expectedaccordingtomapspec));
       haserr = true;
     }
   }
   if (!haserr)
   {
-    mapspecptr = mapspectable.spaceGtMapspecification;
+    mapspecptr = ms->mapspectable.spaceGtMapspecification;
     gt_assert(mapspecptr != NULL);
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
@@ -205,8 +235,8 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
       totalpadunits += (unsigned long) padunits;
     }
     for (mapspecptr++;
-         mapspecptr < mapspectable.spaceGtMapspecification +
-                      mapspectable.nextfreeGtMapspecification; mapspecptr++)
+         mapspecptr < ms->mapspectable.spaceGtMapspecification +
+                      ms->mapspectable.nextfreeGtMapspecification; mapspecptr++)
     {
       if (assigncorrecttype(mapspecptr,mapptr,byteoffset,err) != 0)
       {
@@ -230,17 +260,18 @@ int gt_mapspec_fillmapspecstartptr(GtAssignmapspec assignmapspec,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      gt_error_set(err,"mapping: expected size of index is %lu bytes, "
-                        "but index has %lu bytes",
-                        expectedsize,byteoffset);
+      gt_error_set(err,"mapping: expected file size is %lu bytes, "
+                       "but file has %lu bytes",
+                       expectedsize,byteoffset);
       haserr = true;
     }
   }
-  GT_FREEARRAY(&mapspectable,GtMapspecification);
+  GT_FREEARRAY(&ms->mapspectable,GtMapspecification);
+  gt_free(ms);
   return haserr ? -1 : 0;
 }
 
-int gt_mapspec_addpadbytes(FILE *fp,unsigned long *byteswritten,
+int gt_mapspec_pad(FILE *fp,unsigned long *bytes_written,
                            unsigned long byteoffset,GtError *err)
 {
   bool haserr = false;
@@ -259,34 +290,31 @@ int gt_mapspec_addpadbytes(FILE *fp,unsigned long *byteswritten,
                        strerror(errno));
       haserr = true;
     }
-    *byteswritten = (unsigned long) padunits;
+    *bytes_written = (unsigned long) padunits;
   } else
   {
-    *byteswritten = 0;
+    *bytes_written = 0;
   }
   return haserr ? -1 : 0;
 }
 
-int gt_mapspec_flushtheindex2file(FILE *fp,
-                       GtAssignmapspec assignmapspec,
-                       void *assignmapinfo,
-                       unsigned long expectedsize,
-                       GtError *err)
+int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
+                     void *data, unsigned long expectedsize, GtError *err)
 {
-  GtArrayGtMapspecification mapspectable;
   GtMapspecification *mapspecptr;
   unsigned long byteoffset = 0;
   bool haserr = false;
   unsigned long totalpadunits = 0;
   unsigned long byteswritten;
+  GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
 
   gt_error_check(err);
-  GT_INITARRAY(&mapspectable,GtMapspecification);
-  assignmapspec(&mapspectable,assignmapinfo,true);
-  gt_assert(mapspectable.spaceGtMapspecification != NULL);
-  for (mapspecptr = mapspectable.spaceGtMapspecification;
-       mapspecptr < mapspectable.spaceGtMapspecification +
-                    mapspectable.nextfreeGtMapspecification;
+  GT_INITARRAY(&ms->mapspectable,GtMapspecification);
+  setup(ms, data, true);
+  gt_assert(ms->mapspectable.spaceGtMapspecification != NULL);
+  for (mapspecptr = ms->mapspectable.spaceGtMapspecification;
+       mapspecptr < ms->mapspectable.spaceGtMapspecification +
+                    ms->mapspectable.nextfreeGtMapspecification;
        mapspecptr++)
   {
 #ifdef SKDEBUG
@@ -307,8 +335,8 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
         case GtUcharType:
           WRITEACTIONWITHTYPE(GtUchar);
           break;
-        case GtUshortType:
-          WRITEACTIONWITHTYPE(GtUshort);
+        case Uint16Type:
+          WRITEACTIONWITHTYPE(uint16_t);
           break;
         case Uint32Type:
           WRITEACTIONWITHTYPE(uint32_t);
@@ -334,7 +362,7 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
         case GtSpecialcharinfoType:
           WRITEACTIONWITHTYPE(GtSpecialcharinfo);
           break;
-        case BitElemType:
+        case GtBitElemType:
           WRITEACTIONWITHTYPE(BitElem);
           break;
         default:
@@ -351,7 +379,7 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
                               (uint64_t) (byteoffset +
                                           mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    if (gt_mapspec_addpadbytes(fp,&byteswritten,byteoffset,err) != 0)
+    if (gt_mapspec_pad(fp,&byteswritten,byteoffset,err) != 0)
     {
       haserr = true;
     }
@@ -362,13 +390,129 @@ int gt_mapspec_flushtheindex2file(FILE *fp,
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
-      gt_error_set(err,"flushindex: expected size of index is %lu bytes, "
-                        "but index has %lu bytes",
-                        expectedsize,
-                        byteoffset);
+      gt_error_set(err,"expected file size is %lu bytes, "
+                       "but file has %lu bytes",
+                       expectedsize,
+                       byteoffset);
       haserr = true;
     }
   }
-  GT_FREEARRAY(&mapspectable,GtMapspecification);
+  GT_FREEARRAY(&ms->mapspectable,GtMapspecification);
+  gt_free(ms);
   return haserr ? -1 : 0;
+}
+
+#define NEWMAPSPEC(MS,PTR,TYPE,SIZE,ELEMS)\
+        GT_GETNEXTFREEINARRAY(mapspecptr,&MS->mapspectable, \
+                              GtMapspecification,10);\
+        mapspecptr->typespec = TYPE;\
+        mapspecptr->startptr = PTR;\
+        mapspecptr->sizeofunit = SIZE;\
+        mapspecptr->numofunits = ELEMS;\
+        mapspecptr->name = #PTR
+
+void gt_mapspec_add_char_ptr(GtMapspec *mapspec, char **ptr, unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtCharType, sizeof (char), n);
+}
+
+void gt_mapspec_add_uchar_ptr(GtMapspec *mapspec, GtUchar **ptr,
+                              unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtUcharType, sizeof (GtUchar), n);
+}
+
+void gt_mapspec_add_uint16_ptr(GtMapspec *mapspec, uint16_t **ptr,
+                               unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, Uint16Type, sizeof (unsigned short), n);
+}
+
+void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, unsigned long **ptr,
+                              unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtUlongType, sizeof (unsigned long), n);
+}
+
+void gt_mapspec_add_ulongbound_ptr(GtMapspec *mapspec, GtUlongBound **ptr,
+                                   unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtUlongBoundType, sizeof (GtUlongBound), n);
+}
+
+void gt_mapspec_add_uint32_ptr(GtMapspec *mapspec, uint32_t **ptr,
+                               unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, Uint32Type, sizeof (uint32_t), n);
+}
+
+void gt_mapspec_add_uint64_ptr(GtMapspec *mapspec, uint64_t **ptr,
+                               unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, Uint64Type, sizeof (uint64_t), n);
+}
+
+void gt_mapspec_add_bitsequence_ptr(GtMapspec *mapspec, GtBitsequence **ptr,
+                                    unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtBitsequenceType, sizeof (GtBitsequence), n);
+}
+void gt_mapspec_add_twobitencoding_ptr(GtMapspec *mapspec,
+                                       GtTwobitencoding **ptr, unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtTwobitencodingType, sizeof (GtTwobitencoding), n);
+}
+
+void gt_mapspec_add_specialcharinfo_ptr(GtMapspec *mapspec,
+                                        GtSpecialcharinfo **ptr,
+                                        unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtSpecialcharinfoType, sizeof (GtSpecialcharinfo),
+             n);
+}
+
+void gt_mapspec_add_bitelem_ptr(GtMapspec *mapspec, BitElem **ptr,
+                                unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtBitElemType, sizeof (BitElem), n);
+}
+
+void gt_mapspec_add_filelengthvalues_ptr(GtMapspec *mapspec,
+                                         GtFilelengthvalues **ptr,
+                                         unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtFilelengthvaluesType,
+             sizeof (GtFilelengthvalues), n);
+}
+
+void gt_mapspec_add_pairbwtindex_ptr(GtMapspec *mapspec, GtPairBwtidx **ptr,
+                                     unsigned long n)
+{
+  GtMapspecification *mapspecptr;
+  gt_assert(mapspec && ptr);
+  NEWMAPSPEC(mapspec, ptr, GtPairBwtidxType, sizeof (GtPairBwtidx), n);
 }

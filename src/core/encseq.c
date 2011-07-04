@@ -51,7 +51,7 @@
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
-#include "core/mapspec-gen.h"
+#include "core/mapspec.h"
 #include "core/minmax.h"
 #include "core/progressbar.h"
 #include "core/sequence_buffer_fasta.h"
@@ -718,13 +718,12 @@ bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
           encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) ? true : false;
 }
 
-static void addswtabletomapspectable(GtArrayGtMapspecification *mapspectable,
+static void addswtabletomapspectable(GtMapspec *mapspec,
                                      GtSWtable *swtable,
                                      bool withrangelengths,
                                      unsigned long totallength,
                                      GtEncseqAccessType sat)
 {
-  GtMapspecification *mapspecptr;
   unsigned long numofunits;
 
   switch (sat)
@@ -732,43 +731,50 @@ static void addswtabletomapspectable(GtArrayGtMapspecification *mapspectable,
     case GT_ACCESS_TYPE_UCHARTABLES:
       if (swtable->st_uchar.numofpositionstostore > 0)
       {
-        NEWMAPSPEC(swtable->st_uchar.positions,GtUchar,
-                   swtable->st_uchar.numofpositionstostore);
+        gt_mapspec_add_uchar(mapspec,
+                             swtable->st_uchar.positions,
+                             swtable->st_uchar.numofpositionstostore);
         if (withrangelengths)
         {
-          NEWMAPSPEC(swtable->st_uchar.rangelengths,GtUchar,
-                     swtable->st_uchar.numofpositionstostore);
+          gt_mapspec_add_uchar(mapspec,
+                               swtable->st_uchar.rangelengths,
+                               swtable->st_uchar.numofpositionstostore);
         }
         numofunits = totallength/UCHAR_MAX+1;
-        NEWMAPSPEC(swtable->st_uchar.endidxinpage,GtUlong,numofunits);
+        gt_mapspec_add_ulong(mapspec, swtable->st_uchar.endidxinpage,
+                             numofunits);
       }
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      if (swtable->st_ushort.numofpositionstostore > 0)
+      if (swtable->st_uint16.numofpositionstostore > 0)
       {
-        NEWMAPSPEC(swtable->st_ushort.positions,GtUshort,
-                   swtable->st_ushort.numofpositionstostore);
+        gt_mapspec_add_uint16(mapspec,
+                              swtable->st_uint16.positions,
+                              swtable->st_uint16.numofpositionstostore);
         if (withrangelengths)
         {
-          NEWMAPSPEC(swtable->st_ushort.rangelengths,GtUshort,
-                     swtable->st_ushort.numofpositionstostore);
+          gt_mapspec_add_uint16(mapspec,
+                                swtable->st_uint16.rangelengths,
+                                swtable->st_uint16.numofpositionstostore);
         }
         numofunits = totallength/USHRT_MAX+1;
-        NEWMAPSPEC(swtable->st_ushort.endidxinpage,GtUlong,numofunits);
+        gt_mapspec_add_ulong(mapspec, swtable->st_uint16.endidxinpage,
+                             numofunits);
       }
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       if (swtable->st_uint32.numofpositionstostore > 0)
       {
-        NEWMAPSPEC(swtable->st_uint32.positions,Uint32,
-                   swtable->st_uint32.numofpositionstostore);
+        gt_mapspec_add_uint32(mapspec, swtable->st_uint32.positions,
+                              swtable->st_uint32.numofpositionstostore);
         if (withrangelengths)
         {
-          NEWMAPSPEC(swtable->st_uint32.rangelengths,Uint32,
-                     swtable->st_uint32.numofpositionstostore);
+          gt_mapspec_add_uint32(mapspec, swtable->st_uint32.rangelengths,
+                                swtable->st_uint32.numofpositionstostore);
         }
         numofunits = totallength/UINT32_MAX+1;
-        NEWMAPSPEC(swtable->st_uint32.endidxinpage,GtUlong,numofunits);
+        gt_mapspec_add_ulong(mapspec, swtable->st_uint32.endidxinpage,
+                             numofunits);
       }
       break;
     default:
@@ -777,14 +783,13 @@ static void addswtabletomapspectable(GtArrayGtMapspecification *mapspectable,
   }
 }
 
-static void assignssptabmapspecification(
-                                        GtArrayGtMapspecification *mapspectable,
-                                        void *voidinfo,
-                                        GT_UNUSED bool writemode)
+static void assignssptabmapspecification(GtMapspec *mapspec,
+                                         void *voidinfo,
+                                         GT_UNUSED bool writemode)
 {
   GtEncseq *encseq = (GtEncseq *) voidinfo;
 
-  addswtabletomapspectable(mapspectable,
+  addswtabletomapspectable(mapspec,
                            &encseq->ssptabnew,
                            false,
                            encseq->totallength,
@@ -812,11 +817,8 @@ static int flushssptab2file(const char *indexname,GtEncseq *encseq,
                                             false,
                                             encseq->totallength,
                                             encseq->numofdbsequences-1));
-    if (gt_mapspec_flushtheindex2file(fp,
-                                      assignssptabmapspecification,
-                                      encseq,
-                                      sizessptab,
-                                      err) != 0)
+    if (gt_mapspec_write(assignssptabmapspecification, fp, encseq, sizessptab,
+                         err) != 0)
     {
       haserr = true;
     }
@@ -843,12 +845,8 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
                                            false,
                                            encseq->totallength,
                                            encseq->numofdbsequences-1));
-  if (gt_mapspec_fillmapspecstartptr(assignssptabmapspecification,
-                                     &encseq->ssptabmappedptr,
-                                     encseq,
-                                     tmpfilename,
-                                     sizessptab,
-                                     err) != 0)
+  if (gt_mapspec_read(assignssptabmapspecification, encseq, tmpfilename,
+                      sizessptab, &encseq->ssptabmappedptr, err) != 0)
   {
     haserr = true;
   }
@@ -860,13 +858,11 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
-static void assignencseqmapspecification(
-                                        GtArrayGtMapspecification *mapspectable,
-                                        void *voidinfo,
-                                        bool writemode)
+static void assignencseqmapspecification(GtMapspec *mapspec,
+                                         void *data,
+                                         bool writemode)
 {
-  GtEncseq *encseq = (GtEncseq *) voidinfo;
-  GtMapspecification *mapspecptr;
+  GtEncseq *encseq = (GtEncseq *) data;
   unsigned long numofunits;
   unsigned int numofchars, bitspersymbol;
 
@@ -914,23 +910,26 @@ static void assignencseqmapspecification(
     }
     gt_assert(offset == encseq->lengthofdbfilenames);
   }
-  NEWMAPSPEC(encseq->satcharptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->totallengthptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->numofdbsequencesptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->numofdbfilesptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->lengthofdbfilenamesptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->specialcharinfoptr,GtSpecialcharinfo,1UL);
-  NEWMAPSPEC(encseq->minseqlenptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->maxseqlenptr,GtUlong,1UL);
-  NEWMAPSPEC(encseq->firstfilename,GtChar,encseq->lengthofdbfilenames);
-  NEWMAPSPEC(encseq->filelengthtab,GtFilelengthvalues,encseq->numofdbfiles);
+  gt_mapspec_add_ulong(mapspec, encseq->satcharptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->totallengthptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->numofdbsequencesptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->numofdbfilesptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->lengthofdbfilenamesptr, 1UL);
+  gt_mapspec_add_specialcharinfo(mapspec, encseq->specialcharinfoptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->minseqlenptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->maxseqlenptr, 1UL);
+  gt_mapspec_add_char(mapspec, encseq->firstfilename,
+                      encseq->lengthofdbfilenames);
+  gt_mapspec_add_filelengthvalues(mapspec, encseq->filelengthtab,
+                                  encseq->numofdbfiles);
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
-  NEWMAPSPEC(encseq->characterdistribution,GtUlong,(unsigned long) numofchars);
+  gt_mapspec_add_ulong(mapspec, encseq->characterdistribution,
+                       (unsigned long) numofchars);
   switch (encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
       numofunits = encseq->totallength;
-      NEWMAPSPEC(encseq->plainseq,GtUchar,numofunits);
+      gt_mapspec_add_uchar(mapspec, encseq->plainseq, numofunits);
       break;
     case GT_ACCESS_TYPE_BYTECOMPRESS:
       bitspersymbol = gt_alphabet_bits_per_symbol(encseq->alpha);
@@ -945,28 +944,30 @@ static void assignencseqmapspecification(
                              false);
       }
       gt_assert(encseq->bitpackarray != NULL);
-      NEWMAPSPEC(BITPACKARRAYSTOREVAR(encseq->bitpackarray),BitElem,numofunits);
+      gt_mapspec_add_bitelem(mapspec,
+                             BITPACKARRAYSTOREVAR(encseq->bitpackarray),
+                             numofunits);
       break;
     case GT_ACCESS_TYPE_EQUALLENGTH:
-      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
+      gt_mapspec_add_twobitencoding(mapspec, encseq->twobitencoding,
+                                    encseq->unitsoftwobitencoding);
       break;
     case GT_ACCESS_TYPE_BITACCESS:
-      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
+      gt_mapspec_add_twobitencoding(mapspec, encseq->twobitencoding,
+                                    encseq->unitsoftwobitencoding);
       if (encseq->has_specialranges)
       {
         numofunits = (unsigned long)
                       GT_NUMOFINTSFORBITS(encseq->totallength + GT_INTWORDSIZE);
-        NEWMAPSPEC(encseq->specialbits,GtBitsequence,numofunits);
+        gt_mapspec_add_bitsequence(mapspec, encseq->specialbits, numofunits);
       }
       break;
     case GT_ACCESS_TYPE_UCHARTABLES:
     case GT_ACCESS_TYPE_USHORTTABLES:
     case GT_ACCESS_TYPE_UINT32TABLES:
-      NEWMAPSPEC(encseq->twobitencoding,GtTwobitencoding,
-                 encseq->unitsoftwobitencoding);
-      addswtabletomapspectable(mapspectable,
+      gt_mapspec_add_twobitencoding(mapspec, encseq->twobitencoding,
+                                    encseq->unitsoftwobitencoding);
+      addswtabletomapspectable(mapspec,
                                &encseq->wildcardrangetable,
                                true,
                                encseq->totallength,
@@ -990,11 +991,8 @@ static int flushencseq2file(const char *indexname,GtEncseq *encseq,
   }
   if (!haserr)
   {
-    if (gt_mapspec_flushtheindex2file(fp,
-                                      assignencseqmapspecification,
-                                      encseq,
-                                      encseq->sizeofrep,
-                                      err) != 0)
+    if (gt_mapspec_write(assignencseqmapspecification, fp, encseq,
+                         encseq->sizeofrep, err) != 0)
     {
       haserr = true;
     }
@@ -1034,12 +1032,12 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,GT_ENCSEQFILESUFFIX);
-  if (gt_mapspec_fillmapspecstartptr(assignencseqmapspecification,
-                                     &encseq->mappedptr,
-                                     encseq,
-                                     tmpfilename,
-                                     encseq->sizeofrep,
-                                     err) != 0)
+  if (gt_mapspec_read(assignencseqmapspecification,
+                      encseq,
+                      tmpfilename,
+                      encseq->sizeofrep,
+                      &encseq->mappedptr,
+                      err) != 0)
   {
     haserr = true;
   }
@@ -1081,9 +1079,9 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
       swtable->st_uchar.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      swtable->st_ushort.positions = NULL;
-      swtable->st_ushort.endidxinpage = NULL;
-      swtable->st_ushort.rangelengths = NULL;
+      swtable->st_uint16.positions = NULL;
+      swtable->st_uint16.endidxinpage = NULL;
+      swtable->st_uint16.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       swtable->st_uint32.positions = NULL;
@@ -1141,10 +1139,10 @@ static void initSWtable(GtSWtable *swtable,
       swtable->st_uchar.numofpositionstostore = items;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      swtable->st_ushort.maxrangevalue = (unsigned int) USHRT_MAX;
-      swtable->st_ushort.numofpages
-        = totallength/swtable->st_ushort.maxrangevalue + 1;
-      swtable->st_ushort.numofpositionstostore = items;
+      swtable->st_uint16.maxrangevalue = (unsigned int) USHRT_MAX;
+      swtable->st_uint16.numofpages
+        = totallength/swtable->st_uint16.maxrangevalue + 1;
+      swtable->st_uint16.numofpositionstostore = items;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       swtable->st_uint32.maxrangevalue = (unsigned int) UINT32_MAX;
@@ -1194,16 +1192,16 @@ static Gtssptaboutinfo *ssptaboutinfo_new(GtEncseqAccessType sat,
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       ssptaboutinfo->nextcheckincrement
-        = (unsigned long) ssptaboutinfo->ssptabptr->st_ushort.maxrangevalue+1;
+        = (unsigned long) ssptaboutinfo->ssptabptr->st_uint16.maxrangevalue+1;
       ssptaboutinfo->numofpages
-        = ssptaboutinfo->ssptabptr->st_ushort.numofpages;
-      ssptaboutinfo->ssptabptr->st_ushort.positions
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_ushort.positions)
-                    * ssptaboutinfo->ssptabptr->st_ushort.numofpositionstostore
+        = ssptaboutinfo->ssptabptr->st_uint16.numofpages;
+      ssptaboutinfo->ssptabptr->st_uint16.positions
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uint16.positions)
+                    * ssptaboutinfo->ssptabptr->st_uint16.numofpositionstostore
                    );
-      ssptaboutinfo->ssptabptr->st_ushort.endidxinpage
-        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_ushort.endidxinpage)
-                    * ssptaboutinfo->ssptabptr->st_ushort.numofpages);
+      ssptaboutinfo->ssptabptr->st_uint16.endidxinpage
+        = gt_malloc(sizeof (*ssptaboutinfo->ssptabptr->st_uint16.endidxinpage)
+                    * ssptaboutinfo->ssptabptr->st_uint16.numofpages);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       ssptaboutinfo->nextcheckincrement
@@ -1246,12 +1244,12 @@ static void ssptaboutinfo_processseppos(Gtssptaboutinfo *ssptaboutinfo,
       case GT_ACCESS_TYPE_UCHARTABLES:
         ssptaboutinfo->ssptabptr->st_uchar.positions[ssptaboutinfo->fillpos++]
           = (GtUchar) (seppos &
-                       ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue);
+                             ssptaboutinfo->ssptabptr->st_uchar.maxrangevalue);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
-        ssptaboutinfo->ssptabptr->st_ushort.positions[ssptaboutinfo->fillpos++]
-          = (GtUshort) (seppos &
-                        ssptaboutinfo->ssptabptr->st_ushort.maxrangevalue);
+        ssptaboutinfo->ssptabptr->st_uint16.positions[ssptaboutinfo->fillpos++]
+          = (uint16_t) (seppos &
+                             ssptaboutinfo->ssptabptr->st_uint16.maxrangevalue);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         ssptaboutinfo->ssptabptr->st_uint32.positions[ssptaboutinfo->fillpos++]
@@ -1276,7 +1274,7 @@ static void ssptaboutinfo_setendidx(Gtssptaboutinfo *ssptaboutinfo)
         = ssptaboutinfo->fillpos;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      ssptaboutinfo->ssptabptr->st_ushort.endidxinpage[
+      ssptaboutinfo->ssptabptr->st_uint16.endidxinpage[
                                              ssptaboutinfo->pagenumber++]
         = ssptaboutinfo->fillpos;
       break;
@@ -1367,9 +1365,9 @@ void gt_encseq_delete(GtEncseq *encseq)
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
         gt_free(encseq->twobitencoding);
-        gt_free(encseq->wildcardrangetable.st_ushort.positions);
-        gt_free(encseq->wildcardrangetable.st_ushort.endidxinpage);
-        gt_free(encseq->wildcardrangetable.st_ushort.rangelengths);
+        gt_free(encseq->wildcardrangetable.st_uint16.positions);
+        gt_free(encseq->wildcardrangetable.st_uint16.endidxinpage);
+        gt_free(encseq->wildcardrangetable.st_uint16.rangelengths);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_free(encseq->twobitencoding);
@@ -1387,9 +1385,9 @@ void gt_encseq_delete(GtEncseq *encseq)
         gt_free(encseq->ssptabnew.st_uchar.endidxinpage);
         break;
       case GT_ACCESS_TYPE_USHORTTABLES:
-        gt_assert(encseq->ssptabnew.st_ushort.rangelengths == NULL);
-        gt_free(encseq->ssptabnew.st_ushort.positions);
-        gt_free(encseq->ssptabnew.st_ushort.endidxinpage);
+        gt_assert(encseq->ssptabnew.st_uint16.rangelengths == NULL);
+        gt_free(encseq->ssptabnew.st_uint16.positions);
+        gt_free(encseq->ssptabnew.st_uint16.endidxinpage);
         break;
       case GT_ACCESS_TYPE_UINT32TABLES:
         gt_assert(encseq->ssptabnew.st_uint32.rangelengths == NULL);
@@ -1474,8 +1472,8 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 #undef GT_SPECIALTABLETYPE
 #undef GT_POS2PAGENUM
 
-#define GT_APPENDINT(V)          V##_ushort
-#define GT_SPECIALTABLETYPE      GtUshort
+#define GT_APPENDINT(V)          V##_uint16
+#define GT_SPECIALTABLETYPE      uint16_t
 #define GT_POS2PAGENUM(V)        ((V) >> 16)
 
 #include "core/accspecialrange.gen"
@@ -1486,7 +1484,7 @@ static GtEncseqReaderViatablesinfo *assignSWstate(GtEncseqReader *esr,
 #undef GT_POS2PAGENUM
 
 #define GT_APPENDINT(V)          V##_uint32
-#define GT_SPECIALTABLETYPE      Uint32
+#define GT_SPECIALTABLETYPE      uint32_t
 #ifdef  _LP64
 #define GT_POS2PAGENUM(V)        ((V) >> 32)
 #else
@@ -1514,8 +1512,8 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       printf("ushort pages of maximum value %u\n",
-              swtable->st_ushort.maxrangevalue);
-      showallSWtablewithpages_ushort(&swtable->st_ushort);
+              swtable->st_uint16.maxrangevalue);
+      showallSWtablewithpages_ushort(&swtable->st_uint16);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       printf("uint32 pages of maximum value %u\n",
@@ -2135,11 +2133,11 @@ DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
 DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
                                            issinglepositioninwildcardrangeVia,
                                            checkspecialrange,has_wildcardranges,
-                                           ushort)
+                                           uint16)
 
 DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
                                            issinglepositionseparatorVia,
-                                           checkspecial,has_ssptabnew,ushort)
+                                           checkspecial,has_ssptabnew,uint16)
 
 /* GT_ACCESS_TYPE_UINT32TABLES */
 
@@ -2163,7 +2161,7 @@ static void advancerangeGtEncseqReader(GtEncseqReader *esr,
       advancerangeGtEncseqReader_uchar(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      advancerangeGtEncseqReader_ushort(esr,kindsw);
+      advancerangeGtEncseqReader_uint16(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       advancerangeGtEncseqReader_uint32(esr,kindsw);
@@ -2186,7 +2184,7 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
       binpreparenextrangeGtEncseqReader_uchar(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
-      binpreparenextrangeGtEncseqReader_ushort(esr,kindsw);
+      binpreparenextrangeGtEncseqReader_uint16(esr,kindsw);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       binpreparenextrangeGtEncseqReader_uint32(esr,kindsw);
@@ -2369,7 +2367,7 @@ static unsigned long gt_encseq_seqstartpos_viautables(const GtEncseq *encseq,
       return gt_encseq_seqstartposSW_uchar(&encseq->ssptabnew.st_uchar,
                                            seqnum);
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return gt_encseq_seqstartposSW_ushort(&encseq->ssptabnew.st_ushort,
+      return gt_encseq_seqstartposSW_uint16(&encseq->ssptabnew.st_uint16,
                                             seqnum);
     case GT_ACCESS_TYPE_UINT32TABLES:
       return gt_encseq_seqstartposSW_uint32(&encseq->ssptabnew.st_uint32,
@@ -3146,7 +3144,7 @@ unsigned long gt_encseq_seqnum_ssptabnew(const GtEncseq *encseq,
     case GT_ACCESS_TYPE_UCHARTABLES:
       return gt_encseq_seqnum_uchar(&encseq->ssptabnew.st_uchar,position);
     case GT_ACCESS_TYPE_USHORTTABLES:
-      return gt_encseq_seqnum_ushort(&encseq->ssptabnew.st_ushort,position);
+      return gt_encseq_seqnum_uint16(&encseq->ssptabnew.st_uint16,position);
     case GT_ACCESS_TYPE_UINT32TABLES:
       return gt_encseq_seqnum_uint32(&encseq->ssptabnew.st_uint32,position);
     default:
@@ -3175,7 +3173,7 @@ unsigned long gt_encseq_seqnum(const GtEncseq *encseq,
           num = gt_encseq_seqnum_uchar(&encseq->ssptabnew.st_uchar,position);
           break;
         case GT_ACCESS_TYPE_USHORTTABLES:
-          num = gt_encseq_seqnum_ushort(&encseq->ssptabnew.st_ushort,position);
+          num = gt_encseq_seqnum_uint16(&encseq->ssptabnew.st_uint16,position);
           break;
         case GT_ACCESS_TYPE_UINT32TABLES:
           num = gt_encseq_seqnum_uint32(&encseq->ssptabnew.st_uint32,position);
@@ -3619,14 +3617,14 @@ static GtEncseqfunctions encodedseqfunctab[] =
     },
 
     { /* GT_ACCESS_TYPE_USHORTTABLES */
-      NFCT(fillpos,fillSWtable_ushort),
+      NFCT(fillpos,fillSWtable_uint16),
       NFCT(seqdelivercharnospecial,seqdelivercharnospecial2bitenc),
-      NFCT(seqdelivercharspecial,seqdelivercharSpecial_ushort),
+      NFCT(seqdelivercharspecial,seqdelivercharSpecial_uint16),
       NFCT(delivercontainsspecial,containsspecialViatables),
       NFCT(issinglepositioninwildcardrange,
-           issinglepositioninwildcardrangeViaushort),
+           issinglepositioninwildcardrangeViauint16),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViaushort)
+           issinglepositionseparatorViauint16)
     },
 
     { /* GT_ACCESS_TYPE_UINT32TABLES */
@@ -4885,7 +4883,7 @@ static unsigned long fwdgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
       case GT_ACCESS_TYPE_UCHARTABLES:
         return fwdgetnexttwobitencodingstopposSW_uchar(esr,kindsw);
       case GT_ACCESS_TYPE_USHORTTABLES:
-        return fwdgetnexttwobitencodingstopposSW_ushort(esr,kindsw);
+        return fwdgetnexttwobitencodingstopposSW_uint16(esr,kindsw);
       case GT_ACCESS_TYPE_UINT32TABLES:
         return fwdgetnexttwobitencodingstopposSW_uint32(esr,kindsw);
       default:
@@ -4962,7 +4960,7 @@ static unsigned long revgetnexttwobitencodingstopposSW(GtEncseqReader *esr,
       case GT_ACCESS_TYPE_UCHARTABLES:
         return revgetnexttwobitencodingstopposSW_uchar(esr,kindsw);
       case GT_ACCESS_TYPE_USHORTTABLES:
-        return revgetnexttwobitencodingstopposSW_ushort(esr,kindsw);
+        return revgetnexttwobitencodingstopposSW_uint16(esr,kindsw);
       case GT_ACCESS_TYPE_UINT32TABLES:
         return revgetnexttwobitencodingstopposSW_uint32(esr,kindsw);
       default:

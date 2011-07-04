@@ -1040,7 +1040,7 @@ static bool allowforshortreadsort(const GtBentsedgresources *bsr)
 {
   return (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
           gt_encseq_equallength(bsr->encseq) == 100UL &&
-          bsr->prefixlength >= 4U /* as GT_NUMOFTBEVALUEFOR100 * 
+          bsr->prefixlength >= 4U /* as GT_NUMOFTBEVALUEFOR100 *
                                         GT_UNITSIN2BITENC + 4 >= 100 */
           && bsr->fwd && !bsr->complement)
           /* currently !fwd or complement does not work = > exclude for now */

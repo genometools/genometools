@@ -40,7 +40,6 @@
 #include "core/defined-types.h"
 #include "core/types_api.h"
 #include "core/thread.h"
-#include "core/mapspec-gen.h"
 #include "core/encseq_api.h"
 
 typedef struct
@@ -55,18 +54,18 @@ typedef struct
 
 typedef struct
 {
-  GtUshort *positions,
+  uint16_t *positions,
            *rangelengths;
   unsigned long *endidxinpage;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
-} GtSWtable_ushort;
+} GtSWtable_uint16;
 
 typedef struct
 {
-  Uint32 *positions,
-         *rangelengths;
+  uint32_t *positions,
+           *rangelengths;
   unsigned long *endidxinpage;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
@@ -76,7 +75,7 @@ typedef struct
 typedef union
 {
   GtSWtable_uchar st_uchar;
-  GtSWtable_ushort st_ushort;
+  GtSWtable_uint16 st_uint16;
   GtSWtable_uint32 st_uint32;
 } GtSWtable;
 

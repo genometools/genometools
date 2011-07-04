@@ -19,22 +19,21 @@
 #include <errno.h>
 #include <math.h>
 #include <unistd.h>
-#include "core/error.h"
-#include "core/str.h"
-#include "core/fa.h"
-#include "core/types_api.h"
 #include "core/chardef.h"
-#include "core/mathsupport.h"
-#include "core/unused_api.h"
+#include "core/error.h"
+#include "core/fa.h"
 #include "core/format64.h"
-#include "core/mapspec-gen.h"
-#include "core/unused_api.h"
+#include "core/mapspec.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/safecast-gen.h"
 #include "core/spacecalc.h"
-#include "intcode-def.h"
-#include "esa-fileend.h"
+#include "core/str.h"
+#include "core/types_api.h"
+#include "core/unused_api.h"
 #include "bcktab.h"
+#include "esa-fileend.h"
+#include "intcode-def.h"
 #include "initbasepower.h"
 
 typedef struct
@@ -614,33 +613,31 @@ GtBcktab *gt_bcktab_new(unsigned int numofchars,
   return bcktab;
 }
 
-static void assignbcktabmapspecification(
-                                        GtArrayGtMapspecification *mapspectable,
-                                        void *voidinfo,
-                                        bool writemode)
+static void assignbcktabmapspecification(GtMapspec *mapspec,
+                                         void *data,
+                                         bool writemode)
 {
-  GtBcktab *bcktab = (GtBcktab *) voidinfo;
-  GtMapspecification *mapspecptr;
+  GtBcktab *bcktab = (GtBcktab *) data;
 
   if (bcktab->useulong)
   {
-    NEWMAPSPEC(bcktab->leftborder.ulongbounds,GtUlong,
-               (unsigned long) (bcktab->numofallcodes+1));
+    gt_mapspec_add_ulong(mapspec, bcktab->leftborder.ulongbounds,
+                         (unsigned long) (bcktab->numofallcodes+1));
   } else
   {
-    NEWMAPSPEC(bcktab->leftborder.uintbounds,Uint32,
-               (unsigned long) (bcktab->numofallcodes+1));
+    gt_mapspec_add_uint32(mapspec, bcktab->leftborder.uintbounds,
+                          (unsigned long) (bcktab->numofallcodes+1));
   }
   if (bcktab->withspecialsuffixes)
   {
     if (bcktab->useulong)
     {
-      NEWMAPSPEC(bcktab->ulongcountspecialcodes,GtUlong,
-                 (unsigned long) bcktab->numofspecialcodes);
+      gt_mapspec_add_ulong(mapspec, bcktab->ulongcountspecialcodes,
+                           (unsigned long) bcktab->numofspecialcodes);
     } else
     {
-      NEWMAPSPEC(bcktab->uintcountspecialcodes,Uint32,
-                 (unsigned long) bcktab->numofspecialcodes);
+      gt_mapspec_add_uint32(mapspec, bcktab->uintcountspecialcodes,
+                            (unsigned long) bcktab->numofspecialcodes);
     }
     if (bcktab->numofdistpfxidxcounters > 0)
     {
@@ -660,12 +657,12 @@ static void assignbcktabmapspecification(
       {
         if (bcktab->useulong)
         {
-          NEWMAPSPEC(bcktab->ulongdistpfxidx[0],GtUlong,
-                     bcktab->numofdistpfxidxcounters);
+          gt_mapspec_add_ulong(mapspec, bcktab->ulongdistpfxidx[0],
+                               bcktab->numofdistpfxidxcounters);
         } else
         {
-          NEWMAPSPEC(bcktab->uintdistpfxidx[0],Uint32,
-                     bcktab->numofdistpfxidxcounters);
+          gt_mapspec_add_uint32(mapspec, bcktab->uintdistpfxidx[0],
+                                bcktab->numofdistpfxidxcounters);
         }
       }
     }
@@ -692,11 +689,8 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err)
     sizeofrep -= gt_bcktab_sizeofbasetype(bcktab) *
                  bcktab->numofdistpfxidxcounters;
   }
-  return gt_mapspec_flushtheindex2file(fp,
-                            assignbcktabmapspecification,
-                            (GtBcktab *) bcktab,
-                            sizeofrep,
-                            err);
+  return gt_mapspec_write(assignbcktabmapspecification, fp, (GtBcktab *) bcktab,
+                          sizeofrep, err);
 }
 
 int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
@@ -717,8 +711,7 @@ int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
       haserr = true;
     } else
     {
-      if (gt_mapspec_addpadbytes(fp,&byteswritten,(unsigned long) ftello(fp),
-                                 err) != 0)
+      if (gt_mapspec_pad(fp,&byteswritten,(unsigned long) ftello(fp),err) != 0)
       {
         haserr = true;
       }
@@ -770,12 +763,12 @@ static int fillbcktabmapspecstartptr(GtBcktab *bcktab,
   gt_error_check(err);
   tmpfilename = gt_str_new_cstr(indexname);
   gt_str_append_cstr(tmpfilename,BCKTABSUFFIX);
-  if (gt_mapspec_fillmapspecstartptr(assignbcktabmapspecification,
-                          &bcktab->mappedptr,
-                          bcktab,
-                          tmpfilename,
-                          bcktab->sizeofrep,
-                          err) != 0)
+  if (gt_mapspec_read(assignbcktabmapspecification,
+                      bcktab,
+                      tmpfilename,
+                      bcktab->sizeofrep,
+                      &bcktab->mappedptr,
+                      err) != 0)
   {
     haserr = true;
   }
