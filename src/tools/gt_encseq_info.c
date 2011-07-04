@@ -104,6 +104,11 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
     gt_file_xprintf(arguments->outfp, "%lu\n",
                                       gt_encseq_metadata_num_of_files(emd));
 
+    gt_file_xprintf(arguments->outfp, "length of shortest/longest sequence: ");
+    gt_file_xprintf(arguments->outfp, "%lu/%lu\n",
+                                      gt_encseq_metadata_min_seq_length(emd),
+                                      gt_encseq_metadata_max_seq_length(emd));
+
     gt_file_xprintf(arguments->outfp, "accesstype: ");
     gt_file_xprintf(arguments->outfp, "%s\n",
                  gt_encseq_access_type_str(gt_encseq_metadata_accesstype(emd)));

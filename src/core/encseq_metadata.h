@@ -29,6 +29,8 @@ GtEncseqMetadata*    gt_encseq_metadata_new(const char *indexname,
 unsigned long        gt_encseq_metadata_total_length(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd);
+unsigned long        gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd);
+unsigned long        gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_length_of_filenames(
                                                          GtEncseqMetadata *emd);
 GtEncseqAccessType   gt_encseq_metadata_accesstype(GtEncseqMetadata *emd);

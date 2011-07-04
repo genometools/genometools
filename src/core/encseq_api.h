@@ -132,6 +132,10 @@ void              gt_encseq_extract_decoded(const GtEncseq *encseq,
    Requires multiple sequence support enabled in <encseq>. */
 unsigned long     gt_encseq_seqlength(const GtEncseq *encseq,
                                       unsigned long seqnum);
+/* Returns the length of the shortest sequence in the <encseq>. */
+unsigned long     gt_encseq_min_seq_length(const GtEncseq *encseq);
+/* Returns the length of the longest sequence in the <encseq>. */
+unsigned long     gt_encseq_max_seq_length(const GtEncseq *encseq);
 /* Returns <true> if <encseq> has multiple sequence support. */
 bool              gt_encseq_has_multiseq_support(const GtEncseq *encseq);
 /* Returns <true> if <encseq> has description support. */

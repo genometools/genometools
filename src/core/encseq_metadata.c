@@ -29,7 +29,9 @@ struct GtEncseqMetadata
   unsigned long totallength,
                 numofdbsequences,
                 numofdbfiles,
-                lengthofdbfilenames;
+                lengthofdbfilenames,
+                minseqlen,
+                maxseqlen;
   GtSpecialcharinfo specialcharinfo;
 };
 
@@ -75,6 +77,8 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   NEXTFREAD(emd->numofdbfiles);
   NEXTFREAD(emd->lengthofdbfilenames);
   NEXTFREAD(emd->specialcharinfo);
+  NEXTFREAD(emd->minseqlen);
+  NEXTFREAD(emd->maxseqlen);
   gt_fa_xfclose(fp);
   return had_err ? -1 : 0;
 }
@@ -98,6 +102,18 @@ unsigned long gt_encseq_metadata_total_length(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->totallength;
+}
+
+unsigned long gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return emd->maxseqlen;
+}
+
+unsigned long gt_encseq_metadata_min_seq_length(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return emd->minseqlen;
 }
 
 unsigned long gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd)

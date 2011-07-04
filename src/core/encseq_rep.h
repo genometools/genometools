@@ -172,6 +172,11 @@ struct GtEncseq
 
   bool hasmirror,
        accesstype_via_utables;
+
+  unsigned long minseqlen,
+                *minseqlenptr,
+                maxseqlen,
+                *maxseqlenptr;
   char *oistab;  /* original input sequence(s) */
 };
 #endif
