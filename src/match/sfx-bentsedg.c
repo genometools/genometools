@@ -164,7 +164,8 @@ typedef struct
   GtCountingsortinfo *countingsortinfo;
   GtShortreadsort *shortreadsortinfo;
   const Sfxstrategy *sfxstrategy;
-  unsigned int sortmaxdepth;
+  unsigned int sortmaxdepth,
+               prefixlength;
   Blindtrie *blindtrie;
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
@@ -1035,6 +1036,8 @@ static bool allowforshortreadsort(const GtBentsedgresources *bsr)
 {
   return (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
           gt_encseq_equallength(bsr->encseq) == 100UL &&
+          bsr->prefixlength >= 4U &&
+          /* as GT_NUMOFTBEVALUEFOR100 * GT_UNITSIN2BITENC + 4 >= 100 */
           bsr->fwd && !bsr->complement) ? true : false;
 }
 
@@ -1509,6 +1512,7 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
                                   GtSuffixsortspace *suffixsortspace,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
+                                  unsigned int prefixlength,
                                   unsigned int sortmaxdepth,
                                   const Sfxstrategy *sfxstrategy)
 {
@@ -1523,6 +1527,7 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
   bsr->fwd = GT_ISDIRREVERSE(bsr->readmode) ? false : true;
   bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   bsr->tableoflcpvalues = NULL;
+  bsr->prefixlength = prefixlength;
   for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
   {
     bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
@@ -1641,6 +1646,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                         suffixsortspace,
                         encseq,
                         readmode,
+                        prefixlength,
                         sortmaxdepth,
                         sfxstrategy);
   gt_bcktab_determinemaxsize(bcktab, mincode, maxcode, numberofsuffixes);
@@ -1723,6 +1729,7 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                           suffixsortspace,
                           encseq,
                           readmode,
+                          0,
                           sortmaxdepth,
                           sfxstrategy);
     if (outlcpinfo != NULL)
