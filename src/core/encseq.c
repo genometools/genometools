@@ -5223,21 +5223,14 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   unsigned int offset;
   int idx;
 
-  if (pos == encseq->totallength)
+  gt_assert(encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH);
+  if (pos == encseq->totallength || pos == encseq->logicaltotallength)
   {
     return 0;
   }
-  gt_assert(pos < encseq->logicaltotallength);
   fwd = GT_ISDIRREVERSE(readmode) ? false : true;
-
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
-  if (gt_has_twobitencoding_stoppos_support(encseq))
-  {
-    twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
-  } else
-  {
-    twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
-  }
+  twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
   if (GT_ISDIRREVERSE(readmode))
   {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
@@ -5256,7 +5249,19 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
     {
       return offset + etbecurrent.unitsnotspecial;
     }
-    pos += GT_UNITSIN2BITENC;
+    if (fwd)
+    {
+      pos += GT_UNITSIN2BITENC;
+    } else
+    {
+      if (pos >= (unsigned long) GT_UNITSIN2BITENC)
+      {
+        pos -= (unsigned long) GT_UNITSIN2BITENC;
+      } else
+      {
+        pos = 0;
+      }
+    }
   }
   gt_assert(false);
   return 0;

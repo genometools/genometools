@@ -923,11 +923,12 @@ static int compareshortreadsortinfo(const void *a,const void *b)
         = bq->unitsnotspecial >= maxprefix
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      return gt_encseq_compare_pairof_twobitencodings(true,
-                                                      false,
-                                                      &commonunits,
-                                                      &tbe_a,
-                                                      &tbe_b);
+      return gt_encseq_compare_pairof_twobitencodings(
+                                       true,/*XXX fwd XXX */
+                                       false,/*XXX complement XXX */
+                                       &commonunits,
+                                       &tbe_a,
+                                       &tbe_b);
     }
   }
   gt_assert(false);
@@ -935,7 +936,9 @@ static int compareshortreadsortinfo(const void *a,const void *b)
 }
 
 static unsigned long lcpshortreadinfo(const GtShortreadsort *aq,
-                                      const GtShortreadsort *bq)
+                                      const GtShortreadsort *bq,
+                                      bool fwd,
+                                      bool complement)
 {
   int idx;
   unsigned int maxprefix;
@@ -971,8 +974,8 @@ static unsigned long lcpshortreadinfo(const GtShortreadsort *aq,
         = bq->unitsnotspecial >= maxprefix
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      (void) gt_encseq_compare_pairof_twobitencodings(true,
-                                                      false,
+      (void) gt_encseq_compare_pairof_twobitencodings(fwd,
+                                                      complement,
                                                       &commonunits,
                                                       &tbe_a,
                                                       &tbe_b);
@@ -991,7 +994,6 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
 {
   unsigned long idx, pos;
 
-  gt_assert(bsr->fwd && !bsr->complement);
   gt_assert(width <= (unsigned long) bsr->sfxstrategy->maxshortreadsort);
   for (idx = 0; idx < width; idx++)
   {
@@ -1025,7 +1027,9 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
       gt_suffixsortspace_set(bsr->sssp,subbucketleft,idx,
                              bsr->shortreadsortinfo[idx].suffix);
       lcp = lcpshortreadinfo(bsr->shortreadsortinfo + idx - 1,
-                             bsr->shortreadsortinfo + idx);
+                             bsr->shortreadsortinfo + idx,
+                             bsr->fwd,
+                             bsr->complement);
       lcptab_update(bsr->tableoflcpvalues,subbucketleft + idx,lcp+depth);
     }
   }
@@ -1036,9 +1040,11 @@ static bool allowforshortreadsort(const GtBentsedgresources *bsr)
 {
   return (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
           gt_encseq_equallength(bsr->encseq) == 100UL &&
-          bsr->prefixlength >= 4U &&
-          /* as GT_NUMOFTBEVALUEFOR100 * GT_UNITSIN2BITENC + 4 >= 100 */
-          bsr->fwd && !bsr->complement) ? true : false;
+          bsr->prefixlength >= 4U /* as GT_NUMOFTBEVALUEFOR100 * 
+                                        GT_UNITSIN2BITENC + 4 >= 100 */
+          && bsr->fwd && !bsr->complement)
+          /* currently !fwd or complement does not work = > exclude for now */
+          ? true : false;
 }
 
 static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
