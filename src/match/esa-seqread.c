@@ -197,7 +197,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                                        &ssar->suffixarray->suftabstreamGtUlong);
     } else
     {
-      uint32_t readvalue;
+      uint32_t readvalue = 0;
       int ret = readnextGtUintfromstream(&readvalue,
                                       &ssar->suffixarray->suftabstreamGtUint);
       *currentsuffix = (unsigned long) readvalue;
