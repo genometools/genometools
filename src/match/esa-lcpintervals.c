@@ -274,7 +274,6 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   if (mode == 1U)
   {
-#ifndef INLINEDSequentialsuffixarrayreader
     for (idx = 0; idx < nonspecials; idx++)
     {
       int retval = gt_nextSequentiallcpvalue(&lcpvalue,ssar,err);
@@ -299,7 +298,6 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
       sumsuftab += previoussuffix; /* silly but guarantees that loop is
                                       not eliminated by compiler */
     }
-#endif
   } else
   {
     if (mode == 2U)

@@ -22,6 +22,7 @@
 #include "core/error.h"
 #include "core/encseq.h"
 
+#include "esa-lcpval.h"
 #include "sarr-def.h"
 #include "lcpoverflow.h"
 
@@ -31,45 +32,6 @@ typedef enum
   SEQ_mappedboth,
   SEQ_suftabfrommemory
 } Sequentialaccesstype;
-
-#ifdef INLINEDSequentialsuffixarrayreader
-
-typedef struct
-{
-  Suffixarray *suffixarray;
-  unsigned long nonspecials,
-         numberofsuffixes,
-         nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
-         nextlcptabindex, /* for SEQ_mappedboth */
-         largelcpindex;   /* SEQ_mappedboth */
-} Sequentialsuffixarrayreader;
-
-#define NEXTSEQUENTIALLCPTABVALUE(LCPVALUE,SSAR)\
-        if ((SSAR)->nextlcptabindex >= (SSAR)->numberofsuffixes)\
-        {\
-          gt_error_set(err,"missing lcpvalue value");\
-          haserr = true;\
-          break;\
-        } else\
-        {\
-          GtUchar tmpsmalllcpvalue\
-            = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
-          if (tmpsmalllcpvalue < LCPOVERFLOW)\
-          {\
-            LCPVALUE = (unsigned long) tmpsmalllcpvalue;\
-          } else\
-          {\
-            LCPVALUE = (SSAR)->suffixarray->llvtab[\
-                       (SSAR)->largelcpindex++].value;\
-          }\
-        }
-
-#define NEXTSEQUENTIALSUFTABVALUE(VALUE,SSAR)\
-        VALUE = (SSAR)->suffixarray->suftab[(SSAR)->nextsuftabindex++]
-
-#else
-
-#include "esa-lcpval.h"
 
 struct Sequentialsuffixarrayreader
 {
@@ -87,9 +49,6 @@ struct Sequentialsuffixarrayreader
 };
 
 typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
-
-/* The following four function can only can be used if
-   INLINEDSequentialsuffixarrayreader is not set */
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromRAM(
                                         const GtEncseq *encseq,
@@ -121,7 +80,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
                                      buf->fp);\
             if (ferror(buf->fp))\
             {\
-              gt_error_set(err,"error when trying to read next GtUlong");\
+              gt_error_set(err,"error when trying to read next %s",#TYPE);\
               haserr = true;\
             } else\
             {\
@@ -311,8 +270,6 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
             }\
           }\
         }
-
-#endif /* INLINEDSequentialsuffixarrayreader */
 
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,

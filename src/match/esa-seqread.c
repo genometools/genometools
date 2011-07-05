@@ -24,73 +24,6 @@
 #include "lcpoverflow.h"
 #include "esa-map.h"
 
-#ifdef INLINEDSequentialsuffixarrayreader
-
-Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
-                                  const char *indexname,
-                                  unsigned int demand,
-                                  GT_UNUSED Sequentialaccesstype seqactype,
-                                  GtError *err)
-{
-  Sequentialsuffixarrayreader *ssar;
-
-  /* printf("INLINEDSequentialsuffixarrayreader=true\n"); */
-  ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
-  ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
-  if (gt_mapsuffixarray (ssar->suffixarray,
-                         demand,
-                         indexname,
-                         NULL,
-                         err) != 0)
-  {
-    FREESPACE(ssar->suffixarray);
-    FREESPACE(ssar);
-    return NULL;
-  }
-  ssar->nextsuftabindex = 0;
-  ssar->nextlcptabindex = 1UL;
-  ssar->largelcpindex = 0;
-  gt_assert(ssar->suffixarray != NULL);
-  ssar->numberofsuffixes
-    = gt_encseq_total_length(ssar->suffixarray->encseq) + 1;
-  ssar->nonspecials = gt_encseq_total_length(ssar->suffixarray->encseq) -
-                      gt_encseq_specialcharacters(ssar->suffixarray->encseq);
-  return ssar;
-}
-
-void gt_freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar)
-{
-  if ((*ssar)->suffixarray != NULL)
-  {
-    gt_freesuffixarray((*ssar)->suffixarray);
-    FREESPACE((*ssar)->suffixarray);
-  }
-  FREESPACE(*ssar);
-}
-
-const GtEncseq *gt_encseqSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar != NULL && ssar->suffixarray != NULL);
-  return ssar->suffixarray->encseq;
-}
-
-GtReadmode gt_readmodeSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar != NULL && ssar->suffixarray != NULL);
-  return ssar->suffixarray->readmode;
-}
-
-const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *ssar)
-{
-  gt_assert(ssar != NULL && ssar->suffixarray != NULL);
-  return ssar->suffixarray->suftab;
-}
-
-#else
-
 Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
                                         const char *indexname,
                                         unsigned int demand,
@@ -253,7 +186,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
 }
 
 int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
-                              Sequentialsuffixarrayreader *ssar)
+                                 Sequentialsuffixarrayreader *ssar)
 {
   if (ssar->seqactype == SEQ_scan)
   {
@@ -292,7 +225,6 @@ const ESASuffixptr *gt_suftabSequentialsuffixarrayreader(
   }
   return ssar->suftab;
 }
-#endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
 const Suffixarray *gt_suffixarraySequentialsuffixarrayreader(
               const Sequentialsuffixarrayreader *ssar)
