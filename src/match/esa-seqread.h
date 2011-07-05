@@ -69,8 +69,8 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
 
 #define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,TYPE)\
         {\
-          Bufferedfile_ ## TYPE *buf\
-            = &(SSAR)->suffixarray->suftabstream ## TYPE;\
+          GtBufferedfile_ ## TYPE *buf\
+            = &(SSAR)->suffixarray->suftabstream_ ## TYPE;\
           if (buf->nextread >= buf->nextfree)\
           {\
             buf->nextfree\
@@ -98,12 +98,13 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
 
 #ifdef _LP64
 #define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
-        if ((SSAR)->suffixarray->suftabstreamGtUlong.fp != NULL)\
+        if ((SSAR)->suffixarray->suftabstream_GtUlong.fp != NULL)\
         {\
           NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUlong);\
         } else\
         {\
-          NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,GtUint);\
+          NEXTSEQUENTIALSUFTABVALUE_SEQ_scan_generic(SUFTABVALUE,SSAR,\
+                                                     uint32_t);\
         }
 #else
 #define NEXTSEQUENTIALSUFTABVALUE_SEQ_scan(SUFTABVALUE,SSAR)\
@@ -131,7 +132,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
           GtUchar tmpsmalllcpvalue;\
           if ((SSAR)->seqactype == SEQ_scan)\
           {\
-            int retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,\
+            int retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,\
                                         &(SSAR)->suffixarray->lcptabstream);\
             if (retval > 0)\
             {\
@@ -141,7 +142,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
               } else\
               {\
                 Largelcpvalue tmpexception;\
-                retval = readnextLargelcpvaluefromstream(&tmpexception,\
+                retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,\
                                         &(SSAR)->suffixarray->llvtabstream);\
                 if (retval == 0)\
                 {\
@@ -201,7 +202,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
           GtUchar tmpsmalllcpvalue;\
           if ((SSAR)->seqactype == SEQ_scan)\
           {\
-            int retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,\
+            int retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,\
                                         &(SSAR)->suffixarray->lcptabstream);\
             if (retval > 0)\
             {\
@@ -211,7 +212,7 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
               } else\
               {\
                 Largelcpvalue tmpexception;\
-                retval = readnextLargelcpvaluefromstream(&tmpexception,\
+                retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,\
                                         &(SSAR)->suffixarray->llvtabstream);\
                 if (retval == 0)\
                 {\

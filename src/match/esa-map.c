@@ -213,11 +213,11 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->bcktab = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->bwttabstream.bufferedfilespace = NULL;
-  suffixarray->suftabstreamGtUlong.fp = NULL;
-  suffixarray->suftabstreamGtUlong.bufferedfilespace = NULL;
+  suffixarray->suftabstream_GtUlong.fp = NULL;
+  suffixarray->suftabstream_GtUlong.bufferedfilespace = NULL;
 #ifdef _LP64
-  suffixarray->suftabstreamGtUint.fp = NULL;
-  suffixarray->suftabstreamGtUint.bufferedfilespace = NULL;
+  suffixarray->suftabstream_uint32_t.fp = NULL;
+  suffixarray->suftabstream_uint32_t.bufferedfilespace = NULL;
 #endif
   suffixarray->lcptabstream.fp = NULL;
   suffixarray->lcptabstream.bufferedfilespace = NULL;
@@ -260,13 +260,13 @@ void gt_freesuffixarray(Suffixarray *suffixarray)
   suffixarray->llvtab = NULL;
   gt_fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  gt_fa_xfclose(suffixarray->suftabstreamGtUlong.fp);
-  suffixarray->suftabstreamGtUlong.fp = NULL;
-  FREESPACE(suffixarray->suftabstreamGtUlong.bufferedfilespace);
+  gt_fa_xfclose(suffixarray->suftabstream_GtUlong.fp);
+  suffixarray->suftabstream_GtUlong.fp = NULL;
+  FREESPACE(suffixarray->suftabstream_GtUlong.bufferedfilespace);
 #ifdef _LP64
-  gt_fa_xfclose(suffixarray->suftabstreamGtUint.fp);
-  suffixarray->suftabstreamGtUint.fp = NULL;
-  FREESPACE(suffixarray->suftabstreamGtUint.bufferedfilespace);
+  gt_fa_xfclose(suffixarray->suftabstream_uint32_t.fp);
+  suffixarray->suftabstream_uint32_t.fp = NULL;
+  FREESPACE(suffixarray->suftabstream_uint32_t.bufferedfilespace);
 #endif
   gt_fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
@@ -360,17 +360,17 @@ static int inputsuffixarray(bool map,
                               suffixarray->numberofallsortedsuffixes)
       {
         gt_logger_log(logger,"read suftab in units of 4 bytes");
-        INITBufferedfile(indexname,&suffixarray->suftabstreamGtUint,uint32_t,
+        INITBufferedfile(indexname,&suffixarray->suftabstream_uint32_t,uint32_t,
                          SUFTABSUFFIX);
       } else
       {
         gt_logger_log(logger,"read suftab in units of 8 bytes");
-        INITBufferedfile(indexname,&suffixarray->suftabstreamGtUlong,GtUlong,
+        INITBufferedfile(indexname,&suffixarray->suftabstream_GtUlong,GtUlong,
                          SUFTABSUFFIX);
       }
 #else
       gt_logger_log(logger,"read suftab in units of 4 bytes");
-      INITBufferedfile(indexname,&suffixarray->suftabstreamGtUlong,GtUlong,
+      INITBufferedfile(indexname,&suffixarray->suftabstream_GtUlong,GtUlong,
                        SUFTABSUFFIX);
 #endif
     }

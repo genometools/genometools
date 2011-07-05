@@ -53,11 +53,11 @@
                        nextread;\
           TYPE *bufferedfilespace;\
           FILE *fp;\
-        } Bufferedfile_ ## TYPE
+        } GtBufferedfile_ ## TYPE
 
 #define DECLAREREADFUNCTION(TYPE)\
-        GT_UNUSED static int readnext ## TYPE ## fromstream(TYPE *val,\
-                                                  Bufferedfile_ ## TYPE *buf)\
+        GT_UNUSED static int gt_readnextfromstream_ ## TYPE (TYPE *val,\
+                                                  GtBufferedfile_ ## TYPE *buf)\
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
@@ -84,8 +84,8 @@ DECLAREBufferedfiletype(GtUlong);
 DECLAREREADFUNCTION(GtUlong);
 
 #ifdef _LP64
-DECLAREBufferedfiletype(GtUint);
-DECLAREREADFUNCTION(GtUint);
+DECLAREBufferedfiletype(uint32_t);
+DECLAREREADFUNCTION(uint32_t);
 #endif
 
 DECLAREBufferedfiletype(GtUchar);
@@ -115,12 +115,12 @@ typedef struct
   GtBcktab *bcktab;
   /* or with streams */
 #ifdef _LP64
-  Bufferedfile_GtUint suftabstreamGtUint;
+  GtBufferedfile_uint32_t suftabstream_uint32_t;
 #endif
-  Bufferedfile_GtUlong suftabstreamGtUlong;
-  Bufferedfile_GtUchar bwttabstream,
-                       lcptabstream;
-  Bufferedfile_Largelcpvalue llvtabstream;
+  GtBufferedfile_GtUlong suftabstream_GtUlong;
+  GtBufferedfile_GtUchar bwttabstream,
+                         lcptabstream;
+  GtBufferedfile_Largelcpvalue llvtabstream;
 } Suffixarray;
 
 /*@unused@*/ static inline const Largelcpvalue *getlargelcpvalue(

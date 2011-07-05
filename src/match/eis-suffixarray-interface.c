@@ -149,7 +149,7 @@ struct seqDataReader
 gt_SAIMakeSufTabReader(SuffixarrayFileInterface *sai)
 {
   struct seqDataReader reader = { NULL, NULL};
-  if (sai->sa->suftabstreamGtUlong.fp)
+  if (sai->sa->suftabstream_GtUlong.fp)
   {
     struct seqDataTranslator xltor = {
       { .elemSize = sizeof (unsigned long) }, NULL, NULL,
@@ -243,7 +243,7 @@ SAIGenerate(void *generatorState, void *backlogState,
   sa = sai->sa;
   for (idx = 0; idx < len; ++idx)
   {
-    if (readnextGtUlongfromstream(buf + idx, &sa->suftabstreamGtUlong) != 1)
+    if (gt_readnextfromstream_GtUlong(buf + idx,&sa->suftabstream_GtUlong) != 1)
     {
       break;
     }

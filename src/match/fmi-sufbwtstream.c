@@ -394,15 +394,15 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
       {
         if (storeindexpos)
         {
-          retval = readnextGtUlongfromstream(&tmpsuftabvalue,
-                                            &suffixarray.suftabstreamGtUlong);
+          retval = gt_readnextfromstream_GtUlong(&tmpsuftabvalue,
+                                            &suffixarray.suftabstream_GtUlong);
           if (retval == 0)
           {
             break;
           }
           suftabvalue = (unsigned long) tmpsuftabvalue;
         }
-        retval = readnextGtUcharfromstream(&cc,&suffixarray.bwttabstream);
+        retval = gt_readnextfromstream_GtUchar(&cc,&suffixarray.bwttabstream);
         if (retval == 0)
         {
           break;

@@ -124,7 +124,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
   switch (ssar->seqactype)
   {
     case SEQ_scan:
-      retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,
+      retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,
                                          &ssar->suffixarray->lcptabstream);
       if (retval > 0)
       {
@@ -135,7 +135,7 @@ int gt_nextSequentiallcpvalue(unsigned long *currentlcp,
         {
           Largelcpvalue tmpexception;
 
-          retval = readnextLargelcpvaluefromstream(&tmpexception,
+          retval = gt_readnextfromstream_Largelcpvalue(&tmpexception,
                                             &ssar->suffixarray->llvtabstream);
           if (retval == 0)
           {
@@ -191,21 +191,22 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
   if (ssar->seqactype == SEQ_scan)
   {
 #ifdef _LP64
-    if (ssar->suffixarray->suftabstreamGtUlong.fp != NULL)
+    if (ssar->suffixarray->suftabstream_GtUlong.fp != NULL)
     {
-      return readnextGtUlongfromstream(currentsuffix,
-                                       &ssar->suffixarray->suftabstreamGtUlong);
+      return gt_readnextfromstream_GtUlong(currentsuffix,
+                                 &ssar->suffixarray->suftabstream_GtUlong);
     } else
     {
       uint32_t readvalue = 0;
-      int ret = readnextGtUintfromstream(&readvalue,
-                                      &ssar->suffixarray->suftabstreamGtUint);
+      int ret = gt_readnextfromstream_uint32_t(
+                                 &readvalue,
+                                 &ssar->suffixarray->suftabstream_uint32_t);
       *currentsuffix = (unsigned long) readvalue;
       return ret;
     }
 #else
-     return readnextGtUlongfromstream(currentsuffix,
-                                      &ssar->suffixarray->suftabstreamGtUlong);
+     return gt_readnextfromstream_GtUlong(currentsuffix,
+                                      &ssar->suffixarray->suftabstream_GtUlong);
 #endif
   }
   if (ssar->seqactype == SEQ_mappedboth)

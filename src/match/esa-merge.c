@@ -92,8 +92,8 @@ static int insertfirstsuffixes(Mergertrierep *trierep,
   for (idx=0; idx<numofindexes; idx++)
   {
     retval
-      = readnextGtUlongfromstream(&suftabvalue,
-                                  &suffixarraytable[idx].suftabstreamGtUlong);
+      = gt_readnextfromstream_GtUlong(&suftabvalue,
+                                  &suffixarraytable[idx].suftabstream_GtUlong);
     if (retval == 0)
     {
       gt_error_set(err,"file %s: line %d: unexpected end of file when "
@@ -161,7 +161,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
       emmesa->numofentries--;
     } else
     {
-      retval = readnextGtUcharfromstream(&tmpsmalllcpvalue,
+      retval = gt_readnextfromstream_GtUchar(&tmpsmalllcpvalue,
                                        &emmesa->suffixarraytable[tmpidx].
                                                 lcptabstream);
       if (retval < 0)
@@ -176,7 +176,7 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
       }
       if (tmpsmalllcpvalue == LCPOVERFLOW)
       {
-        retval = readnextLargelcpvaluefromstream(
+        retval = gt_readnextfromstream_Largelcpvalue(
                                &tmpexception,
                                &emmesa->suffixarraytable[tmpidx].llvtabstream);
         if (retval < 0)
@@ -199,9 +199,9 @@ int gt_emissionmergedesa_stepdeleteandinsertothersuffixes(
         tmplastbranchdepth = tmplcpvalue;
       }
       tmplcpnode = findlargestnodeleqlcpvalue(tmpsmallestleaf,tmplcpvalue,err);
-      retval = readnextGtUlongfromstream(&tmpsuftabvalue,
+      retval = gt_readnextfromstream_GtUlong(&tmpsuftabvalue,
                                          &emmesa->suffixarraytable[tmpidx].
-                                         suftabstreamGtUlong);
+                                         suftabstream_GtUlong);
       if (retval == 0)
       {
         gt_error_set(err,"file %s: line %d: unexpected end of file when "

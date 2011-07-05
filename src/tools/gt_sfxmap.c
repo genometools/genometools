@@ -671,10 +671,11 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         {
           GtUchar prevcc;
 
-          if (readnextGtUcharfromstream(&prevcc,&suffixarray.bwttabstream) == 1)
+          if (gt_readnextfromstream_GtUchar(&prevcc,&suffixarray.bwttabstream)
+              == 1)
           {
             GtUchar cc;
-            while (readnextGtUcharfromstream(&cc,&suffixarray.bwttabstream)
+            while (gt_readnextfromstream_GtUchar(&cc,&suffixarray.bwttabstream)
                    == 1)
             {
               if (prevcc != cc || ISSPECIAL(cc))
