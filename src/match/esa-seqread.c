@@ -36,7 +36,7 @@ Sequentialsuffixarrayreader *gt_newSequentialsuffixarrayreaderfromfile(
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   gt_assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
-  if (((seqactype == SEQ_mappedboth)
+  if ((seqactype == SEQ_mappedboth
          ? gt_mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
                                                   demand,
                                                   indexname,
@@ -190,8 +190,23 @@ int gt_nextSequentialsuftabvalue(unsigned long *currentsuffix,
 {
   if (ssar->seqactype == SEQ_scan)
   {
-    return readnextGtUlongfromstream(currentsuffix,
-                                     &ssar->suffixarray->suftabstreamGtUlong);
+#ifdef _LP64
+    if (ssar->suffixarray->suftabstreamGtUlong.fp != NULL)
+    {
+      return readnextGtUlongfromstream(currentsuffix,
+                                       &ssar->suffixarray->suftabstreamGtUlong);
+    } else
+    {
+      uint32_t readvalue;
+      int ret = readnextGtUintfromstream(&readvalue,
+                                      &ssar->suffixarray->suftabstreamGtUint);
+      *currentsuffix = (unsigned long) readvalue;
+      return ret;
+    }
+#else
+     return readnextGtUlongfromstream(currentsuffix,
+                                      &ssar->suffixarray->suftabstreamGtUlong);
+#endif
   }
   if (ssar->seqactype == SEQ_mappedboth)
   {

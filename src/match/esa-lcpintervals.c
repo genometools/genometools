@@ -311,10 +311,17 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
         sumsuftab += previoussuffix; /* silly but guarantees that loop is
                                         not eliminated by compiler */
       }
+    } else
+    {
+      gt_error_set(err,"illegal mode %u: use 1 or 2\n",mode);
+      haserr = true;
     }
   }
-  printf("sumsuftab=%lu\n",sumsuftab);
-  printf("sumlcptab=%lu\n",sumlcptab);
+  if (!haserr)
+  {
+    printf("sumsuftab=%lu\n",sumsuftab);
+    printf("sumlcptab=%lu\n",sumlcptab);
+  }
   return haserr ? -1 : 0;
 }
 
