@@ -356,7 +356,8 @@ static int inputsuffixarray(bool map,
 #ifdef _LP64
       off_t filesize = gt_file_with_suffix_size(indexname,SUFTABSUFFIX);
 
-      if (filesize / 4 == (off_t) (totallength+1))
+      if (filesize == (off_t) sizeof (uint32_t) *
+                              suffixarray->numberofallsortedsuffixes)
       {
         gt_logger_log(logger,"read suftab in units of 4 bytes");
         INITBufferedfile(indexname,&suffixarray->suftabstreamGtUint,uint32_t,
@@ -368,6 +369,7 @@ static int inputsuffixarray(bool map,
                          SUFTABSUFFIX);
       }
 #else
+      gt_logger_log(logger,"read suftab in units of 4 bytes");
       INITBufferedfile(indexname,&suffixarray->suftabstreamGtUlong,GtUlong,
                        SUFTABSUFFIX);
 #endif
