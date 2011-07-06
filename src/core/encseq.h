@@ -296,6 +296,9 @@ unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq);
 /* Return the number of ranges of consecutive runs of wildcards */
 unsigned long gt_encseq_realwildcardranges(const GtEncseq *encseq);
 
+/* Return the length of the longest consecutive run of non-special characters */
+unsigned long gt_encseq_lengthoflongestnonspecial(const GtEncseq *encseq);
+
 /* Return the length of the longest prefix of <encseq> consisting of
   special characters only. */
 unsigned long gt_encseq_lengthofspecialprefix(const GtEncseq *encseq);

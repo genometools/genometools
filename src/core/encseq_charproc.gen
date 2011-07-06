@@ -27,8 +27,18 @@
             if (outoistab)
               gt_xfputc((char) cc, oisfp);
 #endif
+            lastnonspecialrangelength++;
           } else
           {
+            if (lastnonspecialrangelength > 0)
+            {
+              if (lastnonspecialrangelength
+                    > specialcharinfo->lengthoflongestnonspecial) {
+                specialcharinfo->lengthoflongestnonspecial =
+                                                      lastnonspecialrangelength;
+              }
+              lastnonspecialrangelength = 0;
+            }
             if (charcode == (GtUchar) WILDCARD)
             {
               if (wildcardprefix)

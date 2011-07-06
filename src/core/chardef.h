@@ -106,8 +106,10 @@ typedef struct
                 realwildcardranges,     /* number of ranges with wildcards */
                 lengthofwildcardprefix, /* number of wildcards at start of
                                            sequence */
-                lengthofwildcardsuffix; /* number of wildcards at end of
+                lengthofwildcardsuffix, /* number of wildcards at end of
                                            sequence */
+                lengthoflongestnonspecial; /* length of longest non-special
+                                              stretch */
 } GtSpecialcharinfo;
 
 #endif

@@ -187,10 +187,15 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
                                         gt_encseq_wildcards(encseq),
                                         gt_encseq_realwildcardranges(encseq));
 
-          gt_file_xprintf(arguments->outfp, "number of special characters: ");
+      gt_file_xprintf(arguments->outfp, "number of special characters: ");
       gt_file_xprintf(arguments->outfp, "%lu (%lu range(s))\n",
                                         gt_encseq_specialcharacters(encseq),
                                         gt_encseq_realspecialranges(encseq));
+
+      gt_file_xprintf(arguments->outfp, "length of longest non-special "
+                                        "character stretch: ");
+      gt_file_xprintf(arguments->outfp, "%lu\n",
+                                   gt_encseq_lengthoflongestnonspecial(encseq));
 
       gt_file_xprintf(arguments->outfp, "accesstype: ");
       gt_file_xprintf(arguments->outfp, "%s\n",

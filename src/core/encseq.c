@@ -4197,6 +4197,11 @@ unsigned long gt_encseq_lengthofwildcardsuffix(const GtEncseq *encseq)
   return encseq->specialcharinfo.lengthofwildcardsuffix;
 }
 
+unsigned long gt_encseq_lengthoflongestnonspecial(const GtEncseq *encseq)
+{
+  return encseq->specialcharinfo.lengthoflongestnonspecial;
+}
+
 static unsigned long currentspecialrangevalue(unsigned long len,
                                               unsigned long occcount,
                                               unsigned long maxrangevalue)
@@ -4434,6 +4439,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   unsigned long currentpos = 0,
                 lastspecialrangelength = 0,
                 lastwildcardrangelength = 0,
+                lastnonspecialrangelength = 0,
                 lengthofcurrentsequence = 0;
   bool specialprefix = true, wildcardprefix = true, haserr = false;
   GtDiscDistri *distspecialrangelength = NULL, *distwildcardrangelength = NULL;
@@ -4540,6 +4546,15 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
             gt_disc_distri_add(distspecialrangelength,
                                lastspecialrangelength);
           }
+          if (lastnonspecialrangelength > 0)
+          {
+            if (lastnonspecialrangelength
+                  > specialcharinfo->lengthoflongestnonspecial) {
+              specialcharinfo->lengthoflongestnonspecial =
+                                                      lastnonspecialrangelength;
+            }
+            lastnonspecialrangelength = 0;
+          }
           if (lastwildcardrangelength > 0)
           {
             gt_disc_distri_add(distwildcardrangelength,
@@ -4620,6 +4635,7 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
   GtUchar charcode;
   unsigned long currentpos,
                 lastspecialrangelength = 0,
+                lastnonspecialrangelength = 0,
                 lastwildcardrangelength = 0;
   bool specialprefix = true, wildcardprefix = true;
   GtDiscDistri *distspecialrangelength,
