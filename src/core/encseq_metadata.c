@@ -21,6 +21,7 @@
 #include "core/encseq.h"
 #include "core/encseq_rep.h"
 #include "core/fa.h"
+#include "core/intbits.h"
 #include "core/ma.h"
 
 struct GtEncseqMetadata
@@ -46,6 +47,23 @@ struct GtEncseqMetadata
                               #VAL, strerror(errno));\
             had_err = true;\
           }\
+          if (!had_err) {\
+            byteoffset += sizeof (VAL);\
+            if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)\
+            {\
+              char buffer[GT_WORDSIZE_INBYTES];\
+              size_t padunits\
+                = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);\
+              byteoffset += (unsigned long) padunits;\
+              ret = fread(buffer, (size_t) 1, (size_t) padunits, fp);\
+            }\
+            if (ferror(fp))\
+            {\
+              gt_error_set(err,"error when trying to read %s: %s",\
+                                #VAL, strerror(errno));\
+              had_err = true;\
+            }\
+          }\
         }
 
 static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
@@ -53,7 +71,7 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
 {
   FILE *fp;
   bool had_err = false;
-  unsigned long cc;
+  unsigned long cc, byteoffset = 0;
 
   gt_error_check(err);
   fp = gt_fa_fopen_with_suffix(indexname, GT_ENCSEQFILESUFFIX, "rb", err);
@@ -71,14 +89,16 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
       had_err = true;
     }
   }
-  emd->sat = (GtEncseqAccessType) cc;
-  NEXTFREAD(emd->totallength);
-  NEXTFREAD(emd->numofdbsequences);
-  NEXTFREAD(emd->numofdbfiles);
-  NEXTFREAD(emd->lengthofdbfilenames);
-  NEXTFREAD(emd->specialcharinfo);
-  NEXTFREAD(emd->minseqlen);
-  NEXTFREAD(emd->maxseqlen);
+  if (!had_err) {
+    emd->sat = (GtEncseqAccessType) cc;
+    NEXTFREAD(emd->totallength);
+    NEXTFREAD(emd->numofdbsequences);
+    NEXTFREAD(emd->numofdbfiles);
+    NEXTFREAD(emd->lengthofdbfilenames);
+    NEXTFREAD(emd->specialcharinfo);
+    NEXTFREAD(emd->minseqlen);
+    NEXTFREAD(emd->maxseqlen);
+  }
   gt_fa_xfclose(fp);
   return had_err ? -1 : 0;
 }
