@@ -89,30 +89,41 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
     if (!emd)
       had_err = -1;
 
-    gt_file_xprintf(arguments->outfp, "index name: ");
-    gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
+    if (!had_err) {
+      gt_file_xprintf(arguments->outfp, "index name: ");
+      gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
 
-    gt_file_xprintf(arguments->outfp, "total length: ");
-    gt_file_xprintf(arguments->outfp, "%lu\n",
-                                      gt_encseq_metadata_total_length(emd));
+      gt_file_xprintf(arguments->outfp, "file format version: ");
+      gt_file_xprintf(arguments->outfp, "%lu\n",
+                                          gt_encseq_metadata_version(emd));
 
-    gt_file_xprintf(arguments->outfp, "number of sequences: ");
-    gt_file_xprintf(arguments->outfp, "%lu\n",
+      gt_file_xprintf(arguments->outfp, "64-bit file: ");
+      gt_file_xprintf(arguments->outfp, "%s\n", gt_encseq_metadata_is64bit(emd)
+                                                  ? "yes"
+                                                  : "no");
+
+      gt_file_xprintf(arguments->outfp, "total length: ");
+      gt_file_xprintf(arguments->outfp, "%lu\n",
+                                        gt_encseq_metadata_total_length(emd));
+
+      gt_file_xprintf(arguments->outfp, "number of sequences: ");
+      gt_file_xprintf(arguments->outfp, "%lu\n",
                                       gt_encseq_metadata_num_of_sequences(emd));
 
-    gt_file_xprintf(arguments->outfp, "number of files: ");
-    gt_file_xprintf(arguments->outfp, "%lu\n",
-                                      gt_encseq_metadata_num_of_files(emd));
+      gt_file_xprintf(arguments->outfp, "number of files: ");
+      gt_file_xprintf(arguments->outfp, "%lu\n",
+                                        gt_encseq_metadata_num_of_files(emd));
 
-    gt_file_xprintf(arguments->outfp, "length of shortest/longest sequence: ");
-    gt_file_xprintf(arguments->outfp, "%lu/%lu\n",
-                                      gt_encseq_metadata_min_seq_length(emd),
-                                      gt_encseq_metadata_max_seq_length(emd));
+      gt_file_xprintf(arguments->outfp, "length of shortest/longest "
+                                        "sequence: ");
+      gt_file_xprintf(arguments->outfp, "%lu/%lu\n",
+                                        gt_encseq_metadata_min_seq_length(emd),
+                                        gt_encseq_metadata_max_seq_length(emd));
 
-    gt_file_xprintf(arguments->outfp, "accesstype: ");
-    gt_file_xprintf(arguments->outfp, "%s\n",
+      gt_file_xprintf(arguments->outfp, "accesstype: ");
+      gt_file_xprintf(arguments->outfp, "%s\n",
                  gt_encseq_access_type_str(gt_encseq_metadata_accesstype(emd)));
-
+    }
     gt_encseq_metadata_delete(emd);
   } else {
     GtEncseqLoader *encseq_loader;
@@ -124,6 +135,7 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
     if (!(encseq = gt_encseq_loader_load(encseq_loader,
                                          argv[parsed_args], err)))
       had_err = -1;
+
     if (!had_err) {
       GtAlphabet *alpha;
       const GtUchar *chars;
@@ -132,6 +144,14 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 
       gt_file_xprintf(arguments->outfp, "index name: ");
       gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
+
+      gt_file_xprintf(arguments->outfp, "file format version: ");
+      gt_file_xprintf(arguments->outfp, "%lu\n", gt_encseq_version(encseq));
+
+      gt_file_xprintf(arguments->outfp, "64-bit file: ");
+      gt_file_xprintf(arguments->outfp, "%s\n", gt_encseq_is_64_bit(encseq)
+                                                   ? "yes"
+                                                   : "no");
 
       gt_file_xprintf(arguments->outfp, "total length: ");
       gt_file_xprintf(arguments->outfp, "%lu\n",
@@ -148,6 +168,12 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       gt_file_xprintf(arguments->outfp, "number of files: ");
       gt_file_xprintf(arguments->outfp, "%lu\n",
                                         gt_encseq_num_of_files(encseq));
+
+      gt_file_xprintf(arguments->outfp, "length of shortest/longest "
+                                        "sequence: ");
+      gt_file_xprintf(arguments->outfp, "%lu/%lu\n",
+                                      gt_encseq_min_seq_length(encseq),
+                                      gt_encseq_max_seq_length(encseq));
 
       filenames = gt_encseq_filenames(encseq);
       gt_file_xprintf(arguments->outfp, "original filenames:\n");

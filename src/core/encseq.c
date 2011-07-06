@@ -207,6 +207,18 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
   return encseq->logicalnumofdbsequences;
 }
 
+unsigned long gt_encseq_version(const GtEncseq *encseq)
+{
+  gt_assert(encseq);
+  return encseq->version;
+}
+
+bool gt_encseq_is_64_bit(const GtEncseq *encseq)
+{
+  gt_assert(encseq);
+  return ((int) encseq->is64bit == 1);
+}
+
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
                                           unsigned long pos);
 
@@ -870,6 +882,14 @@ static void assignencseqmapspecification(GtMapspec *mapspec,
   {
     unsigned long idx, offset = 0;
 
+    encseq->is64bitptr = gt_malloc(sizeof (*encseq->is64bitptr));
+    encseq->is64bitptr[0] = (GtUchar) (sizeof (unsigned long) == (size_t) 8
+                                         ? 1
+                                         : 0);
+
+    encseq->versionptr = gt_malloc(sizeof (*encseq->versionptr));
+    encseq->versionptr[0] = (unsigned long) GT_ENCSEQ_VERSION;
+
     encseq->satcharptr = gt_malloc(sizeof (*encseq->satcharptr));
     encseq->satcharptr[0] = (unsigned long) encseq->sat;
 
@@ -910,6 +930,9 @@ static void assignencseqmapspecification(GtMapspec *mapspec,
     }
     gt_assert(offset == encseq->lengthofdbfilenames);
   }
+
+  gt_mapspec_add_uchar(mapspec, encseq->is64bitptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->versionptr, 1UL);
   gt_mapspec_add_ulong(mapspec, encseq->satcharptr, 1UL);
   gt_mapspec_add_ulong(mapspec, encseq->totallengthptr, 1UL);
   gt_mapspec_add_ulong(mapspec, encseq->numofdbsequencesptr, 1UL);
@@ -997,6 +1020,10 @@ static int flushencseq2file(const char *indexname,GtEncseq *encseq,
       haserr = true;
     }
   }
+  gt_free(encseq->is64bitptr);
+  encseq->is64bitptr = NULL;
+  gt_free(encseq->versionptr);
+  encseq->versionptr = NULL;
   gt_free(encseq->satcharptr);
   encseq->satcharptr = NULL;
   gt_free(encseq->totallengthptr);
@@ -1052,6 +1079,8 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
     encseq->specialcharinfo = *encseq->specialcharinfoptr;
     encseq->minseqlen = *encseq->minseqlenptr;
     encseq->maxseqlen = *encseq->maxseqlenptr;
+    encseq->version = *encseq->versionptr;
+    encseq->is64bit = *encseq->is64bitptr;
     encseq->filenametab = gt_str_array_new();
     nextstart = encseq->firstfilename;
     for (idx = 0; idx < encseq->numofdbfiles; idx++)
@@ -4337,6 +4366,8 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
          fprintf(stderr,"gt_encseq_determine_size(%d) undefined\n",(int) sat);
          exit(GT_EXIT_PROGRAMMING_ERROR);
   }
+  sum += sizeof (GtUchar); /* for is64bit type */
+  sum += sizeof (unsigned long); /* for version type */
   sum += sizeof (unsigned long); /* for sat type */
   sum += sizeof (totallength);   /* for totallength */
   sum += sizeof (unsigned long); /* for numofdbsequences type */

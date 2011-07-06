@@ -1,8 +1,8 @@
 /*
   Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c)      2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2010 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,8 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
+
+#define GT_ENCSEQ_VERSION  1UL
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))

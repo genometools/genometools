@@ -101,6 +101,12 @@ struct GtEncseq
                 lengthofdbfilenames,
                 *lengthofdbfilenamesptr,
                 sizeofrep;
+
+  unsigned long version,
+                *versionptr;
+  GtUchar is64bit,
+          *is64bitptr;
+
   GtUchar(*seqdeliverchar)(GtEncseqReader *);
   const char *seqdelivercharname;
   bool(*delivercontainsspecial)(const GtEncseq *,

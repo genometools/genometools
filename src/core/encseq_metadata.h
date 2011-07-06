@@ -26,6 +26,8 @@ typedef struct GtEncseqMetadata GtEncseqMetadata;
 
 GtEncseqMetadata*    gt_encseq_metadata_new(const char *indexname,
                                             GtError *err);
+unsigned long        gt_encseq_metadata_version(GtEncseqMetadata *emd);
+bool                 gt_encseq_metadata_is64bit(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_total_length(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_num_of_sequences(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_num_of_files(GtEncseqMetadata *emd);

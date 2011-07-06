@@ -185,6 +185,11 @@ void              gt_encseq_unmirror(GtEncseq *encseq);
 /* Returns <true> if <encseq> contains virtual reverse complement sequences as
    added by <gt_encseq_mirror()>. */
 bool              gt_encseq_is_mirrored(const GtEncseq *encseq);
+/* Returns the version number of the file representation of <encseq> if it
+   exists, or 0 if it was not mapped from a file. */
+unsigned long     gt_encseq_version(const GtEncseq *encseq);
+/* Returns TRUE if <encseq> was created on a 64-bit system. */
+bool              gt_encseq_is_64_bit(const GtEncseq *encseq);
 /* Deletes <encseq> and frees all associated space. */
 void              gt_encseq_delete(GtEncseq *encseq);
 

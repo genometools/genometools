@@ -27,7 +27,9 @@
 struct GtEncseqMetadata
 {
   GtEncseqAccessType sat;
-  unsigned long totallength,
+  GtUchar is64bit;
+  unsigned long version,
+                totallength,
                 numofdbsequences,
                 numofdbfiles,
                 lengthofdbfilenames,
@@ -79,6 +81,35 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
   {
     had_err = true;
   }
+  NEXTFREAD(emd->is64bit);
+  if (!had_err)
+  {
+    if ((int) emd->is64bit > 1)
+    {
+      gt_error_set(err, "illegal platform code %u in \"%s%s\"", emd->is64bit,
+                   indexname, GT_ENCSEQFILESUFFIX);
+      had_err = true;
+    }
+    if (!had_err && ((emd->is64bit && sizeof (unsigned long) != (size_t) 8)
+          || (!emd->is64bit && sizeof (unsigned long) == (size_t) 8)))
+    {
+      gt_error_set(err, "trying to load 64-bit index \"%s%s\" on a 32-bit "
+                        "system or vice versa -- please use correct index "
+                        "for this platform", indexname, GT_ENCSEQFILESUFFIX);
+      had_err = true;
+    }
+  }
+  NEXTFREAD(emd->version);
+  if (!had_err)
+  {
+    if (emd->version < GT_ENCSEQ_VERSION)    {
+      gt_error_set(err, "index \"%s%s\" is format version %lu, current is "
+                        "%lu -- please re-encode",
+                        indexname, GT_ENCSEQFILESUFFIX,
+                        emd->version, GT_ENCSEQ_VERSION);
+      had_err = true;
+    }
+  }
   NEXTFREAD(cc);
   if (!had_err)
   {
@@ -122,6 +153,18 @@ unsigned long gt_encseq_metadata_total_length(GtEncseqMetadata *emd)
 {
   gt_assert(emd != NULL);
   return emd->totallength;
+}
+
+unsigned long gt_encseq_metadata_version(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return emd->version;
+}
+
+bool gt_encseq_metadata_is64bit(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return ((int) emd->is64bit == 1);
 }
 
 unsigned long gt_encseq_metadata_max_seq_length(GtEncseqMetadata *emd)
