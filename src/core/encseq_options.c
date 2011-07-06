@@ -130,6 +130,12 @@ static int gt_encseq_options_check(void *oip, GtError *err)
     }
   }
   if (!had_err) {
+    if (!oi->des && oi->sds) {
+      gt_error_set(err, "option \"-sds yes\" requires \"-des yes\"");
+      had_err = -1;
+    }
+  }
+  if (!had_err) {
     if (oi->optionplain != NULL && gt_option_is_set(oi->optionplain)) {
       if (oi->optiondna != NULL && !gt_option_is_set(oi->optiondna) &&
           oi->optionprotein != NULL && !gt_option_is_set(oi->optionprotein) &&
