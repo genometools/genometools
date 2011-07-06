@@ -42,3 +42,14 @@ Test do
   run "sort #$last_stdout"
   run "diff #{$last_stdout} #{sorted_original}"
 end
+
+Name "gt seqorder without description support"
+Keywords "gt_seqorder"
+Test do
+  seq = "gt_seqorder_test.fas"
+  run "#{$bin}gt encseq encode -des no -sds no #$testdata#{seq}"
+  run_test "#{$bin}gt seqorder -sort #{seq}"
+  grep $last_stderr, "warning"
+  grep $last_stdout, ">\n"
+end
+

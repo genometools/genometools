@@ -20,6 +20,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "match/sfx-bentsedg.h"
 #include "match/sfx-suffixgetset.h"
@@ -137,15 +138,18 @@ static void gt_seqorder_get_shuffled_seqnums(unsigned long nofseqs,
 static void gt_seqorder_output(unsigned long seqnum, GtEncseq *encseq)
 {
   GtEncseqReader *esr;
-  unsigned long startpos, len, desclen;
-  const char *desc;
+  unsigned long startpos, len, desclen = 0;
+  const char *desc = NULL;
   unsigned long i;
 
   startpos = gt_encseq_seqstartpos(encseq, seqnum);
   len = gt_encseq_seqlength(encseq, seqnum);
-  desc = gt_encseq_description(encseq, &desclen, seqnum);
   gt_xfputc(GT_FASTA_SEPARATOR, stdout);
-  gt_xfwrite(desc, (size_t)1, (size_t)desclen, stdout);
+  if (gt_encseq_has_description_support(encseq))
+  {
+    desc = gt_encseq_description(encseq, &desclen, seqnum);
+    gt_xfwrite(desc, (size_t)1, (size_t)desclen, stdout);
+  }
   gt_xfputc('\n', stdout);
   esr = gt_encseq_create_reader_with_readmode(encseq, GT_READMODE_FORWARD,
       startpos);
@@ -174,6 +178,8 @@ static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
   encseq = gt_encseq_loader_load(loader, argv[parsed_args], err);
   if (encseq == NULL)
     had_err = -1;
+  if (had_err == 0 && !gt_encseq_has_description_support(encseq))
+    gt_warning("%s has no description support", argv[parsed_args]);
   if (!had_err)
   {
     nofseqs = gt_encseq_num_of_sequences(encseq);
