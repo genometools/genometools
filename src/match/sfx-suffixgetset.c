@@ -242,6 +242,26 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
   }
 }
 
+void gt_suffixsortspace_exportptr(GtSuffixsortspace_exportptr *exportptr,
+                                  unsigned long subbucketleft,
+                                  GtSuffixsortspace *sssp)
+{
+  if (sssp->ulongtab != NULL)
+  {
+    exportptr->ulongtabsectionptr = sssp->ulongtab + sssp->bucketleftidx
+                                                   + subbucketleft
+                                                   - sssp->offset;
+    exportptr->uinttabsectionptr = NULL;
+  } else
+  {
+    gt_assert(sssp->uinttab != NULL);
+    exportptr->uinttabsectionptr = sssp->uinttab + sssp->bucketleftidx
+                                                 + subbucketleft
+                                                 - sssp->offset;
+    exportptr->ulongtabsectionptr = NULL;
+  }
+}
+
 unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
                                      unsigned long subbucketleft,
                                      unsigned long idx)

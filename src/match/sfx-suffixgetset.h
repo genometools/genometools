@@ -19,9 +19,16 @@
 #define SFX_SUFFIXGETSET_H
 
 #include <stdio.h>
+#include <inttypes.h>
 #include "core/error_api.h"
 
 typedef struct GtSuffixsortspace GtSuffixsortspace;
+
+typedef struct
+{
+  uint32_t *uinttabsectionptr;
+  unsigned long *ulongtabsectionptr;
+} GtSuffixsortspace_exportptr;
 
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
                                           unsigned long maxvalue,
@@ -50,6 +57,10 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
 void gt_suffixsortspace_setdirectwithoffset(GtSuffixsortspace *sssp,
                                             unsigned long idx,
                                             unsigned long value);
+
+void gt_suffixsortspace_exportptr(GtSuffixsortspace_exportptr *exportptr,
+                                  unsigned long subbucketleft,
+                                  GtSuffixsortspace *sssp);
 
 unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
                                      unsigned long subbucketleft,

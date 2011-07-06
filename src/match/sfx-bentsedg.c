@@ -993,39 +993,61 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
                               unsigned long depth)
 {
   unsigned long idx, pos;
+  GtSuffixsortspace_exportptr exportptr;
 
   gt_assert(width <= (unsigned long) bsr->sfxstrategy->maxshortreadsort);
-  for (idx = 0; idx < width; idx++)
-  {
-    pos = gt_suffixsortspace_get(bsr->sssp,subbucketleft,idx);
-    bsr->shortreadsortinfo[idx].suffix = pos;
-    bsr->shortreadsortinfo[idx].unitsnotspecial
-      = gt_encseq_extract2bitencvector(bsr->shortreadsortinfo[idx].tbe,
-                                       GT_NUMOFTBEVALUEFOR100,
-                                       bsr->encseq,
-                                       bsr->esr1,
-                                       bsr->readmode,
-                                       pos+depth);
-  }
-  qsort(bsr->shortreadsortinfo,(size_t) width,sizeof(* bsr->shortreadsortinfo),
-        compareshortreadsortinfo);
-  if (bsr->tableoflcpvalues == NULL)
+  gt_suffixsortspace_exportptr(&exportptr, subbucketleft, bsr->sssp);
+  if (exportptr.ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
     {
-      gt_suffixsortspace_set(bsr->sssp,subbucketleft,idx,
-                             bsr->shortreadsortinfo[idx].suffix);
+      pos = exportptr.ulongtabsectionptr[idx];
+      bsr->shortreadsortinfo[idx].suffix = pos;
+      bsr->shortreadsortinfo[idx].unitsnotspecial
+        = gt_encseq_extract2bitencvector(bsr->shortreadsortinfo[idx].tbe,
+                                         GT_NUMOFTBEVALUEFOR100,
+                                         bsr->encseq,
+                                         bsr->esr1,
+                                         bsr->readmode,
+                                         pos+depth);
     }
   } else
   {
+    for (idx = 0; idx < width; idx++)
+    {
+      pos = (unsigned long) exportptr.uinttabsectionptr[idx];
+      bsr->shortreadsortinfo[idx].suffix = pos;
+      bsr->shortreadsortinfo[idx].unitsnotspecial
+        = gt_encseq_extract2bitencvector(bsr->shortreadsortinfo[idx].tbe,
+                                         GT_NUMOFTBEVALUEFOR100,
+                                         bsr->encseq,
+                                         bsr->esr1,
+                                         bsr->readmode,
+                                         pos+depth);
+    }
+  }
+  qsort(bsr->shortreadsortinfo,(size_t) width,sizeof(* bsr->shortreadsortinfo),
+        compareshortreadsortinfo);
+  if (exportptr.ulongtabsectionptr != NULL)
+  {
+    for (idx = 0; idx < width; idx++)
+    {
+      exportptr.ulongtabsectionptr[idx] = bsr->shortreadsortinfo[idx].suffix;
+    }
+  } else
+  {
+    for (idx = 0; idx < width; idx++)
+    {
+      exportptr.uinttabsectionptr[idx]
+        = (uint32_t) bsr->shortreadsortinfo[idx].suffix;
+    }
+  }
+  if (bsr->tableoflcpvalues != NULL)
+  {
     unsigned long lcp;
 
-    gt_suffixsortspace_set(bsr->sssp,subbucketleft,0,
-                           bsr->shortreadsortinfo[0].suffix);
     for (idx = 1UL; idx < width; idx++)
     {
-      gt_suffixsortspace_set(bsr->sssp,subbucketleft,idx,
-                             bsr->shortreadsortinfo[idx].suffix);
       lcp = lcpshortreadinfo(bsr->shortreadsortinfo + idx - 1,
                              bsr->shortreadsortinfo + idx,
                              bsr->fwd,
