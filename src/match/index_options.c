@@ -237,15 +237,13 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
     int readint;
     char buffer[3];
     bool match = false;
-    const int maxpartsarg = (1 << 22) - 1;
-    had_err = gt_grep(&match, "^[0-9]+(MB|GB)?$", gt_str_get(oi->memlimit),
+    had_err = gt_grep(&match, "^[0-9]+(MB|GB)$", gt_str_get(oi->memlimit),
                       err);
     if (had_err || !match)
     {
       gt_error_set(err,"option -memlimit must have one positive "
-                       "integer argument optionally followed by one of "
-                       "the keywords MB and GB; the integer must be "
-                       "smaller than %d", maxpartsarg);
+                       "integer argument followed by one of "
+                       "the keywords MB and GB");
       had_err = -1;
     }
     if (!had_err)
@@ -367,10 +365,10 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_parser_add_option(op, idxo->optionstorespecialcodes);
 
   idxo->optionparts
-    = gt_option_new_uint("parts",
-                         "specify number of parts in which the index "
-                         "construction is performed",
-                         &idxo->numofparts, 1U);
+    = gt_option_new_uint_max("parts",
+                             "specify number of parts in which the index "
+                             "construction is performed",
+                             &idxo->numofparts, 1U, (unsigned) ((1 << 22) - 1));
   gt_option_is_development_option(idxo->optionparts);
   gt_option_parser_add_option(op, idxo->optionparts);
 
@@ -416,6 +414,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                            0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
     gt_option_exclude(idxo->optionspmopt, idxo->optiondifferencecover);
+
     idxo->optionmemlimit = gt_option_new_string("memlimit",
                            "specify maximal amount of memory to be used during "
                            "index construction (in bytes, the keywords 'MB' "
