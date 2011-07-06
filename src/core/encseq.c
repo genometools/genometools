@@ -6487,25 +6487,24 @@ static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
   return characterdistribution;
 }
 
-static GtEncseq*
-gt_encseq_new_from_files(GtTimer *sfxprogress,
-                         const char *indexname,
-                         const GtStr *str_smap,
-                         const GtStr *str_sat,
-                         GtStrArray *filenametab,
-                         bool isdna,
-                         bool isprotein,
-                         bool isplain,
-                         bool outdestab,
-                         bool outsdstab,
-                         bool outssptab,
-                         bool outoistab,
-                         GtLogger *logger,
-                         GtError *err)
+static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
+                                          const char *indexname,
+                                          const GtStr *str_smap,
+                                          const GtStr *str_sat,
+                                          GtStrArray *filenametab,
+                                          bool isdna,
+                                          bool isprotein,
+                                          bool isplain,
+                                          bool outdestab,
+                                          bool outsdstab,
+                                          bool outssptab,
+                                          bool outoistab,
+                                          GtLogger *logger,
+                                          GtError *err)
 {
   bool haserr = false;
   unsigned int forcetable;
-  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0};
+  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0,0};
   GtAlphabet *alphabet = NULL;
   bool alphabetisbound = false;
   GtFilelengthvalues *filelengthtab = NULL;
@@ -6517,7 +6516,7 @@ gt_encseq_new_from_files(GtTimer *sfxprogress,
                 wildcardranges,
                 minseqlen = GT_UNDEF_ULONG,
                 maxseqlen = GT_UNDEF_ULONG;
-  Definedunsignedlong equallength; /* is defined of all sequences are of equal
+  Definedunsignedlong equallength; /* is defined if all sequences are of equal
                                       length and no WILDCARD appears in the
                                       sequence */
   GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
