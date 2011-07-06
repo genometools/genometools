@@ -36,7 +36,7 @@ struct GtSuffixsortspace
   size_t basesize;
   unsigned long maxindex,
                 maxvalue,
-                offset,
+                partoffset,
                 bucketleftidx,
                 *ulongtab;
 };
@@ -104,7 +104,7 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
     suffixsortspace->uinttab = NULL;
     suffixsortspace->ulongtab = gt_malloc((size_t) sufspacesize);
   }
-  suffixsortspace->offset = 0;
+  suffixsortspace->partoffset = 0;
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->unmapsortspace = false;
   return suffixsortspace;
@@ -134,7 +134,7 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
     suffixsortspace->ulongtab = ptr;
     suffixsortspace->uinttab = NULL;
   }
-  suffixsortspace->offset = 0;
+  suffixsortspace->partoffset = 0;
   suffixsortspace->bucketleftidx = 0;
   suffixsortspace->unmapsortspace = true;
   suffixsortspace->maxindex = numofentries - 1;
@@ -149,10 +149,7 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
 {
   if (suffixsortspace != NULL)
   {
-    if (checklongestdefined)
-    {
-      gt_assert(suffixsortspace->longestidx.defined);
-    }
+    gt_assert(!checklongestdefined || suffixsortspace->longestidx.defined);
     if (suffixsortspace->unmapsortspace)
     {
       gt_fa_xmunmap(suffixsortspace->ulongtab);
@@ -165,33 +162,6 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
     gt_free(suffixsortspace);
   }
 }
-
-/*
-static void suffixptrassert(const GtSuffixsortspace *sssp,
-                            const Suffixptr *subbucket,
-                            unsigned long subbucketleft,
-                            unsigned long idx)
-{
-  gt_assert(sssp != NULL);
-  gt_assert(sssp->sortspace != NULL);
-  gt_assert(sssp->offset <= sssp->bucketleftidx + subbucketleft + idx);
-  gt_assert(subbucket != NULL);
-  if (subbucket + idx != sssp->sortspace +
-                         sssp->bucketleftidx + subbucketleft + idx)
-  {
-    fprintf(stderr,"idx=%lu,subbucket=%lu,sssp->sortspace=%lu,"
-           "bucketleftidx=%lu,subbucketleft=%lu,offset=%lu\n",idx,
-           (unsigned long) subbucket,
-           (unsigned long) sssp->sortspace,
-           sssp->bucketleftidx,
-           subbucketleft,
-           sssp->offset);
-    exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-  gt_assert(subbucket + idx == sssp->sortspace +
-                               sssp->bucketleftidx + subbucketleft + idx);
-}
-*/
 
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx)
@@ -213,7 +183,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
   if (value == 0)
   {
     sssp->longestidx.defined = true;
-    sssp->longestidx.valueunsignedlong = idx + sssp->offset;
+    sssp->longestidx.valueunsignedlong = idx + sssp->partoffset;
   }
   if (sssp->ulongtab != NULL)
   {
@@ -232,10 +202,10 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
 {
   unsigned long idx;
 
-  printf("%lu,%lu=",sssp->bucketleftidx+subbucketleft-sssp->offset,
-                    sssp->bucketleftidx+subbucketleft+width-1-sssp->offset);
-  for (idx=sssp->bucketleftidx+subbucketleft-sssp->offset;
-       idx<sssp->bucketleftidx+subbucketleft+width-sssp->offset;
+  printf("%lu,%lu=",sssp->bucketleftidx+subbucketleft-sssp->partoffset,
+                    sssp->bucketleftidx+subbucketleft+width-1-sssp->partoffset);
+  for (idx=sssp->bucketleftidx+subbucketleft-sssp->partoffset;
+       idx<sssp->bucketleftidx+subbucketleft+width-sssp->partoffset;
        idx++)
   {
     printf(" %lu", gt_suffixsortspace_getdirect(sssp,idx));
@@ -250,14 +220,14 @@ void gt_suffixsortspace_exportptr(GtSuffixsortspace_exportptr *exportptr,
   {
     exportptr->ulongtabsectionptr = sssp->ulongtab + sssp->bucketleftidx
                                                    + subbucketleft
-                                                   - sssp->offset;
+                                                   - sssp->partoffset;
     exportptr->uinttabsectionptr = NULL;
   } else
   {
     gt_assert(sssp->uinttab != NULL);
     exportptr->uinttabsectionptr = sssp->uinttab + sssp->bucketleftidx
                                                  + subbucketleft
-                                                 - sssp->offset;
+                                                 - sssp->partoffset;
     exportptr->ulongtabsectionptr = NULL;
   }
 }
@@ -266,11 +236,10 @@ unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
                                      unsigned long subbucketleft,
                                      unsigned long idx)
 {
-  /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
   return gt_suffixsortspace_getdirect(sssp, sssp->bucketleftidx
                                               + subbucketleft
                                               + idx
-                                              - sssp->offset);
+                                              - sssp->partoffset);
 }
 
 void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
@@ -278,18 +247,10 @@ void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
                             unsigned long idx,
                             unsigned long value)
 {
-  /*suffixptrassert(sssp,subbucket,subbucketleft,idx);*/
   gt_suffixsortspace_setdirect(sssp, sssp->bucketleftidx
                                        + subbucketleft
                                        + idx
-                                       - sssp->offset,value);
-}
-
-void gt_suffixsortspace_setdirectwithoffset(GtSuffixsortspace *sssp,
-                                            unsigned long idx,
-                                            unsigned long value)
-{
-  gt_suffixsortspace_setdirect(sssp,idx - sssp->offset,value);
+                                       - sssp->partoffset,value);
 }
 
 unsigned long gt_suffixsortspace_bucketleftidx_get(const GtSuffixsortspace
@@ -304,15 +265,15 @@ void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
   sssp->bucketleftidx = value;
 }
 
-unsigned long gt_suffixsortspace_offset_get(const GtSuffixsortspace *sssp)
+unsigned long gt_suffixsortspace_partoffset_get(const GtSuffixsortspace *sssp)
 {
-  return sssp->offset;
+  return sssp->partoffset;
 }
 
-void gt_suffixsortspace_offset_set(GtSuffixsortspace *sssp,
-                                   unsigned long offset)
+void gt_suffixsortspace_partoffset_set(GtSuffixsortspace *sssp,
+                                       unsigned long partoffset)
 {
-  sssp->offset = offset;
+  sssp->partoffset = partoffset;
 }
 
 void gt_suffixsortspace_sortspace_delete(GtSuffixsortspace *sssp)

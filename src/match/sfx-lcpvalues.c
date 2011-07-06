@@ -142,11 +142,13 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                           specialsinbucket,
                           bcktab,
                           code);
+#ifndef NDEBUG
       for (idx=0; idx<specialsinbucket; idx++)
       {
         GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
                    lcpsubtab->tableoflcpvalues.subbucketleft+idx);
       }
+#endif
     }
   } else
   {
@@ -177,8 +179,10 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   {
     lcpsubtab->tableoflcpvalues.bucketoflcpvalues
                [lcpsubtab->tableoflcpvalues.subbucketleft] = lcpvalue;
+#ifndef NDEBUG
     GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
                lcpsubtab->tableoflcpvalues.subbucketleft);
+#endif
   }
   return minprefixindex;
 }
@@ -277,8 +281,10 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
     outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
       = gt_malloc(sizeofbucketoflcpvalues);
     outlcpinfo->sizeofinfo += sizeofbucketoflcpvalues;
+#ifndef NDEBUG
     GT_INITBITTAB(outlcpinfo->lcpsubtab.tableoflcpvalues.isset,
                   numoflcpvalues);
+#endif
     outlcpinfo->sizeofinfo += GT_NUMOFINTSFORBITS(numoflcpvalues) *
                               sizeof (GtBitsequence);
     outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
@@ -402,10 +408,14 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   } else
   {
     gt_free(outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues);
+#ifndef NDEBUG
     gt_free(outlcpinfo->lcpsubtab.tableoflcpvalues.isset);
+#endif
   }
   outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues = NULL;
+#ifndef NDEBUG
   outlcpinfo->lcpsubtab.tableoflcpvalues.isset = NULL;
+#endif
   outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = 0;
   gt_free(outlcpinfo);
 }
@@ -662,7 +672,9 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
           /* be careful for the parallel version */
       lcpsubtab->lcp2file->smalllcpvalues
         = (uint8_t *) lcpsubtab->lcp2file->reservoir;
+#ifndef NDEBUG
       lcpsubtab->tableoflcpvalues.isset = NULL;
+#endif
       lcpsubtab->tableoflcpvalues.bucketoflcpvalues
         = (unsigned long *) lcpsubtab->lcp2file->reservoir;
       lcpsubtab->tableoflcpvalues.subbucketleft = 0;

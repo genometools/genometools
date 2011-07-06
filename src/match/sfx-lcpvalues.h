@@ -29,7 +29,9 @@ typedef struct Outlcpinfo Outlcpinfo;
 
 typedef struct
 {
+#ifndef NDEBUG
   GtBitsequence *isset;
+#endif
   unsigned long *bucketoflcpvalues,
                 numofentries,
                 numoflargelcpvalues,
@@ -44,10 +46,12 @@ typedef struct
              tableoflcpvalues->bucketoflcpvalues != NULL &&
              tableoflcpvalues->subbucketleft+idx <
              tableoflcpvalues->numofentries);
+#ifndef NDEBUG
   if (tableoflcpvalues->isset != NULL)
   {
     GT_SETIBIT(tableoflcpvalues->isset,tableoflcpvalues->subbucketleft+idx);
   }
+#endif
   tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->subbucketleft+idx]
     = value;
   if (value >= (unsigned long) LCPOVERFLOW)

@@ -347,8 +347,7 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
     unsigned long stidx;
 
     stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
-    gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
-                                           position);
+    gt_suffixsortspace_set(sfi->suffixsortspace,0,stidx,position);
     /* from right to left */
   }
 }
@@ -401,8 +400,9 @@ static void sfx_derivespecialcodesfromtable(Sfxiterator *sfi,bool deletevalues)
           gt_bcktab_updatespecials(sfi->bcktab,code,prefixindex);
           stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
           /* from right to left */
-          gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
-                           sfi->spaceCodeatposition[j].position - prefixindex);
+          gt_suffixsortspace_set(sfi->suffixsortspace,0,stidx,
+                                 sfi->spaceCodeatposition[j].position
+                                 - prefixindex);
         }
       }
       if (deletevalues)
@@ -457,8 +457,8 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
             gt_assert(code > 0);
             stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
             /* from right to left */
-            gt_suffixsortspace_setdirectwithoffset(sfi->suffixsortspace,stidx,
-                          specialcontext.position - prefixindex);
+            gt_suffixsortspace_set(sfi->suffixsortspace,0,stidx,
+                                   specialcontext.position - prefixindex);
           }
         }
       }
@@ -1711,9 +1711,9 @@ static void preparethispart(Sfxiterator *sfi)
                                   sfi->currentmaxcode,
                                   sfi->logger);
   }
-  gt_suffixsortspace_offset_set(sfi->suffixsortspace,
-                                stpgetcurrentsuftaboffset(sfi->part,
-                                                          sfi->suftabparts));
+  gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
+                                    stpgetcurrentsuftaboffset(sfi->part,
+                                                             sfi->suftabparts));
   if (sfi->sfxstrategy.spmopt == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
@@ -1953,8 +1953,8 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
   sfi->fusp.nextfreeSuffixptr = 0;
   if (sfi->sfxstrategy.spmopt == 0)
   {
-    gt_suffixsortspace_offset_set(sfi->suffixsortspace,
-                                  sfi->totallength - sfi->specialcharacters);
+    gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
+                                      sfi->totallength-sfi->specialcharacters);
     fillspecialnextpage(sfi);
     gt_assert(sfi->fusp.nextfreeSuffixptr > 0);
   } else

@@ -180,36 +180,6 @@ typedef struct
                 countbltriesort;
 } GtBentsedgresources;
 
-#ifdef SKDEBUG
-static void showsuffixrange(const GtBentsedgresources *bsr,
-                            unsigned long subbucketleft,
-                            unsigned long width,
-                            unsigned long depth)
-{
-  unsigned long pi;
-
-  if (bsr->tableoflcpvalues == NULL)
-  {
-    printf("of %lu suffixes at depth %lu:\n",width,depth);
-  } else
-  {
-    unsigned long bucketleftidx
-      = gt_suffixsortspace_bucketleftidx_get(bsr->sssp);
-    printf("of %lu suffixes [%lu,%lu] at depth %lu:\n",
-           width,
-           bucketleftidx + subbucketleft,
-           bucketleftidx + subbucketleft + width,
-           depth);
-  }
-  for (pi = 0; pi <= width; pi++)
-  {
-    unsigned long pos = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pi);
-    printf("suffix %lu:",pos);
-    gt_encseq_showatstartpos(stdout,bsr->fwd,bsr->complement,bsr->encseq,pos);
-  }
-}
-#endif
-
 #ifdef WITHCHECKSTARTPOINTER
 static unsigned int checkstartpointorder(const unsigned long *left,
                                          const unsigned long *right)
@@ -314,10 +284,6 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
   int retval;
   GtCommonunits commonunits;
 
-#ifdef SKDEBUG
-  printf("insertion sort ");
-  showsuffixrange(bsr,subbucketleft,width,offset);
-#endif
   bsr->countinsertionsort++;
   for (pi = 1UL; pi < width; pi++)
   {
@@ -415,10 +381,6 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
   bool tempb;
   GtCommonunits commonunits;
 
-#ifdef SKDEBUG
-  printf("insertion sort (offset=%lu,maxdepth=%lu)\n",offset,maxdepth);
-  showsuffixrange(bsr,subbucketleft,width,offset);
-#endif
   bsr->countinsertionsort++;
   for (pi = 1UL; pi < width; pi++)
   {
@@ -1109,7 +1071,8 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     {
       bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
                          gt_suffixsortspace_bucketleftidx_get(bsr->sssp) +
-                         subbucketleft,width,depth);
+                         subbucketleft,
+                         width,depth);
       return;
     }
     if (multistrategysort(bsr,subbucketleft,width,depth,

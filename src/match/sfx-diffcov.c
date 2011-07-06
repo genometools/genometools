@@ -57,7 +57,7 @@ typedef struct
 
 typedef struct
 {
-  unsigned long subbucketleft,
+  unsigned long blisbl, /* bucketleftindex + subbucketleft */
                 width;
 } Pairsuffixptr;
 
@@ -69,7 +69,7 @@ typedef Pairsuffixptr Inl_Queueelem;
 
 typedef struct
 {
-  unsigned long subbucketleft,
+  unsigned long blisbl, /* bucketleftindex + subbucketleft */
                 width,
                 count,
                 totalwidth,
@@ -298,7 +298,7 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   dcov->firstwithnewdepth.depth = 0;
   dcov->firstwithnewdepth.totalwidth = 0;
   dcov->firstwithnewdepth.count = 0;
-  dcov->firstwithnewdepth.subbucketleft = 0;
+  dcov->firstwithnewdepth.blisbl = 0;
   dcov->firstwithnewdepth.width = 0;
   dcov->firstwithnewdepth.maxwidth = 0;
   dcov->currentqueuesize = 0;
@@ -657,14 +657,14 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
 }
 
 static void dc_anchorleftmost(Differencecover *dcov,
-                              unsigned long subbucketleft,
+                              unsigned long blisbl,
                               unsigned long width)
 {
   unsigned long idx;
 
-  for (idx = subbucketleft; idx < subbucketleft + width; idx++)
+  for (idx = blisbl; idx < blisbl + width; idx++)
   {
-    inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),subbucketleft);
+    inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),blisbl);
   }
 }
 
@@ -687,7 +687,7 @@ static void dc_showintervalsizes(unsigned long count,
 }
 
 static void dc_processunsortedrange(Differencecover *dcov,
-                                    unsigned long subbucketleft,
+                                    unsigned long blisbl,
                                     unsigned long width,
                                     unsigned long depth)
 {
@@ -721,7 +721,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
       dcov->firstwithnewdepth.defined = true;
     }
     gt_logger_log(dcov->logger,"enter new level %lu",depth);
-    dcov->firstwithnewdepth.subbucketleft = subbucketleft;
+    dcov->firstwithnewdepth.blisbl = blisbl;
     dcov->firstwithnewdepth.width = width;
     dcov->firstwithnewdepth.depth = depth;
     dcov->firstwithnewdepth.count = 1UL;
@@ -729,7 +729,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
     dcov->firstwithnewdepth.maxwidth = width;
   }
   pairelem = gt_malloc(sizeof (*pairelem));
-  pairelem->subbucketleft = subbucketleft;
+  pairelem->blisbl = blisbl;
   pairelem->width = width;
   gt_inl_queue_add(dcov->rangestobesorted,pairelem,false);
   dcov->currentqueuesize++;
@@ -756,7 +756,7 @@ static int dcov_compareitv(const void *a,const void *b)
 }
 
 static void dc_sortsuffixesonthislevel(Differencecover *dcov,
-                                       unsigned long subbucketleft,
+                                       unsigned long blisbl,
                                        unsigned long width)
 {
   unsigned long idx, rangestart, startpos;
@@ -766,7 +766,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
     dcov->itvinfo = gt_malloc(sizeof (*dcov->itvinfo) *
                               dcov->allocateditvinfo);
   }
-  if (dcov->firstwithnewdepth.subbucketleft == subbucketleft &&
+  if (dcov->firstwithnewdepth.blisbl == blisbl &&
       dcov->firstwithnewdepth.width == width)
   {
     dcov->currentdepth = dcov->firstwithnewdepth.depth;
@@ -777,7 +777,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   */
   for (idx=0; idx<width; idx++)
   {
-    startpos = suffixptrgetdcov(dcov,subbucketleft+idx);
+    startpos = suffixptrgetdcov(dcov,blisbl+idx);
     dcov->itvinfo[idx].suffixstart = startpos;
     dcov->itvinfo[idx].key
       = inversesuftab_get(dcov,startpos + dcov->currentdepth);
@@ -791,7 +791,7 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dcov_compareitv);
   for (idx=0; idx<width; idx++)
   {
-    suffixptrsetdcov(dcov,subbucketleft+idx,dcov->itvinfo[idx].suffixstart);
+    suffixptrsetdcov(dcov,blisbl+idx,dcov->itvinfo[idx].suffixstart);
   }
   rangestart = 0;
   for (idx=1UL; idx<width; idx++)
@@ -801,15 +801,15 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
       if (rangestart + 1 < idx)
       {
         dc_processunsortedrange(dcov,
-                                subbucketleft + rangestart,
+                                blisbl + rangestart,
                                 idx - rangestart,
                                 GT_MULT2(dcov->currentdepth));
-        dc_anchorleftmost(dcov, subbucketleft + rangestart, idx - rangestart);
+        dc_anchorleftmost(dcov, blisbl + rangestart, idx - rangestart);
       } else
       {
         unsigned long currentsuftabentry
-          = suffixptrgetdcov(dcov,subbucketleft+rangestart);
-        inversesuftab_set(dcov,currentsuftabentry,subbucketleft+rangestart);
+          = suffixptrgetdcov(dcov,blisbl+rangestart);
+        inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
       }
       rangestart = idx;
     }
@@ -817,15 +817,15 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   if (rangestart + 1 < width)
   {
     dc_processunsortedrange(dcov,
-                            subbucketleft + rangestart,
+                            blisbl + rangestart,
                             width - rangestart,
                             GT_MULT2(dcov->currentdepth));
-    dc_anchorleftmost(dcov, subbucketleft + rangestart, width - rangestart);
+    dc_anchorleftmost(dcov, blisbl + rangestart, width - rangestart);
   } else
   {
     unsigned long currentsuftabentry
-      = suffixptrgetdcov(dcov,subbucketleft+rangestart);
-    inversesuftab_set(dcov,currentsuftabentry,subbucketleft+rangestart);
+      = suffixptrgetdcov(dcov,blisbl+rangestart);
+    inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
   }
 }
 
@@ -856,7 +856,7 @@ static void dc_bcktab2firstlevelintervals(Differencecover *dcov)
 }
 
 static void dc_addunsortedrange(void *voiddcov,
-                                unsigned long subbucketleft,
+                                unsigned long blisbl,
                                 unsigned long width,
                                 GT_UNUSED unsigned long depth)
 {
@@ -867,7 +867,7 @@ static void dc_addunsortedrange(void *voiddcov,
   gt_assert(depth >= (unsigned long) dcov->vparam);
   dc_updatewidth (dcov,width,dcov->vparam);
   GT_GETNEXTFREEINARRAY(ptr,&dcov->firstgeneration,Pairsuffixptr,1024);
-  ptr->subbucketleft = subbucketleft;
+  ptr->blisbl = blisbl;
   ptr->width = width;
 }
 
@@ -942,7 +942,7 @@ typedef void * QSORTNAME(Sorttype);
 #include "qsort-array.gen"
 
 void gt_differencecover_sortunsortedbucket(void *data,
-                                           unsigned long subbucketleft,
+                                           unsigned long blisbl,
                                            unsigned long width,
                                            GT_UNUSED unsigned long depth)
 {
@@ -952,8 +952,15 @@ void gt_differencecover_sortunsortedbucket(void *data,
   gt_assert(dcov->diff2pos != NULL);
   gt_assert(width >= 2UL);
   gt_assert(dcov->sssp != NULL);
-  gt_assert(subbucketleft >= gt_suffixsortspace_offset_get(dcov->sssp));
-  dcov->sortoffset = subbucketleft - gt_suffixsortspace_offset_get(dcov->sssp);
+  gt_assert(blisbl >= gt_suffixsortspace_partoffset_get(dcov->sssp));
+  /* blisbl = bucketleftindex + subbucketleft already contains
+     bucketleftindex, therefore we cannot use
+     gt_suffixsortspace_set or
+     gt_suffixsortspace_get as these use the index
+     bucketleftindex + subbucketleft + idx - partoffset
+     = blisbl - partoffset + idx. Thus, instead we use the functions
+     to directly access the suffix sortspace. */
+  dcov->sortoffset = blisbl - gt_suffixsortspace_partoffset_get(dcov->sssp);
   QSORTNAME(gt_inlinedarr_qsort_r) (NULL,width,data);
 }
 
@@ -983,14 +990,14 @@ static void dc_sortremainingsamples(Differencecover *dcov)
                  dcov->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    dc_anchorleftmost(dcov,pairptr->subbucketleft,pairptr->width);
+    dc_anchorleftmost(dcov,pairptr->blisbl,pairptr->width);
   }
   for (pairptr = dcov->firstgeneration.spacePairsuffixptr;
        pairptr < dcov->firstgeneration.spacePairsuffixptr +
                  dcov->firstgeneration.nextfreePairsuffixptr;
        pairptr++)
   {
-    dc_sortsuffixesonthislevel(dcov,pairptr->subbucketleft, pairptr->width);
+    dc_sortsuffixesonthislevel(dcov,pairptr->blisbl, pairptr->width);
   }
   GT_FREEARRAY(&dcov->firstgeneration,Pairsuffixptr);
   while (!gt_inl_queue_isempty(dcov->rangestobesorted))
@@ -999,7 +1006,7 @@ static void dc_sortremainingsamples(Differencecover *dcov)
     thispairptr = (Pairsuffixptr*) gt_inl_queue_get(dcov->rangestobesorted);
     gt_assert(dcov->currentqueuesize > 0);
     dcov->currentqueuesize--;
-    dc_sortsuffixesonthislevel(dcov,thispairptr->subbucketleft,
+    dc_sortsuffixesonthislevel(dcov,thispairptr->blisbl,
                                thispairptr->width);
     gt_free(thispairptr);
   }

@@ -54,10 +54,6 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   unsigned long idx,
                                   unsigned long value);
 
-void gt_suffixsortspace_setdirectwithoffset(GtSuffixsortspace *sssp,
-                                            unsigned long idx,
-                                            unsigned long value);
-
 void gt_suffixsortspace_exportptr(GtSuffixsortspace_exportptr *exportptr,
                                   unsigned long subbucketleft,
                                   GtSuffixsortspace *sssp);
@@ -77,12 +73,12 @@ unsigned long gt_suffixsortspace_bucketleftidx_get(
 void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
                                           unsigned long value);
 
-unsigned long gt_suffixsortspace_offset_get(const GtSuffixsortspace *sssp);
+unsigned long gt_suffixsortspace_partoffset_get(const GtSuffixsortspace *sssp);
 
 void gt_suffixsortspace_sortspace_delete(GtSuffixsortspace *sssp);
 
-void gt_suffixsortspace_offset_set(GtSuffixsortspace *sssp,
-                                   unsigned long offset);
+void gt_suffixsortspace_partoffset_set(GtSuffixsortspace *sssp,
+                                       unsigned long partoffset);
 
 unsigned long *gt_suffixsortspace_ulong_get(const GtSuffixsortspace *sssp);
 
