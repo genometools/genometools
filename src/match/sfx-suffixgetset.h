@@ -59,9 +59,11 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   unsigned long idx,
                                   unsigned long value);
 
-void gt_suffixsortspace_exportptr(GtSuffixsortspace_exportptr *exportptr,
+GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
                                   unsigned long subbucketleft,
                                   GtSuffixsortspace *sssp);
+
+void gt_suffixsortspace_export_done(GtSuffixsortspace *sssp);
 
 unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
                                      unsigned long subbucketleft,
