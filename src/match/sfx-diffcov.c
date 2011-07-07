@@ -128,14 +128,14 @@ static unsigned long suffixptrgetdcov(const Differencecover *dcov,
                                       unsigned long idx)
 {
   gt_suffixsortspace_nooffsets(dcov->sortedsample);
-  return gt_suffixsortspace_getdirect(dcov->sortedsample,idx);
+  return gt_suffixsortspace_get(dcov->sortedsample,0,idx);
 }
 
 static void suffixptrsetdcov(const Differencecover *dcov,
                              unsigned long idx,unsigned long value)
 {
   gt_suffixsortspace_nooffsets(dcov->sortedsample);
-  gt_suffixsortspace_setdirect(dcov->sortedsample,idx,value);
+  gt_suffixsortspace_set(dcov->sortedsample,0,idx,value);
 }
 
 static void fillcoverrank(Differencecover *dcov)
