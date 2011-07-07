@@ -972,7 +972,8 @@ static int performsortmaxdepth(const Sfxmapoptions *arguments,
   {
     unsigned long idx, totallength = gt_encseq_total_length(curi.encseq);
 
-    curi.sssp = gt_suffixsortspace_new(totallength+1, totallength, true);
+    curi.sssp = gt_suffixsortspace_new(totallength+1, totallength, true,
+                                       logger);
     for (idx=0; idx<=totallength; idx++)
     {
       gt_suffixsortspace_setdirect(curi.sssp,idx,idx);

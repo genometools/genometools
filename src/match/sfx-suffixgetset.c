@@ -26,6 +26,7 @@
 #include "core/mathsupport.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
+#include "core/logger_api.h"
 #include "sfx-suffixgetset.h"
 
 struct GtSuffixsortspace
@@ -75,7 +76,8 @@ static void gt_suffixsortspace_overflow_abort(GT_UNUSED const char *f,
 
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
                                           unsigned long maxvalue,
-                                          bool useuint)
+                                          bool useuint,
+                                          GT_UNUSED GtLogger *logger)
 {
   GtSuffixsortspace *suffixsortspace;
   unsigned long sufspacesize;
@@ -89,10 +91,21 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace->exportptr.ulongtabsectionptr = NULL;
   suffixsortspace->exportptr.uinttabsectionptr = NULL;
   suffixsortspace->currentexport = false;
+#ifdef _LP64
+  if (useuint && maxvalue > (unsigned long) UINT_MAX)
+  {
+    useuint = false;
+    gt_logger_log("cannot use 32 bit values for suftab "
+                  "maxvalue=%lu,numofentries=%lu",maxvalue,numofentries);
+  }
+  if (useuint)
+  {
+    gt_logger_log("suftab uses 32bit values: maxvalue=%lu,numofentries=%lu",
+                  maxvalue,numofentries);
+  }
+#endif
   suffixsortspace->basesize = useuint ? sizeof (*suffixsortspace->uinttab)
                                       : sizeof (*suffixsortspace->ulongtab);
-  gt_log_log("suftab as array: maxvalue=%lu,numofentries=%lu",
-             maxvalue,numofentries);
   sufspacesize
     = gt_safe_mult_ulong_check((unsigned long) suffixsortspace->basesize,
                                numofentries,

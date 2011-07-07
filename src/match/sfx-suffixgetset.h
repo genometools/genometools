@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <inttypes.h>
 #include "core/unused_api.h"
+#include "core/logger_api.h"
 #include "core/error_api.h"
 
 #define GT_SUFFIXSORTSPACE_EXPORT_SET(SSSP,EXPORTPTR,INDEX,POS)\
@@ -48,7 +49,8 @@ typedef struct
 
 GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
                                           unsigned long maxvalue,
-                                          bool useuint);
+                                          bool useuint,
+                                          GtLogger *logger);
 
 GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
                                                    const char *filename,

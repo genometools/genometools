@@ -201,8 +201,12 @@ static int gt_seqorder_runner(GT_UNUSED int argc, const char **argv,
     {
       GtSuffixsortspace *suffixsortspace;
       gt_assert(arguments->sort || arguments->revsort);
-      suffixsortspace = gt_suffixsortspace_new(nofseqs,
-          gt_encseq_seqstartpos(encseq, nofseqs-1), false);
+      suffixsortspace
+        = gt_suffixsortspace_new(nofseqs,
+                                 /* Use iterator over sequence separators:
+                                    saves a lot of binary searches */
+                                 gt_encseq_seqstartpos(encseq, nofseqs-1),
+                                 false,NULL);
       gt_seqorder_sort(suffixsortspace, encseq);
       if (arguments->sort)
         for (i = 0; i < nofseqs; i++)

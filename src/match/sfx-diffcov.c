@@ -1154,7 +1154,8 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   }
   dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
                                               dcov->totallength,
-                                              false);
+                                              false,
+                                              dcov->logger);
   posinserted = dcov_derivespecialcodesonthefly(dcov,
                                                 withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
@@ -1367,7 +1368,8 @@ static void gt_differencecover_sortsample0(Differencecover *dcov,
   gt_logger_log(dcov->logger,"fullspecials=%lu",fullspecials);
   dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
                                               dcov->totallength,
-                                              false);
+                                              false,
+                                              dcov->logger);
   posinserted = 0;
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;

@@ -1628,7 +1628,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),
                                sfi->totallength,
-                               sfi->sfxstrategy.suftabuint);
+                               sfi->sfxstrategy.suftabuint,
+                               logger);
     if (gt_encseq_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,
