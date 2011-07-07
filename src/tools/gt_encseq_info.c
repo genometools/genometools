@@ -24,7 +24,8 @@
 
 typedef struct {
   bool nomap,
-       mirror;
+       mirror,
+       noindexname;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } GtEncseqInfoArguments;
@@ -68,6 +69,10 @@ static GtOptionParser* gt_encseq_info_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_exclude(optionnomap, option);
 
+  option = gt_option_new_bool("noindexname", "do not output index name",
+                              &arguments->noindexname, false);
+  gt_option_parser_add_option(op, option);
+
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
 
@@ -90,8 +95,10 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       had_err = -1;
 
     if (!had_err) {
-      gt_file_xprintf(arguments->outfp, "index name: ");
-      gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
+      if (!arguments->noindexname) {
+        gt_file_xprintf(arguments->outfp, "index name: ");
+        gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
+      }
 
       gt_file_xprintf(arguments->outfp, "file format version: ");
       gt_file_xprintf(arguments->outfp, "%lu\n",
@@ -142,8 +149,10 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       const GtStrArray *filenames;
       unsigned long i;
 
-      gt_file_xprintf(arguments->outfp, "index name: ");
-      gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
+      if (!arguments->noindexname) {
+        gt_file_xprintf(arguments->outfp, "index name: ");
+        gt_file_xprintf(arguments->outfp, "%s\n", argv[parsed_args]);
+      }
 
       gt_file_xprintf(arguments->outfp, "file format version: ");
       gt_file_xprintf(arguments->outfp, "%lu\n", gt_encseq_version(encseq));
