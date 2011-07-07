@@ -127,12 +127,14 @@ struct Differencecover
 static unsigned long suffixptrgetdcov(const Differencecover *dcov,
                                       unsigned long idx)
 {
+  gt_suffixsortspace_nooffsets(dcov->sortedsample);
   return gt_suffixsortspace_getdirect(dcov->sortedsample,idx);
 }
 
 static void suffixptrsetdcov(const Differencecover *dcov,
                              unsigned long idx,unsigned long value)
 {
+  gt_suffixsortspace_nooffsets(dcov->sortedsample);
   gt_suffixsortspace_setdirect(dcov->sortedsample,idx,value);
 }
 
@@ -889,14 +891,14 @@ static void dc_addunsortedrange(void *voiddcov,
 #endif
 
 #define QSORT_ARRAY_GET(ARR,RELIDX)\
-        gt_suffixsortspace_getdirect(dcov->sssp,dcov->sortoffset+(RELIDX))
+        gt_suffixsortspace_get(dcov->sssp,dcov->sortoffset,RELIDX)
 
 #ifdef QSORT_ARRAY_SET
 #undef QSORT_ARRAY_SET
 #endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
-        gt_suffixsortspace_setdirect(dcov->sssp,dcov->sortoffset+(RELIDX),VALUE)
+        gt_suffixsortspace_set(dcov->sssp,dcov->sortoffset,RELIDX,VALUE)
 
 int gt_differencecover_compare (const Differencecover *dcov,
                                 unsigned long suffixpos1,
@@ -952,7 +954,7 @@ void gt_differencecover_sortunsortedbucket(void *data,
   gt_assert(dcov->diff2pos != NULL);
   gt_assert(width >= 2UL);
   gt_assert(dcov->sssp != NULL);
-  gt_assert(blisbl >= gt_suffixsortspace_partoffset_get(dcov->sssp));
+  gt_assert(blisbl >= gt_suffixsortspace_bucketleftidx_get(dcov->sssp));
   /* blisbl = bucketleftindex + subbucketleft already contains
      bucketleftindex, therefore we cannot use
      gt_suffixsortspace_set or
@@ -960,7 +962,7 @@ void gt_differencecover_sortunsortedbucket(void *data,
      bucketleftindex + subbucketleft + idx - partoffset
      = blisbl - partoffset + idx. Thus, instead we use the functions
      to directly access the suffix sortspace. */
-  dcov->sortoffset = blisbl - gt_suffixsortspace_partoffset_get(dcov->sssp);
+  dcov->sortoffset = blisbl - gt_suffixsortspace_bucketleftidx_get(dcov->sssp);
   QSORTNAME(gt_inlinedarr_qsort_r) (NULL,width,data);
 }
 

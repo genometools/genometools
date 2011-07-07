@@ -163,6 +163,12 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
   }
 }
 
+void gt_suffixsortspace_nooffsets(const GtSuffixsortspace *sssp)
+{
+  gt_assert(sssp->partoffset == 0);
+  gt_assert(sssp->bucketleftidx == 0);
+}
+
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx)
 {
@@ -263,11 +269,6 @@ void gt_suffixsortspace_bucketleftidx_set(GtSuffixsortspace *sssp,
                                           unsigned long value)
 {
   sssp->bucketleftidx = value;
-}
-
-unsigned long gt_suffixsortspace_partoffset_get(const GtSuffixsortspace *sssp)
-{
-  return sssp->partoffset;
 }
 
 void gt_suffixsortspace_partoffset_set(GtSuffixsortspace *sssp,
