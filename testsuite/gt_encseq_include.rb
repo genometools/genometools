@@ -302,3 +302,52 @@ Keywords "encseq gt_scripts "
 Test do
   run_test "#{$bin}gt #{$testdata}gtscripts/encseq.lua #{$testdata}"
 end
+
+Name "gt encseq 64bit/32bit header (success)"
+Keywords "encseq encseq_file_format"
+Test do
+  is64 = Kernel.system("#{$bin}gt -64bit")
+  if is64 then
+    bit = "64"
+  else
+    bit = "32"
+  end
+  run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}"
+  run "diff #{$last_stdout} #{$testdata}foo.#{bit}.info_map"
+  run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}"
+  run "diff #{$last_stdout} #{$testdata}foo.#{bit}.info_nomap"
+end
+
+Name "gt encseq 64bit/32bit header (failure)"
+Keywords "encseq encseq_file_format"
+Test do
+  is64 = Kernel.system("#{$bin}gt -64bit")
+  if !is64 then
+    bit = "64"
+  else
+    bit = "32"
+  end
+  run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}", \
+           :retval => 1
+  grep $last_stderr, /please use correct index for this platform/
+  run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}", \
+           :retval => 1
+  grep $last_stderr, /please use correct index for this platform/
+end
+
+Name "gt encseq incompatible file format version"
+Keywords "encseq encseq_file_format"
+Test do
+  is64 = Kernel.system("#{$bin}gt -64bit")
+  if is64 then
+    bit = "64"
+  else
+    bit = "32"
+  end
+  run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}.ver0", \
+           :retval => 1
+  grep $last_stderr, /is format version 0/
+  run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}.ver0", \
+           :retval => 1
+  grep $last_stderr, /is format version 0/
+end

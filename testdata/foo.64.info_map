@@ -1,0 +1,24 @@
+file format version: 1
+64-bit file: yes
+total length: 17
+compressed size: 237 bytes
+number of sequences: 2
+number of files: 1
+length of shortest/longest sequence: 8/8
+original filenames:
+	testdata/foobar.fas (17 characters)
+alphabet size: 4
+alphabet characters: acgt (DNA)
+character distribution:
+	a: 4 (23.53%)
+	c: 4 (23.53%)
+	g: 4 (23.53%)
+	t: 4 (23.53%)
+number of wildcards: 0 (0 range(s))
+number of special characters: 1 (1 range(s))
+length of longest non-special character stretch: 8
+accesstype: eqlen
+bits used per character: 111.529412
+has special ranges: yes
+has description support: yes
+has multiple sequence support: yes
