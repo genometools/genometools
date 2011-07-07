@@ -152,7 +152,7 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
 }
 
 void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
-                               bool checklongestdefined)
+                               GT_UNUSED bool checklongestdefined)
 {
   if (suffixsortspace != NULL)
   {
@@ -170,7 +170,7 @@ void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
   }
 }
 
-void gt_suffixsortspace_nooffsets(const GtSuffixsortspace *sssp)
+void gt_suffixsortspace_nooffsets(GT_UNUSED const GtSuffixsortspace *sssp)
 {
   gt_assert(sssp->partoffset == 0);
   gt_assert(sssp->bucketleftidx == 0);

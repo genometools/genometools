@@ -628,7 +628,6 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
 
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueunsignedlong;
-        printf("longest=%lu\n",(unsigned long) longest);
         totallength = gt_encseq_total_length(suffixarray.encseq);
         if (!haserr && arguments->inputsuf && !arguments->usestream)
         {
@@ -637,7 +636,6 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
           gt_assert(suffixarray.suftab != NULL);
           gt_assert(ESASUFFIXPTRGET(suffixarray.suftab,longest) == 0);
         }
-        printf("totallength=%lu\n",(unsigned long) totallength);
         if (!arguments->usestream)
         {
           for (idx = (unsigned long) 1; idx<totallength; idx++)
@@ -666,7 +664,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             }
           }
         }
-        printf("bwtdifferentconsecutive=%lu (%.4f)\n",
+        gt_logger_log(logger,"# bwtdifferentconsecutive=%lu (%.4f)\n",
                bwtdifferentconsecutive,
                (double) bwtdifferentconsecutive/totallength);
       }

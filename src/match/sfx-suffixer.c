@@ -102,6 +102,7 @@ struct Sfxiterator
   bool usebcktmpfile;
   GtStr *bcktabfilename;
   unsigned int kmerfastmaskright;
+  GtSuffixsortspace_exportptr *exportptr;
 };
 
 #ifdef SKDEBUG
@@ -347,8 +348,9 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
     unsigned long stidx;
 
     stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
-    gt_suffixsortspace_set(sfi->suffixsortspace,0,stidx,position);
     /* from right to left */
+    GT_SUFFIXSORTSPACE_EXPORT_SET(sfi->suffixsortspace,sfi->exportptr,stidx,
+                                  position);
   }
 }
 
@@ -1724,6 +1726,7 @@ static void preparethispart(Sfxiterator *sfi)
       sfx_derivespecialcodesonthefly(sfi);
     }
   }
+  sfi->exportptr = gt_suffixsortspace_exportptr(0,sfi->suffixsortspace);
   if (sfi->prefixlength > 1U
       && gt_has_twobitencoding(sfi->encseq)
       && !sfi->sfxstrategy.kmerswithencseqreader)
@@ -1751,6 +1754,7 @@ static void preparethispart(Sfxiterator *sfi)
                      gt_insertkmerwithoutspecial,sfi);
     }
   }
+  gt_suffixsortspace_export_done(sfi->suffixsortspace);
   if (sfi->sfxprogress != NULL)
   {
     gt_timer_show_progress(sfi->sfxprogress, "sorting the buckets", stdout);

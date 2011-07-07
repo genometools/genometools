@@ -141,7 +141,8 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
     suftabparts->numofparts = 0;
   } else
   {
-    if (numofsuffixestoinsert < (unsigned long) numofparts)
+    if (numofsuffixestoinsert < (unsigned long) numofparts ||
+        gt_bcktab_prefixlength(bcktab) == 1U)
     {
       suftabparts->numofparts = 1U;
     } else
@@ -160,12 +161,12 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
     unsigned long widthofsuftabpart, suftaboffset = 0, sumofwidth = 0;
 
     suftabparts->components
-      = gt_malloc(sizeof (*suftabparts->components) * numofparts);
-    widthofsuftabpart = numofsuffixestoinsert/numofparts;
+      = gt_malloc(sizeof (*suftabparts->components) * suftabparts->numofparts);
+    widthofsuftabpart = numofsuffixestoinsert/suftabparts->numofparts;
     remainder = (unsigned int) (numofsuffixestoinsert %
-                                (unsigned long) numofparts);
+                                (unsigned long) suftabparts->numofparts);
     suftabparts->largestsuftabwidth = 0;
-    for (part=0; part < numofparts; part++)
+    for (part=0; part < suftabparts->numofparts; part++)
     {
       if (remainder > 0)
       {
@@ -175,7 +176,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
       {
         suftaboffset += widthofsuftabpart;
       }
-      if (part == numofparts - 1)
+      if (part == suftabparts->numofparts - 1)
       {
         suftabparts->components[part].nextcode
           = gt_bcktab_numofallcodes(bcktab);

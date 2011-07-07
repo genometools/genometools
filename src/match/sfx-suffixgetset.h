@@ -20,7 +20,23 @@
 
 #include <stdio.h>
 #include <inttypes.h>
+#include "core/unused_api.h"
 #include "core/error_api.h"
+
+#define GT_SUFFIXSORTSPACE_EXPORT_SET(SSSP,EXPORTPTR,INDEX,POS)\
+        if ((EXPORTPTR)->ulongtabsectionptr != NULL)\
+        {\
+          (EXPORTPTR)->ulongtabsectionptr[INDEX] = POS;\
+        } else\
+        {\
+          gt_assert((EXPORTPTR)->uinttabsectionptr != NULL);\
+          gt_assert(POS <= (unsigned long) UINT_MAX);\
+          (EXPORTPTR)->uinttabsectionptr[INDEX] = (uint32_t) POS;\
+        }\
+        if (POS == 0)\
+        {\
+          gt_suffixsortspace_updatelongest(SSSP,INDEX);\
+        }
 
 typedef struct GtSuffixsortspace GtSuffixsortspace;
 
@@ -40,8 +56,8 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
                                                    unsigned long maxvalue,
                                                    bool useuint);
 
-void gt_suffixsortspace_delete(GtSuffixsortspace *suffixsortspace,
-                               bool checklongestdefined);
+void gt_suffixsortspace_delete(GT_UNUSED GtSuffixsortspace *suffixsortspace,
+                               GT_UNUSED bool checklongestdefined);
 
 void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
                                   unsigned long subbucketleft,

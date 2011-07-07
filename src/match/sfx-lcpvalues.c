@@ -133,8 +133,6 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
       }
     } else
     {
-      unsigned long idx;
-
       maxprefixindex = gt_bcktab_pfxidx2lcpvalues_ulong(
                           &minprefixindex,
                           lcpsubtab->tableoflcpvalues.bucketoflcpvalues +
@@ -143,10 +141,13 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                           bcktab,
                           code);
 #ifndef NDEBUG
-      for (idx=0; idx<specialsinbucket; idx++)
       {
-        GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
-                   lcpsubtab->tableoflcpvalues.subbucketleft+idx);
+        unsigned long idx;
+        for (idx=0; idx<specialsinbucket; idx++)
+        {
+          GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
+                     lcpsubtab->tableoflcpvalues.subbucketleft+idx);
+        }
       }
 #endif
     }
