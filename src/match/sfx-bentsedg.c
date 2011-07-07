@@ -995,6 +995,10 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     for (idx = 0; idx < width; idx++)
     {
       exportptr.ulongtabsectionptr[idx] = bsr->shortreadsortinfo[idx].suffix;
+      if (exportptr.ulongtabsectionptr[idx] == 0)
+      {
+        gt_suffixsortspace_updatelongest(bsr->sssp,idx);
+      }
     }
   } else
   {
@@ -1002,6 +1006,10 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     {
       exportptr.uinttabsectionptr[idx]
         = (uint32_t) bsr->shortreadsortinfo[idx].suffix;
+      if (exportptr.uinttabsectionptr[idx] == 0)
+      {
+        gt_suffixsortspace_updatelongest(bsr->sssp,idx);
+      }
     }
   }
   if (bsr->tableoflcpvalues != NULL)

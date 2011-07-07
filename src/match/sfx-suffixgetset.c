@@ -181,6 +181,13 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
   return (unsigned long) sssp->uinttab[idx];
 }
 
+void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,unsigned long idx)
+{
+  sssp->longestidx.defined = true;
+  sssp->longestidx.valueunsignedlong = sssp->partoffset +
+                                       sssp->bucketleftidx + idx;
+}
+
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   unsigned long idx,
                                   unsigned long value)

@@ -52,6 +52,9 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
 
 void gt_suffixsortspace_nooffsets(const GtSuffixsortspace *sssp);
 
+void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,
+                                      unsigned long idx);
+
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
                                   unsigned long idx,
                                   unsigned long value);

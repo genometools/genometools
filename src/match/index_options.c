@@ -414,7 +414,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                            0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
     gt_option_exclude(idxo->optionspmopt, idxo->optiondifferencecover);
-
+    gt_option_exclude(idxo->optionspmopt, idxo->optionoutbwttab);
     idxo->optionmemlimit = gt_option_new_string("memlimit",
                            "specify maximal amount of memory to be used during "
                            "index construction (in bytes, the keywords 'MB' "

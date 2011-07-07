@@ -430,33 +430,7 @@ static int gt_checkentiresuftab(const char *filename,
         wholeleafcount++;
       }
     }
-    /*
-    if (gt_has_twobitencoding_stoppos_support(encseq))
-    {
-      unsigned long stoppos;
-
-      gt_encseq_reader_reinit_with_readmode(esr,
-                                            encseq,
-                                            readmode,
-                                            position);
-      stoppos = gt_getnexttwobitencodingstoppos(true, esr);
-      gt_assert(position <= stoppos);
-      if (stoppos - position <= MAXDIST)
-      {
-        countdist[stoppos - position]++;
-      }
-    }
-    */
   }
-  /*
-  for (idx=0; idx<=MAXDIST; idx++)
-  {
-    if (countdist[idx] > 0)
-    {
-      printf("dist[%lu]=%lu\n",idx,countdist[idx]);
-    }
-  }
-  */
   gt_encseq_reader_delete(esr);
   gt_free(startposoccurs);
   if (wholeleafcheck)
@@ -656,6 +630,13 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
         longest = suffixarray.longest.valueunsignedlong;
         printf("longest=%lu\n",(unsigned long) longest);
         totallength = gt_encseq_total_length(suffixarray.encseq);
+        if (!haserr && arguments->inputsuf && !arguments->usestream)
+        {
+          gt_assert(suffixarray.numberofallsortedsuffixes == totallength+1);
+          gt_assert(longest < totallength);
+          gt_assert(suffixarray.suftab != NULL);
+          gt_assert(ESASUFFIXPTRGET(suffixarray.suftab,longest) == 0);
+        }
         printf("totallength=%lu\n",(unsigned long) totallength);
         if (!arguments->usestream)
         {
