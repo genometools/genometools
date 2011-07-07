@@ -7854,7 +7854,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
   const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
   Gtssptaboutinfo *ssptaboutinfo;
   unsigned long i;
-  GtSpecialcharinfo samplespecialcharinfo;
+  GtSpecialcharinfo samplespecialcharinfo = {0,0,0,0,0,0,0,0,0,0,0};
 
   gt_assert(eb->plainseq);
   sequence2specialcharinfo(&samplespecialcharinfo,eb->plainseq,
