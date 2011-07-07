@@ -431,7 +431,7 @@ void gt_mapspec_add_uint16_ptr(GtMapspec *mapspec, uint16_t **ptr,
 {
   GtMapspecification *mapspecptr;
   gt_assert(mapspec && ptr);
-  NEWMAPSPEC(mapspec, ptr, Uint16Type, sizeof (unsigned short), n);
+  NEWMAPSPEC(mapspec, ptr, Uint16Type, sizeof (uint16_t), n);
 }
 
 void gt_mapspec_add_ulong_ptr(GtMapspec *mapspec, unsigned long **ptr,

@@ -95,12 +95,13 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   if (useuint && maxvalue > (unsigned long) UINT_MAX)
   {
     useuint = false;
-    gt_logger_log("cannot use 32 bit values for suftab "
+    gt_logger_log(logger,"cannot use 32 bit values for suftab "
                   "maxvalue=%lu,numofentries=%lu",maxvalue,numofentries);
   }
   if (useuint)
   {
-    gt_logger_log("suftab uses 32bit values: maxvalue=%lu,numofentries=%lu",
+    gt_logger_log(logger,"suftab uses 32bit values: "
+                         "maxvalue=%lu,numofentries=%lu",
                   maxvalue,numofentries);
   }
 #endif

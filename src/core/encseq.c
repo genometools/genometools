@@ -4254,9 +4254,9 @@ static unsigned long currentspecialrangevalue(unsigned long len,
 typedef struct
 {
   GtLogger *logger;
-  unsigned long rangesGtUchar,
-                rangesGtUshort,
-                rangesUint32,
+  unsigned long ranges_uint8_t,
+                ranges_uint16_t,
+                ranges_uint32_t,
                 realranges;
   const char *kind;
 } Updatesumrangeinfo;
@@ -4269,11 +4269,11 @@ static void updatesumranges(unsigned long key, unsigned long long value,
 
   gt_assert(value <= (unsigned long long) ULONG_MAX);
   distvalue = (unsigned long) value;
-  updatesumrangeinfo->rangesGtUchar
+  updatesumrangeinfo->ranges_uint8_t
      += currentspecialrangevalue(key,distvalue,(unsigned long) UCHAR_MAX);
-  updatesumrangeinfo->rangesGtUshort
+  updatesumrangeinfo->ranges_uint16_t
      += currentspecialrangevalue(key,distvalue,(unsigned long) USHRT_MAX);
-  updatesumrangeinfo->rangesUint32
+  updatesumrangeinfo->ranges_uint32_t
      += currentspecialrangevalue(key,distvalue,(unsigned long) UINT32_MAX);
   updatesumrangeinfo->realranges += distvalue;
   gt_logger_log(updatesumrangeinfo->logger,"%sranges of length %lu=%lu",
@@ -4289,17 +4289,17 @@ static unsigned long calcswranges(const char *kind,
   Updatesumrangeinfo updatesumrangeinfo;
 
   updatesumrangeinfo.kind = kind;
-  updatesumrangeinfo.rangesGtUchar = 0;
-  updatesumrangeinfo.rangesGtUshort = 0;
-  updatesumrangeinfo.rangesUint32 = 0;
+  updatesumrangeinfo.ranges_uint8_t = 0;
+  updatesumrangeinfo.ranges_uint16_t = 0;
+  updatesumrangeinfo.ranges_uint32_t = 0;
   updatesumrangeinfo.realranges = 0;
   updatesumrangeinfo.logger = dolog ? logger : NULL;
   gt_disc_distri_foreach(distrangelength,updatesumranges,&updatesumrangeinfo);
   if (rangestab != NULL)
   {
-    rangestab[0] = updatesumrangeinfo.rangesGtUchar;
-    rangestab[1] = updatesumrangeinfo.rangesGtUshort;
-    rangestab[2] = updatesumrangeinfo.rangesUint32;
+    rangestab[0] = updatesumrangeinfo.ranges_uint8_t;
+    rangestab[1] = updatesumrangeinfo.ranges_uint16_t;
+    rangestab[2] = updatesumrangeinfo.ranges_uint32_t;
   }
   return updatesumrangeinfo.realranges;
 }
