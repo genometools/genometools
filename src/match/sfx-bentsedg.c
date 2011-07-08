@@ -847,10 +847,12 @@ static bool multistrategysort(GtBentsedgresources *bsr,
   return false;
 }
 
-static int compareshortreadsortinfo(unsigned long a,unsigned long b,void *data)
+static int compareshortreadsortinfo(unsigned long *lcpvalue,
+                                    unsigned long a,unsigned long b,void *data)
 {
-  int idx;
+  int idx, ret;
   unsigned int maxprefix;
+  GtCommonunits commonunits;
   GtBentsedgresources *bsr = (GtBentsedgresources *) data;
   const GtShortreadsort *aq = bsr->shortreadsortinfo + a;
   const GtShortreadsort *bq = bsr->shortreadsortinfo + b;
@@ -862,18 +864,21 @@ static int compareshortreadsortinfo(unsigned long a,unsigned long b,void *data)
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
     {
-      if (aq->tbe[idx] < bq->tbe[idx])
+      if (aq->tbe[idx] != bq->tbe[idx])
       {
-        return -1;
-      }
-      if (aq->tbe[idx] > bq->tbe[idx])
-      {
-        return 1;
+        ret = gt_encseq_compare_pairof_different_twobitencodings(
+                                                     bsr->fwd,
+                                                     bsr->complement,
+                                                     &commonunits,
+                                                     aq->tbe[idx],
+                                                     bq->tbe[idx]);
+        *lcpvalue = (unsigned long)
+                    (maxprefix - GT_UNITSIN2BITENC + commonunits.common);
+        return ret;
       }
     } else
     {
       GtEndofTwobitencoding tbe_a, tbe_b;
-      GtCommonunits commonunits;
 
       tbe_a.tbe = aq->tbe[idx];
       tbe_b.tbe = bq->tbe[idx];
@@ -887,12 +892,14 @@ static int compareshortreadsortinfo(unsigned long a,unsigned long b,void *data)
         = bq->unitsnotspecial >= maxprefix
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      return gt_encseq_compare_pairof_twobitencodings(
-                                       bsr->fwd,
-                                       bsr->complement,
-                                       &commonunits,
-                                       &tbe_a,
-                                       &tbe_b);
+      ret = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,
+                                                     bsr->complement,
+                                                     &commonunits,
+                                                     &tbe_a,
+                                                     &tbe_b);
+      *lcpvalue = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
+                                   commonunits.common);
+      return ret;
     }
   }
   gt_assert(false);
@@ -983,9 +990,10 @@ static int QSORTNAME(qsortcmparr) (GT_UNUSED const void *arr,
                                    unsigned long b,
                                    const void *data)
 {
+  unsigned long lcpvalue;
   QSORT_ARRAY_DECLARE;
 
-  return compareshortreadsortinfo(QSORT_ARRAY_GET(NULL,a),
+  return compareshortreadsortinfo(&lcpvalue,QSORT_ARRAY_GET(NULL,a),
                                   QSORT_ARRAY_GET(NULL,b),bsr);
 }
 

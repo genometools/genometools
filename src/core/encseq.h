@@ -218,12 +218,6 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtReadmode readmode,
                                          unsigned long pos);
 
-/* The following function computes the longest common prefix of
-   two different 2bit encodings */
-
-unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
-                                                     GtTwobitencoding tbe2);
-
 /* The following function needs to be documented */
 
 unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
@@ -239,11 +233,25 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   The comparison is done for the complemented characters iff <complement>
   is true. */
 int gt_encseq_compare_pairof_twobitencodings(bool fwd,
-                                             bool complement,
-                                             GtCommonunits *commonunits,
-                                             const GtEndofTwobitencoding *ptbe1,
-                                             const GtEndofTwobitencoding
-                                                                      *ptbe2);
+                                           bool complement,
+                                           GtCommonunits *commonunits,
+                                           const GtEndofTwobitencoding *ptbe1,
+                                           const GtEndofTwobitencoding *ptbe2);
+
+/* The following function compares the two bit encodings <tbe1> and <tbe2>
+  and stores the result of the comparison in <commonunits>. The comparison is
+  done in forward direction iff <fwd> is true.
+  The comparison is done for the complemented characters iff <complement>
+  is true. */
+
+unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
+                                                      GtTwobitencoding tbe2);
+int gt_encseq_compare_pairof_different_twobitencodings(
+                                            bool fwd,
+                                            bool complement,
+                                            GtCommonunits *commonunits,
+                                            GtTwobitencoding tbe1,
+                                            GtTwobitencoding tbe2);
 
 /* Return true if and only if the substring of length <len> starting
   at position <startpos> in <encseq> contains a special character.

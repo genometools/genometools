@@ -5380,11 +5380,12 @@ static int suffixofdifferenttwobitencodings(bool complement,
          ? -1 : 1;
 }
 
-static int endofdifferenttwobitencodings(bool fwd,
-                                         bool complement,
-                                         GtCommonunits *commonunits,
-                                         GtTwobitencoding tbe1,
-                                         GtTwobitencoding tbe2)
+int gt_encseq_compare_pairof_different_twobitencodings(
+                                                    bool fwd,
+                                                    bool complement,
+                                                    GtCommonunits *commonunits,
+                                                    GtTwobitencoding tbe1,
+                                                    GtTwobitencoding tbe2)
 {
   return (fwd ? prefixofdifferenttwobitencodings :
                 suffixofdifferenttwobitencodings)
@@ -5417,7 +5418,9 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
       commonunits->rightspecial = false;
       return 1;
     }
-    return endofdifferenttwobitencodings(fwd,complement,commonunits,tbe1,tbe2);
+    return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
+                                                              commonunits,
+                                                              tbe1,tbe2);
   }
   if (ptbe1->unitsnotspecial > ptbe2->unitsnotspecial)
      /* ISSPECIAL(seq2[ptbe2->unitsnotspecial]) &&
@@ -5437,7 +5440,9 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
       commonunits->rightspecial = true;
       return -1;
     }
-    return endofdifferenttwobitencodings(fwd,complement,commonunits,tbe1,tbe2);
+    return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
+                                                              commonunits,
+                                                              tbe1,tbe2);
   }
   gt_assert(ptbe1->unitsnotspecial == ptbe2->unitsnotspecial);
   if (ptbe1->unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
@@ -5465,14 +5470,18 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
         return 0;
       }
     }
-    return endofdifferenttwobitencodings(fwd,complement,commonunits,tbe1,tbe2);
+    return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
+                                                              commonunits,
+                                                              tbe1,tbe2);
   }
   gt_assert(ptbe1->unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC &&
             ptbe2->unitsnotspecial == (unsigned int) GT_UNITSIN2BITENC);
   if (ptbe1->tbe != ptbe2->tbe)
   {
-    return endofdifferenttwobitencodings(fwd,complement,commonunits,
-                                         ptbe1->tbe,ptbe2->tbe);
+    return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
+                                                              commonunits,
+                                                              ptbe1->tbe,
+                                                              ptbe2->tbe);
   }
   gt_assert(commonunits != NULL);
   commonunits->common = (unsigned int) GT_UNITSIN2BITENC;
