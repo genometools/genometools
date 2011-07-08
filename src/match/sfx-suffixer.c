@@ -702,142 +702,142 @@ GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                        GT_MULT2(GT_UNITSIN2BITENC - kmersize)) & maskright;
 }
 
-#define GT_SWAPBITPAIRS(L1,L2,D) ((kmer & (3UL << L1)) >> D) |\
-                                 ((kmer & (3UL << L2)) << D)
+#define GT_SWAPBITPAIRS(KMER,L1,L2,D) (((KMER) & (3UL << L1)) >> D) |\
+                                      (((KMER) & (3UL << L2)) << D)
 
 GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
 {
   switch (kmersize)
   {
     case 2:
-      return GT_SWAPBITPAIRS(2,0,2);
+      return GT_SWAPBITPAIRS(kmer,2,0,2);
     case 3:
-      return GT_SWAPBITPAIRS(4,0,4) |
+      return GT_SWAPBITPAIRS(kmer,4,0,4) |
              (kmer & (3U << 2));
     case 4:
-      return GT_SWAPBITPAIRS(6,0,6) |
-             GT_SWAPBITPAIRS(4,2,2);
+      return GT_SWAPBITPAIRS(kmer,6,0,6) |
+             GT_SWAPBITPAIRS(kmer,4,2,2);
     case 5:
-      return GT_SWAPBITPAIRS(8,0,8) |
-             GT_SWAPBITPAIRS(6,2,4) |
+      return GT_SWAPBITPAIRS(kmer,8,0,8) |
+             GT_SWAPBITPAIRS(kmer,6,2,4) |
              (kmer & (3U << 4));
     case 6:
-      return GT_SWAPBITPAIRS(10,0,10) |
-             GT_SWAPBITPAIRS(8,2,6) |
-             GT_SWAPBITPAIRS(6,4,2);
+      return GT_SWAPBITPAIRS(kmer,10,0,10) |
+             GT_SWAPBITPAIRS(kmer,8,2,6) |
+             GT_SWAPBITPAIRS(kmer,6,4,2);
     case 7:
-      return GT_SWAPBITPAIRS(12,0,12) |
-             GT_SWAPBITPAIRS(10,2,8) |
-             GT_SWAPBITPAIRS(8,4,4) |
+      return GT_SWAPBITPAIRS(kmer,12,0,12) |
+             GT_SWAPBITPAIRS(kmer,10,2,8) |
+             GT_SWAPBITPAIRS(kmer,8,4,4) |
              (kmer & (3U << 6));
     case 8:
-      return GT_SWAPBITPAIRS(14,0,14) |
-             GT_SWAPBITPAIRS(12,2,10) |
-             GT_SWAPBITPAIRS(10,4,6) |
-             GT_SWAPBITPAIRS(8,6,2);
+      return GT_SWAPBITPAIRS(kmer,14,0,14) |
+             GT_SWAPBITPAIRS(kmer,12,2,10) |
+             GT_SWAPBITPAIRS(kmer,10,4,6) |
+             GT_SWAPBITPAIRS(kmer,8,6,2);
     case 9:
-      return GT_SWAPBITPAIRS(16,0,16) |
-             GT_SWAPBITPAIRS(14,2,12) |
-             GT_SWAPBITPAIRS(12,4,8) |
-             GT_SWAPBITPAIRS(10,6,4) |
+      return GT_SWAPBITPAIRS(kmer,16,0,16) |
+             GT_SWAPBITPAIRS(kmer,14,2,12) |
+             GT_SWAPBITPAIRS(kmer,12,4,8) |
+             GT_SWAPBITPAIRS(kmer,10,6,4) |
              (kmer & (3U << 8));
     case 10:
-      return GT_SWAPBITPAIRS(18,0,18) |
-             GT_SWAPBITPAIRS(16,2,14) |
-             GT_SWAPBITPAIRS(14,4,10) |
-             GT_SWAPBITPAIRS(12,6,6) |
-             GT_SWAPBITPAIRS(10,8,2);
+      return GT_SWAPBITPAIRS(kmer,18,0,18) |
+             GT_SWAPBITPAIRS(kmer,16,2,14) |
+             GT_SWAPBITPAIRS(kmer,14,4,10) |
+             GT_SWAPBITPAIRS(kmer,12,6,6) |
+             GT_SWAPBITPAIRS(kmer,10,8,2);
     case 11:
-      return GT_SWAPBITPAIRS(20,0,20) |
-             GT_SWAPBITPAIRS(18,2,16) |
-             GT_SWAPBITPAIRS(16,4,12) |
-             GT_SWAPBITPAIRS(14,6,8) |
-             GT_SWAPBITPAIRS(12,8,4) |
+      return GT_SWAPBITPAIRS(kmer,20,0,20) |
+             GT_SWAPBITPAIRS(kmer,18,2,16) |
+             GT_SWAPBITPAIRS(kmer,16,4,12) |
+             GT_SWAPBITPAIRS(kmer,14,6,8) |
+             GT_SWAPBITPAIRS(kmer,12,8,4) |
              (kmer & (3U << 10));
     case 12:
-      return GT_SWAPBITPAIRS(22,0,22) |
-             GT_SWAPBITPAIRS(20,2,18) |
-             GT_SWAPBITPAIRS(18,4,14) |
-             GT_SWAPBITPAIRS(16,6,10) |
-             GT_SWAPBITPAIRS(14,8,6) |
-             GT_SWAPBITPAIRS(12,10,2);
+      return GT_SWAPBITPAIRS(kmer,22,0,22) |
+             GT_SWAPBITPAIRS(kmer,20,2,18) |
+             GT_SWAPBITPAIRS(kmer,18,4,14) |
+             GT_SWAPBITPAIRS(kmer,16,6,10) |
+             GT_SWAPBITPAIRS(kmer,14,8,6) |
+             GT_SWAPBITPAIRS(kmer,12,10,2);
     case 13:
-      return GT_SWAPBITPAIRS(24,0,24) |
-             GT_SWAPBITPAIRS(22,2,20) |
-             GT_SWAPBITPAIRS(20,4,16) |
-             GT_SWAPBITPAIRS(18,6,12) |
-             GT_SWAPBITPAIRS(16,8,8) |
-             GT_SWAPBITPAIRS(14,10,4) |
+      return GT_SWAPBITPAIRS(kmer,24,0,24) |
+             GT_SWAPBITPAIRS(kmer,22,2,20) |
+             GT_SWAPBITPAIRS(kmer,20,4,16) |
+             GT_SWAPBITPAIRS(kmer,18,6,12) |
+             GT_SWAPBITPAIRS(kmer,16,8,8) |
+             GT_SWAPBITPAIRS(kmer,14,10,4) |
              (kmer & (3U << 12));
     case 14:
-      return GT_SWAPBITPAIRS(26,0,26) |
-             GT_SWAPBITPAIRS(24,2,22) |
-             GT_SWAPBITPAIRS(22,4,18) |
-             GT_SWAPBITPAIRS(20,6,14) |
-             GT_SWAPBITPAIRS(18,8,10) |
-             GT_SWAPBITPAIRS(16,10,6) |
-             GT_SWAPBITPAIRS(14,12,2);
+      return GT_SWAPBITPAIRS(kmer,26,0,26) |
+             GT_SWAPBITPAIRS(kmer,24,2,22) |
+             GT_SWAPBITPAIRS(kmer,22,4,18) |
+             GT_SWAPBITPAIRS(kmer,20,6,14) |
+             GT_SWAPBITPAIRS(kmer,18,8,10) |
+             GT_SWAPBITPAIRS(kmer,16,10,6) |
+             GT_SWAPBITPAIRS(kmer,14,12,2);
 #ifdef _LP64
     case 15:
-      return GT_SWAPBITPAIRS(28,0,28) |
-             GT_SWAPBITPAIRS(26,2,24) |
-             GT_SWAPBITPAIRS(24,4,20) |
-             GT_SWAPBITPAIRS(22,6,16) |
-             GT_SWAPBITPAIRS(20,8,12) |
-             GT_SWAPBITPAIRS(18,10,8) |
-             GT_SWAPBITPAIRS(16,12,4) |
+      return GT_SWAPBITPAIRS(kmer,28,0,28) |
+             GT_SWAPBITPAIRS(kmer,26,2,24) |
+             GT_SWAPBITPAIRS(kmer,24,4,20) |
+             GT_SWAPBITPAIRS(kmer,22,6,16) |
+             GT_SWAPBITPAIRS(kmer,20,8,12) |
+             GT_SWAPBITPAIRS(kmer,18,10,8) |
+             GT_SWAPBITPAIRS(kmer,16,12,4) |
              (kmer & (3U << 14));
     case 16:
-      return GT_SWAPBITPAIRS(30,0,30) |
-             GT_SWAPBITPAIRS(28,2,26) |
-             GT_SWAPBITPAIRS(26,4,22) |
-             GT_SWAPBITPAIRS(24,6,18) |
-             GT_SWAPBITPAIRS(22,8,14) |
-             GT_SWAPBITPAIRS(20,10,10) |
-             GT_SWAPBITPAIRS(18,12,6) |
-             GT_SWAPBITPAIRS(16,14,2);
+      return GT_SWAPBITPAIRS(kmer,30,0,30) |
+             GT_SWAPBITPAIRS(kmer,28,2,26) |
+             GT_SWAPBITPAIRS(kmer,26,4,22) |
+             GT_SWAPBITPAIRS(kmer,24,6,18) |
+             GT_SWAPBITPAIRS(kmer,22,8,14) |
+             GT_SWAPBITPAIRS(kmer,20,10,10) |
+             GT_SWAPBITPAIRS(kmer,18,12,6) |
+             GT_SWAPBITPAIRS(kmer,16,14,2);
     case 17:
-      return GT_SWAPBITPAIRS(32,0,32) |
-             GT_SWAPBITPAIRS(30,2,28) |
-             GT_SWAPBITPAIRS(28,4,24) |
-             GT_SWAPBITPAIRS(26,6,20) |
-             GT_SWAPBITPAIRS(24,8,16) |
-             GT_SWAPBITPAIRS(22,10,12) |
-             GT_SWAPBITPAIRS(20,12,8) |
-             GT_SWAPBITPAIRS(18,14,4) |
+      return GT_SWAPBITPAIRS(kmer,32,0,32) |
+             GT_SWAPBITPAIRS(kmer,30,2,28) |
+             GT_SWAPBITPAIRS(kmer,28,4,24) |
+             GT_SWAPBITPAIRS(kmer,26,6,20) |
+             GT_SWAPBITPAIRS(kmer,24,8,16) |
+             GT_SWAPBITPAIRS(kmer,22,10,12) |
+             GT_SWAPBITPAIRS(kmer,20,12,8) |
+             GT_SWAPBITPAIRS(kmer,18,14,4) |
              (kmer & (3U << 16));
     case 18:
-      return GT_SWAPBITPAIRS(34,0,34) |
-             GT_SWAPBITPAIRS(32,2,30) |
-             GT_SWAPBITPAIRS(30,4,26) |
-             GT_SWAPBITPAIRS(28,6,22) |
-             GT_SWAPBITPAIRS(26,8,18) |
-             GT_SWAPBITPAIRS(24,10,14) |
-             GT_SWAPBITPAIRS(22,12,10) |
-             GT_SWAPBITPAIRS(20,14,6) |
-             GT_SWAPBITPAIRS(18,16,2);
+      return GT_SWAPBITPAIRS(kmer,34,0,34) |
+             GT_SWAPBITPAIRS(kmer,32,2,30) |
+             GT_SWAPBITPAIRS(kmer,30,4,26) |
+             GT_SWAPBITPAIRS(kmer,28,6,22) |
+             GT_SWAPBITPAIRS(kmer,26,8,18) |
+             GT_SWAPBITPAIRS(kmer,24,10,14) |
+             GT_SWAPBITPAIRS(kmer,22,12,10) |
+             GT_SWAPBITPAIRS(kmer,20,14,6) |
+             GT_SWAPBITPAIRS(kmer,18,16,2);
     case 19:
-      return GT_SWAPBITPAIRS(36,0,36) |
-             GT_SWAPBITPAIRS(34,2,32) |
-             GT_SWAPBITPAIRS(32,4,28) |
-             GT_SWAPBITPAIRS(30,6,24) |
-             GT_SWAPBITPAIRS(28,8,20) |
-             GT_SWAPBITPAIRS(26,10,16) |
-             GT_SWAPBITPAIRS(24,12,12) |
-             GT_SWAPBITPAIRS(22,14,8) |
-             GT_SWAPBITPAIRS(20,16,4) |
+      return GT_SWAPBITPAIRS(kmer,36,0,36) |
+             GT_SWAPBITPAIRS(kmer,34,2,32) |
+             GT_SWAPBITPAIRS(kmer,32,4,28) |
+             GT_SWAPBITPAIRS(kmer,30,6,24) |
+             GT_SWAPBITPAIRS(kmer,28,8,20) |
+             GT_SWAPBITPAIRS(kmer,26,10,16) |
+             GT_SWAPBITPAIRS(kmer,24,12,12) |
+             GT_SWAPBITPAIRS(kmer,22,14,8) |
+             GT_SWAPBITPAIRS(kmer,20,16,4) |
              (kmer & (3U << 18));
     case 20:
-      return GT_SWAPBITPAIRS(38,0,38) |
-             GT_SWAPBITPAIRS(36,2,34) |
-             GT_SWAPBITPAIRS(34,4,30) |
-             GT_SWAPBITPAIRS(32,6,26) |
-             GT_SWAPBITPAIRS(30,8,22) |
-             GT_SWAPBITPAIRS(28,10,18) |
-             GT_SWAPBITPAIRS(26,12,14) |
-             GT_SWAPBITPAIRS(24,14,10) |
-             GT_SWAPBITPAIRS(22,16,6) |
-             GT_SWAPBITPAIRS(20,18,2);
+      return GT_SWAPBITPAIRS(kmer,38,0,38) |
+             GT_SWAPBITPAIRS(kmer,36,2,34) |
+             GT_SWAPBITPAIRS(kmer,34,4,30) |
+             GT_SWAPBITPAIRS(kmer,32,6,26) |
+             GT_SWAPBITPAIRS(kmer,30,8,22) |
+             GT_SWAPBITPAIRS(kmer,28,10,18) |
+             GT_SWAPBITPAIRS(kmer,26,12,14) |
+             GT_SWAPBITPAIRS(kmer,24,14,10) |
+             GT_SWAPBITPAIRS(kmer,22,16,6) |
+             GT_SWAPBITPAIRS(kmer,20,18,2);
 #endif
     default: fprintf(stderr,"%s: illegal kmersize=%u\n",__func__,kmersize);
              exit(GT_EXIT_PROGRAMMING_ERROR);
