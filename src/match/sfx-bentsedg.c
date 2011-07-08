@@ -280,18 +280,18 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
                              unsigned long width,
                              unsigned long offset)
 {
-  unsigned long sval1, sval2, pi, pj, startpos1, startpos2, temp,
+  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp,
                 lcpindex, lcplen = 0;
   int retval;
   GtCommonunits commonunits;
 
   bsr->countinsertionsort++;
-  for (pi = 1UL; pi < width; pi++)
+  for (pm = 1UL; pm < width; pm++)
   {
-    for (pj = pi; pj > 0; pj--)
+    for (pl = pm; pl > 0; pl--)
     {
-      sval1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1);
-      sval2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
+      sval1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pl-1);
+      sval2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pl);
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         startpos1 = sval1 + offset;
@@ -353,8 +353,8 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       gt_assert(retval != 0);
       if (bsr->tableoflcpvalues != NULL)
       {
-        lcpindex = subbucketleft+pj;
-        if (pj < pi && retval > 0)
+        lcpindex = subbucketleft+pl;
+        if (pl < pm && retval > 0)
         {
           lcptab_update(bsr->tableoflcpvalues,lcpindex+1,
                         lcpsubtab_getvalue(bsr->tableoflcpvalues,lcpindex));
@@ -365,7 +365,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       {
         break;
       }
-      BS_SWAPARRAY(temp,subbucketleft,pj,pj-1);
+      BS_SWAPARRAY(temp,subbucketleft,pl,pl-1);
     }
   }
 }
@@ -376,19 +376,19 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                      unsigned long offset,
                                      unsigned long maxdepth)
 {
-  unsigned long sval1, sval2, pi, pj, startpos1, startpos2, temp,
+  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp,
                 lcpindex, lcplen = 0, idx = 0;
   int retval;
   bool tempb;
   GtCommonunits commonunits;
 
   bsr->countinsertionsort++;
-  for (pi = 1UL; pi < width; pi++)
+  for (pm = 1UL; pm < width; pm++)
   {
-    for (pj = pi; pj > 0; pj--)
+    for (pl = pm; pl > 0; pl--)
     {
-      sval1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj-1);
-      sval2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pj);
+      sval1 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pl-1);
+      sval2 = gt_suffixsortspace_get(bsr->sssp,subbucketleft,pl);
       if (bsr->sfxstrategy->cmpcharbychar)
       {
         unsigned long endpos1, endpos2;
@@ -462,8 +462,8 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
 #endif
       if (bsr->tableoflcpvalues != NULL && retval != 0)
       {
-        lcpindex = subbucketleft + pj;
-        if (pj < pi && retval > 0)
+        lcpindex = subbucketleft + pl;
+        if (pl < pm && retval > 0)
         {
           lcptab_update(bsr->tableoflcpvalues,lcpindex+1,
                         lcpsubtab_getvalue(bsr->tableoflcpvalues,lcpindex));
@@ -474,14 +474,14 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       {
         break;
       }
-      idx = pj;
+      idx = pl;
       if (retval == 0)
       {
         gt_assert(idx > 0);
         bsr->equalwithprevious[idx] = true;
         break;
       }
-      BS_SWAPARRAY(temp,subbucketleft,pj,pj-1);
+      BS_SWAPARRAY(temp,subbucketleft,pl,pl-1);
       tempb = bsr->equalwithprevious[idx-1];
       bsr->equalwithprevious[idx-1] = bsr->equalwithprevious[idx];
       bsr->equalwithprevious[idx] = tempb;
