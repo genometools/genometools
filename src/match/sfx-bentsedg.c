@@ -163,6 +163,7 @@ typedef struct
   GtMedianinfo *medianinfospace;
   GtCountingsortinfo *countingsortinfo;
   GtShortreadsort *shortreadsortinfo;
+  uint16_t *shortreadsortrefs;
   const Sfxstrategy *sfxstrategy;
   unsigned int sortmaxdepth,
                prefixlength;
@@ -846,12 +847,13 @@ static bool multistrategysort(GtBentsedgresources *bsr,
   return false;
 }
 
-static int compareshortreadsortinfo(const void *a,const void *b)
+static int compareshortreadsortinfo(unsigned long a,unsigned long b,void *data)
 {
   int idx;
   unsigned int maxprefix;
-  const GtShortreadsort *aq = (const GtShortreadsort *) a;
-  const GtShortreadsort *bq = (const GtShortreadsort *) b;
+  GtBentsedgresources *bsr = (GtBentsedgresources *) data;
+  const GtShortreadsort *aq = bsr->shortreadsortinfo + a;
+  const GtShortreadsort *bq = bsr->shortreadsortinfo + b;
 
   for (idx=0, maxprefix = (unsigned int) GT_UNITSIN2BITENC;
        idx<GT_NUMOFTBEVALUEFOR100;
@@ -886,8 +888,8 @@ static int compareshortreadsortinfo(const void *a,const void *b)
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
       return gt_encseq_compare_pairof_twobitencodings(
-                                       true,/*XXX fwd XXX */
-                                       false,/*XXX complement XXX */
+                                       bsr->fwd,
+                                       bsr->complement,
                                        &commonunits,
                                        &tbe_a,
                                        &tbe_b);
@@ -949,6 +951,48 @@ static unsigned long lcpshortreadinfo(const GtShortreadsort *aq,
   return 0;
 }
 
+#ifdef  QSORTNAME
+#undef  QSORTNAME
+#endif
+
+#define QSORTNAME(NAME) shortread_##NAME
+
+#ifdef QSORT_ARRAY_DECLARE
+#undef QSORT_ARRAY_DECLARE
+#endif
+
+#define QSORT_ARRAY_DECLARE\
+        GtBentsedgresources *bsr = (GtBentsedgresources *) data
+
+#ifdef QSORT_ARRAY_GET
+#undef QSORT_ARRAY_GET
+#endif
+
+#define QSORT_ARRAY_GET(ARR,IDX)\
+        (unsigned long) bsr->shortreadsortrefs[IDX]
+
+#ifdef QSORT_ARRAY_SET
+#undef QSORT_ARRAY_SET
+#endif
+
+#define QSORT_ARRAY_SET(ARR,IDX,VALUE)\
+        bsr->shortreadsortrefs[IDX] = (uint16_t) VALUE
+
+static int QSORTNAME(qsortcmparr) (GT_UNUSED const void *arr,
+                                   unsigned long a,
+                                   unsigned long b,
+                                   const void *data)
+{
+  QSORT_ARRAY_DECLARE;
+
+  return compareshortreadsortinfo(QSORT_ARRAY_GET(NULL,a),
+                                  QSORT_ARRAY_GET(NULL,b),bsr);
+}
+
+typedef void * QSORTNAME(Sorttype);
+
+#include "qsort-array.gen"
+
 static void sarrshortreadsort(GtBentsedgresources *bsr,
                               unsigned long subbucketleft,
                               unsigned long width,
@@ -988,13 +1032,17 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
                                          pos+depth);
     }
   }
-  qsort(bsr->shortreadsortinfo,(size_t) width,sizeof(* bsr->shortreadsortinfo),
-        compareshortreadsortinfo);
+  for (idx = 0; idx < width; idx++)
+  {
+    bsr->shortreadsortrefs[idx] = (uint16_t) idx;
+  }
+  QSORTNAME(gt_inlinedarr_qsort_r) (NULL,width,bsr);
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
     {
-      exportptr->ulongtabsectionptr[idx] = bsr->shortreadsortinfo[idx].suffix;
+      exportptr->ulongtabsectionptr[idx]
+        = bsr->shortreadsortinfo[bsr->shortreadsortrefs[idx]].suffix;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(bsr->sssp,idx);
@@ -1005,7 +1053,7 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     for (idx = 0; idx < width; idx++)
     {
       exportptr->uinttabsectionptr[idx]
-        = (uint32_t) bsr->shortreadsortinfo[idx].suffix;
+        = (uint32_t) bsr->shortreadsortinfo[bsr->shortreadsortrefs[idx]].suffix;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(bsr->sssp,idx);
@@ -1018,8 +1066,10 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
 
     for (idx = 1UL; idx < width; idx++)
     {
-      lcp = lcpshortreadinfo(bsr->shortreadsortinfo + idx - 1,
-                             bsr->shortreadsortinfo + idx,
+      lcp = lcpshortreadinfo(bsr->shortreadsortinfo +
+                             bsr->shortreadsortrefs[idx-1],
+                             bsr->shortreadsortinfo +
+                             bsr->shortreadsortrefs[idx],
                              bsr->fwd,
                              bsr->complement);
       lcptab_update(bsr->tableoflcpvalues,subbucketleft + idx,lcp+depth);
@@ -1539,6 +1589,7 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
   {
     bsr->countingsortinfo = NULL;
     bsr->shortreadsortinfo = NULL;
+    bsr->shortreadsortrefs = NULL;
     bsr->medianinfospace = NULL;
   } else
   {
@@ -1555,10 +1606,13 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
     if (allowforshortreadsort(bsr))
     {
       bsr->shortreadsortinfo = gt_malloc(sizeof (*bsr->shortreadsortinfo) *
-                                         sfxstrategy->maxshortreadsort);
+                                         (sfxstrategy->maxshortreadsort+1));
+      bsr->shortreadsortrefs = gt_malloc(sizeof (*bsr->shortreadsortrefs) *
+                                          (sfxstrategy->maxshortreadsort+1));
     } else
     {
       bsr->shortreadsortinfo = NULL;
+      bsr->shortreadsortrefs = NULL;
     }
   }
   bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
@@ -1599,6 +1653,8 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   bsr->medianinfospace = NULL;
   gt_free(bsr->shortreadsortinfo);
   bsr->shortreadsortinfo = NULL;
+  gt_free(bsr->shortreadsortrefs);
+  bsr->shortreadsortrefs = NULL;
   gt_blindtrie_delete(bsr->blindtrie);
   gt_encseq_reader_delete(bsr->esr1);
   gt_encseq_reader_delete(bsr->esr2);

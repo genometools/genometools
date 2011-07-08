@@ -16,7 +16,7 @@ else
   GTBIN=${GTINSTALL}/bin/gt
 fi
 
-${GTBIN} suffixerator -v -des no -tis -ssp -dna -db ${inputfile} -indexname genome-idx
+${GTBIN} suffixerator -v -des no -sds no -tis -ssp -dna -db ${inputfile} -indexname genome-idx
 ${GTBIN} simreads -coverage ${coverage} -len ${readsize} -gzip -force \
             -o genome-idx-${readsize}-${coverage}-reads.fna.gz genome-idx
 rm -f genome-idx.*
