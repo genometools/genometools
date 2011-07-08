@@ -193,12 +193,6 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
 
 #define QSORTNAME(NAME) qsortbench_##NAME
 
-#ifdef QSORT_ARRAY_DECLARE
-#undef QSORT_ARRAY_DECLARE
-#endif
-
-#define QSORT_ARRAY_DECLARE /* Nothing */
-
 #ifdef QSORT_ARRAY_GET
 #undef QSORT_ARRAY_GET
 #endif
@@ -210,6 +204,8 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
 #endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
+
+typedef void * QSORTNAME(Datatype);
 
 typedef unsigned long QSORTNAME(Sorttype);
 

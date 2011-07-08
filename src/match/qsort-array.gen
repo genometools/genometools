@@ -33,7 +33,8 @@
 
 static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
                      (const QSORTNAME(Sorttype) *arr,unsigned long a,
-                      unsigned long b, unsigned long c, void *data)
+                      unsigned long b, unsigned long c,
+                      QSORTNAME(Datatype) data)
 {
   return QSORTNAME(qsortcmparr) (arr, a, b, data) < 0
            ? (QSORTNAME(qsortcmparr) (arr, b, c, data) < 0
@@ -60,14 +61,13 @@ GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 
 static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Sorttype) *arr,
                                               unsigned long len,
-                                              void *data)
+                                              QSORTNAME(Datatype) data)
 {
   unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, d, minval;
   int r;
   bool swapped;
   GtStackIntervalarrtobesorted intervalstack;
   Intervalarrtobesorted current;
-  QSORT_ARRAY_DECLARE;
 
   GT_STACK_INIT(&intervalstack,16UL);
   current.startindex = 0;
@@ -82,11 +82,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Sorttype) *arr,
       for (pm = current.startindex + 1;
            pm < current.startindex + current.len; pm++)
       {
-        for (pl = pm;
-             pl > current.startindex &&
-             QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data) > 0;
-             pl--)
+        for (pl = pm; pl > current.startindex; pl--)
         {
+          r = QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data);
+          if (r <= 0)
+          {
+            break;
+          }
           GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
         }
       }
@@ -157,11 +159,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (QSORTNAME(Sorttype) *arr,
       for (pm = current.startindex + 1;
            pm < current.startindex + current.len; pm++)
       {
-        for (pl = pm;
-             pl > current.startindex &&
-             QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data) > 0;
-             pl--)
+        for (pl = pm; pl > current.startindex; pl--)
         {
+          r = QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data);
+          if (r <= 0)
+          {
+            break;
+          }
           GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
         }
       }

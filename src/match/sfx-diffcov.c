@@ -879,26 +879,21 @@ static void dc_addunsortedrange(void *voiddcov,
 
 #define QSORTNAME(NAME) dc_##NAME
 
-#ifdef QSORT_ARRAY_DECLARE
-#undef QSORT_ARRAY_DECLARE
-#endif
-
-#define QSORT_ARRAY_DECLARE\
-        Differencecover *dcov = (Differencecover *) data
-
 #ifdef QSORT_ARRAY_GET
 #undef QSORT_ARRAY_GET
 #endif
 
 #define QSORT_ARRAY_GET(ARR,RELIDX)\
-        gt_suffixsortspace_get(dcov->sssp,dcov->sortoffset,RELIDX)
+        gt_suffixsortspace_get(data->sssp,data->sortoffset,RELIDX)
 
 #ifdef QSORT_ARRAY_SET
 #undef QSORT_ARRAY_SET
 #endif
 
 #define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
-        gt_suffixsortspace_set(dcov->sssp,dcov->sortoffset,RELIDX,VALUE)
+        gt_suffixsortspace_set(data->sssp,data->sortoffset,RELIDX,VALUE)
+
+typedef Differencecover * QSORTNAME(Datatype);
 
 int gt_differencecover_compare (const Differencecover *dcov,
                                 unsigned long suffixpos1,
@@ -928,15 +923,14 @@ static int QSORTNAME(qsortcmparr) (
                   GT_UNUSED const void *subbucket,
                   unsigned long a,
                   unsigned long b,
-                  const void *data)
+                  const QSORTNAME(Datatype) data)
 {
-  const Differencecover *dcov = (const Differencecover *) data;
   unsigned long suffixpos1, suffixpos2;
 
-  gt_assert(dcov->sssp != NULL);
+  gt_assert(data->sssp != NULL);
   suffixpos1 = QSORT_ARRAY_GET(NULL,a);
   suffixpos2 = QSORT_ARRAY_GET(NULL,b);
-  return gt_differencecover_compare (dcov, suffixpos1, suffixpos2);
+  return gt_differencecover_compare (data, suffixpos1, suffixpos2);
 }
 
 typedef void * QSORTNAME(Sorttype);
