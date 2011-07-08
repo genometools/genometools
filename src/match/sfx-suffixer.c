@@ -474,7 +474,6 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
 {
   bool haserr = false;
 
-  gt_error_check(err);
   if (sfi == NULL)
   {
     return 0;
@@ -493,8 +492,9 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace,
                             sfi->sfxstrategy.spmopt == 0 ? true : false);
-  if (stpgetnumofparts(sfi->suftabparts) > 1U)
+  if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U)
   {
+    gt_error_check(err);
     gt_assert (sfi->bcktabfilename != NULL);
     if (gt_bcktab_flush_remaining(sfi->bcktab,
                                   gt_str_get(sfi->bcktabfilename),err) != 0)
@@ -528,7 +528,6 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   gt_free(sfi->markwholeleafbuckets);
   gt_differencecover_delete(sfi->dcov);
-  gt_fa_fclose(sfi->outfpbcktab);
   gt_str_delete(sfi->bcktabfilename);
   gt_free(sfi);
   return haserr ? -1 : 0;
@@ -595,7 +594,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   if (estimatedspace >= (size_t) maximumspace)
   {
     gt_error_set(err,"already used %.2f MB of memory, cannot compute "
-                     "enhanced suffix array in at most %.2f MB",
+                     "index in at most %.2f MB",
                      GT_MEGABYTES(estimatedspace), GT_MEGABYTES(maximumspace));
     return -1;
   }
@@ -1681,7 +1680,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 static void preparethispart(Sfxiterator *sfi)
 {
   unsigned long partwidth;
-  unsigned int numofparts = stpgetnumofparts(sfi->suftabparts);
   GtBucketspec2 *bucketspec2 = NULL;
 
   if (sfi->part == 0 && sfi->withprogressbar)
@@ -1721,7 +1719,8 @@ static void preparethispart(Sfxiterator *sfi)
   {
     if (sfi->sfxstrategy.storespecialcodes)
     {
-      sfx_derivespecialcodesfromtable(sfi,(numofparts == 1U) ? true : false);
+      sfx_derivespecialcodesfromtable(sfi,
+                    stpgetnumofparts(sfi->suftabparts) == 1U ? true : false);
     } else
     {
       sfx_derivespecialcodesonthefly(sfi);
@@ -1763,7 +1762,7 @@ static void preparethispart(Sfxiterator *sfi)
   /* exit(0); just for testing */
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
 
-  if (numofparts == 1U && sfi->outlcpinfo == NULL &&
+  if (stpgetnumofparts(sfi->suftabparts) == 1U && sfi->outlcpinfo == NULL &&
       sfi->prefixlength >= 2U && sfi->sfxstrategy.spmopt == 0)
   {
     bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
