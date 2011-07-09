@@ -76,7 +76,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
   current.startindex = 0;
   current.len = len;
   GT_STACK_PUSH(&intervalstack,current);
-  if (insertionsortthreshold <= 2)
+  if (insertionsortthreshold <= 2UL)
   {
     insertionsortthreshold = 6UL;
   }
@@ -165,7 +165,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
        paper and therefore we ignore it. */
     if (handlenotswapped && !swapped)
     {                                  /* Switch to insertion sort */
-      gt_assert(current.len <= 40);
+      gt_assert(current.len <= 40UL);
       for (pm = current.startindex + 1;
            pm < current.startindex + current.len; pm++)
       {

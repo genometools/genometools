@@ -5299,7 +5299,7 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
       pos += GT_UNITSIN2BITENC;
     } else
     {
-      if (pos >= (unsigned long) GT_UNITSIN2BITENC)
+      if (pos > (unsigned long) GT_UNITSIN2BITENC)
       {
         pos -= (unsigned long) GT_UNITSIN2BITENC;
       } else
@@ -5308,7 +5308,6 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
       }
     }
   }
-  gt_assert(false);
   return 0;
 }
 
