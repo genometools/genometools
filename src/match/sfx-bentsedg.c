@@ -1245,10 +1245,6 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
                                          pos+depth);
     }
   }
-  for (idx = 0; idx < width; idx++)
-  {
-    bsr->shortreadsortrefs[idx] = (uint16_t) idx;
-  }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,bsr,depth,subbucketleft);
   if (exportptr->ulongtabsectionptr != NULL)
   {
@@ -1256,6 +1252,7 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     {
       exportptr->ulongtabsectionptr[idx]
         = bsr->shortreadsortinfo[bsr->shortreadsortrefs[idx]].suffix;
+      bsr->shortreadsortrefs[idx] = (uint16_t) idx;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(bsr->sssp,idx);
@@ -1267,6 +1264,7 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     {
       exportptr->uinttabsectionptr[idx]
         = (uint32_t) bsr->shortreadsortinfo[bsr->shortreadsortrefs[idx]].suffix;
+      bsr->shortreadsortrefs[idx] = (uint16_t) idx;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(bsr->sssp,idx);
@@ -1814,6 +1812,10 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
                                          (sfxstrategy->maxshortreadsort+1));
       bsr->shortreadsortrefs = gt_malloc(sizeof (*bsr->shortreadsortrefs) *
                                           (sfxstrategy->maxshortreadsort+1));
+      for (idx = 0; idx <= sfxstrategy->maxshortreadsort; idx++)
+      {
+        bsr->shortreadsortrefs[idx] = (uint16_t) idx;
+      }
     } else
     {
       bsr->shortreadsortinfo = NULL;
