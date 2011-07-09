@@ -957,7 +957,7 @@ void gt_differencecover_sortunsortedbucket(void *data,
      = blisbl - partoffset + idx. Thus, instead we use the functions
      to directly access the suffix sortspace. */
   dcov->sortoffset = blisbl - gt_suffixsortspace_bucketleftidx_get(dcov->sssp);
-  QSORTNAME(gt_inlinedarr_qsort_r) (NULL,width,data);
+  QSORTNAME(gt_inlinedarr_qsort_r) (6, false, NULL,width,data);
 }
 
 static void dc_sortremainingsamples(Differencecover *dcov)

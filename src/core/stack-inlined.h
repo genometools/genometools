@@ -20,6 +20,7 @@
 #define STACK_INLINED_H
 #include <stdbool.h>
 #include <string.h>
+#include "core/ma.h"
 
 /*
   This file defines macros to conveniently declare and
@@ -50,15 +51,6 @@
           TYPE staticspace[STATICSIZE], *space;\
           int (*initialiseelement)(void *);\
         } GtStack##TYPE
-
-/*
-#define GT_STACK_DECLARESTRUCT(TYPE,STATICSIZE)\
-        typedef struct\
-        {\
-          unsigned long allocated, nextfree, staticsize, sizeincrement;\
-          TYPE staticspace[STATICSIZE], *space;\
-        } GtStack##TYPE
-*/
 
 /*
   Initialize the stack <S> and define the increment.

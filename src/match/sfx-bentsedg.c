@@ -989,7 +989,7 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
   {
     bsr->shortreadsortrefs[idx] = (uint16_t) idx;
   }
-  QSORTNAME(gt_inlinedarr_qsort_r) (NULL,width,bsr);
+  QSORTNAME(gt_inlinedarr_qsort_r) (6, false, NULL,width,bsr);
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)

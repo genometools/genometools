@@ -232,7 +232,7 @@ static void check_inlinedarr_qsort(unsigned long *a, unsigned long n)
 {
   unsigned long idx;
 
-  QSORTNAME(gt_inlinedarr_qsort_r) (a, n, NULL);
+  QSORTNAME(gt_inlinedarr_qsort_r) (6, false, a, n, NULL);
   for (idx = 1UL; idx < n; idx++) {
     gt_assert(a[idx-1] <= a[idx]);
   }
