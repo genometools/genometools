@@ -57,13 +57,13 @@ typedef struct
        enumlcpitvtree,
        enumlcpitvtreeBU,
        diffcovercheck,
-       wholeleafcheck;
+       wholeleafcheck,
+       spmitv;
   unsigned long delspranges;
   GtStr *esaindexname,
         *pckindexname;
   unsigned int sortmaxdepth,
-               scanesa,
-               spmitv;
+               scanesa;
   GtStrArray *algbounds,
              *streamesq;
 } Sfxmapoptions;
@@ -286,10 +286,10 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                      &arguments->scanesa,0);
   gt_option_parser_add_option(op, optionscanesa);
 
-  optionspmitv = gt_option_new_uint("spmitv",
-                                    "count intervals for suffix prefix "
-                                    "matches of given minimum length",
-                                    &arguments->spmitv,0);
+  optionspmitv = gt_option_new_bool("spmitv",
+                                    "determine distribution of intervals "
+                                    "with whole leaves",
+                                    &arguments->spmitv,false);
   gt_option_parser_add_option(op, optionspmitv);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
@@ -1097,11 +1097,9 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  if (!haserr && arguments->spmitv > 0)
+  if (!haserr && arguments->spmitv)
   {
-    if (gt_process_spmitv(gt_str_get(arguments->esaindexname),
-                          arguments->spmitv,
-                          logger,err) != 0)
+    if (gt_process_spmitv(gt_str_get(arguments->esaindexname),logger,err) != 0)
     {
       haserr = true;
     }

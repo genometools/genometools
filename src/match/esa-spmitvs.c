@@ -31,9 +31,9 @@ typedef struct  /* global information */
   unsigned long unnecessaryleaves,
                 totallength,
                 currentleafindex,
-                lastwholeleaf;
-  unsigned int prefixlength,
-               minlen;
+                lastwholeleaf,
+                maxlen;
+  unsigned int prefixlength;
   Lcpintervalcount *wholeleafcount;
   const GtEncseq *encseq;
   GtReadmode readmode;
@@ -58,8 +58,7 @@ static int processleafedge_spmitv(GT_UNUSED bool firstsucc,
 {
   Spmitv_state *spmitv_state = (Spmitv_state *) bustate;
 
-  if (gt_iswholeleaf(spmitv_state->encseq,
-                     spmitv_state->readmode,leafnumber))
+  if (gt_iswholeleaf(spmitv_state->encseq,spmitv_state->readmode,leafnumber))
   {
     gt_assert(spmitv_state->currentleafindex != spmitv_state->totallength);
     spmitv_state->lastwholeleaf = spmitv_state->currentleafindex;
@@ -93,19 +92,17 @@ static int processbranchingedge_spmitv(GT_UNUSED bool firstsucc,
 
   for (idx=fd+1; idx<sd; idx++)
   {
-    if (idx <= (unsigned long) spmitv_state->minlen)
+    gt_assert(idx <= spmitv_state->maxlen);
+    if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
+        spmitv_state->lastwholeleaf >= slb)
     {
-      if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
-          spmitv_state->lastwholeleaf >= slb)
-      {
-        gt_assert(spmitv_state->lastwholeleaf <= srb);
-        spmitv_state->wholeleafcount[idx].wholeleaf++;
-        spmitv_state->wholeleafcount[idx].wholeleafwidth += (srb - slb + 1);
-      } else
-      {
-        spmitv_state->wholeleafcount[idx].nowholeleaf++;
-        spmitv_state->wholeleafcount[idx].nowholeleafwidth += (srb - slb + 1);
-      }
+      gt_assert(spmitv_state->lastwholeleaf <= srb);
+      spmitv_state->wholeleafcount[idx].wholeleaf++;
+      spmitv_state->wholeleafcount[idx].wholeleafwidth += (srb - slb + 1);
+    } else
+    {
+      spmitv_state->wholeleafcount[idx].nowholeleaf++;
+      spmitv_state->wholeleafcount[idx].nowholeleafwidth += (srb - slb + 1);
     }
   }
   return 0;
@@ -121,9 +118,9 @@ static int processlcpinterval_spmitv(unsigned long lcp,
   Spmitv_state *spmitv_state = (Spmitv_state *) bustate;
 
   if (spmitv_state->lastwholeleaf != spmitv_state->totallength &&
-      spmitv_state->lastwholeleaf >= lb &&
-      lcp <= (unsigned long) spmitv_state->minlen)
+      spmitv_state->lastwholeleaf >= lb)
   {
+    gt_assert(lcp <= (unsigned long) spmitv_state->maxlen);
     gt_assert(spmitv_state->lastwholeleaf <= rb);
     spmitv_state->wholeleafcount[lcp].wholeleaf++;
     spmitv_state->wholeleafcount[lcp].wholeleafwidth += (rb - lb + 1);
@@ -135,9 +132,7 @@ static int processlcpinterval_spmitv(unsigned long lcp,
   return 0;
 }
 
-int gt_process_spmitv(const char *inputindex, unsigned int minlen,
-                      GtLogger *logger,
-                      GtError *err)
+int gt_process_spmitv(const char *inputindex, GtLogger *logger, GtError *err)
 {
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
@@ -161,18 +156,18 @@ int gt_process_spmitv(const char *inputindex, unsigned int minlen,
     unsigned long nonspecials;
     GtCodetype numofallcodes;
 
-    state.minlen = minlen;
-    state.unnecessaryleaves = 0;
     state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);
+    state.maxlen = gt_encseq_max_seq_length(state.encseq);
+    state.unnecessaryleaves = 0;
     state.totallength = gt_encseq_total_length(state.encseq);
     state.currentleafindex = 0;
     state.lastwholeleaf = state.totallength; /* undefined */
     state.prefixlength = gt_Sequentialsuffixarrayreader_prefixlength(ssar);
     state.wholeleafcount = gt_malloc(sizeof (*state.wholeleafcount) *
-                                     (minlen+1));
+                                     (state.maxlen+1));
     memset(state.wholeleafcount,0,
-           sizeof (*state.wholeleafcount) * (minlen+1));
+           sizeof (*state.wholeleafcount) * (state.maxlen+1));
     numofchars = gt_encseq_alphabetnumofchars(state.encseq);
     numofallcodes = (unsigned long) pow((double) numofchars,
                                         (double) state.prefixlength);
@@ -187,17 +182,17 @@ int gt_process_spmitv(const char *inputindex, unsigned int minlen,
       haserr = true;
     } else
     {
-      unsigned int idx;
+      unsigned long idx;
 
       printf("unnecessaryleaves=%lu (%.2f)\n",
               state.unnecessaryleaves,
               (double) state.unnecessaryleaves/nonspecials);
-      for (idx = 0; idx<= minlen; idx++)
+      for (idx = 0; idx<= state.maxlen; idx++)
       {
         if (state.wholeleafcount[idx].wholeleaf != 0 ||
             state.wholeleafcount[idx].nowholeleaf != 0)
         {
-          printf("wholeleaf[%u]:num=%lu (%.2f), ",idx,
+          printf("wholeleaf[%lu]:num=%lu (%.2f), ",idx,
                  state.wholeleafcount[idx].wholeleaf,
                  (double) state.wholeleafcount[idx].wholeleaf/
                           (state.wholeleafcount[idx].wholeleaf+
@@ -205,8 +200,7 @@ int gt_process_spmitv(const char *inputindex, unsigned int minlen,
           printf("width=%lu (%.2f)\n",
                   state.wholeleafcount[idx].wholeleafwidth,
                   (double) state.wholeleafcount[idx].wholeleafwidth/
-                          (state.wholeleafcount[idx].wholeleafwidth+
-                           state.wholeleafcount[idx].nowholeleafwidth));
+                           state.totallength);
         }
       }
     }

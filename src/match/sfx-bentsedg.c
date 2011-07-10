@@ -795,6 +795,7 @@ static void showcountingsortinfo(const GtCountingsortinfo *countingsortinfo,
 }
 */
 
+#undef CHECKFORWHOLELEAFS
 #ifdef CHECKFORWHOLELEAFS
 static bool gt_containswholeleaf(const GtBentsedgresources *bsr,
                                  unsigned long subbucketleft,

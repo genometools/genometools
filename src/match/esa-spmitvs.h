@@ -21,7 +21,6 @@
 #include "core/logger_api.h"
 #include "core/error_api.h"
 
-int gt_process_spmitv(const char *inputindex, GT_UNUSED unsigned int minlen,
-                      GtLogger *logger,GtError *err);
+int gt_process_spmitv(const char *inputindex, GtLogger *logger, GtError *err);
 
 #endif
