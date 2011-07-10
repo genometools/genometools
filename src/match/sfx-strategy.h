@@ -34,7 +34,7 @@ typedef struct
                 maxcountingsort,
                 maxshortreadsort;
   unsigned int differencecover,
-               spmoptminlength;
+               spmopt_minlength;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
                          encoding) */
@@ -58,7 +58,7 @@ typedef struct
   sfxstrategy->maxshortreadsort = MAXSHORTREADSORTDEFAULT;
   sfxstrategy->differencecover = 0;
   sfxstrategy->cmpcharbychar = cmpcharbychar;
-  sfxstrategy->spmoptminlength = 0;
+  sfxstrategy->spmopt_minlength = 0;
   sfxstrategy->storespecialcodes = false;
   sfxstrategy->iteratorbasedkmerscanning = false;
   sfxstrategy->suftabuint = false;

@@ -230,7 +230,13 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
       oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
     }
   }
-
+  if (!had_err && oi->sfxstrategy.kmerswithencseqreader &&
+      oi->sfxstrategy.spmopt_minlength > 0)
+  {
+    gt_error_set(err,"options -spmopt  and -kmerswithencseqreader are "
+                     "not compatible");
+    had_err = -1;
+  }
   if (!had_err
         && oi->optionmemlimit != NULL
         && gt_option_is_set(oi->optionmemlimit)) {
@@ -410,7 +416,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
     idxo->optionspmopt = gt_option_new_uint_min("spmopt",
                                            "optimize esa-construction for "
                                            "suffix-prefix matching",
-                                           &idxo->sfxstrategy.spmoptminlength,
+                                           &idxo->sfxstrategy.spmopt_minlength,
                                            0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
     gt_option_exclude(idxo->optionspmopt, idxo->optiondifferencecover);
@@ -426,7 +432,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   } else {
     idxo->optionoutsuftab
       = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
-    idxo->sfxstrategy.spmoptminlength = 0;
+    idxo->sfxstrategy.spmopt_minlength = 0;
 #ifndef S_SPLINT_S
     gt_registerPackedIndexOptions(op,
                                   &idxo->bwtIdxParams,
