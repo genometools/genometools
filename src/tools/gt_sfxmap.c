@@ -826,7 +826,9 @@ static const Optionargmodedesc stream_esq_operation[] =
   {"stream_reader_multi","read kmers with encseq reader and from word stream",
                    (unsigned int) BSRS_stream_reader_multi},
   {"stream_reader_multi3","read kmers with encseq reader and from word stream",
-                   (unsigned int) BSRS_stream_reader_multi3}
+                   (unsigned int) BSRS_stream_reader_multi3},
+  {"storefirstcodes","store first codes of each sequence in the encseq",
+                   (unsigned int) BSRS_storefirstcodes}
 };
 
 static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
@@ -869,7 +871,8 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
       {
         if ((brsmode == BSRS_reader_multi ||
              brsmode == BSRS_stream_reader_multi ||
-             brsmode == BSRS_stream_reader_multi3) &&
+             brsmode == BSRS_stream_reader_multi3 ||
+             brsmode == BSRS_storefirstcodes) &&
              streamesq_size != 3UL)
         {
           gt_error_set(err,"if option -streamesq has one of the arguments "
@@ -901,6 +904,13 @@ static int stream_esq(const Sfxmapoptions *arguments,GtError *err)
     encseq = gt_encseq_loader_load(el, gt_str_array_get(arguments->streamesq,0),
                                    err);
     if (encseq == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && brsmode == BSRS_storefirstcodes)
+  {
+    if (gt_encseq_mirror(encseq, err) != 0)
     {
       haserr = true;
     }

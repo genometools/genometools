@@ -28,7 +28,8 @@ typedef enum
   BSRS_stream_reader_single,
   BSRS_reader_multi,
   BSRS_stream_reader_multi,
-  BSRS_stream_reader_multi3
+  BSRS_stream_reader_multi3,
+  BSRS_storefirstcodes
 } Bitstreamreadmode;
 
 void gt_encseq_faststream(const GtEncseq *encseq,

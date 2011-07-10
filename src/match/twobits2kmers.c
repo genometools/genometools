@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
 #include "core/intbits.h"
 #include "core/encseq_api.h"
 #include "core/encseq.h"
@@ -165,6 +166,7 @@ static void multireadmode_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     getencseqkmers_twobitencoding(encseq,
                                   (GtReadmode) readmode_int,
                                   kmersize,
+                                  false,
                                   gt_checkkmercode,
                                   kmercodeiterator,
                                   NULL,
@@ -172,6 +174,53 @@ static void multireadmode_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_kmercodeiterator_delete(kmercodeiterator);
     kmercodeiterator = NULL;
   }
+}
+
+typedef struct
+{
+  GtBitsequence *codeoccurrence;
+  unsigned long differentcodes, countpositions;
+} GtFirstcodesinfo;
+
+static void gt_storefirstcodes(void *processinfo,
+                               GT_UNUSED unsigned long pos,
+                               GtCodetype code)
+{
+  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+
+  firstcodesinfo->countpositions++;
+  if (!GT_ISIBITSET(firstcodesinfo->codeoccurrence,code))
+  {
+    firstcodesinfo->differentcodes++;
+    GT_SETIBIT(firstcodesinfo->codeoccurrence,code);
+  }
+}
+
+static void storefirstcodes_getencseqkmers_twobitencoding(
+                                         const GtEncseq *encseq,
+                                         unsigned int kmersize)
+{
+  GtFirstcodesinfo firstcodesinfo;
+  GtCodetype numofallcodes;
+  unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
+
+  numofallcodes = (unsigned long) pow((double) numofchars,(double) kmersize);
+  GT_INITBITTAB(firstcodesinfo.codeoccurrence,numofallcodes);
+  firstcodesinfo.differentcodes = 0;
+  firstcodesinfo.countpositions = 0;
+  getencseqkmers_twobitencoding(encseq,
+                                GT_READMODE_FORWARD,
+                                kmersize,
+                                true,
+                                gt_storefirstcodes,
+                                &firstcodesinfo,
+                                NULL,
+                                NULL);
+  printf("differentcodes=%lu (%.2f) in %lu positions\n",
+          firstcodesinfo.differentcodes,
+          (double) firstcodesinfo.differentcodes/numofallcodes,
+          firstcodesinfo.countpositions);
+  gt_free(firstcodesinfo.codeoccurrence);
 }
 
 static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
@@ -224,6 +273,9 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
       break;
     case BSRS_stream_reader_multi3:
       multireadmode_getencseqkmers_twobitencoding(encseq,kmersize);
+      break;
+    case BSRS_storefirstcodes:
+      storefirstcodes_getencseqkmers_twobitencoding(encseq,kmersize);
       break;
     default:
       break;
@@ -299,10 +351,14 @@ void gt_encseq_faststream(const GtEncseq *encseq,
       case BSRS_reader_multi:
       case BSRS_stream_reader_multi:
       case BSRS_stream_reader_multi3:
+      case BSRS_storefirstcodes:
         gt_encseq_faststream_kmers(encseq,bsrsmode,multiarg);
         break;
     }
-    printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
+    if (pairbitsum > 0)
+    {
+      printf("pairbitsum=" Formatuint64_t "\n",PRINTuint64_tcast(pairbitsum));
+    }
     gt_encseq_reader_delete(esr);
   }
 }

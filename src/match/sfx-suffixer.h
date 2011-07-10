@@ -84,6 +84,7 @@ GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright);
 void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    unsigned int kmersize,
+                                   bool onlyfirst,
                                    void(*processkmercode)(void *,
                                                           unsigned long,
                                                           GtCodetype),
