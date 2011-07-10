@@ -410,7 +410,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
     idxo->optionspmopt = gt_option_new_uint_min("spmopt",
                                            "optimize esa-construction for "
                                            "suffix-prefix matching",
-                                           &idxo->sfxstrategy.spmopt,
+                                           &idxo->sfxstrategy.spmoptminlength,
                                            0,1U);
     gt_option_parser_add_option(op, idxo->optionspmopt);
     gt_option_exclude(idxo->optionspmopt, idxo->optiondifferencecover);
@@ -426,7 +426,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   } else {
     idxo->optionoutsuftab
       = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
-    idxo->sfxstrategy.spmopt = 0;
+    idxo->sfxstrategy.spmoptminlength = 0;
 #ifndef S_SPLINT_S
     gt_registerPackedIndexOptions(op,
                                   &idxo->bwtIdxParams,

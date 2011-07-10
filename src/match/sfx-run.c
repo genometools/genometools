@@ -511,7 +511,7 @@ static int runsuffixerator(bool doesa,
                     so,
                     numofchars,
                     gt_encseq_total_length(encseq),
-                    sfxstrategy.spmopt == 0 ? true : false,
+                    sfxstrategy.spmoptminlength == 0 ? true : false,
                     logger,
                     err) != 0)
       {

@@ -252,7 +252,7 @@ static void updatekmercount(void *processinfo,
 
   if (kmercode->definedspecialposition)
   {
-    if (sfi->sfxstrategy.spmopt == 0)
+    if (sfi->sfxstrategy.spmoptminlength == 0)
     {
       if (sfi->storespecials)
       {
@@ -491,7 +491,8 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   gt_free(sfi->spaceCodeatposition);
   sfi->spaceCodeatposition = NULL;
   gt_suffixsortspace_delete(sfi->suffixsortspace,
-                            sfi->sfxstrategy.spmopt == 0 ? true : false);
+                            sfi->sfxstrategy.spmoptminlength == 0
+                              ? true : false);
   if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U)
   {
     gt_error_check(err);
@@ -1186,7 +1187,7 @@ static void gt_updateleftborderforkmer(Sfxiterator *sfi,
                                        GT_UNUSED unsigned long position,
                                        GtCodetype code)
 {
-  gt_assert(sfi->sfxstrategy.spmopt == 0);
+  gt_assert(sfi->sfxstrategy.spmoptminlength == 0);
   gt_bcktab_leftborder_addcode(sfi->leftborder,code);
 }
 
@@ -1197,7 +1198,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 {
   unsigned int idx;
 
-  gt_assert(sfi->sfxstrategy.spmopt == 0);
+  gt_assert(sfi->sfxstrategy.spmoptminlength == 0);
   if (sfi->sfxstrategy.storespecialcodes)
   {
     Codeatposition *spcaptr;
@@ -1218,7 +1219,7 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
                                               GT_UNUSED unsigned long position,
                                               GtCodetype code)
 {
-  gt_assert(sfi->sfxstrategy.spmopt > 0);
+  gt_assert(sfi->sfxstrategy.spmoptminlength > 0);
   gt_bcktab_leftborder_addcode(sfi->leftborder,code);
   if (firstinrange)
   {
@@ -1309,7 +1310,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       haserr = true;
     } else
     {
-      if (sfxstrategy->spmopt > 0 && prefixlength > sfxstrategy->spmopt)
+      if (sfxstrategy->spmoptminlength > 0 &&
+          prefixlength > sfxstrategy->spmoptminlength)
       {
         gt_error_set(err,"argument for option -pl must not be larger "
                          "than argument to option -spmopt");
@@ -1322,7 +1324,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi = gt_malloc(sizeof (*sfi));
     estimatedspace += sizeof (*sfi);
     if (sfxstrategy != NULL && sfxstrategy->storespecialcodes &&
-        sfxstrategy->spmopt == 0)
+        sfxstrategy->spmoptminlength == 0)
     {
       sfi->spaceCodeatposition
         = gt_malloc(sizeof (*sfi->spaceCodeatposition) * (realspecialranges+1));
@@ -1449,7 +1451,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 prefixlength,
                                 sfi->totallength+1,
                                 sfi->sfxstrategy.storespecialcodes,
-                                sfi->sfxstrategy.spmopt == 0 ? true : false,
+                                sfi->sfxstrategy.spmoptminlength == 0
+                                  ? true : false,
                                 sfi->logger,
                                 err);
     if (sfi->bcktab == NULL)
@@ -1461,7 +1464,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
       sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
-      if (sfi->sfxstrategy.spmopt > 0 && prefixlength > 1U)
+      if (sfi->sfxstrategy.spmoptminlength > 0 && prefixlength > 1U)
       {
         GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->numofallcodes);
         estimatedspace += sizeof (*sfi->markwholeleafbuckets *
@@ -1469,7 +1472,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       }
       sizeofbcktab = gt_bcktab_sizeoftable(sfi->numofchars,prefixlength,
                                            sfi->totallength+1,
-                                           sfi->sfxstrategy.spmopt == 0
+                                           sfi->sfxstrategy.spmoptminlength == 0
                                              ? true : false);
       estimatedspace += (size_t) sizeofbcktab +
                         gt_bcktab_sizeofworkspace(prefixlength);
@@ -1505,7 +1508,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       if (gt_has_twobitencoding(encseq) &&
           !sfi->sfxstrategy.kmerswithencseqreader)
       {
-        if (sfi->sfxstrategy.spmopt == 0)
+        if (sfi->sfxstrategy.spmoptminlength == 0)
         {
           updateleftborder_getencseqkmers_twobitencoding(encseq,
                                                          readmode,
@@ -1516,12 +1519,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         } else
         {
           spmopt_updateleftborder_getencseqkmers_twobitencoding(
-                                                        encseq,
-                                                        readmode,
-                                                        prefixlength,
-                                                        sfi->sfxstrategy.spmopt,
-                                                        sfi,
-                                                        NULL);
+                                            encseq,
+                                            readmode,
+                                            prefixlength,
+                                            sfi->sfxstrategy.spmoptminlength,
+                                            sfi,
+                                            NULL);
         }
       } else
       {
@@ -1534,7 +1537,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         }
       }
       if (sfi->sfxstrategy.storespecialcodes &&
-          sfi->sfxstrategy.spmopt == 0)
+          sfi->sfxstrategy.spmoptminlength == 0)
       {
         gt_assert(realspecialranges+1 >= sfi->nextfreeCodeatposition);
         reversespecialcodes(sfi->spaceCodeatposition,
@@ -1560,7 +1563,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                         sfi->markwholeleafbuckets);
     gt_logger_log(sfi->logger, "largest bucket size=%lu",largestbucketsize);
 
-    if (sfi->sfxstrategy.spmopt > 0)
+    if (sfi->sfxstrategy.spmoptminlength > 0)
     {
       gt_logger_log(sfi->logger, "relevant suffixes=%.2f%%",100.0 *
                                         (double) numofsuffixestosort/
@@ -1576,7 +1579,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (sfi->outlcpinfo != NULL)
     {
       gt_Outlcpinfo_numsuffixes2output_set(sfi->outlcpinfo,
-                                           sfi->sfxstrategy.spmopt == 0
+                                           sfi->sfxstrategy.spmoptminlength == 0
                                              ? sfi->totallength + 1
                                              : numofsuffixestosort);
     }
@@ -1726,7 +1729,7 @@ static void preparethispart(Sfxiterator *sfi)
   gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                     stpgetcurrentsuftaboffset(sfi->part,
                                                              sfi->suftabparts));
-  if (sfi->sfxstrategy.spmopt == 0)
+  if (sfi->sfxstrategy.spmoptminlength == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
     {
@@ -1746,9 +1749,9 @@ static void preparethispart(Sfxiterator *sfi)
                                            sfi->encseq,
                                            sfi->readmode,
                                            sfi->prefixlength,
-                                           sfi->sfxstrategy.spmopt == 0
+                                           sfi->sfxstrategy.spmoptminlength == 0
                                              ? sfi->prefixlength
-                                             : sfi->sfxstrategy.spmopt,
+                                             : sfi->sfxstrategy.spmoptminlength,
                                            sfi,
                                            NULL);
   } else
@@ -1774,7 +1777,7 @@ static void preparethispart(Sfxiterator *sfi)
   partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
 
   if (stpgetnumofparts(sfi->suftabparts) == 1U && sfi->outlcpinfo == NULL &&
-      sfi->prefixlength >= 2U && sfi->sfxstrategy.spmopt == 0)
+      sfi->prefixlength >= 2U && sfi->sfxstrategy.spmoptminlength == 0)
   {
     bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
                                   partwidth,sfi->numofchars);
@@ -1966,7 +1969,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
     return NULL;
   }
   sfi->fusp.nextfreeSuffixptr = 0;
-  if (sfi->sfxstrategy.spmopt == 0)
+  if (sfi->sfxstrategy.spmoptminlength == 0)
   {
     gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                       sfi->totallength-sfi->specialcharacters);
@@ -2001,7 +2004,7 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, Sfxiterator *sfi, GtError *err)
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi)
 {
   gt_assert(sfi != NULL);
-  if (sfi->sfxstrategy.spmopt == 0)
+  if (sfi->sfxstrategy.spmoptminlength == 0)
   {
     return gt_suffixsortspace_longest(sfi->suffixsortspace);
   } else
