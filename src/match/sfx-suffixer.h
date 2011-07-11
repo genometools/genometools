@@ -77,10 +77,6 @@ GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
 GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize);
 
-GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize);
-
-GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright);
-
 void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    unsigned int kmersize,

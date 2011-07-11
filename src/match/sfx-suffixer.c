@@ -76,7 +76,6 @@ struct Sfxiterator
   GtBcktab *bcktab;
   GtCodetype numofallcodes;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
-  GtBitsequence *markwholeleafbuckets;
   Differencecover *dcov;
 
   /* changed in each part */
@@ -105,8 +104,12 @@ struct Sfxiterator
   GtSuffixsortspace_exportptr *exportptr;
   unsigned int spmopt_kmerscansize,
                spmopt_kmerscancodeshift2bckcode,
-               spmopt_kmerscancodeshift2firstmarkcode;
-  unsigned long spmopt_numofallcodes;
+               spmopt_kmerscancodeshift2prefixcode;
+  GtBitsequence *markprefixbuckets,
+                *marksuffixbuckets;
+  GtCodetype spmopt_kmerscancodesuffixmask;
+  unsigned long spmopt_numofallprefixcodes,
+                spmopt_numofallsuffixcodes;
 };
 
 #ifdef SKDEBUG
@@ -333,16 +336,19 @@ static void updatekmercount(void *processinfo,
         (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2bckcode)
 
 #define GT_SCANCODE_TO_FIRSTMARKCODE(CODE)\
-        (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2firstmarkcode)
+        (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2prefixcode)
+
+#define GT_SCANCODE_TO_SECONDMARKCODE(CODE)\
+        (GtCodetype) ((CODE) & sfi->spmopt_kmerscancodesuffixmask);
 
 static void gt_insertkmerwithoutspecial1(void *processinfo,
-                                         GT_UNUSED bool firstinrange,
+                                         bool firstinrange,
                                          unsigned long position,
                                          GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (sfi->markwholeleafbuckets == NULL)
+  if (sfi->markprefixbuckets == NULL)
   {
     if (scancode >= sfi->currentmincode && scancode <= sfi->currentmaxcode)
     {
@@ -356,12 +362,16 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
   } else
   {
     GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(scancode),
-               firstmarkcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode);
+               prefixcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode),
+               secondmarkcode = GT_SCANCODE_TO_SECONDMARKCODE(scancode);
 
-    gt_assert(firstmarkcode < sfi->spmopt_numofallcodes);
+    gt_assert(sfi->marksuffixbuckets != NULL);
+    gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
     if (bcktabcode >= sfi->currentmincode &&
         bcktabcode <= sfi->currentmaxcode &&
-        GT_ISIBITSET(sfi->markwholeleafbuckets,firstmarkcode))
+        (firstinrange ||
+         (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
+         GT_ISIBITSET(sfi->marksuffixbuckets,secondmarkcode))))
     {
       unsigned long stidx;
 
@@ -546,7 +556,8 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   gt_bcktab_delete(sfi->bcktab);
   gt_freesuftabparts(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
-  gt_free(sfi->markwholeleafbuckets);
+  gt_free(sfi->markprefixbuckets);
+  gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
   gt_str_delete(sfi->bcktabfilename);
   gt_free(sfi);
@@ -695,7 +706,7 @@ GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
 {
   unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
   unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
-  const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
 
   if (unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)
   {
@@ -716,7 +727,7 @@ GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
 GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize)
 {
-  const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
   return (GtCodetype) (twobitencoding[0] >>
                        GT_MULT2(GT_UNITSIN2BITENC - kmersize)) & maskright;
 }
@@ -724,7 +735,7 @@ GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
 #define GT_SWAPBITPAIRS(KMER,L1,L2,D) (((KMER) & (3UL << L1)) >> D) |\
                                       (((KMER) & (3UL << L2)) << D)
 
-GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
+static GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
 {
   switch (kmersize)
   {
@@ -796,7 +807,6 @@ GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
              GT_SWAPBITPAIRS(kmer,18,8,10) |
              GT_SWAPBITPAIRS(kmer,16,10,6) |
              GT_SWAPBITPAIRS(kmer,14,12,2);
-#ifdef _LP64
     case 15:
       return GT_SWAPBITPAIRS(kmer,28,0,28) |
              GT_SWAPBITPAIRS(kmer,26,2,24) |
@@ -806,6 +816,7 @@ GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
              GT_SWAPBITPAIRS(kmer,18,10,8) |
              GT_SWAPBITPAIRS(kmer,16,12,4) |
              (kmer & (3U << 14));
+#ifdef _LP64
     case 16:
       return GT_SWAPBITPAIRS(kmer,30,0,30) |
              GT_SWAPBITPAIRS(kmer,28,2,26) |
@@ -857,13 +868,187 @@ GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
              GT_SWAPBITPAIRS(kmer,24,14,10) |
              GT_SWAPBITPAIRS(kmer,22,16,6) |
              GT_SWAPBITPAIRS(kmer,20,18,2);
+    case 21:
+      return GT_SWAPBITPAIRS(kmer,40,0,40) |
+             GT_SWAPBITPAIRS(kmer,38,2,36) |
+             GT_SWAPBITPAIRS(kmer,36,4,32) |
+             GT_SWAPBITPAIRS(kmer,34,6,28) |
+             GT_SWAPBITPAIRS(kmer,32,8,24) |
+             GT_SWAPBITPAIRS(kmer,30,10,20) |
+             GT_SWAPBITPAIRS(kmer,28,12,16) |
+             GT_SWAPBITPAIRS(kmer,26,14,12) |
+             GT_SWAPBITPAIRS(kmer,24,16,8) |
+             GT_SWAPBITPAIRS(kmer,22,18,4) |
+             (kmer & (3U << 20));
+    case 22:
+      return GT_SWAPBITPAIRS(kmer,42,0,42) |
+             GT_SWAPBITPAIRS(kmer,40,2,38) |
+             GT_SWAPBITPAIRS(kmer,38,4,34) |
+             GT_SWAPBITPAIRS(kmer,36,6,30) |
+             GT_SWAPBITPAIRS(kmer,34,8,26) |
+             GT_SWAPBITPAIRS(kmer,32,10,22) |
+             GT_SWAPBITPAIRS(kmer,30,12,18) |
+             GT_SWAPBITPAIRS(kmer,28,14,14) |
+             GT_SWAPBITPAIRS(kmer,26,16,10) |
+             GT_SWAPBITPAIRS(kmer,24,18,6) |
+             GT_SWAPBITPAIRS(kmer,22,20,2);
+    case 23:
+      return GT_SWAPBITPAIRS(kmer,44,0,44) |
+             GT_SWAPBITPAIRS(kmer,42,2,40) |
+             GT_SWAPBITPAIRS(kmer,40,4,36) |
+             GT_SWAPBITPAIRS(kmer,38,6,32) |
+             GT_SWAPBITPAIRS(kmer,36,8,28) |
+             GT_SWAPBITPAIRS(kmer,34,10,24) |
+             GT_SWAPBITPAIRS(kmer,32,12,20) |
+             GT_SWAPBITPAIRS(kmer,30,14,16) |
+             GT_SWAPBITPAIRS(kmer,28,16,12) |
+             GT_SWAPBITPAIRS(kmer,26,18,8) |
+             GT_SWAPBITPAIRS(kmer,24,20,4) |
+             (kmer & (3U << 22));
+    case 24:
+      return GT_SWAPBITPAIRS(kmer,46,0,46) |
+             GT_SWAPBITPAIRS(kmer,44,2,42) |
+             GT_SWAPBITPAIRS(kmer,42,4,38) |
+             GT_SWAPBITPAIRS(kmer,40,6,34) |
+             GT_SWAPBITPAIRS(kmer,38,8,30) |
+             GT_SWAPBITPAIRS(kmer,36,10,26) |
+             GT_SWAPBITPAIRS(kmer,34,12,22) |
+             GT_SWAPBITPAIRS(kmer,32,14,18) |
+             GT_SWAPBITPAIRS(kmer,30,16,14) |
+             GT_SWAPBITPAIRS(kmer,28,18,10) |
+             GT_SWAPBITPAIRS(kmer,26,20,6) |
+             GT_SWAPBITPAIRS(kmer,24,22,2);
+    case 25:
+      return GT_SWAPBITPAIRS(kmer,48,0,48) |
+             GT_SWAPBITPAIRS(kmer,46,2,44) |
+             GT_SWAPBITPAIRS(kmer,44,4,40) |
+             GT_SWAPBITPAIRS(kmer,42,6,36) |
+             GT_SWAPBITPAIRS(kmer,40,8,32) |
+             GT_SWAPBITPAIRS(kmer,38,10,28) |
+             GT_SWAPBITPAIRS(kmer,36,12,24) |
+             GT_SWAPBITPAIRS(kmer,34,14,20) |
+             GT_SWAPBITPAIRS(kmer,32,16,16) |
+             GT_SWAPBITPAIRS(kmer,30,18,12) |
+             GT_SWAPBITPAIRS(kmer,28,20,8) |
+             GT_SWAPBITPAIRS(kmer,26,22,4) |
+             (kmer & (3U << 24));
+    case 26:
+      return GT_SWAPBITPAIRS(kmer,50,0,50) |
+             GT_SWAPBITPAIRS(kmer,48,2,46) |
+             GT_SWAPBITPAIRS(kmer,46,4,42) |
+             GT_SWAPBITPAIRS(kmer,44,6,38) |
+             GT_SWAPBITPAIRS(kmer,42,8,34) |
+             GT_SWAPBITPAIRS(kmer,40,10,30) |
+             GT_SWAPBITPAIRS(kmer,38,12,26) |
+             GT_SWAPBITPAIRS(kmer,36,14,22) |
+             GT_SWAPBITPAIRS(kmer,34,16,18) |
+             GT_SWAPBITPAIRS(kmer,32,18,14) |
+             GT_SWAPBITPAIRS(kmer,30,20,10) |
+             GT_SWAPBITPAIRS(kmer,28,22,6) |
+             GT_SWAPBITPAIRS(kmer,26,24,2);
+    case 27:
+      return GT_SWAPBITPAIRS(kmer,52,0,52) |
+             GT_SWAPBITPAIRS(kmer,50,2,48) |
+             GT_SWAPBITPAIRS(kmer,48,4,44) |
+             GT_SWAPBITPAIRS(kmer,46,6,40) |
+             GT_SWAPBITPAIRS(kmer,44,8,36) |
+             GT_SWAPBITPAIRS(kmer,42,10,32) |
+             GT_SWAPBITPAIRS(kmer,40,12,28) |
+             GT_SWAPBITPAIRS(kmer,38,14,24) |
+             GT_SWAPBITPAIRS(kmer,36,16,20) |
+             GT_SWAPBITPAIRS(kmer,34,18,16) |
+             GT_SWAPBITPAIRS(kmer,32,20,12) |
+             GT_SWAPBITPAIRS(kmer,30,22,8) |
+             GT_SWAPBITPAIRS(kmer,28,24,4) |
+             (kmer & (3U << 26));
+    case 28:
+      return GT_SWAPBITPAIRS(kmer,54,0,54) |
+             GT_SWAPBITPAIRS(kmer,52,2,50) |
+             GT_SWAPBITPAIRS(kmer,50,4,46) |
+             GT_SWAPBITPAIRS(kmer,48,6,42) |
+             GT_SWAPBITPAIRS(kmer,46,8,38) |
+             GT_SWAPBITPAIRS(kmer,44,10,34) |
+             GT_SWAPBITPAIRS(kmer,42,12,30) |
+             GT_SWAPBITPAIRS(kmer,40,14,26) |
+             GT_SWAPBITPAIRS(kmer,38,16,22) |
+             GT_SWAPBITPAIRS(kmer,36,18,18) |
+             GT_SWAPBITPAIRS(kmer,34,20,14) |
+             GT_SWAPBITPAIRS(kmer,32,22,10) |
+             GT_SWAPBITPAIRS(kmer,30,24,6) |
+             GT_SWAPBITPAIRS(kmer,28,26,2);
+    case 29:
+      return GT_SWAPBITPAIRS(kmer,56,0,56) |
+             GT_SWAPBITPAIRS(kmer,54,2,52) |
+             GT_SWAPBITPAIRS(kmer,52,4,48) |
+             GT_SWAPBITPAIRS(kmer,50,6,44) |
+             GT_SWAPBITPAIRS(kmer,48,8,40) |
+             GT_SWAPBITPAIRS(kmer,46,10,36) |
+             GT_SWAPBITPAIRS(kmer,44,12,32) |
+             GT_SWAPBITPAIRS(kmer,42,14,28) |
+             GT_SWAPBITPAIRS(kmer,40,16,24) |
+             GT_SWAPBITPAIRS(kmer,38,18,20) |
+             GT_SWAPBITPAIRS(kmer,36,20,16) |
+             GT_SWAPBITPAIRS(kmer,34,22,12) |
+             GT_SWAPBITPAIRS(kmer,32,24,8) |
+             GT_SWAPBITPAIRS(kmer,30,26,4) |
+             (kmer & (3U << 28));
+    case 30:
+      return GT_SWAPBITPAIRS(kmer,58,0,58) |
+             GT_SWAPBITPAIRS(kmer,56,2,54) |
+             GT_SWAPBITPAIRS(kmer,54,4,50) |
+             GT_SWAPBITPAIRS(kmer,52,6,46) |
+             GT_SWAPBITPAIRS(kmer,50,8,42) |
+             GT_SWAPBITPAIRS(kmer,48,10,38) |
+             GT_SWAPBITPAIRS(kmer,46,12,34) |
+             GT_SWAPBITPAIRS(kmer,44,14,30) |
+             GT_SWAPBITPAIRS(kmer,42,16,26) |
+             GT_SWAPBITPAIRS(kmer,40,18,22) |
+             GT_SWAPBITPAIRS(kmer,38,20,18) |
+             GT_SWAPBITPAIRS(kmer,36,22,14) |
+             GT_SWAPBITPAIRS(kmer,34,24,10) |
+             GT_SWAPBITPAIRS(kmer,32,26,6) |
+             GT_SWAPBITPAIRS(kmer,30,28,2);
+    case 31:
+      return GT_SWAPBITPAIRS(kmer,60,0,60) |
+             GT_SWAPBITPAIRS(kmer,58,2,56) |
+             GT_SWAPBITPAIRS(kmer,56,4,52) |
+             GT_SWAPBITPAIRS(kmer,54,6,48) |
+             GT_SWAPBITPAIRS(kmer,52,8,44) |
+             GT_SWAPBITPAIRS(kmer,50,10,40) |
+             GT_SWAPBITPAIRS(kmer,48,12,36) |
+             GT_SWAPBITPAIRS(kmer,46,14,32) |
+             GT_SWAPBITPAIRS(kmer,44,16,28) |
+             GT_SWAPBITPAIRS(kmer,42,18,24) |
+             GT_SWAPBITPAIRS(kmer,40,20,20) |
+             GT_SWAPBITPAIRS(kmer,38,22,16) |
+             GT_SWAPBITPAIRS(kmer,36,24,12) |
+             GT_SWAPBITPAIRS(kmer,34,26,8) |
+             GT_SWAPBITPAIRS(kmer,32,28,4) |
+             (kmer & (3U << 30));
+    case 32:
+      return GT_SWAPBITPAIRS(kmer,62,0,62) |
+             GT_SWAPBITPAIRS(kmer,60,2,58) |
+             GT_SWAPBITPAIRS(kmer,58,4,54) |
+             GT_SWAPBITPAIRS(kmer,56,6,50) |
+             GT_SWAPBITPAIRS(kmer,54,8,46) |
+             GT_SWAPBITPAIRS(kmer,52,10,42) |
+             GT_SWAPBITPAIRS(kmer,50,12,38) |
+             GT_SWAPBITPAIRS(kmer,48,14,34) |
+             GT_SWAPBITPAIRS(kmer,46,16,30) |
+             GT_SWAPBITPAIRS(kmer,44,18,26) |
+             GT_SWAPBITPAIRS(kmer,42,20,22) |
+             GT_SWAPBITPAIRS(kmer,40,22,18) |
+             GT_SWAPBITPAIRS(kmer,38,24,14) |
+             GT_SWAPBITPAIRS(kmer,36,26,10) |
+             GT_SWAPBITPAIRS(kmer,34,28,6) |
+             GT_SWAPBITPAIRS(kmer,32,30,2);
 #endif
-    default: fprintf(stderr,"%s: illegal kmersize=%u\n",__func__,kmersize);
+    default: fprintf(stderr,"illegal kmersize=%u\n",kmersize);
              exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
 
-GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright)
+static GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright)
 {
   return kmer ^ maskright;
 }
@@ -908,12 +1093,11 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     unsigned long startpos,
                                     unsigned long endpos)
 {
-  unsigned long pos, unitindex;
+  unsigned long pos, unitindex, rightbound = totallength - kmersize;
   unsigned int shiftright;
   GtCodetype code;
   GtUchar cc;
   GtTwobitencoding currentencoding;
-  unsigned long rightbound = totallength - kmersize;
 
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
@@ -933,6 +1117,10 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   {
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
+    /*
+    printf("unitindex=%lu,startpos=%lu,kmersize=%u\n",
+           unitindex,startpos,kmersize);
+    */
     code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
     processkmercode(processkmercodeinfo,pos,
                     GT_ISDIRCOMPLEMENT(readmode)
@@ -1122,7 +1310,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                 realtotallength;
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
-  const GtCodetype maskright = (GtCodetype) (1 << GT_MULT2(kmersize))-1;
+  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
   bool mirrored = gt_encseq_is_mirrored(encseq);
 
   lastend = totallength = realtotallength = gt_encseq_total_length(encseq);
@@ -1238,10 +1426,13 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
                                               GT_UNUSED unsigned long position,
                                               GtCodetype scancode)
 {
-  GtCodetype firstmarkcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode);
+  GtCodetype prefixcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode),
+             secondmarkcode = GT_SCANCODE_TO_SECONDMARKCODE(scancode);
 
   gt_assert(sfi->sfxstrategy.spmopt_minlength > 0);
-  if (firstinrange || GT_ISIBITSET(sfi->markwholeleafbuckets,firstmarkcode))
+  if (firstinrange ||
+      (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
+       GT_ISIBITSET(sfi->marksuffixbuckets,secondmarkcode)))
   {
     gt_bcktab_leftborder_addcode(sfi->leftborder,
                                  GT_SCANCODE_TO_BCKCODE(scancode));
@@ -1289,18 +1480,20 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 
 #define SHOWCURRENTSPACE /* Nothing */
 
-static void gt_sfistorefirstcodes(void *processinfo,
+static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
                                   GT_UNUSED unsigned long pos,
                                   GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
-  GtCodetype firstmarkcode;
-
-  firstmarkcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode);
-
-  if (!GT_ISIBITSET(sfi->markwholeleafbuckets,firstmarkcode))
+  GtCodetype prefixcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode),
+             secondmarkcode = GT_SCANCODE_TO_SECONDMARKCODE(scancode);
+  if (!GT_ISIBITSET(sfi->markprefixbuckets,prefixcode))
   {
-    GT_SETIBIT(sfi->markwholeleafbuckets,firstmarkcode);
+    GT_SETIBIT(sfi->markprefixbuckets,prefixcode);
+  }
+  if (!GT_ISIBITSET(sfi->marksuffixbuckets,secondmarkcode))
+  {
+    GT_SETIBIT(sfi->marksuffixbuckets,secondmarkcode);
   }
 }
 
@@ -1383,11 +1576,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->prefixlength = prefixlength;
     sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->spmopt_kmerscansize = 0;
-    sfi->spmopt_numofallcodes = 0;
+    sfi->spmopt_numofallprefixcodes = 0;
+    sfi->spmopt_numofallsuffixcodes = 0;
     sfi->spmopt_kmerscancodeshift2bckcode = 0;
-    sfi->spmopt_kmerscancodeshift2firstmarkcode = 0;
+    sfi->spmopt_kmerscancodeshift2prefixcode = 0;
+    sfi->spmopt_kmerscancodesuffixmask = 0;
     sfi->dcov = NULL;
-    sfi->markwholeleafbuckets = NULL;
+    sfi->markprefixbuckets = NULL;
+    sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
     if (indexname != NULL)
     {
@@ -1489,28 +1685,46 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       const unsigned int firstlookaheadchars = 3U;
-      const unsigned int secondlookaheadchars = sfi->prefixlength;
+      const unsigned int secondlookaheadchars = sfi->prefixlength+2;
+
       sfi->spmopt_kmerscansize = sfi->prefixlength + firstlookaheadchars +
                                  secondlookaheadchars;
+      gt_assert(sfi->spmopt_kmerscansize <= (unsigned int) GT_UNITSIN2BITENC);
       sfi->spmopt_kmerscancodeshift2bckcode = GT_MULT2(firstlookaheadchars +
                                                        secondlookaheadchars);
-      sfi->spmopt_kmerscancodeshift2firstmarkcode
+      sfi->spmopt_kmerscancodeshift2prefixcode
         = GT_MULT2(secondlookaheadchars);
-      sfi->spmopt_numofallcodes
+      sfi->spmopt_kmerscancodesuffixmask
+        = (GtCodetype) ((1UL << GT_MULT2(secondlookaheadchars)) - 1);
+      sfi->spmopt_numofallprefixcodes
         = (unsigned long) pow((double) sfi->numofchars,
                               (double) (sfi->prefixlength +
                                         firstlookaheadchars));
-      gt_logger_log(sfi->logger,"compute occurrence of %u-mers of prefixes "
-                                "of all sequences",
+      gt_logger_log(sfi->logger,"for all sequences, keep track of "
+                                "%u-mers starting at position 0",
                                 sfi->prefixlength + firstlookaheadchars);
-      GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->spmopt_numofallcodes);
-      estimatedspace += sizeof (*sfi->markwholeleafbuckets *
-                                GT_NUMOFINTSFORBITS(sfi->spmopt_numofallcodes));
+      GT_INITBITTAB(sfi->markprefixbuckets,
+                    sfi->spmopt_numofallprefixcodes);
+      estimatedspace
+        += sizeof (*sfi->markprefixbuckets *
+           GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes));
+      sfi->spmopt_numofallsuffixcodes
+        = (unsigned long) pow((double) sfi->numofchars,
+                              (double) secondlookaheadchars);
+      gt_logger_log(sfi->logger,"for all sequences, keep track of "
+                                "%u-mers starting at position %u",
+                                secondlookaheadchars,
+                                sfi->prefixlength + firstlookaheadchars);
+      GT_INITBITTAB(sfi->marksuffixbuckets,
+                    sfi->spmopt_numofallsuffixcodes);
+      estimatedspace
+        += sizeof (*sfi->marksuffixbuckets *
+           GT_NUMOFINTSFORBITS(sfi->spmopt_numofallsuffixcodes));
       getencseqkmers_twobitencoding(encseq,
                                     sfi->readmode,
                                     sfi->spmopt_kmerscansize,
                                     true,
-                                    gt_sfistorefirstcodes,
+                                    gt_sfimarkprefixsuffixbuckets,
                                     sfi,
                                     NULL,
                                     NULL);
