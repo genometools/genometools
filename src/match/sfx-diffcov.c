@@ -1132,7 +1132,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
     }
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
-  (void) gt_bcktab_leftborderpartialsums(NULL,NULL,dcov->bcktab,NULL);
+  (void) gt_bcktab_leftborderpartialsums(NULL,NULL,dcov->bcktab);
   gt_logger_log(dcov->logger,
               "%lu positions are sampled (%.2f%%) pl=%u",
               dcov->samplesize,

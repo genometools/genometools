@@ -351,17 +351,12 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
     GtCodetype codesmall
       = (GtCodetype) (code >> sfi->spmopt_shiftrightlargecode);
     gt_assert(code < sfi->spmopt_numofallcodes);
-    gt_assert(sfi->spmopt_shiftrightlargecode > 0);
     if (codesmall >= sfi->currentmincode && codesmall <= sfi->currentmaxcode &&
         GT_ISIBITSET(sfi->markwholeleafbuckets,code))
     {
       unsigned long stidx;
 
       stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,codesmall);
-      /*
-      printf("insert position %lu at %lu for code=%lu,codesmall=%lu\n",
-               position,stidx,code,codesmall);
-      */
       /* from right to left */
       GT_SUFFIXSORTSPACE_EXPORT_SET(sfi->suffixsortspace,sfi->exportptr,stidx,
                                     position);
@@ -1239,10 +1234,6 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
   {
     GtCodetype codesmall = (GtCodetype)
                            (code >> sfi->spmopt_shiftrightlargecode);
-    /*
-    printf("count position %lu for code=%lu,codesmall=%lu\n",
-               position,code,codesmall);
-    */
     gt_bcktab_leftborder_addcode(sfi->leftborder,codesmall);
   }
 }
@@ -1483,16 +1474,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      const unsigned int addtoprefixlength = 2U;
+      const unsigned int addtoprefixlength = 3U;
       sfi->spmopt_shiftrightlargecode = GT_MULT2(addtoprefixlength);
       sfi->spmopt_kmersize = sfi->prefixlength + addtoprefixlength;
       sfi->spmopt_numofallcodes
         = (unsigned long) pow((double) sfi->numofchars,
                               (double) sfi->spmopt_kmersize);
-      printf("kmersize=%u,shift=%u,numofcodes=%lu\n",
-           sfi->spmopt_kmersize,
-           sfi->spmopt_shiftrightlargecode,
-           sfi->spmopt_numofallcodes);
       gt_logger_log(sfi->logger,"compute occurrence of %u-mers of prefixes "
                                 "of all sequences",sfi->spmopt_kmersize);
       GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->spmopt_numofallcodes);
@@ -1621,8 +1608,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     largestbucketsize
       = gt_bcktab_leftborderpartialsums(&saved_bucketswithoutwholeleaf,
                                         &numofsuffixestosort,
-                                        sfi->bcktab,NULL);
-                                        /*sfi->markwholeleafbuckets);*/
+                                        sfi->bcktab);
     gt_logger_log(sfi->logger, "largest bucket size=%lu",largestbucketsize);
     if (sfi->sfxstrategy.spmopt_minlength > 0)
     {

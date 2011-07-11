@@ -356,7 +356,6 @@ uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
   uint64_t numofallcodes, numofspecialcodes, sizeofbuckettable;
   GtCodetype *basepower;
 
-  numofallcodes = (uint64_t) pow((double) numofchars,(double) prefixlength);
   if (withspecialsuffixes)
   {
     if (prefixlength >= 2U)
@@ -373,6 +372,7 @@ uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
     basepower = NULL;
     numofspecialcodes = 0;
   }
+  numofallcodes = (uint64_t) pow((double) numofchars,(double) prefixlength);
   sizeofbuckettable
     = gt_bcktab_sizeoftable_generic(prefixlength,
                                     numofallcodes,
@@ -1402,39 +1402,21 @@ GtCodetype gt_bcktab_numofallcodes(const GtBcktab *bcktab)
 unsigned long gt_bcktab_leftborderpartialsums(
                              unsigned long *saved_bucketswithoutwholeleaf,
                              unsigned long *numofsuffixestosort,
-                             GtBcktab *bcktab,
-                             const GtBitsequence *markwholeleafbuckets)
+                             GtBcktab *bcktab)
 {
   unsigned long code, largestbucketsize, sumbuckets, saved = 0, currentsize;
 
   gt_assert(bcktab->numofallcodes > 0);
-  if (markwholeleafbuckets != NULL && !GT_ISIBITSET(markwholeleafbuckets,0))
-  {
-    saved += gt_bcktab_get(bcktab,0);
-    gt_bcktab_leftborder_assign(&bcktab->leftborder,0,0);
-    sumbuckets = 0;
-  } else
-  {
-    sumbuckets = gt_bcktab_get(bcktab,0);
-  }
-  largestbucketsize = sumbuckets;
+  largestbucketsize = sumbuckets = gt_bcktab_get(bcktab,0);
   for (code = 1UL; code < bcktab->numofallcodes; code++)
   {
     currentsize = gt_bcktab_get(bcktab,code);
-    if (markwholeleafbuckets != NULL &&
-        !GT_ISIBITSET(markwholeleafbuckets,code))
+    sumbuckets += currentsize;
+    if (largestbucketsize < currentsize)
     {
-      saved += currentsize;
-      gt_bcktab_leftborder_assign(&bcktab->leftborder,code,sumbuckets);
-    } else
-    {
-      sumbuckets += currentsize;
-      if (largestbucketsize < currentsize)
-      {
-        largestbucketsize = currentsize;
-      }
-      gt_bcktab_leftborder_assign(&bcktab->leftborder,code,sumbuckets);
+      largestbucketsize = currentsize;
     }
+    gt_bcktab_leftborder_assign(&bcktab->leftborder,code,sumbuckets);
   }
   gt_bcktab_leftborder_assign(&bcktab->leftborder,bcktab->numofallcodes,
                               sumbuckets);

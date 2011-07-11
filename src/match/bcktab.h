@@ -182,8 +182,7 @@ unsigned int gt_bcktab_prefixlength(const GtBcktab *bcktab);
 unsigned long gt_bcktab_leftborderpartialsums(
                              unsigned long *saved_bucketswithoutwholeleaf,
                              unsigned long *numofsuffixestosort,
-                             GtBcktab *bcktab,
-                             const GtBitsequence *markwholeleafbuckets);
+                             GtBcktab *bcktab);
 
 size_t gt_bcktab_sizeforlcpvalues(const GtBcktab *bcktab);
 
