@@ -103,8 +103,9 @@ struct Sfxiterator
   GtStr *bcktabfilename;
   unsigned int kmerfastmaskright;
   GtSuffixsortspace_exportptr *exportptr;
-  unsigned int spmopt_kmersize,
-               spmopt_shiftrightlargecode;
+  unsigned int spmopt_kmerscansize,
+               spmopt_kmerscancodeshift2bckcode,
+               spmopt_kmerscancodeshift2firstmarkcode;
   unsigned long spmopt_numofallcodes;
 };
 
@@ -328,35 +329,43 @@ static void updatekmercount(void *processinfo,
 #endif
 }
 
+#define GT_SCANCODE_TO_BCKCODE(CODE)\
+        (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2bckcode)
+
+#define GT_SCANCODE_TO_FIRSTMARKCODE(CODE)\
+        (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2firstmarkcode)
+
 static void gt_insertkmerwithoutspecial1(void *processinfo,
                                          GT_UNUSED bool firstinrange,
                                          unsigned long position,
-                                         GtCodetype code)
+                                         GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
   if (sfi->markwholeleafbuckets == NULL)
   {
-    if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
+    if (scancode >= sfi->currentmincode && scancode <= sfi->currentmaxcode)
     {
       unsigned long stidx;
 
-      stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,code);
+      stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,scancode);
       /* from right to left */
       GT_SUFFIXSORTSPACE_EXPORT_SET(sfi->suffixsortspace,sfi->exportptr,stidx,
                                     position);
     }
   } else
   {
-    GtCodetype codesmall
-      = (GtCodetype) (code >> sfi->spmopt_shiftrightlargecode);
-    gt_assert(code < sfi->spmopt_numofallcodes);
-    if (codesmall >= sfi->currentmincode && codesmall <= sfi->currentmaxcode &&
-        GT_ISIBITSET(sfi->markwholeleafbuckets,code))
+    GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(scancode),
+               firstmarkcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode);
+
+    gt_assert(firstmarkcode < sfi->spmopt_numofallcodes);
+    if (bcktabcode >= sfi->currentmincode &&
+        bcktabcode <= sfi->currentmaxcode &&
+        GT_ISIBITSET(sfi->markwholeleafbuckets,firstmarkcode))
     {
       unsigned long stidx;
 
-      stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,codesmall);
+      stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,bcktabcode);
       /* from right to left */
       GT_SUFFIXSORTSPACE_EXPORT_SET(sfi->suffixsortspace,sfi->exportptr,stidx,
                                     position);
@@ -1227,14 +1236,15 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
                                               bool firstinrange,
                                               GT_UNUSED unsigned long position,
-                                              GtCodetype code)
+                                              GtCodetype scancode)
 {
+  GtCodetype firstmarkcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode);
+
   gt_assert(sfi->sfxstrategy.spmopt_minlength > 0);
-  if (firstinrange || GT_ISIBITSET(sfi->markwholeleafbuckets,code))
+  if (firstinrange || GT_ISIBITSET(sfi->markwholeleafbuckets,firstmarkcode))
   {
-    GtCodetype codesmall = (GtCodetype)
-                           (code >> sfi->spmopt_shiftrightlargecode);
-    gt_bcktab_leftborder_addcode(sfi->leftborder,codesmall);
+    gt_bcktab_leftborder_addcode(sfi->leftborder,
+                                 GT_SCANCODE_TO_BCKCODE(scancode));
   }
 }
 
@@ -1281,13 +1291,16 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 
 static void gt_sfistorefirstcodes(void *processinfo,
                                   GT_UNUSED unsigned long pos,
-                                  GtCodetype code)
+                                  GtCodetype scancode)
 {
-  GtBitsequence *markwholeleafbuckets = (GtBitsequence *) processinfo;
+  Sfxiterator *sfi = (Sfxiterator *) processinfo;
+  GtCodetype firstmarkcode;
 
-  if (!GT_ISIBITSET(markwholeleafbuckets,code))
+  firstmarkcode = GT_SCANCODE_TO_FIRSTMARKCODE(scancode);
+
+  if (!GT_ISIBITSET(sfi->markwholeleafbuckets,firstmarkcode))
   {
-    GT_SETIBIT(markwholeleafbuckets,code);
+    GT_SETIBIT(sfi->markwholeleafbuckets,firstmarkcode);
   }
 }
 
@@ -1369,9 +1382,10 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->numofchars = gt_encseq_alphabetnumofchars(encseq);
     sfi->prefixlength = prefixlength;
     sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
-    sfi->spmopt_kmersize = 0;
+    sfi->spmopt_kmerscansize = 0;
     sfi->spmopt_numofallcodes = 0;
-    sfi->spmopt_shiftrightlargecode = 0;
+    sfi->spmopt_kmerscancodeshift2bckcode = 0;
+    sfi->spmopt_kmerscancodeshift2firstmarkcode = 0;
     sfi->dcov = NULL;
     sfi->markwholeleafbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
@@ -1474,23 +1488,30 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      const unsigned int addtoprefixlength = 3U;
-      sfi->spmopt_shiftrightlargecode = GT_MULT2(addtoprefixlength);
-      sfi->spmopt_kmersize = sfi->prefixlength + addtoprefixlength;
+      const unsigned int firstlookaheadchars = 3U;
+      const unsigned int secondlookaheadchars = sfi->prefixlength;
+      sfi->spmopt_kmerscansize = sfi->prefixlength + firstlookaheadchars +
+                                 secondlookaheadchars;
+      sfi->spmopt_kmerscancodeshift2bckcode = GT_MULT2(firstlookaheadchars +
+                                                       secondlookaheadchars);
+      sfi->spmopt_kmerscancodeshift2firstmarkcode
+        = GT_MULT2(secondlookaheadchars);
       sfi->spmopt_numofallcodes
         = (unsigned long) pow((double) sfi->numofchars,
-                              (double) sfi->spmopt_kmersize);
+                              (double) (sfi->prefixlength +
+                                        firstlookaheadchars));
       gt_logger_log(sfi->logger,"compute occurrence of %u-mers of prefixes "
-                                "of all sequences",sfi->spmopt_kmersize);
+                                "of all sequences",
+                                sfi->prefixlength + firstlookaheadchars);
       GT_INITBITTAB(sfi->markwholeleafbuckets,sfi->spmopt_numofallcodes);
       estimatedspace += sizeof (*sfi->markwholeleafbuckets *
                                 GT_NUMOFINTSFORBITS(sfi->spmopt_numofallcodes));
       getencseqkmers_twobitencoding(encseq,
                                     sfi->readmode,
-                                    sfi->spmopt_kmersize,
+                                    sfi->spmopt_kmerscansize,
                                     true,
                                     gt_sfistorefirstcodes,
-                                    sfi->markwholeleafbuckets,
+                                    sfi,
                                     NULL,
                                     NULL);
     }
@@ -1566,11 +1587,11 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                                          sfi);
         } else
         {
-          gt_assert(sfi->spmopt_kmersize > prefixlength);
+          gt_assert(sfi->spmopt_kmerscansize > prefixlength);
           spmopt_updateleftborder_getencseqkmers_twobitencoding(
                                             encseq,
                                             readmode,
-                                            sfi->spmopt_kmersize,
+                                            sfi->spmopt_kmerscansize,
                                             sfi->sfxstrategy.spmopt_minlength,
                                             sfi,
                                             NULL);
@@ -1798,7 +1819,7 @@ static void preparethispart(Sfxiterator *sfi)
                                      sfi->readmode,
                                      sfi->sfxstrategy.spmopt_minlength == 0
                                        ? sfi->prefixlength
-                                       : sfi->spmopt_kmersize,
+                                       : sfi->spmopt_kmerscansize,
                                      sfi->sfxstrategy.spmopt_minlength == 0
                                        ? sfi->prefixlength
                                        : sfi->sfxstrategy.spmopt_minlength,
