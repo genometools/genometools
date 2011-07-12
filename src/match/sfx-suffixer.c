@@ -338,8 +338,31 @@ static void updatekmercount(void *processinfo,
 #define GT_SCANCODE_TO_PREFIXCODE(CODE)\
         (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2prefixcode)
 
+#ifdef _LP64
 #define GT_SCANCODE_TO_SUFFIXCODE(CODE)\
         (GtCodetype) ((CODE) & sfi->spmopt_kmerscancodesuffixmask);
+
+static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
+                                        GtCodetype scancode)
+{
+  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
+  GtCodetype suffixcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
+
+  gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
+  gt_assert(suffixcode < sfi->spmopt_numofallsuffixcodes);
+  return (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
+          GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)) ? true : false;
+}
+#else
+static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
+                                        GtCodetype scancode)
+{
+  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
+
+  gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
+  return GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) ? true : false;
+}
+#endif
 
 static void gt_insertkmerwithoutspecial1(void *processinfo,
                                          bool firstinrange,
@@ -361,17 +384,11 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
     }
   } else
   {
-    GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(scancode),
-               prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode),
-               suffixcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
+    GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(scancode);
 
-    gt_assert(sfi->marksuffixbuckets != NULL);
-    gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
     if (bcktabcode >= sfi->currentmincode &&
         bcktabcode <= sfi->currentmaxcode &&
-        (firstinrange ||
-         (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
-         GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode))))
+        (firstinrange || gt_checksuffixprefixbuckets(sfi,scancode)))
     {
       unsigned long stidx;
 
@@ -1426,13 +1443,8 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
                                               GT_UNUSED unsigned long position,
                                               GtCodetype scancode)
 {
-  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode),
-             suffixcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
-
   gt_assert(sfi->sfxstrategy.spmopt_minlength > 0);
-  if (firstinrange ||
-      (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
-       GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)))
+  if (firstinrange || gt_checksuffixprefixbuckets(sfi,scancode))
   {
     gt_bcktab_leftborder_addcode(sfi->leftborder,
                                  GT_SCANCODE_TO_BCKCODE(scancode));
@@ -1485,17 +1497,19 @@ static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
                                   GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
-  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode),
-             suffixcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
+  GtCodetype checkcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
 
-  if (!GT_ISIBITSET(sfi->markprefixbuckets,prefixcode))
+  if (!GT_ISIBITSET(sfi->markprefixbuckets,checkcode))
   {
-    GT_SETIBIT(sfi->markprefixbuckets,prefixcode);
+    GT_SETIBIT(sfi->markprefixbuckets,checkcode);
   }
-  if (!GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode))
+#ifdef _LP64
+  checkcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
+  if (!GT_ISIBITSET(sfi->marksuffixbuckets,checkcode))
   {
-    GT_SETIBIT(sfi->marksuffixbuckets,suffixcode);
+    GT_SETIBIT(sfi->marksuffixbuckets,checkcode);
   }
+#endif
 }
 
 Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
@@ -1686,8 +1700,13 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       const unsigned int additionalprefixchars = 3U;
+      size_t sizeofprefixmarks;
+#ifdef _LP64
       const unsigned int suffixchars = sfi->prefixlength+2;
-      size_t sizeofsuffixmarks, sizeofprefixmarks;
+      size_t sizeofsuffixmarks;
+#else
+      const unsigned int suffixchars = 0;
+#endif
 
       sfi->spmopt_kmerscansize = sfi->prefixlength + additionalprefixchars +
                                  suffixchars;
@@ -1716,6 +1735,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       sfi->spmopt_numofallsuffixcodes
         = (unsigned long) pow((double) sfi->numofchars,
                               (double) suffixchars);
+#ifdef _LP64
       GT_INITBITTAB(sfi->marksuffixbuckets,
                     sfi->spmopt_numofallsuffixcodes);
       sizeofsuffixmarks
@@ -1728,6 +1748,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 suffixchars,
                                 sfi->prefixlength + additionalprefixchars,
                                 (unsigned long) sizeofsuffixmarks);
+#endif
       getencseqkmers_twobitencoding(encseq,
                                     sfi->readmode,
                                     sfi->spmopt_kmerscansize,

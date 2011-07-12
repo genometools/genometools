@@ -37,6 +37,9 @@ def parseargs(argv)
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
   end
+  opts.on("--m32","compile 32 bit binary") do |x|
+    options.m64 = false
+  end
   opts.on("--speed","optimize for speed") do |x|
     options.speed = true
   end
