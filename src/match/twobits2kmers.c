@@ -19,6 +19,7 @@
 #include "core/intbits.h"
 #include "core/encseq_api.h"
 #include "core/encseq.h"
+#include "core/codetype.h"
 #include "core/format64.h"
 #include "sfx-mappedstr.h"
 #include "sfx-suffixer.h"
@@ -179,8 +180,38 @@ static void multireadmode_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 typedef struct
 {
   GtBitsequence *codeoccurrence;
-  unsigned long differentcodes, countpositions;
+  unsigned long differentcodes, countsequences, *allfirstcodes,
+                numofallcodes, numofsequences;
 } GtFirstcodesinfo;
+
+static int gt_firstcodes_cmp(const void *a,const void *b)
+{
+  unsigned long av = *((const unsigned long *) a);
+  unsigned long bv = *((const unsigned long *) b);
+
+  return av < bv ? -1 : (av > bv ? +1 : 0);
+}
+
+static unsigned long gt_remdups_insortedarray(unsigned long *values,
+                                              unsigned long num)
+{
+  unsigned long *storeptr, *readptr;
+
+  if (num > 0)
+  {
+    for (storeptr = values, readptr = values+1; readptr < values + num;
+         readptr++)
+    {
+      if (*storeptr != *readptr)
+      {
+        storeptr++;
+        *storeptr = *readptr;
+      }
+    }
+    return (unsigned long) (storeptr - values);
+  }
+  return 0;
+}
 
 static void gt_storefirstcodes(void *processinfo,
                                GT_UNUSED unsigned long pos,
@@ -188,12 +219,22 @@ static void gt_storefirstcodes(void *processinfo,
 {
   GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
 
-  firstcodesinfo->countpositions++;
-  if (!GT_ISIBITSET(firstcodesinfo->codeoccurrence,code))
+  if (firstcodesinfo->codeoccurrence != NULL)
   {
-    firstcodesinfo->differentcodes++;
-    GT_SETIBIT(firstcodesinfo->codeoccurrence,code);
+    gt_assert(code < firstcodesinfo->numofallcodes);
+    if (!GT_ISIBITSET(firstcodesinfo->codeoccurrence,code))
+    {
+      firstcodesinfo->differentcodes++;
+      GT_SETIBIT(firstcodesinfo->codeoccurrence,code);
+    }
+  } else
+  {
+    gt_assert(firstcodesinfo->allfirstcodes != NULL &&
+              firstcodesinfo->countsequences <
+              firstcodesinfo->numofsequences);
+    firstcodesinfo->allfirstcodes[firstcodesinfo->countsequences] = code;
   }
+  firstcodesinfo->countsequences++;
 }
 
 static void storefirstcodes_getencseqkmers_twobitencoding(
@@ -201,13 +242,37 @@ static void storefirstcodes_getencseqkmers_twobitencoding(
                                          unsigned int kmersize)
 {
   GtFirstcodesinfo firstcodesinfo;
-  GtCodetype numofallcodes;
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
+  size_t sizeforbittable, sizeforcodestable;
 
-  numofallcodes = (unsigned long) pow((double) numofchars,(double) kmersize);
-  GT_INITBITTAB(firstcodesinfo.codeoccurrence,numofallcodes);
+  firstcodesinfo.numofsequences = gt_encseq_num_of_sequences(encseq);
+  gt_assert(numofchars == 4U);
+  if (kmersize == (unsigned int) GT_UNITSIN2BITENC)
+  {
+    firstcodesinfo.numofallcodes = 0; /* undefined as 4^32 > ULONG_MAX */
+    sizeforbittable = 0;
+  } else
+  {
+    firstcodesinfo.numofallcodes = 1UL << GT_MULT2(kmersize);
+    sizeforbittable = sizeof (*firstcodesinfo.codeoccurrence) *
+                      GT_NUMOFINTSFORBITS(firstcodesinfo.numofallcodes);
+  }
+  sizeforcodestable = sizeof (*firstcodesinfo.allfirstcodes) *
+                      firstcodesinfo.numofsequences;
+  firstcodesinfo.allfirstcodes = NULL;
+  firstcodesinfo.codeoccurrence = NULL;
+  if (kmersize == (unsigned int) GT_UNITSIN2BITENC ||
+      sizeforcodestable < sizeforbittable)
+  {
+    printf("# use array of size %lu\n",(unsigned long) sizeforcodestable);
+    firstcodesinfo.allfirstcodes = gt_malloc(sizeforcodestable);
+  } else
+  {
+    printf("# use bittable of size %lu\n",(unsigned long) sizeforbittable);
+    GT_INITBITTAB(firstcodesinfo.codeoccurrence,firstcodesinfo.numofallcodes);
+  }
   firstcodesinfo.differentcodes = 0;
-  firstcodesinfo.countpositions = 0;
+  firstcodesinfo.countsequences = 0;
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
@@ -216,10 +281,20 @@ static void storefirstcodes_getencseqkmers_twobitencoding(
                                 &firstcodesinfo,
                                 NULL,
                                 NULL);
-  printf("differentcodes=%lu (%.2f) in %lu positions\n",
+  gt_assert(firstcodesinfo.numofsequences == firstcodesinfo.countsequences);
+  if (firstcodesinfo.allfirstcodes != NULL)
+  {
+    qsort(firstcodesinfo.allfirstcodes,(size_t) firstcodesinfo.numofsequences,
+          sizeof (*firstcodesinfo.allfirstcodes),gt_firstcodes_cmp);
+    firstcodesinfo.differentcodes
+      = gt_remdups_insortedarray(firstcodesinfo.allfirstcodes,
+                                 firstcodesinfo.numofsequences);
+  }
+  printf("numer of different codes=%lu (%.4f) in %lu sequences\n",
           firstcodesinfo.differentcodes,
-          (double) firstcodesinfo.differentcodes/numofallcodes,
-          firstcodesinfo.countpositions);
+          (double) firstcodesinfo.differentcodes/firstcodesinfo.numofsequences,
+          firstcodesinfo.countsequences);
+  gt_free(firstcodesinfo.allfirstcodes);
   gt_free(firstcodesinfo.codeoccurrence);
 }
 
@@ -234,7 +309,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
   const GtTwobitencoding *twobitencoding;
   Multicharacterbitstreamstate mcbs;
 
-  gt_assert(kmersize < (unsigned int) GT_UNITSIN2BITENC);
+  gt_assert(kmersize <= (unsigned int) GT_UNITSIN2BITENC);
   totallength = gt_encseq_total_length(encseq);
   if (totallength < (unsigned long) kmersize)
   {

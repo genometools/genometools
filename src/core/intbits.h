@@ -79,6 +79,9 @@ typedef GtBitsequence GtTwobitencoding;
 #define GT_DIVBYUNITSIN2BITENC(V)      ((V) >> (GT_LOGWORDSIZE-1))
 #define GT_MODBYUNITSIN2BITENC(V)      ((V) & ((1 << (GT_LOGWORDSIZE-1))-1))
 
+#define GT_MASKRIGHT(KMERSIZE)\
+        (~0UL >> GT_MULT2(GT_UNITSIN2BITENC - (KMERSIZE)))
+
 #define GT_DIVWORDSIZE(I)\
         ((I) >> GT_LOGWORDSIZE)              /* \((I) div w\) */
 

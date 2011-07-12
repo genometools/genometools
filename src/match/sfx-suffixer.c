@@ -721,9 +721,9 @@ GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
                                    unsigned long pos,
                                    unsigned int kmersize)
 {
-  unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
-  unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
-  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
+  const unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
+  const unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
+  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
 
   if (unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)
   {
@@ -744,7 +744,7 @@ GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
 GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize)
 {
-  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
+  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
   return (GtCodetype) (twobitencoding[0] >>
                        GT_MULT2(GT_UNITSIN2BITENC - kmersize)) & maskright;
 }
@@ -1327,7 +1327,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                 realtotallength;
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
-  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
+  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
   bool mirrored = gt_encseq_is_mirrored(encseq);
 
   lastend = totallength = realtotallength = gt_encseq_total_length(encseq);

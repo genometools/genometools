@@ -229,7 +229,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                 realtotallength;
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
-  const GtCodetype maskright = (GtCodetype) (1UL << GT_MULT2(kmersize))-1;
+  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
   bool mirrored = gt_encseq_is_mirrored(encseq);
 
   lastend = totallength = realtotallength = gt_encseq_total_length(encseq);
