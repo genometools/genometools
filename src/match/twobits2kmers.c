@@ -138,6 +138,7 @@ static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
 }
 
 static void gt_checkkmercode(void *processinfo,
+                             GT_UNUSED bool firstinrange,
                              GT_UNUSED unsigned long pos,
                              GT_UNUSED GtCodetype code)
 {
@@ -181,7 +182,7 @@ typedef struct
 {
   GtBitsequence *codeoccurrence;
   unsigned long differentcodes, countsequences, *allfirstcodes,
-                numofallcodes, numofsequences;
+                numofallcodes, numofsequences, *countocc;
 } GtFirstcodesinfo;
 
 static int gt_firstcodes_cmp(const void *a,const void *b)
@@ -192,33 +193,76 @@ static int gt_firstcodes_cmp(const void *a,const void *b)
   return av < bv ? -1 : (av > bv ? +1 : 0);
 }
 
-static unsigned long gt_remdups_insortedarray(unsigned long *values,
-                                              unsigned long num)
+static unsigned long gt_remdups_in_sorted_array(
+                                  GtFirstcodesinfo *firstcodesinfo)
 {
   unsigned long *storeptr, *readptr;
 
-  if (num > 0)
+  if (firstcodesinfo->numofsequences > 0)
   {
-    for (storeptr = values, readptr = values+1; readptr < values + num;
+    unsigned long numofdifferentcodes;
+
+    firstcodesinfo->countocc
+      = gt_calloc((size_t) firstcodesinfo->numofsequences,
+                  sizeof (*firstcodesinfo->countocc));
+    firstcodesinfo->countocc[0] = 1UL;
+#ifdef FIRSTCODEDEBUG
+    printf("code=%lu\n",firstcodesinfo->allfirstcodes[0]);
+#endif
+    for (storeptr = firstcodesinfo->allfirstcodes,
+         readptr = firstcodesinfo->allfirstcodes+1;
+         readptr < firstcodesinfo->allfirstcodes +
+                   firstcodesinfo->numofsequences;
          readptr++)
     {
+#ifdef FIRSTCODEDEBUG
+      printf("code=%lu\n",*readptr);
+#endif
       if (*storeptr != *readptr)
       {
         storeptr++;
         *storeptr = *readptr;
       }
+      firstcodesinfo->countocc[(unsigned long)
+                               (storeptr - firstcodesinfo->allfirstcodes)]++;
     }
-    return (unsigned long) (storeptr - values);
+    numofdifferentcodes
+      = (unsigned long) (storeptr - firstcodesinfo->allfirstcodes + 1);
+    if (numofdifferentcodes < firstcodesinfo->numofsequences)
+    {
+      firstcodesinfo->allfirstcodes
+        = gt_realloc(firstcodesinfo->allfirstcodes,
+                     sizeof (*firstcodesinfo->allfirstcodes) *
+                     numofdifferentcodes);
+      firstcodesinfo->countocc
+        = gt_realloc(firstcodesinfo->countocc,
+                     sizeof (*firstcodesinfo->countocc) *
+                     numofdifferentcodes);
+    }
+    {
+#ifdef FIRSTCODEDEBUG
+      unsigned long idx;
+      for (idx=0; idx<numofdifferentcodes;idx++)
+      {
+        printf("%lu: code=%lu,occ=%lu\n",idx,firstcodesinfo->allfirstcodes[idx],
+                                         firstcodesinfo->countocc[idx]);
+      }
+#endif
+    }
+    gt_assert(firstcodesinfo->countocc != NULL);
+    return numofdifferentcodes;
   }
   return 0;
 }
 
 static void gt_storefirstcodes(void *processinfo,
+                               GT_UNUSED bool firstinrange,
                                GT_UNUSED unsigned long pos,
                                GtCodetype code)
 {
   GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
 
+  gt_assert(firstinrange);
   if (firstcodesinfo->codeoccurrence != NULL)
   {
     gt_assert(code < firstcodesinfo->numofallcodes);
@@ -235,6 +279,62 @@ static void gt_storefirstcodes(void *processinfo,
     firstcodesinfo->allfirstcodes[firstcodesinfo->countsequences] = code;
   }
   firstcodesinfo->countsequences++;
+}
+
+const unsigned long *gt_firstcodes_find(const unsigned long *leftptr,
+                                        const unsigned long *rightptr,
+                                        unsigned long code)
+{
+  const unsigned long *midptr;
+
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    if (code < *midptr)
+    {
+      rightptr = midptr-1;
+    } else
+    {
+      if (code > *midptr)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr;
+      }
+    }
+  }
+  return NULL;
+}
+
+static void gt_checkfirstcodesocc(void *processinfo,
+                                  bool firstinrange,
+                                  GT_UNUSED unsigned long pos,
+                                  GtCodetype code)
+{
+  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+  gt_assert(firstinrange);
+
+  gt_assert(firstinrange);
+  if (firstcodesinfo->countocc != NULL)
+  {
+    const unsigned long *ptr;
+    unsigned long idx;
+
+    gt_assert(firstcodesinfo->countocc != NULL &&
+              firstcodesinfo->allfirstcodes);
+
+    ptr = gt_firstcodes_find(firstcodesinfo->allfirstcodes,
+                             firstcodesinfo->allfirstcodes +
+                             firstcodesinfo->differentcodes - 1,code);
+    gt_assert (ptr != NULL);
+    idx = (unsigned long) (ptr - firstcodesinfo->allfirstcodes);
+    /*
+    printf("found code %lu at idx %lu\n",code,idx);
+    */
+    gt_assert(firstcodesinfo->countocc[idx] > 0);
+    firstcodesinfo->countocc[idx]--;
+  }
 }
 
 static void storefirstcodes_getencseqkmers_twobitencoding(
@@ -287,14 +387,37 @@ static void storefirstcodes_getencseqkmers_twobitencoding(
     qsort(firstcodesinfo.allfirstcodes,(size_t) firstcodesinfo.numofsequences,
           sizeof (*firstcodesinfo.allfirstcodes),gt_firstcodes_cmp);
     firstcodesinfo.differentcodes
-      = gt_remdups_insortedarray(firstcodesinfo.allfirstcodes,
-                                 firstcodesinfo.numofsequences);
+      = gt_remdups_in_sorted_array(&firstcodesinfo);
   }
-  printf("numer of different codes=%lu (%.4f) in %lu sequences\n",
+  printf("# number of different codes=%lu (%.4f) in %lu sequences\n",
           firstcodesinfo.differentcodes,
           (double) firstcodesinfo.differentcodes/firstcodesinfo.numofsequences,
           firstcodesinfo.countsequences);
+  if (firstcodesinfo.allfirstcodes != NULL)
+  {
+    unsigned long idx;
+
+    getencseqkmers_twobitencoding(encseq,
+                                  GT_READMODE_FORWARD,
+                                  kmersize,
+                                  true,
+                                  gt_checkfirstcodesocc,
+                                  &firstcodesinfo,
+                                  NULL,
+                                  NULL);
+    gt_assert(firstcodesinfo.countocc != NULL);
+    for (idx = 0; idx < firstcodesinfo.differentcodes; idx++)
+    {
+      if (firstcodesinfo.countocc[idx] != 0)
+      {
+        fprintf(stderr,"countocc[%lu]=%lu!=0\n",idx,
+                 firstcodesinfo.countocc[idx]);
+      }
+      gt_assert (firstcodesinfo.countocc[idx] == 0);
+    }
+  }
   gt_free(firstcodesinfo.allfirstcodes);
+  gt_free(firstcodesinfo.countocc);
   gt_free(firstcodesinfo.codeoccurrence);
 }
 

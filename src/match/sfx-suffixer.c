@@ -1103,6 +1103,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     GtReadmode readmode,
                                     unsigned int kmersize,
                                     void(*processkmercode)(void *,
+                                                           bool,
                                                            unsigned long,
                                                            GtCodetype),
                                     void *processkmercodeinfo,
@@ -1126,6 +1127,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                                        kmersize),
                                kmersize);
     processkmercode(processkmercodeinfo,
+                    true,
                     ADJUSTREVERSEPOS(pos),
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
@@ -1139,7 +1141,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
            unitindex,startpos,kmersize);
     */
     code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
-    processkmercode(processkmercodeinfo,pos,
+    processkmercode(processkmercodeinfo,true,pos,
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
@@ -1159,7 +1161,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
-      processkmercode(processkmercodeinfo,ADJUSTREVERSEPOS(pos),
+      processkmercode(processkmercodeinfo,false,ADJUSTREVERSEPOS(pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);
@@ -1188,7 +1190,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
-      processkmercode(processkmercodeinfo,pos,
+      processkmercode(processkmercodeinfo,false,pos,
                        (readmode == GT_READMODE_COMPL)
                          ? gt_kmercode_complement(code,maskright)
                          : code);
@@ -1220,6 +1222,7 @@ static void getencseqkmers_rangetwobitencoding(
                                       unsigned int kmersize,
                                       bool onlyfirst,
                                       void(*processkmercode)(void *,
+                                                             bool,
                                                              unsigned long,
                                                              GtCodetype),
                                       void *processkmercodeinfo,
@@ -1313,6 +1316,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    unsigned int kmersize,
                                    bool onlyfirst,
                                    void(*processkmercode)(void *,
+                                                          bool,
                                                           unsigned long,
                                                           GtCodetype),
                                    void *processkmercodeinfo,
@@ -1493,12 +1497,14 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 #define SHOWCURRENTSPACE /* Nothing */
 
 static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
-                                  GT_UNUSED unsigned long pos,
-                                  GtCodetype scancode)
+                                          GT_UNUSED bool firstinrange,
+                                          GT_UNUSED unsigned long pos,
+                                          GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
   GtCodetype checkcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
 
+  gt_assert(firstinrange);
   if (!GT_ISIBITSET(sfi->markprefixbuckets,checkcode))
   {
     GT_SETIBIT(sfi->markprefixbuckets,checkcode);
