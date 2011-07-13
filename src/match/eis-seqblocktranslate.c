@@ -20,6 +20,7 @@
 
 #include "core/bitpackstring.h"
 #include "core/combinatorics.h"
+#include "core/mathsupport.h"
 #include "core/dynalloc.h"
 #include "core/log.h"
 #include "core/ma_api.h"
@@ -227,9 +228,9 @@ gt_initCompositionList(struct compList *newList, unsigned blockSize,
     gt_log_log("permSum=%lu, alphabetSize=%lu, blockSize=%d, "
             "pow(alphabetSize, blockSize)=%f",
             (unsigned long)permSum, (unsigned long)alphabetSize, blockSize,
-            pow(alphabetSize, blockSize));
+            gt_power_for_small_exponents(alphabetSize, blockSize));
 #endif
-    gt_assert(permSum == pow(alphabetSize, blockSize));
+    gt_assert(permSum == gt_power_for_small_exponents(alphabetSize, blockSize));
   }
   newList->maxPermIdxBits = gt_requiredUInt64Bits(maxNumPermutations - 1);
   gt_free(composition);

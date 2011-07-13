@@ -42,9 +42,12 @@ char          gt_rand_char(void);
 
 /* Find the log base 2 of an integer in O(wordsize) operations */
 
-#define GT_MAXLOG2VALUE 63
-
 unsigned int gt_determinebitspervalue(uint64_t maxvalue);
+
+/* Determine pow(base,exponent) for small values of exponent */
+
+unsigned long gt_power_for_small_exponents(unsigned int base,
+                                           unsigned int exponent);
 
 int gt_mathsupport_unit_test(GtError *err);
 

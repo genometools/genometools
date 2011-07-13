@@ -126,8 +126,90 @@ unsigned int gt_determinebitspervalue(uint64_t maxvalue)
   {
     bits++;
   }
+#define GT_MAXLOG2VALUE 63
   gt_assert(bits <= GT_MAXLOG2VALUE);
   return bits;
+}
+
+unsigned long gt_power_for_small_exponents(unsigned int base,
+                                           unsigned int exponent)
+{
+  unsigned int logvalue = 0;
+
+  if (exponent == 0)
+  {
+    return 1UL;
+  }
+  switch (base)
+  {
+    case 2UL:
+      logvalue = 1U;
+      break;
+    case 4UL:
+      logvalue = 2U;
+      break;
+    case 8UL:
+      logvalue = 3U;
+      break;
+    case 16UL:
+      logvalue = 4U;
+      break;
+    case 32UL:
+      logvalue = 5U;
+      break;
+    case 64:
+      logvalue = 6U;
+      break;
+    case 128:
+      logvalue = 7U;
+      break;
+    case 256:
+      logvalue = 8U;
+      break;
+  }
+  if (logvalue > 0)
+  {
+    gt_assert(logvalue * exponent < sizeof (void *) * 8);
+    return 1UL << (logvalue * exponent);
+  } else
+  {
+    unsigned long powervalue = (unsigned long) base;
+
+    while (exponent > 1U)
+    {
+      powervalue *= base;
+      exponent--;
+    }
+    return powervalue;
+  }
+}
+
+/* Make some unit tests for this? */
+
+void gt_out_power_for_small_exponents(void)
+{
+  unsigned int exponent;
+
+  for (exponent=1U; exponent<64U; exponent++)
+  {
+    printf("pow(2UL,%u)=%lu\n",exponent,
+            gt_power_for_small_exponents(2U,exponent));
+  }
+  for (exponent=1U; exponent<32U; exponent++)
+  {
+    printf("pow(4UL,%u)=%lu\n",exponent,
+            gt_power_for_small_exponents(4U,exponent));
+  }
+  for (exponent=1U; exponent<16U; exponent++)
+  {
+    printf("pow(8UL,%u)=%lu\n",exponent,
+            gt_power_for_small_exponents(8U,exponent));
+  }
+  for (exponent=1U; exponent<32U; exponent++)
+  {
+    printf("pow(3UL,%u)=%lu\n",exponent,
+            gt_power_for_small_exponents(3U,exponent));
+  }
 }
 
 int gt_mathsupport_unit_test(GtError *err)

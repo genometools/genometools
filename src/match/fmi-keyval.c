@@ -17,14 +17,9 @@
 
 #include <math.h>
 #include "core/divmodmul.h"
+#include "core/mathsupport.h"
 #include "core/safecast-gen.h"
 #include "fmindex.h"
-
-unsigned long gt_determinenumofcodes(unsigned int numofchars,
-                                     unsigned int prefixlength)
-{
-  return (unsigned long) pow((double) numofchars,(double) prefixlength);
-}
 
 unsigned long gt_determinenumberofspecialstostore(const GtSpecialcharinfo
                                                         *specialcharinfo)
@@ -101,7 +96,8 @@ void gt_computefmkeyvalues (Fmindex *fm,
   fm->suffixlength = suffixlength;
   if (fm->suffixlength > 0)
   {
-    fm->numofcodes = gt_determinenumofcodes(fm->mapsize-1,fm->suffixlength);
+    fm->numofcodes = gt_power_for_small_exponents(fm->mapsize-1,
+                                                  fm->suffixlength);
   } else
   {
     fm->numofcodes = 0;

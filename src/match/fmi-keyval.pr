@@ -1,9 +1,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-unsigned long gt_determinenumofcodes(unsigned int numofchars,
-                                     unsigned int prefixlength);
-
 unsigned long gt_determinenumberofspecialstostore(const GtSpecialcharinfo
                                                         *specialcharinfo);
 

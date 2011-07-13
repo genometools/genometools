@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include "core/unused_api.h"
+#include "core/mathsupport.h"
 #include "esa-seqread.h"
 #include "esa-spmitvs.h"
 #include "esa-bottomup.h"
@@ -169,10 +170,8 @@ int gt_process_spmitv(const char *inputindex, GtLogger *logger, GtError *err)
     memset(state.wholeleafcount,0,
            sizeof (*state.wholeleafcount) * (state.maxlen+1));
     numofchars = gt_encseq_alphabetnumofchars(state.encseq);
-    numofallcodes = (unsigned long) pow((double) numofchars,
-                                        (double) state.prefixlength);
+    numofallcodes = gt_power_for_small_exponents(numofchars,state.prefixlength);
     nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-
     if (gt_esa_bottomup(ssar, NULL, NULL, processleafedge_spmitv,
                         processbranchingedge_spmitv,
                         processlcpinterval_spmitv,

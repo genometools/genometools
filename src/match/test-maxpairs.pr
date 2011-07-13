@@ -1,13 +1,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int gt_testmaxpairs(GT_UNUSED const char *indexname,
-                    GT_UNUSED unsigned long samples,
-                    GT_UNUSED unsigned int minlength,
-                    GT_UNUSED unsigned long substringlength,
-                    GT_UNUSED GtLogger *logger,
-                    GT_UNUSED GtError *err);
-
 int gt_testmaxpairs(const char *indexname,
                     unsigned long samples,
                     unsigned int minlength,

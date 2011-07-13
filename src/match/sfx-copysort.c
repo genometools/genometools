@@ -19,6 +19,7 @@
 #include "core/ma_api.h"
 #include "core/qsort_r.h"
 #include "core/array2dim_api.h"
+#include "core/mathsupport.h"
 #include "bcktab.h"
 #include "kmer2string.h"
 #include "core/logger.h"
@@ -309,8 +310,8 @@ static void fillanysubbuckets(GtBucketspec2 *bucketspec2,
 
   maxcode = gt_bcktab_numofallcodes(bcktab) - 1;
   bucketspec2->expandfactor
-    = (GtCodetype) pow((double) bucketspec2->numofchars,
-                     (double) (bucketspec2->prefixlength-2));
+    = (GtCodetype) gt_power_for_small_exponents(bucketspec2->numofchars,
+                                                bucketspec2->prefixlength-2);
   bucketspec2->expandfillsum = gt_bcktab_filltable(bcktab,2U);
 #ifdef SHOWBUCKETSPEC2
   showexpandcode(bucketspec2,bucketspec2->prefixlength);

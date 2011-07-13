@@ -2,14 +2,14 @@
 extern "C" {
 #endif
 int gt_flushfmindex2file(FILE *fp,
-                      Fmindex *fmindex,
-                      bool storeindexpos,
-                      GtError *err);
+                         Fmindex *fmindex,
+                         bool storeindexpos,
+                         GtError *err);
 
 int gt_fillfmmapspecstartptr(Fmindex *fmindex,
-                          bool storeindexpos,
-                          const GtStr *tmpfilename,
-                          GtError *err);
+                             bool storeindexpos,
+                             const GtStr *tmpfilename,
+                             GtError *err);
 
 #ifdef __cplusplus
 }

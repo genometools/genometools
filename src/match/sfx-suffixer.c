@@ -1718,9 +1718,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       sfi->spmopt_kmerscancodesuffixmask
         = (GtCodetype) ((1UL << GT_MULT2(suffixchars)) - 1);
       sfi->spmopt_numofallprefixcodes
-        = (unsigned long) pow((double) sfi->numofchars,
-                              (double) (sfi->prefixlength +
-                                        additionalprefixchars));
+        = gt_power_for_small_exponents(sfi->numofchars,
+                                       sfi->prefixlength +
+                                       additionalprefixchars);
       GT_INITBITTAB(sfi->markprefixbuckets,
                     sfi->spmopt_numofallprefixcodes);
       sizeofprefixmarks
@@ -1733,8 +1733,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 sfi->prefixlength + additionalprefixchars,
                                 sizeofprefixmarks);
       sfi->spmopt_numofallsuffixcodes
-        = (unsigned long) pow((double) sfi->numofchars,
-                              (double) suffixchars);
+        = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
 #ifdef _LP64
       GT_INITBITTAB(sfi->marksuffixbuckets,
                     sfi->spmopt_numofallsuffixcodes);

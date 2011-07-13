@@ -52,15 +52,18 @@ eis-voiditf.c
 eis-specialsrank.c
 encodedseq.c
 enum-patt.c
+esa-bottomup.c
 esa-dfs.c
 esa-maxpairs.c
 esa-merge.c
+esa-lcpintervals.c
 esa-lcpval.c
 esa-map.c
 esa-mmsearch.c
 esa-ppbuckwid.c
 esa-seqread.c
 esa-shulen.c
+esa-spmitvs.c
 esa-splititv.c
 giextract.c
 greedyfwdmat.c
@@ -74,6 +77,7 @@ initeqsvec.c
 inl-encseq.c
 iter-window.c
 kmer2string.c
+lua_tools.c
 mapspec-gen.c
 measure-time.c
 merger-trie.c
@@ -97,6 +101,7 @@ sfx-diffcov.c
 sfx-copysort.c
 sfx-enumcodes.c
 sfx-input.c
+sfx-lcpvalues.c
 sfx-linlcp.c
 sfx-mappedstr.c
 sfx-outprj.c
@@ -114,6 +119,7 @@ shu-divergence.c
 shu-encseq-gc.c
 shu-genomediff-pck-simple.c
 shu-genomediff.c
+shu-unitfile.c
 twobits2kmers.c
 spaced-seeds.c
 specialrank.c

@@ -323,8 +323,8 @@ static bool gt_bcktab_useulong(unsigned long maxvalue)
 }
 
 static uint64_t gt_bcktab_sizeoftable_generic(unsigned int prefixlength,
-                                              uint64_t numofallcodes,
-                                              uint64_t numofspecialcodes,
+                                              unsigned long numofallcodes,
+                                              unsigned long numofspecialcodes,
                                               bool useulong,
                                               const GtCodetype *basepower,
                                               bool countdistpfxidx,
@@ -334,10 +334,10 @@ static uint64_t gt_bcktab_sizeoftable_generic(unsigned int prefixlength,
   size_t sizeofbasetype;
 
   sizeofbasetype = useulong ? sizeof (unsigned long) : sizeof (uint32_t);
-  sizeoftable = (uint64_t) sizeofbasetype * (numofallcodes + 1);
+  sizeoftable = (uint64_t) sizeofbasetype * (uint64_t) (numofallcodes + 1);
   if (withspecialsuffixes)
   {
-    sizeoftable += sizeofbasetype * numofspecialcodes;
+    sizeoftable += sizeofbasetype * (uint64_t) numofspecialcodes;
     if (countdistpfxidx)
     {
       sizeoftable += (uint64_t) sizeofbasetype *
@@ -353,7 +353,8 @@ uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
                                unsigned long maxvalue,
                                bool withspecialsuffixes)
 {
-  uint64_t numofallcodes, numofspecialcodes, sizeofbuckettable;
+  unsigned long numofallcodes, numofspecialcodes;
+  uint64_t sizeofbuckettable;
   GtCodetype *basepower;
 
   if (withspecialsuffixes)
@@ -365,14 +366,13 @@ uint64_t gt_bcktab_sizeoftable(unsigned int numofchars,
     {
       basepower = NULL;
     }
-    numofspecialcodes = (uint64_t) pow((double) numofchars,
-                                       (double) (prefixlength-1));
+    numofspecialcodes = gt_power_for_small_exponents(numofchars,prefixlength-1);
   } else
   {
     basepower = NULL;
     numofspecialcodes = 0;
   }
-  numofallcodes = (uint64_t) pow((double) numofchars,(double) prefixlength);
+  numofallcodes = gt_power_for_small_exponents(numofchars,prefixlength);
   sizeofbuckettable
     = gt_bcktab_sizeoftable_generic(prefixlength,
                                     numofallcodes,
@@ -493,8 +493,8 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
   bcktab->qgrambuffer = gt_malloc(sizeof (*bcktab->qgrambuffer) * prefixlength);
   sizeofrep_uint64_t = gt_bcktab_sizeoftable_generic(
                                           prefixlength,
-                                          (uint64_t) bcktab->numofallcodes,
-                                          (uint64_t) bcktab->numofspecialcodes,
+                                          bcktab->numofallcodes,
+                                          bcktab->numofspecialcodes,
                                           bcktab->useulong,
                                           bcktab->basepower,
                                           true,
@@ -509,8 +509,8 @@ unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
 
   sizeofrep_uint64_t
     = gt_bcktab_sizeoftable_generic(bcktab->prefixlength,
-                                    (uint64_t) bcktab->numofallcodes,
-                                    (uint64_t) bcktab->numofspecialcodes,
+                                    bcktab->numofallcodes,
+                                    bcktab->numofspecialcodes,
                                     bcktab->useulong,
                                     bcktab->basepower,
                                     false,

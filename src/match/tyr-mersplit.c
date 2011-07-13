@@ -24,6 +24,7 @@
 #include "core/fa.h"
 #include "core/defined-types.h"
 #include "core/intbits.h"
+#include "core/mathsupport.h"
 #include "spacedef.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"
@@ -347,8 +348,8 @@ int gt_constructmerbuckets(const char *inputindex,
     printf("# construct mer buckets for prefixlength %u\n",
             tyrbckinfo.prefixlength);
     tyrbckinfo.numofcodes
-      = (unsigned long) pow((double) gt_tyrindex_alphasize(tyrindex),
-                            (double) tyrbckinfo.prefixlength);
+      = gt_power_for_small_exponents(gt_tyrindex_alphasize(tyrindex),
+                                     tyrbckinfo.prefixlength);
     tyrbckinfo.mappedmbdfileptr = NULL;
     printf("# numofcodes = %lu\n",tyrbckinfo.numofcodes);
     gt_tyrindex_show(tyrindex);
@@ -432,8 +433,7 @@ Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
     pl_long = *((unsigned long *) tyrbckinfo->mappedmbdfileptr);
     tyrbckinfo->prefixlength = (unsigned int) pl_long;
     tyrbckinfo->numofcodes
-      = (unsigned long) pow((double) alphasize,
-                            (double) tyrbckinfo->prefixlength);
+      = gt_power_for_small_exponents(alphasize,tyrbckinfo->prefixlength);
     expectedsize
       = sizeof (unsigned long) *
         (1UL +
