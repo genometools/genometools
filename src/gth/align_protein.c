@@ -28,11 +28,6 @@
 #define WSIZE_PROTEIN   20
 #define WSIZE_DNA       60 /* (3 * WSIZE_PROTEIN) */
 
-#define INDEL_PENALTY   -10.0
-#define SCALEFACTOR     0.4
-
-#define ADDEOP    128
-
 /* IMPORTANT: Definition has to be consistent with Retrace in
  * align_protein_imp.h. */
 static const char *retracenames[]= {
