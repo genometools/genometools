@@ -29,8 +29,8 @@ static GthFlt get_score(GtScoreMatrix *score_matrix,
                         unsigned char origreferencechar)
 {
   GthFlt rval = 0.0,
-                  scalefactor   = SCALEFACTOR,
-                  indel_penalty = INDEL_PENALTY;
+         scalefactor   = SCALEFACTOR,
+         indel_penalty = INDEL_PENALTY;
 
   if (amino  == DASH || origreferencechar == DASH) {
     /* 1.) scaled INDEL_PENALTY for deletions from and insertions into genomic
