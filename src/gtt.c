@@ -94,12 +94,12 @@
 #include "tools/gt_mgth.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
-#include "tools/gt_mutate.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
 #include "tools/gt_select.h"
 #include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
+#include "tools/gt_seqmutate.h"
 #include "tools/gt_seqorder.h"
 #include "tools/gt_seqstat.h"
 #include "tools/gt_seqtransform.h"
@@ -167,7 +167,9 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "mergefeat", gt_mergefeat());
   gt_toolbox_add(tools, "mgth", gt_mgth);
   gt_toolbox_add(tools, "mmapandread", gt_mmapandread);
-  gt_toolbox_add_tool(tools, "mutate", gt_mutate());
+  /* hidden "link from the mutate to the seqmutate tool for backward
+     compatibility */
+  gt_toolbox_add_hidden_tool(tools, "mutate", gt_seqmutate());
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
@@ -175,6 +177,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
+  gt_toolbox_add_tool(tools, "seqmutate", gt_seqmutate());
   gt_toolbox_add_tool(tools, "seqorder", gt_seqorder());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
   gt_toolbox_add(tools, "seqstat", gt_seqstat);

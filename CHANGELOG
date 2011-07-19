@@ -1,3 +1,10 @@
+changes in version 1.4.0 (2011-07-19)
+
+- the tool `gt mutate` has been renamed to `gt seqmutate`. The same
+  functionality is still available with `gt mutate` in order not to break
+  existing scripts.
+
+
 changes in version 1.3.9 (2011-07-02)
 
 - various bugfixes and cleanups

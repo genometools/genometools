@@ -22,7 +22,7 @@
 #include "core/outputfile.h"
 #include "extended/gtdatahelp.h"
 #include "extended/mutate.h"
-#include "tools/gt_mutate.h"
+#include "tools/gt_seqmutate.h"
 
 typedef struct {
   unsigned int rate; /* the mutate rate */
@@ -31,14 +31,14 @@ typedef struct {
   GtFile *outfp;
 } MutateArguments;
 
-static void* gt_mutate_arguments_new(void)
+static void* gt_seqmutate_arguments_new(void)
 {
   MutateArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
-static void gt_mutate_arguments_delete(void *tool_arguments)
+static void gt_seqmutate_arguments_delete(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
   if (!arguments) return;
@@ -47,7 +47,7 @@ static void gt_mutate_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_seqmutate_option_parser_new(void *tool_arguments)
 {
   MutateArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -72,7 +72,7 @@ static GtOptionParser* gt_mutate_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
+static int gt_seqmutate_runner(int argc, const char **argv, int parsed_args,
                             void *tool_arguments, GtError *err)
 {
   MutateArguments *arguments = tool_arguments;
@@ -108,11 +108,11 @@ static int gt_mutate_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-GtTool* gt_mutate(void)
+GtTool* gt_seqmutate(void)
 {
-  return gt_tool_new(gt_mutate_arguments_new,
-                     gt_mutate_arguments_delete,
-                     gt_mutate_option_parser_new,
+  return gt_tool_new(gt_seqmutate_arguments_new,
+                     gt_seqmutate_arguments_delete,
+                     gt_seqmutate_option_parser_new,
                      NULL,
-                     gt_mutate_runner);
+                     gt_seqmutate_runner);
 }

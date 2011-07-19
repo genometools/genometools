@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_MUTATE_H
-#define GT_MUTATE_H
+#ifndef GT_SEQMUTATE_H
+#define GT_SEQMUTATE_H
 
 #include "core/tool.h"
 
-/* the mutate tool */
-GtTool* gt_mutate(void);
+/* the seqmutate tool */
+GtTool* gt_seqmutate(void);
 
 #endif
