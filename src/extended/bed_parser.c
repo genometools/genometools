@@ -251,7 +251,8 @@ static int track_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
 }
 
 static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
-                           long offset, GtIO *bed_file, GtError *err)
+                           long offset, GtIO *bed_file, bool thick,
+                           GtError *err)
 {
   int had_err;
   gt_error_check(err);
@@ -261,10 +262,16 @@ static int parse_bed_range(GtRange *range, GtStr *start, GtStr *end,
   /* BED has a weird numbering scheme: positions are 0-based, but the end
      position is not part of the feature. Transform to 1-based coordinates. */
   range->start++;
-  if (!had_err && range->start > range->end) {
-    gt_error_set(err, "file \"%s\": line %lu: BED feature has length 0",
-                 gt_io_get_filename(bed_file), gt_io_get_line_number(bed_file));
-    had_err = -1;
+  /* Ranges defining a 'thick' region sometimes come with length 0 to
+     designate that there are no thick regions. So do not fail here and
+     handle that case later. */
+  if (!thick) {
+    if (!had_err && range->start > range->end) {
+      gt_error_set(err, "file \"%s\": line %lu: BED feature has length 0",
+                   gt_io_get_filename(bed_file),
+                   gt_io_get_line_number(bed_file));
+      had_err = -1;
+    }
   }
   if (offset)
     *range = gt_range_offset(range, offset);
@@ -431,7 +438,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
     word(bed_parser->another_word, bed_file);
     had_err = parse_bed_range(&range, bed_parser->word,
                               bed_parser->another_word, bed_parser->offset,
-                              bed_file, err);
+                              bed_file, false, err);
   }
   if (!had_err) {
     /* add region */
@@ -501,8 +508,8 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
       /* got a thickStart and a thickEnd -> construct corresponding feature */
       had_err = parse_bed_range(&range, bed_parser->word,
                                 bed_parser->another_word, bed_parser->offset,
-                                bed_file, err);
-      if (!had_err)
+                                bed_file, true, err);
+      if (!had_err && range.start <= range.end)
         construct_thick_feature(bed_parser, (GtFeatureNode*) gn, range);
     }
   }
