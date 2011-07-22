@@ -1,0 +1,18 @@
+##gff-version   3
+##sequence-region   chr1 11874 14409
+chr1	.	BED_feature	11874	14409	0	+	.	ID=BED_feature1;Name=uc001aaa.3
+chr1	.	BED_block	11874	12227	0	+	.	Parent=BED_feature1;Name=uc001aaa.3
+chr1	.	BED_block	12613	12721	0	+	.	Parent=BED_feature1;Name=uc001aaa.3
+chr1	.	BED_block	13221	14409	0	+	.	Parent=BED_feature1;Name=uc001aaa.3
+###
+chr1	.	BED_feature	11874	14409	0	+	.	ID=BED_feature2;Name=uc010nxq.1
+chr1	.	BED_block	11874	12227	0	+	.	Parent=BED_feature2;Name=uc010nxq.1
+chr1	.	BED_thick_feature	12190	13639	0	+	.	Parent=BED_feature2;Name=uc010nxq.1
+chr1	.	BED_block	12595	12721	0	+	.	Parent=BED_feature2;Name=uc010nxq.1
+chr1	.	BED_block	13403	14409	0	+	.	Parent=BED_feature2;Name=uc010nxq.1
+###
+chr1	.	BED_feature	11874	14409	0	+	.	ID=BED_feature3;Name=uc010nxr.1
+chr1	.	BED_block	11874	12227	0	+	.	Parent=BED_feature3;Name=uc010nxr.1
+chr1	.	BED_block	12646	12697	0	+	.	Parent=BED_feature3;Name=uc010nxr.1
+chr1	.	BED_block	13221	14409	0	+	.	Parent=BED_feature3;Name=uc010nxr.1
+###
