@@ -76,34 +76,6 @@ bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat)
   return (sat >= GT_ACCESS_TYPE_UCHARTABLES) ? true : false;
 }
 
-#define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
-        (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
-        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1)
-
-uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
-                                 bool withrangelength,
-                                 unsigned long totallength,
-                                 unsigned long items)
-{
-  if (items == 0)
-  {
-    return 0;
-  }
-  switch (sat)
-  {
-    case GT_ACCESS_TYPE_UCHARTABLES:
-      return SIZEOFSWTABLE(GtUchar,UCHAR_MAX);
-    case GT_ACCESS_TYPE_USHORTTABLES:
-      return SIZEOFSWTABLE(uint16_t,USHRT_MAX);
-    case GT_ACCESS_TYPE_UINT32TABLES:
-      return SIZEOFSWTABLE(uint32_t,UINT32_MAX);
-    default:
-      fprintf(stderr,"gt_encseq_sizeofSWtable(sat=%d) is undefined\n",
-              (int) sat);
-      exit(GT_EXIT_PROGRAMMING_ERROR);
-  }
-}
-
 #define CHECKANDUPDATE(SAT,IDX)\
         tmp = gt_encseq_determine_size(SAT, totallength,\
                                        numofsequences,\
