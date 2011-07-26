@@ -108,7 +108,7 @@ struct GtEncseq
        *ssptabmappedptr; /* NULL or pointer to the mapped space block */
   bool has_specialranges,
        has_wildcardranges,
-       has_ssptabnew;
+       has_ssptab;
   unsigned long totallength,
                 logicaltotallength,
                 numofdbsequences,
@@ -155,7 +155,7 @@ struct GtEncseq
                 alphatype;
 
   /* separator index structure */
-  GtSWtable ssptabnew;
+  GtSWtable ssptab;
 
   /* file start position table */
   unsigned long *fsptab; /* is NULL when numofdbfiles is 1

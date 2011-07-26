@@ -401,9 +401,9 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
       swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
       swstate = esr->wildcardrangestate;
       break;
-    case SWtable_ssptabnew:
-      swtable = &(GT_APPENDINT(esr->encseq->ssptabnew.st));
-      swstate = esr->ssptabnewstate;
+    case SWtable_ssptab:
+      swtable = &(GT_APPENDINT(esr->encseq->ssptab.st));
+      swstate = esr->ssptabstate;
       break;
   }
   swstate->hasprevious = swstate->hascurrent = swstate->hasmore = false;
@@ -643,9 +643,9 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
       swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
       swstate = esr->wildcardrangestate;
       break;
-    case SWtable_ssptabnew:
-      swtable = &(GT_APPENDINT(esr->encseq->ssptabnew.st));
-      swstate = esr->ssptabnewstate;
+    case SWtable_ssptab:
+      swtable = &(GT_APPENDINT(esr->encseq->ssptab.st));
+      swstate = esr->ssptabstate;
       break;
     default:
       gt_assert(false);
@@ -786,7 +786,7 @@ static GtUchar GT_APPENDINT(seqdelivercharSpecial)(GtEncseqReader *esr)
      correctly maintain the corresponding swstates */
 
   if (esr->encseq->numofdbsequences > 1UL &&
-      GT_APPENDINT(checknextSW)(esr,SWtable_ssptabnew))
+      GT_APPENDINT(checknextSW)(esr,SWtable_ssptab))
   {
     cc = (GtUchar) SEPARATOR;
     defined = true;
