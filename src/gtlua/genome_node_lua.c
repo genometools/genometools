@@ -113,9 +113,9 @@ static int feature_node_lua_get_strand(lua_State *L)
   GtGenomeNode **gn = check_genome_node(L, 1);
   GtFeatureNode *fn;
   char strand_char[2];
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   strand_char[0] = GT_STRAND_CHARS[gt_feature_node_get_strand(fn)];
   strand_char[1] = '\0';
   lua_pushstring(L, strand_char);
@@ -126,9 +126,9 @@ static int feature_node_lua_get_source(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
   GtFeatureNode *fn;
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   lua_pushstring(L, gt_feature_node_get_source(fn));
   return 1;
 }
@@ -137,9 +137,9 @@ static int feature_node_lua_get_score(lua_State *L)
 {
   GtGenomeNode **gn = check_genome_node(L, 1);
   GtFeatureNode *fn;
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   if (gt_feature_node_score_is_defined(fn))
     lua_pushnumber(L, gt_feature_node_get_score(fn));
   else
@@ -153,7 +153,7 @@ static int feature_node_lua_get_attribute(lua_State *L)
   const char *attr = NULL, *attrval = NULL;
   attr = luaL_checkstring(L, 2);
   GtFeatureNode *fn;
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
   luaL_argcheck(L, fn, 1, "not a feature node");
   attrval = gt_feature_node_get_attribute(fn, attr);
@@ -170,7 +170,7 @@ static int feature_node_lua_get_exons(lua_State *L)
   GtArray *exons = gt_array_new(sizeof (GtGenomeNode*));
   unsigned long i = 0;
   GtFeatureNode *fn;
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
   luaL_argcheck(L, fn, 1, "not a feature node");
   gt_feature_node_get_exons(fn, exons);
@@ -192,9 +192,9 @@ static int feature_node_lua_set_source(lua_State *L)
   GtStr *source_str;
   GtGenomeNode **gn = check_genome_node(L, 1);
   GtFeatureNode *fn;
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   source = luaL_checkstring(L, 2);
   source_str = gt_str_new_cstr(source);
   gt_feature_node_set_source(fn, source_str);
@@ -259,9 +259,9 @@ static int feature_node_lua_output_leading(lua_State *L)
   GtGenomeNode **gn;
   GtFeatureNode *fn;
   gn = check_genome_node(L, 1);
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   gt_gff3_output_leading(fn, NULL);
   return 0;
 }
@@ -271,9 +271,9 @@ static int feature_node_lua_get_type(lua_State *L)
   GtGenomeNode **gn;
   GtFeatureNode *fn;
   gn = check_genome_node(L, 1);
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   lua_pushstring(L, gt_feature_node_get_type(fn));
   return 1;
 }
@@ -288,9 +288,9 @@ static int feature_node_lua_extract_sequence(lua_State *L)
   GtStr *sequence;
   GtError *err;
   gn = check_genome_node(L, 1);
-  /* make sure we get a genome feature */
+  /* make sure we get a feature node */
   fn = gt_feature_node_try_cast(*gn);
-  luaL_argcheck(L, fn, 1, "not a genome feature");
+  luaL_argcheck(L, fn, 1, "not a feature node");
   type = luaL_checkstring(L, 2);
   join = lua_toboolean(L, 3);
   region_mapping = check_region_mapping(L, 4);
