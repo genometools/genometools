@@ -33,6 +33,7 @@
 #include "core/bitpackarray.h"
 #include "core/chardef.h"
 #include "core/encseq_access_type.h"
+#include "core/encseq_api.h"
 #include "core/filelengthvalues.h"
 #include "core/intbits.h"
 #include "core/types_api.h"
@@ -40,13 +41,13 @@
 #include "core/defined-types.h"
 #include "core/types_api.h"
 #include "core/thread.h"
-#include "core/encseq_api.h"
 
 typedef struct
 {
   GtUchar *positions,
           *rangelengths;
   unsigned long *endidxinpage;
+  unsigned long *mappositions;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
@@ -57,6 +58,7 @@ typedef struct
   uint16_t *positions,
            *rangelengths;
   unsigned long *endidxinpage;
+  unsigned long *mappositions;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
@@ -67,6 +69,7 @@ typedef struct
   uint32_t *positions,
            *rangelengths;
   unsigned long *endidxinpage;
+  unsigned long *mappositions;
   unsigned long numofpages;
   unsigned long numofpositionstostore;
   unsigned int maxrangevalue;  /* maximal value of special type */
@@ -91,7 +94,9 @@ typedef struct
                 *minseqlenptr,
                 *maxseqlenptr,
                 *alphatypeptr,
-                *lengthofalphadefptr;
+                *lengthofalphadefptr,
+                *numofallcharsptr;
+  GtUchar *maxsubalphasizeptr;
   GtSpecialcharinfo *specialcharinfoptr;
   char *firstfilename,
        *alphadef;
@@ -99,13 +104,22 @@ typedef struct
   unsigned long *characterdistribution;
 } GtEncseqHeaderPtr;
 
+typedef struct
+{
+  unsigned long *classstartpositionsptr;
+  char *maxcharsptr,
+       *allcharsptr;
+  GtUchar *subsymbolmapptr;
+} GtExceptionTablePtr;
+
 struct GtEncseq
 {
   /* Common part */
   GtEncseqAccessType sat, satsep;
   const char *satname;
   void *mappedptr, /* NULL or pointer to the mapped space block */
-       *ssptabmappedptr; /* NULL or pointer to the mapped space block */
+       *ssptabmappedptr, /* NULL or pointer to the mapped space block */
+       *oistabmappedptr;
   bool has_specialranges,
        has_wildcardranges,
        has_ssptab;
@@ -134,6 +148,8 @@ struct GtEncseq
   const char *issinglepositioninspecialrangename;
   bool(*issinglepositioninwildcardrange)(const GtEncseq *,unsigned long);
   const char *issinglepositioninwildcardrangename;
+  bool(*getexceptionmapping)(const GtEncseq *,unsigned long*, unsigned long);
+  const char *getexceptionmappingname;
   bool(*issinglepositionseparator)(const GtEncseq *,unsigned long);
   const char *issinglepositionseparatorname;
 
@@ -175,7 +191,7 @@ struct GtEncseq
 
   /* only for GT_ACCESS_TYPE_BYTECOMPRESS */
   BitPackArray *bitpackarray;
-  unsigned int numofchars; /* used to have faster access in getencodedchar */
+  unsigned int numofchars;
 
   /* only for GT_ACCESS_TYPE_BITACCESS */
   GtBitsequence *specialbits;
@@ -183,9 +199,22 @@ struct GtEncseq
   /* only for GT_ACCESS_TYPE_UCHARTABLES,
               GT_ACCESS_TYPE_USHORTTABLES,
               GT_ACCESS_TYPE_UINT32TABLES */
-
   GtSWtable wildcardrangetable;
 
+  /* for lossless reproduction of original sequences */
+  bool has_exceptiontable;
+  GtSWtable exceptiontable;
+  BitPackArray *exceptions;
+  unsigned long *classstartpositions,
+                numofallchars;
+  char *maxchars,
+       *allchars;
+  unsigned char *subsymbolmap,
+                maxsubalphasize;
+  GtExceptionTablePtr exceptionheaderptr;
+  GtEncseqAccessType oissat;
+
+  /* reference counting */
   unsigned long reference_count;
   GtMutex *refcount_lock;
 
@@ -194,6 +223,6 @@ struct GtEncseq
 
   unsigned long minseqlen,
                 maxseqlen;
-  char *oistab;  /* original input sequence(s) */
+  char *oistab;  /* XXX: original input sequence(s) */
 };
 #endif

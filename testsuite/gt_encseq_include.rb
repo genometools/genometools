@@ -117,7 +117,8 @@ def testformirrored(s, readmode)
   Keywords "encseq gt_encseq_decode mirroring lossless"
   Test do
     [false, true].each do |lossless|
-      run "#{$bin}gt encseq encode -des -ssp -sds " + \
+      run "rm -f #{s}.*"
+      run "#{$bin}gt encseq encode " + \
               "#{"-lossless" if lossless} " + \
               "#{s}"
       [false, true].each do |mirrored|

@@ -23,10 +23,6 @@
                                  lastwildcardrangelength);
               lastwildcardrangelength = 0;
             }
-#ifdef WITHOISTAB
-            if (outoistab)
-              gt_xfputc((char) cc, oisfp);
-#endif
             lastnonspecialrangelength++;
           } else
           {
@@ -49,10 +45,6 @@
               specialcharinfo->wildcards++;
 #ifdef WITHEQUALLENGTH_DES_SSP
               lengthofcurrentsequence++;
-#endif
-#ifdef WITHOISTAB
-            if (outoistab)
-              gt_xfputc((char) cc, oisfp);
 #endif
             } else
             {
@@ -97,10 +89,6 @@
               }
               (*numofseparators)++;
 #endif
-#ifdef WITHOISTAB
-            if (outoistab)
-              gt_xfputc((char) SEPARATOR, oisfp);
-#endif
             }
             if (specialprefix)
             {
@@ -109,3 +97,6 @@
             specialcharinfo->specialcharacters++;
             lastspecialrangelength++;
           }
+#ifdef WITHORIGDIST
+          originaldistribution[(int) cc]++;
+#endif

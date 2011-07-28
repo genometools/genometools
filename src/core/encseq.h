@@ -36,7 +36,7 @@
 #include "core/types_api.h"
 #include "core/arraydef.h"
 
-#define GT_ENCSEQ_VERSION  2UL
+#define GT_ENCSEQ_VERSION  3UL
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
@@ -320,6 +320,12 @@ unsigned long gt_encseq_wildcards(const GtEncseq *encseq);
   UINT32_MAX, depending on whether the GT_ACCESS_TYPE_UCHARTABLES,
   GT_ACCESS_TYPE_USHORTTABLES, GT_ACCESS_TYPE_UINT32TABLES are used */
 unsigned long gt_encseq_specialranges(const GtEncseq *encseq);
+
+unsigned long gt_encseq_exceptioncharacters(const GtEncseq *encseq);
+
+unsigned long gt_encseq_exceptionranges(const GtEncseq *encseq);
+
+unsigned long gt_encseq_max_subalpha_size(const GtEncseq *encseq);
 
 /* Return the number of ranges of consecutive runs of wildcards
   where the length of each range is limited by UCHAR_MAX, USHORT_MAX, and

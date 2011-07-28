@@ -55,6 +55,7 @@
 #include "core/logger.h"
 #include "core/ma_api.h"
 #include "core/mapspec.h"
+#include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/progressbar.h"
 #include "core/sequence_buffer_fasta.h"
@@ -367,40 +368,46 @@ char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
   char cc;
+  GtUchar mycc;
   gt_assert(encseq != NULL && encseq->alpha);
   gt_assert(pos < encseq->logicaltotallength);
-  if (encseq->oistab == NULL) {
-    GtUchar mycc = gt_encseq_get_encoded_char(encseq, pos, readmode);
-    if (mycc != (GtUchar) SEPARATOR)
-      cc = gt_alphabet_decode(encseq->alpha, mycc);
-    else
-      cc = (char) mycc;
-    return cc;
-  } else {
-    /* translate into forward coords */
+  mycc = gt_encseq_get_encoded_char(encseq, pos, readmode);
+  if (mycc != (GtUchar) SEPARATOR) {
     if (GT_ISDIRREVERSE(readmode))
     {
       pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
     }
-    /* handle virtual coordinates */
-    if (encseq->hasmirror) {
+    if (encseq->has_exceptiontable) {
+      unsigned long mappos = GT_UNDEF_ULONG;
       if (pos > encseq->totallength) {
-        /* invert coordinates and readmode */
-        gt_readmode_invert(readmode);
         pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
-      } else if (pos == encseq->totallength) {
-        return (char) SEPARATOR;
+        gt_readmode_invert(readmode);
       }
+      if (encseq->specialcharinfo.realexceptionranges >  0UL
+            && encseq->getexceptionmapping(encseq, &mappos, pos)) {
+        /* if the character at this position is not the most frequent in
+           its class, look up its exception */
+        unsigned char subalphcode = (unsigned char)
+                                     bitpackarray_get_uint32(encseq->exceptions,
+                                                            (BitOffset) mappos);
+        gt_assert(subalphcode < encseq->maxsubalphasize);
+        /* and map it back to the original character */
+        cc = encseq->allchars[encseq->classstartpositions[mycc] + subalphcode];
+        if (GT_ISDIRCOMPLEMENT(readmode))
+          (void) gt_complement(&cc, cc, NULL);
+      } else {
+        /* otherwise return most frequent character */
+        cc = encseq->maxchars[mycc];
+      }
+    } else {
+      /* we do not have lossless support, decode to class printable */
+      cc = gt_alphabet_decode(encseq->alpha, mycc);
     }
-    gt_assert(pos < encseq->totallength);
-    cc = encseq->oistab[pos];
-    if (GT_ISDIRCOMPLEMENT(readmode) && cc != (char) SEPARATOR) {
-      GT_UNUSED int retval;
-      retval = gt_complement(&cc, cc, NULL);
-      gt_assert(retval == 0);
-    }
-    return cc;
+  } else {
+    cc = (char) mycc;
   }
+
+  return cc;
 }
 
 GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
@@ -600,9 +607,10 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 
 char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 {
-  char cc;
+  char cc = GT_UNDEF_CHAR;
   gt_assert(esr && esr->encseq && esr->encseq->alpha);
-  if (esr->encseq->oistab == NULL) {
+  if (!esr->encseq->has_exceptiontable) {
+    /* no lossless support available, we need to do simple decoding */
     GtUchar mycc = gt_encseq_reader_next_encoded_char(esr);
     if (mycc != (GtUchar) SEPARATOR)
       cc = gt_alphabet_decode(esr->encseq->alpha, mycc);
@@ -610,15 +618,18 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
       cc = (char) mycc;
     return cc;
   } else {
+    GtUchar ccc;
     gt_assert(esr->encseq
               && esr->currentpos < esr->encseq->logicaltotallength);
+    /* if we have mirroring enabled, we need to check whether we cross the
+       boundary between real and virtual sequences, turn around if necessary */
     if (esr->encseq->hasmirror && esr->currentpos == esr->encseq->totallength) {
       if (!esr->startedonmiddle) {
         /* only turn around if we arrived from complementary side */
         gt_readmode_invert(esr->readmode);
+        /* from now on, we can only go backwards on the original sequence! */
+        gt_assert(GT_ISDIRREVERSE(esr->readmode));
       }
-      /* from now on, we can only go backwards on the original sequence! */
-      gt_assert(GT_ISDIRREVERSE(esr->readmode));
       /* go back */
       esr->currentpos--;
       if (esr->encseq->accesstype_via_utables) {
@@ -633,38 +644,62 @@ char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
           binpreparenextrangeGtEncseqReader(esr, SWtable_ssptab);
           advancerangeGtEncseqReader(esr, SWtable_ssptab);
         }
+      } else
+      {
+        if (esr->encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+        {
+          esr->currentpos++;
+          singlepositioninseparatorViaequallength_updatestate(esr);
+          esr->currentpos--;
+        }
       }
       return (char) SEPARATOR;
     }
     gt_assert(esr && esr->currentpos < esr->encseq->totallength);
+
+    ccc = esr->encseq->seqdeliverchar(esr);
+    if (ccc != (GtUchar) SEPARATOR) {
+      unsigned long mappos = GT_UNDEF_ULONG;
+      if (esr->encseq->specialcharinfo.realexceptionranges > 0UL
+            && esr->encseq->getexceptionmapping(esr->encseq,
+                                                &mappos, esr->currentpos)) {
+        /* if the character at this position is not the most frequent in
+           its class, look up its exception */
+        unsigned char subalphcode = (unsigned char)
+                                bitpackarray_get_uint32(esr->encseq->exceptions,
+                                                        (BitOffset) mappos);
+        gt_assert(subalphcode < esr->encseq->maxsubalphasize);
+        /* and map it back to the original character */
+        cc = esr->encseq->allchars[esr->encseq->classstartpositions[(int) ccc]
+                                     + subalphcode];
+      } else {
+        /* otherwise return most frequent character */
+        cc = esr->encseq->maxchars[(int) ccc];
+      }
+      gt_assert(cc != GT_UNDEF_CHAR);
+    } else {
+      cc = (char) SEPARATOR;
+    }
     switch (esr->readmode)
     {
       case GT_READMODE_FORWARD:
-        (void) esr->encseq->seqdeliverchar(esr);
-        cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos++;
         return cc;
       case GT_READMODE_REVERSE:
-        (void) esr->encseq->seqdeliverchar(esr);
-        cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos--;
         return cc;
       case GT_READMODE_COMPL: /* only works with dna */
-        (void) esr->encseq->seqdeliverchar(esr);
-        cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos++;
         if (cc != (char) SEPARATOR)
           (void) gt_complement(&cc, cc, NULL);
         return cc;
       case GT_READMODE_REVCOMPL: /* only works with dna */
-        (void) esr->encseq->seqdeliverchar(esr);
-        cc = esr->encseq->oistab[esr->currentpos];
         esr->currentpos--;
         if (cc != (char) SEPARATOR)
           (void) gt_complement(&cc, cc, NULL);
         return cc;
       default:
-        fprintf(stderr,"gt_encseq_get_encoded_char: "
+        fprintf(stderr,"gt_encseq_next_encoded_char: "
                        "readmode %d not implemented\n",(int) esr->readmode);
         exit(GT_EXIT_PROGRAMMING_ERROR);
     }
@@ -695,13 +730,12 @@ static void showGtRange(const GtRange *range)
     printf("%lu,%lu",range->start,range->end);
   }
 }
-
 #endif
 
 void gt_encseq_extract_encoded(const GtEncseq *encseq,
-                                 GtUchar *buffer,
-                                 unsigned long frompos,
-                                 unsigned long topos)
+                               GtUchar *buffer,
+                               unsigned long frompos,
+                               unsigned long topos)
 {
   GtEncseqReader *esr;
   unsigned long idx, pos;
@@ -783,6 +817,7 @@ bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
 static void addswtabletomapspectable(GtMapspec *mapspec,
                                      GtSWtable *swtable,
                                      bool withrangelengths,
+                                     bool withmappositions,
                                      unsigned long totallength,
                                      GtEncseqAccessType sat)
 {
@@ -805,6 +840,10 @@ static void addswtabletomapspectable(GtMapspec *mapspec,
         numofunits = totallength/UCHAR_MAX+1;
         gt_mapspec_add_ulong(mapspec, swtable->st_uchar.endidxinpage,
                              numofunits);
+        if (withmappositions) {
+          gt_mapspec_add_ulong(mapspec, swtable->st_uchar.mappositions,
+                               swtable->st_uchar.numofpositionstostore);
+        }
       }
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
@@ -822,6 +861,10 @@ static void addswtabletomapspectable(GtMapspec *mapspec,
         numofunits = totallength/USHRT_MAX+1;
         gt_mapspec_add_ulong(mapspec, swtable->st_uint16.endidxinpage,
                              numofunits);
+        if (withmappositions) {
+          gt_mapspec_add_ulong(mapspec, swtable->st_uint16.mappositions,
+                               swtable->st_uchar.numofpositionstostore);
+        }
       }
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
@@ -837,6 +880,10 @@ static void addswtabletomapspectable(GtMapspec *mapspec,
         numofunits = totallength/UINT32_MAX+1;
         gt_mapspec_add_ulong(mapspec, swtable->st_uint32.endidxinpage,
                              numofunits);
+        if (withmappositions) {
+          gt_mapspec_add_ulong(mapspec, swtable->st_uint32.mappositions,
+                               swtable->st_uchar.numofpositionstostore);
+        }
       }
       break;
     default:
@@ -854,16 +901,19 @@ static void assignssptabmapspecification(GtMapspec *mapspec,
   addswtabletomapspectable(mapspec,
                            &encseq->ssptab,
                            false,
+                           false,
                            encseq->totallength,
                            encseq->satsep);
 }
 
 #define SIZEOFSWTABLE(BASETYPE,MAXRANGEVALUE)\
         (withrangelength ? 2 : 1) * ((uint64_t) sizeof (BASETYPE) * items) +\
-        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1)
+        (uint64_t) sizeof (unsigned long) * (totallength/MAXRANGEVALUE+1) +\
+        (withmappositions ? 1 : 0) * ((uint64_t) sizeof (unsigned long) * items)
 
 static uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
                                         bool withrangelength,
+                                        bool withmappositions,
                                         unsigned long totallength,
                                         unsigned long items)
 {
@@ -905,6 +955,7 @@ static int flushssptab2file(const char *indexname,GtEncseq *encseq,
     sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
                               gt_encseq_sizeofSWtable(encseq->satsep,
                                             false,
+                                            false,
                                             encseq->totallength,
                                             encseq->numofdbsequences-1));
     if (gt_mapspec_write(assignssptabmapspecification, fp, encseq, sizessptab,
@@ -933,6 +984,7 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
     = CALLCASTFUNC(uint64_t, unsigned_long,
                    gt_encseq_sizeofSWtable(encseq->satsep,
                                            false,
+                                           false,
                                            encseq->totallength,
                                            encseq->numofdbsequences-1));
   if (gt_mapspec_read(assignssptabmapspecification, encseq, tmpfilename,
@@ -943,6 +995,185 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   if (!haserr)
   {
     encseq->has_ssptab = true;
+  }
+  gt_str_delete(tmpfilename);
+  return haserr ? -1 : 0;
+}
+
+static void assignoistabmapspecification(GtMapspec *mapspec,
+                                         void *voidinfo,
+                                         bool writemode)
+{
+  GtEncseq *encseq = (GtEncseq *) voidinfo;
+  unsigned long numofunits;
+
+  if (writemode)
+  {
+    encseq->exceptionheaderptr.classstartpositionsptr
+              = gt_malloc(UCHAR_MAX * sizeof (unsigned long));
+    memcpy(encseq->exceptionheaderptr.classstartpositionsptr,
+           encseq->classstartpositions,
+           UCHAR_MAX * sizeof (unsigned long));
+
+    encseq->exceptionheaderptr.maxcharsptr
+            = gt_malloc(UCHAR_MAX * sizeof (char));
+    memcpy(encseq->exceptionheaderptr.maxcharsptr, encseq->maxchars,
+            UCHAR_MAX * sizeof (char));
+
+    encseq->exceptionheaderptr.allcharsptr
+            = gt_malloc((size_t) encseq->numofallchars * sizeof (char));
+    memcpy(encseq->exceptionheaderptr.allcharsptr, encseq->allchars,
+           (size_t) encseq->numofallchars * sizeof (char));
+
+    encseq->exceptionheaderptr.subsymbolmapptr
+            = gt_malloc((size_t) UCHAR_MAX * sizeof (unsigned char));
+    memcpy(encseq->exceptionheaderptr.subsymbolmapptr, encseq->subsymbolmap,
+           (size_t) UCHAR_MAX * sizeof (unsigned char));
+  }
+
+  gt_mapspec_add_ulong(mapspec,
+                       encseq->exceptionheaderptr.classstartpositionsptr,
+                       UCHAR_MAX);
+  gt_mapspec_add_char(mapspec,
+                      encseq->exceptionheaderptr.allcharsptr,
+                      encseq->numofallchars);
+  gt_mapspec_add_char(mapspec,
+                      encseq->exceptionheaderptr.maxcharsptr,
+                      (unsigned long) UCHAR_MAX);
+  gt_mapspec_add_uchar(mapspec,
+                       encseq->exceptionheaderptr.subsymbolmapptr,
+                       (unsigned long) UCHAR_MAX);
+  numofunits = (unsigned long) sizeofbitarray(
+                 gt_determinebitspervalue((uint64_t) encseq->maxsubalphasize-1),
+                       (BitOffset) encseq->specialcharinfo.exceptioncharacters);
+  if (!writemode)
+  {
+    encseq->exceptions
+     = bitpackarray_new(gt_determinebitspervalue((uint64_t)
+                                                     encseq->maxsubalphasize-1),
+                        (BitOffset) encseq->specialcharinfo.exceptioncharacters,
+                        false);
+  }
+  gt_assert(encseq->exceptions != NULL);
+  gt_mapspec_add_bitelem(mapspec,
+                         BITPACKARRAYSTOREVAR(encseq->exceptions),
+                         numofunits);
+  addswtabletomapspectable(mapspec, &encseq->exceptiontable, true, true,
+                           encseq->totallength, encseq->oissat);
+}
+
+static void alphabet_to_key_values(const GtAlphabet *alpha,
+                                   unsigned long *alphatype,
+                                   unsigned long *lengthofalphadef,
+                                   char **alphadef)
+{
+  gt_assert(alpha);
+  if (gt_alphabet_is_dna(alpha)) {
+    if (alphatype != NULL)
+      *alphatype = 0UL;
+    if (alphadef != NULL)
+      *alphadef = NULL;
+    if (lengthofalphadef != NULL)
+      *lengthofalphadef = 0UL;
+  } else if (gt_alphabet_is_protein(alpha)) {
+    if (alphatype != NULL)
+      *alphatype = 1UL;
+    if (alphadef != NULL)
+      *alphadef = NULL;
+    if (lengthofalphadef != NULL)
+      *lengthofalphadef = 0UL;
+  } else {
+    GtStr *s = gt_str_new();
+    if (alphatype != NULL)
+      *alphatype = 2UL;
+    gt_alphabet_to_str(alpha, s);
+    if (alphadef != NULL)
+      *alphadef = gt_cstr_dup(gt_str_get(s));
+    if (lengthofalphadef != NULL)
+      *lengthofalphadef = gt_str_length(s);
+    gt_str_delete(s);
+  }
+}
+
+static size_t gt_encseq_size_of_exceptiontablemap(GtEncseq *encseq)
+{
+  unsigned long sizeoistab;
+  sizeoistab = CALLCASTFUNC(uint64_t, unsigned_long,   /* exceptiontables */
+                            gt_encseq_sizeofSWtable(encseq->oissat,
+                                true,
+                                true,
+                                encseq->totallength,
+                                encseq->specialcharinfo.realexceptionranges));
+  sizeoistab += UCHAR_MAX * sizeof (unsigned long);    /* classstartpositions */
+  sizeoistab += encseq->numofallchars * sizeof (char); /* allchars */
+  sizeoistab += UCHAR_MAX * sizeof (char);             /* maxchars */
+  sizeoistab += UCHAR_MAX * sizeof (unsigned char);    /* subsymbolmap */
+  sizeoistab +=                                        /* exceptions */
+               sizeofbitarray(gt_determinebitspervalue((uint64_t)
+                                                     encseq->maxsubalphasize-1),
+                              (BitOffset)
+                                   encseq->specialcharinfo.exceptioncharacters);
+  return (size_t) sizeoistab;
+}
+
+static int flushoistab2file(const char *indexname, GtEncseq *encseq,
+                            GtError *err)
+{
+  FILE *fp;
+  int had_err = 0;
+
+  gt_error_check(err);
+  fp = gt_fa_fopen_with_suffix(indexname, GT_OISTABFILESUFFIX, "wb", err);
+  if (fp == NULL)
+  {
+    had_err = -1;
+  }
+  if (!had_err)
+  {
+    unsigned long sizeoistab = (unsigned long)
+                                    gt_encseq_size_of_exceptiontablemap(encseq);
+    if (gt_mapspec_write(assignoistabmapspecification, fp, encseq, sizeoistab,
+                         err) != 0)
+    {
+      had_err = -1;
+    }
+  }
+  gt_free(encseq->exceptionheaderptr.classstartpositionsptr);
+  gt_free(encseq->exceptionheaderptr.maxcharsptr);
+  gt_free(encseq->exceptionheaderptr.allcharsptr);
+  gt_free(encseq->exceptionheaderptr.subsymbolmapptr);
+  gt_fa_xfclose(fp);
+  return had_err;
+}
+
+static int filloistabmapspecstartptr(GtEncseq *encseq,
+                                     const char *indexname,
+                                     GtError *err)
+{
+  bool haserr = false;
+  GtStr *tmpfilename;
+  unsigned long sizeoistab;
+
+  gt_error_check(err);
+  tmpfilename = gt_str_new_cstr(indexname);
+  gt_str_append_cstr(tmpfilename, GT_OISTABFILESUFFIX);
+
+  sizeoistab = (unsigned long) gt_encseq_size_of_exceptiontablemap(encseq);
+
+  if (gt_mapspec_read(assignoistabmapspecification, encseq, tmpfilename,
+                      sizeoistab, &encseq->oistabmappedptr, err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    encseq->has_ssptab = true;
+    encseq->classstartpositions
+                            = encseq->exceptionheaderptr.classstartpositionsptr;
+    encseq->allchars = encseq->exceptionheaderptr.allcharsptr;
+    encseq->maxchars = encseq->exceptionheaderptr.maxcharsptr;
+    encseq->subsymbolmap = (unsigned char*)
+                                     encseq->exceptionheaderptr.subsymbolmapptr;
   }
   gt_str_delete(tmpfilename);
   return haserr ? -1 : 0;
@@ -959,6 +1190,8 @@ static void gt_encseq_assignheaderforwriting(GtMapspec *mapspec,
                                              unsigned long lengthofdbfilenames,
                                              unsigned long minseqlen,
                                              unsigned long maxseqlen,
+                                             unsigned char maxsubalphasize,
+                                             unsigned long numofallchars,
                                              GtSpecialcharinfo *specialcharinfo,
                                              const GtStrArray *filenametab,
                                              unsigned long lengthofalphadef,
@@ -1013,10 +1246,22 @@ static void gt_encseq_assignheaderforwriting(GtMapspec *mapspec,
       = gt_malloc(sizeof (*headerptr->alphatypeptr));
     headerptr->alphatypeptr[0] = alphatype;
 
-    headerptr->alphadef = gt_malloc(sizeof (*headerptr->alphadef) *
-                                         lengthofalphadef);
-    memcpy(headerptr->alphadef, alphadef, sizeof (*headerptr->alphadef) *
-                                         lengthofalphadef);
+    if (alphadef != NULL) {
+      headerptr->alphadef = gt_malloc(sizeof (*headerptr->alphadef) *
+                                           lengthofalphadef);
+      memcpy(headerptr->alphadef, alphadef, sizeof (*headerptr->alphadef) *
+                                           lengthofalphadef);
+    } else {
+      headerptr->alphadef = NULL;
+    }
+
+    headerptr->maxsubalphasizeptr =
+                             gt_malloc(sizeof (*headerptr->maxsubalphasizeptr));
+    headerptr->maxsubalphasizeptr[0] = (GtUchar) maxsubalphasize;
+
+    headerptr->numofallcharsptr =
+                             gt_malloc(sizeof (*headerptr->numofallcharsptr));
+    headerptr->numofallcharsptr[0] = numofallchars;
 
     headerptr->firstfilename = gt_malloc(sizeof (*headerptr->firstfilename) *
                                          lengthofdbfilenames);
@@ -1042,6 +1287,8 @@ static void gt_encseq_assignheaderforwriting(GtMapspec *mapspec,
   gt_mapspec_add_ulong(mapspec, headerptr->lengthofalphadefptr, 1UL);
   gt_mapspec_add_char(mapspec, headerptr->alphadef, lengthofalphadef);
   gt_mapspec_add_char(mapspec, headerptr->firstfilename, lengthofdbfilenames);
+  gt_mapspec_add_uchar(mapspec, headerptr->maxsubalphasizeptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, headerptr->numofallcharsptr, 1UL);
   gt_mapspec_add_filelengthvalues(mapspec, headerptr->filelengthtab,
                                   numofdbfiles);
   gt_mapspec_add_ulong(mapspec, headerptr->characterdistribution,
@@ -1078,6 +1325,10 @@ static void gt_encseq_headerptr_delete(GtEncseqHeaderPtr *headerptr)
   headerptr->lengthofalphadefptr = NULL;
   gt_free(headerptr->alphadef);
   headerptr->alphadef = NULL;
+  gt_free(headerptr->maxsubalphasizeptr);
+  headerptr->maxsubalphasizeptr = NULL;
+  gt_free(headerptr->numofallcharsptr);
+  headerptr->numofallcharsptr = NULL;
 }
 
 static void gt_assignencseqmapspecification(GtMapspec *mapspec,
@@ -1099,11 +1350,14 @@ static void gt_assignencseqmapspecification(GtMapspec *mapspec,
                                    encseq->lengthofdbfilenames,
                                    encseq->minseqlen,
                                    encseq->maxseqlen,
+                                   encseq->maxsubalphasize,
+                                   encseq->numofallchars,
                                    &encseq->specialcharinfo,
                                    encseq->filenametab,
                                    encseq->lengthofalphadef,
                                    encseq->alphadef,
                                    encseq->alphatype);
+
   switch (encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
@@ -1149,6 +1403,7 @@ static void gt_assignencseqmapspecification(GtMapspec *mapspec,
       addswtabletomapspectable(mapspec,
                                &encseq->wildcardrangetable,
                                true,
+                               false,
                                encseq->totallength,
                                encseq->sat);
       break;
@@ -1200,8 +1455,10 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long numofdbfiles,
                                           unsigned long lengthofdbfilenames,
                                           unsigned long wildcardranges,
+                                          unsigned long exceptionranges,
                                           unsigned long minseqlen,
                                           unsigned long maxseqlen,
+                                          bool oistab,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
@@ -1232,6 +1489,9 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
   {
     unsigned long idx;
     Definedunsignedlong equallength;
+    GtAlphabet *a;
+
+    a = gt_alphabet_new_dna();
 
     equallength.defined = true;
     equallength.valueunsignedlong = lengthofsinglesequence;
@@ -1241,14 +1501,18 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
                                       numoffiles,
                                       determinelengthofdbfilenames(filenametab),
                                       0,
+                                      0,
                                       lengthofsinglesequence,
                                       lengthofsinglesequence,
+                                      false,
                                       &equallength,
-                                      gt_alphabet_new_dna(),
+                                      a,
                                       NULL);
     encseq->twobitencoding = twobitencoding;
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
     encseq->numofchars = 4U;
+    encseq->numofallchars = 4UL;
+    encseq->maxsubalphasize = 1U;
     gt_assert(numofsequences > 0);
     encseq->filenametab = gt_str_array_new();
     for (idx = 0; idx < gt_str_array_size(filenametab); idx++)
@@ -1273,16 +1537,21 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
     encseq->specialcharinfo.specialcharacters = numofsequences - 1;
     encseq->specialcharinfo.specialranges = numofsequences - 1;
     encseq->specialcharinfo.realspecialranges = numofsequences - 1;
-    encseq->specialcharinfo.lengthofspecialprefix = 0;
-    encseq->specialcharinfo.lengthofspecialsuffix = 0;
-    encseq->specialcharinfo.wildcards = 0;
-    encseq->specialcharinfo.wildcardranges = 0;
-    encseq->specialcharinfo.realwildcardranges = 0;
-    encseq->specialcharinfo.lengthofwildcardprefix = 0;
-    encseq->specialcharinfo.lengthofwildcardsuffix = 0;
+    encseq->specialcharinfo.lengthofspecialprefix = 0UL;
+    encseq->specialcharinfo.lengthofspecialsuffix = 0UL;
+    encseq->specialcharinfo.wildcards = 0UL;
+    encseq->specialcharinfo.wildcardranges = 0UL;
+    encseq->specialcharinfo.realwildcardranges = 0UL;
+    encseq->specialcharinfo.lengthofwildcardprefix = 0UL;
+    encseq->specialcharinfo.lengthofwildcardsuffix = 0UL;
     encseq->specialcharinfo.lengthoflongestnonspecial = lengthofsinglesequence;
+    encseq->specialcharinfo.exceptionranges = 0UL;
+    encseq->specialcharinfo.exceptioncharacters = 0UL;
+    encseq->specialcharinfo.realexceptionranges = 0UL;
     encseq->minseqlen = lengthofsinglesequence;
     encseq->maxseqlen = lengthofsinglesequence;
+    alphabet_to_key_values(a, &encseq->alphatype, &encseq->lengthofalphadef,
+                           &encseq->alphadef);
     encseq->lengthofdbfilenames
       = determinelengthofdbfilenames(encseq->filenametab);
     if (gt_mapspec_write(gt_assignencseqmapspecification, fp, encseq,
@@ -1334,6 +1603,9 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
     encseq->specialcharinfo = *encseq->headerptr.specialcharinfoptr;
     encseq->minseqlen = *encseq->headerptr.minseqlenptr;
     encseq->maxseqlen = *encseq->headerptr.maxseqlenptr;
+    encseq->maxsubalphasize = (unsigned char)
+                                          *encseq->headerptr.maxsubalphasizeptr;
+    encseq->numofallchars = *encseq->headerptr.numofallcharsptr;
     encseq->version = *encseq->headerptr.versionptr;
     encseq->is64bit = *encseq->headerptr.is64bitptr;
     encseq->filenametab = gt_str_array_new();
@@ -1359,16 +1631,19 @@ static void setencsequtablesNULL(GtEncseqAccessType sat,
   {
     case GT_ACCESS_TYPE_UCHARTABLES:
       swtable->st_uchar.positions = NULL;
+      swtable->st_uchar.mappositions = NULL;
       swtable->st_uchar.endidxinpage = NULL;
       swtable->st_uchar.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_USHORTTABLES:
       swtable->st_uint16.positions = NULL;
+      swtable->st_uint16.mappositions = NULL;
       swtable->st_uint16.endidxinpage = NULL;
       swtable->st_uint16.rangelengths = NULL;
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       swtable->st_uint32.positions = NULL;
+      swtable->st_uint32.mappositions = NULL;
       swtable->st_uint32.endidxinpage = NULL;
       swtable->st_uint32.rangelengths = NULL;
       break;
@@ -1389,17 +1664,17 @@ static GtEncseqAccessType determineoptimalsssptablerep(
   {
     return GT_ACCESS_TYPE_UNDEFINED;
   }
-  sepsizemin = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UCHARTABLES,false,
+  sepsizemin = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UCHARTABLES,false,false,
                                        totallength,numofseparators);
   satmin = GT_ACCESS_TYPE_UCHARTABLES;
-  sepsize = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_USHORTTABLES,false,
+  sepsize = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_USHORTTABLES,false,false,
                                     totallength,numofseparators);
   if (sepsize < sepsizemin)
   {
     sepsizemin = sepsize;
     satmin = GT_ACCESS_TYPE_USHORTTABLES;
   }
-  sepsize = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UINT32TABLES,false,
+  sepsize = gt_encseq_sizeofSWtable(GT_ACCESS_TYPE_UINT32TABLES,false,false,
                                     totallength,numofseparators);
   if (sepsize < sepsizemin)
   {
@@ -1661,6 +1936,12 @@ void gt_encseq_delete(GtEncseq *encseq)
         break;
       default: break;
     }
+    if (encseq->has_exceptiontable) {
+      gt_free(encseq->exceptiontable.st_uint32.positions);
+      gt_free(encseq->exceptiontable.st_uint32.endidxinpage);
+      gt_free(encseq->exceptiontable.st_uint32.mappositions);
+      gt_free(encseq->exceptiontable.st_uint32.rangelengths);
+    }
     switch (encseq->satsep)
     {
       case GT_ACCESS_TYPE_UCHARTABLES:
@@ -1686,6 +1967,10 @@ void gt_encseq_delete(GtEncseq *encseq)
   if (encseq->ssptabmappedptr != NULL)
   {
     gt_fa_xmunmap(encseq->ssptabmappedptr);
+  }
+  if (encseq->oistabmappedptr != NULL)
+  {
+    gt_fa_xmunmap(encseq->oistabmappedptr);
   }
   encseq->headerptr.characterdistribution = NULL;
   encseq->plainseq = NULL;
@@ -1724,6 +2009,13 @@ void gt_encseq_delete(GtEncseq *encseq)
   {
     gt_free(encseq->fsptab);
     encseq->fsptab = NULL;
+  }
+  if (encseq->exceptions != NULL)
+  {
+    if (encseq->oistabmappedptr != NULL)
+      BITPACKARRAYSTOREVAR(encseq->exceptions) = NULL;
+    bitpackarray_delete(encseq->exceptions);
+    encseq->exceptions = NULL;
   }
   gt_alphabet_delete((GtAlphabet*) encseq->alpha);
   gt_str_array_delete(encseq->filenametab);
@@ -1799,7 +2091,7 @@ static void showallSWtablewithpages(GtEncseqAccessType sat,
     case GT_ACCESS_TYPE_USHORTTABLES:
       printf("ushort pages of maximum value %u\n",
               swtable->st_uint16.maxrangevalue);
-      showallSWtablewithpages_ushort(&swtable->st_uint16);
+      showallSWtablewithpages_uint16(&swtable->st_uint16);
       break;
     case GT_ACCESS_TYPE_UINT32TABLES:
       printf("uint32 pages of maximum value %u\n",
@@ -1826,6 +2118,12 @@ static void showallSWtables(const GtEncseq *encseq)
     printf("ssptab\n");
     showallSWtablewithpages(encseq->satsep,&encseq->ssptab);
   }
+  if (encseq->has_exceptiontable)
+  {
+    printf("exceptions\n");
+    showallSWtablewithpages(GT_ACCESS_TYPE_UINT32TABLES,
+                            &encseq->exceptiontable);
+  }
 }
 
 #endif
@@ -1845,19 +2143,78 @@ static int fillViadirectaccess(GtEncseq *encseq,
                                GtSequenceBuffer *fb,
                                GtError *err)
 {
-  unsigned long currentposition;
+  unsigned long currentposition,
+                fillexceptionrangeidx = 0,
+                mapposition = 0,
+                nextcheckpos = GT_UNDEF_ULONG,
+                pagenumber = 0;
   int retval;
   GtUchar cc;
-
+  char orig;
+  unsigned int lastexceptionrangelength = 0;
+  GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   gt_error_check(err);
+
+  if (encseq->has_exceptiontable) {
+    exceptiontable->positions = gt_malloc(sizeof (*exceptiontable->positions) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->rangelengths =
+                               gt_malloc(sizeof(*exceptiontable->rangelengths) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->endidxinpage =
+                               gt_malloc(sizeof(*exceptiontable->endidxinpage) *
+                                         exceptiontable->numofpages);
+    exceptiontable->mappositions =
+                              gt_malloc(sizeof (*exceptiontable->mappositions) *
+                                        exceptiontable->numofpositionstostore);
+
+    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+  }
+
   encseq->plainseq = gt_malloc(sizeof (*encseq->plainseq) *
                                encseq->totallength);
   encseq->hasplainseqptr = false;
   for (currentposition=0; /* Nothing */; currentposition++)
   {
-    retval = gt_sequence_buffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
     if (retval == 1)
     {
+      if (encseq->has_exceptiontable && cc != (GtUchar) SEPARATOR) {
+        if (orig == encseq->maxchars[cc]) {
+          if (lastexceptionrangelength > 0) {
+            exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                           = (uint32_t) (lastexceptionrangelength-1);
+            lastexceptionrangelength = 0;
+          }
+        } else {
+          if (lastexceptionrangelength == 0)
+          /* at beginning of exception range */
+          {
+            /* store remainder of currentposition: this value is not larger
+               than maxrangevalue and this can be stored in a page */
+            exceptiontable->positions[fillexceptionrangeidx++]
+              = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
+            exceptiontable->mappositions[fillexceptionrangeidx-1]
+              = (mapposition);
+            lastexceptionrangelength = 1U;
+          } else /* extend exception range */
+          {
+            if (lastexceptionrangelength == exceptiontable->maxrangevalue)
+            {
+              gt_assert(fillexceptionrangeidx > 0);
+              exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                 = (uint32_t) exceptiontable->maxrangevalue;
+              lastexceptionrangelength = 0;
+            } else
+            {
+              lastexceptionrangelength++;
+            }
+          }
+          bitpackarray_store_uint32(encseq->exceptions,
+                                   (BitOffset) (mapposition++),
+                                   (uint32_t) encseq->subsymbolmap[(int) orig]);
+        }
+      }
       encseq->plainseq[currentposition] = cc;
       if (cc == (GtUchar) SEPARATOR)
       {
@@ -1873,7 +2230,29 @@ static int fillViadirectaccess(GtEncseq *encseq,
         return -1;
       }
       gt_assert(retval == 0);
+      if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
+      {
+        /* note that we store one less than the length to prevent overflows */
+        gt_assert(fillexceptionrangeidx > 0);
+        gt_assert(fillexceptionrangeidx - 1 <
+                  exceptiontable->numofpositionstostore);
+                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+          = (uint32_t) (lastexceptionrangelength-1);
+      }
       break;
+    }
+    if (encseq->has_exceptiontable && currentposition == nextcheckpos)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
+      nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+    }
+  }
+  if (encseq->has_exceptiontable) {
+    while (pagenumber < exceptiontable->numofpages)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
     }
   }
   ssptaboutinfo_finalize(ssptaboutinfo);
@@ -1943,21 +2322,79 @@ static int fillViabytecompress(GtEncseq *encseq,
                                GtSequenceBuffer *fb,
                                GtError *err)
 {
-  unsigned long currentposition;
+  unsigned long currentposition,
+                fillexceptionrangeidx = 0,
+                mapposition = 0,
+                nextcheckpos = GT_UNDEF_ULONG,
+                pagenumber = 0;
   int retval;
   unsigned int numofchars;
   GtUchar cc;
-
+  char orig;
+  unsigned int lastexceptionrangelength = 0;
+  GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   gt_error_check(err);
+
+  if (encseq->has_exceptiontable) {
+    exceptiontable->positions = gt_malloc(sizeof (*exceptiontable->positions) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->rangelengths =
+                               gt_malloc(sizeof(*exceptiontable->rangelengths) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->endidxinpage =
+                               gt_malloc(sizeof(*exceptiontable->endidxinpage) *
+                                         exceptiontable->numofpages);
+    exceptiontable->mappositions =
+                              gt_malloc(sizeof (*exceptiontable->mappositions) *
+                                        exceptiontable->numofpositionstostore);
+
+    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+  }
   numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   encseq->bitpackarray
     = bitpackarray_new(gt_alphabet_bits_per_symbol(encseq->alpha),
                        (BitOffset) encseq->totallength,true);
   for (currentposition=0; /* Nothing */; currentposition++)
   {
-    retval = gt_sequence_buffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
     if (retval == 1)
     {
+      if (encseq->has_exceptiontable && cc != (GtUchar) SEPARATOR) {
+        if (orig == encseq->maxchars[cc]) {
+          if (lastexceptionrangelength > 0) {
+            exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                           = (uint32_t) (lastexceptionrangelength-1);
+            lastexceptionrangelength = 0;
+          }
+        } else {
+          if (lastexceptionrangelength == 0)
+          /* at beginning of exception range */
+          {
+            /* store remainder of currentposition: this value is not larger
+               than maxrangevalue and this can be stored in a page */
+            exceptiontable->positions[fillexceptionrangeidx++]
+              = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
+            exceptiontable->mappositions[fillexceptionrangeidx-1]
+              = (mapposition);
+            lastexceptionrangelength = 1U;
+          } else /* extend exception range */
+          {
+            if (lastexceptionrangelength == exceptiontable->maxrangevalue)
+            {
+              gt_assert(fillexceptionrangeidx > 0);
+              exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                 = (uint32_t) exceptiontable->maxrangevalue;
+              lastexceptionrangelength = 0;
+            } else
+            {
+              lastexceptionrangelength++;
+            }
+          }
+          bitpackarray_store_uint32(encseq->exceptions,
+                                   (BitOffset) (mapposition++),
+                                   (uint32_t) encseq->subsymbolmap[(int) orig]);
+        }
+      }
       if (ISSPECIAL(cc))
       {
         if (cc == (GtUchar) SEPARATOR)
@@ -1985,8 +2422,30 @@ static int fillViabytecompress(GtEncseq *encseq,
         encseq->bitpackarray = NULL;
         return -1;
       }
+      if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
+      {
+        /* note that we store one less than the length to prevent overflows */
+        gt_assert(fillexceptionrangeidx > 0);
+        gt_assert(fillexceptionrangeidx - 1 <
+                  exceptiontable->numofpositionstostore);
+                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+          = (uint32_t) (lastexceptionrangelength-1);
+      }
       gt_assert(retval == 0);
       break;
+    }
+    if (encseq->has_exceptiontable && currentposition == nextcheckpos)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
+      nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+    }
+  }
+  if (encseq->has_exceptiontable) {
+    while (pagenumber < exceptiontable->numofpages)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
     }
   }
   ssptaboutinfo_finalize(ssptaboutinfo);
@@ -2086,17 +2545,75 @@ static int fillViaequallength(GtEncseq *encseq,
                               GtError *err)
 {
   GtUchar cc;
-  unsigned long pos;
+  char orig;
+  unsigned long pos,
+                fillexceptionrangeidx = 0,
+                mapposition = 0,
+                nextcheckpos = GT_UNDEF_ULONG,
+                pagenumber = 0;
   int retval;
+  unsigned int lastexceptionrangelength = 0;
+  GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViaequallength */
-
   gt_error_check(err);
+
+  if (encseq->has_exceptiontable) {
+    exceptiontable->positions = gt_malloc(sizeof (*exceptiontable->positions) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->rangelengths =
+                               gt_malloc(sizeof(*exceptiontable->rangelengths) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->endidxinpage =
+                               gt_malloc(sizeof(*exceptiontable->endidxinpage) *
+                                         exceptiontable->numofpages);
+    exceptiontable->mappositions =
+                              gt_malloc(sizeof (*exceptiontable->mappositions) *
+                                        exceptiontable->numofpositionstostore);
+
+    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+  }
   gt_assert(encseq->equallength.defined);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = gt_sequence_buffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
     if (retval == 1)
     {
+      if (encseq->has_exceptiontable && cc != (GtUchar) SEPARATOR) {
+        if (orig == encseq->maxchars[cc]) {
+          if (lastexceptionrangelength > 0) {
+            exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                           = (uint32_t) (lastexceptionrangelength-1);
+            lastexceptionrangelength = 0;
+          }
+        } else {
+          if (lastexceptionrangelength == 0)
+          /* at beginning of exception range */
+          {
+            /* store remainder of currentposition: this value is not larger
+               than maxrangevalue and this can be stored in a page */
+            exceptiontable->positions[fillexceptionrangeidx++]
+              = (uint32_t) (pos & exceptiontable->maxrangevalue);
+            exceptiontable->mappositions[fillexceptionrangeidx-1]
+              = (mapposition);
+            lastexceptionrangelength = 1U;
+          } else /* extend exception range */
+          {
+            if (lastexceptionrangelength == exceptiontable->maxrangevalue)
+            {
+              gt_assert(fillexceptionrangeidx > 0);
+              exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                 = (uint32_t) exceptiontable->maxrangevalue;
+              lastexceptionrangelength = 0;
+            } else
+            {
+              lastexceptionrangelength++;
+            }
+          }
+          bitpackarray_store_uint32(encseq->exceptions,
+                                   (BitOffset) (mapposition++),
+                                   (uint32_t) encseq->subsymbolmap[(int) orig]);
+        }
+      }
       bitwise <<= 2;
       if (ISNOTSPECIAL(cc))
       {
@@ -2123,7 +2640,30 @@ static int fillViaequallength(GtEncseq *encseq,
         return -1;
       }
       gt_assert(retval == 0);
+
+      if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
+      {
+        /* note that we store one less than the length to prevent overflows */
+        gt_assert(fillexceptionrangeidx > 0);
+        gt_assert(fillexceptionrangeidx - 1 <
+                  exceptiontable->numofpositionstostore);
+                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+          = (uint32_t) (lastexceptionrangelength-1);
+      }
       break;
+    }
+    if (encseq->has_exceptiontable && pos == nextcheckpos)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
+      nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+    }
+  }
+  if (encseq->has_exceptiontable) {
+    while (pagenumber < exceptiontable->numofpages)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
     }
   }
   UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr); /* in fillViaequallength */
@@ -2246,10 +2786,34 @@ static int fillViabitaccess(GtEncseq *encseq,
                             Gtssptaboutinfo *ssptaboutinfo,
                             GtSequenceBuffer *fb,GtError *err)
 {
-  unsigned long currentposition;
-  GtUchar cc;
+   unsigned long currentposition,
+                fillexceptionrangeidx = 0,
+                mapposition = 0,
+                nextcheckpos = GT_UNDEF_ULONG,
+                pagenumber = 0;
   int retval;
+  GtUchar cc;
+  char orig;
+  unsigned int lastexceptionrangelength = 0;
+  GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
   DECLARESEQBUFFER(encseq->twobitencoding); /* in fillViabitaccess */
+  gt_error_check(err);
+
+  if (encseq->has_exceptiontable) {
+    exceptiontable->positions = gt_malloc(sizeof (*exceptiontable->positions) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->rangelengths =
+                               gt_malloc(sizeof(*exceptiontable->rangelengths) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->endidxinpage =
+                               gt_malloc(sizeof(*exceptiontable->endidxinpage) *
+                                         exceptiontable->numofpages);
+    exceptiontable->mappositions =
+                              gt_malloc(sizeof (*exceptiontable->mappositions) *
+                                        exceptiontable->numofpositionstostore);
+
+    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+  }
 
   gt_error_check(err);
   GT_INITBITTAB(encseq->specialbits,encseq->totallength + GT_INTWORDSIZE);
@@ -2261,9 +2825,45 @@ static int fillViabitaccess(GtEncseq *encseq,
   }
   for (currentposition=0; /* Nothing */; currentposition++)
   {
-    retval = gt_sequence_buffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
     if (retval == 1)
     {
+      if (encseq->has_exceptiontable && cc != (GtUchar) SEPARATOR) {
+        if (orig == encseq->maxchars[cc]) {
+          if (lastexceptionrangelength > 0) {
+            exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                           = (uint32_t) (lastexceptionrangelength-1);
+            lastexceptionrangelength = 0;
+          }
+        } else {
+          if (lastexceptionrangelength == 0)
+          /* at beginning of exception range */
+          {
+            /* store remainder of currentposition: this value is not larger
+               than maxrangevalue and this can be stored in a page */
+            exceptiontable->positions[fillexceptionrangeidx++]
+              = (uint32_t) (currentposition & exceptiontable->maxrangevalue);
+            exceptiontable->mappositions[fillexceptionrangeidx-1]
+              = (mapposition);
+            lastexceptionrangelength = 1U;
+          } else /* extend exception range */
+          {
+            if (lastexceptionrangelength == exceptiontable->maxrangevalue)
+            {
+              gt_assert(fillexceptionrangeidx > 0);
+              exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                 = (uint32_t) exceptiontable->maxrangevalue;
+              lastexceptionrangelength = 0;
+            } else
+            {
+              lastexceptionrangelength++;
+            }
+          }
+          bitpackarray_store_uint32(encseq->exceptions,
+                                   (BitOffset) (mapposition++),
+                                   (uint32_t) encseq->subsymbolmap[(int) orig]);
+        }
+      }
       if (ISSPECIAL(cc))
       {
         GT_SETIBIT(encseq->specialbits,currentposition);
@@ -2299,8 +2899,30 @@ static int fillViabitaccess(GtEncseq *encseq,
       {
         return -1;
       }
+      if (encseq->has_exceptiontable && lastexceptionrangelength > 0)
+      {
+        /* note that we store one less than the length to prevent overflows */
+        gt_assert(fillexceptionrangeidx > 0);
+        gt_assert(fillexceptionrangeidx - 1 <
+                  exceptiontable->numofpositionstostore);
+                  exceptiontable->rangelengths[fillexceptionrangeidx-1]
+          = (uint32_t) (lastexceptionrangelength-1);
+      }
       gt_assert(retval == 0);
+      if (encseq->has_exceptiontable && currentposition == nextcheckpos)
+      {
+        exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+        pagenumber++;
+        nextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+      }
       break;
+    }
+  }
+  if (encseq->has_exceptiontable) {
+    while (pagenumber < exceptiontable->numofpages)
+    {
+      exceptiontable->endidxinpage[pagenumber] = fillexceptionrangeidx;
+      pagenumber++;
     }
   }
   UPDATESEQBUFFERFINAL(bitwise,twobitencodingptr); /* in fillViabitaccess */
@@ -2391,7 +3013,7 @@ static bool issinglepositionseparatorViabitaccess(const GtEncseq *encseq,
 static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
 {\
   return (encseq->EXISTS) &&\
-         CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE,pos);\
+         CHECKFUN##_##TYPE(&encseq->wildcardrangetable.st_##TYPE,NULL,pos);\
 }
 
 #define DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
@@ -2400,6 +3022,15 @@ static bool FCTNAME##TYPE(const GtEncseq *encseq,unsigned long pos)\
 {\
   return (encseq->EXISTS) &&\
          CHECKFUN##_##TYPE(&encseq->ssptab.st_##TYPE,pos);\
+}
+
+#define DECLAREISSINGLEPOSITIONEXCEPTIONVIATABLESFUNCTION(FCTNAME,CHECKFUN,\
+                                                          EXISTS,TYPE)\
+static bool FCTNAME##TYPE(const GtEncseq *encseq, unsigned long *mappos,\
+                          unsigned long pos)\
+{\
+  return (encseq->EXISTS) &&\
+         CHECKFUN##_##TYPE(&encseq->exceptiontable.st_##TYPE,mappos,pos);\
 }
 
 /* GT_ACCESS_TYPE_UCHARTABLES */
@@ -2435,6 +3066,11 @@ DECLAREISSINGLEPOSITIONWILDCARDVIATABLESFUNCTION(
 DECLAREISSINGLEPOSITIONSEPARATORVIATABLESFUNCTION(
                                            issinglepositionseparatorVia,
                                            checkspecial,has_ssptab,uint32)
+
+DECLAREISSINGLEPOSITIONEXCEPTIONVIATABLESFUNCTION(
+                                           issinglepositioninexceptionrangeVia,
+                                           checkspecialrange,has_exceptiontable,
+                                           uint32)
 
 static void advancerangeGtEncseqReader(GtEncseqReader *esr,
                                        KindofSWtable kindsw)
@@ -3608,47 +4244,16 @@ static double determine_spaceinbitsperchar(unsigned long sizeofrep,
                   (double) totallength;
 }
 
-static void alphabet_to_key_values(const GtAlphabet *alpha,
-                                   unsigned long *alphatype,
-                                   unsigned long *lengthofalphadef,
-                                   char **alphadef)
-{
-  gt_assert(alpha);
-  if (gt_alphabet_is_dna(alpha)) {
-    if (alphatype != NULL)
-      *alphatype = 0UL;
-    if (alphadef != NULL)
-      *alphadef = NULL;
-    if (lengthofalphadef != NULL)
-      *lengthofalphadef = 0UL;
-  } else if (gt_alphabet_is_protein(alpha)) {
-    if (alphatype != NULL)
-      *alphatype = 1UL;
-    if (alphadef != NULL)
-      *alphadef = NULL;
-    if (lengthofalphadef != NULL)
-      *lengthofalphadef = 0UL;
-  } else {
-    GtStr *s = gt_str_new();
-    if (alphatype != NULL)
-      *alphatype = 2UL;
-    gt_alphabet_to_str(alpha, s);
-    if (alphadef != NULL)
-      *alphadef = gt_cstr_dup(gt_str_get(s));
-    if (lengthofalphadef != NULL)
-      *lengthofalphadef = gt_str_length(s);
-    gt_str_delete(s);
-  }
-}
-
 static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           unsigned long totallength,
                                           unsigned long numofsequences,
                                           unsigned long numofdbfiles,
                                           unsigned long lengthofdbfilenames,
                                           unsigned long wildcardranges,
+                                          unsigned long exceptionranges,
                                           unsigned long minseqlen,
                                           unsigned long maxseqlen,
+                                          bool oistab,
                                           const Definedunsignedlong
                                              *equallength,
                                           GtAlphabet *alpha,
@@ -3660,9 +4265,12 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
 
   encseq = gt_malloc(sizeof (*encseq));
   encseq->sat = sat;
+  encseq->exceptions = NULL;
+  encseq->oissat = GT_ACCESS_TYPE_UINT32TABLES;
   encseq->accesstype_via_utables = gt_encseq_access_type_isviautables(sat);
   encseq->satsep = determineoptimalsssptablerep(sat,totallength,
                                                 numofsequences-1);
+  encseq->has_exceptiontable = oistab;
   if (encseq->accesstype_via_utables)
   {
     initSWtable(&encseq->wildcardrangetable,totallength,sat,wildcardranges);
@@ -3670,6 +4278,11 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   if (encseq->satsep != GT_ACCESS_TYPE_UNDEFINED)
   {
     initSWtable(&encseq->ssptab,totallength,encseq->satsep,numofsequences-1);
+  }
+  if (encseq->has_exceptiontable)
+  {
+    initSWtable(&encseq->exceptiontable,totallength,encseq->oissat,
+                exceptionranges);
   }
   encseq->has_wildcardranges = (wildcardranges > 0) ? true : false;
   encseq->has_specialranges
@@ -3679,6 +4292,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->filenametab = NULL;
   encseq->mappedptr = NULL;
   encseq->ssptabmappedptr = NULL;
+  encseq->oistabmappedptr = NULL;
   encseq->headerptr.satcharptr = NULL;
   encseq->headerptr.numofdbsequencesptr = NULL;
   encseq->headerptr.numofdbfilesptr = NULL;
@@ -3740,6 +4354,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   }
   encseq->plainseq = NULL;
   encseq->bitpackarray = NULL;
+  encseq->exceptions = NULL;
   encseq->hasplainseqptr = false;
   encseq->specialbits = NULL;
   setencsequtablesNULL(encseq->sat,&encseq->wildcardrangetable);
@@ -3766,6 +4381,7 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
     {
       unsigned long sizessptab = CALLCASTFUNC(uint64_t, unsigned_long,
                                      gt_encseq_sizeofSWtable(encseq->satsep,
+                                              false,
                                               false,
                                               totallength,
                                               numofsequences-1));
@@ -3868,6 +4484,12 @@ typedef struct
   bool(*function)(const GtEncseq *,unsigned long);
 } Issinglepositionspecialfunc;
 
+typedef struct
+{
+  const char *funcname;
+  bool(*function)(const GtEncseq *,unsigned long*, unsigned long);
+} Getexceptionmappingfunc;
+
 /* Do not change the order of the following components */
 
 typedef struct
@@ -3878,6 +4500,7 @@ typedef struct
   Containsspecialfunc delivercontainsspecial;
   Issinglepositionspecialfunc issinglepositioninwildcardrange,
                               issinglepositionseparator;
+  Getexceptionmappingfunc getexceptionmapping;
 } GtEncseqfunctions;
 
 #define NFCT(S,F) {#F,F}
@@ -3892,7 +4515,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViadirectaccess),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViadirectaccess)
+           issinglepositionseparatorViadirectaccess),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     },
 
     { /* GT_ACCESS_TYPE_BYTECOMPRESS */
@@ -3903,7 +4528,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViabytecompress),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViabytecompress)
+           issinglepositionseparatorViabytecompress),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     },
 
     { /* GT_ACCESS_TYPE_EQUALLENGTH */
@@ -3915,7 +4542,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
            NULL), /* if equallength is used, then there are no wildcard
                      ranges. This should be checked directly */
       NFCT(issinglepositionseparator,
-           issinglepositioninspecialrangeViaequallength)
+           issinglepositioninspecialrangeViaequallength),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     },
 
     { /* GT_ACCESS_TYPE_BITACCESS */
@@ -3926,7 +4555,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViabitaccess),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViabitaccess)
+           issinglepositionseparatorViabitaccess),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     },
 
     { /* GT_ACCESS_TYPE_UCHARTABLES */
@@ -3937,7 +4568,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViauchar),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViauchar)
+           issinglepositionseparatorViauchar),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     },
 
     { /* GT_ACCESS_TYPE_USHORTTABLES */
@@ -3948,7 +4581,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViauint16),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViauint16)
+           issinglepositionseparatorViauint16),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     },
 
     { /* GT_ACCESS_TYPE_UINT32TABLES */
@@ -3959,7 +4594,9 @@ static GtEncseqfunctions encodedseqfunctab[] =
       NFCT(issinglepositioninwildcardrange,
            issinglepositioninwildcardrangeViauint32),
       NFCT(issinglepositionseparator,
-           issinglepositionseparatorViauint32)
+           issinglepositionseparatorViauint32),
+      NFCT(getexceptionmapping,
+           issinglepositioninexceptionrangeViauint32)
     }
   };
 
@@ -4036,23 +4673,29 @@ static unsigned int determineleastprobablecharacter(const GtAlphabet *alpha,
 
 #define SIZEOFFUNCTAB sizeof (encodedseqfunctab)/sizeof (encodedseqfunctab[0])
 
-static GtEncseq *files2encodedsequence(
-                                const GtStrArray *filenametab,
-                                const GtFilelengthvalues *filelengthtab,
-                                bool plainformat,
-                                unsigned long totallength,
-                                bool outssptab,
-                                unsigned long numofsequences,
-                                const Definedunsignedlong *equallength,
-                                GtAlphabet *alphabet,
-                                GtEncseqAccessType sat,
-                                unsigned long *characterdistribution,
-                                const GtSpecialcharinfo *specialcharinfo,
-                                unsigned long wildcardranges,
-                                unsigned long minseqlength,
-                                unsigned long maxseqlength,
-                                GtLogger *logger,
-                                GtError *err)
+static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
+                                       const GtFilelengthvalues *filelengthtab,
+                                       bool plainformat,
+                                       unsigned long totallength,
+                                       bool outssptab,
+                                       unsigned long numofsequences,
+                                       const Definedunsignedlong *equallength,
+                                       GtAlphabet *alphabet,
+                                       GtEncseqAccessType sat,
+                                       unsigned long *characterdistribution,
+                                       unsigned long *classstartpositions,
+                                       char *maxchars,
+                                       char *allchars,
+                                       unsigned long numofallchars,
+                                       unsigned char *subsymbolmap,
+                                       unsigned char maxsubalphasize,
+                                       bool outoistab,
+                                       const GtSpecialcharinfo *specialcharinfo,
+                                       unsigned long wildcardranges,
+                                       unsigned long minseqlength,
+                                       unsigned long maxseqlength,
+                                       GtLogger *logger,
+                                       GtError *err)
 {
   GtEncseq *encseq = NULL;
   bool haserr = false;
@@ -4061,7 +4704,7 @@ static GtEncseq *files2encodedsequence(
 
   gt_error_check(err);
 #ifdef INLINEDENCSEQ
-  gt_logger_log(logger,"inlined encodeded sequence");
+  gt_logger_log(logger,"inlined encoded sequence");
 #endif
   if (!haserr)
   {
@@ -4074,20 +4717,30 @@ static GtEncseq *files2encodedsequence(
                                       gt_str_array_size(filenametab),
                                       lengthofdbfilenames,
                                       wildcardranges,
+                                      specialcharinfo->realexceptionranges,
                                       minseqlength,
                                       maxseqlength,
+                                      outoistab,
                                       equallength,
                                       alphabet,
                                       logger);
     ALLASSIGNAPPENDFUNC(sat,encseq->satsep);
+    encseq->getexceptionmapping =
+      encodedseqfunctab[(int) sat].getexceptionmapping.function;
     encseq->mappedptr = NULL;
     encseq->ssptabmappedptr = NULL;
     encseq->headerptr.characterdistribution = characterdistribution;
     encseq->leastprobablecharacter
-      = determineleastprobablecharacter(alphabet,characterdistribution);
+              = determineleastprobablecharacter(alphabet,characterdistribution);
     encseq->filenametab = (GtStrArray *) filenametab;
     encseq->headerptr.filelengthtab = (GtFilelengthvalues *) filelengthtab;
     encseq->specialcharinfo = *specialcharinfo;
+    encseq->classstartpositions = classstartpositions;
+    encseq->maxchars = maxchars;
+    encseq->allchars = allchars;
+    encseq->numofallchars = numofallchars;
+    encseq->subsymbolmap = subsymbolmap;
+    encseq->maxsubalphasize = maxsubalphasize;
     gt_assert(filenametab != NULL);
     if (plainformat)
     {
@@ -4121,6 +4774,17 @@ static GtEncseq *files2encodedsequence(
     } else
     {
       encseq->satsep = GT_ACCESS_TYPE_UNDEFINED;
+    }
+  }
+  if (!haserr)
+  {
+    gt_assert(encseq != NULL);
+    if (encseq->has_exceptiontable) {
+      encseq->exceptions
+        = bitpackarray_new(gt_determinebitspervalue((uint64_t)
+                                                     encseq->maxsubalphasize-1),
+                      (BitOffset) encseq->specialcharinfo.exceptioncharacters,
+                      true);
     }
   }
   if (!haserr)
@@ -4210,13 +4874,17 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
                                  gt_encseq_metadata_num_of_files(emd),
                                  gt_encseq_metadata_length_of_filenames(emd),
                                  si.wildcardranges,
+                                 si.realexceptionranges,
                                  gt_encseq_metadata_min_seq_length(emd),
                                  gt_encseq_metadata_max_seq_length(emd),
+                                 withoistab,
                                  &equallength,
                                  alpha,
                                  logger);
     alpha = NULL;
     ALLASSIGNAPPENDFUNC(gt_encseq_metadata_accesstype(emd),encseq->satsep);
+    encseq->getexceptionmapping =
+      encodedseqfunctab[(int) sat].getexceptionmapping.function;
     if (fillencseqmapspecstartptr(encseq,indexname,logger,err) != 0)
     {
       haserr = true;
@@ -4280,12 +4948,8 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
   if (!haserr && withoistab)
   {
     gt_assert(encseq != NULL);
-    encseq->oistab = gt_fa_mmap_check_size_with_suffix(indexname,
-                                                       GT_OISTABFILESUFFIX,
-                                                       encseq->totallength,
-                                                       sizeof (*encseq->oistab),
-                                                       err);
-    if (encseq->oistab == NULL)
+    encseq->has_exceptiontable = true;
+    if (!haserr && filloistabmapspecstartptr(encseq,indexname,err) != 0)
     {
       haserr = true;
     }
@@ -4443,6 +5107,7 @@ unsigned long gt_encseq_specialcharacters(const GtEncseq *encseq)
 
 unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
 {
+  gt_assert(encseq != NULL);
   if (encseq->hasmirror) {
     /* check whether central specialranges can be merged */
     if (gt_encseq_get_encoded_char(encseq, encseq->totallength-1,
@@ -4453,6 +5118,26 @@ unsigned long gt_encseq_specialranges(const GtEncseq *encseq)
     }
   }
   return encseq->specialcharinfo.specialranges;
+}
+
+unsigned long gt_encseq_exceptioncharacters(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return encseq->specialcharinfo.exceptioncharacters
+           * (encseq->hasmirror ? 2 : 1);
+}
+
+unsigned long gt_encseq_exceptionranges(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return encseq->specialcharinfo.realexceptionranges
+           * (encseq->hasmirror ? 2 : 1);
+}
+
+unsigned long gt_encseq_max_subalpha_size(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return encseq->maxsubalphasize;
 }
 
 unsigned long gt_encseq_realspecialranges(const GtEncseq *encseq)
@@ -4647,7 +5332,8 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
     case GT_ACCESS_TYPE_USHORTTABLES:
     case GT_ACCESS_TYPE_UINT32TABLES:
          sum = sizeoftwobitencoding +
-               gt_encseq_sizeofSWtable(sat,true,totallength,wildcardranges);
+               gt_encseq_sizeofSWtable(sat,true,false,totallength,
+                                       wildcardranges);
          break;
     default:
          fprintf(stderr,"gt_encseq_determine_size(%d) undefined\n",(int) sat);
@@ -4663,6 +5349,8 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
   sum += sizeof (GtSpecialcharinfo); /* for specialcharinfo */
   sum += sizeof (unsigned long); /* for minseqlen type */
   sum += sizeof (unsigned long); /* for maxseqlen type */
+  sum += sizeof (unsigned long); /* for numofallchars type */
+  sum += sizeof (unsigned char); /* for maxsubalphasize type */
   sum += sizeof (GtFilelengthvalues) * numofdbfiles; /* for filelengthtab */
   sum += sizeof (unsigned long) * numofchars; /* for characterdistribution */
   sum += sizeof (char) * lengthofdbfilenames; /* for firstfilename */
@@ -4735,6 +5423,158 @@ void gt_GtSpecialcharinfo_check(const GtSpecialcharinfo *specialcharinfo,
 }
 #endif
 
+static void determine_original_subdist(const GtAlphabet *alpha,
+                                       char *maxchars,
+                                       char **allchars,
+                                       unsigned char *subsymbolmap,
+                                       unsigned char *maxsubalphasize,
+                                       unsigned long *numofallchars,
+                                       unsigned long *classstartpositions,
+                                       unsigned long *originaldistribution)
+{
+  unsigned long i, *maxima, offset = 0, j;
+  unsigned char encodedchar = UNDEFCHAR;
+  GtStr **origchars;
+  const char *classchars;
+
+  maxima = gt_calloc((size_t) UCHAR_MAX, sizeof (*maxima));
+  origchars = gt_calloc((size_t) UCHAR_MAX, sizeof (*origchars));
+  *maxsubalphasize = 0UL;
+
+  for (i = 0; i < (unsigned long) gt_alphabet_num_of_chars(alpha); i++) {
+    maxchars[i] = gt_alphabet_decode(alpha, (GtUchar) i);
+    origchars[i] = gt_str_new();
+  }
+  maxchars[WILDCARD] = gt_alphabet_decode(alpha, (GtUchar) WILDCARD);
+  origchars[WILDCARD] = gt_str_new();
+
+  for (i = 1UL; i < 128UL /* printable characters */; i++) {
+    if (originaldistribution[i] > 0UL) {
+      gt_assert(gt_alphabet_valid_input(alpha, (char) i));
+      encodedchar = (unsigned char) gt_alphabet_encode(alpha, (char) i);
+      gt_assert(encodedchar != UNDEFCHAR);
+      if (encodedchar != SEPARATOR) {
+        if (originaldistribution[i] > maxima[encodedchar]) {
+          maxima[encodedchar] = originaldistribution[i];
+          maxchars[encodedchar] = (char) i;
+        }
+        gt_str_append_char(origchars[encodedchar], (char) i);
+        (*numofallchars)++;
+      }
+    }
+  }
+  *allchars = gt_malloc((size_t) (*numofallchars * sizeof (char)));
+  for (i = 0UL; i < (unsigned long) gt_alphabet_num_of_chars(alpha); i++) {
+    classchars = gt_str_get(origchars[i]);
+    gt_log_log("encoding class %lu: chars: %s, "
+               "most frequent character %d(%c) (%lu occs)",
+               i, classchars, maxchars[i],maxchars[i], maxima[i]);
+    strncpy(*allchars + offset,
+            classchars,
+            (size_t) gt_str_length(origchars[i]));
+    classstartpositions[i] = offset;
+    offset += gt_str_length(origchars[i]);
+    for (j = 0; j < gt_str_length(origchars[i]); j++) {
+      gt_assert(j < (unsigned long) UCHAR_MAX);
+      subsymbolmap[(int) classchars[j]] = (unsigned char) j;
+    }
+    if (gt_str_length(origchars[i]) > *maxsubalphasize) {
+      gt_assert(gt_str_length(origchars[i]) < (unsigned long) UCHAR_MAX);
+      *maxsubalphasize = (unsigned char) gt_str_length(origchars[i]);
+    }
+    gt_str_delete(origchars[i]);
+  }
+  i = WILDCARD;
+  classchars = gt_str_get(origchars[i]);
+  gt_log_log("encoding class %lu: chars: %s, "
+             "most frequent character %d(%c) (%lu occs)",
+               i, classchars, maxchars[i],maxchars[i], maxima[i]);
+  strncpy(*allchars + offset,
+          classchars,
+          (size_t) gt_str_length(origchars[i]));
+  classstartpositions[i] = offset;
+  offset += gt_str_length(origchars[i]);
+  for (j = 0; j < gt_str_length(origchars[i]); j++) {
+    gt_assert(j < (unsigned long) UCHAR_MAX);
+    subsymbolmap[(int) classchars[j]] = (unsigned char) j;
+  }
+  if (gt_str_length(origchars[i]) > *maxsubalphasize) {
+      gt_assert(gt_str_length(origchars[i]) < (unsigned long) UCHAR_MAX);
+      *maxsubalphasize = (unsigned char) gt_str_length(origchars[i]);
+    }
+  gt_str_delete(origchars[i]);
+
+  gt_assert(*numofallchars == offset);
+  gt_free(maxima);
+  gt_free(origchars);
+}
+
+static int countnumberofexceptionranges(const GtAlphabet *alpha,
+                                        bool plainformat,
+                                        const GtStrArray *filenametab,
+                                        GtSpecialcharinfo *specialcharinfo,
+                                        char *maxchars,
+                                        GtError *err)
+{
+  int had_err = 0;
+  GtSequenceBuffer *fb;
+  unsigned long currentpos;
+  if (plainformat)
+    fb = gt_sequence_buffer_plain_new(filenametab);
+  else
+    fb = gt_sequence_buffer_new_guess_type(filenametab, err);
+  if (!fb) {
+    gt_assert(gt_error_is_set(err));
+    had_err = -1;
+  }
+  if (!had_err) {
+    int retval;
+    char cc;
+    unsigned long start = GT_UNDEF_ULONG;
+    bool in_range = false;
+    GtUchar charcode;
+
+    gt_sequence_buffer_set_symbolmap(fb, gt_alphabet_symbolmap(alpha));
+    for (currentpos = 0; /* Nothing */; currentpos++)
+    {
+      retval = gt_sequence_buffer_next_with_original(fb, &charcode, &cc, err);
+      if (retval > 0)
+      {
+        if (charcode != (GtUchar) SEPARATOR) {
+          if (cc != maxchars[charcode]) {
+            if (!in_range) {
+              start = currentpos;
+              in_range = true;
+            }
+            specialcharinfo->exceptioncharacters++;
+          } else {
+            if (in_range) {
+              specialcharinfo->realexceptionranges++;
+              in_range = false;
+            }
+          }
+        }
+      } else
+      {
+        if (retval == 0)
+        {
+          if (in_range) {
+            specialcharinfo->realexceptionranges++;
+            in_range = false;
+          }
+        } else /* retval < 0 */
+        {
+          gt_assert(gt_error_is_set(err));
+          had_err = -1;
+        }
+        break;
+      }
+    }
+  }
+  gt_sequence_buffer_delete(fb);
+  return had_err;
+}
+
 static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            unsigned long *totallength,
                                            GtSpecialcharinfo *specialcharinfo,
@@ -4749,7 +5589,13 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                                            bool outdestab,
                                            bool outsdstab,
                                            unsigned long *characterdistribution,
-                                           bool outoistab,
+                                           unsigned long *classstartpositions,
+                                           char *maxchars,
+                                           char **allchars,
+                                           unsigned long *numofallchars,
+                                           unsigned char *subsymbolmap,
+                                           unsigned char *maxsubalphasize,
+                                           GT_UNUSED bool outoistab,
                                            unsigned long *numofseparators,
                                            unsigned long *minseqlen,
                                            unsigned long *maxseqlen,
@@ -4764,7 +5610,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                 lastwildcardrangelength = 0,
                 lastnonspecialrangelength = 0,
                 lengthofcurrentsequence = 0,
-                lengthofalphadef;
+                lengthofalphadef,
+                *originaldistribution = NULL;
   bool specialprefix = true, wildcardprefix = true, haserr = false;
   GtDiscDistri *distspecialrangelength = NULL, *distwildcardrangelength = NULL;
   GtDescBuffer *descqueue = NULL;
@@ -4810,14 +5657,6 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       haserr = true;
     }
   }
-  if (!haserr && outoistab)
-  {
-    oisfp = gt_fa_fopen_with_suffix(indexname,GT_OISTABFILESUFFIX,"w",err);
-    if (oisfp == NULL)
-    {
-      haserr = true;
-    }
-  }
   if (!haserr)
   {
     char cc;
@@ -4832,6 +5671,8 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
     gt_sequence_buffer_set_chardisttab(fb, characterdistribution);
     distspecialrangelength = gt_disc_distri_new();
     distwildcardrangelength = gt_disc_distri_new();
+    originaldistribution = gt_calloc((size_t) UCHAR_MAX,
+                                     sizeof (unsigned long));
     for (currentpos = 0; /* Nothing */; currentpos++)
     {
 #ifndef _LP64
@@ -4849,6 +5690,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       {
 #define WITHEQUALLENGTH_DES_SSP
 #define WITHOISTAB
+#define WITHORIGDIST
 #include "encseq_charproc.gen"
         if (charcode == (GtUchar) SEPARATOR && lengthofcurrentsequence > 0) {
           if (*maxseqlen == GT_UNDEF_ULONG
@@ -4897,6 +5739,15 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   }
   if (!haserr)
   {
+    determine_original_subdist(alpha, maxchars, allchars, subsymbolmap,
+                               maxsubalphasize, numofallchars,
+                               classstartpositions, originaldistribution);
+    retval = countnumberofexceptionranges(alpha, plainformat, filenametab,
+                                          specialcharinfo, maxchars, err);
+    if (retval != 0)
+      haserr = true;
+  }
+  if (!haserr) {
     if (desfp != NULL)
     {
       desc = (char*) gt_desc_buffer_get_next(descqueue);
@@ -4942,6 +5793,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   if (*maxseqlen == GT_UNDEF_ULONG && *minseqlen == GT_UNDEF_ULONG) {
     *maxseqlen = *minseqlen = lengthofcurrentsequence;
   }
+  gt_free(originaldistribution);
   gt_fa_xfclose(desfp);
   gt_fa_xfclose(sdsfp);
   gt_disc_distri_delete(distspecialrangelength);
@@ -4980,6 +5832,7 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
     charcode = seq[currentpos];
 #undef WITHEQUALLENGTH_DES_SSP
 #undef WITHOISTAB
+#undef WITHORIGDIST
 #include "encseq_charproc.gen"
   }
   if (lastspecialrangelength > 0)
@@ -6874,22 +7727,28 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
 {
   bool haserr = false;
   unsigned int forcetable = GT_UNDEF_UINT;
-  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0,0};
+  GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   GtAlphabet *alphabet = NULL;
   bool alphabetisbound = false;
   GtFilelengthvalues *filelengthtab = NULL;
   unsigned long totallength = 0, specialrangestab[3], wildcardrangestab[3],
                 numofseparators = 0,
-                *characterdistribution = NULL;
-  GtEncseq *encseq = NULL;
-  unsigned long specialranges,
+                *characterdistribution = NULL,
+                *classstartpositions = NULL,
+                specialranges,
                 wildcardranges,
                 minseqlen = GT_UNDEF_ULONG,
-                maxseqlen = GT_UNDEF_ULONG;
+                maxseqlen = GT_UNDEF_ULONG,
+                numofallchars = 0;
+  GtEncseq *encseq = NULL;
+  unsigned char subsymbolmap[UCHAR_MAX+1],
+                maxsubalphasize = 0;
   Definedunsignedlong equallength; /* is defined if all sequences are of equal
                                       length and no WILDCARD appears in the
                                       sequence */
   GtEncseqAccessType sat = GT_ACCESS_TYPE_UNDEFINED;
+  char *allchars = NULL,
+       *maxchars = NULL;
 
   gt_error_check(err);
   filenametab = gt_str_array_ref(filenametab);
@@ -6927,6 +7786,10 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   if (!haserr)
   {
     characterdistribution = initcharacterdistribution(alphabet);
+    maxchars = gt_calloc((size_t) UCHAR_MAX, sizeof (*maxchars));
+    classstartpositions = gt_calloc((size_t) UCHAR_MAX,
+                                    sizeof (*classstartpositions));
+    memset(&subsymbolmap, 0, ((size_t) UCHAR_MAX+1) * sizeof (unsigned char));
     if (gt_inputfiles2sequencekeyvalues(indexname,
                                         &totallength,
                                         &specialcharinfo,
@@ -6941,6 +7804,12 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                         outdestab,
                                         outsdstab,
                                         characterdistribution,
+                                        classstartpositions,
+                                        maxchars,
+                                        &allchars,
+                                        &numofallchars,
+                                        subsymbolmap,
+                                        &maxsubalphasize,
                                         outoistab,
                                         &numofseparators,
                                         &minseqlen,
@@ -7002,6 +7871,13 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                    alphabet,
                                    sat,
                                    characterdistribution,
+                                   classstartpositions,
+                                   maxchars,
+                                   allchars,
+                                   numofallchars,
+                                   subsymbolmap,
+                                   maxsubalphasize,
+                                   outoistab,
                                    &specialcharinfo,
                                    wildcardranges,
                                    minseqlen,
@@ -7030,6 +7906,19 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
       haserr = true;
     }
   }
+  if (!haserr && encseq != NULL && encseq->has_exceptiontable)
+  {
+    if (flushoistab2file(indexname,encseq,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (maxchars != NULL)
+    gt_free(maxchars);
+  if (allchars != NULL)
+    gt_free(allchars);
+  if (classstartpositions != NULL)
+    gt_free(classstartpositions);
   if (haserr)
   {
     gt_free(characterdistribution);
@@ -8273,7 +9162,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
   const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
   Gtssptaboutinfo *ssptaboutinfo;
   unsigned long i;
-  GtSpecialcharinfo samplespecialcharinfo = {0,0,0,0,0,0,0,0,0,0,0};
+  GtSpecialcharinfo samplespecialcharinfo = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
   gt_assert(eb->plainseq);
   sequence2specialcharinfo(&samplespecialcharinfo,eb->plainseq,
@@ -8284,8 +9173,10 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
                                     0,
                                     0,
                                     samplespecialcharinfo.wildcardranges,
+                                    0,
                                     eb->minseqlen,
                                     eb->maxseqlen,
+                                    false,
                                     NULL,
                                     gt_alphabet_ref(eb->alpha),
                                     eb->logger);

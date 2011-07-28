@@ -108,8 +108,11 @@ typedef struct
                                            sequence */
                 lengthofwildcardsuffix, /* number of wildcards at end of
                                            sequence */
-                lengthoflongestnonspecial; /* length of longest non-special
+                lengthoflongestnonspecial, /* length of longest non-special
                                               stretch */
+                exceptioncharacters,    /* total number of exception chars */
+                exceptionranges,        /* number of stored exception ranges */
+                realexceptionranges;    /* number of exception ranges */
 } GtSpecialcharinfo;
 
 #endif

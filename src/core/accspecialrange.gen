@@ -1,6 +1,7 @@
 /*
   Copyright (c) 2007-2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -30,13 +31,18 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
                                      GtSequenceBuffer *fb,
                                      GtError *err)
 {
-  unsigned long fillwildcardrangeidx = 0,
-                currentposition, pagenumber = 0, nextcheckpos, widthbuffer = 0;
+  unsigned long fillwildcardrangeidx = 0, fillexceptionrangeidx = 0,
+                mapposition = 0, currentposition, pagenumber = 0,
+                exceptionpagenumber = 0, nextcheckpos,
+                exceptionnextcheckpos, widthbuffer = 0;
   int retval;
-  unsigned int lastwildcardrangelength = 0;
+  unsigned int lastwildcardrangelength = 0,
+               lastexceptionrangelength = 0;
   GtUchar cc;
+  char orig;
   GT_APPENDINT(GtSWtable) *wildcardrangetable
     = &(GT_APPENDINT(encseq->wildcardrangetable.st));
+  GtSWtable_uint32 *exceptiontable = &(encseq->exceptiontable.st_uint32);
 #ifndef NDEBUG
   unsigned long sumwildcardranges = 0, countwildcards = 0;
 #endif
@@ -50,12 +56,67 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   twobitencodingptr = encseq->twobitencoding;
 
   GT_APPENDINT(allocSWtables)(wildcardrangetable);
+  if (encseq->has_exceptiontable) {
+    exceptiontable->positions = gt_malloc(sizeof (*exceptiontable->positions) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->rangelengths =
+                               gt_malloc(sizeof(*exceptiontable->rangelengths) *
+                                         exceptiontable->numofpositionstostore);
+    exceptiontable->endidxinpage =
+                               gt_malloc(sizeof(*exceptiontable->endidxinpage) *
+                                         exceptiontable->numofpages);
+    exceptiontable->mappositions =
+                              gt_malloc(sizeof (*exceptiontable->mappositions) *
+                                        exceptiontable->numofpositionstostore);
+
+    nextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
+  }
+
   nextcheckpos = (unsigned long) wildcardrangetable->maxrangevalue;
+  exceptionnextcheckpos = (unsigned long) exceptiontable->maxrangevalue;
   for (currentposition=0; /* Nothing */; currentposition++)
   {
-    retval = gt_sequence_buffer_next(fb,&cc,err);
+    retval = gt_sequence_buffer_next_with_original(fb,&cc,&orig,err);
     if (retval > 0)
     {
+      if (encseq->has_exceptiontable && cc != (GtUchar) SEPARATOR) {
+        if (orig == encseq->maxchars[cc]) {
+          if (lastexceptionrangelength > 0) {
+            exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                           = (uint32_t) (lastexceptionrangelength-1);
+            lastexceptionrangelength = 0;
+          }
+        } else {
+          if (lastexceptionrangelength == 0)
+          /* at beginning of exception range */
+          {
+            /* store remainder of currentposition: this value is not larger
+               than maxrangevalue and this can be stored in a page */
+            exceptiontable->positions[fillexceptionrangeidx++]
+              = (uint32_t) (currentposition &
+                                       exceptiontable->maxrangevalue);
+
+            exceptiontable->mappositions[fillexceptionrangeidx-1]
+              = (mapposition);
+            lastexceptionrangelength = 1U;
+          } else /* extend exception range */
+          {
+            if (lastexceptionrangelength == exceptiontable->maxrangevalue)
+            {
+              gt_assert(fillexceptionrangeidx > 0);
+              exceptiontable->rangelengths[fillexceptionrangeidx-1]
+                 = (uint32_t) exceptiontable->maxrangevalue;
+              lastexceptionrangelength = 0;
+            } else
+            {
+              lastexceptionrangelength++;
+            }
+          }
+          bitpackarray_store_uint32(encseq->exceptions,
+                                   (BitOffset) (mapposition++),
+                                   (uint32_t) encseq->subsymbolmap[(int) orig]);
+        }
+      }
       if (ISNOTSPECIAL(cc))
       {
         if (lastwildcardrangelength > 0)
@@ -109,7 +170,7 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
           if (lastwildcardrangelength > 0)
           {
           /* when seeing the first character after a wildcard range, process
-             this an store the corresponding range length for the previous
+             this and store the corresponding range length for the previous
              range */
             wildcardrangetable->rangelengths[fillwildcardrangeidx-1]
               = (GT_SPECIALTABLETYPE) (lastwildcardrangelength-1);
@@ -137,17 +198,35 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
           sumwildcardranges += (unsigned long) lastwildcardrangelength;
 #endif
         }
+        if (lastexceptionrangelength > 0)
+        {
+          /* note that we store one less than the length to prevent overflows */
+          gt_assert(fillexceptionrangeidx > 0);
+          gt_assert(fillexceptionrangeidx - 1 <
+                    exceptiontable->numofpositionstostore);
+                    exceptiontable->rangelengths[fillexceptionrangeidx-1]
+            = (uint32_t) (lastexceptionrangelength-1);
+        }
         break;
       }
       gt_assert(retval < 0);
+      gt_assert(gt_error_is_set(err));
       return -1;
     }
+
     if (currentposition == nextcheckpos)
     {
       wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
       pagenumber++;
       nextcheckpos += (unsigned long) (wildcardrangetable->maxrangevalue+1);
     }
+    if (encseq->has_exceptiontable && currentposition == exceptionnextcheckpos)
+    {
+      exceptiontable->endidxinpage[exceptionpagenumber] = fillexceptionrangeidx;
+      exceptionpagenumber++;
+      exceptionnextcheckpos += (unsigned long) (exceptiontable->maxrangevalue+1);
+    }
+
     ssptaboutinfo_processsanyposition(ssptaboutinfo,currentposition);
     bitwise <<= 2;
     if (ISNOTSPECIAL(cc))
@@ -174,6 +253,13 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
   {
     wildcardrangetable->endidxinpage[pagenumber] = fillwildcardrangeidx;
     pagenumber++;
+  }
+  if (encseq->has_exceptiontable) {
+    while (exceptionpagenumber < exceptiontable->numofpages)
+    {
+      exceptiontable->endidxinpage[exceptionpagenumber] = fillexceptionrangeidx;
+      exceptionpagenumber++;
+    }
   }
   ssptaboutinfo_finalize(ssptaboutinfo);
   return 0;
@@ -202,6 +288,16 @@ static void GT_APPENDINT(showSWtablewithpages)
                                 ? 0
                                 : swtable->rangelengths[idx]) + 1;
     showGtRange(&range);
+    if (swtable->mappositions != NULL) {
+      printf("\n");
+      startpos = (unsigned long) swtable->mappositions[idx];
+      range.start = startpos;
+      range.end = range.start + ((swtable->rangelengths == NULL)
+                                  ? 0
+                                  : swtable->rangelengths[idx]) + 1;
+      printf("map: ");
+      showGtRange(&range);
+    }
     printf("\n");
   }
 }
@@ -263,6 +359,7 @@ static void GT_APPENDINT(showallSWtablewithpages)(
 
 static bool GT_APPENDINT(checkspecialrange)(
                          const GT_APPENDINT(GtSWtable) *swtable,
+                         unsigned long *mappos,
                          unsigned long pos)
 {
   unsigned long pagenumber = (unsigned long) GT_POS2PAGENUM(pos);
@@ -285,6 +382,15 @@ static bool GT_APPENDINT(checkspecialrange)(
                  + (unsigned long) swtable->rangelengths
                                   [(unsigned long) (found - swtable->positions)]
                  + 1;
+        if (swtable->mappositions != NULL) {
+          unsigned long rstart, remainder;
+          rstart = (unsigned long) ((swtable->maxrangevalue+1) * pagenumber)
+                  + (unsigned long) *found;
+          remainder = pos - rstart;
+          *mappos = swtable->mappositions
+                                 [(unsigned long) (found - swtable->positions)]
+                    + remainder;
+        }
         if (pos < rangeend)
         {
           return true;
@@ -312,6 +418,17 @@ static bool GT_APPENDINT(checkspecialrange)(
                  + (unsigned long) swtable->rangelengths
                                   [(unsigned long) (found - swtable->positions)]
                  + 1;
+        if (swtable->mappositions != NULL) {
+          unsigned long rstart, remainder;
+          rstart = (unsigned long) ((swtable->maxrangevalue+1) * pagenumber)
+                  + (unsigned long) *found;
+          remainder = pos - rstart;
+          gt_log_log("pos: %lu, found: %lu, remainder: %lu",
+                     pos, (unsigned long) *found, remainder);
+          *mappos = swtable->mappositions
+                                 [(unsigned long) (found - swtable->positions)]
+                     + remainder;
+        }
         if (pos < rangeend)
         {
           return true;
@@ -738,7 +855,7 @@ static bool GT_APPENDINT(checknextSW)(GtEncseqReader *esr,
 
 #ifdef GT_RANGEDEBUG
   gt_assert(swstate != NULL);
-  printf("%s(kindsw=%d,pos=%lu,previous=(%lu,%lu))\n",
+  printf(" %s(kindsw=%d,pos=%lu,previous=(%lu,%lu))\n",
          __func__,(int) kindsw,
          esr->currentpos,
          swstate->previousrange.start,
