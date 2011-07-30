@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -29,6 +29,8 @@
 typedef struct {
   bool join,
        translate,
+       seqid,
+       target,
        verbose;
   GtStr *type;
   GtSeqid2FileInfo *s2fi;
@@ -86,6 +88,18 @@ static GtOptionParser* gt_extractfeat_option_parser_new(void *tool_arguments)
                               false);
   gt_option_parser_add_option(op, option);
 
+  /* -seqid */
+  option = gt_option_new_bool("seqid", "add sequence ID of extracted features "
+                              "to FASTA descriptions", &arguments->seqid,
+                              false);
+  gt_option_parser_add_option(op, option);
+
+  /* -target */
+  option = gt_option_new_bool("target", "add target ID(s) of extracted "
+                              "features to FASTA descriptions",
+                              &arguments->target, false);
+  gt_option_parser_add_option(op, option);
+
   /* -seqfile, -matchdesc, -usedesc and -regionmapping */
   gt_seqid2file_register_options(op, arguments->s2fi);
 
@@ -138,6 +152,8 @@ static int gt_extractfeat_runner(GT_UNUSED int argc, const char **argv,
                                     gt_str_get(arguments->type),
                                     arguments->join,
                                     arguments->translate,
+                                    arguments->seqid,
+                                    arguments->target,
                                     arguments->width,
                                     arguments->outfp);
 

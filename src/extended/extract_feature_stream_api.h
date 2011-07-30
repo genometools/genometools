@@ -32,12 +32,15 @@ typedef struct GtExtractFeatureStream GtExtractFeatureStream;
    writes them in FASTA format (with the given <width>) to <outfp>. If <join> is
    <true>, features of the given <type> are joined together before the sequence
    is extracted. If <translate> is <true>, the sequences are translated into
-   amino acid sequences before they are written to <outfp>.  Takes ownership of
-   <region_mapping>! */
+   amino acid sequences before they are written to <outfp>. If <seqid> is <true>
+   the sequence IDs of the extracted features are added to the FASTA header.
+   If <target> is <true> the target IDs of the extracted features are added to
+   the FASTA header. Takes ownership of <region_mapping>! */
 GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *region_Mapping,
                                             const char *type, bool join,
-                                            bool translate, unsigned long width,
+                                            bool translate, bool seqid,
+                                            bool target, unsigned long width,
                                             GtFile *outfp);
 
 #endif

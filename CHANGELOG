@@ -1,8 +1,9 @@
-changes in version 1.4.0 (2011-07-19)
+changes in version 1.4.0 (2011-07-30)
 
 - the tool `gt mutate` has been renamed to `gt seqmutate`. The same
   functionality is still available with `gt mutate` in order not to break
   existing scripts.
+- `gt extractfeat` has new options -seqid and -target
 
 
 changes in version 1.3.9 (2011-07-02)

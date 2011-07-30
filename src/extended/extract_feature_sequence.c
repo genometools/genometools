@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -18,6 +18,7 @@
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_parser.h"
 #include "extended/region_mapping_api.h"
 #include "extended/reverse.h"
 
@@ -66,12 +67,13 @@ static int extract_join_feature(GtGenomeNode *gn, const char *type,
 }
 
 int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
-                                const char *type, bool join,
+                                const char *type, bool join, GtStr *seqid,
+                                GtStrArray *target_ids,
                                 GtRegionMapping *region_mapping, GtError *err)
 {
   GtFeatureNode *fn;
   GtRange range;
-  const char *raw_sequence;
+  const char *raw_sequence, *target;
   unsigned long raw_sequence_length, offset;
   int had_err = 0;
 
@@ -79,13 +81,28 @@ int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode *gn,
   fn = gt_genome_node_cast(gt_feature_node_class(), gn);
   gt_assert(fn);
 
+  if (seqid)
+    gt_str_append_str(seqid, gt_genome_node_get_seqid(gn));
+  if (target_ids &&
+      (target = gt_feature_node_get_attribute(fn, GT_GFF_TARGET))) {
+    gt_gff3_parser_parse_all_target_attributes(target, target_ids, NULL, NULL);
+  }
+
   if (join) {
     GtFeatureNodeIterator *fni;
     GtFeatureNode *child;
-    bool reverse_strand = false;
+    bool reverse_strand = false,
+         first_child = true;
     /* in this case we have to traverse the children */
     fni = gt_feature_node_iterator_new_direct(gt_feature_node_cast(gn));
     while (!had_err && (child = gt_feature_node_iterator_next(fni))) {
+      if (first_child && target_ids &&
+          (target = gt_feature_node_get_attribute(child, GT_GFF_TARGET))) {
+        gt_str_array_reset(target_ids);
+        gt_gff3_parser_parse_all_target_attributes(target, target_ids, NULL,
+                                                   NULL);
+        first_child = false;
+      }
       if (extract_join_feature((GtGenomeNode*) child, type, region_mapping,
                                sequence, &reverse_strand, err)) {
         had_err = -1;

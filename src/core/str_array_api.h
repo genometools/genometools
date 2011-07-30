@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -48,6 +48,8 @@ void          gt_str_array_set(GtStrArray *str_array, unsigned long strnum,
 /* Set the size of <str_array> to <size>. <size> must be smaller or equal than
    <gt_str_array_size(str_array)>. */
 void          gt_str_array_set_size(GtStrArray *str_array, unsigned long size);
+/* Set the size of <str_array> to 0. */
+void          gt_str_array_reset(GtStrArray *str_array);
 /* Return the number of strings stored in <str_array>. */
 unsigned long gt_str_array_size(const GtStrArray *str_array);
 /* Delete <str_array>. */

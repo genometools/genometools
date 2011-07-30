@@ -31,6 +31,8 @@ GtNodeVisitor*            gt_extract_feature_visitor_new(GtRegionMapping *rm,
                                                          const char*,
                                                          bool join,
                                                          bool translate,
+                                                         bool seqid,
+                                                         bool target,
                                                          unsigned long width,
                                                          GtFile *outfp);
 

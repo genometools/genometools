@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -22,7 +22,8 @@
 #include "extended/region_mapping_api.h"
 
 int gt_extract_feature_sequence(GtStr *sequence, GtGenomeNode*,
-                                const char *type, bool join, GtRegionMapping*,
+                                const char *type, bool join, GtStr *seqid,
+                                GtStrArray *target_ids, GtRegionMapping*,
                                 GtError*);
 
 #endif

@@ -296,8 +296,8 @@ static int feature_node_lua_extract_sequence(lua_State *L)
   region_mapping = check_region_mapping(L, 4);
   err = gt_error_new();
   sequence = gt_str_new();
-  if (gt_extract_feature_sequence(sequence, *gn, type, join, *region_mapping,
-                                  err)) {
+  if (gt_extract_feature_sequence(sequence, *gn, type, join, NULL, NULL,
+                                  *region_mapping, err)) {
     gt_str_delete(sequence);
     return gt_lua_error(L, err);
   }

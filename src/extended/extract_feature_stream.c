@@ -23,10 +23,12 @@
 GtNodeStream* gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *rm,
                                             const char *type, bool join,
-                                            bool translate, unsigned long width,
+                                            bool translate, bool seqid,
+                                            bool target, unsigned long width,
                                             GtFile *outfp)
 {
   GtNodeVisitor *nv = gt_extract_feature_visitor_new(rm, type, join, translate,
-                                                     width, outfp);
+                                                     seqid, target, width,
+                                                     outfp);
   return gt_visitor_stream_new(in_stream, nv);
 }

@@ -125,3 +125,30 @@ Test do
   run_test "#{$bin}gt extractfeat -help"
   grep($last_stdout, "Lua");
 end
+
+Name "gt extractfeat -seqid"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
+      "-type CDS -join -seqid " +
+      "#{$testdata}gt_extractfeat_seqid_target.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_extractfeat_seqid.fas"
+end
+
+Name "gt extractfeat -target"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
+      "-type mRNA -join -target " +
+      "#{$testdata}gt_extractfeat_seqid_target.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_extractfeat_target.fas"
+end
+
+Name "gt extractfeat -seqid -target"
+Keywords "gt_extractfeat"
+Test do
+  run "#{$bin}gt extractfeat -seqfile #{$testdata}U89959_genomic.fas " +
+      "-type CDS -join -seqid -target " +
+      "#{$testdata}gt_extractfeat_seqid_target.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_extractfeat_seqid_target.fas"
+end

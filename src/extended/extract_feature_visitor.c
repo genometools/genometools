@@ -29,7 +29,9 @@ struct GtExtractFeatureVisitor {
   const GtNodeVisitor parent_instance;
   const char *type;
   bool join,
-       translate;
+       translate,
+       seqid,
+       target;
   unsigned long fastaseq_counter,
                 width;
   GtRegionMapping *region_mapping;
@@ -48,7 +50,8 @@ static void extract_feature_visitor_free(GtNodeVisitor *nv)
 
 static void construct_description(GtStr *description, const char *type,
                                   unsigned long counter, bool join,
-                                  bool translate)
+                                  bool translate, GtStr *seqid,
+                                  GtStrArray *target_ids)
 {
   gt_assert(!gt_str_length(description));
   gt_str_append_cstr(description, type);
@@ -58,6 +61,22 @@ static void construct_description(GtStr *description, const char *type,
     gt_str_append_cstr(description, " (joined)");
   if (translate)
     gt_str_append_cstr(description, " (translated)");
+  if (seqid) {
+    gt_assert(gt_str_length(seqid));
+    gt_str_append_cstr(description, " [seqid ");
+    gt_str_append_str(description, seqid);
+    gt_str_append_char(description, ']');
+  }
+  if (target_ids && gt_str_array_size(target_ids)) {
+    unsigned long i;
+    gt_str_append_cstr(description, " [target IDs ");
+    gt_str_append_cstr(description, gt_str_array_get(target_ids, 0));
+    for (i = 1; i < gt_str_array_size(target_ids); i++) {
+      gt_str_append_char(description, ',');
+      gt_str_append_cstr(description, gt_str_array_get(target_ids, i));
+    }
+    gt_str_append_char(description, ']');
+  }
 }
 
 static int show_entry(GtStr *description, GtStr *sequence, bool translate,
@@ -101,33 +120,47 @@ static int extract_feature_visitor_feature_node(GtNodeVisitor *nv,
   GtExtractFeatureVisitor *efv;
   GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
-  GtStr *description,
+  GtStrArray *target_ids = NULL;
+  GtStr *seqid = NULL,
+        *description,
         *sequence;
   int had_err = 0;
   gt_error_check(err);
   efv = gt_extract_feature_visitor_cast(nv);
   gt_assert(efv->region_mapping);
   fni = gt_feature_node_iterator_new(fn);
+  if (efv->target)
+    target_ids = gt_str_array_new();
+  if (efv->seqid)
+    seqid = gt_str_new();
   description = gt_str_new();
   sequence = gt_str_new();
   while (!had_err && (child = gt_feature_node_iterator_next(fni))) {
+    if (seqid)
+      gt_str_reset(seqid);
+    if (target_ids)
+      gt_str_array_reset(target_ids);
     if (gt_extract_feature_sequence(sequence, (GtGenomeNode*) child, efv->type,
-                                    efv->join, efv->region_mapping, err)) {
+                                    efv->join, seqid, target_ids,
+                                    efv->region_mapping, err)) {
       had_err = -1;
     }
 
     if (!had_err && gt_str_length(sequence)) {
       efv->fastaseq_counter++;
       construct_description(description, efv->type, efv->fastaseq_counter,
-                            efv->join, efv->translate);
+                            efv->join, efv->translate, seqid, target_ids);
       had_err = show_entry(description, sequence, efv->translate, efv->width,
                            efv->outfp);
       gt_str_reset(description);
       gt_str_reset(sequence);
     }
+
   }
   gt_str_delete(sequence);
   gt_str_delete(description);
+  gt_str_delete(seqid);
+  gt_str_array_delete(target_ids);
   gt_feature_node_iterator_delete(fni);
   return had_err;
 }
@@ -149,8 +182,8 @@ const GtNodeVisitorClass* gt_extract_feature_visitor_class()
 
 GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
                                               const char *type, bool join,
-                                              bool translate,
-                                              unsigned long width,
+                                              bool translate, bool seqid,
+                                              bool target, unsigned long width,
                                               GtFile *outfp)
 {
   GtNodeVisitor *nv;
@@ -161,6 +194,8 @@ GtNodeVisitor* gt_extract_feature_visitor_new(GtRegionMapping *rm,
   efv->type = gt_symbol(type);
   efv->join = join;
   efv->translate = translate;
+  efv->seqid = seqid;
+  efv->target = target;
   efv->fastaseq_counter = 0;
   efv->region_mapping = rm;
   efv->width = width;
