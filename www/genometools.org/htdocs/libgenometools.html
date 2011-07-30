@@ -1746,6 +1746,20 @@ Returns the length of the <code>seqnum</code>-th sequence in the <code>encseq</c
    Requires multiple sequence support enabled in <code>encseq</code>.
 </p>
 <hr>
+<a name="gt_encseq_min_seq_length"></a>
+
+<code>unsigned long      gt_encseq_min_seq_length(const GtEncseq *encseq)</code>
+<p>
+Returns the length of the shortest sequence in the <code>encseq</code>.
+</p>
+<hr>
+<a name="gt_encseq_max_seq_length"></a>
+
+<code>unsigned long      gt_encseq_max_seq_length(const GtEncseq *encseq)</code>
+<p>
+Returns the length of the longest sequence in the <code>encseq</code>.
+</p>
+<hr>
 <a name="gt_encseq_has_multiseq_support"></a>
 
 <code>bool               gt_encseq_has_multiseq_support(const GtEncseq *encseq)</code>
@@ -1863,6 +1877,21 @@ Removes virtual reverse complement sequences added by
 <p>
 Returns <code>true</code> if <code>encseq</code> contains virtual reverse complement sequences as
    added by <code>gt_encseq_mirror()</code>.
+</p>
+<hr>
+<a name="gt_encseq_version"></a>
+
+<code>unsigned long      gt_encseq_version(const GtEncseq *encseq)</code>
+<p>
+Returns the version number of the file representation of <code>encseq</code> if it
+   exists, or 0 if it was not mapped from a file.
+</p>
+<hr>
+<a name="gt_encseq_is_64_bit"></a>
+
+<code>bool               gt_encseq_is_64_bit(const GtEncseq *encseq)</code>
+<p>
+Returns TRUE if <code>encseq</code> was created on a 64-bit system.
 </p>
 <hr>
 <a name="gt_encseq_delete"></a>
@@ -2688,7 +2717,8 @@ Delete the error object <code>err</code>.
 <code>GtNodeStream*  gt_extract_feature_stream_new(GtNodeStream *in_stream,
                                             GtRegionMapping *region_Mapping,
                                             const char *type, bool join,
-                                            bool translate, unsigned long width,
+                                            bool translate, bool seqid,
+                                            bool target, unsigned long width,
                                             GtFile *outfp)</code>
 <p>
 Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding sequences
@@ -2696,8 +2726,10 @@ Create a <code>GtExtractFeatureStream*</code> which extracts the corresponding s
    writes them in FASTA format (with the given <code>width</code>) to <code>outfp</code>. If <code>join</code> is
    <code>true</code>, features of the given <code>type</code> are joined together before the sequence
    is extracted. If <code>translate</code> is <code>true</code>, the sequences are translated into
-   amino acid sequences before they are written to <code>outfp</code>.  Takes ownership of
-   <code>region_mapping</code>!
+   amino acid sequences before they are written to <code>outfp</code>. If <code>seqid</code> is <code>true</code>
+   the sequence IDs of the extracted features are added to the FASTA header.
+   If <code>target</code> is <code>true</code> the target IDs of the extracted features are added to
+   the FASTA header. Takes ownership of <code>region_mapping</code>!
 </p>
 <hr>
 <a name="GtFeatureIndex"></a>
@@ -5843,6 +5875,13 @@ Set the size of <code>str_array</code> to <code>size</code>. <code>size</code> m
    <code>gt_str_array_size(str_array)</code>.
 </p>
 <hr>
+<a name="gt_str_array_reset"></a>
+
+<code>void           gt_str_array_reset(GtStrArray *str_array)</code>
+<p>
+Set the size of <code>str_array</code> to 0.
+</p>
+<hr>
 <a name="gt_str_array_size"></a>
 
 <code>unsigned long  gt_str_array_size(const GtStrArray *str_array)</code>
@@ -7805,6 +7844,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_has_multiseq_support"><code>gt_encseq_has_multiseq_support</code></a><br>
 
+  <a href="#gt_encseq_is_64_bit"><code>gt_encseq_is_64_bit</code></a><br>
+
   <a href="#gt_encseq_is_mirrored"><code>gt_encseq_is_mirrored</code></a><br>
 
   <a href="#gt_encseq_loader_delete"><code>gt_encseq_loader_delete</code></a><br>
@@ -7853,6 +7894,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_encseq_loader_ssp_tab_required"><code>gt_encseq_loader_ssp_tab_required</code></a><br>
 
+  <a href="#gt_encseq_max_seq_length"><code>gt_encseq_max_seq_length</code></a><br>
+
+  <a href="#gt_encseq_min_seq_length"><code>gt_encseq_min_seq_length</code></a><br>
+
   <a href="#gt_encseq_mirror"><code>gt_encseq_mirror</code></a><br>
 
   <a href="#gt_encseq_num_of_files"><code>gt_encseq_num_of_files</code></a><br>
@@ -7880,6 +7925,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_encseq_total_length"><code>gt_encseq_total_length</code></a><br>
 
   <a href="#gt_encseq_unmirror"><code>gt_encseq_unmirror</code></a><br>
+
+  <a href="#gt_encseq_version"><code>gt_encseq_version</code></a><br>
 
   <a href="#gt_eof_node_new"><code>gt_eof_node_new</code></a><br>
 
@@ -8555,6 +8602,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_str_array_ref"><code>gt_str_array_ref</code></a><br>
 
+  <a href="#gt_str_array_reset"><code>gt_str_array_reset</code></a><br>
+
   <a href="#gt_str_array_set"><code>gt_str_array_set</code></a><br>
 
   <a href="#gt_str_array_set_cstr"><code>gt_str_array_set_cstr</code></a><br>
@@ -8764,7 +8813,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-07-02
+Last update: 2011-07-30
 </div>
 </div>
 <!-- Piwik -->
