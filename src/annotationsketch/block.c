@@ -31,7 +31,8 @@
 struct GtBlock {
   GtArray *elements;
   GtRange range;
-  GtStr *caption;
+  GtStr *caption,
+        *track_id;
   bool show_caption,
        sorted;
   GtStrand strand;

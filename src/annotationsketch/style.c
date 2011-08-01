@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -264,9 +264,13 @@ static int style_find_section_for_getting(const GtStyle *sty,
   return depth;
 }
 
-GtStyleQueryStatus gt_style_get_color(const GtStyle *sty, const char *section,
-                                      const char *key, GtColor *color,
-                                      GtFeatureNode *gn, GtError *err)
+GtStyleQueryStatus gt_style_get_color_with_track(const GtStyle *sty,
+                                                 const char *section,
+                                                 const char *key,
+                                                 GtColor *color,
+                                                 GtFeatureNode *gn,
+                                                 const GtStr *track_id,
+                                                 GtError *err)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -294,11 +298,17 @@ GtStyleQueryStatus gt_style_get_color(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1))
   {
+    int num_of_args = 0;
     if (gn) {
       GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
       gt_lua_genome_node_push(sty->L, gn_lua);
+      num_of_args++;
+      if (track_id) {
+        lua_pushstring(sty->L, gt_str_get(track_id));
+        num_of_args++;
+      }
     }
-    if (lua_pcall(sty->L, gn ? 1 : 0, 1, 0) != 0)
+    if (lua_pcall(sty->L, num_of_args, 1, 0) != 0)
     {
       gt_error_set(err, "%s", lua_tostring(sty->L, -1));
       lua_pop(sty->L, 3);
@@ -338,6 +348,14 @@ GtStyleQueryStatus gt_style_get_color(const GtStyle *sty, const char *section,
   return GT_STYLE_QUERY_OK;
 }
 
+GtStyleQueryStatus gt_style_get_color(const GtStyle *sty, const char *section,
+                                      const char *key, GtColor *result,
+                                      GtFeatureNode *gn, GtError *err)
+{
+  return gt_style_get_color_with_track(sty, section, key, result, gn, NULL,
+                                       err);
+}
+
 void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
                         const GtColor *color)
 {
@@ -375,9 +393,12 @@ void gt_style_set_color(GtStyle *sty, const char *section, const char *key,
   gt_rwlock_unlock(sty->lock);
 }
 
-GtStyleQueryStatus gt_style_get_str(const GtStyle *sty, const char *section,
-                                    const char *key, GtStr *text,
-                                    GtFeatureNode *gn, GtError *err)
+GtStyleQueryStatus gt_style_get_str_with_track(const GtStyle *sty,
+                                               const char *section,
+                                               const char *key, GtStr *text,
+                                               GtFeatureNode *gn,
+                                               const GtStr *track_id,
+                                               GtError *err)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -403,11 +424,17 @@ GtStyleQueryStatus gt_style_get_str(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1))
   {
+    int num_of_args = 0;
     if (gn) {
       GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
       gt_lua_genome_node_push(sty->L, gn_lua);
+      num_of_args++;
+      if (track_id) {
+        lua_pushstring(sty->L, gt_str_get(track_id));
+        num_of_args++;
+      }
     }
-    if (lua_pcall(sty->L, gn ? 1 : 0, 1, 0) != 0)
+    if (lua_pcall(sty->L, num_of_args, 1, 0) != 0)
     {
       gt_error_set(err, "%s", lua_tostring(sty->L, -1));
       lua_pop(sty->L, 3);
@@ -432,6 +459,13 @@ GtStyleQueryStatus gt_style_get_str(const GtStyle *sty, const char *section,
   return GT_STYLE_QUERY_OK;
 }
 
+GtStyleQueryStatus gt_style_get_str(const GtStyle *sty, const char *section,
+                                    const char *key, GtStr *result,
+                                    GtFeatureNode *gn, GtError *err)
+{
+  return gt_style_get_str_with_track(sty, section, key, result, gn, NULL, err);
+}
+
 void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
                       GtStr *value)
 {
@@ -453,9 +487,12 @@ void gt_style_set_str(GtStyle *sty, const char *section, const char *key,
   gt_rwlock_unlock(sty->lock);
 }
 
-GtStyleQueryStatus gt_style_get_num(const GtStyle *sty, const char *section,
-                                    const char *key, double *val,
-                                    GtFeatureNode *gn, GtError *err)
+GtStyleQueryStatus gt_style_get_num_with_track(const GtStyle *sty,
+                                               const char *section,
+                                               const char *key, double *val,
+                                               GtFeatureNode *gn,
+                                               const GtStr *track_id,
+                                               GtError *err)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -481,11 +518,17 @@ GtStyleQueryStatus gt_style_get_num(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1))
   {
+    int num_of_args = 0;
     if (gn) {
       GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
       gt_lua_genome_node_push(sty->L, gn_lua);
+      num_of_args++;
+      if (track_id) {
+        lua_pushstring(sty->L, gt_str_get(track_id));
+        num_of_args++;
+      }
     }
-    if (lua_pcall(sty->L, gn ? 1 : 0, 1, 0) != 0) {
+    if (lua_pcall(sty->L, num_of_args, 1, 0) != 0) {
       gt_error_set(err, "%s", lua_tostring(sty->L, -1));
       lua_pop(sty->L, 3);
       gt_assert(lua_gettop(sty->L) == stack_size);
@@ -509,6 +552,13 @@ GtStyleQueryStatus gt_style_get_num(const GtStyle *sty, const char *section,
   return GT_STYLE_QUERY_OK;
 }
 
+GtStyleQueryStatus gt_style_get_num(const GtStyle *sty, const char *section,
+                                    const char *key, double *result,
+                                    GtFeatureNode *gn, GtError *err)
+{
+  return gt_style_get_num_with_track(sty, section, key, result, gn, NULL, err);
+}
+
 void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
                     double number)
 {
@@ -530,9 +580,12 @@ void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
   gt_rwlock_unlock(sty->lock);
 }
 
-GtStyleQueryStatus gt_style_get_bool(const GtStyle *sty, const char *section,
-                                     const char *key, bool *val,
-                                     GtFeatureNode *gn, GtError *err)
+GtStyleQueryStatus gt_style_get_bool_with_track(const GtStyle *sty,
+                                                const char *section,
+                                                const char *key, bool *val,
+                                                GtFeatureNode *gn,
+                                                const GtStr *track_id,
+                                                GtError *err)
 {
 #ifndef NDEBUG
   int stack_size;
@@ -558,12 +611,17 @@ GtStyleQueryStatus gt_style_get_bool(const GtStyle *sty, const char *section,
   /* execute callback if function is given */
   if (lua_isfunction(sty->L, -1))
   {
+    int num_of_args = 0;
     if (gn) {
       GtGenomeNode *gn_lua = gt_genome_node_ref((GtGenomeNode*) gn);
       gt_lua_genome_node_push(sty->L, gn_lua);
+      num_of_args++;
+      if (track_id) {
+        lua_pushstring(sty->L, gt_str_get(track_id));
+        num_of_args++;
+      }
     }
-    if (lua_pcall(sty->L, gn ? 1 : 0, 1, 0) != 0)
-    {
+    if (lua_pcall(sty->L, num_of_args, 1, 0) != 0) {
       gt_error_set(err, "%s", lua_tostring(sty->L, -1));
       lua_pop(sty->L, 3);
       gt_assert(lua_gettop(sty->L) == stack_size);
@@ -586,6 +644,13 @@ GtStyleQueryStatus gt_style_get_bool(const GtStyle *sty, const char *section,
   gt_assert(lua_gettop(sty->L) == stack_size);
   gt_rwlock_unlock(sty->lock);
   return GT_STYLE_QUERY_OK;
+}
+
+GtStyleQueryStatus gt_style_get_bool(const GtStyle *sty, const char *section,
+                                     const char *key, bool *result,
+                                     GtFeatureNode *gn, GtError *err)
+{
+  return gt_style_get_bool_with_track(sty, section, key, result, gn, NULL, err);
 }
 
 void gt_style_set_bool(GtStyle *sty, const char *section, const char *key,

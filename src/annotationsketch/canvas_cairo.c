@@ -336,10 +336,11 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
   if (!gt_block_has_only_one_fullsize_element(block)
        && gt_double_smaller_double(block_width, min_len_block))
   {
-    if (gt_style_get_color(canvas->pvt->sty,
+    if (gt_style_get_color_with_track(canvas->pvt->sty,
                            btype, "fill",
                            &fillcolor,
                            gt_block_get_top_level_feature(block),
+                           gt_track_get_title(canvas->pvt->current_track),
                            err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
@@ -438,8 +439,10 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
     return -1;
   }
   /* try to get type-specific bar height */
-  if (gt_style_get_num(canvas->pvt->sty, type, "bar_height", &bar_height,
+  if (gt_style_get_num_with_track(canvas->pvt->sty, type, "bar_height",
+                       &bar_height,
                        gt_element_get_node_ref(elem),
+                       gt_track_get_title(canvas->pvt->current_track),
                        err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
@@ -449,8 +452,10 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
     return -1;
   }
   /* try to get type-specific arrow width */
-  if (gt_style_get_num(canvas->pvt->sty, type, "arrow_width", &arrow_width,
+  if (gt_style_get_num_with_track(canvas->pvt->sty, type, "arrow_width",
+                       &arrow_width,
                        gt_element_get_node_ref(elem),
+                       gt_track_get_title(canvas->pvt->current_track),
                        err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
@@ -472,39 +477,48 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
   elem_width = draw_range.end - draw_range.start;
 
   if (gt_element_is_marked(elem)) {
-    if (gt_style_get_color(canvas->pvt->sty, type, "stroke_marked",
+    if (gt_style_get_color_with_track(canvas->pvt->sty, type, "stroke_marked",
                            &elem_color, gt_element_get_node_ref(elem),
+                           gt_track_get_title(canvas->pvt->current_track),
                            err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
-    if (gt_style_get_num(canvas->pvt->sty, "format", "stroke_marked_width",
+    if (gt_style_get_num_with_track(canvas->pvt->sty, "format",
+                          "stroke_marked_width",
                           &stroke_width, gt_element_get_node_ref(elem),
+                          gt_track_get_title(canvas->pvt->current_track),
                           err) == GT_STYLE_QUERY_ERROR) {
     return -1;
     }
   }
   else {
-    if (gt_style_get_color(canvas->pvt->sty, type, "stroke", &elem_color,
+    if (gt_style_get_color_with_track(canvas->pvt->sty, type, "stroke",
+                              &elem_color,
                               gt_element_get_node_ref(elem),
+                              gt_track_get_title(canvas->pvt->current_track),
                               err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
-    if (gt_style_get_num(canvas->pvt->sty, "format", "stroke_width",
+    if (gt_style_get_num_with_track(canvas->pvt->sty, "format", "stroke_width",
                          &stroke_width,
                          gt_element_get_node_ref(elem),
+                         gt_track_get_title(canvas->pvt->current_track),
                          err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
-    if (gt_style_get_num(canvas->pvt->sty, type, "stroke_width",
+    if (gt_style_get_num_with_track(canvas->pvt->sty, type, "stroke_width",
                          &stroke_width,
                          gt_element_get_node_ref(elem),
+                         gt_track_get_title(canvas->pvt->current_track),
                          err) == GT_STYLE_QUERY_ERROR) {
       return -1;
     }
   }
-  if (gt_style_get_color(canvas->pvt->sty, type, "fill", &fill_color,
-                         gt_element_get_node_ref(elem),
-                         err) == GT_STYLE_QUERY_ERROR) {
+  if (gt_style_get_color_with_track(canvas->pvt->sty, type, "fill",
+                                 &fill_color,
+                                 gt_element_get_node_ref(elem),
+                                 gt_track_get_title(canvas->pvt->current_track),
+                                 err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
 
@@ -544,8 +558,9 @@ int gt_canvas_cairo_visit_element(GtCanvas *canvas, GtElement *elem,
 
   /* draw each element according to style set in the style */
   style = gt_str_new();
-  rval = gt_style_get_str(canvas->pvt->sty, type, "style", style,
+  rval = gt_style_get_str_with_track(canvas->pvt->sty, type, "style", style,
                           gt_element_get_node_ref(elem),
+                          gt_track_get_title(canvas->pvt->current_track),
                           err);
   switch (rval) {
     case GT_STYLE_QUERY_NOT_SET:

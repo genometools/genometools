@@ -23,12 +23,14 @@
 #include "annotationsketch/graphics.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/style.h"
+#include "annotationsketch/track.h"
 
 struct GtCanvasMembers {
   GtRange viewrange;
   double factor, y, margins;
   unsigned long width, height;
   GtStyle *sty;
+  GtTrack *current_track;
   bool show_track_captions;
   GtBittab *bt;
   GtGraphics *g;

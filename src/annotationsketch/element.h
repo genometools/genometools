@@ -29,10 +29,10 @@ typedef struct GtElement GtElement;
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 
-/* Creates a complete new GtElement object. */
+/* Creates a complete new <GtElement> object. */
 GtElement*     gt_element_new(GtFeatureNode*);
 GtElement*     gt_element_ref(GtElement*);
-/* Creates an empty GT_Element object.
+/* Creates an empty <GtElement> object.
    Range and type have to be set afterwards. */
 GtElement*     gt_element_new_empty(void);
 GtRange        gt_element_get_range(const GtElement*);
