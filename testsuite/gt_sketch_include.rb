@@ -134,12 +134,10 @@ Test do
 end
 
 
-
-Dir.glob("#{$testdata}fail*style") do |file|
-  testname = /fail_([^.]+)\.style/.match(file)[1]
-  Name "gt sketch runtime Lua error (#{testname})"
-  Keywords "gt_sketch lua"
-  Test do
+Name "gt sketch runtime Lua failures"
+Keywords "gt_sketch lua"
+Test do
+  Dir.glob("#{$testdata}fail*style") do |file|
     run_test("#{$bin}gt sketch -style #{file} " + \
              "out.png #{$testdata}eden.gff3", \
              :maxtime => 600, :retval => 1)
@@ -237,30 +235,21 @@ Test do
   grep($last_stderr, /Track ordering function must return a number/)
 end
 
-Dir.glob("#{$testdata}fail*style") do |file|
-  testname = /fail_([^.]+)\.style/.match(file)[1]
-  Name "sketch_parsed.py style fail (#{testname})"
+Name "Python runtime style failures"
   Keywords "gt_sketch gt_python annotationsketch"
   Test do
+  Dir.glob("#{$testdata}fail*style") do |file|
     run_python "#{$cur}/gtpython/sketch_parsed.py " + \
                "#{file} sketch_parsed.png " + \
                "#{$testdata}eden.gff3", \
                :maxtime => 600, :retval => 1
     grep($last_stderr, 'attempt to call global \'fail\'')
-  end
 
-  Name "sketch_constructed.py style fail (#{testname})"
-  Keywords "gt_sketch gt_python annotationsketch"
-  Test do
     run_python "#{$cur}/gtpython/sketch_constructed.py " + \
                "#{file} sketch_constructed.png", \
                :maxtime => 600, :retval => 1
     grep($last_stderr, 'attempt to call global \'fail\'')
-  end
 
-  Name "style_serialize.py fail (#{testname})"
-  Keywords "gt_python annotationsketch"
-  Test do
     run_python "#{$testdata}gtpython/style_serialize.py #{file}", :retval => 1
     grep($last_stderr, 'expected boolean, number, or string')
   end
@@ -312,30 +301,21 @@ Test do
   grep($last_stderr, /Track ordering callback must return a number/)
 end
 
-Dir.glob("#{$testdata}fail*style") do |file|
-  testname = /fail_([^.]+)\.style/.match(file)[1]
-  Name "sketch_parsed.rb style fail (#{testname})"
-  Keywords "gt_sketch gt_ruby annotationsketch"
-  Test do
+Name "Ruby runtime style failures"
+Keywords "gt_sketch gt_ruby annotationsketch"
+Test do
+  Dir.glob("#{$testdata}fail*style") do |file|
     run_ruby "#{$cur}/gtruby/sketch_parsed.rb " + \
              "#{file} sketch_parsed.png " + \
              "#{$testdata}eden.gff3", \
              :maxtime => 600, :retval => 1
     grep($last_stderr, 'attempt to call global \'fail\'')
-  end
-  
-  Name "sketch_constructed.rb style fail (#{testname})"
-  Keywords "gt_sketch gt_ruby annotationsketch"
-  Test do
+
     run_ruby "#{$cur}/gtruby/sketch_constructed.rb " + \
              "#{file} sketch_constructed.png", \
              :maxtime => 600, :retval => 1
     grep($last_stderr, 'attempt to call global \'fail\'')
-  end
 
-  Name "style_serialize.rb fail (#{testname})"
-  Keywords "gt_ruby annotationsketch"
-  Test do
     run_ruby "#{$testdata}gtruby/style_serialize.rb #{file}", :retval => 1
     grep($last_stderr, 'expected boolean, number, or string')
   end
