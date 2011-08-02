@@ -74,6 +74,17 @@ Test do
   run "test -e out.png"
 end
 
+Name "gt sketch track IDs to style file"
+Keywords "gt_sketch"
+Test do
+  run "cp #{$testdata}eden.gff3 eden2.gff3"
+  run_test "#{$bin}gt sketch -force -style " + \
+           "#{$testdata}trackname1.style out.png #{$testdata}eden.gff3 " + \
+           "eden2.gff3"
+  run "diff #{$last_stdout} #{$testdata}trackname1.out"
+  run "test -e out.png"
+end
+
 Name "gt sketch multiline without parent"
 Keywords "gt_sketch"
 Test do
