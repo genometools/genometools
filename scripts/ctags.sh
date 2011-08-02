@@ -17,16 +17,16 @@
 #
 
 # make a new tags file
-ctags -w src/*.[ch]                   \
-         src/annotationsketch/*.[ch]  \
-         src/core/*.[ch]              \
-         src/examples/*.[ch]          \
-         src/extended/*.[ch]          \
-         src/gtlua/*.[ch]             \
-         src/gth/*.[ch]               \
-         src/ltr/*.[ch]               \
-         src/match/*.[ch]             \
-         src/mgth/*.[ch]              \
-         src/tools/*.[ch]             \
-         testsuite/*.rb               \
-         scripts/*.rb
+ctags -w -I src/*.[ch]                   \
+            src/annotationsketch/*.[ch]  \
+            src/core/*.[ch]              \
+            src/examples/*.[ch]          \
+            src/extended/*.[ch]          \
+            src/gtlua/*.[ch]             \
+            src/gth/*.[ch]               \
+            src/ltr/*.[ch]               \
+            src/match/*.[ch]             \
+            src/mgth/*.[ch]              \
+            src/tools/*.[ch]             \
+            testsuite/*.rb               \
+            scripts/*.rb
