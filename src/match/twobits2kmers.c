@@ -347,84 +347,81 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
 {
   const unsigned long *leftptr = NULL, *midptr, *rightptr = NULL;
   const GtIndexwithcode *leftic, *midic, *rightic;
-  unsigned int depth = 0;
+  unsigned int depth;
 
   leftic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode;
   rightic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
             firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode - 1;
-  while (true)
+  for (depth = 0; /* Nothing */; depth++)
   {
-    if (depth <= firstcodesinfo->binsearchcache_depth)
+    midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
+    if (code < midic->code)
     {
-      midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
-    } else
-    {
-      midic = NULL;
-    }
-    if (midic != NULL)
-    {
-      if (code < midic->code)
+      if (depth < firstcodesinfo->binsearchcache_depth)
       {
-        gt_assert(rightic->ptr != NULL);
-        if (depth == firstcodesinfo->binsearchcache_depth)
-        {
-          if (leftic > firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
-          {
-            leftptr = (leftic-1)->ptr + 1;
-          } else
-          {
-            leftptr = firstcodesinfo->allfirstcodes;
-          }
-          rightptr = rightic->ptr - 1;
-        }
         rightic = midic - 1;
       } else
       {
-        if (code > midic->code)
+        gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
+        if (leftic > firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
         {
-          gt_assert(leftic->ptr != NULL);
-          if (depth == firstcodesinfo->binsearchcache_depth)
-          {
-            leftptr = leftic->ptr + 1;
-            if (rightic < firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
-                       firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode-1)
-            {
-              rightptr = (rightic+1)->ptr - 1;
-            } else
-            {
-              rightptr = firstcodesinfo->allfirstcodes +
-                         firstcodesinfo->differentcodes - 1;
-            }
-          }
-          leftic = midic + 1;
+          leftptr = (leftic-1)->ptr + 1;
         } else
         {
-          return midic->ptr;
+          leftptr = firstcodesinfo->allfirstcodes;
         }
+        rightptr = rightic->ptr - 1;
+        break;
       }
     } else
     {
-      gt_assert(leftptr != NULL && rightptr != NULL);
-      if (leftptr > rightptr)
+      if (code > midic->code)
       {
-        break;
-      }
-      midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
-      if (code < *midptr)
-      {
-        rightptr = midptr-1;
-      } else
-      {
-        if (code > *midptr)
+        if (depth < firstcodesinfo->binsearchcache_depth)
         {
-          leftptr = midptr + 1;
+          leftic = midic + 1;
         } else
         {
-          return midptr;
+          gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
+          leftptr = leftic->ptr + 1;
+          if (rightic < firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
+                       firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode-1)
+          {
+            rightptr = (rightic+1)->ptr - 1;
+          } else
+          {
+            rightptr = firstcodesinfo->allfirstcodes +
+                       firstcodesinfo->differentcodes - 1;
+          }
+          break;
         }
+      } else
+      {
+        return midic->ptr;
       }
     }
-    depth++;
+  }
+  gt_assert(leftptr != NULL && rightptr != NULL);
+  while (true)
+  {
+    if (leftptr > rightptr)
+    {
+      break;
+    }
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    if (code < *midptr)
+    {
+      rightptr = midptr - 1;
+    } else
+    {
+      if (code > *midptr)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr;
+      }
+    }
   }
   return NULL;
 }
