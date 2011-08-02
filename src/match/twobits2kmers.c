@@ -346,12 +346,9 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
                                         unsigned long code)
 {
   const unsigned long *leftptr = NULL, *midptr, *rightptr = NULL;
-  const unsigned long *leftptr2 = NULL, *rightptr2 = NULL;
   const GtIndexwithcode *leftic, *midic, *rightic;
   unsigned int depth = 0;
 
-  leftptr = firstcodesinfo->allfirstcodes;
-  rightptr = firstcodesinfo->allfirstcodes + firstcodesinfo->differentcodes - 1;
   leftic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode;
   rightic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
             firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode - 1;
@@ -359,7 +356,6 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
   {
     if (depth <= firstcodesinfo->binsearchcache_depth)
     {
-      gt_assert(leftptr <= rightptr);
       midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
     } else
     {
@@ -374,12 +370,12 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
         {
           if (leftic > firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
           {
-            leftptr2 = (leftic-1)->ptr + 1;
+            leftptr = (leftic-1)->ptr + 1;
           } else
           {
-            leftptr2 = firstcodesinfo->allfirstcodes;
+            leftptr = firstcodesinfo->allfirstcodes;
           }
-          rightptr2 = rightic->ptr - 1;
+          rightptr = rightic->ptr - 1;
         }
         rightic = midic - 1;
       } else
@@ -389,15 +385,15 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
           gt_assert(leftic->ptr != NULL);
           if (depth == firstcodesinfo->binsearchcache_depth)
           {
-            leftptr2 = leftic->ptr + 1;
+            leftptr = leftic->ptr + 1;
             if (rightic < firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
                        firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode-1)
             {
-              rightptr2 = (rightic+1)->ptr - 1;
+              rightptr = (rightic+1)->ptr - 1;
             } else
             {
-              rightptr2 = firstcodesinfo->allfirstcodes +
-                          firstcodesinfo->differentcodes - 1;
+              rightptr = firstcodesinfo->allfirstcodes +
+                         firstcodesinfo->differentcodes - 1;
             }
           }
           leftic = midic + 1;
@@ -406,44 +402,26 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
           return midic->ptr;
         }
       }
-    }
-    if (leftptr > rightptr)
-    {
-      break;
-    }
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
-    if (code < *midptr)
-    {
-      rightptr = midptr-1;
     } else
     {
-      if (code > *midptr)
+      gt_assert(leftptr != NULL && rightptr != NULL);
+      if (leftptr > rightptr)
       {
-        leftptr = midptr + 1;
+        break;
+      }
+      midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+      if (code < *midptr)
+      {
+        rightptr = midptr-1;
       } else
       {
-        return midptr;
-      }
-    }
-    if (depth == firstcodesinfo->binsearchcache_depth)
-    {
-      if (leftptr2 != leftptr)
-      {
-        fprintf(stderr,"leftptr2=%lu != %lu=leftptr\n",
-                        (unsigned long)
-                        (leftptr2-firstcodesinfo->allfirstcodes),
-                        (unsigned long)
-                        (leftptr-firstcodesinfo->allfirstcodes));
-        exit(EXIT_FAILURE);
-      }
-      if (rightptr2 != rightptr)
-      {
-        fprintf(stderr,"rightptr2=%lu != %lu=rightptr\n",
-                        (unsigned long)
-                        (rightptr2-firstcodesinfo->allfirstcodes),
-                        (unsigned long)
-                        (rightptr-firstcodesinfo->allfirstcodes));
-        exit(EXIT_FAILURE);
+        if (code > *midptr)
+        {
+          leftptr = midptr + 1;
+        } else
+        {
+          return midptr;
+        }
       }
     }
     depth++;
