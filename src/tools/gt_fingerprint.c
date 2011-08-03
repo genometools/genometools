@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -195,6 +195,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
   FingerprintArguments *arguments = tool_arguments;
+  bool extract_found = true;
   GtBioseq *bs;
   GtStringDistri *sd;
   unsigned long i, j;
@@ -203,6 +204,9 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
   gt_error_check(err);
   gt_assert(arguments);
   sd = gt_string_distri_new();
+
+  if (gt_str_length(arguments->extract))
+    extract_found = false;
 
   /* process sequence files */
   for (i = parsed_args; !had_err && i < argc; i++) {
@@ -219,6 +223,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                                 gt_bioseq_get_sequence(bs, j),
                                 gt_bioseq_get_sequence_length(bs, j),
                                 arguments->width, arguments->outfp);
+            extract_found = true;
           }
         }
         else
@@ -226,6 +231,12 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
       }
     }
     gt_bioseq_delete(bs);
+  }
+
+  if (!had_err && !extract_found) {
+    gt_error_set(err, "could not find sequence with fingerprint '%s' in given "
+                      "sequence file(s)", gt_str_get(arguments->extract));
+    had_err = -1;
   }
 
   if (!had_err) {
