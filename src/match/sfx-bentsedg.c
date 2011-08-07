@@ -915,18 +915,10 @@ static int compareshortreadsortinfo(const GtShortreadsort *aq,
 
 #define QSORTNAME(NAME) shortread_##NAME
 
-#ifdef QSORT_ARRAY_GET
-#undef QSORT_ARRAY_GET
-#endif
-
-#define QSORT_ARRAY_GET(ARR,IDX)\
+#define shortread_ARRAY_GET(ARR,IDX)\
         (unsigned long) data->shortreadsortrefs[IDX]
 
-#ifdef QSORT_ARRAY_SET
-#undef QSORT_ARRAY_SET
-#endif
-
-#define QSORT_ARRAY_SET(ARR,IDX,VALUE)\
+#define shortread_ARRAY_SET(ARR,IDX,VALUE)\
         data->shortreadsortrefs[IDX] = (uint16_t) VALUE
 
 typedef GtBentsedgresources * QSORTNAME(Datatype);
@@ -936,9 +928,9 @@ static int QSORTNAME(qsortcmparr) (unsigned long a,
                                    const QSORTNAME(Datatype) data)
 {
   return compareshortreadsortinfo(
-                           data->shortreadsortinfo + QSORT_ARRAY_GET(NULL,a),
-                           data->shortreadsortinfo + QSORT_ARRAY_GET(NULL,b),
-                           data);
+                      data->shortreadsortinfo + QSORTNAME(ARRAY_GET)(NULL,a),
+                      data->shortreadsortinfo + QSORTNAME(ARRAY_GET)(NULL,b),
+                      data);
 }
 
 typedef unsigned long QSORTNAME(Sorttype);
@@ -951,9 +943,9 @@ typedef unsigned long QSORTNAME(Sorttype);
 #define GT_QSORT_ARR_SWAP(ARR,A,B)\
         if ((A) != (B))\
         {\
-          tmp = QSORT_ARRAY_GET(ARR,A);\
-          QSORT_ARRAY_SET(ARR,A,QSORT_ARRAY_GET(ARR,B));\
-          QSORT_ARRAY_SET(ARR,B,tmp);\
+          tmp = QSORTNAME(ARRAY_GET)(ARR,A);\
+          QSORTNAME(ARRAY_SET)(ARR,A,QSORTNAME(ARRAY_GET)(ARR,B));\
+          QSORTNAME(ARRAY_SET)(ARR,B,tmp);\
         }
 #endif
 
@@ -963,9 +955,9 @@ typedef unsigned long QSORTNAME(Sorttype);
         bidx = B;\
         while ((N)-- > 0)\
         {\
-          tmp = QSORT_ARRAY_GET(ARR,aidx);\
-          QSORT_ARRAY_SET(ARR,aidx,QSORT_ARRAY_GET(ARR,bidx));\
-          QSORT_ARRAY_SET(ARR,bidx,tmp);\
+          tmp = QSORTNAME(ARRAY_GET)(ARR,aidx);\
+          QSORTNAME(ARRAY_SET)(ARR,aidx,QSORTNAME(ARRAY_GET)(ARR,bidx));\
+          QSORTNAME(ARRAY_SET)(ARR,bidx,tmp);\
           aidx++;\
           bidx++;\
         }

@@ -11,9 +11,9 @@
 #define GT_QSORT_ARR_SWAP(ARR,A,B)\
         if ((A) != (B))\
         {\
-          tmp = QSORTNAME(ARRAY_GET)(ARR,A);\
-          QSORTNAME(ARRAY_SET)(ARR,A,QSORTNAME(ARRAY_GET)(ARR,B));\
-          QSORTNAME(ARRAY_SET)(ARR,B,tmp);\
+          tmp = QSORTNAME(QSORT_ARRAY_GET)(ARR,A);\
+          QSORTNAME(QSORT_ARRAY_SET))(ARR,A,QSORTNAME(QSORT_ARRAY_GET)(ARR,B));\
+          QSORTNAME(QSORT_ARRAY_SET)(ARR,B,tmp);\
         }
 #endif
 
@@ -23,9 +23,10 @@
         bidx = B;\
         while ((N)-- > 0)\
         {\
-          tmp = QSORTNAME(ARRAY_GET)(ARR,aidx);\
-          QSORTNAME(ARRAY_SET)(ARR,aidx,QSORTNAME(ARRAY_GET)(ARR,bidx));\
-          QSORTNAME(ARRAY_SET)(ARR,bidx,tmp);\
+          tmp = QSORTNAME(QSORT_ARRAY_GET)(ARR,aidx);\
+          QSORTNAME(QSORT_ARRAY_SET)(ARR,aidx,\
+                    QSORTNAME(QSORT_ARRAY_GET)(ARR,bidx));\
+          QSORTNAME(QSORT_ARRAY_SET)(ARR,bidx,tmp);\
           aidx++;\
           bidx++;\
         }
@@ -33,17 +34,20 @@
 
 static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
                      (const QSORTNAME(Sorttype) *arr,unsigned long a,
-                      unsigned long b, unsigned long c,
-                      QSORTNAME(Datatype) data)
+                      unsigned long b, unsigned long c)
 {
-  return QSORTNAME(qsortcmparr) (arr, a, b, data) < 0
-           ? (QSORTNAME(qsortcmparr) (arr, b, c, data) < 0
+  return QSORTNAME(QSORT_ARRAY_GET)(arr,a) < QSORTNAME(QSORT_ARRAY_GET)(arr,b)
+           ? (QSORTNAME(QSORT_ARRAY_GET)(arr,b)
+              < QSORTNAME(QSORT_ARRAY_GET)(arr,c)
                 ? b
-                : (QSORTNAME(qsortcmparr) (arr, a, c, data) < 0
+                : (QSORTNAME(QSORT_ARRAY_GET)(arr, a)
+                    < QSORTNAME(QSORT_ARRAY_GET)(arr,c)
                      ? c : a))
-           : (QSORTNAME(qsortcmparr) (arr, b, c, data) > 0
-                ? b
-                : (QSORTNAME(qsortcmparr) (arr, a, c, data) < 0
+           : (QSORTNAME(QSORT_ARRAY_GET)(arr,b)
+                 > QSORTNAME(QSORT_ARR_GET)(arr,c)
+                  ? b
+                  : (QSORTNAME(QSORT_ARRAY_GET)(arr, a) <
+                     QSORTNAME(QSORT_ARRAY_GET)(arr,c)
                      ? a
                      : c));
 }
@@ -63,8 +67,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
                                    unsigned long insertionsortthreshold,
                                    bool handlenotswapped,
                                    QSORTNAME(Sorttype) *arr,
-                                   unsigned long len,
-                                   QSORTNAME(Datatype) data)
+                                   unsigned long len)
 {
   unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s;
   int r;
@@ -90,10 +93,11 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
            pm < current.startindex + current.len; pm++)
       {
         for (pl = pm; pl > current.startindex &&
-                      QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data) > 0;
+                      QSORTNAME(QSORT_ARRAY_GET)(arr,pl-1)
+                        > QSORTNAME(QSORT_ARRAY_GET)(arr,pl);
              pl--)
         {
-          GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
+          GT_QSORT_ARR_SWAP(arr, pl, pl - 1);
         }
       }
       continue;
@@ -107,15 +111,15 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       {
         s = GT_DIV8 (current.len);
         pl = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pl, pl + s,
-                                                     pl + GT_MULT2 (s), data);
+                                                     pl + GT_MULT2 (s));
         gt_assert(pm >= s);
         pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pm - s, pm,
-                                                     pm + s, data);
+                                                     pm + s);
         gt_assert(pn >= GT_MULT2(s));
         pn = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pn - GT_MULT2 (s),
-                                                     pn - s, pn, data);
+                                                     pn - s, pn);
       }
-      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pl, pm, pn, data);
+      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (arr, pl, pm, pn);
     }
     GT_QSORT_ARR_SWAP (arr, current.startindex, pm);
     pa = pb = current.startindex + 1;
@@ -123,10 +127,11 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     while (1)
     {
       while (pb <= pc &&
-             (r = QSORTNAME(qsortcmparr) (arr, pb,
-                                          current.startindex, data)) <= 0)
+             QSORTNAME(QSORT_ARRAY_GET)(arr,pb)
+                <= QSORTNAME(QSORT_ARRAY_GET)(arr,current.startindex))
       {
-        if (r == 0)
+        if (QSORTNAME(QSORT_ARRAY_GET)(arr,pb)
+             == QSORTNAME(QSORT_ARRAY_GET)(arr,current.startindex))
         {
           swapped = true;
           GT_QSORT_ARR_SWAP (arr, pa, pb);
@@ -135,10 +140,11 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         pb++;
       }
       while (pb <= pc &&
-             (r = QSORTNAME(qsortcmparr) (arr, pc,
-                                          current.startindex, data)) >= 0)
+             QSORTNAME(QSORT_ARRAY_GET)(arr,pc)
+               >= QSORTNAME(QSORT_ARRAY_GET)(arr,current.startindex))
       {
-        if (r == 0)
+        if (QSORTNAME(QSORT_ARRAY_GET)(arr,pc)
+             == QSORTNAME(QSORT_ARRAY_GET)(arr,current.startindex))
         {
           swapped = true;
           GT_QSORT_ARR_SWAP (arr, pc, pd);
@@ -167,7 +173,8 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
            pm < current.startindex + current.len; pm++)
       {
         for (pl = pm; pl > current.startindex &&
-                      QSORTNAME(qsortcmparr) (arr, pl - 1, pl, data) > 0;
+                      QSORTNAME(QSORT_ARRAY_GET)(arr, pl - 1)
+                       > QSORTNAME(QSORT_ARRAY_GET)(arr, pl);
              pl--)
         {
           GT_QSORT_ARR_SWAP (arr, pl, pl - 1);

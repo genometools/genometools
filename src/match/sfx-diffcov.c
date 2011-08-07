@@ -879,18 +879,10 @@ static void dc_addunsortedrange(void *voiddcov,
 
 #define QSORTNAME(NAME) dc_##NAME
 
-#ifdef QSORT_ARRAY_GET
-#undef QSORT_ARRAY_GET
-#endif
-
-#define QSORT_ARRAY_GET(ARR,RELIDX)\
+#define dc_ARRAY_GET(ARR,RELIDX)\
         gt_suffixsortspace_get(data->sssp,data->sortoffset,RELIDX)
 
-#ifdef QSORT_ARRAY_SET
-#undef QSORT_ARRAY_SET
-#endif
-
-#define QSORT_ARRAY_SET(ARR,RELIDX,VALUE)\
+#define dc_ARRAY_SET(ARR,RELIDX,VALUE)\
         gt_suffixsortspace_set(data->sssp,data->sortoffset,RELIDX,VALUE)
 
 typedef Differencecover * QSORTNAME(Datatype);
@@ -928,8 +920,8 @@ static int QSORTNAME(qsortcmparr) (
   unsigned long suffixpos1, suffixpos2;
 
   gt_assert(data->sssp != NULL);
-  suffixpos1 = QSORT_ARRAY_GET(NULL,a);
-  suffixpos2 = QSORT_ARRAY_GET(NULL,b);
+  suffixpos1 = dc_ARRAY_GET(NULL,a);
+  suffixpos2 = dc_ARRAY_GET(NULL,b);
   return gt_differencecover_compare (data, suffixpos1, suffixpos2);
 }
 
