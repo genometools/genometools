@@ -1102,6 +1102,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     GtCodetype maskright,
                                     GtReadmode readmode,
                                     unsigned int kmersize,
+                                    unsigned int upperkmersize,
                                     void(*processkmercode)(void *,
                                                            bool,
                                                            unsigned long,
@@ -1120,7 +1121,9 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
   {
-    gt_assert(endpos >= (unsigned long) kmersize);
+    unsigned long startpos2;
+
+    gt_assert(endpos >= (unsigned long) upperkmersize);
     pos = endpos - (unsigned long) kmersize;
     unitindex = (pos > 0) ? GT_DIVBYUNITSIN2BITENC(pos-1) : 0;
     code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
@@ -1132,31 +1135,16 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
-  } else
-  {
-    pos = startpos;
-    unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
-    /*
-    printf("unitindex=%lu,startpos=%lu,kmersize=%u\n",
-           unitindex,startpos,kmersize);
-    */
-    code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
-    processkmercode(processkmercodeinfo,true,pos,
-                    GT_ISDIRCOMPLEMENT(readmode)
-                      ? gt_kmercode_complement(code,maskright)
-                      : code);
-  }
-  if (onlyfirst)
-  {
-    return code;
-  }
-  currentencoding = twobitencoding[unitindex];
-  if (GT_ISDIRREVERSE(readmode))
-  {
+    if (onlyfirst)
+    {
+      return code;
+    }
+    currentencoding = twobitencoding[unitindex];
+    startpos2 = startpos + (upperkmersize - kmersize);
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(pos-1));
-    while (pos > startpos)
+    while (pos > startpos2)
     {
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
@@ -1170,7 +1158,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
         shiftright += 2;
       } else
       {
-        gt_assert(unitindex > 0 || pos == startpos);
+        gt_assert(unitindex > 0 || pos == startpos2);
         if (unitindex > 0)
         {
           currentencoding = twobitencoding[--unitindex];
@@ -1182,10 +1170,22 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
   {
     unsigned long maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
 
+    pos = startpos;
+    unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
+    code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
+    processkmercode(processkmercodeinfo,true,pos,
+                    GT_ISDIRCOMPLEMENT(readmode)
+                      ? gt_kmercode_complement(code,maskright)
+                      : code);
+    if (onlyfirst)
+    {
+      return code;
+    }
+    currentencoding = twobitencoding[unitindex];
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
                           GT_MODBYUNITSIN2BITENC(startpos+kmersize));
-    while (pos < endpos - (unsigned long) kmersize)
+    while (pos < endpos - (unsigned long) upperkmersize)
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
@@ -1200,7 +1200,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       } else
       {
         gt_assert(unitindex < maxunitindex-1 ||
-                  pos == endpos - (unsigned long) kmersize);
+                  pos == endpos - (unsigned long) upperkmersize);
         if (unitindex < maxunitindex-1)
         {
           currentencoding = twobitencoding[++unitindex];
@@ -1220,6 +1220,7 @@ static void getencseqkmers_rangetwobitencoding(
                                       GtCodetype maskright,
                                       GtReadmode readmode,
                                       unsigned int kmersize,
+                                      unsigned int upperkmersize,
                                       bool onlyfirst,
                                       void(*processkmercode)(void *,
                                                              bool,
@@ -1251,7 +1252,7 @@ static void getencseqkmers_rangetwobitencoding(
     gt_assert(startpos <= endpos);
     gt_assert(endpos <= realtotallength);
   }
-  if (endpos - startpos >= (unsigned long) kmersize)
+  if (endpos - startpos >= (unsigned long) upperkmersize)
   {
     gt_assert(endpos > 0);
     lastcode = getencseqkmers_nospecialtwobitencoding(twobitencoding,
@@ -1259,18 +1260,19 @@ static void getencseqkmers_rangetwobitencoding(
                                                       maskright,
                                                       readmode,
                                                       kmersize,
+                                                      upperkmersize,
                                                       processkmercode,
                                                       processkmercodeinfo,
                                                       onlyfirst,
                                                       startpos,
                                                       endpos);
-    if (GT_ISDIRCOMPLEMENT(readmode))
-    {
-      lastcode = gt_kmercode_complement(lastcode,maskright);
-    }
-    newcode = ((lastcode << 2) | 3UL) & maskright;
     if (processkmerspecial != NULL)
     {
+      if (GT_ISDIRCOMPLEMENT(readmode))
+      {
+        lastcode = gt_kmercode_complement(lastcode,maskright);
+      }
+      newcode = ((lastcode << 2) | 3UL) & maskright;
       processkmerspecial(processkmerspecialinfo,
                          kmersize-1,
                          (unsigned int) newcode,
@@ -1279,7 +1281,7 @@ static void getencseqkmers_rangetwobitencoding(
     }
   } else
   {
-    if (startpos < endpos)
+    if (processkmerspecial != NULL && startpos < endpos)
     {
       unsigned int fillpos;
 
@@ -1299,14 +1301,11 @@ static void getencseqkmers_rangetwobitencoding(
       newcode
         = ((lastcode << GT_MULT2(fillpos)) | ((1UL << GT_MULT2(fillpos)) - 1))
            & maskright;
-      if (processkmerspecial != NULL)
-      {
-        processkmerspecial(processkmerspecialinfo,
-                           (unsigned int) (endpos - startpos),
-                           (unsigned int) newcode,
-                           GT_ISDIRREVERSE(readmode) ? (totallength - startpos)
-                                                     : endpos);
-      }
+      processkmerspecial(processkmerspecialinfo,
+                         (unsigned int) (endpos - startpos),
+                         (unsigned int) newcode,
+                         GT_ISDIRREVERSE(readmode) ? (totallength - startpos)
+                                                   : endpos);
     }
   }
 }
@@ -1314,6 +1313,7 @@ static void getencseqkmers_rangetwobitencoding(
 void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    unsigned int kmersize,
+                                   unsigned int upperkmersize,
                                    bool onlyfirst,
                                    void(*processkmercode)(void *,
                                                           bool,
@@ -1357,6 +1357,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                            maskright,
                                            readmode,
                                            kmersize,
+                                           upperkmersize,
                                            onlyfirst,
                                            processkmercode,
                                            processkmercodeinfo,
@@ -1379,6 +1380,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                            maskright,
                                            readmode,
                                            kmersize,
+                                           upperkmersize,
                                            onlyfirst,
                                            processkmercode,
                                            processkmercodeinfo,
@@ -1399,6 +1401,7 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      maskright,
                                      readmode,
                                      kmersize,
+                                     upperkmersize,
                                      onlyfirst,
                                      processkmercode,
                                      processkmercodeinfo,
@@ -1756,6 +1759,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
 #endif
       getencseqkmers_twobitencoding(encseq,
                                     sfi->readmode,
+                                    sfi->spmopt_kmerscansize,
                                     sfi->spmopt_kmerscansize,
                                     true,
                                     gt_sfimarkprefixsuffixbuckets,
