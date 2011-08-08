@@ -1446,8 +1446,8 @@ GtOption* gt_option_new_choice(const char *option_str, const char *description,
 #ifndef NDEBUG
   unsigned long in_domain = 1;
   if (default_value) {
-    while (domain[(in_domain - 1)] != NULL) {
-      if (domain[(in_domain - 1)] == default_value) {
+    while (domain[in_domain - 1] != NULL) {
+      if (domain[in_domain - 1] == default_value) {
         in_domain = 0;
         break;
       }

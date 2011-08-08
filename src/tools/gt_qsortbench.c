@@ -1,6 +1,7 @@
 /*
-  Copyright (c) CCYY YOUR NAME HERE <user@your.dom.ain>
-  Copyright (c) CCYY Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -37,7 +38,7 @@ typedef struct {
 
 static void* gt_qsortbench_arguments_new(void)
 {
-  QSortBenchArguments *arguments = gt_calloc(1, sizeof *arguments);
+  QSortBenchArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->impl = gt_str_new();
   return arguments;
 }
@@ -50,36 +51,34 @@ static void gt_qsortbench_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
+static const char *gt_qsort_implementation_names[]
+    = {"thomas","system","inlinedptr","inlinedarr","direct",NULL};
+
 static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 {
   QSortBenchArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  static const char *inputs[] = {
-    "thomas",
-    "inlinedptr",
-    "inlinedarr",
-    "system",
-    NULL
-  };
   GtOption *option;
+
   gt_assert(arguments);
 
   /* init */
   op = gt_option_parser_new("[option ...]", /* XXX */
                             "Benchmarks quicksort implementations."); /* XXX */
 
-  option = gt_option_new_choice("impl", "implementation\n"
-                                       "choose from thomas|system|"
-                                       "inlinedptr|inlinedarr",
-                             arguments->impl, inputs[0], inputs);
+  option = gt_option_new_choice("impl", "implementation\nchoose from "
+                                "thomas|system|inlinedptr|inlinedarr|direct",
+                                arguments->impl,
+                                gt_qsort_implementation_names[0],
+                                gt_qsort_implementation_names);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("size", "size of array to sort",
-                               &arguments->num_values, 1000000);
+  option = gt_option_new_ulong("size", "number of integers to sort",
+                               &arguments->num_values, 1000000UL);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("maxval", "maximal value of an item to sort",
-                               &arguments->maxvalue, 10000);
+  option = gt_option_new_ulong("maxval", "maximal integer to sort",
+                               &arguments->maxvalue, 10000UL);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("aqsort", "prepare bad input array using the "
@@ -94,7 +93,6 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
-
   return op;
 }
 
@@ -147,13 +145,22 @@ static int gt_qsortbench_cmp(const void *px, const void *py)
     candidate = x;
   else if (val[y] == gas)
     candidate = y;
-  return val[x] - val[y];
+  if (val[x] < val[y])
+  {
+    return -1;
+  }
+  if (val[x] > val[y])
+  {
+    return 1;
+  }
+  return 0;
 }
 
-static int gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
+static void gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
 {
   unsigned long i;
-  unsigned long *ptr = malloc(n*sizeof (*ptr));
+  unsigned long *ptr = gt_malloc(sizeof (*ptr) * n);
+
   val = a;
   gas = n-1;
   nsolid = ncmp = candidate = 0;
@@ -161,11 +168,10 @@ static int gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
     ptr[i] = i;
     val[i] = gas;
   }
-  qsort(ptr, n, sizeof (*ptr), gt_qsortbench_cmp);
-  for (i=1;i<n;i++)
+  qsort(ptr, (size_t) n, sizeof (*ptr), gt_qsortbench_cmp);
+  for (i=1UL;i<n;i++)
     gt_assert(val[ptr[i]]==val[ptr[i-1]]+1);
-  free(ptr);
-  return ncmp;
+  gt_free(ptr);
 }
 
 typedef unsigned long Sorttype;
@@ -220,14 +226,16 @@ static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
 
 #include "match/qsort-array.gen"
 
+#include "match/qsort-direct.gen"
+
 static void check_inlinedarr_qsort(unsigned long *a, unsigned long n)
 {
-  unsigned long idx;
+  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, a, n, NULL);
+}
 
-  QSORTNAME(gt_inlinedarr_qsort_r) (6, false, a, n, NULL);
-  for (idx = 1UL; idx < n; idx++) {
-    gt_assert(a[idx-1] <= a[idx]);
-  }
+static void check_direct_qsort(unsigned long *a, unsigned long n)
+{
+  QSORTNAME(gt_direct_qsort) (6UL, false, a, n);
 }
 
 static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
@@ -248,11 +256,7 @@ static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 
 static void check_thomas_qsort(unsigned long *a, unsigned long n)
 {
-  unsigned long idx;
-  gt_qsort_r(a,n,sizeof (Sorttype),NULL, qsortcmpwithdata);
-  for (idx = 1UL; idx < n; idx++) {
-    gt_assert(a[idx-1] <= a[idx]);
-  }
+  gt_qsort_r(a,(size_t) n,sizeof (Sorttype),NULL, qsortcmpwithdata);
 }
 
 static int qsortcmpnodata(const void *a,const void *b)
@@ -271,21 +275,28 @@ static int qsortcmpnodata(const void *a,const void *b)
 
 static void check_gnu_qsort(unsigned long *a, unsigned long n)
 {
-  unsigned long idx;
-  qsort(a,n, sizeof (Sorttype), qsortcmpnodata);
-  for (idx = 1UL; idx < n; idx++) {
-    gt_assert(a[idx-1] <= a[idx]);
-  }
+  qsort(a,(size_t) n, sizeof (Sorttype), qsortcmpnodata);
 }
 
 static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
 {
-  unsigned long idx;
   gt_inlined_qsort_r(a, n, NULL);
-  for (idx = 1UL; idx < n; idx++) {
-    gt_assert(a[idx-1] <= a[idx]);
-  }
 }
+
+typedef void (*GtQsortimplementationfunc)(unsigned long *,unsigned long);
+
+static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
+{
+  check_thomas_qsort,
+  check_gnu_qsort,
+  check_inlinedptr_qsort,
+  check_inlinedarr_qsort,
+  check_direct_qsort
+};
+
+#define GT_NUM_OF_QSORT_IMPLEMENTATIONS\
+        (sizeof (gt_qsort_implementation_funcs)/\
+         sizeof (gt_qsort_implementation_funcs[0]))
 
 static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args,
@@ -293,12 +304,12 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
 {
   QSortBenchArguments *arguments = tool_arguments;
   int had_err = 0;
+  size_t method;
   GtTimer *timer;
-  unsigned long *array, i;
+  unsigned long *array, idx;
 
   gt_error_check(err);
   gt_assert(arguments);
-
   if (arguments->verbose) {
     printf("# number of items = %lu\n", arguments->num_values);
     printf("# max value items = %lu\n", arguments->maxvalue);
@@ -306,7 +317,7 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   }
 
   /* prepare benchmark input data */
-  array = gt_malloc(arguments->num_values * sizeof (unsigned long));
+  array = gt_malloc(sizeof (*array) * arguments->num_values );
   if (arguments->use_aqsort) {
     if (arguments->verbose)
       printf("# using aqsort\n");
@@ -314,8 +325,8 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   } else if (arguments->use_permute) {
     if (arguments->verbose)
       printf("# using permuted array\n");
-    for (i = 0; i < arguments->num_values; ++i) {
-      array[i] = i;
+    for (idx = 0; idx < arguments->num_values; idx++) {
+      array[idx] = idx;
     }
     gt_qbenchsort_permute_ulong_array(array, arguments->num_values);
   } else {
@@ -323,26 +334,28 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
       printf("# using simple array of random numbers\n");
     /* use seed initialization to make array deterministic */
     srand48(366292341);
-    for (i = 0; i < arguments->num_values; ++i) {
-      array[i] = drand48() * arguments->num_values;
+    for (idx = 0; idx < arguments->num_values; idx++) {
+      array[idx] = drand48() * arguments->num_values;
     }
   }
 
   timer = gt_timer_new();
   gt_timer_start(timer);
   /* run implementation */
-  if (strcmp(gt_str_get(arguments->impl), "thomas") == 0) {
-    check_thomas_qsort(array, arguments->num_values);
-  } else if (strcmp(gt_str_get(arguments->impl), "system") == 0) {
-    check_gnu_qsort(array, arguments->num_values);
-  } else if (strcmp(gt_str_get(arguments->impl), "inlinedptr") == 0) {
-    check_inlinedptr_qsort(array, arguments->num_values);
-  }
-    else if (strcmp(gt_str_get(arguments->impl), "inlinedarr") == 0) {
-    check_inlinedarr_qsort(array, arguments->num_values);
+  for (method = 0; method < GT_NUM_OF_QSORT_IMPLEMENTATIONS; method++)
+  {
+    if (strcmp(gt_str_get(arguments->impl),
+               gt_qsort_implementation_names[method]) == 0)
+    {
+      gt_qsort_implementation_funcs[method](array, arguments->num_values);
+      break;
+    }
   }
   gt_timer_show(timer, stdout);
   gt_timer_delete(timer);
+  for (idx = 1UL; idx < arguments->num_values; idx++) {
+    gt_assert(array[idx-1] <= array[idx]);
+  }
   gt_free(array);
   printf("cmpcount = %lu\n",cmpcount);
   return had_err;
