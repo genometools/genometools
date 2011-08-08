@@ -183,14 +183,16 @@ static void gt_firstcodes_halves(GtFirstcodesinfo *firstcodesinfo,
                                             allocatedGtUlong);
 }
 
+static unsigned long depthtotal = 0;
+
 const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
                                         unsigned long code)
 {
   const unsigned long *leftptr = NULL, *midptr, *rightptr = NULL;
+  unsigned int depth;
 
   if (firstcodesinfo->binsearchcache.spaceGtIndexwithcode != NULL)
   {
-    unsigned int depth;
     const GtIndexwithcode *leftic, *midic, *rightic;
 
     leftic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode;
@@ -248,6 +250,7 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
     gt_assert(leftptr != NULL && rightptr != NULL);
   } else
   {
+    depth = 0;
     leftptr = firstcodesinfo->allfirstcodes;
     rightptr = firstcodesinfo->allfirstcodes +
                firstcodesinfo->differentcodes - 1;
@@ -265,10 +268,13 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
         leftptr = midptr + 1;
       } else
       {
+        depthtotal += (unsigned long) depth;
         return midptr;
       }
     }
+    depth++;
   }
+  depthtotal += (unsigned long) depth;
   return NULL;
 }
 
@@ -476,6 +482,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     firstcodesaccum_flush(&firstcodesinfo);
     printf("\nbinsearchbuffer_total=%lu\n",
             firstcodesinfo.binsearchcodebuffer_total);
+    printf("depthtotal = %lu, %.2f\n",depthtotal,(double)depthtotal/
+                                      firstcodesinfo.binsearchcodebuffer_total);
     printf("# firstcodehits=%lu (%.2f)\n",firstcodesinfo.firstcodehits,
                                         (double) firstcodesinfo.firstcodehits/
                                         gt_encseq_total_length(encseq));
