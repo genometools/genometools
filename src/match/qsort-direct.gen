@@ -12,7 +12,7 @@
         if ((A) != (B))\
         {\
           tmp = QSORTNAME(ARRAY_GET)(ARR,A);\
-          QSORTNAME(ARRAY_SET))(ARR,A,QSORTNAME(ARRAY_GET)(ARR,B));\
+          QSORTNAME(ARRAY_SET)(ARR,A,QSORTNAME(ARRAY_GET)(ARR,B));\
           QSORTNAME(ARRAY_SET)(ARR,B,tmp);\
         }
 #endif

@@ -197,14 +197,6 @@ typedef struct
   GtArrayGtUlong binsearchcodebuffer;
 } GtFirstcodesinfo;
 
-static int gt_firstcodes_cmp(const void *a,const void *b)
-{
-  unsigned long av = *((const unsigned long *) a);
-  unsigned long bv = *((const unsigned long *) b);
-
-  return av < bv ? -1 : (av > bv ? +1 : 0);
-}
-
 static unsigned long gt_remdups_in_sorted_array(
                                   GtFirstcodesinfo *firstcodesinfo)
 {
@@ -433,26 +425,17 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
   return NULL;
 }
 
-static int cmpGtUlong(const void *a,const void *b)
-{
-  unsigned long va = *(unsigned long *) a;
-  unsigned long vb = *(unsigned long *) b;
+#ifdef  QSORTNAME
+#undef  QSORTNAME
+#endif
 
-  if (va < vb)
-  {
-    return -1;
-  }
-  if (va > vb)
-  {
-    return 1;
-  }
-  return 0;
-  /*
-  return (*((const unsigned long *) a) < *((const unsigned long *) b)) ? -1 : (
-         (*((const unsigned long *) a) > *((const unsigned long *) b)) ? +1 : 0
-         );
-  */
-}
+#define QSORTNAME(NAME)                        firstcodes_##NAME
+#define firstcodes_ARRAY_GET(ARR,RELIDX)       ARR[RELIDX]
+#define firstcodes_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
+
+typedef unsigned long QSORTNAME(Sorttype);
+
+#include "match/qsort-direct.gen"
 
 static void firstcodesocc_flush(GtFirstcodesinfo *firstcodesinfo)
 {
@@ -460,10 +443,9 @@ static void firstcodesocc_flush(GtFirstcodesinfo *firstcodesinfo)
   unsigned long *vptr, idx;
 
   gt_assert(firstcodesinfo->allfirstcodes);
-  qsort(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
-        (size_t) firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
-        sizeof (*firstcodesinfo->binsearchcodebuffer.spaceGtUlong),
-        cmpGtUlong);
+  QSORTNAME(gt_direct_qsort) (6UL, false,
+            firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
+            firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
 
   for (vptr = firstcodesinfo->binsearchcodebuffer.spaceGtUlong;
        vptr < firstcodesinfo->binsearchcodebuffer.spaceGtUlong +
@@ -507,11 +489,10 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
   unsigned long *vptr;*/
 
   gt_assert(firstcodesinfo->allfirstcodes);
-  qsort(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
-        (size_t) firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
-        sizeof (*firstcodesinfo->binsearchcodebuffer.spaceGtUlong),
-        cmpGtUlong);
-
+  QSORTNAME(gt_direct_qsort)
+            (6UL, false,
+             firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
+             firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
   /*
   for (vptr = firstcodesinfo->binsearchcodebuffer.spaceGtUlong;
        vptr < firstcodesinfo->binsearchcodebuffer.spaceGtUlong +
@@ -603,8 +584,9 @@ static void storefirstcodes_getencseqkmers_twobitencoding(
   gt_assert(firstcodesinfo.numofsequences == firstcodesinfo.countsequences);
   if (firstcodesinfo.allfirstcodes != NULL)
   {
-    qsort(firstcodesinfo.allfirstcodes,(size_t) firstcodesinfo.numofsequences,
-          sizeof (*firstcodesinfo.allfirstcodes),gt_firstcodes_cmp);
+    QSORTNAME(gt_direct_qsort)
+               (6UL, false,
+               firstcodesinfo.allfirstcodes,firstcodesinfo.numofsequences);
     firstcodesinfo.differentcodes
       = gt_remdups_in_sorted_array(&firstcodesinfo);
   }
