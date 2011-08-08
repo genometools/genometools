@@ -485,15 +485,14 @@ static void gt_checkfirstcodesocc(void *processinfo,
 
 static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
 {
-  /*const unsigned long *ptr;
-  unsigned long *vptr;*/
+  const unsigned long *ptr;
+  unsigned long *vptr;
 
   gt_assert(firstcodesinfo->allfirstcodes);
   QSORTNAME(gt_direct_qsort)
             (6UL, false,
              firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
              firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
-  /*
   for (vptr = firstcodesinfo->binsearchcodebuffer.spaceGtUlong;
        vptr < firstcodesinfo->binsearchcodebuffer.spaceGtUlong +
               firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
@@ -507,7 +506,6 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
       firstcodesinfo->firstcodehits++;
     }
   }
-  */
   printf("%u ",firstcodesinfo->flushcount++);
   (void) fflush(stdout);
   firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong = 0;
