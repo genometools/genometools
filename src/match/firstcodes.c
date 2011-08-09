@@ -314,7 +314,7 @@ static void firstcodesocc_flush(GtFirstcodesinfo *firstcodesinfo)
 }
 
 static void gt_checkfirstcodesocc(void *processinfo,
-                                  bool firstinrange,
+                                  GT_UNUSED bool firstinrange,
                                   GT_UNUSED unsigned long pos,
                                   GtCodetype code)
 {
@@ -390,11 +390,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize)
 {
   GtFirstcodesinfo firstcodesinfo;
-  unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   size_t sizeforbittable, sizeforcodestable;
 
   firstcodesinfo.numofsequences = gt_encseq_num_of_sequences(encseq);
-  gt_assert(numofchars == 4U);
+  gt_assert(gt_encseq_alphabetnumofchars(encseq) == 4U);
   if (kmersize == (unsigned int) GT_UNITSIN2BITENC)
   {
     firstcodesinfo.numofallcodes = 0; /* undefined as 4^32 > ULONG_MAX */
