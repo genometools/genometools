@@ -350,6 +350,7 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
   gt_assert(suffixcode < sfi->spmopt_numofallsuffixcodes);
+  /* XXX access to maxprefixbuckets */
   return (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
           GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)) ? true : false;
 }
@@ -360,6 +361,7 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
   GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
 
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
+  /* XXX access to maxprefixbuckets */
   return GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) ? true : false;
 }
 #endif
