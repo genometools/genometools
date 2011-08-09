@@ -248,13 +248,12 @@ static void GT_APPENDINT(showallSWtablewithpages)(
       rightptr = midptr - 1;
     } else
     {
+      found = midptr;
       if (pos > *midptr)
       {
-        found = midptr;
         leftptr = midptr + 1;
       } else
       {
-        found = midptr;
         break;
       }
     }
