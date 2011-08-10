@@ -79,10 +79,24 @@ typedef union
   GtSWtable_uint32 st_uint32;
 } GtSWtable;
 
+typedef struct
+{
+  GtUchar *is64bitptr;
+  unsigned long *versionptr,
+                *satcharptr,
+                *totallengthptr,
+                *numofdbsequencesptr,
+                *numofdbfilesptr,
+                *lengthofdbfilenamesptr,
+                *minseqlenptr,
+                *maxseqlenptr;
+  GtSpecialcharinfo *specialcharinfoptr;
+  char *firstfilename;
+} GtEncseqHeaderPtr;
+
 struct GtEncseq
 {
   /* Common part */
-  unsigned long *satcharptr;  /* need for writing char sat */
   GtEncseqAccessType sat, satsep;
   const char *satname;
   void *mappedptr, /* NULL or pointer to the mapped space block */
@@ -91,21 +105,17 @@ struct GtEncseq
        has_wildcardranges,
        has_ssptabnew;
   unsigned long totallength,
-                *totallengthptr,
                 logicaltotallength,
                 numofdbsequences,
-                *numofdbsequencesptr,    /* need for writing numofdbsequences */
                 logicalnumofdbsequences,
                 numofdbfiles,
-                *numofdbfilesptr,
                 lengthofdbfilenames,
-                *lengthofdbfilenamesptr,
                 sizeofrep;
 
-  unsigned long version,
-                *versionptr;
-  GtUchar is64bit,
-          *is64bitptr;
+  GtEncseqHeaderPtr headerptr;
+
+  unsigned long version;
+  GtUchar is64bit;
 
   GtUchar(*seqdeliverchar)(GtEncseqReader *);
   const char *seqdelivercharname;
@@ -124,12 +134,10 @@ struct GtEncseq
 
   unsigned long *characterdistribution;
   unsigned int leastprobablecharacter;
-  GtSpecialcharinfo *specialcharinfoptr, /* need for writing specialcharinfo */
-                     specialcharinfo; /* information about specialcharacters */
+  GtSpecialcharinfo specialcharinfo; /* information about specialcharacters */
   Definedunsignedlong equallength;
-  GtStrArray *filenametab;    /* table of filenames */
-  char *firstfilename;
   GtFilelengthvalues *filelengthtab;  /* table of length of files */
+  GtStrArray *filenametab;    /* table of filenames */
 
   char *destab;
   bool hasallocateddestab,
@@ -179,9 +187,7 @@ struct GtEncseq
        accesstype_via_utables;
 
   unsigned long minseqlen,
-                *minseqlenptr,
-                maxseqlen,
-                *maxseqlenptr;
+                maxseqlen;
   char *oistab;  /* original input sequence(s) */
 };
 #endif

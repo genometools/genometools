@@ -254,7 +254,7 @@ void gt_suffixsortspace_checkorder(const GtSuffixsortspace *sssp,
 
   gt_assert(width > 0);
   prevpos = gt_suffixsortspace_getdirect(sssp,
-                                         sssp->bucketleftidx+subbucketleft - 
+                                         sssp->bucketleftidx+subbucketleft -
                                          sssp->partoffset);
   for (idx=sssp->bucketleftidx+subbucketleft - sssp->partoffset + 1;
        idx<sssp->bucketleftidx+subbucketleft + width - sssp->partoffset;

@@ -870,84 +870,111 @@ static int fillssptabmapspecstartptr(GtEncseq *encseq,
   return haserr ? -1 : 0;
 }
 
+static void gt_encseq_assignforwriting(GtEncseqHeaderPtr *headerptr,
+                                       GtEncseqAccessType sat,
+                                       unsigned long totallength,
+                                       unsigned long numofdbsequences,
+                                       unsigned long numofdbfiles,
+                                       unsigned long lengthofdbfilenames,
+                                       unsigned long minseqlen,
+                                       unsigned long maxseqlen,
+                                       GtSpecialcharinfo *specialcharinfo,
+                                       const GtStrArray *filenametab)
+{
+  bool writemode = true;
+
+  if (writemode)
+  {
+    unsigned long idx, offset = 0;
+
+    headerptr->is64bitptr = gt_malloc(sizeof (*headerptr->is64bitptr));
+    headerptr->is64bitptr[0] = (GtUchar) (sizeof (unsigned long) == (size_t) 8
+                                         ? 1
+                                         : 0);
+
+    headerptr->versionptr = gt_malloc(sizeof (*headerptr->versionptr));
+    headerptr->versionptr[0] = (unsigned long) GT_ENCSEQ_VERSION;
+
+    headerptr->satcharptr = gt_malloc(sizeof (*headerptr->satcharptr));
+    headerptr->satcharptr[0] = (unsigned long) sat;
+
+    headerptr->totallengthptr = gt_malloc(sizeof (*headerptr->totallengthptr));
+    headerptr->totallengthptr[0] = totallength;
+
+    headerptr->numofdbsequencesptr
+      = gt_malloc(sizeof (*headerptr->numofdbsequencesptr));
+    headerptr->numofdbsequencesptr[0] = numofdbsequences;
+
+    headerptr->numofdbfilesptr
+      = gt_malloc(sizeof (*headerptr->numofdbfilesptr));
+    headerptr->numofdbfilesptr[0] = numofdbfiles;
+
+    headerptr->lengthofdbfilenamesptr
+      = gt_malloc(sizeof (*headerptr->lengthofdbfilenamesptr));
+    headerptr->lengthofdbfilenamesptr[0] = lengthofdbfilenames;
+
+    headerptr->minseqlenptr
+      = gt_malloc(sizeof (*headerptr->minseqlenptr));
+    headerptr->minseqlenptr[0] = minseqlen;
+
+    headerptr->maxseqlenptr
+      = gt_malloc(sizeof (*headerptr->maxseqlenptr));
+    headerptr->maxseqlenptr[0] = maxseqlen;
+
+    headerptr->specialcharinfoptr
+      = gt_malloc(sizeof (*headerptr->specialcharinfoptr));
+    *headerptr->specialcharinfoptr = *specialcharinfo;
+
+    headerptr->firstfilename = gt_malloc(sizeof (*headerptr->firstfilename) *
+                                      lengthofdbfilenames);
+    gt_assert(gt_str_array_size(filenametab) == numofdbfiles);
+    for (idx = 0; idx < numofdbfiles; idx++)
+    {
+      strcpy(headerptr->firstfilename+offset,gt_str_array_get(filenametab,idx));
+      offset += gt_str_length(gt_str_array_get_str(filenametab,idx))+1;
+    }
+  }
+}
+
 static void assignencseqmapspecification(GtMapspec *mapspec,
                                          void *data,
                                          bool writemode)
 {
   GtEncseq *encseq = (GtEncseq *) data;
   unsigned long numofunits;
-  unsigned int numofchars, bitspersymbol;
+  unsigned int bitspersymbol;
 
   if (writemode)
   {
-    unsigned long idx, offset = 0;
-
-    encseq->is64bitptr = gt_malloc(sizeof (*encseq->is64bitptr));
-    encseq->is64bitptr[0] = (GtUchar) (sizeof (unsigned long) == (size_t) 8
-                                         ? 1
-                                         : 0);
-
-    encseq->versionptr = gt_malloc(sizeof (*encseq->versionptr));
-    encseq->versionptr[0] = (unsigned long) GT_ENCSEQ_VERSION;
-
-    encseq->satcharptr = gt_malloc(sizeof (*encseq->satcharptr));
-    encseq->satcharptr[0] = (unsigned long) encseq->sat;
-
-    encseq->totallengthptr = gt_malloc(sizeof (*encseq->totallengthptr));
-    encseq->totallengthptr[0] = encseq->totallength;
-
-    encseq->numofdbsequencesptr
-      = gt_malloc(sizeof (*encseq->numofdbsequencesptr));
-    encseq->numofdbsequencesptr[0] = encseq->numofdbsequences;
-
-    encseq->numofdbfilesptr = gt_malloc(sizeof (*encseq->numofdbfilesptr));
-    encseq->numofdbfilesptr[0] = encseq->numofdbfiles;
-
-    encseq->lengthofdbfilenamesptr
-      = gt_malloc(sizeof (*encseq->lengthofdbfilenamesptr));
-    encseq->lengthofdbfilenamesptr[0] = encseq->lengthofdbfilenames;
-
-    encseq->minseqlenptr
-      = gt_malloc(sizeof (*encseq->minseqlenptr));
-    encseq->minseqlenptr[0] = encseq->minseqlen;
-
-    encseq->maxseqlenptr
-      = gt_malloc(sizeof (*encseq->maxseqlenptr));
-    encseq->maxseqlenptr[0] = encseq->maxseqlen;
-
-    encseq->specialcharinfoptr
-      = gt_malloc(sizeof (*encseq->specialcharinfoptr));
-    *encseq->specialcharinfoptr = encseq->specialcharinfo;
-
-    encseq->firstfilename = gt_malloc(sizeof (*encseq->firstfilename) *
-                                      encseq->lengthofdbfilenames);
-    gt_assert(gt_str_array_size(encseq->filenametab) == encseq->numofdbfiles);
-    for (idx = 0; idx < encseq->numofdbfiles; idx++)
-    {
-      strcpy(encseq->firstfilename+offset,
-             gt_str_array_get(encseq->filenametab,idx));
-      offset += gt_str_length(gt_str_array_get_str(encseq->filenametab,idx))+1;
-    }
-    gt_assert(offset == encseq->lengthofdbfilenames);
+    gt_encseq_assignforwriting(&encseq->headerptr,
+                                       encseq->sat,
+                                       encseq->totallength,
+                                       encseq->numofdbsequences,
+                                       encseq->numofdbfiles,
+                                       encseq->lengthofdbfilenames,
+                                       encseq->minseqlen,
+                                       encseq->maxseqlen,
+                                       &encseq->specialcharinfo,
+                                       encseq->filenametab);
   }
 
-  gt_mapspec_add_uchar(mapspec, encseq->is64bitptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->versionptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->satcharptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->totallengthptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->numofdbsequencesptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->numofdbfilesptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->lengthofdbfilenamesptr, 1UL);
-  gt_mapspec_add_specialcharinfo(mapspec, encseq->specialcharinfoptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->minseqlenptr, 1UL);
-  gt_mapspec_add_ulong(mapspec, encseq->maxseqlenptr, 1UL);
-  gt_mapspec_add_char(mapspec, encseq->firstfilename,
+  gt_mapspec_add_uchar(mapspec, encseq->headerptr.is64bitptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.versionptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.satcharptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.totallengthptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.numofdbsequencesptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.numofdbfilesptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.lengthofdbfilenamesptr, 1UL);
+  gt_mapspec_add_specialcharinfo(mapspec, encseq->headerptr.specialcharinfoptr,
+                                 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.minseqlenptr, 1UL);
+  gt_mapspec_add_ulong(mapspec, encseq->headerptr.maxseqlenptr, 1UL);
+  gt_mapspec_add_char(mapspec, encseq->headerptr.firstfilename,
                       encseq->lengthofdbfilenames);
   gt_mapspec_add_filelengthvalues(mapspec, encseq->filelengthtab,
                                   encseq->numofdbfiles);
-  numofchars = gt_alphabet_num_of_chars(encseq->alpha);
   gt_mapspec_add_ulong(mapspec, encseq->characterdistribution,
-                       (unsigned long) numofchars);
+                       (unsigned long) gt_encseq_alphabetnumofchars(encseq));
   switch (encseq->sat)
   {
     case  GT_ACCESS_TYPE_DIRECTACCESS:
@@ -1020,28 +1047,28 @@ static int flushencseq2file(const char *indexname,GtEncseq *encseq,
       haserr = true;
     }
   }
-  gt_free(encseq->is64bitptr);
-  encseq->is64bitptr = NULL;
-  gt_free(encseq->versionptr);
-  encseq->versionptr = NULL;
-  gt_free(encseq->satcharptr);
-  encseq->satcharptr = NULL;
-  gt_free(encseq->totallengthptr);
-  encseq->totallengthptr = NULL;
-  gt_free(encseq->numofdbsequencesptr);
-  encseq->numofdbsequencesptr = NULL;
-  gt_free(encseq->numofdbfilesptr);
-  encseq->numofdbfilesptr = NULL;
-  gt_free(encseq->lengthofdbfilenamesptr);
-  encseq->lengthofdbfilenamesptr = NULL;
-  gt_free(encseq->firstfilename);
-  encseq->firstfilename = NULL;
-  gt_free(encseq->specialcharinfoptr);
-  encseq->specialcharinfoptr = NULL;
-  gt_free(encseq->minseqlenptr);
-  encseq->minseqlenptr = NULL;
-  gt_free(encseq->maxseqlenptr);
-  encseq->maxseqlenptr = NULL;
+  gt_free(encseq->headerptr.is64bitptr);
+  encseq->headerptr.is64bitptr = NULL;
+  gt_free(encseq->headerptr.versionptr);
+  encseq->headerptr.versionptr = NULL;
+  gt_free(encseq->headerptr.satcharptr);
+  encseq->headerptr.satcharptr = NULL;
+  gt_free(encseq->headerptr.totallengthptr);
+  encseq->headerptr.totallengthptr = NULL;
+  gt_free(encseq->headerptr.numofdbsequencesptr);
+  encseq->headerptr.numofdbsequencesptr = NULL;
+  gt_free(encseq->headerptr.numofdbfilesptr);
+  encseq->headerptr.numofdbfilesptr = NULL;
+  gt_free(encseq->headerptr.lengthofdbfilenamesptr);
+  encseq->headerptr.lengthofdbfilenamesptr = NULL;
+  gt_free(encseq->headerptr.firstfilename);
+  encseq->headerptr.firstfilename = NULL;
+  gt_free(encseq->headerptr.specialcharinfoptr);
+  encseq->headerptr.specialcharinfoptr = NULL;
+  gt_free(encseq->headerptr.minseqlenptr);
+  encseq->headerptr.minseqlenptr = NULL;
+  gt_free(encseq->headerptr.maxseqlenptr);
+  encseq->headerptr.maxseqlenptr = NULL;
   gt_fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
@@ -1070,19 +1097,19 @@ static int fillencseqmapspecstartptr(GtEncseq *encseq,
   }
   if (!haserr)
   {
-    encseq->totallength = *encseq->totallengthptr;
+    encseq->totallength = *encseq->headerptr.totallengthptr;
     encseq->logicaltotallength = encseq->totallength;
-    encseq->numofdbsequences = *encseq->numofdbsequencesptr;
+    encseq->numofdbsequences = *encseq->headerptr.numofdbsequencesptr;
     encseq->logicalnumofdbsequences = encseq->numofdbsequences;
-    encseq->numofdbfiles = *encseq->numofdbfilesptr;
-    encseq->lengthofdbfilenames = *encseq->lengthofdbfilenamesptr;
-    encseq->specialcharinfo = *encseq->specialcharinfoptr;
-    encseq->minseqlen = *encseq->minseqlenptr;
-    encseq->maxseqlen = *encseq->maxseqlenptr;
-    encseq->version = *encseq->versionptr;
-    encseq->is64bit = *encseq->is64bitptr;
+    encseq->numofdbfiles = *encseq->headerptr.numofdbfilesptr;
+    encseq->lengthofdbfilenames = *encseq->headerptr.lengthofdbfilenamesptr;
+    encseq->specialcharinfo = *encseq->headerptr.specialcharinfoptr;
+    encseq->minseqlen = *encseq->headerptr.minseqlenptr;
+    encseq->maxseqlen = *encseq->headerptr.maxseqlenptr;
+    encseq->version = *encseq->headerptr.versionptr;
+    encseq->is64bit = *encseq->headerptr.is64bitptr;
     encseq->filenametab = gt_str_array_new();
-    nextstart = encseq->firstfilename;
+    nextstart = encseq->headerptr.firstfilename;
     for (idx = 0; idx < encseq->numofdbfiles; idx++)
     {
       gt_str_array_add_cstr(encseq->filenametab,nextstart);
@@ -3389,14 +3416,14 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->filenametab = NULL;
   encseq->mappedptr = NULL;
   encseq->ssptabmappedptr = NULL;
-  encseq->satcharptr = NULL;
-  encseq->numofdbsequencesptr = NULL;
-  encseq->numofdbfilesptr = NULL;
-  encseq->lengthofdbfilenamesptr = NULL;
-  encseq->firstfilename = NULL;
-  encseq->specialcharinfoptr = NULL;
-  encseq->minseqlenptr = NULL;
-  encseq->maxseqlenptr = NULL;
+  encseq->headerptr.satcharptr = NULL;
+  encseq->headerptr.numofdbsequencesptr = NULL;
+  encseq->headerptr.numofdbfilesptr = NULL;
+  encseq->headerptr.lengthofdbfilenamesptr = NULL;
+  encseq->headerptr.firstfilename = NULL;
+  encseq->headerptr.specialcharinfoptr = NULL;
+  encseq->headerptr.minseqlenptr = NULL;
+  encseq->headerptr.maxseqlenptr = NULL;
   encseq->reference_count = 0;
   encseq->refcount_lock = gt_mutex_new();
   encseq->destab = NULL;
