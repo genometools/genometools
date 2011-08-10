@@ -1516,6 +1516,9 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
                                      unsigned long depth)
 {
   bsr->mkvauxstack.nextfreeGtMKVstack = 0;
+#ifndef NDEBUG
+  gt_suffixsortspace_checkorder(bsr->sssp,0,width);
+#endif
   subsort_bentleysedgewick(bsr, 0, width, depth);
   while (bsr->mkvauxstack.nextfreeGtMKVstack > 0)
   {

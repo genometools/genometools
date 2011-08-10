@@ -65,6 +65,10 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
                                   unsigned long subbucketleft,
                                   unsigned long width);
 
+void gt_suffixsortspace_checkorder(const GtSuffixsortspace *sssp,
+                                   unsigned long subbucketleft,
+                                   unsigned long width);
+
 unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
                                            unsigned long idx);
 

@@ -246,6 +246,26 @@ void gt_suffixsortspace_showrange(const GtSuffixsortspace *sssp,
   }
 }
 
+void gt_suffixsortspace_checkorder(const GtSuffixsortspace *sssp,
+                                   unsigned long subbucketleft,
+                                   unsigned long width)
+{
+  unsigned long idx, prevpos, currentpos;
+
+  gt_assert(width > 0);
+  prevpos = gt_suffixsortspace_getdirect(sssp,
+                                         sssp->bucketleftidx+subbucketleft - 
+                                         sssp->partoffset);
+  for (idx=sssp->bucketleftidx+subbucketleft - sssp->partoffset + 1;
+       idx<sssp->bucketleftidx+subbucketleft + width - sssp->partoffset;
+       idx++)
+  {
+    currentpos = gt_suffixsortspace_getdirect(sssp,idx);
+    gt_assert(prevpos > currentpos);
+    prevpos = currentpos;
+  }
+}
+
 GtSuffixsortspace_exportptr *gt_suffixsortspace_exportptr(
                                   unsigned long subbucketleft,
                                   GtSuffixsortspace *sssp)
