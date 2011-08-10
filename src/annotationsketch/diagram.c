@@ -42,7 +42,7 @@
    undefined pointer -- never dereference! */
 #define GT_UNDEF_REPR               (void*)~0
 /* used to separate a filename from the type in a track name */
-#define FILENAME_TYPE_SEPARATOR  '|'
+#define GT_FILENAME_TYPE_SEPARATOR  '|'
 
 struct GtDiagram {
   /* GtBlock lists indexed by track keys */
@@ -652,7 +652,7 @@ static void default_track_selector(GtBlock *block, GtStr *result,
   basename = gt_basename(gt_genome_node_get_filename(top));
   gt_str_append_cstr(result, basename);
   gt_free(basename);
-  gt_str_append_char(result, FILENAME_TYPE_SEPARATOR);
+  gt_str_append_char(result, GT_FILENAME_TYPE_SEPARATOR);
   gt_str_append_cstr(result, gt_block_get_type(block));
 }
 
