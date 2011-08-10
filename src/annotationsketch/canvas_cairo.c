@@ -263,10 +263,11 @@ int gt_canvas_cairo_visit_block(GtCanvas *canvas, GtBlock *block,
                        &stroke_width, NULL, err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
-  if (gt_style_get_color(canvas->pvt->sty,
-                         btype, "stroke", &strokecolor,
-                         gt_block_get_top_level_feature(block),
-                         err) == GT_STYLE_QUERY_ERROR) {
+  if (gt_style_get_color_with_track(canvas->pvt->sty,
+                                 btype, "stroke", &strokecolor,
+                                 gt_block_get_top_level_feature(block),
+                                 gt_track_get_title(canvas->pvt->current_track),
+                                 err) == GT_STYLE_QUERY_ERROR) {
     return -1;
   }
 
