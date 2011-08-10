@@ -164,6 +164,21 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
 
 const GtTwobitencoding *gt_encseq_twobitencoding_export(const GtEncseq *encseq);
 
+/* The following function saves an encoded sequence characterized
+   by the given parameters into the index of the given name. Only sequence
+   collections of type eqlength are supported. The other parameters must
+   be consistent with this. */
+int gt_encseq_flushownencseq2file(const char *indexname,
+                                  unsigned long totallength,
+                                  unsigned long lengthofsinglesequence,
+                                  GtTwobitencoding *twobitencoding,
+                                  unsigned long numofsequences,
+                                  unsigned long numoffiles,
+                                  const GtFilelengthvalues *filelengthtab,
+                                  const GtStrArray *filenametab,
+                                  const unsigned long *characterdistribution,
+                                  GtError *err);
+
 /* The following type is used for computing stoppositions when
    the twobitencoding is used */
 
@@ -466,6 +481,12 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
                                 unsigned long multicharcmptrials,
                                 bool withseqnumcheck,
                                 GtError *err);
+
+/* The following checks if the function to write an own encoded
+   sequence to file works correctly. Requires index with
+    sat = GT_ACCESS_TYPE_EQUALLENGTH. */
+
+int gt_encseq_check_ownencseq2file(const char *indexname, GtError *err);
 
 /* the following function returns a count value */
 unsigned long countgt_encseq_compare_viatwobitencoding_get(void);

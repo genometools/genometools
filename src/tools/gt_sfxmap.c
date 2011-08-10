@@ -58,7 +58,8 @@ typedef struct
        enumlcpitvtreeBU,
        diffcovercheck,
        wholeleafcheck,
-       spmitv;
+       spmitv,
+       ownencseq2file;
   unsigned long delspranges;
   GtStr *esaindexname,
         *pckindexname;
@@ -152,7 +153,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
          *optionsortmaxdepth, *optionalgbounds, *optiondiffcov,
          *optionwholeleafcheck,
          *optionenumlcpitvs, *optionenumlcpitvtree, *optionenumlcpitvtreeBU,
-         *optionscanesa, *optionspmitv;
+         *optionscanesa, *optionspmitv, *optionownencseq2file;
 
   gt_assert(arguments != NULL);
   op = gt_option_parser_new("[options]",
@@ -291,6 +292,12 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                     "with whole leaves",
                                     &arguments->spmitv,false);
   gt_option_parser_add_option(op, optionspmitv);
+
+  optionownencseq2file = gt_option_new_bool("ownencseq2file",
+                                            "write own encseq to file",
+                                            &arguments->ownencseq2file,false);
+  gt_option_parser_add_option(op, optionownencseq2file);
+  gt_option_imply(optionownencseq2file, optionesaindex);
 
   optionverbose = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, optionverbose);
@@ -1110,6 +1117,14 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   if (!haserr && arguments->spmitv)
   {
     if (gt_process_spmitv(gt_str_get(arguments->esaindexname),logger,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && arguments->ownencseq2file)
+  {
+    if (gt_encseq_check_ownencseq2file(gt_str_get(arguments->esaindexname),
+                                       err) != 0)
     {
       haserr = true;
     }

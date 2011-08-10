@@ -180,6 +180,8 @@ Test do
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dir rev -dna -db u8.reads"
   run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa u8.reads", \
            :maxtime => 200
+  run_test "#{$bin}/gt dev sfxmap -ownencseq2file -esa u8.reads"
+  run "cmp u8.reads.esq u8.reads2.esq"
 end
 
 all_fastafiles.each do |filename|

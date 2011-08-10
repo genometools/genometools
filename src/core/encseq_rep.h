@@ -92,6 +92,8 @@ typedef struct
                 *maxseqlenptr;
   GtSpecialcharinfo *specialcharinfoptr;
   char *firstfilename;
+  GtFilelengthvalues *filelengthtab;
+  unsigned long *characterdistribution;
 } GtEncseqHeaderPtr;
 
 struct GtEncseq
@@ -132,11 +134,9 @@ struct GtEncseq
   bool(*issinglepositionseparator)(const GtEncseq *,unsigned long);
   const char *issinglepositionseparatorname;
 
-  unsigned long *characterdistribution;
   unsigned int leastprobablecharacter;
   GtSpecialcharinfo specialcharinfo; /* information about specialcharacters */
   Definedunsignedlong equallength;
-  GtFilelengthvalues *filelengthtab;  /* table of length of files */
   GtStrArray *filenametab;    /* table of filenames */
 
   char *destab;
