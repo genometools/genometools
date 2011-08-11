@@ -1101,16 +1101,16 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
                                           GtAlphabet *alpha,
                                           GtLogger *logger);
 
-int gt_encseq_flushownencseq2file(const char *indexname,
-                                  unsigned long totallength,
-                                  unsigned long lengthofsinglesequence,
-                                  GtTwobitencoding *twobitencoding,
-                                  unsigned long numofsequences,
-                                  unsigned long numoffiles,
-                                  const GtFilelengthvalues *filelengthtab,
-                                  const GtStrArray *filenametab,
-                                  const unsigned long *characterdistribution,
-                                  GtError *err)
+int gt_encseq_write_twobitencoding_to_file(const char *indexname,
+                                     unsigned long totallength,
+                                     unsigned long lengthofsinglesequence,
+                                     GtTwobitencoding *twobitencoding,
+                                     unsigned long numofsequences,
+                                     unsigned long numoffiles,
+                                     const GtFilelengthvalues *filelengthtab,
+                                     const GtStrArray *filenametab,
+                                     const unsigned long *characterdistribution,
+                                     GtError *err)
 {
   FILE *fp;
   bool haserr = false;
@@ -7092,7 +7092,8 @@ int gt_encseq_check_consistency(const GtEncseq *encseq,
   return testfullscan(filenametab,encseq,readmode,err);
 }
 
-int gt_encseq_check_ownencseq2file(const char *indexname, GtError *err)
+int gt_encseq_check_external_twobitencoding_to_file(const char *indexname,
+                                                    GtError *err)
 {
   GtEncseqLoader *el;
   GtEncseq *encseq;
@@ -7114,16 +7115,16 @@ int gt_encseq_check_ownencseq2file(const char *indexname, GtError *err)
     indexnamecopy[indexname_len+1] = '\0';
     gt_assert(encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH &&
               encseq->equallength.defined);
-    if (gt_encseq_flushownencseq2file(indexnamecopy,
-                                      gt_encseq_total_length(encseq),
-                                      encseq->equallength.valueunsignedlong,
-                                      encseq->twobitencoding,
-                                      gt_encseq_num_of_sequences(encseq),
-                                      gt_encseq_num_of_files(encseq),
-                                      encseq->headerptr.filelengthtab,
-                                      encseq->filenametab,
-                                      encseq->headerptr.characterdistribution,
-                                      err) != 0)
+    if (gt_encseq_write_twobitencoding_to_file(indexnamecopy,
+                                        gt_encseq_total_length(encseq),
+                                        encseq->equallength.valueunsignedlong,
+                                        encseq->twobitencoding,
+                                        gt_encseq_num_of_sequences(encseq),
+                                        gt_encseq_num_of_files(encseq),
+                                        encseq->headerptr.filelengthtab,
+                                        encseq->filenametab,
+                                        encseq->headerptr.characterdistribution,
+                                        err) != 0)
     {
       haserr = true;
     }

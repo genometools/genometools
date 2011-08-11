@@ -1123,8 +1123,8 @@ static int gt_sfxmap_runner(GT_UNUSED int argc,
   }
   if (!haserr && arguments->ownencseq2file)
   {
-    if (gt_encseq_check_ownencseq2file(gt_str_get(arguments->esaindexname),
-                                       err) != 0)
+    if (gt_encseq_check_external_twobitencoding_to_file(
+                                 gt_str_get(arguments->esaindexname), err) != 0)
     {
       haserr = true;
     }
