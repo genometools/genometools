@@ -32,18 +32,18 @@ typedef struct
   unsigned long mapoffset, mapend;
 } GtMappedrange;
 
-void gt_bcktab_mapped_lbrange_get(GtMappedrange *range,
-                                  size_t sizeofbasetype,
-                                  unsigned long pagesize,
-                                  GtCodetype mincode,
-                                  GtCodetype maxcode);
+void gt_mapped_lbrange_get(GtMappedrange *range,
+                           size_t sizeofbasetype,
+                           unsigned long pagesize,
+                           unsigned long mincode,
+                           unsigned long maxcode);
 
-unsigned int gt_bcktab_mapped_csrange_get(GtMappedrange *range,
-                                          size_t sizeofbasetype,
-                                          unsigned long numofallcodes,
-                                          unsigned int numofchars,
-                                          unsigned long pagesize,
-                                          GtCodetype mincode,
-                                          GtCodetype maxcode);
+unsigned int gt_mapped_csrange_get(GtMappedrange *range,
+                                   size_t sizeofbasetype,
+                                   unsigned long numofallcodes,
+                                   unsigned int numofchars,
+                                   unsigned long pagesize,
+                                   GtCodetype mincode,
+                                   GtCodetype maxcode);
 
 #endif

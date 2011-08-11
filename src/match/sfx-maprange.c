@@ -1,7 +1,7 @@
 #include "core/intbits.h"
 #include "sfx-maprange.h"
 
-static unsigned long gt_multipleofpagesize(GtCodetype code,
+static unsigned long gt_multipleofpagesize(unsigned long code,
                                            bool smaller,
                                            size_t sizeofbasetype,
                                            unsigned long pagesize)
@@ -17,24 +17,24 @@ static unsigned long gt_multipleofpagesize(GtCodetype code,
   return ((code * sizeofbasetype)/pagesize) * pagesize + pagesize;
 }
 
-void gt_bcktab_mapped_lbrange_get(GtMappedrange *range,
-                                  size_t sizeofbasetype,
-                                  unsigned long pagesize,
-                                  GtCodetype mincode,
-                                  GtCodetype maxcode)
+void gt_mapped_lbrange_get(GtMappedrange *range,
+                           size_t sizeofbasetype,
+                           unsigned long pagesize,
+                           unsigned long mincode,
+                           unsigned long maxcode)
 {
   range->mapoffset = gt_multipleofpagesize(mincode,true,sizeofbasetype,
                                            pagesize);
   range->mapend = gt_multipleofpagesize(maxcode,false,sizeofbasetype,pagesize);
 }
 
-unsigned int gt_bcktab_mapped_csrange_get(GtMappedrange *range,
-                                          size_t sizeofbasetype,
-                                          unsigned long numofallcodes,
-                                          unsigned int numofchars,
-                                          unsigned long pagesize,
-                                          GtCodetype mincode,
-                                          GtCodetype maxcode)
+unsigned int gt_mapped_csrange_get(GtMappedrange *range,
+                                   size_t sizeofbasetype,
+                                   unsigned long numofallcodes,
+                                   unsigned int numofchars,
+                                   unsigned long pagesize,
+                                   GtCodetype mincode,
+                                   GtCodetype maxcode)
 {
   GtCodetype firstcode, lastcode;
   unsigned int padoffset = 0;
