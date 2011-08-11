@@ -1742,7 +1742,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 "%u-mers starting at position 0 using a "
                                 "table of size %lu",
                                 sfi->prefixlength + additionalprefixchars,
-                                sizeofprefixmarks);
+                                (unsigned long) sizeofprefixmarks);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
 #ifdef _LP64
