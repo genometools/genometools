@@ -185,7 +185,7 @@ static GtOptionParser* gt_sfxmap_option_parser_new(void *tool_arguments)
                                 "algorithms to sort buckets of suffixes\n"
                                 "first number: maxbound for insertion sort\n"
                                 "second number: maxbound for blindtrie sort\n"
-                                "third number: maxbound for counting sort\n",
+                                "third number: maxbound for counting sort",
                                 arguments->algbounds);
   gt_option_parser_add_option(op, optionalgbounds);
 

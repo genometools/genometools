@@ -357,7 +357,7 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                  "algorithms to sort buckets of suffixes\n"
                                  "first number: maxbound for insertion sort\n"
                                  "second number: maxbound for blindtrie sort\n"
-                                 "third number: maxbound for counting sort\n",
+                                 "third number: maxbound for counting sort",
                                  idxo->algbounds);
   gt_option_is_development_option(idxo->optionalgbounds);
   gt_option_parser_add_option(op, idxo->optionalgbounds);
