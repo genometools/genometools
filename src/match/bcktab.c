@@ -176,7 +176,7 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                         maxcode);
   totalsizeofcodes = (bcktab->numofallcodes+1) * sizeofbasetype;
   gt_logger_log(logger,
-             "part %u: mapped leftborder from %lu to %lu (%.2f of all)",
+             "part %u: mapped leftborder from %lu to %lu (%.1f of all)",
                part,lbrange.mapoffset,lbrange.mapend,
                  (lbrange.mapend - lbrange.mapoffset + 1 >= totalsizeofcodes)
                    ? 100.0
