@@ -578,10 +578,6 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U)
   {
     gt_error_check(err);
-    if (sfi->mappedmarkprefixbuckets != NULL)
-    {
-      gt_fa_xmunmap(sfi->mappedmarkprefixbuckets);
-    }
     gt_assert (sfi->bcktabfilename != NULL);
     if (gt_bcktab_flush_remaining(sfi->bcktab,
                                   gt_str_get(sfi->bcktabfilename),err) != 0)
@@ -604,6 +600,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   if (sfi->mappedmarkprefixbuckets != NULL)
   {
     gt_fa_xmunmap(sfi->mappedmarkprefixbuckets);
+    gt_free(sfi->markprefixbuckets);
   } else
   {
     gt_free(sfi->markprefixbuckets);
@@ -1656,14 +1653,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->markprefixbuckets2 = NULL;
     sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
-    if ((numofparts > 1U || maximumspace > 0) &&
-        sfi->sfxstrategy.spmopt_minlength > 0)
-    {
-      sfi->mappedmarkprefixbucketsfilename = gt_str_new();
-    } else
-    {
-      sfi->mappedmarkprefixbucketsfilename = NULL;
-    }
     if (indexname != NULL)
     {
       sfi->bcktabfilename = gt_str_new_cstr(indexname);
@@ -1699,6 +1688,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       defaultsfxstrategy(&sfi->sfxstrategy,
                          gt_encseq_bitwise_cmp_ok(encseq) ? false : true);
+    }
+    if ((numofparts > 1U || maximumspace > 0) &&
+        sfi->sfxstrategy.spmopt_minlength > 0)
+    {
+      sfi->mappedmarkprefixbucketsfilename = gt_str_new();
+    } else
+    {
+      sfi->mappedmarkprefixbucketsfilename = NULL;
     }
     gt_logger_log(logger,"maxinsertionsort=%lu",
                   sfi->sfxstrategy.maxinsertionsort);
@@ -2090,11 +2087,14 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
                                           unsigned int part,
                                           unsigned long minindex,
                                           unsigned long maxindex,
-                                          unsigned long intsforbits,
                                           GtLogger *logger)
 {
   const size_t sizeofbasetype = sizeof (GtBitsequence);
+  unsigned long idx;
   GtMappedrange lbrange;
+  size_t sizeofprefixmarks
+    = sizeof (*sfi->markprefixbuckets) *
+      GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes);
 
   if (sfi->mappedmarkprefixbuckets != NULL)
   {
@@ -2103,12 +2103,13 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
   gt_mapped_lbrange_get(&lbrange, sizeofbasetype, sfi->pagesize,minindex,
                         maxindex);
   gt_logger_log(logger,
-             "part %u: mapped prefixbuckets from %lu to %lu (%.2f of all)",
+             "part %u: mapped prefixbuckets from %lu to %lu (%.1f%% of all)",
                part,lbrange.mapoffset,lbrange.mapend,
-                 (lbrange.mapend - lbrange.mapoffset + 1 >= intsforbits)
+                 (lbrange.mapend - lbrange.mapoffset + 1
+                  >= (unsigned long) sizeofprefixmarks)
                    ? 100.0
                    : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
-                             intsforbits);
+                             sizeofprefixmarks);
   gt_assert(lbrange.mapoffset <= lbrange.mapend);
   gt_assert(lbrange.mapoffset <= minindex * sizeofbasetype);
   gt_assert(maxindex * sizeofbasetype <= lbrange.mapend);
@@ -2120,6 +2121,10 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
   sfi->markprefixbuckets2
       = ((GtBitsequence *) sfi->mappedmarkprefixbuckets) -
         (lbrange.mapoffset / sizeof (GtBitsequence));
+  for (idx = minindex; idx <= maxindex; idx++)
+  {
+    gt_assert(sfi->markprefixbuckets2[idx] == sfi->markprefixbuckets[idx]);
+  }
 }
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
@@ -2138,9 +2143,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     = GT_BCKTAB_CODE_TO_PREFIX_INDEX(sfi->currentmincode);
   sfi->currentprefixcodemaxindex
     = GT_BCKTAB_CODE_TO_PREFIX_INDEX(sfi->currentmaxcode);
-  printf("prefixcodeindexrange=[%lu,%lu]\n",
-          sfi->currentprefixcodeminindex,
-          sfi->currentprefixcodemaxindex);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   if (sfi->sfxprogress != NULL)
   {
@@ -2163,6 +2165,14 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                   sfi->currentmincode,
                                   sfi->currentmaxcode,
                                   sfi->logger);
+    if (sfi->mappedmarkprefixbucketsfilename != NULL)
+    {
+      gt_prefixbuckets_assignboundsforpart(sfi,
+                                           sfi->part,
+                                           sfi->currentprefixcodeminindex,
+                                           sfi->currentprefixcodemaxindex,
+                                           sfi->logger);
+    }
   }
   gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                     stpgetcurrentsuftaboffset(sfi->part,

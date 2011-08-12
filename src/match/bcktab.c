@@ -215,7 +215,7 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
     totalsizeofcodes = bcktab->numofspecialcodes * sizeofbasetype;
     gt_logger_log(logger,
                   "part %u: mapped countspecialcodes from %lu to %lu "
-                  "(%.2f of all)",part,
+                  "(%.1f%% of all)",part,
                   csrange.mapoffset,csrange.mapend,
                   (csrange.mapend - csrange.mapoffset + 1 >= totalsizeofcodes)
                     ? 100.0
