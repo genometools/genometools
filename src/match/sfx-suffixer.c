@@ -117,7 +117,7 @@ struct Sfxiterator
                 spmopt_numofallsuffixcodes,
                 pagesize;
   void *mappedmarkprefixbuckets;
-  char *mappedmarkprefixbucketsfile;
+  GtStr *mappedmarkprefixbucketsfilename;
 };
 
 #ifdef SKDEBUG
@@ -529,6 +529,29 @@ static void sfx_derivespecialcodesonthefly(Sfxiterator *sfi)
   }
 }
 
+static int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,
+                                         GtError *err)
+{
+  bool haserr = false;
+
+  gt_logger_log(logger,"remove \"%s\"",filename);
+  if (unlink(filename) != 0)
+  {
+    if (err != NULL)
+    {
+      gt_error_set(err,"Cannot unlink file \"%s\": %s",
+                      filename,strerror(errno));
+      haserr = true;
+    } else
+    {
+      fprintf(stderr,"Cannot unlink file \"%s\": %s",
+                      filename,strerror(errno));
+      exit(EXIT_FAILURE);
+    }
+  }
+  return haserr ? -1 : 0;
+}
+
 int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
 {
   bool haserr = false;
@@ -555,6 +578,10 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U)
   {
     gt_error_check(err);
+    if (sfi->mappedmarkprefixbuckets != NULL)
+    {
+      gt_fa_xmunmap(sfi->mappedmarkprefixbuckets);
+    }
     gt_assert (sfi->bcktabfilename != NULL);
     if (gt_bcktab_flush_remaining(sfi->bcktab,
                                   gt_str_get(sfi->bcktabfilename),err) != 0)
@@ -563,33 +590,37 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     }
     if (sfi->usebcktmpfile)
     {
-      gt_logger_log(sfi->logger,"remove \"%s\"",
-                      gt_str_get(sfi->bcktabfilename));
-      if (unlink(gt_str_get(sfi->bcktabfilename)) != 0)
+      if (gt_unlink_possibly_with_error(gt_str_get(sfi->bcktabfilename),
+                                        sfi->logger,err) != 0)
       {
-        if (err != NULL)
-        {
-          gt_error_set(err,"Cannot unlink file \"%s\": %s",
-                          gt_str_get(sfi->bcktabfilename),
-                          strerror(errno));
-          haserr = true;
-        } else
-        {
-          fprintf(stderr,"Cannot unlink file \"%s\": %s",
-                          gt_str_get(sfi->bcktabfilename),
-                          strerror(errno));
-          exit(EXIT_FAILURE);
-        }
+        haserr = true;
       }
     }
   }
   gt_bcktab_delete(sfi->bcktab);
+  gt_str_delete(sfi->bcktabfilename);
   gt_freesuftabparts(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
-  gt_free(sfi->markprefixbuckets);
+  if (sfi->mappedmarkprefixbuckets != NULL)
+  {
+    gt_fa_xmunmap(sfi->mappedmarkprefixbuckets);
+  } else
+  {
+    gt_free(sfi->markprefixbuckets);
+  }
+  sfi->markprefixbuckets = NULL;
   gt_free(sfi->marksuffixbuckets);
+  if (sfi->mappedmarkprefixbucketsfilename != NULL)
+  {
+    if (gt_unlink_possibly_with_error(
+            gt_str_get(sfi->mappedmarkprefixbucketsfilename),
+            sfi->logger,err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  gt_str_delete(sfi->mappedmarkprefixbucketsfilename);
   gt_differencecover_delete(sfi->dcov);
-  gt_str_delete(sfi->bcktabfilename);
   gt_free(sfi);
   return haserr ? -1 : 0;
 }
@@ -1625,6 +1656,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->markprefixbuckets2 = NULL;
     sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
+    if (numofparts > 1U || maximumspace > 0 &&
+        sfi->sfxstrategy.spmopt_minlength > 0)
+    {
+      sfi->mappedmarkprefixbucketsfilename = gt_str_new();
+    } else
+    {
+      sfi->mappedmarkprefixbucketsfilename = NULL;
+    }
     if (indexname != NULL)
     {
       sfi->bcktabfilename = gt_str_new_cstr(indexname);
@@ -1725,7 +1764,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       const unsigned int additionalprefixchars = 3U;
-      size_t sizeofprefixmarks;
+      size_t sizeofprefixmarks, intsforbits;
 #ifdef _LP64
       const unsigned int suffixchars = sfi->prefixlength+2;
       size_t sizeofsuffixmarks;
@@ -1750,9 +1789,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                        additionalprefixchars);
       GT_INITBITTAB(sfi->markprefixbuckets,
                     sfi->spmopt_numofallprefixcodes);
-      sizeofprefixmarks
-        = sizeof (*sfi->markprefixbuckets) *
-          GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes);
+      intsforbits = GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes);
+      sizeofprefixmarks = sizeof (*sfi->markprefixbuckets) * intsforbits;
       estimatedspace += sizeofprefixmarks;
       gt_logger_log(sfi->logger,"for all sequences, keep track of "
                                 "%u-mers starting at position 0 using a "
@@ -1784,6 +1822,24 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                     sfi,
                                     NULL,
                                     NULL);
+      if (sfi->mappedmarkprefixbucketsfilename != NULL)
+      {
+        FILE *outfp_markprefixbuckets
+          = gt_xtmpfp(sfi->mappedmarkprefixbucketsfilename);
+        gt_logger_log(sfi->logger,"write markprefixbuckets to file %s",
+                      gt_str_get(sfi->mappedmarkprefixbucketsfilename));
+        if (fwrite(sfi->markprefixbuckets,sizeof (*sfi->markprefixbuckets),
+                   intsforbits,outfp_markprefixbuckets) != intsforbits)
+        {
+          gt_error_set(err,"cannot write %lu items of size %u: "
+                           "errormsg=\"%s\"",
+                         (unsigned long) intsforbits,
+                         (unsigned int) sizeof (*sfi->markprefixbuckets),
+                         strerror(errno));
+          haserr = true;
+        }
+        gt_fa_fclose(outfp_markprefixbuckets);
+      }
     }
   }
   SHOWCURRENTSPACE;
@@ -2058,7 +2114,7 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
   gt_assert(maxindex * sizeofbasetype <= lbrange.mapend);
   gt_assert(lbrange.mapoffset % sfi->pagesize == 0);
   sfi->mappedmarkprefixbuckets
-    = gt_fa_xmmap_read_range(sfi->mappedmarkprefixbucketsfile,
+    = gt_fa_xmmap_read_range(gt_str_get(sfi->mappedmarkprefixbucketsfilename),
                               (size_t) (lbrange.mapend - lbrange.mapoffset + 1),
                               (size_t) lbrange.mapoffset);
   sfi->markprefixbuckets2
@@ -2066,7 +2122,7 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
         (lbrange.mapoffset / sizeof (GtBitsequence));
 }
 
-static void preparethispart(Sfxiterator *sfi)
+static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
   unsigned long partwidth;
   GtBucketspec2 *bucketspec2 = NULL;
@@ -2336,7 +2392,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
 {
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    preparethispart(sfi);
+    gt_sfxiterator_preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
     if (specialsuffixes != NULL)
     {
