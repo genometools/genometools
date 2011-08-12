@@ -1656,7 +1656,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->markprefixbuckets2 = NULL;
     sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
-    if (numofparts > 1U || maximumspace > 0 &&
+    if ((numofparts > 1U || maximumspace > 0) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       sfi->mappedmarkprefixbucketsfilename = gt_str_new();
