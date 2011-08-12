@@ -110,7 +110,6 @@ struct Sfxiterator
                spmopt_kmerscancodeshift2prefixcode,
                spmopt_bcktabcodeshift2prefixcodeindex;
   GtBitsequence *markprefixbuckets,
-                *markprefixbuckets2,
                 *marksuffixbuckets;
   GtCodetype spmopt_kmerscancodesuffixmask;
   unsigned long spmopt_numofallprefixcodes,
@@ -366,19 +365,6 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 
           GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)) ? true : false;
 }
-static bool gt_checksuffixprefixbuckets2(const Sfxiterator *sfi,
-                                        GtCodetype scancode)
-{
-  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
-  GtCodetype suffixcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
-
-  gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
-  gt_assert(suffixcode < sfi->spmopt_numofallsuffixcodes);
-  /* XXX access to maxprefixbuckets */
-  return (GT_ISIBITSET(sfi->markprefixbuckets2,prefixcode) &&
-
-          GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)) ? true : false;
-}
 #else
 static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
                                         GtCodetype scancode)
@@ -398,7 +384,7 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-  if (sfi->markprefixbuckets2 == NULL)
+  if (sfi->markprefixbuckets == NULL)
   {
     if (scancode >= sfi->currentmincode && scancode <= sfi->currentmaxcode)
     {
@@ -415,7 +401,7 @@ static void gt_insertkmerwithoutspecial1(void *processinfo,
 
     if (bcktabcode >= sfi->currentmincode &&
         bcktabcode <= sfi->currentmaxcode &&
-        (firstinrange || gt_checksuffixprefixbuckets2(sfi,scancode)))
+        (firstinrange || gt_checksuffixprefixbuckets(sfi,scancode)))
     {
       unsigned long stidx;
 
@@ -614,7 +600,6 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   if (sfi->mappedmarkprefixbuckets != NULL)
   {
     gt_fa_xmunmap(sfi->mappedmarkprefixbuckets);
-    gt_free(sfi->markprefixbuckets);
   } else
   {
     gt_free(sfi->markprefixbuckets);
@@ -1664,7 +1649,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->spmopt_kmerscancodesuffixmask = 0;
     sfi->dcov = NULL;
     sfi->markprefixbuckets = NULL;
-    sfi->markprefixbuckets2 = NULL;
     sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
     if (indexname != NULL)
@@ -1963,9 +1947,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
           haserr = true;
         }
         gt_fa_fclose(outfp_markprefixbuckets);
-        /*gt_free(sfi->markprefixbuckets);
+        gt_free(sfi->markprefixbuckets);
         sfi->markprefixbuckets = NULL;
-        estimatedspace -= sizeofprefixmarks;*/
+        estimatedspace -= sizeofprefixmarks;
       }
     }
 #ifdef SKDEBUG
@@ -2112,7 +2096,6 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
                                           GtLogger *logger)
 {
   const size_t sizeofbasetype = sizeof (GtBitsequence);
-  unsigned long idx;
   GtMappedrange lbrange;
   size_t sizeofprefixmarks
     = sizeof (*sfi->markprefixbuckets) *
@@ -2140,13 +2123,9 @@ void gt_prefixbuckets_assignboundsforpart(Sfxiterator *sfi,
     = gt_fa_xmmap_read_range(gt_str_get(sfi->mappedmarkprefixbucketsfilename),
                               (size_t) (lbrange.mapend - lbrange.mapoffset + 1),
                               (size_t) lbrange.mapoffset);
-  sfi->markprefixbuckets2
+  sfi->markprefixbuckets
       = ((GtBitsequence *) sfi->mappedmarkprefixbuckets) -
         (lbrange.mapoffset / sizeof (GtBitsequence));
-  for (idx = minindex; idx <= maxindex; idx++)
-  {
-    gt_assert(sfi->markprefixbuckets2[idx] == sfi->markprefixbuckets[idx]);
-  }
 }
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
