@@ -1560,6 +1560,50 @@ static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
 #endif
 }
 
+static size_t gt_sizeforbittable(unsigned int numofchars,
+                                 unsigned int prefixlength)
+{
+  unsigned long numofcodes;
+
+  numofcodes = gt_power_for_small_exponents(numofchars,prefixlength);
+  return sizeof (GtBitsequence) * GT_NUMOFINTSFORBITS(numofcodes);
+}
+
+static void gt_determineaddionalsuffixprefixchars(
+                                   unsigned int *additionalprefixchars,
+                                   unsigned int *additionalsuffixchars,
+                                   unsigned int numofchars,
+                                   unsigned int prefixlength,
+                                   size_t estimatedspace,
+                                   unsigned long maximumspace)
+{
+  unsigned int prefixchars, suffixchars;
+  size_t sizeofprefixmarks, sizeofsuffixmarks;
+
+  for (prefixchars = 1U; /* Nothing */; prefixchars++)
+  {
+    sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
+    if (estimatedspace + sizeofprefixmarks > (size_t) maximumspace)
+    {
+      prefixchars--;
+      break;
+    }
+  }
+  sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
+  for (suffixchars = 1U; /* Nothing */; suffixchars++)
+  {
+    sizeofsuffixmarks = gt_sizeforbittable(numofchars,prefixlength+suffixchars);
+    if (estimatedspace + sizeofprefixmarks + sizeofsuffixmarks
+        > (size_t) maximumspace)
+    {
+      suffixchars--;
+      break;
+    }
+  }
+  *additionalprefixchars = prefixchars;
+  *additionalsuffixchars = suffixchars;
+}
+
 Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -1777,16 +1821,27 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      const unsigned int additionalprefixchars = 3U;
+      unsigned int additionalprefixchars = 3U;
+      unsigned int additionalsuffixchars = 2U;
       size_t sizeofprefixmarks, intsforbits;
 #ifdef _LP64
-      const unsigned int suffixchars = sfi->prefixlength+2;
+      unsigned int suffixchars = sfi->prefixlength+2;
       size_t sizeofsuffixmarks;
 #else
       const unsigned int suffixchars = 0;
 #endif
-      printf("estimated space %.2f\n",GT_MEGABYTES(estimatedspace));
-
+      if (maximumspace > 0)
+      {
+        gt_determineaddionalsuffixprefixchars(&additionalprefixchars,
+                                              &additionalsuffixchars,
+                                              sfi->numofchars,
+                                              prefixlength,
+                                              estimatedspace,
+                                              maximumspace);
+      }
+#ifdef _LP64
+      suffixchars = sfi->prefixlength+additionalsuffixchars;
+#endif
       sfi->spmopt_kmerscansize = sfi->prefixlength + additionalprefixchars +
                                  suffixchars;
       gt_assert(sfi->spmopt_kmerscansize <= (unsigned int) GT_UNITSIN2BITENC);
@@ -1837,6 +1892,11 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                     sfi,
                                     NULL,
                                     NULL);
+      if (maximumspace > 0)
+      {
+        gt_assert(estimatedspace <= (size_t) maximumspace);
+      }
+      printf("estimated space %.2f\n",GT_MEGABYTES(estimatedspace));
     }
   }
   SHOWCURRENTSPACE;
