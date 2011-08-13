@@ -269,13 +269,19 @@ static int detpfxlen(unsigned int *prefixlength,
                      GtError *err)
 {
   bool haserr = false;
-  Sfxstrategy strategy = gt_index_options_sfxstrategy_value(so->idxopts);
+  unsigned int recommendedprefixlength;
+  Sfxstrategy sfxstrategy = gt_index_options_sfxstrategy_value(so->idxopts);
 
+  recommendedprefixlength
+    = gt_recommendedprefixlength(numofchars,
+                                 totallength,
+                                 sfxstrategy.spmopt_minlength > 0
+                                   ? 0.15 : GT_RECOMMENDED_MULTIPLIER_DEFAULT,
+                                 withspecialsuffixes);
   if (gt_index_options_prefixlength_value(so->idxopts)
                                                    == GT_PREFIXLENGTH_AUTOMATIC)
   {
-    *prefixlength = gt_recommendedprefixlength(numofchars,totallength,
-                                               withspecialsuffixes);
+    *prefixlength = recommendedprefixlength;
     gt_logger_log(logger,
                 "automatically determined prefixlength=%u",
                 *prefixlength);
@@ -284,12 +290,13 @@ static int detpfxlen(unsigned int *prefixlength,
     unsigned int maxprefixlen;
 
     *prefixlength = gt_index_options_prefixlength_value(so->idxopts);
-    maxprefixlen = gt_whatisthemaximalprefixlength(numofchars,
-                                                   totallength,
-                                                   strategy.storespecialcodes
-                                                  ? (unsigned int) PREFIXLENBITS
-                                                  : 0,
-                                                  withspecialsuffixes);
+    maxprefixlen
+      = gt_whatisthemaximalprefixlength(numofchars,
+                                        totallength,
+                                        sfxstrategy.storespecialcodes
+                                          ? (unsigned int) PREFIXLENBITS
+                                          : 0,
+                                        withspecialsuffixes);
     if (gt_checkprefixlength(maxprefixlen,*prefixlength,err) != 0)
     {
       haserr = true;
@@ -297,10 +304,7 @@ static int detpfxlen(unsigned int *prefixlength,
     {
       gt_showmaximalprefixlength(logger,
                                  maxprefixlen,
-                                 gt_recommendedprefixlength(numofchars,
-                                                            totallength,
-                                                            withspecialsuffixes)
-                                 );
+                                 recommendedprefixlength);
     }
   }
   return haserr ? -1 : 0;

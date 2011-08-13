@@ -75,7 +75,6 @@ struct Sfxiterator
   Suftabparts *suftabparts;
   Outlcpinfo *outlcpinfoforsample;
   GtBcktab *bcktab;
-  GtCodetype numofallcodes;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
   Differencecover *dcov;
 
@@ -1754,6 +1753,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   }
   if (!haserr)
   {
+    uint64_t sizeofbcktab;
+
     gt_assert(encseq != NULL && sfi != NULL);
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
@@ -1818,11 +1819,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                     NULL,
                                     NULL);
     }
-  }
-  SHOWCURRENTSPACE;
-  if (!haserr)
-  {
-    uint64_t sizeofbcktab;
+    SHOWCURRENTSPACE;
     gt_assert(sfi != NULL);
     sfi->bcktab = gt_bcktab_new(sfi->numofchars,
                                 prefixlength,
@@ -1835,12 +1832,10 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (sfi->bcktab == NULL)
     {
       sfi->leftborder = NULL;
-      sfi->numofallcodes = 0;
       haserr = true;
     } else
     {
       sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
-      sfi->numofallcodes = gt_bcktab_numofallcodes(sfi->bcktab);
       sizeofbcktab
         = gt_bcktab_sizeoftable(sfi->numofchars,prefixlength,
                                 sfi->totallength+1,
@@ -2135,8 +2130,10 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 
   if (sfi->part == 0 && sfi->withprogressbar)
   {
+    gt_assert(sfi->bcktab != NULL);
     gt_progressbar_start(&sfi->bucketiterstep,
-                         (unsigned long long) sfi->numofallcodes);
+                         (unsigned long long)
+                         gt_bcktab_numofallcodes(sfi->bcktab));
   }
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);

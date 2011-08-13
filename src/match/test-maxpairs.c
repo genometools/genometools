@@ -132,7 +132,7 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
                                   GtError *err)
 {
   Substringmatchinfo ssi;
-  unsigned int numofchars;
+  unsigned int numofchars, recommendedprefixlength;
   GtEncseqBuilder *eb;
   bool haserr = false;
 
@@ -149,11 +149,14 @@ static int sarrselfsubstringmatch(const GtUchar *dbseq,
   ssi.processmaxpairs = processmaxpairs;
   ssi.processmaxpairsinfo = processmaxpairsinfo;
   numofchars = gt_alphabet_num_of_chars(alpha);
+  recommendedprefixlength
+    = gt_recommendedprefixlength(numofchars,
+                                 dblen+querylen+1,
+                                 GT_RECOMMENDED_MULTIPLIER_DEFAULT,
+                                 true);
   if (constructsarrandrunmaxpairs(&ssi,
                                   GT_READMODE_FORWARD,
-                                  gt_recommendedprefixlength(numofchars,
-                                                          dblen+querylen+1,
-                                                          true),
+                                  recommendedprefixlength,
                                   1U, /* parts */
                                   0, /* maximumspace */
                                   NULL,

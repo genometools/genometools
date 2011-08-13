@@ -24,6 +24,7 @@
 #include "core/codetype.h"
 #include "core/logger.h"
 #include "bcktab.h"
+#include "sfx-apfxlen.h"
 #include "initbasepower.h"
 
 /*
@@ -37,14 +38,13 @@
 
 /*
   We allow to choose the prefixlength \(l\) in such a way that the size of
-  table bcktab never exceeds the $\texttt{MAXMULTIPLIEROFTOTALLENGTH}\cdot n$,
+  table bcktab never exceeds the
+  $\texttt{GT_MAXMULTIPLIEROFTOTALLENGTH}\cdot n$,
   where \(n\) is the total length of the input sequence.
 */
 
-#define MAXMULTIPLIEROFTOTALLENGTH 4.0
-#define RECOMMENDEDMULTIPLIER      0.25
-
-#define MAXVALUEWITHBITS(BITNUM)    ((1U << (BITNUM)) - 1)
+#define GT_MAXMULTIPLIEROFTOTALLENGTH   4.0
+#define GT_MAXVALUEWITHBITS(BITNUM)     ((1U << (BITNUM)) - 1)
 
 static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
                                              unsigned long maxbytes,
@@ -81,12 +81,13 @@ static unsigned int prefixlengthwithmaxspace(unsigned int numofchars,
 
 unsigned int gt_recommendedprefixlength(unsigned int numofchars,
                                         unsigned long totallength,
+                                        double recommendedmultiplier,
                                         bool withspecialsuffixes)
 {
   unsigned int prefixlength;
 
   prefixlength = prefixlengthwithmaxspace(numofchars,totallength,
-                                          RECOMMENDEDMULTIPLIER,
+                                          recommendedmultiplier,
                                           totallength+1,
                                           withspecialsuffixes);
   if (prefixlength == 0)
@@ -113,7 +114,7 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
   unsigned int maxprefixlen, mbp;
 
   maxprefixlen = prefixlengthwithmaxspace(numofchars,totallength,
-                                          MAXMULTIPLIEROFTOTALLENGTH,
+                                          GT_MAXMULTIPLIEROFTOTALLENGTH,
                                           totallength+1,
                                           withspecialsuffixes);
   mbp = gt_maxbasepower(numofchars);
@@ -125,14 +126,14 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
       = prefixlengthwithmaxspace(numofchars,
                                  (unsigned long)
                                  MAXREMAININGAFTERPREFIXLEN(prefixlenbits),
-                                 RECOMMENDEDMULTIPLIER,
+                                 GT_RECOMMENDED_MULTIPLIER_DEFAULT,
                                  totallength+1,
                                  withspecialsuffixes);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
-    tmplength = MAXVALUEWITHBITS(prefixlenbits);
+    tmplength = GT_MAXVALUEWITHBITS(prefixlenbits);
     if (tmplength > 0 && maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;

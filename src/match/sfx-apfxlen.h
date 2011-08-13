@@ -20,8 +20,11 @@
 
 #include "core/error_api.h"
 
+#define GT_RECOMMENDED_MULTIPLIER_DEFAULT 0.25
+
 unsigned int gt_recommendedprefixlength(unsigned int numofchars,
                                         unsigned long totallength,
+                                        double recommendedmultiplier,
                                         bool withspecialsuffixes);
 
 unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
@@ -30,11 +33,11 @@ unsigned int gt_whatisthemaximalprefixlength(unsigned int numofchars,
                                           bool withspecialsuffixes);
 
 int gt_checkprefixlength(unsigned int maxprefixlen,
-                      unsigned int prefixlength,
-                      GtError *err);
+                         unsigned int prefixlength,
+                         GtError *err);
 
 void gt_showmaximalprefixlength(GtLogger *logger,
-                             unsigned int maxprefixlen,
-                             unsigned int recommended);
+                                unsigned int maxprefixlen,
+                                unsigned int recommended);
 
 #endif

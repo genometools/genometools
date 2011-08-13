@@ -422,14 +422,16 @@ int gt_determinetyrbckpfxlen(unsigned int *prefixlength,
     *prefixlength = callprefixlength->valueunsignedint;
   } else
   {
-    unsigned int recommended = gt_recommendedprefixlength(tyrindex->alphasize,
-                                           (unsigned long) tyrindex->numofmers,
-                                           true);
-    if (recommended > (unsigned int) tyrindex->mersize)
+    unsigned int recommendedprefixlength
+      = gt_recommendedprefixlength(tyrindex->alphasize,
+                                   (unsigned long) tyrindex->numofmers,
+                                   GT_RECOMMENDED_MULTIPLIER_DEFAULT,
+                                   true);
+    if (recommendedprefixlength > (unsigned int) tyrindex->mersize)
     {
-      recommended = (unsigned int) tyrindex->mersize;
+      recommendedprefixlength = (unsigned int) tyrindex->mersize;
     }
-    *prefixlength = recommended;
+    *prefixlength = recommendedprefixlength;
   }
   return 0;
 }

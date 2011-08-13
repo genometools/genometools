@@ -691,7 +691,7 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
                                GtLogger *logger,
                                GtError *err)
 {
-  unsigned int numofchars;
+  unsigned int numofchars, recommendedprefixlength;
   bool haserr = false;
   GtEncseq *dbencseq;
   GtEncseqBuilder *eb;
@@ -705,10 +705,13 @@ int gt_sarrquerysubstringmatch(const GtUchar *dbseq,
   gt_encseq_builder_delete(eb);
 
   numofchars = gt_alphabet_num_of_chars(alpha);
+  recommendedprefixlength
+    = gt_recommendedprefixlength(numofchars,dblen,
+                                 GT_RECOMMENDED_MULTIPLIER_DEFAULT,
+                                 true);
   if (constructsarrandrunmmsearch(dbencseq,
                                   GT_READMODE_FORWARD,
-                                  gt_recommendedprefixlength(numofchars,dblen,
-                                                             true),
+                                  recommendedprefixlength,
                                   1U, /* parts */
                                   0, /* maximumspace */
                                   query,

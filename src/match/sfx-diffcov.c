@@ -270,9 +270,11 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
     dcov->prefixlength = 0;
   } else
   {
-    dcov->prefixlength = gt_recommendedprefixlength(dcov->numofchars,
-                                                    dcov->maxsamplesize,
-                                                    true);
+    dcov->prefixlength
+      = gt_recommendedprefixlength(dcov->numofchars,
+                                   dcov->maxsamplesize,
+                                   GT_RECOMMENDED_MULTIPLIER_DEFAULT,
+                                   true);
     if (outerprefixlength > 0 && dcov->prefixlength > outerprefixlength)
     {
       dcov->prefixlength = outerprefixlength;
