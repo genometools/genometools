@@ -612,8 +612,8 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     {
       haserr = true;
     }
+    gt_str_delete(sfi->mappedmarkprefixbucketsfilename);
   }
-  gt_str_delete(sfi->mappedmarkprefixbucketsfilename);
   gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
@@ -1640,6 +1640,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
     sfi->mappedmarkprefixbuckets = NULL;
+    sfi->mappedmarkprefixbucketsfilename = NULL;
     sfi->spmopt_kmerscansize = 0;
     sfi->spmopt_numofallprefixcodes = 0;
     sfi->spmopt_numofallsuffixcodes = 0;
@@ -1685,14 +1686,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       defaultsfxstrategy(&sfi->sfxstrategy,
                          gt_encseq_bitwise_cmp_ok(encseq) ? false : true);
-    }
-    if ((numofparts > 1U || maximumspace > 0) &&
-        sfi->sfxstrategy.spmopt_minlength > 0)
-    {
-      sfi->mappedmarkprefixbucketsfilename = gt_str_new();
-    } else
-    {
-      sfi->mappedmarkprefixbucketsfilename = NULL;
     }
     gt_logger_log(logger,"maxinsertionsort=%lu",
                   sfi->sfxstrategy.maxinsertionsort);
@@ -1753,9 +1746,34 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   }
   if (!haserr)
   {
-    uint64_t sizeofbcktab;
 
-    gt_assert(encseq != NULL && sfi != NULL);
+    gt_assert(sfi != NULL);
+    sfi->bcktab = gt_bcktab_new(sfi->numofchars,
+                                prefixlength,
+                                sfi->totallength+1,
+                                sfi->sfxstrategy.storespecialcodes,
+                                sfi->sfxstrategy.spmopt_minlength == 0
+                                  ? true : false,
+                                sfi->logger,
+                                err);
+    if (sfi->bcktab == NULL)
+    {
+      sfi->leftborder = NULL;
+      haserr = true;
+    } else
+    {
+      uint64_t sizeofbcktab;
+
+      sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
+      sizeofbcktab
+        = gt_bcktab_sizeoftable(sfi->numofchars,prefixlength,
+                                sfi->totallength+1,
+                                sfi->sfxstrategy.spmopt_minlength == 0 ? true
+                                                                       : false);
+      estimatedspace += (size_t) sizeofbcktab +
+                        gt_bcktab_sizeofworkspace(prefixlength);
+    }
+    SHOWCURRENTSPACE;
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
@@ -1767,6 +1785,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
 #else
       const unsigned int suffixchars = 0;
 #endif
+      printf("estimated space %.2f\n",GT_MEGABYTES(estimatedspace));
 
       sfi->spmopt_kmerscansize = sfi->prefixlength + additionalprefixchars +
                                  suffixchars;
@@ -1818,31 +1837,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                     sfi,
                                     NULL,
                                     NULL);
-    }
-    SHOWCURRENTSPACE;
-    gt_assert(sfi != NULL);
-    sfi->bcktab = gt_bcktab_new(sfi->numofchars,
-                                prefixlength,
-                                sfi->totallength+1,
-                                sfi->sfxstrategy.storespecialcodes,
-                                sfi->sfxstrategy.spmopt_minlength == 0
-                                  ? true : false,
-                                sfi->logger,
-                                err);
-    if (sfi->bcktab == NULL)
-    {
-      sfi->leftborder = NULL;
-      haserr = true;
-    } else
-    {
-      sfi->leftborder = gt_bcktab_leftborder(sfi->bcktab);
-      sizeofbcktab
-        = gt_bcktab_sizeoftable(sfi->numofchars,prefixlength,
-                                sfi->totallength+1,
-                                sfi->sfxstrategy.spmopt_minlength == 0 ? true
-                                                                       : false);
-      estimatedspace += (size_t) sizeofbcktab +
-                        gt_bcktab_sizeofworkspace(prefixlength);
     }
   }
   SHOWCURRENTSPACE;
@@ -1919,32 +1913,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                   sfi->nextfreeCodeatposition,
                                   sfi->spaceCodeatposition);
 #endif
-      }
-      if (sfi->mappedmarkprefixbucketsfilename != NULL)
-      {
-        size_t intsforbits, sizeofprefixmarks;
-        FILE *outfp_markprefixbuckets
-          = gt_xtmpfp(sfi->mappedmarkprefixbucketsfilename);
-
-        intsforbits = GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes);
-        sizeofprefixmarks = sizeof (*sfi->markprefixbuckets) * intsforbits;
-
-        gt_logger_log(sfi->logger,"write markprefixbuckets to file %s",
-                      gt_str_get(sfi->mappedmarkprefixbucketsfilename));
-        if (fwrite(sfi->markprefixbuckets,sizeof (*sfi->markprefixbuckets),
-                   intsforbits,outfp_markprefixbuckets) != intsforbits)
-        {
-          gt_error_set(err,"cannot write %lu items of size %u: "
-                           "errormsg=\"%s\"",
-                         (unsigned long) intsforbits,
-                         (unsigned int) sizeof (*sfi->markprefixbuckets),
-                         strerror(errno));
-          haserr = true;
-        }
-        gt_fa_fclose(outfp_markprefixbuckets);
-        gt_free(sfi->markprefixbuckets);
-        sfi->markprefixbuckets = NULL;
-        estimatedspace -= sizeofprefixmarks;
       }
     }
 #ifdef SKDEBUG
@@ -2030,6 +1998,34 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       gt_fa_fclose(sfi->outfpbcktab);
       sfi->outfpbcktab = NULL;
       gt_bcktab_delete_unused_memory(sfi->bcktab,logger);
+      if (sfi->sfxstrategy.spmopt_minlength > 0)
+      {
+        size_t intsforbits, sizeofprefixmarks;
+        FILE *outfp_markprefixbuckets;
+
+        sfi->mappedmarkprefixbucketsfilename = gt_str_new();
+        outfp_markprefixbuckets
+          = gt_xtmpfp(sfi->mappedmarkprefixbucketsfilename);
+        intsforbits = GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes);
+        sizeofprefixmarks = sizeof (*sfi->markprefixbuckets) * intsforbits;
+
+        gt_logger_log(sfi->logger,"write markprefixbuckets to file %s",
+                      gt_str_get(sfi->mappedmarkprefixbucketsfilename));
+        if (fwrite(sfi->markprefixbuckets,sizeof (*sfi->markprefixbuckets),
+                   intsforbits,outfp_markprefixbuckets) != intsforbits)
+        {
+          gt_error_set(err,"cannot write %lu items of size %u: "
+                           "errormsg=\"%s\"",
+                         (unsigned long) intsforbits,
+                         (unsigned int) sizeof (*sfi->markprefixbuckets),
+                         strerror(errno));
+          haserr = true;
+        }
+        gt_fa_fclose(outfp_markprefixbuckets);
+        gt_free(sfi->markprefixbuckets);
+        sfi->markprefixbuckets = NULL;
+        estimatedspace -= sizeofprefixmarks;
+      }
     }
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),

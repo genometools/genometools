@@ -5401,9 +5401,9 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
 {
   GtEndofTwobitencoding etbecurrent;
   unsigned long twobitencodingstoppos;
-  bool fwd;
   unsigned int offset;
   int idx;
+  bool fwd;
 
   gt_assert(encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH);
   if (pos == encseq->totallength || pos == encseq->logicaltotallength)
