@@ -64,6 +64,8 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         GtLogger *logger,
                                         GtError *err);
 
+void gt_Sfxmappedrange_make_writable(GtSfxmappedrange *sfxmappedrange);
+
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,

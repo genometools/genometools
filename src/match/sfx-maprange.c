@@ -74,13 +74,14 @@ struct GtSfxmappedrange
   const char *tablename;
   unsigned long numofindexes,
                 pagesize;
-  GtSfxmappedrangetype type;
   size_t sizeofunit;
+  GtSfxmappedrangetype type;
+  bool writable;
 };
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         unsigned long numofindexes,
-                                        GtSfxmappedrangetype sfxmappedrangetype,
+                                        GtSfxmappedrangetype type,
                                         const char *tablename,
                                         GtLogger *logger,
                                         GtError *err)
@@ -95,10 +96,12 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   sfxmappedrange->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
   sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
+  sfxmappedrange->writable = false;
+  sfxmappedrange->type = type;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   sfxmappedrange->tablename = tablename;
   sfxmappedrange->numofindexes = numofindexes;
-  switch (sfxmappedrangetype)
+  switch (type)
   {
     case GtSfxGtBitsequence:
       sfxmappedrange->sizeofunit = sizeof (GtBitsequence);
@@ -139,6 +142,11 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   return sfxmappedrange;
 }
 
+void gt_Sfxmappedrange_make_writable(GtSfxmappedrange *sfxmappedrange)
+{
+  sfxmappedrange->writable = true;
+}
+
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,
@@ -170,10 +178,19 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   gt_assert(lbrange.mapoffset <= minindex * sfxmappedrange->sizeofunit);
   gt_assert(maxindex * sfxmappedrange->sizeofunit <= lbrange.mapend);
   gt_assert(lbrange.mapoffset % sfxmappedrange->pagesize == 0);
-  sfxmappedrange->ptr
-    = gt_fa_xmmap_read_range(gt_str_get(sfxmappedrange->filename),
-                              (size_t) (lbrange.mapend - lbrange.mapoffset + 1),
-                              (size_t) lbrange.mapoffset);
+  if (sfxmappedrange->writable)
+  {
+    sfxmappedrange->ptr
+      = gt_fa_xmmap_write_range (gt_str_get(sfxmappedrange->filename),
+                                 (size_t) (lbrange.mapend-lbrange.mapoffset+1),
+                                 (size_t) lbrange.mapoffset);
+  } else
+  {
+    sfxmappedrange->ptr
+      = gt_fa_xmmap_read_range (gt_str_get(sfxmappedrange->filename),
+                                 (size_t) (lbrange.mapend-lbrange.mapoffset+1),
+                                 (size_t) lbrange.mapoffset);
+  }
   switch (sfxmappedrange->type)
   {
     case GtSfxGtBitsequence:
