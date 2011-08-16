@@ -162,15 +162,7 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
 
   if (bcktab->mappedleftborder != NULL)
   {
-    bcktab->leftborder.ulongbounds = NULL;
-    bcktab->leftborder.uintbounds = NULL;
     gt_fa_xmunmap(bcktab->mappedleftborder);
-  }
-  if (bcktab->mappedcountspecialcodes != NULL)
-  {
-    bcktab->ulongcountspecialcodes = NULL;
-    bcktab->uintcountspecialcodes = NULL;
-    gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
   }
   gt_mapped_lbrange_get(&lbrange,sizeofbasetype,bcktab->pagesize,mincode,
                         maxcode);
@@ -204,13 +196,19 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
   if (bcktab->withspecialsuffixes)
   {
     GtMappedrange csrange;
-    unsigned int padoffset = gt_mapped_csrange_get(&csrange,
-                                                   sizeofbasetype,
-                                                   bcktab->numofallcodes,
-                                                   bcktab->numofchars,
-                                                   bcktab->pagesize,
-                                                   mincode,
-                                                   maxcode);
+    unsigned int padoffset;
+
+    if (bcktab->mappedcountspecialcodes != NULL)
+    {
+      gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
+    }
+    padoffset = gt_mapped_csrange_get(&csrange,
+                                      sizeofbasetype,
+                                      bcktab->numofallcodes,
+                                      bcktab->numofchars,
+                                      bcktab->pagesize,
+                                      mincode,
+                                      maxcode);
     gt_assert(csrange.mapoffset % bcktab->pagesize == 0);
     totalsizeofcodes = bcktab->numofspecialcodes * sizeofbasetype;
     gt_logger_log(logger,
