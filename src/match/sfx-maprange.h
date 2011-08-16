@@ -20,12 +20,24 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include "core/str_api.h"
+#include "core/logger_api.h"
 #include "core/codetype.h"
 
 #define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
                             (((NUMOFCHARS) == 4U)\
                             ? ((CODE) >> 2)\
                             : (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS)))
+
+typedef struct
+{
+  void *ptr, **usedptrptr;
+  GtStr *filename;
+  const char *tablename;
+  unsigned long numofindexes,
+                pagesize;
+  size_t sizeofunit;
+} GtSfxmappedrange;
 
 typedef struct
 {
@@ -45,5 +57,24 @@ unsigned int gt_mapped_csrange_get(GtMappedrange *range,
                                    unsigned long pagesize,
                                    GtCodetype mincode,
                                    GtCodetype maxcode);
+
+GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
+                                        unsigned long numofindexes,
+                                        size_t sizeofunit,
+                                        const char *tablename,
+                                        GtLogger *logger,
+                                        GtError *err);
+
+void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
+                            unsigned int part,
+                            unsigned long minindex,
+                            unsigned long maxindex,
+                            GtLogger *logger);
+
+int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
+                             GtLogger *logger,GtError *err);
+
+int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,
+                                  GtError *err);
 
 #endif
