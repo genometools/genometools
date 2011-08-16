@@ -67,9 +67,20 @@ unsigned int gt_mapped_csrange_get(GtMappedrange *range,
   return padoffset;
 }
 
+struct GtSfxmappedrange
+{
+  void *ptr, **usedptrptr;
+  GtStr *filename;
+  const char *tablename;
+  unsigned long numofindexes,
+                pagesize;
+  GtSfxmappedrangetype type;
+  size_t sizeofunit;
+};
+
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         unsigned long numofindexes,
-                                        size_t sizeofunit,
+                                        GtSfxmappedrangetype sfxmappedrangetype,
                                         const char *tablename,
                                         GtLogger *logger,
                                         GtError *err)
@@ -87,18 +98,32 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   sfxmappedrange->tablename = tablename;
   sfxmappedrange->numofindexes = numofindexes;
-  sfxmappedrange->sizeofunit = sizeofunit;
+  switch (sfxmappedrangetype)
+  {
+    case GtSfxGtBitsequence:
+      sfxmappedrange->sizeofunit = sizeof (GtBitsequence);
+      break;
+    case GtSfxUnsignedint:
+      sfxmappedrange->sizeofunit = sizeof (unsigned int);
+      break;
+    case GtSfxUnsignedlong:
+      sfxmappedrange->sizeofunit = sizeof (unsigned long);
+      break;
+    default:
+      gt_assert(false);
+      break;
+  }
   intsforbits = GT_NUMOFINTSFORBITS(sfxmappedrange->numofindexes);
   gt_logger_log(logger,"write %s to file %s",
                 tablename,gt_str_get(sfxmappedrange->filename));
-  if (fwrite(*sfxmappedrange->usedptrptr,sizeofunit,intsforbits,outfp)
-       != intsforbits)
+  if (fwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
+             intsforbits,outfp) != intsforbits)
   {
     gt_error_set(err,"table %s: cannot write %lu items of size %u: "
                      "errormsg=\"%s\"",
                  tablename,
                  (unsigned long) intsforbits,
-                 (unsigned int) sizeofunit,
+                 (unsigned int) sfxmappedrange->sizeofunit,
                  strerror(errno));
     haserr = true;
   }
@@ -149,15 +174,22 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
     = gt_fa_xmmap_read_range(gt_str_get(sfxmappedrange->filename),
                               (size_t) (lbrange.mapend - lbrange.mapoffset + 1),
                               (size_t) lbrange.mapoffset);
-  if (sfxmappedrange->sizeofunit == sizeof (GtBitsequence))
+  switch (sfxmappedrange->type)
   {
-    return ((GtBitsequence *) sfxmappedrange->ptr) -
-            (lbrange.mapoffset / sfxmappedrange->sizeofunit);
-  } else
-  {
-    gt_assert(false);
-    return NULL;
+    case GtSfxGtBitsequence:
+      return ((GtBitsequence *) sfxmappedrange->ptr) -
+              (lbrange.mapoffset / sfxmappedrange->sizeofunit);
+    case GtSfxUnsignedint:
+      return ((unsigned int *) sfxmappedrange->ptr) -
+              (lbrange.mapoffset / sfxmappedrange->sizeofunit);
+    case GtSfxUnsignedlong:
+      return ((unsigned long *) sfxmappedrange->ptr) -
+              (lbrange.mapoffset / sfxmappedrange->sizeofunit);
+    default:
+      gt_assert(false);
+      break;
   }
+  return NULL;
 }
 
 int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,

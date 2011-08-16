@@ -29,15 +29,14 @@
                             ? ((CODE) >> 2)\
                             : (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS)))
 
-typedef struct
+typedef enum
 {
-  void *ptr, **usedptrptr;
-  GtStr *filename;
-  const char *tablename;
-  unsigned long numofindexes,
-                pagesize;
-  size_t sizeofunit;
-} GtSfxmappedrange;
+  GtSfxGtBitsequence,
+  GtSfxUnsignedint,
+  GtSfxUnsignedlong
+} GtSfxmappedrangetype;
+
+typedef struct GtSfxmappedrange GtSfxmappedrange;
 
 typedef struct
 {
@@ -60,7 +59,7 @@ unsigned int gt_mapped_csrange_get(GtMappedrange *range,
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         unsigned long numofindexes,
-                                        size_t sizeofunit,
+                                        GtSfxmappedrangetype sfxmappedrangetype,
                                         const char *tablename,
                                         GtLogger *logger,
                                         GtError *err);
