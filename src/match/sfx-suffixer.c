@@ -1783,8 +1783,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      unsigned int suffixchars;
-      unsigned int additionalsuffixchars = 2U;
+      unsigned int suffixchars, additionalsuffixchars = 2U;
       size_t sizeofprefixmarks, intsforbits;
 #ifdef _LP64
       size_t sizeofsuffixmarks;
@@ -2033,16 +2032,22 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                   err);
         if (sfi->mappedmarkprefixbuckets == NULL)
         {
+          sfi->markprefixbuckets = NULL;
           haserr = true;
         }
-        sfi->markprefixbuckets = NULL;
+        gt_assert(sfi->markprefixbuckets == NULL);
       }
     }
+  }
+  if (!haserr)
+  {
+    gt_assert(sfi != NULL);
     sfi->suffixsortspace
       = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),
                                sfi->totallength,
                                sfi->sfxstrategy.suftabuint,
                                logger);
+    gt_assert(sfi->suffixsortspace);
     if (gt_encseq_has_specialranges(sfi->encseq))
     {
       sfi->sri = gt_specialrangeiterator_new(sfi->encseq,

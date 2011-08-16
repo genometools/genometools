@@ -104,6 +104,7 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   }
   gt_fa_fclose(outfp);
   gt_free(*sfxmappedrange->usedptrptr);
+  *sfxmappedrange->usedptrptr = NULL;
   if (haserr)
   {
     gt_str_delete(sfxmappedrange->filename);
