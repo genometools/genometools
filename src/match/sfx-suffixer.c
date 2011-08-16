@@ -107,7 +107,7 @@ struct Sfxiterator
   unsigned int spmopt_kmerscansize,
                spmopt_kmerscancodeshift2bckcode,
                spmopt_kmerscancodeshift2prefixcode,
-               spmopt_bcktabcodeshift2prefixcodeindex;
+               spmopt_additionalprefixchars;
   GtBitsequence *markprefixbuckets,
                 *marksuffixbuckets;
   GtCodetype spmopt_kmerscancodesuffixmask;
@@ -342,9 +342,6 @@ static void updatekmercount(void *processinfo,
 #define GT_SCANCODE_TO_PREFIXCODE(CODE)\
         (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2prefixcode)
 
-#define GT_BCKTAB_CODE_TO_PREFIX_INDEX(CODE)\
-        (GtCodetype) ((CODE) >> sfi->spmopt_bcktabcodeshift2prefixcodeindex)
-
 #ifdef _LP64
 #define GT_SCANCODE_TO_SUFFIXCODE(CODE)\
         (GtCodetype) ((CODE) & sfi->spmopt_kmerscancodesuffixmask);
@@ -357,7 +354,6 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
   gt_assert(suffixcode < sfi->spmopt_numofallsuffixcodes);
-  /* XXX access to maxprefixbuckets */
   return (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
 
           GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)) ? true : false;
@@ -369,7 +365,6 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
   GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
 
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
-  /* XXX access to maxprefixbuckets */
   return GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) ? true : false;
 }
 #endif
@@ -1548,7 +1543,7 @@ static void gt_determineaddionalsuffixprefixchars(
   unsigned int prefixchars, suffixchars;
   size_t sizeofprefixmarks, sizeofsuffixmarks;
 
-  for (prefixchars = 1U; /* Nothing */; prefixchars++)
+  for (prefixchars = 1U; prefixchars <= 16U; prefixchars++)
   {
     sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
     if (estimatedspace + sizeofprefixmarks > (size_t) maximumspace)
@@ -1558,7 +1553,7 @@ static void gt_determineaddionalsuffixprefixchars(
     }
   }
   sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
-  for (suffixchars = 1U; /* Nothing */; suffixchars++)
+  for (suffixchars = 1U; suffixchars <= 16U; suffixchars++)
   {
     sizeofsuffixmarks = gt_sizeforbittable(numofchars,prefixlength+suffixchars);
     if (estimatedspace + sizeofprefixmarks + sizeofsuffixmarks
@@ -1657,6 +1652,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->spmopt_kmerscancodeshift2bckcode = 0;
     sfi->spmopt_kmerscancodeshift2prefixcode = 0;
     sfi->spmopt_kmerscancodesuffixmask = 0;
+    sfi->spmopt_additionalprefixchars = 3U;
     sfi->dcov = NULL;
     sfi->markprefixbuckets = NULL;
     sfi->marksuffixbuckets = NULL;
@@ -1787,34 +1783,33 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      unsigned int additionalprefixchars = 3U;
+      unsigned int suffixchars;
       unsigned int additionalsuffixchars = 2U;
       size_t sizeofprefixmarks, intsforbits;
 #ifdef _LP64
-      unsigned int suffixchars = sfi->prefixlength+2;
       size_t sizeofsuffixmarks;
-#else
-      const unsigned int suffixchars = 0;
 #endif
       if (maximumspace > 0)
       {
-        gt_determineaddionalsuffixprefixchars(&additionalprefixchars,
-                                              &additionalsuffixchars,
-                                              sfi->numofchars,
-                                              prefixlength,
-                                              estimatedspace,
-                                              maximumspace);
+        gt_determineaddionalsuffixprefixchars(
+                               &sfi->spmopt_additionalprefixchars,
+                               &additionalsuffixchars,
+                               sfi->numofchars,
+                               prefixlength,
+                               estimatedspace,
+                               maximumspace);
       }
 #ifdef _LP64
       suffixchars = sfi->prefixlength+additionalsuffixchars;
+#else
+      suffixchars = 0;
 #endif
-      sfi->spmopt_kmerscansize = sfi->prefixlength + additionalprefixchars +
+      sfi->spmopt_kmerscansize = sfi->prefixlength +
+                                 sfi->spmopt_additionalprefixchars +
                                  suffixchars;
       gt_assert(sfi->spmopt_kmerscansize <= (unsigned int) GT_UNITSIN2BITENC);
-      sfi->spmopt_kmerscancodeshift2bckcode = GT_MULT2(additionalprefixchars +
-                                                       suffixchars);
-      sfi->spmopt_bcktabcodeshift2prefixcodeindex
-        = GT_LOGWORDSIZE - GT_MULT2(additionalprefixchars);
+      sfi->spmopt_kmerscancodeshift2bckcode
+        = GT_MULT2(sfi->spmopt_additionalprefixchars + suffixchars);
       sfi->spmopt_kmerscancodeshift2prefixcode
         = GT_MULT2(suffixchars);
       sfi->spmopt_kmerscancodesuffixmask
@@ -1822,7 +1817,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       sfi->spmopt_numofallprefixcodes
         = gt_power_for_small_exponents(sfi->numofchars,
                                        sfi->prefixlength +
-                                       additionalprefixchars);
+                                       sfi->spmopt_additionalprefixchars);
       GT_INITBITTAB(sfi->markprefixbuckets,
                     sfi->spmopt_numofallprefixcodes);
       intsforbits = GT_NUMOFINTSFORBITS(sfi->spmopt_numofallprefixcodes);
@@ -1831,7 +1826,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       gt_logger_log(sfi->logger,"for all sequences, keep track of "
                                 "%u-mers starting at position 0 using a "
                                 "table of %lu bytes",
-                                sfi->prefixlength + additionalprefixchars,
+                                sfi->prefixlength +
+                                sfi->spmopt_additionalprefixchars,
                                 (unsigned long) sizeofprefixmarks);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
@@ -1846,7 +1842,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 "%u-mers starting at position %u "
                                 "using a table of %lu bytes",
                                 suffixchars,
-                                sfi->prefixlength + additionalprefixchars,
+                                sfi->prefixlength +
+                                sfi->spmopt_additionalprefixchars,
                                 (unsigned long) sizeofsuffixmarks);
 #endif
       getencseqkmers_twobitencoding(encseq,
@@ -1862,7 +1859,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       {
         gt_assert(estimatedspace <= (size_t) maximumspace);
       }
-      printf("estimated space %.2f\n",GT_MEGABYTES(estimatedspace));
+      /*printf("estimated space %.2f\n",GT_MEGABYTES(estimatedspace));*/
     }
   }
   SHOWCURRENTSPACE;
@@ -2094,6 +2091,18 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 err);
 }
 
+static GtCodetype gt_bcktab_code_to_prefix_index(GtCodetype code,
+                                             unsigned int additionalprefixchars)
+{
+  if (GT_MULT2(additionalprefixchars) > (unsigned int) GT_LOGWORDSIZE)
+  {
+    return (GtCodetype) (code << (GT_MULT2(additionalprefixchars) -
+                                 GT_LOGWORDSIZE));
+  }
+  return (GtCodetype) (code >> (GT_LOGWORDSIZE -
+                                GT_MULT2(additionalprefixchars)));
+}
+
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
   unsigned long partwidth;
@@ -2109,9 +2118,11 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->currentprefixcodeminindex
-    = GT_BCKTAB_CODE_TO_PREFIX_INDEX(sfi->currentmincode);
+    = gt_bcktab_code_to_prefix_index(sfi->currentmincode,
+                                     sfi->spmopt_additionalprefixchars);
   sfi->currentprefixcodemaxindex
-    = GT_BCKTAB_CODE_TO_PREFIX_INDEX(sfi->currentmaxcode);
+    = gt_bcktab_code_to_prefix_index(sfi->currentmaxcode,
+                                     sfi->spmopt_additionalprefixchars);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   if (sfi->sfxprogress != NULL)
   {
