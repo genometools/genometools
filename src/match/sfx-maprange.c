@@ -97,10 +97,13 @@ struct GtSfxmappedrange
   unsigned long pagesize;
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
-  bool writable;
+  bool writable, usetmpfile;
 };
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
+                                        const char *outfilename,
+                                        FILE *outfp,
+                                        bool writable,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         const char *tablename,
@@ -108,7 +111,6 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         GtError *err)
 {
   GtSfxmappedrange *sfxmappedrange;
-  FILE *outfp;
   bool haserr = false;
 
   sfxmappedrange = gt_malloc(sizeof (*sfxmappedrange));
@@ -116,7 +118,18 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   sfxmappedrange->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
   sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
-  outfp = gt_xtmpfp(sfxmappedrange->filename);
+  sfxmappedrange->writable = writable;
+  if (outfilename == NULL)
+  {
+    gt_assert(outfp == NULL);
+    outfp = gt_xtmpfp(sfxmappedrange->filename);
+    sfxmappedrange->usetmpfile = true;
+  } else
+  {
+    gt_str_set(sfxmappedrange->filename,outfilename);
+    gt_assert(outfp != NULL);
+    sfxmappedrange->usetmpfile = false;
+  }
   sfxmappedrange->writable = false;
   sfxmappedrange->type = type;
   sfxmappedrange->tablename = tablename;
@@ -156,7 +169,10 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                  strerror(errno));
     haserr = true;
   }
-  gt_fa_fclose(outfp);
+  if (sfxmappedrange->usetmpfile)
+  {
+    gt_fa_fclose(outfp);
+  }
   gt_free(*sfxmappedrange->usedptrptr);
   *sfxmappedrange->usedptrptr = NULL;
   if (haserr)
@@ -166,11 +182,6 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
     return NULL;
   }
   return sfxmappedrange;
-}
-
-void gt_Sfxmappedrange_make_writable(GtSfxmappedrange *sfxmappedrange)
-{
-  sfxmappedrange->writable = true;
 }
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
@@ -293,15 +304,16 @@ int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
     gt_free(*sfxmappedrange->usedptrptr);
   }
   *sfxmappedrange->usedptrptr = NULL;
-  if (sfxmappedrange->filename != NULL)
+  if (sfxmappedrange->usetmpfile)
   {
+    gt_assert(sfxmappedrange->filename != NULL);
     if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),
                                       logger,err) != 0)
     {
       haserr = true;
     }
-    gt_str_delete(sfxmappedrange->filename);
   }
+  gt_str_delete(sfxmappedrange->filename);
   gt_free(sfxmappedrange);
   return haserr ? -1 : 0;
 }

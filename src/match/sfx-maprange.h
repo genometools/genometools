@@ -61,6 +61,9 @@ unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
                                          unsigned long offset);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
+                                        const char *outfilename,
+                                        FILE *outfp,
+                                        bool writable,
                                         unsigned long numofentries,
                                         /* for GtBitsequence numofentries
                                            means the number of bits, otherwise
