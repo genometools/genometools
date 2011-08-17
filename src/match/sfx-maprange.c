@@ -106,10 +106,10 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
     case GtSfxGtBitsequence:
       sfxmappedrange->sizeofunit = sizeof (GtBitsequence);
       break;
-    case GtSfxUnsignedint:
-      sfxmappedrange->sizeofunit = sizeof (unsigned int);
+    case GtSfxuint32_t:
+      sfxmappedrange->sizeofunit = sizeof (uint32_t);
       break;
-    case GtSfxUnsignedlong:
+    case GtSfxunsignedlong:
       sfxmappedrange->sizeofunit = sizeof (unsigned long);
       break;
     default:
@@ -196,10 +196,10 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
     case GtSfxGtBitsequence:
       return ((GtBitsequence *) sfxmappedrange->ptr) -
               (lbrange.mapoffset / sfxmappedrange->sizeofunit);
-    case GtSfxUnsignedint:
-      return ((unsigned int *) sfxmappedrange->ptr) -
+    case GtSfxuint32_t:
+      return ((uint32_t *) sfxmappedrange->ptr) -
               (lbrange.mapoffset / sfxmappedrange->sizeofunit);
-    case GtSfxUnsignedlong:
+    case GtSfxunsignedlong:
       return ((unsigned long *) sfxmappedrange->ptr) -
               (lbrange.mapoffset / sfxmappedrange->sizeofunit);
     default:

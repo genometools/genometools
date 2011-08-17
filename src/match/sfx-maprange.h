@@ -32,8 +32,8 @@
 typedef enum
 {
   GtSfxGtBitsequence,
-  GtSfxUnsignedint,
-  GtSfxUnsignedlong
+  GtSfxunsignedlong,
+  GtSfxuint32_t
 } GtSfxmappedrangetype;
 
 typedef struct GtSfxmappedrange GtSfxmappedrange;
@@ -59,7 +59,7 @@ unsigned int gt_mapped_csrange_get(GtMappedrange *range,
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         unsigned long numofindexes,
-                                        GtSfxmappedrangetype sfxmappedrangetype,
+                                        GtSfxmappedrangetype type,
                                         const char *tablename,
                                         GtLogger *logger,
                                         GtError *err);
