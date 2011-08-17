@@ -61,8 +61,6 @@ unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
                                          unsigned long offset);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        const char *outfilename,
-                                        FILE *outfp,
                                         bool writable,
                                         unsigned long numofentries,
                                         /* for GtBitsequence numofentries
@@ -73,11 +71,7 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         GtLogger *logger,
                                         GtError *err);
 
-void gt_Sfxmappedrange_make_writable(GtSfxmappedrange *sfxmappedrange);
-
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
-                            unsigned long offset,
-                            unsigned int numofchars,
                             unsigned int part,
                             unsigned long minindex,
                             unsigned long maxindex,

@@ -97,12 +97,10 @@ struct GtSfxmappedrange
   unsigned long pagesize;
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
-  bool writable, usetmpfile;
+  bool writable;
 };
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        const char *outfilename,
-                                        FILE *outfp,
                                         bool writable,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
@@ -112,6 +110,7 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
 {
   GtSfxmappedrange *sfxmappedrange;
   bool haserr = false;
+  FILE *outfp;
 
   sfxmappedrange = gt_malloc(sizeof (*sfxmappedrange));
   sfxmappedrange->ptr = NULL;
@@ -119,17 +118,8 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
   sfxmappedrange->writable = writable;
-  if (outfilename == NULL)
-  {
-    gt_assert(outfp == NULL);
-    outfp = gt_xtmpfp(sfxmappedrange->filename);
-    sfxmappedrange->usetmpfile = true;
-  } else
-  {
-    gt_str_set(sfxmappedrange->filename,outfilename);
-    gt_assert(outfp != NULL);
-    sfxmappedrange->usetmpfile = false;
-  }
+  outfp = gt_xtmpfp(sfxmappedrange->filename);
+  gt_assert(outfp != NULL);
   sfxmappedrange->writable = false;
   sfxmappedrange->type = type;
   sfxmappedrange->tablename = tablename;
@@ -169,10 +159,7 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                  strerror(errno));
     haserr = true;
   }
-  if (sfxmappedrange->usetmpfile)
-  {
-    gt_fa_fclose(outfp);
-  }
+  gt_fa_fclose(outfp);
   gt_free(*sfxmappedrange->usedptrptr);
   *sfxmappedrange->usedptrptr = NULL;
   if (haserr)
@@ -185,8 +172,6 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
 }
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
-                            unsigned long offset,
-                            unsigned int numofchars,
                             unsigned int part,
                             unsigned long minindex,
                             unsigned long maxindex,
@@ -194,34 +179,17 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
 {
   GtMappedrange lbrange;
   unsigned long unitoffset;
-  unsigned int padoffset;
 
   if (sfxmappedrange->ptr != NULL)
   {
     gt_fa_xmunmap(sfxmappedrange->ptr);
   }
-  if (offset == 0)
-  {
-    padoffset = 0;
-    gt_mapped_lbrange_get(&lbrange,
-                          sfxmappedrange->sizeofunit,
-                          sfxmappedrange->pagesize,
-                          minindex,
-                          maxindex);
-    unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
-  } else
-  {
-    padoffset = gt_Sfxmappedrange_padoffset(sfxmappedrange->sizeofunit,offset);
-    gt_mapped_csrange_get(&lbrange,
-                          offset + padoffset + 1,
-                          numofchars,
-                          sfxmappedrange->sizeofunit,
-                          sfxmappedrange->pagesize,
-                          minindex,
-                          maxindex);
-    unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit +
-                 offset + 1 + padoffset;
-  }
+  gt_mapped_lbrange_get(&lbrange,
+                        sfxmappedrange->sizeofunit,
+                        sfxmappedrange->pagesize,
+                        minindex,
+                        maxindex);
+  unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
   if (logger != NULL)
   {
     size_t sizeoftable = sfxmappedrange->sizeofunit *
@@ -304,14 +272,11 @@ int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
     gt_free(*sfxmappedrange->usedptrptr);
   }
   *sfxmappedrange->usedptrptr = NULL;
-  if (sfxmappedrange->usetmpfile)
+  gt_assert(sfxmappedrange->filename != NULL);
+  if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),
+                                    logger,err) != 0)
   {
-    gt_assert(sfxmappedrange->filename != NULL);
-    if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),
-                                      logger,err) != 0)
-    {
-      haserr = true;
-    }
+    haserr = true;
   }
   gt_str_delete(sfxmappedrange->filename);
   gt_free(sfxmappedrange);

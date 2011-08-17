@@ -2032,8 +2032,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         gt_assert(sfi->markprefixbuckets != NULL);
         sfi->mappedmarkprefixbuckets
           = gt_Sfxmappedrange_new((void **) &sfi->markprefixbuckets,
-                                  NULL,
-                                  NULL,
                                   false,
                                   sfi->spmopt_numofallprefixcodes,
                                   GtSfxGtBitsequence,
@@ -2165,7 +2163,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
       sfi->markprefixbuckets
         = (GtBitsequence *)
           gt_Sfxmappedrange_map(sfi->mappedmarkprefixbuckets,
-                                0,0,
                                 sfi->part,
                                 sfi->currentprefixcodeminindex,
                                 sfi->currentprefixcodemaxindex,
