@@ -2155,6 +2155,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
       sfi->markprefixbuckets
         = (GtBitsequence *)
           gt_Sfxmappedrange_map(sfi->mappedmarkprefixbuckets,
+                                0,0,
                                 sfi->part,
                                 sfi->currentprefixcodeminindex,
                                 sfi->currentprefixcodemaxindex,

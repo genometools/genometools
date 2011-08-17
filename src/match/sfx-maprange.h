@@ -70,6 +70,8 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
 void gt_Sfxmappedrange_make_writable(GtSfxmappedrange *sfxmappedrange);
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
+                            unsigned long offset,
+                            unsigned int numofchars,
                             unsigned int part,
                             unsigned long minindex,
                             unsigned long maxindex,
