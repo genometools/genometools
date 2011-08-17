@@ -143,10 +143,9 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
   padoffset = gt_Sfxmappedrange_padoffset(sizeofbasetype,
                                           bcktab->numofallcodes);
   gt_mapped_csrange_get(&csrange,
-                        padoffset,
-                        sizeofbasetype,
-                        bcktab->numofallcodes,
+                        bcktab->numofallcodes + padoffset + 1,
                         bcktab->numofchars,
+                        sizeofbasetype,
                         bcktab->pagesize,
                         mincode, maxcode);
   return lbrange.mapend - lbrange.mapoffset + 1 +
@@ -209,10 +208,9 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
     padoffset = gt_Sfxmappedrange_padoffset(sizeofbasetype,
                                             bcktab->numofallcodes);
     gt_mapped_csrange_get(&csrange,
-                          padoffset,
-                          sizeofbasetype,
-                          bcktab->numofallcodes,
+                          bcktab->numofallcodes + padoffset + 1,
                           bcktab->numofchars,
+                          sizeofbasetype,
                           bcktab->pagesize,
                           mincode,
                           maxcode);

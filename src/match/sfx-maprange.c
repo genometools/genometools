@@ -31,34 +31,34 @@ void gt_mapped_lbrange_get(GtMappedrange *range,
   range->mapend = gt_multipleofpagesize(maxcode,false,sizeofbasetype,pagesize);
 }
 
+static GtCodetype gt_mapped_transformcode(unsigned long offset,
+                                          unsigned int numofchars,
+                                          GtCodetype code)
+{
+  if (code >= (GtCodetype) (numofchars - 1))
+  {
+    return offset + FROMCODE2SPECIALCODE(code,numofchars);
+  } else
+  {
+    return offset;
+  }
+}
+
 void gt_mapped_csrange_get(GtMappedrange *range,
-                           unsigned int padoffset,
-                           size_t sizeofbasetype,
-                           unsigned long numofallcodes,
+                           unsigned long offset,
                            unsigned int numofchars,
+                           size_t sizeofbasetype,
                            unsigned long pagesize,
                            GtCodetype mincode,
                            GtCodetype maxcode)
 {
   GtCodetype firstcode, lastcode;
 
-  firstcode = numofallcodes + 1;
-  if (mincode >= (GtCodetype) (numofchars - 1))
-  {
-    firstcode += FROMCODE2SPECIALCODE(mincode,numofchars);
-  }
-  if (maxcode >= (GtCodetype) (numofchars - 1))
-  {
-    lastcode = numofallcodes + 1 +
-               FROMCODE2SPECIALCODE(maxcode,numofchars);
-  } else
-  {
-    lastcode = numofallcodes + 1;
-  }
+  firstcode = gt_mapped_transformcode(offset,numofchars,mincode);
+  lastcode = gt_mapped_transformcode(offset,numofchars,maxcode);
   range->mapoffset
-    = gt_multipleofpagesize(firstcode+padoffset,true,sizeofbasetype,pagesize);
-  range->mapend = gt_multipleofpagesize(lastcode+padoffset,false,sizeofbasetype,
-                                        pagesize);
+    = gt_multipleofpagesize(firstcode,true,sizeofbasetype,pagesize);
+  range->mapend = gt_multipleofpagesize(lastcode,false,sizeofbasetype,pagesize);
 }
 
 unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,

@@ -50,10 +50,9 @@ void gt_mapped_lbrange_get(GtMappedrange *range,
                            unsigned long maxcode);
 
 void gt_mapped_csrange_get(GtMappedrange *range,
-                           unsigned int padoffset,
-                           size_t sizeofbasetype,
-                           unsigned long numofallcodes,
+                           unsigned long offset,
                            unsigned int numofchars,
+                           size_t sizeofbasetype,
                            unsigned long pagesize,
                            GtCodetype mincode,
                            GtCodetype maxcode);
