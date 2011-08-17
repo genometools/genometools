@@ -49,13 +49,17 @@ void gt_mapped_lbrange_get(GtMappedrange *range,
                            unsigned long mincode,
                            unsigned long maxcode);
 
-unsigned int gt_mapped_csrange_get(GtMappedrange *range,
-                                   size_t sizeofbasetype,
-                                   unsigned long numofallcodes,
-                                   unsigned int numofchars,
-                                   unsigned long pagesize,
-                                   GtCodetype mincode,
-                                   GtCodetype maxcode);
+void gt_mapped_csrange_get(GtMappedrange *range,
+                           unsigned int padoffset,
+                           size_t sizeofbasetype,
+                           unsigned long numofallcodes,
+                           unsigned int numofchars,
+                           unsigned long pagesize,
+                           GtCodetype mincode,
+                           GtCodetype maxcode);
+
+unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
+                                         unsigned long offset);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         unsigned long numofindexes,

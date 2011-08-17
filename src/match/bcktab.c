@@ -136,15 +136,19 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
 {
   GtMappedrange lbrange, csrange;
   size_t sizeofbasetype = gt_bcktab_sizeofbasetype(bcktab);
+  unsigned int padoffset;
 
   gt_mapped_lbrange_get(&lbrange,sizeofbasetype,bcktab->pagesize,mincode,
                         maxcode);
-  (void) gt_mapped_csrange_get(&csrange,
-                               sizeofbasetype,
-                               bcktab->numofallcodes,
-                               bcktab->numofchars,
-                               bcktab->pagesize,
-                               mincode, maxcode);
+  padoffset = gt_Sfxmappedrange_padoffset(sizeofbasetype,
+                                          bcktab->numofallcodes);
+  gt_mapped_csrange_get(&csrange,
+                        padoffset,
+                        sizeofbasetype,
+                        bcktab->numofallcodes,
+                        bcktab->numofchars,
+                        bcktab->pagesize,
+                        mincode, maxcode);
   return lbrange.mapend - lbrange.mapoffset + 1 +
          csrange.mapend - csrange.mapoffset + 1;
 }
@@ -202,13 +206,16 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
     {
       gt_fa_xmunmap(bcktab->mappedcountspecialcodes);
     }
-    padoffset = gt_mapped_csrange_get(&csrange,
-                                      sizeofbasetype,
-                                      bcktab->numofallcodes,
-                                      bcktab->numofchars,
-                                      bcktab->pagesize,
-                                      mincode,
-                                      maxcode);
+    padoffset = gt_Sfxmappedrange_padoffset(sizeofbasetype,
+                                            bcktab->numofallcodes);
+    gt_mapped_csrange_get(&csrange,
+                          padoffset,
+                          sizeofbasetype,
+                          bcktab->numofallcodes,
+                          bcktab->numofchars,
+                          bcktab->pagesize,
+                          mincode,
+                          maxcode);
     gt_assert(csrange.mapoffset % bcktab->pagesize == 0);
     totalsizeofcodes = bcktab->numofspecialcodes * sizeofbasetype;
     gt_logger_log(logger,
