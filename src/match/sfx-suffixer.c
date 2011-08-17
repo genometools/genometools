@@ -99,7 +99,6 @@ struct Sfxiterator
   bool storespecials;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
-  FILE *outfpbcktab;
   bool usebcktmpfile;
   GtStr *bcktabfilename;
   unsigned int kmerfastmaskright;
@@ -1657,27 +1656,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->markprefixbuckets = NULL;
     sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
-    if (indexname != NULL)
-    {
-      sfi->bcktabfilename = gt_str_new_cstr(indexname);
-      gt_str_append_cstr(sfi->bcktabfilename,BCKTABSUFFIX);
-      sfi->outfpbcktab = outfpbcktab;
-      sfi->usebcktmpfile = false;
-    } else
-    {
-      if (numofparts > 1U || maximumspace > 0)
-      {
-        gt_assert(outfpbcktab == NULL);
-        sfi->bcktabfilename = gt_str_new();
-        sfi->outfpbcktab = gt_xtmpfp(sfi->bcktabfilename);
-        sfi->usebcktmpfile = true;
-      } else
-      {
-        sfi->bcktabfilename = NULL;
-        sfi->outfpbcktab = NULL;
-        sfi->usebcktmpfile = false;
-      }
-    }
+    sfi->usebcktmpfile = false;
+    sfi->bcktabfilename = NULL;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -2008,17 +1988,35 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
+    if (indexname != NULL)
+    {
+      sfi->bcktabfilename = gt_str_new_cstr(indexname);
+      gt_str_append_cstr(sfi->bcktabfilename,BCKTABSUFFIX);
+      sfi->usebcktmpfile = false;
+    } else
+    {
+      gt_assert(outfpbcktab == NULL);
+      if (numofparts > 1U || maximumspace > 0)
+      {
+        sfi->bcktabfilename = gt_str_new();
+        outfpbcktab = gt_xtmpfp(sfi->bcktabfilename);
+        sfi->usebcktmpfile = true;
+      } else
+      {
+        sfi->bcktabfilename = NULL;
+        sfi->usebcktmpfile = false;
+      }
+    }
     if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
       gt_bcktab_excludedistpfxidx_out(sfi->bcktab);
-      gt_assert(sfi->outfpbcktab != NULL);
-      if (gt_bcktab_flush_to_file(sfi->outfpbcktab,sfi->bcktab,err) != 0)
+      gt_assert(outfpbcktab != NULL);
+      if (gt_bcktab_flush_to_file(outfpbcktab,sfi->bcktab,err) != 0)
       {
         haserr = true;
       }
       gt_bcktab_includedistpfxidx_out(sfi->bcktab);
-      gt_fa_fclose(sfi->outfpbcktab);
-      sfi->outfpbcktab = NULL;
+      gt_fa_fclose(outfpbcktab);
       gt_bcktab_delete_unused_memory(sfi->bcktab,logger);
       if (sfi->sfxstrategy.spmopt_minlength > 0)
       {
@@ -2433,7 +2431,6 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, Sfxiterator *sfi, GtError *err)
   {
     int ret = gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
     gt_fa_fclose(fp);
-    sfi->outfpbcktab = NULL;
     return ret;
   }
   return 0;
