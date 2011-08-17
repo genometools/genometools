@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include <errno.h>
 #include <unistd.h>
 #include "core/fa.h"
@@ -52,13 +69,11 @@ void gt_mapped_csrange_get(GtMappedrange *range,
                            GtCodetype mincode,
                            GtCodetype maxcode)
 {
-  GtCodetype firstcode, lastcode;
-
-  firstcode = gt_mapped_transformcode(offset,numofchars,mincode);
-  lastcode = gt_mapped_transformcode(offset,numofchars,maxcode);
-  range->mapoffset
-    = gt_multipleofpagesize(firstcode,true,sizeofbasetype,pagesize);
-  range->mapend = gt_multipleofpagesize(lastcode,false,sizeofbasetype,pagesize);
+  gt_mapped_lbrange_get(range,
+                        sizeofbasetype,
+                        pagesize,
+                        gt_mapped_transformcode(offset,numofchars,mincode),
+                        gt_mapped_transformcode(offset,numofchars,maxcode));
 }
 
 unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
@@ -86,7 +101,7 @@ struct GtSfxmappedrange
 };
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        unsigned long numofindexes,
+                                        unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         const char *tablename,
                                         GtLogger *logger,
@@ -101,9 +116,9 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   sfxmappedrange->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
   sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
+  outfp = gt_xtmpfp(sfxmappedrange->filename);
   sfxmappedrange->writable = false;
   sfxmappedrange->type = type;
-  outfp = gt_xtmpfp(sfxmappedrange->filename);
   sfxmappedrange->tablename = tablename;
   switch (type)
   {
@@ -122,10 +137,10 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   }
   if (type == GtSfxGtBitsequence)
   {
-    sfxmappedrange->numofunits = GT_NUMOFINTSFORBITS(numofindexes);
+    sfxmappedrange->numofunits = GT_NUMOFINTSFORBITS(numofentries);
   } else
   {
-    sfxmappedrange->numofunits = (size_t) numofindexes;
+    sfxmappedrange->numofunits = (size_t) numofentries;
   }
   gt_logger_log(logger,"write %s to file %s (%lu units of %lu bytes)",
                 tablename,gt_str_get(sfxmappedrange->filename),

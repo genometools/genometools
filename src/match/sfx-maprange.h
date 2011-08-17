@@ -61,7 +61,10 @@ unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
                                          unsigned long offset);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        unsigned long numofindexes,
+                                        unsigned long numofentries,
+                                        /* for GtBitsequence numofentries
+                                           means the number of bits, otherwise
+                                           the number of array indices */
                                         GtSfxmappedrangetype type,
                                         const char *tablename,
                                         GtLogger *logger,

@@ -547,15 +547,17 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   {
     gt_error_check(err);
     gt_assert (sfi->bcktabfilename != NULL);
-    if (gt_bcktab_flush_remaining(sfi->bcktab,
-                                  gt_str_get(sfi->bcktabfilename),err) != 0)
-    {
-      haserr = true;
-    }
     if (sfi->usebcktmpfile)
     {
       if (gt_unlink_possibly_with_error(gt_str_get(sfi->bcktabfilename),
                                         sfi->logger,err) != 0)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      if (gt_bcktab_flush_remaining(sfi->bcktab,
+                                    gt_str_get(sfi->bcktabfilename),err) != 0)
       {
         haserr = true;
       }
@@ -2018,6 +2020,13 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       gt_bcktab_includedistpfxidx_out(sfi->bcktab);
       gt_fa_fclose(outfpbcktab);
       gt_bcktab_delete_unused_memory(sfi->bcktab,logger);
+    }
+  }
+  if (!haserr)
+  {
+    gt_assert(sfi != NULL && sfi->suftabparts != NULL);
+    if (stpgetnumofparts(sfi->suftabparts) > 1U)
+    {
       if (sfi->sfxstrategy.spmopt_minlength > 0)
       {
         gt_assert(sfi->markprefixbuckets != NULL);
