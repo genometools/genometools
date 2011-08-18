@@ -81,9 +81,7 @@ struct Sfxiterator
   /* changed in each part */
   GtSuffixsortspace *suffixsortspace;
   GtCodetype currentmincode,
-             currentmaxcode,
-             currentprefixcodeminindex,
-             currentprefixcodemaxindex;
+             currentmaxcode;
   unsigned long widthofpart;
   unsigned int part;
   Outlcpinfo *outlcpinfo;
@@ -1547,7 +1545,7 @@ static void gt_determineaddionalsuffixprefixchars(
     }
   }
   sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
-  for (suffixchars = 1U; suffixchars <= 16U; suffixchars++)
+  for (suffixchars = 1U; suffixchars <= prefixchars; suffixchars++)
   {
     sizeofsuffixmarks = gt_sizeforbittable(numofchars,prefixlength+suffixchars);
     if (estimatedspace + sizeofprefixmarks + sizeofsuffixmarks
@@ -1556,6 +1554,10 @@ static void gt_determineaddionalsuffixprefixchars(
       suffixchars--;
       break;
     }
+  }
+  if(prefixchars <= suffixchars)
+  {
+    suffixchars = prefixchars - 1;
   }
   *additionalprefixchars = prefixchars;
   *additionalsuffixchars = suffixchars;
@@ -1639,6 +1641,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->prefixlength = prefixlength;
     sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->mappedmarkprefixbuckets = NULL;
+    sfi->markprefixbuckets = NULL;
+    sfi->marksuffixbuckets = NULL;
     sfi->outfpbcktab = outfpbcktab;
     sfi->spmopt_kmerscansize = 0;
     sfi->spmopt_numofallprefixcodes = 0;
@@ -1648,8 +1652,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->spmopt_kmerscancodesuffixmask = 0;
     sfi->spmopt_additionalprefixchars = 3U;
     sfi->dcov = NULL;
-    sfi->markprefixbuckets = NULL;
-    sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
     if (sfxstrategy != NULL)
     {
@@ -2096,12 +2098,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   }
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
-  sfi->currentprefixcodeminindex
-    = gt_bcktab_code_to_prefix_index(sfi->currentmincode,
-                                     sfi->spmopt_additionalprefixchars);
-  sfi->currentprefixcodemaxindex
-    = gt_bcktab_code_to_prefix_index(sfi->currentmaxcode,
-                                     sfi->spmopt_additionalprefixchars);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
   if (sfi->sfxprogress != NULL)
   {
@@ -2129,8 +2125,12 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
         = (GtBitsequence *)
           gt_Sfxmappedrange_map(sfi->mappedmarkprefixbuckets,
                                 sfi->part,
-                                sfi->currentprefixcodeminindex,
-                                sfi->currentprefixcodemaxindex,
+                                gt_bcktab_code_to_prefix_index(
+                                     sfi->currentmincode,
+                                     sfi->spmopt_additionalprefixchars),
+                                gt_bcktab_code_to_prefix_index(
+                                     sfi->currentmaxcode,
+                                     sfi->spmopt_additionalprefixchars),
                                 sfi->logger);
     }
   }
