@@ -201,7 +201,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
           = gt_bcktab_get(bcktab,suftabparts->components[part-1].nextcode);
       }
       if (suftabparts->largestsuftabwidth <
-         suftabparts->components[part].widthofpart)
+          suftabparts->components[part].widthofpart)
       {
         suftabparts->largestsuftabwidth
           = suftabparts->components[part].widthofpart;

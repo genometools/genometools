@@ -71,14 +71,14 @@ void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   size_t mappedsize;
 
   sfxmappedrange->entire = gt_fa_mmap_read(gt_str_get(sfxmappedrange->filename),
-                                        &mappedsize,err);
+                                           &mappedsize,err);
   if (sfxmappedrange->entire == NULL)
   {
     return NULL;
   }
   if (mappedsize != sfxmappedrange->sizeofunit * sfxmappedrange->numofunits)
   {
-    gt_error_set(err,"mapping file %s: mapped size = %lu != %lu = "
+    gt_error_set(err,"map file %s: mapped size = %lu != %lu = "
                      "expected size",
                       gt_str_get(sfxmappedrange->filename),
                       mappedsize,
