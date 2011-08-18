@@ -1254,7 +1254,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                              (unsigned long) dcov->vparam);
     }
   }
-  gt_bcktab_delete(dcov->bcktab);
+  gt_bcktab_delete(dcov->bcktab,dcov->logger);
   dcov->bcktab = NULL;
   dc_sortremainingsamples(dcov);
   if (withcheck)

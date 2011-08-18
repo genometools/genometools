@@ -76,6 +76,7 @@ GtBcktab *gt_bcktab_map(const char *indexname,
                         unsigned int prefixlength,
                         unsigned long maxvalue,
                         bool withspecialsuffixes,
+                        GtLogger *logger,
                         GtError *err);
 
 unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
@@ -83,13 +84,14 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
                                           GtCodetype maxcode);
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
-                                   const char *bcktabfilename,
                                    unsigned int part,
                                    GtCodetype mincode,
                                    GtCodetype maxcode,
                                    GtLogger *logger);
 
-void gt_bcktab_delete(GtBcktab *bcktab);
+int gt_bcktab_remap_all(GtBcktab *bcktab,GtError *err);
+
+void gt_bcktab_delete(GtBcktab *bcktab,GtLogger *logger);
 
 GtBcktab *gt_bcktab_new(unsigned int numofchars,
                         unsigned int prefixlength,
@@ -108,19 +110,11 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
                                    unsigned int prefixindex,
                                    unsigned int maxprefixlen);
 
-void gt_bcktab_excludedistpfxidx_out(GtBcktab *bcktab);
-
-void gt_bcktab_includedistpfxidx_out(GtBcktab *bcktab);
-
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
+int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err);
+
 unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab);
-
-void gt_bcktab_delete_unused_memory(GtBcktab *bcktab,GtLogger *logger);
-
-int gt_bcktab_flush_remaining(const GtBcktab *bcktab,
-                              const char *bcktabfilename,
-                              GtError *err);
 
 unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
                                        const GtBcktab *bcktab,

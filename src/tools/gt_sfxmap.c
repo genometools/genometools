@@ -671,7 +671,7 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
             }
           }
         }
-        gt_logger_log(logger,"# bwtdifferentconsecutive=%lu (%.4f)\n",
+        gt_logger_log(logger,"bwtdifferentconsecutive=%lu (%.4f)",
                bwtdifferentconsecutive,
                (double) bwtdifferentconsecutive/totallength);
       }

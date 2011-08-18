@@ -24,11 +24,6 @@
 #include "core/logger_api.h"
 #include "core/codetype.h"
 
-#define FROMCODE2SPECIALCODE(CODE,NUMOFCHARS)\
-                            (((NUMOFCHARS) == 4U)\
-                            ? ((CODE) >> 2)\
-                            : (((CODE) - ((NUMOFCHARS)-1)) / (NUMOFCHARS)))
-
 typedef enum
 {
   GtSfxGtBitsequence,
@@ -38,27 +33,8 @@ typedef enum
 
 typedef struct GtSfxmappedrange GtSfxmappedrange;
 
-typedef struct
-{
-  unsigned long mapoffset, mapend;
-} GtMappedrange;
-
-void gt_mapped_lbrange_get(GtMappedrange *range,
-                           size_t sizeofbasetype,
-                           unsigned long pagesize,
-                           unsigned long mincode,
-                           unsigned long maxcode);
-
-void gt_mapped_csrange_get(GtMappedrange *range,
-                           unsigned long offset,
-                           unsigned int numofchars,
-                           size_t sizeofbasetype,
-                           unsigned long pagesize,
-                           GtCodetype mincode,
-                           GtCodetype maxcode);
-
-unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
-                                         unsigned long offset);
+void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
+                                   GtError *err);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         bool writable,
@@ -77,10 +53,11 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned long maxindex,
                             GtLogger *logger);
 
+unsigned long gt_Sfxmappedrange_mappedsize(GtSfxmappedrange *sfxmappedrange,
+                                           unsigned long minindex,
+                                           unsigned long maxindex);
+
 int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
                              GtLogger *logger,GtError *err);
-
-int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,
-                                  GtError *err);
 
 #endif

@@ -50,7 +50,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 unsigned int numofparts,
                                 unsigned long maximumspace,
                                 void *voidoutlcpinfo,
-                                const char *indexname,
                                 FILE *outfpbcktab,
                                 const Sfxstrategy *sfxstrategy,
                                 GtTimer *sfxprogress,

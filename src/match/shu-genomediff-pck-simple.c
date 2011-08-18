@@ -163,7 +163,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
       {
         double div, kr;
 
-        gt_logger_log(logger, "# shulen:\n%f", avgShuLength);
+        gt_logger_log(logger, "shulen:\n%f", avgShuLength);
         gt_log_log("shu: %f, gc: %f, len: %lu",
             avgShuLength, gc_query, subjectLength);
         div =  gt_divergence(arguments->divergence_rel_err,
@@ -175,7 +175,7 @@ int gt_genomediff_pck_shu_simple(GtLogger *logger,
                              gc_query,
                              ln_n_fac,
                              arguments->max_ln_n_fac);
-        gt_logger_log(logger, "# divergence:\n%f", div);
+        gt_logger_log(logger, "divergence:\n%f", div);
 
         kr = gt_calculateKr(div);
 

@@ -96,11 +96,10 @@ struct Sfxiterator
   GtSpecialrangeiterator *sri; /* refers to space used in each part */
 
   /* use for generating k-mer codes */
+  FILE *outfpbcktab;
   bool storespecials;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
-  bool usebcktmpfile;
-  GtStr *bcktabfilename;
   unsigned int kmerfastmaskright;
   GtSuffixsortspace_exportptr *exportptr;
   unsigned int spmopt_kmerscansize,
@@ -354,7 +353,6 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
   gt_assert(suffixcode < sfi->spmopt_numofallsuffixcodes);
   return (GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) &&
-
           GT_ISIBITSET(sfi->marksuffixbuckets,suffixcode)) ? true : false;
 }
 #else
@@ -543,28 +541,23 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   gt_suffixsortspace_delete(sfi->suffixsortspace,
                             sfi->sfxstrategy.spmopt_minlength == 0
                               ? true : false);
-  if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U)
+  if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U &&
+      sfi->outfpbcktab != NULL)
   {
-    gt_error_check(err);
-    gt_assert (sfi->bcktabfilename != NULL);
-    if (sfi->usebcktmpfile)
+    if (gt_bcktab_remap_all(sfi->bcktab,err) != 0)
     {
-      if (gt_unlink_possibly_with_error(gt_str_get(sfi->bcktabfilename),
-                                        sfi->logger,err) != 0)
-      {
-        haserr = true;
-      }
+      haserr = true;
     } else
     {
-      if (gt_bcktab_flush_remaining(sfi->bcktab,
-                                    gt_str_get(sfi->bcktabfilename),err) != 0)
+      int ret = gt_bcktab_flush_to_file(sfi->outfpbcktab,sfi->bcktab,err);
+      gt_fa_fclose(sfi->outfpbcktab);
+      if (ret != 0)
       {
         haserr = true;
       }
     }
   }
-  gt_bcktab_delete(sfi->bcktab);
-  gt_str_delete(sfi->bcktabfilename);
+  gt_bcktab_delete(sfi->bcktab,sfi->logger);
   gt_freesuftabparts(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   if (sfi->mappedmarkprefixbuckets == NULL)
@@ -1575,7 +1568,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 unsigned int numofparts,
                                 unsigned long maximumspace,
                                 void *voidoutlcpinfo,
-                                const char *indexname,
                                 FILE *outfpbcktab,
                                 const Sfxstrategy *sfxstrategy,
                                 GtTimer *sfxprogress,
@@ -1647,6 +1639,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->prefixlength = prefixlength;
     sfi->kmerfastmaskright = (1U << GT_MULT2(prefixlength))-1;
     sfi->mappedmarkprefixbuckets = NULL;
+    sfi->outfpbcktab = outfpbcktab;
     sfi->spmopt_kmerscansize = 0;
     sfi->spmopt_numofallprefixcodes = 0;
     sfi->spmopt_numofallsuffixcodes = 0;
@@ -1658,8 +1651,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->markprefixbuckets = NULL;
     sfi->marksuffixbuckets = NULL;
     sfi->withprogressbar = withprogressbar;
-    sfi->usebcktmpfile = false;
-    sfi->bcktabfilename = NULL;
     if (sfxstrategy != NULL)
     {
        sfi->sfxstrategy = *sfxstrategy;
@@ -1734,14 +1725,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   }
   if (!haserr)
   {
-
+    bool withspecialsuffixes;
     gt_assert(sfi != NULL);
+    withspecialsuffixes = sfi->sfxstrategy.spmopt_minlength == 0 ? true : false;
     sfi->bcktab = gt_bcktab_new(sfi->numofchars,
                                 prefixlength,
                                 sfi->totallength+1,
                                 sfi->sfxstrategy.storespecialcodes,
-                                sfi->sfxstrategy.spmopt_minlength == 0
-                                  ? true : false,
+                                withspecialsuffixes,
                                 sfi->logger,
                                 err);
     if (sfi->bcktab == NULL)
@@ -1990,36 +1981,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
-    if (indexname != NULL)
-    {
-      sfi->bcktabfilename = gt_str_new_cstr(indexname);
-      gt_str_append_cstr(sfi->bcktabfilename,BCKTABSUFFIX);
-      sfi->usebcktmpfile = false;
-    } else
-    {
-      gt_assert(outfpbcktab == NULL);
-      if (numofparts > 1U || maximumspace > 0)
-      {
-        sfi->bcktabfilename = gt_str_new();
-        outfpbcktab = gt_xtmpfp(sfi->bcktabfilename);
-        sfi->usebcktmpfile = true;
-      } else
-      {
-        sfi->bcktabfilename = NULL;
-        sfi->usebcktmpfile = false;
-      }
-    }
     if (stpgetnumofparts(sfi->suftabparts) > 1U)
     {
-      gt_bcktab_excludedistpfxidx_out(sfi->bcktab);
-      gt_assert(outfpbcktab != NULL);
-      if (gt_bcktab_flush_to_file(outfpbcktab,sfi->bcktab,err) != 0)
+      if (gt_bcktab_storetmp(sfi->bcktab, sfi->logger, err) != 0)
       {
         haserr = true;
       }
-      gt_bcktab_includedistpfxidx_out(sfi->bcktab);
-      gt_fa_fclose(outfpbcktab);
-      gt_bcktab_delete_unused_memory(sfi->bcktab,logger);
     }
   }
   if (!haserr)
@@ -2096,7 +2063,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 maximumspace,
                                 NULL,
                                 NULL,
-                                NULL,
                                 sfxstrategy,
                                 sfxprogress,
                                 withprogressbar,
@@ -2153,7 +2119,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                   sfi->currentmincode,
                   sfi->currentmaxcode);
     gt_bcktab_assignboundsforpart(sfi->bcktab,
-                                  gt_str_get(sfi->bcktabfilename),
                                   sfi->part,
                                   sfi->currentmincode,
                                   sfi->currentmaxcode,

@@ -172,8 +172,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int suffixeratorwithoutput(const char *indexname,
-                                  Outfileinfo *outfileinfo,
+static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
                                   const GtEncseq *encseq,
                                   GtReadmode readmode,
                                   unsigned int prefixlength,
@@ -194,7 +193,6 @@ static int suffixeratorwithoutput(const char *indexname,
                            numofparts,
                            maximumspace,
                            outfileinfo->outlcpinfo,
-                           indexname,
                            outfileinfo->outfpbcktab,
                            sfxstrategy,
                            sfxprogress,
@@ -554,7 +552,6 @@ static int runsuffixerator(bool doesa,
       if (doesa)
       {
         if (suffixeratorwithoutput(
-                               gt_str_get(so->indexname),
                                &outfileinfo,
                                encseq,
                                readmode,

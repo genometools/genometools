@@ -20,6 +20,7 @@
 #include "core/fa.h"
 #include "core/intbits.h"
 #include "sfx-maprange.h"
+#include "stamp.h"
 
 static unsigned long gt_multipleofpagesize(unsigned long code,
                                            bool smaller,
@@ -37,61 +38,25 @@ static unsigned long gt_multipleofpagesize(unsigned long code,
   return ((code * sizeofbasetype)/pagesize) * pagesize + pagesize;
 }
 
-void gt_mapped_lbrange_get(GtMappedrange *range,
-                           size_t sizeofbasetype,
-                           unsigned long pagesize,
-                           unsigned long mincode,
-                           unsigned long maxcode)
+typedef struct
+{
+  unsigned long mapoffset, mapend;
+} GtMappedrange;
+
+static void gt_mapped_lbrange_get(GtMappedrange *range,
+                                  size_t sizeofbasetype,
+                                  unsigned long pagesize,
+                                  unsigned long mincode,
+                                  unsigned long maxcode)
 {
   range->mapoffset = gt_multipleofpagesize(mincode,true,sizeofbasetype,
                                            pagesize);
   range->mapend = gt_multipleofpagesize(maxcode,false,sizeofbasetype,pagesize);
 }
 
-static GtCodetype gt_mapped_transformcode(unsigned long offset,
-                                          unsigned int numofchars,
-                                          GtCodetype code)
-{
-  if (code >= (GtCodetype) (numofchars - 1))
-  {
-    return offset + FROMCODE2SPECIALCODE(code,numofchars);
-  } else
-  {
-    return offset;
-  }
-}
-
-void gt_mapped_csrange_get(GtMappedrange *range,
-                           unsigned long offset,
-                           unsigned int numofchars,
-                           size_t sizeofbasetype,
-                           unsigned long pagesize,
-                           GtCodetype mincode,
-                           GtCodetype maxcode)
-{
-  gt_mapped_lbrange_get(range,
-                        sizeofbasetype,
-                        pagesize,
-                        gt_mapped_transformcode(offset,numofchars,mincode),
-                        gt_mapped_transformcode(offset,numofchars,maxcode));
-}
-
-unsigned int gt_Sfxmappedrange_padoffset(size_t sizeofbasetype,
-                                         unsigned long offset)
-{
-  if (sizeofbasetype < GT_WORDSIZE_INBYTES &&
-      ((offset+1) * sizeofbasetype) % GT_WORDSIZE_INBYTES > 0)
-  {
-    return 1U;
-  } else
-  {
-    return 0;
-  }
-}
-
 struct GtSfxmappedrange
 {
-  void *ptr, **usedptrptr;
+  void *ptr, *entire, **usedptrptr;
   GtStr *filename;
   const char *tablename;
   unsigned long pagesize;
@@ -99,6 +64,32 @@ struct GtSfxmappedrange
   GtSfxmappedrangetype type;
   bool writable;
 };
+
+void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
+                                   GtError *err)
+{
+  size_t mappedsize;
+
+  sfxmappedrange->entire = gt_fa_mmap_read(gt_str_get(sfxmappedrange->filename),
+                                        &mappedsize,err);
+  if (sfxmappedrange->entire == NULL)
+  {
+    return NULL;
+  }
+  if (mappedsize != sfxmappedrange->sizeofunit * sfxmappedrange->numofunits)
+  {
+    gt_error_set(err,"mapping file %s: mapped size = %lu != %lu = "
+                     "expected size",
+                      gt_str_get(sfxmappedrange->filename),
+                      mappedsize,
+                      sfxmappedrange->sizeofunit *
+                      sfxmappedrange->numofunits);
+    gt_fa_xmunmap(sfxmappedrange->entire);
+    sfxmappedrange->entire = NULL;
+    return NULL;
+  }
+  return sfxmappedrange->entire;
+}
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         bool writable,
@@ -118,9 +109,9 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
   sfxmappedrange->writable = writable;
+  sfxmappedrange->entire = NULL;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   gt_assert(outfp != NULL);
-  sfxmappedrange->writable = false;
   sfxmappedrange->type = type;
   sfxmappedrange->tablename = tablename;
   switch (type)
@@ -171,6 +162,20 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   return sfxmappedrange;
 }
 
+unsigned long gt_Sfxmappedrange_mappedsize(GtSfxmappedrange *sfxmappedrange,
+                                           unsigned long minindex,
+                                           unsigned long maxindex)
+{
+  GtMappedrange lbrange;
+
+  gt_mapped_lbrange_get(&lbrange,
+                        sfxmappedrange->sizeofunit,
+                        sfxmappedrange->pagesize,
+                        minindex,
+                        maxindex);
+  return lbrange.mapend - lbrange.mapoffset + 1;
+}
+
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,
@@ -189,15 +194,16 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                         sfxmappedrange->pagesize,
                         minindex,
                         maxindex);
-  unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
   if (logger != NULL)
   {
     size_t sizeoftable = sfxmappedrange->sizeofunit *
                          sfxmappedrange->numofunits;
     gt_logger_log(logger,
-                  "part %u: mapped %s from %lu to %lu (%.1f%% of all)",
+                  "part %u: mapped %s from %lu to %lu for %s (%.1f%% of all)",
                   part,sfxmappedrange->tablename,lbrange.mapoffset,
-                  lbrange.mapend,(lbrange.mapend - lbrange.mapoffset + 1
+                  lbrange.mapend,
+                  sfxmappedrange->writable ? "writing" : "reading",
+                  (lbrange.mapend - lbrange.mapoffset + 1
                     >= (unsigned long) sizeoftable)
                       ? 100.0
                       : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
@@ -220,6 +226,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                                 (size_t) (lbrange.mapend-lbrange.mapoffset+1),
                                 (size_t) lbrange.mapoffset);
   }
+  unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
   switch (sfxmappedrange->type)
   {
     case GtSfxGtBitsequence:
@@ -235,8 +242,8 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   return NULL;
 }
 
-int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,
-                                  GtError *err)
+static int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,
+                                         GtError *err)
 {
   bool haserr = false;
 
@@ -267,10 +274,8 @@ int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
   if (sfxmappedrange->ptr != NULL)
   {
     gt_fa_xmunmap(sfxmappedrange->ptr);
-  } else
-  {
-    gt_free(*sfxmappedrange->usedptrptr);
   }
+  gt_fa_xmunmap(sfxmappedrange->entire);
   *sfxmappedrange->usedptrptr = NULL;
   gt_assert(sfxmappedrange->filename != NULL);
   if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),

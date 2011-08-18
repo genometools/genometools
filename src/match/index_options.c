@@ -210,10 +210,6 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
       }
     }
   }
-  if (!had_err && (oi->numofparts > 1U || gt_str_length(oi->memlimit) > 0))
-  {
-    oi->outbcktab = true;
-  }
   if (!had_err)
   {
     if (gt_option_is_set(oi->optionalgbounds))
