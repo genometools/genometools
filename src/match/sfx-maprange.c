@@ -93,56 +93,63 @@ void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   return sfxmappedrange->entire;
 }
 
-GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        bool writable,
-                                        unsigned long numofentries,
-                                        GtSfxmappedrangetype type,
-                                        const char *tablename,
-                                        unsigned long(*transformfunc)(
-                                             unsigned long,unsigned int),
-                                        unsigned int transformfunc_data,
-                                        GtLogger *logger,
-                                        GtError *err)
+GtSfxmappedrange *gt_Sfxmappedrange_new_basic(unsigned long numofentries,
+                                              GtSfxmappedrangetype type,
+                                              unsigned long(*transformfunc)(
+                                                  unsigned long,unsigned int),
+                                              unsigned int transformfunc_data)
 {
   GtSfxmappedrange *sfxmappedrange;
-  bool haserr = false;
-  FILE *outfp;
 
   sfxmappedrange = gt_malloc(sizeof (*sfxmappedrange));
   sfxmappedrange->ptr = NULL;
   sfxmappedrange->pagesize = (unsigned long) sysconf((int) _SC_PAGESIZE);
-  sfxmappedrange->usedptrptr = usedptrptr;
-  sfxmappedrange->filename = gt_str_new();
-  sfxmappedrange->writable = writable;
+  sfxmappedrange->usedptrptr = NULL;
+  sfxmappedrange->filename = NULL;
+  sfxmappedrange->writable = false;
   sfxmappedrange->entire = NULL;
   sfxmappedrange->transformfunc = transformfunc;
   sfxmappedrange->transformfunc_data = transformfunc_data;
-  outfp = gt_xtmpfp(sfxmappedrange->filename);
-  gt_assert(outfp != NULL);
   sfxmappedrange->type = type;
-  sfxmappedrange->tablename = tablename;
+  sfxmappedrange->tablename = NULL;
   switch (type)
   {
     case GtSfxGtBitsequence:
       sfxmappedrange->sizeofunit = sizeof (GtBitsequence);
+      sfxmappedrange->numofunits = GT_NUMOFINTSFORBITS(numofentries);
       break;
     case GtSfxuint32_t:
       sfxmappedrange->sizeofunit = sizeof (uint32_t);
+      sfxmappedrange->numofunits = (size_t) numofentries;
       break;
     case GtSfxunsignedlong:
       sfxmappedrange->sizeofunit = sizeof (unsigned long);
+      sfxmappedrange->numofunits = (size_t) numofentries;
       break;
     default:
       gt_assert(false);
       break;
   }
-  if (type == GtSfxGtBitsequence)
-  {
-    sfxmappedrange->numofunits = GT_NUMOFINTSFORBITS(numofentries);
-  } else
-  {
-    sfxmappedrange->numofunits = (size_t) numofentries;
-  }
+  return sfxmappedrange;
+}
+
+int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
+                              void **usedptrptr,
+                              bool writable,
+                              const char *tablename,
+                              GtLogger *logger,
+                              GtError *err)
+{
+  bool haserr = false;
+  FILE *outfp;
+
+  sfxmappedrange->ptr = NULL;
+  sfxmappedrange->usedptrptr = usedptrptr;
+  sfxmappedrange->filename = gt_str_new();
+  sfxmappedrange->writable = writable;
+  outfp = gt_xtmpfp(sfxmappedrange->filename);
+  gt_assert(outfp != NULL);
+  sfxmappedrange->tablename = tablename;
   gt_logger_log(logger,"write %s to file %s (%lu units of %lu bytes)",
                 tablename,gt_str_get(sfxmappedrange->filename),
                 sfxmappedrange->numofunits,sfxmappedrange->sizeofunit);
@@ -164,6 +171,38 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   {
     gt_str_delete(sfxmappedrange->filename);
     gt_free(sfxmappedrange);
+    return -1;
+  }
+  return 0;
+}
+
+GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
+                                        bool writable,
+                                        unsigned long numofentries,
+                                        /* for GtBitsequence numofentries
+                                           means the number of bits, otherwise
+                                           the number of array indices */
+                                        GtSfxmappedrangetype type,
+                                        const char *tablename,
+                                        unsigned long(*transformfunc)(
+                                             unsigned long,unsigned int),
+                                        unsigned int transformfunc_data,
+                                        GtLogger *logger,
+                                        GtError *err)
+{
+  GtSfxmappedrange *sfxmappedrange;
+
+  sfxmappedrange = gt_Sfxmappedrange_new_basic(numofentries,
+                                               type,
+                                               transformfunc,
+                                               transformfunc_data);
+  if (gt_Sfxmappedrange_enhance(sfxmappedrange,
+                                usedptrptr,
+                                writable,
+                                tablename,
+                                logger,
+                                err) != 0)
+  {
     return NULL;
   }
   return sfxmappedrange;
