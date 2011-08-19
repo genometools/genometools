@@ -33,7 +33,7 @@ struct Suftabparts
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;
-  unsigned long largestsizeforbucketsection,
+  unsigned long largestsizemappedpartwise,
                 largestsuftabwidth,
                 numofsuffixestoinsert;
 };
@@ -136,7 +136,7 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
 
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
-  suftabparts->largestsizeforbucketsection = 0;
+  suftabparts->largestsizemappedpartwise = 0;
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
   {
@@ -155,7 +155,8 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   if (suftabparts->numofparts == 0)
   {
     suftabparts->largestsuftabwidth = fullspecials/numofparts+1;
-    suftabparts->largestsizeforbucketsection = gt_bcktab_size_lb_cs(bcktab);
+    suftabparts->largestsizemappedpartwise
+     = gt_bcktab_size_lb_cs(bcktab);
     suftabparts->components = NULL;
   } else
   {
@@ -212,9 +213,9 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
         = gt_bcktab_mapped_range_size(bcktab,
                                       stpgetcurrentmincode(part,suftabparts),
                                       stpgetcurrentmaxcode(part,suftabparts));
-      if (suftabparts->largestsizeforbucketsection < sizemapped)
+      if (suftabparts->largestsizemappedpartwise < sizemapped)
       {
-        suftabparts->largestsizeforbucketsection = sizemapped;
+        suftabparts->largestsizemappedpartwise = sizemapped;
       }
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
@@ -266,10 +267,10 @@ unsigned long stpgetlargestsuftabwidth(const Suftabparts *suftabparts)
   return suftabparts->largestsuftabwidth;
 }
 
-unsigned long stpgetlargestsizeforbucketsection(const Suftabparts *suftabparts)
+unsigned long stpgetlargestsizemappedpartwise(const Suftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL);
-  return suftabparts->largestsizeforbucketsection;
+  return suftabparts->largestsizemappedpartwise;
 }
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts)

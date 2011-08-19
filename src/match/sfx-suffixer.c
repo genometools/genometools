@@ -664,7 +664,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     } else
     {
       if ((unsigned long) (suftabsize +
-                           stpgetlargestsizeforbucketsection(suftabparts) +
+                           stpgetlargestsizemappedpartwise(suftabparts) +
                            estimatedspace - size_lb_cs) <= maximumspace)
       {
         gt_freesuftabparts(suftabparts);
@@ -1555,12 +1555,24 @@ static void gt_determineaddionalsuffixprefixchars(
       break;
     }
   }
-  if(prefixchars <= suffixchars)
+  if (prefixchars <= suffixchars)
   {
     suffixchars = prefixchars - 1;
   }
   *additionalprefixchars = prefixchars;
   *additionalsuffixchars = suffixchars;
+}
+
+static unsigned long gt_bcktab_code_to_prefix_index(unsigned long code,
+                                             unsigned int additionalprefixchars)
+{
+  if (GT_MULT2(additionalprefixchars) > (unsigned int) GT_LOGWORDSIZE)
+  {
+    return (unsigned long) (code << (GT_MULT2(additionalprefixchars) -
+                                 GT_LOGWORDSIZE));
+  }
+  return (unsigned long) (code >> (GT_LOGWORDSIZE -
+                                GT_MULT2(additionalprefixchars)));
 }
 
 Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
@@ -2005,6 +2017,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                   sfi->spmopt_numofallprefixcodes,
                                   GtSfxGtBitsequence,
                                   "markprefixbuckets",
+                                  gt_bcktab_code_to_prefix_index,
+                                  sfi->spmopt_additionalprefixchars,
                                   sfi->logger,
                                   err);
         if (sfi->mappedmarkprefixbuckets == NULL)
@@ -2072,18 +2086,6 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
                                 err);
 }
 
-static GtCodetype gt_bcktab_code_to_prefix_index(GtCodetype code,
-                                             unsigned int additionalprefixchars)
-{
-  if (GT_MULT2(additionalprefixchars) > (unsigned int) GT_LOGWORDSIZE)
-  {
-    return (GtCodetype) (code << (GT_MULT2(additionalprefixchars) -
-                                 GT_LOGWORDSIZE));
-  }
-  return (GtCodetype) (code >> (GT_LOGWORDSIZE -
-                                GT_MULT2(additionalprefixchars)));
-}
-
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
   unsigned long partwidth;
@@ -2125,12 +2127,8 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
         = (GtBitsequence *)
           gt_Sfxmappedrange_map(sfi->mappedmarkprefixbuckets,
                                 sfi->part,
-                                gt_bcktab_code_to_prefix_index(
-                                     sfi->currentmincode,
-                                     sfi->spmopt_additionalprefixchars),
-                                gt_bcktab_code_to_prefix_index(
-                                     sfi->currentmaxcode,
-                                     sfi->spmopt_additionalprefixchars),
+                                sfi->currentmincode,
+                                sfi->currentmaxcode,
                                 sfi->logger);
     }
   }

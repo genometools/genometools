@@ -49,7 +49,7 @@ unsigned long stpgetlargestsuftabwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
 
-unsigned long stpgetlargestsizeforbucketsection(const Suftabparts *suftabparts);
+unsigned long stpgetlargestsizemappedpartwise(const Suftabparts *suftabparts);
 
 unsigned long stpnumofsuffixestoinsert(const Suftabparts *suftabparts);
 

@@ -62,6 +62,8 @@ struct GtSfxmappedrange
   unsigned long pagesize;
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
+  unsigned long(*transformfunc)(unsigned long,unsigned int);
+  unsigned transformfunc_data;
   bool writable;
 };
 
@@ -96,6 +98,9 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         const char *tablename,
+                                        unsigned long(*transformfunc)(
+                                             unsigned long,unsigned int),
+                                        unsigned int transformfunc_data,
                                         GtLogger *logger,
                                         GtError *err)
 {
@@ -110,6 +115,8 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   sfxmappedrange->filename = gt_str_new();
   sfxmappedrange->writable = writable;
   sfxmappedrange->entire = NULL;
+  sfxmappedrange->transformfunc = transformfunc;
+  sfxmappedrange->transformfunc_data = transformfunc_data;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   gt_assert(outfp != NULL);
   sfxmappedrange->type = type;
@@ -168,6 +175,13 @@ unsigned long gt_Sfxmappedrange_mappedsize(GtSfxmappedrange *sfxmappedrange,
 {
   GtMappedrange lbrange;
 
+  if (sfxmappedrange->transformfunc != NULL)
+  {
+    minindex = sfxmappedrange->transformfunc(minindex,
+                                            sfxmappedrange->transformfunc_data);
+    maxindex = sfxmappedrange->transformfunc(maxindex,
+                                            sfxmappedrange->transformfunc_data);
+  }
   gt_mapped_lbrange_get(&lbrange,
                         sfxmappedrange->sizeofunit,
                         sfxmappedrange->pagesize,
@@ -188,6 +202,13 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   if (sfxmappedrange->ptr != NULL)
   {
     gt_fa_xmunmap(sfxmappedrange->ptr);
+  }
+  if (sfxmappedrange->transformfunc != NULL)
+  {
+    minindex = sfxmappedrange->transformfunc(minindex,
+                                            sfxmappedrange->transformfunc_data);
+    maxindex = sfxmappedrange->transformfunc(maxindex,
+                                            sfxmappedrange->transformfunc_data);
   }
   gt_mapped_lbrange_get(&lbrange,
                         sfxmappedrange->sizeofunit,

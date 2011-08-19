@@ -44,6 +44,9 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                            the number of array indices */
                                         GtSfxmappedrangetype type,
                                         const char *tablename,
+                                        unsigned long(*transformfunc)(
+                                             unsigned long,unsigned int),
+                                        unsigned int transformfunc_data,
                                         GtLogger *logger,
                                         GtError *err);
 

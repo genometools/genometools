@@ -130,10 +130,10 @@ static void gt_bcktab_distpfxidx_increment(const GtBcktab *bcktab,
   }
 }
 
-static GtCodetype gt_bcktab_transformcode(unsigned int numofchars,
-                                          GtCodetype code)
+static unsigned long gt_bcktab_transformcode(unsigned long code,
+                                             unsigned int numofchars)
 {
-  if (code >= (GtCodetype) (numofchars - 1))
+  if (code >= (unsigned long) (numofchars - 1))
   {
     return GT_FROMCODE2SPECIALCODE(code,numofchars);
   } else
@@ -156,10 +156,8 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
       = gt_Sfxmappedrange_mappedsize(bcktab->mappedleftborder,mincode,maxcode);
     if (bcktab->mappedcountspecialcodes != NULL)
     {
-      sumsize += gt_Sfxmappedrange_mappedsize(
-                           bcktab->mappedcountspecialcodes,
-                           gt_bcktab_transformcode(bcktab->numofchars,mincode),
-                           gt_bcktab_transformcode(bcktab->numofchars,maxcode));
+      sumsize += gt_Sfxmappedrange_mappedsize(bcktab->mappedcountspecialcodes,
+                                              mincode,maxcode);
     }
     return sumsize;
   }
@@ -179,6 +177,8 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
                               ? GtSfxunsignedlong
                               : GtSfxuint32_t,
                             "leftborder",
+                            NULL,
+                            0,
                             logger,
                             err);
   if (bcktab->mappedleftborder == NULL)
@@ -199,6 +199,8 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
                                 ? GtSfxunsignedlong
                                 : GtSfxuint32_t,
                               "countspecialcodes",
+                              gt_bcktab_transformcode,
+                              bcktab->numofchars,
                               logger,
                               err);
     if (bcktab->mappedcountspecialcodes == NULL)
@@ -235,14 +237,8 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
   {
     void *tmpspecialcodes;
 
-    tmpspecialcodes
-      = gt_Sfxmappedrange_map(bcktab->mappedcountspecialcodes,
-                              part,
-                              gt_bcktab_transformcode(bcktab->numofchars,
-                                                      mincode),
-                              gt_bcktab_transformcode(bcktab->numofchars,
-                                                      maxcode),
-                              logger);
+    tmpspecialcodes = gt_Sfxmappedrange_map(bcktab->mappedcountspecialcodes,
+                                            part, mincode, maxcode, logger);
     if (bcktab->useulong)
     {
       bcktab->ulongcountspecialcodes = (unsigned long *) tmpspecialcodes;
