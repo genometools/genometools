@@ -331,17 +331,21 @@ int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
   bool haserr = false;
 
   gt_assert(sfxmappedrange != NULL);
-  if (sfxmappedrange->ptr != NULL)
-  {
-    gt_fa_xmunmap(sfxmappedrange->ptr);
-  }
+  gt_fa_xmunmap(sfxmappedrange->ptr);
+  sfxmappedrange->ptr = NULL;
   gt_fa_xmunmap(sfxmappedrange->entire);
-  *sfxmappedrange->usedptrptr = NULL;
-  gt_assert(sfxmappedrange->filename != NULL);
-  if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),
-                                    logger,err) != 0)
+  sfxmappedrange->entire = NULL;
+  if (sfxmappedrange->usedptrptr != NULL)
   {
-    haserr = true;
+    *sfxmappedrange->usedptrptr = NULL;
+  }
+  if (sfxmappedrange->filename != NULL)
+  {
+    if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),
+                                      logger,err) != 0)
+    {
+      haserr = true;
+    }
   }
   gt_str_delete(sfxmappedrange->filename);
   gt_free(sfxmappedrange);

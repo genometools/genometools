@@ -50,6 +50,19 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         GtLogger *logger,
                                         GtError *err);
 
+GtSfxmappedrange *gt_Sfxmappedrange_new_basic(unsigned long numofentries,
+                                              GtSfxmappedrangetype type,
+                                              unsigned long(*transformfunc)(
+                                                  unsigned long,unsigned int),
+                                              unsigned int transformfunc_data);
+
+int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
+                              void **usedptrptr,
+                              bool writable,
+                              const char *tablename,
+                              GtLogger *logger,
+                              GtError *err);
+
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,

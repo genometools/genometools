@@ -568,6 +568,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     {
       haserr = true;
     }
+    sfi->mappedmarkprefixbuckets = NULL;
   }
   gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
@@ -1815,6 +1816,11 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 sfi->prefixlength +
                                 sfi->spmopt_additionalprefixchars,
                                 (unsigned long) sizeofprefixmarks);
+      sfi->mappedmarkprefixbuckets
+        = gt_Sfxmappedrange_new_basic(sfi->spmopt_numofallprefixcodes,
+                                      GtSfxGtBitsequence,
+                                      gt_bcktab_code_to_prefix_index,
+                                      sfi->spmopt_additionalprefixchars);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
 #ifdef _LP64
@@ -2006,27 +2012,29 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (!haserr)
   {
     gt_assert(sfi != NULL && sfi->suftabparts != NULL);
-    if (stpgetnumofparts(sfi->suftabparts) > 1U)
+    if (stpgetnumofparts(sfi->suftabparts) > 1U &&
+        sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      if (sfi->sfxstrategy.spmopt_minlength > 0)
+      gt_assert(sfi->markprefixbuckets != NULL);
+      gt_assert(sfi->mappedmarkprefixbuckets != NULL);
+      if (gt_Sfxmappedrange_enhance(sfi->mappedmarkprefixbuckets,
+                                    (void **) &sfi->markprefixbuckets,
+                                    false,
+                                    "markprefixbuckets",
+                                    sfi->logger,
+                                    err) != 0)
       {
-        gt_assert(sfi->markprefixbuckets != NULL);
-        sfi->mappedmarkprefixbuckets
-          = gt_Sfxmappedrange_new((void **) &sfi->markprefixbuckets,
-                                  false,
-                                  sfi->spmopt_numofallprefixcodes,
-                                  GtSfxGtBitsequence,
-                                  "markprefixbuckets",
-                                  gt_bcktab_code_to_prefix_index,
-                                  sfi->spmopt_additionalprefixchars,
-                                  sfi->logger,
-                                  err);
-        if (sfi->mappedmarkprefixbuckets == NULL)
-        {
-          sfi->markprefixbuckets = NULL;
-          haserr = true;
-        }
-        gt_assert(sfi->markprefixbuckets == NULL);
+        sfi->markprefixbuckets = NULL;
+        haserr = true;
+      }
+      gt_assert(sfi->markprefixbuckets == NULL);
+    } else
+    {
+      if (sfi->mappedmarkprefixbuckets != NULL)
+      {
+        (void) gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,logger,
+                                        NULL);
+        sfi->mappedmarkprefixbuckets = NULL;
       }
     }
   }
