@@ -563,11 +563,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     gt_free(sfi->markprefixbuckets);
   } else
   {
-    if (gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,sfi->logger,err)
-         != 0)
-    {
-      haserr = true;
-    }
+    gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,sfi->logger);
     sfi->mappedmarkprefixbuckets = NULL;
   }
   gt_free(sfi->marksuffixbuckets);
@@ -2032,8 +2028,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       if (sfi->mappedmarkprefixbuckets != NULL)
       {
-        (void) gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,logger,
-                                        NULL);
+        gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,logger);
         sfi->mappedmarkprefixbuckets = NULL;
       }
     }

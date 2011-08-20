@@ -845,12 +845,13 @@ void gt_bcktab_delete(GtBcktab *bcktab,GtLogger *logger)
   {
     if (bcktab->mappedleftborder != NULL)
     {
-      (void) gt_Sfxmappedrange_delete(bcktab->mappedleftborder,logger,NULL);
+      gt_Sfxmappedrange_delete(bcktab->mappedleftborder,logger);
+      bcktab->mappedleftborder = NULL;
     }
     if (bcktab->mappedcountspecialcodes != NULL)
     {
-      (void) gt_Sfxmappedrange_delete(bcktab->mappedcountspecialcodes,logger,
-                                      NULL);
+      gt_Sfxmappedrange_delete(bcktab->mappedcountspecialcodes,logger);
+      bcktab->mappedcountspecialcodes = NULL;
     }
     gt_free(bcktab->ulongcountspecialcodes);
     gt_free(bcktab->uintcountspecialcodes);

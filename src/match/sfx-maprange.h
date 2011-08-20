@@ -73,7 +73,7 @@ unsigned long gt_Sfxmappedrange_mappedsize(GtSfxmappedrange *sfxmappedrange,
                                            unsigned long minindex,
                                            unsigned long maxindex);
 
-int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
-                             GtLogger *logger,GtError *err);
+void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
+                              GtLogger *logger);
 
 #endif

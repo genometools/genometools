@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include "core/fa.h"
+#include "core/xposix.h"
 #include "core/intbits.h"
 #include "sfx-maprange.h"
 #include "stamp.h"
@@ -302,34 +303,8 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   return NULL;
 }
 
-static int gt_unlink_possibly_with_error(const char *filename,GtLogger *logger,
-                                         GtError *err)
+void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
 {
-  bool haserr = false;
-
-  gt_logger_log(logger,"remove \"%s\"",filename);
-  if (unlink(filename) != 0)
-  {
-    if (err != NULL)
-    {
-      gt_error_set(err,"Cannot unlink file \"%s\": %s",
-                      filename,strerror(errno));
-      haserr = true;
-    } else
-    {
-      fprintf(stderr,"Cannot unlink file \"%s\": %s",
-                      filename,strerror(errno));
-      exit(EXIT_FAILURE);
-    }
-  }
-  return haserr ? -1 : 0;
-}
-
-int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
-                             GtLogger *logger,GtError *err)
-{
-  bool haserr = false;
-
   gt_assert(sfxmappedrange != NULL);
   gt_fa_xmunmap(sfxmappedrange->ptr);
   sfxmappedrange->ptr = NULL;
@@ -341,13 +316,9 @@ int gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
   }
   if (sfxmappedrange->filename != NULL)
   {
-    if (gt_unlink_possibly_with_error(gt_str_get(sfxmappedrange->filename),
-                                      logger,err) != 0)
-    {
-      haserr = true;
-    }
+    gt_logger_log(logger,"remove \"%s\"",gt_str_get(sfxmappedrange->filename));
+    gt_xunlink(gt_str_get(sfxmappedrange->filename));
   }
   gt_str_delete(sfxmappedrange->filename);
   gt_free(sfxmappedrange);
-  return haserr ? -1 : 0;
 }
