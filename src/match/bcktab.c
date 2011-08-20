@@ -153,11 +153,11 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
   } else
   {
     unsigned long sumsize
-      = gt_Sfxmappedrange_mappedsize(bcktab->mappedleftborder,mincode,maxcode);
+      = gt_Sfxmappedrange_size_mapped(bcktab->mappedleftborder,mincode,maxcode);
     if (bcktab->mappedcountspecialcodes != NULL)
     {
-      sumsize += gt_Sfxmappedrange_mappedsize(bcktab->mappedcountspecialcodes,
-                                              mincode,maxcode);
+      sumsize += gt_Sfxmappedrange_size_mapped(bcktab->mappedcountspecialcodes,
+                                               mincode,maxcode);
     }
     return sumsize;
   }
@@ -792,7 +792,7 @@ int gt_bcktab_remap_all(GtBcktab *bcktab,GtError *err)
 
   if (bcktab->mappedleftborder != NULL)
   {
-    tmp = gt_sfxmappedrange_map_entire(bcktab->mappedleftborder,err);
+    tmp = gt_Sfxmappedrange_map_entire(bcktab->mappedleftborder,err);
     if (bcktab->useulong)
     {
       bcktab->leftborder.ulongbounds = (unsigned long *) tmp;
@@ -812,7 +812,7 @@ int gt_bcktab_remap_all(GtBcktab *bcktab,GtError *err)
   if (!haserr &&
       bcktab->withspecialsuffixes && bcktab->mappedcountspecialcodes != NULL)
   {
-    tmp = gt_sfxmappedrange_map_entire(bcktab->mappedcountspecialcodes,err);
+    tmp = gt_Sfxmappedrange_map_entire(bcktab->mappedcountspecialcodes,err);
     if (bcktab->useulong)
     {
       bcktab->ulongcountspecialcodes = (unsigned long *) tmp;

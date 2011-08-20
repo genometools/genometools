@@ -20,12 +20,15 @@
 
 #include "core/logger.h"
 #include "core/codetype.h"
+#include "sfx-maprange.h"
 #include "bcktab.h"
 
 typedef struct Suftabparts Suftabparts;
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
                                const GtBcktab *bcktab,
+                               GT_UNUSED
+                               const GtSfxmappedrange *mappedmarkprefixbuckets,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger);

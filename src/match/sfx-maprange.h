@@ -33,8 +33,10 @@ typedef enum
 
 typedef struct GtSfxmappedrange GtSfxmappedrange;
 
-void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
+void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
                                    GtError *err);
+
+size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
                                         bool writable,
@@ -69,9 +71,10 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned long maxindex,
                             GtLogger *logger);
 
-unsigned long gt_Sfxmappedrange_mappedsize(GtSfxmappedrange *sfxmappedrange,
-                                           unsigned long minindex,
-                                           unsigned long maxindex);
+unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
+                                              *sfxmappedrange,
+                                            unsigned long minindex,
+                                            unsigned long maxindex);
 
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
                               GtLogger *logger);

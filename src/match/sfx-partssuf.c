@@ -127,6 +127,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
 
 Suftabparts *gt_newsuftabparts(unsigned int numofparts,
                                const GtBcktab *bcktab,
+                               const GtSfxmappedrange *mappedmarkprefixbuckets,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger)
@@ -155,8 +156,12 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
   if (suftabparts->numofparts == 0)
   {
     suftabparts->largestsuftabwidth = fullspecials/numofparts+1;
-    suftabparts->largestsizemappedpartwise
-     = gt_bcktab_size_lb_cs(bcktab);
+    suftabparts->largestsizemappedpartwise = gt_bcktab_size_lb_cs(bcktab);
+    if (mappedmarkprefixbuckets != NULL)
+    {
+      suftabparts->largestsizemappedpartwise
+        += gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
+    }
     suftabparts->components = NULL;
   } else
   {
@@ -213,6 +218,12 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
         = gt_bcktab_mapped_range_size(bcktab,
                                       stpgetcurrentmincode(part,suftabparts),
                                       stpgetcurrentmaxcode(part,suftabparts));
+      if (mappedmarkprefixbuckets != NULL)
+      {
+        sizemapped += gt_Sfxmappedrange_size_mapped(mappedmarkprefixbuckets,
+                                      stpgetcurrentmincode(part,suftabparts),
+                                      stpgetcurrentmaxcode(part,suftabparts));
+      }
       if (suftabparts->largestsizemappedpartwise < sizemapped)
       {
         suftabparts->largestsizemappedpartwise = sizemapped;

@@ -619,6 +619,8 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
 static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            unsigned long maximumspace,
                                            const GtBcktab *bcktab,
+                                           const GtSfxmappedrange
+                                             *mappedmarkprefixbuckets,
                                            unsigned long totallength,
                                            unsigned long specialcharacters,
                                            unsigned long numofsuffixestosort,
@@ -628,8 +630,14 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   unsigned int parts;
   Suftabparts *suftabparts;
   unsigned long size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
+  size_t sizeofprefixmarks
+    = gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
 
   gt_error_check(err);
+  /*
+  printf("maxspace=%.2f\n",GT_MEGABYTES(maximumspace));
+  printf("estimatedspace=%.2f\n",GT_MEGABYTES(estimatedspace));
+  */
   if (estimatedspace >= (size_t) maximumspace)
   {
     gt_error_set(err,"already used %.2f MB of memory, cannot compute "
@@ -643,6 +651,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
 
     suftabparts = gt_newsuftabparts(parts,
                                     bcktab,
+                                    mappedmarkprefixbuckets,
                                     numofsuffixestosort,
                                     specialcharacters + 1,
                                     NULL);
@@ -651,6 +660,15 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
                                          stpgetlargestsuftabwidth(suftabparts),
                                          totallength,
                                          suftabuint);
+    /*
+    printf("parts=%u,suftabsize=%.2f,largestsizemappedpartwise=%.2f,"
+           "size_lb_cs=%.2f,sizeprefixmarks=%.2f\n",
+           parts,
+           GT_MEGABYTES(suftabsize),
+           GT_MEGABYTES(stpgetlargestsizemappedpartwise(suftabparts)),
+           GT_MEGABYTES(size_lb_cs),
+           GT_MEGABYTES(sizeofprefixmarks));
+    */
     if (parts == 1U)
     {
       if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
@@ -662,7 +680,8 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     {
       if ((unsigned long) (suftabsize +
                            stpgetlargestsizemappedpartwise(suftabparts) +
-                           estimatedspace - size_lb_cs) <= maximumspace)
+                           estimatedspace - size_lb_cs - sizeofprefixmarks)
+                           <= maximumspace)
       {
         gt_freesuftabparts(suftabparts);
         return (int) parts;
@@ -1972,6 +1991,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                        estimatedspace,
                                        maximumspace,
                                        sfi->bcktab,
+                                       sfi->mappedmarkprefixbuckets,
                                        sfi->totallength,
                                        specialcharacters,
                                        numofsuffixestosort,
@@ -1988,11 +2008,20 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       }
     }
   }
+/*
+#define SHOWACTUALSPACE printf("line %d,realspace=heap=%.2f,map=%.2f\n",\
+                              __LINE__,\
+                              GT_MEGABYTES(gt_ma_get_space_current()),\
+                              GT_MEGABYTES(gt_fa_get_space_current()))
+*/
+#define SHOWACTUALSPACE /* Nothing */
+  SHOWACTUALSPACE;
   if (!haserr)
   {
     gt_assert(sfi != NULL);
     sfi->suftabparts = gt_newsuftabparts(numofparts,
                                          sfi->bcktab,
+                                         sfi->mappedmarkprefixbuckets,
                                          numofsuffixestosort,
                                          specialcharacters + 1,
                                          logger);
@@ -2005,6 +2034,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       }
     }
   }
+  SHOWACTUALSPACE;
   if (!haserr)
   {
     gt_assert(sfi != NULL && sfi->suftabparts != NULL);
@@ -2033,6 +2063,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       }
     }
   }
+  SHOWACTUALSPACE;
   if (!haserr)
   {
     gt_assert(sfi != NULL);
@@ -2055,6 +2086,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->fusp.allocatedSuffixptr = stpgetlargestsuftabwidth(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
   }
+  SHOWACTUALSPACE;
   if (haserr)
   {
     (void) gt_Sfxiterator_delete(sfi,NULL);
@@ -2135,6 +2167,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                 sfi->logger);
     }
   }
+  SHOWACTUALSPACE;
   gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
                                     stpgetcurrentsuftaboffset(sfi->part,
                                                              sfi->suftabparts));
@@ -2149,6 +2182,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
       sfx_derivespecialcodesonthefly(sfi);
     }
   }
+  SHOWACTUALSPACE;
   sfi->exportptr = gt_suffixsortspace_exportptr(0,sfi->suffixsortspace);
   if (sfi->prefixlength > 1U
       && gt_has_twobitencoding(sfi->encseq)
@@ -2179,6 +2213,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                      gt_insertkmerwithoutspecial,sfi);
     }
   }
+  SHOWACTUALSPACE;
   gt_suffixsortspace_export_done(sfi->suffixsortspace);
   if (sfi->sfxprogress != NULL)
   {
@@ -2193,6 +2228,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
                                   partwidth,sfi->numofchars);
   }
+  SHOWACTUALSPACE;
   if (sfi->sfxstrategy.differencecover > 0)
   {
     gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
@@ -2226,6 +2262,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_copysort_delete(bucketspec2);
     bucketspec2 = NULL;
   }
+  SHOWACTUALSPACE;
   sfi->part++;
 }
 

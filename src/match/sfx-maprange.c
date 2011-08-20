@@ -68,7 +68,12 @@ struct GtSfxmappedrange
   bool writable;
 };
 
-void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
+size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange)
+{
+  return sfxmappedrange->sizeofunit * sfxmappedrange->numofunits;
+}
+
+void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
                                    GtError *err)
 {
   size_t mappedsize;
@@ -79,14 +84,13 @@ void *gt_sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   {
     return NULL;
   }
-  if (mappedsize != sfxmappedrange->sizeofunit * sfxmappedrange->numofunits)
+  if (mappedsize != gt_Sfxmappedrange_size_entire(sfxmappedrange))
   {
     gt_error_set(err,"map file %s: mapped size = %lu != %lu = "
                      "expected size",
                       gt_str_get(sfxmappedrange->filename),
                       mappedsize,
-                      sfxmappedrange->sizeofunit *
-                      sfxmappedrange->numofunits);
+                      gt_Sfxmappedrange_size_entire(sfxmappedrange));
     gt_fa_xmunmap(sfxmappedrange->entire);
     sfxmappedrange->entire = NULL;
     return NULL;
@@ -209,9 +213,10 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
   return sfxmappedrange;
 }
 
-unsigned long gt_Sfxmappedrange_mappedsize(GtSfxmappedrange *sfxmappedrange,
-                                           unsigned long minindex,
-                                           unsigned long maxindex)
+unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
+                                              *sfxmappedrange,
+                                            unsigned long minindex,
+                                            unsigned long maxindex)
 {
   GtMappedrange lbrange;
 
@@ -257,8 +262,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                         maxindex);
   if (logger != NULL)
   {
-    size_t sizeoftable = sfxmappedrange->sizeofunit *
-                         sfxmappedrange->numofunits;
+    size_t sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
     gt_logger_log(logger,
                   "part %u: mapped %s from %lu to %lu for %s (%.1f%% of all)",
                   part,sfxmappedrange->tablename,lbrange.mapoffset,
