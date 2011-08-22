@@ -89,8 +89,9 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
     gt_error_set(err,"map file %s: mapped size = %lu != %lu = "
                      "expected size",
                       gt_str_get(sfxmappedrange->filename),
-                      mappedsize,
-                      gt_Sfxmappedrange_size_entire(sfxmappedrange));
+                      (unsigned long) mappedsize,
+                      (unsigned long)
+                                 gt_Sfxmappedrange_size_entire(sfxmappedrange));
     gt_fa_xmunmap(sfxmappedrange->entire);
     sfxmappedrange->entire = NULL;
     return NULL;
@@ -156,8 +157,9 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
   gt_assert(outfp != NULL);
   sfxmappedrange->tablename = tablename;
   gt_logger_log(logger,"write %s to file %s (%lu units of %lu bytes)",
-                tablename,gt_str_get(sfxmappedrange->filename),
-                sfxmappedrange->numofunits,sfxmappedrange->sizeofunit);
+                tablename, gt_str_get(sfxmappedrange->filename),
+                (unsigned long) sfxmappedrange->numofunits,
+                (unsigned long) sfxmappedrange->sizeofunit);
   if (fwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
              sfxmappedrange->numofunits,outfp) != sfxmappedrange->numofunits)
   {
