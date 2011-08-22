@@ -1270,7 +1270,9 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
 
 static bool allowforshortreadsort(const GtBentsedgresources *bsr)
 {
-  return (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
+
+  return (bsr->sfxstrategy->cmpcharbychar &&
+          gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
           gt_encseq_equallength(bsr->encseq) == 100UL &&
           bsr->prefixlength >= 4U /* as GT_NUMOFTBEVALUEFOR100 *
                                         GT_UNITSIN2BITENC + 4 >= 100 */
@@ -1777,31 +1779,17 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
   bsr->complement = GT_ISDIRCOMPLEMENT(bsr->readmode) ? true : false;
   bsr->tableoflcpvalues = NULL;
   bsr->prefixlength = prefixlength;
-  for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
-  {
-    bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
-  }
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
-  if (sfxstrategy->cmpcharbychar)
+  bsr->countingsortinfo = NULL;
+  bsr->shortreadsortinfo = NULL;
+  bsr->shortreadsortrefs = NULL;
+  bsr->medianinfospace = NULL;
+  bsr->blindtrie = NULL;
+  bsr->equalwithprevious = NULL;
+  if (!sfxstrategy->cmpcharbychar)
   {
-    bsr->countingsortinfo = NULL;
-    bsr->shortreadsortinfo = NULL;
-    bsr->shortreadsortrefs = NULL;
-    bsr->medianinfospace = NULL;
-  } else
-  {
-    bsr->countingsortinfo = gt_malloc(sizeof (*bsr->countingsortinfo) *
-                                      sfxstrategy->maxcountingsort);
-    if (sfxstrategy->maxwidthrealmedian >= MINMEDIANOF9WIDTH)
-    {
-      bsr->medianinfospace = gt_malloc(sizeof (*bsr->medianinfospace) *
-                                       sfxstrategy->maxwidthrealmedian);
-    } else
-    {
-      bsr->medianinfospace = NULL;
-    }
     if (allowforshortreadsort(bsr))
     {
       bsr->shortreadsortinfo = gt_malloc(sizeof (*bsr->shortreadsortinfo) *
@@ -1816,31 +1804,45 @@ static void initBentsedgresources(GtBentsedgresources *bsr,
     {
       bsr->shortreadsortinfo = NULL;
       bsr->shortreadsortrefs = NULL;
+      for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
+      {
+        bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
+      }
+      bsr->countingsortinfo = gt_malloc(sizeof (*bsr->countingsortinfo) *
+                                        sfxstrategy->maxcountingsort);
+      if (sfxstrategy->maxwidthrealmedian >= MINMEDIANOF9WIDTH)
+      {
+        bsr->medianinfospace = gt_malloc(sizeof (*bsr->medianinfospace) *
+                                         sfxstrategy->maxwidthrealmedian);
+      } else
+      {
+        bsr->medianinfospace = NULL;
+      }
     }
   }
-  bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
-                                    sfxstrategy->maxbltriesort,
-                                    0, /* the nodenumberincrement */
-                                    encseq,
-                                    sfxstrategy->cmpcharbychar,
-                                    bsr->esr1,
-                                    bsr->esr2,
-                                    readmode);
+  if (!allowforshortreadsort(bsr))
+  {
+    bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
+                                      sfxstrategy->maxbltriesort,
+                                      0, /* the nodenumberincrement */
+                                      encseq,
+                                      sfxstrategy->cmpcharbychar,
+                                      bsr->esr1,
+                                      bsr->esr2,
+                                      readmode);
+    if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
+    {
+      bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
+                                         bsr->sfxstrategy->maxinsertionsort);
+      for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
+      {
+        bsr->equalwithprevious[idx] = false;
+      }
+    }
+  }
+  bsr->sortmaxdepth = sortmaxdepth;
   bsr->processunsortedsuffixrangeinfo = NULL;
   bsr->processunsortedsuffixrange = NULL;
-  bsr->sortmaxdepth = sortmaxdepth;
-  if (sortmaxdepth > 0 && bsr->sfxstrategy->maxinsertionsort >= 2UL)
-  {
-    bsr->equalwithprevious = gt_malloc(sizeof (*bsr->equalwithprevious) *
-                                       bsr->sfxstrategy->maxinsertionsort);
-    for (idx=0; idx < bsr->sfxstrategy->maxinsertionsort; idx++)
-    {
-      bsr->equalwithprevious[idx] = false;
-    }
-  } else
-  {
-    bsr->equalwithprevious = NULL;
-  }
   bsr->countinsertionsort = 0;
   bsr->counttqsort = 0;
   bsr->countcountingsort = 0;
