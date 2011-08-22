@@ -163,6 +163,7 @@ void*   gt_fa_mmap_check_size_with_suffix(const char *path, const char *suffix,
 int     gt_fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */
 int     gt_fa_check_mmap_leak(void);
+void    gt_fa_enable_global_spacepeak(void);
 unsigned long gt_fa_get_space_peak(void);
 unsigned long gt_fa_get_space_current(void);
 void    gt_fa_show_space_peak(FILE*);

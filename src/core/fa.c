@@ -23,6 +23,7 @@
 #include "core/hashmap.h"
 #include "core/fa.h"
 #include "core/ma.h"
+#include "core/spacepeak.h"
 #include "core/thread.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
@@ -39,6 +40,7 @@ typedef struct {
             *memory_maps;
   unsigned long current_size,
                 max_size;
+  bool global_space_peak;
 } FA;
 
 static FA *fa = NULL;
@@ -78,6 +80,7 @@ void gt_fa_init(void)
                                     (GtFree) free_FAFileInfo);
   fa->memory_maps = gt_hashmap_new(GT_HASH_DIRECT, NULL,
                                    (GtFree) free_FAMapInfo);
+  fa->global_space_peak = false;
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
@@ -373,6 +376,8 @@ void* gt_fa_mmap_generic_fd_func(int fd, const char *filename, size_t len,
     gt_mutex_lock(fa->mmap_mutex);
     gt_hashmap_add(fa->memory_maps, map, mapinfo);
     fa->current_size += mapinfo->len;
+    if (fa->global_space_peak)
+      gt_spacepeak_add(mapinfo->len);
     if (fa->current_size > fa->max_size)
       fa->max_size = fa->current_size;
     gt_mutex_unlock(fa->mmap_mutex);
@@ -539,6 +544,8 @@ void gt_fa_xmunmap(void *addr)
   gt_xmunmap(addr, mapinfo->len);
   gt_assert(fa->current_size >= mapinfo->len);
   fa->current_size -= mapinfo->len;
+  if (fa->global_space_peak)
+    gt_spacepeak_free(mapinfo->len);
   gt_hashmap_remove(fa->memory_maps, addr);
   gt_mutex_unlock(fa->mmap_mutex);
 }
@@ -651,6 +658,12 @@ int gt_fa_check_mmap_leak(void)
   if (info.has_leak)
     return -1;
   return 0;
+}
+
+void gt_fa_enable_global_spacepeak(void)
+{
+  gt_assert(fa);
+  fa->global_space_peak = true;
 }
 
 unsigned long gt_fa_get_space_peak(void)

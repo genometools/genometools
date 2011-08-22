@@ -21,6 +21,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/spacecalc.h"
+#include "core/spacepeak.h"
 #include "core/thread.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
@@ -28,7 +29,8 @@
 /* the memory allocator class */
 typedef struct {
   GtHashmap *allocated_pointer;
-  bool bookkeeping;
+  bool bookkeeping,
+       global_space_peak;
   unsigned long long mallocevents;
   unsigned long current_size,
                 max_size;
@@ -106,12 +108,15 @@ void gt_ma_init(bool bookkeeping)
                                          (GtFree) ma_info_free);
   /* MA is ready to use */
   ma->bookkeeping = bookkeeping;
+  ma->global_space_peak = false;
 }
 
 static void add_size(MA* ma, unsigned long size)
 {
   gt_assert(ma);
   ma->current_size += size;
+  if (ma->global_space_peak)
+    gt_spacepeak_add(size);
   if (ma->current_size > ma->max_size)
     ma->max_size = ma->current_size;
 }
@@ -121,6 +126,8 @@ static void subtract_size(MA *ma, unsigned long size)
   gt_assert(ma);
   gt_assert(ma->current_size >= size);
   ma->current_size -= size;
+  if (ma->global_space_peak)
+    gt_spacepeak_free(size);
 }
 
 void* gt_malloc_mem(size_t size, const char *src_file, int src_line)
@@ -240,6 +247,12 @@ static int check_space_leak(GT_UNUSED void *key, void *value, void *data,
     info->has_leak = true;
   }
   return 0;
+}
+
+void gt_ma_enable_global_spacepeak(void)
+{
+  gt_assert(ma);
+  ma->global_space_peak = true;
 }
 
 unsigned long gt_ma_get_space_peak(void)

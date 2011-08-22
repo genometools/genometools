@@ -29,6 +29,7 @@
 #include "core/ma.h"
 #include "core/option_api.h"
 #include "core/showtime.h"
+#include "core/spacepeak.h"
 #include "core/splitter.h"
 #include "core/symbol.h"
 #include "core/versionfunc.h"
@@ -101,6 +102,11 @@ void gt_lib_init(void)
   if (spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     gt_warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   gt_fa_init();
+  if (spacepeak) {
+    gt_spacepeak_init();
+    gt_ma_enable_global_spacepeak();
+    gt_fa_enable_global_spacepeak();
+  }
   gt_log_init();
   if (showtime) gt_showtime_enable();
   gt_symbol_init();
@@ -124,6 +130,7 @@ int gt_lib_clean(void)
   if (spacepeak) {
     gt_ma_show_space_peak(stdout);
     gt_fa_show_space_peak(stdout);
+    gt_spacepeak_show_space_peak(stdout);
   }
   fa_fptr_rval = gt_fa_check_fptr_leak();
   fa_mmap_rval = gt_fa_check_mmap_leak();
@@ -132,6 +139,7 @@ int gt_lib_clean(void)
   gt_class_alloc_clean();
   gt_ya_rand_clean();
   gt_log_clean();
+  gt_spacepeak_clean();
   gt_rval = gt_ma_check_space_leak();
   gt_ma_clean();
 #ifndef WITHOUT_CAIRO
