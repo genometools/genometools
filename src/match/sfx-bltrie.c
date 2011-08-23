@@ -945,8 +945,8 @@ size_t gt_blindtrie_size(unsigned long maxnumofsuffixes)
     return 0;
   } else
   {
-    return sizeof(Blindtrie) +
-           (GT_MULT2(maxnumofsuffixes + 1) + 1) * sizeof(Blindtrienode);
+    return sizeof (Blindtrie) +
+           (GT_MULT2(maxnumofsuffixes + 1) + 1) * sizeof (Blindtrienode);
   }
 }
 
