@@ -70,6 +70,7 @@ struct GtSfxmappedrange
 
 size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange)
 {
+  gt_assert(sfxmappedrange != NULL);
   return sfxmappedrange->sizeofunit * sfxmappedrange->numofunits;
 }
 
@@ -78,6 +79,7 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
 {
   size_t mappedsize;
 
+  gt_assert(sfxmappedrange != NULL);
   sfxmappedrange->entire = gt_fa_mmap_read(gt_str_get(sfxmappedrange->filename),
                                            &mappedsize,err);
   if (sfxmappedrange->entire == NULL)
@@ -149,6 +151,7 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
   bool haserr = false;
   FILE *outfp;
 
+  gt_assert(sfxmappedrange != NULL);
   sfxmappedrange->ptr = NULL;
   sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
@@ -222,6 +225,7 @@ unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
 {
   GtMappedrange lbrange;
 
+  gt_assert(sfxmappedrange != NULL);
   if (sfxmappedrange->transformfunc != NULL)
   {
     minindex = sfxmappedrange->transformfunc(minindex,
@@ -246,6 +250,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   GtMappedrange lbrange;
   unsigned long unitoffset;
 
+  gt_assert(sfxmappedrange != NULL);
   if (sfxmappedrange->ptr != NULL)
   {
     gt_fa_xmunmap(sfxmappedrange->ptr);
@@ -311,7 +316,10 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
 
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
 {
-  gt_assert(sfxmappedrange != NULL);
+  if (sfxmappedrange == NULL)
+  {
+    return;
+  }
   gt_fa_xmunmap(sfxmappedrange->ptr);
   sfxmappedrange->ptr = NULL;
   gt_fa_xmunmap(sfxmappedrange->entire);

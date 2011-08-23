@@ -561,11 +561,9 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   if (sfi->mappedmarkprefixbuckets == NULL)
   {
     gt_free(sfi->markprefixbuckets);
-  } else
-  {
-    gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,sfi->logger);
-    sfi->mappedmarkprefixbuckets = NULL;
   }
+  gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,sfi->logger);
+  sfi->mappedmarkprefixbuckets = NULL;
   gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
   gt_free(sfi);
@@ -630,10 +628,16 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   unsigned int parts;
   Suftabparts *suftabparts;
   unsigned long size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
-  size_t sizeofprefixmarks
-    = gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
+  size_t sizeofprefixmarks;
 
   gt_error_check(err);
+  if (mappedmarkprefixbuckets != NULL)
+  {
+    sizeofprefixmarks = gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
+  } else
+  {
+    sizeofprefixmarks = 0;
+  }
   /*
   printf("maxspace=%.2f\n",GT_MEGABYTES(maximumspace));
   printf("estimatedspace=%.2f\n",GT_MEGABYTES(estimatedspace));
@@ -2056,11 +2060,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       gt_assert(sfi->markprefixbuckets == NULL);
     } else
     {
-      if (sfi->mappedmarkprefixbuckets != NULL)
-      {
-        gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,logger);
-        sfi->mappedmarkprefixbuckets = NULL;
-      }
+      gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,logger);
+      sfi->mappedmarkprefixbuckets = NULL;
     }
   }
   SHOWACTUALSPACE;

@@ -101,12 +101,14 @@ struct Blindtrie
 static bool blindtrie_isleaf(const Blindtrie *blindtrie,
                              const Blindtrienodeptr node)
 {
+  gt_assert(node < blindtrie->nextfreeBlindtrienode);
   return blindtrie->spaceBlindtrienode[node].isleafbit ? true : false;
 }
 
 static void blindtrie_setleaf(Blindtrie *blindtrie,
                               const Blindtrienodeptr node,bool isleaf)
 {
+  gt_assert(node < blindtrie->nextfreeBlindtrienode);
   blindtrie->spaceBlindtrienode[node].isleafbit = isleaf ? 1U : 0;
 }
 
@@ -128,6 +130,7 @@ static void blindtrie_setdepth(const Blindtrie *blindtrie,
 static Blindtriesymbol blindtrie_firstchar_get(const Blindtrie *blindtrie,
                                                const Blindtrienodeptr node)
 {
+  gt_assert(node < blindtrie->nextfreeBlindtrienode);
   return blindtrie->spaceBlindtrienode[node].firstchar;
 }
 
@@ -143,6 +146,7 @@ static void blindtrie_firstchar_set(Blindtrie *blindtrie,
 static Blindtrienodeptr blindtrie_rightsibling_get(const Blindtrie *blindtrie,
                                                    const Blindtrienodeptr node)
 {
+  gt_assert(node < blindtrie->nextfreeBlindtrienode);
   return blindtrie->spaceBlindtrienode[node].rightsibling;
 }
 
@@ -150,6 +154,7 @@ static void blindtrie_rightsibling_set(const Blindtrie *blindtrie,
                                        Blindtrienodeptr node,
                                        Blindtrienodeptr rightsibling)
 {
+  gt_assert(node < blindtrie->nextfreeBlindtrienode);
   blindtrie->spaceBlindtrienode[node].rightsibling = rightsibling;
 }
 
@@ -179,6 +184,7 @@ static void blindtrie_leafinfo_set(Blindtrie *blindtrie,
 {
   Blindtrienode *leafptr = blindtrie->spaceBlindtrienode + node;
 
+  gt_assert(node < blindtrie->nextfreeBlindtrienode);
   leafptr->either1.nodestartpos = currentstartpos;
   if (currenttwobitencodingstoppos != GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie))
   {
@@ -273,6 +279,8 @@ static void blindtrie_copy_either(Blindtrie *blindtrie,
                                   Blindtrienodeptr destnode,
                                   Blindtrienodeptr srcnode)
 {
+  gt_assert(destnode < blindtrie->nextfreeBlindtrienode);
+  gt_assert(srcnode < blindtrie->nextfreeBlindtrienode);
   blindtrie->spaceBlindtrienode[destnode].either1
     = blindtrie->spaceBlindtrienode[srcnode].either1;
   blindtrie->spaceBlindtrienode[destnode].either2

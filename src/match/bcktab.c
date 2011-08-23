@@ -843,16 +843,10 @@ void gt_bcktab_delete(GtBcktab *bcktab,GtLogger *logger)
   /*showbcktab(bcktabptr);*/
   if (bcktab->allocated)
   {
-    if (bcktab->mappedleftborder != NULL)
-    {
-      gt_Sfxmappedrange_delete(bcktab->mappedleftborder,logger);
-      bcktab->mappedleftborder = NULL;
-    }
-    if (bcktab->mappedcountspecialcodes != NULL)
-    {
-      gt_Sfxmappedrange_delete(bcktab->mappedcountspecialcodes,logger);
-      bcktab->mappedcountspecialcodes = NULL;
-    }
+    gt_Sfxmappedrange_delete(bcktab->mappedleftborder,logger);
+    bcktab->mappedleftborder = NULL;
+    gt_Sfxmappedrange_delete(bcktab->mappedcountspecialcodes,logger);
+    bcktab->mappedcountspecialcodes = NULL;
     gt_free(bcktab->ulongcountspecialcodes);
     gt_free(bcktab->uintcountspecialcodes);
     gt_free(bcktab->leftborder.ulongbounds);
