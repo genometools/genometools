@@ -43,13 +43,22 @@ struct GtSuffixsortspace
                 *ulongtab;
 };
 
+static bool gt_decide_to_use_uint(bool useuint,unsigned long maxvalue)
+{
+  if (useuint && maxvalue <= (unsigned long) UINT_MAX)
+  {
+    return true;
+  }
+  return false;
+}
+
 size_t gt_suffixsortspace_requiredspace(unsigned long numofentries,
-                                        GT_UNUSED unsigned long maxvalue,
+                                        unsigned long maxvalue,
                                         bool useuint)
 {
   size_t requiredspace = sizeof (GtSuffixsortspace);
 
-  if (useuint)
+  if (gt_decide_to_use_uint(useuint,maxvalue))
   {
     gt_assert(maxvalue <= (unsigned long) UINT_MAX);
     requiredspace += numofentries * sizeof (uint32_t);
@@ -92,28 +101,21 @@ GtSuffixsortspace *gt_suffixsortspace_new(unsigned long numofentries,
   suffixsortspace->exportptr.uinttabsectionptr = NULL;
   suffixsortspace->currentexport = false;
 #ifdef _LP64
-  if (useuint && maxvalue > (unsigned long) UINT_MAX)
-  {
-    useuint = false;
-    gt_logger_log(logger,"cannot use 32 bit values for suftab "
-                  "maxvalue=%lu,numofentries=%lu",maxvalue,numofentries);
-  }
-  if (useuint)
-  {
-    gt_logger_log(logger,"suftab uses 32bit values: "
+  gt_logger_log(logger,"suftab uses %dbit values: "
                          "maxvalue=%lu,numofentries=%lu",
-                  maxvalue,numofentries);
-  }
+                         gt_decide_to_use_uint(useuint,maxvalue) ? 32 : 64,
+                         maxvalue,numofentries);
 #endif
-  suffixsortspace->basesize = useuint ? sizeof (*suffixsortspace->uinttab)
-                                      : sizeof (*suffixsortspace->ulongtab);
+  suffixsortspace->basesize = gt_decide_to_use_uint(useuint,maxvalue)
+                                ? sizeof (*suffixsortspace->uinttab)
+                                : sizeof (*suffixsortspace->ulongtab);
   sufspacesize
     = gt_safe_mult_ulong_check((unsigned long) suffixsortspace->basesize,
                                numofentries,
                                gt_suffixsortspace_overflow_abort,
                                &numofentries);
   gt_log_log("sizeof (suftab)=%lu bytes",sufspacesize);
-  if (useuint)
+  if (gt_decide_to_use_uint(useuint,maxvalue))
   {
     suffixsortspace->ulongtab = NULL;
     suffixsortspace->uinttab = gt_malloc((size_t) sufspacesize);
@@ -138,12 +140,13 @@ GtSuffixsortspace *gt_suffixsortspace_new_fromfile(int filedesc,
   void *ptr;
 
   suffixsortspace = gt_malloc(sizeof (*suffixsortspace));
-  suffixsortspace->basesize = useuint ? sizeof (*suffixsortspace->uinttab)
-                                      : sizeof (*suffixsortspace->ulongtab);
+  suffixsortspace->basesize = gt_decide_to_use_uint(useuint,maxvalue)
+                                ? sizeof (*suffixsortspace->uinttab)
+                                : sizeof (*suffixsortspace->ulongtab);
   ptr = gt_fa_mmap_generic_fd(filedesc,filename,
                               (size_t) numofentries * suffixsortspace->basesize,
                               (size_t) 0,false,false,NULL);
-  if (useuint)
+  if (gt_decide_to_use_uint(useuint,maxvalue))
   {
     suffixsortspace->uinttab = ptr;
     suffixsortspace->ulongtab = NULL;
