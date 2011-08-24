@@ -1555,7 +1555,8 @@ static void gt_determineaddionalsuffixprefixchars(
   unsigned int prefixchars;
   size_t sizeofprefixmarks;
 
-  for (prefixchars = 1U; prefixlength + prefixchars <= GT_UNITSIN2BITENC;
+  for (prefixchars = 1U;
+       prefixlength + prefixchars <= (unsigned int) GT_UNITSIN2BITENC;
        prefixchars++)
   {
     sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
@@ -1820,7 +1821,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       }
 #ifdef _LP64
       if (sfi->prefixlength + sfi->spmopt_additionalprefixchars +
-          sfi->prefixlength + additionalsuffixchars > 
+          sfi->prefixlength + additionalsuffixchars >
           (unsigned int) GT_UNITSIN2BITENC)
       {
         suffixchars = GT_UNITSIN2BITENC -
