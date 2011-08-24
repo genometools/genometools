@@ -1,7 +1,8 @@
 /*
   Copyright (c) 2007-2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -29,6 +30,7 @@
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/str_array.h"
+#include "core/unused_api.h"
 #include "core/xansi_api.h"
 
 #define ALPHABET_GUESS_MAX_LENGTH       5000
@@ -130,7 +132,7 @@ struct GtAlphabet {
 */
 
 static int read_symbolmap_from_lines(GtAlphabet *alpha,
-                                     const GtStr *mapfile,
+                                     const char *mapfile,
                                      const GtStrArray *lines,
                                      GtError *err)
 {
@@ -202,9 +204,16 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
               blankfound = true;
               /*@innerbreak@*/ break;
             }
-            gt_error_set(err,
-                          "illegal character '%c' in line %lu of mapfile %s",
-                          cc,linecount,gt_str_get(mapfile));
+            if (mapfile != NULL) {
+              gt_error_set(err,
+                           "illegal character '%c' in line %lu of mapfile %s",
+                           cc,linecount,mapfile);
+            } else {
+              gt_error_set(err,
+                           "illegal character '%c' in line %lu of alphabet "
+                           "definition",
+                           cc,linecount);
+            }
             haserr = true;
             break;
           }
@@ -217,9 +226,15 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
         {
           if (isspace((int) LINE(column+1)))
           {
-            gt_error_set(err,"illegal character '%c' at the end of "
-                          "line %lu in mapfile %s",
-                          LINE(column+1),linecount,gt_str_get(mapfile));
+            if (mapfile != NULL) {
+              gt_error_set(err,"illegal character '%c' at the end of "
+                            "line %lu in mapfile %s",
+                            LINE(column+1),linecount,mapfile);
+            } else {
+              gt_error_set(err,"illegal character '%c' at the end of "
+                            "line %lu of alphabet definition",
+                            LINE(column+1),linecount);
+            }
             haserr  = true;
             break;
           }
@@ -270,13 +285,13 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
   \texttt{alpha}.
 */
 
-static int read_symbolmap(GtAlphabet *alpha,const GtStr *mapfile,GtError *err)
+static int read_symbolmap(GtAlphabet *alpha,const char *mapfile,GtError *err)
 {
   bool haserr = false;
   GtStrArray *lines;
 
   gt_error_check(err);
-  lines = gt_str_array_new_file(gt_str_get(mapfile));
+  lines = gt_str_array_new_file(mapfile);
   gt_assert(lines != NULL);
   if (read_symbolmap_from_lines(alpha,mapfile,lines,err) != 0)
   {
@@ -500,67 +515,29 @@ static int assign_protein_or_dna_alphabet(GtAlphabet *alpha,
   return 0;
 }
 
-GtAlphabet* gt_alphabet_new(bool isdna,
-                            bool isprotein,
-                            const GtStr *smapfile,
-                            const GtStrArray *filenametab,
-                            GtError *err)
+static GtAlphabet* gt_alphabet_init(void)
 {
   GtAlphabet *alpha;
-  bool haserr = false;
-
-  gt_error_check(err);
-
   alpha = gt_malloc(sizeof *alpha);
   alpha->reference_count = 0;
   alpha->characters = NULL;
   alpha->mapdomain = NULL;
-  if (isdna)
-  {
-    assign_dna_alphabet(alpha);
-  } else
-  {
-    if (isprotein)
-    {
-      assign_protein_alphabet(alpha);
-    } else
-    {
-      gt_error_check(err);
-      if (gt_str_length(smapfile) > 0)
-      {
-        GtStr *transpath = NULL;
+  return alpha;
+}
 
-        if (!gt_file_exists(gt_str_get(smapfile)))
-        {
-          GtStr *prog;
-          const char *progname = gt_error_get_progname(err);
+GtAlphabet* gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
+                                          GtError *err)
+{
+  GtAlphabet *alpha;
+  int had_err = 0;
+  gt_error_check(err);
 
-          gt_assert(progname != NULL);
-          prog = gt_str_new();
-          gt_str_append_cstr_nt(prog, progname,
-                                gt_cstr_length_up_to_char(progname, ' '));
-          transpath = gt_get_gtdata_path(gt_str_get(prog), err);
-          gt_str_delete(prog);
-          gt_str_append_cstr(transpath, "/trans/");
-          gt_str_append_cstr(transpath, gt_str_get(smapfile));
-        }
-        if (read_symbolmap(alpha,
-                           transpath == NULL ? smapfile : transpath,
-                           err) != 0)
-        {
-          haserr = true;
-        }
-        gt_str_delete(transpath);
-      } else
-      {
-        if (assign_protein_or_dna_alphabet(alpha,filenametab,err) != 0)
-        {
-          haserr = true;
-        }
-      }
-    }
+  alpha = gt_alphabet_init();
+  if (assign_protein_or_dna_alphabet(alpha,filenametab,err) != 0) {
+    had_err = -1;
+    gt_assert(gt_error_is_set(err));
   }
-  if (haserr)
+  if (had_err)
   {
     gt_alphabet_delete(alpha);
     return NULL;
@@ -571,15 +548,18 @@ GtAlphabet* gt_alphabet_new(bool isdna,
 GtAlphabet* gt_alphabet_new_dna(void)
 {
   GtAlphabet *a;
-  a = gt_alphabet_new(true, false, NULL, NULL, NULL);
+  a = gt_alphabet_init();
   gt_assert(a);
+  assign_dna_alphabet(a);
   return a;
 }
 
 GtAlphabet* gt_alphabet_new_protein(void)
 {
   GtAlphabet *a;
-  a = gt_alphabet_new(false, true, NULL, NULL, NULL);
+  a = gt_alphabet_init();
+  gt_assert(a);
+  assign_protein_alphabet(a);
   return a;
 }
 
@@ -919,21 +899,86 @@ void gt_alphabet_encode_seq(const GtAlphabet *alphabet, GtUchar *out,
   }
 }
 
-GtAlphabet *gt_alphabet_new_from_file(const char *indexname, GtError *err)
+GtAlphabet *gt_alphabet_new_from_file(const char *filename,
+                                      GtError *err)
 {
   GtStr *tmpfilename;
+  GtAlphabet *a;
+  gt_assert(filename);
+  tmpfilename = gt_str_new_cstr(filename);
+  gt_str_append_cstr(tmpfilename, GT_ALPHABETFILESUFFIX);
+  a = gt_alphabet_new_from_file_no_suffix(gt_str_get(tmpfilename), err);
+  gt_str_delete(tmpfilename);
+  return a;
+}
+
+GtAlphabet* gt_alphabet_new_from_string(const char *alphadef, unsigned long len,
+                                        GtError *err)
+{
+  unsigned long i, j;
+  GtStrArray *sa;
+  GtAlphabet *alpha;
+  gt_assert(alphadef && len > 0);
+  gt_error_check(err);
+
+  alpha = gt_alphabet_init();
+  gt_assert(alphadef);
+
+  sa = gt_str_array_new();
+  j = 0;
+  for (i = 0; i < len; i++) {
+    if (alphadef[i] == '\n' || i == len - 1) {
+      gt_str_array_add_cstr_nt(sa, alphadef+j, i - j);
+      j = i+1;
+    }
+  }
+  if (read_symbolmap_from_lines(alpha, NULL, sa, err) != 0) {
+    gt_str_array_delete(sa);
+    gt_assert(gt_error_is_set(err));
+    return NULL;
+  }
+  gt_str_array_delete(sa);
+  return alpha;
+}
+
+GtAlphabet* gt_alphabet_new_from_file_no_suffix(const char *filename,
+                                                GtError *err)
+{
+  GtStr *transpath = NULL;
   bool haserr = false;
   GtAlphabet *alpha;
-
+  gt_assert(filename);
   gt_error_check(err);
-  tmpfilename = gt_str_new_cstr(indexname);
-  gt_str_append_cstr(tmpfilename,GT_ALPHABETFILESUFFIX);
-  alpha = gt_alphabet_new(false,false,tmpfilename,NULL,err);
+
+  alpha = gt_alphabet_init();
+  if (!gt_file_exists(filename))
+  {
+    GtStr *prog;
+    const char *progname = gt_error_get_progname(err);
+
+    gt_assert(progname != NULL);
+    prog = gt_str_new();
+    gt_str_append_cstr_nt(prog, progname,
+                          gt_cstr_length_up_to_char(progname, ' '));
+    transpath = gt_get_gtdata_path(gt_str_get(prog), err);
+    gt_str_delete(prog);
+    gt_str_append_cstr(transpath, "/trans/");
+    gt_str_append_cstr(transpath, filename);
+  }
+
+  if (read_symbolmap(alpha,
+                     transpath == NULL ? filename : gt_str_get(transpath),
+                     err) != 0)
+  {
+    haserr = true;
+  }
+  gt_str_delete(transpath);
+
   if (alpha == NULL)
   {
     haserr = true;
   }
-  gt_str_delete(tmpfilename);
+
   if (haserr)
   {
     gt_alphabet_delete((GtAlphabet*) alpha);
@@ -973,3 +1018,19 @@ void gt_alphabet_delete(GtAlphabet *alphabet)
   gt_free(alphabet->characters);
   gt_free(alphabet);
 }
+
+/* int gt_alphabet_unit_test(GtError *err)
+{
+  int had_err = 0;
+  GtAlphabet *a;
+  const char *alpha1 = "aA\ncC\ngG\ntTuU\nnsywrkvbdhmNSYWRKVBDHM",
+             *alpha2 = "";
+  unsigned long alpha1len,
+                alpha2len;
+  gt_error_check(err);
+
+  alpha1len = strlen(alpha1);
+  alpha2len = strlen(alpha2);
+
+  return had_err;
+}*/

@@ -6684,12 +6684,18 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
   }
   if (!haserr)
   {
-    alphabet = gt_alphabet_new(isdna,
-                               isprotein,
-                               str_smap,
-                               filenametab, err);
+    if (isdna) {
+      alphabet = gt_alphabet_new_dna();
+    } else if (isprotein) {
+      alphabet = gt_alphabet_new_protein();
+    } else if (gt_str_length(str_smap) > 0UL) {
+      alphabet = gt_alphabet_new_from_file_no_suffix(gt_str_get(str_smap), err);
+    } else {
+      alphabet = gt_alphabet_new_from_sequence(filenametab, err);
+    }
     if (alphabet == NULL)
     {
+      gt_assert(gt_error_is_set(err));
       haserr = true;
     }
   }

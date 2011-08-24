@@ -29,20 +29,6 @@
 /* The following type is for storing alphabets.*/
 typedef struct GtAlphabet GtAlphabet;
 
-/* Returns a new <GtAlphabet> object as described by the following parameters:
-   A DNA alphabet (see <gt_alphabet_new_dna()>) is created if <isdna> is set.
-   Analogously, an amino acid alphabet (see <gt_alphabet_new_protein()>) is
-   created if <isprotein> is set to true. If both are false, the alphabet will
-   be read from the file given in <smapfile>. If <smapfile> is empty, then the
-   sequence files in <filenametab> will be scanned to determine whether they
-   are DNA or protein sequences, and the appropriate alphabet will be used
-   (see gt_alphabet_guess()).
-   Returns NULL on error, see <err> for details. */
-GtAlphabet*    gt_alphabet_new(bool isdna,
-                               bool isprotein,
-                               const GtStr *smapfile,
-                               const GtStrArray *filenametab,
-                               GtError *err);
 /* Return a <GtAlphabet> object which represents a DNA alphabet. */
 GtAlphabet*    gt_alphabet_new_dna(void);
 /* Return a <GtAlphabet> object which represents a protein alphabet. */
@@ -50,8 +36,22 @@ GtAlphabet*    gt_alphabet_new_protein(void);
 /* Return an empty <GtAlphabet> object. */
 GtAlphabet*    gt_alphabet_new_empty(void);
 /* Return a <GtAlphabet> object, as read from an .al1 file specified by
-   <indexname> (i.e. no al1 suffix necessary). */
-GtAlphabet*    gt_alphabet_new_from_file(const char *indexname, GtError *err);
+   <filename> (i.e. no al1 suffix necessary). */
+GtAlphabet*    gt_alphabet_new_from_file(const char *filename, GtError *err);
+/* Return a <GtAlphabet> object, as read from a file specified by
+   <filename>. */
+GtAlphabet*    gt_alphabet_new_from_file_no_suffix(const char *filename,
+                                                   GtError *err);
+/* Return a <GtAlphabet> object, as read from a string of length <len>
+   specified by <alphadef>. */
+GtAlphabet*    gt_alphabet_new_from_string(const char *alphadef,
+                                           unsigned long len, GtError *err);
+/* Returns a new <GtAlphabet> object by scanning the sequence files in
+   <filenametab> to determine whether they are DNA or protein sequences,
+   and the appropriate alphabet will be used (see gt_alphabet_guess()).
+   Returns NULL on error, see <err> for details. */
+GtAlphabet*    gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
+                                             GtError *err);
 /* Try to guess which type the given <sequence> with <length> has (DNA or
    protein) and return an according <GtAlphabet*> object. */
 GtAlphabet*    gt_alphabet_guess(const char *sequence, unsigned long seqlen);
