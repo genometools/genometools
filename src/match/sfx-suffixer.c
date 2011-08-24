@@ -1552,10 +1552,11 @@ static void gt_determineaddionalsuffixprefixchars(
                                    size_t estimatedspace,
                                    unsigned long maximumspace)
 {
-  unsigned int prefixchars, suffixchars;
-  size_t sizeofprefixmarks, sizeofsuffixmarks;
+  unsigned int prefixchars;
+  size_t sizeofprefixmarks;
 
-  for (prefixchars = 1U; prefixchars <= 16U; prefixchars++)
+  for (prefixchars = 1U; prefixlength + prefixchars <= GT_UNITSIN2BITENC;
+       prefixchars++)
   {
     sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
     if (estimatedspace + sizeofprefixmarks > (size_t) maximumspace)
@@ -1564,23 +1565,34 @@ static void gt_determineaddionalsuffixprefixchars(
       break;
     }
   }
-  sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
-  for (suffixchars = 1U; suffixchars <= prefixchars; suffixchars++)
-  {
-    sizeofsuffixmarks = gt_sizeforbittable(numofchars,prefixlength+suffixchars);
-    if (estimatedspace + sizeofprefixmarks + sizeofsuffixmarks
-        > (size_t) maximumspace)
-    {
-      suffixchars--;
-      break;
-    }
-  }
-  if (prefixchars <= suffixchars)
-  {
-    suffixchars = prefixchars - 1;
-  }
   *additionalprefixchars = prefixchars;
-  *additionalsuffixchars = suffixchars;
+#ifdef _LP64
+  {
+    unsigned int suffixchars;
+    size_t sizeofsuffixmarks;
+    sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
+    for (suffixchars = 1U;
+         prefixlength+prefixchars+suffixchars <= GT_UNITSIN2BITENC;
+         suffixchars++)
+    {
+      sizeofsuffixmarks = gt_sizeforbittable(numofchars,
+                                             prefixlength+suffixchars);
+      if (estimatedspace + sizeofprefixmarks + sizeofsuffixmarks
+          > (size_t) maximumspace)
+      {
+        suffixchars--;
+        break;
+      }
+    }
+    if (prefixchars <= suffixchars)
+    {
+      suffixchars = prefixchars - 1;
+    }
+    *additionalsuffixchars = suffixchars;
+  }
+#else
+  *additionalsuffixchars = 0;
+#endif
 }
 
 static unsigned long gt_bcktab_code_to_prefix_index(unsigned long code,
