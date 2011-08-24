@@ -1572,7 +1572,7 @@ static void gt_determineaddionalsuffixprefixchars(
     size_t sizeofsuffixmarks;
     sizeofprefixmarks = gt_sizeforbittable(numofchars,prefixlength+prefixchars);
     for (suffixchars = 1U;
-         prefixlength+prefixchars+suffixchars <= GT_UNITSIN2BITENC;
+         prefixlength+prefixchars+prefixlength+suffixchars <= GT_UNITSIN2BITENC;
          suffixchars++)
     {
       sizeofsuffixmarks = gt_sizeforbittable(numofchars,
