@@ -1588,6 +1588,7 @@ static void gt_determineaddionalsuffixprefixchars(
     {
       suffixchars = prefixchars - 1;
     }
+    gt_assert(suffixchars >= 0);
     *additionalsuffixchars = suffixchars;
   }
 #else
@@ -1802,7 +1803,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     if (prefixlength > 1U && gt_has_twobitencoding(sfi->encseq) &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
-      unsigned int suffixchars, additionalsuffixchars = 2U;
+      unsigned int suffixchars = 0, additionalsuffixchars = 2U;
       size_t sizeofprefixmarks, intsforbits;
 #ifdef _LP64
       size_t sizeofsuffixmarks;
@@ -1818,9 +1819,16 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                maximumspace);
       }
 #ifdef _LP64
-      suffixchars = sfi->prefixlength+additionalsuffixchars;
-#else
-      suffixchars = 0;
+      if (sfi->prefixlength + sfi->spmopt_additionalprefixchars +
+          sfi->prefixlength + additionalsuffixchars > 
+          (unsigned int) GT_UNITSIN2BITENC)
+      {
+        suffixchars = GT_UNITSIN2BITENC -
+                      (sfi->prefixlength + sfi->spmopt_additionalprefixchars);
+      } else
+      {
+        suffixchars = sfi->prefixlength + additionalsuffixchars;
+      }
 #endif
       sfi->spmopt_kmerscansize = sfi->prefixlength +
                                  sfi->spmopt_additionalprefixchars +
