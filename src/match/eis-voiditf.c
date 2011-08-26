@@ -200,13 +200,21 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
 {
   BWTSeq *bwtseq = NULL;
   bool haserr = false;
+  GtEncseqMetadata *emd;
   GtAlphabet *alphabet;
 
-  alphabet = gt_alphabet_new_from_file(indexname,err);
-  if (alphabet == NULL)
-  {
+  emd = gt_encseq_metadata_new(indexname, err);
+  if (emd == NULL) {
     gt_assert(gt_error_is_set(err));
     haserr = true;
+  }
+  if (!haserr) {
+    alphabet = gt_encseq_metadata_alphabet(emd);
+    if (alphabet == NULL)
+    {
+      gt_assert(gt_error_is_set(err));
+      haserr = true;
+    }
   }
   if (!haserr)
   {
@@ -237,7 +245,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
       bwtseq->pckbuckettable = NULL;
     }
   }
-  gt_alphabet_delete(alphabet);
+  gt_encseq_metadata_delete(emd);
   if (haserr && bwtseq != NULL)
   {
     gt_deletevoidBWTSeq((FMindex *) bwtseq);

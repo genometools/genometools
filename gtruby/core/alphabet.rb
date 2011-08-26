@@ -25,8 +25,8 @@ module GT
 
   typealias "bool", "ibool"
   typealias "GtUchar", "unsigned char"
-  extern "GtAlphabet* gt_alphabet_new(int, int, const GtStr*,
-                                      const GtStrArray*, GtError*)"
+  extern "GtAlphabet* gt_alphabet_new_from_sequence(const GtStrArray*,
+                                                    GtError*)"
   extern "GtAlphabet* gt_alphabet_new_dna()"
   extern "GtAlphabet* gt_alphabet_new_protein()"
   extern "GtAlphabet* gt_alphabet_new_empty()"
@@ -80,7 +80,7 @@ module GT
         sa.add(fn)
       end
       err = Error.new
-      aptr = GT.gt_alphabet_new(0, 0, Str.new, sa, err)
+      aptr = GT.gt_alphabet_new_from_sequence(sa, err)
       if aptr == GT::NULL
         GT.gterror(err)
       else

@@ -18,6 +18,7 @@
 #ifndef ENCSEQ_METADATA_H
 #define ENCSEQ_METADATA_H
 
+#include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/encseq_access_type.h"
 #include "core/error_api.h"
@@ -26,6 +27,7 @@ typedef struct GtEncseqMetadata GtEncseqMetadata;
 
 GtEncseqMetadata*    gt_encseq_metadata_new(const char *indexname,
                                             GtError *err);
+GtAlphabet*          gt_encseq_metadata_alphabet(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_version(GtEncseqMetadata *emd);
 bool                 gt_encseq_metadata_is64bit(GtEncseqMetadata *emd);
 unsigned long        gt_encseq_metadata_total_length(GtEncseqMetadata *emd);

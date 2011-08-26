@@ -1,7 +1,9 @@
-file format version: 1
+file format version: 2
 64-bit file: yes
 total length: 17
 number of sequences: 2
 number of files: 1
 length of shortest/longest sequence: 8/8
 accesstype: eqlen
+alphabet size: 4
+alphabet characters: acgt (DNA)

@@ -318,7 +318,6 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
   }
   if (genericindex == NULL)
   {
-    gt_assert(encseq != NULL);
     gt_encseq_delete((GtEncseq *) encseq);
     encseq = NULL;
   } else

@@ -16,10 +16,11 @@
 */
 
 #include <math.h>
-#include "core/tool.h"
+#include "core/alphabet_api.h"
+#include "core/encseq_metadata.h"
 #include "core/ma.h"
 #include "core/str.h"
-#include "core/alphabet_api.h"
+#include "core/tool.h"
 #include "match/pckbucket.h"
 #include "match/eis-voiditf.h"
 
@@ -78,14 +79,21 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
   unsigned long totallength = 0;
   FMindex *fmindex = NULL;
   bool haserr = false;
+  GtEncseqMetadata *emd = NULL;
   Prebwtoptions *prebwtoptions = (Prebwtoptions *) tool_arguments;
   GtAlphabet *alphabet;
   const char *indexname = gt_str_get(prebwtoptions->indexname);
 
-  alphabet = gt_alphabet_new_from_file(indexname,err);
-  if (alphabet == NULL)
-  {
+  emd = gt_encseq_metadata_new(indexname, err);
+  if (emd == NULL) {
     haserr = true;
+  }
+  if (!haserr) {
+    alphabet = gt_encseq_metadata_alphabet(emd);
+    if (alphabet == NULL)
+    {
+      haserr = true;
+    }
   }
   if (!haserr)
   {
@@ -111,7 +119,7 @@ static int gt_prebwt_runner(GT_UNUSED int argc,
     }
     gt_pckbuckettable_delete(pckbt);
   }
-  gt_alphabet_delete(alphabet);
+  gt_encseq_metadata_delete(emd);
   if (fmindex != NULL)
   {
     gt_deletevoidBWTSeq(fmindex);

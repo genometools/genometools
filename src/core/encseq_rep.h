@@ -89,9 +89,12 @@ typedef struct
                 *numofdbfilesptr,
                 *lengthofdbfilenamesptr,
                 *minseqlenptr,
-                *maxseqlenptr;
+                *maxseqlenptr,
+                *alphatypeptr,
+                *lengthofalphadefptr;
   GtSpecialcharinfo *specialcharinfoptr;
-  char *firstfilename;
+  char *firstfilename,
+       *alphadef;
   GtFilelengthvalues *filelengthtab;
   unsigned long *characterdistribution;
 } GtEncseqHeaderPtr;
@@ -145,22 +148,25 @@ struct GtEncseq
        hasallocatedsdstab;
   unsigned long destablength, *sdstab;
 
-  GtAlphabet *alpha;   /* alphabet representation */
+  /* alphabet representation */
+  GtAlphabet *alpha;
+  char *alphadef;
+  unsigned long lengthofalphadef,
+                alphatype;
 
+  /* separator index structure */
   GtSWtable ssptabnew;
 
-  unsigned long *fsptab; /* (if numofdbfiles = 1 then NULL  else
-                                                      numofdbfiles  -1
-                                                      entries */
+  /* file start position table */
+  unsigned long *fsptab; /* is NULL when numofdbfiles is 1
+                            otherwise has numofdbfiles - 1 entries */
 
   /* only for GT_ACCESS_TYPE_EQUALLENGTH,
               GT_ACCESS_TYPE_BITACCESS,
               GT_ACCESS_TYPE_UCHARTABLES,
               GT_ACCESS_TYPE_USHORTTABLES,
               GT_ACCESS_TYPE_UINT32TABLES */
-
   GtTwobitencoding *twobitencoding;
-
   unsigned long unitsoftwobitencoding;
 
   /* only for  GT_ACCESS_TYPE_DIRECTACCESS */

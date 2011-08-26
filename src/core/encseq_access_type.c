@@ -111,7 +111,8 @@ uint64_t gt_encseq_sizeofSWtable(GtEncseqAccessType sat,
                                        lengthofdbfilenames,\
                                        wildcardrangestab[IDX],\
                                        numofchars,\
-                                       0);\
+                                       0,\
+                                       lengthofalphadef);\
         if (tmp < cmin)\
         {\
           cmin = tmp;\
@@ -131,7 +132,8 @@ static GtEncseqAccessType determinesmallestrep(
                                   unsigned long lengthofdbfilenames,
                                   const unsigned long *specialrangestab,
                                   const unsigned long *wildcardrangestab,
-                                  unsigned int numofchars)
+                                  unsigned int numofchars,
+                                  unsigned long lengthofalphadef)
 {
   GtEncseqAccessType cret;
   uint64_t tmp, cmin;
@@ -139,7 +141,8 @@ static GtEncseqAccessType determinesmallestrep(
   cret = GT_ACCESS_TYPE_BITACCESS;
   cmin = gt_encseq_determine_size(cret, totallength,numofsequences,
                                   numofdbfiles, lengthofdbfilenames,
-                                  wildcardrangestab[0], numofchars, 0);
+                                  wildcardrangestab[0], numofchars, 0,
+                                  lengthofalphadef);
   *specialranges = specialrangestab[0];
   *wildcardranges = wildcardrangestab[0];
   if (equallength != NULL && equallength->defined)
@@ -159,6 +162,7 @@ int gt_encseq_access_type_determine(unsigned long *specialranges,
                                     unsigned long totallength,
                                     unsigned long numofsequences,
                                     unsigned long numofdbfiles,
+                                    unsigned long lengthofalphadef,
                                     unsigned long lengthofdbfilenames,
                                     const unsigned long *specialrangestab,
                                     const unsigned long *wildcardrangestab,
@@ -179,7 +183,8 @@ int gt_encseq_access_type_determine(unsigned long *specialranges,
       sat = determinesmallestrep(specialranges,wildcardranges,
                                  equallength,totallength,numofsequences,
                                  numofdbfiles,lengthofdbfilenames,
-                                 specialrangestab,wildcardrangestab,numofchars);
+                                 specialrangestab,wildcardrangestab,numofchars,
+                                 lengthofalphadef);
     } else
     {
       sat = GT_ACCESS_TYPE_BYTECOMPRESS;

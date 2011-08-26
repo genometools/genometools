@@ -48,6 +48,7 @@ struct GtAlphabet {
           symbolmap[GT_MAXALPHABETCHARACTER+1], /* mapping of the symbols */
           *mapdomain,                        /* list of characters mapped */
           *characters;                       /* array of characters to show */
+  GtStr *alphadef;
 };
 
 /*
@@ -144,6 +145,7 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
   GtUchar chartoshow;
 
   gt_error_check(err);
+  alpha->alphadef = gt_str_new();
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
   for (cnum=0; cnum<=(unsigned int) GT_MAXALPHABETCHARACTER; cnum++)
   {
@@ -155,6 +157,8 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
   for (linecount = 0; linecount < gt_str_array_size(lines); linecount++)
   {
     currentline = gt_str_array_get(lines,linecount);
+    gt_str_append_cstr(alpha->alphadef, currentline);
+    gt_str_append_char(alpha->alphadef, '\n');
     ignore = false;
     if (currentline != NULL && currentline[0] != '\0')
     {
@@ -515,16 +519,6 @@ static int assign_protein_or_dna_alphabet(GtAlphabet *alpha,
   return 0;
 }
 
-static GtAlphabet* gt_alphabet_init(void)
-{
-  GtAlphabet *alpha;
-  alpha = gt_malloc(sizeof *alpha);
-  alpha->reference_count = 0;
-  alpha->characters = NULL;
-  alpha->mapdomain = NULL;
-  return alpha;
-}
-
 GtAlphabet* gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
                                           GtError *err)
 {
@@ -532,7 +526,7 @@ GtAlphabet* gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
   int had_err = 0;
   gt_error_check(err);
 
-  alpha = gt_alphabet_init();
+  alpha = gt_alphabet_new_empty();
   if (assign_protein_or_dna_alphabet(alpha,filenametab,err) != 0) {
     had_err = -1;
     gt_assert(gt_error_is_set(err));
@@ -548,7 +542,7 @@ GtAlphabet* gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
 GtAlphabet* gt_alphabet_new_dna(void)
 {
   GtAlphabet *a;
-  a = gt_alphabet_init();
+  a = gt_alphabet_new_empty();
   gt_assert(a);
   assign_dna_alphabet(a);
   return a;
@@ -557,7 +551,7 @@ GtAlphabet* gt_alphabet_new_dna(void)
 GtAlphabet* gt_alphabet_new_protein(void)
 {
   GtAlphabet *a;
-  a = gt_alphabet_init();
+  a = gt_alphabet_new_empty();
   gt_assert(a);
   assign_protein_alphabet(a);
   return a;
@@ -575,6 +569,7 @@ GtAlphabet* gt_alphabet_new_empty(void)
   memset(a->symbolmap, (int) UNDEFCHAR, (size_t) GT_MAXALPHABETCHARACTER+1);
   a->mapdomain = NULL;
   a->characters = NULL;
+  a->alphadef = NULL;
   return a;
 }
 
@@ -627,57 +622,73 @@ unsigned int gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet)
   return alphabet->bitspersymbol;
 }
 
-void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
+void gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest)
 {
   GtUchar chartoshow, currentcc, previouscc = 0, firstinline = 0;
   unsigned int cnum, linenum = 0;
   bool afternewline = true;
-  gt_assert(alphabet && fpout);
-  for (cnum=0; cnum < alphabet->domainsize; cnum++)
-  {
-    currentcc = alphabet->mapdomain[cnum];
-    if (cnum > 0)
+  gt_assert(alphabet && dest);
+  if (alphabet->alphadef != NULL) {
+    gt_assert(gt_str_length(alphabet->alphadef));
+    gt_str_append_str(dest, alphabet->alphadef);
+  } else {
+    for (cnum=0; cnum < alphabet->domainsize; cnum++)
     {
-      if (alphabet->symbolmap[currentcc] != alphabet->symbolmap[previouscc])
+      currentcc = alphabet->mapdomain[cnum];
+      if (cnum > 0)
       {
-        if (linenum < alphabet->mapsize-1)
+        if (alphabet->symbolmap[currentcc] != alphabet->symbolmap[previouscc])
         {
-          chartoshow = alphabet->characters[linenum];
+          if (linenum < alphabet->mapsize-1)
+          {
+            chartoshow = alphabet->characters[linenum];
+          } else
+          {
+            chartoshow = alphabet->wildcardshow;
+          }
+          if (firstinline != chartoshow)
+          {
+            gt_str_append_char(dest, (char) chartoshow);
+          }
+          gt_str_append_char(dest, '\n');
+          afternewline = true;
+          linenum++;
         } else
         {
-          chartoshow = alphabet->wildcardshow;
+          afternewline = false;
         }
-        if (firstinline != chartoshow)
-        {
-          fprintf(fpout," %c",(int) chartoshow);
-        }
-        gt_xfputc('\n',fpout);
-        afternewline = true;
-        linenum++;
-      } else
-      {
-        afternewline = false;
       }
+      gt_str_append_char(dest, (char) currentcc);
+      if (afternewline)
+      {
+        firstinline = currentcc;
+      }
+      previouscc = currentcc;
     }
-    gt_xfputc((int) currentcc,fpout);
-    if (afternewline)
+    if (linenum < alphabet->mapsize-1)
     {
-      firstinline = currentcc;
+      chartoshow = alphabet->characters[linenum];
+    } else
+    {
+      chartoshow = alphabet->wildcardshow;
     }
-    previouscc = currentcc;
+    if (firstinline != chartoshow)
+    {
+      gt_str_append_char(dest, (char) chartoshow);
+    }
+    gt_str_append_char(dest, '\n');
   }
-  if (linenum < alphabet->mapsize-1)
-  {
-    chartoshow = alphabet->characters[linenum];
-  } else
-  {
-    chartoshow = alphabet->wildcardshow;
-  }
-  if (firstinline != chartoshow)
-  {
-    fprintf(fpout," %c",(int) chartoshow);
-  }
-  gt_xfputc((int) '\n',fpout);
+}
+
+void gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout)
+{
+  GtStr *buf;
+  gt_assert(alphabet && fpout);
+  buf = gt_str_new();
+  gt_alphabet_to_str(alphabet, buf);
+  gt_xfwrite(gt_str_get(buf), sizeof (char), (size_t) gt_str_length(buf),
+             fpout);
+  gt_str_delete(buf);
 }
 
 void gt_alphabet_decode_seq_to_fp(const GtAlphabet *alphabet, FILE *fpout,
@@ -921,7 +932,7 @@ GtAlphabet* gt_alphabet_new_from_string(const char *alphadef, unsigned long len,
   gt_assert(alphadef && len > 0);
   gt_error_check(err);
 
-  alpha = gt_alphabet_init();
+  alpha = gt_alphabet_new_empty();
   gt_assert(alphadef);
 
   sa = gt_str_array_new();
@@ -950,7 +961,7 @@ GtAlphabet* gt_alphabet_new_from_file_no_suffix(const char *filename,
   gt_assert(filename);
   gt_error_check(err);
 
-  alpha = gt_alphabet_init();
+  alpha = gt_alphabet_new_empty();
   if (!gt_file_exists(filename))
   {
     GtStr *prog;
@@ -987,7 +998,7 @@ GtAlphabet* gt_alphabet_new_from_file_no_suffix(const char *filename,
   return alpha;
 }
 
-int gt_alphabet_to_file(const GtAlphabet *alpha, const char *indexname,
+int gt_alphabet_to_file(const GtAlphabet *alphabet, const char *indexname,
                         GtError *err)
 {
   FILE *al1fp;
@@ -1001,8 +1012,12 @@ int gt_alphabet_to_file(const GtAlphabet *alpha, const char *indexname,
   }
   if (!haserr)
   {
-    gt_alphabet_output(alpha,al1fp);
+    GtStr *buf = gt_str_new();
+    gt_alphabet_to_str(alphabet, buf);
+    gt_xfwrite(gt_str_get(buf), sizeof (char), (size_t) gt_str_length(buf),
+               al1fp);
     gt_fa_xfclose(al1fp);
+    gt_str_delete(buf);
   }
   return haserr ? -1 : 0;
 }
@@ -1016,6 +1031,8 @@ void gt_alphabet_delete(GtAlphabet *alphabet)
   }
   gt_free(alphabet->mapdomain);
   gt_free(alphabet->characters);
+  if (alphabet->alphadef != NULL)
+    gt_str_delete(alphabet->alphadef);
   gt_free(alphabet);
 }
 

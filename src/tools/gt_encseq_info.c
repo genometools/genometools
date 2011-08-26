@@ -86,6 +86,8 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
 {
   GtEncseqInfoArguments *arguments = tool_arguments;
   int had_err = 0;
+  GtAlphabet *alpha;
+  const GtUchar *chars;
   gt_error_check(err);
   gt_assert(arguments);
 
@@ -130,6 +132,20 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       gt_file_xprintf(arguments->outfp, "accesstype: ");
       gt_file_xprintf(arguments->outfp, "%s\n",
                  gt_encseq_access_type_str(gt_encseq_metadata_accesstype(emd)));
+
+      alpha = gt_encseq_metadata_alphabet(emd);
+      chars = gt_alphabet_characters(alpha);
+      gt_file_xprintf(arguments->outfp, "alphabet size: ");
+      gt_file_xprintf(arguments->outfp, "%u\n",
+                                        gt_alphabet_num_of_chars(alpha));
+      gt_file_xprintf(arguments->outfp, "alphabet characters: ");
+      gt_file_xprintf(arguments->outfp, "%.*s", gt_alphabet_num_of_chars(alpha),
+                                        (char*) chars);
+      if (gt_alphabet_is_dna(alpha))
+        gt_file_xprintf(arguments->outfp, " (DNA)");
+      if (gt_alphabet_is_protein(alpha))
+        gt_file_xprintf(arguments->outfp, " (Protein)");
+      gt_file_xprintf(arguments->outfp, "\n");
     }
     gt_encseq_metadata_delete(emd);
   } else {
@@ -144,8 +160,6 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
       had_err = -1;
 
     if (!had_err) {
-      GtAlphabet *alpha;
-      const GtUchar *chars;
       const GtStrArray *filenames;
       unsigned long i;
 

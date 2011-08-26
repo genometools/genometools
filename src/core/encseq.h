@@ -35,7 +35,7 @@
 #include "core/str_array.h"
 #include "core/types_api.h"
 
-#define GT_ENCSEQ_VERSION  1UL
+#define GT_ENCSEQ_VERSION  2UL
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
@@ -388,7 +388,8 @@ uint64_t gt_encseq_determine_size(GtEncseqAccessType sat,
                                   unsigned long lengthofdbfilenames,
                                   unsigned long wildcardranges,
                                   unsigned int numofchars,
-                                  unsigned int bitspersymbol);
+                                  unsigned int bitspersymbol,
+                                  unsigned long lengthofalphadef);
 
 /* The following function returns the size of the encoded sequence in bytes. */
 unsigned long gt_encseq_sizeofrep(const GtEncseq *encseq);

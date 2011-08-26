@@ -64,7 +64,7 @@ class Alphabet:
             if not os.path.exists(f):
                 raise IOError, ("file not found: %s" % f)
             sa.add(str(f))
-        a_ptr = gtlib.gt_alphabet_new(0, 0, Str(""), sa, e)
+        a_ptr = gtlib.gt_alphabet_new_from_sequence(sa, e)
         a = Alphabet(a_ptr, True)
         if a == None:
           gterror(e)
@@ -132,9 +132,8 @@ class Alphabet:
             return False
 
     def register(cls, gtlib):
-        gtlib.gt_alphabet_new.restype = c_void_p
-        gtlib.gt_alphabet_new.argtypes = [c_int, c_int, Str, StrArray, \
-                                          Error]
+        gtlib.gt_alphabet_new_from_sequence.restype = c_void_p
+        gtlib.gt_alphabet_new_from_sequence.argtypes = [StrArray, Error]
         gtlib.gt_alphabet_new_dna.restype = c_void_p
         gtlib.gt_alphabet_new_dna.argtypes = []
         gtlib.gt_alphabet_new_protein.restype = c_void_p

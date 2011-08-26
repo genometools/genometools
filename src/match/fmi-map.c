@@ -205,7 +205,8 @@ int gt_mapfmindex (Fmindex *fmindex,const char *indexname,
       = (unsigned long) gt_determinenumberofspecialstostore(&specialcharinfo);
     fmindex->specpos.spaceGtPairBwtidx = NULL;
     fmindex->specpos.allocatedGtPairBwtidx = 0;
-    fmindex->alphabet = gt_alphabet_new_from_file(indexname,err);
+    fmindex->alphabet = gt_alphabet_ref(
+                                  gt_encseq_alphabet(fmindex->bwtformatching));
     if (fmindex->alphabet == NULL)
     {
       haserr = true;

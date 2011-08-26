@@ -83,9 +83,12 @@ unsigned int   gt_alphabet_bits_per_symbol(const GtAlphabet *alphabet);
 void           gt_alphabet_output(const GtAlphabet *alphabet, FILE *fpout);
 /* Writes a representation of <alphabet> to the .al1 output file as specified
    by <indexname> (i.e. without the .al1 suffix). */
-int            gt_alphabet_to_file(const GtAlphabet *alpha,
+int            gt_alphabet_to_file(const GtAlphabet *alphabet,
                                    const char *indexname,
                                    GtError *err);
+/* Writes a representation of <alphabet> to the <GtStr> as specified
+   by <dest>. */
+void            gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest);
 /* Returns the printable character specified in <alphabet> for <currentchar>. */
 GtUchar        gt_alphabet_pretty_symbol(const GtAlphabet *alphabet,
                                          unsigned int currentchar);

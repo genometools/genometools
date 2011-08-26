@@ -20,6 +20,7 @@
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
+#include "core/encseq_metadata.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/str.h"
@@ -298,8 +299,8 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
       numofchars = gt_alphabet_num_of_chars(
                                gt_encseq_alphabet(suffixarray.encseq));
       firstignorespecial = totallength - specialcharinfo->specialcharacters;
-      if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
-                           0,err) != 0)
+      if (gt_alphabet_to_file(gt_encseq_alphabet(suffixarray.encseq),
+                              outfmindex, err) != 0)
       {
         haserr = true;
       }
@@ -317,6 +318,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     }
   } else
   {
+    GtEncseqMetadata *emd = NULL;
     if (gt_emissionmergedesa_init(&emmesa,
                                indexnametab,
                                SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
@@ -327,14 +329,22 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      const char *indexname = gt_str_array_get(indexnametab,0);
+      const char *indexname = NULL;
+      indexname = gt_str_array_get(indexnametab,0);
+      emd = gt_encseq_metadata_new(indexname, err);
+      if (emd == NULL) {
+        haserr = true;
+      }
+    }
+    if (!haserr) {
       suffixlength = 0;
-      if (copytheindexfile(outfmindex,indexname,GT_ALPHABETFILESUFFIX,
-                           0,err) != 0)
+      if (gt_alphabet_to_file(gt_encseq_metadata_alphabet(emd),
+                              outfmindex, err) != 0)
       {
         haserr = true;
       }
     }
+    gt_encseq_metadata_delete(emd);
     if (!haserr)
     {
       sequenceoffsettable = gt_encseqtable2sequenceoffsets(&totallength,

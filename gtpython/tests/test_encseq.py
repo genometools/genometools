@@ -26,7 +26,7 @@ class EncodedsequenceTest(unittest.TestCase):
         self.aaseqfile.write(">seq2\n"+self.aaseq2+"\n")
         self.dnaseqfile.close()
         self.aaseqfile.close()
-        self.idxsuffixes = ['esq','des','ssp','sds','al1']
+        self.idxsuffixes = ['esq','des','ssp','sds']
 
     def tearDown(self):
         os.unlink(self.dnaseqfile.name)

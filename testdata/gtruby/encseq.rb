@@ -32,7 +32,7 @@ require 'tempfile'
 @aaseqfile.write(">seq2\n#{@aaseq2}\n")
 @dnaseqfile.flush
 @aaseqfile.flush
-@idxsuffixes = ['esq','des','ssp','sds','al1']
+@idxsuffixes = ['esq','des','ssp','sds']
 
 def create_es(indexname)
   GT::EncseqEncoder.new.encode([@dnaseqfile.path], indexname)

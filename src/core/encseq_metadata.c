@@ -35,14 +35,15 @@ struct GtEncseqMetadata
                 lengthofdbfilenames,
                 minseqlen,
                 maxseqlen;
+  GtAlphabet *alpha;
   GtSpecialcharinfo specialcharinfo;
 };
 
-#define NEXTFREAD(VAL)\
+#define NEXTFREADWSIZE(VAL, SIZE)\
         if (!had_err)\
         {\
           size_t ret;\
-          ret = fread(&(VAL), sizeof (VAL), (size_t) 1, fp);\
+          ret = fread(&(VAL), sizeof (VAL), (size_t) SIZE, fp);\
           if (ferror(fp))\
           {\
             gt_error_set(err,"error when trying to read %s: %s",\
@@ -68,12 +69,16 @@ struct GtEncseqMetadata
           }\
         }
 
+#define NEXTFREAD(VAL)\
+        NEXTFREADWSIZE(VAL,1)
+
 static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
                                    const char *indexname, GtError *err)
 {
   FILE *fp;
   bool had_err = false;
-  unsigned long cc, byteoffset = 0;
+  unsigned long cc, byteoffset = 0, alphatype, lengthofalphadef;
+  char *alphadef;
 
   gt_error_check(err);
   fp = gt_fa_fopen_with_suffix(indexname, GT_ENCSEQFILESUFFIX, "rb", err);
@@ -130,16 +135,48 @@ static int readfirstvaluesfromfile(GtEncseqMetadata *emd,
     NEXTFREAD(emd->minseqlen);
     NEXTFREAD(emd->maxseqlen);
   }
+  NEXTFREAD(alphatype);
+  if (!had_err) {
+    if (alphatype > 2UL) {
+      gt_error_set(err, "illegal alphabet type %lu in \"%s%s\"", alphatype,
+                   indexname, GT_ENCSEQFILESUFFIX);
+      had_err = true;
+    }
+  }
+  if (!had_err) {
+    NEXTFREAD(lengthofalphadef);
+    switch (alphatype) {
+      case 0:
+        emd->alpha = gt_alphabet_new_dna();
+        break;
+      case 1:
+        emd->alpha = gt_alphabet_new_protein();
+        break;
+      case 2:
+        gt_assert(lengthofalphadef > 0);
+        alphadef = gt_malloc(sizeof (char) * lengthofalphadef);
+        NEXTFREADWSIZE(*(alphadef), lengthofalphadef);
+        emd->alpha = gt_alphabet_new_from_string(alphadef, lengthofalphadef,
+                                                 err);
+        if (!emd->alpha) {
+          had_err = true;
+        }
+        gt_free(alphadef);
+        break;
+    }
+    gt_assert(emd->alpha != NULL);
+  }
   gt_fa_xfclose(fp);
   return had_err ? -1 : 0;
 }
 
-GtEncseqMetadata *gt_encseq_metadata_new(const char *indexname, GtError *err)
+GtEncseqMetadata* gt_encseq_metadata_new(const char *indexname, GtError *err)
 {
   int had_err = 0;
   GtEncseqMetadata *encseq_metadata;
   gt_assert(indexname);
   encseq_metadata = gt_malloc(sizeof (GtEncseqMetadata));
+  encseq_metadata->alpha = NULL;
   had_err = readfirstvaluesfromfile(encseq_metadata, indexname, err);
   if (had_err) {
     gt_assert(gt_error_is_set(err));
@@ -147,6 +184,12 @@ GtEncseqMetadata *gt_encseq_metadata_new(const char *indexname, GtError *err)
     encseq_metadata = NULL;
   }
   return encseq_metadata;
+}
+
+GtAlphabet* gt_encseq_metadata_alphabet(GtEncseqMetadata *emd)
+{
+  gt_assert(emd != NULL);
+  return emd->alpha;
 }
 
 unsigned long gt_encseq_metadata_total_length(GtEncseqMetadata *emd)
@@ -211,5 +254,8 @@ GtSpecialcharinfo gt_encseq_metadata_specialcharinfo(GtEncseqMetadata *emd)
 
 void gt_encseq_metadata_delete(GtEncseqMetadata *emd)
 {
+  if (emd == NULL) return;
+  if (emd->alpha != NULL)
+    gt_alphabet_delete(emd->alpha);
   gt_free(emd);
 }

@@ -1,7 +1,7 @@
-file format version: 1
+file format version: 2
 64-bit file: no
 total length: 17
-compressed size: 141 bytes
+compressed size: 149 bytes
 number of sequences: 2
 number of files: 1
 length of shortest/longest sequence: 8/8
@@ -18,7 +18,7 @@ number of wildcards: 0 (0 range(s))
 number of special characters: 1 (1 range(s))
 length of longest non-special character stretch: 8
 accesstype: eqlen
-bits used per character: 66.352941
+bits used per character: 70.117647
 has special ranges: yes
 has description support: yes
 has multiple sequence support: yes
