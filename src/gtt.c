@@ -58,6 +58,7 @@
 #include "extended/splicedseq.h"
 #include "extended/string_matching.h"
 #include "extended/tag_value_map.h"
+#include "extended/uint64hashtable.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
 #include "ltr/ltrelement.h"
@@ -272,6 +273,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "translator class", gt_translator_unit_test);
   gt_hashmap_add(unit_tests, "encseq gc module", gt_encseq_gc_unit_test);
   gt_hashmap_add(unit_tests, "color space module", gt_colorspace_unit_test);
+  gt_hashmap_add(unit_tests, "uint64hashtable", gt_uint64hashtable_unit_test);
 #ifndef WITHOUT_CAIRO
   gt_hashmap_add(unit_tests, "block class", gt_block_unit_test);
   gt_hashmap_add(unit_tests, "diagram class", gt_diagram_unit_test);
