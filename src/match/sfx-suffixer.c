@@ -1589,7 +1589,6 @@ static void gt_determineaddionalsuffixprefixchars(
     {
       suffixchars = prefixchars - 1;
     }
-    gt_assert(suffixchars >= 0);
     *additionalsuffixchars = suffixchars;
   }
 #else
