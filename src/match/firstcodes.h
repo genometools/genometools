@@ -23,4 +23,7 @@
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize);
 
+void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                                  unsigned int kmersize);
+
 #endif

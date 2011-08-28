@@ -236,6 +236,9 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
     case BSRS_storefirstcodes:
       storefirstcodes_getencseqkmers_twobitencoding(encseq,kmersize);
       break;
+    case BSRS_hashfirstcodes:
+      hashfirstcodes_getencseqkmers_twobitencoding(encseq,kmersize);
+      break;
     default:
       break;
   }
@@ -311,6 +314,7 @@ void gt_encseq_faststream(const GtEncseq *encseq,
       case BSRS_stream_reader_multi:
       case BSRS_stream_reader_multi3:
       case BSRS_storefirstcodes:
+      case BSRS_hashfirstcodes:
         gt_encseq_faststream_kmers(encseq,bsrsmode,multiarg);
         break;
     }

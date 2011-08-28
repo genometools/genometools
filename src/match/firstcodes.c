@@ -19,6 +19,7 @@
 #include "core/encseq.h"
 #include "core/codetype.h"
 #include "core/arraydef.h"
+#include "extended/uint64hashtable.h"
 #include "sfx-suffixer.h"
 #include "firstcodes.h"
 
@@ -492,4 +493,47 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_free(firstcodesinfo.allfirstcodes);
   gt_free(firstcodesinfo.countocc);
   gt_free(firstcodesinfo.codeoccurrence);
+}
+
+typedef struct
+{
+  GtUint64hashtable *table;
+  unsigned long differentcodes;
+  unsigned int kmersize;
+} GtHashfirstcodes;
+
+static void gt_hashfirstcodes(void *processinfo,
+                              GT_UNUSED bool firstinrange,
+                              GT_UNUSED unsigned long pos,
+                              GtCodetype code)
+{
+  GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
+
+  if (gt_uint64hashtable_search(hashfirstcodes->table,
+                                (uint64_t) code,
+                                true))
+  {
+    hashfirstcodes->differentcodes++;
+  }
+}
+
+void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                                  unsigned int kmersize)
+{
+  GtHashfirstcodes hashfirstcodes;
+  unsigned long numofsequences = gt_encseq_num_of_sequences(encseq);
+
+  hashfirstcodes.table = gt_uint64hashtable_new((size_t) numofsequences);
+  hashfirstcodes.differentcodes = 0;
+  getencseqkmers_twobitencoding(encseq,
+                                GT_READMODE_FORWARD,
+                                kmersize,
+                                kmersize,
+                                true,
+                                gt_hashfirstcodes,
+                                &hashfirstcodes,
+                                NULL,
+                                NULL);
+  gt_uint64hashtable_delete(hashfirstcodes.table);
+  printf("differentcodes=%lu\n",hashfirstcodes.differentcodes);
 }
