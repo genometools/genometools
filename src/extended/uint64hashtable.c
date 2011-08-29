@@ -85,21 +85,46 @@ typedef struct
   unsigned long count;
 } GtUint64hashstoredvalue;
 
+static int compareGtUint64hashstoredvalue(void *data,
+                                          const void *a,const void *b)
+{
+  GtUint64hashstoredvalue *hspace = (GtUint64hashstoredvalue *) data;
+  uint32_t va = *(const uint32_t *) a;
+  uint32_t vb = *(const uint32_t *) b;
+
+  if (hspace[va].key < hspace[vb].key)
+  {
+    return -1;
+  }
+  if (hspace[va].key > hspace[vb].key)
+  {
+    return 1;
+  }
+  gt_assert(false);
+  return 0;
+}
+
 struct GtUint64hashtable
 {
   GtUint64hashstoredvalue *hspace;
-  size_t    alloc;
-  unsigned long countcollisions, zero_count;
-  bool      zero_occurs;
+  uint32_t *sortedhspace;
+  size_t alloc;
+  unsigned long countcollisions, zero_count,
+                allentries,
+                numofinterestingentries; /* number of entries with
+                                            count > 1 */
+  bool zero_occurs;
 };
 
 GtUint64hashtable *gt_uint64hashtable_new(size_t nof_elements)
 {
   GtUint64hashtable *table;
-  const double loadfactor = 1.25;
+  const double loadfactor = 1.30;
 
   table = gt_malloc(sizeof (*table));
   table->countcollisions = 0;
+  table->numofinterestingentries = 0;
+  table->allentries = 0;
   table->zero_occurs = false;
   table->zero_count = 0;
   table->alloc
@@ -148,10 +173,12 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
 #endif
     for (iteration = 0; iteration < table->alloc; iteration++)
     {
+      gt_assert(pos < table->alloc);
       if (table->hspace[pos].key == emptymark)
       {
         if (insert_if_not_found)
         {
+          table->allentries++;
           table->hspace[pos].key = key;
           table->hspace[pos].count++;
         }
@@ -159,7 +186,12 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
       }
       if (table->hspace[pos].key == key)
       {
+        gt_assert(table->hspace[pos].count > 0);
         table->hspace[pos].count++;
+        if (table->hspace[pos].count == 2UL)
+        {
+          table->numofinterestingentries++;
+        }
         return true;
       }
       table->countcollisions++;
@@ -169,7 +201,7 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
       }
       gt_assert(hashadd > 0);
       pos += hashadd;
-      if (pos > table->alloc)
+      if (pos >= table->alloc)
       {
         pos -= table->alloc;
       }
@@ -192,7 +224,12 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
       return false;
     } else
     {
+      gt_assert(table->zero_count > 0);
       table->zero_count++;
+      if (table->zero_count == 2UL)
+      {
+        table->numofinterestingentries++;
+      }
       return true;
     }
   }
@@ -211,6 +248,43 @@ unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
     }
   }
   return sumcount + table->zero_count;
+}
+
+void gt_uint64hashtable_partialsums(GtUint64hashtable *table)
+{
+  size_t idx, next = 0;
+  unsigned long psum;
+
+  printf("numofinterestingentries=%lu (%.4f)\n",
+            table->numofinterestingentries,
+            (double) table->numofinterestingentries/table->allentries);
+  table->sortedhspace = gt_malloc((size_t) table->numofinterestingentries *
+                                  sizeof (*table->sortedhspace));
+  for (idx = 0; idx < table->alloc; idx++)
+  {
+    if (table->hspace[idx].count >= 2UL)
+    {
+      gt_assert(next < (size_t) table->numofinterestingentries);
+      gt_assert(idx <= UINT32_MAX);
+      table->sortedhspace[next++] = idx;
+    }
+  }
+  if (table->zero_occurs)
+  {
+    psum = table->zero_count;
+  } else
+  {
+    psum = 0;
+  }
+  for (idx = 0; idx < next; idx++)
+  {
+    unsigned long value = table->hspace[table->sortedhspace[idx]].count;
+    table->hspace[table->sortedhspace[idx]].count = psum;
+    psum += value;
+  }
+  qsort_r(table->sortedhspace,next,sizeof(*table->sortedhspace),
+          table->hspace,compareGtUint64hashstoredvalue);
+  gt_free(table->sortedhspace);
 }
 
 int gt_uint64hashtable_unit_test(GtError *err)

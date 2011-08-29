@@ -39,6 +39,8 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
 
 unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table);
 
+void gt_uint64hashtable_partialsums(GtUint64hashtable *table);
+
 int gt_uint64hashtable_unit_test(GtError *err);
 
 #endif
