@@ -27,6 +27,7 @@
 #include "core/safearith.h"
 #include "core/unused_api.h"
 #include "core/logger_api.h"
+#include "core/xansi_api.h"
 #include "sfx-suffixgetset.h"
 
 struct GtSuffixsortspace
@@ -362,24 +363,16 @@ unsigned long gt_suffixsortspace_longest(const GtSuffixsortspace *sssp)
 int gt_suffixsortspace_to_file (FILE *outfpsuftab,
                                 const GtSuffixsortspace *sssp,
                                 unsigned long numberofsuffixes,
-                                GtError *err)
+                                GT_UNUSED GtError *err)
 {
   bool haserr = false;
   size_t basesize = sssp->ulongtab != NULL ? sizeof (*sssp->ulongtab)
                                            : sizeof (*sssp->uinttab);
 
-  if (fwrite(sssp->ulongtab != NULL ? (void *) sssp->ulongtab
+  gt_xfwrite(sssp->ulongtab != NULL ? (void *) sssp->ulongtab
                                     : (void *) sssp->uinttab,
              basesize,
              (size_t) numberofsuffixes,
-             outfpsuftab)
-             != (size_t) numberofsuffixes)
-  {
-    gt_error_set(err,"cannot write %lu items of size %lu: errormsg=\"%s\"",
-                 numberofsuffixes,
-                 (unsigned long) basesize,
-                 strerror(errno));
-    haserr = true;
-  }
+             outfpsuftab);
   return haserr ? -1 : 0;
 }

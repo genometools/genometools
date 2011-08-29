@@ -135,9 +135,24 @@ void gt_xfsetpos(FILE *stream, const fpos_t *pos)
 
 void gt_xfwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
-  if (fwrite(ptr, size, nmemb, stream) != nmemb) {
-    perror("cannot write to stream");
-    exit(EXIT_FAILURE);
+  unsigned long itemsperblock = (1 << 30) / size,
+                itemstowrite = nmemb,
+                itemswritten = 0;
+  while (itemstowrite >= itemsperblock) {
+    if (fwrite((char*) ptr + (size * itemswritten), size,
+               itemsperblock, stream) != itemsperblock) {
+      perror("cannot write to stream");
+      exit(EXIT_FAILURE);
+    }
+    itemstowrite -= itemsperblock;
+    itemswritten += itemsperblock;
+  }
+  if (itemstowrite > 0) {
+    if (fwrite((char*)ptr + (size * itemswritten), size,
+               itemstowrite, stream) != itemstowrite) {
+      perror("cannot write to stream");
+      exit(EXIT_FAILURE);
+    }
   }
 }
 
