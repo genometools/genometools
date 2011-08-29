@@ -20,6 +20,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/hashtable.h" /* gt_uint64_key_mul_hash */
+#include "core/spacecalc.h"
 #include "extended/uint64hashtable.h"
 #include "extended/uint64hashtable_primes.h"
 
@@ -28,7 +29,7 @@
   "developers: modify scripts/makeprimestable.sh to create a larger table\n"
 
 #define GT_UINT64TABLE_NOFPRIMES \
-  (sizeof (gt_uint64hashtable_primes) / sizeof (unsigned long))
+  (sizeof (gt_uint64hashtable_primes) / sizeof (gt_uint64hashtable_primes[0]))
 
 #define GT_UINT64TABLE_LARGEST_PRIME \
   gt_uint64hashtable_primes[GT_UINT64TABLE_NOFPRIMES - 1UL]
@@ -78,10 +79,17 @@ static size_t gt_uint64hashtable_get_size(size_t n)
   return 0;
 }
 
+typedef struct
+{
+  uint64_t key;
+  unsigned long count;
+} GtUint64hashstoredvalue;
+
 struct GtUint64hashtable
 {
-  uint64_t  *space;
+  GtUint64hashstoredvalue *hspace;
   size_t    alloc, fill, maxfill;
+  unsigned long countcollision;
   bool      zero_occurs;
 };
 
@@ -93,10 +101,11 @@ static void gt_uint64hashtable_alloc_table(GtUint64hashtable *table,
 GtUint64hashtable *gt_uint64hashtable_new(size_t nof_elements)
 {
   GtUint64hashtable *table;
-  table = gt_malloc(sizeof (GtUint64hashtable));
+  table = gt_malloc(sizeof (*table));
   table->fill = 0;
   table->alloc = 0;
-  table->space = NULL;
+  table->countcollision = 0;
+  table->hspace = NULL;
   table->zero_occurs = false;
   gt_uint64hashtable_alloc_table(table, gt_uint64hashtable_get_size(
         (size_t)(1 + (double)nof_elements / GT_UINT64TABLE_MAX_LOAD_FACTOR)));
@@ -108,7 +117,8 @@ void gt_uint64hashtable_delete(GtUint64hashtable *table)
 {
   if (table != NULL)
   {
-    gt_free(table->space);
+    printf("# number of collisions %lu\n",table->countcollision);
+    gt_free(table->hspace);
     gt_free(table);
   }
 }
@@ -122,14 +132,6 @@ enum GtUint64hashtableSearchResult
   GT_UINT64TABLE_COLLISION
 };
 
-#define GT_UINT64TABLE_PREPARE_INSERTION(SET) \
-  ((SET)->fill)++;\
-  if ((SET)->fill > (SET)->maxfill) \
-    gt_uint64hashtable_alloc_table((SET), \
-        /* using alloc + 1, the next value in the lookup table is returned */ \
-        gt_uint64hashtable_get_size((SET)->alloc + 1UL));\
-  gt_assert((SET)->fill <= (SET)->maxfill)
-
 static inline enum GtUint64hashtableSearchResult
            gt_uint64hashtable_search_pos(GtUint64hashtable *table,
                                          uint64_t key,
@@ -137,19 +139,32 @@ static inline enum GtUint64hashtableSearchResult
                                          size_t pos)
 {
   gt_assert(pos < table->alloc);
-  if (table->space[pos] == GT_UINT64TABLE_EMPTYMARK)
+  if (table->hspace[pos].key == GT_UINT64TABLE_EMPTYMARK)
   {
     if (insert_if_not_found)
     {
-      GT_UINT64TABLE_PREPARE_INSERTION(table);
-      table->space[pos] = key;
+      table->fill++;
+      if (table->fill > table->maxfill)
+      {
+        /* using alloc + 1, the next value in the lookup table is returned */
+        gt_uint64hashtable_alloc_table(
+                    table,
+                    gt_uint64hashtable_get_size(table->alloc + 1UL));
+      }
+      gt_assert(table->fill <= table->maxfill);
+      table->hspace[pos].key = key;
+      table->hspace[pos].count = 1UL;
     }
     return GT_UINT64TABLE_EMPTY;
+  } else
+  {
+    if (table->hspace[pos].key == key)
+    {
+      table->hspace[pos].count++;
+      return GT_UINT64TABLE_KEY_FOUND;
+    }
+    return GT_UINT64TABLE_COLLISION;
   }
-  else
-    return (table->space[pos] == key)
-      ? GT_UINT64TABLE_KEY_FOUND
-      : GT_UINT64TABLE_COLLISION;
 }
 
 static inline size_t gt_uint64hashtable_h1(uint64_t key, size_t table_size)
@@ -170,15 +185,17 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
   if (key == 0)
   {
     if (table->zero_occurs)
+    {
       return true;
-    else
+    } else
     {
       if (insert_if_not_found)
+      {
         table->zero_occurs = true;
+      }
       return false;
     }
-  }
-  else
+  } else
   {
     size_t i, c;
 #ifndef NDEBUG
@@ -189,8 +206,10 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
     i = gt_uint64hashtable_h1(key, table->alloc);
     retval = gt_uint64hashtable_search_pos(table, key, insert_if_not_found, i);
     if (retval != GT_UINT64TABLE_COLLISION)
+    {
       return retval == GT_UINT64TABLE_EMPTY ? false : true;
-
+    }
+    table->countcollision++;
     c = gt_uint64hashtable_h2(key, table->alloc);
     gt_assert(c > 0);
 #ifndef NDEBUG
@@ -198,45 +217,54 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
 #endif
     while (1)
     {
-      i = (i + c);
+      i += c;
       if (i > table->alloc)
+      {
         i -= table->alloc;
+      }
       gt_assert(i != first_i);
-      retval = gt_uint64hashtable_search_pos(table, key,
-                                             insert_if_not_found, i);
+      retval = gt_uint64hashtable_search_pos(table, key,insert_if_not_found,i);
       if (retval != GT_UINT64TABLE_COLLISION)
+      {
         return retval == GT_UINT64TABLE_EMPTY ? false : true;
+      }
     }
   }
 }
 
 static void gt_uint64hashtable_rehash(GtUint64hashtable *table,
-                                      uint64_t *oldtable,
-    size_t oldsize)
+                                      GtUint64hashstoredvalue *oldtable,
+                                      size_t oldsize)
 {
   size_t i;
+
   table->fill = 0;
   for (i = 0; i < oldsize; i++)
-    if (oldtable[i] != GT_UINT64TABLE_EMPTYMARK)
-      (void)gt_uint64hashtable_search(table, oldtable[i], true);
+  {
+    if (oldtable[i].key != GT_UINT64TABLE_EMPTYMARK)
+    {
+      (void) gt_uint64hashtable_search(table, oldtable[i].key, true);
+    }
+  }
 }
 
 static void gt_uint64hashtable_alloc_table(GtUint64hashtable *table,
                                            size_t tsize)
 {
-  uint64_t *oldspace;
+  GtUint64hashstoredvalue *oldspace;
   size_t oldsize;
 
   oldsize = table->alloc;
-  oldspace = table->space;
+  oldspace = table->hspace;
   table->alloc = tsize;
   table->maxfill = (size_t)((double)tsize * GT_UINT64TABLE_MAX_LOAD_FACTOR);
-  table->space = gt_calloc(tsize, sizeof (uint64_t));
+  table->hspace = gt_calloc(tsize, sizeof (*table->hspace));
+  printf("calloc (%.2f MB)\n",GT_MEGABYTES(tsize * sizeof (*table->hspace)));
   if (oldspace != NULL)
   {
     gt_log_log("rehashing %lu elements; old size: %lu, new size: %lu\n",
-        (unsigned long)table->fill, (unsigned long)oldsize,
-        (unsigned long)tsize);
+        (unsigned long) table->fill, (unsigned long) oldsize,
+        (unsigned long) tsize);
     gt_uint64hashtable_rehash(table, oldspace, tsize);
     gt_free(oldspace);
   }
