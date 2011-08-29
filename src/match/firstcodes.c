@@ -498,7 +498,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 typedef struct
 {
   GtUint64hashtable *table;
-  unsigned long differentcodes;
+  unsigned long differentcodes, remainingcodes;
   unsigned int kmersize;
 } GtHashfirstcodes;
 
@@ -517,6 +517,21 @@ static void gt_hashfirstcodes(void *processinfo,
   }
 }
 
+static void gt_hashremainingcodes(void *processinfo,
+                                  GT_UNUSED bool firstinrange,
+                                  GT_UNUSED unsigned long pos,
+                                  GtCodetype code)
+{
+  GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
+
+  if (gt_uint64hashtable_search(hashfirstcodes->table,
+                                (uint64_t) code,
+                                false))
+  {
+    hashfirstcodes->remainingcodes++;
+  }
+}
+
 void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize)
 {
@@ -525,6 +540,7 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 
   hashfirstcodes.table = gt_uint64hashtable_new((size_t) numofsequences);
   hashfirstcodes.differentcodes = 0;
+  hashfirstcodes.remainingcodes = 0;
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
@@ -540,5 +556,18 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           numofsequences);
   countsum = gt_uint64hashtable_countsum_get(hashfirstcodes.table);
   gt_assert(countsum == numofsequences);
+  getencseqkmers_twobitencoding(encseq,
+                                GT_READMODE_FORWARD,
+                                kmersize,
+                                45U,
+                                false,
+                                gt_hashremainingcodes,
+                                &hashfirstcodes,
+                                NULL,
+                                NULL);
+  printf("# number of remaining suffixes=%lu (%.2f)\n",
+          numofsequences + hashfirstcodes.remainingcodes,
+          (double) (numofsequences + hashfirstcodes.remainingcodes)/
+          (gt_encseq_total_length(encseq)+1));
   gt_uint64hashtable_delete(hashfirstcodes.table);
 }
