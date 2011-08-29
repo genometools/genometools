@@ -136,7 +136,7 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
   gt_assert(table != NULL);
   if (key > 0)
   {
-    size_t pos, hashadd = 0;
+    size_t pos, hashadd = 0, iteration;
     const uint64_t emptymark = 0;
 
 #ifndef NDEBUG
@@ -146,7 +146,7 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
 #ifndef NDEBUG
     first_pos = pos;
 #endif
-    while (true)
+    for (iteration = 0; iteration < table->alloc; iteration++)
     {
       if (table->hspace[pos].key == emptymark)
       {
@@ -175,6 +175,11 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
       }
       gt_assert(pos != first_pos);
     }
+    fprintf(stderr, "function %s, file %s, line %d.\n"
+                    "Cannot find empty slot in hashtable: "
+                    "This is probably a bug, please report it.\n",
+                    __func__, __FILE__, __LINE__);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
   } else
   {
     if (!table->zero_occurs)
