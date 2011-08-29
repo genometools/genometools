@@ -509,9 +509,9 @@ static void gt_hashfirstcodes(void *processinfo,
 {
   GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
 
-  if (gt_uint64hashtable_search(hashfirstcodes->table,
-                                (uint64_t) code,
-                                true))
+  if (!gt_uint64hashtable_search(hashfirstcodes->table,
+                                 (uint64_t) code,
+                                 true))
   {
     hashfirstcodes->differentcodes++;
   }
@@ -535,5 +535,8 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 NULL,
                                 NULL);
   gt_uint64hashtable_delete(hashfirstcodes.table);
-  printf("differentcodes=%lu\n",hashfirstcodes.differentcodes);
+  printf("# number of different codes=%lu (%.4f) in %lu sequences\n",
+          hashfirstcodes.differentcodes,
+          (double) hashfirstcodes.differentcodes/numofsequences,
+          numofsequences);
 }
