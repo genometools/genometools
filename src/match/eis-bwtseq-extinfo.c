@@ -20,6 +20,7 @@
 #include "core/log.h"
 #include "core/minmax.h"
 #include "core/unused_api.h"
+#include "core/xansi_api.h"
 #include "match/eis-specialsrank.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
@@ -70,7 +71,8 @@ writeLocateInfoHeader(FILE *fp, void *cbData)
   }
   headerData.rot0Pos = rot0Pos.valueunsignedlong;
   headerData.featureToggles = headerSrc->featureToggles;
-  return fwrite(&headerData, sizeof (headerData), 1, fp);
+  gt_xfwrite(&headerData, sizeof (headerData), 1, fp);
+  return 1;
 }
 
 /**
@@ -106,16 +108,14 @@ writeRankSortHeader(FILE *fp, void *cbData)
 {
   struct sortModeHeader *headerData = cbData;
   gt_assert(cbData);
-  if (fwrite(&headerData->bitsPerOrigRank, sizeof (headerData->bitsPerOrigRank),
-             1, fp) != 1)
-    return 0;
+  gt_xfwrite(&headerData->bitsPerOrigRank, sizeof (headerData->bitsPerOrigRank),
+             1, fp);
   {
     size_t i, numRanges = MRAEncGetNumRanges(headerData->alphabet);
     for (i = 0; i < numRanges; ++i)
     {
       int16_t mode = headerData->rangeSort[i];
-      if (fwrite(&mode, sizeof (mode), 1, fp) != 1)
-        return 0;
+      gt_xfwrite(&mode, sizeof (mode), 1, fp);
     }
   }
   return 1;

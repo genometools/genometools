@@ -39,6 +39,7 @@
 #include "core/minmax.h"
 #include "core/str.h"
 #include "core/unused_api.h"
+#include "core/xansi_api.h"
 #include "eis-blockcomp-construct.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-encidxseq.h"
@@ -1885,9 +1886,8 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
             SEEK_SET))
     return 0;
   cwBitElems = recordsExpected = aState->cwMemPos / bitElemBits;
-  if (recordsExpected != fwrite(aState->compCache, sizeof (BitElem),
-                                recordsExpected, seqIdx->externalData.idxFP))
-    return 0;
+  gt_xfwrite(aState->compCache, sizeof (BitElem), recordsExpected,
+             seqIdx->externalData.idxFP);
   if ((aState->cwMemOldBits = aState->cwMemPos % bitElemBits))
     aState->compCache[0] = aState->compCache[recordsExpected];
   /* seek2/write variable width indices */
@@ -1895,9 +1895,8 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
             + aState->varDiskOffset/bitElemBits * sizeof (BitElem), SEEK_SET))
     return 0;
   recordsExpected = aState->varMemPos/bitElemBits;
-  if (recordsExpected != fwrite(aState->permCache, sizeof (BitElem),
-                                recordsExpected, seqIdx->externalData.idxFP))
-    return 0;
+  gt_xfwrite(aState->permCache, sizeof (BitElem), recordsExpected,
+             seqIdx->externalData.idxFP);
   /* move last elem of permCache with unwritten bits to front */
   if (aState->varMemPos % bitElemBits)
     aState->permCache[0] = aState->permCache[recordsExpected];
@@ -1992,8 +1991,7 @@ writeExtIdxHeader(FILE *fp, uint16_t headerID, size_t len,
 {
   uint32_t expHeader[2] =
     { EH_HEADER_PREFIX | headerID, len };
-  if (fwrite(expHeader, sizeof (uint32_t), 2, fp)!= 2)
-    return 0;
+  gt_xfwrite(expHeader, sizeof (uint32_t), 2, fp);
   return cbFunc(fp, cbData);
 }
 
@@ -2086,8 +2084,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
   gt_assert(offset == bufLen);
   if (fseeko(fp, 0, SEEK_SET))
     writeIdxHeaderErrRet(0);
-  if (fwrite(buf, bufLen, 1, fp) != 1)
-    writeIdxHeaderErrRet(0);
+  gt_xfwrite(buf, bufLen, 1, fp);
   if (numExtHeaders)
   {
     off_t offsetTargetValue = bufLen;
@@ -2464,10 +2461,8 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
                + aState->cwDiskOffset * sizeof (BitElem), SEEK_SET))
       return 0;
     recordsExpected = 1;
-    if (recordsExpected != fwrite(aState->compCache, sizeof (BitElem),
-                                  recordsExpected,
-                                  seqIdx->externalData.idxFP))
-      return 0;
+    gt_xfwrite(aState->compCache, sizeof (BitElem), recordsExpected,
+               seqIdx->externalData.idxFP);
     ++(aState->cwDiskOffset);
   }
   if (aState->varMemOldBits)
@@ -2479,10 +2474,9 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
                SEEK_SET))
       return 0;
     recordsExpected = 1;
-    if (recordsExpected != fwrite(aState->permCache, sizeof (BitElem),
-                                  recordsExpected,
-                                  seqIdx->externalData.idxFP))
-      return 0;
+    gt_xfwrite(aState->permCache, sizeof (BitElem),
+               recordsExpected,
+               seqIdx->externalData.idxFP);
   }
   rangeEncPos = seqIdx->externalData.varDataPos
     + aState->varDiskOffset / bitElemBits * sizeof (BitElem)

@@ -17,12 +17,14 @@
 
 #include <string.h>
 #include <inttypes.h>
+#include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/divmodmul.h"
-#include "core/fa.h"
 #include "core/error.h"
+#include "core/fa.h"
 #include "core/str.h"
-#include "core/alphabet.h"
+#include "core/xansi_api.h"
+
 #include "emimergeesa.h"
 #include "esa-fileend.h"
 #include "fmindex.h"
@@ -425,14 +427,7 @@ int gt_sufbwt2fmindex(Fmindex *fmindex,
         {
           break;
         }
-        if (fwrite(&cc,
-                  sizeof (GtUchar),
-                  (size_t) 1,
-                  outbwt) != (size_t) 1)
-        {
-          haserr = true;
-          break;
-        }
+        gt_xfwrite(&cc, sizeof (GtUchar), (size_t) 1, outbwt);
       }
       if (bwtpos == nextprogress)
       {

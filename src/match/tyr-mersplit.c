@@ -17,14 +17,15 @@
 
 #include <math.h>
 #include <errno.h>
-#include "core/divmodmul.h"
-#include "core/str_api.h"
-#include "core/minmax.h"
-#include "core/types_api.h"
-#include "core/fa.h"
 #include "core/defined-types.h"
+#include "core/divmodmul.h"
+#include "core/fa.h"
 #include "core/intbits.h"
 #include "core/mathsupport.h"
+#include "core/minmax.h"
+#include "core/str_api.h"
+#include "core/types_api.h"
+#include "core/xansi_api.h"
 #include "spacedef.h"
 #include "tyr-map.h"
 #include "tyr-mersplit.h"
@@ -367,38 +368,19 @@ int gt_constructmerbuckets(const char *inputindex,
   {
     unsigned long pl_long = (unsigned long) tyrbckinfo.prefixlength;
     gt_assert(bucketfp != NULL);
-    if (fwrite(&pl_long,
-               sizeof (pl_long),
-               (size_t) 1,
-               bucketfp) != (size_t) 1)
-    {
-      gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
-                   (unsigned int) sizeof (pl_long),
-                   strerror(errno));
-      haserr = true;
-    }
+    gt_xfwrite(&pl_long, sizeof (pl_long), (size_t) 1, bucketfp);
   }
   if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
     gt_assert(bucketfp != NULL);
-    if (fwrite(tyrbckinfo.bounds,
-               sizeof (*tyrbckinfo.bounds),
-               (size_t) (tyrbckinfo.numofcodes+1),
-               bucketfp) != (size_t) (tyrbckinfo.numofcodes+1))
-    {
-      haserr = true;
-    }
+    gt_xfwrite(tyrbckinfo.bounds, sizeof (*tyrbckinfo.bounds),
+               (size_t) (tyrbckinfo.numofcodes+1), bucketfp);
   }
   if (!haserr && tyrindex != NULL && !gt_tyrindex_isempty(tyrindex))
   {
     gt_assert(bucketfp != NULL);
-    if (fwrite(tyrbckinfo.boundisdefined,
-               sizeof (*tyrbckinfo.boundisdefined),
-               GT_NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1),
-               bucketfp) != GT_NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1))
-    {
-      haserr = true;
-    }
+    gt_xfwrite(tyrbckinfo.boundisdefined, sizeof (*tyrbckinfo.boundisdefined),
+               GT_NUMOFINTSFORBITS(tyrbckinfo.numofcodes+1), bucketfp);
   }
   gt_fa_xfclose(bucketfp);
   if (tyrindex != NULL)

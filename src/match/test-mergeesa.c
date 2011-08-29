@@ -19,11 +19,12 @@
 #include <limits.h>
 #include <string.h>
 #include "core/fa.h"
+#include "core/logger.h"
+#include "core/xansi_api.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
 #include "esa-fileend.h"
-#include "core/logger.h"
 #include "lcpoverflow.h"
 
 #include "encseq2offset.pr"
@@ -85,17 +86,8 @@ static int outputsuflcpllv(void *processinfo,
       = sequenceoffsettable[buf->suftabstore[i].idx] +
         buf->suftabstore[i].startpos;
   }
-  if (fwrite(mergeoutinfo->absstartpostable,
-            sizeof (unsigned long),
-            (size_t) buf->nextstoreidx,
-            mergeoutinfo->outsuf.fp)
-         != (size_t) buf->nextstoreidx)
-  {
-    gt_error_set(err,"fwrite(%s) of %u unsigned long-value failed: %s",
-                  gt_str_get(mergeoutinfo->outsuf.outfilename),
-                  buf->nextstoreidx,strerror(errno));
-    haserr = true;
-  }
+  gt_xfwrite(mergeoutinfo->absstartpostable, sizeof (unsigned long),
+            (size_t) buf->nextstoreidx, mergeoutinfo->outsuf.fp);
   if (!haserr)
   {
     if (buf->lastpage)
@@ -115,26 +107,12 @@ static int outputsuflcpllv(void *processinfo,
       {
         currentexception.position = mergeoutinfo->currentlcpindex;
         currentexception.value = lcpvalue;
-        if (fwrite(&currentexception,sizeof (Largelcpvalue),
-                 (size_t) 1,mergeoutinfo->outllv.fp) != (size_t) 1)
-        {
-          gt_error_set(err,"fwrite(%s) of Largelcpvalue failed: %s",
-                        gt_str_get(mergeoutinfo->outllv.outfilename),
-                        strerror(errno));
-          haserr = true;
-          break;
-        }
+        gt_xfwrite(&currentexception,sizeof (Largelcpvalue), (size_t) 1,
+                   mergeoutinfo->outllv.fp);
         smallvalue = LCPOVERFLOW;
       }
-      if (fwrite(&smallvalue,sizeof (GtUchar),(size_t) 1,
-                mergeoutinfo->outlcp.fp) != (size_t) 1)
-      {
-        gt_error_set(err,"fwrite(%s) of GtUchar failed: %s",
-                       gt_str_get(mergeoutinfo->outlcp.outfilename),
-                       strerror(errno));
-        haserr = true;
-        break;
-      }
+      gt_xfwrite(&smallvalue,sizeof (GtUchar),(size_t) 1,
+                 mergeoutinfo->outlcp.fp);
       mergeoutinfo->currentlcpindex++;
     }
   }
@@ -172,13 +150,9 @@ static int mergeandstoreindex(const GtStr *storeindex,
     }
   }
   smalllcpvalue = 0;
-  if (!haserr && fwrite(&smalllcpvalue,sizeof (GtUchar),(size_t) 1,
-                mergeoutinfo.outlcp.fp) != (size_t) 1)
-  {
-    gt_error_set(err,"fwrite(%s) failed: %s",
-                  gt_str_get(mergeoutinfo.outlcp.outfilename),
-                  strerror(errno));
-    haserr = true;
+  if (!haserr) {
+    gt_xfwrite(&smalllcpvalue,sizeof (GtUchar),(size_t) 1,
+               mergeoutinfo.outlcp.fp);
   }
   if (!haserr)
   {

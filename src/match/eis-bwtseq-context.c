@@ -24,6 +24,7 @@
 #include "core/dataalign.h"
 #include "core/fa.h"
 #include "core/str.h"
+#include "core/xansi_api.h"
 
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
@@ -81,15 +82,13 @@ initBWTSeqContextRetrieverFactory(BWTSeqContextRetrieverFactory *newFactory,
     memset(buf, 0, sizeof (buf));
     for (i = BLOCK_IO_SIZE; i < backingStoreSize; i += BLOCK_IO_SIZE)
     {
-      if (fwrite(buf, sizeof (buf[0]), BLOCK_IO_SIZE, fp)
-          != BLOCK_IO_SIZE)
-        die("short write on backing store creation");
+      gt_xfwrite(buf, sizeof (buf[0]), BLOCK_IO_SIZE, fp);
     }
     {
       unsigned leftOver = backingStoreSize % BLOCK_IO_SIZE;
-      if (leftOver &&
-          fwrite(buf, sizeof (buf[0]), leftOver, fp) != leftOver)
-        die("short write on backing store creation");
+      if (leftOver > 0) {
+        gt_xfwrite(buf, sizeof (buf[0]), leftOver, fp);
+      }
     }
   }
 }
@@ -127,8 +126,7 @@ addMapVal(BWTSeqContextRetrieverFactory *factory,
   FILE *fp = factory->mapTableDiskBackingStore;
   if (fseeko(fp, mapPos, SEEK_SET) == -1)
     die("failed to seek in backing store");
-  if (fwrite(&mapVal, sizeof (mapVal), 1, fp) != 1)
-    die("failed when writing to backing store");
+  gt_xfwrite(&mapVal, sizeof (mapVal), 1, fp);
 }
 
 /**
@@ -302,15 +300,12 @@ BWTSeqCRMapOpen(unsigned short mapIntervalLog2,
         gt_bsStoreUInt16(headerBuf, 0, HEADER_ENTRY_BITS, mapIntervalLog2);
         gt_bsStoreUInt16(headerBuf, HEADER_ENTRY_BITS, HEADER_ENTRY_BITS,
                       bitsPerUlong);
-        if (fwrite(headerBuf,  sizeof (headerBuf), 1, mapFile) != 1)
-          break;
+        gt_xfwrite(headerBuf,  sizeof (headerBuf), 1, mapFile);
         if (fseeko(mapFile, mapSize - 1, SEEK_SET))
           break;
         /* write one byte so mmap works for full file */
-        if (fwrite(&buf, 1, 1, mapFile) != 1)
-          break;
-        if (fflush(mapFile) == EOF)
-          break;
+        gt_xfwrite(&buf, 1, 1, mapFile);
+        gt_xfflush(mapFile);
       }
       else
       {

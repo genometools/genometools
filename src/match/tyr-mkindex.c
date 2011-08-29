@@ -18,14 +18,15 @@
 #include <errno.h>
 #include "core/alphabet.h"
 #include "core/divmodmul.h"
-#include "core/str.h"
-#include "core/unused_api.h"
 #include "core/fa.h"
-#include "esa-seqread.h"
+#include "core/format64.h"
 #include "core/logger.h"
 #include "core/spacecalc.h"
+#include "core/str.h"
+#include "core/unused_api.h"
+#include "core/xansi_api.h"
+#include "esa-seqread.h"
 #include "spacedef.h"
-#include "core/format64.h"
 #include "esa-mmsearch.h"
 #include "tyr-basic.h"
 #include "tyr-mkindex.h"
@@ -353,19 +354,11 @@ static int outputsortedstring2indexviafileptr(const GtEncseq *encseq,
                                               unsigned long countocc,
                                               GtArrayLargecount *largecounts,
                                               unsigned long countoutputmers,
-                                              GtError *err)
+                                              GT_UNUSED GtError *err)
 {
   gt_encseq_sequence2bytecode(bytebuffer,encseq,position,mersize);
-  if (fwrite(bytebuffer, sizeof (*bytebuffer),
-             (size_t) sizeofbuffer,merindexfpout)
-            != (size_t) sizeofbuffer)
-  {
-    gt_error_set(err,"cannot write %lu items of size %u: errormsg=\"%s\"",
-                  (unsigned long) sizeofbuffer,
-                  (unsigned int) sizeof (*bytebuffer),
-                  strerror(errno));
-    return -1;
-  }
+  gt_xfwrite(bytebuffer, sizeof (*bytebuffer), (size_t) sizeofbuffer,
+             merindexfpout);
   if (countsfilefpout != NULL)
   {
     GtUchar smallcount;
@@ -382,14 +375,7 @@ static int outputsortedstring2indexviafileptr(const GtEncseq *encseq,
       lc->value = countocc;
       smallcount = 0;
     }
-    if (fwrite(&smallcount, sizeof (smallcount),(size_t) 1,countsfilefpout)
-              != (size_t) 1)
-    {
-      gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
-                  (unsigned int) sizeof (smallcount),
-                  strerror(errno));
-      return -1;
-    }
+    gt_xfwrite(&smallcount, sizeof (smallcount),(size_t) 1,countsfilefpout);
   }
   return 0;
 }
@@ -640,19 +626,9 @@ static int enumeratelcpintervals(const char *inputindex,
                     (unsigned long) MAXSMALLMERCOUNT,
                     storeindex,
                     COUNTSSUFFIX);
-        if (fwrite(state->largecounts.spaceLargecount,
-                  sizeof (Largecount),
+        gt_xfwrite(state->largecounts.spaceLargecount, sizeof (Largecount),
                   (size_t) state->largecounts.nextfreeLargecount,
-                  state->countsfilefpout) !=
-                  (size_t) state->largecounts.nextfreeLargecount)
-        {
-          gt_error_set(err,
-                       "cannot write %lu items of size %u: errormsg=\"%s\"",
-                       (unsigned long) state->largecounts.nextfreeLargecount,
-                       (unsigned int) sizeof (Largecount),
-                       strerror(errno));
-          haserr = true;
-        }
+                  state->countsfilefpout);
       }
     }
     if (!haserr)

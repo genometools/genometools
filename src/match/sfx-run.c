@@ -24,13 +24,14 @@
 #include "core/chardef.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
+#include "core/encseq_metadata.h"
 #include "core/fa.h"
 #include "core/logger.h"
 #include "core/readmode.h"
 #include "core/showtime.h"
 #include "core/timer_api.h"
 #include "core/unused_api.h"
-#include "core/encseq_metadata.h"
+#include "core/xansi_api.h"
 #include "esa-fileend.h"
 #include "giextract.h"
 #include "stamp.h"
@@ -157,15 +158,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
       }
       if (outfileinfo->outfpbwttab != NULL)
       {
-        if (fwrite(&cc,sizeof (GtUchar),(size_t) 1,outfileinfo->outfpbwttab)
-                    != (size_t) 1)
-        {
-          gt_error_set(err,"cannot write 1 item of size %u: errormsg=\"%s\"",
-                          (unsigned int) sizeof (GtUchar),
-                          strerror(errno));
-          haserr = true;
-          break;
-        }
+        gt_xfwrite(&cc,sizeof (GtUchar),(size_t) 1,outfileinfo->outfpbwttab);
       }
     }
   }

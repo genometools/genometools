@@ -16,8 +16,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <errno.h>
-#include <string.h>
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/filelengthvalues.h"
@@ -29,6 +27,7 @@
 #include "core/safecast-gen.h"
 #include "core/str.h"
 #include "core/ulongbound.h"
+#include "core/xansi_api.h"
 
 typedef enum
 {
@@ -69,18 +68,9 @@ GT_DECLAREARRAYSTRUCT(GtMapspecification);
         }
 
 #define WRITEACTIONWITHTYPE(TYPE)\
-        if (fwrite(*((TYPE **) mapspecptr->startptr),\
+        gt_xfwrite(*((TYPE **) mapspecptr->startptr),\
                    mapspecptr->sizeofunit,\
-                   (size_t) mapspecptr->numofunits, fp) !=\
-                   (size_t) mapspecptr->numofunits)\
-        {\
-          gt_error_set(err,"cannot write %lu items of size %u: "\
-                            "errormsg=\"%s\"",\
-                        (unsigned long) mapspecptr->numofunits,\
-                        (unsigned int) mapspecptr->sizeofunit,\
-                        strerror(errno));\
-          haserr = true;\
-        }
+                   (size_t) mapspecptr->numofunits, fp);
 
 static uint64_t detexpectedaccordingtomapspec(const GtArrayGtMapspecification
                                               *mapspectable)
@@ -119,7 +109,7 @@ static int assigncorrecttype(GtMapspecification *mapspec,
                              GtError *err)
 {
   void *voidptr;
-  bool haserr = false;
+  int had_err = 0;
 
   gt_error_check(err);
   switch (mapspec->typespec)
@@ -166,9 +156,9 @@ static int assigncorrecttype(GtMapspecification *mapspec,
     default:
       gt_error_set(err,"no assignment specification for size %lu",
                     (unsigned long) mapspec->sizeofunit);
-      haserr = true;
+      had_err = -1;
   }
-  return haserr ? -1 : 0;
+  return had_err;
 }
 
 struct GtMapspec {
@@ -185,7 +175,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
   size_t numofbytes;
   GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
   GtMapspecification *mapspecptr;
-  bool haserr = false;
+  int had_err = 0;
   unsigned long totalpadunits = 0;
 
   gt_error_check(err);
@@ -195,18 +185,18 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
   mapptr = gt_fa_mmap_read(gt_str_get(filename), &numofbytes, err);
   if (mapptr == NULL)
   {
-    haserr = true;
+    had_err = -1;
   }
   *mapped = mapptr;
-  if (!haserr)
+  if (!had_err)
   {
     if (assigncorrecttype(ms->mapspectable.spaceGtMapspecification,
                           mapptr,0,err) != 0)
     {
-      haserr = true;
+      had_err = -1;
     }
   }
-  if (!haserr)
+  if (!had_err)
   {
     expectedaccordingtomapspec =
                                detexpectedaccordingtomapspec(&ms->mapspectable);
@@ -217,10 +207,10 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
                          (unsigned long) numofbytes,
                          gt_str_get(filename),
                          PRINTuint64_tcast(expectedaccordingtomapspec));
-      haserr = true;
+      had_err = -1;
     }
   }
-  if (!haserr)
+  if (!had_err)
   {
     mapspecptr = ms->mapspectable.spaceGtMapspecification;
     gt_assert(mapspecptr != NULL);
@@ -240,7 +230,7 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
     {
       if (assigncorrecttype(mapspecptr,mapptr,byteoffset,err) != 0)
       {
-        haserr = true;
+        had_err = -1;
         break;
       }
       byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
@@ -256,46 +246,36 @@ int  gt_mapspec_read(GtMapspecSetupFunc setup, void *data,
       }
     }
   }
-  if (!haserr)
+  if (!had_err)
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
       gt_error_set(err,"mapping: expected file size is %lu bytes, "
                        "but file has %lu bytes",
                        expectedsize,byteoffset);
-      haserr = true;
+      had_err = -1;
     }
   }
   GT_FREEARRAY(&ms->mapspectable,GtMapspecification);
   gt_free(ms);
-  return haserr ? -1 : 0;
+  return had_err;
 }
 
-int gt_mapspec_pad(FILE *fp,unsigned long *bytes_written,
-                           unsigned long byteoffset,GtError *err)
+int gt_mapspec_pad(FILE *fp, unsigned long *bytes_written,
+                   unsigned long byteoffset, GT_UNUSED GtError *err)
 {
-  bool haserr = false;
-
   if (byteoffset % (unsigned long) GT_WORDSIZE_INBYTES > 0)
   {
     GtUchar padbuffer[GT_WORDSIZE_INBYTES-1] = {0};
 
     size_t padunits = GT_WORDSIZE_INBYTES - (byteoffset % GT_WORDSIZE_INBYTES);
-    if (fwrite(padbuffer,sizeof (GtUchar),padunits,fp) != padunits)
-    {
-      gt_error_set(err,"cannot write %lu items of size %u: "
-                       "errormsg=\"%s\"",
-                       (unsigned long) padunits,
-                       (unsigned int) sizeof (GtUchar),
-                       strerror(errno));
-      haserr = true;
-    }
+    gt_xfwrite(padbuffer,sizeof (GtUchar),padunits,fp);
     *bytes_written = (unsigned long) padunits;
   } else
   {
     *bytes_written = 0;
   }
-  return haserr ? -1 : 0;
+  return 0;
 }
 
 int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
@@ -303,7 +283,7 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
 {
   GtMapspecification *mapspecptr;
   unsigned long byteoffset = 0;
-  bool haserr = false;
+  int had_err = 0;
   unsigned long totalpadunits = 0;
   unsigned long byteswritten;
   GtMapspec *ms = gt_malloc(sizeof (GtMapspec));
@@ -368,10 +348,10 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
         default:
            gt_error_set(err,"no map specification for size %lu",
                          (unsigned long) mapspecptr->sizeofunit);
-           haserr = true;
+           had_err = -1;
       }
     }
-    if (haserr)
+    if (had_err)
     {
       break;
     }
@@ -381,12 +361,12 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
                                           mapspecptr->numofunits));
     if (gt_mapspec_pad(fp,&byteswritten,byteoffset,err) != 0)
     {
-      haserr = true;
+      had_err = -1;
     }
     byteoffset += byteswritten;
     totalpadunits += byteswritten;
   }
-  if (!haserr)
+  if (!had_err)
   {
     if (expectedsize + totalpadunits != byteoffset)
     {
@@ -394,12 +374,12 @@ int gt_mapspec_write(GtMapspecSetupFunc setup, FILE *fp,
                        "but file has %lu bytes",
                        expectedsize,
                        byteoffset);
-      haserr = true;
+      had_err = -1;
     }
   }
   GT_FREEARRAY(&ms->mapspectable,GtMapspecification);
   gt_free(ms);
-  return haserr ? -1 : 0;
+  return had_err;
 }
 
 #define NEWMAPSPEC(MS,PTR,TYPE,SIZE,ELEMS)\

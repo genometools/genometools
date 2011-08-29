@@ -22,15 +22,16 @@
 #include <ctype.h>
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
-#include "core/fileutils.h"
-#include "core/error.h"
-#include "core/ma_api.h"
-#include "core/fa.h"
-#include "core/seqiterator_sequence_buffer.h"
-#include "core/progressbar.h"
-#include "core/fasta.h"
-#include "core/format64.h"
 #include "core/encseq.h"
+#include "core/error.h"
+#include "core/fa.h"
+#include "core/fasta.h"
+#include "core/fileutils.h"
+#include "core/format64.h"
+#include "core/ma_api.h"
+#include "core/progressbar.h"
+#include "core/seqiterator_sequence_buffer.h"
+#include "core/xansi_api.h"
 #include "giextract.h"
 #include "echoseq.h"
 
@@ -393,30 +394,26 @@ static int giextract_encodedseq2fasta(FILE *fpout,
                                       unsigned long seqnum,
                                       const Fastakeyquery *fastakeyquery,
                                       unsigned long linewidth,
-                                      GtError *err)
+                                      GT_UNUSED GtError *err)
 {
   const char *desc;
   unsigned long desclen;
   bool haserr = false;
 
   desc = gt_encseq_description(encseq, &desclen, seqnum);
-  (void) putc('>',fpout);
+  gt_xfputc('>',fpout);
   if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
   {
     printf("%s %lu %lu ",fastakeyquery->fastakey,
                          fastakeyquery->frompos,
                          fastakeyquery->topos);
   }
-  if (fwrite(desc,sizeof *desc,(size_t) desclen,fpout) != (size_t) desclen)
-  {
-    gt_error_set(err,"cannot write header of length %lu",desclen);
-    haserr = true;
-  }
+  gt_xfwrite(desc,sizeof *desc,(size_t) desclen,fpout);
   if (!haserr)
   {
     unsigned long frompos, topos, seqstartpos, seqlength ;
 
-    (void) putc('\n',fpout);
+    gt_xfputc('\n',fpout);
     seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
     seqlength = gt_encseq_seqlength(encseq, seqnum);
     if (fastakeyquery != NULL && !COMPLETE(fastakeyquery))
@@ -520,7 +517,7 @@ int gt_extractkeysfromdesfile(const char *indexname,
       firstdesc = false;
       if (!sortkeys)
       {
-        (void) putc((char) constantkeylen,fpout);
+        gt_xfputc((char) constantkeylen,fpout);
       } else
       {
         GtEncseqLoader *el;
@@ -577,14 +574,8 @@ int gt_extractkeysfromdesfile(const char *indexname,
     }
     if (!sortkeys)
     {
-      if (fwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout)
-          != (size_t) keylen)
-      {
-        gt_error_set(err,"cannot write key of length %lu",keylen);
-        haserr = true;
-        break;
-      }
-      (void) putc('\0',fpout);
+      gt_xfwrite(keyptr,sizeof *keyptr,(size_t) keylen,fpout);
+      gt_xfputc('\0',fpout);
     } else
     {
       gt_assert(keytabptr != NULL);

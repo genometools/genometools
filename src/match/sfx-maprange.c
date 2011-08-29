@@ -18,8 +18,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include "core/fa.h"
-#include "core/xposix.h"
 #include "core/intbits.h"
+#include "core/xposix.h"
+#include "core/xansi_api.h"
 #include "sfx-maprange.h"
 #include "stamp.h"
 
@@ -146,7 +147,7 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
                               bool writable,
                               const char *tablename,
                               GtLogger *logger,
-                              GtError *err)
+                              GT_UNUSED GtError *err)
 {
   bool haserr = false;
   FILE *outfp;
@@ -163,17 +164,8 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
                 tablename, gt_str_get(sfxmappedrange->filename),
                 (unsigned long) sfxmappedrange->numofunits,
                 (unsigned long) sfxmappedrange->sizeofunit);
-  if (fwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
-             sfxmappedrange->numofunits,outfp) != sfxmappedrange->numofunits)
-  {
-    gt_error_set(err,"table %s: cannot write %lu items of size %u: "
-                     "errormsg=\"%s\"",
-                 tablename,
-                 (unsigned long) sfxmappedrange->numofunits,
-                 (unsigned int) sfxmappedrange->sizeofunit,
-                 strerror(errno));
-    haserr = true;
-  }
+  gt_xfwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
+             sfxmappedrange->numofunits,outfp);
   gt_fa_fclose(outfp);
   gt_free(*sfxmappedrange->usedptrptr);
   *sfxmappedrange->usedptrptr = NULL;
