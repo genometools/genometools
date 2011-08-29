@@ -37,6 +37,8 @@ void gt_uint64hashtable_delete(GtUint64hashtable *table);
 bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
                                bool insert_if_not_found);
 
+unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table);
+
 int gt_uint64hashtable_unit_test(GtError *err);
 
 #endif

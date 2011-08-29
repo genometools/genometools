@@ -89,7 +89,7 @@ struct GtUint64hashtable
 {
   GtUint64hashstoredvalue *hspace;
   size_t    alloc, fill, maxfill;
-  unsigned long countcollision;
+  unsigned long countcollision, zero_count;
   bool      zero_occurs;
 };
 
@@ -107,6 +107,7 @@ GtUint64hashtable *gt_uint64hashtable_new(size_t nof_elements)
   table->countcollision = 0;
   table->hspace = NULL;
   table->zero_occurs = false;
+  table->zero_count = 0;
   gt_uint64hashtable_alloc_table(table, gt_uint64hashtable_get_size(
         (size_t)(1 + (double)nof_elements / GT_UINT64TABLE_MAX_LOAD_FACTOR)));
   gt_assert(nof_elements < table->maxfill);
@@ -167,6 +168,21 @@ static inline enum GtUint64hashtableSearchResult
   }
 }
 
+unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
+{
+  size_t idx;
+  unsigned long sumcount = 0;
+
+  for (idx=0; idx < table->alloc; idx++)
+  {
+    if (table->hspace[idx].count > 0)
+    {
+      sumcount += table->hspace[idx].count;
+    }
+  }
+  return sumcount + table->zero_count;
+}
+
 static inline size_t gt_uint64hashtable_h1(uint64_t key, size_t table_size)
 {
   return (size_t) gt_uint64_key_mul_hash(key) % table_size;
@@ -186,12 +202,17 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
   {
     if (table->zero_occurs)
     {
+      if (insert_if_not_found)
+      {
+        table->zero_count++;
+      }
       return true;
     } else
     {
       if (insert_if_not_found)
       {
         table->zero_occurs = true;
+        table->zero_count++;
       }
       return false;
     }

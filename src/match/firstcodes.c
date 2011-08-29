@@ -521,7 +521,7 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize)
 {
   GtHashfirstcodes hashfirstcodes;
-  unsigned long numofsequences = gt_encseq_num_of_sequences(encseq);
+  unsigned long countsum, numofsequences = gt_encseq_num_of_sequences(encseq);
 
   hashfirstcodes.table = gt_uint64hashtable_new((size_t) numofsequences);
   hashfirstcodes.differentcodes = 0;
@@ -534,9 +534,11 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 &hashfirstcodes,
                                 NULL,
                                 NULL);
-  gt_uint64hashtable_delete(hashfirstcodes.table);
   printf("# number of different codes=%lu (%.4f) in %lu sequences\n",
           hashfirstcodes.differentcodes,
           (double) hashfirstcodes.differentcodes/numofsequences,
           numofsequences);
+  countsum = gt_uint64hashtable_countsum_get(hashfirstcodes.table);
+  gt_assert(countsum == numofsequences);
+  gt_uint64hashtable_delete(hashfirstcodes.table);
 }
