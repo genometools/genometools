@@ -130,7 +130,7 @@ static int bwttab2file(Outfileinfo *outfileinfo,
                        const GtSuffixsortspace *suffixsortspace,
                        GtReadmode readmode,
                        unsigned long numberofsuffixes,
-                       GtError *err)
+                       GT_UNUSED GtError *err)
 {
   bool haserr = false;
 

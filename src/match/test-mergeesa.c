@@ -20,6 +20,7 @@
 #include <string.h>
 #include "core/fa.h"
 #include "core/logger.h"
+#include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "sarr-def.h"
 #include "spacedef.h"
@@ -69,7 +70,7 @@ static void freeNameandFILE(NameandFILE *nf)
 static int outputsuflcpllv(void *processinfo,
                            const unsigned long *sequenceoffsettable,
                            const Suflcpbuffer *buf,
-                           GtError *err)
+                           GT_UNUSED GtError *err)
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
