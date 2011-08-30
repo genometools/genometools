@@ -19,6 +19,7 @@
 #define UINT64HASHTABLE_H
 
 #include "inttypes.h"
+#include "core/timer_api.h"
 #include "core/error.h"
 
 /* An hash table of uint64_t values without any associated information */
@@ -39,7 +40,8 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
 
 unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table);
 
-unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table);
+unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
+                                             GtTimer *sfxprogress);
 
 unsigned long gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
                                                 uint64_t key);

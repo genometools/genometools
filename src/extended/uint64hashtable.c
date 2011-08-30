@@ -23,6 +23,7 @@
 #include "core/spacecalc.h"
 #include "core/format64.h"
 #include "core/qsort_r_api.h"
+#include "core/timer_api.h"
 #include "extended/uint64hashtable.h"
 #include "extended/uint64hashtable_primes.h"
 
@@ -295,14 +296,18 @@ unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
   return sumcount + table->zero_count;
 }
 
-unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table)
+unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
+                                             GtTimer *sfxprogress)
 {
   size_t idx, next = 0;
   unsigned long psum;
 
   table->sortedhspace = gt_malloc((size_t) table->allentries *
                                   sizeof (*table->sortedhspace));
-  printf("# sorting the hashkeys\n");
+  if (sfxprogress != NULL)
+  {
+    gt_timer_show_progress(sfxprogress, "sorting the hashkeys",stdout);
+  }
   for (idx = 0; idx < table->alloc; idx++)
   {
     if (table->hspace[idx].count > 0)
@@ -318,7 +323,10 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table)
   {
     table->hspace[table->sortedhspace[0]].count += table->zero_count;
   }
-  printf("# computing partial sums\n");
+  if (sfxprogress != NULL)
+  {
+    gt_timer_show_progress(sfxprogress, "computing partial sums",stdout);
+  }
   for (idx = (size_t) 1; idx < next; idx++)
   {
     table->hspace[table->sortedhspace[idx]].count +=

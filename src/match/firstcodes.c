@@ -19,6 +19,7 @@
 #include "core/encseq.h"
 #include "core/codetype.h"
 #include "core/arraydef.h"
+#include "core/showtime.h"
 #include "extended/uint64hashtable.h"
 #include "sfx-suffixer.h"
 #include "firstcodes.h"
@@ -554,12 +555,20 @@ static void gt_insertallcodeswithhashtable(void *processinfo,
 void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize)
 {
+  GtTimer *sfxprogress = NULL;
   GtHashfirstcodes hashfirstcodes;
   unsigned long countsum, numofsequences, totallength, psum;
+  const unsigned int spmopt = 45U;
 
+  if (gt_showtime_enabled())
+  {
+    sfxprogress = gt_timer_new_with_progress_description("inserting first "
+                                                         "codes into "
+                                                         "hashtable");
+    gt_timer_start(sfxprogress);
+  }
   numofsequences = gt_encseq_num_of_sequences(encseq);
   totallength = gt_encseq_total_length(encseq);
-
   hashfirstcodes.table = gt_uint64hashtable_new((size_t) numofsequences);
   hashfirstcodes.differentcodes = 0;
   hashfirstcodes.remainingcodes = 0;
@@ -578,10 +587,15 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           numofsequences);
   countsum = gt_uint64hashtable_countsum_get(hashfirstcodes.table);
   gt_assert(countsum == numofsequences);
+  if (sfxprogress != NULL)
+  {
+    gt_timer_show_progress(sfxprogress, "inserting remaining codes into "
+                                        "hashtable",stdout);
+  }
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
-                                45U,
+                                spmopt,
                                 false,
                                 gt_hashremainingcodes,
                                 &hashfirstcodes,
@@ -591,14 +605,19 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           numofsequences + hashfirstcodes.remainingcodes,
           (double) (numofsequences + hashfirstcodes.remainingcodes)/
           (totallength+1));
-  psum = gt_uint64hashtable_partialsums(hashfirstcodes.table);
+  psum = gt_uint64hashtable_partialsums(hashfirstcodes.table,sfxprogress);
   hashfirstcodes.suftab = gt_malloc((size_t) psum *
                                     sizeof (*hashfirstcodes.suftab));
   hashfirstcodes.finalpsum = psum;
+  if (sfxprogress != NULL)
+  {
+    gt_timer_show_progress(sfxprogress, "inserting suffixes into suffix table",
+                                        stdout);
+  }
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
-                                45U,
+                                spmopt,
                                 false,
                                 gt_insertallcodeswithhashtable,
                                 &hashfirstcodes,
@@ -606,4 +625,9 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 NULL);
   gt_free(hashfirstcodes.suftab);
   gt_uint64hashtable_delete(hashfirstcodes.table);
+  if (sfxprogress != NULL)
+  {
+    gt_timer_show_progress_final(sfxprogress, stdout);
+    gt_timer_delete(sfxprogress);
+  }
 }
