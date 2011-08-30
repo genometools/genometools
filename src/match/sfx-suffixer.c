@@ -39,6 +39,7 @@
 #include "core/divmodmul.h"
 #include "core/format64.h"
 #include "core/fileutils.h"
+#include "extended/uint64hashtable.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -1108,7 +1109,7 @@ static void checkallreversebitpairs(void)
         KMER |= CC;\
         KMER &= maskright
 
-#define ADJUSTREVERSEPOS(POS) (rightbound - (POS))
+#define GT_ADJUSTREVERSEPOS(POS) (rightbound - (POS))
 
 static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     const GtTwobitencoding *twobitencoding,
@@ -1145,7 +1146,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                kmersize);
     processkmercode(processkmercodeinfo,
                     true,
-                    ADJUSTREVERSEPOS(pos),
+                    GT_ADJUSTREVERSEPOS(pos),
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
@@ -1163,7 +1164,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
-      processkmercode(processkmercodeinfo,false,ADJUSTREVERSEPOS(pos),
+      processkmercode(processkmercodeinfo,false,GT_ADJUSTREVERSEPOS(pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);
@@ -1472,6 +1473,19 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
   }
 }
 
+static void gt_htinsertremainingcodes(void *processinfo,
+                                      bool firstinrange,
+                                      GT_UNUSED unsigned long pos,
+                                      GtCodetype code)
+{
+  GtUint64hashtable *table = (GtUint64hashtable *) processinfo;
+
+  if (!firstinrange)
+  {
+    (void) gt_uint64hashtable_search(table,(uint64_t) code,false);
+  }
+}
+
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
 #define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
@@ -1504,6 +1518,20 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 #define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
 
 #include "sfx-mapped4.gen"
+
+#undef PROCESSKMERPREFIX
+#undef PROCESSKMERTYPE
+#undef PROCESSKMERSPECIALTYPE
+#undef PROCESSKMERCODE
+
+#define PROCESSKMERPREFIX(FUN)          htinsertsuffixremainingcodes_##FUN
+#define PROCESSKMERTYPE                 GtUint64hashtable
+#define PROCESSKMERSPECIALTYPE          GT_UNUSED void
+#define PROCESSKMERCODE                 gt_htinsertremainingcodes
+
+#define GT_MAPPED4_GLOBAL
+#include "sfx-mapped4.gen"
+#undef GT_MAPPED4_GLOBAL
 
 /*
 #define SHOWCURRENTSPACE\

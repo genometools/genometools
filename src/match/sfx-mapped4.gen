@@ -45,7 +45,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                kmersize);
     PROCESSKMERCODE(processkmercodeinfo,
                     true,
-                    ADJUSTREVERSEPOS(pos),
+                    GT_ADJUSTREVERSEPOS(pos),
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
@@ -60,7 +60,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       UPDATEKMER(code,cc);
       PROCESSKMERCODE(processkmercodeinfo,
-                      false,ADJUSTREVERSEPOS(pos),
+                      false,GT_ADJUSTREVERSEPOS(pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);
@@ -215,7 +215,10 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
 #endif
 }
 
-static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
+#ifndef GT_MAPPED4_GLOBAL
+static
+#endif
+void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned int kmersize,

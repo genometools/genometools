@@ -499,7 +499,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 typedef struct
 {
   GtUint64hashtable *table;
-  unsigned long differentcodes, remainingcodes;
+  unsigned long differentcodes;
   unsigned int kmersize;
   unsigned long *suftab;
   unsigned long finalpsum;
@@ -520,21 +520,21 @@ static void gt_hashfirstcodes(void *processinfo,
   }
 }
 
+#define USELOCALFUNCTION
+#ifdef USELOCALFUNCTION
 static void gt_hashremainingcodes(void *processinfo,
                                   bool firstinrange,
                                   GT_UNUSED unsigned long pos,
                                   GtCodetype code)
 {
-  GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
+  GtUint64hashtable *table = (GtUint64hashtable *) processinfo;
 
-  if (!firstinrange &&
-      gt_uint64hashtable_search(hashfirstcodes->table,
-                                (uint64_t) code,
-                                false))
+  if (!firstinrange)
   {
-    hashfirstcodes->remainingcodes++;
+    (void) gt_uint64hashtable_search(table,(uint64_t) code,false);
   }
 }
+#endif
 
 static void gt_insertallcodeswithhashtable(void *processinfo,
                                            GT_UNUSED bool firstinrange,
@@ -571,7 +571,6 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   totallength = gt_encseq_total_length(encseq);
   hashfirstcodes.table = gt_uint64hashtable_new((size_t) numofsequences);
   hashfirstcodes.differentcodes = 0;
-  hashfirstcodes.remainingcodes = 0;
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
@@ -592,19 +591,25 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_timer_show_progress(sfxprogress, "inserting remaining codes into "
                                         "hashtable",stdout);
   }
+#ifdef USELOCALFUNCTION
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
                                 spmopt,
                                 false,
                                 gt_hashremainingcodes,
-                                &hashfirstcodes,
+                                hashfirstcodes.table,
                                 NULL,
                                 NULL);
-  printf("# number of remaining suffixes=%lu (%.2f)\n",
-          numofsequences + hashfirstcodes.remainingcodes,
-          (double) (numofsequences + hashfirstcodes.remainingcodes)/
-          (totallength+1));
+#else
+  htinsertsuffixremainingcodes_getencseqkmers_twobitencoding
+                               (encseq,
+                                GT_READMODE_FORWARD,
+                                kmersize,
+                                spmopt,
+                                hashfirstcodes.table,
+                                NULL);
+#endif
   psum = gt_uint64hashtable_partialsums(hashfirstcodes.table,sfxprogress);
   hashfirstcodes.suftab = gt_malloc((size_t) psum *
                                     sizeof (*hashfirstcodes.suftab));
