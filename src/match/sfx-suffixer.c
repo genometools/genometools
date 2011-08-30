@@ -1473,13 +1473,11 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
   }
 }
 
-static void gt_htinsertremainingcodes(void *processinfo,
+static void gt_htinsertremainingcodes(GtUint64hashtable *table,
                                       bool firstinrange,
                                       GT_UNUSED unsigned long pos,
                                       GtCodetype code)
 {
-  GtUint64hashtable *table = (GtUint64hashtable *) processinfo;
-
   if (!firstinrange)
   {
     (void) gt_uint64hashtable_search(table,(uint64_t) code,false);

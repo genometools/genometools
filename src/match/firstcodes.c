@@ -520,7 +520,7 @@ static void gt_hashfirstcodes(void *processinfo,
   }
 }
 
-#define USELOCALFUNCTION
+#undef USELOCALFUNCTION
 #ifdef USELOCALFUNCTION
 static void gt_hashremainingcodes(void *processinfo,
                                   bool firstinrange,
