@@ -500,6 +500,8 @@ typedef struct
   GtUint64hashtable *table;
   unsigned long differentcodes, remainingcodes;
   unsigned int kmersize;
+  unsigned long *suftab;
+  unsigned long finalpsum;
 } GtHashfirstcodes;
 
 static void gt_hashfirstcodes(void *processinfo,
@@ -533,11 +535,27 @@ static void gt_hashremainingcodes(void *processinfo,
   }
 }
 
+static void gt_insertallcodeswithhashtable(void *processinfo,
+                                           GT_UNUSED bool firstinrange,
+                                           unsigned long pos,
+                                           GtCodetype code)
+{
+  GtHashfirstcodes *hashfirstcodes = (GtHashfirstcodes *) processinfo;
+
+  unsigned long idx = gt_uint64hashtable_insertionindex(hashfirstcodes->table,
+                                                        (uint64_t) code);
+  if (idx != ULONG_MAX)
+  {
+    gt_assert(idx < hashfirstcodes->finalpsum);
+    hashfirstcodes->suftab[idx] = pos;
+  }
+}
+
 void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize)
 {
   GtHashfirstcodes hashfirstcodes;
-  unsigned long countsum, numofsequences, totallength;
+  unsigned long countsum, numofsequences, totallength, psum;
 
   numofsequences = gt_encseq_num_of_sequences(encseq);
   totallength = gt_encseq_total_length(encseq);
@@ -573,6 +591,19 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           numofsequences + hashfirstcodes.remainingcodes,
           (double) (numofsequences + hashfirstcodes.remainingcodes)/
           (totallength+1));
-  gt_uint64hashtable_partialsums(hashfirstcodes.table);
+  psum = gt_uint64hashtable_partialsums(hashfirstcodes.table);
+  hashfirstcodes.suftab = gt_malloc((size_t) psum *
+                                    sizeof (*hashfirstcodes.suftab));
+  hashfirstcodes.finalpsum = psum;
+  getencseqkmers_twobitencoding(encseq,
+                                GT_READMODE_FORWARD,
+                                kmersize,
+                                45U,
+                                false,
+                                gt_insertallcodeswithhashtable,
+                                &hashfirstcodes,
+                                NULL,
+                                NULL);
+  gt_free(hashfirstcodes.suftab);
   gt_uint64hashtable_delete(hashfirstcodes.table);
 }

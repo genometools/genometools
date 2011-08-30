@@ -21,6 +21,8 @@
 #include "core/ma.h"
 #include "core/hashtable.h" /* gt_uint64_key_mul_hash */
 #include "core/spacecalc.h"
+#include "core/format64.h"
+#include "core/qsort_r_api.h"
 #include "extended/uint64hashtable.h"
 #include "extended/uint64hashtable_primes.h"
 
@@ -85,8 +87,8 @@ typedef struct
   unsigned long count;
 } GtUint64hashstoredvalue;
 
-static int compareGtUint64hashstoredvalue(void *data,
-                                          const void *a,const void *b)
+static int compareGtUint64hashstoredvalue(const void *a,const void *b,
+                                          void *data)
 {
   GtUint64hashstoredvalue *hspace = (GtUint64hashstoredvalue *) data;
   uint32_t va = *(const uint32_t *) a;
@@ -110,9 +112,7 @@ struct GtUint64hashtable
   uint32_t *sortedhspace;
   size_t alloc;
   unsigned long countcollisions, zero_count,
-                allentries,
-                numofinterestingentries; /* number of entries with
-                                            count > 1 */
+                allentries;
   bool zero_occurs;
 };
 
@@ -123,7 +123,6 @@ GtUint64hashtable *gt_uint64hashtable_new(size_t nof_elements)
 
   table = gt_malloc(sizeof (*table));
   table->countcollisions = 0;
-  table->numofinterestingentries = 0;
   table->allentries = 0;
   table->zero_occurs = false;
   table->zero_count = 0;
@@ -188,10 +187,6 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
       {
         gt_assert(table->hspace[pos].count > 0);
         table->hspace[pos].count++;
-        if (table->hspace[pos].count == 2UL)
-        {
-          table->numofinterestingentries++;
-        }
         return true;
       }
       table->countcollisions++;
@@ -226,12 +221,62 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
     {
       gt_assert(table->zero_count > 0);
       table->zero_count++;
-      if (table->zero_count == 2UL)
-      {
-        table->numofinterestingentries++;
-      }
       return true;
     }
+  }
+}
+
+unsigned long gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
+                                                uint64_t key)
+{
+  gt_assert(table != NULL);
+  if (key > 0)
+  {
+    size_t pos, hashadd = 0, iteration;
+    const uint64_t emptymark = 0;
+
+#ifndef NDEBUG
+    size_t first_pos;
+#endif
+    pos = gt_uint64hashtable_h1(key, table->alloc);
+#ifndef NDEBUG
+    first_pos = pos;
+#endif
+    for (iteration = 0; iteration < table->alloc; iteration++)
+    {
+      gt_assert(pos < table->alloc);
+      if (table->hspace[pos].key == emptymark)
+      {
+        return ULONG_MAX;
+      }
+      if (table->hspace[pos].key == key)
+      {
+        gt_assert(table->hspace[pos].count > 0);
+        return --table->hspace[pos].count;
+      }
+      table->countcollisions++;
+      if (hashadd == 0)
+      {
+        hashadd = gt_uint64hashtable_h2(key, table->alloc);
+      }
+      gt_assert(hashadd > 0);
+      pos += hashadd;
+      if (pos >= table->alloc)
+      {
+        pos -= table->alloc;
+      }
+      gt_assert(pos != first_pos);
+    }
+    fprintf(stderr, "function %s, file %s, line %d.\n"
+                    "Cannot find empty slot in hashtable: "
+                    "This is probably a bug, please report it.\n",
+                    __func__, __FILE__, __LINE__);
+    exit(GT_EXIT_PROGRAMMING_ERROR);
+  } else
+  {
+    gt_assert(table->zero_occurs);
+    gt_assert(table->zero_count > 0);
+    return --table->zero_count;
   }
 }
 
@@ -250,41 +295,38 @@ unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
   return sumcount + table->zero_count;
 }
 
-void gt_uint64hashtable_partialsums(GtUint64hashtable *table)
+unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table)
 {
   size_t idx, next = 0;
   unsigned long psum;
 
-  printf("numofinterestingentries=%lu (%.4f)\n",
-            table->numofinterestingentries,
-            (double) table->numofinterestingentries/table->allentries);
-  table->sortedhspace = gt_malloc((size_t) table->numofinterestingentries *
+  table->sortedhspace = gt_malloc((size_t) table->allentries *
                                   sizeof (*table->sortedhspace));
+  printf("# sorting the hashkeys\n");
   for (idx = 0; idx < table->alloc; idx++)
   {
-    if (table->hspace[idx].count >= 2UL)
+    if (table->hspace[idx].count > 0)
     {
-      gt_assert(next < (size_t) table->numofinterestingentries);
-      gt_assert(idx <= UINT32_MAX);
+      gt_assert(next < (size_t) table->allentries);
       table->sortedhspace[next++] = idx;
     }
   }
+  gt_qsort_r(table->sortedhspace,next,sizeof(*table->sortedhspace),
+             table->hspace,compareGtUint64hashstoredvalue);
+  gt_assert(next > 0);
   if (table->zero_occurs)
   {
-    psum = table->zero_count;
-  } else
-  {
-    psum = 0;
+    table->hspace[table->sortedhspace[0]].count += table->zero_count;
   }
-  for (idx = 0; idx < next; idx++)
+  printf("# computing partial sums\n");
+  for (idx = (size_t) 1; idx < next; idx++)
   {
-    unsigned long value = table->hspace[table->sortedhspace[idx]].count;
-    table->hspace[table->sortedhspace[idx]].count = psum;
-    psum += value;
+    table->hspace[table->sortedhspace[idx]].count +=
+      table->hspace[table->sortedhspace[idx-1]].count;
   }
-  qsort_r(table->sortedhspace,next,sizeof(*table->sortedhspace),
-          table->hspace,compareGtUint64hashstoredvalue);
+  psum = table->hspace[table->sortedhspace[next-1]].count;
   gt_free(table->sortedhspace);
+  return psum;
 }
 
 int gt_uint64hashtable_unit_test(GtError *err)
