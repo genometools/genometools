@@ -297,16 +297,16 @@ unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table)
 }
 
 unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
-                                             GtTimer *sfxprogress)
+                                             GtTimer *timer)
 {
   size_t idx, next = 0;
   unsigned long psum, maxsize = 0;
 
   table->sortedhspace = gt_malloc((size_t) table->allentries *
                                   sizeof (*table->sortedhspace));
-  if (sfxprogress != NULL)
+  if (timer != NULL)
   {
-    gt_timer_show_progress(sfxprogress, "sorting the hashkeys",stdout);
+    gt_timer_show_progress(timer, "sorting the hashkeys",stdout);
   }
   for (idx = 0; idx < table->alloc; idx++)
   {
@@ -327,9 +327,9 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
   {
     table->hspace[table->sortedhspace[0]].count += table->zero_count;
   }
-  if (sfxprogress != NULL)
+  if (timer != NULL)
   {
-    gt_timer_show_progress(sfxprogress, "computing partial sums",stdout);
+    gt_timer_show_progress(timer, "computing partial sums",stdout);
   }
   for (idx = (size_t) 1; idx < next; idx++)
   {

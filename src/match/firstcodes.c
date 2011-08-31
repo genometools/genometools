@@ -19,6 +19,7 @@
 #include "core/encseq.h"
 #include "core/codetype.h"
 #include "core/arraydef.h"
+#include "core/showtime.h"
 #include "sfx-suffixer.h"
 #include "firstcodes.h"
 
@@ -149,10 +150,11 @@ static void gt_firstcodes_halves(GtFirstcodesinfo *firstcodesinfo,
   if (firstcodesinfo->binsearchcache.allocatedGtIndexwithcode <
       firstcodesinfo->differentcodes)
   {
-    firstcodesinfo->binsearchcache.spaceGtIndexwithcode
-      = gt_malloc(sizeof (*firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
-                          * firstcodesinfo->binsearchcache.
-                                            allocatedGtIndexwithcode);
+    size_t allocbytes
+      = sizeof (*firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
+                * firstcodesinfo->binsearchcache.allocatedGtIndexwithcode;
+    printf("size of binsearch cache: %lu\n",(unsigned long) allocbytes);
+    firstcodesinfo->binsearchcache.spaceGtIndexwithcode = gt_malloc(allocbytes);
     gt_assert(firstcodesinfo->differentcodes > 0);
     gt_firstcodes_halves_rek(firstcodesinfo,0,
                              firstcodesinfo->differentcodes - 1,0,maxdepth);
@@ -389,9 +391,16 @@ static void gt_accumulateallfirstcodeocc(void *processinfo,
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize)
 {
+  GtTimer *timer = NULL;
   GtFirstcodesinfo firstcodesinfo;
   size_t sizeforbittable, sizeforcodestable;
 
+  if (gt_showtime_enabled())
+  {
+    timer = gt_timer_new_with_progress_description("insert first codes into "
+                                                   "array");
+    gt_timer_start(timer);
+  }
   firstcodesinfo.numofsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(gt_encseq_alphabetnumofchars(encseq) == 4U);
   if (kmersize == (unsigned int) GT_UNITSIN2BITENC)
@@ -435,6 +444,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_assert(firstcodesinfo.numofsequences == firstcodesinfo.countsequences);
   if (firstcodesinfo.allfirstcodes != NULL)
   {
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "sorting the codes",stdout);
+    }
     QSORTNAME(gt_direct_qsort)
                (6UL, false,
                firstcodesinfo.allfirstcodes,firstcodesinfo.numofsequences);
@@ -469,6 +482,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_assert (firstcodesinfo.countocc[idx] == 0);
     }
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "accumulate counts",stdout);
+    }
     getencseqkmers_twobitencoding(encseq,
                                   GT_READMODE_FORWARD,
                                   kmersize,
@@ -492,4 +509,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_free(firstcodesinfo.allfirstcodes);
   gt_free(firstcodesinfo.countocc);
   gt_free(firstcodesinfo.codeoccurrence);
+  if (timer != NULL)
+  {
+    gt_timer_show_progress_final(timer, stdout);
+    gt_timer_delete(timer);
+  }
 }

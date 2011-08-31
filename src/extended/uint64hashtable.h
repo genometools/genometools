@@ -41,7 +41,7 @@ bool gt_uint64hashtable_search(GtUint64hashtable *table, uint64_t key,
 unsigned long gt_uint64hashtable_countsum_get(const GtUint64hashtable *table);
 
 unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
-                                             GtTimer *sfxprogress);
+                                             GtTimer *timer);
 
 unsigned long gt_uint64hashtable_insertionindex(GtUint64hashtable *table,
                                                 uint64_t key);
