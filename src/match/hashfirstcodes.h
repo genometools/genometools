@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FIRSTCODES_H
-#define FIRSTCODES_H
+#ifndef HASHFIRSTCODES_H
+#define HASHFIRSTCODES_H
 
 #include "core/encseq.h"
 
-void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
-                                                   unsigned int kmersize);
+void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                                  unsigned int kmersize);
 
 #endif

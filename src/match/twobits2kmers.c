@@ -26,6 +26,7 @@
 #include "sfx-suffixer.h"
 #include "twobits2kmers.h"
 #include "firstcodes.h"
+#include "hashfirstcodes.h"
 #include "stamp.h"
 
 #define READNEXTCODEANDCHECKIGNORESPECIAL(POS)\
