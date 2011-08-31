@@ -300,7 +300,7 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
                                              GtTimer *sfxprogress)
 {
   size_t idx, next = 0;
-  unsigned long psum;
+  unsigned long psum, maxsize = 0;
 
   table->sortedhspace = gt_malloc((size_t) table->allentries *
                                   sizeof (*table->sortedhspace));
@@ -314,6 +314,10 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
     {
       gt_assert(next < (size_t) table->allentries);
       table->sortedhspace[next++] = idx;
+      if (maxsize < table->hspace[idx].count)
+      {
+        maxsize = table->hspace[idx].count;
+      }
     }
   }
   gt_qsort_r(table->sortedhspace,next,sizeof(*table->sortedhspace),
@@ -334,6 +338,8 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
   }
   psum = table->hspace[table->sortedhspace[next-1]].count;
   gt_free(table->sortedhspace);
+  printf("average size of bucket = %.2f over %lu buckets (maxsize=%lu)\n",
+            (double) psum/next,(unsigned long) next,maxsize);
   return psum;
 }
 
