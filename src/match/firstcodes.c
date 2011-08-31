@@ -177,12 +177,6 @@ static void gt_firstcodes_halves(GtFirstcodesinfo *firstcodesinfo,
     }
 #endif
   }
-  firstcodesinfo->binsearchcodebuffer.allocatedGtUlong = 3000000UL;
-  firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong = 0;
-  firstcodesinfo->binsearchcodebuffer.spaceGtUlong
-    = gt_malloc(sizeof (*firstcodesinfo->binsearchcodebuffer.spaceGtUlong)
-                          * firstcodesinfo->binsearchcodebuffer.
-                                            allocatedGtUlong);
 }
 
 static unsigned long depthtotal = 0;
@@ -337,9 +331,27 @@ static void gt_checkfirstcodesocc(void *processinfo,
   }
 }
 
+static void gt_checkfirstcodesocc_nobuf(void *processinfo,
+                                        GT_UNUSED bool firstinrange,
+                                        GT_UNUSED unsigned long pos,
+                                        GtCodetype code)
+{
+  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+  const unsigned long *ptr;
+  unsigned long idx;
+
+  ptr = gt_firstcodes_find(firstcodesinfo,code);
+  gt_assert (ptr != NULL);
+  idx = (unsigned long) (ptr - firstcodesinfo->allfirstcodes);
+  gt_assert(firstcodesinfo->countocc[idx] > 0);
+  firstcodesinfo->countocc[idx]--;
+}
+
 static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
 {
+#ifdef INSERT
   const unsigned long *ptr;
+#endif
   unsigned long *vptr;
 
   gt_assert(firstcodesinfo->allfirstcodes != NULL);
@@ -354,6 +366,7 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
               firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
        vptr++)
   {
+#ifdef INSERT
     ptr = gt_firstcodes_find(firstcodesinfo,*vptr);
     if (ptr != NULL)
     {
@@ -361,6 +374,7 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
       firstcodesinfo->countocc[idx]++;
       firstcodesinfo->firstcodehits++;
     }
+#endif
   }
   printf("%u ",firstcodesinfo->flushcount++);
   (void) fflush(stdout);
@@ -388,12 +402,30 @@ static void gt_accumulateallfirstcodeocc(void *processinfo,
   }
 }
 
+static void gt_accumulateallfirstcodeocc_nobuf(void *processinfo,
+                                               GT_UNUSED bool firstinrange,
+                                               GT_UNUSED unsigned long pos,
+                                               GtCodetype code)
+{
+  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+  const unsigned long *ptr;
+
+  ptr = gt_firstcodes_find(firstcodesinfo,code);
+  if (ptr != NULL)
+  {
+    unsigned long idx = (unsigned long) (ptr - firstcodesinfo->allfirstcodes);
+    firstcodesinfo->countocc[idx]++;
+    firstcodesinfo->firstcodehits++;
+  }
+}
+
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize)
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo firstcodesinfo;
   size_t sizeforbittable, sizeforcodestable;
+  const bool buffered = true;
 
   if (gt_showtime_enabled())
   {
@@ -462,21 +494,34 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     unsigned long idx;
 
-    firstcodesinfo.binsearchcache_depth = 10U;
+    firstcodesinfo.binsearchcache_depth = 14U;
     firstcodesinfo.flushcount = 0;
     firstcodesinfo.binsearchcodebuffer_total = 0;
     gt_firstcodes_halves(&firstcodesinfo,firstcodesinfo.binsearchcache_depth);
-    gt_assert(firstcodesinfo.binsearchcodebuffer.allocatedGtUlong > 0);
+    if (buffered)
+    {
+      firstcodesinfo.binsearchcodebuffer.allocatedGtUlong = 3000000UL;
+      firstcodesinfo.binsearchcodebuffer.nextfreeGtUlong = 0;
+      firstcodesinfo.binsearchcodebuffer.spaceGtUlong
+        = gt_malloc(sizeof (*firstcodesinfo.binsearchcodebuffer.spaceGtUlong)
+                              * firstcodesinfo.binsearchcodebuffer.
+                                               allocatedGtUlong);
+      gt_assert(firstcodesinfo.binsearchcodebuffer.allocatedGtUlong > 0);
+    }
     getencseqkmers_twobitencoding(encseq,
                                   GT_READMODE_FORWARD,
                                   kmersize,
                                   kmersize,
                                   true,
-                                  gt_checkfirstcodesocc,
+                                  buffered ? gt_checkfirstcodesocc
+                                           : gt_checkfirstcodesocc_nobuf,
                                   &firstcodesinfo,
                                   NULL,
                                   NULL);
-    firstcodesocc_flush(&firstcodesinfo);
+    if (buffered)
+    {
+      firstcodesocc_flush(&firstcodesinfo);
+    }
     gt_assert(firstcodesinfo.countocc != NULL);
     for (idx = 0; idx < firstcodesinfo.differentcodes; idx++)
     {
@@ -491,15 +536,19 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   kmersize,
                                   45U,
                                   false,
-                                  gt_accumulateallfirstcodeocc,
+                                  buffered ? gt_accumulateallfirstcodeocc
+                                           : gt_accumulateallfirstcodeocc_nobuf,
                                   &firstcodesinfo,
                                   NULL,
                                   NULL);
-    firstcodesaccum_flush(&firstcodesinfo);
-    printf("\nbinsearchbuffer_total=%lu\n",
-            firstcodesinfo.binsearchcodebuffer_total);
-    printf("depthtotal = %lu, %.2f\n",depthtotal,(double)depthtotal/
+    if (buffered)
+    {
+      firstcodesaccum_flush(&firstcodesinfo);
+      printf("\nbinsearchbuffer_total=%lu\n",
+              firstcodesinfo.binsearchcodebuffer_total);
+      printf("depthtotal = %lu, %.2f\n",depthtotal,(double)depthtotal/
                                       firstcodesinfo.binsearchcodebuffer_total);
+    }
     printf("# firstcodehits=%lu (%.2f)\n",firstcodesinfo.firstcodehits,
                                         (double) firstcodesinfo.firstcodehits/
                                         gt_encseq_total_length(encseq));
