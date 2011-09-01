@@ -332,6 +332,38 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
   return NULL;
 }
 
+static unsigned long gt_mergefirstcodes(unsigned long *countocc,
+                                        const unsigned long *querystream_fst,
+                                        const unsigned long *querystream_lst,
+                                        const unsigned long *subjectstream_base,
+                                        const unsigned long *subjectstream_fst,
+                                        const unsigned long *subjectstream_lst)
+{
+  unsigned long found = 0;
+  const unsigned long *query = querystream_fst, *subject = subjectstream_fst;
+
+  while (query < querystream_lst && subject < subjectstream_lst)
+  {
+    if (*query < *subject)
+    {
+      query++;
+    } else
+    {
+      if (*query > *subject)
+      {
+        subject++;
+      } else
+      {
+        countocc[(unsigned long) (subject - subjectstream_base)]++;
+        query++;
+        subject++;
+        found++;
+      }
+    }
+  }
+  return found;
+}
+
 #ifdef  QSORTNAME
 #undef  QSORTNAME
 #endif
@@ -351,7 +383,7 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
 
   gt_assert(firstcodesinfo->allfirstcodes != NULL);
   QSORTNAME(gt_direct_qsort)
-            (6UL, false,
+            (10UL, true,
              firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
              firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
   firstcodesinfo->binsearchcodebuffer_total
@@ -364,9 +396,17 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
     ptr = gt_firstcodes_find(firstcodesinfo,*vptr);
     if (ptr != NULL)
     {
-      firstcodesinfo->countocc[(unsigned long)
-                               (ptr - firstcodesinfo->allfirstcodes)]++;
-      firstcodesinfo->firstcodehits++;
+      firstcodesinfo->firstcodehits
+        += gt_mergefirstcodes(firstcodesinfo->countocc,
+                              vptr,
+                              firstcodesinfo->binsearchcodebuffer.spaceGtUlong
+                              + firstcodesinfo->binsearchcodebuffer.
+                                                nextfreeGtUlong,
+                              firstcodesinfo->allfirstcodes,
+                              ptr,
+                              firstcodesinfo->allfirstcodes +
+                              firstcodesinfo->differentcodes - 1);
+      break;
     }
   }
   printf("%u ",firstcodesinfo->flushcount++);
@@ -455,7 +495,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   firstcodesinfo.flushcount = 0;
   firstcodesinfo.binsearchcodebuffer_total = 0;
   gt_firstcodes_halves(&firstcodesinfo,firstcodesinfo.binsearchcache_depth);
-  firstcodesinfo.binsearchcodebuffer.allocatedGtUlong = 2000000UL;
+  firstcodesinfo.binsearchcodebuffer.allocatedGtUlong = 3000000UL;
   firstcodesinfo.binsearchcodebuffer.nextfreeGtUlong = 0;
   firstcodesinfo.binsearchcodebuffer.spaceGtUlong
     = gt_malloc(sizeof (*firstcodesinfo.binsearchcodebuffer.spaceGtUlong)
