@@ -32,14 +32,31 @@ GT_DECLAREARRAYSTRUCT(GtIndexwithcode);
 
 typedef struct
 {
-  GtBitsequence *codeoccurrence;
-  unsigned long differentcodes, countsequences, *allfirstcodes,
-                firstcodehits, numofallcodes, numofsequences, *countocc;
+  unsigned long differentcodes, 
+                countsequences, 
+                firstcodehits, 
+                numofsequences, 
+                binsearchcodebuffer_total,
+                *allfirstcodes,
+                *countocc;
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth, flushcount;
   GtArrayGtUlong binsearchcodebuffer;
-  unsigned long binsearchcodebuffer_total;
 } GtFirstcodesinfo;
+
+static void gt_storefirstcodes(void *processinfo,
+                               GT_UNUSED bool firstinrange,
+                               GT_UNUSED unsigned long pos,
+                               GtCodetype code)
+{
+  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+
+  gt_assert(firstinrange);
+  gt_assert(firstcodesinfo->allfirstcodes != NULL &&
+            firstcodesinfo->countsequences < firstcodesinfo->numofsequences);
+  firstcodesinfo->allfirstcodes[firstcodesinfo->countsequences] = code;
+  firstcodesinfo->countsequences++;
+}
 
 static unsigned long gt_remdups_in_sorted_array(
                                   GtFirstcodesinfo *firstcodesinfo)
@@ -87,32 +104,6 @@ static unsigned long gt_remdups_in_sorted_array(
     return numofdifferentcodes;
   }
   return 0;
-}
-
-static void gt_storefirstcodes(void *processinfo,
-                               GT_UNUSED bool firstinrange,
-                               GT_UNUSED unsigned long pos,
-                               GtCodetype code)
-{
-  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
-
-  gt_assert(firstinrange);
-  if (firstcodesinfo->codeoccurrence != NULL)
-  {
-    gt_assert(code < firstcodesinfo->numofallcodes);
-    if (!GT_ISIBITSET(firstcodesinfo->codeoccurrence,code))
-    {
-      firstcodesinfo->differentcodes++;
-      GT_SETIBIT(firstcodesinfo->codeoccurrence,code);
-    }
-  } else
-  {
-    gt_assert(firstcodesinfo->allfirstcodes != NULL &&
-              firstcodesinfo->countsequences <
-              firstcodesinfo->numofsequences);
-    firstcodesinfo->allfirstcodes[firstcodesinfo->countsequences] = code;
-  }
-  firstcodesinfo->countsequences++;
 }
 
 static void gt_firstcodes_halves_rek(GtFirstcodesinfo *firstcodesinfo,
@@ -331,27 +322,9 @@ static void gt_checkfirstcodesocc(void *processinfo,
   }
 }
 
-static void gt_checkfirstcodesocc_nobuf(void *processinfo,
-                                        GT_UNUSED bool firstinrange,
-                                        GT_UNUSED unsigned long pos,
-                                        GtCodetype code)
-{
-  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
-  const unsigned long *ptr;
-  unsigned long idx;
-
-  ptr = gt_firstcodes_find(firstcodesinfo,code);
-  gt_assert (ptr != NULL);
-  idx = (unsigned long) (ptr - firstcodesinfo->allfirstcodes);
-  gt_assert(firstcodesinfo->countocc[idx] > 0);
-  firstcodesinfo->countocc[idx]--;
-}
-
 static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
 {
-#ifdef INSERT
   const unsigned long *ptr;
-#endif
   unsigned long *vptr;
 
   gt_assert(firstcodesinfo->allfirstcodes != NULL);
@@ -366,15 +339,13 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
               firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
        vptr++)
   {
-#ifdef INSERT
     ptr = gt_firstcodes_find(firstcodesinfo,*vptr);
     if (ptr != NULL)
     {
-      unsigned long idx = (unsigned long) (ptr - firstcodesinfo->allfirstcodes);
-      firstcodesinfo->countocc[idx]++;
+      firstcodesinfo->countocc[(unsigned long) 
+                               (ptr - firstcodesinfo->allfirstcodes)]++;
       firstcodesinfo->firstcodehits++;
     }
-#endif
   }
   printf("%u ",firstcodesinfo->flushcount++);
   (void) fflush(stdout);
@@ -402,30 +373,12 @@ static void gt_accumulateallfirstcodeocc(void *processinfo,
   }
 }
 
-static void gt_accumulateallfirstcodeocc_nobuf(void *processinfo,
-                                               GT_UNUSED bool firstinrange,
-                                               GT_UNUSED unsigned long pos,
-                                               GtCodetype code)
-{
-  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
-  const unsigned long *ptr;
-
-  ptr = gt_firstcodes_find(firstcodesinfo,code);
-  if (ptr != NULL)
-  {
-    unsigned long idx = (unsigned long) (ptr - firstcodesinfo->allfirstcodes);
-    firstcodesinfo->countocc[idx]++;
-    firstcodesinfo->firstcodehits++;
-  }
-}
-
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize)
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo firstcodesinfo;
-  size_t sizeforbittable, sizeforcodestable;
-  const bool buffered = true;
+  size_t sizeforcodestable;
 
   if (gt_showtime_enabled())
   {
@@ -435,30 +388,11 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   firstcodesinfo.numofsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(gt_encseq_alphabetnumofchars(encseq) == 4U);
-  if (kmersize == (unsigned int) GT_UNITSIN2BITENC)
-  {
-    firstcodesinfo.numofallcodes = 0; /* undefined as 4^32 > ULONG_MAX */
-    sizeforbittable = 0;
-  } else
-  {
-    firstcodesinfo.numofallcodes = 1UL << GT_MULT2(kmersize);
-    sizeforbittable = sizeof (*firstcodesinfo.codeoccurrence) *
-                      GT_NUMOFINTSFORBITS(firstcodesinfo.numofallcodes);
-  }
   sizeforcodestable = sizeof (*firstcodesinfo.allfirstcodes) *
                       firstcodesinfo.numofsequences;
   firstcodesinfo.allfirstcodes = NULL;
-  firstcodesinfo.codeoccurrence = NULL;
-  if (kmersize == (unsigned int) GT_UNITSIN2BITENC ||
-      sizeforcodestable < sizeforbittable)
-  {
-    printf("# use array of size %lu\n",(unsigned long) sizeforcodestable);
-    firstcodesinfo.allfirstcodes = gt_malloc(sizeforcodestable);
-  } else
-  {
-    printf("# use bittable of size %lu\n",(unsigned long) sizeforbittable);
-    GT_INITBITTAB(firstcodesinfo.codeoccurrence,firstcodesinfo.numofallcodes);
-  }
+  printf("# use array of size %lu\n",(unsigned long) sizeforcodestable);
+  firstcodesinfo.allfirstcodes = gt_malloc(sizeforcodestable);
   firstcodesinfo.differentcodes = 0;
   firstcodesinfo.countsequences = 0;
   firstcodesinfo.firstcodehits = 0;
@@ -498,30 +432,23 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     firstcodesinfo.flushcount = 0;
     firstcodesinfo.binsearchcodebuffer_total = 0;
     gt_firstcodes_halves(&firstcodesinfo,firstcodesinfo.binsearchcache_depth);
-    if (buffered)
-    {
-      firstcodesinfo.binsearchcodebuffer.allocatedGtUlong = 3000000UL;
-      firstcodesinfo.binsearchcodebuffer.nextfreeGtUlong = 0;
-      firstcodesinfo.binsearchcodebuffer.spaceGtUlong
-        = gt_malloc(sizeof (*firstcodesinfo.binsearchcodebuffer.spaceGtUlong)
-                              * firstcodesinfo.binsearchcodebuffer.
-                                               allocatedGtUlong);
-      gt_assert(firstcodesinfo.binsearchcodebuffer.allocatedGtUlong > 0);
-    }
+    firstcodesinfo.binsearchcodebuffer.allocatedGtUlong = 3000000UL;
+    firstcodesinfo.binsearchcodebuffer.nextfreeGtUlong = 0;
+    firstcodesinfo.binsearchcodebuffer.spaceGtUlong
+      = gt_malloc(sizeof (*firstcodesinfo.binsearchcodebuffer.spaceGtUlong)
+                            * firstcodesinfo.binsearchcodebuffer.
+                                             allocatedGtUlong);
+    gt_assert(firstcodesinfo.binsearchcodebuffer.allocatedGtUlong > 0);
     getencseqkmers_twobitencoding(encseq,
                                   GT_READMODE_FORWARD,
                                   kmersize,
                                   kmersize,
                                   true,
-                                  buffered ? gt_checkfirstcodesocc
-                                           : gt_checkfirstcodesocc_nobuf,
+                                  gt_checkfirstcodesocc,
                                   &firstcodesinfo,
                                   NULL,
                                   NULL);
-    if (buffered)
-    {
-      firstcodesocc_flush(&firstcodesinfo);
-    }
+    firstcodesocc_flush(&firstcodesinfo);
     gt_assert(firstcodesinfo.countocc != NULL);
     for (idx = 0; idx < firstcodesinfo.differentcodes; idx++)
     {
@@ -536,19 +463,15 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   kmersize,
                                   45U,
                                   false,
-                                  buffered ? gt_accumulateallfirstcodeocc
-                                           : gt_accumulateallfirstcodeocc_nobuf,
+                                  gt_accumulateallfirstcodeocc,
                                   &firstcodesinfo,
                                   NULL,
                                   NULL);
-    if (buffered)
-    {
-      firstcodesaccum_flush(&firstcodesinfo);
-      printf("\nbinsearchbuffer_total=%lu\n",
-              firstcodesinfo.binsearchcodebuffer_total);
-      printf("depthtotal = %lu, %.2f\n",depthtotal,(double)depthtotal/
-                                      firstcodesinfo.binsearchcodebuffer_total);
-    }
+    firstcodesaccum_flush(&firstcodesinfo);
+    printf("\nbinsearchbuffer_total=%lu\n",
+            firstcodesinfo.binsearchcodebuffer_total);
+    printf("depthtotal = %lu, %.2f\n",depthtotal,(double)depthtotal/
+                                    firstcodesinfo.binsearchcodebuffer_total);
     printf("# firstcodehits=%lu (%.2f)\n",firstcodesinfo.firstcodehits,
                                         (double) firstcodesinfo.firstcodehits/
                                         gt_encseq_total_length(encseq));
@@ -557,7 +480,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GT_FREEARRAY(&firstcodesinfo.binsearchcodebuffer,GtUlong);
   gt_free(firstcodesinfo.allfirstcodes);
   gt_free(firstcodesinfo.countocc);
-  gt_free(firstcodesinfo.codeoccurrence);
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);
