@@ -158,7 +158,7 @@ static unsigned long gt_remdups_in_sorted_array(
       firstcodesinfo->countocc
         = gt_realloc(firstcodesinfo->countocc,
                      sizeof (*firstcodesinfo->countocc) *
-                     numofdifferentcodes);
+                     (numofdifferentcodes+1));
     }
     gt_assert(firstcodesinfo->countocc != NULL);
     return numofdifferentcodes;
@@ -421,7 +421,6 @@ static void gt_accumulateallfirstcodeocc(void *processinfo,
 {
   GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
 
-  gt_assert(firstcodesinfo->countocc != NULL);
   if (firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong  ==
       firstcodesinfo->binsearchcodebuffer.allocatedGtUlong)
   {
@@ -435,6 +434,18 @@ static void gt_accumulateallfirstcodeocc(void *processinfo,
     firstcodesinfo->binsearchcodebuffer.spaceGtUlong[
       firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong++] = code;
   }
+}
+
+static void storefirstcodes_partialsum(GtFirstcodesinfo *firstcodesinfo)
+{
+  unsigned long idx;
+
+  for (idx = 1UL; idx < firstcodesinfo->differentcodes; idx++)
+  {
+    firstcodesinfo->countocc[idx] += firstcodesinfo->countocc[idx-1];
+  }
+  firstcodesinfo->countocc[firstcodesinfo->differentcodes] =
+    firstcodesinfo->countocc[firstcodesinfo->differentcodes-1];
 }
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
@@ -523,6 +534,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   printf("# firstcodehits=%lu (%.2f)\n",firstcodesinfo.firstcodehits,
                                       (double) firstcodesinfo.firstcodehits/
                                       gt_encseq_total_length(encseq));
+  storefirstcodes_partialsum(&firstcodesinfo);
   GT_FREEARRAY(&firstcodesinfo.binsearchcache,GtIndexwithcode);
   GT_FREEARRAY(&firstcodesinfo.binsearchcodebuffer,GtUlong);
   gt_free(firstcodesinfo.allfirstcodes);
