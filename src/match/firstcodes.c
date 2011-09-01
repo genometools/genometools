@@ -21,6 +21,7 @@
 #include "core/arraydef.h"
 #include "core/showtime.h"
 #include "core/mathsupport.h"
+#include "core/radix-intsort.h"
 #include "sfx-suffixer.h"
 #include "firstcodes.h"
 
@@ -95,6 +96,7 @@ typedef struct
   GtArrayGtUlong binsearchcodebuffer;
   Gtmarksubstring markprefix,
                   marksuffix;
+  unsigned long *tempforradixsort;
 } GtFirstcodesinfo;
 
 static void gt_storefirstcodes(void *processinfo,
@@ -364,28 +366,15 @@ static unsigned long gt_mergefirstcodes(unsigned long *countocc,
   return found;
 }
 
-#ifdef  QSORTNAME
-#undef  QSORTNAME
-#endif
-
-#define QSORTNAME(NAME)                        firstcodes_##NAME
-#define firstcodes_ARRAY_GET(ARR,RELIDX)       ARR[RELIDX]
-#define firstcodes_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
-
-typedef unsigned long QSORTNAME(Sorttype);
-
-#include "match/qsort-direct.gen"
-
 static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
 {
   const unsigned long *ptr;
   unsigned long *vptr;
 
   gt_assert(firstcodesinfo->allfirstcodes != NULL);
-  QSORTNAME(gt_direct_qsort)
-            (10UL, true,
-             firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
-             firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
+  gt_radix_integersort(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
+                      firstcodesinfo->tempforradixsort,
+                      firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
   firstcodesinfo->binsearchcodebuffer_total
     += firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
   for (vptr = firstcodesinfo->binsearchcodebuffer.spaceGtUlong;
@@ -447,6 +436,18 @@ static void storefirstcodes_partialsum(GtFirstcodesinfo *firstcodesinfo)
   firstcodesinfo->countocc[firstcodesinfo->differentcodes] =
     firstcodesinfo->countocc[firstcodesinfo->differentcodes-1];
 }
+
+#ifdef  QSORTNAME
+#undef  QSORTNAME
+#endif
+
+#define QSORTNAME(NAME)                        firstcodes_##NAME
+#define firstcodes_ARRAY_GET(ARR,RELIDX)       ARR[RELIDX]
+#define firstcodes_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
+
+typedef unsigned long QSORTNAME(Sorttype);
+
+#include "match/qsort-direct.gen"
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize)
@@ -517,6 +518,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     gt_timer_show_progress(timer, "accumulate counts",stdout);
   }
+  firstcodesinfo.tempforradixsort
+    = gt_malloc((size_t) firstcodesinfo.binsearchcodebuffer.allocatedGtUlong
+                * sizeof (GtUlong));
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
@@ -527,6 +531,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 NULL,
                                 NULL);
   firstcodesaccum_flush(&firstcodesinfo);
+  gt_free(firstcodesinfo.tempforradixsort);
   printf("\nbinsearchbuffer_total=%lu (%.2f)\n",
           firstcodesinfo.binsearchcodebuffer_total,
           (double) firstcodesinfo.binsearchcodebuffer_total/
