@@ -100,6 +100,15 @@ You can change this with the prefix argument. For example, to install under
 
 # make prefix=/usr install
 
+Please note that all make options given during the compilation must be
+given in the `make install' invocation again. For example, if you compiled
+GenomeTools with the '64bit=yes cairo=no' options, the correct installation
+command would be:
+
+# make prefix=/usr 64bit=yes cairo=no install
+
+Omitting these options may lead to problems during installation.
+
 
 Final note
 -----------
