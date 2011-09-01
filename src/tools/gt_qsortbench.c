@@ -25,6 +25,7 @@
 #include "core/timer.h"
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
+#include "core/radix-intsort.h"
 #include "tools/gt_qsortbench.h"
 
 typedef struct {
@@ -52,7 +53,7 @@ static void gt_qsortbench_arguments_delete(void *tool_arguments)
 }
 
 static const char *gt_qsort_implementation_names[]
-    = {"thomas","system","inlinedptr","inlinedarr","direct",NULL};
+    = {"thomas","system","inlinedptr","inlinedarr","direct","radix",NULL};
 
 static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 {
@@ -67,7 +68,8 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
                             "Benchmarks quicksort implementations."); /* XXX */
 
   option = gt_option_new_choice("impl", "implementation\nchoose from "
-                                "thomas|system|inlinedptr|inlinedarr|direct",
+                                "thomas|system|inlinedptr|inlinedarr|"
+                                "direct|radix",
                                 arguments->impl,
                                 gt_qsort_implementation_names[0],
                                 gt_qsort_implementation_names);
@@ -283,6 +285,14 @@ static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
   gt_inlined_qsort_r(a, n, NULL);
 }
 
+static void check_radix_integersort(unsigned long *source, unsigned long len)
+{
+  unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
+
+  gt_radix_integersort(source, temp, len);
+  gt_free(temp);
+}
+
 typedef void (*GtQsortimplementationfunc)(unsigned long *,unsigned long);
 
 static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
@@ -291,7 +301,8 @@ static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
   check_gnu_qsort,
   check_inlinedptr_qsort,
   check_inlinedarr_qsort,
-  check_direct_qsort
+  check_direct_qsort,
+  check_radix_integersort
 };
 
 #define GT_NUM_OF_QSORT_IMPLEMENTATIONS\
