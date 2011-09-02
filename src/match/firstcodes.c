@@ -113,6 +113,19 @@ static void gt_storefirstcodes(void *processinfo,
   firstcodesinfo->countsequences++;
 }
 
+#ifdef SKDEBUG
+static void checkcodesorder(const unsigned long *tab,unsigned long len,
+                            bool allowequal)
+{
+  unsigned long idx;
+
+  for (idx=1UL; idx < len; idx++)
+  {
+    gt_assert(tab[idx-1] < tab[idx] || (allowequal && tab[idx-1] == tab[idx]));
+  }
+}
+#endif
+
 static unsigned long gt_remdups_in_sorted_array(
                                   GtFirstcodesinfo *firstcodesinfo)
 {
@@ -161,6 +174,9 @@ static unsigned long gt_remdups_in_sorted_array(
         = gt_realloc(firstcodesinfo->countocc,
                      sizeof (*firstcodesinfo->countocc) *
                      (numofdifferentcodes+1));
+#ifdef SKDEBUG
+      checkcodesorder(firstcodesinfo->allfirstcodes,numofdifferentcodes,false);
+#endif
     }
     gt_assert(firstcodesinfo->countocc != NULL);
     return numofdifferentcodes;
@@ -358,7 +374,6 @@ static unsigned long gt_mergefirstcodes(unsigned long *countocc,
       {
         countocc[(unsigned long) (subject - subjectstream_base)]++;
         query++;
-        subject++;
         found++;
       }
     }
@@ -375,6 +390,11 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
   gt_radix_integersort(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
                       firstcodesinfo->tempforradixsort,
                       firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
+#ifdef SKDEBUG
+  checkcodesorder(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
+                  firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
+                  true);
+#endif
   firstcodesinfo->binsearchcodebuffer_total
     += firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
   for (vptr = firstcodesinfo->binsearchcodebuffer.spaceGtUlong;
@@ -394,7 +414,7 @@ static void firstcodesaccum_flush(GtFirstcodesinfo *firstcodesinfo)
                               firstcodesinfo->allfirstcodes,
                               ptr,
                               firstcodesinfo->allfirstcodes +
-                              firstcodesinfo->differentcodes - 1);
+                              firstcodesinfo->differentcodes);
       break;
     }
   }
@@ -532,7 +552,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 NULL);
   firstcodesaccum_flush(&firstcodesinfo);
   gt_free(firstcodesinfo.tempforradixsort);
-  printf("\nbinsearchbuffer_total=%lu (%.2f)\n",
+  printf("\nbinsearchcodebuffer_total=%lu (%.2f)\n",
           firstcodesinfo.binsearchcodebuffer_total,
           (double) firstcodesinfo.binsearchcodebuffer_total/
                    gt_encseq_total_length(encseq));
