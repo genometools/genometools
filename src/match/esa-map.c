@@ -24,13 +24,15 @@
 #include "core/endianess_api.h"
 #include "core/error.h"
 #include "core/fa.h"
+#ifndef S_SPLINT_S
 #include "core/fileutils.h"
+#endif
 #include "core/format64.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
-#include "sarr-def.h"
 #include "esa-fileend.h"
 #include "sfx-ri-def.h"
+#include "sarr-def.h"
 #include "spacedef.h"
 #include "stamp.h"
 

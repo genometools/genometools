@@ -16,7 +16,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include "core/cstr_api.h"
 #include "core/sequence_buffer_fasta.h"
 #include "core/sequence_buffer_rep.h"

@@ -15,10 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <math.h>
 #include <string.h>
 #include <errno.h>
-#include <math.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif
 #include "core/chardef.h"
 #include "core/error.h"
 #include "core/fa.h"

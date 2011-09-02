@@ -15,10 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <stdio.h>
-#include <string.h>
+#ifndef S_SPLINT_S
 #include <ctype.h>
 #include <unistd.h>
+#endif
+#include <stdio.h>
+#include <string.h>
 #include "core/cstr_api.h"
 #include "core/fasta.h"
 #include "core/hashmap.h"

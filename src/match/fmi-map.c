@@ -20,7 +20,9 @@
 #include <stdbool.h>
 #include "core/error.h"
 #include "core/fa.h"
+#ifndef S_SPLINT_S
 #include "core/fileutils.h"
+#endif
 #include "core/array.h"
 #include "core/str.h"
 #include "core/alphabet.h"

@@ -19,10 +19,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#include "core/fileutils.h"
+#endif
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
-#include "core/encseq.h"
 #include "core/error.h"
 #include "core/fa.h"
 #include "core/fasta.h"

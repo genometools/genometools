@@ -18,8 +18,6 @@
 #ifndef FASTABUFFER_IMP_H
 #define FASTABUFFER_IMP_H
 
-#include <sys/types.h>
-
 #define OUTPUTFILEBUFFERSIZE 4096
 #define INPUTFILEBUFFERSIZE  4096
 

@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include "core/chardef.h"
 #include "core/cstr_api.h"
 #include "core/error.h"

@@ -16,7 +16,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include <string.h>
 #include "core/fa.h"
 #include "core/ma.h"

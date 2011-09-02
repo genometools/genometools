@@ -18,9 +18,11 @@
 */
 
 #include <stdio.h>
-#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#endif
 #include "core/alphabet.h"
 #include "core/chardef.h"
 #include "core/cstr_api.h"

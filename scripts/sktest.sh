@@ -41,6 +41,7 @@ fi
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 
+startdate="`date`"
 cd testsuite
 env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_encseq'
 
@@ -68,3 +69,5 @@ env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex' \
 cd ..
 
 sktest-match.sh
+echo "start at ${startdate}"
+echo "end at `date`"

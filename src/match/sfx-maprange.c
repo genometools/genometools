@@ -16,7 +16,10 @@
 */
 
 #include <errno.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#include "core/xposix.h"
+#endif
 #include "core/fa.h"
 #include "core/intbits.h"
 #include "core/xposix.h"

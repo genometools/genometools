@@ -21,8 +21,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <limits.h>
-#include <ctype.h>
 #include <errno.h>
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#include "core/xposix.h"
+#endif
+#include "core/types_api.h"
+#include "core/fa.h"
 #include "core/alphabet.h"
 #include "core/array.h"
 #include "core/arraydef.h"
@@ -42,12 +47,10 @@
 #endif
 #include "core/ensure.h"
 #include "core/error.h"
-#include "core/fa.h"
 #include "core/filelengthvalues.h"
 #include "core/fileutils_api.h"
 #include "core/format64.h"
 #include "core/intbits.h"
-#include "core/types_api.h"
 #include "core/log_api.h"
 #include "core/logger.h"
 #include "core/ma_api.h"
@@ -61,9 +64,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
-#include "core/xposix.h"
 #include "core/defined-types.h"
-#include "match/stamp.h"
 
 #undef GT_RANGEDEBUG
 

@@ -21,4 +21,10 @@
 void gt_radix_integersort(unsigned long *source, unsigned long *temp,
                           unsigned long len);
 
+void gt_radix_integersort_2tab(unsigned long *source,
+                               unsigned int *sourceperm,
+                               unsigned long *temp,
+                               unsigned int *temp2,
+                               unsigned long len);
+
 #endif

@@ -97,7 +97,7 @@ static void gt_radix_phase_integersort_2tab(unsigned int offset,
 
   /* fill dest with the right values in the right place */
   bp = ((uint8_t *) source) + offset;
-  for (sourceoffset = 0; sourceoffset < len; 
+  for (sourceoffset = 0; sourceoffset < len;
        bp += sizeof (unsigned long), sourceoffset++)
   {
     idx = count[*bp]++;
@@ -106,7 +106,7 @@ static void gt_radix_phase_integersort_2tab(unsigned int offset,
   }
 }
 
-void gt_radix_integersort_2tab(unsigned long *source, 
+void gt_radix_integersort_2tab(unsigned long *source,
                                unsigned int *sourceperm,
                                unsigned long *temp,
                                unsigned int *temp2,

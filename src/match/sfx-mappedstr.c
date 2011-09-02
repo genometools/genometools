@@ -15,9 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
+#include <ctype.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <zlib.h>
 #include <stdbool.h>
 #include "core/assert_api.h"

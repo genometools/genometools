@@ -16,17 +16,21 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "core/cstr_api.h"
-#include "core/fileutils_api.h"
-#include "core/ma.h"
-#include "core/sequence_buffer.h"
-#include "core/splitter.h"
-#include "core/xansi_api.h"
+#ifndef S_SPLINT_S
+#include <fcntl.h>
 #include "core/xposix.h"
+#include "core/fileutils_api.h"
+#else
+typedef int off_t;
+#endif
+#include "core/xansi_api.h"
+#include "core/ma.h"
+#include "core/splitter.h"
+#include "core/sequence_buffer.h"
+#include "core/cstr_api.h"
 
 bool gt_file_exists(const char *path)
 {

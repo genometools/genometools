@@ -20,8 +20,12 @@
 #define FILEUTILS_API_H
 
 #include <stdbool.h>
-#include <sys/types.h>
 #include <stdio.h>
+#ifndef S_SPLINT_S
+#include <sys/types.h>
+#else
+typedef int off_t;
+#endif
 #include "core/str_api.h"
 #include "core/str_array_api.h"
 

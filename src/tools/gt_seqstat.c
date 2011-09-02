@@ -17,21 +17,26 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <limits.h>
 #include <string.h>
+#include <limits.h>
+#ifndef S_SPLINT_S
 #include <sys/types.h>
-#include <sys/stat.h>
 #include "core/fileutils_api.h"
+#include "core/xposix.h"
+#else
+typedef int off_t;
+#endif
 #include "core/ma.h"
-#include "core/option_api.h"
+#include "core/versionfunc.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/seqiterator_fastq.h"
-#include "core/unused_api.h"
-#include "core/versionfunc.h"
-#include "core/xposix.h"
 #include "core/progressbar.h"
-#include "core/disc_distri.h"
 #include "core/format64.h"
+#include "core/unused_api.h"
+#include "core/types_api.h"
+#include "core/disc_distri.h"
+#include "core/option_api.h"
+#include "core/error_api.h"
 #include "match/stamp.h"
 #include "tools/gt_seqstat.h"
 

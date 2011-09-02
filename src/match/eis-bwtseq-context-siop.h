@@ -18,7 +18,9 @@
 #define EIS_BWTSEQ_CONTEXT_SIOP_H
 
 #include <stdio.h>
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#endif
 
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"

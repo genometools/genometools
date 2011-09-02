@@ -19,9 +19,11 @@
 #include <stdio.h>
 #include <limits.h>
 #include <errno.h>
-#include <sys/stat.h>
+#ifndef S_SPLINT_S
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#endif
 #include "core/arraydef.h"
 #include "core/assert_api.h"
 #include "core/chardef.h"

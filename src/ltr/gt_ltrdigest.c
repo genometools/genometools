@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include <string.h>
 #include "core/fileutils_api.h"
 #include "core/log.h"
