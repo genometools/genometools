@@ -18,13 +18,8 @@
 #ifndef RADIX_INTSORT_H
 #define RADIX_INTSORT_H
 
-void gt_radix_integersort(unsigned long *source, unsigned long *temp,
-                          unsigned long len);
+#include "core/types_api.h"
 
-void gt_radix_integersort_2tab(unsigned long *source,
-                               unsigned int *sourceperm,
-                               unsigned long *temp,
-                               unsigned int *temp2,
-                               unsigned long len);
+void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp, unsigned long len);
 
 #endif

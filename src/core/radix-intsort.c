@@ -19,13 +19,14 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "core/assert_api.h"
+#include "core/types_api.h"
 
 /* replaced byte with offset to avoid * 8 operation in loop */
 
-static void gt_radix_phase_integersort(unsigned int offset,
-                                       unsigned long *source,
-                                       unsigned long *dest,
-                                       unsigned long len)
+static void gt_radix_phase_GtUlong(unsigned int offset,
+                                   GtUlong *source,
+                                   GtUlong *dest,
+                                   unsigned long len)
 {
   unsigned long count[256] = {0}, *sp, *cp, s, c, idx;
   uint8_t *bp;
@@ -53,75 +54,18 @@ static void gt_radix_phase_integersort(unsigned int offset,
   }
 }
 
-void gt_radix_integersort(unsigned long *source, unsigned long *temp,
-                          unsigned long len)
+void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 {
   /* allocate heap memory to avoid the need of additional parameter */
   gt_assert(temp != NULL && source != NULL);
-  gt_radix_phase_integersort(0, source, temp, len);
-  gt_radix_phase_integersort(1U, temp, source, len);
-  gt_radix_phase_integersort(2U, source, temp, len);
-  gt_radix_phase_integersort(3U, temp, source, len);
+  gt_radix_phase_GtUlong(0, source, temp, len);
+  gt_radix_phase_GtUlong(1U, temp, source, len);
+  gt_radix_phase_GtUlong(2U, source, temp, len);
+  gt_radix_phase_GtUlong(3U, temp, source, len);
 #ifdef _LP64
-  gt_radix_phase_integersort(4U, source, temp, len);
-  gt_radix_phase_integersort(5U, temp, source, len);
-  gt_radix_phase_integersort(6U, source, temp, len);
-  gt_radix_phase_integersort(7U, temp, source, len);
-#endif
-}
-
-static void gt_radix_phase_integersort_2tab(unsigned int offset,
-                                            unsigned long *source,
-                                            unsigned int *sourceperm,
-                                            unsigned long *dest,
-                                            unsigned int *destperm,
-                                            unsigned long len)
-{
-  unsigned long count[256] = {0}, *cp, s, c, idx, sourceoffset;
-  uint8_t *bp;
-
-  /* count occurences of every byte value */
-  bp = ((uint8_t *) source) + offset;
-  for (idx = 0; idx < len; idx++, bp += sizeof (unsigned long))
-  {
-    count[*bp]++;
-  }
-
-  /* compute partial sums */
-  for (s = 0, cp = count, idx = 0; idx < 256UL; idx++, cp++)
-  {
-    c = *cp;
-    *cp = s;
-    s += c;
-  }
-
-  /* fill dest with the right values in the right place */
-  bp = ((uint8_t *) source) + offset;
-  for (sourceoffset = 0; sourceoffset < len;
-       bp += sizeof (unsigned long), sourceoffset++)
-  {
-    idx = count[*bp]++;
-    dest[idx] = source[sourceoffset];
-    destperm[idx] = sourceperm[sourceoffset];
-  }
-}
-
-void gt_radix_integersort_2tab(unsigned long *source,
-                               unsigned int *sourceperm,
-                               unsigned long *temp,
-                               unsigned int *temp2,
-                               unsigned long len)
-{
-  /* allocate heap memory to avoid the need of additional parameter */
-  gt_assert(temp != NULL && source != NULL);
-  gt_radix_phase_integersort_2tab(0, source, sourceperm, temp, temp2, len);
-  gt_radix_phase_integersort_2tab(1U,temp, temp2, source, sourceperm, len);
-  gt_radix_phase_integersort_2tab(2U,source, sourceperm, temp, temp2, len);
-  gt_radix_phase_integersort_2tab(3U,temp, temp2, source, sourceperm, len);
-#ifdef _LP64
-  gt_radix_phase_integersort_2tab(4U, source, sourceperm, temp, temp2, len);
-  gt_radix_phase_integersort_2tab(5U, temp, temp2, source, sourceperm, len);
-  gt_radix_phase_integersort_2tab(6U, source, sourceperm, temp, temp2, len);
-  gt_radix_phase_integersort_2tab(7U, temp, temp2, source, sourceperm, len);
+  gt_radix_phase_GtUlong(4U, source, temp, len);
+  gt_radix_phase_GtUlong(5U, temp, source, len);
+  gt_radix_phase_GtUlong(6U, source, temp, len);
+  gt_radix_phase_GtUlong(7U, temp, source, len);
 #endif
 }

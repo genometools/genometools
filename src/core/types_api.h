@@ -23,4 +23,9 @@
 typedef uint8_t       GtUchar;
 typedef unsigned long GtUlong;
 
+typedef struct
+{
+  GtUlong a, b;
+} GtUlongPair;
+
 #endif

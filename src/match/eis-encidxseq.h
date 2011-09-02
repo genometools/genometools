@@ -28,6 +28,7 @@
 #include "core/bitpackstring.h"
 #include "core/error.h"
 #include "core/str.h"
+#include "core/types_api.h"
 
 #include "core/logger.h"
 #include "match/eis-encidxseq-param.h"
@@ -184,11 +185,6 @@ EISRank(EISeq *seq, Symbol sym, unsigned long pos, union EISHint *hint);
 static inline unsigned long
 EISSymTransformedRank(EISeq *seq, Symbol tSym, unsigned long pos,
                       union EISHint *hint);
-
-typedef struct
-{
-  unsigned long a,b;
-}GtUlongPair;
 
 /**
  * \brief Return number of occurrences of symbol sym in index up to

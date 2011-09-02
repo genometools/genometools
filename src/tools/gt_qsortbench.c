@@ -285,11 +285,11 @@ static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
   gt_inlined_qsort_r(a, n, NULL);
 }
 
-static void check_radix_integersort(unsigned long *source, unsigned long len)
+static void check_radixsort_GtUlong(unsigned long *source, unsigned long len)
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radix_integersort(source, temp, len);
+  gt_radixsort_GtUlong(source, temp, len);
   gt_free(temp);
 }
 
@@ -302,7 +302,7 @@ static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
   check_inlinedptr_qsort,
   check_inlinedarr_qsort,
   check_direct_qsort,
-  check_radix_integersort
+  check_radixsort_GtUlong
 };
 
 #define GT_NUM_OF_QSORT_IMPLEMENTATIONS\
