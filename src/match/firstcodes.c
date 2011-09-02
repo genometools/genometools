@@ -85,15 +85,17 @@ typedef struct
                 firstcodehits,
                 countsequences,
                 numofsequences,
-                binsearchcodebuffer_total,
                 binsearchcache_unknownwidth,
                 binsearchcache_unknowncount,
+                *codebuffer,
+                codebuffer_allocated,
+                codebuffer_nextfree,
+                codebuffer_total,
                 *allfirstcodes,
                 *countocc;
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth,
                flushcount;
-  GtArrayGtUlong binsearchcodebuffer;
   Gtmarksubstring markprefix,
                   marksuffix;
   unsigned long *tempforradixsort;
@@ -106,13 +108,13 @@ static void gt_storefirstcodes(void *processinfo,
                                GT_UNUSED unsigned long pos,
                                GtCodetype code)
 {
-  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+  GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
 
   gt_assert(firstinrange);
-  gt_assert(firstcodesinfo->allfirstcodes != NULL &&
-            firstcodesinfo->countsequences < firstcodesinfo->numofsequences);
-  firstcodesinfo->allfirstcodes[firstcodesinfo->countsequences] = code;
-  firstcodesinfo->countsequences++;
+  gt_assert(fci->allfirstcodes != NULL &&
+            fci->countsequences < fci->numofsequences);
+  fci->allfirstcodes[fci->countsequences] = code;
+  fci->countsequences++;
 }
 
 #ifdef SKDEBUG
@@ -128,27 +130,21 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 }
 #endif
 
-static unsigned long gt_remdups_in_sorted_array(
-                                  GtFirstcodesinfo *firstcodesinfo)
+static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
 {
   unsigned long *storeptr, *readptr;
 
-  if (firstcodesinfo->numofsequences > 0)
+  if (fci->numofsequences > 0)
   {
     unsigned long numofdifferentcodes;
 
-    firstcodesinfo->countocc
-      = gt_calloc((size_t) firstcodesinfo->numofsequences,
-                  sizeof (*firstcodesinfo->countocc));
-    firstcodesinfo->countocc[0] = 1UL;
-    gt_marksubstring_mark(&firstcodesinfo->markprefix,
-                          firstcodesinfo->allfirstcodes[0]);
-    gt_marksubstring_mark(&firstcodesinfo->marksuffix,
-                          firstcodesinfo->allfirstcodes[0]);
-    for (storeptr = firstcodesinfo->allfirstcodes,
-         readptr = firstcodesinfo->allfirstcodes+1;
-         readptr < firstcodesinfo->allfirstcodes +
-                   firstcodesinfo->numofsequences;
+    fci->countocc = gt_calloc((size_t) fci->numofsequences,
+                              sizeof (*fci->countocc));
+    fci->countocc[0] = 1UL;
+    gt_marksubstring_mark(&fci->markprefix,fci->allfirstcodes[0]);
+    gt_marksubstring_mark(&fci->marksuffix,fci->allfirstcodes[0]);
+    for (storeptr = fci->allfirstcodes, readptr = fci->allfirstcodes+1;
+         readptr < fci->allfirstcodes + fci->numofsequences;
          readptr++)
     {
       if (*storeptr != *readptr)
@@ -157,36 +153,32 @@ static unsigned long gt_remdups_in_sorted_array(
 
         *storeptr = *readptr;
       }
-      firstcodesinfo->countocc[(unsigned long)
-                               (storeptr - firstcodesinfo->allfirstcodes)]++;
-      gt_marksubstring_mark(&firstcodesinfo->markprefix,*readptr);
-      gt_marksubstring_mark(&firstcodesinfo->marksuffix,*readptr);
+      fci->countocc[(unsigned long) (storeptr - fci->allfirstcodes)]++;
+      gt_marksubstring_mark(&fci->markprefix,*readptr);
+      gt_marksubstring_mark(&fci->marksuffix,*readptr);
     }
-    numofdifferentcodes
-      = (unsigned long) (storeptr - firstcodesinfo->allfirstcodes + 1);
-    if (numofdifferentcodes < firstcodesinfo->numofsequences)
+    numofdifferentcodes = (unsigned long) (storeptr - fci->allfirstcodes + 1);
+    if (numofdifferentcodes < fci->numofsequences)
     {
       /* reduce the memory requirement, as the duplicated elements are not
          needed */
-      firstcodesinfo->allfirstcodes
-        = gt_realloc(firstcodesinfo->allfirstcodes,
-                     sizeof (*firstcodesinfo->allfirstcodes) *
-                     numofdifferentcodes);
-      firstcodesinfo->countocc
-        = gt_realloc(firstcodesinfo->countocc,
-                     sizeof (*firstcodesinfo->countocc) *
-                     (numofdifferentcodes+1));
+      fci->allfirstcodes = gt_realloc(fci->allfirstcodes,
+                                      sizeof (*fci->allfirstcodes) *
+                                      numofdifferentcodes);
+      fci->countocc = gt_realloc(fci->countocc,
+                                 sizeof (*fci->countocc) *
+                                 (numofdifferentcodes+1));
 #ifdef SKDEBUG
-      checkcodesorder(firstcodesinfo->allfirstcodes,numofdifferentcodes,false);
+      checkcodesorder(fci->allfirstcodes,numofdifferentcodes,false);
 #endif
     }
-    gt_assert(firstcodesinfo->countocc != NULL);
+    gt_assert(fci->countocc != NULL);
     return numofdifferentcodes;
   }
   return 0;
 }
 
-static void gt_firstcodes_halves_rek(GtFirstcodesinfo *firstcodesinfo,
+static void gt_firstcodes_halves_rek(GtFirstcodesinfo *fci,
                                      unsigned long left,unsigned long right,
                                      unsigned int depth,unsigned int maxdepth)
 {
@@ -196,101 +188,98 @@ static void gt_firstcodes_halves_rek(GtFirstcodesinfo *firstcodesinfo,
   mid = left + GT_DIV2(right-left);
   if (depth < maxdepth)
   {
-    gt_firstcodes_halves_rek(firstcodesinfo,left,mid-1,depth+1,maxdepth);
+    gt_firstcodes_halves_rek(fci,left,mid-1,depth+1,maxdepth);
   } else
   {
-    firstcodesinfo->binsearchcache_unknownwidth += (unsigned long) (mid-left);
-    firstcodesinfo->binsearchcache_unknowncount++;
+    fci->binsearchcache_unknownwidth += (unsigned long) (mid-left);
+    fci->binsearchcache_unknowncount++;
   }
-  gt_assert(firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode <
-            firstcodesinfo->binsearchcache.allocatedGtIndexwithcode);
-  firstcodesinfo->binsearchcache.spaceGtIndexwithcode[
-                  firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode]
-                  .ptr = firstcodesinfo->allfirstcodes + mid;
-  firstcodesinfo->binsearchcache.spaceGtIndexwithcode[
-                  firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode++]
-                  .code = firstcodesinfo->allfirstcodes[mid];
+  gt_assert(fci->binsearchcache.nextfreeGtIndexwithcode <
+            fci->binsearchcache.allocatedGtIndexwithcode);
+  fci->binsearchcache.spaceGtIndexwithcode[fci->binsearchcache.
+                                           nextfreeGtIndexwithcode]
+                                           .ptr = fci->allfirstcodes + mid;
+  fci->binsearchcache.spaceGtIndexwithcode[fci->binsearchcache.
+                                           nextfreeGtIndexwithcode++]
+                                           .code = fci->allfirstcodes[mid];
   if (depth < maxdepth)
   {
-    gt_firstcodes_halves_rek(firstcodesinfo,mid+1,right,depth+1,maxdepth);
+    gt_firstcodes_halves_rek(fci,mid+1,right,depth+1,maxdepth);
   } else
   {
-    firstcodesinfo->binsearchcache_unknownwidth += (unsigned long) (right-mid);
-    firstcodesinfo->binsearchcache_unknowncount++;
+    fci->binsearchcache_unknownwidth += (unsigned long) (right-mid);
+    fci->binsearchcache_unknowncount++;
   }
 }
 
-static void gt_firstcodes_halves(GtFirstcodesinfo *firstcodesinfo,
+static void gt_firstcodes_halves(GtFirstcodesinfo *fci,
                                  unsigned int maxdepth)
 {
-  firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode = 0;
-  firstcodesinfo->binsearchcache.allocatedGtIndexwithcode
-    = (1UL << (maxdepth+1)) - 1;
-  if (firstcodesinfo->binsearchcache.allocatedGtIndexwithcode <
-      firstcodesinfo->differentcodes)
+  fci->binsearchcache.nextfreeGtIndexwithcode = 0;
+  fci->binsearchcache.allocatedGtIndexwithcode = (1UL << (maxdepth+1)) - 1;
+  if (fci->binsearchcache.allocatedGtIndexwithcode < fci->differentcodes)
   {
     size_t allocbytes
-      = sizeof (*firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
-                * firstcodesinfo->binsearchcache.allocatedGtIndexwithcode;
+      = sizeof (*fci->binsearchcache.spaceGtIndexwithcode)
+                * fci->binsearchcache.allocatedGtIndexwithcode;
     printf("size of binsearch cache: %lu\n",(unsigned long) allocbytes);
-    firstcodesinfo->binsearchcache.spaceGtIndexwithcode = gt_malloc(allocbytes);
-    gt_assert(firstcodesinfo->differentcodes > 0);
-    gt_firstcodes_halves_rek(firstcodesinfo,0,
-                             firstcodesinfo->differentcodes - 1,0,maxdepth);
-    gt_assert(firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode
-              == firstcodesinfo->binsearchcache.allocatedGtIndexwithcode);
+    fci->binsearchcache.spaceGtIndexwithcode = gt_malloc(allocbytes);
+    gt_assert(fci->differentcodes > 0);
+    gt_firstcodes_halves_rek(fci,0,fci->differentcodes - 1,0,maxdepth);
+    gt_assert(fci->binsearchcache.nextfreeGtIndexwithcode
+              == fci->binsearchcache.allocatedGtIndexwithcode);
     printf("average size of uncached range: %.2f\n",
-            (double) firstcodesinfo->binsearchcache_unknownwidth/
-            firstcodesinfo->binsearchcache_unknowncount);
+            (double) fci->binsearchcache_unknownwidth/
+            fci->binsearchcache_unknowncount);
 #undef FIRSTCODEDEBUG
 #ifdef FIRSTCODEDEBUG
     {
       unsigned long idx;
 
-      for (idx=0; idx < firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode;
+      for (idx=0; idx < fci->binsearchcache.nextfreeGtIndexwithcode;
            idx++)
       {
         printf("%lu %lu\n",
              (unsigned long)
-             (firstcodesinfo->binsearchcache.spaceGtIndexwithcode[idx].ptr -
-             firstcodesinfo->allfirstcodes),
-             firstcodesinfo->binsearchcache.spaceGtIndexwithcode[idx].code);
+             (fci->binsearchcache.spaceGtIndexwithcode[idx].ptr -
+             fci->allfirstcodes),
+             fci->binsearchcache.spaceGtIndexwithcode[idx].code);
       }
     }
 #endif
   }
 }
 
-const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
+const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
                                         unsigned long code)
 {
   const unsigned long *leftptr = NULL, *midptr, *rightptr = NULL;
   unsigned int depth;
 
-  if (firstcodesinfo->binsearchcache.spaceGtIndexwithcode != NULL)
+  if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     const GtIndexwithcode *leftic, *midic, *rightic;
 
-    leftic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode;
-    rightic = firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
-              firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode - 1;
+    leftic = fci->binsearchcache.spaceGtIndexwithcode;
+    rightic = fci->binsearchcache.spaceGtIndexwithcode +
+              fci->binsearchcache.nextfreeGtIndexwithcode - 1;
     for (depth = 0; /* Nothing */; depth++)
     {
       midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
       if (code < midic->code)
       {
-        if (depth < firstcodesinfo->binsearchcache_depth)
+        if (depth < fci->binsearchcache_depth)
         {
           rightic = midic - 1;
         } else
         {
           gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
-          if (leftic > firstcodesinfo->binsearchcache.spaceGtIndexwithcode)
+          if (leftic > fci->binsearchcache.spaceGtIndexwithcode)
           {
             leftptr = (leftic-1)->ptr + 1;
           } else
           {
-            leftptr = firstcodesinfo->allfirstcodes;
+            leftptr = fci->allfirstcodes;
           }
           rightptr = rightic->ptr - 1;
           break;
@@ -299,21 +288,21 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
       {
         if (code > midic->code)
         {
-          if (depth < firstcodesinfo->binsearchcache_depth)
+          if (depth < fci->binsearchcache_depth)
           {
             leftic = midic + 1;
           } else
           {
             gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
             leftptr = leftic->ptr + 1;
-            if (rightic < firstcodesinfo->binsearchcache.spaceGtIndexwithcode +
-                     firstcodesinfo->binsearchcache.nextfreeGtIndexwithcode-1)
+            if (rightic < fci->binsearchcache.spaceGtIndexwithcode +
+                     fci->binsearchcache.nextfreeGtIndexwithcode-1)
             {
               rightptr = (rightic+1)->ptr - 1;
             } else
             {
-              rightptr = firstcodesinfo->allfirstcodes +
-                         firstcodesinfo->differentcodes - 1;
+              rightptr = fci->allfirstcodes +
+                         fci->differentcodes - 1;
             }
             break;
           }
@@ -327,9 +316,8 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
   } else
   {
     depth = 0;
-    leftptr = firstcodesinfo->allfirstcodes;
-    rightptr = firstcodesinfo->allfirstcodes +
-               firstcodesinfo->differentcodes - 1;
+    leftptr = fci->allfirstcodes;
+    rightptr = fci->allfirstcodes + fci->differentcodes - 1;
   }
   while (leftptr <= rightptr)
   {
@@ -353,19 +341,17 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
 }
 
 static unsigned long gt_firstcodes_accumulatecounts_merge(
-                                        GtFirstcodesinfo *firstcodesinfo,
+                                        GtFirstcodesinfo *fci,
                                         const unsigned long *querystream_fst,
                                         const unsigned long *subjectstream_fst)
 {
   unsigned long found = 0;
   const unsigned long *query = querystream_fst,
                       *subject = subjectstream_fst,
-                      *querystream_lst
-                        = firstcodesinfo->binsearchcodebuffer.spaceGtUlong
-                          + firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
-                      *subjectstream_lst
-                        = firstcodesinfo->allfirstcodes +
-                          firstcodesinfo->differentcodes;
+                      *querystream_lst = fci->codebuffer
+                                         + fci->codebuffer_nextfree,
+                      *subjectstream_lst = fci->allfirstcodes
+                                           + fci->differentcodes;
 
   while (query < querystream_lst && subject < subjectstream_lst)
   {
@@ -379,8 +365,8 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
         subject++;
       } else
       {
-        firstcodesinfo->countocc[(unsigned long)
-                                 (subject - firstcodesinfo->allfirstcodes)]++;
+        fci->countocc[(unsigned long)
+                                 (subject - fci->allfirstcodes)]++;
         query++;
         found++;
       }
@@ -390,38 +376,34 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
 }
 
 static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo
-                                                   *firstcodesinfo)
+                                                   *fci)
 {
   const unsigned long *ptr;
   unsigned long *vptr;
 
-  gt_assert(firstcodesinfo->allfirstcodes != NULL);
-  gt_radixsort_GtUlong(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
-                       firstcodesinfo->tempforradixsort,
-                       firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong);
+  gt_assert(fci->allfirstcodes != NULL);
+  gt_radixsort_GtUlong(fci->codebuffer,
+                       fci->tempforradixsort,fci->codebuffer_nextfree);
 #ifdef SKDEBUG
-  checkcodesorder(firstcodesinfo->binsearchcodebuffer.spaceGtUlong,
-                  firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
+  checkcodesorder(fci->codebuffer,fci->codebuffer_nextfree,
                   true);
 #endif
-  firstcodesinfo->binsearchcodebuffer_total
-    += firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
-  for (vptr = firstcodesinfo->binsearchcodebuffer.spaceGtUlong;
-       vptr < firstcodesinfo->binsearchcodebuffer.spaceGtUlong +
-              firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong;
+  fci->codebuffer_total += fci->codebuffer_nextfree;
+  for (vptr = fci->codebuffer;
+       vptr < fci->codebuffer +
+              fci->codebuffer_nextfree;
        vptr++)
   {
-    ptr = gt_firstcodes_find(firstcodesinfo,*vptr);
+    ptr = gt_firstcodes_find(fci,*vptr);
     if (ptr != NULL)
     {
-      firstcodesinfo->firstcodehits
-        += gt_firstcodes_accumulatecounts_merge(firstcodesinfo, vptr, ptr);
+      fci->firstcodehits += gt_firstcodes_accumulatecounts_merge(fci,vptr, ptr);
       break;
     }
   }
-  printf("%u ",firstcodesinfo->flushcount++);
+  printf("%u ",fci->flushcount++);
   (void) fflush(stdout);
-  firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong = 0;
+  fci->codebuffer_nextfree = 0;
 }
 
 static void gt_firstcodes_accumulatecounts(void *processinfo,
@@ -429,38 +411,35 @@ static void gt_firstcodes_accumulatecounts(void *processinfo,
                                            GT_UNUSED unsigned long pos,
                                            GtCodetype code)
 {
-  GtFirstcodesinfo *firstcodesinfo = (GtFirstcodesinfo *) processinfo;
+  GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
 
-  if (firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong  ==
-      firstcodesinfo->binsearchcodebuffer.allocatedGtUlong)
+  if (fci->codebuffer_nextfree  == fci->codebuffer_allocated)
   {
-    gt_firstcodes_accumulatecounts_flush(firstcodesinfo);
+    gt_firstcodes_accumulatecounts_flush(fci);
   }
-  if (gt_marksubstring_checkmark(&firstcodesinfo->markprefix,code) &&
-      gt_marksubstring_checkmark(&firstcodesinfo->marksuffix,code))
+  if (gt_marksubstring_checkmark(&fci->markprefix,code) &&
+      gt_marksubstring_checkmark(&fci->marksuffix,code))
   {
-    gt_assert (firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong <
-               firstcodesinfo->binsearchcodebuffer.allocatedGtUlong);
-    firstcodesinfo->binsearchcodebuffer.spaceGtUlong[
-      firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong++] = code;
+    gt_assert (fci->codebuffer_nextfree <
+               fci->codebuffer_allocated);
+    fci->codebuffer[fci->codebuffer_nextfree++] = code;
   }
 }
 
 #ifdef INSERTION
 static unsigned long gt_firstcodes_insertsuffix_merge(
-                                        GtFirstcodesinfo *firstcodesinfo,
+                                        GtFirstcodesinfo *fci,
                                         const unsigned long *querystream_fst,
                                         const unsigned long *subjectstream_fst)
 {
   unsigned long found = 0, idx;
   const unsigned long *query = querystream_fst,
                       *subject = subjectstream_fst,
-                      *querystream_lst
-                        = firstcodesinfo->binsearchcodebuffer.spaceGtUlong
-                          + firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
+                      *querystream_lst = fci->codebuffer
+                          + fci->codebuffer_nextfree,
                       *subjectstream_lst
-                        = firstcodesinfo->allfirstcodes +
-                          firstcodesinfo->differentcodes;
+                        = fci->allfirstcodes +
+                          fci->differentcodes;
 
   while (query < querystream_lst && subject < subjectstream_lst)
   {
@@ -474,8 +453,8 @@ static unsigned long gt_firstcodes_insertsuffix_merge(
         subject++;
       } else
       {
-        idx = --firstcodesinfo->countocc[(unsigned long)
-                               (subject - firstcodesinfo->allfirstcodes)];
+        idx = --fci->countocc[(unsigned long)
+                               (subject - fci->allfirstcodes)];
         query++;
         found++;
       }
@@ -485,16 +464,15 @@ static unsigned long gt_firstcodes_insertsuffix_merge(
 }
 #endif
 
-static void storefirstcodes_partialsum(GtFirstcodesinfo *firstcodesinfo)
+static void storefirstcodes_partialsum(GtFirstcodesinfo *fci)
 {
   unsigned long idx;
 
-  for (idx = 1UL; idx < firstcodesinfo->differentcodes; idx++)
+  for (idx = 1UL; idx < fci->differentcodes; idx++)
   {
-    firstcodesinfo->countocc[idx] += firstcodesinfo->countocc[idx-1];
+    fci->countocc[idx] += fci->countocc[idx-1];
   }
-  firstcodesinfo->countocc[firstcodesinfo->differentcodes] =
-    firstcodesinfo->countocc[firstcodesinfo->differentcodes-1];
+  fci->countocc[fci->differentcodes] = fci->countocc[fci->differentcodes-1];
 }
 
 #ifdef  QSORTNAME
@@ -513,7 +491,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize)
 {
   GtTimer *timer = NULL;
-  GtFirstcodesinfo firstcodesinfo;
+  GtFirstcodesinfo fci;
   size_t sizeforcodestable, numofsuftabentries;
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
@@ -524,97 +502,91 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    "array");
     gt_timer_start(timer);
   }
-  firstcodesinfo.numofsequences = gt_encseq_num_of_sequences(encseq);
+  fci.numofsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(numofchars == 4U);
-  sizeforcodestable = sizeof (*firstcodesinfo.allfirstcodes) *
-                      firstcodesinfo.numofsequences;
+  sizeforcodestable = sizeof (*fci.allfirstcodes) *
+                      fci.numofsequences;
   printf("# use array of size %lu\n",(unsigned long) sizeforcodestable);
-  firstcodesinfo.allfirstcodes = gt_malloc(sizeforcodestable);
-  firstcodesinfo.differentcodes = 0;
-  firstcodesinfo.countsequences = 0;
-  firstcodesinfo.firstcodehits = 0;
-  firstcodesinfo.binsearchcache_unknownwidth = 0;
-  firstcodesinfo.binsearchcache_unknowncount = 0;
-  GT_INITARRAY(&firstcodesinfo.binsearchcache,GtIndexwithcode);
-  GT_INITARRAY(&firstcodesinfo.binsearchcodebuffer,GtUlong);
+  fci.allfirstcodes = gt_malloc(sizeforcodestable);
+  fci.differentcodes = 0;
+  fci.countsequences = 0;
+  fci.firstcodehits = 0;
+  fci.binsearchcache_unknownwidth = 0;
+  fci.binsearchcache_unknowncount = 0;
+  GT_INITARRAY(&fci.binsearchcache,GtIndexwithcode);
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
                                 kmersize,
                                 true,
                                 gt_storefirstcodes,
-                                &firstcodesinfo,
+                                &fci,
                                 NULL,
                                 NULL);
-  gt_assert(firstcodesinfo.numofsequences == firstcodesinfo.countsequences);
+  gt_assert(fci.numofsequences == fci.countsequences);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "sorting the codes",stdout);
   }
   QSORTNAME(gt_direct_qsort)
              (6UL, false,
-             firstcodesinfo.allfirstcodes,firstcodesinfo.numofsequences);
-  gt_marksubstring_init(&firstcodesinfo.markprefix,numofchars,kmersize,false,
+             fci.allfirstcodes,fci.numofsequences);
+  gt_marksubstring_init(&fci.markprefix,numofchars,kmersize,false,
                         markprefixunits);
-  gt_marksubstring_init(&firstcodesinfo.marksuffix,numofchars,kmersize,
+  gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,
                         true,markprefixunits);
-  firstcodesinfo.differentcodes = gt_remdups_in_sorted_array(&firstcodesinfo);
+  fci.differentcodes = gt_remdups_in_sorted_array(&fci);
   printf("# number of different codes=%lu (%.4f) in %lu sequences\n",
-          firstcodesinfo.differentcodes,
-          (double) firstcodesinfo.differentcodes/firstcodesinfo.numofsequences,
-          firstcodesinfo.countsequences);
-  firstcodesinfo.binsearchcache_depth = 15U;
-  firstcodesinfo.flushcount = 0;
-  firstcodesinfo.binsearchcodebuffer_total = 0;
-  gt_firstcodes_halves(&firstcodesinfo,firstcodesinfo.binsearchcache_depth);
-  firstcodesinfo.binsearchcodebuffer.allocatedGtUlong = 3000000UL;
-  firstcodesinfo.binsearchcodebuffer.nextfreeGtUlong = 0;
-  firstcodesinfo.binsearchcodebuffer.spaceGtUlong
-    = gt_malloc(sizeof (*firstcodesinfo.binsearchcodebuffer.spaceGtUlong)
-                          * firstcodesinfo.binsearchcodebuffer.
-                                           allocatedGtUlong);
-  gt_assert(firstcodesinfo.binsearchcodebuffer.allocatedGtUlong > 0);
+          fci.differentcodes,
+          (double) fci.differentcodes/fci.numofsequences,
+          fci.countsequences);
+  fci.binsearchcache_depth = 15U;
+  fci.flushcount = 0;
+  fci.codebuffer_total = 0;
+  gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
+  fci.codebuffer_allocated = 3000000UL;
+  fci.codebuffer_nextfree = 0;
+  fci.codebuffer = gt_malloc(sizeof (*fci.codebuffer)
+                             * fci.codebuffer_allocated);
+  gt_assert(fci.codebuffer_allocated > 0);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "accumulate counts",stdout);
   }
-  firstcodesinfo.tempforradixsort
-    = gt_malloc((size_t) firstcodesinfo.binsearchcodebuffer.allocatedGtUlong
-                * sizeof (*firstcodesinfo.tempforradixsort));
+  fci.tempforradixsort = gt_malloc((size_t) fci.codebuffer_allocated
+                                   * sizeof (*fci.tempforradixsort));
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
                                 45U,
                                 false,
                                 gt_firstcodes_accumulatecounts,
-                                &firstcodesinfo,
+                                &fci,
                                 NULL,
                                 NULL);
-  gt_firstcodes_accumulatecounts_flush(&firstcodesinfo);
-  printf("\nbinsearchcodebuffer_total=%lu (%.2f)\n",
-          firstcodesinfo.binsearchcodebuffer_total,
-          (double) firstcodesinfo.binsearchcodebuffer_total/
+  gt_firstcodes_accumulatecounts_flush(&fci);
+  printf("\ncodebuffer_total=%lu (%.2f)\n",
+          fci.codebuffer_total,
+          (double) fci.codebuffer_total/
                    gt_encseq_total_length(encseq));
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "compute partial sums",stdout);
   }
-  printf("# firstcodehits=%lu (%.2f)\n",firstcodesinfo.firstcodehits,
-                                      (double) firstcodesinfo.firstcodehits/
+  printf("# firstcodehits=%lu (%.2f)\n",fci.firstcodehits,
+                                      (double) fci.firstcodehits/
                                       gt_encseq_total_length(encseq));
-  storefirstcodes_partialsum(&firstcodesinfo);
+  storefirstcodes_partialsum(&fci);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "insert suffixes",stdout);
   }
-  numofsuftabentries = (size_t) firstcodesinfo.firstcodehits;
-  firstcodesinfo.firstcodehits = 0;
-  gt_free(firstcodesinfo.tempforradixsort);
-  GT_FREEARRAY(&firstcodesinfo.binsearchcodebuffer,GtUlong);
-  firstcodesinfo.suftabseqnum
-    = gt_malloc(numofsuftabentries * sizeof (*firstcodesinfo.suftabseqnum));
-  firstcodesinfo.suftaboffset
-    = gt_malloc(numofsuftabentries * sizeof (*firstcodesinfo.suftaboffset));
+  numofsuftabentries = (size_t) fci.firstcodehits;
+  fci.firstcodehits = 0;
+  gt_free(fci.tempforradixsort);
+  gt_free(fci.codebuffer);
+  fci.suftabseqnum = gt_malloc(numofsuftabentries * sizeof (*fci.suftabseqnum));
+  fci.suftaboffset = gt_malloc(numofsuftabentries * sizeof (*fci.suftaboffset));
   /*
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
@@ -622,17 +594,17 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 45U,
                                 false,
                                 gt_firstcodes_insertsuffixes,
-                                &firstcodesinfo,
+                                &fci,
                                 NULL,
                                 NULL);
   */
-  GT_FREEARRAY(&firstcodesinfo.binsearchcache,GtIndexwithcode);
-  gt_free(firstcodesinfo.allfirstcodes);
-  gt_free(firstcodesinfo.countocc);
-  gt_free(firstcodesinfo.markprefix.bits);
-  gt_free(firstcodesinfo.marksuffix.bits);
-  gt_free(firstcodesinfo.suftabseqnum);
-  gt_free(firstcodesinfo.suftaboffset);
+  GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
+  gt_free(fci.allfirstcodes);
+  gt_free(fci.countocc);
+  gt_free(fci.markprefix.bits);
+  gt_free(fci.marksuffix.bits);
+  gt_free(fci.suftabseqnum);
+  gt_free(fci.suftaboffset);
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);
