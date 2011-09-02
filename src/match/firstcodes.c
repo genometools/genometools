@@ -101,6 +101,10 @@ typedef struct
   uint8_t *suftaboffset;
 } GtFirstcodesinfo;
 
+typedef void (*GtFirstcodesmergefunction)(GtFirstcodesinfo *,
+                                          const unsigned long *,
+                                          const unsigned long *);
+
 static void gt_storefirstcodes(void *processinfo,
                                GT_UNUSED bool firstinrange,
                                GT_UNUSED unsigned long pos,
@@ -353,15 +357,19 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *firstcodesinfo,
 }
 
 static unsigned long gt_firstcodes_accumulatecounts_merge(
-                                        unsigned long *countocc,
+                                        GtFirstcodesinfo *firstcodesinfo,
                                         const unsigned long *querystream_fst,
-                                        const unsigned long *querystream_lst,
-                                        const unsigned long *subjectstream_base,
-                                        const unsigned long *subjectstream_fst,
-                                        const unsigned long *subjectstream_lst)
+                                        const unsigned long *subjectstream_fst)
 {
   unsigned long found = 0;
-  const unsigned long *query = querystream_fst, *subject = subjectstream_fst;
+  const unsigned long *query = querystream_fst,
+                      *subject = subjectstream_fst,
+                      *querystream_lst
+                        = firstcodesinfo->binsearchcodebuffer.spaceGtUlong
+                          + firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
+                      *subjectstream_lst
+                        = firstcodesinfo->allfirstcodes +
+                          firstcodesinfo->differentcodes;
 
   while (query < querystream_lst && subject < subjectstream_lst)
   {
@@ -375,7 +383,8 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
         subject++;
       } else
       {
-        countocc[(unsigned long) (subject - subjectstream_base)]++;
+        firstcodesinfo->countocc[(unsigned long)
+                                 (subject - firstcodesinfo->allfirstcodes)]++;
         query++;
         found++;
       }
@@ -410,14 +419,7 @@ static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo
     if (ptr != NULL)
     {
       firstcodesinfo->firstcodehits
-        += gt_firstcodes_accumulatecounts_merge(
-                firstcodesinfo->countocc,
-                vptr,
-                firstcodesinfo->binsearchcodebuffer.spaceGtUlong
-                    + firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
-                firstcodesinfo->allfirstcodes,
-                ptr,
-                firstcodesinfo->allfirstcodes + firstcodesinfo->differentcodes);
+        += gt_firstcodes_accumulatecounts_merge( firstcodesinfo, vptr, ptr);
       break;
     }
   }
