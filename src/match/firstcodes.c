@@ -93,6 +93,7 @@ typedef struct
                 codebuffer_total,
                 *allfirstcodes,
                 *countocc;
+  GtUlongPair *codeposbuffer;
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth,
                flushcount;
@@ -582,9 +583,14 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_timer_show_progress(timer, "insert suffixes",stdout);
   }
   numofsuftabentries = (size_t) fci.firstcodehits;
-  fci.firstcodehits = 0;
   gt_free(fci.tempforradixsort);
   gt_free(fci.codebuffer);
+  fci.firstcodehits = 0;
+  gt_assert(fci.codebuffer_nextfree == 0);
+  fci.codebuffer_total = 0;
+  fci.codebuffer_allocated /= 2UL;
+  fci.codeposbuffer = gt_malloc(sizeof (*fci.codeposbuffer)
+                                * fci.codebuffer_allocated);
   fci.suftabseqnum = gt_malloc(numofsuftabentries * sizeof (*fci.suftabseqnum));
   fci.suftaboffset = gt_malloc(numofsuftabentries * sizeof (*fci.suftaboffset));
   /*
@@ -599,6 +605,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 NULL);
   */
   GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
+  gt_free(fci.codeposbuffer);
   gt_free(fci.allfirstcodes);
   gt_free(fci.countocc);
   gt_free(fci.markprefix.bits);
