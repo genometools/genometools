@@ -22,4 +22,7 @@
 
 void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp, unsigned long len);
 
+void gt_radixsort_GtUlongPair(GtUlongPair *source, GtUlongPair *temp,
+                              unsigned long len);
+
 #endif
