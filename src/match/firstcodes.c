@@ -450,6 +450,45 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
   return found;
 }
 
+#ifdef INSERTION
+static unsigned long gt_firstcodes_insertsuffix_merge(
+                                        GtFirstcodesinfo *firstcodesinfo,
+                                        const unsigned long *querystream_fst,
+                                        const unsigned long *subjectstream_fst)
+{
+  unsigned long found = 0, idx;
+  const unsigned long *query = querystream_fst,
+                      *subject = subjectstream_fst,
+                      *querystream_lst
+                        = firstcodesinfo->binsearchcodebuffer.spaceGtUlong
+                          + firstcodesinfo->binsearchcodebuffer.nextfreeGtUlong,
+                      *subjectstream_lst
+                        = firstcodesinfo->allfirstcodes +
+                          firstcodesinfo->differentcodes;
+
+  while (query < querystream_lst && subject < subjectstream_lst)
+  {
+    if (*query < *subject)
+    {
+      query++;
+    } else
+    {
+      if (*query > *subject)
+      {
+        subject++;
+      } else
+      {
+        idx = --firstcodesinfo->countocc[(unsigned long)
+                               (subject - firstcodesinfo->allfirstcodes)];
+        query++;
+        found++;
+      }
+    }
+  }
+  return found;
+}
+#endif
+
 static void gt_firstcodes_accumulatecounts(void *processinfo,
                                            bool firstinrange,
                                            unsigned long pos,
