@@ -18,10 +18,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include <limits.h>
 #include "core/assert_api.h"
 #include "core/types_api.h"
+#include "match/stamp.h"
 
 /* replaced byte with offset to avoid * 8 operation in loop */
+
+/* be careful only works for litte endian byte order */
 
 static void gt_radix_phase_GtUlong(unsigned int offset,
                                    GtUlong *source,
@@ -69,6 +74,62 @@ void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
   gt_radix_phase_GtUlong(6U, source, temp, len);
   gt_radix_phase_GtUlong(7U, temp, source, len);
 #endif
+}
+
+#define GT_RADIX_ACCESS_CHAR(SP) ((*(SP) >> shift) & 255UL)
+
+static void gt_radix_phase_GtUlong2(size_t offset,
+                                    GtUlong *source,
+                                    GtUlong *dest,
+                                    unsigned long left,
+                                    unsigned long right)
+{
+  unsigned long idx, s, c, *sp, *cp;
+  const size_t maxoffset = sizeof (unsigned long) - 1;
+  unsigned long count[256] = {0};
+  const size_t shift = (maxoffset - offset) * CHAR_BIT;
+
+  /* count occurences of every byte value */
+  for (sp = source + left; sp <= source + right; sp++)
+  {
+    count[GT_RADIX_ACCESS_CHAR(sp)]++;
+  }
+  /* compute partial sums */
+  for (s = 0, cp = count; cp < count + 256UL; cp++)
+  {
+    c = *cp;
+    *cp = s;
+    s += c;
+  }
+  /* fill dest with the right values in the right place */
+  for (sp = source+left; sp <= source + right; sp++)
+  {
+    dest[left+count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
+  }
+  memcpy(source+left,dest+left,(size_t) sizeof (*source) * (right - left + 1));
+  if (offset < maxoffset)
+  {
+    for (idx = 0; idx < 256UL; idx++)
+    {
+      unsigned long newleft = (idx == 0) ? 0 : count[idx-1];
+      /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
+                                   = count[idx]-newleft > 1
+      => count[idx] > newleft + 1 */
+      if (newleft+1 < count[idx])
+      {
+        gt_radix_phase_GtUlong2(offset+1,
+                                source,
+                                dest,
+                                left+newleft,
+                                left+count[idx]-1);
+      }
+    }
+  }
+}
+
+void gt_radixsort_GtUlong2(GtUlong *source, GtUlong *dest, unsigned long len)
+{
+  gt_radix_phase_GtUlong2(0,source,dest,0,len-1);
 }
 
 /* assume that the first element in GtUlongPair is the sort key */

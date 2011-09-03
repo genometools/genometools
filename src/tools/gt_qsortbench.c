@@ -53,7 +53,8 @@ static void gt_qsortbench_arguments_delete(void *tool_arguments)
 }
 
 static const char *gt_qsort_implementation_names[]
-    = {"thomas","system","inlinedptr","inlinedarr","direct","radix",NULL};
+    = {"thomas","system","inlinedptr","inlinedarr","direct","radix","radixrec",
+       NULL};
 
 static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 {
@@ -69,7 +70,7 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_choice("impl", "implementation\nchoose from "
                                 "thomas|system|inlinedptr|inlinedarr|"
-                                "direct|radix",
+                                "direct|radix|radixrec",
                                 arguments->impl,
                                 gt_qsort_implementation_names[0],
                                 gt_qsort_implementation_names);
@@ -293,6 +294,14 @@ static void check_radixsort_GtUlong(unsigned long *source, unsigned long len)
   gt_free(temp);
 }
 
+static void check_radixsortrek_GtUlong(unsigned long *source, unsigned long len)
+{
+  unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
+
+  gt_radixsort_GtUlong2(source, temp, len);
+  gt_free(temp);
+}
+
 typedef void (*GtQsortimplementationfunc)(unsigned long *,unsigned long);
 
 static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
@@ -302,7 +311,8 @@ static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
   check_inlinedptr_qsort,
   check_inlinedarr_qsort,
   check_direct_qsort,
-  check_radixsort_GtUlong
+  check_radixsort_GtUlong,
+  check_radixsortrek_GtUlong
 };
 
 #define GT_NUM_OF_QSORT_IMPLEMENTATIONS\
