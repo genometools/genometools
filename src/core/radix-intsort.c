@@ -22,6 +22,7 @@
 #include <limits.h>
 #include "core/assert_api.h"
 #include "core/endianess_api.h"
+#include "core/stack-inlined.h"
 #include "core/types_api.h"
 
 /* replaced byte with offset to avoid * 8 operation in loop */
@@ -129,6 +130,75 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
 void gt_radixsort_GtUlong2(GtUlong *source, GtUlong *dest, unsigned long len)
 {
   gt_radix_phase_GtUlong_rek(0,source,dest,len);
+}
+
+typedef struct
+{
+  size_t offset;
+  GtUlong *left;
+  unsigned long len;
+} GtRadixsort_stackelem;
+
+GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,512);
+
+void gt_radixsort_GtUlong3(GtUlong *source,
+                           GtUlong *dest,
+                           unsigned long len)
+{
+  unsigned long idx, s, c, *sp, *cp;
+  const size_t maxoffset = sizeof (unsigned long) - 1;
+  unsigned long count[256] = {0};
+  size_t shift;
+  GtStackGtRadixsort_stackelem stack;
+  GtRadixsort_stackelem tmpelem, current;
+
+  GT_STACK_INIT(&stack,512UL);
+  tmpelem.offset = 0;
+  tmpelem.left = source;
+  tmpelem.len = len;
+  GT_STACK_PUSH(&stack,tmpelem);
+  while (!GT_STACK_ISEMPTY(&stack))
+  {
+    current = GT_STACK_POP(&stack);
+    shift = (maxoffset - current.offset) * CHAR_BIT;
+    /* count occurences of every byte value */
+    for (sp = current.left; sp < current.left+current.len; sp++)
+    {
+      count[GT_RADIX_ACCESS_CHAR(sp)]++;
+    }
+    /* compute partial sums */
+    for (s = 0, cp = count; cp < count + 256UL; cp++)
+    {
+      c = *cp;
+      *cp = s;
+      s += c;
+    }
+    /* fill dest with the right values in the right place */
+    for (sp = current.left; sp < current.left+current.len; sp++)
+    {
+      dest[count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
+    }
+    memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
+    if (current.offset < maxoffset)
+    {
+      for (idx = 0; idx < 256UL; idx++)
+      {
+        unsigned long newleft = (idx == 0) ? 0 : count[idx-1];
+        /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
+                                     = count[idx]-newleft > 1
+        => count[idx] > newleft + 1 */
+        if (newleft+1 < count[idx])
+        {
+          tmpelem.offset = current.offset + 1;
+          tmpelem.left = current.left + newleft;
+          tmpelem.len = count[idx]-newleft;
+          GT_STACK_PUSH(&stack,tmpelem);
+        }
+      }
+    }
+    memset(count,0,(size_t) sizeof (*count) * 256);
+  }
+  GT_STACK_DELETE(&stack);
 }
 
 /* assume that the first element in GtUlongPair is the sort key */
