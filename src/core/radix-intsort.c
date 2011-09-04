@@ -141,15 +141,39 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,512);
 
+static int compareRadixkeys(const void *a,const void *b)
+{
+  if (*(uint8_t *) a < *((uint8_t *)b))
+  {
+    return 1;
+  }
+  if (*(uint8_t *) a > *((uint8_t *)b))
+  {
+    return -1;
+  }
+  gt_assert(false);
+  return 0;
+}
+
+static void sortRadixkeys(uint8_t *keys,unsigned long differentkeys)
+{
+  qsort(keys,(size_t) differentkeys,sizeof (*keys),compareRadixkeys);
+}
+
 void gt_radixsort_GtUlong3(GtUlong *source,
                            GtUlong *dest,
                            unsigned long len)
 {
-  unsigned long idx, s, c, *sp, *cp, maxidx, count[256] = {0};
+  unsigned long idx, s, c, *sp, *cp, differentkeys, keyidx, newleft,
+                count[256] = {0};
   const size_t maxoffset = sizeof (unsigned long) - 1;
   size_t shift;
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpelem, current;
+  uint8_t keys[256];
+
+  unsigned long pushcount = 0;
+  unsigned long iteroverkeys = 0;
 
   GT_STACK_INIT(&stack,512UL);
   tmpelem.offset = 0;
@@ -161,17 +185,17 @@ void gt_radixsort_GtUlong3(GtUlong *source,
     current = GT_STACK_POP(&stack);
     shift = (maxoffset - current.offset) * CHAR_BIT;
     /* count occurences of every byte value */
-    maxidx = 0;
+    differentkeys = 0;
     for (sp = current.left; sp < current.left+current.len; sp++)
     {
       idx = GT_RADIX_ACCESS_CHAR(sp);
-      if (idx > maxidx)
+      if (count[idx] == 1UL) /* only keys occurring at least twice are relev. */
       {
-        maxidx = idx;
+        keys[differentkeys++] = (uint8_t) idx;
       }
       count[idx]++;
     }
-    if (maxidx > 0)
+    if (differentkeys > 1UL)
     {
       /* compute partial sums */
       for (s = 0, cp = count; cp < count + 256UL; cp++)
@@ -189,19 +213,21 @@ void gt_radixsort_GtUlong3(GtUlong *source,
     }
     if (current.offset < maxoffset)
     {
-      for (idx = 0; idx <= maxidx; idx++)
+      iteroverkeys++;
+      sortRadixkeys(keys,differentkeys);
+      for (keyidx = 0; keyidx < differentkeys; keyidx++)
       {
-        unsigned long newleft = (idx == 0) ? 0 : count[idx-1];
+        idx = (unsigned long) keys[keyidx];
+        newleft = (idx == 0) ? 0 : count[idx-1];
         /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
                                      = count[idx]-newleft > 1
         => count[idx] > newleft + 1 */
-        if (newleft+1 < count[idx])
-        {
-          tmpelem.offset = current.offset + 1;
-          tmpelem.left = current.left + newleft;
-          tmpelem.len = count[idx]-newleft;
-          GT_STACK_PUSH(&stack,tmpelem);
-        }
+        gt_assert(newleft+1 < count[idx]);
+        tmpelem.offset = current.offset + 1;
+        tmpelem.left = current.left + newleft;
+        tmpelem.len = count[idx] - newleft;
+        GT_STACK_PUSH(&stack,tmpelem);
+        pushcount++;
       }
     }
     memset(count,0,(size_t) sizeof (*count) * 256);

@@ -387,7 +387,10 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     gt_assert(array[idx-1] <= array[idx]);
   }
   gt_free(array);
-  printf("cmpcount = %lu\n",cmpcount);
+  if (cmpcount > 0)
+  {
+    printf("cmpcount = %lu\n",cmpcount);
+  }
   return had_err;
 }
 
