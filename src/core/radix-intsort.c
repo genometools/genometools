@@ -145,9 +145,8 @@ void gt_radixsort_GtUlong3(GtUlong *source,
                            GtUlong *dest,
                            unsigned long len)
 {
-  unsigned long idx, s, c, *sp, *cp;
+  unsigned long idx, s, c, *sp, *cp, maxidx, count[256] = {0};
   const size_t maxoffset = sizeof (unsigned long) - 1;
-  unsigned long count[256] = {0};
   size_t shift;
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpelem, current;
@@ -162,26 +161,35 @@ void gt_radixsort_GtUlong3(GtUlong *source,
     current = GT_STACK_POP(&stack);
     shift = (maxoffset - current.offset) * CHAR_BIT;
     /* count occurences of every byte value */
+    maxidx = 0;
     for (sp = current.left; sp < current.left+current.len; sp++)
     {
-      count[GT_RADIX_ACCESS_CHAR(sp)]++;
+      idx = GT_RADIX_ACCESS_CHAR(sp);
+      if (idx > maxidx)
+      {
+        maxidx = idx;
+      }
+      count[idx]++;
     }
-    /* compute partial sums */
-    for (s = 0, cp = count; cp < count + 256UL; cp++)
+    if (maxidx > 0)
     {
-      c = *cp;
-      *cp = s;
-      s += c;
+      /* compute partial sums */
+      for (s = 0, cp = count; cp < count + 256UL; cp++)
+      {
+        c = *cp;
+        *cp = s;
+        s += c;
+      }
+      /* fill dest with the right values in the right place */
+      for (sp = current.left; sp < current.left+current.len; sp++)
+      {
+        dest[count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
+      }
+      memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
     }
-    /* fill dest with the right values in the right place */
-    for (sp = current.left; sp < current.left+current.len; sp++)
-    {
-      dest[count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
-    }
-    memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
     if (current.offset < maxoffset)
     {
-      for (idx = 0; idx < 256UL; idx++)
+      for (idx = 0; idx <= maxidx; idx++)
       {
         unsigned long newleft = (idx == 0) ? 0 : count[idx-1];
         /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
