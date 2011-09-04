@@ -81,8 +81,7 @@ void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 static void gt_radix_phase_GtUlong2(size_t offset,
                                     GtUlong *source,
                                     GtUlong *dest,
-                                    unsigned long left,
-                                    unsigned long right)
+                                    unsigned long len)
 {
   unsigned long idx, s, c, *sp, *cp;
   const size_t maxoffset = sizeof (unsigned long) - 1;
@@ -90,7 +89,7 @@ static void gt_radix_phase_GtUlong2(size_t offset,
   const size_t shift = (maxoffset - offset) * CHAR_BIT;
 
   /* count occurences of every byte value */
-  for (sp = source + left; sp <= source + right; sp++)
+  for (sp = source; sp < source+len; sp++)
   {
     count[GT_RADIX_ACCESS_CHAR(sp)]++;
   }
@@ -102,11 +101,11 @@ static void gt_radix_phase_GtUlong2(size_t offset,
     s += c;
   }
   /* fill dest with the right values in the right place */
-  for (sp = source+left; sp <= source + right; sp++)
+  for (sp = source; sp < source+len; sp++)
   {
-    dest[left+count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
+    dest[count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
   }
-  memcpy(source+left,dest+left,(size_t) sizeof (*source) * (right - left + 1));
+  memcpy(source,dest,(size_t) sizeof (*source) * len);
   if (offset < maxoffset)
   {
     for (idx = 0; idx < 256UL; idx++)
@@ -118,10 +117,9 @@ static void gt_radix_phase_GtUlong2(size_t offset,
       if (newleft+1 < count[idx])
       {
         gt_radix_phase_GtUlong2(offset+1,
-                                source,
-                                dest,
-                                left+newleft,
-                                left+count[idx]-1);
+                                source+newleft,
+                                dest+newleft,
+                                count[idx]-newleft);
       }
     }
   }
@@ -129,7 +127,7 @@ static void gt_radix_phase_GtUlong2(size_t offset,
 
 void gt_radixsort_GtUlong2(GtUlong *source, GtUlong *dest, unsigned long len)
 {
-  gt_radix_phase_GtUlong2(0,source,dest,0,len-1);
+  gt_radix_phase_GtUlong2(0,source,dest,len);
 }
 
 /* assume that the first element in GtUlongPair is the sort key */
