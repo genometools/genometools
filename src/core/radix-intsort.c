@@ -21,8 +21,8 @@
 #include <string.h>
 #include <limits.h>
 #include "core/assert_api.h"
+#include "core/endianess_api.h"
 #include "core/types_api.h"
-#include "match/stamp.h"
 
 /* replaced byte with offset to avoid * 8 operation in loop */
 
@@ -62,6 +62,7 @@ static void gt_radix_phase_GtUlong(unsigned int offset,
 
 void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 {
+  gt_assert(gt_is_little_endian());
   /* allocate heap memory to avoid the need of additional parameter */
   gt_assert(temp != NULL && source != NULL);
   gt_radix_phase_GtUlong(0, source, temp, len);
@@ -78,7 +79,7 @@ void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 
 #define GT_RADIX_ACCESS_CHAR(SP) ((*(SP) >> shift) & 255UL)
 
-static void gt_radix_phase_GtUlong2(size_t offset,
+static void gt_radix_phase_GtUlong_rek(size_t offset,
                                     GtUlong *source,
                                     GtUlong *dest,
                                     unsigned long len)
@@ -116,10 +117,10 @@ static void gt_radix_phase_GtUlong2(size_t offset,
       => count[idx] > newleft + 1 */
       if (newleft+1 < count[idx])
       {
-        gt_radix_phase_GtUlong2(offset+1,
-                                source+newleft,
-                                dest+newleft,
-                                count[idx]-newleft);
+        gt_radix_phase_GtUlong_rek(offset+1,
+                                   source+newleft,
+                                   dest+newleft,
+                                   count[idx]-newleft);
       }
     }
   }
@@ -127,7 +128,7 @@ static void gt_radix_phase_GtUlong2(size_t offset,
 
 void gt_radixsort_GtUlong2(GtUlong *source, GtUlong *dest, unsigned long len)
 {
-  gt_radix_phase_GtUlong2(0,source,dest,len);
+  gt_radix_phase_GtUlong_rek(0,source,dest,len);
 }
 
 /* assume that the first element in GtUlongPair is the sort key */
@@ -142,6 +143,7 @@ static void gt_radix_phase_GtUlongPair(unsigned int offset,
   const size_t increment = sizeof (*source);
   uint8_t *bp;
 
+  gt_assert(gt_is_little_endian());
   /* count occurences of every byte value */
   bp = ((uint8_t *) source) + offset;
   for (idx = 0; idx < len; idx++, bp += increment)
