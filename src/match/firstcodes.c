@@ -88,6 +88,7 @@ typedef struct
                 numofsequences,
                 binsearchcache_unknownwidth,
                 binsearchcache_unknowncount,
+                maxbucketsize,
                 *codebuffer,
                 codebuffer_allocated,
                 codebuffer_nextfree,
@@ -517,8 +518,13 @@ static void storefirstcodes_partialsum(GtFirstcodesinfo *fci)
 {
   unsigned long idx;
 
+  fci->maxbucketsize = fci->countocc[0];
   for (idx = 1UL; idx < fci->differentcodes; idx++)
   {
+    if (fci->maxbucketsize < fci->countocc[idx])
+    {
+      fci->maxbucketsize = fci->countocc[idx];
+    }
     fci->countocc[idx] += fci->countocc[idx-1];
   }
   fci->countocc[fci->differentcodes] = fci->countocc[fci->differentcodes-1];
@@ -657,6 +663,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_insertsuffixes_flush(&fci);
   printf("\n# firstcodeposhits=%lu\n",fci.firstcodeposhits);
   gt_assert(fci.firstcodeposhits == fci.firstcodehits + fci.numofsequences);
+  printf("maxbucketsize=%lu\n",fci.maxbucketsize);
   GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
   gt_free(fci.codeposbuffer);
   gt_free(fci.tempcodeposforradixsort);
