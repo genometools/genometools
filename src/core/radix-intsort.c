@@ -78,7 +78,7 @@ void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 #endif
 }
 
-#define GT_RADIX_ACCESS_CHAR(SP) ((*(SP) >> shift) & 255UL)
+#define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & 255UL)
 
 static void gt_radix_phase_GtUlong_rek(size_t offset,
                                     GtUlong *source,
@@ -93,7 +93,7 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
   /* count occurences of every byte value */
   for (sp = source; sp < source+len; sp++)
   {
-    count[GT_RADIX_ACCESS_CHAR(sp)]++;
+    count[GT_RADIX_ACCESS_CHAR(shift,sp)]++;
   }
   /* compute partial sums */
   for (s = 0, cp = count; cp < count + 256UL; cp++)
@@ -105,7 +105,7 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
   /* fill dest with the right values in the right place */
   for (sp = source; sp < source+len; sp++)
   {
-    dest[count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
+    dest[count[GT_RADIX_ACCESS_CHAR(shift,sp)]++] = *sp;
   }
   memcpy(source,dest,(size_t) sizeof (*source) * len);
   if (offset < maxoffset)
@@ -185,7 +185,7 @@ void gt_radixsort_GtUlong3(GtUlong *source,
     differentkeys = 0;
     for (sp = current.left; sp < current.left+current.len; sp++)
     {
-      idx = GT_RADIX_ACCESS_CHAR(sp);
+      idx = GT_RADIX_ACCESS_CHAR(shift,sp);
       if (count[idx] == 1UL) /* only keys occurring at least twice are relev. */
       {
         keys[differentkeys++] = (uint8_t) idx;
@@ -204,7 +204,7 @@ void gt_radixsort_GtUlong3(GtUlong *source,
       /* fill dest with the right values in the right place */
       for (sp = current.left; sp < current.left+current.len; sp++)
       {
-        dest[count[GT_RADIX_ACCESS_CHAR(sp)]++] = *sp;
+        dest[count[GT_RADIX_ACCESS_CHAR(shift,sp)]++] = *sp;
       }
       memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
     }
