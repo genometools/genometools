@@ -23,6 +23,9 @@
 void gt_radixsort_GtUlong_linear(GtUlong *source, GtUlong *temp,
                                  unsigned long len);
 
+void gt_radixsort_GtUlong_linear2(GtUlong *source, GtUlong *temp,
+                                  unsigned long len);
+
 void gt_radixsort_GtUlong_recursive(GtUlong *source, GtUlong *dest,
                                     unsigned long len);
 

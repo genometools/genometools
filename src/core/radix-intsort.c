@@ -81,6 +81,50 @@ void gt_radixsort_GtUlong_linear(GtUlong *source, GtUlong *temp,
 
 #define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
 
+static void gt_radix_phase_GtUlong2(unsigned int shift,
+                                    GtUlong *source,
+                                    GtUlong *dest,
+                                    unsigned long len)
+{
+  unsigned long s, c, *sp, *cp, count[256] = {0};
+
+  /* count occurences of every byte value */
+  for (sp = source; sp < source + len; sp++)
+  {
+    count[GT_RADIX_ACCESS_CHAR(shift,sp)]++;
+  }
+
+  /* compute partial sums */
+  for (s = 0, cp = count; cp < count + 256UL; cp++)
+  {
+    c = *cp;
+    *cp = s;
+    s += c;
+  }
+
+  /* fill dest with the right values in the right place */
+  for (sp = source; sp < source + len; sp++)
+  {
+    dest[count[GT_RADIX_ACCESS_CHAR(shift,sp)]++] = *sp;
+  }
+}
+
+void gt_radixsort_GtUlong_linear2(GtUlong *source, GtUlong *temp,
+                                  unsigned long len)
+{
+  gt_assert(temp != NULL && source != NULL);
+  gt_radix_phase_GtUlong2(0, source, temp, len);
+  gt_radix_phase_GtUlong2(8U, temp, source, len);
+  gt_radix_phase_GtUlong2(16U, source, temp, len);
+  gt_radix_phase_GtUlong2(24U, temp, source, len);
+#ifdef _LP64
+  gt_radix_phase_GtUlong2(32U, source, temp, len);
+  gt_radix_phase_GtUlong2(40U, temp, source, len);
+  gt_radix_phase_GtUlong2(48U, source, temp, len);
+  gt_radix_phase_GtUlong2(56U, temp, source, len);
+#endif
+}
+
 static void gt_radix_phase_GtUlong_recursive(size_t offset,
                                              GtUlong *source,
                                              GtUlong *dest,
