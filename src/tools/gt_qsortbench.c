@@ -54,7 +54,7 @@ static void gt_qsortbench_arguments_delete(void *tool_arguments)
 
 static const char *gt_qsort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct",
-       "radix","radixrec","radixit",NULL};
+       "radixlin","radixrec","radixdiv",NULL};
 
 static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 {
@@ -70,7 +70,7 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_choice("impl", "implementation\nchoose from "
                                 "thomas|system|inlinedptr|inlinedarr|"
-                                "direct|radix|radixrec|radixit",
+                                "direct|radixlin|radixrec|radixdiv",
                                 arguments->impl,
                                 gt_qsort_implementation_names[0],
                                 gt_qsort_implementation_names);
@@ -286,27 +286,30 @@ static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
   gt_inlined_qsort_r(a, n, NULL);
 }
 
-static void check_radixsort_GtUlong(unsigned long *source, unsigned long len)
+static void check_radixsort_GtUlong_linear(unsigned long *source,
+                                           unsigned long len)
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radixsort_GtUlong(source, temp, len);
+  gt_radixsort_GtUlong_linear(source, temp, len);
   gt_free(temp);
 }
 
-static void check_radixsortrek_GtUlong(unsigned long *source, unsigned long len)
+static void check_radixsort_GtUlong_recursive(unsigned long *source,
+                                              unsigned long len)
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radixsort_GtUlong2(source, temp, len);
+  gt_radixsort_GtUlong_recursive(source, temp, len);
   gt_free(temp);
 }
 
-static void check_radixsort_GtUlong3(unsigned long *source, unsigned long len)
+static void check_radixsort_GtUlong_divide(unsigned long *source,
+                                           unsigned long len)
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radixsort_GtUlong3(source, temp, len);
+  gt_radixsort_GtUlong_divide(source, temp, len);
   gt_free(temp);
 }
 
@@ -319,9 +322,9 @@ static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
   check_inlinedptr_qsort,
   check_inlinedarr_qsort,
   check_direct_qsort,
-  check_radixsort_GtUlong,
-  check_radixsortrek_GtUlong,
-  check_radixsort_GtUlong3
+  check_radixsort_GtUlong_linear,
+  check_radixsort_GtUlong_recursive,
+  check_radixsort_GtUlong_divide
 };
 
 #define GT_NUM_OF_QSORT_IMPLEMENTATIONS\
@@ -365,7 +368,7 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
     /* use seed initialization to make array deterministic */
     srand48(366292341);
     for (idx = 0; idx < arguments->num_values; idx++) {
-      array[idx] = drand48() * arguments->num_values;
+      array[idx] = drand48() * arguments->maxvalue;
     }
   }
 

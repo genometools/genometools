@@ -61,7 +61,8 @@ static void gt_radix_phase_GtUlong(unsigned int offset,
   }
 }
 
-void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
+void gt_radixsort_GtUlong_linear(GtUlong *source, GtUlong *temp,
+                                 unsigned long len)
 {
   gt_assert(gt_is_little_endian());
   /* allocate heap memory to avoid the need of additional parameter */
@@ -80,10 +81,10 @@ void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 
 #define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
 
-static void gt_radix_phase_GtUlong_rek(size_t offset,
-                                    GtUlong *source,
-                                    GtUlong *dest,
-                                    unsigned long len)
+static void gt_radix_phase_GtUlong_recursive(size_t offset,
+                                             GtUlong *source,
+                                             GtUlong *dest,
+                                             unsigned long len)
 {
   unsigned long idx, s, c, *sp, *cp;
   const size_t maxoffset = sizeof (unsigned long) - 1;
@@ -118,18 +119,19 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
       => count[idx] > newleft + 1 */
       if (newleft+1 < count[idx])
       {
-        gt_radix_phase_GtUlong_rek(offset+1,
-                                   source+newleft,
-                                   dest+newleft,
-                                   count[idx]-newleft);
+        gt_radix_phase_GtUlong_recursive(offset+1,
+                                         source+newleft,
+                                         dest+newleft,
+                                         count[idx]-newleft);
       }
     }
   }
 }
 
-void gt_radixsort_GtUlong2(GtUlong *source, GtUlong *dest, unsigned long len)
+void gt_radixsort_GtUlong_recursive(GtUlong *source, GtUlong *dest,
+                                    unsigned long len)
 {
-  gt_radix_phase_GtUlong_rek(0,source,dest,len);
+  gt_radix_phase_GtUlong_recursive(0,source,dest,len);
 }
 
 typedef struct
@@ -141,32 +143,12 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,512);
 
-static int compareRadixkeys(const void *a,const void *b)
-{
-  if (*(uint8_t *) a < *((uint8_t *)b))
-  {
-    return 1;
-  }
-  if (*(uint8_t *) a > *((uint8_t *)b))
-  {
-    return -1;
-  }
-  gt_assert(false);
-  return 0;
-}
-
-static void sortRadixkeys(uint8_t *keys,unsigned long differentkeys)
-{
-  qsort(keys,(size_t) differentkeys,sizeof (*keys),compareRadixkeys);
-}
-
-void gt_radixsort_GtUlong3(GtUlong *source, GtUlong *dest, unsigned long len)
+void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
+                                 unsigned long len)
 {
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpelem, current;
-  unsigned long idx, s, c, *sp, *cp, differentkeys, keyidx, newleft,
-                count[UINT8_MAX+1] = {0};
-  uint8_t keys[UINT8_MAX+1];
+  unsigned long idx, s, c, *sp, *cp, newleft, count[UINT8_MAX+1] = {0};
 
   GT_STACK_INIT(&stack,64UL);
   tmpelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
@@ -177,47 +159,38 @@ void gt_radixsort_GtUlong3(GtUlong *source, GtUlong *dest, unsigned long len)
   {
     current = GT_STACK_POP(&stack);
     /* count occurences of every byte value */
-    differentkeys = 0;
     for (sp = current.left; sp < current.left+current.len; sp++)
     {
-      idx = GT_RADIX_ACCESS_CHAR(current.shift,sp);
-      if (count[idx] == 1UL) /* only keys occurring at least twice are relev. */
-      {
-        keys[differentkeys++] = (uint8_t) idx;
-      }
-      count[idx]++;
+      count[GT_RADIX_ACCESS_CHAR(current.shift,sp)]++;
     }
-    if (differentkeys > 1UL)
+    /* compute partial sums */
+    for (s = 0, cp = count; cp <= count + UINT8_MAX; cp++)
     {
-      /* compute partial sums */
-      for (s = 0, cp = count; cp <= count + UINT8_MAX; cp++)
-      {
-        c = *cp;
-        *cp = s;
-        s += c;
-      }
-      /* fill dest with the right values in the right place */
-      for (sp = current.left; sp < current.left+current.len; sp++)
-      {
-        dest[count[GT_RADIX_ACCESS_CHAR(current.shift,sp)]++] = *sp;
-      }
-      memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
+      c = *cp;
+      *cp = s;
+      s += c;
     }
+    /* fill dest with the right values in the right place */
+    for (sp = current.left; sp < current.left+current.len; sp++)
+    {
+      dest[count[GT_RADIX_ACCESS_CHAR(current.shift,sp)]++] = *sp;
+    }
+    memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
     if (current.shift > 0)
     {
-      sortRadixkeys(keys,differentkeys);
-      for (keyidx = 0; keyidx < differentkeys; keyidx++)
+      for (idx = 0; idx <= UINT8_MAX; idx++)
       {
-        idx = (unsigned long) keys[keyidx];
         newleft = (idx == 0) ? 0 : count[idx-1];
         /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
                                      = count[idx]-newleft > 1
         => count[idx] > newleft + 1 */
-        /* gt_assert(newleft+1 < count[idx]);*/
-        tmpelem.shift = current.shift - CHAR_BIT;
-        tmpelem.left = current.left + newleft;
-        tmpelem.len = count[idx] - newleft;
-        GT_STACK_PUSH(&stack,tmpelem);
+        if (newleft+1 < count[idx])
+        {
+          tmpelem.shift = current.shift - CHAR_BIT;
+          tmpelem.left = current.left + newleft;
+          tmpelem.len = count[idx] - newleft;
+          GT_STACK_PUSH(&stack,tmpelem);
+        }
       }
     }
     memset(count,0,(size_t) sizeof (*count) * (UINT8_MAX+1));

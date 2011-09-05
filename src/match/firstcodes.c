@@ -383,8 +383,8 @@ static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo
   unsigned long *vptr;
 
   gt_assert(fci->allfirstcodes != NULL);
-  gt_radixsort_GtUlong(fci->codebuffer,
-                       fci->tempforradixsort,fci->codebuffer_nextfree);
+  gt_radixsort_GtUlong_linear(fci->codebuffer,
+                              fci->tempforradixsort,fci->codebuffer_nextfree);
 #ifdef SKDEBUG
   checkcodesorder(fci->codebuffer,fci->codebuffer_nextfree,
                   true);
