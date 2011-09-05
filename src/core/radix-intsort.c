@@ -27,8 +27,6 @@
 #define GT_RADIX_ACCESS_KEY(MASK,SHIFT,PTR) ((*(PTR) >> (SHIFT)) & (MASK))
 #define GT_RADIX_ACCESS_UINT8(SHIFT,SP)\
         GT_RADIX_ACCESS_KEY(UINT8_MAX,SHIFT,SP)
-#define GT_RADIX_ACCESS_UINT16(SHIFT,SP)\
-        GT_RADIX_ACCESS_KEY(UINT16_MAX,SHIFT,SP)
 
 #ifdef SKDEBUG
 static void showbytewise(unsigned long value)
@@ -180,8 +178,6 @@ typedef struct
 } GtRadixsort_stackelem;
 
 GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,512);
-
-#define GT_RADIX_ACCESS_UINT16_FIRST(SP) ((*(SP) >> 48) & UINT16_MAX)
 
 static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
                                            GtUlong *source,
