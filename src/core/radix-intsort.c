@@ -24,33 +24,47 @@
 #include "core/stack-inlined.h"
 #include "core/types_api.h"
 
-#define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
+#define GT_RADIX_ACCESS_UINT8(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
+
+#ifdef SKDEBUG
+static void showbytewise(unsigned long value)
+{
+  int shift;
+
+  for (shift = 56; shift >= 0; shift-=8)
+  {
+    printf("%lu ",GT_RADIX_ACCESS_UINT8(shift,&value));
+    if (shift > 0)
+    {
+      printf(" ");
+    }
+  }
+}
+#endif
 
 static void gt_radixsort_phase_uint8(unsigned int shift,
                                      GtUlong *source,
                                      GtUlong *dest,
                                      unsigned long len)
 {
-  unsigned long s, c, *sp, *cp, count[256] = {0};
+  unsigned long *ptr, count[UINT8_MAX+1] = {0};
 
   /* count occurences of every byte value */
-  for (sp = source; sp < source + len; sp++)
+  for (ptr = source; ptr < source + len; ptr++)
   {
-    count[GT_RADIX_ACCESS_CHAR(shift,sp)]++;
+    count[GT_RADIX_ACCESS_UINT8(shift,ptr)]++;
   }
 
   /* compute partial sums */
-  for (s = 0, cp = count; cp < count + 256UL; cp++)
+  for (ptr = count+1; ptr <= count + UINT8_MAX; ptr++)
   {
-    c = *cp;
-    *cp = s;
-    s += c;
+    *ptr += *(ptr-1);
   }
 
   /* fill dest with the right values in the right place */
-  for (sp = source; sp < source + len; sp++)
+  for (ptr = source + len - 1; ptr >= source; ptr--)
   {
-    dest[count[GT_RADIX_ACCESS_CHAR(shift,sp)]++] = *sp;
+    dest[--count[GT_RADIX_ACCESS_UINT8(shift,ptr)]] = *ptr;
   }
 }
 
@@ -83,7 +97,7 @@ static void gt_radix_phase_GtUlong_recursive(size_t offset,
   /* count occurences of every byte value */
   for (sp = source; sp < source+len; sp++)
   {
-    count[GT_RADIX_ACCESS_CHAR(shift,sp)]++;
+    count[GT_RADIX_ACCESS_UINT8(shift,sp)]++;
   }
   /* compute partial sums */
   for (s = 0, cp = count; cp <= count + UINT8_MAX; cp++)
@@ -95,7 +109,7 @@ static void gt_radix_phase_GtUlong_recursive(size_t offset,
   /* fill dest with the right values in the right place */
   for (sp = source; sp < source+len; sp++)
   {
-    dest[count[GT_RADIX_ACCESS_CHAR(shift,sp)]++] = *sp;
+    dest[count[GT_RADIX_ACCESS_UINT8(shift,sp)]++] = *sp;
   }
   memcpy(source,dest,(size_t) sizeof (*source) * len);
   if (offset < maxoffset)
@@ -141,7 +155,6 @@ static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
 {
   GtRadixsort_stackelem tmpelem;
   unsigned long idx, s, c, *sp, *cp, newleft, count[UINT16_MAX+1];
-  unsigned long pushfirst = 0;
 
   GT_STACK_INIT(stack,64UL);
   for (idx=0; idx<=UINT16_MAX; idx++)
@@ -177,10 +190,8 @@ static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
       tmpelem.left = source + newleft;
       tmpelem.len = count[idx] - newleft;
       GT_STACK_PUSH(stack,tmpelem);
-      pushfirst++;
     }
   }
-  printf("pushfirst=%lu\n",pushfirst);
 }
 
 void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
@@ -189,7 +200,7 @@ void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpelem, current;
   unsigned long idx, s, c, *sp, *cp, newleft, count[UINT8_MAX+1] = {0};
-  const bool simple = true;
+  const bool simple = false;
 
   if (simple)
   {
@@ -208,7 +219,7 @@ void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
     /* count occurences of every byte value */
     for (sp = current.left; sp < current.left+current.len; sp++)
     {
-      count[GT_RADIX_ACCESS_CHAR(current.shift,sp)]++;
+      count[GT_RADIX_ACCESS_UINT8(current.shift,sp)]++;
     }
     /* compute partial sums */
     for (s = 0, cp = count; cp <= count + UINT8_MAX; cp++)
@@ -220,7 +231,7 @@ void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
     /* fill dest with the right values in the right place */
     for (sp = current.left; sp < current.left+current.len; sp++)
     {
-      dest[count[GT_RADIX_ACCESS_CHAR(current.shift,sp)]++] = *sp;
+      dest[count[GT_RADIX_ACCESS_UINT8(current.shift,sp)]++] = *sp;
     }
     memcpy(current.left,dest,(size_t) sizeof (*source) * current.len);
     if (current.shift > 0)
