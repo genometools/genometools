@@ -78,7 +78,7 @@ void gt_radixsort_GtUlong(GtUlong *source, GtUlong *temp,unsigned long len)
 #endif
 }
 
-#define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & 255UL)
+#define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
 
 static void gt_radix_phase_GtUlong_rek(size_t offset,
                                     GtUlong *source,
@@ -87,7 +87,7 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
 {
   unsigned long idx, s, c, *sp, *cp;
   const size_t maxoffset = sizeof (unsigned long) - 1;
-  unsigned long count[256] = {0};
+  unsigned long count[UINT8_MAX+1] = {0};
   const size_t shift = (maxoffset - offset) * CHAR_BIT;
 
   /* count occurences of every byte value */
@@ -96,7 +96,7 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
     count[GT_RADIX_ACCESS_CHAR(shift,sp)]++;
   }
   /* compute partial sums */
-  for (s = 0, cp = count; cp < count + 256UL; cp++)
+  for (s = 0, cp = count; cp <= count + UINT8_MAX; cp++)
   {
     c = *cp;
     *cp = s;
@@ -110,7 +110,7 @@ static void gt_radix_phase_GtUlong_rek(size_t offset,
   memcpy(source,dest,(size_t) sizeof (*source) * len);
   if (offset < maxoffset)
   {
-    for (idx = 0; idx < 256UL; idx++)
+    for (idx = 0; idx <= UINT8_MAX; idx++)
     {
       unsigned long newleft = (idx == 0) ? 0 : count[idx-1];
       /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
@@ -165,9 +165,8 @@ void gt_radixsort_GtUlong3(GtUlong *source, GtUlong *dest, unsigned long len)
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpelem, current;
   unsigned long idx, s, c, *sp, *cp, differentkeys, keyidx, newleft,
-                count[256] = {0};
-  uint8_t keys[256];
-  unsigned long maxdepth = 0;
+                count[UINT8_MAX+1] = {0};
+  uint8_t keys[UINT8_MAX+1];
 
   GT_STACK_INIT(&stack,64UL);
   tmpelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
@@ -191,7 +190,7 @@ void gt_radixsort_GtUlong3(GtUlong *source, GtUlong *dest, unsigned long len)
     if (differentkeys > 1UL)
     {
       /* compute partial sums */
-      for (s = 0, cp = count; cp < count + 256UL; cp++)
+      for (s = 0, cp = count; cp <= count + UINT8_MAX; cp++)
       {
         c = *cp;
         *cp = s;
@@ -214,20 +213,15 @@ void gt_radixsort_GtUlong3(GtUlong *source, GtUlong *dest, unsigned long len)
         /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
                                      = count[idx]-newleft > 1
         => count[idx] > newleft + 1 */
-        gt_assert(newleft+1 < count[idx]);
+        /* gt_assert(newleft+1 < count[idx]);*/
         tmpelem.shift = current.shift - CHAR_BIT;
         tmpelem.left = current.left + newleft;
         tmpelem.len = count[idx] - newleft;
         GT_STACK_PUSH(&stack,tmpelem);
-        if (stack.nextfree > maxdepth)
-        {
-          maxdepth = stack.nextfree;
-        }
       }
     }
-    memset(count,0,(size_t) sizeof (*count) * 256);
+    memset(count,0,(size_t) sizeof (*count) * (UINT8_MAX+1));
   }
-  printf("maxdepth = %lu\n",maxdepth);
   GT_STACK_DELETE(&stack);
 }
 
