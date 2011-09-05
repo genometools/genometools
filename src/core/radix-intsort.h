@@ -20,7 +20,7 @@
 
 #include "core/types_api.h"
 
-void gt_radixsort_GtUlong_linear(bool smalltables,GtUlong *source, 
+void gt_radixsort_GtUlong_linear(bool smalltables,GtUlong *source,
                                  GtUlong *dest, unsigned long len);
 
 void gt_radixsort_GtUlongPair(GtUlongPair *source, GtUlongPair *temp,
