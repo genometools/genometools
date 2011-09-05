@@ -23,8 +23,8 @@
 void gt_radixsort_GtUlong_linear(bool smalltables,GtUlong *source,
                                  GtUlong *dest, unsigned long len);
 
-void gt_radixsort_GtUlongPair(GtUlongPair *source, GtUlongPair *temp,
-                              unsigned long len);
+void gt_radixsort_GtUlongPair_linear(bool smalltables,GtUlongPair *source,
+                                     GtUlongPair *temp,unsigned long len);
 
 void gt_radixsort_GtUlong_divide(GtUlong *source,
                                  GtUlong *dest,

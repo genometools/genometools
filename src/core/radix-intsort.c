@@ -25,6 +25,8 @@
 #include "core/types_api.h"
 
 #define GT_RADIX_ACCESS_KEY(MASK,SHIFT,PTR) ((*(PTR) >> (SHIFT)) & (MASK))
+#define GT_RADIX_ACCESS_KEY_PAIR(MASK,SHIFT,PTR)\
+        (((PTR)->a >> (SHIFT)) & (MASK))
 #define GT_RADIX_ACCESS_UINT8(SHIFT,SP)\
         GT_RADIX_ACCESS_KEY(UINT8_MAX,SHIFT,SP)
 
@@ -110,6 +112,74 @@ void gt_radixsort_GtUlong_linear(bool smalltables,GtUlong *source,
     /*printf("phase %lu\n",(unsigned long) (iter * CHAR_BIT * basesize));*/
     gt_radixsort_GtUlong_linear_phase (iter * CHAR_BIT * basesize, maxvalue,
                                        count, source, temp, len);
+    ptr = source;
+    source = temp;
+    temp = ptr;
+  }
+  gt_free(count);
+}
+
+static void gt_radixsort_GtUlongPair_linear_phase(size_t shift,
+                                                  size_t maxvalue,
+                                                  Countbasetype *count,
+                                                  GtUlongPair *source,
+                                                  GtUlongPair *dest,
+                                                  unsigned long len)
+{
+  Countbasetype *cptr, idx;
+  GtUlongPair *sptr;
+
+  /* count occurences of every byte value */
+  gt_assert(len <= (unsigned long) UINT_MAX);
+  for (cptr = count; cptr <= count + maxvalue; cptr++)
+  {
+    *cptr = 0;
+  }
+  for (sptr = source; sptr < source + len; sptr++)
+  {
+    count[GT_RADIX_ACCESS_KEY_PAIR(maxvalue,shift,sptr)]++;
+  }
+
+  /* compute partial sums */
+  for (cptr = count+1; cptr <= count + maxvalue; cptr++)
+  {
+    *cptr += *(cptr-1);
+  }
+
+  /* fill dest with the right values in the right place */
+  for (sptr = source + len - 1; sptr >= source; sptr--)
+  {
+    idx = --count[GT_RADIX_ACCESS_KEY_PAIR(maxvalue,shift,sptr)];
+    dest[idx] = *sptr;
+  }
+}
+
+void gt_radixsort_GtUlongPair_linear(bool smalltables,GtUlongPair *source,
+                                     GtUlongPair *temp,unsigned long len)
+{
+  unsigned int iter;
+  Countbasetype *count;
+  size_t basesize, maxvalue;
+
+  gt_assert(source != NULL && temp != NULL);
+  if (smalltables)
+  {
+    basesize = sizeof (uint8_t);
+    maxvalue = UINT8_MAX;
+  } else
+  {
+    basesize = sizeof (uint16_t);
+    maxvalue = UINT16_MAX;
+  }
+  count = gt_malloc(sizeof(*count) * (maxvalue+1));
+  for (iter = 0; iter <(unsigned int) (sizeof(unsigned long)/basesize);
+       iter++)
+  {
+    GtUlongPair *ptr;
+
+    /*printf("phase %lu\n",(unsigned long) (iter * CHAR_BIT * basesize));*/
+    gt_radixsort_GtUlongPair_linear_phase (iter * CHAR_BIT * basesize, maxvalue,
+                                           count, source, temp, len);
     ptr = source;
     source = temp;
     temp = ptr;
