@@ -172,9 +172,6 @@ void gt_radixsort_GtUlong3(GtUlong *source,
   GtRadixsort_stackelem tmpelem, current;
   uint8_t keys[256];
 
-  unsigned long pushcount = 0;
-  unsigned long iteroverkeys = 0;
-
   GT_STACK_INIT(&stack,512UL);
   tmpelem.offset = 0;
   tmpelem.left = source;
@@ -213,7 +210,6 @@ void gt_radixsort_GtUlong3(GtUlong *source,
     }
     if (current.offset < maxoffset)
     {
-      iteroverkeys++;
       sortRadixkeys(keys,differentkeys);
       for (keyidx = 0; keyidx < differentkeys; keyidx++)
       {
@@ -227,7 +223,6 @@ void gt_radixsort_GtUlong3(GtUlong *source,
         tmpelem.left = current.left + newleft;
         tmpelem.len = count[idx] - newleft;
         GT_STACK_PUSH(&stack,tmpelem);
-        pushcount++;
       }
     }
     memset(count,0,(size_t) sizeof (*count) * 256);
