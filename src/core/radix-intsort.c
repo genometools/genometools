@@ -21,70 +21,15 @@
 #include <string.h>
 #include <limits.h>
 #include "core/assert_api.h"
-#include "core/endianess_api.h"
 #include "core/stack-inlined.h"
 #include "core/types_api.h"
 
-/* replaced byte with offset to avoid * 8 operation in loop */
-
-/* be careful only works for litte endian byte order */
-
-static void gt_radix_phase_GtUlong(unsigned int offset,
-                                   GtUlong *source,
-                                   GtUlong *dest,
-                                   unsigned long len)
-{
-  unsigned long idx, s, c, *sp, *cp, count[256] = {0};
-  const size_t increment = sizeof (*source);
-  uint8_t *bp;
-
-  /* count occurences of every byte value */
-  bp = ((uint8_t *) source) + offset;
-  for (idx = 0; idx < len; idx++, bp += increment)
-  {
-    count[*bp]++;
-  }
-
-  /* compute partial sums */
-  for (s = 0, cp = count, idx = 0; idx < 256UL; idx++, cp++)
-  {
-    c = *cp;
-    *cp = s;
-    s += c;
-  }
-
-  /* fill dest with the right values in the right place */
-  bp = ((uint8_t *) source) + offset;
-  for (sp = source; sp < source + len; bp += increment, sp++)
-  {
-    dest[count[*bp]++] = *sp;
-  }
-}
-
-void gt_radixsort_GtUlong_linear(GtUlong *source, GtUlong *temp,
-                                 unsigned long len)
-{
-  gt_assert(gt_is_little_endian());
-  /* allocate heap memory to avoid the need of additional parameter */
-  gt_assert(temp != NULL && source != NULL);
-  gt_radix_phase_GtUlong(0, source, temp, len);
-  gt_radix_phase_GtUlong(1U, temp, source, len);
-  gt_radix_phase_GtUlong(2U, source, temp, len);
-  gt_radix_phase_GtUlong(3U, temp, source, len);
-#ifdef _LP64
-  gt_radix_phase_GtUlong(4U, source, temp, len);
-  gt_radix_phase_GtUlong(5U, temp, source, len);
-  gt_radix_phase_GtUlong(6U, source, temp, len);
-  gt_radix_phase_GtUlong(7U, temp, source, len);
-#endif
-}
-
 #define GT_RADIX_ACCESS_CHAR(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
 
-static void gt_radix_phase_GtUlong2(unsigned int shift,
-                                    GtUlong *source,
-                                    GtUlong *dest,
-                                    unsigned long len)
+static void gt_radixsort_phase_uint8(unsigned int shift,
+                                     GtUlong *source,
+                                     GtUlong *dest,
+                                     unsigned long len)
 {
   unsigned long s, c, *sp, *cp, count[256] = {0};
 
@@ -109,19 +54,19 @@ static void gt_radix_phase_GtUlong2(unsigned int shift,
   }
 }
 
-void gt_radixsort_GtUlong_linear2(GtUlong *source, GtUlong *temp,
-                                  unsigned long len)
+void gt_radixsort_GtUlong_linear(GtUlong *source, GtUlong *temp,
+                                 unsigned long len)
 {
   gt_assert(temp != NULL && source != NULL);
-  gt_radix_phase_GtUlong2(0, source, temp, len);
-  gt_radix_phase_GtUlong2(8U, temp, source, len);
-  gt_radix_phase_GtUlong2(16U, source, temp, len);
-  gt_radix_phase_GtUlong2(24U, temp, source, len);
+  gt_radixsort_phase_uint8(0, source, temp, len);
+  gt_radixsort_phase_uint8(8U, temp, source, len);
+  gt_radixsort_phase_uint8(16U, source, temp, len);
+  gt_radixsort_phase_uint8(24U, temp, source, len);
 #ifdef _LP64
-  gt_radix_phase_GtUlong2(32U, source, temp, len);
-  gt_radix_phase_GtUlong2(40U, temp, source, len);
-  gt_radix_phase_GtUlong2(48U, source, temp, len);
-  gt_radix_phase_GtUlong2(56U, temp, source, len);
+  gt_radixsort_phase_uint8(32U, source, temp, len);
+  gt_radixsort_phase_uint8(40U, temp, source, len);
+  gt_radixsort_phase_uint8(48U, source, temp, len);
+  gt_radixsort_phase_uint8(56U, temp, source, len);
 #endif
 }
 
@@ -298,57 +243,4 @@ void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
     memset(count,0,(size_t) sizeof (*count) * (UINT8_MAX+1));
   }
   GT_STACK_DELETE(&stack);
-}
-
-/* assume that the first element in GtUlongPair is the sort key */
-
-static void gt_radix_phase_GtUlongPair(unsigned int offset,
-                                       GtUlongPair *source,
-                                       GtUlongPair *dest,
-                                       unsigned long len)
-{
-  unsigned long idx, *cp, s, c, count[256] = {0};
-  GtUlongPair *sp;
-  const size_t increment = sizeof (*source);
-  uint8_t *bp;
-
-  gt_assert(gt_is_little_endian());
-  /* count occurences of every byte value */
-  bp = ((uint8_t *) source) + offset;
-  for (idx = 0; idx < len; idx++, bp += increment)
-  {
-    count[*bp]++;
-  }
-
-  /* compute partial sums */
-  for (s = 0, cp = count, idx = 0; idx < 256UL; idx++, cp++)
-  {
-    c = *cp;
-    *cp = s;
-    s += c;
-  }
-
-  /* fill dest with the right values in the right place */
-  bp = ((uint8_t *) source) + offset;
-  for (sp = source; sp < source + len; bp += increment, sp++)
-  {
-    dest[count[*bp]++] = *sp;
-  }
-}
-
-void gt_radixsort_GtUlongPair(GtUlongPair *source, GtUlongPair *temp,
-                              unsigned long len)
-{
-  /* allocate heap memory to avoid the need of additional parameter */
-  gt_assert(temp != NULL && source != NULL);
-  gt_radix_phase_GtUlongPair(0, source, temp, len);
-  gt_radix_phase_GtUlongPair(1U, temp, source, len);
-  gt_radix_phase_GtUlongPair(2U, source, temp, len);
-  gt_radix_phase_GtUlongPair(3U, temp, source, len);
-#ifdef _LP64
-  gt_radix_phase_GtUlongPair(4U, source, temp, len);
-  gt_radix_phase_GtUlongPair(5U, temp, source, len);
-  gt_radix_phase_GtUlongPair(6U, source, temp, len);
-  gt_radix_phase_GtUlongPair(7U, temp, source, len);
-#endif
 }
