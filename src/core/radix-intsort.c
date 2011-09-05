@@ -143,18 +143,76 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,512);
 
+#define GT_RADIX_ACCESS_UINT16(SP) ((*(SP) >> 48) & UINT16_MAX)
+
+static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
+                                           GtUlong *source,
+                                           GtUlong *dest,
+                                           unsigned long len)
+{
+  GtRadixsort_stackelem tmpelem;
+  unsigned long idx, s, c, *sp, *cp, newleft, count[UINT16_MAX+1];
+  unsigned long pushfirst = 0;
+
+  GT_STACK_INIT(stack,64UL);
+  for (idx=0; idx<=UINT16_MAX; idx++)
+  {
+    count[idx] = 0;
+  }
+  for (sp = source; sp < source + len; sp++)
+  {
+    count[GT_RADIX_ACCESS_UINT16(sp)]++;
+  }
+  for (s = 0, cp = count; cp <= count + UINT16_MAX; cp++)
+  {
+    c = *cp;
+    *cp = s;
+    s += c;
+  }
+  /* fill dest with the right values in the right place */
+  for (sp = source; sp < source + len; sp++)
+  {
+    dest[count[GT_RADIX_ACCESS_UINT16(sp)]++] = *sp;
+  }
+  memcpy(source,dest,(size_t) sizeof (*source) * len);
+  for (idx = 0; idx <= UINT16_MAX; idx++)
+  {
+    newleft = (idx == 0) ? 0 : count[idx-1];
+    /* |newleft .. count[idx]-1| = count[idx]-1-newleft+1
+                                 = count[idx]-newleft > 1
+        => count[idx] > newleft + 1
+    */
+    if (newleft+1 < count[idx])
+    {
+      tmpelem.shift = (uint8_t) 40;
+      tmpelem.left = source + newleft;
+      tmpelem.len = count[idx] - newleft;
+      GT_STACK_PUSH(stack,tmpelem);
+      pushfirst++;
+    }
+  }
+  printf("pushfirst=%lu\n",pushfirst);
+}
+
 void gt_radixsort_GtUlong_divide(GtUlong *source, GtUlong *dest,
                                  unsigned long len)
 {
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpelem, current;
   unsigned long idx, s, c, *sp, *cp, newleft, count[UINT8_MAX+1] = {0};
+  const bool simple = true;
 
-  GT_STACK_INIT(&stack,64UL);
-  tmpelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
-  tmpelem.left = source;
-  tmpelem.len = len;
-  GT_STACK_PUSH(&stack,tmpelem);
+  if (simple)
+  {
+    GT_STACK_INIT(&stack,64UL);
+    tmpelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
+    tmpelem.left = source;
+    tmpelem.len = len;
+    GT_STACK_PUSH(&stack,tmpelem);
+  } else
+  {
+    gt_radixsort_GtUlong_initstack(&stack, source, dest, len);
+  }
   while (!GT_STACK_ISEMPTY(&stack))
   {
     current = GT_STACK_POP(&stack);
