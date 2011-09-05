@@ -1,5 +1,5 @@
 methods = ["thomas","system","inlinedptr","inlinedarr",
-           "direct","radixlin","radixrec","radixdiv"]
+           "direct","radixlinsmall","radixlinlarge","radixrec","radixdiv"]
 
 lenlist=[1000,2000,4000,1000000,2000000]
 

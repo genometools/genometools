@@ -24,7 +24,11 @@
 #include "core/stack-inlined.h"
 #include "core/types_api.h"
 
-#define GT_RADIX_ACCESS_UINT8(SHIFT,SP) ((*(SP) >> (SHIFT)) & UINT8_MAX)
+#define GT_RADIX_ACCESS_KEY(MASK,SHIFT,PTR) ((*(PTR) >> (SHIFT)) & (MASK))
+#define GT_RADIX_ACCESS_UINT8(SHIFT,SP)\
+        GT_RADIX_ACCESS_KEY(UINT8_MAX,SHIFT,SP)
+#define GT_RADIX_ACCESS_UINT16(SHIFT,SP)\
+        GT_RADIX_ACCESS_KEY(UINT16_MAX,SHIFT,SP)
 
 #ifdef SKDEBUG
 static void showbytewise(unsigned long value)
@@ -42,46 +46,77 @@ static void showbytewise(unsigned long value)
 }
 #endif
 
-static void gt_radixsort_phase_uint8(unsigned int shift,
-                                     GtUlong *source,
-                                     GtUlong *dest,
-                                     unsigned long len)
+/* if sorting for table large than UINT_MAX is required, set the following
+   type to unsigned long */
+
+typedef unsigned int Countbasetype;
+
+static void gt_radixsort_phase_generic(size_t shift,
+                                       size_t maxvalue,
+                                       Countbasetype *count,
+                                       GtUlong *source,
+                                       GtUlong *dest,
+                                       unsigned long len)
 {
-  unsigned long *ptr, count[UINT8_MAX+1] = {0};
+  Countbasetype *cptr, idx;
+  GtUlong *sptr;
 
   /* count occurences of every byte value */
-  for (ptr = source; ptr < source + len; ptr++)
+  gt_assert(len <= (unsigned long) UINT_MAX);
+  for (cptr = count; cptr <= count + maxvalue; cptr++)
   {
-    count[GT_RADIX_ACCESS_UINT8(shift,ptr)]++;
+    *cptr = 0;
+  }
+  for (sptr = source; sptr < source + len; sptr++)
+  {
+    count[GT_RADIX_ACCESS_KEY(maxvalue,shift,sptr)]++;
   }
 
   /* compute partial sums */
-  for (ptr = count+1; ptr <= count + UINT8_MAX; ptr++)
+  for (cptr = count+1; cptr <= count + maxvalue; cptr++)
   {
-    *ptr += *(ptr-1);
+    *cptr += *(cptr-1);
   }
 
   /* fill dest with the right values in the right place */
-  for (ptr = source + len - 1; ptr >= source; ptr--)
+  for (sptr = source + len - 1; sptr >= source; sptr--)
   {
-    dest[--count[GT_RADIX_ACCESS_UINT8(shift,ptr)]] = *ptr;
+    idx = --count[GT_RADIX_ACCESS_KEY(maxvalue,shift,sptr)];
+    dest[idx] = *sptr;
   }
 }
 
-void gt_radixsort_GtUlong_linear(GtUlong *source, GtUlong *temp,
-                                 unsigned long len)
+void gt_radixsort_GtUlong_linear(bool smalltables,GtUlong *source, 
+                                 GtUlong *temp,unsigned long len)
 {
-  gt_assert(temp != NULL && source != NULL);
-  gt_radixsort_phase_uint8(0, source, temp, len);
-  gt_radixsort_phase_uint8(8U, temp, source, len);
-  gt_radixsort_phase_uint8(16U, source, temp, len);
-  gt_radixsort_phase_uint8(24U, temp, source, len);
-#ifdef _LP64
-  gt_radixsort_phase_uint8(32U, source, temp, len);
-  gt_radixsort_phase_uint8(40U, temp, source, len);
-  gt_radixsort_phase_uint8(48U, source, temp, len);
-  gt_radixsort_phase_uint8(56U, temp, source, len);
-#endif
+  unsigned int iter;
+  Countbasetype *count;
+  size_t basesize, maxvalue;
+
+  gt_assert(source != NULL && temp != NULL);
+  if (smalltables)
+  {
+    basesize = sizeof (uint8_t);
+    maxvalue = UINT8_MAX;
+  } else
+  {
+    basesize = sizeof (uint16_t);
+    maxvalue = UINT16_MAX;
+  }
+  count = gt_malloc(sizeof(*count) * (maxvalue+1));
+  for (iter = 0; iter <(unsigned int) (sizeof(unsigned long)/basesize);
+       iter++)
+  {
+    GtUlong *ptr;
+
+    /*printf("phase %lu\n",(unsigned long) (iter * CHAR_BIT * basesize));*/
+    gt_radixsort_phase_generic (iter * CHAR_BIT * basesize, maxvalue, count,
+                               source, temp, len);
+    ptr = source;
+    source = temp;
+    temp = ptr;
+  }
+  gt_free(count);
 }
 
 static void gt_radix_phase_GtUlong_recursive(size_t offset,
@@ -146,7 +181,7 @@ typedef struct
 
 GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,512);
 
-#define GT_RADIX_ACCESS_UINT16(SP) ((*(SP) >> 48) & UINT16_MAX)
+#define GT_RADIX_ACCESS_UINT16_FIRST(SP) ((*(SP) >> 48) & UINT16_MAX)
 
 static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
                                            GtUlong *source,
@@ -163,7 +198,7 @@ static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
   }
   for (sp = source; sp < source + len; sp++)
   {
-    count[GT_RADIX_ACCESS_UINT16(sp)]++;
+    count[GT_RADIX_ACCESS_UINT16_FIRST(sp)]++;
   }
   for (s = 0, cp = count; cp <= count + UINT16_MAX; cp++)
   {
@@ -174,7 +209,7 @@ static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
   /* fill dest with the right values in the right place */
   for (sp = source; sp < source + len; sp++)
   {
-    dest[count[GT_RADIX_ACCESS_UINT16(sp)]++] = *sp;
+    dest[count[GT_RADIX_ACCESS_UINT16_FIRST(sp)]++] = *sp;
   }
   memcpy(source,dest,(size_t) sizeof (*source) * len);
   for (idx = 0; idx <= UINT16_MAX; idx++)

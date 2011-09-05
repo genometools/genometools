@@ -54,7 +54,7 @@ static void gt_qsortbench_arguments_delete(void *tool_arguments)
 
 static const char *gt_qsort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct",
-       "radixlin","radixrec","radixdiv",NULL};
+       "radixlinsmall","radixlinlarge","radixrec","radixdiv",NULL};
 
 static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
 {
@@ -69,8 +69,8 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
                             "Benchmarks quicksort implementations."); /* XXX */
 
   option = gt_option_new_choice("impl", "implementation\nchoose from "
-                                "thomas|system|inlinedptr|inlinedarr|"
-                                "direct|radixlin|radixrec|radixdiv",
+                                "thomas|system|inlinedptr|inlinedarr|direct|"
+                                "radixlinsmall|radixlinlarge|radixrec|radixdiv",
                                 arguments->impl,
                                 gt_qsort_implementation_names[0],
                                 gt_qsort_implementation_names);
@@ -286,12 +286,21 @@ static void check_inlinedptr_qsort(unsigned long *a, unsigned long n)
   gt_inlined_qsort_r(a, n, NULL);
 }
 
-static void check_radixsort_GtUlong_linear(unsigned long *source,
-                                           unsigned long len)
+static void check_radixsort_GtUlong_linear_small(unsigned long *source,
+                                                 unsigned long len)
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radixsort_GtUlong_linear(source, temp, len);
+  gt_radixsort_GtUlong_linear(true,source, temp, len);
+  gt_free(temp);
+}
+
+static void check_radixsort_GtUlong_linear_large(unsigned long *source,
+                                                 unsigned long len)
+{
+  unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
+
+  gt_radixsort_GtUlong_linear(false,source, temp, len);
   gt_free(temp);
 }
 
@@ -322,7 +331,8 @@ static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
   check_inlinedptr_qsort,
   check_inlinedarr_qsort,
   check_direct_qsort,
-  check_radixsort_GtUlong_linear,
+  check_radixsort_GtUlong_linear_small,
+  check_radixsort_GtUlong_linear_large,
   check_radixsort_GtUlong_recursive,
   check_radixsort_GtUlong_divide
 };
