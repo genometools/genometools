@@ -4079,7 +4079,7 @@ static GtEncseq* gt_encseq_new_from_index(const char *indexname,
   GtEncseq *encseq = NULL;
   bool haserr = false;
   GtEncseqMetadata *emd = NULL;
-  GtAlphabet *alpha;
+  GtAlphabet *alpha = NULL;
 
   gt_error_check(err);
   if (!haserr)
