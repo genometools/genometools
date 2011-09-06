@@ -40,7 +40,10 @@ struct GtShortreadsortworkinfo
 {
   uint16_t *shortreadsortrefs;
   GtShortreadsort *shortreadsortinfo;
-  GtLcpvalues *tableoflcpvalues; /* pointer copy */
+  GtLcpvalues *tableoflcpvalues; /* always NULL in the context of
+                                    firstcodes; otherwise: NULL iff
+                                    lcpvalues are not required. */
+  uint16_t *firstcodeslcpvalues;
   unsigned long numofentries,
                 tmplcplen;
   bool fwd, complement;
@@ -52,7 +55,8 @@ size_t gt_shortreadsort_size(unsigned long maxvalue)
 }
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
-                                              GtReadmode readmode)
+                                              GtReadmode readmode,
+                                              bool firstcodes)
 {
   unsigned long idx;
   GtShortreadsortworkinfo *srsw;
@@ -64,6 +68,14 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
     = gt_malloc(sizeof (*srsw->shortreadsortinfo) * srsw->numofentries);
   srsw->shortreadsortrefs
     = gt_malloc(sizeof (*srsw->shortreadsortrefs) * srsw->numofentries);
+  if (firstcodes)
+  {
+    srsw->firstcodeslcpvalues
+      = gt_malloc(sizeof (*srsw->firstcodeslcpvalues) * srsw->numofentries);
+  } else
+  {
+    srsw->firstcodeslcpvalues = NULL;
+  }
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
@@ -82,6 +94,8 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
     srsw->shortreadsortinfo = NULL;
     gt_free(srsw->shortreadsortrefs);
     srsw->shortreadsortrefs = NULL;
+    gt_free(srsw->firstcodeslcpvalues);
+    srsw->firstcodeslcpvalues = NULL;
     gt_free(srsw);
   }
 }
@@ -277,6 +291,12 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
             }
             lcptab_update(data->tableoflcpvalues,lcpindex,
                           depth + data->tmplcplen);
+          } else
+          {
+            if (data->firstcodeslcpvalues != NULL)
+            {
+              data->firstcodeslcpvalues[pl+1] = data->firstcodeslcpvalues[pl];
+            }
           }
           if (r <= 0)
           {
@@ -407,6 +427,14 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         */
         lcptab_update(data->tableoflcpvalues,subbucketleft+current.startindex+s,
                       depth+smallermaxlcp);
+      } else
+      {
+        if (data->firstcodeslcpvalues != NULL)
+        {
+          gt_assert(depth + smallermaxlcp <= UINT16_MAX);
+          data->firstcodeslcpvalues[current.startindex+s]
+            = (uint16_t) (depth + smallermaxlcp);
+        }
       }
       if (s > 1UL)
       {
@@ -428,6 +456,14 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         gt_assert(pn >= s);
         lcptab_update(data->tableoflcpvalues, subbucketleft + pn - s,
                       depth + greatermaxlcp);
+      } else
+      {
+        if (data->firstcodeslcpvalues != NULL)
+        {
+          gt_assert(depth + greatermaxlcp <= UINT16_MAX);
+          data->firstcodeslcpvalues[pn - s]
+            = (uint16_t) (depth + greatermaxlcp);
+        }
       }
       if (s > 1UL)
       {

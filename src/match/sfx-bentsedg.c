@@ -1368,7 +1368,8 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
     if (allowforshortreadsort(bsr->sfxstrategy,bsr->encseq,bsr->prefixlength,
                               bsr->readmode))
     {
-      bsr->srsw = gt_shortreadsort_new(sfxstrategy->maxshortreadsort,readmode);
+      bsr->srsw = gt_shortreadsort_new(sfxstrategy->maxshortreadsort,readmode,
+                                       false);
     } else
     {
       for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)

@@ -531,61 +531,26 @@ static void storefirstcodes_partialsum(GtFirstcodesinfo *fci)
   fci->countocc[fci->differentcodes] = fci->countocc[fci->differentcodes-1];
 }
 
-static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
-                                        GtReadmode readmode,
-                                        unsigned long *suftab,
-                                        unsigned long maxbucketsize,
-                                        const unsigned long *countocc,
-                                        unsigned long differentcodes,
-                                        unsigned long depth)
+static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
+                                             GtReadmode readmode,
+                                             GtEncseqReader *esr1,
+                                             GtEncseqReader *esr2,
+                                             unsigned long previous,
+                                             bool previousdefined,
+                                             const unsigned long *suftab_bucket,
+                                             unsigned long numberofsuffixes)
 {
-  unsigned long idx, width;
-  GtShortreadsortworkinfo *srsw;
-  GtEncseqReader *esr;
-
-  srsw = gt_shortreadsort_new(maxbucketsize,readmode);
-  esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  for (idx = 0; idx <differentcodes; idx++)
-  {
-    gt_assert(countocc[idx+1]>countocc[idx]);
-    width = countocc[idx+1] - countocc[idx];
-    if (width >= 2UL)
-    {
-     gt_shortreadsort_array_sort(srsw,
-                                  encseq,
-                                  readmode,
-                                  esr,
-                                  suftab,
-                                  countocc[idx],
-                                  width,
-                                  depth);
-    }
-  }
-  gt_encseq_reader_delete(esr);
-  gt_shortreadsort_delete(srsw);
-}
-
-static void gt_firstcodes_checksuftab(const GtEncseq *encseq,
-                                      GtReadmode readmode,
-                                      const unsigned long *suftab,
-                                      unsigned long numberofsuffixes)
-{
-  unsigned long idx, previous, current, maxlcp,
+  unsigned long idx, current, maxlcp,
                 totallength = gt_encseq_total_length(encseq);
-  GtEncseqReader *esr1, *esr2;
   int cmp;
   const bool specialsareequal = false, specialsareequalatdepth0 = false;
   const unsigned long depth = 0;
 
-  esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  gt_assert(numberofsuffixes > 0);
-  previous = suftab[0];
-  gt_assert(previous < totallength);
-  for (idx = 1UL; idx < numberofsuffixes; idx++)
+  gt_assert(!previousdefined || previous < totallength);
+  for (idx = 0; idx < numberofsuffixes; idx++)
   {
-    current = suftab[idx];
-    if (idx < totallength)
+    current = suftab_bucket[idx];
+    if (previousdefined && idx < totallength)
     {
       gt_assert(current < totallength);
       cmp = gt_encseq_check_comparetwosuffixes(encseq,
@@ -599,18 +564,66 @@ static void gt_firstcodes_checksuftab(const GtEncseq *encseq,
                                                esr1,
                                                esr2);
       gt_assert(cmp <= 0);
-    } else
-    {
-      maxlcp = 0;
-      if (numberofsuffixes == totallength+1)
-      {
-        gt_assert(current == totallength);
-      }
     }
     previous = current;
+    previousdefined = true;
   }
+}
+
+static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned long *suftab,
+                                        unsigned long maxbucketsize,
+                                        const unsigned long *countocc,
+                                        unsigned long differentcodes,
+                                        unsigned long depth)
+{
+  unsigned long idx, width, previous = 0;
+  GtShortreadsortworkinfo *srsw;
+  GtEncseqReader *esr, *esr1 = NULL, *esr2 = NULL;
+  bool previousdefined = false;
+  const bool withsuftabcheck = true;
+
+  if (withsuftabcheck)
+  {
+    esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+    esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  }
+  srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
+  esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  for (idx = 0; idx <differentcodes; idx++)
+  {
+    gt_assert(countocc[idx+1]>countocc[idx]);
+    width = countocc[idx+1] - countocc[idx];
+    if (width >= 2UL)
+    {
+      gt_shortreadsort_array_sort(srsw,
+                                  encseq,
+                                  readmode,
+                                  esr,
+                                  suftab,
+                                  countocc[idx],
+                                  width,
+                                  depth);
+      if (withsuftabcheck)
+      {
+        gt_firstcodes_checksuftab_bucket(encseq,
+                                         readmode,
+                                         esr1,
+                                         esr2,
+                                         previous,
+                                         previousdefined,
+                                         suftab + countocc[idx],
+                                         width);
+        previousdefined = true;
+        previous = suftab[countocc[idx] + width -1];
+      }
+    }
+  }
+  gt_encseq_reader_delete(esr);
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
+  gt_shortreadsort_delete(srsw);
 }
 
 #ifdef  QSORTNAME
@@ -634,7 +647,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  const bool withsuftabcheck = false;
 
   if (gt_showtime_enabled())
   {
@@ -767,17 +779,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               fci.differentcodes,
                               (unsigned long) kmersize);
   gt_free(fci.countocc);
-  if (withsuftabcheck)
-  {
-    if (timer != NULL)
-    {
-      gt_timer_show_progress(timer, "checking the suffix order",stdout);
-    }
-    gt_firstcodes_checksuftab(encseq,
-                              readmode,
-                              fci.suftab,
-                              fci.firstcodehits+fci.numofsequences);
-  }
   gt_free(fci.suftab);
   if (timer != NULL)
   {

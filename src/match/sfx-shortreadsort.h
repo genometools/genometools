@@ -34,7 +34,8 @@ typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 size_t gt_shortreadsort_size(unsigned long maxvalue);
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
-                                              GtReadmode readmode);
+                                              GtReadmode readmode,
+                                              bool firstcodes);
 
 void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);
 
