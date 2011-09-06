@@ -151,6 +151,15 @@ typedef struct
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
+typedef struct
+{
+  uint16_t *shortreadsortrefs;
+  GtShortreadsort *shortreadsortinfo;
+  GtLcpvalues *tableoflcpvalues; /* pointer copy */
+  unsigned long tmplcplen;
+  bool fwd, complement;
+} GtShortreadsortworkinfo;
+
 GT_DECLAREARRAYSTRUCT(GtMKVstack);
 
 typedef struct
@@ -182,7 +191,6 @@ typedef struct
                 countshortreadsort,
                 countcountingsort,
                 countbltriesort;
-  unsigned long lcplen;
 } GtBentsedgresources;
 
 #ifdef WITHCHECKSTARTPOINTER
@@ -854,7 +862,7 @@ static bool multistrategysort(GtBentsedgresources *bsr,
 
 static int compareshortreadsortinfo(const GtShortreadsort *aq,
                                     const GtShortreadsort *bq,
-                                    GtBentsedgresources *bsr)
+                                    GtShortreadsortworkinfo *srsw)
 {
   int idx, retval;
   unsigned int maxprefix;
@@ -870,13 +878,14 @@ static int compareshortreadsortinfo(const GtShortreadsort *aq,
       if (aq->tbe[idx] != bq->tbe[idx])
       {
         retval = gt_encseq_compare_pairof_different_twobitencodings(
-                                                     bsr->fwd,
-                                                     bsr->complement,
+                                                     srsw->fwd,
+                                                     srsw->complement,
                                                      &commonunits,
                                                      aq->tbe[idx],
                                                      bq->tbe[idx]);
-        bsr->lcplen = (unsigned long)
-                      (maxprefix - GT_UNITSIN2BITENC + commonunits.common);
+        srsw->tmplcplen
+          = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
+                             commonunits.common);
         return retval;
       }
     } else
@@ -895,13 +904,13 @@ static int compareshortreadsortinfo(const GtShortreadsort *aq,
         = bq->unitsnotspecial >= maxprefix
            ? maxprefix
            : bq->unitsnotspecial + GT_UNITSIN2BITENC - maxprefix;
-      retval = gt_encseq_compare_pairof_twobitencodings(bsr->fwd,
-                                                        bsr->complement,
+      retval = gt_encseq_compare_pairof_twobitencodings(srsw->fwd,
+                                                        srsw->complement,
                                                         &commonunits,
                                                         &tbe_a,
                                                         &tbe_b);
-      bsr->lcplen = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
-                                     commonunits.common);
+      srsw->tmplcplen = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
+                                         commonunits.common);
       return retval;
     }
   }
@@ -921,7 +930,7 @@ static int compareshortreadsortinfo(const GtShortreadsort *aq,
 #define shortread_ARRAY_SET(ARR,IDX,VALUE)\
         data->shortreadsortrefs[IDX] = (uint16_t) VALUE
 
-typedef GtBentsedgresources * QSORTNAME(Datatype);
+typedef GtShortreadsortworkinfo * QSORTNAME(Datatype);
 
 static int QSORTNAME(qsortcmparr) (unsigned long a,
                                    unsigned long b,
@@ -1034,7 +1043,8 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
                             lcpsubtab_getvalue(data->tableoflcpvalues,
                                                lcpindex));
             }
-            lcptab_update(data->tableoflcpvalues,lcpindex,depth+data->lcplen);
+            lcptab_update(data->tableoflcpvalues,lcpindex,
+                          depth + data->tmplcplen);
           }
           if (r <= 0)
           {
@@ -1075,7 +1085,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         r = QSORTNAME(qsortcmparr) (pb, current.startindex, data);
         if (r > 0)
         {
-          UPDATEMAXLCP(greatermaxlcp,data->lcplen);
+          UPDATEMAXLCP(greatermaxlcp,data->tmplcplen);
           break;
         }
         if (r == 0)
@@ -1085,7 +1095,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           pa++;
         } else
         {
-          UPDATEMAXLCP(smallermaxlcp,data->lcplen);
+          UPDATEMAXLCP(smallermaxlcp,data->tmplcplen);
         }
         pb++;
       }
@@ -1094,7 +1104,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         r = QSORTNAME(qsortcmparr) (pc, current.startindex, data);
         if (r < 0)
         {
-          UPDATEMAXLCP(smallermaxlcp,data->lcplen);
+          UPDATEMAXLCP(smallermaxlcp,data->tmplcplen);
           break;
         }
         if (r == 0)
@@ -1105,7 +1115,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           pd--;
         } else
         {
-          UPDATEMAXLCP(greatermaxlcp,data->lcplen);
+          UPDATEMAXLCP(greatermaxlcp,data->tmplcplen);
         }
         gt_assert(pc > 0);
         pc--;
@@ -1199,28 +1209,34 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
   GT_STACK_DELETE(&intervalstack);
 }
 
-static void sarrshortreadsort(GtBentsedgresources *bsr,
+static void sarrshortreadsort(GtShortreadsort *shortreadsortinfo,
+                              uint16_t *shortreadsortrefs,
+                              const GtEncseq *encseq,
+                              GtReadmode readmode,
+                              GtEncseqReader *esr,
+                              GtSuffixsortspace *sssp,
+                              GtLcpvalues *tableoflcpvalues,
                               unsigned long subbucketleft,
                               unsigned long width,
                               unsigned long depth)
 {
   unsigned long idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
+  GtShortreadsortworkinfo srsw;
 
-  gt_assert(width <= (unsigned long) bsr->sfxstrategy->maxshortreadsort);
-  exportptr = gt_suffixsortspace_exportptr(subbucketleft, bsr->sssp);
+  exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
     {
       pos = exportptr->ulongtabsectionptr[idx];
-      bsr->shortreadsortinfo[idx].suffix = pos;
-      bsr->shortreadsortinfo[idx].unitsnotspecial
-        = gt_encseq_extract2bitencvector(bsr->shortreadsortinfo[idx].tbe,
+      shortreadsortinfo[idx].suffix = pos;
+      shortreadsortinfo[idx].unitsnotspecial
+        = gt_encseq_extract2bitencvector(shortreadsortinfo[idx].tbe,
                                          GT_NUMOFTBEVALUEFOR100,
-                                         bsr->encseq,
-                                         bsr->esr1,
-                                         bsr->readmode,
+                                         encseq,
+                                         esr,
+                                         readmode,
                                          pos+depth);
     }
   } else
@@ -1228,27 +1244,33 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     for (idx = 0; idx < width; idx++)
     {
       pos = (unsigned long) exportptr->uinttabsectionptr[idx];
-      bsr->shortreadsortinfo[idx].suffix = pos;
-      bsr->shortreadsortinfo[idx].unitsnotspecial
-        = gt_encseq_extract2bitencvector(bsr->shortreadsortinfo[idx].tbe,
+      shortreadsortinfo[idx].suffix = pos;
+      shortreadsortinfo[idx].unitsnotspecial
+        = gt_encseq_extract2bitencvector(shortreadsortinfo[idx].tbe,
                                          GT_NUMOFTBEVALUEFOR100,
-                                         bsr->encseq,
-                                         bsr->esr1,
-                                         bsr->readmode,
+                                         encseq,
+                                         esr,
+                                         readmode,
                                          pos+depth);
     }
   }
-  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,bsr,depth,subbucketleft);
+  srsw.tableoflcpvalues = tableoflcpvalues;
+  srsw.shortreadsortrefs = shortreadsortrefs;
+  srsw.shortreadsortinfo = shortreadsortinfo;
+  srsw.fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+  srsw.complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
+  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,&srsw, depth,
+                                    subbucketleft);
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
     {
       exportptr->ulongtabsectionptr[idx]
-        = bsr->shortreadsortinfo[bsr->shortreadsortrefs[idx]].suffix;
-      bsr->shortreadsortrefs[idx] = (uint16_t) idx;
+        = shortreadsortinfo[shortreadsortrefs[idx]].suffix;
+      shortreadsortrefs[idx] = (uint16_t) idx;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
-        gt_suffixsortspace_updatelongest(bsr->sssp,idx);
+        gt_suffixsortspace_updatelongest(sssp,idx);
       }
     }
   } else
@@ -1256,16 +1278,15 @@ static void sarrshortreadsort(GtBentsedgresources *bsr,
     for (idx = 0; idx < width; idx++)
     {
       exportptr->uinttabsectionptr[idx]
-        = (uint32_t) bsr->shortreadsortinfo[bsr->shortreadsortrefs[idx]].suffix;
-      bsr->shortreadsortrefs[idx] = (uint16_t) idx;
+        = (uint32_t) shortreadsortinfo[shortreadsortrefs[idx]].suffix;
+      shortreadsortrefs[idx] = (uint16_t) idx;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
-        gt_suffixsortspace_updatelongest(bsr->sssp,idx);
+        gt_suffixsortspace_updatelongest(sssp,idx);
       }
     }
   }
-  gt_suffixsortspace_export_done(bsr->sssp);
-  bsr->countshortreadsort++;
+  gt_suffixsortspace_export_done(sssp);
 }
 
 static bool allowforshortreadsort(const Sfxstrategy *sfxstrategy,
@@ -1320,7 +1341,17 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
         bsr->readmode) &&
         width <= (unsigned long) bsr->sfxstrategy->maxshortreadsort)
     {
-      sarrshortreadsort(bsr,subbucketleft,width,depth);
+      sarrshortreadsort(bsr->shortreadsortinfo,
+                        bsr->shortreadsortrefs,
+                        bsr->encseq,
+                        bsr->readmode,
+                        bsr->esr1,
+                        bsr->sssp,
+                        bsr->tableoflcpvalues,
+                        subbucketleft,
+                        width,
+                        depth);
+      bsr->countshortreadsort++;
       return;
     }
     if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
