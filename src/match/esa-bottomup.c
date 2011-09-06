@@ -285,8 +285,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
 }
 
 int gt_esa_bottomup_RAM(
-                    const unsigned long *suftab,
-                    const uint16_t *lcptab,
+                    const unsigned long *suftab_bucket,
+                    const uint16_t *lcptab_bucket,
                     unsigned long nonspecials,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
                     void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
@@ -326,12 +326,13 @@ int gt_esa_bottomup_RAM(
   GtBUItvinfo *lastinterval = NULL, *stackspace = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
 
-  lastsuftabvalue = suftab[nonspecials-1];
+  gt_assert(nonspecials > 0);
+  lastsuftabvalue = suftab_bucket[nonspecials-1];
   PUSH_ESA_BOTTOMUP(0,0);
   for (idx = 0; idx < nonspecials; idx++)
   {
-    lcpvalue = (unsigned long) lcptab[idx+1];
-    previoussuffix = suftab[idx];
+    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    previoussuffix = suftab_bucket[idx];
     if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
     {
       if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)

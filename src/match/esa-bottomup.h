@@ -54,8 +54,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                     GtError *err);
 
 int gt_esa_bottomup_RAM(
-                    const unsigned long *suftab,
-                    const uint16_t *lcptab,
+                    const unsigned long *suftab_bucket,
+                    const uint16_t *lcptab_bucket,
                     unsigned long nonspecials,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
                     void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
