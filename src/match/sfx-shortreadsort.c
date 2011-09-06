@@ -54,6 +54,13 @@ size_t gt_shortreadsort_size(unsigned long maxvalue)
   return (sizeof (GtShortreadsort) + sizeof (uint16_t)) * (maxvalue+1);
 }
 
+const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
+{
+  gt_assert(srsw->firstcodeslcpvalues != NULL);
+
+  return srsw->firstcodeslcpvalues;
+}
+
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
                                               GtReadmode readmode,
                                               bool firstcodes)
@@ -72,6 +79,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   {
     srsw->firstcodeslcpvalues
       = gt_malloc(sizeof (*srsw->firstcodeslcpvalues) * srsw->numofentries);
+    srsw->firstcodeslcpvalues[0] = 0; /* since it is not set otherwise */
   } else
   {
     srsw->firstcodeslcpvalues = NULL;
@@ -295,7 +303,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           {
             if (data->firstcodeslcpvalues != NULL)
             {
-              data->firstcodeslcpvalues[pl+1] = data->firstcodeslcpvalues[pl];
+              if (pl < pm && r > 0)
+              {
+                data->firstcodeslcpvalues[pl+1] = data->firstcodeslcpvalues[pl];
+              }
+              gt_assert(depth + data->tmplcplen <= UINT16_MAX);
+              data->firstcodeslcpvalues[pl]
+                = (uint16_t) (depth + data->tmplcplen);
             }
           }
           if (r <= 0)

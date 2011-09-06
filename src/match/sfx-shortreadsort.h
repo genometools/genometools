@@ -42,6 +42,8 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);
 void gt_shortreadsort_assigntableoflcpvalues(
           GtShortreadsortworkinfo *srsw,GtLcpvalues *tableoflcpvalues);
 
+const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw);
+
 void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,

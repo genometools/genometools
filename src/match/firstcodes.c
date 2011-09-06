@@ -538,6 +538,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              unsigned long previous,
                                              bool previousdefined,
                                              const unsigned long *suftab_bucket,
+                                             const uint16_t *lcpvalues,
                                              unsigned long numberofsuffixes)
 {
   unsigned long idx, current, maxlcp,
@@ -563,7 +564,8 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                                current,
                                                esr1,
                                                esr2);
-      gt_assert(cmp <= 0);
+      gt_assert(cmp < 0);
+      gt_assert(idx == 0 || maxlcp == (unsigned long) lcpvalues[idx]);
     }
     previous = current;
     previousdefined = true;
@@ -583,6 +585,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   GtEncseqReader *esr, *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const bool withsuftabcheck = true;
+  const uint16_t *lcpvalues;
 
   if (withsuftabcheck)
   {
@@ -590,6 +593,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
+  lcpvalues = gt_shortreadsort_lcpvalues(srsw);
   esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   for (idx = 0; idx <differentcodes; idx++)
   {
@@ -614,6 +618,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                          previous,
                                          previousdefined,
                                          suftab + countocc[idx],
+                                         lcpvalues,
                                          width);
         previousdefined = true;
         previous = suftab[countocc[idx] + width -1];
