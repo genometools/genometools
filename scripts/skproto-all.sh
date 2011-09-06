@@ -111,6 +111,7 @@ sfx-readint.c
 sfx-readmode.c
 sfx-remainsort.c
 sfx-run.c
+sfx-shortreadsort.c
 sfx-suffixer.c
 sfx-suffixgetset.c
 sfx-suftaborder.c
