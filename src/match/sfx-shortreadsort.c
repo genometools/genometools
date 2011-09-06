@@ -19,6 +19,7 @@
 #include "core/intbits.h"
 #include "core/stack-inlined.h"
 #include "core/minmax.h"
+#include "core/assert_api.h"
 #include "sfx-lcpvalues.h"
 #include "sfx-shortreadsort.h"
 
@@ -58,6 +59,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
 
   srsw = gt_malloc(sizeof(*srsw));
   srsw->numofentries = maxshortreadsort + 1;
+  gt_assert(maxshortreadsort <= UINT16_MAX);
   srsw->shortreadsortinfo
     = gt_malloc(sizeof (*srsw->shortreadsortinfo) * srsw->numofentries);
   srsw->shortreadsortrefs
@@ -510,4 +512,37 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
     }
   }
   gt_suffixsortspace_export_done(sssp);
+}
+
+void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 GtEncseqReader *esr,
+                                 unsigned long *suftab,
+                                 unsigned long subbucketleft,
+                                 unsigned long width,
+                                 unsigned long depth)
+{
+  unsigned long idx, pos;
+
+  for (idx = 0; idx < width; idx++)
+  {
+    pos = suftab[subbucketleft + idx];
+    srsw->shortreadsortinfo[idx].suffix = pos;
+    srsw->shortreadsortinfo[idx].unitsnotspecial
+      = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
+                                       GT_NUMOFTBEVALUEFOR100,
+                                       encseq,
+                                       esr,
+                                       readmode,
+                                       pos+depth);
+  }
+  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
+                                    subbucketleft);
+  for (idx = 0; idx < width; idx++)
+  {
+    suftab[subbucketleft + idx]
+      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
+    srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+  }
 }

@@ -50,4 +50,13 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long width,
                                 unsigned long depth);
 
+void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
+                                 const GtEncseq *encseq,
+                                 GtReadmode readmode,
+                                 GtEncseqReader *esr,
+                                 unsigned long *suftab,
+                                 unsigned long subbucketleft,
+                                 unsigned long width,
+                                 unsigned long depth);
+
 #endif
