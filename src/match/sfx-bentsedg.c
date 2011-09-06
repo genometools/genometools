@@ -174,8 +174,6 @@ typedef struct
   GtLcpvalues *tableoflcpvalues;
   GtMedianinfo *medianinfospace;
   GtCountingsortinfo *countingsortinfo;
-  GtShortreadsort *shortreadsortinfo;
-  uint16_t *shortreadsortrefs;
   const Sfxstrategy *sfxstrategy;
   unsigned int sortmaxdepth,
                prefixlength;
@@ -191,6 +189,7 @@ typedef struct
                 countshortreadsort,
                 countcountingsort,
                 countbltriesort;
+  GtShortreadsortworkinfo srsw;
 } GtBentsedgresources;
 
 #ifdef WITHCHECKSTARTPOINTER
@@ -1209,20 +1208,17 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
   GT_STACK_DELETE(&intervalstack);
 }
 
-static void sarrshortreadsort(GtShortreadsort *shortreadsortinfo,
-                              uint16_t *shortreadsortrefs,
+static void sarrshortreadsort(GtShortreadsortworkinfo *srsw,
                               const GtEncseq *encseq,
                               GtReadmode readmode,
                               GtEncseqReader *esr,
                               GtSuffixsortspace *sssp,
-                              GtLcpvalues *tableoflcpvalues,
                               unsigned long subbucketleft,
                               unsigned long width,
                               unsigned long depth)
 {
   unsigned long idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
-  GtShortreadsortworkinfo srsw;
 
   exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   if (exportptr->ulongtabsectionptr != NULL)
@@ -1230,9 +1226,9 @@ static void sarrshortreadsort(GtShortreadsort *shortreadsortinfo,
     for (idx = 0; idx < width; idx++)
     {
       pos = exportptr->ulongtabsectionptr[idx];
-      shortreadsortinfo[idx].suffix = pos;
-      shortreadsortinfo[idx].unitsnotspecial
-        = gt_encseq_extract2bitencvector(shortreadsortinfo[idx].tbe,
+      srsw->shortreadsortinfo[idx].suffix = pos;
+      srsw->shortreadsortinfo[idx].unitsnotspecial
+        = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
                                          GT_NUMOFTBEVALUEFOR100,
                                          encseq,
                                          esr,
@@ -1244,9 +1240,9 @@ static void sarrshortreadsort(GtShortreadsort *shortreadsortinfo,
     for (idx = 0; idx < width; idx++)
     {
       pos = (unsigned long) exportptr->uinttabsectionptr[idx];
-      shortreadsortinfo[idx].suffix = pos;
-      shortreadsortinfo[idx].unitsnotspecial
-        = gt_encseq_extract2bitencvector(shortreadsortinfo[idx].tbe,
+      srsw->shortreadsortinfo[idx].suffix = pos;
+      srsw->shortreadsortinfo[idx].unitsnotspecial
+        = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
                                          GT_NUMOFTBEVALUEFOR100,
                                          encseq,
                                          esr,
@@ -1254,20 +1250,15 @@ static void sarrshortreadsort(GtShortreadsort *shortreadsortinfo,
                                          pos+depth);
     }
   }
-  srsw.tableoflcpvalues = tableoflcpvalues;
-  srsw.shortreadsortrefs = shortreadsortrefs;
-  srsw.shortreadsortinfo = shortreadsortinfo;
-  srsw.fwd = GT_ISDIRREVERSE(readmode) ? false : true;
-  srsw.complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
-  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,&srsw, depth,
+  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,srsw, depth,
                                     subbucketleft);
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
     {
       exportptr->ulongtabsectionptr[idx]
-        = shortreadsortinfo[shortreadsortrefs[idx]].suffix;
-      shortreadsortrefs[idx] = (uint16_t) idx;
+        = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
+      srsw->shortreadsortrefs[idx] = (uint16_t) idx;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(sssp,idx);
@@ -1278,8 +1269,9 @@ static void sarrshortreadsort(GtShortreadsort *shortreadsortinfo,
     for (idx = 0; idx < width; idx++)
     {
       exportptr->uinttabsectionptr[idx]
-        = (uint32_t) shortreadsortinfo[shortreadsortrefs[idx]].suffix;
-      shortreadsortrefs[idx] = (uint16_t) idx;
+        = (uint32_t) srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]]
+                                            .suffix;
+      srsw->shortreadsortrefs[idx] = (uint16_t) idx;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(sssp,idx);
@@ -1341,13 +1333,11 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
         bsr->readmode) &&
         width <= (unsigned long) bsr->sfxstrategy->maxshortreadsort)
     {
-      sarrshortreadsort(bsr->shortreadsortinfo,
-                        bsr->shortreadsortrefs,
+      sarrshortreadsort(&bsr->srsw,
                         bsr->encseq,
                         bsr->readmode,
                         bsr->esr1,
                         bsr->sssp,
-                        bsr->tableoflcpvalues,
                         subbucketleft,
                         width,
                         depth);
@@ -1795,6 +1785,24 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
   }
 }
 
+static void shortreadsortworkinfo_init(GtShortreadsortworkinfo *srsw,
+                                       unsigned long maxshortreadsort,
+                                       GtReadmode readmode)
+{
+  unsigned long idx;
+
+  srsw->shortreadsortinfo
+    = gt_malloc(sizeof (*srsw->shortreadsortinfo) * (maxshortreadsort+1));
+  srsw->shortreadsortrefs
+    = gt_malloc(sizeof (*srsw->shortreadsortrefs) * (maxshortreadsort+1));
+  srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
+  srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
+  for (idx = 0; idx <= maxshortreadsort; idx++)
+  {
+    srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+  }
+}
+
 static void bentsedgresources_init(GtBentsedgresources *bsr,
                                    GtSuffixsortspace *suffixsortspace,
                                    const GtEncseq *encseq,
@@ -1819,8 +1827,8 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
   bsr->countingsortinfo = NULL;
-  bsr->shortreadsortinfo = NULL;
-  bsr->shortreadsortrefs = NULL;
+  bsr->srsw.shortreadsortinfo = NULL;
+  bsr->srsw.shortreadsortrefs = NULL;
   bsr->medianinfospace = NULL;
   bsr->blindtrie = NULL;
   bsr->equalwithprevious = NULL;
@@ -1829,18 +1837,12 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
     if (allowforshortreadsort(bsr->sfxstrategy,bsr->encseq,bsr->prefixlength,
                               bsr->readmode))
     {
-      bsr->shortreadsortinfo = gt_malloc(sizeof (*bsr->shortreadsortinfo) *
-                                         (sfxstrategy->maxshortreadsort+1));
-      bsr->shortreadsortrefs = gt_malloc(sizeof (*bsr->shortreadsortrefs) *
-                                          (sfxstrategy->maxshortreadsort+1));
-      for (idx = 0; idx <= sfxstrategy->maxshortreadsort; idx++)
-      {
-        bsr->shortreadsortrefs[idx] = (uint16_t) idx;
-      }
+      shortreadsortworkinfo_init(&bsr->srsw,sfxstrategy->maxshortreadsort,
+                                 readmode);
     } else
     {
-      bsr->shortreadsortinfo = NULL;
-      bsr->shortreadsortrefs = NULL;
+      bsr->srsw.shortreadsortinfo = NULL;
+      bsr->srsw.shortreadsortrefs = NULL;
       for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
       {
         bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
@@ -1923,10 +1925,10 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   bsr->countingsortinfo = NULL;
   gt_free(bsr->medianinfospace);
   bsr->medianinfospace = NULL;
-  gt_free(bsr->shortreadsortinfo);
-  bsr->shortreadsortinfo = NULL;
-  gt_free(bsr->shortreadsortrefs);
-  bsr->shortreadsortrefs = NULL;
+  gt_free(bsr->srsw.shortreadsortinfo);
+  bsr->srsw.shortreadsortinfo = NULL;
+  gt_free(bsr->srsw.shortreadsortrefs);
+  bsr->srsw.shortreadsortrefs = NULL;
   gt_blindtrie_delete(bsr->blindtrie);
   gt_encseq_reader_delete(bsr->esr1);
   gt_encseq_reader_delete(bsr->esr2);
@@ -1981,6 +1983,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   if (outlcpinfo != NULL)
   {
     bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);
+    bsr.srsw.tableoflcpvalues = bsr.tableoflcpvalues;
   }
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
@@ -2054,15 +2057,16 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
   if (numberofsuffixes > 1UL)
   {
     bentsedgresources_init(&bsr,
-                          suffixsortspace,
-                          encseq,
-                          readmode,
-                          0,
-                          sortmaxdepth,
-                          sfxstrategy);
+                           suffixsortspace,
+                           encseq,
+                           readmode,
+                           0,
+                           sortmaxdepth,
+                           sfxstrategy);
     if (outlcpinfo != NULL)
     {
       bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,NULL);
+      bsr.srsw.tableoflcpvalues = bsr.tableoflcpvalues;
     }
     bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
     bsr.processunsortedsuffixrange = processunsortedsuffixrange;
