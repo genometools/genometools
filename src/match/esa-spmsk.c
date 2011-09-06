@@ -36,6 +36,11 @@ struct GtSpmsk_state /* global information */
   GtSpmsk_info *info;
 };
 
+static GtBUinfo *gt_spmsk_allocatestackinfo(GtBUstate *bustate)
+{
+  return (GtBUinfo *) (((GtSpmsk_state *) bustate)->info);
+}
+
 static int spmsk_processleafedge(GT_UNUSED bool firstsucc,
                                  GT_UNUSED unsigned long fd,
                                  GT_UNUSED unsigned long flb,
@@ -96,11 +101,6 @@ void gt_spmsk_delete(GtSpmsk_state *state)
   gt_free(state);
 }
 
-static GtBUinfo *gt_spmsk_allocatestackinfo(GtBUstate *bustate)
-{
-  return (GtBUinfo *) (((GtSpmsk_state *) bustate)->info);
-}
-
 int gt_spmsk_process(GtSpmsk_state *state,
                         const unsigned long *suftab_bucket,
                         const uint16_t *lcptab_bucket,
@@ -117,8 +117,8 @@ int gt_spmsk_process(GtSpmsk_state *state,
                           spmsk_processlcpinterval,
                           (GtBUstate *) &state,
                           err) != 0)
-    {
-      return -1;
-    }
-    return 0;
+  {
+    return -1;
+  }
+  return 0;
 }
