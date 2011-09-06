@@ -23,6 +23,7 @@
 #include "core/mathsupport.h"
 #include "core/radix-intsort.h"
 #include "sfx-suffixer.h"
+#include "sfx-shortreadsort.h"
 #include "firstcodes.h"
 
 typedef struct
@@ -530,6 +531,40 @@ static void storefirstcodes_partialsum(GtFirstcodesinfo *fci)
   fci->countocc[fci->differentcodes] = fci->countocc[fci->differentcodes-1];
 }
 
+static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
+                                        GtReadmode readmode,
+                                        unsigned long *suftab,
+                                        unsigned long maxbucketsize,
+                                        const unsigned long *countocc,
+                                        unsigned long differentcodes,
+                                        unsigned long depth)
+{
+  unsigned long idx, width;
+  GtShortreadsortworkinfo *srsw;
+  GtEncseqReader *esr;
+
+  srsw = gt_shortreadsort_new(maxbucketsize,readmode);
+  esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  for (idx = 0; idx <differentcodes; idx++)
+  {
+    gt_assert(countocc[idx+1]>countocc[idx]);
+    width = countocc[idx+1] - countocc[idx];
+    if (width >= 2UL)
+    {
+     gt_shortreadsort_array_sort(srsw,
+                                  encseq,
+                                  readmode,
+                                  esr,
+                                  suftab,
+                                  countocc[idx],
+                                  width,
+                                  depth);
+    }
+  }
+  gt_encseq_reader_delete(esr);
+  gt_shortreadsort_delete(srsw);
+}
+
 #ifdef  QSORTNAME
 #undef  QSORTNAME
 #endif
@@ -667,10 +702,17 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
   gt_free(fci.codeposbuffer);
   gt_free(fci.tempcodeposforradixsort);
-  gt_free(fci.allfirstcodes);
-  gt_free(fci.countocc);
   gt_free(fci.markprefix.bits);
   gt_free(fci.marksuffix.bits);
+  gt_free(fci.allfirstcodes);
+  gt_firstcodes_sortremaining(encseq,
+                              GT_READMODE_FORWARD,
+                              fci.suftab,
+                              fci.maxbucketsize,
+                              fci.countocc,
+                              fci.differentcodes,
+                              (unsigned long) kmersize);
+  gt_free(fci.countocc);
   gt_free(fci.suftab);
   if (timer != NULL)
   {
