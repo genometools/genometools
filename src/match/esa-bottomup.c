@@ -188,8 +188,6 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       }
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
-        gt_assert(lastinterval->info == NULL ||
-                  lastinterval->info != TOP_ESA_BOTTOMUP.info);
         if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;
@@ -329,7 +327,7 @@ int gt_esa_bottomup_RAM(
   gt_assert(nonspecials > 0);
   lastsuftabvalue = suftab_bucket[nonspecials-1];
   PUSH_ESA_BOTTOMUP(0,0);
-  for (idx = 0; idx < nonspecials; idx++)
+  for (idx = 0; idx < nonspecials-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = suftab_bucket[idx];
@@ -371,8 +369,6 @@ int gt_esa_bottomup_RAM(
       }
       if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
       {
-        gt_assert(lastinterval->info == NULL ||
-                  lastinterval->info != TOP_ESA_BOTTOMUP.info);
         if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;

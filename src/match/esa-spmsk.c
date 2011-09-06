@@ -30,7 +30,7 @@ typedef struct
 struct GtSpmsk_state /* global information */
 {
   unsigned long totallength,
-                minlen;
+                minmatchlength;
   const GtEncseq *encseq;
   GtReadmode readmode;
   GtSpmsk_info *info;
@@ -85,14 +85,14 @@ static int spmsk_processlcpinterval(GT_UNUSED unsigned long lcp,
 
 GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
                             GtReadmode readmode,
-                            unsigned long minlen)
+                            unsigned long minmatchlength)
 {
   GtSpmsk_state *state = gt_malloc(sizeof (*state));
 
   state->encseq = encseq;
   state->readmode = readmode;
   state->totallength = gt_encseq_total_length(encseq);
-  state->minlen = minlen;
+  state->minmatchlength = minmatchlength;
   return state;
 }
 

@@ -24,6 +24,7 @@
 #include "core/radix-intsort.h"
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
+#include "esa-spmsk.h"
 #include "firstcodes.h"
 
 typedef struct
@@ -538,7 +539,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              unsigned long previous,
                                              bool previousdefined,
                                              const unsigned long *suftab_bucket,
-                                             const uint16_t *lcpvalues,
+                                             const uint16_t *lcptab_bucket,
                                              unsigned long numberofsuffixes)
 {
   unsigned long idx, current, maxlcp,
@@ -565,7 +566,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                                esr1,
                                                esr2);
       gt_assert(cmp < 0);
-      gt_assert(idx == 0 || maxlcp == (unsigned long) lcpvalues[idx]);
+      gt_assert(idx == 0 || maxlcp == (unsigned long) lcptab_bucket[idx]);
     }
     previous = current;
     previousdefined = true;
@@ -578,22 +579,29 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         unsigned long maxbucketsize,
                                         const unsigned long *countocc,
                                         unsigned long differentcodes,
-                                        unsigned long depth)
+                                        unsigned long depth,
+                                        unsigned long minmatchlength)
 {
   unsigned long idx, width, previous = 0;
   GtShortreadsortworkinfo *srsw;
   GtEncseqReader *esr, *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
+  const uint16_t *lcptab_bucket;
+  GtSpmsk_state *spmsk_state = NULL;
   const bool withsuftabcheck = true;
-  const uint16_t *lcpvalues;
+  const bool computespms = true;
 
   if (withsuftabcheck)
   {
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
+  if (computespms)
+  {
+    spmsk_state = gt_spmsk_new(encseq,readmode,minmatchlength);
+  }
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
-  lcpvalues = gt_shortreadsort_lcpvalues(srsw);
+  lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   for (idx = 0; idx <differentcodes; idx++)
   {
@@ -618,10 +626,19 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                          previous,
                                          previousdefined,
                                          suftab + countocc[idx],
-                                         lcpvalues,
+                                         lcptab_bucket,
                                          width);
         previousdefined = true;
         previous = suftab[countocc[idx] + width -1];
+      }
+      if (computespms)
+      {
+        int ret = gt_spmsk_process(spmsk_state,
+                                   suftab + countocc[idx],
+                                   lcptab_bucket,
+                                   width,
+                                   NULL);
+        gt_assert(ret == 0);
       }
     }
   }
@@ -629,6 +646,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   gt_shortreadsort_delete(srsw);
+  gt_spmsk_delete(spmsk_state);
 }
 
 #ifdef  QSORTNAME
@@ -651,6 +669,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   size_t sizeforcodestable;
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
+  unsigned int minmatchlength = 45U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
 
   if (gt_showtime_enabled())
@@ -716,7 +735,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   getencseqkmers_twobitencoding(encseq,
                                 readmode,
                                 kmersize,
-                                45U,
+                                minmatchlength,
                                 false,
                                 gt_firstcodes_accumulatecounts,
                                 &fci,
@@ -756,7 +775,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   getencseqkmers_twobitencoding(encseq,
                                 readmode,
                                 kmersize,
-                                45U,
+                                minmatchlength,
                                 false,
                                 gt_firstcodes_insertsuffixes,
                                 &fci,
@@ -782,7 +801,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               fci.maxbucketsize,
                               fci.countocc,
                               fci.differentcodes,
-                              (unsigned long) kmersize);
+                              (unsigned long) kmersize,
+                              (unsigned long) minmatchlength);
   gt_free(fci.countocc);
   gt_free(fci.suftab);
   if (timer != NULL)
