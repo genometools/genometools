@@ -570,7 +570,8 @@ static void gt_firstcodes_checksuftab(const GtEncseq *encseq,
                                       const unsigned long *suftab,
                                       unsigned long numberofsuffixes)
 {
-  unsigned long idx, maxlcp, totallength = gt_encseq_total_length(encseq);
+  unsigned long idx, previous, current, maxlcp,
+                totallength = gt_encseq_total_length(encseq);
   GtEncseqReader *esr1, *esr2;
   int cmp;
   const bool specialsareequal = false, specialsareequalatdepth0 = false;
@@ -579,20 +580,22 @@ static void gt_firstcodes_checksuftab(const GtEncseq *encseq,
   esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   gt_assert(numberofsuffixes > 0);
-  gt_assert(suftab[0] < totallength);
+  previous = suftab[0];
+  gt_assert(previous < totallength);
   for (idx = 1UL; idx < numberofsuffixes; idx++)
   {
+    current = suftab[idx];
     if (idx < totallength)
     {
-      gt_assert(suftab[idx] < totallength);
+      gt_assert(current < totallength);
       cmp = gt_encseq_check_comparetwosuffixes(encseq,
                                                readmode,
                                                &maxlcp,
                                                specialsareequal,
                                                specialsareequalatdepth0,
                                                depth,
-                                               suftab[idx-1],
-                                               suftab[idx],
+                                               previous,
+                                               current,
                                                esr1,
                                                esr2);
       gt_assert(cmp <= 0);
@@ -601,9 +604,10 @@ static void gt_firstcodes_checksuftab(const GtEncseq *encseq,
       maxlcp = 0;
       if (numberofsuffixes == totallength+1)
       {
-        gt_assert(suftab[idx] == totallength);
+        gt_assert(current == totallength);
       }
     }
+    previous = current;
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
@@ -690,7 +694,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_timer_show_progress(timer, "accumulate counts",stdout);
   }
   fci.tempcodeforradixsort = gt_malloc((size_t) fci.codebuffer_allocated
-                                   * sizeof (*fci.tempcodeforradixsort));
+                                       * sizeof (*fci.tempcodeforradixsort));
   getencseqkmers_twobitencoding(encseq,
                                 readmode,
                                 kmersize,
