@@ -634,6 +634,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
+  const bool withsuftabcheck = false;
 
   if (gt_showtime_enabled())
   {
@@ -765,15 +766,18 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               fci.countocc,
                               fci.differentcodes,
                               (unsigned long) kmersize);
-  if (timer != NULL)
-  {
-    gt_timer_show_progress(timer, "checking the suffix order",stdout);
-  }
-  gt_firstcodes_checksuftab(encseq,
-                            readmode,
-                            fci.suftab,
-                            fci.firstcodehits+fci.numofsequences);
   gt_free(fci.countocc);
+  if (withsuftabcheck)
+  {
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "checking the suffix order",stdout);
+    }
+    gt_firstcodes_checksuftab(encseq,
+                              readmode,
+                              fci.suftab,
+                              fci.firstcodehits+fci.numofsequences);
+  }
   gt_free(fci.suftab);
   if (timer != NULL)
   {
