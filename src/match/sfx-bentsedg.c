@@ -1896,6 +1896,12 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->countshortreadsort = 0;
 }
 
+static size_t gt_shortreadsort_size(const Sfxstrategy *sfxstrategy)
+{
+  return sizeof (GtShortreadsort) * (sfxstrategy->maxshortreadsort+1) +
+         sizeof (uint16_t) * (sfxstrategy->maxshortreadsort+1);
+}
+
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy,
                                   const GtEncseq *encseq,
                                   unsigned int prefixlength,
@@ -1907,8 +1913,7 @@ size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy,
   {
     if (allowforshortreadsort(sfxstrategy,encseq,prefixlength,readmode))
     {
-      sumsize += sizeof (GtShortreadsort) * (sfxstrategy->maxshortreadsort+1) +
-                 sizeof (uint16_t) * (sfxstrategy->maxshortreadsort+1);
+      sumsize += gt_shortreadsort_size(sfxstrategy);
     } else
     {
       sumsize += sizeof (GtCountingsortinfo) * sfxstrategy->maxcountingsort;
