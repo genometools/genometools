@@ -652,6 +652,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
   GtOption *option;
   bool has_extended_options, option_parsed;
   long long_value;
+  unsigned long ulong_value;
   int minus_offset, had_err = 0;
   GtStr *gt_error_str;
 
@@ -921,18 +922,16 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                                                               argv, err);
               if (!had_err) {
                 argnum++;
-                if (gt_parse_long(&long_value, argv[argnum]) ||
-                    long_value < 0) {
-                  gt_error_set(err, "argument to option \"-%s\" must be a "
-                               "non-negative integer",
-                               gt_str_get(option->option_str));
+                if (gt_parse_ulong(&ulong_value, argv[argnum])) {
+                  gt_error_set(err, "argument to option \"-%s\" is out of "
+                               "range", gt_str_get(option->option_str));
                   had_err = -1;
                 }
               }
               if (!had_err) {
                 /* minimum value check */
                 if (option->min_value_set &&
-                    long_value < option->min_value.ul) {
+                    ulong_value < option->min_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                "integer >= %lu", gt_str_get(option->option_str),
                                option->min_value.ul);
@@ -942,7 +941,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
               if (!had_err) {
                 /* maximum value check */
                 if (option->max_value_set &&
-                    long_value > option->max_value.ul) {
+                    ulong_value > option->max_value.ul) {
                   gt_error_set(err, "argument to option \"-%s\" must be an "
                                "integer <= %lu", gt_str_get(option->option_str),
                                option->max_value.ul);
@@ -950,7 +949,7 @@ GtOPrval gt_option_parser_parse(GtOptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
-                *(unsigned long*) option->value = long_value;
+                *(unsigned long*) option->value = ulong_value;
                 option_parsed = true;
               }
               break;
