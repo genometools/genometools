@@ -19,6 +19,7 @@
 #include "core/unused_api.h"
 #include "core/readmode_api.h"
 #include "core/error_api.h"
+#include "core/arraydef.h"
 #include "esa-bottomup.h"
 #include "esa-spmsk.h"
 
@@ -29,57 +30,104 @@ typedef struct
 
 struct GtSpmsk_state /* global information */
 {
-  unsigned long totallength,
-                minmatchlength;
   const GtEncseq *encseq;
   GtReadmode readmode;
-  GtSpmsk_info *info;
+  unsigned long totallength,
+                minmatchlength;
+  GtArrayGtUlong Wset, Lset;
 };
 
-static GtBUinfo *gt_spmsk_allocatestackinfo(GtBUstate *bustate)
+static GtBUinfo *gt_spmsk_allocatestackinfo(GT_UNUSED GtBUstate *bustate)
 {
-  return (GtBUinfo *) (((GtSpmsk_state *) bustate)->info);
+  return (GtBUinfo *) gt_malloc(sizeof (GtSpmsk_info));
 }
 
-static int spmsk_processleafedge(GT_UNUSED bool firstsucc,
-                                 GT_UNUSED unsigned long fd,
+static void gt_spmsk_freestackinfo(GtBUinfo *buinfo,
+                                   GT_UNUSED GtBUstate *bustate)
+{
+  gt_free(buinfo);
+}
+
+static int spmsk_processleafedge(bool firstedge,
+                                 unsigned long fd,
                                  GT_UNUSED unsigned long flb,
-                                 GT_UNUSED GtBUinfo *info,
-                                 GT_UNUSED unsigned long leafnumber,
+                                 GtBUinfo *finfo,
+                                 unsigned long pos,
                                  GtBUstate *bustate,
                                  GT_UNUSED GtError *err)
 
 {
-  GT_UNUSED GtSpmsk_state *spmsk_state = (GtSpmsk_state *) bustate;
+  GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
+  if (fd >= state->minmatchlength)
+  {
+    unsigned long idx;
+
+    if (firstedge)
+    {
+      ((GtSpmsk_info *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
+    }
+    if (pos == 0 || gt_encseq_position_is_separator(state->encseq,
+                                                    pos - 1,
+                                                    state->readmode))
+    {
+      idx = gt_encseq_seqnum(state->encseq,pos);
+      GT_STOREINARRAY(&state->Wset,GtUlong,128,idx);
+    }
+    if (pos + fd == state->totallength ||
+        gt_encseq_position_is_separator(state->encseq,
+                                        pos + fd,state->readmode))
+    {
+      idx = gt_encseq_seqnum(state->encseq,pos);
+      GT_STOREINARRAY(&state->Lset,GtUlong,128,idx);
+    }
+  }
   return 0;
 }
 
-static int spmsk_processbranchingedge(GT_UNUSED bool firstsucc,
-                                      GT_UNUSED unsigned long fd,
+static int spmsk_processbranchingedge(bool firstedge,
+                                      unsigned long fd,
                                       GT_UNUSED unsigned long flb,
-                                      GT_UNUSED GtBUinfo *finfo,
+                                      GtBUinfo *finfo,
                                       GT_UNUSED unsigned long sd,
                                       GT_UNUSED unsigned long slb,
                                       GT_UNUSED unsigned long srb,
-                                      GT_UNUSED GtBUinfo *sinfo,
+                                      GtBUinfo *sinfo,
                                       GtBUstate *bustate,
                                       GT_UNUSED GtError *err)
 {
-  GT_UNUSED GtSpmsk_state *spmsk_state = (GtSpmsk_state *) bustate;
+  GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
+  if (fd >= state->minmatchlength && firstedge)
+  {
+    ((GtSpmsk_info *) finfo)->firstinW = ((GtSpmsk_info *) sinfo)->firstinW;
+  }
   return 0;
 }
 
-static int spmsk_processlcpinterval(GT_UNUSED unsigned long lcp,
+static int spmsk_processlcpinterval(unsigned long lcp,
                                     GT_UNUSED unsigned long lb,
                                     GT_UNUSED unsigned long rb,
-                                    GT_UNUSED GtBUinfo *info,
+                                    GtBUinfo *info,
                                     GtBUstate *bustate,
                                     GT_UNUSED GtError *err)
 {
-  GT_UNUSED GtSpmsk_state *spmsk_state = (GtSpmsk_state *) bustate;
+  GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
+  if (lcp >= state->minmatchlength)
+  {
+    unsigned long lidx, widx, firstpos = ((GtSpmsk_info *) info)->firstinW;
+
+    for (lidx = 0; lidx < state->Lset.nextfreeGtUlong; lidx++)
+    {
+      unsigned long lpos = state->Lset.spaceGtUlong[lidx];
+
+      for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
+      {
+        printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
+      }
+    }
+  }
   return 0;
 }
 
@@ -93,11 +141,15 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
   state->readmode = readmode;
   state->totallength = gt_encseq_total_length(encseq);
   state->minmatchlength = minmatchlength;
+  GT_INITARRAY(&state->Wset,GtUlong);
+  GT_INITARRAY(&state->Lset,GtUlong);
   return state;
 }
 
 void gt_spmsk_delete(GtSpmsk_state *state)
 {
+  GT_FREEARRAY(&state->Wset,GtUlong);
+  GT_FREEARRAY(&state->Lset,GtUlong);
   gt_free(state);
 }
 
@@ -111,7 +163,7 @@ int gt_spmsk_process(GtSpmsk_state *state,
                           lcptab_bucket,
                           nonspecials,
                           gt_spmsk_allocatestackinfo,
-                          NULL,
+                          gt_spmsk_freestackinfo,
                           spmsk_processleafedge,
                           spmsk_processbranchingedge,
                           spmsk_processlcpinterval,
