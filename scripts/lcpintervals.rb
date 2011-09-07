@@ -232,12 +232,13 @@ def spmleafedge(res,firstedge,itv,pos)
     if firstedge 
       res.firstinW[itv2key(itv)] = res.wset.length
     end
-    idx = res.encseq.seqnum(pos)
     if pos == 0 or res.encseq.get_encoded_char(pos-1) == 255
+      idx = res.encseq.seqnum(pos)
       res.wset.push(idx)
     end
     if pos + itv.lcp == res.encseq.total_length or
        res.encseq.get_encoded_char(pos + itv.lcp) == 255
+      idx = res.encseq.seqnum(pos)
       res.lset.push(idx)
     end
   end
@@ -251,8 +252,8 @@ end
 
 def spmlcpinterval(res,itv)
   if itv.lcp >= res.minlen
+    firstpos = res.firstinW[itv2key(itv)]
     res.lset.each do |l|
-      firstpos = res.firstinW[itv2key(itv)]
       firstpos.upto(res.wset.length-1) do |i|
         puts "#{l} #{res.wset[i]} #{itv.lcp}"
       end

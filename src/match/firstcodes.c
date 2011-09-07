@@ -669,7 +669,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   size_t sizeforcodestable;
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
-  unsigned int minmatchlength = 45U;
+  unsigned int minmatchlength = 35U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
 
   if (gt_showtime_enabled())

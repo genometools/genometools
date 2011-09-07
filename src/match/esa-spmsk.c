@@ -63,6 +63,8 @@ static int spmsk_processleafedge(bool firstedge,
   {
     unsigned long idx;
 
+    printf("processleaf(firstedge=%s,fd=%lu,pos=%lu\n",
+            firstedge ? "true" : "false",fd,pos);
     if (firstedge)
     {
       ((GtSpmsk_info *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
@@ -72,6 +74,7 @@ static int spmsk_processleafedge(bool firstedge,
                                                     state->readmode))
     {
       idx = gt_encseq_seqnum(state->encseq,pos);
+      printf("Wset += %lu\n",idx);
       GT_STOREINARRAY(&state->Wset,GtUlong,128,idx);
     }
     if (pos + fd == state->totallength ||
@@ -79,6 +82,7 @@ static int spmsk_processleafedge(bool firstedge,
                                         pos + fd,state->readmode))
     {
       idx = gt_encseq_seqnum(state->encseq,pos);
+      printf("Lset += %lu\n",idx);
       GT_STOREINARRAY(&state->Lset,GtUlong,128,idx);
     }
   }
@@ -100,6 +104,8 @@ static int spmsk_processbranchingedge(bool firstedge,
 
   if (fd >= state->minmatchlength && firstedge)
   {
+    printf("processbranch(firstedge=%s,fd=%lu\n",
+            firstedge ? "true" : "false",fd);
     ((GtSpmsk_info *) finfo)->firstinW = ((GtSpmsk_info *) sinfo)->firstinW;
   }
   return 0;
@@ -118,6 +124,7 @@ static int spmsk_processlcpinterval(unsigned long lcp,
   {
     unsigned long lidx, widx, firstpos = ((GtSpmsk_info *) info)->firstinW;
 
+    printf("processlcpinterval(lcp=%lu,firstpos=%lu\n",lcp,firstpos);
     for (lidx = 0; lidx < state->Lset.nextfreeGtUlong; lidx++)
     {
       unsigned long lpos = state->Lset.spaceGtUlong[lidx];
@@ -127,6 +134,10 @@ static int spmsk_processlcpinterval(unsigned long lcp,
         printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
       }
     }
+    state->Lset.nextfreeGtUlong = 0;
+  } else
+  {
+    state->Wset.nextfreeGtUlong = 0;
   }
   return 0;
 }
