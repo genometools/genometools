@@ -24,7 +24,7 @@
 #include "core/types_api.h"
 #include "core/logger.h"
 #include "core/format64.h"
-#include "sfx-ri-def.h"
+#include "esa-scanprj.h"
 
 typedef union
 {

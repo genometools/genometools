@@ -31,7 +31,7 @@
 #include "core/codetype.h"
 #include "core/encseq.h"
 #include "esa-fileend.h"
-#include "sfx-ri-def.h"
+#include "esa-scanprj.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "stamp.h"

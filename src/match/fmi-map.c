@@ -27,7 +27,7 @@
 #include "core/str.h"
 #include "core/alphabet.h"
 #include "core/logger.h"
-#include "sfx-ri-def.h"
+#include "esa-scanprj.h"
 #include "fmindex.h"
 
 #include "fmi-keyval.pr"
