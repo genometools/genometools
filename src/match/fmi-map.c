@@ -55,32 +55,34 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                  GtError *err)
 {
   bool haserr = false;
-  GtArray *riktab;
+  GtScannedprjkeytable *scannedprjkeytable;
   unsigned int intstoreindexpos;
 
   gt_error_check(err);
-  riktab = gt_array_new(gt_scannedprjkey_size());
-  SETREADINTKEYS("bwtlength",&fmindex->bwtlength,NULL);
-  SETREADINTKEYS("longest",&fmindex->longestsuffixpos,NULL);
-  SETREADINTKEYS("storeindexpos",&intstoreindexpos,NULL);
-  SETREADINTKEYS("log2blocksize",&fmindex->log2bsize,NULL);
-  SETREADINTKEYS("log2markdist",&fmindex->log2markdist,NULL);
-  SETREADINTKEYS("specialcharacters",&specialcharinfo->specialcharacters,NULL);
-  SETREADINTKEYS("specialranges",&specialcharinfo->specialranges,NULL);
-  SETREADINTKEYS("realspecialranges",&specialcharinfo->realspecialranges,NULL);
-  SETREADINTKEYS("lengthofspecialprefix",
-                 &specialcharinfo->lengthofspecialprefix,NULL);
-  SETREADINTKEYS("lengthofspecialsuffix",
-                 &specialcharinfo->lengthofspecialsuffix,NULL);
-  SETREADINTKEYS("wildcards",&specialcharinfo->wildcards,NULL);
-  SETREADINTKEYS("wildcardranges",&specialcharinfo->wildcardranges,NULL);
-  SETREADINTKEYS("realwildcardranges",
-                 &specialcharinfo->realwildcardranges,NULL);
-  SETREADINTKEYS("lengthofwildcardprefix",
-                 &specialcharinfo->lengthofwildcardprefix,NULL);
-  SETREADINTKEYS("lengthofwildcardsuffix",
-                 &specialcharinfo->lengthofwildcardsuffix,NULL);
-  SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
+  scannedprjkeytable = gt_scannedprjkeytable_new();
+  GT_SCANNEDPRJKEY_ADD("bwtlength",&fmindex->bwtlength,NULL);
+  GT_SCANNEDPRJKEY_ADD("longest",&fmindex->longestsuffixpos,NULL);
+  GT_SCANNEDPRJKEY_ADD("storeindexpos",&intstoreindexpos,NULL);
+  GT_SCANNEDPRJKEY_ADD("log2blocksize",&fmindex->log2bsize,NULL);
+  GT_SCANNEDPRJKEY_ADD("log2markdist",&fmindex->log2markdist,NULL);
+  GT_SCANNEDPRJKEY_ADD("specialcharacters",
+                       &specialcharinfo->specialcharacters,NULL);
+  GT_SCANNEDPRJKEY_ADD("specialranges",&specialcharinfo->specialranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("realspecialranges",&specialcharinfo->realspecialranges,
+                       NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofspecialprefix",
+                       &specialcharinfo->lengthofspecialprefix,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofspecialsuffix",
+                       &specialcharinfo->lengthofspecialsuffix,NULL);
+  GT_SCANNEDPRJKEY_ADD("wildcards",&specialcharinfo->wildcards,NULL);
+  GT_SCANNEDPRJKEY_ADD("wildcardranges",&specialcharinfo->wildcardranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("realwildcardranges",
+                       &specialcharinfo->realwildcardranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofwildcardprefix",
+                       &specialcharinfo->lengthofwildcardprefix,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofwildcardsuffix",
+                       &specialcharinfo->lengthofwildcardsuffix,NULL);
+  GT_SCANNEDPRJKEY_ADD("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
     GtStr *currentline;
@@ -95,7 +97,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                    linenum,
                                    gt_str_get(currentline),
                                    gt_str_length(currentline),
-                                   riktab,
+                                   scannedprjkeytable,
                                    err) != 0)
       {
         haserr = true;
@@ -105,8 +107,9 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     }
     gt_str_delete(currentline);
   }
-  if (!haserr && gt_allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
-                                logger,err) != 0)
+  if (!haserr && gt_scannedprjkey_allkeysdefined(indexname,FMASCIIFILESUFFIX,
+                                                 scannedprjkeytable,
+                                                 logger,err) != 0)
   {
     haserr = true;
   }
@@ -127,7 +130,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       }
     }
   }
-  gt_array_delete(riktab);
+  gt_scannedprjkeytable_delete(scannedprjkeytable);
   return haserr ? -1 : 0;
 }
 

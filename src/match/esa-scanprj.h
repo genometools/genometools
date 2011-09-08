@@ -15,39 +15,43 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_RI_DEF_H
-#define SFX_RI_DEF_H
+#ifndef ESA_SCANPRJ_H
+#define ESA_SCANPRJ_H
 #include "core/array.h"
 #include "core/error.h"
 #include "core/str.h"
 #include "core/logger.h"
 
-#define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
-        gt_scannedprjkey_add(riktab,VALNAME,VAL,sizeof (*(VAL)),false,FORCEREAD)
+#define GT_SCANNEDPRJKEY_ADD(VALNAME,VAL,FORCEREAD)\
+        gt_scannedprjkey_add(scannedprjkeytable,VALNAME,VAL,sizeof (*(VAL)),\
+                             false,FORCEREAD)
 
-typedef struct GtScannedprjkey GtScannedprjkey;
+typedef struct GtScannedprjkeytable GtScannedprjkeytable;
 
-size_t gt_scannedprjkey_size(void);
+GtScannedprjkeytable *gt_scannedprjkeytable_new(void);
 
-void gt_scannedprjkey_add(GtArray *riktab,
+void gt_scannedprjkeytable_delete(GtScannedprjkeytable *scannedprjkeytable);
+
+void gt_scannedprjkey_add(GtScannedprjkeytable *scannedprjkeytable,
                           const char *keystring,
                           void *valueptr,
                           size_t sizeval,
                           bool readdouble,
                           bool *readflag);
 
-int gt_allkeysdefined(const char *indexname,
-                      const char *suffix,
-                      const GtArray *riktab,
-                      GtLogger *logger,
-                      GtError *err);
-
 int gt_scannedprjkey_analyze(const char *indexname,
                              const char *suffix,
                              unsigned int linenum,
                              const char *linebuffer,
                              unsigned long linelength,
-                             GtArray *riktab,
+                             GtScannedprjkeytable *scannedprjkeytable,
                              GtError *err);
+
+int gt_scannedprjkey_allkeysdefined(
+                               const char *indexname,
+                               const char *suffix,
+                               const GtScannedprjkeytable *scannedprjkeytable,
+                               GtLogger *logger,
+                               GtError *err);
 
 #endif

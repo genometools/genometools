@@ -64,7 +64,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   Definedunsignedlong maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
-  GtArray *riktab;
+  GtScannedprjkeytable *scannedprjkeytable;
   GtStr *currentline;
   /* the following five variables are local as the parsed values are
      not required: they are determined by reading the encseq */
@@ -75,57 +75,57 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                 numofquerysequences;
 
   gt_error_check(err);
-  riktab = gt_array_new(gt_scannedprjkey_size());
-  SETREADINTKEYS("totallength",&totallength,NULL);
-  SETREADINTKEYS("specialcharacters",
-                 &specialcharinfo.specialcharacters,NULL);
-  SETREADINTKEYS("specialranges",
-                 &specialcharinfo.specialranges,NULL);
-  SETREADINTKEYS("realspecialranges",
-                 &specialcharinfo.realspecialranges,NULL);
-  SETREADINTKEYS("lengthofspecialprefix",
-                 &specialcharinfo.lengthofspecialprefix,NULL);
-  SETREADINTKEYS("lengthofspecialsuffix",
-                 &specialcharinfo.lengthofspecialsuffix,NULL);
-  SETREADINTKEYS("wildcards",
-                 &specialcharinfo.wildcards,NULL);
-  SETREADINTKEYS("wildcardranges",
-                 &specialcharinfo.wildcardranges,NULL);
-  SETREADINTKEYS("realwildcardranges",
-                 &specialcharinfo.realwildcardranges,NULL);
-  SETREADINTKEYS("lengthofwildcardprefix",
-                 &specialcharinfo.lengthofwildcardprefix,NULL);
-  SETREADINTKEYS("lengthofwildcardsuffix",
-                 &specialcharinfo.lengthofwildcardsuffix,NULL);
-  SETREADINTKEYS("numofsequences",&numofsequences,NULL);
-  SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
-  gt_scannedprjkey_add(riktab,"numofquerysequences",
+  scannedprjkeytable = gt_scannedprjkeytable_new();
+  GT_SCANNEDPRJKEY_ADD("totallength",&totallength,NULL);
+  GT_SCANNEDPRJKEY_ADD("specialcharacters",
+                       &specialcharinfo.specialcharacters,NULL);
+  GT_SCANNEDPRJKEY_ADD("specialranges",
+                       &specialcharinfo.specialranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("realspecialranges",
+                       &specialcharinfo.realspecialranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofspecialprefix",
+                       &specialcharinfo.lengthofspecialprefix,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofspecialsuffix",
+                       &specialcharinfo.lengthofspecialsuffix,NULL);
+  GT_SCANNEDPRJKEY_ADD("wildcards",
+                       &specialcharinfo.wildcards,NULL);
+  GT_SCANNEDPRJKEY_ADD("wildcardranges",
+                       &specialcharinfo.wildcardranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("realwildcardranges",
+                       &specialcharinfo.realwildcardranges,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofwildcardprefix",
+                       &specialcharinfo.lengthofwildcardprefix,NULL);
+  GT_SCANNEDPRJKEY_ADD("lengthofwildcardsuffix",
+                       &specialcharinfo.lengthofwildcardsuffix,NULL);
+  GT_SCANNEDPRJKEY_ADD("numofsequences",&numofsequences,NULL);
+  GT_SCANNEDPRJKEY_ADD("numofdbsequences",&numofdbsequences,NULL);
+  gt_scannedprjkey_add(scannedprjkeytable,"numofquerysequences",
                        &numofquerysequences,0,false,NULL);
-  SETREADINTKEYS("numberofallsortedsuffixes",
-                 &suffixarray->numberofallsortedsuffixes,NULL);
-  SETREADINTKEYS("longest",&suffixarray->longest.valueunsignedlong,
-                           &suffixarray->longest.defined);
-  SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
-  SETREADINTKEYS("largelcpvalues",
-                 &suffixarray->numoflargelcpvalues.valueunsignedlong,
-                 &suffixarray->numoflargelcpvalues.defined);
-  gt_scannedprjkey_add(riktab,"averagelcp",
+  GT_SCANNEDPRJKEY_ADD("numberofallsortedsuffixes",
+                       &suffixarray->numberofallsortedsuffixes,NULL);
+  GT_SCANNEDPRJKEY_ADD("longest",&suffixarray->longest.valueunsignedlong,
+                       &suffixarray->longest.defined);
+  GT_SCANNEDPRJKEY_ADD("prefixlength",&suffixarray->prefixlength,NULL);
+  GT_SCANNEDPRJKEY_ADD("largelcpvalues",
+                       &suffixarray->numoflargelcpvalues.valueunsignedlong,
+                       &suffixarray->numoflargelcpvalues.defined);
+  gt_scannedprjkey_add(scannedprjkeytable,"averagelcp",
                        &suffixarray->averagelcp.valuedouble,
                        sizeof (suffixarray->averagelcp.valuedouble),
                        true,
                        &suffixarray->averagelcp.defined);
-  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueunsignedlong,
-                 &maxbranchdepth.defined);
-  SETREADINTKEYS("integersize",&integersize,NULL);
-  SETREADINTKEYS("littleendian",&littleendian,NULL);
-  SETREADINTKEYS("readmode",&readmodeint,NULL);
-  SETREADINTKEYS("mirrored",&mirrored,NULL);
+  GT_SCANNEDPRJKEY_ADD("maxbranchdepth",&maxbranchdepth.valueunsignedlong,
+                       &maxbranchdepth.defined);
+  GT_SCANNEDPRJKEY_ADD("integersize",&integersize,NULL);
+  GT_SCANNEDPRJKEY_ADD("littleendian",&littleendian,NULL);
+  GT_SCANNEDPRJKEY_ADD("readmode",&readmodeint,NULL);
+  GT_SCANNEDPRJKEY_ADD("mirrored",&mirrored,NULL);
   currentline = gt_str_new();
   for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF; linenum++)
   {
     currentlinelength = gt_str_length(currentline);
     if (dbfilelen <= (size_t) currentlinelength &&
-       memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
+        memcmp(DBFILEKEY,gt_str_get(currentline),dbfilelen) == 0)
     {
       /* Nothing */
     } else
@@ -135,7 +135,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                                    linenum,
                                    gt_str_get(currentline),
                                    currentlinelength,
-                                   riktab,
+                                   scannedprjkeytable,
                                    err) != 0)
       {
         haserr = true;
@@ -145,14 +145,13 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
     gt_str_reset(currentline);
   }
   gt_str_delete(currentline);
-  if (!haserr && gt_allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
-                                logger,err) != 0)
+  if (!haserr && gt_scannedprjkey_allkeysdefined(indexname,PROJECTFILESUFFIX,
+                                                 scannedprjkeytable,
+                                                 logger,err) != 0)
   {
     haserr = true;
   }
-  if (!haserr &&
-      integersize != (uint32_t) 32 &&
-      integersize != (uint32_t) 64)
+  if (!haserr && integersize != (uint32_t) 32 && integersize != (uint32_t) 64)
   {
     gt_error_set(err,"%s%s contains illegal line defining the integer size",
                  indexname,PROJECTFILESUFFIX);
@@ -207,7 +206,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
     }
     suffixarray->mirroredencseq = (mirrored == (uint32_t) 1);
   }
-  gt_array_delete(riktab);
+  gt_scannedprjkeytable_delete(scannedprjkeytable);
   return haserr ? -1 : 0;
 }
 

@@ -20,6 +20,7 @@
 #include <inttypes.h>
 #include "core/error.h"
 #include "core/str.h"
+#include "core/ma.h"
 #include "core/array.h"
 #include "core/types_api.h"
 #include "core/logger.h"
@@ -33,7 +34,7 @@ typedef union
   double doublevalue;
 } GtScannedprjvalue;
 
-struct GtScannedprjkey
+typedef struct
 {
   const char *keystring;
   uint32_t *uint32valueptr;
@@ -43,14 +44,29 @@ struct GtScannedprjkey
        ptrdefined,
        found,
        *readflag;
+} GtScannedprjkey;
+
+struct GtScannedprjkeytable
+{
+  GtArray *arr;
 };
 
-size_t gt_scannedprjkey_size(void)
+GtScannedprjkeytable *gt_scannedprjkeytable_new(void)
 {
-  return sizeof (GtScannedprjkey);
+  GtScannedprjkeytable *scannedprjkeytable;
+
+  scannedprjkeytable = gt_malloc(sizeof (*scannedprjkeytable));
+  scannedprjkeytable->arr = gt_array_new(sizeof (GtScannedprjkey));
+  return scannedprjkeytable;
 }
 
-void gt_scannedprjkey_add(GtArray *riktab,
+void gt_scannedprjkeytable_delete(GtScannedprjkeytable *scannedprjkeytable)
+{
+  gt_array_delete(scannedprjkeytable->arr);
+  gt_free(scannedprjkeytable);
+}
+
+void gt_scannedprjkey_add(GtScannedprjkeytable *scannedprjkeytable,
                           const char *keystring,
                           void *valueptr,
                           size_t sizeval,
@@ -91,7 +107,8 @@ void gt_scannedprjkey_add(GtArray *riktab,
     }
   }
   rikvalue.found = false;
-  gt_array_add_elem(riktab,&rikvalue,sizeof (GtScannedprjkey));
+  gt_array_add_elem(scannedprjkeytable->arr,&rikvalue,
+                    sizeof (GtScannedprjkey));
 }
 
 static int gt_scannedprjkey_scanline(uint32_t *lengthofkey,
@@ -164,17 +181,20 @@ static int gt_scannedprjkey_scanline(uint32_t *lengthofkey,
   return haserr ? -1 : retval;
 }
 
-int gt_allkeysdefined(const char *indexname,const char *suffix,
-                      const GtArray *riktab,GtLogger *logger,
-                      GtError *err)
+int gt_scannedprjkey_allkeysdefined(
+                               const char *indexname,
+                               const char *suffix,
+                               const GtScannedprjkeytable *scannedprjkeytable,
+                               GtLogger *logger,
+                               GtError *err)
 {
   unsigned long idx;
   GtScannedprjkey *rikptr;
 
   gt_error_check(err);
-  for (idx=0; idx<gt_array_size(riktab); idx++)
+  for (idx=0; idx<gt_array_size(scannedprjkeytable->arr); idx++)
   {
-    rikptr = (GtScannedprjkey *) gt_array_get(riktab,idx);
+    rikptr = (GtScannedprjkey *) gt_array_get(scannedprjkeytable->arr,idx);
     if (rikptr->found)
     {
       if (rikptr->ptrdefined)
@@ -230,7 +250,7 @@ int gt_scannedprjkey_analyze(const char *indexname,
                              unsigned int linenum,
                              const char *linebuffer,
                              unsigned long linelength,
-                             GtArray *riktab,
+                             GtScannedprjkeytable *scannedprjkeytable,
                              GtError *err)
 {
   GtScannedprjkey *rikptr;
@@ -251,9 +271,9 @@ int gt_scannedprjkey_analyze(const char *indexname,
     haserr = true;
   } else
   {
-    for (i=0; i<gt_array_size(riktab); i++)
+    for (i=0; i<gt_array_size(scannedprjkeytable->arr); i++)
     {
-      rikptr = gt_array_get(riktab,i);
+      rikptr = gt_array_get(scannedprjkeytable->arr,i);
       if (memcmp(linebuffer, rikptr->keystring,(size_t) lengthofkey) == 0)
       {
         rikptr->found = true;
