@@ -102,6 +102,7 @@ typedef struct
 {
   GtEncseq *encseq;
   Definedunsignedlong numoflargelcpvalues; /* only in esa-map.c */
+  Defineddouble averagelcp;
   Definedunsignedlong longest; /* for BWT */
   GtReadmode readmode; /* relevant when reading the encoded sequence */
   bool mirroredencseq;

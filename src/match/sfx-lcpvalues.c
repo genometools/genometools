@@ -43,6 +43,7 @@ typedef struct
 {
   GtLcpvalues tableoflcpvalues;
   Lcpoutput2file *lcp2file;
+  double lcptabsum;
 } Lcpsubtab;
 
 typedef struct
@@ -198,6 +199,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
 
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   outlcpinfo->sizeofinfo = sizeof (*outlcpinfo);
+  outlcpinfo->lcpsubtab.lcptabsum = 0.0;
   if (indexname == NULL)
   {
     outlcpinfo->lcpsubtab.lcp2file = NULL;
@@ -342,6 +344,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       largelcpvalueptr->value = lcpvalue;
       lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
+    lcpsubtab->lcptabsum += (double) lcpvalue;
   }
   outsmalllcpvalues(lcpsubtab->lcp2file,
                     (unsigned long) (bucketright - bucketleft + 1));
@@ -470,6 +473,12 @@ unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo)
 {
   gt_assert(outlcpinfo->lcpsubtab.lcp2file != NULL);
   return outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues;
+}
+
+double gt_Outlcpinfo_lcptabsum(const Outlcpinfo *outlcpinfo)
+{
+  gt_assert(outlcpinfo != NULL);
+  return outlcpinfo->lcpsubtab.lcptabsum;
 }
 
 void gt_Outlcpinfo_numsuffixes2output_set(Outlcpinfo *outlcpinfo,

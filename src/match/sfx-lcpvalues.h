@@ -93,6 +93,8 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
 
+double gt_Outlcpinfo_lcptabsum(const Outlcpinfo *outlcpinfo);
+
 void gt_Outlcpinfo_numsuffixes2output_set(Outlcpinfo *outlcpinfo,
                                           unsigned long numsuffixes2output);
 

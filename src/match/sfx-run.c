@@ -584,15 +584,19 @@ static int runsuffixerator(bool doesa,
   if (!haserr)
   {
     unsigned long numoflargelcpvalues, maxbranchdepth;
+    double averagelcp;
 
     if (outfileinfo.outlcpinfo == NULL)
     {
       numoflargelcpvalues = maxbranchdepth = 0;
+      averagelcp = 0.0;
     } else
     {
       numoflargelcpvalues
         = gt_Outlcpinfo_numoflargelcpvalues(outfileinfo.outlcpinfo);
       maxbranchdepth = gt_Outlcpinfo_maxbranchdepth(outfileinfo.outlcpinfo);
+      averagelcp = gt_Outlcpinfo_lcptabsum(outfileinfo.outlcpinfo)/
+                   outfileinfo.numberofallsortedsuffixes;
     }
     if (gt_outprjfile(gt_str_get(so->indexname),
                       readmode,
@@ -600,6 +604,7 @@ static int runsuffixerator(bool doesa,
                       outfileinfo.numberofallsortedsuffixes,
                       prefixlength,
                       numoflargelcpvalues,
+                      averagelcp,
                       maxbranchdepth,
                       &outfileinfo.longest,
                       err) != 0)

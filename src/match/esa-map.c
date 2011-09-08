@@ -75,7 +75,7 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                 numofquerysequences;
 
   gt_error_check(err);
-  riktab = gt_array_new(gt_sizeofReadintkeys());
+  riktab = gt_array_new(gt_scannedprjkey_size());
   SETREADINTKEYS("totallength",&totallength,NULL);
   SETREADINTKEYS("specialcharacters",
                  &specialcharinfo.specialcharacters,NULL);
@@ -99,7 +99,8 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
                  &specialcharinfo.lengthofwildcardsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&numofdbsequences,NULL);
-  gt_setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,0,NULL);
+  gt_scannedprjkey_add(riktab,"numofquerysequences",
+                       &numofquerysequences,0,false,NULL);
   SETREADINTKEYS("numberofallsortedsuffixes",
                  &suffixarray->numberofallsortedsuffixes,NULL);
   SETREADINTKEYS("longest",&suffixarray->longest.valueunsignedlong,
@@ -108,6 +109,11 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("largelcpvalues",
                  &suffixarray->numoflargelcpvalues.valueunsignedlong,
                  &suffixarray->numoflargelcpvalues.defined);
+  gt_scannedprjkey_add(riktab,"averagelcp",
+                       &suffixarray->averagelcp.valuedouble,
+                       sizeof (suffixarray->averagelcp.valuedouble),
+                       true,
+                       &suffixarray->averagelcp.defined);
   SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueunsignedlong,
                  &maxbranchdepth.defined);
   SETREADINTKEYS("integersize",&integersize,NULL);
@@ -124,13 +130,13 @@ static int scanprjfileuintkeysviafileptr(Suffixarray *suffixarray,
       /* Nothing */
     } else
     {
-      if (gt_analyzeuintline(indexname,
-                         PROJECTFILESUFFIX,
-                         linenum,
-                         gt_str_get(currentline),
-                         currentlinelength,
-                         riktab,
-                         err) != 0)
+      if (gt_scannedprjkey_analyze(indexname,
+                                   PROJECTFILESUFFIX,
+                                   linenum,
+                                   gt_str_get(currentline),
+                                   currentlinelength,
+                                   riktab,
+                                   err) != 0)
       {
         haserr = true;
         break;

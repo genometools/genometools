@@ -42,6 +42,7 @@ static void showprjinfo(FILE *outprj,
                         unsigned long numberofallsortedsuffixes,
                         unsigned int prefixlength,
                         unsigned long numoflargelcpvalues,
+                        double averagelcp,
                         unsigned long maxbranchdepth,
                         const Definedunsignedlong *longest)
 {
@@ -71,6 +72,7 @@ static void showprjinfo(FILE *outprj,
   }
   fprintf(outprj,"prefixlength=%u\n",prefixlength);
   fprintf(outprj,"largelcpvalues=%lu\n",numoflargelcpvalues);
+  fprintf(outprj,"averagelcp=%.2f\n",averagelcp);
   fprintf(outprj,"maxbranchdepth=%lu\n",maxbranchdepth);
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (unsigned long) * CHAR_BIT));
@@ -85,6 +87,7 @@ int gt_outprjfile(const char *indexname,
                   unsigned long numberofallsortedsuffixes,
                   unsigned int prefixlength,
                   unsigned long numoflargelcpvalues,
+                  double averagelcp,
                   unsigned long maxbranchdepth,
                   const Definedunsignedlong *longest,
                   GtError *err)
@@ -106,6 +109,7 @@ int gt_outprjfile(const char *indexname,
                 numberofallsortedsuffixes,
                 prefixlength,
                 numoflargelcpvalues,
+                averagelcp,
                 maxbranchdepth,
                 longest);
     gt_fa_xfclose(prjfp);

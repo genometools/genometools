@@ -28,6 +28,7 @@ int gt_outprjfile(const char *indexname,
                   unsigned long numberofallsortedsuffixes,
                   unsigned int prefixlength,
                   unsigned long numoflargelcpvalues,
+                  double averagelcp,
                   unsigned long maxbranchdepth,
                   const Definedunsignedlong *longest,
                   GtError *err);

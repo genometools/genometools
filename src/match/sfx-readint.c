@@ -28,95 +28,127 @@
 
 typedef union
 {
-  uint32_t smallvalue;
-  uint64_t bigvalue;
-} Smallorbigint;
+  uint32_t uint32value;
+  uint64_t uint64value;
+  double doublevalue;
+} GtScannedprjvalue;
 
- struct Readintkeys
+struct GtScannedprjkey
 {
   const char *keystring;
-  uint32_t *smallvalueptr;
-  uint64_t *bigvalueptr;
-  bool ptrdefined,
+  uint32_t *uint32valueptr;
+  uint64_t *uint64valueptr;
+  double *doublevalueptr;
+  bool readdouble,
+       ptrdefined,
        found,
        *readflag;
 };
 
-size_t gt_sizeofReadintkeys(void)
+size_t gt_scannedprjkey_size(void)
 {
-  return sizeof (Readintkeys);
+  return sizeof (GtScannedprjkey);
 }
 
-void gt_setreadintkeys(GtArray *riktab,
-                    const char *keystring,
-                    void *valueptr,
-                    size_t sizeval,
-                    bool *readflag)
+void gt_scannedprjkey_add(GtArray *riktab,
+                          const char *keystring,
+                          void *valueptr,
+                          size_t sizeval,
+                          bool readdouble,
+                          bool *readflag)
 {
-  Readintkeys rikvalue;
+  GtScannedprjkey rikvalue;
 
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
-  gt_assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);
-  switch (sizeval)
+  rikvalue.readdouble = readdouble;
+  if (readdouble)
   {
-    case 0: rikvalue.smallvalueptr = NULL;
-            rikvalue.bigvalueptr = NULL;
-            rikvalue.ptrdefined = false;
-            break;
-    case 4: gt_assert(sizeof (uint32_t) == (size_t) 4);
-            rikvalue.smallvalueptr = valueptr;
-            rikvalue.bigvalueptr = NULL;
-            rikvalue.ptrdefined = true;
-            break;
-    case 8: gt_assert(sizeof (uint64_t) == (size_t) 8);
-            rikvalue.bigvalueptr = valueptr;
-            rikvalue.smallvalueptr = NULL;
-            rikvalue.ptrdefined = true;
-            break;
+    gt_assert(sizeval == sizeof (double));
+    rikvalue.uint32valueptr = NULL;
+    rikvalue.uint64valueptr = NULL;
+    rikvalue.doublevalueptr = valueptr;
+    rikvalue.ptrdefined = true;
+  } else
+  {
+    gt_assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);
+    switch (sizeval)
+    {
+      case 0: rikvalue.uint32valueptr = NULL;
+              rikvalue.uint64valueptr = NULL;
+              rikvalue.ptrdefined = false;
+              break;
+      case 4: gt_assert(sizeof (uint32_t) == (size_t) 4);
+              rikvalue.uint32valueptr = valueptr;
+              rikvalue.uint64valueptr = NULL;
+              rikvalue.ptrdefined = true;
+              break;
+      case 8: gt_assert(sizeof (uint64_t) == (size_t) 8);
+              rikvalue.uint64valueptr = valueptr;
+              rikvalue.uint32valueptr = NULL;
+              rikvalue.ptrdefined = true;
+              break;
+    }
   }
   rikvalue.found = false;
-  gt_array_add_elem(riktab,&rikvalue,sizeof (Readintkeys));
+  gt_array_add_elem(riktab,&rikvalue,sizeof (GtScannedprjkey));
 }
 
-static int scanuintintline(uint32_t *lengthofkey,
-                           Smallorbigint *smallorbigint,
-                           const char *linebuffer,
-                           unsigned long linelength,
-                           GtError *err)
+static int gt_scannedprjkey_scanline(uint32_t *lengthofkey,
+                                     GtScannedprjvalue *scannedprjvalue,
+                                     const char *linebuffer,
+                                     unsigned long linelength,
+                                     GtError *err)
 {
-  int64_t readint;
-  unsigned long i;
-  bool found = false;
+  unsigned long idx;
+  bool haserr = false, found = false;
   int retval = 0;
 
   gt_error_check(err);
-  for (i=0; i<linelength; i++)
+  for (idx=0; idx<linelength; idx++)
   {
-    if (linebuffer[i] == '=')
+    if (linebuffer[idx] == '=')
     {
-      *lengthofkey = (uint32_t) i;
+      *lengthofkey = (uint32_t) idx;
       found = true;
+      if (strchr(linebuffer + idx + 1,'.') != NULL)
+      {
+        double readdouble;
 
-      if (sscanf((const char *) (linebuffer + i + 1),
-                 FormatScanint64_t,
-                 SCANint64_tcast(&readint)) != 1 ||
-         readint < (int64_t) 0)
-      {
-        gt_error_set(err,"cannot find non-negative integer in \"%*.*s\"",
-                           (int) (linelength - (i+1)),
-                           (int) (linelength - (i+1)),
-                           linebuffer + i + 1);
-        return -1;
-      }
-      if (readint <= (int64_t) UINT32_MAX)
-      {
-        smallorbigint->smallvalue = (uint32_t) readint;
-        retval = 0;
+        if (sscanf((const char *) (linebuffer + idx + 1),"%lf",
+                   &readdouble) != 1)
+        {
+          gt_error_set(err,"cannot find floating point number in \"%*.*s\"",
+                             (int) (linelength - (idx+1)),
+                             (int) (linelength - (idx+1)),
+                             linebuffer + idx + 1);
+          return -1;
+        }
+        scannedprjvalue->doublevalue = readdouble;
+        retval = 2;
       } else
       {
-        smallorbigint->bigvalue = (uint64_t) readint;
-        retval = 1;
+        int64_t readint;
+
+        if (sscanf((const char *) (linebuffer + idx + 1),
+                   FormatScanint64_t,
+                   SCANint64_tcast(&readint)) != 1 || readint < (int64_t) 0)
+        {
+          gt_error_set(err,"cannot find non-negative integer in \"%*.*s\"",
+                             (int) (linelength - (idx+1)),
+                             (int) (linelength - (idx+1)),
+                             linebuffer + idx + 1);
+          return -1;
+        }
+        if (readint <= (int64_t) UINT32_MAX)
+        {
+          scannedprjvalue->uint32value = (uint32_t) readint;
+          retval = 0;
+        } else
+        {
+          scannedprjvalue->uint64value = (uint64_t) readint;
+          retval = 1;
+        }
       }
       break;
     }
@@ -127,41 +159,48 @@ static int scanuintintline(uint32_t *lengthofkey,
                        (int) linelength,
                        (int) linelength,
                        linebuffer);
-    return -2;
+    haserr = true;
   }
-  return retval;
+  return haserr ? -1 : retval;
 }
 
 int gt_allkeysdefined(const char *indexname,const char *suffix,
                       const GtArray *riktab,GtLogger *logger,
                       GtError *err)
 {
-  unsigned long i;
-  Readintkeys *rikptr;
+  unsigned long idx;
+  GtScannedprjkey *rikptr;
 
   gt_error_check(err);
-  for (i=0; i<gt_array_size(riktab); i++)
+  for (idx=0; idx<gt_array_size(riktab); idx++)
   {
-    rikptr = (Readintkeys *) gt_array_get(riktab,i);
+    rikptr = (GtScannedprjkey *) gt_array_get(riktab,idx);
     if (rikptr->found)
     {
       if (rikptr->ptrdefined)
       {
-        if (rikptr->smallvalueptr != NULL)
+        if (rikptr->uint32valueptr != NULL)
         {
           gt_logger_log(logger,"%s=%u",
                       rikptr->keystring,
-                      (unsigned int) *(rikptr->smallvalueptr));
+                      (unsigned int) *(rikptr->uint32valueptr));
         } else
         {
-          if (rikptr->bigvalueptr != NULL)
+          if (rikptr->uint64valueptr != NULL)
           {
             gt_logger_log(logger,"%s=" Formatuint64_t,
                         rikptr->keystring,
-                        PRINTuint64_tcast(*(rikptr->bigvalueptr)));
+                        PRINTuint64_tcast(*(rikptr->uint64valueptr)));
           } else
           {
-            gt_assert(false);
+            if (rikptr->doublevalueptr != NULL)
+            {
+              gt_logger_log(logger,"%s=%.2f", rikptr->keystring,
+                            *(rikptr->doublevalueptr));
+            } else
+            {
+              gt_assert(false);
+            }
           }
         }
       } else
@@ -177,9 +216,7 @@ int gt_allkeysdefined(const char *indexname,const char *suffix,
       if (rikptr->readflag == NULL)
       {
         gt_error_set(err,"file %s%s: missing line beginning with \"%s=\"",
-                     indexname,
-                           suffix,
-                           rikptr->keystring);
+                     indexname, suffix, rikptr->keystring);
         return -1;
       }
       *(rikptr->readflag) = false;
@@ -188,27 +225,27 @@ int gt_allkeysdefined(const char *indexname,const char *suffix,
   return 0;
 }
 
-int gt_analyzeuintline(const char *indexname,
-                    const char *suffix,
-                    unsigned int linenum,
-                    const char *linebuffer,
-                    unsigned long linelength,
-                    GtArray *riktab,
-                    GtError *err)
+int gt_scannedprjkey_analyze(const char *indexname,
+                             const char *suffix,
+                             unsigned int linenum,
+                             const char *linebuffer,
+                             unsigned long linelength,
+                             GtArray *riktab,
+                             GtError *err)
 {
-  Readintkeys *rikptr;
+  GtScannedprjkey *rikptr;
   bool found = false, haserr = false;
   unsigned long i;
   int retval;
-  Smallorbigint smallorbigint;
+  GtScannedprjvalue scannedprjvalue;
   uint32_t lengthofkey;
 
   gt_error_check(err);
-  retval = scanuintintline(&lengthofkey,
-                           &smallorbigint,
-                           linebuffer,
-                           linelength,
-                           err);
+  retval = gt_scannedprjkey_scanline(&lengthofkey,
+                                     &scannedprjvalue,
+                                     linebuffer,
+                                     linelength,
+                                     err);
   if (retval < 0)
   {
     haserr = true;
@@ -217,34 +254,49 @@ int gt_analyzeuintline(const char *indexname,
     for (i=0; i<gt_array_size(riktab); i++)
     {
       rikptr = gt_array_get(riktab,i);
-      if (memcmp(linebuffer,
-                 rikptr->keystring,
-                 (size_t) lengthofkey) == 0)
+      if (memcmp(linebuffer, rikptr->keystring,(size_t) lengthofkey) == 0)
       {
         rikptr->found = true;
         if (rikptr->ptrdefined)
         {
-          if (rikptr->smallvalueptr == NULL)
+          if (rikptr->uint32valueptr == NULL)
           {
             if (retval == 1)
             {
-              *(rikptr->bigvalueptr) = smallorbigint.bigvalue;
+              *(rikptr->uint64valueptr) = scannedprjvalue.uint64value;
             } else
             {
-              *(rikptr->bigvalueptr) = (uint64_t) smallorbigint.smallvalue;
+              if (retval == 2)
+              {
+                gt_assert(rikptr->readdouble);
+                *(rikptr->doublevalueptr) = scannedprjvalue.doublevalue;
+              } else
+              {
+                gt_assert(retval == 0);
+                *(rikptr->uint64valueptr)
+                  = (uint64_t) scannedprjvalue.uint32value;
+              }
             }
           } else
           {
             if (retval == 1)
             {
-              gt_error_set(err,
-                           "bigvalue " Formatuint64_t " does not fit into %s",
-                           PRINTuint64_tcast(smallorbigint.bigvalue),
+              gt_error_set(err,"uint64value " Formatuint64_t
+                           " does not fit into %s",
+                           PRINTuint64_tcast(scannedprjvalue.uint64value),
                            rikptr->keystring);
               haserr = true;
               break;
             }
-            *(rikptr->smallvalueptr) = smallorbigint.smallvalue;
+            if (retval == 2)
+            {
+              gt_error_set(err,"double %.2f does not fit into %s",
+                           scannedprjvalue.doublevalue,
+                           rikptr->keystring);
+              haserr = true;
+              break;
+            }
+            *(rikptr->uint32valueptr) = scannedprjvalue.uint32value;
           }
         }
         found = true;

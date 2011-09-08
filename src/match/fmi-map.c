@@ -59,7 +59,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   unsigned int intstoreindexpos;
 
   gt_error_check(err);
-  riktab = gt_array_new(gt_sizeofReadintkeys());
+  riktab = gt_array_new(gt_scannedprjkey_size());
   SETREADINTKEYS("bwtlength",&fmindex->bwtlength,NULL);
   SETREADINTKEYS("longest",&fmindex->longestsuffixpos,NULL);
   SETREADINTKEYS("storeindexpos",&intstoreindexpos,NULL);
@@ -90,13 +90,13 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     for (linenum = 0; gt_str_read_next_line(currentline, fpin) != EOF;
          linenum++)
     {
-      if (gt_analyzeuintline(indexname,
-                         FMASCIIFILESUFFIX,
-                         linenum,
-                         gt_str_get(currentline),
-                         gt_str_length(currentline),
-                         riktab,
-                         err) != 0)
+      if (gt_scannedprjkey_analyze(indexname,
+                                   FMASCIIFILESUFFIX,
+                                   linenum,
+                                   gt_str_get(currentline),
+                                   gt_str_length(currentline),
+                                   riktab,
+                                   err) != 0)
       {
         haserr = true;
         break;
