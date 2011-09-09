@@ -218,8 +218,8 @@ static void gt_firstcodes_halves_rek(GtFirstcodesinfo *fci,
   }
 }
 
-static void gt_firstcodes_halves(GtFirstcodesinfo *fci,
-                                 unsigned int maxdepth)
+static size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,
+                                   unsigned int maxdepth)
 {
   fci->binsearchcache.nextfreeGtIndexwithcode = 0;
   fci->binsearchcache.allocatedGtIndexwithcode = (1UL << (maxdepth+1)) - 1;
@@ -248,8 +248,10 @@ static void gt_firstcodes_halves(GtFirstcodesinfo *fci,
              fci->binsearchcache.spaceGtIndexwithcode[idx].code);
       }
     }
+    return allocbytes;
 #endif
   }
+  return 0;
 }
 
 const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
@@ -677,7 +679,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
-  size_t sizeforcodestable;
+  size_t sizeforcodestable, binsearchcache_size;
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
@@ -728,10 +730,13 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                 fci.differentcodes,
           (double) fci.differentcodes/fci.numofsequences,
           fci.countsequences);
-  fci.binsearchcache_depth = 15U;
+  fci.binsearchcache_depth = (unsigned int) log10((double) fci.differentcodes);
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
-  gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
+  binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
+  gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
+                       fci.binsearchcache_depth,
+                       binsearchcache_size);
   fci.codebuffer_allocated = 3000000UL;
   fci.codebuffer_nextfree = 0;
   fci.codebuffer = gt_malloc(sizeof (*fci.codebuffer)
