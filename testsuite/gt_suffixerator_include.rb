@@ -90,6 +90,33 @@ Test do
       "-o genome-idx-100-5-reads.fna.gz genome-idx"
   run_test "#{$bin}/gt suffixerator -mirrored -v -spmopt 45 -suf -lcp -dna " +
            "-parts 4 -db genome-idx-100-5-reads.fna.gz"
+  run "#{$bin}/gt sequniq -rev genome-idx-100-5-reads.fna.gz"
+  run "mv #{$last_stdout} tmp.fas"
+  sfxopt="-pl 2 -dna -lcp -suf -tis -ssp -db tmp.fas"
+  indexname="sfx"
+  mirrored=1
+  minlen=35
+  if mirrored
+    sfxopt="#{sfxopt} -mirrored"
+    indexname="sfx-m"
+  else
+    indexname="sfx"
+    run "#{$bin}/gt encseq encode -indexname seq #{$last_stdout}"
+    run "#{$bin}/gt encseq decode -mirrored seq"
+    run "mv #{$last_stdout} tmp.fas"
+  end
+  sfxmapopt="-tis -suf -lcp -ssp -wholeleafcheck"
+  run_test "#{$bin}/gt suffixerator -indexname #{indexname}-#{minlen} " +
+           "-spmopt #{minlen} #{sfxopt}"
+  run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}-#{minlen}"
+  run_test "#{$bin}/gt suffixerator -indexname #{indexname} #{sfxopt}"
+  run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}"
+  run_test "#{$bin}/gt repfind -spm -l #{minlen} -ii #{indexname}"
+  run "mv #{$last_stdout} result.repfind"
+  run_test "#{$bin}/gt dev sfxmap -stream-esq #{indexname} storefirstcodes 32"
+  run "grep -v '^#' #{$last_stdout}"
+  run "mv #{$last_stdout} result.firstcodes"
+  run "cmp result.repfind result.firstcodes"
 end
 
 allfiles = []

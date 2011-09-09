@@ -227,15 +227,11 @@ static void gt_firstcodes_halves(GtFirstcodesinfo *fci,
     size_t allocbytes
       = sizeof (*fci->binsearchcache.spaceGtIndexwithcode)
                 * fci->binsearchcache.allocatedGtIndexwithcode;
-    printf("size of binsearch cache: %lu\n",(unsigned long) allocbytes);
     fci->binsearchcache.spaceGtIndexwithcode = gt_malloc(allocbytes);
     gt_assert(fci->differentcodes > 0);
     gt_firstcodes_halves_rek(fci,0,fci->differentcodes - 1,0,maxdepth);
     gt_assert(fci->binsearchcache.nextfreeGtIndexwithcode
               == fci->binsearchcache.allocatedGtIndexwithcode);
-    printf("average size of uncached range: %.2f\n",
-            (double) fci->binsearchcache_unknownwidth/
-            fci->binsearchcache_unknowncount);
 #undef FIRSTCODEDEBUG
 #ifdef FIRSTCODEDEBUG
     {
@@ -405,6 +401,10 @@ static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo
       break;
     }
   }
+  if (fci->flushcount == 0)
+  {
+    printf("# ");
+  }
   printf("%u ",fci->flushcount++);
   (void) fflush(stdout);
   fci->codebuffer_nextfree = 0;
@@ -491,6 +491,10 @@ static void gt_firstcodes_insertsuffixes_flush(GtFirstcodesinfo *fci)
       break;
     }
   }
+  if (fci->flushcount == 0)
+  {
+    printf("# ");
+  }
   printf("%u ",fci->flushcount++);
   (void) fflush(stdout);
   fci->codebuffer_nextfree = 0;
@@ -565,7 +569,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                                current,
                                                esr1,
                                                esr2);
-      gt_assert(cmp < 0);
+      gt_assert(cmp <= 0);
       gt_assert(idx == 0 || maxlcp == (unsigned long) lcptab_bucket[idx]);
     }
     previous = current;
@@ -634,6 +638,8 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
       if (computespms)
       {
         int ret;
+
+        /*
         unsigned long j;
 
         printf("bucket %lu %lu of suftab at %lu\n",countocc[idx],
@@ -644,6 +650,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
           printf("suftab[%lu]=%lu with lcp %u\n",j,suftab[countocc[idx] + j],
                  (unsigned int) lcptab_bucket[j]);
         }
+        */
         ret = gt_spmsk_process(spmsk_state,
                                suftab + countocc[idx],
                                lcptab_bucket,

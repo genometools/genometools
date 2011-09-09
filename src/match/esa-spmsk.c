@@ -37,17 +37,15 @@ struct GtSpmsk_state /* global information */
   GtArrayGtUlong Wset, Lset;
 };
 
+/*
 static void showstate(int line,const GtSpmsk_state *state)
 {
-  printf("line %d: encseq %lu,",line,(unsigned long) state->encseq);
-  printf("readmode=%d,totallength %lu,",(int) state->readmode,
-                                       state->totallength);
-  printf("minmatchlength %lu ",state->minmatchlength);
-  printf("Wset %lu %lu,",state->Wset.allocatedGtUlong,
+  printf("line %d: Wset %lu %lu,",line,state->Wset.allocatedGtUlong,
                         state->Wset.nextfreeGtUlong);
   printf("Lset %lu %lu\n",state->Lset.allocatedGtUlong,
                         state->Lset.nextfreeGtUlong);
 }
+*/
 
 static GtBUinfo *gt_spmsk_allocatestackinfo(GT_UNUSED GtBUstate *bustate)
 {
@@ -73,15 +71,16 @@ static int spmsk_processleafedge(bool firstedge,
 {
   GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
-  showstate(__LINE__,state);
+  /*showstate(__LINE__,state);*/
   if (fd >= state->minmatchlength)
   {
     unsigned long idx;
 
-    printf("processleaf(firstedge=%s,fd=%lu,pos=%lu\n",
-            firstedge ? "true" : "false",fd,pos);
+    /*printf("processleaf(firstedge=%s,fd=%lu,pos=%lu\n",
+            firstedge ? "true" : "false",fd,pos);*/
     if (firstedge)
     {
+      gt_assert(finfo != NULL);
       ((GtSpmsk_info *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
     }
     if (pos == 0 || gt_encseq_position_is_separator(state->encseq,
@@ -89,7 +88,7 @@ static int spmsk_processleafedge(bool firstedge,
                                                     state->readmode))
     {
       idx = gt_encseq_seqnum(state->encseq,pos);
-      printf("Wset += %lu\n",idx);
+      /*printf("Wset += %lu\n",idx);*/
       GT_STOREINARRAY(&state->Wset,GtUlong,128,idx);
     }
     if (pos + fd == state->totallength ||
@@ -97,7 +96,7 @@ static int spmsk_processleafedge(bool firstedge,
                                         pos + fd,state->readmode))
     {
       idx = gt_encseq_seqnum(state->encseq,pos);
-      printf("Lset += %lu\n",idx);
+      /*printf("Lset += %lu\n",idx);*/
       GT_STOREINARRAY(&state->Lset,GtUlong,128,idx);
     }
   }
@@ -117,12 +116,15 @@ static int spmsk_processbranchingedge(bool firstedge,
 {
   GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
-  showstate(__LINE__,state);
+  /*showstate(__LINE__,state);*/
   if (fd >= state->minmatchlength && firstedge)
   {
-    printf("processbranch(firstedge=%s,fd=%lu\n",
-            firstedge ? "true" : "false",fd);
-    ((GtSpmsk_info *) finfo)->firstinW = ((GtSpmsk_info *) sinfo)->firstinW;
+    /*printf("processbranch(firstedge=%s,fd=%lu,sd=%lu\n",
+            firstedge ? "true" : "false",fd,sd);*/
+    gt_assert(finfo != NULL);
+    gt_assert(sinfo == NULL);
+    /*((GtSpmsk_info *) finfo)->firstinW = ((GtSpmsk_info *)
+ * sinfo)->firstinW;*/
   }
   return 0;
 }
@@ -136,18 +138,20 @@ static int spmsk_processlcpinterval(unsigned long lcp,
 {
   GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
-  showstate(__LINE__,state);
-  printf("process %lu %lu %lu\n",lcp,lb,rb);
+  /*showstate(__LINE__,state);
+  printf("process %lu %lu %lu\n",lcp,lb,rb);*/
   if (lcp >= state->minmatchlength)
   {
-    unsigned long lidx, widx, firstpos = ((GtSpmsk_info *) info)->firstinW;
+    unsigned long lidx, widx, firstpos;
 
-    printf("processlcpinterval(lcp=%lu,firstpos=%lu\n",lcp,firstpos);
+    gt_assert(info != NULL);
+    firstpos = ((GtSpmsk_info *) info)->firstinW;
+    /*printf("processlcpinterval(lcp=%lu,firstpos=%lu)\n",lcp,firstpos);*/
     for (lidx = 0; lidx < state->Lset.nextfreeGtUlong; lidx++)
     {
       unsigned long lpos = state->Lset.spaceGtUlong[lidx];
 
-      gt_assert(firstpos < state->Wset.nextfreeGtUlong);
+      /*gt_assert(firstpos < state->Wset.nextfreeGtUlong);*/
       for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
       {
         printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
@@ -171,9 +175,9 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
   state->readmode = readmode;
   state->totallength = gt_encseq_total_length(encseq);
   state->minmatchlength = minmatchlength;
-  printf("set minmatchlength %lu at address %lu\n",
+  /*printf("set minmatchlength %lu at address %lu\n",
          state->minmatchlength,
-         (unsigned long) &state->minmatchlength);
+         (unsigned long) &state->minmatchlength);*/
   GT_INITARRAY(&state->Wset,GtUlong);
   GT_INITARRAY(&state->Lset,GtUlong);
   return state;
@@ -200,7 +204,7 @@ int gt_spmsk_process(GtSpmsk_state *state,
                           spmsk_processleafedge,
                           spmsk_processbranchingedge,
                           spmsk_processlcpinterval,
-                          (GtBUstate *) &state,
+                          (GtBUstate *) state,
                           err) != 0)
   {
     return -1;

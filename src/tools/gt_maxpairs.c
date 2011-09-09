@@ -36,18 +36,18 @@ typedef struct
 {
   unsigned int userdefinedleastlength;
   unsigned long samples;
-  bool scanfile, beverbose, forward, reverse;
+  bool scanfile, beverbose, forward, reverse, searchspm;
   GtStr *indexname;
   GtStrArray *queryfiles;
   GtOption *refforwardoption;
 } Maxpairsoptions;
 
-static int simpleexactselfmatchoutput(void *info,
-                                      const GtEncseq *encseq,
-                                      unsigned long len,
-                                      unsigned long pos1,
-                                      unsigned long pos2,
-                                      GT_UNUSED GtError *err)
+static int gt_simpleexactselfmatchoutput(void *info,
+                                         const GtEncseq *encseq,
+                                         unsigned long len,
+                                         unsigned long pos1,
+                                         unsigned long pos2,
+                                         GT_UNUSED GtError *err)
 {
   unsigned long queryseqnum, seqstartpos, seqlength;
   Querymatch *querymatch = (Querymatch *) info;
@@ -71,6 +71,50 @@ static int simpleexactselfmatchoutput(void *info,
                   pos2 - seqstartpos,
                   seqlength);
   return gt_querymatch_output(info, encseq, querymatch, err);
+}
+
+static int gt_simplesuffixprefixmatchoutput(GT_UNUSED void *info,
+                                            const GtEncseq *encseq,
+                                            unsigned long matchlen,
+                                            unsigned long pos1,
+                                            unsigned long pos2,
+                                            GT_UNUSED GtError *err)
+{
+  unsigned long seqnum1, relpos1, seqnum2, relpos2, seqstartpos;
+
+  if (pos1 > pos2)
+  {
+    unsigned long tmp = pos1;
+    pos1 = pos2;
+    pos2 = tmp;
+  }
+  seqnum1 = gt_encseq_seqnum(encseq,pos1);
+  seqstartpos = gt_encseq_seqstartpos(encseq, seqnum1);
+  gt_assert(seqstartpos <= pos1);
+  relpos1 = pos1 - seqstartpos;
+  seqnum2 = gt_encseq_seqnum(encseq,pos2);
+  seqstartpos = gt_encseq_seqstartpos(encseq, seqnum2);
+  gt_assert(seqstartpos <= pos2);
+  relpos2 = pos2 - seqstartpos;
+  if (relpos1 == 0)
+  {
+    unsigned long seqlen2 = gt_encseq_seqlength(encseq,seqnum2);
+    if (relpos2 + matchlen == seqlen2)
+    {
+      printf("%lu %lu %lu\n",seqnum2,seqnum1,matchlen);
+    }
+  } else
+  {
+    if (relpos2 == 0)
+    {
+      unsigned long seqlen1 = gt_encseq_seqlength(encseq,seqnum1);
+      if (relpos1 + matchlen == seqlen1)
+      {
+        printf("%lu %lu %lu\n",seqnum1,seqnum2,matchlen);
+      }
+    }
+  }
+  return 0;
 }
 
 static int callenummaxpairs(const char *indexname,
@@ -144,7 +188,7 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
 {
   GtOptionParser *op;
   GtOption *option, *reverseoption, *queryoption,
-           *scanoption, *sampleoption, *forwardoption;
+           *scanoption, *sampleoption, *forwardoption, *spmoption;
   Maxpairsoptions *arguments = tool_arguments;
 
   op = gt_option_parser_new("[options] -ii indexname",
@@ -175,6 +219,12 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(sampleoption);
   gt_option_parser_add_option(op, sampleoption);
 
+  spmoption = gt_option_new_bool("spm","Search for suffix prefix matches",
+                                       &arguments->searchspm,
+                                       false);
+  gt_option_is_development_option(spmoption);
+  gt_option_parser_add_option(op, spmoption);
+
   scanoption = gt_option_new_bool("scan","scan index rather than mapping "
                                          "it to main memory",
                                   &arguments->scanfile,
@@ -202,6 +252,10 @@ static GtOptionParser *gt_repfind_option_parser_new(void *tool_arguments)
   gt_option_exclude(queryoption,sampleoption);
   gt_option_exclude(queryoption,scanoption);
   gt_option_exclude(queryoption,reverseoption);
+  gt_option_exclude(queryoption,spmoption);
+  gt_option_exclude(reverseoption,spmoption);
+  gt_option_exclude(queryoption,spmoption);
+  gt_option_exclude(sampleoption,spmoption);
   return op;
 }
 
@@ -246,7 +300,9 @@ static int gt_repfind_runner(GT_UNUSED int argc,
           if (callenummaxpairs(gt_str_get(arguments->indexname),
                                arguments->userdefinedleastlength,
                                arguments->scanfile,
-                               simpleexactselfmatchoutput,
+                               arguments->searchspm
+                                 ? gt_simplesuffixprefixmatchoutput
+                                 : gt_simpleexactselfmatchoutput,
                                querymatchspaceptr,
                                logger,
                                err) != 0)

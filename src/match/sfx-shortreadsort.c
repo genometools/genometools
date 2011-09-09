@@ -608,9 +608,11 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
       = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
     srsw->shortreadsortrefs[idx] = (uint16_t) idx;
   }
+  /*
   for (idx = 1UL; idx < width; idx++)
   {
     gt_assert(srsw->firstcodeslcpvalues[idx] <= (uint16_t) GTMAXDISTANCE_SR);
     srsw->distoflcpvalues[srsw->firstcodeslcpvalues[idx]]++;
   }
+  */
 }
