@@ -37,9 +37,23 @@ struct GtSpmsk_state /* global information */
   GtArrayGtUlong Wset, Lset;
 };
 
+static void showstate(int line,const GtSpmsk_state *state)
+{
+  printf("line %d: encseq %lu,",line,(unsigned long) state->encseq);
+  printf("readmode=%d,totallength %lu,",(int) state->readmode,
+                                       state->totallength);
+  printf("minmatchlength %lu ",state->minmatchlength);
+  printf("Wset %lu %lu,",state->Wset.allocatedGtUlong,
+                        state->Wset.nextfreeGtUlong);
+  printf("Lset %lu %lu\n",state->Lset.allocatedGtUlong,
+                        state->Lset.nextfreeGtUlong);
+}
+
 static GtBUinfo *gt_spmsk_allocatestackinfo(GT_UNUSED GtBUstate *bustate)
 {
-  return (GtBUinfo *) gt_malloc(sizeof (GtSpmsk_info));
+  GtSpmsk_info *info = gt_malloc(sizeof (*info));
+  info->firstinW = ULONG_MAX;
+  return (GtBUinfo *) info;
 }
 
 static void gt_spmsk_freestackinfo(GtBUinfo *buinfo,
@@ -59,6 +73,7 @@ static int spmsk_processleafedge(bool firstedge,
 {
   GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
+  showstate(__LINE__,state);
   if (fd >= state->minmatchlength)
   {
     unsigned long idx;
@@ -102,6 +117,7 @@ static int spmsk_processbranchingedge(bool firstedge,
 {
   GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
+  showstate(__LINE__,state);
   if (fd >= state->minmatchlength && firstedge)
   {
     printf("processbranch(firstedge=%s,fd=%lu\n",
@@ -120,6 +136,8 @@ static int spmsk_processlcpinterval(unsigned long lcp,
 {
   GtSpmsk_state *state = (GtSpmsk_state *) bustate;
 
+  showstate(__LINE__,state);
+  printf("process %lu %lu %lu\n",lcp,lb,rb);
   if (lcp >= state->minmatchlength)
   {
     unsigned long lidx, widx, firstpos = ((GtSpmsk_info *) info)->firstinW;
@@ -129,6 +147,7 @@ static int spmsk_processlcpinterval(unsigned long lcp,
     {
       unsigned long lpos = state->Lset.spaceGtUlong[lidx];
 
+      gt_assert(firstpos < state->Wset.nextfreeGtUlong);
       for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
       {
         printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
@@ -152,6 +171,9 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
   state->readmode = readmode;
   state->totallength = gt_encseq_total_length(encseq);
   state->minmatchlength = minmatchlength;
+  printf("set minmatchlength %lu at address %lu\n",
+         state->minmatchlength,
+         (unsigned long) &state->minmatchlength);
   GT_INITARRAY(&state->Wset,GtUlong);
   GT_INITARRAY(&state->Lset,GtUlong);
   return state;

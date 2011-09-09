@@ -229,6 +229,7 @@ end
 
 def spmleafedge(res,firstedge,itv,pos)
   if itv.lcp >= res.minlen
+    puts "leafedge from #{itv.lcp} #{itv.lb} to #{pos}"
     if firstedge 
       res.firstinW[itv2key(itv)] = res.wset.length
     end
@@ -246,12 +247,15 @@ end
 
 def spmbranchedge(res,firstedge,itv,itvprime)
   if itv.lcp >= res.minlen and firstedge
+    print "branch from #{itv.lcp} #{itv.lb} #{itv.rb} to "
+    puts  "#{itvprime.lcp} #{itvprime.lb} #{itvprime.rb}"
     res.firstinW[itv2key(itv)] = res.firstinW[itv2key(itvprime)]
   end
 end
 
 def spmlcpinterval(res,itv)
   if itv.lcp >= res.minlen
+    puts "itv #{itv.lcp} #{itv.lb}"
     firstpos = res.firstinW[itv2key(itv)]
     res.lset.each do |l|
       firstpos.upto(res.wset.length-1) do |i|

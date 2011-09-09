@@ -143,7 +143,7 @@ static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
   {
     unsigned long numofdifferentcodes;
 
-    fci->countocc = gt_calloc((size_t) fci->numofsequences,
+    fci->countocc = gt_calloc((size_t) (fci->numofsequences+1),
                               sizeof (*fci->countocc));
     fci->countocc[0] = 1UL;
     gt_marksubstring_mark(&fci->markprefix,fci->allfirstcodes[0]);
@@ -633,11 +633,22 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
       }
       if (computespms)
       {
-        int ret = gt_spmsk_process(spmsk_state,
-                                   suftab + countocc[idx],
-                                   lcptab_bucket,
-                                   width,
-                                   NULL);
+        int ret;
+        unsigned long j;
+
+        printf("bucket %lu %lu of suftab at %lu\n",countocc[idx],
+                                                   countocc[idx]+width-1,
+                                                   (unsigned long) suftab);
+        for (j = 0; j < width; j++)
+        {
+          printf("suftab[%lu]=%lu with lcp %u\n",j,suftab[countocc[idx] + j],
+                 (unsigned int) lcptab_bucket[j]);
+        }
+        ret = gt_spmsk_process(spmsk_state,
+                               suftab + countocc[idx],
+                               lcptab_bucket,
+                               width,
+                               NULL);
         gt_assert(ret == 0);
       }
     }

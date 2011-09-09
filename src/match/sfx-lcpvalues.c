@@ -20,6 +20,7 @@
 #include "core/unused_api.h"
 #include "core/minmax.h"
 #include "core/arraydef.h"
+#include "core/disc_distri.h"
 #include "esa-fileend.h"
 #include "sfx-lcpvalues.h"
 #include "turnwheels.h"
@@ -44,6 +45,7 @@ typedef struct
   GtLcpvalues tableoflcpvalues;
   Lcpoutput2file *lcp2file;
   double lcptabsum;
+  GtDiscDistri *distlcpvalues;
 } Lcpsubtab;
 
 typedef struct
@@ -200,6 +202,7 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   outlcpinfo->sizeofinfo = sizeof (*outlcpinfo);
   outlcpinfo->lcpsubtab.lcptabsum = 0.0;
+  outlcpinfo->lcpsubtab.distlcpvalues = gt_disc_distri_new();
   if (indexname == NULL)
   {
     outlcpinfo->lcpsubtab.lcp2file = NULL;
@@ -345,6 +348,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
     lcpsubtab->lcptabsum += (double) lcpvalue;
+    gt_disc_distri_add(lcpsubtab->distlcpvalues, lcpvalue);
   }
   outsmalllcpvalues(lcpsubtab->lcp2file,
                     (unsigned long) (bucketright - bucketleft + 1));
@@ -421,6 +425,8 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   outlcpinfo->lcpsubtab.tableoflcpvalues.isset = NULL;
 #endif
   outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = 0;
+  gt_disc_distri_show(outlcpinfo->lcpsubtab.distlcpvalues,NULL);
+  gt_disc_distri_delete(outlcpinfo->lcpsubtab.distlcpvalues);
   gt_free(outlcpinfo);
 }
 
