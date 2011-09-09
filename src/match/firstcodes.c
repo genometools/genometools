@@ -591,7 +591,9 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         unsigned long differentcodes,
                                         unsigned long depth,
                                         unsigned long minmatchlength,
-                                        bool withsuftabcheck)
+                                        bool withsuftabcheck,
+                                        bool countspms,
+                                        bool outputspms)
 {
   unsigned long idx, width, previous = 0;
   GtShortreadsortworkinfo *srsw;
@@ -599,16 +601,16 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
   GtSpmsk_state *spmsk_state = NULL;
-  const bool computespms = true;
 
   if (withsuftabcheck)
   {
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
-  if (computespms)
+  if (outputspms || countspms)
   {
-    spmsk_state = gt_spmsk_new(encseq,readmode,minmatchlength);
+    spmsk_state = gt_spmsk_new(encseq,readmode,minmatchlength,
+                               countspms,outputspms);
   }
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
@@ -641,7 +643,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
         previousdefined = true;
         previous = suftab[countocc[idx] + width -1];
       }
-      if (computespms)
+      if (outputspms || countspms)
       {
         int ret = gt_spmsk_process(spmsk_state,
                                    suftab + countocc[idx],
@@ -675,6 +677,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
                                                    unsigned int minmatchlength,
                                                    bool withsuftabcheck,
+                                                   bool countspms,
+                                                   bool outputspms,
                                                    GtLogger *logger)
 {
   GtTimer *timer = NULL;
@@ -737,7 +741,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
                        fci.binsearchcache_depth,
                        binsearchcache_size);
-  fci.codebuffer_allocated = 3000000UL;
+  fci.codebuffer_allocated = fci.differentcodes/4;
   fci.codebuffer_nextfree = 0;
   fci.codebuffer = gt_malloc(sizeof (*fci.codebuffer)
                              * fci.codebuffer_allocated);
@@ -819,7 +823,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               fci.differentcodes,
                               (unsigned long) kmersize,
                               (unsigned long) minmatchlength,
-                              withsuftabcheck);
+                              withsuftabcheck,
+                              countspms,
+                              outputspms);
   gt_free(fci.countocc);
   gt_free(fci.suftab);
   if (timer != NULL)

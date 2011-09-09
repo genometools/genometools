@@ -33,7 +33,10 @@ struct GtSpmsk_state /* global information */
   const GtEncseq *encseq;
   GtReadmode readmode;
   unsigned long totallength,
-                minmatchlength;
+                minmatchlength,
+                spmcounter;
+  bool countspms,
+       outputspms;
   GtArrayGtUlong Wset, Lset;
 };
 
@@ -105,11 +108,21 @@ static int spmsk_processlcpinterval(unsigned long lcp,
     firstpos = ((GtSpmsk_info *) info)->firstinW;
     for (lidx = 0; lidx < state->Lset.nextfreeGtUlong; lidx++)
     {
-      unsigned long lpos = state->Lset.spaceGtUlong[lidx];
-
-      for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
+      if (state->outputspms)
       {
-        printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
+        unsigned long lpos = state->Lset.spaceGtUlong[lidx];
+
+        for (widx = firstpos; widx < state->Wset.nextfreeGtUlong; widx++)
+        {
+          printf("%lu %lu %lu\n",lpos,state->Wset.spaceGtUlong[widx],lcp);
+        }
+      } else
+      {
+        gt_assert(state->countspms);
+        if (firstpos < state->Wset.nextfreeGtUlong)
+        {
+          state->spmcounter += state->Wset.nextfreeGtUlong - firstpos;
+        }
       }
     }
     state->Lset.nextfreeGtUlong = 0;
@@ -122,7 +135,9 @@ static int spmsk_processlcpinterval(unsigned long lcp,
 
 GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
                             GtReadmode readmode,
-                            unsigned long minmatchlength)
+                            unsigned long minmatchlength,
+                            bool countspms,
+                            bool outputspms)
 {
   GtSpmsk_state *state = gt_malloc(sizeof (*state));
 
@@ -130,6 +145,9 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
   state->readmode = readmode;
   state->totallength = gt_encseq_total_length(encseq);
   state->minmatchlength = minmatchlength;
+  state->countspms = countspms;
+  state->outputspms = outputspms;
+  state->spmcounter = 0;
   GT_INITARRAY(&state->Wset,GtUlong);
   GT_INITARRAY(&state->Lset,GtUlong);
   return state;
@@ -137,9 +155,16 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
 
 void gt_spmsk_delete(GtSpmsk_state *state)
 {
-  GT_FREEARRAY(&state->Wset,GtUlong);
-  GT_FREEARRAY(&state->Lset,GtUlong);
-  gt_free(state);
+  if (state != NULL)
+  {
+    if (state->countspms)
+    {
+      printf("number of suffix-prefix matches=%lu\n",state->spmcounter);
+    }
+    GT_FREEARRAY(&state->Wset,GtUlong);
+    GT_FREEARRAY(&state->Lset,GtUlong);
+    gt_free(state);
+  }
 }
 
 int gt_spmsk_process(GtSpmsk_state *state,

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/option_api.h"
@@ -26,15 +27,21 @@
 typedef struct {
   bool checksuftab,
        mirrored,
-       verbose;
+       verbose,
+       outputspms,
+       countspms;
   unsigned int minmatchlength;
-  GtStr  *encseqinput;
+  GtStr *encseqinput,
+        *spmspec;
 } GtEncseq2spmArguments;
 
 static void* gt_encseq2spm_arguments_new(void)
 {
   GtEncseq2spmArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
+  arguments->outputspms = false;
+  arguments->countspms = false;
   arguments->encseqinput = gt_str_new();
+  arguments->spmspec = gt_str_new();
   return arguments;
 }
 
@@ -43,6 +50,7 @@ static void gt_encseq2spm_arguments_delete(void *tool_arguments)
   GtEncseq2spmArguments *arguments = tool_arguments;
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
+  gt_str_delete(arguments->spmspec);
   gt_free(arguments);
 }
 
@@ -75,6 +83,11 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
                              &arguments->mirrored, false);
   gt_option_parser_add_option(op, option);
 
+  /* -spm */
+  option = gt_option_new_string("spm", "specify output for spms",
+                                arguments->spmspec, NULL);
+  gt_option_parser_add_option(op, option);
+
   /* -ii */
   option = gt_option_new_string("ii", "specify the input sequence",
                                 arguments->encseqinput, NULL);
@@ -91,6 +104,7 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
                                          GT_UNUSED void *tool_arguments,
                                          GtError *err)
 {
+  GtEncseq2spmArguments *arguments = tool_arguments;
   bool haserr = false;
 
   gt_error_check(err);
@@ -98,6 +112,25 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
   {
     gt_error_set(err,"unnecessary arguments");
     haserr = true;
+  }
+  if (!haserr && gt_str_length(arguments->spmspec) > 0)
+  {
+    const char *spmspecstring = gt_str_get(arguments->spmspec);
+    if (strcmp(spmspecstring,"show") == 0)
+    {
+      arguments->outputspms = true;
+    } else
+    {
+      if (strcmp(spmspecstring,"count") == 0)
+      {
+        arguments->countspms = true;
+      } else
+      {
+        gt_error_set(err,"illegal argument \"%s\" to option -spm",
+                     spmspecstring);
+        haserr = true;
+      }
+    }
   }
   return haserr ? -1 : 0;
 }
@@ -134,6 +167,8 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
                                                 arguments->minmatchlength,
                                                 arguments->checksuftab,
+                                                arguments->countspms,
+                                                arguments->outputspms,
                                                 logger);
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
