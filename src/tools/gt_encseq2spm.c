@@ -18,10 +18,12 @@
 #include "core/ma.h"
 #include "core/unused_api.h"
 #include "core/option_api.h"
+#include "core/encseq_api.h"
 #include "tools/gt_encseq2spm.h"
 
 typedef struct {
-  bool checksuftab;
+  bool checksuftab,
+       mirrored;
   GtStr  *encseqinput;
 } GtEncseq2spmArguments;
 
@@ -56,11 +58,18 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("checksuftab", "check the suffix table",
                              &arguments->checksuftab, false);
   gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
 
-  /* -e */
-  option = gt_option_new_string("e", "specify the encoded sequence",
+  /* -mirrored */
+  option = gt_option_new_bool("mirrored", "use sequence with its mirror",
+                             &arguments->mirrored, false);
+  gt_option_parser_add_option(op, option);
+
+  /* -ii */
+  option = gt_option_new_string("ii", "specify the input sequence",
                                 arguments->encseqinput, NULL);
   gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
   return op;
 }
 
@@ -80,7 +89,6 @@ static int gt_encseq2spm_arguments_check(GT_UNUSED int rest_argc,
   {
     printf("%s\n", gt_str_get(arguments->encseqinput));
   }
-
   return had_err;
 }
 
@@ -88,19 +96,34 @@ static int gt_encseq2spm_runner(int argc, const char **argv, int parsed_args,
                               void *tool_arguments, GT_UNUSED GtError *err)
 {
   GtEncseq2spmArguments *arguments = tool_arguments;
-  int had_err = 0;
+  GtEncseqLoader *el = NULL;
+  GtEncseq *encseq = NULL;
+  bool haserr = false;
 
   gt_error_check(err);
   gt_assert(arguments);
-
-  /* XXX */
+  el = gt_encseq_loader_new();
+  encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
+                                 err);
+  if (encseq == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr && arguments->mirrored)
+  {
+    if (gt_encseq_mirror(encseq, err) != 0)
+    {
+      haserr = true;
+    }
+  }
   if (arguments->checksuftab)
   {
     printf("argc=%d, parsed_args=%d\n", argc, parsed_args);
   }
   printf("argv[0]=%s\n", argv[0]);
-
-  return had_err;
+  gt_encseq_delete(encseq);
+  gt_encseq_loader_delete(el);
+  return haserr ? -1 : 0;
 }
 
 GtTool* gt_encseq2spm(void)
