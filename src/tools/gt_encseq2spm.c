@@ -25,6 +25,7 @@
 typedef struct {
   bool checksuftab,
        mirrored;
+  unsigned int minmatchlength;
   GtStr  *encseqinput;
 } GtEncseq2spmArguments;
 
@@ -54,6 +55,12 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[option ...] [file]",
                             "Compute suffix prefix matches "
                             "from encoded sequence.");
+
+  /* -l */
+  option = gt_option_new_uint("l", "specify the minimum length",
+                             &arguments->minmatchlength, 0);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
   /* -checksuftab */
   option = gt_option_new_bool("checksuftab", "check the suffix table",
@@ -117,6 +124,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     }
   }
   storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
+                                                arguments->minmatchlength,
                                                 arguments->checksuftab);
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);

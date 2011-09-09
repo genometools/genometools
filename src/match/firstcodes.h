@@ -22,6 +22,7 @@
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
+                                                   unsigned int minmatchlength,
                                                    bool withsuftabcheck);
 
 #endif
