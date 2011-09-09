@@ -114,7 +114,6 @@ Test do
   run_test "#{$bin}/gt repfind -spm -l #{minlen} -ii #{indexname}"
   run "mv #{$last_stdout} result.repfind"
   run_test "#{$bin}/gt encseq2spm -l #{minlen} -mirrored -ii #{indexname}"
-  run "grep -v '^#' #{$last_stdout}"
   run "mv #{$last_stdout} result.firstcodes"
   run "cmp result.repfind result.firstcodes"
 end

@@ -19,12 +19,14 @@
 #include "core/unused_api.h"
 #include "core/option_api.h"
 #include "core/encseq_api.h"
+#include "core/logger.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
 
 typedef struct {
   bool checksuftab,
-       mirrored;
+       mirrored,
+       verbose;
   unsigned int minmatchlength;
   GtStr  *encseqinput;
 } GtEncseq2spmArguments;
@@ -78,6 +80,10 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
                                 arguments->encseqinput, NULL);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
+
+  option = gt_option_new_verbose(&arguments->verbose);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 
@@ -105,6 +111,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   GtEncseq2spmArguments *arguments = tool_arguments;
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
+  GtLogger *logger;
   bool haserr = false;
 
   gt_error_check(err);
@@ -123,11 +130,14 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
+  logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
   storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
                                                 arguments->minmatchlength,
-                                                arguments->checksuftab);
+                                                arguments->checksuftab,
+                                                logger);
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
+  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 

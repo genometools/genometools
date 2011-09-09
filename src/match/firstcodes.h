@@ -18,11 +18,13 @@
 #ifndef FIRSTCODES_H
 #define FIRSTCODES_H
 
-#include "core/encseq.h"
+#include "core/log_api.h"
+#include "core/encseq_api.h"
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
                                                    unsigned int minmatchlength,
-                                                   bool withsuftabcheck);
+                                                   bool withsuftabcheck,
+                                                   GtLogger *logger);
 
 #endif
