@@ -80,6 +80,7 @@ typedef struct
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
+                              bool withdistribution,
                               GtError *err);
 
 size_t gt_Outlcpinfo_size(const Outlcpinfo *outlcpinfo);

@@ -196,7 +196,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge(firstedge,
+        if (processbranchingedge != NULL &&
+            processbranchingedge(firstedge,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,
@@ -225,7 +226,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
-        if (processbranchingedge(true,
+        if (processbranchingedge != NULL &&
+            processbranchingedge(true,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,
@@ -377,7 +379,8 @@ int gt_esa_bottomup_RAM(
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge(firstedge,
+        if (processbranchingedge != NULL &&
+            processbranchingedge(firstedge,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,
@@ -406,7 +409,8 @@ int gt_esa_bottomup_RAM(
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
-        if (processbranchingedge(true,
+        if (processbranchingedge != NULL &&
+            processbranchingedge(true,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  TOP_ESA_BOTTOMUP.info,

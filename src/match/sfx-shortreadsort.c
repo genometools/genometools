@@ -47,8 +47,7 @@ struct GtShortreadsortworkinfo
                                     lcpvalues are not required. */
   uint16_t *firstcodeslcpvalues;
   unsigned long numofentries,
-                tmplcplen,
-                distoflcpvalues[GTMAXDISTANCE_SR+1];
+                tmplcplen;
   bool fwd, complement;
 };
 
@@ -87,7 +86,6 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   {
     srsw->firstcodeslcpvalues = NULL;
   }
-  memset(srsw->distoflcpvalues,0,sizeof(srsw->distoflcpvalues));
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
@@ -102,15 +100,6 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
 {
   if (srsw != NULL)
   {
-    unsigned long idx;
-
-    for (idx = 0; idx <= (unsigned long) GTMAXDISTANCE_SR; idx++)
-    {
-      if (srsw->distoflcpvalues[idx] > 0)
-      {
-        printf("%lu %lu\n",idx,srsw->distoflcpvalues[idx]);
-      }
-    }
     gt_free(srsw->shortreadsortinfo);
     srsw->shortreadsortinfo = NULL;
     gt_free(srsw->shortreadsortrefs);
@@ -608,11 +597,4 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
       = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
     srsw->shortreadsortrefs[idx] = (uint16_t) idx;
   }
-  /*
-  for (idx = 1UL; idx < width; idx++)
-  {
-    gt_assert(srsw->firstcodeslcpvalues[idx] <= (uint16_t) GTMAXDISTANCE_SR);
-    srsw->distoflcpvalues[srsw->firstcodeslcpvalues[idx]]++;
-  }
-  */
 }

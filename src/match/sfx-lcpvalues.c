@@ -194,6 +194,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                               unsigned int numofchars,
                               unsigned int prefixlength,
+                              bool withdistribution,
                               GtError *err)
 {
   bool haserr = false;
@@ -202,7 +203,13 @@ Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   outlcpinfo->sizeofinfo = sizeof (*outlcpinfo);
   outlcpinfo->lcpsubtab.lcptabsum = 0.0;
-  outlcpinfo->lcpsubtab.distlcpvalues = gt_disc_distri_new();
+  if (withdistribution)
+  {
+    outlcpinfo->lcpsubtab.distlcpvalues = gt_disc_distri_new();
+  } else
+  {
+    outlcpinfo->lcpsubtab.distlcpvalues = NULL;
+  }
   if (indexname == NULL)
   {
     outlcpinfo->lcpsubtab.lcp2file = NULL;
@@ -348,7 +355,10 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
     }
     lcpsubtab->lcptabsum += (double) lcpvalue;
-    gt_disc_distri_add(lcpsubtab->distlcpvalues, lcpvalue);
+    if (lcpsubtab->distlcpvalues != NULL)
+    {
+      gt_disc_distri_add(lcpsubtab->distlcpvalues, lcpvalue);
+    }
   }
   outsmalllcpvalues(lcpsubtab->lcp2file,
                     (unsigned long) (bucketright - bucketleft + 1));
@@ -425,8 +435,11 @@ void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo)
   outlcpinfo->lcpsubtab.tableoflcpvalues.isset = NULL;
 #endif
   outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = 0;
-  gt_disc_distri_show(outlcpinfo->lcpsubtab.distlcpvalues,NULL);
-  gt_disc_distri_delete(outlcpinfo->lcpsubtab.distlcpvalues);
+  if (outlcpinfo->lcpsubtab.distlcpvalues != NULL)
+  {
+    gt_disc_distri_show(outlcpinfo->lcpsubtab.distlcpvalues,NULL);
+    gt_disc_distri_delete(outlcpinfo->lcpsubtab.distlcpvalues);
+  }
   gt_free(outlcpinfo);
 }
 
