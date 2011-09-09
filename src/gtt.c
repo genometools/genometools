@@ -76,6 +76,7 @@
 #include "tools/gt_dev.h"
 #include "tools/gt_dupfeat.h"
 #include "tools/gt_encseq.h"
+#include "tools/gt_encseq2spm.h"
 #include "tools/gt_eval.h"
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
@@ -147,6 +148,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_hidden_tool(tools, "dev", gt_dev());
   gt_toolbox_add_tool(tools, "dupfeat", gt_dupfeat());
   gt_toolbox_add_tool(tools, "encseq", gt_encseq());
+  gt_toolbox_add_tool(tools, "encseq2spm", gt_encseq2spm());
   gt_toolbox_add_tool(tools, "eval", gt_eval());
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
