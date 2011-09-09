@@ -21,6 +21,7 @@
 #include "core/encseq.h"
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
-                                                   unsigned int kmersize);
+                                                   unsigned int kmersize,
+                                                   bool withsuftabcheck);
 
 #endif

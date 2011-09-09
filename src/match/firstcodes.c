@@ -584,7 +584,8 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         const unsigned long *countocc,
                                         unsigned long differentcodes,
                                         unsigned long depth,
-                                        unsigned long minmatchlength)
+                                        unsigned long minmatchlength,
+                                        bool withsuftabcheck)
 {
   unsigned long idx, width, previous = 0;
   GtShortreadsortworkinfo *srsw;
@@ -592,7 +593,6 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
   GtSpmsk_state *spmsk_state = NULL;
-  const bool withsuftabcheck = true;
   const bool computespms = true;
 
   if (withsuftabcheck)
@@ -666,7 +666,8 @@ typedef unsigned long QSORTNAME(Sorttype);
 #include "match/qsort-direct.gen"
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
-                                                   unsigned int kmersize)
+                                                   unsigned int kmersize,
+                                                   bool withsuftabcheck)
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
@@ -806,7 +807,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               fci.countocc,
                               fci.differentcodes,
                               (unsigned long) kmersize,
-                              (unsigned long) minmatchlength);
+                              (unsigned long) minmatchlength,
+                              withsuftabcheck);
   gt_free(fci.countocc);
   gt_free(fci.suftab);
   if (timer != NULL)

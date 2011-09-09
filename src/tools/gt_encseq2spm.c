@@ -20,6 +20,7 @@
 #include "core/option_api.h"
 #include "core/encseq_api.h"
 #include "tools/gt_encseq2spm.h"
+#include "match/firstcodes.h"
 
 typedef struct {
   bool checksuftab,
@@ -73,27 +74,26 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_encseq2spm_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
+static int gt_encseq2spm_arguments_check(int rest_argc,
+                                         GT_UNUSED void *tool_arguments,
+                                         GtError *err)
 {
-  GtEncseq2spmArguments *arguments = tool_arguments;
-  int had_err = 0;
+  bool haserr = false;
 
   gt_error_check(err);
-  gt_assert(arguments);
-
-  /* XXX: do some checking after the option have been parsed (usally this is not
-     necessary and this function can be removed completely). */
-  if (gt_str_length(arguments->encseqinput) > 0)
+  if (rest_argc != 0)
   {
-    printf("%s\n", gt_str_get(arguments->encseqinput));
+    gt_error_set(err,"unnecessary arguments");
+    haserr = true;
   }
-  return had_err;
+  return haserr ? -1 : 0;
 }
 
-static int gt_encseq2spm_runner(int argc, const char **argv, int parsed_args,
-                              void *tool_arguments, GT_UNUSED GtError *err)
+static int gt_encseq2spm_runner(GT_UNUSED int argc,
+                                GT_UNUSED const char **argv,
+                                GT_UNUSED int parsed_args,
+                                void *tool_arguments,
+                                GtError *err)
 {
   GtEncseq2spmArguments *arguments = tool_arguments;
   GtEncseqLoader *el = NULL;
@@ -116,11 +116,8 @@ static int gt_encseq2spm_runner(int argc, const char **argv, int parsed_args,
       haserr = true;
     }
   }
-  if (arguments->checksuftab)
-  {
-    printf("argc=%d, parsed_args=%d\n", argc, parsed_args);
-  }
-  printf("argv[0]=%s\n", argv[0]);
+  storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
+                                                arguments->checksuftab);
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
   return haserr ? -1 : 0;
