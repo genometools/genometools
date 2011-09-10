@@ -15,29 +15,32 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SPMSK_H
-#define ESA_SPMSK_H
+#ifndef SPMSUFTAB_H
+#define SPMSUFTAB_H
 
-#include <stdint.h>
-#include "core/error_api.h"
-#include "core/encseq_api.h"
-#include "match/spmsuftab.h"
+#include "core/unused_api.h"
 
-typedef struct GtSpmsk_state GtSpmsk_state;
+typedef struct
+{
+  unsigned long *suftab;
+} GtSpmsuftab;
 
-GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
-                            GtReadmode readmode,
-                            unsigned long minmatchlength,
-                            bool countspms,
-                            bool outputspms);
+GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
+                                              unsigned long idx,
+                                              unsigned long value)
+{
+  spmsuftab->suftab[idx] = value;
+}
 
-void gt_spmsk_delete(GtSpmsk_state *state);
+GT_UNUSED static inline unsigned long gt_spmsuftab_get(
+                                      const GtSpmsuftab *spmsuftab,
+                                      unsigned long idx)
+{
+  return spmsuftab->suftab[idx];
+}
 
-int gt_spmsk_process(GtSpmsk_state *state,
-                     const GtSpmsuftab *spmsuftab,
-                     unsigned long subbucketleft,
-                     const uint16_t *lcptab_bucket,
-                     unsigned long nonspecials,
-                     GtError *err);
+GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries);
+
+void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab);
 
 #endif

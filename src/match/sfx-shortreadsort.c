@@ -22,6 +22,7 @@
 #include "core/assert_api.h"
 #include "sfx-lcpvalues.h"
 #include "sfx-shortreadsort.h"
+#include "spmsuftab.h"
 
 #ifdef _LP64
 #define GT_NUMOFTBEVALUEFOR100 3
@@ -570,7 +571,7 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtEncseqReader *esr,
-                                 unsigned long *suftab,
+                                 GtSpmsuftab *spmsuftab,
                                  unsigned long subbucketleft,
                                  unsigned long width,
                                  unsigned long depth)
@@ -579,7 +580,7 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
 
   for (idx = 0; idx < width; idx++)
   {
-    pos = suftab[subbucketleft + idx];
+    pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
     srsw->shortreadsortinfo[idx].suffix = pos;
     srsw->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
@@ -591,10 +592,13 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
                                     subbucketleft);
+  /* Instead of setting the values here again, one could directly store
+     the result in a buffer and handle this later */
   for (idx = 0; idx < width; idx++)
   {
-    suftab[subbucketleft + idx]
-      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
+    gt_spmsuftab_set(spmsuftab,subbucketleft + idx,
+                     srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]]
+                                            .suffix);
     srsw->shortreadsortrefs[idx] = (uint16_t) idx;
   }
 }

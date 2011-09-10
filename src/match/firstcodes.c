@@ -25,6 +25,7 @@
 #include "core/log_api.h"
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
+#include "spmsuftab.h"
 #include "esa-spmsk.h"
 #include "firstcodes.h"
 
@@ -106,7 +107,7 @@ typedef struct
   Gtmarksubstring markprefix,
                   marksuffix;
   unsigned long *tempcodeforradixsort;
-  unsigned long *suftab;
+  GtSpmsuftab *spmsuftab;
 } GtFirstcodesinfo;
 
 static void gt_storefirstcodes(void *processinfo,
@@ -461,7 +462,7 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
       {
         idx = --fci->countocc[(unsigned long) (subject - fci->allfirstcodes)];
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
-        fci->suftab[idx] = query->b;
+        gt_spmsuftab_set(fci->spmsuftab,idx,query->b);
         query++;
         found++;
       }
@@ -548,7 +549,8 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              GtEncseqReader *esr2,
                                              unsigned long previous,
                                              bool previousdefined,
-                                             const unsigned long *suftab_bucket,
+                                             const GtSpmsuftab *spmsuftab,
+                                             unsigned long subbucketleft,
                                              const uint16_t *lcptab_bucket,
                                              unsigned long numberofsuffixes)
 {
@@ -561,7 +563,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
   gt_assert(!previousdefined || previous < totallength);
   for (idx = 0; idx < numberofsuffixes; idx++)
   {
-    current = suftab_bucket[idx];
+    current = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
     if (previousdefined && idx < totallength)
     {
       gt_assert(current < totallength);
@@ -585,7 +587,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
 
 static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         GtReadmode readmode,
-                                        unsigned long *suftab,
+                                        GtSpmsuftab *spmsuftab,
                                         unsigned long maxbucketsize,
                                         const unsigned long *countocc,
                                         unsigned long differentcodes,
@@ -625,7 +627,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                   encseq,
                                   readmode,
                                   esr,
-                                  suftab,
+                                  spmsuftab,
                                   countocc[idx],
                                   width,
                                   depth);
@@ -637,16 +639,18 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                          esr2,
                                          previous,
                                          previousdefined,
-                                         suftab + countocc[idx],
+                                         spmsuftab,
+                                         countocc[idx],
                                          lcptab_bucket,
                                          width);
         previousdefined = true;
-        previous = suftab[countocc[idx] + width -1];
+        previous = gt_spmsuftab_get(spmsuftab,countocc[idx] + width -1);
       }
       if (outputspms || countspms)
       {
         int ret = gt_spmsk_process(spmsk_state,
-                                   suftab + countocc[idx],
+                                   spmsuftab,
+                                   countocc[idx],
                                    lcptab_bucket,
                                    width,
                                    NULL);
@@ -787,10 +791,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 * fci.codebuffer_allocated);
   fci.tempcodeposforradixsort = gt_malloc(sizeof (*fci.tempcodeposforradixsort)
                                           * fci.codebuffer_allocated);
-  fci.suftab = gt_malloc(sizeof (*fci.suftab) * (fci.firstcodehits+
-                                                 fci.numofsequences));
+  fci.spmsuftab = gt_spmsuftab_new(fci.firstcodehits + fci.numofsequences);
   gt_logger_log(logger,"allocate %lu entries for suftab",fci.firstcodehits +
-                                                          fci.numofsequences);
+                                                         fci.numofsequences);
   fci.flushcount = 0;
   getencseqkmers_twobitencoding(encseq,
                                 readmode,
@@ -817,7 +820,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   gt_firstcodes_sortremaining(encseq,
                               readmode,
-                              fci.suftab,
+                              fci.spmsuftab,
                               fci.maxbucketsize,
                               fci.countocc,
                               fci.differentcodes,
@@ -827,7 +830,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               countspms,
                               outputspms);
   gt_free(fci.countocc);
-  gt_free(fci.suftab);
+  gt_spmsuftab_delete(fci.spmsuftab);
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);

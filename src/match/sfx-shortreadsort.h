@@ -22,6 +22,7 @@
 #include "core/encseq_api.h"
 #include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
+#include "spmsuftab.h"
 
 #define GT_BSR_UPDATEMAXLCP(MAXVAL,LCP)\
         if ((MAXVAL) < (LCP))\
@@ -57,7 +58,7 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtEncseqReader *esr,
-                                 unsigned long *suftab,
+                                 GtSpmsuftab *spmsuftab,
                                  unsigned long subbucketleft,
                                  unsigned long width,
                                  unsigned long depth);

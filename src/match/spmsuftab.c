@@ -15,29 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SPMSK_H
-#define ESA_SPMSK_H
+#include "core/ma.h"
+#include "spmsuftab.h"
 
-#include <stdint.h>
-#include "core/error_api.h"
-#include "core/encseq_api.h"
-#include "match/spmsuftab.h"
+GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries)
+{
+  GtSpmsuftab *spmsuftab = gt_malloc(sizeof (*spmsuftab));
 
-typedef struct GtSpmsk_state GtSpmsk_state;
+  spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
+  return spmsuftab;
+}
 
-GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
-                            GtReadmode readmode,
-                            unsigned long minmatchlength,
-                            bool countspms,
-                            bool outputspms);
-
-void gt_spmsk_delete(GtSpmsk_state *state);
-
-int gt_spmsk_process(GtSpmsk_state *state,
-                     const GtSpmsuftab *spmsuftab,
-                     unsigned long subbucketleft,
-                     const uint16_t *lcptab_bucket,
-                     unsigned long nonspecials,
-                     GtError *err);
-
-#endif
+void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
+{
+  gt_free(spmsuftab->suftab);
+  gt_free(spmsuftab);
+}
