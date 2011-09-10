@@ -38,6 +38,7 @@ struct GtSpmsk_state /* global information */
   bool countspms,
        outputspms;
   GtArrayGtUlong Wset, Lset;
+  GtArrayGtBUItvinfo *stack;
 };
 
 static GtBUinfo *gt_spmsk_allocatestackinfo(GT_UNUSED GtBUstate *bustate)
@@ -148,6 +149,7 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
   state->countspms = countspms;
   state->outputspms = outputspms;
   state->spmcounter = 0;
+  state->stack = gt_GtArrayGtBUItvinfo_new();
   GT_INITARRAY(&state->Wset,GtUlong);
   GT_INITARRAY(&state->Lset,GtUlong);
   return state;
@@ -163,21 +165,22 @@ void gt_spmsk_delete(GtSpmsk_state *state)
     }
     GT_FREEARRAY(&state->Wset,GtUlong);
     GT_FREEARRAY(&state->Lset,GtUlong);
+    gt_GtArrayGtBUItvinfo_delete(state->stack,gt_spmsk_freestackinfo,NULL);
     gt_free(state);
   }
 }
 
 int gt_spmsk_process(GtSpmsk_state *state,
-                        const unsigned long *suftab_bucket,
-                        const uint16_t *lcptab_bucket,
-                        unsigned long nonspecials,
-                        GtError *err)
+                     const unsigned long *suftab_bucket,
+                     const uint16_t *lcptab_bucket,
+                     unsigned long nonspecials,
+                     GtError *err)
 {
   if (gt_esa_bottomup_RAM(suftab_bucket,
                           lcptab_bucket,
                           nonspecials,
+                          state->stack,
                           gt_spmsk_allocatestackinfo,
-                          gt_spmsk_freestackinfo,
                           spmsk_processleafedge,
                           NULL,
                           spmsk_processlcpinterval,

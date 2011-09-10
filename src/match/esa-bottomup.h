@@ -25,6 +25,8 @@
 typedef struct GtBUinfo GtBUinfo;
 typedef struct GtBUstate GtBUstate;
 
+typedef struct GtArrayGtBUItvinfo GtArrayGtBUItvinfo;
+
 int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
                     void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
@@ -53,12 +55,18 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                     GtBUstate *bustate,
                     GtError *err);
 
+GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void);
+
+void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
+                                  void (*freeBUinfo)(GtBUinfo *,GtBUstate *),
+                                  GtBUstate *state);
+
 int gt_esa_bottomup_RAM(
                     const unsigned long *suftab_bucket,
                     const uint16_t *lcptab_bucket,
                     unsigned long nonspecials,
+                    GtArrayGtBUItvinfo *stack,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
-                    void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
                     int (*processleafedge)(bool,
                                            unsigned long,
                                            unsigned long,

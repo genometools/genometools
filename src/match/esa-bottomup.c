@@ -17,34 +17,70 @@
 
 #include <limits.h>
 #include "core/ma.h"
+#include "core/arraydef.h"
 #include "esa-bottomup.h"
 #include "esa-seqread.h"
 
-#define TOP_ESA_BOTTOMUP   stackspace[nextfreeItvinfo-1]
-#define POP_ESA_BOTTOMUP   (stackspace + (--nextfreeItvinfo))
+#define TOP_ESA_BOTTOMUP\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
+#define POP_ESA_BOTTOMUP\
+        (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
 #define PUSH_ESA_BOTTOMUP(LCP,LB)\
-        if (nextfreeItvinfo >= allocatedItvinfo)\
+        if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
-          gt_assert(nextfreeItvinfo == allocatedItvinfo);\
-          stackspace = allocateBUstack(stackspace,\
-                                       allocatedItvinfo,\
-                                       allocatedItvinfo+incrementstacksize,\
-                                       allocateBUinfo,\
-                                       bustate);\
-          allocatedItvinfo += incrementstacksize;\
+          gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
+          stack->spaceGtBUItvinfo\
+            = allocateBUstack(stack->spaceGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo+incrementstacksize,\
+                              allocateBUinfo,\
+                              bustate);\
+          stack->allocatedGtBUItvinfo += incrementstacksize;\
         }\
-        gt_assert(stackspace != NULL);\
-        stackspace[nextfreeItvinfo].lcp = LCP;\
-        stackspace[nextfreeItvinfo].lb = LB;\
-        stackspace[nextfreeItvinfo].rb = ULONG_MAX;\
-        nextfreeItvinfo++
+        gt_assert(stack->spaceGtBUItvinfo != NULL);\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lcp = LCP;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lb = LB;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].rb = ULONG_MAX;\
+        stack->nextfreeGtBUItvinfo++
 
 typedef struct
 {
   unsigned long lcp, lb, rb;
   GtBUinfo *info;
 } GtBUItvinfo;
+
+struct GtArrayGtBUItvinfo
+{
+  GtBUItvinfo *spaceGtBUItvinfo;
+  unsigned long allocatedGtBUItvinfo,
+                nextfreeGtBUItvinfo;
+};
+
+GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void)
+{
+  GtArrayGtBUItvinfo *stack = gt_malloc(sizeof (*stack));
+
+  GT_INITARRAY(stack,GtBUItvinfo);
+  return stack;
+}
+
+void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
+                                  void (*freeBUinfo)(GtBUinfo *,GtBUstate *),
+                                  GtBUstate *state)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
+  {
+    if (freeBUinfo != NULL)
+    {
+      freeBUinfo(stack->spaceGtBUItvinfo[idx].info,state);
+    }
+  }
+  gt_free(stack->spaceGtBUItvinfo);
+  gt_free(stack);
+}
 
 #ifdef SKDEBUG
 static void showstack(const GtBUItvinfo *stackspace,
@@ -87,23 +123,6 @@ static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
   return itvinfo;
 }
 
-static void freeBUItvinfo(GtBUItvinfo *ptr,
-                          unsigned long allocated,
-                          void (*freeBUinfo)(GtBUinfo *,GtBUstate *),
-                          GtBUstate *state)
-{
-  unsigned long idx;
-
-  for (idx=0; idx<allocated; idx++)
-  {
-    if (freeBUinfo != NULL)
-    {
-      freeBUinfo(ptr[idx].info,state);
-    }
-  }
-  gt_free(ptr);
-}
-
 int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
                     void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
@@ -138,12 +157,12 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                 previoussuffix = 0,
                 idx,
                 nonspecials,
-                allocatedItvinfo = 0,
-                lastsuftabvalue = 0,
-                nextfreeItvinfo = 0;
-  GtBUItvinfo *lastinterval = NULL, *stackspace = NULL;
+                lastsuftabvalue = 0;
+  GtBUItvinfo *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
+  GtArrayGtBUItvinfo *stack;
 
+  stack = gt_GtArrayGtBUItvinfo_new();
   PUSH_ESA_BOTTOMUP(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
@@ -256,7 +275,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  gt_assert(nextfreeItvinfo > 0);
+  gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
     if (processleafedge(false,
@@ -280,7 +299,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  freeBUItvinfo(stackspace, allocatedItvinfo, freeBUinfo, bustate);
+  gt_GtArrayGtBUItvinfo_delete(stack,freeBUinfo,bustate);
   return haserr ? -1 : 0;
 }
 
@@ -288,8 +307,8 @@ int gt_esa_bottomup_RAM(
                     const unsigned long *suftab_bucket,
                     const uint16_t *lcptab_bucket,
                     unsigned long nonspecials,
+                    GtArrayGtBUItvinfo *stack,
                     GtBUinfo *(*allocateBUinfo)(GtBUstate *),
-                    void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
                     int (*processleafedge)(bool,
                                            unsigned long,
                                            unsigned long,
@@ -319,15 +338,11 @@ int gt_esa_bottomup_RAM(
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix = 0,
-                idx,
-                allocatedItvinfo = 0,
-                lastsuftabvalue,
-                nextfreeItvinfo = 0;
-  GtBUItvinfo *lastinterval = NULL, *stackspace = NULL;
+                idx;
+  GtBUItvinfo *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
 
   gt_assert(nonspecials > 0);
-  lastsuftabvalue = suftab_bucket[nonspecials-1];
   PUSH_ESA_BOTTOMUP(0,0);
   for (idx = 0; idx < nonspecials-1; idx++)
   {
@@ -439,9 +454,11 @@ int gt_esa_bottomup_RAM(
       }
     }
   }
-  gt_assert(nextfreeItvinfo > 0);
+  gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
+    unsigned long lastsuftabvalue = suftab_bucket[nonspecials-1];
+
     if (processleafedge(false,
                         TOP_ESA_BOTTOMUP.lcp,
                         TOP_ESA_BOTTOMUP.lb,
@@ -463,6 +480,6 @@ int gt_esa_bottomup_RAM(
       }
     }
   }
-  freeBUItvinfo(stackspace, allocatedItvinfo, freeBUinfo, bustate);
+  stack->nextfreeGtBUItvinfo = 0; /* empty the stack */
   return haserr ? -1 : 0;
 }
