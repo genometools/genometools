@@ -21,7 +21,8 @@
 #include <stdint.h>
 #include "core/error_api.h"
 #include "core/encseq_api.h"
-#include "match/spmsuftab.h"
+#include "sfx-shortreadsort.h"
+#include "spmsuftab.h"
 
 typedef struct GtSpmsk_state GtSpmsk_state;
 
@@ -34,8 +35,7 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
 void gt_spmsk_delete(GtSpmsk_state *state);
 
 int gt_spmsk_process(GtSpmsk_state *state,
-                     const GtSpmsuftab *spmsuftab,
-                     unsigned long subbucketleft,
+                     GtShortreadsortworkinfo *srsw,
                      const uint16_t *lcptab_bucket,
                      unsigned long nonspecials,
                      GtError *err);

@@ -55,6 +55,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long depth);
 
 void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
+                                 bool writefinalorder,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtEncseqReader *esr,
@@ -62,5 +63,10 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
                                  unsigned long subbucketleft,
                                  unsigned long width,
                                  unsigned long depth);
+
+unsigned long gt_shortreadsort_array_next(GtShortreadsortworkinfo *srsw,
+                                          unsigned long width);
+
+void gt_shortreadsort_array_reset(GtShortreadsortworkinfo *srsw);
 
 #endif
