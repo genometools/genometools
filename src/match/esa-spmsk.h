@@ -22,7 +22,6 @@
 #include "core/error_api.h"
 #include "core/encseq_api.h"
 #include "sfx-shortreadsort.h"
-#include "spmsuftab.h"
 
 typedef struct GtSpmsk_state GtSpmsk_state;
 

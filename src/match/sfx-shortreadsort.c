@@ -38,7 +38,14 @@ typedef struct
 } GtShortreadsort;
 
 #define GTMAXDISTANCE_SR 100
-#define GTSHORTREADORDERBUFFER_SIZE 128UL
+
+typedef struct 
+{
+  unsigned long nextidx,
+                total,
+                size,
+                *space;
+} GtShortreadoutputbuffer;
 
 struct GtShortreadsortworkinfo
 {
@@ -51,10 +58,7 @@ struct GtShortreadsortworkinfo
   unsigned long numofentries,
                 tmplcplen;
   bool fwd, complement;
-  unsigned long nextinbuffer,
-                totalread,
-                buffersize,
-                *orderbuffer;
+  GtShortreadoutputbuffer outputbuffer;
 };
 
 size_t gt_shortreadsort_size(unsigned long maxvalue)
@@ -73,7 +77,6 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
                                               GtReadmode readmode,
                                               bool firstcodes)
 {
-  unsigned long idx;
   GtShortreadsortworkinfo *srsw;
 
   srsw = gt_malloc(sizeof(*srsw));
@@ -95,14 +98,9 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
-  srsw->nextinbuffer = GTSHORTREADORDERBUFFER_SIZE;
-  srsw->totalread = 0;
-  srsw->buffersize = MIN(1024UL,maxshortreadsort);
-  srsw->orderbuffer = gt_malloc(sizeof(*srsw->orderbuffer) * srsw->buffersize);
-  for (idx = 0; idx <= maxshortreadsort; idx++)
-  {
-    srsw->shortreadsortrefs[idx] = (uint16_t) idx;
-  }
+  srsw->outputbuffer.size = MIN(srsw->outputbuffer.nextidx,maxshortreadsort);
+  srsw->outputbuffer.space = gt_malloc(sizeof(*srsw->outputbuffer.space) *
+                                       srsw->outputbuffer.size);
   return srsw;
 }
 
@@ -116,8 +114,8 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
     srsw->shortreadsortrefs = NULL;
     gt_free(srsw->firstcodeslcpvalues);
     srsw->firstcodeslcpvalues = NULL;
-    gt_free(srsw->orderbuffer);
-    srsw->orderbuffer = NULL;
+    gt_free(srsw->outputbuffer.space);
+    srsw->outputbuffer.space = NULL;
     gt_free(srsw);
   }
 }
@@ -596,26 +594,31 @@ static void gt_shortreadsort_array_getorder(GtShortreadsortworkinfo *srsw,
 unsigned long gt_shortreadsort_array_next(GtShortreadsortworkinfo *srsw,
                                           unsigned long width)
 {
-  gt_assert(srsw->totalread < width);
-  if (srsw->nextinbuffer == srsw->buffersize)
+  gt_assert(srsw->outputbuffer.total < width);
+  if (srsw->outputbuffer.nextidx == srsw->outputbuffer.size)
   {
-    unsigned long j, idx,
-                  maxindex = MIN(width,srsw->totalread + srsw->buffersize);
-    for (j = 0, idx = srsw->totalread; idx < maxindex; j++, idx++)
+    unsigned long j, idx, endidx;
+
+    endidx = srsw->outputbuffer.total + srsw->outputbuffer.size;
+    if (endidx > width)
     {
-      srsw->orderbuffer[j]
+      endidx = width;
+    }
+    for (j = 0, idx = srsw->outputbuffer.total; idx < endidx; j++, idx++)
+    {
+      srsw->outputbuffer.space[j]
         = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
     }
-    srsw->nextinbuffer = 0;
+    srsw->outputbuffer.nextidx = 0;
   }
-  srsw->totalread++;
-  return srsw->orderbuffer[srsw->nextinbuffer++];
+  srsw->outputbuffer.total++;
+  return srsw->outputbuffer.space[srsw->outputbuffer.nextidx++];
 }
 
 void gt_shortreadsort_array_reset(GtShortreadsortworkinfo *srsw)
 {
-  srsw->nextinbuffer = srsw->buffersize;
-  srsw->totalread = 0;
+  srsw->outputbuffer.nextidx = srsw->outputbuffer.size;
+  srsw->outputbuffer.total = 0;
 }
 
 void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
