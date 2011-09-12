@@ -39,7 +39,7 @@ typedef struct
 
 #define GTMAXDISTANCE_SR 100
 
-typedef struct 
+typedef struct
 {
   unsigned long nextidx,
                 total,
@@ -98,9 +98,8 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
-  srsw->outputbuffer.size = MIN(srsw->outputbuffer.nextidx,maxshortreadsort);
-  srsw->outputbuffer.space = gt_malloc(sizeof(*srsw->outputbuffer.space) *
-                                       srsw->outputbuffer.size);
+  srsw->outputbuffer.space = NULL;
+  srsw->outputbuffer.size = 0;
   return srsw;
 }
 
@@ -617,6 +616,12 @@ unsigned long gt_shortreadsort_array_next(GtShortreadsortworkinfo *srsw,
 
 void gt_shortreadsort_array_reset(GtShortreadsortworkinfo *srsw)
 {
+  if (srsw->outputbuffer.space == NULL)
+  {
+    srsw->outputbuffer.size = MIN(1024UL,srsw->numofentries);
+    srsw->outputbuffer.space = gt_malloc(sizeof(*srsw->outputbuffer.space) *
+                                         srsw->outputbuffer.size);
+  }
   srsw->outputbuffer.nextidx = srsw->outputbuffer.size;
   srsw->outputbuffer.total = 0;
 }
