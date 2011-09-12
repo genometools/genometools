@@ -29,13 +29,12 @@ typedef struct
                 sumofwidth;
 } Suftabpartcomponent;
 
-struct Suftabparts
+struct GtSuftabparts
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;
   unsigned long largestsizemappedpartwise,
-                largestsuftabwidth,
-                numofsuffixestoinsert;
+                largestsuftabwidth;
 };
 
 #ifdef SKDEBUG
@@ -47,7 +46,7 @@ static void showrecord(const Suftabpartcomponent *component)
                                  component->nextcode);
 }
 
-static void showallrecords(const Suftabparts *suftabparts)
+static void showallrecords(const GtSuftabparts *suftabparts)
 {
   unsigned int idx;
 
@@ -59,8 +58,8 @@ static void showallrecords(const Suftabparts *suftabparts)
 }
 #endif
 
-static void removeemptyparts(Suftabparts *suftabparts,
-                             GtLogger *logger)
+static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
+                                            GtLogger *logger)
 {
 #ifdef SKDEBUG
   printf("# before removial\n");
@@ -125,18 +124,17 @@ static void removeemptyparts(Suftabparts *suftabparts,
 #endif
 }
 
-Suftabparts *gt_newsuftabparts(unsigned int numofparts,
+GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                const GtBcktab *bcktab,
                                const GtSfxmappedrange *mappedmarkprefixbuckets,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger)
 {
-  Suftabparts *suftabparts;
+  GtSuftabparts *suftabparts;
   unsigned long sizemapped;
 
   suftabparts = gt_malloc(sizeof *suftabparts);
-  suftabparts->numofsuffixestoinsert = numofsuffixestoinsert;
   suftabparts->largestsizemappedpartwise = 0;
   gt_assert(suftabparts != NULL);
   if (numofsuffixestoinsert == 0)
@@ -216,13 +214,13 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
       suftabparts->components[part].sumofwidth = sumofwidth;
       sizemapped
         = gt_bcktab_mapped_range_size(bcktab,
-                                      stpgetcurrentmincode(part,suftabparts),
-                                      stpgetcurrentmaxcode(part,suftabparts));
+                                      gt_suftabparts_mincode(part,suftabparts),
+                                      gt_suftabparts_maxcode(part,suftabparts));
       if (mappedmarkprefixbuckets != NULL)
       {
         sizemapped += gt_Sfxmappedrange_size_mapped(mappedmarkprefixbuckets,
-                                      stpgetcurrentmincode(part,suftabparts),
-                                      stpgetcurrentmaxcode(part,suftabparts));
+                                      gt_suftabparts_mincode(part,suftabparts),
+                                      gt_suftabparts_maxcode(part,suftabparts));
       }
       if (suftabparts->largestsizemappedpartwise < sizemapped)
       {
@@ -231,26 +229,35 @@ Suftabparts *gt_newsuftabparts(unsigned int numofparts,
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
-  removeemptyparts(suftabparts,logger);
+  gt_suftabparts_removeemptyparts(suftabparts,logger);
   return suftabparts;
 }
 
-GtCodetype stpgetcurrentmincode(unsigned int part,
-                                const Suftabparts *suftabparts)
+void gt_suftabparts_delete(GtSuftabparts *suftabparts)
+{
+  if (suftabparts != NULL)
+  {
+    gt_free(suftabparts->components);
+    gt_free(suftabparts);
+  }
+}
+
+GtCodetype gt_suftabparts_mincode(unsigned int part,
+                                const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return (part == 0) ? 0 : suftabparts->components[part-1].nextcode + 1;
 }
 
-unsigned long stpgetcurrentsuftaboffset(unsigned int part,
-                                        const Suftabparts *suftabparts)
+unsigned long gt_suftabparts_offset(unsigned int part,
+                                        const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return suftabparts->components[part].suftaboffset;
 }
 
-GtCodetype stpgetcurrentmaxcode(unsigned int part,
-                                const Suftabparts *suftabparts)
+GtCodetype gt_suftabparts_maxcode(unsigned int part,
+                                const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return (part == suftabparts->numofparts - 1)
@@ -258,49 +265,35 @@ GtCodetype stpgetcurrentmaxcode(unsigned int part,
            : suftabparts->components[part].nextcode;
 }
 
-unsigned long stpgetcurrentsumofwdith(unsigned int part,
-                                      const Suftabparts *suftabparts)
+unsigned long gt_suftabparts_sumofwdith(unsigned int part,
+                                      const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return suftabparts->components[part].sumofwidth;
 }
 
-unsigned long stpgetcurrentwidthofpart(unsigned int part,
-                                       const Suftabparts *suftabparts)
+unsigned long gt_suftabparts_widthofpart(unsigned int part,
+                                       const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   return suftabparts->components[part].widthofpart;
 }
 
-unsigned long stpgetlargestsuftabwidth(const Suftabparts *suftabparts)
+unsigned long gt_suftabparts_largest_width(const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL);
   return suftabparts->largestsuftabwidth;
 }
 
-unsigned long stpgetlargestsizemappedpartwise(const Suftabparts *suftabparts)
+unsigned long gt_suftabparts_largestsizemappedpartwise(
+                                          const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL);
   return suftabparts->largestsizemappedpartwise;
 }
 
-unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
+unsigned int gt_suftabparts_numofparts(const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL);
   return suftabparts->numofparts;
-}
-
-unsigned long stpnumofsuffixestoinsert(const Suftabparts *suftabparts)
-{
-  gt_assert(suftabparts != NULL);
-  return suftabparts->numofsuffixestoinsert;
-}
-
-void gt_freesuftabparts(Suftabparts *suftabparts)
-{
-  if (suftabparts != NULL)
-  {
-    gt_free(suftabparts->components);
-    gt_free(suftabparts);
-  }
 }

@@ -75,7 +75,7 @@ struct Sfxiterator
   bool withprogressbar;
 
   /* invariant for each part */
-  Suftabparts *suftabparts;
+  GtSuftabparts *suftabparts;
   Outlcpinfo *outlcpinfoforsample;
   GtBcktab *bcktab;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
@@ -542,7 +542,8 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
   gt_suffixsortspace_delete(sfi->suffixsortspace,
                             sfi->sfxstrategy.spmopt_minlength == 0
                               ? true : false);
-  if (sfi->suftabparts != NULL && stpgetnumofparts(sfi->suftabparts) > 1U &&
+  if (sfi->suftabparts != NULL &&
+      gt_suftabparts_numofparts(sfi->suftabparts) > 1U &&
       sfi->outfpbcktab != NULL)
   {
     if (gt_bcktab_remap_all(sfi->bcktab,err) != 0)
@@ -559,7 +560,7 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
     }
   }
   gt_bcktab_delete(sfi->bcktab,sfi->logger);
-  gt_freesuftabparts(sfi->suftabparts);
+  gt_suftabparts_delete(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   if (sfi->mappedmarkprefixbuckets == NULL)
   {
@@ -629,7 +630,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
                                            GtError *err)
 {
   unsigned int parts;
-  Suftabparts *suftabparts;
+  GtSuftabparts *suftabparts;
   unsigned long size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
   size_t sizeofprefixmarks;
 
@@ -656,7 +657,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
   {
     size_t suftabsize;
 
-    suftabparts = gt_newsuftabparts(parts,
+    suftabparts = gt_suftabparts_new(parts,
                                     bcktab,
                                     mappedmarkprefixbuckets,
                                     numofsuffixestosort,
@@ -664,15 +665,15 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
                                     NULL);
     gt_assert(suftabparts != NULL);
     suftabsize = gt_suffixsortspace_requiredspace(
-                                         stpgetlargestsuftabwidth(suftabparts),
-                                         totallength,
-                                         suftabuint);
+                                     gt_suftabparts_largest_width(suftabparts),
+                                     totallength,
+                                     suftabuint);
     /*
     printf("parts=%u,suftabsize=%.2f,largestsizemappedpartwise=%.2f,"
            "size_lb_cs=%.2f,sizeprefixmarks=%.2f\n",
            parts,
            GT_MEGABYTES(suftabsize),
-           GT_MEGABYTES(stpgetlargestsizemappedpartwise(suftabparts)),
+           GT_MEGABYTES(gt_suftabparts_largestsizemappedpartwise(suftabparts)),
            GT_MEGABYTES(size_lb_cs),
            GT_MEGABYTES(sizeofprefixmarks));
     */
@@ -680,21 +681,21 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     {
       if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
       {
-        gt_freesuftabparts(suftabparts);
+        gt_suftabparts_delete(suftabparts);
         return (int) parts;
       }
     } else
     {
       if ((unsigned long) (suftabsize +
-                           stpgetlargestsizemappedpartwise(suftabparts) +
-                           estimatedspace - size_lb_cs - sizeofprefixmarks)
+                           gt_suftabparts_largestsizemappedpartwise(suftabparts)
+                           + estimatedspace - size_lb_cs - sizeofprefixmarks)
                            <= maximumspace)
       {
-        gt_freesuftabparts(suftabparts);
+        gt_suftabparts_delete(suftabparts);
         return (int) parts;
       }
     }
-    gt_freesuftabparts(suftabparts);
+    gt_suftabparts_delete(suftabparts);
   }
   gt_error_set(err,"cannot compute enhanced suffix array in at most %lu bytes",
                    maximumspace);
@@ -2071,14 +2072,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (!haserr)
   {
     gt_assert(sfi != NULL);
-    sfi->suftabparts = gt_newsuftabparts(numofparts,
+    sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
                                          sfi->mappedmarkprefixbuckets,
                                          numofsuffixestosort,
                                          specialcharacters + 1,
                                          logger);
     gt_assert(sfi->suftabparts != NULL);
-    if (stpgetnumofparts(sfi->suftabparts) > 1U)
+    if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
       if (gt_bcktab_storetmp(sfi->bcktab, sfi->logger, err) != 0)
       {
@@ -2090,7 +2091,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (!haserr)
   {
     gt_assert(sfi != NULL && sfi->suftabparts != NULL);
-    if (stpgetnumofparts(sfi->suftabparts) > 1U &&
+    if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       gt_assert(sfi->markprefixbuckets != NULL);
@@ -2117,7 +2118,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   {
     gt_assert(sfi != NULL);
     sfi->suffixsortspace
-      = gt_suffixsortspace_new(stpgetlargestsuftabwidth(sfi->suftabparts),
+      = gt_suffixsortspace_new(gt_suftabparts_largest_width(sfi->suftabparts),
                                sfi->totallength,
                                sfi->sfxstrategy.suftabuint,
                                logger);
@@ -2132,7 +2133,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       sfi->sri = NULL;
     }
     sfi->fusp.sssp = sfi->suffixsortspace;
-    sfi->fusp.allocatedSuffixptr = stpgetlargestsuftabwidth(sfi->suftabparts);
+    sfi->fusp.allocatedSuffixptr
+      = gt_suftabparts_largest_width(sfi->suftabparts);
     sfi->overhang.start = sfi->overhang.end = 0;
   }
   SHOWACTUALSPACE;
@@ -2172,7 +2174,7 @@ Sfxiterator *gt_Sfxiterator_new(const GtEncseq *encseq,
 
 static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
 {
-  unsigned long partwidth;
+  unsigned long sumofwidthforpart;
   GtBucketspec2 *bucketspec2 = NULL;
 
   if (sfi->part == 0 && sfi->withprogressbar)
@@ -2182,21 +2184,21 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                          (unsigned long long)
                          gt_bcktab_numofallcodes(sfi->bcktab));
   }
-  sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
-  sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
-  sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
+  sfi->currentmincode = gt_suftabparts_mincode(sfi->part,sfi->suftabparts);
+  sfi->currentmaxcode = gt_suftabparts_maxcode(sfi->part,sfi->suftabparts);
+  sfi->widthofpart = gt_suftabparts_widthofpart(sfi->part,sfi->suftabparts);
   if (sfi->sfxprogress != NULL)
   {
     gt_timer_show_progress(sfi->sfxprogress, "inserting suffixes into buckets",
                            stdout);
   }
-  if (stpgetnumofparts(sfi->suftabparts) > 1U)
+  if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
   {
     gt_logger_log(sfi->logger,"compute part %u: "
                               "%lu suffixes,%lu buckets from "
                               "%lu..%lu",
                   sfi->part,
-                  stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts),
+                  gt_suftabparts_widthofpart(sfi->part,sfi->suftabparts),
                   sfi->currentmaxcode - sfi->currentmincode + 1,
                   sfi->currentmincode,
                   sfi->currentmaxcode);
@@ -2218,14 +2220,16 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   }
   SHOWACTUALSPACE;
   gt_suffixsortspace_partoffset_set(sfi->suffixsortspace,
-                                    stpgetcurrentsuftaboffset(sfi->part,
+                                    gt_suftabparts_offset(sfi->part,
                                                              sfi->suftabparts));
   if (sfi->sfxstrategy.spmopt_minlength == 0)
   {
     if (sfi->sfxstrategy.storespecialcodes)
     {
       sfx_derivespecialcodesfromtable(sfi,
-                    stpgetnumofparts(sfi->suftabparts) == 1U ? true : false);
+                          gt_suftabparts_numofparts(sfi->suftabparts) == 1U
+                            ? true
+                            : false);
     } else
     {
       sfx_derivespecialcodesonthefly(sfi);
@@ -2269,13 +2273,14 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_timer_show_progress(sfi->sfxprogress, "sorting the buckets", stdout);
   }
   /* exit(0); just for testing */
-  partwidth = stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts);
+  sumofwidthforpart = gt_suftabparts_sumofwdith(sfi->part,sfi->suftabparts);
 
-  if (stpgetnumofparts(sfi->suftabparts) == 1U && sfi->outlcpinfo == NULL &&
+  if (gt_suftabparts_numofparts(sfi->suftabparts) == 1U &&
+      sfi->outlcpinfo == NULL &&
       sfi->prefixlength >= 2U && sfi->sfxstrategy.spmopt_minlength == 0)
   {
     bucketspec2 = gt_copysort_new(sfi->bcktab,sfi->encseq,sfi->readmode,
-                                  partwidth,sfi->numofchars);
+                                  sumofwidthforpart,sfi->numofchars);
   }
   SHOWACTUALSPACE;
   if (sfi->sfxstrategy.differencecover > 0)
@@ -2293,7 +2298,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   if (!sfi->sfxstrategy.onlybucketinsertion)
   {
     gt_sortallbuckets(sfi->suffixsortspace,
-                      partwidth,
+                      sumofwidthforpart,
                       bucketspec2,
                       sfi->encseq,
                       sfi->readmode,
@@ -2455,7 +2460,7 @@ const GtSuffixsortspace *gt_Sfxiterator_next(unsigned long *numberofsuffixes,
                                              bool *specialsuffixes,
                                              Sfxiterator *sfi)
 {
-  if (sfi->part < stpgetnumofparts(sfi->suftabparts))
+  if (sfi->part < gt_suftabparts_numofparts(sfi->suftabparts))
   {
     gt_sfxiterator_preparethispart(sfi);
     *numberofsuffixes = sfi->widthofpart;
@@ -2496,7 +2501,7 @@ int gt_Sfxiterator_bcktab2file(FILE *fp, Sfxiterator *sfi, GtError *err)
 {
   gt_error_check(err);
   gt_assert(sfi != NULL && sfi->bcktab != NULL);
-  if (stpgetnumofparts(sfi->suftabparts) <= 1U)
+  if (gt_suftabparts_numofparts(sfi->suftabparts) <= 1U)
   {
     int ret = gt_bcktab_flush_to_file(fp,sfi->bcktab,err);
     gt_fa_fclose(fp);

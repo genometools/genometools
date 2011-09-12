@@ -23,39 +23,37 @@
 #include "sfx-maprange.h"
 #include "bcktab.h"
 
-typedef struct Suftabparts Suftabparts;
+typedef struct GtSuftabparts GtSuftabparts;
 
-Suftabparts *gt_newsuftabparts(unsigned int numofparts,
+GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                const GtBcktab *bcktab,
-                               GT_UNUSED
                                const GtSfxmappedrange *mappedmarkprefixbuckets,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger);
 
-GtCodetype stpgetcurrentmincode(unsigned int part,
-                              const Suftabparts *suftabparts);
+void gt_suftabparts_delete(GtSuftabparts *suftabparts);
 
-GtCodetype stpgetcurrentmaxcode(unsigned int part,
-                                const Suftabparts *suftabparts);
+GtCodetype gt_suftabparts_mincode(unsigned int part,
+                                  const GtSuftabparts *suftabparts);
 
-unsigned long stpgetcurrentsuftaboffset(unsigned int part,
-                                        const Suftabparts *suftabparts);
+GtCodetype gt_suftabparts_maxcode(unsigned int part,
+                                  const GtSuftabparts *suftabparts);
 
-unsigned long stpgetcurrentsumofwdith(unsigned int part,
-                               const Suftabparts *suftabparts);
+unsigned long gt_suftabparts_offset(unsigned int part,
+                                    const GtSuftabparts *suftabparts);
 
-unsigned long stpgetcurrentwidthofpart(unsigned int part,
-                                const Suftabparts *suftabparts);
+unsigned long gt_suftabparts_sumofwdith(unsigned int part,
+                                        const GtSuftabparts *suftabparts);
 
-unsigned long stpgetlargestsuftabwidth(const Suftabparts *suftabparts);
+unsigned long gt_suftabparts_widthofpart(unsigned int part,
+                                         const GtSuftabparts *suftabparts);
 
-unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
+unsigned long gt_suftabparts_largest_width(const GtSuftabparts *suftabparts);
 
-unsigned long stpgetlargestsizemappedpartwise(const Suftabparts *suftabparts);
+unsigned int gt_suftabparts_numofparts(const GtSuftabparts *suftabparts);
 
-unsigned long stpnumofsuffixestoinsert(const Suftabparts *suftabparts);
-
-void gt_freesuftabparts(Suftabparts *suftabparts);
+unsigned long gt_suftabparts_largestsizemappedpartwise(
+                                       const GtSuftabparts *suftabparts);
 
 #endif
