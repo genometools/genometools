@@ -37,14 +37,6 @@ typedef struct
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
-typedef struct
-{
-  unsigned long nextidx,
-                total,
-                size,
-                *space;
-} GtShortreadoutputbuffer;
-
 struct GtShortreadsortworkinfo
 {
   uint16_t *shortreadsortrefs;
@@ -593,31 +585,26 @@ static void gt_shortreadsort_array_getorder(GtShortreadsortworkinfo *srsw,
   }
 }
 
-unsigned long gt_shortreadsort_array_next(GtShortreadsortworkinfo *srsw,
-                                          unsigned long width)
+void gt_shortreadsort_fillbuffer(GtShortreadsortworkinfo *srsw,
+                                 unsigned long width)
 {
-  gt_assert(srsw->outputbuffer.total < width);
-  if (srsw->outputbuffer.nextidx == srsw->outputbuffer.size)
-  {
-    unsigned long j, idx, endidx;
+  unsigned long j, idx, endidx;
 
-    endidx = srsw->outputbuffer.total + srsw->outputbuffer.size;
-    if (endidx > width)
-    {
-      endidx = width;
-    }
-    for (j = 0, idx = srsw->outputbuffer.total; idx < endidx; j++, idx++)
-    {
-      srsw->outputbuffer.space[j]
-        = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
-    }
-    srsw->outputbuffer.nextidx = 0;
+  endidx = srsw->outputbuffer.total + srsw->outputbuffer.size;
+  if (endidx > width)
+  {
+    endidx = width;
   }
-  srsw->outputbuffer.total++;
-  return srsw->outputbuffer.space[srsw->outputbuffer.nextidx++];
+  for (j = 0, idx = srsw->outputbuffer.total; idx < endidx; j++, idx++)
+  {
+    srsw->outputbuffer.space[j]
+      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
+  }
+  srsw->outputbuffer.nextidx = 0;
 }
 
-void gt_shortreadsort_array_reset(GtShortreadsortworkinfo *srsw)
+GtShortreadoutputbuffer *gt_shortreadsort_array_reset(
+                              GtShortreadsortworkinfo *srsw)
 {
   if (srsw->outputbuffer.space == NULL)
   {
@@ -627,6 +614,7 @@ void gt_shortreadsort_array_reset(GtShortreadsortworkinfo *srsw)
   }
   srsw->outputbuffer.nextidx = srsw->outputbuffer.size;
   srsw->outputbuffer.total = 0;
+  return &srsw->outputbuffer;
 }
 
 void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,

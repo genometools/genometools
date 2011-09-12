@@ -20,6 +20,7 @@
 
 #include "core/readmode_api.h"
 #include "core/encseq_api.h"
+#include "core/unused_api.h"
 #include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
 #include "spmsuftab.h"
@@ -29,6 +30,14 @@
         {\
           MAXVAL = LCP;\
         }
+
+typedef struct
+{
+  unsigned long nextidx,
+                total,
+                size,
+                *space;
+} GtShortreadoutputbuffer;
 
 typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 
@@ -64,9 +73,24 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
                                  unsigned long width,
                                  unsigned long depth);
 
-unsigned long gt_shortreadsort_array_next(GtShortreadsortworkinfo *srsw,
-                                          unsigned long width);
+GtShortreadoutputbuffer *gt_shortreadsort_array_reset(
+                             GtShortreadsortworkinfo *srsw);
 
-void gt_shortreadsort_array_reset(GtShortreadsortworkinfo *srsw);
+void gt_shortreadsort_fillbuffer(GtShortreadsortworkinfo *srsw,
+                                 unsigned long width);
+
+GT_UNUSED static inline unsigned long gt_shortreadsort_array_next(
+                                          GtShortreadoutputbuffer *outputbuffer,
+                                          GtShortreadsortworkinfo *srsw,
+                                          unsigned long width)
+{
+  gt_assert(outputbuffer->total < width);
+  if (outputbuffer->nextidx == outputbuffer->size)
+  {
+    gt_shortreadsort_fillbuffer(srsw,width);
+  }
+  outputbuffer->total++;
+  return outputbuffer->space[outputbuffer->nextidx++];
+}
 
 #endif

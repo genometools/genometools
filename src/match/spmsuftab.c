@@ -16,18 +16,42 @@
 */
 
 #include "core/ma.h"
+#include "core/mathsupport.h"
 #include "spmsuftab.h"
 
-GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries)
+GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
+                              GT_UNUSED unsigned long maxvalue)
 {
   GtSpmsuftab *spmsuftab = gt_malloc(sizeof (*spmsuftab));
+#ifdef SPMSUFTABBITPACK
+  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
 
+  spmsuftab->bitpackarray
+    = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
+#else
   spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
+#endif
   return spmsuftab;
 }
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
 {
+#ifdef SPMSUFTABBITPACK
+  bitpackarray_delete(spmsuftab->bitpackarray);
+#else
   gt_free(spmsuftab->suftab);
+#endif
   gt_free(spmsuftab);
+}
+
+size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
+                                  GT_UNUSED unsigned long maxvalue)
+{
+#ifdef SPMSUFTABBITPACK
+  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+  return sizeof (GtSpmsuftab) +
+         sizeofbitarray(bitspervalue,(BitOffset) numofentries);
+#else
+  return sizeof (GtSpmsuftab) + numofentries * sizeof (unsigned long);
+#endif
 }

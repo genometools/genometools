@@ -23,6 +23,7 @@
 #include "core/mathsupport.h"
 #include "core/radix-intsort.h"
 #include "core/log_api.h"
+#include "core/spacecalc.h"
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
@@ -590,11 +591,12 @@ static void gt_firstcodes_fillsuftabbuffer(unsigned long *suftabbuffer,
                                            GtShortreadsortworkinfo *srsw)
 {
   unsigned long idx;
+  GtShortreadoutputbuffer *outputbuffer;
 
-  gt_shortreadsort_array_reset(srsw);
+  outputbuffer = gt_shortreadsort_array_reset(srsw);
   for (idx = 0; idx < width; idx++)
   {
-    suftabbuffer[idx] = gt_shortreadsort_array_next(srsw,width);
+    suftabbuffer[idx] = gt_shortreadsort_array_next(outputbuffer,srsw,width);
   }
 }
 
@@ -667,7 +669,6 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
       {
         int ret;
 
-        gt_shortreadsort_array_reset(srsw);
         ret = gt_spmsk_process(spmsk_state,
                                srsw,
                                lcptab_bucket,
@@ -707,10 +708,12 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
-  size_t sizeforcodestable, binsearchcache_size;
+  size_t sizeforcodestable, binsearchcache_size, suftab_size;
   unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
+  const unsigned long totallength = gt_encseq_total_length(encseq);
+  unsigned long suftabentries;
 
   if (gt_showtime_enabled())
   {
@@ -788,15 +791,14 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_accumulatecounts_flush(&fci);
   gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
           fci.codebuffer_total,
-          (double) fci.codebuffer_total/
-                   gt_encseq_total_length(encseq));
+          (double) fci.codebuffer_total/totallength);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "compute partial sums",stdout);
   }
   gt_logger_log(logger,"firstcodehits=%lu (%.2f)",fci.firstcodehits,
                                            (double) fci.firstcodehits/
-                                           gt_encseq_total_length(encseq));
+                                           totallength);
   storefirstcodes_partialsum(&fci);
   if (timer != NULL)
   {
@@ -811,9 +813,11 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 * fci.codebuffer_allocated);
   fci.tempcodeposforradixsort = gt_malloc(sizeof (*fci.tempcodeposforradixsort)
                                           * fci.codebuffer_allocated);
-  fci.spmsuftab = gt_spmsuftab_new(fci.firstcodehits + fci.numofsequences);
-  gt_logger_log(logger,"allocate %lu entries for suftab",fci.firstcodehits +
-                                                         fci.numofsequences);
+  suftabentries = fci.firstcodehits + fci.numofsequences;
+  fci.spmsuftab = gt_spmsuftab_new(suftabentries,totallength);
+  suftab_size = gt_spmsuftab_requiredspace(suftabentries,totallength);
+  gt_logger_log(logger,"allocate %lu entries for suftab (%.2f megabytes)",
+                suftabentries, GT_MEGABYTES(suftab_size));
   fci.flushcount = 0;
   getencseqkmers_twobitencoding(encseq,
                                 readmode,
@@ -826,7 +830,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 NULL);
   gt_firstcodes_insertsuffixes_flush(&fci);
   gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
-  gt_assert(fci.firstcodeposhits == fci.firstcodehits + fci.numofsequences);
+  gt_assert(fci.firstcodeposhits == suftabentries);
   gt_logger_log(logger,"maxbucketsize=%lu",fci.maxbucketsize);
   GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
   gt_free(fci.codeposbuffer);
