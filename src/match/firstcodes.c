@@ -550,7 +550,8 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              unsigned long previous,
                                              bool previousdefined,
                                              const unsigned long *suftabbuffer,
-                                             const uint16_t *lcptab_bucket,
+                                             GT_UNUSED const uint16_t
+                                               *lcptab_bucket,
                                              unsigned long numberofsuffixes)
 {
   unsigned long idx, current, maxlcp,
