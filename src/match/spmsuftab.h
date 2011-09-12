@@ -20,7 +20,7 @@
 
 #include "core/unused_api.h"
 
-#undef SPMSUFTABBITPACK
+#define SPMSUFTABBITPACK
 #ifdef SPMSUFTABBITPACK
 #include "core/bitpackarray.h"
 #endif
