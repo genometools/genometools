@@ -37,8 +37,6 @@ typedef struct
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
-#define GTMAXDISTANCE_SR 100
-
 typedef struct
 {
   unsigned long nextidx,
@@ -77,6 +75,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
                                               GtReadmode readmode,
                                               bool firstcodes)
 {
+  unsigned long idx;
   GtShortreadsortworkinfo *srsw;
 
   srsw = gt_malloc(sizeof(*srsw));
@@ -100,6 +99,10 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   srsw->tableoflcpvalues = NULL;
   srsw->outputbuffer.space = NULL;
   srsw->outputbuffer.size = 0;
+  for (idx = 0; idx < srsw->numofentries; idx++)
+  {
+    srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+  }
   return srsw;
 }
 
