@@ -64,7 +64,7 @@ static void gt_marksubstring_init(Gtmarksubstring *mark,unsigned int numofchars,
     mark->mask = ~(GtCodetype) 0;
   }
   GT_INITBITTAB(mark->bits,mark->entries);
-  mark->size = sizeof(GtBitsequence) * GT_NUMOFINTSFORBITS(mark->entries);
+  mark->size = sizeof (GtBitsequence) * GT_NUMOFINTSFORBITS(mark->entries);
 }
 
 static void gt_marksubstring_mark(Gtmarksubstring *mark,GtCodetype code)
@@ -196,7 +196,7 @@ static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
 #ifdef SKDEBUG
       checkcodesorder(fci->allfirstcodes,numofdifferentcodes,false);
 #endif
-      fci->size_to_split 
+      fci->size_to_split
         += sizeof (*fci->allfirstcodes) * numofdifferentcodes
            + sizeof (*fci->countocc) * (numofdifferentcodes+1);
     }
@@ -795,7 +795,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.workspace += binsearchcache_size;
   gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
                        fci.binsearchcache_depth,
-                       binsearchcache_size);
+                       (unsigned long) binsearchcache_size);
   fci.codebuffer_allocated = fci.differentcodes/4;
   fci.codebuffer_nextfree = 0;
   fci.codebuffer = gt_malloc(sizeof (*fci.codebuffer)
@@ -886,7 +886,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               outputspms);
   gt_free(fci.countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
-  printf("estimatedspace = %.2f\n",GT_MEGABYTES(fci.workspace + 
+  printf("estimatedspace = %.2f\n",GT_MEGABYTES(fci.workspace +
                                                 fci.size_to_split +
                                                 suftab_size));
   if (timer != NULL)
