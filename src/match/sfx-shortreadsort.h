@@ -31,14 +31,6 @@
           MAXVAL = LCP;\
         }
 
-typedef struct
-{
-  unsigned long nextidx,
-                total,
-                size,
-                *space;
-} GtShortreadoutputbuffer;
-
 typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 
 size_t gt_shortreadsort_size(unsigned long maxvalue);
@@ -63,8 +55,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long width,
                                 unsigned long depth);
 
-void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
-                                 bool writefinalorder,
+void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
+                                 GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtEncseqReader *esr,
@@ -72,25 +64,5 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
                                  unsigned long subbucketleft,
                                  unsigned long width,
                                  unsigned long depth);
-
-GtShortreadoutputbuffer *gt_shortreadsort_array_reset(
-                             GtShortreadsortworkinfo *srsw);
-
-void gt_shortreadsort_fillbuffer(GtShortreadsortworkinfo *srsw,
-                                 unsigned long width);
-
-GT_UNUSED static inline unsigned long gt_shortreadsort_array_next(
-                                          GtShortreadoutputbuffer *outputbuffer,
-                                          GtShortreadsortworkinfo *srsw,
-                                          unsigned long width)
-{
-  gt_assert(outputbuffer->total < width);
-  if (outputbuffer->nextidx == outputbuffer->size)
-  {
-    gt_shortreadsort_fillbuffer(srsw,width);
-  }
-  outputbuffer->total++;
-  return outputbuffer->space[outputbuffer->nextidx++];
-}
 
 #endif

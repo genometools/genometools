@@ -23,12 +23,15 @@
 #include "core/mathsupport.h"
 #include "core/radix-intsort.h"
 #include "core/log_api.h"
+#include "core/spacepeak.h"
 #include "core/spacecalc.h"
+#include "core/fa.h"
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
 #include "esa-spmsk.h"
 #include "firstcodes.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -245,8 +248,6 @@ static size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,
 {
   fci->binsearchcache.nextfreeGtIndexwithcode = 0;
   fci->binsearchcache.allocatedGtIndexwithcode = (1UL << (maxdepth+1)) - 1;
-  printf("alloced=%lu,differentcodes=%lu\n",
-         fci->binsearchcache.allocatedGtIndexwithcode,fci->differentcodes);
   if (fci->binsearchcache.allocatedGtIndexwithcode < fci->differentcodes)
   {
     size_t allocbytes
@@ -608,20 +609,6 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
   }
 }
 
-static void gt_firstcodes_fillsuftabbuffer(unsigned long *suftabbuffer,
-                                           unsigned long width,
-                                           GtShortreadsortworkinfo *srsw)
-{
-  unsigned long idx;
-  GtShortreadoutputbuffer *outputbuffer;
-
-  outputbuffer = gt_shortreadsort_array_reset(srsw);
-  for (idx = 0; idx < width; idx++)
-  {
-    suftabbuffer[idx] = gt_shortreadsort_array_next(outputbuffer,srsw,width);
-  }
-}
-
 static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GtSpmsuftab *spmsuftab,
@@ -639,15 +626,13 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   GtEncseqReader *esr, *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
-  unsigned long *suftabbuffer = NULL; /* only used for checking */
   GtSpmsk_state *spmsk_state = NULL;
-  const bool writefinalorder = (countspms || outputspms) ? false : true;
+  unsigned long *suftab_bucket;
 
   if (withsuftabcheck)
   {
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-    suftabbuffer = gt_malloc(sizeof (*suftabbuffer) * maxbucketsize);
   }
   if (outputspms || countspms)
   {
@@ -657,14 +642,15 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
   for (idx = 0; idx <differentcodes; idx++)
   {
     gt_assert(countocc[idx+1]>countocc[idx]);
     width = countocc[idx+1] - countocc[idx];
     if (width >= 2UL)
     {
-      gt_shortreadsort_array_sort(srsw,
-                                  writefinalorder,
+      gt_shortreadsort_array_sort(suftab_bucket,
+                                  srsw,
                                   encseq,
                                   readmode,
                                   esr,
@@ -674,25 +660,24 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                   depth);
       if (withsuftabcheck)
       {
-        gt_firstcodes_fillsuftabbuffer(suftabbuffer,width,srsw);
         gt_firstcodes_checksuftab_bucket(encseq,
                                          readmode,
                                          esr1,
                                          esr2,
                                          previous,
                                          previousdefined,
-                                         suftabbuffer,
+                                         suftab_bucket,
                                          lcptab_bucket,
                                          width);
         previousdefined = true;
-        previous = gt_spmsuftab_get(spmsuftab,countocc[idx] + width -1);
+        previous = suftab_bucket[width-1];
       }
       if (outputspms || countspms)
       {
         int ret;
 
         ret = gt_spmsk_process(spmsk_state,
-                               srsw,
+                               suftab_bucket,
                                lcptab_bucket,
                                width,
                                NULL);
@@ -703,8 +688,8 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr);
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
-  gt_free(suftabbuffer);
   gt_shortreadsort_delete(srsw);
+  gt_free(suftab_bucket);
   gt_spmsk_delete(spmsk_state);
 }
 
@@ -730,15 +715,17 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
-  size_t sizeforcodestable, binsearchcache_size, suftab_size;
-  unsigned int numofchars = gt_encseq_alphabetnumofchars(encseq);
+  size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
+  unsigned int numofchars;
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  const unsigned long totallength = gt_encseq_total_length(encseq);
+  unsigned long totallength;
   unsigned long suftabentries;
 
-  fci.workspace = (size_t) gt_encseq_sizeofrep(encseq) +
-                           gt_encseq_sizeofstructure();
+  numofchars = gt_encseq_alphabetnumofchars(encseq);
+  totallength = gt_encseq_total_length(encseq);
+  fci.workspace = (size_t) gt_encseq_sizeofrep(encseq);
+  fci.size_to_split = 0;
   if (gt_showtime_enabled())
   {
     timer = gt_timer_new_with_progress_description("insert first codes into "
@@ -886,9 +873,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               outputspms);
   gt_free(fci.countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
-  printf("estimatedspace = %.2f\n",GT_MEGABYTES(fci.workspace +
-                                                fci.size_to_split +
-                                                suftab_size));
+  gt_logger_log(logger,"estimatedspace = %.2f",GT_MEGABYTES(fci.workspace +
+                                               fci.size_to_split +
+                                               suftab_size));
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);

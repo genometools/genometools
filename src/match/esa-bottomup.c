@@ -304,7 +304,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
 }
 
 int gt_esa_bottomup_RAM(
-                    GtShortreadsortworkinfo *srsw,
+                    const unsigned long *suftab,
                     const uint16_t *lcptab_bucket,
                     unsigned long nonspecials,
                     GtArrayGtBUItvinfo *stack,
@@ -341,15 +341,13 @@ int gt_esa_bottomup_RAM(
                 idx;
   GtBUItvinfo *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
-  GtShortreadoutputbuffer *outputbuffer;
 
   gt_assert(nonspecials > 0);
   PUSH_ESA_BOTTOMUP(0,0);
-  outputbuffer = gt_shortreadsort_array_reset(srsw);
   for (idx = 0; idx < nonspecials-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
-    previoussuffix = gt_shortreadsort_array_next(outputbuffer,srsw,nonspecials);
+    previoussuffix = suftab[idx];
     if (lcpvalue <= TOP_ESA_BOTTOMUP.lcp)
     {
       if (TOP_ESA_BOTTOMUP.lcp > 0 || !firstedgefromroot)
@@ -459,9 +457,7 @@ int gt_esa_bottomup_RAM(
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
-    unsigned long lastsuftabvalue
-      = gt_shortreadsort_array_next(outputbuffer,srsw,nonspecials);
-         /* at index nonspecials - 1 */
+    unsigned long lastsuftabvalue = suftab[nonspecials-1];
     if (processleafedge(false,
                         TOP_ESA_BOTTOMUP.lcp,
                         TOP_ESA_BOTTOMUP.lb,

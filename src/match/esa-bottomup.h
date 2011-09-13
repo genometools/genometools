@@ -21,7 +21,6 @@
 #include "core/logger_api.h"
 #include "core/error_api.h"
 #include "esa-seqread.h"
-#include "sfx-shortreadsort.h"
 
 typedef struct GtBUinfo GtBUinfo;
 typedef struct GtBUstate GtBUstate;
@@ -63,7 +62,7 @@ void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
                                   GtBUstate *state);
 
 int gt_esa_bottomup_RAM(
-                    GtShortreadsortworkinfo *srsw,
+                    const unsigned long *suftab,
                     const uint16_t *lcptab_bucket,
                     unsigned long nonspecials,
                     GtArrayGtBUItvinfo *stack,

@@ -48,7 +48,6 @@ struct GtShortreadsortworkinfo
   unsigned long numofentries,
                 tmplcplen;
   bool fwd, complement;
-  GtShortreadoutputbuffer outputbuffer;
 };
 
 size_t gt_shortreadsort_size(unsigned long maxvalue)
@@ -89,8 +88,6 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
-  srsw->outputbuffer.space = NULL;
-  srsw->outputbuffer.size = 0;
   for (idx = 0; idx < srsw->numofentries; idx++)
   {
     srsw->shortreadsortrefs[idx] = (uint16_t) idx;
@@ -108,8 +105,6 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
     srsw->shortreadsortrefs = NULL;
     gt_free(srsw->firstcodeslcpvalues);
     srsw->firstcodeslcpvalues = NULL;
-    gt_free(srsw->outputbuffer.space);
-    srsw->outputbuffer.space = NULL;
     gt_free(srsw);
   }
 }
@@ -570,55 +565,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-static void gt_shortreadsort_array_getorder(GtShortreadsortworkinfo *srsw,
-                                            GtSpmsuftab *spmsuftab,
-                                            unsigned long subbucketleft,
-                                            unsigned long width)
-{
-  unsigned long idx;
-
-  for (idx = 0; idx < width; idx++)
-  {
-    gt_spmsuftab_set(spmsuftab,subbucketleft + idx,
-                     srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]]
-                                            .suffix);
-  }
-}
-
-void gt_shortreadsort_fillbuffer(GtShortreadsortworkinfo *srsw,
-                                 unsigned long width)
-{
-  unsigned long j, idx, endidx;
-
-  endidx = srsw->outputbuffer.total + srsw->outputbuffer.size;
-  if (endidx > width)
-  {
-    endidx = width;
-  }
-  for (j = 0, idx = srsw->outputbuffer.total; idx < endidx; j++, idx++)
-  {
-    srsw->outputbuffer.space[j]
-      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
-  }
-  srsw->outputbuffer.nextidx = 0;
-}
-
-GtShortreadoutputbuffer *gt_shortreadsort_array_reset(
-                              GtShortreadsortworkinfo *srsw)
-{
-  if (srsw->outputbuffer.space == NULL)
-  {
-    srsw->outputbuffer.size = MIN(1024UL,srsw->numofentries);
-    srsw->outputbuffer.space = gt_malloc(sizeof(*srsw->outputbuffer.space) *
-                                         srsw->outputbuffer.size);
-  }
-  srsw->outputbuffer.nextidx = srsw->outputbuffer.size;
-  srsw->outputbuffer.total = 0;
-  return &srsw->outputbuffer;
-}
-
-void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
-                                 bool writefinalorder,
+void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
+                                 GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtReadmode readmode,
                                  GtEncseqReader *esr,
@@ -651,8 +599,9 @@ void gt_shortreadsort_array_sort(GtShortreadsortworkinfo *srsw,
      allow accessing the ordered sequence of suffixes in the
      sorted order, using the function
      gt_shortreadsort_array_next */
-  if (writefinalorder)
+  for (idx = 0; idx < width; idx++)
   {
-    gt_shortreadsort_array_getorder(srsw, spmsuftab, subbucketleft, width);
+    suftab_bucket[idx]
+      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
   }
 }

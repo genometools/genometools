@@ -141,6 +141,7 @@ static void encseq2bytecode(GtUchar *dest,
 {
   unsigned long i, j;
 
+  gt_assert(encseq != NULL && dest != NULL);
   if (len >= 3UL)
   {
     for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
@@ -176,7 +177,7 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  unsigned long startindex,
                                  unsigned long len)
 {
-  gt_assert(encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS);
+  gt_assert(encseq != NULL && encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS);
   if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS)
   {
     gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,len);
@@ -191,21 +192,34 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  unsigned long startindex,
                                  unsigned long len)
 {
-  gt_assert(encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
+  gt_assert(encseq != NULL && encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
   gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,
                                        len);
 }
 #endif
 
+#ifndef GT_INLINEDENCSEQ
+unsigned long gt_encseq_total_length(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return encseq->logicaltotallength;
+}
+
+unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return encseq->logicalnumofdbsequences;
+}
+
 unsigned long gt_encseq_version(const GtEncseq *encseq)
 {
-  gt_assert(encseq);
+  gt_assert(encseq != NULL);
   return encseq->version;
 }
 
 bool gt_encseq_is_64_bit(const GtEncseq *encseq)
 {
-  gt_assert(encseq);
+  gt_assert(encseq != NULL);
   return ((int) encseq->is64bit == 1);
 }
 
@@ -264,7 +278,7 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
                                    unsigned long pos,
                                    GtReadmode readmode)
 {
-  gt_assert(pos < encseq->logicaltotallength);
+  gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
   /* translate into forward coords */
   if (GT_ISDIRREVERSE(readmode))
   {
@@ -353,11 +367,45 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
+bool gt_encseq_position_is_separator(const GtEncseq *encseq,
+                                     unsigned long pos,
+                                     GtReadmode readmode)
+{
+  gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
+  /* translate into forward coords */
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+  }
+  /* handle virtual coordinates */
+  if (encseq->hasmirror)
+  {
+    if (pos > encseq->totallength)
+    {
+      /* invert coordinates and readmode */
+      gt_readmode_invert(readmode);
+      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
+    } else
+    {
+      if (pos == encseq->totallength)
+      {
+        return true;
+      }
+    }
+  }
+  if (encseq->numofdbsequences == 1UL)
+  {
+    return false;
+  }
+  gt_assert(encseq->issinglepositionseparator != NULL);
+  return encseq->issinglepositionseparator(encseq,pos);
+}
+
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
   char cc;
-  gt_assert(encseq && encseq->alpha);
+  gt_assert(encseq != NULL && encseq->alpha);
   gt_assert(pos < encseq->logicaltotallength);
   if (encseq->oistab == NULL) {
     GtUchar mycc = gt_encseq_get_encoded_char(encseq, pos, readmode);
@@ -397,7 +445,7 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode)
 {
-  gt_assert(pos < encseq->logicaltotallength);
+  gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
   /* translate into forward coords */
   if (GT_ISDIRREVERSE(readmode))
   {
@@ -635,7 +683,8 @@ bool gt_encseq_contains_special(const GtEncseq *encseq,
                                 unsigned long startpos,
                                 unsigned long len)
 {
-  gt_assert(len >= 1UL && startpos + len <= encseq->totallength);
+  gt_assert(len >= 1UL && encseq != NULL &&
+            startpos + len <= encseq->totallength);
   return encseq->delivercontainsspecial(encseq,readmode,esr,startpos,len);
 }
 
@@ -661,7 +710,8 @@ void gt_encseq_extract_encoded(const GtEncseq *encseq,
   GtEncseqReader *esr;
   unsigned long idx, pos;
 
-  gt_assert(frompos <= topos && topos < encseq->logicaltotallength);
+  gt_assert(frompos <= topos && encseq != NULL &&
+            topos < encseq->logicaltotallength);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
@@ -680,7 +730,8 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
   GtEncseqReader *esr;
   unsigned long idx, pos;
 
-  gt_assert(frompos <= topos && topos < encseq->logicaltotallength);
+  gt_assert(frompos <= topos && encseq != NULL &&
+            topos < encseq->logicaltotallength);
   esr = gt_encseq_create_reader_with_readmode(encseq,
                                               GT_READMODE_FORWARD,
                                               frompos);
@@ -693,6 +744,7 @@ void gt_encseq_extract_decoded(const GtEncseq *encseq,
 
 const char* gt_encseq_accessname(const GtEncseq *encseq)
 {
+  gt_assert(encseq != NULL);
   return gt_encseq_access_type_str(encseq->sat);
 }
 
@@ -719,6 +771,7 @@ static int getsatforcevalue(const char *str,GtError *err)
 
 bool gt_has_twobitencoding(const GtEncseq *encseq)
 {
+  gt_assert(encseq != NULL);
   return (encseq->accesstype_via_utables ||
           encseq->sat >= GT_ACCESS_TYPE_EQUALLENGTH ||
           encseq->sat == GT_ACCESS_TYPE_BITACCESS) ? true : false;
@@ -726,7 +779,7 @@ bool gt_has_twobitencoding(const GtEncseq *encseq)
 
 bool gt_has_twobitencoding_stoppos_support(const GtEncseq *encseq)
 {
-  gt_assert(encseq->sat != GT_ACCESS_TYPE_UNDEFINED);
+  gt_assert(encseq != NULL && encseq->sat != GT_ACCESS_TYPE_UNDEFINED);
   return (encseq->accesstype_via_utables ||
           encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH) ? true : false;
 }
@@ -3718,6 +3771,7 @@ int gt_specialcharinfo_read(GtSpecialcharinfo *specialcharinfo,
 
 unsigned int gt_encseq_alphabetnumofchars(const GtEncseq *encseq)
 {
+  gt_assert(encseq != NULL);
   return gt_alphabet_num_of_chars(encseq->alpha);
 }
 

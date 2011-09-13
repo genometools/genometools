@@ -171,12 +171,12 @@ void gt_spmsk_delete(GtSpmsk_state *state)
 }
 
 int gt_spmsk_process(GtSpmsk_state *state,
-                     GtShortreadsortworkinfo *srsw,
+                     const unsigned long *suftab,
                      const uint16_t *lcptab_bucket,
                      unsigned long nonspecials,
                      GtError *err)
 {
-  if (gt_esa_bottomup_RAM(srsw,
+  if (gt_esa_bottomup_RAM(suftab,
                           lcptab_bucket,
                           nonspecials,
                           state->stack,

@@ -21,8 +21,12 @@
 #include "core/option_api.h"
 #include "core/encseq_api.h"
 #include "core/logger.h"
+#include "core/spacecalc.h"
+#include "core/fa.h"
+#include "core/spacepeak.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
+#include "match/stamp.h"
 
 typedef struct {
   bool checksuftab,
@@ -144,12 +148,12 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   GtEncseq2spmArguments *arguments = tool_arguments;
   GtEncseqLoader *el = NULL;
   GtEncseq *encseq = NULL;
-  GtLogger *logger;
   bool haserr = false;
 
   gt_error_check(err);
   gt_assert(arguments);
   el = gt_encseq_loader_new();
+  gt_encseq_loader_drop_description_support(el);
   encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
                                  err);
   if (encseq == NULL)
@@ -163,16 +167,21 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
-  storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
-                                                arguments->minmatchlength,
-                                                arguments->checksuftab,
-                                                arguments->countspms,
-                                                arguments->outputspms,
-                                                logger);
+  if (!haserr)
+  {
+    GtLogger *logger;
+
+    logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
+    storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
+                                                  arguments->minmatchlength,
+                                                  arguments->checksuftab,
+                                                  arguments->countspms,
+                                                  arguments->outputspms,
+                                                  logger);
+    gt_logger_delete(logger);
+  }
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(el);
-  gt_logger_delete(logger);
   return haserr ? -1 : 0;
 }
 
