@@ -30,9 +30,8 @@
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
 #include "esa-spmsk.h"
+#include "firstcodes-tab.h"
 #include "firstcodes.h"
-#include "sfx-maprange.h"
-#include "stamp.h"
 
 typedef struct
 {
@@ -92,17 +91,6 @@ static bool gt_marksubstring_checkmark(const Gtmarksubstring *mark,
 
 typedef struct
 {
-  size_t size_to_split;
-  unsigned long differentcodes,
-                *allfirstcodes,
-                *countocc;
-  GtSfxmappedrange *mappedcountocc,
-                   *mappedallfirstcodes,
-                   *mappedmarkprefix;
-} GtFirstcodestab;
-
-typedef struct
-{
   unsigned long firstcodehits,
                 firstcodeposhits,
                 countsequences,
@@ -128,78 +116,6 @@ typedef struct
 } GtFirstcodesinfo;
 
 /* call the following function after computing the partial sums */
-
-unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
-                                           unsigned long idx)
-{
-  gt_assert(idx <= fct->differentcodes);
-  return fct->countocc[idx];
-}
-
-size_t gt_firstcodes_size_to_split(const GtFirstcodestab *fct)
-{
-  return fct->size_to_split;
-}
-
-unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct)
-{
-  return fct->differentcodes;
-}
-
-unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
-                                            unsigned long suftaboffset)
-{
-  unsigned long left = 0, right = fct->differentcodes, mid, midval,
-                found = fct->differentcodes;
-
-  while (left+1 < right)
-  {
-    mid = GT_DIV2(left+right);
-    midval = gt_firstcodes_get_leftborder(fct,mid);
-    if (suftaboffset == midval)
-    {
-      return mid;
-    }
-    if (suftaboffset < midval)
-    {
-      found = mid;
-      right = mid - 1;
-    } else
-    {
-      left = mid + 1;
-    }
-  }
-  return found;
-}
-
-unsigned long gt_firstcodes_mapped_range_size(const GtFirstcodestab *fct,
-                                              unsigned long minindex,
-                                              unsigned long maxindex)
-{
-  size_t idx;
-  GtSfxmappedrange *maptab[3];
-  unsigned long sumsize = 0;
-
-  maptab[0] = fct->mappedcountocc;
-  maptab[1] = fct->mappedallfirstcodes;
-  maptab[2] = fct->mappedmarkprefix;;
-  for (idx = 0; idx < sizeof (maptab)/sizeof (maptab[0]); idx++)
-  {
-    if (maptab[idx] == NULL)
-    {
-      return (unsigned long) fct->size_to_split;
-    }
-    sumsize += gt_Sfxmappedrange_size_mapped(maptab[idx],minindex,maxindex);
-  }
-  return sumsize;
-}
-
-unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
-                                     unsigned long idx)
-{
-  gt_assert(idx < fct->differentcodes);
-  return fct->allfirstcodes[idx];
-}
 
 static void gt_storefirstcodes(void *processinfo,
                                GT_UNUSED bool firstinrange,
