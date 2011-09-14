@@ -21,7 +21,7 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #else
-typedef unsigned long ssize_t;
+typedef long ssize_t;
 #endif
 
 #define OUTPUTFILEBUFFERSIZE 4096
