@@ -80,8 +80,8 @@ GtBcktab *gt_bcktab_map(const char *indexname,
                         GtError *err);
 
 unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
-                                          GtCodetype mincode,
-                                          GtCodetype maxcode);
+                                          GtCodetype minindex,
+                                          GtCodetype maxindex);
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    unsigned int part,

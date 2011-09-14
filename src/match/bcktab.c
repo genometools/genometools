@@ -145,8 +145,8 @@ static unsigned long gt_bcktab_transformcode(unsigned long code,
 }
 
 unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
-                                          GtCodetype mincode,
-                                          GtCodetype maxcode)
+                                          GtCodetype minindex,
+                                          GtCodetype maxindex)
 {
 
   if (bcktab->mappedleftborder == NULL)
@@ -155,11 +155,12 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
   } else
   {
     unsigned long sumsize
-      = gt_Sfxmappedrange_size_mapped(bcktab->mappedleftborder,mincode,maxcode);
+      = gt_Sfxmappedrange_size_mapped(bcktab->mappedleftborder,
+                                      minindex,maxindex);
     if (bcktab->mappedcountspecialcodes != NULL)
     {
       sumsize += gt_Sfxmappedrange_size_mapped(bcktab->mappedcountspecialcodes,
-                                               mincode,maxcode);
+                                               minindex,maxindex);
     }
     return sumsize;
   }

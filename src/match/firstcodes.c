@@ -31,6 +31,7 @@
 #include "spmsuftab.h"
 #include "esa-spmsk.h"
 #include "firstcodes.h"
+#include "sfx-maprange.h"
 #include "stamp.h"
 
 typedef struct
@@ -91,8 +92,7 @@ static bool gt_marksubstring_checkmark(const Gtmarksubstring *mark,
 
 typedef struct
 {
-  unsigned long differentcodes,
-                firstcodehits,
+  unsigned long firstcodehits,
                 firstcodeposhits,
                 countsequences,
                 numofsequences,
@@ -102,9 +102,7 @@ typedef struct
                 *codebuffer,
                 codebuffer_allocated,
                 codebuffer_nextfree,
-                codebuffer_total,
-                *allfirstcodes,
-                *countocc;
+                codebuffer_total;
   GtUlongPair *codeposbuffer,
               *tempcodeposforradixsort;
   GtArrayGtIndexwithcode binsearchcache;
@@ -114,21 +112,89 @@ typedef struct
                   marksuffix;
   unsigned long *tempcodeforradixsort;
   GtSpmsuftab *spmsuftab;
-  size_t size_to_split,
-         workspace;
+  size_t workspace;
+  size_t size_to_split;
+  unsigned long differentcodes,
+                *allfirstcodes,
+                *countocc;
+  GtSfxmappedrange *mappedcountocc,
+                   *mappedallfirstcodes,
+                   *mappedmarkprefix;
 } GtFirstcodesinfo;
 
 /* call the following function after computing the partial sums */
 
-unsigned long gt_storefirstcodes_getleftborder(const GtFirstcodesinfo *fci,
-                                               unsigned long idx)
+unsigned long gt_firstcodes_get_leftborder(const GtFirstcodesinfo *fci,
+                                           unsigned long idx)
 {
+  gt_assert(idx <= fci->differentcodes);
   return fci->countocc[idx];
 }
 
-size_t gt_storefirstcodes_size_to_split(const GtFirstcodesinfo *fci)
+size_t gt_firstcodes_size_to_split(const GtFirstcodesinfo *fci)
 {
   return fci->size_to_split;
+}
+
+unsigned long gt_firstcodes_numofallcodes(const GtFirstcodesinfo *fci)
+{
+  return fci->differentcodes;
+}
+
+unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodesinfo *fci,
+                                            unsigned long suftaboffset)
+{
+  unsigned long left = 0, right = fci->differentcodes, mid, midval,
+                found = fci->differentcodes;
+
+  while (left+1 < right)
+  {
+    mid = GT_DIV2(left+right);
+    midval = gt_firstcodes_get_leftborder(fci,mid);
+    if (suftaboffset == midval)
+    {
+      return mid;
+    }
+    if (suftaboffset < midval)
+    {
+      found = mid;
+      right = mid - 1;
+    } else
+    {
+      left = mid + 1;
+    }
+  }
+  return found;
+}
+
+unsigned long gt_firstcodes_mapped_range_size(const GtFirstcodesinfo *fci,
+                                              unsigned long minindex,
+                                              unsigned long maxindex)
+{
+  size_t idx;
+  GtSfxmappedrange *maptab[3];
+  unsigned long sumsize = 0;
+
+  maptab[0] = fci->mappedcountocc;
+  maptab[1] = fci->mappedallfirstcodes;
+  maptab[2] = fci->mappedmarkprefix;;
+  for (idx = 0; idx < sizeof (maptab)/sizeof (maptab[0]); idx++)
+  {
+    if (maptab[idx] == NULL)
+    {
+      return (unsigned long) fci->size_to_split;
+    }
+    sumsize += gt_Sfxmappedrange_size_mapped(fci->mappedcountocc,minindex,
+                                             maxindex);
+  }
+  return sumsize;
+}
+
+unsigned long gt_firstcodes_idx_code(const GtFirstcodesinfo *fci,
+                                     unsigned long idx)
+{
+  gt_assert(idx < fci->differentcodes);
+  return fci->allfirstcodes[idx];
 }
 
 static void gt_storefirstcodes(void *processinfo,
