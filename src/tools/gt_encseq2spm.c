@@ -154,6 +154,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   gt_assert(arguments);
   el = gt_encseq_loader_new();
   gt_encseq_loader_drop_description_support(el);
+  gt_encseq_loader_disable_autosupport(el);
   encseq = gt_encseq_loader_load(el, gt_str_get(arguments->encseqinput),
                                  err);
   if (encseq == NULL)

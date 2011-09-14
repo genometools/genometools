@@ -873,9 +873,12 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               outputspms);
   gt_free(fci.countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
+  gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fci.workspace));
+  gt_logger_log(logger,"size to split = %.2f",GT_MEGABYTES(fci.size_to_split +
+                                                           suftab_size));
   gt_logger_log(logger,"estimatedspace = %.2f",GT_MEGABYTES(fci.workspace +
-                                               fci.size_to_split +
-                                               suftab_size));
+                                                            fci.size_to_split +
+                                                            suftab_size));
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);
