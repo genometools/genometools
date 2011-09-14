@@ -18,6 +18,8 @@
 #ifndef FASTABUFFER_IMP_H
 #define FASTABUFFER_IMP_H
 
+#include <unistd.h>
+
 #define OUTPUTFILEBUFFERSIZE 4096
 #define INPUTFILEBUFFERSIZE  4096
 
