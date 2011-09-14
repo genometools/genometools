@@ -21,12 +21,8 @@
 #include "core/option_api.h"
 #include "core/encseq_api.h"
 #include "core/logger.h"
-#include "core/spacecalc.h"
-#include "core/fa.h"
-#include "core/spacepeak.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
-#include "match/stamp.h"
 
 typedef struct {
   bool checksuftab,

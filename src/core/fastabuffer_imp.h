@@ -18,7 +18,11 @@
 #ifndef FASTABUFFER_IMP_H
 #define FASTABUFFER_IMP_H
 
+#ifndef S_SPLINT_S
 #include <unistd.h>
+#else
+typedef unsigned long ssize_t;
+#endif
 
 #define OUTPUTFILEBUFFERSIZE 4096
 #define INPUTFILEBUFFERSIZE  4096

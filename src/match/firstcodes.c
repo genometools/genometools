@@ -120,8 +120,8 @@ typedef struct
 
 /* call the following function after computing the partial sums */
 
-unsigned long gt_storefirstcodes_get(const GtFirstcodesinfo *fci,
-                                     unsigned long idx)
+unsigned long gt_storefirstcodes_getleftborder(const GtFirstcodesinfo *fci,
+                                               unsigned long idx)
 {
   return fci->countocc[idx];
 }

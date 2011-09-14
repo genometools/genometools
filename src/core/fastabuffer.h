@@ -37,6 +37,6 @@ GtFastaBuffer* gt_fastabuffer_new(const GtStrArray *filenametab,
 static int   gt_fastabuffer_next(GtFastaBuffer*, GtUchar *val, GtError*);
 void         gt_fastabuffer_delete(GtFastaBuffer*);
 
-#include "fastabuffer_imp.h"
+#include "core/fastabuffer_imp.h"
 
 #endif
