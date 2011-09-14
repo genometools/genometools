@@ -69,7 +69,7 @@ typedef struct GtBcktab GtBcktab;
 void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
                                  unsigned long value);
 
-unsigned long gt_bcktab_get(const GtBcktab *bcktab,GtCodetype code);
+unsigned long gt_bcktab_get_leftborder(const GtBcktab *bcktab,GtCodetype code);
 
 GtBcktab *gt_bcktab_map(const char *indexname,
                         unsigned int numofchars,

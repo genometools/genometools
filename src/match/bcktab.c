@@ -95,7 +95,7 @@ void gt_bcktab_leftborder_assign(GtLeftborder *lb,GtCodetype code,
   }
 }
 
-unsigned long gt_bcktab_get(const GtBcktab *bcktab,GtCodetype code)
+unsigned long gt_bcktab_get_leftborder(const GtBcktab *bcktab,GtCodetype code)
 {
   gt_assert(bcktab != NULL);
   if (bcktab->leftborder.ulongbounds != NULL)
@@ -783,7 +783,7 @@ void gt_bcktab_leftborder_show(const GtBcktab *bcktab)
   for (idx=0; idx<bcktab->numofallcodes; idx++)
   {
     printf("leftborder[" FormatGtCodetype "]=%lu\n",idx,
-                                                    gt_bcktab_get(bcktab,idx));
+                                    gt_bcktab_get_leftborder(bcktab,idx));
   }
 }
 
@@ -959,10 +959,10 @@ unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
                                        unsigned long totalwidth,
                                        unsigned int rightchar)
 {
-  bucketspec->left = gt_bcktab_get(bcktab,code);
+  bucketspec->left = gt_bcktab_get_leftborder(bcktab,code);
   if (code < maxcode)
   {
-    unsigned long nextleftborder = gt_bcktab_get(bcktab,code+1);
+    unsigned long nextleftborder = gt_bcktab_get_leftborder(bcktab,code+1);
 
     if (nextleftborder > 0)
     {
@@ -1027,7 +1027,7 @@ unsigned long gt_bcktab_calcrightbounds(const GtBcktab *bcktab,
                                         GtCodetype maxcode,
                                         unsigned long totalwidth)
 {
-  return code < maxcode ? gt_bcktab_get(bcktab,code+1) : totalwidth;
+  return code < maxcode ? gt_bcktab_get_leftborder(bcktab,code+1) : totalwidth;
 }
 
 GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
@@ -1305,10 +1305,10 @@ unsigned long gt_bcktab_leftborderpartialsums(
   unsigned long code, largestbucketsize, sumbuckets, saved = 0, currentsize;
 
   gt_assert(bcktab->numofallcodes > 0);
-  largestbucketsize = sumbuckets = gt_bcktab_get(bcktab,0);
+  largestbucketsize = sumbuckets = gt_bcktab_get_leftborder(bcktab,0);
   for (code = 1UL; code < bcktab->numofallcodes; code++)
   {
-    currentsize = gt_bcktab_get(bcktab,code);
+    currentsize = gt_bcktab_get_leftborder(bcktab,code);
     sumbuckets += currentsize;
     if (largestbucketsize < currentsize)
     {
@@ -1350,7 +1350,7 @@ GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
   while (left+1 < right)
   {
     mid = GT_DIV2(left+right);
-    midval = gt_bcktab_get(bcktab,mid);
+    midval = gt_bcktab_get_leftborder(bcktab,mid);
     if (suftaboffset == midval)
     {
       return mid;

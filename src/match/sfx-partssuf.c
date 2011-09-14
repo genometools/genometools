@@ -195,15 +195,19 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       if (part == 0)
       {
         suftabparts->components[part].widthofpart
-          = gt_bcktab_get(bcktab,suftabparts->components[part].nextidx);
+          = gt_bcktab_get_leftborder(bcktab,
+                                     suftabparts->components[part].nextidx);
         suftabparts->components[part].suftaboffset = 0;
       } else
       {
         suftabparts->components[part].widthofpart
-          = gt_bcktab_get(bcktab,suftabparts->components[part].nextidx) -
-            gt_bcktab_get(bcktab,suftabparts->components[part-1].nextidx);
+          = gt_bcktab_get_leftborder(bcktab,
+                                     suftabparts->components[part].nextidx) -
+            gt_bcktab_get_leftborder(bcktab,
+                                     suftabparts->components[part-1].nextidx);
         suftabparts->components[part].suftaboffset
-          = gt_bcktab_get(bcktab,suftabparts->components[part-1].nextidx);
+          = gt_bcktab_get_leftborder(bcktab,
+                                     suftabparts->components[part-1].nextidx);
       }
       if (suftabparts->largestsuftabwidth <
           suftabparts->components[part].widthofpart)

@@ -123,10 +123,10 @@ typedef struct
 unsigned long gt_storefirstcodes_get(const GtFirstcodesinfo *fci,
                                      unsigned long idx)
 {
-  return fci->allfirstcodes[idx];
+  return fci->countocc[idx];
 }
 
-size_t gt_storefirstcodes_size_to_map(const GtFirstcodesinfo *fci)
+size_t gt_storefirstcodes_size_to_split(const GtFirstcodesinfo *fci)
 {
   return fci->size_to_split;
 }
