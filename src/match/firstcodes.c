@@ -36,7 +36,7 @@
 
 typedef struct
 {
-  unsigned long code, *ptr;
+  unsigned long idx, code;
 } GtIndexwithcode;
 
 GT_DECLAREARRAYSTRUCT(GtIndexwithcode);
@@ -219,8 +219,7 @@ static void gt_firstcodes_halves_rek(GtFirstcodesinfo *fci,
   gt_assert(fci->binsearchcache.nextfreeGtIndexwithcode <
             fci->binsearchcache.allocatedGtIndexwithcode);
   fci->binsearchcache.spaceGtIndexwithcode[fci->binsearchcache.
-                                           nextfreeGtIndexwithcode]
-                                           .ptr = fci->tab.allfirstcodes + mid;
+                                           nextfreeGtIndexwithcode].idx = mid;
   fci->binsearchcache.spaceGtIndexwithcode[fci->binsearchcache.
                                            nextfreeGtIndexwithcode++]
                                            .code = fci->tab.allfirstcodes[mid];
@@ -270,10 +269,10 @@ static size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,
   return 0;
 }
 
-const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
-                                        unsigned long code)
+unsigned long gt_firstcodes_find(const GtFirstcodesinfo *fci,
+                                 unsigned long code)
 {
-  const unsigned long *leftptr = NULL, *midptr, *rightptr = NULL;
+  unsigned long leftidx = ULONG_MAX, mididx, rightidx = ULONG_MAX;
   unsigned int depth;
 
   if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
@@ -293,15 +292,16 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
           rightic = midic - 1;
         } else
         {
-          gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
+          gt_assert(leftic->idx != ULONG_MAX &&
+                    rightic->idx != ULONG_MAX);
           if (leftic > fci->binsearchcache.spaceGtIndexwithcode)
           {
-            leftptr = (leftic-1)->ptr + 1;
+            leftidx = (leftic-1)->idx + 1;
           } else
           {
-            leftptr = fci->tab.allfirstcodes;
+            leftidx = 0;
           }
-          rightptr = rightic->ptr - 1;
+          rightidx = rightic->idx - 1;
           break;
         }
       } else
@@ -313,51 +313,50 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
             leftic = midic + 1;
           } else
           {
-            gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
-            leftptr = leftic->ptr + 1;
+            gt_assert(leftic->idx != ULONG_MAX && rightic->idx != ULONG_MAX);
+            leftidx = leftic->idx + 1;
             if (rightic < fci->binsearchcache.spaceGtIndexwithcode +
-                     fci->binsearchcache.nextfreeGtIndexwithcode-1)
+                          fci->binsearchcache.nextfreeGtIndexwithcode-1)
             {
-              rightptr = (rightic+1)->ptr - 1;
+              rightidx = (rightic+1)->idx - 1;
             } else
             {
-              rightptr = fci->tab.allfirstcodes +
-                         fci->tab.differentcodes - 1;
+              rightidx = fci->tab.differentcodes - 1;
             }
             break;
           }
         } else
         {
-          return midic->ptr;
+          return midic->idx;
         }
       }
     }
-    gt_assert(leftptr != NULL && rightptr != NULL);
+    gt_assert(leftidx != ULONG_MAX && rightidx != ULONG_MAX);
   } else
   {
     depth = 0;
-    leftptr = fci->tab.allfirstcodes;
-    rightptr = fci->tab.allfirstcodes + fci->tab.differentcodes - 1;
+    leftidx = 0;
+    rightidx = fci->tab.differentcodes - 1;
   }
-  while (leftptr <= rightptr)
+  while (leftidx <= rightidx)
   {
-    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
-    if (code < *midptr)
+    mididx = leftidx + GT_DIV2(rightidx-leftidx);
+    if (code < fci->tab.allfirstcodes[mididx])
     {
-      rightptr = midptr - 1;
+      rightidx = mididx - 1;
     } else
     {
-      if (code > *midptr)
+      if (code > fci->tab.allfirstcodes[mididx])
       {
-        leftptr = midptr + 1;
+        leftidx = mididx + 1;
       } else
       {
-        return midptr;
+        return mididx;
       }
     }
     depth++;
   }
-  return NULL;
+  return ULONG_MAX;
 }
 
 static unsigned long gt_firstcodes_accumulatecounts_merge(
@@ -396,7 +395,7 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
 
 static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo *fci)
 {
-  const unsigned long *ptr;
+  unsigned long idx;
   unsigned long *vptr;
 
   gt_assert(fci->tab.allfirstcodes != NULL);
@@ -412,10 +411,13 @@ static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo *fci)
        vptr < fci->codebuffer + fci->codebuffer_nextfree;
        vptr++)
   {
-    ptr = gt_firstcodes_find(fci,*vptr);
-    if (ptr != NULL)
+    idx = gt_firstcodes_find(fci,*vptr);
+    if (idx != ULONG_MAX)
     {
-      fci->firstcodehits += gt_firstcodes_accumulatecounts_merge(fci,vptr, ptr);
+      gt_assert(idx < fci->tab.differentcodes);
+      fci->firstcodehits
+        += gt_firstcodes_accumulatecounts_merge(fci,vptr,
+                                                fci->tab.allfirstcodes + idx);
       break;
     }
   }
@@ -489,7 +491,7 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
 
 static void gt_firstcodes_insertsuffixes_flush(GtFirstcodesinfo *fci)
 {
-  const unsigned long *ptr;
+  unsigned long idx;
   GtUlongPair *vptr;
 
   gt_assert(fci->tab.allfirstcodes != NULL);
@@ -505,10 +507,13 @@ static void gt_firstcodes_insertsuffixes_flush(GtFirstcodesinfo *fci)
               fci->codebuffer_nextfree;
        vptr++)
   {
-    ptr = gt_firstcodes_find(fci,vptr->a);
-    if (ptr != NULL)
+    idx = gt_firstcodes_find(fci,vptr->a);
+    if (idx != ULONG_MAX)
     {
-      fci->firstcodeposhits += gt_firstcodes_insertsuffixes_merge(fci,vptr,ptr);
+      gt_assert(idx < fci->tab.differentcodes);
+      fci->firstcodeposhits
+        += gt_firstcodes_insertsuffixes_merge(fci,vptr,
+                                              fci->tab.allfirstcodes+idx);
       break;
     }
   }
@@ -833,6 +838,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   storefirstcodes_partialsum(&fci);
   suftabentries = fci.firstcodehits + fci.numofsequences;
+  gt_assert(parts > 0);
   suftabparts = gt_suftabparts_new(parts,
                                    NULL,
                                    &fci.tab,

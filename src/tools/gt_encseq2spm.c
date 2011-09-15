@@ -75,7 +75,7 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
 
   /* -parts */
   option = gt_option_new_uint_min("parts", "specify the number of parts",
-                                  &arguments->parts, 0, 1U);
+                                  &arguments->parts, 1U, 1U);
   gt_option_parser_add_option(op, option);
 
   /* -checksuftab */
