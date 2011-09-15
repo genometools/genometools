@@ -166,61 +166,59 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
   }
 }
 
-int gt_bcktab_storetmp(GtSfxmappedrangelist *sfxmrlist,
-                       GtBcktab *bcktab, GtLogger *logger, GtError *err)
+int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
 {
   bool haserr = false;
 
-  bcktab->mappedleftborder
-    = gt_Sfxmappedrange_new(bcktab->useulong
-                              ? (void **) &bcktab->leftborder.ulongbounds
-                              : (void **) &bcktab->leftborder.uintbounds,
-                            true,
-                            bcktab->numofallcodes+1,
-                            bcktab->useulong
-                              ? GtSfxunsignedlong
-                              : GtSfxuint32_t,
-                            "leftborder",
-                            NULL,
-                            0,
-                            logger,
-                            err);
-  if (bcktab->mappedleftborder == NULL)
+  if (gt_Sfxmappedrange_enhance(bcktab->mappedleftborder,
+                                bcktab->useulong
+                                  ? (void **) &bcktab->leftborder.ulongbounds
+                                  : (void **) &bcktab->leftborder.uintbounds,
+                                true,
+                                "leftborder",
+                                logger,
+                                err) != 0)
   {
-    bcktab->leftborder.ulongbounds = NULL;
-    bcktab->leftborder.uintbounds = NULL;
     haserr = true;
-  } else
-  {
-    gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedleftborder);
   }
   if (!haserr && bcktab->withspecialsuffixes)
   {
-    bcktab->mappedcountspecialcodes
-      = gt_Sfxmappedrange_new(bcktab->useulong
-                              ? (void **) &bcktab->ulongcountspecialcodes
-                              : (void **) &bcktab->uintcountspecialcodes,
-                              true,
-                              bcktab->numofspecialcodes,
-                              bcktab->useulong
-                                ? GtSfxunsignedlong
-                                : GtSfxuint32_t,
-                              "countspecialcodes",
-                              gt_bcktab_transformcode,
-                              bcktab->numofchars,
-                              logger,
-                              err);
-    if (bcktab->mappedcountspecialcodes == NULL)
+    if (gt_Sfxmappedrange_enhance(bcktab->mappedcountspecialcodes,
+                                  bcktab->useulong
+                                    ? (void **) &bcktab->ulongcountspecialcodes
+                                    : (void **) &bcktab->uintcountspecialcodes,
+                                  true,
+                                  "countspecialcodes",
+                                  logger,
+                                  err) != 0)
     {
-      bcktab->ulongcountspecialcodes = NULL;
-      bcktab->uintcountspecialcodes = NULL;
       haserr = true;
-    } else
-    {
-      gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedcountspecialcodes);
     }
   }
   return haserr ? -1 : 0;
+}
+
+void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
+{
+  bcktab->mappedleftborder
+    = gt_Sfxmappedrange_new(bcktab->numofallcodes+1,
+                            bcktab->useulong
+                              ? GtSfxunsignedlong
+                              : GtSfxuint32_t,
+                            NULL,
+                            0);
+  gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedleftborder);
+  if (bcktab->withspecialsuffixes)
+  {
+    bcktab->mappedcountspecialcodes
+      = gt_Sfxmappedrange_new(bcktab->numofspecialcodes,
+                              bcktab->useulong
+                                ? GtSfxunsignedlong
+                                : GtSfxuint32_t,
+                              gt_bcktab_transformcode,
+                              bcktab->numofchars);
+    gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedcountspecialcodes);
+  }
 }
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,

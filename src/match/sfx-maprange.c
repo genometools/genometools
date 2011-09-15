@@ -104,11 +104,11 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   return sfxmappedrange->entire;
 }
 
-GtSfxmappedrange *gt_Sfxmappedrange_new_basic(unsigned long numofentries,
-                                              GtSfxmappedrangetype type,
-                                              unsigned long(*transformfunc)(
+GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
+                                        GtSfxmappedrangetype type,
+                                        unsigned long(*transformfunc)(
                                                   unsigned long,unsigned int),
-                                              unsigned int transformfunc_data)
+                                        unsigned int transformfunc_data)
 {
   GtSfxmappedrange *sfxmappedrange;
 
@@ -178,38 +178,6 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
     return -1;
   }
   return 0;
-}
-
-GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        bool writable,
-                                        unsigned long numofentries,
-                                        /* for GtBitsequence numofentries
-                                           means the number of bits, otherwise
-                                           the number of array indices */
-                                        GtSfxmappedrangetype type,
-                                        const char *tablename,
-                                        unsigned long(*transformfunc)(
-                                             unsigned long,unsigned int),
-                                        unsigned int transformfunc_data,
-                                        GtLogger *logger,
-                                        GtError *err)
-{
-  GtSfxmappedrange *sfxmappedrange;
-
-  sfxmappedrange = gt_Sfxmappedrange_new_basic(numofentries,
-                                               type,
-                                               transformfunc,
-                                               transformfunc_data);
-  if (gt_Sfxmappedrange_enhance(sfxmappedrange,
-                                usedptrptr,
-                                writable,
-                                tablename,
-                                logger,
-                                err) != 0)
-  {
-    return NULL;
-  }
-  return sfxmappedrange;
 }
 
 unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange

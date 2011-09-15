@@ -51,25 +51,11 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
 
 size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange);
 
-GtSfxmappedrange *gt_Sfxmappedrange_new(void **usedptrptr,
-                                        bool writable,
-                                        unsigned long numofentries,
-                                        /* for GtBitsequence numofentries
-                                           means the number of bits, otherwise
-                                           the number of array indices */
+GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
                                         GtSfxmappedrangetype type,
-                                        const char *tablename,
                                         unsigned long(*transformfunc)(
-                                             unsigned long,unsigned int),
-                                        unsigned int transformfunc_data,
-                                        GtLogger *logger,
-                                        GtError *err);
-
-GtSfxmappedrange *gt_Sfxmappedrange_new_basic(unsigned long numofentries,
-                                              GtSfxmappedrangetype type,
-                                              unsigned long(*transformfunc)(
-                                                  unsigned long,unsigned int),
-                                              unsigned int transformfunc_data);
+                                            unsigned long,unsigned int),
+                                        unsigned int transformfunc_data);
 
 int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
                               void **usedptrptr,

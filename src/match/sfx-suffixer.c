@@ -1886,10 +1886,10 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 sfi->spmopt_additionalprefixchars,
                                 (unsigned long) sizeofprefixmarks);
       sfi->mappedmarkprefixbuckets
-        = gt_Sfxmappedrange_new_basic(sfi->spmopt_numofallprefixcodes,
-                                      GtSfxGtBitsequence,
-                                      gt_bcktab_code_to_prefix_index,
-                                      sfi->spmopt_additionalprefixchars);
+        = gt_Sfxmappedrange_new(sfi->spmopt_numofallprefixcodes,
+                                GtSfxGtBitsequence,
+                                gt_bcktab_code_to_prefix_index,
+                                sfi->spmopt_additionalprefixchars);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
 #ifdef _LP64
@@ -2073,6 +2073,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (!haserr)
   {
     gt_assert(sfi != NULL);
+    gt_bcktab_maprange_lb_cs(sfxmrlist,sfi->bcktab);
     sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
                                          sfi->mappedmarkprefixbuckets,
@@ -2082,7 +2083,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi->suftabparts != NULL);
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
-      if (gt_bcktab_storetmp(sfxmrlist,sfi->bcktab, sfi->logger, err) != 0)
+      if (gt_bcktab_storetmp(sfi->bcktab, sfi->logger, err) != 0)
       {
         haserr = true;
       }
