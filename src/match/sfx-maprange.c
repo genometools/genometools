@@ -50,15 +50,15 @@ typedef struct
   unsigned long mapoffset, mapend;
 } GtMappedrange;
 
-static void gt_mapped_lbrange_get(GtMappedrange *range,
-                                  size_t sizeofbasetype,
-                                  unsigned long pagesize,
-                                  unsigned long mincode,
-                                  unsigned long maxcode)
+static void gt_Sfxmapped_offset_end(GtMappedrange *range,
+                                    size_t sizeofbasetype,
+                                    unsigned long pagesize,
+                                    unsigned long minindex,
+                                    unsigned long maxindex)
 {
-  range->mapoffset = gt_multipleofpagesize(mincode,true,sizeofbasetype,
+  range->mapoffset = gt_multipleofpagesize(minindex,true,sizeofbasetype,
                                            pagesize);
-  range->mapend = gt_multipleofpagesize(maxcode,false,sizeofbasetype,pagesize);
+  range->mapend = gt_multipleofpagesize(maxindex,false,sizeofbasetype,pagesize);
 }
 
 struct GtSfxmappedrange
@@ -213,11 +213,11 @@ static unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
     maxindex = sfxmappedrange->transformfunc(maxindex,
                                             sfxmappedrange->transformfunc_data);
   }
-  gt_mapped_lbrange_get(&lbrange,
-                        sfxmappedrange->sizeofunit,
-                        sfxmappedrange->pagesize,
-                        minindex,
-                        maxindex);
+  gt_Sfxmapped_offset_end(&lbrange,
+                          sfxmappedrange->sizeofunit,
+                          sfxmappedrange->pagesize,
+                          minindex,
+                          maxindex);
   return lbrange.mapend - lbrange.mapoffset + 1;
 }
 
@@ -242,11 +242,11 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
     maxindex = sfxmappedrange->transformfunc(maxindex,
                                             sfxmappedrange->transformfunc_data);
   }
-  gt_mapped_lbrange_get(&lbrange,
-                        sfxmappedrange->sizeofunit,
-                        sfxmappedrange->pagesize,
-                        minindex,
-                        maxindex);
+  gt_Sfxmapped_offset_end(&lbrange,
+                          sfxmappedrange->sizeofunit,
+                          sfxmappedrange->pagesize,
+                          minindex,
+                          maxindex);
   if (logger != NULL)
   {
     size_t sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);

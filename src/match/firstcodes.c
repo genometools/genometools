@@ -89,6 +89,12 @@ static bool gt_marksubstring_checkmark(const Gtmarksubstring *mark,
   return GT_ISIBITSET(mark->bits,code) ? true : false;
 }
 
+static unsigned long gt_kmercode_to_prefix_index(unsigned long code,
+                                                 unsigned int shiftright)
+{
+  return code >> shiftright;
+}
+
 typedef struct
 {
   unsigned long firstcodehits,
@@ -701,16 +707,16 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
-  size_t size_to_split, sizeforcodestable, binsearchcache_size, suftab_size = 0;
+  size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars;
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  unsigned long totallength, suftabentries;
+  unsigned long totallength, suftabentries, size_to_split;
+  GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
 
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   totallength = gt_encseq_total_length(encseq);
   fci.workspace = (size_t) gt_encseq_sizeofrep(encseq);
-  size_to_split = 0;
   fci.tab.mappedcountocc = NULL;
   fci.tab.mappedallfirstcodes = NULL;
   fci.tab.mappedmarkprefix = NULL;
@@ -752,16 +758,34 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              fci.tab.allfirstcodes,fci.numofsequences);
   gt_marksubstring_init(&fci.markprefix,numofchars,kmersize,false,
                         markprefixunits);
-  gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,
-                        true,markprefixunits);
+  gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,true,
+                        markprefixunits);
+  fci.tab.mappedmarkprefix = gt_Sfxmappedrange_new("markprefix",
+                                                   fci.markprefix.entries,
+                                                   GtSfxGtBitsequence,
+                                                   gt_kmercode_to_prefix_index,
+                                                   fci.markprefix.shiftright);
+  gt_Sfxmappedrangelist_add(sfxmrlist,fci.tab.mappedmarkprefix);
   fci.workspace += fci.marksuffix.size;
   fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
+  if (fci.tab.differentcodes > 0)
+  {
+    fci.tab.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
+                                                        fci.tab.differentcodes,
+                                                        GtSfxunsignedlong,
+                                                        NULL,0);
+    gt_Sfxmappedrangelist_add(sfxmrlist,fci.tab.mappedallfirstcodes);
+    fci.tab.mappedcountocc = gt_Sfxmappedrange_new("countocc",
+                                                   fci.tab.differentcodes+1,
+                                                   GtSfxunsignedlong,
+                                                   NULL,0);
+    gt_Sfxmappedrangelist_add(sfxmrlist,fci.tab.mappedcountocc);
+  }
+  size_to_split = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
   gt_logger_log(logger,"number of different codes=%lu (%.4f) in %lu sequences",
                 fci.tab.differentcodes,
           (double) fci.tab.differentcodes/fci.numofsequences,
           fci.countsequences);
-  gt_logger_log(logger,"size of space to split %.1f megabytes",
-                GT_MEGABYTES(size_to_split));
   fci.binsearchcache_depth
     = (unsigned int) log10((double) fci.tab.differentcodes);
   fci.flushcount = 0;
@@ -861,6 +885,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               outputspms);
   gt_free(fci.tab.countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
+  gt_Sfxmappedrangelist_delete(sfxmrlist);
+  gt_Sfxmappedrange_delete(fci.tab.mappedmarkprefix,logger);
+  gt_Sfxmappedrange_delete(fci.tab.mappedcountocc,logger);
+  gt_Sfxmappedrange_delete(fci.tab.mappedallfirstcodes,logger);
   gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fci.workspace));
   gt_logger_log(logger,"size to split = %.2f",
                 GT_MEGABYTES(size_to_split + suftab_size));

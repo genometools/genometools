@@ -23,7 +23,7 @@
 #include "core/intbits.h"
 #include "core/codetype.h"
 #include "core/logger_api.h"
-#include "match/sfx-maprange.h"
+#include "sfx-maprange.h"
 
 typedef struct
 {
