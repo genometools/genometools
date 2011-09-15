@@ -23,7 +23,10 @@
 #endif
 #include "core/fa.h"
 #include "core/intbits.h"
+<<<<<<< HEAD
 #include "core/log.h"
+=======
+>>>>>>> Add the tablename when constructing the mapped-table.
 #include "sfx-maprange.h"
 
 static unsigned long gt_multipleofpagesize(unsigned long code,
@@ -61,8 +64,7 @@ static void gt_mapped_lbrange_get(GtMappedrange *range,
 struct GtSfxmappedrange
 {
   void *ptr, *entire, **usedptrptr;
-  GtStr *filename;
-  const char *tablename;
+  GtStr *filename, *tablename;
   unsigned long pagesize;
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
@@ -104,7 +106,8 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   return sfxmappedrange->entire;
 }
 
-GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
+GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
+                                        unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         unsigned long(*transformfunc)(
                                                   unsigned long,unsigned int),
@@ -122,7 +125,7 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
   sfxmappedrange->transformfunc = transformfunc;
   sfxmappedrange->transformfunc_data = transformfunc_data;
   sfxmappedrange->type = type;
-  sfxmappedrange->tablename = NULL;
+  sfxmappedrange->tablename = gt_str_new_cstr(tablename);
   switch (type)
   {
     case GtSfxGtBitsequence:
@@ -147,7 +150,6 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
 int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
                               void **usedptrptr,
                               bool writable,
-                              const char *tablename,
                               GtLogger *logger,
                               GT_UNUSED GtError *err)
 {
@@ -161,18 +163,33 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
   sfxmappedrange->writable = writable;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   gt_assert(outfp != NULL);
-  sfxmappedrange->tablename = tablename;
   gt_logger_log(logger,"write %s to file %s (%lu units of %lu bytes)",
-                tablename, gt_str_get(sfxmappedrange->filename),
+                gt_str_get(sfxmappedrange->tablename),
+                gt_str_get(sfxmappedrange->filename),
                 (unsigned long) sfxmappedrange->numofunits,
                 (unsigned long) sfxmappedrange->sizeofunit);
+<<<<<<< HEAD
   gt_xfwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
              sfxmappedrange->numofunits,outfp);
+=======
+  if (fwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
+             sfxmappedrange->numofunits,outfp) != sfxmappedrange->numofunits)
+  {
+    gt_error_set(err,"table %s: cannot write %lu items of size %u: "
+                     "errormsg=\"%s\"",
+                 gt_str_get(sfxmappedrange->tablename),
+                 (unsigned long) sfxmappedrange->numofunits,
+                 (unsigned int) sfxmappedrange->sizeofunit,
+                 strerror(errno));
+    haserr = true;
+  }
+>>>>>>> Add the tablename when constructing the mapped-table.
   gt_fa_fclose(outfp);
   gt_free(*sfxmappedrange->usedptrptr);
   *sfxmappedrange->usedptrptr = NULL;
   if (haserr)
   {
+    gt_str_delete(sfxmappedrange->tablename);
     gt_str_delete(sfxmappedrange->filename);
     gt_free(sfxmappedrange);
     return -1;
@@ -234,7 +251,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
     size_t sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
     gt_logger_log(logger,
                   "part %u: mapped %s from %lu to %lu for %s (%.1f%% of all)",
-                  part,sfxmappedrange->tablename,lbrange.mapoffset,
+                  part,gt_str_get(sfxmappedrange->tablename),lbrange.mapoffset,
                   lbrange.mapend,
                   sfxmappedrange->writable ? "writing" : "reading",
                   (lbrange.mapend - lbrange.mapoffset + 1
@@ -276,55 +293,6 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   return NULL;
 }
 
-struct GtSfxmappedrangelist
-{
-  GtArray *arr;
-};
-
-GtSfxmappedrangelist *gt_Sfxmappedrangelist_new(size_t size_of_elem)
-{
-  GtSfxmappedrangelist *sfxmrlist = gt_malloc(sizeof (*sfxmrlist));
-
-  sfxmrlist->arr = gt_array_new(size_of_elem);
-  return sfxmrlist;
-}
-
-void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
-                               GtSfxmappedrange *sfxmappedrange)
-{
-  gt_assert(sfxmrlist != NULL);
-
-  gt_array_add_elem(sfxmrlist->arr,sfxmappedrange,sizeof (sfxmappedrange));
-}
-
-unsigned long gt_Sfxmappedrange_size_of_part(
-                                         const GtSfxmappedrangelist *sfxmrlist,
-                                         unsigned long minindex,
-                                         unsigned long maxindex)
-{
-  unsigned long idx, sumsize = 0;
-
-  for (idx = 0; idx < gt_array_size(sfxmrlist->arr); idx++)
-  {
-    GtSfxmappedrange *sfxmappedrange = gt_array_get(sfxmrlist->arr,idx);
-    if (sfxmappedrange != NULL)
-    {
-      sumsize += gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
-                                               maxindex);
-    }
-  }
-  return sumsize;
-}
-
-void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist)
-{
-  if (sfxmrlist != NULL)
-  {
-    gt_array_delete(sfxmrlist->arr);
-    gt_free(sfxmrlist);
-  }
-}
-
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
 {
   if (sfxmappedrange == NULL)
@@ -344,6 +312,80 @@ void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
     gt_logger_log(logger,"remove \"%s\"",gt_str_get(sfxmappedrange->filename));
     gt_xunlink(gt_str_get(sfxmappedrange->filename));
   }
+  gt_str_delete(sfxmappedrange->tablename);
   gt_str_delete(sfxmappedrange->filename);
   gt_free(sfxmappedrange);
+}
+
+struct GtSfxmappedrangelist
+{
+  GtSfxmappedrange **arr;
+  unsigned long nextfree, allocated;
+};
+
+GtSfxmappedrangelist *gt_Sfxmappedrangelist_new(void)
+{
+  GtSfxmappedrangelist *sfxmrlist = gt_malloc(sizeof (*sfxmrlist));
+
+  sfxmrlist->arr = NULL;
+  sfxmrlist->nextfree = sfxmrlist->allocated = 0;
+  return sfxmrlist;
+}
+
+void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
+                               GtSfxmappedrange *sfxmappedrange)
+{
+  gt_assert(sfxmrlist != NULL);
+
+  if (sfxmrlist->nextfree >= sfxmrlist->allocated)
+  {
+    sfxmrlist->allocated += 4UL;
+    sfxmrlist->arr = gt_realloc(sfxmrlist->arr,sizeof (*sfxmrlist->arr) *
+                                               sfxmrlist->allocated);
+  }
+  sfxmrlist->arr[sfxmrlist->nextfree++] = sfxmappedrange;
+}
+
+unsigned long gt_Sfxmappedrangelist_size_mapped(
+                                         const GtSfxmappedrangelist *sfxmrlist,
+                                         unsigned long minindex,
+                                         unsigned long maxindex)
+{
+  unsigned long idx, sumsize = 0;
+
+  for (idx = 0; idx < sfxmrlist->nextfree; idx++)
+  {
+    GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
+    if (sfxmappedrange != NULL)
+    {
+      sumsize += gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
+                                               maxindex);
+    }
+  }
+  return sumsize;
+}
+
+unsigned long gt_Sfxmappedrangelist_size_entire(
+                                         const GtSfxmappedrangelist *sfxmrlist)
+{
+  unsigned long idx, sumsize = 0;
+
+  for (idx = 0; idx < sfxmrlist->nextfree; idx++)
+  {
+    GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
+    if (sfxmappedrange != NULL)
+    {
+      sumsize += gt_Sfxmappedrange_size_entire(sfxmappedrange);
+    }
+  }
+  return sumsize;
+}
+
+void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist)
+{
+  if (sfxmrlist != NULL)
+  {
+    gt_free(sfxmrlist->arr);
+    gt_free(sfxmrlist);
+  }
 }

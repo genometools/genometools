@@ -618,16 +618,17 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
   }
 }
 
-static int computepartsfittingmaximumspace(size_t estimatedspace,
-                                           unsigned long maximumspace,
-                                           const GtBcktab *bcktab,
-                                           const GtSfxmappedrange
-                                             *mappedmarkprefixbuckets,
-                                           unsigned long totallength,
-                                           unsigned long specialcharacters,
-                                           unsigned long numofsuffixestosort,
-                                           bool suftabuint,
-                                           GtError *err)
+static int computepartsfittingmaximumspace(
+                                size_t estimatedspace,
+                                unsigned long maximumspace,
+                                const GtBcktab *bcktab,
+                                const GtSfxmappedrange *mappedmarkprefixbuckets,
+                                const GtSfxmappedrangelist *sfxmrlist,
+                                unsigned long totallength,
+                                unsigned long specialcharacters,
+                                unsigned long numofsuffixestosort,
+                                bool suftabuint,
+                                GtError *err)
 {
   unsigned int parts;
   GtSuftabparts *suftabparts;
@@ -660,6 +661,7 @@ static int computepartsfittingmaximumspace(size_t estimatedspace,
     suftabparts = gt_suftabparts_new(parts,
                                     bcktab,
                                     mappedmarkprefixbuckets,
+                                    sfxmrlist,
                                     numofsuffixestosort,
                                     specialcharacters + 1,
                                     NULL);
@@ -1654,7 +1656,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   Sfxiterator *sfi = NULL;
   unsigned long realspecialranges, specialcharacters, numofsuffixestosort = 0;
   bool haserr = false;
-  GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new(sizeof (void *));
+  GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
 #ifdef _LP64
   size_t estimatedspace = (size_t) 13131;
 #else
@@ -1886,10 +1888,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 sfi->spmopt_additionalprefixchars,
                                 (unsigned long) sizeofprefixmarks);
       sfi->mappedmarkprefixbuckets
-        = gt_Sfxmappedrange_new(sfi->spmopt_numofallprefixcodes,
+        = gt_Sfxmappedrange_new("markprefixbuckets",
+                                sfi->spmopt_numofallprefixcodes,
                                 GtSfxGtBitsequence,
                                 gt_bcktab_code_to_prefix_index,
                                 sfi->spmopt_additionalprefixchars);
+      gt_Sfxmappedrangelist_add(sfxmrlist,sfi->mappedmarkprefixbuckets);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);
 #ifdef _LP64
@@ -2036,6 +2040,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       verifyestimatedspace(estimatedspace);
     }
 #endif
+    gt_bcktab_maprange_lb_cs(sfxmrlist,sfi->bcktab);
     if (maximumspace > 0)
     {
       int retval;
@@ -2046,6 +2051,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                        maximumspace,
                                        sfi->bcktab,
                                        sfi->mappedmarkprefixbuckets,
+                                       sfxmrlist,
                                        sfi->totallength,
                                        specialcharacters,
                                        numofsuffixestosort,
@@ -2073,10 +2079,10 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   if (!haserr)
   {
     gt_assert(sfi != NULL);
-    gt_bcktab_maprange_lb_cs(sfxmrlist,sfi->bcktab);
     sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
                                          sfi->mappedmarkprefixbuckets,
+                                         sfxmrlist,
                                          numofsuffixestosort,
                                          specialcharacters + 1,
                                          logger);
@@ -2101,7 +2107,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       if (gt_Sfxmappedrange_enhance(sfi->mappedmarkprefixbuckets,
                                     (void **) &sfi->markprefixbuckets,
                                     false,
-                                    "markprefixbuckets",
                                     sfi->logger,
                                     err) != 0)
       {

@@ -127,6 +127,7 @@ static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                const GtBcktab *bcktab,
                                const GtSfxmappedrange *mappedmarkprefixbuckets,
+                               const GtSfxmappedrangelist *sfxmrlist,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger)
@@ -159,6 +160,14 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     {
       suftabparts->largestsizemappedpartwise
         += gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
+    }
+    if (suftabparts->largestsizemappedpartwise !=
+        gt_Sfxmappedrangelist_size_entire(sfxmrlist))
+    {
+      fprintf(stderr,"largestsizemapped = %lu != %lu = size_entire\n",
+              suftabparts->largestsizemappedpartwise,
+              gt_Sfxmappedrangelist_size_entire(sfxmrlist));
+      exit(EXIT_FAILURE);
     }
     suftabparts->components = NULL;
   } else

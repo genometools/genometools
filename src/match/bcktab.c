@@ -175,7 +175,6 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
                                   ? (void **) &bcktab->leftborder.ulongbounds
                                   : (void **) &bcktab->leftborder.uintbounds,
                                 true,
-                                "leftborder",
                                 logger,
                                 err) != 0)
   {
@@ -188,7 +187,6 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
                                     ? (void **) &bcktab->ulongcountspecialcodes
                                     : (void **) &bcktab->uintcountspecialcodes,
                                   true,
-                                  "countspecialcodes",
                                   logger,
                                   err) != 0)
     {
@@ -201,7 +199,8 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
 void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
 {
   bcktab->mappedleftborder
-    = gt_Sfxmappedrange_new(bcktab->numofallcodes+1,
+    = gt_Sfxmappedrange_new("leftborder",
+                            bcktab->numofallcodes+1,
                             bcktab->useulong
                               ? GtSfxunsignedlong
                               : GtSfxuint32_t,
@@ -211,7 +210,8 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
   if (bcktab->withspecialsuffixes)
   {
     bcktab->mappedcountspecialcodes
-      = gt_Sfxmappedrange_new(bcktab->numofspecialcodes,
+      = gt_Sfxmappedrange_new("countspecialcodes",
+                              bcktab->numofspecialcodes,
                               bcktab->useulong
                                 ? GtSfxunsignedlong
                                 : GtSfxuint32_t,

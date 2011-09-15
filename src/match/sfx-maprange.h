@@ -32,26 +32,14 @@ typedef enum
 } GtSfxmappedrangetype;
 
 typedef struct GtSfxmappedrange GtSfxmappedrange;
-typedef struct GtSfxmappedrangelist GtSfxmappedrangelist;
-
-GtSfxmappedrangelist *gt_Sfxmappedrangelist_new(size_t size_of_elem);
-
-void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
-                               GtSfxmappedrange *sfxmappedrange);
-
-unsigned long gt_Sfxmappedrange_size_of_part(
-                                         const GtSfxmappedrangelist *sfxmrlist,
-                                         unsigned long minindex,
-                                         unsigned long maxindex);
-
-void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist);
 
 void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
                                    GtError *err);
 
 size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange);
 
-GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
+GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
+                                        unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         unsigned long(*transformfunc)(
                                             unsigned long,unsigned int),
@@ -60,7 +48,6 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(unsigned long numofentries,
 int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
                               void **usedptrptr,
                               bool writable,
-                              const char *tablename,
                               GtLogger *logger,
                               GtError *err);
 
@@ -77,5 +64,22 @@ unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
 
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
                               GtLogger *logger);
+
+typedef struct GtSfxmappedrangelist GtSfxmappedrangelist;
+
+GtSfxmappedrangelist *gt_Sfxmappedrangelist_new(void);
+
+void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
+                               GtSfxmappedrange *sfxmappedrange);
+
+unsigned long gt_Sfxmappedrangelist_size_mapped(
+                                         const GtSfxmappedrangelist *sfxmrlist,
+                                         unsigned long minindex,
+                                         unsigned long maxindex);
+
+unsigned long gt_Sfxmappedrangelist_size_entire(
+                                         const GtSfxmappedrangelist *sfxmrlist);
+
+void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist);
 
 #endif

@@ -28,6 +28,7 @@ typedef struct GtSuftabparts GtSuftabparts;
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                const GtBcktab *bcktab,
                                const GtSfxmappedrange *mappedmarkprefixbuckets,
+                               GT_UNUSED const GtSfxmappedrangelist *sfxmrlist,
                                unsigned long numofsuffixestoinsert,
                                unsigned long fullspecials,
                                GtLogger *logger);
