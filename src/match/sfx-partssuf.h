@@ -27,6 +27,8 @@
 
 typedef struct GtSuftabparts GtSuftabparts;
 
+void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts);
+
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
                                   const GtFirstcodestab *fct,

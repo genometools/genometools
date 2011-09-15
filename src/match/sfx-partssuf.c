@@ -41,8 +41,7 @@ struct GtSuftabparts
                 largestsuftabwidth;
 };
 
-#ifdef SKDEBUG
-static void showrecord(const GtSuftabpartcomponent *component)
+static void gt_suftabparts_showrecord(const GtSuftabpartcomponent *component)
 {
   printf("# part: width=%lu offset=%lu sumwidth=%lu nextidx=%lu\n",
           component->widthofpart,component->suftaboffset,
@@ -50,17 +49,16 @@ static void showrecord(const GtSuftabpartcomponent *component)
                                  component->nextidx);
 }
 
-static void showallrecords(const GtSuftabparts *suftabparts)
+void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts)
 {
   unsigned int idx;
 
   gt_assert(suftabparts != NULL);
   for (idx = 0; idx < suftabparts->numofparts; idx++)
   {
-    showrecord(suftabparts->components + idx);
+    gt_suftabparts_showrecord(suftabparts->components + idx);
   }
 }
-#endif
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
                                             GtLogger *logger)
