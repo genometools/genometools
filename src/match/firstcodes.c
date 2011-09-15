@@ -32,6 +32,7 @@
 #include "esa-spmsk.h"
 #include "firstcodes-tab.h"
 #include "firstcodes.h"
+#include "sfx-partssuf.h"
 
 typedef struct
 {
@@ -713,6 +714,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long totallength, suftabentries, size_to_split;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
+  GtSuftabparts *suftabparts;
 
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   totallength = gt_encseq_total_length(encseq);
@@ -784,8 +786,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   size_to_split = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
   gt_logger_log(logger,"number of different codes=%lu (%.4f) in %lu sequences",
                 fci.tab.differentcodes,
-          (double) fci.tab.differentcodes/fci.numofsequences,
-          fci.countsequences);
+                (double) fci.tab.differentcodes/fci.numofsequences,
+                fci.countsequences);
   fci.binsearchcache_depth
     = (unsigned int) log10((double) fci.tab.differentcodes);
   fci.flushcount = 0;
@@ -822,14 +824,24 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
                 fci.codebuffer_total,
                 (double) fci.codebuffer_total/totallength);
+  gt_logger_log(logger,"firstcodehits=%lu (%.2f)",fci.firstcodehits,
+                          (double) fci.firstcodehits/totallength);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "compute partial sums",stdout);
   }
-  gt_logger_log(logger,"firstcodehits=%lu (%.2f)",fci.firstcodehits,
-                                           (double) fci.firstcodehits/
-                                           totallength);
   storefirstcodes_partialsum(&fci);
+  suftabentries = fci.firstcodehits + fci.numofsequences;
+  suftabparts = gt_suftabparts_new(3U,
+                                   NULL,
+                                   &fci.tab,
+                                   sfxmrlist,
+                                   suftabentries,
+                                   0,
+                                   logger);
+  gt_assert(suftabparts != NULL);
+  gt_suftabparts_showallrecords(suftabparts);
+  gt_suftabparts_delete(suftabparts);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "insert suffixes",stdout);
@@ -843,7 +855,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 * fci.codebuffer_allocated);
   fci.tempcodeposforradixsort = gt_malloc(sizeof (*fci.tempcodeposforradixsort)
                                           * fci.codebuffer_allocated);
-  suftabentries = fci.firstcodehits + fci.numofsequences;
   fci.spmsuftab = gt_spmsuftab_new(suftabentries,totallength);
   suftab_size = gt_spmsuftab_requiredspace(suftabentries,totallength);
   gt_logger_log(logger,"allocate %lu entries for suftab (%.2f megabytes)",
