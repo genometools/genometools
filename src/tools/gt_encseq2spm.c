@@ -30,7 +30,8 @@ typedef struct {
        verbose,
        outputspms,
        countspms;
-  unsigned int minmatchlength;
+  unsigned int minmatchlength,
+               parts;
   GtStr *encseqinput,
         *spmspec;
 } GtEncseq2spmArguments;
@@ -67,10 +68,15 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
                             "from encoded sequence.");
 
   /* -l */
-  option = gt_option_new_uint("l", "specify the minimum length",
-                             &arguments->minmatchlength, 0);
+  option = gt_option_new_uint_min("l", "specify the minimum length",
+                                  &arguments->minmatchlength, 0, 1U);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
+
+  /* -parts */
+  option = gt_option_new_uint_min("parts", "specify the number of parts",
+                                  &arguments->parts, 0, 1U);
+  gt_option_parser_add_option(op, option);
 
   /* -checksuftab */
   option = gt_option_new_bool("checksuftab", "check the suffix table",
@@ -170,6 +176,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
 
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
     storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
+                                                  arguments->parts,
                                                   arguments->minmatchlength,
                                                   arguments->checksuftab,
                                                   arguments->countspms,

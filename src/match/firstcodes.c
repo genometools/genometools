@@ -700,6 +700,7 @@ typedef unsigned long QSORTNAME(Sorttype);
 
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
+                                                   unsigned int parts,
                                                    unsigned int minmatchlength,
                                                    bool withsuftabcheck,
                                                    bool countspms,
@@ -832,7 +833,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   storefirstcodes_partialsum(&fci);
   suftabentries = fci.firstcodehits + fci.numofsequences;
-  suftabparts = gt_suftabparts_new(3U,
+  suftabparts = gt_suftabparts_new(parts,
                                    NULL,
                                    &fci.tab,
                                    sfxmrlist,

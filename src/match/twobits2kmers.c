@@ -236,7 +236,7 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
       break;
     case BSRS_storefirstcodes:
       gt_assert(kmersize >= 32U);
-      storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,kmersize,
+      storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,1U,kmersize,
                                                     false,false,false,NULL);
       break;
     case BSRS_hashfirstcodes:
