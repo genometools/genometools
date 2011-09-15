@@ -22,12 +22,14 @@
 #include "core/codetype.h"
 #include "core/error_api.h"
 #include "sfx-maprange.h"
+#include "firstcodes-tab.h"
 #include "bcktab.h"
 
 typedef struct GtSuftabparts GtSuftabparts;
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
+                                  const GtFirstcodestab *fct,
                                   const GtSfxmappedrangelist *sfxmrlist,
                                   unsigned long numofsuffixestoinsert,
                                   unsigned long fullspecials,
@@ -60,6 +62,7 @@ unsigned long gt_suftabparts_largestsizemappedpartwise(
 int gt_suftabparts_fit_memlimit(size_t estimatedspace,
                                 unsigned long maximumspace,
                                 const GtBcktab *bcktab,
+                                const GtFirstcodestab *fct,
                                 const GtSfxmappedrangelist *sfxmrlist,
                                 unsigned long totallength,
                                 unsigned long specialcharacters,

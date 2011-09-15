@@ -1963,6 +1963,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       retval = gt_suftabparts_fit_memlimit(estimatedspace,
                                            maximumspace,
                                            sfi->bcktab,
+                                           NULL,
                                            sfxmrlist,
                                            sfi->totallength,
                                            specialcharacters,
@@ -1993,6 +1994,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi != NULL);
     sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
+                                         NULL,
                                          sfxmrlist,
                                          numofsuffixestosort,
                                          specialcharacters + 1,

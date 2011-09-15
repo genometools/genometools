@@ -22,6 +22,7 @@
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-partssuf.h"
+#include "firstcodes-tab.h"
 
 typedef struct
 {
@@ -128,6 +129,7 @@ static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
+                                  const GtFirstcodestab *fct,
                                   const GtSfxmappedrangelist *sfxmrlist,
                                   unsigned long numofsuffixestoinsert,
                                   unsigned long fullspecials,
@@ -136,6 +138,8 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
   GtSuftabparts *suftabparts;
   unsigned long size_mapped;
 
+  gt_assert((bcktab == NULL && fct != NULL) ||
+            (bcktab != NULL && fct == NULL));
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->largestsizemappedpartwise = 0;
   gt_assert(suftabparts != NULL);
@@ -145,7 +149,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
   } else
   {
     if (numofsuffixestoinsert < (unsigned long) numofparts ||
-        gt_bcktab_prefixlength(bcktab) == 1U)
+        (bcktab != NULL && gt_bcktab_prefixlength(bcktab) == 1U))
     {
       suftabparts->numofparts = 1U;
     } else
@@ -162,7 +166,8 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
   } else
   {
     unsigned int part, remainder;
-    unsigned long lb, rb, suftaboffset = 0, sumofwidth = 0;
+    unsigned long secondidx, firstbound = 0, secondbound,
+                  suftaboffset = 0, sumofwidth = 0;
     const unsigned long widthofsuftabpart
       = numofsuffixestoinsert/suftabparts->numofparts;
 
@@ -183,26 +188,27 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       }
       if (part == suftabparts->numofparts - 1)
       {
-        suftabparts->components[part].nextidx
-          = gt_bcktab_numofallcodes(bcktab);
+        secondidx = bcktab != NULL ? gt_bcktab_numofallcodes(bcktab)
+                                   : gt_firstcodes_numofallcodes(fct);
       } else
       {
-        suftabparts->components[part].nextidx
-          = gt_bcktab_findfirstlarger(bcktab,suftaboffset);
+        secondidx = bcktab != NULL
+                      ? gt_bcktab_findfirstlarger(bcktab,suftaboffset)
+                      : gt_firstcodes_findfirstlarger(fct,suftaboffset);
       }
-      rb = gt_bcktab_get_leftborder(bcktab,
-                                    suftabparts->components[part].nextidx);
+      suftabparts->components[part].nextidx = secondidx;
+      secondbound = bcktab != NULL
+                      ? gt_bcktab_get_leftborder(bcktab,secondidx)
+                      : gt_firstcodes_get_leftborder(fct,secondidx);
       if (part == 0)
       {
-        suftabparts->components[part].widthofpart = rb;
+        suftabparts->components[part].widthofpart = secondbound;
         suftabparts->components[part].suftaboffset = 0;
       } else
       {
-        lb = gt_bcktab_get_leftborder(bcktab,
-                                      suftabparts->components[part-1].nextidx);
-        gt_assert(rb >= lb);
-        suftabparts->components[part].widthofpart = rb - lb;
-        suftabparts->components[part].suftaboffset = lb;
+        gt_assert(secondbound >= firstbound);
+        suftabparts->components[part].widthofpart = secondbound - firstbound;
+        suftabparts->components[part].suftaboffset = firstbound;
       }
       if (suftabparts->largestsuftabwidth <
           suftabparts->components[part].widthofpart)
@@ -219,6 +225,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       {
         suftabparts->largestsizemappedpartwise = size_mapped;
       }
+      firstbound = secondbound;
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
@@ -295,6 +302,7 @@ unsigned int gt_suftabparts_numofparts(const GtSuftabparts *suftabparts)
 int gt_suftabparts_fit_memlimit(size_t estimatedspace,
                                 unsigned long maximumspace,
                                 const GtBcktab *bcktab,
+                                const GtFirstcodestab *fct,
                                 const GtSfxmappedrangelist *sfxmrlist,
                                 unsigned long totallength,
                                 unsigned long specialcharacters,
@@ -323,11 +331,12 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
     size_t suftabsize;
 
     suftabparts = gt_suftabparts_new(parts,
-                                    bcktab,
-                                    sfxmrlist,
-                                    numofsuffixestosort,
-                                    specialcharacters + 1,
-                                    NULL);
+                                     bcktab,
+                                     fct,
+                                     sfxmrlist,
+                                     numofsuffixestosort,
+                                     specialcharacters + 1,
+                                     NULL);
     gt_assert(suftabparts != NULL);
     suftabsize = gt_suffixsortspace_requiredspace(
                                      gt_suftabparts_largest_width(suftabparts),
