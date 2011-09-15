@@ -18,6 +18,7 @@
 #include "core/assert_api.h"
 #include "core/ma_api.h"
 #include "core/codetype.h"
+#include "core/spacecalc.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-partssuf.h"

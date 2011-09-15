@@ -73,7 +73,8 @@ struct GtSfxmappedrange
   bool writable;
 };
 
-size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange)
+static size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange
+                                              *sfxmappedrange)
 {
   gt_assert(sfxmappedrange != NULL);
   return sfxmappedrange->sizeofunit * sfxmappedrange->numofunits;
@@ -197,10 +198,10 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
   return 0;
 }
 
-unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
-                                              *sfxmappedrange,
-                                            unsigned long minindex,
-                                            unsigned long maxindex)
+static unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
+                                                      *sfxmappedrange,
+                                                   unsigned long minindex,
+                                                   unsigned long maxindex)
 {
   GtMappedrange lbrange;
 

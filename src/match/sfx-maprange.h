@@ -36,8 +36,6 @@ typedef struct GtSfxmappedrange GtSfxmappedrange;
 void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
                                    GtError *err);
 
-size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange);
-
 GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
@@ -57,11 +55,6 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned long maxindex,
                             GtLogger *logger);
 
-unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
-                                              *sfxmappedrange,
-                                            unsigned long minindex,
-                                            unsigned long maxindex);
-
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
                               GtLogger *logger);
 
@@ -77,9 +70,9 @@ unsigned long gt_Sfxmappedrangelist_size_mapped(
                                          unsigned long minindex,
                                          unsigned long maxindex);
 
-unsigned long gt_Sfxmappedrangelist_size_entire(
-                                         const GtSfxmappedrangelist *sfxmrlist);
-
 void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist);
+
+unsigned long gt_Sfxmappedrangelist_size_entire(
+                                       const GtSfxmappedrangelist *sfxmrlist);
 
 #endif

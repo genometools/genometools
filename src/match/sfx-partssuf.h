@@ -21,18 +21,17 @@
 #include "core/logger.h"
 #include "core/codetype.h"
 #include "core/error_api.h"
-#include "core/spacecalc.h"
 #include "sfx-maprange.h"
 #include "bcktab.h"
 
 typedef struct GtSuftabparts GtSuftabparts;
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
-                               const GtBcktab *bcktab,
-                               const GtSfxmappedrangelist *sfxmrlist,
-                               unsigned long numofsuffixestoinsert,
-                               unsigned long fullspecials,
-                               GtLogger *logger);
+                                  const GtBcktab *bcktab,
+                                  const GtSfxmappedrangelist *sfxmrlist,
+                                  unsigned long numofsuffixestoinsert,
+                                  unsigned long fullspecials,
+                                  GtLogger *logger);
 
 void gt_suftabparts_delete(GtSuftabparts *suftabparts);
 
