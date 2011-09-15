@@ -125,15 +125,14 @@ static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
 }
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
-                               const GtBcktab *bcktab,
-                               const GtSfxmappedrange *mappedmarkprefixbuckets,
-                               const GtSfxmappedrangelist *sfxmrlist,
-                               unsigned long numofsuffixestoinsert,
-                               unsigned long fullspecials,
-                               GtLogger *logger)
+                                  const GtBcktab *bcktab,
+                                  const GtSfxmappedrangelist *sfxmrlist,
+                                  unsigned long numofsuffixestoinsert,
+                                  unsigned long fullspecials,
+                                  GtLogger *logger)
 {
   GtSuftabparts *suftabparts;
-  unsigned long sizemapped;
+  unsigned long size_mapped;
 
   suftabparts = gt_malloc(sizeof *suftabparts);
   suftabparts->largestsizemappedpartwise = 0;
@@ -155,25 +154,13 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
   if (suftabparts->numofparts == 0)
   {
     suftabparts->largestsuftabwidth = fullspecials/numofparts+1;
-    suftabparts->largestsizemappedpartwise = gt_bcktab_size_lb_cs(bcktab);
-    if (mappedmarkprefixbuckets != NULL)
-    {
-      suftabparts->largestsizemappedpartwise
-        += gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
-    }
-    if (suftabparts->largestsizemappedpartwise !=
-        gt_Sfxmappedrangelist_size_entire(sfxmrlist))
-    {
-      fprintf(stderr,"largestsizemapped = %lu != %lu = size_entire\n",
-              suftabparts->largestsizemappedpartwise,
-              gt_Sfxmappedrangelist_size_entire(sfxmrlist));
-      exit(EXIT_FAILURE);
-    }
+    suftabparts->largestsizemappedpartwise
+      = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
     suftabparts->components = NULL;
   } else
   {
     unsigned int part, remainder;
-    unsigned long suftaboffset = 0, sumofwidth = 0;
+    unsigned long lb, rb, suftaboffset = 0, sumofwidth = 0;
     const unsigned long widthofsuftabpart
       = numofsuffixestoinsert/suftabparts->numofparts;
 
@@ -201,22 +188,19 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
         suftabparts->components[part].nextidx
           = gt_bcktab_findfirstlarger(bcktab,suftaboffset);
       }
+      rb = gt_bcktab_get_leftborder(bcktab,
+                                    suftabparts->components[part].nextidx);
       if (part == 0)
       {
-        suftabparts->components[part].widthofpart
-          = gt_bcktab_get_leftborder(bcktab,
-                                     suftabparts->components[part].nextidx);
+        suftabparts->components[part].widthofpart = rb;
         suftabparts->components[part].suftaboffset = 0;
       } else
       {
-        suftabparts->components[part].widthofpart
-          = gt_bcktab_get_leftborder(bcktab,
-                                     suftabparts->components[part].nextidx) -
-            gt_bcktab_get_leftborder(bcktab,
-                                     suftabparts->components[part-1].nextidx);
-        suftabparts->components[part].suftaboffset
-          = gt_bcktab_get_leftborder(bcktab,
-                                     suftabparts->components[part-1].nextidx);
+        lb = gt_bcktab_get_leftborder(bcktab,
+                                      suftabparts->components[part-1].nextidx);
+        gt_assert(rb >= lb);
+        suftabparts->components[part].widthofpart = rb - lb;
+        suftabparts->components[part].suftaboffset = lb;
       }
       if (suftabparts->largestsuftabwidth <
           suftabparts->components[part].widthofpart)
@@ -226,19 +210,12 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       }
       sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
-      sizemapped
-        = gt_bcktab_mapped_range_size(bcktab,
+      size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
                                       gt_suftabparts_mincode(part,suftabparts),
                                       gt_suftabparts_maxcode(part,suftabparts));
-      if (mappedmarkprefixbuckets != NULL)
+      if (suftabparts->largestsizemappedpartwise < size_mapped)
       {
-        sizemapped += gt_Sfxmappedrange_size_mapped(mappedmarkprefixbuckets,
-                                      gt_suftabparts_mincode(part,suftabparts),
-                                      gt_suftabparts_maxcode(part,suftabparts));
-      }
-      if (suftabparts->largestsizemappedpartwise < sizemapped)
-      {
-        suftabparts->largestsizemappedpartwise = sizemapped;
+        suftabparts->largestsizemappedpartwise = size_mapped;
       }
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);

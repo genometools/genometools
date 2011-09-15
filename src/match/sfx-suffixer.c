@@ -622,7 +622,6 @@ static int computepartsfittingmaximumspace(
                                 size_t estimatedspace,
                                 unsigned long maximumspace,
                                 const GtBcktab *bcktab,
-                                const GtSfxmappedrange *mappedmarkprefixbuckets,
                                 const GtSfxmappedrangelist *sfxmrlist,
                                 unsigned long totallength,
                                 unsigned long specialcharacters,
@@ -632,17 +631,9 @@ static int computepartsfittingmaximumspace(
 {
   unsigned int parts;
   GtSuftabparts *suftabparts;
-  unsigned long size_lb_cs = gt_bcktab_size_lb_cs(bcktab);
-  size_t sizeofprefixmarks;
+  unsigned long size_mapped = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
 
   gt_error_check(err);
-  if (mappedmarkprefixbuckets != NULL)
-  {
-    sizeofprefixmarks = gt_Sfxmappedrange_size_entire(mappedmarkprefixbuckets);
-  } else
-  {
-    sizeofprefixmarks = 0;
-  }
   /*
   printf("maxspace=%.2f\n",GT_MEGABYTES(maximumspace));
   printf("estimatedspace=%.2f\n",GT_MEGABYTES(estimatedspace));
@@ -660,7 +651,6 @@ static int computepartsfittingmaximumspace(
 
     suftabparts = gt_suftabparts_new(parts,
                                     bcktab,
-                                    mappedmarkprefixbuckets,
                                     sfxmrlist,
                                     numofsuffixestosort,
                                     specialcharacters + 1,
@@ -670,15 +660,6 @@ static int computepartsfittingmaximumspace(
                                      gt_suftabparts_largest_width(suftabparts),
                                      totallength,
                                      suftabuint);
-    /*
-    printf("parts=%u,suftabsize=%.2f,largestsizemappedpartwise=%.2f,"
-           "size_lb_cs=%.2f,sizeprefixmarks=%.2f\n",
-           parts,
-           GT_MEGABYTES(suftabsize),
-           GT_MEGABYTES(gt_suftabparts_largestsizemappedpartwise(suftabparts)),
-           GT_MEGABYTES(size_lb_cs),
-           GT_MEGABYTES(sizeofprefixmarks));
-    */
     if (parts == 1U)
     {
       if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
@@ -690,7 +671,7 @@ static int computepartsfittingmaximumspace(
     {
       if ((unsigned long) (suftabsize +
                            gt_suftabparts_largestsizemappedpartwise(suftabparts)
-                           + estimatedspace - size_lb_cs - sizeofprefixmarks)
+                           + estimatedspace - size_mapped)
                            <= maximumspace)
       {
         gt_suftabparts_delete(suftabparts);
@@ -2050,7 +2031,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                        estimatedspace,
                                        maximumspace,
                                        sfi->bcktab,
-                                       sfi->mappedmarkprefixbuckets,
                                        sfxmrlist,
                                        sfi->totallength,
                                        specialcharacters,
@@ -2081,7 +2061,6 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi != NULL);
     sfi->suftabparts = gt_suftabparts_new(numofparts,
                                          sfi->bcktab,
-                                         sfi->mappedmarkprefixbuckets,
                                          sfxmrlist,
                                          numofsuffixestosort,
                                          specialcharacters + 1,

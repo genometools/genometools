@@ -25,11 +25,6 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
   return fct->countocc[idx];
 }
 
-size_t gt_firstcodes_size_to_split(const GtFirstcodestab *fct)
-{
-  return fct->size_to_split;
-}
-
 unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct)
 {
   return fct->differentcodes;
@@ -59,28 +54,6 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
     }
   }
   return found;
-}
-
-unsigned long gt_firstcodes_mapped_range_size(const GtFirstcodestab *fct,
-                                              unsigned long minindex,
-                                              unsigned long maxindex)
-{
-  size_t idx;
-  GtSfxmappedrange *maptab[3];
-  unsigned long sumsize = 0;
-
-  maptab[0] = fct->mappedcountocc;
-  maptab[1] = fct->mappedallfirstcodes;
-  maptab[2] = fct->mappedmarkprefix;;
-  for (idx = 0; idx < sizeof (maptab)/sizeof (maptab[0]); idx++)
-  {
-    if (maptab[idx] == NULL)
-    {
-      return (unsigned long) fct->size_to_split;
-    }
-    sumsize += gt_Sfxmappedrange_size_mapped(maptab[idx],minindex,maxindex);
-  }
-  return sumsize;
 }
 
 unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,

@@ -186,9 +186,6 @@ static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
 #ifdef SKDEBUG
       checkcodesorder(fci->tab.allfirstcodes,numofdifferentcodes,false);
 #endif
-      fci->tab.size_to_split
-        += sizeof (*fci->tab.allfirstcodes) * numofdifferentcodes
-           + sizeof (*fci->tab.countocc) * (numofdifferentcodes+1);
     }
     gt_assert(fci->tab.countocc != NULL);
     return numofdifferentcodes;
@@ -704,17 +701,16 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
-  size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
+  size_t size_to_split, sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars;
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  unsigned long totallength;
-  unsigned long suftabentries;
+  unsigned long totallength, suftabentries;
 
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   totallength = gt_encseq_total_length(encseq);
   fci.workspace = (size_t) gt_encseq_sizeofrep(encseq);
-  fci.tab.size_to_split = 0;
+  size_to_split = 0;
   fci.tab.mappedcountocc = NULL;
   fci.tab.mappedallfirstcodes = NULL;
   fci.tab.mappedmarkprefix = NULL;
@@ -756,7 +752,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              fci.tab.allfirstcodes,fci.numofsequences);
   gt_marksubstring_init(&fci.markprefix,numofchars,kmersize,false,
                         markprefixunits);
-  fci.tab.size_to_split = fci.markprefix.size;
   gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,
                         true,markprefixunits);
   fci.workspace += fci.marksuffix.size;
@@ -766,7 +761,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           (double) fci.tab.differentcodes/fci.numofsequences,
           fci.countsequences);
   gt_logger_log(logger,"size of space to split %.1f megabytes",
-                GT_MEGABYTES(fci.tab.size_to_split));
+                GT_MEGABYTES(size_to_split));
   fci.binsearchcache_depth
     = (unsigned int) log10((double) fci.tab.differentcodes);
   fci.flushcount = 0;
@@ -868,10 +863,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fci.workspace));
   gt_logger_log(logger,"size to split = %.2f",
-                GT_MEGABYTES(fci.tab.size_to_split + suftab_size));
+                GT_MEGABYTES(size_to_split + suftab_size));
   gt_logger_log(logger,"estimatedspace = %.2f",
                 GT_MEGABYTES(fci.workspace +
-                             fci.tab.size_to_split +
+                             size_to_split +
                              suftab_size));
   if (timer != NULL)
   {

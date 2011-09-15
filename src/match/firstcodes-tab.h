@@ -22,7 +22,6 @@
 
 typedef struct
 {
-  size_t size_to_split;
   unsigned long differentcodes,
                 *allfirstcodes,
                 *countocc;
@@ -34,16 +33,10 @@ typedef struct
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);
 
-size_t gt_firstcodes_size_to_split(const GtFirstcodestab *fct);
-
 unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                             unsigned long suftaboffset);
-
-unsigned long gt_firstcodes_mapped_range_size(const GtFirstcodestab *fct,
-                                              unsigned long minindex,
-                                              unsigned long maxindex);
 
 unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
                                      unsigned long idx);

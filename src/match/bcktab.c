@@ -144,28 +144,6 @@ static unsigned long gt_bcktab_transformcode(unsigned long code,
   }
 }
 
-unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
-                                          GtCodetype minindex,
-                                          GtCodetype maxindex)
-{
-
-  if (bcktab->mappedleftborder == NULL)
-  {
-    return bcktab->sizeofrep;
-  } else
-  {
-    unsigned long sumsize
-      = gt_Sfxmappedrange_size_mapped(bcktab->mappedleftborder,
-                                      minindex,maxindex);
-    if (bcktab->mappedcountspecialcodes != NULL)
-    {
-      sumsize += gt_Sfxmappedrange_size_mapped(bcktab->mappedcountspecialcodes,
-                                               minindex,maxindex);
-    }
-    return sumsize;
-  }
-}
-
 int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
 {
   bool haserr = false;
@@ -458,21 +436,6 @@ static GtBcktab *gt_bcktab_new_withinit(unsigned int numofchars,
                                           withspecialsuffixes);
   bcktab->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
   return bcktab;
-}
-
-unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
-{
-  uint64_t sizeofrep_uint64_t;
-
-  sizeofrep_uint64_t
-    = gt_bcktab_sizeoftable_generic(bcktab->prefixlength,
-                                    bcktab->numofallcodes,
-                                    bcktab->numofspecialcodes,
-                                    bcktab->useulong,
-                                    bcktab->basepower,
-                                    false,
-                                    bcktab->withspecialsuffixes);
-  return CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
 }
 
 GtBcktab *gt_bcktab_new(unsigned int numofchars,

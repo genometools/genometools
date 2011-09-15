@@ -80,10 +80,6 @@ GtBcktab *gt_bcktab_map(const char *indexname,
                         GtLogger *logger,
                         GtError *err);
 
-unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
-                                          GtCodetype minindex,
-                                          GtCodetype maxindex);
-
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    unsigned int part,
                                    GtCodetype mincode,
@@ -116,8 +112,6 @@ int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err);
 
 void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab);
-
-unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab);
 
 unsigned int gt_bcktab_calcboundsparts(GtBucketspecification *bucketspec,
                                        const GtBcktab *bcktab,
