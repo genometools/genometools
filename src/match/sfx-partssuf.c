@@ -21,6 +21,7 @@
 #include "core/spacecalc.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
+#include "spmsuftab.h"
 #include "sfx-partssuf.h"
 #include "firstcodes-tab.h"
 
@@ -329,6 +330,7 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
   for (parts = 1U; parts <= 500U; parts++)
   {
     size_t suftabsize;
+    unsigned long numofentries;
 
     suftabparts = gt_suftabparts_new(parts,
                                      bcktab,
@@ -338,10 +340,18 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
                                      specialcharacters + 1,
                                      NULL);
     gt_assert(suftabparts != NULL);
-    suftabsize = gt_suffixsortspace_requiredspace(
-                                     gt_suftabparts_largest_width(suftabparts),
-                                     totallength,
-                                     suftabuint);
+    numofentries = gt_suftabparts_largest_width(suftabparts);
+    if (bcktab != NULL)
+    {
+      gt_assert(fct == NULL);
+      suftabsize = gt_suffixsortspace_requiredspace(numofentries,
+                                                    totallength,
+                                                    suftabuint);
+    } else
+    {
+      gt_assert(fct != NULL);
+      suftabsize = gt_spmsuftab_requiredspace(numofentries,totallength);
+    }
     if (parts == 1U)
     {
       if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
