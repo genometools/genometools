@@ -467,6 +467,9 @@ unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
                                     bcktab->basepower,
                                     false,
                                     bcktab->withspecialsuffixes);
+  gt_assert(bcktab->mappedleftborder != NULL);
+  gt_assert(!bcktab->withspecialsuffixes ||
+            bcktab->mappedcountspecialcodes != NULL);
   return CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
 }
 

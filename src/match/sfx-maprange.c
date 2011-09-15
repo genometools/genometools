@@ -19,13 +19,12 @@
 #ifndef S_SPLINT_S
 #include <unistd.h>
 #include "core/xposix.h"
+#include "core/xansi_api.h"
 #endif
 #include "core/fa.h"
 #include "core/intbits.h"
-#include "core/xposix.h"
-#include "core/xansi_api.h"
+#include "core/log.h"
 #include "sfx-maprange.h"
-#include "stamp.h"
 
 static unsigned long gt_multipleofpagesize(unsigned long code,
                                            bool smaller,
@@ -307,6 +306,55 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
       break;
   }
   return NULL;
+}
+
+struct GtSfxmappedrangelist
+{
+  GtArray *arr;
+};
+
+GtSfxmappedrangelist *gt_Sfxmappedrangelist_new(size_t size_of_elem)
+{
+  GtSfxmappedrangelist *sfxmrlist = gt_malloc(sizeof (*sfxmrlist));
+
+  sfxmrlist->arr = gt_array_new(size_of_elem);
+  return sfxmrlist;
+}
+
+void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
+                               GtSfxmappedrange *sfxmappedrange)
+{
+  gt_assert(sfxmrlist != NULL);
+
+  gt_array_add_elem(sfxmrlist->arr,sfxmappedrange,sizeof (sfxmappedrange));
+}
+
+unsigned long gt_Sfxmappedrange_size_of_part(
+                                         const GtSfxmappedrangelist *sfxmrlist,
+                                         unsigned long minindex,
+                                         unsigned long maxindex)
+{
+  unsigned long idx, sumsize = 0;
+
+  for (idx = 0; idx < gt_array_size(sfxmrlist->arr); idx++)
+  {
+    GtSfxmappedrange *sfxmappedrange = gt_array_get(sfxmrlist->arr,idx);
+    if (sfxmappedrange != NULL)
+    {
+      sumsize += gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
+                                               maxindex);
+    }
+  }
+  return sumsize;
+}
+
+void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist)
+{
+  if (sfxmrlist != NULL)
+  {
+    gt_array_delete(sfxmrlist->arr);
+    gt_free(sfxmrlist);
+  }
 }
 
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)

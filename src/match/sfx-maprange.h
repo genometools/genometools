@@ -32,6 +32,19 @@ typedef enum
 } GtSfxmappedrangetype;
 
 typedef struct GtSfxmappedrange GtSfxmappedrange;
+typedef struct GtSfxmappedrangelist GtSfxmappedrangelist;
+
+GtSfxmappedrangelist *gt_Sfxmappedrangelist_new(size_t size_of_elem);
+
+void gt_Sfxmappedrangelist_add(GtSfxmappedrangelist *sfxmrlist,
+                               GtSfxmappedrange *sfxmappedrange);
+
+unsigned long gt_Sfxmappedrange_size_of_part(
+                                         const GtSfxmappedrangelist *sfxmrlist,
+                                         unsigned long minindex,
+                                         unsigned long maxindex);
+
+void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist);
 
 void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
                                    GtError *err);
