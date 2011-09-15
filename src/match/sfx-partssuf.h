@@ -20,6 +20,8 @@
 
 #include "core/logger.h"
 #include "core/codetype.h"
+#include "core/error_api.h"
+#include "core/spacecalc.h"
 #include "sfx-maprange.h"
 #include "bcktab.h"
 
@@ -55,5 +57,15 @@ unsigned int gt_suftabparts_numofparts(const GtSuftabparts *suftabparts);
 
 unsigned long gt_suftabparts_largestsizemappedpartwise(
                                        const GtSuftabparts *suftabparts);
+
+int gt_suftabparts_fit_memlimit(size_t estimatedspace,
+                                unsigned long maximumspace,
+                                const GtBcktab *bcktab,
+                                const GtSfxmappedrangelist *sfxmrlist,
+                                unsigned long totallength,
+                                unsigned long specialcharacters,
+                                unsigned long numofsuffixestosort,
+                                bool suftabuint,
+                                GtError *err);
 
 #endif

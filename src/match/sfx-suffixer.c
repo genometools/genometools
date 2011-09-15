@@ -618,73 +618,6 @@ void getencseqkmersinsertkmerwithoutspecial(const GtEncseq *encseq,
   }
 }
 
-static int computepartsfittingmaximumspace(
-                                size_t estimatedspace,
-                                unsigned long maximumspace,
-                                const GtBcktab *bcktab,
-                                const GtSfxmappedrangelist *sfxmrlist,
-                                unsigned long totallength,
-                                unsigned long specialcharacters,
-                                unsigned long numofsuffixestosort,
-                                bool suftabuint,
-                                GtError *err)
-{
-  unsigned int parts;
-  GtSuftabparts *suftabparts;
-  unsigned long size_mapped = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
-
-  gt_error_check(err);
-  /*
-  printf("maxspace=%.2f\n",GT_MEGABYTES(maximumspace));
-  printf("estimatedspace=%.2f\n",GT_MEGABYTES(estimatedspace));
-  */
-  if (estimatedspace >= (size_t) maximumspace)
-  {
-    gt_error_set(err,"already used %.2f MB of memory, cannot compute "
-                     "index in at most %.2f MB",
-                     GT_MEGABYTES(estimatedspace), GT_MEGABYTES(maximumspace));
-    return -1;
-  }
-  for (parts = 1U; parts <= 500U; parts++)
-  {
-    size_t suftabsize;
-
-    suftabparts = gt_suftabparts_new(parts,
-                                    bcktab,
-                                    sfxmrlist,
-                                    numofsuffixestosort,
-                                    specialcharacters + 1,
-                                    NULL);
-    gt_assert(suftabparts != NULL);
-    suftabsize = gt_suffixsortspace_requiredspace(
-                                     gt_suftabparts_largest_width(suftabparts),
-                                     totallength,
-                                     suftabuint);
-    if (parts == 1U)
-    {
-      if ((unsigned long) (suftabsize + estimatedspace) <= maximumspace)
-      {
-        gt_suftabparts_delete(suftabparts);
-        return (int) parts;
-      }
-    } else
-    {
-      if ((unsigned long) (suftabsize +
-                           gt_suftabparts_largestsizemappedpartwise(suftabparts)
-                           + estimatedspace - size_mapped)
-                           <= maximumspace)
-      {
-        gt_suftabparts_delete(suftabparts);
-        return (int) parts;
-      }
-    }
-    gt_suftabparts_delete(suftabparts);
-  }
-  gt_error_set(err,"cannot compute enhanced suffix array in at most %lu bytes",
-                   maximumspace);
-  return -1;
-}
-
 #undef DEBUGSIZEESTIMATION
 #ifdef DEBUGSIZEESTIMATION
 static void verifyestimatedspace(size_t estimatedspace)
@@ -2027,16 +1960,15 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       int retval;
 
       gt_assert(numofparts == 1U);
-      retval = computepartsfittingmaximumspace(
-                                       estimatedspace,
-                                       maximumspace,
-                                       sfi->bcktab,
-                                       sfxmrlist,
-                                       sfi->totallength,
-                                       specialcharacters,
-                                       numofsuffixestosort,
-                                       sfi->sfxstrategy.suftabuint,
-                                       err);
+      retval = gt_suftabparts_fit_memlimit(estimatedspace,
+                                           maximumspace,
+                                           sfi->bcktab,
+                                           sfxmrlist,
+                                           sfi->totallength,
+                                           specialcharacters,
+                                           numofsuffixestosort,
+                                           sfi->sfxstrategy.suftabuint,
+                                           err);
       if (retval < 0)
       {
         haserr = true;
