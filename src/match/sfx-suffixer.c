@@ -1654,6 +1654,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
   Sfxiterator *sfi = NULL;
   unsigned long realspecialranges, specialcharacters, numofsuffixestosort = 0;
   bool haserr = false;
+  GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new(sizeof (void *));
 #ifdef _LP64
   size_t estimatedspace = (size_t) 13131;
 #else
@@ -2081,7 +2082,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi->suftabparts != NULL);
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
-      if (gt_bcktab_storetmp(sfi->bcktab, sfi->logger, err) != 0)
+      if (gt_bcktab_storetmp(sfxmrlist,sfi->bcktab, sfi->logger, err) != 0)
       {
         haserr = true;
       }
@@ -2138,6 +2139,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->overhang.start = sfi->overhang.end = 0;
   }
   SHOWACTUALSPACE;
+  gt_Sfxmappedrangelist_delete(sfxmrlist);
   if (haserr)
   {
     (void) gt_Sfxiterator_delete(sfi,NULL);

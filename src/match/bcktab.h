@@ -23,6 +23,7 @@
 #include "core/intbits.h"
 #include "core/codetype.h"
 #include "core/logger_api.h"
+#include "match/sfx-maprange.h"
 
 typedef struct
 {
@@ -112,7 +113,8 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
 
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
-int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err);
+int gt_bcktab_storetmp(GtSfxmappedrangelist *sfxmrlist,
+                       GtBcktab *bcktab, GtLogger *logger, GtError *err);
 
 unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab);
 

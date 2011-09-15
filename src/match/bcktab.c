@@ -166,7 +166,8 @@ unsigned long gt_bcktab_mapped_range_size(const GtBcktab *bcktab,
   }
 }
 
-int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
+int gt_bcktab_storetmp(GtSfxmappedrangelist *sfxmrlist,
+                       GtBcktab *bcktab, GtLogger *logger, GtError *err)
 {
   bool haserr = false;
 
@@ -189,6 +190,9 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
     bcktab->leftborder.ulongbounds = NULL;
     bcktab->leftborder.uintbounds = NULL;
     haserr = true;
+  } else
+  {
+    gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedleftborder);
   }
   if (!haserr && bcktab->withspecialsuffixes)
   {
@@ -211,6 +215,9 @@ int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
       bcktab->ulongcountspecialcodes = NULL;
       bcktab->uintcountspecialcodes = NULL;
       haserr = true;
+    } else
+    {
+      gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedcountspecialcodes);
     }
   }
   return haserr ? -1 : 0;
@@ -467,9 +474,6 @@ unsigned long gt_bcktab_size_lb_cs(const GtBcktab *bcktab)
                                     bcktab->basepower,
                                     false,
                                     bcktab->withspecialsuffixes);
-  gt_assert(bcktab->mappedleftborder != NULL);
-  gt_assert(!bcktab->withspecialsuffixes ||
-            bcktab->mappedcountspecialcodes != NULL);
   return CALLCASTFUNC(uint64_t,unsigned_long,sizeofrep_uint64_t);
 }
 
