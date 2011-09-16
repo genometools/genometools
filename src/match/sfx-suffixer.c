@@ -1542,8 +1542,11 @@ static void gt_determineaddionalsuffixprefixchars(
 }
 
 static unsigned long gt_bcktab_code_to_prefix_index(unsigned long code,
-                                             unsigned int additionalprefixchars)
+                                                    const void *data)
 {
+  unsigned int additionalprefixchars, *ptr = (unsigned int *) data;
+
+  additionalprefixchars = *ptr;
   if (GT_MULT2(additionalprefixchars) > (unsigned int) GT_LOGWORDSIZE)
   {
     return (unsigned long) (code << (GT_MULT2(additionalprefixchars) -
@@ -1806,7 +1809,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 sfi->spmopt_numofallprefixcodes,
                                 GtSfxGtBitsequence,
                                 gt_bcktab_code_to_prefix_index,
-                                sfi->spmopt_additionalprefixchars);
+                                &sfi->spmopt_additionalprefixchars);
       gt_Sfxmappedrangelist_add(sfxmrlist,sfi->mappedmarkprefixbuckets);
       sfi->spmopt_numofallsuffixcodes
         = gt_power_for_small_exponents(sfi->numofchars,suffixchars);

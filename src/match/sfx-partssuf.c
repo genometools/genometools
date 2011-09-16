@@ -232,8 +232,8 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
       size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
-                                      gt_suftabparts_mincode(part,suftabparts),
-                                      gt_suftabparts_maxcode(part,suftabparts));
+                                    gt_suftabparts_minindex(part,suftabparts),
+                                    gt_suftabparts_maxindex(part,suftabparts));
       if (suftabparts->largestsizemappedpartwise < size_mapped)
       {
         suftabparts->largestsizemappedpartwise = size_mapped;

@@ -65,8 +65,8 @@ struct GtSfxmappedrange
   unsigned long pagesize;
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
-  unsigned long(*transformfunc)(unsigned long,unsigned int);
-  unsigned transformfunc_data;
+  GtSfxmappedrangetransformfunc transformfunc;
+  const void *transformfunc_data;
   bool writable;
 };
 
@@ -107,9 +107,9 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
 GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
-                                        unsigned long(*transformfunc)(
-                                                  unsigned long,unsigned int),
-                                        unsigned int transformfunc_data)
+                                        GtSfxmappedrangetransformfunc
+                                          transformfunc,
+                                        const void *transformfunc_data)
 {
   GtSfxmappedrange *sfxmappedrange;
 
@@ -331,6 +331,11 @@ unsigned long gt_Sfxmappedrangelist_size_mapped(
     GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
     if (sfxmappedrange != NULL)
     {
+      /*printf("size_mapped %s %lu %lu => %lu\n",
+                  gt_str_get(sfxmappedrange->tablename),
+                  minindex,maxindex,
+                  gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
+                                                maxindex));*/
       sumsize += gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
                                                maxindex);
     }

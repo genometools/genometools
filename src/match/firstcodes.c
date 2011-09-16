@@ -90,12 +90,6 @@ static bool gt_marksubstring_checkmark(const Gtmarksubstring *mark,
   return GT_ISIBITSET(mark->bits,code) ? true : false;
 }
 
-static unsigned long gt_kmercode_to_prefix_index(unsigned long code,
-                                                 unsigned int shiftright)
-{
-  return code >> shiftright;
-}
-
 typedef struct
 {
   unsigned long firstcodehits,
@@ -125,6 +119,14 @@ typedef struct
                    *mappedmarkprefix;
   GtFirstcodestab tab;
 } GtFirstcodesinfo;
+
+static unsigned long gt_kmercode_to_prefix_index(unsigned long idx,
+                                                 const void *data)
+{
+  const GtFirstcodesinfo *fci = (const GtFirstcodesinfo *) data;
+
+  return fci->tab.allfirstcodes[idx] >> fci->markprefix.shiftright;
+}
 
 /* call the following function after computing the partial sums */
 
@@ -764,14 +766,14 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_assert(numofchars == 4U);
   gt_marksubstring_init(&fci.markprefix,numofchars,kmersize,false,
                         markprefixunits);
-  gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,true,
-                        markprefixunits);
   fci.mappedmarkprefix = gt_Sfxmappedrange_new("markprefix",
                                                fci.markprefix.entries,
                                                GtSfxGtBitsequence,
                                                gt_kmercode_to_prefix_index,
-                                               fci.markprefix.shiftright);
+                                               &fci);
   gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
+  gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,true,
+                        markprefixunits);
   workspace += fci.marksuffix.size;
   fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
   if (fci.tab.differentcodes > 0)
@@ -779,12 +781,12 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
                                                     fci.tab.differentcodes,
                                                     GtSfxunsignedlong,
-                                                    NULL,0);
+                                                    NULL,NULL);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedallfirstcodes);
     fci.mappedcountocc = gt_Sfxmappedrange_new("countocc",
                                                fci.tab.differentcodes+1,
                                                GtSfxunsignedlong,
-                                               NULL,0);
+                                               NULL,NULL);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedcountocc);
   } else
   {

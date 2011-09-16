@@ -133,8 +133,11 @@ static void gt_bcktab_distpfxidx_increment(const GtBcktab *bcktab,
 }
 
 static unsigned long gt_bcktab_transformcode(unsigned long code,
-                                             unsigned int numofchars)
+                                             const void *data)
 {
+  unsigned int numofchars, *numofcharptr = (unsigned int *) data;
+
+  numofchars = *numofcharptr;
   if (code >= (unsigned long) (numofchars - 1))
   {
     return GT_FROMCODE2SPECIALCODE(code,numofchars);
@@ -173,7 +176,7 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
                               ? GtSfxunsignedlong
                               : GtSfxuint32_t,
                             NULL,
-                            0);
+                            NULL);
   gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedleftborder);
   if (bcktab->withspecialsuffixes)
   {
@@ -184,7 +187,7 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
                                 ? GtSfxunsignedlong
                                 : GtSfxuint32_t,
                               gt_bcktab_transformcode,
-                              bcktab->numofchars);
+                              &bcktab->numofchars);
     gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedcountspecialcodes);
   }
 }
