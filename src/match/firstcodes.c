@@ -868,10 +868,19 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                false,
                                logger);
     gt_assert(fci.tab.allfirstcodes == NULL);
+    gt_assert(fci.tab.countocc != NULL);
+    gt_assert(fci.mappedcountocc != NULL);
+    gt_Sfxmappedrange_storetmp(fci.mappedcountocc,
+                               (void **) &fci.tab.countocc,
+                               true,
+                               logger);
+    gt_assert(fci.tab.countocc == NULL);
   } else
   {
     gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
     fci.mappedallfirstcodes = NULL;
+    gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
+    fci.mappedcountocc = NULL;
   }
   fci.codebuffer_total = 0;
   fci.codebuffer_allocated /= 2UL;
@@ -906,6 +915,16 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.tab.allfirstcodes
         = (unsigned long *)
           gt_Sfxmappedrange_map(fci.mappedallfirstcodes,
+                                part,
+                                fci.currentminindex,
+                                fci.currentmaxindex,
+                                logger);
+    }
+    if (fci.mappedcountocc != NULL)
+    {
+      fci.tab.countocc
+        = (unsigned long *)
+          gt_Sfxmappedrange_map(fci.mappedcountocc,
                                 part,
                                 fci.currentminindex,
                                 fci.currentmaxindex,
@@ -958,7 +977,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_suftabparts_delete(suftabparts);
   gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
   gt_assert(fci.firstcodeposhits == suftabentries);
-  gt_free(fci.tab.countocc);
+  if (fci.mappedcountocc == NULL)
+  {
+    gt_free(fci.tab.countocc);
+  }
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
   gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
