@@ -31,6 +31,7 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
 #else
   spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
 #endif
+  spmsuftab->partoffset = 0;
   return spmsuftab;
 }
 
@@ -42,6 +43,11 @@ void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
   gt_free(spmsuftab->suftab);
 #endif
   gt_free(spmsuftab);
+}
+
+void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
+{
+  spmsuftab->partoffset = offset;
 }
 
 size_t gt_spmsuftab_requiredspace(unsigned long numofentries,

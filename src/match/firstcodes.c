@@ -449,8 +449,8 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
 {
   unsigned long found = 0, idx;
   const GtUlongPair *query = querystream_fst,
-                      *querystream_lst = fci->codeposbuffer +
-                                         fci->codebuffer_nextfree;
+                    *querystream_lst = fci->codeposbuffer +
+                                       fci->codebuffer_nextfree;
   const unsigned long *subject = subjectstream_fst,
                       *subjectstream_lst = fci->tab.allfirstcodes +
                                            fci->tab.differentcodes;
@@ -493,8 +493,7 @@ static void gt_firstcodes_insertsuffixes_flush(GtFirstcodesinfo *fci)
 #endif
   fci->codebuffer_total += fci->codebuffer_nextfree;
   for (vptr = fci->codeposbuffer;
-       vptr < fci->codeposbuffer +
-              fci->codebuffer_nextfree;
+       vptr < fci->codeposbuffer + fci->codebuffer_nextfree;
        vptr++)
   {
     idx = gt_firstcodes_find(fci,vptr->a);
@@ -912,5 +911,5 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_timer_show_progress_final(timer, stdout);
     gt_timer_delete(timer);
   }
-  printf("callfirstcodes_find = %lu\n",callfirstcodes_find);
+  /*printf("callfirstcodes_find = %lu\n",callfirstcodes_find);*/
 }

@@ -27,6 +27,7 @@
 
 typedef struct
 {
+  unsigned long partoffset;
 #ifdef SPMSUFTABBITPACK
   BitPackArray *bitpackarray;
 #else
@@ -38,13 +39,15 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
                                               unsigned long idx,
                                               unsigned long value)
 {
+  gt_assert(idx >= spmsuftab->partoffset);
+  idx -= spmsuftab->partoffset;
 #ifdef SPMSUFTABBITPACK
   gt_assert(spmsuftab->bitpackarray != NULL);
 #ifdef _LP64
-  bitpackarray_store_uint64(spmsuftab->bitpackarray,(BitOffset) idx,
+  bitpackarray_store_uint64(spmsuftab->bitpackarray, (BitOffset) idx,
                             (uint64_t) value);
 #else
-  bitpackarray_store_uint32(spmsuftab->bitpackarray,(BitOffset) idx,
+  bitpackarray_store_uint32(spmsuftab->bitpackarray, (BitOffset) idx,
                             (uint32_t) value);
 #endif
 #else
@@ -56,6 +59,8 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
                                       const GtSpmsuftab *spmsuftab,
                                       unsigned long idx)
 {
+  gt_assert(idx >= spmsuftab->partoffset);
+  idx -= spmsuftab->partoffset;
 #ifdef SPMSUFTABBITPACK
   gt_assert(spmsuftab->bitpackarray != NULL);
 #ifdef _LP64
@@ -77,5 +82,7 @@ void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab);
 
 size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
                                   unsigned long maxvalue);
+
+void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset);
 
 #endif
