@@ -27,7 +27,7 @@
 
 typedef struct
 {
-  unsigned long partoffset;
+  unsigned long partoffset, numofentries, maxvalue;
 #ifdef SPMSUFTABBITPACK
   BitPackArray *bitpackarray;
 #else
@@ -41,6 +41,14 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
 {
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
+  if (idx >= spmsuftab->numofentries)
+  {
+    fprintf(stderr,"line %d: idx = %lu >= %lu = numofentries\n",
+            __LINE__,idx,spmsuftab->numofentries);
+    exit(EXIT_FAILURE);
+  }
+  gt_assert(idx < spmsuftab->numofentries);
+  gt_assert(value <= spmsuftab->maxvalue);
 #ifdef SPMSUFTABBITPACK
   gt_assert(spmsuftab->bitpackarray != NULL);
 #ifdef _LP64
@@ -61,6 +69,13 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
 {
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
+  if (idx >= spmsuftab->numofentries)
+  {
+    fprintf(stderr,"line %d: idx = %lu >= %lu = numofentries\n",
+            __LINE__,idx,spmsuftab->numofentries);
+    exit(EXIT_FAILURE);
+  }
+  gt_assert(idx < spmsuftab->numofentries);
 #ifdef SPMSUFTABBITPACK
   gt_assert(spmsuftab->bitpackarray != NULL);
 #ifdef _LP64

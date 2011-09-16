@@ -2194,7 +2194,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_timer_show_progress(sfi->sfxprogress, "sorting the buckets", stdout);
   }
   /* exit(0); just for testing */
-  sumofwidthforpart = gt_suftabparts_sumofwdith(sfi->part,sfi->suftabparts);
+  sumofwidthforpart = gt_suftabparts_sumofwidth(sfi->part,sfi->suftabparts);
 
   if (gt_suftabparts_numofparts(sfi->suftabparts) == 1U &&
       sfi->outlcpinfo == NULL &&

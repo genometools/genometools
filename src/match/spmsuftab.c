@@ -20,7 +20,7 @@
 #include "spmsuftab.h"
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
-                              GT_UNUSED unsigned long maxvalue)
+                              unsigned long maxvalue)
 {
   GtSpmsuftab *spmsuftab = gt_malloc(sizeof (*spmsuftab));
 #ifdef SPMSUFTABBITPACK
@@ -32,6 +32,8 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
   spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
 #endif
   spmsuftab->partoffset = 0;
+  spmsuftab->numofentries = numofentries;
+  spmsuftab->maxvalue = maxvalue;
   return spmsuftab;
 }
 

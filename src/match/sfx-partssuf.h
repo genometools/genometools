@@ -54,7 +54,7 @@ GtCodetype gt_suftabparts_maxcode(unsigned int part,
 unsigned long gt_suftabparts_offset(unsigned int part,
                                     const GtSuftabparts *suftabparts);
 
-unsigned long gt_suftabparts_sumofwdith(unsigned int part,
+unsigned long gt_suftabparts_sumofwidth(unsigned int part,
                                         const GtSuftabparts *suftabparts);
 
 unsigned long gt_suftabparts_widthofpart(unsigned int part,

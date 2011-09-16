@@ -54,6 +54,7 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
       left = mid + 1;
     }
   }
+  gt_assert(suftaboffset <= gt_firstcodes_get_leftborder(fct,found));
   return found;
 }
 

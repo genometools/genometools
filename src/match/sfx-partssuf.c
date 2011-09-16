@@ -170,6 +170,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     suftabparts->components = NULL;
   } else
   {
+    /*unsigned long idx;*/
     unsigned int part, remainder;
     unsigned long secondidx, firstbound = 0, secondbound,
                   suftaboffset = 0, sumofwidth = 0;
@@ -181,6 +182,13 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     remainder = (unsigned int) (numofsuffixestoinsert %
                                 (unsigned long) suftabparts->numofparts);
     suftabparts->largestsuftabwidth = 0;
+    /*if (fct != NULL)
+    {
+      for (idx = 0; idx < fct->differentcodes; idx++)
+      {
+        printf("count[%lu]=%lu\n",idx,fct->countocc[idx]);
+      }
+    }*/
     for (part=0; part < suftabparts->numofparts; part++)
     {
       if (remainder > 0)
@@ -298,7 +306,7 @@ unsigned long gt_suftabparts_offset(unsigned int part,
   return suftabparts->components[part].suftaboffset;
 }
 
-unsigned long gt_suftabparts_sumofwdith(unsigned int part,
+unsigned long gt_suftabparts_sumofwidth(unsigned int part,
                                         const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
