@@ -253,18 +253,34 @@ void gt_suftabparts_delete(GtSuftabparts *suftabparts)
   }
 }
 
+GtCodetype gt_suftabparts_minindex(unsigned int part,
+                                   const GtSuftabparts *suftabparts)
+{
+  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  return (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
+}
+
 GtCodetype gt_suftabparts_mincode(unsigned int part,
                                   const GtSuftabparts *suftabparts)
 {
   unsigned long idx;
 
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  idx = (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
+  idx = gt_suftabparts_minindex(part,suftabparts);
   if (suftabparts->fct == NULL)
   {
     return idx;
   }
   return gt_firstcodes_idx2code(suftabparts->fct,idx);
+}
+
+GtCodetype gt_suftabparts_maxindex(unsigned int part,
+                                   const GtSuftabparts *suftabparts)
+{
+  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  return (part == suftabparts->numofparts - 1)
+           ? suftabparts->components[part].nextidx - 1
+           : suftabparts->components[part].nextidx;
 }
 
 GtCodetype gt_suftabparts_maxcode(unsigned int part,
@@ -273,12 +289,10 @@ GtCodetype gt_suftabparts_maxcode(unsigned int part,
   unsigned long idx;
 
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  idx = (part == suftabparts->numofparts - 1)
-           ? suftabparts->components[part].nextidx - 1
-           : suftabparts->components[part].nextidx;
+  idx = gt_suftabparts_maxindex(part,suftabparts);
   if (suftabparts->fct == NULL)
   {
-    return idx;
+   return idx;
   }
   return gt_firstcodes_idx2code(suftabparts->fct,idx);
 }

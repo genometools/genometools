@@ -39,8 +39,14 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
 
 void gt_suftabparts_delete(GtSuftabparts *suftabparts);
 
+GtCodetype gt_suftabparts_minindex(unsigned int part,
+                                   const GtSuftabparts *suftabparts);
+
 GtCodetype gt_suftabparts_mincode(unsigned int part,
                                   const GtSuftabparts *suftabparts);
+
+GtCodetype gt_suftabparts_maxindex(unsigned int part,
+                                   const GtSuftabparts *suftabparts);
 
 GtCodetype gt_suftabparts_maxcode(unsigned int part,
                                   const GtSuftabparts *suftabparts);
