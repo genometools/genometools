@@ -109,7 +109,7 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
 
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
-int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err);
+void gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger);
 
 void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab);
 

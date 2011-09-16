@@ -43,11 +43,10 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                             unsigned long,unsigned int),
                                         unsigned int transformfunc_data);
 
-int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
-                              void **usedptrptr,
-                              bool writable,
-                              GtLogger *logger,
-                              GtError *err);
+void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
+                                void **usedptrptr,
+                                bool writable,
+                                GtLogger *logger);
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,

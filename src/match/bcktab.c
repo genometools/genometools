@@ -144,34 +144,24 @@ static unsigned long gt_bcktab_transformcode(unsigned long code,
   }
 }
 
-int gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger, GtError *err)
+void gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger)
 {
-  bool haserr = false;
 
-  if (gt_Sfxmappedrange_enhance(bcktab->mappedleftborder,
-                                bcktab->useulong
-                                  ? (void **) &bcktab->leftborder.ulongbounds
-                                  : (void **) &bcktab->leftborder.uintbounds,
-                                true,
-                                logger,
-                                err) != 0)
+  gt_Sfxmappedrange_storetmp(bcktab->mappedleftborder,
+                             bcktab->useulong
+                               ? (void **) &bcktab->leftborder.ulongbounds
+                               : (void **) &bcktab->leftborder.uintbounds,
+                             true,
+                             logger);
+  if (bcktab->withspecialsuffixes)
   {
-    haserr = true;
+    gt_Sfxmappedrange_storetmp(bcktab->mappedcountspecialcodes,
+                               bcktab->useulong
+                                 ? (void **) &bcktab->ulongcountspecialcodes
+                                 : (void **) &bcktab->uintcountspecialcodes,
+                               true,
+                               logger);
   }
-  if (!haserr && bcktab->withspecialsuffixes)
-  {
-    if (gt_Sfxmappedrange_enhance(bcktab->mappedcountspecialcodes,
-                                  bcktab->useulong
-                                    ? (void **) &bcktab->ulongcountspecialcodes
-                                    : (void **) &bcktab->uintcountspecialcodes,
-                                  true,
-                                  logger,
-                                  err) != 0)
-    {
-      haserr = true;
-    }
-  }
-  return haserr ? -1 : 0;
 }
 
 void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)

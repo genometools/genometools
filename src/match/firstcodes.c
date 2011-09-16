@@ -855,6 +855,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    suftabentries,
                                    0,
                                    logger);
+  gt_Sfxmappedrangelist_delete(sfxmrlist);
   gt_assert(suftabparts != NULL);
   /*
   gt_suftabparts_showallrecords(suftabparts);
@@ -930,7 +931,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_assert(fci.firstcodeposhits == suftabentries);
   gt_free(fci.tab.countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
-  gt_Sfxmappedrangelist_delete(sfxmrlist);
   gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
   gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);

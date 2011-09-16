@@ -2002,30 +2002,19 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi->suftabparts != NULL);
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
-      if (gt_bcktab_storetmp(sfi->bcktab, sfi->logger, err) != 0)
-      {
-        haserr = true;
-      }
+      gt_bcktab_storetmp(sfi->bcktab, sfi->logger);
     }
-  }
-  SHOWACTUALSPACE;
-  if (!haserr)
-  {
+    SHOWACTUALSPACE;
     gt_assert(sfi != NULL && sfi->suftabparts != NULL);
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U &&
         sfi->sfxstrategy.spmopt_minlength > 0)
     {
       gt_assert(sfi->markprefixbuckets != NULL);
       gt_assert(sfi->mappedmarkprefixbuckets != NULL);
-      if (gt_Sfxmappedrange_enhance(sfi->mappedmarkprefixbuckets,
-                                    (void **) &sfi->markprefixbuckets,
-                                    false,
-                                    sfi->logger,
-                                    err) != 0)
-      {
-        sfi->markprefixbuckets = NULL;
-        haserr = true;
-      }
+      gt_Sfxmappedrange_storetmp(sfi->mappedmarkprefixbuckets,
+                                     (void **) &sfi->markprefixbuckets,
+                                     false,
+                                     sfi->logger);
       gt_assert(sfi->markprefixbuckets == NULL);
     } else
     {

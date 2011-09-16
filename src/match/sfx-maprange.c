@@ -23,10 +23,7 @@
 #endif
 #include "core/fa.h"
 #include "core/intbits.h"
-<<<<<<< HEAD
 #include "core/log.h"
-=======
->>>>>>> Add the tablename when constructing the mapped-table.
 #include "sfx-maprange.h"
 
 static unsigned long gt_multipleofpagesize(unsigned long code,
@@ -148,13 +145,10 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
   return sfxmappedrange;
 }
 
-int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
-                              void **usedptrptr,
-                              bool writable,
-                              GtLogger *logger,
-                              GT_UNUSED GtError *err)
+void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
+                                void **usedptrptr,
+                                bool writable)
 {
-  bool haserr = false;
   FILE *outfp;
 
   gt_assert(sfxmappedrange != NULL);
@@ -164,38 +158,16 @@ int gt_Sfxmappedrange_enhance(GtSfxmappedrange *sfxmappedrange,
   sfxmappedrange->writable = writable;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   gt_assert(outfp != NULL);
-  gt_logger_log(logger,"write %s to file %s (%lu units of %lu bytes)",
-                gt_str_get(sfxmappedrange->tablename),
-                gt_str_get(sfxmappedrange->filename),
-                (unsigned long) sfxmappedrange->numofunits,
-                (unsigned long) sfxmappedrange->sizeofunit);
-<<<<<<< HEAD
+  gt_logr_log("write %s to file %s (%lu units of %lu bytes)",
+              gt_str_get(sfxmappedrange->tablename),
+              gt_str_get(sfxmappedrange->filename),
+              (unsigned long) sfxmappedrange->numofunits,
+              (unsigned long) sfxmappedrange->sizeofunit);
   gt_xfwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
              sfxmappedrange->numofunits,outfp);
-=======
-  if (fwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
-             sfxmappedrange->numofunits,outfp) != sfxmappedrange->numofunits)
-  {
-    gt_error_set(err,"table %s: cannot write %lu items of size %u: "
-                     "errormsg=\"%s\"",
-                 gt_str_get(sfxmappedrange->tablename),
-                 (unsigned long) sfxmappedrange->numofunits,
-                 (unsigned int) sfxmappedrange->sizeofunit,
-                 strerror(errno));
-    haserr = true;
-  }
->>>>>>> Add the tablename when constructing the mapped-table.
   gt_fa_fclose(outfp);
   gt_free(*sfxmappedrange->usedptrptr);
   *sfxmappedrange->usedptrptr = NULL;
-  if (haserr)
-  {
-    gt_str_delete(sfxmappedrange->tablename);
-    gt_str_delete(sfxmappedrange->filename);
-    gt_free(sfxmappedrange);
-    return -1;
-  }
-  return 0;
 }
 
 static unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
