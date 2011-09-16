@@ -107,6 +107,8 @@ typedef struct
                 codebuffer_total,
                 currentmincode,
                 currentmaxcode,
+                currentminindex,
+                currentmaxindex,
                 widthofpart,
                 *codebuffer;
   GtUlongPair *codeposbuffer,
@@ -365,11 +367,11 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
   const unsigned long *query = querystream_fst,
                       *subject = subjectstream_fst,
                       *querystream_lst = fci->codebuffer
-                                         + fci->codebuffer_nextfree,
+                                         + fci->codebuffer_nextfree - 1,
                       *subjectstream_lst = fci->tab.allfirstcodes
-                                           + fci->tab.differentcodes;
+                                           + fci->tab.differentcodes - 1;
 
-  while (query < querystream_lst && subject < subjectstream_lst)
+  while (query <= querystream_lst && subject <= subjectstream_lst)
   {
     if (*query < *subject)
     {
@@ -454,12 +456,12 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
   unsigned long found = 0, idx;
   const GtUlongPair *query = querystream_fst,
                     *querystream_lst = fci->codeposbuffer +
-                                       fci->codebuffer_nextfree;
+                                       fci->codebuffer_nextfree - 1;
   const unsigned long *subject = subjectstream_fst,
                       *subjectstream_lst = fci->tab.allfirstcodes +
-                                           fci->tab.differentcodes;
+                                           fci->currentmaxindex;
 
-  while (query < querystream_lst && subject < subjectstream_lst)
+  while (query <= querystream_lst && subject <= subjectstream_lst)
   {
     if (query->a < *subject)
     {
@@ -500,7 +502,8 @@ static void gt_firstcodes_insertsuffixes_flush(GtFirstcodesinfo *fci)
        vptr < fci->codeposbuffer + fci->codebuffer_nextfree;
        vptr++)
   {
-    ptr = gt_firstcodes_find(fci,true,0,fci->tab.differentcodes-1,vptr->a);
+    ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
+                                       fci->currentmaxindex,vptr->a);
     if (ptr != NULL)
     {
       fci->firstcodeposhits += gt_firstcodes_insertsuffixes_merge(fci,vptr,ptr);
@@ -609,28 +612,20 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         unsigned long maxindex,
                                         unsigned long sumofwidth,
                                         unsigned long depth,
-                                        unsigned long minmatchlength,
-                                        bool withsuftabcheck,
-                                        bool countspms,
-                                        bool outputspms)
+                                        GtSpmsk_state *spmsk_state,
+                                        bool withsuftabcheck)
 {
   unsigned long idx, width, previous = 0, sumwidth = 0;
   GtShortreadsortworkinfo *srsw;
   GtEncseqReader *esr, *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
-  GtSpmsk_state *spmsk_state = NULL;
   unsigned long *suftab_bucket;
 
   if (withsuftabcheck)
   {
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  }
-  if (outputspms || countspms)
-  {
-    spmsk_state = gt_spmsk_new(encseq,readmode,minmatchlength,
-                               countspms,outputspms);
   }
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
@@ -695,7 +690,6 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr2);
   gt_shortreadsort_delete(srsw);
   gt_free(suftab_bucket);
-  gt_spmsk_delete(spmsk_state);
 }
 
 #ifdef  QSORTNAME
@@ -730,6 +724,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
   size_t workspace;
   GtSuftabparts *suftabparts;
+  GtSpmsk_state *spmsk_state = NULL;
 
   workspace = (size_t) gt_encseq_sizeofrep(encseq);
   if (gt_showtime_enabled())
@@ -876,6 +871,11 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                 largest_width, GT_MEGABYTES(suftab_size));
   fci.flushcount = 0;
   /* Here the iteration over the parts starts */
+  if (outputspms || countspms)
+  {
+    spmsk_state = gt_spmsk_new(encseq,readmode,(unsigned long ) minmatchlength,
+                               countspms,outputspms);
+  }
   for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)
   {
     if (timer != NULL)
@@ -885,6 +885,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_logger_log(logger,"compute part %u",part);
     fci.currentmincode = gt_suftabparts_mincode(part,suftabparts);
     fci.currentmaxcode = gt_suftabparts_maxcode(part,suftabparts);
+    fci.currentminindex = gt_suftabparts_minindex(part,suftabparts);
+    fci.currentmaxindex = gt_suftabparts_maxindex(part,suftabparts);
     fci.widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
     gt_spmsuftab_partoffset(fci.spmsuftab,
                             gt_suftabparts_offset(part,suftabparts));
@@ -920,12 +922,11 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 gt_suftabparts_maxindex(part,suftabparts),
                                 gt_suftabparts_sumofwidth(part,suftabparts),
                                 (unsigned long) kmersize,
-                                (unsigned long) minmatchlength,
-                                withsuftabcheck,
-                                countspms,
-                                outputspms);
+                                spmsk_state,
+                                withsuftabcheck);
   }
   /* Here the iteration over the parts ends */
+  gt_spmsk_delete(spmsk_state);
   gt_suftabparts_delete(suftabparts);
   gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
   gt_assert(fci.firstcodeposhits == suftabentries);
