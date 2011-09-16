@@ -42,10 +42,11 @@ struct GtSuftabparts
   const GtFirstcodestab *fct;
 };
 
-static void gt_suftabparts_showrecord(const GtSuftabpartcomponent *component)
+static void gt_suftabparts_showrecord(unsigned int part,
+                                      const GtSuftabpartcomponent *component)
 {
-  printf("# part: width=%lu offset=%lu sumwidth=%lu nextidx=%lu\n",
-          component->widthofpart,component->suftaboffset,
+  printf("# part %u: width=%lu offset=%lu sumwidth=%lu nextidx=%lu\n",
+          part,component->widthofpart,component->suftaboffset,
                                  component->sumofwidth,
                                  component->nextidx);
 }
@@ -57,7 +58,7 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts)
   gt_assert(suftabparts != NULL);
   for (part = 0; part < suftabparts->numofparts; part++)
   {
-    gt_suftabparts_showrecord(suftabparts->components + part);
+    gt_suftabparts_showrecord(part,suftabparts->components + part);
     printf("# mincode=%lu maxcode=%lu\n",
             gt_suftabparts_mincode(part,suftabparts),
             gt_suftabparts_maxcode(part,suftabparts));
@@ -161,7 +162,6 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       suftabparts->numofparts = numofparts;
     }
   }
-  printf("numofparts=%u\n",suftabparts->numofparts);
   if (suftabparts->numofparts == 0)
   {
     suftabparts->largestsuftabwidth = fullspecials/numofparts+1;
@@ -181,12 +181,8 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     remainder = (unsigned int) (numofsuffixestoinsert %
                                 (unsigned long) suftabparts->numofparts);
     suftabparts->largestsuftabwidth = 0;
-    printf("numofsuffixestoinsert=%lu\n",numofsuffixestoinsert);
-    printf("widthofsuftabpart=%lu\n",widthofsuftabpart);
     for (part=0; part < suftabparts->numofparts; part++)
     {
-      printf("part %u: remainder=%u,suftaboffset=%lu\n",part,remainder,
-                                                        suftaboffset);
       if (remainder > 0)
       {
         suftaboffset += widthofsuftabpart + 1;
@@ -234,8 +230,6 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       {
         suftabparts->largestsizemappedpartwise = size_mapped;
       }
-      printf("sumofwidth=%lu,firstbound=%lu,secondbound=%lu\n",sumofwidth,
-                      firstbound,secondbound);
       firstbound = secondbound;
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
