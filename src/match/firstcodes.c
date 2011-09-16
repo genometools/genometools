@@ -22,7 +22,7 @@
 #include "core/showtime.h"
 #include "core/mathsupport.h"
 #include "core/radix-intsort.h"
-#include "core/log_api.h"
+#include "core/logger_api.h"
 #include "core/spacepeak.h"
 #include "core/spacecalc.h"
 #include "core/fa.h"
@@ -902,10 +902,8 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.tempcodeposforradixsort = gt_malloc(sizeof (*fci.tempcodeposforradixsort)
                                           * fci.codebuffer_allocated);
   largest_width = gt_suftabparts_largest_width(suftabparts);
-  fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength);
+  fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,logger);
   suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength);
-  gt_logger_log(logger,"allocate %lu entries for suftab (%.2f megabytes)",
-                largest_width, GT_MEGABYTES(suftab_size));
   fci.flushcount = 0;
   if (outputspms || countspms)
   {

@@ -20,20 +20,28 @@
 #include "spmsuftab.h"
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
-                              unsigned long maxvalue)
+                              unsigned long maxvalue,
+                              GtLogger *logger)
 {
   GtSpmsuftab *spmsuftab = gt_malloc(sizeof (*spmsuftab));
-#ifdef SPMSUFTABBITPACK
   unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
 
-  printf("use %lu bitpackarray-entries of %u bits\n",numofentries,
-           bitspervalue);
-
-  spmsuftab->bitpackarray
-    = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
-#else
-  spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
-#endif
+  if (bitspervalue > 32U)
+  {
+    gt_logger_log(logger,"use %lu bitpackarray-entries of %u bits (%lu bytes)",
+                  numofentries,bitspervalue,
+                  gt_spmsuftab_requiredspace(numofentries,maxvalue));
+    spmsuftab->bitpackarray
+      = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
+    spmsuftab->suftab = NULL;
+  } else
+  {
+    gt_logger_log(logger,"use %lu uint32_t-entries (%lu bytes)",
+                         numofentries,
+                         gt_spmsuftab_requiredspace(numofentries,maxvalue));
+    spmsuftab->bitpackarray = NULL;
+    spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
+  }
   spmsuftab->partoffset = 0;
   spmsuftab->numofentries = numofentries;
   spmsuftab->maxvalue = maxvalue;
@@ -42,11 +50,13 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
 {
-#ifdef SPMSUFTABBITPACK
-  bitpackarray_delete(spmsuftab->bitpackarray);
-#else
-  gt_free(spmsuftab->suftab);
-#endif
+  if (spmsuftab->bitpackarray != NULL)
+  {
+    bitpackarray_delete(spmsuftab->bitpackarray);
+  } else
+  {
+    gt_free(spmsuftab->suftab);
+  }
   gt_free(spmsuftab);
 }
 
@@ -58,11 +68,14 @@ void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
 size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
                                   GT_UNUSED unsigned long maxvalue)
 {
-#ifdef SPMSUFTABBITPACK
   unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
-  return sizeof (GtSpmsuftab) +
-         sizeofbitarray(bitspervalue,(BitOffset) numofentries);
-#else
-  return sizeof (GtSpmsuftab) + numofentries * sizeof (unsigned long);
-#endif
+
+  if (bitspervalue > 32U)
+  {
+    return sizeof (GtSpmsuftab) +
+           sizeofbitarray(bitspervalue,(BitOffset) numofentries);
+  } else
+  {
+    return sizeof (GtSpmsuftab) + numofentries * sizeof (uint32_t);
+  }
 }

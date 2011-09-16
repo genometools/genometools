@@ -19,6 +19,7 @@
 #define SPMSUFTAB_H
 
 #include "core/unused_api.h"
+#include "core/logger_api.h"
 
 #define SPMSUFTABBITPACK
 #ifdef SPMSUFTABBITPACK
@@ -28,11 +29,8 @@
 typedef struct
 {
   unsigned long partoffset, numofentries, maxvalue;
-#ifdef SPMSUFTABBITPACK
   BitPackArray *bitpackarray;
-#else
-  unsigned long *suftab;
-#endif
+  uint32_t *suftab;
 } GtSpmsuftab;
 
 GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
@@ -41,26 +39,21 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
 {
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
-  if (idx >= spmsuftab->numofentries)
+  gt_assert(idx < spmsuftab->numofentries && value <= spmsuftab->maxvalue);
+  if (spmsuftab->bitpackarray != NULL)
   {
-    fprintf(stderr,"line %d: idx = %lu >= %lu = numofentries\n",
-            __LINE__,idx,spmsuftab->numofentries);
-    exit(EXIT_FAILURE);
-  }
-  gt_assert(idx < spmsuftab->numofentries);
-  gt_assert(value <= spmsuftab->maxvalue);
-#ifdef SPMSUFTABBITPACK
-  gt_assert(spmsuftab->bitpackarray != NULL);
 #ifdef _LP64
-  bitpackarray_store_uint64(spmsuftab->bitpackarray, (BitOffset) idx,
-                            (uint64_t) value);
+    bitpackarray_store_uint64(spmsuftab->bitpackarray, (BitOffset) idx,
+                              (uint64_t) value);
 #else
-  bitpackarray_store_uint32(spmsuftab->bitpackarray, (BitOffset) idx,
-                            (uint32_t) value);
+    bitpackarray_store_uint32(spmsuftab->bitpackarray, (BitOffset) idx,
+                              (uint32_t) value);
 #endif
-#else
-  spmsuftab->suftab[idx] = value;
-#endif
+  } else
+  {
+    gt_assert(spmsuftab->suftab != NULL && value <= UINT32_MAX);
+    spmsuftab->suftab[idx] = (uint32_t) value;
+  }
 }
 
 GT_UNUSED static inline unsigned long gt_spmsuftab_get(
@@ -69,29 +62,25 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
 {
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
-  if (idx >= spmsuftab->numofentries)
-  {
-    fprintf(stderr,"line %d: idx = %lu >= %lu = numofentries\n",
-            __LINE__,idx,spmsuftab->numofentries);
-    exit(EXIT_FAILURE);
-  }
   gt_assert(idx < spmsuftab->numofentries);
-#ifdef SPMSUFTABBITPACK
-  gt_assert(spmsuftab->bitpackarray != NULL);
+  if (spmsuftab->bitpackarray != NULL)
+  {
 #ifdef _LP64
-  return bitpackarray_get_uint64(spmsuftab->bitpackarray,(BitOffset) idx);
+    return bitpackarray_get_uint64(spmsuftab->bitpackarray,(BitOffset) idx);
 #else
-  return (unsigned long)
-         bitpackarray_get_uint32(spmsuftab->bitpackarray,(BitOffset) idx);
+    return (unsigned long)
+           bitpackarray_get_uint32(spmsuftab->bitpackarray,(BitOffset) idx);
 #endif
-#else
-  gt_assert(spmsuftab->suftab != NULL);
-  return spmsuftab->suftab[idx];
-#endif
+  } else
+  {
+    gt_assert(spmsuftab->suftab != NULL);
+    return (unsigned long) spmsuftab->suftab[idx];
+  }
 }
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
-                              unsigned long maxvalue);
+                              unsigned long maxvalue,
+                              GtLogger *logger);
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab);
 
