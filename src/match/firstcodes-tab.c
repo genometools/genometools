@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "firstcodes-tab.h"
 

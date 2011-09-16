@@ -18,16 +18,11 @@
 #ifndef FIRSTCODES_TAB_H
 #define FIRSTCODES_TAB_H
 
-#include "sfx-maprange.h"
-
 typedef struct
 {
   unsigned long differentcodes,
                 *allfirstcodes,
                 *countocc;
-  GtSfxmappedrange *mappedcountocc,
-                   *mappedallfirstcodes,
-                   *mappedmarkprefix;
 } GtFirstcodestab;
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,

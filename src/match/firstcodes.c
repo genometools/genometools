@@ -115,6 +115,9 @@ typedef struct
                   marksuffix;
   unsigned long *tempcodeforradixsort;
   GtSpmsuftab *spmsuftab;
+  GtSfxmappedrange *mappedcountocc,
+                   *mappedallfirstcodes,
+                   *mappedmarkprefix;
   GtFirstcodestab tab;
 } GtFirstcodesinfo;
 
@@ -753,30 +756,30 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                         markprefixunits);
   gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,true,
                         markprefixunits);
-  fci.tab.mappedmarkprefix = gt_Sfxmappedrange_new("markprefix",
-                                                   fci.markprefix.entries,
-                                                   GtSfxGtBitsequence,
-                                                   gt_kmercode_to_prefix_index,
-                                                   fci.markprefix.shiftright);
-  gt_Sfxmappedrangelist_add(sfxmrlist,fci.tab.mappedmarkprefix);
+  fci.mappedmarkprefix = gt_Sfxmappedrange_new("markprefix",
+                                               fci.markprefix.entries,
+                                               GtSfxGtBitsequence,
+                                               gt_kmercode_to_prefix_index,
+                                               fci.markprefix.shiftright);
+  gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
   workspace += fci.marksuffix.size;
   fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
   if (fci.tab.differentcodes > 0)
   {
-    fci.tab.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
-                                                        fci.tab.differentcodes,
-                                                        GtSfxunsignedlong,
-                                                        NULL,0);
-    gt_Sfxmappedrangelist_add(sfxmrlist,fci.tab.mappedallfirstcodes);
-    fci.tab.mappedcountocc = gt_Sfxmappedrange_new("countocc",
-                                                   fci.tab.differentcodes+1,
-                                                   GtSfxunsignedlong,
-                                                   NULL,0);
-    gt_Sfxmappedrangelist_add(sfxmrlist,fci.tab.mappedcountocc);
+    fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
+                                                    fci.tab.differentcodes,
+                                                    GtSfxunsignedlong,
+                                                    NULL,0);
+    gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedallfirstcodes);
+    fci.mappedcountocc = gt_Sfxmappedrange_new("countocc",
+                                               fci.tab.differentcodes+1,
+                                               GtSfxunsignedlong,
+                                               NULL,0);
+    gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedcountocc);
   } else
   {
-    fci.tab.mappedallfirstcodes = NULL;
-    fci.tab.mappedcountocc = NULL;
+    fci.mappedallfirstcodes = NULL;
+    fci.mappedcountocc = NULL;
   }
   size_to_split = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
   gt_logger_log(logger,"number of different codes=%lu (%.4f) in %lu sequences",
@@ -896,9 +899,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_free(fci.tab.countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_Sfxmappedrangelist_delete(sfxmrlist);
-  gt_Sfxmappedrange_delete(fci.tab.mappedmarkprefix,logger);
-  gt_Sfxmappedrange_delete(fci.tab.mappedcountocc,logger);
-  gt_Sfxmappedrange_delete(fci.tab.mappedallfirstcodes,logger);
+  gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
+  gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
+  gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
   gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(workspace));
   gt_logger_log(logger,"size to split = %.2f",
                 GT_MEGABYTES(size_to_split + suftab_size));
