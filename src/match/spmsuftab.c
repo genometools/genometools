@@ -26,6 +26,9 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
 #ifdef SPMSUFTABBITPACK
   unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
 
+  printf("use %lu bitpackarray-entries of %u bits\n",numofentries,
+           bitspervalue);
+
   spmsuftab->bitpackarray
     = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
 #else
