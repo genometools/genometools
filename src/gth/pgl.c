@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -188,4 +188,11 @@ GtStrand gth_pgl_genomic_strand(const GthPGL *pgl)
 {
   gt_assert(pgl);
   return pgl->pglo->gen_strand_forward ? GT_STRAND_FORWARD : GT_STRAND_REVERSE;
+}
+
+const char* gth_pgl_gen_id(const GthPGL *pgl)
+{
+  gt_assert(pgl);
+  /* the genomic ID is the same for every AGS */
+  return gt_str_get(gth_ags_get_gen_id(gth_pgl_get_ags(pgl, 0)));
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -64,6 +64,7 @@ typedef struct {
                                     /* (for debugging purposes) */
        skipalignmentout,            /* skip the output of spliced alignments */
        showseqnums,                 /* show sequence numbers in output */
+       pglgentemplate,              /* show genomic template in PGL lines */
        xmlout,                      /* show output in XML format */
        gff3out,                     /* show output in GFF3 format */
        gff3descranges,              /* use description ranges for GFF3 output */

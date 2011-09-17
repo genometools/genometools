@@ -133,6 +133,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optstartcodon = NULL,           /* output */
          *optfinalstopcodon = NULL,       /* output */
          *optshowseqnums = NULL,          /* output */
+         *optpglgentemplate = NULL,       /* output */
          *optgs2out = NULL,               /* output */
          *optmaskpolyatails = NULL,       /* data preprocessing */
          *optproteinsmap = NULL,          /* data preprocessing */
@@ -473,6 +474,14 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                       GTH_DEFAULT_SHOWSEQNUMS);
   gt_option_is_extended_option(optshowseqnums);
   gt_option_parser_add_option(op, optshowseqnums);
+
+  /* -pglgentemplate */
+  optpglgentemplate = gt_option_new_bool("pglgentemplate", "show genomic "
+                                         "template in PGL lines \n(switch off "
+                                         "for backward compatibility)",
+                                         &call_info->out->pglgentemplate, true);
+  gt_option_is_extended_option(optpglgentemplate);
+  gt_option_parser_add_option(op, optpglgentemplate);
 
   /* -gs2out */
   optgs2out = gt_option_new_bool("gs2out", "output in old GeneSeqer2 format",

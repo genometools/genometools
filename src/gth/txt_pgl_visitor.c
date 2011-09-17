@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2004-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2004-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -158,7 +158,7 @@ static void show_ags(const GthAGS *ags, unsigned long pglnum,
 
   /* output 3-phase translation */
   gt_outputtranslationandorf(pglnum, ags, agsnum, translationtable, input,
-                          indentlevel, out);
+                             indentlevel, out);
 
   /* output three final newlines */
   gt_file_xprintf(outfp, "\n\n\n");
@@ -192,7 +192,7 @@ static void show_pgl(GthPGL *pgl, unsigned long pglnum,
                                 pgl->maxrange.end));
   }
   else {
-    gt_file_xprintf(outfp, "PGL %3lu (%c strand):      %lu     %lu\n",
+    gt_file_xprintf(outfp, "PGL %3lu (%c strand):      %lu     %lu",
                     pglnum + OUTPUTOFFSET,
                     SHOWSTRAND(gth_pgl_is_forward(pgl)),
                     SHOWGENPOS(gth_pgl_is_forward(pgl),
@@ -203,6 +203,9 @@ static void show_pgl(GthPGL *pgl, unsigned long pglnum,
                                gth_pgl_total_length(pgl),
                                gth_pgl_genomic_offset(pgl),
                                pgl->maxrange.end));
+    if (out->pglgentemplate)
+      gt_file_xprintf(outfp, " (genomic template '%s')", gth_pgl_gen_id(pgl));
+    gt_file_xfputc('\n', outfp);
   }
 
   for (i = 0; i < gt_array_size(pgl->assemblies); i++) {

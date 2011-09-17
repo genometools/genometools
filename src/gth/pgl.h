@@ -60,5 +60,6 @@ unsigned long  gth_pgl_total_length(const GthPGL*);
 unsigned long  gth_pgl_genomic_offset(const GthPGL*);
 GtRange        gth_pgl_genomic_range(const GthPGL*);
 GtStrand       gth_pgl_genomic_strand(const GthPGL*);
+const char*    gth_pgl_gen_id(const GthPGL*);
 
 #endif
