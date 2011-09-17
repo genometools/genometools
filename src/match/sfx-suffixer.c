@@ -366,13 +366,11 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 }
 #endif
 
-static void gt_insertkmerwithoutspecial1(void *processinfo,
+static void gt_insertkmerwithoutspecial1(Sfxiterator *sfi,
                                          bool firstinrange,
                                          unsigned long position,
                                          GtCodetype scancode)
 {
-  Sfxiterator *sfi = (Sfxiterator *) processinfo;
-
   if (sfi->markprefixbuckets == NULL)
   {
     if (scancode >= sfi->currentmincode && scancode <= sfi->currentmaxcode)
@@ -408,12 +406,13 @@ static void gt_insertkmerwithoutspecial(void *processinfo,
 {
   if (!kmercode->definedspecialposition)
   {
-    gt_insertkmerwithoutspecial1(processinfo,false, position, kmercode->code);
+    gt_insertkmerwithoutspecial1((Sfxiterator *) processinfo, false,
+                                 position, kmercode->code);
   }
 }
 
-static void reversespecialcodes(Codeatposition *spaceCodeatposition,
-                                unsigned long nextfreeCodeatposition)
+static void gt_reversespecialcodes(Codeatposition *spaceCodeatposition,
+                                   unsigned long nextfreeCodeatposition)
 {
   Codeatposition *front, *back, tmp;
 
@@ -1418,7 +1417,7 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 #undef PROCESSKMERCODE
 
 #define PROCESSKMERPREFIX(FUN)          insertsuffix_##FUN
-#define PROCESSKMERTYPE                 void
+#define PROCESSKMERTYPE                 Sfxiterator
 #define PROCESSKMERSPECIALTYPE          GT_UNUSED Sfxiterator
 #define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
 
@@ -1881,8 +1880,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
           sfi->sfxstrategy.spmopt_minlength == 0)
       {
         gt_assert(realspecialranges+1 >= sfi->nextfreeCodeatposition);
-        reversespecialcodes(sfi->spaceCodeatposition,
-                            sfi->nextfreeCodeatposition);
+        gt_reversespecialcodes(sfi->spaceCodeatposition,
+                               sfi->nextfreeCodeatposition);
 #ifdef SKDEBUG
         verifycodelistcomputation(encseq,
                                   readmode,
