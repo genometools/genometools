@@ -46,8 +46,6 @@ static void gt_hashfirstcodes(void *processinfo,
   }
 }
 
-#undef USELOCALFUNCTION
-#ifdef USELOCALFUNCTION
 static void gt_hashremainingcodes(void *processinfo,
                                   bool firstinrange,
                                   GT_UNUSED unsigned long pos,
@@ -60,7 +58,6 @@ static void gt_hashremainingcodes(void *processinfo,
     (void) gt_uint64hashtable_search(table,(uint64_t) code,false);
   }
 }
-#endif
 
 static void gt_insertallcodeswithhashtable(void *processinfo,
                                            GT_UNUSED bool firstinrange,
@@ -115,7 +112,6 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     gt_timer_show_progress(timer, "accumulate counts",stdout);
   }
-#ifdef USELOCALFUNCTION
   getencseqkmers_twobitencoding(encseq,
                                 GT_READMODE_FORWARD,
                                 kmersize,
@@ -125,15 +121,6 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 hashfirstcodes.table,
                                 NULL,
                                 NULL);
-#else
-  htinsertsuffixremainingcodes_getencseqkmers_twobitencoding
-                               (encseq,
-                                GT_READMODE_FORWARD,
-                                kmersize,
-                                spmopt,
-                                hashfirstcodes.table,
-                                NULL);
-#endif
   psum = gt_uint64hashtable_partialsums(hashfirstcodes.table,timer);
   hashfirstcodes.suftab = gt_malloc((size_t) psum *
                                     sizeof (*hashfirstcodes.suftab));

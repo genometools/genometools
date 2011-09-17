@@ -41,7 +41,6 @@
 #include "core/divmodmul.h"
 #include "core/format64.h"
 #include "core/fileutils.h"
-#include "extended/uint64hashtable.h"
 #include "intcode-def.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
@@ -1392,17 +1391,6 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
   }
 }
 
-static void gt_htinsertremainingcodes(GtUint64hashtable *table,
-                                      bool firstinrange,
-                                      GT_UNUSED unsigned long pos,
-                                      GtCodetype code)
-{
-  if (!firstinrange)
-  {
-    (void) gt_uint64hashtable_search(table,(uint64_t) code,false);
-  }
-}
-
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
 #define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
@@ -1435,20 +1423,6 @@ static void gt_htinsertremainingcodes(GtUint64hashtable *table,
 #define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
 
 #include "sfx-mapped4.gen"
-
-#undef PROCESSKMERPREFIX
-#undef PROCESSKMERTYPE
-#undef PROCESSKMERSPECIALTYPE
-#undef PROCESSKMERCODE
-
-#define PROCESSKMERPREFIX(FUN)          htinsertsuffixremainingcodes_##FUN
-#define PROCESSKMERTYPE                 GtUint64hashtable
-#define PROCESSKMERSPECIALTYPE          GT_UNUSED void
-#define PROCESSKMERCODE                 gt_htinsertremainingcodes
-
-#define GT_MAPPED4_GLOBAL
-#include "sfx-mapped4.gen"
-#undef GT_MAPPED4_GLOBAL
 
 /*
 #define SHOWCURRENTSPACE\
