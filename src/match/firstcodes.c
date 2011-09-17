@@ -32,6 +32,7 @@
 #include "esa-spmsk.h"
 #include "firstcodes-tab.h"
 #include "firstcodes.h"
+#include "marksubstring.h"
 #include "sfx-partssuf.h"
 
 typedef struct
@@ -40,55 +41,6 @@ typedef struct
 } GtIndexwithcode;
 
 GT_DECLAREARRAYSTRUCT(GtIndexwithcode);
-
-typedef struct
-{
-  size_t size;
-  unsigned int units, shiftright;
-  unsigned long entries;
-  GtCodetype mask;
-  GtBitsequence *bits;
-} Gtmarksubstring;
-
-static void gt_marksubstring_init(Gtmarksubstring *mark,unsigned int numofchars,
-                                  unsigned int kmersize, bool usesuffix,
-                                  unsigned int units)
-{
-  gt_assert(kmersize >= units);
-  mark->units = units;
-  mark->entries = gt_power_for_small_exponents(numofchars,units);
-  gt_assert(kmersize >= units + units);
-  if (usesuffix)
-  {
-    mark->shiftright = 0;
-    mark->mask = (GtCodetype) (mark->entries-1);
-  } else
-  {
-    mark->shiftright = GT_MULT2(kmersize - units);
-    mark->mask = ~(GtCodetype) 0;
-  }
-  GT_INITBITTAB(mark->bits,mark->entries);
-  mark->size = sizeof (GtBitsequence) * GT_NUMOFINTSFORBITS(mark->entries);
-}
-
-static void gt_marksubstring_mark(Gtmarksubstring *mark,GtCodetype code)
-{
-  code = (code >> (GtCodetype) mark->shiftright) & mark->mask;
-
-  gt_assert(code < mark->entries);
-  if (!GT_ISIBITSET(mark->bits,code))
-  {
-    GT_SETIBIT(mark->bits,code);
-  }
-}
-
-static bool gt_marksubstring_checkmark(const Gtmarksubstring *mark,
-                                       GtCodetype code)
-{
-  code = (code >> (GtCodetype) mark->shiftright) & mark->mask;
-
-  return GT_ISIBITSET(mark->bits,code) ? true : false;
-}
 
 typedef struct
 {
@@ -109,9 +61,10 @@ typedef struct
               *tempcodeposforradixsort;
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth,
-               flushcount;
-  Gtmarksubstring markprefix,
-                  marksuffix;
+               flushcount,
+               shiftright2index;
+  Gtmarksubstring *markprefix,
+                  *marksuffix;
   unsigned long *tempcodeforradixsort;
   GtSpmsuftab *spmsuftab;
   GtSfxmappedrange *mappedcountocc,
@@ -125,8 +78,7 @@ static unsigned long gt_kmercode_to_prefix_index(unsigned long idx,
 {
   const GtFirstcodesinfo *fci = (const GtFirstcodesinfo *) data;
 
-  return fci->tab.allfirstcodes[idx] >>
-         (fci->markprefix.shiftright+GT_LOGWORDSIZE);
+  return fci->tab.allfirstcodes[idx] >> fci->shiftright2index;
 }
 
 /* call the following function after computing the partial sums */
@@ -168,8 +120,8 @@ static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
     fci->tab.countocc = gt_calloc((size_t) (fci->numofsequences+1),
                               sizeof (*fci->tab.countocc));
     fci->tab.countocc[0] = 1UL;
-    gt_marksubstring_mark(&fci->markprefix,fci->tab.allfirstcodes[0]);
-    gt_marksubstring_mark(&fci->marksuffix,fci->tab.allfirstcodes[0]);
+    gt_marksubstring_mark(fci->markprefix,fci->tab.allfirstcodes[0]);
+    gt_marksubstring_mark(fci->marksuffix,fci->tab.allfirstcodes[0]);
     for (storeptr = fci->tab.allfirstcodes, readptr = fci->tab.allfirstcodes+1;
          readptr < fci->tab.allfirstcodes + fci->numofsequences;
          readptr++)
@@ -181,8 +133,8 @@ static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
         *storeptr = *readptr;
       }
       fci->tab.countocc[(unsigned long) (storeptr - fci->tab.allfirstcodes)]++;
-      gt_marksubstring_mark(&fci->markprefix,*readptr);
-      gt_marksubstring_mark(&fci->marksuffix,*readptr);
+      gt_marksubstring_mark(fci->markprefix,*readptr);
+      gt_marksubstring_mark(fci->marksuffix,*readptr);
     }
     numofdifferentcodes
       = (unsigned long) (storeptr - fci->tab.allfirstcodes + 1);
@@ -437,10 +389,11 @@ static void gt_firstcodes_accumulatecounts(void *processinfo,
                                            GtCodetype code)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
+  GtCodetype tmpcode;
 
   if (!firstinrange &&
-      gt_marksubstring_checkmark(&fci->markprefix,code) &&
-      gt_marksubstring_checkmark(&fci->marksuffix,code))
+      GT_MARKSUBSTRING_CHECKMARK(fci->markprefix,code) &&
+      GT_MARKSUBSTRING_CHECKMARK(fci->marksuffix,code))
   {
     if (fci->codebuffer_nextfree == fci->codebuffer_allocated)
     {
@@ -530,11 +483,12 @@ static void gt_firstcodes_insertsuffixes(void *processinfo,
                                          GtCodetype code)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
+  GtCodetype tmpcode;
 
   if (fci->currentmincode <= code &&
       code <= fci->currentmaxcode &&
-      gt_marksubstring_checkmark(&fci->markprefix,code) &&
-      gt_marksubstring_checkmark(&fci->marksuffix,code))
+      GT_MARKSUBSTRING_CHECKMARK(fci->markprefix,code) &&
+      GT_MARKSUBSTRING_CHECKMARK(fci->marksuffix,code))
   {
     if (fci->codebuffer_nextfree == fci->codebuffer_allocated)
     {
@@ -765,17 +719,20 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              fci.tab.allfirstcodes,fci.numofsequences);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
-  gt_marksubstring_init(&fci.markprefix,numofchars,kmersize,false,
-                        markprefixunits);
-  fci.mappedmarkprefix = gt_Sfxmappedrange_new("markprefix",
-                                               fci.markprefix.entries,
-                                               GtSfxGtBitsequence,
-                                               gt_kmercode_to_prefix_index,
-                                               &fci);
+  fci.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
+                                        markprefixunits);
+  fci.shiftright2index = gt_marksubstring_shiftright(fci.markprefix)
+                         + GT_LOGWORDSIZE;
+  fci.mappedmarkprefix
+    = gt_Sfxmappedrange_new("markprefix",
+                            gt_marksubstring_entries(fci.markprefix),
+                            GtSfxGtBitsequence,
+                            gt_kmercode_to_prefix_index,
+                            &fci);
   gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
-  gt_marksubstring_init(&fci.marksuffix,numofchars,kmersize,true,
-                        markprefixunits);
-  workspace += fci.marksuffix.size;
+  fci.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
+                                        markprefixunits);
+  workspace += gt_marksubstring_size(fci.marksuffix);
   fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
   if (fci.tab.differentcodes > 0)
   {
@@ -879,13 +836,13 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                logger);
     gt_assert(fci.tab.countocc == NULL);
 
-    gt_assert(fci.markprefix.bits != NULL);
+    gt_marksubstring_bits_null(fci.markprefix,false);
     gt_assert(fci.mappedmarkprefix != NULL);
     gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
-                               (void **) &fci.markprefix.bits,
+                               gt_marksubstring_bits_address(fci.markprefix),
                                false,
                                logger);
-    gt_assert(fci.markprefix.bits == NULL);
+    gt_marksubstring_bits_null(fci.markprefix,true);
   } else
   {
     gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
@@ -942,13 +899,13 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     if (fci.mappedmarkprefix != NULL)
     {
-      fci.markprefix.bits
-        = (GtBitsequence *)
-          gt_Sfxmappedrange_map(fci.mappedmarkprefix,
-                                part,
-                                fci.currentminindex,
-                                fci.currentmaxindex,
-                                logger);
+      gt_marksubstring_bits_map(fci.markprefix,
+                                (GtBitsequence *)
+                                gt_Sfxmappedrange_map(fci.mappedmarkprefix,
+                                                      part,
+                                                      fci.currentminindex,
+                                                      fci.currentmaxindex,
+                                                      logger));
     }
     fci.currentmincode = gt_suftabparts_mincode(part,suftabparts);
     fci.currentmaxcode = gt_suftabparts_maxcode(part,suftabparts);
@@ -969,11 +926,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
       gt_free(fci.codeposbuffer);
       gt_free(fci.tempcodeposforradixsort);
-      if (fci.mappedmarkprefix == NULL)
-      {
-        gt_free(fci.markprefix.bits);
-      }
-      gt_free(fci.marksuffix.bits);
+      gt_marksubstring_delete(fci.markprefix,
+                              fci.mappedmarkprefix == NULL ? true : false);
+      gt_marksubstring_delete(fci.marksuffix,true);
       if (fci.mappedallfirstcodes == NULL)
       {
         gt_free(fci.tab.allfirstcodes);
