@@ -26,6 +26,7 @@
 #include "core/intbits.h"
 #include "core/codetype.h"
 #include "extended/uint64hashtable.h"
+#include "firstcodes-buf.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-strategy.h"
 
@@ -93,12 +94,12 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                              unsigned long),
                                    void *processkmerspecialinfo);
 
-void htinsertsuffixremainingcodes_getencseqkmers_twobitencoding(
+void gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
                                const GtEncseq *encseq,
                                GtReadmode readmode,
                                unsigned int kmersize,
                                unsigned int upperkmersize,
-                               GtUint64hashtable *processkmercodeinfo,
+                               GtCodeposbuffer *processkmercodeinfo,
                                GT_UNUSED void *processkmerspecialinfo);
 
 #endif

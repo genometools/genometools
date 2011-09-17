@@ -31,6 +31,7 @@
 #include "spmsuftab.h"
 #include "esa-spmsk.h"
 #include "firstcodes-tab.h"
+#include "firstcodes-buf.h"
 #include "firstcodes.h"
 #include "marksubstring.h"
 #include "sfx-partssuf.h"
@@ -41,21 +42,6 @@ typedef struct
 } GtIndexwithcode;
 
 GT_DECLAREARRAYSTRUCT(GtIndexwithcode);
-
-typedef void (*GtCodeposbufferflushfunction)(void *);
-
-typedef struct
-{
-  unsigned long currentmincode,
-                currentmaxcode,
-                nextfree,
-                allocated;
-  Gtmarksubstring *markprefix,
-                  *marksuffix;
-  GtCodeposbufferflushfunction flush_function;
-  GtUlongPair *spaceGtUlongPair;
-  void *fciptr;
-} GtCodeposbuffer;
 
 typedef struct
 {
@@ -487,29 +473,6 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
   fci->buf.nextfree = 0;
 }
 
-static void gt_firstcodes_insertsuffixes(void *processinfo,
-                                         GT_UNUSED bool firstinrange,
-                                         unsigned long pos,
-                                         GtCodetype code)
-{
-  GtCodeposbuffer *buf = (GtCodeposbuffer *) processinfo;
-  GtCodetype tmpcode;
-
-  if (buf->currentmincode <= code &&
-      code <= buf->currentmaxcode &&
-      GT_MARKSUBSTRING_CHECKMARK(buf->markprefix,code) &&
-      GT_MARKSUBSTRING_CHECKMARK(buf->marksuffix,code))
-  {
-    if (buf->nextfree == buf->allocated)
-    {
-      buf->flush_function(buf->fciptr);
-    }
-    gt_assert (buf->nextfree < buf->allocated);
-    buf->spaceGtUlongPair[buf->nextfree].a = code;
-    buf->spaceGtUlongPair[buf->nextfree++].b = pos;
-  }
-}
-
 static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci)
 {
   unsigned long idx, maxbucketsize;
@@ -924,6 +887,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.buf.currentmaxcode = gt_suftabparts_maxcode(part,suftabparts);
     gt_spmsuftab_partoffset(fci.spmsuftab,
                             gt_suftabparts_offset(part,suftabparts));
+#ifdef OLDVERSION
     getencseqkmers_twobitencoding(encseq,
                                   readmode,
                                   kmersize,
@@ -933,6 +897,15 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   &fci.buf,
                                   NULL,
                                   NULL);
+#else
+    gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
+                                  encseq,
+                                  readmode,
+                                  kmersize,
+                                  minmatchlength,
+                                  &fci.buf,
+                                  NULL);
+#endif
     gt_firstcodes_insertsuffixes_flush(&fci);
     if (part == gt_suftabparts_numofparts(suftabparts) - 1)
     {

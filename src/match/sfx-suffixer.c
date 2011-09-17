@@ -42,6 +42,7 @@
 #include "core/format64.h"
 #include "core/fileutils.h"
 #include "intcode-def.h"
+#include "firstcodes-buf.h"
 #include "esa-fileend.h"
 #include "sfx-diffcov.h"
 #include "sfx-partssuf.h"
@@ -1390,6 +1391,28 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
   }
 }
 
+static void gt_firstcodes_insertsuffixes(GtCodeposbuffer *buf,
+                                         GT_UNUSED bool firstinrange,
+                                         unsigned long pos,
+                                         GtCodetype code)
+{
+  GtCodetype tmpcode;
+
+  if (buf->currentmincode <= code &&
+      code <= buf->currentmaxcode &&
+      GT_MARKSUBSTRING_CHECKMARK(buf->markprefix,code) &&
+      GT_MARKSUBSTRING_CHECKMARK(buf->marksuffix,code))
+  {
+    if (buf->nextfree == buf->allocated)
+    {
+      buf->flush_function(buf->fciptr);
+    }
+    gt_assert (buf->nextfree < buf->allocated);
+    buf->spaceGtUlongPair[buf->nextfree].a = code;
+    buf->spaceGtUlongPair[buf->nextfree++].b = pos;
+  }
+}
+
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
 #define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
@@ -1422,6 +1445,20 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 #define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
 
 #include "sfx-mapped4.gen"
+
+#undef PROCESSKMERPREFIX
+#undef PROCESSKMERTYPE
+#undef PROCESSKMERSPECIALTYPE
+#undef PROCESSKMERCODE
+
+#define PROCESSKMERPREFIX(FUN)          gt_firstcodes_insertsuffix_##FUN
+#define PROCESSKMERTYPE                 GtCodeposbuffer
+#define PROCESSKMERSPECIALTYPE          GT_UNUSED void
+#define PROCESSKMERCODE                 gt_firstcodes_insertsuffixes
+
+#define GT_MAPPED4_GLOBAL
+#include "sfx-mapped4.gen"
+#undef GT_MAPPED4_GLOBAL
 
 /*
 #define SHOWCURRENTSPACE\
