@@ -910,7 +910,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     if (timer != NULL)
     {
-      gt_timer_show_progress(timer, "sort buckets of suffixes",stdout);
+      gt_timer_show_progress(timer, "to sort buckets of suffixes",stdout);
     }
     gt_firstcodes_sortremaining(encseq,
                                 readmode,
@@ -923,6 +923,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                 (unsigned long) kmersize,
                                 spmsk_state,
                                 withsuftabcheck);
+  }
+  if (timer != NULL)
+  {
+    gt_timer_show_progress(timer, "cleaning up",stdout);
   }
   gt_spmsk_delete(spmsk_state);
   gt_suftabparts_delete(suftabparts);
