@@ -367,39 +367,34 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 }
 #endif
 
-static void gt_insertkmerwithoutspecial1(Sfxiterator *sfi,
-                                         bool firstinrange,
-                                         unsigned long position,
-                                         GtCodetype scancode)
-{
-  if (sfi->markprefixbuckets == NULL)
-  {
-    if (scancode >= sfi->currentmincode && scancode <= sfi->currentmaxcode)
-    {
-      unsigned long stidx;
-
-      stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,scancode);
-      /* from right to left */
-      GT_SUFFIXSORTSPACE_EXPORT_SET(sfi->suffixsortspace,sfi->exportptr,stidx,
-                                    position);
-    }
-  } else
-  {
-    GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(sfi,scancode);
-
-    if (bcktabcode >= sfi->currentmincode &&
-        bcktabcode <= sfi->currentmaxcode &&
-        (firstinrange || gt_checksuffixprefixbuckets(sfi,scancode)))
-    {
-      unsigned long stidx;
-
-      stidx = gt_bcktab_leftborder_insertionindex(sfi->leftborder,bcktabcode);
-      /* from right to left */
-      GT_SUFFIXSORTSPACE_EXPORT_SET(sfi->suffixsortspace,sfi->exportptr,stidx,
-                                    position);
-    }
-  }
-}
+#define GT_INSERTKMERWITHOUTSPECIAL1(SFI,FIRSTINRANGE,POSITION,SCANCODE)\
+        if ((SFI)->markprefixbuckets == NULL)\
+        {\
+          if ((SCANCODE) >= (SFI)->currentmincode &&\
+              (SCANCODE) <= (SFI)->currentmaxcode)\
+          {\
+            unsigned long stidx;\
+            stidx = gt_bcktab_leftborder_insertionindex((SFI)->leftborder,\
+                                                        SCANCODE);\
+            /* from right to left */\
+            GT_SUFFIXSORTSPACE_EXPORT_SET((SFI)->suffixsortspace,\
+                                          (SFI)->exportptr,stidx,POSITION);\
+          }\
+        } else\
+        {\
+          GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE((SFI),SCANCODE);\
+          if (bcktabcode >= (SFI)->currentmincode &&\
+              bcktabcode <= (SFI)->currentmaxcode &&\
+              (FIRSTINRANGE || gt_checksuffixprefixbuckets(SFI,SCANCODE)))\
+          {\
+            unsigned long stidx;\
+            stidx = gt_bcktab_leftborder_insertionindex((SFI)->leftborder,\
+                                                        bcktabcode);\
+            /* from right to left */\
+            GT_SUFFIXSORTSPACE_EXPORT_SET((SFI)->suffixsortspace,\
+                                          (SFI)->exportptr,stidx,POSITION);\
+          }\
+        }
 
 static void gt_insertkmerwithoutspecial(void *processinfo,
                                         unsigned long position,
@@ -407,7 +402,7 @@ static void gt_insertkmerwithoutspecial(void *processinfo,
 {
   if (!kmercode->definedspecialposition)
   {
-    gt_insertkmerwithoutspecial1((Sfxiterator *) processinfo, false,
+    GT_INSERTKMERWITHOUTSPECIAL1((Sfxiterator *) processinfo, false,
                                  position, kmercode->code);
   }
 }
@@ -1435,7 +1430,7 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 #define PROCESSKMERPREFIX(FUN)          insertsuffix_##FUN
 #define PROCESSKMERTYPE                 Sfxiterator
 #define PROCESSKMERSPECIALTYPE          GT_UNUSED Sfxiterator
-#define PROCESSKMERCODE                 gt_insertkmerwithoutspecial1
+#define PROCESSKMERCODE                 GT_INSERTKMERWITHOUTSPECIAL1
 
 #include "sfx-mapped4.gen"
 
