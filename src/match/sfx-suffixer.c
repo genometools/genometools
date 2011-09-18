@@ -1391,27 +1391,23 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
   }
 }
 
-static void gt_firstcodes_insertsuffixes(GtCodeposbuffer *buf,
-                                         GT_UNUSED bool firstinrange,
-                                         unsigned long pos,
-                                         GtCodetype code)
-{
-  GtCodetype tmpcode;
-
-  if (buf->currentmincode <= code &&
-      code <= buf->currentmaxcode &&
-      GT_MARKSUBSTRING_CHECKMARK(buf->markprefix,code) &&
-      GT_MARKSUBSTRING_CHECKMARK(buf->marksuffix,code))
-  {
-    if (buf->nextfree == buf->allocated)
-    {
-      buf->flush_function(buf->fciptr);
-    }
-    gt_assert (buf->nextfree < buf->allocated);
-    buf->spaceGtUlongPair[buf->nextfree].a = code;
-    buf->spaceGtUlongPair[buf->nextfree++].b = pos;
+#define GT_FIRSTCODES_INSERTSUFFIXES(BUF,FIRSTINRANGE,POSITION,CODE)\
+  {\
+    GtCodetype tmpcode; /* use for GT_MARKSUBSTRING_CHECKMARK*/\
+    if ((BUF)->currentmincode <= (CODE) &&\
+        (CODE) <= (BUF)->currentmaxcode &&\
+        GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
+        GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
+    {\
+      if ((BUF)->nextfree == (BUF)->allocated)\
+      {\
+        (BUF)->flush_function((BUF)->fciptr);\
+      }\
+      gt_assert ((BUF)->nextfree < (BUF)->allocated);\
+      (BUF)->spaceGtUlongPair[(BUF)->nextfree].a = CODE;\
+      (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b = POSITION;\
+    }\
   }
-}
 
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
@@ -1454,7 +1450,7 @@ static void gt_firstcodes_insertsuffixes(GtCodeposbuffer *buf,
 #define PROCESSKMERPREFIX(FUN)          gt_firstcodes_insertsuffix_##FUN
 #define PROCESSKMERTYPE                 GtCodeposbuffer
 #define PROCESSKMERSPECIALTYPE          GT_UNUSED void
-#define PROCESSKMERCODE                 gt_firstcodes_insertsuffixes
+#define PROCESSKMERCODE                 GT_FIRSTCODES_INSERTSUFFIXES
 
 #define GT_MAPPED4_GLOBAL
 #include "sfx-mapped4.gen"
