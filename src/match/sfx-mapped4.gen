@@ -35,6 +35,9 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
 #ifndef GT_IGNORERIGHTBOUND
   unsigned long rightbound = totallength - kmersize;
 #endif
+#ifdef GT_WITHMARKSUBSTRINGTMPCODE
+  GtCodetype marksubstringtmpcode;
+#endif
 
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))

@@ -33,6 +33,7 @@ typedef struct
                   *marksuffix;
   GtCodeposbufferflushfunction flush_function;
   GtUlongPair *spaceGtUlongPair;
+  GtUlong *spaceGtUlong;
   void *fciptr;
 } GtCodeposbuffer;
 

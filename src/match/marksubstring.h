@@ -33,8 +33,9 @@ struct Gtmarksubstring
 };
 
 #define GT_MARKSUBSTRING_CHECKMARK(MARK,CODE)\
-        (tmpcode = ((CODE) >> (GtCodetype) (MARK)->shiftright) & (MARK)->mask,\
-        GT_ISIBITSET((MARK)->bits,tmpcode) ? true : false)
+        (marksubstringtmpcode\
+           = ((CODE) >> (GtCodetype) (MARK)->shiftright) & (MARK)->mask,\
+        GT_ISIBITSET((MARK)->bits,marksubstringtmpcode) ? true : false)
 
 Gtmarksubstring *gt_marksubstring_new(unsigned int numofchars,
                                       unsigned int kmersize, bool usesuffix,

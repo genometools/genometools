@@ -1381,9 +1381,23 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                        GT_SCANCODE_TO_BCKCODE(SFI,SCANCODE));\
         }
 
+#define GT_FIRSTCODES_ACCUMULATECOUNTS(BUF,FIRSTINRANGE,POSITION,CODE)\
+        {\
+          if (!(FIRSTINRANGE) &&\
+              GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
+              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
+          {\
+            if ((BUF)->nextfree == (BUF)->allocated)\
+            {\
+              (BUF)->flush_function((BUF)->fciptr);\
+            }\
+            gt_assert ((BUF)->nextfree < (BUF)->allocated);\
+            (BUF)->spaceGtUlong[(BUF)->nextfree++] = CODE;\
+          }\
+        }
+
 #define GT_FIRSTCODES_INSERTSUFFIXES(BUF,FIRSTINRANGE,POSITION,CODE)\
         {\
-          GtCodetype tmpcode; /* use for GT_MARKSUBSTRING_CHECKMARK*/\
           if ((BUF)->currentmincode <= (CODE) &&\
               (CODE) <= (BUF)->currentmaxcode &&\
               GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
@@ -1413,6 +1427,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 #undef PROCESSKMERCODE
 #undef PROCESSKMERCODESPECIAL
 
+/* start with next inling */
+
 #define PROCESSKMERPREFIX(FUN) spmopt_updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
 #define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
@@ -1421,6 +1437,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 
 #include "sfx-mapped4.gen"
 #undef GT_IGNORERIGHTBOUND
+
+/* start with next inling */
 
 #undef PROCESSKMERPREFIX
 #undef PROCESSKMERTYPE
@@ -1439,14 +1457,36 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 #undef PROCESSKMERSPECIALTYPE
 #undef PROCESSKMERCODE
 
+/* start with next inling */
+
+#define PROCESSKMERPREFIX(FUN)          gt_firstcodes_accumulatecounts_##FUN
+#define PROCESSKMERTYPE                 GtCodeposbuffer
+#define PROCESSKMERSPECIALTYPE          GT_UNUSED void
+#define PROCESSKMERCODE                 GT_FIRSTCODES_ACCUMULATECOUNTS
+
+#define GT_MAPPED4_GLOBAL
+#define GT_WITHMARKSUBSTRINGTMPCODE
+
+#define GT_IGNORERIGHTBOUND
+#include "sfx-mapped4.gen"
+#undef GT_IGNORERIGHTBOUND
+
+#undef PROCESSKMERPREFIX
+#undef PROCESSKMERTYPE
+#undef PROCESSKMERSPECIALTYPE
+#undef PROCESSKMERCODE
+
+/* start with next inling */
+
 #define PROCESSKMERPREFIX(FUN)          gt_firstcodes_insertsuffix_##FUN
 #define PROCESSKMERTYPE                 GtCodeposbuffer
 #define PROCESSKMERSPECIALTYPE          GT_UNUSED void
 #define PROCESSKMERCODE                 GT_FIRSTCODES_INSERTSUFFIXES
 
-#define GT_MAPPED4_GLOBAL
 #include "sfx-mapped4.gen"
+
 #undef GT_MAPPED4_GLOBAL
+#undef GT_WITHMARKSUBSTRINGTMPCODE
 
 /*
 #define SHOWCURRENTSPACE\

@@ -102,4 +102,12 @@ void gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
                                GtCodeposbuffer *processkmercodeinfo,
                                GT_UNUSED void *processkmerspecialinfo);
 
+void gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
+                               const GtEncseq *encseq,
+                               GtReadmode readmode,
+                               unsigned int kmersize,
+                               unsigned int upperkmersize,
+                               GtCodeposbuffer *processkmercodeinfo,
+                               GT_UNUSED void *processkmerspecialinfo);
+
 #endif

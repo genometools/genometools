@@ -52,8 +52,7 @@ typedef struct
                 codebuffer_total,
                 currentminindex,
                 currentmaxindex,
-                widthofpart,
-                *codebuffer;
+                widthofpart;
   GtUlongPair *tempcodeposforradixsort;
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth,
@@ -316,7 +315,7 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
   unsigned long found = 0;
   const unsigned long *query = querystream_fst,
                       *subject = subjectstream_fst,
-                      *querystream_lst = fci->codebuffer
+                      *querystream_lst = fci->buf.spaceGtUlong
                                          + fci->buf.nextfree - 1,
                       *subjectstream_lst = fci->tab.allfirstcodes
                                            + fci->tab.differentcodes - 1;
@@ -342,22 +341,22 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
   return found;
 }
 
-static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo *fci)
+static void gt_firstcodes_accumulatecounts_flush(void *data)
 {
   const unsigned long *ptr;
   unsigned long *vptr;
+  GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
 
   gt_assert(fci->tab.allfirstcodes != NULL);
-  gt_radixsort_GtUlong_linear(false,fci->codebuffer,
+  gt_radixsort_GtUlong_linear(false,fci->buf.spaceGtUlong,
                               fci->tempcodeforradixsort,
                               fci->buf.nextfree);
 #ifdef SKDEBUG
-  checkcodesorder(fci->codebuffer,fci->buf.nextfree,
-                  true);
+  checkcodesorder(fci->buf.spaceGtUlong,fci->buf.nextfree,true);
 #endif
   fci->codebuffer_total += fci->buf.nextfree;
-  for (vptr = fci->codebuffer;
-       vptr < fci->codebuffer + fci->buf.nextfree;
+  for (vptr = fci->buf.spaceGtUlong;
+       vptr < fci->buf.spaceGtUlong + fci->buf.nextfree;
        vptr++)
   {
     ptr = gt_firstcodes_find(fci,true,0,fci->tab.differentcodes-1,*vptr);
@@ -376,27 +375,6 @@ static void gt_firstcodes_accumulatecounts_flush(GtFirstcodesinfo *fci)
   (void) fflush(stdout);
 #endif
   fci->buf.nextfree = 0;
-}
-
-static void gt_firstcodes_accumulatecounts(void *processinfo,
-                                           bool firstinrange,
-                                           GT_UNUSED unsigned long pos,
-                                           GtCodetype code)
-{
-  GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
-  GtCodetype tmpcode;
-
-  if (!firstinrange &&
-      GT_MARKSUBSTRING_CHECKMARK(fci->buf.markprefix,code) &&
-      GT_MARKSUBSTRING_CHECKMARK(fci->buf.marksuffix,code))
-  {
-    if (fci->buf.nextfree == fci->buf.allocated)
-    {
-      gt_firstcodes_accumulatecounts_flush(fci);
-    }
-    gt_assert (fci->buf.nextfree < fci->buf.allocated);
-    fci->codebuffer[fci->buf.nextfree++] = code;
-  }
 }
 
 static unsigned long gt_firstcodes_insertsuffixes_merge(
@@ -740,9 +718,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                        (unsigned long) binsearchcache_size);
   fci.buf.allocated = fci.tab.differentcodes/4;
   fci.buf.nextfree = 0;
-  fci.codebuffer = gt_malloc(sizeof (*fci.codebuffer)
-                             * fci.buf.allocated);
-  workspace += sizeof (*fci.codebuffer) * fci.buf.allocated;
+  fci.buf.spaceGtUlong = gt_malloc(sizeof (*fci.buf.spaceGtUlong)
+                                   * fci.buf.allocated);
+  workspace += sizeof (*fci.buf.spaceGtUlong) * fci.buf.allocated;
   gt_assert(fci.buf.allocated > 0);
   if (timer != NULL)
   {
@@ -752,14 +730,14 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                        * sizeof (*fci.tempcodeforradixsort));
   workspace += (size_t) fci.buf.allocated
                * sizeof (*fci.tempcodeforradixsort);
-  getencseqkmers_twobitencoding(encseq,
+  fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
+  fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
+  gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
+                                encseq,
                                 readmode,
                                 kmersize,
                                 minmatchlength,
-                                false,
-                                gt_firstcodes_accumulatecounts,
-                                &fci,
-                                NULL,
+                                &fci.buf,
                                 NULL);
   gt_firstcodes_accumulatecounts_flush(&fci);
   totallength = gt_encseq_total_length(encseq);
@@ -790,7 +768,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_suftabparts_showallrecords(suftabparts);
   */
   gt_free(fci.tempcodeforradixsort);
-  gt_free(fci.codebuffer);
+  gt_free(fci.buf.spaceGtUlong);
   gt_assert(fci.buf.nextfree == 0);
   if (gt_suftabparts_numofparts(suftabparts) > 1U)
   {
@@ -829,7 +807,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.codebuffer_total = 0;
   fci.buf.allocated /= 2UL;
   fci.buf.spaceGtUlongPair = gt_malloc(sizeof (*fci.buf.spaceGtUlongPair)
-                                * fci.buf.allocated);
+                                       * fci.buf.allocated);
   fci.tempcodeposforradixsort = gt_malloc(sizeof (*fci.tempcodeposforradixsort)
                                           * fci.buf.allocated);
   largest_width = gt_suftabparts_largest_width(suftabparts);
@@ -842,7 +820,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                countspms,outputspms);
   }
   fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
-  fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
   for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)
   {
     if (timer != NULL)
