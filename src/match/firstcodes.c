@@ -887,17 +887,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.buf.currentmaxcode = gt_suftabparts_maxcode(part,suftabparts);
     gt_spmsuftab_partoffset(fci.spmsuftab,
                             gt_suftabparts_offset(part,suftabparts));
-#ifdef OLDVERSION
-    getencseqkmers_twobitencoding(encseq,
-                                  readmode,
-                                  kmersize,
-                                  minmatchlength,
-                                  false,
-                                  gt_firstcodes_insertsuffixes,
-                                  &fci.buf,
-                                  NULL,
-                                  NULL);
-#else
     gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
                                   encseq,
                                   readmode,
@@ -905,7 +894,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   minmatchlength,
                                   &fci.buf,
                                   NULL);
-#endif
     gt_firstcodes_insertsuffixes_flush(&fci);
     if (part == gt_suftabparts_numofparts(suftabparts) - 1)
     {
