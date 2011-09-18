@@ -335,21 +335,21 @@ static void updatekmercount(void *processinfo,
 #endif
 }
 
-#define GT_SCANCODE_TO_BCKCODE(CODE)\
-        (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2bckcode)
+#define GT_SCANCODE_TO_BCKCODE(SFI,CODE)\
+        (GtCodetype) ((CODE) >> (SFI)->spmopt_kmerscancodeshift2bckcode)
 
-#define GT_SCANCODE_TO_PREFIXCODE(CODE)\
-        (GtCodetype) ((CODE) >> sfi->spmopt_kmerscancodeshift2prefixcode)
+#define GT_SCANCODE_TO_PREFIXCODE(SFI,CODE)\
+        (GtCodetype) ((CODE) >> (SFI)->spmopt_kmerscancodeshift2prefixcode)
 
 #ifdef _LP64
-#define GT_SCANCODE_TO_SUFFIXCODE(CODE)\
-        (GtCodetype) ((CODE) & sfi->spmopt_kmerscancodesuffixmask);
+#define GT_SCANCODE_TO_SUFFIXCODE(SFI,CODE)\
+        (GtCodetype) ((CODE) & (SFI)->spmopt_kmerscancodesuffixmask)
 
 static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
                                         GtCodetype scancode)
 {
-  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
-  GtCodetype suffixcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
+  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(sfi,scancode);
+  GtCodetype suffixcode = GT_SCANCODE_TO_SUFFIXCODE(sfi,scancode);
 
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
   gt_assert(suffixcode < sfi->spmopt_numofallsuffixcodes);
@@ -360,7 +360,7 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
                                         GtCodetype scancode)
 {
-  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
+  GtCodetype prefixcode = GT_SCANCODE_TO_PREFIXCODE(sfi,scancode);
 
   gt_assert(prefixcode < sfi->spmopt_numofallprefixcodes);
   return GT_ISIBITSET(sfi->markprefixbuckets,prefixcode) ? true : false;
@@ -385,7 +385,7 @@ static void gt_insertkmerwithoutspecial1(Sfxiterator *sfi,
     }
   } else
   {
-    GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(scancode);
+    GtCodetype bcktabcode = GT_SCANCODE_TO_BCKCODE(sfi,scancode);
 
     if (bcktabcode >= sfi->currentmincode &&
         bcktabcode <= sfi->currentmaxcode &&
@@ -1378,36 +1378,31 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
   }
 }
 
-static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
-                                              bool firstinrange,
-                                              GT_UNUSED unsigned long position,
-                                              GtCodetype scancode)
-{
-  gt_assert(sfi->sfxstrategy.spmopt_minlength > 0);
-  if (firstinrange || gt_checksuffixprefixbuckets(sfi,scancode))
-  {
-    gt_bcktab_leftborder_addcode(sfi->leftborder,
-                                 GT_SCANCODE_TO_BCKCODE(scancode));
-  }
-}
+#define GT_SPMOPT_UPDATELEFTBORDERFORKMER(SFI,FIRSTINRANGE,POSITION,SCANCODE)\
+        gt_assert((SFI)->sfxstrategy.spmopt_minlength > 0);\
+        if (FIRSTINRANGE || gt_checksuffixprefixbuckets(SFI,SCANCODE))\
+        {\
+          gt_bcktab_leftborder_addcode((SFI)->leftborder,\
+                                       GT_SCANCODE_TO_BCKCODE(SFI,SCANCODE));\
+        }
 
 #define GT_FIRSTCODES_INSERTSUFFIXES(BUF,FIRSTINRANGE,POSITION,CODE)\
-  {\
-    GtCodetype tmpcode; /* use for GT_MARKSUBSTRING_CHECKMARK*/\
-    if ((BUF)->currentmincode <= (CODE) &&\
-        (CODE) <= (BUF)->currentmaxcode &&\
-        GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
-        GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
-    {\
-      if ((BUF)->nextfree == (BUF)->allocated)\
-      {\
-        (BUF)->flush_function((BUF)->fciptr);\
-      }\
-      gt_assert ((BUF)->nextfree < (BUF)->allocated);\
-      (BUF)->spaceGtUlongPair[(BUF)->nextfree].a = CODE;\
-      (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b = POSITION;\
-    }\
-  }
+        {\
+          GtCodetype tmpcode; /* use for GT_MARKSUBSTRING_CHECKMARK*/\
+          if ((BUF)->currentmincode <= (CODE) &&\
+              (CODE) <= (BUF)->currentmaxcode &&\
+              GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
+              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
+          {\
+            if ((BUF)->nextfree == (BUF)->allocated)\
+            {\
+              (BUF)->flush_function((BUF)->fciptr);\
+            }\
+            gt_assert ((BUF)->nextfree < (BUF)->allocated);\
+            (BUF)->spaceGtUlongPair[(BUF)->nextfree].a = CODE;\
+            (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b = POSITION;\
+          }\
+        }
 
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
@@ -1426,9 +1421,11 @@ static void gt_spmopt_updateleftborderforkmer(Sfxiterator *sfi,
 #define PROCESSKMERPREFIX(FUN) spmopt_updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
 #define PROCESSKMERSPECIALTYPE GT_UNUSED Sfxiterator
-#define PROCESSKMERCODE        gt_spmopt_updateleftborderforkmer
+#define PROCESSKMERCODE        GT_SPMOPT_UPDATELEFTBORDERFORKMER
+#define GT_IGNORERIGHTBOUND
 
 #include "sfx-mapped4.gen"
+#undef GT_IGNORERIGHTBOUND
 
 #undef PROCESSKMERPREFIX
 #undef PROCESSKMERTYPE
@@ -1470,7 +1467,7 @@ static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
                                           GtCodetype scancode)
 {
   Sfxiterator *sfi = (Sfxiterator *) processinfo;
-  GtCodetype checkcode = GT_SCANCODE_TO_PREFIXCODE(scancode);
+  GtCodetype checkcode = GT_SCANCODE_TO_PREFIXCODE(sfi,scancode);
 
   gt_assert(firstinrange);
   if (!GT_ISIBITSET(sfi->markprefixbuckets,checkcode))
@@ -1478,7 +1475,7 @@ static void gt_sfimarkprefixsuffixbuckets(void *processinfo,
     GT_SETIBIT(sfi->markprefixbuckets,checkcode);
   }
 #ifdef _LP64
-  checkcode = GT_SCANCODE_TO_SUFFIXCODE(scancode);
+  checkcode = GT_SCANCODE_TO_SUFFIXCODE(sfi,scancode);
   if (!GT_ISIBITSET(sfi->marksuffixbuckets,checkcode))
   {
     GT_SETIBIT(sfi->marksuffixbuckets,checkcode);

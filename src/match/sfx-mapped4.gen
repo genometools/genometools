@@ -26,12 +26,15 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                     unsigned long startpos,
                                     unsigned long endpos)
 {
-  unsigned long pos, unitindex, rightbound = totallength - kmersize;
+  unsigned long pos, unitindex;
   unsigned int shiftright;
   GtCodetype code;
   GtUchar cc;
   GtCodetype transcode;
   GtTwobitencoding currentencoding;
+#ifndef GT_IGNORERIGHTBOUND
+  unsigned long rightbound = totallength - kmersize;
+#endif
 
   gt_assert(kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
