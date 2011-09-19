@@ -612,6 +612,34 @@ typedef unsigned long QSORTNAME(Sorttype);
 
 #include "match/qsort-direct.gen"
 
+typedef struct
+{
+  size_t workspace, splitspace;
+} GtFirstcodesspacelog;
+
+static void gt_firstcodes_update_workspace(int line,
+                                           bool addtowork,
+                                           GtFirstcodesspacelog *fcsl,
+                                           size_t addworkspace)
+{
+  if (addtowork)
+  {
+    fcsl->workspace += addworkspace;
+  } else
+  {
+    fcsl->splitspace += addworkspace;
+  }
+  printf("line %d: add %.2f bytes to %space; work=%.2f,split=%.2f,all=%.2f\n",
+          line,
+          GT_MEGABYTES(addworkspace),
+          addtowork ? "work" : "split",
+          GT_MEGABYTES(fcsl->workspace),
+          GT_MEGABYTES(fcsl->splitspace),
+          GT_MEGABYTES(fcsl->workspace+fcsl->splitspace));
+  printf("current space peak %.2f\n",
+          GT_MEGABYTES(gt_spacepeak_get_space_peak()));
+}
+
 void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
                                                    unsigned int parts,
@@ -627,14 +655,16 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned int numofchars, part;
   const unsigned int markprefixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  unsigned long maxbucketsize, totallength, suftabentries, size_to_split,
-                largest_width;
+  unsigned long maxbucketsize, totallength, suftabentries, largest_width;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
-  size_t workspace;
   GtSuftabparts *suftabparts;
+  GtFirstcodesspacelog fcsl;
   GtSpmsk_state *spmsk_state = NULL;
 
-  workspace = (size_t) gt_encseq_sizeofrep(encseq);
+  fcsl.workspace = 0;
+  fcsl.splitspace = 0;
+  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+                                 (size_t) gt_encseq_sizeofrep(encseq));
   if (gt_showtime_enabled())
   {
     timer = gt_timer_new_with_progress_description("insert first codes into "
@@ -682,7 +712,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
   fci.buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
                                         markprefixunits);
-  workspace += gt_marksubstring_size(fci.buf.marksuffix);
+  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+                                 (size_t)
+                                 gt_marksubstring_size(fci.buf.marksuffix));
   fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
   if (fci.tab.differentcodes > 0)
   {
@@ -701,7 +733,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.mappedallfirstcodes = NULL;
     fci.mappedcountocc = NULL;
   }
-  size_to_split = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
+  gt_firstcodes_update_workspace(__LINE__,false,&fcsl,
+                                 (size_t)
+                                 gt_Sfxmappedrangelist_size_entire(sfxmrlist));
   gt_logger_log(logger,"number of different codes=%lu (%.4f) in %lu sequences",
                 fci.tab.differentcodes,
                 (double) fci.tab.differentcodes/fci.numofsequences,
@@ -711,7 +745,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
   binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
-  workspace += binsearchcache_size;
+  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,binsearchcache_size);
   gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
                        fci.binsearchcache_depth,
                        (unsigned long) binsearchcache_size);
@@ -719,7 +753,9 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.buf.nextfree = 0;
   fci.buf.spaceGtUlong = gt_malloc(sizeof (*fci.buf.spaceGtUlong)
                                    * fci.buf.allocated);
-  workspace += sizeof (*fci.buf.spaceGtUlong) * fci.buf.allocated;
+  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+                                 sizeof (*fci.buf.spaceGtUlong)
+                                 * fci.buf.allocated);
   gt_assert(fci.buf.allocated > 0);
   if (timer != NULL)
   {
@@ -727,8 +763,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   fci.tempcodeforradixsort = gt_malloc((size_t) fci.buf.allocated
                                        * sizeof (*fci.tempcodeforradixsort));
-  workspace += (size_t) fci.buf.allocated
-               * sizeof (*fci.tempcodeforradixsort);
+  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+                                 (size_t) fci.buf.allocated
+                                 * sizeof (*fci.tempcodeforradixsort));
+
   fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
   fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
   gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
@@ -917,12 +955,12 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
-  gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(workspace));
-  gt_logger_log(logger,"size to split = %.2f",
-                GT_MEGABYTES(size_to_split + suftab_size));
+  gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fcsl.workspace));
+  gt_logger_log(logger,"size to split = %.2f",GT_MEGABYTES(fcsl.splitspace));
+  gt_logger_log(logger,"suftabsize = %.2f",GT_MEGABYTES(suftab_size));
   gt_logger_log(logger,"estimatedspace = %.2f",
-                GT_MEGABYTES(workspace +
-                             size_to_split +
+                GT_MEGABYTES(fcsl.workspace +
+                             fcsl.splitspace +
                              suftab_size));
   if (timer != NULL)
   {
