@@ -37,9 +37,11 @@ typedef struct
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
+typedef uint32_t GtShortreadsortreftype;
+
 struct GtShortreadsortworkinfo
 {
-  uint16_t *shortreadsortrefs;
+  GtShortreadsortreftype *shortreadsortrefs;
   GtShortreadsort *shortreadsortinfo;
   GtLcpvalues *tableoflcpvalues; /* always NULL in the context of
                                     firstcodes; otherwise: NULL iff
@@ -52,7 +54,8 @@ struct GtShortreadsortworkinfo
 
 size_t gt_shortreadsort_size(unsigned long maxvalue)
 {
-  return (sizeof (GtShortreadsort) + sizeof (uint16_t)) * (maxvalue+1);
+  return (sizeof (GtShortreadsort) +
+         sizeof (GtShortreadsortreftype)) * (maxvalue+1);
 }
 
 const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
@@ -62,16 +65,19 @@ const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
   return srsw->firstcodeslcpvalues;
 }
 
-GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
+GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
                                               bool firstcodes)
 {
   unsigned long idx;
   GtShortreadsortworkinfo *srsw;
+  const unsigned long maxshortreadsort
+   = sizeof (GtShortreadsortreftype) == sizeof (uint16_t) ? UINT16_MAX
+                                                          : UINT32_MAX;
 
   srsw = gt_malloc(sizeof(*srsw));
-  srsw->numofentries = maxshortreadsort + 1;
-  gt_assert(maxshortreadsort <= UINT16_MAX);
+  srsw->numofentries = maxwidth + 1;
+  gt_assert(maxwidth <= maxshortreadsort);
   srsw->shortreadsortinfo
     = gt_malloc(sizeof (*srsw->shortreadsortinfo) * srsw->numofentries);
   srsw->shortreadsortrefs
@@ -90,7 +96,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxshortreadsort,
   srsw->tableoflcpvalues = NULL;
   for (idx = 0; idx < srsw->numofentries; idx++)
   {
-    srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+    srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
   }
   return srsw;
 }
@@ -183,7 +189,7 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
         (unsigned long) data->shortreadsortrefs[IDX]
 
 #define shortread_ARRAY_SET(ARR,IDX,VALUE)\
-        data->shortreadsortrefs[IDX] = (uint16_t) VALUE
+        data->shortreadsortrefs[IDX] = (GtShortreadsortreftype) VALUE
 
 typedef GtShortreadsortworkinfo * QSORTNAME(Datatype);
 
@@ -542,7 +548,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
     {
       exportptr->ulongtabsectionptr[idx]
         = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
-      srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+      srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(sssp,idx);
@@ -555,7 +561,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
       exportptr->uinttabsectionptr[idx]
         = (uint32_t) srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]]
                                             .suffix;
-      srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+      srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(sssp,idx);
@@ -579,7 +585,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
 
   for (idx = 0; idx < width; idx++)
   {
-    srsw->shortreadsortrefs[idx] = (uint16_t) idx;
+    srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
   }
   for (idx = 0; idx < width; idx++)
   {

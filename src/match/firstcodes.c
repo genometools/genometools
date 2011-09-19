@@ -643,8 +643,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   fci.numofsequences = gt_encseq_num_of_sequences(encseq);
   sizeforcodestable = sizeof (*fci.tab.allfirstcodes) * fci.numofsequences;
-  gt_logger_log(logger,"use array of size %lu",
-                 (unsigned long) sizeforcodestable);
+  gt_logger_log(logger,"store %lu prefix codes",fci.numofsequences);
   fci.tab.allfirstcodes = gt_malloc(sizeforcodestable);
   fci.tab.differentcodes = 0;
   fci.countsequences = 0;
@@ -663,7 +662,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_assert(fci.numofsequences == fci.countsequences);
   if (timer != NULL)
   {
-    gt_timer_show_progress(timer, "sorting the codes",stdout);
+    gt_timer_show_progress(timer, "to sort the codes",stdout);
   }
   QSORTNAME(gt_direct_qsort)
              (6UL, false,
@@ -724,7 +723,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_assert(fci.buf.allocated > 0);
   if (timer != NULL)
   {
-    gt_timer_show_progress(timer, "accumulate counts",stdout);
+    gt_timer_show_progress(timer, "to accumulate counts",stdout);
   }
   fci.tempcodeforradixsort = gt_malloc((size_t) fci.buf.allocated
                                        * sizeof (*fci.tempcodeforradixsort));
@@ -748,7 +747,7 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                           (double) fci.firstcodehits/totallength);
   if (timer != NULL)
   {
-    gt_timer_show_progress(timer, "compute partial sums",stdout);
+    gt_timer_show_progress(timer, "to compute partial sums",stdout);
   }
   maxbucketsize = storefirstcodes_partialsum(&fci);
   gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
