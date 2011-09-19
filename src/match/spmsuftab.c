@@ -33,13 +33,7 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
     gt_logger_log(logger,"use %lu bitpackarray-entries of %u bits (%lu bytes)",
                   numofentries,bitspervalue,required);
     spmsuftab->bitpackarray
-#ifdef THOMASBITPACK
-      = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
-    gt_logger_log(logger,"thomas' version");
-#else
       = gt_GtCompactulongstore_new(numofentries,bitspervalue);
-    gt_logger_log(logger,"sk version");
-#endif
     spmsuftab->suftab = NULL;
   } else
   {
@@ -58,12 +52,7 @@ void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
 {
   if (spmsuftab->bitpackarray != NULL)
   {
-    gt_free(spmsuftab->suftab);
-#ifdef THOMASBITPACK
-    bitpackarray_delete(spmsuftab->bitpackarray);
-#else
     gt_GtCompactulongstore_delete(spmsuftab->bitpackarray);
-#endif
   } else
   {
     gt_free(spmsuftab->suftab);
@@ -84,11 +73,7 @@ size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
   if (bitspervalue > 32U)
   {
     return sizeof (GtSpmsuftab) +
-#ifdef THOMASBITPACK
-           sizeofbitarray(bitspervalue,(BitOffset) numofentries);
-#else
            gt_GtCompactulongstore_size(numofentries,bitspervalue);
-#endif
   } else
   {
     return sizeof (GtSpmsuftab) + numofentries * sizeof (uint32_t);
