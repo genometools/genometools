@@ -877,8 +877,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
       gt_free(fci.buf.spaceGtUlongPair);
       gt_free(fci.tempcodeposforradixsort);
+      gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
       gt_marksubstring_delete(fci.buf.markprefix,
                               fci.mappedmarkprefix == NULL ? true : false);
+      fci.buf.markprefix = NULL;
       gt_marksubstring_delete(fci.buf.marksuffix,true);
       if (fci.mappedallfirstcodes == NULL)
       {
@@ -914,7 +916,6 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_free(fci.tab.countocc);
   }
   gt_spmsuftab_delete(fci.spmsuftab);
-  gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
   gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
   gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(workspace));

@@ -21,15 +21,21 @@
 #include "core/unused_api.h"
 #include "core/logger_api.h"
 
-#define SPMSUFTABBITPACK
-#ifdef SPMSUFTABBITPACK
+#undef THOMASBITPACK
+#ifdef THOMASBITPACK
 #include "core/bitpackarray.h"
+#else
+#include "core/compactulongstore.h"
 #endif
 
 typedef struct
 {
   unsigned long partoffset, numofentries, maxvalue;
+#ifdef THOMASBITPACK
   BitPackArray *bitpackarray;
+#else
+  GtCompactUlongstore *bitpackarray;
+#endif
   uint32_t *suftab;
 } GtSpmsuftab;
 
@@ -42,12 +48,16 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
   gt_assert(idx < spmsuftab->numofentries && value <= spmsuftab->maxvalue);
   if (spmsuftab->bitpackarray != NULL)
   {
+#ifdef THOMASBITPACK
 #ifdef _LP64
     bitpackarray_store_uint64(spmsuftab->bitpackarray, (BitOffset) idx,
                               (uint64_t) value);
 #else
     bitpackarray_store_uint32(spmsuftab->bitpackarray, (BitOffset) idx,
                               (uint32_t) value);
+#endif
+#else
+    gt_GtCompactulongstore_update(spmsuftab->bitpackarray,idx,value);
 #endif
   } else
   {
@@ -65,11 +75,15 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
   gt_assert(idx < spmsuftab->numofentries);
   if (spmsuftab->bitpackarray != NULL)
   {
+#ifdef THOMASBITPACK
 #ifdef _LP64
     return bitpackarray_get_uint64(spmsuftab->bitpackarray,(BitOffset) idx);
 #else
     return (unsigned long)
            bitpackarray_get_uint32(spmsuftab->bitpackarray,(BitOffset) idx);
+#endif
+#else
+    return gt_GtCompactulongstore_get(spmsuftab->bitpackarray,idx);
 #endif
   } else
   {

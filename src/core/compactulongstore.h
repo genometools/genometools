@@ -25,6 +25,9 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
 
 void gt_GtCompactulongstore_delete(GtCompactUlongstore *cus);
 
+size_t gt_GtCompactulongstore_size(unsigned long numofentries,
+                                   unsigned int bitsperentry);
+
 unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
                                          unsigned long idx);
 

@@ -26,6 +26,7 @@
 struct GtCompactUlongstore
 {
   unsigned long *tab,
+                numofentries,
                 maskright;
   unsigned int bitsperentry,
                bitsleft;
@@ -40,6 +41,7 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
   gt_assert(numofentries <= ULONG_MAX/bitsperentry);
   totalbits = numofentries * bitsperentry;
   cus = gt_malloc(sizeof (*cus));
+  cus->numofentries = numofentries;
   arraysize = GT_DIVWORDSIZE(totalbits);
   if (GT_MODWORDSIZE(totalbits) > 0)
   {
@@ -51,6 +53,21 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
   cus->bitsleft = (unsigned int) GT_INTWORDSIZE - cus->bitsperentry;
   cus->maskright = ~0UL >> cus->bitsleft;
   return cus;
+}
+
+size_t gt_GtCompactulongstore_size(unsigned long numofentries,
+                                   unsigned int bitsperentry)
+{
+  unsigned long arraysize, totalbits;
+
+  gt_assert(numofentries <= ULONG_MAX/bitsperentry);
+  totalbits = numofentries * bitsperentry;
+  arraysize = GT_DIVWORDSIZE(totalbits);
+  if (GT_MODWORDSIZE(totalbits) > 0)
+  {
+    arraysize++;
+  }
+  return sizeof (GtCompactUlongstore) + sizeof (unsigned long) * arraysize;
 }
 
 void gt_GtCompactulongstore_delete(GtCompactUlongstore *cus)
@@ -68,6 +85,7 @@ unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
   unsigned int unitoffset;
   unsigned long unitindex;
 
+  gt_assert(idx < cus->numofentries);
   idx *= cus->bitsperentry;
   unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
   unitindex = GT_DIVWORDSIZE(idx);
@@ -93,6 +111,7 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
   unsigned int unitoffset;
   unsigned long unitindex;
 
+  gt_assert(idx < cus->numofentries);
   gt_assert(value <= cus->maskright);
   idx *= cus->bitsperentry;
   unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
@@ -106,14 +125,13 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
   } else
   {
     unsigned int shiftright = unitoffset - cus->bitsleft;
-    unsigned long masklast = ~0UL >> (GT_INTWORDSIZE + cus->bitsleft -
-                                      unitoffset);
 
     cus->tab[unitindex]
       = (cus->tab[unitindex] & ~(cus->maskright >> shiftright)) |
         (value >> shiftright);
     cus->tab[unitindex+1]
-      = (cus->tab[unitindex+1] & masklast) |
+      = (cus->tab[unitindex+1] & ~(cus->maskright <<
+                                   (GT_INTWORDSIZE - shiftright))) |
         (value << (GT_INTWORDSIZE - shiftright));
   }
 }

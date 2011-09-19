@@ -272,6 +272,7 @@ void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
   {
     return;
   }
+  gt_logger_log(logger,"delete table %s",gt_str_get(sfxmappedrange->tablename));
   gt_fa_xmunmap(sfxmappedrange->ptr);
   sfxmappedrange->ptr = NULL;
   gt_fa_xmunmap(sfxmappedrange->entire);
