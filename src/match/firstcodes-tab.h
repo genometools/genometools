@@ -18,11 +18,15 @@
 #ifndef FIRSTCODES_TAB_H
 #define FIRSTCODES_TAB_H
 
+#include <inttypes.h>
+
 typedef struct
 {
   unsigned long differentcodes,
                 *allfirstcodes,
-                *countocc;
+                overflow_index;
+  uint32_t *countocc;
+  unsigned long *overflow_countocc;
 } GtFirstcodestab;
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,

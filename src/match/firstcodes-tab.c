@@ -23,7 +23,13 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx)
 {
   gt_assert(idx <= fct->differentcodes);
-  return fct->countocc[idx];
+  if (fct->overflow_index == 0 || idx < fct->overflow_index)
+  {
+    return (unsigned long) fct->countocc[idx];
+  } else
+  {
+    return fct->overflow_countocc[idx - fct->overflow_index];
+  }
 }
 
 unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct)
