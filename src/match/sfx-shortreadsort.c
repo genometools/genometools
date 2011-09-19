@@ -71,9 +71,11 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
 {
   unsigned long idx;
   GtShortreadsortworkinfo *srsw;
+#ifndef NDEBUG
   const unsigned long maxshortreadsort
    = sizeof (GtShortreadsortreftype) == sizeof (uint16_t) ? UINT16_MAX
                                                           : UINT32_MAX;
+#endif
 
   srsw = gt_malloc(sizeof(*srsw));
   srsw->numofentries = maxwidth + 1;

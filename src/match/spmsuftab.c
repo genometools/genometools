@@ -23,25 +23,17 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
                               unsigned long maxvalue,
                               GtLogger *logger)
 {
-  GtSpmsuftab *spmsuftab = gt_malloc(sizeof (*spmsuftab));
-  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+  GtSpmsuftab *spmsuftab;
+  unsigned int bitspervalue;
   unsigned long required = (unsigned long)
                            gt_spmsuftab_requiredspace(numofentries,maxvalue);
 
-  if (bitspervalue > 32U)
-  {
-    gt_logger_log(logger,"use %lu bitpackarray-entries of %u bits (%lu bytes)",
-                  numofentries,bitspervalue,required);
-    spmsuftab->bitpackarray
-      = gt_GtCompactulongstore_new(numofentries,bitspervalue);
-    spmsuftab->suftab = NULL;
-  } else
-  {
-    gt_logger_log(logger,"use %lu uint32_t-entries (%lu bytes)",
-                         numofentries,required);
-    spmsuftab->bitpackarray = NULL;
-    spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
-  }
+  bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+  gt_logger_log(logger,"use %lu bitpackarray-entries of %u bits (%lu bytes)",
+                numofentries,bitspervalue,required);
+  spmsuftab = gt_malloc(sizeof (*spmsuftab));
+  spmsuftab->bitpackarray
+    = gt_GtCompactulongstore_new(numofentries,bitspervalue);
   spmsuftab->partoffset = 0;
   spmsuftab->numofentries = numofentries;
   spmsuftab->maxvalue = maxvalue;
@@ -50,13 +42,7 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
 {
-  if (spmsuftab->bitpackarray != NULL)
-  {
-    gt_GtCompactulongstore_delete(spmsuftab->bitpackarray);
-  } else
-  {
-    gt_free(spmsuftab->suftab);
-  }
+  gt_GtCompactulongstore_delete(spmsuftab->bitpackarray);
   gt_free(spmsuftab);
 }
 
@@ -70,12 +56,6 @@ size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
 {
   unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
 
-  if (bitspervalue > 32U)
-  {
-    return sizeof (GtSpmsuftab) +
-           gt_GtCompactulongstore_size(numofentries,bitspervalue);
-  } else
-  {
-    return sizeof (GtSpmsuftab) + numofentries * sizeof (uint32_t);
-  }
+  return sizeof (GtSpmsuftab) +
+         gt_GtCompactulongstore_size(numofentries,bitspervalue);
 }

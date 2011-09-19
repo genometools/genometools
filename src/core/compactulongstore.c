@@ -119,6 +119,7 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
   if (unitoffset <= (unsigned int) cus->bitsleft)
   {
     unsigned int shiftleft = cus->bitsleft - unitoffset;
+
     cus->tab[unitindex]
       = (cus->tab[unitindex] & ~(cus->maskright << shiftleft)) |
         (value << shiftleft);

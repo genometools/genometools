@@ -26,7 +26,6 @@ typedef struct
 {
   unsigned long partoffset, numofentries, maxvalue;
   GtCompactUlongstore *bitpackarray;
-  uint32_t *suftab;
 } GtSpmsuftab;
 
 GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
@@ -36,14 +35,8 @@ GT_UNUSED static inline void gt_spmsuftab_set(GtSpmsuftab *spmsuftab,
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
   gt_assert(idx < spmsuftab->numofentries && value <= spmsuftab->maxvalue);
-  if (spmsuftab->bitpackarray != NULL)
-  {
-    gt_GtCompactulongstore_update(spmsuftab->bitpackarray,idx,value);
-  } else
-  {
-    gt_assert(spmsuftab->suftab != NULL && value <= UINT32_MAX);
-    spmsuftab->suftab[idx] = (uint32_t) value;
-  }
+  gt_assert(spmsuftab->bitpackarray != NULL);
+  gt_GtCompactulongstore_update(spmsuftab->bitpackarray,idx,value);
 }
 
 GT_UNUSED static inline unsigned long gt_spmsuftab_get(
@@ -53,14 +46,7 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
   gt_assert(idx >= spmsuftab->partoffset);
   idx -= spmsuftab->partoffset;
   gt_assert(idx < spmsuftab->numofentries);
-  if (spmsuftab->bitpackarray != NULL)
-  {
-    return gt_GtCompactulongstore_get(spmsuftab->bitpackarray,idx);
-  } else
-  {
-    gt_assert(spmsuftab->suftab != NULL);
-    return (unsigned long) spmsuftab->suftab[idx];
-  }
+  return gt_GtCompactulongstore_get(spmsuftab->bitpackarray,idx);
 }
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
