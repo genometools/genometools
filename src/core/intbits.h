@@ -187,12 +187,12 @@ typedef GtBitsequence GtTwobitencoding;
   unsigned int idx, unit = 0;
   GtBitsequence mask;
 
-  for (idx=0, unit = 0, mask = GT_FIRSTBIT;
+  for (idx=0, unit = 1U, mask = GT_FIRSTBIT;
        mask > 0;
        unit++, mask >>= 1)
   {
     buffer[idx++] = (bs & mask) ? '1' : '0';
-    if (unit % units > 0)
+    if (unit % units == 0)
     {
       buffer[idx++] = ' ';
     }

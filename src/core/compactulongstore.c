@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <limits.h>
 #include "intbits.h"
 #include "error_api.h"
 #include "mathsupport.h"
@@ -34,14 +35,16 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
                                                 unsigned int bitsperentry)
 {
   GtCompactUlongstore *cus;
-  uint64_t arraysize, totalbits = (uint64_t) numofentries * bitsperentry;
+  unsigned long arraysize, totalbits;
 
+  gt_assert(numofentries <= ULONG_MAX/bitsperentry);
+  totalbits = numofentries * bitsperentry;
+  cus = gt_malloc(sizeof (*cus));
   arraysize = GT_DIVWORDSIZE(totalbits);
   if (GT_MODWORDSIZE(totalbits) > 0)
   {
     arraysize++;
   }
-  cus = gt_malloc(sizeof (*cus));
   cus->tab = gt_calloc((size_t) arraysize,sizeof (*cus->tab));
   cus->bitsperentry = bitsperentry;
   gt_assert(bitsperentry <= (unsigned int) GT_INTWORDSIZE);
@@ -62,9 +65,12 @@ void gt_GtCompactulongstore_delete(GtCompactUlongstore *cus)
 unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
                                          unsigned long idx)
 {
-  const unsigned int unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
-  const unsigned long unitindex = GT_DIVWORDSIZE(idx);
+  unsigned int unitoffset;
+  unsigned long unitindex;
 
+  idx *= cus->bitsperentry;
+  unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
+  unitindex = GT_DIVWORDSIZE(idx);
   if (unitoffset <= (unsigned int) cus->bitsleft)
   {
     return (unsigned long) (cus->tab[unitindex] >>
@@ -84,10 +90,13 @@ unsigned long gt_GtCompactulongstore_get(const GtCompactUlongstore *cus,
 void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
                                    unsigned long idx,unsigned long value)
 {
-  const unsigned int unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
-  const unsigned long unitindex = GT_DIVWORDSIZE(idx);
+  unsigned int unitoffset;
+  unsigned long unitindex;
 
   gt_assert(value <= cus->maskright);
+  idx *= cus->bitsperentry;
+  unitoffset = (unsigned int) GT_MODWORDSIZE(idx);
+  unitindex = GT_DIVWORDSIZE(idx);
   if (unitoffset <= (unsigned int) cus->bitsleft)
   {
     unsigned int shiftleft = cus->bitsleft - unitoffset;
@@ -101,7 +110,7 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
                                       unitoffset);
 
     cus->tab[unitindex]
-      = (cus->tab[unitindex] & (cus->maskright >> shiftright)) |
+      = (cus->tab[unitindex] & ~(cus->maskright >> shiftright)) |
         (value >> shiftright);
     cus->tab[unitindex+1]
       = (cus->tab[unitindex+1] & masklast) |
@@ -109,12 +118,12 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
   }
 }
 
-int gt_GtCompactulongstore_unit_test(GT_UNUSED GtError *err)
+int gt_GtCompactulongstore_unit_test(GtError *err)
 {
   GtCompactUlongstore *cus;
-  const unsigned long constnums = 1000UL;
+  const unsigned long constnums = 100000UL;
   unsigned int bits;
-  unsigned long nums, idx, numforbits, *checknumbers;
+  unsigned long value, nums, idx, numforbits, *checknumbers;
   int had_err = 0;
 
   checknumbers = gt_malloc(sizeof (*checknumbers) * constnums);
@@ -122,22 +131,18 @@ int gt_GtCompactulongstore_unit_test(GT_UNUSED GtError *err)
   {
     numforbits = 1UL << bits;
     nums = numforbits < constnums ? numforbits : constnums;
-    printf("bits=%u => %lu entries\n",bits,nums);
     cus = gt_GtCompactulongstore_new(nums,bits);
     for (idx = 0; idx < nums; idx++)
     {
       checknumbers[idx] = nums == constnums ? gt_rand_max(numforbits-1) : idx;
       gt_GtCompactulongstore_update(cus,idx,checknumbers[idx]);
+      value = gt_GtCompactulongstore_get(cus,idx);
+      ensure(had_err,checknumbers[idx] == value);
     }
     for (idx = 0; had_err == 0 && idx < nums; idx++)
     {
-      unsigned long value = gt_GtCompactulongstore_get(cus,idx);
-      if (checknumbers[idx] != value)
-      {
-        fprintf(stderr,"number = %lu != %lu = value\n",
-                checknumbers[idx],value);
-        exit(EXIT_FAILURE);
-      }
+      value = gt_GtCompactulongstore_get(cus,idx);
+      ensure(had_err,checknumbers[idx] == value);
     }
     gt_GtCompactulongstore_delete(cus);
   }

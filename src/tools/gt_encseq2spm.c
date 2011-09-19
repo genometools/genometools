@@ -21,7 +21,6 @@
 #include "core/option_api.h"
 #include "core/encseq_api.h"
 #include "core/logger.h"
-#include "core/compactulongstore.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
 
@@ -154,7 +153,6 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   bool haserr = false;
 
   gt_error_check(err);
-  /*(void) gt_GtCompactulongstore_unit_test(err);*/
   gt_assert(arguments);
   el = gt_encseq_loader_new();
   gt_encseq_loader_drop_description_support(el);

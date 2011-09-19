@@ -28,7 +28,7 @@
 #include "core/codon_iterator_simple.h"
 #include "core/colorspace.h"
 #include "core/countingsort.h"
-/*#include "core/compactulongstore.h"*/
+#include "core/compactulongstore.h"
 #include "core/cstr_table.h"
 #include "core/desc_buffer.h"
 #include "core/disc_distri.h"
@@ -211,8 +211,8 @@ GtHashmap* gtt_unit_tests(void)
   GtHashmap *unit_tests = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
   /* add unit tests */
-  /*gt_hashmap_add(unit_tests, "compactulongstore class", 
-                 gt_GtCompactulongstore_unit_test);*/
+  gt_hashmap_add(unit_tests, "compactulongstore class",
+                 gt_GtCompactulongstore_unit_test);
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
   gt_hashmap_add(unit_tests, "array example", gt_array_example);
