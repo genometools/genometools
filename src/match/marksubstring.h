@@ -51,7 +51,7 @@ unsigned int gt_marksubstring_shiftright(const Gtmarksubstring *mark);
 
 unsigned long gt_marksubstring_entries(const Gtmarksubstring *mark);
 
-unsigned long gt_marksubstring_size(const Gtmarksubstring *mark);
+size_t gt_marksubstring_size(const Gtmarksubstring *mark);
 
 void gt_marksubstring_bits_null(const Gtmarksubstring *mark,bool null);
 

@@ -25,20 +25,20 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
 {
   GtSpmsuftab *spmsuftab = gt_malloc(sizeof (*spmsuftab));
   unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+  unsigned long required = (unsigned long)
+                           gt_spmsuftab_requiredspace(numofentries,maxvalue);
 
   if (bitspervalue > 32U)
   {
     gt_logger_log(logger,"use %lu bitpackarray-entries of %u bits (%lu bytes)",
-                  numofentries,bitspervalue,
-                  gt_spmsuftab_requiredspace(numofentries,maxvalue));
+                  numofentries,bitspervalue,required);
     spmsuftab->bitpackarray
       = bitpackarray_new(bitspervalue,(BitOffset) numofentries,true);
     spmsuftab->suftab = NULL;
   } else
   {
     gt_logger_log(logger,"use %lu uint32_t-entries (%lu bytes)",
-                         numofentries,
-                         gt_spmsuftab_requiredspace(numofentries,maxvalue));
+                         numofentries,required);
     spmsuftab->bitpackarray = NULL;
     spmsuftab->suftab = gt_malloc(sizeof (*spmsuftab->suftab) * numofentries);
   }
