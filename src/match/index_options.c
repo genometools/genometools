@@ -235,48 +235,9 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
   }
   if (!had_err
         && oi->optionmemlimit != NULL
-        && gt_option_is_set(oi->optionmemlimit)) {
-    int readint;
-    char buffer[3];
-    bool match = false;
-    had_err = gt_grep(&match, "^[0-9]+(MB|GB)$", gt_str_get(oi->memlimit),
-                      err);
-    if (had_err || !match)
-    {
-      gt_error_set(err,"option -memlimit must have one positive "
-                       "integer argument followed by one of "
-                       "the keywords MB and GB");
-      had_err = -1;
-    }
-    if (!had_err)
-    {
-      (void) sscanf(gt_str_get(oi->memlimit), "%d%s", &readint, buffer);
-      oi->maximumspace = (unsigned long) readint;
-      if (strcmp(buffer, "GB") == 0)
-      {
-        if (sizeof (unsigned long) == (size_t) 4 && oi->maximumspace > 3UL)
-        {
-          gt_error_set(err,"for 32bit binaries one cannot specify more "
-                           "than 3 GB as maximum space");
-          had_err = -1;
-        }
-        if (had_err != 1)
-        {
-          oi->maximumspace <<= 30;
-        }
-      } else if (strcmp(buffer, "MB") == 0) {
-        if (sizeof (unsigned long) == (size_t) 4 && oi->maximumspace > 4095UL)
-        {
-          gt_error_set(err,"for 32bit binaries one cannot specify more "
-                           "than 4095 MB as maximum space");
-          had_err = -1;
-        }
-        if (!had_err)
-        {
-          oi->maximumspace <<= 20;
-        }
-      }
-    }
+        && gt_option_is_set(oi->optionmemlimit))
+  {
+    had_err = gt_option_parse_memlimit(&oi->maximumspace,oi->memlimit,err);
   }
   if (!had_err)
   {

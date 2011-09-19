@@ -21,6 +21,7 @@
 #include "core/cstr_api.h"
 #include "core/fa.h"
 #include "core/hashmap_api.h"
+#include "core/grep_api.h"
 #include "core/ma.h"
 #include "core/mail_address.h"
 #include "core/option_api.h"
@@ -1576,4 +1577,57 @@ void gt_option_delete(GtOption *o)
   gt_array_delete(o->exclusions);
   gt_array_delete(o->mandatory_either_options);
   gt_free(o);
+}
+
+int gt_option_parse_memlimit(unsigned long *maximumspace,const GtStr *memlimit,
+                             GtError *err)
+{
+  int had_err = 0;
+  bool match = false;
+
+  had_err = gt_grep(&match, "^[0-9]+(MB|GB)$", gt_str_get(memlimit), err);
+  if (had_err || !match)
+  {
+    gt_error_set(err,"option -memlimit must have one positive "
+                     "integer argument followed by one of "
+                     "the keywords MB and GB");
+    had_err = -1;
+  }
+  if (!had_err)
+  {
+    int readint;
+    char buffer[2+1];
+
+    (void) sscanf(gt_str_get(memlimit), "%d%s", &readint, buffer);
+    *maximumspace = (unsigned long) readint;
+    if (strcmp(buffer, "GB") == 0)
+    {
+      if (sizeof (unsigned long) == (size_t) 4 && *maximumspace > 3UL)
+      {
+        gt_error_set(err,"for 32bit binaries one cannot specify more "
+                         "than 3 GB as maximum space");
+        had_err = -1;
+      }
+      if (had_err != 1)
+      {
+        *maximumspace <<= 30;
+      }
+    } else
+    {
+      if (strcmp(buffer, "MB") == 0)
+      {
+        if (sizeof (unsigned long) == (size_t) 4 && *maximumspace > 4095UL)
+        {
+          gt_error_set(err,"for 32bit binaries one cannot specify more "
+                           "than 4095 MB as maximum space");
+          had_err = -1;
+        }
+        if (!had_err)
+        {
+          *maximumspace <<= 20;
+        }
+      }
+    }
+  }
+  return had_err;
 }
