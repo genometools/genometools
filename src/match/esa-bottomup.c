@@ -17,7 +17,6 @@
 
 #include <limits.h>
 #include "core/ma.h"
-#include "core/arraydef.h"
 #include "esa-bottomup.h"
 #include "esa-seqread.h"
 
@@ -61,7 +60,8 @@ GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void)
 {
   GtArrayGtBUItvinfo *stack = gt_malloc(sizeof (*stack));
 
-  GT_INITARRAY(stack,GtBUItvinfo);
+  stack->spaceGtBUItvinfo = NULL;
+  stack->allocatedGtBUItvinfo = stack->nextfreeGtBUItvinfo = 0;
   return stack;
 }
 

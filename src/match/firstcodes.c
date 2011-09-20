@@ -1035,8 +1035,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   gt_spmsk_delete(spmsk_state);
   gt_suftabparts_delete(suftabparts);
-  gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
-  gt_assert(fci.firstcodeposhits == suftabentries);
+  if (!haserr)
+  {
+    gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
+    gt_assert(fci.firstcodeposhits == suftabentries);
+  }
   if (fci.mappedcountocc == NULL)
   {
     gt_free(fci.tab.countocc);
@@ -1045,13 +1048,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
-  gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fcsl.workspace));
-  gt_logger_log(logger,"size to split = %.2f",GT_MEGABYTES(fcsl.splitspace));
-  gt_logger_log(logger,"suftabsize = %.2f",GT_MEGABYTES(suftab_size));
-  gt_logger_log(logger,"estimatedspace = %.2f",
-                GT_MEGABYTES(fcsl.workspace +
-                             fcsl.splitspace +
-                             suftab_size));
+  if (!haserr)
+  {
+    gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fcsl.workspace));
+    gt_logger_log(logger,"size to split = %.2f",GT_MEGABYTES(fcsl.splitspace));
+    gt_logger_log(logger,"suftabsize = %.2f",GT_MEGABYTES(suftab_size));
+    gt_logger_log(logger,"estimatedspace = %.2f",
+                  GT_MEGABYTES(fcsl.workspace +
+                               fcsl.splitspace +
+                               suftab_size));
+  }
   if (timer != NULL)
   {
     gt_timer_show_progress_final(timer, stdout);
