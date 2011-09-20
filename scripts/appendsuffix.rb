@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 
 #
 # Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>

@@ -36,7 +36,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
 #ifdef SHUDEBUG
   unsigned long id;
 #endif
-} BUinfo_shulen;
+} GtBUinfo_shulen;
 
 typedef struct  /* global information */
 {
@@ -48,9 +48,9 @@ typedef struct  /* global information */
 #ifdef SHUDEBUG
   unsigned long nextid;
 #endif
-} BUstate_shulen;
+} GtBUstate_shulen;
 
-static void resetgnumdist_shulen(BUinfo_shulen *father,
+static void resetgnumdist_shulen(GtBUinfo_shulen *father,
                                     unsigned long numofdbfiles)
 {
   unsigned long idx;
@@ -64,8 +64,8 @@ static void resetgnumdist_shulen(BUinfo_shulen *father,
   }
 }
 
-static void initBUinfo_shulen(BUinfo_shulen *buinfo,
-                              GT_UNUSED BUstate_shulen *state)
+static void initBUinfo_shulen(GtBUinfo_shulen *buinfo,
+                              GT_UNUSED GtBUstate_shulen *state)
 {
 #ifdef SHUDEBUG
   buinfo->id = state->nextid++;
@@ -73,8 +73,8 @@ static void initBUinfo_shulen(BUinfo_shulen *buinfo,
   buinfo->gnumdist = NULL;
 }
 
-static void freeBUinfo_shulen(BUinfo_shulen *buinfo,
-                              GT_UNUSED BUstate_shulen *state)
+static void freeBUinfo_shulen(GtBUinfo_shulen *buinfo,
+                              GT_UNUSED GtBUstate_shulen *state)
 {
   gt_free(buinfo->gnumdist);
 }
@@ -94,9 +94,9 @@ static void contribute_shulen(GT_UNUSED int line,
 }
 
 #ifdef SHUDEBUG
-static void shownode(int line,const BUstate_shulen *state,
+static void shownode(int line,const GtBUstate_shulen *state,
                      const char *kind,
-                     const BUinfo_shulen *node)
+                     const GtBUinfo_shulen *node)
 {
   unsigned long idx;
 
@@ -116,9 +116,9 @@ static void shownode(int line,const BUstate_shulen *state,
 static int processleafedge_shulen(bool firstsucc,
                                   unsigned long fatherdepth,
                                   GT_UNUSED unsigned long fatherlb,
-                                  BUinfo_shulen *father,
+                                  GtBUinfo_shulen *father,
                                   unsigned long leafnumber,
-                                  BUstate_shulen *state,
+                                  GtBUstate_shulen *state,
                                   GT_UNUSED GtError *err)
 {
   unsigned long idx, gnum;
@@ -190,10 +190,10 @@ static int processleafedge_shulen(bool firstsucc,
   return 0;
 }
 
-static void cartproduct_shulen(BUstate_shulen *state,
+static void cartproduct_shulen(GtBUstate_shulen *state,
                                unsigned long depth,
-                               const BUinfo_shulen *node1,
-                               const BUinfo_shulen *node2)
+                               const GtBUinfo_shulen *node1,
+                               const GtBUinfo_shulen *node2)
 {
   unsigned long referidx, shulenidx;
 
@@ -217,12 +217,12 @@ static void cartproduct_shulen(BUstate_shulen *state,
 static int processbranchingedge_shulen(bool firstsucc,
                                        unsigned long fatherdepth,
                                        GT_UNUSED unsigned long fatherlp,
-                                       BUinfo_shulen *father,
+                                       GtBUinfo_shulen *father,
                                        GT_UNUSED unsigned long sondepth,
                                        GT_UNUSED unsigned long sonlb,
                                        GT_UNUSED unsigned long sonrb,
-                                       BUinfo_shulen *son,
-                                       BUstate_shulen *state,
+                                       GtBUinfo_shulen *son,
+                                       GtBUstate_shulen *state,
                                        GT_UNUSED GtError *err)
 {
   unsigned long idx;
@@ -282,8 +282,8 @@ static int processbranchingedge_shulen(bool firstsucc,
 static int processlcpinterval_shulen(GT_UNUSED unsigned long lcp,
                                      GT_UNUSED unsigned long lb,
                                      GT_UNUSED unsigned long rb,
-                                     GT_UNUSED BUinfo_shulen *info,
-                                     GT_UNUSED BUstate_shulen *state,
+                                     GT_UNUSED GtBUinfo_shulen *info,
+                                     GT_UNUSED GtBUstate_shulen *state,
                                      GT_UNUSED GtError *err)
 {
   return 0;
@@ -295,7 +295,7 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
                               const GtEncseq *encseq,
                               GtError *err)
 {
-  BUstate_shulen *state;
+  GtBUstate_shulen *state;
   bool haserr = false;
   unsigned long referidx, shulenidx;
 
@@ -471,7 +471,7 @@ int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
                                  struct GtShuUnitFileInfo_tag *unit_info,
                                  GtError *err)
 {
-  BUstate_shulen *state;
+  GtBUstate_shulen *state;
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));

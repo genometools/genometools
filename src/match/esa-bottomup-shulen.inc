@@ -19,65 +19,97 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static void initBUinfo_shulen(BUinfo_shulen *,BUstate_shulen *);
+static void initBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
 
-static void freeBUinfo_shulen(BUinfo_shulen *,BUstate_shulen *);
+static void freeBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
 
 static int processleafedge_shulen(bool,
     unsigned long,
     unsigned long,
-    BUinfo_shulen *,
+    GtBUinfo_shulen *,
     unsigned long,
-    BUstate_shulen *,
+    GtBUstate_shulen *,
     GtError *err);
 
 static int processbranchingedge_shulen(bool firstsucc,
     unsigned long,
     unsigned long,
-    BUinfo_shulen *,
+    GtBUinfo_shulen *,
     unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo_shulen *,
-    BUstate_shulen *,
+    GtBUinfo_shulen *,
+    GtBUstate_shulen *,
     GtError *);
 
 static int processlcpinterval_shulen(unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo_shulen *,
-    BUstate_shulen *,
+    GtBUinfo_shulen *,
+    GtBUstate_shulen *,
     GtError *err);
 
-#define TOP_ESA_BOTTOMUP_shulen   stackspace[nextfreeItvinfo-1]
-#define POP_ESA_BOTTOMUP_shulen   (stackspace + (--nextfreeItvinfo))
+#define TOP_ESA_BOTTOMUP_shulen\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
+#define POP_ESA_BOTTOMUP_shulen\
+        (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
 #define PUSH_ESA_BOTTOMUP_shulen(LCP,LB)\
-        if (nextfreeItvinfo >= allocatedItvinfo)\
+        if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
-          gt_assert(nextfreeItvinfo == allocatedItvinfo);\
-          stackspace = allocateBUstack_shulen(stackspace,\
-                                       allocatedItvinfo,\
-                                       allocatedItvinfo+incrementstacksize,\
-                                       bustate);\
-          allocatedItvinfo += incrementstacksize;\
+          gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
+          stack->spaceGtBUItvinfo\
+            = allocateBUstack_shulen(stack->spaceGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo+incrementstacksize,\
+                              bustate);\
+          stack->allocatedGtBUItvinfo += incrementstacksize;\
         }\
-        gt_assert(stackspace != NULL);\
-        stackspace[nextfreeItvinfo].lcp = LCP;\
-        stackspace[nextfreeItvinfo].lb = LB;\
-        stackspace[nextfreeItvinfo].rb = ULONG_MAX;\
-        nextfreeItvinfo++
+        gt_assert(stack->spaceGtBUItvinfo != NULL);\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lcp = LCP;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lb = LB;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].rb = ULONG_MAX;\
+        stack->nextfreeGtBUItvinfo++
 
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  BUinfo_shulen info;
+  GtBUinfo_shulen info;
 } GtBUItvinfo_shulen;
+
+typedef struct
+{
+  GtBUItvinfo_shulen *spaceGtBUItvinfo;
+  unsigned long allocatedGtBUItvinfo,
+                nextfreeGtBUItvinfo;
+} GtArrayGtBUItvinfo_shulen;
+
+GtArrayGtBUItvinfo_shulen *gt_GtArrayGtBUItvinfo_new_shulen(void)
+{
+  GtArrayGtBUItvinfo_shulen *stack = gt_malloc(sizeof (*stack));
+
+  stack->spaceGtBUItvinfo = NULL;
+  stack->allocatedGtBUItvinfo = stack->nextfreeGtBUItvinfo = 0;
+  return stack;
+}
+
+void gt_GtArrayGtBUItvinfo_delete_shulen(GtArrayGtBUItvinfo_shulen *stack,
+                                  GtBUstate_shulen *state)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
+  {
+    freeBUinfo_shulen(&stack->spaceGtBUItvinfo[idx].info,state);
+  }
+  gt_free(stack->spaceGtBUItvinfo);
+  gt_free(stack);
+}
 
 static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
                                    unsigned long currentallocated,
                                    unsigned long allocated,
-                                   BUstate_shulen *state)
+                                   GtBUstate_shulen *state)
 {
   unsigned long idx;
   GtBUItvinfo_shulen *itvinfo;
@@ -92,21 +124,8 @@ static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
   return itvinfo;
 }
 
-static void freeBUItvinfo_shulen(GtBUItvinfo_shulen *ptr,
-                          unsigned long allocated,
-                          BUstate_shulen *state)
-{
-  unsigned long idx;
-
-  for (idx=0; idx<allocated; idx++)
-  {
-    freeBUinfo_shulen(&ptr[idx].info,state);
-  }
-  gt_free(ptr);
-}
-
 int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
-                    BUstate_shulen *bustate,
+                    GtBUstate_shulen *bustate,
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -114,12 +133,12 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                 previoussuffix = 0,
                 idx,
                 nonspecials,
-                allocatedItvinfo = 0,
-                nextfreeItvinfo = 0,
                 lastsuftabvalue = 0;
-  GtBUItvinfo_shulen *lastinterval = NULL, *stackspace = NULL;
+  GtBUItvinfo_shulen *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
+  GtArrayGtBUItvinfo_shulen *stack;
 
+  stack = gt_GtArrayGtBUItvinfo_new_shulen();
   PUSH_ESA_BOTTOMUP_shulen(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
@@ -151,7 +170,8 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_shulen;
       lastinterval->rb = idx;
-      if (processlcpinterval_shulen(lastinterval->lcp,
+      if (processlcpinterval_shulen != NULL &&
+          processlcpinterval_shulen(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -171,7 +191,8 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge_shulen(firstedge,
+        if (processbranchingedge_shulen != NULL &&
+            processbranchingedge_shulen(firstedge,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
                                  &TOP_ESA_BOTTOMUP_shulen.info,
@@ -200,7 +221,8 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
-        if (processbranchingedge_shulen(true,
+        if (processbranchingedge_shulen != NULL &&
+            processbranchingedge_shulen(true,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
                                  &TOP_ESA_BOTTOMUP_shulen.info,
@@ -229,7 +251,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  gt_assert(nextfreeItvinfo > 0);
+  gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_shulen.lcp > 0)
   {
     if (processleafedge_shulen(false,
@@ -253,6 +275,6 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  freeBUItvinfo_shulen(stackspace, allocatedItvinfo, bustate);
+  gt_GtArrayGtBUItvinfo_delete_shulen(stack,bustate);
   return haserr ? -1 : 0;
 }

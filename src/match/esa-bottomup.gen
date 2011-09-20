@@ -19,65 +19,97 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static void initBUinfo(BUinfo *,BUstate *);
+static void initBUinfo(GtBUinfo *,GtBUstate *);
 
-static void freeBUinfo(BUinfo *,BUstate *);
+static void freeBUinfo(GtBUinfo *,GtBUstate *);
 
 static int processleafedge(bool,
     unsigned long,
     unsigned long,
-    BUinfo *,
+    GtBUinfo *,
     unsigned long,
-    BUstate *,
+    GtBUstate *,
     GtError *err);
 
 static int processbranchingedge(bool firstsucc,
     unsigned long,
     unsigned long,
-    BUinfo *,
+    GtBUinfo *,
     unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo *,
-    BUstate *,
+    GtBUinfo *,
+    GtBUstate *,
     GtError *);
 
 static int processlcpinterval(unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo *,
-    BUstate *,
+    GtBUinfo *,
+    GtBUstate *,
     GtError *err);
 
-#define TOP_ESA_BOTTOMUP   stackspace[nextfreeItvinfo-1]
-#define POP_ESA_BOTTOMUP   (stackspace + (--nextfreeItvinfo))
+#define TOP_ESA_BOTTOMUP\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
+#define POP_ESA_BOTTOMUP\
+        (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
 #define PUSH_ESA_BOTTOMUP(LCP,LB)\
-        if (nextfreeItvinfo >= allocatedItvinfo)\
+        if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
-          gt_assert(nextfreeItvinfo == allocatedItvinfo);\
-          stackspace = allocateBUstack(stackspace,\
-                                       allocatedItvinfo,\
-                                       allocatedItvinfo+incrementstacksize,\
-                                       bustate);\
-          allocatedItvinfo += incrementstacksize;\
+          gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
+          stack->spaceGtBUItvinfo\
+            = allocateBUstack(stack->spaceGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo+incrementstacksize,\
+                              bustate);\
+          stack->allocatedGtBUItvinfo += incrementstacksize;\
         }\
-        gt_assert(stackspace != NULL);\
-        stackspace[nextfreeItvinfo].lcp = LCP;\
-        stackspace[nextfreeItvinfo].lb = LB;\
-        stackspace[nextfreeItvinfo].rb = ULONG_MAX;\
-        nextfreeItvinfo++
+        gt_assert(stack->spaceGtBUItvinfo != NULL);\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lcp = LCP;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lb = LB;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].rb = ULONG_MAX;\
+        stack->nextfreeGtBUItvinfo++
 
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  BUinfo info;
+  GtBUinfo info;
 } GtBUItvinfo;
+
+typedef struct
+{
+  GtBUItvinfo *spaceGtBUItvinfo;
+  unsigned long allocatedGtBUItvinfo,
+                nextfreeGtBUItvinfo;
+} GtArrayGtBUItvinfo;
+
+GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void)
+{
+  GtArrayGtBUItvinfo *stack = gt_malloc(sizeof (*stack));
+
+  stack->spaceGtBUItvinfo = NULL;
+  stack->allocatedGtBUItvinfo = stack->nextfreeGtBUItvinfo = 0;
+  return stack;
+}
+
+void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
+                                  GtBUstate *state)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
+  {
+    freeBUinfo(&stack->spaceGtBUItvinfo[idx].info,state);
+  }
+  gt_free(stack->spaceGtBUItvinfo);
+  gt_free(stack);
+}
 
 static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
                                    unsigned long currentallocated,
                                    unsigned long allocated,
-                                   BUstate *state)
+                                   GtBUstate *state)
 {
   unsigned long idx;
   GtBUItvinfo *itvinfo;
@@ -92,21 +124,8 @@ static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
   return itvinfo;
 }
 
-static void freeBUItvinfo(GtBUItvinfo *ptr,
-                          unsigned long allocated,
-                          BUstate *state)
-{
-  unsigned long idx;
-
-  for (idx=0; idx<allocated; idx++)
-  {
-    freeBUinfo(&ptr[idx].info,state);
-  }
-  gt_free(ptr);
-}
-
 int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
-                    BUstate *bustate,
+                    GtBUstate *bustate,
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -114,12 +133,12 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                 previoussuffix = 0,
                 idx,
                 nonspecials,
-                allocatedItvinfo = 0,
-                nextfreeItvinfo = 0,
                 lastsuftabvalue = 0;
-  GtBUItvinfo *lastinterval = NULL, *stackspace = NULL;
+  GtBUItvinfo *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
+  GtArrayGtBUItvinfo *stack;
 
+  stack = gt_GtArrayGtBUItvinfo_new();
   PUSH_ESA_BOTTOMUP(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
@@ -151,7 +170,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
-      if (processlcpinterval(lastinterval->lcp,
+      if (processlcpinterval != NULL &&
+          processlcpinterval(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -171,7 +191,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge(firstedge,
+        if (processbranchingedge != NULL &&
+            processbranchingedge(firstedge,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  &TOP_ESA_BOTTOMUP.info,
@@ -200,7 +221,8 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
-        if (processbranchingedge(true,
+        if (processbranchingedge != NULL &&
+            processbranchingedge(true,
                                  TOP_ESA_BOTTOMUP.lcp,
                                  TOP_ESA_BOTTOMUP.lb,
                                  &TOP_ESA_BOTTOMUP.info,
@@ -229,7 +251,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  gt_assert(nextfreeItvinfo > 0);
+  gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
     if (processleafedge(false,
@@ -253,6 +275,6 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  freeBUItvinfo(stackspace, allocatedItvinfo, bustate);
+  gt_GtArrayGtBUItvinfo_delete(stack,bustate);
   return haserr ? -1 : 0;
 }

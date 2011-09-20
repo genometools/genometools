@@ -19,65 +19,97 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static void initBUinfo_maxpairs(BUinfo_maxpairs *,BUstate_maxpairs *);
+static void initBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
 
-static void freeBUinfo_maxpairs(BUinfo_maxpairs *,BUstate_maxpairs *);
+static void freeBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
 
 static int processleafedge_maxpairs(bool,
     unsigned long,
     unsigned long,
-    BUinfo_maxpairs *,
+    GtBUinfo_maxpairs *,
     unsigned long,
-    BUstate_maxpairs *,
+    GtBUstate_maxpairs *,
     GtError *err);
 
 static int processbranchingedge_maxpairs(bool firstsucc,
     unsigned long,
     unsigned long,
-    BUinfo_maxpairs *,
+    GtBUinfo_maxpairs *,
     unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo_maxpairs *,
-    BUstate_maxpairs *,
+    GtBUinfo_maxpairs *,
+    GtBUstate_maxpairs *,
     GtError *);
 
 static int processlcpinterval_maxpairs(unsigned long,
     unsigned long,
     unsigned long,
-    BUinfo_maxpairs *,
-    BUstate_maxpairs *,
+    GtBUinfo_maxpairs *,
+    GtBUstate_maxpairs *,
     GtError *err);
 
-#define TOP_ESA_BOTTOMUP_maxpairs   stackspace[nextfreeItvinfo-1]
-#define POP_ESA_BOTTOMUP_maxpairs   (stackspace + (--nextfreeItvinfo))
+#define TOP_ESA_BOTTOMUP_maxpairs\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
+#define POP_ESA_BOTTOMUP_maxpairs\
+        (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
 #define PUSH_ESA_BOTTOMUP_maxpairs(LCP,LB)\
-        if (nextfreeItvinfo >= allocatedItvinfo)\
+        if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
-          gt_assert(nextfreeItvinfo == allocatedItvinfo);\
-          stackspace = allocateBUstack_maxpairs(stackspace,\
-                                       allocatedItvinfo,\
-                                       allocatedItvinfo+incrementstacksize,\
-                                       bustate);\
-          allocatedItvinfo += incrementstacksize;\
+          gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
+          stack->spaceGtBUItvinfo\
+            = allocateBUstack_maxpairs(stack->spaceGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo,\
+                              stack->allocatedGtBUItvinfo+incrementstacksize,\
+                              bustate);\
+          stack->allocatedGtBUItvinfo += incrementstacksize;\
         }\
-        gt_assert(stackspace != NULL);\
-        stackspace[nextfreeItvinfo].lcp = LCP;\
-        stackspace[nextfreeItvinfo].lb = LB;\
-        stackspace[nextfreeItvinfo].rb = ULONG_MAX;\
-        nextfreeItvinfo++
+        gt_assert(stack->spaceGtBUItvinfo != NULL);\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lcp = LCP;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lb = LB;\
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].rb = ULONG_MAX;\
+        stack->nextfreeGtBUItvinfo++
 
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  BUinfo_maxpairs info;
+  GtBUinfo_maxpairs info;
 } GtBUItvinfo_maxpairs;
+
+typedef struct
+{
+  GtBUItvinfo_maxpairs *spaceGtBUItvinfo;
+  unsigned long allocatedGtBUItvinfo,
+                nextfreeGtBUItvinfo;
+} GtArrayGtBUItvinfo_maxpairs;
+
+GtArrayGtBUItvinfo_maxpairs *gt_GtArrayGtBUItvinfo_new_maxpairs(void)
+{
+  GtArrayGtBUItvinfo_maxpairs *stack = gt_malloc(sizeof (*stack));
+
+  stack->spaceGtBUItvinfo = NULL;
+  stack->allocatedGtBUItvinfo = stack->nextfreeGtBUItvinfo = 0;
+  return stack;
+}
+
+void gt_GtArrayGtBUItvinfo_delete_maxpairs(GtArrayGtBUItvinfo_maxpairs *stack,
+                                  GtBUstate_maxpairs *state)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
+  {
+    freeBUinfo_maxpairs(&stack->spaceGtBUItvinfo[idx].info,state);
+  }
+  gt_free(stack->spaceGtBUItvinfo);
+  gt_free(stack);
+}
 
 static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
                                    unsigned long currentallocated,
                                    unsigned long allocated,
-                                   BUstate_maxpairs *state)
+                                   GtBUstate_maxpairs *state)
 {
   unsigned long idx;
   GtBUItvinfo_maxpairs *itvinfo;
@@ -92,21 +124,8 @@ static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
   return itvinfo;
 }
 
-static void freeBUItvinfo_maxpairs(GtBUItvinfo_maxpairs *ptr,
-                          unsigned long allocated,
-                          BUstate_maxpairs *state)
-{
-  unsigned long idx;
-
-  for (idx=0; idx<allocated; idx++)
-  {
-    freeBUinfo_maxpairs(&ptr[idx].info,state);
-  }
-  gt_free(ptr);
-}
-
 int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
-                    BUstate_maxpairs *bustate,
+                    GtBUstate_maxpairs *bustate,
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -114,12 +133,12 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                 previoussuffix = 0,
                 idx,
                 nonspecials,
-                allocatedItvinfo = 0,
-                nextfreeItvinfo = 0,
                 lastsuftabvalue = 0;
-  GtBUItvinfo_maxpairs *lastinterval = NULL, *stackspace = NULL;
+  GtBUItvinfo_maxpairs *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
+  GtArrayGtBUItvinfo_maxpairs *stack;
 
+  stack = gt_GtArrayGtBUItvinfo_new_maxpairs();
   PUSH_ESA_BOTTOMUP_maxpairs(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
@@ -151,7 +170,8 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_maxpairs;
       lastinterval->rb = idx;
-      if (processlcpinterval_maxpairs(lastinterval->lcp,
+      if (processlcpinterval_maxpairs != NULL &&
+          processlcpinterval_maxpairs(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -171,7 +191,8 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge_maxpairs(firstedge,
+        if (processbranchingedge_maxpairs != NULL &&
+            processbranchingedge_maxpairs(firstedge,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
                                  &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -200,7 +221,8 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
-        if (processbranchingedge_maxpairs(true,
+        if (processbranchingedge_maxpairs != NULL &&
+            processbranchingedge_maxpairs(true,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
                                  &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -229,7 +251,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  gt_assert(nextfreeItvinfo > 0);
+  gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_maxpairs.lcp > 0)
   {
     if (processleafedge_maxpairs(false,
@@ -253,6 +275,6 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  freeBUItvinfo_maxpairs(stackspace, allocatedItvinfo, bustate);
+  gt_GtArrayGtBUItvinfo_delete_maxpairs(stack,bustate);
   return haserr ? -1 : 0;
 }

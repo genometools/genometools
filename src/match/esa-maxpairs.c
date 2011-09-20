@@ -50,7 +50,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
   Listtype *nodeposlist;
-} BUinfo_maxpairs;
+} GtBUinfo_maxpairs;
 
 typedef struct  /* global information */
 {
@@ -63,21 +63,23 @@ typedef struct  /* global information */
   GtReadmode readmode;
   Processmaxpairs processmaxpairs;
   void *processmaxpairsinfo;
-} BUstate_maxpairs;
+} GtBUstate_maxpairs;
 
-static void initBUinfo_maxpairs(BUinfo_maxpairs *buinfo,BUstate_maxpairs *state)
+static void initBUinfo_maxpairs(GtBUinfo_maxpairs *buinfo,
+                                GtBUstate_maxpairs *state)
 {
   buinfo->nodeposlist = gt_malloc(sizeof(*buinfo->nodeposlist) *
                                   state->alphabetsize);
 }
 
-static void freeBUinfo_maxpairs(BUinfo_maxpairs *buinfo,
-                                GT_UNUSED BUstate_maxpairs *state)
+static void freeBUinfo_maxpairs(GtBUinfo_maxpairs *buinfo,
+                                GT_UNUSED GtBUstate_maxpairs *state)
 {
   gt_free(buinfo->nodeposlist);
 }
 
-static void add2poslist_maxpairs(BUstate_maxpairs *state,BUinfo_maxpairs *ninfo,
+static void add2poslist_maxpairs(GtBUstate_maxpairs *state,
+                                 GtBUinfo_maxpairs *ninfo,
                                  unsigned int base,unsigned long leafnumber)
 {
   GtArrayGtUlong *ptr;
@@ -94,9 +96,9 @@ static void add2poslist_maxpairs(BUstate_maxpairs *state,BUinfo_maxpairs *ninfo,
   }
 }
 
-static void concatlists_maxpairs(BUstate_maxpairs *state,
-                                 BUinfo_maxpairs *father,
-                                 BUinfo_maxpairs *son)
+static void concatlists_maxpairs(GtBUstate_maxpairs *state,
+                                 GtBUinfo_maxpairs *father,
+                                 GtBUinfo_maxpairs *son)
 {
   unsigned int base;
 
@@ -107,9 +109,9 @@ static void concatlists_maxpairs(BUstate_maxpairs *state,
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1_maxpairs(BUstate_maxpairs *state,
+static int cartproduct1_maxpairs(GtBUstate_maxpairs *state,
                                  unsigned long fatherdepth,
-                                 const BUinfo_maxpairs *ninfo,
+                                 const GtBUinfo_maxpairs *ninfo,
                                  unsigned int base,
                                  unsigned long leafnumber,GtError *err)
 {
@@ -129,11 +131,11 @@ static int cartproduct1_maxpairs(BUstate_maxpairs *state,
   return 0;
 }
 
-static int cartproduct2_maxpairs(BUstate_maxpairs *state,
+static int cartproduct2_maxpairs(GtBUstate_maxpairs *state,
                                  unsigned long fatherdepth,
-                                 const BUinfo_maxpairs *ninfo1,
+                                 const GtBUinfo_maxpairs *ninfo1,
                                  unsigned int base1,
-                                 const BUinfo_maxpairs *ninfo2,
+                                 const GtBUinfo_maxpairs *ninfo2,
                                  unsigned int base2,
                                  GtError *err)
 {
@@ -158,7 +160,7 @@ static int cartproduct2_maxpairs(BUstate_maxpairs *state,
   return 0;
 }
 
-static void setpostabto0_maxpairs(BUstate_maxpairs *state)
+static void setpostabto0_maxpairs(GtBUstate_maxpairs *state)
 {
   unsigned int base;
 
@@ -176,9 +178,9 @@ static void setpostabto0_maxpairs(BUstate_maxpairs *state)
 static int processleafedge_maxpairs(bool firstsucc,
                                     unsigned long fatherdepth,
                                     GT_UNUSED unsigned long fatherlb,
-                                    BUinfo_maxpairs *father,
+                                    GtBUinfo_maxpairs *father,
                                     unsigned long leafnumber,
-                                    BUstate_maxpairs *state,
+                                    GtBUstate_maxpairs *state,
                                     GtError *err)
 {
   unsigned int base;
@@ -258,12 +260,12 @@ static int processleafedge_maxpairs(bool firstsucc,
 static int processbranchingedge_maxpairs(bool firstsucc,
                                          unsigned long fatherdepth,
                                          GT_UNUSED unsigned long fatherlb,
-                                         BUinfo_maxpairs *father,
+                                         GtBUinfo_maxpairs *father,
                                          GT_UNUSED unsigned long sondepth,
                                          GT_UNUSED unsigned long sonlb,
                                          GT_UNUSED unsigned long sonrb,
-                                         BUinfo_maxpairs *son,
-                                         BUstate_maxpairs *state,
+                                         GtBUinfo_maxpairs *son,
+                                         GtBUstate_maxpairs *state,
                                          GtError *err)
 {
   unsigned int chfather, chson;
@@ -350,8 +352,8 @@ static int processbranchingedge_maxpairs(bool firstsucc,
 static int processlcpinterval_maxpairs(GT_UNUSED unsigned long lcp,
                                        GT_UNUSED unsigned long lb,
                                        GT_UNUSED unsigned long rb,
-                                       GT_UNUSED BUinfo_maxpairs *info,
-                                       GT_UNUSED BUstate_maxpairs *state,
+                                       GT_UNUSED GtBUinfo_maxpairs *info,
+                                       GT_UNUSED GtBUstate_maxpairs *state,
                                        GT_UNUSED GtError *err)
 {
   return 0;
@@ -369,7 +371,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
 {
   unsigned int base;
   GtArrayGtUlong *ptr;
-  BUstate_maxpairs *state;
+  GtBUstate_maxpairs *state;
   bool haserr = false;
 
   state = gt_malloc(sizeof (*state));

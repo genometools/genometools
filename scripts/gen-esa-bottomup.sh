@@ -6,5 +6,6 @@ for suffix in maxpairs shulen
 do
   file=${TEMPLATE}-${suffix}.inc
   rm -f $file
-  scripts/appendsuffix.rb ${TEMPLATE}.gen ${suffix} BUinfo BUstate > $file
+  scripts/appendsuffix.rb ${TEMPLATE}.gen ${suffix} GtBUinfo GtBUstate \
+                          GtArrayGtBUItvinfo > $file
 done
