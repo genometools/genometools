@@ -728,7 +728,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   const unsigned int markprefixunits = 14U;
   const unsigned int marksuffixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  unsigned long maxbucketsize, totallength, suftabentries, largest_width;
+  unsigned long maxbucketsize, totallength, suftabentries = 0, largest_width;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
   GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
@@ -832,70 +832,98 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
                        fci.binsearchcache_depth,
                        (unsigned long) binsearchcache_size);
-  fci.buf.allocated = fci.tab.differentcodes/5;
-  fci.buf.nextfree = 0;
-  fci.buf.spaceGtUlong = gt_malloc(sizeof (*fci.buf.spaceGtUlong)
-                                   * fci.buf.allocated);
-  gt_firstcodes_update_workspace(__LINE__,"position buffer",true,&fcsl,
-                                 sizeof (*fci.buf.spaceGtUlong)
-                                 * fci.buf.allocated,logger);
-  gt_assert(fci.buf.allocated > 0);
-  if (timer != NULL)
-  {
-    gt_timer_show_progress(timer, "to accumulate counts",stdout);
-  }
-  fci.tempcodeforradixsort = gt_malloc((size_t) fci.buf.allocated
-                                       * sizeof (*fci.tempcodeforradixsort));
-  gt_firstcodes_update_workspace(__LINE__,"tempcodeforradixsort",true,&fcsl,
-                                 (size_t) fci.buf.allocated
-                                 * sizeof (*fci.tempcodeforradixsort),logger);
-
-  fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
-  fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
-  gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
-                                encseq,
-                                readmode,
-                                kmersize,
-                                minmatchlength,
-                                &fci.buf,
-                                NULL);
-  gt_firstcodes_accumulatecounts_flush(&fci);
-  totallength = gt_encseq_total_length(encseq);
-  gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
-                fci.codebuffer_total,
-                (double) fci.codebuffer_total/totallength);
-  gt_logger_log(logger,"firstcodehits=%lu (%.2f)",fci.firstcodehits,
-                          (double) fci.firstcodehits/totallength);
-  if (timer != NULL)
-  {
-    gt_timer_show_progress(timer, "to compute partial sums",stdout);
-  }
-  maxbucketsize = storefirstcodes_partialsum(&fci);
-  gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
-  suftabentries = fci.firstcodehits + fci.numofsequences;
   if (maximumspace > 0)
   {
-    int retval;
-
-    gt_assert(numofparts == 1U);
-    retval = gt_suftabparts_fit_memlimit(fcsl.workspace + fcsl.splitspace,
-                                         maximumspace,
-                                         NULL,
-                                         &fci.tab,
-                                         sfxmrlist,
-                                         totallength,
-                                         0, /* special characters not used */
-                                         suftabentries,
-                                         false, /* suftabuint not used */
-                                         err);
-    if (retval < 0)
+    if ((unsigned long) (fcsl.workspace + fcsl.splitspace) >= maximumspace)
     {
+      gt_error_set(err,"already used %.2f MB of memory, cannot compute "
+                       "index in at most %.2f MB",
+                       GT_MEGABYTES(fcsl.workspace + fcsl.splitspace),
+                       GT_MEGABYTES(maximumspace));
       haserr = true;
     } else
     {
-      gt_assert(retval > 0);
-      numofparts = (unsigned int) retval;
-      gt_logger_log(logger, "derived parts=%u",numofparts);
+      size_t remainspace = (size_t) maximumspace -
+                           (fcsl.workspace + fcsl.splitspace);
+
+      fci.buf.allocated = (unsigned long)
+                          remainspace / (sizeof (*fci.buf.spaceGtUlong) +
+                                         sizeof (*fci.tempcodeforradixsort));
+      if (fci.buf.allocated < fci.tab.differentcodes/15UL)
+      {
+        fci.buf.allocated = fci.tab.differentcodes/15UL;
+      }
+    }
+  } else
+  {
+    fci.buf.allocated = fci.tab.differentcodes/5;
+  }
+  fci.buf.nextfree = 0;
+  if (!haserr)
+  {
+    fci.buf.spaceGtUlong = gt_malloc(sizeof (*fci.buf.spaceGtUlong)
+                                     * fci.buf.allocated);
+    gt_firstcodes_update_workspace(__LINE__,"position buffer",true,&fcsl,
+                                   sizeof (*fci.buf.spaceGtUlong)
+                                   * fci.buf.allocated,logger);
+    gt_assert(fci.buf.allocated > 0);
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "to accumulate counts",stdout);
+    }
+    fci.tempcodeforradixsort = gt_malloc((size_t) fci.buf.allocated
+                                         * sizeof (*fci.tempcodeforradixsort));
+    gt_firstcodes_update_workspace(__LINE__,"tempcodeforradixsort",true,&fcsl,
+                                   (size_t) fci.buf.allocated
+                                   * sizeof (*fci.tempcodeforradixsort),logger);
+
+    fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
+    fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
+    gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
+                                  encseq,
+                                  readmode,
+                                  kmersize,
+                                  minmatchlength,
+                                  &fci.buf,
+                                  NULL);
+    gt_firstcodes_accumulatecounts_flush(&fci);
+    totallength = gt_encseq_total_length(encseq);
+    gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
+                  fci.codebuffer_total,
+                  (double) fci.codebuffer_total/totallength);
+    gt_logger_log(logger,"firstcodehits=%lu (%.2f)",fci.firstcodehits,
+                            (double) fci.firstcodehits/totallength);
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer, "to compute partial sums",stdout);
+    }
+    maxbucketsize = storefirstcodes_partialsum(&fci);
+    gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
+    suftabentries = fci.firstcodehits + fci.numofsequences;
+    if (maximumspace > 0)
+    {
+      int retval;
+
+      gt_assert(numofparts == 1U);
+      retval = gt_suftabparts_fit_memlimit(fcsl.workspace + fcsl.splitspace,
+                                           maximumspace,
+                                           NULL,
+                                           &fci.tab,
+                                           sfxmrlist,
+                                           totallength,
+                                           0, /* special characters not used */
+                                           suftabentries,
+                                           false, /* suftabuint not used */
+                                           err);
+      if (retval < 0)
+      {
+        haserr = true;
+      } else
+      {
+        gt_assert(retval > 0);
+        numofparts = (unsigned int) retval;
+        gt_logger_log(logger, "derived parts=%u",numofparts);
+      }
     }
   }
   if (!haserr)
