@@ -5583,6 +5583,47 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   return 0;
 }
 
+/*  Assumption: the relpos is in a read in the range
+    from 0 to |r| - l, where l is the minimum length */
+
+unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
+                                            int sizeofvector,
+                                            const GtEncseq *encseq,
+                                            unsigned long seqnum,
+                                            unsigned long relpos)
+{
+  GtEndofTwobitencoding etbecurrent;
+  unsigned long pos, twobitencodingstoppos;
+  unsigned int offset;
+  int idx;
+
+  if (seqnum < gt_encseq_num_of_sequences(encseq) - 1)
+  {
+    twobitencodingstoppos = gt_encseq_seqstartpos(encseq,seqnum + 1) - 1;
+  } else
+  {
+    twobitencodingstoppos = gt_encseq_total_length(encseq);
+  }
+  pos = gt_encseq_seqstartpos(encseq,seqnum) + relpos;
+  for (idx = 0, offset = 0; idx <sizeofvector; idx++,
+       offset += (unsigned int) GT_UNITSIN2BITENC)
+  {
+    if (pos == twobitencodingstoppos)
+    {
+      return offset;
+    }
+    (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, true, pos,
+                                    twobitencodingstoppos);
+    tbevector[idx] = etbecurrent.tbe;
+    if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
+    {
+      return offset + etbecurrent.unitsnotspecial;
+    }
+    pos += GT_UNITSIN2BITENC;
+  }
+  return 0;
+}
+
 #define MASKPREFIX(PREFIX)\
       (GtTwobitencoding)\
      (~((((GtTwobitencoding) 1) << GT_MULT2(GT_UNITSIN2BITENC - (PREFIX))) - 1))
