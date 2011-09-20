@@ -666,6 +666,7 @@ typedef struct
 } GtFirstcodesspacelog;
 
 static void gt_firstcodes_update_workspace(int line,
+                                           const char *kind,
                                            bool addtowork,
                                            GtFirstcodesspacelog *fcsl,
                                            size_t addworkspace,
@@ -678,10 +679,11 @@ static void gt_firstcodes_update_workspace(int line,
   {
     fcsl->splitspace += addworkspace;
   }
-  gt_logger_log(logger,"line %d: add %.2f bytes to %space; work=%.2f, "
-                       "split=%.2f,all=%.2f",
+  gt_logger_log(logger,"line %d: add %.2f MB for %s to %space; work=%.2f, "
+                       "split=%.2f,all=%.2f MB",
                 line,
                 GT_MEGABYTES(addworkspace),
+                kind,
                 addtowork ? "work" : "split",
                 GT_MEGABYTES(fcsl->workspace),
                 GT_MEGABYTES(fcsl->splitspace),
@@ -738,7 +740,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.spmsuftab = NULL;
   fci.buf.spaceGtUlongPair = NULL;
   fci.tempcodeposforradixsort = NULL;
-  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+  gt_firstcodes_update_workspace(__LINE__,"encseq",true,&fcsl,
                                  (size_t) gt_encseq_sizeofrep(encseq),logger);
   if (gt_showtime_enabled())
   {
@@ -789,7 +791,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
   fci.buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
                                             marksuffixunits);
-  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+  gt_firstcodes_update_workspace(__LINE__,"marksuffix",true,&fcsl,
                                  (size_t)
                                  gt_marksubstring_size(fci.buf.marksuffix),
                                  logger);
@@ -811,7 +813,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.mappedallfirstcodes = NULL;
     fci.mappedcountocc = NULL;
   }
-  gt_firstcodes_update_workspace(__LINE__,false,&fcsl,
+  gt_firstcodes_update_workspace(__LINE__,"splitable arrays",false,&fcsl,
                                  (size_t)
                                  gt_Sfxmappedrangelist_size_entire(sfxmrlist),
                                  logger);
@@ -824,16 +826,17 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
   binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
-  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,binsearchcache_size,
+  gt_firstcodes_update_workspace(__LINE__,"binsearchcache",
+                                 true,&fcsl,binsearchcache_size,
                                  logger);
   gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
                        fci.binsearchcache_depth,
                        (unsigned long) binsearchcache_size);
-  fci.buf.allocated = fci.tab.differentcodes/4;
+  fci.buf.allocated = fci.tab.differentcodes/5;
   fci.buf.nextfree = 0;
   fci.buf.spaceGtUlong = gt_malloc(sizeof (*fci.buf.spaceGtUlong)
                                    * fci.buf.allocated);
-  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+  gt_firstcodes_update_workspace(__LINE__,"position buffer",true,&fcsl,
                                  sizeof (*fci.buf.spaceGtUlong)
                                  * fci.buf.allocated,logger);
   gt_assert(fci.buf.allocated > 0);
@@ -843,7 +846,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   fci.tempcodeforradixsort = gt_malloc((size_t) fci.buf.allocated
                                        * sizeof (*fci.tempcodeforradixsort));
-  gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
+  gt_firstcodes_update_workspace(__LINE__,"tempcodeforradixsort",true,&fcsl,
                                  (size_t) fci.buf.allocated
                                  * sizeof (*fci.tempcodeforradixsort),logger);
 
