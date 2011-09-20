@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SPMSK_INL_H
-#define ESA_SPMSK_INL_H
+#ifndef ESA_SPMSK_H
+#define ESA_SPMSK_H
 
 #include <stdint.h>
 #include "core/error_api.h"
