@@ -52,7 +52,7 @@ void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
 }
 
 size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
-                                  GT_UNUSED unsigned long maxvalue)
+                                  unsigned long maxvalue)
 {
   unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
 

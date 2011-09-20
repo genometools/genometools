@@ -708,6 +708,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars, part;
   const unsigned int markprefixunits = 14U;
+  const unsigned int marksuffixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long maxbucketsize, totallength, suftabentries, largest_width;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
@@ -757,7 +758,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
   fci.buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
-                                        markprefixunits);
+                                            markprefixunits);
   fci.shiftright2index = gt_marksubstring_shiftright(fci.buf.markprefix)
                          + GT_LOGWORDSIZE;
   fci.mappedmarkprefix
@@ -768,7 +769,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                             &fci);
   gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
   fci.buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
-                                        markprefixunits);
+                                            marksuffixunits);
   gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
                                  (size_t)
                                  gt_marksubstring_size(fci.buf.marksuffix),
@@ -855,7 +856,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     int retval;
 
     gt_assert(numofparts == 1U);
-    retval = gt_suftabparts_fit_memlimit(fcsl.workspace,
+    retval = gt_suftabparts_fit_memlimit(fcsl.workspace + fcsl.splitspace,
                                          maximumspace,
                                          NULL,
                                          &fci.tab,
