@@ -19,49 +19,49 @@
 #include "core/ma.h"
 #include "esa-seqread.h"
 
-static void initBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
+static void initBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 
-static void freeBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
+static void freeBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 
-static int processleafedge_shulen(bool,
+static int processleafedge_spmsk(bool,
     unsigned long,
     unsigned long,
-    GtBUinfo_shulen *,
+    GtBUinfo_spmsk *,
     unsigned long,
-    GtBUstate_shulen *,
+    GtBUstate_spmsk *,
     GtError *err);
 
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-static int processbranchingedge_shulen(bool firstsucc,
+static int processbranchingedge_spmsk(bool firstsucc,
     unsigned long,
     unsigned long,
-    GtBUinfo_shulen *,
+    GtBUinfo_spmsk *,
     unsigned long,
     unsigned long,
     unsigned long,
-    GtBUinfo_shulen *,
-    GtBUstate_shulen *,
+    GtBUinfo_spmsk *,
+    GtBUstate_spmsk *,
     GtError *);
 #endif
 
-static int processlcpinterval_shulen(unsigned long,
+static int processlcpinterval_spmsk(unsigned long,
     unsigned long,
     unsigned long,
-    GtBUinfo_shulen *,
-    GtBUstate_shulen *,
+    GtBUinfo_spmsk *,
+    GtBUstate_spmsk *,
     GtError *err);
 
-#define TOP_ESA_BOTTOMUP_shulen\
+#define TOP_ESA_BOTTOMUP_spmsk\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
-#define POP_ESA_BOTTOMUP_shulen\
+#define POP_ESA_BOTTOMUP_spmsk\
         (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
-#define PUSH_ESA_BOTTOMUP_shulen(LCP,LB)\
+#define PUSH_ESA_BOTTOMUP_spmsk(LCP,LB)\
         if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
           gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
           stack->spaceGtBUItvinfo\
-            = allocateBUstack_shulen(stack->spaceGtBUItvinfo,\
+            = allocateBUstack_spmsk(stack->spaceGtBUItvinfo,\
                               stack->allocatedGtBUItvinfo,\
                               stack->allocatedGtBUItvinfo+incrementstacksize,\
                               bustate);\
@@ -76,51 +76,51 @@ static int processlcpinterval_shulen(unsigned long,
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  GtBUinfo_shulen info;
-} GtBUItvinfo_shulen;
+  GtBUinfo_spmsk info;
+} GtBUItvinfo_spmsk;
 
 typedef struct
 {
-  GtBUItvinfo_shulen *spaceGtBUItvinfo;
+  GtBUItvinfo_spmsk *spaceGtBUItvinfo;
   unsigned long allocatedGtBUItvinfo,
                 nextfreeGtBUItvinfo;
-} GtArrayGtBUItvinfo_shulen;
+} GtArrayGtBUItvinfo_spmsk;
 
-GtArrayGtBUItvinfo_shulen *gt_GtArrayGtBUItvinfo_new_shulen(void)
+GtArrayGtBUItvinfo_spmsk *gt_GtArrayGtBUItvinfo_new_spmsk(void)
 {
-  GtArrayGtBUItvinfo_shulen *stack = gt_malloc(sizeof (*stack));
+  GtArrayGtBUItvinfo_spmsk *stack = gt_malloc(sizeof (*stack));
 
   stack->spaceGtBUItvinfo = NULL;
   stack->allocatedGtBUItvinfo = stack->nextfreeGtBUItvinfo = 0;
   return stack;
 }
 
-void gt_GtArrayGtBUItvinfo_delete_shulen(GtArrayGtBUItvinfo_shulen *stack,
-                                  GtBUstate_shulen *state)
+void gt_GtArrayGtBUItvinfo_delete_spmsk(GtArrayGtBUItvinfo_spmsk *stack,
+                                  GtBUstate_spmsk *state)
 {
   unsigned long idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
-    freeBUinfo_shulen(&stack->spaceGtBUItvinfo[idx].info,state);
+    freeBUinfo_spmsk(&stack->spaceGtBUItvinfo[idx].info,state);
   }
   gt_free(stack->spaceGtBUItvinfo);
   gt_free(stack);
 }
 
-static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
+static GtBUItvinfo_spmsk *allocateBUstack_spmsk(GtBUItvinfo_spmsk *ptr,
                                    unsigned long currentallocated,
                                    unsigned long allocated,
-                                   GtBUstate_shulen *state)
+                                   GtBUstate_spmsk *state)
 {
   unsigned long idx;
-  GtBUItvinfo_shulen *itvinfo;
+  GtBUItvinfo_spmsk *itvinfo;
 
   itvinfo = gt_realloc(ptr,sizeof(*itvinfo) * allocated);
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {
-    initBUinfo_shulen(&itvinfo[idx].info,state);
+    initBUinfo_spmsk(&itvinfo[idx].info,state);
   }
   gt_assert(itvinfo != NULL);
   return itvinfo;
@@ -128,8 +128,8 @@ static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
 
 #ifndef GT_ESA_BOTTOM_UP_RAM
 
-int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
-                    GtBUstate_shulen *bustate,
+int gt_esa_bottomup_spmsk(Sequentialsuffixarrayreader *ssar,
+                    GtBUstate_spmsk *bustate,
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -138,20 +138,20 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                 idx,
                 nonspecials,
                 lastsuftabvalue = 0;
-  GtBUItvinfo_shulen *lastinterval = NULL;
+  GtBUItvinfo_spmsk *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
-  GtArrayGtBUItvinfo_shulen *stack;
+  GtArrayGtBUItvinfo_spmsk *stack;
 
-  stack = gt_GtArrayGtBUItvinfo_new_shulen();
-  PUSH_ESA_BOTTOMUP_shulen(0,0);
+  stack = gt_GtArrayGtBUItvinfo_new_spmsk();
+  PUSH_ESA_BOTTOMUP_spmsk(0,0);
   nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
   for (idx = 0; idx < nonspecials; idx++)
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
+    if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
-      if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
+      if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
       {
         firstedge = false;
       } else
@@ -159,10 +159,10 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         firstedge = true;
         firstedgefromroot = false;
       }
-      if (processleafedge_shulen(firstedge,
-                          TOP_ESA_BOTTOMUP_shulen.lcp,
-                          TOP_ESA_BOTTOMUP_shulen.lb,
-                          &TOP_ESA_BOTTOMUP_shulen.info,
+      if (processleafedge_spmsk(firstedge,
+                          TOP_ESA_BOTTOMUP_spmsk.lcp,
+                          TOP_ESA_BOTTOMUP_spmsk.lb,
+                          &TOP_ESA_BOTTOMUP_spmsk.info,
                           previoussuffix,bustate,err) != 0)
       {
         haserr = true;
@@ -170,12 +170,12 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_shulen.lcp)
+    while (lcpvalue < TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
-      lastinterval = POP_ESA_BOTTOMUP_shulen;
+      lastinterval = POP_ESA_BOTTOMUP_spmsk;
       lastinterval->rb = idx;
-      if (processlcpinterval_shulen != NULL &&
-          processlcpinterval_shulen(lastinterval->lcp,
+      if (processlcpinterval_spmsk != NULL &&
+          processlcpinterval_spmsk(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -185,9 +185,9 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         haserr = true;
         break;
       }
-      if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
+      if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
       {
-        if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
+        if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;
         } else
@@ -196,11 +196,11 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(firstedge,
-                                 TOP_ESA_BOTTOMUP_shulen.lcp,
-                                 TOP_ESA_BOTTOMUP_shulen.lb,
-                                 &TOP_ESA_BOTTOMUP_shulen.info,
+        if (processbranchingedge_spmsk != NULL &&
+            processbranchingedge_spmsk(firstedge,
+                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
+                                 TOP_ESA_BOTTOMUP_spmsk.lb,
+                                 &TOP_ESA_BOTTOMUP_spmsk.info,
                                  lastinterval->lcp,
                                  lastinterval->lb,
                                  lastinterval->rb,
@@ -219,7 +219,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     {
       break;
     }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_shulen.lcp)
+    if (lcpvalue > TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -228,13 +228,13 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         unsigned long lastintervallcp = lastinterval->lcp,
                       lastintervalrb = lastinterval->rb;
 #endif
-        PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
+        PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(true,
-                                 TOP_ESA_BOTTOMUP_shulen.lcp,
-                                 TOP_ESA_BOTTOMUP_shulen.lb,
-                                 &TOP_ESA_BOTTOMUP_shulen.info,
+        if (processbranchingedge_spmsk != NULL &&
+            processbranchingedge_spmsk(true,
+                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
+                                 TOP_ESA_BOTTOMUP_spmsk.lb,
+                                 &TOP_ESA_BOTTOMUP_spmsk.info,
                                  lastintervallcp,
                                  lastintervallb,
                                  lastintervalrb,
@@ -248,11 +248,11 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
         lastinterval = NULL;
       } else
       {
-        PUSH_ESA_BOTTOMUP_shulen(lcpvalue,idx);
-        if (processleafedge_shulen(true,
-                            TOP_ESA_BOTTOMUP_shulen.lcp,
-                            TOP_ESA_BOTTOMUP_shulen.lb,
-                            &TOP_ESA_BOTTOMUP_shulen.info,
+        PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,idx);
+        if (processleafedge_spmsk(true,
+                            TOP_ESA_BOTTOMUP_spmsk.lcp,
+                            TOP_ESA_BOTTOMUP_spmsk.lb,
+                            &TOP_ESA_BOTTOMUP_spmsk.info,
                             previoussuffix,bustate,err) != 0)
         {
           haserr = true;
@@ -262,22 +262,22 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     }
   }
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
-  if (!haserr && TOP_ESA_BOTTOMUP_shulen.lcp > 0)
+  if (!haserr && TOP_ESA_BOTTOMUP_spmsk.lcp > 0)
   {
-    if (processleafedge_shulen(false,
-                        TOP_ESA_BOTTOMUP_shulen.lcp,
-                        TOP_ESA_BOTTOMUP_shulen.lb,
-                        &TOP_ESA_BOTTOMUP_shulen.info,
+    if (processleafedge_spmsk(false,
+                        TOP_ESA_BOTTOMUP_spmsk.lcp,
+                        TOP_ESA_BOTTOMUP_spmsk.lb,
+                        &TOP_ESA_BOTTOMUP_spmsk.info,
                         lastsuftabvalue,bustate,err) != 0)
     {
       haserr = true;
     } else
     {
-      TOP_ESA_BOTTOMUP_shulen.rb = idx;
-      if (processlcpinterval_shulen(TOP_ESA_BOTTOMUP_shulen.lcp,
-                             TOP_ESA_BOTTOMUP_shulen.lb,
-                             TOP_ESA_BOTTOMUP_shulen.rb,
-                             &TOP_ESA_BOTTOMUP_shulen.info,
+      TOP_ESA_BOTTOMUP_spmsk.rb = idx;
+      if (processlcpinterval_spmsk(TOP_ESA_BOTTOMUP_spmsk.lcp,
+                             TOP_ESA_BOTTOMUP_spmsk.lb,
+                             TOP_ESA_BOTTOMUP_spmsk.rb,
+                             &TOP_ESA_BOTTOMUP_spmsk.info,
                              bustate,
                              err) != 0)
       {
@@ -285,35 +285,35 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
       }
     }
   }
-  gt_GtArrayGtBUItvinfo_delete_shulen(stack,bustate);
+  gt_GtArrayGtBUItvinfo_delete_spmsk(stack,bustate);
   return haserr ? -1 : 0;
 }
 
 #else
 
-int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
+int gt_esa_bottomup_RAM_spmsk(const unsigned long *suftab,
                         const uint16_t *lcptab_bucket,
                         unsigned long nonspecials,
-                        GtArrayGtBUItvinfo_shulen *stack,
-                        GtBUstate_shulen *bustate,
+                        GtArrayGtBUItvinfo_spmsk *stack,
+                        GtBUstate_spmsk *bustate,
                         GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix = 0,
                 idx;
-  GtBUItvinfo_shulen *lastinterval = NULL;
+  GtBUItvinfo_spmsk *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
 
   gt_assert(nonspecials > 0);
-  PUSH_ESA_BOTTOMUP_shulen(0,0);
+  PUSH_ESA_BOTTOMUP_spmsk(0,0);
   for (idx = 0; idx < nonspecials-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = suftab[idx];
-    if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
+    if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
-      if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
+      if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
       {
         firstedge = false;
       } else
@@ -321,10 +321,10 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
         firstedge = true;
         firstedgefromroot = false;
       }
-      if (processleafedge_shulen(firstedge,
-                          TOP_ESA_BOTTOMUP_shulen.lcp,
-                          TOP_ESA_BOTTOMUP_shulen.lb,
-                          &TOP_ESA_BOTTOMUP_shulen.info,
+      if (processleafedge_spmsk(firstedge,
+                          TOP_ESA_BOTTOMUP_spmsk.lcp,
+                          TOP_ESA_BOTTOMUP_spmsk.lb,
+                          &TOP_ESA_BOTTOMUP_spmsk.info,
                           previoussuffix,bustate,err) != 0)
       {
         haserr = true;
@@ -332,12 +332,12 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_shulen.lcp)
+    while (lcpvalue < TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
-      lastinterval = POP_ESA_BOTTOMUP_shulen;
+      lastinterval = POP_ESA_BOTTOMUP_spmsk;
       lastinterval->rb = idx;
-      if (processlcpinterval_shulen != NULL &&
-          processlcpinterval_shulen(lastinterval->lcp,
+      if (processlcpinterval_spmsk != NULL &&
+          processlcpinterval_spmsk(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -347,9 +347,9 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
         haserr = true;
         break;
       }
-      if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
+      if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
       {
-        if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
+        if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
         {
           firstedge = false;
         } else
@@ -358,11 +358,11 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(firstedge,
-                                 TOP_ESA_BOTTOMUP_shulen.lcp,
-                                 TOP_ESA_BOTTOMUP_shulen.lb,
-                                 &TOP_ESA_BOTTOMUP_shulen.info,
+        if (processbranchingedge_spmsk != NULL &&
+            processbranchingedge_spmsk(firstedge,
+                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
+                                 TOP_ESA_BOTTOMUP_spmsk.lb,
+                                 &TOP_ESA_BOTTOMUP_spmsk.info,
                                  lastinterval->lcp,
                                  lastinterval->lb,
                                  lastinterval->rb,
@@ -381,7 +381,7 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
     {
       break;
     }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_shulen.lcp)
+    if (lcpvalue > TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -390,13 +390,13 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
         unsigned long lastintervallcp = lastinterval->lcp,
                       lastintervalrb = lastinterval->rb;
 #endif
-        PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
+        PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(true,
-                                 TOP_ESA_BOTTOMUP_shulen.lcp,
-                                 TOP_ESA_BOTTOMUP_shulen.lb,
-                                 &TOP_ESA_BOTTOMUP_shulen.info,
+        if (processbranchingedge_spmsk != NULL &&
+            processbranchingedge_spmsk(true,
+                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
+                                 TOP_ESA_BOTTOMUP_spmsk.lb,
+                                 &TOP_ESA_BOTTOMUP_spmsk.info,
                                  lastintervallcp,
                                  lastintervallb,
                                  lastintervalrb,
@@ -410,11 +410,11 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
         lastinterval = NULL;
       } else
       {
-        PUSH_ESA_BOTTOMUP_shulen(lcpvalue,idx);
-        if (processleafedge_shulen(true,
-                            TOP_ESA_BOTTOMUP_shulen.lcp,
-                            TOP_ESA_BOTTOMUP_shulen.lb,
-                            &TOP_ESA_BOTTOMUP_shulen.info,
+        PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,idx);
+        if (processleafedge_spmsk(true,
+                            TOP_ESA_BOTTOMUP_spmsk.lcp,
+                            TOP_ESA_BOTTOMUP_spmsk.lb,
+                            &TOP_ESA_BOTTOMUP_spmsk.info,
                             previoussuffix,bustate,err) != 0)
         {
           haserr = true;
@@ -424,23 +424,23 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab,
     }
   }
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
-  if (!haserr && TOP_ESA_BOTTOMUP_shulen.lcp > 0)
+  if (!haserr && TOP_ESA_BOTTOMUP_spmsk.lcp > 0)
   {
     unsigned long lastsuftabvalue = suftab[nonspecials-1];
-    if (processleafedge_shulen(false,
-                        TOP_ESA_BOTTOMUP_shulen.lcp,
-                        TOP_ESA_BOTTOMUP_shulen.lb,
-                        &TOP_ESA_BOTTOMUP_shulen.info,
+    if (processleafedge_spmsk(false,
+                        TOP_ESA_BOTTOMUP_spmsk.lcp,
+                        TOP_ESA_BOTTOMUP_spmsk.lb,
+                        &TOP_ESA_BOTTOMUP_spmsk.info,
                         lastsuftabvalue,bustate,err) != 0)
     {
       haserr = true;
     } else
     {
-      TOP_ESA_BOTTOMUP_shulen.rb = idx;
-      if (processlcpinterval_shulen(TOP_ESA_BOTTOMUP_shulen.lcp,
-                             TOP_ESA_BOTTOMUP_shulen.lb,
-                             TOP_ESA_BOTTOMUP_shulen.rb,
-                             &TOP_ESA_BOTTOMUP_shulen.info,
+      TOP_ESA_BOTTOMUP_spmsk.rb = idx;
+      if (processlcpinterval_spmsk(TOP_ESA_BOTTOMUP_spmsk.lcp,
+                             TOP_ESA_BOTTOMUP_spmsk.lb,
+                             TOP_ESA_BOTTOMUP_spmsk.rb,
+                             &TOP_ESA_BOTTOMUP_spmsk.info,
                              bustate,
                              err) != 0)
       {

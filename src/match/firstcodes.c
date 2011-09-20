@@ -565,7 +565,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         unsigned long maxindex,
                                         unsigned long sumofwidth,
                                         unsigned long depth,
-                                        GtSpmsk_state *spmsk_state,
+                                        GtBUstate_spmsk *spmsk_state,
                                         bool withsuftabcheck)
 {
   unsigned long current, next, idx, width, previous = 0, sumwidth = 0;
@@ -628,7 +628,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
       {
         int ret;
 
-        ret = gt_spmsk_process(spmsk_state,
+        ret = gt_spmsk_inl_process(spmsk_state,
                                suftab_bucket,
                                lcptab_bucket,
                                width,
@@ -732,7 +732,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
   GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
-  GtSpmsk_state *spmsk_state = NULL;
+  GtBUstate_spmsk *spmsk_state = NULL;
   bool haserr = false;
 
   fcsl.workspace = 0;
@@ -992,7 +992,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.flushcount = 0;
     if (outputspms || countspms)
     {
-      spmsk_state = gt_spmsk_new(encseq,readmode,
+      spmsk_state = gt_spmsk_inl_new(encseq,readmode,
                                  (unsigned long ) minmatchlength,
                                  countspms,outputspms);
     }
@@ -1082,7 +1082,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     gt_free(fci.tempcodeforradixsort);
   }
-  gt_spmsk_delete(spmsk_state);
+  gt_spmsk_inl_delete(spmsk_state);
   gt_suftabparts_delete(suftabparts);
   if (!haserr)
   {

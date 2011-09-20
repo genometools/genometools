@@ -31,6 +31,7 @@ static int processleafedge_maxpairs(bool,
     GtBUstate_maxpairs *,
     GtError *err);
 
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
 static int processbranchingedge_maxpairs(bool firstsucc,
     unsigned long,
     unsigned long,
@@ -41,6 +42,7 @@ static int processbranchingedge_maxpairs(bool firstsucc,
     GtBUinfo_maxpairs *,
     GtBUstate_maxpairs *,
     GtError *);
+#endif
 
 static int processlcpinterval_maxpairs(unsigned long,
     unsigned long,
@@ -124,6 +126,8 @@ static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
   return itvinfo;
 }
 
+#ifndef GT_ESA_BOTTOM_UP_RAM
+
 int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_maxpairs *bustate,
                     GtError *err)
@@ -191,6 +195,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_maxpairs != NULL &&
             processbranchingedge_maxpairs(firstedge,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
@@ -206,6 +211,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           haserr = true;
           break;
         }
+#endif
         lastinterval = NULL;
       }
     }
@@ -217,10 +223,13 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     {
       if (lastinterval != NULL)
       {
+        unsigned long lastintervallb = lastinterval->lb;
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         unsigned long lastintervallcp = lastinterval->lcp,
-                      lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
+#endif
         PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_maxpairs != NULL &&
             processbranchingedge_maxpairs(true,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
@@ -235,6 +244,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           haserr = true;
           break;
         }
+#endif
         lastinterval = NULL;
       } else
       {
@@ -278,3 +288,168 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
   gt_GtArrayGtBUItvinfo_delete_maxpairs(stack,bustate);
   return haserr ? -1 : 0;
 }
+
+#else
+
+int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab,
+                        const uint16_t *lcptab_bucket,
+                        unsigned long nonspecials,
+                        GtArrayGtBUItvinfo_maxpairs *stack,
+                        GtBUstate_maxpairs *bustate,
+                        GtError *err)
+{
+  const unsigned long incrementstacksize = 32UL;
+  unsigned long lcpvalue,
+                previoussuffix = 0,
+                idx;
+  GtBUItvinfo_maxpairs *lastinterval = NULL;
+  bool haserr = false, firstedge, firstedgefromroot = true;
+
+  gt_assert(nonspecials > 0);
+  PUSH_ESA_BOTTOMUP_maxpairs(0,0);
+  for (idx = 0; idx < nonspecials-1; idx++)
+  {
+    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
+    previoussuffix = suftab[idx];
+    if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
+    {
+      if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
+      {
+        firstedge = false;
+      } else
+      {
+        firstedge = true;
+        firstedgefromroot = false;
+      }
+      if (processleafedge_maxpairs(firstedge,
+                          TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                          TOP_ESA_BOTTOMUP_maxpairs.lb,
+                          &TOP_ESA_BOTTOMUP_maxpairs.info,
+                          previoussuffix,bustate,err) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+    gt_assert(lastinterval == NULL);
+    while (lcpvalue < TOP_ESA_BOTTOMUP_maxpairs.lcp)
+    {
+      lastinterval = POP_ESA_BOTTOMUP_maxpairs;
+      lastinterval->rb = idx;
+      if (processlcpinterval_maxpairs != NULL &&
+          processlcpinterval_maxpairs(lastinterval->lcp,
+                             lastinterval->lb,
+                             lastinterval->rb,
+                             &lastinterval->info,
+                             bustate,
+                             err) != 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
+      {
+        if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
+        {
+          firstedge = false;
+        } else
+        {
+          firstedge = true;
+          firstedgefromroot = false;
+        }
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
+        if (processbranchingedge_maxpairs != NULL &&
+            processbranchingedge_maxpairs(firstedge,
+                                 TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                                 TOP_ESA_BOTTOMUP_maxpairs.lb,
+                                 &TOP_ESA_BOTTOMUP_maxpairs.info,
+                                 lastinterval->lcp,
+                                 lastinterval->lb,
+                                 lastinterval->rb,
+                                 &lastinterval->info,
+                                 bustate,
+                                 err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+#endif
+        lastinterval = NULL;
+      }
+    }
+    if (haserr)
+    {
+      break;
+    }
+    if (lcpvalue > TOP_ESA_BOTTOMUP_maxpairs.lcp)
+    {
+      if (lastinterval != NULL)
+      {
+        unsigned long lastintervallb = lastinterval->lb;
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
+        unsigned long lastintervallcp = lastinterval->lcp,
+                      lastintervalrb = lastinterval->rb;
+#endif
+        PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
+#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
+        if (processbranchingedge_maxpairs != NULL &&
+            processbranchingedge_maxpairs(true,
+                                 TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                                 TOP_ESA_BOTTOMUP_maxpairs.lb,
+                                 &TOP_ESA_BOTTOMUP_maxpairs.info,
+                                 lastintervallcp,
+                                 lastintervallb,
+                                 lastintervalrb,
+                                 NULL,
+                                 bustate,err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+#endif
+        lastinterval = NULL;
+      } else
+      {
+        PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,idx);
+        if (processleafedge_maxpairs(true,
+                            TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                            TOP_ESA_BOTTOMUP_maxpairs.lb,
+                            &TOP_ESA_BOTTOMUP_maxpairs.info,
+                            previoussuffix,bustate,err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+    }
+  }
+  gt_assert(stack->nextfreeGtBUItvinfo > 0);
+  if (!haserr && TOP_ESA_BOTTOMUP_maxpairs.lcp > 0)
+  {
+    unsigned long lastsuftabvalue = suftab[nonspecials-1];
+    if (processleafedge_maxpairs(false,
+                        TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                        TOP_ESA_BOTTOMUP_maxpairs.lb,
+                        &TOP_ESA_BOTTOMUP_maxpairs.info,
+                        lastsuftabvalue,bustate,err) != 0)
+    {
+      haserr = true;
+    } else
+    {
+      TOP_ESA_BOTTOMUP_maxpairs.rb = idx;
+      if (processlcpinterval_maxpairs(TOP_ESA_BOTTOMUP_maxpairs.lcp,
+                             TOP_ESA_BOTTOMUP_maxpairs.lb,
+                             TOP_ESA_BOTTOMUP_maxpairs.rb,
+                             &TOP_ESA_BOTTOMUP_maxpairs.info,
+                             bustate,
+                             err) != 0)
+      {
+        haserr = true;
+      }
+    }
+  }
+  stack->nextfreeGtBUItvinfo = 0; /* empty the stack */
+  return haserr ? -1 : 0;
+}
+
+#endif

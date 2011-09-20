@@ -15,24 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_SPMSK_H
-#define ESA_SPMSK_H
+#ifndef ESA_SPMSK_INL_H
+#define ESA_SPMSK_INL_H
 
 #include <stdint.h>
 #include "core/error_api.h"
 #include "core/encseq_api.h"
 
-typedef struct GtSpmsk_state GtSpmsk_state;
+typedef struct GtBUstate_spmsk GtBUstate_spmsk;
 
-GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
+GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
                             unsigned long minmatchlength,
                             bool countspms,
                             bool outputspms);
 
-void gt_spmsk_delete(GtSpmsk_state *state);
+void gt_spmsk_inl_delete(GtBUstate_spmsk *state);
 
-int gt_spmsk_process(GtSpmsk_state *state,
+int gt_spmsk_inl_process(GtBUstate_spmsk *state,
                      const unsigned long *suftab,
                      const uint16_t *lcptab_bucket,
                      unsigned long nonspecials,

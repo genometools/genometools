@@ -26,9 +26,9 @@
 typedef struct
 {
   unsigned long firstinW;
-} GtSpmsk_info;
+} GtBUinfo_spmsk;
 
-struct GtSpmsk_state /* global information */
+struct GtBUstate_spmsk /* global information */
 {
   const GtEncseq *encseq;
   GtReadmode readmode;
@@ -38,33 +38,30 @@ struct GtSpmsk_state /* global information */
   bool countspms,
        outputspms;
   GtArrayGtUlong Wset, Lset;
-  GtArrayGtBUItvinfo *stack;
+  void *stack;
 };
 
-static GtBUinfo *gt_spmsk_allocatestackinfo(GT_UNUSED GtBUstate *bustate)
+static void initBUinfo_spmsk(GtBUinfo_spmsk *buinfo,
+                             GT_UNUSED GtBUstate_spmsk *state)
 {
-  GtSpmsk_info *info = gt_malloc(sizeof (*info));
-  info->firstinW = ULONG_MAX;
-  return (GtBUinfo *) info;
+  buinfo->firstinW = ULONG_MAX;
 }
 
-static void gt_spmsk_freestackinfo(GtBUinfo *buinfo,
-                                   GT_UNUSED GtBUstate *bustate)
+static void freeBUinfo_spmsk(GT_UNUSED GtBUinfo_spmsk *info,
+                             GT_UNUSED GtBUstate_spmsk *state)
 {
-  gt_free(buinfo);
+  return;
 }
 
-static int spmsk_processleafedge(bool firstedge,
+static int processleafedge_spmsk(bool firstedge,
                                  unsigned long fd,
                                  GT_UNUSED unsigned long flb,
-                                 GtBUinfo *finfo,
+                                 GtBUinfo_spmsk *finfo,
                                  unsigned long pos,
-                                 GtBUstate *bustate,
+                                 GtBUstate_spmsk *state,
                                  GT_UNUSED GtError *err)
 
 {
-  GtSpmsk_state *state = (GtSpmsk_state *) bustate;
-
   if (fd >= state->minmatchlength)
   {
     unsigned long idx;
@@ -72,7 +69,7 @@ static int spmsk_processleafedge(bool firstedge,
     if (firstedge)
     {
       gt_assert(finfo != NULL);
-      ((GtSpmsk_info *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
+      ((GtBUinfo_spmsk *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
     }
     if (pos == 0 || gt_encseq_position_is_separator(state->encseq,
                                                     pos - 1,
@@ -92,21 +89,19 @@ static int spmsk_processleafedge(bool firstedge,
   return 0;
 }
 
-static int spmsk_processlcpinterval(unsigned long lcp,
+static int processlcpinterval_spmsk(unsigned long lcp,
                                     GT_UNUSED unsigned long lb,
                                     GT_UNUSED unsigned long rb,
-                                    GtBUinfo *info,
-                                    GtBUstate *bustate,
+                                    GtBUinfo_spmsk *info,
+                                    GtBUstate_spmsk *state,
                                     GT_UNUSED GtError *err)
 {
-  GtSpmsk_state *state = (GtSpmsk_state *) bustate;
-
   if (lcp >= state->minmatchlength)
   {
     unsigned long lidx, widx, firstpos;
 
     gt_assert(info != NULL);
-    firstpos = ((GtSpmsk_info *) info)->firstinW;
+    firstpos = ((GtBUinfo_spmsk *) info)->firstinW;
     for (lidx = 0; lidx < state->Lset.nextfreeGtUlong; lidx++)
     {
       if (state->outputspms)
@@ -134,13 +129,17 @@ static int spmsk_processlcpinterval(unsigned long lcp,
   return 0;
 }
 
-GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
+#define GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
+#define GT_ESA_BOTTOM_UP_RAM
+#include "esa-bottomup-spmsk.inc"
+
+GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
                             unsigned long minmatchlength,
                             bool countspms,
                             bool outputspms)
 {
-  GtSpmsk_state *state = gt_malloc(sizeof (*state));
+  GtBUstate_spmsk *state = gt_malloc(sizeof (*state));
 
   state->encseq = encseq;
   state->readmode = readmode;
@@ -149,13 +148,13 @@ GtSpmsk_state *gt_spmsk_new(const GtEncseq *encseq,
   state->countspms = countspms;
   state->outputspms = outputspms;
   state->spmcounter = 0;
-  state->stack = gt_GtArrayGtBUItvinfo_new();
+  state->stack = (void *) gt_GtArrayGtBUItvinfo_new();
   GT_INITARRAY(&state->Wset,GtUlong);
   GT_INITARRAY(&state->Lset,GtUlong);
   return state;
 }
 
-void gt_spmsk_delete(GtSpmsk_state *state)
+void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 {
   if (state != NULL)
   {
@@ -165,26 +164,23 @@ void gt_spmsk_delete(GtSpmsk_state *state)
     }
     GT_FREEARRAY(&state->Wset,GtUlong);
     GT_FREEARRAY(&state->Lset,GtUlong);
-    gt_GtArrayGtBUItvinfo_delete(state->stack,gt_spmsk_freestackinfo,NULL);
+    gt_GtArrayGtBUItvinfo_delete_spmsk(
+                 (GtArrayGtBUItvinfo_spmsk *) state->stack,state);
     gt_free(state);
   }
 }
 
-int gt_spmsk_process(GtSpmsk_state *state,
+int gt_spmsk_inl_process(GtBUstate_spmsk *state,
                      const unsigned long *suftab,
                      const uint16_t *lcptab_bucket,
                      unsigned long nonspecials,
                      GtError *err)
 {
-  if (gt_esa_bottomup_RAM(suftab,
+  if (gt_esa_bottomup_RAM_spmsk(suftab,
                           lcptab_bucket,
                           nonspecials,
-                          state->stack,
-                          gt_spmsk_allocatestackinfo,
-                          spmsk_processleafedge,
-                          NULL,
-                          spmsk_processlcpinterval,
-                          (GtBUstate *) state,
+                          (GtArrayGtBUItvinfo_spmsk *) state->stack,
+                          state,
                           err) != 0)
   {
     return -1;
