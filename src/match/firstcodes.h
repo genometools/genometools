@@ -19,15 +19,18 @@
 #define FIRSTCODES_H
 
 #include "core/log_api.h"
+#include "core/error_api.h"
 #include "core/encseq_api.h"
 
-void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
-                                                   unsigned int kmersize,
-                                                   unsigned int parts,
-                                                   unsigned int minmatchlength,
-                                                   bool withsuftabcheck,
-                                                   bool countspms,
-                                                   bool outputspms,
-                                                   GtLogger *logger);
+int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
+                                                  unsigned int kmersize,
+                                                  unsigned int numofparts,
+                                                  unsigned long maximumspace,
+                                                  unsigned int minmatchlength,
+                                                  bool withsuftabcheck,
+                                                  bool countspms,
+                                                  bool outputspms,
+                                                  GtLogger *logger,
+                                                  GtError *err);
 
 #endif

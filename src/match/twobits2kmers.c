@@ -25,7 +25,6 @@
 #include "sfx-mappedstr.h"
 #include "sfx-suffixer.h"
 #include "twobits2kmers.h"
-#include "firstcodes.h"
 #include "hashfirstcodes.h"
 #include "stamp.h"
 
@@ -234,11 +233,6 @@ static void gt_encseq_faststream_kmers(const GtEncseq *encseq,
     case BSRS_stream_reader_multi3:
       multireadmode_getencseqkmers_twobitencoding(encseq,kmersize);
       break;
-    case BSRS_storefirstcodes:
-      gt_assert(kmersize >= 32U);
-      storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,1U,kmersize,
-                                                    false,false,false,NULL);
-      break;
     case BSRS_hashfirstcodes:
       hashfirstcodes_getencseqkmers_twobitencoding(encseq,kmersize);
       break;
@@ -316,7 +310,6 @@ void gt_encseq_faststream(const GtEncseq *encseq,
       case BSRS_reader_multi:
       case BSRS_stream_reader_multi:
       case BSRS_stream_reader_multi3:
-      case BSRS_storefirstcodes:
       case BSRS_hashfirstcodes:
         gt_encseq_faststream_kmers(encseq,bsrsmode,multiarg);
         break;

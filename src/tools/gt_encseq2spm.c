@@ -32,8 +32,11 @@ typedef struct {
        countspms;
   unsigned int minmatchlength,
                parts;
+  unsigned long maximumspace;
   GtStr *encseqinput,
-        *spmspec;
+        *spmspec,
+        *memlimit;
+  GtOption *optionmemlimit;
 } GtEncseq2spmArguments;
 
 static void* gt_encseq2spm_arguments_new(void)
@@ -43,6 +46,9 @@ static void* gt_encseq2spm_arguments_new(void)
   arguments->countspms = false;
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
+  arguments->optionmemlimit = NULL;
+  arguments->memlimit = gt_str_new();
+  arguments->maximumspace = 0UL; /* in bytes */
   return arguments;
 }
 
@@ -52,6 +58,7 @@ static void gt_encseq2spm_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
   gt_str_delete(arguments->spmspec);
+  gt_str_delete(arguments->memlimit);
   gt_free(arguments);
 }
 
@@ -59,7 +66,8 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
 {
   GtEncseq2spmArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option;
+  GtOption *option, *optionparts;
+
   gt_assert(arguments);
 
   /* init */
@@ -74,9 +82,18 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option);
 
   /* -parts */
-  option = gt_option_new_uint_min("parts", "specify the number of parts",
+  optionparts = gt_option_new_uint_min("parts", "specify the number of parts",
                                   &arguments->parts, 1U, 1U);
-  gt_option_parser_add_option(op, option);
+  gt_option_parser_add_option(op, optionparts);
+
+  /* -memlimit */
+  arguments->optionmemlimit = gt_option_new_string("memlimit",
+                       "specify maximal amount of memory to be used during "
+                       "index construction (in bytes, the keywords 'MB' "
+                       "and 'GB' are allowed)",
+                       arguments->memlimit, NULL);
+  gt_option_parser_add_option(op, arguments->optionmemlimit);
+  gt_option_exclude(arguments->optionmemlimit, optionparts);
 
   /* -checksuftab */
   option = gt_option_new_bool("checksuftab", "check the suffix table",
@@ -107,7 +124,7 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
 }
 
 static int gt_encseq2spm_arguments_check(int rest_argc,
-                                         GT_UNUSED void *tool_arguments,
+                                         void *tool_arguments,
                                          GtError *err)
 {
   GtEncseq2spmArguments *arguments = tool_arguments;
@@ -136,6 +153,15 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
                      spmspecstring);
         haserr = true;
       }
+    }
+  }
+  if (!haserr && arguments->optionmemlimit != NULL
+        && gt_option_is_set(arguments->optionmemlimit))
+  {
+    if (gt_option_parse_memlimit(&arguments->maximumspace,arguments->memlimit,
+                                 err) != 0)
+    {
+      haserr = true;
     }
   }
   return haserr ? -1 : 0;
@@ -175,13 +201,18 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     GtLogger *logger;
 
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
-    storefirstcodes_getencseqkmers_twobitencoding(encseq,32U,
-                                                  arguments->parts,
-                                                  arguments->minmatchlength,
-                                                  arguments->checksuftab,
-                                                  arguments->countspms,
-                                                  arguments->outputspms,
-                                                  logger);
+    if (storefirstcodes_getencseqkmers_twobitencoding(encseq,
+                                                      32U,
+                                                      arguments->parts,
+                                                      arguments->maximumspace,
+                                                      arguments->minmatchlength,
+                                                      arguments->checksuftab,
+                                                      arguments->countspms,
+                                                      arguments->outputspms,
+                                                      logger,err) != 0)
+    {
+      haserr = true;
+    }
     gt_logger_delete(logger);
   }
   gt_encseq_delete(encseq);

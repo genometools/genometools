@@ -26,6 +26,7 @@
 #include "core/spacepeak.h"
 #include "core/spacecalc.h"
 #include "core/fa.h"
+#include "core/error_api.h"
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
@@ -691,14 +692,16 @@ static void gt_firstcodes_update_workspace(int line,
   */
 }
 
-void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
+int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
-                                                   unsigned int parts,
+                                                   unsigned int numofparts,
+                                                   unsigned long maximumspace,
                                                    unsigned int minmatchlength,
                                                    bool withsuftabcheck,
                                                    bool countspms,
                                                    bool outputspms,
-                                                   GtLogger *logger)
+                                                   GtLogger *logger,
+                                                   GtError *err)
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
@@ -708,9 +711,10 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long maxbucketsize, totallength, suftabentries, largest_width;
   GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
-  GtSuftabparts *suftabparts;
+  GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
   GtSpmsk_state *spmsk_state = NULL;
+  bool haserr = false;
 
   fcsl.workspace = 0;
   fcsl.splitspace = 0;
@@ -846,154 +850,183 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   maxbucketsize = storefirstcodes_partialsum(&fci);
   gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
   suftabentries = fci.firstcodehits + fci.numofsequences;
-  gt_assert(parts > 0);
-  suftabparts = gt_suftabparts_new(parts,
-                                   NULL,
-                                   &fci.tab,
-                                   sfxmrlist,
-                                   suftabentries,
-                                   0,
-                                   logger);
-  gt_Sfxmappedrangelist_delete(sfxmrlist);
-  sfxmrlist = NULL;
-  gt_assert(suftabparts != NULL);
-  /*
-  gt_suftabparts_showallrecords(suftabparts);
-  */
-  gt_free(fci.tempcodeforradixsort);
-  gt_free(fci.buf.spaceGtUlong);
-  gt_assert(fci.buf.nextfree == 0);
-  if (gt_suftabparts_numofparts(suftabparts) > 1U)
+  if (maximumspace > 0)
   {
-    gt_assert(fci.tab.allfirstcodes != NULL);
-    gt_assert(fci.mappedallfirstcodes != NULL);
-    gt_Sfxmappedrange_storetmp(fci.mappedallfirstcodes,
-                               (void **) &fci.tab.allfirstcodes,
-                               false,
-                               logger);
-    gt_assert(fci.tab.allfirstcodes == NULL);
-    gt_assert(fci.tab.countocc != NULL);
-    gt_assert(fci.mappedcountocc != NULL);
-    gt_Sfxmappedrange_storetmp(fci.mappedcountocc,
-                               (void **) &fci.tab.countocc,
-                               true,
-                               logger);
-    gt_assert(fci.tab.countocc == NULL);
-    gt_marksubstring_bits_null(fci.buf.markprefix,false);
-    gt_assert(fci.mappedmarkprefix != NULL);
-    gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
-                               gt_marksubstring_bits_address(
-                                  fci.buf.markprefix),
-                               false,
-                               logger);
-    gt_marksubstring_bits_null(fci.buf.markprefix,true);
-  } else
-  {
-    gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
-    fci.mappedallfirstcodes = NULL;
-    gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
-    fci.mappedcountocc = NULL;
-    gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
-    fci.mappedmarkprefix = NULL;
+    int retval;
+
+    gt_assert(numofparts == 1U);
+    retval = gt_suftabparts_fit_memlimit(fcsl.workspace,
+                                         maximumspace,
+                                         NULL,
+                                         &fci.tab,
+                                         sfxmrlist,
+                                         totallength,
+                                         0, /* special characters not used */
+                                         suftabentries,
+                                         false, /* suftabuint not used */
+                                         err);
+    if (retval < 0)
+    {
+      haserr = true;
+    } else
+    {
+      gt_assert(retval > 0);
+      numofparts = (unsigned int) retval;
+      gt_logger_log(logger, "derived parts=%u",numofparts);
+    }
   }
-  fci.codebuffer_total = 0;
-  fci.buf.allocated /= 2UL;
-  fci.buf.spaceGtUlongPair = gt_malloc(sizeof (*fci.buf.spaceGtUlongPair)
-                                       * fci.buf.allocated);
-  fci.tempcodeposforradixsort = gt_malloc(sizeof (*fci.tempcodeposforradixsort)
-                                          * fci.buf.allocated);
-  largest_width = gt_suftabparts_largest_width(suftabparts);
-  fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,logger);
-  suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength);
-  fci.flushcount = 0;
-  if (outputspms || countspms)
+  if (!haserr)
   {
-    spmsk_state = gt_spmsk_new(encseq,readmode,(unsigned long ) minmatchlength,
-                               countspms,outputspms);
-  }
-  fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
-  for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)
-  {
-    if (timer != NULL)
+    gt_assert(numofparts > 0);
+    suftabparts = gt_suftabparts_new(numofparts,
+                                     NULL,
+                                     &fci.tab,
+                                     sfxmrlist,
+                                     suftabentries,
+                                     0,
+                                     logger);
+    gt_Sfxmappedrangelist_delete(sfxmrlist);
+    sfxmrlist = NULL;
+    gt_assert(suftabparts != NULL);
+    /*
+    gt_suftabparts_showallrecords(suftabparts);
+    */
+    gt_free(fci.tempcodeforradixsort);
+    gt_free(fci.buf.spaceGtUlong);
+    gt_assert(fci.buf.nextfree == 0);
+    if (gt_suftabparts_numofparts(suftabparts) > 1U)
     {
-      gt_timer_show_progress(timer, "to insert suffixes into buckets",stdout);
-    }
-    gt_logger_log(logger,"compute part %u",part);
-    fci.currentminindex = gt_suftabparts_minindex(part,suftabparts);
-    fci.currentmaxindex = gt_suftabparts_maxindex(part,suftabparts);
-    fci.widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
-    if (fci.mappedallfirstcodes != NULL)
+      gt_assert(fci.tab.allfirstcodes != NULL);
+      gt_assert(fci.mappedallfirstcodes != NULL);
+      gt_Sfxmappedrange_storetmp(fci.mappedallfirstcodes,
+                                 (void **) &fci.tab.allfirstcodes,
+                                 false,
+                                 logger);
+      gt_assert(fci.tab.allfirstcodes == NULL);
+      gt_assert(fci.tab.countocc != NULL);
+      gt_assert(fci.mappedcountocc != NULL);
+      gt_Sfxmappedrange_storetmp(fci.mappedcountocc,
+                                 (void **) &fci.tab.countocc,
+                                 true,
+                                 logger);
+      gt_assert(fci.tab.countocc == NULL);
+      gt_marksubstring_bits_null(fci.buf.markprefix,false);
+      gt_assert(fci.mappedmarkprefix != NULL);
+      gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
+                                 gt_marksubstring_bits_address(
+                                    fci.buf.markprefix),
+                                 false,
+                                 logger);
+      gt_marksubstring_bits_null(fci.buf.markprefix,true);
+    } else
     {
-      fci.tab.allfirstcodes
-        = (unsigned long *)
-          gt_Sfxmappedrange_map(fci.mappedallfirstcodes,
-                                part,
-                                fci.currentminindex,
-                                fci.currentmaxindex,
-                                logger);
-    }
-    if (fci.mappedcountocc != NULL)
-    {
-      fci.tab.countocc
-        = (uint32_t *)
-          gt_Sfxmappedrange_map(fci.mappedcountocc,
-                                part,
-                                fci.currentminindex,
-                                fci.currentmaxindex,
-                                logger);
-    }
-    if (fci.mappedmarkprefix != NULL)
-    {
-      gt_marksubstring_bits_map(fci.buf.markprefix,
-                                (GtBitsequence *)
-                                gt_Sfxmappedrange_map(fci.mappedmarkprefix,
-                                                      part,
-                                                      fci.currentminindex,
-                                                      fci.currentmaxindex,
-                                                      logger));
-    }
-    fci.buf.currentmincode = gt_suftabparts_mincode(part,suftabparts);
-    fci.buf.currentmaxcode = gt_suftabparts_maxcode(part,suftabparts);
-    gt_spmsuftab_partoffset(fci.spmsuftab,
-                            gt_suftabparts_offset(part,suftabparts));
-    gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
-                                  encseq,
-                                  readmode,
-                                  kmersize,
-                                  minmatchlength,
-                                  &fci.buf,
-                                  NULL);
-    gt_firstcodes_insertsuffixes_flush(&fci);
-    if (part == gt_suftabparts_numofparts(suftabparts) - 1)
-    {
-      GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
-      gt_free(fci.buf.spaceGtUlongPair);
-      gt_free(fci.tempcodeposforradixsort);
+      gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
+      fci.mappedallfirstcodes = NULL;
+      gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
+      fci.mappedcountocc = NULL;
       gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
-      gt_marksubstring_delete(fci.buf.markprefix,
-                              fci.mappedmarkprefix == NULL ? true : false);
-      fci.buf.markprefix = NULL;
-      gt_marksubstring_delete(fci.buf.marksuffix,true);
-      if (fci.mappedallfirstcodes == NULL)
-      {
-        gt_free(fci.tab.allfirstcodes);
-      }
+      fci.mappedmarkprefix = NULL;
     }
-    if (timer != NULL)
+    fci.codebuffer_total = 0;
+    fci.buf.allocated /= 2UL;
+    fci.buf.spaceGtUlongPair = gt_malloc(sizeof (*fci.buf.spaceGtUlongPair)
+                                         * fci.buf.allocated);
+    fci.tempcodeposforradixsort
+      = gt_malloc(sizeof (*fci.tempcodeposforradixsort) * fci.buf.allocated);
+    largest_width = gt_suftabparts_largest_width(suftabparts);
+    fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,logger);
+    suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength);
+    fci.flushcount = 0;
+    if (outputspms || countspms)
     {
-      gt_timer_show_progress(timer, "to sort buckets of suffixes",stdout);
+      spmsk_state = gt_spmsk_new(encseq,readmode,
+                                 (unsigned long ) minmatchlength,
+                                 countspms,outputspms);
     }
-    gt_firstcodes_sortremaining(encseq,
-                                readmode,
-                                fci.spmsuftab,
-                                maxbucketsize,
-                                &fci.tab,
-                                gt_suftabparts_minindex(part,suftabparts),
-                                gt_suftabparts_maxindex(part,suftabparts),
-                                gt_suftabparts_sumofwidth(part,suftabparts),
-                                (unsigned long) kmersize,
-                                spmsk_state,
-                                withsuftabcheck);
+    fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
+    for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)
+    {
+      if (timer != NULL)
+      {
+        gt_timer_show_progress(timer, "to insert suffixes into buckets",stdout);
+      }
+      gt_logger_log(logger,"compute part %u",part);
+      fci.currentminindex = gt_suftabparts_minindex(part,suftabparts);
+      fci.currentmaxindex = gt_suftabparts_maxindex(part,suftabparts);
+      fci.widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
+      if (fci.mappedallfirstcodes != NULL)
+      {
+        fci.tab.allfirstcodes
+          = (unsigned long *)
+            gt_Sfxmappedrange_map(fci.mappedallfirstcodes,
+                                  part,
+                                  fci.currentminindex,
+                                  fci.currentmaxindex,
+                                  logger);
+      }
+      if (fci.mappedcountocc != NULL)
+      {
+        fci.tab.countocc
+          = (uint32_t *)
+            gt_Sfxmappedrange_map(fci.mappedcountocc,
+                                  part,
+                                  fci.currentminindex,
+                                  fci.currentmaxindex,
+                                  logger);
+      }
+      if (fci.mappedmarkprefix != NULL)
+      {
+        gt_marksubstring_bits_map(fci.buf.markprefix,
+                                  (GtBitsequence *)
+                                  gt_Sfxmappedrange_map(fci.mappedmarkprefix,
+                                                        part,
+                                                        fci.currentminindex,
+                                                        fci.currentmaxindex,
+                                                        logger));
+      }
+      fci.buf.currentmincode = gt_suftabparts_mincode(part,suftabparts);
+      fci.buf.currentmaxcode = gt_suftabparts_maxcode(part,suftabparts);
+      gt_spmsuftab_partoffset(fci.spmsuftab,
+                              gt_suftabparts_offset(part,suftabparts));
+      gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
+                                    encseq,
+                                    readmode,
+                                    kmersize,
+                                    minmatchlength,
+                                    &fci.buf,
+                                    NULL);
+      gt_firstcodes_insertsuffixes_flush(&fci);
+      if (part == gt_suftabparts_numofparts(suftabparts) - 1)
+      {
+        GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
+        gt_free(fci.buf.spaceGtUlongPair);
+        gt_free(fci.tempcodeposforradixsort);
+        gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
+        gt_marksubstring_delete(fci.buf.markprefix,
+                                fci.mappedmarkprefix == NULL ? true : false);
+        fci.buf.markprefix = NULL;
+        gt_marksubstring_delete(fci.buf.marksuffix,true);
+        if (fci.mappedallfirstcodes == NULL)
+        {
+          gt_free(fci.tab.allfirstcodes);
+        }
+      }
+      if (timer != NULL)
+      {
+        gt_timer_show_progress(timer, "to sort buckets of suffixes",stdout);
+      }
+      gt_firstcodes_sortremaining(encseq,
+                                  readmode,
+                                  fci.spmsuftab,
+                                  maxbucketsize,
+                                  &fci.tab,
+                                  gt_suftabparts_minindex(part,suftabparts),
+                                  gt_suftabparts_maxindex(part,suftabparts),
+                                  gt_suftabparts_sumofwidth(part,suftabparts),
+                                  (unsigned long) kmersize,
+                                  spmsk_state,
+                                  withsuftabcheck);
+    }
   }
   if (timer != NULL)
   {
@@ -1024,4 +1057,5 @@ void storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_timer_delete(timer);
   }
   /*printf("callfirstcodes_find = %lu\n",callfirstcodes_find);*/
+  return haserr ? -1 : 0;
 }
