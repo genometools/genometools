@@ -61,12 +61,17 @@ esa-lcpval.c
 esa-map.c
 esa-mmsearch.c
 esa-ppbuckwid.c
+esa-scanprj.c
 esa-seqread.c
 esa-shulen.c
 esa-spmitvs.c
 esa-splititv.c
+esa-spmsk.c
+firstcodes.c
+firstcodes-tab.c
 giextract.c
 greedyfwdmat.c
+hashfirstcodes.c
 idx-limdfs.c
 idxlocali.c
 idxlocalidp.c
@@ -79,6 +84,7 @@ iter-window.c
 kmer2string.c
 lua_tools.c
 mapspec-gen.c
+marksubstring.c
 measure-time.c
 merger-trie.c
 mssufpat.c
@@ -104,6 +110,7 @@ sfx-input.c
 sfx-lcpvalues.c
 sfx-linlcp.c
 sfx-mappedstr.c
+sfx-maprange.c
 sfx-outprj.c
 sfx-partssuf.c
 sfx-progress.c
@@ -120,10 +127,11 @@ shu-divergence.c
 shu-encseq-gc.c
 shu-genomediff-pck-simple.c
 shu-genomediff.c
-shu-unitfile.c
+shu_unitfile.c
 twobits2kmers.c
 spaced-seeds.c
 specialrank.c
+spmsuftab.c
 substriter.c
 tagerator.c
 test-pairwise.c
