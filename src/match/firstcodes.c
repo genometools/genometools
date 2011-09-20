@@ -739,7 +739,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fcsl.splitspace = 0;
   fci.spmsuftab = NULL;
   fci.buf.spaceGtUlongPair = NULL;
+  fci.buf.spaceGtUlong = NULL;
   fci.tempcodeposforradixsort = NULL;
+  fci.tempcodeforradixsort = NULL;
   gt_firstcodes_update_workspace(__LINE__,"encseq",true,&fcsl,
                                  (size_t) gt_encseq_sizeofrep(encseq),logger);
   if (gt_showtime_enabled())
