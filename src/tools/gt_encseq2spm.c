@@ -35,8 +35,8 @@ typedef struct {
   unsigned long maximumspace;
   GtStr *encseqinput,
         *spmspec,
-        *memlimit;
-  GtOption *optionmemlimit;
+        *memlimitarg;
+  GtOption *refoptionmemlimit;
 } GtEncseq2spmArguments;
 
 static void* gt_encseq2spm_arguments_new(void)
@@ -46,8 +46,7 @@ static void* gt_encseq2spm_arguments_new(void)
   arguments->countspms = false;
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
-  arguments->optionmemlimit = NULL;
-  arguments->memlimit = gt_str_new();
+  arguments->memlimitarg = gt_str_new();
   arguments->maximumspace = 0UL; /* in bytes */
   return arguments;
 }
@@ -58,7 +57,8 @@ static void gt_encseq2spm_arguments_delete(void *tool_arguments)
   if (!arguments) return;
   gt_str_delete(arguments->encseqinput);
   gt_str_delete(arguments->spmspec);
-  gt_str_delete(arguments->memlimit);
+  gt_option_delete(arguments->refoptionmemlimit);
+  gt_str_delete(arguments->memlimitarg);
   gt_free(arguments);
 }
 
@@ -66,7 +66,7 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
 {
   GtEncseq2spmArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *optionparts;
+  GtOption *option, *optionparts, *optionmemlimit;
 
   gt_assert(arguments);
 
@@ -87,13 +87,14 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, optionparts);
 
   /* -memlimit */
-  arguments->optionmemlimit = gt_option_new_string("memlimit",
+  optionmemlimit = gt_option_new_string("memlimit",
                        "specify maximal amount of memory to be used during "
                        "index construction (in bytes, the keywords 'MB' "
                        "and 'GB' are allowed)",
-                       arguments->memlimit, NULL);
-  gt_option_parser_add_option(op, arguments->optionmemlimit);
-  gt_option_exclude(arguments->optionmemlimit, optionparts);
+                       arguments->memlimitarg, NULL);
+  gt_option_parser_add_option(op, optionmemlimit);
+  gt_option_exclude(optionmemlimit, optionparts);
+  arguments->refoptionmemlimit = gt_option_ref(optionmemlimit);
 
   /* -checksuftab */
   option = gt_option_new_bool("checksuftab", "check the suffix table",
@@ -155,10 +156,10 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
       }
     }
   }
-  if (!haserr && arguments->optionmemlimit != NULL
-        && gt_option_is_set(arguments->optionmemlimit))
+  if (!haserr && gt_option_is_set(arguments->refoptionmemlimit))
   {
-    if (gt_option_parse_memlimit(&arguments->maximumspace,arguments->memlimit,
+    if (gt_option_parse_memlimit(&arguments->maximumspace,
+                                 arguments->memlimitarg,
                                  err) != 0)
     {
       haserr = true;

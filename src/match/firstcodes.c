@@ -692,6 +692,22 @@ static void gt_firstcodes_update_workspace(int line,
   */
 }
 
+static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci,
+                                           GtLogger *logger)
+{
+  GT_FREEARRAY(&fci->binsearchcache,GtIndexwithcode);
+  gt_free(fci->buf.spaceGtUlongPair);
+  gt_free(fci->tempcodeposforradixsort);
+  gt_Sfxmappedrange_delete(fci->mappedmarkprefix,logger);
+  gt_marksubstring_delete(fci->buf.markprefix,true);
+  fci->buf.markprefix = NULL;
+  gt_marksubstring_delete(fci->buf.marksuffix,true);
+  if (fci->mappedallfirstcodes == NULL)
+  {
+    gt_free(fci->tab.allfirstcodes);
+  }
+}
+
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
                                                    unsigned int numofparts,
@@ -719,6 +735,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 
   fcsl.workspace = 0;
   fcsl.splitspace = 0;
+  fci.spmsuftab = NULL;
+  fci.buf.spaceGtUlongPair = NULL;
+  fci.tempcodeposforradixsort = NULL;
   gt_firstcodes_update_workspace(__LINE__,true,&fcsl,
                                  (size_t) gt_encseq_sizeofrep(encseq),logger);
   if (gt_showtime_enabled())
@@ -999,18 +1018,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_firstcodes_insertsuffixes_flush(&fci);
       if (part == gt_suftabparts_numofparts(suftabparts) - 1)
       {
-        GT_FREEARRAY(&fci.binsearchcache,GtIndexwithcode);
-        gt_free(fci.buf.spaceGtUlongPair);
-        gt_free(fci.tempcodeposforradixsort);
-        gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
-        gt_marksubstring_delete(fci.buf.markprefix,
-                                fci.mappedmarkprefix == NULL ? true : false);
-        fci.buf.markprefix = NULL;
-        gt_marksubstring_delete(fci.buf.marksuffix,true);
-        if (fci.mappedallfirstcodes == NULL)
-        {
-          gt_free(fci.tab.allfirstcodes);
-        }
+        gt_firstcode_delete_before_end(&fci,logger);
       }
       if (timer != NULL)
       {
@@ -1033,6 +1041,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     gt_timer_show_progress(timer, "cleaning up",stdout);
   }
+  if (haserr)
+  {
+    gt_firstcode_delete_before_end(&fci,logger);
+    gt_free(fci.buf.spaceGtUlong);
+    gt_free(fci.tab.allfirstcodes);
+    gt_Sfxmappedrangelist_delete(sfxmrlist);
+    gt_free(fci.tempcodeforradixsort);
+  }
   gt_spmsk_delete(spmsk_state);
   gt_suftabparts_delete(suftabparts);
   if (!haserr)
@@ -1040,7 +1056,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
     gt_assert(fci.firstcodeposhits == suftabentries);
   }
-  if (fci.mappedcountocc == NULL)
+  if (haserr || fci.mappedcountocc == NULL)
   {
     gt_free(fci.tab.countocc);
   }

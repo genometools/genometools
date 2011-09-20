@@ -42,8 +42,11 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
 {
-  gt_GtCompactulongstore_delete(spmsuftab->bitpackarray);
-  gt_free(spmsuftab);
+  if (spmsuftab != NULL)
+  {
+    gt_GtCompactulongstore_delete(spmsuftab->bitpackarray);
+    gt_free(spmsuftab);
+  }
 }
 
 void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
