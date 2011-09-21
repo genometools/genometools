@@ -30,6 +30,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   bool withsuftabcheck,
                                                   bool countspms,
                                                   bool outputspms,
+                                                  const char *indexname,
                                                   GtLogger *logger,
                                                   GtError *err);
 

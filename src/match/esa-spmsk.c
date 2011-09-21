@@ -140,7 +140,8 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
                             unsigned long minmatchlength,
                             bool countspms,
-                            bool outputspms)
+                            bool outputspms,
+                            GT_UNUSED const char *indexname)
 {
   GtBUstate_spmsk *state = gt_malloc(sizeof (*state));
 

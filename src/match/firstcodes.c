@@ -711,6 +711,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    bool withsuftabcheck,
                                                    bool countspms,
                                                    bool outputspms,
+                                                   const char *indexname,
                                                    GtLogger *logger,
                                                    GtError *err)
 {
@@ -987,7 +988,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       spmsk_state = gt_spmsk_inl_new(encseq,readmode,
                                  (unsigned long ) minmatchlength,
-                                 countspms,outputspms);
+                                 countspms,outputspms,indexname);
     }
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
     for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)

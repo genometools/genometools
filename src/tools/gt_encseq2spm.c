@@ -210,6 +210,8 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->checksuftab,
                                                       arguments->countspms,
                                                       arguments->outputspms,
+                                                      gt_str_get(
+                                                        arguments->encseqinput),
                                                       logger,err) != 0)
     {
       haserr = true;

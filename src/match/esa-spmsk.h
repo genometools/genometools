@@ -19,6 +19,7 @@
 #define ESA_SPMSK_H
 
 #include <stdint.h>
+#include "core/unused_api.h"
 #include "core/error_api.h"
 #include "core/encseq_api.h"
 
@@ -28,7 +29,8 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
                             unsigned long minmatchlength,
                             bool countspms,
-                            bool outputspms);
+                            bool outputspms,
+                            GT_UNUSED const char *indexname);
 
 void gt_spmsk_inl_delete(GtBUstate_spmsk *state);
 
