@@ -38,7 +38,6 @@ size_t gt_shortreadsort_size(unsigned long maxvalue);
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
-                                              unsigned int bitsforrelpos,
                                               bool firstcodes);
 
 void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);

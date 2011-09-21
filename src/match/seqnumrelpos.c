@@ -48,3 +48,11 @@ void gt_seqnumrelpostab_add(GtSeqnumrelpostab *snrp,
 {
   snrp->tab[idx] = value;
 }
+
+unsigned long gt_seqnumrelpostab_encode(const GtSeqnumrelpostab *snrp,
+                                        unsigned long seqnum,
+                                        unsigned long relpos)
+{
+  gt_assert(relpos <= snrp->relposmask);
+  return (seqnum << snrp->bitsforrelpos) | relpos;
+}

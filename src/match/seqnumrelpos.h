@@ -16,4 +16,8 @@ void gt_seqnumrelpostab_add(GtSeqnumrelpostab *snrp,
                             unsigned long idx,
                             unsigned long value);
 
+unsigned long gt_seqnumrelpostab_encode(const GtSeqnumrelpostab *snrp,
+                                        unsigned long seqnum,
+                                        unsigned long relpos);
+
 #endif

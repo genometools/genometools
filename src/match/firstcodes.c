@@ -585,7 +585,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
-  srsw = gt_shortreadsort_new(maxbucketsize,readmode,bitsforrelpos,true);
+  srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
   snrp = gt_seqnumrelpostab_new(maxbucketsize,bitsforrelpos,encseq);

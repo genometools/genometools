@@ -51,7 +51,6 @@ struct GtShortreadsortworkinfo
   uint16_t *firstcodeslcpvalues;
   unsigned long numofentries,
                 tmplcplen;
-  unsigned int bitsforrelpos;
   bool fwd, complement;
 };
 
@@ -70,7 +69,6 @@ const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
-                                              unsigned int bitsforrelpos,
                                               bool firstcodes)
 {
   unsigned long idx;
@@ -84,7 +82,6 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw = gt_malloc(sizeof(*srsw));
   gt_assert(maxwidth <= maxshortreadsort);
   srsw->numofentries = maxwidth + 1;
-  srsw->bitsforrelpos = bitsforrelpos;
   srsw->shortreadsortinfo
     = gt_malloc(sizeof (*srsw->shortreadsortinfo) * srsw->numofentries);
   srsw->shortreadsortrefs
@@ -517,7 +514,6 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   unsigned long idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
 
-  gt_assert(srsw->bitsforrelpos == 0); /* this is only needed in array_sort */
   exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   if (exportptr->ulongtabsectionptr != NULL)
   {
@@ -579,9 +575,6 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-#define GT_COMBINE_SEQNUM_RELPOS(SEQNUM,SHIFT,RELPOS)\
-        ((SEQNUM) << (SHIFT) | (RELPOS))
-
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                                  GtSeqnumrelpostab *snrp,
                                  GtShortreadsortworkinfo *srsw,
@@ -604,7 +597,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
     relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
     srsw->shortreadsortinfo[idx].suffix = pos;
     srsw->shortreadsortinfo[idx].seqnum_relpos
-      = GT_COMBINE_SEQNUM_RELPOS(seqnum,srsw->bitsforrelpos,relpos);
+      = gt_seqnumrelpostab_encode(snrp, seqnum, relpos);
     srsw->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_relpos_extract2bitencvector(
                          srsw->shortreadsortinfo[idx].tbe,
