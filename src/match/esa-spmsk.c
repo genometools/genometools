@@ -174,18 +174,21 @@ void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
   }
 }
 
-int gt_spmsk_inl_process(GtBUstate_spmsk *state,
-                     const unsigned long *suftab,
-                     const uint16_t *lcptab_bucket,
-                     unsigned long nonspecials,
-                     GtError *err)
+int gt_spmsk_inl_process(void *data,
+                         const unsigned long *suftab,
+                         GT_UNUSED const GtSeqnumrelpostab *snrp,
+                         const uint16_t *lcptab_bucket,
+                         unsigned long nonspecials,
+                         GtError *err)
 {
+  GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;
+
   if (gt_esa_bottomup_RAM_spmsk(suftab,
-                          lcptab_bucket,
-                          nonspecials,
-                          (GtArrayGtBUItvinfo_spmsk *) state->stack,
-                          state,
-                          err) != 0)
+                                lcptab_bucket,
+                                nonspecials,
+                                (GtArrayGtBUItvinfo_spmsk *) state->stack,
+                                state,
+                                err) != 0)
   {
     return -1;
   }

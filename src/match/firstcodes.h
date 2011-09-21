@@ -18,9 +18,16 @@
 #ifndef FIRSTCODES_H
 #define FIRSTCODES_H
 
+#include <inttypes.h>
 #include "core/log_api.h"
 #include "core/error_api.h"
 #include "core/encseq_api.h"
+#include "seqnumrelpos.h"
+
+typedef int (*GtFirstcodesintervalprocess)(void *,const unsigned long *,
+                                           const GtSeqnumrelpostab *,
+                                           const uint16_t *,
+                                           unsigned long,GtError *);
 
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
@@ -28,9 +35,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned long maximumspace,
                                                   unsigned int minmatchlength,
                                                   bool withsuftabcheck,
-                                                  bool countspms,
-                                                  bool outputspms,
-                                                  const char *indexname,
+                                                  GtFirstcodesintervalprocess
+                                                     itvprocess,
+                                                  void *itvprocessdata,
                                                   GtLogger *logger,
                                                   GtError *err);
 

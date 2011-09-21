@@ -30,7 +30,6 @@
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
-#include "esa-spmsk.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-buf.h"
 #include "firstcodes.h"
@@ -559,7 +558,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
   }
 }
 
-static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
+static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GtSpmsuftab *spmsuftab,
                                         unsigned long maxbucketsize,
@@ -569,8 +568,11 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         unsigned long maxindex,
                                         unsigned long sumofwidth,
                                         unsigned long depth,
-                                        GtBUstate_spmsk *spmsk_state,
-                                        bool withsuftabcheck)
+                                        GtFirstcodesintervalprocess
+                                          itvprocess,
+                                        void *itvprocessdata,
+                                        bool withsuftabcheck,
+                                        GtError *err)
 {
   unsigned long current, next, idx, width, previoussuffix = 0, sumwidth = 0;
   GtShortreadsortworkinfo *srsw;
@@ -579,6 +581,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   const uint16_t *lcptab_bucket;
   unsigned long *suftab_bucket;
   GtSeqnumrelpostab *snrp;
+  bool haserr = false;
 
   if (withsuftabcheck)
   {
@@ -630,13 +633,14 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
         previoussuffix = gt_seqnumrelpostab_pos(snrp,width-1);
         gt_assert(previoussuffix == suftab_bucket[width-1]);
       }
-      if (spmsk_state != NULL)
+      if (itvprocess != NULL)
       {
-        int ret;
-
-        ret = gt_spmsk_inl_process(spmsk_state, suftab_bucket,
-                                   lcptab_bucket, width, NULL);
-        gt_assert(ret == 0);
+        if (itvprocess(itvprocessdata,suftab_bucket,snrp,
+                        lcptab_bucket, width, err) != 0)
+        {
+          haserr = true;
+          break;
+        }
       }
     } else
     {
@@ -649,6 +653,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_shortreadsort_delete(srsw);
   gt_free(suftab_bucket);
   gt_seqnumrelpostab_delete(snrp);
+  return haserr ? -1 : 0;
 }
 
 #ifdef  QSORTNAME
@@ -719,9 +724,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned long maximumspace,
                                                    unsigned int minmatchlength,
                                                    bool withsuftabcheck,
-                                                   bool countspms,
-                                                   bool outputspms,
-                                                   const char *indexname,
+                                                   GtFirstcodesintervalprocess
+                                                     itvprocess,
+                                                   void *itvprocessdata,
                                                    GtLogger *logger,
                                                    GtError *err)
 {
@@ -737,7 +742,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
-  GtBUstate_spmsk *spmsk_state = NULL;
   bool haserr = false;
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
@@ -1019,12 +1023,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,logger);
     suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength);
     fci.flushcount = 0;
-    if (outputspms || countspms)
-    {
-      spmsk_state = gt_spmsk_inl_new(encseq,readmode,
-                                 (unsigned long ) minmatchlength,
-                                 countspms,outputspms,indexname);
-    }
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
     for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)
     {
@@ -1086,7 +1084,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         gt_timer_show_progress(timer, "to sort buckets of suffixes",stdout);
       }
-      gt_firstcodes_sortremaining(encseq,
+      if (gt_firstcodes_sortremaining(encseq,
                                   readmode,
                                   fci.spmsuftab,
                                   maxbucketsize,
@@ -1096,8 +1094,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   gt_suftabparts_maxindex(part,suftabparts),
                                   gt_suftabparts_sumofwidth(part,suftabparts),
                                   (unsigned long) kmersize,
-                                  spmsk_state,
-                                  withsuftabcheck);
+                                  itvprocess,
+                                  itvprocessdata,
+                                  withsuftabcheck,
+                                  err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   if (timer != NULL)
@@ -1112,7 +1115,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     gt_free(fci.tempcodeforradixsort);
   }
-  gt_spmsk_inl_delete(spmsk_state);
   gt_suftabparts_delete(suftabparts);
   if (!haserr)
   {

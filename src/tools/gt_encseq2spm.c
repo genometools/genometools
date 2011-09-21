@@ -23,6 +23,7 @@
 #include "core/logger.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
+#include "match/esa-spmsk.h"
 
 typedef struct {
   bool checksuftab,
@@ -200,7 +201,18 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   if (!haserr)
   {
     GtLogger *logger;
+    const GtReadmode readmode = GT_READMODE_FORWARD;
+    GtBUstate_spmsk *spmsk_state = NULL;
 
+    if (arguments->countspms || arguments->outputspms)
+    {
+      spmsk_state = gt_spmsk_inl_new(encseq,
+                                     readmode,
+                                     (unsigned long) arguments->minmatchlength,
+                                     arguments->countspms,
+                                     arguments->outputspms,
+                                     gt_str_get(arguments->encseqinput));
+    }
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
     if (storefirstcodes_getencseqkmers_twobitencoding(encseq,
                                                       32U,
@@ -208,14 +220,13 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->maximumspace,
                                                       arguments->minmatchlength,
                                                       arguments->checksuftab,
-                                                      arguments->countspms,
-                                                      arguments->outputspms,
-                                                      gt_str_get(
-                                                        arguments->encseqinput),
+                                                      gt_spmsk_inl_process,
+                                                      spmsk_state,
                                                       logger,err) != 0)
     {
       haserr = true;
     }
+    gt_spmsk_inl_delete(spmsk_state);
     gt_logger_delete(logger);
   }
   gt_encseq_delete(encseq);

@@ -22,22 +22,24 @@
 #include "core/unused_api.h"
 #include "core/error_api.h"
 #include "core/encseq_api.h"
+#include "seqnumrelpos.h"
 
 typedef struct GtBUstate_spmsk GtBUstate_spmsk;
 
 GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
-                            GtReadmode readmode,
-                            unsigned long minmatchlength,
-                            bool countspms,
-                            bool outputspms,
-                            GT_UNUSED const char *indexname);
+                                  GtReadmode readmode,
+                                  unsigned long minmatchlength,
+                                  bool countspms,
+                                  bool outputspms,
+                                  GT_UNUSED const char *indexname);
 
 void gt_spmsk_inl_delete(GtBUstate_spmsk *state);
 
-int gt_spmsk_inl_process(GtBUstate_spmsk *state,
-                     const unsigned long *suftab,
-                     const uint16_t *lcptab_bucket,
-                     unsigned long nonspecials,
-                     GtError *err);
+int gt_spmsk_inl_process(void *data,
+                         const unsigned long *suftab,
+                         const GtSeqnumrelpostab *snrp,
+                         const uint16_t *lcptab_bucket,
+                         unsigned long nonspecials,
+                         GtError *err);
 
 #endif
