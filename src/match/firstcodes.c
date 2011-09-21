@@ -570,7 +570,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
 {
   unsigned long current, next, idx, width, previous = 0, sumwidth = 0;
   GtShortreadsortworkinfo *srsw;
-  GtEncseqReader *esr, *esr1 = NULL, *esr2 = NULL;
+  GtEncseqReader *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
   unsigned long *suftab_bucket;
@@ -582,7 +582,6 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   }
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
-  esr = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
   current = gt_firstcodes_get_leftborder(fct,minindex);
   for (idx = minindex; idx <=maxindex; idx++)
@@ -604,8 +603,6 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
       gt_shortreadsort_array_sort(suftab_bucket,
                                   srsw,
                                   encseq,
-                                  readmode,
-                                  esr,
                                   spmsuftab,
                                   current,
                                   width,
@@ -628,11 +625,8 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
       {
         int ret;
 
-        ret = gt_spmsk_inl_process(spmsk_state,
-                               suftab_bucket,
-                               lcptab_bucket,
-                               width,
-                               NULL);
+        ret = gt_spmsk_inl_process(spmsk_state, suftab_bucket, lcptab_bucket,
+                                   width, NULL);
         gt_assert(ret == 0);
       }
     } else
@@ -641,7 +635,6 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
     }
     current = next;
   }
-  gt_encseq_reader_delete(esr);
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   gt_shortreadsort_delete(srsw);
