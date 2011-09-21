@@ -560,6 +560,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                         GtReadmode readmode,
                                         GtSpmsuftab *spmsuftab,
                                         unsigned long maxbucketsize,
+                                        unsigned int bitsforrelpos,
                                         const GtFirstcodestab *fct,
                                         unsigned long minindex,
                                         unsigned long maxindex,
@@ -573,17 +574,20 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   GtEncseqReader *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
-  unsigned long *suftab_bucket;
+  unsigned long *suftab_bucket, *seqnum_relpos_bucket;
 
   if (withsuftabcheck)
   {
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
-  srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
+  srsw = gt_shortreadsort_new(maxbucketsize,readmode,bitsforrelpos,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
+  seqnum_relpos_bucket
+    = gt_malloc(sizeof (*seqnum_relpos_bucket) * maxbucketsize);
   current = gt_firstcodes_get_leftborder(fct,minindex);
+
   for (idx = minindex; idx <=maxindex; idx++)
   {
     if (idx < maxindex)
@@ -601,6 +605,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
     if (width >= 2UL)
     {
       gt_shortreadsort_array_sort(suftab_bucket,
+                                  seqnum_relpos_bucket,
                                   srsw,
                                   encseq,
                                   spmsuftab,
@@ -639,6 +644,7 @@ static void gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr2);
   gt_shortreadsort_delete(srsw);
   gt_free(suftab_bucket);
+  gt_free(seqnum_relpos_bucket);
 }
 
 #ifdef  QSORTNAME
@@ -718,17 +724,38 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
-  unsigned int numofchars, part;
+  unsigned int numofchars, part, bitsforrelpos, bitsforseqnum;
   const unsigned int markprefixunits = 14U;
   const unsigned int marksuffixunits = 14U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
-  unsigned long maxbucketsize, totallength, suftabentries = 0, largest_width;
-  GtSfxmappedrangelist *sfxmrlist = gt_Sfxmappedrangelist_new();
+  unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
+                totallength, suftabentries = 0, largest_width;
+  GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
   GtBUstate_spmsk *spmsk_state = NULL;
   bool haserr = false;
 
+  maxseqlength = gt_encseq_max_seq_length(encseq);
+  if (maxseqlength > (unsigned long) minmatchlength)
+  {
+    maxrelpos = maxseqlength - (unsigned long) minmatchlength;
+  } else
+  {
+    maxrelpos = 0;
+  }
+  bitsforrelpos = gt_determinebitspervalue((uint64_t) maxrelpos);
+  numofdbsequences = gt_encseq_num_of_sequences(encseq);
+  gt_assert(numofdbsequences > 0);
+  bitsforseqnum = gt_determinebitspervalue((uint64_t) (numofdbsequences - 1));
+  if (bitsforseqnum + bitsforrelpos > (unsigned int) GT_INTWORDSIZE)
+  {
+    gt_error_set(err,"cannot process encoded sequences with %lu sequences "
+                     "of length up to %lu (%u+%u bits)",
+                     numofdbsequences,maxseqlength,bitsforseqnum,bitsforrelpos);
+    return -1;
+  }
+  sfxmrlist = gt_Sfxmappedrangelist_new();
   fcsl.workspace = 0;
   fcsl.splitspace = 0;
   fci.spmsuftab = NULL;
@@ -1059,6 +1086,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   readmode,
                                   fci.spmsuftab,
                                   maxbucketsize,
+                                  bitsforrelpos,
                                   &fci.tab,
                                   gt_suftabparts_minindex(part,suftabparts),
                                   gt_suftabparts_maxindex(part,suftabparts),

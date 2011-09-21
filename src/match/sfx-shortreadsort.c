@@ -33,6 +33,7 @@
 typedef struct
 {
   unsigned long suffix;
+  unsigned long seqnum_relpos;
   GtTwobitencoding tbe[GT_NUMOFTBEVALUEFOR100];
   unsigned int unitsnotspecial;
 } GtShortreadsort;
@@ -49,6 +50,7 @@ struct GtShortreadsortworkinfo
   uint16_t *firstcodeslcpvalues;
   unsigned long numofentries,
                 tmplcplen;
+  unsigned int bitsforrelpos;
   bool fwd, complement;
 };
 
@@ -67,6 +69,7 @@ const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
+                                              unsigned int bitsforrelpos,
                                               bool firstcodes)
 {
   unsigned long idx;
@@ -78,8 +81,9 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
 #endif
 
   srsw = gt_malloc(sizeof(*srsw));
-  srsw->numofentries = maxwidth + 1;
   gt_assert(maxwidth <= maxshortreadsort);
+  srsw->numofentries = maxwidth + 1;
+  srsw->bitsforrelpos = bitsforrelpos;
   srsw->shortreadsortinfo
     = gt_malloc(sizeof (*srsw->shortreadsortinfo) * srsw->numofentries);
   srsw->shortreadsortrefs
@@ -512,6 +516,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   unsigned long idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
 
+  gt_assert(srsw->bitsforrelpos == 0); /* this is only needed in array_sort */
   exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   if (exportptr->ulongtabsectionptr != NULL)
   {
@@ -573,7 +578,11 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
+#define GT_COMBINE_SEQNUM_RELPOS(SEQNUM,SHIFT,RELPOS)\
+        ((SEQNUM) << (SHIFT) | (RELPOS))
+
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
+                                 unsigned long *seqnum_relpos_bucket,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtSpmsuftab *spmsuftab,
@@ -581,7 +590,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                                  unsigned long width,
                                  unsigned long depth)
 {
-  unsigned long idx, pos, seqnum;
+  unsigned long idx, pos, seqnum, relpos;
 
   for (idx = 0; idx < width; idx++)
   {
@@ -590,25 +599,26 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
   for (idx = 0; idx < width; idx++)
   {
     pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
-    srsw->shortreadsortinfo[idx].suffix = pos;
     seqnum = gt_encseq_seqnum(encseq,pos+depth);
+    relpos = pos + depth - gt_encseq_seqstartpos(encseq,seqnum);
+    srsw->shortreadsortinfo[idx].suffix = pos;
+    srsw->shortreadsortinfo[idx].seqnum_relpos
+      = GT_COMBINE_SEQNUM_RELPOS(seqnum,srsw->bitsforrelpos,relpos);
     srsw->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_relpos_extract2bitencvector(
                          srsw->shortreadsortinfo[idx].tbe,
                          GT_NUMOFTBEVALUEFOR100,
                          encseq,
                          seqnum,
-                         pos + depth - gt_encseq_seqstartpos(encseq,seqnum));
+                         relpos);
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
                                     subbucketleft);
-  /* do not alwas write the results into the original table, but instead
-     allow accessing the ordered sequence of suffixes in the
-     sorted order, using the function
-     gt_shortreadsort_array_next */
   for (idx = 0; idx < width; idx++)
   {
     suftab_bucket[idx]
       = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
+    seqnum_relpos_bucket[idx]
+      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].seqnum_relpos;
   }
 }

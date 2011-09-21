@@ -37,6 +37,7 @@ size_t gt_shortreadsort_size(unsigned long maxvalue);
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
+                                              unsigned int bitsforrelpos,
                                               bool firstcodes);
 
 void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);
@@ -56,6 +57,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long depth);
 
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
+                                 unsigned long *seqnum_relpos_bucket,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtSpmsuftab *spmsuftab,
