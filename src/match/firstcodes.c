@@ -845,14 +845,18 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.buf.allocated = (unsigned long)
                           remainspace / (sizeof (*fci.buf.spaceGtUlong) +
                                          sizeof (*fci.tempcodeforradixsort));
-      if (fci.buf.allocated < fci.tab.differentcodes/15UL)
+      if (fci.buf.allocated < fci.tab.differentcodes/16UL)
       {
-        fci.buf.allocated = fci.tab.differentcodes/15UL;
+        fci.buf.allocated = fci.tab.differentcodes/16UL;
       }
     }
   } else
   {
     fci.buf.allocated = fci.tab.differentcodes/5;
+  }
+  if (fci.buf.allocated < 16UL)
+  {
+    fci.buf.allocated = 16UL;
   }
   fci.buf.nextfree = 0;
   if (!haserr)
