@@ -576,14 +576,14 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
-                                 GtReadmode readmode,
-                                 GtEncseqReader *esr,
+                                 GT_UNUSED GtReadmode readmode,
+                                 GT_UNUSED GtEncseqReader *esr,
                                  GtSpmsuftab *spmsuftab,
                                  unsigned long subbucketleft,
                                  unsigned long width,
                                  unsigned long depth)
 {
-  unsigned long idx, pos;
+  unsigned long idx, pos, seqnum;
 
   for (idx = 0; idx < width; idx++)
   {
@@ -593,13 +593,14 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
   {
     pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
     srsw->shortreadsortinfo[idx].suffix = pos;
+    seqnum = gt_encseq_seqnum(encseq,pos+depth);
     srsw->shortreadsortinfo[idx].unitsnotspecial
-      = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
-                                       GT_NUMOFTBEVALUEFOR100,
-                                       encseq,
-                                       esr,
-                                       readmode,
-                                       pos+depth);
+      = gt_encseq_relpos_extract2bitencvector(
+                         srsw->shortreadsortinfo[idx].tbe,
+                         GT_NUMOFTBEVALUEFOR100,
+                         encseq,
+                         seqnum,
+                         pos + depth - gt_encseq_seqstartpos(encseq,seqnum));
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
                                     subbucketleft);

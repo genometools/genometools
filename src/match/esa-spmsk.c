@@ -38,6 +38,9 @@ struct GtBUstate_spmsk /* global information */
   bool countspms,
        outputspms;
   GtArrayGtUlong Wset, Lset;
+  /* Declare the stack as void as the real type
+     GtArrayGtBUItvinfo_spmsk  is declared later in
+     esa-bottomup-spmsk.inc */
   void *stack;
 };
 

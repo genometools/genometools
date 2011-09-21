@@ -236,6 +236,12 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
                                             GtReadmode readmode,
                                             unsigned long pos);
 
+unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
+                                            int sizeofvector,
+                                            const GtEncseq *encseq,
+                                            unsigned long seqnum,
+                                            unsigned long relpos);
+
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
   done in forward direction iff <fwd> is true.
