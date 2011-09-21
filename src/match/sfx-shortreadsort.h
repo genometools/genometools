@@ -24,6 +24,7 @@
 #include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
 #include "spmsuftab.h"
+#include "seqnumrelpos.h"
 
 #define GT_BSR_UPDATEMAXLCP(MAXVAL,LCP)\
         if ((MAXVAL) < (LCP))\
@@ -57,7 +58,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long depth);
 
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
-                                 unsigned long *seqnum_relpos_bucket,
+                                 GtSeqnumrelpostab *snrp,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtSpmsuftab *spmsuftab,

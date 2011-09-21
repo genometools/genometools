@@ -100,6 +100,7 @@ pssm.c
 prsqualint.c
 querymatch.c
 revcompl.c
+seqnumrelpos.c
 sfx-apfxlen.c
 sfx-bentsedg.c
 sfx-bltrie.c

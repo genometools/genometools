@@ -23,6 +23,7 @@
 #include "sfx-lcpvalues.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
+#include "seqnumrelpos.h"
 
 #ifdef _LP64
 #define GT_NUMOFTBEVALUEFOR100 3
@@ -582,7 +583,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
         ((SEQNUM) << (SHIFT) | (RELPOS))
 
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
-                                 unsigned long *seqnum_relpos_bucket,
+                                 GtSeqnumrelpostab *snrp,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtSpmsuftab *spmsuftab,
@@ -599,8 +600,8 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
   for (idx = 0; idx < width; idx++)
   {
     pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
-    seqnum = gt_encseq_seqnum(encseq,pos+depth);
-    relpos = pos + depth - gt_encseq_seqstartpos(encseq,seqnum);
+    seqnum = gt_encseq_seqnum(encseq,pos);
+    relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
     srsw->shortreadsortinfo[idx].suffix = pos;
     srsw->shortreadsortinfo[idx].seqnum_relpos
       = GT_COMBINE_SEQNUM_RELPOS(seqnum,srsw->bitsforrelpos,relpos);
@@ -610,7 +611,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                          GT_NUMOFTBEVALUEFOR100,
                          encseq,
                          seqnum,
-                         relpos);
+                         relpos + depth);
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
                                     subbucketleft);
@@ -618,7 +619,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
   {
     suftab_bucket[idx]
       = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
-    seqnum_relpos_bucket[idx]
-      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].seqnum_relpos;
+    gt_seqnumrelpostab_add(snrp,idx,
+        srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].seqnum_relpos);
   }
 }
