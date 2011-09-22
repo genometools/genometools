@@ -299,7 +299,8 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
 #else
 
 int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
-                        GT_UNUSED const GtSeqnumrelpostab *snrp,
+                        const unsigned long *seqnum_relpos_bucket,
+                        const GtSeqnumrelpos *snrp,
                         const uint16_t *lcptab_bucket,
                         unsigned long nonspecials,
                         GtArrayGtBUItvinfo_maxpairs *stack,
@@ -308,6 +309,7 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
 {
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
+                tmp,
                 previoussuffix = 0,
                 previousseqnum = 0,
                 previousrelpos = 0,
@@ -321,8 +323,9 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = suftab_bucket[idx];
-    previousseqnum = gt_seqnumrelpostab_seqnum(snrp,idx);
-    previousrelpos = gt_seqnumrelpostab_relpos(snrp,idx);
+    tmp = seqnum_relpos_bucket[idx];
+    previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,tmp);
+    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,tmp);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {
       if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
@@ -443,8 +446,9 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
     unsigned long lastsuftabvalue, lastseqnum, lastrelpos;
 
     lastsuftabvalue = suftab_bucket[nonspecials-1];
-    lastseqnum = gt_seqnumrelpostab_seqnum(snrp,nonspecials-1);
-    lastrelpos = gt_seqnumrelpostab_relpos(snrp,nonspecials-1);
+    tmp = seqnum_relpos_bucket[nonspecials-1];
+    lastseqnum = gt_seqnumrelpos_decode_seqnum(snrp,tmp);
+    lastrelpos = gt_seqnumrelpos_decode_relpos(snrp,tmp);
     if (processleafedge_maxpairs(false,
                         TOP_ESA_BOTTOMUP_maxpairs.lcp,
                         TOP_ESA_BOTTOMUP_maxpairs.lb,

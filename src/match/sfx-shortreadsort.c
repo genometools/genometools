@@ -576,7 +576,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
 }
 
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
-                                 GtSeqnumrelpostab *snrp,
+                                 unsigned long *seqnum_relpos_bucket,
+                                 GtSeqnumrelpos *snrp,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtSpmsuftab *spmsuftab,
@@ -597,7 +598,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
     relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
     srsw->shortreadsortinfo[idx].suffix = pos;
     srsw->shortreadsortinfo[idx].seqnum_relpos
-      = gt_seqnumrelpostab_encode(snrp, seqnum, relpos);
+      = gt_seqnumrelpos_encode(snrp, seqnum, relpos);
     srsw->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_relpos_extract2bitencvector(
                          srsw->shortreadsortinfo[idx].tbe,
@@ -612,7 +613,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
   {
     suftab_bucket[idx]
       = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
-    gt_seqnumrelpostab_add(snrp,idx,
-        srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].seqnum_relpos);
+    seqnum_relpos_bucket[idx]
+      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].seqnum_relpos;
   }
 }

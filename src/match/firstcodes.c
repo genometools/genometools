@@ -522,7 +522,9 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              bool previousdefined,
                                              GT_UNUSED const unsigned long
                                                *suftab_bucket,
-                                             const GtSeqnumrelpostab *snrp,
+                                             const unsigned long
+                                               *seqnum_relpos_bucket,
+                                             const GtSeqnumrelpos *snrp,
                                              GT_UNUSED const uint16_t
                                                *lcptab_bucket,
                                              unsigned long numberofsuffixes)
@@ -536,7 +538,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
   gt_assert(!previousdefined || previoussuffix < totallength);
   for (idx = 0; idx < numberofsuffixes; idx++)
   {
-    current = gt_seqnumrelpostab_pos(snrp,idx);
+    current = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[idx]);
     gt_assert(current == suftab_bucket[idx]);
     if (previousdefined && idx < totallength)
     {
@@ -580,8 +582,8 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   GtEncseqReader *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
-  unsigned long *suftab_bucket;
-  GtSeqnumrelpostab *snrp;
+  unsigned long *suftab_bucket, *seqnum_relpos_bucket;
+  GtSeqnumrelpos *snrp;
   bool haserr = false;
 
   if (withsuftabcheck)
@@ -592,7 +594,9 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
-  snrp = gt_seqnumrelpostab_new(maxbucketsize,bitsforrelpos,encseq);
+  seqnum_relpos_bucket
+    = gt_malloc(sizeof (*seqnum_relpos_bucket) * maxbucketsize);
+  snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   current = gt_firstcodes_get_leftborder(fct,minindex);
   for (idx = minindex; idx <=maxindex; idx++)
   {
@@ -611,6 +615,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     if (width >= 2UL)
     {
       gt_shortreadsort_array_sort(suftab_bucket,
+                                  seqnum_relpos_bucket,
                                   snrp,
                                   srsw,
                                   encseq,
@@ -627,16 +632,18 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                          previoussuffix,
                                          previousdefined,
                                          suftab_bucket,
+                                         seqnum_relpos_bucket,
                                          snrp,
                                          lcptab_bucket,
                                          width);
         previousdefined = true;
-        previoussuffix = gt_seqnumrelpostab_pos(snrp,width-1);
+        previoussuffix
+          = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[width-1]);
         gt_assert(previoussuffix == suftab_bucket[width-1]);
       }
       if (itvprocess != NULL)
       {
-        if (itvprocess(itvprocessdata,suftab_bucket,snrp,
+        if (itvprocess(itvprocessdata,suftab_bucket,seqnum_relpos_bucket,snrp,
                         lcptab_bucket, width, err) != 0)
         {
           haserr = true;
@@ -653,7 +660,8 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr2);
   gt_shortreadsort_delete(srsw);
   gt_free(suftab_bucket);
-  gt_seqnumrelpostab_delete(snrp);
+  gt_free(seqnum_relpos_bucket);
+  gt_seqnumrelpos_delete(snrp);
   return haserr ? -1 : 0;
 }
 

@@ -169,7 +169,8 @@ void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 
 int gt_spmsk_inl_process(void *data,
                          const unsigned long *suftab_bucket,
-                         const GtSeqnumrelpostab *snrp,
+                         const unsigned long *seqnum_relpos_bucket,
+                         const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
                          unsigned long nonspecials,
                          GtError *err)
@@ -181,6 +182,7 @@ int gt_spmsk_inl_process(void *data,
   gt_assert(snrp != NULL);
   gt_assert(lcptab_bucket != NULL);
   if (gt_esa_bottomup_RAM_spmsk(suftab_bucket,
+                                seqnum_relpos_bucket,
                                 snrp,
                                 lcptab_bucket,
                                 nonspecials,

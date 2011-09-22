@@ -25,7 +25,8 @@
 #include "seqnumrelpos.h"
 
 typedef int (*GtFirstcodesintervalprocess)(void *,const unsigned long *,
-                                           const GtSeqnumrelpostab *,
+                                           const unsigned long *,
+                                           const GtSeqnumrelpos *,
                                            const uint16_t *,
                                            unsigned long,GtError *);
 

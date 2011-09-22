@@ -1,29 +1,24 @@
 #ifndef SEQNUMRELPOS_H
 #define SEQNUMRELPOS_H
 
-typedef struct GtSeqnumrelpostab GtSeqnumrelpostab;
+typedef struct GtSeqnumrelpos GtSeqnumrelpos;
 
-GtSeqnumrelpostab *gt_seqnumrelpostab_new(unsigned long numofentries,
-                                          unsigned int bitsforrelpos,
-                                          const GtEncseq *encseq);
+GtSeqnumrelpos *gt_seqnumrelpos_new(unsigned int bitsforrelpos,
+                                    const GtEncseq *encseq);
 
-void gt_seqnumrelpostab_delete(GtSeqnumrelpostab *snrp);
+void gt_seqnumrelpos_delete(GtSeqnumrelpos *snrp);
 
-unsigned long gt_seqnumrelpostab_pos(const GtSeqnumrelpostab *snrp,
-                                     unsigned long idx);
+unsigned long gt_seqnumrelpos_decode_pos(const GtSeqnumrelpos *snrp,
+                                         unsigned long seqnumrelpos);
 
-unsigned long gt_seqnumrelpostab_seqnum(const GtSeqnumrelpostab *snrp,
-                                        unsigned long idx);
+unsigned long gt_seqnumrelpos_decode_seqnum(const GtSeqnumrelpos *snrp,
+                                            unsigned long seqnumrelpos);
 
-unsigned long gt_seqnumrelpostab_relpos(const GtSeqnumrelpostab *snrp,
-                                        unsigned long idx);
+unsigned long gt_seqnumrelpos_decode_relpos(const GtSeqnumrelpos *snrp,
+                                            unsigned long seqnumrelpos);
 
-void gt_seqnumrelpostab_add(GtSeqnumrelpostab *snrp,
-                            unsigned long idx,
-                            unsigned long value);
-
-unsigned long gt_seqnumrelpostab_encode(const GtSeqnumrelpostab *snrp,
-                                        unsigned long seqnum,
-                                        unsigned long relpos);
+unsigned long gt_seqnumrelpos_encode(const GtSeqnumrelpos *snrp,
+                                     unsigned long seqnum,
+                                     unsigned long relpos);
 
 #endif
