@@ -59,7 +59,7 @@ static int processleafedge_spmsk(bool firstedge,
                                  unsigned long fd,
                                  GT_UNUSED unsigned long flb,
                                  GtBUinfo_spmsk *finfo,
-                                 unsigned long position,
+                                 GT_UNUSED unsigned long position,
                                  unsigned long seqnum,
                                  unsigned long relpos,
                                  GtBUstate_spmsk *state,
@@ -68,35 +68,18 @@ static int processleafedge_spmsk(bool firstedge,
 {
   if (fd >= state->minmatchlength)
   {
-    unsigned long idx;
-
     if (firstedge)
     {
       gt_assert(finfo != NULL);
       ((GtBUinfo_spmsk *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
     }
-    if (position == 0 || gt_encseq_position_is_separator(state->encseq,
-                                                         position - 1,
-                                                         state->readmode))
+    if (relpos == 0)
     {
-      gt_assert(relpos == 0);
-      idx = gt_encseq_seqnum(state->encseq,position);
-      GT_STOREINARRAY(&state->Wset,GtUlong,128,idx);
-    } else
-    {
-      gt_assert(relpos > 0);
+      GT_STOREINARRAY(&state->Wset,GtUlong,128,seqnum);
     }
-    if (position + fd == state->totallength ||
-        gt_encseq_position_is_separator(state->encseq,
-                                        position + fd,state->readmode))
+    if (relpos + fd == gt_encseq_seqlength(state->encseq,seqnum))
     {
-      gt_assert(relpos + fd == gt_encseq_seqlength(state->encseq,seqnum));
-      idx = gt_encseq_seqnum(state->encseq,position);
-      gt_assert(idx == seqnum);
-      GT_STOREINARRAY(&state->Lset,GtUlong,128,idx);
-    } else
-    {
-      gt_assert(relpos + fd < gt_encseq_seqlength(state->encseq,seqnum));
+      GT_STOREINARRAY(&state->Lset,GtUlong,128,seqnum);
     }
   }
   return 0;
