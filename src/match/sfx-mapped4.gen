@@ -22,7 +22,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
 #endif
                                     unsigned long maxunitindex,
                                     GtCodetype maskright,
-                                    GtReadmode readmode,
+                                    const GtReadmode readmode,
                                     unsigned int kmersize,
                                     unsigned int upperkmersize,
                                     PROCESSKMERTYPE *processkmercodeinfo,
@@ -239,7 +239,7 @@ static
 #endif
 void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                const GtEncseq *encseq,
-                               GtReadmode readmode,
+                               const GtReadmode readmode,
                                unsigned int kmersize,
                                unsigned int upperkmersize,
                                PROCESSKMERTYPE *processkmercodeinfo,
