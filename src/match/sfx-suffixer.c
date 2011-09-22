@@ -1017,7 +1017,7 @@ static void checkallreversebitpairs(void)
 }
 #endif
 
-#define UPDATEKMER(KMER,CC)\
+#define GT_UPDATEKMER(KMER,CC)\
         KMER <<= 2;\
         KMER |= CC;\
         KMER &= maskright
@@ -1076,7 +1076,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      UPDATEKMER(code,cc);
+      GT_UPDATEKMER(code,cc);
       processkmercode(processkmercodeinfo,false,GT_ADJUSTREVERSEPOS(pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
@@ -1117,7 +1117,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      UPDATEKMER(code,cc);
+      GT_UPDATEKMER(code,cc);
       processkmercode(processkmercodeinfo,false,pos,
                        (readmode == GT_READMODE_COMPL)
                          ? gt_kmercode_complement(code,maskright)

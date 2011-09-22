@@ -17,7 +17,10 @@
 
 static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                     const GtTwobitencoding *twobitencoding,
+#ifndef GT_IGNORERIGHTBOUND
                                     unsigned long totallength,
+#endif
+                                    unsigned long maxunitindex,
                                     GtCodetype maskright,
                                     GtReadmode readmode,
                                     unsigned int kmersize,
@@ -28,9 +31,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
 {
   unsigned long pos, unitindex;
   unsigned int shiftright;
-  GtCodetype code;
+  GtCodetype code, transcode;
   GtUchar cc;
-  GtCodetype transcode;
   GtTwobitencoding currentencoding;
 #ifndef GT_IGNORERIGHTBOUND
   unsigned long rightbound = totallength - kmersize;
@@ -66,7 +68,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
     {
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      UPDATEKMER(code,cc);
+      GT_UPDATEKMER(code,cc);
       transcode = (readmode == GT_READMODE_REVCOMPL)
                     ? gt_kmercode_complement(code,maskright)
                     : code;
@@ -88,8 +90,6 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
     }
   } else
   {
-    unsigned long maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
-
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
     code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
@@ -108,7 +108,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      UPDATEKMER(code,cc);
+      GT_UPDATEKMER(code,cc);
       transcode = (readmode == GT_READMODE_COMPL)
                     ? gt_kmercode_complement(code,maskright)
                     : code;
@@ -134,6 +134,7 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
 static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                              const GtTwobitencoding *twobitencoding,
                              unsigned long totallength,
+                             unsigned long maxunitindex,
                              unsigned long realtotallength,
                              bool mirrored,
                              GtCodetype maskright,
@@ -147,14 +148,19 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
 {
   GtCodetype lastcode;
 
-  if (mirrored && startpos >= realtotallength) {
+  if (mirrored && startpos >= realtotallength)
+  {
     gt_readmode_invert(readmode);
     startpos = GT_REVERSEPOS(realtotallength, startpos - realtotallength - 2);
     if (endpos == totallength)
+    {
       endpos = 0;
-    else
+    } else
+    {
       endpos = GT_REVERSEPOS(realtotallength, endpos - realtotallength - 2);
-    if (startpos > endpos) {
+    }
+    if (startpos > endpos)
+    {
       unsigned long tmp = startpos;
       startpos = endpos;
       endpos = tmp;
@@ -167,7 +173,10 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
     gt_assert(endpos > 0);
     lastcode = PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                                       twobitencoding,
+#ifndef GT_IGNORERIGHTBOUND
                                                       totallength,
+#endif
+                                                      maxunitindex,
                                                       maskright,
                                                       readmode,
                                                       kmersize,
@@ -236,7 +245,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                PROCESSKMERTYPE *processkmercodeinfo,
                                PROCESSKMERSPECIALTYPE *processkmerspecialinfo)
 {
-  unsigned long laststart = 0, lastend,
+  unsigned long laststart = 0, maxunitindex, lastend,
                 totallength,
                 realtotallength;
   const GtTwobitencoding *twobitencoding
@@ -245,7 +254,9 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
   bool mirrored = gt_encseq_is_mirrored(encseq);
 
   lastend = totallength = realtotallength = gt_encseq_total_length(encseq);
-  if (mirrored) {
+  maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
+  if (mirrored)
+  {
     gt_assert((totallength & 1) == 1UL);
     realtotallength = (realtotallength - 1) / 2;
   }
@@ -263,6 +274,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            twobitencoding,
                                            totallength,
+                                           maxunitindex,
                                            realtotallength,
                                            mirrored,
                                            maskright,
@@ -285,6 +297,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
         PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                                            twobitencoding,
                                            totallength,
+                                           maxunitindex,
                                            realtotallength,
                                            mirrored,
                                            maskright,
@@ -303,6 +316,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
   }
   PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(twobitencoding,
                                      totallength,
+                                     maxunitindex,
                                      realtotallength,
                                      mirrored,
                                      maskright,
