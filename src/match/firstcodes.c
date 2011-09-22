@@ -562,20 +562,19 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
 }
 
 static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
-                                        GtReadmode readmode,
-                                        GtSpmsuftab *spmsuftab,
-                                        unsigned long maxbucketsize,
-                                        unsigned int bitsforrelpos,
-                                        const GtFirstcodestab *fct,
-                                        unsigned long minindex,
-                                        unsigned long maxindex,
-                                        unsigned long sumofwidth,
-                                        unsigned long depth,
-                                        GtFirstcodesintervalprocess
-                                          itvprocess,
-                                        void *itvprocessdata,
-                                        bool withsuftabcheck,
-                                        GtError *err)
+                                       GtReadmode readmode,
+                                       GtSpmsuftab *spmsuftab,
+                                       unsigned long maxbucketsize,
+                                       const GtSeqnumrelpos *snrp,
+                                       const GtFirstcodestab *fct,
+                                       unsigned long minindex,
+                                       unsigned long maxindex,
+                                       unsigned long sumofwidth,
+                                       unsigned long depth,
+                                       GtFirstcodesintervalprocess itvprocess,
+                                       void *itvprocessdata,
+                                       bool withsuftabcheck,
+                                       GtError *err)
 {
   unsigned long current, next, idx, width, previoussuffix = 0, sumwidth = 0;
   GtShortreadsortworkinfo *srsw;
@@ -583,7 +582,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
   unsigned long *suftab_bucket, *seqnum_relpos_bucket;
-  GtSeqnumrelpos *snrp;
   bool haserr = false;
 
   if (withsuftabcheck)
@@ -596,7 +594,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
   seqnum_relpos_bucket
     = gt_malloc(sizeof (*seqnum_relpos_bucket) * maxbucketsize);
-  snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   current = gt_firstcodes_get_leftborder(fct,minindex);
   for (idx = minindex; idx <=maxindex; idx++)
   {
@@ -661,7 +658,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_shortreadsort_delete(srsw);
   gt_free(suftab_bucket);
   gt_free(seqnum_relpos_bucket);
-  gt_seqnumrelpos_delete(snrp);
   return haserr ? -1 : 0;
 }
 
@@ -762,6 +758,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     maxrelpos = 0;
   }
   bitsforrelpos = gt_determinebitspervalue((uint64_t) maxrelpos);
+  fci.buf.snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   numofdbsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(numofdbsequences > 0);
   bitsforseqnum = gt_determinebitspervalue((uint64_t) (numofdbsequences - 1));
@@ -1097,7 +1094,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   readmode,
                                   fci.spmsuftab,
                                   maxbucketsize,
-                                  bitsforrelpos,
+                                  fci.buf.snrp,
                                   &fci.tab,
                                   gt_suftabparts_minindex(part,suftabparts),
                                   gt_suftabparts_maxindex(part,suftabparts),
@@ -1138,6 +1135,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
+  gt_seqnumrelpos_delete(fci.buf.snrp);
   if (!haserr)
   {
     gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fcsl.workspace));

@@ -58,7 +58,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
 
 void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                                  unsigned long *seqnum_relpos_bucket,
-                                 GtSeqnumrelpos *snrp,
+                                 const GtSeqnumrelpos *snrp,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
                                  GtSpmsuftab *spmsuftab,

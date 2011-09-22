@@ -20,6 +20,7 @@
 
 #include "core/types_api.h"
 #include "marksubstring.h"
+#include "seqnumrelpos.h"
 
 typedef void (*GtCodeposbufferflushfunction)(void *);
 
@@ -34,6 +35,7 @@ typedef struct
   GtCodeposbufferflushfunction flush_function;
   GtUlongPair *spaceGtUlongPair;
   GtUlong *spaceGtUlong;
+  GtSeqnumrelpos *snrp;
   void *fciptr;
 } GtCodeposbuffer;
 
