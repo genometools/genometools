@@ -71,8 +71,7 @@ static void save_sa_in_gff3(GthSA *sa, GthRegionFactory *region_factory,
                                      gth_sa_gen_seq_num(sa)) - 1;
   /* create gene feature */
   range.start = gth_sa_left_genomic_exon_border(sa, 0);
-  range.end   = gth_sa_right_genomic_exon_border(sa,
-                                          gth_sa_num_of_exons(sa)-1);
+  range.end   = gth_sa_right_genomic_exon_border(sa, gth_sa_num_of_exons(sa)-1);
   range = gt_range_reorder(range);
   range = gt_range_offset(&range, offset);
   gene_feature = (GtFeatureNode*)
