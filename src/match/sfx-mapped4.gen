@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2010 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -50,6 +50,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                                       position));
     PROCESSKMERCODE(processkmercodeinfo,true,
                     GT_ADJUSTREVERSEPOS(mapped4info->rightbound,position),
+                    specialfreeunit,
+                    relpos,
                     transcode);
     currentencoding = mapped4info->twobitencoding[unitindex];
     startpos += mapped4info->upperkmersize - mapped4info->kmersize;
@@ -69,6 +71,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                                                         position));
       PROCESSKMERCODE(processkmercodeinfo, false,
                       GT_ADJUSTREVERSEPOS(mapped4info->rightbound,position),
+                      specialfreeunit,
+                      relpos,
                       transcode);
       if (shiftright < (unsigned int) (GT_INTWORDSIZE-2))
       {
@@ -94,7 +98,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                   ? gt_kmercode_complement(code,mapped4info->maskright)
                   : code;
     GT_ENCSEQ_RELPOS_SEQNUM_CHECK(position);
-    PROCESSKMERCODE(processkmercodeinfo, true, position, transcode);
+    PROCESSKMERCODE(processkmercodeinfo, true, position, specialfreeunit,
+                    relpos, transcode);
     currentencoding = mapped4info->twobitencoding[unitindex];
     shiftright = (unsigned int)
                  GT_MULT2(GT_UNITSIN2BITENC - 1 -
@@ -112,7 +117,8 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
                     ? gt_kmercode_complement(code,mapped4info->maskright)
                     : code;
       GT_ENCSEQ_RELPOS_SEQNUM_CHECK(position);
-      PROCESSKMERCODE(processkmercodeinfo,false,position,transcode);
+      PROCESSKMERCODE(processkmercodeinfo,false,position,specialfreeunit,relpos,
+                      transcode);
       if (shiftright > 0)
       {
         shiftright -= 2;
@@ -184,10 +190,10 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
       newcode = ((lastcode << 2) | 3UL) & mapped4info->maskright;
       PROCESSKMERCODESPECIAL(processkmerspecialinfo,
                              mapped4info->kmersize-1,
-                             (unsigned int) newcode,
                              GT_ISDIRREVERSE(readmode)
                                ? (mapped4info->totallength-startpos)
-                               : endpos);
+                               : endpos,
+                             (unsigned int) newcode);
     }
 #endif
   }
@@ -216,10 +222,10 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
            & mapped4info->maskright;
       PROCESSKMERCODESPECIAL(processkmerspecialinfo,
                              (unsigned int) (endpos - startpos),
-                             (unsigned int) newcode,
                              GT_ISDIRREVERSE(readmode)
                                ? (mapped4info->totallength - startpos)
-                               : endpos);
+                               : endpos,
+                             (unsigned int) newcode);
     }
   }
 #endif

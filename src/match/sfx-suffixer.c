@@ -367,7 +367,8 @@ static bool gt_checksuffixprefixbuckets(const Sfxiterator *sfi,
 }
 #endif
 
-#define GT_INSERTKMERWITHOUTSPECIAL1(SFI,FIRSTINRANGE,POSITION,SCANCODE)\
+#define GT_INSERTKMERWITHOUTSPECIAL1(SFI,FIRSTINRANGE,POSITION,SEQNUM,RELPOS,\
+                                     SCANCODE)\
         if ((SFI)->markprefixbuckets == NULL)\
         {\
           if ((SCANCODE) >= (SFI)->currentmincode &&\
@@ -403,7 +404,7 @@ static void gt_insertkmerwithoutspecial(void *processinfo,
   if (!kmercode->definedspecialposition)
   {
     GT_INSERTKMERWITHOUTSPECIAL1((Sfxiterator *) processinfo, false,
-                                 position, kmercode->code);
+                                 position, 0, 0, kmercode->code);
   }
 }
 
@@ -1345,6 +1346,8 @@ void getencseqkmers_twobitencoding(const GtEncseq *encseq,
 static void gt_updateleftborderforkmer(Sfxiterator *sfi,
                                        GT_UNUSED bool firstinrange,
                                        GT_UNUSED unsigned long position,
+                                       GT_UNUSED unsigned long seqnum,
+                                       GT_UNUSED unsigned long relpos,
                                        GtCodetype code)
 {
   gt_assert(sfi->sfxstrategy.spmopt_minlength == 0);
@@ -1353,8 +1356,8 @@ static void gt_updateleftborderforkmer(Sfxiterator *sfi,
 
 static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                               unsigned int maxprefixindex,
-                                              unsigned int code,
-                                              unsigned long position)
+                                              unsigned long position,
+                                              unsigned int code)
 {
   unsigned int idx;
 
@@ -1374,7 +1377,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
   }
 }
 
-#define GT_SPMOPT_UPDATELEFTBORDERFORKMER(SFI,FIRSTINRANGE,POSITION,SCANCODE)\
+#define GT_SPMOPT_UPDATELEFTBORDERFORKMER(SFI,FIRSTINRANGE,POSITION,SEQNUM,\
+                                          RELPOS,SCANCODE)\
         gt_assert((SFI)->sfxstrategy.spmopt_minlength > 0);\
         if (FIRSTINRANGE || gt_checksuffixprefixbuckets(SFI,SCANCODE))\
         {\
@@ -1382,7 +1386,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                        GT_SCANCODE_TO_BCKCODE(SFI,SCANCODE));\
         }
 
-#define GT_FIRSTCODES_ACCUMULATECOUNTS(BUF,FIRSTINRANGE,POSITION,CODE)\
+#define GT_FIRSTCODES_ACCUMULATECOUNTS(BUF,FIRSTINRANGE,POSITION,SEQNUM,\
+                                       RELPOS,CODE)\
         {\
           if (!(FIRSTINRANGE) &&\
               GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
@@ -1397,7 +1402,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
           }\
         }
 
-#define GT_FIRSTCODES_INSERTSUFFIXES(BUF,FIRSTINRANGE,POSITION,CODE)\
+#define GT_FIRSTCODES_INSERTSUFFIXES(BUF,FIRSTINRANGE,POSITION,SEQNUM,RELPOS,\
+                                     CODE)\
         {\
           if ((BUF)->currentmincode <= (CODE) &&\
               (CODE) <= (BUF)->currentmaxcode &&\
