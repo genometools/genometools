@@ -520,7 +520,8 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              GtEncseqReader *esr2,
                                              unsigned long previoussuffix,
                                              bool previousdefined,
-                                             const unsigned long *suftab_bucket,
+                                             GT_UNUSED const unsigned long
+                                               *suftab_bucket,
                                              const GtSeqnumrelpostab *snrp,
                                              GT_UNUSED const uint16_t
                                                *lcptab_bucket,

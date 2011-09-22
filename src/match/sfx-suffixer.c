@@ -1017,12 +1017,12 @@ static void checkallreversebitpairs(void)
 }
 #endif
 
-#define GT_UPDATEKMER(KMER,CC)\
+#define GT_UPDATEKMER(KMER,CC,MASKRIGHT)\
         KMER <<= 2;\
         KMER |= CC;\
-        KMER &= maskright
+        KMER &= MASKRIGHT
 
-#define GT_ADJUSTREVERSEPOS(POS) (rightbound - (POS))
+#define GT_ADJUSTREVERSEPOS(RB,POS) ((RB) - (POS))
 
 static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                     const GtTwobitencoding *twobitencoding,
@@ -1059,7 +1059,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
                                kmersize);
     processkmercode(processkmercodeinfo,
                     true,
-                    GT_ADJUSTREVERSEPOS(pos),
+                    GT_ADJUSTREVERSEPOS(rightbound,pos),
                     GT_ISDIRCOMPLEMENT(readmode)
                       ? gt_kmercode_complement(code,maskright)
                       : code);
@@ -1076,8 +1076,9 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      GT_UPDATEKMER(code,cc);
-      processkmercode(processkmercodeinfo,false,GT_ADJUSTREVERSEPOS(pos),
+      GT_UPDATEKMER(code,cc,maskright);
+      processkmercode(processkmercodeinfo,false,
+                      GT_ADJUSTREVERSEPOS(rightbound,pos),
                        (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);
@@ -1117,7 +1118,7 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     {
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
-      GT_UPDATEKMER(code,cc);
+      GT_UPDATEKMER(code,cc,maskright);
       processkmercode(processkmercodeinfo,false,pos,
                        (readmode == GT_READMODE_COMPL)
                          ? gt_kmercode_complement(code,maskright)
@@ -1412,6 +1413,15 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
             (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b = POSITION;\
           }\
         }
+
+typedef struct
+{
+  const GtTwobitencoding *twobitencoding;
+  unsigned long totallength, maxunitindex, realtotallength, rightbound;
+  GtCodetype maskright;
+  unsigned int kmersize, upperkmersize;
+  bool mirrored;
+} GtSfxmapped4constinfo;
 
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
