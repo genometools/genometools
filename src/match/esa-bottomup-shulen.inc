@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-#ifndef GT_ESA_BOTTOM_UP_RAM
+#ifdef GT_ESA_BOTTOM_UP_RAM
 #include "seqnumrelpos.h"
 #endif
 
@@ -31,6 +31,10 @@ static int processleafedge_shulen(bool,
     unsigned long,
     GtBUinfo_shulen *,
     unsigned long,
+#ifdef GT_ESA_BOTTOM_UP_RAM
+    unsigned long,
+    unsigned long,
+#endif
     GtBUstate_shulen *,
     GtError *err);
 
@@ -333,7 +337,8 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab_bucket,
                           TOP_ESA_BOTTOMUP_shulen.lcp,
                           TOP_ESA_BOTTOMUP_shulen.lb,
                           &TOP_ESA_BOTTOMUP_shulen.info,
-                          previoussuffix,bustate,err) != 0)
+                          previoussuffix,previousseqnum,previousrelpos,
+                          bustate,err) != 0)
       {
         haserr = true;
         break;
@@ -423,7 +428,8 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab_bucket,
                             TOP_ESA_BOTTOMUP_shulen.lcp,
                             TOP_ESA_BOTTOMUP_shulen.lb,
                             &TOP_ESA_BOTTOMUP_shulen.info,
-                            previoussuffix,bustate,err) != 0)
+                            previoussuffix,previousseqnum,previousrelpos,
+                            bustate,err) != 0)
         {
           haserr = true;
           break;
@@ -443,7 +449,7 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *suftab_bucket,
                         TOP_ESA_BOTTOMUP_shulen.lcp,
                         TOP_ESA_BOTTOMUP_shulen.lb,
                         &TOP_ESA_BOTTOMUP_shulen.info,
-                        lastsuftabvalue,bustate,err) != 0)
+                        lastsuftabvalue,lastseqnum,lastrelpos,bustate,err) != 0)
     {
       haserr = true;
     } else

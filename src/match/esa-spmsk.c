@@ -59,7 +59,9 @@ static int processleafedge_spmsk(bool firstedge,
                                  unsigned long fd,
                                  GT_UNUSED unsigned long flb,
                                  GtBUinfo_spmsk *finfo,
-                                 unsigned long pos,
+                                 unsigned long position,
+                                 unsigned long seqnum,
+                                 unsigned long relpos,
                                  GtBUstate_spmsk *state,
                                  GT_UNUSED GtError *err)
 
@@ -73,19 +75,28 @@ static int processleafedge_spmsk(bool firstedge,
       gt_assert(finfo != NULL);
       ((GtBUinfo_spmsk *) finfo)->firstinW = state->Wset.nextfreeGtUlong;
     }
-    if (pos == 0 || gt_encseq_position_is_separator(state->encseq,
-                                                    pos - 1,
-                                                    state->readmode))
+    if (position == 0 || gt_encseq_position_is_separator(state->encseq,
+                                                         position - 1,
+                                                         state->readmode))
     {
-      idx = gt_encseq_seqnum(state->encseq,pos);
+      gt_assert(relpos == 0);
+      idx = gt_encseq_seqnum(state->encseq,position);
       GT_STOREINARRAY(&state->Wset,GtUlong,128,idx);
-    }
-    if (pos + fd == state->totallength ||
-        gt_encseq_position_is_separator(state->encseq,
-                                        pos + fd,state->readmode))
+    } else
     {
-      idx = gt_encseq_seqnum(state->encseq,pos);
+      gt_assert(relpos > 0);
+    }
+    if (position + fd == state->totallength ||
+        gt_encseq_position_is_separator(state->encseq,
+                                        position + fd,state->readmode))
+    {
+      gt_assert(relpos + fd == gt_encseq_seqlength(state->encseq,seqnum));
+      idx = gt_encseq_seqnum(state->encseq,position);
+      gt_assert(idx == seqnum);
       GT_STOREINARRAY(&state->Lset,GtUlong,128,idx);
+    } else
+    {
+      gt_assert(relpos + fd < gt_encseq_seqlength(state->encseq,seqnum));
     }
   }
   return 0;

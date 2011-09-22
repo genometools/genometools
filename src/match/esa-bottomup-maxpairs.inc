@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-#ifndef GT_ESA_BOTTOM_UP_RAM
+#ifdef GT_ESA_BOTTOM_UP_RAM
 #include "seqnumrelpos.h"
 #endif
 
@@ -31,6 +31,10 @@ static int processleafedge_maxpairs(bool,
     unsigned long,
     GtBUinfo_maxpairs *,
     unsigned long,
+#ifdef GT_ESA_BOTTOM_UP_RAM
+    unsigned long,
+    unsigned long,
+#endif
     GtBUstate_maxpairs *,
     GtError *err);
 
@@ -333,7 +337,8 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
                           TOP_ESA_BOTTOMUP_maxpairs.lcp,
                           TOP_ESA_BOTTOMUP_maxpairs.lb,
                           &TOP_ESA_BOTTOMUP_maxpairs.info,
-                          previoussuffix,bustate,err) != 0)
+                          previoussuffix,previousseqnum,previousrelpos,
+                          bustate,err) != 0)
       {
         haserr = true;
         break;
@@ -423,7 +428,8 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
                             TOP_ESA_BOTTOMUP_maxpairs.lcp,
                             TOP_ESA_BOTTOMUP_maxpairs.lb,
                             &TOP_ESA_BOTTOMUP_maxpairs.info,
-                            previoussuffix,bustate,err) != 0)
+                            previoussuffix,previousseqnum,previousrelpos,
+                            bustate,err) != 0)
         {
           haserr = true;
           break;
@@ -443,7 +449,7 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *suftab_bucket,
                         TOP_ESA_BOTTOMUP_maxpairs.lcp,
                         TOP_ESA_BOTTOMUP_maxpairs.lb,
                         &TOP_ESA_BOTTOMUP_maxpairs.info,
-                        lastsuftabvalue,bustate,err) != 0)
+                        lastsuftabvalue,lastseqnum,lastrelpos,bustate,err) != 0)
     {
       haserr = true;
     } else
