@@ -39,8 +39,7 @@ struct GtBUstate_spmsk /* global information */
        outputspms;
   GtArrayGtUlong Wset, Lset;
   /* Declare the stack as void as the real type
-     GtArrayGtBUItvinfo_spmsk  is declared later in
-     esa-bottomup-spmsk.inc */
+     GtArrayGtBUItvinfo_spmsk is declared later in esa-bottomup-spmsk.inc */
   void *stack;
 };
 
@@ -175,15 +174,16 @@ void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 }
 
 int gt_spmsk_inl_process(void *data,
-                         const unsigned long *suftab,
-                         GT_UNUSED const GtSeqnumrelpostab *snrp,
+                         const unsigned long *suftab_bucket,
+                         const GtSeqnumrelpostab *snrp,
                          const uint16_t *lcptab_bucket,
                          unsigned long nonspecials,
                          GtError *err)
 {
   GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;
 
-  if (gt_esa_bottomup_RAM_spmsk(suftab,
+  if (gt_esa_bottomup_RAM_spmsk(suftab_bucket,
+                                snrp,
                                 lcptab_bucket,
                                 nonspecials,
                                 (GtArrayGtBUItvinfo_spmsk *) state->stack,

@@ -18,6 +18,9 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
+#ifndef GT_ESA_BOTTOM_UP_RAM
+#include "seqnumrelpos.h"
+#endif
 
 static void initBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 
@@ -291,7 +294,8 @@ int gt_esa_bottomup_spmsk(Sequentialsuffixarrayreader *ssar,
 
 #else
 
-int gt_esa_bottomup_RAM_spmsk(const unsigned long *suftab,
+int gt_esa_bottomup_RAM_spmsk(const unsigned long *suftab_bucket,
+                        GT_UNUSED const GtSeqnumrelpostab *snrp,
                         const uint16_t *lcptab_bucket,
                         unsigned long nonspecials,
                         GtArrayGtBUItvinfo_spmsk *stack,
@@ -301,6 +305,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *suftab,
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix = 0,
+                previousseqnum = 0,
+                previousrelpos = 0,
                 idx;
   GtBUItvinfo_spmsk *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
@@ -310,7 +316,9 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *suftab,
   for (idx = 0; idx < nonspecials-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
-    previoussuffix = suftab[idx];
+    previoussuffix = suftab_bucket[idx];
+    previousseqnum = gt_seqnumrelpostab_seqnum(snrp,idx);
+    previousrelpos = gt_seqnumrelpostab_relpos(snrp,idx);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
       if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
@@ -426,7 +434,11 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *suftab,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmsk.lcp > 0)
   {
-    unsigned long lastsuftabvalue = suftab[nonspecials-1];
+    unsigned long lastsuftabvalue, lastseqnum, lastrelpos;
+
+    lastsuftabvalue = suftab_bucket[nonspecials-1];
+    lastseqnum = gt_seqnumrelpostab_seqnum(snrp,nonspecials-1);
+    lastrelpos = gt_seqnumrelpostab_relpos(snrp,nonspecials-1);
     if (processleafedge_spmsk(false,
                         TOP_ESA_BOTTOMUP_spmsk.lcp,
                         TOP_ESA_BOTTOMUP_spmsk.lb,
