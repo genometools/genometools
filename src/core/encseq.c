@@ -6793,6 +6793,33 @@ int gt_encseq_check_comparetwosuffixes(const GtEncseq *encseq,
   return retval;
 }
 
+void gt_encseq_relpos_seqnum_check(const char *filename,int line,
+                                   const GtEncseq *encseq,unsigned long relpos,
+                                   unsigned long seqnum,unsigned long position)
+{
+  if (encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH)
+  {
+    unsigned long seqnum2, relpos2;
+
+    seqnum2 = gt_encseq_seqnum(encseq,position);
+    relpos2 = position - gt_encseq_seqstartpos(encseq,seqnum2);
+    if (seqnum != seqnum2)
+    {
+      fprintf(stderr,"file %s,line %d: pos=%lu,seqnum = %lu != %lu "
+                     " = seqnum.correct\n",filename,line,position,
+                     seqnum,seqnum2);
+      exit(EXIT_FAILURE);
+    }
+    if (relpos != relpos2)
+    {
+      fprintf(stderr,"file %s,line %d: pos=%lu,relpos=%lu != %lu "
+                     " = relpos.correct\n",filename,line,position,
+                     relpos,relpos2);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
 static unsigned long *initcharacterdistribution(const GtAlphabet *alpha)
 {
   unsigned long *characterdistribution;

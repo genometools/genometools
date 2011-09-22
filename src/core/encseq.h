@@ -494,6 +494,15 @@ unsigned long countgt_encseq_compare_viatwobitencoding_get(void);
 
 uint64_t gt_encseq_pairbitsum(const GtEncseq *encseq);
 
+/* the following function checks if a sequence number and relative
+   position is consistent with the given position. It only works for
+   sequences of equal length and should be extended to sequences
+   of variable length. */
+
+void gt_encseq_relpos_seqnum_check(const char *filename,int line,
+                                   const GtEncseq *encseq,unsigned long relpos,
+                                   unsigned long seqnum,unsigned long position);
+
 /* for a position outside the range from 0 to totallength -1 deliver a
    unique integer */
 #define GT_UNIQUEINT(POS)        ((unsigned long) ((POS) + GT_COMPAREOFFSET))

@@ -1417,11 +1417,21 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 typedef struct
 {
   const GtTwobitencoding *twobitencoding;
-  unsigned long totallength, maxunitindex, realtotallength, rightbound;
+  unsigned long totallength, maxunitindex, realtotallength, rightbound,
+                numofsequences;
   GtCodetype maskright;
   unsigned int kmersize, upperkmersize;
   bool mirrored;
+  const GtEncseq *encseq; /* XXX remove later */
 } GtSfxmapped4constinfo;
+
+/* This is for checking only
+#define GT_ENCSEQ_RELPOS_SEQNUM_CHECK(POS)\
+        gt_encseq_relpos_seqnum_check(__FILE__,__LINE__,\
+                                      mapped4info->encseq,relpos,\
+                                      specialfreeunit,POS)
+*/
+#define GT_ENCSEQ_RELPOS_SEQNUM_CHECK(POS) /* Nothing */
 
 #define PROCESSKMERPREFIX(FUN) updateleftborder_##FUN
 #define PROCESSKMERTYPE        Sfxiterator
