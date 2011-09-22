@@ -193,6 +193,10 @@ int gt_spmsk_inl_process(void *data,
 {
   GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;
 
+  gt_assert(state != NULL);
+  gt_assert(suftab_bucket != NULL);
+  gt_assert(snrp != NULL);
+  gt_assert(lcptab_bucket != NULL);
   if (gt_esa_bottomup_RAM_spmsk(suftab_bucket,
                                 snrp,
                                 lcptab_bucket,

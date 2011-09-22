@@ -220,7 +220,9 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->maximumspace,
                                                       arguments->minmatchlength,
                                                       arguments->checksuftab,
-                                                      gt_spmsk_inl_process,
+                                                      spmsk_state != NULL
+                                                        ? gt_spmsk_inl_process
+                                                        : NULL,
                                                       spmsk_state,
                                                       logger,err) != 0)
     {
