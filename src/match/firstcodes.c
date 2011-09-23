@@ -523,8 +523,6 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
                                              GtEncseqReader *esr2,
                                              unsigned long previoussuffix,
                                              bool previousdefined,
-                                             GT_UNUSED const unsigned long
-                                               *suftab_bucket,
                                              const unsigned long
                                                *seqnum_relpos_bucket,
                                              const GtSeqnumrelpos *snrp,
@@ -542,7 +540,6 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
   for (idx = 0; idx < numberofsuffixes; idx++)
   {
     current = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[idx]);
-    gt_assert(current == suftab_bucket[idx]);
     if (previousdefined && idx < totallength)
     {
       gt_assert(current < totallength);
@@ -631,7 +628,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                          esr2,
                                          previoussuffix,
                                          previousdefined,
-                                         suftab_bucket,
                                          seqnum_relpos_bucket,
                                          snrp,
                                          lcptab_bucket,
@@ -639,7 +635,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
         previousdefined = true;
         previoussuffix
           = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[width-1]);
-        gt_assert(previoussuffix == suftab_bucket[width-1]);
       }
       if (itvprocess != NULL)
       {
