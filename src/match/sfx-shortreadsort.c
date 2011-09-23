@@ -596,7 +596,7 @@ void gt_shortreadsort_array_sort(unsigned long *seqnum_relpos_bucket,
       pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
       seqnum = gt_encseq_seqnum(encseq,pos);
       relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
-      srsw->shortreadsortinfo[idx].suffix 
+      srsw->shortreadsortinfo[idx].suffix
         = gt_seqnumrelpos_encode(snrp, seqnum, relpos);
     } else
     {

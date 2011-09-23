@@ -149,7 +149,7 @@ typedef struct
   const Sfxstrategy *sfxstrategy;
   unsigned int sortmaxdepth,
                prefixlength;
-  Blindtrie *blindtrie;
+  GtBlindtrie *blindtrie;
   unsigned long leftlcpdist[GT_UNITSIN2BITENC],
                 rightlcpdist[GT_UNITSIN2BITENC];
   GtSuffixsortspace *sssp;

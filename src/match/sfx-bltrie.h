@@ -28,22 +28,24 @@ typedef void (*GtProcessunsortedsuffixrange)(void *,
                                         unsigned long,
                                         unsigned long);
 
-typedef struct Blindtrie Blindtrie;
+typedef struct GtBlindtrie GtBlindtrie;
 
-Blindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
-                            unsigned long maxnumofsuffixes,
-                            unsigned int nodenumberincrement,
-                            const GtEncseq *encseq,
-                            bool cmpcharbychar,
-                            GtEncseqReader *esr1,
-                            GtEncseqReader *esr2,
-                            GtReadmode readmode);
+GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
+                              unsigned long maxnumofsuffixes,
+                              unsigned int nodenumberincrement,
+                              const GtEncseq *encseq,
+                              bool cmpcharbychar,
+                              GtEncseqReader *esr1,
+                              GtEncseqReader *esr2,
+                              GtReadmode readmode);
 
 size_t gt_blindtrie_size(unsigned long maxnumofsuffixes);
 
-void gt_blindtrie_reset(Blindtrie *blindtrie);
+size_t gt_blindtrie_current_size(const GtBlindtrie *blindtrie);
 
-void gt_blindtrie_suffixsort(Blindtrie *blindtrie,
+void gt_blindtrie_reset(GtBlindtrie *blindtrie);
+
+void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                              unsigned long subbucketleft,
                              GtLcpvalues *tableoflcpvalues,
                              unsigned long numberofsuffixes,
@@ -53,9 +55,9 @@ void gt_blindtrie_suffixsort(Blindtrie *blindtrie,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange);
 
-void gt_blindtrie_delete(Blindtrie *blindtrie);
+void gt_blindtrie_delete(GtBlindtrie *blindtrie);
 
-bool gt_blindtrie_retrieve(Blindtrie *blindtrie,
+bool gt_blindtrie_retrieve(GtBlindtrie *blindtrie,
                            unsigned long currentstartpos);
 
 #endif
