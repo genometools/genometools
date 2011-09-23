@@ -34,7 +34,6 @@
 typedef struct
 {
   unsigned long suffix;
-  unsigned long seqnum_relpos;
   GtTwobitencoding tbe[GT_NUMOFTBEVALUEFOR100];
   unsigned int unitsnotspecial;
 } GtShortreadsort;
@@ -575,8 +574,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
-                                 unsigned long *seqnum_relpos_bucket,
+void gt_shortreadsort_array_sort(unsigned long *seqnum_relpos_bucket,
                                  const GtSeqnumrelpos *snrp,
                                  GtShortreadsortworkinfo *srsw,
                                  const GtEncseq *encseq,
@@ -598,16 +596,15 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
       pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
       seqnum = gt_encseq_seqnum(encseq,pos);
       relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
+      srsw->shortreadsortinfo[idx].suffix 
+        = gt_seqnumrelpos_encode(snrp, seqnum, relpos);
     } else
     {
       seqnum_relpos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
       seqnum = gt_seqnumrelpos_decode_seqnum(snrp,seqnum_relpos);
       relpos = gt_seqnumrelpos_decode_relpos(snrp,seqnum_relpos);
-      pos = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos);
+      srsw->shortreadsortinfo[idx].suffix = seqnum_relpos;
     }
-    srsw->shortreadsortinfo[idx].suffix = pos;
-    srsw->shortreadsortinfo[idx].seqnum_relpos
-      = gt_seqnumrelpos_encode(snrp, seqnum, relpos);
     srsw->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_relpos_extract2bitencvector(
                          srsw->shortreadsortinfo[idx].tbe,
@@ -620,9 +617,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                                     subbucketleft);
   for (idx = 0; idx < width; idx++)
   {
-    suftab_bucket[idx]
-      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
     seqnum_relpos_bucket[idx]
-      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].seqnum_relpos;
+      = srsw->shortreadsortinfo[srsw->shortreadsortrefs[idx]].suffix;
   }
 }

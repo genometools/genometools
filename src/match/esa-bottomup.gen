@@ -30,10 +30,11 @@ static int processleafedge(bool,
     unsigned long,
     unsigned long,
     GtBUinfo *,
-    unsigned long,
 #ifdef GT_ESA_BOTTOM_UP_RAM
-    unsigned long,
-    unsigned long,
+    unsigned long, /* seqnum */
+    unsigned long, /* relpos */
+#else
+    unsigned long, /* position */
 #endif
     GtBUstate *,
     GtError *err);
@@ -298,8 +299,7 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
 
 #else
 
-int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
-                        const unsigned long *seqnum_relpos_bucket,
+int gt_esa_bottomup_RAM(const unsigned long *seqnum_relpos_bucket,
                         const GtSeqnumrelpos *snrp,
                         const uint16_t *lcptab_bucket,
                         unsigned long nonspecials,
@@ -310,7 +310,6 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 tmp,
-                previoussuffix = 0,
                 previousseqnum = 0,
                 previousrelpos = 0,
                 idx;
@@ -322,7 +321,6 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
   for (idx = 0; idx < nonspecials-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
-    previoussuffix = suftab_bucket[idx];
     tmp = seqnum_relpos_bucket[idx];
     previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,tmp);
     previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,tmp);
@@ -340,8 +338,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
                           TOP_ESA_BOTTOMUP.lcp,
                           TOP_ESA_BOTTOMUP.lb,
                           &TOP_ESA_BOTTOMUP.info,
-                          previoussuffix,previousseqnum,previousrelpos,
-                          bustate,err) != 0)
+                          previousseqnum,previousrelpos,bustate,err) != 0)
       {
         haserr = true;
         break;
@@ -431,8 +428,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
                             TOP_ESA_BOTTOMUP.lcp,
                             TOP_ESA_BOTTOMUP.lb,
                             &TOP_ESA_BOTTOMUP.info,
-                            previoussuffix,previousseqnum,previousrelpos,
-                            bustate,err) != 0)
+                            previousseqnum,previousrelpos,bustate,err) != 0)
         {
           haserr = true;
           break;
@@ -443,9 +439,8 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
-    unsigned long lastsuftabvalue, lastseqnum, lastrelpos;
+    unsigned long lastseqnum, lastrelpos;
 
-    lastsuftabvalue = suftab_bucket[nonspecials-1];
     tmp = seqnum_relpos_bucket[nonspecials-1];
     lastseqnum = gt_seqnumrelpos_decode_seqnum(snrp,tmp);
     lastrelpos = gt_seqnumrelpos_decode_relpos(snrp,tmp);
@@ -453,7 +448,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab_bucket,
                         TOP_ESA_BOTTOMUP.lcp,
                         TOP_ESA_BOTTOMUP.lb,
                         &TOP_ESA_BOTTOMUP.info,
-                        lastsuftabvalue,lastseqnum,lastrelpos,bustate,err) != 0)
+                        lastseqnum,lastrelpos,bustate,err) != 0)
     {
       haserr = true;
     } else

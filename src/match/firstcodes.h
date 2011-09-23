@@ -24,7 +24,7 @@
 #include "core/encseq_api.h"
 #include "seqnumrelpos.h"
 
-typedef int (*GtFirstcodesintervalprocess)(void *,const unsigned long *,
+typedef int (*GtFirstcodesintervalprocess)(void *,
                                            const unsigned long *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,

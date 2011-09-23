@@ -59,7 +59,6 @@ static int processleafedge_spmsk(bool firstedge,
                                  unsigned long fd,
                                  GT_UNUSED unsigned long flb,
                                  GtBUinfo_spmsk *finfo,
-                                 GT_UNUSED unsigned long position,
                                  unsigned long seqnum,
                                  unsigned long relpos,
                                  GtBUstate_spmsk *state,
@@ -168,7 +167,6 @@ void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 }
 
 int gt_spmsk_inl_process(void *data,
-                         const unsigned long *suftab_bucket,
                          const unsigned long *seqnum_relpos_bucket,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
@@ -178,11 +176,9 @@ int gt_spmsk_inl_process(void *data,
   GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;
 
   gt_assert(state != NULL);
-  gt_assert(suftab_bucket != NULL);
   gt_assert(snrp != NULL);
   gt_assert(lcptab_bucket != NULL);
-  if (gt_esa_bottomup_RAM_spmsk(suftab_bucket,
-                                seqnum_relpos_bucket,
+  if (gt_esa_bottomup_RAM_spmsk(seqnum_relpos_bucket,
                                 snrp,
                                 lcptab_bucket,
                                 nonspecials,

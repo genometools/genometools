@@ -581,7 +581,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   GtEncseqReader *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
-  unsigned long *suftab_bucket, *seqnum_relpos_bucket;
+  unsigned long *seqnum_relpos_bucket;
   bool haserr = false;
 
   if (withsuftabcheck)
@@ -591,7 +591,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   }
   srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
-  suftab_bucket = gt_malloc(sizeof (*suftab_bucket) * maxbucketsize);
   seqnum_relpos_bucket
     = gt_malloc(sizeof (*seqnum_relpos_bucket) * maxbucketsize);
   current = gt_firstcodes_get_leftborder(fct,minindex);
@@ -611,8 +610,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     gt_assert(sumwidth <= spmsuftab->numofentries);
     if (width >= 2UL)
     {
-      gt_shortreadsort_array_sort(suftab_bucket,
-                                  seqnum_relpos_bucket,
+      gt_shortreadsort_array_sort(seqnum_relpos_bucket,
                                   snrp,
                                   srsw,
                                   encseq,
@@ -638,7 +636,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
       }
       if (itvprocess != NULL)
       {
-        if (itvprocess(itvprocessdata,suftab_bucket,seqnum_relpos_bucket,snrp,
+        if (itvprocess(itvprocessdata,seqnum_relpos_bucket,snrp,
                         lcptab_bucket, width, err) != 0)
         {
           haserr = true;
@@ -654,7 +652,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   gt_shortreadsort_delete(srsw);
-  gt_free(suftab_bucket);
   gt_free(seqnum_relpos_bucket);
   return haserr ? -1 : 0;
 }
