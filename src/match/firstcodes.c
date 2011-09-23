@@ -27,6 +27,7 @@
 #include "core/spacecalc.h"
 #include "core/fa.h"
 #include "core/error_api.h"
+#include "core/disc_distri.h"
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
@@ -462,14 +463,81 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
   fci->buf.nextfree = 0;
 }
 
-static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci)
+typedef struct
+{
+  unsigned long smallcount, smallsum,
+                largecount, largesum,
+                hugecount, hugesum;
+} GtCountdistri_info;
+
+static void evaluate_distvalue(unsigned long key,
+                               unsigned long long value,
+                               void *data)
+{
+  GtCountdistri_info *cdi = (GtCountdistri_info *) data;
+
+  gt_assert(value > 0);
+  if (key <= UCHAR_MAX)
+  {
+    cdi->smallcount++;
+    cdi->smallsum += value;
+  } else
+  {
+    if (key <= UINT16_MAX)
+    {
+      cdi->largecount++;
+      cdi->largesum += value;
+    } else
+    {
+      cdi->hugecount++;
+      cdi->hugesum += value;
+    }
+  }
+}
+
+static void evaluate_countdistri(const GtDiscDistri *countdistri,
+                                 GtLogger *logger)
+{
+  GtCountdistri_info cdi;
+  unsigned long sum;
+  size_t spaceforcounttab, spacenow;
+
+  cdi.smallcount = 0;
+  cdi.smallsum = 0;
+  cdi.largecount = 0;
+  cdi.largesum = 0;
+  cdi.hugecount = 0;
+  cdi.hugesum = 0;
+  gt_disc_distri_foreach(countdistri,evaluate_distvalue,&cdi);
+  sum = cdi.smallsum + cdi.largesum + cdi.hugesum;
+  gt_logger_log(logger,"small=%lu,%lu (%.2f)",cdi.smallcount,cdi.smallsum,
+          (double) cdi.smallsum/sum);
+  gt_logger_log(logger,"large=%lu,%lu (%.2f)",cdi.largecount,cdi.largesum,
+          (double) cdi.largesum/sum);
+  gt_logger_log(logger,"huge=%lu,%lu (%.2f)",cdi.hugecount,cdi.hugesum,
+          (double) cdi.largesum/sum);
+  spaceforcounttab = sizeof (uint64_t)/4 * sum;
+  spaceforcounttab += (sizeof (uint16_t) + sizeof (unsigned long))
+                      * cdi.largecount;
+  spaceforcounttab += (sizeof (uint32_t) + sizeof (unsigned long))
+                      * cdi.hugecount;
+  spacenow = sizeof (uint32_t) * sum;
+  gt_logger_log(logger,"spaceforcounttab/spacenow=%.5f",
+          (double) spaceforcounttab/spacenow);
+}
+
+static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci,
+                                                GtLogger *logger)
 {
   unsigned long idx, sum, maxbucketsize;
+  GtDiscDistri *countdistri = gt_disc_distri_new();
 
   fci->tab.overflow_index = 0;
   maxbucketsize = (unsigned long) fci->tab.countocc[0];
+  gt_disc_distri_add(countdistri,(unsigned long) fci->tab.countocc[0]);
   for (idx = 1UL; idx < fci->tab.differentcodes; idx++)
   {
+    gt_disc_distri_add(countdistri,(unsigned long) fci->tab.countocc[idx]);
     if (maxbucketsize < (unsigned long) fci->tab.countocc[idx])
     {
       maxbucketsize = (unsigned long) fci->tab.countocc[idx];
@@ -514,6 +582,8 @@ static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci)
       = fci->tab.overflow_countocc[fci->tab.differentcodes -
                                    fci->tab.overflow_index - 1];
   }
+  evaluate_countdistri(countdistri,logger);
+  gt_disc_distri_delete(countdistri);
   return maxbucketsize;
 }
 
@@ -946,7 +1016,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
-    maxbucketsize = storefirstcodes_partialsum(&fci);
+    maxbucketsize = storefirstcodes_partialsum(&fci,logger);
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     suftabentries = fci.firstcodehits + fci.numofsequences;
     if (maximumspace > 0)
@@ -1089,7 +1159,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       = gt_malloc(sizeof (*fci.tempcodeposforradixsort) * fci.buf.allocated);
     /*
     printf("allocate %.2f for codeposbuffer\n",
-             GT_MEGABYTES(sizeof(*fci.buf.spaceGtUlongPair) * 2 *
+             GT_MEGABYTES(sizeof (*fci.buf.spaceGtUlongPair) * 2 *
                           fci.buf.allocated));
     */
 
