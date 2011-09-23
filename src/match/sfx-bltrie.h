@@ -39,6 +39,8 @@ GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
                               GtEncseqReader *esr2,
                               GtReadmode readmode);
 
+void gt_blindtrie_resize(GtBlindtrie *blindtrie,unsigned int maxnumofnodes);
+
 size_t gt_blindtrie_size(unsigned long maxnumofsuffixes);
 
 size_t gt_blindtrie_current_size(const GtBlindtrie *blindtrie);

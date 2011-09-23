@@ -941,6 +941,19 @@ GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,
   return blindtrie;
 }
 
+void gt_blindtrie_resize(GtBlindtrie *blindtrie,unsigned int maxnumofnodes)
+{
+  gt_assert(maxnumofnodes > 0);
+  if (blindtrie->allocatedBlindtrienode > maxnumofnodes)
+  {
+    blindtrie->allocatedBlindtrienode = maxnumofnodes;
+    blindtrie->spaceBlindtrienode
+      = gt_realloc(blindtrie->spaceBlindtrienode,
+                   sizeof (*blindtrie->spaceBlindtrienode) *
+                   blindtrie->allocatedBlindtrienode);
+  }
+}
+
 size_t gt_blindtrie_size(unsigned long maxnumofsuffixes)
 {
   if (maxnumofsuffixes == 1UL)
