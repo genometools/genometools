@@ -242,7 +242,7 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                PROCESSKMERTYPE *processkmercodeinfo,
                                PROCESSKMERSPECIALTYPE *processkmerspecialinfo)
 {
-  unsigned long laststart = 0, lastend, specialfreeunit;
+  unsigned long laststart = 0, lastend, specialfreeunit = 0;
   GtSfxmapped4constinfo mapped4info;
 
   mapped4info.twobitencoding = gt_encseq_twobitencoding_export(encseq);
