@@ -48,15 +48,15 @@ struct GtShortreadsortworkinfo
                                     firstcodes; otherwise: NULL iff
                                     lcpvalues are not required. */
   uint16_t *firstcodeslcpvalues;
-  unsigned long numofentries,
-                tmplcplen;
+  unsigned long tmplcplen;
   bool fwd, complement;
 };
 
-size_t gt_shortreadsort_size(unsigned long maxvalue)
+size_t gt_shortreadsort_size(bool firstcodes,unsigned long maxwidth)
 {
-  return (sizeof (GtShortreadsort) +
-         sizeof (GtShortreadsortreftype)) * (maxvalue+1);
+  size_t sizeforlcpvalues = firstcodes ? (sizeof (uint16_t) * maxwidth) : 0;
+  return sizeforlcpvalues + (sizeof (GtShortreadsort) +
+         sizeof (GtShortreadsortreftype)) * maxwidth;
 }
 
 const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
@@ -80,15 +80,14 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
 
   srsw = gt_malloc(sizeof(*srsw));
   gt_assert(maxwidth <= maxshortreadsort);
-  srsw->numofentries = maxwidth + 1;
   srsw->shortreadsortinfo
-    = gt_malloc(sizeof (*srsw->shortreadsortinfo) * srsw->numofentries);
+    = gt_malloc(sizeof (*srsw->shortreadsortinfo) * maxwidth);
   srsw->shortreadsortrefs
-    = gt_malloc(sizeof (*srsw->shortreadsortrefs) * srsw->numofentries);
+    = gt_malloc(sizeof (*srsw->shortreadsortrefs) * maxwidth);
   if (firstcodes)
   {
     srsw->firstcodeslcpvalues
-      = gt_malloc(sizeof (*srsw->firstcodeslcpvalues) * srsw->numofentries);
+      = gt_malloc(sizeof (*srsw->firstcodeslcpvalues) * maxwidth);
     srsw->firstcodeslcpvalues[0] = 0; /* since it is not set otherwise */
   } else
   {
@@ -97,7 +96,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
-  for (idx = 0; idx < srsw->numofentries; idx++)
+  for (idx = 0; idx < maxwidth; idx++)
   {
     srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
   }

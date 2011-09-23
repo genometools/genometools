@@ -1430,7 +1430,7 @@ size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy,
   {
     if (allowforshortreadsort(sfxstrategy,encseq,prefixlength,readmode))
     {
-      sumsize += gt_shortreadsort_size(sfxstrategy->maxshortreadsort);
+      sumsize += gt_shortreadsort_size(false,sfxstrategy->maxshortreadsort);
     } else
     {
       sumsize += sizeof (GtCountingsortinfo) * sfxstrategy->maxcountingsort;
