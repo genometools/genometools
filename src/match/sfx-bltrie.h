@@ -58,6 +58,7 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
 void gt_blindtrie_delete(GtBlindtrie *blindtrie);
 
 bool gt_blindtrie_retrieve(GtBlindtrie *blindtrie,
-                           unsigned long currentstartpos);
+                           unsigned long currentstartpos,
+                           unsigned long currenttwobitencodingstoppos);
 
 #endif

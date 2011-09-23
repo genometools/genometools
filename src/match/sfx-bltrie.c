@@ -362,10 +362,10 @@ static unsigned long blindtrie_currenttwobitencodingstoppos_get(
 }
 
 static void blindtrie_makeroot(GtBlindtrie *blindtrie,
-                               unsigned long currentstartpos)
+                               unsigned long currentstartpos,
+                               unsigned long currenttwobitencodingstoppos)
 {
   GtBlindtriesymbol firstchar;
-  unsigned long currenttwobitencodingstoppos;
 
   gt_assert(blindtrie->nextfreeBlindtrienode == GT_BLINDTRIE_ROOTIDX);
   (void) blindtrie_newnode(blindtrie);
@@ -384,8 +384,11 @@ static void blindtrie_makeroot(GtBlindtrie *blindtrie,
     {
       firstchar = GT_UNIQUEINT(currentstartpos);
     }
-    currenttwobitencodingstoppos
-      = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+    if (currenttwobitencodingstoppos == ULONG_MAX)
+    {
+      currenttwobitencodingstoppos
+        = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+    }
   } else
   {
     firstchar = GT_UNIQUEINT(currentstartpos);
@@ -661,7 +664,7 @@ static unsigned long blindtrie_twobitencoding_getlcp(
   gt_Viatwobitkeyvalues_reinit(blindtrie->vtk1,
                                blindtrie->encseq,
                                blindtrie->readmode,
-                               NULL,
+                               NULL, /* esr */
                                leafpos,
                                depth,
                                blindtrie->maxdepthminusoffset,
@@ -669,7 +672,7 @@ static unsigned long blindtrie_twobitencoding_getlcp(
   gt_Viatwobitkeyvalues_reinit(blindtrie->vtk2,
                                blindtrie->encseq,
                                blindtrie->readmode,
-                               NULL,
+                               NULL, /* esr */
                                currentstartpos,
                                depth,
                                blindtrie->maxdepthminusoffset,
@@ -1091,7 +1094,7 @@ static void gt_blindtrie_insertsuffix(GtBlindtrie *blindtrie,
       blindtrie->maxdepthminusoffset = maxdepth - offset;
     }
     blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
-    blindtrie_makeroot(blindtrie,currentstartpos);
+    blindtrie_makeroot(blindtrie,currentstartpos,ULONG_MAX);
   } else
   {
     if (blindtrie_isleftofboundary(blindtrie,currentstartpos,0))
@@ -1224,22 +1227,32 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
 }
 
 bool gt_blindtrie_retrieve(GtBlindtrie *blindtrie,
-                           unsigned long currentstartpos)
+                           unsigned long currentstartpos,
+                           unsigned long currenttwobitencodingstoppos)
 {
+  gt_assert(!blindtrie->cmpcharbychar);
+  if (currenttwobitencodingstoppos != ULONG_MAX)
+  {
+    gt_assert(blindtrie->esr1 == NULL);
+    gt_assert(blindtrie->esr2 == NULL);
+  }
   if (blindtrie->nextfreeBlindtrienode == 0)
   {
     blindtrie->maxdepthminusoffset = 0;
-    blindtrie_makeroot(blindtrie,currentstartpos);
+    blindtrie_makeroot(blindtrie,currentstartpos,currenttwobitencodingstoppos);
     return false;
   } else
   {
     GtBlindtriesnodeptr leafinsubtrie, splitnode;
     GtBlindtriesymbol mm_oldsuffix, mm_newsuffix;
     bool mm_oldsuffixisseparator;
-    unsigned long currenttwobitencodingstoppos, lcp;
+    unsigned long lcp;
 
-    currenttwobitencodingstoppos
-      = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+    if (currenttwobitencodingstoppos == ULONG_MAX)
+    {
+      currenttwobitencodingstoppos
+        = blindtrie_currenttwobitencodingstoppos_get(blindtrie,currentstartpos);
+    }
     leafinsubtrie = blindtrie_findcompanion(blindtrie,currentstartpos,
                                             currenttwobitencodingstoppos);
     gt_assert(blindtrie_isleaf(blindtrie,leafinsubtrie));
