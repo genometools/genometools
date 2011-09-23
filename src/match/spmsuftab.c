@@ -17,26 +17,44 @@
 
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/minmax.h"
 #include "spmsuftab.h"
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
                               unsigned long maxvalue,
+                              unsigned int bitsforseqnumrelpos,
                               GtLogger *logger)
 {
   GtSpmsuftab *spmsuftab;
-  unsigned int bitspervalue;
-  unsigned long required = (unsigned long)
-                           gt_spmsuftab_requiredspace(numofentries,maxvalue);
+  unsigned int bitsforpositions;
+  unsigned long required;
 
-  bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
-  gt_logger_log(logger,"use %lu bitpackarray-entries of %u bits (%lu bytes)",
-                numofentries,bitspervalue,required);
   spmsuftab = gt_malloc(sizeof (*spmsuftab));
-  spmsuftab->bitpackarray
-    = gt_GtCompactulongstore_new(numofentries,bitspervalue);
+  required = (unsigned long) gt_spmsuftab_requiredspace(numofentries,
+                                                        maxvalue,
+                                                        bitsforseqnumrelpos);
+  bitsforpositions = gt_determinebitspervalue((uint64_t) maxvalue);
+  if (bitsforpositions < bitsforseqnumrelpos)
+  {
+    gt_logger_log(logger,"use %lu bitpackarray-entries for all positions "
+                         "(%u bits each,%lu bytes total)",
+                         numofentries,bitsforpositions,required);
+    spmsuftab->bitpackarray
+      = gt_GtCompactulongstore_new(numofentries,bitsforpositions);
+    spmsuftab->usebitsforpositions = true;
+    spmsuftab->maxvalue = maxvalue;
+  } else
+  {
+    gt_logger_log(logger,"use %lu bitpackarray-entries for all "
+                         "seqnum/relpos-pairs (%u bits each,%lu bytes total)",
+                         numofentries,bitsforseqnumrelpos,required);
+    spmsuftab->bitpackarray
+      = gt_GtCompactulongstore_new(numofentries,bitsforseqnumrelpos);
+    spmsuftab->usebitsforpositions = false;
+    spmsuftab->maxvalue = (1UL << bitsforseqnumrelpos) - 1;
+  }
   spmsuftab->partoffset = 0;
   spmsuftab->numofentries = numofentries;
-  spmsuftab->maxvalue = maxvalue;
   return spmsuftab;
 }
 
@@ -49,16 +67,24 @@ void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab)
   }
 }
 
+bool gt_spmsuftab_usebitsforpositions(const GtSpmsuftab *spmsuftab)
+{
+  return spmsuftab->usebitsforpositions;
+}
+
 void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset)
 {
   spmsuftab->partoffset = offset;
 }
 
 size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
-                                  unsigned long maxvalue)
+                                  unsigned long maxvalue,
+                                  unsigned int bitsforseqnumrelpos)
 {
-  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+  unsigned int bitsforpositions = gt_determinebitspervalue((uint64_t) maxvalue);
 
   return sizeof (GtSpmsuftab) +
-         gt_GtCompactulongstore_size(numofentries,bitspervalue);
+                gt_GtCompactulongstore_size(numofentries,
+                                            MIN(bitsforpositions,
+                                                bitsforseqnumrelpos));
 }

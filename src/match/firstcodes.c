@@ -413,7 +413,10 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
           idx = --fci->tab.overflow_countocc[idx - fci->tab.overflow_index];
         }
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
-        gt_spmsuftab_set(fci->spmsuftab,idx,query->b);
+        gt_spmsuftab_set(fci->spmsuftab,idx,
+                         gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
+                           ? gt_seqnumrelpos_decode_pos(fci->buf.snrp,query->b)
+                           : query->b);
         query++;
         found++;
       }
@@ -952,6 +955,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                            &fci.tab,
                                            sfxmrlist,
                                            totallength,
+                                           bitsforseqnum + bitsforrelpos,
                                            0, /* special characters not used */
                                            suftabentries,
                                            false, /* suftabuint not used */
@@ -1026,8 +1030,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.tempcodeposforradixsort
       = gt_malloc(sizeof (*fci.tempcodeposforradixsort) * fci.buf.allocated);
     largest_width = gt_suftabparts_largest_width(suftabparts);
-    fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,logger);
-    suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength);
+    fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,
+                                     bitsforseqnum + bitsforrelpos,
+                                     logger);
+    suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength,
+                                             bitsforseqnum + bitsforrelpos);
     fci.flushcount = 0;
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
     for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)

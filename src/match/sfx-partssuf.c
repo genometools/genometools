@@ -345,6 +345,7 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
                                 const GtFirstcodestab *fct,
                                 const GtSfxmappedrangelist *sfxmrlist,
                                 unsigned long totallength,
+                                unsigned int bitsforseqnumrelpos,
                                 unsigned long specialcharacters,
                                 unsigned long numofsuffixestosort,
                                 bool suftabuint,
@@ -389,7 +390,8 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
     } else
     {
       gt_assert(fct != NULL);
-      suftabsize = gt_spmsuftab_requiredspace(numofentries,totallength);
+      suftabsize = gt_spmsuftab_requiredspace(numofentries,totallength,
+                                              bitsforseqnumrelpos);
     }
     if (parts == 1U)
     {

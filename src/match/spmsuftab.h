@@ -25,6 +25,7 @@
 typedef struct
 {
   unsigned long partoffset, numofentries, maxvalue;
+  bool usebitsforpositions;
   GtCompactUlongstore *bitpackarray;
 } GtSpmsuftab;
 
@@ -51,13 +52,18 @@ GT_UNUSED static inline unsigned long gt_spmsuftab_get(
 
 GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
                               unsigned long maxvalue,
+                              unsigned int bitsforseqnumrelpos,
                               GtLogger *logger);
+
+bool gt_spmsuftab_usebitsforpositions(const GtSpmsuftab *spmsuftab);
 
 void gt_spmsuftab_delete(GtSpmsuftab *spmsuftab);
 
 size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
-                                  unsigned long maxvalue);
+                                  unsigned long maxvalue,
+                                  unsigned int bitsforseqnumrelpos);
 
-void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,unsigned long offset);
+void gt_spmsuftab_partoffset(GtSpmsuftab *spmsuftab,
+                             unsigned long offset);
 
 #endif

@@ -585,7 +585,7 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
                                  unsigned long width,
                                  unsigned long depth)
 {
-  unsigned long idx, pos, seqnum, relpos;
+  unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
 
   for (idx = 0; idx < width; idx++)
   {
@@ -593,9 +593,18 @@ void gt_shortreadsort_array_sort(unsigned long *suftab_bucket,
   }
   for (idx = 0; idx < width; idx++)
   {
-    pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
-    seqnum = gt_encseq_seqnum(encseq,pos);
-    relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
+    if (gt_spmsuftab_usebitsforpositions(spmsuftab))
+    {
+      pos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
+      seqnum = gt_encseq_seqnum(encseq,pos);
+      relpos = pos - gt_encseq_seqstartpos(encseq,seqnum);
+    } else
+    {
+      seqnum_relpos = gt_spmsuftab_get(spmsuftab,subbucketleft + idx);
+      seqnum = gt_seqnumrelpos_decode_seqnum(snrp,seqnum_relpos);
+      relpos = gt_seqnumrelpos_decode_relpos(snrp,seqnum_relpos);
+      pos = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos);
+    }
     srsw->shortreadsortinfo[idx].suffix = pos;
     srsw->shortreadsortinfo[idx].seqnum_relpos
       = gt_seqnumrelpos_encode(snrp, seqnum, relpos);

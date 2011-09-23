@@ -1416,7 +1416,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
             }\
             gt_assert ((BUF)->nextfree < (BUF)->allocated);\
             (BUF)->spaceGtUlongPair[(BUF)->nextfree].a = CODE;\
-            (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b = POSITION;\
+            (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b\
+              = gt_seqnumrelpos_encode((BUF)->snrp,SEQNUM,RELPOS);\
           }\
         }
 
@@ -2033,6 +2034,8 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                            NULL,
                                            sfxmrlist,
                                            sfi->totallength,
+                                           0, /* bitsforseqnumrelpos not
+                                                 needed */
                                            specialcharacters,
                                            numofsuffixestosort,
                                            sfi->sfxstrategy.suftabuint,
