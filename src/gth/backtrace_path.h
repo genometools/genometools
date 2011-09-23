@@ -86,7 +86,7 @@ void            gth_backtrace_path_add_eop(GthBacktracePath*, Eoptype eoptype,
 
 /* add the corresponding edit operation */
 void            gth_backtrace_path_add_match(GthBacktracePath*,
-                                         bool ensure_single_match);
+                                             bool ensure_single_match);
 void            gth_backtrace_path_add_mismatch(GthBacktracePath*);
 void            gth_backtrace_path_add_deletion(GthBacktracePath*);
 void            gth_backtrace_path_add_insertion(GthBacktracePath*);
