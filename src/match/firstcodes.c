@@ -804,6 +804,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned long maximumspace,
                                                    unsigned int minmatchlength,
                                                    bool withsuftabcheck,
+                                                   bool onlyaccumulation,
                                                    GtFirstcodesintervalprocess
                                                      itvprocess,
                                                    void *itvprocessdata,
@@ -1153,18 +1154,21 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       fci.buf.allocated /= 2UL;
     }
-    fci.buf.spaceGtUlongPair = gt_malloc(sizeof (*fci.buf.spaceGtUlongPair)
-                                         * fci.buf.allocated);
-    fci.tempcodeposforradixsort
-      = gt_malloc(sizeof (*fci.tempcodeposforradixsort) * fci.buf.allocated);
+    if (!onlyaccumulation)
+    {
+      fci.buf.spaceGtUlongPair = gt_malloc(sizeof (*fci.buf.spaceGtUlongPair)
+                                           * fci.buf.allocated);
+      fci.tempcodeposforradixsort
+        = gt_malloc(sizeof (*fci.tempcodeposforradixsort) * fci.buf.allocated);
+    }
     /*
     printf("allocate %.2f for codeposbuffer\n",
              GT_MEGABYTES(sizeof (*fci.buf.spaceGtUlongPair) * 2 *
                           fci.buf.allocated));
     */
-
     fci.flushcount = 0;
-    for (part = 0; part < gt_suftabparts_numofparts(suftabparts); part++)
+    for (part = 0; !onlyaccumulation &&
+                   part < gt_suftabparts_numofparts(suftabparts); part++)
     {
       if (timer != NULL)
       {
@@ -1265,8 +1269,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_suftabparts_delete(suftabparts);
   if (!haserr)
   {
-    gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
-    gt_assert(fci.firstcodeposhits == suftabentries);
+    if (!onlyaccumulation)
+    {
+      gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
+      gt_assert(fci.firstcodeposhits == suftabentries);
+    } else
+    {
+      gt_firstcode_delete_before_end(&fci,logger);
+    }
   }
   if (haserr || fci.mappedcountocc == NULL)
   {

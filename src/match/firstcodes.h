@@ -36,6 +36,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned long maximumspace,
                                                   unsigned int minmatchlength,
                                                   bool withsuftabcheck,
+                                                  bool onlyaccumulation,
                                                   GtFirstcodesintervalprocess
                                                      itvprocess,
                                                   void *itvprocessdata,
