@@ -26,7 +26,7 @@ typedef struct
                 *allfirstcodes,
                 overflow_index;
   uint32_t *countocc;
-  unsigned long *overflow_countocc;
+  unsigned long *overflow_leftborder;
 } GtFirstcodestab;
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,

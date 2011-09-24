@@ -404,7 +404,7 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
           idx = (unsigned long) fci->tab.countocc[idx];
         } else
         {
-          idx = --fci->tab.overflow_countocc[idx - fci->tab.overflow_index];
+          idx = --fci->tab.overflow_leftborder[idx - fci->tab.overflow_index];
         }
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
         gt_spmsuftab_set(fci->spmsuftab,idx,
@@ -546,9 +546,9 @@ static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci)
   {
     unsigned long endidx = fci->tab.differentcodes - fci->tab.overflow_index;
 
-    fci->tab.overflow_countocc = gt_malloc(sizeof (*fci->tab.overflow_countocc)
-                                           * (endidx + 1));
-    fci->tab.overflow_countocc[0]
+    fci->tab.overflow_leftborder
+     = gt_malloc(sizeof (*fci->tab.overflow_leftborder) * (endidx + 1));
+    fci->tab.overflow_leftborder[0]
       = (unsigned long) fci->tab.countocc[fci->tab.overflow_index] +
         (unsigned long) fci->tab.countocc[fci->tab.overflow_index-1];
     for (idx = 1UL; idx < endidx; idx++)
@@ -557,11 +557,12 @@ static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci)
       {
         maxbucketsize = (unsigned long) fci->tab.countocc[idx];
       }
-      fci->tab.overflow_countocc[idx]
+      fci->tab.overflow_leftborder[idx]
         = (unsigned long) fci->tab.countocc[fci->tab.overflow_index+idx];
-      fci->tab.overflow_countocc[idx] += fci->tab.overflow_countocc[idx-1];
+      fci->tab.overflow_leftborder[idx] += fci->tab.overflow_leftborder[idx-1];
     }
-    fci->tab.overflow_countocc[endidx] = fci->tab.overflow_countocc[endidx-1];
+    fci->tab.overflow_leftborder[endidx]
+     = fci->tab.overflow_leftborder[endidx-1];
   }
   evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
@@ -847,7 +848,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_logger_log(logger,"store %lu prefix codes",fci.numofsequences);
   fci.tab.allfirstcodes = gt_malloc(sizeforcodestable);
   fci.tab.countocc = NULL;
-  fci.tab.overflow_countocc = NULL;
+  fci.tab.overflow_leftborder = NULL;
   fci.tab.differentcodes = 0;
   fci.countsequences = 0;
   fci.firstcodehits = 0;
@@ -1250,7 +1251,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     gt_free(fci.tab.countocc);
   }
-  gt_free(fci.tab.overflow_countocc);
+  gt_free(fci.tab.overflow_leftborder);
   gt_spmsuftab_delete(fci.spmsuftab);
   gt_Sfxmappedrange_delete(fci.mappedcountocc);
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes);

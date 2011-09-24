@@ -28,7 +28,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
     return (unsigned long) fct->countocc[idx];
   } else
   {
-    return fct->overflow_countocc[idx - fct->overflow_index];
+    return fct->overflow_leftborder[idx - fct->overflow_index];
   }
 }
 
