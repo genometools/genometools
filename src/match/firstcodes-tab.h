@@ -19,6 +19,7 @@
 #define FIRSTCODES_TAB_H
 
 #include <inttypes.h>
+#include "core/unused_api.h"
 
 typedef struct
 {
@@ -28,6 +29,33 @@ typedef struct
   uint32_t *countocc;
   unsigned long *overflow_leftborder;
 } GtFirstcodestab;
+
+void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
+                                unsigned long numofsequences);
+
+void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
+                                   unsigned long numofdifferentcodes);
+
+static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
+                                                    unsigned long idx)
+{
+  fct->countocc[idx]++;
+}
+
+static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
+                                                         unsigned long idx)
+{
+  gt_assert(idx < fct->differentcodes);
+  if (fct->overflow_index == 0 || idx < fct->overflow_index)
+  {
+    return (unsigned long) --fct->countocc[idx];
+  } else
+  {
+    return --fct->overflow_leftborder[idx - fct->overflow_index];
+  }
+}
+
+unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);
