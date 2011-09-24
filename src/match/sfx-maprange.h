@@ -21,7 +21,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include "core/str_api.h"
-#include "core/logger_api.h"
 #include "core/codetype.h"
 
 typedef enum
@@ -48,17 +47,14 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
 
 void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
                                 void **usedptrptr,
-                                bool writable,
-                                GtLogger *logger);
+                                bool writable);
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,
-                            unsigned long maxindex,
-                            GtLogger *logger);
+                            unsigned long maxindex);
 
-void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,
-                              GtLogger *logger);
+void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange);
 
 typedef struct GtSfxmappedrangelist GtSfxmappedrangelist;
 

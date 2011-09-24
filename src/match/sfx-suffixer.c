@@ -554,14 +554,14 @@ int gt_Sfxiterator_delete(Sfxiterator *sfi,GtError *err)
       }
     }
   }
-  gt_bcktab_delete(sfi->bcktab,sfi->logger);
+  gt_bcktab_delete(sfi->bcktab);
   gt_suftabparts_delete(sfi->suftabparts);
   gt_Outlcpinfo_delete(sfi->outlcpinfoforsample);
   if (sfi->mappedmarkprefixbuckets == NULL)
   {
     gt_free(sfi->markprefixbuckets);
   }
-  gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,sfi->logger);
+  gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets);
   sfi->mappedmarkprefixbuckets = NULL;
   gt_free(sfi->marksuffixbuckets);
   gt_differencecover_delete(sfi->dcov);
@@ -2072,7 +2072,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     gt_assert(sfi->suftabparts != NULL);
     if (gt_suftabparts_numofparts(sfi->suftabparts) > 1U)
     {
-      gt_bcktab_storetmp(sfi->bcktab, sfi->logger);
+      gt_bcktab_storetmp(sfi->bcktab);
     }
     SHOWACTUALSPACE;
     gt_assert(sfi != NULL && sfi->suftabparts != NULL);
@@ -2082,13 +2082,12 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       gt_assert(sfi->markprefixbuckets != NULL);
       gt_assert(sfi->mappedmarkprefixbuckets != NULL);
       gt_Sfxmappedrange_storetmp(sfi->mappedmarkprefixbuckets,
-                                     (void **) &sfi->markprefixbuckets,
-                                     false,
-                                     sfi->logger);
+                                 (void **) &sfi->markprefixbuckets,
+                                 false);
       gt_assert(sfi->markprefixbuckets == NULL);
     } else
     {
-      gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets,logger);
+      gt_Sfxmappedrange_delete(sfi->mappedmarkprefixbuckets);
       sfi->mappedmarkprefixbuckets = NULL;
     }
   }
@@ -2185,8 +2184,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_bcktab_assignboundsforpart(sfi->bcktab,
                                   sfi->part,
                                   sfi->currentmincode,
-                                  sfi->currentmaxcode,
-                                  sfi->logger);
+                                  sfi->currentmaxcode);
     if (sfi->mappedmarkprefixbuckets != NULL)
     {
       sfi->markprefixbuckets
@@ -2194,8 +2192,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
           gt_Sfxmappedrange_map(sfi->mappedmarkprefixbuckets,
                                 sfi->part,
                                 sfi->currentmincode,
-                                sfi->currentmaxcode,
-                                sfi->logger);
+                                sfi->currentmaxcode);
     }
   }
   SHOWACTUALSPACE;

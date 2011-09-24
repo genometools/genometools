@@ -77,18 +77,16 @@ GtBcktab *gt_bcktab_map(const char *indexname,
                         unsigned int prefixlength,
                         unsigned long maxvalue,
                         bool withspecialsuffixes,
-                        GtLogger *logger,
                         GtError *err);
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
                                    unsigned int part,
                                    GtCodetype mincode,
-                                   GtCodetype maxcode,
-                                   GtLogger *logger);
+                                   GtCodetype maxcode);
 
 int gt_bcktab_remap_all(GtBcktab *bcktab,GtError *err);
 
-void gt_bcktab_delete(GtBcktab *bcktab,GtLogger *logger);
+void gt_bcktab_delete(GtBcktab *bcktab);
 
 GtBcktab *gt_bcktab_new(unsigned int numofchars,
                         unsigned int prefixlength,
@@ -109,7 +107,7 @@ GtCodetype gt_bcktab_codedownscale(const GtBcktab *bcktab,
 
 int gt_bcktab_flush_to_file(FILE *fp,const GtBcktab *bcktab,GtError *err);
 
-void gt_bcktab_storetmp(GtBcktab *bcktab, GtLogger *logger);
+void gt_bcktab_storetmp(GtBcktab *bcktab);
 
 void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab);
 

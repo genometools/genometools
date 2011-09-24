@@ -368,14 +368,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
       break;
     }
   }
-#ifdef FLUSHCOUNT
-  if (fci->flushcount == 0)
-  {
-    printf("# ");
-  }
-  printf("%u ",fci->flushcount++);
-  (void) fflush(stdout);
-#endif
+  fci->flushcount++;
   fci->buf.nextfree = 0;
 }
 
@@ -452,14 +445,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
       break;
     }
   }
-#ifdef FLUSHCOUNT
-  if (fci->flushcount == 0)
-  {
-    printf("# ");
-  }
-  printf("%u ",fci->flushcount++);
-  (void) fflush(stdout);
-#endif
+  fci->flushcount++;
   fci->buf.nextfree = 0;
 }
 
@@ -495,8 +481,7 @@ static void evaluate_distvalue(unsigned long key,
   }
 }
 
-static void evaluate_countdistri(const GtDiscDistri *countdistri,
-                                 GtLogger *logger)
+static void evaluate_countdistri(const GtDiscDistri *countdistri)
 {
   GtCountdistri_info cdi;
   unsigned long sum;
@@ -510,11 +495,11 @@ static void evaluate_countdistri(const GtDiscDistri *countdistri,
   cdi.hugesum = 0;
   gt_disc_distri_foreach(countdistri,evaluate_distvalue,&cdi);
   sum = cdi.smallsum + cdi.largesum + cdi.hugesum;
-  gt_logger_log(logger,"small=%lu,%lu (%.2f)",cdi.smallcount,cdi.smallsum,
+  gt_log_log("small=%lu,%lu (%.2f)",cdi.smallcount,cdi.smallsum,
           (double) cdi.smallsum/sum);
-  gt_logger_log(logger,"large=%lu,%lu (%.2f)",cdi.largecount,cdi.largesum,
+  gt_log_log("large=%lu,%lu (%.2f)",cdi.largecount,cdi.largesum,
           (double) cdi.largesum/sum);
-  gt_logger_log(logger,"huge=%lu,%lu (%.2f)",cdi.hugecount,cdi.hugesum,
+  gt_log_log("huge=%lu,%lu (%.2f)",cdi.hugecount,cdi.hugesum,
           (double) cdi.largesum/sum);
   spaceforcounttab = sizeof (uint64_t)/4 * sum;
   spaceforcounttab += (sizeof (uint16_t) + sizeof (unsigned long))
@@ -522,12 +507,11 @@ static void evaluate_countdistri(const GtDiscDistri *countdistri,
   spaceforcounttab += (sizeof (uint32_t) + sizeof (unsigned long))
                       * cdi.hugecount;
   spacenow = sizeof (uint32_t) * sum;
-  gt_logger_log(logger,"spaceforcounttab/spacenow=%.5f",
+  gt_log_log("spaceforcounttab/spacenow=%.5f",
           (double) spaceforcounttab/spacenow);
 }
 
-static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci,
-                                                GtLogger *logger)
+static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci)
 {
   unsigned long idx, sum, maxbucketsize;
   GtDiscDistri *countdistri = gt_disc_distri_new();
@@ -560,14 +544,14 @@ static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci,
       = fci->tab.countocc[fci->tab.differentcodes-1];
   } else
   {
+    unsigned long endidx = fci->tab.differentcodes - fci->tab.overflow_index;
+
     fci->tab.overflow_countocc = gt_malloc(sizeof (*fci->tab.overflow_countocc)
-                                           * (fci->tab.differentcodes -
-                                              fci->tab.overflow_index + 1));
+                                           * (endidx + 1));
     fci->tab.overflow_countocc[0]
       = (unsigned long) fci->tab.countocc[fci->tab.overflow_index] +
         (unsigned long) fci->tab.countocc[fci->tab.overflow_index-1];
-    for (idx = 1UL; idx < fci->tab.differentcodes - fci->tab.overflow_index;
-         idx++)
+    for (idx = 1UL; idx < endidx; idx++)
     {
       if (maxbucketsize < (unsigned long) fci->tab.countocc[idx])
       {
@@ -577,12 +561,9 @@ static unsigned long storefirstcodes_partialsum(GtFirstcodesinfo *fci,
         = (unsigned long) fci->tab.countocc[fci->tab.overflow_index+idx];
       fci->tab.overflow_countocc[idx] += fci->tab.overflow_countocc[idx-1];
     }
-    fci->tab.overflow_countocc[fci->tab.differentcodes -
-                               fci->tab.overflow_index]
-      = fci->tab.overflow_countocc[fci->tab.differentcodes -
-                                   fci->tab.overflow_index - 1];
+    fci->tab.overflow_countocc[endidx] = fci->tab.overflow_countocc[endidx-1];
   }
-  evaluate_countdistri(countdistri,logger);
+  evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   return maxbucketsize;
 }
@@ -742,8 +723,7 @@ static void gt_firstcodes_update_workspace(int line,
                                            const char *kind,
                                            bool addtowork,
                                            GtFirstcodesspacelog *fcsl,
-                                           size_t workspace,
-                                           GtLogger *logger)
+                                           size_t workspace)
 {
   if (addtowork)
   {
@@ -766,29 +746,28 @@ static void gt_firstcodes_update_workspace(int line,
       fcsl->splitspace -= workspace;
     }
   }
-  gt_logger_log(logger,"line %d: %s %.2f MB for %s to %space; work=%.2f, "
-                       "split=%.2f,all=%.2f MB",
-                line,
-                add ? "add" : "delete",
-                GT_MEGABYTES(workspace),
-                kind,
-                addtowork ? "work" : "split",
-                GT_MEGABYTES(fcsl->workspace),
-                GT_MEGABYTES(fcsl->splitspace),
-                GT_MEGABYTES(fcsl->workspace+fcsl->splitspace));
+  gt_log_log("line %d: %s %.2f MB for %s to %space; work=%.2f, "
+             "split=%.2f,all=%.2f MB",
+             line,
+             add ? "add" : "delete",
+             GT_MEGABYTES(workspace),
+             kind,
+             addtowork ? "work" : "split",
+             GT_MEGABYTES(fcsl->workspace),
+             GT_MEGABYTES(fcsl->splitspace),
+             GT_MEGABYTES(fcsl->workspace+fcsl->splitspace));
   /*
   gt_logger_log(logger,"current space peak %.2f",
                 GT_MEGABYTES(gt_spacepeak_get_space_peak()));
   */
 }
 
-static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci,
-                                           GtLogger *logger)
+static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
 {
   GT_FREEARRAY(&fci->binsearchcache,GtIndexwithcode);
   gt_free(fci->buf.spaceGtUlongPair);
   gt_free(fci->tempcodeposforradixsort);
-  gt_Sfxmappedrange_delete(fci->mappedmarkprefix,logger);
+  gt_Sfxmappedrange_delete(fci->mappedmarkprefix);
   gt_marksubstring_delete(fci->buf.markprefix,true);
   fci->buf.markprefix = NULL;
   gt_marksubstring_delete(fci->buf.marksuffix,true);
@@ -856,7 +835,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.tempcodeposforradixsort = NULL;
   fci.tempcodeforradixsort = NULL;
   gt_firstcodes_update_workspace(__LINE__,true,"encseq",true,&fcsl,
-                                 (size_t) gt_encseq_sizeofrep(encseq),logger);
+                                 (size_t) gt_encseq_sizeofrep(encseq));
   if (gt_showtime_enabled())
   {
     timer = gt_timer_new_with_progress_description("insert first codes into "
@@ -908,8 +887,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                             marksuffixunits);
   gt_firstcodes_update_workspace(__LINE__,true,"marksuffix",true,&fcsl,
                                  (size_t)
-                                 gt_marksubstring_size(fci.buf.marksuffix),
-                                 logger);
+                                 gt_marksubstring_size(fci.buf.marksuffix));
   fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
   if (fci.tab.differentcodes > 0)
   {
@@ -930,8 +908,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   gt_firstcodes_update_workspace(__LINE__,true,"splitable arrays",false,&fcsl,
                                  (size_t)
-                                 gt_Sfxmappedrangelist_size_entire(sfxmrlist),
-                                 logger);
+                                 gt_Sfxmappedrangelist_size_entire(sfxmrlist));
   gt_logger_log(logger,"number of different codes=%lu (%.4f) in %lu sequences",
                 fci.tab.differentcodes,
                 (double) fci.tab.differentcodes/fci.numofsequences,
@@ -942,11 +919,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.codebuffer_total = 0;
   binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
   gt_firstcodes_update_workspace(__LINE__,true,"binsearchcache",
-                                 true,&fcsl,binsearchcache_size,
-                                 logger);
-  gt_logger_log(logger,"binsearchcache_depth=%u => %lu bytes",
-                       fci.binsearchcache_depth,
-                       (unsigned long) binsearchcache_size);
+                                 true,&fcsl,binsearchcache_size);
+  gt_log_log("binsearchcache_depth=%u => %lu bytes",
+             fci.binsearchcache_depth,(unsigned long) binsearchcache_size);
   if (maximumspace > 0)
   {
     if ((unsigned long) (fcsl.workspace + fcsl.splitspace) >= maximumspace)
@@ -984,7 +959,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      * fci.buf.allocated);
     gt_firstcodes_update_workspace(__LINE__,true,"position buffer",true,&fcsl,
                                    sizeof (*fci.buf.spaceGtUlong)
-                                   * fci.buf.allocated,logger);
+                                   * fci.buf.allocated);
     gt_assert(fci.buf.allocated > 0);
     if (timer != NULL)
     {
@@ -995,7 +970,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_update_workspace(__LINE__,true,"tempcodeforradixsort",
                                    true,&fcsl,
                                    (size_t) fci.buf.allocated
-                                   * sizeof (*fci.tempcodeforradixsort),logger);
+                                   * sizeof (*fci.tempcodeforradixsort));
 
     fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
     fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
@@ -1011,13 +986,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
                   fci.codebuffer_total,
                   (double) fci.codebuffer_total/totallength);
-    gt_logger_log(logger,"firstcodehits=%lu (%.2f)",fci.firstcodehits,
-                            (double) fci.firstcodehits/totallength);
+    gt_logger_log(logger,"firstcodehits=%lu (%.2f), %u rounds (avg length %lu)",
+                           fci.firstcodehits,
+                           (double) fci.firstcodehits/totallength,
+                           fci.flushcount,
+                           fci.firstcodehits/fci.flushcount);
     if (timer != NULL)
     {
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
-    maxbucketsize = storefirstcodes_partialsum(&fci,logger);
+    maxbucketsize = storefirstcodes_partialsum(&fci);
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     suftabentries = fci.firstcodehits + fci.numofsequences;
     if (maximumspace > 0)
@@ -1067,12 +1045,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_update_workspace(__LINE__,false,"tempcodeforradixsort",
                                    true,&fcsl,
                                    (size_t) fci.buf.allocated
-                                   * sizeof (*fci.tempcodeforradixsort),logger);
+                                   * sizeof (*fci.tempcodeforradixsort));
     gt_free(fci.buf.spaceGtUlong);
     gt_firstcodes_update_workspace(__LINE__,false,"buf.spaceGtUlong",
                                    true,&fcsl,
                                    (size_t) fci.buf.allocated
-                                   * sizeof (*fci.buf.spaceGtUlong),logger);
+                                   * sizeof (*fci.buf.spaceGtUlong));
     gt_assert(fci.buf.nextfree == 0);
     if (gt_suftabparts_numofparts(suftabparts) > 1U)
     {
@@ -1080,36 +1058,32 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_assert(fci.mappedallfirstcodes != NULL);
       gt_Sfxmappedrange_storetmp(fci.mappedallfirstcodes,
                                  (void **) &fci.tab.allfirstcodes,
-                                 false,
-                                 logger);
+                                 false);
       gt_assert(fci.tab.allfirstcodes == NULL);
       gt_assert(fci.tab.countocc != NULL);
       gt_assert(fci.mappedcountocc != NULL);
       gt_Sfxmappedrange_storetmp(fci.mappedcountocc,
                                  (void **) &fci.tab.countocc,
-                                 true,
-                                 logger);
+                                 true);
       gt_assert(fci.tab.countocc == NULL);
       gt_marksubstring_bits_null(fci.buf.markprefix,false);
       gt_assert(fci.mappedmarkprefix != NULL);
       gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
                                  gt_marksubstring_bits_address(
                                     fci.buf.markprefix),
-                                 false,
-                                 logger);
+                                 false);
       gt_firstcodes_update_workspace(__LINE__,false,"splitable arrays",
                                      false,&fcsl,
                                      (size_t)
-                                     fcsl.splitspace,
-                                     logger);
+                                     fcsl.splitspace);
       gt_marksubstring_bits_null(fci.buf.markprefix,true);
     } else
     {
-      gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
+      gt_Sfxmappedrange_delete(fci.mappedallfirstcodes);
       fci.mappedallfirstcodes = NULL;
-      gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
+      gt_Sfxmappedrange_delete(fci.mappedcountocc);
       fci.mappedcountocc = NULL;
-      gt_Sfxmappedrange_delete(fci.mappedmarkprefix,logger);
+      gt_Sfxmappedrange_delete(fci.mappedmarkprefix);
       fci.mappedmarkprefix = NULL;
     }
     fci.codebuffer_total = 0;
@@ -1125,23 +1099,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_update_workspace(__LINE__,true,"shortreadsort",
                                    true,&fcsl,
                                    (size_t)
-                                   gt_shortreadsort_size(true,maxbucketsize),
-                                   logger);
+                                   gt_shortreadsort_size(true,maxbucketsize));
     seqnum_relpos_bucket
       = gt_malloc(sizeof (*seqnum_relpos_bucket) * maxbucketsize);
     gt_firstcodes_update_workspace(__LINE__,true,"seqnum_relpos_bucket",
                                    true,&fcsl,
                                    (size_t)
                                    sizeof (*seqnum_relpos_bucket) *
-                                       maxbucketsize,
-                                   logger);
-    gt_logger_log(logger,"estimated space after suftaballoc %.2f",
-                  GT_MEGABYTES(fcsl.workspace + suftab_size));
-    gt_logger_log(logger,"largest size mapped partwise %.2f",
-        GT_MEGABYTES(gt_suftabparts_largestsizemappedpartwise(suftabparts)));
-    /*gt_logger_log(logger,"current space after suftaballoc %.2f",
-                   GT_MEGABYTES(gt_ma_get_space_current() +
-                                gt_fa_get_space_current()));*/
+                                       maxbucketsize);
     if (maximumspace > 0)
     {
       size_t used = fcsl.workspace + suftab_size +
@@ -1174,10 +1139,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         gt_timer_show_progress(timer, "to insert suffixes into buckets",stdout);
       }
-      gt_logger_log(logger,"compute part %u",part);
+      fci.widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
+      gt_logger_log(logger,"compute part %u (%.2f%%)",part,
+                   (double) fci.widthofpart/suftabentries);
       fci.currentminindex = gt_suftabparts_minindex(part,suftabparts);
       fci.currentmaxindex = gt_suftabparts_maxindex(part,suftabparts);
-      fci.widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
       if (fci.mappedallfirstcodes != NULL)
       {
         fci.tab.allfirstcodes
@@ -1185,8 +1151,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
             gt_Sfxmappedrange_map(fci.mappedallfirstcodes,
                                   part,
                                   fci.currentminindex,
-                                  fci.currentmaxindex,
-                                  logger);
+                                  fci.currentmaxindex);
       }
       if (fci.mappedcountocc != NULL)
       {
@@ -1195,8 +1160,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
             gt_Sfxmappedrange_map(fci.mappedcountocc,
                                   part,
                                   fci.currentminindex,
-                                  fci.currentmaxindex,
-                                  logger);
+                                  fci.currentmaxindex);
       }
       if (fci.mappedmarkprefix != NULL)
       {
@@ -1205,8 +1169,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   gt_Sfxmappedrange_map(fci.mappedmarkprefix,
                                                         part,
                                                         fci.currentminindex,
-                                                        fci.currentmaxindex,
-                                                        logger));
+                                                        fci.currentmaxindex));
       }
       /*
       gt_logger_log(logger,"current space for part %u=%.2f",
@@ -1226,7 +1189,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_firstcodes_insertsuffixes_flush(&fci);
       if (part == gt_suftabparts_numofparts(suftabparts) - 1)
       {
-        gt_firstcode_delete_before_end(&fci,logger);
+        gt_firstcode_delete_before_end(&fci);
       }
       if (timer != NULL)
       {
@@ -1260,7 +1223,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_free(seqnum_relpos_bucket);
   if (haserr)
   {
-    gt_firstcode_delete_before_end(&fci,logger);
+    gt_firstcode_delete_before_end(&fci);
     gt_free(fci.buf.spaceGtUlong);
     gt_free(fci.tab.allfirstcodes);
     gt_Sfxmappedrangelist_delete(sfxmrlist);
@@ -1271,11 +1234,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     if (!onlyaccumulation)
     {
-      gt_logger_log(logger,"firstcodeposhits=%lu",fci.firstcodeposhits);
+      gt_logger_log(logger,"firstcodeposhits=%lu (%.2f), %u rounds (avg "
+                           "length %lu)",
+                           fci.firstcodeposhits,
+                           (double) fci.firstcodeposhits/totallength,
+                           fci.flushcount,
+                           fci.firstcodeposhits/fci.flushcount);
       gt_assert(fci.firstcodeposhits == suftabentries);
     } else
     {
-      gt_firstcode_delete_before_end(&fci,logger);
+      gt_firstcode_delete_before_end(&fci);
     }
   }
   if (haserr || fci.mappedcountocc == NULL)
@@ -1284,18 +1252,17 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   gt_free(fci.tab.overflow_countocc);
   gt_spmsuftab_delete(fci.spmsuftab);
-  gt_Sfxmappedrange_delete(fci.mappedcountocc,logger);
-  gt_Sfxmappedrange_delete(fci.mappedallfirstcodes,logger);
+  gt_Sfxmappedrange_delete(fci.mappedcountocc);
+  gt_Sfxmappedrange_delete(fci.mappedallfirstcodes);
   gt_seqnumrelpos_delete(fci.buf.snrp);
   if (!haserr)
   {
-    gt_logger_log(logger,"workspace = %.2f",GT_MEGABYTES(fcsl.workspace));
-    gt_logger_log(logger,"size to split = %.2f",GT_MEGABYTES(fcsl.splitspace));
-    gt_logger_log(logger,"suftabsize = %.2f",GT_MEGABYTES(suftab_size));
-    gt_logger_log(logger,"estimatedspace = %.2f",
-                  GT_MEGABYTES(fcsl.workspace +
-                               fcsl.splitspace +
-                               suftab_size));
+    gt_log_log("workspace = %.2f",GT_MEGABYTES(fcsl.workspace));
+    gt_log_log("size to split = %.2f",GT_MEGABYTES(fcsl.splitspace));
+    gt_log_log("suftabsize = %.2f",GT_MEGABYTES(suftab_size));
+    gt_log_log("estimatedspace = %.2f",GT_MEGABYTES(fcsl.workspace +
+                                                    fcsl.splitspace +
+                                                    suftab_size));
   }
   if (timer != NULL)
   {

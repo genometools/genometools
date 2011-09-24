@@ -158,11 +158,11 @@ void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
   sfxmappedrange->writable = writable;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
   gt_assert(outfp != NULL);
-  gt_logr_log("write %s to file %s (%lu units of %lu bytes)",
-              gt_str_get(sfxmappedrange->tablename),
-              gt_str_get(sfxmappedrange->filename),
-              (unsigned long) sfxmappedrange->numofunits,
-              (unsigned long) sfxmappedrange->sizeofunit);
+  gt_log_log("write %s to file %s (%lu units of %lu bytes)",
+             gt_str_get(sfxmappedrange->tablename),
+             gt_str_get(sfxmappedrange->filename),
+             (unsigned long) sfxmappedrange->numofunits,
+             (unsigned long) sfxmappedrange->sizeofunit);
   gt_xfwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
              sfxmappedrange->numofunits,outfp);
   gt_fa_fclose(outfp);
@@ -196,11 +196,11 @@ static unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,
-                            unsigned long maxindex,
-                            GtLogger *logger)
+                            unsigned long maxindex)
 {
   GtMappedrange lbrange;
   unsigned long unitoffset;
+  size_t sizeoftable;
 
   gt_assert(sfxmappedrange != NULL);
   if (sfxmappedrange->ptr != NULL)
@@ -219,20 +219,16 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                           sfxmappedrange->pagesize,
                           minindex,
                           maxindex);
-  if (logger != NULL)
-  {
-    size_t sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
-    gt_logger_log(logger,
-                  "part %u: mapped %s from %lu to %lu for %s (%.1f%% of all)",
-                  part,gt_str_get(sfxmappedrange->tablename),lbrange.mapoffset,
-                  lbrange.mapend,
-                  sfxmappedrange->writable ? "writing" : "reading",
-                  (lbrange.mapend - lbrange.mapoffset + 1
-                    >= (unsigned long) sizeoftable)
-                      ? 100.0
-                      : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
-                        sizeoftable);
-  }
+  sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
+  gt_log_log("part %u: mapped %s from %lu to %lu for %s (%.1f%% of all)",
+             part,gt_str_get(sfxmappedrange->tablename),lbrange.mapoffset,
+             lbrange.mapend,
+             sfxmappedrange->writable ? "writing" : "reading",
+             (lbrange.mapend - lbrange.mapoffset + 1
+               >= (unsigned long) sizeoftable)
+                  ? 100.0
+                  : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
+                             sizeoftable);
   gt_assert(lbrange.mapoffset <= lbrange.mapend);
   gt_assert(lbrange.mapoffset <= minindex * sfxmappedrange->sizeofunit);
   gt_assert(maxindex * sfxmappedrange->sizeofunit <= lbrange.mapend);
@@ -266,13 +262,13 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   return NULL;
 }
 
-void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
+void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange)
 {
   if (sfxmappedrange == NULL)
   {
     return;
   }
-  gt_logger_log(logger,"delete table %s",gt_str_get(sfxmappedrange->tablename));
+  gt_log_log("delete table %s",gt_str_get(sfxmappedrange->tablename));
   gt_fa_xmunmap(sfxmappedrange->ptr);
   sfxmappedrange->ptr = NULL;
   gt_fa_xmunmap(sfxmappedrange->entire);
@@ -283,7 +279,7 @@ void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange,GtLogger *logger)
   }
   if (sfxmappedrange->filename != NULL)
   {
-    gt_logger_log(logger,"remove \"%s\"",gt_str_get(sfxmappedrange->filename));
+    gt_log_log("remove \"%s\"",gt_str_get(sfxmappedrange->filename));
     gt_xunlink(gt_str_get(sfxmappedrange->filename));
   }
   gt_str_delete(sfxmappedrange->tablename);
