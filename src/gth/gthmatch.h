@@ -25,7 +25,7 @@
   computed by vmatch. It is a subset of the StoreMatch structure.
   Some parts have been deleted to reduce the space consumption of gth.
 
-  Keep in sync with function gthmatchesareequal() in file gthmatch.c
+  Keep in sync with function gth_matches_are_equal() in file gthmatch.c!
 */
 
 typedef struct {
