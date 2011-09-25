@@ -23,6 +23,11 @@
 #include "core/spacecalc.h"
 #include "firstcodes-tab.h"
 
+DECLARE_HASHMAP(unsigned long, ul, unsigned long, ul, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, unsigned long, ul, gt_ht_ul_elem_hash,
+               gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
+               inline)
+
 void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                                 unsigned long numofsequences)
 {
@@ -30,6 +35,7 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                             sizeof (*fct->countocc));
   fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
                                   sizeof (*fct->countocc_small));
+  fct->countocc_exceptions = ul_ul_gt_hashmap_new();
 }
 
 void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
@@ -123,6 +129,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
       fct->countocc_small[idx] = (uint8_t) currentcount;
     } else
     {
+      gt_assert(fct->countocc_exceptions != NULL);
+      gt_assert(ul_ul_gt_hashmap_get(fct->countocc_exceptions,idx) == NULL);
+      ul_ul_gt_hashmap_add(fct->countocc_exceptions, idx,
+                           (unsigned long) currentcount);
       fct->countocc_small[idx] = 0;
     }
   }
@@ -238,7 +248,10 @@ unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
 {
   gt_free(fct->countocc);
+  fct->countocc = NULL;
   gt_free(fct->countocc_small);
+  fct->countocc_small = NULL;
+  gt_hashtable_delete(fct->countocc_exceptions);
 }
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
