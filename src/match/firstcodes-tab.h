@@ -27,6 +27,7 @@ typedef struct
                 *allfirstcodes,
                 overflow_index;
   uint32_t *countocc;
+  uint8_t *countocc_small;
   unsigned long *overflow_leftborder;
 } GtFirstcodestab;
 
@@ -36,12 +37,14 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
 void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
                                    unsigned long numofdifferentcodes);
 
+GT_UNUSED
 static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
                                                     unsigned long idx)
 {
   fct->countocc[idx]++;
 }
 
+GT_UNUSED
 static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
 {
@@ -67,5 +70,13 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
                                      unsigned long idx);
+
+void gt_firstcodes_countocc_delete(GtFirstcodestab *fct);
+
+void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
+
+void **gt_firstcodes_countocc_address(GtFirstcodestab *fct);
+
+void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
 #endif

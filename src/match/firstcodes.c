@@ -717,7 +717,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   sizeforcodestable = sizeof (*fci.tab.allfirstcodes) * fci.numofsequences;
   gt_logger_log(logger,"store %lu prefix codes",fci.numofsequences);
   fci.tab.allfirstcodes = gt_malloc(sizeforcodestable);
-  fci.tab.countocc = NULL;
+  gt_firstcodes_countocc_setnull(&fci.tab);
   fci.tab.overflow_leftborder = NULL;
   fci.tab.differentcodes = 0;
   fci.countsequences = 0;
@@ -931,12 +931,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  (void **) &fci.tab.allfirstcodes,
                                  false);
       gt_assert(fci.tab.allfirstcodes == NULL);
-      gt_assert(fci.tab.countocc != NULL);
       gt_assert(fci.mappedcountocc != NULL);
       gt_Sfxmappedrange_storetmp(fci.mappedcountocc,
-                                 (void **) &fci.tab.countocc,
+                                 gt_firstcodes_countocc_address(&fci.tab),
                                  true);
-      gt_assert(fci.tab.countocc == NULL);
       gt_marksubstring_bits_null(fci.buf.markprefix,false);
       gt_assert(fci.mappedmarkprefix != NULL);
       gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
@@ -1026,12 +1024,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
       if (fci.mappedcountocc != NULL)
       {
-        fci.tab.countocc
-          = (uint32_t *)
-            gt_Sfxmappedrange_map(fci.mappedcountocc,
-                                  part,
-                                  fci.currentminindex,
-                                  fci.currentmaxindex);
+        gt_firstcodes_countocc_remap(&fci.tab,
+                                     (uint32_t *) gt_Sfxmappedrange_map(
+                                                        fci.mappedcountocc,
+                                                        part,
+                                                        fci.currentminindex,
+                                                        fci.currentmaxindex));
       }
       if (fci.mappedmarkprefix != NULL)
       {
@@ -1119,7 +1117,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   if (haserr || fci.mappedcountocc == NULL)
   {
-    gt_free(fci.tab.countocc);
+    gt_firstcodes_countocc_delete(&fci.tab);
+  } else
+  {
+    gt_free(fci.tab.countocc_small);
   }
   gt_free(fci.tab.overflow_leftborder);
   gt_spmsuftab_delete(fci.spmsuftab);

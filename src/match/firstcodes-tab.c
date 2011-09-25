@@ -28,12 +28,17 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
 {
   fct->countocc = gt_calloc((size_t) (numofsequences+1),
                             sizeof (*fct->countocc));
+  fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
+                                  sizeof (*fct->countocc_small));
 }
 
 void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
                                    unsigned long numofdifferentcodes)
 {
   fct->countocc = gt_realloc(fct->countocc,sizeof (*fct->countocc) *
+                                           (numofdifferentcodes+1));
+  fct->countocc_small = gt_realloc(fct->countocc_small,
+                                   sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
 }
 
@@ -216,4 +221,25 @@ unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
 {
   gt_assert(idx < fct->differentcodes);
   return fct->allfirstcodes[idx];
+}
+
+void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
+{
+  gt_free(fct->countocc);
+  gt_free(fct->countocc_small);
+}
+
+void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
+{
+  fct->countocc = NULL;
+}
+
+void **gt_firstcodes_countocc_address(GtFirstcodestab *fct)
+{
+  return (void **) &fct->countocc;
+}
+
+void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr)
+{
+  fct->countocc = ptr;
 }
