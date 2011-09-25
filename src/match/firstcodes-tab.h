@@ -21,6 +21,8 @@
 #include <inttypes.h>
 #include "core/unused_api.h"
 
+#define GT_FIRSTCODES_MAXSMALL UINT8_MAX
+
 typedef struct
 {
   unsigned long differentcodes,

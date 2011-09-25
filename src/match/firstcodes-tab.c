@@ -114,6 +114,18 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   GtDiscDistri *countdistri = gt_disc_distri_new();
   const unsigned long maxvalue = UINT16_MAX; /* XXX changes this to 32 */
 
+  for (idx = 0; idx < fct->differentcodes; idx++)
+  {
+    currentcount = GT_PARTIALSUM_COUNT_GET(idx);
+    gt_assert(currentcount > 0);
+    if (currentcount <= GT_FIRSTCODES_MAXSMALL)
+    {
+      fct->countocc_small[idx] = (uint8_t) currentcount;
+    } else
+    {
+      fct->countocc_small[idx] = 0;
+    }
+  }
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
