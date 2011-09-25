@@ -21,10 +21,11 @@
 #include "core/disc_distri.h"
 #include "core/log.h"
 #include "core/spacecalc.h"
+#include "core/hashmap-generic.h"
 #include "firstcodes-tab.h"
 
-DECLARE_HASHMAP(unsigned long, ul, unsigned long, ul, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, unsigned long, ul, gt_ht_ul_elem_hash,
+DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
@@ -35,7 +36,8 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                             sizeof (*fct->countocc));
   fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
                                   sizeof (*fct->countocc_small));
-  fct->countocc_exceptions = ul_ul_gt_hashmap_new();
+  fct->countocc_exceptions = ul_u32_gt_hashmap_new();
+  gt_assert(fct->countocc_exceptions != NULL);
 }
 
 void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
@@ -46,6 +48,10 @@ void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
+  fct->samplerate = 4096UL;
+  fct->numofsamples = 1UL + numofdifferentcodes/fct->samplerate;
+  fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
+                                    fct->numofsamples);
 }
 
 typedef struct
@@ -115,11 +121,15 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
 {
-  unsigned long idx, partsum, maxbucketsize;
+  unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
-  const unsigned long maxvalue = UINT16_MAX; /* XXX changes this to 32 */
+  const unsigned long bitmask = fct->samplerate - 1;
+  const unsigned long maxvalue = UINT8_MAX; /* XXX changes thi 16 */
 
+  gt_assert(maxvalue == (1UL << (CHAR_BIT *
+                                 sizeof (*fct->countocc_small))) - 1);
+  gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
@@ -129,18 +139,25 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
       fct->countocc_small[idx] = (uint8_t) currentcount;
     } else
     {
+      uint32_t *valueptr;
+
       gt_assert(fct->countocc_exceptions != NULL);
-      gt_assert(ul_ul_gt_hashmap_get(fct->countocc_exceptions,idx) == NULL);
-      ul_ul_gt_hashmap_add(fct->countocc_exceptions, idx,
-                           (unsigned long) currentcount);
+      gt_assert(ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx) == NULL);
+      ul_u32_gt_hashmap_add(fct->countocc_exceptions, idx, currentcount);
+      valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions, idx);
+      gt_assert(valueptr != NULL);
+      gt_assert(*valueptr == currentcount);
       fct->countocc_small[idx] = 0;
+      largevalues++;
     }
   }
+  gt_log_log("largevalues=%lu",largevalues);
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
   gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+  fct->countocc_samples[samplecount++] = partsum;
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
@@ -150,6 +167,11 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
       maxbucketsize = (unsigned long) currentcount;
     }
     partsum += (unsigned long) currentcount;
+    if ((idx & bitmask) == 0)
+    {
+      gt_assert(samplecount < fct->numofsamples);
+      fct->countocc_samples[samplecount++] = partsum;
+    }
     if (partsum <= maxvalue)
     {
       GT_PARTIALSUM_LEFTBORDER_SET(idx,(uint32_t) partsum);
@@ -184,10 +206,17 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
         maxbucketsize = (unsigned long) currentcount;
       }
       partsum += currentcount;
+      if ((idx & bitmask) == 0)
+      {
+        gt_assert(samplecount < fct->numofsamples);
+        fct->countocc_samples[samplecount++] = partsum;
+      }
       fct->overflow_leftborder[idx] = partsum;
     }
     fct->overflow_leftborder[endidx] = partsum;
   }
+  /*gt_assert(samplecount <= fct->numofsamples - 1);
+  fct->countocc_samples[samplecount++] = partsum;*/
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   return maxbucketsize;
@@ -252,6 +281,7 @@ void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
   gt_free(fct->countocc_small);
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
+  gt_free(fct->countocc_samples);
 }
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)

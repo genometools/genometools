@@ -28,11 +28,14 @@ typedef struct
 {
   unsigned long differentcodes,
                 *allfirstcodes,
-                overflow_index;
+                overflow_index,
+                numofsamples,
+                samplerate;
   uint32_t *countocc;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder;
+  unsigned long *countocc_samples;
 } GtFirstcodestab;
 
 void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
