@@ -77,18 +77,18 @@ typedef struct {
   double cumulative_probability;
   unsigned long long num_of_occurrences;
   GtFile *outfp;
-} ShowValueInfo;
+} GtShowValueInfo;
 
 static enum iterator_op
 showvalue(unsigned long key, unsigned long long occurrences,
           void *data, GT_UNUSED GtError *err)
 {
   double probability;
-  ShowValueInfo *info;
+  GtShowValueInfo *info;
 
   gt_error_check(err);
   gt_assert(data && occurrences);
-  info = (ShowValueInfo*) data;
+  info = (GtShowValueInfo*) data;
 
   probability = (double) ((double) occurrences / info->num_of_occurrences);
   info->cumulative_probability += probability;
@@ -99,7 +99,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
 
 void gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp)
 {
-  ShowValueInfo showvalueinfo;
+  GtShowValueInfo showvalueinfo;
   int rval;
 
   gt_assert(d);
