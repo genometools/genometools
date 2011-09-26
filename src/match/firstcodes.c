@@ -678,6 +678,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   bool haserr = false;
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
+  totallength = gt_encseq_total_length(encseq);
   if (maxseqlength > (unsigned long) minmatchlength)
   {
     maxrelpos = maxseqlength - (unsigned long) minmatchlength;
@@ -853,7 +854,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   &fci.buf,
                                   NULL);
     gt_firstcodes_accumulatecounts_flush(&fci);
-    totallength = gt_encseq_total_length(encseq);
     gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
                   fci.codebuffer_total,
                   (double) fci.codebuffer_total/totallength);
