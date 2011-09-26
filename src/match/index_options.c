@@ -424,7 +424,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                            idxo->memlimit, NULL);
     gt_option_parser_add_option(op, idxo->optionmemlimit);
     gt_option_exclude(idxo->optionmemlimit, idxo->optionparts);
-    gt_option_exclude(idxo->optionparts, idxo->optionmemlimit);
   } else {
     idxo->optionoutsuftab
       = idxo->optionoutlcptab = idxo->optionoutbwttab = NULL;
