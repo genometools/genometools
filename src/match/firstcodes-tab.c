@@ -37,6 +37,7 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
                                   sizeof (*fct->countocc_small));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
+  fct->usesample = false;
   gt_assert(fct->countocc_exceptions != NULL);
 }
 
@@ -48,8 +49,8 @@ void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
-  fct->samplerate = 4096UL;
-  fct->numofsamples = 1UL + 1UL + numofdifferentcodes/fct->samplerate;
+  fct->sampledistance = 512UL;
+  fct->numofsamples = 1UL + 1UL + numofdifferentcodes/fct->sampledistance;
   fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
                                     fct->numofsamples);
 }
@@ -124,7 +125,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
-  const unsigned long bitmask = fct->samplerate - 1;
+  const unsigned long bitmask = fct->sampledistance - 1;
   const unsigned long maxvalue = UINT8_MAX; /* XXX changes thi 16 */
 
   gt_assert(maxvalue == (1UL << (CHAR_BIT *
@@ -219,9 +220,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   if (((idx - 1) & bitmask) != 0)
   {
     gt_assert(samplecount < fct->numofsamples);
-    fct->countocc_samples[samplecount++] = partsum;
+    fct->countocc_samples[samplecount] = partsum;
+    fct->numofsamples = samplecount;
+  } else
+  {
+    fct->numofsamples = samplecount - 1;
   }
-  fct->numofsamples = samplecount;
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   return maxbucketsize;
@@ -230,27 +234,48 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx)
 {
-  gt_assert(idx <= fct->differentcodes);
-  if (fct->overflow_index == 0 || idx < fct->overflow_index)
+  if (fct->usesample)
   {
-    return (unsigned long) fct->countocc[idx];
+    if (idx > fct->numofsamples)
+    {
+      printf("idx = %lu > %lu = numofsamples\n",idx,fct->numofsamples);
+    }
+    gt_assert(idx <= fct->numofsamples);
+    return fct->countocc_samples[idx];
   } else
   {
-    return fct->overflow_leftborder[idx - fct->overflow_index];
+    gt_assert(idx <= fct->differentcodes);
+    if (fct->overflow_index == 0 || idx < fct->overflow_index)
+    {
+      return (unsigned long) fct->countocc[idx];
+    } else
+    {
+      return fct->overflow_leftborder[idx - fct->overflow_index];
+    }
   }
 }
 
 unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct)
 {
+  if (fct->usesample)
+  {
+    return fct->numofsamples;
+  }
   return fct->differentcodes;
 }
 
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                             unsigned long suftaboffset)
 {
-  unsigned long left = 0, right = fct->differentcodes, mid, midval,
-                found = fct->differentcodes;
+  unsigned long left = 0, right, mid, midval, found;
 
+  if (fct->usesample)
+  {
+    right = found = fct->numofsamples;
+  } else
+  {
+    right = found = fct->differentcodes;
+  }
   while (left+1 < right)
   {
     mid = GT_DIV2(left+right);
@@ -270,6 +295,15 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
   }
   gt_assert(suftaboffset <= gt_firstcodes_get_leftborder(fct,found));
   return found;
+}
+
+unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
+                                        unsigned long idx)
+{
+  gt_assert(fct->usesample);
+  gt_assert(idx < fct->numofsamples);
+  gt_assert(idx * fct->sampledistance < fct->differentcodes);
+  return idx * fct->sampledistance;
 }
 
 unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,

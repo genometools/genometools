@@ -671,7 +671,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
                 totallength, suftabentries = 0, largest_width;
   GtSfxmappedrangelist *sfxmrlist;
-  GtSuftabparts *suftabparts = NULL;
+  GtSuftabparts *suftabparts = NULL, *suftabparts_sample;
   GtFirstcodesspacelog fcsl;
   GtShortreadsortworkinfo *srsw = NULL;
   unsigned long *seqnum_relpos_bucket = NULL;
@@ -906,6 +906,18 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      suftabentries,
                                      0,
                                      logger);
+    gt_suftabparts_showallrecords(suftabparts);
+    fci.tab.usesample = true;
+    suftabparts_sample = gt_suftabparts_new(numofparts,
+                                      NULL,
+                                      &fci.tab,
+                                      sfxmrlist,
+                                      suftabentries,
+                                      0,
+                                      logger);
+    gt_suftabparts_showallrecords(suftabparts_sample);
+    gt_suftabparts_delete(suftabparts_sample);
+    fci.tab.usesample = false;
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     sfxmrlist = NULL;
     gt_assert(suftabparts != NULL);

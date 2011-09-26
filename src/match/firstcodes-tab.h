@@ -30,12 +30,13 @@ typedef struct
                 *allfirstcodes,
                 overflow_index,
                 numofsamples,
-                samplerate;
+                sampledistance;
   uint32_t *countocc;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder;
   unsigned long *countocc_samples;
+  bool usesample;
 } GtFirstcodestab;
 
 void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
@@ -85,5 +86,8 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 void **gt_firstcodes_countocc_address(GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr);
+
+unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
+                                        unsigned long idx);
 
 #endif
