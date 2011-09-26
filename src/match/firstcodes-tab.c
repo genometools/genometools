@@ -49,7 +49,7 @@ void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
   fct->samplerate = 4096UL;
-  fct->numofsamples = 1UL + numofdifferentcodes/fct->samplerate;
+  fct->numofsamples = 1UL + 1UL + numofdifferentcodes/fct->samplerate;
   fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
                                     fct->numofsamples);
 }
@@ -215,8 +215,13 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
     }
     fct->overflow_leftborder[endidx] = partsum;
   }
-  /*gt_assert(samplecount <= fct->numofsamples - 1);
-  fct->countocc_samples[samplecount++] = partsum;*/
+  gt_assert(idx > 0);
+  if (((idx - 1) & bitmask) != 0)
+  {
+    gt_assert(samplecount < fct->numofsamples);
+    fct->countocc_samples[samplecount++] = partsum;
+  }
+  fct->numofsamples = samplecount;
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   return maxbucketsize;
