@@ -19,6 +19,7 @@
 #include "core/ma_api.h"
 #include "core/codetype.h"
 #include "core/spacecalc.h"
+#include "core/log.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
 #include "spmsuftab.h"
@@ -42,27 +43,27 @@ struct GtSuftabparts
   const GtFirstcodestab *fct;
 };
 
-static void gt_suftabparts_showrecord(unsigned int part,
-                                      const GtSuftabpartcomponent *component)
-{
-  printf("# part %u: width=%lu offset=%lu sumwidth=%lu nextidx=%lu\n",
-          part,component->widthofpart,component->suftaboffset,
-                                 component->sumofwidth,
-                                 component->nextidx);
-}
-
 void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts)
 {
   unsigned int part;
+  unsigned long totalwidth;
 
   gt_assert(suftabparts != NULL);
+  gt_assert(suftabparts->numofparts > 1U);
+  totalwidth = suftabparts->components[suftabparts->numofparts - 1].sumofwidth;
   for (part = 0; part < suftabparts->numofparts; part++)
   {
-    gt_suftabparts_showrecord(part,suftabparts->components + part);
-    printf("# mincode=%lu maxcode=%lu\n",
-            gt_suftabparts_mincode(part,suftabparts),
-            gt_suftabparts_maxcode(part,suftabparts));
+
+    gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu mincode=%lu maxcode=%lu",
+               part,
+               suftabparts->components[part].widthofpart,
+               100.00 * (double) suftabparts->components[part].widthofpart/
+                                 totalwidth,
+               suftabparts->components[part].suftaboffset,
+               gt_suftabparts_mincode(part,suftabparts),
+               gt_suftabparts_maxcode(part,suftabparts));
   }
+  gt_log_log("variance %.0f",gt_suftabparts_variance(suftabparts));
 }
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
@@ -236,6 +237,31 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
   }
   gt_suftabparts_removeemptyparts(suftabparts,logger);
   return suftabparts;
+}
+
+double gt_suftabparts_variance(const GtSuftabparts *suftabparts)
+{
+
+  gt_assert(suftabparts->numofparts > 0);
+  if (suftabparts->numofparts == 1U)
+  {
+    return 0.0;
+  } else
+  {
+    double meanwidth, difference, sum = 0.0;
+    unsigned int part;
+
+    meanwidth = (double)
+                suftabparts->components[suftabparts->numofparts-1].sumofwidth/
+                suftabparts->numofparts;
+    for (part = 0; part < suftabparts->numofparts; part++)
+    {
+      difference = (double) suftabparts->components[part].widthofpart
+                   - meanwidth;
+      sum += difference * difference;
+    }
+    return sum/(double) (suftabparts->numofparts-1);
+  }
 }
 
 void gt_suftabparts_delete(GtSuftabparts *suftabparts)

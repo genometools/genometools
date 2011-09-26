@@ -67,6 +67,8 @@ unsigned int gt_suftabparts_numofparts(const GtSuftabparts *suftabparts);
 unsigned long gt_suftabparts_largestsizemappedpartwise(
                                        const GtSuftabparts *suftabparts);
 
+double gt_suftabparts_variance(const GtSuftabparts *suftabparts);
+
 int gt_suftabparts_fit_memlimit(size_t estimatedspace,
                                 unsigned long maximumspace,
                                 const GtBcktab *bcktab,

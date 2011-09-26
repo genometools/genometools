@@ -49,10 +49,6 @@ void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
-  fct->sampledistance = 512UL;
-  fct->numofsamples = 1UL + 1UL + numofdifferentcodes/fct->sampledistance;
-  fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
-                                    fct->numofsamples);
 }
 
 typedef struct
@@ -125,7 +121,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
-  const unsigned long bitmask = fct->sampledistance - 1;
+  unsigned long bitmask;
   const unsigned long maxvalue = UINT8_MAX; /* XXX changes thi 16 */
 
   gt_assert(maxvalue == (1UL << (CHAR_BIT *
@@ -158,6 +154,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
   gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+  fct->sampledistance = 256UL;
+  bitmask = fct->sampledistance - 1;
+  fct->numofsamples = 1UL + 1UL + fct->differentcodes/fct->sampledistance;
+  fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
+                                    fct->numofsamples);
+  gt_assert(samplecount < fct->numofsamples);
   fct->countocc_samples[samplecount++] = partsum;
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {

@@ -854,12 +854,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                   &fci.buf,
                                   NULL);
     gt_firstcodes_accumulatecounts_flush(&fci);
-    gt_logger_log(logger,"codebuffer_total=%lu (%.2f)",
+    gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
                   fci.codebuffer_total,
-                  (double) fci.codebuffer_total/totallength);
-    gt_logger_log(logger,"firstcodehits=%lu (%.2f), %u rounds (avg length %lu)",
+                  100.0 * (double) fci.codebuffer_total/totallength);
+    gt_logger_log(logger,"firstcodehits=%lu (%.3f%% of all suffixes), "
+                         "%u rounds (avg length %lu)",
                            fci.firstcodehits,
-                           (double) fci.firstcodehits/totallength,
+                           100.0 * (double) fci.firstcodehits/totallength,
                            fci.flushcount,
                            fci.firstcodehits/fci.flushcount);
     if (timer != NULL)
@@ -974,7 +975,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      logger);
     suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength,
                                              bitsforseqnum + bitsforrelpos);
-
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
     srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
     gt_firstcodes_update_workspace(__LINE__,true,"shortreadsort",
@@ -1021,8 +1021,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         gt_timer_show_progress(timer, "to insert suffixes into buckets",stdout);
       }
       fci.widthofpart = gt_suftabparts_widthofpart(part,suftabparts);
-      gt_logger_log(logger,"compute part %u (%.2f%%)",part,
-                   (double) fci.widthofpart/suftabentries);
+      gt_logger_log(logger,"compute part %u (%.2f%% of all candidates)",part,
+                   (double) 100.0 * fci.widthofpart/suftabentries);
       fci.currentminindex = gt_suftabparts_minindex(part,suftabparts);
       fci.currentmaxindex = gt_suftabparts_maxindex(part,suftabparts);
       if (fci.mappedallfirstcodes != NULL)
@@ -1115,10 +1115,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     if (!onlyaccumulation)
     {
-      gt_logger_log(logger,"firstcodeposhits=%lu (%.2f), %u rounds (avg "
-                           "length %lu)",
+      gt_logger_log(logger,"firstcodeposhits=%lu (%.3f%% of all suffixes), "
+                           "%u rounds (avg length %lu)",
                            fci.firstcodeposhits,
-                           (double) fci.firstcodeposhits/totallength,
+                           100.0 * (double) fci.firstcodeposhits/totallength,
                            fci.flushcount,
                            fci.firstcodeposhits/fci.flushcount);
       gt_assert(fci.firstcodeposhits == suftabentries);
