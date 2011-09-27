@@ -94,18 +94,15 @@ GtUchar           gt_encseq_get_encoded_char(const GtEncseq *encseq,
 char              gt_encseq_get_decoded_char(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode);
+#endif
 
 /* Returns true iff <pos> is a separator position of <encseq>
    read in the direction as indicated by <readmode>. */
 bool              gt_encseq_position_is_separator(const GtEncseq *encseq,
                                                   unsigned long pos,
                                                   GtReadmode readmode);
-
-#endif
-
 /* Increases the reference count of <encseq>. */
 GtEncseq*         gt_encseq_ref(GtEncseq *encseq);
-
 /* Returns a new <GtEncseqReader> for <encseq>, starting from position
    <startpos>. Also supports reading the sequence from the reverse and
    delivering (reverse) complement characters on DNA alphabets using the
