@@ -122,7 +122,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
-  const unsigned long maxvalue = UINT32_MAX; /* XXX changes thi 16 */
+  const unsigned long maxvalue = UINT8_MAX;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)
@@ -255,6 +255,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
       return (unsigned long) fct->countocc[idx];
     } else
     {
+      gt_assert(idx >= fct->overflow_index);
       return fct->overflow_leftborder[idx - fct->overflow_index];
     }
   }

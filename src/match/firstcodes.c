@@ -1038,12 +1038,24 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
       if (fci.mappedcountocc != NULL)
       {
-        gt_firstcodes_countocc_remap(&fci.tab,
-                                     (uint32_t *) gt_Sfxmappedrange_map(
-                                                        fci.mappedcountocc,
-                                                        part,
-                                                        fci.currentminindex,
-                                                        fci.currentmaxindex));
+        unsigned long largestindex2map;
+
+        if (part > 0 && fci.tab.overflow_index > 0)
+        {
+          largestindex2map = MIN(fci.tab.overflow_index-1,fci.currentmaxindex);
+        } else
+        {
+          largestindex2map = fci.currentmaxindex;
+        }
+        if (fci.currentminindex <= largestindex2map)
+        {
+          gt_firstcodes_countocc_remap(&fci.tab,
+                                       (uint32_t *) gt_Sfxmappedrange_map(
+                                                          fci.mappedcountocc,
+                                                          part,
+                                                          fci.currentminindex,
+                                                          largestindex2map));
+        }
       }
       if (fci.mappedmarkprefix != NULL)
       {
