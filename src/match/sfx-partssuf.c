@@ -56,22 +56,27 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
   {
     if (withcodes)
     {
-      gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu mincode=%lu "
-                 "maxcode=%lu",
+      gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu nextidx=%lu "
+                 "minindex=%lu maxindex=%lu "
+                 "mincode=%lu maxcode=%lu",
                  part,
                  suftabparts->components[part].widthofpart,
                  100.00 * (double) suftabparts->components[part].widthofpart/
                                    totalwidth,
                  suftabparts->components[part].suftaboffset,
+                 suftabparts->components[part].nextidx,
+                 gt_suftabparts_minindex(part,suftabparts),
+                 gt_suftabparts_maxindex(part,suftabparts),
                  gt_suftabparts_mincode(part,suftabparts),
                  gt_suftabparts_maxcode(part,suftabparts));
     } else
     {
-      gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu",
+      gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu nextidx=%lu",
                  part,
                  suftabparts->components[part].widthofpart,
                  100.00 * (double) suftabparts->components[part].widthofpart/
                                    totalwidth,
+                 suftabparts->components[part].nextidx,
                  suftabparts->components[part].suftaboffset);
     }
   }
@@ -277,6 +282,7 @@ GtCodetype gt_suftabparts_minindex(unsigned int part,
                                    const GtSuftabparts *suftabparts)
 {
   GtCodetype minindex;
+
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
   minindex = (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
   if (suftabparts->fct != NULL && suftabparts->fct->usesample)
