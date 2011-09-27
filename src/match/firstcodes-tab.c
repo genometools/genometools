@@ -198,31 +198,33 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
     GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
   } else
   {
-    unsigned long endidx = fct->differentcodes - fct->overflow_index;
+    unsigned long overflowcells = fct->differentcodes - fct->overflow_index + 1;
 
     fct->overflow_leftborder
-      = gt_malloc(sizeof (*fct->overflow_leftborder) * (endidx + 1));
+      = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
+    fct->overflow_leftborder_ptr
+      = fct->overflow_leftborder - fct->overflow_index;
     currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
     partsum += (unsigned long) currentcount;
-    fct->overflow_leftborder[0] = partsum;
-    for (idx = 1UL; idx < endidx; idx++)
+    fct->overflow_leftborder_ptr[fct->overflow_index] = partsum;
+    for (idx = fct->overflow_index+1; idx < fct->differentcodes; idx++)
     {
-      currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index+idx);
+      currentcount = GT_PARTIALSUM_COUNT_GET(idx);
       gt_disc_distri_add(countdistri,(unsigned long) currentcount);
       if (maxbucketsize < (unsigned long) currentcount)
       {
         maxbucketsize = (unsigned long) currentcount;
       }
       partsum += currentcount;
-      if (((fct->overflow_index + idx) & bitmask) == 0)
+      if ((idx & bitmask) == 0)
       {
         gt_assert(samplecount < fct->numofsamples);
         fct->countocc_samples[samplecount++] = partsum;
       }
-      fct->overflow_leftborder[idx] = partsum;
+      fct->overflow_leftborder_ptr[idx] = partsum;
     }
-    fct->overflow_leftborder[endidx] = partsum;
+    fct->overflow_leftborder_ptr[fct->differentcodes] = partsum;
   }
   gt_assert(idx > 0);
   if (partsum > fct->countocc_samples[samplecount-1])
@@ -256,7 +258,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
     } else
     {
       gt_assert(idx >= fct->overflow_index);
-      return fct->overflow_leftborder[idx - fct->overflow_index];
+      return fct->overflow_leftborder_ptr[idx];
     }
   }
 }

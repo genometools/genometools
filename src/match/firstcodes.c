@@ -720,6 +720,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.tab.allfirstcodes = gt_malloc(sizeforcodestable);
   gt_firstcodes_countocc_setnull(&fci.tab);
   fci.tab.overflow_leftborder = NULL;
+  fci.tab.overflow_leftborder_ptr = NULL;
   fci.tab.differentcodes = 0;
   fci.countsequences = 0;
   fci.firstcodehits = 0;
