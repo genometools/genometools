@@ -122,10 +122,8 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
-  const unsigned long maxvalue = UINT8_MAX; /* XXX changes thi 16 */
+  const unsigned long maxvalue = UINT32_MAX; /* XXX changes thi 16 */
 
-  gt_assert(maxvalue == (1UL << (CHAR_BIT *
-                                 sizeof (*fct->countocc_small))) - 1);
   gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)
   {
@@ -148,13 +146,21 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
       largevalues++;
     }
   }
-  gt_log_log("largevalues=%lu",largevalues);
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
   gt_disc_distri_add(countdistri,(unsigned long) currentcount);
-  fct->sampledistance = 256UL;
+  fct->sampleshift = 9U;
+  while (true)
+  {
+    fct->sampledistance = 1UL << fct->sampleshift;
+    if (fct->sampledistance < fct->differentcodes)
+    {
+      break;
+    }
+    fct->sampleshift--;
+  }
   bitmask = fct->sampledistance - 1;
   fct->numofsamples = 1UL + 1UL + fct->differentcodes/fct->sampledistance;
   fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
@@ -209,7 +215,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
         maxbucketsize = (unsigned long) currentcount;
       }
       partsum += currentcount;
-      if ((idx & bitmask) == 0)
+      if (((fct->overflow_index + idx) & bitmask) == 0)
       {
         gt_assert(samplecount < fct->numofsamples);
         fct->countocc_samples[samplecount++] = partsum;
@@ -219,13 +225,14 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
     fct->overflow_leftborder[endidx] = partsum;
   }
   gt_assert(idx > 0);
-  if (((idx - 1) & bitmask) != 0)
+  if (partsum > fct->countocc_samples[samplecount-1])
   {
     gt_assert(samplecount < fct->numofsamples);
     fct->countocc_samples[samplecount] = partsum;
     fct->numofsamples = samplecount;
   } else
   {
+    gt_assert(partsum == fct->countocc_samples[samplecount-1]);
     fct->numofsamples = samplecount - 1;
   }
   gt_firstcodes_evaluate_countdistri(countdistri);
@@ -238,10 +245,6 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
 {
   if (fct->usesample)
   {
-    if (idx > fct->numofsamples)
-    {
-      printf("idx = %lu > %lu = numofsamples\n",idx,fct->numofsamples);
-    }
     gt_assert(idx <= fct->numofsamples);
     return fct->countocc_samples[idx];
   } else
@@ -302,16 +305,22 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx)
 {
-  gt_assert(fct->usesample);
-  gt_assert(idx < fct->numofsamples);
-  gt_assert(idx * fct->sampledistance < fct->differentcodes);
-  return idx * fct->sampledistance;
+  gt_assert(idx <= fct->numofsamples);
+  if (idx < fct->numofsamples)
+  {
+    return idx << fct->sampleshift;
+  }
+  return fct->differentcodes;
 }
 
 unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
                                      unsigned long idx)
 {
-  gt_assert(idx < fct->differentcodes);
+  gt_assert(idx <= fct->differentcodes);
+  if (idx == fct->differentcodes)
+  {
+    return fct->allfirstcodes[idx-1];
+  }
   return fct->allfirstcodes[idx];
 }
 

@@ -31,6 +31,7 @@ typedef struct
                 overflow_index,
                 numofsamples,
                 sampledistance;
+  unsigned int sampleshift;
   uint32_t *countocc;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;

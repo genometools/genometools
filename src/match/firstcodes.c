@@ -907,7 +907,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      suftabentries,
                                      0,
                                      logger);
-    gt_suftabparts_showallrecords(suftabparts);
+    gt_suftabparts_showallrecords(suftabparts,true);
     fci.tab.usesample = true;
     suftabparts_sample = gt_suftabparts_new(numofparts,
                                       NULL,
@@ -916,7 +916,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                       suftabentries,
                                       0,
                                       logger);
-    gt_suftabparts_showallrecords(suftabparts_sample);
+    gt_suftabparts_showallrecords(suftabparts_sample,true);
+    gt_assert(fci.tab.allfirstcodes[fci.tab.differentcodes - 1] ==
+              gt_suftabparts_maxindex_last(suftabparts_sample));
     gt_suftabparts_delete(suftabparts_sample);
     fci.tab.usesample = false;
     gt_Sfxmappedrangelist_delete(sfxmrlist);

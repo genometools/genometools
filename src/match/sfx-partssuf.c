@@ -43,40 +43,56 @@ struct GtSuftabparts
   const GtFirstcodestab *fct;
 };
 
-void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts)
+void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
+                                   bool withcodes)
 {
   unsigned int part;
   unsigned long totalwidth;
 
   gt_assert(suftabparts != NULL);
-  gt_assert(suftabparts->numofparts > 1U);
+  gt_assert(suftabparts->numofparts >= 1U);
   totalwidth = suftabparts->components[suftabparts->numofparts - 1].sumofwidth;
   for (part = 0; part < suftabparts->numofparts; part++)
   {
-
-    gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu mincode=%lu maxcode=%lu",
-               part,
-               suftabparts->components[part].widthofpart,
-               100.00 * (double) suftabparts->components[part].widthofpart/
-                                 totalwidth,
-               suftabparts->components[part].suftaboffset,
-               gt_suftabparts_mincode(part,suftabparts),
-               gt_suftabparts_maxcode(part,suftabparts));
+    if (withcodes)
+    {
+      gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu mincode=%lu "
+                 "maxcode=%lu",
+                 part,
+                 suftabparts->components[part].widthofpart,
+                 100.00 * (double) suftabparts->components[part].widthofpart/
+                                   totalwidth,
+                 suftabparts->components[part].suftaboffset,
+                 gt_suftabparts_mincode(part,suftabparts),
+                 gt_suftabparts_maxcode(part,suftabparts));
+    } else
+    {
+      gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu",
+                 part,
+                 suftabparts->components[part].widthofpart,
+                 100.00 * (double) suftabparts->components[part].widthofpart/
+                                   totalwidth,
+                 suftabparts->components[part].suftaboffset);
+    }
   }
   gt_log_log("variance %.0f",gt_suftabparts_variance(suftabparts));
 }
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
+                                            unsigned long totalwidth,
                                             GtLogger *logger)
 {
+#undef SKDEBUG
 #ifdef SKDEBUG
-  printf("# before removial\n");
-  showallrecords(suftabparts);
+  gt_log_log("before removal");
+  gt_suftabparts_showallrecords(suftabparts,false);
 #endif
   gt_assert(suftabparts != NULL);
   if (suftabparts->numofparts > 0)
   {
     unsigned int destpart, srcpart;
+    unsigned long sumwidth = 0;
+
     for (destpart = 0, srcpart = 0; srcpart < suftabparts->numofparts;
          srcpart++)
     {
@@ -89,46 +105,26 @@ static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
         destpart++;
       }
     }
-    if (suftabparts->components[suftabparts->numofparts-1].widthofpart == 0)
+    if (destpart < srcpart)
     {
-      gt_assert(suftabparts->numofparts > 1U);
-      destpart = suftabparts->numofparts-2;
-      while (true)
-      {
-        if (suftabparts->components[destpart].widthofpart > 0)
-        {
-          suftabparts->components[destpart].nextidx
-            = suftabparts->components[suftabparts->numofparts-1].nextidx;
-          suftabparts->numofparts = destpart + 1;
-          break;
-        }
-        if (destpart > 0)
-        {
-          destpart--;
-        } else
-        {
-          gt_assert(false);
-        }
-      }
-    } else
-    {
-      if (destpart < srcpart)
-      {
-        suftabparts->numofparts -= (srcpart - destpart);
-        gt_assert(suftabparts->numofparts == destpart);
-      }
+      suftabparts->components[destpart-1].nextidx
+        = suftabparts->components[suftabparts->numofparts-1].nextidx;
+      suftabparts->numofparts -= (srcpart - destpart);
+      gt_assert(suftabparts->numofparts == destpart);
     }
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       gt_assert(suftabparts->components[srcpart].widthofpart > 0);
+      sumwidth+=suftabparts->components[srcpart].widthofpart;
       gt_logger_log(logger,"widthofpart[%u]=%lu",
                     srcpart,
                     suftabparts->components[srcpart].widthofpart);
     }
+    gt_assert(sumwidth == totalwidth);
   }
 #ifdef SKDEBUG
-  printf("#after removal\n");
-  showallrecords(suftabparts);
+  gt_log_log("after removal");
+  gt_suftabparts_showallrecords(suftabparts,true);
 #endif
 }
 
@@ -142,6 +138,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
 {
   GtSuftabparts *suftabparts;
   unsigned long size_mapped;
+  unsigned int part;
 
   gt_assert((bcktab == NULL && fct != NULL) ||
             (bcktab != NULL && fct == NULL));
@@ -171,7 +168,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     suftabparts->components = NULL;
   } else
   {
-    unsigned int part, remainder;
+    unsigned int remainder;
     unsigned long secondidx, firstbound = 0, secondbound,
                   suftaboffset = 0, sumofwidth = 0;
     const unsigned long widthofsuftabpart
@@ -224,18 +221,21 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       }
       sumofwidth += suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
-      size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
-                                    gt_suftabparts_minindex(part,suftabparts),
-                                    gt_suftabparts_maxindex(part,suftabparts));
-      if (suftabparts->largestsizemappedpartwise < size_mapped)
-      {
-        suftabparts->largestsizemappedpartwise = size_mapped;
-      }
       firstbound = secondbound;
     }
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
-  gt_suftabparts_removeemptyparts(suftabparts,logger);
+  gt_suftabparts_removeemptyparts(suftabparts,numofsuffixestoinsert,logger);
+  for (part=0; part < suftabparts->numofparts; part++)
+  {
+    size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
+                                  gt_suftabparts_minindex(part,suftabparts),
+                                  gt_suftabparts_maxindex(part,suftabparts));
+    if (suftabparts->largestsizemappedpartwise < size_mapped)
+    {
+      suftabparts->largestsizemappedpartwise = size_mapped;
+    }
+  }
   return suftabparts;
 }
 
@@ -306,13 +306,14 @@ GtCodetype gt_suftabparts_maxindex(unsigned int part,
   GtCodetype maxindex;
 
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  if (suftabparts->fct != NULL && suftabparts->fct->usesample)
+  {
+    maxindex = suftabparts->components[part].nextidx;
+    return gt_firstcodes_sample2full(suftabparts->fct,maxindex);
+  }
   maxindex = (part == suftabparts->numofparts - 1)
                ? suftabparts->components[part].nextidx - 1
                : suftabparts->components[part].nextidx;
-  if (suftabparts->fct != NULL && suftabparts->fct->usesample)
-  {
-    return gt_firstcodes_sample2full(suftabparts->fct,maxindex);
-  }
   return maxindex;
 }
 
@@ -328,6 +329,12 @@ GtCodetype gt_suftabparts_maxcode(unsigned int part,
    return idx;
   }
   return gt_firstcodes_idx2code(suftabparts->fct,idx);
+}
+
+GtCodetype gt_suftabparts_maxindex_last(const GtSuftabparts *suftabparts)
+{
+  gt_assert(suftabparts->numofparts > 0);
+  return gt_suftabparts_maxcode(suftabparts->numofparts-1,suftabparts);
 }
 
 unsigned long gt_suftabparts_offset(unsigned int part,
