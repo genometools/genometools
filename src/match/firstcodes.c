@@ -1196,6 +1196,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_free(fci.tab.countocc_small);
     gt_free(fci.tab.countocc_samples);
     gt_hashtable_delete(fci.tab.countocc_exceptions);
+    gt_str_delete(fci.tab.outfilenameleftborder);
   }
   if (haserr || fci.mappedoverflow == NULL)
   {

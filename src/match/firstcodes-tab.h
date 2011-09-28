@@ -20,6 +20,7 @@
 
 #include <inttypes.h>
 #include "core/unused_api.h"
+#include "core/str_api.h"
 #include "core/hashmap-generic.h"
 
 #define GT_FIRSTCODES_MAXSMALL UINT8_MAX
@@ -38,6 +39,7 @@ typedef struct
   unsigned long *overflow_leftborder;
   unsigned long *countocc_samples;
   bool usesample;
+  GtStr *outfilenameleftborder;
 } GtFirstcodestab;
 
 void gt_firstcodes_countocc_new(GtFirstcodestab *fct,

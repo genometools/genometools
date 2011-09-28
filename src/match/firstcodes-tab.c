@@ -15,6 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
+#include "core/xansi_api.h"
+#endif
+#include "core/fa.h"
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/ma.h"
@@ -38,6 +42,7 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                                   sizeof (*fct->countocc_small));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   fct->usesample = false;
+  fct->outfilenameleftborder = NULL;
   gt_assert(fct->countocc_exceptions != NULL);
 }
 
@@ -114,7 +119,17 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
 }
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]
-#define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)  fct->countocc[IDX] = VALUE
+
+#define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)\
+        gt_assert((VALUE) <= UINT32_MAX);\
+        fct->countocc[IDX] = VALUE;\
+        if (nextfreeleftborderbuffer == allocatedleftborderbuffer)\
+        {\
+          gt_xfwrite(spaceleftborderbuffer,sizeof (*spaceleftborderbuffer),\
+                     nextfreeleftborderbuffer,fpleftborderbuffer);\
+          nextfreeleftborderbuffer = 0;\
+        }\
+        spaceleftborderbuffer[nextfreeleftborderbuffer++] = (uint32_t) VALUE
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
 {
@@ -122,7 +137,11 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
-  const unsigned long maxvalue = UINT8_MAX;
+  const unsigned long maxvalue = UINT8_MAX; /* reset back to UINT32_MAX */
+  uint32_t *spaceleftborderbuffer;
+  FILE *fpleftborderbuffer;
+  unsigned long nextfreeleftborderbuffer = 0;
+  const unsigned long allocatedleftborderbuffer = 1024UL;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)
@@ -167,6 +186,14 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
                                     fct->numofsamples);
   gt_assert(samplecount < fct->numofsamples);
   fct->countocc_samples[samplecount++] = partsum;
+  fct->outfilenameleftborder = gt_str_new();
+  fpleftborderbuffer = gt_xtmpfp(fct->outfilenameleftborder);
+  spaceleftborderbuffer = gt_malloc(sizeof (*spaceleftborderbuffer) *
+                                    allocatedleftborderbuffer);
+  gt_assert(fpleftborderbuffer != NULL);
+  gt_log_log("write leftborder to file %s",
+             gt_str_get(fct->outfilenameleftborder));
+  GT_PARTIALSUM_LEFTBORDER_SET(0,(uint32_t) partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
@@ -196,11 +223,20 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   {
     gt_assert(partsum <= maxvalue);
     GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
+    gt_xfwrite(spaceleftborderbuffer,sizeof (*spaceleftborderbuffer),
+               nextfreeleftborderbuffer,fpleftborderbuffer);
+    nextfreeleftborderbuffer = 0;
+    gt_fa_fclose(fpleftborderbuffer);
   } else
   {
     unsigned long overflowcells = fct->differentcodes - fct->overflow_index + 1;
     unsigned long *overflow_leftborder_ptr;
 
+    gt_assert(nextfreeleftborderbuffer > 0);
+    gt_xfwrite(spaceleftborderbuffer,sizeof (*spaceleftborderbuffer),
+               nextfreeleftborderbuffer,fpleftborderbuffer);
+    nextfreeleftborderbuffer = 0;
+    gt_fa_fclose(fpleftborderbuffer);
     fct->overflow_leftborder
       = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
     overflow_leftborder_ptr = fct->overflow_leftborder - fct->overflow_index;
@@ -239,6 +275,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   }
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
+  gt_free(spaceleftborderbuffer);
   return maxbucketsize;
 }
 
@@ -335,6 +372,7 @@ void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
   gt_free(fct->countocc_samples);
+  gt_str_delete(fct->outfilenameleftborder);
 }
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
