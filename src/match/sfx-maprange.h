@@ -56,7 +56,6 @@ void gt_Sfxmappedrange_usetmp(GtSfxmappedrange *sfxmappedrange,
                               bool writable);
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
-                            unsigned int part,
                             unsigned long minindex,
                             unsigned long maxindex);
 

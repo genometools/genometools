@@ -325,6 +325,12 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
   }
 }
 
+unsigned long gt_firstcodes_countocc_entries(const GtFirstcodestab *fct)
+{
+  return fct->overflow_index > 0 ? fct->overflow_index
+                                 : fct->differentcodes + 1;
+}
+
 unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct)
 {
   if (fct->usesample)

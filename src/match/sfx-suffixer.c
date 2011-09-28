@@ -2182,7 +2182,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                   sfi->currentmincode,
                   sfi->currentmaxcode);
     gt_bcktab_assignboundsforpart(sfi->bcktab,
-                                  sfi->part,
                                   sfi->currentmincode,
                                   sfi->currentmaxcode);
     if (sfi->mappedmarkprefixbuckets != NULL)
@@ -2190,7 +2189,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
       sfi->markprefixbuckets
         = (GtBitsequence *)
           gt_Sfxmappedrange_map(sfi->mappedmarkprefixbuckets,
-                                sfi->part,
                                 sfi->currentmincode,
                                 sfi->currentmaxcode);
     }

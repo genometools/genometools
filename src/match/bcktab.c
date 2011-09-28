@@ -191,14 +191,12 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
 }
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
-                                   unsigned int part,
                                    GtCodetype mincode,
                                    GtCodetype maxcode)
 {
   void *tmpleftborder;
 
   tmpleftborder = gt_Sfxmappedrange_map(bcktab->mappedleftborder,
-                                        part,
                                         mincode,
                                         maxcode);
   if (bcktab->useulong)
@@ -213,7 +211,7 @@ void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
     void *tmpspecialcodes;
 
     tmpspecialcodes = gt_Sfxmappedrange_map(bcktab->mappedcountspecialcodes,
-                                            part, mincode, maxcode);
+                                            mincode, maxcode);
     if (bcktab->useulong)
     {
       bcktab->ulongcountspecialcodes = (unsigned long *) tmpspecialcodes;

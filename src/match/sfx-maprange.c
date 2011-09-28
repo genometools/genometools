@@ -93,16 +93,19 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   }
   if (mappedsize != gt_Sfxmappedrange_size_entire(sfxmappedrange))
   {
-    gt_error_set(err,"map file %s: mapped size = %lu != %lu = "
-                     "expected size",
-                      gt_str_get(sfxmappedrange->filename),
-                      (unsigned long) mappedsize,
-                      (unsigned long)
-                                 gt_Sfxmappedrange_size_entire(sfxmappedrange));
+    gt_error_set(err,"map file %s: mapped size = %lu != %lu = expected size",
+                     gt_str_get(sfxmappedrange->filename),
+                     (unsigned long) mappedsize,
+                     (unsigned long) gt_Sfxmappedrange_size_entire(
+                                                      sfxmappedrange));
     gt_fa_xmunmap(sfxmappedrange->entire);
     sfxmappedrange->entire = NULL;
     return NULL;
   }
+  gt_log_log("map %s completely (%lu units of size %u)",
+              gt_str_get(sfxmappedrange->tablename),
+              sfxmappedrange->numofunits,
+              (unsigned int) sfxmappedrange->sizeofunit);
   return sfxmappedrange->entire;
 }
 
@@ -226,7 +229,6 @@ static unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
 }
 
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
-                            unsigned int part,
                             unsigned long minindex,
                             unsigned long maxindex)
 {
@@ -252,8 +254,9 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                           minindex,
                           maxindex);
   sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
-  gt_log_log("part %u: mapped %s from %lu to %lu for %s (%.1f%% of all)",
-             part,gt_str_get(sfxmappedrange->tablename),lbrange.mapoffset,
+  gt_log_log("mapped %s from %lu to %lu for %s (%.1f%% of all)",
+             gt_str_get(sfxmappedrange->tablename),
+             lbrange.mapoffset,
              lbrange.mapend,
              sfxmappedrange->writable ? "writing" : "reading",
              (lbrange.mapend - lbrange.mapoffset + 1

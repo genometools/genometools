@@ -80,7 +80,6 @@ GtBcktab *gt_bcktab_map(const char *indexname,
                         GtError *err);
 
 void gt_bcktab_assignboundsforpart(GtBcktab *bcktab,
-                                   unsigned int part,
                                    GtCodetype mincode,
                                    GtCodetype maxcode);
 

@@ -93,4 +93,6 @@ void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr);
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx);
 
+unsigned long gt_firstcodes_countocc_entries(const GtFirstcodestab *fct);
+
 #endif
