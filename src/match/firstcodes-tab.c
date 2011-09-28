@@ -203,6 +203,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   fct->countocc_samples[samplecount++] = partsum;
   fct->outfilenameleftborder = gt_str_new();
   fpleftborderbuffer = gt_xtmpfp(fct->outfilenameleftborder);
+  leftborderbuffer.nextfreeuint32_t = 0;
   leftborderbuffer.allocateduint32_t = 1024UL;
   leftborderbuffer.spaceuint32_t
    = gt_malloc(sizeof (*leftborderbuffer.spaceuint32_t) *
