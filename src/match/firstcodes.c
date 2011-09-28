@@ -963,7 +963,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                fci.tab.outfilenameleftborder,
                                gt_firstcodes_countocc_address(&fci.tab),
                                fci.tab.overflow_index > 0
-                                 ? fci.tab.overflow_index - 1
+                                 ? fci.tab.overflow_index
                                  : fci.tab.differentcodes + 1,
                                true);
       if (fci.tab.overflow_index > 0)
@@ -994,6 +994,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.mappedoverflow = NULL;
       gt_Sfxmappedrange_delete(fci.mappedmarkprefix);
       fci.mappedmarkprefix = NULL;
+      if (fci.tab.overflow_index > 0)
+      {
+        fci.tab.countocc = gt_realloc(fci.tab.countocc,
+                                      sizeof (*fci.tab.countocc) *
+                                      fci.tab.overflow_index);
+      }
     }
     fci.codebuffer_total = 0;
     largest_width = gt_suftabparts_largest_width(suftabparts);

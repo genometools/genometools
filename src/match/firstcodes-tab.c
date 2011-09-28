@@ -141,7 +141,7 @@ static unsigned long gt_leftborderbuffer_flush(FILE *fpleftborderbuffer,
         if (leftborderbuffer.nextfreeuint32_t ==\
             leftborderbuffer.allocateduint32_t)\
         {\
-          totalwriteleftborderbuffer\
+          leftborderbuffer_totalwrite\
             += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);\
         }\
         leftborderbuffer.spaceuint32_t[leftborderbuffer.nextfreeuint32_t++]\
@@ -153,10 +153,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
-  const unsigned long maxvalue = UINT32_MAX; /* reset back to UINT32_MAX */
+  const unsigned long maxvalue = UINT8_MAX; /* reset back to UINT32_MAX */
   FILE *fpleftborderbuffer;
   GtArrayuint32_t leftborderbuffer;
-  unsigned long totalwriteleftborderbuffer = 0;
+  unsigned long leftborderbuffer_totalwrite = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)
@@ -238,7 +238,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   {
     gt_assert(partsum <= maxvalue);
     GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
-    totalwriteleftborderbuffer
+    leftborderbuffer_totalwrite
       += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
   } else
@@ -247,7 +247,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
     unsigned long *overflow_leftborder_ptr;
 
     gt_assert(leftborderbuffer.nextfreeuint32_t > 0);
-    totalwriteleftborderbuffer
+    leftborderbuffer_totalwrite
       += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
     fct->overflow_leftborder
@@ -288,8 +288,15 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   }
   gt_log_log("write leftborder to file %s (%lu units of size %u)",
              gt_str_get(fct->outfilenameleftborder),
-             totalwriteleftborderbuffer,
+             leftborderbuffer_totalwrite,
              (unsigned int) sizeof (*leftborderbuffer.spaceuint32_t));
+  if (fct->overflow_index > 0)
+  {
+    gt_assert(leftborderbuffer_totalwrite == fct->overflow_index);
+  } else
+  {
+    gt_assert(leftborderbuffer_totalwrite == fct->differentcodes + 1);
+  }
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   gt_free(leftborderbuffer.spaceuint32_t);
