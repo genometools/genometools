@@ -723,7 +723,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.tab.allfirstcodes = gt_malloc(sizeforcodestable);
   gt_firstcodes_countocc_setnull(&fci.tab);
   fci.tab.overflow_leftborder = NULL;
-  fci.tab.overflow_leftborder_ptr = NULL;
   fci.tab.differentcodes = 0;
   fci.countsequences = 0;
   fci.firstcodehits = 0;
@@ -1082,16 +1081,27 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       if (fci.mappedoverflow != NULL)
       {
         gt_assert(fci.tab.overflow_index > 0);
-        if (fci.currentminindex >= fci.tab.overflow_index)
+        if (fci.tab.overflow_index <= fci.currentmaxindex)
         {
-          fci.tab.overflow_leftborder
-            = (unsigned long *)
-              gt_Sfxmappedrange_map(fci.mappedoverflow,
-                                    part,
-                                    fci.currentminindex-fci.tab.overflow_index,
-                                    fci.currentmaxindex-fci.tab.overflow_index);
-          fci.tab.overflow_leftborder_ptr
-            = fci.tab.overflow_leftborder - fci.tab.overflow_index;
+          if (fci.currentminindex <= fci.tab.overflow_index)
+          {
+            fci.tab.overflow_leftborder
+              = (unsigned long *)
+                gt_Sfxmappedrange_map(fci.mappedoverflow,
+                                      part,
+                                      0,
+                                      fci.currentmaxindex);
+          } else
+          {
+            fci.tab.overflow_leftborder
+              = (unsigned long *)
+                gt_Sfxmappedrange_map(fci.mappedoverflow,
+                                      part,
+                                      fci.currentminindex -
+                                        fci.tab.overflow_index,
+                                      fci.currentmaxindex -
+                                        fci.tab.overflow_index);
+          }
         }
       }
       if (fci.mappedmarkprefix != NULL)

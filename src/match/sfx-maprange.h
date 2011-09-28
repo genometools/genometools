@@ -54,6 +54,9 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned long minindex,
                             unsigned long maxindex);
 
+void gt_Sfxmappedrange_checkindex(const GtSfxmappedrange *sfxmappedrange,
+                                  unsigned long idx);
+
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange);
 
 typedef struct GtSfxmappedrangelist GtSfxmappedrangelist;

@@ -35,8 +35,7 @@ typedef struct
   uint32_t *countocc;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
-  unsigned long *overflow_leftborder,
-                *overflow_leftborder_ptr;
+  unsigned long *overflow_leftborder;
   unsigned long *countocc_samples;
   bool usesample;
 } GtFirstcodestab;

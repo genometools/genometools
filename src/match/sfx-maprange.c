@@ -66,6 +66,8 @@ struct GtSfxmappedrange
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
   GtSfxmappedrangetransformfunc transformfunc;
+  unsigned long currentminindex, currentmaxindex;
+  bool indexrange_defined;
   const void *transformfunc_data;
   bool writable;
 };
@@ -124,6 +126,8 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
   sfxmappedrange->transformfunc_data = transformfunc_data;
   sfxmappedrange->type = type;
   sfxmappedrange->tablename = gt_str_new_cstr(tablename);
+  sfxmappedrange->currentminindex = sfxmappedrange->currentmaxindex = 0;
+  sfxmappedrange->indexrange_defined = false;
   switch (type)
   {
     case GtSfxGtBitsequence:
@@ -246,6 +250,9 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                                 (size_t) (lbrange.mapend-lbrange.mapoffset+1),
                                 (size_t) lbrange.mapoffset);
   }
+  sfxmappedrange->indexrange_defined = true;
+  sfxmappedrange->currentmaxindex = maxindex;
+  sfxmappedrange->currentminindex = minindex;
   unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
   switch (sfxmappedrange->type)
   {
@@ -260,6 +267,16 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
       break;
   }
   return NULL;
+}
+
+void gt_Sfxmappedrange_checkindex(const GtSfxmappedrange *sfxmappedrange,
+                                  unsigned long idx)
+{
+  if (sfxmappedrange->indexrange_defined)
+  {
+    gt_assert(sfxmappedrange->currentminindex <= idx);
+    gt_assert(idx <= sfxmappedrange->currentminindex);
+  }
 }
 
 void gt_Sfxmappedrange_delete(GtSfxmappedrange *sfxmappedrange)
