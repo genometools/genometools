@@ -49,6 +49,12 @@ void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
                                 void **usedptrptr,
                                 bool writable);
 
+void gt_Sfxmappedrange_usetmp(GtSfxmappedrange *sfxmappedrange,
+                              const GtStr *tmpfilename,
+                              void **usedptrptr,
+                              unsigned long numofentries,
+                              bool writable);
+
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned int part,
                             unsigned long minindex,
