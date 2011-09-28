@@ -31,12 +31,15 @@ typedef struct
   unsigned long nextidx,
                 widthofpart,
                 suftaboffset,
-                sumofwidth;
+                sumofwidth,
+                minindex,
+                maxindex;
 } GtSuftabpartcomponent;
 
 struct GtSuftabparts
 {
   GtSuftabpartcomponent *components;
+  bool indexrange_available;
   unsigned int numofparts;
   unsigned long largestsizemappedpartwise,
                 largestsuftabwidth;
@@ -81,6 +84,37 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
     }
   }
   gt_log_log("variance %.0f",gt_suftabparts_variance(suftabparts));
+}
+
+static GtCodetype gt_suftabparts_minindex_raw(unsigned int part,
+                                              const GtSuftabparts *suftabparts)
+{
+  GtCodetype minindex;
+  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+
+  minindex = (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
+  if (suftabparts->fct != NULL)
+  {
+    return gt_firstcodes_sample2full(suftabparts->fct,minindex);
+  }
+  return minindex;
+}
+
+static GtCodetype gt_suftabparts_maxindex_raw(unsigned int part,
+                                              const GtSuftabparts *suftabparts)
+{
+  GtCodetype maxindex;
+
+  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
+  if (suftabparts->fct != NULL)
+  {
+    maxindex = suftabparts->components[part].nextidx;
+    return gt_firstcodes_sample2full(suftabparts->fct,maxindex);
+  }
+  maxindex = (part == suftabparts->numofparts - 1)
+               ? suftabparts->components[part].nextidx - 1
+               : suftabparts->components[part].nextidx;
+  return maxindex;
 }
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
@@ -197,7 +231,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       if (part == suftabparts->numofparts - 1)
       {
         secondidx = bcktab != NULL ? gt_bcktab_numofallcodes(bcktab)
-                                   : gt_firstcodes_numofallcodes(fct);
+                                   : gt_firstcodes_numofsamples(fct);
       } else
       {
         secondidx = bcktab != NULL
@@ -207,7 +241,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       suftabparts->components[part].nextidx = secondidx;
       secondbound = bcktab != NULL
                       ? gt_bcktab_get_leftborder(bcktab,secondidx)
-                      : gt_firstcodes_get_leftborder(fct,secondidx);
+                      : gt_firstcodes_get_sample(fct,secondidx);
       if (part == 0)
       {
         suftabparts->components[part].widthofpart = secondbound;
@@ -231,6 +265,25 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
   gt_suftabparts_removeemptyparts(suftabparts,numofsuffixestoinsert,logger);
+  gt_assert(suftabparts->components != NULL);
+  for (part=0; part < suftabparts->numofparts; part++)
+  {
+    suftabparts->components[part].minindex
+      = gt_suftabparts_minindex_raw(part,suftabparts);
+    suftabparts->components[part].maxindex
+      = gt_suftabparts_maxindex_raw(part,suftabparts);
+  }
+  for (part=1U; part < suftabparts->numofparts; part++)
+  {
+    if (suftabparts->components[part].minindex !=
+          suftabparts->components[part-1].maxindex + 1)
+    {
+      suftabparts->components[part].minindex
+        = suftabparts->components[part-1].maxindex + 1;
+      gt_log_log("corrected minindex[%u] to %lu",
+                  part,suftabparts->components[part].minindex);
+    }
+  }
   for (part=0; part < suftabparts->numofparts; part++)
   {
     size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
@@ -281,60 +334,41 @@ void gt_suftabparts_delete(GtSuftabparts *suftabparts)
 GtCodetype gt_suftabparts_minindex(unsigned int part,
                                    const GtSuftabparts *suftabparts)
 {
-  GtCodetype minindex;
-
-  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  minindex = (part == 0) ? 0 : suftabparts->components[part-1].nextidx + 1;
-  if (suftabparts->fct != NULL && suftabparts->fct->usesample)
-  {
-    return gt_firstcodes_sample2full(suftabparts->fct,minindex);
-  }
-  return minindex;
+  return suftabparts->components[part].minindex;
 }
 
 GtCodetype gt_suftabparts_mincode(unsigned int part,
                                   const GtSuftabparts *suftabparts)
 {
-  unsigned long idx;
+  unsigned long minidx;
 
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  idx = gt_suftabparts_minindex(part,suftabparts);
-  if (suftabparts->fct == NULL)
+  minidx = gt_suftabparts_minindex(part,suftabparts);
+  if (suftabparts->fct != NULL)
   {
-    return idx;
+    return gt_firstcodes_idx2code(suftabparts->fct,minidx);
   }
-  return gt_firstcodes_idx2code(suftabparts->fct,idx);
+  return minidx;
 }
 
 GtCodetype gt_suftabparts_maxindex(unsigned int part,
                                    const GtSuftabparts *suftabparts)
 {
-  GtCodetype maxindex;
-
-  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  if (suftabparts->fct != NULL && suftabparts->fct->usesample)
-  {
-    maxindex = suftabparts->components[part].nextidx;
-    return gt_firstcodes_sample2full(suftabparts->fct,maxindex);
-  }
-  maxindex = (part == suftabparts->numofparts - 1)
-               ? suftabparts->components[part].nextidx - 1
-               : suftabparts->components[part].nextidx;
-  return maxindex;
+  return suftabparts->components[part].maxindex;
 }
 
 GtCodetype gt_suftabparts_maxcode(unsigned int part,
                                   const GtSuftabparts *suftabparts)
 {
-  unsigned long idx;
+  unsigned long maxidx;
 
   gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  idx = gt_suftabparts_maxindex(part,suftabparts);
-  if (suftabparts->fct == NULL)
+  maxidx = gt_suftabparts_maxindex(part,suftabparts);
+  if (suftabparts->fct != NULL)
   {
-   return idx;
+    return gt_firstcodes_idx2code(suftabparts->fct,maxidx);
   }
-  return gt_firstcodes_idx2code(suftabparts->fct,idx);
+  return maxidx;
 }
 
 GtCodetype gt_suftabparts_maxindex_last(const GtSuftabparts *suftabparts)

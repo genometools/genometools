@@ -42,7 +42,6 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
                                   sizeof (*fct->countocc_small));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
-  fct->usesample = false;
   fct->outfilenameleftborder = NULL;
   gt_assert(fct->countocc_exceptions != NULL);
 }
@@ -147,6 +146,10 @@ static unsigned long gt_leftborderbuffer_flush(FILE *fpleftborderbuffer,
         leftborderbuffer.spaceuint32_t[leftborderbuffer.nextfreeuint32_t++]\
           = (uint32_t) VALUE
 
+#define GT_FIRSTCODES_ADD_SAMPLE(PARTSUM)\
+        gt_assert(samplecount < fct->numofsamples);\
+        fct->countocc_samples[samplecount++] = PARTSUM
+
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
 {
   unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
@@ -199,8 +202,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   fct->numofsamples = 1UL + 1UL + fct->differentcodes/fct->sampledistance;
   fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
                                     fct->numofsamples);
-  gt_assert(samplecount < fct->numofsamples);
-  fct->countocc_samples[samplecount++] = partsum;
+  GT_FIRSTCODES_ADD_SAMPLE(partsum);
   fct->outfilenameleftborder = gt_str_new();
   fpleftborderbuffer = gt_xtmpfp(fct->outfilenameleftborder);
   leftborderbuffer.nextfreeuint32_t = 0;
@@ -221,8 +223,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
     partsum += (unsigned long) currentcount;
     if ((idx & bitmask) == 0)
     {
-      gt_assert(samplecount < fct->numofsamples);
-      fct->countocc_samples[samplecount++] = partsum;
+      GT_FIRSTCODES_ADD_SAMPLE(partsum);
     }
     if (partsum <= maxvalue)
     {
@@ -269,8 +270,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
       partsum += currentcount;
       if ((idx & bitmask) == 0)
       {
-        gt_assert(samplecount < fct->numofsamples);
-        fct->countocc_samples[samplecount++] = partsum;
+        GT_FIRSTCODES_ADD_SAMPLE(partsum);
       }
       overflow_leftborder_ptr[idx] = partsum;
     }
@@ -279,14 +279,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   gt_assert(idx > 0);
   if (partsum > fct->countocc_samples[samplecount-1])
   {
-    gt_assert(samplecount < fct->numofsamples);
-    fct->countocc_samples[samplecount] = partsum;
-    fct->numofsamples = samplecount;
+    GT_FIRSTCODES_ADD_SAMPLE(partsum);
   } else
   {
     gt_assert(partsum == fct->countocc_samples[samplecount-1]);
-    fct->numofsamples = samplecount - 1;
   }
+  fct->numofsamples = samplecount-1;
   gt_log_log("write leftborder to file %s (%lu units of size %u)",
              gt_str_get(fct->outfilenameleftborder),
              leftborderbuffer_totalwrite,
@@ -304,24 +302,24 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   return maxbucketsize;
 }
 
+unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
+                                       unsigned long idx)
+{
+  gt_assert(idx <= fct->numofsamples);
+  return fct->countocc_samples[idx];
+}
+
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx)
 {
-  if (fct->usesample)
+  gt_assert(idx <= fct->differentcodes);
+  if (fct->overflow_index == 0 || idx < fct->overflow_index)
   {
-    gt_assert(idx <= fct->numofsamples);
-    return fct->countocc_samples[idx];
+    return (unsigned long) fct->countocc[idx];
   } else
   {
-    gt_assert(idx <= fct->differentcodes);
-    if (fct->overflow_index == 0 || idx < fct->overflow_index)
-    {
-      return (unsigned long) fct->countocc[idx];
-    } else
-    {
-      gt_assert(idx >= fct->overflow_index);
-      return fct->overflow_leftborder[idx - fct->overflow_index];
-    }
+    gt_assert(idx >= fct->overflow_index);
+    return fct->overflow_leftborder[idx - fct->overflow_index];
   }
 }
 
@@ -331,13 +329,9 @@ unsigned long gt_firstcodes_countocc_entries(const GtFirstcodestab *fct)
                                  : fct->differentcodes + 1;
 }
 
-unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct)
+unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct)
 {
-  if (fct->usesample)
-  {
-    return fct->numofsamples;
-  }
-  return fct->differentcodes;
+  return fct->numofsamples;
 }
 
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
@@ -345,17 +339,11 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
 {
   unsigned long left = 0, right, mid, midval, found;
 
-  if (fct->usesample)
-  {
-    right = found = fct->numofsamples;
-  } else
-  {
-    right = found = fct->differentcodes;
-  }
+  right = found = fct->numofsamples;
   while (left+1 < right)
   {
     mid = GT_DIV2(left+right);
-    midval = gt_firstcodes_get_leftborder(fct,mid);
+    midval = gt_firstcodes_get_sample(fct,mid);
     if (suftaboffset == midval)
     {
       return mid;
@@ -369,7 +357,7 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
       left = mid + 1;
     }
   }
-  gt_assert(suftaboffset <= gt_firstcodes_get_leftborder(fct,found));
+  gt_assert(suftaboffset <= gt_firstcodes_get_sample(fct,found));
   return found;
 }
 

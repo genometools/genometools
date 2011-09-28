@@ -673,7 +673,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
                 totallength, suftabentries = 0, largest_width;
   GtSfxmappedrangelist *sfxmrlist;
-  GtSuftabparts *suftabparts = NULL, *suftabparts_sample;
+  GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
   GtShortreadsortworkinfo *srsw = NULL;
   unsigned long *seqnum_relpos_bucket = NULL;
@@ -919,26 +919,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      suftabentries,
                                      0,
                                      logger);
+    gt_assert(suftabparts != NULL);
     gt_suftabparts_showallrecords(suftabparts,true);
-    fci.tab.usesample = true;
-    suftabparts_sample = gt_suftabparts_new(numofparts,
-                                      NULL,
-                                      &fci.tab,
-                                      sfxmrlist,
-                                      suftabentries,
-                                      0,
-                                      logger);
-    gt_suftabparts_showallrecords(suftabparts_sample,true);
     gt_assert(fci.tab.allfirstcodes[fci.tab.differentcodes - 1] ==
-              gt_suftabparts_maxindex_last(suftabparts_sample));
-    gt_suftabparts_delete(suftabparts_sample);
-    fci.tab.usesample = false;
+              gt_suftabparts_maxindex_last(suftabparts));
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     sfxmrlist = NULL;
-    gt_assert(suftabparts != NULL);
-    /*
-    gt_suftabparts_showallrecords(suftabparts);
-    */
     gt_free(fci.tempcodeforradixsort);
     gt_firstcodes_update_workspace(__LINE__,false,"tempcodeforradixsort",
                                    true,&fcsl,

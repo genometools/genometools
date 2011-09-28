@@ -38,7 +38,6 @@ typedef struct
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder;
   unsigned long *countocc_samples;
-  bool usesample;
   GtStr *outfilenameleftborder;
 } GtFirstcodestab;
 
@@ -74,7 +73,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct);
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);
 
-unsigned long gt_firstcodes_numofallcodes(const GtFirstcodestab *fct);
+unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                             unsigned long suftaboffset);
@@ -94,5 +93,8 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx);
 
 unsigned long gt_firstcodes_countocc_entries(const GtFirstcodestab *fct);
+
+unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
+                                       unsigned long idx);
 
 #endif
