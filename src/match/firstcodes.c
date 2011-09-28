@@ -959,9 +959,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  false);
       gt_assert(fci.tab.allfirstcodes == NULL);
       gt_assert(fci.mappedcountocc != NULL);
-      gt_Sfxmappedrange_storetmp(fci.mappedcountocc,
-                                 gt_firstcodes_countocc_address(&fci.tab),
-                                 true);
+      gt_Sfxmappedrange_usetmp(fci.mappedcountocc,
+                               fci.tab.outfilenameleftborder,
+                               gt_firstcodes_countocc_address(&fci.tab),
+                               fci.tab.overflow_index > 0
+                                 ? fci.tab.overflow_index - 1
+                                 : fci.tab.differentcodes + 1,
+                               true);
       if (fci.tab.overflow_index > 0)
       {
         gt_assert(fci.mappedoverflow != NULL);

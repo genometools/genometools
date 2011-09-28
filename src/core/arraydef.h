@@ -18,6 +18,7 @@
 #ifndef ARRAYDEF_H
 #define ARRAYDEF_H
 
+#include <inttypes.h>
 #include "core/assert_api.h"
 #include "core/ma.h"
 #include "core/types_api.h"
@@ -128,5 +129,7 @@
 GT_DECLAREARRAYSTRUCT(GtUchar);
 GT_DECLAREARRAYSTRUCT(GtUlong);
 GT_DECLAREARRAYSTRUCT(char);
+GT_DECLAREARRAYSTRUCT(uint32_t);
+GT_DECLAREARRAYSTRUCT(uint64_t);
 
 #endif

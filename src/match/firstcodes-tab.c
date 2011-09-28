@@ -26,6 +26,7 @@
 #include "core/log.h"
 #include "core/spacecalc.h"
 #include "core/hashmap-generic.h"
+#include "core/arraydef.h"
 #include "firstcodes-tab.h"
 
 DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
@@ -118,18 +119,33 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
           GT_MEGABYTES(spaceopt+spacewithhash));
 }
 
+static unsigned long gt_leftborderbuffer_flush(FILE *fpleftborderbuffer,
+                                               GtArrayuint32_t
+                                                 *leftborderbuffer)
+{
+  unsigned long tmp;
+
+  gt_xfwrite(leftborderbuffer->spaceuint32_t,
+             sizeof (*leftborderbuffer->spaceuint32_t),
+             leftborderbuffer->nextfreeuint32_t,fpleftborderbuffer);
+  tmp = leftborderbuffer->nextfreeuint32_t;
+  leftborderbuffer->nextfreeuint32_t = 0;
+  return tmp;
+}
+
 #define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]
 
 #define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)\
         gt_assert((VALUE) <= UINT32_MAX);\
         fct->countocc[IDX] = VALUE;\
-        if (nextfreeleftborderbuffer == allocatedleftborderbuffer)\
+        if (leftborderbuffer.nextfreeuint32_t ==\
+            leftborderbuffer.allocateduint32_t)\
         {\
-          gt_xfwrite(spaceleftborderbuffer,sizeof (*spaceleftborderbuffer),\
-                     nextfreeleftborderbuffer,fpleftborderbuffer);\
-          nextfreeleftborderbuffer = 0;\
+          totalwriteleftborderbuffer\
+            += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);\
         }\
-        spaceleftborderbuffer[nextfreeleftborderbuffer++] = (uint32_t) VALUE
+        leftborderbuffer.spaceuint32_t[leftborderbuffer.nextfreeuint32_t++]\
+          = (uint32_t) VALUE
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
 {
@@ -137,11 +153,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
-  const unsigned long maxvalue = UINT8_MAX; /* reset back to UINT32_MAX */
-  uint32_t *spaceleftborderbuffer;
+  const unsigned long maxvalue = UINT32_MAX; /* reset back to UINT32_MAX */
   FILE *fpleftborderbuffer;
-  unsigned long nextfreeleftborderbuffer = 0;
-  const unsigned long allocatedleftborderbuffer = 1024UL;
+  GtArrayuint32_t leftborderbuffer;
+  unsigned long totalwriteleftborderbuffer = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)
@@ -188,11 +203,11 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   fct->countocc_samples[samplecount++] = partsum;
   fct->outfilenameleftborder = gt_str_new();
   fpleftborderbuffer = gt_xtmpfp(fct->outfilenameleftborder);
-  spaceleftborderbuffer = gt_malloc(sizeof (*spaceleftborderbuffer) *
-                                    allocatedleftborderbuffer);
+  leftborderbuffer.allocateduint32_t = 1024UL;
+  leftborderbuffer.spaceuint32_t
+   = gt_malloc(sizeof (*leftborderbuffer.spaceuint32_t) *
+               leftborderbuffer.allocateduint32_t);
   gt_assert(fpleftborderbuffer != NULL);
-  gt_log_log("write leftborder to file %s",
-             gt_str_get(fct->outfilenameleftborder));
   GT_PARTIALSUM_LEFTBORDER_SET(0,(uint32_t) partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
@@ -223,19 +238,17 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
   {
     gt_assert(partsum <= maxvalue);
     GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
-    gt_xfwrite(spaceleftborderbuffer,sizeof (*spaceleftborderbuffer),
-               nextfreeleftborderbuffer,fpleftborderbuffer);
-    nextfreeleftborderbuffer = 0;
+    totalwriteleftborderbuffer
+      += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
   } else
   {
     unsigned long overflowcells = fct->differentcodes - fct->overflow_index + 1;
     unsigned long *overflow_leftborder_ptr;
 
-    gt_assert(nextfreeleftborderbuffer > 0);
-    gt_xfwrite(spaceleftborderbuffer,sizeof (*spaceleftborderbuffer),
-               nextfreeleftborderbuffer,fpleftborderbuffer);
-    nextfreeleftborderbuffer = 0;
+    gt_assert(leftborderbuffer.nextfreeuint32_t > 0);
+    totalwriteleftborderbuffer
+      += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
     fct->overflow_leftborder
       = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
@@ -273,9 +286,13 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
     gt_assert(partsum == fct->countocc_samples[samplecount-1]);
     fct->numofsamples = samplecount - 1;
   }
+  gt_log_log("write leftborder to file %s (%lu units of size %u)",
+             gt_str_get(fct->outfilenameleftborder),
+             totalwriteleftborderbuffer,
+             (unsigned int) sizeof (*leftborderbuffer.spaceuint32_t));
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
-  gt_free(spaceleftborderbuffer);
+  gt_free(leftborderbuffer.spaceuint32_t);
   return maxbucketsize;
 }
 
