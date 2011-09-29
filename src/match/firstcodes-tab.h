@@ -32,7 +32,10 @@ typedef struct
   unsigned long differentcodes,
                 overflow_index,
                 numofsamples,
-                sampledistance;
+                sampledistance,
+                hashmap_addcount,
+                hashmap_incrementcount,
+                all_incrementcount;
   unsigned int sampleshift;
   uint32_t *countocc;
   uint8_t *countocc_small;
@@ -57,9 +60,35 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
   if (firstincrement)
   {
     fct->countocc[idx] = (uint32_t) 1;
+    fct->countocc_small[idx] = (uint8_t) 1;
   } else
   {
     fct->countocc[idx]++;
+    fct->all_incrementcount++;
+    if (fct->countocc_small[idx] > 0)
+    {
+      if (fct->countocc_small[idx] < GT_FIRSTCODES_MAXSMALL)
+      {
+        fct->countocc_small[idx]++;
+      } else
+      {
+        if (fct->countocc_small[idx] == GT_FIRSTCODES_MAXSMALL)
+        {
+          fct->countocc_small[idx] = 0;
+          ul_u32_gt_hashmap_add(fct->countocc_exceptions, idx, (uint32_t) 1);
+          fct->hashmap_addcount++;
+        }
+      }
+    } else
+    {
+      /* there is already an overflow for this index */
+      uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+
+      gt_assert(valueptr != NULL);
+      gt_assert(*valueptr < UINT32_MAX);
+      (*valueptr)++;
+      fct->hashmap_incrementcount++;
+    }
   }
 }
 

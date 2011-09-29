@@ -42,6 +42,8 @@ static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->countocc_samples = NULL;
   fct->outfilenameleftborder = NULL;
   fct->countocc_allocated = true;
+  fct->hashmap_addcount = 0;
+  fct->hashmap_incrementcount = 0;
 }
 
 static void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
@@ -220,11 +222,40 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
         gt_assert(samplecount < fct->numofsamples);\
         fct->countocc_samples[samplecount++] = PARTSUM
 
+static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
+                                           unsigned long idx)
+{
+  if (fct->countocc_small[idx] > 0)
+  {
+    return (uint32_t) fct->countocc_small[idx];
+  } else
+  {
+    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+
+    gt_assert(valueptr != NULL);
+    return *valueptr + (uint32_t) GT_FIRSTCODES_MAXSMALL;
+  }
+}
+
+static void gt_firstcodes_countocc_check(const GtFirstcodestab *fct)
+{
+  unsigned long idx;
+  uint32_t currentcount1, currentcount2;
+
+  for (idx = 0; idx < fct->differentcodes; idx++)
+  {
+    currentcount1 = GT_PARTIALSUM_COUNT_GET(idx);
+    gt_assert(currentcount1 > 0);
+    currentcount2 = gt_firstcodes_countocc_get(fct,idx);
+    gt_assert(currentcount1 == currentcount2);
+  }
+}
+
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
                                         unsigned long *overflow_index,
                                         bool forceoverflow)
 {
-  unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
+  unsigned long idx, partsum, maxbucketsize, samplecount = 0;
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
@@ -234,6 +265,13 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
   const unsigned long maxvalue = forceoverflow ? UINT8_MAX : UINT32_MAX;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
+  gt_log_log("hashmap_addcount=%lu",fct->hashmap_addcount);
+  gt_log_log("hashmap_incrementcount=%lu (%.5f%%)",
+                  fct->hashmap_incrementcount,
+                  100.0 * (double) fct->hashmap_incrementcount/
+                                     fct->all_incrementcount);
+  gt_firstcodes_countocc_check(fct);
+  /*
   for (idx = 0; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
@@ -255,6 +293,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
       largevalues++;
     }
   }
+  */
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
