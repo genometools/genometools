@@ -630,6 +630,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
   GtShortreadsortworkinfo *srsw = NULL;
+  unsigned long differentcodes;
   unsigned long *seqnum_relpos_bucket = NULL;
   bool haserr = false;
 
@@ -716,19 +717,19 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  (size_t)
                                  gt_marksubstring_size(fci.buf.marksuffix));
   gt_assert(fci.allfirstcodes != NULL);
-  gt_firstcodes_remdups(&fci.allfirstcodes,
-                        &fci.tab,fci.numofsequences,
-                        fci.buf.markprefix, fci.buf.marksuffix,
-                        logger);
-  if (fci.tab.differentcodes > 0)
+  differentcodes = gt_firstcodes_remdups(&fci.allfirstcodes,
+                                         &fci.tab,fci.numofsequences,
+                                         fci.buf.markprefix, fci.buf.marksuffix,
+                                         logger);
+  if (differentcodes > 0)
   {
     fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
-                                                    fci.tab.differentcodes,
+                                                    differentcodes,
                                                     GtSfxunsignedlong,
                                                     NULL,NULL);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedallfirstcodes);
     fci.mappedcountocc = gt_Sfxmappedrange_new("countocc",
-                                               fci.tab.differentcodes+1,
+                                               differentcodes+1,
                                                GtSfxuint32_t,
                                                NULL,NULL);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedcountocc);
@@ -741,7 +742,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  (size_t)
                                  gt_Sfxmappedrangelist_size_entire(sfxmrlist));
   fci.binsearchcache_depth
-    = (unsigned int) log10((double) fci.tab.differentcodes);
+    = (unsigned int) log10((double) differentcodes);
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
   binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
@@ -766,14 +767,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.buf.allocated = (unsigned long)
                           remainspace / (sizeof (*fci.buf.spaceGtUlong) +
                                          sizeof (*fci.tempcodeforradixsort));
-      if (fci.buf.allocated < fci.tab.differentcodes/16UL)
+      if (fci.buf.allocated < differentcodes/16UL)
       {
-        fci.buf.allocated = fci.tab.differentcodes/16UL;
+        fci.buf.allocated = differentcodes/16UL;
       }
     }
   } else
   {
-    fci.buf.allocated = fci.tab.differentcodes/5;
+    fci.buf.allocated = differentcodes/5;
   }
   if (fci.buf.allocated < 16UL)
   {
@@ -826,7 +827,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     if (fci.tab.overflow_index > 0)
     {
-      unsigned long overflowcells = fci.tab.differentcodes -
+      unsigned long overflowcells = differentcodes -
                                     fci.tab.overflow_index + 1;
       fci.mappedoverflow = gt_Sfxmappedrange_new("overflow_leftborder",
                                                  overflowcells,
@@ -873,7 +874,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      logger);
     gt_assert(suftabparts != NULL);
     gt_suftabparts_showallrecords(suftabparts,true);
-    gt_assert(fci.allfirstcodes[fci.tab.differentcodes - 1] ==
+    gt_assert(fci.allfirstcodes[differentcodes - 1] ==
               gt_firstcodes_idx2code(&fci,
                                      gt_suftabparts_maxindex_last(suftabparts))
              );

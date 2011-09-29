@@ -149,12 +149,12 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 }
 #endif
 
-void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
-                           GtFirstcodestab *fct,
-                           unsigned long numofsequences,
-                           Gtmarksubstring *markprefix,
-                           Gtmarksubstring *marksuffix,
-                           GtLogger *logger)
+unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
+                                    GtFirstcodestab *fct,
+                                    unsigned long numofsequences,
+                                    Gtmarksubstring *markprefix,
+                                    Gtmarksubstring *marksuffix,
+                                    GtLogger *logger)
 {
   if (numofsequences == 0)
   {
@@ -204,6 +204,7 @@ void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
                 fct->differentcodes,
                 100.00 * (double) fct->differentcodes/numofsequences,
                 numofsequences);
+  return fct->differentcodes;
 }
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]

@@ -93,12 +93,12 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
 
-void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
-                           GtFirstcodestab *fct,
-                           unsigned long numofsequences,
-                           Gtmarksubstring *markprefix,
-                           Gtmarksubstring *marksuffix,
-                           GtLogger *logger);
+unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
+                                    GtFirstcodestab *fct,
+                                    unsigned long numofsequences,
+                                    Gtmarksubstring *markprefix,
+                                    Gtmarksubstring *marksuffix,
+                                    GtLogger *logger);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 
