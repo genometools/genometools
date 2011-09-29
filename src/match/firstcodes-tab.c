@@ -29,11 +29,6 @@
 #include "core/arraydef.h"
 #include "firstcodes-tab.h"
 
-DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
-DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
-               gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
-               inline)
-
 static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                                        unsigned long numofsequences)
 {
@@ -162,9 +157,10 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   } else
   {
     unsigned long numofdifferentcodes, *storeptr, *readptr;
+    bool firstincrement;
 
     gt_firstcodes_countocc_new(fct,numofsequences);
-    gt_firstcodes_countocc_increment(fct,0);
+    gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
     gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
     for (storeptr = allfirstcodes, readptr = allfirstcodes+1;
@@ -175,9 +171,14 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
       {
         storeptr++;
         *storeptr = *readptr;
+        firstincrement = true;
+      } else
+      {
+        firstincrement = false;
       }
       gt_firstcodes_countocc_increment(fct,(unsigned long)
-                                       (storeptr - allfirstcodes));
+                                       (storeptr - allfirstcodes),
+                                       firstincrement);
       gt_marksubstring_mark(markprefix,*readptr);
       gt_marksubstring_mark(marksuffix,*readptr);
     }

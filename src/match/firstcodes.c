@@ -30,12 +30,12 @@
 #include "sfx-suffixer.h"
 #include "sfx-shortreadsort.h"
 #include "spmsuftab.h"
-#include "firstcodes-tab.h"
 #include "firstcodes-buf.h"
 #include "firstcodes.h"
 #include "marksubstring.h"
 #include "sfx-partssuf.h"
 #include "seqnumrelpos.h"
+#include "firstcodes-tab.h"
 
 typedef struct
 {
@@ -276,7 +276,8 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
       } else
       {
         gt_firstcodes_countocc_increment(&fci->tab,(unsigned long)
-                                         (subject - fci->allfirstcodes));
+                                         (subject - fci->allfirstcodes),
+                                         false);
         query++;
         found++;
       }

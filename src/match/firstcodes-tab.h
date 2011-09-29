@@ -44,10 +44,20 @@ typedef struct
        overflow_allocated;
 } GtFirstcodestab;
 
+DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
+DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
+               gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
+               inline)
+
 GT_UNUSED
 static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
-                                                    unsigned long idx)
+                                                    unsigned long idx,
+                                                    bool firstincrement)
 {
+  if (firstincrement)
+  {
+    gt_assert(fct->countocc[idx] == 0);
+  }
   fct->countocc[idx]++;
 }
 

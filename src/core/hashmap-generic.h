@@ -104,7 +104,7 @@
     gt_hashtable_delete(ht);                                     \
   }                                                           \
                                                               \
-  static inline valuetype *                                   \
+  /*@unused@*/ static inline valuetype *                                   \
   keytag##_##valuetag##_gt_hashmap_get(GtHashtable *ht,            \
                                     const keytype key)        \
   {                                                           \
@@ -123,7 +123,7 @@
     return gt_hashtable_remove(ht, &key);                        \
   }                                                           \
                                                               \
-  static inline void                                          \
+  /*@unused@*/ static inline void                                          \
   keytag##_##valuetag##_gt_hashmap_add(GtHashtable *ht,            \
                                     const keytype key,        \
                                     valuetype value)          \
