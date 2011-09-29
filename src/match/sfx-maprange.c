@@ -301,7 +301,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
 }
 
 void gt_Sfxmappedrange_checkindex(const GtSfxmappedrange *sfxmappedrange,
-                                  unsigned long idx)
+                                  GT_UNUSED unsigned long idx)
 {
   if (sfxmappedrange->indexrange_defined)
   {

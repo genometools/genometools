@@ -115,7 +115,7 @@ static GtCodetype gt_suftabparts_maxindex_raw(unsigned int part,
 }
 
 static void gt_suftabparts_removeemptyparts(GtSuftabparts *suftabparts,
-                                            unsigned long totalwidth,
+                                            GT_UNUSED unsigned long totalwidth,
                                             GtLogger *logger)
 {
 #undef SKDEBUG
