@@ -35,12 +35,13 @@ typedef struct
                 sampledistance;
   unsigned int sampleshift;
   uint32_t *countocc;
-  bool countocc_allocated;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder;
   unsigned long *countocc_samples;
   GtStr *outfilenameleftborder;
+  bool countocc_allocated,
+       overflow_allocated;
 } GtFirstcodestab;
 
 GT_UNUSED
@@ -88,6 +89,8 @@ void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 
+void gt_firstcodes_overflow_remap(GtFirstcodestab *fct,unsigned long *ptr);
+
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx);
 
@@ -104,5 +107,9 @@ unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
                                     GtLogger *logger);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
+
+void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct);
+
+void gt_firstcodes_overflow_delete(GtFirstcodestab *fct);
 
 #endif

@@ -331,6 +331,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
     gt_fa_fclose(fpleftborderbuffer);
     fct->overflow_leftborder
       = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
+    fct->overflow_allocated = true;
     overflow_leftborder_ptr = fct->overflow_leftborder - fct->overflow_index;
     currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
@@ -489,6 +490,11 @@ void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr)
   fct->countocc = ptr;
 }
 
+void gt_firstcodes_overflow_remap(GtFirstcodestab *fct,unsigned long *ptr)
+{
+  fct->overflow_leftborder = ptr;
+}
+
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct)
 {
   return fct->outfilenameleftborder;
@@ -497,4 +503,17 @@ const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct)
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct)
 {
   fct->countocc_allocated = false;
+}
+
+void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct)
+{
+  fct->overflow_allocated = false;
+}
+
+void gt_firstcodes_overflow_delete(GtFirstcodestab *fct)
+{
+  if (fct->overflow_allocated)
+  {
+    gt_free(fct->overflow_leftborder);
+  }
 }
