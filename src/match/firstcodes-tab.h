@@ -65,6 +65,7 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
 }
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
+                                        unsigned long *overflow_index,
                                         bool forceoverflow);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
@@ -84,6 +85,8 @@ void **gt_firstcodes_countocc_address(GtFirstcodestab *fct);
 void **gt_firstcodes_overflow_address(GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr);
+
+const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx);

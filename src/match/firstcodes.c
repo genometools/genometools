@@ -630,7 +630,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtSuftabparts *suftabparts = NULL;
   GtFirstcodesspacelog fcsl;
   GtShortreadsortworkinfo *srsw = NULL;
-  unsigned long differentcodes;
+  unsigned long differentcodes, overflow_index;
   unsigned long *seqnum_relpos_bucket = NULL;
   bool haserr = false;
 
@@ -823,12 +823,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
-    maxbucketsize = gt_firstcodes_partialsums(&fci.tab,forceoverflow);
+    maxbucketsize = gt_firstcodes_partialsums(&fci.tab,&overflow_index,
+                                              forceoverflow);
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
-    if (fci.tab.overflow_index > 0)
+    if (overflow_index > 0)
     {
-      unsigned long overflowcells = differentcodes -
-                                    fci.tab.overflow_index + 1;
+      unsigned long overflowcells = differentcodes - overflow_index + 1;
       fci.mappedoverflow = gt_Sfxmappedrange_new("overflow_leftborder",
                                                  overflowcells,
                                                  GtSfxunsignedlong,NULL,NULL);
@@ -892,7 +892,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    * sizeof (*fci.buf.spaceGtUlong));
     gt_assert(fci.mappedcountocc != NULL);
     gt_Sfxmappedrange_usetmp(fci.mappedcountocc,
-                             fci.tab.outfilenameleftborder,
+                             gt_firstcodes_outfilenameleftborder(&fci.tab),
                              gt_firstcodes_countocc_address(&fci.tab),
                              gt_firstcodes_leftborder_entries(&fci.tab),
                              true);
@@ -906,7 +906,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  (void **) &fci.allfirstcodes,
                                  false);
       gt_assert(fci.allfirstcodes == NULL);
-      if (fci.tab.overflow_index > 0)
+      if (overflow_index > 0)
       {
         gt_assert(fci.mappedoverflow != NULL);
         gt_Sfxmappedrange_storetmp(
@@ -1014,9 +1014,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         unsigned long largestindex2map;
 
-        if (part > 0 && fci.tab.overflow_index > 0)
+        if (part > 0 && overflow_index > 0)
         {
-          largestindex2map = MIN(fci.tab.overflow_index-1,fci.currentmaxindex);
+          largestindex2map = MIN(overflow_index-1,fci.currentmaxindex);
         } else
         {
           largestindex2map = fci.currentmaxindex;
@@ -1032,10 +1032,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
       if (fci.mappedoverflow != NULL)
       {
-        gt_assert(fci.tab.overflow_index > 0);
-        if (fci.tab.overflow_index <= fci.currentmaxindex)
+        gt_assert(overflow_index > 0);
+        if (overflow_index <= fci.currentmaxindex)
         {
-          if (fci.currentminindex <= fci.tab.overflow_index)
+          if (fci.currentminindex <= overflow_index)
           {
             fci.tab.overflow_leftborder
               = (unsigned long *)
@@ -1047,10 +1047,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
             fci.tab.overflow_leftborder
               = (unsigned long *)
                 gt_Sfxmappedrange_map(fci.mappedoverflow,
-                                      fci.currentminindex -
-                                        fci.tab.overflow_index,
-                                      fci.currentmaxindex -
-                                        fci.tab.overflow_index);
+                                      fci.currentminindex - overflow_index,
+                                      fci.currentmaxindex - overflow_index);
           }
         }
       }

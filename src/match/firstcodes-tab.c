@@ -225,7 +225,9 @@ unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
         gt_assert(samplecount < fct->numofsamples);\
         fct->countocc_samples[samplecount++] = PARTSUM
 
-unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,bool forceoverflow)
+unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
+                                        unsigned long *overflow_index,
+                                        bool forceoverflow)
 {
   unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
   uint32_t currentcount;
@@ -374,6 +376,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,bool forceoverflow)
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   gt_free(leftborderbuffer.spaceuint32_t);
+  *overflow_index = fct->overflow_index;
   return maxbucketsize;
 }
 
@@ -484,6 +487,11 @@ void **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
 void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr)
 {
   fct->countocc = ptr;
+}
+
+const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct)
+{
+  return fct->outfilenameleftborder;
 }
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct)
