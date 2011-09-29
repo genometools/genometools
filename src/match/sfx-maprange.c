@@ -72,8 +72,7 @@ struct GtSfxmappedrange
   bool writable;
 };
 
-static size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange
-                                              *sfxmappedrange)
+size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange)
 {
   gt_assert(sfxmappedrange != NULL);
   return sfxmappedrange->sizeofunit * sfxmappedrange->numofunits;

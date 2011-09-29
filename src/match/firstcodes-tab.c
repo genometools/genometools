@@ -37,7 +37,7 @@ static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder = NULL;
-  fct->countocc_samples = NULL;
+  fct->leftborder_samples = NULL;
   fct->outfilenameleftborder = NULL;
   fct->hashmap_addcount = 0;
   fct->hashmap_incrementcount = 0;
@@ -198,6 +198,11 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   return fct->differentcodes;
 }
 
+size_t gt_firstcodes_remdups_space(const GtFirstcodestab *fct)
+{
+  return sizeof (*fct->countocc_small) * (fct->differentcodes + 1);
+}
+
 #define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
 
 #define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)\
@@ -213,7 +218,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
 
 #define GT_FIRSTCODES_ADD_SAMPLE(PARTSUM)\
         gt_assert(samplecount < fct->numofsamples);\
-        fct->countocc_samples[samplecount++] = PARTSUM
+        fct->leftborder_samples[samplecount++] = PARTSUM
 
 static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
                                            unsigned long idx)
@@ -248,7 +253,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
   gt_log_log("hashmap_incrementcount=%lu (%.5f%%)",
                   fct->hashmap_incrementcount,
                   100.0 * (double) fct->hashmap_incrementcount/
-                                     fct->all_incrementcount);
+                                   fct->all_incrementcount);
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
@@ -266,8 +271,8 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
   }
   bitmask = fct->sampledistance - 1;
   fct->numofsamples = 1UL + 1UL + fct->differentcodes/fct->sampledistance;
-  fct->countocc_samples = gt_malloc(sizeof(*fct->countocc_samples) *
-                                    fct->numofsamples);
+  fct->leftborder_samples = gt_malloc(sizeof(*fct->leftborder_samples) *
+                                      fct->numofsamples);
   GT_FIRSTCODES_ADD_SAMPLE(partsum);
   fct->outfilenameleftborder = gt_str_new();
   fpleftborderbuffer = gt_xtmpfp(fct->outfilenameleftborder);
@@ -344,12 +349,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
     overflow_leftborder_ptr[fct->differentcodes] = partsum;
   }
   gt_assert(idx > 0);
-  if (partsum > fct->countocc_samples[samplecount-1])
+  if (partsum > fct->leftborder_samples[samplecount-1])
   {
     GT_FIRSTCODES_ADD_SAMPLE(partsum);
   } else
   {
-    gt_assert(partsum == fct->countocc_samples[samplecount-1]);
+    gt_assert(partsum == fct->leftborder_samples[samplecount-1]);
   }
   fct->numofsamples = samplecount-1;
   gt_log_log("write leftborder to file %s (%lu units of size %u)",
@@ -378,7 +383,7 @@ unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx)
 {
   gt_assert(idx <= fct->numofsamples);
-  return fct->countocc_samples[idx];
+  return fct->leftborder_samples[idx];
 }
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
@@ -446,8 +451,8 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
 
 void gt_firstcodes_samples_delete(GtFirstcodestab *fct)
 {
-  gt_free(fct->countocc_samples);
-  fct->countocc_samples = NULL;
+  gt_free(fct->leftborder_samples);
+  fct->leftborder_samples = NULL;
 }
 
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
@@ -465,7 +470,7 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
 {
   fct->leftborder = NULL;
   fct->countocc_small = NULL;
-  fct->countocc_samples = NULL;
+  fct->leftborder_samples = NULL;
   fct->overflow_leftborder = NULL;
   fct->countocc_exceptions = NULL;
   fct->differentcodes = 0;

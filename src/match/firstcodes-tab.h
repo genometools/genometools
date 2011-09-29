@@ -40,8 +40,8 @@ typedef struct
   uint32_t *leftborder;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
-  unsigned long *overflow_leftborder;
-  unsigned long *countocc_samples;
+  unsigned long *overflow_leftborder,
+                *leftborder_samples;
   GtStr *outfilenameleftborder;
   bool overflow_allocated;
 } GtFirstcodestab;
@@ -145,6 +145,8 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
                                     GtLogger *logger);
+
+size_t gt_firstcodes_remdups_space(const GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 
