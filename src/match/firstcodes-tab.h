@@ -22,6 +22,7 @@
 #include "core/unused_api.h"
 #include "core/str_api.h"
 #include "core/hashmap-generic.h"
+#include "core/logger_api.h"
 #include "marksubstring.h"
 
 #define GT_FIRSTCODES_MAXSMALL UINT8_MAX
@@ -96,7 +97,8 @@ void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
                            GtFirstcodestab *fct,
                            unsigned long numofsequences,
                            Gtmarksubstring *markprefix,
-                           Gtmarksubstring *marksuffix);
+                           Gtmarksubstring *marksuffix,
+                           GtLogger *logger);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 

@@ -153,7 +153,8 @@ void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
                            GtFirstcodestab *fct,
                            unsigned long numofsequences,
                            Gtmarksubstring *markprefix,
-                           Gtmarksubstring *marksuffix)
+                           Gtmarksubstring *marksuffix,
+                           GtLogger *logger)
 {
   if (numofsequences == 0)
   {
@@ -198,6 +199,11 @@ void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
     }
     fct->differentcodes = numofdifferentcodes;
   }
+  gt_logger_log(logger,"number of different first codes=%lu (%.2f%%) "
+                       "in %lu sequences",
+                fct->differentcodes,
+                100.00 * (double) fct->differentcodes/numofsequences,
+                numofsequences);
 }
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]

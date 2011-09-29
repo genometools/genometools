@@ -718,7 +718,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_assert(fci.allfirstcodes != NULL);
   gt_firstcodes_remdups(&fci.allfirstcodes,
                         &fci.tab,fci.numofsequences,
-                        fci.buf.markprefix, fci.buf.marksuffix);
+                        fci.buf.markprefix, fci.buf.marksuffix,
+                        logger);
   if (fci.tab.differentcodes > 0)
   {
     fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
@@ -739,10 +740,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_update_workspace(__LINE__,true,"splitable arrays",false,&fcsl,
                                  (size_t)
                                  gt_Sfxmappedrangelist_size_entire(sfxmrlist));
-  gt_logger_log(logger,"number of different codes=%lu (%.4f) in %lu sequences",
-                fci.tab.differentcodes,
-                (double) fci.tab.differentcodes/fci.numofsequences,
-                fci.countsequences);
   fci.binsearchcache_depth
     = (unsigned int) log10((double) fci.tab.differentcodes);
   fci.flushcount = 0;
