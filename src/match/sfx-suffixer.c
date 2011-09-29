@@ -2163,8 +2163,8 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                          (unsigned long long)
                          gt_bcktab_numofallcodes(sfi->bcktab));
   }
-  sfi->currentmincode = gt_suftabparts_mincode(sfi->part,sfi->suftabparts);
-  sfi->currentmaxcode = gt_suftabparts_maxcode(sfi->part,sfi->suftabparts);
+  sfi->currentmincode = gt_suftabparts_minindex(sfi->part,sfi->suftabparts);
+  sfi->currentmaxcode = gt_suftabparts_maxindex(sfi->part,sfi->suftabparts);
   sfi->widthofpart = gt_suftabparts_widthofpart(sfi->part,sfi->suftabparts);
   if (sfi->sfxprogress != NULL)
   {

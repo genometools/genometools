@@ -28,7 +28,7 @@
 typedef struct GtSuftabparts GtSuftabparts;
 
 void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
-                                   bool withcodes);
+                                   bool withminmaxindex);
 
 GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
                                   const GtBcktab *bcktab,
@@ -43,16 +43,10 @@ void gt_suftabparts_delete(GtSuftabparts *suftabparts);
 GtCodetype gt_suftabparts_minindex(unsigned int part,
                                    const GtSuftabparts *suftabparts);
 
-GtCodetype gt_suftabparts_mincode(unsigned int part,
-                                  const GtSuftabparts *suftabparts);
-
 GtCodetype gt_suftabparts_maxindex(unsigned int part,
                                    const GtSuftabparts *suftabparts);
 
 GtCodetype gt_suftabparts_maxindex_last(const GtSuftabparts *suftabparts);
-
-GtCodetype gt_suftabparts_maxcode(unsigned int part,
-                                  const GtSuftabparts *suftabparts);
 
 unsigned long gt_suftabparts_offset(unsigned int part,
                                     const GtSuftabparts *suftabparts);

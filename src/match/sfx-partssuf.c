@@ -47,7 +47,7 @@ struct GtSuftabparts
 };
 
 void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
-                                   bool withcodes)
+                                   bool withminmaxindex)
 {
   unsigned int part;
   unsigned long totalwidth;
@@ -57,11 +57,10 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
   totalwidth = suftabparts->components[suftabparts->numofparts - 1].sumofwidth;
   for (part = 0; part < suftabparts->numofparts; part++)
   {
-    if (withcodes)
+    if (withminmaxindex)
     {
       gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu nextidx=%lu "
-                 "minindex=%lu maxindex=%lu "
-                 "mincode=%lu maxcode=%lu",
+                 "minindex=%lu maxindex=%lu ",
                  part,
                  suftabparts->components[part].widthofpart,
                  100.00 * (double) suftabparts->components[part].widthofpart/
@@ -69,9 +68,7 @@ void gt_suftabparts_showallrecords(const GtSuftabparts *suftabparts,
                  suftabparts->components[part].suftaboffset,
                  suftabparts->components[part].nextidx,
                  gt_suftabparts_minindex(part,suftabparts),
-                 gt_suftabparts_maxindex(part,suftabparts),
-                 gt_suftabparts_mincode(part,suftabparts),
-                 gt_suftabparts_maxcode(part,suftabparts));
+                 gt_suftabparts_maxindex(part,suftabparts));
     } else
     {
       gt_log_log("part %u: width=%lu (%.2f%%) offset=%lu nextidx=%lu",
@@ -337,44 +334,16 @@ GtCodetype gt_suftabparts_minindex(unsigned int part,
   return suftabparts->components[part].minindex;
 }
 
-GtCodetype gt_suftabparts_mincode(unsigned int part,
-                                  const GtSuftabparts *suftabparts)
-{
-  unsigned long minidx;
-
-  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  minidx = gt_suftabparts_minindex(part,suftabparts);
-  if (suftabparts->fct != NULL)
-  {
-    return gt_firstcodes_idx2code(suftabparts->fct,minidx);
-  }
-  return minidx;
-}
-
 GtCodetype gt_suftabparts_maxindex(unsigned int part,
                                    const GtSuftabparts *suftabparts)
 {
   return suftabparts->components[part].maxindex;
 }
 
-GtCodetype gt_suftabparts_maxcode(unsigned int part,
-                                  const GtSuftabparts *suftabparts)
-{
-  unsigned long maxidx;
-
-  gt_assert(suftabparts != NULL && part < suftabparts->numofparts);
-  maxidx = gt_suftabparts_maxindex(part,suftabparts);
-  if (suftabparts->fct != NULL)
-  {
-    return gt_firstcodes_idx2code(suftabparts->fct,maxidx);
-  }
-  return maxidx;
-}
-
 GtCodetype gt_suftabparts_maxindex_last(const GtSuftabparts *suftabparts)
 {
   gt_assert(suftabparts->numofparts > 0);
-  return gt_suftabparts_maxcode(suftabparts->numofparts-1,suftabparts);
+  return gt_suftabparts_maxindex(suftabparts->numofparts-1,suftabparts);
 }
 
 unsigned long gt_suftabparts_offset(unsigned int part,

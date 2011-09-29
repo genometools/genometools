@@ -149,7 +149,8 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 }
 #endif
 
-void gt_firstcodes_remdups(GtFirstcodestab *fct,
+void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
+                           GtFirstcodestab *fct,
                            unsigned long numofsequences,
                            Gtmarksubstring *markprefix,
                            Gtmarksubstring *marksuffix)
@@ -159,14 +160,16 @@ void gt_firstcodes_remdups(GtFirstcodestab *fct,
     fct->differentcodes = 0;
   } else
   {
-    unsigned long numofdifferentcodes, *storeptr, *readptr;
+    unsigned long numofdifferentcodes, *storeptr, *readptr,
+                  *allfirstcodes;
 
+    allfirstcodes = *allfirstcodesptr;
     gt_firstcodes_countocc_new(fct,numofsequences);
     gt_firstcodes_countocc_increment(fct,0);
-    gt_marksubstring_mark(markprefix,fct->allfirstcodes[0]);
-    gt_marksubstring_mark(marksuffix,fct->allfirstcodes[0]);
-    for (storeptr = fct->allfirstcodes, readptr = fct->allfirstcodes+1;
-         readptr < fct->allfirstcodes + numofsequences;
+    gt_marksubstring_mark(markprefix,allfirstcodes[0]);
+    gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
+    for (storeptr = allfirstcodes, readptr = allfirstcodes+1;
+         readptr < allfirstcodes + numofsequences;
          readptr++)
     {
       if (*storeptr != *readptr)
@@ -175,21 +178,22 @@ void gt_firstcodes_remdups(GtFirstcodestab *fct,
         *storeptr = *readptr;
       }
       gt_firstcodes_countocc_increment(fct,(unsigned long)
-                                       (storeptr - fct->allfirstcodes));
+                                       (storeptr - allfirstcodes));
       gt_marksubstring_mark(markprefix,*readptr);
       gt_marksubstring_mark(marksuffix,*readptr);
     }
-    numofdifferentcodes = (unsigned long) (storeptr - fct->allfirstcodes + 1);
+    numofdifferentcodes = (unsigned long) (storeptr - allfirstcodes + 1);
     if (numofdifferentcodes < numofsequences)
     {
       /* reduce the memory requirement, as the duplicated elements are not
          needed */
-      fct->allfirstcodes = gt_realloc(fct->allfirstcodes,
-                                      sizeof (*fct->allfirstcodes) *
+      *allfirstcodesptr = gt_realloc(*allfirstcodesptr,
+                                     sizeof (**allfirstcodesptr) *
                                       numofdifferentcodes);
+      allfirstcodes = *allfirstcodesptr;
       gt_firstcodes_countocc_resize(fct,numofdifferentcodes);
 #ifdef SKDEBUG
-      checkcodesorder(fct->allfirstcodes,numofdifferentcodes,false);
+      checkcodesorder(allfirstcodes,numofdifferentcodes,false);
 #endif
     }
     fct->differentcodes = numofdifferentcodes;
@@ -434,17 +438,6 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
     return idx << fct->sampleshift;
   }
   return fct->differentcodes - 1;
-}
-
-unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
-                                     unsigned long idx)
-{
-  gt_assert(idx <= fct->differentcodes);
-  if (idx == fct->differentcodes)
-  {
-    return fct->allfirstcodes[idx-1];
-  }
-  return fct->allfirstcodes[idx];
 }
 
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)

@@ -29,7 +29,6 @@
 typedef struct
 {
   unsigned long differentcodes,
-                *allfirstcodes,
                 overflow_index,
                 numofsamples,
                 sampledistance;
@@ -74,9 +73,6 @@ unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                             unsigned long suftaboffset);
 
-unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
-                                     unsigned long idx);
-
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
@@ -95,7 +91,8 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
 
-void gt_firstcodes_remdups(GtFirstcodestab *fct,
+void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
+                           GtFirstcodestab *fct,
                            unsigned long numofsequences,
                            Gtmarksubstring *markprefix,
                            Gtmarksubstring *marksuffix);
