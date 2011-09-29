@@ -115,6 +115,8 @@ unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                             unsigned long suftaboffset);
 
+void gt_firstcodes_samples_delete(GtFirstcodestab *fct);
+
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);

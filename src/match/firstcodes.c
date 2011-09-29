@@ -895,6 +895,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              );
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     sfxmrlist = NULL;
+    gt_firstcodes_samples_delete(&fci.tab);
     gt_free(fci.tempcodeforradixsort);
     GT_FCI_SUBTRACTWORKSPACE("tempcodeforradixsort",
                              (size_t) fci.buf.allocated

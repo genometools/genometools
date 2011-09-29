@@ -365,6 +365,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
   }
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
+  gt_free(fct->countocc_small);
+  fct->countocc_small = NULL;
+  gt_hashtable_delete(fct->countocc_exceptions);
+  fct->countocc_exceptions = NULL;
   gt_free(leftborderbuffer.spaceuint32_t);
   *overflow_index = fct->overflow_index;
   return maxbucketsize;
@@ -440,14 +444,19 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
   return fct->differentcodes - 1;
 }
 
+void gt_firstcodes_samples_delete(GtFirstcodestab *fct)
+{
+  gt_free(fct->countocc_samples);
+  fct->countocc_samples = NULL;
+}
+
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
 {
   gt_free(fct->countocc_small);
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
   fct->countocc_exceptions = NULL;
-  gt_free(fct->countocc_samples);
-  fct->countocc_samples = NULL;
+  gt_firstcodes_samples_delete(fct);
   gt_str_delete(fct->outfilenameleftborder);
   fct->outfilenameleftborder = NULL;
 }
@@ -456,7 +465,9 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
 {
   fct->leftborder = NULL;
   fct->countocc_small = NULL;
+  fct->countocc_samples = NULL;
   fct->overflow_leftborder = NULL;
+  fct->countocc_exceptions = NULL;
   fct->differentcodes = 0;
 }
 
