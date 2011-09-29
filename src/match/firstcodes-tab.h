@@ -95,10 +95,10 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
 
-unsigned long gt_firstcodes_remdups(GtFirstcodestab *fct,
-                                    unsigned long numofsequences,
-                                    Gtmarksubstring *markprefix,
-                                    Gtmarksubstring *marksuffix);
+void gt_firstcodes_remdups(GtFirstcodestab *fct,
+                           unsigned long numofsequences,
+                           Gtmarksubstring *markprefix,
+                           Gtmarksubstring *marksuffix);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 

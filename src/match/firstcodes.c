@@ -663,7 +663,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_logger_log(logger,"store %lu prefix codes",fci.numofsequences);
   fci.tab.allfirstcodes = gt_malloc(sizeforcodestable);
   gt_firstcodes_countocc_setnull(&fci.tab);
-  fci.tab.differentcodes = 0;
   fci.countsequences = 0;
   fci.firstcodehits = 0;
   fci.firstcodeposhits = 0;
@@ -703,10 +702,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_update_workspace(__LINE__,true,"marksuffix",true,&fcsl,
                                  (size_t)
                                  gt_marksubstring_size(fci.buf.marksuffix));
-  fci.tab.differentcodes = gt_firstcodes_remdups(&fci.tab,
-                                                 fci.numofsequences,
-                                                 fci.buf.markprefix,
-                                                 fci.buf.marksuffix);
+  gt_firstcodes_remdups(&fci.tab,fci.numofsequences,
+                        fci.buf.markprefix, fci.buf.marksuffix);
   if (fci.tab.differentcodes > 0)
   {
     fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",

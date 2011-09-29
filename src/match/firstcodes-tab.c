@@ -149,12 +149,15 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 }
 #endif
 
-unsigned long gt_firstcodes_remdups(GtFirstcodestab *fct,
-                                    unsigned long numofsequences,
-                                    Gtmarksubstring *markprefix,
-                                    Gtmarksubstring *marksuffix)
+void gt_firstcodes_remdups(GtFirstcodestab *fct,
+                           unsigned long numofsequences,
+                           Gtmarksubstring *markprefix,
+                           Gtmarksubstring *marksuffix)
 {
-  if (numofsequences > 0)
+  if (numofsequences == 0)
+  {
+    fct->differentcodes = 0;
+  } else
   {
     unsigned long numofdifferentcodes, *storeptr, *readptr;
 
@@ -189,9 +192,8 @@ unsigned long gt_firstcodes_remdups(GtFirstcodestab *fct,
       checkcodesorder(fct->allfirstcodes,numofdifferentcodes,false);
 #endif
     }
-    return numofdifferentcodes;
+    fct->differentcodes = numofdifferentcodes;
   }
-  return 0;
 }
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]
@@ -466,6 +468,7 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
 {
   fct->countocc = NULL;
   fct->overflow_leftborder = NULL;
+  fct->differentcodes = 0;
 }
 
 void **gt_firstcodes_countocc_address(GtFirstcodestab *fct)
