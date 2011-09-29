@@ -32,6 +32,7 @@ typedef struct
        verbose,
        outputspms,
        onlyaccum,
+       forceoverflow,
        countspms;
   unsigned int minmatchlength,
                parts;
@@ -124,6 +125,12 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   /* -onlyaccum */
   option = gt_option_new_bool("onlyaccum", "only accumulate codes",
                              &arguments->onlyaccum, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  /* -foreceoverflow */
+  option = gt_option_new_bool("forceoverflow", "force overflow of countocc",
+                             &arguments->forceoverflow, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -229,6 +236,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->minmatchlength,
                                                       arguments->checksuftab,
                                                       arguments->onlyaccum,
+                                                      arguments->forceoverflow,
                                                       spmsk_state != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,

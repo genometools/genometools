@@ -610,6 +610,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int minmatchlength,
                                                    bool withsuftabcheck,
                                                    bool onlyaccumulation,
+                                                   bool forceoverflow,
                                                    GtFirstcodesintervalprocess
                                                      itvprocess,
                                                    void *itvprocessdata,
@@ -824,7 +825,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
-    maxbucketsize = gt_firstcodes_partialsums(&fci.tab);
+    maxbucketsize = gt_firstcodes_partialsums(&fci.tab,forceoverflow);
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     if (fci.tab.overflow_index > 0)
     {

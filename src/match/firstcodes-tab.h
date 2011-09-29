@@ -63,7 +63,8 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
   }
 }
 
-unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct);
+unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
+                                        bool forceoverflow);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);

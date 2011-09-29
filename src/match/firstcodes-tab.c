@@ -218,16 +218,16 @@ void gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
         gt_assert(samplecount < fct->numofsamples);\
         fct->countocc_samples[samplecount++] = PARTSUM
 
-unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct)
+unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,bool forceoverflow)
 {
   unsigned long idx, partsum, maxbucketsize, largevalues = 0, samplecount = 0;
   uint32_t currentcount;
   GtDiscDistri *countdistri = gt_disc_distri_new();
   unsigned long bitmask;
-  const unsigned long maxvalue = UINT8_MAX; /* reset back to UINT32_MAX */
   FILE *fpleftborderbuffer;
   GtArrayuint32_t leftborderbuffer;
   unsigned long leftborderbuffer_totalwrite = 0;
+  const unsigned long maxvalue = forceoverflow ? UINT8_MAX : UINT32_MAX;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   for (idx = 0; idx < fct->differentcodes; idx++)

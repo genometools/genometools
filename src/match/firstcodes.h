@@ -30,17 +30,18 @@ typedef int (*GtFirstcodesintervalprocess)(void *,
                                            const uint16_t *,
                                            unsigned long,GtError *);
 
-int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
-                                                  unsigned int kmersize,
-                                                  unsigned int numofparts,
-                                                  unsigned long maximumspace,
-                                                  unsigned int minmatchlength,
-                                                  bool withsuftabcheck,
-                                                  bool onlyaccumulation,
-                                                  GtFirstcodesintervalprocess
-                                                     itvprocess,
-                                                  void *itvprocessdata,
-                                                  GtLogger *logger,
-                                                  GtError *err);
+int storefirstcodes_getencseqkmers_twobitencoding(
+                    const GtEncseq *encseq,
+                    unsigned int kmersize,
+                    unsigned int numofparts,
+                    unsigned long maximumspace,
+                    unsigned int minmatchlength,
+                    bool withsuftabcheck, /* set to false, only for tests */
+                    bool onlyaccumulation, /* set to false, only for tests */
+                    bool forceoverflow, /* set to false, only for tests */
+                    GtFirstcodesintervalprocess itvprocess,
+                    void *itvprocessdata,
+                    GtLogger *logger,
+                    GtError *err);
 
 #endif
