@@ -1,6 +1,8 @@
 #include "core/ma.h"
+#include "core/fa.h"
 #include "core/log_api.h"
 #include "core/spacecalc.h"
+#include "core/spacepeak.h"
 #include "firstcodes-spacelog.h"
 
 struct GtFirstcodesspacelog
@@ -57,7 +59,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     }
   }
   gt_log_log("file %s, line %d: %s %.2f MB for %s to %space; work=%.2f, "
-             "split=%.2f,all=%.2f MB",
+             "split=%.2f, all=%.2f MB",
              filename,
              line,
              add ? "add" : "delete",
@@ -67,8 +69,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
              GT_MEGABYTES(fcsl->workspace),
              GT_MEGABYTES(fcsl->splitspace),
              GT_MEGABYTES(fcsl->workspace+fcsl->splitspace));
-  /*
-  gt_logger_log(logger,"current space peak %.2f",
-                GT_MEGABYTES(gt_spacepeak_get_space_peak()));
-  */
+  gt_log_log("current space usage %.2f",
+             GT_MEGABYTES(gt_ma_get_space_current() +
+                          gt_fa_get_space_current()));
 }

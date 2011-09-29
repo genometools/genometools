@@ -671,13 +671,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                       (size_t) gt_marksubstring_size(fci.buf.marksuffix));
   gt_assert(fci.allfirstcodes != NULL);
   fci.differentcodes = gt_firstcodes_remdups(fci.allfirstcodes,
+                                             fci.fcsl,
                                              &fci.tab,
                                              fci.numofsequences,
                                              fci.buf.markprefix,
                                              fci.buf.marksuffix,
                                              logger);
-  GT_FCI_ADDWORKSPACE(fci.fcsl,"count_small",
-                      (size_t) gt_firstcodes_remdups_space(&fci.tab));
   if (fci.differentcodes > 0)
   {
     if (fci.differentcodes < fci.numofsequences)
@@ -782,7 +781,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
-    maxbucketsize = gt_firstcodes_partialsums(&fci.tab,&overflow_index,
+    maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,
+                                              &fci.tab,
+                                              &overflow_index,
                                               forceoverflow);
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     if (overflow_index > 0)
@@ -840,7 +841,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              );
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     sfxmrlist = NULL;
-    gt_firstcodes_samples_delete(&fci.tab);
+    gt_firstcodes_samples_delete(fci.fcsl,&fci.tab);
     gt_free(fci.tempcodeforradixsort);
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"tempcodeforradixsort",
                              (size_t) fci.buf.allocated
@@ -863,6 +864,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_Sfxmappedrange_storetmp(fci.mappedallfirstcodes,
                                  (void **) &fci.allfirstcodes,
                                  false);
+      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes",
+                       gt_Sfxmappedrange_size_entire(fci.mappedallfirstcodes));
       gt_assert(fci.allfirstcodes == NULL);
       if (overflow_index > 0)
       {

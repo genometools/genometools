@@ -24,6 +24,7 @@
 #include "core/hashmap-generic.h"
 #include "core/logger_api.h"
 #include "marksubstring.h"
+#include "firstcodes-spacelog.h"
 
 #define GT_FIRSTCODES_MAXSMALL UINT8_MAX
 
@@ -103,7 +104,8 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
   }
 }
 
-unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
+unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
+                                        GtFirstcodestab *fct,
                                         unsigned long *overflow_index,
                                         bool forceoverflow);
 
@@ -115,7 +117,8 @@ unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                             unsigned long suftaboffset);
 
-void gt_firstcodes_samples_delete(GtFirstcodestab *fct);
+void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
+                                  GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct);
 
@@ -140,13 +143,12 @@ unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
 
 unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
+                                    GtFirstcodesspacelog *fcsl,
                                     GtFirstcodestab *fct,
                                     unsigned long numofsequences,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
                                     GtLogger *logger);
-
-size_t gt_firstcodes_remdups_space(const GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 
