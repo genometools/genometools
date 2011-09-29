@@ -22,6 +22,7 @@
 #include "core/unused_api.h"
 #include "core/str_api.h"
 #include "core/hashmap-generic.h"
+#include "marksubstring.h"
 
 #define GT_FIRSTCODES_MAXSMALL UINT8_MAX
 
@@ -41,12 +42,6 @@ typedef struct
   unsigned long *countocc_samples;
   GtStr *outfilenameleftborder;
 } GtFirstcodestab;
-
-void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
-                                unsigned long numofsequences);
-
-void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
-                                   unsigned long numofdifferentcodes);
 
 GT_UNUSED
 static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
@@ -99,6 +94,11 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
+
+unsigned long gt_firstcodes_remdups(GtFirstcodestab *fct,
+                                    unsigned long numofsequences,
+                                    Gtmarksubstring *markprefix,
+                                    Gtmarksubstring *marksuffix);
 
 void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 

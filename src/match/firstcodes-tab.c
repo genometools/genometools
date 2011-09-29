@@ -34,8 +34,8 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
-void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
-                                unsigned long numofsequences)
+static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
+                                       unsigned long numofsequences)
 {
   fct->countocc = gt_calloc((size_t) (numofsequences+1),
                             sizeof (*fct->countocc));
@@ -49,8 +49,8 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->countocc_allocated = true;
 }
 
-void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
-                                   unsigned long numofdifferentcodes)
+static void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
+                                          unsigned long numofdifferentcodes)
 {
   fct->countocc = gt_realloc(fct->countocc,sizeof (*fct->countocc) *
                                            (numofdifferentcodes+1));
@@ -134,6 +134,64 @@ static unsigned long gt_leftborderbuffer_flush(FILE *fpleftborderbuffer,
   tmp = leftborderbuffer->nextfreeuint32_t;
   leftborderbuffer->nextfreeuint32_t = 0;
   return tmp;
+}
+
+#ifdef SKDEBUG
+static void checkcodesorder(const unsigned long *tab,unsigned long len,
+                            bool allowequal)
+{
+  unsigned long idx;
+
+  for (idx=1UL; idx < len; idx++)
+  {
+    gt_assert(tab[idx-1] < tab[idx] || (allowequal && tab[idx-1] == tab[idx]));
+  }
+}
+#endif
+
+unsigned long gt_firstcodes_remdups(GtFirstcodestab *fct,
+                                    unsigned long numofsequences,
+                                    Gtmarksubstring *markprefix,
+                                    Gtmarksubstring *marksuffix)
+{
+  if (numofsequences > 0)
+  {
+    unsigned long numofdifferentcodes, *storeptr, *readptr;
+
+    gt_firstcodes_countocc_new(fct,numofsequences);
+    gt_firstcodes_countocc_increment(fct,0);
+    gt_marksubstring_mark(markprefix,fct->allfirstcodes[0]);
+    gt_marksubstring_mark(marksuffix,fct->allfirstcodes[0]);
+    for (storeptr = fct->allfirstcodes, readptr = fct->allfirstcodes+1;
+         readptr < fct->allfirstcodes + numofsequences;
+         readptr++)
+    {
+      if (*storeptr != *readptr)
+      {
+        storeptr++;
+        *storeptr = *readptr;
+      }
+      gt_firstcodes_countocc_increment(fct,(unsigned long)
+                                       (storeptr - fct->allfirstcodes));
+      gt_marksubstring_mark(markprefix,*readptr);
+      gt_marksubstring_mark(marksuffix,*readptr);
+    }
+    numofdifferentcodes = (unsigned long) (storeptr - fct->allfirstcodes + 1);
+    if (numofdifferentcodes < numofsequences)
+    {
+      /* reduce the memory requirement, as the duplicated elements are not
+         needed */
+      fct->allfirstcodes = gt_realloc(fct->allfirstcodes,
+                                      sizeof (*fct->allfirstcodes) *
+                                      numofdifferentcodes);
+      gt_firstcodes_countocc_resize(fct,numofdifferentcodes);
+#ifdef SKDEBUG
+      checkcodesorder(fct->allfirstcodes,numofdifferentcodes,false);
+#endif
+    }
+    return numofdifferentcodes;
+  }
+  return 0;
 }
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]

@@ -93,65 +93,6 @@ static void gt_storefirstcodes(void *processinfo,
   fci->tab.allfirstcodes[fci->countsequences++] = code;
 }
 
-#ifdef SKDEBUG
-static void checkcodesorder(const unsigned long *tab,unsigned long len,
-                            bool allowequal)
-{
-  unsigned long idx;
-
-  for (idx=1UL; idx < len; idx++)
-  {
-    gt_assert(tab[idx-1] < tab[idx] || (allowequal && tab[idx-1] == tab[idx]));
-  }
-}
-#endif
-
-static unsigned long gt_remdups_in_sorted_array(GtFirstcodesinfo *fci)
-{
-  unsigned long *storeptr, *readptr;
-
-  if (fci->numofsequences > 0)
-  {
-    unsigned long numofdifferentcodes;
-
-    gt_firstcodes_countocc_new(&fci->tab,fci->numofsequences);
-    gt_firstcodes_countocc_increment(&fci->tab,0);
-    gt_marksubstring_mark(fci->buf.markprefix,fci->tab.allfirstcodes[0]);
-    gt_marksubstring_mark(fci->buf.marksuffix,fci->tab.allfirstcodes[0]);
-    for (storeptr = fci->tab.allfirstcodes, readptr = fci->tab.allfirstcodes+1;
-         readptr < fci->tab.allfirstcodes + fci->numofsequences;
-         readptr++)
-    {
-      if (*storeptr != *readptr)
-      {
-        storeptr++;
-
-        *storeptr = *readptr;
-      }
-      gt_firstcodes_countocc_increment(&fci->tab,(unsigned long)
-                                       (storeptr - fci->tab.allfirstcodes));
-      gt_marksubstring_mark(fci->buf.markprefix,*readptr);
-      gt_marksubstring_mark(fci->buf.marksuffix,*readptr);
-    }
-    numofdifferentcodes
-      = (unsigned long) (storeptr - fci->tab.allfirstcodes + 1);
-    if (numofdifferentcodes < fci->numofsequences)
-    {
-      /* reduce the memory requirement, as the duplicated elements are not
-         needed */
-      fci->tab.allfirstcodes = gt_realloc(fci->tab.allfirstcodes,
-                                          sizeof (*fci->tab.allfirstcodes) *
-                                          numofdifferentcodes);
-      gt_firstcodes_countocc_resize(&fci->tab,numofdifferentcodes);
-#ifdef SKDEBUG
-      checkcodesorder(fci->tab.allfirstcodes,numofdifferentcodes,false);
-#endif
-    }
-    return numofdifferentcodes;
-  }
-  return 0;
-}
-
 static void gt_firstcodes_halves_rek(GtFirstcodesinfo *fci,
                                      unsigned long left,unsigned long right,
                                      unsigned int depth,unsigned int maxdepth)
@@ -762,7 +703,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_update_workspace(__LINE__,true,"marksuffix",true,&fcsl,
                                  (size_t)
                                  gt_marksubstring_size(fci.buf.marksuffix));
-  fci.tab.differentcodes = gt_remdups_in_sorted_array(&fci);
+  fci.tab.differentcodes = gt_firstcodes_remdups(&fci.tab,
+                                                 fci.numofsequences,
+                                                 fci.buf.markprefix,
+                                                 fci.buf.marksuffix);
   if (fci.tab.differentcodes > 0)
   {
     fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
