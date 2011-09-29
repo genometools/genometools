@@ -57,7 +57,7 @@ def parseargs(argv)
 end
 
 def makecompilerflags(fp,options)
-  fp.print "all:\n\t\${MAKE} -j #{options.j} curses=no cairo=no"
+  fp.print "all:\n\t\${MAKE} -j#{options.j} curses=no cairo=no"
   fp.print " CFLAGS+=-fstrict-aliasing"
   if options.ddd
     fp.print " opt=no"
