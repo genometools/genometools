@@ -56,9 +56,11 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
 {
   if (firstincrement)
   {
-    gt_assert(fct->countocc[idx] == 0);
+    fct->countocc[idx] = (uint32_t) 1;
+  } else
+  {
+    fct->countocc[idx]++;
   }
-  fct->countocc[idx]++;
 }
 
 GT_UNUSED

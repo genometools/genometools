@@ -32,9 +32,9 @@
 static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                                        unsigned long numofsequences)
 {
-  fct->countocc = gt_calloc((size_t) (numofsequences+1),
+  fct->countocc = gt_malloc((size_t) (numofsequences+1) *
                             sizeof (*fct->countocc));
-  fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
+  fct->countocc_small = gt_malloc((size_t) (numofsequences+1) *
                                   sizeof (*fct->countocc_small));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   gt_assert(fct->countocc_exceptions != NULL);
