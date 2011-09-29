@@ -42,8 +42,11 @@ void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->countocc_small = gt_calloc((size_t) (numofsequences+1),
                                   sizeof (*fct->countocc_small));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
-  fct->outfilenameleftborder = NULL;
   gt_assert(fct->countocc_exceptions != NULL);
+  fct->outfilenameleftborder = NULL;
+  fct->countocc_samples = NULL;
+  fct->outfilenameleftborder = NULL;
+  fct->countocc_allocated = true;
 }
 
 void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
@@ -54,6 +57,7 @@ void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
+  fct->countocc_allocated = true;
 }
 
 typedef struct
@@ -323,7 +327,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
   }
 }
 
-unsigned long gt_firstcodes_countocc_entries(const GtFirstcodestab *fct)
+unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct)
 {
   return fct->overflow_index > 0 ? fct->overflow_index
                                  : fct->differentcodes + 1;
@@ -385,18 +389,25 @@ unsigned long gt_firstcodes_idx2code(const GtFirstcodestab *fct,
 
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
 {
-  gt_free(fct->countocc);
-  fct->countocc = NULL;
+  if (fct->countocc_allocated)
+  {
+    gt_free(fct->countocc);
+    fct->countocc = NULL;
+  }
   gt_free(fct->countocc_small);
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
+  fct->countocc_exceptions = NULL;
   gt_free(fct->countocc_samples);
+  fct->countocc_samples = NULL;
   gt_str_delete(fct->outfilenameleftborder);
+  fct->outfilenameleftborder = NULL;
 }
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
 {
   fct->countocc = NULL;
+  fct->overflow_leftborder = NULL;
 }
 
 void **gt_firstcodes_countocc_address(GtFirstcodestab *fct)
@@ -404,7 +415,17 @@ void **gt_firstcodes_countocc_address(GtFirstcodestab *fct)
   return (void **) &fct->countocc;
 }
 
+void **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
+{
+  return (void **) &fct->overflow_leftborder;
+}
+
 void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr)
 {
   fct->countocc = ptr;
+}
+
+void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct)
+{
+  fct->countocc_allocated = false;
 }
