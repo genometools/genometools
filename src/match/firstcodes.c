@@ -718,13 +718,20 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  (size_t)
                                  gt_marksubstring_size(fci.buf.marksuffix));
   gt_assert(fci.allfirstcodes != NULL);
-  fci.differentcodes = gt_firstcodes_remdups(&fci.allfirstcodes,
-                                             &fci.tab,fci.numofsequences,
+  fci.differentcodes = gt_firstcodes_remdups(fci.allfirstcodes,
+                                             &fci.tab,
+                                             fci.numofsequences,
                                              fci.buf.markprefix,
                                              fci.buf.marksuffix,
                                              logger);
   if (fci.differentcodes > 0)
   {
+    if (fci.differentcodes < fci.numofsequences)
+    {
+      fci.allfirstcodes = gt_realloc(fci.allfirstcodes,
+                                     sizeof (*fci.allfirstcodes) *
+                                     fci.differentcodes);
+    }
     fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
                                                     fci.differentcodes,
                                                     GtSfxunsignedlong,

@@ -149,7 +149,7 @@ static void checkcodesorder(const unsigned long *tab,unsigned long len,
 }
 #endif
 
-unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
+unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     GtFirstcodestab *fct,
                                     unsigned long numofsequences,
                                     Gtmarksubstring *markprefix,
@@ -161,10 +161,8 @@ unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
     fct->differentcodes = 0;
   } else
   {
-    unsigned long numofdifferentcodes, *storeptr, *readptr,
-                  *allfirstcodes;
+    unsigned long numofdifferentcodes, *storeptr, *readptr;
 
-    allfirstcodes = *allfirstcodesptr;
     gt_firstcodes_countocc_new(fct,numofsequences);
     gt_firstcodes_countocc_increment(fct,0);
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
@@ -188,10 +186,6 @@ unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
     {
       /* reduce the memory requirement, as the duplicated elements are not
          needed */
-      *allfirstcodesptr = gt_realloc(*allfirstcodesptr,
-                                     sizeof (**allfirstcodesptr) *
-                                      numofdifferentcodes);
-      allfirstcodes = *allfirstcodesptr;
       gt_firstcodes_countocc_resize(fct,numofdifferentcodes);
 #ifdef SKDEBUG
       checkcodesorder(allfirstcodes,numofdifferentcodes,false);

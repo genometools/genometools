@@ -99,7 +99,7 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
 
-unsigned long gt_firstcodes_remdups(unsigned long **allfirstcodesptr,
+unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     GtFirstcodestab *fct,
                                     unsigned long numofsequences,
                                     Gtmarksubstring *markprefix,
