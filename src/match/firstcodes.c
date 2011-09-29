@@ -903,10 +903,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_assert(fci.mappedcountocc != NULL);
     gt_Sfxmappedrange_usetmp(fci.mappedcountocc,
                              gt_firstcodes_outfilenameleftborder(&fci.tab),
-                             gt_firstcodes_countocc_address(&fci.tab),
+                             gt_firstcodes_leftborder_address(&fci.tab),
                              gt_firstcodes_leftborder_entries(&fci.tab),
                              true);
-    gt_firstcodes_countocc_isnotallocated(&fci.tab);
     gt_assert(fci.buf.nextfree == 0);
     if (gt_suftabparts_numofparts(suftabparts) > 1U)
     {
@@ -1016,7 +1015,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         unsigned long leftborder_entries
          = gt_firstcodes_leftborder_entries(&fci.tab);
 
-        gt_firstcodes_countocc_remap(&fci.tab,
+        gt_firstcodes_leftborder_remap(&fci.tab,
                                      (uint32_t *)
                                      gt_Sfxmappedrange_map(fci.mappedcountocc,
                                                            0,
@@ -1034,7 +1033,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         }
         if (fci.currentminindex <= largestindex2map)
         {
-          gt_firstcodes_countocc_remap(&fci.tab,
+          gt_firstcodes_leftborder_remap(&fci.tab,
                                        (uint32_t *) gt_Sfxmappedrange_map(
                                                           fci.mappedcountocc,
                                                           fci.currentminindex,

@@ -37,14 +37,13 @@ typedef struct
                 hashmap_incrementcount,
                 all_incrementcount;
   unsigned int sampleshift;
-  uint32_t *countocc;
+  uint32_t *leftborder;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder;
   unsigned long *countocc_samples;
   GtStr *outfilenameleftborder;
-  bool countocc_allocated,
-       overflow_allocated;
+  bool overflow_allocated;
 } GtFirstcodestab;
 
 DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
@@ -59,11 +58,9 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
 {
   if (firstincrement)
   {
-    fct->countocc[idx] = (uint32_t) 1;
     fct->countocc_small[idx] = (uint8_t) 1;
   } else
   {
-    fct->countocc[idx]++;
     fct->all_incrementcount++;
     if (fct->countocc_small[idx] > 0)
     {
@@ -99,7 +96,7 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
   gt_assert(idx < fct->differentcodes);
   if (fct->overflow_index == 0 || idx < fct->overflow_index)
   {
-    return (unsigned long) --fct->countocc[idx];
+    return (unsigned long) --fct->leftborder[idx];
   } else
   {
     return --fct->overflow_leftborder[idx - fct->overflow_index];
@@ -122,11 +119,11 @@ void gt_firstcodes_countocc_delete(GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 
-void **gt_firstcodes_countocc_address(GtFirstcodestab *fct);
+void **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);
 
 void **gt_firstcodes_overflow_address(GtFirstcodestab *fct);
 
-void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr);
+void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 

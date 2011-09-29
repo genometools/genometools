@@ -32,8 +32,6 @@
 static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
                                        unsigned long numofsequences)
 {
-  fct->countocc = gt_malloc((size_t) (numofsequences+1) *
-                            sizeof (*fct->countocc));
   fct->countocc_small = gt_malloc((size_t) (numofsequences+1) *
                                   sizeof (*fct->countocc_small));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
@@ -41,7 +39,6 @@ static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->outfilenameleftborder = NULL;
   fct->countocc_samples = NULL;
   fct->outfilenameleftborder = NULL;
-  fct->countocc_allocated = true;
   fct->hashmap_addcount = 0;
   fct->hashmap_incrementcount = 0;
 }
@@ -49,12 +46,9 @@ static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
 static void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
                                           unsigned long numofdifferentcodes)
 {
-  fct->countocc = gt_realloc(fct->countocc,sizeof (*fct->countocc) *
-                                           (numofdifferentcodes+1));
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
-  fct->countocc_allocated = true;
 }
 
 typedef struct
@@ -204,11 +198,10 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   return fct->differentcodes;
 }
 
-#define GT_PARTIALSUM_COUNT_GET(IDX)             fct->countocc[IDX]
+#define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
 
 #define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)\
         gt_assert((VALUE) <= UINT32_MAX);\
-        fct->countocc[IDX] = VALUE;\
         if (leftborderbuffer.nextfreeuint32_t ==\
             leftborderbuffer.allocateduint32_t)\
         {\
@@ -237,20 +230,6 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
   }
 }
 
-static void gt_firstcodes_countocc_check(const GtFirstcodestab *fct)
-{
-  unsigned long idx;
-  uint32_t currentcount1, currentcount2;
-
-  for (idx = 0; idx < fct->differentcodes; idx++)
-  {
-    currentcount1 = GT_PARTIALSUM_COUNT_GET(idx);
-    gt_assert(currentcount1 > 0);
-    currentcount2 = gt_firstcodes_countocc_get(fct,idx);
-    gt_assert(currentcount1 == currentcount2);
-  }
-}
-
 unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
                                         unsigned long *overflow_index,
                                         bool forceoverflow)
@@ -270,30 +249,6 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodestab *fct,
                   fct->hashmap_incrementcount,
                   100.0 * (double) fct->hashmap_incrementcount/
                                      fct->all_incrementcount);
-  gt_firstcodes_countocc_check(fct);
-  /*
-  for (idx = 0; idx < fct->differentcodes; idx++)
-  {
-    currentcount = GT_PARTIALSUM_COUNT_GET(idx);
-    gt_assert(currentcount > 0);
-    if (currentcount <= GT_FIRSTCODES_MAXSMALL)
-    {
-      fct->countocc_small[idx] = (uint8_t) currentcount;
-    } else
-    {
-      uint32_t *valueptr;
-
-      gt_assert(fct->countocc_exceptions != NULL);
-      gt_assert(ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx) == NULL);
-      ul_u32_gt_hashmap_add(fct->countocc_exceptions, idx, currentcount);
-      valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions, idx);
-      gt_assert(valueptr != NULL);
-      gt_assert(*valueptr == currentcount);
-      fct->countocc_small[idx] = 0;
-      largevalues++;
-    }
-  }
-  */
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
@@ -428,7 +383,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
   gt_assert(idx <= fct->differentcodes);
   if (fct->overflow_index == 0 || idx < fct->overflow_index)
   {
-    return (unsigned long) fct->countocc[idx];
+    return (unsigned long) fct->leftborder[idx];
   } else
   {
     gt_assert(idx >= fct->overflow_index);
@@ -487,11 +442,6 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
 
 void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
 {
-  if (fct->countocc_allocated)
-  {
-    gt_free(fct->countocc);
-    fct->countocc = NULL;
-  }
   gt_free(fct->countocc_small);
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
@@ -504,14 +454,15 @@ void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
 {
-  fct->countocc = NULL;
+  fct->leftborder = NULL;
+  fct->countocc_small = NULL;
   fct->overflow_leftborder = NULL;
   fct->differentcodes = 0;
 }
 
-void **gt_firstcodes_countocc_address(GtFirstcodestab *fct)
+void **gt_firstcodes_leftborder_address(GtFirstcodestab *fct)
 {
-  return (void **) &fct->countocc;
+  return (void **) &fct->leftborder;
 }
 
 void **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
@@ -519,9 +470,9 @@ void **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
   return (void **) &fct->overflow_leftborder;
 }
 
-void gt_firstcodes_countocc_remap(GtFirstcodestab *fct,uint32_t *ptr)
+void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr)
 {
-  fct->countocc = ptr;
+  fct->leftborder = ptr;
 }
 
 void gt_firstcodes_overflow_remap(GtFirstcodestab *fct,unsigned long *ptr)
@@ -532,11 +483,6 @@ void gt_firstcodes_overflow_remap(GtFirstcodestab *fct,unsigned long *ptr)
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct)
 {
   return fct->outfilenameleftborder;
-}
-
-void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct)
-{
-  fct->countocc_allocated = false;
 }
 
 void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct)
