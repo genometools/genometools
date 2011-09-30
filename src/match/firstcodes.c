@@ -582,8 +582,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars, part, bitsforrelpos, bitsforseqnum;
-  const unsigned int markprefixunits = 14U;
-  const unsigned int marksuffixunits = 14U;
+  const unsigned int markprefixunits = 13U;
+  const unsigned int marksuffixunits = 13U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
                 totallength, suftabentries = 0, largest_width;
