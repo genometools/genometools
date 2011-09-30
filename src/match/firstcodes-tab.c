@@ -255,6 +255,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtArrayuint32_t leftborderbuffer;
   unsigned long leftborderbuffer_totalwrite = 0;
   const unsigned long maxvalue = forceoverflow ? UINT8_MAX : UINT32_MAX;
+  unsigned long spacewithhashtab = 0, spacewithouthashtab = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   gt_log_log("hashmap_addcount=%lu",fct->hashmap_addcount);
@@ -390,7 +391,22 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_free(fct->countocc_small);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
   fct->countocc_small = NULL;
+  if (gt_ma_enabled() && gt_fa_enabled())
+  {
+    spacewithhashtab = gt_ma_get_space_current() + gt_fa_get_space_current();
+  }
   gt_hashtable_delete(fct->countocc_exceptions);
+  if (gt_ma_enabled() && gt_fa_enabled())
+  {
+    unsigned long hashtabspace;
+
+    spacewithouthashtab = gt_ma_get_space_current() + gt_fa_get_space_current();
+    gt_assert(spacewithouthashtab < spacewithhashtab);
+    hashtabspace = spacewithhashtab - spacewithouthashtab;
+    gt_assert(fct->hashmap_addcount > 0);
+    printf("space for hashtab=%.2f (%lu bytes per entry)\n",
+           GT_MEGABYTES(hashtabspace),hashtabspace/fct->hashmap_addcount);
+  }
   fct->countocc_exceptions = NULL;
   gt_assert(leftborderbuffer.spaceuint32_t != NULL);
   gt_free(leftborderbuffer.spaceuint32_t);
