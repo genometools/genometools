@@ -28,12 +28,17 @@
 #include "core/hashmap-generic.h"
 #include "core/arraydef.h"
 #include "firstcodes-tab.h"
+#include "stamp.h"
 
-static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
+static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
+                                       GtFirstcodestab *fct,
                                        unsigned long numofsequences)
 {
   fct->countocc_small = gt_malloc((size_t) (numofsequences+1) *
                                   sizeof (*fct->countocc_small));
+  GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
+                      sizeof (*fct->countocc_small) *
+                      (numofsequences+1));
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder = NULL;
@@ -41,14 +46,20 @@ static void gt_firstcodes_countocc_new(GtFirstcodestab *fct,
   fct->outfilenameleftborder = NULL;
   fct->hashmap_addcount = 0;
   fct->hashmap_incrementcount = 0;
+  fct->all_incrementcount = 0;
 }
 
-static void gt_firstcodes_countocc_resize(GtFirstcodestab *fct,
+static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
+                                          GtFirstcodestab *fct,
                                           unsigned long numofdifferentcodes)
 {
+  GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
+  GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
+                      sizeof (*fct->countocc_small) *
+                      (numofdifferentcodes+1));
 }
 
 typedef struct
@@ -156,7 +167,8 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     unsigned long numofdifferentcodes, *storeptr, *readptr;
     bool firstincrement;
 
-    gt_firstcodes_countocc_new(fct,numofsequences);
+    STAMP;
+    gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
     gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
     gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
@@ -184,10 +196,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     {
       /* reduce the memory requirement, as the duplicated elements are not
          needed */
-      gt_firstcodes_countocc_resize(fct,numofdifferentcodes);
-      GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
-                          sizeof (*fct->countocc_small) *
-                          (fct->differentcodes+1));
+      gt_firstcodes_countocc_resize(fcsl,fct,numofdifferentcodes);
 #ifdef SKDEBUG
       checkcodesorder(allfirstcodes,numofdifferentcodes,false);
 #endif
@@ -319,6 +328,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     leftborderbuffer_totalwrite
       += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
+    fct->overflow_allocated = false;
   } else
   {
     unsigned long overflowcells = fct->differentcodes - fct->overflow_index + 1;
@@ -378,16 +388,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
   gt_free(fct->countocc_small);
-  GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small",
-                           sizeof (*fct->countocc_small) *
-                           (fct->differentcodes+1));
+  GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
   fct->countocc_exceptions = NULL;
   gt_free(leftborderbuffer.spaceuint32_t);
-  GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer",
-                           sizeof (*leftborderbuffer.spaceuint32_t) *
-                           leftborderbuffer.allocateduint32_t);
+  GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer");
   gt_assert(fpleftborderbuffer != NULL);
   *overflow_index = fct->overflow_index;
   return maxbucketsize;
@@ -469,9 +475,7 @@ void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
   gt_free(fct->leftborder_samples);
   if (fcsl != NULL)
   {
-    GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborder_samples",
-                             sizeof (*fct->leftborder_samples) *
-                             fct->numofsamples);
+    GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborder_samples");
   }
   fct->leftborder_samples = NULL;
 }

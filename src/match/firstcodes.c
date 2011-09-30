@@ -843,13 +843,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     sfxmrlist = NULL;
     gt_firstcodes_samples_delete(fci.fcsl,&fci.tab);
     gt_free(fci.tempcodeforradixsort);
-    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"tempcodeforradixsort",
-                             (size_t) fci.buf.allocated
-                                      * sizeof (*fci.tempcodeforradixsort));
+    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"tempcodeforradixsort");
     gt_free(fci.buf.spaceGtUlong);
-    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"buf.spaceGtUlong",
-                             (size_t) fci.buf.allocated
-                                      * sizeof (*fci.buf.spaceGtUlong));
+    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"position buffer");
     gt_assert(fci.mappedleftborder != NULL);
     gt_Sfxmappedrange_usetmp(fci.mappedleftborder,
                              gt_firstcodes_outfilenameleftborder(&fci.tab),
@@ -864,14 +860,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_Sfxmappedrange_storetmp(fci.mappedallfirstcodes,
                                  (void **) &fci.allfirstcodes,
                                  false);
-      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes",
-                       gt_Sfxmappedrange_size_entire(fci.mappedallfirstcodes));
+      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
       gt_assert(fci.allfirstcodes == NULL);
       if (overflow_index > 0)
       {
         gt_assert(fci.mappedoverflow != NULL);
-        GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder",
-                       gt_Sfxmappedrange_size_entire(fci.mappedoverflow));
+        GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
         gt_Sfxmappedrange_storetmp(fci.mappedoverflow,
                                    gt_firstcodes_overflow_address(&fci.tab),
                                    true);
@@ -879,12 +873,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
       gt_marksubstring_bits_null(fci.buf.markprefix,false);
       gt_assert(fci.mappedmarkprefix != NULL);
-      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"splitable arrays",
-                       gt_Sfxmappedrange_size_entire(fci.mappedmarkprefix));
       gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
                                  gt_marksubstring_bits_address(
                                     fci.buf.markprefix),
                                  false);
+      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"markprefix");
       gt_marksubstring_bits_null(fci.buf.markprefix,true);
     } else
     {

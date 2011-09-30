@@ -13,9 +13,9 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 int line,
                                 const char *filename,
                                 bool add,
-                                const char *kind,
-                                bool addtowork,
-                                size_t workspace);
+                                const char *title,
+                                bool work,
+                                size_t size);
 
 #define GT_FCI_ADDWORKSPACE(FCSL,TAB,SIZE)\
         gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,true,TAB,true,SIZE)
@@ -23,10 +23,10 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
 #define GT_FCI_ADDSPLITSPACE(FCSL,TAB,SIZE)\
         gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,true,TAB,false,SIZE)
 
-#define GT_FCI_SUBTRACTWORKSPACE(FCSL,TAB,SIZE)\
-        gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,true,SIZE)
+#define GT_FCI_SUBTRACTWORKSPACE(FCSL,TAB)\
+        gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,true,0)
 
-#define GT_FCI_SUBTRACTSPLITSPACE(FCSL,TAB,SIZE)\
-        gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,false,SIZE)
+#define GT_FCI_SUBTRACTSPLITSPACE(FCSL,TAB)\
+        gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,false,0)
 
 #endif
