@@ -204,10 +204,10 @@ void gt_Sfxmappedrange_usetmp(GtSfxmappedrange *sfxmappedrange,
   *sfxmappedrange->usedptrptr = NULL;
 }
 
-static unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
+unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
                                                       *sfxmappedrange,
-                                                   unsigned long minindex,
-                                                   unsigned long maxindex)
+                                            unsigned long minindex,
+                                            unsigned long maxindex)
 {
   GtMappedrange lbrange;
 

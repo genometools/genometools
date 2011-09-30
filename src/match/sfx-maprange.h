@@ -61,6 +61,11 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
 
 size_t gt_Sfxmappedrange_size_entire(const GtSfxmappedrange *sfxmappedrange);
 
+unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
+                                                      *sfxmappedrange,
+                                            unsigned long minindex,
+                                            unsigned long maxindex);
+
 void gt_Sfxmappedrange_checkindex(const GtSfxmappedrange *sfxmappedrange,
                                   GT_UNUSED unsigned long idx);
 

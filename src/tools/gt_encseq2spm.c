@@ -234,9 +234,12 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->parts,
                                                       arguments->maximumspace,
                                                       arguments->minmatchlength,
-                                                      arguments->checksuftab,
-                                                      arguments->onlyaccum,
-                                                      arguments->forceoverflow,
+                                     /* use false */  arguments->checksuftab,
+                                     /* use false */  arguments->onlyaccum,
+                                     /* use false */  arguments->forceoverflow,
+                                     /* specify the extra space needed for
+                                        the function processing the interval */
+                                                      0,
                                                       spmsk_state != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,
