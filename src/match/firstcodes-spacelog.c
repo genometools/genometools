@@ -33,15 +33,6 @@ GtFirstcodesspacelog *gt_firstcodes_spacelog_new(void)
   return fcsl;
 }
 
-void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl)
-{
-  if (fcsl != NULL)
-  {
-    gt_free(fcsl->entries);
-    gt_free(fcsl);
-  }
-}
-
 size_t gt_firstcodes_spacelog_total(GtFirstcodesspacelog *fcsl)
 {
   return fcsl->workspace + fcsl->splitspace;
@@ -88,17 +79,36 @@ static void gt_spacelog_addentry(GtFirstcodesspacelog *fcsl,
   fcsl->nextfree++;
 }
 
-static void gt_spacelog_showentries(FILE *fp,const GtFirstcodesspacelog *fcsl)
+static bool gt_spacelog_showentries(FILE *fp,const GtFirstcodesspacelog *fcsl)
 {
   unsigned long idx;
+  bool foundnonempty = false;
 
   for (idx = 0; idx < fcsl->nextfree; idx++)
   {
-    fprintf(fp,"%s %d %s %lu\n",
-             fcsl->entries[idx].filename,
-             fcsl->entries[idx].line,
-             fcsl->entries[idx].title,
-             (unsigned long) fcsl->entries[idx].size);
+    if (fcsl->entries[idx].size > 0)
+    {
+      fprintf(fp,"%s %d %s %lu\n",
+               fcsl->entries[idx].filename,
+               fcsl->entries[idx].line,
+               fcsl->entries[idx].title,
+               (unsigned long) fcsl->entries[idx].size);
+      foundnonempty = true;
+    }
+  }
+  return foundnonempty;
+}
+
+void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl)
+{
+  if (fcsl != NULL)
+  {
+    if (gt_spacelog_showentries(stderr,fcsl))
+    {
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+    gt_free(fcsl->entries);
+    gt_free(fcsl);
   }
 }
 
@@ -145,10 +155,11 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     {
       fprintf(stderr,"cannot find title \"%s\" (from file %s, line %d) "
                      "in spacelog entries\n",title,filename,line);
-      gt_spacelog_showentries(stderr,fcsl);
+      (void) gt_spacelog_showentries(stderr,fcsl);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
     size = entry->size;
+    entry->size = 0;
     if (work)
     {
       fcsl->workspace -= size;

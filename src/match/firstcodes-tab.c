@@ -167,7 +167,6 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     unsigned long numofdifferentcodes, *storeptr, *readptr;
     bool firstincrement;
 
-    STAMP;
     gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
     gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
@@ -387,11 +386,13 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   }
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
+  gt_assert (fct->countocc_small != NULL);
   gt_free(fct->countocc_small);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
   fct->countocc_small = NULL;
   gt_hashtable_delete(fct->countocc_exceptions);
   fct->countocc_exceptions = NULL;
+  gt_assert(leftborderbuffer.spaceuint32_t != NULL);
   gt_free(leftborderbuffer.spaceuint32_t);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer");
   gt_assert(fpleftborderbuffer != NULL);
@@ -472,21 +473,26 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
 void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
                                   GtFirstcodestab *fct)
 {
-  gt_free(fct->leftborder_samples);
-  if (fcsl != NULL)
+  if (fct->leftborder_samples != NULL)
   {
+    gt_free(fct->leftborder_samples);
     GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborder_samples");
+    fct->leftborder_samples = NULL;
   }
-  fct->leftborder_samples = NULL;
 }
 
-void gt_firstcodes_countocc_delete(GtFirstcodestab *fct)
+void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
+                                   GtFirstcodestab *fct)
 {
-  gt_free(fct->countocc_small);
-  fct->countocc_small = NULL;
+  if (fct->countocc_small != NULL)
+  {
+    GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
+    gt_free(fct->countocc_small);
+    fct->countocc_small = NULL;
+  }
   gt_hashtable_delete(fct->countocc_exceptions);
   fct->countocc_exceptions = NULL;
-  gt_firstcodes_samples_delete(NULL,fct);
+  gt_firstcodes_samples_delete(fcsl,fct);
   gt_str_delete(fct->outfilenameleftborder);
   fct->outfilenameleftborder = NULL;
 }
@@ -531,10 +537,13 @@ void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct)
   fct->overflow_allocated = false;
 }
 
-void gt_firstcodes_overflow_delete(GtFirstcodestab *fct)
+void gt_firstcodes_overflow_delete(GtFirstcodesspacelog *fcsl,
+                                   GtFirstcodestab *fct)
 {
-  if (fct->overflow_allocated)
+  if (fct->overflow_allocated && fct->overflow_leftborder != NULL)
   {
+    GT_FCI_SUBTRACTWORKSPACE(fcsl,"overflow_leftborder");
     gt_free(fct->overflow_leftborder);
+    fct->overflow_leftborder = NULL;
   }
 }

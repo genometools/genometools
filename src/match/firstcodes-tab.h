@@ -120,7 +120,8 @@ unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
 void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
                                   GtFirstcodestab *fct);
 
-void gt_firstcodes_countocc_delete(GtFirstcodestab *fct);
+void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
+                                   GtFirstcodestab *fct);
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 
@@ -154,6 +155,7 @@ void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
 
 void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct);
 
-void gt_firstcodes_overflow_delete(GtFirstcodestab *fct);
+void gt_firstcodes_overflow_delete(GtFirstcodesspacelog *fcsl,
+                                   GtFirstcodestab *fct);
 
 #endif
