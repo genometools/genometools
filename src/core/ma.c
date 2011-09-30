@@ -289,6 +289,11 @@ int gt_ma_check_space_leak(void)
   return 0;
 }
 
+bool gt_ma_enabled(void)
+{
+  return ma == NULL ? false : true;
+}
+
 static int print_allocation(GT_UNUSED void *key, void *value,
                             void *data, GT_UNUSED GtError *err)
 {

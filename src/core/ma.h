@@ -30,6 +30,7 @@ unsigned long gt_ma_get_space_peak(void); /* in bytes */
 unsigned long gt_ma_get_space_current(void);
 void          gt_ma_show_space_peak(FILE*);
 void          gt_ma_show_allocations(FILE*);
+bool          gt_ma_enabled(void);
 /* check if all allocated memory has been freed, prints to stderr */
 int           gt_ma_check_space_leak(void);
 void          gt_ma_clean(void);

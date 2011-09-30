@@ -69,7 +69,10 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
              GT_MEGABYTES(fcsl->workspace),
              GT_MEGABYTES(fcsl->splitspace),
              GT_MEGABYTES(fcsl->workspace+fcsl->splitspace));
-  gt_log_log("current space usage %.2f",
-             GT_MEGABYTES(gt_ma_get_space_current() +
-                          gt_fa_get_space_current()));
+  if (gt_ma_enabled() && gt_fa_enabled())
+  {
+    gt_log_log("current space usage %.2f",
+               GT_MEGABYTES(gt_ma_get_space_current() +
+                            gt_fa_get_space_current()));
+  }
 }

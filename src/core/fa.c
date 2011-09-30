@@ -83,6 +83,11 @@ void gt_fa_init(void)
   fa->global_space_peak = false;
 }
 
+bool gt_fa_enabled(void)
+{
+  return fa == NULL ? false : true;
+}
+
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
                               GtFileMode file_mode, bool x,
                               const char *src_file, int src_line, GtError *err)
