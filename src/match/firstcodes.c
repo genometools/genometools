@@ -55,6 +55,7 @@ typedef struct
                 currentminindex,
                 currentmaxindex,
                 differentcodes, /* a copy of the same value as in tab */
+                overflow_index, /* a copy of the same value as in tab */
                 widthofpart;
   GtUlongPair *tempcodeposforradixsort;
   GtArrayGtIndexwithcode binsearchcache;
@@ -605,7 +606,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
   GtShortreadsortworkinfo *srsw = NULL;
-  unsigned long overflow_index;
   unsigned long *seqnum_relpos_bucket = NULL;
   bool isleftbordermapped;
   bool haserr = false;
@@ -795,7 +795,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,
                                               &fci.tab,
-                                              &overflow_index,
+                                              &fci.overflow_index,
                                               forceoverflow);
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     fci.mappedmarkprefix
@@ -823,9 +823,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    NULL);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedleftborder);
     }
-    if (overflow_index > 0)
+    if (fci.overflow_index > 0)
     {
-      unsigned long overflowcells = fci.differentcodes - overflow_index + 1;
+      unsigned long overflowcells = fci.differentcodes - fci.overflow_index + 1;
       fci.mappedoverflow = gt_Sfxmappedrange_new("overflow_leftborder",
                                                  overflowcells,
                                                  GtSfxunsignedlong,
@@ -899,7 +899,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  false);
       GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
       gt_assert(fci.allfirstcodes == NULL);
-      if (overflow_index > 0)
+      if (fci.overflow_index > 0)
       {
         gt_assert(fci.mappedoverflow != NULL);
         GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
@@ -1017,9 +1017,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         unsigned long largestindex2map;
 
-        if (overflow_index > 0)
+        if (fci.overflow_index > 0)
         {
-          largestindex2map = MIN(overflow_index-1,fci.currentmaxindex);
+          largestindex2map = MIN(fci.overflow_index-1,fci.currentmaxindex);
         } else
         {
           largestindex2map = fci.currentmaxindex;
@@ -1044,12 +1044,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       }
       if (fci.mappedoverflow != NULL)
       {
-        gt_assert(overflow_index > 0);
-        if (overflow_index <= fci.currentmaxindex)
+        gt_assert(fci.overflow_index > 0);
+        if (fci.overflow_index <= fci.currentmaxindex)
         {
           void *ptr;
 
-          if (fci.currentminindex <= overflow_index)
+          if (fci.currentminindex <= fci.overflow_index)
           {
             ptr = gt_Sfxmappedrange_map(fci.mappedoverflow,
                                         0,
@@ -1062,14 +1062,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           } else
           {
             ptr = gt_Sfxmappedrange_map(fci.mappedoverflow,
-                                        fci.currentminindex - overflow_index,
-                                        fci.currentmaxindex - overflow_index);
+                                        fci.currentminindex-fci.overflow_index,
+                                        fci.currentmaxindex-fci.overflow_index);
             GT_FCI_ADDSPLITSPACE(fci.fcsl,"overflow_leftborder",
                                  (size_t)
                                  gt_Sfxmappedrange_size_mapped(
-                                           fci.mappedoverflow,
-                                           fci.currentminindex - overflow_index,
-                                           fci.currentmaxindex - overflow_index)
+                                        fci.mappedoverflow,
+                                        fci.currentminindex-fci.overflow_index,
+                                        fci.currentmaxindex-fci.overflow_index)
                                 );
           }
           gt_firstcodes_overflow_remap(&fci.tab,(unsigned long *) ptr);
@@ -1145,7 +1145,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"leftborder");
       }
-      if (fci.mappedoverflow != NULL && overflow_index <= fci.currentmaxindex)
+      if (fci.mappedoverflow != NULL &&
+          fci.overflow_index <= fci.currentmaxindex)
       {
         GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
       }
