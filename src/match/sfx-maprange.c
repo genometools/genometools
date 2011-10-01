@@ -247,55 +247,57 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
     maxindex = sfxmappedrange->transformfunc(maxindex,
                                             sfxmappedrange->transformfunc_data);
   }
-  gt_assert(minindex <= maxindex);
-  gt_Sfxmapped_offset_end(&lbrange,
-                          sfxmappedrange->sizeofunit,
-                          sfxmappedrange->pagesize,
-                          minindex,
-                          maxindex);
-  sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
-  gt_log_log("mapped %s from %lu to %lu for %s (%.1f%% of all)",
-             gt_str_get(sfxmappedrange->tablename),
-             lbrange.mapoffset,
-             lbrange.mapend,
-             sfxmappedrange->writable ? "writing" : "reading",
-             (lbrange.mapend - lbrange.mapoffset + 1
-               >= (unsigned long) sizeoftable)
-                  ? 100.0
-                  : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
-                             sizeoftable);
-  gt_assert(lbrange.mapoffset <= lbrange.mapend);
-  gt_assert(lbrange.mapoffset <= minindex * sfxmappedrange->sizeofunit);
-  gt_assert(maxindex * sfxmappedrange->sizeofunit <= lbrange.mapend);
-  gt_assert(lbrange.mapoffset % sfxmappedrange->pagesize == 0);
-  if (sfxmappedrange->writable)
+  if (minindex <= maxindex)
   {
-    sfxmappedrange->ptr
-      = gt_fa_xmmap_write_range (gt_str_get(sfxmappedrange->filename),
-                                 (size_t) (lbrange.mapend-lbrange.mapoffset+1),
-                                 (size_t) lbrange.mapoffset);
-  } else
-  {
-    sfxmappedrange->ptr
-      = gt_fa_xmmap_read_range (gt_str_get(sfxmappedrange->filename),
-                                (size_t) (lbrange.mapend-lbrange.mapoffset+1),
-                                (size_t) lbrange.mapoffset);
-  }
-  sfxmappedrange->indexrange_defined = true;
-  sfxmappedrange->currentmaxindex = maxindex;
-  sfxmappedrange->currentminindex = minindex;
-  unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
-  switch (sfxmappedrange->type)
-  {
-    case GtSfxGtBitsequence:
-      return ((GtBitsequence *) sfxmappedrange->ptr) - unitoffset;
-    case GtSfxuint32_t:
-      return ((uint32_t *) sfxmappedrange->ptr) - unitoffset;
-    case GtSfxunsignedlong:
-      return ((unsigned long *) sfxmappedrange->ptr) - unitoffset;
-    default:
-      gt_assert(false);
-      break;
+    gt_Sfxmapped_offset_end(&lbrange,
+                            sfxmappedrange->sizeofunit,
+                            sfxmappedrange->pagesize,
+                            minindex,
+                            maxindex);
+    sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
+    gt_log_log("mapped %s from %lu to %lu for %s (%.1f%% of all)",
+               gt_str_get(sfxmappedrange->tablename),
+               lbrange.mapoffset,
+               lbrange.mapend,
+               sfxmappedrange->writable ? "writing" : "reading",
+               (lbrange.mapend - lbrange.mapoffset + 1
+                 >= (unsigned long) sizeoftable)
+                    ? 100.0
+                    : 100.0 * (lbrange.mapend - lbrange.mapoffset + 1)/
+                               sizeoftable);
+    gt_assert(lbrange.mapoffset <= lbrange.mapend);
+    gt_assert(lbrange.mapoffset <= minindex * sfxmappedrange->sizeofunit);
+    gt_assert(maxindex * sfxmappedrange->sizeofunit <= lbrange.mapend);
+    gt_assert(lbrange.mapoffset % sfxmappedrange->pagesize == 0);
+    if (sfxmappedrange->writable)
+    {
+      sfxmappedrange->ptr
+        = gt_fa_xmmap_write_range(gt_str_get(sfxmappedrange->filename),
+                                  (size_t) (lbrange.mapend-lbrange.mapoffset+1),
+                                  (size_t) lbrange.mapoffset);
+    } else
+    {
+      sfxmappedrange->ptr
+        = gt_fa_xmmap_read_range (gt_str_get(sfxmappedrange->filename),
+                                  (size_t) (lbrange.mapend-lbrange.mapoffset+1),
+                                  (size_t) lbrange.mapoffset);
+    }
+    sfxmappedrange->indexrange_defined = true;
+    sfxmappedrange->currentmaxindex = maxindex;
+    sfxmappedrange->currentminindex = minindex;
+    unitoffset = lbrange.mapoffset / sfxmappedrange->sizeofunit;
+    switch (sfxmappedrange->type)
+    {
+      case GtSfxGtBitsequence:
+        return ((GtBitsequence *) sfxmappedrange->ptr) - unitoffset;
+      case GtSfxuint32_t:
+        return ((uint32_t *) sfxmappedrange->ptr) - unitoffset;
+      case GtSfxunsignedlong:
+        return ((unsigned long *) sfxmappedrange->ptr) - unitoffset;
+      default:
+        gt_assert(false);
+        break;
+    }
   }
   return NULL;
 }
