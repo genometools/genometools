@@ -247,7 +247,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
     maxindex = sfxmappedrange->transformfunc(maxindex,
                                             sfxmappedrange->transformfunc_data);
   }
-  gt_assert(minindex < maxindex);
+  gt_assert(minindex <= maxindex);
   gt_Sfxmapped_offset_end(&lbrange,
                           sfxmappedrange->sizeofunit,
                           sfxmappedrange->pagesize,

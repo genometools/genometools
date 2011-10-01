@@ -997,10 +997,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
          = gt_firstcodes_leftborder_entries(&fci.tab);
 
         gt_firstcodes_leftborder_remap(&fci.tab,
-                                     (uint32_t *)
-                                     gt_Sfxmappedrange_map(fci.mappedleftborder,
-                                                           0,
-                                                           leftborder_entries));
+                                  (uint32_t *)
+                                  gt_Sfxmappedrange_map(fci.mappedleftborder,
+                                                        0,
+                                                        leftborder_entries-1));
         GT_FCI_ADDSPLITSPACE(fci.fcsl,"leftborder",
                              gt_Sfxmappedrange_size_entire(
                                        fci.mappedleftborder));
@@ -1009,7 +1009,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         unsigned long largestindex2map;
 
-        if (part > 0 && overflow_index > 0)
+        if (overflow_index > 0)
         {
           largestindex2map = MIN(overflow_index-1,fci.currentmaxindex);
         } else
