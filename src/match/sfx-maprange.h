@@ -42,7 +42,9 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         GtSfxmappedrangetransformfunc
-                                          transformfunc,
+                                          min_transformfunc,
+                                        GtSfxmappedrangetransformfunc
+                                          max_transformfunc,
                                         const void *transformfunc_data);
 
 void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,

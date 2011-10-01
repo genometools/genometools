@@ -1874,6 +1874,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 sfi->spmopt_numofallprefixcodes,
                                 GtSfxGtBitsequence,
                                 gt_bcktab_code_to_prefix_index,
+                                gt_bcktab_code_to_prefix_index,
                                 &sfi->spmopt_additionalprefixchars);
       gt_Sfxmappedrangelist_add(sfxmrlist,sfi->mappedmarkprefixbuckets);
       sfi->spmopt_numofallsuffixcodes

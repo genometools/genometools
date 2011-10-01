@@ -174,6 +174,7 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
                               ? GtSfxunsignedlong
                               : GtSfxuint32_t,
                             NULL,
+                            NULL,
                             NULL);
   gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedleftborder);
   if (bcktab->withspecialsuffixes)
@@ -184,6 +185,7 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
                               bcktab->useulong
                                 ? GtSfxunsignedlong
                                 : GtSfxuint32_t,
+                              gt_bcktab_transformcode,
                               gt_bcktab_transformcode,
                               &bcktab->numofchars);
     gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedcountspecialcodes);

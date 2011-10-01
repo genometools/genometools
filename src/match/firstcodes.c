@@ -803,6 +803,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                               gt_marksubstring_entries(fci.buf.markprefix),
                               GtSfxGtBitsequence,
                               gt_kmercode_to_prefix_index,
+                              gt_kmercode_to_prefix_index,
                               &fci);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
     if (fci.differentcodes > 0)
@@ -810,12 +811,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.mappedallfirstcodes = gt_Sfxmappedrange_new("allfirstcodes",
                                                       fci.differentcodes,
                                                       GtSfxunsignedlong,
-                                                      NULL,NULL);
+                                                      NULL,
+                                                      NULL,
+                                                      NULL);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedallfirstcodes);
       fci.mappedleftborder = gt_Sfxmappedrange_new("leftborder",
                                                    fci.differentcodes+1,
                                                    GtSfxuint32_t,
-                                                   NULL,NULL);
+                                                   NULL,
+                                                   NULL,
+                                                   NULL);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedleftborder);
     }
     if (overflow_index > 0)
@@ -823,7 +828,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       unsigned long overflowcells = fci.differentcodes - overflow_index + 1;
       fci.mappedoverflow = gt_Sfxmappedrange_new("overflow_leftborder",
                                                  overflowcells,
-                                                 GtSfxunsignedlong,NULL,NULL);
+                                                 GtSfxunsignedlong,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedoverflow);
     }
     suftabentries = fci.firstcodehits + fci.numofsequences;

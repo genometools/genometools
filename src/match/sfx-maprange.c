@@ -65,9 +65,9 @@ struct GtSfxmappedrange
   unsigned long pagesize;
   size_t numofunits, sizeofunit;
   GtSfxmappedrangetype type;
-  GtSfxmappedrangetransformfunc transformfunc;
   unsigned long currentminindex, currentmaxindex;
   bool indexrange_defined;
+  GtSfxmappedrangetransformfunc min_transformfunc, max_transformfunc;
   const void *transformfunc_data;
   bool writable;
 };
@@ -112,7 +112,9 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         GtSfxmappedrangetransformfunc
-                                          transformfunc,
+                                          min_transformfunc,
+                                        GtSfxmappedrangetransformfunc
+                                          max_transformfunc,
                                         const void *transformfunc_data)
 {
   GtSfxmappedrange *sfxmappedrange;
@@ -124,7 +126,8 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
   sfxmappedrange->filename = NULL;
   sfxmappedrange->writable = false;
   sfxmappedrange->entire = NULL;
-  sfxmappedrange->transformfunc = transformfunc;
+  sfxmappedrange->min_transformfunc = min_transformfunc;
+  sfxmappedrange->max_transformfunc = max_transformfunc;
   sfxmappedrange->transformfunc_data = transformfunc_data;
   sfxmappedrange->type = type;
   sfxmappedrange->tablename = gt_str_new_cstr(tablename);
@@ -212,12 +215,15 @@ unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
   GtMappedrange lbrange;
 
   gt_assert(sfxmappedrange != NULL);
-  if (sfxmappedrange->transformfunc != NULL)
+  if (sfxmappedrange->min_transformfunc != NULL)
   {
-    minindex = sfxmappedrange->transformfunc(minindex,
-                                            sfxmappedrange->transformfunc_data);
-    maxindex = sfxmappedrange->transformfunc(maxindex,
-                                            sfxmappedrange->transformfunc_data);
+    minindex = sfxmappedrange->min_transformfunc(
+                     minindex,sfxmappedrange->transformfunc_data);
+  }
+  if (sfxmappedrange->max_transformfunc != NULL)
+  {
+    maxindex = sfxmappedrange->max_transformfunc(
+                        maxindex,sfxmappedrange->transformfunc_data);
   }
   gt_Sfxmapped_offset_end(&lbrange,
                           sfxmappedrange->sizeofunit,
@@ -240,12 +246,15 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
   {
     gt_fa_xmunmap(sfxmappedrange->ptr);
   }
-  if (sfxmappedrange->transformfunc != NULL)
+  if (sfxmappedrange->min_transformfunc != NULL)
   {
-    minindex = sfxmappedrange->transformfunc(minindex,
-                                            sfxmappedrange->transformfunc_data);
-    maxindex = sfxmappedrange->transformfunc(maxindex,
-                                            sfxmappedrange->transformfunc_data);
+    minindex = sfxmappedrange->min_transformfunc(
+                                   minindex,sfxmappedrange->transformfunc_data);
+  }
+  if (sfxmappedrange->max_transformfunc != NULL)
+  {
+    maxindex = sfxmappedrange->max_transformfunc(
+                                   maxindex,sfxmappedrange->transformfunc_data);
   }
   if (minindex <= maxindex)
   {
