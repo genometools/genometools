@@ -147,6 +147,14 @@ static unsigned long gt_bcktab_transformcode(unsigned long code,
   }
 }
 
+static void gt_bcktab_transform_minmax_code(unsigned long *mincode,
+                                            unsigned long *maxcode,
+                                            const void *data)
+{
+  *mincode = gt_bcktab_transformcode(*mincode,data);
+  *maxcode = gt_bcktab_transformcode(*maxcode,data);
+}
+
 void gt_bcktab_storetmp(GtBcktab *bcktab)
 {
 
@@ -174,7 +182,6 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
                               ? GtSfxunsignedlong
                               : GtSfxuint32_t,
                             NULL,
-                            NULL,
                             NULL);
   gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedleftborder);
   if (bcktab->withspecialsuffixes)
@@ -185,8 +192,7 @@ void gt_bcktab_maprange_lb_cs(GtSfxmappedrangelist *sfxmrlist,GtBcktab *bcktab)
                               bcktab->useulong
                                 ? GtSfxunsignedlong
                                 : GtSfxuint32_t,
-                              gt_bcktab_transformcode,
-                              gt_bcktab_transformcode,
+                              gt_bcktab_transform_minmax_code,
                               &bcktab->numofchars);
     gt_Sfxmappedrangelist_add(sfxmrlist,bcktab->mappedcountspecialcodes);
   }

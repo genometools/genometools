@@ -1621,6 +1621,14 @@ static unsigned long gt_bcktab_code_to_prefix_index(unsigned long code,
                                 GT_MULT2(additionalprefixchars)));
 }
 
+static void gt_bcktab_code_to_minmax_prefix_index(unsigned long *mincode,
+                                                  unsigned long *maxcode,
+                                                  const void *data)
+{
+  *mincode = gt_bcktab_code_to_prefix_index(*mincode,data);
+  *maxcode = gt_bcktab_code_to_prefix_index(*maxcode,data);
+}
+
 Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
                                 const GtEncseq *encseq,
                                 GtReadmode readmode,
@@ -1873,8 +1881,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
         = gt_Sfxmappedrange_new("markprefixbuckets",
                                 sfi->spmopt_numofallprefixcodes,
                                 GtSfxGtBitsequence,
-                                gt_bcktab_code_to_prefix_index,
-                                gt_bcktab_code_to_prefix_index,
+                                gt_bcktab_code_to_minmax_prefix_index,
                                 &sfi->spmopt_additionalprefixchars);
       gt_Sfxmappedrangelist_add(sfxmrlist,sfi->mappedmarkprefixbuckets);
       sfi->spmopt_numofallsuffixcodes

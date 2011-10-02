@@ -35,16 +35,15 @@ typedef struct GtSfxmappedrange GtSfxmappedrange;
 void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
                                    GtError *err);
 
-typedef unsigned long (*GtSfxmappedrangetransformfunc)(
-                                                  unsigned long,const void *);
+typedef void (*GtSfxmappedrangetransformfunc)(unsigned long *,
+                                              unsigned long *,
+                                              const void *);
 
 GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                         unsigned long numofentries,
                                         GtSfxmappedrangetype type,
                                         GtSfxmappedrangetransformfunc
-                                          min_transformfunc,
-                                        GtSfxmappedrangetransformfunc
-                                          max_transformfunc,
+                                          transformfunc,
                                         const void *transformfunc_data);
 
 void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,

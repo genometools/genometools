@@ -262,33 +262,36 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
     gt_assert(sumofwidth == numofsuffixestoinsert);
   }
   gt_suftabparts_removeemptyparts(suftabparts,numofsuffixestoinsert,logger);
-  gt_assert(suftabparts->components != NULL);
-  for (part=0; part < suftabparts->numofparts; part++)
+  if (suftabparts->numofparts > 0)
   {
-    suftabparts->components[part].minindex
-      = gt_suftabparts_minindex_raw(part,suftabparts);
-    suftabparts->components[part].maxindex
-      = gt_suftabparts_maxindex_raw(part,suftabparts);
-  }
-  for (part=1U; part < suftabparts->numofparts; part++)
-  {
-    if (suftabparts->components[part].minindex !=
-          suftabparts->components[part-1].maxindex + 1)
+    gt_assert(suftabparts->components != NULL);
+    for (part=0; part < suftabparts->numofparts; part++)
     {
       suftabparts->components[part].minindex
-        = suftabparts->components[part-1].maxindex + 1;
-      gt_log_log("corrected minindex[%u] to %lu",
-                  part,suftabparts->components[part].minindex);
+        = gt_suftabparts_minindex_raw(part,suftabparts);
+      suftabparts->components[part].maxindex
+        = gt_suftabparts_maxindex_raw(part,suftabparts);
     }
-  }
-  for (part=0; part < suftabparts->numofparts; part++)
-  {
-    size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
-                                  gt_suftabparts_minindex(part,suftabparts),
-                                  gt_suftabparts_maxindex(part,suftabparts));
-    if (suftabparts->largestsizemappedpartwise < size_mapped)
+    for (part=1U; part < suftabparts->numofparts; part++)
     {
-      suftabparts->largestsizemappedpartwise = size_mapped;
+      if (suftabparts->components[part].minindex !=
+            suftabparts->components[part-1].maxindex + 1)
+      {
+        suftabparts->components[part].minindex
+          = suftabparts->components[part-1].maxindex + 1;
+        gt_log_log("corrected minindex[%u] to %lu",
+                    part,suftabparts->components[part].minindex);
+      }
+    }
+    for (part=0; part < suftabparts->numofparts; part++)
+    {
+      size_mapped = gt_Sfxmappedrangelist_size_mapped(sfxmrlist,
+                                    gt_suftabparts_minindex(part,suftabparts),
+                                    gt_suftabparts_maxindex(part,suftabparts));
+      if (suftabparts->largestsizemappedpartwise < size_mapped)
+      {
+        suftabparts->largestsizemappedpartwise = size_mapped;
+      }
     }
   }
   return suftabparts;

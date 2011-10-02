@@ -74,8 +74,8 @@ typedef struct
   GtFirstcodestab tab;
 } GtFirstcodesinfo;
 
-static unsigned long gt_kmercode_to_prefix_index(unsigned long idx,
-                                                 const void *data)
+static unsigned long gt_kmercode2prefix_index(unsigned long idx,
+                                              const void *data)
 {
   const GtFirstcodesinfo *fci = (const GtFirstcodesinfo *) data;
 
@@ -83,8 +83,16 @@ static unsigned long gt_kmercode_to_prefix_index(unsigned long idx,
   return fci->allfirstcodes[idx] >> fci->shiftright2index;
 }
 
-static unsigned long gt_maxindex_for_leftborder(unsigned long idx,
-                                                const void *data)
+static void gt_kmercode2prefix_minmax_index(unsigned long *minindex,
+                                            unsigned long *maxindex,
+                                            const void *data)
+{
+  *minindex = gt_kmercode2prefix_index(*minindex,data);
+  *maxindex = gt_kmercode2prefix_index(*maxindex,data);
+}
+
+static unsigned long gt_maxindex_leftborder(unsigned long idx,
+                                            const void *data)
 {
   const GtFirstcodesinfo *fci = (const GtFirstcodesinfo *) data;
 
@@ -96,6 +104,13 @@ static unsigned long gt_maxindex_for_leftborder(unsigned long idx,
   {
     return idx;
   }
+}
+
+static void gt_minmax_index_leftborder(GT_UNUSED unsigned long *minindex,
+                                       unsigned long *maxindex,
+                                       const void *data)
+{
+  *maxindex = gt_maxindex_leftborder(*maxindex,data);
 }
 
 /* call the following function after computing the partial sums */
@@ -816,8 +831,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       = gt_Sfxmappedrange_new("markprefix",
                               gt_marksubstring_entries(fci.buf.markprefix),
                               GtSfxGtBitsequence,
-                              gt_kmercode_to_prefix_index,
-                              gt_kmercode_to_prefix_index,
+                              gt_kmercode2prefix_minmax_index,
                               &fci);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
     if (fci.differentcodes > 0)
@@ -826,14 +840,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                       fci.differentcodes,
                                                       GtSfxunsignedlong,
                                                       NULL,
-                                                      NULL,
                                                       NULL);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedallfirstcodes);
       fci.mappedleftborder = gt_Sfxmappedrange_new("leftborder",
                                                    fci.differentcodes+1,
                                                    GtSfxuint32_t,
-                                                   NULL,
-                                                   gt_maxindex_for_leftborder,
+                                                   gt_minmax_index_leftborder,
                                                    &fci);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedleftborder);
     }
@@ -843,7 +855,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.mappedoverflow = gt_Sfxmappedrange_new("overflow_leftborder",
                                                  overflowcells,
                                                  GtSfxunsignedlong,
-                                                 NULL,
                                                  NULL,
                                                  NULL);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedoverflow);
