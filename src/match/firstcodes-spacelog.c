@@ -103,10 +103,10 @@ void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl)
 {
   if (fcsl != NULL)
   {
-    /*if (gt_spacelog_showentries(stderr,fcsl))
+    if (gt_spacelog_showentries(stderr,fcsl))
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
-    }*/
+    }
     gt_free(fcsl->entries);
     gt_free(fcsl);
   }
