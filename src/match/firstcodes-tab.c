@@ -255,7 +255,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtArrayuint32_t leftborderbuffer;
   unsigned long leftborderbuffer_totalwrite = 0;
   const unsigned long maxvalue = forceoverflow ? UINT8_MAX : UINT32_MAX;
-  unsigned long spacewithhashtab = 0, spacewithouthashtab = 0;
+  unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   gt_log_log("hashmap_addcount=%lu",fct->hashmap_addcount);
@@ -340,8 +340,8 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     gt_fa_fclose(fpleftborderbuffer);
     fct->overflow_leftborder
       = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
-    GT_FCI_ADDWORKSPACE(fcsl,"overflow_leftborder",
-                        sizeof (*fct->overflow_leftborder) * overflowcells);
+    GT_FCI_ADDSPLITSPACE(fcsl,"overflow_leftborder",
+                         sizeof (*fct->overflow_leftborder) * overflowcells);
     fct->overflow_allocated = true;
     overflow_leftborder_ptr = fct->overflow_leftborder - fct->overflow_index;
     currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
@@ -393,18 +393,18 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   fct->countocc_small = NULL;
   if (fct->hashmap_addcount > 0 && gt_ma_enabled() && gt_fa_enabled())
   {
-    spacewithhashtab = gt_ma_get_space_current() + gt_fa_get_space_current();
+    spacewithhashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
   }
   gt_hashtable_delete(fct->countocc_exceptions);
   if (fct->hashmap_addcount > 0 && gt_ma_enabled() && gt_fa_enabled())
   {
-    unsigned long hashtabspace;
+    unsigned long hashmapspace;
 
-    spacewithouthashtab = gt_ma_get_space_current() + gt_fa_get_space_current();
-    gt_assert(spacewithouthashtab < spacewithhashtab);
-    hashtabspace = spacewithhashtab - spacewithouthashtab;
-    printf("space for hashtab=%.2f (%lu bytes per entry)\n",
-           GT_MEGABYTES(hashtabspace),hashtabspace/fct->hashmap_addcount);
+    spacewithouthashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
+    gt_assert(spacewithouthashmap < spacewithhashmap);
+    hashmapspace = spacewithhashmap - spacewithouthashmap;
+    printf("space for hashmap=%.2f (%lu bytes per entry)\n",
+           GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;
   gt_assert(leftborderbuffer.spaceuint32_t != NULL);
@@ -557,7 +557,7 @@ void gt_firstcodes_overflow_delete(GtFirstcodesspacelog *fcsl,
 {
   if (fct->overflow_allocated && fct->overflow_leftborder != NULL)
   {
-    GT_FCI_SUBTRACTWORKSPACE(fcsl,"overflow_leftborder");
+    GT_FCI_SUBTRACTSPLITSPACE(fcsl,"overflow_leftborder");
     gt_free(fct->overflow_leftborder);
     fct->overflow_leftborder = NULL;
   }

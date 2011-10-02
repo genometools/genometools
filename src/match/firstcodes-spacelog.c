@@ -112,6 +112,20 @@ void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl)
   }
 }
 
+static void gt_firstcodes_subtract_error(const char *title,
+                                         const char *filename,
+                                         int line,
+                                         size_t size,
+                                         bool work,
+                                         size_t sumspace)
+{
+  fprintf(stderr,"for title \"%s\" (from file %s, line %d) "
+                 "in spacelog entries: "
+                 "size=%lu > %lu=%sspace\n",title,filename,line,
+                 (unsigned long) size,(unsigned long) sumspace,
+                 work ? "work" : "split");
+}
+
 void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 int line,
                                 const char *filename,
@@ -162,13 +176,27 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     entry->size = 0;
     if (work)
     {
+      if (size > fcsl->workspace)
+      {
+        gt_firstcodes_subtract_error(title, filename, line, size, true,
+                                     fcsl->workspace);
+        (void) gt_spacelog_showentries(stderr,fcsl);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
       fcsl->workspace -= size;
     } else
     {
+      if (size > fcsl->splitspace)
+      {
+        gt_firstcodes_subtract_error(title, filename, line, size, false,
+                                     fcsl->splitspace);
+        (void) gt_spacelog_showentries(stderr,fcsl);
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
       fcsl->splitspace -= size;
     }
   }
-  gt_log_log("file %s, line %d: %s %.2f MB for %s to %space; work=%.2f, "
+  gt_log_log("file %s, line %d: %s %.2f MB for %s to %sspace; work=%.2f, "
              "split=%.2f, all=%.2f MB",
              filename,
              line,

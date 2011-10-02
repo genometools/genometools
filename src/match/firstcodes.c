@@ -602,16 +602,12 @@ static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
     GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"tempcodeposforradixsort");
     fci->tempcodeposforradixsort = NULL;
   }
-  if (fci->mappedmarkprefix == NULL)
-  {
-    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"markprefix");
-  }
   gt_Sfxmappedrange_delete(fci->mappedmarkprefix);
   gt_marksubstring_delete(fci->buf.markprefix,true);
   GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"markprefix");
   fci->buf.markprefix = NULL;
   gt_marksubstring_delete(fci->buf.marksuffix,true);
-  GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"marksuffix");
+  GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"marksuffix");
   if (fci->mappedallfirstcodes == NULL)
   {
     gt_free(fci->allfirstcodes);
@@ -753,10 +749,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     if (fci.differentcodes < fci.numofsequences)
     {
-      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
       fci.allfirstcodes = gt_realloc(fci.allfirstcodes,
                                      sizeof (*fci.allfirstcodes) *
                                      fci.differentcodes);
+      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
       GT_FCI_ADDSPLITSPACE(fci.fcsl,"allfirstcodes",
                            sizeof (*fci.allfirstcodes) * fci.differentcodes);
     }
@@ -953,10 +949,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       if (fci.overflow_index > 0)
       {
         gt_assert(fci.mappedoverflow != NULL);
-        GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
         gt_Sfxmappedrange_storetmp(fci.mappedoverflow,
                                    gt_firstcodes_overflow_address(&fci.tab),
                                    true);
+        GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
         gt_firstcodes_overflow_isnotallocated(&fci.tab);
       }
       gt_marksubstring_bits_null(fci.buf.markprefix,false);
@@ -983,6 +979,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                      logger);
     suftab_size = gt_spmsuftab_requiredspace(largest_width,totallength,
                                              bitsforseqnum + bitsforrelpos);
+    GT_FCI_ADDWORKSPACE(fci.fcsl,"suftab",suftab_size);
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
     srsw = gt_shortreadsort_new(maxbucketsize,readmode,true);
     GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
@@ -1156,10 +1153,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         haserr = true;
       }
-      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"leftborder");
-      if (fci.mappedoverflow != NULL &&
-          fci.overflow_index <= fci.currentmaxindex)
+      if (fci.mappedleftborder != NULL)
       {
+        gt_Sfxmappedrange_unmap(fci.mappedleftborder);
+        GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"leftborder");
+      }
+      if (fci.mappedoverflow != NULL)
+      {
+        gt_Sfxmappedrange_unmap(fci.mappedoverflow);
         GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
       }
     }
@@ -1203,6 +1204,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
   gt_firstcodes_overflow_delete(fci.fcsl,&fci.tab);
   gt_spmsuftab_delete(fci.spmsuftab);
+  GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"suftab");
   gt_Sfxmappedrange_delete(fci.mappedleftborder);
   gt_Sfxmappedrange_delete(fci.mappedoverflow);
   if (fci.mappedallfirstcodes == NULL)
