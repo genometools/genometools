@@ -83,7 +83,7 @@ static unsigned long gt_kmercode2prefix_index(unsigned long idx,
   return fci->allfirstcodes[idx] >> fci->shiftright2index;
 }
 
-static void gt_kmercode2prefix_minmax_index(unsigned long *minindex,
+static void gt_minmax_index_kmercode2prefix(unsigned long *minindex,
                                             unsigned long *maxindex,
                                             const void *data)
 {
@@ -831,7 +831,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       = gt_Sfxmappedrange_new("markprefix",
                               gt_marksubstring_entries(fci.buf.markprefix),
                               GtSfxGtBitsequence,
-                              gt_kmercode2prefix_minmax_index,
+                              gt_minmax_index_kmercode2prefix,
                               &fci);
     gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedmarkprefix);
     if (fci.differentcodes > 0)
