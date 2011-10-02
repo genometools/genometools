@@ -1124,10 +1124,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         if (fci.mappedmarkprefix != NULL)
         {
+          gt_Sfxmappedrange_unmap(fci.mappedmarkprefix);
           GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"markprefix");
         }
         if (fci.mappedallfirstcodes != NULL)
         {
+          gt_Sfxmappedrange_unmap(fci.mappedallfirstcodes);
           GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
         }
       }

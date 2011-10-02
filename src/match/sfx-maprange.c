@@ -229,6 +229,16 @@ unsigned long gt_Sfxmappedrange_size_mapped(const GtSfxmappedrange
   return 0;
 }
 
+void gt_Sfxmappedrange_unmap(GtSfxmappedrange *sfxmappedrange)
+{
+  gt_assert(sfxmappedrange != NULL);
+  if (sfxmappedrange->ptr != NULL)
+  {
+    gt_fa_xmunmap(sfxmappedrange->ptr);
+  }
+  sfxmappedrange->ptr = 0;
+}
+
 void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             unsigned long minindex,
                             unsigned long maxindex)
