@@ -452,11 +452,19 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
       }
     } else
     {
-      if ((unsigned long) (suftabsize +
-                           gt_suftabparts_largestsizemappedpartwise(suftabparts)
-                           + estimatedspace - size_mapped)
+      unsigned long largest
+        = gt_suftabparts_largestsizemappedpartwise(suftabparts);
+      if ((unsigned long) (suftabsize + largest + estimatedspace - size_mapped)
                            <= maximumspace)
       {
+        gt_log_log("return parts = %u as suftabsize=%.2f +"
+                   "largest=%.2f + estimated=%.2f - size_mapped=%2.f <= %.2f",
+                    parts,
+                    GT_MEGABYTES(suftabsize),
+                    GT_MEGABYTES(largest),
+                    GT_MEGABYTES(estimatedspace),
+                    GT_MEGABYTES(size_mapped),
+                    GT_MEGABYTES(maximumspace));
         gt_suftabparts_delete(suftabparts);
         return (int) parts;
       }

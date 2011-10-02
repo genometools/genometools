@@ -843,8 +843,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                            fci.flushcount,
                            fci.firstcodehits/fci.flushcount);
     gt_free(fci.tempcodeforradixsort);
+    fci.tempcodeforradixsort = NULL;
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"tempcodeforradixsort");
     gt_free(fci.buf.spaceGtUlong);
+    fci.buf.spaceGtUlong = NULL;
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"position buffer");
     if (timer != NULL)
     {
@@ -890,24 +892,45 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedoverflow);
     }
     suftabentries = fci.firstcodehits + fci.numofsequences;
-    if (maximumspace > 0)
+    if (numofparts == 0 || maximumspace > 0)
     {
       int retval;
+      unsigned long leftbordersize;
 
-      gt_assert(numofparts == 1U);
+      gt_assert((numofparts == 0 && maximumspace == 0) ||
+                (numofparts == 1U && maximumspace > 0));
+
+      if (numofparts == 0)
+      {
+        maximumspace = (unsigned long)
+                       (gt_firstcodes_spacelog_peak(fci.fcsl) +
+                       gt_shortreadsort_size(true,maxbucketsize) +
+                       (sizeof (*seqnum_relpos_bucket) * maxbucketsize) +
+                       4 * 4096);
+      }
+      if (fci.mappedleftborder != NULL)
+      {
+        leftbordersize
+          = gt_Sfxmappedrange_size_mapped(fci.mappedleftborder,0,
+                              gt_firstcodes_leftborder_entries(&fci.tab)-1);
+      } else
+      {
+        leftbordersize = 0;
+      }
       retval = gt_suftabparts_fit_memlimit(
-                                        gt_firstcodes_spacelog_total(fci.fcsl)
-                                         + phase2extraspace,
-                                        maximumspace,
-                                        NULL,
-                                        &fci.tab,
-                                        sfxmrlist,
-                                        totallength,
-                                        bitsforseqnum + bitsforrelpos,
-                                        0, /* special characters not used */
-                                        suftabentries,
-                                        false, /* suftabuint not used */
-                                        err);
+                                    gt_firstcodes_spacelog_total(fci.fcsl)
+                                     + leftbordersize /*as this is subtracted*/
+                                     + phase2extraspace,
+                                    maximumspace,
+                                    NULL,
+                                    &fci.tab,
+                                    sfxmrlist,
+                                    totallength,
+                                    bitsforseqnum + bitsforrelpos,
+                                    0, /* special characters not used */
+                                    suftabentries,
+                                    false, /* suftabuint not used */
+                                    err);
       if (retval < 0)
       {
         haserr = true;
@@ -999,11 +1022,24 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  maxbucketsize);
     if (maximumspace > 0)
     {
-      size_t used = gt_firstcodes_spacelog_total(fci.fcsl) +
+      size_t used = gt_firstcodes_spacelog_workspace(fci.fcsl) +
                     phase2extraspace +
                     gt_suftabparts_largestsizemappedpartwise(suftabparts);
 
-      gt_assert(maximumspace > (unsigned long) used);
+      /*if ((unsigned long) used > maximumspace)
+      {
+        fprintf(stderr,"used = %lu (%.2f) > %lu (%.2f) = maximum\n",
+                    used,GT_MEGABYTES(used),maximumspace,
+                    GT_MEGABYTES(maximumspace));
+        fprintf(stderr,"largestsize_mapped=%lu (%.2f)\n",
+                    gt_suftabparts_largestsizemappedpartwise(suftabparts),
+                    GT_MEGABYTES(
+                    gt_suftabparts_largestsizemappedpartwise(suftabparts))
+                    );
+        (void) gt_firstcodes_spacelog_showentries(stderr,fci.fcsl);
+      }
+      */
+      gt_assert((unsigned long) used <= maximumspace);
       fci.buf.allocated = (maximumspace - used)/
                           (2 * sizeof (*fci.tempcodeposforradixsort));
     } else
@@ -1209,8 +1245,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
   gt_firstcodes_overflow_delete(fci.fcsl,&fci.tab);
-  gt_spmsuftab_delete(fci.spmsuftab);
-  GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"suftab");
+  if (fci.spmsuftab != NULL)
+  {
+    gt_spmsuftab_delete(fci.spmsuftab);
+    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"suftab");
+    fci.spmsuftab = NULL;
+  }
   gt_Sfxmappedrange_delete(fci.mappedleftborder);
   gt_Sfxmappedrange_delete(fci.mappedoverflow);
   if (fci.mappedallfirstcodes == NULL)

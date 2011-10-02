@@ -7,11 +7,18 @@ GtFirstcodesspacelog *gt_firstcodes_spacelog_new(void);
 
 void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl);
 
-size_t gt_firstcodes_spacelog_total(GtFirstcodesspacelog *fcsl);
+size_t gt_firstcodes_spacelog_total(const GtFirstcodesspacelog *fcsl);
+
+size_t gt_firstcodes_spacelog_workspace(const GtFirstcodesspacelog *fcsl);
 
 void gt_firstcodes_spacelog_start_diff(GtFirstcodesspacelog *fcsl);
 
 void gt_firstcodes_spacelog_stop_diff(GtFirstcodesspacelog *fcsl);
+
+size_t gt_firstcodes_spacelog_peak(const GtFirstcodesspacelog *fcsl);
+
+bool gt_firstcodes_spacelog_showentries(FILE *fp,
+                                        const GtFirstcodesspacelog *fcsl);
 
 void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 int line,

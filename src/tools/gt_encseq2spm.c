@@ -35,7 +35,7 @@ typedef struct
        forceoverflow,
        countspms;
   unsigned int minmatchlength,
-               parts;
+               numofparts;
   unsigned long maximumspace;
   GtStr *encseqinput,
         *spmspec,
@@ -48,6 +48,7 @@ static void* gt_encseq2spm_arguments_new(void)
   GtEncseq2spmArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->outputspms = false;
   arguments->countspms = false;
+  arguments->numofparts = 0;
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
   arguments->memlimitarg = gt_str_new();
@@ -86,8 +87,8 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_is_mandatory(option);
 
   /* -parts */
-  optionparts = gt_option_new_uint_min("parts", "specify the number of parts",
-                                  &arguments->parts, 1U, 1U);
+  optionparts = gt_option_new_uint("parts", "specify the number of parts",
+                                  &arguments->numofparts, 0U);
   gt_option_parser_add_option(op, optionparts);
 
   /* -memlimit */
@@ -231,7 +232,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
     if (storefirstcodes_getencseqkmers_twobitencoding(encseq,
                                                       32U,
-                                                      arguments->parts,
+                                                      arguments->numofparts,
                                                       arguments->maximumspace,
                                                       arguments->minmatchlength,
                                      /* use false */  arguments->checksuftab,
