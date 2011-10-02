@@ -4,6 +4,7 @@
 #include "core/log_api.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"
+#include "core/mathsupport.h"
 #include "firstcodes-spacelog.h"
 
 typedef struct
@@ -18,6 +19,8 @@ struct GtFirstcodesspacelog
 {
   size_t workspace,
          splitspace;
+  double max_percent_difference;
+  bool calc_difference;
   GtFirstcodespacelogentry *entries;
   unsigned long nextfree, allocated;
 };
@@ -29,8 +32,20 @@ GtFirstcodesspacelog *gt_firstcodes_spacelog_new(void)
   fcsl = gt_malloc(sizeof (GtFirstcodesspacelog));
   fcsl->workspace = fcsl->splitspace = 0;
   fcsl->nextfree = fcsl->allocated = 0;
+  fcsl->max_percent_difference = 0.0;
+  fcsl->calc_difference = false;
   fcsl->entries = NULL;
   return fcsl;
+}
+
+void gt_firstcodes_spacelog_start_diff(GtFirstcodesspacelog *fcsl)
+{
+  fcsl->calc_difference = (gt_ma_enabled() && gt_fa_enabled()) ? true : false;
+}
+
+void gt_firstcodes_spacelog_stop_diff(GtFirstcodesspacelog *fcsl)
+{
+  fcsl->calc_difference = false;
 }
 
 size_t gt_firstcodes_spacelog_total(GtFirstcodesspacelog *fcsl)
@@ -107,6 +122,8 @@ void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl)
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
+    gt_log_log("maximal difference between estimated and real space = %.2f%%",
+               fcsl->max_percent_difference);
     gt_free(fcsl->entries);
     gt_free(fcsl);
   }
@@ -135,6 +152,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 size_t size)
 {
   GtFirstcodespacelogentry *entry;
+  size_t logspace;
 
   if (add)
   {
@@ -163,7 +181,6 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     }
   } else
   {
-    gt_assert(size == 0);
     entry = gt_spacelog_find(fcsl,title);
     if (entry == NULL)
     {
@@ -172,30 +189,52 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
       (void) gt_spacelog_showentries(stderr,fcsl);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-    size = entry->size;
-    entry->size = 0;
     if (work)
     {
-      if (size > fcsl->workspace)
+      if (entry->size > fcsl->workspace)
       {
-        gt_firstcodes_subtract_error(title, filename, line, size, true,
+        gt_firstcodes_subtract_error(title, filename, line, entry->size, true,
                                      fcsl->workspace);
         (void) gt_spacelog_showentries(stderr,fcsl);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
-      fcsl->workspace -= size;
+      fcsl->workspace -= entry->size;
     } else
     {
-      if (size > fcsl->splitspace)
+      if (entry->size > fcsl->splitspace)
       {
-        gt_firstcodes_subtract_error(title, filename, line, size, false,
+        gt_firstcodes_subtract_error(title, filename, line, entry->size, false,
                                      fcsl->splitspace);
         (void) gt_spacelog_showentries(stderr,fcsl);
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
-      fcsl->splitspace -= size;
+      fcsl->splitspace -= entry->size;
+    }
+    if (size > 0)
+    {
+      gt_spacelog_updateaddentry(entry,filename,line,title,size);
+      if (work)
+      {
+        fcsl->workspace += size;
+      } else
+      {
+        fcsl->splitspace += size;
+      }
+      if (size > entry->size)
+      {
+        add = true;
+        size -= entry->size;
+      } else
+      {
+        size = entry->size - size;
+      }
+    } else
+    {
+      size = entry->size;
+      entry->size = 0;
     }
   }
+  logspace = fcsl->workspace+fcsl->splitspace;
   gt_log_log("file %s, line %d: %s %.2f MB for %s to %sspace; work=%.2f, "
              "split=%.2f, all=%.2f MB",
              filename,
@@ -206,11 +245,42 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
              work ? "work" : "split",
              GT_MEGABYTES(fcsl->workspace),
              GT_MEGABYTES(fcsl->splitspace),
-             GT_MEGABYTES(fcsl->workspace+fcsl->splitspace));
+             GT_MEGABYTES(logspace));
   if (gt_ma_enabled() && gt_fa_enabled())
   {
-    gt_log_log("current space usage %.2f",
-               GT_MEGABYTES(gt_ma_get_space_current() +
-                            gt_fa_get_space_current()));
+    unsigned long realspace = gt_ma_get_space_current() +
+                              gt_fa_get_space_current();
+    gt_log_log("current space usage %.2f (%.5f+%.5f)",GT_MEGABYTES(realspace),
+                                GT_MEGABYTES(gt_ma_get_space_current()),
+                                GT_MEGABYTES(gt_fa_get_space_current()));
+    if (fcsl->calc_difference)
+    {
+      double percent_difference;
+
+      if ((unsigned long) logspace > realspace)
+      {
+        fprintf(stderr,"overestimating logspace\n");
+        exit(GT_EXIT_PROGRAMMING_ERROR);
+      }
+      if (realspace >= 1000000UL)
+      {
+        /*
+        printf("realspace=%lu,logspace=%lu\n",realspace,
+                                              (unsigned long) logspace);
+        */
+        percent_difference = 100.0 * (double) (realspace - logspace)/realspace;
+        if (gt_double_larger_double(percent_difference,3.0))
+        {
+          fprintf(stderr,"space difference of %.2f%% is too large\n",
+                       percent_difference);
+          exit(GT_EXIT_PROGRAMMING_ERROR);
+        }
+        if (gt_double_smaller_double(fcsl->max_percent_difference,
+                                     percent_difference))
+        {
+          fcsl->max_percent_difference = percent_difference;
+        }
+      }
+    }
   }
 }

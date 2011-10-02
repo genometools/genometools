@@ -605,17 +605,19 @@ static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
   if (fci->mappedmarkprefix != NULL)
   {
     gt_Sfxmappedrange_delete(fci->mappedmarkprefix);
+    gt_marksubstring_delete(fci->buf.markprefix,true);
   } else
   {
+    gt_marksubstring_delete(fci->buf.markprefix,true);
     GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"markprefix");
   }
-  gt_marksubstring_delete(fci->buf.markprefix,true);
   fci->buf.markprefix = NULL;
   gt_marksubstring_delete(fci->buf.marksuffix,true);
   GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"marksuffix");
-  if (fci->mappedallfirstcodes == NULL)
+  if (fci->mappedallfirstcodes == NULL && fci->allfirstcodes != NULL)
   {
     gt_free(fci->allfirstcodes);
+    GT_FCI_SUBTRACTSPLITSPACE(fci->fcsl,"allfirstcodes");
   }
 }
 
@@ -694,6 +696,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.mappedmarkprefix = NULL;
   fci.mappedleftborder = NULL;
   GT_FCI_ADDWORKSPACE(fci.fcsl,"encseq",(size_t) gt_encseq_sizeofrep(encseq));
+  if (withsuftabcheck)
+  {
+    gt_firstcodes_spacelog_start_diff(fci.fcsl);
+  }
   if (gt_showtime_enabled())
   {
     timer = gt_timer_new_with_progress_description("to insert first codes into "
@@ -754,9 +760,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.allfirstcodes = gt_realloc(fci.allfirstcodes,
                                      sizeof (*fci.allfirstcodes) *
                                      fci.differentcodes);
-      GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
-      GT_FCI_ADDSPLITSPACE(fci.fcsl,"allfirstcodes",
-                           sizeof (*fci.allfirstcodes) * fci.differentcodes);
+      GT_FCI_SUBTRACTADDSPLITSPACE(fci.fcsl,"allfirstcodes",
+                                   sizeof (*fci.allfirstcodes) *
+                                   fci.differentcodes);
     }
   }
   fci.binsearchcache_depth
@@ -1213,6 +1219,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   gt_Sfxmappedrange_delete(fci.mappedallfirstcodes);
   gt_seqnumrelpos_delete(fci.buf.snrp);
+  gt_firstcodes_spacelog_stop_diff(fci.fcsl);
   GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"encseq");
   gt_firstcodes_spacelog_delete(fci.fcsl);
   if (timer != NULL)

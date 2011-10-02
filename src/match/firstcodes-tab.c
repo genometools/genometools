@@ -53,13 +53,12 @@ static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
                                           GtFirstcodestab *fct,
                                           unsigned long numofdifferentcodes)
 {
-  GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
   fct->countocc_small = gt_realloc(fct->countocc_small,
                                    sizeof (*fct->countocc_small) *
                                            (numofdifferentcodes+1));
-  GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
-                      sizeof (*fct->countocc_small) *
-                      (numofdifferentcodes+1));
+  GT_FCI_SUBTRACTADDWORKSPACE(fcsl,"countocc_small",
+                              sizeof (*fct->countocc_small) *
+                              (numofdifferentcodes+1));
 }
 
 typedef struct
@@ -557,8 +556,8 @@ void gt_firstcodes_overflow_delete(GtFirstcodesspacelog *fcsl,
 {
   if (fct->overflow_allocated && fct->overflow_leftborder != NULL)
   {
-    GT_FCI_SUBTRACTSPLITSPACE(fcsl,"overflow_leftborder");
     gt_free(fct->overflow_leftborder);
+    GT_FCI_SUBTRACTSPLITSPACE(fcsl,"overflow_leftborder");
     fct->overflow_leftborder = NULL;
   }
 }

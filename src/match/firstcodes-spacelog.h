@@ -9,6 +9,10 @@ void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl);
 
 size_t gt_firstcodes_spacelog_total(GtFirstcodesspacelog *fcsl);
 
+void gt_firstcodes_spacelog_start_diff(GtFirstcodesspacelog *fcsl);
+
+void gt_firstcodes_spacelog_stop_diff(GtFirstcodesspacelog *fcsl);
+
 void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 int line,
                                 const char *filename,
@@ -28,5 +32,11 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
 
 #define GT_FCI_SUBTRACTSPLITSPACE(FCSL,TAB)\
         gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,false,0)
+
+#define GT_FCI_SUBTRACTADDWORKSPACE(FCSL,TAB,SIZE)\
+        gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,true,SIZE)
+
+#define GT_FCI_SUBTRACTADDSPLITSPACE(FCSL,TAB,SIZE)\
+        gt_firstcodes_spacelog_add(FCSL,__LINE__,__FILE__,false,TAB,false,SIZE)
 
 #endif
