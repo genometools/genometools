@@ -682,9 +682,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     marksuffixunits = markprefixunits;
   }
-  if (marksuffixunits + markprefixunits > (unsigned int) GT_UNITSIN2BITENC)
+  if (marksuffixunits + markprefixunits > kmersize)
   {
-    markprefixunits = marksuffixunits = (unsigned int) GT_UNITSIN2BITENC/2U;
+    marksuffixunits = kmersize/2U;
+    markprefixunits = kmersize - marksuffixunits;
   }
   gt_log_log("markprefixunits=%u,marksuffixunits=%u",markprefixunits,
                                                        marksuffixunits);
@@ -1221,7 +1222,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                      GT_MEGABYTES(spaceforbucketprocessing));
         } else
         {
-          gt_assert(false);
+          spaceforbucketprocessing = 0;
         }
       }
       if (gt_firstcodes_sortremaining(encseq,

@@ -21,6 +21,8 @@
 #include "core/option_api.h"
 #include "core/encseq_api.h"
 #include "core/logger.h"
+#include "core/intbits.h"
+#include "core/minmax.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
 #include "match/esa-spmsk.h"
@@ -248,6 +250,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     GtLogger *logger;
     const GtReadmode readmode = GT_READMODE_FORWARD;
     GtBUstate_spmsk *spmsk_state = NULL;
+    unsigned int kmersize;
 
     if (arguments->countspms || arguments->outputspms)
     {
@@ -259,8 +262,9 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                      gt_str_get(arguments->encseqinput));
     }
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
+    kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,arguments->minmatchlength);
     if (storefirstcodes_getencseqkmers_twobitencoding(encseq,
-                                                      32U,
+                                                      kmersize,
                                                       arguments->numofparts,
                                                       arguments->maximumspace,
                                                       arguments->minmatchlength,
