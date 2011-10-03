@@ -22,7 +22,9 @@
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
 #include "core/ma.h"
+#ifdef SKDEBIG
 #include "core/disc_distri.h"
+#endif
 #include "core/log.h"
 #include "core/spacecalc.h"
 #include "core/hashmap-generic.h"
@@ -57,6 +59,8 @@ static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
                               sizeof (*fct->countocc_small) *
                               (numofdifferentcodes+1));
 }
+
+#ifdef SKDEBUG
 
 typedef struct
 {
@@ -119,6 +123,7 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
           GT_MEGABYTES(spaceopt+spacedirectstore),
           GT_MEGABYTES(spaceopt+spacewithhash));
 }
+#endif
 
 static unsigned long gt_leftborderbuffer_flush(FILE *fpleftborderbuffer,
                                                GtArrayuint32_t
@@ -245,7 +250,9 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
 {
   unsigned long idx, partsum, maxbucketsize, samplecount = 0;
   uint32_t currentcount;
+#ifdef SKDEBUG
   GtDiscDistri *countdistri = gt_disc_distri_new();
+#endif
   unsigned long bitmask;
   FILE *fpleftborderbuffer;
   GtArrayuint32_t leftborderbuffer;
@@ -267,7 +274,9 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
+#ifdef SKDEBUG
   gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+#endif
   fct->sampleshift = 9U;
   while (true)
   {
@@ -300,7 +309,9 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
+#ifdef SKDEBUG
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+#endif
     if (maxbucketsize < (unsigned long) currentcount)
     {
       maxbucketsize = (unsigned long) currentcount;
@@ -345,13 +356,17 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     fct->overflow_allocated = true;
     overflow_leftborder_ptr = fct->overflow_leftborder - fct->overflow_index;
     currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
+#ifdef SKDEBUG
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+#endif
     partsum += (unsigned long) currentcount;
     overflow_leftborder_ptr[fct->overflow_index] = partsum;
     for (idx = fct->overflow_index+1; idx < fct->differentcodes; idx++)
     {
       currentcount = GT_PARTIALSUM_COUNT_GET(idx);
+#ifdef SKDEBUG
       gt_disc_distri_add(countdistri,(unsigned long) currentcount);
+#endif
       if (maxbucketsize < (unsigned long) currentcount)
       {
         maxbucketsize = (unsigned long) currentcount;
@@ -385,8 +400,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   {
     gt_assert(leftborderbuffer_totalwrite == fct->differentcodes + 1);
   }
+#ifdef SKDEBUG
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
+#endif
   gt_assert (fct->countocc_small != NULL);
   gt_free(fct->countocc_small);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
