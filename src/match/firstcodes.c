@@ -1028,7 +1028,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_Sfxmappedrange_delete(fci.mappedmarkprefix);
       fci.mappedmarkprefix = NULL;
     }
-    fci.codebuffer_total = 0;
     largest_width = gt_suftabparts_largest_width(suftabparts);
     fci.spmsuftab = gt_spmsuftab_new(largest_width,totallength,
                                      bitsforseqnum + bitsforrelpos,
@@ -1067,6 +1066,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_assert((unsigned long) used <= maximumspace);
       fci.buf.allocated = (maximumspace - used)/
                           (2 * sizeof (*fci.tempcodeposforradixsort));
+      if ((unsigned long) (fci.codebuffer_total+fci.numofsequences)/
+                          fci.buf.allocated > 400UL)
+      {
+        fci.buf.allocated = (fci.codebuffer_total+fci.numofsequences)/400UL;
+      }
     } else
     {
       fci.buf.allocated /= 2UL;
@@ -1089,6 +1093,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              GT_MEGABYTES(sizeof (*fci.buf.spaceGtUlongPair) * 2 *
                           fci.buf.allocated));
     */
+    fci.codebuffer_total = 0;
     fci.flushcount = 0;
     for (part = 0; !onlyaccumulation &&
                    part < gt_suftabparts_numofparts(suftabparts); part++)
@@ -1212,7 +1217,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           spaceforbucketprocessing = maximumspace -
                                      (unsigned long)
                                      gt_firstcodes_spacelog_total(fci.fcsl);
-          gt_log_log("space left for sortremaining: %.2f\n",
+          gt_log_log("space left for sortremaining: %.2f",
                      GT_MEGABYTES(spaceforbucketprocessing));
         } else
         {

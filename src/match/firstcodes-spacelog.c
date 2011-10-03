@@ -185,9 +185,8 @@ static void gt_firstcodes_updatemax(GtFirstcodesspacelog *fcsl)
   if (fcsl->workspace + fcsl->splitspace > fcsl->spacepeak)
   {
     fcsl->spacepeak = fcsl->workspace + fcsl->splitspace;
-    gt_log_log("update spacepeak to %.2f (%lu)",
-               GT_MEGABYTES(fcsl->spacepeak),
-               (unsigned long) fcsl->spacepeak);
+    gt_log_log("update spacepeak to %.2f MB",
+               GT_MEGABYTES(fcsl->spacepeak));
   }
 }
 

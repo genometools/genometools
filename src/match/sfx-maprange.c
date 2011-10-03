@@ -265,7 +265,7 @@ void *gt_Sfxmappedrange_map(GtSfxmappedrange *sfxmappedrange,
                             minindex,
                             maxindex);
     sizeoftable = gt_Sfxmappedrange_size_entire(sfxmappedrange);
-    gt_log_log("mapped %s from %lu to %lu for %s (%.1f%% of all)",
+    gt_log_log("mapped %s[%lu..%lu] for %s (%.1f%% of all)",
                gt_str_get(sfxmappedrange->tablename),
                lbrange.mapoffset,
                lbrange.mapend,
