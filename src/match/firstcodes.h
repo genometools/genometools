@@ -39,8 +39,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     bool withsuftabcheck, /* set to false, only for tests */
                     bool onlyaccumulation, /* set to false, only for tests */
                     bool forceoverflow, /* set to false, only for tests */
-                    size_t phase2extraspace, /* extra space needed in proc.
-                                                intervals */
+                    unsigned long phase2extra, /* extra space needed in proc.
+                                                  intervals */
                     GtFirstcodesintervalprocess itvprocess,
                     void *itvprocessdata,
                     GtLogger *logger,

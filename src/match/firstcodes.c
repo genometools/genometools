@@ -640,7 +640,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    bool withsuftabcheck,
                                                    bool onlyaccumulation,
                                                    bool forceoverflow,
-                                                   size_t phase2extraspace,
+                                                   unsigned long phase2extra,
                                                    GtFirstcodesintervalprocess
                                                      itvprocess,
                                                    void *itvprocessdata,
@@ -799,19 +799,19 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   if (maximumspace > 0)
   {
     if ((unsigned long) gt_firstcodes_spacelog_total(fci.fcsl) +
-                        phase2extraspace >= maximumspace)
+                        phase2extra >= maximumspace)
     {
       gt_error_set(err,"already used %.2f MB of memory and need %.2f MB later "
                        "=> cannot compute index in at most %.2f MB",
                        GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)),
-                       GT_MEGABYTES(phase2extraspace),
+                       GT_MEGABYTES(phase2extra),
                        GT_MEGABYTES(maximumspace));
       haserr = true;
     } else
     {
       size_t remainspace = (size_t) maximumspace -
-                           (gt_firstcodes_spacelog_total(fci.fcsl) -
-                            phase2extraspace);
+                           (gt_firstcodes_spacelog_total(fci.fcsl) +
+                            phase2extra);
 
       fci.buf.allocated = (unsigned long)
                           remainspace / (sizeof (*fci.buf.spaceGtUlong) +
@@ -924,6 +924,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         maximumspace = (unsigned long)
                        (gt_firstcodes_spacelog_peak(fci.fcsl) +
+                       phase2extra +
                        gt_shortreadsort_size(true,maxbucketsize) +
                        (sizeof (*seqnum_relpos_bucket) * maxbucketsize) +
                        4 * 4096);
@@ -943,7 +944,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       retval = gt_suftabparts_fit_memlimit(
                                     gt_firstcodes_spacelog_total(fci.fcsl)
                                      + leftbordersize /*as this is subtracted*/
-                                     + phase2extraspace,
+                                     + phase2extra,
                                     maximumspace,
                                     NULL,
                                     &fci.tab,
@@ -1046,7 +1047,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     if (maximumspace > 0)
     {
       size_t used = gt_firstcodes_spacelog_workspace(fci.fcsl) +
-                    phase2extraspace +
+                    phase2extra +
                     gt_suftabparts_largestsizemappedpartwise(suftabparts);
 
       /*if ((unsigned long) used > maximumspace)
@@ -1204,10 +1205,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         if ((unsigned long) gt_firstcodes_spacelog_total(fci.fcsl)
             < maximumspace)
         {
-          gt_log_log("space left for sortremaining: %.2f",
+          gt_log_log("space left for sortremaining: %.2f\n",
                      GT_MEGABYTES(maximumspace -
                                   (unsigned long)
                                   gt_firstcodes_spacelog_total(fci.fcsl)));
+        } else
+        {
+          gt_assert(false);
         }
       }
       if (gt_firstcodes_sortremaining(encseq,

@@ -36,11 +36,14 @@ typedef struct
        countspms;
   unsigned int minmatchlength,
                numofparts;
-  unsigned long maximumspace;
+  unsigned long maximumspace,
+                phase2extra;
   GtStr *encseqinput,
         *spmspec,
-        *memlimitarg;
-  GtOption *refoptionmemlimit;
+        *memlimitarg,
+        *phase2extraarg;
+  GtOption *refoptionmemlimit,
+           *refoptionphase2extra;
 } GtEncseq2spmArguments;
 
 static void* gt_encseq2spm_arguments_new(void)
@@ -52,6 +55,8 @@ static void* gt_encseq2spm_arguments_new(void)
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
   arguments->memlimitarg = gt_str_new();
+  arguments->phase2extraarg = gt_str_new();
+  arguments->phase2extra = 0UL; /* in bytes */
   arguments->maximumspace = 0UL; /* in bytes */
   return arguments;
 }
@@ -63,7 +68,9 @@ static void gt_encseq2spm_arguments_delete(void *tool_arguments)
   gt_str_delete(arguments->encseqinput);
   gt_str_delete(arguments->spmspec);
   gt_option_delete(arguments->refoptionmemlimit);
+  gt_option_delete(arguments->refoptionphase2extra);
   gt_str_delete(arguments->memlimitarg);
+  gt_str_delete(arguments->phase2extraarg);
   gt_free(arguments);
 }
 
@@ -135,6 +142,17 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  /* -phase2extra */
+  option = gt_option_new_string("phase2extra",
+                       "specify  amount of additional space required for "
+                       "the second phase of the computation involving the "
+                       "processing of the intervals (in bytes, "
+                       "the keywords 'MB' and 'GB' are allowed)",
+                       arguments->phase2extraarg, NULL);
+  gt_option_parser_add_option(op, option);
+  arguments->refoptionphase2extra = gt_option_ref(option);
+  gt_option_is_development_option(option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -175,9 +193,20 @@ static int gt_encseq2spm_arguments_check(int rest_argc,
   }
   if (!haserr && gt_option_is_set(arguments->refoptionmemlimit))
   {
-    if (gt_option_parse_memlimit(&arguments->maximumspace,
-                                 arguments->memlimitarg,
-                                 err) != 0)
+    if (gt_option_parse_spacespec(&arguments->maximumspace,
+                                  "memlimit",
+                                  arguments->memlimitarg,
+                                  err) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && gt_option_is_set(arguments->refoptionphase2extra))
+  {
+    if (gt_option_parse_spacespec(&arguments->phase2extra,
+                                  "phase2extra",
+                                  arguments->phase2extraarg,
+                                  err) != 0)
     {
       haserr = true;
     }
@@ -240,7 +269,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                      /* use false */  arguments->forceoverflow,
                                      /* specify the extra space needed for
                                         the function processing the interval */
-                                                      0,
+                                                      arguments->phase2extra,
                                                       spmsk_state != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,

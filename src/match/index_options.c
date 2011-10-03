@@ -237,7 +237,8 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
         && oi->optionmemlimit != NULL
         && gt_option_is_set(oi->optionmemlimit))
   {
-    had_err = gt_option_parse_memlimit(&oi->maximumspace,oi->memlimit,err);
+    had_err = gt_option_parse_spacespec(&oi->maximumspace,"memlimit",
+                                        oi->memlimit,err);
   }
   if (!had_err)
   {

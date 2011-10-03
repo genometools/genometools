@@ -336,7 +336,9 @@ void            gt_option_delete(GtOption*);
 /* Parse the argument to option -memlimit. Could be made into
    a special parser, but I do not know how. SK. 2011-09-19 */
 
-int gt_option_parse_memlimit(unsigned long *maximumspace,const GtStr *memlimit,
-                             GtError *err);
+int gt_option_parse_spacespec(unsigned long *maximumspace,
+                              const char *optname,
+                              const GtStr *memlimit,
+                              GtError *err);
 
 #endif

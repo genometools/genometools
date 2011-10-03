@@ -1579,8 +1579,10 @@ void gt_option_delete(GtOption *o)
   gt_free(o);
 }
 
-int gt_option_parse_memlimit(unsigned long *maximumspace,const GtStr *memlimit,
-                             GtError *err)
+int gt_option_parse_spacespec(unsigned long *maximumspace,
+                              const char *optname,
+                              const GtStr *memlimit,
+                              GtError *err)
 {
   int had_err = 0;
   bool match = false;
@@ -1588,9 +1590,9 @@ int gt_option_parse_memlimit(unsigned long *maximumspace,const GtStr *memlimit,
   had_err = gt_grep(&match, "^[0-9]+(MB|GB)$", gt_str_get(memlimit), err);
   if (had_err || !match)
   {
-    gt_error_set(err,"option -memlimit must have one positive "
+    gt_error_set(err,"option -%s must have one positive "
                      "integer argument followed by one of "
-                     "the keywords MB and GB");
+                     "the keywords MB and GB",optname);
     had_err = -1;
   }
   if (!had_err)
@@ -1604,8 +1606,8 @@ int gt_option_parse_memlimit(unsigned long *maximumspace,const GtStr *memlimit,
     {
       if (sizeof (unsigned long) == (size_t) 4 && *maximumspace > 3UL)
       {
-        gt_error_set(err,"for 32bit binaries one cannot specify more "
-                         "than 3 GB as maximum space");
+        gt_error_set(err,"option -%s: for 32bit binaries one cannot "
+                         "specify more than 3 GB as maximum space",optname);
         had_err = -1;
       }
       if (had_err != 1)
@@ -1618,8 +1620,9 @@ int gt_option_parse_memlimit(unsigned long *maximumspace,const GtStr *memlimit,
       {
         if (sizeof (unsigned long) == (size_t) 4 && *maximumspace > 4095UL)
         {
-          gt_error_set(err,"for 32bit binaries one cannot specify more "
-                           "than 4095 MB as maximum space");
+          gt_error_set(err,"option -%s: for 32bit binaries one cannot "
+                           "specify more than 4095 MB as maximum space",
+                           optname);
           had_err = -1;
         }
         if (!had_err)
