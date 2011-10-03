@@ -28,7 +28,9 @@ typedef int (*GtFirstcodesintervalprocess)(void *,
                                            const unsigned long *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,
-                                           unsigned long,GtError *);
+                                           unsigned long,
+                                           unsigned long,
+                                           GtError *);
 
 int storefirstcodes_getencseqkmers_twobitencoding(
                     const GtEncseq *encseq,

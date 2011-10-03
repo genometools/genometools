@@ -34,7 +34,8 @@ struct GtBUstate_spmsk /* global information */
   GtReadmode readmode;
   unsigned long totallength,
                 minmatchlength,
-                spmcounter;
+                spmcounter,
+                spaceforbucketprocessing;
   bool countspms,
        outputspms;
   GtArrayGtUlong Wset, Lset;
@@ -171,6 +172,7 @@ int gt_spmsk_inl_process(void *data,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
                          unsigned long nonspecials,
+                         unsigned long spaceforbucketprocessing,
                          GtError *err)
 {
   GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;
@@ -178,6 +180,7 @@ int gt_spmsk_inl_process(void *data,
   gt_assert(state != NULL);
   gt_assert(snrp != NULL);
   gt_assert(lcptab_bucket != NULL);
+  state->spaceforbucketprocessing = spaceforbucketprocessing;
   if (gt_esa_bottomup_RAM_spmsk(seqnum_relpos_bucket,
                                 snrp,
                                 lcptab_bucket,

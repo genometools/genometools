@@ -40,6 +40,17 @@ int gt_spmsk_inl_process(void *data,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
                          unsigned long nonspecials,
+                         unsigned long spaceforbucketprocessing,
+                         /* this parameter can be 0 in case where
+                            user defined memlimit or derived
+                            memlimit is not available. If it is available
+                            then, value is > 0 and gives the amount of space
+                            in bytes which can be used in the bucket processing
+                            without exceeding the given memlimit. Note
+                            that after each part, the bucket processing
+                            machinery must delete its space to a minimum,
+                            as all space required adds up to the maximum.
+                         */
                          GtError *err);
 
 #endif

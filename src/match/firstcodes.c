@@ -495,6 +495,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                        unsigned long minindex,
                                        unsigned long maxindex,
                                        unsigned long sumofwidth,
+                                       unsigned long spaceforbucketprocessing,
                                        unsigned long depth,
                                        GtFirstcodesintervalprocess itvprocess,
                                        void *itvprocessdata,
@@ -557,7 +558,8 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
       if (itvprocess != NULL)
       {
         if (itvprocess(itvprocessdata,seqnum_relpos_bucket,snrp,
-                        lcptab_bucket, width, err) != 0)
+                       lcptab_bucket, width, spaceforbucketprocessing,
+                       err) != 0)
         {
           haserr = true;
           break;
@@ -1091,6 +1093,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     for (part = 0; !onlyaccumulation &&
                    part < gt_suftabparts_numofparts(suftabparts); part++)
     {
+      unsigned long spaceforbucketprocessing;
+
       if (timer != NULL)
       {
         gt_timer_show_progress(timer, "to insert suffixes into buckets",stdout);
@@ -1199,15 +1203,17 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         gt_timer_show_progress(timer, "to sort buckets of suffixes",stdout);
       }
+      spaceforbucketprocessing = 0;
       if (maximumspace > 0)
       {
         if ((unsigned long) gt_firstcodes_spacelog_total(fci.fcsl)
             < maximumspace)
         {
+          spaceforbucketprocessing = maximumspace -
+                                     (unsigned long)
+                                     gt_firstcodes_spacelog_total(fci.fcsl);
           gt_log_log("space left for sortremaining: %.2f\n",
-                     GT_MEGABYTES(maximumspace -
-                                  (unsigned long)
-                                  gt_firstcodes_spacelog_total(fci.fcsl)));
+                     GT_MEGABYTES(spaceforbucketprocessing));
         } else
         {
           gt_assert(false);
@@ -1224,6 +1230,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                       fci.currentmaxindex,
                                       gt_suftabparts_sumofwidth(part,
                                                                 suftabparts),
+                                      spaceforbucketprocessing,
                                       (unsigned long) kmersize,
                                       itvprocess,
                                       itvprocessdata,
