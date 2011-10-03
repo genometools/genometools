@@ -666,7 +666,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   maxseqlength = gt_encseq_max_seq_length(encseq);
   totallength = gt_encseq_total_length(encseq);
   logtotallength = (unsigned int) log((double) totallength);
-  gt_log_log("totallength=%lu\n",totallength);
+  gt_log_log("totallength=%lu",totallength);
   if (logtotallength >= 7U)
   {
     markprefixunits = MAX(7U,logtotallength - 7U);
@@ -681,7 +681,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     marksuffixunits = markprefixunits;
   }
-  gt_log_log("markprefixunits=%u,marksuffixunits=%u\n",markprefixunits,
+  if (marksuffixunits + markprefixunits > (unsigned int) GT_UNITSIN2BITENC)
+  {
+    markprefixunits = marksuffixunits = (unsigned int) GT_UNITSIN2BITENC/2U;
+  }
+  gt_log_log("markprefixunits=%u,marksuffixunits=%u",markprefixunits,
                                                        marksuffixunits);
   if (maxseqlength > (unsigned long) minmatchlength)
   {
@@ -697,6 +701,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   bitsforseqnum = gt_determinebitspervalue((uint64_t) (numofdbsequences - 1));
   if (bitsforseqnum + bitsforrelpos > (unsigned int) GT_INTWORDSIZE)
   {
+    gt_seqnumrelpos_delete(fci.buf.snrp);
     gt_error_set(err,"cannot process encoded sequences with %lu sequences "
                      "of length up to %lu (%u+%u bits)",
                      numofdbsequences,maxseqlength,bitsforseqnum,bitsforrelpos);
