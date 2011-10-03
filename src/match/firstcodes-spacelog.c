@@ -275,18 +275,23 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
     }
   }
   logspace = fcsl->workspace+fcsl->splitspace;
-  gt_log_log("file %s, line %d: %s %.2f MB for %s to %sspace; "
-             "work=%.2f, split=%.2f, all=%.2f MB (%lu)",
+  gt_log_log(
+#ifdef SKDEBUG
+             "file %s, line %d: "
+#endif
+             "%s %s= %.2f, %s, w=%.2f, s=%.2f, sum=%.2f MB",
+#ifdef SKDEBUG
              filename,
              line,
-             add ? "add" : "delete",
+#endif
+             work ? "w" : "s",
+             add ? "+" : "-",
              GT_MEGABYTES(size),
              title,
-             work ? "work" : "split",
              GT_MEGABYTES(fcsl->workspace),
              GT_MEGABYTES(fcsl->splitspace),
-             GT_MEGABYTES(logspace),
-             (unsigned long) logspace);
+             GT_MEGABYTES(logspace));
+#ifdef SKDEBUG
   if (gt_ma_enabled() && gt_fa_enabled())
   {
     unsigned long realspace = gt_ma_get_space_current() +
@@ -295,7 +300,6 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 GT_MEGABYTES(realspace),
                                 GT_MEGABYTES(gt_ma_get_space_current()),
                                 GT_MEGABYTES(gt_fa_get_space_current()));
-#ifdef SKDEBUG
     if (fcsl->calc_difference)
     {
       double percent_difference;
@@ -325,6 +329,6 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
         }
       }
     }
-#endif
   }
+#endif
 }
