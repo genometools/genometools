@@ -254,12 +254,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
-  printf("hashmap_addcount=%lu\n",fct->hashmap_addcount);
-  printf("hashmap_incrementcount=%lu (%.2f%%)\n",
+  gt_log_log("hashmap_addcount=%lu\n",fct->hashmap_addcount);
+  gt_log_log("hashmap_incrementcount=%lu (%.2f%%)\n",
                   fct->hashmap_incrementcount,
                   100.0 * (double) fct->hashmap_incrementcount/
                                    fct->all_incrementcount);
-  printf("hashmap_getcount=%lu (%.2f%%)\n",
+  gt_log_log("hashmap_getcount=%lu (%.2f%%)\n",
                   fct->hashmap_getcount,
                   100.0 * (double) fct->hashmap_getcount/
                                    fct->all_incrementcount);
@@ -403,7 +403,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     spacewithouthashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
     gt_assert(spacewithouthashmap < spacewithhashmap);
     hashmapspace = spacewithhashmap - spacewithouthashmap;
-    printf("space for hashmap=%.2f (%lu bytes per entry)\n",
+    gt_log_log("space for hashmap=%.2f (%lu bytes per entry)",
            GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;

@@ -651,7 +651,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars, part, bitsforrelpos, bitsforseqnum;
-  const unsigned int markprefixunits = 14U;
+  const unsigned int markprefixunits = 13U;
   const unsigned int marksuffixunits = 12U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
@@ -766,7 +766,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
   }
   fci.binsearchcache_depth
-    = (unsigned int) log10((double) fci.differentcodes);
+    = 2U + (unsigned int) log10((double) fci.differentcodes);
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
   binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
