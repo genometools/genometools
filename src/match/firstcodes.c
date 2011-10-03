@@ -650,17 +650,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
-  unsigned int numofchars, part, bitsforrelpos, bitsforseqnum;
-  unsigned int markprefixunits, marksuffixunits;
-  unsigned int logtotallength;
-  const GtReadmode readmode = GT_READMODE_FORWARD;
+  unsigned int numofchars, part, bitsforrelpos, bitsforseqnum,
+               markprefixunits, marksuffixunits, logtotallength;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
-                totallength, suftabentries = 0, largest_width;
+                totallength, suftabentries = 0, largest_width,
+                *seqnum_relpos_bucket = NULL;
   GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
   GtShortreadsortworkinfo *srsw = NULL;
-  unsigned long *seqnum_relpos_bucket = NULL;
   void *mapptr;
+  const GtReadmode readmode = GT_READMODE_FORWARD;
   bool haserr = false;
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
