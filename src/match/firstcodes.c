@@ -651,8 +651,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars, part, bitsforrelpos, bitsforseqnum;
-  const unsigned int markprefixunits = 13U;
-  const unsigned int marksuffixunits = 13U;
+  const unsigned int markprefixunits = 14U;
+  const unsigned int marksuffixunits = 12U;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
                 totallength, suftabentries = 0, largest_width;
@@ -897,16 +897,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       int retval;
       unsigned long leftbordersize;
 
-      gt_assert((numofparts == 0 && maximumspace == 0) ||
-                (numofparts == 1U && maximumspace > 0));
-
-      if (numofparts == 0)
+      if (numofparts == 0 && maximumspace == 0)
       {
         maximumspace = (unsigned long)
                        (gt_firstcodes_spacelog_peak(fci.fcsl) +
                        gt_shortreadsort_size(true,maxbucketsize) +
                        (sizeof (*seqnum_relpos_bucket) * maxbucketsize) +
                        4 * 4096);
+      } else
+      {
+        gt_assert(maximumspace > 0);
       }
       if (fci.mappedleftborder != NULL)
       {
