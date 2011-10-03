@@ -651,8 +651,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, binsearchcache_size, suftab_size = 0;
   unsigned int numofchars, part, bitsforrelpos, bitsforseqnum;
-  const unsigned int markprefixunits = 13U;
-  const unsigned int marksuffixunits = 12U;
+  unsigned int markprefixunits, marksuffixunits;
+  unsigned int logtotallength;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
                 totallength, suftabentries = 0, largest_width;
@@ -665,6 +665,24 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
   totallength = gt_encseq_total_length(encseq);
+  logtotallength = (unsigned int) log((double) totallength);
+  gt_log_log("totallength=%lu\n",totallength);
+  if (logtotallength >= 7U)
+  {
+    markprefixunits = MAX(7U,logtotallength - 7U);
+  } else
+  {
+    markprefixunits = 7U;
+  }
+  if (markprefixunits >= 2U)
+  {
+    marksuffixunits = markprefixunits - 1;
+  } else
+  {
+    marksuffixunits = markprefixunits;
+  }
+  gt_log_log("markprefixunits=%u,marksuffixunits=%u\n",markprefixunits,
+                                                       marksuffixunits);
   if (maxseqlength > (unsigned long) minmatchlength)
   {
     maxrelpos = maxseqlength - (unsigned long) minmatchlength;
