@@ -762,7 +762,6 @@ static GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
              GT_SWAPBITPAIRS(kmer,18,10,8) |
              GT_SWAPBITPAIRS(kmer,16,12,4) |
              (kmer & (3U << 14));
-#ifdef _LP64
     case 16:
       return GT_SWAPBITPAIRS(kmer,30,0,30) |
              GT_SWAPBITPAIRS(kmer,28,2,26) |
@@ -772,6 +771,7 @@ static GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
              GT_SWAPBITPAIRS(kmer,20,10,10) |
              GT_SWAPBITPAIRS(kmer,18,12,6) |
              GT_SWAPBITPAIRS(kmer,16,14,2);
+#ifdef _LP64
     case 17:
       return GT_SWAPBITPAIRS(kmer,32,0,32) |
              GT_SWAPBITPAIRS(kmer,30,2,28) |

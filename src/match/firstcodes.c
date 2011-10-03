@@ -1051,9 +1051,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                     phase2extra +
                     gt_suftabparts_largestsizemappedpartwise(suftabparts);
 
-      /*if ((unsigned long) used > maximumspace)
+      if ((unsigned long) used < maximumspace)
       {
-        fprintf(stderr,"used = %lu (%.2f) > %lu (%.2f) = maximum\n",
+        /*fprintf(stderr,"used = %lu (%.2f) > %lu (%.2f) = maximum\n",
                     used,GT_MEGABYTES(used),maximumspace,
                     GT_MEGABYTES(maximumspace));
         fprintf(stderr,"largestsize_mapped=%lu (%.2f)\n",
@@ -1061,12 +1061,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                     GT_MEGABYTES(
                     gt_suftabparts_largestsizemappedpartwise(suftabparts))
                     );
-        (void) gt_firstcodes_spacelog_showentries(stderr,fci.fcsl);
+        (void) gt_firstcodes_spacelog_showentries(stderr,fci.fcsl);*/
+        fci.buf.allocated = (maximumspace - used)/
+                            (2 * sizeof (*fci.tempcodeposforradixsort));
+      } else
+      {
+        fci.buf.allocated /= 4UL;
       }
-      */
-      gt_assert((unsigned long) used <= maximumspace);
-      fci.buf.allocated = (maximumspace - used)/
-                          (2 * sizeof (*fci.tempcodeposforradixsort));
       if ((unsigned long) (fci.codebuffer_total+fci.numofsequences)/
                           fci.buf.allocated > 400UL)
       {
