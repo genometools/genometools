@@ -1199,6 +1199,17 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         gt_timer_show_progress(timer, "to sort buckets of suffixes",stdout);
       }
+      if (maximumspace > 0)
+      {
+        if ((unsigned long) gt_firstcodes_spacelog_total(fci.fcsl)
+            < maximumspace)
+        {
+          gt_log_log("space left for sortremaining: %.2f",
+                     GT_MEGABYTES(maximumspace -
+                                  (unsigned long)
+                                  gt_firstcodes_spacelog_total(fci.fcsl)));
+        }
+      }
       if (gt_firstcodes_sortremaining(encseq,
                                       readmode,
                                       srsw,
