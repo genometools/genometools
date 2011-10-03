@@ -36,6 +36,7 @@ typedef struct
                 sampledistance,
                 hashmap_addcount,
                 hashmap_incrementcount,
+                hashmap_getcount,
                 all_incrementcount;
   unsigned int sampleshift;
   uint32_t *leftborder;
@@ -44,6 +45,8 @@ typedef struct
   unsigned long *overflow_leftborder,
                 *leftborder_samples;
   GtStr *outfilenameleftborder;
+  unsigned long lastincremented_idx;
+  uint32_t *lastincremented_valueptr;
   bool overflow_allocated;
 } GtFirstcodestab;
 
@@ -80,11 +83,24 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
     } else
     {
       /* there is already an overflow for this index */
-      uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+      if (fct->lastincremented_valueptr != NULL &&
+          fct->lastincremented_idx == idx)
+      {
+        /* last index is identucal to current index. */
+        gt_assert(*fct->lastincremented_valueptr < UINT32_MAX);
+        (*fct->lastincremented_valueptr)++;
+      } else
+      {
+        uint32_t *valueptr
+          = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
 
-      gt_assert(valueptr != NULL);
-      gt_assert(*valueptr < UINT32_MAX);
-      (*valueptr)++;
+        fct->hashmap_getcount++;
+        gt_assert(valueptr != NULL);
+        gt_assert(*valueptr < UINT32_MAX);
+        (*valueptr)++;
+        fct->lastincremented_idx = idx;
+        fct->lastincremented_valueptr = valueptr;
+      }
       fct->hashmap_incrementcount++;
     }
   }

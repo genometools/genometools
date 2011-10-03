@@ -44,9 +44,6 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->outfilenameleftborder = NULL;
   fct->leftborder_samples = NULL;
   fct->outfilenameleftborder = NULL;
-  fct->hashmap_addcount = 0;
-  fct->hashmap_incrementcount = 0;
-  fct->all_incrementcount = 0;
 }
 
 static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
@@ -257,10 +254,14 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
-  gt_log_log("hashmap_addcount=%lu",fct->hashmap_addcount);
-  gt_log_log("hashmap_incrementcount=%lu (%.5f%%)",
+  printf("hashmap_addcount=%lu\n",fct->hashmap_addcount);
+  printf("hashmap_incrementcount=%lu (%.2f%%)\n",
                   fct->hashmap_incrementcount,
                   100.0 * (double) fct->hashmap_incrementcount/
+                                   fct->all_incrementcount);
+  printf("hashmap_getcount=%lu (%.2f%%)\n",
+                  fct->hashmap_getcount,
+                  100.0 * (double) fct->hashmap_getcount/
                                    fct->all_incrementcount);
   fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
@@ -519,6 +520,12 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->overflow_leftborder = NULL;
   fct->countocc_exceptions = NULL;
   fct->differentcodes = 0;
+  fct->lastincremented_idx = 0;
+  fct->lastincremented_valueptr = NULL;
+  fct->hashmap_addcount = 0;
+  fct->hashmap_incrementcount = 0;
+  fct->all_incrementcount = 0;
+  fct->hashmap_getcount = 0;
 }
 
 void **gt_firstcodes_leftborder_address(GtFirstcodestab *fct)
