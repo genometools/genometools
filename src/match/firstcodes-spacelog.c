@@ -136,10 +136,12 @@ void gt_firstcodes_spacelog_delete(GtFirstcodesspacelog *fcsl)
 {
   if (fcsl != NULL)
   {
-    /* if (gt_firstcodes_spacelog_showentries(stderr,fcsl))
+#ifdef SKDEBUG
+    if (gt_firstcodes_spacelog_showentries(stderr,fcsl))
     {
       exit(GT_EXIT_PROGRAMMING_ERROR);
-    }*/
+    }
+#endif
     gt_log_log("maximal difference between estimated and real space = %.2f%%",
                fcsl->max_percent_difference);
     gt_free(fcsl->entries);
@@ -293,6 +295,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
                                 GT_MEGABYTES(realspace),
                                 GT_MEGABYTES(gt_ma_get_space_current()),
                                 GT_MEGABYTES(gt_fa_get_space_current()));
+#ifdef SKDEBUG
     if (fcsl->calc_difference)
     {
       double percent_difference;
@@ -322,5 +325,6 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
         }
       }
     }
+#endif
   }
 }
