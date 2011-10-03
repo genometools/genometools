@@ -279,8 +279,6 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       {
         suftabparts->components[part].minindex
           = suftabparts->components[part-1].maxindex + 1;
-        gt_log_log("corrected minindex[%u] to %lu",
-                    part,suftabparts->components[part].minindex);
       }
     }
     for (part=0; part < suftabparts->numofparts; part++)
