@@ -119,6 +119,27 @@ void gt_radixsort_GtUlong_linear(bool smalltables,GtUlong *source,
   gt_free(count);
 }
 
+void gt_merge_sorted_inplace(GtUlong *leftpart,GtUlong *rightpart,
+                             unsigned long len)
+{
+  GtUlong tmp, *left = leftpart, *right = rightpart;
+
+  while(left < right && right < rightpart + len)
+  {
+    if (*left > *right)
+    {
+      tmp = *left;
+      *left = *right;
+      *right = tmp;
+      left++;
+      right++;
+    } else
+    {
+      left++;
+    }
+  }
+}
+
 static void gt_radixsort_GtUlongPair_linear_phase(size_t shift,
                                                   size_t maxvalue,
                                                   Countbasetype *count,
