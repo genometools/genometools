@@ -404,17 +404,6 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
   unsigned long size_mapped = gt_Sfxmappedrangelist_size_entire(sfxmrlist);
 
   gt_error_check(err);
-  /*
-  printf("maxspace=%.2f\n",GT_MEGABYTES(maximumspace));
-  printf("estimatedspace=%.2f\n",GT_MEGABYTES(estimatedspace));
-  */
-  if (estimatedspace >= (size_t) maximumspace)
-  {
-    gt_error_set(err,"already used %.2f MB of memory, cannot compute "
-                     "index in at most %.2f MB",
-                     GT_MEGABYTES(estimatedspace), GT_MEGABYTES(maximumspace));
-    return -1;
-  }
   for (parts = 1U; parts <= 500U; parts++)
   {
     size_t suftabsize;

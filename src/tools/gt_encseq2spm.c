@@ -35,6 +35,7 @@ typedef struct
        outputspms,
        onlyaccum,
        forceoverflow,
+       radixlarge,
        countspms;
   unsigned int minmatchlength,
                numofparts;
@@ -53,6 +54,7 @@ static void* gt_encseq2spm_arguments_new(void)
   GtEncseq2spmArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->outputspms = false;
   arguments->countspms = false;
+  arguments->radixlarge = false;
   arguments->numofparts = 0;
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
@@ -153,6 +155,12 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
                        arguments->phase2extraarg, NULL);
   gt_option_parser_add_option(op, option);
   arguments->refoptionphase2extra = gt_option_ref(option);
+  gt_option_is_development_option(option);
+
+  /* -radixlarge */
+  option = gt_option_new_bool("radixlarge", "use large tables for radixsort",
+                              &arguments->radixlarge, false);
+  gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
   option = gt_option_new_verbose(&arguments->verbose);
@@ -274,6 +282,8 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                      /* specify the extra space needed for
                                         the function processing the interval */
                                                       arguments->phase2extra,
+                                     /* use true */   arguments->radixlarge ?
+                                                        false : true,
                                                       spmsk_state != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,

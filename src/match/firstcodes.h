@@ -43,6 +43,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     bool forceoverflow, /* set to false, only for tests */
                     unsigned long phase2extra, /* extra space needed in proc.
                                                   intervals */
+                    bool radixsmall,
                     GtFirstcodesintervalprocess itvprocess,
                     void *itvprocessdata,
                     GtLogger *logger,

@@ -257,7 +257,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   FILE *fpleftborderbuffer;
   GtArrayuint32_t leftborderbuffer;
   unsigned long leftborderbuffer_totalwrite = 0;
-  const unsigned long maxvalue = forceoverflow ? UINT8_MAX : UINT32_MAX;
+  const unsigned long maxvalue = forceoverflow ? UINT16_MAX : UINT32_MAX;
   unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
 
   gt_assert(fct->differentcodes < UINT32_MAX);
