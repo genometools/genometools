@@ -52,7 +52,7 @@
         {\
           if ((RR)->ptr2_pair < (RR)->end2_pair)\
           {\
-            if ((RR)->ptr1_pair->a <= *(RR)->ptr2_pair->a)\
+            if ((RR)->ptr1_pair->a <= (RR)->ptr2_pair->a)\
             {\
               VALUE = *(RR)->ptr1_pair++;\
             } else\
@@ -67,7 +67,7 @@
         {\
           if ((RR)->ptr2_pair < (RR)->end2_pair)\
           {\
-            VALUE = *(RR)->ptr2++;\
+            VALUE = *(RR)->ptr2_pair++;\
           } else\
           {\
             STOPSTATEMENT;\

@@ -461,27 +461,79 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
   return found;
 }
 
+static unsigned long gt_firstcodes_insertsuffixes_merge_rr(
+                                        GtFirstcodesinfo *fci,
+                                        GtRadixreader *radixreader,
+                                        GtUlongPair current,
+                                        const unsigned long *subjectstream_fst)
+{
+  unsigned long found = 0, idx;
+  const unsigned long *subject = subjectstream_fst,
+                      *subjectstream_lst = fci->allfirstcodes +
+                                           fci->currentmaxindex;
+
+  while (subject <= subjectstream_lst)
+  {
+    if (current.a <= *subject)
+    {
+      if (current.a == *subject)
+      {
+        idx = (unsigned long) (subject - fci->allfirstcodes);
+        idx = gt_firstcodes_insertionindex(&fci->tab,idx);
+        gt_assert(idx < fci->firstcodehits + fci->numofsequences);
+        gt_spmsuftab_set(fci->spmsuftab,idx,
+                         gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
+                           ? gt_seqnumrelpos_decode_pos(fci->buf.snrp,current.b)
+                           : current.b);
+        found++;
+      }
+      GT_RADIXREADER_NEXT_PAIR(current,radixreader,break);
+    } else
+    {
+      subject++;
+    }
+  }
+  return found;
+}
+
 static void gt_firstcodes_insertsuffixes_flush(void *data)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
 
   if (fci->buf.nextfree > 0)
   {
+    GtUlongPair firstelem;
     const unsigned long *ptr;
+    GtRadixreader radixreader;
+
     gt_assert(fci->allfirstcodes != NULL);
-    gt_radixsort_linear(fci->radixsort_codepos,fci->buf.nextfree);
-#ifdef SKDEBUG
-  checkcodeposorder(fci->buf.spaceGtUlongPair,fci->buf.nextfree,true);
-#endif
     fci->codebuffer_total += fci->buf.nextfree;
+    if (fci->radixparts == 1U)
+    {
+      gt_radixsort_linear(fci->radixsort_codepos,fci->buf.nextfree);
+      firstelem = fci->buf.spaceGtUlongPair[0];
+    } else
+    {
+      gt_radixsort_linear_rr(&radixreader,fci->radixsort_codepos,
+                             fci->buf.nextfree);
+      GT_RADIXREADER_NEXT_PAIR(firstelem,&radixreader,gt_assert(false));
+    }
     ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
                              fci->currentmaxindex,
-                             fci->buf.spaceGtUlongPair[0].a);
+                             firstelem.a);
     if (ptr != NULL)
     {
-      fci->firstcodeposhits
-        += gt_firstcodes_insertsuffixes_merge(fci,fci->buf.spaceGtUlongPair,
-                                              ptr);
+      if (fci->radixparts == 1U)
+      {
+        fci->firstcodeposhits
+          += gt_firstcodes_insertsuffixes_merge(fci,fci->buf.spaceGtUlongPair,
+                                                ptr);
+      } else
+      {
+        fci->firstcodeposhits
+          += gt_firstcodes_insertsuffixes_merge_rr(fci,&radixreader,firstelem,
+                                                   ptr);
+      }
     }
     fci->flushcount++;
     fci->buf.nextfree = 0;
@@ -881,8 +933,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     if (numofparts == 0)
     {
       const bool pair = false;
-      fci.buf.allocated = gt_radixsort_entries(pair,fci.radixparts,
-                            gt_firstcodes_spacelog_total(fci.fcsl)/10UL);
+      fci.buf.allocated
+        = gt_radixsort_entries(pair,fci.radixparts,
+                               gt_firstcodes_spacelog_total(fci.fcsl)/7UL);
     } else
     {
       fci.buf.allocated = fci.differentcodes/5;
@@ -1106,6 +1159,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  maxbucketsize);
     if (maximumspace > 0)
     {
+      const unsigned long maxrounds = fci.radixparts == 1U ? 400UL : 300UL;
       size_t used = gt_firstcodes_spacelog_workspace(fci.fcsl) +
                     phase2extra +
                     gt_suftabparts_largestsizemappedpartwise(suftabparts);
@@ -1121,15 +1175,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         fci.buf.allocated /= 4UL;
       }
       if ((unsigned long) (fci.codebuffer_total+fci.numofsequences)/
-                          fci.buf.allocated > 400UL)
+                          fci.buf.allocated > maxrounds)
       {
-        fci.buf.allocated = (fci.codebuffer_total+fci.numofsequences)/400UL;
+        fci.buf.allocated = (fci.codebuffer_total+fci.numofsequences)/maxrounds;
       }
     } else
     {
       fci.buf.allocated /= 2UL;
     }
-    fci.radixparts = 1U; /* delete later */
     if (!onlyaccumulation)
     {
       fci.radixsort_codepos = gt_radixsort_new(true,fci.radixsmall,
