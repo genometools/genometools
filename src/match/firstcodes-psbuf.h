@@ -24,25 +24,35 @@
 typedef struct
 {
   uint32_t *spaceuint32_t;
-  unsigned long nextfreeuint32_t,
-                allocateduint32_t;
+  unsigned long *spaceulong, nextfree, allocated;
   GtStr *outfilename;
   FILE *fp;
+  bool useulong;
   unsigned long totalwrite;
-} GtOutbufferuint32_t;
+} GtLeftborderOutbuffer;
 
-#define GT_LEFTBORDERBUFFER_ADDVALUE(BUF,VALUE)\
-        if ((BUF)->nextfreeuint32_t == (BUF)->allocateduint32_t)\
+#define GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t(BUF,VALUE)\
+        gt_assert(!leftborderbuffer->useulong);\
+        if ((BUF)->nextfree == (BUF)->allocated)\
         {\
           gt_leftborderbuffer_flush(BUF);\
         }\
-        (BUF)->spaceuint32_t[(BUF)->nextfreeuint32_t++] = (uint32_t) VALUE
+        (BUF)->spaceuint32_t[(BUF)->nextfree++] = (uint32_t) VALUE
 
-GtOutbufferuint32_t *gt_leftborderbuffer_new(GtFirstcodesspacelog *fcsl);
+#define GT_LEFTBORDERBUFFER_ADDVALUE_ulong(BUF,VALUE)\
+        gt_assert(leftborderbuffer->useulong);\
+        if ((BUF)->nextfree == (BUF)->allocated)\
+        {\
+          gt_leftborderbuffer_flush(BUF);\
+        }\
+        (BUF)->spaceulong[(BUF)->nextfree++] = VALUE
 
-void gt_leftborderbuffer_flush(GtOutbufferuint32_t *leftborderbuffer);
+GtLeftborderOutbuffer *gt_leftborderbuffer_new(GtFirstcodesspacelog *fcsl,
+                                               bool useulong);
 
-GtStr *gt_leftborderbuffer_delete(GtOutbufferuint32_t *lbbuf,
+void gt_leftborderbuffer_flush(GtLeftborderOutbuffer *leftborderbuffer);
+
+GtStr *gt_leftborderbuffer_delete(GtLeftborderOutbuffer *lbbuf,
                                   GtFirstcodesspacelog *fcsl,
                                   unsigned long expectedwritten);
 

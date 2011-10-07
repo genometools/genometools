@@ -44,10 +44,10 @@ typedef struct
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder,
                 *leftborder_samples;
-  GtStr *outfilenameleftborder;
+  GtStr *outfilenameleftborder,
+        *outfilenameoverflowleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
-  bool overflow_allocated;
 } GtFirstcodestab;
 
 DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
@@ -149,6 +149,9 @@ void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 
+const GtStr *gt_firstcodes_outfilenameoverflowleftborder(
+                                const GtFirstcodestab *fct);
+
 void gt_firstcodes_overflow_remap(GtFirstcodestab *fct,unsigned long *ptr);
 
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
@@ -159,6 +162,9 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
 
+unsigned long gt_firstcodes_overflowleftborder_entries(
+                    const GtFirstcodestab *fct);
+
 unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     GtFirstcodesspacelog *fcsl,
                                     GtFirstcodestab *fct,
@@ -166,12 +172,5 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
                                     GtLogger *logger);
-
-void gt_firstcodes_countocc_isnotallocated(GtFirstcodestab *fct);
-
-void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct);
-
-void gt_firstcodes_overflow_delete(GtFirstcodesspacelog *fcsl,
-                                   GtFirstcodestab *fct);
 
 #endif

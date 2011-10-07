@@ -45,6 +45,7 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder = NULL;
+  fct->outfilenameoverflowleftborder = NULL;
   fct->leftborder_samples = NULL;
 }
 
@@ -201,7 +202,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
 
 #define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)\
         gt_assert((VALUE) <= UINT32_MAX);\
-        GT_LEFTBORDERBUFFER_ADDVALUE(leftborderbuffer,VALUE)
+        GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t(leftborderbuffer,VALUE)
 
 #define GT_FIRSTCODES_ADD_SAMPLE(PARTSUM)\
         gt_assert(samplecount < fct->numofsamples);\
@@ -233,7 +234,8 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtDiscDistri *countdistri = gt_disc_distri_new();
 #endif
   unsigned long bitmask;
-  GtOutbufferuint32_t *leftborderbuffer = NULL;
+  GtLeftborderOutbuffer *leftborderbuffer = NULL,
+                        *overflow_leftborderbuffer = NULL;
   const unsigned long maxvalue = forceoverflow ? UINT16_MAX : UINT32_MAX;
   unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
 
@@ -271,7 +273,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GT_FCI_ADDWORKSPACE(fcsl,"leftborder_samples",
                       sizeof (*fct->leftborder_samples) * fct->numofsamples);
   GT_FIRSTCODES_ADD_SAMPLE(partsum);
-  leftborderbuffer = gt_leftborderbuffer_new(fcsl);
+  leftborderbuffer = gt_leftborderbuffer_new(fcsl,false);
   GT_PARTIALSUM_LEFTBORDER_SET(0,(uint32_t) partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
@@ -306,27 +308,18 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     fct->outfilenameleftborder
       = gt_leftborderbuffer_delete(leftborderbuffer,fcsl,
                                    gt_firstcodes_leftborder_entries(fct));
-    fct->overflow_allocated = false;
   } else
   {
-    unsigned long overflowcells = fct->differentcodes - fct->overflow_index + 1;
-    unsigned long *overflow_leftborder_ptr;
-
     fct->outfilenameleftborder
       = gt_leftborderbuffer_delete(leftborderbuffer,fcsl,
                                    gt_firstcodes_leftborder_entries(fct));
-    fct->overflow_leftborder
-      = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
-    GT_FCI_ADDSPLITSPACE(fcsl,"overflow_leftborder",
-                         sizeof (*fct->overflow_leftborder) * overflowcells);
-    fct->overflow_allocated = true;
-    overflow_leftborder_ptr = fct->overflow_leftborder - fct->overflow_index;
+    overflow_leftborderbuffer = gt_leftborderbuffer_new(fcsl,true);
     currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
 #ifdef SKDEBUG
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
 #endif
     partsum += (unsigned long) currentcount;
-    overflow_leftborder_ptr[fct->overflow_index] = partsum;
+    GT_LEFTBORDERBUFFER_ADDVALUE_ulong(overflow_leftborderbuffer,partsum);
     for (idx = fct->overflow_index+1; idx < fct->differentcodes; idx++)
     {
       currentcount = GT_PARTIALSUM_COUNT_GET(idx);
@@ -342,9 +335,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       {
         GT_FIRSTCODES_ADD_SAMPLE(partsum);
       }
-      overflow_leftborder_ptr[idx] = partsum;
+      GT_LEFTBORDERBUFFER_ADDVALUE_ulong(overflow_leftborderbuffer,partsum);
     }
-    overflow_leftborder_ptr[fct->differentcodes] = partsum;
+    GT_LEFTBORDERBUFFER_ADDVALUE_ulong(overflow_leftborderbuffer,partsum);
+    fct->outfilenameoverflowleftborder
+      = gt_leftborderbuffer_delete(overflow_leftborderbuffer,fcsl,
+                              gt_firstcodes_overflowleftborder_entries(fct));
   }
   gt_assert(idx > 0);
   if (partsum > fct->leftborder_samples[samplecount-1])
@@ -408,6 +404,13 @@ unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct)
 {
   return fct->overflow_index > 0 ? fct->overflow_index
                                  : fct->differentcodes + 1;
+}
+
+unsigned long gt_firstcodes_overflowleftborder_entries(
+                    const GtFirstcodestab *fct)
+{
+  return fct->overflow_index > 0 ?  fct->differentcodes -
+                                    fct->overflow_index + 1 : 0;
 }
 
 unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct)
@@ -478,6 +481,8 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
   gt_firstcodes_samples_delete(fcsl,fct);
   gt_str_delete(fct->outfilenameleftborder);
   fct->outfilenameleftborder = NULL;
+  gt_str_delete(fct->outfilenameoverflowleftborder);
+  fct->outfilenameoverflowleftborder = NULL;
 }
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
@@ -521,18 +526,8 @@ const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct)
   return fct->outfilenameleftborder;
 }
 
-void gt_firstcodes_overflow_isnotallocated(GtFirstcodestab *fct)
+const GtStr *gt_firstcodes_outfilenameoverflowleftborder(
+                                const GtFirstcodestab *fct)
 {
-  fct->overflow_allocated = false;
-}
-
-void gt_firstcodes_overflow_delete(GtFirstcodesspacelog *fcsl,
-                                   GtFirstcodestab *fct)
-{
-  if (fct->overflow_allocated && fct->overflow_leftborder != NULL)
-  {
-    gt_free(fct->overflow_leftborder);
-    GT_FCI_SUBTRACTSPLITSPACE(fcsl,"overflow_leftborder");
-    fct->overflow_leftborder = NULL;
-  }
+  return fct->outfilenameoverflowleftborder;
 }

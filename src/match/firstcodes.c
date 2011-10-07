@@ -1026,21 +1026,19 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     if (fci.overflow_index > 0)
     {
-      unsigned long overflowcells = fci.differentcodes - fci.overflow_index + 1;
-
       fci.mappedoverflow
         = gt_Sfxmappedrange_new("overflow_leftborder",
-                                overflowcells,
-                                GtSfxunsignedlong,
-                                gt_minmax_index_overflow_leftborder,
-                                &fci);
+                           gt_firstcodes_overflowleftborder_entries(&fci.tab),
+                           GtSfxunsignedlong,
+                           gt_minmax_index_overflow_leftborder,
+                           &fci);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedoverflow);
     }
     suftabentries = fci.firstcodehits + fci.numofsequences;
     if (numofparts == 0 || maximumspace > 0)
     {
       int retval;
-      unsigned long leftbordersize;
+      unsigned long leftbordersize, overflowleftbordersize;
 
       if (numofparts == 0 && maximumspace == 0)
       {
@@ -1063,9 +1061,19 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         leftbordersize = 0;
       }
+      if (fci.mappedoverflow != NULL)
+      {
+        overflowleftbordersize
+          = gt_Sfxmappedrange_size_mapped(fci.mappedoverflow,0,
+                         gt_firstcodes_overflowleftborder_entries(&fci.tab)-1);
+      } else
+      {
+        overflowleftbordersize = 0;
+      }
       retval = gt_suftabparts_fit_memlimit(
                                     gt_firstcodes_spacelog_total(fci.fcsl)
                                      + leftbordersize /*as this is subtracted*/
+                                     + overflowleftbordersize
                                      + phase2extra,
                                     maximumspace,
                                     NULL,
@@ -1113,6 +1121,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                              gt_firstcodes_leftborder_address(&fci.tab),
                              gt_firstcodes_leftborder_entries(&fci.tab),
                              true);
+    if (fci.overflow_index > 0)
+    {
+      gt_assert(fci.mappedoverflow != NULL);
+      gt_Sfxmappedrange_usetmp(fci.mappedoverflow,
+                               gt_firstcodes_outfilenameoverflowleftborder(
+                                           &fci.tab),
+                               gt_firstcodes_overflow_address(&fci.tab),
+                             gt_firstcodes_overflowleftborder_entries(&fci.tab),
+                               true);
+    }
     gt_assert(fci.buf.nextfree == 0);
     if (gt_suftabparts_numofparts(suftabparts) > 1U)
     {
@@ -1123,15 +1141,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  false);
       GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"allfirstcodes");
       gt_assert(fci.allfirstcodes == NULL);
-      if (fci.overflow_index > 0)
-      {
-        gt_assert(fci.mappedoverflow != NULL);
-        gt_Sfxmappedrange_storetmp(fci.mappedoverflow,
-                                   gt_firstcodes_overflow_address(&fci.tab),
-                                   true);
-        GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"overflow_leftborder");
-        gt_firstcodes_overflow_isnotallocated(&fci.tab);
-      }
       gt_marksubstring_bits_null(fci.buf.markprefix,false);
       gt_assert(fci.mappedmarkprefix != NULL);
       gt_Sfxmappedrange_storetmp(fci.mappedmarkprefix,
@@ -1144,8 +1153,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_Sfxmappedrange_delete(fci.mappedallfirstcodes);
       fci.mappedallfirstcodes = NULL;
-      gt_Sfxmappedrange_delete(fci.mappedoverflow);
-      fci.mappedoverflow = NULL;
       gt_Sfxmappedrange_delete(fci.mappedmarkprefix);
       fci.mappedmarkprefix = NULL;
     }
@@ -1398,7 +1405,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
   }
   gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
-  gt_firstcodes_overflow_delete(fci.fcsl,&fci.tab);
   if (fci.spmsuftab != NULL)
   {
     gt_spmsuftab_delete(fci.spmsuftab);
