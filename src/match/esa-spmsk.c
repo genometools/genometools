@@ -193,3 +193,8 @@ int gt_spmsk_inl_process(void *data,
   }
   return 0;
 }
+
+void gt_spmsk_inl_process_end(GT_UNUSED void *data)
+{
+  return;
+}

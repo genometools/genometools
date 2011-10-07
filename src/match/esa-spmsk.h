@@ -53,4 +53,6 @@ int gt_spmsk_inl_process(void *data,
                          */
                          GtError *err);
 
+void gt_spmsk_inl_process_end(GT_UNUSED void *data);
+
 #endif

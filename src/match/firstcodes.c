@@ -597,6 +597,8 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                        unsigned long spaceforbucketprocessing,
                                        unsigned long depth,
                                        GtFirstcodesintervalprocess itvprocess,
+                                       GtFirstcodesintervalprocess_end
+                                              itvprocess_end,
                                        void *itvprocessdata,
                                        bool withsuftabcheck,
                                        GtError *err)
@@ -670,6 +672,10 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     }
     current = next;
   }
+  if (itvprocess_end != NULL)
+  {
+    itvprocess_end(itvprocessdata);
+  }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);
   return haserr ? -1 : 0;
@@ -742,6 +748,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int radixparts,
                                                    GtFirstcodesintervalprocess
                                                      itvprocess,
+                                                 GtFirstcodesintervalprocess_end
+                                                     itvprocess_end,
                                                    void *itvprocessdata,
                                                    GtLogger *logger,
                                                    GtError *err)
@@ -1334,6 +1342,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                       spaceforbucketprocessing,
                                       (unsigned long) kmersize,
                                       itvprocess,
+                                      itvprocess_end,
                                       itvprocessdata,
                                       withsuftabcheck,
                                       err) != 0)

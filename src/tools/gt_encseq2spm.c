@@ -297,6 +297,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       spmsk_state != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,
+                                                      gt_spmsk_inl_process_end,
                                                       spmsk_state,
                                                       logger,err) != 0)
     {

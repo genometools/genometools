@@ -32,6 +32,8 @@ typedef int (*GtFirstcodesintervalprocess)(void *,
                                            unsigned long,
                                            GtError *);
 
+typedef void (*GtFirstcodesintervalprocess_end)(void *);
+
 int storefirstcodes_getencseqkmers_twobitencoding(
                     const GtEncseq *encseq,
                     unsigned int kmersize,
@@ -46,6 +48,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     bool radixsmall,      /* set to true */
                     unsigned int radixparts, /* set to 2 */
                     GtFirstcodesintervalprocess itvprocess,
+                    GtFirstcodesintervalprocess_end itvprocess_end,
                     void *itvprocessdata,
                     GtLogger *logger,
                     GtError *err);
