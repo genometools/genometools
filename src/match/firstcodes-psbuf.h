@@ -19,6 +19,7 @@
 #define FIRSTCODES_PSBUF_H
 
 #include <inttypes.h>
+#include "core/unused_api.h"
 #include "firstcodes-spacelog.h"
 
 typedef struct
@@ -54,6 +55,6 @@ void gt_leftborderbuffer_flush(GtLeftborderOutbuffer *leftborderbuffer);
 
 GtStr *gt_leftborderbuffer_delete(GtLeftborderOutbuffer *lbbuf,
                                   GtFirstcodesspacelog *fcsl,
-                                  unsigned long expectedwritten);
+                                  GT_UNUSED unsigned long expectedwritten);
 
 #endif

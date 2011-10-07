@@ -229,7 +229,8 @@ static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
   return 0;
 }
 
-static void gt_qsortbench_verify(const unsigned long *arr,unsigned long len)
+static void gt_qsortbench_verify(GT_UNUSED const unsigned long *arr,
+                                 unsigned long len)
 {
   unsigned long idx;
 

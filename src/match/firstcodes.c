@@ -383,6 +383,12 @@ static unsigned long gt_firstcodes_accumulatecounts_merge_rr(
   return found;
 }
 
+static void gt_firstcodes_flush_exit(const char *filename,int line)
+{
+  fprintf(stderr,"file %s, line %d: programming error\n",filename,line);
+  exit(GT_EXIT_PROGRAMMING_ERROR);
+}
+
 static void gt_firstcodes_accumulatecounts_flush(void *data)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
@@ -403,7 +409,8 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
     {
       gt_radixsort_linear_rr(&radixreader,fci->radixsort_code,
                              fci->buf.nextfree);
-      GT_RADIXREADER_NEXT(firstelem,&radixreader,gt_assert(false));
+      GT_RADIXREADER_NEXT(firstelem,&radixreader,
+                          gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
     ptr = gt_firstcodes_find(fci,false,0,fci->differentcodes-1,firstelem);
     if (ptr != NULL)
@@ -516,7 +523,8 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
     {
       gt_radixsort_linear_rr(&radixreader,fci->radixsort_codepos,
                              fci->buf.nextfree);
-      GT_RADIXREADER_NEXT_PAIR(firstelem,&radixreader,gt_assert(false));
+      GT_RADIXREADER_NEXT_PAIR(firstelem,&radixreader,
+                               gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
     ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
                              fci->currentmaxindex,
