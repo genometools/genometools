@@ -439,15 +439,9 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
 
   while (query <= querystream_lst && subject <= subjectstream_lst)
   {
-    if (query->a < *subject)
+    if (query->a <= *subject)
     {
-      query++;
-    } else
-    {
-      if (query->a > *subject)
-      {
-        subject++;
-      } else
+      if (query->a == *subject)
       {
         idx = (unsigned long) (subject - fci->allfirstcodes);
         idx = gt_firstcodes_insertionindex(&fci->tab,idx);
@@ -456,9 +450,12 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
                          gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
                            ? gt_seqnumrelpos_decode_pos(fci->buf.snrp,query->b)
                            : query->b);
-        query++;
         found++;
       }
+      query++;
+    } else
+    {
+      subject++;
     }
   }
   return found;

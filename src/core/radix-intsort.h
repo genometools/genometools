@@ -47,9 +47,37 @@
           }\
         }
 
+#define GT_RADIXREADER_NEXT_PAIR(VALUE,RR,STOPSTATEMENT)\
+        if ((RR)->ptr1_pair < (RR)->end1_pair)\
+        {\
+          if ((RR)->ptr2_pair < (RR)->end2_pair)\
+          {\
+            if ((RR)->ptr1_pair->a <= *(RR)->ptr2_pair->a)\
+            {\
+              VALUE = *(RR)->ptr1_pair++;\
+            } else\
+            {\
+              VALUE = *(RR)->ptr2_pair++;\
+            }\
+          } else\
+          {\
+            VALUE = *(RR)->ptr1_pair++;\
+          }\
+        } else\
+        {\
+          if ((RR)->ptr2_pair < (RR)->end2_pair)\
+          {\
+            VALUE = *(RR)->ptr2++;\
+          } else\
+          {\
+            STOPSTATEMENT;\
+          }\
+        }
+
 typedef struct
 {
   GtUlong *ptr1, *ptr2, *end1, *end2;
+  GtUlongPair *ptr1_pair, *ptr2_pair, *end1_pair, *end2_pair;
 } GtRadixreader;
 
 typedef struct GtRadixsortinfo GtRadixsortinfo;
