@@ -339,6 +339,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     leftborderbuffer_totalwrite
       += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
+    fpleftborderbuffer = NULL;
     fct->overflow_allocated = false;
   } else
   {
@@ -349,6 +350,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     leftborderbuffer_totalwrite
       += gt_leftborderbuffer_flush(fpleftborderbuffer,&leftborderbuffer);
     gt_fa_fclose(fpleftborderbuffer);
+    fpleftborderbuffer = NULL;
     fct->overflow_leftborder
       = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
     GT_FCI_ADDSPLITSPACE(fcsl,"overflow_leftborder",
@@ -427,7 +429,6 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_assert(leftborderbuffer.spaceuint32_t != NULL);
   gt_free(leftborderbuffer.spaceuint32_t);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer");
-  gt_assert(fpleftborderbuffer != NULL);
   *overflow_index = fct->overflow_index;
   return maxbucketsize;
 }
