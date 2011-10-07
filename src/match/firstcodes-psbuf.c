@@ -1,0 +1,74 @@
+/*
+  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#include <stdio.h>
+#include "core/str_api.h"
+#include "core/xansi_api.h"
+#include "core/ma.h"
+#include "core/log.h"
+#include "core/fa.h"
+#include "firstcodes-psbuf.h"
+#include "firstcodes-spacelog.h"
+
+GtOutbufferuint32_t *gt_leftborderbuffer_new(GtFirstcodesspacelog *fcsl)
+{
+  GtOutbufferuint32_t *lbbuf = gt_malloc(sizeof (*lbbuf));
+
+  lbbuf->totalwrite = 0;
+  lbbuf->outfilename = gt_str_new();
+  lbbuf->fp = gt_xtmpfp(lbbuf->outfilename);
+  lbbuf->nextfreeuint32_t = 0;
+  lbbuf->allocateduint32_t = 1024UL;
+  lbbuf->spaceuint32_t = gt_malloc(sizeof (*lbbuf->spaceuint32_t) *
+                                   lbbuf->allocateduint32_t);
+  GT_FCI_ADDWORKSPACE(fcsl,"leftborderbuffer",
+                      sizeof (*lbbuf->spaceuint32_t)
+                      * lbbuf->allocateduint32_t);
+  return lbbuf;
+}
+
+void gt_leftborderbuffer_flush(GtOutbufferuint32_t *leftborderbuffer)
+{
+  gt_xfwrite(leftborderbuffer->spaceuint32_t,
+             sizeof (*leftborderbuffer->spaceuint32_t),
+             (size_t) leftborderbuffer->nextfreeuint32_t,
+             leftborderbuffer->fp);
+  leftborderbuffer->totalwrite += leftborderbuffer->nextfreeuint32_t;
+  leftborderbuffer->nextfreeuint32_t = 0;
+}
+
+GtStr *gt_leftborderbuffer_delete(GtOutbufferuint32_t *lbbuf,
+                                  GtFirstcodesspacelog *fcsl,
+                                  unsigned long expectedwritten)
+{
+  GtStr *outfilename;
+
+  gt_assert(lbbuf != NULL);
+  gt_leftborderbuffer_flush(lbbuf);
+  gt_fa_fclose(lbbuf->fp);
+  lbbuf->fp = NULL;
+  gt_log_log("write leftborder to file %s (%lu units of size %u)",
+             gt_str_get(lbbuf->outfilename),
+             lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceuint32_t));
+  gt_assert(lbbuf->totalwrite == expectedwritten);
+  gt_assert(lbbuf->spaceuint32_t != NULL);
+  gt_free(lbbuf->spaceuint32_t);
+  outfilename = lbbuf->outfilename;
+  gt_free(lbbuf);
+  GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer");
+  return outfilename;
+}

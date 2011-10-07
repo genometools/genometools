@@ -30,6 +30,7 @@
 #include "core/hashmap-generic.h"
 #include "core/arraydef.h"
 #include "firstcodes-tab.h"
+#include "firstcodes-psbuf.h"
 #include "stamp.h"
 
 static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
@@ -123,72 +124,6 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
           GT_MEGABYTES(spaceopt+spacewithhash));
 }
 #endif
-
-typedef struct
-{
-  uint32_t *spaceuint32_t;
-  unsigned long nextfreeuint32_t,
-                allocateduint32_t;
-  GtStr *outfilename;
-  FILE *fp;
-  unsigned long totalwrite;
-} GtOutbufferuint32_t;
-
-static void gt_leftborderbuffer_flush(GtOutbufferuint32_t *leftborderbuffer)
-{
-  gt_xfwrite(leftborderbuffer->spaceuint32_t,
-             sizeof (*leftborderbuffer->spaceuint32_t),
-             leftborderbuffer->nextfreeuint32_t,
-             leftborderbuffer->fp);
-  leftborderbuffer->totalwrite += leftborderbuffer->nextfreeuint32_t;
-  leftborderbuffer->nextfreeuint32_t = 0;
-}
-
-static GtOutbufferuint32_t *gt_leftborderbuffer_new(GtFirstcodesspacelog *fcsl)
-{
-  GtOutbufferuint32_t *lbbuf = gt_malloc(sizeof (*lbbuf));
-
-  lbbuf->totalwrite = 0;
-  lbbuf->outfilename = gt_str_new();
-  lbbuf->fp = gt_xtmpfp(lbbuf->outfilename);
-  lbbuf->nextfreeuint32_t = 0;
-  lbbuf->allocateduint32_t = 1024UL;
-  lbbuf->spaceuint32_t = gt_malloc(sizeof (*lbbuf->spaceuint32_t) *
-                                   lbbuf->allocateduint32_t);
-  GT_FCI_ADDWORKSPACE(fcsl,"leftborderbuffer",
-                      sizeof (*lbbuf->spaceuint32_t)
-                      * lbbuf->allocateduint32_t);
-  return lbbuf;
-}
-
-#define GT_LEFTBORDERBUFFER_ADDVALUE(BUF,VALUE)\
-        if ((BUF)->nextfreeuint32_t == (BUF)->allocateduint32_t)\
-        {\
-          gt_leftborderbuffer_flush(BUF);\
-        }\
-        (BUF)->spaceuint32_t[(BUF)->nextfreeuint32_t++] = (uint32_t) VALUE
-
-static GtStr *gt_leftborderbuffer_delete(GtOutbufferuint32_t *lbbuf,
-                                         GtFirstcodesspacelog *fcsl,
-                                         unsigned long expectedwritten)
-{
-  GtStr *outfilename;
-
-  gt_assert(lbbuf != NULL);
-  gt_leftborderbuffer_flush(lbbuf);
-  gt_fa_fclose(lbbuf->fp);
-  lbbuf->fp = NULL;
-  gt_log_log("write leftborder to file %s (%lu units of size %u)",
-             gt_str_get(lbbuf->outfilename),
-             lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceuint32_t));
-  gt_assert(lbbuf->totalwrite == expectedwritten);
-  gt_assert(lbbuf->spaceuint32_t != NULL);
-  gt_free(lbbuf->spaceuint32_t);
-  outfilename = lbbuf->outfilename;
-  gt_free(lbbuf);
-  GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer");
-  return outfilename;
-}
 
 #ifdef SKDEBUG
 static void checkcodesorder(const unsigned long *tab,unsigned long len,
