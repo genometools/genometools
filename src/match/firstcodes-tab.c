@@ -129,7 +129,7 @@ typedef struct
   uint32_t *spaceuint32_t;
   unsigned long nextfreeuint32_t,
                 allocateduint32_t;
-  const char *outfilename;
+  GtStr *outfilename;
   FILE *fp;
   unsigned long totalwrite;
 } GtOutbufferuint32_t;
@@ -144,14 +144,13 @@ static void gt_leftborderbuffer_flush(GtOutbufferuint32_t *leftborderbuffer)
   leftborderbuffer->nextfreeuint32_t = 0;
 }
 
-static GtStr *gt_leftborderbuffer_init(GtOutbufferuint32_t *lbbuf,
-                                       GtFirstcodesspacelog *fcsl)
+static GtOutbufferuint32_t *gt_leftborderbuffer_new(GtFirstcodesspacelog *fcsl)
 {
-  GtStr *tmpfile = gt_str_new();
+  GtOutbufferuint32_t *lbbuf = gt_malloc(sizeof (*lbbuf));
 
   lbbuf->totalwrite = 0;
-  lbbuf->fp = gt_xtmpfp(tmpfile);
-  lbbuf->outfilename = gt_str_get(tmpfile);
+  lbbuf->outfilename = gt_str_new();
+  lbbuf->fp = gt_xtmpfp(lbbuf->outfilename);
   lbbuf->nextfreeuint32_t = 0;
   lbbuf->allocateduint32_t = 1024UL;
   lbbuf->spaceuint32_t = gt_malloc(sizeof (*lbbuf->spaceuint32_t) *
@@ -159,30 +158,36 @@ static GtStr *gt_leftborderbuffer_init(GtOutbufferuint32_t *lbbuf,
   GT_FCI_ADDWORKSPACE(fcsl,"leftborderbuffer",
                       sizeof (*lbbuf->spaceuint32_t)
                       * lbbuf->allocateduint32_t);
-  return tmpfile;
+  return lbbuf;
 }
 
 #define GT_LEFTBORDERBUFFER_ADDVALUE(BUF,VALUE)\
-        if ((BUF).nextfreeuint32_t == (BUF).allocateduint32_t)\
+        if ((BUF)->nextfreeuint32_t == (BUF)->allocateduint32_t)\
         {\
-          gt_leftborderbuffer_flush(&(BUF));\
+          gt_leftborderbuffer_flush(BUF);\
         }\
-        BUF.spaceuint32_t[BUF.nextfreeuint32_t++] = (uint32_t) VALUE
+        (BUF)->spaceuint32_t[(BUF)->nextfreeuint32_t++] = (uint32_t) VALUE
 
-static void gt_leftborderbuffer_delete(GtOutbufferuint32_t *lbbuf,
-                                       GtFirstcodesspacelog *fcsl,
-                                       unsigned long expectedwritten)
+static GtStr *gt_leftborderbuffer_delete(GtOutbufferuint32_t *lbbuf,
+                                         GtFirstcodesspacelog *fcsl,
+                                         unsigned long expectedwritten)
 {
+  GtStr *outfilename;
+
+  gt_assert(lbbuf != NULL);
   gt_leftborderbuffer_flush(lbbuf);
   gt_fa_fclose(lbbuf->fp);
   lbbuf->fp = NULL;
   gt_log_log("write leftborder to file %s (%lu units of size %u)",
-             lbbuf->outfilename,
+             gt_str_get(lbbuf->outfilename),
              lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceuint32_t));
   gt_assert(lbbuf->totalwrite == expectedwritten);
   gt_assert(lbbuf->spaceuint32_t != NULL);
   gt_free(lbbuf->spaceuint32_t);
+  outfilename = lbbuf->outfilename;
+  gt_free(lbbuf);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"leftborderbuffer");
+  return outfilename;
 }
 
 #ifdef SKDEBUG
@@ -293,7 +298,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtDiscDistri *countdistri = gt_disc_distri_new();
 #endif
   unsigned long bitmask;
-  GtOutbufferuint32_t leftborderbuffer;
+  GtOutbufferuint32_t *leftborderbuffer = NULL;
   const unsigned long maxvalue = forceoverflow ? UINT16_MAX : UINT32_MAX;
   unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
 
@@ -331,7 +336,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GT_FCI_ADDWORKSPACE(fcsl,"leftborder_samples",
                       sizeof (*fct->leftborder_samples) * fct->numofsamples);
   GT_FIRSTCODES_ADD_SAMPLE(partsum);
-  fct->outfilenameleftborder = gt_leftborderbuffer_init(&leftborderbuffer,fcsl);
+  leftborderbuffer = gt_leftborderbuffer_new(fcsl);
   GT_PARTIALSUM_LEFTBORDER_SET(0,(uint32_t) partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
@@ -363,16 +368,18 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   {
     gt_assert(partsum <= maxvalue);
     GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
-    gt_leftborderbuffer_delete(&leftborderbuffer,fcsl,
-                               gt_firstcodes_leftborder_entries(fct));
+    fct->outfilenameleftborder
+      = gt_leftborderbuffer_delete(leftborderbuffer,fcsl,
+                                   gt_firstcodes_leftborder_entries(fct));
     fct->overflow_allocated = false;
   } else
   {
     unsigned long overflowcells = fct->differentcodes - fct->overflow_index + 1;
     unsigned long *overflow_leftborder_ptr;
 
-    gt_leftborderbuffer_delete(&leftborderbuffer,fcsl,
-                               gt_firstcodes_leftborder_entries(fct));
+    fct->outfilenameleftborder
+      = gt_leftborderbuffer_delete(leftborderbuffer,fcsl,
+                                   gt_firstcodes_leftborder_entries(fct));
     fct->overflow_leftborder
       = gt_malloc(sizeof (*fct->overflow_leftborder) * overflowcells);
     GT_FCI_ADDSPLITSPACE(fcsl,"overflow_leftborder",
