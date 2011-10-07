@@ -46,7 +46,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     unsigned long phase2extra, /* extra space needed in proc.
                                                   intervals */
                     bool radixsmall,      /* set to true */
-                    unsigned int radixparts, /* set to 2 */
+                    unsigned int radixparts, /* set to 2U */
                     GtFirstcodesintervalprocess itvprocess,
                     GtFirstcodesintervalprocess_end itvprocess_end,
                     void *itvprocessdata,
