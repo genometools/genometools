@@ -38,7 +38,8 @@ typedef struct
        radixlarge,
        countspms;
   unsigned int minmatchlength,
-               numofparts;
+               numofparts,
+               radixparts;
   unsigned long maximumspace,
                 phase2extra;
   GtStr *encseqinput,
@@ -56,6 +57,7 @@ static void* gt_encseq2spm_arguments_new(void)
   arguments->countspms = false;
   arguments->radixlarge = false;
   arguments->numofparts = 0;
+  arguments->radixparts = 2U;
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
   arguments->memlimitarg = gt_str_new();
@@ -160,6 +162,13 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   /* -radixlarge */
   option = gt_option_new_bool("radixlarge", "use large tables for radixsort",
                               &arguments->radixlarge, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  /* -radixparts */
+  option = gt_option_new_uint("radixparts", "specify the number of parts "
+                              "for radixsort",
+                              &arguments->radixparts, 2U);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -284,6 +293,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->phase2extra,
                                      /* use true */   arguments->radixlarge ?
                                                         false : true,
+                                     /* use 2 */      arguments->radixparts,
                                                       spmsk_state != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,

@@ -690,6 +690,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    bool forceoverflow,
                                                    unsigned long phase2extra,
                                                    bool radixsmall,
+                                                   unsigned int radixparts,
                                                    GtFirstcodesintervalprocess
                                                      itvprocess,
                                                    void *itvprocessdata,
@@ -748,7 +749,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   bitsforrelpos = gt_determinebitspervalue((uint64_t) maxrelpos);
   fci.radixsmall = radixsmall;
-  fci.radixparts = 2U;
+  fci.radixparts = radixparts;
   fci.buf.snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   numofdbsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(numofdbsequences > 0);
