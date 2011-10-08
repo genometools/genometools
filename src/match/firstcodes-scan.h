@@ -9,7 +9,7 @@ void gt_firstcodes_kmerscan(const GtBitsequence *twobitencoding,
                             unsigned long totallength,
                             unsigned long maxunitindex,
                             unsigned int kmersize,
-                            void (*processcode)(bool,GtCodetype,
+                            void (*processcode)(GtCodetype,GtCodetype,
                                                 unsigned long,void *),
                             void *data);
 
