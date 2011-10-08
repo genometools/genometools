@@ -71,10 +71,6 @@ int gt_Sfxiterator_bcktab2file(FILE *fp,Sfxiterator *sfi,GtError *err);
 
 unsigned long gt_Sfxiterator_longest(const Sfxiterator *sfi);
 
-GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
-                                   unsigned long pos,
-                                   unsigned int kmersize);
-
 GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize);
 

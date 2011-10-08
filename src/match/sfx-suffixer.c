@@ -44,6 +44,7 @@
 #include "intcode-def.h"
 #include "firstcodes-buf.h"
 #include "esa-fileend.h"
+#include "kmercodes.h"
 #include "sfx-diffcov.h"
 #include "sfx-partssuf.h"
 #include "sfx-suffixer.h"
@@ -646,30 +647,6 @@ static void verifyestimatedspace(size_t estimatedspace)
 }
 #endif
 
-GtCodetype gt_kmercode_at_position(const GtTwobitencoding *twobitencoding,
-                                   unsigned long pos,
-                                   unsigned int kmersize)
-{
-  const unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
-  const unsigned long unitindex = GT_DIVBYUNITSIN2BITENC(pos);
-  const GtCodetype maskright = GT_MASKRIGHT(kmersize);
-
-  if (unitoffset <= (unsigned int) GT_UNITSIN2BITENC - kmersize)
-  {
-    return (GtCodetype) (twobitencoding[unitindex]
-            >> GT_MULT2(GT_UNITSIN2BITENC - kmersize - unitoffset))
-           & maskright;
-  } else
-  {
-    unsigned int shiftleft = GT_MULT2(unitoffset+kmersize-GT_UNITSIN2BITENC);
-    return (GtCodetype)
-           ((twobitencoding[unitindex] << shiftleft) |
-            (twobitencoding[unitindex+1] >> (GT_MULT2(GT_UNITSIN2BITENC) -
-                                             shiftleft)))
-           & maskright;
-  }
-}
-
 GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                                    unsigned int kmersize)
 {
@@ -678,10 +655,8 @@ GtCodetype gt_kmercode_at_firstpos(const GtTwobitencoding *twobitencoding,
                        GT_MULT2(GT_UNITSIN2BITENC - kmersize)) & maskright;
 }
 
-#define GT_SWAPBITPAIRS(KMER,L1,L2,D) (((KMER) & (3UL << L1)) >> D) |\
-                                      (((KMER) & (3UL << L2)) << D)
-
-static GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
+static inline GtCodetype gt_kmercode_reverse(GtCodetype kmer,
+                                             unsigned int kmersize)
 {
   switch (kmersize)
   {
@@ -994,12 +969,8 @@ static GtCodetype gt_kmercode_reverse(GtCodetype kmer,unsigned int kmersize)
   }
 }
 
-static GtCodetype gt_kmercode_complement(GtCodetype kmer,GtCodetype maskright)
-{
-  return kmer ^ maskright;
-}
-
 #ifdef SKDEBUG
+
 static void checkallreversebitpairs(void)
 {
   unsigned int kmersize, code, coderev, coderevrev, maxcode;
