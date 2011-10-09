@@ -2,11 +2,11 @@
 #include "core/types_api.h"
 #include "core/codetype.h"
 #include "core/divmodmul.h"
+#include "core/encseq.h"
 #include "kmercodes.h"
 #include "firstcodes-scan.h"
 
-#define FIRSTCODES_VERIFY
-#ifdef FIRSTCODES_VERIFY
+#ifdef WITHCHECK
 static void gt_firstcode_verifycodes(const GtBitsequence *twobitencoding,
                                      unsigned long position,
                                      unsigned int kmersize,
@@ -28,6 +28,7 @@ static void gt_firstcode_verifycodes(const GtBitsequence *twobitencoding,
 #endif
 
 static void gt_firstcodes_kmerscan_range(const GtBitsequence *twobitencoding,
+                                         GT_UNUSED bool withcheck,
                                          unsigned int kmersize,
                                          unsigned long startpos,
                                          unsigned long endpos,
@@ -71,12 +72,15 @@ static void gt_firstcodes_kmerscan_range(const GtBitsequence *twobitencoding,
     {
       processcode(fcode,rccode,position,data);
     }
-#ifdef FIRSTCODES_VERIFY
-    gt_firstcode_verifycodes(twobitencoding,
-                             position,
-                             kmersize,
-                             fcode,
-                             rccode);
+#ifdef WITHCHECK
+    if (withcheck)
+    {
+      gt_firstcode_verifycodes(twobitencoding,
+                               position,
+                               kmersize,
+                               fcode,
+                               rccode);
+    }
 #endif
     if (shiftright > 0)
     {
@@ -94,6 +98,7 @@ static void gt_firstcodes_kmerscan_range(const GtBitsequence *twobitencoding,
 }
 
 void gt_firstcodes_kmerscan(const GtBitsequence *twobitencoding,
+                            bool withcheck,
                             unsigned long equallength,
                             unsigned long totallength,
                             unsigned long maxunitindex,
@@ -108,6 +113,7 @@ void gt_firstcodes_kmerscan(const GtBitsequence *twobitencoding,
   {
     /*printf("startpos=%lu,endpos=%lu\n",startpos,startpos+equallength);*/
     gt_firstcodes_kmerscan_range(twobitencoding,
+                                 withcheck,
                                  kmersize,
                                  startpos,
                                  startpos + equallength,
@@ -115,4 +121,23 @@ void gt_firstcodes_kmerscan(const GtBitsequence *twobitencoding,
                                  processcode,
                                  data);
   }
+}
+
+void gt_firstcode_runkmerscan(const GtEncseq *encseq,
+                              bool withcheck,unsigned int kmersize)
+{
+  const GtTwobitencoding *twobitencoding
+    = gt_encseq_twobitencoding_export(encseq);
+  const unsigned long totallength = gt_encseq_total_length(encseq),
+                      equallength = gt_encseq_equallength(encseq),
+                      maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
+
+  gt_firstcodes_kmerscan(twobitencoding,
+                         withcheck,
+                         equallength,
+                         totallength,
+                         maxunitindex,
+                         kmersize,
+                         NULL,
+                         NULL);
 }

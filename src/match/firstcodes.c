@@ -744,27 +744,20 @@ static unsigned long gt_firstcodes_idx2code(const GtFirstcodesinfo *fci,
   return fci->allfirstcodes[idx];
 }
 
-#undef FASTSCANCODE
-#ifdef FASTSCANCODE
-
-static void checkfastfirstscan(const GtEncseq *encseq,
-                               unsigned int kmersize)
+void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
 {
-  const GtTwobitencoding *twobitencoding
-    = gt_encseq_twobitencoding_export(encseq);
-  const unsigned long totallength = gt_encseq_total_length(encseq),
-                      equallength = gt_encseq_equallength(encseq),
-                      maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
+  const GtReadmode readmode = GT_READMODE_FORWARD;
 
-  gt_firstcodes_kmerscan(twobitencoding,
-                         equallength,
-                         totallength,
-                         maxunitindex,
-                         kmersize,
-                         NULL,
-                         NULL);
+  getencseqkmers_twobitencoding(encseq,
+                                readmode,
+                                kmersize,
+                                kmersize,
+                                false,
+                                NULL,
+                                NULL,
+                                NULL,
+                                NULL);
 }
-#endif
 
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    unsigned int kmersize,
@@ -801,22 +794,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   bool haserr = false;
 #ifdef WITHCACHE
   size_t binsearchcache_size;
-#endif
-
-#ifdef FASTSCANCODE
-  /* remove this section later */
-  if (gt_showtime_enabled())
-  {
-    timer = gt_timer_new_with_progress_description("to check fastscanning");
-    gt_timer_start(timer);
-  }
-  checkfastfirstscan(encseq,kmersize);
-  if (timer != NULL)
-  {
-    gt_timer_show_progress_final(timer, stdout);
-    gt_timer_delete(timer);
-  }
-  return 0;
 #endif
 
   maxseqlength = gt_encseq_max_seq_length(encseq);

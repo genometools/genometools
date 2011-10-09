@@ -34,6 +34,8 @@ typedef int (*GtFirstcodesintervalprocess)(void *,
 
 typedef void (*GtFirstcodesintervalprocess_end)(void *);
 
+void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize);
+
 int storefirstcodes_getencseqkmers_twobitencoding(
                     const GtEncseq *encseq,
                     unsigned int kmersize,

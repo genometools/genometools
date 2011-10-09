@@ -1029,12 +1029,15 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     code = gt_kmercode_reverse(gt_kmercode_at_position(twobitencoding,pos,
                                                        kmersize),
                                kmersize);
-    processkmercode(processkmercodeinfo,
-                    true,
-                    GT_ADJUSTREVERSEPOS(rightbound,pos),
-                    GT_ISDIRCOMPLEMENT(readmode)
-                      ? gt_kmercode_complement(code,maskright)
-                      : code);
+    if (processkmercode != NULL)
+    {
+      processkmercode(processkmercodeinfo,
+                      true,
+                      GT_ADJUSTREVERSEPOS(rightbound,pos),
+                      GT_ISDIRCOMPLEMENT(readmode)
+                        ? gt_kmercode_complement(code,maskright)
+                        : code);
+    }
     if (onlyfirst)
     {
       return code;
@@ -1049,11 +1052,14 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos--;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       GT_UPDATEKMER(code,cc,maskright);
-      processkmercode(processkmercodeinfo,false,
-                      GT_ADJUSTREVERSEPOS(rightbound,pos),
-                       (readmode == GT_READMODE_REVCOMPL)
+      if (processkmercode != NULL)
+      {
+        processkmercode(processkmercodeinfo,false,
+                        GT_ADJUSTREVERSEPOS(rightbound,pos),
+                         (readmode == GT_READMODE_REVCOMPL)
                           ? gt_kmercode_complement(code,maskright)
                           : code);
+      }
       if (shiftright < (unsigned int) (GT_INTWORDSIZE-2))
       {
         shiftright += 2;
@@ -1074,10 +1080,13 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
     pos = startpos;
     unitindex = GT_DIVBYUNITSIN2BITENC(startpos+kmersize);
     code = gt_kmercode_at_position(twobitencoding,pos,kmersize);
-    processkmercode(processkmercodeinfo,true,pos,
-                    GT_ISDIRCOMPLEMENT(readmode)
-                      ? gt_kmercode_complement(code,maskright)
-                      : code);
+    if (processkmercode != NULL)
+    {
+      processkmercode(processkmercodeinfo,true,pos,
+                      GT_ISDIRCOMPLEMENT(readmode)
+                        ? gt_kmercode_complement(code,maskright)
+                        : code);
+    }
     if (onlyfirst)
     {
       return code;
@@ -1091,10 +1100,13 @@ static GtCodetype getencseqkmers_nospecialtwobitencoding(
       pos++;
       cc = (GtUchar) (currentencoding >> shiftright) & 3;
       GT_UPDATEKMER(code,cc,maskright);
-      processkmercode(processkmercodeinfo,false,pos,
-                       (readmode == GT_READMODE_COMPL)
-                         ? gt_kmercode_complement(code,maskright)
-                         : code);
+      if (processkmercode != NULL)
+      {
+        processkmercode(processkmercodeinfo,false,pos,
+                          (readmode == GT_READMODE_COMPL)
+                            ? gt_kmercode_complement(code,maskright)
+                            : code);
+      }
       if (shiftright > 0)
       {
         shiftright -= 2;

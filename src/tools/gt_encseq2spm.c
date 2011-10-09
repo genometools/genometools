@@ -23,8 +23,10 @@
 #include "core/logger.h"
 #include "core/intbits.h"
 #include "core/minmax.h"
+#include "core/showtime.h"
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
+#include "match/firstcodes-scan.h"
 #include "match/esa-spmsk.h"
 
 typedef struct
@@ -39,7 +41,8 @@ typedef struct
        countspms;
   unsigned int minmatchlength,
                numofparts,
-               radixparts;
+               radixparts,
+               singlescan;
   unsigned long maximumspace,
                 phase2extra;
   GtStr *encseqinput,
@@ -56,6 +59,7 @@ static void* gt_encseq2spm_arguments_new(void)
   arguments->outputspms = false;
   arguments->countspms = false;
   arguments->radixlarge = false;
+  arguments->singlescan = 0;
   arguments->numofparts = 0;
   arguments->radixparts = 2U;
   arguments->encseqinput = gt_str_new();
@@ -172,6 +176,13 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  /* -singlescan */
+  option = gt_option_new_uint("singlescan", "run a single scan: 1: fast; "
+                              "2: fast with check; 3: sfx-mapped4-version",
+                              &arguments->singlescan, 0);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -262,7 +273,63 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       haserr = true;
     }
   }
-  if (!haserr)
+
+  if (!haserr && arguments->singlescan > 0)
+  {
+    GtTimer *timer = NULL;
+
+    if (gt_showtime_enabled())
+    {
+      char *outmsg;
+
+      switch (arguments->singlescan)
+      {
+        case 1:
+          outmsg = "to run fast scanning";
+          break;
+        case 2:
+          outmsg = "to run fast scanning with check";
+          break;
+        case 3:
+          outmsg = "to run old scanning code";
+          break;
+        default:
+          gt_error_set(err,"argument %u to option -singlescan not allowed",
+                       arguments->singlescan);
+          haserr = true;
+      }
+      if (!haserr)
+      {
+        timer = gt_timer_new_with_progress_description(outmsg);
+        gt_timer_start(timer);
+      }
+    }
+    if (!haserr)
+    {
+      unsigned int kmersize;
+      kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
+                     arguments->minmatchlength);
+      if (arguments->singlescan == 1U)
+      {
+        gt_firstcode_runkmerscan(encseq,false,kmersize);
+      } else
+      {
+        if (arguments->singlescan == 2U)
+        {
+          gt_firstcode_runkmerscan(encseq,true,kmersize);
+        } else
+        {
+          gt_rungetencseqkmers(encseq,kmersize);
+        }
+      }
+    }
+    if (timer != NULL)
+    {
+      gt_timer_show_progress_final(timer, stdout);
+      gt_timer_delete(timer);
+    }
+  }
+  if (!haserr && arguments->singlescan == 0)
   {
     GtLogger *logger;
     const GtReadmode readmode = GT_READMODE_FORWARD;
