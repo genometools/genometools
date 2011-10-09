@@ -993,6 +993,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                         gt_radixsort_size(fci.radixsort_code));
     fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
     fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
+    gt_logger_log(logger,"maximum space for accumulation counts %.2f MB",
+                  GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
                                   encseq,
                                   readmode,
@@ -1025,6 +1027,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                               &fci.tab,
                                               &fci.overflow_index,
                                               forceoverflow);
+    gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
+                  GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
     fci.mappedmarkprefix
       = gt_Sfxmappedrange_new("markprefix",
@@ -1198,7 +1202,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  maxbucketsize);
     if (maximumspace > 0)
     {
-      const unsigned long maxrounds = fci.radixparts == 1U ? 400UL : 300UL;
+      const unsigned long maxrounds = fci.radixparts == 1U ? 500UL : 400UL;
       size_t used = gt_firstcodes_spacelog_workspace(fci.fcsl) +
                     phase2extra +
                     gt_suftabparts_largestsizemappedpartwise(suftabparts);
@@ -1313,6 +1317,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                    fci.currentminindex,
                                                    fci.currentmaxindex));
       }
+      gt_logger_log(logger,"maximum space for part %u: %.2f MB",
+                    part,GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
       fci.buf.currentmincode = gt_firstcodes_idx2code(&fci,fci.currentminindex);
       fci.buf.currentmaxcode = gt_firstcodes_idx2code(&fci,fci.currentmaxindex);
       gt_spmsuftab_partoffset(fci.spmsuftab,
