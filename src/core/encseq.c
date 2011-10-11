@@ -142,33 +142,75 @@ static void encseq2bytecode(GtUchar *dest,
   unsigned long i, j;
 
   gt_assert(encseq != NULL && dest != NULL);
-  if (len >= 3UL)
-  {
-    for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
+  if (encseq->twobitencoding != NULL) {
+    if (len >= 3UL)
     {
-      dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
-              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4)
-              | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2)
-              | (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i+3);
+      for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
+      {
+        dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
+               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4)
+               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2)
+               | (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i+3);
+      }
+    } else
+    {
+      i = startindex;
+      j = 0;
     }
-  } else
-  {
-    i = startindex;
-    j = 0;
-  }
-  switch (GT_MOD4(len))
-  {
-    case 1UL:
-      dest[j] = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
-      break;
-    case 2UL:
-      dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
+    switch (GT_MOD4(len))
+    {
+      case 1UL:
+        dest[j] = (GtUchar) EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6;
+        break;
+      case 2UL:
+        dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4);
-      break;
-    case 3UL:
-      dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
+        break;
+      case 3UL:
+        dest[j] = (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i) << 6)
               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+1) << 4)
               | (GtUchar) (EXTRACTENCODEDCHAR(encseq->twobitencoding,i+2) << 2);
+    }
+  } else if (encseq->sat == GT_ACCESS_TYPE_BYTECOMPRESS)
+  {
+    if (len >= 3UL)
+    {
+      for (i=startindex, j=0; i < startindex + len - 3; i+=4, j++)
+      {
+        dest[j] = (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i) << 6)
+                | (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i+1) << 4)
+                | (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i+2) << 2)
+                | (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i+3));
+      }
+    } else
+    {
+      i = startindex;
+      j = 0;
+    }
+    switch (GT_MOD4(len))
+    {
+      case 1UL:
+        dest[j] = (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i) << 6);
+        break;
+      case 2UL:
+        dest[j] = (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i) << 6)
+                | (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i+1) << 4);
+        break;
+      case 3UL:
+        dest[j] = (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i) << 6)
+                | (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i+1) << 4)
+                | (GtUchar) (bitpackarray_get_uint32(encseq->bitpackarray,
+                                                     (BitOffset) i+2) << 2);
+    }
   }
 }
 
@@ -177,7 +219,6 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
                                  unsigned long startindex,
                                  unsigned long len)
 {
-  gt_assert(encseq != NULL && encseq->sat != GT_ACCESS_TYPE_BYTECOMPRESS);
   if (encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS)
   {
     gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,len);
