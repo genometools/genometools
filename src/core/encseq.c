@@ -7433,6 +7433,10 @@ GtEncseqEncoder* gt_encseq_encoder_new_from_options(GtEncseqOptions *opts,
     had_err = gt_encseq_encoder_use_representation(ee,
                                   gt_str_get(gt_encseq_options_sat_value(opts)),
                                   err);
+  if (had_err) {
+    gt_encseq_encoder_delete(ee);
+    ee = NULL;
+  }
   return ee;
 }
 
