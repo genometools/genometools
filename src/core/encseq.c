@@ -198,6 +198,18 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
 }
 #endif
 
+unsigned long gt_encseq_version(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return encseq->version;
+}
+
+bool gt_encseq_is_64_bit(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return ((int) encseq->is64bit == 1);
+}
+
 #ifndef GT_INLINEDENCSEQ
 unsigned long gt_encseq_total_length(const GtEncseq *encseq)
 {
@@ -209,18 +221,6 @@ unsigned long gt_encseq_num_of_sequences(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
   return encseq->logicalnumofdbsequences;
-}
-
-unsigned long gt_encseq_version(const GtEncseq *encseq)
-{
-  gt_assert(encseq != NULL);
-  return encseq->version;
-}
-
-bool gt_encseq_is_64_bit(const GtEncseq *encseq)
-{
-  gt_assert(encseq != NULL);
-  return ((int) encseq->is64bit == 1);
 }
 
 static GtUchar delivercharViabytecompress(const GtEncseq *encseq,
@@ -322,40 +322,6 @@ GtUchar gt_encseq_get_encoded_char(const GtEncseq *encseq,
   }
 }
 
-bool gt_encseq_position_is_separator(const GtEncseq *encseq,
-                                     unsigned long pos,
-                                     GtReadmode readmode)
-{
-  gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
-  /* translate into forward coords */
-  if (GT_ISDIRREVERSE(readmode))
-  {
-    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
-  }
-  /* handle virtual coordinates */
-  if (encseq->hasmirror)
-  {
-    if (pos > encseq->totallength)
-    {
-      /* invert coordinates and readmode */
-      gt_readmode_invert(readmode);
-      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
-    } else
-    {
-      if (pos == encseq->totallength)
-      {
-        return true;
-      }
-    }
-  }
-  if (encseq->numofdbsequences == 1UL)
-  {
-    return false;
-  }
-  gt_assert(encseq->issinglepositionseparator != NULL);
-  return encseq->issinglepositionseparator(encseq,pos);
-}
-
 char gt_encseq_get_decoded_char(const GtEncseq *encseq, unsigned long pos,
                                 GtReadmode readmode)
 {
@@ -442,6 +408,40 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
   }
 }
 #endif
+
+bool gt_encseq_position_is_separator(const GtEncseq *encseq,
+                                     unsigned long pos,
+                                     GtReadmode readmode)
+{
+  gt_assert(encseq != NULL && pos < encseq->logicaltotallength);
+  /* translate into forward coords */
+  if (GT_ISDIRREVERSE(readmode))
+  {
+    pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
+  }
+  /* handle virtual coordinates */
+  if (encseq->hasmirror)
+  {
+    if (pos > encseq->totallength)
+    {
+      /* invert coordinates and readmode */
+      gt_readmode_invert(readmode);
+      pos = GT_REVERSEPOS(encseq->totallength, pos - encseq->totallength - 1);
+    } else
+    {
+      if (pos == encseq->totallength)
+      {
+        return true;
+      }
+    }
+  }
+  if (encseq->numofdbsequences == 1UL)
+  {
+    return false;
+  }
+  gt_assert(encseq->issinglepositionseparator != NULL);
+  return encseq->issinglepositionseparator(encseq,pos);
+}
 
 /* The following components are only accessed when the encseq access is one of
    GT_ACCESS_TYPE_UCHARTABLES,

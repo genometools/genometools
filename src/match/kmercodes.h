@@ -40,6 +40,7 @@ static inline GtCodetype gt_kmercode_complement(GtCodetype kmer,
 
 /*@unused@*/ static inline GtCodetype gt_kmercode_reverse32(GtCodetype kmer)
 {
+#ifdef _LP64
   return GT_SWAPBITPAIRS(kmer,62,0,62) |
          GT_SWAPBITPAIRS(kmer,60,2,58) |
          GT_SWAPBITPAIRS(kmer,58,4,54) |
@@ -56,5 +57,15 @@ static inline GtCodetype gt_kmercode_complement(GtCodetype kmer,
          GT_SWAPBITPAIRS(kmer,36,26,10) |
          GT_SWAPBITPAIRS(kmer,34,28,6) |
          GT_SWAPBITPAIRS(kmer,32,30,2);
+#else
+  return GT_SWAPBITPAIRS(kmer, 30, 0,30) |
+         GT_SWAPBITPAIRS(kmer, 28, 2,26) |
+         GT_SWAPBITPAIRS(kmer, 26, 4,22) |
+         GT_SWAPBITPAIRS(kmer, 24, 6,18) |
+         GT_SWAPBITPAIRS(kmer, 22, 8,14) |
+         GT_SWAPBITPAIRS(kmer, 20,10,10) |
+         GT_SWAPBITPAIRS(kmer, 18,12, 6) |
+         GT_SWAPBITPAIRS(kmer, 16,14, 2);
+#endif
 }
 #endif

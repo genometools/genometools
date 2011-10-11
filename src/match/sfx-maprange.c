@@ -103,7 +103,7 @@ void *gt_Sfxmappedrange_map_entire(GtSfxmappedrange *sfxmappedrange,
   }
   gt_log_log("map %s completely (%lu units of size %u)",
               gt_str_get(sfxmappedrange->tablename),
-              sfxmappedrange->numofunits,
+              (unsigned long) sfxmappedrange->numofunits,
               (unsigned int) sfxmappedrange->sizeofunit);
   return sfxmappedrange->entire;
 }

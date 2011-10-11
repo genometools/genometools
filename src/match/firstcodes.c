@@ -25,6 +25,7 @@
 #include "core/logger_api.h"
 #include "core/spacepeak.h"
 #include "core/spacecalc.h"
+#include "core/undef_api.h"
 #include "core/fa.h"
 #include "core/error_api.h"
 #include "sfx-suffixer.h"
@@ -612,7 +613,8 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
-  unsigned long current, next, idx, width, previoussuffix = 0, sumwidth = 0;
+  unsigned long current, next = GT_UNDEF_ULONG, idx,
+                width, previoussuffix = 0, sumwidth = 0;
   GtEncseqReader *esr1 = NULL, *esr2 = NULL;
   bool previousdefined = false;
   const uint16_t *lcptab_bucket;
@@ -679,6 +681,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     {
       gt_assert(width == 1UL);
     }
+    gt_assert(next != GT_UNDEF_ULONG);
     current = next;
   }
   if (itvprocess_end != NULL)
