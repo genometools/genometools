@@ -125,15 +125,13 @@ void gt_GtCompactulongstore_update(GtCompactUlongstore *cus,
         (value << shiftleft);
   } else
   {
-    unsigned int shiftright = unitoffset - cus->bitsleft;
+    unsigned int shift = unitoffset - cus->bitsleft;
 
     cus->tab[unitindex]
-      = (cus->tab[unitindex] & ~(cus->maskright >> shiftright)) |
-        (value >> shiftright);
+      = (cus->tab[unitindex] & ~(cus->maskright >> shift)) | (value >> shift);
+    shift = (unsigned int) GT_INTWORDSIZE - shift;
     cus->tab[unitindex+1]
-      = (cus->tab[unitindex+1] & ~(cus->maskright <<
-                                   (GT_INTWORDSIZE - shiftright))) |
-        (value << (GT_INTWORDSIZE - shiftright));
+      = (cus->tab[unitindex+1] & ~(cus->maskright << shift)) | (value << shift);
   }
 }
 
