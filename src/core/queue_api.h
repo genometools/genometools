@@ -27,10 +27,10 @@ typedef struct GtQueue GtQueue;
 
 /* Return a new <GtQueue> object. */
 GtQueue*      gt_queue_new(void);
-/* Add <elem> to <queue> (__enqueue__ in computer science lingo). */
+/* Add <elem> to <queue> (__enqueue__ in computer science terminology). */
 void          gt_queue_add(GtQueue *queue, void *elem);
 /* Remove the first element from non-empty <queue> and return it (__dequeue__ in
-   computer science lingo). */
+   computer science terminology). */
 void*         gt_queue_get(GtQueue *queue);
 /* Return the first element in non-empty <queue> without removing it. */
 void*         gt_queue_head(GtQueue *queue);
