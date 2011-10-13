@@ -127,7 +127,7 @@ static GtOPrval sketch_parse_options(int *parsed_args,
   gt_option_hide_default(option2);
 
   /* -width */
-  option = gt_option_new_uint_min("width", "target image width",
+  option = gt_option_new_uint_min("width", "target image width (in pixel)",
                                   &arguments->width,
                                   800, 1);
   gt_option_parser_add_option(op, option);
