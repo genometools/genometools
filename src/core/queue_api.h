@@ -25,7 +25,7 @@
    any type in an First-In-First-Out (FIFO) fashion. */
 typedef struct GtQueue GtQueue;
 
-/* Return a new <GtQueue > object. */
+/* Return a new <GtQueue> object. */
 GtQueue*      gt_queue_new(void);
 /* Add <elem> to <queue> (__enqueue__ in computer science lingo). */
 void          gt_queue_add(GtQueue *queue, void *elem);
