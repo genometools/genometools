@@ -25,8 +25,8 @@
 
 /* Implements the <GtGenomeNode> interface. A single feature node corresponds
    to a GFF3 feature line (i.e., a line which does not start with <#>).
-   Part-of relationships (which are realised in GFF3 with the <Parent> and <ID>
-   attributes) are realised in the C API with the
+   Part-of relationships (which are realized in GFF3 with the <Parent> and <ID>
+   attributes) are realized in the C API with the
    <gt_feature_node_add_child()> method.
 
    Besides the ``mere'' feature nodes two ``special'' feature nodes exist:
