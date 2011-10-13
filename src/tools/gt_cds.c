@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -66,7 +66,7 @@ static GtOptionParser* gt_cds_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   op = gt_option_parser_new("[option ...] [GFF3_file]",
-                            "Add CDS features to exon "
+                            "Add CDS (coding sequence) features to exon "
                             "features given in GFF3 file.");
 
   /* -minorflen */
