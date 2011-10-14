@@ -800,15 +800,15 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 #endif
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
+
   totallength = gt_encseq_total_length(encseq);
-  logtotallength = (unsigned int) log((double) totallength);
-  gt_log_log("totallength=%lu",totallength);
-  if (logtotallength >= 7U)
+  logtotallength = (unsigned int) round(log((double) totallength));
+  if (logtotallength >= 8U)
   {
-    markprefixunits = MAX(7U,logtotallength - 7U);
+    markprefixunits = MAX(8U,logtotallength - 8U);
   } else
   {
-    markprefixunits = 7U;
+    markprefixunits = 8U;
   }
   if (markprefixunits >= 2U)
   {
@@ -823,7 +823,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     markprefixunits = kmersize - marksuffixunits;
   }
   gt_log_log("markprefixunits=%u,marksuffixunits=%u",markprefixunits,
-                                                       marksuffixunits);
+                                                     marksuffixunits);
   if (maxseqlength > (unsigned long) minmatchlength)
   {
     maxrelpos = maxseqlength - (unsigned long) minmatchlength;
