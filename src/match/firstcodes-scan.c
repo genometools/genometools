@@ -6,6 +6,7 @@
 #include "kmercodes.h"
 #include "firstcodes-scan.h"
 
+#undef WITHCHECK
 #ifdef WITHCHECK
 static void gt_firstcode_verifycodes(const GtBitsequence *twobitencoding,
                                      unsigned long position,
@@ -14,8 +15,9 @@ static void gt_firstcode_verifycodes(const GtBitsequence *twobitencoding,
                                      GtCodetype rccode)
 {
   GtCodetype bfcode = gt_kmercode_at_position(twobitencoding,position,kmersize),
-             bfrccode = gt_kmercode_complement(gt_kmercode_reverse32(bfcode),
-                                               GT_MASKRIGHT(kmersize));
+             bfrccode = gt_kmercode_complement(
+                                     gt_kmercode_reverse(bfcode,kmersize),
+                                     GT_MASKRIGHT(kmersize));
 
   gt_assert(fcode == bfcode);
   if (rccode != bfrccode)
@@ -47,10 +49,11 @@ static void gt_firstcodes_kmerscan_range(const GtBitsequence *twobitencoding,
   const unsigned long maskright = GT_MASKRIGHT(kmersize);
   GtCodetype cc;
 
-  gt_assert(kmersize == 32U);
+  gt_assert(kmersize <= GT_UNITSIN2BITENC);
   position = startpos;
   fcode = gt_kmercode_at_position(twobitencoding, position, kmersize);
-  rccode = gt_kmercode_complement(gt_kmercode_reverse32(fcode),maskright);
+  rccode = gt_kmercode_complement(gt_kmercode_reverse(fcode,kmersize),
+                                  maskright);
   if (processcode != NULL)
   {
     processcode(fcode,rccode,position,data);
@@ -128,10 +131,18 @@ void gt_firstcode_runkmerscan(const GtEncseq *encseq,
 {
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
-  const unsigned long totallength = gt_encseq_total_length(encseq),
-                      equallength = gt_encseq_equallength(encseq),
-                      maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
+  unsigned long totallength, equallength, maxunitindex;
 
+  if (gt_encseq_is_mirrored(encseq))
+  {
+    totallength = (gt_encseq_total_length(encseq)-1)/2;
+  } else
+  {
+    totallength = gt_encseq_total_length(encseq);
+  }
+  maxunitindex = gt_unitsoftwobitencoding(totallength) - 1;
+  printf("totallength=%lu,maxunitindex=%lu\n",totallength,maxunitindex);
+  equallength = gt_encseq_equallength(encseq),
   gt_firstcodes_kmerscan(twobitencoding,
                          withcheck,
                          equallength,
