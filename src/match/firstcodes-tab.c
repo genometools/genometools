@@ -359,12 +359,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_free(fct->countocc_small);
   GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
   fct->countocc_small = NULL;
-  if (fct->hashmap_addcount > 0 && gt_ma_enabled() && gt_fa_enabled())
+  if (fct->hashmap_addcount > 0 && gt_ma_bookkeeping_enabled())
   {
     spacewithhashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
   }
   gt_hashtable_delete(fct->countocc_exceptions);
-  if (fct->hashmap_addcount > 0 && gt_ma_enabled() && gt_fa_enabled())
+  if (fct->hashmap_addcount > 0 && gt_ma_bookkeeping_enabled())
   {
     unsigned long hashmapspace;
 

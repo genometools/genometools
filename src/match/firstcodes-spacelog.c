@@ -60,7 +60,7 @@ GtFirstcodesspacelog *gt_firstcodes_spacelog_new(void)
 
 void gt_firstcodes_spacelog_start_diff(GtFirstcodesspacelog *fcsl)
 {
-  fcsl->calc_difference = (gt_ma_enabled() && gt_fa_enabled()) ? true : false;
+  fcsl->calc_difference = gt_ma_bookkeeping_enabled();
 }
 
 void gt_firstcodes_spacelog_stop_diff(GtFirstcodesspacelog *fcsl)
@@ -308,7 +308,7 @@ void gt_firstcodes_spacelog_add(GtFirstcodesspacelog *fcsl,
              GT_MEGABYTES(fcsl->splitspace),
              GT_MEGABYTES(logspace));
 #ifdef SKDEBUG
-  if (gt_ma_enabled() && gt_fa_enabled())
+  if (gt_ma_bookkeeping_enabled())
   {
     unsigned long realspace = gt_ma_get_space_current() +
                               gt_fa_get_space_current();

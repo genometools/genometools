@@ -49,7 +49,6 @@ void    gt_fa_xfclose(FILE *stream);
 void    gt_fa_lock_shared(FILE *stream);
 void    gt_fa_lock_exclusive(FILE *stream);
 void    gt_fa_unlock(FILE *stream);
-bool    gt_fa_enabled(void);
 
 /* functions for gzip file pointer */
 #define gt_fa_gzopen(path, mode, err)\

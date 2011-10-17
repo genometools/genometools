@@ -289,9 +289,10 @@ int gt_ma_check_space_leak(void)
   return 0;
 }
 
-bool gt_ma_enabled(void)
+bool gt_ma_bookkeeping_enabled(void)
 {
-  return ma == NULL ? false : true;
+  gt_assert(ma);
+  return ma->bookkeeping;
 }
 
 static int print_allocation(GT_UNUSED void *key, void *value,
