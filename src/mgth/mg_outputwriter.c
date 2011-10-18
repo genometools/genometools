@@ -16,9 +16,10 @@
 */
 #include <ctype.h>
 
-#include "core/unused_api.h"
-#include "core/hashmap.h"
 #include "mg_outputwriter.h"
+
+#include "core/hashmap.h"
+#include "core/unused_api.h"
 
 /* Funktion, die nacheinander die erforderlichen Funktionen zur Erstellung
    des txt-Dokuments aufruft
@@ -681,7 +682,7 @@ static void output_hitdna(ParseStruct *parsestruct_ptr,
                    HitInformation *hit_information,
                    RegionStruct **regionmatrix, GtError * err)
 {
-  int had_err = 0;
+  GT_UNUSED int had_err = 0;
 
   unsigned long arraysize,
     from = 0,

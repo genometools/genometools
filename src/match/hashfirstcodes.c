@@ -80,7 +80,7 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtHashfirstcodes hashfirstcodes;
-  unsigned long countsum, numofsequences, totallength, psum;
+  unsigned long countsum, numofsequences, GT_UNUSED totallength, psum;
   const unsigned int spmopt = 45U;
 
   if (gt_showtime_enabled())

@@ -16,6 +16,7 @@
 */
 
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "gth/ags.h"
 #include "gth/pgl.h"
 
@@ -163,7 +164,7 @@ unsigned long gth_pgl_genomic_offset(const GthPGL *pgl)
 
 GtRange gth_pgl_genomic_range(const GthPGL *pgl)
 {
-  unsigned long gen_offset, gen_total_length;
+  unsigned long GT_UNUSED gen_offset, GT_UNUSED gen_total_length;
   GtRange range;
   GthAGS *ags;
   gt_assert(pgl);

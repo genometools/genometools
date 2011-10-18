@@ -1327,7 +1327,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
                            void *cpinfo,
                            GtLogger *logger)
 {
-  unsigned int retval;
+  GT_UNUSED unsigned int retval;
   GtChain2Dimgapcostfunction chaingapcostfunction;
 
   gt_assert(presortdim <= 1U);

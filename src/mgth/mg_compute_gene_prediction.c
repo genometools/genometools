@@ -18,6 +18,8 @@
 
 #include "mg_compute_gene_prediction.h"
 
+#include "core/unused_api.h"
+
 /* Funktion zur Berechnung der Start-Stop Informationen der genkodierenden
    Bereiche sowie deren Leserahmen
    Parameter: row, column, max-Wert der letzten Spalte der Opt-Path-Matrix,
@@ -496,7 +498,7 @@ static int frameshiftprocessing(ParseStruct *parsestruct_ptr,
 
   unsigned long arraysize,
     arraysize_realframe,
-    arraysize_real,
+    GT_UNUSED arraysize_real,
     arraysize_tmp,
     array_idx,
     arrayreal_idx = 0,

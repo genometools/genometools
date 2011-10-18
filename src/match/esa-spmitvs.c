@@ -155,7 +155,7 @@ int gt_process_spmitv(const char *inputindex, GtLogger *logger, GtError *err)
     Spmitv_state state;
     unsigned int numofchars;
     unsigned long nonspecials;
-    GtCodetype numofallcodes;
+    GT_UNUSED GtCodetype numofallcodes;
 
     state.encseq = gt_encseqSequentialsuffixarrayreader(ssar);
     state.readmode = gt_readmodeSequentialsuffixarrayreader(ssar);

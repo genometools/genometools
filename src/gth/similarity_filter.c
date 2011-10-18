@@ -17,10 +17,11 @@
 
 #include "core/trans_table.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "core/warning_api.h"
+#include "gth/chaining.h"
 #include "gth/gtherror.h"
 #include "gth/gthxml.h"
-#include "gth/chaining.h"
 #include "gth/intermediate.h"
 #include "gth/proc_sa_collection.h"
 #include "gth/similarity_filter.h"
@@ -376,7 +377,7 @@ static int call_dna_DP(bool directmatches, GthCallInfo *call_info,
 {
   int rval;
   bool bothstrandsanalyzed, firstdp = true,
-       gs2outdirectmatches = directmatches;
+       GT_UNUSED gs2outdirectmatches = directmatches;
   GthSA *saB = NULL;
   GtFile *outfp = call_info->out->outfp;
 

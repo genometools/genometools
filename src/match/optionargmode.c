@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "optionargmode.h"
+#include "core/unused_api.h"
 
 int gt_optionargaddbitmask(const Optionargmodedesc *modedesc,
                            size_t numberofentries,
@@ -73,7 +74,7 @@ GtStr *gt_getargmodekeywords(const Optionargmodedesc *modedesc,
                              const char *what)
 {
   GtStr *helpstring;
-  size_t idx, modecount, len, maxlen = 0, spacelen;
+  size_t idx, modecount, len, maxlen = 0, GT_UNUSED spacelen;
   const char *space = "    ";
 
   for (modecount=0; modecount < numberofentries; modecount++)

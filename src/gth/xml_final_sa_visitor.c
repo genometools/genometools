@@ -17,6 +17,7 @@
 
 #include "core/chardef.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "gth/indent.h"
 #include "gth/sa_visitor_rep.h"
 #include "gth/xml_final_sa_visitor.h"
@@ -334,7 +335,7 @@ static void xml_final_show_spliced_alignment(GthSA *sa, GthInput *input,
                                              GtFile *outfp)
 {
   unsigned char *first_line, *second_line, *third_line;
-  bool reverse_subject_pos = false;
+  GT_UNUSED bool reverse_subject_pos = false;
   unsigned long cols;
 
   gt_assert(sa && input);

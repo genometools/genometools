@@ -228,7 +228,7 @@ static void create_CDS_features_for_ORF(GtRange orf, GtCDSVisitor *v,
   for (i = strand == GT_STRAND_FORWARD ? orf.start : orf.end;
        strand == GT_STRAND_FORWARD ? i < orf.end : i > orf.start;
        strand == GT_STRAND_FORWARD ? i++ : i--) {
-    unsigned long prev_length;
+    GT_UNUSED unsigned long prev_length;
     if (gt_splicedseq_pos_is_border(v->splicedseq, i)) {
       gt_feature_node_set_end(cds_feature,
                               gt_splicedseq_map(v->splicedseq, i) + v->offset);

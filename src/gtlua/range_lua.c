@@ -18,6 +18,7 @@
 #include "lauxlib.h"
 #include "extended/luahelper.h"
 #include "gtlua/range_lua.h"
+#include "core/unused_api.h"
 
 static int range_lua_new(lua_State *L)
 {
@@ -64,7 +65,7 @@ static GtArray* range_table_to_array(lua_State *L)
   lua_Integer i = 1;
   GtArray *ranges;
   GtRange *range;
-  const char *msg;
+  GT_UNUSED const char *msg;
   bool error;
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);

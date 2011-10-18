@@ -28,6 +28,7 @@
 #include "core/str_array.h"
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-mrangealphabet-priv.h"
+#include "core/unused_api.h"
 
 MRAEnc *
 gt_newMultiRangeAlphabetEncodingUInt8(AlphabetRangeID numRanges,
@@ -180,7 +181,7 @@ gt_MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
   {
   case sourceUInt8:
     {
-      const MRAEncUInt8 *ui8alpha;
+      GT_UNUSED const MRAEncUInt8 *ui8alpha;
       uint8_t *mappings, destSym;
       AlphabetRangeSize *newRanges, sym;
       AlphabetRangeID range, numRanges = MRAEncGetNumRanges(srcAlpha);

@@ -18,6 +18,7 @@
 #include "core/codon.h"
 #include "core/orf.h"
 #include "core/trans_table.h"
+#include "core/unused_api.h"
 #include "gth/gthorf.h"
 #include "gth/gthstopcodon.h"
 #include "gth/indent.h"
@@ -125,7 +126,7 @@ static void showsingleORF(MaximalORF *orf, bool gen_strand_forward,
                           unsigned int indentlevel, GthOutput *out)
 {
   unsigned long i;
-  bool hasborder = false;
+  GT_UNUSED bool hasborder = false;
   GtFile *outfp = out->outfp;
 
   if (out->xmlout) {

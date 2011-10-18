@@ -462,7 +462,7 @@ static void process_csa_genes(GtQueue *gt_genome_node_buffer,
 void gt_csa_visitor_process_cluster(GtNodeVisitor *nv, bool final_cluster)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(nv);
-  GtFeatureNode *first_feature;
+  GT_UNUSED GtFeatureNode *first_feature;
   GtArray *csa_genes;
   unsigned long i;
 

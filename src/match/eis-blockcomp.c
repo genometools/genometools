@@ -951,7 +951,7 @@ fetchSuperBlock(const struct blockCompositionSeq *seqIdx,
   else
   {
     FILE *idxFP;
-    int ret;
+    GT_UNUSED int ret;
     size_t superBlockCWDiskSize = superBlockCWMaxReadSize(seqIdx);
     BitOffset bucketOffset = bucketNum * superBlockCWBits(seqIdx);
     BitOffset varDataOffset;
@@ -1002,7 +1002,7 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
                        const struct blockCompositionSeq *seqIdx,
                        size_t numEntries)
 {
-  unsigned bucketBlocks, bucketLen, blockSize;
+  unsigned bucketBlocks, GT_UNUSED bucketLen, blockSize;
   size_t superBlockSize;
 
   gt_assert(seqIdx && sBlockCache);
@@ -1117,7 +1117,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, unsigned long blockNum,
 {
   struct superBlock *sBlock;
   BitOffset varDataMemOffset, cwIdxMemOffset;
-  unsigned long relBlockNum;
+  GT_UNUSED unsigned long relBlockNum;
   unsigned blockSize;
   Symbol *block;
   gt_assert(seqIdx);
@@ -2142,7 +2142,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet,
                          const char *projectName, int features, GtError *err)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
-  Symbol blockMapAlphabetSize, totalAlphabetSize;
+  Symbol blockMapAlphabetSize, GT_UNUSED totalAlphabetSize;
   MRAEnc *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
   size_t headerLen;
   int *modesCopy = NULL;
@@ -2530,7 +2530,7 @@ newBlockCompSeqHint(const struct encIdxSeq *seq)
 static void
 deleteBlockCompSeqHint(struct encIdxSeq *seq, union EISHint *hint)
 {
-  struct blockCompositionSeq *seqIdx;
+  GT_UNUSED struct blockCompositionSeq *seqIdx;
   gt_assert(seq && seq->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(seq);
   destructSuperBlockSeqCache(&hint->bcHint.sBlockCache);

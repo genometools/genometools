@@ -42,7 +42,7 @@ struct GtEncseqMetadata
 #define NEXTFREADWSIZE(VAL, SIZE)\
         if (!had_err)\
         {\
-          size_t ret;\
+          GT_UNUSED size_t ret;\
           ret = fread(&(VAL), sizeof (VAL), (size_t) SIZE, fp);\
           if (ferror(fp))\
           {\

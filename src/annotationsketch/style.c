@@ -786,7 +786,7 @@ int gt_style_unit_test(GtError *err)
   GtStr *test1      = gt_str_new_cstr("mRNA"),
         *str        = gt_str_new(),
         *sty_buffer = gt_str_new();
-  GtColor col1, col2, col, defcol, tmpcol;
+  GtColor col1, col2, GT_UNUSED col, defcol, tmpcol;
   double num = 10.0;
   gt_error_check(err);
 

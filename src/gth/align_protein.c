@@ -631,7 +631,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
   unsigned long genptr          = gen_dp_length, last_genptr = 0,
                 genptr_tail     = gen_dp_length,
                 refptr          = ref_dp_length,
-                dummy_index     = GT_UNDEF_ULONG,
+                GT_UNUSED dummy_index     = GT_UNDEF_ULONG,
                 dummy_b2_genptr = GT_UNDEF_ULONG,
                 dummy_b3_genptr = GT_UNDEF_ULONG,
                 dummy_c3_genptr = GT_UNDEF_ULONG;

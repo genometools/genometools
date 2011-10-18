@@ -279,7 +279,9 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
   GtLogger *logger = NULL;
   bool haserr = false;
   const GtAlphabet *alphabet = NULL;
+#ifdef WITHBCKTAB
   unsigned int prefixlength = 0;
+#endif
   unsigned long totallength;
   bool gt_mapfmindexfail = false;
 
@@ -341,7 +343,9 @@ static int gt_greedyfwdmat(bool doms,int argc, const char **argv,GtError *err)
     } else
     {
       alphabet = gt_encseq_alphabet(suffixarray.encseq);
+#ifdef WITHBCKTAB
       prefixlength = suffixarray.prefixlength;
+#endif
       totallength = gt_encseq_total_length(suffixarray.encseq);
     }
     if (!haserr)

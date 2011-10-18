@@ -19,6 +19,7 @@
 #include "core/md5_seqid.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "extended/gff3_escaping.h"
 #include "gth/default.h"
 #include "gth/sa.h"
@@ -1201,7 +1202,7 @@ unsigned long gth_sa_get_alignment_lines(const GthSA *sa,
 {
   unsigned long genomicstartcutoff, genomicendcutoff, genomictotalcutoff,
                 referencestartcutoff, referenceendcutoff, referencetotalcutoff;
-  bool reverse_subject_pos = false;
+  GT_UNUSED bool reverse_subject_pos = false;
 
   gt_assert(sa && first_line && second_line && third_line && input);
 

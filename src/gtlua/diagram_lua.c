@@ -29,6 +29,7 @@
 #include "gtlua/feature_index_lua.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/range_lua.h"
+#include "core/unused_api.h"
 
 static int diagram_lua_new(lua_State *L)
 {
@@ -65,7 +66,7 @@ static GtArray* genome_node_table_to_array(lua_State *L)
   lua_Integer i = 1;
   GtArray *nodes;
   GtGenomeNode **gn;
-  const char *msg;
+  GT_UNUSED const char *msg;
   bool error;
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);

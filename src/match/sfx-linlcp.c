@@ -171,7 +171,7 @@ static void inversesuffixarray2specialranknext(
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long specialcharacters, idx, *rightofpartwidth = NULL;
+    unsigned long GT_UNUSED specialcharacters, idx, *rightofpartwidth = NULL;
     unsigned long specialranklistindex, nextrightofpartwidth = 0;
 
     rightofpartwidth = fillrightofpartwidth(rightposinverse,

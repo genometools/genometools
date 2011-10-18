@@ -90,7 +90,7 @@ const GtTypeCheckerClass* gt_type_checker_builtin_class(void)
 
 GtTypeChecker* gt_type_checker_builtin_new(void)
 {
-  GtTypeCheckerBuiltin *type_checker_builtin;
+  GT_UNUSED GtTypeCheckerBuiltin *type_checker_builtin;
   GtTypeChecker *type_checker;
   type_checker = gt_type_checker_create(gt_type_checker_builtin_class());
   type_checker_builtin = gt_type_checker_builtin_cast(type_checker);

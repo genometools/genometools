@@ -753,7 +753,7 @@ static int readkeysize(const char *indexname,GtError *err)
   }
   if (!haserr)
   {
-    size_t ret;
+    GT_UNUSED size_t ret;
 
     ret = fread(&cc,sizeof cc, (size_t) 1, fp);
     if (ferror(fp))

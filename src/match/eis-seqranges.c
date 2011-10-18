@@ -402,7 +402,7 @@ gt_SRLFindPositionLast(struct seqRangeList *rangeList, unsigned long pos,
   seqRangeListSearchHint hintCopy;
   size_t numRanges;
   struct seqRange *ranges;
-  unsigned symBits;
+  GT_UNUSED unsigned symBits;
   gt_assert(rangeList);
   ranges = rangeList->ranges;
   symBits = rangeList->symBits;

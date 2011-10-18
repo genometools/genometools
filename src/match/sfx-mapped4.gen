@@ -146,7 +146,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
                               unsigned long startpos,
                               unsigned long endpos)
 {
-  GtCodetype lastcode;
+  GT_UNUSED GtCodetype lastcode;
 
   if (mapped4info->mirrored && startpos >= mapped4info->realtotallength)
   {
@@ -333,3 +333,5 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                        ? lastend
                                        : mapped4info.totallength);
 }
+/* vim: ft=c
+*/

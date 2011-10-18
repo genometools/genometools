@@ -66,7 +66,7 @@ int gt_custom_track_gc_content_sketch(GtCustomTrack *ct, GtGraphics *graphics,
 {
   int had_err = 0;
   GtCustomTrackGcContent *ctgc;
-  double iter, iter_step, value, *data;
+  double iter, iter_step, GT_UNUSED value, *data;
   unsigned long n;
   GtRange value_range = {0, 1};
   GtColor color, grey, black;

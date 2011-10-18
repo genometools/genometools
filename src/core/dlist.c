@@ -164,7 +164,7 @@ int gt_dlist_example(GT_UNUSED GtError *err)
 {
   GtDlistelem *dlistelem;
   GtDlist *dlist;
-  void *data;
+  GT_UNUSED void *data;
   int elem = 1984;
   gt_error_check(err);
 

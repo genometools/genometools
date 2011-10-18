@@ -947,7 +947,7 @@ unsigned long gt_feature_node_number_of_children_of_type(const GtFeatureNode
                                                          const GtFeatureNode
                                                          *node)
 {
-  int had_err = 0;
+  GT_UNUSED int had_err = 0;
   GtTypeTraverseInfo traverseinfo;
   gt_assert(parent && node);
   traverseinfo.type = gt_feature_node_get_type(node);
