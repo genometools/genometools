@@ -73,7 +73,10 @@ void rnx_expected(int p,int req) {
 
 char *rnx_p2str(int p) {
   char *s=NULL,*s1;
-  int dt,ps,val,nc,p1;
+  int dt,
+      __attribute__ ((unused)) /*@unused@*/ps,
+      val,nc,
+      __attribute__ ((unused)) /*@unused@*/p1;
   switch(RN_P_TYP(p)) {
   case RN_P_ERROR: s=s_clone("error"); break;
   case RN_P_NOT_ALLOWED: s=s_clone("notAllowed"); break;

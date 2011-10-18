@@ -61,7 +61,9 @@ static int de(int p) {
 static void flatten(int p) { if(!rn_marked(p)) {flat[n_f++]=p; rn_mark(p);}}
 
 static void deref(int start) {
-  int p,p1,p2,nc,i,changed;
+  int p,p1,p2,
+      __attribute__ ((unused)) /*@unused@*/nc,
+      i,changed;
 
   flat=(int*)m_alloc(len_f=LEN_F,sizeof(int)); n_f=0;
   if(RN_P_IS(start,RN_P_REF)) start=de(start);
@@ -110,7 +112,8 @@ static void deref(int start) {
 }
 
 static int loop(int p) {
-  int nc,p1,p2,ret=1;
+  int __attribute__ ((unused)) /*@unused@*/nc,
+      p1,p2,ret=1;
   if(rn_marked(p)) return 1;
   rn_mark(p);
   switch(RN_P_TYP(p)) {
@@ -161,7 +164,8 @@ static void loops(void) {
 }
 
 static void ctype(int p) {
-  int p1,p2,nc;
+  int p1,p2,
+      __attribute__ ((unused)) /*@unused@*/nc;
   if(!rn_contentType(p)) {
     switch(RN_P_TYP(p)) {
     case RN_P_NOT_ALLOWED: rn_setContentType(p,RN_P_FLG_CTE,0); break;
@@ -244,7 +248,8 @@ static int bad_data_except(int p) {
 }
 
 static int bad_one_or_more(int p,int in_group) {
-  int nc,p1,p2;
+  int __attribute__ ((unused)) /*@unused@*/nc,
+      p1,p2;
   switch(RN_P_TYP(p)) {
   case RN_P_NOT_ALLOWED: case RN_P_EMPTY: case RN_P_TEXT:
   case RN_P_DATA: case RN_P_VALUE:

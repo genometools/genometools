@@ -375,7 +375,9 @@ static int equal_s(int s1,int s2) {return strcmp(rn_string+s1,rn_string+s2)==0;}
   if(p>=since && !rn_marked(p)) {flat[n_f++]=p; rn_mark(p);}  \
 } while(0)
 static void mark_p(int start,int since) {
-  int p,p1,p2,nc,i,n_f;
+  int p,p1,p2,
+      __attribute__ ((unused)) /*@unused@*/ nc,
+      i,n_f;
   int *flat=(int*)m_alloc(i_p-since,sizeof(int));
 
   n_f=0; pick_p(start);
@@ -414,7 +416,9 @@ static void mark_p(int start,int since) {
   } \
 } while(0)
 static void sweep_p(int *starts,int n_st,int since) {
-  int p,p1,p2,nc,q,changed,touched;
+  int p,p1,p2,
+      __attribute__ ((unused)) /*@unused@*/ nc,
+      q,changed,touched;
   int *xlat;
   xlat=(int*)m_alloc(i_p-since,sizeof(int));
   changed=0;
@@ -487,7 +491,9 @@ static void unmark_p(int since) {
 }
 
 static void compress_p(int *starts,int n_st,int since) {
-  int p,psiz, p1,p2,nc, q,i_q, newlen_p;
+  int p,psiz, p1,p2,
+      __attribute__ ((unused)) /*@unused@*/ nc,
+      q,i_q, newlen_p;
   int *xlat=(int*)m_alloc(i_p-since,sizeof(int));
   p=q=since;
   while(p!=i_p) { psiz=p_size[RN_P_TYP(p)];

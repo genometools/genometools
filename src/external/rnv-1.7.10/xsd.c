@@ -234,7 +234,7 @@ static int b64lenn(char *s,int n) {
 
 static int fdiglenn(char *s,int n) {
   char *end=s+n; int len=0;
-  for(;;) { if(end==s) break;
+  for(;;) { if(end<=s) break;
     --end;
     if(*end!='0'&&!xmlc_white_space(*end)) {++end; break;}
   }
