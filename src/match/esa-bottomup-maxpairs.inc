@@ -182,8 +182,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_maxpairs;
       lastinterval->rb = idx;
-      if (processlcpinterval_maxpairs != NULL &&
-          processlcpinterval_maxpairs(lastinterval->lcp,
+      if (processlcpinterval_maxpairs(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -204,8 +203,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_maxpairs != NULL &&
-            processbranchingedge_maxpairs(firstedge,
+        if (processbranchingedge_maxpairs(firstedge,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
                                  &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -238,8 +236,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
 #endif
         PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_maxpairs != NULL &&
-            processbranchingedge_maxpairs(true,
+        if (processbranchingedge_maxpairs(true,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
                                  &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -349,8 +346,7 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *seqnum_relpos_bucket,
     {
       lastinterval = POP_ESA_BOTTOMUP_maxpairs;
       lastinterval->rb = idx;
-      if (processlcpinterval_maxpairs != NULL &&
-          processlcpinterval_maxpairs(lastinterval->lcp,
+      if (processlcpinterval_maxpairs(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -371,8 +367,7 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *seqnum_relpos_bucket,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_maxpairs != NULL &&
-            processbranchingedge_maxpairs(firstedge,
+        if (processbranchingedge_maxpairs(firstedge,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
                                  &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -405,8 +400,7 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *seqnum_relpos_bucket,
 #endif
         PUSH_ESA_BOTTOMUP_maxpairs(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_maxpairs != NULL &&
-            processbranchingedge_maxpairs(true,
+        if (processbranchingedge_maxpairs(true,
                                  TOP_ESA_BOTTOMUP_maxpairs.lcp,
                                  TOP_ESA_BOTTOMUP_maxpairs.lb,
                                  &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -470,3 +464,5 @@ int gt_esa_bottomup_RAM_maxpairs(const unsigned long *seqnum_relpos_bucket,
 }
 
 #endif
+/* vim: ft=c
+*/

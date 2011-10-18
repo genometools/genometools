@@ -182,8 +182,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_shulen;
       lastinterval->rb = idx;
-      if (processlcpinterval_shulen != NULL &&
-          processlcpinterval_shulen(lastinterval->lcp,
+      if (processlcpinterval_shulen(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -204,8 +203,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(firstedge,
+        if (processbranchingedge_shulen(firstedge,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
                                  &TOP_ESA_BOTTOMUP_shulen.info,
@@ -238,8 +236,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
 #endif
         PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(true,
+        if (processbranchingedge_shulen(true,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
                                  &TOP_ESA_BOTTOMUP_shulen.info,
@@ -349,8 +346,7 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *seqnum_relpos_bucket,
     {
       lastinterval = POP_ESA_BOTTOMUP_shulen;
       lastinterval->rb = idx;
-      if (processlcpinterval_shulen != NULL &&
-          processlcpinterval_shulen(lastinterval->lcp,
+      if (processlcpinterval_shulen(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -371,8 +367,7 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *seqnum_relpos_bucket,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(firstedge,
+        if (processbranchingedge_shulen(firstedge,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
                                  &TOP_ESA_BOTTOMUP_shulen.info,
@@ -405,8 +400,7 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *seqnum_relpos_bucket,
 #endif
         PUSH_ESA_BOTTOMUP_shulen(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_shulen != NULL &&
-            processbranchingedge_shulen(true,
+        if (processbranchingedge_shulen(true,
                                  TOP_ESA_BOTTOMUP_shulen.lcp,
                                  TOP_ESA_BOTTOMUP_shulen.lb,
                                  &TOP_ESA_BOTTOMUP_shulen.info,
@@ -470,3 +464,5 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *seqnum_relpos_bucket,
 }
 
 #endif
+/* vim: ft=c
+*/

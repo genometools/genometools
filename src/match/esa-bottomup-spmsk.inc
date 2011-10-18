@@ -182,8 +182,7 @@ int gt_esa_bottomup_spmsk(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_spmsk;
       lastinterval->rb = idx;
-      if (processlcpinterval_spmsk != NULL &&
-          processlcpinterval_spmsk(lastinterval->lcp,
+      if (processlcpinterval_spmsk(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -204,8 +203,7 @@ int gt_esa_bottomup_spmsk(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk != NULL &&
-            processbranchingedge_spmsk(firstedge,
+        if (processbranchingedge_spmsk(firstedge,
                                  TOP_ESA_BOTTOMUP_spmsk.lcp,
                                  TOP_ESA_BOTTOMUP_spmsk.lb,
                                  &TOP_ESA_BOTTOMUP_spmsk.info,
@@ -238,8 +236,7 @@ int gt_esa_bottomup_spmsk(Sequentialsuffixarrayreader *ssar,
 #endif
         PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk != NULL &&
-            processbranchingedge_spmsk(true,
+        if (processbranchingedge_spmsk(true,
                                  TOP_ESA_BOTTOMUP_spmsk.lcp,
                                  TOP_ESA_BOTTOMUP_spmsk.lb,
                                  &TOP_ESA_BOTTOMUP_spmsk.info,
@@ -349,8 +346,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *seqnum_relpos_bucket,
     {
       lastinterval = POP_ESA_BOTTOMUP_spmsk;
       lastinterval->rb = idx;
-      if (processlcpinterval_spmsk != NULL &&
-          processlcpinterval_spmsk(lastinterval->lcp,
+      if (processlcpinterval_spmsk(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -371,8 +367,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *seqnum_relpos_bucket,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk != NULL &&
-            processbranchingedge_spmsk(firstedge,
+        if (processbranchingedge_spmsk(firstedge,
                                  TOP_ESA_BOTTOMUP_spmsk.lcp,
                                  TOP_ESA_BOTTOMUP_spmsk.lb,
                                  &TOP_ESA_BOTTOMUP_spmsk.info,
@@ -405,8 +400,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *seqnum_relpos_bucket,
 #endif
         PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk != NULL &&
-            processbranchingedge_spmsk(true,
+        if (processbranchingedge_spmsk(true,
                                  TOP_ESA_BOTTOMUP_spmsk.lcp,
                                  TOP_ESA_BOTTOMUP_spmsk.lb,
                                  &TOP_ESA_BOTTOMUP_spmsk.info,
@@ -470,3 +464,5 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *seqnum_relpos_bucket,
 }
 
 #endif
+/* vim: ft=c
+*/
