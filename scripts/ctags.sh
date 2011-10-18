@@ -17,7 +17,8 @@
 #
 
 # make a new tags file
-ctags -w -I src/*.[ch]                   \
+ctags -w --c++-kinds=+p --fields=+iaS --extra=+q \
+            src/*.[ch]                   \
             src/annotationsketch/*.[ch]  \
             src/core/*.[ch]              \
             src/examples/*.[ch]          \
