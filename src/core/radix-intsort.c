@@ -452,7 +452,12 @@ static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
 {
   GtRadixsort_stackelem tmpelem;
   unsigned long idx, s, c, *sp, *cp, newleft, count[UINT16_MAX+1];
-  const size_t mask = UINT16_MAX, shift = (size_t) 48;
+  const size_t mask = UINT16_MAX;
+#ifdef _LP64
+  const size_t shift = (size_t) 48;
+#else
+  const size_t shift = (size_t) 16;
+#endif
 
   GT_STACK_INIT(stack,64UL);
   for (idx=0; idx<=UINT16_MAX; idx++)
@@ -484,7 +489,11 @@ static void gt_radixsort_GtUlong_initstack(GtStackGtRadixsort_stackelem *stack,
     */
     if (newleft+1 < count[idx])
     {
+#ifdef _LP64
       tmpelem.shift = (uint8_t) 40;
+#else
+      tmpelem.shift = (uint8_t) 8;
+#endif
       tmpelem.left = source + newleft;
       tmpelem.len = count[idx] - newleft;
       GT_STACK_PUSH(stack,tmpelem);

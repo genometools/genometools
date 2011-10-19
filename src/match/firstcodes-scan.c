@@ -49,7 +49,7 @@ static void gt_firstcodes_kmerscan_range(const GtBitsequence *twobitencoding,
   const unsigned long maskright = GT_MASKRIGHT(kmersize);
   GtCodetype cc;
 
-  gt_assert(kmersize <= GT_UNITSIN2BITENC);
+  gt_assert(kmersize <= (unsigned int) GT_UNITSIN2BITENC);
   position = startpos;
   fcode = gt_kmercode_at_position(twobitencoding, position, kmersize);
   rccode = gt_kmercode_complement(gt_kmercode_reverse(fcode,kmersize),
