@@ -46,7 +46,7 @@ runchain2dimfailure("-global ov h")
 runchain2dimfailure("-local 2p h")
 runchain2dimfailure("-local -global")
 runchain2dimfailure("-global","#{$testdata}ecolicmp-neg.of")
-runchain2dimfailure("-global","#{$testdata}ecolicmp-seÂ.of")
+runchain2dimfailure("-global","#{$testdata}ecolicmp-se.of")
 
 # runchain2dimall("#{$testdata}ecolicmp.of")
 
