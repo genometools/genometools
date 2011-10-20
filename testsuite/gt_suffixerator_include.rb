@@ -1,3 +1,11 @@
+def flattenfilelist(filelist)
+  s=""
+  filelist.each do |f|
+    s += "#{$testdata}#{f} "
+  end
+  return s
+end
+
 def outoptionsnobck
   return "-tis -suf -des -sds -ssp -lcp -bwt"
 end
@@ -7,10 +15,7 @@ def outoptions
 end
 
 def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
-  filearg=""
-  filelist.each do |filename|
-    filearg += "#{$testdata}#{filename} "
-  end
+  filearg=flattenfilelist(filelist)
   if alldirs
     dirlist=["fwd","rev","cpl ","rcl "]
   else
@@ -24,7 +29,7 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
     run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
              "-algbds 10 31 80 #{extra} #{outoptions} " +
              "-indexname esa -dir " + dirarg + " -db " + filearg
-    if dirarg == "cpl" or dirarg = "rcl"
+    if dirarg == "cpl" or dirarg == "rcl"
       run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
                "-esa esa",
                :maxtime => 600
@@ -38,7 +43,7 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
                "-algbds 10 31 80 #{extra} #{outoptions} " +
                "-indexname esa-#{dirarg_rev} -dir " + dirarg_rev +
                " -db " + filearg
-      run_test "#{$bin}gt packedindex mkindex -indexname pck -dir " + dirarg +
+      run_test "#{$bin}gt packedindex mkindex -v -indexname pck -dir " + dirarg +
                " -db " + filearg
       run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
                "-esa esa -pck pck -cmpsuf",
@@ -51,32 +56,17 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
 end
 
 def checkdc(filelist)
-  filearg=""
-  filelist.each do |filename|
-    filearg += "#{$testdata}#{filename} "
-  end
+  filearg=flattenfilelist(filelist)
   run_test "#{$bin}gt suffixerator -v -pl -dc 64 -dccheck " +
-           "-lcp -suf -ssp -tis -indexname sfx -db " + filearg
+           "-lcp -suf -ssp -tis -indexname sfx -db " + flattenfilelist(filelist)
   run_test "#{$bin}gt dev sfxmap -suf -tis -ssp -v -esa sfx",
            :maxtime => 600
   run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -dccheck " +
-           "-lcp -suf -tis -indexname sfx3 -db " + filearg
+           "-lcp -suf -tis -indexname sfx3 -db " + flattenfilelist(filelist)
   run "diff sfx3.suf sfx.suf"
 end
 
-def flattenfilelist(filelist)
-  s=""
-  filelist.each do |f|
-    s += "#{$testdata}#{f} "
-  end
-  return s
-end
-
 def checkbwt(filelist)
-  filearg=""
-  filelist.each do |filename|
-    filearg += "#{$testdata}#{filename} "
-  end
   run_test "#{$bin}gt suffixerator -pl #{outoptions} -indexname sfx -db " +
            flattenfilelist(filelist)
 end
@@ -167,18 +157,21 @@ allfiles += all_fastqfiles
 
 alldir = ["fwd","cpl","rev","rcl"]
 
-all_fastafiles.each do |filelist|
+Name "gt suffixerator + sfxmap allfiles"
+Keywords "gt_suffixerator tis"
+Test do
+  run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
+     flattenfilelist(all_fastafiles)
+  run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
+end
+
+all_fastafiles.each do |filename|
   Name "gt suffixerator + sfxmap"
   Keywords "gt_suffixerator tis"
   Test do
     run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
-             flattenfilelist(filelist)
+             "#{$testdata}#{filename}"
     run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
-    filelist.each do |filename|
-      run_test "#{$bin}gt suffixerator -tis -ssp -indexname sfx -db " +
-               "#{$testdata}#{filename}"
-      run_test "#{$bin}gt dev sfxmap -ssp -tis -esa sfx"
-    end
   end
 end
 
@@ -225,16 +218,16 @@ Test do
 end
 
 alldir.each do |dir|
-  all_fastafiles.each do |filelist|
+  all_fastafiles.each do |filename|
     Name "gt suffixerator #{dir}"
     Keywords "gt_suffixerator"
     Test do
       run_test "#{$bin}gt suffixerator -dir #{dir} -tis -suf -bwt -lcp " +
                "-indexname sfx -pl -db " +
-               flattenfilelist(filelist)
+               "#{$testdata}#{filename}"
       run_test "#{$bin}gt suffixerator -storespecialcodes -dir #{dir} -tis " +
                "-suf -lcp -indexname sfx -pl -db " +
-               flattenfilelist(filelist)
+               "#{$testdata}#{filename}"
       run_test "#{$bin}gt suffixerator -tis -bwt -lcp -pl -ii sfx"
     end
   end
@@ -292,6 +285,7 @@ end
 1.upto(3) do |parts|
   [0,2].each do |withsmap|
     extra=""
+    extraname=""
     if withsmap == 1
       extra="-protein"
       extraname="protein"
