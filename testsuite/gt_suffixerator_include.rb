@@ -17,7 +17,7 @@ end
 def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
   filearg=flattenfilelist(filelist)
   if alldirs
-    dirlist=["fwd","rev","cpl ","rcl "]
+    dirlist=["fwd","rev","cpl","rcl"]
   else
     dirlist=["fwd ","rev"]
   end
