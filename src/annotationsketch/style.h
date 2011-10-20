@@ -129,6 +129,10 @@ GtStyleQueryStatus gt_style_get_bool_with_track(const GtStyle *style,
                                                 const GtStr *track_id,
                                                 GtError *err);
 
+/* Set numeric value of key <key> in <section> to <number>. */
+void     gt_style_set_num_p(GtStyle*, const char *section, const char *key,
+                            double* number);
+
 int            gt_style_unit_test(GtError*);
 
 /* Deletes a GtStyle object but leaves the internal Lua state intact. */

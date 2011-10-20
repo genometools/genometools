@@ -559,6 +559,12 @@ GtStyleQueryStatus gt_style_get_num(const GtStyle *sty, const char *section,
   return gt_style_get_num_with_track(sty, section, key, result, gn, NULL, err);
 }
 
+void gt_style_set_num_p(GtStyle *sty, const char *section, const char *key,
+                        double* number)
+{
+  gt_style_set_num(sty, section, key, *number);
+}
+
 void gt_style_set_num(GtStyle *sty, const char *section, const char *key,
                     double number)
 {

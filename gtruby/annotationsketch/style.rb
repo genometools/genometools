@@ -54,7 +54,7 @@ module GT
   extern "void gt_style_set_str(GtStyle*, const char*, const char*, GtStr*)"
   extern "int  gt_style_get_num(const GtStyle*, const char*, " +
                                "const char*, double*, GtGenomeNode*, GtError*)"
-  extern "void gt_style_set_num(GtStyle*, const char*, const char*, double)"
+  extern "void gt_style_set_num_p(GtStyle*, const char*, const char*, double*)"
   extern "int  gt_style_get_bool(const GtStyle*, const char*, " +
                                 "const char*, bool*, GtGenomeNode*, GtError*)"
   extern "void gt_style_set_bool(GtStyle*, const char*, const char*, bool)"
@@ -158,7 +158,9 @@ module GT
 
     def set_num(section, key, number)
       num = number.to_f
-      GT.gt_style_set_num(@style, section, key, num)
+      double = DoubleArg.malloc
+      double.val = num
+      GT.gt_style_set_num_p(@style, section, key, double)
     end
 
     def get_bool(section, key, gn = GT::NULL)
