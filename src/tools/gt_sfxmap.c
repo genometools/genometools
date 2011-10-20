@@ -788,14 +788,12 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   {
     GtAlphabet *alphabet;
 
-    alphabet = gt_alphabet_new_from_file(gt_str_get(arguments->pckindexname),
-                                         err);
+    alphabet = gt_encseq_metadata_alphabet(encseqmetadata);
     if (alphabet == NULL)
     {
       haserr = true;
     }
     numofchars = gt_alphabet_num_of_chars(alphabet);
-    gt_alphabet_delete(alphabet);
   }
   if (!haserr)
   {
