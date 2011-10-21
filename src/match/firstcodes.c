@@ -644,14 +644,14 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     gt_assert(sumwidth <= spmsuftab->numofentries);
     if (width >= 2UL)
     {
-      gt_shortreadsort_array_sort(seqnum_relpos_bucket,
-                                  snrp,
-                                  srsw,
-                                  encseq,
-                                  spmsuftab,
-                                  current,
-                                  width,
-                                  depth);
+      gt_shortreadsort_firstcodes_sort(seqnum_relpos_bucket,
+                                       snrp,
+                                       srsw,
+                                       encseq,
+                                       spmsuftab,
+                                       current,
+                                       width,
+                                       depth);
       if (withsuftabcheck)
       {
         gt_firstcodes_checksuftab_bucket(encseq,

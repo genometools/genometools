@@ -34,7 +34,7 @@
 typedef struct
 {
   unsigned long suffix;
-  GtTwobitencoding tbe[GT_NUMOFTBEVALUEFOR100];
+  GtTwobitencoding tbeidx[GT_NUMOFTBEVALUEFOR100];
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
@@ -138,14 +138,14 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
     {
-      if (aq->tbe[idx] != bq->tbe[idx])
+      if (aq->tbeidx[idx] != bq->tbeidx[idx])
       {
         retval = gt_encseq_compare_pairof_different_twobitencodings(
                                                      srsw->fwd,
                                                      srsw->complement,
                                                      &commonunits,
-                                                     aq->tbe[idx],
-                                                     bq->tbe[idx]);
+                                                     aq->tbeidx[idx],
+                                                     bq->tbeidx[idx]);
         srsw->tmplcplen
           = (unsigned long) (maxprefix - GT_UNITSIN2BITENC +
                              commonunits.common);
@@ -155,8 +155,8 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
     {
       GtEndofTwobitencoding tbe_a, tbe_b;
 
-      tbe_a.tbe = aq->tbe[idx];
-      tbe_b.tbe = bq->tbe[idx];
+      tbe_a.tbe = aq->tbeidx[idx];
+      tbe_b.tbe = bq->tbeidx[idx];
       tbe_a.position = aq->suffix;
       tbe_b.position = bq->suffix;
       tbe_a.unitsnotspecial
@@ -520,7 +520,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
       pos = exportptr->ulongtabsectionptr[idx];
       srsw->shortreadsortinfo[idx].suffix = pos;
       srsw->shortreadsortinfo[idx].unitsnotspecial
-        = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
+        = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbeidx,
                                          GT_NUMOFTBEVALUEFOR100,
                                          encseq,
                                          esr,
@@ -534,7 +534,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
       pos = (unsigned long) exportptr->uinttabsectionptr[idx];
       srsw->shortreadsortinfo[idx].suffix = pos;
       srsw->shortreadsortinfo[idx].unitsnotspecial
-        = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbe,
+        = gt_encseq_extract2bitencvector(srsw->shortreadsortinfo[idx].tbeidx,
                                          GT_NUMOFTBEVALUEFOR100,
                                          encseq,
                                          esr,
@@ -573,14 +573,14 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-void gt_shortreadsort_array_sort(unsigned long *seqnum_relpos_bucket,
-                                 const GtSeqnumrelpos *snrp,
-                                 GtShortreadsortworkinfo *srsw,
-                                 const GtEncseq *encseq,
-                                 GtSpmsuftab *spmsuftab,
-                                 unsigned long subbucketleft,
-                                 unsigned long width,
-                                 unsigned long depth)
+void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
+                                      const GtSeqnumrelpos *snrp,
+                                      GtShortreadsortworkinfo *srsw,
+                                      const GtEncseq *encseq,
+                                      GtSpmsuftab *spmsuftab,
+                                      unsigned long subbucketleft,
+                                      unsigned long width,
+                                      unsigned long depth)
 {
   unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
 
@@ -606,7 +606,7 @@ void gt_shortreadsort_array_sort(unsigned long *seqnum_relpos_bucket,
     }
     srsw->shortreadsortinfo[idx].unitsnotspecial
       = gt_encseq_relpos_extract2bitencvector(
-                         srsw->shortreadsortinfo[idx].tbe,
+                         srsw->shortreadsortinfo[idx].tbeidx,
                          GT_NUMOFTBEVALUEFOR100,
                          encseq,
                          seqnum,
