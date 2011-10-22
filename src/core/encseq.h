@@ -227,7 +227,10 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtReadmode readmode,
                                          unsigned long pos);
 
-/* The following function needs to be documented */
+/* The following function extracts the twobitencoding beginning at position
+   <pos> in the given encoded sequence <encseq> and ending at
+   the next stop position wrt. to the readmode; The result is stored in
+   <tbevector> which points to an array of size <sizeofvector>. */
 
 unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
                                             int sizeofvector,
@@ -236,11 +239,19 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
                                             GtReadmode readmode,
                                             unsigned long pos);
 
+/* The following function extracts the twobitencoding for the
+   sequence with sequence number <seqnum> beginning at the relative
+   position <relpos>.  The result is stored in
+   <tbevector> which points to an array of size <sizeofvector>. The
+   number of elements stored is stored at the address
+   <storedvalues> points to. */
+
 unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
-                                            int sizeofvector,
-                                            const GtEncseq *encseq,
-                                            unsigned long seqnum,
-                                            unsigned long relpos);
+                                          unsigned int *storedvalues,
+                                          GT_UNUSED unsigned int sizeofvector,
+                                          const GtEncseq *encseq,
+                                          unsigned long seqnum,
+                                          unsigned long relpos);
 
 /* The following function compares the two bit encodings <ptbe1> and <ptbe2>
   and stores the result of the comparison in <commonunits>. The comparison is

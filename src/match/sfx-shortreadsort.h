@@ -40,6 +40,9 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
                                               bool firstcodes);
 
+unsigned long gt_shortreadsort_sumofstoredvalues(
+                                      const GtShortreadsortworkinfo *srsw);
+
 void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);
 
 void gt_shortreadsort_assigntableoflcpvalues(

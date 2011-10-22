@@ -1410,6 +1410,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"seqnum_relpos_bucket");
+    if (!onlyaccumulation)
+    {
+      gt_logger_log(logger,"average short read depth=%.2f",
+                    (double) gt_shortreadsort_sumofstoredvalues(srsw)/
+                                                     fci.firstcodeposhits);
+    }
   }
   gt_shortreadsort_delete(srsw);
   gt_free(seqnum_relpos_bucket);
