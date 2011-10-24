@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -50,7 +50,8 @@ static int dp_matrix_init(GthDPMatrix *dpm,
                           unsigned long gen_dp_length,
                           unsigned long ref_dp_length,
                           unsigned long autoicmaxmatrixsize,
-                          bool introncutout, GthJumpTable *jump_table,
+                          bool introncutout,
+                          GthJumpTable *jump_table,
                           GthStat *stat)
 {
   unsigned long t, n, m, matrixsize, sizeofpathtype =  sizeof (PATHTYPE);
@@ -88,6 +89,7 @@ static int dp_matrix_init(GthDPMatrix *dpm,
                                GT_DIV2(gen_dp_length + 1) +
                                GT_MOD2(gen_dp_length + 1), ref_dp_length + 1);
   }
+  dpm->path_jt = NULL;
   if (!dpm->path)
     return GTH_ERROR_MATRIX_ALLOCATION_FAILED;
 
@@ -730,6 +732,8 @@ static void dp_matrix_free(GthDPMatrix *dpm)
 
   /* freeing space for dpm->path */
   gth_array2dim_plain_delete(dpm->path);
+  if (dpm->path_jt)
+    gth_array2dim_plain_delete(dpm->path_jt);
 }
 
 #if 0

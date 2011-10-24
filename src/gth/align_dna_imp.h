@@ -77,6 +77,7 @@ struct GthDPMatrix {
                                                            score of a path */
   PATHTYPE **path;                   /* backtrace table of size
                                         gen_dp_length * ref_dp_length */
+  PATHTYPE **path_jt;
   unsigned long *intronstart[DNA_NUMOFSCORETABLES],
                 *exonstart[DNA_NUMOFSCORETABLES],
                 gen_dp_length,
