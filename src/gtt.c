@@ -18,6 +18,7 @@
 #include "gtt.h"
 #include "core/array.h"
 #include "core/array2dim_api.h"
+#include "core/array2dim_sparse.h"
 #include "core/array3dim.h"
 #include "core/basename_api.h"
 #include "core/bitpackarray.h"
@@ -217,6 +218,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
   gt_hashmap_add(unit_tests, "array example", gt_array_example);
   gt_hashmap_add(unit_tests, "array2dim example", gt_array2dim_example);
+  gt_hashmap_add(unit_tests, "array2dim sparse example",
+                 gt_array2dim_sparse_example);
   gt_hashmap_add(unit_tests, "array3dim example", gt_array3dim_example);
   gt_hashmap_add(unit_tests, "basename module", gt_basename_unit_test);
   gt_hashmap_add(unit_tests, "bit pack array class", gt_bitpackarray_unit_test);
