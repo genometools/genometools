@@ -531,7 +531,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
 {
   unsigned long genptr = dpm->gen_dp_length, last_genptr = 0,
                 refptr = dpm->ref_dp_length;
-  PATHTYPE pathtype;
+  PATHTYPE pathtype, pathtype_jt;
   bool lower;
 
   gt_assert(!gth_backtrace_path_length(backtrace_path));
@@ -541,24 +541,39 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
        types.  Thereby, no further changes on the backtracing procedure are
        necessary. */
     pathtype = dpm->path[GT_DIV2(genptr)][refptr];
+    if (dpm->path_jt)
+      pathtype_jt = dpm->path_jt[GT_DIV2(genptr)][refptr];
     lower = (bool) !GT_MOD2(genptr);
     if (lower) {
-      if (actualstate == DNA_E_STATE)
+      if (actualstate == DNA_E_STATE) {
         pathtype  &= LOWER_E_STATE_MASK;
+        pathtype_jt  &= LOWER_E_STATE_MASK;
+      }
       else {
         pathtype  &= LOWER_I_STATE_MASK;
         pathtype >>= 3;
+        pathtype_jt  &= LOWER_I_STATE_MASK;
+        pathtype_jt >>= 3;
       }
     }
     else {
       if (actualstate == DNA_E_STATE) {
         pathtype  &= UPPER_E_STATE_MASK;
         pathtype >>= 4;
+        pathtype_jt  &= UPPER_E_STATE_MASK;
+        pathtype_jt >>= 4;
       }
       else {
         pathtype  &= UPPER_I_STATE_MASK;
         pathtype >>= 7;
+        pathtype_jt  &= UPPER_I_STATE_MASK;
+        pathtype_jt >>= 7;
       }
+    }
+
+    if (dpm->path_jt) {
+      printf("genptr=%lu, refptr=%lu\n", genptr, refptr);
+      gt_assert(pathtype == pathtype_jt);
     }
 
     if (introncutout) {
