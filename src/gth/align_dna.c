@@ -531,7 +531,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
 {
   unsigned long genptr = dpm->gen_dp_length, last_genptr = 0,
                 refptr = dpm->ref_dp_length;
-  PATHTYPE pathtype, pathtype_jt;
+  PATHTYPE pathtype, pathtype_jt = 0;
   bool lower;
 
   gt_assert(!gth_backtrace_path_length(backtrace_path));
