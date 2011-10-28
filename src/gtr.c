@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -34,6 +34,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/thread.h"
+#include "core/unit_testing.h"
 #include "core/versionfunc.h"
 #include "core/xansi_api.h"
 #include "core/yarandom.h"
@@ -202,30 +203,6 @@ void gtr_register_components(GtR *gtr)
   gtr->unit_tests = gtt_unit_tests();
 }
 
-static int run_test(void *key, void *value, void *data, GtError *err)
-{
-  int had_err, *had_errp;
-  char *testname = key;
-  UnitTestFunc test = value;
-  gt_error_check(err);
-  gt_assert(testname && test && data);
-  had_errp = (int*) data;
-  printf("%s...", testname);
-  gt_xfflush(stdout);
-  had_err = test(err);
-  if (had_err) {
-    gt_xputs("error");
-    *had_errp = had_err;
-    fprintf(stderr, "first error: %s\n", gt_error_get(err));
-    gt_error_unset(err);
-    gt_xfflush(stderr);
-  }
-  else
-    gt_xputs("ok");
-  gt_xfflush(stdout);
-  return 0;
-}
-
 static int check64bit(void)
 {
   if (sizeof (unsigned long) == 8)
@@ -262,16 +239,16 @@ static int run_tests(GtR *gtr, GtError *err)
       key = gt_str_get(gtr->test_only);
       value = gt_hashmap_get(gtr->unit_tests, key);
       if (value) {
-        had_err = run_test(key, value, &test_err, err);
-        gt_assert(!had_err); /* cannot happen, run_test() is sane */
+        had_err = gt_unit_test_run(key, value, &test_err, err);
+        gt_assert(!had_err); /* cannot happen, gt_unit_test_run() is sane */
       } else {
         gt_error_set(err, "Test \"%s\" not found", key);
         return EXIT_FAILURE;
       }
     } else {
       had_err = gt_hashmap_foreach_in_key_order(
-        gtr->unit_tests, run_test, &test_err, err);
-      gt_assert(!had_err); /* cannot happen, run_test() is sane */
+        gtr->unit_tests, gt_unit_test_run, &test_err, err);
+      gt_assert(!had_err); /* cannot happen, gt_unit_test_run() is sane */
     }
   }
   if (test_err)

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,16 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTT_H
-#define GTT_H
+#ifndef UNIT_TESTING_H
+#define UNIT_TESTING_H
 
-#include "core/fptr_api.h"
-#include "core/hashmap.h"
-#include "extended/toolbox.h"
+#include "core/error_api.h"
 
-/* The GenomeTools toolbox (gtt) module */
+typedef int (*GtUnitTestFunc)(GtError*);
 
-GtToolbox* gtt_tools(void);      /* return all GenomeTools tools */
-GtHashmap* gtt_unit_tests(void); /* return all GenomeTools unit tests */
+int gt_unit_test_run(void *key, void *value, void *data, GtError *err);
 
 #endif
