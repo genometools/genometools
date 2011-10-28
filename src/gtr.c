@@ -241,13 +241,16 @@ static int run_tests(GtR *gtr, GtError *err)
       if (value) {
         had_err = gt_unit_test_run(key, value, &test_err, err);
         gt_assert(!had_err); /* cannot happen, gt_unit_test_run() is sane */
-      } else {
+      }
+      else {
         gt_error_set(err, "Test \"%s\" not found", key);
         return EXIT_FAILURE;
       }
-    } else {
-      had_err = gt_hashmap_foreach_in_key_order(
-        gtr->unit_tests, gt_unit_test_run, &test_err, err);
+    }
+    else {
+      had_err = gt_hashmap_foreach_in_key_order(gtr->unit_tests,
+                                                gt_unit_test_run, &test_err,
+                                                err);
       gt_assert(!had_err); /* cannot happen, gt_unit_test_run() is sane */
     }
   }
