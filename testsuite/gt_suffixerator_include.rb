@@ -43,14 +43,16 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
                "-algbds 10 31 80 #{extra} #{outoptions} " +
                "-indexname esa-#{dirarg_rev} -dir " + dirarg_rev +
                " -db " + filearg
-      run_test "#{$bin}gt packedindex mkindex -v -indexname pck -dir " + dirarg +
-               " -db " + filearg
-      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
-               "-esa esa -pck pck -cmpsuf",
-               :maxtime => 600
-      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
-               "-esa esa-#{dirarg_rev} -pck pck -cmplcp",
-               :maxtime => 600
+      if dirarg != "rcl" or dirarg != "cpl" then
+        run_test "#{$bin}gt packedindex mkindex -v -indexname pck -dir " + dirarg +
+                 " -db " + filearg
+        run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
+                 "-esa esa -pck pck -cmpsuf",
+                 :maxtime => 600
+        run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
+                 "-esa esa-#{dirarg_rev} -pck pck -cmplcp",
+                 :maxtime => 600
+      end
     end
   end
 end
@@ -306,31 +308,31 @@ end
     [0,2].each do |withsmap|
       extra=""
       if withsmap == 1
-	extra="-dna"
-	extraname=" dna"
+        extra="-dna"
+        extraname=" dna"
       elsif withsmap == 2
-	extra="-smap TransDNA"
-	extraname=" trans"
+        extra="-smap TransDNA"
+        extraname=" trans"
       end
       if cmpval == 0
-	cmp=false
+        cmp=false
       elsif cmpval == 1
-	cmp=true
+        cmp=true
       else
-	cmp=true
+        cmp=true
       end
       all_fastafiles.each do |filename|
-	Name "gt suffixerator+map #{filename}#{extraname} #{parts} parts"
-	Keywords "gt_suffixerator"
-	Test do
-	  checksfx(parts,extra,cmp,[filename])
-	end
+        Name "gt suffixerator+map #{filename}#{extraname} #{parts} parts"
+        Keywords "gt_suffixerator"
+        Test do
+          checksfx(parts,extra,cmp,[filename])
+        end
       end
       filelist=["RandomN.fna","Random.fna","Atinsert.fna"]
       Name "gt suffixerator+map dna filelist#{extraname} #{parts} parts"
       Keywords "gt_suffixerator"
       Test do
-	checksfx(parts,extra,cmp,filelist)
+        checksfx(parts,extra,cmp,filelist)
       end
     end
   end
