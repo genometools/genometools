@@ -8313,180 +8313,180 @@ int gt_encseq_builder_unit_test(GtError *err)
   eb = gt_encseq_builder_new(alpha);
   gt_encseq_builder_create_ssp_tab(eb);
   gt_encseq_builder_add_cstr(eb, testseq, 12UL, NULL);
-  ensure(had_err, eb->own);
+  gt_ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encseq_total_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_total_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
   gt_encseq_extract_encoded(encseq, buffer, 0,
                               gt_encseq_total_length(encseq)-1);
-  ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
-  ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
-  ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 12UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
-  ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1UL);
-  ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
-  ensure(had_err,
+  gt_ensure(had_err, memcmp(preenc, buffer, 11 * sizeof (char)) == 0);
+  gt_ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
+  gt_ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
+  gt_ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
+  gt_ensure(had_err, gt_str_array_size(filenames) == 1UL);
+  gt_ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 2UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 2UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 2UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't')) == 5UL);
-           ensure(had_err, gt_encseq_specialcharacters(encseq) == 1UL);
-  ensure(had_err, gt_encseq_specialranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_realspecialranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
-  ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+           gt_ensure(had_err, gt_encseq_specialcharacters(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_specialranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_realspecialranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
+  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* two unencoded sequences */
   gt_encseq_builder_add_cstr(eb, testseq, 12UL, NULL);
   gt_encseq_builder_add_cstr(eb, testseq, 12UL, NULL);
-  ensure(had_err, eb->own);
+  gt_ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encseq_total_length(encseq) == 25UL);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
-  ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1UL);
-  ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
-  ensure(had_err,
+  gt_ensure(had_err, gt_encseq_total_length(encseq) == 25UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
+  gt_ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
+  gt_ensure(had_err, gt_str_array_size(filenames) == 1UL);
+  gt_ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 4UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 4UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 4UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't')) == 10UL);
-  ensure(had_err, gt_encseq_specialcharacters(encseq) == 3UL);
-  ensure(had_err, gt_encseq_specialranges(encseq) == 3UL);
-  ensure(had_err, gt_encseq_realspecialranges(encseq) == 3UL);
-  ensure(had_err, gt_encseq_wildcards(encseq) == 2UL);
-  ensure(had_err, gt_encseq_wildcardranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_realwildcardranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, gt_encseq_specialcharacters(encseq) == 3UL);
+  gt_ensure(had_err, gt_encseq_specialranges(encseq) == 3UL);
+  gt_ensure(had_err, gt_encseq_realspecialranges(encseq) == 3UL);
+  gt_ensure(had_err, gt_encseq_wildcards(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_wildcardranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_realwildcardranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
+  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* one preencoded sequence */
-  ensure(had_err, eb->plainseq == NULL);
+  gt_ensure(had_err, eb->plainseq == NULL);
   gt_encseq_builder_add_encoded(eb, preenc, 12UL, NULL);
-  ensure(had_err, !eb->own);
+  gt_ensure(had_err, !eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encseq_total_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
-  ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1UL);
-  ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
-  ensure(had_err,
+  gt_ensure(had_err, gt_encseq_total_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_sequences(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
+  gt_ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
+  gt_ensure(had_err, gt_str_array_size(filenames) == 1UL);
+  gt_ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 2UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 2UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 2UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't')) == 5UL);
-  ensure(had_err, gt_encseq_specialcharacters(encseq) == 1UL);
-  ensure(had_err, gt_encseq_specialranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_realspecialranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
-  ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, gt_encseq_specialcharacters(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_specialranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_realspecialranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
+  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* mix unencoded/preencoded sequences, partial */
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
   gt_encseq_builder_add_encoded(eb, preenc, 12UL, NULL);
-  ensure(had_err, eb->own);
+  gt_ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encseq_total_length(encseq) == 17UL);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 4UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
-  ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1UL);
-  ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
-  ensure(had_err,
+  gt_ensure(had_err, gt_encseq_total_length(encseq) == 17UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 4UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
+  gt_ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
+  gt_ensure(had_err, gt_str_array_size(filenames) == 1UL);
+  gt_ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 3UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 3UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 3UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't')) == 6UL);
-  ensure(had_err, gt_encseq_specialcharacters(encseq) == 2UL);
-  ensure(had_err, gt_encseq_specialranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_realspecialranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
-  ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, gt_encseq_specialcharacters(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_specialranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_realspecialranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
+  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* mix unencoded/preencoded sequences, partial */
   gt_encseq_builder_add_encoded(eb, preenc, 12UL, NULL);
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, NULL);
-  ensure(had_err, eb->own);
+  gt_ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encseq_total_length(encseq) == 17UL);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 4UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
-  ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
-  ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 12UL);
-  ensure(had_err, gt_encseq_seqstartpos(encseq, 1UL) == 13UL);
-  ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
-  ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1UL);
-  ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
-  ensure(had_err,
+  gt_ensure(had_err, gt_encseq_total_length(encseq) == 17UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 4UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_sequences(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_seqstartpos(encseq, 0UL) == 0UL);
+  gt_ensure(had_err, gt_encseq_seqlength(encseq, 0UL) == 12UL);
+  gt_ensure(had_err, gt_encseq_seqstartpos(encseq, 1UL) == 13UL);
+  gt_ensure(had_err, gt_encseq_seqlength(encseq, 1UL) == 4UL);
+  gt_ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
+  gt_ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
+  gt_ensure(had_err, gt_str_array_size(filenames) == 1UL);
+  gt_ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 3UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 3UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 3UL);
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't')) == 6UL);
-  ensure(had_err, gt_encseq_specialcharacters(encseq) == 2UL);
-  ensure(had_err, gt_encseq_specialranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_realspecialranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
-  ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
-  ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, gt_encseq_specialcharacters(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_specialranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_realspecialranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_wildcards(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_wildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_realwildcardranges(encseq) == 1UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
+  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* mix unencoded/preencoded sequences, partial */
@@ -8495,53 +8495,56 @@ int gt_encseq_builder_unit_test(GtError *err)
   gt_encseq_builder_add_cstr(eb, testseq, 4UL, "foo");
   gt_encseq_builder_add_encoded(eb, preenc, 12UL, "bar");
   gt_encseq_builder_add_encoded(eb, preenc, 12UL, "baz");
-  ensure(had_err, eb->destab);
+  gt_ensure(had_err, eb->destab);
   encseq = gt_encseq_builder_build(eb, err);
   gt_encseq_check_descriptions(encseq);
-  ensure(had_err, encseq->sdstab);
-  ensure(had_err, gt_encseq_total_length(encseq) == 30UL);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 4UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
-  ensure(had_err, gt_encseq_num_of_sequences(encseq) == 3UL);
+  gt_ensure(had_err, encseq->sdstab);
+  gt_ensure(had_err, gt_encseq_total_length(encseq) == 30UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 4UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 12UL);
+  gt_ensure(had_err, gt_encseq_num_of_sequences(encseq) == 3UL);
   desc = gt_encseq_description(encseq, &desclen, 0UL);
-  ensure(had_err, strncmp(desc, "foo", (size_t) desclen * sizeof (char)) == 0);
+  gt_ensure(had_err,
+            strncmp(desc, "foo", (size_t) desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 1UL);
-  ensure(had_err, strncmp(desc, "bar", (size_t) desclen * sizeof (char)) == 0);
+  gt_ensure(had_err,
+            strncmp(desc, "bar", (size_t) desclen * sizeof (char)) == 0);
   desc = gt_encseq_description(encseq, &desclen, 2UL);
-  ensure(had_err, strncmp(desc, "baz", (size_t) desclen * sizeof (char)) == 0);
-  ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
-  ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
-  ensure(had_err, gt_str_array_size(filenames) == 1UL);
-  ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
-  ensure(had_err,
-         gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 5UL);
-  ensure(had_err,
-         gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 5UL);
-  ensure(had_err,
-         gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 5UL);
-  ensure(had_err,
+  gt_ensure(had_err,
+            strncmp(desc, "baz", (size_t) desclen * sizeof (char)) == 0);
+  gt_ensure(had_err, gt_encseq_num_of_files(encseq) == 1UL);
+  gt_ensure(had_err, (filenames = gt_encseq_filenames(encseq)));
+  gt_ensure(had_err, gt_str_array_size(filenames) == 1UL);
+  gt_ensure(had_err, strcmp(gt_str_array_get(filenames, 0), "generated") == 0);
+  gt_ensure(had_err,
+            gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'a')) == 5UL);
+  gt_ensure(had_err,
+            gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'c')) == 5UL);
+  gt_ensure(had_err,
+            gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 'g')) == 5UL);
+  gt_ensure(had_err,
          gt_encseq_charcount(encseq, gt_alphabet_encode(alpha, 't')) == 11UL);
-  ensure(had_err, gt_encseq_specialcharacters(encseq) == 4UL);
-  ensure(had_err, gt_encseq_specialranges(encseq) == 4UL);
-  ensure(had_err, gt_encseq_realspecialranges(encseq) == 4UL);
-  ensure(had_err, gt_encseq_wildcards(encseq) == 2UL);
-  ensure(had_err, gt_encseq_wildcardranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_realwildcardranges(encseq) == 2UL);
-  ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
-  ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
-  ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
+  gt_ensure(had_err, gt_encseq_specialcharacters(encseq) == 4UL);
+  gt_ensure(had_err, gt_encseq_specialranges(encseq) == 4UL);
+  gt_ensure(had_err, gt_encseq_realspecialranges(encseq) == 4UL);
+  gt_ensure(had_err, gt_encseq_wildcards(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_wildcardranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_realwildcardranges(encseq) == 2UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofspecialsuffix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardprefix(encseq) == 0UL);
+  gt_ensure(had_err, gt_encseq_lengthofwildcardsuffix(encseq) == 0UL);
+  gt_ensure(had_err, !gt_has_twobitencoding_stoppos_support(encseq));
   gt_encseq_delete(encseq);
 
   /* changed min/max order */
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, "foo");
   gt_encseq_builder_add_cstr(eb, testseq, 11UL, "foo");
   gt_encseq_builder_add_encoded(eb, preenc, 3UL, "foo");
-  ensure(had_err, eb->own);
+  gt_ensure(had_err, eb->own);
   encseq = gt_encseq_builder_build(eb, err);
-  ensure(had_err, gt_encseq_min_seq_length(encseq) == 3UL);
-  ensure(had_err, gt_encseq_max_seq_length(encseq) == 11UL);
+  gt_ensure(had_err, gt_encseq_min_seq_length(encseq) == 3UL);
+  gt_ensure(had_err, gt_encseq_max_seq_length(encseq) == 11UL);
   gt_encseq_delete(encseq);
 
   gt_encseq_builder_delete(eb);

@@ -22,11 +22,11 @@
 #include "core/error.h"
 
 /* the ensure macro used for unit tests */
-#define ensure(had_err, expr)                                                  \
+#define gt_ensure(had_err, expr)                                               \
         do {                                                                   \
           if (!had_err) {                                                      \
             if (!(expr)) {                                                     \
-              gt_error_set(err, "ensure(%s) failed: function %s, file %s, "    \
+              gt_error_set(err, "gt_ensure(%s) failed: function %s, file %s, " \
                            "line %d.\nThis is probably a bug, please report.", \
                            #expr, __func__, __FILE__, __LINE__);               \
               had_err = -1;                                                    \

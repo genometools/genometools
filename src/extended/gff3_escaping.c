@@ -143,14 +143,14 @@ static int test_single_escaping(char unescaped_char, const char *escaped_char,
   snprintf(escaped_testseq, sizeof escaped_testseq, "foo%sbar", escaped_char);
   if (expect_escape) {
     gt_gff3_escape(escaped_seq, unescaped_testseq, strlen(unescaped_testseq));
-    ensure(had_err, !strcmp(gt_str_get(escaped_seq), escaped_testseq));
+    gt_ensure(had_err, !strcmp(gt_str_get(escaped_seq), escaped_testseq));
   } else {
     gt_str_append_cstr(escaped_seq, escaped_testseq);
   }
   if (!had_err && expect_unescape) {
     had_err = gt_gff3_unescape(unescaped_seq, gt_str_get(escaped_seq),
                                gt_str_length(escaped_seq), err);
-    ensure(had_err, !strcmp(gt_str_get(unescaped_seq), unescaped_testseq));
+    gt_ensure(had_err, !strcmp(gt_str_get(unescaped_seq), unescaped_testseq));
   }
   gt_str_delete(unescaped_seq);
   gt_str_delete(escaped_seq);
@@ -194,12 +194,12 @@ int gt_gff3_escaping_unit_test(GtError *err)
     char code[10];
     snprintf(code, 10, "foo%%%Xbar", i);
     had_err = gt_gff3_unescape(unescaped, code, 10, err);
-    ensure(had_err, !strcmp(gt_str_get(unescaped), code));
+    gt_ensure(had_err, !strcmp(gt_str_get(unescaped), code));
     gt_str_reset(unescaped);
   }
 
   /* error cases */
-  ensure(had_err, gt_gff3_unescape(seq, "foo%2", 5, NULL));
+  gt_ensure(had_err, gt_gff3_unescape(seq, "foo%2", 5, NULL));
 
   gt_str_delete(seq);
   gt_str_delete(unescaped);

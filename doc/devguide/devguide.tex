@@ -1489,8 +1489,8 @@ int gt_class_unit_test(GtError *err) /* must be called 'err'! */
   int had_err = 0;
   gt_error_check(err);               /* will abort if error was already set */           
 
-  ensure(had_err, 1 + 1 == 2);       /* will succeed */
-  ensure(had_err, 1 + 1 == 3);       /* will fail */
+  gt_ensure(had_err, 1 + 1 == 2);    /* will succeed */
+  gt_ensure(had_err, 1 + 1 == 3);    /* will fail */
 
   return had_err;
 }

@@ -137,12 +137,12 @@ int gt_codon_iterator_encseq_unit_test(GtError *err)
   ci = gt_codon_iterator_encseq_new(encseq, 0, strlen(testseq), NULL);
   i = 0;
   while (!(gt_codon_iterator_next(ci, &n1, &n2, &n3, &frame, NULL))) {
-    ensure(had_err, n1 == testseq[i]);
-    ensure(had_err, n2 == testseq[i+1]);
-    ensure(had_err, n3 == testseq[i+2]);
+    gt_ensure(had_err, n1 == testseq[i]);
+    gt_ensure(had_err, n2 == testseq[i+1]);
+    gt_ensure(had_err, n3 == testseq[i+2]);
     i++;
   }
-  ensure(had_err, i == strlen(testseq)-2);
+  gt_ensure(had_err, i == strlen(testseq)-2);
   gt_codon_iterator_delete(ci);
   gt_encseq_delete(encseq);
   gt_encseq_builder_delete(eb);

@@ -143,20 +143,20 @@ int gt_element_unit_test(GtError *err)
 
   /* tests gt_element_get_range */
   r_temp = gt_element_get_range(e);
-  ensure(had_err, (0 == gt_range_compare(&r1, &r_temp)));
-  ensure(had_err, (1 == gt_range_compare(&r2, &r_temp)));
+  gt_ensure(had_err, (0 == gt_range_compare(&r1, &r_temp)));
+  gt_ensure(had_err, (1 == gt_range_compare(&r2, &r_temp)));
 
   /* tests gt_element_get_type and gt_element_set_type*/
-  ensure(had_err, !strcmp(gt_ft_exon, gt_element_get_type(e)));
-  ensure(had_err, strcmp(gt_ft_intron, gt_element_get_type(e)));
+  gt_ensure(had_err, !strcmp(gt_ft_exon, gt_element_get_type(e)));
+  gt_ensure(had_err, strcmp(gt_ft_intron, gt_element_get_type(e)));
   gt_element_set_type(e, gt_ft_intron);
-  ensure(had_err, !strcmp(gt_ft_intron, gt_element_get_type(e)));
+  gt_ensure(had_err, !strcmp(gt_ft_intron, gt_element_get_type(e)));
   gt_element_set_type(e2, gt_ft_intron);
 
   /* tests elements_are_equal */
-  ensure(had_err, elements_are_equal(e, e2));
-  ensure(had_err, !elements_are_equal(e, e3));
-  ensure(had_err, !elements_are_equal(e2, e3));
+  gt_ensure(had_err, elements_are_equal(e, e2));
+  gt_ensure(had_err, !elements_are_equal(e, e3));
+  gt_ensure(had_err, !elements_are_equal(e2, e3));
 
   gt_element_delete(e);
   gt_element_delete(e2);

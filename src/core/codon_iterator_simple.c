@@ -115,12 +115,12 @@ int gt_codon_iterator_simple_unit_test(GtError *err)
   ci = gt_codon_iterator_simple_new(testseq, 26, NULL);
   i = 0;
   while (!gt_codon_iterator_next(ci, &n1, &n2, &n3, &frame, NULL)) {
-    ensure(had_err, n1 == testseq[i]);
-    ensure(had_err, n2 == testseq[i+1]);
-    ensure(had_err, n3 == testseq[i+2]);
+    gt_ensure(had_err, n1 == testseq[i]);
+    gt_ensure(had_err, n2 == testseq[i+1]);
+    gt_ensure(had_err, n3 == testseq[i+2]);
     i++;
   }
-  ensure(had_err, i == 24);
+  gt_ensure(had_err, i == 24);
   gt_codon_iterator_delete(ci);
   return had_err;
 }

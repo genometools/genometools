@@ -128,8 +128,8 @@ int gt_image_info_unit_test(GtError *err)
                             gt_rand_max_double(100.0),
                             features[i]);
     gt_image_info_add_rec_map(ii, rms[i]);
-    ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
-    ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
+    gt_ensure(had_err, gt_image_info_num_of_rec_maps(ii) == i+1);
+    gt_ensure(had_err, (rm = gt_image_info_get_rec_map(ii, i)) == rms[i]);
     gt_genome_node_delete((GtGenomeNode*) features[i]);
   }
 

@@ -154,12 +154,12 @@ int gt_GtCompactulongstore_unit_test(GtError *err)
       checknumbers[idx] = nums == constnums ? gt_rand_max(numforbits-1) : idx;
       gt_GtCompactulongstore_update(cus,idx,checknumbers[idx]);
       value = gt_GtCompactulongstore_get(cus,idx);
-      ensure(had_err,checknumbers[idx] == value);
+      gt_ensure(had_err,checknumbers[idx] == value);
     }
     for (idx = 0; had_err == 0 && idx < nums; idx++)
     {
       value = gt_GtCompactulongstore_get(cus,idx);
-      ensure(had_err,checknumbers[idx] == value);
+      gt_ensure(had_err,checknumbers[idx] == value);
     }
     gt_GtCompactulongstore_delete(cus);
   }

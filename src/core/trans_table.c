@@ -835,21 +835,21 @@ int gt_trans_table_unit_test(GtError *err)
 
   /* check retrieval of table descriptions */
   schemes = gt_trans_table_get_scheme_descriptions();
-  ensure(had_err,
+  gt_ensure(had_err,
          gt_str_array_size(schemes) == (unsigned long) GT_NUMOFTRANSSCHEMES);
 
   /* check switching translation scheme */
   /* test_errnum = gt_translator_set_translation_scheme(tr, 3, test_err);
-  ensure(had_err, !test_errnum && !gt_error_is_set(test_err)); */
+  gt_ensure(had_err, !test_errnum && !gt_error_is_set(test_err)); */
 
   /* check switching to invalid translation scheme */
   /* test_errnum = gt_translator_set_translation_scheme(tr, 7, test_err);
-  ensure(had_err, test_errnum && gt_error_is_set(test_err)); */
+  gt_ensure(had_err, test_errnum && gt_error_is_set(test_err)); */
 
   /* switch back to default translation scheme */
   /* gt_error_unset(test_err);
   test_errnum = gt_translator_set_translation_scheme(tr, 1, test_err);
-  ensure(had_err, !test_errnum && !gt_error_is_set(test_err)); */
+  gt_ensure(had_err, !test_errnum && !gt_error_is_set(test_err)); */
 
   /* check single codon translation */
   /*
@@ -863,10 +863,10 @@ int gt_trans_table_unit_test(GtError *err)
         char c3 = bases[k], ret1, ret2;
         test_errnum = gt_translator_codon2amino(tr, c1, c2, c3, &ret1,
                                                 test_err);
-        ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
+        gt_ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
         ret2 = gt_transa(tr->scheme->aminos, true, c1, c2, c3, NULL,
                            test_err);
-        ensure(had_err, ret1 == ret2);
+        gt_ensure(had_err, ret1 == ret2);
       }
     }
   } */

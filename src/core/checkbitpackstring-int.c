@@ -114,7 +114,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     unsigned v = randSrc[i];
     int bits = gt_requiredUIntBits(v);
     unsigned r = gt_bsGetUInt(bitStore, offset, bits);
-    ensure(had_err, r == v);
+    gt_ensure(had_err, r == v);
     if (had_err)
     {
       gt_log_log("Expected %""u"", got %""u"", i = %lu\n",
@@ -137,7 +137,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     {
       int lowBit = v & 1;
       v >>= 1;
-      ensure(had_err, lowBit == (r = gt_bsGetBit(bitStore, --i)));
+      gt_ensure(had_err, lowBit == (r = gt_bsGetBit(bitStore, --i)));
       if (had_err)
       {
         gt_log_log("Expected %d, got %d, i = %llu\n",
@@ -159,7 +159,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     }
     v = randSrc[0];
     r = gt_bsGetUInt(bitStoreCopy, offsetStart, numBits);
-    ensure(had_err, r == v);
+    gt_ensure(had_err, r == v);
     if (had_err)
     {
       gt_log_log("Expected %""u"", got %""u""\n", v, r);
@@ -168,7 +168,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     for (i = 0; i < numBits; ++i)
       bsToggleBit(bitStoreCopy, offsetStart + i);
     r = gt_bsGetUInt(bitStoreCopy, offsetStart, numBits);
-    ensure(had_err, r == (v = (~v & mask)));
+    gt_ensure(had_err, r == (v = (~v & mask)));
     if (had_err)
     {
       gt_log_log("Expected %""u"", got %""u""\n", v, r);
@@ -193,8 +193,8 @@ gt_bitPackStringInt_unit_test(GtError *err)
         int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier
                             *   error. */
-        ensure(had_err, r0 == v0 && r1 == v1);
-        ensure(had_err, icmp_unsigned(v0, v1) ==
+        gt_ensure(had_err, r0 == v0 && r1 == v1);
+        gt_ensure(had_err, icmp_unsigned(v0, v1) ==
                (result = gt_bsCompare(bitStore, offset, bits0,
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
@@ -228,7 +228,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     {
       unsigned v = randSrc[i] & mask;
       unsigned r = gt_bsGetUInt(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""u"", got %""u"",\n"
@@ -246,7 +246,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     {
       unsigned v = randSrc[i] & mask;
       unsigned r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log( "Expected %""u"", got %""u"",\n"
@@ -286,7 +286,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
     int v = randSrc[i];
     unsigned bits = gt_requiredIntBits(v);
     int r = gt_bsGetInt(bitStore, offset, bits);
-    ensure(had_err, r == v);
+    gt_ensure(had_err, r == v);
     if (had_err)
     {
       gt_log_log("Expected %""d"", got %""d"",\n"
@@ -311,7 +311,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       int m = (int)1 << (numBits - 1);
       int v = (int)((randSrc[i] & mask) ^ m) - m;
       int r = gt_bsGetInt(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""d"", got %""d"",\n"
@@ -331,7 +331,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       int m = (int)1 << (numBits - 1);
       int v = (int)((randSrc[i] & mask) ^ m) - m;
       int r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""d"", got %""d"", i = %lu\n",
@@ -346,7 +346,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       int r = 0;
       gt_bsGetUniformIntArray(bitStore, offsetStart,
                                 numBits, 1, &r);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""d"", got %""d"
@@ -374,7 +374,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         ~((~(unsigned)0) << numBits):~(unsigned)0;
       unsigned v = randSrc[i] & mask;
       unsigned r = gt_bsGetUInt(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""u"", got %""u"",\n"
@@ -396,7 +396,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         ~((~(unsigned)0) << numBits):~(unsigned)0;
       unsigned v = randSrc[i] & mask,
         r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log( "Expected %""u"", got %""u"",\n"
@@ -443,7 +443,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       int m = (int)1 << (numBits - 1);
       int v = (int)((randSrc[i] & mask) ^ m) - m;
       int r = gt_bsGetInt(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""d"", got %""d"",\n"
@@ -467,7 +467,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       int m = (int)1 << (numBits - 1);
       int v = (int)((randSrc[i] & mask) ^ m) - m;
       int r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""d"", got %""d"", i = %lu\n",
@@ -485,7 +485,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
       int r = 0;
       gt_bsGetNonUniformIntArray(bitStore, offsetStart,
                                      1, numBits, numBitsList, &r);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %""d"", got %""d"
@@ -531,9 +531,9 @@ gt_bitPackStringInt_unit_test(GtError *err)
        * gt_bsStoreUniformUIntArray(bitStoreCopy, destOffset,
        *                              numBits, numValueCopies, randSrc); */
       gt_bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
-      ensure(had_err,
-             gt_bsCompare(bitStore, offset, numCopyBits,
-                       bitStoreCopy, destOffset, numCopyBits) == 0);
+      gt_ensure(had_err,
+                gt_bsCompare(bitStore, offset, numCopyBits,
+                             bitStoreCopy, destOffset, numCopyBits) == 0);
       if (had_err)
       {
         gt_log_log("Expected equality on bitstrings\n"
@@ -584,7 +584,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         {
           int v = (int)((randSrc[i] & mask) ^ m) - m;
           int r = gt_bsGetInt(bitStore, offset, numBits);
-          ensure(had_err, r == v);
+          gt_ensure(had_err, r == v);
           if (had_err)
           {
             gt_log_log( "Expected %""d"", got %""d"",\n"
@@ -597,7 +597,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         for (; i < resetStart + numResetValues; ++i)
         {
           int r = gt_bsGetInt(bitStore, offset, numBits);
-          ensure(had_err, r == cmpVal);
+          gt_ensure(had_err, r == cmpVal);
           if (had_err)
           {
             gt_log_log("Expected %""d"", got %""d"",\n"
@@ -611,7 +611,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         {
           int v = (int)((randSrc[i] & mask) ^ m) - m;
           int r = gt_bsGetInt(bitStore, offset, numBits);
-          ensure(had_err, r == v);
+          gt_ensure(had_err, r == v);
           if (had_err)
           {
             gt_log_log("Expected %""d"", got %""d"",\n"
@@ -659,7 +659,7 @@ gt_bitPackStringInt_unit_test(GtError *err)
         unsigned v = (unsigned)randSrc[i] & mask;
         bitCountRef += genBitCount_unsigned(v);
       }
-      ensure(had_err, bitCountRef == bitCountCmp);
+      gt_ensure(had_err, bitCountRef == bitCountCmp);
       if (had_err)
       {
         gt_log_log("Expected %llu, got %llu,\n"

@@ -126,8 +126,8 @@ int gt_bsearch_unit_test(GtError *err)
   /* the empty case */
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, !gt_array_size(members)); /* no member found */
-  ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
+  gt_ensure(had_err, !gt_array_size(members)); /* no member found */
+  gt_ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
                                    gt_array_size(elements), sizeof (int), cmp,
                                    NULL));
 
@@ -137,33 +137,33 @@ int gt_bsearch_unit_test(GtError *err)
   gt_array_add(elements, element);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, gt_array_size(members) == 1); /* one member found */
+  gt_ensure(had_err, gt_array_size(members) == 1); /* one member found */
   member_ptr = *(int**) gt_array_get(members, 0);
-  ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, *member_ptr == element);
   member_ptr = gt_bsearch_data(&key, gt_array_get_space(elements),
                                gt_array_size(elements), sizeof (int), cmp,
                                NULL);
-  ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, *member_ptr == element);
 
   key = -7;
   gt_array_reset(members);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, !gt_array_size(members)); /* no member found */
+  gt_ensure(had_err, !gt_array_size(members)); /* no member found */
 
   /* 2 elements */
   key = 7;
   gt_array_reset(members);
   gt_array_add(elements, element);
-  ensure(had_err, gt_array_size(elements) == 2);
+  gt_ensure(had_err, gt_array_size(elements) == 2);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, gt_array_size(members) == 2); /* two members found */
+  gt_ensure(had_err, gt_array_size(members) == 2); /* two members found */
   member_ptr = *(int**) gt_array_get(members, 0);
-  ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) gt_array_get(members, 1);
-  ensure(had_err, *member_ptr == element);
-  ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
+  gt_ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
                                   gt_array_size(elements), sizeof (int), cmp,
                                   NULL));
 
@@ -171,8 +171,8 @@ int gt_bsearch_unit_test(GtError *err)
   gt_array_reset(members);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, !gt_array_size(members)); /* no member found */
-  ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
+  gt_ensure(had_err, !gt_array_size(members)); /* no member found */
+  gt_ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
                                    gt_array_size(elements), sizeof (int), cmp,
                                    NULL));
 
@@ -180,17 +180,17 @@ int gt_bsearch_unit_test(GtError *err)
   key = 7;
   gt_array_reset(members);
   gt_array_add(elements, element);
-  ensure(had_err, gt_array_size(elements) == 3);
+  gt_ensure(had_err, gt_array_size(elements) == 3);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, gt_array_size(members) == 3); /* three members found */
+  gt_ensure(had_err, gt_array_size(members) == 3); /* three members found */
   member_ptr = *(int**) gt_array_get(members, 0);
-  ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) gt_array_get(members, 1);
-  ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) gt_array_get(members, 2);
-  ensure(had_err, *member_ptr == element);
-  ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
+  gt_ensure(had_err, *member_ptr == element);
+  gt_ensure(had_err, gt_bsearch_data(&key, gt_array_get_space(elements),
                                   gt_array_size(elements), sizeof (int), cmp,
                                   NULL));
 
@@ -198,8 +198,8 @@ int gt_bsearch_unit_test(GtError *err)
   gt_array_reset(members);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, !gt_array_size(members)); /* no member found */
-  ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
+  gt_ensure(had_err, !gt_array_size(members)); /* no member found */
+  gt_ensure(had_err, !gt_bsearch_data(&key, gt_array_get_space(elements),
                                    gt_array_size(elements), sizeof (int), cmp,
                                    NULL));
 
@@ -221,19 +221,19 @@ int gt_bsearch_unit_test(GtError *err)
   gt_array_add(elements, element);
   element = 3;
   gt_array_add(elements, element);
-  ensure(had_err, gt_array_size(elements) == 9);
+  gt_ensure(had_err, gt_array_size(elements) == 9);
   key = -3;
   gt_array_reset(members);
   gt_bsearch_all(members, &key, gt_array_get_space(elements),
                  gt_array_size(elements), sizeof (int), cmp, NULL);
-  ensure(had_err, gt_array_size(members) == 3); /* three members found */
+  gt_ensure(had_err, gt_array_size(members) == 3); /* three members found */
   member_ptr = *(int**) gt_array_get(members, 0);
-  ensure(had_err, *member_ptr == -3);
+  gt_ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) gt_array_get(members, 1);
-  ensure(had_err, *member_ptr == -3);
+  gt_ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) gt_array_get(members, 2);
-  ensure(had_err, *member_ptr == -3);
-  ensure(had_err,
+  gt_ensure(had_err, *member_ptr == -3);
+  gt_ensure(had_err,
          gt_bsearch_data(&key, gt_array_get_space(elements),
                          gt_array_size(elements), sizeof (int), cmp,NULL));
 
@@ -242,18 +242,18 @@ int gt_bsearch_unit_test(GtError *err)
   b = gt_bittab_new(gt_array_size(elements));
   gt_bsearch_all_mark(members, &key, gt_array_get_space(elements),
                    gt_array_size(elements), sizeof (int), cmp, NULL, b);
-  ensure(had_err, gt_array_size(members) == 3); /* three members found */
+  gt_ensure(had_err, gt_array_size(members) == 3); /* three members found */
   member_ptr = *(int**) gt_array_get(members, 0);
-  ensure(had_err, *member_ptr == -3);
+  gt_ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) gt_array_get(members, 1);
-  ensure(had_err, *member_ptr == -3);
+  gt_ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) gt_array_get(members, 2);
-  ensure(had_err, *member_ptr == -3);
+  gt_ensure(had_err, *member_ptr == -3);
   /* the correct elements are marked (and only these) */
-  ensure(had_err, gt_bittab_bit_is_set(b, 2));
-  ensure(had_err, gt_bittab_bit_is_set(b, 3));
-  ensure(had_err, gt_bittab_bit_is_set(b, 4));
-  ensure(had_err, gt_bittab_count_set_bits(b) == 3);
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 2));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 3));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 4));
+  gt_ensure(had_err, gt_bittab_count_set_bits(b) == 3);
 
   /* free */
   gt_array_delete(elements);

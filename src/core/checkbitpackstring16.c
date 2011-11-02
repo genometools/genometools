@@ -114,7 +114,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     uint16_t v = randSrc[i];
     int bits = gt_requiredUInt16Bits(v);
     uint16_t r = gt_bsGetUInt16(bitStore, offset, bits);
-    ensure(had_err, r == v);
+    gt_ensure(had_err, r == v);
     if (had_err)
     {
       gt_log_log("Expected %"PRIu16", got %"PRIu16", i = %lu\n",
@@ -137,7 +137,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     {
       int lowBit = v & 1;
       v >>= 1;
-      ensure(had_err, lowBit == (r = gt_bsGetBit(bitStore, --i)));
+      gt_ensure(had_err, lowBit == (r = gt_bsGetBit(bitStore, --i)));
       if (had_err)
       {
         gt_log_log("Expected %d, got %d, i = %llu\n",
@@ -159,7 +159,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     }
     v = randSrc[0];
     r = gt_bsGetUInt16(bitStoreCopy, offsetStart, numBits);
-    ensure(had_err, r == v);
+    gt_ensure(had_err, r == v);
     if (had_err)
     {
       gt_log_log("Expected %"PRIu16", got %"PRIu16"\n", v, r);
@@ -168,7 +168,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     for (i = 0; i < numBits; ++i)
       bsToggleBit(bitStoreCopy, offsetStart + i);
     r = gt_bsGetUInt16(bitStoreCopy, offsetStart, numBits);
-    ensure(had_err, r == (v = (~v & mask)));
+    gt_ensure(had_err, r == (v = (~v & mask)));
     if (had_err)
     {
       gt_log_log("Expected %"PRIu16", got %"PRIu16"\n", v, r);
@@ -193,8 +193,8 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         int result = -2;   /*< -2 is not a return value of gt_bsCompare, thus
                             *   if it is displayed, there was an earlier
                             *   error. */
-        ensure(had_err, r0 == v0 && r1 == v1);
-        ensure(had_err, icmp_uint16_t(v0, v1) ==
+        gt_ensure(had_err, r0 == v0 && r1 == v1);
+        gt_ensure(had_err, icmp_uint16_t(v0, v1) ==
                (result = gt_bsCompare(bitStore, offset, bits0,
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
@@ -228,7 +228,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     {
       uint16_t v = randSrc[i] & mask;
       uint16_t r = gt_bsGetUInt16(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRIu16", got %"PRIu16",\n"
@@ -246,7 +246,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     {
       uint16_t v = randSrc[i] & mask;
       uint16_t r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log( "Expected %"PRIu16", got %"PRIu16",\n"
@@ -286,7 +286,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
     int16_t v = randSrc[i];
     unsigned bits = gt_requiredInt16Bits(v);
     int16_t r = gt_bsGetInt16(bitStore, offset, bits);
-    ensure(had_err, r == v);
+    gt_ensure(had_err, r == v);
     if (had_err)
     {
       gt_log_log("Expected %"PRId16", got %"PRId16",\n"
@@ -311,7 +311,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       int16_t m = (int16_t)1 << (numBits - 1);
       int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
       int16_t r = gt_bsGetInt16(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRId16", got %"PRId16",\n"
@@ -331,7 +331,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       int16_t m = (int16_t)1 << (numBits - 1);
       int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
       int16_t r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRId16", got %"PRId16", i = %lu\n",
@@ -346,7 +346,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       int16_t r = 0;
       gt_bsGetUniformInt16Array(bitStore, offsetStart,
                                 numBits, 1, &r);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRId16", got %"PRId16
@@ -374,7 +374,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         ~((~(uint16_t)0) << numBits):~(uint16_t)0;
       uint16_t v = randSrc[i] & mask;
       uint16_t r = gt_bsGetUInt16(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRIu16", got %"PRIu16",\n"
@@ -396,7 +396,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         ~((~(uint16_t)0) << numBits):~(uint16_t)0;
       uint16_t v = randSrc[i] & mask,
         r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log( "Expected %"PRIu16", got %"PRIu16",\n"
@@ -443,7 +443,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       int16_t m = (int16_t)1 << (numBits - 1);
       int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
       int16_t r = gt_bsGetInt16(bitStore, offset, numBits);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRId16", got %"PRId16",\n"
@@ -467,7 +467,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       int16_t m = (int16_t)1 << (numBits - 1);
       int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
       int16_t r = randCmp[i];
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRId16", got %"PRId16", i = %lu\n",
@@ -485,7 +485,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
       int16_t r = 0;
       gt_bsGetNonUniformInt16Array(bitStore, offsetStart,
                                      1, numBits, numBitsList, &r);
-      ensure(had_err, r == v);
+      gt_ensure(had_err, r == v);
       if (had_err)
       {
         gt_log_log("Expected %"PRId16", got %"PRId16
@@ -531,9 +531,9 @@ gt_bitPackStringInt16_unit_test(GtError *err)
        * gt_bsStoreUniformUInt16Array(bitStoreCopy, destOffset,
        *                              numBits, numValueCopies, randSrc); */
       gt_bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
-      ensure(had_err,
-             gt_bsCompare(bitStore, offset, numCopyBits,
-                       bitStoreCopy, destOffset, numCopyBits) == 0);
+      gt_ensure(had_err,
+                gt_bsCompare(bitStore, offset, numCopyBits,
+                             bitStoreCopy, destOffset, numCopyBits) == 0);
       if (had_err)
       {
         gt_log_log("Expected equality on bitstrings\n"
@@ -584,7 +584,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         {
           int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
           int16_t r = gt_bsGetInt16(bitStore, offset, numBits);
-          ensure(had_err, r == v);
+          gt_ensure(had_err, r == v);
           if (had_err)
           {
             gt_log_log( "Expected %"PRId16", got %"PRId16",\n"
@@ -597,7 +597,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         for (; i < resetStart + numResetValues; ++i)
         {
           int16_t r = gt_bsGetInt16(bitStore, offset, numBits);
-          ensure(had_err, r == cmpVal);
+          gt_ensure(had_err, r == cmpVal);
           if (had_err)
           {
             gt_log_log("Expected %"PRId16", got %"PRId16",\n"
@@ -611,7 +611,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         {
           int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
           int16_t r = gt_bsGetInt16(bitStore, offset, numBits);
-          ensure(had_err, r == v);
+          gt_ensure(had_err, r == v);
           if (had_err)
           {
             gt_log_log("Expected %"PRId16", got %"PRId16",\n"
@@ -659,7 +659,7 @@ gt_bitPackStringInt16_unit_test(GtError *err)
         uint16_t v = (uint16_t)randSrc[i] & mask;
         bitCountRef += genBitCount_uint16_t(v);
       }
-      ensure(had_err, bitCountRef == bitCountCmp);
+      gt_ensure(had_err, bitCountRef == bitCountCmp);
       if (had_err)
       {
         gt_log_log("Expected %llu, got %llu,\n"

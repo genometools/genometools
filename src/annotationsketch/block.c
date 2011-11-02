@@ -414,48 +414,48 @@ int gt_block_unit_test(GtError *err)
   b = gt_block_new();
 
   /* test gt_block_insert_elements */
-  ensure(had_err, (0UL == gt_block_get_size(b)));
+  gt_ensure(had_err, (0UL == gt_block_get_size(b)));
   gt_block_insert_element(b, (GtFeatureNode*) gn1);
-  ensure(had_err, (1UL == gt_block_get_size(b)));
+  gt_ensure(had_err, (1UL == gt_block_get_size(b)));
   gt_block_insert_element(b, (GtFeatureNode*) gn2);
-  ensure(had_err, (2UL == gt_block_get_size(b)));
+  gt_ensure(had_err, (2UL == gt_block_get_size(b)));
 
   /* test gt_block_set_range & gt_block_get_range */
   r_temp = gt_range_join(&r1, &r2);
   gt_block_set_range(b, r_temp);
   b_range = gt_block_get_range(b);
-  ensure(had_err, (0 == gt_range_compare(&b_range, &r_temp)));
-  ensure(had_err, (1 == gt_range_compare(&r2, &r_temp)));
+  gt_ensure(had_err, (0 == gt_range_compare(&b_range, &r_temp)));
+  gt_ensure(had_err, (1 == gt_range_compare(&r2, &r_temp)));
 
   /* tests gt_block_set_caption & gt_block_get_caption */
   gt_block_set_caption(b, caption1);
-  ensure(had_err, (0 == gt_str_cmp(gt_block_get_caption(b), caption1)));
-  ensure(had_err, (0 != gt_str_cmp(gt_block_get_caption(b), caption2)));
+  gt_ensure(had_err, (0 == gt_str_cmp(gt_block_get_caption(b), caption1)));
+  gt_ensure(had_err, (0 != gt_str_cmp(gt_block_get_caption(b), caption2)));
 
   /* tests gt_block_set_strand & gt_block_get_range */
   s = gt_block_get_strand(b);
-  ensure(had_err, (GT_STRAND_UNKNOWN == s));
+  gt_ensure(had_err, (GT_STRAND_UNKNOWN == s));
   gt_block_set_strand(b, GT_STRAND_FORWARD);
   s = gt_block_get_strand(b);
-  ensure(had_err, (GT_STRAND_FORWARD == s));
+  gt_ensure(had_err, (GT_STRAND_FORWARD == s));
 
   /* test gt_block_get_max_height() */
   sty = gt_style_new(err);
-  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, height == BAR_HEIGHT_DEFAULT);
+  gt_ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, height == BAR_HEIGHT_DEFAULT);
   gt_style_set_num(sty, "exon", "bar_height", 42);
-  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, height == 42);
+  gt_ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, height == 42);
   gt_style_set_num(sty, "gene", "bar_height", 23);
-  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, height == 42);
+  gt_ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, height == 42);
   gt_style_unset(sty, "exon", "bar_height");
-  ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, height == 23);
+  gt_ensure(had_err, gt_block_get_max_height(b, &height, sty, err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, height == 23);
 
   gt_str_delete(caption2);
   gt_str_delete(seqid);

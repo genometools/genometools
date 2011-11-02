@@ -193,10 +193,10 @@ static void foreachtester(unsigned long key,
   struct ForeachTesterData *tdata = data;
   GtError *err = tdata->err;
   tdata->counter++;
-  ensure(*(tdata->had_err), tdata->counter < DISC_DISTRI_FOREACHTESTSIZE);
-  ensure(*(tdata->had_err),
+  gt_ensure(*(tdata->had_err), tdata->counter < DISC_DISTRI_FOREACHTESTSIZE);
+  gt_ensure(*(tdata->had_err),
          (unsigned long) tdata->expkeys[tdata->counter] == key);
-  ensure(*(tdata->had_err),
+  gt_ensure(*(tdata->had_err),
          (unsigned long long) tdata->expvalues[tdata->counter] == value);
 }
 
@@ -210,14 +210,14 @@ int gt_disc_distri_unit_test(GtError *err)
 
   d = gt_disc_distri_new();
 
-  ensure(had_err, gt_disc_distri_get(d, 0UL) == 0);
-  ensure(had_err, gt_disc_distri_get(d, 100UL) == 0);
+  gt_ensure(had_err, gt_disc_distri_get(d, 0UL) == 0);
+  gt_ensure(had_err, gt_disc_distri_get(d, 100UL) == 0);
   if (!had_err) {
     gt_disc_distri_add(d, 0);
     gt_disc_distri_add_multi(d, 100UL, 256ULL);
   }
-  ensure(had_err, gt_disc_distri_get(d, 0UL) == 1ULL);
-  ensure(had_err, gt_disc_distri_get(d, 100UL) == 256ULL);
+  gt_ensure(had_err, gt_disc_distri_get(d, 0UL) == 1ULL);
+  gt_ensure(had_err, gt_disc_distri_get(d, 100UL) == 256ULL);
 
   /* test foreach and foreach_in_reverse_order: */
   gt_disc_distri_add(d, 2UL);

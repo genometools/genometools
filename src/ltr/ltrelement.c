@@ -123,24 +123,26 @@ int gt_ltrelement_unit_test(GtError *err)
   /* check left LTR */
   element.leftLTR_5 = 20UL;
   element.leftLTR_3 = 119UL;
-  ensure(had_err, gt_ltrelement_leftltrlen(&element) == 100UL);
+  gt_ensure(had_err, gt_ltrelement_leftltrlen(&element) == 100UL);
   memset(tmp, 0, BUFSIZ);
   memcpy(tmp, fullseq + (element.leftLTR_5 * sizeof (char)),
          (size_t) (element.leftLTR_3 - element.leftLTR_5+ 1) * sizeof (char));
-  ensure(had_err, strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
-                              "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
-                              "cgaa" ) == 0);
+  gt_ensure(had_err,
+            strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
+                        "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
+                        "cgaa" ) == 0);
 
   /* check right LTR */
   element.rightLTR_5 = 520UL;
   element.rightLTR_3 = 619UL;
-  ensure(had_err, gt_ltrelement_rightltrlen(&element) == 100UL);
+  gt_ensure(had_err, gt_ltrelement_rightltrlen(&element) == 100UL);
   memset(tmp, 0, BUFSIZ);
   memcpy(tmp, fullseq + (element.rightLTR_5 * sizeof (char)),
          (size_t) (element.rightLTR_3 - element.rightLTR_5+ 1) * sizeof (char));
-  ensure(had_err, strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
-                              "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
-                              "cgaa" ) == 0);
+  gt_ensure(had_err,
+            strcmp(tmp, "tatagcactgcatttcgaatatagtttcgaatatagcactgcatttcg"
+                        "aatatagcactgcatttcgaatatagtttcgaatatagcactgcattt"
+                        "cgaa" ) == 0);
 
   return had_err;
 }

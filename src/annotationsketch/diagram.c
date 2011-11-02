@@ -975,7 +975,7 @@ int gt_diagram_unit_test(GtError *err)
 
   /* removed the multithreading test for now until it is fixed */
   gt_diagram_unit_test_sketch_func(&sh);
-  ensure(had_err, sh.errstatus == 0);
+  gt_ensure(had_err, sh.errstatus == 0);
 
   gt_style_delete(sh.sty);
   gt_diagram_delete(sh.d);

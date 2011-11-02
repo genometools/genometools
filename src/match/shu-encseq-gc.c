@@ -195,7 +195,7 @@ int gt_encseq_gc_unit_test(GtError *err)
                                   true,
                                   err)) != NULL)
   {
-    ensure(had_err, gt_double_equals_double(results[0], 0.0));
+    gt_ensure(had_err, gt_double_equals_double(results[0], 0.0));
   }
   else
   {
@@ -218,7 +218,7 @@ int gt_encseq_gc_unit_test(GtError *err)
                                     true,
                                     err)) != NULL)
     {
-      ensure(had_err, gt_double_equals_one(results[0]));
+      gt_ensure(had_err, gt_double_equals_one(results[0]));
     }
     else
     {
@@ -243,8 +243,8 @@ int gt_encseq_gc_unit_test(GtError *err)
                                     true,
                                     err)) != NULL)
     {
-      ensure(had_err, gt_double_equals_double(results[0], 0.5));
-      ensure(had_err, gt_double_equals_double(results[1], 0.5));
+      gt_ensure(had_err, gt_double_equals_double(results[0], 0.5));
+      gt_ensure(had_err, gt_double_equals_double(results[1], 0.5));
     }
     else
     {
@@ -260,8 +260,8 @@ int gt_encseq_gc_unit_test(GtError *err)
                                       true,
                                       err)) != NULL)
       {
-        ensure(had_err, gt_double_equals_double(results[0], 0.5));
-        ensure(had_err, gt_double_equals_double(results[1], (2.0/5.0)));
+        gt_ensure(had_err, gt_double_equals_double(results[0], 0.5));
+        gt_ensure(had_err, gt_double_equals_double(results[1], (2.0/5.0)));
       }
       else
       {
@@ -291,10 +291,10 @@ int gt_encseq_gc_unit_test(GtError *err)
                                       true,
                                       err)) != NULL)
       {
-        ensure(had_err, gt_double_equals_double(results[0], 0.5));
-        ensure(had_err, gt_double_equals_double(results[1], 0.5));
-        ensure(had_err, gt_double_equals_double(results[2], 0.5));
-        ensure(had_err, gt_double_equals_double(results[3], 0.5));
+        gt_ensure(had_err, gt_double_equals_double(results[0], 0.5));
+        gt_ensure(had_err, gt_double_equals_double(results[1], 0.5));
+        gt_ensure(had_err, gt_double_equals_double(results[2], 0.5));
+        gt_ensure(had_err, gt_double_equals_double(results[3], 0.5));
       }
       else
       {
@@ -310,10 +310,10 @@ int gt_encseq_gc_unit_test(GtError *err)
                                         true,
                                         err)) != NULL)
         {
-          ensure(had_err, gt_double_equals_double(results[0], 0.5));
-          ensure(had_err, gt_double_equals_double(results[1], (2.0/5.0)));
-          ensure(had_err, gt_double_equals_double(results[2], (2.0/5.0)));
-          ensure(had_err, gt_double_equals_double(results[3], 0.5));
+          gt_ensure(had_err, gt_double_equals_double(results[0], 0.5));
+          gt_ensure(had_err, gt_double_equals_double(results[1], (2.0/5.0)));
+          gt_ensure(had_err, gt_double_equals_double(results[2], (2.0/5.0)));
+          gt_ensure(had_err, gt_double_equals_double(results[3], 0.5));
         }
         else
         {

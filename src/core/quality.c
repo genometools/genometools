@@ -65,52 +65,53 @@ int gt_quality_unit_test(GtError *err)
   int had_err = 0;
   double val, phredscore, solexascore;
 
-  ensure(had_err, gt_quality_fastq_to_phred('!') == 0);
-  ensure(had_err, gt_quality_fastq_to_phred('{') == 90);
+  gt_ensure(had_err, gt_quality_fastq_to_phred('!') == 0);
+  gt_ensure(had_err, gt_quality_fastq_to_phred('{') == 90);
   val = gt_quality_phred_to_errorprob(gt_quality_fastq_to_phred('!'));
-  ensure(had_err, gt_double_equals_double(val, 1.0));
+  gt_ensure(had_err, gt_double_equals_double(val, 1.0));
   val = gt_quality_phred_to_errorprob(gt_quality_fastq_to_phred('{'));
-  ensure(had_err, gt_double_equals_double(val, 0.000000001));
+  gt_ensure(had_err, gt_double_equals_double(val, 0.000000001));
 
-  ensure(had_err, gt_quality_fastq_to_solexa('@') == 0);
-  ensure(had_err, gt_quality_fastq_to_solexa('!') == -31);
-  ensure(had_err, gt_quality_fastq_to_solexa('8') == -8);
-  ensure(had_err, gt_quality_fastq_to_solexa('{') == 59);
+  gt_ensure(had_err, gt_quality_fastq_to_solexa('@') == 0);
+  gt_ensure(had_err, gt_quality_fastq_to_solexa('!') == -31);
+  gt_ensure(had_err, gt_quality_fastq_to_solexa('8') == -8);
+  gt_ensure(had_err, gt_quality_fastq_to_solexa('{') == 59);
 
   phredscore = gt_quality_fastq_to_phred('A');
   solexascore = gt_quality_fastq_to_solexa('A'+31);
-  ensure(had_err, phredscore == solexascore);
+  gt_ensure(had_err, phredscore == solexascore);
 
   /* testing conversion (has rounding errors!)
      taken from Biopython test cases
      (http://portal.open-bio.org/pipermail/biopython-dev
              /2009-February/005385.html) */
   solexascore = gt_quality_phred_to_solexa(90);
-  ensure(had_err, gt_double_equals_double(solexascore, 89.999999995657035));
+  gt_ensure(had_err, gt_double_equals_double(solexascore, 89.999999995657035));
   solexascore = gt_quality_phred_to_solexa(50);
-  ensure(had_err, gt_double_equals_double(solexascore, 49.99995657033466));
+  gt_ensure(had_err, gt_double_equals_double(solexascore, 49.99995657033466));
   solexascore = gt_quality_phred_to_solexa(10);
-  ensure(had_err, gt_double_equals_double(solexascore, 9.5424250943932485));
+  gt_ensure(had_err, gt_double_equals_double(solexascore, 9.5424250943932485));
   solexascore = gt_quality_phred_to_solexa(1);
-  ensure(had_err, gt_double_equals_double(solexascore, -5.8682532438011537));
+  gt_ensure(had_err, gt_double_equals_double(solexascore, -5.8682532438011537));
   solexascore = gt_quality_phred_to_solexa(0.1);
-  ensure(had_err, gt_double_equals_double(solexascore, -16.32774717238372));
+  gt_ensure(had_err, gt_double_equals_double(solexascore, -16.32774717238372));
 
   phredscore = gt_quality_solexa_to_phred(90);
-  ensure(had_err, gt_double_equals_double(phredscore, 90.000000004342922));
+  gt_ensure(had_err, gt_double_equals_double(phredscore, 90.000000004342922));
   phredscore = gt_quality_solexa_to_phred(10);
-  ensure(had_err, gt_double_equals_double(phredscore, 10.41392685158225));
+  gt_ensure(had_err, gt_double_equals_double(phredscore, 10.41392685158225));
   phredscore = gt_quality_solexa_to_phred(0);
-  ensure(had_err, gt_double_equals_double(phredscore, 3.0102999566398116));
+  gt_ensure(had_err, gt_double_equals_double(phredscore, 3.0102999566398116));
   phredscore = gt_quality_solexa_to_phred(-20);
-  ensure(had_err, gt_double_equals_double(phredscore, 0.043213737826425784));
+  gt_ensure(had_err, gt_double_equals_double(phredscore, 0.043213737826425784));
 
   solexascore = gt_quality_fastq_to_solexa('!');
   phredscore = gt_quality_solexa_to_phred(solexascore);
-  ensure(had_err, gt_double_equals_double(phredscore, 0.0034483543102526788));
+  gt_ensure(had_err,
+            gt_double_equals_double(phredscore, 0.0034483543102526788));
   solexascore = gt_quality_fastq_to_solexa('{');
   phredscore = gt_quality_solexa_to_phred(solexascore);
-  ensure(had_err, gt_double_equals_double(phredscore, 59.000005467440147));
+  gt_ensure(had_err, gt_double_equals_double(phredscore, 59.000005467440147));
 
   return had_err;
 }

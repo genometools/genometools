@@ -1502,10 +1502,10 @@ static bool mangle_tree (SearchOrder how,
 }
 
 #define MANGLECHECK(ORDER,MODE,LAG)\
-        ensure (had_err,!mangle_tree (ORDER, MODE, &root, LAG,err))
+        gt_ensure(had_err,!mangle_tree (ORDER, MODE, &root, LAG,err))
 
 #define WALKCHECK\
-        ensure (had_err,!walk_tree (root, (unsigned long) SIZE))
+        gt_ensure(had_err,!walk_tree (root, (unsigned long) SIZE))
 
 /**
  * Unit test for the red black tree datastructure

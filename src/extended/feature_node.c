@@ -688,7 +688,7 @@ int gt_feature_node_unit_test(GtError *err)
   seqid = gt_str_new_cstr("seqid");
   fn = gt_feature_node_new(seqid, gt_ft_gene, 1, 1000, GT_STRAND_FORWARD);
 
-  ensure(had_err, !gt_feature_node_score_is_defined((GtFeatureNode*) fn));
+  gt_ensure(had_err, !gt_feature_node_score_is_defined((GtFeatureNode*) fn));
 
   gt_genome_node_delete(fn);
   gt_str_delete(seqid);

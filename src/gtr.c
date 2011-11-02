@@ -219,17 +219,18 @@ static int run_tests(GtR *gtr, GtError *err)
   gt_assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
-  ensure(had_err, sizeof (char) == 1);
-  ensure(had_err, sizeof (unsigned char) == 1);
-  ensure(had_err, sizeof (short) == 2);
-  ensure(had_err, sizeof (unsigned short) == 2);
-  ensure(had_err, sizeof (int) == 4);
-  ensure(had_err, sizeof (unsigned int) == 4);
-  ensure(had_err, sizeof (long) == 4 || sizeof (long) == 8);
-  ensure(had_err, sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
-  ensure(had_err, sizeof (unsigned long) >= sizeof (size_t));
-  ensure(had_err, sizeof (long long) == 8);
-  ensure(had_err, sizeof (unsigned long long) == 8);
+  gt_ensure(had_err, sizeof (char) == 1);
+  gt_ensure(had_err, sizeof (unsigned char) == 1);
+  gt_ensure(had_err, sizeof (short) == 2);
+  gt_ensure(had_err, sizeof (unsigned short) == 2);
+  gt_ensure(had_err, sizeof (int) == 4);
+  gt_ensure(had_err, sizeof (unsigned int) == 4);
+  gt_ensure(had_err, sizeof (long) == 4 || sizeof (long) == 8);
+  gt_ensure(had_err, sizeof (unsigned long) == 4 ||
+                     sizeof (unsigned long) == 8);
+  gt_ensure(had_err, sizeof (unsigned long) >= sizeof (size_t));
+  gt_ensure(had_err, sizeof (long long) == 8);
+  gt_ensure(had_err, sizeof (unsigned long long) == 8);
 
   /* show seed */
   printf("seed=%u\n", gtr->seed);

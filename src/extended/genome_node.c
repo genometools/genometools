@@ -393,35 +393,35 @@ int gt_genome_node_unit_test(GtError *err)
   gnc->size = sizeof (GtGenomeNode);
 
   gn = gt_genome_node_create(gnc);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == NULL);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == NULL);
-  ensure(had_err, gn->userdata_nof_items == 0);
-  ensure(had_err, gn->userdata == NULL);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == NULL);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == NULL);
+  gt_ensure(had_err, gn->userdata_nof_items == 0);
+  gt_ensure(had_err, gn->userdata == NULL);
 
   gt_genome_node_add_user_data(gn, testkey1, testptr1, NULL);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) != NULL);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == testptr1);
-  ensure(had_err, gn->userdata_nof_items == 1);
-  ensure(had_err, gn->userdata != NULL);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) != NULL);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == testptr1);
+  gt_ensure(had_err, gn->userdata_nof_items == 1);
+  gt_ensure(had_err, gn->userdata != NULL);
 
   gt_genome_node_add_user_data(gn, testkey2, testptr2, gt_free_func);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) != NULL);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == testptr2);
-  ensure(had_err, gn->userdata_nof_items == 2);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) != NULL);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == testptr2);
+  gt_ensure(had_err, gn->userdata_nof_items == 2);
 
   gt_genome_node_release_user_data(gn, testkey1);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == NULL);
-  ensure(had_err, gn->userdata_nof_items == 1);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey1) == NULL);
+  gt_ensure(had_err, gn->userdata_nof_items == 1);
 
   gt_genome_node_release_user_data(gn, testkey2);
-  ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == NULL);
-  ensure(had_err, gn->userdata_nof_items == 0);
-  ensure(had_err, gn->userdata == NULL);
+  gt_ensure(had_err, gt_genome_node_get_user_data(gn, testkey2) == NULL);
+  gt_ensure(had_err, gn->userdata_nof_items == 0);
+  gt_ensure(had_err, gn->userdata == NULL);
 
   testptr2 = gt_malloc(sizeof (char)*4);
   gt_genome_node_add_user_data(gn, testkey1, testptr1, NULL);
   gt_genome_node_add_user_data(gn, testkey2, testptr2, gt_free_func);
-  ensure(had_err, gn->userdata != NULL);
+  gt_ensure(had_err, gn->userdata != NULL);
   gt_genome_node_delete(gn);
 
   gt_free(gnc);

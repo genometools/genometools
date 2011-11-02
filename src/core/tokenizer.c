@@ -143,7 +143,7 @@ int gt_tokenizer_unit_test(GtError *err)
   gt_fa_xfclose(tmpfp);
   t = gt_tokenizer_new(gt_io_new(gt_str_get(tmpfilename), "r"));
   gt_tokenizer_skip_comment_lines(t);
-  ensure(had_err, !gt_tokenizer_has_token(t));
+  gt_ensure(had_err, !gt_tokenizer_has_token(t));
   gt_tokenizer_delete(t);
   gt_xremove(gt_str_get(tmpfilename));
 
@@ -154,31 +154,31 @@ int gt_tokenizer_unit_test(GtError *err)
   t = gt_tokenizer_new(gt_io_new(gt_str_get(tmpfilename), "r"));
 
   token = gt_tokenizer_get_token(t);
-  ensure(had_err, !strcmp(gt_str_get(token), "a"));
+  gt_ensure(had_err, !strcmp(gt_str_get(token), "a"));
   gt_str_delete(token);
 
   gt_tokenizer_next_token(t);
   token = gt_tokenizer_get_token(t);
-  ensure(had_err, !strcmp(gt_str_get(token), "bb"));
+  gt_ensure(had_err, !strcmp(gt_str_get(token), "bb"));
   gt_str_delete(token);
 
   gt_tokenizer_next_token(t);
   token = gt_tokenizer_get_token(t);
-  ensure(had_err, !strcmp(gt_str_get(token), "ccc\n"));
+  gt_ensure(had_err, !strcmp(gt_str_get(token), "ccc\n"));
   gt_str_delete(token);
 
   gt_tokenizer_next_token(t);
   token = gt_tokenizer_get_token(t);
-  ensure(had_err, !strcmp(gt_str_get(token), "dddd"));
+  gt_ensure(had_err, !strcmp(gt_str_get(token), "dddd"));
   gt_str_delete(token);
 
   gt_tokenizer_next_token(t);
   token = gt_tokenizer_get_token(t);
-  ensure(had_err, !strcmp(gt_str_get(token), "-5"));
+  gt_ensure(had_err, !strcmp(gt_str_get(token), "-5"));
   gt_str_delete(token);
 
   gt_tokenizer_next_token(t);
-  ensure(had_err, !gt_tokenizer_has_token(t));
+  gt_ensure(had_err, !gt_tokenizer_has_token(t));
   gt_tokenizer_delete(t);
   gt_xremove(gt_str_get(tmpfilename));
   gt_str_delete(tmpfilename);

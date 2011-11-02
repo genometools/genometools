@@ -118,12 +118,12 @@ static int check_splicedseq(Splicedseq *ss, GtError *err)
   gt_error_check(err);
   gt_splicedseq_add(ss, 2, 3, origseq);
   gt_splicedseq_add(ss, 6, 8, origseq);
-  ensure(had_err, strcmp(gt_splicedseq_get(ss), splicedseq) == 0);
-  ensure(had_err, !gt_splicedseq_pos_is_border(ss, 0));
-  ensure(had_err,  gt_splicedseq_pos_is_border(ss, 1));
-  ensure(had_err, !gt_splicedseq_pos_is_border(ss, 2));
-  ensure(had_err, !gt_splicedseq_pos_is_border(ss, 3));
-  ensure(had_err, !gt_splicedseq_pos_is_border(ss, 4));
+  gt_ensure(had_err, strcmp(gt_splicedseq_get(ss), splicedseq) == 0);
+  gt_ensure(had_err, !gt_splicedseq_pos_is_border(ss, 0));
+  gt_ensure(had_err,  gt_splicedseq_pos_is_border(ss, 1));
+  gt_ensure(had_err, !gt_splicedseq_pos_is_border(ss, 2));
+  gt_ensure(had_err, !gt_splicedseq_pos_is_border(ss, 3));
+  gt_ensure(had_err, !gt_splicedseq_pos_is_border(ss, 4));
   return had_err;
 }
 

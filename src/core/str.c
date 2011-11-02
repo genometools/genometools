@@ -287,78 +287,78 @@ int gt_str_unit_test(GtError *err)
 
   /* the empty string */
   s1 = gt_str_new();
-  ensure(had_err, gt_str_length(s1) == 0);
+  gt_ensure(had_err, gt_str_length(s1) == 0);
   gt_str_delete(s1);
 
   /* string testing */
   s1 = gt_str_new();
   gt_str_set(s1, cstring_1);
-  ensure(had_err, gt_str_length(s1) == 11);
-  ensure(had_err, strcmp(gt_str_get(s1), cstring_1) == 0);
+  gt_ensure(had_err, gt_str_length(s1) == 11);
+  gt_ensure(had_err, strcmp(gt_str_get(s1), cstring_1) == 0);
   gt_str_delete(s1);
 
   s1 = gt_str_new_cstr(cstring_1);
-  ensure(had_err, gt_str_length(s1) == 11);
+  gt_ensure(had_err, gt_str_length(s1) == 11);
   gt_str_delete(s1);
 
   s1 = gt_str_new();
   s2 = gt_str_new_cstr("foo");
-  ensure(had_err, gt_str_length(s2) == 3);
+  gt_ensure(had_err, gt_str_length(s2) == 3);
   gt_str_append_str(s1, s2);
-  ensure(had_err, gt_str_length(s1) == 3);
+  gt_ensure(had_err, gt_str_length(s1) == 3);
   gt_str_append_cstr(s1, "bar");
-  ensure(had_err, gt_str_length(s1) == 6);
+  gt_ensure(had_err, gt_str_length(s1) == 6);
   gt_str_append_char(s1, 'b');
   gt_str_append_char(s1, 'a');
   gt_str_append_char(s1, 'z');
-  ensure(had_err, gt_str_length(s1) == 9);
-  ensure(had_err, strcmp("foobarbaz", gt_str_get(s1)) == 0);
-  ensure(had_err, strcmp("foo", gt_str_get(s2)) == 0);
+  gt_ensure(had_err, gt_str_length(s1) == 9);
+  gt_ensure(had_err, strcmp("foobarbaz", gt_str_get(s1)) == 0);
+  gt_ensure(had_err, strcmp("foo", gt_str_get(s2)) == 0);
   gt_str_append_ulong(s1, 1984);
-  ensure(had_err, strcmp("foobarbaz1984", gt_str_get(s1)) == 0);
+  gt_ensure(had_err, strcmp("foobarbaz1984", gt_str_get(s1)) == 0);
   gt_str_delete(s1);
   gt_str_delete(s2);
 
   /* testing gt_str_append_ulong() and gt_str_set_length() */
   s = gt_str_new();
   gt_str_append_ulong(s, 0);
-  ensure(had_err, strcmp("0", gt_str_get(s)) == 0);
+  gt_ensure(had_err, strcmp("0", gt_str_get(s)) == 0);
   gt_str_reset(s);
-  ensure(had_err, strcmp("", gt_str_get(s)) == 0);
+  gt_ensure(had_err, strcmp("", gt_str_get(s)) == 0);
   gt_str_append_ulong(s, 6);
-  ensure(had_err, strcmp("6", gt_str_get(s)) == 0);
+  gt_ensure(had_err, strcmp("6", gt_str_get(s)) == 0);
   gt_str_append_ulong(s, 16);
-  ensure(had_err, strcmp("616", gt_str_get(s)) == 0);
+  gt_ensure(had_err, strcmp("616", gt_str_get(s)) == 0);
   gt_str_delete(s);
 
   /* make sure that gt_str_get never returns NULL */
   s = gt_str_new();
-  ensure(had_err, gt_str_get(s));
-  ensure(had_err, gt_str_length(s) == 0);
-  ensure(had_err, strlen(gt_str_get(s)) == 0);
+  gt_ensure(had_err, gt_str_get(s));
+  gt_ensure(had_err, gt_str_length(s) == 0);
+  gt_ensure(had_err, strlen(gt_str_get(s)) == 0);
   gt_str_delete(s);
 
   s = gt_str_new_cstr(NULL);
-  ensure(had_err, gt_str_get(s));
-  ensure(had_err, gt_str_length(s) == 0);
-  ensure(had_err, strlen(gt_str_get(s)) == 0);
+  gt_ensure(had_err, gt_str_get(s));
+  gt_ensure(had_err, gt_str_length(s) == 0);
+  gt_ensure(had_err, strlen(gt_str_get(s)) == 0);
   gt_str_delete(s);
 
   /* test gt_str_new() followed by gt_str_append_cstr_nt() */
   s = gt_str_new();
   gt_str_append_cstr_nt(s, "foo", 3);
-  ensure(had_err, strcmp("foo", gt_str_get(s)) == 0);
-  ensure(had_err, gt_str_length(s) == 3);
+  gt_ensure(had_err, strcmp("foo", gt_str_get(s)) == 0);
+  gt_ensure(had_err, gt_str_length(s) == 3);
   gt_str_delete(s);
 
   /* test gt_str_clone() */
   s  = gt_str_new_cstr("foobarbaz");
   s1 = gt_str_clone(s);
-  ensure(had_err, gt_str_cmp(s, s1) == 0);
+  gt_ensure(had_err, gt_str_cmp(s, s1) == 0);
   gt_str_append_cstr(s1, "boo");
-  ensure(had_err, gt_str_cmp(s, s1) != 0);
+  gt_ensure(had_err, gt_str_cmp(s, s1) != 0);
   gt_str_append_cstr(s, "boo");
-  ensure(had_err, gt_str_cmp(s, s1) == 0);
+  gt_ensure(had_err, gt_str_cmp(s, s1) == 0);
   gt_str_delete(s);
   gt_str_delete(s1);
 

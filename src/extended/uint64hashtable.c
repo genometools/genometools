@@ -353,27 +353,27 @@ int gt_uint64hashtable_unit_test(GtError *err)
   gt_error_check(err);
 
   table = gt_uint64hashtable_new(0);
-  ensure(had_err, table != NULL);
+  gt_ensure(had_err, table != NULL);
   found = gt_uint64hashtable_search(table, (uint64_t)7, false);
-  ensure(had_err, !found);
+  gt_ensure(had_err, !found);
   found = gt_uint64hashtable_search(table, (uint64_t)7, true);
-  ensure(had_err, !found);
+  gt_ensure(had_err, !found);
   found = gt_uint64hashtable_search(table, (uint64_t)7, true);
-  ensure(had_err, found);
+  gt_ensure(had_err, found);
   gt_uint64hashtable_delete(table);
 
   nof_elements = (size_t)10000;
   table = gt_uint64hashtable_new(nof_elements);
-  ensure(had_err, table != NULL);
+  gt_ensure(had_err, table != NULL);
   for (i = 0; i < nof_elements; i++)
   {
     found = gt_uint64hashtable_search(table, (uint64_t)i, true);
-    ensure(had_err, !found);
+    gt_ensure(had_err, !found);
   }
   for (i = 0; i < nof_elements; i++)
   {
     found = gt_uint64hashtable_search(table, (uint64_t)i, true);
-    ensure(had_err, found);
+    gt_ensure(had_err, found);
   }
   gt_uint64hashtable_delete(table);
   return had_err;

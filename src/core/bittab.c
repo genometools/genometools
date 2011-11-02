@@ -346,7 +346,7 @@ int gt_bittab_unit_test(GtError *err)
     b = gt_bittab_new(size);
     tmp = gt_bittab_new(size);
     and = gt_bittab_new(size);
-    ensure(had_err, gt_bittab_size(b) == size);
+    gt_ensure(had_err, gt_bittab_size(b) == size);
 
     for (j = 0; j < size && !had_err; j++) {
       counter = 0;
@@ -355,60 +355,60 @@ int gt_bittab_unit_test(GtError *err)
            bit  = gt_bittab_get_next_bitnum(b, bit)) {
         counter++;
       }
-      ensure(had_err, counter == j);
+      gt_ensure(had_err, counter == j);
 
-      ensure(had_err, gt_bittab_count_set_bits(b) == j);
-      ensure(had_err, !gt_bittab_bit_is_set(b, j));
+      gt_ensure(had_err, gt_bittab_count_set_bits(b) == j);
+      gt_ensure(had_err, !gt_bittab_bit_is_set(b, j));
       gt_bittab_set_bit(b, j);
-      ensure(had_err, gt_bittab_bit_is_set(b, j));
+      gt_ensure(had_err, gt_bittab_bit_is_set(b, j));
 
       gt_bittab_complement(tmp, b);
-      ensure(had_err, gt_bittab_count_set_bits(tmp) == size - j - 1);
-      ensure(had_err, !gt_bittab_cmp(b, tmp));
+      gt_ensure(had_err, gt_bittab_count_set_bits(tmp) == size - j - 1);
+      gt_ensure(had_err, !gt_bittab_cmp(b, tmp));
       gt_bittab_and(and, b, tmp);
-      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
+      gt_ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
       gt_bittab_unset(and);
       gt_bittab_equal(and, b);
       gt_bittab_or_equal(and, tmp);
-      ensure(had_err, gt_bittab_size(and) == size);
+      gt_ensure(had_err, gt_bittab_size(and) == size);
 
       gt_bittab_equal(and, b);
-      ensure(had_err, gt_bittab_count_set_bits(and) == j + 1);
+      gt_ensure(had_err, gt_bittab_count_set_bits(and) == j + 1);
       gt_bittab_and_equal(and, tmp);
-      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
+      gt_ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
       gt_bittab_complement(tmp, tmp);
-      ensure(had_err, gt_bittab_cmp(b, tmp));
+      gt_ensure(had_err, gt_bittab_cmp(b, tmp));
     }
 
-    ensure(had_err, gt_bittab_count_set_bits(b) == size);
+    gt_ensure(had_err, gt_bittab_count_set_bits(b) == size);
     gt_bittab_complement(tmp, b);
-    ensure(had_err, gt_bittab_count_set_bits(tmp) == 0);
+    gt_ensure(had_err, gt_bittab_count_set_bits(tmp) == 0);
 
     for (j = 0; j < size && !had_err; j++) {
       gt_bittab_unset_bit(b, j);
-      ensure(had_err, !gt_bittab_bit_is_set(b, j));
-      ensure(had_err, gt_bittab_count_set_bits(b) == size - j - 1);
+      gt_ensure(had_err, !gt_bittab_bit_is_set(b, j));
+      gt_ensure(had_err, gt_bittab_count_set_bits(b) == size - j - 1);
 
       gt_bittab_complement(tmp, b);
-      ensure(had_err, !gt_bittab_cmp(b, tmp));
-      ensure(had_err, gt_bittab_count_set_bits(tmp) == j + 1);
+      gt_ensure(had_err, !gt_bittab_cmp(b, tmp));
+      gt_ensure(had_err, gt_bittab_count_set_bits(tmp) == j + 1);
       gt_bittab_and(and, b, tmp);
-      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
+      gt_ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
       gt_bittab_unset(and);
       gt_bittab_equal(and, b);
       gt_bittab_or_equal(and, tmp);
-      ensure(had_err, gt_bittab_size(and) == size);
+      gt_ensure(had_err, gt_bittab_size(and) == size);
 
       gt_bittab_equal(and, b);
-      ensure(had_err, gt_bittab_count_set_bits(and) == size - j - 1);
+      gt_ensure(had_err, gt_bittab_count_set_bits(and) == size - j - 1);
       gt_bittab_and_equal(and, tmp);
-      ensure(had_err, gt_bittab_count_set_bits(and) == 0);
+      gt_ensure(had_err, gt_bittab_count_set_bits(and) == 0);
 
       gt_bittab_complement(tmp, tmp);
-      ensure(had_err, gt_bittab_cmp(b, tmp));
+      gt_ensure(had_err, gt_bittab_cmp(b, tmp));
     }
 
     gt_bittab_delete(b);
@@ -435,15 +435,15 @@ int gt_bittab_unit_test(GtError *err)
   gt_bittab_set_bit(b, 77);
   gt_bittab_set_bit(b, 96);
   gt_bittab_set_bit(b, 123);
-  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  gt_ensure(had_err, gt_bittab_count_set_bits(b) == 6);
   gt_bittab_shift_left_equal(b);
-  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
-  ensure(had_err, gt_bittab_bit_is_set(b, 1));
-  ensure(had_err, gt_bittab_bit_is_set(b, 33));
-  ensure(had_err, gt_bittab_bit_is_set(b, 65));
-  ensure(had_err, gt_bittab_bit_is_set(b, 78));
-  ensure(had_err, gt_bittab_bit_is_set(b, 97));
-  ensure(had_err, gt_bittab_bit_is_set(b, 124));
+  gt_ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 1));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 33));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 65));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 78));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 97));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 124));
   gt_bittab_delete(b);
 
   /* test gt_bittab_shift_right_equal() */
@@ -454,15 +454,15 @@ int gt_bittab_unit_test(GtError *err)
   gt_bittab_set_bit(b, 77);
   gt_bittab_set_bit(b, 97);
   gt_bittab_set_bit(b, 124);
-  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  gt_ensure(had_err, gt_bittab_count_set_bits(b) == 6);
   gt_bittab_shift_right_equal(b);
-  ensure(had_err, gt_bittab_count_set_bits(b) == 6);
-  ensure(had_err, gt_bittab_bit_is_set(b, 0));
-  ensure(had_err, gt_bittab_bit_is_set(b, 32));
-  ensure(had_err, gt_bittab_bit_is_set(b, 64));
-  ensure(had_err, gt_bittab_bit_is_set(b, 76));
-  ensure(had_err, gt_bittab_bit_is_set(b, 96));
-  ensure(had_err, gt_bittab_bit_is_set(b, 123));
+  gt_ensure(had_err, gt_bittab_count_set_bits(b) == 6);
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 0));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 32));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 64));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 76));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 96));
+  gt_ensure(had_err, gt_bittab_bit_is_set(b, 123));
   gt_bittab_delete(b);
 
   return had_err;

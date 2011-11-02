@@ -304,57 +304,57 @@ int gt_track_unit_test(GtError *err)
   sty = gt_style_new(err);
 
   track = gt_track_new(title, GT_UNDEF_ULONG, true, lb);
-  ensure(had_err, track);
-  ensure(had_err, gt_track_get_title(track) == title);
+  gt_ensure(had_err, track);
+  gt_ensure(had_err, gt_track_get_title(track) == title);
 
-  ensure(had_err, gt_track_get_number_of_lines(track) == 0);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest);
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_number_of_lines(track) == 0);
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest);
+  gt_ensure(had_err, !gt_error_is_set(err));
 
-  ensure(had_err, gt_track_insert_block(track, b[0], err) == 0);
-  ensure(had_err, !gt_error_is_set(err));
-  ensure(had_err, gt_track_get_number_of_lines(track) == 1);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + l_rest + BAR_HEIGHT_DEFAULT);
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_insert_block(track, b[0], err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_number_of_lines(track) == 1);
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + l_rest + BAR_HEIGHT_DEFAULT);
+  gt_ensure(had_err, !gt_error_is_set(err));
 
-  ensure(had_err, gt_track_insert_block(track, b[1], err) == 0);
-  ensure(had_err, !gt_error_is_set(err));
-  ensure(had_err, gt_track_get_number_of_lines(track) == 1);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + l_rest + BAR_HEIGHT_DEFAULT);
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_insert_block(track, b[1], err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_number_of_lines(track) == 1);
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + l_rest + BAR_HEIGHT_DEFAULT);
+  gt_ensure(had_err, !gt_error_is_set(err));
 
-  ensure(had_err, gt_track_insert_block(track, b[2], err) == 0);
-  ensure(had_err, !gt_error_is_set(err));
-  ensure(had_err, gt_track_get_number_of_lines(track) == 2);
-  ensure(had_err, gt_track_insert_block(track, b[3], err) == 0);
-  ensure(had_err, !gt_error_is_set(err));
-  ensure(had_err, gt_track_get_number_of_lines(track) == 2);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + 2*(l_rest + BAR_HEIGHT_DEFAULT));
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_insert_block(track, b[2], err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_number_of_lines(track) == 2);
+  gt_ensure(had_err, gt_track_insert_block(track, b[3], err) == 0);
+  gt_ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_number_of_lines(track) == 2);
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + 2*(l_rest + BAR_HEIGHT_DEFAULT));
+  gt_ensure(had_err, !gt_error_is_set(err));
 
   gt_style_set_num(sty, "exon", "bar_height", 42);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + 2*(l_rest+42));
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + 2*(l_rest+42));
+  gt_ensure(had_err, !gt_error_is_set(err));
   gt_style_set_num(sty, "gene", "bar_height", 23);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + 2*(l_rest+42));
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + 2*(l_rest+42));
+  gt_ensure(had_err, !gt_error_is_set(err));
   gt_style_unset(sty, "exon", "bar_height");
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + 2*(l_rest+23));
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + 2*(l_rest+23));
+  gt_ensure(had_err, !gt_error_is_set(err));
   gt_style_unset(sty, "gene", "bar_height");
   gt_style_set_num(sty, "format", "bar_height", 99);
-  ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
-  ensure(had_err, height == t_rest + 2*(l_rest+99));
-  ensure(had_err, !gt_error_is_set(err));
+  gt_ensure(had_err, gt_track_get_height(track, &height, sty, err) == 0);
+  gt_ensure(had_err, height == t_rest + 2*(l_rest+99));
+  gt_ensure(had_err, !gt_error_is_set(err));
 
-  ensure(had_err, gt_track_get_number_of_discarded_blocks(track) == 0);
+  gt_ensure(had_err, gt_track_get_number_of_discarded_blocks(track) == 0);
 
   gt_track_delete(track);
   gt_str_delete(title);

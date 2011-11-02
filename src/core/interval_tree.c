@@ -392,7 +392,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     gt_interval_tree_insert(it, new_node);
   }
 
-  ensure(had_err, gt_interval_tree_size(it) == num_testranges);
+  gt_ensure(had_err, gt_interval_tree_size(it) == num_testranges);
 
   /* perform test queries */
   for (i = 0; i < num_samples && !had_err; i++)
@@ -405,7 +405,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
     {
       /* we have a hit, check if really overlapping */
       res_rng = (GtRange*) gt_interval_tree_node_get_data(res);
-      ensure(had_err, gt_range_overlap(&qrange, res_rng));
+      gt_ensure(had_err, gt_range_overlap(&qrange, res_rng));
     } else {
       /* no hit, check whether there really is no overlapping
          interval in tree */
@@ -421,7 +421,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
           break;
         }
       }
-      ensure(had_err, !found);
+      gt_ensure(had_err, !found);
     }
   }
 
@@ -452,7 +452,7 @@ int gt_interval_tree_unit_test(GT_UNUSED GtError *err)
       gt_array_sort_stable(ref, range_ptr_compare);
       gt_array_sort_stable(res, range_ptr_compare);
       /* must be equal */
-      ensure(had_err, gt_array_cmp(ref, res)==0);
+      gt_ensure(had_err, gt_array_cmp(ref, res)==0);
       gt_array_delete(ref);
     }
     gt_array_delete(res);

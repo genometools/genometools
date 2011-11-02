@@ -89,13 +89,13 @@ int gt_cstr_table_unit_test(GtError *err)
   int had_err = 0;
   gt_error_check(err);
   table = gt_cstr_table_new();
-  ensure(had_err, !gt_cstr_table_get(table, "foo"));
+  gt_ensure(had_err, !gt_cstr_table_get(table, "foo"));
   if (!had_err)
     gt_cstr_table_add(table, "foo");
-  ensure(had_err, !strcmp(gt_cstr_table_get(table, "foo"), "foo"));
+  gt_ensure(had_err, !strcmp(gt_cstr_table_get(table, "foo"), "foo"));
   sta = gt_cstr_table_get_all(table);
-  ensure(had_err, gt_str_array_size(sta) == 1);
-  ensure(had_err, strcmp(gt_str_array_get(sta, 0), "foo") == 0);
+  gt_ensure(had_err, gt_str_array_size(sta) == 1);
+  gt_ensure(had_err, strcmp(gt_str_array_get(sta, 0), "foo") == 0);
   gt_str_array_delete(sta);
   gt_cstr_table_delete(table);
   return had_err;

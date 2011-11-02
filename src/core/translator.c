@@ -246,46 +246,46 @@ int gt_translator_unit_test(GtError *err)
   while (!test_errnum && translated) {
     gt_str_append_char(protein[frame], translated);
     test_errnum = gt_translator_next(tr, &translated, &frame, test_err);
-    ensure(had_err,
+    gt_ensure(had_err,
            test_errnum != GT_TRANSLATOR_ERROR && !gt_error_is_set(test_err));
   }
-  ensure(had_err,
+  gt_ensure(had_err,
          test_errnum == GT_TRANSLATOR_END && !gt_error_is_set(test_err));
 
   /* check 3-frame translation */
-  ensure(had_err, strcmp(gt_str_get(protein[0]),
+  gt_ensure(had_err, strcmp(gt_str_get(protein[0]),
                          "SFSF*LQRAICLCVD*KKSV**QLLNWLPAVSKLKFY*LR") == 0);
-  ensure(had_err, strcmp(gt_str_get(protein[1]),
+  gt_ensure(had_err, strcmp(gt_str_get(protein[1]),
                          "AFHSDCNGQYVSVWIKKRVSDSSF*TGYLP*VN*NFIDL") == 0);
-  ensure(had_err, strcmp(gt_str_get(protein[2]),
+  gt_ensure(had_err, strcmp(gt_str_get(protein[2]),
                          "LFILTATGNMSLCGLKKECLIAASELVTCRE*IKILLT*") == 0);
 
   /* find start codon -- positive */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_startcodon(tr, &pos, test_err);
-  ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
-  ensure(had_err, pos == 11UL);
+  gt_ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
+  gt_ensure(had_err, pos == 11UL);
 
   /* find stop codon -- positive */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_stopcodon(tr, &pos, test_err);
-  ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
-  ensure(had_err, pos == 12UL);
+  gt_ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
+  gt_ensure(had_err, pos == 12UL);
 
   /* find arbitrary codons -- positive */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_codon(tr, codons, &pos, test_err);
-  ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
-  ensure(had_err, pos == 14UL);
+  gt_ensure(had_err, !test_errnum && !gt_error_is_set(test_err));
+  gt_ensure(had_err, pos == 14UL);
 
   /* find arbitrary codons -- negative (invalid codons) */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_codon(tr, invalidcodons, &pos, test_err);
-  ensure(had_err,
+  gt_ensure(had_err,
          test_errnum == GT_TRANSLATOR_ERROR && gt_error_is_set(test_err));
 
   gt_error_unset(test_err);
@@ -293,11 +293,11 @@ int gt_translator_unit_test(GtError *err)
   ci = gt_codon_iterator_simple_new(invalidseq,
                                     (unsigned long) strlen(invalidseq),
                                     test_err);
-  ensure(had_err, ci && !gt_error_is_set(test_err));
+  gt_ensure(had_err, ci && !gt_error_is_set(test_err));
   gt_translator_reset(tr, ci);
   /* check translation of sequence with invalid beginning */
   test_errnum = gt_translator_next(tr, &translated, &frame, test_err);
-  ensure(had_err, test_errnum && gt_error_is_set(test_err));
+  gt_ensure(had_err, test_errnum && gt_error_is_set(test_err));
 
   /* check translation of sequence with invalid character within */
   gt_error_unset(test_err);
@@ -305,14 +305,14 @@ int gt_translator_unit_test(GtError *err)
   ci = gt_codon_iterator_simple_new(invalidseq2,
                                     (unsigned long) strlen(invalidseq2),
                                     test_err);
-  ensure(had_err, ci && !gt_error_is_set(test_err));
+  gt_ensure(had_err, ci && !gt_error_is_set(test_err));
   gt_translator_reset(tr, ci);
   test_errnum = gt_translator_next(tr, &translated, &frame, test_err);
   while (!test_errnum && translated) {
     gt_str_append_char(protein[frame], translated);
     test_errnum = gt_translator_next(tr, &translated, &frame, test_err);
   }
-  ensure(had_err,
+  gt_ensure(had_err,
          test_errnum == GT_TRANSLATOR_ERROR && gt_error_is_set(test_err));
 
   /* find start codon -- fail */
@@ -321,24 +321,24 @@ int gt_translator_unit_test(GtError *err)
   ci = gt_codon_iterator_simple_new(no_startcodon,
                                     (unsigned long) strlen(no_startcodon),
                                     test_err);
-  ensure(had_err, ci && !gt_error_is_set(test_err));
+  gt_ensure(had_err, ci && !gt_error_is_set(test_err));
   gt_translator_reset(tr, ci);
   test_errnum = gt_translator_find_startcodon(tr, &pos, test_err);
-  ensure(had_err,
+  gt_ensure(had_err,
          test_errnum == GT_TRANSLATOR_END && !gt_error_is_set(test_err));
 
   /* find stop codon -- fail */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_stopcodon(tr, &pos, test_err);
-  ensure(had_err,
+  gt_ensure(had_err,
          test_errnum == GT_TRANSLATOR_END && !gt_error_is_set(test_err));
 
   /* find arbitrary codons -- negative (none there) */
   gt_error_unset(test_err);
   gt_codon_iterator_rewind(ci);
   test_errnum = gt_translator_find_codon(tr, codons, &pos, test_err);
-  ensure(had_err,
+  gt_ensure(had_err,
          test_errnum == GT_TRANSLATOR_END && !gt_error_is_set(test_err));
 
   gt_codon_iterator_delete(ci);

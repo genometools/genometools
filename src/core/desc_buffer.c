@@ -160,9 +160,9 @@ int gt_desc_buffer_unit_test(GtError *err)
 
   s = gt_desc_buffer_new();
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, "") == 0);
-  ensure(had_err, ret == s->buf);
-  ensure(had_err, gt_desc_buffer_length(s) == 0);
+  gt_ensure(had_err, strcmp(ret, "") == 0);
+  gt_ensure(had_err, ret == s->buf);
+  gt_ensure(had_err, gt_desc_buffer_length(s) == 0);
   gt_desc_buffer_delete(s);
 
   s = gt_desc_buffer_new();
@@ -171,9 +171,9 @@ int gt_desc_buffer_unit_test(GtError *err)
   }
   gt_desc_buffer_finish(s);
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, strs[0]) == 0);
-  ensure(had_err, ret == s->buf);
-  ensure(had_err, gt_desc_buffer_length(s) == 4);
+  gt_ensure(had_err, strcmp(ret, strs[0]) == 0);
+  gt_ensure(had_err, ret == s->buf);
+  gt_ensure(had_err, gt_desc_buffer_length(s) == 4);
   gt_desc_buffer_delete(s);
 
   s = gt_desc_buffer_new();
@@ -184,12 +184,12 @@ int gt_desc_buffer_unit_test(GtError *err)
     gt_desc_buffer_finish(s);
   }
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, strs[0]) == 0);
-  ensure(had_err, ret == s->buf);
+  gt_ensure(had_err, strcmp(ret, strs[0]) == 0);
+  gt_ensure(had_err, ret == s->buf);
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, strs[1]) == 0);
-  ensure(had_err, ret == s->buf+4);
-  ensure(had_err, gt_desc_buffer_length(s) == 8);
+  gt_ensure(had_err, strcmp(ret, strs[1]) == 0);
+  gt_ensure(had_err, ret == s->buf+4);
+  gt_ensure(had_err, gt_desc_buffer_length(s) == 8);
   gt_desc_buffer_delete(s);
 
   s = gt_desc_buffer_new();
@@ -200,15 +200,15 @@ int gt_desc_buffer_unit_test(GtError *err)
     gt_desc_buffer_finish(s);
   }
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, strs[0]) == 0);
-  ensure(had_err, ret == s->buf);
+  gt_ensure(had_err, strcmp(ret, strs[0]) == 0);
+  gt_ensure(had_err, ret == s->buf);
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, strs[1]) == 0);
-  ensure(had_err, ret == s->buf+4);
+  gt_ensure(had_err, strcmp(ret, strs[1]) == 0);
+  gt_ensure(had_err, ret == s->buf+4);
   ret = gt_desc_buffer_get_next(s);
-  ensure(had_err, strcmp(ret, strs[2]) == 0);
-  ensure(had_err, ret == s->buf+8);
-  ensure(had_err, gt_desc_buffer_length(s) == 12);
+  gt_ensure(had_err, strcmp(ret, strs[2]) == 0);
+  gt_ensure(had_err, ret == s->buf+8);
+  gt_ensure(had_err, gt_desc_buffer_length(s) == 12);
   gt_desc_buffer_delete(s);
 
   return had_err;

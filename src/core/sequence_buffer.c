@@ -233,26 +233,26 @@ int gt_sequence_buffer_unit_test(GtError *err)
                  "     gatcgcgcta\n"
                  "//\n");
   gt_fa_xfclose(tmpfp);
-  ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
+  gt_ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
   gt_str_array_add(testfiles, tmpfilename);
   gt_str_reset(tmpfilename);
   tmpfp = gt_xtmpfp(tmpfilename);
   fprintf(tmpfp, ">test3\nseq3xx\n"
                  ">test4\nseq4xxx\n");
   gt_fa_xfclose(tmpfp);
-  ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
+  gt_ensure(had_err, gt_file_exists(gt_str_get(tmpfilename)));
   gt_str_array_add(testfiles, tmpfilename);
   gt_str_delete(tmpfilename);
 
   sb = gt_sequence_buffer_new_guess_type(testfiles, err);
-  ensure(had_err, sb != NULL);
+  gt_ensure(had_err, sb != NULL);
 
   gt_sequence_buffer_delete(sb);
   for (i=0;i<gt_str_array_size(testfiles);i++) {
     const char *fn;
     fn = gt_str_array_get(testfiles, i);
     gt_xremove(fn);
-    ensure(had_err, !gt_file_exists(fn));
+    gt_ensure(had_err, !gt_file_exists(fn));
   }
   gt_str_array_delete(testfiles);
 

@@ -321,11 +321,11 @@ int gt_feature_index_memory_unit_test(GtError *err)
   gt_error_check(err);
 
   fi = gt_feature_index_memory_new();
-  ensure(had_err, fi);
+  gt_ensure(had_err, fi);
 
   /* run generic feature index tests */
   had_err = gt_feature_index_unit_test(fi, err);
-  ensure(had_err, status == 0);
+  gt_ensure(had_err, status == 0);
 
   /* run subclass specific tests */
   testerr = gt_error_new();
@@ -336,16 +336,16 @@ int gt_feature_index_memory_unit_test(GtError *err)
   tmp = gt_feature_index_memory_get_node_by_ptr(
                                             gt_feature_index_memory_cast(fi),
                                             fn, testerr);
-  ensure(had_err, tmp == fn);
-  ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, tmp == fn);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
 
   /* we don't store NULL pointers */
   tmp = gt_feature_index_memory_get_node_by_ptr(
                                                gt_feature_index_memory_cast(fi),
                                                (GtFeatureNode*) 0,
                                                 testerr);
-  ensure(had_err, tmp == NULL);
-  ensure(had_err, gt_error_is_set(testerr));
+  gt_ensure(had_err, tmp == NULL);
+  gt_ensure(had_err, gt_error_is_set(testerr));
   gt_genome_node_delete((GtGenomeNode*) fn);
   gt_feature_index_delete(fi);
 

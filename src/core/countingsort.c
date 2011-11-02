@@ -82,7 +82,7 @@ int gt_countingsort_unit_test(GtError *err)
                   gt_countingsort_get_max(numbers, sizeof (unsigned int), 5,
                                           NULL, get_int),
                   NULL,  get_int);
-  ensure(had_err,
+  gt_ensure(had_err,
          !memcmp(sorted_numbers, numbers_out, sizeof (unsigned int) * 5));
   return had_err;
 }

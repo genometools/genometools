@@ -218,40 +218,40 @@ int gt_mathsupport_unit_test(GtError *err)
   double less_than_epsilon = 0.0000000000000001;
   gt_error_check(err);
 
-  ensure(had_err, !gt_double_equals_one(1.1));
-  ensure(had_err, gt_double_equals_one(1));
-  ensure(had_err, gt_double_equals_one(1+less_than_epsilon));
-  ensure(had_err, !gt_double_equals_one(-1-less_than_epsilon));
+  gt_ensure(had_err, !gt_double_equals_one(1.1));
+  gt_ensure(had_err, gt_double_equals_one(1));
+  gt_ensure(had_err, gt_double_equals_one(1+less_than_epsilon));
+  gt_ensure(had_err, !gt_double_equals_one(-1-less_than_epsilon));
 
-  ensure(had_err, !gt_double_equals_double(1.0, 2.0));
-  ensure(had_err, !gt_double_equals_double(-1.0, 1.0));
-  ensure(had_err, !gt_double_equals_double(1.0, -1.0));
-  ensure(had_err, !gt_double_equals_double(-1.0, 1+less_than_epsilon));
-  ensure(had_err, !gt_double_equals_double(1.0, 1.1));
-  ensure(had_err, gt_double_equals_double(1.0, 1+less_than_epsilon));
-  ensure(had_err, gt_double_equals_double(1.0, 1.0));
-  ensure(had_err, gt_double_equals_double(0.0, 0.0));
-  ensure(had_err, gt_double_equals_double(-1.0, -1.0));
-  ensure(had_err, gt_double_equals_double(-1.0+less_than_epsilon, -1.0));
-  ensure(had_err, gt_double_equals_double(-1.0, -1.0+less_than_epsilon));
-  ensure(had_err, gt_double_equals_double(1.0+less_than_epsilon, 1.0));
-  ensure(had_err, gt_double_equals_double(1.0, 1.0+less_than_epsilon));
+  gt_ensure(had_err, !gt_double_equals_double(1.0, 2.0));
+  gt_ensure(had_err, !gt_double_equals_double(-1.0, 1.0));
+  gt_ensure(had_err, !gt_double_equals_double(1.0, -1.0));
+  gt_ensure(had_err, !gt_double_equals_double(-1.0, 1+less_than_epsilon));
+  gt_ensure(had_err, !gt_double_equals_double(1.0, 1.1));
+  gt_ensure(had_err, gt_double_equals_double(1.0, 1+less_than_epsilon));
+  gt_ensure(had_err, gt_double_equals_double(1.0, 1.0));
+  gt_ensure(had_err, gt_double_equals_double(0.0, 0.0));
+  gt_ensure(had_err, gt_double_equals_double(-1.0, -1.0));
+  gt_ensure(had_err, gt_double_equals_double(-1.0+less_than_epsilon, -1.0));
+  gt_ensure(had_err, gt_double_equals_double(-1.0, -1.0+less_than_epsilon));
+  gt_ensure(had_err, gt_double_equals_double(1.0+less_than_epsilon, 1.0));
+  gt_ensure(had_err, gt_double_equals_double(1.0, 1.0+less_than_epsilon));
 
-  ensure(had_err, gt_double_compare(1.0, 1.0) == 0);
-  ensure(had_err, gt_double_compare(1.0, 1.1) < 0);
-  ensure(had_err, gt_double_compare(1.1, 1.0) > 0);
-  ensure(had_err, gt_double_compare(1.1, -1.0) > 0);
-  ensure(had_err, gt_double_compare(-1.1, -1.0) < 0);
-  ensure(had_err, gt_double_compare(1+less_than_epsilon, 1.0) == 0);
-  ensure(had_err, gt_double_compare(1+less_than_epsilon, -1.0) > 0);
-  ensure(had_err, gt_double_compare(-1+less_than_epsilon, -1.0) == 0);
-  ensure(had_err, gt_double_compare(-1+less_than_epsilon, 1.0) < 0);
+  gt_ensure(had_err, gt_double_compare(1.0, 1.0) == 0);
+  gt_ensure(had_err, gt_double_compare(1.0, 1.1) < 0);
+  gt_ensure(had_err, gt_double_compare(1.1, 1.0) > 0);
+  gt_ensure(had_err, gt_double_compare(1.1, -1.0) > 0);
+  gt_ensure(had_err, gt_double_compare(-1.1, -1.0) < 0);
+  gt_ensure(had_err, gt_double_compare(1+less_than_epsilon, 1.0) == 0);
+  gt_ensure(had_err, gt_double_compare(1+less_than_epsilon, -1.0) > 0);
+  gt_ensure(had_err, gt_double_compare(-1+less_than_epsilon, -1.0) == 0);
+  gt_ensure(had_err, gt_double_compare(-1+less_than_epsilon, 1.0) < 0);
 
-  ensure(had_err, gt_double_smaller_double(1.0, 1.1));
-  ensure(had_err, gt_double_smaller_double(-1.0, 1.1));
-  ensure(had_err, gt_double_smaller_double(-1.1, -1.0));
-  ensure(had_err, !gt_double_smaller_double(-1.0, -1.1));
-  ensure(had_err, !gt_double_smaller_double(1.0-less_than_epsilon, 1.0));
+  gt_ensure(had_err, gt_double_smaller_double(1.0, 1.1));
+  gt_ensure(had_err, gt_double_smaller_double(-1.0, 1.1));
+  gt_ensure(had_err, gt_double_smaller_double(-1.1, -1.0));
+  gt_ensure(had_err, !gt_double_smaller_double(-1.0, -1.1));
+  gt_ensure(had_err, !gt_double_smaller_double(1.0-less_than_epsilon, 1.0));
 
   return had_err;
 }

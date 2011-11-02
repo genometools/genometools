@@ -799,37 +799,37 @@ int gt_style_unit_test(GtError *err)
   testerr = gt_error_new();
 
   /* instantiate new style object */
-  ensure(had_err, (sty = gt_style_new(testerr)) != NULL);
-  ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, (sty = gt_style_new(testerr)) != NULL);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
 
   /* test safe/unsafe mode switching */
-  ensure(had_err, !gt_style_is_unsafe(sty));
+  gt_ensure(had_err, !gt_style_is_unsafe(sty));
   gt_style_unsafe_mode(sty);
-  ensure(had_err, gt_style_is_unsafe(sty));
+  gt_ensure(had_err, gt_style_is_unsafe(sty));
   gt_style_safe_mode(sty);
-  ensure(had_err, !gt_style_is_unsafe(sty));
+  gt_ensure(had_err, !gt_style_is_unsafe(sty));
 
   /* at the beginning, all values are defaults, since nothing is defined */
-  ensure(had_err, gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL,
+  gt_ensure(had_err, gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL,
                                      testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, gt_color_equals(&tmpcol, &defcol));
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, gt_style_get_color(sty, "cds", "fill", &tmpcol, NULL,
+  gt_ensure(had_err, gt_color_equals(&tmpcol, &defcol));
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, gt_style_get_color(sty, "cds", "fill", &tmpcol, NULL,
                                      testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, gt_color_equals(&tmpcol, &defcol));
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL,
+  gt_ensure(had_err, gt_color_equals(&tmpcol, &defcol));
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL,
                                      testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, gt_color_equals(&tmpcol, &defcol));
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, gt_style_get_num(sty, "format", "margins", &num, NULL,
+  gt_ensure(had_err, gt_color_equals(&tmpcol, &defcol));
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, gt_style_get_num(sty, "format", "margins", &num, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, num == 10.0);
-  ensure(had_err, gt_style_get_bool(sty, "exon", "collapse_to_parent", &val,
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, num == 10.0);
+  gt_ensure(had_err, gt_style_get_bool(sty, "exon", "collapse_to_parent", &val,
                                     NULL, testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, !val);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, !val);
 
   /* change some values... */
   (void) gt_style_set_color(sty, "exon", "fill", &col1);
@@ -838,55 +838,55 @@ int gt_style_unit_test(GtError *err)
 
   /* is it saved correctly? */
   (void) gt_style_get_color(sty, "exon", "fill", &tmpcol, NULL, testerr);
-  ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
-  ensure(had_err, gt_color_equals(&tmpcol, &col1));
-  ensure(had_err, gt_style_get_num(sty, "format", "margins", &num, NULL,
+  gt_ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+  gt_ensure(had_err, gt_color_equals(&tmpcol, &col1));
+  gt_ensure(had_err, gt_style_get_num(sty, "format", "margins", &num, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, num == 11.0);
-  ensure(had_err, !gt_error_is_set(testerr));
-  ensure(had_err, gt_style_get_num(sty, "format", "foo", &num, NULL,
+  gt_ensure(had_err, num == 11.0);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, gt_style_get_num(sty, "format", "foo", &num, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, num == 2.0);
-  ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, num == 2.0);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
 
   /* create a new color definition */
   gt_style_set_color(sty, "foo", "fill", &col2);
   gt_style_set_str(sty, "bar", "baz", test1);
 
   /* is it saved correctly? */
-  ensure(had_err, gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL,
+  gt_ensure(had_err, gt_style_get_color(sty, "foo", "fill", &tmpcol, NULL,
                                      testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
-  ensure(had_err, gt_color_equals(&tmpcol, &col2));
+  gt_ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+  gt_ensure(had_err, gt_color_equals(&tmpcol, &col2));
   gt_str_reset(str);
-  ensure(had_err, gt_style_get_str(sty, "bar", "baz", str, NULL,
+  gt_ensure(had_err, gt_style_get_str(sty, "bar", "baz", str, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
-  ensure(had_err, (gt_str_cmp(str,test1)==0));
+  gt_ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
+  gt_ensure(had_err, (gt_str_cmp(str,test1)==0));
   gt_str_reset(str);
-  ensure(had_err, gt_style_get_str(sty, "bar", "test", str, NULL,
+  gt_ensure(had_err, gt_style_get_str(sty, "bar", "test", str, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, (strcmp(gt_str_get(str),"")==0));
+  gt_ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
   /* clone a GtStyle object */
   new_sty = gt_style_clone(sty, testerr);
-  ensure(had_err, new_sty  != NULL);
-  ensure(had_err, !gt_error_is_set(testerr));
+  gt_ensure(had_err, new_sty  != NULL);
+  gt_ensure(had_err, !gt_error_is_set(testerr));
 
   /* check again */
-  ensure(had_err, gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL,
+  gt_ensure(had_err, gt_style_get_color(new_sty, "foo", "fill", &tmpcol, NULL,
                                      testerr) == 0);
-  ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
-  ensure(had_err, gt_color_equals(&tmpcol, &col2));
+  gt_ensure(had_err, !gt_color_equals(&tmpcol, &defcol));
+  gt_ensure(had_err, gt_color_equals(&tmpcol, &col2));
   gt_str_reset(str);
-  ensure(had_err, gt_style_get_str(new_sty, "bar", "baz", str, NULL,
+  gt_ensure(had_err, gt_style_get_str(new_sty, "bar", "baz", str, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
-  ensure(had_err, (gt_str_cmp(str,test1)==0));
+  gt_ensure(had_err, (strcmp(gt_str_get(str),"")!=0));
+  gt_ensure(had_err, (gt_str_cmp(str,test1)==0));
   gt_str_reset(str);
-  ensure(had_err, gt_style_get_str(new_sty, "bar", "test", str, NULL,
+  gt_ensure(had_err, gt_style_get_str(new_sty, "bar", "test", str, NULL,
                                    testerr) != GT_STYLE_QUERY_ERROR);
-  ensure(had_err, (strcmp(gt_str_get(str),"")==0));
+  gt_ensure(had_err, (strcmp(gt_str_get(str),"")==0));
 
   /* mem cleanup */
   gt_error_delete(testerr);

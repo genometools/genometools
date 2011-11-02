@@ -61,7 +61,7 @@ int gt_bitpackarray_unit_test(GtError *err)
     {
       uint32_t v = randSrc[i];
       uint32_t r = bitpackarray_get_uint32(bitStore, i);
-      ensure(had_err, (v & mask) == r);
+      gt_ensure(had_err, (v & mask) == r);
       if (had_err)
       {
         gt_log_log("gt_bsStoreUInt32/bitpackarray_get_uint32: "
@@ -91,7 +91,7 @@ int gt_bitpackarray_unit_test(GtError *err)
       mask = ~(uint64_t)0;
     else
       mask = ~((~(uint64_t)0)<<bits);
-    ensure(had_err, (randSrc = gt_malloc(sizeof (uint64_t)*numRnd))
+    gt_ensure(had_err, (randSrc = gt_malloc(sizeof (uint64_t)*numRnd))
            && (bitStore = bitpackarray_new(bits, numRnd,true))
            && (randCmp = gt_malloc(sizeof (uint64_t)*numRnd)));
     if (had_err)
@@ -114,7 +114,7 @@ int gt_bitpackarray_unit_test(GtError *err)
     {
       uint64_t v = randSrc[i];
       uint64_t r = bitpackarray_get_uint64(bitStore, i);
-      ensure(had_err, (v & mask) == r);
+      gt_ensure(had_err, (v & mask) == r);
       if (had_err)
       {
         gt_log_log("gt_bsStoreUInt64/bitpackarray_get_uint64: "

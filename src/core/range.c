@@ -229,7 +229,7 @@ int gt_range_unit_test(GtError *err)
   int had_err = 0;
   gt_error_check(err);
 
-  ensure(had_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
+  gt_ensure(had_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
                   sizeof (counts)     / sizeof (counts[0]));
 
   /* test gt_ranges_uniq() */
@@ -240,14 +240,14 @@ int gt_range_unit_test(GtError *err)
        i++)
     gt_array_add(ranges, ranges_in[i]);
   gt_ranges_uniq(tmp_ranges, ranges);
-  ensure(had_err, gt_array_size(ranges) ==
+  gt_ensure(had_err, gt_array_size(ranges) ==
                   sizeof (ranges_in) / sizeof (ranges_in[0]));
-  ensure(had_err, gt_array_size(tmp_ranges) ==
+  gt_ensure(had_err, gt_array_size(tmp_ranges) ==
                   sizeof (ranges_out) / sizeof (ranges_out[0]));
   for (i = 0; i < gt_array_size(tmp_ranges) && !had_err; i++) {
-    ensure(had_err, ranges_out[i].start ==
+    gt_ensure(had_err, ranges_out[i].start ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
-    ensure(had_err, ranges_out[i].end ==
+    gt_ensure(had_err, ranges_out[i].end ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
 
@@ -256,36 +256,38 @@ int gt_range_unit_test(GtError *err)
   gt_array_add_array(tmp_ranges, ranges);
   gt_ranges_uniq_in_place(tmp_ranges);
   for (i = 0; i < gt_array_size(tmp_ranges) && !had_err; i++) {
-    ensure(had_err, ranges_out[i].start ==
+    gt_ensure(had_err, ranges_out[i].start ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
-    ensure(had_err, ranges_out[i].end ==
+    gt_ensure(had_err, ranges_out[i].end ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
 
   /* test gt_ranges_uniq_count() */
   gt_array_reset(tmp_ranges);
   ctr = gt_ranges_uniq_count(tmp_ranges, ranges);
-  ensure(had_err, gt_array_size(tmp_ranges) == gt_array_size(ctr));
-  ensure(had_err, gt_array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
+  gt_ensure(had_err, gt_array_size(tmp_ranges) == gt_array_size(ctr));
+  gt_ensure(had_err,
+            gt_array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
-    ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
-    ensure(had_err, ranges_out[i].start ==
+    gt_ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
+    gt_ensure(had_err, ranges_out[i].start ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).start);
-    ensure(had_err, ranges_out[i].end ==
+    gt_ensure(had_err, ranges_out[i].end ==
                     (*(GtRange*) gt_array_get(tmp_ranges, i)).end);
   }
   gt_array_delete(ctr);
 
   /* test gt_ranges_uniq_in_place_count() */
   ctr = gt_ranges_uniq_in_place_count(ranges);
-  ensure(had_err, gt_array_size(ranges) == gt_array_size(ctr));
-  ensure(had_err, gt_array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
+  gt_ensure(had_err, gt_array_size(ranges) == gt_array_size(ctr));
+  gt_ensure(had_err,
+            gt_array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < gt_array_size(ctr) && !had_err; i++) {
-    ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
-    ensure(had_err,
+    gt_ensure(had_err, counts[i] == *(unsigned long*) gt_array_get(ctr, i));
+    gt_ensure(had_err,
            ranges_out[i].start == (*(GtRange*)
                                              gt_array_get(ranges, i)).start);
-    ensure(had_err,
+    gt_ensure(had_err,
            ranges_out[i].end == (*(GtRange*) gt_array_get(ranges, i)).end);
   }
   gt_array_delete(ctr);
@@ -294,11 +296,11 @@ int gt_range_unit_test(GtError *err)
   if (!had_err) {
     GtRange range = { 1, 100 };
     range = gt_range_reorder(range);
-    ensure(had_err, range.start == 1 && range.end == 100);
+    gt_ensure(had_err, range.start == 1 && range.end == 100);
     range.start = 100;
     range.end = 1;
     range = gt_range_reorder(range);
-    ensure(had_err, range.start == 1 && range.end == 100);
+    gt_ensure(had_err, range.start == 1 && range.end == 100);
   }
 
   /* free */

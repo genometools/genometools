@@ -158,41 +158,41 @@ int gt_line_unit_test(GtError *err)
   gt_block_set_range(b2, r2);
 
   /* test gt_line_insert_block */
-  ensure(had_err,  (0 == gt_array_size(gt_line_get_blocks(l1))));
+  gt_ensure(had_err,  (0 == gt_array_size(gt_line_get_blocks(l1))));
   gt_line_insert_block(l1, b1);
-  ensure(had_err,  (1 == gt_array_size(gt_line_get_blocks(l1))));
+  gt_ensure(had_err,  (1 == gt_array_size(gt_line_get_blocks(l1))));
   gt_line_insert_block(l1, b2);
-  ensure(had_err,  (2 == gt_array_size(gt_line_get_blocks(l1))));
+  gt_ensure(had_err,  (2 == gt_array_size(gt_line_get_blocks(l1))));
 
   /* test gt_line_get_blocks */
   blocks = gt_line_get_blocks(l1);
-  ensure(had_err, (2 == gt_array_size(blocks)));
+  gt_ensure(had_err, (2 == gt_array_size(blocks)));
 
   /* test gt_line_get_height() */
   if (!had_err)
   {
     sty = gt_style_new(err);
-    ensure(had_err, sty && !gt_error_is_set(err));
-    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
-    ensure(had_err, height == BAR_HEIGHT_DEFAULT);
-    ensure(had_err, !gt_error_is_set(err));
+    gt_ensure(had_err, sty && !gt_error_is_set(err));
+    gt_ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    gt_ensure(had_err, height == BAR_HEIGHT_DEFAULT);
+    gt_ensure(had_err, !gt_error_is_set(err));
     gt_style_set_num(sty, "exon", "bar_height", 42);
-    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
-    ensure(had_err, height == 42);
-    ensure(had_err, !gt_error_is_set(err));
+    gt_ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    gt_ensure(had_err, height == 42);
+    gt_ensure(had_err, !gt_error_is_set(err));
     gt_style_set_num(sty, "gene", "bar_height", 23);
-    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
-    ensure(had_err, height == 42);
-    ensure(had_err, !gt_error_is_set(err));
+    gt_ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    gt_ensure(had_err, height == 42);
+    gt_ensure(had_err, !gt_error_is_set(err));
     gt_style_unset(sty, "exon", "bar_height");
-    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
-    ensure(had_err, height == 23);
-    ensure(had_err, !gt_error_is_set(err));
+    gt_ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    gt_ensure(had_err, height == 23);
+    gt_ensure(had_err, !gt_error_is_set(err));
     gt_style_unset(sty, "gene", "bar_height");
     gt_style_set_num(sty, "format", "bar_height", 99);
-    ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
-    ensure(had_err, height == 99);
-    ensure(had_err, !gt_error_is_set(err));
+    gt_ensure(had_err, gt_line_get_height(l1, &height, sty, err) == 0);
+    gt_ensure(had_err, height == 99);
+    gt_ensure(had_err, !gt_error_is_set(err));
   }
 
   gt_str_delete(seqid1);

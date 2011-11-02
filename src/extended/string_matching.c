@@ -217,10 +217,10 @@ int gt_string_matching_unit_test(GtError *err)
   gt_string_matching_shift_and(text, strlen(text), "", 0, store_match,
                             shift_and_matches);
 
-  ensure(had_err, !gt_array_size(brute_force_matches));
-  ensure(had_err, !gt_array_size(bmh_matches));
-  ensure(had_err, !gt_array_size(kmp_matches));
-  ensure(had_err, !gt_array_size(shift_and_matches));
+  gt_ensure(had_err, !gt_array_size(brute_force_matches));
+  gt_ensure(had_err, !gt_array_size(bmh_matches));
+  gt_ensure(had_err, !gt_array_size(kmp_matches));
+  gt_ensure(had_err, !gt_array_size(shift_and_matches));
 
   for (i = 0; !had_err && i < STRING_MATCHING_NUM_OF_TESTS; i++) {
     unsigned long j, n, m;
@@ -245,9 +245,9 @@ int gt_string_matching_unit_test(GtError *err)
     gt_string_matching_shift_and(s, n, p, m, store_first_match,
                                  &shift_and_match);
     /* comparing (first match) */
-    ensure(had_err, brute_force_match == bmh_match);
-    ensure(had_err, brute_force_match == kmp_match);
-    ensure(had_err, brute_force_match == shift_and_match);
+    gt_ensure(had_err, brute_force_match == bmh_match);
+    gt_ensure(had_err, brute_force_match == kmp_match);
+    gt_ensure(had_err, brute_force_match == shift_and_match);
     /* matching (all matches) */
     gt_string_matching_brute_force(s, n, p, m, store_match,
                                    brute_force_matches);
@@ -255,15 +255,15 @@ int gt_string_matching_unit_test(GtError *err)
     gt_string_matching_kmp(s, n, p, m, store_match, kmp_matches);
     gt_string_matching_shift_and(s, n, p, m, store_match, shift_and_matches);
     /* comparing (all matches) */
-    ensure(had_err, gt_array_size(brute_force_matches) ==
+    gt_ensure(had_err, gt_array_size(brute_force_matches) ==
                     gt_array_size(bmh_matches));
-    ensure(had_err, gt_array_size(brute_force_matches) ==
+    gt_ensure(had_err, gt_array_size(brute_force_matches) ==
                     gt_array_size(kmp_matches));
-    ensure(had_err, gt_array_size(brute_force_matches) ==
+    gt_ensure(had_err, gt_array_size(brute_force_matches) ==
                     gt_array_size(shift_and_matches));
-    ensure(had_err, !gt_array_cmp(brute_force_matches, bmh_matches));
-    ensure(had_err, !gt_array_cmp(brute_force_matches, kmp_matches));
-    ensure(had_err, !gt_array_cmp(brute_force_matches, shift_and_matches));
+    gt_ensure(had_err, !gt_array_cmp(brute_force_matches, bmh_matches));
+    gt_ensure(had_err, !gt_array_cmp(brute_force_matches, kmp_matches));
+    gt_ensure(had_err, !gt_array_cmp(brute_force_matches, shift_and_matches));
     /* reset */
     gt_array_reset(brute_force_matches);
     gt_array_reset(bmh_matches);

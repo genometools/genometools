@@ -62,60 +62,60 @@ int gt_basename_unit_test(GtError *err)
   gt_error_check(err);
 
   bn = gt_basename("/usr/lib");
-  ensure(had_err, !strcmp(bn, "lib"));
+  gt_ensure(had_err, !strcmp(bn, "lib"));
   gt_free(bn);
 
   if (!had_err) {
     bn = gt_basename("/usr/");
-    ensure(had_err, !strcmp(bn, "usr"));
+    gt_ensure(had_err, !strcmp(bn, "usr"));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename("usr");
-    ensure(had_err, !strcmp(bn, "usr"));
+    gt_ensure(had_err, !strcmp(bn, "usr"));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename("/");
-    ensure(had_err, !strcmp(bn, "/"));
+    gt_ensure(had_err, !strcmp(bn, "/"));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename("///");
-    ensure(had_err, !strcmp(bn, "/"));
+    gt_ensure(had_err, !strcmp(bn, "/"));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename("//usr//lib//");
-    ensure(had_err, !strcmp(bn, "lib"));
+    gt_ensure(had_err, !strcmp(bn, "lib"));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename(NULL);
-    ensure(had_err, !strcmp(bn, "."));
+    gt_ensure(had_err, !strcmp(bn, "."));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename("");
-    ensure(had_err, !strcmp(bn, "."));
+    gt_ensure(had_err, !strcmp(bn, "."));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename(".");
-    ensure(had_err, !strcmp(bn, "."));
+    gt_ensure(had_err, !strcmp(bn, "."));
     gt_free(bn);
   }
 
   if (!had_err) {
     bn = gt_basename("..");
-    ensure(had_err, !strcmp(bn, ".."));
+    gt_ensure(had_err, !strcmp(bn, ".."));
     gt_free(bn);
   }
 

@@ -439,7 +439,7 @@ int gt_ppt_unit_test(GtError *err)
   rev_seq = gt_malloc(600 * sizeof (char));
   memcpy(seq,     fullseq + 20, (size_t) 600);
   memcpy(rev_seq, fullseq + 20, (size_t) 600);
-  ensure(had_err, !gt_reverse_complement(rev_seq, 600UL, err));
+  gt_ensure(had_err, !gt_reverse_complement(rev_seq, 600UL, err));
 
   element.leftLTR_5 = 20UL;
   element.leftLTR_3 = 119UL;
@@ -462,26 +462,26 @@ int gt_ppt_unit_test(GtError *err)
   o.ubox_u_prob = UBOX_U_PROB;
   rs = gt_ppt_find(seq, rev_seq, &element, &o);
 
-  ensure(had_err, gt_ppt_results_get_number_of_hits(rs) == 2UL);
+  gt_ensure(had_err, gt_ppt_results_get_number_of_hits(rs) == 2UL);
   h = gt_ppt_results_get_ranked_hit(rs, 0);
-  ensure(had_err, h);
+  gt_ensure(had_err, h);
   rng = gt_ppt_hit_get_coords(h);
-  ensure(had_err, rng.start == 507UL);
-  ensure(had_err, rng.end == 519UL);
+  gt_ensure(had_err, rng.start == 507UL);
+  gt_ensure(had_err, rng.end == 519UL);
   memset(tmp, 0, BUFSIZ);
   memcpy(tmp, fullseq + (rng.start * sizeof (char)),
          (size_t) ((rng.end - rng.start + 1) * sizeof (char)));
-  ensure(had_err, strcmp(tmp, "gggatagggggag" ) == 0);
+  gt_ensure(had_err, strcmp(tmp, "gggatagggggag" ) == 0);
 
   h = gt_ppt_results_get_ranked_hit(rs, 1UL);
-  ensure(had_err, h);
+  gt_ensure(had_err, h);
   rng = gt_ppt_hit_get_coords(h);
-  ensure(had_err, rng.start == 124UL);
-  ensure(had_err, rng.end == 133UL);
+  gt_ensure(had_err, rng.start == 124UL);
+  gt_ensure(had_err, rng.end == 133UL);
   memset(tmp, 0, BUFSIZ);
   memcpy(tmp, fullseq + (rng.start * sizeof (char)),
          (size_t) ((rng.end - rng.start + 1) * sizeof (char)));
-  ensure(had_err, strcmp(tmp, "tcttctttct" ) == 0);
+  gt_ensure(had_err, strcmp(tmp, "tcttctttct" ) == 0);
 
   gt_free(rev_seq);
   gt_free(seq);
