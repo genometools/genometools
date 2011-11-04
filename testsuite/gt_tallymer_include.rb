@@ -23,7 +23,7 @@ def checktallymer(reffile,mersize)
   run_test("#{$bin}gt tallymer mkindex -test -mersize #{mersize} -esa sfxidx",
            :maxtime => 360)
   suffix="tyrmkiout"
-  run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
+  run "mv #{last_stdout} #{reffile}.gt#{suffix}"
   run "cmp -s #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
   run_test "#{$bin}gt tallymer mkindex #{outoptions} " + 
            "-indexname tyr-index -esa sfxidx", :maxtime => 360
@@ -31,7 +31,7 @@ def checktallymer(reffile,mersize)
     suffix="tyrseaout"
     run_test "#{$bin}gt tallymer search -strand fp -output qseqnum qpos " + 
              "counts sequence -test -tyr tyr-index -q #{query}", :maxtime => 360
-    run "mv #{$last_stdout} #{reffile}.gt#{suffix}"
+    run "mv #{last_stdout} #{reffile}.gt#{suffix}"
     run "cmp -s #{reffile}.gt#{suffix} #{reftestdir}/#{reffile}.#{suffix}"
   end
 end

@@ -19,7 +19,7 @@ Keywords "gt_sketch"
 Test do
   run_test("#{$bin}gt sketch -format unknown out.png " + \
            "#{$testdata}gff3_file_1_short.txt", :retval => 1, :maxtime => 600)
-  grep($last_stderr, /must be one of:/)
+  grep(last_stderr, /must be one of:/)
 end
 
 Name "gt sketch short test (unwriteable PNG file)"
@@ -29,7 +29,7 @@ Test do
   run "chmod u-w unwriteable.png"
   run_test("#{$bin}gt sketch -force unwriteable.png " + \
            "#{$testdata}gff3_file_1_short.txt", :retval => 1, :maxtime => 600)
-  grep($last_stderr, /an I\/O error occurred/)
+  grep(last_stderr, /an I\/O error occurred/)
 end
 
 Name "gt sketch short test (unwriteable PDF file)"
@@ -39,7 +39,7 @@ Test do
   run "chmod u-w unwriteable.pdf"
   run_test("#{$bin}gt sketch -format pdf -force unwriteable.pdf " + \
            "#{$testdata}gff3_file_1_short.txt", :retval => 1, :maxtime => 600)
-  grep($last_stderr, /Permission denied/)
+  grep(last_stderr, /Permission denied/)
 end
 
 Name "gt sketch short test (nonexistant style file)"
@@ -47,7 +47,7 @@ Keywords "gt_sketch"
 Test do
   run_test("#{$bin}gt sketch -style foo.bar out.png " + \
            "#{$testdata}gff3_file_1_short.txt", :retval => 1, :maxtime => 600)
-  grep($last_stderr, /style file 'foo.bar' does not exist/)
+  grep(last_stderr, /style file 'foo.bar' does not exist/)
 end
 
 Name "gt sketch short test (invalid style file)"
@@ -56,7 +56,7 @@ Test do
   run "echo thisisnotlua > foo.bar"
   run_test("#{$bin}gt sketch  -style foo.bar out.png " + \
            "#{$testdata}gff3_file_1_short.txt", :retval => 1, :maxtime => 600)
-  grep($last_stderr, /cannot run style file/)
+  grep(last_stderr, /cannot run style file/)
 end
 
 Name "gt sketch prob 1"
@@ -81,7 +81,7 @@ Test do
   run_test "#{$bin}gt sketch -force -style " + \
            "#{$testdata}trackname1.style out.png #{$testdata}eden.gff3 " + \
            "eden2.gff3"
-  run "diff #{$last_stdout} #{$testdata}trackname1.out"
+  run "diff #{last_stdout} #{$testdata}trackname1.out"
   run "test -e out.png"
 end
 
@@ -105,7 +105,7 @@ Keywords "gt_sketch showrecmaps"
 Test do
   run_test "#{$bin}gt sketch -showrecmaps out.png " +
            "#{$testdata}standard_gene_as_tree.gff3", :maxtime => 600
-  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
+  run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.recmaps"
 end
 
 Name "gt sketch -showrecmaps (normal text size)"
@@ -113,7 +113,7 @@ Keywords "gt_sketch showrecmaps"
 Test do
   run_test "#{$bin}gt sketch -showrecmaps out.png " +
            "#{$testdata}gt_sketch_textwidth.gff3", :maxtime => 600
-  run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_0.recmaps"
+  run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_0.recmaps"
 end
 
 Name "gt sketch -showrecmaps (narrow image)"
@@ -121,7 +121,7 @@ Keywords "gt_sketch showrecmaps"
 Test do
   run_test "#{$bin}gt sketch -width 300 -showrecmaps out.png " +
            "#{$testdata}gt_sketch_textwidth.gff3", :maxtime => 600
-  run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_1.recmaps"
+  run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_1.recmaps"
 end
 
 Name "gt sketch -showrecmaps (large text size)"
@@ -130,7 +130,7 @@ Test do
   run_test "#{$bin}gt sketch -style #{$testdata}bigfonts.style " + \
            "-showrecmaps out.png #{$testdata}gt_sketch_textwidth.gff3", \
            :maxtime => 600
-  run "diff #{$last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
+  run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
 end
 
 
@@ -141,7 +141,7 @@ Test do
     run_test("#{$bin}gt sketch -style #{file} " + \
              "out.png #{$testdata}eden.gff3", \
              :maxtime => 600, :retval => 1)
-    grep($last_stderr, 'attempt to call global \'fail\'')
+    grep(last_stderr, 'attempt to call global \'fail\'')
   end
 end
 
@@ -169,7 +169,7 @@ Test do
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}eden.gff3 ", \
            :maxtime => 600
-  run "diff #{$last_stdout} #{$testdata}order_sketch_out.txt"
+  run "diff #{last_stdout} #{$testdata}order_sketch_out.txt"
 end
 
 Name "sketch_constructed (Lua)"
@@ -222,7 +222,7 @@ Test do
              "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
              "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
              :maxtime => 600
-  grep($last_stderr, /Track ordering function must return a number/)
+  grep(last_stderr, /Track ordering function must return a number/)
 end
 
 Name "sketch_parsed invalid order (Python, None)"
@@ -232,7 +232,7 @@ Test do
              "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
              "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
              :maxtime => 600
-  grep($last_stderr, /Track ordering function must return a number/)
+  grep(last_stderr, /Track ordering function must return a number/)
 end
 
 Name "Python runtime style failures"
@@ -243,15 +243,15 @@ Name "Python runtime style failures"
                "#{file} sketch_parsed.png " + \
                "#{$testdata}eden.gff3", \
                :maxtime => 600, :retval => 1
-    grep($last_stderr, 'attempt to call global \'fail\'')
+    grep(last_stderr, 'attempt to call global \'fail\'')
 
     run_python "#{$cur}/gtpython/sketch_constructed.py " + \
                "#{file} sketch_constructed.png", \
                :maxtime => 600, :retval => 1
-    grep($last_stderr, 'attempt to call global \'fail\'')
+    grep(last_stderr, 'attempt to call global \'fail\'')
 
     run_python "#{$testdata}gtpython/style_serialize.py #{file}", :retval => 1
-    grep($last_stderr, 'expected boolean, number, or string')
+    grep(last_stderr, 'expected boolean, number, or string')
   end
 end
 
@@ -288,7 +288,7 @@ Test do
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
            :maxtime => 600, :retval => 1
-  grep($last_stderr, /Track ordering callback must return a number/)
+  grep(last_stderr, /Track ordering callback must return a number/)
 end
 
 Name "sketch_parsed invalid order (Ruby, nil)"
@@ -298,7 +298,7 @@ Test do
            "#{$cur}/gtdata/sketch/default.style sketch_parsed.png " + \
            "#{$testdata}standard_gene_with_introns_as_tree.gff3", \
            :maxtime => 600, :retval => 1
-  grep($last_stderr, /Track ordering callback must return a number/)
+  grep(last_stderr, /Track ordering callback must return a number/)
 end
 
 Name "Ruby runtime style failures"
@@ -309,14 +309,14 @@ Test do
              "#{file} sketch_parsed.png " + \
              "#{$testdata}eden.gff3", \
              :maxtime => 600, :retval => 1
-    grep($last_stderr, 'attempt to call global \'fail\'')
+    grep(last_stderr, 'attempt to call global \'fail\'')
 
     run_ruby "#{$cur}/gtruby/sketch_constructed.rb " + \
              "#{file} sketch_constructed.png", \
              :maxtime => 600, :retval => 1
-    grep($last_stderr, 'attempt to call global \'fail\'')
+    grep(last_stderr, 'attempt to call global \'fail\'')
 
     run_ruby "#{$testdata}gtruby/style_serialize.rb #{file}", :retval => 1
-    grep($last_stderr, 'expected boolean, number, or string')
+    grep(last_stderr, 'expected boolean, number, or string')
   end
 end

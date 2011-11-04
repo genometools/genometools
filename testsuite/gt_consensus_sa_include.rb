@@ -6,7 +6,7 @@ for infile in Dir.entries(File.join($testdata, "consensus_sa")).grep(/\.in$/) do
   Test do
     run_test "#{$bin}gt dev consensus_sa #{infile}"
     outfile = infile.gsub(/\.in$/, ".out")
-    run "diff #{$last_stdout} #{outfile}"
+    run "diff #{last_stdout} #{outfile}"
   end
   i += 1
 end

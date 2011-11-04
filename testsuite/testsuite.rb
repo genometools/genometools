@@ -170,3 +170,10 @@ require 'scripts_include'
 if $arguments["gcov"] then
   require 'gcov_include' # must be last
 end
+
+#we now have all tests in $testsuite.
+
+if $arguments["threads"] then
+  $testsuite.nof_threads = $arguments["threads"].to_i
+end
+$testsuite.run

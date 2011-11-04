@@ -1,11 +1,11 @@
 def total_length(fas)
   run_test %Q(grep -v ">" #{fas} | tr -d "[:space:]" | wc -c)
-  return Integer(IO.read($last_stdout))
+  return Integer(IO.read(last_stdout))
 end
 
 def nof_seq(fas)
   run_test %Q(grep  "^>" #{fas} | wc -l)
-  return Integer(IO.read($last_stdout))
+  return Integer(IO.read(last_stdout))
 end
 
 def expect(label, value, expected)
@@ -84,11 +84,11 @@ Test do
   # test that reads originate from target sequence
   # or its reverse complement
   run_test "#{$bin}gt convertseq -fastawidth #{n+1} #{fas}"
-  run_test "tail -n 1 #$last_stdout"
-  direct = IO.read($last_stdout)
+  run_test "tail -n 1 #{last_stdout}"
+  direct = IO.read(last_stdout)
   run_test "#{$bin}gt convertseq -r -fastawidth #{n+1} #{fas}"
-  run_test "tail -n 1 #$last_stdout"
-  rc = IO.read($last_stdout)
+  run_test "tail -n 1 #{last_stdout}"
+  rc = IO.read(last_stdout)
 
   run_test "#{$bin}gt convertseq -fastawidth #{len+1} -force -o reads2 reads"
   

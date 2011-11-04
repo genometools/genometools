@@ -39,7 +39,7 @@ def compueshulengthdistforpair(file1,file2,indexname)
   run_test "#{$bin}gt suffixerator -db #{file1} -indexname #{indexname} " + 
            "-dna -suf -tis"
   run_test "#{$bin}gt shulengthdist -ii #{indexname} -q #{file2}"
-  readnumfromfile($last_stdout) do |n|
+  readnumfromfile(last_stdout) do |n|
     return n
   end
 end
@@ -51,7 +51,7 @@ def checkshulengthdistforpair(file1,file2)
            "-dna -suf -tis -lcp"
   run_test "#{$bin}gt shulengthdist -ii both"
   list = []
-  read3numfromfile($last_stdout) do |idx1,idx2,n|
+  read3numfromfile(last_stdout) do |idx1,idx2,n|
     list.push(n)
   end
   if [dist1,dist2] != list
@@ -87,7 +87,7 @@ def checkshulengthdistforlist(filelist)
   run_test "#{$bin}gt suffixerator -db #{realfilelist.join(' ')} -indexname all " + 
            "-dna -suf -tis -lcp"
   run_test "#{$bin}gt shulengthdist -ii all"
-  read3numfromfile($last_stdout) do |idx1,idx2,n|
+  read3numfromfile(last_stdout) do |idx1,idx2,n|
     multishulengthmatrix[idx1,idx2] = n
   end
   0.upto(numofdbfiles-1) do |idx1|

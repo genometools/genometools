@@ -29,12 +29,12 @@ end
 
 def checkgreedyfwdmat(queryfile,ms)
   run_test(makegreedyfwdmatcall(queryfile,"-fmi fmi",ms), :maxtime => 1200)
-  run "mv #{$last_stdout} tmp.fmi"
+  run "mv #{last_stdout} tmp.fmi"
   run_test(makegreedyfwdmatcall(queryfile,"-esa sfx",ms), :maxtime => 1200)
-  run "mv #{$last_stdout} tmp.esa"
+  run "mv #{last_stdout} tmp.esa"
   run "diff tmp.esa tmp.fmi"
   run_test(makegreedyfwdmatcall(queryfile,"-pck pck",ms), :maxtime => 1200)
-  run "mv #{$last_stdout} tmp.pck"
+  run "mv #{last_stdout} tmp.pck"
   run "diff tmp.pck tmp.fmi"
 end
 
@@ -100,10 +100,10 @@ def checkrepfind(reffile)
   minlength = determineminlength(reffile)
   run_test("#{$bin}gt repfind -l #{minlength} -ii sfxidx", :maxtime => 600)
   resultfile="#{$gttestdata}repfind-result/#{reffile}.result"
-  run "cmp -s #{$last_stdout} #{resultfile}"
+  run "cmp -s #{last_stdout} #{resultfile}"
   run_test("#{$bin}gt repfind -l #{minlength} -r -ii sfxidx", :maxtime => 600)
   resultfile="#{$gttestdata}repfind-result/#{reffile}-r.result"
-  run "cmp -s #{$last_stdout} #{resultfile}"
+  run "cmp -s #{last_stdout} #{resultfile}"
 end
 
 def checkrepfindwithquery(reffile,queryfile)
@@ -114,14 +114,14 @@ def checkrepfindwithquery(reffile,queryfile)
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
   run_test("#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}",
            :maxtime => 600)
-  # run "sort #{$last_stdout}"
+  # run "sort #{last_stdout}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/mkvtree.x -indexname mkv-idx " +
   #    "-allout -v -pl -dna -db #{reffilepath}"
   #run "/Users/kurtz/bin-ops/i686-apple-darwin/vmatch-mini.x 15 mkv-idx " +
   #    "#{queryfilepath}"
-  #run "sed -e '/^#/d' #{$last_stdout} | sort"
-  # run "#{$scriptsdir}repfind-cmp.rb #{$last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
-  run "cmp -s #{$last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
+  #run "sed -e '/^#/d' #{last_stdout} | sort"
+  # run "#{$scriptsdir}repfind-cmp.rb #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
+  run "cmp -s #{last_stdout} #{$gttestdata}repfind-result/#{reffile}-#{queryfile}.result"
 end
 
 Name "gt paircmp"
@@ -146,11 +146,11 @@ Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
            "-indexname sfx -dna -tis -suf -lcp -ssp -pl"
   run_test "#{$bin}gt repfind -l 8 -ii sfx"
-  run "grep -v '^#' #{$last_stdout}"
-  run "diff -w #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
+  run "grep -v '^#' #{last_stdout}"
+  run "diff -w #{last_stdout} #{$testdata}repfind-8-Atinsert.txt"
   run_test "#{$bin}gt repfind -scan -l 8 -ii sfx"
-  run "grep -v '^#' #{$last_stdout}"
-  run "diff -w #{$last_stdout} #{$testdata}repfind-8-Atinsert.txt"
+  run "grep -v '^#' #{last_stdout}"
+  run "diff -w #{last_stdout} #{$testdata}repfind-8-Atinsert.txt"
   run_test "#{$bin}gt repfind -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 

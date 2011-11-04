@@ -3,16 +3,16 @@ if not $arguments["nocairo"] then
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/gff3.rb #{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   end
 
   Name "gtruby: genome_visitor bindings (output stream)"
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/genome_visitor.rb #{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   end
 
   Name "gtruby: feature_index and feature_stream bindings"
@@ -20,8 +20,8 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/feature_stuff.rb " +
              "#{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{last_stdout} -"
   end
 
   Name "gtruby: AnnotationSketch bindings (valid gff3 file)"
@@ -36,7 +36,7 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby("#{$testdata}gtruby/sketch.rb test.png #{$testdata}corrupt.gff3",
              :retval => 1)
-    grep $last_stderr, "GenomeTools error"
+    grep last_stderr, "GenomeTools error"
   end
 
   Name "gtruby: AnnotationSketch bindings (nonexistent gff3 file)"
@@ -44,7 +44,7 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby("#{$testdata}gtruby/sketch.rb test.png " +
              "#{$testdata}nonexistent_file", :retval => 1)
-    grep $last_stderr, "GenomeTools error"
+    grep last_stderr, "GenomeTools error"
   end
 
   Name "gtruby: AnnotationSketch bindings (PNG stream)"
@@ -59,8 +59,8 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/block_stuff.rb " +
              "#{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.blocks"
   end
 
   Name "gtruby: AnnotationSketch bindings (style)"
@@ -103,7 +103,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/show_seqids.rb #{$testdata}encode_known_genes_Mar07.gff3"
-    run "diff #{$last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
+    run "diff #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
   end
 
   Name "gtruby: used_types"
@@ -111,7 +111,7 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/used_types.rb " +
              "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.types"
+    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.types"
   end
 
   Name "gtruby: show_recmaps"
@@ -119,7 +119,7 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/show_recmaps.rb " +
              "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
+    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
 
   Name "gtruby: {Comment,Sequence,Region}Node classes"
@@ -132,7 +132,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_ruby"
   Test do
     run_ruby "#{$testdata}gtruby/custom_stuff.rb #{$testdata}eden.gff3"
-    run "diff #{$last_stdout} #{$testdata}custom_streams_ref.txt"
+    run "diff #{last_stdout} #{$testdata}custom_streams_ref.txt"
   end
 
   Name "gtruby: Range class"

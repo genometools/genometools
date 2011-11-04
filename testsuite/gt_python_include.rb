@@ -3,16 +3,16 @@ if not $arguments["nocairo"] then
   Keywords "gt_python"
   Test do
     run_python "#{$testdata}gtpython/gff3.py #{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   end
 
   Name "gtpython: genome_visitor bindings (output stream)"
   Keywords "gt_python"
   Test do
     run_python "#{$testdata}gtpython/genome_visitor.py #{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "diff #{last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
   end
 
   Name "gtpython: feature_index and feature_stream bindings"
@@ -20,8 +20,8 @@ if not $arguments["nocairo"] then
   Test do
     run_python "#{$testdata}gtpython/feature_stuff.py " +
                "#{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{last_stdout} -"
   end
 
   Name "gtpython: AnnotationSketch bindings (valid gff3 file)"
@@ -36,7 +36,7 @@ if not $arguments["nocairo"] then
   Test do
     run_python("#{$testdata}gtpython/sketch.py test.png #{$testdata}corrupt.gff3",
                :retval => 1)
-    grep $last_stderr, "GenomeTools error"
+    grep last_stderr, "GenomeTools error"
   end
 
   Name "gtpython: AnnotationSketch bindings (nonexistent gff3 file)"
@@ -44,7 +44,7 @@ if not $arguments["nocairo"] then
   Test do
     run_python("#{$testdata}gtpython/sketch.py test.png " +
                "#{$testdata}nonexistent_file", :retval => 1)
-    grep $last_stderr, "GenomeTools error"
+    grep last_stderr, "GenomeTools error"
   end
 
   Name "gtpython: AnnotationSketch bindings (simple sketch)"
@@ -66,8 +66,8 @@ if not $arguments["nocairo"] then
   Test do
     run_python "#{$testdata}gtpython/block_stuff.py " +
              "#{$testdata}gff3_file_1_short.txt"
-    run "env LC_ALL=C sort #{$last_stdout}"
-    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.blocks"
+    run "env LC_ALL=C sort #{last_stdout}"
+    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.blocks"
   end
 
   Name "gtpython: AnnotationSketch bindings (style)"
@@ -104,7 +104,7 @@ if not $arguments["nocairo"] then
   Keywords "gt_python"
   Test do
     run_python "#{$testdata}gtpython/show_seqids.py #{$testdata}encode_known_genes_Mar07.gff3"
-    run "diff #{$last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
+    run "diff #{last_stdout} #{$testdata}encode_known_genes_Mar07.seqids"
   end
 
   Name "gtpython: used_types"
@@ -112,7 +112,7 @@ if not $arguments["nocairo"] then
   Test do
     run_python "#{$testdata}gtpython/used_types.py " +
                "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.types"
+    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.types"
   end
 
   Name "gtpython: show_recmaps"
@@ -120,14 +120,14 @@ if not $arguments["nocairo"] then
   Test do
     run_python "#{$testdata}gtpython/show_recmaps.py " +
                "#{$testdata}standard_gene_as_tree.gff3"
-    run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
+    run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
 
   Name "gtpython: unittests"
   Keywords "gt_python unittests"
   Test do
     run_python "#{$gtpython}/tests/__init__.py "
-    grep $last_stderr, "OK"
+    grep last_stderr, "OK"
   end
 
 end

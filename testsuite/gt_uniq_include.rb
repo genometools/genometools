@@ -2,14 +2,14 @@ Name "gt uniq -help"
 Keywords "gt_uniq"
 Test do
   run_test "#{$bin}gt uniq -help"
-  grep $last_stdout, "Report bugs to"
+  grep last_stdout, "Report bugs to"
 end
 
 Name "gt uniq -noop"
 Keywords "gt_uniq"
 Test do
   run_test("#{$bin}gt uniq -noop", :retval => 1)
-  grep $last_stderr, "unknown option"
+  grep last_stderr, "unknown option"
 end
 
 Name "gt uniq nonexistent file"
@@ -37,6 +37,6 @@ end
   Keywords "gt_uniq"
   Test do
     run_test "#{$bin}gt uniq #{$testdata}gt_uniq_test_#{i}.gff3"
-    run "diff #{$last_stdout} #{$testdata}gt_uniq_test_#{i}.out"
+    run "diff #{last_stdout} #{$testdata}gt_uniq_test_#{i}.out"
   end
 end

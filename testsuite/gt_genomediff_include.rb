@@ -186,7 +186,7 @@ smallfilecodes.each do |code|
     test_pck("#{code}*fas",
              "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua", "")
 
-    File.open($last_stdout, 'r') do |outfile|
+    File.open(last_stdout, 'r') do |outfile|
       while line = outfile.gets do
         line.chomp!
         next if line.match /^#/
@@ -205,7 +205,7 @@ smallfilecodes.each do |code|
              "-shulen -unitfile #{$testdata}genomediff/unitfile1.lua ",
              "")
 
-    File.open($last_stdout, 'r') do |outfile|
+    File.open(last_stdout, 'r') do |outfile|
       while line = outfile.gets do
         line.chomp!
         next if line.match /^#/
@@ -298,7 +298,7 @@ kr_testable_files.each do |code|
     end
     test_pck("#{files}", "-shulen", "")
 
-    File.open($last_stdout, 'r') do |outfile|
+    File.open(last_stdout, 'r') do |outfile|
       while line = outfile.gets do
         line.chomp!
         next if line.match /^#/
@@ -316,7 +316,7 @@ kr_testable_files.each do |code|
 
     test_esa("#{files}", "-shulen", "")
 
-    File.open($last_stdout, 'r') do |outfile|
+    File.open(last_stdout, 'r') do |outfile|
       while line = outfile.gets do
         line.chomp!
         next if line.match /^#/
@@ -371,7 +371,7 @@ kr_testable_files.each do |code|
 
     test_pck("#{files}", "", "")
 
-    File.open($last_stdout, 'r') do |outfile|
+    File.open(last_stdout, 'r') do |outfile|
       while line = outfile.gets do
         line.chomp!
         next if line.match /^#/
@@ -389,7 +389,7 @@ kr_testable_files.each do |code|
 
     test_esa("#{files}", "", "")
 
-    File.open($last_stdout, 'r') do |outfile|
+    File.open(last_stdout, 'r') do |outfile|
       while line = outfile.gets do
         line.chomp!
         next if line.match /^#/
@@ -454,7 +454,7 @@ def check_shulen_for_list_pairwise(list)
 
           test_pck("#{$testdata}#{file1} #{$testdata}#{file2}", "-shulen", "")
 
-          File.open($last_stdout, 'r') do |outfile|
+          File.open(last_stdout, 'r') do |outfile|
             while line = outfile.gets do
               line.chomp!
               next if line.match /^#/
@@ -472,7 +472,7 @@ def check_shulen_for_list_pairwise(list)
           test_esa("#{$testdata}#{file1} #{$testdata}#{file2}",
                     "-shulen", "")
 
-          File.open($last_stdout, 'r') do |outfile|
+          File.open(last_stdout, 'r') do |outfile|
             while line = outfile.gets do
               line.chomp!
               next if line.match /^#/
@@ -512,7 +512,7 @@ Test do
 
   test_pck(realfiles, "-shulen", "")
 
-  File.open($last_stdout, 'r') do |outfile|
+  File.open(last_stdout, 'r') do |outfile|
     while line = outfile.gets do
       line.chomp!
       next if line.match /^#/
@@ -529,7 +529,7 @@ Test do
   end
   test_esa(realfiles, "-shulen", "")
 
-  File.open($last_stdout, 'r') do |outfile|
+  File.open(last_stdout, 'r') do |outfile|
     while line = outfile.gets do
       line.chomp!
       next if line.match /^#/

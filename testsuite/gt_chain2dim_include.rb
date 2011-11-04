@@ -12,7 +12,7 @@ def runchain2dim(args,matchfile)
   Test do
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
     argstring = args.gsub(/[ ]/,"")
-    run "cmp -s #{$last_stdout} #{$testdata}chaindata/chain#{argstring}"
+    run "cmp -s #{last_stdout} #{$testdata}chaindata/chain#{argstring}"
   end
 end
 
@@ -22,10 +22,10 @@ def runchain2dimvschain2dim(args,matchfile)
   Test do
     run "rf2
     run_test "#{$bin}gt chain2dim -m #{matchfile} " + args
-    run "cp #{$last_stdout} gtchain.out"
+    run "cp #{last_stdout} gtchain.out"
     run "/Users/stefan/bin-ops/i686-apple-darwin/chain2dim.x " + args + 
         " #{matchfile}"
-    run "cp #{$last_stdout} vschain.out"
+    run "cp #{last_stdout} vschain.out"
     run "cmp -s gtchain.out vschain.out"
   end
 end

@@ -27,7 +27,7 @@ end
 def iterrunmerge(numtoselect)
   reference="#{$testdata}at1MB"
   run "#{$scriptsdir}seqselect.rb #{numtoselect} #{reference}"
-  run "#{$scriptsdir}splitmultifasta.rb TMP 0 #{$last_stdout}"
+  run "#{$scriptsdir}splitmultifasta.rb TMP 0 #{last_stdout}"
   referencefiles = Array.new()
   Dir.new('.').each do |filename|
     if filename.match(/^TMP-/)

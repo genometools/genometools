@@ -81,7 +81,7 @@ Test do
   run_test "#{$bin}/gt suffixerator -mirrored -v -spmopt 45 -suf -lcp -dna " +
            "-parts 4 -db genome-idx-100-5-reads.fna.gz"
   run "#{$bin}/gt sequniq -rev genome-idx-100-5-reads.fna.gz"
-  run "mv #{$last_stdout} tmp.fas"
+  run "mv #{last_stdout} tmp.fas"
   sfxopt="-pl 2 -dna -lcp -suf -tis -ssp -db tmp.fas"
   indexname="sfx"
   mirrored=1
@@ -91,9 +91,9 @@ Test do
     indexname="sfx-m"
   else
     indexname="sfx"
-    run "#{$bin}/gt encseq encode -indexname seq #{$last_stdout}"
+    run "#{$bin}/gt encseq encode -indexname seq #{last_stdout}"
     run "#{$bin}/gt encseq decode -mirrored seq"
-    run "mv #{$last_stdout} tmp.fas"
+    run "mv #{last_stdout} tmp.fas"
   end
   sfxmapopt="-tis -suf -lcp -ssp -wholeleafcheck"
   run_test "#{$bin}/gt suffixerator -indexname #{indexname}-#{minlen} " +
@@ -102,9 +102,9 @@ Test do
   run_test "#{$bin}/gt suffixerator -indexname #{indexname} #{sfxopt}"
   run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}"
   run_test "#{$bin}/gt repfind -spm -l #{minlen} -ii #{indexname}"
-  run "mv #{$last_stdout} result.repfind"
+  run "mv #{last_stdout} result.repfind"
   run_test "#{$bin}/gt encseq2spm -parts 3 -l #{minlen} -spm show -mirrored -ii #{indexname}"
-  run "mv #{$last_stdout} result.firstcodes"
+  run "mv #{last_stdout} result.firstcodes"
   run "cmp result.repfind result.firstcodes"
 end
 
@@ -193,7 +193,7 @@ Test do
            "-db #{$testdata}U89959_genomic.fas -indexname u8idx"
   run_test "#{$bin}/gt simreads -coverage 4 -len 100 -force -o u8.reads u8idx"
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dna -db u8.reads"
-  run "grep -q '# init character encoding (eqlen ' #{$last_stdout}"
+  run "grep -q '# init character encoding (eqlen ' #{last_stdout}"
   run_test "#{$bin}/gt dev sfxmap -bwt -suf -lcp -des -sds -ssp -esa u8.reads",\
            :maxtime => 200
   run_test "#{$bin}/gt suffixerator -v #{outoptionsnobck} -dir rev -dna -db u8.reads"
@@ -433,7 +433,7 @@ SATTESTFILES.each do |file|
                "-ssp -tis -db #{file[:filename]} -indexname myidx", \
                :retval => retval
       if !file[:msgs][sat].nil? then
-        grep($last_stderr, /#{file[:msgs][sat]}/)
+        grep(last_stderr, /#{file[:msgs][sat]}/)
       end
       run_test "#{$bin}/gt dev sfxmap -suf -lcp -des -sds -ssp -esa myidx", \
                :retval => retval
@@ -521,7 +521,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
                    "-memlimit #{limit.floor}MB " + \
                    "-ii dmel", :maxtime => 600
           lastout = nil
-          File.open($last_stdout) do |f|
+          File.open(last_stdout) do |f|
             out = f.read
             if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
               mysize = m[1].to_f
@@ -542,7 +542,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
         "-parts 3 -memlimit 2MB", :retval => 1
-    grep($last_stderr, /exclude each other/)
+    grep(last_stderr, /exclude each other/)
   end
 
   Name "gt suffixerator -memlimit invalid size"
@@ -550,7 +550,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
         "-memlimit 2TB", :retval => 1
-    grep($last_stderr, /one of the keywords MB and GB/)
+    grep(last_stderr, /one of the keywords MB and GB/)
   end
 
   Name "gt suffixerator -memlimit invalid size"
@@ -558,7 +558,7 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   Test do
     run "#{$bin}/gt suffixerator -db #{$testdata}/at1MB -indexname foo " + \
         "-memlimit 2.2GB", :retval => 1
-    grep($last_stderr, /one of the keywords MB and GB/)
+    grep(last_stderr, /one of the keywords MB and GB/)
   end
 end
 

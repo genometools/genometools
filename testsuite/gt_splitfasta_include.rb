@@ -41,7 +41,7 @@ Test do
   run "cp #{$testdata}U89959_genomic.fas ."
   run "touch U89959_genomic.fas.1"
   run_test("#{$bin}gt splitfasta U89959_genomic.fas", :retval => 1)
-  grep $last_stderr, /exists already/
+  grep last_stderr, /exists already/
 end
 
 Name "gt splitfasta (-force)"
@@ -70,14 +70,14 @@ Keywords "gt_splitfasta"
 Test do
   run_test("#{$bin}gt splitfasta -splitdesc . #{$testdata}nonexistent_file",
            :retval => 1)
-  grep $last_stderr, /does not exist or is not readable/
+  grep last_stderr, /does not exist or is not readable/
 end
 
 Name "gt splitfasta (empty file)"
 Keywords "gt_splitfasta"
 Test do
   run_test("#{$bin}gt splitfasta #{$testdata}empty_file", :retval => 1)
-  grep $last_stderr, /is empty/
+  grep last_stderr, /is empty/
 end
 
 
@@ -86,7 +86,7 @@ Keywords "gt_splitfasta"
 Test do
   run_test("#{$bin}gt splitfasta #{$testdata}gt_bioseq_fail_2.fas",
            :retval => 1)
-  grep $last_stderr, /file is not in FASTA format/
+  grep last_stderr, /file is not in FASTA format/
 end
 
 Name "gt splitfasta (-splitdesc)"
@@ -107,7 +107,7 @@ Test do
   run "touch foo.fas"
   run_test("#{$bin}gt splitfasta -splitdesc . #{$testdata}foobar.fas",
            :retval => 1)
-  grep $last_stderr, /exists already/
+  grep last_stderr, /exists already/
 end
 
 Name "gt splitfasta (-splitdesc -force)"
@@ -171,6 +171,6 @@ if $gttestdata then
     run "touch test.fas.2.gz"
     run_test("#{$bin}gt splitfasta -targetsize 1 test.fas.gz",
              :retval => 1, :maxtime => 120)
-    grep $last_stderr, /exists already/
+    grep last_stderr, /exists already/
   end
 end

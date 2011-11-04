@@ -6,7 +6,7 @@ def process_bed_files(dir)
     Test do
       run_test("#{$bin}gt bed_to_gff3 #{infile}", :maxtime => 320)
       outfile = infile.gsub(/\.bed$/, ".gff3")
-      run "diff #{$last_stdout} #{outfile}"
+      run "diff #{last_stdout} #{outfile}"
     end
   end
 end
@@ -22,5 +22,5 @@ Keywords "gt_bed_to_gff3"
 Test do
   run_test "#{$bin}gt bed_to_gff3 -featuretype gene -thicktype CDS " +
            "-blocktype exon #{$testdata}bed_files/ct_example3.bed"
-  run "diff #{$last_stdout} #{$testdata}bed_files/ct_example3.gff3_as_gene"
+  run "diff #{last_stdout} #{$testdata}bed_files/ct_example3.gff3_as_gene"
 end

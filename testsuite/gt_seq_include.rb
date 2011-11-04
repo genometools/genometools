@@ -81,14 +81,14 @@ Name "gt seq test 3"
 Keywords "gt_seq"
 Test do
   run_test "#{$bin}gt seq -recreate -showfasta -width 70 #{$testdata}gt_bioseq_succ_3.fas"
-  run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
+  run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
 Name "gt seq test 3 (stdin)"
 Keywords "gt_seq"
 Test do
   run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt seq -recreate -showfasta -width 70 -"
-  run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
+  run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
 1.upto(3) do |i|
@@ -96,7 +96,7 @@ end
   Keywords "gt_seq"
   Test do
     run_test "#{$bin}gt seq -showseqnum #{i} -width 70 #{$testdata}gt_bioseq_succ_3.fas"
-    run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
+    run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
   end
 end
 
@@ -105,7 +105,7 @@ end
   Keywords "gt_seq"
   Test do
     run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt seq -showseqnum #{i} -width 70 -"
-    run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
+    run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
   end
 end
 
@@ -144,14 +144,14 @@ Name "gt seq -gc-content"
 Keywords "gt_seq"
 Test do
   run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt seq -gc-content -"
-  run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.gc"
+  run "diff #{last_stdout} #{$testdata}gt_bioseq_succ_3.gc"
 end
 
 Name "gt seq -seqlengthdistri"
 Keywords "gt_seq"
 Test do
   run_test "#{$bin}gt seq -seqlengthdistri #{$testdata}sw100K1.fsa"
-  run "diff #{$last_stdout} #{$testdata}gt_bioseq_seqlengthdistri.out"
+  run "diff #{last_stdout} #{$testdata}gt_bioseq_seqlengthdistri.out"
 end
 
 Name "gt seq -showseqnum 1.5"

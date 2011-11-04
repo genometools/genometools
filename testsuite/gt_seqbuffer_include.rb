@@ -2,42 +2,42 @@ Name "sequence buffer: EMBL 2-character code missing"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test1.embl", :retval => 1
-  grep($last_stderr, "2-character line code not found in line 2")
+  grep(last_stderr, "2-character line code not found in line 2")
 end
 
 Name "sequence buffer: EMBL file type unguessable"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test2.embl", :retval => 1
-  grep($last_stderr, "cannot guess file type of file")
+  grep(last_stderr, "cannot guess file type of file")
 end
 
 Name "sequence buffer: EMBL missing blanks"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test3.embl", :retval => 1
-  grep($last_stderr, "3 blanks expected between")
+  grep(last_stderr, "3 blanks expected between")
 end
 
 Name "sequence buffer: EMBL unterminated sequence"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test4.embl", :retval => 1
-  grep($last_stderr, "unterminated sequence")
+  grep(last_stderr, "unterminated sequence")
 end
 
 Name "sequence buffer: EMBL multi-line description"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test5.embl"
-  run "diff #{$last_stdout} #{$testdata}embl_test5.fas"
+  run "diff #{last_stdout} #{$testdata}embl_test5.fas"
 end
 
 Name "sequence buffer: EMBL empty sequence"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}embl_test6.embl", :retval => 1
-  grep($last_stderr, "sequence 0 is empty")
+  grep(last_stderr, "sequence 0 is empty")
 end
 
 Name "sequence buffer: EMBL files mixed with GenBank"
@@ -80,10 +80,10 @@ allfiles.each do |file|
   Test do
     run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
              "#{$testdata}#{file}.embl"
-    efflength1 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    efflength1 = File.open(last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
     run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
              "#{$testdata}#{file}.fna"
-    efflength2 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    efflength2 = File.open(last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
     raise if efflength1 != efflength2
   end
 
@@ -92,7 +92,7 @@ allfiles.each do |file|
   Test do
     run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
              "#{$testdata}#{file}.embl"
-    rawlength = File.open($last_stderr).read.match(/ (\d+)\/\d+$/)[1].to_i
+    rawlength = File.open(last_stderr).read.match(/ (\d+)\/\d+$/)[1].to_i
     realsize = File.size("#{$testdata}#{file}.embl")
     raise if rawlength != realsize
   end
@@ -103,7 +103,7 @@ Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test1.gbk", \
            :retval => 1
-  grep($last_stderr, "sequence 0 is empty")
+  grep(last_stderr, "sequence 0 is empty")
 end
 
 Name "sequence buffer: GenBank file type unguessable"
@@ -111,7 +111,7 @@ Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test3.gbk", \
            :retval => 1
-  grep($last_stderr, "cannot guess file type of file")
+  grep(last_stderr, "cannot guess file type of file")
 end
 
 Name "sequence buffer: GenBank unterminated sequence"
@@ -119,7 +119,7 @@ Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test4.gbk", \
            :retval => 1
-  grep($last_stderr, "only terminators")
+  grep(last_stderr, "only terminators")
 end
 
 Name "sequence buffer: GenBank missing sequence offset numbers"
@@ -127,7 +127,7 @@ Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test6.gbk", \
            :retval => 1
-  grep($last_stderr, "sequence offset")
+  grep(last_stderr, "sequence offset")
 end
 
 Name "sequence buffer: GenBank blank missing"
@@ -135,14 +135,14 @@ Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test5.gbk", \
            :retval => 1
-  grep($last_stderr, "blank expected")
+  grep(last_stderr, "blank expected")
 end
 
 Name "sequence buffer: GenBank text before LOCUS"
 Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test2.gbk"
-  run "diff #{$last_stdout} #{$testdata}genbank_test2.fas"
+  run "diff #{last_stdout} #{$testdata}genbank_test2.fas"
 end
 
 Name "sequence buffer: GenBank missing DEFINITION line"
@@ -156,7 +156,7 @@ Keywords "gt_convertseq sequencebuffer"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}genbank_test8.gbk", \
            :retval => 1
-  grep($last_stderr, "encountered another DEFINITION line")
+  grep(last_stderr, "encountered another DEFINITION line")
 end
 
 Name "sequence buffer: GenBank files mixed with EMBL"
@@ -199,10 +199,10 @@ gbfiles.each do |file|
   Test do
     run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
              "#{$testdata}#{file}.gbk"
-    efflength1 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    efflength1 = File.open(last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
     run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
              "#{$testdata}#{file}.fna"
-    efflength2 = File.open($last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
+    efflength2 = File.open(last_stderr).read.match(/ \d+\/(\d+)$/)[1].to_i
     raise if efflength1 != efflength2
   end
 
@@ -211,7 +211,7 @@ gbfiles.each do |file|
   Test do
     run_test "#{$bin}gt convertseq -noseq -showfilelengthvalues " + \
              "#{$testdata}#{file}.gbk"
-    rawlength = File.open($last_stderr).read.match(/ (\d+)\/\d+$/)[1].to_i
+    rawlength = File.open(last_stderr).read.match(/ (\d+)\/\d+$/)[1].to_i
     realsize = File.size("#{$testdata}#{file}.gbk")
     raise if rawlength != realsize
   end
@@ -221,7 +221,7 @@ Name "sequence buffer: FastQ success"
 Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}test1.fastq"
-  run "diff -i #{$last_stdout} #{$testdata}test1.fasta"
+  run "diff -i #{last_stdout} #{$testdata}test1.fasta"
 end
 
 Name "sequence buffer: FastQ success, seq > buffersize"
@@ -229,7 +229,7 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt dev readreads -fasta #{$testdata}fastq_long.fastq > ref.fasta"
   run_test "#{$bin}gt convertseq #{$testdata}fastq_long.fastq"
-  run "diff -i #{$last_stdout} ref.fasta"
+  run "diff -i #{last_stdout} ref.fasta"
 end
 
 Name "sequence buffer: FastQ non-FASTQ file"
@@ -237,7 +237,7 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}eden.gff3", \
            :retval => 1
-  grep($last_stderr, /unknown file contents/)
+  grep(last_stderr, /unknown file contents/)
 end
 
 Name "sequence buffer: FastQ invalid block start"
@@ -245,7 +245,7 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}test2_wrong_begin.fastq", \
            :retval => 1
-  grep($last_stderr, /unknown file contents/)
+  grep(last_stderr, /unknown file contents/)
 end
 
 Name "sequence buffer: FastQ different seqnames"
@@ -254,7 +254,7 @@ Test do
   run_test "#{$bin}gt convertseq " + \
            "#{$testdata}test3_different_seqnames.fastq", \
            :retval => 1
-  grep($last_stderr, "sequence description 'HWI-EAS306_9_FC305MP_6_1_1331" + \
+  grep(last_stderr, "sequence description 'HWI-EAS306_9_FC305MP_6_1_1331" + \
                      "_1843' is not equal to qualities description 'HWI-EAS3" +\
                      "06_9_FC305MP_6_1_1331' in line")
 end
@@ -265,7 +265,7 @@ Test do
   run_test "#{$bin}gt convertseq " + \
            "#{$testdata}test4_different_seqlengths.fastq", \
            :retval => 1
-  grep($last_stderr, "lengths of character sequence and qualities sequence " + \
+  grep(last_stderr, "lengths of character sequence and qualities sequence " + \
                      "differ")
 end
 
@@ -275,7 +275,7 @@ Test do
   run_test "#{$bin}gt convertseq " + \
            "#{$testdata}test9_uneven_length.fastq", \
            :retval => 1
-  grep($last_stderr, "qualities string of sequence length 33 is not ended " + \
+  grep(last_stderr, "qualities string of sequence length 33 is not ended " + \
                      "by newline")
 end
 
@@ -286,7 +286,7 @@ Test do
            "#{$testdata}test5_tricky.fastq > ref.fas"
   run_test "#{$bin}gt convertseq " + \
            "#{$testdata}test5_tricky.fastq"
-  run "diff -i #{$last_stdout} ref.fas"
+  run "diff -i #{last_stdout} ref.fas"
 end
 
 Name "sequence buffer: FastQ empty sequence"
@@ -294,7 +294,7 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}test7_empty_seq.fastq", \
            :retval => 1
-  grep($last_stderr, /empty sequence/)
+  grep(last_stderr, /empty sequence/)
 end
 
 Name "sequence buffer: FastQ premature end"
@@ -302,7 +302,7 @@ Keywords "gt_convertseq sequencebuffer fastq"
 Test do
   run_test "#{$bin}gt convertseq #{$testdata}test6_premature_end.fastq", \
            :retval => 1
-  grep($last_stderr, /premature end/)
+  grep(last_stderr, /premature end/)
 end
 
 Name "sequence buffer: FastQ multiline"

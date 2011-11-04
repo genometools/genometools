@@ -3,11 +3,54 @@
 # Patrick Maass, 2006
 
 require 'fileutils'
+require 'thread'
 
 class TestFailed < Exception
 end
 class TestError < Exception
 end
+
+class Testsuite
+  attr_writer :nof_threads
+  attr_reader :outlock
+
+  def initialize
+    @tests = []
+    @nof_threads = 1
+    @outlock = Mutex.new
+  end
+
+  def run
+    inlock = Mutex.new
+    threads = []
+    1.upto(@nof_threads) do |n|
+      threads << Thread.new(n, @tests, inlock) do |n, tests, inlock|
+        while tests.length > 0
+          t = nil
+          inlock.synchronize do
+            t = tests.shift
+          end
+          if !t.nil?
+            t.process
+          end
+        end
+      end
+    end
+    threads.each do |thread|
+      thread.join
+    end
+  end
+
+  def threaded?
+    (@nof_threads > 1)
+  end
+
+  def add(t)
+    @tests.push(t)
+  end
+end
+
+$testsuite = Testsuite.new
 
 class Test
   @@id = 1
@@ -24,6 +67,7 @@ class Test
 
   def initialize(str)
     @name = str
+    @code = nil
     @id = @@id
     @@id += 1
     @requirements = nil
@@ -31,6 +75,9 @@ class Test
 
   def requires(str)
     @requirements = str
+  end
+  def code(block)
+    @code = block
   end
   def keywords(str)
     @keywords ||= nil
@@ -68,6 +115,22 @@ class Test
     return @@failed, @@errors
   end
 
+  def process
+    if @code != nil
+      self.test($arguments["keywords"], $arguments["select"],
+                $arguments["name"], &@code)
+    end
+  end
+
+  def printmsg(msg)
+    if $testsuite.threaded?
+      $testsuite.outlock.synchronize do
+        STDOUT.print msg
+      end
+    else
+      STDOUT.print msg
+    end
+  end
 
   def test(keywords, selection, name)
     raise "already run" if @did_run
@@ -98,10 +161,14 @@ class Test
         end
       end
     end
-
+    msg = ""
     pid = fork do
-      STDOUT.printf "%3d: %-60s: ", @id, @name
-      STDOUT.flush
+      msg << "%3d: %-60s: " % [@id, @name]
+      if !$testsuite.threaded?
+        STDOUT.print msg
+        STDOUT.flush
+        msg = ""
+      end
       e_info = nil
       e_code = 0
       begin
@@ -119,20 +186,23 @@ class Test
       if e_info
         i = "failed"
         if e_code != 1 then i = "error" end
-        puts i
-        puts "     [ problem: #{e_info.message}"
-        puts "       in: #{Dir.pwd} ]"
+        msg << i << "\n"
+        msg << "     [ problem: #{e_info.message}" << "\n"
+        msg << "       in: #{Dir.pwd} ]" << "\n"
         File.open("stest_error", "w") do |f|
           f.puts("Test #{@id} '#{@name}': #{i}:")
           f.puts("#{e_info.message}:")
           f.puts(e_info.backtrace)
         end
+        printmsg msg
         exit e_code
       else
-        puts "ok"
+        msg << "ok" << "\n"
+        printmsg msg
         exit 0
       end
     end
+    printmsg msg
     begin
       p, s = Process::waitpid2(pid)
     rescue Interrupt => e
@@ -146,7 +216,6 @@ class Test
     end
     @did_run = true
   end
-
 end
 
 def Test.exec(cmd, env, out_filename, err_filename, cmd_filename, max_t)
@@ -378,8 +447,16 @@ def run(str, opts = {})
   max_t = opts[:maxtime]
   max_t ||= 60
   Test.run(cmd, env, o_fn, r_fn, c_fn, rv, max_t)
-  $last_stdout = o_fn
-  $last_stderr = r_fn
+  Thread.current[:last_stdout] = o_fn
+  Thread.current[:last_stderr] = r_fn
+end
+
+def last_stdout
+  Thread.current[:last_stdout]
+end
+
+def last_stderr
+  Thread.current[:last_stderr]
 end
 
 def failtest(msg)
@@ -449,8 +526,8 @@ end
 
 def Test(&block)
   t = $curr_test
-  t.test($arguments["keywords"], $arguments["select"],
-         $arguments["name"], &block)
+  t.code(block)
+  $testsuite.add(t)
 end
 
 def OnError
@@ -524,4 +601,3 @@ if $0 == __FILE__
   require testfile
   OnError do exit(1) end
 end
-

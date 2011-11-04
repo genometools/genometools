@@ -3,7 +3,7 @@ Keywords "gt_encseq_encode encseq gt_encseq_decode"
 Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run "#{$bin}gt encseq decode foobar.fas"
-  run "diff #{$last_stdout} #{$testdata}foobar.fas"
+  run "diff #{last_stdout} #{$testdata}foobar.fas"
 end
 
 Name "gt encseq encode multiple files without indexname"
@@ -12,7 +12,7 @@ Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run_test "#{$bin}gt encseq encode #{$testdata}foobar.fas " + \
            "#{$testdata}foobar.fas", :retval => 1
-  grep($last_stderr, /if more than one input file is given/)
+  grep(last_stderr, /if more than one input file is given/)
 end
 
 Name "gt encseq decode lossless without ois"
@@ -21,7 +21,7 @@ Test do
   run "#{$bin}gt encseq encode #{$testdata}foobar.fas"
   run_test "#{$bin}gt encseq decode -lossless foobar.fas", \
            :retval => 1
-  grep($last_stderr, /cannot open file.*ois/)
+  grep(last_stderr, /cannot open file.*ois/)
 end
 
 STDREADMODES  = ["fwd", "rev"]
@@ -32,11 +32,11 @@ DNATESTSEQS   = ["#{$testdata}foobar.fas",
 AATESTSEQS    = ["#{$testdata}trembl-eqlen.faa"]
 NUMSAMPLES    = 5
 
-def revcomp(seq)
-  comp(seq).reverse
+def es_revcomp(seq)
+  es_comp(seq).reverse
 end
 
-def comp(seq)
+def es_comp(seq)
   seq.tr("aAcCgGtTnNrRyYmMkKwWsSbBdDhHvV","tTgGcCaAnNyYrRkKmMwWsSvVhHdDbB")
 end
 
@@ -55,7 +55,7 @@ def getseq(filename, mirrored = false, rm = "fwd")
       header = seqarr.shift.chomp
       seq = seqarr.collect{|v| v.chomp}.join('')
       sequences.push(seq)
-      rcseqs.push(revcomp(seq))
+      rcseqs.push(es_revcomp(seq))
     end
   end
   ret =  sequences.join("|")
@@ -68,9 +68,9 @@ def getseq(filename, mirrored = false, rm = "fwd")
     when "rev" then
       ret = ret.reverse
     when "cpl" then
-      ret = comp(ret)
+      ret = es_comp(ret)
     when "rcl" then
-      ret = revcomp(ret)
+      ret = es_revcomp(ret)
     else
       raise "unknown readmode"
   end
@@ -107,7 +107,7 @@ def run_encseq_comparison(filename, mirrored, lossless, readmode, singlechars,
         f.write(outseq)
         f.write("\n")
       end
-      run "diff seqout #{$last_stdout}"
+      run "diff seqout #{last_stdout}"
     end
   end
 end
@@ -140,7 +140,7 @@ def testformirrored(s, readmode)
               f.write(seq)
               f.write("\n")
             end
-            run "diff seqout #{$last_stdout}"
+            run "diff seqout #{last_stdout}"
           end
         end
       end
@@ -229,7 +229,7 @@ Keywords "encseq gt_encseq_decode single"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seq 3 foo"
-  run "diff #{$last_stdout} #{$testdata}Atinsert_single_3.fna"
+  run "diff #{last_stdout} #{$testdata}Atinsert_single_3.fna"
 end
 
 Name "gt encseq decode single sequence (reverse)"
@@ -237,7 +237,7 @@ Keywords "encseq gt_encseq_decode single"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -dir rev -seq 17 foo"
-  run "diff #{$last_stdout} #{$testdata}Atinsert_single_3_rev.fna"
+  run "diff #{last_stdout} #{$testdata}Atinsert_single_3_rev.fna"
 end
 
 Name "gt encseq decode single sequence (invalid seqnumber)"
@@ -245,7 +245,7 @@ Keywords "encseq gt_encseq_decode single"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seq 36 foo", :retval => 1
-  grep $last_stderr, /exceeds/
+  grep last_stderr, /exceeds/
 end
 
 Name "gt encseq decode single sequence (with -output concat)"
@@ -253,7 +253,7 @@ Keywords "encseq gt_encseq_decode single"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -output concat -seq 36 foo", :retval => 1
-  grep $last_stderr, /can only be used with the/
+  grep last_stderr, /can only be used with the/
 end
 
 Name "gt encseq decode sequence range"
@@ -261,7 +261,7 @@ Keywords "encseq gt_encseq_decode seqrange"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seqrange 3 7 foo"
-  run "diff #{$last_stdout} #{$testdata}Atinsert_seqrange_3-7.fna"
+  run "diff #{last_stdout} #{$testdata}Atinsert_seqrange_3-7.fna"
 end
 
 Name "gt encseq decode sequence range (reverse)"
@@ -269,7 +269,7 @@ Keywords "encseq gt_encseq_decode seqrange"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -dir rev -seqrange 13 17 foo"
-  run "diff #{$last_stdout} #{$testdata}Atinsert_seqrange_13-17_rev.fna"
+  run "diff #{last_stdout} #{$testdata}Atinsert_seqrange_13-17_rev.fna"
 end
 
 Name "gt encseq decode sequence range (invalid range start)"
@@ -277,7 +277,7 @@ Keywords "encseq gt_encseq_decode seqrange"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seqrange 37 49 foo", :retval => 1
-  grep $last_stderr, /exceeding/
+  grep last_stderr, /exceeding/
 end
 
 Name "gt encseq decode sequence range (invalid range end)"
@@ -285,7 +285,7 @@ Keywords "encseq gt_encseq_decode seqrange"
 Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -seqrange 3 49 foo", :retval => 1
-  grep $last_stderr, /exceeding/
+  grep last_stderr, /exceeding/
 end
 
 Name "gt encseq decode sequence range (with -output concat)"
@@ -294,7 +294,7 @@ Test do
   run "#{$bin}gt encseq encode -indexname foo #{$testdata}Atinsert.fna"
   run_test "#{$bin}gt encseq decode -output concat -seqrange 3 49 foo", \
            :retval => 1
-  grep $last_stderr, /can only be used with the/
+  grep last_stderr, /can only be used with the/
 end
 
 Name "gt encseq Lua bindings"
@@ -313,9 +313,9 @@ Test do
     bit = "32"
   end
   run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}"
-  run "diff #{$last_stdout} #{$testdata}foo.#{bit}.info_map"
+  run "diff #{last_stdout} #{$testdata}foo.#{bit}.info_map"
   run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}"
-  run "diff #{$last_stdout} #{$testdata}foo.#{bit}.info_nomap"
+  run "diff #{last_stdout} #{$testdata}foo.#{bit}.info_nomap"
 end
 
 Name "gt encseq 64bit/32bit header (failure)"
@@ -329,10 +329,10 @@ Test do
   end
   run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}", \
            :retval => 1
-  grep $last_stderr, /please use correct index for this platform/
+  grep last_stderr, /please use correct index for this platform/
   run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}", \
            :retval => 1
-  grep $last_stderr, /please use correct index for this platform/
+  grep last_stderr, /please use correct index for this platform/
 end
 
 Name "gt encseq incompatible file format version"
@@ -346,8 +346,8 @@ Test do
   end
   run_test "#{$bin}gt encseq info -noindexname #{$testdata}foo.#{bit}.ver0", \
            :retval => 1
-  grep $last_stderr, /is format version 0/
+  grep last_stderr, /is format version 0/
   run_test "#{$bin}gt encseq info -noindexname -nomap #{$testdata}foo.#{bit}.ver0", \
            :retval => 1
-  grep $last_stderr, /is format version 0/
+  grep last_stderr, /is format version 0/
 end

@@ -197,7 +197,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /is not sorted/)
+    grep(last_stderr, /is not sorted/)
   end
 
   Name "gt ltrdigest wrong sequence regions in input GFF"
@@ -205,7 +205,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4_wrong_seqid.gff3 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, "Feature 'LTR_retrotransposon1' on line 6 has invalid region identifier,must be 'seqX' with X being a sequence number, but was 'chr4'")
+    grep(last_stderr, "Feature 'LTR_retrotransposon1' on line 6 has invalid region identifier,must be 'seqX' with X being a sequence number, but was 'chr4'")
   end
 
   Name "gt ltrdigest missing input sequence"
@@ -213,7 +213,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted", :retval => 1
-    grep($last_stderr, /missing argument/)
+    grep(last_stderr, /missing argument/)
   end
 
   Name "gt ltrdigest missing tRNA library but -trna given"
@@ -221,7 +221,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest -trnas -outfileprefix foo #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /missing argument to option/)
+    grep(last_stderr, /missing argument to option/)
   end
 
   Name "gt ltrdigest corrupt tRNA library"
@@ -229,7 +229,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}ltrdigest/corrupt_trna.fas #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /the first character of fasta file/)
+    grep(last_stderr, /the first character of fasta file/)
   end
 
   Name "gt ltrdigest tRNA implied options"
@@ -237,13 +237,13 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest -pbsalilen 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /option "-pbsalilen" requires option "-trnas"/)
+    grep(last_stderr, /option "-pbsalilen" requires option "-trnas"/)
     run_test "#{$bin}gt ltrdigest -pbsoffset 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /option "-pbsoffset" requires option "-trnas"/)
+    grep(last_stderr, /option "-pbsoffset" requires option "-trnas"/)
     run_test "#{$bin}gt ltrdigest -pbstrnaoffset 10 20 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, /option "-pbstrnaoffset" requires option "-trnas"/)
+    grep(last_stderr, /option "-pbstrnaoffset" requires option "-trnas"/)
     run_test "#{$bin}gt ltrdigest -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   if $arguments["hmmer"] then
@@ -252,7 +252,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/corrupt.hmm -- #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep($last_stderr, /Failed to open HMM file/)
+      grep(last_stderr, /Failed to open HMM file/)
     end
 
     Name "gt ltrdigest HMM list not properly closed (--)"
@@ -260,7 +260,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep($last_stderr, /missing argument/)
+      grep(last_stderr, /missing argument/)
     end
   
     Name "gt ltrdigest pHMM implied options"
@@ -268,9 +268,9 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -pdomevalcutoff 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep($last_stderr, /option "-pdomevalcutoff" requires option "-hmms"/)
+      grep(last_stderr, /option "-pdomevalcutoff" requires option "-hmms"/)
       run_test "#{$bin}gt ltrdigest -pdomevalcutoff 2.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-      grep($last_stderr, /argument to option "-pdomevalcutoff" must be a floating point value <= 1.000000/)
+      grep(last_stderr, /argument to option "-pdomevalcutoff" must be a floating point value <= 1.000000/)
     end
 
     Name "gt ltrdigest use of deprecated '-threads' switch"
@@ -278,7 +278,7 @@ if $gttestdata then
     Test do
       run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
       run_test "#{$bin}gt ltrdigest -threads 2 -outfileprefix result4 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
-      grep($last_stderr, /option is deprecated. Please use/)
+      grep(last_stderr, /option is deprecated. Please use/)
     end
   end
 
@@ -296,7 +296,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -ppttprob 0.1 -pptaprob 0.1 -pptgprob 0.2 -pptcprob 0.2 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     # positive test
     run_test "#{$bin}gt ltrdigest -ppttprob 0.25 -pptaprob 0.25 -pptgprob 0.25 -pptcprob 0.25 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   Name "gt ltrdigest PPT HMM parameters (U-box U frequency)"
@@ -306,7 +306,7 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -pptuprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     run_test "#{$bin}gt ltrdigest -pptuprob 0.0 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
     run_test "#{$bin}gt ltrdigest -pptuprob 0.91 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
   end
 
   Name "gt ltrdigest PPT HMM parameters (PPT R/Y frequencies)"
@@ -316,9 +316,9 @@ if $gttestdata then
     run_test "#{$bin}gt ltrdigest -pptrprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     run_test "#{$bin}gt ltrdigest -pptyprob 1.3 #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
     run_test "#{$bin}gt ltrdigest -pptrprob 0.97 -pptyprob 0.03 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3"
     run_test "#{$bin}gt ltrdigest -pptrprob 0.6 -pptyprob 0.4 -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_4.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0
-    #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
+    #run "diff #{last_stdout} #{$gttestdata}ltrdigest/4_ref_noHMM.gff3", :retval => 1
   end
 
   Name "gt ltrdigest GFF and sequence do not match"
@@ -326,7 +326,7 @@ if $gttestdata then
   Test do
     run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/4_genomic_dmel_RELEASE3-1.FASTA.gz"
     run_test "#{$bin}gt ltrdigest #{$gttestdata}ltrdigest/dmel_test_Run9_2L.gff3.sorted 4_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 1
-    grep($last_stderr, "exceeds sequence boundaries!")
+    grep(last_stderr, "exceeds sequence boundaries!")
   end
   
   # positive test for all D.mel chromosomes -> must match reference
@@ -338,8 +338,8 @@ if $gttestdata then
       Test do
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz"
         run_test "#{$bin}gt ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa -hmms #{$gttestdata}ltrdigest/hmms/RVT_1.hmm --  #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", :retval => 0, :maxtime => 12000
-        check_ppt_pbs($last_stdout, chr)       
-        #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
+        check_ppt_pbs(last_stdout, chr)       
+        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref.gff3"
       end
     else
       Name "gt ltrdigest D. mel. chromosome #{chr} basic test, no HMM"
@@ -348,8 +348,8 @@ if $gttestdata then
         run_test "#{$bin}gt suffixerator -dna -des -ssp -tis -v -db #{$gttestdata}ltrdigest/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz"
         run_test "#{$bin}gt -j 2 ltrdigest -outfileprefix result#{chr} -trnas #{$gttestdata}ltrdigest/Dm-tRNAs-uniq.fa #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz",\
        :retval => 0, :maxtime => 500
-        check_ppt_pbs($last_stdout, chr)
-        #run "diff #{$last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
+        check_ppt_pbs(last_stdout, chr)
+        #run "diff #{last_stdout} #{$gttestdata}ltrdigest/#{chr}_ref_noHMM.gff3"
       end
     end
   end
@@ -366,7 +366,7 @@ if $gttestdata then
                  " #{$gttestdata}ltrdigest/dmel_test_Run9_#{chr}.gff3.sorted " + \
                  " #{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
                  :retval => 0, :maxtime => 12000
-        check_amino_acid_output($last_stdout, chr, ["RVT_1"])
+        check_amino_acid_output(last_stdout, chr, ["RVT_1"])
       end
     end
   end
