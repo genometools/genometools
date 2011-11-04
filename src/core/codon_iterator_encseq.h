@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -27,6 +27,13 @@ GtCodonIterator*            gt_codon_iterator_encseq_new(GtEncseq *encseq,
                                                          unsigned long startpos,
                                                          unsigned long length,
                                                          GtError *err);
+
+GtCodonIterator*            gt_codon_iterator_encseq_new_with_readmode(
+                                                        GtEncseq *encseq,
+                                                        unsigned long startpos,
+                                                        unsigned long length,
+                                                        GtReadmode readmode,
+                                                        GT_UNUSED GtError *err);
 
 const GtCodonIteratorClass* gt_codon_iterator_encseq_class(void);
 int                         gt_codon_iterator_encseq_unit_test(GtError *err);
