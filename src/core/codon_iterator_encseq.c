@@ -129,10 +129,44 @@ GtCodonIterator* gt_codon_iterator_encseq_new(GtEncseq *encseq,
                                                     GT_READMODE_FORWARD, err);
 }
 
+static int gt_codon_iterator_encseq_single_test(GtEncseq *encseq,
+                                                const char *testseq,
+                                                const char *testseq_cmp,
+                                                GtReadmode readmode,
+                                                GT_UNUSED GtError *err)
+{
+  unsigned long j, k, i;
+  GtCodonIterator *ci;
+  char n1, n2, n3;
+  int had_err = 0;
+  unsigned int frame;
+  gt_error_check(err);
+
+  for (j = 0; !had_err && j < strlen(testseq); j++) {
+    for (k = j; !had_err && k < strlen(testseq); k++) {
+      GtCodonIteratorStatus s;
+      ci = gt_codon_iterator_encseq_new_with_readmode(encseq, j,
+                                                      strlen(testseq) - k,
+                                                      readmode,
+                                                      NULL);
+      i = j;
+      while (!had_err && !(s = gt_codon_iterator_next(ci, &n1, &n2, &n3,
+                                                      &frame, NULL))) {
+        gt_ensure(had_err, n1 == testseq_cmp[i]);
+        gt_ensure(had_err, n2 == testseq_cmp[i+1]);
+        gt_ensure(had_err, n3 == testseq_cmp[i+2]);
+        i++;
+      }
+      gt_codon_iterator_delete(ci);
+    }
+  }
+  return had_err;
+}
+
 int gt_codon_iterator_encseq_unit_test(GtError *err)
 {
   int had_err = 0,
-      i, j, k;
+      i, j;
   const char *testseq    = "gctgatcgactgaacatagctagcacggccgcgcgatcgtacgatg",
              *testseq_rc = "catcgtacgatcgcgcggccgtgctagctatgttcagtcgatcagc",
              *testseq_rv = "gtagcatgctagcgcgccggcacgatcgatacaagtcagctagtcg",
@@ -151,84 +185,20 @@ int gt_codon_iterator_encseq_unit_test(GtError *err)
   encseq = gt_encseq_builder_build(eb, NULL);
 
   /* forward tests */
-  for (j = 0; !had_err && j < strlen(testseq); j++) {
-    for (k = j; !had_err && k < strlen(testseq); k++) {
-      GtCodonIteratorStatus s;
-      ci = gt_codon_iterator_encseq_new_with_readmode(encseq, j,
-                                                      strlen(testseq) - k,
-                                                      GT_READMODE_FORWARD,
-                                                      NULL);
-      i = j;
-      while (!had_err && !(s = gt_codon_iterator_next(ci, &n1, &n2, &n3,
-                                                      &frame, NULL))) {
-       gt_ensure(had_err, n1 == testseq[i]);
-        gt_ensure(had_err, n2 == testseq[i+1]);
-        gt_ensure(had_err, n3 == testseq[i+2]);
-        i++;
-      }
-      gt_codon_iterator_delete(ci);
-    }
-  }
+  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq,
+                                                 GT_READMODE_FORWARD, err);
 
   /* complement tests */
-  for (j = 0; !had_err && j < strlen(testseq); j++) {
-    for (k = j; !had_err && k < strlen(testseq); k++) {
-      GtCodonIteratorStatus s;
-      ci = gt_codon_iterator_encseq_new_with_readmode(encseq, j,
-                                                      strlen(testseq) - k,
-                                                      GT_READMODE_COMPL,
-                                                      NULL);
-      i = j;
-      while (!had_err && !(s = gt_codon_iterator_next(ci, &n1, &n2, &n3,
-                                                      &frame, NULL))) {
-        gt_ensure(had_err, n1 == testseq_cm[i]);
-        gt_ensure(had_err, n2 == testseq_cm[i+1]);
-        gt_ensure(had_err, n3 == testseq_cm[i+2]);
-        i++;
-      }
-      gt_codon_iterator_delete(ci);
-    }
-  }
+  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_cm,
+                                                 GT_READMODE_COMPL, err);
 
   /* revcompl tests */
-  for (j = 0; !had_err && j < strlen(testseq); j++) {
-    for (k = j; !had_err && k < strlen(testseq); k++) {
-      GtCodonIteratorStatus s;
-      ci = gt_codon_iterator_encseq_new_with_readmode(encseq, j,
-                                                      strlen(testseq) - k,
-                                                      GT_READMODE_REVCOMPL,
-                                                      NULL);
-      i = j;
-      while (!had_err && !(s = gt_codon_iterator_next(ci, &n1, &n2, &n3,
-                                                      &frame, NULL))) {
-        gt_ensure(had_err, n1 == testseq_rc[i]);
-        gt_ensure(had_err, n2 == testseq_rc[i+1]);
-        gt_ensure(had_err, n3 == testseq_rc[i+2]);
-        i++;
-      }
-      gt_codon_iterator_delete(ci);
-    }
-  }
+  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_rc,
+                                                 GT_READMODE_REVCOMPL, err);
 
   /* reverse tests */
-  for (j = 0; !had_err && j < strlen(testseq); j++) {
-    for (k = j; !had_err && k < strlen(testseq); k++) {
-      GtCodonIteratorStatus s;
-      ci = gt_codon_iterator_encseq_new_with_readmode(encseq, j,
-                                                      strlen(testseq) - k,
-                                                      GT_READMODE_REVERSE,
-                                                      NULL);
-      i = j;
-      while (!had_err && !(s = gt_codon_iterator_next(ci, &n1, &n2, &n3,
-                                                      &frame, NULL))) {
-        gt_ensure(had_err, n1 == testseq_rv[i]);
-        gt_ensure(had_err, n2 == testseq_rv[i+1]);
-        gt_ensure(had_err, n3 == testseq_rv[i+2]);
-        i++;
-      }
-      gt_codon_iterator_delete(ci);
-    }
-  }
+  had_err = gt_codon_iterator_encseq_single_test(encseq, testseq, testseq_rv,
+                                                 GT_READMODE_REVERSE, err);
 
   /* lengths < 3 */
   for (j = 0; !had_err && j < 3; j++) {
