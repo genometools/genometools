@@ -138,7 +138,6 @@ void gt_uint64hashtable_delete(GtUint64hashtable *table)
 {
   if (table != NULL)
   {
-    printf("# number of collisions %lu\n",table->countcollisions);
     gt_free(table->hspace);
     gt_free(table);
   }
@@ -338,8 +337,6 @@ unsigned long gt_uint64hashtable_partialsums(GtUint64hashtable *table,
   }
   psum = table->hspace[table->sortedhspace[next-1]].count;
   gt_free(table->sortedhspace);
-  printf("average size of bucket = %.2f over %lu buckets (maxsize=%lu)\n",
-            (double) psum/next,(unsigned long) next,maxsize);
   return psum;
 }
 
