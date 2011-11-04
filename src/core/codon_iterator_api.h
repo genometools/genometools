@@ -35,7 +35,7 @@ typedef struct GtCodonIteratorClass GtCodonIteratorClass;
 unsigned long          gt_codon_iterator_current_position(GtCodonIterator *ci);
 /* Return the length of the substring to scan, given at instantiation time. */
 unsigned long          gt_codon_iterator_length(GtCodonIterator *ci);
-/* Rewind the iterator to point again to the  position in the sequence given
+/* Rewind the iterator to point again to the position in the sequence given
    at iterator instantiation time. */
 void                   gt_codon_iterator_rewind(GtCodonIterator *ci);
 /* Sets the values of <n1>, <n2> and <n3> to the codon beginning at the current
