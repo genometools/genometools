@@ -121,11 +121,11 @@ if options.prepare_only
 end
 
 if options.esa
-  puts "***ESA***"
-  puts Genomediff.esa_index(files, options.parts, options.name, options.idxopts)
+  STDERR.puts "***ESA***"
+  STDERR.puts Genomediff.esa_index(files, options.parts, options.name, options.idxopts)
   puts Genomediff.esa_genomediff(options.name,options.diffopts)
 else
-  puts "***FM-INDEX***"
-  puts Genomediff.pck_index(files, 8, options.parts, options.name, options.idxopts)
+  STDERR.puts "***FM-INDEX***"
+  STDERR.puts Genomediff.pck_index(files, 8, options.parts, options.name, options.idxopts)
   puts Genomediff.pck_genomediff(options.name, options.diffopts)
 end
