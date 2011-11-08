@@ -108,7 +108,7 @@ void gt_string_distri_foreach(const GtStringDistri *sd,
                               GtStringDistriIterFunc func, void *data)
 {
   StringDistriForeachInfo info;
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(sd);
   if (sd->hashdist) {
     info.func = func;

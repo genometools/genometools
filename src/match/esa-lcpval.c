@@ -16,6 +16,7 @@
 */
 
 #include "core/encseq.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 #include "esa-lcpval.h"
 
@@ -56,7 +57,7 @@ unsigned long gt_nextLcpvalueiterator(Lcpvalueiterator *lvi,
     lcpvalue = 0;
   } else
   {
-    int cmp;
+    GT_UNUSED int cmp;
 
     cmp = gt_encseq_check_comparetwosuffixes(lvi->encseq,
                                              lvi->readmode,

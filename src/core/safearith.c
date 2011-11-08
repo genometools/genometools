@@ -152,7 +152,6 @@ int gt_safearith_example(GT_UNUSED GtError *err)
   unsigned long ulong;
   long slong;
   unsigned int a, b, c;
-  int dest, src;
   gt_error_check(err);
 
   /* safe assignments */
@@ -173,9 +172,7 @@ int gt_safearith_example(GT_UNUSED GtError *err)
   gt_assert(c == 255);
 
   /* safe absolutes */
-  src = -256;
-  dest = gt_safe_abs(src);
-  gt_assert(dest == 256);
+  gt_assert(gt_safe_abs(-256) == 256);
 
   return 0;
 }

@@ -132,7 +132,7 @@ static int show_rangelist(void *key, void *value, GT_UNUSED void *data,
 void gt_regioncov_visitor_show_coverage(GtNodeVisitor *nv)
 {
   GtRegionCovVisitor *regioncov_visitor = gt_regioncov_visitor_cast(nv);
-  int had_err;
+  GT_UNUSED int had_err;
   had_err = gt_hashmap_foreach_in_key_order(regioncov_visitor->region2rangelist,
                                          show_rangelist, NULL, NULL);
   gt_assert(!had_err); /* show_rangelist() is sane */

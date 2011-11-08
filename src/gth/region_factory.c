@@ -235,7 +235,7 @@ void gth_region_factory_save(GthRegionFactory *rf, GtArray *nodes,
   GtHashmap *sequence_regions;
   unsigned long i, j;
   GtStr *sequenceid;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(rf && nodes && input);
   gt_assert(!rf->factory_was_used);
   rf->seqid_store = seqid_store_new(input);

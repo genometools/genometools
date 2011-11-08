@@ -16,29 +16,30 @@
 */
 
 #include <math.h>
-#include "core/encseq.h"
-#include "core/codetype.h"
 #include "core/arraydef.h"
-#include "core/showtime.h"
+#include "core/codetype.h"
+#include "core/encseq.h"
+#include "core/error_api.h"
+#include "core/fa.h"
+#include "core/logger_api.h"
 #include "core/mathsupport.h"
 #include "core/radix-intsort.h"
-#include "core/logger_api.h"
-#include "core/spacepeak.h"
+#include "core/showtime.h"
 #include "core/spacecalc.h"
+#include "core/spacepeak.h"
 #include "core/undef_api.h"
-#include "core/fa.h"
-#include "core/error_api.h"
-#include "sfx-suffixer.h"
-#include "sfx-shortreadsort.h"
-#include "spmsuftab.h"
+#include "core/unused_api.h"
 #include "firstcodes-buf.h"
-#include "firstcodes.h"
-#include "marksubstring.h"
-#include "sfx-partssuf.h"
-#include "seqnumrelpos.h"
-#include "firstcodes-tab.h"
 #include "firstcodes-scan.h"
 #include "firstcodes-spacelog.h"
+#include "firstcodes-tab.h"
+#include "firstcodes.h"
+#include "marksubstring.h"
+#include "seqnumrelpos.h"
+#include "sfx-partssuf.h"
+#include "sfx-shortreadsort.h"
+#include "sfx-suffixer.h"
+#include "spmsuftab.h"
 
 typedef struct
 {
@@ -565,7 +566,7 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
 {
   unsigned long idx, current, maxlcp,
                 totallength = gt_encseq_total_length(encseq);
-  int cmp;
+  GT_UNUSED int cmp;
   const bool specialsareequal = false, specialsareequalatdepth0 = false;
   const unsigned long depth = 0;
 

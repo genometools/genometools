@@ -28,14 +28,15 @@
 #endif
 
 #include <math.h>
-#include "core/fileutils_api.h"
+#include "annotationsketch/graphics_cairo.h"
+#include "annotationsketch/graphics_rep.h"
 #include "core/file.h"
+#include "core/fileutils_api.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/minmax.h"
 #include "core/str.h"
-#include "annotationsketch/graphics_cairo.h"
-#include "annotationsketch/graphics_rep.h"
+#include "core/unused_api.h"
 
 struct GtGraphicsCairo {
   const GtGraphics parent_instance;
@@ -656,7 +657,7 @@ int gt_graphics_cairo_save_to_file(const GtGraphics *gg, const char *filename,
 void gt_graphics_cairo_save_to_stream(const GtGraphics *gg, GtStr *stream)
 {
   const GtGraphicsCairo *g = (const GtGraphicsCairo*) gg;
-  cairo_status_t rval;
+  GT_UNUSED cairo_status_t rval;
   cairo_surface_t *bgsurf = NULL;
   cairo_t *bgc = NULL;
   gt_assert(g && stream);

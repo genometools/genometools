@@ -20,11 +20,11 @@
 #include "core/divmodmul.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
-#include "gth/gthenum.h"
-#include "gth/gtherror.h"
 #include "gth/align_dna_imp.h"
 #include "gth/array2dim_plain.h"
 #include "gth/compute_scores.h"
+#include "gth/gthenum.h"
+#include "gth/gtherror.h"
 #include "gth/path_walker.h"
 
 /* IMPORTANT: Definition has to be consistent with DnaRetrace in
@@ -940,7 +940,7 @@ static void detect_small_terminal_exons(GthSA *sa,
   GthBacktracePath *backtrace_path;
   GthDPOptionsCore *dp_options_core_terminal;
   GthDPOptionsEST *dp_options_est_terminal;
-  int rval;
+  GT_UNUSED int rval; /*XXX*/
 
   /* determine positions of terminal DP */
   gen_dp_start_terminal = gen_dp_start + gen_dp_length -
@@ -1065,7 +1065,7 @@ static void detect_small_initial_exons(GthSA *sa,
   GthDPMatrix dpm_initial;
   GthBacktracePath *backtrace_path;
   GthPathWalker *path_walker = NULL; /* XXX */
-  int rval;
+  GT_UNUSED int rval; /*XXX*/
 
   if (comments) {
     gt_file_xprintf(outfp, "%c detect_small_initial_exons():\n",

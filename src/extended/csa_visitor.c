@@ -210,7 +210,7 @@ static int csa_visitor_save_exon(GtFeatureNode *fn, void *data,
 static void get_exons(GtArray *exon_ranges, const void *sa)
 {
   GtFeatureNode *fn = *(GtFeatureNode**) sa;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(exon_ranges && fn && gt_feature_node_has_type(fn, gt_ft_gene));
   had_err = gt_feature_node_traverse_children(fn, exon_ranges,
                                               csa_visitor_save_exon, false,

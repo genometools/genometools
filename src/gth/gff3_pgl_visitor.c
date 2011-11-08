@@ -100,7 +100,7 @@ static void save_pgl_in_gff3(GthPGL *pgl, GthRegionFactory *region_factory,
   unsigned long i, j;
   GtRange range;
   GtStr *seqid;
-  int had_err;
+  GT_UNUSED int had_err;
   struct GthAGS *ags;
   long offset;
 

@@ -17,6 +17,7 @@
 
 #include <time.h>
 #include "core/ma.h"
+#include "core/unused_api.h"
 #include "gth/time.h"
 
 #define TIMESTRINGLENGTH  80
@@ -25,7 +26,7 @@ char* gth_get_time(void)
 {
   time_t utime;
   char *timestring;
-  int rval;
+  GT_UNUSED int rval;
 
   /* determine timestring */
   if (time(&utime) < 0) {

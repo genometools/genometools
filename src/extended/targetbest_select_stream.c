@@ -21,6 +21,7 @@
 #include "core/hashmap.h"
 #include "core/ma.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
@@ -81,7 +82,7 @@ static void select_targetbest(GtFeatureNode *current_feature,
   GtDlistelem *previous_elem;
   GtStr *first_target_id;
   const char *target;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(current_feature && trees);
   target = gt_feature_node_get_attribute(current_feature, GT_GFF_TARGET);
   gt_assert(target);

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/unused_api.h"
 #include "gth/chaining.h"
 
 #define POLYATAILFILTERALPHASIZE                4
@@ -284,7 +285,7 @@ static void show_chain_calc_status(GthShowVerbose showverbose,
                                    unsigned long refseqnum)
 {
   char buf[SHOW_CHAIN_CALCULATION_STATUS_BUF_SIZE];
-  int rval;
+  GT_UNUSED int rval;
 
   gt_assert(numofchains > 0);
 

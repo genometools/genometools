@@ -124,7 +124,7 @@ int gt_toolbox_show(GT_UNUSED const char *progname, void *toolbox,
                  GT_UNUSED GtError *err)
 {
   GtToolbox *tb;
-  int had_err = 0;
+  GT_UNUSED int had_err = 0;
   gt_error_check(err);
   gt_assert(toolbox);
   tb = (GtToolbox*) toolbox;

@@ -278,7 +278,7 @@ void gt_ma_show_space_peak(FILE *fp)
 int gt_ma_check_space_leak(void)
 {
   CheckSpaceLeakInfo info;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(ma);
   info.has_leak = false;
   had_err = gt_hashmap_foreach(ma->allocated_pointer, check_space_leak, &info,
@@ -309,7 +309,7 @@ static int print_allocation(GT_UNUSED void *key, void *value,
 
 void gt_ma_show_allocations(FILE *outfp)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(ma);
   had_err = gt_hashmap_foreach(ma->allocated_pointer, print_allocation,
                                outfp, NULL);

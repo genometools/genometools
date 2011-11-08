@@ -19,9 +19,9 @@
 #include <string.h>
 #include "core/chardef.h"
 #include "core/divmodmul.h"
-#include "core/ma_api.h"
-
 #include "core/encseq.h"
+#include "core/ma_api.h"
+#include "core/unused_api.h"
 
 typedef struct
 {
@@ -154,7 +154,7 @@ Specialrank *gt_fillspecialranklist(const GtEncseq *encseq,
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long realspecialranges, specialrank, totallength;
+    unsigned long realspecialranges, specialrank, GT_UNUSED totallength;
     Specialrank *specialranklist, *rbptr;
 
     totallength = gt_encseq_total_length(encseq);

@@ -245,7 +245,7 @@ static int add_auto_sr_to_queue(GT_UNUSED void *key, void *value, void *data,
 
 void gt_add_ids_visitor_finalize(GtNodeVisitor *nv)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   GtAddIDsVisitor *add_ids_visitor = add_ids_visitor_cast(nv);
   had_err = gt_hashmap_foreach(add_ids_visitor->undefined_sequence_regions,
                                add_auto_sr_to_queue,

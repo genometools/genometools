@@ -270,7 +270,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
   GtArray *gt_genome_node_array;
   ConstructionInfo cinfo;
   GTF_feature_type gtf_feature_type;
-  bool gff_type_is_valid = false;
+  GT_UNUSED bool gff_type_is_valid = false;
   const char *type = NULL;
   const char *filename;
   bool score_is_defined;

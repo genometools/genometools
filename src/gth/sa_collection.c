@@ -239,7 +239,7 @@ static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
 static void insert_alignment(GthSACollection *sa_collection, GthSA *saB,
                              bool use_rootEST)
 {
-  GthSA *saA = NULL;
+  GT_UNUSED GthSA *saA = NULL;
   bool nodecreated;
 
   gt_assert(sa_collection && saB);
@@ -437,7 +437,7 @@ static GtArray* sa_collection_get_alignments(const GthSACollection
                                              *sa_collection)
 {
   GtArray *alignments = gt_array_new(sizeof (GthSA*));
-  int had_err;
+  GT_UNUSED int had_err;
   /* traverse the tree */
   had_err = gt_rbt_walk(sa_collection->rootlist, storealignmentptr, alignments);
   gt_assert(!had_err); /* storealignmentptr() is sane */

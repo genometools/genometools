@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/fa.h"
-#include "core/xansi_api.h"
-#include "core/unused_api.h"
-#include "core/minmax.h"
 #include "core/arraydef.h"
 #include "core/disc_distri.h"
+#include "core/fa.h"
+#include "core/minmax.h"
+#include "core/unused_api.h"
+#include "core/xansi_api.h"
 #include "esa-fileend.h"
 #include "sfx-lcpvalues.h"
 #include "turnwheels.h"
@@ -450,7 +450,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    unsigned long maxdepth,
                                    const Outlcpinfo *outlcpinfosample)
 {
-  int cmp;
+  GT_UNUSED int cmp;
   unsigned long idx, reallcp, startpos1, startpos2, currentlcp;
 
   startpos1 = gt_suffixsortspace_getdirect(sortedsample,0);

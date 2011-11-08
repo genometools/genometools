@@ -7040,7 +7040,7 @@ static void testseqnumextraction(const GtEncseq *encseq)
 {
   GtUchar cc;
   bool startofsequence = true;
-  unsigned long pos, startpos, totallength, currentseqnum = 0;
+  unsigned long pos, totallength, currentseqnum = 0;
 
   totallength = encseq->logicaltotallength;
   for (pos=0; pos < totallength; pos++)
@@ -7074,8 +7074,7 @@ static void testseqnumextraction(const GtEncseq *encseq)
       }
       if (startofsequence)
       {
-        startpos = gt_encseq_seqstartpos(encseq,seqnum1);
-        gt_assert(startpos == pos);
+        gt_assert(gt_encseq_seqstartpos(encseq,seqnum1) == pos);
         startofsequence = false;
       }
     }

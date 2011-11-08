@@ -20,10 +20,13 @@
 #include "core/logger.h"
 #include "core/option_api.h"
 #include "core/str_array_api.h"
+#include "core/unused_api.h"
 #include "match/echoseq.h"
-#include "match/esa-seqread.h"
-#include "match/esa-map.h"
 #include "match/eis-voiditf.h"
+#include "match/esa-lcpintervals.h"
+#include "match/esa-map.h"
+#include "match/esa-seqread.h"
+#include "match/esa-spmitvs.h"
 #include "match/index_options.h"
 #include "match/optionargmode.h"
 #include "match/pckdfs.h"
@@ -32,12 +35,10 @@
 #include "match/sfx-strategy.h"
 #include "match/sfx-suffixgetset.h"
 #include "match/sfx-suftaborder.h"
+#include "match/stamp.h"
 #include "match/test-mappedstr.pr"
 #include "match/twobits2kmers.h"
-#include "match/esa-lcpintervals.h"
-#include "match/esa-spmitvs.h"
 #include "tools/gt_sfxmap.h"
-#include "match/stamp.h"
 
 typedef struct
 {
@@ -631,7 +632,8 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       }
       if (!haserr && arguments->inputbwt)
       {
-        unsigned long totallength, bwtdifferentconsecutive = 0, idx, longest;
+        unsigned long totallength, bwtdifferentconsecutive = 0, idx,
+                      GT_UNUSED longest;
 
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueunsignedlong;
@@ -755,7 +757,7 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   }
   if (!haserr)
   {
-    unsigned long idx, pos, numofnonspecials, currentsuffix = 0;
+    unsigned long idx, pos, numofnonspecials, GT_UNUSED currentsuffix = 0;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
 

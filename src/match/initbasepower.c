@@ -17,6 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/codetype.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 
 unsigned int gt_maxbasepower(unsigned int numofchars)
@@ -34,11 +35,10 @@ unsigned int gt_maxbasepower(unsigned int numofchars)
 
 GtCodetype *gt_initbasepower(unsigned int numofchars,unsigned int prefixlength)
 {
-  GtCodetype thepower = (GtCodetype) 1, minfailure, *basepower;
+  GtCodetype thepower = (GtCodetype) 1, *basepower;
   unsigned int i;
 
   ALLOCASSIGNSPACE(basepower,NULL,GtCodetype,prefixlength+1);
-  minfailure = (~(GtCodetype) 0)/(GtCodetype) numofchars;
   for (i=0; /* Nothing */; i++)
   {
     basepower[i] = thepower;
@@ -46,7 +46,7 @@ GtCodetype *gt_initbasepower(unsigned int numofchars,unsigned int prefixlength)
     {
       break;
     }
-    gt_assert(thepower < minfailure);
+    gt_assert(thepower < ((~(GtCodetype) 0)/(GtCodetype) numofchars));
     thepower *= numofchars;
   }
   return basepower;

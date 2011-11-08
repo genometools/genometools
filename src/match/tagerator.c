@@ -17,26 +17,26 @@
 
 #include <limits.h>
 #include "core/alphabet.h"
-#include "core/unused_api.h"
-#include "core/str_array.h"
-#include "core/ma_api.h"
+#include "core/arraydef.h"
 #include "core/error.h"
 #include "core/fileutils_api.h"
-#include "core/seqiterator_sequence_buffer.h"
-#include "core/arraydef.h"
-#include "revcompl.h"
-#include "sarr-def.h"
-#include "core/intbits.h"
-#include "myersapm.h"
 #include "core/format64.h"
-#include "idx-limdfs.h"
-#include "mssufpat.h"
+#include "core/intbits.h"
+#include "core/ma_api.h"
+#include "core/seqiterator_sequence_buffer.h"
+#include "core/str_array.h"
+#include "core/unused_api.h"
 #include "apmeoveridx.h"
 #include "dist-short.h"
+#include "echoseq.h"
+#include "esa-map.h"
+#include "idx-limdfs.h"
+#include "mssufpat.h"
+#include "myersapm.h"
+#include "revcompl.h"
+#include "sarr-def.h"
 #include "stamp.h"
 #include "tagerator.h"
-#include "esa-map.h"
-#include "echoseq.h"
 
 #define MAXTAGSIZE GT_INTWORDSIZE
 
@@ -214,7 +214,7 @@ static void checkmstats(void *processinfo,
                         unsigned long leftbound,
                         unsigned long rightbound)
 {
-  unsigned long realmstatlength;
+  GT_UNUSED unsigned long realmstatlength;
   TgrTagwithlength *twl = (TgrTagwithlength *) patterninfo;
 
   realmstatlength = genericmstats((const Limdfsresources *) processinfo,

@@ -58,7 +58,7 @@ static void show_matrix_calculation_status(GthShowVerbose showverbose,
 {
   char buf[SHOW_MATRIX_CALCULATION_STATUS_BUF_SIZE],
        icdeltastring[ICDELTASTRINGLENGTH];
-  int rval;
+  GT_UNUSED int rval;
 
   if (introncutout) {
     rval =  snprintf(icdeltastring, ICDELTASTRINGLENGTH, ", icdelta=%lu",
@@ -799,7 +799,7 @@ static void show_compute_matches_status(bool direct, GthShowVerbose showverbose,
                                         unsigned long num_of_ref_files)
 {
   char buf[SHOW_COMPUTE_MATCHES_STATUS_BUF_SIZE];
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(num_of_gen_files && num_of_ref_files );
   if (num_of_gen_files == 1 && num_of_ref_files == 1) {
     if (direct)

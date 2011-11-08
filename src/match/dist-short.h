@@ -17,8 +17,9 @@
 
 #ifndef DIST_SHORT_H
 #define DIST_SHORT_H
-#include "core/types_api.h"
 #include "core/defined-types.h"
+#include "core/encseq_api.h"
+#include "core/types_api.h"
 
 unsigned long gt_distanceofshortstringsbytearray(unsigned long *eqsvector,
                                      unsigned int alphasize,

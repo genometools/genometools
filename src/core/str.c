@@ -23,6 +23,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/str.h"
+#include "core/unused_api.h"
 #include "core/xansi_api.h"
 
 struct GtStr {
@@ -137,7 +138,7 @@ void gt_str_append_char(GtStr *dest, char c)
 void gt_str_append_double(GtStr *dest, double d, int precision)
 {
   char buf[BUFSIZ];
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(dest);
   rval = snprintf(buf, BUFSIZ, "%.*f", precision, d);
   gt_assert(rval < BUFSIZ);
@@ -147,7 +148,7 @@ void gt_str_append_double(GtStr *dest, double d, int precision)
 void gt_str_append_int(GtStr *dest, int intval)
 {
   char buf[BUFSIZ];
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(dest);
   rval = snprintf(buf, BUFSIZ, "%d", intval);
   gt_assert(rval < BUFSIZ);
@@ -157,7 +158,7 @@ void gt_str_append_int(GtStr *dest, int intval)
 void gt_str_append_uint(GtStr *dest, unsigned int uint)
 {
   char buf[BUFSIZ];
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(dest);
   rval = snprintf(buf, BUFSIZ, "%u", uint);
   gt_assert(rval < BUFSIZ);

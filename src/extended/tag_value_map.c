@@ -85,7 +85,7 @@ void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
                           const char *value)
 {
   size_t tag_len, value_len, map_len = 0;
-  const char *tag_already_used;
+  GT_UNUSED const char *tag_already_used;
   gt_assert(map && *map && tag && value);
   tag_len = strlen(tag);
   value_len = strlen(value);
@@ -104,12 +104,12 @@ void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
 void gt_tag_value_map_set(GtTagValueMap *map, const char *tag,
                           const char *new_value)
 {
-  size_t tag_len, old_value_len, new_value_len, map_len = 0;
+  size_t old_value_len, new_value_len, map_len = 0;
   char *old_value;
   gt_assert(map && *map && tag && new_value);
-  tag_len = strlen(tag);
+  gt_assert(strlen(tag));
   new_value_len = strlen(new_value);
-  gt_assert(tag_len && new_value_len);
+  gt_assert(new_value_len);
   /* determine current map length */
   old_value = get_value(*map, tag, &map_len);
   if (!old_value)

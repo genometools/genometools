@@ -27,6 +27,7 @@
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 
 struct GtBlock {
   GtArray *elements;
@@ -175,7 +176,7 @@ void gt_block_insert_element(GtBlock *block, GtFeatureNode *node)
 
 void gt_block_merge(GtBlock *b1, GtBlock *b2)
 {
-  unsigned int merged_size, i;
+  unsigned int GT_UNUSED merged_size, i;
   gt_assert(b1 && b2);
   merged_size = gt_block_get_size(b1) + gt_block_get_size(b2);
   for (i=0;i<gt_array_size(b2->elements);i++)

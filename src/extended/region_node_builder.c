@@ -17,8 +17,8 @@
 #include "core/cstr_api.h"
 #include "core/hashmap.h"
 #include "core/ma.h"
-#include "core/unused_api.h"
 #include "core/str_api.h"
+#include "core/unused_api.h"
 #include "extended/region_node.h"
 #include "extended/region_node_builder.h"
 
@@ -80,7 +80,7 @@ static int build_region_nodes(void *key, void *value, void *data,
 void gt_region_node_builder_build(const GtRegionNodeBuilder *rnb,
                                   GtQueue *genome_nodes)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(rnb && genome_nodes);
   had_err = gt_hashmap_foreach(rnb->sequence_region_to_range,
                                build_region_nodes, genome_nodes, NULL);

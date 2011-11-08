@@ -44,7 +44,7 @@ GtCstrTable* gt_cstr_table_new()
 void gt_cstr_table_add(GtCstrTable *table, const char *cstr)
 {
   char *dup;
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(table && cstr);
   gt_assert(!gt_cstr_table_get(table, cstr));
   dup = gt_cstr_dup(cstr);
@@ -72,7 +72,7 @@ static enum iterator_op store_type(void *elem, void *data,
 
 GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   GtStrArray *cstrs;
   gt_assert(table);
   cstrs = gt_str_array_new();

@@ -42,7 +42,7 @@ static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
   GtInterFeatureVisitor *aiv = (GtInterFeatureVisitor*) data;
   GtFeatureNode *inter_node;
   GtRange previous_range, current_range, inter_range;
-  GtStrand previous_strand, current_strand, inter_strand;
+  GtStrand previous_strand, /*current_strand, */inter_strand;
   GtStr *parent_seqid;
   gt_error_check(err);
   gt_assert(current_feature);
@@ -65,8 +65,8 @@ static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
 
       /* determine inter strand */
       previous_strand = gt_feature_node_get_strand(aiv->previous_feature);
-      current_strand = gt_feature_node_get_strand(current_feature);
-      gt_assert(previous_strand == current_strand);
+      /*current_strand = gt_feature_node_get_strand(current_feature);*/
+      gt_assert(previous_strand == gt_feature_node_get_strand(current_feature));
       inter_strand = previous_strand;
 
       /* determine sequence id */

@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/encseq.h"
 #include "core/codetype.h"
+#include "core/encseq.h"
 #include "core/showtime.h"
+#include "core/unused_api.h"
 #include "extended/uint64hashtable.h"
-#include "sfx-suffixer.h"
 #include "hashfirstcodes.h"
+#include "sfx-suffixer.h"
 
 typedef struct
 {
@@ -80,7 +81,8 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 {
   GtTimer *timer = NULL;
   GtHashfirstcodes hashfirstcodes;
-  unsigned long countsum, numofsequences, GT_UNUSED totallength, psum;
+  unsigned long numofsequences, GT_UNUSED totallength, psum;
+  /*GT_UNUSED unsigned long countsum;*/
   const unsigned int spmopt = 45U;
 
   if (gt_showtime_enabled())
@@ -106,8 +108,8 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           hashfirstcodes.differentcodes,
           (double) hashfirstcodes.differentcodes/numofsequences,
           numofsequences);
-  countsum = gt_uint64hashtable_countsum_get(hashfirstcodes.table);
-  gt_assert(countsum == numofsequences);
+  /*countsum = gt_uint64hashtable_countsum_get(hashfirstcodes.table);*/
+  gt_assert(gt_uint64hashtable_countsum_get(hashfirstcodes.table) == numofsequences);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "accumulate counts",stdout);

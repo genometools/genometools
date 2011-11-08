@@ -134,7 +134,7 @@ static void compute_type_statistics(GtFeatureNode *fn, GtStatVisitor *sv)
 static int compute_statistics(GtFeatureNode *fn, void *data, GtError *err)
 {
   GtStatVisitor *sv;
-  int rval;
+  GT_UNUSED int rval;
   gt_error_check(err);
   gt_assert(data);
   sv = (GtStatVisitor*) data;

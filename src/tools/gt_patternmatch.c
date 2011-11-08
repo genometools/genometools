@@ -16,19 +16,20 @@
 */
 
 #include <inttypes.h>
-#include "core/error.h"
-#include "core/str.h"
-#include "core/option_api.h"
-#include "core/versionfunc.h"
 #include "core/encseq.h"
-#include "match/sarr-def.h"
-#include "match/stamp.h"
+#include "core/error.h"
+#include "core/option_api.h"
+#include "core/str.h"
+#include "core/unused_api.h"
+#include "core/versionfunc.h"
+#include "match/cutendpfx.h"
 #include "match/enum-patt-def.h"
+#include "match/esa-map.h"
 #include "match/esa-mmsearch.h"
 #include "match/qgram2code.h"
+#include "match/sarr-def.h"
 #include "match/spacedef.h"
-#include "match/cutendpfx.h"
-#include "match/esa-map.h"
+#include "match/stamp.h"
 
 #include "tools/gt_patternmatch.h"
 
@@ -95,14 +96,14 @@ static int callpatternmatcher(const Pmatchoptions *pmopt, GtError *err)
     unsigned long trial;
     unsigned long dbstart;
     Enumpatterniterator *epi;
-    unsigned int firstspecial;
+    GT_UNUSED unsigned int firstspecial;
     MMsearchiterator *mmsibck, *mmsiimm;
     GtBucketspecification bucketspec;
     Bucketenumerator *bucketenumerator;
     Lcpinterval itv;
     unsigned long refstart;
     GtEncseqReader *esr1, *esr2;
-    int retval;
+    GT_UNUSED int retval;
     unsigned long idx, maxlcp;
     GtCodetype code = 0;
     const GtCodetype **multimappower;

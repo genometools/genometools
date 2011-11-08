@@ -150,7 +150,7 @@ static int loadline(lua_State *L, GetLine *gl) {
 #ifdef CURSES
   if (lua_strlen(L, 1) > 0) { /* non-empty line? */
     char *line;
-    int rval;
+    GT_UNUSED int rval;
     /* save complete line in history */
     line = gt_cstr_dup(lua_tostring(L, 1));
     gt_cstr_rep(line, '\n', ' '); /* replace all newlines in <line> with blanks,

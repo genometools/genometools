@@ -100,7 +100,7 @@ showvalue(unsigned long key, unsigned long long occurrences,
 void gt_disc_distri_show(const GtDiscDistri *d, GtFile *outfp)
 {
   GtShowValueInfo showvalueinfo;
-  int rval;
+  GT_UNUSED int rval;
 
   gt_assert(d);
 
@@ -138,7 +138,7 @@ void gt_disc_distri_foreach_generic(const GtDiscDistri *d,
                                     ul_ull_gt_hashmap_KeyCmp cmp)
 {
   DiscDistriForeachInfo info;
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(d);
   if (d->hashdist != NULL) {
     info.func = func;

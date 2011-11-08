@@ -453,7 +453,7 @@ static void match_mismatch_genomicproteinline(GtUchar **genomicproteinptr,
   GtUchar dna[GT_CODON_LENGTH];
   GtTransTable *transtable;
   char codon;
-  int rval;
+  GT_UNUSED int rval;
 
   transtable = gt_trans_table_new(translationschemenumber, NULL);
   /* XXX: the validity of the translation table has to be checked before */
@@ -786,8 +786,8 @@ static unsigned long filltheproteinlines(GtUchar *genomicdnaline,
                                 unsigned long lenalg,
                                 unsigned long translationschemenumber)
 {
-  unsigned long genomicdnalinelen,
-       genomicproteinlinelen,
+  unsigned long GT_UNUSED genomicdnalinelen,
+       GT_UNUSED genomicproteinlinelen,
        referenceproteinlinelen;
 
   /* construct genomic DNA line of alignment */

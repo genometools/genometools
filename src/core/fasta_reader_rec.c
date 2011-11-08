@@ -20,6 +20,7 @@
 #include "core/fasta_reader_rep.h"
 #include "core/fasta_separator.h"
 #include "core/io.h"
+#include "core/unused_api.h"
 
 struct GtFastaReaderRec {
   const GtFastaReader parent_instance;
@@ -32,7 +33,7 @@ struct GtFastaReaderRec {
 static int parse_fasta_description(GtStr *description, GtIO *seqio,
                                    GtError *err)
 {
-  int rval;
+  GT_UNUSED int rval;
   char cc;
   gt_error_check(err);
   gt_assert(description && seqio);

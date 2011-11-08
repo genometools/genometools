@@ -18,6 +18,7 @@
 #include <math.h>
 #include "core/cstr_api.h"
 #include "core/outputfile.h"
+#include "core/unused_api.h"
 #include "gth/gthxml.h"
 #include "gth/gthverbosefunc.h"
 #include "gth/intermediate.h"
@@ -62,7 +63,7 @@ static void close_output_files(Store_in_subset_file_data
                                *store_in_subset_file_data)
 {
   char buf[SHOW_SPLIT_FILE_BUF_SIZE];
-  int rval;
+  GT_UNUSED int rval;
   unsigned long i;
 
   for (i = 0; i < store_in_subset_file_data->num_of_subset_files; i++) {

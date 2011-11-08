@@ -16,17 +16,18 @@
 */
 
 #include <math.h>
-#include "core/intbits.h"
-#include "core/encseq_api.h"
-#include "core/encseq.h"
-#include "core/codetype.h"
-#include "core/format64.h"
 #include "core/arraydef.h"
+#include "core/codetype.h"
+#include "core/encseq.h"
+#include "core/encseq_api.h"
+#include "core/format64.h"
+#include "core/intbits.h"
+#include "core/unused_api.h"
+#include "hashfirstcodes.h"
 #include "sfx-mappedstr.h"
 #include "sfx-suffixer.h"
-#include "twobits2kmers.h"
-#include "hashfirstcodes.h"
 #include "stamp.h"
+#include "twobits2kmers.h"
 
 #define READNEXTCODEANDCHECKIGNORESPECIAL(POS)\
         gt_assert(kmercodeiterator != NULL);\
@@ -140,11 +141,12 @@ static inline GtCodetype mcbs_next(Multicharacterbitstreamstate *mcbs,
   return kmer;
 }
 
-static void gt_checkkmercode(void *processinfo,
+static void gt_checkkmercode(GT_UNUSED void *processinfo,
                              GT_UNUSED bool firstinrange,
                              GT_UNUSED unsigned long pos,
                              GT_UNUSED GtCodetype code)
 {
+#ifndef NDEBUG
   GtKmercodeiterator *kmercodeiterator = (GtKmercodeiterator *) processinfo;
   const GtKmercode *kmercodeptr;
 
@@ -152,6 +154,7 @@ static void gt_checkkmercode(void *processinfo,
   kmercodeptr = gt_kmercodeiterator_encseq_nonspecial_next(kmercodeiterator);
   gt_assert(kmercodeptr != NULL && !kmercodeptr->definedspecialposition);
   gt_assert(code == kmercodeptr->code);
+#endif
 }
 
 static void multireadmode_getencseqkmers_twobitencoding(const GtEncseq *encseq,

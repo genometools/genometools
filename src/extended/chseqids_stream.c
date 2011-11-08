@@ -55,7 +55,7 @@ static int chseqids_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtFeatureNode *feature_node;
   GtStr *changed_seqid;
   unsigned long i;
-  int rval, had_err = 0;
+  int GT_UNUSED rval, had_err = 0;
   gt_error_check(err);
   cs = chseqids_stream_cast(ns);
 

@@ -22,11 +22,11 @@
 #include "core/defined-types.h"
 #include "core/fa.h"
 #include "core/log_api.h"
+#include "core/logger_api.h"
 #include "core/ma_api.h"
 #include "core/mathsupport.h"
 #include "core/safearith.h"
 #include "core/unused_api.h"
-#include "core/logger_api.h"
 #include "core/xansi_api.h"
 #include "sfx-suffixgetset.h"
 
@@ -254,7 +254,8 @@ void gt_suffixsortspace_checkorder(const GtSuffixsortspace *sssp,
                                    unsigned long subbucketleft,
                                    unsigned long width)
 {
-  unsigned long idx, prevpos, currentpos;
+  unsigned long idx, currentpos;
+  GT_UNUSED unsigned long prevpos;
 
   gt_assert(width > 0);
   prevpos = gt_suffixsortspace_getdirect(sssp,

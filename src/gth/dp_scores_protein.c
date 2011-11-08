@@ -17,6 +17,7 @@
 #include "core/array2dim_api.h"
 #include "core/array3dim.h"
 #include "core/trans_table.h"
+#include "core/unused_api.h"
 #include "gth/align_common.h"
 #include "gth/dp_scores_protein.h"
 
@@ -78,7 +79,7 @@ static GtUchar*** precompute_codon2amino(unsigned long translationtable)
   GtUchar ***codon2amino;
   GtTransTable *transtable;
   GtAlphabet *dna_alpha;
-  int x, y, z, rval;
+  int x, y, z, GT_UNUSED rval;
   char amino;
   gt_array3dim_malloc(codon2amino, 4, 4, 4);
   dna_alpha = gt_alphabet_new_dna();

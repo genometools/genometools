@@ -187,7 +187,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                                             patternLen);
         if (BWTSeqHasLocateInformation(bwtSeq))
         {
-          unsigned long numMatches;
           if ((had_err = !gt_reinitEMIterator(&EMIter, bwtSeq, pptr, patternLen,
                                            false)))
           {
@@ -195,9 +194,9 @@ gt_packedindex_chk_search(int argc, const char *argv[], GtError *err)
                   " iterator", stderr);
             abort();
           }
-          numMatches = gt_EMINumMatchesTotal(&EMIter);
-          gt_assert(numMatches == gt_BWTSeqMatchCount(bwtSeq, pptr, patternLen,
-                                                false));
+          gt_assert(gt_EMINumMatchesTotal(&EMIter) ==
+                    gt_BWTSeqMatchCount(bwtSeq, pptr, patternLen,
+                                        false));
           gt_assert(gt_EMINumMatchesTotal(&EMIter)
                       == gt_countmmsearchiterator(mmsi));
           while (gt_nextmmsearchiterator(&dbstart,mmsi))

@@ -17,9 +17,10 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-#include "core/types_api.h"
 #include "core/chardef.h"
 #include "core/codetype.h"
+#include "core/types_api.h"
+#include "core/unused_api.h"
 #include "spacedef.h"
 #include "bcktab.h"
 #include "cutendpfx.h"
@@ -64,7 +65,7 @@ Bucketenumerator *gt_newbucketenumerator(const GtBcktab *bcktab,
                                       unsigned int demandprefixlength)
 {
   Bucketenumerator *bucketenumerator;
-  unsigned int firstspecial;
+  GT_UNUSED unsigned int firstspecial;
 
   ALLOCASSIGNSPACE(bucketenumerator,NULL,Bucketenumerator,1);
   bucketenumerator->bcktab = bcktab;

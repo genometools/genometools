@@ -25,6 +25,7 @@
 #include "core/minmax.h"
 #include "core/str_api.h"
 #include "core/types_api.h"
+#include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "spacedef.h"
 #include "tyr-map.h"
@@ -395,7 +396,7 @@ int gt_constructmerbuckets(const char *inputindex,
 Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
                               GtError *err)
 {
-  size_t numofbytes, expectedsize;
+  size_t numofbytes;
   Tyrbckinfo *tyrbckinfo;
   bool haserr = false;
 
@@ -416,12 +417,11 @@ Tyrbckinfo *gt_tyrbckinfo_new(const char *tyrindexname,unsigned int alphasize,
     tyrbckinfo->prefixlength = (unsigned int) pl_long;
     tyrbckinfo->numofcodes
       = gt_power_for_small_exponents(alphasize,tyrbckinfo->prefixlength);
-    expectedsize
-      = sizeof (unsigned long) *
-        (1UL +
-         (tyrbckinfo->numofcodes+1) +
-         GT_NUMOFINTSFORBITS(tyrbckinfo->numofcodes + 1));
-    gt_assert(expectedsize == numofbytes);
+    /*check if numofbytes == expected size*/
+    gt_assert(numofbytes == sizeof (unsigned long) *
+                            (1UL +
+                             (tyrbckinfo->numofcodes+1) +
+                             GT_NUMOFINTSFORBITS(tyrbckinfo->numofcodes + 1)));
     tyrbckinfo->bounds = ((unsigned long *) tyrbckinfo->mappedmbdfileptr) + 1;
     tyrbckinfo->boundisdefined
       = tyrbckinfo->bounds + tyrbckinfo->numofcodes + 1;

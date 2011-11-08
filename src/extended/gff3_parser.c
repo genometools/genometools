@@ -276,7 +276,7 @@ void gt_gff3_parser_parse_all_target_attributes(const char *values,
                                                 GtArray *target_ranges,
                                                 GtArray *target_strands)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   had_err = parse_target_attributes(values, NULL, NULL, NULL, NULL, target_ids,
                                     target_ranges, target_strands, "", 0,
                                     NULL);
@@ -338,7 +338,7 @@ static void replace_node(GtFeatureNode *node_to_replace,
                          GtFeatureNode *replacing_node, GtQueue *genome_nodes)
 {
   ReplaceInfo replace_info;
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(node_to_replace && replacing_node && genome_nodes);
   replace_info.node_to_replace = node_to_replace;
   replace_info.replacing_node = replacing_node;

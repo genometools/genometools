@@ -611,7 +611,7 @@ static void show_parse_file_status(GthShowVerbose showverbose,
                                    const char *filename)
 {
   char buf[SHOW_PARSE_FILE_STATUS_BUF_SIZE];
-  int rval;
+  GT_UNUSED int rval;
   rval = snprintf(buf, SHOW_PARSE_FILE_STATUS_BUF_SIZE,
                   "process file %lu/%lu: %s",  filenum + 1,  numoffiles,
                   filename);

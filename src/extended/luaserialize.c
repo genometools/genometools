@@ -21,6 +21,7 @@
 #include "lualib.h"
 #include "core/assert_api.h"
 #include "core/ensure.h"
+#include "core/unused_api.h"
 #include "extended/luaserialize.h"
 
 static int format_scalar(lua_State *L, GtStr *out, int index, bool table_key,
@@ -75,7 +76,7 @@ static int format_scalar(lua_State *L, GtStr *out, int index, bool table_key,
 static int parse_table(lua_State *L, GtStr *out, int index, int level,
                        GtError *err)
 {
-  int rval, had_err = 0;
+  int GT_UNUSED rval, had_err = 0;
   gt_error_check(err);
   gt_assert(lua_istable(L, index));
   lua_pushnil(L);

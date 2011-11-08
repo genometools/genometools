@@ -252,7 +252,7 @@ unsigned char gthgetcodon(unsigned char genomicchar1,
                           const GtTransTable *transtable)
 {
   char codon;
-  int rval;
+  GT_UNUSED int rval;
 
   /* translate dna into codon */
   rval = gt_trans_table_translate_codon(transtable,

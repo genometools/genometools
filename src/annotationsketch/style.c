@@ -212,7 +212,7 @@ int gt_style_load_file(GtStyle *sty, const char *filename, GtError *err)
 
 void gt_style_reload(GtStyle *sty)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(sty && sty->filename);
   rval = gt_style_load_file(sty, sty->filename, NULL);
   gt_assert(!rval); /* should not happen, file was loaded before */

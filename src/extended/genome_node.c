@@ -296,7 +296,7 @@ void gt_genome_nodes_show(GtArray *nodes, GtFile *outfp)
   gt_assert(nodes);
   gff3_visitor = gt_gff3_visitor_new(outfp);
   for (i = 0; i < gt_array_size(nodes); i++) {
-    int had_err;
+    GT_UNUSED int had_err;
     had_err = gt_genome_node_accept(*(GtGenomeNode**) gt_array_get(nodes, i),
                                     gff3_visitor, NULL);
     gt_assert(!had_err); /* should not happen */

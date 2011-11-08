@@ -118,11 +118,11 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
 
 static void fclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 {
-  FAFileInfo *fileinfo;
+  /*FAFileInfo *fileinfo;*/
   gt_assert(stream && fa);
   gt_mutex_lock(fa->file_mutex);
-  fileinfo = gt_hashmap_get(fa->file_pointer, stream);
-  gt_assert(fileinfo);
+  /*fileinfo = gt_hashmap_get(fa->file_pointer, stream);*/
+  gt_assert(gt_hashmap_get(fa->file_pointer, stream));
   gt_hashmap_remove(fa->file_pointer, stream);
   gt_mutex_unlock(fa->file_mutex);
   switch (file_mode) {
@@ -141,11 +141,11 @@ static void fclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 
 static void xfclose_generic(void *stream, GtFileMode file_mode, FA *fa)
 {
-  FAFileInfo *fileinfo;
+  /*FAFileInfo *fileinfo;*/
   gt_assert(stream && fa);
   gt_mutex_lock(fa->file_mutex);
-  fileinfo = gt_hashmap_get(fa->file_pointer, stream);
-  gt_assert(fileinfo);
+  /*fileinfo = gt_hashmap_get(fa->file_pointer, stream);*/
+  gt_assert(gt_hashmap_get(fa->file_pointer, stream));
   gt_hashmap_remove(fa->file_pointer, stream);
   gt_mutex_unlock(fa->file_mutex);
   switch (file_mode) {
@@ -637,7 +637,7 @@ static int check_mmap_leak(GT_UNUSED void *key, void *value, void *data,
 int gt_fa_check_fptr_leak(void)
 {
   CheckLeakInfo info;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(fa);
   info.has_leak = false;
   had_err = gt_hashmap_foreach(fa->file_pointer, check_fptr_leak, &info, NULL);
@@ -650,7 +650,7 @@ int gt_fa_check_fptr_leak(void)
 int gt_fa_check_mmap_leak(void)
 {
   CheckLeakInfo info;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(fa);
   info.has_leak = false;
   had_err = gt_hashmap_foreach(fa->memory_maps, check_mmap_leak, &info, NULL);

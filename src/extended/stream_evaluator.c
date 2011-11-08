@@ -588,7 +588,7 @@ static bool mRNAs_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2,
   GtArray *exons_1, *exons_2;
   StoreExonFeatureInfo info;
   bool equal;
-  int had_err;
+  GT_UNUSED int had_err;
 
   gt_assert(gn_1 && gn_2 && feature_type);
 
@@ -650,7 +650,7 @@ static bool genes_are_equal(GtGenomeNode *gn_1, GtGenomeNode *gn_2,
   StoreGeneFeatureInfo info;
   unsigned long i;
   bool equal;
-  int had_err;
+  GT_UNUSED int had_err;
 
   gt_assert(gn_1 && gn_2 && feature_type);
 

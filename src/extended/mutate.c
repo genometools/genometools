@@ -21,6 +21,7 @@
 #include "core/log.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/unused_api.h"
 #include "extended/mutate.h"
 
 #define MUTATED_DESC_PRIMER " [mutated with rate "
@@ -29,7 +30,7 @@ static char* mutate_description(const char *description, unsigned int rate)
 {
   unsigned long mutated_description_len;
   char *mutated_description;
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(description);
   gt_assert(rate <= 100);
   mutated_description_len = strlen(description) + strlen(MUTATED_DESC_PRIMER)

@@ -15,14 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/divmodmul.h"
-#include "core/fa.h"
-#include "core/encseq.h"
 #include "core/defined-types.h"
+#include "core/divmodmul.h"
+#include "core/encseq.h"
+#include "core/fa.h"
+#include "core/unused_api.h"
+#include "sfx-apfxlen.h"
 #include "spacedef.h"
 #include "tyr-basic.h"
 #include "tyr-map.h"
-#include "sfx-apfxlen.h"
 
 struct Tyrindex
 {
@@ -364,11 +365,12 @@ static int mymemcmp(unsigned long *offset,const GtUchar *s1,const GtUchar *s2,
   return NULL;
 }
 
-void gt_tyrindex_check(const Tyrindex *tyrindex)
+void gt_tyrindex_check(GT_UNUSED const Tyrindex *tyrindex)
 {
+#ifndef NDEBUG
   GtUchar *mercodeptr;
   const GtUchar *result;
-  unsigned long position, previousposition = 0;
+  unsigned long position, GT_UNUSED previousposition = 0;
 
   for (mercodeptr = tyrindex->mertable;
        mercodeptr <= tyrindex->lastmer;
@@ -378,24 +380,21 @@ void gt_tyrindex_check(const Tyrindex *tyrindex)
                                    tyrindex->mertable,
                                    tyrindex->lastmer);
     gt_assert(result != NULL);
-#ifndef NDEBUG
     if ((result - tyrindex->mertable) % tyrindex->merbytes != 0)
     {
       fprintf(stderr,"result is not multiple of %lu\n",tyrindex->merbytes);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-#endif
     position = (unsigned long) (result-tyrindex->mertable)/
                                tyrindex->merbytes;
-#ifndef NDEBUG
     if (position > 0 && previousposition + 1 != position)
     {
       fprintf(stderr,"position %lu is not increasing\n",position);
       exit(GT_EXIT_PROGRAMMING_ERROR);
     }
-#endif
     previousposition = position;
   }
+#endif
 }
 
 int gt_determinetyrbckpfxlen(unsigned int *prefixlength,

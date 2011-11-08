@@ -141,7 +141,7 @@ GtArray* gt_feature_index_memory_get_features_for_seqid(GtFeatureIndex *gfi,
                                                         const char *seqid)
 {
   RegionInfo *ri;
-  int had_err = 0;
+  GT_UNUSED int had_err = 0;
   GtArray *a;
   GtFeatureIndexMemory *fi;
   gt_assert(gfi && seqid);
@@ -228,7 +228,7 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi)
 {
   GtCstrTable* seqids;
   GtStrArray *ret;
-  int rval;
+  GT_UNUSED int rval;
   GtFeatureIndexMemory *fi;
   gt_assert(gfi);
 

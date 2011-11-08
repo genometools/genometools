@@ -451,7 +451,7 @@ static int feature_node_save_exon(GtFeatureNode *fn, void *data,
 
 void gt_feature_node_get_exons(GtFeatureNode *fn, GtArray *exon_features)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(fn && exon_features && !gt_array_size(exon_features));
   had_err = gt_feature_node_traverse_children(fn, exon_features,
                                               feature_node_save_exon, false,
@@ -503,7 +503,7 @@ static int determine_transcripttypes(GtFeatureNode *fn, void *data,
                                      GT_UNUSED GtError *err)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_error_check(err);
   gt_assert(fn && info);
   /* reset exon_features and cds_features */
@@ -522,7 +522,7 @@ static int determine_transcripttypes(GtFeatureNode *fn, void *data,
 void gt_feature_node_determine_transcripttypes(GtFeatureNode *fn)
 {
   SaveExonAndCDSInfo info;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(fn);
   info.exon_features = gt_array_new(sizeof (GtFeatureNode*));
   info.cds_features = gt_array_new(sizeof (GtFeatureNode*));
@@ -996,7 +996,7 @@ static int remove_leaf(GtFeatureNode *node, void *data, GT_UNUSED GtError *err)
 
 void gt_feature_node_remove_leaf(GtFeatureNode *tree, GtFeatureNode *leafn)
 {
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(tree && leafn);
   gt_assert(!gt_feature_node_number_of_children(leafn));
   had_err = gt_feature_node_traverse_children(tree, leafn, remove_leaf, true,
@@ -1028,7 +1028,7 @@ static int check_marked_status(GtFeatureNode *fn, void *data,
 bool gt_feature_node_contains_marked(GtFeatureNode *fn)
 {
   bool contains_marked = false;
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(fn);
   rval = gt_feature_node_traverse_children(fn, &contains_marked,
                                            check_marked_status, true, NULL);

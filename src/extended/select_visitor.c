@@ -107,7 +107,7 @@ static bool filter_targetstrand(GtFeatureNode *fn, GtStrand targetstrand)
       (target = gt_feature_node_get_attribute(fn, GT_GFF_TARGET))) {
     unsigned long num_of_targets;
     GtStrand parsed_strand;
-    int had_err;
+    GT_UNUSED int had_err;
     had_err = gt_gff3_parser_parse_target_attributes(target, &num_of_targets,
                                                      NULL, NULL, &parsed_strand,
                                                      "", 0, NULL);

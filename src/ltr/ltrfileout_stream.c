@@ -129,10 +129,9 @@ static int write_pdom(GtLTRFileOutStream *ls, GtArray *pdoms,
   {
     for (i=1UL; i<gt_array_size(pdoms); i++)
     {
-      int rval;
-      rval = gt_genome_node_cmp(*(GtGenomeNode**)gt_array_get(pdoms, i),
-                                *(GtGenomeNode**)gt_array_get(pdoms, i-1));
-      gt_assert(rval >= 0);
+      gt_assert(gt_genome_node_cmp(*(GtGenomeNode**)gt_array_get(pdoms, i),
+                                *(GtGenomeNode**)gt_array_get(pdoms, i-1))
+                >= 0);
     }
     if (gt_feature_node_get_strand(*(GtFeatureNode**) gt_array_get(pdoms, 0UL))
         == GT_STRAND_REVERSE)
