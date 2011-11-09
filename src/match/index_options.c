@@ -55,7 +55,8 @@ struct GtIndexOptions
        outbwttab,
        outbcktab,
        outkystab,
-       outkyssort;
+       outkyssort,
+       lcpdist;
   GtStr *kysargumentstring,
         *indexname,
         *dir,
@@ -358,6 +359,14 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                    false);
     gt_option_parser_add_option(op, idxo->optionoutlcptab);
 
+    idxo->option = gt_option_new_bool("lcpdist",
+                              "output distributions of values in lcptab",
+                              &idxo->lcpdist,
+                              false);
+    gt_option_is_extended_option(idxo->option);
+    gt_option_imply(idxo->option, idxo->optionoutlcptab);
+    gt_option_parser_add_option(op, idxo->option);
+
     idxo->optionoutbwttab = gt_option_new_bool("bwt",
                                    "output Burrows-Wheeler Transformation "
                                    "(bwttab) to file",
@@ -514,13 +523,6 @@ GT_INDEX_OPTS_GETTER_DEF(outbwttab, bool);
 GT_INDEX_OPTS_GETTER_DEF(outbcktab, bool);
 GT_INDEX_OPTS_GETTER_DEF(prefixlength, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF(algbounds, GtStrArray*);
-/* these are available as options only, values are not to be used directly */
-/* SK: removed these, as they do not seem to be used.
-GT_INDEX_OPTS_GETTER_DEF_OPT(cmpcharbychar);
-GT_INDEX_OPTS_GETTER_DEF_OPT(storespecialcodes);
-GT_INDEX_OPTS_GETTER_DEF_OPT(maxwidthrealmedian);
-GT_INDEX_OPTS_GETTER_DEF_OPT(differencecover);
-*/
 /* these are available as values only, set _after_ option processing */
 GT_INDEX_OPTS_GETTER_DEF_VAL(numofparts, unsigned int);
 GT_INDEX_OPTS_GETTER_DEF_VAL(maximumspace, unsigned long);
@@ -528,6 +530,7 @@ GT_INDEX_OPTS_GETTER_DEF_VAL(outkystab, bool);
 GT_INDEX_OPTS_GETTER_DEF_VAL(outkyssort, bool);
 GT_INDEX_OPTS_GETTER_DEF_VAL(sfxstrategy, Sfxstrategy);
 GT_INDEX_OPTS_GETTER_DEF_VAL(readmode, GtReadmode);
+GT_INDEX_OPTS_GETTER_DEF_VAL(lcpdist, bool);
 #ifndef S_SPLINT_S
 GT_INDEX_OPTS_GETTER_DEF_VAL(bwtIdxParams, struct bwtOptions);
 #endif

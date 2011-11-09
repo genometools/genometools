@@ -193,6 +193,10 @@ static void showoptions(const Suffixeratoroptions *so)
                         strategy.maxbltriesort);
   gt_logger_log_force(logger, "maxcountingsort=%lu",
                         strategy.maxcountingsort);
+  gt_logger_log_force(logger, "lcpdist=%s",
+                        gt_index_options_lcpdist_value(so->idxopts)
+                          ? "true"
+                          : "false");
   gt_logger_delete(logger);
 }
 

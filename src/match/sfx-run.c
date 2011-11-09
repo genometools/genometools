@@ -95,9 +95,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
       = gt_Outlcpinfo_new(gt_str_get(so->indexname),
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
-                          false, /* SK: should be triggered by option,
-                                    need option -lcpdist or
-                                    -lcp dist, see E-mail from 9.9.2011 */
+                          gt_index_options_lcpdist_value(so->idxopts),
                           err);
     if (outfileinfo->outlcpinfo == NULL)
     {
