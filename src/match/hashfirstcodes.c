@@ -109,7 +109,8 @@ void hashfirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           (double) hashfirstcodes.differentcodes/numofsequences,
           numofsequences);
   /*countsum = gt_uint64hashtable_countsum_get(hashfirstcodes.table);*/
-  gt_assert(gt_uint64hashtable_countsum_get(hashfirstcodes.table) == numofsequences);
+  gt_assert(gt_uint64hashtable_countsum_get(hashfirstcodes.table)
+               == numofsequences);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "accumulate counts",stdout);
