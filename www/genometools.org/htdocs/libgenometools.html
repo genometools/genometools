@@ -274,25 +274,6 @@ Create a <code>GtAddIntronsStream*</code> which inserts feature nodes of type <e
 <p> The following type is for storing alphabets.</p>
 
 <hr>
-<a name="gt_alphabet_new"></a>
-
-<code>GtAlphabet*     gt_alphabet_new(bool isdna,
-                               bool isprotein,
-                               const GtStr *smapfile,
-                               const GtStrArray *filenametab,
-                               GtError *err)</code>
-<p>
-Returns a new <code>GtAlphabet</code> object as described by the following parameters:
-   A DNA alphabet (see <code>gt_alphabet_new_dna()</code>) is created if <code>isdna</code> is set.
-   Analogously, an amino acid alphabet (see <code>gt_alphabet_new_protein()</code>) is
-   created if <code>isprotein</code> is set to true. If both are false, the alphabet will
-   be read from the file given in <code>smapfile</code>. If <code>smapfile</code> is empty, then the
-   sequence files in <code>filenametab</code> will be scanned to determine whether they
-   are DNA or protein sequences, and the appropriate alphabet will be used
-   (see <code>gt_alphabet_guess()</code>).
-   Returns NULL on error, see <code>err</code> for details.
-</p>
-<hr>
 <a name="gt_alphabet_new_dna"></a>
 
 <code>GtAlphabet*     gt_alphabet_new_dna(void)</code>
@@ -316,10 +297,39 @@ Return an empty <code>GtAlphabet</code> object.
 <hr>
 <a name="gt_alphabet_new_from_file"></a>
 
-<code>GtAlphabet*     gt_alphabet_new_from_file(const char *indexname, GtError *err)</code>
+<code>GtAlphabet*     gt_alphabet_new_from_file(const char *filename, GtError *err)</code>
 <p>
 Return a <code>GtAlphabet</code> object, as read from an .al1 file specified by
-   <code>indexname</code> (i.e. no al1 suffix necessary).
+   <code>filename</code> (i.e. no al1 suffix necessary).
+</p>
+<hr>
+<a name="gt_alphabet_new_from_file_no_suffix"></a>
+
+<code>GtAlphabet*     gt_alphabet_new_from_file_no_suffix(const char *filename,
+                                                   GtError *err)</code>
+<p>
+Return a <code>GtAlphabet</code> object, as read from a file specified by
+   <code>filename</code>.
+</p>
+<hr>
+<a name="gt_alphabet_new_from_string"></a>
+
+<code>GtAlphabet*     gt_alphabet_new_from_string(const char *alphadef,
+                                           unsigned long len, GtError *err)</code>
+<p>
+Return a <code>GtAlphabet</code> object, as read from a string of length <code>len</code>
+   specified by <code>alphadef</code>.
+</p>
+<hr>
+<a name="gt_alphabet_new_from_sequence"></a>
+
+<code>GtAlphabet*     gt_alphabet_new_from_sequence(const GtStrArray *filenametab,
+                                             GtError *err)</code>
+<p>
+Returns a new <code>GtAlphabet</code> object by scanning the sequence files in
+   <code>filenametab</code> to determine whether they are DNA or protein sequences,
+   and the appropriate alphabet will be used (see <code>gt_alphabet_guess()</code>).
+   Returns NULL on error, see <code>err</code> for details.
 </p>
 <hr>
 <a name="gt_alphabet_guess"></a>
@@ -413,12 +423,20 @@ Writes a representation of <code>alphabet</code> to the file pointer <code>fpout
 <hr>
 <a name="gt_alphabet_to_file"></a>
 
-<code>int             gt_alphabet_to_file(const GtAlphabet *alpha,
+<code>int             gt_alphabet_to_file(const GtAlphabet *alphabet,
                                    const char *indexname,
                                    GtError *err)</code>
 <p>
 Writes a representation of <code>alphabet</code> to the .al1 output file as specified
    by <code>indexname</code> (i.e. without the .al1 suffix).
+</p>
+<hr>
+<a name="gt_alphabet_to_str"></a>
+
+<code>void             gt_alphabet_to_str(const GtAlphabet *alphabet, GtStr *dest)</code>
+<p>
+Writes a representation of <code>alphabet</code> to the <code>GtStr</code> as specified
+   by <code>dest</code>.
 </p>
 <hr>
 <a name="gt_alphabet_pretty_symbol"></a>
@@ -1235,7 +1253,7 @@ Return the length of the substring to scan, given at instantiation time.
 
 <code>void                    gt_codon_iterator_rewind(GtCodonIterator *ci)</code>
 <p>
-Rewind the iterator to point again to the  position in the sequence given
+Rewind the iterator to point again to the position in the sequence given
    at iterator instantiation time.
 </p>
 <hr>
@@ -2852,8 +2870,8 @@ Creates a new <code>GtFeatureIndexMemory</code> object.
 
 <p> Implements the <code>GtGenomeNode</code> interface. A single feature node corresponds
    to a GFF3 feature line (i.e., a line which does not start with <code>#</code>).
-   Part-of relationships (which are realised in GFF3 with the <code>Parent</code> and <code>ID</code>
-   attributes) are realised in the C API with the
+   Part-of relationships (which are realized in GFF3 with the <code>Parent</code> and <code>ID</code>
+   attributes) are realized in the C API with the
    <code>gt_feature_node_add_child()</code> method.</p><p>   Besides the ``mere'' feature nodes two ``special'' feature nodes exist:
    multi-features and pseudo-features.</p><p>   Multi-features represent features which span multiple lines (it is indicated
    in GFF3 files by the fact, that each line has the same ID attribute).</p><p>   To check if a feature is a multi-feature use the method
@@ -4941,6 +4959,17 @@ Return <code>true</code> if <code>option</code> was set, <code>false</code> othe
 Delete <code>option</code>.
 </p>
 <hr>
+<a name="gt_option_parse_spacespec"></a>
+
+<code>int  gt_option_parse_spacespec(unsigned long *maximumspace,
+                              const char *optname,
+                              const GtStr *memlimit,
+                              GtError *err)</code>
+<p>
+Parse the argument to option -memlimit. Could be made into
+   a special parser, but I do not know how. SK. 2011-09-19
+</p>
+<hr>
 <a name="GtOptionParser"></a>
 <h2>Class GtOptionParser</h2>
 
@@ -5119,14 +5148,14 @@ Map <code>phase_char</code> to the corresponding phase enum type.
 
 <code>GtQueue*       gt_queue_new(void)</code>
 <p>
-Return a new <code>GtQueue </code> object.
+Return a new <code>GtQueue</code> object.
 </p>
 <hr>
 <a name="gt_queue_add"></a>
 
 <code>void           gt_queue_add(GtQueue *queue, void *elem)</code>
 <p>
-Add <code>elem</code> to <code>queue</code> (<em>enqueue</em> in computer science lingo).
+Add <code>elem</code> to <code>queue</code> (<em>enqueue</em> in computer science terminology).
 </p>
 <hr>
 <a name="gt_queue_get"></a>
@@ -5134,7 +5163,7 @@ Add <code>elem</code> to <code>queue</code> (<em>enqueue</em> in computer scienc
 <code>void*          gt_queue_get(GtQueue *queue)</code>
 <p>
 Remove the first element from non-empty <code>queue</code> and return it (<em>dequeue</em> in
-   computer science lingo).
+   computer science terminology).
 </p>
 <hr>
 <a name="gt_queue_head"></a>
@@ -7422,13 +7451,17 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_alphabet_is_protein"><code>gt_alphabet_is_protein</code></a><br>
 
-  <a href="#gt_alphabet_new"><code>gt_alphabet_new</code></a><br>
-
   <a href="#gt_alphabet_new_dna"><code>gt_alphabet_new_dna</code></a><br>
 
   <a href="#gt_alphabet_new_empty"><code>gt_alphabet_new_empty</code></a><br>
 
   <a href="#gt_alphabet_new_from_file"><code>gt_alphabet_new_from_file</code></a><br>
+
+  <a href="#gt_alphabet_new_from_file_no_suffix"><code>gt_alphabet_new_from_file_no_suffix</code></a><br>
+
+  <a href="#gt_alphabet_new_from_sequence"><code>gt_alphabet_new_from_sequence</code></a><br>
+
+  <a href="#gt_alphabet_new_from_string"><code>gt_alphabet_new_from_string</code></a><br>
 
   <a href="#gt_alphabet_new_protein"><code>gt_alphabet_new_protein</code></a><br>
 
@@ -7445,6 +7478,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_alphabet_symbolmap"><code>gt_alphabet_symbolmap</code></a><br>
 
   <a href="#gt_alphabet_to_file"><code>gt_alphabet_to_file</code></a><br>
+
+  <a href="#gt_alphabet_to_str"><code>gt_alphabet_to_str</code></a><br>
 
   <a href="#gt_alphabet_valid_input"><code>gt_alphabet_valid_input</code></a><br>
 
@@ -8428,6 +8463,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_option_new_width"><code>gt_option_new_width</code></a><br>
 
+  <a href="#gt_option_parse_spacespec"><code>gt_option_parse_spacespec</code></a><br>
+
   <a href="#gt_option_parser_add_option"><code>gt_option_parser_add_option</code></a><br>
 
   <a href="#gt_option_parser_delete"><code>gt_option_parser_delete</code></a><br>
@@ -8813,7 +8850,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2011-07-30
+Last update: 2011-11-09
 </div>
 </div>
 <!-- Piwik -->
