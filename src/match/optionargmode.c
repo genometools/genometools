@@ -74,7 +74,8 @@ GtStr *gt_getargmodekeywords(const Optionargmodedesc *modedesc,
                              const char *what)
 {
   GtStr *helpstring;
-  size_t idx, modecount, len, maxlen = 0, GT_UNUSED spacelen;
+  size_t idx, modecount, len, maxlen = 0;
+  GT_UNUSED size_t spacelen;
   const char *space = "    ";
 
   for (modecount=0; modecount < numberofentries; modecount++)

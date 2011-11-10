@@ -246,10 +246,12 @@ int gt_ltrfileout_stream_next(GtNodeStream *ns, GtGenomeNode **gn, GtError *err)
 
   if (ls->element.mainnode != NULL)
   {
-    unsigned long seqnr, seqid_len, seqstartpos, GT_UNUSED seqlength;
+    unsigned long seqnr, seqid_len, seqstartpos;
+    GT_UNUSED unsigned long seqlength;
     char *outseq,
          desc[GT_MAXFASTAHEADER];
-    GtRange ltr3_rng, ltr5_rng, GT_UNUSED elemrng;
+    GtRange ltr3_rng, ltr5_rng;
+    GT_UNUSED GtRange elemrng;
 
     /* find sequence in GtEncseq */
     const char *sreg = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*)

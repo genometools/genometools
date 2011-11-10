@@ -370,7 +370,8 @@ void gt_tyrindex_check(GT_UNUSED const Tyrindex *tyrindex)
 #ifndef NDEBUG
   GtUchar *mercodeptr;
   const GtUchar *result;
-  unsigned long position, GT_UNUSED previousposition = 0;
+  unsigned long position;
+  GT_UNUSED unsigned long previousposition = 0;
 
   for (mercodeptr = tyrindex->mertable;
        mercodeptr <= tyrindex->lastmer;

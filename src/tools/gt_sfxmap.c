@@ -632,8 +632,8 @@ static int sfxmap_esa(const Sfxmapoptions *arguments, GtLogger *logger,
       }
       if (!haserr && arguments->inputbwt)
       {
-        unsigned long totallength, bwtdifferentconsecutive = 0, idx,
-                      GT_UNUSED longest;
+        unsigned long totallength, bwtdifferentconsecutive = 0, idx;
+        GT_UNUSED unsigned long longest;
 
         gt_assert(suffixarray.longest.defined);
         longest = suffixarray.longest.valueunsignedlong;
@@ -757,7 +757,8 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   }
   if (!haserr)
   {
-    unsigned long idx, pos, numofnonspecials, GT_UNUSED currentsuffix = 0;
+    unsigned long idx, pos, numofnonspecials;
+    GT_UNUSED unsigned long currentsuffix = 0;
     GtSpecialcharinfo specialcharinfo;
     Bwtseqpositioniterator *bspi;
 

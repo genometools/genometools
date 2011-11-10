@@ -154,7 +154,8 @@ Specialrank *gt_fillspecialranklist(const GtEncseq *encseq,
   {
     GtSpecialrangeiterator *sri;
     GtRange range;
-    unsigned long realspecialranges, specialrank, GT_UNUSED totallength;
+    unsigned long realspecialranges, specialrank;
+    GT_UNUSED unsigned long totallength;
     Specialrank *specialranklist, *rbptr;
 
     totallength = gt_encseq_total_length(encseq);
