@@ -23,7 +23,8 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/lpeg-0.10.2 \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
-            -I$(CURDIR)/src/external/libtecla-1.6.1
+            -I$(CURDIR)/src/external/libtecla-1.6.1 \
+            -I$(CURDIR)/src/external/samtools-0.1.18
 # these variables are exported by the configuration script
 ifndef CC
   CC:=gcc
@@ -219,6 +220,29 @@ ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
 ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
 ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
 
+SAMTOOLS_DIR:=src/external/samtools-0.1.18
+SAMTOOLS_SRC:=$(SAMTOOLS_DIR)/bgzf.c \
+              $(SAMTOOLS_DIR)/kstring.c \
+              $(SAMTOOLS_DIR)/bam_aux.c \
+              $(SAMTOOLS_DIR)/bam.c \
+              $(SAMTOOLS_DIR)/bam_import.c \
+              $(SAMTOOLS_DIR)/sam.c \
+              $(SAMTOOLS_DIR)/bam_index.c \
+              $(SAMTOOLS_DIR)/bam_pileup.c \
+              $(SAMTOOLS_DIR)/bam_lpileup.c \
+              $(SAMTOOLS_DIR)/bam_md.c \
+              $(SAMTOOLS_DIR)/razf.c \
+              $(SAMTOOLS_DIR)/faidx.c \
+              $(SAMTOOLS_DIR)/bedidx.c \
+              $(SAMTOOLS_DIR)/knetfile.c \
+              $(SAMTOOLS_DIR)/bam_sort.c \
+              $(SAMTOOLS_DIR)/sam_header.c \
+              $(SAMTOOLS_DIR)/bam_reheader.c \
+              $(SAMTOOLS_DIR)/kprobaln.c \
+              $(SAMTOOLS_DIR)/bam_cat.c
+SAMTOOLS_OBJ:=$(SAMTOOLS_SRC:%.c=obj/%.o)
+SAMTOOLS_DEP:=$(SAMTOOLS_SRC:%.c=obj/%.d)
+
 # the objects which are included into the single GenomeTools shared library
 GTSHAREDLIB_LIBDEP:=-lbz2 -lz
 
@@ -396,9 +420,11 @@ else
 endif
 LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
                     $(LIBLUA_OBJ) \
-                    $(LIBEXPAT_OBJ)
+                    $(LIBEXPAT_OBJ) \
+                    $(SAMTOOLS_OBJ)
 LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
                     $(LIBLUA_DEP) \
+                    $(SAMTOOLS_DEP) \
                     $(LIBEXPAT_DEP)
 
 ifeq ($(with-hmmer),yes)
@@ -654,6 +680,14 @@ $(1): $(2)
         $(3) -MM -MP -MT $$@
 endef
 
+obj/$(SAMTOOLS_DIR)/%.o: $(SAMTOOLS_DIR)/%.c
+	@echo "[compile $@]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	  $(EXP_CFLAGS) $(GT_CFLAGS_NO_WERROR)
+	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	  -MT $@
+
 $(eval $(call COMPILE_template, obj/%.o, %.c))
 
 obj/%.o: %.cxx
@@ -686,6 +720,7 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 	 $(LIBBZ2_DEP) \
          $(HMMER_DEP) \
 	 $(ZLIB_DEP) \
+	 $(SAMTOOLS_DEP) \
          $(LIBGENOMETOOLS_DEP) \
          obj/src/examples/custom_stream.d \
          obj/src/examples/gff3sort.d \
