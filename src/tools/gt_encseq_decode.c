@@ -26,6 +26,7 @@
 #include "core/readmode.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/warning_api.h"
 #include "core/xansi_api.h"
 #include "tools/gt_encseq_decode.h"
 
@@ -168,7 +169,7 @@ int gt_encseq_decode_arguments_check(GT_UNUSED int rest_argc,
 }
 
 static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
-                           GtError *err)
+                           const char *filename, GtError *err)
 {
   unsigned long i, j, sfrom, sto;
   int had_err = 0;
@@ -207,12 +208,20 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
     }
     for (i = sfrom; i < sto; i++) {
       unsigned long desclen, startpos, len;
-      const char *desc;
+      char buf[BUFSIZ];
+      const char *desc = NULL;
       /* XXX: maybe make this distinction in the functions via readmode? */
       if (!GT_ISDIRREVERSE(args->rm)) {
         startpos = gt_encseq_seqstartpos(encseq, i);
         len = gt_encseq_seqlength(encseq, i);
-        desc = gt_encseq_description(encseq, &desclen, i);
+        if (gt_encseq_has_description_support(encseq)) {
+          desc = gt_encseq_description(encseq, &desclen, i);
+        } else {
+          gt_warning("Missing description support for file %s", filename);
+          (void) snprintf(buf, BUFSIZ, "sequence %lu", i);
+          desclen = strlen(buf);
+          desc = buf;
+        }
       } else {
         startpos = gt_encseq_seqstartpos(encseq, i);
         len = gt_encseq_seqlength(encseq,
@@ -221,10 +230,18 @@ static int output_sequence(GtEncseq *encseq, GtEncseqDecodeArguments *args,
                      - (gt_encseq_seqstartpos(encseq,
                                               gt_encseq_num_of_sequences(
                                                 encseq)-1-i) + len);
-        desc = gt_encseq_description(encseq,
-                                     &desclen,
-                                     gt_encseq_num_of_sequences(encseq)-1-i);
+        if (gt_encseq_has_description_support(encseq)) {
+          desc = gt_encseq_description(encseq,
+                                       &desclen,
+                                       gt_encseq_num_of_sequences(encseq)-1-i);
+        } else {
+          gt_warning("Missing description support for file %s", filename);
+          (void) snprintf(buf, BUFSIZ, "sequence %lu", i);
+          desclen = strlen(buf);
+          desc = buf;
+        }
       }
+      gt_assert(desc);
       /* output description */
       gt_xfputc(GT_FASTA_SEPARATOR, stdout);
       gt_xfwrite(desc, 1, desclen, stdout);
@@ -313,7 +330,7 @@ static int decode_sequence_file(const char *seqfile,
       had_err = gt_encseq_mirror(encseq, err);
   }
   if (!had_err)
-    had_err = output_sequence(encseq, args, err);
+    had_err = output_sequence(encseq, args, seqfile, err);
   gt_encseq_delete(encseq);
   gt_encseq_loader_delete(encseq_loader);
   return had_err;
