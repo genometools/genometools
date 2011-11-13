@@ -572,7 +572,10 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
     }
 
     if (dpm->path_jt) {
+#if 0
       printf("genptr=%lu, refptr=%lu\n", genptr, refptr);
+      printf("pathtype=%d, pathtype_jt=%d\n", pathtype, pathtype_jt);
+#endif
       gt_assert(pathtype == pathtype_jt);
     }
 
