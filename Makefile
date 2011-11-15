@@ -870,11 +870,11 @@ DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
 
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
-	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
-                     ${wildcard ${CURDIR}/src/ltr/*.c}\
-                                ${SKTOOLS} ${SKCORE} ${DWTOOLS}}}}\
-     obj/redblack.splint\
-     obj/uint64hashtable.splint
+             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
+             ${wildcard ${CURDIR}/src/ltr/*.c}\
+             ${SKTOOLS} ${SKCORE} ${DWTOOLS}}}}\
+          obj/redblack.splint\
+          obj/uint64hashtable.splint
 
 spgt:${ALLSPLINT}
 
