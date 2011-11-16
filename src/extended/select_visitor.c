@@ -26,12 +26,8 @@
 #include "extended/gff3_defines.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_visitor_api.h"
+#include "extended/script_filter.h"
 #include "extended/select_visitor.h"
-#include "gtlua/genome_node_lua.h"
-#include "gtlua/gt_lua.h"
-#include "lua.h"
-#include "lauxlib.h"
-#include "lualib.h"
 
 typedef enum {
   GT_SELECT_AND,
@@ -60,7 +56,7 @@ struct GtSelectVisitor {
   GtStrArray *select_files;
   GtSelectLogic select_logic;
   bool is_lua;
-  lua_State **L;
+  GtArray *script_filters;
   GtSelectNodeFunc drophandler;
   void *data;
 };
@@ -68,102 +64,20 @@ struct GtSelectVisitor {
 #define select_visitor_cast(GV)\
         gt_node_visitor_cast(gt_select_visitor_class(), GV)
 
-static const luaL_Reg select_visitor_luasecurelibs[] = {
-  {"", luaopen_base},
-  {LUA_TABLIBNAME, luaopen_table},
-  {LUA_STRLIBNAME, luaopen_string},
-  {LUA_MATHLIBNAME, luaopen_math},
-  {"gt", gt_lua_open_lib}, /* open the GenomeTools library for callbacks */
-  {NULL, NULL}
-};
-
-static void select_visitor_luaL_opencustomlibs(lua_State *L,
-                                               const luaL_Reg *lib)
-{
-  for (; lib->func; lib++) {
-    lua_pushcfunction(L, lib->func);
-    lua_pushstring(L, lib->name);
-    lua_call(L, 1, 0);
-  }
-}
-
-static int filter_lua(lua_State **L, GtFeatureNode *gf, unsigned long num_files,
-                      unsigned int logic, bool *select_node, GtError *err)
-{
-  int had_err = 0;
-#ifndef NDEBUG
-  int stack_size;
-#endif
-  unsigned long i;
-  GtGenomeNode *gn_lua;
-
-  for (i = 0; i < num_files; i++) {
-#ifndef NDEBUG
-    stack_size = lua_gettop(L[i]);
-#endif
-
-    if (!had_err) {
-      lua_getglobal(L[i], "filter");
-      if (lua_isnil(L[i], -1)) {
-        gt_error_set(err, "function 'filter' is not defined");
-        had_err = -1;
-        lua_pop(L[i], 1);
-        break;
-      }
-    }
-
-    gn_lua = gt_genome_node_ref((GtGenomeNode*) gf);
-    gt_lua_genome_node_push(L[i], gn_lua);
-
-    if (lua_pcall(L[i], 1, 1, 0) != 0) {
-      gt_error_set(err, "error running function 'filter': %s",
-                   lua_tostring(L[i], -1));
-      lua_pop(L[i], 1);
-      had_err = -1;
-      break;
-    }
-
-    if (!lua_isboolean(L[i], -1)) {
-      gt_error_set(err, "function 'filter' must return boolean");
-      lua_pop(L[i], 1);
-      had_err = -1;
-      break;
-    }
-
-    if (!had_err && i == 0) {
-      *select_node = lua_toboolean(L[i], -1);
-      lua_pop(L[i], 1);
-    } else if (!had_err && logic == GT_SELECT_AND) {
-      *select_node = *select_node || lua_toboolean(L[i], -1);
-      lua_pop(L[i], 1);
-      if (*select_node) {
-        break;
-      }
-    } else if (!had_err && logic == GT_SELECT_OR) {
-      *select_node = *select_node && lua_toboolean(L[i], -1);
-      lua_pop(L[i], 1);
-      if (!*select_node) {
-        break;
-      }
-    }
-    gt_assert(lua_gettop(L[i]) == stack_size);
-  }
-
-  return had_err;
-}
-
 static void select_visitor_free(GtNodeVisitor *nv)
 {
   int i;
   GtSelectVisitor *select_visitor = select_visitor_cast(nv);
   gt_str_delete(select_visitor->source);
   gt_str_delete(select_visitor->seqid);
-  if (select_visitor->L) {
-    for (i = 0; i < gt_str_array_size(select_visitor->select_files); i++) {
-      lua_close(select_visitor->L[i]);
+  if (gt_array_size(select_visitor->script_filters) > 0) {
+    for (i = 0; i < gt_array_size(select_visitor->script_filters); i++) {
+      GtScriptFilter *todelete =
+            *(GtScriptFilter**) gt_array_get(select_visitor->script_filters, i);
+      gt_script_filter_delete(todelete);
     }
   }
-  gt_free(select_visitor->L);
+  gt_array_delete(select_visitor->script_filters);
   gt_queue_delete(select_visitor->node_buffer);
 }
 
@@ -253,6 +167,36 @@ static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp,
   return false;
 }
 
+static int filter_lua(GtArray *filters, GtFeatureNode *fn, GtSelectLogic logic,
+                      bool *select_node, GtError *err)
+{
+  int had_err = 0;
+  unsigned long i;
+  gt_assert(filters && fn && select_node);
+  gt_error_check(err);
+
+  for (i = 0; !had_err && i < gt_array_size(filters); i++) {
+    bool result;
+    GtScriptFilter *sf = *(GtScriptFilter**) gt_array_get(filters, i);
+    had_err = gt_script_filter_run(sf, fn, &result, err);
+
+    if (!had_err && i == 0) {
+      *select_node = result;
+    } else if (!had_err && logic == GT_SELECT_AND) {
+      *select_node = *select_node || result;
+      if (*select_node) {
+        break;
+      }
+    } else if (!had_err && logic == GT_SELECT_OR) {
+      *select_node = *select_node && result;
+      if (!*select_node) {
+        break;
+      }
+    }
+  }
+  return had_err;
+}
+
 static int select_visitor_feature_node(GtNodeVisitor *nv,
                                        GtFeatureNode *fn,
                                        GtError *err)
@@ -321,8 +265,8 @@ static int select_visitor_feature_node(GtNodeVisitor *nv,
   }
 
   if (fv->is_lua && !select_node)
-    had_err = filter_lua(fv->L, fn, gt_str_array_size(fv->select_files),
-                         fv->select_logic, &select_node, err);
+    had_err = filter_lua(fv->script_filters, fn, fv->select_logic,
+                         &select_node, err);
 
   if (select_node && !had_err)
     fv->drophandler((GtGenomeNode*) fn, fv->data, err);
@@ -461,40 +405,25 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
   select_visitor->is_lua = false;
 
   if (gt_str_array_size(select_visitor->select_files) > 0) {
-
     int i, j;
     select_visitor->is_lua = true;
-
-    select_visitor->L = gt_malloc(
-         gt_str_array_size(select_visitor->select_files) * sizeof (lua_State*));
-
+    select_visitor->script_filters = gt_array_new(sizeof (GtScriptFilter*));
     for (i = 0; i < gt_str_array_size(select_visitor->select_files); i++) {
-      select_visitor->L[i] = luaL_newstate();
-      if (!select_visitor->L[i]) {
-        gt_error_set(err, "out of memory (cannot create new Lua state)");
-        for (j = i; j > -1; j--)
-          lua_close(select_visitor->L[j]);
-        gt_free(select_visitor->L);
-        select_visitor->L = NULL;
+      GtScriptFilter *sf;
+      sf = gt_script_filter_new(gt_str_array_get(select_visitor->select_files,
+                                                 i),
+                                err);
+      if (!sf) {
+        for (j = 0; j < gt_array_size(select_visitor->script_filters); j++) {
+          GtScriptFilter *todelete =
+            *(GtScriptFilter**) gt_array_get(select_visitor->script_filters, j);
+          gt_script_filter_delete(todelete);
+        }
         gt_node_visitor_delete(nv);
         return NULL;
-      }
-      else {
-        select_visitor_luaL_opencustomlibs(select_visitor->L[i],
-                                           select_visitor_luasecurelibs);
-        if (luaL_loadfile(select_visitor->L[i],
-                           gt_str_array_get(select_visitor->select_files, i)) ||
-                                     lua_pcall(select_visitor->L[i], 0, 0, 0)) {
-            gt_error_set(err, "cannot run file: %s",
-                         lua_tostring(select_visitor->L[i], -1));
-            lua_pop(select_visitor->L[i], 1);
-          for (j = i; j > -1; j--)
-            lua_close(select_visitor->L[j]);
-          gt_free(select_visitor->L);
-          select_visitor->L = NULL;
-          gt_node_visitor_delete(nv);
-          return NULL;
-        }
+        break;
+      } else {
+        gt_array_add(select_visitor->script_filters, sf);
       }
     }
   }

@@ -101,6 +101,7 @@
 #include "extended/rdb_sqlite_api.h"
 #include "extended/region_mapping_api.h"
 #include "extended/region_node_api.h"
+#include "extended/script_filter_api.h"
 #include "extended/select_stream_api.h"
 #include "extended/sequence_node_api.h"
 #include "extended/sort_stream_api.h"

@@ -113,6 +113,7 @@
 #include "tools/gt_orffinder.h"
 #include "tools/gt_packedindex.h"
 #include "tools/gt_prebwt.h"
+#include "tools/gt_script_filter.h"
 #include "tools/gt_select.h"
 #include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
@@ -194,6 +195,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
   gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "repfind", gt_repfind());
+  gt_toolbox_add_tool(tools, "scriptfilter", gt_script_filter());
   gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
   gt_toolbox_add_tool(tools, "readjoiner", gt_readjoiner());
