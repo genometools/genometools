@@ -23,9 +23,9 @@
 #include "gth/path_matrix.h"
 
 typedef struct {
-  bool used;
-  GthPath e_entry,
-           i_entry;
+  bool used, on_max_path;
+  GthPath e_path,
+          i_path;
 } PMEntry;
 
 struct GthPathMatrix {
@@ -36,7 +36,7 @@ struct GthPathMatrix {
 
 static void path_matrix_fill(GthPathMatrix *pm, GthPath **path)
 {
-  unsigned long genptr, refptr;
+  unsigned long genptr, refptr, genidx, refidx;
   GthPath e_path, i_path;
   bool lower;
 
@@ -56,7 +56,12 @@ static void path_matrix_fill(GthPathMatrix *pm, GthPath **path)
         i_path &= UPPER_I_STATE_MASK;
         i_path >>= 7;
       }
-
+      gt_assert(i_path == DNA_E_N || i_path == DNA_I_N);
+      genidx = genptr - pm->gen_range.start;
+      refidx = refptr - pm->ref_range.start;
+      pm->entries[genidx][refidx].used = true;
+      pm->entries[genidx][refidx].e_path = e_path;
+      pm->entries[genidx][refidx].i_path = i_path;
     }
   }
 
@@ -73,15 +78,78 @@ GthPathMatrix* gth_path_matrix_new(GthPath **path,
   pm->gen_range.end   = MIN(btmatrixgenrange->end, gen_dp_length);
   pm->ref_range.start = btmatrixrefrange->start;
   pm->ref_range.end   = MIN(btmatrixrefrange->end, ref_dp_length);
-  gt_array2dim_calloc(pm->entries, gt_range_length(&pm->ref_range),
-                      gt_range_length(&pm->gen_range));
+  gt_array2dim_calloc(pm->entries, gt_range_length(&pm->gen_range),
+                      gt_range_length(&pm->ref_range));
   path_matrix_fill(pm, path);
   return pm;
 }
 
+static char on_max_path_char(PMEntry entry)
+{
+  return entry.on_max_path ? '*' : ' ';
+}
+
+static char matrix_char(GthPath path)
+{
+  switch (path) {
+    case DNA_E_N:
+    case DNA_E_NM:
+    case DNA_E_M:
+      return 'E';
+    case DNA_I_N:
+    case DNA_I_NM:
+    case DNA_I_M:
+      return 'I';
+    default:
+      gt_assert(0);
+  }
+}
+
+static char direction_char(GthPath path)
+{
+  switch (path) {
+    case DNA_E_N:
+    case DNA_I_N:
+      return '-';
+    case DNA_E_NM:
+    case DNA_I_NM:
+      return '\\';
+    case DNA_E_M:
+    case DNA_I_M:
+      return '|';
+    default:
+      gt_assert(0);
+  }
+}
+
 void gth_path_matrix_show(GthPathMatrix *pm)
 {
+  unsigned long genptr, refptr, genidx, refidx;
+  PMEntry entry;
   gt_assert(pm);
+  printf("    ");
+  for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++)
+    printf("%4lu", genptr);
+  printf("\n\n");
+
+  for (refptr = pm->ref_range.start; refptr <= pm->ref_range.end; refptr++) {
+    refidx = refptr - pm->ref_range.start;
+    printf("%4lu", refptr);
+    for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
+      genidx = genptr - pm->gen_range.start;
+      entry = pm->entries[genidx][refidx];
+      printf(" %c%c%c", on_max_path_char(entry), matrix_char(entry.e_path),
+             direction_char(entry.e_path));
+    }
+    printf("\n    ");
+    for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
+      genidx = genptr - pm->gen_range.start;
+      entry = pm->entries[genidx][refidx];
+      printf(" %c%c%c", on_max_path_char(entry), matrix_char(entry.i_path),
+             direction_char(entry.i_path));
+    }
+    putchar('\n');
+  }
 }
 
 void gth_path_matrix_delete(GthPathMatrix *pm)
