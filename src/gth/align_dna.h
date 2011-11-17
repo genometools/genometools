@@ -139,7 +139,7 @@ GthSA* gth_align_dna_simple(GthInput *input,
                             unsigned long ref_seq_num,
                             GthSpliceSiteModel *splice_site_model);
 
-void gth_show_backtrace_matrix(PATHTYPE **path,
+void gth_show_backtrace_matrix(GthPath **path,
                                unsigned long gen_dp_length,
                                unsigned long ref_dp_length,
                                const GtRange *btmatrixgenrange,

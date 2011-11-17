@@ -56,7 +56,7 @@ static int dp_matrix_init(GthDPMatrix *dpm,
                           GthJumpTable *jump_table,
                           GthStat *stat)
 {
-  unsigned long t, n, m, matrixsize, sizeofpathtype =  sizeof (PATHTYPE);
+  unsigned long t, n, m, matrixsize, sizeofpathtype =  sizeof (GthPath);
 
   /* XXX: adjust this check for QUARTER_MATRIX case */
   if (DNA_NUMOFSTATES * sizeofpathtype * (gen_dp_length + 1) >=
@@ -154,7 +154,7 @@ static void E_1m(GthDPMatrix *dpm, unsigned char genomicchar,
                  GthDPOptionsCore *dp_options_core)
 {
   GthFlt value, maxvalue;
-  PATHTYPE retrace;
+  GthPath retrace;
   GthDbl rval = 0.0, outputweight = 0.0;
   unsigned char referencechar = ref_seq_tran[m-1];
   unsigned int gen_alphabet_mapsize = gt_alphabet_size(gen_alphabet);
@@ -249,7 +249,7 @@ static void E_1m(GthDPMatrix *dpm, unsigned char genomicchar,
 static void I_1m(GthDPMatrix *dpm, unsigned long m, GthDbl log_1minusprobies)
 {
   GthFlt value, maxvalue;
-  PATHTYPE retrace;
+  GthPath retrace;
 
   /* 0. */
   maxvalue = (GthFlt) (dpm->score[DNA_E_STATE][0][m] + log_1minusprobies);
@@ -287,7 +287,7 @@ static void dna_complete_path_matrix(GthDPMatrix *dpm,
                                      GthDPOptionsCore *dp_options_core)
 {
   GthFlt value, maxvalue;
-  PATHTYPE retrace;
+  GthPath retrace;
   unsigned long n, m, modn, modnminus1;
   GthDbl rval, outputweight, **outputweights,
          log_probies,          /* initial exon state probability */
@@ -533,7 +533,7 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
 {
   unsigned long genptr = dpm->gen_dp_length, last_genptr = 0,
                 refptr = dpm->ref_dp_length;
-  PATHTYPE pathtype, pathtype_jt = 0;
+  GthPath pathtype, pathtype_jt = 0;
   bool lower;
 
   gt_assert(!gth_backtrace_path_length(backtrace_path));
@@ -703,7 +703,7 @@ static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
 {
   int rval;
   GthFlt value, maxvalue;
-  PATHTYPE retrace;
+  GthPath retrace;
   DnaStates state;
 
   if (useintron) {
@@ -818,7 +818,7 @@ static void dp_matrix_set_exonstart(DPMatrix *dpm, unsigned long n,
 static DnaRetrace dp_matrix_get_retrace_e_state(DPMatrix *dpm, unsigned long n,
                                                                unsigned long m)
 {
-  PATHTYPE pathtype;
+  GthPath pathtype;
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   pathtype = dpm->path[GT_DIV2(n)][m];
   if (!GT_MOD2(n)) {
@@ -834,7 +834,7 @@ static DnaRetrace dp_matrix_get_retrace_e_state(DPMatrix *dpm, unsigned long n,
 static DnaRetrace dp_matrix_get_retrace_i_state(DPMatrix *dpm, unsigned long n,
                                                                unsigned long m)
 {
-  PATHTYPE pathtype;
+  GthPath pathtype;
   gt_assert(dpm && n < dpm->gen_dp_length && m < dpm->ref_dp_length);
   pathtype = dpm->path[GT_DIV2(n)][m];
   if (!GT_MOD2(n)) {

@@ -66,7 +66,7 @@ static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
                             GthStat *stat)
 {
   unsigned long matrixsize, t, n,
-       sizeofpathtype =  sizeof (PATHTYPE);
+       sizeofpathtype =  sizeof (GthPath);
 
   /* XXX: adjust this check for QUARTER_MATRIX case */
   if (PROTEIN_NUMOFSTATES * sizeofpathtype * (gen_dp_length + 1) >=
@@ -104,9 +104,9 @@ static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
     }
 
     if (jump_table)
-      core->path[t] = calloc(matrixsize, sizeof (PATHTYPE));
+      core->path[t] = calloc(matrixsize, sizeof (GthPath));
     else
-      core->path[t] = malloc(sizeof (PATHTYPE) * matrixsize);
+      core->path[t] = malloc(sizeof (GthPath) * matrixsize);
 
     if (!core->path[t]) {
       /* matrix allocation failed, return after free of allocated tables */
@@ -192,25 +192,25 @@ static void initDPtables(GthDPtables *dpm,
   for (n = 0; n <  PROTEIN_NUMOFSCORETABLES; n++)
   {
     SCORE(E_STATE,n,0)  = (GthFlt) 0.0;
-    PATH(E_STATE,n,0)   = (PATHTYPE)        E_N1;
+    PATH(E_STATE,n,0)   = (GthPath)        E_N1;
     SCORE(IA_STATE,n,0) = (GthFlt) 0.0;
-    PATH(IA_STATE,n,0)  = (PATHTYPE)        IA_N1;
+    PATH(IA_STATE,n,0)  = (GthPath)        IA_N1;
     SCORE(IB_STATE,n,0) = (GthFlt) 0.0;
-    PATH(IB_STATE,n,0)  = (PATHTYPE)        IB_N1;
+    PATH(IB_STATE,n,0)  = (GthPath)        IB_N1;
     SCORE(IC_STATE,n,0) = (GthFlt) 0.0;
-    PATH(IC_STATE,n,0)  = (PATHTYPE)        IC_N1;
+    PATH(IC_STATE,n,0)  = (GthPath)        IC_N1;
 
     for (m = 1; m <= ref_dp_length; m++)
     {
       SCORE(E_STATE,n,m) = (GthFlt) 0.0;
-      PATH(E_STATE,n,m)  = (PATHTYPE)        E_M;
+      PATH(E_STATE,n,m)  = (GthPath)        E_M;
       /* disallow intron status for 5' non-matching cDNA letters: */
       SCORE(IA_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
-      PATH(IA_STATE,n,m)  = (PATHTYPE)        IA_N1;
+      PATH(IA_STATE,n,m)  = (GthPath)        IA_N1;
       SCORE(IB_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
-      PATH(IB_STATE,n,m)  = (PATHTYPE)        IB_N1;
+      PATH(IB_STATE,n,m)  = (GthPath)        IB_N1;
       SCORE(IC_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
-      PATH(IC_STATE,n,m)  = (PATHTYPE)        IC_N1;
+      PATH(IC_STATE,n,m)  = (GthPath)        IC_N1;
     }
   }
 
@@ -239,10 +239,10 @@ static void initDPtables(GthDPtables *dpm,
                                          (ref_dp_length + 1));
   }
 
-  PATH(E_STATE,0,0) = (PATHTYPE) E_N1M;
-  PATH(IA_STATE,0,0) = (PATHTYPE) E_N1M;
-  PATH(IB_STATE,0,0) = (PATHTYPE) E_N1M;
-  PATH(IC_STATE,0,0) = (PATHTYPE) E_N1M;
+  PATH(E_STATE,0,0) = (GthPath) E_N1M;
+  PATH(IA_STATE,0,0) = (GthPath) E_N1M;
+  PATH(IB_STATE,0,0) = (GthPath) E_N1M;
+  PATH(IC_STATE,0,0) = (GthPath) E_N1M;
 }
 
 unsigned char gthgetcodon(unsigned char genomicchar1,
@@ -280,7 +280,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
   unsigned long n, m, modn, modnminus1, modnminus2, modnminus3;
   unsigned char origreferencechar;
   GthFlt value, maxvalue;
-  PATHTYPE retrace;
+  GthPath retrace;
 
   /* stepping along the genomic sequence */
   for (n = GENOMICDPSTART; n <= gen_dp_length; n++) {
@@ -289,10 +289,10 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
     modnminus2 = GT_MOD4(n-2),
     modnminus3 = GT_MOD4(n-3);
 
-    PATH(E_STATE, n, 0)  = (PATHTYPE) E_N1;
-    PATH(IA_STATE, n, 0) = (PATHTYPE) IA_N1;
-    PATH(IB_STATE, n, 0) = (PATHTYPE) IB_N1;
-    PATH(IC_STATE, n, 0) = (PATHTYPE) IC_N1;
+    PATH(E_STATE, n, 0)  = (GthPath) E_N1;
+    PATH(IA_STATE, n, 0) = (GthPath) IA_N1;
+    PATH(IB_STATE, n, 0) = (GthPath) IB_N1;
+    PATH(IC_STATE, n, 0) = (GthPath) IC_N1;
 
     /* stepping along the protein sequence */
     for (m = REFERENCEDPSTART; m <= ref_dp_length; m++) {
@@ -306,7 +306,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
                   GTHGETSCORE(dp_scores_protein, gen_seq_tran[n-3],
                               gen_seq_tran[n-2], gen_seq_tran[n-1],
                               origreferencechar));
-      retrace  = (PATHTYPE) E_N3M;
+      retrace  = (GthPath) E_N3M;
 
       /* 1. */
       value = SCORE(E_STATE, modnminus2, m-1);
@@ -463,7 +463,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
       maxvalue = SCORE(IA_STATE, modnminus1, m);
       if (!dp_options_core->freeintrontrans)
         maxvalue += dp_param->log_1minusPacceptor[n-2];
-      retrace  = (PATHTYPE) IA_N1;
+      retrace  = (GthPath) IA_N1;
 
       value = SCORE(E_STATE, modnminus1, m) + dp_param->log_Pdonor[n-1];
       if (proteinexonpenal) {
@@ -492,7 +492,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
       maxvalue = SCORE(IB_STATE, modnminus1, m);
       if (!dp_options_core->freeintrontrans)
         maxvalue += dp_param->log_1minusPacceptor[n-2];
-      retrace  = (PATHTYPE) IB_N1;
+      retrace  = (GthPath) IB_N1;
 
       value = SCORE(E_STATE, modnminus2, m) + dp_param->log_Pdonor[n-1];
       if (proteinexonpenal) {
@@ -523,7 +523,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
       maxvalue = SCORE(IC_STATE, modnminus1, m);
       if (!dp_options_core->freeintrontrans)
         maxvalue += dp_param->log_1minusPacceptor[n-2];
-      retrace = (PATHTYPE) IC_N1;
+      retrace = (GthPath) IC_N1;
 
       value = SCORE(E_STATE, modnminus3, m) + dp_param->log_Pdonor[n-1];
       if (proteinexonpenal) {
@@ -581,7 +581,7 @@ static void include_exon(GthBacktracePath *backtrace_path,
   }
 }
 
-static void include_intron(GthBacktracePath *backtrace_path, PATHTYPE pathtype,
+static void include_intron(GthBacktracePath *backtrace_path, GthPath pathtype,
                            unsigned long intronlength)
 {
   /* at least one editoperation already saved */
@@ -638,7 +638,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 #ifndef NDEBUG
   unsigned long numofincludedintrons = 0;
 #endif
-  PATHTYPE pathtype;
+  GthPath pathtype;
   Dummystatus dummystatus = DUMMY_STATUS_UNDEFINED;
   unsigned char codon;
   bool skipdummyprocessing = false;
@@ -680,9 +680,9 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
         if (gth_spliced_seq_pos_is_border(spliced_seq, genptr_tail - 1)) {
           /* ensure that introns are only included into already existing introns
           */
-          if ((pathtype != (PATHTYPE) IA_N1 &&
-               pathtype != (PATHTYPE) IB_N1 &&
-               pathtype != (PATHTYPE) IC_N1) ||
+          if ((pathtype != (GthPath) IA_N1 &&
+               pathtype != (GthPath) IB_N1 &&
+               pathtype != (GthPath) IC_N1) ||
                !gth_backtrace_path_last_is_intron(backtrace_path)) {
             if (noicinintroncheck) {
               /* intron cutout in intron check disabled,
@@ -934,11 +934,11 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 {
   int rval;
   GthFlt value, maxvalue;
-  PATHTYPE retrace;
+  GthPath retrace;
   States state;
 
   maxvalue = SCORE(E_STATE, GT_MOD4(gen_dp_length), ref_dp_length);
-  retrace  = (PATHTYPE) E_STATE;
+  retrace  = (GthPath) E_STATE;
 
   for (state = (States) 1; state < PROTEIN_NUMOFSTATES; state++) {
     value = SCORE(state, GT_MOD4(gen_dp_length), ref_dp_length);

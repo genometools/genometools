@@ -79,7 +79,7 @@ typedef enum {
 typedef struct {
   /* table to store the score of a path */
   GthFlt *score[PROTEIN_NUMOFSTATES][PROTEIN_NUMOFSCORETABLES];
-  PATHTYPE *path[PROTEIN_NUMOFSTATES]; /* backtrace table of size
+  GthPath *path[PROTEIN_NUMOFSTATES]; /* backtrace table of size
                                           gen_dp_length * ref_dp_length */
   unsigned long columnlength;          /* the length of a column of the DP
                                           matrix (equals ref_dp_length + 1)

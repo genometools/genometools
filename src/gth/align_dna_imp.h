@@ -75,9 +75,9 @@ typedef enum {
 struct GthDPMatrix {
   GthFlt *score[DNA_NUMOFSTATES][DNA_NUMOFSCORETABLES]; /* table to store the
                                                            score of a path */
-  PATHTYPE **path;                   /* backtrace table of size
+  GthPath **path;                   /* backtrace table of size
                                         gen_dp_length * ref_dp_length */
-  PATHTYPE **path_jt;
+  GthPath **path_jt;
   unsigned long *intronstart[DNA_NUMOFSCORETABLES],
                 *exonstart[DNA_NUMOFSCORETABLES],
                 gen_dp_length,

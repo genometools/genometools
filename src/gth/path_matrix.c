@@ -24,7 +24,7 @@
 
 typedef struct {
   bool used;
-  PATHTYPE e_entry,
+  GthPath e_entry,
            i_entry;
 } PMEntry;
 
@@ -34,10 +34,10 @@ struct GthPathMatrix {
   PMEntry **entries;
 };
 
-static void path_matrix_fill(GthPathMatrix *pm, PATHTYPE **path)
+static void path_matrix_fill(GthPathMatrix *pm, GthPath **path)
 {
   unsigned long genptr, refptr;
-  PATHTYPE e_path, i_path;
+  GthPath e_path, i_path;
   bool lower;
 
   for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
@@ -62,7 +62,7 @@ static void path_matrix_fill(GthPathMatrix *pm, PATHTYPE **path)
 
 }
 
-GthPathMatrix* gth_path_matrix_new(PATHTYPE **path,
+GthPathMatrix* gth_path_matrix_new(GthPath **path,
                                    unsigned long gen_dp_length,
                                    unsigned long ref_dp_length,
                                    const GtRange *btmatrixgenrange,

@@ -19,7 +19,7 @@
 
 typedef struct GthPathMatrix GthPathMatrix;
 
-GthPathMatrix* gth_path_matrix_new(PATHTYPE **path,
+GthPathMatrix* gth_path_matrix_new(GthPath **path,
                                    unsigned long gen_dp_length,
                                    unsigned long ref_dp_length,
                                    const GtRange *btmatrixgenrange,

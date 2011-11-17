@@ -39,9 +39,9 @@
         if (maxvalue < value)\
         {\
           maxvalue = value;\
-          retrace = (PATHTYPE) C;\
+          retrace = (GthPath) C;\
         }
 
-typedef unsigned char PATHTYPE;
+typedef unsigned char GthPath;
 
 #endif
