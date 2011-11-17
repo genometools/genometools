@@ -529,7 +529,8 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
                              const unsigned char *gen_seq_tran,
                              DnaStates actualstate, bool introncutout,
                              GthSplicedSeq *spliced_seq, bool comments,
-                             bool noicinintroncheck, GtFile *outfp)
+                             bool noicinintroncheck, GthPathMatrix *pm,
+                             GtFile *outfp)
 {
   unsigned long genptr = dpm->gen_dp_length, last_genptr = 0,
                 refptr = dpm->ref_dp_length;
@@ -620,6 +621,9 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
       }
     }
 
+    if (pm)
+      gth_path_matrix_set_max_path(pm, genptr, refptr, actualstate);
+
     switch (actualstate) {
       case DNA_E_STATE:
         /* we are currently in an exon state, the possible pathtypes for exon
@@ -688,6 +692,9 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
   /* refptr is at start of refseq */
   gt_assert(refptr == 0);
 
+  if (pm)
+    gth_path_matrix_set_max_path(pm, genptr, refptr, actualstate);
+
   return 0;
 }
 
@@ -699,6 +706,7 @@ static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
                                  GthSplicedSeq *spliced_seq,
                                  bool comments, bool noicinintroncheck,
                                  bool useintron, /* XXX */
+                                 GthPathMatrix *pm,
                                  GtFile *outfp)
 {
   int rval;
@@ -724,7 +732,7 @@ static int dna_find_optimal_path(GthBacktracePath *backtrace_path,
   if ((rval = dna_evaltracepath(backtrace_path, dpm, ref_seq_tran,
                                 gen_seq_tran, (DnaStates) retrace,
                                 introncutout, spliced_seq, comments,
-                                noicinintroncheck, outfp))) {
+                                noicinintroncheck, pm, outfp))) {
     return rval;
   }
 
@@ -1033,7 +1041,8 @@ static void detect_small_terminal_exons(GthSA *sa,
                                ref_seq_tran + ref_dp_length
                                - ref_dp_length_terminal,
                                gen_seq_tran + gen_dp_start_terminal,
-                               false, NULL, comments, false, false, outfp);
+                               false, NULL, comments, false, false, NULL,
+                               outfp);
   gt_assert(!rval);
 
   gt_assert(gth_sa_is_valid(sa)); /* XXX */
@@ -1150,7 +1159,8 @@ static void detect_small_initial_exons(GthSA *sa,
   gth_backtrace_path_set_alphatype(backtrace_path, DNA_ALPHA);
   rval = dna_find_optimal_path(backtrace_path, &dpm_initial, ref_seq_tran,
                                gen_seq_tran + gen_dp_start_initial,
-                               false, NULL, comments, false, false, outfp);
+                               false, NULL, comments, false, false, NULL,
+                               outfp);
   gt_assert(!rval);
   gt_assert(gth_sa_is_valid(sa)); /* XXX */
 
@@ -1237,6 +1247,7 @@ int gth_align_dna(GthSA *sa,
 {
   unsigned long gen_dp_start, gen_dp_end, gen_dp_length;
   GthSplicedSeq *spliced_seq = NULL;
+  GthPathMatrix *pm = NULL;
   GthDPParam *dp_param;
   GthDPMatrix dpm;
   int rval;
@@ -1287,12 +1298,9 @@ int gth_align_dna(GthSA *sa,
 
   /* debugging */
   if (dp_options_core->btmatrixgenrange.start != GT_UNDEF_ULONG) {
-    GthPathMatrix *pm =
-      gth_path_matrix_new(dpm.path, dpm.gen_dp_length, dpm.ref_dp_length,
-                          &dp_options_core->btmatrixgenrange,
-                          &dp_options_core->btmatrixrefrange);
-    gth_path_matrix_show(pm);
-    gth_path_matrix_delete(pm);
+    pm = gth_path_matrix_new(dpm.path, dpm.gen_dp_length, dpm.ref_dp_length,
+                             &dp_options_core->btmatrixgenrange,
+                             &dp_options_core->btmatrixrefrange);
   }
 
   /* backtracing */
@@ -1302,13 +1310,18 @@ int gth_align_dna(GthSA *sa,
                                                  : gen_seq_tran + gen_dp_start,
                                     introncutout, spliced_seq, comments,
                                     dp_options_core->noicinintroncheck, false,
-                                    outfp))) {
+                                    pm, outfp))) {
     if (rval == GTH_ERROR_CUTOUT_NOT_IN_INTRON) {
       dp_matrix_free(&dpm);
       gth_dp_param_delete(dp_param);
       gth_spliced_seq_delete(spliced_seq);
     }
     return rval;
+  }
+
+  if (pm) {
+    gth_path_matrix_show(pm);
+    gth_path_matrix_delete(pm);
   }
 
   /* intron cutout is done after this point */

@@ -25,6 +25,10 @@ GthPathMatrix* gth_path_matrix_new(GthPath **path,
                                    const GtRange *btmatrixgenrange,
                                    const GtRange *btmatrixrefrange);
 void           gth_path_matrix_show(GthPathMatrix*);
+void           gth_path_matrix_set_max_path(GthPathMatrix*,
+                                            unsigned long genptr,
+                                            unsigned long refptr,
+                                            DnaStates actualstate);
 void           gth_path_matrix_delete(GthPathMatrix*);
 
 #endif

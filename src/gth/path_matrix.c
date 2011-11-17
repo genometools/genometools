@@ -23,7 +23,7 @@
 #include "gth/path_matrix.h"
 
 typedef struct {
-  bool used, on_max_path;
+  bool used, on_max_path_e, on_max_path_i;
   GthPath e_path,
           i_path;
 } PMEntry;
@@ -84,9 +84,9 @@ GthPathMatrix* gth_path_matrix_new(GthPath **path,
   return pm;
 }
 
-static char on_max_path_char(PMEntry entry)
+static char on_max_path_char(bool on_max_path)
 {
-  return entry.on_max_path ? '*' : ' ';
+  return on_max_path ? '*' : ' ';
 }
 
 static char matrix_char(GthPath path)
@@ -138,17 +138,46 @@ void gth_path_matrix_show(GthPathMatrix *pm)
     for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
       genidx = genptr - pm->gen_range.start;
       entry = pm->entries[genidx][refidx];
-      printf(" %c%c%c", on_max_path_char(entry), matrix_char(entry.e_path),
-             direction_char(entry.e_path));
+      if (entry.used) {
+        printf(" %c%c%c", on_max_path_char(entry.on_max_path_e),
+               matrix_char(entry.e_path), direction_char(entry.e_path));
+      }
+      else
+        printf("    ");
     }
     printf("\n    ");
     for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
       genidx = genptr - pm->gen_range.start;
       entry = pm->entries[genidx][refidx];
-      printf(" %c%c%c", on_max_path_char(entry), matrix_char(entry.i_path),
-             direction_char(entry.i_path));
+      if (entry.used) {
+        printf(" %c%c%c", on_max_path_char(entry.on_max_path_i),
+               matrix_char(entry.i_path), direction_char(entry.i_path));
+      }
+      else
+        printf("    ");
     }
     putchar('\n');
+  }
+}
+
+void gth_path_matrix_set_max_path(GthPathMatrix *pm, unsigned long genptr,
+                                  unsigned long refptr, DnaStates actualstate)
+{
+  unsigned long genidx, refidx;
+  gt_assert(pm);
+  if (genptr >= pm->gen_range.start && genptr <= pm->gen_range.end &&
+      refptr >= pm->ref_range.start && refptr <= pm->ref_range.end) {
+    genidx = genptr - pm->gen_range.start;
+    refidx = refptr - pm->ref_range.start;
+    switch (actualstate) {
+      case DNA_E_STATE:
+        pm->entries[genidx][refidx].on_max_path_e = true;
+        break;
+      case DNA_I_STATE:
+        pm->entries[genidx][refidx].on_max_path_i = true;
+        break;
+      default: gt_assert(0);
+    }
   }
 }
 
