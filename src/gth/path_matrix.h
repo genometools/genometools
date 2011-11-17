@@ -17,18 +17,21 @@
 #ifndef PATH_MATRIX_H
 #define PATH_MATRIX_H
 
+#include "core/array2dim_sparse.h"
+
 typedef struct GthPathMatrix GthPathMatrix;
 
 GthPathMatrix* gth_path_matrix_new(GthPath **path,
                                    unsigned long gen_dp_length,
                                    unsigned long ref_dp_length,
                                    const GtRange *btmatrixgenrange,
-                                   const GtRange *btmatrixrefrange);
+                                   const GtRange *btmatrixrefrange,
+                                   GtRowInfo *ri);
 void           gth_path_matrix_show(GthPathMatrix*);
 void           gth_path_matrix_set_max_path(GthPathMatrix*,
                                             unsigned long genptr,
                                             unsigned long refptr,
-                                            DnaStates actualstate);
+                                            bool e_state);
 void           gth_path_matrix_delete(GthPathMatrix*);
 
 #endif

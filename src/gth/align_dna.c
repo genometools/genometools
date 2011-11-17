@@ -1286,7 +1286,7 @@ int gth_align_dna(GthSA *sa,
                                              : gen_seq_tran + gen_dp_start,
                                 ref_seq_tran, 0, gen_alphabet, dp_param,
                                 dp_options_est, dp_options_core, jump_table,
-                                gen_ranges, ref_dp_length, ref_offset);
+                                gen_ranges, ref_dp_length, ref_offset, &pm);
   }
   else {
     dna_complete_path_matrix(&dpm,
@@ -1297,10 +1297,11 @@ int gth_align_dna(GthSA *sa,
   }
 
   /* debugging */
-  if (dp_options_core->btmatrixgenrange.start != GT_UNDEF_ULONG) {
+  if (!dpm.path_jt &&
+      dp_options_core->btmatrixgenrange.start != GT_UNDEF_ULONG) {
     pm = gth_path_matrix_new(dpm.path, dpm.gen_dp_length, dpm.ref_dp_length,
                              &dp_options_core->btmatrixgenrange,
-                             &dp_options_core->btmatrixrefrange);
+                             &dp_options_core->btmatrixrefrange, NULL);
   }
 
   /* backtracing */

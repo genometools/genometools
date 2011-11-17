@@ -22,6 +22,7 @@
 #include "gth/dp_options_core.h"
 #include "gth/dp_options_est.h"
 #include "gth/dp_options_postpro.h"
+#include "gth/path_matrix.h"
 #include "gth/sa.h"
 
 #define DASH_DASH_WEIGHT        0.0
@@ -87,7 +88,8 @@ typedef void (*GthDNACompletePathMatrixJT)(GthDPMatrix *dpm,
                                            GthJumpTable *jumpt_table,
                                            GtArray *gen_ranges,
                                            unsigned long ref_dp_length,
-                                           unsigned long ref_offset);
+                                           unsigned long ref_offset,
+                                           GthPathMatrix **pm);
 #define ADDOUTPUTWEIGHTIDENTITY(VAR,N)\
         if ((N) < (gen_alphabet_mapsize-1))\
         {\

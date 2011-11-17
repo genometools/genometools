@@ -34,7 +34,7 @@ struct GthPathMatrix {
   PMEntry **entries;
 };
 
-static void path_matrix_fill(GthPathMatrix *pm, GthPath **path)
+static void path_matrix_fill(GthPathMatrix *pm, GthPath **path, GtRowInfo *ri)
 {
   unsigned long genptr, refptr, genidx, refidx;
   GthPath e_path, i_path;
@@ -42,26 +42,30 @@ static void path_matrix_fill(GthPathMatrix *pm, GthPath **path)
 
   for (genptr = pm->gen_range.start; genptr <= pm->gen_range.end; genptr++) {
     for (refptr = pm->ref_range.start; refptr <= pm->ref_range.end; refptr++) {
-      e_path = path[GT_DIV2(genptr)][refptr];
-      i_path = path[GT_DIV2(genptr)][refptr];
-      lower = (bool) !GT_MOD2(genptr);
-      if (lower) {
-        e_path &= LOWER_E_STATE_MASK;
-        i_path &= LOWER_I_STATE_MASK;
-        i_path >>= 3;
+      if (!ri ||
+          (refptr >= ri[genptr].offset &&
+           refptr < ri[genptr].offset + ri[genptr].length)) {
+        e_path = path[GT_DIV2(genptr)][refptr];
+        i_path = path[GT_DIV2(genptr)][refptr];
+        lower = (bool) !GT_MOD2(genptr);
+        if (lower) {
+          e_path &= LOWER_E_STATE_MASK;
+          i_path &= LOWER_I_STATE_MASK;
+          i_path >>= 3;
+        }
+        else {
+          e_path &= UPPER_E_STATE_MASK;
+          e_path >>= 4;
+          i_path &= UPPER_I_STATE_MASK;
+          i_path >>= 7;
+        }
+        gt_assert(i_path == DNA_E_N || i_path == DNA_I_N);
+        genidx = genptr - pm->gen_range.start;
+        refidx = refptr - pm->ref_range.start;
+        pm->entries[genidx][refidx].used = true;
+        pm->entries[genidx][refidx].e_path = e_path;
+        pm->entries[genidx][refidx].i_path = i_path;
       }
-      else {
-        e_path &= UPPER_E_STATE_MASK;
-        e_path >>= 4;
-        i_path &= UPPER_I_STATE_MASK;
-        i_path >>= 7;
-      }
-      gt_assert(i_path == DNA_E_N || i_path == DNA_I_N);
-      genidx = genptr - pm->gen_range.start;
-      refidx = refptr - pm->ref_range.start;
-      pm->entries[genidx][refidx].used = true;
-      pm->entries[genidx][refidx].e_path = e_path;
-      pm->entries[genidx][refidx].i_path = i_path;
     }
   }
 
@@ -71,7 +75,8 @@ GthPathMatrix* gth_path_matrix_new(GthPath **path,
                                    unsigned long gen_dp_length,
                                    unsigned long ref_dp_length,
                                    const GtRange *btmatrixgenrange,
-                                   const GtRange *btmatrixrefrange)
+                                   const GtRange *btmatrixrefrange,
+                                   GtRowInfo *ri)
 {
   GthPathMatrix *pm = gt_malloc(sizeof *pm);
   pm->gen_range.start = btmatrixgenrange->start;
@@ -80,7 +85,7 @@ GthPathMatrix* gth_path_matrix_new(GthPath **path,
   pm->ref_range.end   = MIN(btmatrixrefrange->end, ref_dp_length);
   gt_array2dim_calloc(pm->entries, gt_range_length(&pm->gen_range),
                       gt_range_length(&pm->ref_range));
-  path_matrix_fill(pm, path);
+  path_matrix_fill(pm, path, ri);
   return pm;
 }
 
@@ -161,7 +166,7 @@ void gth_path_matrix_show(GthPathMatrix *pm)
 }
 
 void gth_path_matrix_set_max_path(GthPathMatrix *pm, unsigned long genptr,
-                                  unsigned long refptr, DnaStates actualstate)
+                                  unsigned long refptr, bool e_state)
 {
   unsigned long genidx, refidx;
   gt_assert(pm);
@@ -169,15 +174,10 @@ void gth_path_matrix_set_max_path(GthPathMatrix *pm, unsigned long genptr,
       refptr >= pm->ref_range.start && refptr <= pm->ref_range.end) {
     genidx = genptr - pm->gen_range.start;
     refidx = refptr - pm->ref_range.start;
-    switch (actualstate) {
-      case DNA_E_STATE:
-        pm->entries[genidx][refidx].on_max_path_e = true;
-        break;
-      case DNA_I_STATE:
-        pm->entries[genidx][refidx].on_max_path_i = true;
-        break;
-      default: gt_assert(0);
-    }
+    if (e_state)
+      pm->entries[genidx][refidx].on_max_path_e = true;
+    else
+      pm->entries[genidx][refidx].on_max_path_i = true;
   }
 }
 
