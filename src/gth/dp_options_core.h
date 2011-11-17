@@ -32,6 +32,7 @@ typedef struct {
          shortintronpenalty;      /* penalty for short introns */
   GtRange btmatrixgenrange,
           btmatrixrefrange;
+  bool jtdebug;
 } GthDPOptionsCore;
 
 GthDPOptionsCore* gth_dp_options_core_new(void);

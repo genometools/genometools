@@ -329,6 +329,7 @@ static void chaining_info_init(GthChainingInfo *chaining_info,
   chaining_info->directmatches    = directmatches;
   chaining_info->refseqisindex    = call_info->simfilterparam.inverse ||
                                     !refseqisdna;
+  chaining_info->jtdebug          = call_info->dp_options_core->jtdebug;
   chaining_info->call_info        = call_info;
   chaining_info->input            = input;
   chaining_info->stat             = stat;
@@ -440,6 +441,7 @@ static void calc_chains_from_matches(GthChainCollection *chain_collection,
   info.jump_table_new    = jump_table_new;
   info.jump_table_new_reverse = jump_table_new_reverse;
   info.jump_table_delete = jump_table_delete;
+  info.jtdebug           = chaining_info->jtdebug;
   info.directmatches     = chaining_info->directmatches;
   info.outfp             = outfp;
   info.gen_file_num      = chaining_info->gen_file_num;

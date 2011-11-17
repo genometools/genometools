@@ -29,7 +29,8 @@ typedef struct GthJumpTable GthJumpTable;
 
 /* Create jump table for the chain of <num_of_matches> many <matches>. */
 typedef GthJumpTable* (*GthJumpTableNew)(GthJTMatch *matches,
-                                         unsigned long num_of_matches);
+                                         unsigned long num_of_matches,
+                                         bool debug);
 typedef GthJumpTable* (*GthJumpTableNewReverse)(const GthJumpTable*,
                                                 unsigned long gen_total_length,
                                                 unsigned long gen_offset,

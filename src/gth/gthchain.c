@@ -727,7 +727,7 @@ void gth_save_chain(GtChain *chain, GtFragment *fragments,
                                                      &genomicrange);
       forward_jump_table =
         info->jump_table_new(gt_array_get_space(chain_fragments),
-                             gt_array_size(chain_fragments));
+                             gt_array_size(chain_fragments), info->jtdebug);
       reverse_jump_table =
         info->jump_table_new_reverse(forward_jump_table,
                                      info->gen_total_length, info->gen_offset,

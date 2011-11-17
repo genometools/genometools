@@ -37,7 +37,8 @@ void gth_chaining(GthChainCollection *chain_collection,
 
 typedef struct {
   bool directmatches,
-       refseqisindex; /* (inverse || !refseqisdna) */
+       refseqisindex, /* (inverse || !refseqisdna) */
+       jtdebug;
   GthCallInfo *call_info;
   GthInput *input;
   GthStat *stat;

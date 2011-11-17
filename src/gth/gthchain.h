@@ -86,6 +86,7 @@ typedef struct {
   GthJumpTableNew jump_table_new;
   GthJumpTableNewReverse jump_table_new_reverse;
   GthJumpTableDelete jump_table_delete;
+  bool jtdebug;
   GthStat *stat;
   GtFile *outfp;
 } GthSaveChainInfo;

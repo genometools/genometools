@@ -187,6 +187,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optshortintronpenalty = NULL,   /* short exon/intron parameters */
          *optbtmatrixgenrange = NULL,
          *optbtmatrixrefrange = NULL,
+         *optjtdebug = NULL,
          *optwzerotransition = NULL,      /* special parameters for DP
                                              algorithm */
          *optwdecreasedoutput = NULL,     /* special parameters for DP
@@ -1000,6 +1001,16 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                               ->btmatrixrefrange, NULL);
     gt_option_is_development_option(optbtmatrixrefrange);
     gt_option_parser_add_option(op, optbtmatrixrefrange);
+  }
+
+  /* -jtdebug */
+  if (!gthconsensus_parsing) {
+    optjtdebug = gt_option_new_bool("jtdebug", "enable debugging output for "
+                                    "jump table stuff",
+                                    &call_info->dp_options_core->jtdebug,
+                                    false);
+    gt_option_is_development_option(optjtdebug);
+    gt_option_parser_add_option(op, optjtdebug);
   }
 
   /* -wzerotransition */
