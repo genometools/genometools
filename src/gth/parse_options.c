@@ -185,6 +185,8 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optdpminintronlength = NULL,    /* short exon/intron parameters */
          *optshortexonpenalty = NULL,     /* short exon/intron parameters */
          *optshortintronpenalty = NULL,   /* short exon/intron parameters */
+         *optbtmatrixgenrange = NULL,
+         *optbtmatrixrefrange = NULL,
          *optwzerotransition = NULL,      /* special parameters for DP
                                              algorithm */
          *optwdecreasedoutput = NULL,     /* special parameters for DP
@@ -979,6 +981,27 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_parser_add_option(op, optshortintronpenalty);
   }
 
+  /* -btmatrixgenrage */
+  if (!gthconsensus_parsing) {
+    optbtmatrixgenrange = gt_option_new_range("btmatrixgenrange", "set the "
+                                              "backtrace genomic range to show",
+                                              &call_info->dp_options_core
+                                              ->btmatrixgenrange, NULL);
+    gt_option_is_development_option(optbtmatrixgenrange);
+    gt_option_parser_add_option(op, optbtmatrixgenrange);
+  }
+
+  /* -btmatrixrefrange */
+  if (!gthconsensus_parsing) {
+    optbtmatrixrefrange = gt_option_new_range("btmatrixrefrange", "set the "
+                                              "backtrace reference range to "
+                                              "show",
+                                              &call_info->dp_options_core
+                                              ->btmatrixrefrange, NULL);
+    gt_option_is_development_option(optbtmatrixrefrange);
+    gt_option_parser_add_option(op, optbtmatrixrefrange);
+  }
+
   /* -wzerotransition */
   if (!gthconsensus_parsing) {
     optwzerotransition = gt_option_new_uint("wzerotransition", "set the zero "
@@ -1277,6 +1300,10 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_imply(optsortagswf, optsortags);
   gt_option_imply(optgff3descranges, optgff3out);
   gt_option_imply(optmd5ids, optgff3out);
+  if (optbtmatrixgenrange && optbtmatrixrefrange) {
+    gt_option_imply(optbtmatrixgenrange, optbtmatrixrefrange);
+    gt_option_imply(optbtmatrixrefrange, optbtmatrixrefrange);
+  }
 
   /* option implications (either 2) */
   if (optgff3out && optskipalignmentout && optintermediate)

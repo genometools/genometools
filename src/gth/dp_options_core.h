@@ -19,6 +19,7 @@
 #define DP_OPTIONS_CORE_H
 
 #include <stdbool.h>
+#include "core/range_api.h"
 
 typedef struct {
   bool noicinintroncheck,         /* perform no check if intron coutout is in
@@ -29,6 +30,8 @@ typedef struct {
                dpminintronlength; /* minimum intron length */
   double shortexonpenalty,        /* penalty for short exons */
          shortintronpenalty;      /* penalty for short introns */
+  GtRange btmatrixgenrange,
+          btmatrixrefrange;
 } GthDPOptionsCore;
 
 GthDPOptionsCore* gth_dp_options_core_new(void);

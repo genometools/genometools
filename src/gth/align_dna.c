@@ -19,12 +19,14 @@
 #include "core/array2dim_api.h"
 #include "core/divmodmul.h"
 #include "core/safearith.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "gth/align_dna_imp.h"
 #include "gth/array2dim_plain.h"
 #include "gth/compute_scores.h"
 #include "gth/gthenum.h"
 #include "gth/gtherror.h"
+#include "gth/path_matrix.h"
 #include "gth/path_walker.h"
 
 /* IMPORTANT: Definition has to be consistent with DnaRetrace in
@@ -476,7 +478,7 @@ static void dna_complete_path_matrix(GthDPMatrix *dpm,
         dpm->path[GT_DIV2(n)][m] |= retrace;
 
       switch (retrace) {
-        case I_STATE_E_N:
+       case I_STATE_E_N:
           /* begin of a new intron */
           dpm->intronstart[modn][m] = n;
           break;
@@ -1281,6 +1283,16 @@ int gth_align_dna(GthSA *sa,
                                           : gen_seq_tran + gen_dp_start,
                              ref_seq_tran, 0, gen_alphabet, dp_param,
                              dp_options_est, dp_options_core);
+  }
+
+  /* debugging */
+  if (dp_options_core->btmatrixgenrange.start != GT_UNDEF_ULONG) {
+    GthPathMatrix *pm =
+      gth_path_matrix_new(dpm.path, dpm.gen_dp_length, dpm.ref_dp_length,
+                          &dp_options_core->btmatrixgenrange,
+                          &dp_options_core->btmatrixrefrange);
+    gth_path_matrix_show(pm);
+    gth_path_matrix_delete(pm);
   }
 
   /* backtracing */
