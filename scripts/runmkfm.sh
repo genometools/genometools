@@ -30,7 +30,7 @@ cerr()
 
 suffixerator()
 {
-  cerr "${gtbin} suffixerator -algbds 3 40 120 $*"
+  cerr "${gtbin} suffixerator -algbds 3 43 120 $*"
 }
 
 makesuftab()

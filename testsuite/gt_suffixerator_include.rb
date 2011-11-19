@@ -27,7 +27,7 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
       extra=extra + " -cmpcharbychar"
     end
     run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
-             "-algbds 10 31 80 #{extra} #{outoptions} " +
+             "-algbds 10 43 80 #{extra} #{outoptions} " +
              "-indexname esa -dir " + dirarg + " -db " + filearg
     if dirarg == "cpl" or dirarg == "rcl"
       run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
@@ -40,19 +40,17 @@ def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
         dirarg_rev = "fwd"
       end
       run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl " +
-               "-algbds 10 31 80 #{extra} #{outoptions} " +
+               "-algbds 10 43 80 #{extra} #{outoptions} " +
                "-indexname esa-#{dirarg_rev} -dir " + dirarg_rev +
                " -db " + filearg
-      if dirarg != "rcl" or dirarg != "cpl" then
-        run_test "#{$bin}gt packedindex mkindex -v -indexname pck -dir " + dirarg +
-                 " -db " + filearg
-        run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
-                 "-esa esa -pck pck -cmpsuf",
-                 :maxtime => 600
-        run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
-                 "-esa esa-#{dirarg_rev} -pck pck -cmplcp",
-                 :maxtime => 600
-      end
+      run_test "#{$bin}gt packedindex mkindex -v -indexname pck -dir " + dirarg +
+               " -db " + filearg
+      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
+               "-esa esa -pck pck -cmpsuf",
+               :maxtime => 600
+      run_test "#{$bin}gt dev sfxmap #{outoptions} -v " +
+               "-esa esa-#{dirarg_rev} -pck pck -cmplcp",
+               :maxtime => 600
     end
   end
 end
@@ -345,7 +343,7 @@ def checkmapped(keyword,args)
   Name "gt suffixerator checkmapped #{keyword}"
   Keywords "gt_suffixerator gttestdata"
   Test do
-    run_test "#{$bin}gt suffixerator #{outoptions} -algbds 3 34 90 " +
+    run_test "#{$bin}gt suffixerator #{outoptions} -algbds 3 43 90 " +
              "-indexname sfxidx #{args}",
              :maxtime => 1200
     run_test "#{$bin}gt dev sfxmap #{outoptions} -v -esa sfxidx",

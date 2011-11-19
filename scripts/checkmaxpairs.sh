@@ -49,7 +49,7 @@ filenames=$*
 for filename in ${filenames}
 do
   echo "$0 ${minlength} ${filename}"
-  checkerror "../bin/gt suffixerator -algbds 3 40 120 -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
+  checkerror "../bin/gt suffixerator -algbds 3 43 120 -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
   if test "X${queryfile}" = "X"
   then
     checkerror "../bin/gt repfind -l ${minlength} -ii sfxidx" > result.mp

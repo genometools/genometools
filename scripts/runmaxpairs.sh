@@ -51,7 +51,7 @@ for filename in ${filenames}
 do
   echo "$0 ${minlength} ${filename}"
   checkerror "mkvtree.x -db ${filename} -indexname mkvidx -dna -ois -sti1 -bck -suf -tis -lcp -bwt -pl"
-  checkerror "../bin/gt suffixerator -algbds 3 40 120 -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
+  checkerror "../bin/gt suffixerator -algbds 3 43 120 -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
   if test "X${queryfile}" = "X"
   then
     checkerror "${VMMINI} ${minlength} mkvidx" > result.vm

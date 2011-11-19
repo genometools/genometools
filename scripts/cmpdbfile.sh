@@ -28,7 +28,7 @@ comparefiles()
 
 options="$*"
 
-checkerror "../bin/gt suffixerator -algbds 3 40 120 -indexname /tmp/idx-sfx -des ${options}"
+checkerror "../bin/gt suffixerator -algbds 3 43 120 -indexname /tmp/idx-sfx -des ${options}"
 MKVTREE="/Users/stefan/bin-ops/i686-apple-darwin/mkvtree.x"
 checkerror "${MKVTREE} -indexname /tmp/idx-mkv -dna ${options}"
 echo "XXX ${options}"

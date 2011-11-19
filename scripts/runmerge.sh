@@ -14,7 +14,7 @@ mkdir -p ${INDEXDIR}
 queryfile=$1
 shift
 referencefiles=$*
-SFXOPTS="-dna -algbds 3 40 120 -suf -lcp -tis -pl"
+SFXOPTS="-dna -algbds 3 43 120 -suf -lcp -tis -pl"
 ../bin/gt suffixerator ${SFXOPTS} -indexname ${INDEXDIR}/all -db ${referencefiles}
 num=0
 indexlist=""
