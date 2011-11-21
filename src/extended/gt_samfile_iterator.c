@@ -50,10 +50,11 @@ GtSamfileIter *gt_samfile_iter_new_bam(const char *bamfilename,
 }
 
 GtSamfileIter *gt_samfile_iter_new_sam(const char *samfilename,
-                                       GtAlphabet *alphabet) {
+                                       GtAlphabet *alphabet,
+                                       const char *auxfilename) {
   return gt_samfile_iter_new(samfilename,
                          "r",
-                         NULL,
+                         (void *) auxfilename,
                          alphabet);
 }
 
@@ -61,22 +62,23 @@ void gt_samfile_iter_delete(GtSamfileIter *s_iter) {
   samclose(s_iter->samfile);
   if (s_iter->current_alignment)
     gt_sam_alignment_delete(s_iter->current_alignment);
+  gt_alphabet_delete(s_iter->alphabet);
   gt_free(s_iter);
 }
 
 int gt_samfile_iter_next(GtSamfileIter *s_iter,
                          GtSamAlignment **gt_s_alignment) {
-  unsigned long read;
+  int read;
   if (s_iter->current_alignment == NULL)
     s_iter->current_alignment = gt_sam_alignment_new(s_iter->alphabet);
   read = samread(s_iter->samfile, s_iter->current_alignment->s_alignment);
-  if (read >= 0UL) {
+  if (read > 0) {
     *gt_s_alignment = s_iter->current_alignment;
-    return 0;
+    return read;
   }
   else {
     *gt_s_alignment = NULL;
-    return -1;
+    return read;
   }
 }
 

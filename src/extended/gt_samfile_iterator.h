@@ -26,15 +26,21 @@ typedef struct GtSamfileIter GtSamfileIter;
 GtSamfileIter *gt_samfile_iter_new_bam(const char *filename,
                                        GtAlphabet *alphabet);
 
+/*
+  auxfilename can be NULL, but then the samfile has to contain header
+  information. Otherwise it should be the name of a file containing the list of
+  references as produced by 'samtools faidx ref.fa'
+*/
 GtSamfileIter *gt_samfile_iter_new_sam(const char *filename,
-                                       GtAlphabet *alphabet);
+                                       GtAlphabet *alphabet,
+                                       const char *auxfilename);
 
 void gt_samfile_iter_delete(GtSamfileIter *s_iter);
 
 /*
- returns -1 if no more alignments can be returned or an error occured.
- gt_s_alignment will point to the current alignment. This gets overwritten with
- each next. Do not free gt_s_alignment. Will be freed with iterator.
+  returns -1 if no more alignments can be returned or an error occured.
+  gt_s_alignment will point to the current alignment. This gets overwritten with
+  each next. Do not free gt_s_alignment. Will be freed with iterator.
 */
 int gt_samfile_iter_next(GtSamfileIter *s_iter,
                          GtSamAlignment **gt_s_alignment);

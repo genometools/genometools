@@ -24,16 +24,17 @@
 #include "tools/gt_dev.h"
 #include "tools/gt_extracttarget.h"
 #include "tools/gt_guessprot.h"
+#include "tools/gt_idxlocali.h"
 #include "tools/gt_magicmatch.h"
 #include "tools/gt_mergeesa.h"
 #include "tools/gt_paircmp.h"
-#include "tools/gt_idxlocali.h"
 #include "tools/gt_patternmatch.h"
 #include "tools/gt_qsortbench.h"
+#include "tools/gt_readreads.h"
 #include "tools/gt_regioncov.h"
+#include "tools/gt_sam_interface.h"
 #include "tools/gt_sfxmap.h"
 #include "tools/gt_skproto.h"
-#include "tools/gt_readreads.h"
 #include "tools/gt_trieins.h"
 
 static void* gt_dev_arguments_new(void)
@@ -41,21 +42,22 @@ static void* gt_dev_arguments_new(void)
   GtToolbox *dev_toolbox = gt_toolbox_new();
   /* add development tools here with a function call like this:
      gt_toolbox_add(dev_toolbox, "devtool", gt_devtool); */
-  gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
-  gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
   gt_toolbox_add(dev_toolbox, "gthmkbssmfiles", gt_gthmkbssmfiles);
   gt_toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
-  gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
-  gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
   gt_toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
   gt_toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
   gt_toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
+  gt_toolbox_add_tool(dev_toolbox, "consensus_sa", gt_consensus_sa_tool());
+  gt_toolbox_add_tool(dev_toolbox, "extracttarget", gt_extracttarget());
+  gt_toolbox_add_tool(dev_toolbox, "idxlocali", gt_idxlocali());
+  gt_toolbox_add_tool(dev_toolbox, "magicmatch", gt_magicmatch());
   gt_toolbox_add_tool(dev_toolbox, "qsortbench", gt_qsortbench());
   gt_toolbox_add_tool(dev_toolbox, "readreads", gt_readreads());
-  gt_toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  gt_toolbox_add_tool(dev_toolbox, "sambam", gt_sam_interface());
   gt_toolbox_add_tool(dev_toolbox, "sfxmap", gt_sfxmap());
   gt_toolbox_add_tool(dev_toolbox, "skproto", gt_skproto());
-  gt_toolbox_add(dev_toolbox, "trieins", gt_trieins);
   return dev_toolbox;
 }
 
