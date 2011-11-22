@@ -621,8 +621,10 @@ static int dna_evaltracepath(GthBacktracePath *backtrace_path, GthDPMatrix *dpm,
       }
     }
 
-    if (pm)
-      gth_path_matrix_set_max_path(pm, genptr, refptr, actualstate);
+    if (pm) {
+      gth_path_matrix_set_max_path(pm, genptr, refptr,
+                                   actualstate == DNA_E_STATE);
+    }
 
     switch (actualstate) {
       case DNA_E_STATE:
