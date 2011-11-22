@@ -381,6 +381,93 @@ static unsigned long determinenumberofwholeleaves(const GtEncseq *encseq,
   return wholeleafcount;
 }
 
+static int gt_encseq_check_comparefullsuffixes(const GtEncseq *encseq,
+                                               GtReadmode readmode,
+                                               unsigned long *maxlcp,
+                                               unsigned long start1,
+                                               unsigned long start2,
+                                               GtEncseqReader *esr1,
+                                               GtEncseqReader *esr2)
+{
+  GtUchar cc1, cc2;
+  unsigned long pos1, pos2, totallength;
+  int retval;
+
+  totallength = gt_encseq_total_length(encseq);
+  if (esr1 != NULL && esr2 != NULL)
+  {
+    gt_encseq_reader_reinit_with_readmode(esr1,encseq,readmode,start1);
+    gt_encseq_reader_reinit_with_readmode(esr2,encseq,readmode,start2);
+  } else
+  {
+    gt_assert(esr1 == NULL && esr2 == NULL);
+  }
+  for (pos1=start1, pos2=start2; /* Nothing */; pos1++, pos2++)
+  {
+    if (pos1 >= totallength)
+    {
+      cc1 = (GtUchar) SEPARATOR;
+    } else
+    {
+      cc1 = (esr1 != NULL) ? gt_encseq_reader_next_encoded_char(esr1)
+                           : gt_encseq_get_encoded_char(encseq,pos1,readmode);
+    }
+    if (pos2 >= totallength)
+    {
+      cc2 = (GtUchar) SEPARATOR;
+    } else
+    {
+      cc2 = (esr2 != NULL) ? gt_encseq_reader_next_encoded_char(esr2)
+                           : gt_encseq_get_encoded_char(encseq,pos2,readmode);
+    }
+    if (ISSPECIAL(cc1))
+    {
+      if (ISSPECIAL(cc2))
+      {
+        if (pos1 < pos2)
+        {
+          *maxlcp = pos1  - start1;
+          retval = -1; /* a < b */
+          break;
+        }
+        if (pos1 > pos2)
+        {
+          *maxlcp = pos1 - start1;
+          retval = 1; /* a > b */
+          break;
+        }
+        *maxlcp = pos1 - start1 + 1;
+        retval = 0; /* a = b */
+        break;
+      }
+      *maxlcp = pos1 - start1;
+      retval = 1; /* a > b */
+      break;
+    } else
+    {
+      if (ISSPECIAL(cc2))
+      {
+        *maxlcp = pos1 - start1;
+        retval = -1; /* a < b */
+        break;
+      }
+      if (cc1 < cc2)
+      {
+        *maxlcp = pos1 - start1;
+        retval = -1; /* a < b */
+        break;
+      }
+      if (cc1 > cc2)
+      {
+        *maxlcp = pos1 - start1;
+        retval = 1; /* a > b */
+        break;
+      }
+    }
+  }
+  return retval;
+}
+
 static int gt_checkentiresuftab(const char *filename,
                                 int line,
                                 const GtEncseq *encseq,
@@ -466,17 +553,14 @@ static int gt_checkentiresuftab(const char *filename,
     if (idx < totallength)
     {
       gt_assert(ESASUFFIXPTRGET(suftab,idx) < totallength);
-      cmp = gt_encseq_check_comparetwosuffixes(encseq,
-                                               readmode,
-                                               &maxlcp,
-                                               specialsareequal,
-                                               specialsareequalatdepth0,
-                                               depth,
-                                               ESASUFFIXPTRGET(suftab,idx-1),
-                                               ESASUFFIXPTRGET(suftab,idx),
-                                               esr1,
-                                               esr2);
-      if (cmp > 0)
+      cmp = gt_encseq_check_comparefullsuffixes(encseq,
+                                                readmode,
+                                                &maxlcp,
+                                                ESASUFFIXPTRGET(suftab,idx-1),
+                                                ESASUFFIXPTRGET(suftab,idx),
+                                                esr1,
+                                                esr2);
+      if (cmp >= 0)
       {
         showcomparisonfailureESA(filename,
                                  line,
