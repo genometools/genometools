@@ -1,5 +1,5 @@
 def runmerge(queryfile,referencefiles)
-  sfxopts="-dna -algbds 3 43 120 -suf -lcp -tis -pl"
+  sfxopts="-dna -algbds 3 31 80 -suf -lcp -tis -pl"
   run_test "#{$bin}gt suffixerator #{sfxopts} -indexname all " +
            "-db #{referencefiles.join(" ")}"
   num = 0

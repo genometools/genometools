@@ -5217,7 +5217,7 @@ static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        unsigned long twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
-  ptbe->position = currentpos;
+  ptbe->referpos = currentpos;
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
     if (currentpos < twobitencodingstoppos)
@@ -5366,7 +5366,7 @@ static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        unsigned long twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
-  ptbe->position = currentpos;
+  ptbe->referpos = currentpos;
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
     if (currentpos >= twobitencodingstoppos)
@@ -5449,7 +5449,7 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
       /* handle special case where we start on the virtual separator */
       pos = currentpos + (fwd ? GT_UNITSIN2BITENC : -GT_UNITSIN2BITENC);
       ptbe->tbe = 0;
-      ptbe->position = currentpos;
+      ptbe->referpos = currentpos;
       ptbe->unitsnotspecial = 0;
       return pos;
     }
@@ -5475,7 +5475,7 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
     if (ptbe->unitsnotspecial > 0)
       ptbe->tbe ^= ~0;
     /* mangle coordinates */
-    ptbe->position = GT_REVERSEPOS(encseq->logicaltotallength, currentpos);
+    ptbe->referpos = GT_REVERSEPOS(encseq->logicaltotallength, currentpos);
     /* handle the fact that the position returned by (fwd|rev)extract2bitenc()
        cannot be negative */
     if (pos == 0 && currentpos < (unsigned long) GT_UNITSIN2BITENC) {
@@ -5770,15 +5770,15 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
       gt_assert(commonunits != NULL);
       commonunits->common = ptbe1->unitsnotspecial;
       commonunits->leftspecial = commonunits->rightspecial = true;
-      if (ptbe1->position < ptbe2->position)
+      if (ptbe1->referpos < ptbe2->referpos)
       {
         return fwd ? -1 : 1;
       }
-      if (ptbe1->position > ptbe2->position)
+      if (ptbe1->referpos > ptbe2->referpos)
       {
         return fwd ? 1 : -1;
       }
-      if (ptbe1->position == ptbe2->position)
+      if (ptbe1->referpos == ptbe2->referpos)
       {
         return 0;
       }
@@ -6153,7 +6153,7 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
                                        unsigned long start,
                                        unsigned long depth)
 {
-  unsigned long i, end, totallength;
+  unsigned long idx, end, totallength;
   const unsigned long maxshow = 30UL;
   GtUchar cc;
   const GtUchar *characters;
@@ -6167,14 +6167,14 @@ void gt_encseq_showatstartposwithdepth(FILE *fp,
   {
     end = MIN(start + maxshow,MIN(totallength,start+depth));
   }
-  for (i = start; i < end; i++)
+  for (idx = start; idx <= end; idx++)
   {
-    if (i == totallength)
+    if (idx == totallength)
     {
       (void) putc('~',fp);
       break;
     }
-    cc = gt_encseq_get_encoded_char(encseq,i,readmode);
+    cc = gt_encseq_get_encoded_char(encseq,idx,readmode);
     if (ISSPECIAL(cc))
     {
       (void) putc('~',fp);

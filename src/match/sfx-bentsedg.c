@@ -94,7 +94,7 @@ typedef GtEndofTwobitencoding GtSfxcmp;
           {\
             TMPVAR.tbe = 0;\
             TMPVAR.unitsnotspecial = 0;\
-            TMPVAR.position = pos;\
+            TMPVAR.referpos = bsr-> fwd ? pos : 0;\
           }\
         }
 
@@ -1146,7 +1146,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
         continue;
       }
       BS_SWAPARRAY(temp, subbucketleft, 0, pm);
-      PTR2INT(pivotcmpbits,subbucketleft,0);
+      PTR2INT(pivotcmpbits,subbucketleft,0UL);
     }
     bsr->counttqsort++;
     /* now pivot element is at index subbucketleft */

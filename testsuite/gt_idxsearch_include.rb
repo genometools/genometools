@@ -94,7 +94,7 @@ end
 
 def checkrepfind(reffile)
   reffilepath=addfilepath(reffile)
-  run_test("#{$bin}gt suffixerator -algbds 3 43 120 -db " +
+  run_test("#{$bin}gt suffixerator -algbds 3 31 80 -db " +
            "#{reffilepath} -indexname sfxidx -dna -suf -tis -lcp -ssp -pl",
            :maxtime => 320)
   minlength = determineminlength(reffile)
@@ -110,7 +110,7 @@ def checkrepfindwithquery(reffile,queryfile)
   reffilepath=addfilepath(reffile)
   queryfilepath=addfilepath(queryfile)
   idxname=reffile + "-idx"
-  run_test "#{$bin}gt suffixerator -algbds 3 43 120 -db " +
+  run_test "#{$bin}gt suffixerator -algbds 3 31 80 -db " +
            "#{reffilepath} -indexname #{idxname} -dna -suf -tis -lcp -ssp -pl"
   run_test("#{$bin}gt repfind -l 15 -ii #{idxname} -q #{queryfilepath}",
            :maxtime => 600)

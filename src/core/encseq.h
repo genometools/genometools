@@ -61,7 +61,7 @@ typedef struct
 {
   GtTwobitencoding tbe;           /* two bit encoding */
   unsigned int unitsnotspecial;   /* units which are not special */
-  unsigned long position;
+  unsigned long referpos;
 } GtEndofTwobitencoding;
 
 /* The following type stores the result of comparing a pair of twobit
