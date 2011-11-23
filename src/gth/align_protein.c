@@ -189,7 +189,6 @@ static const char* showretracenames(Retrace retrace)
 }
 
 /* the following function initalizes the input structure */
-
 static void initinput(GthAlignInputProtein *input,
                       const unsigned char *ref_seq_orig,
                       GthInput *gth_input)
@@ -200,10 +199,10 @@ static void initinput(GthAlignInputProtein *input,
 }
 
 /* the following function allocates space for the DP tables for proteins */
-static int dp_tables_init(GthDPtables *dpm, unsigned long gen_dp_length,
-                          bool proteinexonpenal, unsigned long ref_dp_length,
-                          unsigned long autoicmaxmatrixsize, bool introncutout,
-                          GthJumpTable *jump_table, GthStat *stat)
+static int dp_tables_alloc(GthDPtables *dpm, unsigned long gen_dp_length,
+                           bool proteinexonpenal, unsigned long ref_dp_length,
+                           unsigned long autoicmaxmatrixsize, bool introncutout,
+                           GthJumpTable *jump_table, GthStat *stat)
 {
   unsigned long n;
   int rval;
@@ -241,9 +240,8 @@ static int dp_tables_init(GthDPtables *dpm, unsigned long gen_dp_length,
 }
 
 /* the following function initializes the DP tables for proteins */
-static void initDPtables(GthDPtables *dpm,
-                         bool proteinexonpenal,
-                         unsigned long ref_dp_length)
+static void dp_tables_init(GthDPtables *dpm, bool proteinexonpenal,
+                           unsigned long ref_dp_length)
 {
   unsigned long n, m;
 
@@ -1103,17 +1101,17 @@ int gth_align_protein(GthSA *sa,
                                                     comments, outfp);
   }
   initinput(&input, ref_seq_orig, gth_input);
-  if ((rval = dp_tables_init(&dpm, introncutout ? spliced_seq->splicedseqlen
-                                                : gen_dp_length,
-                             proteinexonpenal, ref_dp_length,
-                             autoicmaxmatrixsize, introncutout, jump_table,
-                             stat))) {
+  if ((rval = dp_tables_alloc(&dpm, introncutout ? spliced_seq->splicedseqlen
+                                                 : gen_dp_length,
+                              proteinexonpenal, ref_dp_length,
+                              autoicmaxmatrixsize, introncutout, jump_table,
+                              stat))) {
     gth_dp_param_delete(dp_param);
     gth_spliced_seq_delete(spliced_seq);
     gth_dp_scores_protein_delete(dp_scores_protein);
     return rval;
   }
-  initDPtables(&dpm, proteinexonpenal, ref_dp_length);
+  dp_tables_init(&dpm, proteinexonpenal, ref_dp_length);
   gth_sa_set(sa, PROTEIN_ALPHA, gen_dp_start, gen_dp_length);
 
   transtable = gt_trans_table_new(translationtable, NULL);
