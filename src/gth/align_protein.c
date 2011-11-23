@@ -123,7 +123,7 @@ static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
                             GthStat *stat)
 {
   unsigned long matrixsize, t, n,
-       sizeofpathtype =  sizeof (GthPath);
+                sizeofpathtype = sizeof (GthPath);
 
   /* XXX: adjust this check for QUARTER_MATRIX case */
   if (PROTEIN_NUMOFSTATES * sizeofpathtype * (gen_dp_length + 1) >=
