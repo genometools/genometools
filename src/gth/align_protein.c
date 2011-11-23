@@ -609,8 +609,9 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
 static void include_exon(GthBacktracePath *backtrace_path,
                          unsigned long exonlength)
 {
-  unsigned long i, divresult = exonlength / GT_CODON_LENGTH,
-          modresult = exonlength % GT_CODON_LENGTH;
+  unsigned long i,
+                divresult = exonlength / GT_CODON_LENGTH,
+                modresult = exonlength % GT_CODON_LENGTH;
 
   /* at least one editoperation already saved */
   gt_assert(gth_backtrace_path_length(backtrace_path));
@@ -784,8 +785,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
       }
     }
 
-    switch (actualstate)
-    {
+    switch (actualstate) {
       case E_STATE:
         /* we are currently in an exon state, the possible pathtypes for exon
            states are handled here */
@@ -799,7 +799,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 
             if (codon == ref_seq_orig[refptr - 1]) {
               gth_backtrace_path_add_match(backtrace_path,
-                                       dummystatus == ENSURE_SINGLE_MATCH);
+                                           dummystatus == ENSURE_SINGLE_MATCH);
             }
             else
               gth_backtrace_path_add_mismatch(backtrace_path);
@@ -850,7 +850,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
                                 transtable);
             if (codon == ref_seq_orig[refptr - 1]) {
               gth_backtrace_path_add_match(backtrace_path,
-                                       dummystatus == ENSURE_SINGLE_MATCH);
+                                           dummystatus == ENSURE_SINGLE_MATCH);
             }
             else
               gth_backtrace_path_add_mismatch(backtrace_path);
