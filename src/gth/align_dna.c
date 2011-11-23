@@ -16,7 +16,6 @@
 */
 
 #include <math.h>
-#include "core/array2dim_api.h"
 #include "core/divmodmul.h"
 #include "core/safearith.h"
 #include "core/undef_api.h"

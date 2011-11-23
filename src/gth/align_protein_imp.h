@@ -28,8 +28,6 @@
 
 #define PROTEIN_NUMOFSCORETABLES  4
 
-#define PATH(N,M)     dpm->core.path[(N) * dpm->core.columnlength + (M)]
-
 /* these definitions refer to the state index for the two N x M score matrices
 */
 typedef enum {
@@ -79,10 +77,7 @@ typedef enum {
 typedef struct {
   /* table to store the score of a path */
   GthFlt *score[PROTEIN_NUMOFSTATES][PROTEIN_NUMOFSCORETABLES];
-  GthPath *path; /* backtrace table of size gen_dp_length * ref_dp_length */
-  unsigned long columnlength;          /* the length of a column of the DP
-                                          matrix (equals ref_dp_length + 1)
-                                          needed for access of pathD */
+  GthPath **path; /* backtrace table of size gen_dp_length * ref_dp_length */
 } DPtablecore;
 
 /* structure of a path matrix byte:

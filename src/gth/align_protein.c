@@ -20,6 +20,7 @@
 #include "core/safearith.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "gth/array2dim_plain.h"
 #include "gth/gthenum.h"
 #include "gth/gtherror.h"
 #include "gth/align_protein_imp.h"
@@ -56,25 +57,25 @@ static void dp_table_core_free(DPtablecore *core)
     for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++)
       gt_free(core->score[t][n]);
   }
-  free(core->path);
+  gth_array2dim_plain_delete(core->path);
 }
 
 static GthPath path_e_state_read(GthDPtables *dpm, unsigned int n,
                                  unsigned int m)
 {
-  return PATH(n, m) & E_STATE_MASK;
+  return dpm->core.path[n][m] & E_STATE_MASK;
 }
 
 static void path_e_state_write(GthDPtables *dpm, unsigned int n, unsigned int m,
                                GthPath e)
 {
-  PATH(n, m) = e;
+  dpm->core.path[n][m] = e;
 }
 
 static GthPath path_ia_state_read(GthDPtables *dpm, unsigned int n,
                                   unsigned int m)
 {
-  if ((PATH(n, m) & IA_STATE_MASK) >> 4)
+  if ((dpm->core.path[n][m] & IA_STATE_MASK) >> 4)
     return E_N1;
   return IA_N1;
 }
@@ -83,13 +84,13 @@ static void path_ia_state_write(GthDPtables *dpm, unsigned int n,
                                 unsigned int m, GthPath e)
 {
   if (e == E_N1)
-    PATH(n, m) |= (1 << 4);
+    dpm->core.path[n][m] |= (1 << 4);
 }
 
 static GthPath path_ib_state_read(GthDPtables *dpm, unsigned int n,
                                   unsigned int m)
 {
-  if ((PATH(n, m) & IB_STATE_MASK) >> 5)
+  if ((dpm->core.path[n][m] & IB_STATE_MASK) >> 5)
     return E_N2;
   return IB_N1;
 }
@@ -98,13 +99,13 @@ static void path_ib_state_write(GthDPtables *dpm, unsigned int n,
                                 unsigned int m, GthPath e)
 {
   if (e == E_N2)
-    PATH(n, m) |= (1 << 5);
+    dpm->core.path[n][m] |= (1 << 5);
 }
 
 static GthPath path_ic_state_read(GthDPtables *dpm, unsigned int n,
                                   unsigned int m)
 {
-  if ((PATH(n, m) & IC_STATE_MASK) >> 6)
+  if ((dpm->core.path[n][m] & IC_STATE_MASK) >> 6)
     return E_N3;
   return IC_N1;
 }
@@ -113,7 +114,7 @@ static void path_ic_state_write(GthDPtables *dpm, unsigned int n,
                                 unsigned int m, GthPath e)
 {
   if (e == E_N3)
-    PATH(n, m) |= (1 << 6);
+    dpm->core.path[n][m] |= (1 << 6);
 }
 
 static int dp_table_core_init(DPtablecore *core, unsigned long gen_dp_length,
@@ -134,7 +135,6 @@ static int dp_table_core_init(DPtablecore *core, unsigned long gen_dp_length,
   }
 
   matrixsize = gt_safe_mult_ulong(gen_dp_length + 1, ref_dp_length + 1);
-  core->columnlength = ref_dp_length + 1;
 
   if (!introncutout && autoicmaxmatrixsize > 0) {
     /* in this case the automatic intron cutout technique is enabled
@@ -160,10 +160,14 @@ static int dp_table_core_init(DPtablecore *core, unsigned long gen_dp_length,
     }
   }
 
-  if (jump_table)
-    core->path = calloc(matrixsize, sizeof (GthPath));
-  else
-    core->path = malloc(sizeof (GthPath) * matrixsize);
+  if (jump_table) {
+    gth_array2dim_plain_calloc(core->path, gen_dp_length + 1,
+                               ref_dp_length + 1);
+  }
+  else {
+    gth_array2dim_plain_malloc(core->path, gen_dp_length + 1,
+                               ref_dp_length + 1);
+  }
   if (!core->path) {
     /* matrix allocation failed, return after free of allocated tables */
     dp_table_core_free(core);
