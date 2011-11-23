@@ -55,69 +55,65 @@ static void freeDPtablecore(DPtablecore *core)
   for (t =  E_STATE; t < PROTEIN_NUMOFSTATES; t++) {
     for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++)
       gt_free(core->score[t][n]);
-    free(core->path[t]);
   }
+  free(core->path);
 }
 
 static GthPath path_e_state_read(GthDPtables *dpm, unsigned int n,
                                  unsigned int m)
 {
-  return PATH(E_STATE, n, m);
+  return PATH(n, m) & E_STATE_MASK;
 }
 
 static void path_e_state_write(GthDPtables *dpm, unsigned int n, unsigned int m,
                                GthPath e)
 {
-  gt_assert(e == E_N3M  ||
-            e == E_N2M  ||
-            e == E_N1M  ||
-            e == E_M    ||
-            e == E_N3   ||
-            e == E_N2   ||
-            e == E_N1   ||
-            e == IA_N3M ||
-            e == IB_N2M ||
-            e == IC_N1M);
-  PATH(E_STATE, n, m) = e;
+  PATH(n, m) = e;
 }
 
 static GthPath path_ia_state_read(GthDPtables *dpm, unsigned int n,
                                   unsigned int m)
 {
-  return PATH(IA_STATE, n, m);
+  if ((PATH(n, m) & IA_STATE_MASK) >> 4)
+    return E_N1;
+  return IA_N1;
 }
 
 static void path_ia_state_write(GthDPtables *dpm, unsigned int n,
                                 unsigned int m, GthPath e)
 {
-  gt_assert(e == IA_N1 || e == E_N1);
-  PATH(IA_STATE, n, m) = e;
+  if (e == E_N1)
+    PATH(n, m) |= (1 << 4);
 }
 
 static GthPath path_ib_state_read(GthDPtables *dpm, unsigned int n,
                                   unsigned int m)
 {
-  return PATH(IB_STATE, n, m);
+  if ((PATH(n, m) & IB_STATE_MASK) >> 5)
+    return E_N2;
+  return IB_N1;
 }
 
 static void path_ib_state_write(GthDPtables *dpm, unsigned int n,
                                 unsigned int m, GthPath e)
 {
-  gt_assert(e == IB_N1 || e == E_N2);
-  PATH(IB_STATE, n, m) = e;
+  if (e == E_N2)
+    PATH(n, m) |= (1 << 5);
 }
 
 static GthPath path_ic_state_read(GthDPtables *dpm, unsigned int n,
                                   unsigned int m)
 {
-  return PATH(IC_STATE, n, m);
+  if ((PATH(n, m) & IC_STATE_MASK) >> 6)
+    return E_N3;
+  return IC_N1;
 }
 
 static void path_ic_state_write(GthDPtables *dpm, unsigned int n,
                                 unsigned int m, GthPath e)
 {
-  gt_assert(e == IC_N1 || e == E_N3);
-  PATH(IC_STATE, n, m) = e;
+  if (e == E_N3)
+    PATH(n, m) |= (1 << 6);
 }
 
 static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
@@ -152,34 +148,32 @@ static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
 
   /* set everything to NULL */
   for  (t =  E_STATE; t < PROTEIN_NUMOFSTATES; t++) {
-    for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++) {
+    for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++)
       core->score[t][n] = NULL;
-    }
-    core->path[t] = NULL;
   }
+  core->path = NULL;
 
   /* allocating space for core->score and core->path */
   for (t = E_STATE; t < PROTEIN_NUMOFSTATES; t++) {
     for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++) {
       core->score[t][n] = gt_malloc(sizeof (GthFlt) * (ref_dp_length + 1));
     }
+  }
 
-    if (jump_table)
-      core->path[t] = calloc(matrixsize, sizeof (GthPath));
-    else
-      core->path[t] = malloc(sizeof (GthPath) * matrixsize);
-
-    if (!core->path[t]) {
-      /* matrix allocation failed, return after free of allocated tables */
-      freeDPtablecore(core);
-      return GTH_ERROR_MATRIX_ALLOCATION_FAILED;
-    }
+  if (jump_table)
+    core->path = calloc(matrixsize, sizeof (GthPath));
+  else
+    core->path = malloc(sizeof (GthPath) * matrixsize);
+  if (!core->path) {
+    /* matrix allocation failed, return after free of allocated tables */
+    freeDPtablecore(core);
+    return GTH_ERROR_MATRIX_ALLOCATION_FAILED;
   }
 
   /* statistics */
   gth_stat_increment_numofbacktracematrixallocations(stat);
   gth_stat_increase_totalsizeofbacktracematricesinMB(stat,
-                     (sizeofpathtype * matrixsize * PROTEIN_NUMOFSTATES) >> 20);
+                                           (sizeofpathtype * matrixsize) >> 20);
 
   return 0;
 }

@@ -28,7 +28,7 @@
 
 #define PROTEIN_NUMOFSCORETABLES  4
 
-#define PATH(T,N,M)     dpm->core.path[T][(N) * dpm->core.columnlength + (M)]
+#define PATH(N,M)     dpm->core.path[(N) * dpm->core.columnlength + (M)]
 
 /* these definitions refer to the state index for the two N x M score matrices
 */
@@ -79,12 +79,30 @@ typedef enum {
 typedef struct {
   /* table to store the score of a path */
   GthFlt *score[PROTEIN_NUMOFSTATES][PROTEIN_NUMOFSCORETABLES];
-  GthPath *path[PROTEIN_NUMOFSTATES]; /* backtrace table of size
-                                          gen_dp_length * ref_dp_length */
+  GthPath *path; /* backtrace table of size gen_dp_length * ref_dp_length */
   unsigned long columnlength;          /* the length of a column of the DP
                                           matrix (equals ref_dp_length + 1)
                                           needed for access of pathD */
 } DPtablecore;
+
+/* structure of a path matrix byte:
+
+   87654321
+    |||+---E_STATE (bits 1 to 4)
+    |||
+    ||+----IA_STATE (bit 5)
+    ||
+    |+-----IB_STATE (bit 6)
+    |
+    +------IC_STATE (bit 7)
+
+    bit 8 is unused.
+*/
+
+#define E_STATE_MASK      0xf     /* |0000|1111| */
+#define IA_STATE_MASK     0x10    /* |0001|0000| */
+#define IB_STATE_MASK     0x20    /* |0010|0000| */
+#define IC_STATE_MASK     0x40    /* |0100|0000| */
 
 /* the following structure bundles all tables involved in the dynamic
    programming for proteins */
