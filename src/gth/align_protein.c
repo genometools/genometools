@@ -224,7 +224,7 @@ static int dp_tables_init(GthDPtables *dpm, unsigned long gen_dp_length,
                                     (ref_dp_length + 1));
     }
     else
-      dpm->exonstart[n]   = NULL;
+      dpm->exonstart[n] = NULL;
     dpm->splitcodon_B[n] = gt_malloc(sizeof (unsigned char) *
                                      (ref_dp_length + 1));
     dpm->splitcodon_C1[n] = gt_malloc(sizeof (unsigned char) *
@@ -1023,7 +1023,7 @@ static int find_optimal_path(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 }
 
 /* the following function frees the DP tables for proteins */
-static void dp_tables_free(GthDPtables *dpm, bool proteinexonpenal)
+static void dp_tables_free(GthDPtables *dpm)
 {
   unsigned long n;
 
@@ -1035,8 +1035,7 @@ static void dp_tables_free(GthDPtables *dpm, bool proteinexonpenal)
     gt_free(dpm->intronstart_A[n]);
     gt_free(dpm->intronstart_B[n]);
     gt_free(dpm->intronstart_C[n]);
-    if (proteinexonpenal)
-      gt_free(dpm->exonstart[n]);
+    gt_free(dpm->exonstart[n]);
     gt_free(dpm->splitcodon_B[n]);
     gt_free(dpm->splitcodon_C1[n]);
     gt_free(dpm->splitcodon_C2[n]);
@@ -1152,7 +1151,7 @@ int gth_align_protein(GthSA *sa,
                                 gen_alphabet, input.ref_seq_orig, outfp))) {
     if (rval == GTH_ERROR_CUTOUT_NOT_IN_INTRON) {
       gt_trans_table_delete(transtable);
-      dp_tables_free(&dpm, proteinexonpenal);
+      dp_tables_free(&dpm);
       gth_dp_param_delete(dp_param);
       gth_spliced_seq_delete(spliced_seq);
       gth_dp_scores_protein_delete(dp_scores_protein);
@@ -1183,7 +1182,7 @@ int gth_align_protein(GthSA *sa,
 
   /* free */
   gt_trans_table_delete(transtable);
-  dp_tables_free(&dpm, proteinexonpenal);
+  dp_tables_free(&dpm);
   gth_dp_param_delete(dp_param);
   gth_spliced_seq_delete(spliced_seq);
   gth_dp_scores_protein_delete(dp_scores_protein);
