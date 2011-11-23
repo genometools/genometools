@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -57,6 +57,67 @@ static void freeDPtablecore(DPtablecore *core)
       gt_free(core->score[t][n]);
     free(core->path[t]);
   }
+}
+
+static GthPath path_e_state_read(GthDPtables *dpm, unsigned int n,
+                                 unsigned int m)
+{
+  return PATH(E_STATE, n, m);
+}
+
+static void path_e_state_write(GthDPtables *dpm, unsigned int n, unsigned int m,
+                               GthPath e)
+{
+  gt_assert(e == E_N3M  ||
+            e == E_N2M  ||
+            e == E_N1M  ||
+            e == E_M    ||
+            e == E_N3   ||
+            e == E_N2   ||
+            e == E_N1   ||
+            e == IA_N3M ||
+            e == IB_N2M ||
+            e == IC_N1M);
+  PATH(E_STATE, n, m) = e;
+}
+
+static GthPath path_ia_state_read(GthDPtables *dpm, unsigned int n,
+                                  unsigned int m)
+{
+  return PATH(IA_STATE, n, m);
+}
+
+static void path_ia_state_write(GthDPtables *dpm, unsigned int n,
+                                unsigned int m, GthPath e)
+{
+  gt_assert(e == IA_N1 || e == E_N1);
+  PATH(IA_STATE, n, m) = e;
+}
+
+static GthPath path_ib_state_read(GthDPtables *dpm, unsigned int n,
+                                  unsigned int m)
+{
+  return PATH(IB_STATE, n, m);
+}
+
+static void path_ib_state_write(GthDPtables *dpm, unsigned int n,
+                                unsigned int m, GthPath e)
+{
+  gt_assert(e == IB_N1 || e == E_N2);
+  PATH(IB_STATE, n, m) = e;
+}
+
+static GthPath path_ic_state_read(GthDPtables *dpm, unsigned int n,
+                                  unsigned int m)
+{
+  return PATH(IC_STATE, n, m);
+}
+
+static void path_ic_state_write(GthDPtables *dpm, unsigned int n,
+                                unsigned int m, GthPath e)
+{
+  gt_assert(e == IC_N1 || e == E_N3);
+  PATH(IC_STATE, n, m) = e;
 }
 
 static int allocDPtablecore(DPtablecore *core, unsigned long gen_dp_length,
@@ -189,43 +250,37 @@ static void initDPtables(GthDPtables *dpm,
   unsigned long n, m;
 
   /* initialize the DP matrices */
-  for (n = 0; n <  PROTEIN_NUMOFSCORETABLES; n++)
-  {
+  for (n = 0; n <  PROTEIN_NUMOFSCORETABLES; n++) {
     SCORE(E_STATE,n,0)  = (GthFlt) 0.0;
-    PATH(E_STATE,n,0)   = (GthPath)        E_N1;
+    path_e_state_write(dpm, n, 0, E_N1);
     SCORE(IA_STATE,n,0) = (GthFlt) 0.0;
-    PATH(IA_STATE,n,0)  = (GthPath)        IA_N1;
+    path_ia_state_write(dpm, n, 0, IA_N1);
     SCORE(IB_STATE,n,0) = (GthFlt) 0.0;
-    PATH(IB_STATE,n,0)  = (GthPath)        IB_N1;
+    path_ib_state_write(dpm, n, 0, IB_N1);
     SCORE(IC_STATE,n,0) = (GthFlt) 0.0;
-    PATH(IC_STATE,n,0)  = (GthPath)        IC_N1;
+    path_ic_state_write(dpm, n, 0, IC_N1);
 
-    for (m = 1; m <= ref_dp_length; m++)
-    {
+    for (m = 1; m <= ref_dp_length; m++) {
       SCORE(E_STATE,n,m) = (GthFlt) 0.0;
-      PATH(E_STATE,n,m)  = (GthPath)        E_M;
+      path_e_state_write(dpm, n, m, E_M);
       /* disallow intron status for 5' non-matching cDNA letters: */
       SCORE(IA_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
-      PATH(IA_STATE,n,m)  = (GthPath)        IA_N1;
+      path_ia_state_write(dpm, n, m, IA_N1);
       SCORE(IB_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
-      PATH(IB_STATE,n,m)  = (GthPath)        IB_N1;
+      path_ib_state_write(dpm, n, m, IB_N1);
       SCORE(IC_STATE,n,m) = (GthFlt) GTH_MINUSINFINITY;
-      PATH(IC_STATE,n,m)  = (GthPath)        IC_N1;
+      path_ic_state_write(dpm, n, m, IC_N1);
     }
   }
 
-  for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++)
-  {
-    for (m = 0; m <= ref_dp_length; m++)
-    {
+  for (n = 0; n < PROTEIN_NUMOFSCORETABLES; n++) {
+    for (m = 0; m <= ref_dp_length; m++) {
       /* XXX: replace by memset, in gthsahmtd, too */
       dpm->intronstart_A[n][m] = 0;
       dpm->intronstart_B[n][m] = 0;
       dpm->intronstart_C[n][m] = 0;
       if (proteinexonpenal)
-      {
         dpm->exonstart[n][m]   = 0;
-      }
     }
 
     /* set the splitcodon tables to "UNSET" values.
@@ -239,10 +294,10 @@ static void initDPtables(GthDPtables *dpm,
                                          (ref_dp_length + 1));
   }
 
-  PATH(E_STATE,0,0) = (GthPath) E_N1M;
-  PATH(IA_STATE,0,0) = (GthPath) E_N1M;
-  PATH(IB_STATE,0,0) = (GthPath) E_N1M;
-  PATH(IC_STATE,0,0) = (GthPath) E_N1M;
+  path_e_state_write(dpm, 0, 0, E_N1M);
+  path_ia_state_write(dpm, 0, 0, E_N1);
+  path_ib_state_write(dpm, 0, 0, E_N2);
+  path_ic_state_write(dpm, 0, 0, E_N3);
 }
 
 unsigned char gthgetcodon(unsigned char genomicchar1,
@@ -289,10 +344,10 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
     modnminus2 = GT_MOD4(n-2),
     modnminus3 = GT_MOD4(n-3);
 
-    PATH(E_STATE, n, 0)  = (GthPath) E_N1;
-    PATH(IA_STATE, n, 0) = (GthPath) IA_N1;
-    PATH(IB_STATE, n, 0) = (GthPath) IB_N1;
-    PATH(IC_STATE, n, 0) = (GthPath) IC_N1;
+    path_e_state_write(dpm, n, 0, E_N1);
+    path_ia_state_write(dpm, n, 0, IA_N1);
+    path_ib_state_write(dpm, n, 0, IB_N1);
+    path_ic_state_write(dpm, n, 0, IC_N1);
 
     /* stepping along the protein sequence */
     for (m = REFERENCEDPSTART; m <= ref_dp_length; m++) {
@@ -422,7 +477,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
 
       /* save maximum values */
       SCORE(E_STATE, modn, m) = maxvalue;
-      PATH(E_STATE, n, m)     = retrace;
+      path_e_state_write(dpm, n, m, retrace);
 
       if (proteinexonpenal) {
         switch (retrace) {
@@ -476,7 +531,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
 
       /* save maximum values */
       SCORE(IA_STATE, modn, m) = maxvalue;
-      PATH(IA_STATE, n, m) = retrace;
+      path_ia_state_write(dpm, n, m, retrace);
 
       switch (retrace) {
         case IA_N1:
@@ -505,7 +560,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
 
       /* save maximum values */
       SCORE(IB_STATE, modn, m) = maxvalue;
-      PATH(IB_STATE, n, m) = retrace;
+      path_ib_state_write(dpm, n, m, retrace);
 
       switch (retrace) {
         case(IB_N1):
@@ -536,7 +591,7 @@ static void complete_path_matrix(GthDPtables *dpm, GthAlignInputProtein *input,
 
       /* save maximum values */
       SCORE(IC_STATE, modn, m) = maxvalue;
-      PATH(IC_STATE, n, m) = retrace;
+      path_ic_state_write(dpm, n, m, retrace);
 
       switch (retrace) {
         case(IC_N1):
@@ -652,7 +707,21 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
     skipdummyprocessing = true;
 
   while ((genptr > 0) || (refptr > 0)) {
-    pathtype = PATH(actualstate, genptr, refptr);
+    switch (actualstate) {
+      case E_STATE:
+        pathtype = path_e_state_read(dpm, genptr, refptr);
+        break;
+      case IA_STATE:
+        pathtype = path_ia_state_read(dpm, genptr, refptr);
+        break;
+      case IB_STATE:
+        pathtype = path_ib_state_read(dpm, genptr, refptr);
+        break;
+      case IC_STATE:
+        pathtype = path_ic_state_read(dpm, genptr, refptr);
+        break;
+      default: gt_assert(0);
+    }
 
     switch (dummystatus) {
       case DUMMY_STATUS_UNDEFINED:
