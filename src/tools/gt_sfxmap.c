@@ -476,8 +476,8 @@ static int gt_checkentiresuftab(const char *filename,
                                 unsigned long numberofsuffixes,
                                 bool wholeleafcheck,
                                 Sequentialsuffixarrayreader *ssar,
-                                bool specialsareequal,
-                                bool specialsareequalatdepth0,
+                                GT_UNUSED bool specialsareequal,
+                                GT_UNUSED bool specialsareequalatdepth0,
                                 unsigned long depth,
                                 GT_UNUSED GtError *err)
 {

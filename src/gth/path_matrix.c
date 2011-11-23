@@ -107,6 +107,7 @@ static char matrix_char(GthPath path)
       return 'I';
     default:
       gt_assert(0);
+      return 'X'; /* cannot happen */
   }
 }
 
@@ -124,6 +125,7 @@ static char direction_char(GthPath path)
       return '|';
     default:
       gt_assert(0);
+      return 'X'; /* cannot happen */
   }
 }
 
