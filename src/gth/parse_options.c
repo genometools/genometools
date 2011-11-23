@@ -187,6 +187,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
          *optshortintronpenalty = NULL,   /* short exon/intron parameters */
          *optbtmatrixgenrange = NULL,
          *optbtmatrixrefrange = NULL,
+         *optjtoverlap = NULL,
          *optjtdebug = NULL,
          *optwzerotransition = NULL,      /* special parameters for DP
                                              algorithm */
@@ -1001,6 +1002,15 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
                                               ->btmatrixrefrange, NULL);
     gt_option_is_development_option(optbtmatrixrefrange);
     gt_option_parser_add_option(op, optbtmatrixrefrange);
+  }
+
+  /* -jtoverlap */
+  if (!gthconsensus_parsing) {
+    optjtoverlap = gt_option_new_ulong("jtoverlap", "set jump table overlap",
+                                       &call_info->dp_options_core->jtoverlap,
+                                       5);
+    gt_option_is_development_option(optjtoverlap);
+    gt_option_parser_add_option(op, optjtoverlap);
   }
 
   /* -jtdebug */
