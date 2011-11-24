@@ -20,10 +20,9 @@
 #include "core/ma_api.h"
 #include "core/types_api.h"
 #include "core/undef_api.h"
-#include "extended/gt_sam_alignment_rep.h"
-#include "external/samtools-0.1.18/sam.h"
-
-#include "extended/gt_sam_alignment.h"
+#include "extended/sam_alignment_rep.h"
+#include "extended/sam_alignment.h"
+#include <sam.h>
 
 #define BAMBASEA 1
 #define BAMBASEC 2
@@ -33,7 +32,8 @@
 
 #define PHREDOFFSET 33
 
-GtSamAlignment *gt_sam_alignment_new(GtAlphabet *alphabet) {
+GtSamAlignment *gt_sam_alignment_new(GtAlphabet *alphabet)
+{
   GtSamAlignment *gt_s_alignment;
   gt_s_alignment = gt_malloc(sizeof (GtSamAlignment));
   gt_s_alignment->s_alignment = bam_init1();
@@ -44,7 +44,8 @@ GtSamAlignment *gt_sam_alignment_new(GtAlphabet *alphabet) {
   return gt_s_alignment;
 }
 
-void gt_sam_alignment_delete(GtSamAlignment *gt_s_alignment) {
+void gt_sam_alignment_delete(GtSamAlignment *gt_s_alignment)
+{
   bam_destroy1(gt_s_alignment->s_alignment);
   gt_alphabet_delete(gt_s_alignment->alphabet);
   if (gt_s_alignment->buffsize > 0) {
@@ -72,23 +73,28 @@ static GtUchar bambase2gtbase(uint8_t base, GtAlphabet *alphabet)
   return GT_UNDEF_UCHAR;
 }
 
-unsigned long gt_sam_alignment_pos(GtSamAlignment *gt_s_alignment) {
+unsigned long gt_sam_alignment_pos(GtSamAlignment *gt_s_alignment)
+{
   return (unsigned long) gt_s_alignment->s_alignment->core.pos;
 }
 
-unsigned long gt_sam_alignment_read_length(GtSamAlignment *gt_s_alignment) {
+unsigned long gt_sam_alignment_read_length(GtSamAlignment *gt_s_alignment)
+{
   return (unsigned long) gt_s_alignment->s_alignment->core.l_qseq;
 }
 
-const char *gt_sam_alignment_identifier(GtSamAlignment *gt_s_alignment) {
+const char *gt_sam_alignment_identifier(GtSamAlignment *gt_s_alignment)
+{
   return bam1_qname(gt_s_alignment->s_alignment);
 }
 
-int32_t gt_sam_alignment_ref_num(GtSamAlignment *gt_s_alignment) {
+int32_t gt_sam_alignment_ref_num(GtSamAlignment *gt_s_alignment)
+{
   return gt_s_alignment->s_alignment->core.tid;
 }
 
-const GtUchar *gt_sam_alignment_sequence(GtSamAlignment *gt_s_alignment) {
+const GtUchar *gt_sam_alignment_sequence(GtSamAlignment *gt_s_alignment)
+{
   unsigned long query_len, idx;
   uint8_t *bam_seq;
 
@@ -116,7 +122,8 @@ const GtUchar *gt_sam_alignment_sequence(GtSamAlignment *gt_s_alignment) {
   return gt_s_alignment->seq_buffer;
 }
 
-const GtUchar *gt_sam_alignment_qualitystring(GtSamAlignment *gt_s_alignment) {
+const GtUchar *gt_sam_alignment_qualitystring(GtSamAlignment *gt_s_alignment)
+{
   unsigned long query_len, idx;
   uint8_t *qual;
 
@@ -141,17 +148,20 @@ const GtUchar *gt_sam_alignment_qualitystring(GtSamAlignment *gt_s_alignment) {
   return gt_s_alignment->qual_buffer;
 }
 
-uint16_t gt_sam_alignment_cigar_length(GtSamAlignment *gt_s_alignment) {
+uint16_t gt_sam_alignment_cigar_length(GtSamAlignment *gt_s_alignment)
+{
   return gt_s_alignment->s_alignment->core.n_cigar;
 }
 
-uint32_t gt_sam_alignment_cigar_i_lengt(GtSamAlignment *gt_s_alignment,
-                                             uint16_t i) {
+uint32_t gt_sam_alignment_cigar_i_length(GtSamAlignment *gt_s_alignment,
+                                         uint16_t i)
+{
   return bam1_cigar(gt_s_alignment->s_alignment)[i]>>BAM_CIGAR_SHIFT;
 }
 
 unsigned char gt_sam_alignment_cigar_i_operation(GtSamAlignment *gt_s_alignment,
-                                                 uint16_t i) {
+                                                 uint16_t i)
+{
   switch ((unsigned char) bam1_cigar(gt_s_alignment->s_alignment)[i]
                           & BAM_CIGAR_MASK) {
     case BAM_CMATCH:
@@ -177,40 +187,96 @@ unsigned char gt_sam_alignment_cigar_i_operation(GtSamAlignment *gt_s_alignment,
   }
 }
 
-uint32_t gt_sam_alignment_flag(GtSamAlignment *gt_s_alignment) {
+uint32_t gt_sam_alignment_flag(GtSamAlignment *gt_s_alignment)
+{
   return gt_s_alignment->s_alignment->core.flag;
 }
-uint32_t gt_sam_alignment_is_paired(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FPAIRED;
+
+bool gt_sam_alignment_is_paired(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FPAIRED)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_is_proper_paired(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FPROPER_PAIR;
+
+bool gt_sam_alignment_is_proper_paired(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FPROPER_PAIR)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_is_unmapped(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FUNMAP;
+
+bool gt_sam_alignment_is_unmapped(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FUNMAP)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_mate_is_unmapped(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FMUNMAP;
+
+bool gt_sam_alignment_mate_is_unmapped(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FMUNMAP)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_is_reverse(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FREVERSE;
+
+bool gt_sam_alignment_is_reverse(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FREVERSE)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_mate_is_reverse(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FMREVERSE;
+
+bool gt_sam_alignment_mate_is_reverse(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FMREVERSE)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_is_read1(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FREAD1;
+
+bool gt_sam_alignment_is_read1(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FREAD1)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_is_read2(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FREAD2;
+
+bool gt_sam_alignment_is_read2(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FREAD2)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_is_secondary(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FSECONDARY;
+
+bool gt_sam_alignment_is_secondary(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FSECONDARY)
+    return true;
+  else
+    return false;
 }
-uint32_t gt_sam_alignment_has_qc_failure(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FQCFAIL;
+
+bool gt_sam_alignment_has_qc_failure(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FQCFAIL)
+    return true;
+  else
+    return false;
 }
-uint32_t
-gt_sam_alignment_is_optical_pcr_duplicate(GtSamAlignment *gt_s_alignment) {
-  return gt_s_alignment->s_alignment->core.flag & BAM_FDUP;
+
+bool
+gt_sam_alignment_is_optical_pcr_duplicate(GtSamAlignment *gt_s_alignment)
+{
+  if (gt_s_alignment->s_alignment->core.flag & BAM_FDUP)
+    return true;
+  else
+    return false;
 }

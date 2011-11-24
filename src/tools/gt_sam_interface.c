@@ -18,8 +18,8 @@
 #include "core/alphabet_api.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/gt_sam_alignment.h"
-#include "extended/gt_samfile_iterator.h"
+#include "extended/sam_alignment.h"
+#include "extended/samfile_iterator.h"
 #include "tools/gt_sam_interface.h"
 
 typedef struct {
@@ -100,7 +100,7 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
 {
   GtSamInterfaceArguments *arguments = tool_arguments;
   int had_err = 0, count_out = 0;
-  GtSamfileIter *sa_iter;
+  GtSamfileIterator *sa_iter;
   GtSamAlignment *sa_align;
   GtAlphabet *alpha = gt_alphabet_new_dna();
 
@@ -109,17 +109,17 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
 
   if (arguments->bool_is_sam) {
     if (gt_option_is_set(arguments->ref_idxfile))
-      sa_iter = gt_samfile_iter_new_sam(argv[parsed_args], alpha,
+      sa_iter = gt_samfile_iterator_new_sam(argv[parsed_args], alpha,
                                         gt_str_get(arguments->indexfilename));
     else
-      sa_iter  = gt_samfile_iter_new_sam(argv[parsed_args], alpha,
+      sa_iter  = gt_samfile_iterator_new_sam(argv[parsed_args], alpha,
                                         NULL);
 
   }
   else {
-    sa_iter = gt_samfile_iter_new_bam(argv[parsed_args], alpha);
+    sa_iter = gt_samfile_iterator_new_bam(argv[parsed_args], alpha);
   }
-  while (gt_samfile_iter_next(sa_iter, &sa_align) > 0 &&
+  while (gt_samfile_iterator_next(sa_iter, &sa_align) > 0 &&
          arguments->lines - count_out) {
     uint16_t cig_len, idx;
 
@@ -128,14 +128,14 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
     printf("%s\t%d\t%s\t",
            gt_sam_alignment_identifier(sa_align),
            gt_sam_alignment_flag(sa_align),
-           gt_samfile_iter_reference(sa_iter,
+           gt_samfile_iterator_reference(sa_iter,
                                      gt_sam_alignment_ref_num(sa_align)));
     if (gt_sam_alignment_is_unmapped(sa_align))
       printf("*");
     else {
       for (idx = 0; idx < cig_len; idx++) {
         printf("%d%c",
-               gt_sam_alignment_cigar_i_lengt(sa_align, idx),
+               gt_sam_alignment_cigar_i_length(sa_align, idx),
                gt_sam_alignment_cigar_i_operation(sa_align, idx));
       }
     }
@@ -147,7 +147,7 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
            gt_sam_alignment_qualitystring(sa_align));
     count_out++;
   }
-  gt_samfile_iter_delete(sa_iter);
+  gt_samfile_iterator_delete(sa_iter);
   gt_alphabet_delete(alpha);
   return had_err;
 }

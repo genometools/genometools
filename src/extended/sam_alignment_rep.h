@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_SAM_ALIGNMENT_REP_H
-#define GT_SAM_ALIGNMENT_REP_H
+#ifndef SAM_ALIGNMENT_REP_H
+#define SAM_ALIGNMENT_REP_H
 
+#include <sam.h>
 #include "core/alphabet_api.h"
-#include "external/samtools-0.1.18/sam.h"
 
 struct GtSamAlignment{
   bam1_t *s_alignment;
