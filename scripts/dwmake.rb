@@ -33,16 +33,22 @@ def parseargs(argv)
   options.ddd = false
   options.j = 3
   opts = OptionParser.new
-  opts.on("--m64","compile 64 bit binary") do |x|
+  opts.on("-m","--m64","compile 64 bit binary") do |x|
     options.m64 = true
   end
-  opts.on("--speed","optimize for speed") do |x|
+  opts.on("-s","--speed","optimize for speed") do |x|
+    if options.ddd
+      usage(opts,"-d and -s exclusive")
+    end
     options.speed = true
   end
-  opts.on("--prof","compile for profiling") do |x|
+  opts.on("-p","--prof","compile for profiling") do |x|
     options.prof = true
   end
-  opts.on("--ddd","compile for debugging (no opt)") do |x|
+  opts.on("-d","--ddd","compile for debugging (no opt)") do |x|
+    if options.speed
+      usage(opts,"-d and -s exclusive")
+    end
     options.ddd = true
   end
   opts.on("-j n", Integer, "number of processes for make") do |x|
