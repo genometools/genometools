@@ -102,6 +102,7 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->outlcptab = false;
   oi->outbwttab = false;
   oi->outbcktab = false;
+  oi->lcpdist = false;
   oi->option = NULL;
   oi->optiondir = NULL;
   oi->optionoutsuftab = NULL;
