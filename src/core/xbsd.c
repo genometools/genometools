@@ -14,11 +14,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <fcntl.h>
+#include <string.h>
 #include "core/xbsd.h"
 
-void xflock(int fd, int operation)
+static void gt_xflock_shared_with_op(int fd, short l_type)
 {
-  if (flock(fd, operation)) {
+  struct flock f;
+  memset(&f, 0, sizeof (f));
+  f.l_type = l_type;
+  if (fcntl(fd, F_SETLKW, &f)) {
     perror("cannot flock");
     exit(EXIT_FAILURE);
   }
@@ -26,15 +31,15 @@ void xflock(int fd, int operation)
 
 void gt_xflock_shared(int fd)
 {
-  return xflock(fd, LOCK_SH);
+  gt_xflock_shared_with_op(fd, F_RDLCK);
 }
 
 void gt_xflock_exclusive(int fd)
 {
-  return xflock(fd, LOCK_EX);
+  gt_xflock_shared_with_op(fd, F_WRLCK);
 }
 
 void gt_xflock_unlock(int fd)
 {
-  return xflock(fd, LOCK_UN);
+  gt_xflock_shared_with_op(fd, F_UNLCK);
 }

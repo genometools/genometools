@@ -16,6 +16,7 @@
 */
 
 #include <sys/mman.h>
+#include <fcntl.h>
 #include "core/dynalloc.h"
 #include "core/eansi.h"
 #include "core/ebzlib.h"
