@@ -18,7 +18,7 @@
 #include <string.h>
 #include "core/xbsd.h"
 
-static void gt_xflock_shared_with_op(int fd, short l_type)
+static void gt_xflock_with_op(int fd, short l_type)
 {
   struct flock f;
   memset(&f, 0, sizeof (f));
@@ -31,15 +31,15 @@ static void gt_xflock_shared_with_op(int fd, short l_type)
 
 void gt_xflock_shared(int fd)
 {
-  gt_xflock_shared_with_op(fd, F_RDLCK);
+  gt_xflock_with_op(fd, F_RDLCK);
 }
 
 void gt_xflock_exclusive(int fd)
 {
-  gt_xflock_shared_with_op(fd, F_WRLCK);
+  gt_xflock_with_op(fd, F_WRLCK);
 }
 
 void gt_xflock_unlock(int fd)
 {
-  gt_xflock_shared_with_op(fd, F_UNLCK);
+  gt_xflock_with_op(fd, F_UNLCK);
 }
