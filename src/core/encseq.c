@@ -6852,7 +6852,7 @@ static GtEncseq* gt_encseq_new_from_files(GtTimer *sfxprogress,
                                           GtError *err)
 {
   bool haserr = false;
-  unsigned int forcetable;
+  unsigned int forcetable = GT_UNDEF_UINT;
   GtSpecialcharinfo specialcharinfo = {0,0,0,0,0,0,0,0,0,0,0};
   GtAlphabet *alphabet = NULL;
   bool alphabetisbound = false;
