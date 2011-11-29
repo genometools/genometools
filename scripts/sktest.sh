@@ -18,6 +18,7 @@
 set -e -x
 
 USAGE="Usage: $0 [-memcheck]"
+program="./testsuite.rb -threads 2"
 
 if test $# -eq 0
 then
@@ -27,7 +28,7 @@ else
   then
     if test "$1" = "-memcheck"
     then
-      MC="-memcheck" 
+      program="${program} -memcheck" 
     else
       echo ${USAGE}
       exit 1
@@ -43,27 +44,27 @@ fi
 
 startdate="`date`"
 cd testsuite
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_encseq'
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_encseq'
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_suffixerator'
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_suffixerator'
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-       ${MC} -keywords 'gt_suffixerator and gttestdata' \
+env -i GT_MEM_BOOKKEEPING=on \
+       ${program} -keywords 'gt_suffixerator and gttestdata' \
        -gttestdata ${GTTESTDATA}
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_qsortbench'
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_qsortbench'
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb  ${MC} -keywords 'gt_extractseq' \
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_extractseq' \
        -gttestdata ${GTTESTDATA}
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_checkprjfiles' \
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_checkprjfiles' \
        -gttestdata ${GTTESTDATA}
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_trieins'
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_trieins'
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_mergeesa'
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_mergeesa'
 
-env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb ${MC} -keywords 'gt_packedindex' \
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_packedindex' \
        -gttestdata ${GTTESTDATA}
 
 cd ..
