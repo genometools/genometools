@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -100,6 +100,9 @@
 #define GTH_DEFAULT_DPMININTRONLENGTH    50
 #define GTH_DEFAULT_SHORTEXONPENALTY     100.0
 #define GTH_DEFAULT_SHORTINTRONPENALTY   100.0
+
+#define GTH_DEFAULT_JTOVERLAP            5
+#define GTH_DEFAULT_JTDEBUG              false
 
 #define GTH_DEFAULT_PROBIES              0.5
 #define GTH_DEFAULT_PROBDELGEN           0.03

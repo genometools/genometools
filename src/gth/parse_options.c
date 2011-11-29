@@ -1008,7 +1008,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   if (!gthconsensus_parsing) {
     optjtoverlap = gt_option_new_ulong("jtoverlap", "set jump table overlap",
                                        &call_info->dp_options_core->jtoverlap,
-                                       5);
+                                       GTH_DEFAULT_JTOVERLAP);
     gt_option_is_development_option(optjtoverlap);
     gt_option_parser_add_option(op, optjtoverlap);
   }
@@ -1018,7 +1018,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     optjtdebug = gt_option_new_bool("jtdebug", "enable debugging output for "
                                     "jump table stuff",
                                     &call_info->dp_options_core->jtdebug,
-                                    false);
+                                    GTH_DEFAULT_JTDEBUG);
     gt_option_is_development_option(optjtdebug);
     gt_option_parser_add_option(op, optjtdebug);
   }

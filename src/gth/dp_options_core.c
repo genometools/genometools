@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2009 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -16,6 +16,7 @@
 */
 
 #include "core/ma_api.h"
+#include "core/undef_api.h"
 #include "gth/default.h"
 #include "gth/dp_options_core.h"
 
@@ -28,6 +29,12 @@ GthDPOptionsCore* gth_dp_options_core_new(void)
   dp_options_core->dpminintronlength = GTH_DEFAULT_DPMININTRONLENGTH;
   dp_options_core->shortexonpenalty = GTH_DEFAULT_SHORTEXONPENALTY;
   dp_options_core->shortintronpenalty = GTH_DEFAULT_SHORTINTRONPENALTY;
+  dp_options_core->btmatrixgenrange.start = GT_UNDEF_ULONG;
+  dp_options_core->btmatrixgenrange.end = GT_UNDEF_ULONG;
+  dp_options_core->btmatrixrefrange.start = GT_UNDEF_ULONG;
+  dp_options_core->btmatrixrefrange.end = GT_UNDEF_ULONG;
+  dp_options_core->jtoverlap = GTH_DEFAULT_JTOVERLAP;
+  dp_options_core->jtdebug = GTH_DEFAULT_JTDEBUG;
   return dp_options_core;
 }
 
