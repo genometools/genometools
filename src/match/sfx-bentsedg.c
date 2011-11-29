@@ -95,7 +95,6 @@ typedef GtEndofTwobitencoding GtSfxcmp;
           {\
             TMPVAR.tbe = 0;\
             TMPVAR.unitsnotspecial = 0;\
-            TMPVAR.referpos = bsr-> fwd ? pos : 0;\
           }\
         }
 

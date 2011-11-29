@@ -5217,7 +5217,6 @@ static unsigned long fwdextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        unsigned long twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
-  ptbe->referpos = currentpos;
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
     if (currentpos < twobitencodingstoppos)
@@ -5366,7 +5365,6 @@ static unsigned long revextract2bitenc(GtEndofTwobitencoding *ptbe,
                                        unsigned long twobitencodingstoppos)
 {
   gt_assert(encseq != NULL && currentpos < encseq->totallength);
-  ptbe->referpos = currentpos;
   if (encseq->sat != GT_ACCESS_TYPE_BITACCESS)
   {
     if (currentpos >= twobitencodingstoppos)
@@ -5449,7 +5447,6 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
       /* handle special case where we start on the virtual separator */
       pos = currentpos + (fwd ? GT_UNITSIN2BITENC : -GT_UNITSIN2BITENC);
       ptbe->tbe = 0;
-      ptbe->referpos = currentpos;
       ptbe->unitsnotspecial = 0;
       return pos;
     }
@@ -5474,8 +5471,6 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
     /* complement */
     if (ptbe->unitsnotspecial > 0)
       ptbe->tbe ^= ~0;
-    /* mangle coordinates */
-    ptbe->referpos = GT_REVERSEPOS(encseq->logicaltotallength, currentpos);
     /* handle the fact that the position returned by (fwd|rev)extract2bitenc()
        cannot be negative */
     if (pos == 0 && currentpos < (unsigned long) GT_UNITSIN2BITENC) {
@@ -5705,20 +5700,6 @@ int gt_encseq_compare_pairof_different_twobitencodings(
          (complement,commonunits,tbe1,tbe2);
 }
 
-static int evalreferstartpos(const GtEndofTwobitencoding *ptbe1,
-                             const GtEndofTwobitencoding *ptbe2)
-{
-  if (ptbe1->referstartpos < ptbe2->referstartpos)
-  {
-    return -1;
-  }
-  if (ptbe1->referstartpos > ptbe2->referstartpos)
-  {
-    return 1;
-  }
-  return 0;
-}
-
 int gt_encseq_compare_pairof_twobitencodings(bool fwd,
                                              bool complement,
                                              GtCommonunits *commonunits,
@@ -5781,35 +5762,18 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
     {
-      int retval, retval2;
-
       gt_assert(commonunits != NULL);
       commonunits->common = ptbe1->unitsnotspecial;
       commonunits->leftspecial = commonunits->rightspecial = true;
-      if (ptbe1->referpos < ptbe2->referpos)
+      if (ptbe1->referstartpos < ptbe2->referstartpos)
       {
-        retval = fwd ? -1 : 1;
-      } else
-      {
-        if (ptbe1->referpos > ptbe2->referpos)
-        {
-          retval = fwd ? 1 : -1;
-        } else
-        {
-          retval = 0;
-        }
+        return -1;
       }
-      retval2 = evalreferstartpos(ptbe1,ptbe2);
-      if (retval2 != retval)
+      if (ptbe1->referstartpos > ptbe2->referstartpos)
       {
-        fprintf(stderr,"1: referpos=%lu, referstartpos=%lu\n",
-                      ptbe1->referpos,ptbe1->referstartpos);
-        fprintf(stderr,"2: referpos=%lu, referstartpos=%lu\n",
-                      ptbe2->referpos,ptbe2->referstartpos);
-        fprintf(stderr,"retval2 = %d != %d = retval\n",retval2,retval);
-        exit(EXIT_FAILURE);
+        return 1;
       }
-      return retval;
+      return 0;
     }
     return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
                                                               commonunits,
