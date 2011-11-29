@@ -5705,6 +5705,20 @@ int gt_encseq_compare_pairof_different_twobitencodings(
          (complement,commonunits,tbe1,tbe2);
 }
 
+static int evalreferstartpos(const GtEndofTwobitencoding *ptbe1,
+                             const GtEndofTwobitencoding *ptbe2)
+{
+  if (ptbe1->referstartpos < ptbe2->referstartpos)
+  {
+    return -1;
+  }
+  if (ptbe1->referstartpos > ptbe2->referstartpos)
+  {
+    return 1;
+  }
+  return 0;
+}
+
 int gt_encseq_compare_pairof_twobitencodings(bool fwd,
                                              bool complement,
                                              GtCommonunits *commonunits,
@@ -5767,21 +5781,35 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
     tbe2 = ptbe2->tbe & mask;
     if (tbe1 == tbe2)
     {
+      int retval, retval2;
+
       gt_assert(commonunits != NULL);
       commonunits->common = ptbe1->unitsnotspecial;
       commonunits->leftspecial = commonunits->rightspecial = true;
       if (ptbe1->referpos < ptbe2->referpos)
       {
-        return fwd ? -1 : 1;
-      }
-      if (ptbe1->referpos > ptbe2->referpos)
+        retval = fwd ? -1 : 1;
+      } else
       {
-        return fwd ? 1 : -1;
+        if (ptbe1->referpos > ptbe2->referpos)
+        {
+          retval = fwd ? 1 : -1;
+        } else
+        {
+          retval = 0;
+        }
       }
-      if (ptbe1->referpos == ptbe2->referpos)
+      retval2 = evalreferstartpos(ptbe1,ptbe2);
+      if (retval2 != retval)
       {
-        return 0;
+        fprintf(stderr,"1: referpos=%lu, referstartpos=%lu\n",
+                      ptbe1->referpos,ptbe1->referstartpos);
+        fprintf(stderr,"2: referpos=%lu, referstartpos=%lu\n",
+                      ptbe2->referpos,ptbe2->referstartpos);
+        fprintf(stderr,"retval2 = %d != %d = retval\n",retval2,retval);
+        exit(EXIT_FAILURE);
       }
+      return retval;
     }
     return gt_encseq_compare_pairof_different_twobitencodings(fwd,complement,
                                                               commonunits,
@@ -5917,6 +5945,8 @@ int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
   GtUchar tmp;
 
   countgt_encseq_compare_viatwobitencoding++;
+  ptbe1.referstartpos = vtk1->pos;
+  ptbe2.referstartpos = vtk2->pos;
   do
   {
     if (vtk1->pos < vtk1->endpos)
@@ -6539,6 +6569,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   {
     twobitencodingstoppos1 = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
+  ptbe1.referstartpos = esr1->currentpos;
   esr1->currentpos = gt_encseq_extract2bitenc(&ptbe1,encseq,fwd,
                                               esr1->currentpos,
                                               twobitencodingstoppos1);
@@ -6550,6 +6581,7 @@ static void multicharactercompare_withtest(const GtEncseq *encseq,
   {
     twobitencodingstoppos2 = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
+  ptbe2.referstartpos = esr2->currentpos;
   esr2->currentpos = gt_encseq_extract2bitenc(&ptbe2,encseq,fwd,
                                               esr2->currentpos,
                                               twobitencodingstoppos2);

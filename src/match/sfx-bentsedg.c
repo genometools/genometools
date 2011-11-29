@@ -82,6 +82,7 @@ typedef GtEndofTwobitencoding GtSfxcmp;
           unsigned long pos\
             = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX);\
           POSASSIGNMENT;\
+          TMPVAR.referstartpos = pos;\
           if (pos + depth < bsr->totallength)\
           {\
             pos += depth;\

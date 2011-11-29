@@ -174,8 +174,8 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
 
       tbe_a.tbe = srsw->tbereservoir_space[aq->tbeidx + idx];
       tbe_b.tbe = srsw->tbereservoir_space[bq->tbeidx + idx];
-      tbe_a.referpos = aq->suffixrepresentation;
-      tbe_b.referpos = bq->suffixrepresentation;
+      tbe_a.referstartpos = tbe_a.referpos = aq->suffixrepresentation;
+      tbe_b.referstartpos = tbe_b.referpos = bq->suffixrepresentation;
       tbe_a.unitsnotspecial
         = aq->unitsnotspecial >= maxprefix
            ? maxprefix

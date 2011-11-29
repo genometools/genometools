@@ -137,7 +137,7 @@ static int gt_encseq_bitextract_runner(GT_UNUSED int argc, const char **argv,
              "returnvalue      %lu\n",
              buffer,
              etbe.unitsnotspecial,
-             etbe.referpos,
+             arguments->bitpos,
              ret);
       gt_encseq_reader_delete(esr);
     }
