@@ -64,7 +64,7 @@ static bool nodes_are_equal_feature_trees(GtGenomeNode *first_node,
 static bool uniq(GtGenomeNode **first_node, GtGenomeNode **second_node)
 {
   bool first_score_is_defined, second_score_is_defined;
-  float first_score = 0.0, second_score;
+  float first_score = 0.0, second_score = 0.0;
   gt_assert(*first_node && *second_node);
   if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     if ((first_score_is_defined =
