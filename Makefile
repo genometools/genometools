@@ -39,7 +39,6 @@ EXP_CPPFLAGS:=$(CPPFLAGS)
 EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
-GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
@@ -254,10 +253,6 @@ ifeq ($(assert),no)
   EXP_CPPFLAGS += -DNDEBUG
 endif
 
-ifneq ($(errorcheck),no)
-  GT_CFLAGS += -Werror
-endif
-
 ifeq ($(cov),yes)
   export CCACHE_DISABLE # ccache cannot handle coverage objects
   GT_CFLAGS += -fprofile-arcs -ftest-coverage
@@ -429,6 +424,12 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
 
 ifeq ($(with-hmmer),yes)
   LIBGENOMETOOLS_OBJ += $(HMMER_OBJ) $(EASEL_OBJ)
+endif
+
+GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
+
+ifneq ($(errorcheck),no)
+  GT_CFLAGS += -Werror
 endif
 
 # set prefix for install target
