@@ -681,7 +681,7 @@ $(1): $(2)
 endef
 
 obj/$(SAMTOOLS_DIR)/%.o: $(SAMTOOLS_DIR)/%.c
-	@echo "[compile $@]"
+	@echo "[compile $(notdir $@)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
 	  $(EXP_CFLAGS) $(GT_CFLAGS_NO_WERROR)
