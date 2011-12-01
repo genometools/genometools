@@ -68,7 +68,7 @@ typedef struct  /* global information */
 static void initBUinfo_maxpairs(GtBUinfo_maxpairs *buinfo,
                                 GtBUstate_maxpairs *state)
 {
-  buinfo->nodeposlist = gt_malloc(sizeof(*buinfo->nodeposlist) *
+  buinfo->nodeposlist = gt_malloc(sizeof (*buinfo->nodeposlist) *
                                   state->alphabetsize);
 }
 
@@ -384,7 +384,7 @@ int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state->readmode = readmode;
 
   GT_INITARRAY(&state->uniquechar,GtUlong);
-  state->poslist = gt_malloc(sizeof(*state->poslist) * state->alphabetsize);
+  state->poslist = gt_malloc(sizeof (*state->poslist) * state->alphabetsize);
   for (base = 0; base < state->alphabetsize; base++)
   {
     ptr = &state->poslist[base];

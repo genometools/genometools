@@ -124,7 +124,7 @@ static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
   unsigned long idx;
   GtBUItvinfo_shulen *itvinfo;
 
-  itvinfo = gt_realloc(ptr,sizeof(*itvinfo) * allocated);
+  itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {

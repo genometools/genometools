@@ -46,9 +46,17 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
                                           transformfunc,
                                         const void *transformfunc_data);
 
-void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
-                                void **usedptrptr,
-                                bool writable);
+void gt_Sfxmappedrange_storetmp_ulong(GtSfxmappedrange *sfxmappedrange,
+                                      unsigned long **usedptrptr,
+                                      bool writable);
+
+void gt_Sfxmappedrange_storetmp_uint32(GtSfxmappedrange *sfxmappedrange,
+                                       uint32_t **usedptrptr,
+                                       bool writable);
+
+void gt_Sfxmappedrange_storetmp_bitsequence(GtSfxmappedrange *sfxmappedrange,
+                                            GtBitsequence **usedptrptr,
+                                            bool writable);
 
 void gt_Sfxmappedrange_usetmp(GtSfxmappedrange *sfxmappedrange,
                               const GtStr *tmpfilename,

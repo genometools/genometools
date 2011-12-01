@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
@@ -15,33 +16,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ESA_BOTTOMUP_H
-#define ESA_BOTTOMUP_H
+#ifndef ESA_SPMITVS_VISITOR_H
+#define ESA_SPMITVS_VISITOR_H
 
-#include "core/logger_api.h"
+#include "core/encseq_api.h"
 #include "core/error_api.h"
-#include "esa-seqread.h"
-#include "esa_visitor.h"
+#include "core/logger.h"
+#include "match/esa_visitor.h"
 
-typedef struct GtBUinfo GtBUinfo;
-typedef struct GtBUstate GtBUstate;
+typedef struct GtESASpmitvsVisitor GtESASpmitvsVisitor;
 
-typedef struct GtArrayGtBUItvinfo GtArrayGtBUItvinfo;
-
-int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
-                    GtESAVisitor *ev,
-                    GtError *err);
-
-GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void);
-
-void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
-                                  GtESAVisitor *ev);
-
-int gt_esa_bottomup_RAM(const unsigned long *suftab,
-                        const uint16_t *lcptab_bucket,
-                        unsigned long nonspecials,
-                        GtArrayGtBUItvinfo *stack,
-                        GtESAVisitor *ev,
-                        GtError *err);
+const GtESAVisitorClass* gt_esa_spmitvs_visitor_class(void);
+GtESAVisitor*            gt_esa_spmitvs_visitor_new(const GtEncseq *encseq,
+                                                    GtReadmode readmode,
+                                                    unsigned int prefixlength,
+                                                    GtError *err);
+void                     gt_esa_spmitvs_visitor_print_results(
+                                                     GtESASpmitvsVisitor*,
+                                                     unsigned long nonspecials);
 
 #endif

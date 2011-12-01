@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -19,6 +20,7 @@
 #include "core/ma.h"
 #include "esa-bottomup.h"
 #include "esa-seqread.h"
+#include "esa_visitor.h"
 
 #define TOP_ESA_BOTTOMUP\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -33,8 +35,7 @@
             = allocateBUstack(stack->spaceGtBUItvinfo,\
                               stack->allocatedGtBUItvinfo,\
                               stack->allocatedGtBUItvinfo+incrementstacksize,\
-                              allocateBUinfo,\
-                              bustate);\
+                              ev);\
           stack->allocatedGtBUItvinfo += incrementstacksize;\
         }\
         gt_assert(stack->spaceGtBUItvinfo != NULL);\
@@ -46,7 +47,7 @@
 typedef struct
 {
   unsigned long lcp, lb, rb;
-  GtBUinfo *info;
+  GtESAVisitorInfo *info;
 } GtBUItvinfo;
 
 struct GtArrayGtBUItvinfo
@@ -66,17 +67,13 @@ GtArrayGtBUItvinfo *gt_GtArrayGtBUItvinfo_new(void)
 }
 
 void gt_GtArrayGtBUItvinfo_delete(GtArrayGtBUItvinfo *stack,
-                                  void (*freeBUinfo)(GtBUinfo *,GtBUstate *),
-                                  GtBUstate *state)
+                                  GtESAVisitor *ev)
 {
   unsigned long idx;
 
   for (idx=0; idx<stack->allocatedGtBUItvinfo; idx++)
   {
-    if (freeBUinfo != NULL)
-    {
-      freeBUinfo(stack->spaceGtBUItvinfo[idx].info,state);
-    }
+    gt_esa_visitor_info_delete(stack->spaceGtBUItvinfo[idx].info, ev);
   }
   gt_free(stack->spaceGtBUItvinfo);
   gt_free(stack);
@@ -99,57 +96,25 @@ static void showstack(const GtBUItvinfo *stackspace,
 #endif
 
 static GtBUItvinfo *allocateBUstack(GtBUItvinfo *ptr,
-                                   unsigned long currentallocated,
-                                   unsigned long allocated,
-                                   GtBUinfo *(*allocateBUinfo)(GtBUstate *),
-                                   GtBUstate *state)
+                                    unsigned long currentallocated,
+                                    unsigned long allocated,
+                                    GtESAVisitor *ev)
 {
   unsigned long idx;
   GtBUItvinfo *itvinfo;
 
-  itvinfo = gt_realloc(ptr,sizeof(*itvinfo) * allocated);
+  itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {
-    if (allocateBUinfo == NULL)
-    {
-      itvinfo[idx].info = NULL;
-    } else
-    {
-      itvinfo[idx].info = allocateBUinfo(state);
-    }
+    itvinfo[idx].info = gt_esa_visitor_info_new(ev);
   }
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
 
 int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
-                    GtBUinfo *(*allocateBUinfo)(GtBUstate *),
-                    void(*freeBUinfo)(GtBUinfo *,GtBUstate *),
-                    int (*processleafedge)(bool,
-                                           unsigned long,
-                                           unsigned long,
-                                           GtBUinfo *,
-                                           unsigned long,
-                                           GtBUstate *,
-                                           GtError *err),
-                    int (*processbranchingedge)(bool firstsucc,
-                                                unsigned long,
-                                                unsigned long,
-                                                GtBUinfo *,
-                                                unsigned long,
-                                                unsigned long,
-                                                unsigned long,
-                                                GtBUinfo *,
-                                                GtBUstate *,
-                                                GtError *),
-                    int (*processlcpinterval)(unsigned long,
-                                              unsigned long,
-                                              unsigned long,
-                                              GtBUinfo *,
-                                              GtBUstate *,
-                                              GtError *err),
-                    GtBUstate *bustate,
+                    GtESAVisitor *ev,
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -179,11 +144,13 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
         firstedge = true;
         firstedgefromroot = false;
       }
-      if (processleafedge(firstedge,
-                          TOP_ESA_BOTTOMUP.lcp,
-                          TOP_ESA_BOTTOMUP.lb,
-                          TOP_ESA_BOTTOMUP.info,
-                          previoussuffix,bustate,err) != 0)
+      if (gt_esa_visitor_visit_leaf_edge(ev,
+                                         firstedge,
+                                         TOP_ESA_BOTTOMUP.lcp,
+                                         TOP_ESA_BOTTOMUP.lb,
+                                         TOP_ESA_BOTTOMUP.info,
+                                         previoussuffix,
+                                         err) != 0)
       {
         haserr = true;
         break;
@@ -194,13 +161,12 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
-      if (processlcpinterval != NULL &&
-          processlcpinterval(lastinterval->lcp,
-                             lastinterval->lb,
-                             lastinterval->rb,
-                             lastinterval->info,
-                             bustate,
-                             err) != 0)
+      if (gt_esa_visitor_visit_lcp_interval(ev,
+                                            lastinterval->lcp,
+                                            lastinterval->lb,
+                                            lastinterval->rb,
+                                            lastinterval->info,
+                                            err) != 0)
       {
         haserr = true;
         break;
@@ -215,17 +181,16 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge != NULL &&
-            processbranchingedge(firstedge,
-                                 TOP_ESA_BOTTOMUP.lcp,
-                                 TOP_ESA_BOTTOMUP.lb,
-                                 TOP_ESA_BOTTOMUP.info,
-                                 lastinterval->lcp,
-                                 lastinterval->lb,
-                                 lastinterval->rb,
-                                 lastinterval->info,
-                                 bustate,
-                                 err) != 0)
+        if (gt_esa_visitor_visit_branching_edge(ev,
+                                                firstedge,
+                                                TOP_ESA_BOTTOMUP.lcp,
+                                                TOP_ESA_BOTTOMUP.lb,
+                                                TOP_ESA_BOTTOMUP.info,
+                                                lastinterval->lcp,
+                                                lastinterval->lb,
+                                                lastinterval->rb,
+                                                lastinterval->info,
+                                                err) != 0)
         {
           haserr = true;
           break;
@@ -245,16 +210,16 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
-        if (processbranchingedge != NULL &&
-            processbranchingedge(true,
-                                 TOP_ESA_BOTTOMUP.lcp,
-                                 TOP_ESA_BOTTOMUP.lb,
-                                 TOP_ESA_BOTTOMUP.info,
-                                 lastintervallcp,
-                                 lastintervallb,
-                                 lastintervalrb,
-                                 NULL,
-                                 bustate,err) != 0)
+        if (gt_esa_visitor_visit_branching_edge(ev,
+                                                true,
+                                                TOP_ESA_BOTTOMUP.lcp,
+                                                TOP_ESA_BOTTOMUP.lb,
+                                                TOP_ESA_BOTTOMUP.info,
+                                                lastintervallcp,
+                                                lastintervallb,
+                                                lastintervalrb,
+                                                NULL,
+                                                err) != 0)
         {
           haserr = true;
           break;
@@ -263,11 +228,13 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
       } else
       {
         PUSH_ESA_BOTTOMUP(lcpvalue,idx);
-        if (processleafedge(true,
-                            TOP_ESA_BOTTOMUP.lcp,
-                            TOP_ESA_BOTTOMUP.lb,
-                            TOP_ESA_BOTTOMUP.info,
-                            previoussuffix,bustate,err) != 0)
+        if (gt_esa_visitor_visit_leaf_edge(ev,
+                                           true,
+                                           TOP_ESA_BOTTOMUP.lcp,
+                                           TOP_ESA_BOTTOMUP.lb,
+                                           TOP_ESA_BOTTOMUP.info,
+                                           previoussuffix,
+                                           err) != 0)
         {
           haserr = true;
           break;
@@ -278,28 +245,30 @@ int gt_esa_bottomup(Sequentialsuffixarrayreader *ssar,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
-    if (processleafedge(false,
-                        TOP_ESA_BOTTOMUP.lcp,
-                        TOP_ESA_BOTTOMUP.lb,
-                        TOP_ESA_BOTTOMUP.info,
-                        lastsuftabvalue,bustate,err) != 0)
+    if (gt_esa_visitor_visit_leaf_edge(ev,
+                                       false,
+                                       TOP_ESA_BOTTOMUP.lcp,
+                                       TOP_ESA_BOTTOMUP.lb,
+                                       TOP_ESA_BOTTOMUP.info,
+                                       lastsuftabvalue,
+                                       err) != 0)
     {
       haserr = true;
     } else
     {
       TOP_ESA_BOTTOMUP.rb = idx;
-      if (processlcpinterval(TOP_ESA_BOTTOMUP.lcp,
-                             TOP_ESA_BOTTOMUP.lb,
-                             TOP_ESA_BOTTOMUP.rb,
-                             TOP_ESA_BOTTOMUP.info,
-                             bustate,
-                             err) != 0)
+      if (gt_esa_visitor_visit_lcp_interval(ev,
+                                            TOP_ESA_BOTTOMUP.lcp,
+                                            TOP_ESA_BOTTOMUP.lb,
+                                            TOP_ESA_BOTTOMUP.rb,
+                                            TOP_ESA_BOTTOMUP.info,
+                                            err) != 0)
       {
         haserr = true;
       }
     }
   }
-  gt_GtArrayGtBUItvinfo_delete(stack,freeBUinfo,bustate);
+  gt_GtArrayGtBUItvinfo_delete(stack, ev);
   return haserr ? -1 : 0;
 }
 
@@ -307,31 +276,7 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
                         const uint16_t *lcptab_bucket,
                         unsigned long nonspecials,
                         GtArrayGtBUItvinfo *stack,
-                        GtBUinfo *(*allocateBUinfo)(GtBUstate *),
-                        int (*processleafedge)(bool,
-                                               unsigned long,
-                                               unsigned long,
-                                               GtBUinfo *,
-                                               unsigned long,
-                                               GtBUstate *,
-                                               GtError *err),
-                        int (*processbranchingedge)(bool firstsucc,
-                                                    unsigned long,
-                                                    unsigned long,
-                                                    GtBUinfo *,
-                                                    unsigned long,
-                                                    unsigned long,
-                                                    unsigned long,
-                                                    GtBUinfo *,
-                                                    GtBUstate *,
-                                                    GtError *),
-                        int (*processlcpinterval)(unsigned long,
-                                                  unsigned long,
-                                                  unsigned long,
-                                                  GtBUinfo *,
-                                                  GtBUstate *,
-                                                  GtError *err),
-                        GtBUstate *bustate,
+                        GtESAVisitor *ev,
                         GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -357,11 +302,13 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
         firstedge = true;
         firstedgefromroot = false;
       }
-      if (processleafedge(firstedge,
-                          TOP_ESA_BOTTOMUP.lcp,
-                          TOP_ESA_BOTTOMUP.lb,
-                          TOP_ESA_BOTTOMUP.info,
-                          previoussuffix,bustate,err) != 0)
+      if (gt_esa_visitor_visit_leaf_edge(ev,
+                                         firstedge,
+                                         TOP_ESA_BOTTOMUP.lcp,
+                                         TOP_ESA_BOTTOMUP.lb,
+                                         TOP_ESA_BOTTOMUP.info,
+                                         previoussuffix,
+                                         err) != 0)
       {
         haserr = true;
         break;
@@ -372,13 +319,12 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
     {
       lastinterval = POP_ESA_BOTTOMUP;
       lastinterval->rb = idx;
-      if (processlcpinterval != NULL &&
-          processlcpinterval(lastinterval->lcp,
-                             lastinterval->lb,
-                             lastinterval->rb,
-                             lastinterval->info,
-                             bustate,
-                             err) != 0)
+      if (gt_esa_visitor_visit_lcp_interval(ev,
+                                            lastinterval->lcp,
+                                            lastinterval->lb,
+                                            lastinterval->rb,
+                                            lastinterval->info,
+                                            err) != 0)
       {
         haserr = true;
         break;
@@ -393,17 +339,16 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
           firstedge = true;
           firstedgefromroot = false;
         }
-        if (processbranchingedge != NULL &&
-            processbranchingedge(firstedge,
-                                 TOP_ESA_BOTTOMUP.lcp,
-                                 TOP_ESA_BOTTOMUP.lb,
-                                 TOP_ESA_BOTTOMUP.info,
-                                 lastinterval->lcp,
-                                 lastinterval->lb,
-                                 lastinterval->rb,
-                                 lastinterval->info,
-                                 bustate,
-                                 err) != 0)
+        if (gt_esa_visitor_visit_branching_edge(ev,
+                                                firstedge,
+                                                TOP_ESA_BOTTOMUP.lcp,
+                                                TOP_ESA_BOTTOMUP.lb,
+                                                TOP_ESA_BOTTOMUP.info,
+                                                lastinterval->lcp,
+                                                lastinterval->lb,
+                                                lastinterval->rb,
+                                                lastinterval->info,
+                                                err) != 0)
         {
           haserr = true;
           break;
@@ -423,16 +368,16 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
                       lastintervallb = lastinterval->lb,
                       lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP(lcpvalue,lastintervallb);
-        if (processbranchingedge != NULL &&
-            processbranchingedge(true,
-                                 TOP_ESA_BOTTOMUP.lcp,
-                                 TOP_ESA_BOTTOMUP.lb,
-                                 TOP_ESA_BOTTOMUP.info,
-                                 lastintervallcp,
-                                 lastintervallb,
-                                 lastintervalrb,
-                                 NULL,
-                                 bustate,err) != 0)
+        if (gt_esa_visitor_visit_branching_edge(ev,
+                                                true,
+                                                TOP_ESA_BOTTOMUP.lcp,
+                                                TOP_ESA_BOTTOMUP.lb,
+                                                TOP_ESA_BOTTOMUP.info,
+                                                lastintervallcp,
+                                                lastintervallb,
+                                                lastintervalrb,
+                                                NULL,
+                                                err) != 0)
         {
           haserr = true;
           break;
@@ -441,11 +386,13 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
       } else
       {
         PUSH_ESA_BOTTOMUP(lcpvalue,idx);
-        if (processleafedge(true,
-                            TOP_ESA_BOTTOMUP.lcp,
-                            TOP_ESA_BOTTOMUP.lb,
-                            TOP_ESA_BOTTOMUP.info,
-                            previoussuffix,bustate,err) != 0)
+        if (gt_esa_visitor_visit_leaf_edge(ev,
+                                           true,
+                                           TOP_ESA_BOTTOMUP.lcp,
+                                           TOP_ESA_BOTTOMUP.lb,
+                                           TOP_ESA_BOTTOMUP.info,
+                                           previoussuffix,
+                                           err) != 0)
         {
           haserr = true;
           break;
@@ -457,22 +404,24 @@ int gt_esa_bottomup_RAM(const unsigned long *suftab,
   if (!haserr && TOP_ESA_BOTTOMUP.lcp > 0)
   {
     unsigned long lastsuftabvalue = suftab[nonspecials-1];
-    if (processleafedge(false,
-                        TOP_ESA_BOTTOMUP.lcp,
-                        TOP_ESA_BOTTOMUP.lb,
-                        TOP_ESA_BOTTOMUP.info,
-                        lastsuftabvalue,bustate,err) != 0)
+    if (gt_esa_visitor_visit_leaf_edge(ev,
+                                       false,
+                                       TOP_ESA_BOTTOMUP.lcp,
+                                       TOP_ESA_BOTTOMUP.lb,
+                                       TOP_ESA_BOTTOMUP.info,
+                                       lastsuftabvalue,
+                                       err) != 0)
     {
       haserr = true;
     } else
     {
       TOP_ESA_BOTTOMUP.rb = idx;
-      if (processlcpinterval(TOP_ESA_BOTTOMUP.lcp,
-                             TOP_ESA_BOTTOMUP.lb,
-                             TOP_ESA_BOTTOMUP.rb,
-                             TOP_ESA_BOTTOMUP.info,
-                             bustate,
-                             err) != 0)
+      if (gt_esa_visitor_visit_lcp_interval(ev,
+                                            TOP_ESA_BOTTOMUP.lcp,
+                                            TOP_ESA_BOTTOMUP.lb,
+                                            TOP_ESA_BOTTOMUP.rb,
+                                            TOP_ESA_BOTTOMUP.info,
+                                            err) != 0)
       {
         haserr = true;
       }

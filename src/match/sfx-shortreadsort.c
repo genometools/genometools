@@ -81,7 +81,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                                           : UINT32_MAX;
 #endif
 
-  srsw = gt_malloc(sizeof(*srsw));
+  srsw = gt_malloc(sizeof (*srsw));
   gt_assert(maxwidth <= maxshortreadsort);
   srsw->shortreadsorttable
     = gt_malloc(sizeof (*srsw->shortreadsorttable) * maxwidth);
@@ -100,7 +100,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
   srsw->sumofstoredvalues = 0;
-  srsw->tbereservoir_space = gt_malloc(sizeof(GtTwobitencoding) * maxwidth *
+  srsw->tbereservoir_space = gt_malloc(sizeof (GtTwobitencoding) * maxwidth *
                                        GT_NUMOFTBEVALUEFOR100);
   for (idx = 0, offset = 0; idx < maxwidth;
        idx++, offset += GT_NUMOFTBEVALUEFOR100)

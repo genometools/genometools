@@ -98,9 +98,9 @@ void gt_marksubstring_bits_null(GT_UNUSED const Gtmarksubstring *mark,bool null)
   }
 }
 
-void **gt_marksubstring_bits_address(Gtmarksubstring *mark)
+GtBitsequence** gt_marksubstring_bits_address(Gtmarksubstring *mark)
 {
-  return (void **) &mark->bits;
+  return &mark->bits;
 }
 
 void gt_marksubstring_bits_map(Gtmarksubstring *mark,GtBitsequence *bitsmap)

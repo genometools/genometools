@@ -1,0 +1,59 @@
+/*
+  Copyright (c) 2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#ifndef ESA_VISITOR_H
+#define ESA_VISITOR_H
+
+#include <stdbool.h>
+#include "core/error_api.h"
+
+typedef struct GtESAVisitor GtESAVisitor;
+typedef struct GtESAVisitorClass GtESAVisitorClass;
+typedef struct GtESAVisitorInfo GtESAVisitorInfo;
+
+void*             gt_esa_visitor_cast(const GtESAVisitorClass*, GtESAVisitor*);
+int               gt_esa_visitor_visit_leaf_edge(GtESAVisitor*,
+                                                 bool,
+                                                 unsigned long,
+                                                 unsigned long,
+                                                 GtESAVisitorInfo*,
+                                                 unsigned long,
+                                                 GtError*);
+int               gt_esa_visitor_visit_branching_edge(GtESAVisitor*,
+                                                      bool,
+                                                      unsigned long,
+                                                      unsigned long,
+                                                      GtESAVisitorInfo*,
+                                                      unsigned long,
+                                                      unsigned long,
+                                                      unsigned long,
+                                                      GtESAVisitorInfo*,
+                                                      GtError*);
+int               gt_esa_visitor_visit_lcp_interval(GtESAVisitor*,
+                                                    unsigned long,
+                                                    unsigned long,
+                                                    unsigned long,
+                                                    GtESAVisitorInfo*,
+                                                    GtError*);
+void              gt_esa_visitor_delete(GtESAVisitor *ev);
+
+GtESAVisitorInfo* gt_esa_visitor_info_new(GtESAVisitor*);
+void              gt_esa_visitor_info_delete(GtESAVisitorInfo*,
+                                             GtESAVisitor*);
+
+#endif

@@ -22,6 +22,7 @@
 #include "esa-lcpintervals.h"
 #include "esa-dfs.h"
 #include "esa-bottomup.h"
+#include "esa_lcpintervals_visitor.h"
 
 typedef struct  /* global information */
 {
@@ -186,34 +187,6 @@ static int showlcpinterval(GT_UNUSED void *data,const Lcpinterval *lcpinterval)
   return 0;
 }
 
-static int showleafedgeBU(bool firstsucc,
-                          unsigned long fd,
-                          unsigned long flb,
-                          GT_UNUSED GtBUinfo *info,
-                          unsigned long leafnumber,
-                          GT_UNUSED GtBUstate *bustate,
-                          GT_UNUSED GtError *err)
-
-{
-  printf("L %c %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,leafnumber);
-  return 0;
-}
-
-static int showbranchingedgeBU(bool firstsucc,
-                               unsigned long fd,
-                               unsigned long flb,
-                               GT_UNUSED GtBUinfo *finfo,
-                               unsigned long sd,
-                               unsigned long slb,
-                               GT_UNUSED unsigned long srb,
-                               GT_UNUSED GtBUinfo *sinfo,
-                               GT_UNUSED GtBUstate *bustate,
-                               GT_UNUSED GtError *err)
-{
-  printf("B %c %lu %lu %lu %lu\n",firstsucc ? '1' : '0',fd,flb,sd,slb);
-  return 0;
-}
-
 int gt_runenumlcpvalues(const char *inputindex,
                         bool outedges,
                         bool bottomup,
@@ -239,11 +212,12 @@ int gt_runenumlcpvalues(const char *inputindex,
   {
     if (bottomup)
     {
-      if (gt_esa_bottomup(ssar, NULL, NULL, showleafedgeBU, showbranchingedgeBU,
-                          NULL,NULL, err) != 0)
+      GtESAVisitor *elv = gt_esa_lcpitvs_visitor_new();
+      if (gt_esa_bottomup(ssar, elv, err) != 0)
       {
         haserr = true;
       }
+      gt_esa_visitor_delete(elv);
     } else
     {
       if (gt_enumlcpvalues(outedges, ssar, showlcpinterval, NULL,

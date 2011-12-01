@@ -268,7 +268,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   }
   bitmask = fct->sampledistance - 1;
   fct->numofsamples = 1UL + 1UL + fct->differentcodes/fct->sampledistance;
-  fct->leftborder_samples = gt_malloc(sizeof(*fct->leftborder_samples) *
+  fct->leftborder_samples = gt_malloc(sizeof (*fct->leftborder_samples) *
                                       fct->numofsamples);
   GT_FCI_ADDWORKSPACE(fcsl,"leftborder_samples",
                       sizeof (*fct->leftborder_samples) * fct->numofsamples);
@@ -501,14 +501,14 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->hashmap_getcount = 0;
 }
 
-void **gt_firstcodes_leftborder_address(GtFirstcodestab *fct)
+uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct)
 {
-  return (void **) &fct->leftborder;
+  return &fct->leftborder;
 }
 
-void **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
+unsigned long **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
 {
-  return (void **) &fct->overflow_leftborder;
+  return &fct->overflow_leftborder;
 }
 
 void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr)

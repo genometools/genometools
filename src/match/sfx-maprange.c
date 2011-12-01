@@ -151,15 +151,21 @@ GtSfxmappedrange *gt_Sfxmappedrange_new(const char *tablename,
   return sfxmappedrange;
 }
 
-void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
-                                void **usedptrptr,
-                                bool writable)
+typedef union {
+  GtBitsequence **bs;
+  unsigned long **ulong;
+  uint32_t **uint32;
+} GtSfxStoretype;
+
+static void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
+                                       GtSfxStoretype usedptrptr,
+                                       GtSfxmappedrangetype type,
+                                       bool writable)
 {
   FILE *outfp;
 
   gt_assert(sfxmappedrange != NULL);
   sfxmappedrange->ptr = NULL;
-  sfxmappedrange->usedptrptr = usedptrptr;
   sfxmappedrange->filename = gt_str_new();
   sfxmappedrange->writable = writable;
   outfp = gt_xtmpfp(sfxmappedrange->filename);
@@ -169,11 +175,63 @@ void gt_Sfxmappedrange_storetmp(GtSfxmappedrange *sfxmappedrange,
              gt_str_get(sfxmappedrange->filename),
              (unsigned long) sfxmappedrange->numofunits,
              (unsigned long) sfxmappedrange->sizeofunit);
-  gt_xfwrite(*sfxmappedrange->usedptrptr,sfxmappedrange->sizeofunit,
-             sfxmappedrange->numofunits,outfp);
-  gt_fa_fclose(outfp);
-  gt_free(*sfxmappedrange->usedptrptr);
-  *sfxmappedrange->usedptrptr = NULL;
+  switch (type) {
+    case GtSfxGtBitsequence:
+      gt_xfwrite(*(usedptrptr.bs),sfxmappedrange->sizeofunit,
+                 sfxmappedrange->numofunits,outfp);
+      sfxmappedrange->usedptrptr = (void**) usedptrptr.bs;
+      gt_free(*(usedptrptr.bs));
+      *(usedptrptr.bs) = NULL;
+      break;
+    case GtSfxunsignedlong:
+      gt_xfwrite(*(usedptrptr.ulong),sfxmappedrange->sizeofunit,
+                 sfxmappedrange->numofunits,outfp);
+      sfxmappedrange->usedptrptr = (void**) usedptrptr.ulong;
+      gt_free(*(usedptrptr.ulong));
+      *(usedptrptr.ulong) = NULL;
+      break;
+    case GtSfxuint32_t:
+      gt_xfwrite(*(usedptrptr.uint32),sfxmappedrange->sizeofunit,
+                 sfxmappedrange->numofunits,outfp);
+      sfxmappedrange->usedptrptr = (void**) usedptrptr.uint32;
+      gt_free(*(usedptrptr.uint32));
+      *(usedptrptr.uint32) = NULL;
+      break;
+   }
+   gt_fa_fclose(outfp);
+}
+
+void gt_Sfxmappedrange_storetmp_ulong(GtSfxmappedrange *sfxmappedrange,
+                                      unsigned long **usedptrptr,
+                                      bool writable)
+{
+  GtSfxStoretype st;
+  gt_assert(usedptrptr != NULL);
+
+  st.ulong = usedptrptr;
+  gt_Sfxmappedrange_storetmp(sfxmappedrange, st, GtSfxunsignedlong, writable);
+}
+
+void gt_Sfxmappedrange_storetmp_uint32(GtSfxmappedrange *sfxmappedrange,
+                                       uint32_t **usedptrptr,
+                                       bool writable)
+{
+  GtSfxStoretype st;
+  gt_assert(usedptrptr != NULL);
+
+  st.uint32 = usedptrptr;
+  gt_Sfxmappedrange_storetmp(sfxmappedrange, st, GtSfxuint32_t, writable);
+}
+
+void gt_Sfxmappedrange_storetmp_bitsequence(GtSfxmappedrange *sfxmappedrange,
+                                            GtBitsequence **usedptrptr,
+                                            bool writable)
+{
+  GtSfxStoretype st;
+  gt_assert(usedptrptr != NULL);
+
+  st.bs = usedptrptr;
+  gt_Sfxmappedrange_storetmp(sfxmappedrange, st, GtSfxGtBitsequence, writable);
 }
 
 void gt_Sfxmappedrange_usetmp(GtSfxmappedrange *sfxmappedrange,

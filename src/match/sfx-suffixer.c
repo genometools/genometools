@@ -1758,9 +1758,9 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     {
       gt_assert(sfi->markprefixbuckets != NULL);
       gt_assert(sfi->mappedmarkprefixbuckets != NULL);
-      gt_Sfxmappedrange_storetmp(sfi->mappedmarkprefixbuckets,
-                                 (void **) &sfi->markprefixbuckets,
-                                 false);
+      gt_Sfxmappedrange_storetmp_bitsequence(sfi->mappedmarkprefixbuckets,
+                                             &sfi->markprefixbuckets,
+                                             false);
       gt_assert(sfi->markprefixbuckets == NULL);
     } else
     {

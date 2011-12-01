@@ -94,7 +94,7 @@ int gt_genomediff_shu(GtLogger *logger,
   Sequentialsuffixarrayreader *ssar = NULL;
   struct GtShuUnitFileInfo_tag *unit_info;
 
-  unit_info = gt_malloc(sizeof(*unit_info));
+  unit_info = gt_malloc(sizeof (*unit_info));
   unit_info->map_files = NULL;
   unit_info->genome_names = NULL;
   unit_info->num_of_genomes = 0;

@@ -157,19 +157,26 @@ static void gt_bcktab_transform_minmax_code(unsigned long *mincode,
 
 void gt_bcktab_storetmp(GtBcktab *bcktab)
 {
-
-  gt_Sfxmappedrange_storetmp(bcktab->mappedleftborder,
-                             bcktab->useulong
-                               ? (void **) &bcktab->leftborder.ulongbounds
-                               : (void **) &bcktab->leftborder.uintbounds,
-                             true);
-  if (bcktab->withspecialsuffixes)
-  {
-    gt_Sfxmappedrange_storetmp(bcktab->mappedcountspecialcodes,
-                               bcktab->useulong
-                                 ? (void **) &bcktab->ulongcountspecialcodes
-                                 : (void **) &bcktab->uintcountspecialcodes,
-                               true);
+  if (bcktab->useulong) {
+    gt_Sfxmappedrange_storetmp_ulong(bcktab->mappedleftborder,
+                                     &bcktab->leftborder.ulongbounds,
+                                     true);
+    if (bcktab->withspecialsuffixes)
+    {
+      gt_Sfxmappedrange_storetmp_ulong(bcktab->mappedcountspecialcodes,
+                                       &bcktab->ulongcountspecialcodes,
+                                       true);
+    }
+  } else {
+    gt_Sfxmappedrange_storetmp_uint32(bcktab->mappedleftborder,
+                                      &bcktab->leftborder.uintbounds,
+                                      true);
+    if (bcktab->withspecialsuffixes)
+    {
+      gt_Sfxmappedrange_storetmp_uint32(bcktab->mappedcountspecialcodes,
+                                        &bcktab->uintcountspecialcodes,
+                                        true);
+    }
   }
 }
 

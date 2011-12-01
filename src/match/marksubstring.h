@@ -55,7 +55,7 @@ size_t gt_marksubstring_size(const Gtmarksubstring *mark);
 
 void gt_marksubstring_bits_null(const Gtmarksubstring *mark,bool null);
 
-void **gt_marksubstring_bits_address(Gtmarksubstring *mark);
+GtBitsequence** gt_marksubstring_bits_address(Gtmarksubstring *mark);
 
 void gt_marksubstring_bits_map(Gtmarksubstring *mark,
                                GtBitsequence *bitsmap);

@@ -141,9 +141,9 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 
-void **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);
+uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);
 
-void **gt_firstcodes_overflow_address(GtFirstcodestab *fct);
+unsigned long **gt_firstcodes_overflow_address(GtFirstcodestab *fct);
 
 void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
