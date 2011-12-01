@@ -31,7 +31,7 @@ typedef struct {
 
 static void* gt_sam_interface_arguments_new(void)
 {
-  GtSamInterfaceArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtSamInterfaceArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->indexfilename = gt_str_new();
   return arguments;
 }
@@ -75,7 +75,7 @@ static GtOptionParser* gt_sam_interface_option_parser_new(void *tool_arguments)
                              &arguments->lines, -1);
   gt_option_parser_add_option(op, option);
 
-  gt_option_parser_set_min_max_args(op, 1, 1);
+  gt_option_parser_set_min_max_args(op, 1U, 1U);
   return op;
 }
 
@@ -127,7 +127,7 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
 
     printf("%s\t%d\t%s\t",
            gt_sam_alignment_identifier(sa_align),
-           gt_sam_alignment_flag(sa_align),
+           (int) gt_sam_alignment_flag(sa_align),
            gt_samfile_iterator_reference(sa_iter,
                                      gt_sam_alignment_ref_num(sa_align)));
     if (gt_sam_alignment_is_unmapped(sa_align))
@@ -135,7 +135,7 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
     else {
       for (idx = 0; idx < cig_len; idx++) {
         printf("%d%c",
-               gt_sam_alignment_cigar_i_length(sa_align, idx),
+               (int) gt_sam_alignment_cigar_i_length(sa_align, idx),
                gt_sam_alignment_cigar_i_operation(sa_align, idx));
       }
     }
@@ -144,7 +144,7 @@ static int gt_sam_interface_runner(GT_UNUSED int argc,
         gt_sam_alignment_sequence(sa_align),
         gt_sam_alignment_read_length(sa_align));
     printf("\t%s\n",
-           gt_sam_alignment_qualitystring(sa_align));
+           (char *) gt_sam_alignment_qualitystring(sa_align));
     count_out++;
   }
   gt_samfile_iterator_delete(sa_iter);
