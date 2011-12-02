@@ -229,6 +229,17 @@ static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
       return -1;
     if (gth_sa_call_number(saA) > gth_sa_call_number(saB))
       return 1;
+
+    if (gth_sa_ref_file_num(saA) < gth_sa_ref_file_num(saB))
+      return -1;
+    if (gth_sa_ref_file_num(saA) > gth_sa_ref_file_num(saB))
+      return 1;
+
+    if (gth_sa_ref_seq_num(saA) < gth_sa_ref_seq_num(saB))
+      return -1;
+    if (gth_sa_ref_seq_num(saA) > gth_sa_ref_seq_num(saB))
+      return 1;
+
     gt_assert(0);
   }
 
