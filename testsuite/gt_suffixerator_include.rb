@@ -562,3 +562,20 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
   end
 end
 
+Name "gt sfxmap spmitv"
+Keywords "gt_suffixerator spmitv"
+Test do
+  run "#{$bin}/gt suffixerator -db #{$testdata}/Reads2.fna -suf -lcp"
+  run "#{$bin}/gt dev sfxmap -spmitv -esa Reads2.fna"
+  run "diff #{last_stdout} #{$testdata}/Reads2-spmitv.txt"
+end
+
+Name "gt sfxmap lcp-interval trees bottomup"
+Keywords "gt_suffixerator lcpitv"
+Test do
+  run "#{$bin}/gt suffixerator -db #{$testdata}/Reads2.fna -suf -lcp " + \
+      "-indexname sfx"
+  run "#{$bin}/gt dev sfxmap -enumlcpitvtreeBU -esa sfx > withBU.txt"
+  run "#{$bin}/gt dev sfxmap -enumlcpitvtree -esa sfx > noBU.txt"
+  run "diff withBU.txt noBU.txt"
+end
