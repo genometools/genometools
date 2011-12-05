@@ -307,6 +307,10 @@ ifneq ($(curses),no)
   GTLIBS := lib/libtecla.a
 endif
 
+ifdef testthreads
+  STEST_FLAGS += -threads $(testthreads)
+endif
+
 ifdef gttestdata
   STEST_FLAGS += -gttestdata $(gttestdata)
 endif
