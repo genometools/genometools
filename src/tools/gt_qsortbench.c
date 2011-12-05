@@ -66,12 +66,12 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
   gt_assert(arguments);
 
   /* init */
-  op = gt_option_parser_new("[option ...]", /* XXX */
-                            "Benchmarks quicksort implementations."); /* XXX */
+  op = gt_option_parser_new("[option ...]",
+                            "Benchmarks quicksort implementations.");
 
   option = gt_option_new_choice("impl", "implementation\nchoose from "
-                                "thomas|system|inlinedptr|inlinedarr|direct|"
-                                "radixlinsmall|radixlinlarge|radixrec|"
+                                "thomas|system|inlinedptr|inlinedarr|direct|\n"
+                                "radixlinsmall|radixlinlarge|radixrec|\n"
                                 "radixdiv|radixlinsmall2|radixlinslarge2",
                                 arguments->impl,
                                 gt_qsort_implementation_names[0],
