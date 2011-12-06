@@ -48,9 +48,9 @@ struct GtShortreadsortworkinfo
                                     firstcodes; otherwise: NULL iff
                                     lcpvalues are not required. */
   uint16_t *firstcodeslcpvalues;
-  unsigned long tmplcplen, sumofstoredvalues;
-  bool fwd, complement;
   GtTwobitencoding *tbereservoir_space;
+  unsigned long tbereservoir_allocated, tmplcplen, sumofstoredvalues;
+  bool fwd, complement;
 };
 
 size_t gt_shortreadsort_size(bool firstcodes,unsigned long maxwidth)
@@ -100,19 +100,29 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->tableoflcpvalues = NULL;
   srsw->sumofstoredvalues = 0;
-  srsw->tbereservoir_space = gt_malloc(sizeof (GtTwobitencoding) * maxwidth *
-                                       GT_NUMOFTBEVALUEFOR100);
-  for (idx = 0, offset = 0; idx < maxwidth;
-       idx++, offset += GT_NUMOFTBEVALUEFOR100)
+  srsw->tbereservoir_allocated = maxwidth * GT_NUMOFTBEVALUEFOR100;
+  srsw->tbereservoir_space = gt_malloc(sizeof (GtTwobitencoding) *
+                                       srsw->tbereservoir_allocated);
+  if (firstcodes)
   {
-    srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
-    srsw->shortreadsorttable[idx].tbeidx = offset;
+    for (idx = 0; idx < maxwidth; idx++)
+    {
+      srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
+    }
+  } else
+  {
+    for (idx = 0, offset = 0; idx < maxwidth;
+         idx++, offset += GT_NUMOFTBEVALUEFOR100)
+    {
+      srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
+      srsw->shortreadsorttable[idx].tbeidx = offset;
+    }
   }
   return srsw;
 }
 
-unsigned long gt_shortreadsort_sumofstoredvalues(
-                                      const GtShortreadsortworkinfo *srsw)
+unsigned long gt_shortreadsort_sumofstoredvalues(const GtShortreadsortworkinfo
+                                                       *srsw)
 {
   return srsw->sumofstoredvalues;
 }
@@ -148,9 +158,10 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
   GtCommonunits commonunits;
 
   for (idx=0, maxprefix = (unsigned int) GT_UNITSIN2BITENC;
-       idx<GT_NUMOFTBEVALUEFOR100;
+       /* Nothing */;
        idx++, maxprefix+=(unsigned int) GT_UNITSIN2BITENC)
   {
+    gt_assert(idx<GT_NUMOFTBEVALUEFOR100);
     if (aq->unitsnotspecial >= maxprefix &&
         bq->unitsnotspecial >= maxprefix)
     {
@@ -602,7 +613,7 @@ void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
                                       unsigned long width,
                                       unsigned long depth)
 {
-  unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
+  unsigned long idx, pos, seqnum, relpos, seqnum_relpos, nextfree = 0;
 
   for (idx = 0; idx < width; idx++)
   {
@@ -626,15 +637,16 @@ void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
       relpos = gt_seqnumrelpos_decode_relpos(snrp,seqnum_relpos);
       srsw->shortreadsorttable[idx].suffixrepresentation = seqnum_relpos;
     }
+    gt_assert(nextfree < srsw->tbereservoir_allocated);
+    srsw->shortreadsorttable[idx].tbeidx = (uint32_t) nextfree;
     srsw->shortreadsorttable[idx].unitsnotspecial
       = gt_encseq_relpos_extract2bitencvector(
-                         srsw->tbereservoir_space +
-                         srsw->shortreadsorttable[idx].tbeidx,
+                         srsw->tbereservoir_space + nextfree,
                          &storedvalues,
-                         (unsigned int) GT_NUMOFTBEVALUEFOR100,
                          encseq,
                          seqnum,
                          relpos + depth);
+    nextfree += (unsigned long) storedvalues;
     srsw->sumofstoredvalues += (unsigned long) storedvalues;
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,

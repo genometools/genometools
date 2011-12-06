@@ -241,14 +241,12 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
 
 /* The following function extracts the twobitencoding for the
    sequence with sequence number <seqnum> beginning at the relative
-   position <relpos>.  The result is stored in
-   <tbevector> which points to an array of size <sizeofvector>. The
-   number of elements stored is stored at the address
-   <storedvalues> points to. */
+   position <relpos>.  The result is stored in <tbevector> which
+   points to an array of appropriate size. The number of elements
+   is stored at the address <storedvalues> points to. */
 
 unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
                                           unsigned int *storedvalues,
-                                          GT_UNUSED unsigned int sizeofvector,
                                           const GtEncseq *encseq,
                                           unsigned long seqnum,
                                           unsigned long relpos);

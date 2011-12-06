@@ -5581,7 +5581,6 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
 
 unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
                                           unsigned int *storedvalues,
-                                          GT_UNUSED unsigned int sizeofvector,
                                           const GtEncseq *encseq,
                                           unsigned long seqnum,
                                           unsigned long relpos)
@@ -5608,7 +5607,6 @@ unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
     }
     (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, true, pos,
                                     twobitencodingstoppos);
-    gt_assert(idx < sizeofvector);
     tbevector[idx] = etbecurrent.tbe;
     if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
     {
