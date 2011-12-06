@@ -778,12 +778,12 @@ static int comparelcpvalue(void *info,unsigned long lcp,GtError *err)
   Sequentialsuffixarrayreader *ssar = (Sequentialsuffixarrayreader *) info;
   bool haserr = false;
 
-  do /* fake lookp to allow for the use of a break statement */
+  do /* fake loop to allow for the use of a break statement */
   {
     NEXTSEQUENTIALLCPTABVALUE(currentlcpvalue,ssar);
     if (lcp != currentlcpvalue)
     {
-      gt_error_set(err,"lcp=%lu != %lu=currentlcpvalue\n",lcp,currentlcpvalue);
+      gt_error_set(err,"lcp=%lu != %lu=currentlcpvalue",lcp,currentlcpvalue);
       haserr = true;
       break;
     }
@@ -886,9 +886,13 @@ static int sfxmap_pck(const Sfxmapoptions *arguments,GtLogger *logger,
   {
     if (arguments->cmplcp && ssar != NULL)
     {
-      gt_logger_log(logger, "perform dfs traversal");
-      if (gt_fmindex_dfstraverse(fmindex,numofchars,totallength,comparelcpvalue,
-                                  (void *) ssar,err) != 0)
+      gt_logger_log(logger,"perform dfs traversal");
+      if (gt_fmindex_dfstraverse(fmindex,
+                                 numofchars,
+                                 totallength,
+                                 comparelcpvalue,
+                                 (void *) ssar,
+                                 err) != 0)
       {
         haserr = true;
       }
