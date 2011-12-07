@@ -14,12 +14,12 @@ def outoptions
   return outoptionsnobck + " -bck"
 end
 
-def checksfx(parts,withsmap,cmp,filelist,alldirs=true)
+def checksfx(parts,extra,cmp,filelist,alldirs=true)
   filearg=flattenfilelist(filelist)
   if alldirs
     dirlist=["fwd","rev","cpl","rcl"]
   else
-    dirlist=["fwd ","rev"]
+    dirlist=["fwd","rev"]
   end
   dirlist.each do |dirarg|
     extra=""
@@ -282,10 +282,8 @@ Test do
   checkbwt(all_fastafiles)
 end
 
-# Stefan: have a look at why these fail now.
-=begin
 1.upto(3) do |parts|
-  [0,2].each do |withsmap|
+  [0,1,2].each do |withsmap|
     extra=""
     extraname=""
     if withsmap == 1
@@ -302,11 +300,10 @@ end
     end
   end
 end
-=end
 
 0.upto(2) do |cmpval|
   1.upto(2) do |parts|
-    [0,2].each do |withsmap|
+    [0,1,2].each do |withsmap|
       extra=""
       if withsmap == 1
         extra="-dna"
@@ -505,7 +502,8 @@ if !`#{$bin}/gt suffixerator -help`.match(/memlimit/).nil? then
       Test do
         size = nil
         run "#{$bin}/gt encseq encode -indexname dmel " + \
-            "#{$gttestdata}ltrharvest/d_mel/#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
+            "#{$gttestdata}ltrharvest/d_mel/" + \
+            "#{chr}_genomic_dmel_RELEASE3-1.FASTA.gz", \
             :maxtime => 600
         out = `env GT_MEM_BOOKKEEPING=on GT_ENV_OPTIONS=-spacepeak #{$bin}/gt suffixerator -v -suf -ii dmel`
         if m = out.match(/space peak in megabytes: ([.0-9]+) /) then
