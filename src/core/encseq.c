@@ -5518,12 +5518,12 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
   return ret;
 }
 
-unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
-                                            int sizeofvector,
-                                            const GtEncseq *encseq,
-                                            GtEncseqReader *esr,
-                                            GtReadmode readmode,
-                                            unsigned long pos)
+unsigned int gt_encseq_extract2bitencvector(
+                                       GtArrayGtTwobitencoding *tbereservoir,
+                                       const GtEncseq *encseq,
+                                       GtEncseqReader *esr,
+                                       GtReadmode readmode,
+                                       unsigned long pos)
 {
   GtEndofTwobitencoding etbecurrent;
   unsigned long twobitencodingstoppos;
@@ -5543,7 +5543,7 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
   {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
   }
-  for (idx = 0, offset = 0; idx <sizeofvector; idx++,
+  for (idx = 0, offset = 0; /* Nothing */; idx++,
        offset += (unsigned int) GT_UNITSIN2BITENC)
   {
     if (pos == twobitencodingstoppos)
@@ -5552,7 +5552,7 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
     }
     (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
                                     twobitencodingstoppos);
-    tbevector[idx] = etbecurrent.tbe;
+    GT_STOREINARRAY(tbereservoir,GtTwobitencoding,32UL,etbecurrent.tbe);
     if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
     {
       return offset + etbecurrent.unitsnotspecial;
@@ -5579,8 +5579,8 @@ unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
 /*  Assumption: the relpos is in a read in the range
     from 0 to |r| - l, where l is the minimum length */
 
-unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
-                                          unsigned int *storedvalues,
+unsigned int gt_encseq_relpos_extract2bitencvector(
+                                          GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
                                           unsigned long seqnum,
                                           unsigned long relpos)
@@ -5602,16 +5602,14 @@ unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
   {
     if (pos == twobitencodingstoppos)
     {
-      *storedvalues = idx;
       return offset;
     }
     (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, true, pos,
                                     twobitencodingstoppos);
-    tbevector[idx] = etbecurrent.tbe;
+    GT_STOREINARRAY(tbereservoir,GtTwobitencoding,32UL,etbecurrent.tbe);
     if (etbecurrent.unitsnotspecial < (unsigned int) GT_UNITSIN2BITENC)
     {
       gt_assert(etbecurrent.unitsnotspecial > 0);
-      *storedvalues = idx + 1;
       return offset + etbecurrent.unitsnotspecial;
     }
     pos += GT_UNITSIN2BITENC;

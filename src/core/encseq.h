@@ -34,11 +34,14 @@
 #include "core/str.h"
 #include "core/str_array.h"
 #include "core/types_api.h"
+#include "core/arraydef.h"
 
 #define GT_ENCSEQ_VERSION  2UL
 
 #define GT_REVERSEPOS(TOTALLENGTH,POS) \
           ((TOTALLENGTH) - 1 - (POS))
+
+GT_DECLAREARRAYSTRUCT(GtTwobitencoding);
 
 /* Creates a new <GtEncseqEncoder> using the options given in <opts>.
    If no encoder could be created using the given options, <NULL> is
@@ -230,23 +233,23 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
 /* The following function extracts the twobitencoding beginning at position
    <pos> in the given encoded sequence <encseq> and ending at
    the next stop position wrt. to the readmode; The result is stored in
-   <tbevector> which points to an array of size <sizeofvector>. */
+   <tbereservoir> which points to an array of size <sizeofvector>. */
 
-unsigned int gt_encseq_extract2bitencvector(GtTwobitencoding *tbevector,
-                                            int sizeofvector,
-                                            const GtEncseq *encseq,
-                                            GtEncseqReader *esr,
-                                            GtReadmode readmode,
-                                            unsigned long pos);
+unsigned int gt_encseq_extract2bitencvector(
+                                         GtArrayGtTwobitencoding *tbereservoir,
+                                         const GtEncseq *encseq,
+                                         GtEncseqReader *esr,
+                                         GtReadmode readmode,
+                                         unsigned long pos);
 
 /* The following function extracts the twobitencoding for the
    sequence with sequence number <seqnum> beginning at the relative
-   position <relpos>.  The result is stored in <tbevector> which
+   position <relpos>.  The result is stored in <tbereservoir> which
    points to an array of appropriate size. The number of elements
    is stored at the address <storedvalues> points to. */
 
-unsigned int gt_encseq_relpos_extract2bitencvector(GtTwobitencoding *tbevector,
-                                          unsigned int *storedvalues,
+unsigned int gt_encseq_relpos_extract2bitencvector(
+                                          GtArrayGtTwobitencoding *tbereservoir,
                                           const GtEncseq *encseq,
                                           unsigned long seqnum,
                                           unsigned long relpos);
