@@ -228,7 +228,8 @@ static int gt_encseq_info_runner(GT_UNUSED int argc, const char **argv,
         gt_file_xprintf(arguments->outfp, "\t%c: %lu (%.2f%%)\n",
                                           (char) chars[i],
                                           cc,
-                             (cc /(double) gt_encseq_total_length(encseq))*100);
+                             (cc /(double) (gt_encseq_total_length(encseq)
+                                  - gt_encseq_num_of_sequences(encseq)+1))*100);
       }
 
       gt_file_xprintf(arguments->outfp, "number of wildcards: ");
