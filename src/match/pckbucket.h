@@ -48,4 +48,7 @@ unsigned int gt_pckbuckettable_maxdepth_get(const Pckbuckettable
 
 const void *gt_pckbuckettable_mbtab_get(const Pckbuckettable *pckbuckettable);
 
+unsigned int gt_pckbuckettable_numofchars_get(
+                       const Pckbuckettable *pckbuckettable);
+
 #endif

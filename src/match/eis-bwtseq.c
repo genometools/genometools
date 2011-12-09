@@ -144,17 +144,78 @@ gt_deleteBWTSeq(BWTSeq *bwtSeq)
   gt_free(bwtSeq);
 }
 
+typedef struct
+{
+  const Mbtab **mbtab;
+  unsigned int numofchars, maxdepth, depth;
+  GtCodetype code;
+} GtPrebwtstate;
+
+static const Mbtab *gt_prebwt_next(GtPrebwtstate *prebwt,Symbol curSym)
+{
+  prebwt->code = prebwt->code * prebwt->numofchars + curSym;
+  prebwt->depth++;
+  return prebwt->mbtab[prebwt->depth] + prebwt->code;
+}
+
+unsigned long gt_exactmatchuptomaxdepth(const Mbtab **mbptr,
+                                        const Mbtab **mbtab,
+                                        const MRAEnc *alphabet,
+                                        unsigned int numofchars,
+                                        unsigned int maxdepth,
+                                        const GtUchar *sequence,
+                                        unsigned long seqlen)
+{
+  GtCodetype code;
+  unsigned int depth;
+  GtUchar cc;
+  Symbol curSym;
+
+  gt_assert(seqlen > 0);
+  for (depth = 0, code = 0;  depth < maxdepth; depth++)
+  {
+    if (seqlen <= (unsigned long) depth)
+    {
+      return seqlen;
+    }
+    cc = sequence[depth];
+    gt_assert(ISNOTSPECIAL(cc));
+    curSym = MRAEncMapSymbol(alphabet, cc);
+    code = code * numofchars + curSym;
+    *mbptr = mbtab[depth+1] + code;
+    if ((*mbptr)->lowerbound >= (*mbptr)->upperbound)
+    {
+      break;
+    }
+    /*
+    printf("exactmatch: depth=%u with %u,curSym=%u,%lu %lu (%lu)\n",
+             depth,cc,curSym,(*mbptr)->lowerbound,(*mbptr)->upperbound,
+             (*mbptr)->upperbound - (*mbptr)->lowerbound);
+    */
+  }
+  return (unsigned long) depth;
+}
+
 static inline void
 getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               struct matchBound *match, bool forward)
 {
   const Symbol *qptr, *qend;
   Symbol curSym;
+  const Mbtab *mbptr;
   const MRAEnc *alphabet;
-  /* Mbtab *mbtab; */
+  GtPrebwtstate prebwt;
 
-  gt_assert(bwtSeq && query);
   alphabet = BWTSeqGetAlphabet(bwtSeq);
+  prebwt.mbtab = gt_bwtseq2mbtab((const FMindex *) bwtSeq);
+  if (prebwt.mbtab != NULL)
+  {
+    prebwt.numofchars = gt_bwtseq2numofchars((const FMindex *) bwtSeq);
+    prebwt.maxdepth = gt_bwtseq2maxdepth((const FMindex *) bwtSeq);
+    prebwt.code = 0;
+    prebwt.depth = 0;
+  }
+  gt_assert(bwtSeq && query);
   if (forward)
   {
     qptr = query;
@@ -164,38 +225,41 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     qptr = query + queryLen - 1;
     qend = query - 1;
   }
-  /*
-  mbtab = gt_pcktb2mbtab(bwtSeq->pckbuckettable);
-  if (mbtab != NULL)
-  {
-  }
-  */
-  /* Add code here to handle the case that MBtab is available */
+  gt_assert(ISNOTSPECIAL(*qptr));
   curSym = MRAEncMapSymbol(alphabet, *qptr);
-  /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
-  qptr = forward ? (qptr+1) : (qptr-1);
   match->start = bwtSeq->count[curSym];
   match->end   = bwtSeq->count[curSym + 1];
-  while (match->start <= match->end && qptr != qend)
+  if (match->start < match->end && prebwt.mbtab != NULL)
+  {
+    mbptr = gt_prebwt_next(&prebwt,curSym);
+    gt_assert(mbptr->lowerbound == match->start);
+    gt_assert(mbptr->upperbound == match->end);
+  }
+  qptr = forward ? (qptr+1) : (qptr-1);
+  while (match->start < match->end && qptr != qend)
   {
     GtUlongPair occPair;
+
+    gt_assert(ISNOTSPECIAL(*qptr));
     curSym = MRAEncMapSymbol(alphabet, *qptr);
-    /*printf("query[%lu]=%d\n",(unsigned long) (qptr-query),(int) *qptr); */
     occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
                                           match->end);
     match->start = bwtSeq->count[curSym] + occPair.a;
     match->end   = bwtSeq->count[curSym] + occPair.b;
+    if (match->start < match->end &&
+        prebwt.mbtab != NULL && prebwt.depth < prebwt.maxdepth)
+    {
+      mbptr = gt_prebwt_next(&prebwt,curSym);
+      gt_assert(mbptr->lowerbound == match->start);
+      gt_assert(mbptr->upperbound == match->end);
+    }
     qptr = forward ? (qptr+1) : (qptr-1);
   }
-  /*
-  printf("start=%lu, end = %lu\n",(unsigned long) match->start,
-                                  (unsigned long) match->end);
-  */
 }
 
 unsigned long gt_packedindexuniqueforward(const BWTSeq *bwtSeq,
-                                       const GtUchar *qstart,
-                                       const GtUchar *qend)
+                                          const GtUchar *qstart,
+                                          const GtUchar *qend)
 {
   GtUchar cc;
   const GtUchar *qptr;

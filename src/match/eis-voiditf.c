@@ -275,6 +275,16 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex)
                                         ->pckbuckettable);
 }
 
+unsigned int gt_bwtseq2numofchars(const FMindex *fmindex)
+{
+  if (((const BWTSeq *) fmindex)->pckbuckettable == NULL)
+  {
+    return 0;
+  }
+  return gt_pckbuckettable_numofchars_get(((const BWTSeq *) fmindex)
+                                          ->pckbuckettable);
+}
+
 void gt_bwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
                                     unsigned long *rangeOccs,
                                     const FMindex *fmindex,

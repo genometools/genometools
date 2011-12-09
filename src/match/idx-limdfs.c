@@ -1040,36 +1040,6 @@ static void smalldepthbwtrangesplitwithoutspecial(GtArrayBoundswithchar *bwci,
   }
 }
 
-unsigned long gt_exactmatchuptomaxdepth(const Mbtab *mbptr,
-                                     const Mbtab **mbtab,
-                                     GtUchar alphasize,
-                                     unsigned int maxdepth,
-                                     const GtUchar *sequence,
-                                     unsigned long seqlen)
-{
-  GtCodetype code = 0;
-  unsigned int depth = 0;
-  GtUchar cc;
-
-  gt_assert(seqlen > 0);
-  for (depth = 0, code = 0;  depth <= maxdepth;
-       depth++, code = code * alphasize + cc)
-  {
-    if (seqlen <= (unsigned long) depth)
-    {
-      return seqlen;
-    }
-    cc = sequence[depth];
-    gt_assert(ISNOTSPECIAL(cc));
-    mbptr = mbtab[depth] + code + cc;
-    if (mbptr->lowerbound >= mbptr->upperbound)
-    {
-      break;
-    }
-  }
-  return (unsigned long) depth;
-}
-
 static void pck_splitandprocess(Limdfsresources *limdfsresources,
                                 const AbstractDfstransformer *adfst)
 {

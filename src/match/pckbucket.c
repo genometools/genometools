@@ -188,11 +188,6 @@ Pckbuckettable *gt_pckbuckettable_new(const FMindex *fmindex,
       child.depth = parent.depth + 1;
       gt_assert(child.depth <= maxdepth);
       child.code = parent.code * numofchars + idx;
-      /*
-      printf("depth=%lu code=%lu: %lu %lu\n",
-             child.depth,child.code,(unsigned long) child.lowerbound,
-                                    (unsigned long) child.upperbound);
-      */
       pckbuckettable_storeBoundsatdepth(pckbt,&child);
       if (child.depth < maxdepth)
       {
@@ -279,6 +274,12 @@ unsigned int gt_pckbuckettable_maxdepth_get(
                        const Pckbuckettable *pckbuckettable)
 {
   return pckbuckettable->maxdepth;
+}
+
+unsigned int gt_pckbuckettable_numofchars_get(
+                       const Pckbuckettable *pckbuckettable)
+{
+  return pckbuckettable->numofchars;
 }
 
 const void *gt_pckbuckettable_mbtab_get(const Pckbuckettable *pckbuckettable)

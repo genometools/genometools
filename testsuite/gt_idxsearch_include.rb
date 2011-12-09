@@ -52,6 +52,7 @@ def checktagerator(queryfile,ms)
     run_test("#{$bin}gt tagerator -rw -cmp -esa sfx -q patternfile " +
              " -maxocc 10",
              :maxtime => 200)
+    run_test "#{$bin}gt prebwt -maxdepth 4 -pck pck", :maxtime => 100
     run_test("#{$bin}gt tagerator -rw -cmp -e 0 -pck pck -q patternfile",
              :maxtime => 200)
     run_test("#{$bin}gt tagerator -rw -cmp -e 1 -pck pck -q patternfile",

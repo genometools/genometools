@@ -131,6 +131,8 @@ unsigned long gt_bwtrangesplitallwithoutspecial(Mbtab *mbtab,
 
 unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex);
 
+unsigned int gt_bwtseq2numofchars(const FMindex *fmindex);
+
 const Mbtab **gt_bwtseq2mbtab(const FMindex *fmindex);
 
 /* this does currently not work, only for the root interval. This is due to the
