@@ -151,9 +151,9 @@ typedef struct
   GtCodetype code;
 } GtPrebwtstate;
 
-static const Mbtab *gt_prebwt_next(GtPrebwtstate *prebwt,Symbol curSym)
+static const Mbtab *gt_prebwt_next(GtPrebwtstate *prebwt,unsigned int cc)
 {
-  prebwt->code = prebwt->code * prebwt->numofchars + curSym;
+  prebwt->code = prebwt->code * prebwt->numofchars + cc;
   prebwt->depth++;
   return prebwt->mbtab[prebwt->depth] + prebwt->code;
 }
@@ -201,12 +201,11 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               struct matchBound *match, bool forward)
 {
   const Symbol *qptr, *qend;
-  Symbol curSym;
+  unsigned int cc;
   const Mbtab *mbptr;
-  const MRAEnc *alphabet;
   GtPrebwtstate prebwt;
 
-  alphabet = BWTSeqGetAlphabet(bwtSeq);
+  gt_assert(bwtSeq && query);
   prebwt.mbtab = gt_bwtseq2mbtab((const FMindex *) bwtSeq);
   if (prebwt.mbtab != NULL)
   {
@@ -215,7 +214,6 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     prebwt.code = 0;
     prebwt.depth = 0;
   }
-  gt_assert(bwtSeq && query);
   if (forward)
   {
     qptr = query;
@@ -226,12 +224,12 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     qend = query - 1;
   }
   gt_assert(ISNOTSPECIAL(*qptr));
-  curSym = MRAEncMapSymbol(alphabet, *qptr);
-  match->start = bwtSeq->count[curSym];
-  match->end   = bwtSeq->count[curSym + 1];
+  cc = (unsigned int) *qptr;
+  match->start = bwtSeq->count[cc];
+  match->end   = bwtSeq->count[cc + 1];
   if (match->start < match->end && prebwt.mbtab != NULL)
   {
-    mbptr = gt_prebwt_next(&prebwt,curSym);
+    mbptr = gt_prebwt_next(&prebwt,cc);
     gt_assert(mbptr->lowerbound == match->start);
     gt_assert(mbptr->upperbound == match->end);
   }
@@ -241,15 +239,15 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     GtUlongPair occPair;
 
     gt_assert(ISNOTSPECIAL(*qptr));
-    curSym = MRAEncMapSymbol(alphabet, *qptr);
-    occPair = BWTSeqTransformedPosPairOcc(bwtSeq, curSym, match->start,
+    cc = (unsigned int) *qptr;
+    occPair = BWTSeqTransformedPosPairOcc(bwtSeq, (Symbol) cc, match->start,
                                           match->end);
-    match->start = bwtSeq->count[curSym] + occPair.a;
-    match->end   = bwtSeq->count[curSym] + occPair.b;
+    match->start = bwtSeq->count[cc] + occPair.a;
+    match->end   = bwtSeq->count[cc] + occPair.b;
     if (match->start < match->end &&
         prebwt.mbtab != NULL && prebwt.depth < prebwt.maxdepth)
     {
-      mbptr = gt_prebwt_next(&prebwt,curSym);
+      mbptr = gt_prebwt_next(&prebwt,cc);
       gt_assert(mbptr->lowerbound == match->start);
       gt_assert(mbptr->upperbound == match->end);
     }
