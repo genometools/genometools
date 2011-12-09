@@ -168,14 +168,6 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   GtPrebwtstate prebwt;
 
   gt_assert(bwtSeq && query);
-  prebwt.mbtab = gt_bwtseq2mbtab((const FMindex *) bwtSeq);
-  if (prebwt.mbtab != NULL)
-  {
-    prebwt.numofchars = gt_bwtseq2numofchars((const FMindex *) bwtSeq);
-    prebwt.maxdepth = gt_bwtseq2maxdepth((const FMindex *) bwtSeq);
-    prebwt.code = 0;
-    prebwt.depth = 0;
-  }
   if (forward)
   {
     qptr = query;
@@ -187,19 +179,20 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   }
   gt_assert(ISNOTSPECIAL(*qptr));
   cc = (unsigned int) *qptr;
-  match->start = bwtSeq->count[cc];
-  match->end   = bwtSeq->count[cc + 1];
+  prebwt.mbtab = gt_bwtseq2mbtab((const FMindex *) bwtSeq);
   if (prebwt.mbtab != NULL)
   {
+    prebwt.numofchars = gt_bwtseq2numofchars((const FMindex *) bwtSeq);
+    prebwt.maxdepth = gt_bwtseq2maxdepth((const FMindex *) bwtSeq);
+    prebwt.code = 0;
+    prebwt.depth = 0;
     mbptr = gt_prebwt_next(&prebwt,cc);
-    if (match->start < match->end)
-    {
-      gt_assert(mbptr->lowerbound == match->start);
-      gt_assert(mbptr->upperbound == match->end);
-    } else
-    {
-      gt_assert(mbptr->lowerbound >= mbptr->upperbound);
-    }
+    match->start = mbptr->lowerbound;
+    match->end = mbptr->upperbound;
+  } else
+  {
+    match->start = bwtSeq->count[cc];
+    match->end   = bwtSeq->count[cc + 1];
   }
   qptr = forward ? (qptr+1) : (qptr-1);
   while (match->start < match->end && qptr != qend)
@@ -208,21 +201,17 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 
     gt_assert(ISNOTSPECIAL(*qptr));
     cc = (unsigned int) *qptr;
-    occPair = BWTSeqTransformedPosPairOcc(bwtSeq, (Symbol) cc, match->start,
-                                          match->end);
-    match->start = bwtSeq->count[cc] + occPair.a;
-    match->end   = bwtSeq->count[cc] + occPair.b;
     if (prebwt.mbtab != NULL && prebwt.depth < prebwt.maxdepth)
     {
       mbptr = gt_prebwt_next(&prebwt,cc);
-      if (match->start < match->end)
-      {
-        gt_assert(mbptr->lowerbound == match->start);
-        gt_assert(mbptr->upperbound == match->end);
-      } else
-      {
-        gt_assert(mbptr->lowerbound >= mbptr->upperbound);
-      }
+      match->start = mbptr->lowerbound;
+      match->end = mbptr->upperbound;
+    } else
+    {
+      occPair = BWTSeqTransformedPosPairOcc(bwtSeq, (Symbol) cc, match->start,
+                                            match->end);
+      match->start = bwtSeq->count[cc] + occPair.a;
+      match->end   = bwtSeq->count[cc] + occPair.b;
     }
     qptr = forward ? (qptr+1) : (qptr-1);
   }
