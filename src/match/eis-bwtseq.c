@@ -158,44 +158,6 @@ static const Mbtab *gt_prebwt_next(GtPrebwtstate *prebwt,unsigned int cc)
   return prebwt->mbtab[prebwt->depth] + prebwt->code;
 }
 
-unsigned long gt_exactmatchuptomaxdepth(const Mbtab **mbptr,
-                                        const Mbtab **mbtab,
-                                        const MRAEnc *alphabet,
-                                        unsigned int numofchars,
-                                        unsigned int maxdepth,
-                                        const GtUchar *sequence,
-                                        unsigned long seqlen)
-{
-  GtCodetype code;
-  unsigned int depth;
-  GtUchar cc;
-  Symbol curSym;
-
-  gt_assert(seqlen > 0);
-  for (depth = 0, code = 0;  depth < maxdepth; depth++)
-  {
-    if (seqlen <= (unsigned long) depth)
-    {
-      return seqlen;
-    }
-    cc = sequence[depth];
-    gt_assert(ISNOTSPECIAL(cc));
-    curSym = MRAEncMapSymbol(alphabet, cc);
-    code = code * numofchars + curSym;
-    *mbptr = mbtab[depth+1] + code;
-    if ((*mbptr)->lowerbound >= (*mbptr)->upperbound)
-    {
-      break;
-    }
-    /*
-    printf("exactmatch: depth=%u with %u,curSym=%u,%lu %lu (%lu)\n",
-             depth,cc,curSym,(*mbptr)->lowerbound,(*mbptr)->upperbound,
-             (*mbptr)->upperbound - (*mbptr)->lowerbound);
-    */
-  }
-  return (unsigned long) depth;
-}
-
 static inline void
 getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               struct matchBound *match, bool forward)
