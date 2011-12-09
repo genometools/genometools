@@ -189,11 +189,17 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
   cc = (unsigned int) *qptr;
   match->start = bwtSeq->count[cc];
   match->end   = bwtSeq->count[cc + 1];
-  if (match->start < match->end && prebwt.mbtab != NULL)
+  if (prebwt.mbtab != NULL)
   {
     mbptr = gt_prebwt_next(&prebwt,cc);
-    gt_assert(mbptr->lowerbound == match->start);
-    gt_assert(mbptr->upperbound == match->end);
+    if (match->start < match->end)
+    {
+      gt_assert(mbptr->lowerbound == match->start);
+      gt_assert(mbptr->upperbound == match->end);
+    } else
+    {
+      gt_assert(mbptr->lowerbound >= mbptr->upperbound);
+    }
   }
   qptr = forward ? (qptr+1) : (qptr-1);
   while (match->start < match->end && qptr != qend)
@@ -206,12 +212,17 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                                           match->end);
     match->start = bwtSeq->count[cc] + occPair.a;
     match->end   = bwtSeq->count[cc] + occPair.b;
-    if (match->start < match->end &&
-        prebwt.mbtab != NULL && prebwt.depth < prebwt.maxdepth)
+    if (prebwt.mbtab != NULL && prebwt.depth < prebwt.maxdepth)
     {
       mbptr = gt_prebwt_next(&prebwt,cc);
-      gt_assert(mbptr->lowerbound == match->start);
-      gt_assert(mbptr->upperbound == match->end);
+      if (match->start < match->end)
+      {
+        gt_assert(mbptr->lowerbound == match->start);
+        gt_assert(mbptr->upperbound == match->end);
+      } else
+      {
+        gt_assert(mbptr->lowerbound >= mbptr->upperbound);
+      }
     }
     qptr = forward ? (qptr+1) : (qptr-1);
   }
