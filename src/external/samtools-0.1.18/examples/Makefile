@@ -9,9 +9,9 @@ ex1.bam:ex1.sam.gz ex1.fa.fai
 ex1.bam.bai:ex1.bam
 		../samtools index ex1.bam
 ex1.pileup.gz:ex1.bam ex1.fa
-		../samtools pileup -cf ex1.fa ex1.bam | gzip > ex1.pileup.gz
+		../samtools mpileup -cf ex1.fa ex1.bam | gzip > ex1.pileup.gz
 ex1.glf:ex1.bam ex1.fa
-		../samtools pileup -gf ex1.fa ex1.bam > ex1.glf
+		../samtools mpileup -gf ex1.fa ex1.bam > ex1.glf
 ex1.glfview.gz:ex1.glf
 		../samtools glfview ex1.glf | gzip > ex1.glfview.gz
 ex1a.bam:ex1.bam
