@@ -256,6 +256,7 @@ FMindex *gt_loadvoidBWTSeqForSA(const char *indexname,
 
 const Mbtab **gt_bwtseq2mbtab(const FMindex *fmindex)
 {
+  gt_assert(fmindex != NULL);
   if (((const BWTSeq *) fmindex)->pckbuckettable == NULL)
   {
     return NULL;
@@ -267,6 +268,7 @@ const Mbtab **gt_bwtseq2mbtab(const FMindex *fmindex)
 
 unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex)
 {
+  gt_assert(fmindex != NULL);
   if (((const BWTSeq *) fmindex)->pckbuckettable == NULL)
   {
     return 0;
@@ -277,6 +279,7 @@ unsigned int gt_bwtseq2maxdepth(const FMindex *fmindex)
 
 unsigned int gt_bwtseq2numofchars(const FMindex *fmindex)
 {
+  gt_assert(fmindex != NULL);
   if (((const BWTSeq *) fmindex)->pckbuckettable == NULL)
   {
     return 0;

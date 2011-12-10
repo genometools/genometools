@@ -124,6 +124,7 @@ gt_newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet,
   totalSize = rangeSortOffset + sizeof (enum rangeSortMode)
     * MRAEncGetNumRanges(alphabet);
   bwtSeq = gt_malloc(totalSize);
+  bwtSeq->pckbuckettable = NULL;
   counts = (unsigned long *)((char  *)bwtSeq + countsOffset);
   rangeSort = (enum rangeSortMode *)((char *)bwtSeq + rangeSortOffset);
   if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, counts, rangeSort,

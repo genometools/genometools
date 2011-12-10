@@ -47,6 +47,7 @@ static void pckbuckettable_settaboffsets(Pckbuckettable *pckbt)
 {
   unsigned int idx;
 
+  gt_assert(pckbt != NULL);
   for (idx=0; idx<pckbt->maxdepth; idx++)
   {
     pckbt->mbtab[idx+1] = pckbt->mbtab[idx] + pckbt->basepower[idx];
@@ -91,6 +92,7 @@ static Pckbuckettable *pckbuckettable_allocandinittable(unsigned int numofchars,
 
 void gt_pckbuckettable_delete(Pckbuckettable *pckbt)
 {
+  gt_assert(pckbt != NULL);
   if (pckbt->mapptr == NULL)
   {
     gt_free(pckbt->mbtab[0]);
@@ -109,6 +111,7 @@ void gt_pckbuckettable_delete(Pckbuckettable *pckbt)
 static void pckbuckettable_storeBoundsatdepth(Pckbuckettable *pckbt,
                                               const Pckbck_Boundsatdepth *bd)
 {
+  gt_assert(bd != NULL && pckbt != NULL);
   gt_assert(bd->depth <= pckbt->maxdepth);
   gt_assert(bd->code <= pckbt->basepower[bd->depth]);
   /*
@@ -130,6 +133,7 @@ static void pckbuckettable_followleafedge(Pckbuckettable *pckbt,
   GtUchar cc;
   Pckbck_Boundsatdepth bdleaf;
 
+  gt_assert(bd != NULL);
   bdleaf.code = bd->code;
   bdleaf.depth = bd->depth;
   bdleaf.lowerbound = bd->lowerbound;
@@ -273,16 +277,19 @@ Pckbuckettable *gt_pckbuckettable_map(const char *indexname,
 unsigned int gt_pckbuckettable_maxdepth_get(
                        const Pckbuckettable *pckbuckettable)
 {
+  gt_assert(pckbuckettable != NULL);
   return pckbuckettable->maxdepth;
 }
 
 unsigned int gt_pckbuckettable_numofchars_get(
                        const Pckbuckettable *pckbuckettable)
 {
+  gt_assert(pckbuckettable != NULL);
   return pckbuckettable->numofchars;
 }
 
 const void *gt_pckbuckettable_mbtab_get(const Pckbuckettable *pckbuckettable)
 {
+  gt_assert(pckbuckettable != NULL);
   return (const void *) pckbuckettable->mbtab;
 }
