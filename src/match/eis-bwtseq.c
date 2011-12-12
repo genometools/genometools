@@ -192,6 +192,10 @@ getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
     match->end = mbptr->upperbound;
   } else
   {
+    prebwt.numofchars = GT_UNDEF_UINT;
+    prebwt.maxdepth = GT_UNDEF_UINT;
+    prebwt.code = 0;
+    prebwt.depth = GT_UNDEF_UINT;
     match->start = bwtSeq->count[cc];
     match->end   = bwtSeq->count[cc + 1];
   }
