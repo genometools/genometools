@@ -15,18 +15,14 @@
 */
 
 #include <string.h>
-
 #include "core/assert_api.h"
 #include "core/dataalign.h"
 #include "core/error.h"
 #include "core/log.h"
 #include "core/str.h"
+#include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/yarandom.h"
-
-#include "match/sarr-def.h"
-#include "match/esa-map.h"
-
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
 #include "match/eis-bwtseq-extinfo.h"
@@ -37,6 +33,8 @@
 #include "match/eis-mrangealphabet.h"
 #include "match/eis-suffixerator-interface.h"
 #include "match/eis-suffixarray-interface.h"
+#include "match/esa-map.h"
+#include "match/sarr-def.h"
 
 /**
  * @param alphabet ownership of alphabet is with the newly produced
