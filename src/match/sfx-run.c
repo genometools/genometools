@@ -236,6 +236,8 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   {
     outfileinfo->longest.defined = true;
     outfileinfo->longest.valueunsignedlong = gt_Sfxiterator_longest(sfi);
+    gt_assert(outfileinfo->longest.valueunsignedlong <
+              gt_encseq_total_length(encseq));
     if (outfileinfo->outfpbcktab != NULL)
     {
       if (gt_Sfxiterator_bcktab2file(outfileinfo->outfpbcktab,sfi,err) != 0)

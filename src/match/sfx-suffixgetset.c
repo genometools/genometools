@@ -209,8 +209,7 @@ unsigned long gt_suffixsortspace_getdirect(const GtSuffixsortspace *sssp,
 void gt_suffixsortspace_updatelongest(GtSuffixsortspace *sssp,unsigned long idx)
 {
   sssp->longestidx.defined = true;
-  sssp->longestidx.valueunsignedlong = sssp->partoffset +
-                                       sssp->bucketleftidx + idx;
+  sssp->longestidx.valueunsignedlong = sssp->bucketleftidx + idx;
 }
 
 void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,

@@ -214,6 +214,7 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
   }
   if (!had_err)
   {
+    oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
     if (gt_option_is_set(oi->optionalgbounds))
     {
       if (gt_parse_algbounds(&oi->sfxstrategy,oi->algbounds,err) != 0)
@@ -225,7 +226,6 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
       oi->sfxstrategy.maxinsertionsort = MAXINSERTIONSORTDEFAULT;
       oi->sfxstrategy.maxbltriesort = MAXBLTRIESORTDEFAULT;
       oi->sfxstrategy.maxcountingsort = MAXCOUNTINGSORTDEFAULT;
-      oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
     }
   }
   if (!had_err && oi->sfxstrategy.kmerswithencseqreader &&

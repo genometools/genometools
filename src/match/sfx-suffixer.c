@@ -1944,7 +1944,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
     gt_logger_log(sfi->logger,"used workspace for sorting: %.2f MB",
                     GT_MEGABYTES(gt_size_of_sort_workspace (&sfi->sfxstrategy,
                                                             sfi->encseq,
-                                                            sfi->prefixlength,
                                                             sfi->readmode)));
   }
   if (!sfi->sfxstrategy.onlybucketinsertion)

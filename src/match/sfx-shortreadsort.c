@@ -49,14 +49,15 @@ struct GtShortreadsortworkinfo
 
 static unsigned long gt_shortreadsort_allocate_size(unsigned long maxwidth)
 {
-  return maxwidth * 1.8;
+  return (unsigned long) (maxwidth * 1.8);
 }
 
 size_t gt_shortreadsort_size(bool firstcodes,unsigned long maxwidth)
 {
   size_t sizeforlcpvalues = firstcodes ? (sizeof (uint16_t) * maxwidth) : 0;
-  return sizeforlcpvalues + (sizeof (GtShortreadsort) +
-         sizeof (GtShortreadsortreftype)) * maxwidth +
+  return sizeforlcpvalues +
+         (sizeof (GtShortreadsort) + sizeof (GtShortreadsortreftype))
+         * maxwidth +
          sizeof (GtTwobitencoding) * gt_shortreadsort_allocate_size(maxwidth);
 }
 

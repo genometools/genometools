@@ -22,6 +22,7 @@
 #include "core/str.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/undef_api.h"
 #include "core/yarandom.h"
 #include "match/eis-bitpackseqpos.h"
 #include "match/eis-bwtseq.h"
