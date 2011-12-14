@@ -1511,8 +1511,8 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
     encseq->twobitencoding = twobitencoding;
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
     encseq->numofchars = 4U;
-    encseq->numofallchars = 4UL;
-    encseq->maxsubalphasize = 1U;
+    encseq->numofallchars = 0UL;
+    encseq->maxsubalphasize = 0U;
     gt_assert(numofsequences > 0);
     encseq->filenametab = gt_str_array_new();
     for (idx = 0; idx < gt_str_array_size(filenametab); idx++)
