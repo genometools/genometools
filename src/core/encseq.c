@@ -5737,7 +5737,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   if (!haserr) {
     alphabet_to_key_values(alpha, NULL, &lengthofalphadef, NULL);
   }
-  if (!haserr)
+  if (!haserr && outoistab)
   {
     determine_original_subdist(alpha, maxchars, allchars, subsymbolmap,
                                maxsubalphasize, numofallchars,
