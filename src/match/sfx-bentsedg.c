@@ -837,7 +837,6 @@ static bool allowforshortreadsort(const Sfxstrategy *sfxstrategy,
 {
 
   return (!sfxstrategy->cmpcharbychar
-          && gt_encseq_accesstype_get(encseq) == GT_ACCESS_TYPE_EQUALLENGTH
           && gt_encseq_max_seq_length(encseq) <= 1000UL
           && !GT_ISDIRREVERSE(readmode)
           && !GT_ISDIRCOMPLEMENT(readmode))

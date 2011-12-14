@@ -6386,16 +6386,18 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
   {
     twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
   }
-
   if (GT_ISDIRREVERSE(readmode))
+  {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
-
+  }
   ret = gt_encseq_extract2bitenc(ptbe,encseq, fwd, pos, twobitencodingstoppos);
 
   /* XXX: may be lessefficient, but just assigning ret to esr->currentpos may
      not reflect the real reading direction! */
   if (ret < encseq->logicaltotallength)
+  {
     gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,ret);
+  }
   return ret;
 }
 
@@ -6412,14 +6414,19 @@ unsigned int gt_encseq_extract2bitencvector(
   int idx;
   bool fwd;
 
-  gt_assert(encseq->sat == GT_ACCESS_TYPE_EQUALLENGTH);
   if (pos == encseq->totallength || pos == encseq->logicaltotallength)
   {
     return 0;
   }
   fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
-  twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd,esr);
+  if (gt_has_twobitencoding_stoppos_support(encseq))
+  {
+    twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
+  } else
+  {
+    twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
+  }
   if (GT_ISDIRREVERSE(readmode))
   {
     pos = GT_REVERSEPOS(encseq->logicaltotallength, pos);
