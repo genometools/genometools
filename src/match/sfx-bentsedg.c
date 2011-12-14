@@ -837,10 +837,9 @@ static bool allowforshortreadsort(const Sfxstrategy *sfxstrategy,
 {
 
   return (!sfxstrategy->cmpcharbychar
-          && gt_encseq_max_seq_length(encseq) <= 1000UL
-          && !GT_ISDIRREVERSE(readmode)
-          && !GT_ISDIRCOMPLEMENT(readmode))
-          /* currently !fwd or complement does not work = > exclude for now */
+          && gt_encseq_max_seq_length(encseq) <= 1500UL
+          && !GT_ISDIRREVERSE(readmode))
+          /* currently !fwd does not work = > exclude for now */
           ? true : false;
 }
 
