@@ -38,7 +38,7 @@ typedef struct {
 
 static void* gt_sequniq_arguments_new(void)
 {
-  GtSequniqArguments *arguments = gt_calloc(1, sizeof *arguments);
+  GtSequniqArguments *arguments = gt_calloc((size_t)1, sizeof *arguments);
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
@@ -97,7 +97,7 @@ static GtOptionParser* gt_sequniq_option_parser_new(void *tool_arguments)
   /* option implications */
   gt_option_imply(verbose_option, seqit_option);
 
-  gt_option_parser_set_min_args(op, 1);
+  gt_option_parser_set_min_args(op, 1U);
   return op;
 }
 
@@ -120,21 +120,21 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
       if (!(bs = gt_bioseq_new(argv[i], err)))
         had_err = -1;
       if (!had_err) {
+        GtMD5SetStatus retval;
         for (j = 0; j < gt_bioseq_number_of_sequences(bs) && !had_err; j++) {
-          had_err = gt_md5set_add_sequence(md5set,
-                                           gt_bioseq_get_sequence(bs, j),
-                                           gt_bioseq_get_sequence_length(bs, j),
-                                           arguments->rev, err);
-          if (!had_err)
+          retval = gt_md5set_add_sequence(md5set,
+              gt_bioseq_get_sequence(bs, j),
+              gt_bioseq_get_sequence_length(bs, j),
+              arguments->rev, err);
+          if (retval == GT_MD5SET_NOT_FOUND)
             gt_fasta_show_entry(gt_bioseq_get_description(bs, j),
                                 gt_bioseq_get_sequence(bs, j),
                                 gt_bioseq_get_sequence_length(bs, j),
                                 arguments->width, arguments->outfp);
-          else if (had_err > 0)
-          {
+          else if (retval != GT_MD5SET_ERROR)
             duplicates++;
-            had_err = 0;
-          }
+          else
+            had_err = -1;
           num_of_sequences++;
         }
         gt_bioseq_delete(bs);
@@ -164,19 +164,19 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
                              (unsigned long long) totalsize);
       }
       while (!had_err) {
+        GtMD5SetStatus retval;
         if ((gt_seqiterator_next(seqit, &sequence, &len, &desc, err)) != 1)
           break;
 
-        had_err = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
-                                         arguments->rev, err);
-        if (!had_err)
+        retval = gt_md5set_add_sequence(md5set, (const char*) sequence, len,
+            arguments->rev, err);
+        if (retval == GT_MD5SET_NOT_FOUND)
           gt_fasta_show_entry(desc, (const char*) sequence, len,
                               arguments->width, arguments->outfp);
-        else if (had_err > 0)
-        {
+        else if (retval != GT_MD5SET_ERROR)
           duplicates++;
-          had_err = 0;
-        }
+        else
+          had_err = -1;
         num_of_sequences++;
       }
       if (arguments->verbose)
@@ -188,9 +188,9 @@ static int gt_sequniq_runner(int argc, const char **argv, int parsed_args,
 
   /* show statistics */
   if (!had_err) {
-    fprintf(stderr, "# %llu out of %llu sequences have been removed (%.3f%%)\n",
-            duplicates, num_of_sequences,
-            ((double) duplicates / num_of_sequences) * 100.0);
+    fprintf(stderr, "# %lu out of %lu sequences have been removed (%.3f%%)\n",
+            (unsigned long)duplicates, (unsigned long)num_of_sequences,
+            ((double) duplicates / (double)num_of_sequences) * 100.0);
   }
 
   gt_md5set_delete(md5set);

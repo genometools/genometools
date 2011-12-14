@@ -1,0 +1,12 @@
+graph StringGraph {
+ 0 -- 2 [arrowtail=inv,arrowhead=normal];
+ 2 -- 16 [arrowtail=inv,arrowhead=normal];
+ 4 -- 14 [arrowtail=inv,arrowhead=normal];
+ 7 -- 9 [arrowtail=inv,arrowhead=normal];
+ 9 -- 3 [arrowtail=inv,arrowhead=normal];
+ 13 -- 7 [arrowtail=inv,arrowhead=normal];
+ 14 -- 18 [arrowtail=inv,arrowhead=normal];
+ 16 -- 17 [arrowtail=inv,arrowhead=normal];
+ 17 -- 4 [arrowtail=inv,arrowhead=normal];
+ 18 -- 13 [arrowtail=inv,arrowhead=normal];
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2009-2010 Giorgio Gonnella <ggonnella@yahoo.it>
+# Copyright (c) 2009-2010 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -43,7 +43,7 @@ e.g.
 
 There is absolutely no guarantee that the results are correct.
 Existing files are not overwritten or modified.
-Report bugs to <ggonnell@yahoo.it>.
+Report bugs to <gonnella@zbh.uni-hamburg.de>.
 END_HELP
 
 $license = <<-END_LICENSE

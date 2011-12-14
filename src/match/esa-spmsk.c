@@ -198,3 +198,5 @@ void gt_spmsk_inl_process_end(GT_UNUSED void *data)
 {
   return;
 }
+
+#undef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE

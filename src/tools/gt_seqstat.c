@@ -1,8 +1,8 @@
 /*
   Copyright (c) 2007      Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2010      Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2010-2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -26,10 +26,14 @@
 #else
 typedef int off_t;
 #endif
+#include "core/fa.h"
 #include "core/ma.h"
 #include "core/versionfunc.h"
 #include "core/seqiterator_sequence_buffer.h"
 #include "core/seqiterator_fastq.h"
+#include "core/unused_api.h"
+#include "core/versionfunc.h"
+#include "core/xansi_api.h"
 #include "core/progressbar.h"
 #include "core/format64.h"
 #include "core/unused_api.h"
@@ -37,6 +41,8 @@ typedef int off_t;
 #include "core/disc_distri.h"
 #include "core/option_api.h"
 #include "core/error_api.h"
+#include "core/logger.h"
+#include "extended/assembly_stats_calculator.h"
 #include "match/stamp.h"
 #include "tools/gt_seqstat.h"
 
@@ -44,11 +50,14 @@ typedef struct
 {
   bool verbose,
        dodistlen,
+       binarydistlen,
        doastretch,
        docstats,
        showestimsize;
   unsigned int bucketsize;
 } SeqstatArguments;
+
+#define GT_SEQSTAT_BINARY_DISTLEN_SUFFIX ".distlen"
 
 static GtOPrval parse_options(SeqstatArguments *arguments,
                               int *parsed_args,int argc,
@@ -56,7 +65,8 @@ static GtOPrval parse_options(SeqstatArguments *arguments,
 {
   GtOptionParser *op;
   GtOption *optionverbose, *optiondistlen, *optionbucketsize,
-           *optioncstats, *optionastretch, *optionestimsize;
+           *optioncstats, *optionastretch, *optionestimsize,
+           *optionbinarydistlen;
   GtOPrval oprval;
 
   gt_error_check(err);
@@ -78,6 +88,16 @@ static GtOPrval parse_options(SeqstatArguments *arguments,
                                 &arguments->bucketsize, 100U, 1U);
   gt_option_imply(optionbucketsize, optiondistlen);
   gt_option_parser_add_option(op, optionbucketsize);
+
+  optionbinarydistlen = gt_option_new_bool("binary",
+                                  "use a binary format for distlen output\n"
+                                  "output filename: <first_input_filename>"
+                                  GT_SEQSTAT_BINARY_DISTLEN_SUFFIX "\n"
+                                  "bucketsize: 1",
+                                  &arguments->binarydistlen,false);
+  gt_option_imply(optionbinarydistlen, optiondistlen);
+  gt_option_exclude(optionbinarydistlen, optionbucketsize);
+  gt_option_parser_add_option(op, optionbinarydistlen);
 
   optioncstats = gt_option_new_bool("contigs",
                                    "summary of contigs set statistics",
@@ -116,6 +136,20 @@ static void showdistseqlen(unsigned long key, unsigned long long value,
          (*bucketsize) * key,
          (*bucketsize) * (key+1) - 1,
          distvalue);
+}
+
+static void showdistseqlenbinary(unsigned long key, unsigned long long value,
+                            void *data)
+{
+  unsigned long value_ul;
+  /*@ignore@*/
+  FILE *file = data;
+  /*@end@*/
+
+  gt_assert(value <= (unsigned long long) ULONG_MAX);
+  value_ul = (unsigned long) value;
+  gt_xfwrite(&key, sizeof (key), (size_t)1, file);
+  gt_xfwrite(&value_ul, sizeof (value_ul), (size_t)1, file);
 }
 
 typedef struct
@@ -206,66 +240,6 @@ static void processastretches(const GtDiscDistri *distastretch,
   gt_free(astretchinfo.mmercount);
 }
 
-#define NOF_NSTATS 2 /* N50, N80 */
-
-typedef struct
-{
-  unsigned long       nvalue[NOF_NSTATS];
-  unsigned long long  min[NOF_NSTATS];
-  bool                done[NOF_NSTATS];
-  char                *name[NOF_NSTATS];
-  unsigned long long  current;
-} Nstats;
-
-static void calcNstats(unsigned long key, unsigned long long value,
-                        void *data)
-{
-  Nstats *nstats = data;
-  int i;
-  nstats->current += (key*value);
-  for (i = 0; i < NOF_NSTATS; i++)
-  {
-    if (!nstats->done[i])
-    {
-      if (nstats->current >= nstats->min[i])
-      {
-        nstats->done[i] = true;
-        nstats->nvalue[i] = key;
-      }
-    }
-  }
-}
-
-#define initNstat(INDEX, NAME, PORTION)\
-    nstats.name[INDEX] = (NAME);\
-    nstats.min[INDEX] = (unsigned long long) (sumlength * (PORTION) / 100);\
-    nstats.nvalue[INDEX] = 0;\
-    nstats.done[INDEX] = false
-
-static void showcstats(uint64_t numofseq, uint64_t sumlength,
-                        unsigned long minlength, unsigned long maxlength,
-                        GtDiscDistri *distctglen)
-{
-  Nstats nstats;
-  int i;
-
-  initNstat(0, "N50", 50);
-  initNstat(1, "N80", 80);
-  nstats.current = 0;
-
-  gt_disc_distri_foreach_in_reverse_order(distctglen, calcNstats,
-                                          &nstats);
-  printf("# number of contigs: "Formatuint64_t"\n",
-         PRINTuint64_tcast(numofseq));
-  printf("# total length:      "Formatuint64_t"\n",
-         PRINTuint64_tcast(sumlength));
-  printf("# average size:      %.2f\n", (double) sumlength/numofseq);
-  printf("# longest contig:    %lu\n", maxlength);
-  for (i = 0; i < NOF_NSTATS ; i++)
-    printf("# %s:               %lu\n", nstats.name[i], nstats.nvalue[i]);
-  printf("# smallest contig:   %lu\n", minlength);
-}
-
 int gt_seqstat(int argc, const char **argv, GtError *err)
 {
   GtStrArray *files;
@@ -276,7 +250,8 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
   int i, parsed_args, had_err = 0;
   off_t totalsize;
   GtDiscDistri *distseqlen = NULL;
-  GtDiscDistri *distctglen = NULL;
+  GtAssemblyStatsCalculator *asc = NULL;
+  GtLogger *asc_logger = NULL;
   GtDiscDistri *distastretch = NULL;
   uint64_t numofseq = 0, sumlength = 0;
   unsigned long minlength = 0, maxlength = 0;
@@ -316,10 +291,12 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
       if (arguments.dodistlen)
       {
         distseqlen = gt_disc_distri_new();
+        if (arguments.binarydistlen)
+          arguments.bucketsize = 1U;
       }
       if (arguments.docstats)
       {
-        distctglen = gt_disc_distri_new();
+        asc = gt_assembly_stats_calculator_new();
       }
       if (arguments.doastretch)
       {
@@ -356,7 +333,7 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
           }
           if (arguments.docstats)
           {
-            gt_disc_distri_add(distctglen,len);
+            gt_assembly_stats_calculator_add(asc, len);
           }
         }
         if (arguments.doastretch)
@@ -380,19 +357,43 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
              PRINTuint64_tcast(sumlength));
     printf("# minimum length %lu\n",minlength);
     printf("# maximum length %lu\n",maxlength);
-    printf("# distribution of sequence length in buckets of size %u\n",
-           arguments.bucketsize);
-    gt_disc_distri_foreach(distseqlen, showdistseqlen,
-                           &(arguments.bucketsize));
+    if (arguments.binarydistlen)
+    {
+      FILE *distlenoutfile;
+      GtStr *distlenoutfilename = gt_str_new_cstr(argv[parsed_args]);
+      gt_str_append_cstr(distlenoutfilename, GT_SEQSTAT_BINARY_DISTLEN_SUFFIX);
+      distlenoutfile = gt_fa_fopen(gt_str_get(distlenoutfilename), "wb", err);
+      if (distlenoutfile == NULL)
+        had_err = -1;
+      else
+      {
+        /*@ignore@*/
+        gt_disc_distri_foreach(distseqlen, showdistseqlenbinary,
+            distlenoutfile);
+        /*@end@*/
+        printf("# distribution of sequence length written to file: %s\n",
+          gt_str_get(distlenoutfilename));
+        gt_fa_fclose(distlenoutfile);
+      }
+      gt_str_delete(distlenoutfilename);
+    }
+    else
+    {
+      printf("# distribution of sequence length in buckets of size %u\n",
+          arguments.bucketsize);
+      gt_disc_distri_foreach(distseqlen, showdistseqlen,
+          &(arguments.bucketsize));
+    }
     gt_disc_distri_delete(distseqlen);
   }
   if (!had_err && arguments.docstats)
   {
-    showcstats(numofseq, sumlength, minlength,
-               maxlength, distctglen);
+    asc_logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
+    gt_assembly_stats_calculator_show(asc, asc_logger);
+    gt_logger_delete(asc_logger);
   }
-  if (distctglen != NULL)
-    gt_disc_distri_delete(distctglen);
+  if (asc != NULL)
+    gt_assembly_stats_calculator_delete(asc);
   if (!had_err && arguments.doastretch)
   {
     processastretches(distastretch,countA);

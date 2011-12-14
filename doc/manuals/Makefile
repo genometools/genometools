@@ -1,4 +1,5 @@
-ALL=ltrharvest.pdf\
+ALL=readjoiner.pdf\
+    ltrharvest.pdf\
     ltrdigest.pdf\
     uniquesub.pdf\
     matstat.pdf\

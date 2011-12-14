@@ -4,6 +4,7 @@
 #define GT_MD5SET_NOFPRIMES 2432
 #define GT_MD5SET_LARGEST_PRIME 548682082147ULL
 
+/*@unused@*/
 static const unsigned long long gt_md5set_primes[] =
 {
 1048583ULL,

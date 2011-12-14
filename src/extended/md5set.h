@@ -25,6 +25,7 @@
 typedef struct GtMD5Set GtMD5Set;
 
 typedef enum {
+  GT_MD5SET_ERROR = -1,
   GT_MD5SET_NOT_FOUND,
   GT_MD5SET_FOUND,
   GT_MD5SET_RC_FOUND
@@ -47,7 +48,7 @@ void      gt_md5set_delete(GtMD5Set *set);
    <GT_MD5SET_FOUND> if <seq> was already present in the forward direction, and
    <GT_MD5SET_RC_FOUND> if <seq> was already present in the reverse complement
    direction. */
-int       gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
+GtMD5SetStatus gt_md5set_add_sequence(GtMD5Set *set, const char* seq,
                                  unsigned long seqlen, bool both_strands,
                                  GtError *err);
 

@@ -1,0 +1,360 @@
+\documentclass[12pt,titlepage]{article}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
+\usepackage{url}
+\usepackage{alltt}
+\usepackage{xspace}
+\usepackage{times}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{verbatim}
+%\usepackage[dvips]{hyperref}
+\usepackage{optionman}
+
+\newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
+\newcommand{\Readjoiner}{\textit{Readjoiner}\xspace}
+\newcommand{\Rdjprefilter}{\textit{Readjoiner Prefilter}\xspace}
+\newcommand{\Rdjoverlap}{\textit{Readjoiner Overlap}\xspace}
+\newcommand{\Rdjassembly}{\textit{Readjoiner Assembly}\xspace}
+\newcommand{\Gtconvertseq}{\textit{Convertseq}\xspace}
+\newcommand{\Gtreadreads}{\textit{Readreads}\xspace}
+\newcommand{\Gtsuffixerator}{\textit{Suffixerator}\xspace}
+
+\newcommand{\Gtcmd}{\texttt{gt}\xspace}
+\newcommand{\Readjoinercmd}{\texttt{gt readjoiner}\xspace}
+\newcommand{\Rdjprefiltercmd}{\texttt{gt readjoiner prefilter}\xspace}
+\newcommand{\Rdjoverlapcmd}{\texttt{gt readjoiner overlap}\xspace}
+\newcommand{\Rdjassemblycmd}{\texttt{gt readjoiner assembly}\xspace}
+\newcommand{\Gtconvertseqcmd}{\texttt{gt convertseq}\xspace}
+\newcommand{\Gtreadreadscmd}{\texttt{gt dev readreads}\xspace}
+\newcommand{\Gtsuffixeratorcmd}{\texttt{gt suffixerator}\xspace}
+
+\newcommand{\minlen}{\ell}
+
+\title{\Huge{\Readjoiner 1.0:\\ User manual.}\\[3mm]
+\Large{A fast and memory efficient \\string
+ graph-based sequence assembler.}}
+\author{\begin{tabular}{c}
+         \textit{Giorgio Gonnella}\\
+         \textit{Stefan Kurtz}\\[2cm]
+         Research Group for Genome Informatics\\
+         Center for Bioinformatics\\
+         University of Hamburg\\
+         Bundesstrasse 43\\
+         20146 Hamburg (Germany)\\[1cm]
+         \url{gonnella@zbh.uni-hamburg.de}\\
+         \url{kurtz@zbh.uni-hamburg.de}\\[1cm]
+        \end{tabular}}
+
+\begin{document}
+\maketitle
+
+\section{Introduction} \label{Introduction}
+
+\Readjoiner is a software pipeline for the \textit{de novo} assembly of
+ sequencing readsets, based on the assembly string graph framework
+  \cite{MYE:2005}.
+
+\Readjoiner is written in \texttt{C} (standard ANSI C99) and it is based on the
+\GenomeTools library \cite{genometools}. It has no external library
+dependencies and may be compiled on any POSIX-compliant operative system.
+ \Readjoiner is implemented as a collection of tools, all compiled in the single
+\GenomeTools binary named \Gtcmd.
+
+\subsection{Variable and fixed-length readsets}
+
+Several next generation technologies, such
+as the Illumina Genome Analyzers, are synchronous and thus produce
+readsets, where the read length is constant: in \Readjoiner these
+are called \textit{eqlen} readsets.
+Eqlen reads are fully supported by \Readjoiner.
+
+Other technologies, such as Roche 454, produce
+reads with different read lengths (in \Readjoiner called \textit{varlen}
+readsets). \Readjoiner currently provides only an experimental support for varlen reads.
+
+\subsection{Pipeline overview}
+
+The \Readjoiner assembly pipeline consists in three phases, summarized in the
+ following table.
+
+\begin{tabular}{lll}
+Phase & Tool & Description \\
+\textit{Prefiltering} & \Rdjprefiltercmd &
+  encode reads, remove contained and ambiguous\\
+\textit{Overlap}   & \Rdjoverlapcmd &
+  determine all pairs suffix-prefix matches (SPMs) \\
+\textit{Assembly}  & \Rdjassemblycmd &
+ build the string graph, output the contigs \\
+\end{tabular}
+
+In the next sections more information about each of the phases is provided.
+
+\subsection{Step 1: Prefiltering}
+
+The first step in the \Readjoiner pipeline is the \Rdjprefilter tool.
+The input to \Rdjprefilter shall be a set of sequencing reads in
+one or more MultiFASTA file\footnote{
+  }.
+Input formats different from FASTA can be converted using GenomeTools,
+as explained in Section \ref{nonfastainput}.
+
+Contained reads represent redundant sequence information, which is not included
+in the string graph \cite{MYE:2005}. Two categories of contained
+reads can be distinguished: reads which are suffices or prefices of other reads or reverse complements
+of reads (including duplicated reads) and internally contained reads, which
+are equal to an internal substring of other reads or reverse complements of reads.
+
+Reads which are suffixes or prefixes of other reads can be efficiently
+identified by sorting all reads
+and their reverse complements. This is done by \Rdjprefilter.
+Additionally \Rdjprefilter removes any read which include ambiguity codes,
+as these cannot be unambiguosly assembled with other reads.
+
+The output of the \Rdjprefilter tool is a sequence in
+\GenomeTools encoded sequence format.
+
+\subsection{Step 2: Overlap phase}
+
+To construct the string graph, the suffix-prefix matches (SPM) among all pairs
+of reads must be calculated. Due to the small size of the DNA alphabet (4),
+small random matches from reads originating from different regions of the
+original DNA molecule are common. Thus, to avoid spurious matches a minimal
+match length pameter $\minlen$ is used.
+
+Transitive edges are not present in the final string graph \cite{MYE:2005}.
+ \Rdjoverlap matching algorithm allows to recognize which SPM would
+ correspond to transitive edges in the graph. Thus the graph can be constructed
+ only including the irreducible edges, requiring less memory.
+
+The \Rdjoverlap tool computes the list of suffix-prefix matches among
+all pairs of reads using a suffix sorting and scanning approach.
+Non-relevant suffixes are excluded, such as those shorter
+than $\minlen$ or without an initial $k$-mer matching a read or reverse
+complement of read.
+
+An index of the SPM-relevant suffixes is constructed during this phase.
+The index construction is partitioned in order to limit the
+space peak.
+\Readjoiner uses heuristics
+to automatically calculates a value for this parameter, which is usually
+a good choice..
+However, a memory limit or number of parts can be given as a parameter
+to control this time vs.\ space tradeoff.
+
+\subsection{Step 3: Assembly phase}
+
+The \Rdjassembly tool constructs a string graph. Each non-contained read
+in the sequencing readset is represented by a pair of vertices modeling
+its two extremities (Begin and End vertices). Irreducible SPMs are represented
+by directed edges.
+
+Sequencing errors present in the reads lead to characteristic paths
+in the graph. The error-correction algorithms described in \cite{Edena}
+are experimentally implemented and can be applied to recognize dead ends
+and p-bubbles and remove them. Finally the graph is traversed and sequences
+corresponding to unbranched paths are output.
+
+\section{Usage} \label{Usage}
+
+In the following text:
+
+\begin{itemize}
+\item \texttt{Typewriter font} is used for the names of software tools.
+\item \texttt{\small{Small typewriter font}} is used for file names.
+\item \begin{footnotesize}\texttt{Footnote sized typewriter font}
+      \end{footnotesize} with a leading
+      \begin{footnotesize}\texttt{'-'}\end{footnotesize}
+      is used for program options.
+\item \Showoptionarg{small italic font} is used for the argument(s) of an
+      option.
+\end{itemize}
+
+\subsection{Command-line tools} \label{Overview}
+
+\Readjoiner is a collection of tools (a toolbox) which are part of
+the \Gtcmd binary. Tools are called on the command line as follows:
+
+\texttt{gt} \texttt{readjoiner} \texttt{<toolname>} $[$\Showoption{option}
+ \Showoptionarg{arguments(s)}$]+$
+
+where toolname is prefilter, overlap or assembly.
+
+An overview of the most common options of a given tool is output, when the
+option \Showoption{help} is used.
+\footnote{Additional options may be also available, which
+ may be displayed using the options \Showoption{help+} and
+  \Showoption{helpdev}. These may be
+ in some cases test, experimental or untested parts of the software.}.
+
+\subsection{The \Rdjprefilter tool}
+
+Input: reads (single or multiple uncompressed files) in FASTA format.
+
+\texttt{gt} \texttt{contfilter} $[$\Showoption{option}
+ \Showoptionarg{arguments(s)}$]+$
+
+\begin{Justshowoptions}
+\Option{db}{\Showoptionarg{inputfilename}}{
+Specify the name of the MultiFASTA files to be used as input.}
+\Option{readset}{\Showoptionarg{readsetname}}{
+(optional) Specify a name to be used by \Readjoiner for the readset.\\
+Default: first input filename.}
+\Option{varlen}{}{
+(Experimental!)
+Use this option if the readset contains reads with variable length such
+as 454 and Sanger reads.\\
+Default: fixed-length reads (eqlen).}
+\Option{v}{}{
+Be verbose.}
+\Option{q}{}{
+Suppress standard output messages.}
+\end{Justshowoptions}
+
+Output: the output consists in a readset
+in \GenomeTools encoded sequence format, containing all reads except the ones which
+are prefixes
+or suffixes of other reads or reverse complements of other reads and the reads
+containing ambuiguity codes.
+
+\subsection{The \Rdjoverlap tool}
+
+Input: a prefix- and suffix-free readset in \GenomeTools encoded sequence format
+(such as the output of \Rdjprefilter).
+
+\begin{Justshowoptions}
+\Option{readset}{\Showoptionarg{readset}}{
+Specify the readset name.}
+\Option{l}{\Showoptionarg{minlen}}{
+Specify the minimal SPM length parameter.}
+\Option{v}{}{
+Be verbose.}
+\Option{q}{}{
+Suppress standard output messages.}
+\end{Justshowoptions}
+
+Output: the output consists in a \texttt{.spm} file, containing a binary encoded
+list\footnote{To convert the list to a text format, use the following command:
+\texttt{gt readjoiner spmtest -readset <readsetname> -test showlist}.}
+ of the non-redundant irreducible suffix-prefix matches in the readset.
+
+\subsection{The \Rdjassembly tool}
+
+Input: a SPM list in \Readjoiner format
+(such as the output of \Rdjoverlap).
+
+\begin{Justshowoptions}
+\Option{readset}{\Showoptionarg{readset}}{
+Specify the readset name}
+\Option{l}{\Showoptionarg{minlen}}{
+(optional) Specify the minimal SPM length parameter.
+The value should be at least as high as the one used for \Rdjoverlap.
+If an higher value is used, shorter overlaps are not loaded in the
+string graph.}
+\Option{errors}{}{
+Clean short dead ends and remove p-bubbles}
+\Option{v}{}{
+Be verbose.}
+\Option{q}{}{
+Suppress standard output messages.}
+\end{Justshowoptions}
+
+\section{Examples}
+
+Consider a dataset containing fixed-length reads (e.g.\ Illumina reads)
+in the files \texttt{ilreads1.fas} and \texttt{ilreads2.fas}.
+
+The first step will be run by \Rdjprefilter.
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt readjoiner prefilter -readset myreadset -db ilreads1.fas ilreads2.fas ilreads3.fas
+\end{verbatim}
+\end{footnotesize}
+
+The result is output in
+\GenomeTools encoded sequence format and consist in a \texttt{readset.esq} file.
+The encoded sequence can now be used as input for \Rdjoverlap. We will use
+a minimal SPM lenght of 45 for this example.
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt readjoiner overlap -readset readset -l 45
+\end{verbatim}
+\end{footnotesize}
+
+The output will be a file \texttt{readset.spm}, containing
+a list of irreducible non-redundant SPMs in \Readjoiner binary format.
+
+The next step consists in running the assembly phase using the
+\Rdjassembly tool.
+
+\begin{footnotesize}
+\begin{verbatim}
+> gt readjoiner assembly -readset readset -l 45
+\end{verbatim}
+\end{footnotesize}
+
+The contigs are saved in FASTA format in \texttt{readset.contigs.fas}.
+Basic statistics of the assembly results, such as the N50 value
+and the total length, are displayed in the standard output.
+
+\section{Experimental features}
+
+\subsection{Variable-length readsets}
+
+The processing of a variable-length readset is identical to the one described
+in the previous section, except that the \Rdjprefilter tool requires
+the option \Showoption{varlen}.
+
+\subsection{Real world datasets}
+
+Reads containing sequencing errors, such as the case of real world datasets,
+should first be handled using a sequencing error correction tool.
+Then, the prefilter and overlap tools shall be run as explained.
+In the assembly phase, the \Showoption{errors} option shall be used.
+
+\section{Appendix}
+
+\subsection{Input format conversion}
+\label{nonfastainput}
+
+Sequencing readsets in format different from FASTA must be converted before
+entering the \Readjoiner pipeline.
+
+\GenomeTools provide some convertion tools.
+FASTA with qualities (FASTQ) can be converted into FASTA using the \Gtreadreads
+tool. Other common sequence formats can be converted using \Gtconvertseq.
+
+\begin{thebibliography}{1}
+
+\bibitem{MYE:2005}
+Myers, EW. (2005).
+\newblock {{T}he fragment assembly string graph}.
+\newblock {\em Bioinformatics\/}, {21 Suppl 2}, 79--85.
+
+\bibitem{genometools}
+Gremme, G. (2011).
+\newblock The \textsc{GenomeTools} genome analysis system.
+  \url{http://genometools.org}.
+
+\bibitem{AKO04}
+Abouelhoda MI, Kurtz S, and Ohlebusch E.
+\newblock Replacing suffix trees with enhanced suffix arrays.
+\newblock {\em Journal of Discrete Algorithms}, 2:53--86, 2004.
+
+\bibitem{Edena}
+Hernandez D, François P, Farinelli L, Osterås M, and Schrenzel J.
+  (2008).
+\newblock De novo bacterial genome sequencing: millions of very short reads
+  assembled on a desktop computer.
+\newblock {\em Genome Res\/}, {18}(5), 802--809.
+
+\bibitem{Readjoiner}
+Gonnella G and Kurtz S (2011).
+\newblock {Readjoiner. A fast and memory efficient string
+ graph-based sequence assembler.}
+\newblock {\em Submitted\/}
+
+\end{thebibliography}
+
+\end{document}

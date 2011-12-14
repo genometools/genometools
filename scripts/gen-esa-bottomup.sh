@@ -2,7 +2,7 @@
 
 TEMPLATE=src/match/esa-bottomup
 
-for suffix in maxpairs shulen spmsk
+for suffix in maxpairs shulen spmsk rdjo rdjce rdjcv spmeq spmvar
 do
   file=${TEMPLATE}-${suffix}.inc
   rm -f $file

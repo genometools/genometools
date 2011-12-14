@@ -150,7 +150,6 @@ int gt_depthfirstesa(Sequentialsuffixarrayreader *ssar,
       } else
       {
         gt_assert(nextfreeItvinfo < allocatedItvinfo);
-        gt_assert(ABOVETOP.dfsinfo != NULL);
         if (processbranchedge != NULL &&
             processbranchedge(false,
                               TOP.depth,

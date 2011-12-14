@@ -66,7 +66,11 @@
 #include "ltr/ltrelement.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
+#include "match/rdj-pairwise.h"
+#include "match/rdj-spmlist.h"
+#include "match/rdj-strgraph.h"
 #include "match/shu-encseq-gc.h"
+#include "tools/gt_readjoiner.h"
 #include "tools/gt_bed_to_gff3.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_chain2dim.h"
@@ -181,6 +185,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "repfind", gt_repfind());
   gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
+  gt_toolbox_add_tool(tools, "readjoiner", gt_readjoiner());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "seqmutate", gt_seqmutate());
   gt_toolbox_add_tool(tools, "seqorder", gt_seqorder());
@@ -259,6 +264,12 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "ltrelement module", gt_ltrelement_unit_test);
   gt_hashmap_add(unit_tests, "mathsupport module", gt_mathsupport_unit_test);
   gt_hashmap_add(unit_tests, "memory allocator module", gt_ma_unit_test);
+  gt_hashmap_add(unit_tests, "rdj: pairwise overlaps finder modules",
+                 gt_rdj_pairwise_unit_test);
+  gt_hashmap_add(unit_tests, "rdj: suffix-prefix matches list module",
+    gt_spmlist_unit_test);
+  gt_hashmap_add(unit_tests, "rdj: string graph class",
+                 gt_strgraph_unit_test);
   gt_hashmap_add(unit_tests, "PPT finder module", gt_ppt_unit_test);
   gt_hashmap_add(unit_tests, "PBS finder module", gt_pbs_unit_test);
   gt_hashmap_add(unit_tests, "queue class", gt_queue_unit_test);

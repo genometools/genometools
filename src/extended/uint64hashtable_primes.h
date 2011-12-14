@@ -1027,7 +1027,7 @@ static const unsigned long gt_uint64hashtable_primes[] =
   4283452139UL,
   4287646481UL,
   4291840799UL,
-#if _LP64
+#if defined (_LP64) || defined (LP64)
   4294967311UL,
   4362076231UL,
   4429185097UL,
