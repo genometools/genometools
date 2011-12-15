@@ -5530,7 +5530,6 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
   if (!had_err) {
     int retval;
     char cc;
-    unsigned long start = GT_UNDEF_ULONG;
     bool in_range = false;
     GtUchar charcode;
 
@@ -5543,7 +5542,6 @@ static int countnumberofexceptionranges(const GtAlphabet *alpha,
         if (charcode != (GtUchar) SEPARATOR) {
           if (cc != maxchars[charcode]) {
             if (!in_range) {
-              start = currentpos;
               in_range = true;
             }
             specialcharinfo->exceptioncharacters++;
