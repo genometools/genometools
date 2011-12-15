@@ -1511,8 +1511,8 @@ int gt_encseq_write_twobitencoding_to_file(const char *indexname,
     encseq->twobitencoding = twobitencoding;
     encseq->unitsoftwobitencoding = gt_unitsoftwobitencoding(totallength);
     encseq->numofchars = 4U;
-    encseq->numofallchars = 0UL;
-    encseq->maxsubalphasize = 0U;
+    encseq->numofallchars = 4UL;
+    encseq->maxsubalphasize = 1U;
     gt_assert(numofsequences > 0);
     encseq->filenametab = gt_str_array_new();
     for (idx = 0; idx < gt_str_array_size(filenametab); idx++)
@@ -5737,15 +5737,17 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
   if (!haserr) {
     alphabet_to_key_values(alpha, NULL, &lengthofalphadef, NULL);
   }
-  if (!haserr && outoistab)
+  if (!haserr)
   {
     determine_original_subdist(alpha, maxchars, allchars, subsymbolmap,
                                maxsubalphasize, numofallchars,
                                classstartpositions, originaldistribution);
-    retval = countnumberofexceptionranges(alpha, plainformat, filenametab,
-                                          specialcharinfo, maxchars, err);
-    if (retval != 0)
-      haserr = true;
+    if (outoistab) {
+      retval = countnumberofexceptionranges(alpha, plainformat, filenametab,
+                                            specialcharinfo, maxchars, err);
+      if (retval != 0)
+        haserr = true;
+    }
   }
   if (!haserr) {
     if (desfp != NULL)
