@@ -71,7 +71,7 @@ Name "gt stat (-exonnumberdistri encode)"
 Keywords "gt_stat"
 Test do
   run_test "#{$bin}gt stat -exonnumberdistri " +
-           "#{$testdata}encode_known_genes_Mar07.gff3"
+           "#{$testdata}encode_known_genes_Mar07.gff3", :maxtime => 300
   run "diff #{last_stdout} #{$testdata}gt_stat_exonnumberdistri_encode.out"
 end
 

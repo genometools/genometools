@@ -98,14 +98,16 @@ Test do
   sfxmapopt="-tis -suf -lcp -ssp -wholeleafcheck"
   run_test "#{$bin}/gt suffixerator -indexname #{indexname}-#{minlen} " +
            "-spmopt #{minlen} #{sfxopt}", :maxtime => 600
-  run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}-#{minlen}"
+  run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}-#{minlen}",
+           :maxtime => 600
   run_test "#{$bin}/gt suffixerator -indexname #{indexname} #{sfxopt}"
-  run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}"
+  run_test "#{$bin}/gt dev sfxmap #{sfxmapopt} -esa #{indexname}",
+           :maxtime => 600
   run_test "#{$bin}/gt repfind -spm -l #{minlen} -ii #{indexname}",
            :maxtime => 600
   run "mv #{last_stdout} result.repfind"
   run_test "#{$bin}/gt encseq2spm -parts 3 -l #{minlen} -spm show " + \
-           "-mirrored -ii #{indexname}"
+           "-mirrored -ii #{indexname}", :maxtime => 600
   run "mv #{last_stdout} result.firstcodes"
   run "cmp result.repfind result.firstcodes"
 end
