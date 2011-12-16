@@ -365,8 +365,8 @@ endif
 
 ifeq ($(findstring clang,$(CC)),clang)
   # do not complain about unnecessary options
-  GT_CFLAGS += -Qunused-arguments
-  GT_CPPFLAGS += -Qunused-arguments
+  GT_CFLAGS += -Qunused-arguments -Wno-parentheses
+  GT_CPPFLAGS += -Qunused-arguments -Wno-parentheses
 endif
 
 ifneq ($(sharedlib),no)
