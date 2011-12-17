@@ -35,7 +35,7 @@ typedef struct {
   unsigned int lengthcutoff, depthcutoff;
   GtStr  *readset, *buffersizearg;
   bool errors, paths2seq, redtrans, elendistri;
-  unsigned int deadend;
+  unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
   unsigned long buffersize;
 } GtReadjoinerAssemblyArguments;
@@ -67,7 +67,7 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   GtReadjoinerAssemblyArguments *arguments = tool_arguments;
   GtOptionParser *op;
   GtOption *option, *errors_option, *deadend_option, *v_option,
-           *q_option;
+           *q_option, *bubble_option, *deadend_depth_option;
   gt_assert(arguments);
 
   /* init */
@@ -113,14 +113,29 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
   gt_option_is_extended_option(errors_option);
   gt_option_parser_add_option(op, errors_option);
 
+  /* -bubble */
+  bubble_option = gt_option_new_uint("bubble", "number of rounds of p-bubble "
+      "removal to perform", &arguments->bubble, 3U);
+  gt_option_is_extended_option(bubble_option);
+  gt_option_imply(bubble_option, errors_option);
+  gt_option_parser_add_option(op, bubble_option);
+
   /* -deadend */
-  deadend_option = gt_option_new_uint_min("deadend", "specify the maximal "
-      "length of a path to an end-vertex by which the path shall be considered "
-      "a dead end",
-      &arguments->deadend, 10U, 1U);
+  deadend_option = gt_option_new_uint("deadend", "number of rounds of "
+      "dead end removal to perform a dead end",
+      &arguments->deadend, 10U);
   gt_option_is_extended_option(deadend_option);
   gt_option_imply(deadend_option, errors_option);
   gt_option_parser_add_option(op, deadend_option);
+
+  /* -deadend-depth */
+  deadend_depth_option = gt_option_new_uint_min("deadend-depth", "specify the "
+      "maximal depth of a path to an end-vertex by which the path shall be "
+      "considered a dead end",
+      &arguments->deadend_depth, 10U, 1U);
+  gt_option_is_extended_option(deadend_depth_option);
+  gt_option_imply(deadend_depth_option, errors_option);
+  gt_option_parser_add_option(op, deadend_depth_option);
 
   /* -paths2seq */
   option = gt_option_new_bool("paths2seq", "read <indexname>"
@@ -204,17 +219,38 @@ static int gt_readjoiner_assembly_count_spm(const char *readset,
 }
 
 static int gt_readjoiner_assembly_error_correction(GtStrgraph *strgraph,
-    unsigned int deadend, GtLogger *verbose_logger)
+    unsigned int bubble, unsigned int deadend, unsigned int deadend_depth,
+    GtLogger *verbose_logger)
 {
-  unsigned long retval;
-  gt_logger_log(verbose_logger, "remove dead-end paths");
-  retval = gt_strgraph_reddepaths(strgraph, (unsigned long)deadend, false);
-  gt_logger_log(verbose_logger, "removed dead-end path edges = %lu",
-      retval);
+  unsigned int i;
+  unsigned long retval, retval_sum;
   gt_logger_log(verbose_logger, "remove p-bubbles");
-  retval = gt_strgraph_redpbubbles(strgraph, 0, 1UL, false);
-  gt_logger_log(verbose_logger, "removed p-bubble edges = %lu",
-      retval);
+
+  retval_sum = 0;
+  retval = 1UL;
+  for (i = 0; i < bubble && retval > 0; i++)
+  {
+    retval = gt_strgraph_redpbubbles(strgraph, 0, 1UL, false);
+    retval_sum += retval;
+    gt_logger_log(verbose_logger, "removed p-bubble edges [round %u] = %lu",
+        i + 1, retval);
+  }
+  gt_logger_log(verbose_logger, "removed p-bubble edges [%u rounds] = %lu", i,
+      retval_sum);
+  gt_logger_log(verbose_logger, "remove dead-end paths");
+
+  retval_sum = 0;
+  retval = 1UL;
+  for (i = 0; i < deadend && retval > 0; i++)
+  {
+    retval = gt_strgraph_reddepaths(strgraph, (unsigned long)deadend_depth,
+        false);
+    retval_sum += retval;
+    gt_logger_log(verbose_logger, "removed dead-end path edges [round %u] = "
+        "%lu", i + 1, retval);
+  }
+  gt_logger_log(verbose_logger,
+      "removed dead-end path edges [%u rounds] = %lu", i, retval);
   return 0;
 }
 
@@ -371,18 +407,19 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
       if (arguments->elendistri)
         gt_strgraph_show_edge_lengths_distribution(strgraph, readset,
             GT_READJOINER_SUFFIX_ELEN_DISTRI);
-      if (!eqlen)
-      {
-        gt_encseq_delete(reads);
-        reads = NULL;
-        if (had_err == 0)
-          gt_strgraph_set_encseq(strgraph, NULL);
-      }
       if (had_err == 0)
       {
         gt_strgraph_log_stats(strgraph, verbose_logger);
         gt_strgraph_log_space(strgraph);
       }
+    }
+
+    if (!eqlen && reads != NULL && !arguments->errors)
+    {
+      gt_encseq_delete(reads);
+      reads = NULL;
+      if (had_err == 0)
+        gt_strgraph_set_encseq(strgraph, NULL);
     }
 
     if (had_err == 0 && arguments->redtrans)
@@ -402,7 +439,16 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
         gt_timer_show_progress(timer, GT_READJOINER_MSG_CLEANSG, stdout);
       gt_logger_log(default_logger, GT_READJOINER_MSG_CLEANSG);
       had_err = gt_readjoiner_assembly_error_correction(strgraph,
-          arguments->deadend, verbose_logger);
+          arguments->bubble, arguments->deadend, arguments->deadend_depth,
+          verbose_logger);
+    }
+
+    if (!eqlen && reads != NULL)
+    {
+      gt_encseq_delete(reads);
+      reads = NULL;
+      if (had_err == 0)
+        gt_strgraph_set_encseq(strgraph, NULL);
     }
 
     if (had_err == 0)
