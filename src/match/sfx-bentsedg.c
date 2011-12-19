@@ -832,8 +832,7 @@ static bool multistrategysort(GtBentsedgresources *bsr,
 }
 
 static bool allowforshortreadsort(const Sfxstrategy *sfxstrategy,
-                                  const GtEncseq *encseq,
-                                  GT_UNUSED GtReadmode readmode)
+                                  const GtEncseq *encseq)
 {
   return (!sfxstrategy->cmpcharbychar
           && gt_encseq_max_seq_length(encseq) <= 1500UL)
@@ -871,7 +870,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     }
 #endif
     /* generalize the following for cases with small maximal length */
-    if (allowforshortreadsort(bsr->sfxstrategy,bsr->encseq,bsr->readmode) &&
+    if (allowforshortreadsort(bsr->sfxstrategy,bsr->encseq) &&
         width <= (unsigned long) bsr->sfxstrategy->maxshortreadsort)
     {
       gt_shortreadsort_sssp_sort(bsr->srsw,
@@ -1356,7 +1355,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->srsw = NULL;
   if (!sfxstrategy->cmpcharbychar)
   {
-    if (allowforshortreadsort(bsr->sfxstrategy,bsr->encseq,bsr->readmode))
+    if (allowforshortreadsort(bsr->sfxstrategy,bsr->encseq))
     {
       bsr->srsw = gt_shortreadsort_new(sfxstrategy->maxshortreadsort,readmode,
                                        false);
@@ -1378,7 +1377,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
       }
     }
   }
-  if (!allowforshortreadsort(bsr->sfxstrategy,bsr->encseq,bsr->readmode))
+  if (!allowforshortreadsort(bsr->sfxstrategy,bsr->encseq))
   {
     bsr->blindtrie = gt_blindtrie_new(bsr->sssp,
                                       sfxstrategy->maxbltriesort,
@@ -1409,14 +1408,13 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
 }
 
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy,
-                                  const GtEncseq *encseq,
-                                  GtReadmode readmode)
+                                  const GtEncseq *encseq)
 {
   size_t sumsize = 0;
 
   if (!sfxstrategy->cmpcharbychar)
   {
-    if (allowforshortreadsort(sfxstrategy,encseq,readmode))
+    if (allowforshortreadsort(sfxstrategy,encseq))
     {
       sumsize += gt_shortreadsort_size(false,sfxstrategy->maxshortreadsort);
     } else
@@ -1428,7 +1426,7 @@ size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy,
       }
     }
   }
-  if (!allowforshortreadsort(sfxstrategy,encseq,readmode))
+  if (!allowforshortreadsort(sfxstrategy,encseq))
   {
     sumsize += gt_blindtrie_size(sfxstrategy->maxbltriesort);
   }

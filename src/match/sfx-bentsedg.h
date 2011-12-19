@@ -62,7 +62,6 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
                                  GtLogger *logger);
 
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy,
-                                  const GtEncseq *encseq,
-                                  GtReadmode readmode);
+                                  const GtEncseq *encseq);
 
 #endif
