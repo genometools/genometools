@@ -1,24 +1,17 @@
 #!/bin/sh
 
 USAGE="Usage: $0 [-memcheck]"
+program="./testsuite.rb -threads 2"
 
-if test $# -eq 0
+if test $# -eq 1
 then
-  MC=""
-else
-  if test $# -eq 1
+  if test "$1" = "-memcheck"
   then
-    if test "$1" = "-memcheck"
-    then
-      MC="-memcheck" 
-    else
-      echo ${USAGE}
-      exit 1
-    fi 
+    program="${program} -memcheck" 
   else
     echo ${USAGE}
     exit 1
-  fi
+  fi 
 fi
 
 cerr()
@@ -39,19 +32,19 @@ then
                  gt_paircmp gt_patternmatch gt_ltrharvest\
                  gt_repfind gt_tallymer gt_uniquesub gt_genomediff
   do
-    env -i GT_MEM_BOOKKEEPING=on ./testsuite.rb \
-         ${MC} -keywords ${keyword} \
+    env -i GT_MEM_BOOKKEEPING=on ${program} \
+         -keywords ${keyword} \
          -gttestdata ${GTTESTDATA}
     if test $? -ne 0
     then
       exit 1
     fi
   done
-  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords 'gt_repfind and gttestdata' \
+  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ${program} \
+       -keywords 'gt_repfind and gttestdata' \
        -gttestdata ${GTTESTDATA}
-  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ./testsuite.rb \
-       ${MC} -keywords 'gt_greedyfwdmat and gttestdata' \
+  env -i GT_MEM_BOOKKEEPING=on GTTESTDATA=${HOME}/gttestdata ${program} \
+       -keywords 'gt_greedyfwdmat and gttestdata' \
        -gttestdata ${GTTESTDATA}
   cd ..
 fi

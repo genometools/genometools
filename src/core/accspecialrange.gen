@@ -222,7 +222,8 @@ static int GT_APPENDINT(fillSWtable)(GtEncseq *encseq,
     }
     if (encseq->has_exceptiontable && currentposition == exceptionnextcheckpos)
     {
-      exceptiontable->endidxinpage[exceptionpagenumber] = fillexceptionrangeidx;
+      exceptiontable->endidxinpage[exceptionpagenumber]
+        = fillexceptionrangeidx;
       exceptionpagenumber++;
       exceptionnextcheckpos
         += (unsigned long) (exceptiontable->maxrangevalue+1);

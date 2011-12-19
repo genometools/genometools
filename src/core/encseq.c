@@ -6425,7 +6425,7 @@ unsigned int gt_encseq_extract2bitencvector(
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
   } else
   {
-    twobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(encseq);
+    twobitencodingstoppos = fwd ? GT_TWOBITENCODINGSTOPPOSUNDEF(encseq) : 0;
   }
   if (GT_ISDIRREVERSE(readmode))
   {
@@ -6434,9 +6434,18 @@ unsigned int gt_encseq_extract2bitencvector(
   for (idx = 0, offset = 0; /* Nothing */; idx++,
        offset += (unsigned int) GT_UNITSIN2BITENC)
   {
-    if (pos == twobitencodingstoppos)
+    if (fwd)
     {
-      return offset;
+      if (pos == twobitencodingstoppos)
+      {
+        return offset;
+      }
+    } else
+    {
+      if (pos < twobitencodingstoppos)
+      {
+        return offset;
+      }
     }
     (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
                                     twobitencodingstoppos);
@@ -6450,12 +6459,12 @@ unsigned int gt_encseq_extract2bitencvector(
       pos += GT_UNITSIN2BITENC;
     } else
     {
-      if (pos > (unsigned long) GT_UNITSIN2BITENC)
+      if (pos >= (unsigned long) GT_UNITSIN2BITENC)
       {
         pos -= (unsigned long) GT_UNITSIN2BITENC;
       } else
       {
-        pos = 0;
+        return offset + etbecurrent.unitsnotspecial;
       }
     }
   }

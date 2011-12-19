@@ -20,23 +20,15 @@ set -e -x
 USAGE="Usage: $0 [-memcheck]"
 program="./testsuite.rb -threads 2"
 
-if test $# -eq 0
+if test $# -eq 1
 then
-  MC=""
-else
-  if test $# -eq 1
+  if test "$1" = "-memcheck"
   then
-    if test "$1" = "-memcheck"
-    then
-      program="${program} -memcheck" 
-    else
-      echo ${USAGE}
-      exit 1
-    fi 
+    program="${program} -memcheck" 
   else
     echo ${USAGE}
     exit 1
-  fi
+  fi 
 fi
 
 # optional -memcheck   (run valgrind)

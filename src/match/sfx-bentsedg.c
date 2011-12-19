@@ -833,13 +833,10 @@ static bool multistrategysort(GtBentsedgresources *bsr,
 
 static bool allowforshortreadsort(const Sfxstrategy *sfxstrategy,
                                   const GtEncseq *encseq,
-                                  GtReadmode readmode)
+                                  GT_UNUSED GtReadmode readmode)
 {
-
   return (!sfxstrategy->cmpcharbychar
-          && gt_encseq_max_seq_length(encseq) <= 1500UL
-          && !GT_ISDIRREVERSE(readmode))
-          /* currently !fwd does not work = > exclude for now */
+          && gt_encseq_max_seq_length(encseq) <= 1500UL)
           ? true : false;
 }
 
