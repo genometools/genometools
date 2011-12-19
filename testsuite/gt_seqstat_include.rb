@@ -22,7 +22,7 @@ end
 Name "gt seqstat distlen"
 Keywords "gt_seqstat"
 Test do
-  {10 => "860--869 1", 
+  {10 => "860--869 1",
    100 => "800--899 4",
    1000 => "0--999 21"}.each_pair do |bucketsize, expected|
     run_test "#{$bin}gt seqstat -v -distlen"+
@@ -41,6 +41,24 @@ Test do
   grep(last_stdout, "longest.*1102")
   grep(last_stdout, "N50.*421")
   grep(last_stdout, "smallest.*56")
+end
+
+Name "gt seqstat contigs NG stats"
+Keywords "gt_seqstat"
+Test do
+  run_test "#{$bin}gt seqstat -genome 770425 -contigs #{$testdata}at1MB"
+  grep(last_stdout, "total.*770425")
+  grep(last_stdout, "N50.*421")
+  grep(last_stdout, "NG50.*421")
+  run_test "#{$bin}gt seqstat -genome 100000 -contigs #{$testdata}at1MB"
+  grep(last_stdout, "N50.*421")
+  grep(last_stdout, "NG50.*591")
+  run_test "#{$bin}gt seqstat -genome 1000000 -contigs #{$testdata}at1MB"
+  grep(last_stdout, "N50.*421")
+  grep(last_stdout, "NG50.*386")
+  run_test "#{$bin}gt seqstat -genome 1600000 -contigs #{$testdata}at1MB"
+  grep(last_stdout, "N50.*421")
+  grep(last_stdout, "NG50.*n\.a\.")
 end
 
 Name "gt seqstat fail (unknown file type)"

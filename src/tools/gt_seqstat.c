@@ -55,6 +55,7 @@ typedef struct
        docstats,
        showestimsize;
   unsigned int bucketsize;
+  unsigned long genome_length;
 } SeqstatArguments;
 
 #define GT_SEQSTAT_BINARY_DISTLEN_SUFFIX ".distlen"
@@ -65,8 +66,8 @@ static GtOPrval parse_options(SeqstatArguments *arguments,
 {
   GtOptionParser *op;
   GtOption *optionverbose, *optiondistlen, *optionbucketsize,
-           *optioncstats, *optionastretch, *optionestimsize,
-           *optionbinarydistlen;
+           *optioncontigs, *optionastretch, *optionestimsize,
+           *optionbinarydistlen, *optiongenome;
   GtOPrval oprval;
 
   gt_error_check(err);
@@ -99,10 +100,10 @@ static GtOPrval parse_options(SeqstatArguments *arguments,
   gt_option_exclude(optionbinarydistlen, optionbucketsize);
   gt_option_parser_add_option(op, optionbinarydistlen);
 
-  optioncstats = gt_option_new_bool("contigs",
+  optioncontigs = gt_option_new_bool("contigs",
                                    "summary of contigs set statistics",
                                    &arguments->docstats,false);
-  gt_option_parser_add_option(op, optioncstats);
+  gt_option_parser_add_option(op, optioncontigs);
 
   optionastretch = gt_option_new_bool("astretch",
                                    "show distribution of A-substrings",
@@ -116,6 +117,12 @@ static GtOPrval parse_options(SeqstatArguments *arguments,
                                    &arguments->showestimsize,false);
   gt_option_parser_add_option(op, optionestimsize);
   gt_option_is_development_option(optionestimsize);
+
+  optiongenome = gt_option_new_ulong_min("genome",
+                                "set genome length for NG50/NG80 calculation",
+                                &arguments->genome_length, 0, 1UL);
+  gt_option_imply(optiongenome, optioncontigs);
+  gt_option_parser_add_option(op, optiongenome);
 
   gt_option_parser_set_min_args(op, 1U);
   oprval = gt_option_parser_parse(op, parsed_args, argc, argv, gt_versionfunc,
@@ -297,6 +304,8 @@ int gt_seqstat(int argc, const char **argv, GtError *err)
       if (arguments.docstats)
       {
         asc = gt_assembly_stats_calculator_new();
+        gt_assembly_stats_calculator_set_genome_length(asc,
+            arguments.genome_length);
       }
       if (arguments.doastretch)
       {

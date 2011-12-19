@@ -28,6 +28,11 @@ void gt_assembly_stats_calculator_delete(GtAssemblyStatsCalculator *asc);
 void gt_assembly_stats_calculator_add(GtAssemblyStatsCalculator *asc,
     unsigned long length);
 
+/* if the following is set to a value > 0 (which is the default value)
+ * then the NG50 and NG80 are also calculated */
+void gt_assembly_stats_calculator_set_genome_length(
+    GtAssemblyStatsCalculator *asc, unsigned long genome_length);
+
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
     GtLogger *logger);
 
