@@ -38,7 +38,7 @@ struct GtShortreadsortworkinfo
 {
   GtShortreadsortreftype *shortreadsortrefs;
   GtShortreadsort *shortreadsorttable;
-  GtLcpvalues *tableoflcpvalues; /* always NULL in the context of
+  GtLcpvalues *sssplcpvalues; /* always NULL in the context of
                                     firstcodes; otherwise: NULL iff
                                     lcpvalues are not required. */
   uint16_t *firstcodeslcpvalues;
@@ -97,7 +97,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   }
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
-  srsw->tableoflcpvalues = NULL;
+  srsw->sssplcpvalues = NULL;
   srsw->sumofstoredvalues = 0;
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   srsw->tbereservoir.allocatedGtTwobitencoding
@@ -136,7 +136,7 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
 void gt_shortreadsort_assigntableoflcpvalues(
           GtShortreadsortworkinfo *srsw,GtLcpvalues *tableoflcpvalues)
 {
-  srsw->tableoflcpvalues = tableoflcpvalues;
+  srsw->sssplcpvalues = tableoflcpvalues;
 }
 
 static int gt_shortreadsort_compare(const GtShortreadsort *aq,
@@ -317,16 +317,16 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         for (pl = pm; pl > current.startindex; pl--)
         {
           r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
-          if (data->tableoflcpvalues != NULL)
+          if (data->sssplcpvalues != NULL)
           {
             unsigned long lcpindex = subbucketleft + pl;
             if (pl < pm && r > 0)
             {
-              lcptab_update(data->tableoflcpvalues,lcpindex+1,
-                            lcpsubtab_getvalue(data->tableoflcpvalues,
+              lcptab_update(data->sssplcpvalues,lcpindex+1,
+                            lcpsubtab_getvalue(data->sssplcpvalues,
                                                lcpindex));
             }
-            lcptab_update(data->tableoflcpvalues,lcpindex,
+            lcptab_update(data->sssplcpvalues,lcpindex,
                           depth + data->tmplcplen);
           } else
           {
@@ -460,7 +460,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     gt_assert(pb >= pa);
     if ((s = (unsigned long) (pb - pa)) > 0)
     {
-      if (data->tableoflcpvalues != NULL)
+      if (data->sssplcpvalues != NULL)
       {
         /*
           left part has suffix with lcp up to length smallermaxlcp w.r.t.
@@ -468,7 +468,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        lcptab_update(data->tableoflcpvalues,subbucketleft+current.startindex+s,
+        lcptab_update(data->sssplcpvalues,subbucketleft+current.startindex+s,
                       depth+smallermaxlcp);
       } else
       {
@@ -488,7 +488,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     gt_assert(pd >= pc);
     if ((s = (unsigned long) (pd - pc)) > 0)
     {
-      if (data->tableoflcpvalues != NULL)
+      if (data->sssplcpvalues != NULL)
       {
         /*
           right part has suffix with lcp up to length largermaxlcp w.r.t.
@@ -497,7 +497,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           element in the first part of the right side.
         */
         gt_assert(pn >= s);
-        lcptab_update(data->tableoflcpvalues, subbucketleft + pn - s,
+        lcptab_update(data->sssplcpvalues, subbucketleft + pn - s,
                       depth + greatermaxlcp);
       } else
       {
