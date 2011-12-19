@@ -191,7 +191,7 @@ Test do
 end
 
 # the next test compares direct construction with complete graph + trans.red.
-Name "gt_readjoiner: transitive spm determination test - 1"
+Name "gt readjoiner: transitive spm determination test - 1"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/transred_1.fas", "-varlen")
@@ -205,7 +205,7 @@ Test do
            " reads.contigs.fas"
 end
 
-Name "gt_readjoiner: transitive spm determination test - 2"
+Name "gt readjoiner: transitive spm determination test - 2"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/transred_2.fas", "-varlen")
@@ -223,7 +223,7 @@ end
 # (the readset is varlen, currently not completely supported)
 # the expected spm list from -l 10 -singlestrand is in transred_3.l10.ss.spm
 
-Name "gt_readjoiner: transitive spm determination test - 3"
+Name "gt readjoiner: transitive spm determination test - 3"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/test_1.fas")
@@ -236,7 +236,7 @@ Test do
 end
 
 
-Name "gt_readjoiner: transitive spm determination test - 4"
+Name "gt readjoiner: transitive spm determination test - 4"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/test_2.fas")
@@ -248,7 +248,7 @@ Test do
   run "diff reads.contigs.fas contigs"
 end
 
-Name "gt_readjoiner: transitive spm determination test - 5"
+Name "gt readjoiner: transitive spm determination test - 5"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/test_3.fas")
@@ -260,7 +260,7 @@ Test do
   run "diff reads.contigs.fas contigs"
 end
 
-Name "gt_readjoiner: transitive spm determination test - 6"
+Name "gt readjoiner: transitive spm determination test - 6"
 Keywords "gt_readjoiner"
 Test do
   # this describes the next test case:
@@ -299,7 +299,7 @@ Test do
   run "diff reads.contigs.fas contigs"
 end
 
-Name "gt_readjoiner: transitive spm determination test - 7"
+Name "gt readjoiner: transitive spm determination test - 7"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/large_count.fas")
@@ -311,7 +311,7 @@ Test do
   run "diff reads.contigs.fas contigs"
 end
 
-Name "gt_readjoiner: transitive spm determination test - 8"
+Name "gt readjoiner: transitive spm determination test - 8"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/large_wset.fas")
@@ -323,7 +323,7 @@ Test do
   run "diff reads.contigs.fas contigs"
 end
 
-Name "gt_readjoiner: test different read lengths"
+Name "gt readjoiner: test different read lengths"
 Keywords "gt_readjoiner"
 Test do
   run_prefilter("#{$testdata}/readjoiner/70x_161nt.fas")
@@ -335,7 +335,7 @@ end
 [true, false].each do |mirrored|
   %w{contained_eqlen contained_varlen 30x_800nt 70x_100nt}.each do |fasta|
     Name "gt readjoiner spmtest#{' singlestrand' if !mirrored}: #{fasta}"
-    Keywords "gt_readjoiner gt_readjoiner_spmtest"
+    Keywords "gt readjoiner gt_readjoiner_spmtest"
     Test do
       spmtest += " -singlestrand" if !mirrored
       encode_reads("#$testdata/readjoiner/#{fasta}.fas")
@@ -428,28 +428,31 @@ if $gttestdata
 
   # compare results with precalculated known results
   [700, 7000, 70000].each do |nofreads|
-    Name "gt readjoiner: #{nofreads}x100"
-    Keywords "gt_readjoiner"
-    Test do
-      readset="#{$gttestdata}/readjoiner/#{nofreads}x_100nt_reads"
-      run_prefilter(readset, "-cnt")
-      run "#{cnttest} -test showlist -readset reads"
-      run "diff #{last_stdout} #{readset}.cnt"
-      run_overlap(45)
-      run "#{spmtest} -test showlist -readset reads"
-      run "sort #{last_stdout}"
-      spm = last_stdout
-      run "sort #{readset}.l45.spm"
-      ref = last_stdout
-      run "diff #{spm} #{ref}"
-      run_assembly
-      run "diff reads.contigs.fas #{readset}.l45.contigs"
+    readset="#{$gttestdata}/readjoiner/#{nofreads}x_100nt_reads"
+    if File.exists?(readset)
+      Name "gt readjoiner: #{nofreads}x100"
+      Keywords "gt_readjoiner"
+      Test do
+        readset="#{$gttestdata}/readjoiner/#{nofreads}x_100nt_reads"
+        run_prefilter(readset, "-cnt")
+        run "#{cnttest} -test showlist -readset reads"
+        run "diff #{last_stdout} #{readset}.cnt"
+        run_overlap(45)
+        run "#{spmtest} -test showlist -readset reads"
+        run "sort #{last_stdout}"
+        spm = last_stdout
+        run "sort #{readset}.l45.spm"
+        ref = last_stdout
+        run "diff #{spm} #{ref}"
+        run_assembly
+        run "diff reads.contigs.fas #{readset}.l45.contigs"
+      end
     end
 
     [161, 200, 300, 400, 600, 800, 1000].each do |len|
       reads = "#{$gttestdata}/readjoiner/#{nofreads}x_#{len}nt_reads"
       if File.exists?(reads)
-        Name "gt_readjoiner: #{nofreads}x#{len}"
+        Name "gt readjoiner: #{nofreads}x#{len}"
         Keywords "gt_readjoiner"
         Test do
           run_prefilter(reads)
