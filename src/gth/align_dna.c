@@ -762,7 +762,7 @@ static void dp_matrix_free(GthDPMatrix *dpm)
   /* freeing space for dpm->path */
   gth_array2dim_plain_delete(dpm->path);
   if (dpm->path_jt)
-    gth_array2dim_plain_delete(dpm->path_jt);
+    gt_array2dim_delete(dpm->path_jt);
 }
 
 #if 0
