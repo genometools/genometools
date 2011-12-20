@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -121,17 +121,17 @@ static int parse_range(GtRange *range, const char *start, const char *end,
   start_val = strtol(start, &ep, 10);
   if (start[0] == '\0' || *ep != '\0') {
     gt_error_set(err, "could not parse number '%s' on line %u in file '%s'",
-              start, line_number, filename);
+                 start, line_number, filename);
     return -1;
   }
   if (errno == ERANGE && (start_val == LONG_MAX || start_val == LONG_MIN)) {
     gt_error_set(err, "number '%s' out of range on line %u in file '%s'", start,
-              line_number, filename);
+                 line_number, filename);
     return -1;
   }
   if (start_val < 0) {
     gt_error_set(err, "start '%s' is negative on line %u in file '%s'", start,
-              line_number, filename);
+                 line_number, filename);
     return -1;
   }
 
@@ -145,12 +145,12 @@ static int parse_range(GtRange *range, const char *start, const char *end,
   }
   if (errno == ERANGE && (end_val == LONG_MAX || end_val == LONG_MIN)) {
     gt_error_set(err, "number '%s' out of range on line %u in file '%s'", end,
-              line_number, filename);
+                 line_number, filename);
     return -1;
   }
   if (end_val < 0) {
     gt_error_set(err, "end '%s' is negative on line %u in file '%s'", end,
-              line_number, filename);
+                 line_number, filename);
     return -1;
   }
 

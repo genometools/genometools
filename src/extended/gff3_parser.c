@@ -1317,9 +1317,10 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
 
     if (!had_err) {
       /* skip non-blanks */
-      while (tmpline <= tmplineend && !(tmpline[0] == ' '
-              || tmpline[0] == '\t'))
+      while (tmpline <= tmplineend &&
+             !(tmpline[0] == ' ' || tmpline[0] == '\t')) {
         tmpline++;
+      }
       /* terminate seqstart */
       *tmpline++ = '\0';
       /* skip blanks */
@@ -1335,9 +1336,9 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       had_err = gt_parse_range(&range, seqstart, tmpline, line_number, filename,
                                err);
     }
-    if (!had_err  && range.start == 0) {
+    if (!had_err && range.start == 0) {
       gt_error_set(err, "illegal region start 0 on line %u in file \"%s\" "
-                "(GFF3 files are 1-based)", line_number, filename);
+                   "(GFF3 files are 1-based)", line_number, filename);
       had_err = -1;
     }
     if (!had_err)
