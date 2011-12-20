@@ -32,16 +32,15 @@ typedef struct
   unsigned int unitsnotspecial;
 } GtShortreadsort;
 
-typedef uint32_t GtShortreadsortreftype;
-
 struct GtShortreadsortworkinfo
 {
-  GtShortreadsortreftype *shortreadsortrefs;
   GtShortreadsort *shortreadsorttable;
-  GtLcpvalues *sssplcpvalues; /* always NULL in the context of
+  GtLcpvalues *sssplcpvalues;    /* always NULL in the context of
                                     firstcodes; otherwise: NULL iff
                                     lcpvalues are not required. */
-  uint16_t *firstcodeslcpvalues;
+  uint16_t *firstcodeslcpvalues; /* always NULL for firstcodes;
+                                    otherwise: NULL if lcpvalues are
+                                    not required */
   GtArrayGtTwobitencoding tbereservoir;
   unsigned long tmplcplen, sumofstoredvalues;
   bool fwd, complement;
@@ -56,8 +55,7 @@ size_t gt_shortreadsort_size(bool firstcodes,unsigned long maxwidth)
 {
   size_t sizeforlcpvalues = firstcodes ? (sizeof (uint16_t) * maxwidth) : 0;
   return sizeforlcpvalues +
-         (sizeof (GtShortreadsort) + sizeof (GtShortreadsortreftype))
-         * maxwidth +
+         sizeof (GtShortreadsort) * maxwidth +
          sizeof (GtTwobitencoding) * gt_shortreadsort_allocate_size(maxwidth);
 }
 
@@ -72,20 +70,12 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
                                               bool firstcodes)
 {
-  unsigned long idx;
   GtShortreadsortworkinfo *srsw;
-#ifndef NDEBUG
-  const unsigned long maxshortreadsort
-   = sizeof (GtShortreadsortreftype) == sizeof (uint16_t) ? UINT16_MAX
-                                                          : UINT32_MAX;
-#endif
 
   srsw = gt_malloc(sizeof (*srsw));
-  gt_assert(maxwidth <= maxshortreadsort);
+  gt_assert(maxwidth <= (unsigned long) UINT32_MAX);
   srsw->shortreadsorttable
     = gt_malloc(sizeof (*srsw->shortreadsorttable) * maxwidth);
-  srsw->shortreadsortrefs
-    = gt_malloc(sizeof (*srsw->shortreadsortrefs) * maxwidth);
   if (firstcodes)
   {
     srsw->firstcodeslcpvalues
@@ -105,10 +95,6 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw->tbereservoir.spaceGtTwobitencoding
     = gt_malloc(sizeof (GtTwobitencoding) *
                 srsw->tbereservoir.allocatedGtTwobitencoding);
-  for (idx = 0; idx < maxwidth; idx++)
-  {
-    srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
-  }
   return srsw;
 }
 
@@ -124,8 +110,6 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
   {
     gt_free(srsw->shortreadsorttable);
     srsw->shortreadsorttable = NULL;
-    gt_free(srsw->shortreadsortrefs);
-    srsw->shortreadsortrefs = NULL;
     gt_free(srsw->firstcodeslcpvalues);
     srsw->firstcodeslcpvalues = NULL;
     GT_FREEARRAY(&srsw->tbereservoir,GtTwobitencoding);
@@ -201,17 +185,13 @@ static int gt_shortreadsort_compare(const GtShortreadsort *aq,
   /*@end@*/
 }
 
-#ifdef  QSORTNAME
-#undef  QSORTNAME
+#ifdef QSORTNAME
+#undef QSORTNAME
 #endif
 
-#define QSORTNAME(NAME) shortread_##NAME
-
-#define shortread_ARRAY_GET(ARR,IDX)\
-        (unsigned long) data->shortreadsortrefs[IDX]
-
-#define shortread_ARRAY_SET(ARR,IDX,VALUE)\
-        data->shortreadsortrefs[IDX] = (GtShortreadsortreftype) VALUE
+#define QSORTNAME(NAME)                    shortread_##NAME
+#define shortread_ARRAY_GET(ARR,IDX)       data->shortreadsorttable[IDX]
+#define shortread_ARRAY_SET(ARR,IDX,VALUE) data->shortreadsorttable[IDX] = VALUE
 
 typedef GtShortreadsortworkinfo * QSORTNAME(Datatype);
 
@@ -219,10 +199,9 @@ static int QSORTNAME(qsortcmparr) (unsigned long a,
                                    unsigned long b,
                                    const QSORTNAME(Datatype) data)
 {
-  return gt_shortreadsort_compare(
-                      data->shortreadsorttable + QSORTNAME(ARRAY_GET)(NULL,a),
-                      data->shortreadsorttable + QSORTNAME(ARRAY_GET)(NULL,b),
-                      data);
+  return gt_shortreadsort_compare(&QSORTNAME(ARRAY_GET)(NULL,a),
+                                  &QSORTNAME(ARRAY_GET)(NULL,b),
+                                  data);
 }
 
 typedef unsigned long QSORTNAME(Sorttype);
@@ -290,8 +269,9 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
                                    unsigned long depth,
                                    unsigned long subbucketleft)
 {
-  unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s,
+  unsigned long pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s,
                 smallermaxlcp, greatermaxlcp;
+  GtShortreadsort tmp;
   int r;
   bool swapped;
   GtStackIntervalarrtobesorted intervalstack;
@@ -572,9 +552,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
     for (idx = 0; idx < width; idx++)
     {
       exportptr->ulongtabsectionptr[idx]
-        = srsw->shortreadsorttable[srsw->shortreadsortrefs[idx]].
-                                  suffixrepresentation;
-      srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
+        = srsw->shortreadsorttable[idx].suffixrepresentation;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(sssp,idx);
@@ -585,9 +563,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
     for (idx = 0; idx < width; idx++)
     {
       exportptr->uinttabsectionptr[idx]
-        = (uint32_t) srsw->shortreadsorttable[srsw->shortreadsortrefs[idx]]
-                                            .suffixrepresentation;
-      srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
+        = (uint32_t) srsw->shortreadsorttable[idx].suffixrepresentation;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
         gt_suffixsortspace_updatelongest(sssp,idx);
@@ -608,10 +584,6 @@ void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
 {
   unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
 
-  for (idx = 0; idx < width; idx++)
-  {
-    srsw->shortreadsortrefs[idx] = (GtShortreadsortreftype) idx;
-  }
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   for (idx = 0; idx < width; idx++)
   {
@@ -643,7 +615,6 @@ void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
   for (idx = 0; idx < width; idx++)
   {
     seqnum_relpos_bucket[idx]
-      = srsw->shortreadsorttable[srsw->shortreadsortrefs[idx]].
-                                 suffixrepresentation;
+      = srsw->shortreadsorttable[idx].suffixrepresentation;
   }
 }
