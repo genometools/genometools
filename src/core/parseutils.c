@@ -130,9 +130,21 @@ static int parse_range(GtRange *range, const char *start, const char *end,
     return -1;
   }
   if (start_val < 0) {
-    gt_error_set(err, "start '%s' is negative on line %u in file '%s'", start,
-                 line_number, filename);
-    return -1;
+    if (tidy) {
+      gt_warning("start '%s' is negative on line %u in file '%s'; reset to 1",
+                 start, line_number, filename);
+      start_val = 1;
+    }
+    else {
+      gt_error_set(err, "start '%s' is negative on line %u in file '%s'", start,
+                   line_number, filename);
+      return -1;
+    }
+  }
+  if (start_val == 0 && tidy) {
+    gt_warning("start '%s' is zero on line %u in file '%s' (GFF3 files are "
+               "1-based); reset to 1", start, line_number, filename);
+    start_val = 1;
   }
 
   /* parse and check end */
@@ -149,9 +161,21 @@ static int parse_range(GtRange *range, const char *start, const char *end,
     return -1;
   }
   if (end_val < 0) {
-    gt_error_set(err, "end '%s' is negative on line %u in file '%s'", end,
-                 line_number, filename);
-    return -1;
+    if (tidy) {
+      gt_warning("end '%s' is negative on line %u in file '%s'; reset to 1",
+                 end, line_number, filename);
+      end_val = 1;
+    }
+    else {
+      gt_error_set(err, "end '%s' is negative on line %u in file '%s'", end,
+                   line_number, filename);
+      return -1;
+    }
+  }
+  if (end_val == 0 && tidy) {
+    gt_warning("end '%s' is zero on line %u in file '%s' (GFF3 files are "
+               "1-based); reset to 1", end, line_number, filename);
+    end_val = 1;
   }
 
   /* check range */
