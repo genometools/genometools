@@ -38,9 +38,12 @@ int  gt_gff3_parser_parse_target_attributes(const char *values,
                                             GtStrand *first_target_strand,
                                             const char *filename,
                                             unsigned int line_number, GtError*);
-void gt_gff3_parser_parse_all_target_attributes(const char *values,
-                                                GtStrArray *target_ids,
-                                                GtArray *target_ranges,
-                                                GtArray *target_strands);
+int gt_gff3_parser_parse_all_target_attributes(const char *values, bool tidy,
+                                               GtStrArray *target_ids,
+                                               GtArray *target_ranges,
+                                               GtArray *target_strands,
+                                               const char *filename,
+                                               unsigned int line_number,
+                                               GtError *err);
 
 #endif

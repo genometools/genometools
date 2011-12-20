@@ -146,8 +146,8 @@ static int add_offset_if_necessary(GtRange *range, GtGFF3Parser *parser,
   return had_err;
 }
 
-static int parse_target_attribute(const char *value, GtStr *target_id,
-                                  GtRange *target_range,
+static int parse_target_attribute(const char *value, bool tidy,
+                                  GtStr *target_id, GtRange *target_range,
                                   GtStrand *target_strand,
                                   GtStrArray *target_ids,
                                   GtArray *target_ranges,
@@ -187,9 +187,18 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
     gt_str_array_add(target_ids, unescaped_target);
   /* parse target range */
   if (!had_err) {
-    had_err = gt_parse_range(&parsed_range, gt_splitter_get_token(splitter, 1),
-                          gt_splitter_get_token(splitter, 2), line_number,
-                          filename, err);
+    if (tidy) {
+      had_err = gt_parse_range_tidy(&parsed_range,
+                                    gt_splitter_get_token(splitter, 1),
+                                    gt_splitter_get_token(splitter, 2),
+                                    line_number, filename, err);
+    }
+    else {
+      had_err = gt_parse_range(&parsed_range,
+                               gt_splitter_get_token(splitter, 1),
+                               gt_splitter_get_token(splitter, 2), line_number,
+                               filename, err);
+    }
   }
   if (!had_err && target_range)
     *target_range = parsed_range;
@@ -221,7 +230,7 @@ static int parse_target_attribute(const char *value, GtStr *target_id,
   return had_err;
 }
 
-static int parse_target_attributes(const char *values,
+static int parse_target_attributes(const char *values, bool tidy,
                                    unsigned long *num_of_targets,
                                    GtStr *first_target_id,
                                    GtRange *first_target_range,
@@ -245,7 +254,7 @@ static int parse_target_attributes(const char *values,
   if (num_of_targets)
     *num_of_targets = gt_splitter_size(splitter);
   for (i = 0; !had_err && i < gt_splitter_size(splitter); i++) {
-    had_err = parse_target_attribute(gt_splitter_get_token(splitter, i),
+    had_err = parse_target_attribute(gt_splitter_get_token(splitter, i), tidy,
                                      i ? NULL : first_target_id,
                                      i ? NULL : first_target_range,
                                      i ? NULL : first_target_strand,
@@ -266,21 +275,22 @@ int gt_gff3_parser_parse_target_attributes(const char *values,
                                            unsigned int line_number,
                                            GtError *err)
 {
-  return parse_target_attributes(values, num_of_targets, first_target_id,
+  return parse_target_attributes(values, false, num_of_targets, first_target_id,
                                  first_target_range, first_target_strand, NULL,
                                  NULL, NULL, filename, line_number, err);
 }
 
-void gt_gff3_parser_parse_all_target_attributes(const char *values,
-                                                GtStrArray *target_ids,
-                                                GtArray *target_ranges,
-                                                GtArray *target_strands)
+int gt_gff3_parser_parse_all_target_attributes(const char *values, bool tidy,
+                                               GtStrArray *target_ids,
+                                               GtArray *target_ranges,
+                                               GtArray *target_strands,
+                                               const char *filename,
+                                               unsigned int line_number,
+                                               GtError *err)
 {
-  GT_UNUSED int had_err;
-  had_err = parse_target_attributes(values, NULL, NULL, NULL, NULL, target_ids,
-                                    target_ranges, target_strands, "", 0,
-                                    NULL);
-  gt_assert(!had_err); /* has to be parsed already */
+  return parse_target_attributes(values, tidy, NULL, NULL, NULL, NULL,
+                                 target_ids, target_ranges, target_strands,
+                                 filename, line_number, err);
 }
 
 static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
@@ -872,6 +882,30 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
   return had_err;
 }
 
+static void build_new_target(GtStr *target, GtStrArray *target_ids,
+                             GtArray *target_ranges, GtArray *target_strands)
+{
+  unsigned long i;
+  gt_assert(target && target_ids && target_ranges && target_strands);
+  for (i = 0; i < gt_str_array_size(target_ids); i++) {
+    GtRange *range;
+    GtStrand *strand;
+    range = gt_array_get(target_ranges, i);
+    strand = gt_array_get(target_strands, i);
+    if (i)
+      gt_str_append_char(target, ',');
+    gt_str_append_cstr(target, gt_str_array_get(target_ids, i));
+    gt_str_append_char(target, ' ');
+    gt_str_append_ulong(target, range->start);
+    gt_str_append_char(target, ' ');
+    gt_str_append_ulong(target, range->end);
+    if (*strand != GT_NUM_OF_STRAND_TYPES) {
+      gt_str_append_char(target, ' ');
+      gt_str_append_char(target, GT_STRAND_CHARS[*strand]);
+    }
+  }
+}
+
 static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                             bool *is_child, GtGFF3Parser *parser,
                             GtQueue *genome_nodes, const char *filename,
@@ -1008,6 +1042,35 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         had_err = gt_gff3_parser_parse_target_attributes(attr_value, NULL, NULL,
                                                          NULL, NULL, filename,
                                                          line_number, err);
+        if (had_err && parser->tidy) {
+          GtStrArray *target_ids;
+          GtArray *target_ranges, *target_strands;
+          /* try to tidy up the ``Target'' attributes */
+          had_err = 0;
+          gt_error_unset(err);
+          target_ids = gt_str_array_new();
+          target_ranges = gt_array_new(sizeof (GtRange));
+          target_strands = gt_array_new(sizeof (GtStrand));
+          had_err = gt_gff3_parser_parse_all_target_attributes(attr_value, true,
+                                                               target_ids,
+                                                               target_ranges,
+                                                               target_strands,
+                                                               filename,
+                                                               line_number,
+                                                               err);
+          if (!had_err) {
+            GtStr *new_target = gt_str_new();
+            build_new_target(new_target, target_ids, target_ranges,
+                             target_strands);
+            gt_feature_node_set_attribute((GtFeatureNode*) feature_node,
+                                          GT_GFF_TARGET,
+                                          gt_str_get(new_target));
+            gt_str_delete(new_target);
+          }
+          gt_array_delete(target_strands);
+          gt_array_delete(target_ranges);
+          gt_str_array_delete(target_ids);
+        }
       }
     }
   }

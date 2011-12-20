@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -79,7 +79,7 @@ static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
   GtArray *target_ranges, *target_strands;
   GtStr *desc, *new_seqid;
   unsigned long i;
-  int had_err = 0;
+  int had_err;
   gt_error_check(err);
   gt_assert(fn && target && region_mapping);
   target_ids = gt_str_array_new();
@@ -87,8 +87,11 @@ static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
   target_strands = gt_array_new(sizeof (GtStrand));
   desc = gt_str_new();
   new_seqid = gt_str_new();
-  gt_gff3_parser_parse_all_target_attributes(target, target_ids, target_ranges,
-                                             target_strands);
+  had_err = gt_gff3_parser_parse_all_target_attributes(target, false,
+                                                       target_ids,
+                                                       target_ranges,
+                                                       target_strands, "", 0,
+                                                       err);
   for (i = 0; !had_err && i < gt_str_array_size(target_ids); i++) {
     GtStr *seqid;
     gt_str_reset(desc);
