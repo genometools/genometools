@@ -882,8 +882,9 @@ static int check_multi_feature_constrains(GtGenomeNode *new_gf,
   return had_err;
 }
 
-static void build_new_target(GtStr *target, GtStrArray *target_ids,
-                             GtArray *target_ranges, GtArray *target_strands)
+void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
+                                     GtArray *target_ranges,
+                                     GtArray *target_strands)
 {
   unsigned long i;
   gt_assert(target && target_ids && target_ranges && target_strands);
@@ -1060,8 +1061,8 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                                                                err);
           if (!had_err) {
             GtStr *new_target = gt_str_new();
-            build_new_target(new_target, target_ids, target_ranges,
-                             target_strands);
+            gt_gff3_parser_build_target_str(new_target, target_ids,
+                                            target_ranges, target_strands);
             gt_feature_node_set_attribute((GtFeatureNode*) feature_node,
                                           GT_GFF_TARGET,
                                           gt_str_get(new_target));

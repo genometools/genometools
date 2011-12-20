@@ -46,31 +46,6 @@ typedef struct {
   GtRegionMapping *region_mapping;
 } M2IChangeSeqidInfo;
 
-static void m2i_build_new_target(GtStr *target, GtStrArray *target_ids,
-                                 GtArray *target_ranges,
-                                 GtArray *target_strands)
-{
-  unsigned long i;
-  gt_assert(target && target_ids && target_ranges && target_strands);
-  for (i = 0; i < gt_str_array_size(target_ids); i++) {
-    GtRange *range;
-    GtStrand *strand;
-    range = gt_array_get(target_ranges, i);
-    strand = gt_array_get(target_strands, i);
-    if (i)
-      gt_str_append_char(target, ',');
-    gt_str_append_cstr(target, gt_str_array_get(target_ids, i));
-    gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->start);
-    gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->end);
-    if (*strand != GT_NUM_OF_STRAND_TYPES) {
-      gt_str_append_char(target, ' ');
-      gt_str_append_char(target, GT_STRAND_CHARS[*strand]);
-    }
-  }
-}
-
 static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
                                     GtRegionMapping *region_mapping,
                                     GtError *err)
@@ -105,7 +80,8 @@ static int m2i_change_target_seqids(GtFeatureNode *fn, const char *target,
   }
   if (!had_err) {
     GtStr *new_target = gt_str_new();
-    m2i_build_new_target(new_target, target_ids, target_ranges, target_strands);
+    gt_gff3_parser_build_target_str(new_target, target_ids, target_ranges,
+                                    target_strands);
     gt_feature_node_set_attribute(fn, GT_GFF_TARGET, gt_str_get(new_target));
     gt_str_delete(new_target);
   }

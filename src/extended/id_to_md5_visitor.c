@@ -48,42 +48,18 @@ typedef struct {
   unsigned long offset;
 } I2MChangeSeqidInfo;
 
-static void i2m_build_new_target(GtStr *target, GtStrArray *target_ids,
-                                 GtArray *target_ranges,
-                                 GtArray *target_strands)
-{
-  unsigned long i;
-  gt_assert(target && target_ids && target_ranges && target_strands);
-  for (i = 0; i < gt_str_array_size(target_ids); i++) {
-    GtRange *range;
-    GtStrand *strand;
-    range = gt_array_get(target_ranges, i);
-    strand = gt_array_get(target_strands, i);
-    if (i)
-      gt_str_append_char(target, ',');
-    gt_str_append_cstr(target, GT_MD5_SEQID_PREFIX);
-    gt_str_append_cstr(target, gt_str_array_get(target_ids, i));
-    gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->start);
-    gt_str_append_char(target, ' ');
-    gt_str_append_ulong(target, range->end);
-    if (*strand != GT_NUM_OF_STRAND_TYPES) {
-      gt_str_append_char(target, ' ');
-      gt_str_append_char(target, GT_STRAND_CHARS[*strand]);
-    }
-  }
-}
-
 static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
                                     GtRegionMapping *region_mapping,
                                     GtError *err)
 {
-  GtStrArray *target_ids;
   GtArray *target_ranges, *target_strands;
+  GtStrArray *target_ids;
   unsigned long i;
+  GtStr *md5str;
   int had_err;
   gt_error_check(err);
   gt_assert(fn && target && region_mapping);
+  md5str = gt_str_new();
   target_ids = gt_str_array_new();
   target_ranges = gt_array_new(sizeof (GtRange));
   target_strands = gt_array_new(sizeof (GtStrand));
@@ -105,7 +81,9 @@ static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
     }
     if (!had_err) {
       GtRange transformed_range;
-      gt_str_array_set_cstr(target_ids, i, md5);
+      gt_str_set(md5str, GT_MD5_SEQID_PREFIX);
+      gt_str_append_cstr(md5str, md5);
+      gt_str_array_set(target_ids, i, md5str);
       gt_assert(offset);
       transformed_range = gt_range_offset(range, -(offset - 1));
       range->start = transformed_range.start;
@@ -114,13 +92,15 @@ static int i2m_change_target_seqids(GtFeatureNode *fn, const char *target,
   }
   if (!had_err) {
     GtStr *new_target = gt_str_new();
-    i2m_build_new_target(new_target, target_ids, target_ranges, target_strands);
+    gt_gff3_parser_build_target_str(new_target, target_ids, target_ranges,
+                                    target_strands);
     gt_feature_node_set_attribute(fn, GT_GFF_TARGET, gt_str_get(new_target));
     gt_str_delete(new_target);
   }
   gt_array_delete(target_strands);
   gt_array_delete(target_ranges);
   gt_str_array_delete(target_ids);
+  gt_str_delete(md5str);
   return had_err;
 }
 
