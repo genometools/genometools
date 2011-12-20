@@ -1333,8 +1333,14 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       }
     }
     if (!had_err) {
-      had_err = gt_parse_range(&range, seqstart, tmpline, line_number, filename,
-                               err);
+      if (parser->tidy) {
+        had_err = gt_parse_range_tidy(&range, seqstart, tmpline, line_number,
+                                      filename, err);
+      }
+      else {
+        had_err = gt_parse_range(&range, seqstart, tmpline, line_number,
+                                 filename, err);
+      }
     }
     if (!had_err && range.start == 0) {
       gt_error_set(err, "illegal region start 0 on line %u in file \"%s\" "
