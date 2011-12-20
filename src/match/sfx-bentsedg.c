@@ -835,7 +835,7 @@ static bool allowforshortreadsort(const Sfxstrategy *sfxstrategy,
                                   const GtEncseq *encseq)
 {
   return (!sfxstrategy->cmpcharbychar
-          && gt_encseq_max_seq_length(encseq) <= 1500UL)
+          && gt_encseq_lengthoflongestnonspecial(encseq) <= 1100UL)
           ? true : false;
 }
 

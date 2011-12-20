@@ -42,21 +42,23 @@ struct GtShortreadsortworkinfo
                                     otherwise: NULL if lcpvalues are
                                     not required */
   GtArrayGtTwobitencoding tbereservoir;
-  unsigned long tmplcplen, sumofstoredvalues;
+  unsigned long tmplcplen, currentbucketsize, sumofstoredvalues;
   bool fwd, complement;
 };
 
-static unsigned long gt_shortreadsort_allocate_size(unsigned long maxwidth)
+static unsigned long gt_shortreadsort_allocate_size(unsigned long maxwidth,
+                                                    double factor)
 {
-  return (unsigned long) (maxwidth * 1.8);
+  return (unsigned long) (maxwidth * factor);
 }
 
-size_t gt_shortreadsort_size(bool firstcodes,unsigned long maxwidth)
+size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize)
 {
-  size_t sizeforlcpvalues = firstcodes ? (sizeof (uint16_t) * maxwidth) : 0;
+  size_t sizeforlcpvalues = firstcodes ? (sizeof (uint16_t) * bucketsize) : 0;
   return sizeforlcpvalues +
-         sizeof (GtShortreadsort) * maxwidth +
-         sizeof (GtTwobitencoding) * gt_shortreadsort_allocate_size(maxwidth);
+         sizeof (GtShortreadsort) * bucketsize +
+         sizeof (GtTwobitencoding) * gt_shortreadsort_allocate_size(bucketsize,
+                                                                    1.8);
 }
 
 const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
@@ -66,6 +68,44 @@ const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
   return srsw->firstcodeslcpvalues;
 }
 
+void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
+                             unsigned long bucketsize,
+                             bool firstcodes,
+                             double factor)
+{
+  gt_assert(bucketsize <= (unsigned long) UINT32_MAX);
+  if (srsw->currentbucketsize < bucketsize)
+  {
+    srsw->shortreadsorttable = gt_realloc(srsw->shortreadsorttable,
+                                          sizeof (*srsw->shortreadsorttable) *
+                                          bucketsize);
+  }
+  if (firstcodes)
+  {
+    if (srsw->currentbucketsize < bucketsize)
+    {
+      srsw->firstcodeslcpvalues
+        = gt_realloc(srsw->firstcodeslcpvalues,
+                     sizeof (*srsw->firstcodeslcpvalues) * bucketsize);
+      srsw->firstcodeslcpvalues[0] = 0; /* since it is not set otherwise */
+    }
+  } else
+  {
+    srsw->firstcodeslcpvalues = NULL;
+  }
+  srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
+  if (srsw->currentbucketsize < bucketsize)
+  {
+    srsw->tbereservoir.allocatedGtTwobitencoding
+      = gt_shortreadsort_allocate_size(bucketsize,factor);
+    srsw->tbereservoir.spaceGtTwobitencoding
+      = gt_realloc(srsw->tbereservoir.spaceGtTwobitencoding,
+                   sizeof (GtTwobitencoding) *
+                   srsw->tbereservoir.allocatedGtTwobitencoding);
+    srsw->currentbucketsize = bucketsize;
+  }
+}
+
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               GtReadmode readmode,
                                               bool firstcodes)
@@ -73,28 +113,18 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   GtShortreadsortworkinfo *srsw;
 
   srsw = gt_malloc(sizeof (*srsw));
-  gt_assert(maxwidth <= (unsigned long) UINT32_MAX);
-  srsw->shortreadsorttable
-    = gt_malloc(sizeof (*srsw->shortreadsorttable) * maxwidth);
-  if (firstcodes)
-  {
-    srsw->firstcodeslcpvalues
-      = gt_malloc(sizeof (*srsw->firstcodeslcpvalues) * maxwidth);
-    srsw->firstcodeslcpvalues[0] = 0; /* since it is not set otherwise */
-  } else
-  {
-    srsw->firstcodeslcpvalues = NULL;
-  }
   srsw->fwd = GT_ISDIRREVERSE(readmode) ? false : true;
   srsw->complement = GT_ISDIRCOMPLEMENT(readmode) ? true : false;
   srsw->sssplcpvalues = NULL;
   srsw->sumofstoredvalues = 0;
-  srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
-  srsw->tbereservoir.allocatedGtTwobitencoding
-    = gt_shortreadsort_allocate_size(maxwidth);
-  srsw->tbereservoir.spaceGtTwobitencoding
-    = gt_malloc(sizeof (GtTwobitencoding) *
-                srsw->tbereservoir.allocatedGtTwobitencoding);
+  srsw->currentbucketsize = 0;
+  srsw->shortreadsorttable = NULL;
+  srsw->firstcodeslcpvalues = NULL;
+  GT_INITARRAY(&srsw->tbereservoir,GtTwobitencoding);
+  if (maxwidth > 0)
+  {
+    gt_shortreadsort_resize(srsw,maxwidth,firstcodes,1.8);
+  }
   return srsw;
 }
 
