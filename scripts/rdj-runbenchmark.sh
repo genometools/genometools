@@ -438,7 +438,7 @@ function run_sga_assembly {
   _READSET=$1
   __READS=$READSETSDIR/$_READSET.reads.fas
   _CMD=$SGA
-  _CMD_ARGS=="assemble $2 -v $1.reads.asqg.gz"
+  _CMD_ARGS="assemble $2 -v $1.reads.asqg.gz"
   __start
   __append_version_sga
   __run
