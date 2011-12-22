@@ -25,6 +25,7 @@
 #include "tools/gt_readjoiner_assembly.h"
 #include "tools/gt_readjoiner_cnttest.h"
 #include "tools/gt_readjoiner_spmtest.h"
+#include "tools/gt_readjoiner_correct.h"
 
 static void* gt_readjoiner_arguments_new(void)
 {
@@ -37,6 +38,8 @@ static void* gt_readjoiner_arguments_new(void)
       gt_readjoiner_cnttest());
   gt_toolbox_add_hidden_tool(readjoiner_toolbox, "spmtest",
       gt_readjoiner_spmtest());
+  gt_toolbox_add_hidden_tool(readjoiner_toolbox, "correct",
+      gt_readjoiner_correct());
   return readjoiner_toolbox;
 }
 

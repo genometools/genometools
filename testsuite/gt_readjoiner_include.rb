@@ -3,6 +3,12 @@ rdjA = "#{$bin}gt readjoiner assembly"
 spmtest = "#{$bin}gt readjoiner spmtest"
 cnttest = "#{$bin}gt readjoiner cnttest"
 
+def run_correct(input, k, c)
+  run "#{$bin}gt suffixerator -mirrored -suf -lcp -ssp"+
+      " -indexname reads -db #{input}"
+  run "#{$bin}gt readjoiner correct -k #{k} -c #{c} -ii reads"
+end
+
 def run_prefilter(input, moreopts="")
   run "#{$bin}gt readjoiner prefilter -readset reads "+
       "-db #{input} #{moreopts}"
@@ -25,6 +31,13 @@ end
 def prepare_esa(indexname, mirrored)
   run "#{$bin}gt suffixerator -ii #{indexname} -suf -lcp -ssp "+
       "#{mirrored ? '-mirrored' : ''}"
+end
+
+Name "gt readjoiner correct"
+Keywords "gt_readjoiner gt_readjoiner_correct"
+Test do
+  run_correct("#{$testdata}/readjoiner/errors_1.fas", 12, 2)
+  run "diff #{last_stdout} #{$testdata}/readjoiner/errors_1.editscript"
 end
 
 Name "gt readjoiner prefilter: correct encseq output (eqlen)"
