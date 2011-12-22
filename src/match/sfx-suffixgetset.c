@@ -220,7 +220,7 @@ void gt_suffixsortspace_setdirect(GtSuffixsortspace *sssp,
   if (value == 0)
   {
     sssp->longestidx.defined = true;
-    sssp->longestidx.valueunsignedlong = idx + sssp->partoffset;
+    sssp->longestidx.valueunsignedlong = sssp->partoffset + idx;
   }
   if (sssp->ulongtab != NULL)
   {

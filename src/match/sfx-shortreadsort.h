@@ -34,9 +34,11 @@
 
 typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 
-size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize);
+size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
+                             unsigned long maxremain);
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
+                                              unsigned long maxremain,
                                               GtReadmode readmode,
                                               bool firstcodes);
 
@@ -52,6 +54,7 @@ const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw);
 
 void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 const GtEncseq *encseq,
+                                unsigned long maxremain,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 GtSuffixsortspace *sssp,

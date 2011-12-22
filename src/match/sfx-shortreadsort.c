@@ -46,19 +46,29 @@ struct GtShortreadsortworkinfo
   bool fwd, complement;
 };
 
-static unsigned long gt_shortreadsort_allocate_size(unsigned long maxwidth,
-                                                    double factor)
+static unsigned long gt_shortreadsort_encoding_size(unsigned long bucketsize,
+                                                    unsigned long maxremain)
 {
-  return (unsigned long) (maxwidth * factor);
+  double factor = 1.0;
+
+  if (maxremain > (2UL * (unsigned long) GT_UNITSIN2BITENC))
+  {
+    factor += maxremain/(2UL * (unsigned long) GT_UNITSIN2BITENC);
+  } else
+  {
+    factor = 1.0;
+  }
+  return (unsigned long) (bucketsize * factor);
 }
 
-size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize)
+size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
+                             unsigned long maxremain)
 {
-  size_t sizeforlcpvalues = firstcodes ? (sizeof (uint16_t) * bucketsize) : 0;
+  size_t sizeforlcpvalues = firstcodes ? sizeof (uint16_t) * bucketsize : 0;
   return sizeforlcpvalues +
          sizeof (GtShortreadsort) * bucketsize +
-         sizeof (GtTwobitencoding) * gt_shortreadsort_allocate_size(bucketsize,
-                                                                    1.8);
+         sizeof (GtTwobitencoding) *
+         gt_shortreadsort_encoding_size(bucketsize,maxremain);
 }
 
 const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
@@ -68,10 +78,10 @@ const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
   return srsw->firstcodeslcpvalues;
 }
 
-void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
-                             unsigned long bucketsize,
-                             bool firstcodes,
-                             double factor)
+static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
+                                    bool firstcodes,
+                                    unsigned long bucketsize,
+                                    unsigned long maxremain)
 {
   gt_assert(bucketsize <= (unsigned long) UINT32_MAX);
   if (srsw->currentbucketsize < bucketsize)
@@ -97,7 +107,7 @@ void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
   if (srsw->currentbucketsize < bucketsize)
   {
     srsw->tbereservoir.allocatedGtTwobitencoding
-      = gt_shortreadsort_allocate_size(bucketsize,factor);
+        = gt_shortreadsort_encoding_size(bucketsize,maxremain);
     srsw->tbereservoir.spaceGtTwobitencoding
       = gt_realloc(srsw->tbereservoir.spaceGtTwobitencoding,
                    sizeof (GtTwobitencoding) *
@@ -107,6 +117,7 @@ void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
 }
 
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
+                                              unsigned long maxremain,
                                               GtReadmode readmode,
                                               bool firstcodes)
 {
@@ -123,7 +134,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   GT_INITARRAY(&srsw->tbereservoir,GtTwobitencoding);
   if (maxwidth > 0)
   {
-    gt_shortreadsort_resize(srsw,maxwidth,firstcodes,1.8);
+    gt_shortreadsort_resize(srsw,firstcodes,maxwidth,maxremain);
   }
   return srsw;
 }
@@ -147,10 +158,13 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
   }
 }
 
-void gt_shortreadsort_assigntableoflcpvalues(
-          GtShortreadsortworkinfo *srsw,GtLcpvalues *tableoflcpvalues)
+void gt_shortreadsort_assigntableoflcpvalues(GtShortreadsortworkinfo *srsw,
+                                             GtLcpvalues *tableoflcpvalues)
 {
-  srsw->sssplcpvalues = tableoflcpvalues;
+  if (srsw != NULL)
+  {
+    srsw->sssplcpvalues = tableoflcpvalues;
+  }
 }
 
 static int gt_shortreadsort_compare(const GtShortreadsort *aq,
@@ -532,6 +546,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
 
 void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 const GtEncseq *encseq,
+                                unsigned long maxremain,
                                 GtReadmode readmode,
                                 GtEncseqReader *esr,
                                 GtSuffixsortspace *sssp,
@@ -542,6 +557,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   unsigned long idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
 
+  gt_shortreadsort_resize(srsw, false, width, maxremain);
   exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   if (exportptr->ulongtabsectionptr != NULL)
@@ -585,7 +601,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
         = srsw->shortreadsorttable[idx].suffixrepresentation;
       if (exportptr->ulongtabsectionptr[idx] == 0)
       {
-        gt_suffixsortspace_updatelongest(sssp,idx);
+        gt_suffixsortspace_updatelongest(sssp,subbucketleft + idx);
       }
     }
   } else
@@ -596,7 +612,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
         = (uint32_t) srsw->shortreadsorttable[idx].suffixrepresentation;
       if (exportptr->uinttabsectionptr[idx] == 0)
       {
-        gt_suffixsortspace_updatelongest(sssp,idx);
+        gt_suffixsortspace_updatelongest(sssp,subbucketleft + idx);
       }
     }
   }

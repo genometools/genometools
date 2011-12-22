@@ -214,7 +214,6 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
   }
   if (!had_err)
   {
-    oi->sfxstrategy.maxshortreadsort = MAXSHORTREADSORTDEFAULT;
     if (gt_option_is_set(oi->optionalgbounds))
     {
       if (gt_parse_algbounds(&oi->sfxstrategy,oi->algbounds,err) != 0)
