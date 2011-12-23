@@ -1,19 +1,24 @@
+/*
+  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #ifndef FIRSTCODES_SCAN_H
 #define FIRSTCODES_SCAN_H
 
-#include "core/intbits.h"
-#include "core/codetype.h"
 #include "core/encseq_api.h"
-
-unsigned long gt_firstcodes_kmerscan(const GtBitsequence *twobitencoding,
-                                     bool withcheck,
-                                     unsigned long equallength,
-                                     unsigned long totallength,
-                                     unsigned long maxunitindex,
-                                     unsigned int kmersize,
-                                     void (*processcode)(GtCodetype,GtCodetype,
-                                                         unsigned long,void *),
-                                     void *data);
 
 void gt_firstcode_runkmerscan(const GtEncseq *encseq,
                               bool withcheck,unsigned int kmersize);
