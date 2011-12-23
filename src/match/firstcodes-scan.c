@@ -170,7 +170,8 @@ unsigned long gt_firstcodes_kmerscan(const GtEncseq *encseq,
     GtRange range;
 
     sri = gt_specialrangeiterator_new(encseq,true);
-    while (gt_specialrangeiterator_next(sri,&range))
+    while (gt_specialrangeiterator_next(sri,&range)
+           && range.start < totallength)
     {
       gt_assert(range.start >= laststart);
       if (range.start - laststart >= (unsigned long) kmersize)
