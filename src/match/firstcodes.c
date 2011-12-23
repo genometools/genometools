@@ -29,6 +29,9 @@
 #include "core/spacepeak.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread.h"
+#endif
 #include "firstcodes-buf.h"
 #include "firstcodes-scan.h"
 #include "firstcodes-spacelog.h"
@@ -633,6 +636,9 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   }
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   current = gt_firstcodes_get_leftborder(fct,minindex);
+#ifdef GT_THREADS_ENABLED
+  printf("jobs=%u\n",gt_jobs);
+#endif
   for (idx = minindex; idx <=maxindex; idx++)
   {
     if (idx < maxindex)
