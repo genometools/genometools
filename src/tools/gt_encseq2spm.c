@@ -177,8 +177,9 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_is_development_option(option);
 
   /* -singlescan */
-  option = gt_option_new_uint("singlescan", "run a single scan: 1: fast; "
-                              "2: fast with check; 3: sfx-mapped4-version",
+  option = gt_option_new_uint("singlescan", "run a single scan: 1=fast; "
+                              "2=fast with check; 3=fast with output; "
+                              "4=sfx-mapped4-version",
                               &arguments->singlescan, 0);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
@@ -291,6 +292,9 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
           outmsg = "to run fast scanning with check";
           break;
         case 3:
+          outmsg = "to run fast scanning with output";
+          break;
+        case 4:
           outmsg = "to run old scanning code";
           break;
         default:
@@ -309,17 +313,14 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       unsigned int kmersize;
       kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
                      arguments->minmatchlength);
-      if (arguments->singlescan == 1U)
+      if (arguments->singlescan == 4U)
       {
-        gt_firstcode_runkmerscan(encseq,false,kmersize);
+        gt_rungetencseqkmers(encseq,kmersize);
       } else
       {
-        if (arguments->singlescan == 2U)
+        if (arguments->singlescan > 0)
         {
-          gt_firstcode_runkmerscan(encseq,true,kmersize);
-        } else
-        {
-          gt_rungetencseqkmers(encseq,kmersize);
+          gt_firstcode_runkmerscan(encseq,arguments->singlescan - 1,kmersize);
         }
       }
     }

@@ -21,6 +21,6 @@
 #include "core/encseq_api.h"
 
 void gt_firstcode_runkmerscan(const GtEncseq *encseq,
-                              bool withcheck,unsigned int kmersize);
+                              unsigned int mode,unsigned int kmersize);
 
 #endif
