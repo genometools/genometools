@@ -8,10 +8,10 @@ maxvallist = [922332036854775807,10000]
 methods.each do |met|
   lenlist.each do |len|
     maxvallist.each do |maxv|
-      Name "gt qsortbench #{met}"
-      Keywords "gt_qsortbench"
+      Name "gt sortbench #{met}"
+      Keywords "gt_sortbench"
       Test do
-        run "#{$bin}gt dev qsortbench -impl #{met} -size #{len} -maxval #{maxv}"
+        run "#{$bin}gt dev sortbench -impl #{met} -size #{len} -maxval #{maxv}"
       end
     end
   end

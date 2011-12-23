@@ -26,7 +26,7 @@
 #include "core/mathsupport.h"
 #include "core/unused_api.h"
 #include "core/radix-intsort.h"
-#include "tools/gt_qsortbench.h"
+#include "tools/gt_sortbench.h"
 
 typedef struct {
   GtStr *impl;
@@ -37,14 +37,14 @@ typedef struct {
        verbose;
 } QSortBenchArguments;
 
-static void* gt_qsortbench_arguments_new(void)
+static void* gt_sortbench_arguments_new(void)
 {
   QSortBenchArguments *arguments = gt_calloc((size_t) 1, sizeof *arguments);
   arguments->impl = gt_str_new();
   return arguments;
 }
 
-static void gt_qsortbench_arguments_delete(void *tool_arguments)
+static void gt_sortbench_arguments_delete(void *tool_arguments)
 {
   QSortBenchArguments *arguments = tool_arguments;
   if (!arguments) return;
@@ -52,12 +52,12 @@ static void gt_qsortbench_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static const char *gt_qsort_implementation_names[]
+static const char *gt_sort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct",
        "radixlinsmall","radixlinlarge","radixrec","radixdiv",
        "radixlinsmall2","radixlinlarge2",NULL};
 
-static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 {
   QSortBenchArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -74,8 +74,8 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
                                 "radixlinsmall|radixlinlarge|radixrec|\n"
                                 "radixdiv|radixlinsmall2|radixlinslarge2",
                                 arguments->impl,
-                                gt_qsort_implementation_names[0],
-                                gt_qsort_implementation_names);
+                                gt_sort_implementation_names[0],
+                                gt_sort_implementation_names);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_ulong("size", "number of integers to sort",
@@ -101,7 +101,7 @@ static GtOptionParser* gt_qsortbench_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_qsortbench_arguments_check(GT_UNUSED int rest_argc,
+static int gt_sortbench_arguments_check(GT_UNUSED int rest_argc,
                                        GT_UNUSED void *tool_arguments,
                                        GT_UNUSED GtError *err)
 {
@@ -134,7 +134,7 @@ unsigned long candidate;    /* pivot candidate */
 unsigned long gas;          /* gas value = highest sorted value */
 #define freeze(x) val[x] = nsolid++
 
-static int gt_qsortbench_cmp(const void *px, const void *py)
+static int gt_sortbench_cmp(const void *px, const void *py)
 {
   const unsigned long x = *(const unsigned long*)px;
   const unsigned long y = *(const unsigned long*)py;
@@ -161,7 +161,7 @@ static int gt_qsortbench_cmp(const void *px, const void *py)
   return 0;
 }
 
-static void gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
+static void gt_sortbench_aqsort(unsigned long n, unsigned long *a)
 {
   unsigned long i;
   unsigned long *ptr = gt_malloc(sizeof (*ptr) * n);
@@ -173,7 +173,7 @@ static void gt_qsortbench_aqsort(unsigned long n, unsigned long *a)
     ptr[i] = i;
     val[i] = gas;
   }
-  qsort(ptr, (size_t) n, sizeof (*ptr), gt_qsortbench_cmp);
+  qsort(ptr, (size_t) n, sizeof (*ptr), gt_sortbench_cmp);
   for (i=1UL;i<n;i++)
     gt_assert(val[ptr[i]]==val[ptr[i-1]]+1);
   gt_free(ptr);
@@ -202,11 +202,11 @@ static int qsortcmp(const Sorttype *a,const Sorttype *b,
 #undef  QSORTNAME
 #endif
 
-#define QSORTNAME(NAME) qsortbench_##NAME
+#define QSORTNAME(NAME) sortbench_##NAME
 
-#define qsortbench_ARRAY_GET(ARR,RELIDX) ARR[RELIDX]
+#define sortbench_ARRAY_GET(ARR,RELIDX) ARR[RELIDX]
 
-#define qsortbench_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
+#define sortbench_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
 
 typedef void * QSORTNAME(Datatype);
 
@@ -229,7 +229,7 @@ static int QSORTNAME(qsortcmparr)(const QSORTNAME(Sorttype) *arr,
   return 0;
 }
 
-static void gt_qsortbench_verify(GT_UNUSED const unsigned long *arr,
+static void gt_sortbench_verify(GT_UNUSED const unsigned long *arr,
                                  unsigned long len)
 {
   unsigned long idx;
@@ -246,7 +246,7 @@ static void gt_qsortbench_verify(GT_UNUSED const unsigned long *arr,
 static void check_inlinedarr_qsort(unsigned long *arr, unsigned long len)
 {
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, arr, len, NULL);
-  gt_qsortbench_verify(arr,len);
+  gt_sortbench_verify(arr,len);
 }
 
 #include "match/qsort-direct.gen"
@@ -254,10 +254,10 @@ static void check_inlinedarr_qsort(unsigned long *arr, unsigned long len)
 static void check_direct_qsort(unsigned long *arr, unsigned long len)
 {
   QSORTNAME(gt_direct_qsort) (6UL, false, arr, len);
-  gt_qsortbench_verify(arr,len);
+  gt_sortbench_verify(arr,len);
 }
 
-static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
+static int sortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 {
   cmpcount++;
   if (*(Sorttype*)a < *((Sorttype*)b))
@@ -275,11 +275,11 @@ static int qsortcmpwithdata(const void *a,const void *b, GT_UNUSED void *data)
 
 static void check_thomas_qsort(unsigned long *arr, unsigned long len)
 {
-  gt_qsort_r(arr,(size_t) len,sizeof (Sorttype),NULL, qsortcmpwithdata);
-  gt_qsortbench_verify(arr,len);
+  gt_qsort_r(arr,(size_t) len,sizeof (Sorttype),NULL, sortcmpwithdata);
+  gt_sortbench_verify(arr,len);
 }
 
-static int qsortcmpnodata(const void *a,const void *b)
+static int sortcmpnodata(const void *a,const void *b)
 {
   cmpcount++;
   if (*(Sorttype*)a < *((Sorttype*)b))
@@ -295,14 +295,14 @@ static int qsortcmpnodata(const void *a,const void *b)
 
 static void check_gnu_qsort(unsigned long *arr, unsigned long len)
 {
-  qsort(arr,(size_t) len, sizeof (Sorttype), qsortcmpnodata);
-  gt_qsortbench_verify(arr,len);
+  qsort(arr,(size_t) len, sizeof (Sorttype), sortcmpnodata);
+  gt_sortbench_verify(arr,len);
 }
 
 static void check_inlinedptr_qsort(unsigned long *arr, unsigned long len)
 {
   gt_inlined_qsort_r(arr, len, NULL);
-  gt_qsortbench_verify(arr,len);
+  gt_sortbench_verify(arr,len);
 }
 
 static void check_radixsort_GtUlong_linear_gen(bool smalltables,
@@ -317,7 +317,7 @@ static void check_radixsort_GtUlong_linear_gen(bool smalltables,
   if (parts == 1U)
   {
     gt_radixsort_linear(radixsort,len);
-    gt_qsortbench_verify(arr,len);
+    gt_sortbench_verify(arr,len);
   } else
   {
     GtRadixreader radixreader;
@@ -357,7 +357,7 @@ static void check_radixsort_GtUlong_recursive(unsigned long *arr,
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
   gt_radixsort_GtUlong_recursive(arr, temp, len);
-  gt_qsortbench_verify(arr,len);
+  gt_sortbench_verify(arr,len);
   gt_free(temp);
 }
 
@@ -367,13 +367,13 @@ static void check_radixsort_GtUlong_divide(unsigned long *arr,
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
   gt_radixsort_GtUlong_divide(arr, temp, len);
-  gt_qsortbench_verify(arr,len);
+  gt_sortbench_verify(arr,len);
   gt_free(temp);
 }
 
 typedef void (*GtQsortimplementationfunc)(unsigned long *,unsigned long);
 
-static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
+static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
 {
   check_thomas_qsort,
   check_gnu_qsort,
@@ -388,11 +388,11 @@ static GtQsortimplementationfunc gt_qsort_implementation_funcs[] =
   check_radixsort_GtUlong_linear_large2
 };
 
-#define GT_NUM_OF_QSORT_IMPLEMENTATIONS\
-        (sizeof (gt_qsort_implementation_funcs)/\
-         sizeof (gt_qsort_implementation_funcs[0]))
+#define GT_NUM_OF_SORT_IMPLEMENTATIONS\
+        (sizeof (gt_sort_implementation_funcs)/\
+         sizeof (gt_sort_implementation_funcs[0]))
 
-static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
+static int gt_sortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
                                 GT_UNUSED int parsed_args,
                                 void *tool_arguments, GT_UNUSED GtError *err)
 {
@@ -415,7 +415,7 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   if (arguments->use_aqsort) {
     if (arguments->verbose)
       printf("# using aqsort\n");
-    gt_qsortbench_aqsort(arguments->num_values, array);
+    gt_sortbench_aqsort(arguments->num_values, array);
   } else if (arguments->use_permute) {
     if (arguments->verbose)
       printf("# using permuted array\n");
@@ -436,12 +436,12 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   timer = gt_timer_new();
   gt_timer_start(timer);
   /* run implementation */
-  for (method = 0; method < GT_NUM_OF_QSORT_IMPLEMENTATIONS; method++)
+  for (method = 0; method < GT_NUM_OF_SORT_IMPLEMENTATIONS; method++)
   {
     if (strcmp(gt_str_get(arguments->impl),
-               gt_qsort_implementation_names[method]) == 0)
+               gt_sort_implementation_names[method]) == 0)
     {
-      gt_qsort_implementation_funcs[method](array, arguments->num_values);
+      gt_sort_implementation_funcs[method](array, arguments->num_values);
       break;
     }
   }
@@ -455,11 +455,11 @@ static int gt_qsortbench_runner(GT_UNUSED int argc, GT_UNUSED const char **argv,
   return had_err;
 }
 
-GtTool* gt_qsortbench(void)
+GtTool* gt_sortbench(void)
 {
-  return gt_tool_new(gt_qsortbench_arguments_new,
-                  gt_qsortbench_arguments_delete,
-                  gt_qsortbench_option_parser_new,
-                  gt_qsortbench_arguments_check,
-                  gt_qsortbench_runner);
+  return gt_tool_new(gt_sortbench_arguments_new,
+                     gt_sortbench_arguments_delete,
+                     gt_sortbench_option_parser_new,
+                     gt_sortbench_arguments_check,
+                     gt_sortbench_runner);
 }

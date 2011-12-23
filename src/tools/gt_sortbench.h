@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_QSORTBENCH_H
-#define GT_QSORTBENCH_H
+#ifndef GT_SORTBENCH_H
+#define GT_SORTBENCH_H
 
 #include "core/tool.h"
 
-/* the qsortbench tool */
-GtTool* gt_qsortbench(void);
+/* the sortbench tool */
+GtTool* gt_sortbench(void);
 
 #endif

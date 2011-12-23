@@ -44,7 +44,7 @@ env -i GT_MEM_BOOKKEEPING=on \
        ${program} -keywords 'gt_suffixerator and gttestdata' \
        -gttestdata ${GTTESTDATA}
 
-env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_qsortbench'
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_sortbench'
 
 env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_extractseq' \
        -gttestdata ${GTTESTDATA}
