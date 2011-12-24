@@ -47,16 +47,14 @@ static void gt_firstcode_verifycodes(const GtBitsequence *twobitencoding,
 }
 #endif
 
-typedef void (*GtProcesskmercode)(GtCodetype,
-                                  unsigned long,unsigned long,
-                                  GtCodetype,
-                                  unsigned long,unsigned long,
-                                  void *);
+typedef void (*GtProcesskmercode)(GtCodetype,unsigned long,
+                                  unsigned long,void *);
 
 static GtTwobitencoding gt_firstcodes_kmerscan_range(
                                          const GtBitsequence *twobitencoding,
                                          GT_UNUSED bool withcheck,
                                          unsigned int kmersize,
+                                         unsigned int minmatchlength,
                                          unsigned long startpos,
                                          unsigned long endpos,
                                          unsigned long fseqnum,
@@ -65,14 +63,14 @@ static GtTwobitencoding gt_firstcodes_kmerscan_range(
                                          GtProcesskmercode processcode,
                                          void *data)
 {
-  unsigned long position, unitindex, frelpos;
   GtTwobitencoding currentencoding, encodingsum = 0;
   unsigned int shiftright;
   const unsigned int shiftleft = GT_MULT2(kmersize-1);
-  GtCodetype fcode, rccode;
+  GtCodetype cc, fcode, rccode;
+  unsigned long position, unitindex, frelpos;
   const unsigned long maskright = GT_MASKRIGHT(kmersize);
+  const unsigned long lastpossiblepos = endpos - startpos - minmatchlength;
   const unsigned long lastfrelpos = endpos - startpos - kmersize;
-  GtCodetype cc;
 
   gt_assert(kmersize <= (unsigned int) GT_UNITSIN2BITENC);
   position = startpos;
@@ -81,7 +79,11 @@ static GtTwobitencoding gt_firstcodes_kmerscan_range(
                                   maskright);
   if (processcode != NULL)
   {
-    processcode(fcode,fseqnum,0,rccode,rseqnum,lastfrelpos,data);
+    processcode(fcode,fseqnum,0,data);
+    if (lastfrelpos <= lastpossiblepos)
+    {
+      processcode(rccode,rseqnum,lastfrelpos,data);
+    }
   }
   unitindex = GT_DIVBYUNITSIN2BITENC(startpos + kmersize);
   currentencoding = twobitencoding[unitindex];
@@ -101,8 +103,14 @@ static GtTwobitencoding gt_firstcodes_kmerscan_range(
     if (processcode != NULL)
     {
       gt_assert(lastfrelpos >= frelpos);
-      processcode(fcode,fseqnum,frelpos,
-                  rccode,rseqnum,lastfrelpos - frelpos,data);
+      if (frelpos <= lastpossiblepos)
+      {
+        processcode(fcode,fseqnum,frelpos,data);
+      }
+      if (lastfrelpos - frelpos <= lastpossiblepos)
+      {
+        processcode(rccode,rseqnum,lastfrelpos - frelpos,data);
+      }
     }
 #ifdef WITHCHECK
     if (withcheck)
@@ -132,20 +140,20 @@ static GtTwobitencoding gt_firstcodes_kmerscan_range(
   return encodingsum;
 }
 
-unsigned long gt_firstcodes_kmerscan_eqlen(
-                                     const GtBitsequence *twobitencoding,
-                                     bool withcheck,
-                                     unsigned long equallength,
-                                     unsigned long totallength,
-                                     unsigned long numofsequences,
-                                     unsigned long maxunitindex,
-                                     unsigned int kmersize,
-                                     GtProcesskmercode processcode,
-                                     void *data)
+unsigned long gt_firstcodes_kmerscan_eqlen(const GtBitsequence *twobitencoding,
+                                           bool withcheck,
+                                           unsigned long equallength,
+                                           unsigned long totallength,
+                                           unsigned long numofsequences,
+                                           unsigned long maxunitindex,
+                                           unsigned int kmersize,
+                                           unsigned int minmatchlength,
+                                           GtProcesskmercode processcode,
+                                           void *data)
 {
   unsigned long startpos, encodingsum = 0, fseqnum;
 
-  if (equallength > (unsigned long) kmersize)
+  if (equallength >= (unsigned long) minmatchlength)
   {
     for (startpos = 0, fseqnum = 0; startpos < totallength;
          startpos += equallength+1, fseqnum++)
@@ -154,6 +162,7 @@ unsigned long gt_firstcodes_kmerscan_eqlen(
                                                   twobitencoding,
                                                   withcheck,
                                                   kmersize,
+                                                  minmatchlength,
                                                   startpos,
                                                   startpos + equallength,
                                                   fseqnum,
@@ -173,6 +182,7 @@ unsigned long gt_firstcodes_kmerscan(const GtEncseq *encseq,
                                      unsigned long numofsequences,
                                      unsigned long maxunitindex,
                                      unsigned int kmersize,
+                                     unsigned int minmatchlength,
                                      GtProcesskmercode processcode,
                                      void *data)
 {
@@ -188,12 +198,13 @@ unsigned long gt_firstcodes_kmerscan(const GtEncseq *encseq,
            && range.start < totallength)
     {
       gt_assert(range.start >= laststart);
-      if (range.start - laststart >= (unsigned long) kmersize)
+      if (range.start - laststart >= (unsigned long) minmatchlength)
       {
         encodingsum += (unsigned long) gt_firstcodes_kmerscan_range(
                                                 twobitencoding,
                                                 withcheck,
                                                 kmersize,
+                                                minmatchlength,
                                                 laststart,
                                                 range.start,
                                                 fseqnum,
@@ -207,12 +218,13 @@ unsigned long gt_firstcodes_kmerscan(const GtEncseq *encseq,
     }
     gt_specialrangeiterator_delete(sri);
   }
-  if (totallength - laststart >= (unsigned long) kmersize)
+  if (totallength - laststart >= (unsigned long) minmatchlength)
   {
     encodingsum += (unsigned long) gt_firstcodes_kmerscan_range(
                                               twobitencoding,
                                               withcheck,
                                               kmersize,
+                                              minmatchlength,
                                               laststart,
                                               totallength,
                                               fseqnum,
@@ -224,20 +236,18 @@ unsigned long gt_firstcodes_kmerscan(const GtEncseq *encseq,
   return encodingsum;
 }
 
-static void showcodes (GtCodetype fcode,
-                       unsigned long fseqnum,
-                       unsigned long frelpos,
-                       GtCodetype rcode,
-                       unsigned long rseqnum,
-                       unsigned long rrelpos,
+static void showcodes (GtCodetype code,
+                       unsigned long seqnum,
+                       unsigned long relpos,
                        GT_UNUSED void *data)
 {
-  printf("%lu %lu %lu\n",fcode,fseqnum,frelpos);
-  printf("%lu %lu %lu\n",rcode,rseqnum,rrelpos);
+  printf("%c %lu %lu %lu\n",relpos == 0 ? 'T' : 'F',code,seqnum,relpos);
 }
 
 void gt_firstcode_runkmerscan(const GtEncseq *encseq,
-                              unsigned int mode,unsigned int kmersize)
+                              unsigned int mode,
+                              unsigned int kmersize,
+                              unsigned int minmatchlength)
 {
   const GtTwobitencoding *twobitencoding
     = gt_encseq_twobitencoding_export(encseq);
@@ -265,6 +275,7 @@ void gt_firstcode_runkmerscan(const GtEncseq *encseq,
                                                numofsequences,
                                                maxunitindex,
                                                kmersize,
+                                               minmatchlength,
                                                mode == 2U ? showcodes : NULL,
                                                NULL);
   } else
@@ -276,6 +287,7 @@ void gt_firstcode_runkmerscan(const GtEncseq *encseq,
                                          numofsequences,
                                          maxunitindex,
                                          kmersize,
+                                         minmatchlength,
                                          mode == 2U ? showcodes : NULL,
                                          NULL);
   }

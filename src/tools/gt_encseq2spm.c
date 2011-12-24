@@ -320,7 +320,8 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       {
         if (arguments->singlescan > 0)
         {
-          gt_firstcode_runkmerscan(encseq,arguments->singlescan - 1,kmersize);
+          gt_firstcode_runkmerscan(encseq,arguments->singlescan - 1,kmersize,
+                                   arguments->minmatchlength);
         }
       }
     }
