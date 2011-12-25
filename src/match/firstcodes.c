@@ -33,9 +33,9 @@
 #include "core/thread.h"
 #endif
 #include "firstcodes-buf.h"
-#include "firstcodes-scan.h"
 #include "firstcodes-spacelog.h"
 #include "firstcodes-tab.h"
+#include "firstcodes-accum.h"
 #include "firstcodes.h"
 #include "marksubstring.h"
 #include "seqnumrelpos.h"

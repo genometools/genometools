@@ -23,7 +23,7 @@
 #include "core/log_api.h"
 #include "kmercodes.h"
 #include "firstcodes-buf.h"
-#include "firstcodes-scan.h"
+#include "firstcodes-accum.h"
 
 #define GT_FIRSTCODES_ACCUM(BUF,CODE,RELPOS)\
         {\
@@ -43,19 +43,20 @@
 static GtTwobitencoding gt_firstcodes_accum_kmerscan_range(
                                          const GtBitsequence *twobitencoding,
                                          unsigned int kmersize,
+                                         unsigned int minmatchlength,
                                          unsigned long startpos,
                                          unsigned long endpos,
                                          unsigned long maxunitindex,
                                          GtCodeposbuffer *buf)
 {
   unsigned long position, unitindex, frelpos;
-  GtTwobitencoding currentencoding, encodingsum = 0;
   unsigned int shiftright;
   const unsigned int shiftleft = GT_MULT2(kmersize-1);
-  GtCodetype fcode, rccode;
   const unsigned long maskright = GT_MASKRIGHT(kmersize);
+  const unsigned long lastpossiblepos = endpos - startpos - minmatchlength;
   const unsigned long lastfrelpos = endpos - startpos - kmersize;
-  GtCodetype cc, marksubstringtmpcode;
+  GtTwobitencoding currentencoding, encodingsum = 0;
+  GtCodetype cc, marksubstringtmpcode, fcode, rccode;
 
   gt_assert(kmersize <= (unsigned int) GT_UNITSIN2BITENC);
   position = startpos;
@@ -63,7 +64,10 @@ static GtTwobitencoding gt_firstcodes_accum_kmerscan_range(
   rccode = gt_kmercode_complement(gt_kmercode_reverse(fcode,kmersize),
                                   maskright);
   GT_FIRSTCODES_ACCUM(buf,fcode,0);
-  GT_FIRSTCODES_ACCUM(buf,rccode,lastfrelpos);
+  if (lastfrelpos <= lastpossiblepos)
+  {
+    GT_FIRSTCODES_ACCUM(buf,rccode,lastfrelpos);
+  }
   unitindex = GT_DIVBYUNITSIN2BITENC(startpos + kmersize);
   currentencoding = twobitencoding[unitindex];
   encodingsum += currentencoding;
@@ -80,8 +84,14 @@ static GtTwobitencoding gt_firstcodes_accum_kmerscan_range(
     fcode = ((fcode << 2) | cc) & maskright;
     rccode = (rccode >> 2) | ((cc ^ 3UL) << shiftleft);
     gt_assert(lastfrelpos >= frelpos);
-    GT_FIRSTCODES_ACCUM(buf,fcode,frelpos);
-    GT_FIRSTCODES_ACCUM(buf,rccode,lastfrelpos - frelpos);
+    if (frelpos <= lastpossiblepos)
+    {
+      GT_FIRSTCODES_ACCUM(buf,fcode,frelpos);
+    }
+    if (lastfrelpos - frelpos <= lastpossiblepos)
+    {
+      GT_FIRSTCODES_ACCUM(buf,rccode,lastfrelpos - frelpos);
+    }
     if (shiftright > 0)
     {
       shiftright -= 2;
@@ -106,6 +116,7 @@ unsigned long gt_firstcodes_accum_kmerscan_eqlen(
                                      unsigned long totallength,
                                      unsigned long maxunitindex,
                                      unsigned int kmersize,
+                                     unsigned int minmatchlength,
                                      GtCodeposbuffer *buf)
 {
   unsigned long startpos, encodingsum = 0, fseqnum;
@@ -118,6 +129,7 @@ unsigned long gt_firstcodes_accum_kmerscan_eqlen(
       encodingsum += (unsigned long) gt_firstcodes_accum_kmerscan_range(
                                                   twobitencoding,
                                                   kmersize,
+                                                  minmatchlength,
                                                   startpos,
                                                   startpos + equallength,
                                                   maxunitindex,
@@ -132,6 +144,7 @@ unsigned long gt_firstcodes_accum_kmerscan(const GtEncseq *encseq,
                                            unsigned long totallength,
                                            unsigned long maxunitindex,
                                            unsigned int kmersize,
+                                           unsigned int minmatchlength,
                                            GtCodeposbuffer *buf)
 {
   unsigned long laststart = 0, encodingsum = 0, fseqnum = 0;
@@ -148,13 +161,14 @@ unsigned long gt_firstcodes_accum_kmerscan(const GtEncseq *encseq,
       gt_assert(range.start >= laststart);
       if (range.start - laststart >= (unsigned long) kmersize)
       {
-        encodingsum += (unsigned long) gt_firstcodes_accum_kmerscan_range(
-                                                twobitencoding,
-                                                kmersize,
-                                                laststart,
-                                                range.start,
-                                                maxunitindex,
-                                                buf);
+        encodingsum
+         += (unsigned long) gt_firstcodes_accum_kmerscan_range(twobitencoding,
+                                                               kmersize,
+                                                               minmatchlength,
+                                                               laststart,
+                                                               range.start,
+                                                               maxunitindex,
+                                                               buf);
       }
       laststart = range.end;
       fseqnum++;
@@ -163,19 +177,21 @@ unsigned long gt_firstcodes_accum_kmerscan(const GtEncseq *encseq,
   }
   if (totallength - laststart >= (unsigned long) kmersize)
   {
-    encodingsum += (unsigned long) gt_firstcodes_accum_kmerscan_range(
-                                              twobitencoding,
-                                              kmersize,
-                                              laststart,
-                                              totallength,
-                                              maxunitindex,
-                                              buf);
+    encodingsum
+      += (unsigned long) gt_firstcodes_accum_kmerscan_range(twobitencoding,
+                                                            kmersize,
+                                                            minmatchlength,
+                                                            laststart,
+                                                            totallength,
+                                                            maxunitindex,
+                                                            buf);
   }
   return encodingsum;
 }
 
 void gt_firstcodes_accum_runkmerscan(const GtEncseq *encseq,
                                      unsigned int kmersize,
+                                     unsigned int minmatchlength,
                                      GtCodeposbuffer *buf)
 {
   const GtTwobitencoding *twobitencoding
@@ -196,19 +212,21 @@ void gt_firstcodes_accum_runkmerscan(const GtEncseq *encseq,
     unsigned long equallength = gt_encseq_equallength(encseq);
 
     encodingsum = gt_firstcodes_accum_kmerscan_eqlen(twobitencoding,
-                                               equallength,
-                                               totallength,
-                                               maxunitindex,
-                                               kmersize,
-                                               buf);
+                                                     equallength,
+                                                     totallength,
+                                                     maxunitindex,
+                                                     kmersize,
+                                                     minmatchlength,
+                                                     buf);
   } else
   {
     encodingsum = gt_firstcodes_accum_kmerscan(encseq,
-                                         twobitencoding,
-                                         totallength,
-                                         maxunitindex,
-                                         kmersize,
-                                         buf);
+                                               twobitencoding,
+                                               totallength,
+                                               maxunitindex,
+                                               kmersize,
+                                               minmatchlength,
+                                               buf);
   }
   gt_log_log("encodingsum = %lu\n",encodingsum);
 }
