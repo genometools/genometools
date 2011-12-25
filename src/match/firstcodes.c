@@ -637,7 +637,7 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   current = gt_firstcodes_get_leftborder(fct,minindex);
 #ifdef GT_THREADS_ENABLED
-  printf("jobs=%u\n",gt_jobs);
+  gt_log_log("jobs=%u",gt_jobs);
 #endif
   for (idx = minindex; idx <=maxindex; idx++)
   {

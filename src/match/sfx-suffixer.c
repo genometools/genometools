@@ -1058,8 +1058,8 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
 #define GT_FIRSTCODES_ACCUMULATECOUNTS(BUF,FIRSTINRANGE,POSITION,SEQNUM,\
                                        RELPOS,CODE)\
         {\
-          printf("%s %lu %lu %lu\n",\
-                 (FIRSTINRANGE) ? "T" : "F",CODE,SEQNUM,RELPOS);\
+          /*printf("%s %lu %lu %lu\n",\
+                 (FIRSTINRANGE) ? "T" : "F",CODE,SEQNUM,RELPOS);*/\
           if (!(FIRSTINRANGE) &&\
               GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
               GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
