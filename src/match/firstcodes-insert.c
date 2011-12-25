@@ -24,7 +24,7 @@
 #include "firstcodes-buf.h"
 #include "firstcodes-insert.h"
 
-#define GT_FIRSTCODES_INSERTSUFFIXES(BUF,CODE,SEQNUM,RELPOS)\
+#define GT_FIRSTCODES_INSERTSUFFIXES_NEW(BUF,CODE,SEQNUM,RELPOS)\
         {\
           if ((BUF)->currentmincode <= (CODE) &&\
               (CODE) <= (BUF)->currentmaxcode &&\
@@ -67,10 +67,10 @@ static void gt_firstcodes_insert_kmerscan_range(
   fcode = gt_kmercode_at_position(twobitencoding, position, kmersize);
   rccode = gt_kmercode_complement(gt_kmercode_reverse(fcode,kmersize),
                                   maskright);
-  GT_FIRSTCODES_INSERTSUFFIXES(buf,fcode,fseqnum,0);
+  GT_FIRSTCODES_INSERTSUFFIXES_NEW(buf,fcode,fseqnum,0);
   if (lastfrelpos <= lastpossiblepos)
   {
-    GT_FIRSTCODES_INSERTSUFFIXES(buf,rccode,rseqnum,lastfrelpos);
+    GT_FIRSTCODES_INSERTSUFFIXES_NEW(buf,rccode,rseqnum,lastfrelpos);
   }
   unitindex = GT_DIVBYUNITSIN2BITENC(startpos + kmersize);
   currentencoding = twobitencoding[unitindex];
@@ -89,11 +89,11 @@ static void gt_firstcodes_insert_kmerscan_range(
     gt_assert(lastfrelpos >= frelpos);
     if (frelpos <= lastpossiblepos)
     {
-      GT_FIRSTCODES_INSERTSUFFIXES(buf,fcode,fseqnum,frelpos);
+      GT_FIRSTCODES_INSERTSUFFIXES_NEW(buf,fcode,fseqnum,frelpos);
     }
     if (lastfrelpos - frelpos <= lastpossiblepos)
     {
-      GT_FIRSTCODES_INSERTSUFFIXES(buf,rccode,rseqnum,lastfrelpos - frelpos);
+      GT_FIRSTCODES_INSERTSUFFIXES_NEW(buf,rccode,rseqnum,lastfrelpos-frelpos);
     }
     if (shiftright > 0)
     {
