@@ -36,6 +36,7 @@
 #include "firstcodes-spacelog.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-accum.h"
+#include "firstcodes-insert.h"
 #include "firstcodes.h"
 #include "marksubstring.h"
 #include "seqnumrelpos.h"
@@ -775,23 +776,23 @@ void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
 }
 
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
-                                                   unsigned int kmersize,
-                                                   unsigned int numofparts,
-                                                   unsigned long maximumspace,
-                                                   unsigned int minmatchlength,
-                                                   bool withsuftabcheck,
-                                                   bool onlyaccumulation,
-                                                   bool forceoverflow,
-                                                   unsigned long phase2extra,
-                                                   bool radixsmall,
-                                                   unsigned int radixparts,
-                                                   GtFirstcodesintervalprocess
-                                                     itvprocess,
+                                                  unsigned int kmersize,
+                                                  unsigned int numofparts,
+                                                  unsigned long maximumspace,
+                                                  unsigned int minmatchlength,
+                                                  bool withsuftabcheck,
+                                                  bool onlyaccumulation,
+                                                  bool forceoverflow,
+                                                  unsigned long phase2extra,
+                                                  bool radixsmall,
+                                                  unsigned int radixparts,
+                                                  GtFirstcodesintervalprocess
+                                                    itvprocess,
                                                  GtFirstcodesintervalprocess_end
                                                      itvprocess_end,
-                                                   void *itvprocessdata,
-                                                   GtLogger *logger,
-                                                   GtError *err)
+                                                  void *itvprocessdata,
+                                                  GtLogger *logger,
+                                                  GtError *err)
 {
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
@@ -1010,13 +1011,17 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
     gt_logger_log(logger,"maximum space for accumulation counts %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
-    gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(
-                                  encseq,
-                                  readmode,
-                                  kmersize,
-                                  minmatchlength,
-                                  &fci.buf,
-                                  NULL);
+#undef OLDSCAN
+#ifdef OLDSCAN
+    gt_firstcodes_accumulatecounts_getencseqkmers_twobitencoding(encseq,
+                                                                 readmode,
+                                                                 kmersize,
+                                                                 minmatchlength,
+                                                                 &fci.buf,
+                                                                 NULL);
+#else
+    gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci.buf);
+#endif
     gt_firstcodes_accumulatecounts_flush(&fci);
     gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
                   fci.codebuffer_total,
@@ -1341,6 +1346,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.buf.currentmaxcode = gt_firstcodes_idx2code(&fci,fci.currentmaxindex);
       gt_spmsuftab_partoffset(fci.spmsuftab,
                               gt_suftabparts_offset(part,suftabparts));
+#ifdef OLDSCAN
       gt_firstcodes_insertsuffix_getencseqkmers_twobitencoding(
                                     encseq,
                                     readmode,
@@ -1348,6 +1354,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                     minmatchlength,
                                     &fci.buf,
                                     NULL);
+#else
+      gt_firstcodes_insert_runkmerscan(encseq,
+                                      kmersize,
+                                      minmatchlength,
+                                      &fci.buf);
+#endif
       gt_firstcodes_insertsuffixes_flush(&fci);
       if (fci.mappedmarkprefix != NULL)
       {
