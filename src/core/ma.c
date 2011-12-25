@@ -255,6 +255,12 @@ void gt_ma_enable_global_spacepeak(void)
   ma->global_space_peak = true;
 }
 
+void gt_ma_disable_global_spacepeak(void)
+{
+  gt_assert(ma);
+  ma->global_space_peak = false;
+}
+
 unsigned long gt_ma_get_space_peak(void)
 {
   gt_assert(ma);

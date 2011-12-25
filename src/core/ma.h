@@ -26,6 +26,7 @@
 
 void          gt_ma_init(bool bookkeeping);
 void          gt_ma_enable_global_spacepeak(void);
+void          gt_ma_disable_global_spacepeak(void);
 unsigned long gt_ma_get_space_peak(void); /* in bytes */
 unsigned long gt_ma_get_space_current(void);
 void          gt_ma_show_space_peak(FILE*);

@@ -131,6 +131,7 @@ int gt_lib_clean(void)
     gt_ma_show_space_peak(stdout);
     gt_fa_show_space_peak(stdout);
     gt_spacepeak_show_space_peak(stdout);
+    gt_ma_disable_global_spacepeak();
   }
   fa_fptr_rval = gt_fa_check_fptr_leak();
   fa_mmap_rval = gt_fa_check_mmap_leak();
