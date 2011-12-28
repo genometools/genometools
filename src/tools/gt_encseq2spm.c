@@ -128,6 +128,7 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("mirrored", "use sequence with its mirror",
                              &arguments->mirrored, false);
   gt_option_parser_add_option(op, option);
+  gt_option_is_mandatory(option);
 
   /* -spm */
   option = gt_option_new_string("spm", "specify output for spms",
