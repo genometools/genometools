@@ -27,28 +27,14 @@ typedef struct
   uint32_t *spaceuint32_t;
   unsigned long *spaceulong, nextfree, allocated;
   GtStr *outfilename;
+  GtStr *name;
   FILE *fp;
   bool useulong;
   unsigned long totalwrite;
 } GtLeftborderOutbuffer;
 
-#define GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t(BUF,VALUE)\
-        gt_assert(!leftborderbuffer->useulong);\
-        if ((BUF)->nextfree == (BUF)->allocated)\
-        {\
-          gt_leftborderbuffer_flush(BUF);\
-        }\
-        (BUF)->spaceuint32_t[(BUF)->nextfree++] = (uint32_t) VALUE
-
-#define GT_LEFTBORDERBUFFER_ADDVALUE_ulong(BUF,VALUE)\
-        gt_assert(leftborderbuffer->useulong);\
-        if ((BUF)->nextfree == (BUF)->allocated)\
-        {\
-          gt_leftborderbuffer_flush(BUF);\
-        }\
-        (BUF)->spaceulong[(BUF)->nextfree++] = VALUE
-
-GtLeftborderOutbuffer *gt_leftborderbuffer_new(GtFirstcodesspacelog *fcsl,
+GtLeftborderOutbuffer *gt_leftborderbuffer_new(const char *name,
+                                               GtFirstcodesspacelog *fcsl,
                                                bool useulong);
 
 void gt_leftborderbuffer_flush(GtLeftborderOutbuffer *leftborderbuffer);

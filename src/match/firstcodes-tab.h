@@ -40,11 +40,13 @@ typedef struct
                 all_incrementcount;
   unsigned int sampleshift;
   uint32_t *leftborder;
+  uint32_t *leftborder_all;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *overflow_leftborder,
                 *leftborder_samples;
   GtStr *outfilenameleftborder,
+        *outfilenameleftborder_all,
         *outfilenameoverflowleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
@@ -143,11 +145,18 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 
 uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);
 
+uint32_t **gt_firstcodes_leftborder_all_address(GtFirstcodestab *fct);
+
 unsigned long **gt_firstcodes_overflow_address(GtFirstcodestab *fct);
 
 void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
+void gt_firstcodes_leftborder_all_remap(GtFirstcodestab *fct,uint32_t *ptr);
+
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
+
+const GtStr *gt_firstcodes_outfilenameleftborder_all(const
+                                                     GtFirstcodestab *fct);
 
 const GtStr *gt_firstcodes_outfilenameoverflowleftborder(
                                 const GtFirstcodestab *fct);
@@ -158,6 +167,8 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx);
 
 unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
+
+unsigned long gt_firstcodes_leftborder_all_entries(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
