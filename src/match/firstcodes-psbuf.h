@@ -25,12 +25,10 @@
 typedef struct
 {
   uint32_t *spaceuint32_t;
-  unsigned long *spaceulong, nextfree, allocated;
-  GtStr *outfilename;
-  GtStr *name;
+  unsigned long *spaceulong, nextfree, allocated, totalwrite;
+  GtStr *outfilename, *name;
   FILE *fp;
   bool useulong;
-  unsigned long totalwrite;
 } GtLeftborderOutbuffer;
 
 GtLeftborderOutbuffer *gt_leftborderbuffer_new(const char *name,
