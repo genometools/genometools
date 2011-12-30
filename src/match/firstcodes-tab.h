@@ -23,6 +23,7 @@
 #include "core/str_api.h"
 #include "core/hashmap-generic.h"
 #include "core/logger_api.h"
+#include "core/arraydef.h"
 #include "marksubstring.h"
 #include "firstcodes-spacelog.h"
 
@@ -50,6 +51,9 @@ typedef struct
         *outfilenameoverflowleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
+  unsigned long exceedvalue;
+  unsigned int modvaluebits;
+  GtArrayGtUlong bitchangepoints;
 } GtFirstcodestab;
 
 DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
@@ -124,8 +128,12 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
+                                        unsigned long expectedlastpartsum,
                                         unsigned long *overflow_index,
                                         bool forceoverflow);
+
+unsigned long gt_firstcodes_get_leftborder_all(const GtFirstcodestab *fct,
+                                               unsigned long idx);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);

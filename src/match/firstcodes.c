@@ -776,6 +776,25 @@ void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
                                 NULL);
 }
 
+static void gt_check_leftborder(const GtFirstcodestab *fct,
+                                unsigned long minindex,
+                                unsigned long maxindex)
+{
+  unsigned long idx, current, current2;
+
+  for (idx = minindex; idx <= maxindex; idx++)
+  {
+    current = gt_firstcodes_get_leftborder(fct,idx);
+    current2 = gt_firstcodes_get_leftborder_all(fct,idx);
+    if (current != current2)
+    {
+      fprintf(stderr,"idx %lu: current = %lu != %lu = current2\n",
+                    idx,current,current2);
+      exit(EXIT_FAILURE);
+    }
+  }
+}
+
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
                                                   unsigned int numofparts,
@@ -815,8 +834,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
   totallength = gt_encseq_total_length(encseq);
-  logtotallength = (unsigned int)
-                                 gt_firstcodes_round(log((double) totallength));
+  logtotallength
+    = (unsigned int) gt_firstcodes_round(log((double) totallength));
   if (logtotallength >= 8U)
   {
     markprefixunits = MAX(8U,logtotallength - 8U);
@@ -1045,8 +1064,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
+    suftabentries = fci.firstcodehits + fci.numofsequences;
     maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,
                                               &fci.tab,
+                                              suftabentries,
                                               &fci.overflow_index,
                                               forceoverflow);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
@@ -1090,7 +1111,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                            &fci);
       gt_Sfxmappedrangelist_add(sfxmrlist,fci.mappedoverflow);
     }
-    suftabentries = fci.firstcodehits + fci.numofsequences;
     if (numofparts == 0 || maximumspace > 0)
     {
       int retval;
@@ -1369,6 +1389,15 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                           fci.mappedoverflow,
                                           fci.currentminindex,
                                           fci.currentmaxindex));
+      }
+      if (gt_suftabparts_numofparts(suftabparts) == 1U)
+      {
+        gt_check_leftborder(&fci.tab,0,
+                            gt_firstcodes_leftborder_all_entries(&fci.tab) - 1);
+      } else
+      {
+        gt_check_leftborder(&fci.tab,fci.currentminindex,
+                                     fci.currentmaxindex);
       }
       if (fci.mappedmarkprefix != NULL)
       {
