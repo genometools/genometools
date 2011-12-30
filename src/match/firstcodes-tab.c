@@ -199,6 +199,21 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   return fct->differentcodes;
 }
 
+static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
+                                           unsigned long idx)
+{
+  if (fct->countocc_small[idx] > 0)
+  {
+    return (uint32_t) fct->countocc_small[idx];
+  } else
+  {
+    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+
+    gt_assert(valueptr != NULL);
+    return *valueptr + (uint32_t) GT_FIRSTCODES_MAXSMALL;
+  }
+}
+
 #define GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t(BUF,VALUE)\
         gt_assert(!(BUF)->useulong);\
         if ((BUF)->nextfree == (BUF)->allocated)\
@@ -225,21 +240,6 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
 #define GT_FIRSTCODES_ADD_SAMPLE(PARTSUM)\
         gt_assert(samplecount < fct->numofsamples);\
         fct->leftborder_samples[samplecount++] = PARTSUM
-
-static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
-                                           unsigned long idx)
-{
-  if (fct->countocc_small[idx] > 0)
-  {
-    return (uint32_t) fct->countocc_small[idx];
-  } else
-  {
-    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
-
-    gt_assert(valueptr != NULL);
-    return *valueptr + (uint32_t) GT_FIRSTCODES_MAXSMALL;
-  }
-}
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
