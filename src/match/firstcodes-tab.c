@@ -567,7 +567,6 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->leftborder_all = NULL;
   fct->countocc_small = NULL;
   fct->leftborder_samples = NULL;
-  fct->overflow_leftborder = NULL;
   fct->countocc_exceptions = NULL;
   fct->differentcodes = 0;
   fct->lastincremented_idx = 0;
@@ -583,19 +582,9 @@ uint32_t **gt_firstcodes_leftborder_all_address(GtFirstcodestab *fct)
   return &fct->leftborder_all;
 }
 
-unsigned long **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
-{
-  return &fct->overflow_leftborder;
-}
-
 void gt_firstcodes_leftborder_all_remap(GtFirstcodestab *fct,uint32_t *ptr)
 {
   fct->leftborder_all = ptr;
-}
-
-void gt_firstcodes_overflow_remap(GtFirstcodestab *fct,unsigned long *ptr)
-{
-  fct->overflow_leftborder = ptr;
 }
 
 const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct)
