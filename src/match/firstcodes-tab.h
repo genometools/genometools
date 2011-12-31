@@ -44,8 +44,7 @@ typedef struct
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *leftborder_samples;
-  GtStr *outfilenameleftborder,
-        *outfilenameleftborder_all,
+  GtStr *outfilenameleftborder_all,
         *outfilenameoverflowleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
@@ -162,8 +161,6 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 uint32_t **gt_firstcodes_leftborder_all_address(GtFirstcodestab *fct);
 
 void gt_firstcodes_leftborder_all_remap(GtFirstcodestab *fct,uint32_t *ptr);
-
-const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 
 const GtStr *gt_firstcodes_outfilenameleftborder_all(const
                                                      GtFirstcodestab *fct);
