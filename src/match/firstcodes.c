@@ -463,13 +463,9 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
     {
       if (query->a == *subject)
       {
-        unsigned long idx1, idx2;
-
-        idx = (unsigned long) (subject - fci->allfirstcodes);
-        idx1 = gt_firstcodes_insertionindex(&fci->tab,idx);
-        idx2 = gt_firstcodes_insertionindex_all(&fci->tab,idx);
-        gt_assert(idx1 == idx2);
-        idx = idx1;
+        idx = gt_firstcodes_insertionindex(&fci->tab,
+                                           (unsigned long)
+                                           (subject - fci->allfirstcodes));
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
         gt_spmsuftab_set(fci->spmsuftab,idx,
                          gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
@@ -503,13 +499,9 @@ static unsigned long gt_firstcodes_insertsuffixes_merge_rr(
     {
       if (current.a == *subject)
       {
-        unsigned long idx1, idx2;
-
-        idx = (unsigned long) (subject - fci->allfirstcodes);
-        idx1 = gt_firstcodes_insertionindex(&fci->tab,idx);
-        idx2 = gt_firstcodes_insertionindex_all(&fci->tab,idx);
-        gt_assert(idx1 == idx2);
-        idx = idx1;
+        idx = gt_firstcodes_insertionindex(&fci->tab,
+                                           (unsigned long)
+                                           (subject - fci->allfirstcodes));
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
         gt_spmsuftab_set(fci->spmsuftab,idx,
                          gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
@@ -784,25 +776,6 @@ void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
                                 NULL,
                                 NULL,
                                 NULL);
-}
-
-static void gt_check_leftborder(const GtFirstcodestab *fct,
-                                unsigned long minindex,
-                                unsigned long maxindex)
-{
-  unsigned long idx, current, current2;
-
-  for (idx = minindex; idx <= maxindex; idx++)
-  {
-    current = gt_firstcodes_get_leftborder(fct,idx);
-    current2 = gt_firstcodes_get_leftborder_all(fct,idx);
-    if (current != current2)
-    {
-      fprintf(stderr,"idx %lu: current = %lu != %lu = current2\n",
-                    idx,current,current2);
-      exit(EXIT_FAILURE);
-    }
-  }
 }
 
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
@@ -1399,15 +1372,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                           fci.mappedoverflow,
                                           fci.currentminindex,
                                           fci.currentmaxindex));
-      }
-      if (gt_suftabparts_numofparts(suftabparts) == 1U)
-      {
-        gt_check_leftborder(&fci.tab,0,
-                            gt_firstcodes_leftborder_all_entries(&fci.tab) - 1);
-      } else
-      {
-        gt_check_leftborder(&fci.tab,fci.currentminindex,
-                                     fci.currentmaxindex);
       }
       if (fci.mappedmarkprefix != NULL)
       {

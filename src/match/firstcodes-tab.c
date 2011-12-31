@@ -49,7 +49,7 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->outfilenameleftborder_all = NULL;
   fct->outfilenameoverflowleftborder = NULL;
   fct->leftborder_samples = NULL;
-  fct->modvaluebits = 20U;
+  fct->modvaluebits = 16U;
   /* XXX remove the following later */
   fct->modvaluemask = (uint32_t) ((1U << fct->modvaluebits) - 1);
   GT_INITARRAY(&fct->bitchangepoints,GtUlong);
@@ -461,26 +461,12 @@ unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
   return fct->leftborder_samples[idx];
 }
 
-unsigned long gt_firstcodes_get_leftborder_all(const GtFirstcodestab *fct,
-                                               unsigned long idx)
+unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
+                                           unsigned long idx)
 {
   GT_CHANGEPOINT_GET(changepoint);
   return (unsigned long) fct->leftborder_all[idx]
                          + (changepoint << fct->modvaluebits);
-}
-
-unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
-                                           unsigned long idx)
-{
-  gt_assert(idx <= fct->differentcodes);
-  if (fct->overflow_index == 0 || idx < fct->overflow_index)
-  {
-    return (unsigned long) fct->leftborder[idx];
-  } else
-  {
-    gt_assert(idx >= fct->overflow_index);
-    return fct->overflow_leftborder[idx - fct->overflow_index];
-  }
 }
 
 unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct)

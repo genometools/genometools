@@ -119,8 +119,7 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
             /* Nothing */ ;
 
 GT_UNUSED
-static inline unsigned long gt_firstcodes_insertionindex_all(
-                                                         GtFirstcodestab *fct,
+static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
 {
   GT_CHANGEPOINT_GET(changepoint);
@@ -140,28 +139,11 @@ static inline unsigned long gt_firstcodes_insertionindex_all(
   }
 }
 
-GT_UNUSED
-static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
-                                                         unsigned long idx)
-{
-  gt_assert(idx < fct->differentcodes);
-  if (fct->overflow_index == 0 || idx < fct->overflow_index)
-  {
-    return (unsigned long) --fct->leftborder[idx];
-  } else
-  {
-    return --fct->overflow_leftborder[idx - fct->overflow_index];
-  }
-}
-
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
                                         unsigned long expectedlastpartsum,
                                         unsigned long *overflow_index,
                                         bool forceoverflow);
-
-unsigned long gt_firstcodes_get_leftborder_all(const GtFirstcodestab *fct,
-                                               unsigned long idx);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);
