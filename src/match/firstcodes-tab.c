@@ -564,7 +564,6 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
 {
-  fct->leftborder = NULL;
   fct->leftborder_all = NULL;
   fct->countocc_small = NULL;
   fct->leftborder_samples = NULL;
@@ -579,11 +578,6 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->hashmap_getcount = 0;
 }
 
-uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct)
-{
-  return &fct->leftborder;
-}
-
 uint32_t **gt_firstcodes_leftborder_all_address(GtFirstcodestab *fct)
 {
   return &fct->leftborder_all;
@@ -592,11 +586,6 @@ uint32_t **gt_firstcodes_leftborder_all_address(GtFirstcodestab *fct)
 unsigned long **gt_firstcodes_overflow_address(GtFirstcodestab *fct)
 {
   return &fct->overflow_leftborder;
-}
-
-void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr)
-{
-  fct->leftborder = ptr;
 }
 
 void gt_firstcodes_leftborder_all_remap(GtFirstcodestab *fct,uint32_t *ptr)
