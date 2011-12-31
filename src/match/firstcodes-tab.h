@@ -51,7 +51,6 @@ typedef struct
         *outfilenameoverflowleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
-  unsigned long exceedvalue;
   unsigned int modvaluebits;
   uint32_t modvaluemask;
   GtArrayGtUlong bitchangepoints;

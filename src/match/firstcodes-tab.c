@@ -49,10 +49,9 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->outfilenameleftborder_all = NULL;
   fct->outfilenameoverflowleftborder = NULL;
   fct->leftborder_samples = NULL;
-  fct->modvaluebits = 16U;
+  fct->modvaluebits = 20U;
   /* XXX remove the following later */
   fct->modvaluemask = (uint32_t) ((1U << fct->modvaluebits) - 1);
-  fct->exceedvalue = 1UL;
   GT_INITARRAY(&fct->bitchangepoints,GtUlong);
 }
 
@@ -259,13 +258,14 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
 #define GT_FIRSTCODES_ADDCHANGEPOINT(CURRENTCOUNT,PARTSUM,IDX)\
         gt_assert((unsigned long) CURRENTCOUNT < (1UL << fct->modvaluebits));\
         if (fct->bitchangepoints.allocatedGtUlong > 0 &&\
-            PARTSUM >= (fct->exceedvalue << fct->modvaluebits))\
+            PARTSUM >= exceedvalue)\
         {\
           gt_assert((IDX) > 0 && fct->bitchangepoints.nextfreeGtUlong <\
                                  fct->bitchangepoints.allocatedGtUlong);\
           fct->bitchangepoints.spaceGtUlong\
              [fct->bitchangepoints.nextfreeGtUlong++] = IDX-1;\
-          fct->exceedvalue++;\
+          exceedvalue = ((exceedvalue >> fct->modvaluebits) + 1) << \
+                        fct->modvaluebits;\
         }
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
@@ -274,19 +274,19 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         unsigned long *overflow_index,
                                         bool forceoverflow)
 {
-  unsigned long idx, partsum, maxbucketsize, samplecount = 0;
+  unsigned long idx, partsum, maxbucketsize, bitmask, samplecount = 0,
+                spacewithhashmap = 0, spacewithouthashmap = 0,
+                exceedvalue = 1UL << fct->modvaluebits;
   uint32_t currentcount;
-#ifdef SKDEBUG
-  GtDiscDistri *countdistri = gt_disc_distri_new();
-#endif
-  unsigned long bitmask;
   GtLeftborderOutbuffer *leftborderbuffer = NULL,
                         *leftborderbuffer_all = NULL,
                         *overflow_leftborderbuffer = NULL;
   const unsigned long maxvalue = forceoverflow ? UINT16_MAX : UINT32_MAX;
-  unsigned long spacewithhashmap = 0, spacewithouthashmap = 0;
   const unsigned int btp
     = gt_determinebitspervalue((uint64_t) expectedlastpartsum);
+#ifdef SKDEBUG
+  GtDiscDistri *countdistri = gt_disc_distri_new();
+#endif
 
   gt_assert(fct->differentcodes < UINT32_MAX);
   gt_log_log("hashmap_addcount=%lu",fct->hashmap_addcount);
