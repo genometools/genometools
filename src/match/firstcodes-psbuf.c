@@ -25,8 +25,7 @@
 #include "firstcodes-spacelog.h"
 
 GtLeftborderOutbuffer *gt_leftborderbuffer_new(const char *name,
-                                               GtFirstcodesspacelog *fcsl,
-                                               bool useulong)
+                                               GtFirstcodesspacelog *fcsl)
 {
   GtLeftborderOutbuffer *lbbuf = gt_malloc(sizeof (*lbbuf));
 
@@ -36,40 +35,19 @@ GtLeftborderOutbuffer *gt_leftborderbuffer_new(const char *name,
   lbbuf->nextfree = 0;
   lbbuf->allocated = 1024UL;
   lbbuf->name = gt_str_new_cstr(name);
-  lbbuf->useulong = useulong;
-  if (useulong)
-  {
-    lbbuf->spaceulong = gt_malloc(sizeof (*lbbuf->spaceulong) *
-                                  lbbuf->allocated);
-    GT_FCI_ADDWORKSPACE(fcsl,name,
-                        sizeof (*lbbuf->spaceulong) * lbbuf->allocated);
-    lbbuf->spaceuint32_t = NULL;
-  } else
-  {
-    lbbuf->spaceuint32_t = gt_malloc(sizeof (*lbbuf->spaceuint32_t) *
-                                     lbbuf->allocated);
-    GT_FCI_ADDWORKSPACE(fcsl,name,
-                        sizeof (*lbbuf->spaceuint32_t) * lbbuf->allocated);
-    lbbuf->spaceulong = NULL;
-  }
+  lbbuf->spaceuint32_t = gt_malloc(sizeof (*lbbuf->spaceuint32_t) *
+                                   lbbuf->allocated);
+  GT_FCI_ADDWORKSPACE(fcsl,name,
+                      sizeof (*lbbuf->spaceuint32_t) * lbbuf->allocated);
   return lbbuf;
 }
 
 void gt_leftborderbuffer_flush(GtLeftborderOutbuffer *leftborderbuffer)
 {
-  if (leftborderbuffer->useulong)
-  {
-    gt_xfwrite(leftborderbuffer->spaceulong,
-               sizeof (*leftborderbuffer->spaceulong),
-               (size_t) leftborderbuffer->nextfree,
-               leftborderbuffer->fp);
-  } else
-  {
-    gt_xfwrite(leftborderbuffer->spaceuint32_t,
-               sizeof (*leftborderbuffer->spaceuint32_t),
-               (size_t) leftborderbuffer->nextfree,
-               leftborderbuffer->fp);
-  }
+  gt_xfwrite(leftborderbuffer->spaceuint32_t,
+             sizeof (*leftborderbuffer->spaceuint32_t),
+             (size_t) leftborderbuffer->nextfree,
+             leftborderbuffer->fp);
   leftborderbuffer->totalwrite += leftborderbuffer->nextfree;
   leftborderbuffer->nextfree = 0;
 }
@@ -84,25 +62,13 @@ GtStr *gt_leftborderbuffer_delete(GtLeftborderOutbuffer *lbbuf,
   gt_leftborderbuffer_flush(lbbuf);
   gt_fa_fclose(lbbuf->fp);
   lbbuf->fp = NULL;
-  if (lbbuf->useulong)
-  {
-    gt_log_log("write %s to file %s (%lu units of size %u)",
-               gt_str_get(lbbuf->name),
-               gt_str_get(lbbuf->outfilename),
-               lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceulong));
-    gt_assert(lbbuf->spaceulong != NULL);
-    gt_free(lbbuf->spaceulong);
-    GT_FCI_SUBTRACTWORKSPACE(fcsl,gt_str_get(lbbuf->name));
-  } else
-  {
-    gt_log_log("write %s to file %s (%lu units of size %u)",
-               gt_str_get(lbbuf->name),
-               gt_str_get(lbbuf->outfilename),
-               lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceuint32_t));
-    gt_assert(lbbuf->spaceuint32_t != NULL);
-    gt_free(lbbuf->spaceuint32_t);
-    GT_FCI_SUBTRACTWORKSPACE(fcsl,gt_str_get(lbbuf->name));
-  }
+  gt_log_log("write %s to file %s (%lu units of size %u)",
+             gt_str_get(lbbuf->name),
+             gt_str_get(lbbuf->outfilename),
+             lbbuf->totalwrite,(unsigned int) sizeof (*lbbuf->spaceuint32_t));
+  gt_assert(lbbuf->spaceuint32_t != NULL);
+  gt_free(lbbuf->spaceuint32_t);
+  GT_FCI_SUBTRACTWORKSPACE(fcsl,gt_str_get(lbbuf->name));
   gt_assert(lbbuf->totalwrite == expectedwritten);
   outfilename = lbbuf->outfilename;
   gt_str_delete(lbbuf->name);

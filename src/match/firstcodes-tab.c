@@ -46,7 +46,6 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder_all = NULL;
-  fct->outfilenameoverflowleftborder = NULL;
   fct->leftborder_samples = NULL;
   fct->modvaluebits = 16U;
   /* XXX remove the following later */
@@ -218,30 +217,13 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
   }
 }
 
-#define GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t(BUF,VALUE)\
-        gt_assert(!(BUF)->useulong);\
-        if ((BUF)->nextfree == (BUF)->allocated)\
-        {\
-          gt_leftborderbuffer_flush(BUF);\
-        }\
-        (BUF)->spaceuint32_t[(BUF)->nextfree++] = (uint32_t) VALUE
-
 #define GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(BUF,VALUE)\
-        gt_assert(!(BUF)->useulong);\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
           gt_leftborderbuffer_flush(BUF);\
         }\
         (BUF)->spaceuint32_t[(BUF)->nextfree++]\
           = (uint32_t) ((VALUE) & fct->modvaluemask)
-
-#define GT_LEFTBORDERBUFFER_ADDVALUE_ulong(BUF,VALUE)\
-        gt_assert((BUF)->useulong);\
-        if ((BUF)->nextfree == (BUF)->allocated)\
-        {\
-          gt_leftborderbuffer_flush(BUF);\
-        }\
-        (BUF)->spaceulong[(BUF)->nextfree++] = VALUE
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
 
@@ -276,8 +258,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                 spacewithhashmap = 0, spacewithouthashmap = 0,
                 exceedvalue = 1UL << fct->modvaluebits;
   uint32_t currentcount;
-  GtLeftborderOutbuffer *leftborderbuffer_all = NULL,
-                        *overflow_leftborderbuffer = NULL;
+  GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
   const unsigned long maxvalue = forceoverflow ? UINT16_MAX : UINT32_MAX;
   const unsigned int btp
     = gt_determinebitspervalue((uint64_t) expectedlastpartsum);
@@ -333,7 +314,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GT_FCI_ADDWORKSPACE(fcsl,"leftborder_samples",
                       sizeof (*fct->leftborder_samples) * fct->numofsamples);
   GT_FIRSTCODES_ADD_SAMPLE(partsum);
-  leftborderbuffer_all = gt_leftborderbuffer_new("leftborder_all",fcsl,false);
+  leftborderbuffer_all = gt_leftborderbuffer_new("leftborder_all",fcsl);
   GT_PARTIALSUM_LEFTBORDER_SET(0,(uint32_t) partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
@@ -368,15 +349,12 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
   } else
   {
-    overflow_leftborderbuffer = gt_leftborderbuffer_new("overflow_leftborder",
-                                                        fcsl,true);
     currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
 #ifdef SKDEBUG
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
 #endif
     partsum += currentcount;
     GT_FIRSTCODES_ADDCHANGEPOINT(currentcount,partsum,fct->overflow_index);
-    GT_LEFTBORDERBUFFER_ADDVALUE_ulong(overflow_leftborderbuffer,partsum);
     GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,partsum);
     for (idx = fct->overflow_index+1; idx < fct->differentcodes; idx++)
     {
@@ -394,14 +372,9 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       {
         GT_FIRSTCODES_ADD_SAMPLE(partsum);
       }
-      GT_LEFTBORDERBUFFER_ADDVALUE_ulong(overflow_leftborderbuffer,partsum);
       GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,partsum);
     }
-    GT_LEFTBORDERBUFFER_ADDVALUE_ulong(overflow_leftborderbuffer,partsum);
     GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,partsum);
-    fct->outfilenameoverflowleftborder
-      = gt_leftborderbuffer_delete(overflow_leftborderbuffer,fcsl,
-                              gt_firstcodes_overflowleftborder_entries(fct));
   }
   fct->outfilenameleftborder_all
       = gt_leftborderbuffer_delete(leftborderbuffer_all,fcsl,
@@ -545,8 +518,6 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
   gt_firstcodes_samples_delete(fcsl,fct);
   gt_str_delete(fct->outfilenameleftborder_all);
   fct->outfilenameleftborder_all = NULL;
-  gt_str_delete(fct->outfilenameoverflowleftborder);
-  fct->outfilenameoverflowleftborder = NULL;
   GT_FREEARRAY(&fct->bitchangepoints,GtUlong);
 }
 
@@ -578,10 +549,4 @@ void gt_firstcodes_leftborder_all_remap(GtFirstcodestab *fct,uint32_t *ptr)
 const GtStr *gt_firstcodes_outfilenameleftborder_all(const GtFirstcodestab *fct)
 {
   return fct->outfilenameleftborder_all;
-}
-
-const GtStr *gt_firstcodes_outfilenameoverflowleftborder(
-                                const GtFirstcodestab *fct)
-{
-  return fct->outfilenameoverflowleftborder;
 }
