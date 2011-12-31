@@ -53,6 +53,7 @@ typedef struct
   uint32_t *lastincremented_valueptr;
   unsigned long exceedvalue;
   unsigned int modvaluebits;
+  uint32_t modvaluemask;
   GtArrayGtUlong bitchangepoints;
 } GtFirstcodestab;
 
@@ -125,6 +126,12 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
     return --fct->overflow_leftborder[idx - fct->overflow_index];
   }
 }
+
+#define GT_CHANGEPOINT_GET(CP)\
+        unsigned long CP;\
+        for (CP = 0; CP < fct->bitchangepoints.nextfreeGtUlong &&\
+                     idx > fct->bitchangepoints.spaceGtUlong[CP]; CP++)\
+            /* Nothing */ ;
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
