@@ -463,8 +463,13 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
     {
       if (query->a == *subject)
       {
+        unsigned long idx1, idx2;
+
         idx = (unsigned long) (subject - fci->allfirstcodes);
-        idx = gt_firstcodes_insertionindex(&fci->tab,idx);
+        idx1 = gt_firstcodes_insertionindex(&fci->tab,idx);
+        idx2 = gt_firstcodes_insertionindex_all(&fci->tab,idx);
+        gt_assert(idx1 == idx2);
+        idx = idx1;
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
         gt_spmsuftab_set(fci->spmsuftab,idx,
                          gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
@@ -498,8 +503,13 @@ static unsigned long gt_firstcodes_insertsuffixes_merge_rr(
     {
       if (current.a == *subject)
       {
+        unsigned long idx1, idx2;
+
         idx = (unsigned long) (subject - fci->allfirstcodes);
-        idx = gt_firstcodes_insertionindex(&fci->tab,idx);
+        idx1 = gt_firstcodes_insertionindex(&fci->tab,idx);
+        idx2 = gt_firstcodes_insertionindex_all(&fci->tab,idx);
+        gt_assert(idx1 == idx2);
+        idx = idx1;
         gt_assert(idx < fci->firstcodehits + fci->numofsequences);
         gt_spmsuftab_set(fci->spmsuftab,idx,
                          gt_spmsuftab_usebitsforpositions(fci->spmsuftab)

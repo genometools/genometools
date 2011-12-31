@@ -113,6 +113,34 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
   }
 }
 
+#define GT_CHANGEPOINT_GET(CP)\
+        unsigned long CP;\
+        for (CP = 0; CP < fct->bitchangepoints.nextfreeGtUlong &&\
+                     idx > fct->bitchangepoints.spaceGtUlong[CP]; CP++)\
+            /* Nothing */ ;
+
+GT_UNUSED
+static inline unsigned long gt_firstcodes_insertionindex_all(
+                                                         GtFirstcodestab *fct,
+                                                         unsigned long idx)
+{
+  GT_CHANGEPOINT_GET(changepoint);
+  gt_assert(idx < fct->differentcodes);
+  if (fct->leftborder_all[idx] > 0)
+  {
+    return (unsigned long) --fct->leftborder_all[idx]
+                           + (changepoint << fct->modvaluebits);
+  } else
+  {
+    gt_assert(changepoint > 0);
+    changepoint--;
+    fct->bitchangepoints.spaceGtUlong[changepoint]++;
+    fct->leftborder_all[idx] = fct->modvaluemask;
+    return (unsigned long)
+           fct->leftborder_all[idx] + (changepoint << fct->modvaluebits);
+  }
+}
+
 GT_UNUSED
 static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
@@ -126,12 +154,6 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
     return --fct->overflow_leftborder[idx - fct->overflow_index];
   }
 }
-
-#define GT_CHANGEPOINT_GET(CP)\
-        unsigned long CP;\
-        for (CP = 0; CP < fct->bitchangepoints.nextfreeGtUlong &&\
-                     idx > fct->bitchangepoints.spaceGtUlong[CP]; CP++)\
-            /* Nothing */ ;
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
