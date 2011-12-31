@@ -62,7 +62,6 @@ typedef struct
                 currentminindex,
                 currentmaxindex,
                 differentcodes, /* a copy of the same value as in tab */
-                overflow_index, /* a copy of the same value as in tab */
                 widthofpart;
   bool radixsmall;
 #define WITHCACHE
@@ -738,7 +737,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int minmatchlength,
                                                   bool withsuftabcheck,
                                                   bool onlyaccumulation,
-                                                  bool forceoverflow,
                                                   unsigned long phase2extra,
                                                   bool radixsmall,
                                                   unsigned int radixparts,
@@ -1001,9 +999,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     suftabentries = fci.firstcodehits + fci.numofsequences;
     maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,
                                               &fci.tab,
-                                              suftabentries,
-                                              &fci.overflow_index,
-                                              forceoverflow);
+                                              suftabentries);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);

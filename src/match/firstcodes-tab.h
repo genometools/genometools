@@ -32,7 +32,6 @@
 typedef struct
 {
   unsigned long differentcodes,
-                overflow_index,
                 numofsamples,
                 sampledistance,
                 hashmap_addcount,
@@ -137,9 +136,7 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
-                                        unsigned long expectedlastpartsum,
-                                        unsigned long *overflow_index,
-                                        bool forceoverflow);
+                                        unsigned long expectedlastpartsum);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx);
@@ -173,9 +170,6 @@ unsigned long gt_firstcodes_leftborder_all_entries(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
-
-unsigned long gt_firstcodes_overflowleftborder_entries(
-                    const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     GtFirstcodesspacelog *fcsl,

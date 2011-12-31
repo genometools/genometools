@@ -47,8 +47,7 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder_all = NULL;
   fct->leftborder_samples = NULL;
-  fct->modvaluebits = 16U;
-  /* XXX remove the following later */
+  fct->modvaluebits = 16U; /* XXX remove the following later */
   fct->modvaluemask = (uint32_t) ((1U << fct->modvaluebits) - 1);
   GT_INITARRAY(&fct->bitchangepoints,GtUlong);
 }
@@ -217,7 +216,9 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
   }
 }
 
-#define GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(BUF,VALUE)\
+#define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
+
+#define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
           gt_leftborderbuffer_flush(BUF);\
@@ -225,41 +226,19 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
         (BUF)->spaceuint32_t[(BUF)->nextfree++]\
           = (uint32_t) ((VALUE) & fct->modvaluemask)
 
-#define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
-
-#define GT_PARTIALSUM_LEFTBORDER_SET(IDX,VALUE)\
-        gt_assert((VALUE) <= UINT32_MAX);\
-        GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,VALUE)
-
 #define GT_FIRSTCODES_ADD_SAMPLE(PARTSUM)\
         gt_assert(samplecount < fct->numofsamples);\
         fct->leftborder_samples[samplecount++] = PARTSUM
 
-#define GT_FIRSTCODES_ADDCHANGEPOINT(CURRENTCOUNT,PARTSUM,IDX)\
-        gt_assert((unsigned long) CURRENTCOUNT < (1UL << fct->modvaluebits));\
-        if (fct->bitchangepoints.allocatedGtUlong > 0 &&\
-            PARTSUM >= exceedvalue)\
-        {\
-          gt_assert((IDX) > 0 && fct->bitchangepoints.nextfreeGtUlong <\
-                                 fct->bitchangepoints.allocatedGtUlong);\
-          fct->bitchangepoints.spaceGtUlong\
-             [fct->bitchangepoints.nextfreeGtUlong++] = IDX-1;\
-          exceedvalue = ((exceedvalue >> fct->modvaluebits) + 1) << \
-                        fct->modvaluebits;\
-        }
-
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
-                                        unsigned long expectedlastpartsum,
-                                        unsigned long *overflow_index,
-                                        bool forceoverflow)
+                                        unsigned long expectedlastpartsum)
 {
   unsigned long idx, partsum, maxbucketsize, bitmask, samplecount = 0,
                 spacewithhashmap = 0, spacewithouthashmap = 0,
                 exceedvalue = 1UL << fct->modvaluebits;
   uint32_t currentcount;
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
-  const unsigned long maxvalue = forceoverflow ? UINT16_MAX : UINT32_MAX;
   const unsigned int btp
     = gt_determinebitspervalue((uint64_t) expectedlastpartsum);
 #ifdef SKDEBUG
@@ -290,7 +269,6 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
                 * fct->bitchangepoints.allocatedGtUlong);
   fct->bitchangepoints.nextfreeGtUlong = 0;
-  fct->overflow_index = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
@@ -315,10 +293,11 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                       sizeof (*fct->leftborder_samples) * fct->numofsamples);
   GT_FIRSTCODES_ADD_SAMPLE(partsum);
   leftborderbuffer_all = gt_leftborderbuffer_new("leftborder_all",fcsl);
-  GT_PARTIALSUM_LEFTBORDER_SET(0,(uint32_t) partsum);
+  GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
+    gt_assert(currentcount <= fct->modvaluemask);
 #ifdef SKDEBUG
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
 #endif
@@ -327,55 +306,23 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       maxbucketsize = (unsigned long) currentcount;
     }
     partsum += currentcount;
-    GT_FIRSTCODES_ADDCHANGEPOINT(currentcount,partsum,idx);
+    if (fct->bitchangepoints.allocatedGtUlong > 0 &&
+        partsum >= exceedvalue)
+    {
+      gt_assert(idx > 0 && fct->bitchangepoints.nextfreeGtUlong <
+                           fct->bitchangepoints.allocatedGtUlong);
+      fct->bitchangepoints.spaceGtUlong
+        [fct->bitchangepoints.nextfreeGtUlong++] = idx-1;
+      exceedvalue
+        = ((exceedvalue >> fct->modvaluebits) + 1) << fct->modvaluebits;
+    }
     if ((idx & bitmask) == 0)
     {
       GT_FIRSTCODES_ADD_SAMPLE(partsum);
     }
-    if (partsum <= maxvalue)
-    {
-      GT_PARTIALSUM_LEFTBORDER_SET(idx,(uint32_t) partsum);
-    } else
-    {
-      gt_assert(idx > 0);
-      partsum -= (unsigned long) currentcount;
-      fct->overflow_index = idx;
-      break;
-    }
+    GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   }
-  if (fct->overflow_index == 0)
-  {
-    gt_assert(partsum <= maxvalue);
-    GT_PARTIALSUM_LEFTBORDER_SET(fct->differentcodes,(uint32_t) partsum);
-  } else
-  {
-    currentcount = GT_PARTIALSUM_COUNT_GET(fct->overflow_index);
-#ifdef SKDEBUG
-    gt_disc_distri_add(countdistri,(unsigned long) currentcount);
-#endif
-    partsum += currentcount;
-    GT_FIRSTCODES_ADDCHANGEPOINT(currentcount,partsum,fct->overflow_index);
-    GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,partsum);
-    for (idx = fct->overflow_index+1; idx < fct->differentcodes; idx++)
-    {
-      currentcount = GT_PARTIALSUM_COUNT_GET(idx);
-#ifdef SKDEBUG
-      gt_disc_distri_add(countdistri,(unsigned long) currentcount);
-#endif
-      if (maxbucketsize < (unsigned long) currentcount)
-      {
-        maxbucketsize = (unsigned long) currentcount;
-      }
-      partsum += currentcount;
-      GT_FIRSTCODES_ADDCHANGEPOINT(currentcount,partsum,idx);
-      if ((idx & bitmask) == 0)
-      {
-        GT_FIRSTCODES_ADD_SAMPLE(partsum);
-      }
-      GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,partsum);
-    }
-    GT_LEFTBORDERBUFFER_ADDVALUE_uint32_t_all(leftborderbuffer_all,partsum);
-  }
+  GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   fct->outfilenameleftborder_all
       = gt_leftborderbuffer_delete(leftborderbuffer_all,fcsl,
                                    gt_firstcodes_leftborder_all_entries(fct));
@@ -413,7 +360,6 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
            GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;
-  *overflow_index = fct->overflow_index;
   return maxbucketsize;
 }
 
@@ -432,22 +378,9 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                          + (changepoint << fct->modvaluebits);
 }
 
-unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct)
-{
-  return fct->overflow_index > 0 ? fct->overflow_index
-                                 : fct->differentcodes + 1;
-}
-
 unsigned long gt_firstcodes_leftborder_all_entries(const GtFirstcodestab *fct)
 {
   return fct->differentcodes + 1;
-}
-
-unsigned long gt_firstcodes_overflowleftborder_entries(
-                    const GtFirstcodestab *fct)
-{
-  return fct->overflow_index > 0 ?  fct->differentcodes -
-                                    fct->overflow_index + 1 : 0;
 }
 
 unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct)
