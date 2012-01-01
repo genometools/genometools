@@ -41,6 +41,7 @@ struct GtShortreadsortworkinfo
   uint16_t *firstcodeslcpvalues; /* always NULL for firstcodes;
                                     otherwise: NULL if lcpvalues are
                                     not required */
+  unsigned long *seqnum_relpos_bucket; /* only for firstcodes */
   GtArrayGtTwobitencoding tbereservoir;
   unsigned long tmplcplen, currentbucketsize, sumofstoredvalues;
   bool fwd, complement;
@@ -66,7 +67,7 @@ size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
 {
   size_t sizeforlcpvalues = firstcodes ? sizeof (uint16_t) * bucketsize : 0;
   return sizeforlcpvalues +
-         sizeof (GtShortreadsort) * bucketsize +
+         (sizeof (GtShortreadsort) + sizeof (unsigned long)) * bucketsize +
          sizeof (GtTwobitencoding) *
          gt_shortreadsort_encoding_size(bucketsize,maxremain);
 }
@@ -98,6 +99,9 @@ static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
         = gt_realloc(srsw->firstcodeslcpvalues,
                      sizeof (*srsw->firstcodeslcpvalues) * bucketsize);
       srsw->firstcodeslcpvalues[0] = 0; /* since it is not set otherwise */
+      srsw->seqnum_relpos_bucket
+        = gt_realloc(srsw->seqnum_relpos_bucket,
+                     sizeof (*srsw->seqnum_relpos_bucket) * bucketsize);
     }
   } else
   {
@@ -131,6 +135,7 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw->currentbucketsize = 0;
   srsw->shortreadsorttable = NULL;
   srsw->firstcodeslcpvalues = NULL;
+  srsw->seqnum_relpos_bucket = NULL;
   GT_INITARRAY(&srsw->tbereservoir,GtTwobitencoding);
   if (maxwidth > 0)
   {
@@ -153,6 +158,8 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
     srsw->shortreadsorttable = NULL;
     gt_free(srsw->firstcodeslcpvalues);
     srsw->firstcodeslcpvalues = NULL;
+    gt_free(srsw->seqnum_relpos_bucket);
+    srsw->seqnum_relpos_bucket = NULL;
     GT_FREEARRAY(&srsw->tbereservoir,GtTwobitencoding);
     gt_free(srsw);
   }
@@ -619,14 +626,14 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
-                                      const GtSeqnumrelpos *snrp,
-                                      GtShortreadsortworkinfo *srsw,
-                                      const GtEncseq *encseq,
-                                      GtSpmsuftab *spmsuftab,
-                                      unsigned long subbucketleft,
-                                      unsigned long width,
-                                      unsigned long depth)
+const unsigned long *gt_shortreadsort_firstcodes_sort(
+                                    GtShortreadsortworkinfo *srsw,
+                                    const GtSeqnumrelpos *snrp,
+                                    const GtEncseq *encseq,
+                                    const GtSpmsuftab *spmsuftab,
+                                    unsigned long subbucketleft,
+                                    unsigned long width,
+                                    unsigned long depth)
 {
   unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
 
@@ -660,7 +667,8 @@ void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
                                     subbucketleft);
   for (idx = 0; idx < width; idx++)
   {
-    seqnum_relpos_bucket[idx]
+    srsw->seqnum_relpos_bucket[idx]
       = srsw->shortreadsorttable[idx].suffixrepresentation;
   }
+  return srsw->seqnum_relpos_bucket;
 }

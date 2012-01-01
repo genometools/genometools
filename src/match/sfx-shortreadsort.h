@@ -62,11 +62,11 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long width,
                                 unsigned long depth);
 
-void gt_shortreadsort_firstcodes_sort(unsigned long *seqnum_relpos_bucket,
-                                      const GtSeqnumrelpos *snrp,
+const unsigned long *gt_shortreadsort_firstcodes_sort(
                                       GtShortreadsortworkinfo *srsw,
+                                      const GtSeqnumrelpos *snrp,
                                       const GtEncseq *encseq,
-                                      GtSpmsuftab *spmsuftab,
+                                      const GtSpmsuftab *spmsuftab,
                                       unsigned long subbucketleft,
                                       unsigned long width,
                                       unsigned long depth);

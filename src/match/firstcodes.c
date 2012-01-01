@@ -559,11 +559,10 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
   }
 }
 
-static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
+static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
+                                       const GtEncseq *encseq,
                                        GtReadmode readmode,
-                                       GtShortreadsortworkinfo *srsw,
-                                       unsigned long *seqnum_relpos_bucket,
-                                       GtSpmsuftab *spmsuftab,
+                                       const GtSpmsuftab *spmsuftab,
                                        const GtSeqnumrelpos *snrp,
                                        const GtFirstcodestab *fct,
                                        unsigned long minindex,
@@ -580,17 +579,106 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
 {
   unsigned long current, next = GT_UNDEF_ULONG, idx,
                 width, previoussuffix = 0, sumwidth = 0;
+  const unsigned long *seqnum_relpos_bucket;
   GtEncseqReader *esr1 = NULL, *esr2 = NULL;
-  bool previousdefined = false;
   const uint16_t *lcptab_bucket;
-  bool haserr = false;
+  bool previousdefined = false, haserr = false;
 
   if (withsuftabcheck)
   {
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
+  /* The following only works if firstcodeslcpvalues is not reallocated */
   lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
+  current = gt_firstcodes_get_leftborder(fct,minindex);
+  for (idx = minindex; idx <=maxindex; idx++)
+  {
+    if (idx < maxindex)
+    {
+      next = gt_firstcodes_get_leftborder(fct,idx+1);
+      gt_assert(next > current);
+      width = next - current;
+    } else
+    {
+      gt_assert(sumofwidth > current);
+      width = sumofwidth - current;
+    }
+    sumwidth += width;
+    gt_assert(sumwidth <= spmsuftab->numofentries);
+    if (width >= 2UL)
+    {
+      seqnum_relpos_bucket
+        = gt_shortreadsort_firstcodes_sort(srsw,
+                                           snrp,
+                                           encseq,
+                                           spmsuftab,
+                                           current,
+                                           width,
+                                           depth);
+      if (withsuftabcheck)
+      {
+        gt_firstcodes_checksuftab_bucket(encseq,
+                                         readmode,
+                                         esr1,
+                                         esr2,
+                                         previoussuffix,
+                                         previousdefined,
+                                         seqnum_relpos_bucket,
+                                         snrp,
+                                         lcptab_bucket,
+                                         width);
+        previousdefined = true;
+        previoussuffix
+          = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[width-1]);
+      }
+      if (itvprocess != NULL)
+      {
+        if (itvprocess(itvprocessdata,seqnum_relpos_bucket,snrp,
+                       lcptab_bucket,width,spaceforbucketprocessing,err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+    } else
+    {
+      gt_assert(width == 1UL);
+    }
+    gt_assert(next != GT_UNDEF_ULONG);
+    current = next;
+  }
+  if (itvprocess_end != NULL)
+  {
+    itvprocess_end(itvprocessdata);
+  }
+  gt_encseq_reader_delete(esr1);
+  gt_encseq_reader_delete(esr2);
+  return haserr ? -1 : 0;
+}
+
+/*
+  The following must be supplied independently for each thread:
+  seqnum_relpos_bucket of size maxwidth
+*/
+
+void gt_firstcodes_threads_sortremaining(GtShortreadsortworkinfo *srswtab,
+                                         const GtEncseq *encseq,
+                                         const GtSpmsuftab *spmsuftab,
+                                         const GtSeqnumrelpos *snrp,
+                                         const GtFirstcodestab *fct,
+                                         unsigned long minindex,
+                                         unsigned long maxindex,
+                                         unsigned long sumofwidth,
+                                         unsigned long depth)
+{
+  unsigned long current, next = GT_UNDEF_ULONG, idx,
+                width, sumwidth = 0;
+  const uint16_t *lcptab_bucket;
+  const unsigned long *seqnum_relpos_bucket;
+
+  /* The following only works if firstcodeslcpvalues is not reallocated */
+  lcptab_bucket = gt_shortreadsort_lcpvalues(srswtab);
   current = gt_firstcodes_get_leftborder(fct,minindex);
 #ifdef GT_THREADS_ENABLED
   gt_log_log("jobs=%u",gt_jobs);
@@ -611,40 +699,14 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     gt_assert(sumwidth <= spmsuftab->numofentries);
     if (width >= 2UL)
     {
-      gt_shortreadsort_firstcodes_sort(seqnum_relpos_bucket,
-                                       snrp,
-                                       srsw,
-                                       encseq,
-                                       spmsuftab,
-                                       current,
-                                       width,
-                                       depth);
-      if (withsuftabcheck)
-      {
-        gt_firstcodes_checksuftab_bucket(encseq,
-                                         readmode,
-                                         esr1,
-                                         esr2,
-                                         previoussuffix,
-                                         previousdefined,
-                                         seqnum_relpos_bucket,
-                                         snrp,
-                                         lcptab_bucket,
-                                         width);
-        previousdefined = true;
-        previoussuffix
-          = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[width-1]);
-      }
-      if (itvprocess != NULL)
-      {
-        if (itvprocess(itvprocessdata,seqnum_relpos_bucket,snrp,
-                       lcptab_bucket, width, spaceforbucketprocessing,
-                       err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
+      seqnum_relpos_bucket
+        = gt_shortreadsort_firstcodes_sort(srswtab,
+                                           snrp,
+                                           encseq,
+                                           spmsuftab,
+                                           current,
+                                           width,
+                                           depth);
     } else
     {
       gt_assert(width == 1UL);
@@ -652,13 +714,6 @@ static int gt_firstcodes_sortremaining(const GtEncseq *encseq,
     gt_assert(next != GT_UNDEF_ULONG);
     current = next;
   }
-  if (itvprocess_end != NULL)
-  {
-    itvprocess_end(itvprocessdata);
-  }
-  gt_encseq_reader_delete(esr1);
-  gt_encseq_reader_delete(esr2);
-  return haserr ? -1 : 0;
 }
 
 #ifdef  QSORTNAME
@@ -754,8 +809,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned int numofchars, part, bitsforrelpos, bitsforseqnum,
                markprefixunits, marksuffixunits, logtotallength;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
-                totallength, suftabentries = 0, largest_width,
-                *seqnum_relpos_bucket = NULL;
+                totallength, suftabentries = 0, largest_width;
   GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
   GtShortreadsortworkinfo *srsw = NULL;
@@ -997,9 +1051,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_timer_show_progress(timer, "to compute partial sums",stdout);
     }
     suftabentries = fci.firstcodehits + fci.numofsequences;
-    maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,
-                                              &fci.tab,
-                                              suftabentries);
+    maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,&fci.tab,suftabentries);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
@@ -1037,7 +1089,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                        phase2extra +
                        gt_shortreadsort_size(true,maxbucketsize,
                                              maxseqlength - kmersize) +
-                       (sizeof (*seqnum_relpos_bucket) * maxbucketsize) +
                        4 * 4096);
       } else
       {
@@ -1140,11 +1191,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
                         gt_shortreadsort_size(true,maxbucketsize,
                                               maxseqlength - kmersize));
-    seqnum_relpos_bucket
-      = gt_malloc(sizeof (*seqnum_relpos_bucket) * maxbucketsize);
-    GT_FCI_ADDWORKSPACE(fci.fcsl,"seqnum_relpos_bucket",
-                        (size_t) sizeof (*seqnum_relpos_bucket) *
-                                 maxbucketsize);
     if (maximumspace > 0)
     {
       const unsigned long maxrounds = fci.radixparts == 1U ? 500UL : 400UL;
@@ -1305,10 +1351,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           spaceforbucketprocessing = 0;
         }
       }
-      if (gt_firstcodes_sortremaining(encseq,
+      if (gt_firstcodes_sortremaining(srsw,
+                                      encseq,
                                       readmode,
-                                      srsw,
-                                      seqnum_relpos_bucket,
                                       fci.spmsuftab,
                                       fci.buf.snrp,
                                       &fci.tab,
@@ -1340,7 +1385,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   if (!haserr)
   {
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
-    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"seqnum_relpos_bucket");
     if (!onlyaccumulation)
     {
       gt_logger_log(logger,"average short read depth=%.2f",
@@ -1349,7 +1393,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
   }
   gt_shortreadsort_delete(srsw);
-  gt_free(seqnum_relpos_bucket);
   if (haserr)
   {
     gt_firstcode_delete_before_end(&fci);
