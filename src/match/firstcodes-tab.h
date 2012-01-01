@@ -39,11 +39,11 @@ typedef struct
                 hashmap_getcount,
                 all_incrementcount;
   unsigned int sampleshift;
-  uint32_t *leftborder_all;
+  uint32_t *leftborder;
   uint8_t *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *leftborder_samples;
-  GtStr *outfilenameleftborder_all;
+  GtStr *outfilenameleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
   unsigned int modvaluebits;
@@ -119,18 +119,18 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
 {
   GT_CHANGEPOINT_GET(changepoint);
   gt_assert(idx < fct->differentcodes);
-  if (fct->leftborder_all[idx] > 0)
+  if (fct->leftborder[idx] > 0)
   {
-    return (unsigned long) --fct->leftborder_all[idx]
+    return (unsigned long) --fct->leftborder[idx]
                            + (changepoint << fct->modvaluebits);
   } else
   {
     gt_assert(changepoint > 0);
     changepoint--;
     fct->bitchangepoints.spaceGtUlong[changepoint]++;
-    fct->leftborder_all[idx] = fct->modvaluemask;
+    fct->leftborder[idx] = fct->modvaluemask;
     return (unsigned long)
-           fct->leftborder_all[idx] + (changepoint << fct->modvaluebits);
+           fct->leftborder[idx] + (changepoint << fct->modvaluebits);
   }
 }
 
@@ -154,11 +154,11 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
 
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 
-uint32_t **gt_firstcodes_leftborder_all_address(GtFirstcodestab *fct);
+uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);
 
-void gt_firstcodes_leftborder_all_remap(GtFirstcodestab *fct,uint32_t *ptr);
+void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
-const GtStr *gt_firstcodes_outfilenameleftborder_all(const
+const GtStr *gt_firstcodes_outfilenameleftborder(const
                                                      GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
@@ -166,7 +166,7 @@ unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 
-unsigned long gt_firstcodes_leftborder_all_entries(const GtFirstcodestab *fct);
+unsigned long gt_firstcodes_leftborder_entries(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
                                        unsigned long idx);
