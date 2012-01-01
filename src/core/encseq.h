@@ -201,9 +201,6 @@ void gt_Viatwobitkeyvalues_reinit(GtViatwobitkeyvalues *vtk,
 /* The following is the destructor for the latter type */
 void gt_Viatwobitkeyvalues_delete(GtViatwobitkeyvalues *vtk);
 
-/* The following is used to flag a stoppos as being undefined */
-#define GT_TWOBITENCODINGSTOPPOSUNDEF(PTR) ((PTR)->totallength)
-
 int gt_encseq_process_viatwobitencoding(GtCommonunits *commonunits,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,

@@ -6321,8 +6321,18 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
 {
   bool mirrored = false;
   unsigned long pos;
-  gt_assert(currentpos < encseq->logicaltotallength);
 
+  /*
+  printf("currentpos=%lu\n",currentpos);
+  if (currentpos >= encseq->logicaltotallength)
+  {
+    fprintf(stderr,"currentpos = %lu >= %lu = logicaltotallength\n",
+               currentpos,encseq->logicaltotallength);
+    printf(NULL);
+    exit(EXIT_FAILURE);
+  }
+  */
+  gt_assert(currentpos < encseq->logicaltotallength);
   if (encseq->hasmirror && currentpos >= encseq->totallength) {
     if (currentpos == encseq->totallength) {
       /* handle special case where we start on the virtual separator */
@@ -6365,6 +6375,11 @@ static unsigned long gt_encseq_extract2bitenc(GtEndofTwobitencoding *ptbe,
   return pos;
 }
 
+/* The following is used to flag a stoppos as being undefined */
+
+#define GT_TWOBITENCODINGSTOPPOSUNDEF(PTR)\
+        ((PTR)->hasmirror ? (PTR)->logicaltotallength : (PTR)->totallength)
+
 unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
                                          GtEndofTwobitencoding *ptbe,
                                          GtEncseqReader *esr,
@@ -6377,7 +6392,6 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
 
   gt_assert(pos < encseq->logicaltotallength);
   fwd = GT_ISDIRREVERSE(readmode) ? false : true;
-
   gt_encseq_reader_reinit_with_readmode(esr,encseq,readmode,pos);
   if (gt_has_twobitencoding_stoppos_support(encseq))
   {
@@ -6392,7 +6406,7 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
   }
   ret = gt_encseq_extract2bitenc(ptbe,encseq, fwd, pos, twobitencodingstoppos);
 
-  /* XXX: may be lessefficient, but just assigning ret to esr->currentpos may
+  /* XXX: may be less efficient, but just assigning ret to esr->currentpos may
      not reflect the real reading direction! */
   if (ret < encseq->logicaltotallength)
   {
@@ -6447,6 +6461,9 @@ unsigned int gt_encseq_extract2bitencvector(
         return offset;
       }
     }
+    /*
+    printf("pos=%lu,twobitencodingstoppos=%lu\n",pos,twobitencodingstoppos);
+    */
     (void) gt_encseq_extract2bitenc(&etbecurrent,encseq, fwd, pos,
                                     twobitencodingstoppos);
     GT_STOREINARRAY(tbereservoir,GtTwobitencoding,32UL,etbecurrent.tbe);

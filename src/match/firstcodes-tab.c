@@ -47,8 +47,14 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder_all = NULL;
   fct->leftborder_samples = NULL;
-  fct->modvaluebits = 16U; /* XXX remove the following later */
-  fct->modvaluemask = (uint32_t) ((1U << fct->modvaluebits) - 1);
+  fct->modvaluebits = 32U; /* XXX remove the following later */
+  if (fct->modvaluebits == 32U)
+  {
+    fct->modvaluemask = UINT32_MAX;
+  } else
+  {
+    fct->modvaluemask = (uint32_t) ((1UL << fct->modvaluebits) - 1);
+  }
   GT_INITARRAY(&fct->bitchangepoints,GtUlong);
 }
 
@@ -306,8 +312,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       maxbucketsize = (unsigned long) currentcount;
     }
     partsum += currentcount;
-    if (fct->bitchangepoints.allocatedGtUlong > 0 &&
-        partsum >= exceedvalue)
+    if (fct->bitchangepoints.allocatedGtUlong > 0 && partsum >= exceedvalue)
     {
       gt_assert(idx > 0 && fct->bitchangepoints.nextfreeGtUlong <
                            fct->bitchangepoints.allocatedGtUlong);
@@ -326,7 +331,6 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   fct->outfilenameleftborder_all
       = gt_leftborderbuffer_delete(leftborderbuffer_all,fcsl,
                                    gt_firstcodes_leftborder_all_entries(fct));
-  gt_assert(idx > 0);
   if (partsum > fct->leftborder_samples[samplecount-1])
   {
     GT_FIRSTCODES_ADD_SAMPLE(partsum);
@@ -357,7 +361,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     gt_assert(spacewithouthashmap < spacewithhashmap);
     hashmapspace = spacewithhashmap - spacewithouthashmap;
     gt_log_log("space for hashmap=%.2f (%lu bytes per entry)",
-           GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
+               GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;
   return maxbucketsize;

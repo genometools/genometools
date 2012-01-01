@@ -91,8 +91,10 @@ struct GtBlindtrie
   GtEncseqReader *esr1, *esr2;
   GtReadmode readmode;
   unsigned long totallength,
+                logicaltotallength,
                 maxdepthminusoffset;
   bool cmpcharbychar,
+       hasmirror,
        has_twobitencoding_stoppos_support;
   unsigned int nodenumberincrement;
   GtViatwobitkeyvalues *vtk1, *vtk2;
@@ -178,6 +180,7 @@ static void blindtrie_firstchild_set(const GtBlindtrie *blindtrie,
 }
 
 #define GT_TWOBITENCODINGSTARTSTOPOFFSETUNDEF UINT_MAX
+#define GT_BLTRIESTOPPOSUNDEF(BLTRIE)         ((BLTRIE)->totallength)
 
 static void blindtrie_leafinfo_set(GtBlindtrie *blindtrie,
                                    GtBlindtriesnodeptr node,
@@ -188,7 +191,7 @@ static void blindtrie_leafinfo_set(GtBlindtrie *blindtrie,
 
   gt_assert(node < blindtrie->nextfreeBlindtrienode);
   leafptr->either1.nodestartpos = currentstartpos;
-  if (currenttwobitencodingstoppos != GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie))
+  if (currenttwobitencodingstoppos != GT_BLTRIESTOPPOSUNDEF(blindtrie))
   {
     if (GT_ISDIRREVERSE(blindtrie->readmode))
     {
@@ -274,7 +277,7 @@ static unsigned long blindtrie_nodestoppos_get(const GtBlindtrie *blindtrie,
     }
     return nodestoppos;
   }
-  return GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie);
+  return GT_BLTRIESTOPPOSUNDEF(blindtrie);
 }
 
 static void blindtrie_copy_either(GtBlindtrie *blindtrie,
@@ -358,7 +361,7 @@ static unsigned long blindtrie_currenttwobitencodingstoppos_get(
     return gt_getnexttwobitencodingstoppos(GT_ISDIRREVERSE(blindtrie->readmode)
                                            ? false : true,blindtrie->esr1);
   }
-  return GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie);
+  return GT_BLTRIESTOPPOSUNDEF(blindtrie);
 }
 
 static void blindtrie_makeroot(GtBlindtrie *blindtrie,
@@ -392,7 +395,7 @@ static void blindtrie_makeroot(GtBlindtrie *blindtrie,
   } else
   {
     firstchar = GT_UNIQUEINT(currentstartpos);
-    currenttwobitencodingstoppos = GT_TWOBITENCODINGSTOPPOSUNDEF(blindtrie);
+    currenttwobitencodingstoppos = GT_BLTRIESTOPPOSUNDEF(blindtrie);
   }
   blindtrie_firstchild_set(blindtrie,GT_BLINDTRIE_ROOTIDX,
                            blindtrie_newleaf(blindtrie,currentstartpos,
