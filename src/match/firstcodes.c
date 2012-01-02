@@ -751,7 +751,7 @@ void gt_firstcodes_threads_sortremaining(GtShortreadsortworkinfo *srswtab,
 #ifdef GT_THREADS_ENABLED
   gt_log_log("jobs=%u",gt_jobs);
 #endif
-  for (idx = minindex; idx <=maxindex; idx++)
+  for (idx = minindex; idx <= maxindex; idx++)
   {
     if (idx < maxindex)
     {
@@ -1447,7 +1447,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       } else
       {
         unsigned int j;
-        unsigned long *endindexes;
+        unsigned long sumwidth = 0, *endindexes;
 
         gt_assert(gt_jobs >= 2U);
         endindexes = gt_evenly_divide_buckets(&fci.tab,
@@ -1463,11 +1463,19 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                         right = endindexes[j], lb, rb;
 
           lb = gt_firstcodes_get_leftborder(&fci.tab,left);
-          rb = gt_firstcodes_get_leftborder(&fci.tab,right);
+          if (j < gt_jobs - 1)
+          {
+            rb = gt_firstcodes_get_leftborder(&fci.tab,right+1) - 1;
+          } else
+          {
+            rb = gt_suftabparts_sumofwidth(part,suftabparts) - 1;
+          }
+          gt_assert(lb <= rb);
           gt_logger_log(logger,"part %u,thread %u: process [%lu,%lu]=[%lu,%lu] "
-                                "of width %lu",part,j,left,right,lb,rb,
-                                                rb-lb+1);
+                               "of width %lu",part,j,left,right,lb,rb,rb-lb+1);
+          sumwidth += rb - lb + 1;
         }
+        gt_assert (sumwidth != gt_suftabparts_widthofpart(part,suftabparts));
         gt_free(endindexes);
       }
 #endif
