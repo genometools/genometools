@@ -904,7 +904,7 @@ splintclean:
 
 obj/%.splint: ${CURDIR}/src/match/%.c
 	@echo "splint $<"
-	@splint $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DGT_THREADS_ENABLED $(INCLUDEOPT) -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c

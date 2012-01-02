@@ -444,39 +444,53 @@ unsigned long gt_Sfxmappedrangelist_size_mapped(
                                          unsigned long minindex,
                                          unsigned long maxindex)
 {
-  unsigned long idx, sumsize = 0;
-
-  for (idx = 0; idx < sfxmrlist->nextfree; idx++)
+  if (sfxmrlist == NULL)
   {
-    GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
-    if (sfxmappedrange != NULL)
+    gt_assert(maxindex >= minindex);
+    return maxindex - minindex + 1;
+  } else
+  {
+    unsigned long idx, sumsize = 0;
+
+    for (idx = 0; idx < sfxmrlist->nextfree; idx++)
     {
-      /*printf("size_mapped %s %lu %lu => %lu\n",
-                  gt_str_get(sfxmappedrange->tablename),
-                  minindex,maxindex,
-                  gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
-                                                maxindex));*/
-      sumsize += gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
-                                               maxindex);
+      GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
+      if (sfxmappedrange != NULL)
+      {
+        /*printf("size_mapped %s %lu %lu => %lu\n",
+                    gt_str_get(sfxmappedrange->tablename),
+                    minindex,maxindex,
+                    gt_Sfxmappedrange_size_mapped(sfxmappedrange,minindex,
+                                                  maxindex));*/
+        sumsize += gt_Sfxmappedrange_size_mapped(sfxmappedrange,
+                                                 minindex,
+                                                 maxindex);
+      }
     }
+    return sumsize;
   }
-  return sumsize;
 }
 
 unsigned long gt_Sfxmappedrangelist_size_entire(
                                          const GtSfxmappedrangelist *sfxmrlist)
 {
-  unsigned long idx, sumsize = 0;
-
-  for (idx = 0; idx < sfxmrlist->nextfree; idx++)
+  if (sfxmrlist == NULL)
   {
-    GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
-    if (sfxmappedrange != NULL)
+    return 0;
+  } else
+  {
+    unsigned long idx, sumsize = 0;
+
+    for (idx = 0; idx < sfxmrlist->nextfree; idx++)
     {
-      sumsize += gt_Sfxmappedrange_size_entire(sfxmappedrange);
+      GtSfxmappedrange *sfxmappedrange = sfxmrlist->arr[idx];
+      if (sfxmappedrange != NULL)
+      {
+        sumsize += gt_Sfxmappedrange_size_entire(sfxmappedrange);
+      }
     }
+    return sumsize;
   }
-  return sumsize;
 }
 
 void gt_Sfxmappedrangelist_delete(GtSfxmappedrangelist *sfxmrlist)

@@ -657,6 +657,74 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
   return haserr ? -1 : 0;
 }
 
+#ifdef GT_THREADS_ENABLED
+static unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
+                                                   unsigned long start,
+                                                   unsigned long end,
+                                                   unsigned long offset)
+{
+  unsigned long left = start, right = end, found = end, mid, midval;
+
+  while (left+1 < right)
+  {
+    mid = GT_DIV2(left+right);
+    midval = gt_firstcodes_get_leftborder(fct,mid);
+    if (offset == midval)
+    {
+      return mid;
+    }
+    if (offset < midval)
+    {
+      found = mid;
+      right = mid - 1;
+    } else
+    {
+      left = mid + 1;
+    }
+  }
+  return found;
+}
+
+static unsigned long *gt_evenly_divide_buckets(const GtFirstcodestab *fct,
+                                               unsigned long minindex,
+                                               unsigned long maxindex,
+                                               unsigned long numofsuffixes,
+                                               unsigned int numofparts)
+{
+  unsigned long *endindexes, widthofpart, offset;
+  unsigned int part, remainder;
+
+  gt_assert(minindex < maxindex && numofparts >= 2U);
+  widthofpart = numofsuffixes/numofparts;
+  endindexes = gt_malloc(sizeof (*endindexes) * numofparts);
+  offset = gt_firstcodes_get_leftborder(fct,minindex);
+  remainder = (unsigned int) (numofsuffixes % (unsigned long) numofparts);
+  for (part=0; part < numofparts; part++)
+  {
+    if (remainder > 0)
+    {
+      offset += widthofpart + 1;
+      remainder--;
+    } else
+    {
+      offset += widthofpart;
+    }
+    if (part == numofparts - 1)
+    {
+      endindexes[part] = maxindex;
+    } else
+    {
+      unsigned long start = (part == 0) ? minindex : endindexes[part-1] + 1;
+
+      endindexes[part] = gt_firstcodes_findfirstlarger(fct,start,maxindex,
+                                                      offset);
+      gt_assert(endindexes[part] <= maxindex);
+    }
+  }
+  return endindexes;
+}
+#endif
+
 /*
   The following must be supplied independently for each thread:
   seqnum_relpos_bucket of size maxwidth
@@ -1351,6 +1419,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
           spaceforbucketprocessing = 0;
         }
       }
+#ifdef GT_THREADS_ENABLED
+      if (gt_jobs == 1U)
+      {
+#endif
       if (gt_firstcodes_sortremaining(srsw,
                                       encseq,
                                       readmode,
@@ -1371,6 +1443,34 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         haserr = true;
       }
+#ifdef GT_THREADS_ENABLED
+      } else
+      {
+        unsigned int j;
+        unsigned long *endindexes;
+
+        gt_assert(gt_jobs >= 2U);
+        endindexes = gt_evenly_divide_buckets(&fci.tab,
+                                              fci.currentminindex,
+                                              fci.currentmaxindex,
+                                              gt_suftabparts_widthofpart(part,
+                                                                suftabparts),
+                                              gt_jobs);
+        for (j=0; j<gt_jobs; j++)
+        {
+          unsigned long left = j == 0 ? fci.currentminindex
+                                      : endindexes[j-1] + 1,
+                        right = endindexes[j], lb, rb;
+
+          lb = gt_firstcodes_get_leftborder(&fci.tab,left);
+          rb = gt_firstcodes_get_leftborder(&fci.tab,right);
+          gt_logger_log(logger,"part %u,thread %u: process [%lu,%lu]=[%lu,%lu] "
+                                "of width %lu",part,j,left,right,lb,rb,
+                                                rb-lb+1);
+        }
+        gt_free(endindexes);
+      }
+#endif
       if (fci.mappedleftborder != NULL)
       {
         gt_Sfxmappedrange_unmap(fci.mappedleftborder);

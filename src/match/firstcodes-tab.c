@@ -378,6 +378,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx)
 {
   GT_CHANGEPOINT_GET(changepoint);
+
   return (unsigned long) fct->leftborder[idx]
                          + (changepoint << fct->modvaluebits);
 }
@@ -392,8 +393,8 @@ unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct)
   return fct->numofsamples;
 }
 
-unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
-                                            unsigned long suftaboffset)
+unsigned long gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
+                                                  unsigned long suftaboffset)
 {
   unsigned long left = 0, right, mid, midval, found;
 

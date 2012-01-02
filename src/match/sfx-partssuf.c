@@ -233,7 +233,7 @@ GtSuftabparts *gt_suftabparts_new(unsigned int numofparts,
       {
         secondidx = bcktab != NULL
                       ? gt_bcktab_findfirstlarger(bcktab,suftaboffset)
-                      : gt_firstcodes_findfirstlarger(fct,suftaboffset);
+                      : gt_firstcodes_findfirstsamplelarger(fct,suftaboffset);
       }
       suftabparts->components[part].nextidx = secondidx;
       secondbound = bcktab != NULL
@@ -427,7 +427,8 @@ int gt_suftabparts_fit_memlimit(size_t estimatedspace,
     } else
     {
       gt_assert(fct != NULL);
-      suftabsize = gt_spmsuftab_requiredspace(numofentries,totallength,
+      suftabsize = gt_spmsuftab_requiredspace(numofentries,
+                                              totallength,
                                               bitsforseqnumrelpos);
     }
     if (parts == 1U)

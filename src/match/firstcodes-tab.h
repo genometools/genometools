@@ -143,8 +143,8 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_numofsamples(const GtFirstcodestab *fct);
 
-unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
-                                            unsigned long suftaboffset);
+unsigned long gt_firstcodes_findfirstsamplelarger(const GtFirstcodestab *fct,
+                                                  unsigned long suftaboffset);
 
 void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
                                   GtFirstcodestab *fct);
