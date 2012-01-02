@@ -730,15 +730,15 @@ static unsigned long *gt_evenly_divide_buckets(const GtFirstcodestab *fct,
   seqnum_relpos_bucket of size maxwidth
 */
 
-void gt_firstcodes_threads_sortremaining(GtShortreadsortworkinfo *srswtab,
-                                         const GtEncseq *encseq,
-                                         const GtSpmsuftab *spmsuftab,
-                                         const GtSeqnumrelpos *snrp,
-                                         const GtFirstcodestab *fct,
-                                         unsigned long minindex,
-                                         unsigned long maxindex,
-                                         unsigned long sumofwidth,
-                                         unsigned long depth)
+void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
+                                  const GtEncseq *encseq,
+                                  const GtSpmsuftab *spmsuftab,
+                                  const GtSeqnumrelpos *snrp,
+                                  const GtFirstcodestab *fct,
+                                  unsigned long minindex,
+                                  unsigned long maxindex,
+                                  unsigned long sumofwidth,
+                                  unsigned long depth)
 {
   unsigned long current, next = GT_UNDEF_ULONG, idx,
                 width, sumwidth = 0;
@@ -746,7 +746,7 @@ void gt_firstcodes_threads_sortremaining(GtShortreadsortworkinfo *srswtab,
   const unsigned long *seqnum_relpos_bucket;
 
   /* The following only works if firstcodeslcpvalues is not reallocated */
-  lcptab_bucket = gt_shortreadsort_lcpvalues(srswtab);
+  lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   current = gt_firstcodes_get_leftborder(fct,minindex);
 #ifdef GT_THREADS_ENABLED
   gt_log_log("jobs=%u",gt_jobs);
@@ -768,7 +768,7 @@ void gt_firstcodes_threads_sortremaining(GtShortreadsortworkinfo *srswtab,
     if (width >= 2UL)
     {
       seqnum_relpos_bucket
-        = gt_shortreadsort_firstcodes_sort(srswtab,
+        = gt_shortreadsort_firstcodes_sort(srsw,
                                            snrp,
                                            encseq,
                                            spmsuftab,
@@ -782,6 +782,71 @@ void gt_firstcodes_threads_sortremaining(GtShortreadsortworkinfo *srswtab,
     gt_assert(next != GT_UNDEF_ULONG);
     current = next;
   }
+}
+
+typedef struct
+{
+  GtShortreadsortworkinfo *srsw;
+  const GtEncseq *encseq;
+  const GtSpmsuftab *spmsuftab;
+  const GtSeqnumrelpos *snrp;
+  const GtFirstcodestab *fct;
+  unsigned long minindex,
+                maxindex,
+                sumofwidth,
+                depth;
+} GtSortRemainingThreadinfo;
+
+static void gt_firstcodes_threads_sortremaining(
+                                          GtShortreadsortworkinfo **srswtab,
+                                          const GtEncseq *encseq,
+                                          const GtSpmsuftab *spmsuftab,
+                                          const GtSeqnumrelpos *snrp,
+                                          const GtFirstcodestab *fct,
+                                          unsigned long minindex,
+                                          unsigned long maxindex,
+                                          unsigned long widthofpart,
+                                          unsigned long sumofwidth,
+                                          unsigned int threads,
+                                          GtLogger *logger)
+{
+  unsigned int t;
+  unsigned long sum = 0, *endindexes;
+  GtSortRemainingThreadinfo *threadinfo;
+
+  gt_assert(threads >= 2U);
+  endindexes = gt_evenly_divide_buckets(fct,
+                                        minindex,
+                                        maxindex,
+                                        widthofpart,
+                                        threads);
+  threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
+  for (t=0; t<threads; t++)
+  {
+    unsigned long left = t == 0 ? minindex : endindexes[t-1] + 1,
+                  right = endindexes[t], lb, rb;
+
+    threadinfo[t].srsw = srswtab[t];
+    threadinfo[t].encseq = encseq;
+    threadinfo[t].spmsuftab = spmsuftab;
+    threadinfo[t].snrp = snrp;
+    threadinfo[t].fct = fct;
+    lb = gt_firstcodes_get_leftborder(fct,left);
+    if (t < threads - 1)
+    {
+      rb = gt_firstcodes_get_leftborder(fct,right+1) - 1;
+    } else
+    {
+      rb = sumofwidth - 1;
+    }
+    gt_assert(lb <= rb);
+    gt_logger_log(logger,"thread %u: process [%lu,%lu]=[%lu,%lu] "
+                         "of width %lu",t,left,right,lb,rb,rb-lb+1);
+    sum += rb - lb + 1;
+  }
+  gt_assert (sum == widthofpart);
+  gt_free(threadinfo);
+  gt_free(endindexes);
 }
 
 #ifdef  QSORTNAME
@@ -880,7 +945,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                 totallength, suftabentries = 0, largest_width;
   GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
-  GtShortreadsortworkinfo *srsw = NULL;
+  GtShortreadsortworkinfo *srsw = NULL, **srswtab = NULL;
   void *mapptr;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   bool haserr = false;
@@ -1254,11 +1319,29 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                              bitsforseqnum + bitsforrelpos);
     GT_FCI_ADDWORKSPACE(fci.fcsl,"suftab",suftab_size);
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
-    srsw = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
-                                readmode,true);
-    GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
-                        gt_shortreadsort_size(true,maxbucketsize,
-                                              maxseqlength - kmersize));
+#ifdef GT_THREADS_ENABLED
+    if (gt_jobs > 1U)
+    {
+      unsigned int j;
+
+      srswtab = gt_malloc(sizeof (*srswtab) * gt_jobs);
+      for (j = 0; j < gt_jobs; j++)
+      {
+        srswtab[j] = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
+                                          readmode,true);
+      }
+      GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
+                          gt_jobs * gt_shortreadsort_size(true,maxbucketsize,
+                                                     maxseqlength - kmersize));
+    } else
+#endif
+    {
+      srsw = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
+                                  readmode,true);
+      GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
+                          gt_shortreadsort_size(true,maxbucketsize,
+                                                maxseqlength - kmersize));
+    }
     if (maximumspace > 0)
     {
       const unsigned long maxrounds = fci.radixparts == 1U ? 500UL : 400UL;
@@ -1420,65 +1503,45 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         }
       }
 #ifdef GT_THREADS_ENABLED
-      if (gt_jobs == 1U)
+      if (gt_jobs > 1U)
       {
-#endif
-      if (gt_firstcodes_sortremaining(srsw,
-                                      encseq,
-                                      readmode,
-                                      fci.spmsuftab,
-                                      fci.buf.snrp,
-                                      &fci.tab,
-                                      fci.currentminindex,
-                                      fci.currentmaxindex,
-                                      gt_suftabparts_sumofwidth(part,
+        gt_firstcodes_threads_sortremaining(srswtab,
+                                            encseq,
+                                            fci.spmsuftab,
+                                            fci.buf.snrp,
+                                            &fci.tab,
+                                            fci.currentminindex,
+                                            fci.currentmaxindex,
+                                            gt_suftabparts_widthofpart(part,
                                                                 suftabparts),
-                                      spaceforbucketprocessing,
-                                      (unsigned long) kmersize,
-                                      itvprocess,
-                                      itvprocess_end,
-                                      itvprocessdata,
-                                      withsuftabcheck,
-                                      err) != 0)
-      {
-        haserr = true;
-      }
-#ifdef GT_THREADS_ENABLED
+                                            gt_suftabparts_sumofwidth(part,
+                                                                suftabparts),
+                                            gt_jobs,
+                                            logger);
       } else
-      {
-        unsigned int j;
-        unsigned long sumwidth = 0, *endindexes;
-
-        gt_assert(gt_jobs >= 2U);
-        endindexes = gt_evenly_divide_buckets(&fci.tab,
-                                              fci.currentminindex,
-                                              fci.currentmaxindex,
-                                              gt_suftabparts_widthofpart(part,
-                                                                suftabparts),
-                                              gt_jobs);
-        for (j=0; j<gt_jobs; j++)
-        {
-          unsigned long left = j == 0 ? fci.currentminindex
-                                      : endindexes[j-1] + 1,
-                        right = endindexes[j], lb, rb;
-
-          lb = gt_firstcodes_get_leftborder(&fci.tab,left);
-          if (j < gt_jobs - 1)
-          {
-            rb = gt_firstcodes_get_leftborder(&fci.tab,right+1) - 1;
-          } else
-          {
-            rb = gt_suftabparts_sumofwidth(part,suftabparts) - 1;
-          }
-          gt_assert(lb <= rb);
-          gt_logger_log(logger,"part %u,thread %u: process [%lu,%lu]=[%lu,%lu] "
-                               "of width %lu",part,j,left,right,lb,rb,rb-lb+1);
-          sumwidth += rb - lb + 1;
-        }
-        gt_assert (sumwidth != gt_suftabparts_widthofpart(part,suftabparts));
-        gt_free(endindexes);
-      }
 #endif
+      {
+        if (gt_firstcodes_sortremaining(srsw,
+                                        encseq,
+                                        readmode,
+                                        fci.spmsuftab,
+                                        fci.buf.snrp,
+                                        &fci.tab,
+                                        fci.currentminindex,
+                                        fci.currentmaxindex,
+                                        gt_suftabparts_sumofwidth(part,
+                                                                  suftabparts),
+                                        spaceforbucketprocessing,
+                                        (unsigned long) kmersize,
+                                        itvprocess,
+                                        itvprocess_end,
+                                        itvprocessdata,
+                                        withsuftabcheck,
+                                        err) != 0)
+        {
+          haserr = true;
+        }
+      }
       if (fci.mappedleftborder != NULL)
       {
         gt_Sfxmappedrange_unmap(fci.mappedleftborder);
@@ -1490,12 +1553,38 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     gt_timer_show_progress(timer, "cleaning up",stdout);
   }
-  if (!haserr)
+#ifdef GT_THREADS_ENABLED
+  if (gt_jobs > 1U)
+  {
+    unsigned int j;
+
+    if (!haserr)
+    {
+      GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
+    }
+    if (srswtab != NULL)
+    {
+      for (j=0; j<gt_jobs; j++)
+      {
+        if (!haserr && !onlyaccumulation)
+        {
+          gt_logger_log(logger,"average short read depth for thread %u is %.2f",
+                        j,
+                        (double) gt_shortreadsort_sumofstoredvalues(srswtab[j])/
+                                                       fci.firstcodeposhits);
+        }
+        gt_shortreadsort_delete(srswtab[j]);
+      }
+    }
+    gt_free(srswtab);
+  }
+#endif
+  if (srsw != NULL && !haserr)
   {
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
     if (!onlyaccumulation)
     {
-      gt_logger_log(logger,"average short read depth=%.2f",
+      gt_logger_log(logger,"average short read depth is %.2f",
                     (double) gt_shortreadsort_sumofstoredvalues(srsw)/
                                                      fci.firstcodeposhits);
     }
