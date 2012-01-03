@@ -595,7 +595,6 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
-  /* The following only works if firstcodeslcpvalues is not reallocated */
   current = gt_firstcodes_get_leftborder(fct,partminindex);
   for (idx = partminindex; idx <= partmaxindex; idx++)
   {
@@ -666,19 +665,23 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
 #ifdef GT_THREADS_ENABLED
 static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
                                          const GtEncseq *encseq,
+                                         GtReadmode readmode,
                                          const GtSpmsuftab *spmsuftab,
                                          const GtSeqnumrelpos *snrp,
                                          const GtFirstcodestab *fct,
                                          unsigned long minindex,
                                          unsigned long maxindex,
                                          unsigned long sumofwidth,
-                                         unsigned long depth)
+                                         unsigned long depth,
+                                         bool withsuftabcheck)
 {
   unsigned long current,
                 next = GT_UNDEF_ULONG,
                 idx,
                 width,
-                sumwidth = 0;
+                sumwidth = 0,
+                previoussuffix = 0;
+  bool previousdefined = false;
   GtShortreadsortresult srsresult;
 
   current = gt_firstcodes_get_leftborder(fct,minindex);
@@ -706,6 +709,22 @@ static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
                                        current,
                                        width,
                                        depth);
+      if (withsuftabcheck)
+      {
+        gt_firstcodes_checksuftab_bucket(encseq,
+                                         readmode,
+                                         NULL,
+                                         NULL,
+                                         previoussuffix,
+                                         previousdefined,
+                                         srsresult.suftab_bucket,
+                                         snrp,
+                                         srsresult.lcptab_bucket,
+                                         width);
+        previousdefined = true;
+        previoussuffix
+          = gt_seqnumrelpos_decode_pos(snrp,srsresult.suftab_bucket[width-1]);
+      }
     } else
     {
       gt_assert(width == 1UL);
@@ -785,6 +804,7 @@ typedef struct
 {
   GtShortreadsortworkinfo *srsw;
   const GtEncseq *encseq;
+  GtReadmode readmode;
   const GtSpmsuftab *spmsuftab;
   const GtSeqnumrelpos *snrp;
   const GtFirstcodestab *fct;
@@ -792,6 +812,7 @@ typedef struct
                 minindex,
                 maxindex,
                 sumofwidth;
+  bool withsuftabcheck;
 #ifndef S_SPLINT_S
   pthread_t threadid;
 #endif
@@ -806,19 +827,22 @@ static void *gt_firstcodes_thread_caller_sortremaining(void *data)
 
   gt_firstcodes_sortremaining2(threadinfo->srsw,
                                threadinfo->encseq,
+                               threadinfo->readmode,
                                threadinfo->spmsuftab,
                                threadinfo->snrp,
                                threadinfo->fct,
                                threadinfo->minindex,
                                threadinfo->maxindex,
                                threadinfo->sumofwidth,
-                               threadinfo->depth);
+                               threadinfo->depth,
+                               threadinfo->withsuftabcheck);
   return NULL;
 }
 
 static void gt_firstcodes_thread_sortremaining(
                                           GtShortreadsortworkinfo **srswtab,
                                           const GtEncseq *encseq,
+                                          GtReadmode readmode,
                                           const GtSpmsuftab *spmsuftab,
                                           const GtSeqnumrelpos *snrp,
                                           const GtFirstcodestab *fct,
@@ -827,6 +851,7 @@ static void gt_firstcodes_thread_sortremaining(
                                           unsigned long widthofpart,
                                           unsigned long sumofwidth,
                                           unsigned long depth,
+                                          bool withsuftabcheck,
                                           unsigned int threads,
                                           GtLogger *logger)
 {
@@ -852,6 +877,8 @@ static void gt_firstcodes_thread_sortremaining(
     threadinfo[t].fct = fct;
     threadinfo[t].minindex = t == 0 ? partminindex : endindexes[t-1] + 1,
     threadinfo[t].maxindex = endindexes[t];
+    threadinfo[t].readmode = readmode;
+    threadinfo[t].withsuftabcheck = withsuftabcheck;
     threadinfo[t].depth = depth;
     lb = gt_firstcodes_get_leftborder(fct,threadinfo[t].minindex);
     if (t < threads - 1)
@@ -1549,6 +1576,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       {
         gt_firstcodes_thread_sortremaining(srswtab,
                                            encseq,
+                                           readmode,
                                            fci.spmsuftab,
                                            fci.buf.snrp,
                                            &fci.tab,
@@ -1559,6 +1587,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                            gt_suftabparts_sumofwidth(part,
                                                                suftabparts),
                                            (unsigned long) kmersize,
+                                           withsuftabcheck,
                                            gt_jobs,
                                            logger);
       } else

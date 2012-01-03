@@ -3257,8 +3257,7 @@ GtEncseqReader* gt_encseq_create_reader_with_readmode(const GtEncseq *encseq,
   /* the following is implicit by using calloc, but we better initialize
      it for documentation */
   esr->wildcardrangestate = esr->ssptabstate = NULL;
-  gt_encseq_reader_reinit_with_readmode(esr, (GtEncseq*) encseq, readmode,
-                                        startpos);
+  gt_encseq_reader_reinit_with_readmode(esr, encseq, readmode, startpos);
   return esr;
 }
 
