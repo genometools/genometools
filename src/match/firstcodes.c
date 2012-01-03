@@ -16,6 +16,9 @@
 */
 
 #include <math.h>
+#ifndef S_SPLINT_S /* pthread header cannot be parsed by splint => omit it */
+#include <pthread.h>
+#endif
 #include "core/arraydef.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
@@ -730,15 +733,15 @@ static unsigned long *gt_evenly_divide_buckets(const GtFirstcodestab *fct,
   seqnum_relpos_bucket of size maxwidth
 */
 
-void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
-                                  const GtEncseq *encseq,
-                                  const GtSpmsuftab *spmsuftab,
-                                  const GtSeqnumrelpos *snrp,
-                                  const GtFirstcodestab *fct,
-                                  unsigned long minindex,
-                                  unsigned long maxindex,
-                                  unsigned long sumofwidth,
-                                  unsigned long depth)
+static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
+                                         const GtEncseq *encseq,
+                                         const GtSpmsuftab *spmsuftab,
+                                         const GtSeqnumrelpos *snrp,
+                                         const GtFirstcodestab *fct,
+                                         unsigned long minindex,
+                                         unsigned long maxindex,
+                                         unsigned long sumofwidth,
+                                         unsigned long depth)
 {
   unsigned long current, next = GT_UNDEF_ULONG, idx,
                 width, sumwidth = 0;
@@ -791,11 +794,33 @@ typedef struct
   const GtSpmsuftab *spmsuftab;
   const GtSeqnumrelpos *snrp;
   const GtFirstcodestab *fct;
-  unsigned long minindex,
+  unsigned long depth,
+                minindex,
                 maxindex,
-                sumofwidth,
-                depth;
+                sumofwidth;
+#ifndef S_SPLINT_S
+  pthread_t threadid;
+#endif
 } GtSortRemainingThreadinfo;
+
+#ifdef S_SPLINT_S
+/*@unused@*/
+#endif
+static void *gt_firstcodes_thread_caller_sortremaining(void *data)
+{
+  GtSortRemainingThreadinfo *threadinfo = (GtSortRemainingThreadinfo *) data;
+
+  gt_firstcodes_sortremaining2(threadinfo->srsw,
+                               threadinfo->encseq,
+                               threadinfo->spmsuftab,
+                               threadinfo->snrp,
+                               threadinfo->fct,
+                               threadinfo->minindex,
+                               threadinfo->maxindex,
+                               threadinfo->sumofwidth,
+                               threadinfo->depth);
+  return NULL;
+}
 
 static void gt_firstcodes_threads_sortremaining(
                                           GtShortreadsortworkinfo **srswtab,
@@ -803,48 +828,70 @@ static void gt_firstcodes_threads_sortremaining(
                                           const GtSpmsuftab *spmsuftab,
                                           const GtSeqnumrelpos *snrp,
                                           const GtFirstcodestab *fct,
-                                          unsigned long minindex,
-                                          unsigned long maxindex,
+                                          unsigned long partminindex,
+                                          unsigned long partmaxindex,
                                           unsigned long widthofpart,
                                           unsigned long sumofwidth,
+                                          unsigned long depth,
                                           unsigned int threads,
                                           GtLogger *logger)
 {
   unsigned int t;
   unsigned long sum = 0, *endindexes;
   GtSortRemainingThreadinfo *threadinfo;
+#ifndef S_SPLINT_S
+  void *exit_status;
+#endif
 
   gt_assert(threads >= 2U);
   endindexes = gt_evenly_divide_buckets(fct,
-                                        minindex,
-                                        maxindex,
+                                        partminindex,
+                                        partmaxindex,
                                         widthofpart,
                                         threads);
   threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
   for (t=0; t<threads; t++)
   {
-    unsigned long left = t == 0 ? minindex : endindexes[t-1] + 1,
-                  right = endindexes[t], lb, rb;
+    unsigned long lb;
 
     threadinfo[t].srsw = srswtab[t];
     threadinfo[t].encseq = encseq;
     threadinfo[t].spmsuftab = spmsuftab;
     threadinfo[t].snrp = snrp;
     threadinfo[t].fct = fct;
-    lb = gt_firstcodes_get_leftborder(fct,left);
+    threadinfo[t].minindex = t == 0 ? partminindex : endindexes[t-1] + 1,
+    threadinfo[t].maxindex = endindexes[t];
+    threadinfo[t].depth = depth;
+    lb = gt_firstcodes_get_leftborder(fct,threadinfo[t].minindex);
     if (t < threads - 1)
     {
-      rb = gt_firstcodes_get_leftborder(fct,right+1) - 1;
+      threadinfo[t].sumofwidth
+        = gt_firstcodes_get_leftborder(fct,threadinfo[t].maxindex+1);
     } else
     {
-      rb = sumofwidth - 1;
+      threadinfo[t].sumofwidth = sumofwidth;
     }
-    gt_assert(lb <= rb);
+    gt_assert(lb < threadinfo[t].sumofwidth);
     gt_logger_log(logger,"thread %u: process [%lu,%lu]=[%lu,%lu] "
-                         "of width %lu",t,left,right,lb,rb,rb-lb+1);
-    sum += rb - lb + 1;
+                         "of width %lu",t,threadinfo[t].minindex,
+                                          threadinfo[t].maxindex,
+                                          lb,
+                                          threadinfo[t].sumofwidth,
+                                          threadinfo[t].sumofwidth - lb);
+    sum += threadinfo[t].sumofwidth - lb;
+#ifndef S_SPLINT_S
+    pthread_create (&threadinfo[t].threadid, NULL,
+                    gt_firstcodes_thread_caller_sortremaining,
+                    threadinfo + t);
+#endif
   }
   gt_assert (sum == widthofpart);
+#ifndef S_SPLINT_S
+  for (t=0; t<threads; t++)
+  {
+    pthread_join(threadinfo[t].threadid, &exit_status);
+  }
+#endif
   gt_free(threadinfo);
   gt_free(endindexes);
 }
@@ -1516,6 +1563,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                                 suftabparts),
                                             gt_suftabparts_sumofwidth(part,
                                                                 suftabparts),
+                                            (unsigned long) kmersize,
                                             gt_jobs,
                                             logger);
       } else
@@ -1564,16 +1612,19 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     if (srswtab != NULL)
     {
+      unsigned long sumofstoredvalues = 0;
       for (j=0; j<gt_jobs; j++)
       {
         if (!haserr && !onlyaccumulation)
         {
-          gt_logger_log(logger,"average short read depth for thread %u is %.2f",
-                        j,
-                        (double) gt_shortreadsort_sumofstoredvalues(srswtab[j])/
-                                                       fci.firstcodeposhits);
+          sumofstoredvalues = gt_shortreadsort_sumofstoredvalues(srswtab[j]);
         }
         gt_shortreadsort_delete(srswtab[j]);
+      }
+      if (!haserr && !onlyaccumulation)
+      {
+        gt_logger_log(logger,"average short read depth is %.2f",
+                    (double) sumofstoredvalues/fci.firstcodeposhits);
       }
     }
     gt_free(srswtab);
