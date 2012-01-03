@@ -72,13 +72,6 @@ size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
          gt_shortreadsort_encoding_size(bucketsize,maxremain);
 }
 
-const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw)
-{
-  gt_assert(srsw->firstcodeslcpvalues != NULL);
-
-  return srsw->firstcodeslcpvalues;
-}
-
 static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
                                     bool firstcodes,
                                     unsigned long bucketsize,
@@ -626,14 +619,14 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-const unsigned long *gt_shortreadsort_firstcodes_sort(
-                                    GtShortreadsortworkinfo *srsw,
-                                    const GtSeqnumrelpos *snrp,
-                                    const GtEncseq *encseq,
-                                    const GtSpmsuftab *spmsuftab,
-                                    unsigned long subbucketleft,
-                                    unsigned long width,
-                                    unsigned long depth)
+void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
+                                      GtShortreadsortworkinfo *srsw,
+                                      const GtSeqnumrelpos *snrp,
+                                      const GtEncseq *encseq,
+                                      const GtSpmsuftab *spmsuftab,
+                                      unsigned long subbucketleft,
+                                      unsigned long width,
+                                      unsigned long depth)
 {
   unsigned long idx, pos, seqnum, relpos, seqnum_relpos;
 
@@ -670,5 +663,6 @@ const unsigned long *gt_shortreadsort_firstcodes_sort(
     srsw->seqnum_relpos_bucket[idx]
       = srsw->shortreadsorttable[idx].suffixrepresentation;
   }
-  return srsw->seqnum_relpos_bucket;
+  srsresult->suftab_bucket = srsw->seqnum_relpos_bucket;
+  srsresult->lcptab_bucket = srsw->firstcodeslcpvalues;
 }

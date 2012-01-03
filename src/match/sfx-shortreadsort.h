@@ -34,6 +34,12 @@
 
 typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 
+typedef struct
+{
+  unsigned long *suftab_bucket;
+  uint16_t *lcptab_bucket;
+} GtShortreadsortresult;
+
 size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
                              unsigned long maxremain);
 
@@ -50,8 +56,6 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw);
 void gt_shortreadsort_assigntableoflcpvalues(
           GtShortreadsortworkinfo *srsw,GtLcpvalues *tableoflcpvalues);
 
-const uint16_t *gt_shortreadsort_lcpvalues(const GtShortreadsortworkinfo *srsw);
-
 void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 const GtEncseq *encseq,
                                 unsigned long maxremain,
@@ -62,7 +66,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long width,
                                 unsigned long depth);
 
-const unsigned long *gt_shortreadsort_firstcodes_sort(
+void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       GtShortreadsortworkinfo *srsw,
                                       const GtSeqnumrelpos *snrp,
                                       const GtEncseq *encseq,

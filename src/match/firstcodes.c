@@ -580,11 +580,14 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
-  unsigned long current, next = GT_UNDEF_ULONG, idx,
-                width, previoussuffix = 0, sumwidth = 0;
-  const unsigned long *seqnum_relpos_bucket;
+  unsigned long current,
+                next = GT_UNDEF_ULONG,
+                idx,
+                width,
+                sumwidth = 0,
+                previoussuffix = 0;
   GtEncseqReader *esr1 = NULL, *esr2 = NULL;
-  const uint16_t *lcptab_bucket;
+  GtShortreadsortresult srsresult;
   bool previousdefined = false, haserr = false;
 
   if (withsuftabcheck)
@@ -593,7 +596,6 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   }
   /* The following only works if firstcodeslcpvalues is not reallocated */
-  lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
   current = gt_firstcodes_get_leftborder(fct,partminindex);
   for (idx = partminindex; idx <= partmaxindex; idx++)
   {
@@ -611,14 +613,14 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     gt_assert(sumwidth <= spmsuftab->numofentries);
     if (width >= 2UL)
     {
-      seqnum_relpos_bucket
-        = gt_shortreadsort_firstcodes_sort(srsw,
-                                           snrp,
-                                           encseq,
-                                           spmsuftab,
-                                           current,
-                                           width,
-                                           depth);
+      gt_shortreadsort_firstcodes_sort(&srsresult,
+                                       srsw,
+                                       snrp,
+                                       encseq,
+                                       spmsuftab,
+                                       current,
+                                       width,
+                                       depth);
       if (withsuftabcheck)
       {
         gt_firstcodes_checksuftab_bucket(encseq,
@@ -627,18 +629,19 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                          esr2,
                                          previoussuffix,
                                          previousdefined,
-                                         seqnum_relpos_bucket,
+                                         srsresult.suftab_bucket,
                                          snrp,
-                                         lcptab_bucket,
+                                         srsresult.lcptab_bucket,
                                          width);
         previousdefined = true;
         previoussuffix
-          = gt_seqnumrelpos_decode_pos(snrp,seqnum_relpos_bucket[width-1]);
+          = gt_seqnumrelpos_decode_pos(snrp,srsresult.suftab_bucket[width-1]);
       }
       if (itvprocess != NULL)
       {
-        if (itvprocess(itvprocessdata,seqnum_relpos_bucket,snrp,
-                       lcptab_bucket,width,spaceforbucketprocessing,err) != 0)
+        if (itvprocess(itvprocessdata,srsresult.suftab_bucket,snrp,
+                       srsresult.lcptab_bucket,width,
+                       spaceforbucketprocessing,err) != 0)
         {
           haserr = true;
           break;
@@ -661,6 +664,57 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
 }
 
 #ifdef GT_THREADS_ENABLED
+static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
+                                         const GtEncseq *encseq,
+                                         const GtSpmsuftab *spmsuftab,
+                                         const GtSeqnumrelpos *snrp,
+                                         const GtFirstcodestab *fct,
+                                         unsigned long minindex,
+                                         unsigned long maxindex,
+                                         unsigned long sumofwidth,
+                                         unsigned long depth)
+{
+  unsigned long current,
+                next = GT_UNDEF_ULONG,
+                idx,
+                width,
+                sumwidth = 0;
+  GtShortreadsortresult srsresult;
+
+  current = gt_firstcodes_get_leftborder(fct,minindex);
+  for (idx = minindex; idx <= maxindex; idx++)
+  {
+    if (idx < maxindex)
+    {
+      next = gt_firstcodes_get_leftborder(fct,idx+1);
+      gt_assert(next > current);
+      width = next - current;
+    } else
+    {
+      gt_assert(sumofwidth > current);
+      width = sumofwidth - current;
+    }
+    sumwidth += width;
+    gt_assert(sumwidth <= spmsuftab->numofentries);
+    if (width >= 2UL)
+    {
+      gt_shortreadsort_firstcodes_sort(&srsresult,
+                                       srsw,
+                                       snrp,
+                                       encseq,
+                                       spmsuftab,
+                                       current,
+                                       width,
+                                       depth);
+    } else
+    {
+      gt_assert(width == 1UL);
+    }
+    gt_assert(next != GT_UNDEF_ULONG);
+    current = next;
+  }
+}
+
 static unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                                    unsigned long start,
                                                    unsigned long end,
@@ -725,57 +779,6 @@ static unsigned long *gt_evenly_divide_part(const GtFirstcodestab *fct,
     }
   }
   return endindexes;
-}
-
-static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
-                                         const GtEncseq *encseq,
-                                         const GtSpmsuftab *spmsuftab,
-                                         const GtSeqnumrelpos *snrp,
-                                         const GtFirstcodestab *fct,
-                                         unsigned long minindex,
-                                         unsigned long maxindex,
-                                         unsigned long sumofwidth,
-                                         unsigned long depth)
-{
-  unsigned long current, next = GT_UNDEF_ULONG, idx,
-                width, sumwidth = 0;
-  const uint16_t *lcptab_bucket;
-  const unsigned long *seqnum_relpos_bucket;
-
-  /* The following only works if firstcodeslcpvalues is not reallocated */
-  lcptab_bucket = gt_shortreadsort_lcpvalues(srsw);
-  current = gt_firstcodes_get_leftborder(fct,minindex);
-  for (idx = minindex; idx <= maxindex; idx++)
-  {
-    if (idx < maxindex)
-    {
-      next = gt_firstcodes_get_leftborder(fct,idx+1);
-      gt_assert(next > current);
-      width = next - current;
-    } else
-    {
-      gt_assert(sumofwidth > current);
-      width = sumofwidth - current;
-    }
-    sumwidth += width;
-    gt_assert(sumwidth <= spmsuftab->numofentries);
-    if (width >= 2UL)
-    {
-      seqnum_relpos_bucket
-        = gt_shortreadsort_firstcodes_sort(srsw,
-                                           snrp,
-                                           encseq,
-                                           spmsuftab,
-                                           current,
-                                           width,
-                                           depth);
-    } else
-    {
-      gt_assert(width == 1UL);
-    }
-    gt_assert(next != GT_UNDEF_ULONG);
-    current = next;
-  }
 }
 
 typedef struct
