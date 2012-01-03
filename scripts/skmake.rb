@@ -33,6 +33,7 @@ def parseargs(argv)
   options.prof = false
   options.jobs = 4
   options.fileargs = nil
+  options.threads = true
   opts = OptionParser.new
   opts.on("--m64","compile 64 bit binary") do |x|
     options.m64 = true
@@ -48,6 +49,9 @@ def parseargs(argv)
   end
   opts.on("--noopt","no optimization") do |x|
     options.optimize = false
+  end
+  opts.on("--nothreads","compilation without threaded code") do |x|
+    options.threads = false
   end
   opts.on("-j","--j NUM","run jobs in given number of threads") do |x|
     options.jobs = x.to_i
@@ -74,6 +78,9 @@ def makecompilerflags(fp,options)
   end
   if not options.optimize
     fp.print " opt=no"
+  end
+  if options.threads
+    fp.print " threads=yes"
   end
   fp.print " CC='ccache #{ENV["CC"]}'"
   if not options.fileargs.nil?
