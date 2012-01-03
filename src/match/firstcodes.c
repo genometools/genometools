@@ -1006,18 +1006,20 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtFirstcodesinfo fci;
   size_t sizeforcodestable, suftab_size = 0;
   unsigned int numofchars, part, bitsforrelpos, bitsforseqnum,
-               markprefixunits, marksuffixunits, logtotallength;
+               markprefixunits, marksuffixunits, logtotallength, threadcount;
   unsigned long maxbucketsize, maxseqlength, numofdbsequences, maxrelpos,
                 totallength, suftabentries = 0, largest_width;
   GtSfxmappedrangelist *sfxmrlist;
   GtSuftabparts *suftabparts = NULL;
-  GtShortreadsortworkinfo *srsw = NULL;
-#ifdef GT_THREADS_ENABLED
   GtShortreadsortworkinfo **srswtab = NULL;
-#endif
   void *mapptr;
   const GtReadmode readmode = GT_READMODE_FORWARD;
   bool haserr = false;
+#ifdef GT_THREADS_ENABLED
+  const unsigned int threads = gt_jobs;
+#else
+  const unsigned int threads = 1U;
+#endif
 #ifdef WITHCACHE
   size_t binsearchcache_size;
 #endif
@@ -1388,29 +1390,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                              bitsforseqnum + bitsforrelpos);
     GT_FCI_ADDWORKSPACE(fci.fcsl,"suftab",suftab_size);
     fci.buf.flush_function = gt_firstcodes_insertsuffixes_flush;
-#ifdef GT_THREADS_ENABLED
-    if (gt_jobs > 1U)
+    srswtab = gt_malloc(sizeof (*srswtab) * threads);
+    for (threadcount = 0; threadcount < threads; threadcount++)
     {
-      unsigned int j;
-
-      srswtab = gt_malloc(sizeof (*srswtab) * gt_jobs);
-      for (j = 0; j < gt_jobs; j++)
-      {
-        srswtab[j] = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
-                                          readmode,true);
-      }
-      GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
-                          gt_jobs * gt_shortreadsort_size(true,maxbucketsize,
-                                                     maxseqlength - kmersize));
-    } else
-#endif
-    {
-      srsw = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
-                                  readmode,true);
-      GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
-                          gt_shortreadsort_size(true,maxbucketsize,
-                                                maxseqlength - kmersize));
+      srswtab[threadcount]
+        = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
+                               readmode,true);
     }
+    GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
+                        threads * gt_shortreadsort_size(true,maxbucketsize,
+                                                        maxseqlength-kmersize));
     if (maximumspace > 0)
     {
       const unsigned long maxrounds = fci.radixparts == 1U ? 500UL : 400UL;
@@ -1572,7 +1561,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
         }
       }
 #ifdef GT_THREADS_ENABLED
-      if (gt_jobs > 1U)
+      if (threads > 1U)
       {
         gt_firstcodes_thread_sortremaining(srswtab,
                                            encseq,
@@ -1588,12 +1577,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                                suftabparts),
                                            (unsigned long) kmersize,
                                            withsuftabcheck,
-                                           gt_jobs,
+                                           threads,
                                            logger);
       } else
 #endif
       {
-        if (gt_firstcodes_sortremaining(srsw,
+        if (gt_firstcodes_sortremaining(srswtab[0],
                                         encseq,
                                         readmode,
                                         fci.spmsuftab,
@@ -1625,48 +1614,31 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     gt_timer_show_progress(timer, "cleaning up",stdout);
   }
-#ifdef GT_THREADS_ENABLED
-  if (gt_jobs > 1U)
+  if (!haserr)
   {
-    unsigned int j;
+    GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
+  }
+  if (srswtab != NULL)
+  {
+    unsigned long sumofstoredvalues = 0;
 
-    if (!haserr)
+    for (threadcount=0; threadcount<threads; threadcount++)
     {
-      GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
-    }
-    if (srswtab != NULL)
-    {
-      unsigned long sumofstoredvalues = 0;
-      for (j=0; j<gt_jobs; j++)
-      {
-        if (!haserr && !onlyaccumulation)
-        {
-          sumofstoredvalues = gt_shortreadsort_sumofstoredvalues(srswtab[j]);
-        }
-        gt_shortreadsort_delete(srswtab[j]);
-      }
+      gt_assert(srswtab != NULL);
       if (!haserr && !onlyaccumulation)
       {
-        gt_logger_log(logger,"average short read depth is %.2f",
-                    (double) sumofstoredvalues/fci.firstcodeposhits);
+        sumofstoredvalues +=
+          gt_shortreadsort_sumofstoredvalues(srswtab[threadcount]);
       }
+      gt_shortreadsort_delete(srswtab[threadcount]);
     }
-    gt_free(srswtab);
-  } else
-#endif
-  {
-    if (srsw != NULL && !haserr)
+    if (!haserr && !onlyaccumulation)
     {
-      GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
-      if (!onlyaccumulation)
-      {
-        gt_logger_log(logger,"average short read depth is %.2f",
-                      (double) gt_shortreadsort_sumofstoredvalues(srsw)/
-                                                       fci.firstcodeposhits);
-      }
+      gt_logger_log(logger,"average short read depth is %.2f",
+                      (double) sumofstoredvalues/fci.firstcodeposhits);
     }
   }
-  gt_shortreadsort_delete(srsw);
+  gt_free(srswtab);
   if (haserr)
   {
     gt_firstcode_delete_before_end(&fci);
