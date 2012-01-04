@@ -36,6 +36,7 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
 void gt_spmsk_inl_delete(GtBUstate_spmsk *state);
 
 int gt_spmsk_inl_process(void *data,
+                         unsigned int thread,
                          const unsigned long *seqnum_relpos_bucket,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
@@ -53,6 +54,6 @@ int gt_spmsk_inl_process(void *data,
                          */
                          GtError *err);
 
-void gt_spmsk_inl_process_end(GT_UNUSED void *data);
+void gt_spmsk_inl_process_end(GT_UNUSED void *data,unsigned int thread);
 
 #endif

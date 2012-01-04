@@ -168,6 +168,7 @@ void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 }
 
 int gt_spmsk_inl_process(void *data,
+                         unsigned int thread,
                          const unsigned long *seqnum_relpos_bucket,
                          const GtSeqnumrelpos *snrp,
                          const uint16_t *lcptab_bucket,
@@ -175,9 +176,9 @@ int gt_spmsk_inl_process(void *data,
                          unsigned long spaceforbucketprocessing,
                          GtError *err)
 {
-  GtBUstate_spmsk *state = (GtBUstate_spmsk *) data;
+  GtBUstate_spmsk *state, **states = (GtBUstate_spmsk **) data;
 
-  gt_assert(state != NULL);
+  state = states[thread];
   gt_assert(snrp != NULL);
   gt_assert(lcptab_bucket != NULL);
   state->spaceforbucketprocessing = spaceforbucketprocessing;
@@ -194,7 +195,8 @@ int gt_spmsk_inl_process(void *data,
   return 0;
 }
 
-void gt_spmsk_inl_process_end(GT_UNUSED void *data)
+void gt_spmsk_inl_process_end(GT_UNUSED void *data,
+                              GT_UNUSED unsigned int thread)
 {
   return;
 }

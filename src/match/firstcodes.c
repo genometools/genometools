@@ -638,8 +638,8 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
       }
       if (itvprocess != NULL)
       {
-        if (itvprocess(itvprocessdata,srsresult.suftab_bucket,snrp,
-                       srsresult.lcptab_bucket,width,
+        if (itvprocess(itvprocessdata,0,srsresult.suftab_bucket,
+                       snrp,srsresult.lcptab_bucket,width,
                        spaceforbucketprocessing,err) != 0)
         {
           haserr = true;
@@ -655,7 +655,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
   }
   if (itvprocess_end != NULL)
   {
-    itvprocess_end(itvprocessdata);
+    itvprocess_end(itvprocessdata,0);
   }
   gt_encseq_reader_delete(esr1);
   gt_encseq_reader_delete(esr2);

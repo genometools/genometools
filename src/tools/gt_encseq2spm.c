@@ -24,6 +24,9 @@
 #include "core/intbits.h"
 #include "core/minmax.h"
 #include "core/showtime.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread.h"
+#endif
 #include "tools/gt_encseq2spm.h"
 #include "match/firstcodes.h"
 #include "match/firstcodes-scan.h"
@@ -329,17 +332,28 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   {
     GtLogger *logger;
     const GtReadmode readmode = GT_READMODE_FORWARD;
-    GtBUstate_spmsk *spmsk_state = NULL;
-    unsigned int kmersize;
+    GtBUstate_spmsk **spmsk_states = NULL;
+    unsigned int kmersize, threadcount;
+
+#ifdef GT_THREADS_ENABLED
+    const unsigned int threads = gt_jobs;
+#else
+    const unsigned int threads = 1U;
+#endif
 
     if (arguments->countspms || arguments->outputspms)
     {
-      spmsk_state = gt_spmsk_inl_new(encseq,
-                                     readmode,
-                                     (unsigned long) arguments->minmatchlength,
-                                     arguments->countspms,
-                                     arguments->outputspms,
-                                     gt_str_get(arguments->encseqinput));
+      spmsk_states = gt_malloc(sizeof (*spmsk_states) * threads);
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        spmsk_states[threadcount]
+          = gt_spmsk_inl_new(encseq,
+                             readmode,
+                             (unsigned long) arguments->minmatchlength,
+                             arguments->countspms,
+                             arguments->outputspms,
+                             gt_str_get(arguments->encseqinput));
+      }
     }
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
     kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,arguments->minmatchlength);
@@ -356,16 +370,24 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                      /* use true */   arguments->radixlarge ?
                                                         false : true,
                                      /* use 2 */      arguments->radixparts,
-                                                      spmsk_state != NULL
+                                                      spmsk_states != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,
                                                       gt_spmsk_inl_process_end,
-                                                      spmsk_state,
-                                                      logger,err) != 0)
+                                                      spmsk_states,
+                                                      logger,
+                                                      err) != 0)
     {
       haserr = true;
     }
-    gt_spmsk_inl_delete(spmsk_state);
+    if (spmsk_states != NULL)
+    {
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        gt_spmsk_inl_delete(spmsk_states[threadcount]);
+      }
+      gt_free(spmsk_states);
+    }
     gt_logger_delete(logger);
   }
   gt_encseq_delete(encseq);
