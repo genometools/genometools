@@ -568,8 +568,8 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        const GtSpmsuftab *spmsuftab,
                                        const GtSeqnumrelpos *snrp,
                                        const GtFirstcodestab *fct,
-                                       unsigned long partminindex,
-                                       unsigned long partmaxindex,
+                                       unsigned long minindex,
+                                       unsigned long maxindex,
                                        unsigned long sumofwidth,
                                        unsigned long spaceforbucketprocessing,
                                        unsigned long depth,
@@ -577,6 +577,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        GtFirstcodesintervalprocess_end
                                               itvprocess_end,
                                        void *itvprocessdata,
+                                       unsigned int thread,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
@@ -586,103 +587,8 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                 width,
                 sumwidth = 0,
                 previoussuffix = 0;
-  GtEncseqReader *esr1 = NULL, *esr2 = NULL;
   GtShortreadsortresult srsresult;
   bool previousdefined = false, haserr = false;
-
-  if (withsuftabcheck)
-  {
-    esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-    esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
-  }
-  current = gt_firstcodes_get_leftborder(fct,partminindex);
-  for (idx = partminindex; idx <= partmaxindex; idx++)
-  {
-    if (idx <  partmaxindex)
-    {
-      next = gt_firstcodes_get_leftborder(fct,idx+1);
-      gt_assert(next > current);
-      width = next - current;
-    } else
-    {
-      gt_assert(sumofwidth > current);
-      width = sumofwidth - current;
-    }
-    sumwidth += width;
-    gt_assert(sumwidth <= spmsuftab->numofentries);
-    if (width >= 2UL)
-    {
-      gt_shortreadsort_firstcodes_sort(&srsresult,
-                                       srsw,
-                                       snrp,
-                                       encseq,
-                                       spmsuftab,
-                                       current,
-                                       width,
-                                       depth);
-      if (withsuftabcheck)
-      {
-        gt_firstcodes_checksuftab_bucket(encseq,
-                                         readmode,
-                                         esr1,
-                                         esr2,
-                                         previoussuffix,
-                                         previousdefined,
-                                         srsresult.suftab_bucket,
-                                         snrp,
-                                         srsresult.lcptab_bucket,
-                                         width);
-        previousdefined = true;
-        previoussuffix
-          = gt_seqnumrelpos_decode_pos(snrp,srsresult.suftab_bucket[width-1]);
-      }
-      if (itvprocess != NULL)
-      {
-        if (itvprocess(itvprocessdata,0,srsresult.suftab_bucket,
-                       snrp,srsresult.lcptab_bucket,width,
-                       spaceforbucketprocessing,err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-    } else
-    {
-      gt_assert(width == 1UL);
-    }
-    gt_assert(next != GT_UNDEF_ULONG);
-    current = next;
-  }
-  if (itvprocess_end != NULL)
-  {
-    itvprocess_end(itvprocessdata,0);
-  }
-  gt_encseq_reader_delete(esr1);
-  gt_encseq_reader_delete(esr2);
-  return haserr ? -1 : 0;
-}
-
-#ifdef GT_THREADS_ENABLED
-static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
-                                         const GtEncseq *encseq,
-                                         GtReadmode readmode,
-                                         const GtSpmsuftab *spmsuftab,
-                                         const GtSeqnumrelpos *snrp,
-                                         const GtFirstcodestab *fct,
-                                         unsigned long minindex,
-                                         unsigned long maxindex,
-                                         unsigned long sumofwidth,
-                                         unsigned long depth,
-                                         bool withsuftabcheck)
-{
-  unsigned long current,
-                next = GT_UNDEF_ULONG,
-                idx,
-                width,
-                sumwidth = 0,
-                previoussuffix = 0;
-  bool previousdefined = false;
-  GtShortreadsortresult srsresult;
 
   current = gt_firstcodes_get_leftborder(fct,minindex);
   for (idx = minindex; idx <= maxindex; idx++)
@@ -725,6 +631,16 @@ static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
         previoussuffix
           = gt_seqnumrelpos_decode_pos(snrp,srsresult.suftab_bucket[width-1]);
       }
+      if (itvprocess != NULL)
+      {
+        if (itvprocess(itvprocessdata,thread,srsresult.suftab_bucket,
+                       snrp,srsresult.lcptab_bucket,width,
+                       spaceforbucketprocessing,err) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
     } else
     {
       gt_assert(width == 1UL);
@@ -732,7 +648,14 @@ static void gt_firstcodes_sortremaining2(GtShortreadsortworkinfo *srsw,
     gt_assert(next != GT_UNDEF_ULONG);
     current = next;
   }
+  if (itvprocess_end != NULL)
+  {
+    itvprocess_end(itvprocessdata,thread);
+  }
+  return haserr ? -1 : 0;
 }
+
+#ifdef GT_THREADS_ENABLED
 
 static unsigned long gt_firstcodes_findfirstlarger(const GtFirstcodestab *fct,
                                                    unsigned long start,
@@ -811,8 +734,14 @@ typedef struct
   unsigned long depth,
                 minindex,
                 maxindex,
-                sumofwidth;
+                sumofwidth,
+                spaceforbucketprocessing;
+  unsigned int thread;
   bool withsuftabcheck;
+  GtFirstcodesintervalprocess itvprocess;
+  GtFirstcodesintervalprocess_end itvprocess_end;
+  void *itvprocessdata;
+  GtError *err;
 #ifndef S_SPLINT_S
   pthread_t threadid;
 #endif
@@ -825,35 +754,50 @@ static void *gt_firstcodes_thread_caller_sortremaining(void *data)
 {
   GtSortRemainingThreadinfo *threadinfo = (GtSortRemainingThreadinfo *) data;
 
-  gt_firstcodes_sortremaining2(threadinfo->srsw,
-                               threadinfo->encseq,
-                               threadinfo->readmode,
-                               threadinfo->spmsuftab,
-                               threadinfo->snrp,
-                               threadinfo->fct,
-                               threadinfo->minindex,
-                               threadinfo->maxindex,
-                               threadinfo->sumofwidth,
-                               threadinfo->depth,
-                               threadinfo->withsuftabcheck);
+  if (gt_firstcodes_sortremaining(threadinfo->srsw,
+                                  threadinfo->encseq,
+                                  threadinfo->readmode,
+                                  threadinfo->spmsuftab,
+                                  threadinfo->snrp,
+                                  threadinfo->fct,
+                                  threadinfo->minindex,
+                                  threadinfo->maxindex,
+                                  threadinfo->sumofwidth,
+                                  threadinfo->spaceforbucketprocessing,
+                                  threadinfo->depth,
+                                  threadinfo->itvprocess,
+                                  threadinfo->itvprocess_end,
+                                  threadinfo->itvprocessdata,
+                                  threadinfo->thread,
+                                  threadinfo->withsuftabcheck,
+                                  threadinfo->err) != 0)
+  {
+    gt_assert(false);
+  }
   return NULL;
 }
 
-static void gt_firstcodes_thread_sortremaining(
-                                          GtShortreadsortworkinfo **srswtab,
-                                          const GtEncseq *encseq,
-                                          GtReadmode readmode,
-                                          const GtSpmsuftab *spmsuftab,
-                                          const GtSeqnumrelpos *snrp,
-                                          const GtFirstcodestab *fct,
-                                          unsigned long partminindex,
-                                          unsigned long partmaxindex,
-                                          unsigned long widthofpart,
-                                          unsigned long sumofwidth,
-                                          unsigned long depth,
-                                          bool withsuftabcheck,
-                                          unsigned int threads,
-                                          GtLogger *logger)
+static int gt_firstcodes_thread_sortremaining(
+                                       GtShortreadsortworkinfo **srswtab,
+                                       const GtEncseq *encseq,
+                                       GtReadmode readmode,
+                                       const GtSpmsuftab *spmsuftab,
+                                       const GtSeqnumrelpos *snrp,
+                                       const GtFirstcodestab *fct,
+                                       unsigned long partminindex,
+                                       unsigned long partmaxindex,
+                                       unsigned long widthofpart,
+                                       unsigned long sumofwidth,
+                                       unsigned long spaceforbucketprocessing,
+                                       unsigned long depth,
+                                       GtFirstcodesintervalprocess itvprocess,
+                                       GtFirstcodesintervalprocess_end
+                                         itvprocess_end,
+                                       void *itvprocessdata,
+                                       bool withsuftabcheck,
+                                       unsigned int threads,
+                                       GtLogger *logger,
+                                       GtError *err)
 {
   unsigned int t;
   unsigned long sum = 0, *endindexes;
@@ -879,7 +823,13 @@ static void gt_firstcodes_thread_sortremaining(
     threadinfo[t].maxindex = endindexes[t];
     threadinfo[t].readmode = readmode;
     threadinfo[t].withsuftabcheck = withsuftabcheck;
+    threadinfo[t].spaceforbucketprocessing = spaceforbucketprocessing;
     threadinfo[t].depth = depth;
+    threadinfo[t].itvprocess = itvprocess;
+    threadinfo[t].itvprocess_end = itvprocess_end;
+    threadinfo[t].itvprocessdata = itvprocessdata;
+    threadinfo[t].thread = t;
+    threadinfo[t].err = err;
     lb = gt_firstcodes_get_leftborder(fct,threadinfo[t].minindex);
     if (t < threads - 1)
     {
@@ -898,7 +848,8 @@ static void gt_firstcodes_thread_sortremaining(
                                           threadinfo[t].sumofwidth - lb);
     sum += threadinfo[t].sumofwidth - lb;
 #ifndef S_SPLINT_S
-    pthread_create (&threadinfo[t].threadid, NULL,
+    pthread_create (&threadinfo[t].threadid,
+                    NULL,
                     gt_firstcodes_thread_caller_sortremaining,
                     threadinfo + t);
 #endif
@@ -912,6 +863,7 @@ static void gt_firstcodes_thread_sortremaining(
 #endif
   gt_free(threadinfo);
   gt_free(endindexes);
+  return 0;
 }
 #endif
 
@@ -1563,7 +1515,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 #ifdef GT_THREADS_ENABLED
       if (threads > 1U)
       {
-        gt_firstcodes_thread_sortremaining(srswtab,
+        if (gt_firstcodes_thread_sortremaining(
+                                           srswtab,
                                            encseq,
                                            readmode,
                                            fci.spmsuftab,
@@ -1575,10 +1528,18 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                                suftabparts),
                                            gt_suftabparts_sumofwidth(part,
                                                                suftabparts),
+                                           spaceforbucketprocessing,
                                            (unsigned long) kmersize,
+                                           itvprocess,
+                                           itvprocess_end,
+                                           itvprocessdata,
                                            withsuftabcheck,
                                            threads,
-                                           logger);
+                                           logger,
+                                           NULL) != 0)
+        {
+          haserr = true;
+        }
       } else
 #endif
       {
@@ -1597,6 +1558,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                         itvprocess,
                                         itvprocess_end,
                                         itvprocessdata,
+                                        0,
                                         withsuftabcheck,
                                         err) != 0)
         {
