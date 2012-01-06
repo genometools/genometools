@@ -382,9 +382,15 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     }
     if (spmsk_states != NULL)
     {
+      unsigned long countmatches = 0;
+
       for (threadcount = 0; threadcount < threads; threadcount++)
       {
-        gt_spmsk_inl_delete(spmsk_states[threadcount]);
+        countmatches += gt_spmsk_inl_delete(spmsk_states[threadcount]);
+      }
+      if (arguments->countspms)
+      {
+        printf("number of suffix-prefix matches=%lu\n",countmatches);
       }
       gt_free(spmsk_states);
     }

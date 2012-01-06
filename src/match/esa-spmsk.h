@@ -33,7 +33,7 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                                   bool outputspms,
                                   GT_UNUSED const char *indexname);
 
-void gt_spmsk_inl_delete(GtBUstate_spmsk *state);
+unsigned long gt_spmsk_inl_delete(GtBUstate_spmsk *state);
 
 int gt_spmsk_inl_process(void *data,
                          unsigned int thread,

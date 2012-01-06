@@ -151,20 +151,18 @@ GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
   return state;
 }
 
-void gt_spmsk_inl_delete(GtBUstate_spmsk *state)
+unsigned long gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 {
   if (state != NULL)
   {
-    if (state->countspms)
-    {
-      printf("number of suffix-prefix matches=%lu\n",state->spmcounter);
-    }
     GT_FREEARRAY(&state->Wset,GtUlong);
     GT_FREEARRAY(&state->Lset,GtUlong);
     gt_GtArrayGtBUItvinfo_delete_spmsk(
                  (GtArrayGtBUItvinfo_spmsk *) state->stack,state);
     gt_free(state);
+    return state->spmcounter;
   }
+  return 0;
 }
 
 int gt_spmsk_inl_process(void *data,
