@@ -199,11 +199,6 @@ Specify the name of the MultiFASTA files to be used as input.}
 \Option{readset}{\Showoptionarg{readsetname}}{
 (optional) Specify a name to be used by \Readjoiner for the readset.\\
 Default: first input filename.}
-\Option{varlen}{}{
-(Experimental!)
-Use this option if the readset contains reads with variable length such
-as 454 and Sanger reads.\\
-Default: fixed-length reads (eqlen).}
 \Option{v}{}{
 Be verbose.}
 \Option{q}{}{
@@ -303,8 +298,7 @@ and the total length, are displayed in the standard output.
 \subsection{Variable-length readsets}
 
 The processing of a variable-length readset is identical to the one described
-in the previous section, except that the \Rdjprefilter tool requires
-the option \Showoption{varlen}.
+in the previous section.
 
 \subsection{Real world datasets}
 

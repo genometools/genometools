@@ -1365,7 +1365,7 @@ static void gt_contfinder_append_seppos(GtContfinder *contfinder,
   (contfinder->seppos)[(contfinder->seppos_nextfree)++] = pos;
 }
 
-static int gt_contfinder_encode_files(GtContfinder *contfinder, bool varlen,
+static int gt_contfinder_encode_files(GtContfinder *contfinder,
     GtError *err)
 {
   int had_err = 0;
@@ -1386,6 +1386,7 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder, bool varlen,
   int a;
   bool valid_sequence = true;
   unsigned long characterdistribution[GT_CONTFINDER_ALPHASIZE];
+  bool varlen = false;
 
   gt_error_check(err);
 
@@ -1455,10 +1456,10 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder, bool varlen,
             }
             if (valid_sequence)
             {
+              len++;
               if (varlen)
               {
                 {
-                  len++;
                   if (len > maxlen)
                     maxlen = len;
                   pos += len;
@@ -1467,12 +1468,37 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder, bool varlen,
               }
               else
               {
-                contfinder->len = len + 1;
+                if (nofseqs > 2UL)
+                {
+                  if (len != contfinder->len)
+                  {
+                    unsigned long seqnum;
+                    gt_log_log("readset is varlen: sequences 0..%lu are "
+                        "%lu bp long, sequence %lu is %lu bp long",
+                        nofseqs - 2UL, (unsigned long)contfinder->len - 1,
+                        nofseqs - 1UL, (unsigned long)len - 1);
+                    varlen = true;
+                    maxlen = (len > contfinder->len) ? len : contfinder->len;
+                    for (seqnum = 0; seqnum < nofseqs - 2UL; seqnum++)
+                    {
+                      pos += contfinder->len;
+                      gt_contfinder_append_seppos(contfinder, pos - 1,
+                          totallength);
+                    }
+                    contfinder->len = 0;
+                    pos += len;
+                    gt_contfinder_append_seppos(contfinder, pos - 1,
+                        totallength);
+                  }
+                }
+                else
+                {
+                  contfinder->len = len;
+                }
               }
             }
             len = 0;
           }
-          else
           /* handle the case in which a description
              is longer than the line array: */
           while (strlen(line) == GT_CONTFINDER_READBUFFER_SIZE - (size_t)1
@@ -1533,25 +1559,6 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder, bool varlen,
           }
         }
       }
-      /* add last sequence to char distri */
-      for (a = 0; a < GT_CONTFINDER_ALPHASIZE; a++)
-      {
-        contfinder->characterdistribution[a] += characterdistribution[a];
-        characterdistribution[a] = 0;
-      }
-      if (varlen)
-      {
-        len++;
-        if (len > maxlen)
-          maxlen = len;
-        pos += len;
-        gt_contfinder_append_seppos(contfinder, pos - 1, totallength);
-      }
-      else
-      {
-        if (nofseqs == 1UL)
-          contfinder->len = len + 1;
-      }
       if (ferror(file) != 0)
       {
         gt_error_set(err, "Error by reading file %s: %s", filename,
@@ -1562,6 +1569,34 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder, bool varlen,
     gt_fa_fclose(file);
     contfinder->filelengthtab[i].effectivelength = varlen ?
       contfinder->seppos[nofseqs - 1] : (len + 1) * nofseqs - 1;
+  }
+  /* add last sequence to char distri */
+  for (a = 0; a < GT_CONTFINDER_ALPHASIZE; a++)
+  {
+    contfinder->characterdistribution[a] += characterdistribution[a];
+    characterdistribution[a] = 0;
+  }
+  len++;
+  if (varlen)
+  {
+    if (len > maxlen)
+      maxlen = len;
+    pos += len;
+    gt_contfinder_append_seppos(contfinder, pos - 1, totallength);
+  }
+  else if (nofseqs == 1UL)
+  {
+    contfinder->len = len;
+  }
+  else if (nofseqs == 2UL && contfinder->len != len)
+  {
+    varlen = true;
+    maxlen = (len > contfinder->len) ? len : contfinder->len;
+    pos += contfinder->len;
+    gt_contfinder_append_seppos(contfinder, pos - 1, totallength);
+    contfinder->len = 0;
+    pos += len;
+    gt_contfinder_append_seppos(contfinder, pos - 1, totallength);
   }
   if (!had_err)
   {
@@ -1659,7 +1694,7 @@ unsigned long gt_contfinder_nofcontained(GtContfinder *contfinder)
 }
 
 GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
-    bool varlen, bool output_encseq, GtError *err)
+    bool output_encseq, GtError *err)
 {
   GtContfinder *contfinder;
   int had_err = 0;
@@ -1675,10 +1710,10 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
   contfinder->discardedlength = 0;
   contfinder->contained = NULL;
   contfinder->contained_deleted = false;
-  had_err = gt_contfinder_encode_files(contfinder, varlen, err);
-  if (!had_err && output_encseq && contfinder->nofseqs > 0)
+  had_err = gt_contfinder_encode_files(contfinder, err);
+  if (!had_err && contfinder->len > 0 &&
+      output_encseq && contfinder->nofseqs > 0)
   {
-    gt_assert(!varlen);
     gt_contfinder_set_separators_to_less_frequent_char(contfinder);
     had_err = gt_contfinder_output_encseq(contfinder, err);
   }

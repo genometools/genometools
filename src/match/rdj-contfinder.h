@@ -25,7 +25,7 @@ typedef struct GtContfinder GtContfinder;
 
 /* totallength: if 0, the sum of the size of the files is used */
 GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
-    bool varlen, bool output_encseq, GtError *err);
+    bool output_encseq, GtError *err);
 
 typedef enum {
   GT_CONTFINDER_SEQNUMS,

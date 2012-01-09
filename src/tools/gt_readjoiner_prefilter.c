@@ -28,7 +28,7 @@
 typedef struct {
   bool verbose, quiet;
   bool singlestrand, encodeonly, cntlist, encseqall, encseq, sorted, seqnums,
-       fasta, twobit, varlen, seppos, testrs;
+       fasta, twobit, seppos, testrs;
   unsigned long width;
   GtStr *readset;
   GtStrArray *db;
@@ -59,7 +59,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   GtOptionParser *op;
   GtOption *singlestrand_option, *encodeonly_option, *cntlist_option,
            *fasta_option, *sorted_option, *seqnums_option, *twobit_option,
-           *varlen_option, *seppos_option, *testrs_option, *encseqall_option,
+           *seppos_option, *testrs_option, *encseqall_option,
            *encseq_option, *readset_option, *v_option, *q_option, *db_option;
 
   gt_assert(arguments);
@@ -82,14 +82,6 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   gt_option_hide_default(db_option);
   gt_option_is_mandatory(db_option);
   gt_option_parser_add_option(op, db_option);
-
-  /* -varlen */
-  varlen_option = gt_option_new_bool("varlen",
-      "use it if reads have different lengths\n"
-      "default: reads have equal lengths",
-      &arguments->varlen, false);
-  gt_option_hide_default(varlen_option);
-  gt_option_parser_add_option(op, varlen_option);
 
   /* -v */
   v_option = gt_option_new_verbose(&arguments->verbose);
@@ -178,7 +170,6 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       "output encseq before containments removal",
       &arguments->encseqall, false);
   gt_option_is_development_option(encseqall_option);
-  gt_option_exclude(encseqall_option, varlen_option);
   gt_option_parser_add_option(op, encseqall_option);
 
   gt_option_parser_set_max_args(op, 0U);
@@ -192,6 +183,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   GtReadjoinerPrefilterArguments *arguments = tool_arguments;
   GtContfinder *contfinder;
   int had_err = 0;
+  bool varlen;
   GtStr *cntlistfilename = NULL;
   GtStr *sepposfilename = NULL;
   unsigned long i;
@@ -236,14 +228,15 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   }
 
   contfinder = gt_contfinder_new(arguments->db, arguments->readset,
-      arguments->varlen, arguments->encseqall, err);
+      arguments->encseqall, err);
+  varlen = gt_contfinder_read_length(contfinder) == 0;
 
   input_nofreads = gt_contfinder_nofseqs(contfinder) +
     gt_contfinder_nofdiscarded(contfinder);
   output_nofreads = input_nofreads;
   gt_logger_log(default_logger, "number of reads in complete readset = %lu",
       input_nofreads);
-  if (arguments->varlen)
+  if (varlen)
     gt_logger_log(verbose_logger, "read length = variable");
   else
     gt_logger_log(verbose_logger, "read length = %lu",
@@ -285,8 +278,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
 
     if (arguments->encseq)
       gt_logger_log(verbose_logger, "encseq saved: %s.(esq|al1%s)",
-          gt_str_get(arguments->readset), arguments->varlen ?
-          "|ssp" : "");
+          gt_str_get(arguments->readset), varlen ? "|ssp" : "");
     if (arguments->cntlist)
       gt_logger_log(verbose_logger, "contained reads list saved: %s",
           gt_str_get(cntlistfilename));

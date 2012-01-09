@@ -54,9 +54,9 @@ Name "gt readjoiner prefilter: correct encseq output (not eqlen)"
 Keywords "gt_readjoiner gt_readjoiner_prefilter"
 Test do
   run_prefilter("#{$testdata}/readjoiner/30x_long_varlen.fas",
-                "-varlen -encseq false -fasta true -q true")
+                "-encseq false -fasta true -q true")
   contfree = last_stdout
-  run_prefilter(contfree, "-varlen")
+  run_prefilter(contfree, "")
   run "mv reads.esq reads.prefilter.esq"
   run "mv #{contfree} reads.fas"
   encode_reads("reads.fas")
@@ -194,7 +194,7 @@ end
 Name "gt readjoiner: transitive spm determination test - 1"
 Keywords "gt_readjoiner"
 Test do
-  run_prefilter("#{$testdata}/readjoiner/transred_1.fas", "-varlen")
+  run_prefilter("#{$testdata}/readjoiner/transred_1.fas", "")
   run_overlap(4, "-singlestrand")
   run_assembly("-lengthcutoff 1 -depthcutoff 1")
   run_test "grep -f #{$testdata}/readjoiner/transred_1_targetseq.fas "+
@@ -208,7 +208,7 @@ end
 Name "gt readjoiner: transitive spm determination test - 2"
 Keywords "gt_readjoiner"
 Test do
-  run_prefilter("#{$testdata}/readjoiner/transred_2.fas", "-varlen")
+  run_prefilter("#{$testdata}/readjoiner/transred_2.fas", "")
   run_overlap(4)
   run_assembly("-lengthcutoff 1 -depthcutoff 1")
   run_test "grep -f #{$testdata}/readjoiner/transred_1_targetseq.fas "+
