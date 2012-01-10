@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -x
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
@@ -16,18 +16,26 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+# try to differntiate between Exuberant Ctags and BSD Ctags
+ctags --version > /dev/null
+
+if [ $? -eq 0 ]
+then
+  exuberantopts="--c++-kinds=+p --fields=+iaSKlm --extra=+q"
+fi
+
 # make a new tags file
-ctags -w --c++-kinds=+p --fields=+iaSKlm --extra=+q \
-            src/*.[ch]                   \
-            src/annotationsketch/*.[ch]  \
-            src/core/*.[ch]              \
-            src/examples/*.[ch]          \
-            src/extended/*.[ch]          \
-            src/gtlua/*.[ch]             \
-            src/gth/*.[ch]               \
-            src/ltr/*.[ch]               \
-            src/match/*.[ch]             \
-            src/mgth/*.[ch]              \
-            src/tools/*.[ch]             \
-            testsuite/*.rb               \
-            scripts/*.rb
+ctags -w ${exuberantopts}          \
+      src/*.[ch]                   \
+      src/annotationsketch/*.[ch]  \
+      src/core/*.[ch]              \
+      src/examples/*.[ch]          \
+      src/extended/*.[ch]          \
+      src/gtlua/*.[ch]             \
+      src/gth/*.[ch]               \
+      src/ltr/*.[ch]               \
+      src/match/*.[ch]             \
+      src/mgth/*.[ch]              \
+      src/tools/*.[ch]             \
+      testsuite/*.rb               \
+      scripts/*.rb
