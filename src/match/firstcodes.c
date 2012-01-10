@@ -631,6 +631,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
       if (itvprocess != NULL)
       {
         if (itvprocess(itvprocessdata,threadnum,
+                       ((void **) itvprocessdata)[threadnum],
                        srsresult.suftab_bucket,
                        snrp,srsresult.lcptab_bucket,width,
                        spaceforbucketprocessing,err) != 0)

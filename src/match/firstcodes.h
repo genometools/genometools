@@ -26,6 +26,7 @@
 
 typedef int (*GtFirstcodesintervalprocess)(void *,
                                            unsigned int,
+                                           void *,
                                            const unsigned long *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,
