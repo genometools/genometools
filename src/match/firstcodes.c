@@ -16,9 +16,6 @@
 */
 
 #include <math.h>
-#ifndef S_SPLINT_S /* pthread header cannot be parsed by splint => omit it */
-#include <pthread.h>
-#endif
 #include "core/arraydef.h"
 #include "core/codetype.h"
 #include "core/encseq.h"
@@ -577,7 +574,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        GtFirstcodesintervalprocess_end
                                               itvprocess_end,
                                        void *itvprocessdata,
-                                       unsigned int thread,
+                                       unsigned int threadnum,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
@@ -633,7 +630,8 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
       }
       if (itvprocess != NULL)
       {
-        if (itvprocess(itvprocessdata,thread,srsresult.suftab_bucket,
+        if (itvprocess(itvprocessdata,threadnum,
+                       srsresult.suftab_bucket,
                        snrp,srsresult.lcptab_bucket,width,
                        spaceforbucketprocessing,err) != 0)
         {
@@ -650,7 +648,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
   }
   if (itvprocess_end != NULL)
   {
-    itvprocess_end(itvprocessdata,thread);
+    itvprocess_end(itvprocessdata,threadnum);
   }
   return haserr ? -1 : 0;
 }
@@ -736,20 +734,15 @@ typedef struct
                 maxindex,
                 sumofwidth,
                 spaceforbucketprocessing;
-  unsigned int thread;
+  unsigned int threadnum;
   bool withsuftabcheck;
   GtFirstcodesintervalprocess itvprocess;
   GtFirstcodesintervalprocess_end itvprocess_end;
   void *itvprocessdata;
   GtError *err;
-#ifndef S_SPLINT_S
-  pthread_t threadid;
-#endif
+  GtThread *thread;
 } GtSortRemainingThreadinfo;
 
-#ifdef S_SPLINT_S
-/*@unused@*/
-#endif
 static void *gt_firstcodes_thread_caller_sortremaining(void *data)
 {
   GtSortRemainingThreadinfo *threadinfo = (GtSortRemainingThreadinfo *) data;
@@ -768,7 +761,7 @@ static void *gt_firstcodes_thread_caller_sortremaining(void *data)
                                   threadinfo->itvprocess,
                                   threadinfo->itvprocess_end,
                                   threadinfo->itvprocessdata,
-                                  threadinfo->thread,
+                                  threadinfo->threadnum,
                                   threadinfo->withsuftabcheck,
                                   threadinfo->err) != 0)
   {
@@ -802,9 +795,7 @@ static int gt_firstcodes_thread_sortremaining(
   unsigned int t;
   unsigned long sum = 0, *endindexes;
   GtSortRemainingThreadinfo *threadinfo;
-#ifndef S_SPLINT_S
-  void *exit_status;
-#endif
+  bool haserr = false;
 
   gt_assert(threads >= 2U);
   endindexes = gt_evenly_divide_part(fct,partminindex,partmaxindex,widthofpart,
@@ -828,7 +819,7 @@ static int gt_firstcodes_thread_sortremaining(
     threadinfo[t].itvprocess = itvprocess;
     threadinfo[t].itvprocess_end = itvprocess_end;
     threadinfo[t].itvprocessdata = itvprocessdata;
-    threadinfo[t].thread = t;
+    threadinfo[t].threadnum = t;
     threadinfo[t].err = err;
     lb = gt_firstcodes_get_leftborder(fct,threadinfo[t].minindex);
     if (t < threads - 1)
@@ -847,23 +838,26 @@ static int gt_firstcodes_thread_sortremaining(
                                           threadinfo[t].sumofwidth,
                                           threadinfo[t].sumofwidth - lb);
     sum += threadinfo[t].sumofwidth - lb;
-#ifndef S_SPLINT_S
-    pthread_create (&threadinfo[t].threadid,
-                    NULL,
-                    gt_firstcodes_thread_caller_sortremaining,
-                    threadinfo + t);
-#endif
+    threadinfo[t].thread
+      = gt_thread_new (gt_firstcodes_thread_caller_sortremaining,
+                       threadinfo + t,err);
+    if (threadinfo[t].thread == NULL)
+    {
+      haserr = true;
+    }
   }
-  gt_assert (sum == widthofpart);
-#ifndef S_SPLINT_S
+  gt_assert (haserr || sum == widthofpart);
   for (t=0; t<threads; t++)
   {
-    pthread_join(threadinfo[t].threadid, &exit_status);
+    if (!haserr)
+    {
+      gt_thread_join(threadinfo[t].thread);
+    }
+    gt_thread_delete(threadinfo[t].thread);
   }
-#endif
   gt_free(threadinfo);
   gt_free(endindexes);
-  return 0;
+  return haserr ? -1 : 0;
 }
 #endif
 
