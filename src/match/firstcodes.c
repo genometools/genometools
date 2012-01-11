@@ -574,7 +574,6 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
                                        GtFirstcodesintervalprocess_end
                                               itvprocess_end,
                                        void *itvprocessdata,
-                                       unsigned int threadnum,
                                        bool withsuftabcheck,
                                        GtError *err)
 {
@@ -630,8 +629,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
       }
       if (itvprocess != NULL)
       {
-        if (itvprocess(itvprocessdata,threadnum,
-                       ((void **) itvprocessdata)[threadnum],
+        if (itvprocess(itvprocessdata,
                        srsresult.suftab_bucket,
                        snrp,srsresult.lcptab_bucket,width,
                        spaceforbucketprocessing,err) != 0)
@@ -649,7 +647,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
   }
   if (itvprocess_end != NULL)
   {
-    itvprocess_end(itvprocessdata,threadnum);
+    itvprocess_end(itvprocessdata);
   }
   return haserr ? -1 : 0;
 }
@@ -735,7 +733,6 @@ typedef struct
                 maxindex,
                 sumofwidth,
                 spaceforbucketprocessing;
-  unsigned int threadnum;
   bool withsuftabcheck;
   GtFirstcodesintervalprocess itvprocess;
   GtFirstcodesintervalprocess_end itvprocess_end;
@@ -762,7 +759,6 @@ static void *gt_firstcodes_thread_caller_sortremaining(void *data)
                                   threadinfo->itvprocess,
                                   threadinfo->itvprocess_end,
                                   threadinfo->itvprocessdata,
-                                  threadinfo->threadnum,
                                   threadinfo->withsuftabcheck,
                                   threadinfo->err) != 0)
   {
@@ -787,7 +783,7 @@ static int gt_firstcodes_thread_sortremaining(
                                        GtFirstcodesintervalprocess itvprocess,
                                        GtFirstcodesintervalprocess_end
                                          itvprocess_end,
-                                       void *itvprocessdata,
+                                       void *itvprocessdatatab,
                                        bool withsuftabcheck,
                                        unsigned int threads,
                                        GtLogger *logger,
@@ -819,8 +815,13 @@ static int gt_firstcodes_thread_sortremaining(
     threadinfo[t].depth = depth;
     threadinfo[t].itvprocess = itvprocess;
     threadinfo[t].itvprocess_end = itvprocess_end;
-    threadinfo[t].itvprocessdata = itvprocessdata;
-    threadinfo[t].threadnum = t;
+    if (itvprocessdatatab == NULL)
+    {
+      threadinfo[t].itvprocessdata = NULL;
+    } else
+    {
+      threadinfo[t].itvprocessdata = ((void **) itvprocessdatatab)[t];
+    }
     threadinfo[t].err = err;
     lb = gt_firstcodes_get_leftborder(fct,threadinfo[t].minindex);
     if (t < threads - 1)
@@ -945,7 +946,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                     itvprocess,
                                                  GtFirstcodesintervalprocess_end
                                                      itvprocess_end,
-                                                  void *itvprocessdata,
+                                                  void *itvprocessdatatab,
                                                   GtLogger *logger,
                                                   GtError *err)
 {
@@ -1527,7 +1528,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                            (unsigned long) kmersize,
                                            itvprocess,
                                            itvprocess_end,
-                                           itvprocessdata,
+                                           itvprocessdatatab,
                                            withsuftabcheck,
                                            threads,
                                            logger,
@@ -1552,8 +1553,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                         (unsigned long) kmersize,
                                         itvprocess,
                                         itvprocess_end,
-                                        itvprocessdata,
-                                        0,
+                                        itvprocessdatatab == NULL
+                                          ? NULL
+                                          : ((void **) itvprocessdatatab)[0],
                                         withsuftabcheck,
                                         err) != 0)
         {

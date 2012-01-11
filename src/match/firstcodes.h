@@ -25,8 +25,6 @@
 #include "seqnumrelpos.h"
 
 typedef int (*GtFirstcodesintervalprocess)(void *,
-                                           unsigned int,
-                                           void *,
                                            const unsigned long *,
                                            const GtSeqnumrelpos *,
                                            const uint16_t *,
@@ -34,7 +32,7 @@ typedef int (*GtFirstcodesintervalprocess)(void *,
                                            unsigned long,
                                            GtError *);
 
-typedef void (*GtFirstcodesintervalprocess_end)(void *,unsigned int);
+typedef void (*GtFirstcodesintervalprocess_end)(void *);
 
 void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize);
 
@@ -52,7 +50,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     unsigned int radixparts, /* set to 2U */
                     GtFirstcodesintervalprocess itvprocess,
                     GtFirstcodesintervalprocess_end itvprocess_end,
-                    void *itvprocessdata,
+                    void *itvprocessdatatab,
                     GtLogger *logger,
                     GtError *err);
 
