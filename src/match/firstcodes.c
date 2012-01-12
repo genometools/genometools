@@ -63,21 +63,21 @@ typedef struct
                 currentmaxindex,
                 differentcodes, /* a copy of the same value as in tab */
                 widthofpart;
-  bool radixsmall;
 #define WITHCACHE
 #ifdef WITHCACHE
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth;
 #endif
   unsigned int flushcount,
-               shiftright2index;
+               shiftright2index,
+               radixparts;
+  bool radixsmall;
   GtRadixsortinfo *radixsort_code,
                   *radixsort_codepos;
   GtSpmsuftab *spmsuftab;
   GtSfxmappedrange *mappedleftborder,
                    *mappedallfirstcodes,
                    *mappedmarkprefix;
-  unsigned int radixparts;
   unsigned long *allfirstcodes;
   GtFirstcodesspacelog *fcsl;
   GtCodeposbuffer buf;
