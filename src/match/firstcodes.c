@@ -1093,6 +1093,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                              logger);
   if (fci.differentcodes > 0)
   {
+    unsigned long myidx, mindiff = 0, maxdiff = 0;
+
     if (fci.differentcodes < fci.numofsequences)
     {
       fci.allfirstcodes = gt_realloc(fci.allfirstcodes,
@@ -1102,6 +1104,22 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    sizeof (*fci.allfirstcodes) *
                                    fci.differentcodes);
     }
+    for (myidx = 1UL; myidx < fci.differentcodes; myidx++)
+    {
+      unsigned long diff;
+      gt_assert(fci.allfirstcodes[myidx-1] < fci.allfirstcodes[myidx]);
+      diff = fci.allfirstcodes[myidx] - fci.allfirstcodes[myidx-1];
+      if (myidx == 1UL || diff < mindiff)
+      {
+        mindiff = diff;
+      }
+      if (diff > maxdiff)
+      {
+        maxdiff = diff;
+      }
+    }
+    gt_logger_log(logger,"allfirstcodes: mindiff=%lu,maxdiff=%lu(%u bits)",
+                  mindiff,maxdiff,gt_determinebitspervalue((uint64_t) maxdiff));
   }
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
