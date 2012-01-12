@@ -45,12 +45,15 @@
 #include "sfx-suffixer.h"
 #include "spmsuftab.h"
 
+#define WITHCACHE
+#ifdef WITHCACHE
 typedef struct
 {
   unsigned long *ptr, code;
 } GtIndexwithcode;
 
 GT_DECLAREARRAYSTRUCT(GtIndexwithcode);
+#endif
 
 typedef struct
 {
@@ -63,7 +66,6 @@ typedef struct
                 currentmaxindex,
                 differentcodes, /* a copy of the same value as in tab */
                 widthofpart;
-#define WITHCACHE
 #ifdef WITHCACHE
   GtArrayGtIndexwithcode binsearchcache;
   unsigned int binsearchcache_depth;
@@ -115,8 +117,8 @@ static void gt_storefirstcodes(void *processinfo,
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) processinfo;
 
-  gt_assert(fci != NULL && firstinrange);
-  gt_assert(fci->allfirstcodes != NULL &&
+  gt_assert(fci != NULL && firstinrange &&
+            fci->allfirstcodes != NULL &&
             fci->countsequences < fci->numofsequences);
   fci->allfirstcodes[fci->countsequences++] = code;
 }
@@ -173,10 +175,10 @@ size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,
            idx++)
       {
         printf("%lu %lu\n",
-             (unsigned long)
-             (fci->binsearchcache.spaceGtIndexwithcode[idx].ptr -
-             fci->allfirstcodes),
-             fci->binsearchcache.spaceGtIndexwithcode[idx].code);
+               (unsigned long)
+               (fci->binsearchcache.spaceGtIndexwithcode[idx].ptr -
+               fci->allfirstcodes),
+               fci->binsearchcache.spaceGtIndexwithcode[idx].code);
       }
     }
 #endif
@@ -530,9 +532,9 @@ static void gt_firstcodes_checksuftab_bucket(const GtEncseq *encseq,
 {
   unsigned long idx, current, maxlcp,
                 totallength = gt_encseq_total_length(encseq);
+  const unsigned long depth = 0;
   GT_UNUSED int cmp;
   const bool specialsareequal = false, specialsareequalatdepth0 = false;
-  const unsigned long depth = 0;
 
   gt_assert(!previousdefined || previoussuffix < totallength);
   for (idx = 0; idx < numberofsuffixes; idx++)
@@ -1156,6 +1158,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   if (!haserr)
   {
     const bool pair = false;
+
     if (timer != NULL)
     {
       gt_timer_show_progress(timer, "to accumulate counts",stdout);
@@ -1301,10 +1304,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_samples_delete(fci.fcsl,&fci.tab);
     gt_assert(fci.mappedleftborder != NULL);
     gt_Sfxmappedrange_usetmp(fci.mappedleftborder,
-                       gt_firstcodes_outfilenameleftborder(&fci.tab),
-                       (void **) gt_firstcodes_leftborder_address(&fci.tab),
-                       gt_firstcodes_leftborder_entries(&fci.tab),
-                       true);
+                             gt_firstcodes_outfilenameleftborder(&fci.tab),
+                             (void **)
+                               gt_firstcodes_leftborder_address(&fci.tab),
+                             gt_firstcodes_leftborder_entries(&fci.tab),
+                             true);
     gt_assert(fci.buf.nextfree == 0);
     if (gt_suftabparts_numofparts(suftabparts) > 1U)
     {
@@ -1318,9 +1322,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_marksubstring_bits_null(fci.buf.markprefix,false);
       gt_assert(fci.mappedmarkprefix != NULL);
       gt_Sfxmappedrange_storetmp_bitsequence(fci.mappedmarkprefix,
-                                 gt_marksubstring_bits_address(
-                                    fci.buf.markprefix),
-                                 false);
+                                             gt_marksubstring_bits_address(
+                                                  fci.buf.markprefix),
+                                             false);
       GT_FCI_SUBTRACTSPLITSPACE(fci.fcsl,"markprefix");
       gt_marksubstring_bits_null(fci.buf.markprefix,true);
     } else
@@ -1417,7 +1421,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       if (gt_suftabparts_numofparts(suftabparts) == 1U)
       {
         unsigned long leftborder_entries
-         = gt_firstcodes_leftborder_entries(&fci.tab);
+          = gt_firstcodes_leftborder_entries(&fci.tab);
 
         gt_assert(part == 0);
         mapptr = gt_Sfxmappedrange_map(fci.mappedleftborder,
