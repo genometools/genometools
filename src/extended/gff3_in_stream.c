@@ -20,12 +20,15 @@
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_in_stream_plain.h"
 #include "extended/node_stream_api.h"
+#include "extended/tidy_region_node_stream.h"
 
 struct GtGFF3InStream {
   const GtNodeStream parent_instance;
   GtNodeStream *gff3_in_stream_plain,
                *add_ids_stream,
-               *cds_check_stream;
+               *cds_check_stream,
+               *fix_region_stream,
+               *last_stream;
 };
 
 #define gff3_in_stream_cast(NS)\
@@ -37,7 +40,7 @@ static int gff3_in_stream_next(GtNodeStream *ns, GtGenomeNode **gn,
   GtGFF3InStream *is;
   gt_error_check(err);
   is = gff3_in_stream_cast(ns);
-  return gt_node_stream_next(is->cds_check_stream, gn, err);
+  return gt_node_stream_next(is->last_stream, gn, err);
 }
 
 static void gff3_in_stream_free(GtNodeStream *ns)
@@ -46,6 +49,7 @@ static void gff3_in_stream_free(GtNodeStream *ns)
   gt_node_stream_delete(gff3_in_stream->cds_check_stream);
   gt_node_stream_delete(gff3_in_stream->add_ids_stream);
   gt_node_stream_delete(gff3_in_stream->gff3_in_stream_plain);
+  gt_node_stream_delete(gff3_in_stream->fix_region_stream);
 }
 
 const GtNodeStreamClass* gt_gff3_in_stream_class(void)
@@ -120,15 +124,28 @@ void gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream *is)
                                        is->cds_check_stream);
 }
 
+void gt_gff3_in_stream_fix_region_boundaries(GtGFF3InStream *is)
+{
+  gt_assert(is);
+  gt_gff3_in_stream_plain_do_not_check_region_boundaries(
+                               (GtGFF3InStreamPlain*) is->gff3_in_stream_plain);
+  is->last_stream = is->fix_region_stream =
+             gt_tidy_region_node_stream_new(is->last_stream);
+}
+
 GtNodeStream* gt_gff3_in_stream_new_unsorted(int num_of_files,
                                              const char **filenames)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_class(), false);
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
+  is->fix_region_stream = NULL;
   is->gff3_in_stream_plain = gt_gff3_in_stream_plain_new_unsorted(num_of_files,
                                                                   filenames);
+  gt_gff3_in_stream_plain_check_region_boundaries(
+                               (GtGFF3InStreamPlain*) is->gff3_in_stream_plain);
   is->add_ids_stream = gt_add_ids_stream_new(is->gff3_in_stream_plain);
-  is->cds_check_stream = gt_cds_check_stream_new(is->add_ids_stream);
+  is->last_stream = is->cds_check_stream =
+                                    gt_cds_check_stream_new(is->add_ids_stream);
   return ns;
 }
 
@@ -136,8 +153,12 @@ GtNodeStream* gt_gff3_in_stream_new_sorted(const char *filename)
 {
   GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_class(), true);
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
+  is->fix_region_stream = NULL;
   is->gff3_in_stream_plain = gt_gff3_in_stream_plain_new_sorted(filename);
   is->add_ids_stream = gt_add_ids_stream_new(is->gff3_in_stream_plain);
-  is->cds_check_stream = gt_cds_check_stream_new(is->add_ids_stream);
+  gt_gff3_in_stream_plain_check_region_boundaries(
+                               (GtGFF3InStreamPlain*) is->gff3_in_stream_plain);
+  is->last_stream = is->cds_check_stream =
+                                    gt_cds_check_stream_new(is->add_ids_stream);
   return ns;
 }

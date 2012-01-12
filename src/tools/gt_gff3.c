@@ -43,7 +43,8 @@ typedef struct {
        verbose,
        typecheck_built_in,
        tidy,
-       show;
+       show,
+       fixboundaries;
   long offset;
   GtStr *offsetfile,
         *typecheck;
@@ -119,6 +120,14 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
   option = gt_option_new_bool("addids", "add missing \""
                               GT_GFF_SEQUENCE_REGION"\" lines automatically",
                               &arguments->addids, true);
+  gt_option_parser_add_option(op, option);
+
+  /* -fixregionboundaries */
+  option = gt_option_new_bool("fixregionboundaries", "automatically adjust \""
+                              GT_GFF_SEQUENCE_REGION"\" lines to contain all "
+                              "their features (memory consumption is "
+                              "proportional to the input file size(s))",
+                              &arguments->fixboundaries, false);
   gt_option_parser_add_option(op, option);
 
   /* -mergefeat */
@@ -240,6 +249,9 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
   /* enable tidy mode (if necessary) */
   if (!had_err && arguments->tidy)
     gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);
+
+  if (!had_err && arguments->fixboundaries)
+    gt_gff3_in_stream_fix_region_boundaries((GtGFF3InStream*) gff3_in_stream);
 
   /* create sort stream (if necessary) */
   if (!had_err && arguments->sort) {

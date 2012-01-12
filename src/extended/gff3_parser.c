@@ -46,6 +46,7 @@ struct GtGFF3Parser {
             *source_to_str_mapping;
   bool incomplete_node, /* at least on node is potentially incomplete */
        checkids,
+       checkregions,
        tidy,
        fasta_parsing, /* parser is in FASTA parsing mode */
        eof_emitted;
@@ -101,6 +102,18 @@ void gt_gff3_parser_check_id_attributes(GtGFF3Parser *parser)
 {
   gt_assert(parser);
   parser->checkids = true;
+}
+
+void gt_gff3_parser_check_region_boundaries(GtGFF3Parser *parser)
+{
+  gt_assert(parser);
+  parser->checkregions = true;
+}
+
+void gt_gff3_parser_do_not_check_region_boundaries(GtGFF3Parser *parser)
+{
+  gt_assert(parser);
+  parser->checkregions = false;
 }
 
 void gt_gff3_parser_set_offset(GtGFF3Parser *parser, long offset)
@@ -312,7 +325,7 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
     gt_hashmap_add(parser->seqid_to_ssr_mapping, gt_str_get(ssr->seqid_str),
                    ssr);
   }
-  else if (!gt_range_contains(&ssr->range, &range)) { /* perform range check */
+  else if (!gt_range_contains(&ssr->range, &range) && parser->checkregions) {
     gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" is "
                  "not contained in range (%lu,%lu) of corresponding sequence "
                  "region on line %u", range.start, range.end, line_number,

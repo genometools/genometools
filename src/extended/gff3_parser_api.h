@@ -40,6 +40,14 @@ GtGFF3Parser* gt_gff3_parser_new(GtTypeChecker *type_checker);
    consumption of the <gff3_parser> becomes proportional to the input file
    size(s). */
 void          gt_gff3_parser_check_id_attributes(GtGFF3Parser *gff3_parser);
+/* Enable sequence region boundary checking in <gff3_parser>. That is,
+   encountering features outside the sequence region boundaries will result in
+   an error. */
+void          gt_gff3_parser_check_region_boundaries(GtGFF3Parser *gff3_parser);
+/* Disable sequence region boundary checking in <gff3_parser>. That is,
+   features outside the sequence region boundaries will be permitted. */
+void          gt_gff3_parser_do_not_check_region_boundaries(GtGFF3Parser
+                                                                  *gff3_parser);
 /* Transform all features parsed by <gff3_parser> by the given <offset>. */
 void          gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser, long offset);
 /* Enable the tidy mode in <gff3_parser>. In tidy mode the <gff3_parser> parser

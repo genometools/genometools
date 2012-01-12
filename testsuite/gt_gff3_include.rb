@@ -412,6 +412,28 @@ Test do
   grep last_stderr, "has no tag"
 end
 
+Name "gt gff3 fix region boundaries (end)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -fixregionboundaries #{$testdata}gt_gff3_range_check.gff3")
+  grep last_stdout, "sr 1000 2001"
+end
+
+Name "gt gff3 fix region boundaries (start)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -fixregionboundaries #{$testdata}gt_gff3_range_check2.gff3")
+  grep last_stdout, "sr 900 2000"
+end
+
+Name "gt gff3 fix region boundaries (end)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -fixregionboundaries #{$testdata}gt_gff3_range_check3.gff3")
+  grep last_stdout, "sr 900 2001"
+end
+
+
 Name "gt gff3 empty attribute name"
 Keywords "gt_gff3 gff3_attribute"
 Test do

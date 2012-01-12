@@ -32,6 +32,10 @@ GtNodeStream* gt_gff3_in_stream_plain_new_unsorted(int num_of_files,
                                                    const char **filenames);
 GtNodeStream* gt_gff3_in_stream_plain_new_sorted(const char *filename);
 void          gt_gff3_in_stream_plain_check_id_attributes(GtGFF3InStreamPlain*);
+void          gt_gff3_in_stream_plain_check_region_boundaries(
+                                                          GtGFF3InStreamPlain*);
+void          gt_gff3_in_stream_plain_do_not_check_region_boundaries(
+                                                          GtGFF3InStreamPlain*);
 void          gt_gff3_in_stream_plain_enable_tidy_mode(GtNodeStream*);
 void          gt_gff3_in_stream_plain_show_progress_bar(GtGFF3InStreamPlain*);
 void          gt_gff3_in_stream_plain_set_type_checker(GtNodeStream*,
