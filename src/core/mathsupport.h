@@ -20,7 +20,6 @@
 
 #include <stdbool.h>
 #include <math.h>
-#include <inttypes.h>
 #include "core/error_api.h"
 
 /* Returns the log of the sum of two log probabilities. */
@@ -42,7 +41,7 @@ char          gt_rand_char(void);
 
 /* Find the log base 2 of an integer in O(wordsize) operations */
 
-unsigned int gt_determinebitspervalue(uint64_t maxvalue);
+unsigned int gt_determinebitspervalue(unsigned long maxvalue);
 
 /* Determine pow(base,exponent) for small values of exponent */
 

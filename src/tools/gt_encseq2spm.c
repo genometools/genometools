@@ -39,6 +39,7 @@ typedef struct
        verbose,
        outputspms,
        onlyaccum,
+       onlyallfirstcodes,
        radixlarge,
        countspms;
   unsigned int minmatchlength,
@@ -146,6 +147,12 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   /* -onlyaccum */
   option = gt_option_new_bool("onlyaccum", "only accumulate codes",
                              &arguments->onlyaccum, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  /* -onlyallfirstcodes */
+  option = gt_option_new_bool("onlyallfirstcodes", "only determines allcodes",
+                              &arguments->onlyallfirstcodes, false);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -364,6 +371,8 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->minmatchlength,
                                      /* use false */  arguments->checksuftab,
                                      /* use false */  arguments->onlyaccum,
+                                     /* use false */  arguments->
+                                                            onlyallfirstcodes,
                                      /* specify the extra space needed for
                                         the function processing the interval */
                                                       arguments->phase2extra,

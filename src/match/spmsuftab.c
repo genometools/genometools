@@ -33,7 +33,7 @@ GtSpmsuftab *gt_spmsuftab_new(unsigned long numofentries,
   required = (unsigned long) gt_spmsuftab_requiredspace(numofentries,
                                                         maxvalue,
                                                         bitsforseqnumrelpos);
-  bitsforpositions = gt_determinebitspervalue((uint64_t) maxvalue);
+  bitsforpositions = gt_determinebitspervalue(maxvalue);
   if (bitsforpositions < bitsforseqnumrelpos)
   {
     gt_logger_log(logger,"use %lu bitpackarray-entries for all positions "
@@ -81,7 +81,7 @@ size_t gt_spmsuftab_requiredspace(unsigned long numofentries,
                                   unsigned long maxvalue,
                                   unsigned int bitsforseqnumrelpos)
 {
-  unsigned int bitsforpositions = gt_determinebitspervalue((uint64_t) maxvalue);
+  unsigned int bitsforpositions = gt_determinebitspervalue(maxvalue);
 
   return sizeof (GtSpmsuftab) +
                 gt_GtCompactulongstore_size(numofentries,

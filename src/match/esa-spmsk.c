@@ -155,12 +155,15 @@ unsigned long gt_spmsk_inl_delete(GtBUstate_spmsk *state)
 {
   if (state != NULL)
   {
+    unsigned long tmpcount;
+
     GT_FREEARRAY(&state->Wset,GtUlong);
     GT_FREEARRAY(&state->Lset,GtUlong);
     gt_GtArrayGtBUItvinfo_delete_spmsk(
                  (GtArrayGtBUItvinfo_spmsk *) state->stack,state);
+    tmpcount = state->spmcounter;
     gt_free(state);
-    return state->spmcounter;
+    return tmpcount;
   }
   return 0;
 }

@@ -152,6 +152,9 @@ void gt_firstcodes_samples_delete(GtFirstcodesspacelog *fcsl,
 void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
                                    GtFirstcodestab *fct);
 
+void gt_firstcodes_tab_delete(GtFirstcodesspacelog *fcsl,
+                              GtFirstcodestab *fct);
+
 void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct);
 
 uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);

@@ -934,6 +934,36 @@ void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
                                 NULL);
 }
 
+static void run_allcodes_distribution(const unsigned long *allfirstcodes,
+                                      unsigned long differentcodes)
+{
+  unsigned long idx, diff, mindiff = 0, maxdiff = 0, distbits[64+1] = {0};
+
+  for (idx = 1UL; idx < differentcodes; idx++)
+  {
+    gt_assert(allfirstcodes[idx-1] < allfirstcodes[idx]);
+    diff = allfirstcodes[idx] - allfirstcodes[idx-1];
+    if (idx == 1UL || diff < mindiff)
+    {
+      mindiff = diff;
+    }
+    if (diff > maxdiff)
+    {
+      maxdiff = diff;
+    }
+    distbits[gt_determinebitspervalue(diff)]++;
+  }
+  printf("allfirstcodes: mindiff=%lu,maxdiff=%lu(%u bits)\n",
+         mindiff,maxdiff,gt_determinebitspervalue(maxdiff));
+  for (idx = 0; idx <= 64UL; idx++)
+  {
+    if (distbits[idx] > 0)
+    {
+      printf("%lu bits: %lu\n",idx,distbits[idx]);
+    }
+  }
+}
+
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
                                                   unsigned int numofparts,
@@ -941,6 +971,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int minmatchlength,
                                                   bool withsuftabcheck,
                                                   bool onlyaccumulation,
+                                                  bool onlyallfirstcodes,
                                                   unsigned long phase2extra,
                                                   bool radixsmall,
                                                   unsigned int radixparts,
@@ -1006,13 +1037,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     maxrelpos = 0;
   }
-  bitsforrelpos = gt_determinebitspervalue((uint64_t) maxrelpos);
+  bitsforrelpos = gt_determinebitspervalue(maxrelpos);
   fci.radixsmall = radixsmall;
   fci.radixparts = radixparts;
   fci.buf.snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   numofdbsequences = gt_encseq_num_of_sequences(encseq);
   gt_assert(numofdbsequences > 0);
-  bitsforseqnum = gt_determinebitspervalue((uint64_t) (numofdbsequences - 1));
+  bitsforseqnum = gt_determinebitspervalue(numofdbsequences - 1);
   if (bitsforseqnum + bitsforrelpos > (unsigned int) GT_INTWORDSIZE)
   {
     gt_seqnumrelpos_delete(fci.buf.snrp);
@@ -1093,8 +1124,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                              logger);
   if (fci.differentcodes > 0)
   {
-    unsigned long myidx, mindiff = 0, maxdiff = 0;
-
     if (fci.differentcodes < fci.numofsequences)
     {
       fci.allfirstcodes = gt_realloc(fci.allfirstcodes,
@@ -1104,22 +1133,22 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                    sizeof (*fci.allfirstcodes) *
                                    fci.differentcodes);
     }
-    for (myidx = 1UL; myidx < fci.differentcodes; myidx++)
+    if (onlyallfirstcodes)
     {
-      unsigned long diff;
-      gt_assert(fci.allfirstcodes[myidx-1] < fci.allfirstcodes[myidx]);
-      diff = fci.allfirstcodes[myidx] - fci.allfirstcodes[myidx-1];
-      if (myidx == 1UL || diff < mindiff)
+      run_allcodes_distribution(fci.allfirstcodes,fci.differentcodes);
+      gt_free(fci.allfirstcodes);
+      gt_marksubstring_delete(fci.buf.markprefix,true);
+      gt_marksubstring_delete(fci.buf.marksuffix,true);
+      gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
+      gt_firstcodes_spacelog_delete(fci.fcsl);
+      gt_seqnumrelpos_delete(fci.buf.snrp);
+      gt_Sfxmappedrangelist_delete(sfxmrlist);
+      if (timer != NULL)
       {
-        mindiff = diff;
+        gt_timer_delete(timer);
       }
-      if (diff > maxdiff)
-      {
-        maxdiff = diff;
-      }
+      return 0;
     }
-    gt_logger_log(logger,"allfirstcodes: mindiff=%lu,maxdiff=%lu(%u bits)",
-                  mindiff,maxdiff,gt_determinebitspervalue((uint64_t) maxdiff));
   }
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
@@ -1646,6 +1675,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
   }
   gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
+  gt_firstcodes_tab_delete(fci.fcsl,&fci.tab);
   if (fci.spmsuftab != NULL)
   {
     gt_spmsuftab_delete(fci.spmsuftab);

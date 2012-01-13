@@ -276,7 +276,8 @@ static int read_symbolmap_from_lines(GtAlphabet *alpha,
   /* there are mapsize-1 characters plus wildcard plus separator.
      hence there are mapsize+1 symbols in the range 0..mapsize.
      that is, mapsize is the largest symbol and we obtain */
-  alpha->bitspersymbol = gt_determinebitspervalue((uint64_t) alpha->mapsize);
+  alpha->bitspersymbol
+    = gt_determinebitspervalue((unsigned long) alpha->mapsize);
   return haserr ? -1 : 0;
 }
 
@@ -383,8 +384,8 @@ void gt_alphabet_add_mapping(GtAlphabet *alphabet, const char *characters)
   for (i = 0; i < num_of_characters; i++)
     alphabet->symbolmap[(int) characters[i]] = (GtUchar) alphabet->mapsize;
   alphabet->mapsize++;
-  alphabet->bitspersymbol = gt_determinebitspervalue((uint64_t)
-                                                       alphabet->mapsize);
+  alphabet->bitspersymbol
+    = gt_determinebitspervalue((unsigned long) alphabet->mapsize);
 }
 
 void gt_alphabet_add_wildcard(GtAlphabet *alphabet, char wildcard)

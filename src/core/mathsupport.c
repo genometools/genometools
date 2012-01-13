@@ -18,6 +18,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <inttypes.h>
+#include <limits.h>
 #include "core/ensure.h"
 #include "core/mathsupport.h"
 #include "core/yarandom.h" /* necessary to define random() correctly */
@@ -117,10 +118,10 @@ char gt_rand_char(void)
   \url{http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogObvious}
 */
 
-unsigned int gt_determinebitspervalue(uint64_t maxvalue)
+unsigned int gt_determinebitspervalue(unsigned long maxvalue)
 {
   unsigned int bits = 0;
-  uint64_t value;
+  unsigned long value;
 
   for (value = maxvalue; value > 0; value >>= 1)
   {
@@ -128,6 +129,18 @@ unsigned int gt_determinebitspervalue(uint64_t maxvalue)
   }
 #define GT_MAXLOG2VALUE 63
   gt_assert(bits <= GT_MAXLOG2VALUE);
+#ifdef USEbuiltin_clzl
+  {
+    unsigned int fastbits = (unsigned int) (sizeof(unsigned long) * CHAR_BIT) -
+                            __builtin_clzl(maxvalue);
+    if (bits != fastbits)
+    {
+      fprintf(stderr,"maxvalue=%lu: bits = %u != %d = clzl\n",
+                        maxvalue,bits,fastbits);
+      exit(EXIT_FAILURE);
+    }
+  }
+#endif
   return bits;
 }
 

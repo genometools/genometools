@@ -245,8 +245,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                 exceedvalue = 1UL << fct->modvaluebits;
   uint32_t currentcount;
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
-  const unsigned int btp
-    = gt_determinebitspervalue((uint64_t) expectedlastpartsum);
+  const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
 #ifdef SKDEBUG
   GtDiscDistri *countdistri = gt_disc_distri_new();
 #endif
@@ -453,6 +452,10 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
   }
   gt_hashtable_delete(fct->countocc_exceptions);
   fct->countocc_exceptions = NULL;
+}
+
+void gt_firstcodes_tab_delete(GtFirstcodesspacelog *fcsl,GtFirstcodestab *fct)
+{
   gt_firstcodes_samples_delete(fcsl,fct);
   gt_str_delete(fct->outfilenameleftborder);
   fct->outfilenameleftborder = NULL;

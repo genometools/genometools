@@ -65,7 +65,7 @@ typedef struct
                                                   unsigned long maxvalue)
 {
   Compressedtable *compressedtable;
-  unsigned int bitspervalue = gt_determinebitspervalue((uint64_t) maxvalue);
+  unsigned int bitspervalue = gt_determinebitspervalue(maxvalue);
 
   compressedtable = compressedtablebits_new(numofvalues,bitspervalue);
   compressedtable->maxvalue = maxvalue;

@@ -44,6 +44,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     unsigned int minmatchlength,
                     bool withsuftabcheck, /* set to false, only for tests */
                     bool onlyaccumulation, /* set to false, only for tests */
+                    bool onlyallfirstcodes, /* set to false, only for tests */
                     unsigned long phase2extra, /* extra space needed in proc.
                                                   intervals */
                     bool radixsmall,      /* set to true */

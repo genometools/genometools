@@ -1006,6 +1006,7 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
 {
   GtEncseq *encseq = (GtEncseq *) voidinfo;
   unsigned long numofunits;
+  unsigned int bitsforsubalpha;
 
   if (writemode)
   {
@@ -1043,14 +1044,15 @@ static void assignoistabmapspecification(GtMapspec *mapspec,
   gt_mapspec_add_uchar(mapspec,
                        encseq->exceptionheaderptr.subsymbolmapptr,
                        (unsigned long) UCHAR_MAX);
-  numofunits = (unsigned long) sizeofbitarray(
-                 gt_determinebitspervalue((uint64_t) encseq->maxsubalphasize-1),
+  bitsforsubalpha
+    = gt_determinebitspervalue((unsigned long) encseq->maxsubalphasize-1);
+  numofunits
+   = (unsigned long) sizeofbitarray(bitsforsubalpha,
                        (BitOffset) encseq->specialcharinfo.exceptioncharacters);
   if (!writemode)
   {
     encseq->exceptions
-     = bitpackarray_new(gt_determinebitspervalue((uint64_t)
-                                                     encseq->maxsubalphasize-1),
+     = bitpackarray_new(bitsforsubalpha,
                         (BitOffset) encseq->specialcharinfo.exceptioncharacters,
                         false);
   }
@@ -1098,6 +1100,8 @@ static void alphabet_to_key_values(const GtAlphabet *alpha,
 static size_t gt_encseq_size_of_exceptiontablemap(GtEncseq *encseq)
 {
   unsigned long sizeoistab;
+  unsigned int bitsforsubalpha;
+
   sizeoistab = CALLCASTFUNC(uint64_t, unsigned_long,   /* exceptiontables */
                             gt_encseq_sizeofSWtable(encseq->oissat,
                                 true,
@@ -1108,11 +1112,12 @@ static size_t gt_encseq_size_of_exceptiontablemap(GtEncseq *encseq)
   sizeoistab += encseq->numofallchars * sizeof (char); /* allchars */
   sizeoistab += UCHAR_MAX * sizeof (char);             /* maxchars */
   sizeoistab += UCHAR_MAX * sizeof (unsigned char);    /* subsymbolmap */
-  sizeoistab +=                                        /* exceptions */
-               sizeofbitarray(gt_determinebitspervalue((uint64_t)
-                                                     encseq->maxsubalphasize-1),
-                              (BitOffset)
-                                   encseq->specialcharinfo.exceptioncharacters);
+  bitsforsubalpha = gt_determinebitspervalue((unsigned long)
+                                             encseq->maxsubalphasize-1);
+  sizeoistab += sizeofbitarray(bitsforsubalpha,
+                              (BitOffset) encseq->
+                                          specialcharinfo.exceptioncharacters);
+/* exceptions */
   return (size_t) sizeoistab;
 }
 
@@ -4778,12 +4783,16 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
   if (!haserr)
   {
     gt_assert(encseq != NULL);
-    if (encseq->has_exceptiontable) {
+    if (encseq->has_exceptiontable)
+    {
+      unsigned int bitsforsubalpha
+        = gt_determinebitspervalue((unsigned long) encseq->maxsubalphasize-1);
+
       encseq->exceptions
-        = bitpackarray_new(gt_determinebitspervalue((uint64_t)
-                                                     encseq->maxsubalphasize-1),
-                      (BitOffset) encseq->specialcharinfo.exceptioncharacters,
-                      true);
+        = bitpackarray_new(bitsforsubalpha,
+                           (BitOffset) encseq->
+                                       specialcharinfo.exceptioncharacters,
+                           true);
     }
   }
   if (!haserr)
