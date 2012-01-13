@@ -45,7 +45,8 @@ typedef struct
   unsigned int minmatchlength,
                numofparts,
                radixparts,
-               singlescan;
+               singlescan,
+               addbscache_depth;
   unsigned long maximumspace,
                 phase2extra;
   GtStr *encseqinput,
@@ -153,6 +154,12 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   /* -onlyallfirstcodes */
   option = gt_option_new_bool("onlyallfirstcodes", "only determines allcodes",
                               &arguments->onlyallfirstcodes, false);
+  gt_option_parser_add_option(op, option);
+  gt_option_is_development_option(option);
+
+  /* -addbscachedepth */
+  option = gt_option_new_uint("addbscachedepth", "only determines allcodes",
+                              &arguments->addbscache_depth, 5U);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
@@ -373,6 +380,8 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                      /* use false */  arguments->onlyaccum,
                                      /* use false */  arguments->
                                                             onlyallfirstcodes,
+                                     /* use 5U */     arguments->
+                                                            addbscache_depth,
                                      /* specify the extra space needed for
                                         the function processing the interval */
                                                       arguments->phase2extra,

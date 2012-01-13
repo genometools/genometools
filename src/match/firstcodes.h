@@ -45,6 +45,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(
                     bool withsuftabcheck, /* set to false, only for tests */
                     bool onlyaccumulation, /* set to false, only for tests */
                     bool onlyallfirstcodes, /* set to false, only for tests */
+                    GT_UNUSED unsigned int addbscache_depth, /* set to 5U */
                     unsigned long phase2extra, /* extra space needed in proc.
                                                   intervals */
                     bool radixsmall,      /* set to true */

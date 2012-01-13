@@ -151,8 +151,49 @@ static void gt_firstcodes_halves_rek(GtFirstcodesinfo *fci,
   }
 }
 
-size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,
-                                   unsigned int maxdepth)
+static unsigned long gt_firstcodes_cacheinterval(
+                     const GtArrayGtIndexwithcode *binsearchcache)
+{
+  unsigned long idx, width = 0;
+
+  if (binsearchcache->nextfreeGtIndexwithcode > 1UL)
+  {
+    for (idx=1UL; idx < binsearchcache->nextfreeGtIndexwithcode; idx++)
+    {
+      unsigned long tmpwidth;
+
+      gt_assert(binsearchcache->spaceGtIndexwithcode[idx-1].ptr <
+                binsearchcache->spaceGtIndexwithcode[idx].ptr);
+      tmpwidth = (unsigned long)
+                 (binsearchcache->spaceGtIndexwithcode[idx].ptr -
+                  binsearchcache->spaceGtIndexwithcode[idx-1].ptr);
+      if (idx > 1UL)
+      {
+        if (tmpwidth != width)
+        {
+          unsigned long diff = tmpwidth < width ? width - tmpwidth
+                                                : tmpwidth - width;
+          if (diff > 1UL)
+          {
+            fprintf(stderr,"tmpwidth= %lu != %lu =width\n",tmpwidth,width);
+            exit(EXIT_FAILURE);
+          }
+        }
+      } else
+      {
+        width = tmpwidth;
+      }
+    }
+    /*printf("%lu %lu\n",
+           (unsigned long)
+           (binsearchcache.spaceGtIndexwithcode[idx].ptr -
+           fci->allfirstcodes),
+           binsearchcache.spaceGtIndexwithcode[idx].code);*/
+  }
+  return width;
+}
+
+size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,unsigned int maxdepth)
 {
   fci->binsearchcache.nextfreeGtIndexwithcode = 0;
   fci->binsearchcache.allocatedGtIndexwithcode = (1UL << (maxdepth+1)) - 1;
@@ -166,22 +207,6 @@ size_t gt_firstcodes_halves(GtFirstcodesinfo *fci,
     gt_firstcodes_halves_rek(fci,0,fci->differentcodes - 1,0,maxdepth);
     gt_assert(fci->binsearchcache.nextfreeGtIndexwithcode
               == fci->binsearchcache.allocatedGtIndexwithcode);
-#undef FIRSTCODEDEBUG
-#ifdef FIRSTCODEDEBUG
-    {
-      unsigned long idx;
-
-      for (idx=0; idx < fci->binsearchcache.nextfreeGtIndexwithcode;
-           idx++)
-      {
-        printf("%lu %lu\n",
-               (unsigned long)
-               (fci->binsearchcache.spaceGtIndexwithcode[idx].ptr -
-               fci->allfirstcodes),
-               fci->binsearchcache.spaceGtIndexwithcode[idx].code);
-      }
-    }
-#endif
     return allocbytes;
   }
   return 0;
@@ -972,6 +997,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   bool withsuftabcheck,
                                                   bool onlyaccumulation,
                                                   bool onlyallfirstcodes,
+                                                  GT_UNUSED
+                                                  unsigned int addbscache_depth,
                                                   unsigned long phase2extra,
                                                   bool radixsmall,
                                                   unsigned int radixparts,
@@ -1154,11 +1181,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.codebuffer_total = 0;
 #ifdef WITHCACHE
   fci.binsearchcache_depth
-    = 2U + (unsigned int) log10((double) fci.differentcodes);
+    = addbscache_depth + (unsigned int) log10((double) fci.differentcodes);
   binsearchcache_size = gt_firstcodes_halves(&fci,fci.binsearchcache_depth);
   GT_FCI_ADDWORKSPACE(fci.fcsl,"binsearchcache",binsearchcache_size);
-  gt_log_log("binsearchcache_depth=%u => %lu bytes",
-             fci.binsearchcache_depth,(unsigned long) binsearchcache_size);
+  gt_log_log("binsearchcache_depth=%u => %lu bytes (intervals=%lu)",
+             fci.binsearchcache_depth,
+             (unsigned long) binsearchcache_size,
+             gt_firstcodes_cacheinterval(&fci.binsearchcache));
 #endif
   if (maximumspace > 0)
   {

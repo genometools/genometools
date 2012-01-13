@@ -268,7 +268,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   {
     fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - fct->modvaluebits);
   }
-  gt_log_log("lastpartsum=%lu, bitchangepoints.allocated=%lu\n",
+  gt_log_log("lastpartsum=%lu, bitchangepoints.allocated=%lu",
              expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
   fct->bitchangepoints.spaceGtUlong
     = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
