@@ -690,7 +690,7 @@ static int evaltracepath(GthBacktracePath *backtrace_path, GthDPtables *dpm,
 #ifndef NDEBUG
   unsigned long numofincludedintrons = 0;
 #endif
-  GthPath pathtype;
+  GthPath pathtype = (GthPath) 0;
   Dummystatus dummystatus = DUMMY_STATUS_UNDEFINED;
   unsigned char codon;
   bool skipdummyprocessing = false;

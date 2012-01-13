@@ -95,7 +95,7 @@ int gt_bioseq_collection_grep_desc(GtBioseqCollection *bsc, const char **rawseq,
                                    unsigned long *length, GtStr *seqid,
                                    GtError *err)
 {
-  unsigned long filenum, seqnum;
+  unsigned long filenum = 0, seqnum = 0;
   int had_err;
   gt_error_check(err);
   gt_assert(bsc && rawseq && length && seqid);
@@ -111,7 +111,7 @@ int gt_bioseq_collection_grep_desc_md5(GtBioseqCollection *bsc,
                                        const char **md5, GtStr *seqid,
                                        GtError *err)
 {
-  unsigned long filenum, seqnum;
+  unsigned long filenum = 0, seqnum = 0;
   int had_err;
   gt_error_check(err);
   gt_assert(bsc && md5 && seqid);

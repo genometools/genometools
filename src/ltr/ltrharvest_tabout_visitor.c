@@ -80,7 +80,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
   GtStr *line;
   GtRange rng;
   bool no_element = false;
-  unsigned long seqnum;
+  unsigned long seqnum = 0;
   const char *fnt;
   char buf[BUFSIZ];
   lv = gt_ltrharvest_tabout_visitor_cast(nv);

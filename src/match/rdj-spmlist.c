@@ -51,6 +51,13 @@
  *
  * */
 
+#if defined(__LP64) || (BITS == 32)
+#define GT_RDJ_LENGTHASSERTION(BITS)\
+        gt_assert(length <= (UINT ## BITS ## _MAX >> 2))
+#else
+#define GT_RDJ_LENGTHASSERTION(BITS) /* Nothing */
+#endif
+
 #define DEFINE_GT_SPMLIST_BIN_FORMAT(BITS)\
 void gt_spmlist_write_header_bin ## BITS(FILE *file)\
 {\
@@ -61,8 +68,8 @@ void gt_spmproc_show_bin ## BITS(unsigned long suffix_seqnum,\
     bool prefixseq_direct, void *file)\
 {\
   uint ## BITS ## _t spmdata[3];\
-  gt_assert(length <= (UINT ## BITS ## _MAX >> 2));\
   length <<= 2;\
+  GT_RDJ_LENGTHASSERTION(BITS);\
   if (suffixseq_direct)\
     length |= 2;\
   if (prefixseq_direct)\
@@ -158,7 +165,7 @@ static inline int parse_line(GtStr *s, unsigned long min_length,
   int had_err = 0;
   GtSplitter *splitter;
   char **tokens = NULL;
-  unsigned long suffix_seqnum, prefix_seqnum, suffix_length,
+  unsigned long suffix_seqnum = 0, prefix_seqnum = 0, suffix_length = 0,
                 prefix_length, unit_edist;
   bool suffixseq_direct = true, prefixseq_direct = true, exact;
 
