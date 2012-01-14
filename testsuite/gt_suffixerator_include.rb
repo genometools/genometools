@@ -108,7 +108,7 @@ Test do
            :maxtime => 1000
   run "mv #{last_stdout} result.repfind"
   run_test "#{$bin}/gt encseq2spm -parts 3 -l #{minlen} -spm show " + \
-           "-mirrored -ii #{indexname}", :maxtime => 1000
+           "-ii #{indexname}", :maxtime => 1000
   run "mv #{last_stdout} result.firstcodes"
   run "cmp result.repfind result.firstcodes"
 end

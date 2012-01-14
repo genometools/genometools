@@ -35,7 +35,7 @@
 typedef struct
 {
   bool checksuftab,
-       mirrored,
+       singlestrand,
        verbose,
        outputspms,
        onlyaccum,
@@ -128,11 +128,11 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
-  /* -mirrored */
-  option = gt_option_new_bool("mirrored", "use sequence with its mirror",
-                             &arguments->mirrored, false);
+  /* -singlestrand */
+  option = gt_option_new_bool("singlestrand", "use only the forward strand "
+                              "of the sequence",
+                              &arguments->singlestrand, false);
   gt_option_parser_add_option(op, option);
-  gt_option_is_mandatory(option);
 
   /* -spm */
   option = gt_option_new_string("spm", "specify output for spms",
@@ -278,11 +278,18 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
   {
     haserr = true;
   }
-  if (!haserr && arguments->mirrored)
+  if (!haserr)
   {
-    if (gt_encseq_mirror(encseq, err) != 0)
+    if (arguments->singlestrand)
     {
+      gt_error_set(err,"option -singlestand is not implemented");
       haserr = true;
+    } else
+    {
+      if (gt_encseq_mirror(encseq, err) != 0)
+      {
+        haserr = true;
+      }
     }
   }
 

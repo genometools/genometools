@@ -16,10 +16,9 @@ env -i bin/gt sequniq -rev $inputfile > tmp.fas
 sfxopt="-pl 2 -dna -lcp -suf -tis -ssp -db tmp.fas"
 if test ${mirrored} == "m"
 then
-  sfxopt="${sfxopt} -mirrored"
   idx="sfx-m"
 else
-  idx="sfx"
+  idx="sfx-f"
   env -i bin/gt encseq encode -indexname seq tmp.fas
   env -i bin/gt encseq decode -mirrored seq > tmp-m.fas
   mv tmp-m.fas tmp.fas
