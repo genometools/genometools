@@ -52,7 +52,12 @@ typedef struct
   unsigned long *ptr, code;
 } GtIndexwithcode;
 
-GT_DECLAREARRAYSTRUCT(GtIndexwithcode);
+typedef struct
+{
+  GtIndexwithcode *spaceGtIndexwithcode;
+  unsigned long width, nextfreeGtIndexwithcode, allocatedGtIndexwithcode;
+} GtArrayGtIndexwithcode;
+
 #endif
 
 typedef struct
@@ -128,12 +133,13 @@ static void gt_storefirstcodes(void *processinfo,
 static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
                                                unsigned int maxdepth)
 {
-  unsigned long idx, current, width;
+  unsigned long idx, current;
 
   fci->binsearchcache.nextfreeGtIndexwithcode = 0;
   fci->binsearchcache.allocatedGtIndexwithcode = 1UL << (maxdepth+1);
-  width = fci->differentcodes/fci->binsearchcache.allocatedGtIndexwithcode;
-  current = width;
+  fci->binsearchcache.width
+    = fci->differentcodes/fci->binsearchcache.allocatedGtIndexwithcode;
+  current = fci->binsearchcache.width;
   if (fci->binsearchcache.allocatedGtIndexwithcode < fci->differentcodes)
   {
     size_t allocbytes
@@ -148,7 +154,7 @@ static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
       fci->binsearchcache.
            spaceGtIndexwithcode[fci->binsearchcache.nextfreeGtIndexwithcode++]
                                .code = fci->allfirstcodes[current];
-      current += width;
+      current += fci->binsearchcache.width;
     }
     /*
     if (idx > 0)
@@ -156,7 +162,7 @@ static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
       printf("%lu entries of width %lu: last=%lu\n",
              fci->binsearchcache.nextfreeGtIndexwithcode,
              (unsigned long)
-             width,
+             fci->binsearchcache.width,
              (fci->binsearchcache.spaceGtIndexwithcode[idx-1].ptr
               - fci->allfirstcodes));
     }
