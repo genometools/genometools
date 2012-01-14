@@ -363,7 +363,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
       GT_RADIXREADER_NEXT(firstelem,&radixreader,
                           gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
-    ptr = gt_firstcodes_find(fci,false,0,fci->differentcodes-1,firstelem);
+    ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,firstelem);
     if (ptr != NULL)
     {
       if (fci->radixparts == 1U)
@@ -479,7 +479,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
       GT_RADIXREADER_NEXT_PAIR(firstelem,&radixreader,
                                gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
-    ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
+    ptr = gt_firstcodes_find(fci,true,fci->currentminindex,
                              fci->currentmaxindex,
                              firstelem.a);
     if (ptr != NULL)
