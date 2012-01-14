@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007-2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -28,9 +28,6 @@ static GtCodetype PROCESSKMERPREFIX(getencseqkmers_nospecialtwobitencoding)(
   GtTwobitencoding currentencoding;
   unsigned int shiftright;
   GtUchar cc;
-#ifdef GT_WITHMARKSUBSTRINGTMPCODE
-  GtCodetype marksubstringtmpcode;
-#endif
 
   gt_assert(mapped4info->kmersize > 1U);
   if (GT_ISDIRREVERSE(readmode))
@@ -231,10 +228,7 @@ static void PROCESSKMERPREFIX(getencseqkmers_rangetwobitencoding)(
 #endif
 }
 
-#ifndef GT_MAPPED4_GLOBAL
-static
-#endif
-void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
+static void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                const GtEncseq *encseq,
                                const GtReadmode readmode,
                                unsigned int kmersize,
@@ -333,5 +327,3 @@ void PROCESSKMERPREFIX(getencseqkmers_twobitencoding)(
                                        ? lastend
                                        : mapped4info.totallength);
 }
-/* vim: ft=c
-*/

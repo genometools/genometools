@@ -1155,37 +1155,6 @@ typedef struct
 #undef PROCESSKMERSPECIALTYPE
 #undef PROCESSKMERCODE
 
-/* start with next inling */
-
-#define PROCESSKMERPREFIX(FUN)          gt_firstcodes_accumulatecounts_##FUN
-#define PROCESSKMERTYPE                 GtCodeposbuffer
-#define PROCESSKMERSPECIALTYPE          GT_UNUSED void
-#define PROCESSKMERCODE                 GT_FIRSTCODES_ACCUMULATECOUNTS
-
-#define GT_MAPPED4_GLOBAL
-#define GT_WITHMARKSUBSTRINGTMPCODE
-
-#define GT_IGNORERIGHTBOUND
-#include "sfx-mapped4.gen"
-#undef GT_IGNORERIGHTBOUND
-
-#undef PROCESSKMERPREFIX
-#undef PROCESSKMERTYPE
-#undef PROCESSKMERSPECIALTYPE
-#undef PROCESSKMERCODE
-
-/* start with next inling */
-
-#define PROCESSKMERPREFIX(FUN)          gt_firstcodes_insertsuffix_##FUN
-#define PROCESSKMERTYPE                 GtCodeposbuffer
-#define PROCESSKMERSPECIALTYPE          GT_UNUSED void
-#define PROCESSKMERCODE                 GT_FIRSTCODES_INSERTSUFFIXES
-
-#include "sfx-mapped4.gen"
-
-#undef GT_MAPPED4_GLOBAL
-#undef GT_WITHMARKSUBSTRINGTMPCODE
-
 /*
 #define SHOWCURRENTSPACE\
         printf("spacepeak at line %d: %.2f\n",__LINE__,\
