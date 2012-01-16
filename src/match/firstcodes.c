@@ -56,6 +56,8 @@ typedef struct
 {
   GtIndexwithcode *spaceGtIndexwithcode;
   unsigned long width, nextfreeGtIndexwithcode, allocatedGtIndexwithcode;
+  size_t size;
+  unsigned int depth;
 } GtArrayGtIndexwithcode;
 
 #endif
@@ -73,7 +75,6 @@ typedef struct
                 widthofpart;
 #ifdef WITHCACHE
   GtArrayGtIndexwithcode binsearchcache;
-  unsigned int binsearchcache_depth;
 #endif
   unsigned int flushcount,
                shiftright2index,
@@ -113,8 +114,6 @@ static void gt_minmax_index_kmercode2prefix(unsigned long *minindex,
   *maxindex = gt_kmercode2prefix_index(*maxindex,data);
 }
 
-/* call the following function after computing the partial sums */
-
 static void gt_storefirstcodes(void *processinfo,
                                GT_UNUSED bool firstinrange,
                                GT_UNUSED unsigned long pos,
@@ -148,6 +147,7 @@ static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
     fci->binsearchcache.spaceGtIndexwithcode = gt_malloc(allocbytes);
     for (idx=0; idx< fci->binsearchcache.allocatedGtIndexwithcode; idx++)
     {
+      gt_assert(current < fci->differentcodes);
       fci->binsearchcache.
            spaceGtIndexwithcode[fci->binsearchcache.nextfreeGtIndexwithcode]
                                .ptr = fci->allfirstcodes + current;
@@ -197,7 +197,7 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
       if (code < midic->code)
       {
         found = midic->ptr;
-        if (depth < fci->binsearchcache_depth)
+        if (depth < fci->binsearchcache.depth)
         {
           rightic = midic - 1;
         } else
@@ -217,7 +217,7 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
       {
         if (code > midic->code)
         {
-          if (depth < fci->binsearchcache_depth)
+          if (depth < fci->binsearchcache.depth)
           {
             leftic = midic + 1;
           } else
@@ -479,7 +479,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
       GT_RADIXREADER_NEXT_PAIR(firstelem,&radixreader,
                                gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
-    ptr = gt_firstcodes_find(fci,true,fci->currentminindex,
+    ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
                              fci->currentmaxindex,
                              firstelem.a);
     if (ptr != NULL)
@@ -987,9 +987,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
 #else
   const unsigned int threads = 1U;
 #endif
-#ifdef WITHCACHE
-  size_t binsearchcache_size;
-#endif
 
   maxseqlength = gt_encseq_max_seq_length(encseq);
   totallength = gt_encseq_total_length(encseq);
@@ -1139,14 +1136,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
 #ifdef WITHCACHE
-  fci.binsearchcache_depth
+  fci.binsearchcache.depth
     = addbscache_depth + (unsigned int) log10((double) fci.differentcodes);
-  binsearchcache_size
-    = gt_firstcodes_fillbinsearchcache(&fci,fci.binsearchcache_depth);
-  GT_FCI_ADDWORKSPACE(fci.fcsl,"binsearchcache",binsearchcache_size);
-  gt_log_log("binsearchcache_depth=%u => %lu bytes",
-             fci.binsearchcache_depth,
-             (unsigned long) binsearchcache_size);
+  fci.binsearchcache.size
+    = gt_firstcodes_fillbinsearchcache(&fci,fci.binsearchcache.depth);
+  GT_FCI_ADDWORKSPACE(fci.fcsl,"binsearchcache",fci.binsearchcache.size);
+  gt_log_log("binsearchcache.depth=%u => %lu bytes",
+             fci.binsearchcache.depth,
+             (unsigned long) fci.binsearchcache.size);
 #endif
   if (maximumspace > 0)
   {
