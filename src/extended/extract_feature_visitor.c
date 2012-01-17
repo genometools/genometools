@@ -23,7 +23,7 @@
 #include "extended/extract_feature_sequence.h"
 #include "extended/extract_feature_visitor.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtExtractFeatureVisitor {
   const GtNodeVisitor parent_instance;

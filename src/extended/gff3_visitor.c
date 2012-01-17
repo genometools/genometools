@@ -31,7 +31,7 @@
 #include "extended/gff3_output.h"
 #include "extended/gff3_parser.h"
 #include "extended/gff3_visitor.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtGFF3Visitor {
   const GtNodeVisitor parent_instance;

@@ -20,7 +20,7 @@
 #include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 /* the <GtNodeVisitor> interface */
 struct GtNodeVisitorClass {

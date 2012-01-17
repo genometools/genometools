@@ -21,7 +21,7 @@
 #include "core/unused_api.h"
 #include "extended/dup_feature_visitor.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtDupFeatureVisitor {
   const GtNodeVisitor parent_instance;

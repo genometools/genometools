@@ -24,7 +24,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_output.h"
 #include "extended/gtf_visitor.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtGTFVisitor {
   const GtNodeVisitor parent_instance;

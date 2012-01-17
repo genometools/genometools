@@ -26,7 +26,7 @@
 #include "extended/add_ids_visitor.h"
 #include "extended/feature_node_iterator_api.h"
 #include "extended/gff3_parser.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtAddIDsVisitor {
   const GtNodeVisitor parent_instance;

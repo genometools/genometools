@@ -22,7 +22,7 @@
 #include "core/minmax.h"
 #include "core/range.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/regioncov_visitor.h"
 
 struct GtRegionCovVisitor {

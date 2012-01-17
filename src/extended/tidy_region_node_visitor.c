@@ -27,7 +27,7 @@
 #include "core/warning_api.h"
 #include "extended/tidy_region_node_visitor.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtTidyRegionNodeVisitor {
   const GtNodeVisitor parent_instance;

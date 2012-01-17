@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "core/range.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_node.h"
 #include "ltr/ltr_visitor.h"
 

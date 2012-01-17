@@ -26,7 +26,7 @@
 #include "extended/cds_visitor.h"
 #include "extended/feature_node.h"
 #include "extended/feature_type.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/splicedseq.h"
 
 struct GtCDSVisitor {

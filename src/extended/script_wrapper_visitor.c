@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "extended/script_wrapper_visitor.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtScriptWrapperVisitor {
   const GtNodeVisitor parent_instance;

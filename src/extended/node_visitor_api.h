@@ -46,4 +46,34 @@ int   gt_node_visitor_visit_sequence_node(GtNodeVisitor *node_visitor,
 /* Delete <node_visitor>. */
 void  gt_node_visitor_delete(GtNodeVisitor *node_visitor);
 
+typedef void (*GtNodeVisitorFreeFunc)(GtNodeVisitor*);
+typedef int  (*GtNodeVisitorCommentNodeFunc)(GtNodeVisitor*, GtCommentNode*,
+                                             GtError*);
+typedef int  (*GtNodeVisitorFeatureNodeFunc)(GtNodeVisitor*, GtFeatureNode*,
+                                             GtError*);
+typedef int  (*GtNodeVisitorRegionNodeFunc)(GtNodeVisitor*, GtRegionNode*,
+                                            GtError*);
+typedef int  (*GtNodeVisitorSequenceNodeFunc)(GtNodeVisitor*, GtSequenceNode*,
+                                              GtError*);
+typedef int  (*GtNodeVisitorEOFNodeFunc)(GtNodeVisitor*, GtEOFNode*, GtError*);
+
+typedef struct GtNodeVisitorClass GtNodeVisitorClass;
+typedef struct GtNodeVisitorMembers GtNodeVisitorMembers;
+
+struct GtNodeVisitor {
+  const GtNodeVisitorClass *c_class;
+  GtNodeVisitorMembers *members;
+};
+
+const GtNodeVisitorClass* gt_node_visitor_class_new(size_t size,
+                                                  GtNodeVisitorFreeFunc,
+                                                  GtNodeVisitorCommentNodeFunc,
+                                                  GtNodeVisitorFeatureNodeFunc,
+                                                  GtNodeVisitorRegionNodeFunc,
+                                                  GtNodeVisitorSequenceNodeFunc,
+                                                  GtNodeVisitorEOFNodeFunc);
+GtNodeVisitor*      gt_node_visitor_create(const GtNodeVisitorClass*);
+void*               gt_node_visitor_cast(const GtNodeVisitorClass*,
+                                         GtNodeVisitor*);
+
 #endif

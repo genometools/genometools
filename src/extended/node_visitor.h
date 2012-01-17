@@ -20,9 +20,6 @@
 
 #include "extended/node_visitor_api.h"
 
-typedef struct GtNodeVisitorClass GtNodeVisitorClass;
-
-void* gt_node_visitor_cast(const GtNodeVisitorClass*, GtNodeVisitor*);
 int   gt_node_visitor_visit_eof_node(GtNodeVisitor*, GtEOFNode*, GtError*);
 
 #endif

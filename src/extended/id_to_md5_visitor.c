@@ -21,7 +21,7 @@
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/id_to_md5_visitor.h"
 
 struct GtSeqidsToMD5Visitor {

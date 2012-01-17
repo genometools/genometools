@@ -24,7 +24,7 @@
 #include "core/range.h"
 #include "core/str_api.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "ltr/ltrharvest_tabout_visitor.h"

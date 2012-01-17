@@ -22,7 +22,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_parser.h"
 #include "extended/md5_to_id_visitor.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/regular_seqid.h"
 
 struct GtMD5ToSeqidsVisitor {

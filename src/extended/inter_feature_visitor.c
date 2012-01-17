@@ -23,7 +23,7 @@
 #include "core/warning_api.h"
 #include "extended/feature_node.h"
 #include "extended/inter_feature_visitor.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 struct GtInterFeatureVisitor {
   const GtNodeVisitor parent_instance;

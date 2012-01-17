@@ -17,7 +17,7 @@
 
 #include "core/assert_api.h"
 #include "core/unused_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/region_node.h"
 #include "annotationsketch/feature_index.h"
 #include "annotationsketch/feature_visitor.h"

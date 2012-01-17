@@ -25,7 +25,7 @@
 #include "extended/feature_node.h"
 #include "extended/feature_type.h"
 #include "extended/gff3_parser.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 
 #define GT_CSA_SOURCE_TAG "gt csa"
 

@@ -27,7 +27,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/warning_api.h"
-#include "extended/node_visitor_rep.h"
+#include "extended/node_visitor_api.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
 #include "ltr/ltrharvest_fasta_out_visitor.h"
