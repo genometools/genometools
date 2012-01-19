@@ -39,6 +39,7 @@
 #include "core/encseq_api.h"
 #include "core/endianess_api.h"
 #include "core/error_api.h"
+#include "core/fasta_api.h"
 #include "core/file_api.h"
 #include "core/fileutils_api.h"
 #include "core/fptr_api.h"

@@ -15,19 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FASTA_H
-#define FASTA_H
+#ifndef FASTA_API_H
+#define FASTA_API_H
 
-#include "core/fasta_api.h"
-#include "core/file.h"
+#include "core/file_api.h"
 
-/* Print a fasta entry with optional <description> and <suffix> plus mandatory
-   <sequence> to <outfp>. If <width> is != 0 the sequence is formatted
-   accordingly. */
-void gt_fasta_show_entry_with_suffix(const char *description,
-                                     const char *sequence,
-                                     unsigned long sequence_length,
-                                     const char *suffix, unsigned long width,
-                                     GtFile *outfp);
+/* Print a fasta entry with optional <description> and mandatory <sequence> to
+   <outfp>. If <width> is != 0 the sequence is formatted accordingly. */
+void gt_fasta_show_entry(const char *description, const char *sequence,
+                         unsigned long sequence_length, unsigned long width,
+                         GtFile *outfp);
 
 #endif
