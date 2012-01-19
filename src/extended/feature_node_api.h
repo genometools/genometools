@@ -118,6 +118,17 @@ void           gt_feature_node_set_type(GtFeatureNode *feature_node,
 bool           gt_feature_node_has_type(GtFeatureNode *feature_node,
                                         const char *type);
 
+/* Return the number of children for given <feature_node>. */
+unsigned long  gt_feature_node_number_of_children(const GtFeatureNode
+                                                  *feature_node);
+
+/* Return the number of children of type <node>
+   for given GtFeatureNode <parent>. */
+unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
+                                                          *parent,
+                                                          const GtFeatureNode
+                                                          *node);
+
 /* Return <true> if the score of <feature_node> is defined, <false>
    otherwise. */
 bool           gt_feature_node_score_is_defined(const GtFeatureNode

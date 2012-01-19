@@ -67,11 +67,6 @@ int            gt_feature_node_traverse_children_top(GtFeatureNode
 int            gt_feature_node_traverse_direct_children(GtFeatureNode*, void*,
                                                       GtFeatureNodeTraverseFunc,
                                                         GtError*);
-unsigned long  gt_feature_node_number_of_children(const GtFeatureNode*);
-unsigned long  gt_feature_node_number_of_children_of_type(const GtFeatureNode
-                                                          *parent,
-                                                          const GtFeatureNode
-                                                          *node);
 /* Does not free the leaf, do not use during traversal! */
 void           gt_feature_node_remove_leaf(GtFeatureNode *tree,
                                            GtFeatureNode *leafn);
