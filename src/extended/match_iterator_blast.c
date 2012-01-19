@@ -25,7 +25,9 @@
 #include "core/file.h"
 #include "core/fileutils_api.h"
 #include "core/undef_api.h"
-#include "extended/match_iterator.h"
+#include "extended/match.h"
+#include "extended/match_blast.h"
+#include "extended/match_iterator_api.h"
 #include "extended/match_iterator_blast.h"
 #include "extended/match_iterator_rep.h"
 
@@ -59,17 +61,16 @@ struct GtMatchIteratorBlast {
 const GtMatchIteratorClass* gt_match_iterator_blast_class(void);
 
 static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
-                                                          GtFragment *match,
+                                                          GtMatch **match,
                                                           GtError *err)
 {
   gt_assert(gm);
   unsigned long columncount = 0;
-  long storeinteger[READNUMS];
+  long storeinteger[READNUMS], tmp;
   long double e_value;
   float bitscore;
   char query_seq[BUFSIZ], db_seq[BUFSIZ], buffer[BUFSIZ];
   int had_err = 0, i = 0, readvalues = 0;
-  GtBlastMatchInfo *blast_info = NULL;
   GtMatchIteratorBlast *m = gt_match_iterator_blast_cast(gm);
 
   if (m->pvt->matchfilep) {
@@ -127,31 +128,25 @@ static GtMatchIteratorStatus gt_match_iterator_blast_next(GtMatchIterator *gm,
    }
 
   if (!had_err) {
-    if (storeinteger[1] <= storeinteger[2]) {
-      match->startpos1 = storeinteger[1];
-      match->endpos1 = storeinteger[2];
-    } else {
-      match->startpos1 = storeinteger[2];
-      match->endpos1 = storeinteger[1];
+    if (storeinteger[1] > storeinteger[2]) {
+      tmp = storeinteger[1];
+      storeinteger[1] = storeinteger[2];
+      storeinteger[2] = tmp;
     }
-    if (storeinteger[3] <= storeinteger[4]) {
-      match->startpos2 = storeinteger[3];
-      match->endpos2 = storeinteger[4];
-    } else {
-      match->startpos2 = storeinteger[4];
-      match->endpos2 = storeinteger[3];
+    if (storeinteger[3] > storeinteger[4]) {
+      tmp = storeinteger[3];
+      storeinteger[3] = storeinteger[4];
+      storeinteger[4] = tmp;
     }
-    gt_assert(match->startpos1 <= match->endpos1
-                && match->startpos2 <= match->endpos2);
-    blast_info = gt_calloc(1, sizeof (GtBlastMatchInfo));
-    blast_info->ali_length = storeinteger[0];
-    blast_info->seqid1 = gt_malloc((strlen(query_seq) + 1) * sizeof (char));
-    strcpy(blast_info->seqid1, query_seq);
-    blast_info->seqid2 = gt_malloc((strlen(db_seq) + 1) * sizeof (char));
-    strcpy(blast_info->seqid2, db_seq);
-    blast_info->e_value = e_value;
-    blast_info->bitscore = bitscore;
-    match->data = (void*) blast_info;
+    *match = gt_match_blast_new(query_seq,
+                                db_seq,
+                                storeinteger[1],
+                                storeinteger[2],
+                                storeinteger[3],
+                                storeinteger[4],
+                                e_value,
+                                bitscore,
+                                storeinteger[0]);
     m->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }
@@ -196,15 +191,18 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
 }
 
 GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
-                                            const char *db_name,
-                                            float evalue,
-                                            int word_size,
-                                            int gapopen,
-                                            int gapextend,
-                                            int penalty,
-                                            int reward,
-                                            int xdrop_gap_final,
-                                            GtError *err)
+                                                         const char *db_name,
+                                                         double evalue,
+                                                         bool dust,
+                                                         int word_size,
+                                                         int gapopen,
+                                                         int gapextend,
+                                                         int penalty,
+                                                         int reward,
+                                                         double threshold,
+                                                         int num_threads,
+                                                         int xdrop_gap_final,
+                                                         GtError *err)
 {
   GtMatchIterator *mp;
   GtMatchIteratorBlast *mpb;
@@ -222,21 +220,28 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
   } else {
     sprintf(blast_call, "blastall -p blastn");
   }
-  if (evalue != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -e %f",blast_call, evalue);
+  if (evalue != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -e %.6f", blast_call, evalue);
+  if (dust)
+    sprintf(blast_call, "%s -F", blast_call);
   if (word_size != GT_UNDEF_INT)
     sprintf(blast_call, "%s -W %d", blast_call, word_size);
   if (gapopen != GT_UNDEF_INT)
-   sprintf(blast_call, "%s -G %d", blast_call, gapopen);
+    sprintf(blast_call, "%s -G %d", blast_call, gapopen);
   if (gapextend != GT_UNDEF_INT)
     sprintf(blast_call, "%s -E %d", blast_call, gapextend);
   if (penalty != GT_UNDEF_INT)
     sprintf(blast_call, "%s -q %d", blast_call, penalty);
   if (reward != GT_UNDEF_INT)
     sprintf(blast_call, "%s -r %d", blast_call, reward);
+  if (threshold != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -f %.3f", blast_call, threshold);
+  if (num_threads != GT_UNDEF_INT)
+    sprintf(blast_call, "%s -a %d", blast_call, num_threads);
   if (xdrop_gap_final != GT_UNDEF_INT)
     sprintf(blast_call, "%s -Z %d", blast_call, xdrop_gap_final);
-  sprintf(blast_call, "%s -i %s -d %s -m 8", blast_call, query, db_name);
+  sprintf(blast_call, "%s -i %s -d %s -m 8", blast_call, query,
+           db_name);
 
   mpb->pvt->matchfilep = popen(blast_call, "r");
   if (!mpb->pvt->matchfilep) {
@@ -248,13 +253,13 @@ GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
 }
 
 GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
-                                            const char *db_name,
-                                            float evalue,
-                                            int word_size,
-                                            int gapopen,
-                                            int gapextend,
-                                            int xdrop_gap_final,
-                                            GtError *err)
+                                                         const char *db_name,
+                                                         double evalue,
+                                                         int word_size,
+                                                         int gapopen,
+                                                         int gapextend,
+                                                         int xdrop_gap_final,
+                                                         GtError *err)
 {
   GtMatchIterator *mp;
   GtMatchIteratorBlast *mpb;
@@ -272,17 +277,18 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
   } else {
     sprintf(blast_call, "blastall -p blastp");
   }
-  if (evalue != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -e %f",blast_call, evalue);
+  if (evalue != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -e %.6f",blast_call, evalue);
   if (word_size != GT_UNDEF_INT)
     sprintf(blast_call, "%s -W %d", blast_call, word_size);
   if (gapopen != GT_UNDEF_INT)
-   sprintf(blast_call, "%s -G %d", blast_call, gapopen);
+    sprintf(blast_call, "%s -G %d", blast_call, gapopen);
   if (gapextend != GT_UNDEF_INT)
     sprintf(blast_call, "%s -E %d", blast_call, gapextend);
   if (xdrop_gap_final != GT_UNDEF_INT)
     sprintf(blast_call, "%s -Z %d", blast_call, xdrop_gap_final);
-  sprintf(blast_call, "%s -i %s -d %s -m 8", blast_call, query, db_name);
+  sprintf(blast_call, "%s -i %s -d %s -m 8", blast_call, query,
+           db_name);
 
   mpb->pvt->matchfilep = popen(blast_call, "r");
   if (!mpb->pvt->matchfilep) {
@@ -294,17 +300,19 @@ GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
 }
 
 GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
-                                                  const char *db_name,
-                                                  float evalue,
-                                                  int word_size,
-                                                  int gapopen,
-                                                  int gapextend,
-                                                  int penalty,
-                                                  int reward,
-                                                  float perc_identity,
-                                                  int num_threads,
-                                                  float xdrop_gap_final,
-                                                  GtError *err)
+                                                      const char *db_name,
+                                                      double evalue,
+                                                      bool dust,
+                                                      int word_size,
+                                                      int gapopen,
+                                                      int gapextend,
+                                                      int penalty,
+                                                      int reward,
+                                                      double perc_identity,
+                                                      int num_threads,
+                                                      double xdrop_gap_final,
+                                                      const char *moreblast,
+                                                      GtError *err)
 {
   GtMatchIterator *mp;
   GtMatchIteratorBlast *mpb;
@@ -322,26 +330,32 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
   } else {
     sprintf(blast_call, "blastn");
   }
-  if (evalue != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -evalue %f",blast_call, evalue);
+  if (evalue != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -evalue %.6f", blast_call, evalue);
+  if (dust)
+    sprintf(blast_call, "%s -dust yes", blast_call);
   if (word_size != GT_UNDEF_INT)
     sprintf(blast_call, "%s -word_size %d", blast_call, word_size);
   if (gapopen != GT_UNDEF_INT)
-   sprintf(blast_call, "%s -gapopen %d", blast_call, gapopen);
+    sprintf(blast_call, "%s -gapopen %d", blast_call, gapopen);
   if (gapextend != GT_UNDEF_INT)
     sprintf(blast_call, "%s -gapextend %d", blast_call, gapextend);
   if (penalty != GT_UNDEF_INT)
     sprintf(blast_call, "%s -penalty %d", blast_call, penalty);
   if (reward != GT_UNDEF_INT)
     sprintf(blast_call, "%s -reward %d", blast_call, reward);
-  if (perc_identity != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -perc_identity %f", blast_call, perc_identity);
+  if (perc_identity != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -perc_identity %.2f", blast_call,
+            perc_identity);
   if (num_threads != GT_UNDEF_INT)
     sprintf(blast_call, "%s -num_threads %d", blast_call, num_threads);
-  if (xdrop_gap_final != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -xdrop_gap_final %f", blast_call, xdrop_gap_final);
-  sprintf(blast_call, "%s -query %s -db %s -outfmt 6", blast_call, query,
-                                                       db_name);
+  if (xdrop_gap_final != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -xdrop_gap_final %.2f", blast_call,
+            xdrop_gap_final);
+  if (moreblast)
+    sprintf(blast_call, "%s %s", blast_call, moreblast);
+  sprintf(blast_call, "%s -query %s -db %s -outfmt 6", blast_call,
+          query, db_name);
 
   mpb->pvt->matchfilep = popen(blast_call, "r");
   if (!mpb->pvt->matchfilep) {
@@ -353,14 +367,14 @@ GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
 }
 
 GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
-                                         const char *db_name,
-                                         float evalue,
-                                         int word_size,
-                                         int gapopen,
-                                         int gapextend,
-                                         int num_threads,
-                                         float xdrop_gap_final,
-                                         GtError *err)
+                                                      const char *db_name,
+                                                      double evalue,
+                                                      int word_size,
+                                                      int gapopen,
+                                                      int gapextend,
+                                                      int num_threads,
+                                                      double xdrop_gap_final,
+                                                      GtError *err)
 {
   GtMatchIterator *mp;
   GtMatchIteratorBlast *mpb;
@@ -378,20 +392,21 @@ GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
   } else {
     sprintf(blast_call, "blastp");
   }
-  if (evalue != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -evalue %f",blast_call, evalue);
+  if (evalue != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -evalue %.6f",blast_call, evalue);
   if (word_size != GT_UNDEF_INT)
     sprintf(blast_call, "%s -word_size %d", blast_call, word_size);
   if (gapopen != GT_UNDEF_INT)
-   sprintf(blast_call, "%s -gapopen %d", blast_call, gapopen);
+    sprintf(blast_call, "%s -gapopen %d", blast_call, gapopen);
   if (gapextend != GT_UNDEF_INT)
     sprintf(blast_call, "%s -gapextend %d", blast_call, gapextend);
   if (num_threads != GT_UNDEF_INT)
     sprintf(blast_call, "%s -num_threads %d", blast_call, num_threads);
-  if (xdrop_gap_final != GT_UNDEF_FLOAT)
-    sprintf(blast_call, "%s -xdrop_gap_final %f", blast_call, xdrop_gap_final);
-  sprintf(blast_call, "%s -query %s -db %s -outfmt 6", blast_call, query,
-                                                       db_name);
+  if (xdrop_gap_final != GT_UNDEF_DOUBLE)
+    sprintf(blast_call, "%s -xdrop_gap_final %.2f", blast_call,
+             xdrop_gap_final);
+  sprintf(blast_call, "%s -query %s -db %s -outfmt 6", blast_call,
+           query, db_name);
 
   mpb->pvt->matchfilep = popen(blast_call, "r");
   if (!mpb->pvt->matchfilep) {

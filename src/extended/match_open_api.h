@@ -1,7 +1,6 @@
 /*
-  Copyright (c) 2010      Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
-  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,13 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MATCH_ITERATOR_OPEN_H
-#define MATCH_ITERATOR_OPEN_H
+#ifndef MATCH_OPEN_API_H
+#define MATCH_OPEN_API_H
 
-#include "extended/match_iterator_api.h"
+typedef struct GtMatchOpen GtMatchOpen;
 
-typedef struct GtMatchIteratorOpen GtMatchIteratorOpen;
+#include "extended/match_api.h"
 
-GtMatchIterator* gt_match_iterator_open_new(const char*, GtError*);
+GtMatch* gt_match_open_new(char *seqid1,
+                           char *seqid2,
+                           unsigned long start_seq1,
+                           unsigned long start_seq2,
+                           unsigned long end_seq1,
+                           unsigned long end_seq2,
+                           long weight);
+
+void gt_match_open_set_weight(GtMatchOpen *mo, long weight);
+
+long gt_match_open_get_weight(GtMatchOpen *mo);
 
 #endif

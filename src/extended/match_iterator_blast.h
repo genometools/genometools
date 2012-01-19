@@ -18,7 +18,7 @@
 #ifndef MATCH_ITERATOR_BLAST_H
 #define MATCH_ITERATOR_BLAST_H
 
-#include "extended/match_iterator.h"
+#include "extended/match_iterator_api.h"
 
 typedef struct GtMatchIteratorBlast GtMatchIteratorBlast;
 
@@ -33,45 +33,50 @@ GtMatchIterator* gt_match_iterator_blast_file_new(const char *matchfile,
                                                   GtError *err);
 
 GtMatchIterator* gt_match_iterator_blastalln_process_new(const char *query,
-                                            const char *db_name,
-                                            float evalue,
-                                            int word_size,
-                                            int gapopen,
-                                            int gapextend,
-                                            int penalty,
-                                            int reward,
-                                            int xdrop_gap_final,
-                                            GtError *err);
+                                                         const char *db_name,
+                                                         double evalue,
+                                                         bool dust,
+                                                         int word_size,
+                                                         int gapopen,
+                                                         int gapextend,
+                                                         int penalty,
+                                                         int reward,
+                                                         double threashold,
+                                                         int num_threads,
+                                                         int xdrop_gap_final,
+                                                         GtError *err);
 
 GtMatchIterator* gt_match_iterator_blastallp_process_new(const char *query,
-                                            const char *db_name,
-                                            float evalue,
-                                            int word_size,
-                                            int gapopen,
-                                            int gapextend,
-                                            int xdrop_gap_final,
-                                            GtError *err);
+                                                         const char *db_name,
+                                                         double evalue,
+                                                         int word_size,
+                                                         int gapopen,
+                                                         int gapextend,
+                                                         int xdrop_gap_final,
+                                                         GtError *err);
 
 GtMatchIterator* gt_match_iterator_blastn_process_new(const char *query,
-                                         const char *db_name,
-                                         float evalue,
-                                         int word_size,
-                                         int gapopen,
-                                         int gapextend,
-                                         int penalty,
-                                         int reward,
-                                         float perc_identity,
-                                         int num_threads,
-                                         float xdrop_gap_final,
-                                         GtError *err);
+                                                      const char *db_name,
+                                                      double evalue,
+                                                      bool dust,
+                                                      int word_size,
+                                                      int gapopen,
+                                                      int gapextend,
+                                                      int penalty,
+                                                      int reward,
+                                                      double perc_identity,
+                                                      int num_threads,
+                                                      double xdrop_gap_final,
+                                                      const char *moreblast,
+                                                      GtError *err);
 
 GtMatchIterator* gt_match_iterator_blastp_process_new(const char *query,
-                                         const char *db_name,
-                                         float evalue,
-                                         int word_size,
-                                         int gapopen,
-                                         int gapextend,
-                                         int num_threads,
-                                         float xdrop_gap_final,
-                                         GtError *err);
+                                                      const char *db_name,
+                                                      double evalue,
+                                                      int word_size,
+                                                      int gapopen,
+                                                      int gapextend,
+                                                      int num_threads,
+                                                      double xdrop_gap_final,
+                                                      GtError *err);
 #endif

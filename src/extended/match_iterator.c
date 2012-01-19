@@ -19,7 +19,7 @@
 #include "core/class_alloc.h"
 #include "core/ma.h"
 #include "core/unused_api.h"
-#include "match_iterator.h"
+#include "match_iterator_api.h"
 #include "match_iterator_rep.h"
 
 const GtMatchIteratorClass* gt_match_iterator_class_new(size_t size,
@@ -43,7 +43,7 @@ GtMatchIterator* gt_match_iterator_create(const GtMatchIteratorClass *mpc)
 }
 
 GtMatchIteratorStatus gt_match_iterator_next(GtMatchIterator *mp,
-                                             GtFragment *match, GtError *err)
+                                             GtMatch **match, GtError *err)
 {
   gt_assert(mp);
   if (mp->c_class->next)

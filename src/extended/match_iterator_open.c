@@ -23,7 +23,9 @@
 #include "core/array_api.h"
 #include "core/file.h"
 #include "core/fileutils_api.h"
-#include "extended/match_iterator.h"
+#include "extended/match.h"
+#include "extended/match_open.h"
+#include "extended/match_iterator_api.h"
 #include "extended/match_iterator_open.h"
 #include "extended/match_iterator_rep.h"
 
@@ -55,7 +57,7 @@ struct GtMatchIteratorOpen {
 const GtMatchIteratorClass* gt_match_iterator_open_class(void);
 
 static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
-                                                         GtFragment *match,
+                                                         GtMatch **match,
                                                          GtError *err)
 {
   unsigned long columncount = 0;
@@ -63,7 +65,6 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
   long storeinteger[READNUMS];
   int had_err = 0, i = 0;
   char buffer[BUFSIZ], seqid1[BUFSIZ], seqid2[BUFSIZ];
-  GtOpenMatchInfo *seq_ids = NULL;
   GtMatchIteratorOpen *mpi = gt_match_iterator_open_cast(gmpi);
   gt_assert(mpi);
 
@@ -127,17 +128,13 @@ static GtMatchIteratorStatus gt_match_iterator_open_next(GtMatchIterator *gmpi,
    }
 
   if (!had_err) {
-    match->startpos1 = storeinteger[1];
-    match->endpos1 = storeinteger[1] + storeinteger[0] - 1;
-    match->startpos2 = storeinteger[3];
-    match->endpos2 = storeinteger[3] + storeinteger[2] - 1;
-    match->weight = storeinteger[4];
-    seq_ids = gt_calloc(1, sizeof (GtOpenMatchInfo));
-    seq_ids->seqid1 = gt_calloc((strlen(seqid1) + 1), 1);
-    strcpy(seq_ids->seqid1, seqid1);
-    seq_ids->seqid2 = gt_calloc((strlen(seqid2) + 1), 1);
-    strcpy(seq_ids->seqid2, seqid2);
-    match->data = (void*) seq_ids;
+    *match = gt_match_open_new(seqid1,
+                               seqid2,
+                               storeinteger[1],
+                               storeinteger[1] + storeinteger[0] - 1,
+                               storeinteger[3],
+                               storeinteger[3] + storeinteger[2] - 1,
+                               storeinteger[4]);
     mpi->pvt->curpos++;
     return GT_MATCHER_STATUS_OK;
   }

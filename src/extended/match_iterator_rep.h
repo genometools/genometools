@@ -21,10 +21,11 @@
 
 #include <string.h>
 #include "core/file.h"
-#include "extended/match_iterator.h"
+#include "match.h"
+#include "extended/match_iterator_api.h"
 
 typedef GtMatchIteratorStatus (*GtMatchIteratorNextFunc)(GtMatchIterator*,
-                                                         GtFragment*, GtError*);
+                                                         GtMatch**, GtError*);
 typedef void (*GtMatchIteratorFreeFunc)(GtMatchIterator*);
 
 struct GtMatchIteratorClass {

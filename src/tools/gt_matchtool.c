@@ -20,8 +20,10 @@
 #include "core/ma.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
-#include "extended/globalchaining.h"
-#include "extended/match_iterator.h"
+#include "extended/match.h"
+#include "extended/match_blast.h"
+#include "extended/match_open.h"
+#include "extended/match_iterator_api.h"
 #include "extended/match_iterator_blast.h"
 #include "extended/match_iterator_open.h"
 #include "tools/gt_matchtool.h"
@@ -154,7 +156,8 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
 {
   GtMatchtoolArguments *arguments = tool_arguments;
   GtMatchIterator *mp = NULL;
-  GT_UNUSED GtFragment match;
+  GtMatch *match = NULL;
+
   int status, had_err = 0;
 
   gt_error_check(err);
@@ -172,7 +175,7 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
   } else if (strcmp(gt_str_get(arguments->type), "BLASTALLP") == 0) {
     mp = gt_match_iterator_blastallp_process_new(gt_str_get(arguments->query),
                                           gt_str_get(arguments->db),
-                                          GT_UNDEF_FLOAT, GT_UNDEF_INT,
+                                          GT_UNDEF_DOUBLE, GT_UNDEF_INT,
                                           GT_UNDEF_INT, GT_UNDEF_INT,
                                           GT_UNDEF_INT, err);
     if (!mp)
@@ -180,28 +183,29 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
   } else if (strcmp(gt_str_get(arguments->type), "BLASTALLN") == 0) {
     mp = gt_match_iterator_blastalln_process_new(gt_str_get(arguments->query),
                                           gt_str_get(arguments->db),
-                                          GT_UNDEF_FLOAT, GT_UNDEF_INT,
+                                          GT_UNDEF_DOUBLE, false, GT_UNDEF_INT,
                                           GT_UNDEF_INT, GT_UNDEF_INT,
                                           GT_UNDEF_INT, GT_UNDEF_INT,
+                                          GT_UNDEF_DOUBLE, GT_UNDEF_INT,
                                           GT_UNDEF_INT, err);
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "BLASTP") == 0) {
     mp = gt_match_iterator_blastp_process_new(gt_str_get(arguments->query),
                                        gt_str_get(arguments->db),
-                                       GT_UNDEF_FLOAT, GT_UNDEF_INT,
+                                       GT_UNDEF_DOUBLE, GT_UNDEF_INT,
                                        GT_UNDEF_INT, GT_UNDEF_INT,
-                                       GT_UNDEF_INT, GT_UNDEF_FLOAT, err);
+                                       GT_UNDEF_INT, GT_UNDEF_DOUBLE, err);
     if (!mp)
       had_err = -1;
   } else if (strcmp(gt_str_get(arguments->type), "BLASTN") == 0) {
     mp = gt_match_iterator_blastn_process_new(gt_str_get(arguments->query),
                                        gt_str_get(arguments->db),
-                                       GT_UNDEF_FLOAT, GT_UNDEF_INT,
+                                       GT_UNDEF_DOUBLE, false, GT_UNDEF_INT,
                                        GT_UNDEF_INT, GT_UNDEF_INT,
                                        GT_UNDEF_INT, GT_UNDEF_INT,
-                                       GT_UNDEF_FLOAT, GT_UNDEF_INT,
-                                       GT_UNDEF_FLOAT, err);
+                                       GT_UNDEF_DOUBLE, GT_UNDEF_INT,
+                                       GT_UNDEF_DOUBLE, NULL, err);
     if (!mp)
       had_err = -1;
   } else {
@@ -210,19 +214,25 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
 
   if ((!had_err) && (strcmp(gt_str_get(arguments->type),
                                                           "OPENMATCH") == 0)) {
-    GtOpenMatchInfo *omi;
     fprintf(stdout, "seqid1\tseqid2\tstartpos1\tstartpos2\tendpos1\tendpos2\t"
                     "weight\n");
     while ((status = gt_match_iterator_next(mp, &match, err))
                                                      != GT_MATCHER_STATUS_END) {
       if (status == GT_MATCHER_STATUS_OK) {
-        omi = (GtOpenMatchInfo*) match.data;
+        GtMatchOpen *matcho = gt_match_open_cast(match);
+        GtRange range_seq1;
+        GtRange range_seq2;
+        gt_match_get_range_seq1(match, &range_seq1);
+        gt_match_get_range_seq2(match, &range_seq2);
         fprintf(stdout, "%s\t%s\t%lu\t%lu\t%lu\t%lu\t%lu\n",
-                omi->seqid1, omi->seqid2, match.startpos1, match.startpos2,
-                match.endpos1, match.endpos2, match.weight);
-        gt_free(omi->seqid1);
-        gt_free(omi->seqid2);
-        gt_free(match.data);
+                gt_match_get_seqid1(match),
+                gt_match_get_seqid2(match),
+                range_seq1.start,
+                range_seq2.start,
+                range_seq1.end,
+                range_seq2.end,
+                gt_match_open_get_weight(matcho));
+        gt_match_delete(match);
       } else if (status == GT_MATCHER_STATUS_ERROR) {
         had_err =-1;
         break;
@@ -230,20 +240,27 @@ static int gt_matchtool_runner(GT_UNUSED int argc,
     }
     gt_match_iterator_delete(mp);
   } else if (!had_err) {
-    GtBlastMatchInfo *omi;
     fprintf(stdout, "query\tdbname2\tq.startpos\td.startpos\tq.endpos\t"
                     "d.endpos\tbit score\tevalue\tali length\n");
     while ((status = gt_match_iterator_next(mp, &match, err)) !=
                                           GT_MATCHER_STATUS_END) {
       if (status == GT_MATCHER_STATUS_OK) {
-        omi = (GtBlastMatchInfo*) match.data;
+        GtMatchBlast *matchb = gt_match_blast_cast(match);
+        GtRange range_seq1;
+        GtRange range_seq2;
+        gt_match_get_range_seq1(match, &range_seq1);
+        gt_match_get_range_seq2(match, &range_seq2);
         fprintf(stdout, "%s\t%s\t%lu\t%lu\t%lu\t%lu\t%.3f\t%Lg\t%lu\n",
-                omi->seqid1, omi->seqid2, match.startpos1, match.startpos2,
-                match.endpos1, match.endpos2, omi->bitscore, omi->e_value,
-                omi->ali_length);
-        gt_free(omi->seqid1);
-        gt_free(omi->seqid2);
-        gt_free(match.data);
+                gt_match_get_seqid1(match),
+                gt_match_get_seqid2(match),
+                range_seq1.start,
+                range_seq2.start,
+                range_seq1.end,
+                range_seq2.end,
+                gt_match_blast_get_bitscore(matchb),
+                gt_match_blast_get_evalue(matchb),
+                gt_match_blast_get_align_length(matchb));
+        gt_match_delete(match);
       } else if (status == GT_MATCHER_STATUS_ERROR) {
         had_err =-1;
         break;

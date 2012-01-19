@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2010      Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
-  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,11 +16,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MATCH_ITERATOR_H
-#define MATCH_ITERATOR_H
+#ifndef MATCH_ITERATOR_API_H
+#define MATCH_ITERATOR_API_H
 
 #include "core/error_api.h"
-#include "extended/globalchaining.h"
+#include "extended/match_api.h"
 
 typedef struct GtMatchIterator GtMatchIterator;
 typedef struct GtMatchIteratorClass GtMatchIteratorClass;
@@ -31,10 +31,16 @@ typedef enum {
   GT_MATCHER_STATUS_ERROR
 } GtMatchIteratorStatus;
 
+/* Advances <mp> by one, returning the next match.
+   Writes a pointer to the next match to the position pointed to by <match>.
+   Returns GT_MATCHER_STATUS_OK when the match could be delivered and there are
+   more matches to come, GT_MATCHER_STATUS_END when no more matches are
+   available, and GT_MATCHER_STATUS_ERROR if an error occurred. <err> is set
+   accordingly. */
 GtMatchIteratorStatus gt_match_iterator_next(GtMatchIterator *mp,
-                                             GtFragment *match, GtError *err);
-void*                 gt_match_iterator_cast(const GtMatchIteratorClass *mc,
-                                             GtMatchIterator *m);
-void                   gt_match_iterator_delete(GtMatchIterator*);
+                                             GtMatch **match, GtError *err);
+
+/* Deletes <mp>, freeing all associated space. */
+void                  gt_match_iterator_delete(GtMatchIterator *mp);
 
 #endif

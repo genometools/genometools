@@ -1,7 +1,6 @@
 /*
-  Copyright (c) 2010      Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
-  Copyright (c)      2011 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-  Copyright (c) 2010-2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MATCH_ITERATOR_OPEN_H
-#define MATCH_ITERATOR_OPEN_H
+#ifndef MATCH_VISITOR_H
+#define MATCH_VISITOR_H
 
-#include "extended/match_iterator_api.h"
+#include "extended/match_visitor_api.h"
 
-typedef struct GtMatchIteratorOpen GtMatchIteratorOpen;
+typedef struct GtMatchVisitorClass GtMatchVisitorClass;
 
-GtMatchIterator* gt_match_iterator_open_new(const char*, GtError*);
+void* gt_match_visitor_cast(const GtMatchVisitorClass*, GtMatchVisitor*);
 
 #endif
