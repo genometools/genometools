@@ -101,6 +101,26 @@ void gt_tag_value_map_add(GtTagValueMap *map, const char *tag,
   (*map)[map_len + tag_len + 1 + value_len + 1] = '\0';
 }
 
+void gt_tag_value_map_remove(GtTagValueMap *map, const char *tag)
+{
+  size_t tag_len, value_len, map_len;
+  char *value;
+
+  gt_assert(map && tag);
+  tag_len = strlen(tag);
+  gt_assert(tag_len);
+  /* determine value for given tag */
+  value = get_value(*map, tag, NULL);
+  gt_assert(value);
+  map_len = get_map_len(*map);
+  value_len = strlen(value);
+  /* move memory from end position of value to start position of tag */
+  memmove(value - tag_len - 1, value + value_len + 1,
+          map_len - ((size_t) value - (size_t) *map + value_len) + 1);
+  *map = gt_realloc(*map, map_len - (tag_len + 1 + value_len + 1) + 1);
+  gt_assert((*map)[map_len - (tag_len + 1 + value_len + 1)] == '\0');
+}
+
 void gt_tag_value_map_set(GtTagValueMap *map, const char *tag,
                           const char *new_value)
 {
@@ -260,6 +280,54 @@ int gt_tag_value_map_unit_test(GtError *err)
               !strcmp(gt_tag_value_map_get(map, "tag 2"), "value YYY"));
     gt_ensure(had_err,
               !strcmp(gt_tag_value_map_get(map, "tag 3"), "value ZZZ"));
+    gt_tag_value_map_delete(map);
+  }
+
+  /* test gt_tag_value_map_remove() (remove first tag)*/
+  if (!had_err) {
+    size_t old_map_len, new_map_len;
+    map = create_filled_tag_value_list();
+    gt_tag_value_map_set(&map, "tag 1", "value XXX");
+    gt_tag_value_map_set(&map, "tag 2", "value YYY");
+    gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
+    old_map_len = get_map_len(map);
+    gt_tag_value_map_remove(&map, "tag 1");
+    new_map_len = get_map_len(map);
+    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(had_err, !(old_map_len - new_map_len - strlen("tag 1") - 1
+                     - strlen("value XXX") -1));
+    gt_tag_value_map_delete(map);
+  }
+
+  /* test gt_tag_value_map_remove() (remove middle tag)*/
+  if (!had_err) {
+    size_t old_map_len, new_map_len;
+    map = create_filled_tag_value_list();
+    gt_tag_value_map_set(&map, "tag 1", "value XXX");
+    gt_tag_value_map_set(&map, "tag 2", "value YYY");
+    gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
+    old_map_len = get_map_len(map);
+    gt_tag_value_map_remove(&map, "tag 2");
+    new_map_len = get_map_len(map);
+    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(had_err, !(old_map_len - new_map_len - strlen("tag 2") - 1
+                     - strlen("value YYY") -1));
+    gt_tag_value_map_delete(map);
+  }
+
+  /* test gt_tag_value_map_remove() (remove last tag)*/
+  if (!had_err) {
+    size_t old_map_len, new_map_len;
+    map = create_filled_tag_value_list();
+    gt_tag_value_map_set(&map, "tag 1", "value XXX");
+    gt_tag_value_map_set(&map, "tag 2", "value YYY");
+    gt_tag_value_map_set(&map, "tag 3", "value ZZZ");
+    old_map_len = get_map_len(map);
+    gt_tag_value_map_remove(&map, "tag 3");
+    new_map_len = get_map_len(map);
+    gt_ensure(had_err, !gt_tag_value_map_get(map, "unused tag"));
+    gt_ensure(had_err, !(old_map_len - new_map_len - strlen("tag 3") - 1
+                     - strlen("value ZZZ") -1));
     gt_tag_value_map_delete(map);
   }
 

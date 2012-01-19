@@ -52,6 +52,12 @@ void          gt_tag_value_map_set(GtTagValueMap *tag_value_map,
    does not contain such a value, <NULL> is returned. */
 const char*   gt_tag_value_map_get(const GtTagValueMap tag_value_map,
                                    const char *tag);
+
+/* Removes the given <tag> from <tag_value_map>. <tag_value_map> must contain
+   the given <tag> already! */
+void          gt_tag_value_map_remove(GtTagValueMap *tag_value_map,
+                                      const char *tag);
+
 /* Apply <iterator_func> to each tag/value pair contained in <tag_value_map> and
    pass <data> along. */
 void          gt_tag_value_map_foreach(const GtTagValueMap tag_value_map,
