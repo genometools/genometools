@@ -1117,6 +1117,13 @@ void gt_feature_node_mark(GtFeatureNode *fn)
     fn->observer->mark_changed(fn, true, fn->observer->data);
 }
 
+void gt_feature_node_unmark(GtFeatureNode *fn)
+{
+  gt_assert(fn);
+  if (!gt_feature_node_is_marked(fn))
+    fn->bit_field &= ~(1);
+}
+
 bool gt_feature_node_is_marked(const GtFeatureNode *fn)
 {
   gt_assert(fn);
