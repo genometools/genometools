@@ -88,6 +88,12 @@ void          gt_genome_node_release_user_data(GtGenomeNode *genome_node,
 int           gt_genome_node_cmp(GtGenomeNode *genome_node_a,
                                  GtGenomeNode *genome_node_b);
 
+/* Sort node array <nodes> */
+void          gt_genome_nodes_sort(GtArray *nodes);
+
+/* Sort node array <nodes> in a stable way*/
+void          gt_genome_nodes_sort_stable(GtArray *nodes);
+
 /* Let <genome_node> accept the <node_visitor>.
    In the case of an error, -1 is returned and <err> is set accordingly. */
 int           gt_genome_node_accept(GtGenomeNode *genome_node,
