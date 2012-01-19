@@ -68,6 +68,7 @@
 #include "extended/uint64hashtable.h"
 #include "ltr/gt_ltrdigest.h"
 #include "ltr/gt_ltrharvest.h"
+#include "ltr/gt_ltrclustering.h"
 #include "ltr/ltrelement.h"
 #include "ltr/pbs.h"
 #include "ltr/ppt.h"
@@ -180,6 +181,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "id_to_md5", gt_id_to_md5());
   gt_toolbox_add_tool(tools, "interfeat", gt_interfeat());
   gt_toolbox_add_tool(tools, "ltrharvest", gt_ltrharvest());
+  gt_toolbox_add_tool(tools, "ltrclustering", gt_ltrclustering());
   gt_toolbox_add_tool(tools, "matchtool", gt_matchtool());
   gt_toolbox_add(tools, "matstat", gt_matstat);
   gt_toolbox_add_tool(tools, "md5_to_id", gt_md5_to_id());
