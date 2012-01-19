@@ -23,31 +23,10 @@
 #include "annotationsketch/style_api.h"
 #include "extended/genome_node.h"
 
-typedef enum {
-  GT_STYLE_QUERY_OK,
-  GT_STYLE_QUERY_NOT_SET,
-  GT_STYLE_QUERY_ERROR
-} GtStyleQueryStatus;
-
 /* Creates a GtStyle object which reuses the given Lua state
    instead of creating a new one. */
 GtStyle*       gt_style_new_with_state(lua_State*);
 
-/* Retrieves a color value from <style> for key <key> in section <section>.
-   The color is written to the location pointed to by <result>. Optionally, a
-   feature node pointer <fn> can be specified for handling in node-specific
-   callbacks.
-   Because color definitions can be functions, <gt_style_get_color()> can fail
-   at runtime. In this case, this function returns GT_STYLE_QUERY_ERROR and
-   <err> is set accordingly.
-   If the color was not specified in <style>, a grey default color
-   is written to <result> and GT_STYLE_QUERY_NOT_SET is returned so the caller
-   can provide a custom default.
-   In case of successful retrieval of an existing color, GT_STYLE_QUERY_OK
-   is returned. */
-GtStyleQueryStatus gt_style_get_color(const GtStyle *style, const char *section,
-                                      const char *key, GtColor *result,
-                                      GtFeatureNode *fn, GtError *err);
 /* Identical to gt_style_get_color(), except that it also takes a <track_id>
    which is passed to a potential callback function in the style file. */
 GtStyleQueryStatus gt_style_get_color_with_track(const GtStyle *style,
