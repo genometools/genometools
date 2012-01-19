@@ -622,6 +622,15 @@ void gt_feature_node_set_attribute(GtFeatureNode *fn,
     gt_tag_value_map_set(&fn->attributes, attr_name, attr_value);
 }
 
+void gt_feature_node_remove_attribute(GtFeatureNode *fn,
+                                      const char *attr_name)
+{
+  gt_assert(fn && attr_name);
+  gt_assert(strlen(attr_name)); /* attribute name cannot be empty */
+  gt_assert(fn->attributes); /* attribute list must exist already */
+  gt_tag_value_map_remove(&fn->attributes, attr_name);
+}
+
 void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
                                       AttributeIterFunc iterfunc, void *data)
 {

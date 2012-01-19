@@ -177,6 +177,12 @@ void           gt_feature_node_set_attribute(GtFeatureNode* feature_node,
                                              const char *tag,
                                              const char *value);
 
+/* Remove attribute <tag> from <feature_node>. <feature_node> must contain an
+   attribute with the given <tag> already! You should not remove Parent and ID
+   attributes. */
+void           gt_feature_node_remove_attribute(GtFeatureNode* feature_node,
+                                                const char *tag);
+
 /* Return <true> if <feature_node> is a multi-feature, <false> otherwise. */
 bool           gt_feature_node_is_multi(const GtFeatureNode *feature_node);
 
