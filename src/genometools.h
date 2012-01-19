@@ -76,6 +76,8 @@
 #include "extended/add_introns_stream_api.h"
 #include "extended/anno_db_gfflike_api.h"
 #include "extended/anno_db_schema_api.h"
+#include "extended/array_in_stream_api.h"
+#include "extended/array_out_stream_api.h"
 #include "extended/bed_in_stream_api.h"
 #include "extended/comment_node_api.h"
 #include "extended/csa_stream_api.h"
