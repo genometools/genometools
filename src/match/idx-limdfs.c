@@ -292,7 +292,7 @@ static void tracethestackelems(GtMatch *match,
 {
   unsigned long previous = 0;
 
-  gt_reinitLocalitracebackstate(limdfsresources->dfsconstinfo,
+  gt_reinitLocaliTracebackstate(limdfsresources->dfsconstinfo,
                              runptr->lcpitv.offset,
                              pprefixlen);
   do
@@ -305,13 +305,13 @@ static void tracethestackelems(GtMatch *match,
     gt_assert(previous > 0);
     gt_assert(runptr->previousstackelem <
               limdfsresources->stack.nextfreeLcpintervalwithinfo);
-    gt_processelemLocalitracebackstate(limdfsresources->dfsconstinfo,
+    gt_processelemLocaliTracebackstate(limdfsresources->dfsconstinfo,
                                     runptr->lcpitv.inchar,runptr->aliasstate);
     runptr = limdfsresources->stack.spaceLcpintervalwithinfo +
              runptr->previousstackelem;
   } while (runptr->lcpitv.offset > 0);
   match->alignment
-    = gt_completealignmentfromLocalitracebackstate(&match->querylen,
+    = gt_completealignmentfromLocaliTracebackstate(&match->querylen,
                                                 limdfsresources->dfsconstinfo);
   gt_assert(pprefixlen >= match->querylen);
   match->querystartpos = pprefixlen - match->querylen;

@@ -23,15 +23,15 @@
 
 const AbstractDfstransformer *gt_locali_AbstractDfstransformer(void);
 
-void gt_reinitLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_reinitLocaliTracebackstate(Limdfsconstinfo *lci,
                                 unsigned long dbprefixlen,
                                 unsigned long pprefixlen);
 
-void gt_processelemLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
                                      GtUchar currentchar,
                                      const void *aliasstate);
 
-const void *gt_completealignmentfromLocalitracebackstate(
+const void *gt_completealignmentfromLocaliTracebackstate(
                                       unsigned long *alignedquerylength,
                                       const Limdfsconstinfo *lci);
 

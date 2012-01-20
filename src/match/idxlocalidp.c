@@ -36,7 +36,7 @@ typedef struct
   GtUchar *spaceGtUchardbsubstring;
   unsigned long allocatedGtUchardbsubstring;
   GtAlignment *alignment;
-} Localitracebackstate;
+} LocaliTracebackstate;
 
 struct Limdfsconstinfo
 {
@@ -45,7 +45,7 @@ struct Limdfsconstinfo
   unsigned long maxcollen,
                 querylength,
                 threshold;
-  Localitracebackstate tbs;
+  LocaliTracebackstate tbs;
 };
 
 typedef enum
@@ -54,7 +54,7 @@ typedef enum
   Insertbit,
   Replacebit,
   Deletebit
-} Tracebit;
+} LocaliTracebit;
 
 typedef struct
 {
@@ -65,16 +65,16 @@ typedef struct
             delcell;
 #endif
   Scoretype bestcell;
-  Tracebit tracebit;
-} Matrixvalue;
+  LocaliTracebit tracebit;
+} LocaliMatrixvalue;
 
 typedef struct
 {
-  Matrixvalue *colvalues;
+  LocaliMatrixvalue *colvalues;
   unsigned long lenval,
                 pprefixlen,
                 maxvalue;
-} Column;
+} LocaliColumn;
 
 typedef struct
 {
@@ -99,7 +99,7 @@ static inline Scoretype max3 (Scoretype a,Scoretype b,Scoretype c)
 #endif
 
 #ifdef SKDEBUG
-static void showscorecolumn(const Column *column,
+static void showscorecolumn(const LocaliColumn *column,
                             unsigned long querylength,
                             unsigned long currentdepth)
 {
@@ -129,7 +129,8 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
                             unsigned long currentdepth,
                             const Limdfsconstinfo *lci)
 {
-  showscorecolumn((const Column *) aliasstate,lci->querylength,currentdepth);
+  showscorecolumn((const LocaliColumn *) aliasstate,
+                  lci->querylength,currentdepth);
 }
 #endif
 
@@ -154,7 +155,7 @@ void locali_showLimdfsstate(const DECLAREPTRDFSSTATE(aliasstate),
           outcol->colvalues[i].tracebit = BIT;\
         }
 
-static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
+static void secondcolumn (const Limdfsconstinfo *lci,LocaliColumn *outcol,
                           GtUchar dbchar)
 {
   unsigned long i;
@@ -162,8 +163,9 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
   if (outcol->lenval < lci->maxcollen)
   {
     REALLOCMSG(outcol);
-    outcol->colvalues = gt_realloc (outcol->colvalues,
-                                    sizeof (Matrixvalue) * lci->maxcollen);
+    outcol->colvalues = gt_realloc(outcol->colvalues,
+                                   sizeof (LocaliMatrixvalue)
+                                     * lci->maxcollen);
     outcol->lenval = lci->maxcollen;
     ATADDRESS("",outcol);
   }
@@ -210,9 +212,9 @@ static void secondcolumn (const Limdfsconstinfo *lci,Column *outcol,
 }
 
 static void nextcolumn (const Limdfsconstinfo *lci,
-                        Column *outcol,
+                        LocaliColumn *outcol,
                         const GtUchar dbchar,
-                        const Column *incol)
+                        const LocaliColumn *incol)
 {
   unsigned long i;
 #ifndef AFFINE
@@ -225,8 +227,9 @@ static void nextcolumn (const Limdfsconstinfo *lci,
   if (outcol->lenval < lci->querylength+1)
   {
     REALLOCMSG(outcol);
-    outcol->colvalues = gt_realloc (outcol->colvalues,
-                                    sizeof (Matrixvalue) * lci->maxcollen);
+    outcol->colvalues = gt_realloc(outcol->colvalues,
+                                   sizeof (LocaliMatrixvalue)
+                                     * lci->maxcollen);
     outcol->lenval = lci->maxcollen;
     ATADDRESS("",outcol);
   }
@@ -366,10 +369,10 @@ static void nextcolumn (const Limdfsconstinfo *lci,
 #ifdef AFFINE
 static void inplacenextcolumn (const Limdfsconstinfo *lci,
                                const GtUchar dbchar,
-                               Column *column)
+                               LocaliColumn *column)
 {
   unsigned long i;
-  Matrixvalue nw, west;
+  LocaliMatrixvalue nw, west;
 
   column->colvalues[0].repcell = column->colvalues[0].delcell = MINUSINFTY;
   if (column->colvalues[0].inscell > 0)
@@ -525,13 +528,14 @@ static void locali_freedfsconstinfo (Limdfsconstinfo **lci)
 static void locali_initrootLimdfsstate(DECLAREPTRDFSSTATE(aliasstate),
                                        Limdfsconstinfo *lci)
 {
-  Column *column = (Column *) aliasstate;
+  LocaliColumn *column = (LocaliColumn *) aliasstate;
 
   if (column->lenval < lci->maxcollen)
   {
     REALLOCMSG(column);
-    column->colvalues = gt_realloc (column->colvalues,
-                                    sizeof (Matrixvalue) * lci->maxcollen);
+    column->colvalues = gt_realloc(column->colvalues,
+                                   sizeof (LocaliMatrixvalue)
+                                      * lci->maxcollen);
     column->lenval = lci->maxcollen;
     ATADDRESS("",column);
   }
@@ -539,7 +543,7 @@ static void locali_initrootLimdfsstate(DECLAREPTRDFSSTATE(aliasstate),
 
 static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 {
-  Column *column = (Column *) aliasstate;
+  LocaliColumn *column = (LocaliColumn *) aliasstate;
 
   column->colvalues = NULL;
   column->lenval = 0;
@@ -547,7 +551,7 @@ static void locali_initLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 
 static void locali_freeLimdfsstackelem (DECLAREPTRDFSSTATE (aliasstate))
 {
-  Column *column = (Column *) aliasstate;
+  LocaliColumn *column = (LocaliColumn *) aliasstate;
 
   if (column ->colvalues != NULL)
   {
@@ -562,8 +566,8 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
                                     const DECLAREPTRDFSSTATE(srcstate),
                                     Limdfsconstinfo *lci)
 {
-  Column *destcol = (Column *) deststate;
-  const Column *srccol = (const Column *) srcstate;
+  LocaliColumn *destcol = (LocaliColumn *) deststate;
+  const LocaliColumn *srccol = (const LocaliColumn *) srcstate;
 
   if (srccol->colvalues != NULL)
   {
@@ -572,8 +576,9 @@ static void locali_copyLimdfsstate (DECLAREPTRDFSSTATE(deststate),
     if (destcol->lenval < lci->maxcollen)
     {
       REALLOCMSG(destcol);
-      destcol->colvalues = gt_realloc (destcol->colvalues,
-                                       sizeof (Matrixvalue) * lci->maxcollen);
+      destcol->colvalues = gt_realloc(destcol->colvalues,
+                                      sizeof (LocaliMatrixvalue)
+                                        * lci->maxcollen);
       destcol->lenval = lci->maxcollen;
       ATADDRESS("",destcol);
     }
@@ -608,7 +613,7 @@ static void locali_fullmatchLimdfsstate (Limdfsresult *limdfsresult,
                                          GT_UNUSED unsigned long currentdepth,
                                          Limdfsconstinfo *lci)
 {
-  Column *column = (Column *) aliasstate;
+  LocaliColumn *column = (LocaliColumn *) aliasstate;
 
   if (column->colvalues != NULL)
   {
@@ -639,8 +644,8 @@ static void locali_nextLimdfsstate (const Limdfsconstinfo *lci,
                                     GtUchar currentchar,
                                     const DECLAREPTRDFSSTATE (aliasincol))
 {
-  Column *outcol = (Column *) aliasoutcol;
-  const Column *incol = (const Column *) aliasincol;
+  LocaliColumn *outcol = (LocaliColumn *) aliasoutcol;
+  const LocaliColumn *incol = (const LocaliColumn *) aliasincol;
 
   if (currentdepth > 1UL)
   {
@@ -657,7 +662,7 @@ static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
                                            GT_UNUSED unsigned long currentdepth,
                                            GtUchar currentchar)
 {
-  Column *column = (Column *) aliasstate;
+  LocaliColumn *column = (LocaliColumn *) aliasstate;
 
   if (currentdepth > 1UL)
   {
@@ -669,11 +674,11 @@ static void locali_inplacenextLimdfsstate (const Limdfsconstinfo *lci,
 }
 #endif
 
-void gt_reinitLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_reinitLocaliTracebackstate(Limdfsconstinfo *lci,
                                 unsigned long dbprefixlen,
                                 unsigned long pprefixlen)
 {
-  Localitracebackstate *tbs = &lci->tbs;
+  LocaliTracebackstate *tbs = &lci->tbs;
 
   tbs->dbprefixlen = tbs->dbcurrent = dbprefixlen;
   tbs->queryend = tbs->querypos = pprefixlen;
@@ -685,12 +690,12 @@ void gt_reinitLocalitracebackstate(Limdfsconstinfo *lci,
   gt_alignment_reset(tbs->alignment);
 }
 
-void gt_processelemLocalitracebackstate(Limdfsconstinfo *lci,
+void gt_processelemLocaliTracebackstate(Limdfsconstinfo *lci,
                                      GtUchar currentchar,
                                      const void *aliasstate)
 {
-  Localitracebackstate *tbs = &lci->tbs;
-  const Column *column = (const Column *) aliasstate;
+  LocaliTracebackstate *tbs = &lci->tbs;
+  const LocaliColumn *column = (const LocaliColumn *) aliasstate;
 
   while (true)
   {
@@ -736,7 +741,7 @@ void gt_processelemLocalitracebackstate(Limdfsconstinfo *lci,
   }
 }
 
-const void *gt_completealignmentfromLocalitracebackstate(
+const void *gt_completealignmentfromLocaliTracebackstate(
                                         unsigned long *alignedquerylength,
                                         const Limdfsconstinfo *lci)
 {
@@ -775,7 +780,7 @@ const AbstractDfstransformer *gt_locali_AbstractDfstransformer (void)
 {
   static const AbstractDfstransformer locali_adfst =
   {
-    sizeof (Column),
+    sizeof (LocaliColumn),
     locali_allocatedfsconstinfo,
     locali_initdfsconstinfo,
     NULL,
