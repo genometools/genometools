@@ -1055,43 +1055,6 @@ static void gt_updateleftborderforspecialkmer(Sfxiterator *sfi,
                                        GT_SCANCODE_TO_BCKCODE(SFI,SCANCODE));\
         }
 
-#define GT_FIRSTCODES_ACCUMULATECOUNTS(BUF,FIRSTINRANGE,POSITION,SEQNUM,\
-                                       RELPOS,CODE)\
-        {\
-          /*printf("%s %lu %lu %lu\n",\
-                 (FIRSTINRANGE) ? "T" : "F",CODE,SEQNUM,RELPOS);*/\
-          if (!(FIRSTINRANGE) &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
-          {\
-            if ((BUF)->nextfree == (BUF)->allocated)\
-            {\
-              (BUF)->flush_function((BUF)->fciptr);\
-            }\
-            gt_assert ((BUF)->nextfree < (BUF)->allocated);\
-            (BUF)->spaceGtUlong[(BUF)->nextfree++] = CODE;\
-          }\
-        }
-
-#define GT_FIRSTCODES_INSERTSUFFIXES(BUF,FIRSTINRANGE,POSITION,SEQNUM,RELPOS,\
-                                     CODE)\
-        {\
-          if ((BUF)->currentmincode <= (CODE) &&\
-              (CODE) <= (BUF)->currentmaxcode &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->markprefix,CODE) &&\
-              GT_MARKSUBSTRING_CHECKMARK((BUF)->marksuffix,CODE))\
-          {\
-            if ((BUF)->nextfree == (BUF)->allocated)\
-            {\
-              (BUF)->flush_function((BUF)->fciptr);\
-            }\
-            gt_assert ((BUF)->nextfree < (BUF)->allocated);\
-            (BUF)->spaceGtUlongPair[(BUF)->nextfree].a = CODE;\
-            (BUF)->spaceGtUlongPair[(BUF)->nextfree++].b\
-              = gt_seqnumrelpos_encode((BUF)->snrp,SEQNUM,RELPOS);\
-          }\
-        }
-
 typedef struct
 {
   const GtTwobitencoding *twobitencoding;
