@@ -209,7 +209,7 @@ struct Limdfsresources
   GtUchar *currentpathspace;
   unsigned long allocatedpathspace;
   unsigned long numberofmatches;
-  Processmatch processmatch;
+  ProcessIdxMatch processmatch;
   void *processmatchinfo;
   Processresult processresult;
 };
@@ -219,7 +219,7 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
                                     unsigned long maxintervalwidth,
                                     unsigned long maxpathlength,
                                     bool keepexpandedonstack,
-                                    Processmatch processmatch,
+                                    ProcessIdxMatch processmatch,
                                     void *processmatchinfo,
                                     Processresult processresult,
                                     void *patterninfo,
@@ -285,7 +285,7 @@ Limdfsresources *gt_newLimdfsresources(const Genericindex *genericindex,
   return limdfsresources;
 }
 
-static void tracethestackelems(GtMatch *match,
+static void tracethestackelems(GtIdxMatch *match,
                                Limdfsresources *limdfsresources,
                                unsigned long pprefixlen,
                                const Lcpintervalwithinfo *runptr)
@@ -404,11 +404,11 @@ void gt_freeLimdfsresources(Limdfsresources **ptrlimdfsresources,
 /* enumerate the suffixes in an LCP-interval */
 
 static void gen_esa_overinterval(const Genericindex *genericindex,
-                                 Processmatch processmatch,
+                                 ProcessIdxMatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
                                  GT_UNUSED unsigned long totallength,
-                                 GtMatch *match)
+                                 GtIdxMatch *match)
 {
   unsigned long idx;
 
@@ -422,7 +422,7 @@ static void gen_esa_overinterval(const Genericindex *genericindex,
 
 static void esa_overinterval(Limdfsresources *limdfsresources,
                              const Indexbounds *itv,
-                             GtMatch *match)
+                             GtIdxMatch *match)
 {
   gen_esa_overinterval(limdfsresources->genericindex,
                        limdfsresources->processmatch,
@@ -434,11 +434,11 @@ static void esa_overinterval(Limdfsresources *limdfsresources,
 }
 
 static void gen_pck_overinterval(const Genericindex *genericindex,
-                                 Processmatch processmatch,
+                                 ProcessIdxMatch processmatch,
                                  void *processmatchinfo,
                                  const Indexbounds *itv,
                                  unsigned long totallength,
-                                 GtMatch *match)
+                                 GtIdxMatch *match)
 {
   Bwtseqpositioniterator *bspi;
   unsigned long dbstartpos;
@@ -458,7 +458,7 @@ static void gen_pck_overinterval(const Genericindex *genericindex,
 
 static void pck_overinterval(Limdfsresources *limdfsresources,
                              const Indexbounds *itv,
-                             GtMatch *match)
+                             GtIdxMatch *match)
 {
   gen_pck_overinterval(limdfsresources->genericindex,
                        limdfsresources->processmatch,
@@ -469,7 +469,7 @@ static void pck_overinterval(Limdfsresources *limdfsresources,
   limdfsresources->numberofmatches += (itv->rightbound - itv->leftbound);
 }
 
-static void storemstatsposition(void *processinfo,const GtMatch *match)
+static void storemstatsposition(void *processinfo,const GtIdxMatch *match)
 {
   GtArrayGtUlong *mstatspos = (GtArrayGtUlong *) processinfo;
 
@@ -492,7 +492,7 @@ GtArrayGtUlong *gt_fromitv2sortedmatchpositions(
                                              unsigned long offset)
 {
   Indexbounds itv;
-  GtMatch match;
+  GtIdxMatch match;
 
   limdfsresources->mstatspos.nextfreeGtUlong = 0;
   itv.leftbound = leftbound;
@@ -612,7 +612,7 @@ static void esa_overcontext(Limdfsresources *limdfsresources,
   unsigned long resetvalue = 0;
   GtUchar cc;
   Limdfsresult limdfsresult;
-  GtMatch match;
+  GtIdxMatch match;
 
   initparentcopy(limdfsresources,adfst);
   startpos = ESASUFFIXPTRGET(limdfsresources->genericindex->suffixarray->suftab,
@@ -705,7 +705,7 @@ static void pck_overcontext(Limdfsresources *limdfsresources,
   unsigned long bound;
   Bwtseqcontextiterator *bsci;
   Limdfsresult limdfsresult;
-  GtMatch match;
+  GtIdxMatch match;
 
   gt_assert(child != NULL);
   bound = child->leftbound;
@@ -868,7 +868,7 @@ static void pushandpossiblypop(Limdfsresources *limdfsresources,
   }
   if (limdfsresult.status == Limdfssuccess)
   {
-    GtMatch match;
+    GtIdxMatch match;
 
     match.dbabsolute = true;
     match.querylen = limdfsresult.pprefixlen;
@@ -1303,14 +1303,14 @@ static bool esa_exactpatternmatching(const Suffixarray *suffixarray,
                                      const GtUchar *pattern,
                                      unsigned long patternlength,
                                      const GtUchar *dbsubstring,
-                                     Processmatch processmatch,
+                                     ProcessIdxMatch processmatch,
                                      void *processmatchinfo)
 {
   MMsearchiterator *mmsi;
   unsigned long dbstartpos,
          totallength = gt_encseq_total_length(suffixarray->encseq);
   bool nomatches;
-  GtMatch match;
+  GtIdxMatch match;
 
   mmsi = gt_newmmsearchiteratorcomplete_plain(suffixarray->encseq,
                                            suffixarray->suftab,

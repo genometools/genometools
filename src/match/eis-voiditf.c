@@ -463,12 +463,12 @@ bool gt_pck_exactpatternmatching(const FMindex *fmindex,
                                  unsigned long patternlength,
                                  unsigned long totallength,
                                  const GtUchar *dbsubstring,
-                                 Processmatch processmatch,
+                                 ProcessIdxMatch processmatch,
                                  void *processmatchinfo)
 {
   BWTSeqExactMatchesIterator *bsemi;
   unsigned long dbstartpos, numofmatches;
-  GtMatch match;
+  GtIdxMatch match;
 
   bsemi = gt_newEMIterator((const BWTSeq *) fmindex,
                            pattern,(size_t) patternlength, true);

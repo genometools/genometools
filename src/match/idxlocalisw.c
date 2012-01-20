@@ -334,7 +334,7 @@ struct SWdpresource
   GtUchar *dbsubstring;
   unsigned long allocatedswcol, allocatedmaxedges, allocateddbsubstring;
   Retracebits *maxedges;
-  Processmatch processmatch;
+  ProcessIdxMatch processmatch;
   void *processmatchinfo;
 };
 
@@ -363,7 +363,7 @@ static void applysmithwaterman(SWdpresource *dpresource,
                                  query,querylen,encseq,startpos,endpos);
   if (score >= (Scoretype) dpresource->scorethreshold)
   {
-    GtMatch match;
+    GtIdxMatch match;
 
     swlocalsimilarityregion(dpresource->swentrycol,
                             &maxentry,
@@ -447,7 +447,7 @@ SWdpresource *gt_newSWdpresource(Scoretype matchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
                               bool showalignment,
-                              Processmatch processmatch,
+                              ProcessIdxMatch processmatch,
                               void *processmatchinfo)
 {
   SWdpresource *swdpresource;

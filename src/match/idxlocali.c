@@ -39,7 +39,7 @@ typedef struct
   const GtEncseq *encseq;
 } Showmatchinfo;
 
-static void showmatch(void *processinfo,const GtMatch *match)
+static void showmatch(void *processinfo,const GtIdxMatch *match)
 {
   Showmatchinfo *showmatchinfo = (Showmatchinfo *) processinfo;
   unsigned long seqnum;
@@ -89,7 +89,7 @@ void gt_initstorematch(Storematchinfo *storematch,
   GT_INITBITTAB(storematch->hasmatch,numofdbsequences);
 }
 
-static void storematch(void *info,const GtMatch *match)
+static void storematch(void *info,const GtIdxMatch *match)
 {
   Storematchinfo *storematch = (Storematchinfo *) info;
   unsigned long seqnum;
@@ -204,7 +204,7 @@ int gt_runidxlocali(const IdxlocaliOptions *idxlocalioptions,GtError *err)
     const AbstractDfstransformer *dfst;
     SWdpresource *swdpresource = NULL;
     Showmatchinfo showmatchinfo;
-    Processmatch processmatch;
+    ProcessIdxMatch processmatch;
     GtAlphabet *a;
     void *processmatchinfoonline, *processmatchinfooffline;
     Storematchinfo storeonline, storeoffline;

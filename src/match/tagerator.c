@@ -79,7 +79,7 @@ typedef struct
           (void) putchar('\t');\
         }
 
-static void tgr_showmatch(void *processinfo,const GtMatch *match)
+static void tgr_showmatch(void *processinfo,const GtIdxMatch *match)
 {
   TgrShowmatchinfo *showmatchinfo = (TgrShowmatchinfo *) processinfo;
   bool firstitem = true;
@@ -196,7 +196,7 @@ typedef struct
   const TgrTagwithlength *twlptr;
 } ArrayTgrSimplematch;
 
-static void tgr_storematch(void *processinfo,const GtMatch *match)
+static void tgr_storematch(void *processinfo,const GtIdxMatch *match)
 {
   ArrayTgrSimplematch *storetab = (ArrayTgrSimplematch *) processinfo;
   TgrSimplematch *simplematch;
@@ -592,7 +592,7 @@ int gt_runtagerator(const TageratorOptions *tageratoroptions,GtError *err)
     unsigned int numofchars;
     const GtUchar *symbolmap, *currenttag;
     char *desc = NULL;
-    Processmatch processmatch;
+    ProcessIdxMatch processmatch;
     TgrShowmatchinfo showmatchinfo;
     void *processmatchinfoonline, *processmatchinfooffline;
     Limdfsresources *limdfsresources = NULL;

@@ -27,7 +27,7 @@ Myersonlineresources *gt_newMyersonlineresources(
                         unsigned int numofchars,
                         bool nowildcards,
                         const GtEncseq *encseq,
-                        Processmatch processmatch,
+                        ProcessIdxMatch processmatch,
                         void *processmatchinfo);
 
 void gt_freeMyersonlineresources(

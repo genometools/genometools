@@ -31,10 +31,10 @@ typedef struct
                 querylen,
                 distance;
   const void *alignment;
-} GtMatch;
+} GtIdxMatch;
 
-typedef void (*Processmatch)(void *processinfo,
-                             const GtMatch *match);
+typedef void (*ProcessIdxMatch)(void *processinfo,
+                             const GtIdxMatch *match);
 
 typedef void (*Processresult)(void *,
                               const void *,

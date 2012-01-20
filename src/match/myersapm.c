@@ -35,14 +35,14 @@ struct Myersonlineresources
                 *eqsvector;
   unsigned int alphasize;
   bool nowildcards;
-  Processmatch processmatch;
+  ProcessIdxMatch processmatch;
   void *processmatchinfo;
 };
 
 Myersonlineresources *gt_newMyersonlineresources(unsigned int numofchars,
                                                  bool nowildcards,
                                                  const GtEncseq *encseq,
-                                                 Processmatch processmatch,
+                                                 ProcessIdxMatch processmatch,
                                                  void *processmatchinfo)
 {
   Myersonlineresources *mor;
@@ -89,7 +89,7 @@ void gt_edistmyersbitvectorAPM(Myersonlineresources *mor,
   GtUchar cc;
   unsigned long pos;
   const GtReadmode readmode = GT_READMODE_REVERSE;
-  GtMatch match;
+  GtIdxMatch match;
 
   gt_initeqsvectorrev(mor->eqsvectorrev,
                    (unsigned long) mor->alphasize,

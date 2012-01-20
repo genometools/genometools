@@ -111,7 +111,7 @@ bool gt_pck_exactpatternmatching(const FMindex *fmindex,
                                  unsigned long patternlength,
                                  unsigned long totallength,
                                  const GtUchar *dbsubstring,
-                                 Processmatch processmatch,
+                                 ProcessIdxMatch processmatch,
                                  void *processmatchinfo);
 
 unsigned long gt_voidpackedfindfirstmatchconvert(const FMindex *fmindex,

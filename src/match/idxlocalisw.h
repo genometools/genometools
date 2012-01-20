@@ -42,7 +42,7 @@ SWdpresource *gt_newSWdpresource(Scoretype matchscore,
                               Scoretype gapextend,
                               unsigned long scorethreshold,
                               bool showalignment,
-                              Processmatch processmatch,
+                              ProcessIdxMatch processmatch,
                               void *processmatchinfo);
 
 void gt_multiapplysmithwaterman(SWdpresource *dpresource,

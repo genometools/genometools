@@ -130,7 +130,7 @@ static void singlequerymatchspacedseed(Limdfsresources *limdfsresources,
 }
 
 static void cgr_showmatch(GT_UNUSED void *processinfo,
-                      const GtMatch *match)
+                      const GtIdxMatch *match)
 {
   printf("%lu\t",match->dblen);
   printf("%lu\n",match->dbstartpos);
