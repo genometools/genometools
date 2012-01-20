@@ -130,56 +130,6 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
   }
   gt_feature_node_iterator_delete(fni1);
 
- /* fni1 = gt_feature_node_iterator_new((GtFeatureNode*) candidate1);
-
-  while ((curnode1 = gt_feature_node_iterator_next(fni1))) {
-    fnt1 = gt_feature_node_get_type(curnode1);
-    if ((strcmp(fnt1, "repeat_region") == 0) ||
-        (strcmp(fnt1, "LTR_Retrotransposon") == 0))
-      continue;
-    else if (strcmp(fnt1, "protein_match") == 0)
-      fnt1 = gt_feature_node_get_attribute(curnode1, "name");
-    fni2 = gt_feature_node_iterator_new((GtFeatureNode*) candidate2);
-    while ((curnode2 = gt_feature_node_iterator_next(fni2))) {
-      broken = false;
-      fnt2 = gt_feature_node_get_type(curnode2);
-      if ((strcmp(fnt2, "repeat_region") == 0) ||
-          (strcmp(fnt2, "LTR_Retrotransposon") == 0))
-        continue;
-      else if (strcmp(fnt2, "protein_match") == 0)
-        fnt2 = gt_feature_node_get_attribute(curnode2, "name");
-      if (strcmp(fnt1, fnt2) == 0) {
-        clid1 = gt_feature_node_get_attribute(curnode1, "clid");
-        if (clid1 != NULL)
-          sscanf(clid1, "%lu", &clnum1);
-        else
-          clnum1 = GT_UNDEF_ULONG;
-        clid2 = gt_feature_node_get_attribute(curnode2, "clid");
-        if (clid2 != NULL)
-          sscanf(clid2, "%lu", &clnum2);
-        else
-          clnum2 = GT_UNDEF_ULONG;
-        if (clnum1 == clnum2) {
-          if ((clnum1 != GT_UNDEF_ULONG) && (clnum2 != GT_UNDEF_ULONG))
-            seen_a = true;
-          compatible = true;
-        }
-        else if ((clnum1 == GT_UNDEF_ULONG && clnum2 != GT_UNDEF_ULONG) ||
-                 (clnum1 != GT_UNDEF_ULONG && clnum2 == GT_UNDEF_ULONG))
-          compatible = true;
-        else if (clnum1 != clnum2) {
-          broken = true;
-          compatible = false;
-          break;
-        }
-      }
-    }
-    gt_feature_node_iterator_delete(fni2);
-    if (broken)
-      break;
-  }
-  gt_feature_node_iterator_delete(fni1);*/
-
   return (compatible && seen_a);
 }
 
