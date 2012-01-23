@@ -5688,9 +5688,13 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
       {
 #define WITHEQUALLENGTH_DES_SSP
 #define WITHOISTAB
+#define WITHCOUNTMINMAX
 #define WITHORIGDIST
 #include "encseq_charproc.gen"
-        if (charcode == (GtUchar) SEPARATOR && lengthofcurrentsequence > 0) {
+      } else
+      {
+        if (retval == 0)
+        {
           if (*maxseqlen == GT_UNDEF_ULONG
                 || lengthofcurrentsequence > *maxseqlen) {
             *maxseqlen = lengthofcurrentsequence;
@@ -5699,12 +5703,6 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                || lengthofcurrentsequence < *minseqlen) {
             *minseqlen = lengthofcurrentsequence;
           }
-          lengthofcurrentsequence = 0;
-        }
-      } else
-      {
-        if (retval == 0)
-        {
           if (lastspecialrangelength > 0)
           {
             gt_disc_distri_add(distspecialrangelength,
@@ -5770,7 +5768,7 @@ static int gt_inputfiles2sequencekeyvalues(const char *indexname,
                       wildcardrangestab,
                       distwildcardrangelength,
                       logger);
-    if (equallength->defined)
+    if (equallength->defined && lengthofcurrentsequence > 0)
     {
       if (equallength->valueunsignedlong > 0)
       {
@@ -5833,6 +5831,7 @@ static void sequence2specialcharinfo(GtSpecialcharinfo *specialcharinfo,
 #undef WITHEQUALLENGTH_DES_SSP
 #undef WITHOISTAB
 #undef WITHORIGDIST
+#undef WITHCOUNTMINMAX
 #include "encseq_charproc.gen"
   }
   if (lastspecialrangelength > 0)
@@ -8171,6 +8170,32 @@ static int testfullscan(const GtStrArray *filenametab,
   gt_encseq_reader_delete(esr);
   gt_sequence_buffer_delete(fb);
   return haserr ? -1 : 0;
+}
+
+int gt_encseq_check_minmax(const GtEncseq *encseq, GtError *err)
+{
+  int had_err = 0;
+  unsigned long i,
+                min,
+                max;
+  gt_assert(encseq);
+
+  min = gt_encseq_min_seq_length(encseq);
+  max = gt_encseq_max_seq_length(encseq);
+  for (i = 0UL; !had_err && i < gt_encseq_num_of_sequences(encseq); i++)
+  {
+    if (min > gt_encseq_seqlength(encseq, i)) {
+      gt_error_set(err, "sequence %lu has length %lu, but indexed minimum is "
+                        "%lu", i, gt_encseq_seqlength(encseq, i), min);
+      had_err = -1;
+    }
+    if (!had_err && max < gt_encseq_seqlength(encseq, i)) {
+      gt_error_set(err, "sequence %lu has length %lu, but indexed maximum is "
+                        "%lu", i, gt_encseq_seqlength(encseq, i), max);
+      had_err = -1;
+    }
+  }
+  return had_err;
 }
 
 int gt_encseq_check_consistency(const GtEncseq *encseq,

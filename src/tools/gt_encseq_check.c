@@ -117,6 +117,10 @@ static int gt_encseq_check_runner(GT_UNUSED int argc, const char **argv,
     {
       gt_encseq_check_markpos(encseq);
     }
+    if (!had_err)
+    {
+      had_err = gt_encseq_check_minmax(encseq, err);
+    }
     if (!had_err &&
            arguments->prefixlength > 0)
     {

@@ -73,7 +73,6 @@
                   gt_assert(lengthofcurrentsequence > 0);
                   equallength->valueunsignedlong = lengthofcurrentsequence;
                 }
-                lengthofcurrentsequence = 0;
               }
               if (desfp != NULL)
               {
@@ -88,6 +87,17 @@
                 gt_xfputc((int) '\n',desfp);
               }
               (*numofseparators)++;
+#endif
+#ifdef WITHCOUNTMINMAX
+             if (*maxseqlen == GT_UNDEF_ULONG
+                    || lengthofcurrentsequence > *maxseqlen) {
+                *maxseqlen = lengthofcurrentsequence;
+              }
+              if (*minseqlen == GT_UNDEF_ULONG
+                   || lengthofcurrentsequence < *minseqlen) {
+                *minseqlen = lengthofcurrentsequence;
+              }
+              lengthofcurrentsequence = 0;
 #endif
             }
             if (specialprefix)
