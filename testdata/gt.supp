@@ -53,3 +53,12 @@
    fun:cairo_text_extents
    ...
 }
+{
+   <pthreads_mac>
+   Memcheck:Cond
+   fun:pthread_rwlock_init
+   fun:gt_rwlock_new
+   fun:gt_ma_init
+   fun:gt_lib_init
+   ...
+}
