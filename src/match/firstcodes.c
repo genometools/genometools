@@ -87,7 +87,9 @@ typedef struct
                    *mappedallfirstcodes,
                    *mappedmarkprefix;
   unsigned long *allfirstcodes;
+#ifdef FIRSTCODES_DIFFERENCES
   unsigned long *allfirstcodes_differences;
+#endif
   GtFirstcodesspacelog *fcsl;
   GtCodeposbuffer buf;
   GtFirstcodestab tab;
@@ -155,6 +157,7 @@ static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
                                .code = fci->allfirstcodes[current];
       current += fci->binsearchcache.width;
     }
+#ifdef FIRSTCODES_DIFFERENCES
     fci->allfirstcodes_differences
       = malloc(sizeof(*fci->allfirstcodes_differences) * fci->differentcodes);
     gt_assert(fci->allfirstcodes_differences != NULL);
@@ -167,6 +170,7 @@ static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
       /*printf("differences[%lu]=%lu\n",idx,
                             fci->allfirstcodes_differences[idx]);*/
     }
+#endif
     /*
     if (idx > 0)
     {
@@ -201,7 +205,9 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
                                         unsigned long code)
 {
   const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
+#ifdef FIRSTCODES_DIFFERENCES
   const unsigned long *foundlinear = NULL;
+#endif
 
 #ifdef WITHCACHE
   unsigned int depth;
@@ -222,7 +228,9 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
       if (code < midic->code)
       {
         found = midic->ptr;
+#ifdef FIRSTCODES_DIFFERENCES
         foundlinear = midic->ptr;
+#endif
         if (depth < fci->binsearchcache.depth)
         {
           rightic = midic - 1;
@@ -267,6 +275,7 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
       }
     }
     gt_assert(leftptr != NULL && rightptr != NULL);
+#ifdef FIRSTCODES_DIFFERENCES
     if (leftptr <= rightptr)
     {
       unsigned long tmpcode;
@@ -302,6 +311,7 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
         }
       }
     }
+#endif
   } else
   {
 #endif
@@ -324,14 +334,17 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
         leftptr = midptr + 1;
       } else
       {
+#ifdef FIRSTCODES_DIFFERENCES
         if (withcache && fci->binsearchcache.spaceGtIndexwithcode != NULL)
         {
           gt_assert(midptr == foundlinear);
         }
+#endif
         return midptr;
       }
     }
   }
+#ifdef FIRSTCODES_DIFFERENCES
   if (withcache && fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     if (found != foundlinear)
@@ -341,6 +354,7 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
       exit(EXIT_FAILURE);
     }
   }
+#endif
   return found;
 }
 
@@ -1134,7 +1148,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   sizeforcodestable = sizeof (*fci.allfirstcodes) * fci.numofsequences;
   gt_logger_log(logger,"store %lu prefix codes",fci.numofsequences);
   fci.allfirstcodes = gt_malloc(sizeforcodestable);
+#ifdef FIRSTCODES_DIFFERENCES
   fci.allfirstcodes_differences = NULL;
+#endif
   GT_FCI_ADDSPLITSPACE(fci.fcsl,"allfirstcodes",sizeforcodestable);
   gt_firstcodes_countocc_setnull(&fci.tab);
   fci.countsequences = 0;
@@ -1285,10 +1301,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
                   fci.codebuffer_total,
                   100.0 * (double) fci.codebuffer_total/totallength);
+#ifdef FIRSTCODES_DIFFERENCES
     if (fci.allfirstcodes_differences != NULL)
     {
       free(fci.allfirstcodes_differences);
     }
+#endif
     if (fci.firstcodehits > 0)
     {
       gt_assert(fci.flushcount > 0);
