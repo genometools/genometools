@@ -24,6 +24,9 @@
 #include "core/intbits.h"
 #include "core/logger.h"
 #include "core/minmax.h"
+#ifdef GT_THREADS_ENABLED
+#include "core/thread.h"
+#endif
 #include "tools/gt_readjoiner_overlap.h"
 #include "match/rdj-spmfind.h"
 #include "match/firstcodes.h"
@@ -259,39 +262,71 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
   }
   if (!haserr)
   {
+    unsigned int threadcount;
+#ifdef GT_THREADS_ENABLED
+    const unsigned int threads = gt_jobs;
+#else
+    const unsigned int threads = 1U;
+#endif
     if (eqlen)
     {
-      GtBUstate_spmeq *state;
-      state = gt_spmfind_eqlen_state_new(encseq,
-          (unsigned long)arguments->minmatchlength,
-          (unsigned long)arguments->w_maxsize, arguments->elimtrans,
-          arguments->showspm, gt_str_get(arguments->encseqinput),
-          default_logger, verbose_logger, err);
+      GtBUstate_spmeq **state_table
+        = gt_malloc(sizeof (*state_table) * threads);
+
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        state_table[threadcount]
+          = gt_spmfind_eqlen_state_new(encseq,
+                (unsigned long)arguments->minmatchlength,
+                (unsigned long)arguments->w_maxsize, arguments->elimtrans,
+                arguments->showspm, gt_str_get(arguments->encseqinput),
+                default_logger, verbose_logger, err);
+      }
       if (storefirstcodes_getencseqkmers_twobitencoding(encseq, kmersize,
             arguments->numofparts, arguments->maximumspace,
-            arguments->minmatchlength, false, false, false,
+            arguments->minmatchlength, false, false, false, 5U,
             arguments->phase2extra, arguments->radixsmall,
             arguments->radixparts, gt_spmfind_eqlen_process,
-            gt_spmfind_eqlen_process_end, state, verbose_logger, err) != 0)
+            gt_spmfind_eqlen_process_end, state_table, verbose_logger, err)
+            != 0)
+      {
         haserr = true;
-      gt_spmfind_eqlen_state_delete(state);
+      }
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        gt_spmfind_eqlen_state_delete(state_table[threadcount]);
+      }
+      gt_free(state_table);
     }
     else
     {
-      GtBUstate_spmvar *state;
-      state = gt_spmfind_varlen_state_new(encseq,
-          (unsigned long)arguments->minmatchlength,
-          (unsigned long)arguments->w_maxsize, arguments->elimtrans,
-          arguments->showspm, gt_str_get(arguments->encseqinput),
-          default_logger, verbose_logger, err);
+      GtBUstate_spmvar **state_table
+        = gt_malloc(sizeof (*state_table) * threads);
+
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        state_table[threadcount]
+           = gt_spmfind_varlen_state_new(encseq,
+                  (unsigned long)arguments->minmatchlength,
+                  (unsigned long)arguments->w_maxsize, arguments->elimtrans,
+                  arguments->showspm, gt_str_get(arguments->encseqinput),
+                  default_logger, verbose_logger, err);
+      }
       if (storefirstcodes_getencseqkmers_twobitencoding(encseq, kmersize,
             arguments->numofparts, arguments->maximumspace,
-            arguments->minmatchlength, false, false, false,
+            arguments->minmatchlength, false, false, false, 5U,
             arguments->phase2extra, arguments->radixsmall,
             arguments->radixparts, gt_spmfind_varlen_process,
-            gt_spmfind_varlen_process_end, state, verbose_logger, err) != 0)
+            gt_spmfind_varlen_process_end, state_table, verbose_logger, err)
+           != 0)
+      {
         haserr = true;
-      gt_spmfind_varlen_state_delete(state);
+      }
+      for (threadcount = 0; threadcount < threads; threadcount++)
+      {
+        gt_spmfind_varlen_state_delete(state_table[threadcount]);
+      }
+      gt_free(state_table);
     }
   }
   gt_logger_delete(default_logger);
