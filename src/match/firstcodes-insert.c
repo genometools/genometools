@@ -66,7 +66,7 @@ static void gt_firstcodes_insert_kmerscan_range(
   fcode = gt_kmercode_at_position(twobitencoding, startpos, kmersize);
   rccode = gt_kmercode_complement(gt_kmercode_reverse(fcode,kmersize),
                                   maskright);
-  GT_FIRSTCODES_INSERTSUFFIXES(buf,fcode,fseqnum,0);
+  GT_FIRSTCODES_INSERTSUFFIXES(buf,fcode,fseqnum,0UL);
   if (kmersize == minmatchlength)
   {
     GT_FIRSTCODES_INSERTSUFFIXES(buf,rccode,rseqnum,lastfrelpos);

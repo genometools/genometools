@@ -15,9 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include <errno.h>
-#include <limits.h>
 #include <string.h>
 #include "core/alphabet.h"
 #include "core/compactulongstore.h"

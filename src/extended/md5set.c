@@ -16,7 +16,9 @@
 */
 
 #include <string.h>
+#ifndef S_SPLINT_S
 #include <ctype.h>
+#endif
 #include "md5.h"
 #include "core/log.h"
 #include "core/ma.h"

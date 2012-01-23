@@ -264,15 +264,16 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   if (btp <= fct->modvaluebits)
   {
     fct->bitchangepoints.allocatedGtUlong = 0;
+    fct->bitchangepoints.spaceGtUlong = NULL;
   } else
   {
     fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - fct->modvaluebits);
+    gt_log_log("lastpartsum=%lu, bitchangepoints.allocated=%lu",
+              expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
+    fct->bitchangepoints.spaceGtUlong
+      = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
+                  * fct->bitchangepoints.allocatedGtUlong);
   }
-  gt_log_log("lastpartsum=%lu, bitchangepoints.allocated=%lu",
-             expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
-  fct->bitchangepoints.spaceGtUlong
-    = gt_malloc(sizeof (*fct->bitchangepoints.spaceGtUlong)
-                * fct->bitchangepoints.allocatedGtUlong);
   fct->bitchangepoints.nextfreeGtUlong = 0;
   currentcount = GT_PARTIALSUM_COUNT_GET(0);
   partsum = (unsigned long) currentcount;
@@ -315,6 +316,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
     {
       gt_assert(idx > 0 && fct->bitchangepoints.nextfreeGtUlong <
                            fct->bitchangepoints.allocatedGtUlong);
+      gt_assert(fct->bitchangepoints.spaceGtUlong != NULL);
       fct->bitchangepoints.spaceGtUlong
         [fct->bitchangepoints.nextfreeGtUlong++] = idx-1;
       exceedvalue

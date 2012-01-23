@@ -666,7 +666,7 @@ static int gt_firstcodes_sortremaining(GtShortreadsortworkinfo *srsw,
     if (idx < maxindex)
     {
       next = gt_firstcodes_get_leftborder(fct,idx+1);
-      gt_assert(next > current);
+      gt_assert(current < next);
       width = next - current;
     } else
     {
@@ -1096,8 +1096,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   if (marksuffixunits + markprefixunits > kmersize)
   {
-    marksuffixunits = kmersize/2U;
-    markprefixunits = kmersize - marksuffixunits;
+    if (marksuffixunits % 2U == 0)
+    {
+      marksuffixunits = markprefixunits = kmersize/2U;
+    } else
+    {
+      marksuffixunits = kmersize/2;
+      marksuffixunits = kmersize - marksuffixunits;
+    }
   }
   gt_log_log("markprefixunits=%u,marksuffixunits=%u",markprefixunits,
                                                      marksuffixunits);
@@ -1146,7 +1152,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   }
   fci.numofsequences = gt_encseq_num_of_sequences(encseq);
   sizeforcodestable = sizeof (*fci.allfirstcodes) * fci.numofsequences;
-  gt_logger_log(logger,"store %lu prefix codes",fci.numofsequences);
   fci.allfirstcodes = gt_malloc(sizeforcodestable);
 #ifdef FIRSTCODES_DIFFERENCES
   fci.allfirstcodes_differences = NULL;
@@ -1162,13 +1167,14 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   getencseqkmers_twobitencoding(encseq,
                                 readmode,
                                 kmersize,
-                                kmersize,
+                                minmatchlength,
                                 true,
                                 gt_storefirstcodes,
                                 &fci,
                                 NULL,
                                 NULL);
-  gt_assert(fci.numofsequences == fci.countsequences);
+  fci.numofsequences = fci.countsequences;
+  gt_logger_log(logger,"have stored %lu prefix codes",fci.numofsequences);
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "to sort the codes",stdout);

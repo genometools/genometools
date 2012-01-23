@@ -30,7 +30,6 @@ Gtmarksubstring *gt_marksubstring_new(unsigned int numofchars,
   gt_assert(kmersize >= units);
   mark->units = units;
   mark->entries = gt_power_for_small_exponents(numofchars,units);
-  gt_assert(kmersize >= units + units);
   if (usesuffix)
   {
     mark->shiftright = 0;
