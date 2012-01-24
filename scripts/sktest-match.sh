@@ -30,7 +30,8 @@ then
   cd testsuite
   for keyword in gt_idxlocali gt_chain2dim gt_greedyfwdmat \
                  gt_paircmp gt_patternmatch gt_ltrharvest\
-                 gt_repfind gt_tallymer gt_uniquesub gt_genomediff
+                 gt_repfind gt_tallymer gt_uniquesub gt_genomediff \
+                 gt_readjoiner
   do
     env -i GT_MEM_BOOKKEEPING=on ${program} \
          -keywords ${keyword} \
