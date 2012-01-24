@@ -83,6 +83,8 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
                                &arguments->num_values, 1000000UL);
   gt_option_parser_add_option(op, option);
 
+  /* default set to ULONG_MAX-1 to facilitate proper testing of the
+     radixsort implementations (make sure that higher order bits are set) */
   option = gt_option_new_ulong("maxval", "maximal integer to sort",
                                &arguments->maxvalue, ULONG_MAX-1);
   gt_option_parser_add_option(op, option);
