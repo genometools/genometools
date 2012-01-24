@@ -1085,7 +1085,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     markprefixunits = MAX(8U,logtotallength - 8U);
   } else
   {
-    markprefixunits = 8U;
+    markprefixunits = MIN(kmersize/2U,8U);
   }
   if (markprefixunits >= 2U)
   {
@@ -1102,7 +1102,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     } else
     {
       marksuffixunits = kmersize/2;
-      marksuffixunits = kmersize - marksuffixunits;
+      markprefixunits = kmersize - marksuffixunits;
     }
   }
   gt_log_log("markprefixunits=%u,marksuffixunits=%u",markprefixunits,
