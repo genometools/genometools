@@ -16,16 +16,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/qsort_r.h"
 #include "core/ma.h"
+#include "core/mathsupport.h"
+#include "core/qsort_r.h"
 #include "core/str.h"
 #include "core/timer.h"
-#include "core/mathsupport.h"
-#include "core/unused_api.h"
 #include "core/radix-intsort.h"
+#include "core/unused_api.h"
 #include "tools/gt_sortbench.h"
 
 typedef struct {
@@ -83,7 +84,7 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_ulong("maxval", "maximal integer to sort",
-                               &arguments->maxvalue, 10000UL);
+                               &arguments->maxvalue, ULONG_MAX-1);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_bool("aqsort", "prepare bad input array using the "
