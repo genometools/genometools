@@ -465,8 +465,14 @@ module OutputParser
       detect(log, /# N50:\s+(\d+)/, "@n50")
       detect(log, /# N80:\s+(\d+)/, "@n80")
       detect(log, /# longest contig:\s+(\d+)/, "@lngst")
-      detect(log, /# number of contigs:\s(\d+)\n# total length:\s+(\d+)/m,
-               "@nofcontigs", "@tcontigslen")
+      detect(log,
+           /# number of contigs:\s+(\d+)\n# total length:\s+(\d+)/m,
+           "@nofcontigs", "@tcontigslen")
+      if !@tcontigslen
+        detect(log,
+             /# number of contigs:\s+(\d+)\n# total contigs length:\s+(\d+)/m,
+             "@nofcontigs", "@tcontigslen")
+      end
       if log =~ /# no contigs/
         @nofcontigs = 0
         @n50 = 0
