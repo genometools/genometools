@@ -253,13 +253,6 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
     if (gt_encseq_mirror(encseq, err) != 0)
       haserr = true;
   }
-  if (!haserr && (unsigned long)arguments->minmatchlength >
-      gt_encseq_min_seq_length(encseq))
-  {
-    gt_error_set(err, "-l value (%u) > minimal sequence length (%lu)",
-        arguments->minmatchlength, gt_encseq_min_seq_length(encseq));
-    haserr = true;
-  }
   if (!haserr)
   {
     unsigned int threadcount;
