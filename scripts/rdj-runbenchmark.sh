@@ -325,7 +325,7 @@ function run_encseq2spm {
   _STEP=e2s
   _READSET=$1
   _CMD="$GT $GTOPTS"
-  _CMD_ARGS="encseq2spm -mirrored -l $MINLEN -v -ii $_READSET $2"
+  _CMD_ARGS="encseq2spm -l $MINLEN -v -ii $_READSET $2"
   __start
   __append_version_genometools
   __run
