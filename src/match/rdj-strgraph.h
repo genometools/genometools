@@ -56,8 +56,8 @@ void gt_spmproc_strgraph_count_and_save(unsigned long suffix_readnum,
     bool suffixseq_direct, bool prefixseq_direct, void *strgraph);
 
 int gt_strgraph_load_spm_from_file(GtStrgraph *strgraph,
-    unsigned long min_length, bool load_self_spm, const char *indexname,
-    const char *suffix, GtError *err);
+    unsigned long min_length, bool load_self_spm, GtBitsequence *contained,
+    const char *indexname, const char *suffix, GtError *err);
 
 /* --- construction --- */
 
