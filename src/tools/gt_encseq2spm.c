@@ -359,6 +359,7 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                        arguments->minmatchlength);
       }
       gt_assert(kmersize > 0);
+      gt_log_log("kmersize=%u", kmersize);
       if (arguments->singlescan == 4U)
       {
         gt_rungetencseqkmers(encseq,kmersize);
