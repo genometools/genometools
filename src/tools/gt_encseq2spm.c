@@ -46,7 +46,8 @@ typedef struct
                numofparts,
                radixparts,
                singlescan,
-               addbscache_depth;
+               addbscache_depth,
+               forcek;
   unsigned long maximumspace,
                 phase2extra;
   GtStr *encseqinput,
@@ -195,6 +196,12 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 
+  /* -forcek */
+  option = gt_option_new_uint("forcek", "specify the value of k",
+                              &arguments->forcek, 0);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   option = gt_option_new_verbose(&arguments->verbose);
   gt_option_parser_add_option(op, option);
 
@@ -328,9 +335,30 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     }
     if (!haserr)
     {
-      unsigned int kmersize;
-      kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
-                     arguments->minmatchlength);
+      unsigned int kmersize = 0;
+      if (arguments->forcek > 0)
+      {
+        kmersize = arguments->forcek;
+        if (kmersize > arguments->minmatchlength)
+        {
+          gt_error_set(err,"argument %u to option -forcek > l",
+                       kmersize);
+          haserr = true;
+        }
+        else if (kmersize > (unsigned int)GT_UNITSIN2BITENC)
+        {
+          gt_error_set(err,
+              "argument %u to option -forcek > %u (machine word size/2)",
+              kmersize, (unsigned int)GT_UNITSIN2BITENC);
+          haserr = true;
+        }
+      }
+      else
+      {
+        kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
+                       arguments->minmatchlength);
+      }
+      gt_assert(kmersize > 0);
       if (arguments->singlescan == 4U)
       {
         gt_rungetencseqkmers(encseq,kmersize);
