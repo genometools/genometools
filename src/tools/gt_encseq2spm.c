@@ -208,6 +208,38 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   return op;
 }
 
+static bool gt_encseq2spm_kmersize(GtEncseq2spmArguments *arguments,
+    unsigned int *kmersize, GtError *err)
+{
+  bool haserr = false;
+  gt_assert(kmersize != NULL);
+  if (arguments->forcek > 0)
+  {
+    *kmersize = arguments->forcek;
+    if (*kmersize > arguments->minmatchlength)
+    {
+      gt_error_set(err,"argument %u to option -forcek > l",
+          *kmersize);
+      haserr = true;
+    }
+    else if (*kmersize > (unsigned int)GT_UNITSIN2BITENC)
+    {
+      gt_error_set(err,
+          "argument %u to option -forcek > %u (machine word size/2)",
+          *kmersize, (unsigned int)GT_UNITSIN2BITENC);
+      haserr = true;
+    }
+  }
+  else
+  {
+    *kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
+        arguments->minmatchlength);
+  }
+  gt_log_log("kmersize=%u", *kmersize);
+  gt_assert(*kmersize > 0);
+  return haserr;
+}
+
 static int gt_encseq2spm_arguments_check(int rest_argc,
                                          void *tool_arguments,
                                          GtError *err)
@@ -336,39 +368,19 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
     if (!haserr)
     {
       unsigned int kmersize = 0;
-      if (arguments->forcek > 0)
+      haserr = gt_encseq2spm_kmersize(arguments, &kmersize, err);
+      if (!haserr)
       {
-        kmersize = arguments->forcek;
-        if (kmersize > arguments->minmatchlength)
+        if (arguments->singlescan == 4U)
         {
-          gt_error_set(err,"argument %u to option -forcek > l",
-                       kmersize);
-          haserr = true;
-        }
-        else if (kmersize > (unsigned int)GT_UNITSIN2BITENC)
+          gt_rungetencseqkmers(encseq,kmersize);
+        } else
         {
-          gt_error_set(err,
-              "argument %u to option -forcek > %u (machine word size/2)",
-              kmersize, (unsigned int)GT_UNITSIN2BITENC);
-          haserr = true;
-        }
-      }
-      else
-      {
-        kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,
-                       arguments->minmatchlength);
-      }
-      gt_assert(kmersize > 0);
-      gt_log_log("kmersize=%u", kmersize);
-      if (arguments->singlescan == 4U)
-      {
-        gt_rungetencseqkmers(encseq,kmersize);
-      } else
-      {
-        if (arguments->singlescan > 0)
-        {
-          gt_firstcode_runkmerscan(encseq,arguments->singlescan - 1,kmersize,
-                                   arguments->minmatchlength);
+          if (arguments->singlescan > 0)
+          {
+            gt_firstcode_runkmerscan(encseq,arguments->singlescan - 1,kmersize,
+                arguments->minmatchlength);
+          }
         }
       }
     }
@@ -406,8 +418,10 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
       }
     }
     logger = gt_logger_new(arguments->verbose,GT_LOGGER_DEFLT_PREFIX, stdout);
-    kmersize = MIN((unsigned int) GT_UNITSIN2BITENC,arguments->minmatchlength);
-    if (storefirstcodes_getencseqkmers_twobitencoding(encseq,
+    haserr = gt_encseq2spm_kmersize(arguments, &kmersize, err);
+    if (!haserr)
+    {
+      if (storefirstcodes_getencseqkmers_twobitencoding(encseq,
                                                       kmersize,
                                                       arguments->numofparts,
                                                       arguments->maximumspace,
@@ -431,8 +445,9 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       spmsk_states,
                                                       logger,
                                                       err) != 0)
-    {
-      haserr = true;
+      {
+        haserr = true;
+      }
     }
     if (spmsk_states != NULL)
     {
