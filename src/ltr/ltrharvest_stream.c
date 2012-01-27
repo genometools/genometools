@@ -612,30 +612,31 @@ static void searchformotifonlyinside(GtLTRharvestStream *lo,
   /** vicinity of 3'-border of left LTR **/
   /* do not align over 5'border of left LTR,
      in case of need decrease alignment length */
-  if ( (startleftLTR = boundaries->leftLTR_3 -
-         lo->vicinityforcorrectboundaries) <
+  if ((boundaries->leftLTR_3 < lo->vicinityforcorrectboundaries)
+      || (startleftLTR = boundaries->leftLTR_3 -
+         lo->vicinityforcorrectboundaries + 1) <
       boundaries->leftLTR_5 + 2)
   {
     startleftLTR = boundaries->leftLTR_5 + 2;
   }
   /* do not align over 5'-border of right LTR */
-  if ( (endleftLTR = boundaries->leftLTR_3 +
-       lo->vicinityforcorrectboundaries) >
+  if ((endleftLTR = boundaries->leftLTR_3 +
+       lo->vicinityforcorrectboundaries - 1) >
       boundaries->rightLTR_5 - 1)
   {
     endleftLTR = boundaries->rightLTR_5 - 1;
   }
   /** vicinity of 5'-border of right LTR **/
   /* do not align over 3'-border of left LTR */
-  if ( (startrightLTR = boundaries->rightLTR_5 -
-         lo->vicinityforcorrectboundaries)
+  if ((startrightLTR = boundaries->rightLTR_5 -
+         lo->vicinityforcorrectboundaries + 1)
        < boundaries->leftLTR_3 + 1)
   {
     startrightLTR = boundaries->leftLTR_3 + 1;
   }
   /* do not align over 3'border of right LTR */
-  if ( (endrightLTR = boundaries->rightLTR_5 +
-       lo->vicinityforcorrectboundaries) >
+  if ((endrightLTR = boundaries->rightLTR_5 +
+       lo->vicinityforcorrectboundaries - 1) >
       boundaries->rightLTR_3 - 2)
   {
     endrightLTR = boundaries->rightLTR_3 - 2;
