@@ -36,6 +36,7 @@
 #include "core/str_array_api.h"
 #include "core/xansi_api.h"
 #include "match/rdj-cntlist.h"
+#include "match/rdj-filesuf-def.h"
 #include "match/rdj-contfinder.h"
 
 #ifdef GT_READJOINER_LARGE_READSET /* > 2^32 reads */
@@ -1068,55 +1069,49 @@ static void gt_contfinder_set_separators_to_less_frequent_char(GtContfinder
   }
 }
 
+static int gt_contfinder_output_fasta(GtContfinder *contfinder, GtError *err)
+{
+  GtStr *fas_path;
+  GtFile *fas_outfp;
+  int had_err = 0;
+
+  fas_path = gt_str_new_cstr(contfinder->indexname);
+  gt_str_append_cstr(fas_path, GT_READJOINER_SUFFIX_PREFILTERED_FAS);
+  gt_log_log("output prefiltered reads to %s", gt_str_get(fas_path));
+  fas_outfp = gt_file_new(gt_str_get(fas_path), "w", err);
+  if (fas_outfp == NULL)
+    had_err = -1;
+  else
+  {
+    gt_contfinder_sequential_decode(*contfinder, fas_outfp);
+  }
+  gt_file_delete(fas_outfp);
+  gt_str_delete(fas_path);
+  return had_err;
+}
+
 static int gt_contfinder_output_encseq(GtContfinder *contfinder, GtError *err)
 {
-  if (contfinder->len > 0)
+  GtAlphabet *dna = gt_alphabet_new_dna();
+  FILE *a_file = gt_fa_fopen_with_suffix(contfinder->indexname,
+      GT_ALPHABETFILESUFFIX, "wb", err);
+  int had_err = 0;
+  gt_assert(contfinder->len > 0);
+  gt_log_log("output prefiltered reads to encseq %s", contfinder->indexname);
+  if (a_file == NULL)
+    had_err = -1;
+  gt_alphabet_output(dna, a_file);
+  gt_fa_fclose(a_file);
+  gt_alphabet_delete(dna);
+  if (!had_err)
   {
-    GtAlphabet *dna = gt_alphabet_new_dna();
-    FILE *a_file = gt_fa_fopen_with_suffix(contfinder->indexname,
-        GT_ALPHABETFILESUFFIX, "wb", err);
-    if (a_file == NULL)
-      return -1;
-    gt_alphabet_output(dna, a_file);
-    gt_fa_fclose(a_file);
-    gt_alphabet_delete(dna);
-    return gt_encseq_write_twobitencoding_to_file(contfinder->indexname,
+    had_err = gt_encseq_write_twobitencoding_to_file(contfinder->indexname,
         (unsigned long)contfinder->totallength, (unsigned long)(contfinder->len
           - 1), contfinder->twobitencoding, (unsigned long)contfinder->nofseqs,
         gt_str_array_size(contfinder->filenametab), contfinder->filelengthtab,
         contfinder->filenametab, contfinder->characterdistribution, err);
   }
-  else
-  {
-    /* current (slow) strategy: write fasta, then encode it */
-    GtStr *fas_path;
-    GtFile *fas_outfp;
-    GtEncseqEncoder *encoder = gt_encseq_encoder_new();
-    GtStrArray *infiles = gt_str_array_new();
-    int had_err = 0;
-
-    fas_path = gt_str_new_cstr(contfinder->indexname);
-    gt_str_append_cstr(fas_path, ".fas");
-    fas_outfp = gt_file_new(gt_str_get(fas_path), "w", err);
-    if (fas_outfp == NULL)
-      had_err = -1;
-    else
-    {
-      gt_contfinder_sequential_decode(*contfinder, fas_outfp);
-    }
-    gt_file_delete(fas_outfp);
-    if (!had_err)
-    {
-      gt_str_array_add(infiles, fas_path);
-      gt_encseq_encoder_disable_description_support(encoder);
-      had_err = gt_encseq_encoder_encode(encoder, infiles,
-          contfinder->indexname, err);
-    }
-    gt_encseq_encoder_delete(encoder);
-    gt_str_delete(fas_path);
-    gt_str_array_delete(infiles);
-    return had_err;
-  }
+  return had_err;
 }
 
 int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
@@ -1265,10 +1260,16 @@ int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
   {
     if (contfinder->len > 0)
     {
+      gt_log_log("read length: %lu", contfinder->len);
       gt_contfinder_delete_contained(contfinder);
       gt_contfinder_set_separators_to_less_frequent_char(contfinder);
+      had_err = gt_contfinder_output_encseq(contfinder, err);
     }
-    had_err = gt_contfinder_output_encseq(contfinder, err);
+    else
+    {
+      /* currently actually writes fasta */
+      had_err = gt_contfinder_output_fasta(contfinder, err);
+    }
   }
 
   if (!had_err && cntlistfilename != NULL)
@@ -1427,6 +1428,7 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder,
     characterdistribution[a] = 0;
   }
 
+  contfinder->len = 0;
   codepos = 0;
   for (i = 0; i < gt_str_array_size(contfinder->filenametab); i++)
   {
@@ -1551,7 +1553,7 @@ static int gt_contfinder_encode_files(GtContfinder *contfinder,
                   for (a = 0; a < GT_CONTFINDER_ALPHASIZE; a++)
                     characterdistribution[a] = 0;
                   contfinder->discardedlength += len;
-                  len = 0;
+                  len = contfinder->len;
                 }
                 contfinder->discardedlength++;
               }

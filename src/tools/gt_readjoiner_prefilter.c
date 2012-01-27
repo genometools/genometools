@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/log.h"
 #include "core/logger.h"
+#include "core/encseq.h"
 #include "core/fa.h"
 #include "core/ma.h"
 #include "core/outputfile.h"
@@ -176,6 +178,26 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
   return op;
 }
 
+static int gt_prefilter_output_varlen_encseq(const char *indexname,
+    GtError *err)
+{
+  GtStr *fas_path;
+  GtEncseqEncoder *encoder = gt_encseq_encoder_new();
+  GtStrArray *infiles = gt_str_array_new();
+  int had_err = 0;
+
+  fas_path = gt_str_new_cstr(indexname);
+  gt_str_append_cstr(fas_path, GT_READJOINER_SUFFIX_PREFILTERED_FAS);
+  gt_str_array_add(infiles, fas_path);
+  gt_encseq_encoder_disable_description_support(encoder);
+  gt_log_log("encode prefiltered reads to encseq %s", indexname);
+  had_err = gt_encseq_encoder_encode(encoder, infiles, indexname, err);
+  gt_encseq_encoder_delete(encoder);
+  gt_str_delete(fas_path);
+  gt_str_array_delete(infiles);
+  return had_err;
+}
+
 static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     GT_UNUSED const char **argv, GT_UNUSED int parsed_args,
     void *tool_arguments, GtError *err)
@@ -292,6 +314,11 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     gt_contfinder_radixsort_eqlen_tester(contfinder);
 
   gt_contfinder_delete(contfinder);
+  if (arguments->encseq && varlen)
+  {
+    gt_prefilter_output_varlen_encseq(gt_str_get(arguments->readset), err);
+  }
+
   gt_str_delete(cntlistfilename);
   gt_str_delete(sepposfilename);
   gt_logger_delete(verbose_logger);

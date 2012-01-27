@@ -29,6 +29,10 @@
 #define GT_READJOINER_SUFFIX_CONTIG_PATHS      ".paths"
 #define GT_READJOINER_SUFFIX_CONTIGS           ".contigs.fas"
 
+/* -- prefilter -- */
+
+#define GT_READJOINER_SUFFIX_PREFILTERED_FAS   ".prefiltered.fas"
+
 /* -- test / debug / development output -- */
 
 #define GT_READJOINER_SUFFIX_CNTLIST           ".cnt"

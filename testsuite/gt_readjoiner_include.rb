@@ -71,8 +71,8 @@ Test do
   contfree = last_stdout
   run_prefilter(contfree, "")
   run "mv reads.esq reads.prefilter.esq"
-  run "mv #{contfree} reads.fas"
-  encode_reads("reads.fas")
+  run "mv #{contfree} reads.prefiltered.fas"
+  encode_reads("reads.prefiltered.fas")
   run "diff reads.esq reads.prefilter.esq"
 end
 
