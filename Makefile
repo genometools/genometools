@@ -80,7 +80,11 @@ endif
 
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
-OVERRIDELIBS:=lib/libbz2.a
+ifneq ($(useshared),yes)
+  OVERRIDELIBS:=lib/libbz2.a
+else
+  OVERRIDELIBS:=
+endif
 
 # compiled executables
 GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
@@ -228,6 +232,14 @@ SAMTOOLS_DEP:=$(SAMTOOLS_SRC:%.c=obj/%.d)
 
 # the objects which are included into the single GenomeTools shared library
 GTSHAREDLIB_LIBDEP:=-lbz2 -lz
+
+# add necessary shared lib dependencies then not building them ourselves
+ifeq ($(useshared),yes)
+  DEPLIBS:=-lbz2 -lz -lexpat -llua5.1-lpeg -llua5.1 -llua5.1-md5  \
+           -llua5.1-filesystem -llua5.1-des56 -lbam
+  EXP_LDLIBS += $(DEPLIBS)
+  GTSHAREDLIB_LIBDEP += $(DEPLIBS)
+endif
 
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
@@ -408,14 +420,18 @@ ifeq ($(amalgamation),yes)
 else
   LIBGENOMETOOLS_SRC:=$(LIBGENOMETOOLS_PRESRC)
 endif
-LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o) \
-                    $(LIBLUA_OBJ) \
-                    $(LIBEXPAT_OBJ) \
-                    $(SAMTOOLS_OBJ)
-LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d) \
-                    $(LIBLUA_DEP) \
-                    $(SAMTOOLS_DEP) \
-                    $(LIBEXPAT_DEP)
+
+LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o)
+LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
+
+ifneq ($(useshared),yes)
+  LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
+                        $(LIBEXPAT_OBJ) \
+                        $(SAMTOOLS_OBJ)
+  LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
+                        $(LIBEXPAT_DEP) \
+                        $(SAMTOOLS_DEP)
+endif
 
 ifeq ($(with-hmmer),yes)
   LIBGENOMETOOLS_OBJ += $(HMMER_OBJ) $(EASEL_OBJ)
@@ -430,13 +446,24 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
+ifdef DESTDIR
+  prefix:=$(DESTDIR)$(prefix)
+endif
+
 # allow to set patch program
 patch ?= patch
 
+ifneq ($(useshared),yes)
+  ADDITIONAL_BINARIES:=bin/lua
+else
+  ADDITIONAL_BINARIES:=
+endif
+
 all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
-     bin/skproto bin/gt bin/lua bin/examples/custom_stream \
+     bin/skproto bin/gt bin/examples/custom_stream \
      bin/examples/gff3sort bin/examples/gff3validator bin/examples/noop \
-     $(ANNOTATIONSKETCH_EXAMPLES)
+     $(ANNOTATIONSKETCH_EXAMPLES) \
+     $(ADDITIONAL_BINARIES)
 
 ifdef NO_STATIC_LINKING
 static:
@@ -485,9 +512,14 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+ifneq ($(useshared),yes)
+  ADDITIONAL_SO_DEPS:=lib/libbz2.a \
+                      lib/libz.a
+endif
+
 lib/libgenometools$(SHARED_OBJ_NAME_EXT): obj/gt_config.h \
-                                          $(LIBGENOMETOOLS_OBJ) lib/libbz2.a \
-                                          lib/libz.a
+                                          $(LIBGENOMETOOLS_OBJ) \
+                                          $(ADDITIONAL_SO_DEPS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(SHARED) $(LIBGENOMETOOLS_OBJ) \
@@ -695,13 +727,13 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 -include $(GTMAIN_DEP) \
          $(EXAMPLES_DEP) \
          $(SKPROTO_DEP) \
-	 $(TOOLS_DEP) \
+         $(TOOLS_DEP) \
          $(LUAMAIN_DEP) \
-	 $(LIBTECLA_DEP) \
-	 $(LIBBZ2_DEP) \
+         $(LIBTECLA_DEP) \
+         $(LIBBZ2_DEP) \
          $(HMMER_DEP) \
-	 $(ZLIB_DEP) \
-	 $(SAMTOOLS_DEP) \
+         $(ZLIB_DEP) \
+         $(SAMTOOLS_DEP) \
          $(LIBGENOMETOOLS_DEP) \
          obj/src/examples/custom_stream.d \
          obj/src/examples/gff3sort.d \
