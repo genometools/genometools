@@ -247,24 +247,28 @@ int gt_sketch(int argc, const char **argv, GtError *err)
                         gt_cstr_length_up_to_char(argv[0], ' '));
   gt_style_file = gt_get_gtdata_path(gt_str_get(prog), err);
   gt_str_delete(prog);
-  gt_str_append_cstr(gt_style_file, "/sketch/default.style");
-  arguments.stylefile = gt_str_new_cstr(gt_str_get(gt_style_file));
-  switch (sketch_parse_options(&parsed_args, &arguments, argc, argv, err)) {
-    case GT_OPTION_PARSER_OK: break;
-    case GT_OPTION_PARSER_ERROR:
-      gt_str_delete(arguments.stylefile);
-      gt_str_delete(gt_style_file);
-      gt_str_delete(arguments.seqid);
-      gt_str_delete(arguments.format);
-      gt_str_delete(arguments.input);
-      return -1;
-    case GT_OPTION_PARSER_REQUESTS_EXIT:
-      gt_str_delete(arguments.stylefile);
-      gt_str_delete(gt_style_file);
-      gt_str_delete(arguments.seqid);
-      gt_str_delete(arguments.format);
-      gt_str_delete(arguments.input);
-      return 0;
+  if (!gt_style_file)
+    had_err = -1;
+  if (!had_err) {
+    gt_str_append_cstr(gt_style_file, "/sketch/default.style");
+    arguments.stylefile = gt_str_new_cstr(gt_str_get(gt_style_file));
+    switch (sketch_parse_options(&parsed_args, &arguments, argc, argv, err)) {
+      case GT_OPTION_PARSER_OK: break;
+      case GT_OPTION_PARSER_ERROR:
+        gt_str_delete(arguments.stylefile);
+        gt_str_delete(gt_style_file);
+        gt_str_delete(arguments.seqid);
+        gt_str_delete(arguments.format);
+        gt_str_delete(arguments.input);
+        return -1;
+      case GT_OPTION_PARSER_REQUESTS_EXIT:
+        gt_str_delete(arguments.stylefile);
+        gt_str_delete(gt_style_file);
+        gt_str_delete(arguments.seqid);
+        gt_str_delete(arguments.format);
+        gt_str_delete(arguments.input);
+        return 0;
+    }
   }
 
   /* save name of output file */

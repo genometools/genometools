@@ -22,10 +22,13 @@
 
 #define GTDATADIR "/gtdata"
 #define UPDIR     "/.."
+static const char* GTDATA_DEFAULT_PATHS[]={ "/usr/share/genometools" GTDATADIR,
+                                            NULL };
 
 GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
 {
   GtStr *path;
+  const char **defaultpath;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(prog);
@@ -39,6 +42,14 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
     gt_str_set_length(path, gt_str_length(path) - strlen(GTDATADIR));
     gt_str_append_cstr(path, UPDIR);
     gt_str_append_cstr(path, GTDATADIR);
+    if (gt_file_exists(gt_str_get(path)))
+      return path;
+    for (defaultpath = GTDATA_DEFAULT_PATHS; *defaultpath; defaultpath++) {
+      gt_str_reset(path);
+      gt_str_append_cstr(path, *defaultpath);
+      if (gt_file_exists(gt_str_get(path)))
+        return path;
+    }
     if (!gt_file_exists(gt_str_get(path))) {
       gt_error_set(err, "could not find gtdata/ directory");
       had_err = -1;
