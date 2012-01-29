@@ -84,10 +84,18 @@ GtR* gtr_new(GtError *err)
   if (!had_err) {
     luaL_openlibs(gtr->L);    /* open the standard libraries */
     gt_lua_open_lib(gtr->L);  /* open the GenomeTools library */
-    luaopen_lfs(gtr->L);      /* open Lua filesystem */
-    /* luaopen_lpeg(gtr->L); */     /* open LPeg library */
-    luaopen_md5_core(gtr->L); /* open MD5 library */
-    luaopen_des56(gtr->L);
+    lua_pushcfunction(gtr->L, luaopen_lpeg);
+    lua_pushstring(gtr->L, "lpeg");
+    lua_call(gtr->L, 1, 0);   /* open LPeg library */
+    lua_pushcfunction(gtr->L, luaopen_md5_core);
+    lua_pushstring(gtr->L, "md5");
+    lua_call(gtr->L, 1, 0);   /* open MD5 library */
+    lua_pushcfunction(gtr->L, luaopen_lfs);
+    lua_pushstring(gtr->L, "lfs");
+    lua_call(gtr->L, 1, 0);   /* open Lua filesystem */
+    lua_pushcfunction(gtr->L, luaopen_des56);
+    lua_pushstring(gtr->L, "des56");
+    lua_call(gtr->L, 1, 0);   /* open DES56 library */
     had_err = gt_lua_set_modules_path(gtr->L, err);
   }
 #ifndef WITHOUT_CAIRO
