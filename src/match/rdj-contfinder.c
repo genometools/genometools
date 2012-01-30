@@ -1260,7 +1260,7 @@ int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
   {
     if (contfinder->len > 0)
     {
-      gt_log_log("read length: %lu", contfinder->len);
+      gt_log_log("read length: %lu", (unsigned long) contfinder->len);
       gt_contfinder_delete_contained(contfinder);
       gt_contfinder_set_separators_to_less_frequent_char(contfinder);
       had_err = gt_contfinder_output_encseq(contfinder, err);
