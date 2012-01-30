@@ -1191,6 +1191,87 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
   }
 }
 
+static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
+                                    unsigned int numofparts,
+                                    unsigned long maximumspace,
+                                    unsigned long phase2extra,
+                                    unsigned int radixparts,
+                                    GtError *err)
+{
+  if (maximumspace > 0)
+  {
+    if ((unsigned long) gt_firstcodes_spacelog_total(fci->fcsl) +
+                        phase2extra >= maximumspace)
+    {
+      gt_error_set(err,"already used %.2f MB of memory and need %.2f MB later "
+                       "=> cannot compute index in at most %.2f MB",
+                       GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)),
+                       GT_MEGABYTES(phase2extra),
+                       GT_MEGABYTES(maximumspace));
+      return -1;
+    } else
+    {
+      const bool pair = false;
+      size_t remainspace = (size_t) maximumspace -
+                           (gt_firstcodes_spacelog_total(fci->fcsl) +
+                            phase2extra);
+
+      fci->buf.allocated = gt_radixsort_entries(pair,radixparts,remainspace);
+      if (fci->buf.allocated < fci->differentcodes/16UL)
+      {
+        fci->buf.allocated = fci->differentcodes/16UL;
+      }
+    }
+  } else
+  {
+    if (numofparts == 0)
+    {
+      const bool pair = false;
+
+      fci->buf.allocated
+        = gt_radixsort_entries(pair,radixparts,
+                               gt_firstcodes_spacelog_total(fci->fcsl)/7UL);
+    } else
+    {
+      fci->buf.allocated = fci->differentcodes/5;
+    }
+  }
+  if (fci->buf.allocated < 16UL)
+  {
+    fci->buf.allocated = 16UL;
+  }
+  return 0;
+}
+
+static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
+                                               const GtEncseq *encseq,
+                                               unsigned int kmersize,
+                                               unsigned int minmatchlength,
+                                               unsigned int radixparts,
+                                               bool radixsmall,
+                                               GtLogger *logger,
+                                               GtTimer *timer)
+{
+  const bool pair = false;
+
+  if (timer != NULL)
+  {
+    gt_timer_show_progress(timer, "to accumulate counts",stdout);
+  }
+  gt_assert(fci->buf.allocated > 0);
+  fci->radixsort_code = gt_radixsort_new(pair,radixsmall,fci->buf.allocated,
+                                         radixparts,NULL);
+  fci->buf.spaceGtUlong = gt_radixsort_arr(fci->radixsort_code);
+  GT_FCI_ADDWORKSPACE(fci->fcsl,"radixsort_code",
+                      gt_radixsort_size(fci->radixsort_code));
+  fci->buf.fciptr = fci; /* as we need to give fci to the flush function */
+  fci->buf.flush_function = gt_firstcodes_accumulatecounts_flush;
+  gt_logger_log(logger,"maximum space for accumulation counts %.2f MB",
+                GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)));
+  gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci->buf);
+  gt_firstcodes_accumulatecounts_flush(fci);
+}
+
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
                                                   unsigned int numofparts,
@@ -1286,68 +1367,26 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
              fci.binsearchcache.depth,
              (unsigned long) fci.binsearchcache.size);
 #endif
-  if (maximumspace > 0)
+  if (gt_firstcodes_allocspace(&fci,
+                               numofparts,
+                               maximumspace,
+                               phase2extra,
+                               radixparts,
+                               err) != 0)
   {
-    if ((unsigned long) gt_firstcodes_spacelog_total(fci.fcsl) +
-                        phase2extra >= maximumspace)
-    {
-      gt_error_set(err,"already used %.2f MB of memory and need %.2f MB later "
-                       "=> cannot compute index in at most %.2f MB",
-                       GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)),
-                       GT_MEGABYTES(phase2extra),
-                       GT_MEGABYTES(maximumspace));
-      haserr = true;
-    } else
-    {
-      const bool pair = false;
-      size_t remainspace = (size_t) maximumspace -
-                           (gt_firstcodes_spacelog_total(fci.fcsl) +
-                            phase2extra);
-
-      fci.buf.allocated = gt_radixsort_entries(pair,radixparts,remainspace);
-      if (fci.buf.allocated < fci.differentcodes/16UL)
-      {
-        fci.buf.allocated = fci.differentcodes/16UL;
-      }
-    }
-  } else
-  {
-    if (numofparts == 0)
-    {
-      const bool pair = false;
-      fci.buf.allocated
-        = gt_radixsort_entries(pair,radixparts,
-                               gt_firstcodes_spacelog_total(fci.fcsl)/7UL);
-    } else
-    {
-      fci.buf.allocated = fci.differentcodes/5;
-    }
-  }
-  if (fci.buf.allocated < 16UL)
-  {
-    fci.buf.allocated = 16UL;
+    haserr = true;
   }
   fci.buf.nextfree = 0;
   if (!haserr)
   {
-    const bool pair = false;
-
-    if (timer != NULL)
-    {
-      gt_timer_show_progress(timer, "to accumulate counts",stdout);
-    }
-    gt_assert(fci.buf.allocated > 0);
-    fci.radixsort_code = gt_radixsort_new(pair,radixsmall,fci.buf.allocated,
-                                          radixparts,NULL);
-    fci.buf.spaceGtUlong = gt_radixsort_arr(fci.radixsort_code);
-    GT_FCI_ADDWORKSPACE(fci.fcsl,"radixsort_code",
-                        gt_radixsort_size(fci.radixsort_code));
-    fci.buf.fciptr = &fci; /* as we need to give fci to the flush function */
-    fci.buf.flush_function = gt_firstcodes_accumulatecounts_flush;
-    gt_logger_log(logger,"maximum space for accumulation counts %.2f MB",
-                  GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
-    gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci.buf);
-    gt_firstcodes_accumulatecounts_flush(&fci);
+    gt_firstcodes_accumulatecounts_run(&fci,
+                                       encseq,
+                                       kmersize,
+                                       minmatchlength,
+                                       radixparts,
+                                       radixsmall,
+                                       logger,
+                                       timer);
     totallength = gt_encseq_total_length(encseq);
     maxseqlength = gt_encseq_max_seq_length(encseq);
     gt_logger_log(logger,"codebuffer_total=%lu (%.3f%% of all suffixes)",
