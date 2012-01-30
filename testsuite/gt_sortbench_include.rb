@@ -4,10 +4,10 @@ methods = ["thomas","system","inlinedptr","inlinedarr",
 lenlist=[10,20,30,1000,2000,4000,1000000,2000000]
 
 methods.each do |met|
-  lenlist.each do |len|
-    Name "gt sortbench #{met}"
-    Keywords "gt_sortbench"
-    Test do
+  Name "gt sortbench #{met}"
+  Keywords "gt_sortbench"
+  Test do
+    lenlist.each do |len|
       run "#{$bin}gt dev sortbench -impl #{met} -size #{len}"
       run "#{$bin}gt dev sortbench -impl #{met} -size #{len} -maxval 10000"
     end
