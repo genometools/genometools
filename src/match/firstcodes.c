@@ -1134,6 +1134,63 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
   return 0;
 }
 
+static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
+                                       const GtEncseq *encseq,
+                                       GtReadmode readmode,
+                                       unsigned int kmersize,
+                                       unsigned int minmatchlength,
+                                       GtLogger *logger,
+                                       GtTimer *timer)
+{
+  unsigned int numofchars;
+
+  getencseqkmers_twobitencoding(encseq,
+                                readmode,
+                                kmersize,
+                                minmatchlength,
+                                true,
+                                gt_storefirstcodes,
+                                fci,
+                                NULL,
+                                NULL);
+  fci->numofsequences = fci->countsequences;
+  gt_logger_log(logger,"have stored %lu prefix codes",fci->numofsequences);
+  if (timer != NULL)
+  {
+    gt_timer_show_progress(timer, "to sort the codes",stdout);
+  }
+  QSORTNAME(gt_direct_qsort)(6UL, false,fci->allfirstcodes,fci->numofsequences);
+  numofchars = gt_encseq_alphabetnumofchars(encseq);
+  gt_assert(numofchars == 4U);
+  fci->buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
+                                            fci->markprefixunits);
+  fci->shiftright2index = gt_marksubstring_shiftright(fci->buf.markprefix)
+                         + GT_LOGWORDSIZE;
+  GT_FCI_ADDSPLITSPACE(fci->fcsl,"markprefix",
+                      (size_t) gt_marksubstring_size(fci->buf.markprefix));
+  fci->buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
+                                            fci->marksuffixunits);
+  GT_FCI_ADDWORKSPACE(fci->fcsl,"marksuffix",
+                      (size_t) gt_marksubstring_size(fci->buf.marksuffix));
+  gt_assert(fci->allfirstcodes != NULL);
+  fci->differentcodes = gt_firstcodes_remdups(fci->allfirstcodes,
+                                             fci->fcsl,
+                                             &fci->tab,
+                                             fci->numofsequences,
+                                             fci->buf.markprefix,
+                                             fci->buf.marksuffix,
+                                             logger);
+  if (fci->differentcodes > 0 && fci->differentcodes < fci->numofsequences)
+  {
+    fci->allfirstcodes = gt_realloc(fci->allfirstcodes,
+                                    sizeof (*fci->allfirstcodes) *
+                                    fci->differentcodes);
+    GT_FCI_SUBTRACTADDSPLITSPACE(fci->fcsl,"allfirstcodes",
+                                 sizeof (*fci->allfirstcodes) *
+                                 fci->differentcodes);
+  }
+}
+
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
                                                   unsigned int numofparts,
@@ -1158,7 +1215,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   GtTimer *timer = NULL;
   GtFirstcodesinfo fci;
   size_t suftab_size = 0;
-  unsigned int numofchars, part, threadcount;
+  unsigned int part, threadcount;
   unsigned long maxbucketsize, suftabentries = 0, largest_width,
                 totallength, maxseqlength;
   GtSfxmappedrangelist *sfxmrlist;
@@ -1193,71 +1250,29 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
   }
   /* perform the following only when haserr = false */
-  getencseqkmers_twobitencoding(encseq,
-                                readmode,
-                                kmersize,
-                                minmatchlength,
-                                true,
-                                gt_storefirstcodes,
-                                &fci,
-                                NULL,
-                                NULL);
-  fci.numofsequences = fci.countsequences;
-  gt_logger_log(logger,"have stored %lu prefix codes",fci.numofsequences);
-  if (timer != NULL)
+  gt_firstcodes_collectcodes(&fci,
+                             encseq,
+                             readmode,
+                             kmersize,
+                             minmatchlength,
+                             logger,
+                             timer);
+
+  if (fci.differentcodes > 0 && onlyallfirstcodes)
   {
-    gt_timer_show_progress(timer, "to sort the codes",stdout);
-  }
-  QSORTNAME(gt_direct_qsort)
-             (6UL, false,
-             fci.allfirstcodes,fci.numofsequences);
-  numofchars = gt_encseq_alphabetnumofchars(encseq);
-  gt_assert(numofchars == 4U);
-  fci.buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
-                                            fci.markprefixunits);
-  fci.shiftright2index = gt_marksubstring_shiftright(fci.buf.markprefix)
-                         + GT_LOGWORDSIZE;
-  GT_FCI_ADDSPLITSPACE(fci.fcsl,"markprefix",
-                      (size_t) gt_marksubstring_size(fci.buf.markprefix));
-  fci.buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,
-                                            fci.marksuffixunits);
-  GT_FCI_ADDWORKSPACE(fci.fcsl,"marksuffix",
-                      (size_t) gt_marksubstring_size(fci.buf.marksuffix));
-  gt_assert(fci.allfirstcodes != NULL);
-  fci.differentcodes = gt_firstcodes_remdups(fci.allfirstcodes,
-                                             fci.fcsl,
-                                             &fci.tab,
-                                             fci.numofsequences,
-                                             fci.buf.markprefix,
-                                             fci.buf.marksuffix,
-                                             logger);
-  if (fci.differentcodes > 0)
-  {
-    if (fci.differentcodes < fci.numofsequences)
+    run_allcodes_distribution(fci.allfirstcodes,fci.differentcodes);
+    gt_free(fci.allfirstcodes);
+    gt_marksubstring_delete(fci.buf.markprefix,true);
+    gt_marksubstring_delete(fci.buf.marksuffix,true);
+    gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
+    gt_firstcodes_spacelog_delete(fci.fcsl);
+    gt_seqnumrelpos_delete(fci.buf.snrp);
+    gt_Sfxmappedrangelist_delete(sfxmrlist);
+    if (timer != NULL)
     {
-      fci.allfirstcodes = gt_realloc(fci.allfirstcodes,
-                                     sizeof (*fci.allfirstcodes) *
-                                     fci.differentcodes);
-      GT_FCI_SUBTRACTADDSPLITSPACE(fci.fcsl,"allfirstcodes",
-                                   sizeof (*fci.allfirstcodes) *
-                                   fci.differentcodes);
+      gt_timer_delete(timer);
     }
-    if (onlyallfirstcodes)
-    {
-      run_allcodes_distribution(fci.allfirstcodes,fci.differentcodes);
-      gt_free(fci.allfirstcodes);
-      gt_marksubstring_delete(fci.buf.markprefix,true);
-      gt_marksubstring_delete(fci.buf.marksuffix,true);
-      gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
-      gt_firstcodes_spacelog_delete(fci.fcsl);
-      gt_seqnumrelpos_delete(fci.buf.snrp);
-      gt_Sfxmappedrangelist_delete(sfxmrlist);
-      if (timer != NULL)
-      {
-        gt_timer_delete(timer);
-      }
-      return 0;
-    }
+    return 0;
   }
   fci.flushcount = 0;
   fci.codebuffer_total = 0;
