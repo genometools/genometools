@@ -1463,6 +1463,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   const unsigned int threads = 1U;
 #endif
 
+  if (maxseqlength < (unsigned long) minmatchlength)
+  {
+    return 0;
+  }
   if (gt_firstcodes_init(&fci,
                          encseq,
                          kmersize,
