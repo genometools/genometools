@@ -86,17 +86,16 @@ Test do
    run "grep 'no contigs' #{last_stdout}"
 end
 
-Name "gt readjoiner overlap: error when -l value > min read len"
-Keywords "gt_readjoiner_overlap"
+Name "gt readjoiner overlap: eqlen; minlen > readlen"
+Keywords "gt_readjoiner gt_readjoiner_overlap"
 Test do
   run_prefilter("#$testdata/readjoiner/tiny.fas")
-  run_test "#{$bin}gt readjoiner overlap -readset reads -l 17",
-    :retval => 1
-  run "grep '\\-l ' #{last_stderr}"
+  run_test "#{$bin}gt readjoiner overlap -readset reads -l 17"
 end
 
+=begin singlestrand
 Name "gt readjoiner overlap: singlestrand vs mirrored mode"
-Keywords "gt_readjoiner_overlap"
+Keywords "gt_readjoiner gt_readjoiner_overlap"
 Test do
   run_prefilter("#$testdata/readjoiner/tiny.fas")
   run_overlap(4, "-singlestrand")
@@ -110,6 +109,7 @@ Test do
   run_test "diff #{spm} " +
     "#$testdata/readjoiner/tiny_mirrored.spm", :retval => 0
 end
+=end
 
 def assert_empty(fn, desc)
   fncontent = IO.read(fn)
@@ -416,22 +416,30 @@ def assert_nofspm(irreducible, transitive = nil)
   end
 end
 
-=begin comment
-Name "gt encseq2spm with short min match length values"
-Keywords "gt_readjoiner_NEW gt_encseq2spm"
+[1, 2].each do |varlen_test|
+  Name "gt encseq2spm: different minlen values - test #{varlen_test}"
+  Keywords "gt_readjoiner gt_encseq2spm NEW"
+  Test do
+    encode_reads("#$testdata/readjoiner/varlen_#{varlen_test}.fas")
+    [10, 13, 15, 33, 65, 84].each do |minlen|
+      run "#$bin/gt encseq2spm -l #{minlen} -ii reads"
+    end
+  end
+end
+
+Name "gt encseq2spm: different minlen values - test 3"
+Keywords "gt_readjoiner gt_encseq2spm NEW"
 Test do
   run_prefilter("#$testdata/readjoiner/minlen_test.fas")
   run "#$bin/gt encseq2spm -l 14 -ii reads"
   run "#$bin/gt encseq2spm -l 15 -ii reads"
 end
-=end
 
 Name "gt readjoiner overlap: different min match lengths"
-Keywords "gt_readjoiner gt_readjoiner_overlap"
+Keywords "gt_readjoiner gt_readjoiner_overlap NEW"
 Test do
   run_prefilter("#$testdata/readjoiner/minlen_test.fas")
-  # this should actually work also for minlen < 16!
-  16.upto(40) do |minlen|
+  1.upto(40) do |minlen|
     run_overlap(minlen)
     assert_nofspm(40 - minlen)
   end
