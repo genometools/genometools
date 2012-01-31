@@ -1451,7 +1451,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   unsigned long maxbucketsize, suftabentries = 0, largest_width,
                 totallength = gt_encseq_total_length(encseq),
                 maxseqlength = gt_encseq_max_seq_length(encseq);
-  GtSfxmappedrangelist *sfxmrlist;
+  GtSfxmappedrangelist *sfxmrlist = NULL;
   GtSuftabparts *suftabparts = NULL;
   GtShortreadsortworkinfo **srswtab = NULL;
   void *mapptr;
