@@ -124,7 +124,7 @@ static GtBUItvinfo_spmeq *allocateBUstack_spmeq(GtBUItvinfo_spmeq *ptr,
   unsigned long idx;
   GtBUItvinfo_spmeq *itvinfo;
 
-  itvinfo = gt_realloc(ptr,sizeof(*itvinfo) * allocated);
+  itvinfo = gt_realloc(ptr,sizeof (*itvinfo) * allocated);
   gt_assert(allocated > currentallocated);
   for (idx=currentallocated; idx<allocated; idx++)
   {
@@ -182,8 +182,7 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_spmeq;
       lastinterval->rb = idx;
-      if (processlcpinterval_spmeq != NULL &&
-          processlcpinterval_spmeq(lastinterval->lcp,
+      if (processlcpinterval_spmeq(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -204,8 +203,7 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmeq != NULL &&
-            processbranchingedge_spmeq(firstedge,
+        if (processbranchingedge_spmeq(firstedge,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
                                  TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
@@ -238,8 +236,7 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
 #endif
         PUSH_ESA_BOTTOMUP_spmeq(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmeq != NULL &&
-            processbranchingedge_spmeq(true,
+        if (processbranchingedge_spmeq(true,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
                                  TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
@@ -349,8 +346,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
     {
       lastinterval = POP_ESA_BOTTOMUP_spmeq;
       lastinterval->rb = idx;
-      if (processlcpinterval_spmeq != NULL &&
-          processlcpinterval_spmeq(lastinterval->lcp,
+      if (processlcpinterval_spmeq(lastinterval->lcp,
                              lastinterval->lb,
                              lastinterval->rb,
                              &lastinterval->info,
@@ -371,8 +367,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
           firstedgefromroot = false;
         }
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmeq != NULL &&
-            processbranchingedge_spmeq(firstedge,
+        if (processbranchingedge_spmeq(firstedge,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
                                  TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
@@ -405,8 +400,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
 #endif
         PUSH_ESA_BOTTOMUP_spmeq(lcpvalue,lastintervallb);
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmeq != NULL &&
-            processbranchingedge_spmeq(true,
+        if (processbranchingedge_spmeq(true,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
                                  TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
@@ -470,3 +464,5 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
 }
 
 #endif
+/* vim: ft=c
+*/
