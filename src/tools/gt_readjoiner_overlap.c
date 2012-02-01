@@ -273,7 +273,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
                 (unsigned long)arguments->minmatchlength,
                 (unsigned long)arguments->w_maxsize, arguments->elimtrans,
                 arguments->showspm, gt_str_get(arguments->encseqinput),
-                default_logger, verbose_logger, err);
+                threadcount, default_logger, verbose_logger, err);
       }
       if (storefirstcodes_getencseqkmers_twobitencoding(encseq, kmersize,
             arguments->numofparts, arguments->maximumspace,
@@ -303,7 +303,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
                   (unsigned long)arguments->minmatchlength,
                   (unsigned long)arguments->w_maxsize, arguments->elimtrans,
                   arguments->showspm, gt_str_get(arguments->encseqinput),
-                  default_logger, verbose_logger, err);
+                  threadcount, default_logger, verbose_logger, err);
       }
       if (storefirstcodes_getencseqkmers_twobitencoding(encseq, kmersize,
             arguments->numofparts, arguments->maximumspace,

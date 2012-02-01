@@ -34,8 +34,8 @@ typedef struct GtBUstate_spm GtBUstate_spmeq;
 
 GtBUstate_spmeq *gt_spmfind_eqlen_state_new(const GtEncseq *encseq,
     unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
-    bool showspm, const char *indexname, GtLogger *default_logger,
-    GtLogger *verbose_logger, GtError *err);
+    bool showspm, const char *indexname, unsigned int threadnum,
+    GtLogger *default_logger, GtLogger *verbose_logger, GtError *err);
 
 void gt_spmfind_eqlen_state_delete(GtBUstate_spmeq *state);
 
@@ -50,8 +50,8 @@ typedef struct GtBUstate_spm GtBUstate_spmvar;
 
 GtBUstate_spmvar *gt_spmfind_varlen_state_new(const GtEncseq *encseq,
     unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
-    bool showspm, const char *indexname, GtLogger *default_logger,
-    GtLogger *verbose_logger, GtError *err);
+    bool showspm, const char *indexname, unsigned int threadnum,
+    GtLogger *default_logger, GtLogger *verbose_logger, GtError *err);
 
 void gt_spmfind_varlen_state_delete(GtBUstate_spmvar *state);
 

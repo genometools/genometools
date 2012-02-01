@@ -625,67 +625,59 @@ static void showstatistics_spm(GtBUstate_spmeq *state)
 
 static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
     unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
-    bool showspm, const char *indexname, GtLogger *default_logger,
-    GtLogger *verbose_logger, GtError *err)
+    bool showspm, const char *indexname, unsigned int threadnum,
+    GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
 {
   GtBUstate_spmeq *state = gt_calloc((size_t)1, sizeof (*state));
 
   state->default_logger = default_logger;
   state->verbose_logger = verbose_logger;
   state->err = err;
-
   state->indexname = indexname;
-  gt_logger_log(verbose_logger, "readset name = %s", indexname);
-
   state->encseq = encseq;
-
   state->nofreads = gt_encseq_num_of_sequences(encseq);
-
   state->first_revcompl = gt_encseq_is_mirrored(encseq) ?
     state->nofreads >> 1 : 0;
-  if (state->first_revcompl == 0)
-    gt_logger_log(verbose_logger, "single strand mode");
-
-  gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
-      state->first_revcompl > 0 ? state->first_revcompl : state->nofreads);
-
   state->totallength = gt_encseq_total_length(encseq);
-  gt_logger_log(verbose_logger, "total length of filtered readset = %lu",
-      gt_encseq_is_mirrored(encseq) ? (state->totallength -
-        state->nofreads + 1) >> 1 : (state->totallength -
-          state->nofreads + 1));
-
+  state->minmatchlength = minmatchlength;
+  state->elimtrans = elimtrans;
+  state->w_maxsize = (w_maxsize == 0) ? ULONG_MAX : w_maxsize;
   if (eqlen)
   {
     state->read_length = gt_encseq_seqlength(encseq, 0);
-    gt_logger_log(verbose_logger, "read length = %lu", state->read_length);
   }
   else
   {
+    state->read_length = 0;
     GT_INITBITTAB(state->contained, state->first_revcompl > 0 ?
         state->first_revcompl : state->nofreads);
-    gt_logger_log(verbose_logger, "read length = variable");
   }
 
-  state->minmatchlength = minmatchlength;
-  gt_logger_log(verbose_logger, "minimal match length = %lu",
-      state->minmatchlength);
-
-  if (w_maxsize == 0)
+  if (threadnum == 0)
   {
-    state->w_maxsize = ULONG_MAX;
-    gt_logger_log(verbose_logger, "wset size limit = unlimited");
+    gt_logger_log(verbose_logger, "readset name = %s", indexname);
+    if (state->first_revcompl == 0)
+      gt_logger_log(verbose_logger, "single strand mode");
+    gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
+        state->first_revcompl > 0 ? state->first_revcompl : state->nofreads);
+    gt_logger_log(verbose_logger, "total length of filtered readset = %lu",
+        gt_encseq_is_mirrored(encseq) ? (state->totallength -
+          state->nofreads + 1) >> 1 : (state->totallength -
+            state->nofreads + 1));
+    if (eqlen)
+      gt_logger_log(verbose_logger, "read length = %lu", state->read_length);
+    else
+      gt_logger_log(verbose_logger, "read length = variable");
+    gt_logger_log(verbose_logger, "minimal match length = %lu",
+        state->minmatchlength);
+    if (w_maxsize == 0)
+      gt_logger_log(verbose_logger, "wset size limit = unlimited");
+    else
+      gt_logger_log(verbose_logger, "wset size limit = %lu",
+          state->w_maxsize);
+    gt_logger_log(verbose_logger, "eliminate transitive SPM = %s",
+        state->elimtrans ? "true" : "false");
   }
-  else
-  {
-    state->w_maxsize = w_maxsize;
-    gt_logger_log(verbose_logger, "wset size limit = %lu",
-        state->w_maxsize);
-  }
-
-  state->elimtrans = elimtrans;
-  gt_logger_log(verbose_logger, "eliminate transitive SPM = %s",
-      state->elimtrans ? "true" : "false");
 
   if (showspm)
   {
@@ -695,8 +687,12 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
   else
   {
     /*@ignore@*/
-    state->procdata = gt_fa_fopen_with_suffix(indexname,
-        GT_READJOINER_SUFFIX_SPMLIST, "wb", NULL);
+    GtStr *suffix = gt_str_new_cstr(GT_READJOINER_SUFFIX_SPMLIST);
+    gt_str_append_char(suffix, '.');
+    gt_str_append_uint(suffix, threadnum);
+    state->procdata = gt_fa_fopen_with_suffix(indexname, gt_str_get(suffix),
+        "wb", NULL);
+    gt_str_delete(suffix);
     /*@end@*/
     if (!state->procdata)
       exit(-1);
@@ -725,8 +721,9 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
   state->stack = (void *) gt_GtArrayGtBUItvinfo_new();
 
 #ifdef GT_READJOINER_STATISTICS
-  gt_logger_log(state->verbose_logger,
-      "spmfind: additional statistics output activated");
+  if (threadnum == 0)
+    gt_logger_log(state->verbose_logger,
+        "spmfind: additional statistics output activated");
   state->initial_l_allocated = state->l_allocated;
   state->initial_w_allocated = state->w_allocated;
   state->w_per_terminal = gt_disc_distri_new();
@@ -737,22 +734,22 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
 
 GtBUstate_spmeq *gt_spmfind_eqlen_state_new(const GtEncseq *encseq,
     unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
-    bool showspm, const char *indexname, GtLogger *default_logger,
-    GtLogger *verbose_logger, GtError *err)
+    bool showspm, const char *indexname, unsigned int threadnum,
+    GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
 {
   return (GtBUstate_spmeq *)gt_spmfind_state_new(true, encseq, minmatchlength,
-      w_maxsize, elimtrans, showspm, indexname, default_logger, verbose_logger,
-      err);
+      w_maxsize, elimtrans, showspm, indexname, threadnum, default_logger,
+      verbose_logger, err);
 }
 
 GtBUstate_spmvar *gt_spmfind_varlen_state_new(const GtEncseq *encseq,
     unsigned long minmatchlength, unsigned long w_maxsize, bool elimtrans,
-    bool showspm, const char *indexname, GtLogger *default_logger,
-    GtLogger *verbose_logger, GtError *err)
+    bool showspm, const char *indexname, unsigned int threadnum,
+    GtLogger *default_logger, GtLogger *verbose_logger, GtError *err)
 {
   return (GtBUstate_spmvar *)gt_spmfind_state_new(false, encseq, minmatchlength,
-      w_maxsize, elimtrans, showspm, indexname, default_logger, verbose_logger,
-      err);
+      w_maxsize, elimtrans, showspm, indexname, threadnum, default_logger,
+      verbose_logger, err);
 }
 
 static void gt_spmfind_state_delete(bool eqlen, GtBUstate_spm *state)
