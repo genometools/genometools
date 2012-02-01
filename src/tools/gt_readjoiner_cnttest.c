@@ -148,7 +148,7 @@ static int gt_readjoiner_cnttest_runner(GT_UNUSED int argc,
     GtStr *fn = NULL;
     fn = gt_str_clone(arguments->readset);
     gt_str_append_cstr(fn, GT_READJOINER_SUFFIX_CNTLIST);
-    had_err = gt_cntlist_parse(gt_str_get(fn), &bits, &nofreads, err);
+    had_err = gt_cntlist_parse(gt_str_get(fn), true, &bits, &nofreads, err);
     gt_str_delete(fn);
   }
   else if (arguments->test == GT_READJOINER_CNTTEST_BRUTEFORCE ||

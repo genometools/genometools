@@ -324,6 +324,7 @@ static int gt_readjoiner_assembly_paths2seq(const char *readset,
   gt_encseq_loader_disable_autosupport(el);
   gt_encseq_loader_mirror(el);
   reads = gt_encseq_loader_load(el, readset, err);
+  gt_assert(reads != NULL);
   gt_readjoiner_assembly_pump_encseq_through_cache(reads);
   if (gt_showtime_enabled())
     gt_timer_show_progress(*timer, GT_READJOINER_MSG_OUTPUTCONTIGS, stdout);
@@ -381,6 +382,7 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     gt_encseq_loader_drop_description_support(el);
     gt_encseq_loader_disable_autosupport(el);
     reads = gt_encseq_loader_load(el, readset, err);
+    gt_assert(reads != NULL);
     eqlen = gt_encseq_accesstype_get(reads) == GT_ACCESS_TYPE_EQUALLENGTH;
     nreads = gt_encseq_num_of_sequences(reads);
     gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
@@ -398,11 +400,24 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
     }
     else
     {
+      unsigned int i;
       unsigned long nofreads;
       GtStr *filename = gt_str_clone(arguments->readset);
-      gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_CNTLIST);
-      had_err = gt_cntlist_parse(gt_str_get(filename), &contained, &nofreads,
-          err);
+      gt_str_append_cstr(filename, ".0" GT_READJOINER_SUFFIX_CNTLIST);
+      had_err = gt_cntlist_parse(gt_str_get(filename), true, &contained,
+          &nofreads, err);
+      for (i = 1U; i < arguments->nspmfiles && had_err == 0; i++)
+      {
+        unsigned long nofreads_i;
+        gt_str_reset(filename);
+        gt_str_append_str(filename, arguments->readset);
+        gt_str_append_char(filename, '.');
+        gt_str_append_uint(filename, i);
+        gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_CNTLIST);
+        had_err = gt_cntlist_parse(gt_str_get(filename), false, &contained,
+            &nofreads_i, err);
+        gt_assert(nofreads == nofreads_i);
+      }
       gt_str_delete(filename);
       rlen = 0;
       gt_logger_log(verbose_logger, "read length = variable");

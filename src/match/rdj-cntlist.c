@@ -19,10 +19,13 @@
 #include <limits.h>
 #include "core/fa.h"
 #include "core/fileutils.h"
+#include "core/log.h"
 #include "core/xansi_api.h"
 #include "match/rdj-cntlist.h"
 
-#define GT_CNTLIST_BIT_HEADER 0
+#define GT_CNTLIST_BIT_HEADER   (int)'\0'
+#define GT_CNTLIST_BIN_HEADER   (int)'\1'
+#define GT_CNTLIST_ASCII_HEADER (int)'['
 
 static inline void gt_cntlist_show_ascii(GtBitsequence *cntlist,
     unsigned long nofreads, FILE *file)
@@ -35,7 +38,15 @@ static inline void gt_cntlist_show_ascii(GtBitsequence *cntlist,
       fprintf(file, "%lu\n", i);
 }
 
-static inline void gt_cntlist_show_bit(GT_UNUSED GtBitsequence *cntlist,
+void gt_cntlist_write_bin_header(unsigned long nofreads, FILE *file)
+{
+  gt_assert(file != NULL);
+  (void)putc(GT_CNTLIST_BIN_HEADER, file);
+  (void)putc((char)sizeof(unsigned long), file);
+  (void)fwrite(&(nofreads), sizeof (unsigned long), (size_t)1, file);
+}
+
+static inline void gt_cntlist_show_bit(GtBitsequence *cntlist,
     unsigned long nofreads, FILE *file)
 {
   gt_assert(file != NULL);
@@ -67,13 +78,13 @@ int gt_cntlist_show(GtBitsequence *cntlist, unsigned long nofreads,
   return 0;
 }
 
-int gt_cntlist_parse_bit(FILE *infp, GtBitsequence **cntlist,
+static int gt_cntlist_parse_bin_or_bit_header(FILE *infp,
     unsigned long *nofreads, GtError *err)
 {
   int c;
   size_t n;
 
-  gt_assert(infp != NULL && nofreads != NULL && cntlist != NULL);
+  gt_assert(infp != NULL && nofreads != NULL);
   gt_error_check(err);
   c = gt_xfgetc(infp);
   if (c == EOF)
@@ -93,19 +104,80 @@ int gt_cntlist_parse_bit(FILE *infp, GtBitsequence **cntlist,
     gt_error_set(err, "contained reads list: unrecognized format");
     return -1;
   }
-  GT_INITBITTAB(*cntlist, *nofreads);
-  n = fread(*cntlist, sizeof (GtBitsequence),
-      GT_NUMOFINTSFORBITS(*nofreads), infp);
-  if (n != GT_NUMOFINTSFORBITS(*nofreads))
-  {
-    gt_error_set(err, "contained reads file: unrecognized format");
-    return -1;
-  }
   return 0;
 }
 
-int gt_cntlist_parse_ascii(FILE *infp, GtBitsequence **cntlist,
-    unsigned long *nofreads, GtError *err)
+static int gt_cntlist_parse_bit(FILE *infp, bool alloc_cntlist,
+    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
+{
+  int had_err = gt_cntlist_parse_bin_or_bit_header(infp, nofreads, err);
+  if (had_err == 0)
+  {
+    size_t n;
+    gt_assert(cntlist != NULL);
+    if (alloc_cntlist)
+    {
+      GT_INITBITTAB(*cntlist, *nofreads);
+      n = fread(*cntlist, sizeof (GtBitsequence),
+          GT_NUMOFINTSFORBITS(*nofreads), infp);
+      if (n != GT_NUMOFINTSFORBITS(*nofreads))
+      {
+        gt_error_set(err, "contained reads file: unrecognized format");
+        had_err = -1;
+      }
+    }
+    else
+    {
+      /* combine using OR with existing data */
+      size_t i;
+      for (i = 0; i < GT_NUMOFINTSFORBITS(*nofreads); i++)
+      {
+        GtBitsequence value;
+        n = fread(&value, sizeof (GtBitsequence), (size_t)1, infp);
+        if (n != (size_t)1)
+        {
+          gt_error_set(err, "contained reads file: unrecognized format");
+          had_err = -1;
+          break;
+        }
+        *cntlist[i] |= value;
+      }
+    }
+  }
+  return had_err;
+}
+
+static int gt_cntlist_parse_bin(FILE *infp, bool alloc_cntlist,
+    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
+{
+  int had_err = gt_cntlist_parse_bin_or_bit_header(infp, nofreads, err);
+  if (had_err == 0)
+  {
+    size_t n;
+    unsigned long seqnum;
+    gt_assert(cntlist != NULL);
+    if (alloc_cntlist)
+      GT_INITBITTAB(*cntlist, *nofreads);
+    while (true)
+    {
+      n = fread(&seqnum, sizeof (unsigned long), (size_t)1, infp);
+      if (n != (size_t)1)
+      {
+        if (!feof(infp))
+        {
+          gt_error_set(err, "contained reads file: unrecognized format");
+          had_err = -1;
+        }
+        break;
+      }
+      GT_SETIBIT(*cntlist, seqnum);
+    }
+  }
+  return had_err;
+}
+
+static int gt_cntlist_parse_ascii(FILE *infp, bool alloc_cntlist,
+    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
 {
   int n;
   unsigned long seqnum;
@@ -118,11 +190,13 @@ int gt_cntlist_parse_ascii(FILE *infp, GtBitsequence **cntlist,
     gt_error_set(err, "contained reads file: unrecognized format");
     return -1;
   }
-  GT_INITBITTAB(*cntlist, *nofreads);
+  if (alloc_cntlist)
+    GT_INITBITTAB(*cntlist, *nofreads);
   while (true)
   {
     n = fscanf(infp, "%lu\n", &seqnum);
-    if (n == EOF) break;
+    if (n == EOF)
+      break;
     else if (n != 1)
     {
       gt_error_set(err, "contained reads file: unrecognized format");
@@ -133,15 +207,17 @@ int gt_cntlist_parse_ascii(FILE *infp, GtBitsequence **cntlist,
   return 0;
 }
 
-int gt_cntlist_parse(const char *filename, GtBitsequence **cntlist,
-    unsigned long *nofreads, GtError *err)
+int gt_cntlist_parse(const char *filename, bool alloc_cntlist,
+    GtBitsequence **cntlist, unsigned long *nofreads, GtError *err)
 {
   int c, retval = 0;
   FILE *infp;
 
+  gt_log_log("parse contained reads list file: %s", filename);
   infp = gt_fa_fopen(filename, "rb", err);
 
-  if (infp == NULL) return -1;
+  if (infp == NULL)
+    return -1;
 
   c = gt_xfgetc(infp);
   switch (c)
@@ -150,12 +226,25 @@ int gt_cntlist_parse(const char *filename, GtBitsequence **cntlist,
       gt_error_set(err, "%s: unexpected end of file", filename);
       retval = 1;
       break;
+    case GT_CNTLIST_BIN_HEADER:
+      gt_log_log("contained reads list format: BIN");
+      retval = gt_cntlist_parse_bin(infp, alloc_cntlist, cntlist, nofreads,
+          err);
+      break;
     case GT_CNTLIST_BIT_HEADER:
-      retval = gt_cntlist_parse_bit(infp, cntlist, nofreads, err);
+      gt_log_log("contained reads list format: BIT");
+      retval = gt_cntlist_parse_bit(infp, alloc_cntlist, cntlist, nofreads,
+          err);
+      break;
+    case GT_CNTLIST_ASCII_HEADER:
+      gt_xungetc(c, infp);
+      gt_log_log("contained reads list format: ASCII");
+      retval = gt_cntlist_parse_ascii(infp, alloc_cntlist, cntlist, nofreads,
+          err);
       break;
     default:
-      gt_xungetc(c, infp);
-      retval = gt_cntlist_parse_ascii(infp, cntlist, nofreads, err);
+      gt_error_set(err, "%s: unrecognized format", filename);
+      retval = 1;
       break;
   }
   gt_fa_fclose(infp);
@@ -189,7 +278,7 @@ unsigned long gt_cntlist_xload(const char *filename, GtBitsequence **cntlist,
   }
 
   err = gt_error_new();
-  retval = gt_cntlist_parse(filename, cntlist, &found_nofreads, err);
+  retval = gt_cntlist_parse(filename, true, cntlist, &found_nofreads, err);
   if (retval != 0)
   {
     fprintf(stderr, "FATAL: error by parsing contained reads list: %s\n",

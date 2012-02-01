@@ -694,7 +694,7 @@ int gt_strgraph_load_spm_from_file(GtStrgraph *strgraph,
   unsigned int i;
 
   gt_assert(strgraph != NULL);
-  if (contained)
+  if (contained != NULL)
   {
     skipdata.out.e.proc = gt_spmproc_strgraph_add;
     skipdata.to_skip = contained;
@@ -708,8 +708,8 @@ int gt_strgraph_load_spm_from_file(GtStrgraph *strgraph,
     gt_str_append_uint(filename, i);
     gt_str_append_cstr(filename, suffix);
     had_err = gt_spmlist_parse(gt_str_get(filename), min_length,
-        contained ? gt_spmproc_skip : gt_spmproc_strgraph_add,
-        contained ? (void*)&skipdata : (void*)strgraph, err);
+        contained != NULL ? gt_spmproc_skip : gt_spmproc_strgraph_add,
+        contained != NULL ? (void*)&skipdata : (void*)strgraph, err);
     gt_str_reset(filename);
   }
   gt_str_delete(filename);

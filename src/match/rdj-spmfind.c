@@ -90,7 +90,7 @@ struct GtBUstate_spm {
 
   /* varlen contained reads detection */
   unsigned long shortest;
-  GtBitsequence *contained;
+  FILE *cntfile;
   unsigned long nof_contained;
 
   unsigned long spaceforbucketprocessing;
@@ -437,11 +437,9 @@ static inline int processleafedge_spmvar(bool firstsucc,
       {
         unsigned long readnum = GT_READJOINER_READNUM(seqnum,
             state->first_revcompl, state->nofreads);
-        if (!GT_ISIBITSET(state->contained, readnum))
-        {
-          GT_SETIBIT(state->contained, readnum);
-          state->nof_contained++;
-        }
+        (void)fwrite(&(readnum), sizeof (unsigned long), (size_t)1,
+            state->cntfile);
+        state->nof_contained++;
       }
     }
     if (relpos + fatherdepth == seqlen)
@@ -652,9 +650,18 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
   }
   else
   {
+    GtStr *suffix = gt_str_new();
     state->read_length = 0;
-    GT_INITBITTAB(state->contained, state->first_revcompl > 0 ?
-        state->first_revcompl : state->nofreads);
+    gt_str_append_char(suffix, '.');
+    gt_str_append_uint(suffix, threadnum);
+    gt_str_append_cstr(suffix, GT_READJOINER_SUFFIX_CNTLIST);
+    state->cntfile = gt_fa_fopen_with_suffix(indexname, gt_str_get(suffix),
+        "wb", NULL);
+    gt_cntlist_write_bin_header(gt_encseq_is_mirrored(encseq) ?
+        state->nofreads >> 1 : state->nofreads, state->cntfile);
+    gt_str_delete(suffix);
+    if (!state->cntfile)
+      exit(-1);
   }
   state->threadnum = threadnum;
 
@@ -691,16 +698,16 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
   }
   else
   {
-    /*@ignore@*/
     GtStr *suffix = gt_str_new();
     gt_str_append_char(suffix, '.');
     gt_str_append_uint(suffix, threadnum);
     gt_str_append_cstr(suffix, GT_READJOINER_SUFFIX_SPMLIST);
+    /*@ignore@*/
     state->procdata = gt_fa_fopen_with_suffix(indexname, gt_str_get(suffix),
         "wb", NULL);
-    gt_str_delete(suffix);
     /*@end@*/
-    if (!state->procdata)
+    gt_str_delete(suffix);
+    if (state->procdata == NULL)
       exit(-1);
     if (state->first_revcompl > UINT32_MAX ||
         (state->first_revcompl == 0 && state->nofreads > UINT32_MAX))
@@ -815,16 +822,13 @@ static void gt_spmfind_state_delete(bool eqlen, GtBUstate_spm *state)
       GtStr *path = gt_str_new_cstr(state->indexname);
       gt_str_append_cstr(path, GT_READJOINER_SUFFIX_CNTLIST);
 
-      (void)gt_cntlist_show(state->contained, state->first_revcompl > 0 ?
-          state->first_revcompl : state->nofreads, gt_str_get(path),
-          true, state->err);
       gt_logger_log(state->verbose_logger, "number of internally contained "
           "reads [thread %u] = %lu", state->threadnum, state->nof_contained);
 
       gt_str_delete(path);
-      gt_free(state->contained);
       gt_GtArrayGtBUItvinfo_delete_spmvar(
           (GtArrayGtBUItvinfo_spmvar *)state->stack, state);
+      gt_fa_fclose(state->cntfile);
     }
     if (state->procdata != NULL)
       /*@ignore@*/
