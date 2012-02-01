@@ -161,8 +161,7 @@ uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct);
 
 void gt_firstcodes_leftborder_remap(GtFirstcodestab *fct,uint32_t *ptr);
 
-const GtStr *gt_firstcodes_outfilenameleftborder(const
-                                                     GtFirstcodestab *fct);
+const GtStr *gt_firstcodes_outfilenameleftborder(const GtFirstcodestab *fct);
 
 unsigned long gt_firstcodes_sample2full(const GtFirstcodestab *fct,
                                         unsigned long idx);

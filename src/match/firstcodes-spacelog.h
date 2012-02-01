@@ -18,6 +18,9 @@
 #ifndef FIRSTCODES_SPACELOG_H
 #define FIRSTCODES_SPACELOG_H
 
+#include <stdio.h>
+#include <stdbool.h>
+
 typedef struct GtFirstcodesspacelog GtFirstcodesspacelog;
 
 GtFirstcodesspacelog *gt_firstcodes_spacelog_new(void);

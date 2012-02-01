@@ -1854,35 +1854,18 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     GT_FCI_SUBTRACTWORKSPACE(fci.fcsl,"shortreadsort");
   }
-  if (srswtab != NULL)
+  if (!haserr && !onlyaccumulation && srswtab != NULL)
   {
     unsigned long sumofstoredvalues = 0;
 
     for (threadcount=0; threadcount<threads; threadcount++)
     {
-      if (!haserr && !onlyaccumulation)
-      {
-        sumofstoredvalues +=
-          gt_shortreadsort_sumofstoredvalues(srswtab[threadcount]);
-      }
-      gt_shortreadsort_delete(srswtab[threadcount]);
+      sumofstoredvalues +=
+        gt_shortreadsort_sumofstoredvalues(srswtab[threadcount]);
     }
-    if (!haserr && !onlyaccumulation)
-    {
-      gt_logger_log(logger,"average short read depth is %.2f",
+    gt_logger_log(logger,"average short read depth is %.2f",
                       (double) sumofstoredvalues/fci.firstcodeposhits);
-    }
-    gt_free(srswtab);
   }
-  if (haserr)
-  {
-    gt_firstcode_delete_before_end(&fci);
-    gt_free(fci.allfirstcodes);
-    gt_Sfxmappedrangelist_delete(sfxmrlist);
-    fci.buf.spaceGtUlong = NULL;
-    gt_radixsort_delete(fci.radixsort_code);
-  }
-  gt_suftabparts_delete(suftabparts);
   if (!haserr)
   {
     if (!onlyaccumulation)
@@ -1899,6 +1882,23 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_firstcode_delete_before_end(&fci);
     }
   }
+  if (srswtab != NULL)
+  {
+    for (threadcount=0; threadcount<threads; threadcount++)
+    {
+      gt_shortreadsort_delete(srswtab[threadcount]);
+    }
+    gt_free(srswtab);
+  }
+  if (haserr)
+  {
+    gt_firstcode_delete_before_end(&fci);
+    gt_free(fci.allfirstcodes);
+    gt_Sfxmappedrangelist_delete(sfxmrlist);
+    fci.buf.spaceGtUlong = NULL;
+    gt_radixsort_delete(fci.radixsort_code);
+  }
+  gt_suftabparts_delete(suftabparts);
   gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
   gt_firstcodes_tab_delete(fci.fcsl,&fci.tab);
   if (fci.spmsuftab != NULL)
