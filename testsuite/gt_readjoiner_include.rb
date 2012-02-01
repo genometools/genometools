@@ -459,7 +459,7 @@ if $gttestdata
         run "#{cnttest} -test showlist -readset reads"
         run "diff #{last_stdout} #{readset}.cnt"
         run_overlap(45)
-        run "#{spmtest} -test showlist -readset reads"
+        run "#{spmtest} -test showlist -readset reads.0"
         run "sort #{last_stdout}"
         spm = last_stdout
         run "sort #{readset}.l45.spm"
@@ -498,7 +498,7 @@ if $gttestdata
     reads4 = last_stdout
     run_prefilter("#{reads1} #{reads2} #{reads3} #{reads4}")
     run_overlap(45)
-    run "#{spmtest} -test showlist -readset reads"
+    run "#{spmtest} -test showlist -readset reads.0"
     run "sort #{last_stdout}"
     spm = last_stdout
     run "sort #{readset}.l45.spm"

@@ -39,6 +39,7 @@ typedef struct {
   unsigned int deadend, bubble, deadend_depth;
   GtOption *refoptionbuffersize;
   unsigned long buffersize;
+  unsigned int nspmfiles;
 } GtReadjoinerAssemblyArguments;
 
 static void* gt_readjoiner_assembly_arguments_new(void)
@@ -80,6 +81,13 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
       arguments->readset, NULL);
   gt_option_parser_add_option(op, option);
   gt_option_is_mandatory(option);
+
+  /* -spmfiles */
+  option = gt_option_new_uint_min("spmfiles", "number of SPM files to read\n"
+      "this must be equal to the value of -j for the overlap phase",
+      &arguments->nspmfiles, 1U, 1U);
+  gt_option_is_extended_option(option);
+  gt_option_parser_add_option(op, option);
 
   /* -l */
   option = gt_option_new_uint_min("l", "specify the minimum SPM length",
@@ -205,27 +213,31 @@ static int gt_readjoiner_assembly_arguments_check(GT_UNUSED int rest_argc,
   "save contig sequences"
 
 static int gt_readjoiner_assembly_count_spm(const char *readset, bool eqlen,
-    unsigned int minmatchlength, GtStrgraph *strgraph, GtBitsequence *contained,
-    GtLogger *default_logger, GtError *err)
+    unsigned int minmatchlength, unsigned int nspmfiles, GtStrgraph *strgraph,
+    GtBitsequence *contained, GtLogger *default_logger, GtError *err)
 {
+  GtSpmprocSkipData skipdata;
   int had_err = 0;
-  GtStr *filename;
+  unsigned int i;
+  GtStr *filename = gt_str_new();
   gt_logger_log(default_logger, GT_READJOINER_MSG_COUNTSPM);
-  filename = gt_str_new_cstr(readset);
-  gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_SPMLIST);
-  if (eqlen)
-    had_err = gt_spmlist_parse(gt_str_get(filename),
-        (unsigned long)minmatchlength, gt_spmproc_strgraph_count, strgraph,
-        err);
-  else
+  if (!eqlen)
   {
-    GtSpmprocSkipData skipdata;
     skipdata.out.e.proc = gt_spmproc_strgraph_count;
     skipdata.to_skip = contained;
     skipdata.out.e.data = strgraph;
+  }
+  for (i = 0; i < nspmfiles; i++)
+  {
+    gt_str_append_cstr(filename, readset);
+    gt_str_append_char(filename, '.');
+    gt_str_append_uint(filename, i);
+    gt_str_append_cstr(filename, GT_READJOINER_SUFFIX_SPMLIST);
     had_err = gt_spmlist_parse(gt_str_get(filename),
-        (unsigned long)minmatchlength, gt_spmproc_skip, &skipdata,
-        err);
+        (unsigned long)minmatchlength,
+        eqlen ? gt_spmproc_strgraph_count : gt_spmproc_skip,
+        eqlen ? (void*)strgraph : (void*)&skipdata, err);
+    gt_str_reset(filename);
   }
   gt_str_delete(filename);
   return had_err;
@@ -412,8 +424,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
         gt_timer_show_cpu_time_by_progress(timer);
       }
       had_err = gt_readjoiner_assembly_count_spm(readset, eqlen,
-         arguments->minmatchlength, strgraph, contained, default_logger,
-         err);
+         arguments->minmatchlength, arguments->nspmfiles, strgraph, contained,
+         default_logger, err);
       gt_readjoiner_assembly_show_current_space("(edges counted)");
       if (gt_showtime_enabled())
         gt_timer_show_progress(timer, GT_READJOINER_MSG_BUILDSG, stdout);
@@ -427,7 +439,8 @@ static int gt_readjoiner_assembly_runner(GT_UNUSED int argc,
       gt_readjoiner_assembly_show_current_space("(graph allocated)");
       had_err = gt_strgraph_load_spm_from_file(strgraph,
             (unsigned long)arguments->minmatchlength, arguments->redtrans,
-            contained, readset, GT_READJOINER_SUFFIX_SPMLIST, err);
+            contained, readset, arguments->nspmfiles,
+            GT_READJOINER_SUFFIX_SPMLIST, err);
     }
     if (had_err == 0)
     {

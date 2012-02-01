@@ -687,9 +687,10 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
   else
   {
     /*@ignore@*/
-    GtStr *suffix = gt_str_new_cstr(GT_READJOINER_SUFFIX_SPMLIST);
+    GtStr *suffix = gt_str_new();
     gt_str_append_char(suffix, '.');
     gt_str_append_uint(suffix, threadnum);
+    gt_str_append_cstr(suffix, GT_READJOINER_SUFFIX_SPMLIST);
     state->procdata = gt_fa_fopen_with_suffix(indexname, gt_str_get(suffix),
         "wb", NULL);
     gt_str_delete(suffix);
