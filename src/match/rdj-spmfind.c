@@ -94,6 +94,7 @@ struct GtBUstate_spm {
   unsigned long nof_contained;
 
   unsigned long spaceforbucketprocessing;
+  unsigned int threadnum;
 
 #ifdef GT_READJOINER_STATISTICS
   /* statistics */
@@ -549,6 +550,9 @@ static void showstatistics_spm(GtBUstate_spmeq *state)
 {
   unsigned long nof_correct_dir_transitive;
 
+  gt_logger_log(state->verbose_logger, "--- statistics for thread %u ---",
+      state->threadnum);
+
   /* encseq */
   gt_logger_log(state->verbose_logger, "encseq: number of reads: %lu",
       gt_encseq_num_of_sequences(state->encseq));
@@ -641,7 +645,7 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
   state->totallength = gt_encseq_total_length(encseq);
   state->minmatchlength = minmatchlength;
   state->elimtrans = elimtrans;
-  state->w_maxsize = (w_maxsize == 0) ? ULONG_MAX : w_maxsize;
+  state->w_maxsize = (w_maxsize == 0) ? ULONG_MAX : w_maxsize;\
   if (eqlen)
   {
     state->read_length = gt_encseq_seqlength(encseq, 0);
@@ -652,6 +656,7 @@ static GtBUstate_spm *gt_spmfind_state_new(bool eqlen, const GtEncseq *encseq,
     GT_INITBITTAB(state->contained, state->first_revcompl > 0 ?
         state->first_revcompl : state->nofreads);
   }
+  state->threadnum = threadnum;
 
   if (threadnum == 0)
   {
@@ -753,15 +758,47 @@ GtBUstate_spmvar *gt_spmfind_varlen_state_new(const GtEncseq *encseq,
       verbose_logger, err);
 }
 
+static unsigned long gt_spmfind_nof_trans_spm(GtBUstate_spm *state)
+{
+  return state->nof_transitive_withrc + (state->nof_transitive_other >> 1);
+}
+
+static unsigned long gt_spmfind_nof_irr_spm(GtBUstate_spm *state)
+{
+  return state->nofvalidspm;
+}
+
+unsigned long gt_spmfind_varlen_nof_trans_spm(GtBUstate_spmvar *state)
+{
+  return gt_spmfind_nof_trans_spm(state);
+}
+
+unsigned long gt_spmfind_varlen_nof_irr_spm(GtBUstate_spmvar *state)
+{
+  return gt_spmfind_nof_irr_spm(state);
+}
+
+unsigned long gt_spmfind_eqlen_nof_trans_spm(GtBUstate_spmeq *state)
+{
+  return gt_spmfind_nof_trans_spm(state);
+}
+
+unsigned long gt_spmfind_eqlen_nof_irr_spm(GtBUstate_spmeq *state)
+{
+  return gt_spmfind_nof_irr_spm(state);
+}
+
 static void gt_spmfind_state_delete(bool eqlen, GtBUstate_spm *state)
 {
   if (state != NULL)
   {
-    gt_logger_log(state->default_logger, "number of %ssuffix-prefix matches"
-        " = %lu", state->elimtrans ? "irreducible " : "", state->nofvalidspm);
+    gt_logger_log(state->verbose_logger, "number of %ssuffix-prefix matches "
+        "[thread %u] = %lu", state->elimtrans ? "irreducible " : "",
+        state->threadnum, state->nofvalidspm);
     if (state->elimtrans)
-      gt_logger_log(state->default_logger, "number of transitive "
-          "suffix-prefix matches = %lu", state->nof_transitive_withrc +
+      gt_logger_log(state->verbose_logger, "number of transitive "
+          "suffix-prefix matches [thread %u] = %lu",
+          state->threadnum, state->nof_transitive_withrc +
           (state->nof_transitive_other >> 1));
 #ifdef GT_READJOINER_STATISTICS
     showstatistics_spm(state);
@@ -781,8 +818,8 @@ static void gt_spmfind_state_delete(bool eqlen, GtBUstate_spm *state)
       (void)gt_cntlist_show(state->contained, state->first_revcompl > 0 ?
           state->first_revcompl : state->nofreads, gt_str_get(path),
           true, state->err);
-      gt_logger_log(state->default_logger, "number of strictly contained reads"
-          " = %lu", state->nof_contained);
+      gt_logger_log(state->verbose_logger, "number of internally contained "
+          "reads [thread %u] = %lu", state->threadnum, state->nof_contained);
 
       gt_str_delete(path);
       gt_free(state->contained);

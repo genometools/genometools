@@ -62,4 +62,12 @@ int gt_spmfind_varlen_process(void *data,
 
 void gt_spmfind_varlen_process_end(void *data);
 
+unsigned long gt_spmfind_varlen_nof_trans_spm(GtBUstate_spmvar *state);
+
+unsigned long gt_spmfind_varlen_nof_irr_spm(GtBUstate_spmvar *state);
+
+unsigned long gt_spmfind_eqlen_nof_trans_spm(GtBUstate_spmeq *state);
+
+unsigned long gt_spmfind_eqlen_nof_irr_spm(GtBUstate_spmeq *state);
+
 #endif

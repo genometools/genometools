@@ -227,6 +227,7 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
   unsigned int kmersize;
   bool haserr = false;
   bool eqlen;
+  unsigned long total_nof_irr_spm = 0, total_nof_trans_spm = 0;
 
   gt_error_check(err);
   gt_assert(arguments);
@@ -287,6 +288,10 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
       }
       for (threadcount = 0; threadcount < threads; threadcount++)
       {
+        total_nof_irr_spm +=
+          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
+        total_nof_trans_spm +=
+          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
         gt_spmfind_eqlen_state_delete(state_table[threadcount]);
       }
       gt_free(state_table);
@@ -311,16 +316,28 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
             arguments->phase2extra, arguments->radixsmall,
             arguments->radixparts, gt_spmfind_varlen_process,
             gt_spmfind_varlen_process_end, state_table, verbose_logger, err)
-           != 0)
+          != 0)
       {
         haserr = true;
       }
       for (threadcount = 0; threadcount < threads; threadcount++)
       {
         gt_spmfind_varlen_state_delete(state_table[threadcount]);
+        total_nof_irr_spm +=
+          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
+        total_nof_trans_spm +=
+          gt_spmfind_eqlen_nof_irr_spm(state_table[threadcount]);
       }
       gt_free(state_table);
     }
+  }
+  if (!haserr)
+  {
+    gt_logger_log(default_logger, "number of %ssuffix-prefix matches = %lu",
+        arguments->elimtrans ? "irreducible " : "", total_nof_irr_spm);
+    if (arguments->elimtrans)
+      gt_logger_log(default_logger, "number of transitive suffix-prefix "
+          "matches = %lu", total_nof_trans_spm);
   }
   gt_logger_delete(default_logger);
   gt_logger_delete(verbose_logger);
