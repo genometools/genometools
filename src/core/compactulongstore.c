@@ -38,6 +38,9 @@ GtCompactUlongstore *gt_GtCompactulongstore_new(unsigned long numofentries,
   GtCompactUlongstore *cus;
   unsigned long arraysize, totalbits;
 
+  /* if this assertion appears, then probably the 32-bit version of the
+     code is used. Better use the 64-bit version by compiling with
+     64bit=yes */
   gt_assert(numofentries <= ULONG_MAX/bitsperentry);
   totalbits = numofentries * bitsperentry;
   cus = gt_malloc(sizeof (*cus));
@@ -60,6 +63,9 @@ size_t gt_GtCompactulongstore_size(unsigned long numofentries,
 {
   unsigned long arraysize, totalbits;
 
+  /* if this assertion appears, then probably the 32-bit version of the
+     code is used. Better use the 64-bit version by compiling with
+     64bit=yes */
   gt_assert(numofentries <= ULONG_MAX/bitsperentry);
   totalbits = numofentries * bitsperentry;
   arraysize = GT_DIVWORDSIZE(totalbits);

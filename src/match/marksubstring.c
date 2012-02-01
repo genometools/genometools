@@ -46,11 +46,14 @@ Gtmarksubstring *gt_marksubstring_new(unsigned int numofchars,
 
 void gt_marksubstring_delete(Gtmarksubstring *mark,bool withbits)
 {
-  if (withbits)
+  if (mark != NULL)
   {
-    gt_free(mark->bits);
+    if (withbits)
+    {
+      gt_free(mark->bits);
+    }
+    gt_free(mark);
   }
-  gt_free(mark);
 }
 
 void gt_marksubstring_mark(Gtmarksubstring *mark,GtCodetype code)

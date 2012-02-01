@@ -32,7 +32,6 @@
 #include "core/arraydef.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-psbuf.h"
-#include "stamp.h"
 
 static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
                                        GtFirstcodestab *fct,
@@ -477,6 +476,8 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->hashmap_incrementcount = 0;
   fct->all_incrementcount = 0;
   fct->hashmap_getcount = 0;
+  fct->outfilenameleftborder = NULL;
+  GT_INITARRAY(&fct->bitchangepoints,GtUlong);
 }
 
 uint32_t **gt_firstcodes_leftborder_address(GtFirstcodestab *fct)
