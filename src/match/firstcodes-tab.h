@@ -46,9 +46,11 @@ typedef struct
   GtStr *outfilenameleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
-  unsigned int modvaluebits;
+#ifdef __LP64
   uint32_t modvaluemask;
+  unsigned int modvaluebits;
   GtArrayGtUlong bitchangepoints;
+#endif
 } GtFirstcodestab;
 
 DECLARE_HASHMAP(unsigned long, ul, uint32_t, u32, static, inline)
@@ -107,16 +109,19 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
   }
 }
 
+#ifdef __LP64
 #define GT_CHANGEPOINT_GET(CP)\
         unsigned long CP;\
         for (CP = 0; CP < fct->bitchangepoints.nextfreeGtUlong &&\
                      idx > fct->bitchangepoints.spaceGtUlong[CP]; CP++)\
             /* Nothing */ ;
+#endif
 
 GT_UNUSED
 static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
 {
+#ifdef __LP64
   GT_CHANGEPOINT_GET(changepoint);
   gt_assert(idx < fct->differentcodes);
   if (fct->leftborder[idx] > 0)
@@ -132,6 +137,10 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
     return (unsigned long)
            fct->leftborder[idx] + (changepoint << fct->modvaluebits);
   }
+#else
+  gt_assert(idx < fct->differentcodes && fct->leftborder[idx] > 0);
+  return (unsigned long) --fct->leftborder[idx];
+#endif
 }
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
