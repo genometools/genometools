@@ -56,7 +56,6 @@ typedef struct
 {
   GtIndexwithcode *spaceGtIndexwithcode;
   unsigned long width, nextfreeGtIndexwithcode, allocatedGtIndexwithcode;
-  size_t size;
   unsigned int depth;
 } GtArrayGtIndexwithcode;
 
@@ -134,19 +133,24 @@ static void gt_storefirstcodes(void *processinfo,
 
 #ifdef WITHCACHE
 
-static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
-                                               unsigned int maxdepth)
+static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
+                                             unsigned int addbscache_depth)
 {
+  size_t allocbytes = 0;
+
+  fci->binsearchcache.depth
+    = addbscache_depth + (unsigned int) log10((double) fci->differentcodes);
   fci->binsearchcache.nextfreeGtIndexwithcode = 0;
-  fci->binsearchcache.allocatedGtIndexwithcode = 1UL << (maxdepth+1);
+  fci->binsearchcache.allocatedGtIndexwithcode
+    = 1UL << (fci->binsearchcache.depth+1);
   fci->binsearchcache.width
     = fci->differentcodes/fci->binsearchcache.allocatedGtIndexwithcode;
   if (fci->binsearchcache.allocatedGtIndexwithcode < fci->differentcodes)
   {
     unsigned long idx, current = fci->binsearchcache.width;
-    size_t allocbytes
-      = sizeof (*fci->binsearchcache.spaceGtIndexwithcode)
-                * fci->binsearchcache.allocatedGtIndexwithcode;
+
+    allocbytes = sizeof (*fci->binsearchcache.spaceGtIndexwithcode)
+                 * fci->binsearchcache.allocatedGtIndexwithcode;
     fci->binsearchcache.spaceGtIndexwithcode = gt_malloc(allocbytes);
     for (idx=0; idx < fci->binsearchcache.allocatedGtIndexwithcode; idx++)
     {
@@ -169,24 +173,13 @@ static size_t gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
       gt_assert(fci->allfirstcodes[idx-1] < fci->allfirstcodes[idx]);
       fci->allfirstcodes_differences[idx]
         = fci->allfirstcodes[idx] - fci->allfirstcodes[idx-1];
-      /*printf("differences[%lu]=%lu\n",idx,
-                            fci->allfirstcodes_differences[idx]);*/
     }
 #endif
-    /*
-    if (idx > 0)
-    {
-      printf("%lu entries of width %lu: last=%lu\n",
-             fci->binsearchcache.nextfreeGtIndexwithcode,
-             (unsigned long)
-             fci->binsearchcache.width,
-             (fci->binsearchcache.spaceGtIndexwithcode[idx-1].ptr
-              - fci->allfirstcodes));
-    }
-    */
-    return allocbytes;
   }
-  return 0;
+  gt_log_log("binsearchcache.depth=%u => %lu bytes",
+             fci->binsearchcache.depth,
+             (unsigned long) allocbytes);
+  GT_FCI_ADDWORKSPACE(fci->fcsl,"binsearchcache",allocbytes);
 }
 #endif
 
@@ -1429,6 +1422,42 @@ static void gt_firstcodes_handle_tmp(GtFirstcodesinfo *fci,
   }
 }
 
+static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
+                                                  unsigned long maximumspace,
+                                                  unsigned int radixparts,
+                                                  const GtSuftabparts
+                                                    *suftabparts,
+                                                  unsigned long phase2extra)
+{
+  if (maximumspace > 0)
+  {
+    const unsigned long maxrounds = radixparts == 1U ? 500UL : 400UL;
+    size_t used = gt_firstcodes_spacelog_workspace(fci->fcsl) +
+                  phase2extra +
+                  gt_suftabparts_largestsizemappedpartwise(suftabparts);
+
+    if ((unsigned long) used < maximumspace)
+    {
+      const bool pair = true;
+      fci->buf.allocated
+        = gt_radixsort_entries(pair,radixparts,
+                               (size_t) maximumspace - used);
+    } else
+    {
+      fci->buf.allocated /= 4UL;
+    }
+    if ((unsigned long) (fci->codebuffer_total+fci->numofsequences)/
+                        fci->buf.allocated > maxrounds)
+    {
+      fci->buf.allocated
+        = (fci->codebuffer_total+fci->numofsequences)/maxrounds;
+    }
+  } else
+  {
+    fci->buf.allocated /= 2UL;
+  }
+}
+
 int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   unsigned int kmersize,
                                                   unsigned int numofparts,
@@ -1512,14 +1541,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.flushcount = 0;
     fci.codebuffer_total = 0;
 #ifdef WITHCACHE
-    fci.binsearchcache.depth
-      = addbscache_depth + (unsigned int) log10((double) fci.differentcodes);
-    fci.binsearchcache.size
-      = gt_firstcodes_fillbinsearchcache(&fci,fci.binsearchcache.depth);
-    GT_FCI_ADDWORKSPACE(fci.fcsl,"binsearchcache",fci.binsearchcache.size);
-    gt_log_log("binsearchcache.depth=%u => %lu bytes",
-               fci.binsearchcache.depth,
-               (unsigned long) fci.binsearchcache.size);
+    gt_firstcodes_fillbinsearchcache(&fci,addbscache_depth);
 #endif
     if (gt_firstcodes_allocspace(&fci,
                                  numofparts,
@@ -1610,32 +1632,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
                         threads * gt_shortreadsort_size(true,maxbucketsize,
                                                         maxseqlength-kmersize));
-    if (maximumspace > 0)
-    {
-      const unsigned long maxrounds = radixparts == 1U ? 500UL : 400UL;
-      size_t used = gt_firstcodes_spacelog_workspace(fci.fcsl) +
-                    phase2extra +
-                    gt_suftabparts_largestsizemappedpartwise(suftabparts);
-
-      if ((unsigned long) used < maximumspace)
-      {
-        const bool pair = true;
-        fci.buf.allocated
-          = gt_radixsort_entries(pair,radixparts,
-                                 (size_t) maximumspace - used);
-      } else
-      {
-        fci.buf.allocated /= 4UL;
-      }
-      if ((unsigned long) (fci.codebuffer_total+fci.numofsequences)/
-                          fci.buf.allocated > maxrounds)
-      {
-        fci.buf.allocated = (fci.codebuffer_total+fci.numofsequences)/maxrounds;
-      }
-    } else
-    {
-      fci.buf.allocated /= 2UL;
-    }
+    gt_firstcodes_allocsize_for_insertion(&fci,
+                                          maximumspace,
+                                          radixparts,
+                                          suftabparts,
+                                          phase2extra);
     if (!onlyaccumulation)
     {
       fci.radixsort_codepos = gt_radixsort_new(true,radixsmall,
