@@ -439,7 +439,7 @@ Name "gt readjoiner overlap: different min match lengths"
 Keywords "gt_readjoiner gt_readjoiner_overlap NEW"
 Test do
   run_prefilter("#$testdata/readjoiner/minlen_test.fas")
-  1.upto(40) do |minlen|
+  2.upto(40) do |minlen|
     run_overlap(minlen)
     assert_nofspm(40 - minlen)
   end

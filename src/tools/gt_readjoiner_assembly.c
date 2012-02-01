@@ -83,7 +83,7 @@ static GtOptionParser* gt_readjoiner_assembly_option_parser_new(
 
   /* -l */
   option = gt_option_new_uint_min("l", "specify the minimum SPM length",
-      &arguments->minmatchlength, 0, 1U);
+      &arguments->minmatchlength, 0, 2U);
   gt_option_is_extended_option(option);
   gt_option_parser_add_option(op, option);
 
