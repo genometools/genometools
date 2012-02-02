@@ -389,7 +389,49 @@ void gt_radixsort_linear_rr(GtRadixreader *rr,
     /*gt_radixsort_verify(rr);*/
   } else
   {
-    gt_assert(false); /*XXX: to be implemented */
+    unsigned int idx;
+    unsigned long sumwidth = 0, width;
+
+    if (len % radixsort->parts == 0)
+    {
+      width = len/radixsort->parts;
+    } else
+    {
+      width = len/radixsort->parts + 1;
+    }
+    for (idx = 0; idx < radixsort->parts; idx++)
+    {
+      if (idx == 0)
+      {
+        radixsort->ranges[idx].start = 0;
+      } else
+      {
+        radixsort->ranges[idx].start = radixsort->ranges[idx-1].end + 1;
+      }
+      if (idx < radixsort->parts - 1)
+      {
+        radixsort->ranges[idx].end = (idx+1) * width - 1;
+      } else
+      {
+        radixsort->ranges[idx].end = len - 1;
+      }
+      sumwidth += radixsort->ranges[idx].end - radixsort->ranges[idx].start + 1;
+    }
+    gt_assert(sumwidth == len);
+    for (idx = 0; idx < radixsort->parts; idx++)
+    {
+      unsigned long currentwidth = radixsort->ranges[idx].end -
+                                   radixsort->ranges[idx].start + 1;
+      gt_assert (currentwidth <= radixsort->tempalloc);
+      if (radixsort->pair)
+      {
+        gt_assert(false);
+      } else
+      {
+        gt_radixsort_GtUlong_linear(radixsort,radixsort->ranges[idx].start,
+                                    currentwidth);
+      }
+    }
   }
 }
 
