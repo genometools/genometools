@@ -24,6 +24,7 @@
 #include "core/stack-inlined.h"
 #include "core/types_api.h"
 #include "core/radix-intsort.h"
+#include "core/range_api.h"
 
 #define GT_RADIX_KEY(MASK,SHIFT,VALUE)    (((VALUE) >> (SHIFT)) & (MASK))
 #define GT_RADIX_KEY_PTR(MASK,SHIFT,PTR)  GT_RADIX_KEY(MASK,SHIFT,*(PTR))
@@ -60,6 +61,7 @@ struct GtRadixsortinfo
   bool ownarr, pair;
   unsigned long maxlen, tempalloc;
   unsigned int parts;
+  GtRange *ranges;
   size_t basesize, maxvalue;
 };
 
@@ -84,7 +86,7 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
   radixsort->pair = pair;
   radixsort->count = gt_malloc(sizeof (*radixsort->count) *
                                (radixsort->maxvalue+1));
-  gt_assert(parts == 1U || parts == 2U);
+  gt_assert(parts >= 1U);
   radixsort->parts = parts;
   if (arr == NULL)
   {
@@ -111,7 +113,8 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
     }
     radixsort->ownarr = false;
   }
-  radixsort->tempalloc = (parts == 1U) ? maxlen : maxlen/2 + 1;
+  radixsort->tempalloc = (parts == 1U) ? maxlen : maxlen/parts + 1;
+  radixsort->ranges = gt_malloc(sizeof(*radixsort->ranges) * parts);
   if (pair)
   {
     radixsort->temp = NULL;
@@ -161,7 +164,7 @@ unsigned long gt_radixsort_entries(bool pair,unsigned int parts,
 {
   double factor;
 
-  gt_assert(parts == 1U || parts == 2U);
+  gt_assert(parts >= 1U);
   /* Note that calculation includes data and temp. The space for temp
      depends on the number of parts. */
   factor = 1.0 + 1.0/(double) parts;
@@ -175,6 +178,7 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsort)
     gt_free(radixsort->count);
     gt_free(radixsort->temp);
     gt_free(radixsort->temppair);
+    gt_free(radixsort->ranges);
     if (radixsort->ownarr)
     {
       gt_free(radixsort->arr);
@@ -365,22 +369,27 @@ void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
 void gt_radixsort_linear_rr(GtRadixreader *rr,
                             GtRadixsortinfo *radixsort,unsigned long len)
 {
-  unsigned long len1;
 
-  gt_assert(radixsort->parts == 2U);
-  len1 = len/2;
-  gt_assert(len >= len1);
-  if (radixsort->pair)
+  if (radixsort->parts == 2U)
   {
-    gt_radixsort_GtUlongPair_linear(radixsort,0,len1);
-    gt_radixsort_GtUlongPair_linear(radixsort,len1,len - len1);
+    unsigned long len1;
+    len1 = len/2;
+    gt_assert(len >= len1);
+    if (radixsort->pair)
+    {
+      gt_radixsort_GtUlongPair_linear(radixsort,0,len1);
+      gt_radixsort_GtUlongPair_linear(radixsort,len1,len - len1);
+    } else
+    {
+      gt_radixsort_GtUlong_linear(radixsort,0,len1);
+      gt_radixsort_GtUlong_linear(radixsort,len1,len - len1);
+    }
+    gt_radixreader_init(rr,radixsort,len1,len);
+    /*gt_radixsort_verify(rr);*/
   } else
   {
-    gt_radixsort_GtUlong_linear(radixsort,0,len1);
-    gt_radixsort_GtUlong_linear(radixsort,len1,len - len1);
+    gt_assert(false); /*XXX: to be implemented */
   }
-  gt_radixreader_init(rr,radixsort,len1,len);
-  /*gt_radixsort_verify(rr);*/
 }
 
 static void gt_radix_phase_GtUlong_recursive(size_t offset,
