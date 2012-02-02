@@ -60,6 +60,49 @@ static void freeBUinfo_errfind(GT_UNUSED GtBUinfo_errfind *buinfo,
   /* nothing to do */
 }
 
+static inline void gt_errfind_reset(GtBUstate_errfind *state)
+{
+  unsigned int i;
+  state->currentchar = 0;
+  for (i = 0; i < state->alphasize; i++)
+    state->count[i] = 0;
+  state->seprange = false;
+}
+
+static inline void gt_errfind_process_kmer(unsigned long leafnumber,
+    GtBUstate_errfind *state)
+{
+  unsigned long current_count = ++state->count[state->currentchar];
+  if (current_count <= state->c)
+  {
+    gt_assert(leafnumber + state->k - 1 <
+        gt_encseq_total_length(state->encseq));
+    state->kpositions[state->currentchar * state->c + current_count - 1] =
+      leafnumber + state->k - 1;
+  }
+}
+
+#ifdef RDJ_ERRFIND_DEBUG
+#define RDJ_ERRFIND_KMINUSITHCHAR(I) \
+  ((leafnumber + state->k - I) < gt_encseq_total_length(state->encseq)) \
+    ? gt_encseq_get_decoded_char(state->encseq, leafnumber +  state->k - I, \
+        GT_READMODE_FORWARD) \
+    : '-'
+#define RDJ_ERRFIND_SHOW_KMER \
+  gt_log_log("ln: %lu; fd: %lu; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",\
+    leafnumber, fatherdepth, RDJ_ERRFIND_KMINUSITHCHAR(state->k),\
+    RDJ_ERRFIND_KMINUSITHCHAR(11), RDJ_ERRFIND_KMINUSITHCHAR(10),\
+    RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),\
+    RDJ_ERRFIND_KMINUSITHCHAR(7), RDJ_ERRFIND_KMINUSITHCHAR(6),\
+    RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),\
+    RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),\
+    RDJ_ERRFIND_KMINUSITHCHAR(1), RDJ_ERRFIND_KMINUSITHCHAR(0));
+#endif
+
+#define RDJ_ERRFIND_IS_SEPRANGE(ENCSEQ, POS)\
+  ((POS) == gt_encseq_total_length(ENCSEQ) || \
+   gt_encseq_position_is_separator((ENCSEQ), (POS), GT_READMODE_FORWARD))
+
 static int processleafedge_errfind(GT_UNUSED bool firstsucc,
     unsigned long fatherdepth,
     GT_UNUSED GtBUinfo_errfind *father, unsigned long leafnumber,
@@ -68,51 +111,20 @@ static int processleafedge_errfind(GT_UNUSED bool firstsucc,
 #ifdef RDJ_ERRFIND_DEBUG
   if (leafnumber == state->debug_value)
     gt_log_enable();
-#define RDJ_ERRFIND_KMINUSITHCHAR(I) \
-  ((leafnumber + state->k - I) < gt_encseq_total_length(state->encseq)) \
-    ? gt_encseq_get_decoded_char(state->encseq, leafnumber +  state->k - I, \
-        GT_READMODE_FORWARD) \
-    : '-'
-    gt_log_log("ln: %lu; fd: %lu; k-mer: %c...%c%c%c%c%c%c%c%c%c%c%c(%c)",
-      leafnumber, fatherdepth, RDJ_ERRFIND_KMINUSITHCHAR(state->k),
-      RDJ_ERRFIND_KMINUSITHCHAR(11), RDJ_ERRFIND_KMINUSITHCHAR(10),
-      RDJ_ERRFIND_KMINUSITHCHAR(9), RDJ_ERRFIND_KMINUSITHCHAR(8),
-      RDJ_ERRFIND_KMINUSITHCHAR(7), RDJ_ERRFIND_KMINUSITHCHAR(6),
-      RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),
-      RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),
-      RDJ_ERRFIND_KMINUSITHCHAR(1), RDJ_ERRFIND_KMINUSITHCHAR(0));
+  RDJ_ERRFIND_SHOW_KMER;
 #endif
   if (fatherdepth < state->k - 1)
-  {
-    unsigned int i;
-    state->currentchar = 0;
-    for (i = 0; i < state->alphasize; i++)
-      state->count[i] = 0;
-    state->seprange = false;
-  }
+    gt_errfind_reset(state);
   else if (!state->seprange)
   {
-    if (fatherdepth == state->k - 1)
+    if (fatherdepth == state->k - 1 &&
+        RDJ_ERRFIND_IS_SEPRANGE(state->encseq, leafnumber + fatherdepth))
     {
-      if (leafnumber + fatherdepth == gt_encseq_total_length(state->encseq) ||
-          gt_encseq_position_is_separator(state->encseq, leafnumber +
-            fatherdepth, GT_READMODE_FORWARD))
-      {
-        state->seprange = true;
-      }
+      state->seprange = true;
     }
     if (!state->seprange && state->currentchar < state->alphasize)
     {
-      {
-        unsigned long current_count = ++state->count[state->currentchar];
-        if (current_count <= state->c)
-        {
-          gt_assert(leafnumber + state->k - 1 <
-              gt_encseq_total_length(state->encseq));
-          state->kpositions[state->currentchar * state->c + current_count - 1] =
-            leafnumber + state->k - 1;
-        }
-      }
+      gt_errfind_process_kmer(leafnumber, state);
       if (fatherdepth == state->k - 1)
       {
         state->currentchar++;
@@ -133,20 +145,14 @@ static int processbranchingedge_errfind(GT_UNUSED bool firstsucc,
     GT_UNUSED GtError *err)
 {
   if (fatherdepth < state->k - 1)
+    gt_errfind_reset(state);
+  else if (fatherdepth == state->k - 1)
   {
-    unsigned int i;
-    state->currentchar = 0;
-    for (i = 0; i < state->alphasize; i++)
-      state->count[i] = 0;
-    state->seprange = false;
-  }
-      if (fatherdepth == state->k - 1)
-      {
-          state->currentchar++;
+      state->currentchar++;
 #ifdef RDJ_ERRFIND_DEBUG
-          gt_log_log("currentchar incremented, now is %u", state->currentchar);
+      gt_log_log("currentchar incremented, now is %u", state->currentchar);
 #endif
-      }
+  }
   return 0;
 }
 
