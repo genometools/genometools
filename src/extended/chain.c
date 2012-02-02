@@ -28,7 +28,7 @@ struct GtChain {
 GtChain* gt_chain_new(void)
 {
   GtChain *chain;
-  chain = gt_calloc(1, sizeof *chain);
+  chain = gt_calloc((size_t) 1, sizeof *chain);
   chain->fragments = gt_array_new(sizeof (unsigned long));
   return chain;
 }

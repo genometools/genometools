@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any

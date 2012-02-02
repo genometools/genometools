@@ -28,7 +28,7 @@ end
 def parseargs(argv)
   options = OpenStruct.new
   options.optimize = true
-  options.m64 = false
+  options.m64 = true
   options.speed = false
   options.prof = false
   options.jobs = 4

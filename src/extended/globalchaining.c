@@ -101,7 +101,7 @@ static long overlapcost(GtFragment *fragments,
 
   gt_log_log("overlap total  (#%lu, #%lu)=%lu", i, j, overlaplength);
 
-  return overlaplength;
+  return (long) overlaplength;
 }
 
 static void chainingboundarycases(GtChain *chain,
@@ -110,7 +110,7 @@ static void chainingboundarycases(GtChain *chain,
 {
   if (num_of_fragments == 0)
     gt_chain_reset(chain);
-  else if (num_of_fragments == 1) {
+  else if (num_of_fragments == 1UL) {
     gt_chain_reset(chain);
     gt_chain_set_score(chain, fragments[0].weight);
     gt_chain_add_fragnum(chain, 0);
@@ -183,10 +183,10 @@ static void bruteforcechainingscores(GtChaininfo *chaininfo,
   localmaxfrag.maxscore = 0;
   localmaxfrag.maxfragnum = 0;
 
-  if (num_of_fragments > 1) {
+  if (num_of_fragments > 1UL) {
     chaininfo[0].previousinchain = UNDEFPREVIOUS;
     chaininfo[0].score = fragments[0].weight;
-    for (rightfrag = 1; rightfrag < num_of_fragments; rightfrag++) {
+    for (rightfrag = 1UL; rightfrag < num_of_fragments; rightfrag++) {
       weightright = fragments[rightfrag].weight;
       localmaxfrag.defined = false;
       for (leftfrag = 0; leftfrag < rightfrag; leftfrag++) {
@@ -406,7 +406,7 @@ static void globalchaining_generic(bool maxscore_chains,
   chaininfo = gt_malloc(sizeof (GtChaininfo) * num_of_fragments);
   if (gt_log_enabled())
     log_fragments(fragments, num_of_fragments);
-  if (num_of_fragments > 1) {
+  if (num_of_fragments > 1UL) {
     /* compute chains */
     if (!maxscore_chains) {
       overlapinfo = gt_malloc(sizeof (Overlapinfo) * num_of_fragments);

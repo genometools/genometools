@@ -880,15 +880,14 @@ SKTOOLS=${shell grep -l Kurtz src/tools/*.c}
 SKCORE=${shell grep -l 'Stefan Kurtz' src/core/*.c}
 DWTOOLS=${shell grep -l Willrodt src/tools/*.c}
 GGTOOLS=${shell grep -l Gonnella src/tools/*.c}
+SKEXT=${shell grep -l 'Stefan Kurtz' src/extended/*.c}
 GGEXT=${shell grep -l Gonnella src/extended/*.c}
 
 ALLSPLINT=${addprefix obj/,${notdir ${subst .c,.splint,\
              ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/match/*.c}}\
              ${wildcard ${CURDIR}/src/ltr/*.c}\
-             ${SKTOOLS} ${SKCORE} ${DWTOOLS} \
-             ${GGTOOLS} ${GGEXT} }}}\
-          obj/redblack.splint\
-          obj/uint64hashtable.splint
+             ${SKTOOLS} ${SKCORE} ${SKEXT} ${DWTOOLS} \
+             ${GGTOOLS} ${GGEXT} }}}
 
 spgt:${ALLSPLINT}
 
