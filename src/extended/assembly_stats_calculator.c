@@ -100,14 +100,14 @@ static void calcNstats(unsigned long key, unsigned long long value,
   unsigned int i;
   nstats->current_len += (key * value);
   nstats->current_num += value;
-  for (i = 0; i < NOF_LIMITS; i++)
+  for (i = 0; i < (unsigned int) NOF_LIMITS; i++)
   {
-    if (key > nstats->limit[i])
+    if ((unsigned long long) key > nstats->limit[i])
       nstats->larger_than_limit[i] = nstats->current_num;
   }
   if (nstats->median == 0 && nstats->current_num >= nstats->half_num)
   {
-    nstats->median = key;
+    nstats->median = (unsigned long long) key;
   }
   for (i = 0; i < nstats->nofstats; i++)
   {
@@ -115,7 +115,7 @@ static void calcNstats(unsigned long key, unsigned long long value,
     {
       nstats->done[i] = true;
       nstats->nvalue[i] = key;
-      nstats->lvalue[i] = nstats->current_num;
+      nstats->lvalue[i] = (unsigned long) nstats->current_num;
     }
   }
 }
@@ -129,7 +129,7 @@ static void calcNstats(unsigned long key, unsigned long long value,
   nstats.nofstats++
 
 #define initLimit(INDEX, LENGTH)\
-  nstats.limit[INDEX] = (unsigned long) (LENGTH);\
+  nstats.limit[INDEX] = (unsigned long long) (LENGTH);\
   nstats.larger_than_limit[INDEX] = 0
 
 void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
@@ -155,7 +155,7 @@ void gt_assembly_stats_calculator_show(GtAssemblyStatsCalculator *asc,
   initLimit(4, 1000000ULL);
   nstats.current_len = 0;
   nstats.current_num = 0;
-  nstats.half_num = asc->numofseq >> 1;
+  nstats.half_num = (unsigned long long) (asc->numofseq >> 1);
   nstats.median = 0;
   gt_disc_distri_foreach_in_reverse_order(asc->lengths, calcNstats, &nstats);
 

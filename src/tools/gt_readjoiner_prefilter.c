@@ -291,34 +291,47 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
         gt_contfinder_nofcontained(contfinder),
         (float)gt_contfinder_nofcontained(contfinder) * 100 /
         (float)input_nofreads);
-    if (!arguments->verbose)
-      gt_logger_log(default_logger, "contained reads = %lu",
-          gt_contfinder_nofcontained(contfinder));
-    output_nofreads -= gt_contfinder_nofcontained(contfinder);
-    gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
-        output_nofreads);
+    if (!had_err)
+    {
+      if (!arguments->verbose)
+      {
+        gt_logger_log(default_logger, "contained reads = %lu",
+            gt_contfinder_nofcontained(contfinder));
+      }
+      output_nofreads -= gt_contfinder_nofcontained(contfinder);
+      gt_logger_log(default_logger, "number of reads in filtered readset = %lu",
+                    output_nofreads);
 
-    if (arguments->encseq)
-      gt_logger_log(verbose_logger, "encseq saved: %s.(esq|al1%s)",
-          gt_str_get(arguments->readset), varlen ? "|ssp" : "");
-    if (arguments->cntlist)
-      gt_logger_log(verbose_logger, "contained reads list saved: %s",
-          gt_str_get(cntlistfilename));
-    if (arguments->seppos)
-      gt_logger_log(verbose_logger, "separator positions saved: %s",
-          gt_str_get(sepposfilename));
-
+      if (arguments->encseq)
+      {
+        gt_logger_log(verbose_logger, "encseq saved: %s.(esq|al1%s)",
+                      gt_str_get(arguments->readset), varlen ? "|ssp" : "");
+      }
+      if (arguments->cntlist)
+      {
+        gt_logger_log(verbose_logger, "contained reads list saved: %s",
+                      gt_str_get(cntlistfilename));
+      }
+      if (arguments->seppos)
+      {
+        gt_logger_log(verbose_logger, "separator positions saved: %s",
+                      gt_str_get(sepposfilename));
+      }
+    }
   }
-
-  if (arguments->testrs)
-    gt_contfinder_radixsort_eqlen_tester(contfinder);
-
-  gt_contfinder_delete(contfinder);
-  if (arguments->encseq && varlen)
+  if (!had_err)
   {
-    gt_prefilter_output_varlen_encseq(gt_str_get(arguments->readset), err);
+    if (arguments->testrs)
+    {
+      gt_contfinder_radixsort_eqlen_tester(contfinder);
+    }
+    gt_contfinder_delete(contfinder);
+    if (arguments->encseq && varlen)
+    {
+      had_err
+        = gt_prefilter_output_varlen_encseq(gt_str_get(arguments->readset),err);
+    }
   }
-
   gt_str_delete(cntlistfilename);
   gt_str_delete(sepposfilename);
   gt_logger_delete(verbose_logger);
