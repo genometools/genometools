@@ -80,7 +80,7 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
 
 void gt_thread_join(GtThread *thread)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(thread);
   rval = pthread_join(*(pthread_t*) thread, NULL);
   gt_assert(!rval); /* XXX */
@@ -100,7 +100,7 @@ static void* thread_xmalloc(size_t size, const char *filename, int line)
 GtRWLock* gt_rwlock_new(void)
 {
   GtRWLock *rwlock;
-  int rval;
+  GT_UNUSED int rval;
   /* XXX: can we use gt_malloc() here? */
   rwlock = thread_xmalloc(sizeof (pthread_rwlock_t), __FILE__, __LINE__);
   /* initialize read/write lock with default attributes */
@@ -111,7 +111,7 @@ GtRWLock* gt_rwlock_new(void)
 
 void gt_rwlock_delete(GtRWLock *rwlock)
 {
-  int rval;
+  GT_UNUSED int rval;
   if (!rwlock) return;
   rval = pthread_rwlock_destroy((pthread_rwlock_t*) rwlock);
   gt_assert(!rval);
@@ -120,7 +120,7 @@ void gt_rwlock_delete(GtRWLock *rwlock)
 
 void gt_rwlock_rdlock_func(GtRWLock *rwlock)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(rwlock);
   rval = pthread_rwlock_rdlock((pthread_rwlock_t*) rwlock);
   gt_assert(!rval);
@@ -128,7 +128,7 @@ void gt_rwlock_rdlock_func(GtRWLock *rwlock)
 
 void gt_rwlock_wrlock_func(GtRWLock *rwlock)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(rwlock);
   rval = pthread_rwlock_wrlock((pthread_rwlock_t*) rwlock);
   gt_assert(!rval);
@@ -136,7 +136,7 @@ void gt_rwlock_wrlock_func(GtRWLock *rwlock)
 
 void gt_rwlock_unlock_func(GtRWLock *rwlock)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(rwlock);
   rval = pthread_rwlock_unlock((pthread_rwlock_t*) rwlock);
   gt_assert(!rval);
@@ -145,7 +145,7 @@ void gt_rwlock_unlock_func(GtRWLock *rwlock)
 GtMutex* gt_mutex_new(void)
 {
   GtMutex *mutex;
-  int rval;
+  GT_UNUSED int rval;
   /* XXX: can we use gt_malloc() here? */
   mutex = thread_xmalloc(sizeof (pthread_mutex_t), __FILE__, __LINE__);
   /* initialize mutex with default attributes */
@@ -156,7 +156,7 @@ GtMutex* gt_mutex_new(void)
 
 void gt_mutex_delete(GtMutex *mutex)
 {
-  int rval;
+  GT_UNUSED int rval;
   if (!mutex) return;
   rval = pthread_mutex_destroy((pthread_mutex_t*) mutex);
   gt_assert(!rval);
@@ -165,7 +165,7 @@ void gt_mutex_delete(GtMutex *mutex)
 
 void gt_mutex_lock_func(GtMutex *mutex)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(mutex);
   rval = pthread_mutex_lock((pthread_mutex_t*) mutex);
   gt_assert(!rval);
@@ -173,7 +173,7 @@ void gt_mutex_lock_func(GtMutex *mutex)
 
 void gt_mutex_unlock_func(GtMutex *mutex)
 {
-  int rval;
+  GT_UNUSED int rval;
   gt_assert(mutex);
   rval = pthread_mutex_unlock((pthread_mutex_t*) mutex);
   gt_assert(!rval);
