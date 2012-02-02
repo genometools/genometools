@@ -58,7 +58,11 @@ void priorityqueue_add(GtPriorityQueue *pq, GtPQelementtype value)
   {
     GtPQelementtype *ptr, tmp;
 
+    /* store elements in reverse order, i.e.\ with the minimum element
+       at the last index */
     pq->elements[pq->numofelements++] = value;
+    /* move last element to the left until and element larger or equal
+       value is found */
     for (ptr = pq->elements + pq->numofelements - 1; ptr > pq->elements; ptr--)
     {
       if (*(ptr-1) < *ptr)
@@ -66,6 +70,9 @@ void priorityqueue_add(GtPriorityQueue *pq, GtPQelementtype value)
         tmp = *ptr;
         *ptr = *(ptr-1);
         *(ptr-1) = tmp;
+      } else
+      {
+        break;
       }
     }
     priorityqueue_checkorder(pq);
@@ -126,7 +133,8 @@ GtPQelementtype priorityqueue_delete_min(GtPriorityQueue *pq)
 GtPQelementtype priorityqueue_find_min(const GtPriorityQueue *pq)
 {
   gt_assert(!priorityqueue_is_empty(pq));
-  return pq->elements[pq->capacity < (unsigned long) GT_MINPQSIZE ? 0 : 1];
+  return pq->elements[pq->capacity < (unsigned long) GT_MINPQSIZE
+                       ? pq->numofelements-1 : 1UL];
 }
 
 bool priorityqueue_is_empty(const GtPriorityQueue *pq)
