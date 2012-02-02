@@ -77,7 +77,7 @@ typedef uint64_t GtStrgraphVnum;
 
 #define GT_STRGRAPH_DESERIALIZE_DATA(FP, NOFELEMS, SPACE)\
   {\
-    int nofreadbytes;\
+    GT_UNUSED int nofreadbytes;\
     nofreadbytes = gt_file_xread((FP), (void*)(SPACE), (sizeof (*(SPACE))) *\
         (NOFELEMS));\
     gt_assert(nofreadbytes == (int)(sizeof (*(SPACE)) * (NOFELEMS)));\
@@ -453,7 +453,7 @@ static void gt_strgraph_save(const GtStrgraph *strgraph, GtFile *outfp)
 
 static void gt_strgraph_load(GtStrgraph *strgraph, GtFile *infp)
 {
-  int read;
+  GT_UNUSED int read;
   GtStrgraphVnum n_vertices;
   read = gt_file_xread(infp, (void*)&n_vertices, sizeof (GtStrgraphVnum));
   gt_assert(read == (int)sizeof (GtStrgraphVnum));

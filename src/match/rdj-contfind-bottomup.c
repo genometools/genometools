@@ -229,7 +229,7 @@ unsigned long gt_contfind_bottomup(Sequentialsuffixarrayreader *ssar,
 {
   ContfindBUstate state;
   unsigned long totallength;
-  int retval;
+  GT_UNUSED int retval;
 
   gt_assert(ssar != NULL);
   gt_assert(contained != NULL);

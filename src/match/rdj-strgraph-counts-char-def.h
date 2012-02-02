@@ -118,7 +118,7 @@ enum iterator_op gt_strgraph__save_large_count(GtStrgraphVnum vnum,
   {\
     GtStrgraphVnum          __large_count_vnum;\
     GtStrgraphCount__Large  __large_count = 0;\
-    int                     __large_count_read_retval;\
+    GT_UNUSED int           __large_count_read_retval;\
     \
     while (gt_file_xread((FP), &__large_count_vnum,\
         sizeof (__large_count_vnum)) == (int)sizeof (__large_count_vnum))\
