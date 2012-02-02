@@ -237,8 +237,8 @@ static void gt_radixsort_GtUlong_linear(GtRadixsortinfo *radixsort,
             radixsort->temp != NULL);
   source = radixsort->arr + offset;
   dest = radixsort->temp;
-  for (iter = 0; iter <(unsigned int) (sizeof(unsigned long)/
-                                      radixsort->basesize);
+  for (iter = 0; iter < (unsigned int) (sizeof(unsigned long)/
+                                       radixsort->basesize);
        iter++)
   {
     GtUlong *ptr;
@@ -370,10 +370,11 @@ void gt_radixsort_linear_rr(GtRadixreader *rr,
                             GtRadixsortinfo *radixsort,unsigned long len)
 {
 
+  gt_assert(radixsort->parts >= 2U);
   if (radixsort->parts == 2U)
   {
-    unsigned long len1;
-    len1 = len/2;
+    unsigned long len1 = len/2;
+
     gt_assert(len >= len1);
     if (radixsort->pair)
     {
