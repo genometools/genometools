@@ -37,7 +37,7 @@ static void gt_radix_showbytewise(unsigned long value)
 {
   int shift;
 
-  for (shift = 56; shift >= 0; shift-=8)
+  for (shift = GT_INTWORDSIZE - 8; shift >= 0; shift-=8)
   {
     printf("%lu ",GT_RADIX_KEY_UINT8(shift,&value));
     if (shift > 0)
