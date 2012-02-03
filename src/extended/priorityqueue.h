@@ -21,11 +21,13 @@
 typedef struct GtPriorityQueue GtPriorityQueue;
 typedef struct
 {
-  unsigned long value, key;
+  unsigned long sortkey,
+                value;
 } GtPQelementtype;
 
 GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements);
-void gt_priorityqueue_add(GtPriorityQueue *pq, const GtPQelementtype *elem);
+void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
+                          unsigned long value);
 GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq);
 const GtPQelementtype *gt_priorityqueue_find_min(const GtPriorityQueue *pq);
 bool gt_priorityqueue_is_empty(const GtPriorityQueue *pq);

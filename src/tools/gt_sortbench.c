@@ -336,6 +336,7 @@ static void check_radixsort_GtUlong_linear_gen(bool smalltables,
   {
     GtRadixreader *radixreader = gt_radixsort_linear_rr(radixsort,len);
     gt_radixsort_verify(radixreader);
+    printf("verified\n");
   }
   gt_radixsort_delete(radixsort);
 }

@@ -442,8 +442,11 @@ GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
       {
         gt_radixsort_GtUlong_linear(radixsort,radixsort->ranges[idx].start,
                                     currentwidth);
+        gt_priorityqueue_add(radixsort->radixreader->priorityqueue,
+                             radixsort->arr[radixsort->ranges[idx].start],
+                             (unsigned long) idx);
         radixsort->radixreader->ptrtab[idx].currentptr
-          = radixsort->arr + radixsort->ranges[idx].start;
+          = radixsort->arr + radixsort->ranges[idx].start + 1;
         radixsort->radixreader->ptrtab[idx].endptr
           = radixsort->arr + radixsort->ranges[idx].end + 1;
       }

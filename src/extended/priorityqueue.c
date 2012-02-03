@@ -37,8 +37,8 @@ GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
   pq->elements = gt_malloc(sizeof (*pq->elements) * (maxnumofelements + 1));
   pq->capacity = maxnumofelements;
   pq->numofelements = 0;
+  pq->elements[0].sortkey = 0;
   pq->elements[0].value = 0;
-  pq->elements[0].key = 0;
   return pq;
 }
 
@@ -49,7 +49,7 @@ static void gt_priorityqueue_checkorder(const GtPriorityQueue *pq)
   gt_assert(pq != NULL);
   for (ptr = pq->elements; ptr < pq->elements + pq->numofelements - 1; ptr++)
   {
-    gt_assert(ptr->value >= (ptr+1)->value);
+    gt_assert(ptr->sortkey >= (ptr+1)->sortkey);
   }
 }
 
@@ -65,7 +65,8 @@ bool gt_priorityqueue_is_full(const GtPriorityQueue *pq)
   return pq->numofelements == pq->capacity ? true : false;
 }
 
-void gt_priorityqueue_add(GtPriorityQueue *pq, const GtPQelementtype *elem)
+void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
+                          unsigned long value)
 {
   gt_assert(pq != NULL && !gt_priorityqueue_is_full(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
@@ -74,12 +75,13 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, const GtPQelementtype *elem)
 
     /* store elements in reverse order, i.e.\ with the minimum element
        at the last index */
-    pq->elements[pq->numofelements++] = *elem;
-    /* move last element to the left until and element larger or equal
-       value is found */
+    pq->elements[pq->numofelements].sortkey = sortkey;
+    pq->elements[pq->numofelements++].value = value;
+    /* move last element to the left until and element larger or equal than
+       the key is found. */
     for (ptr = pq->elements + pq->numofelements - 1; ptr > pq->elements; ptr--)
     {
-      if ((ptr-1)->value < ptr->value)
+      if ((ptr-1)->sortkey < ptr->sortkey)
       {
         tmp = *ptr;
         *ptr = *(ptr-1);
@@ -95,14 +97,15 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, const GtPQelementtype *elem)
     unsigned long idx;
 
     for (idx = ++pq->numofelements;
-         idx/2 > 0 && pq->elements[idx/2].value > elem->value;
+         idx/2 > 0 && pq->elements[idx/2].sortkey > sortkey;
          idx /= 2)
     {
       gt_assert(idx > 0);
       pq->elements[idx] = pq->elements[idx/2];
     }
     gt_assert(idx > 0);
-    pq->elements[idx] = *elem;
+    pq->elements[idx].sortkey = sortkey;
+    pq->elements[idx].value = value;
   }
 }
 
@@ -125,11 +128,11 @@ GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
       child = idx * 2;
       gt_assert(child > 0);
       if (child != pq->numofelements &&
-          pq->elements[child + 1].value < pq->elements[child].value)
+          pq->elements[child + 1].sortkey < pq->elements[child].sortkey)
       {
         child++;
       }
-      if (lastelement.value > pq->elements[child].value)
+      if (lastelement.sortkey > pq->elements[child].sortkey)
       {
         pq->elements[idx] = pq->elements[child];
       } else

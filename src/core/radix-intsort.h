@@ -51,6 +51,23 @@
           }\
         } else\
         {\
+          if (gt_priorityqueue_is_empty((RR)->priorityqueue))\
+          {\
+            STOPSTATEMENT;\
+          } else\
+          {\
+            GtPQelementtype *minelem \
+              = gt_priorityqueue_delete_min((RR)->priorityqueue);\
+            VALUE = minelem->sortkey;\
+            if ((RR)->ptrtab[minelem->value].currentptr <\
+                (RR)->ptrtab[minelem->value].endptr)\
+            {\
+              gt_priorityqueue_add((RR)->priorityqueue,\
+                                   *(RR)->ptrtab[minelem->value].currentptr,\
+                                   minelem->value);\
+              (RR)->ptrtab[minelem->value].currentptr++;\
+            }\
+          }\
         }
 
 #define GT_RADIXREADER_NEXT_PAIR(VALUE,RR,STOPSTATEMENT)\
