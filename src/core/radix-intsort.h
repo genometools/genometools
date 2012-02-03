@@ -19,7 +19,6 @@
 #define RADIX_INTSORT_H
 
 #include "core/types_api.h"
-#include "extended/priorityqueue.h"
 
 #define GT_RADIXREADER_NEXT(VALUE,RR,STOPSTATEMENT)\
         if ((RR)->ptrtab == NULL)\
@@ -51,22 +50,22 @@
           }\
         } else\
         {\
-          if (gt_priorityqueue_is_empty((RR)->priorityqueue))\
+          if ((RR)->pq_numofelements > 0)\
           {\
-            STOPSTATEMENT;\
+            GtRadixreaderPQelemtype *minelem = (RR)->pq_values +\
+                                               (--(RR)->pq_numofelements);\
+            VALUE = minelem->sortkey;\
+            if ((RR)->ptrtab[minelem->part].currentptr <\
+                (RR)->ptrtab[minelem->part].endptr)\
+            {\
+              gt_radixreaderPQadd((RR),\
+                                  *(RR)->ptrtab[minelem->part].currentptr,\
+                                  minelem->part,0);\
+              (RR)->ptrtab[minelem->part].currentptr++;\
+            }\
           } else\
           {\
-            GtPQelementtype *minelem \
-              = gt_priorityqueue_delete_min((RR)->priorityqueue);\
-            VALUE = minelem->sortkey;\
-            if ((RR)->ptrtab[minelem->value].currentptr <\
-                (RR)->ptrtab[minelem->value].endptr)\
-            {\
-              gt_priorityqueue_add((RR)->priorityqueue,\
-                                   *(RR)->ptrtab[minelem->value].currentptr,\
-                                   minelem->value);\
-              (RR)->ptrtab[minelem->value].currentptr++;\
-            }\
+            STOPSTATEMENT;\
           }\
         }
 
@@ -99,6 +98,13 @@
 
 typedef struct
 {
+  unsigned long sortkey;
+  unsigned long suffixref;
+  unsigned int part;
+} GtRadixreaderPQelemtype;
+
+typedef struct
+{
   GtUlong *currentptr, *endptr;
 } GtRadixreaderPointerpair;
 
@@ -107,10 +113,39 @@ typedef struct
   GtUlong *ptr1, *ptr2, *end1, *end2;
   GtUlongPair *ptr1_pair, *ptr2_pair, *end1_pair, *end2_pair;
   GtRadixreaderPointerpair *ptrtab;
-  GtPriorityQueue *priorityqueue;
+  unsigned long pq_numofelements;
+  GtRadixreaderPQelemtype *pq_values;
 } GtRadixreader;
 
 typedef struct GtRadixsortinfo GtRadixsortinfo;
+
+static inline void gt_radixreaderPQadd(GtRadixreader *rr,
+                                       unsigned long sortkey,
+                                       unsigned int part,
+                                       unsigned long suffixref)
+{
+  GtRadixreaderPQelemtype *ptr;
+
+    /* store elements in reverse order, i.e.\ with the minimum element
+       at the last index */
+    /* move elements to the right until an element larger or equal than
+       the key is found. */
+  for (ptr = rr->pq_values + rr->pq_numofelements - 1; ptr >= rr->pq_values;
+       ptr--)
+  {
+    if (ptr->sortkey < sortkey)
+    {
+      *(ptr+1) = *ptr;
+    } else
+    {
+      break;
+    }
+  }
+  (ptr+1)->sortkey = sortkey;
+  (ptr+1)->part = part;
+  (ptr+1)->suffixref = suffixref;
+  rr->pq_numofelements++;
+}
 
 GtRadixsortinfo *gt_radixsort_new(bool pair,
                                   bool smalltables,

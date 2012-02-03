@@ -71,27 +71,25 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
   gt_assert(pq != NULL && !gt_priorityqueue_is_full(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
   {
-    GtPQelementtype *ptr, tmp;
+    GtPQelementtype *ptr;
 
     /* store elements in reverse order, i.e.\ with the minimum element
        at the last index */
-    pq->elements[pq->numofelements].sortkey = sortkey;
-    pq->elements[pq->numofelements++].value = value;
-    /* move last element to the left until and element larger or equal than
+    /* move elements to the right until an element larger or equal than
        the key is found. */
-    for (ptr = pq->elements + pq->numofelements - 1; ptr > pq->elements; ptr--)
+    for (ptr = pq->elements + pq->numofelements - 1; ptr >= pq->elements; ptr--)
     {
-      if ((ptr-1)->sortkey < ptr->sortkey)
+      if (ptr->sortkey < sortkey)
       {
-        tmp = *ptr;
-        *ptr = *(ptr-1);
-        *(ptr-1) = tmp;
+        *(ptr+1) = *ptr;
       } else
       {
         break;
       }
     }
-    gt_priorityqueue_checkorder(pq);
+    (ptr+1)->sortkey = sortkey;
+    (ptr+1)->value = value;
+    pq->numofelements++;
   } else
   {
     unsigned long idx;
