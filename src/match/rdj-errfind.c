@@ -82,7 +82,6 @@ static inline void gt_errfind_process_kmer(unsigned long leafnumber,
   }
 }
 
-#ifdef RDJ_ERRFIND_DEBUG
 #define RDJ_ERRFIND_KMINUSITHCHAR(I) \
   ((leafnumber + state->k - I) < gt_encseq_total_length(state->encseq)) \
     ? gt_encseq_get_decoded_char(state->encseq, leafnumber +  state->k - I, \
@@ -97,11 +96,20 @@ static inline void gt_errfind_process_kmer(unsigned long leafnumber,
     RDJ_ERRFIND_KMINUSITHCHAR(5), RDJ_ERRFIND_KMINUSITHCHAR(4),\
     RDJ_ERRFIND_KMINUSITHCHAR(3), RDJ_ERRFIND_KMINUSITHCHAR(2),\
     RDJ_ERRFIND_KMINUSITHCHAR(1), RDJ_ERRFIND_KMINUSITHCHAR(0));
-#endif
 
 #define RDJ_ERRFIND_IS_SEPRANGE(ENCSEQ, POS)\
   ((POS) == gt_encseq_total_length(ENCSEQ) || \
    gt_encseq_position_is_separator((ENCSEQ), (POS), GT_READMODE_FORWARD))
+
+GT_UNUSED
+static inline unsigned long gt_errfind_sfxlength(const GtEncseq *encseq,
+    unsigned long pos)
+{
+  unsigned long seqnum = gt_encseq_seqnum(encseq, pos);
+  unsigned long seqstartpos = gt_encseq_seqstartpos(encseq, seqnum);
+  unsigned long seqlength = gt_encseq_seqlength(encseq, seqnum);
+  return seqstartpos + (seqlength - 1) - pos;
+}
 
 static int processleafedge_errfind(GT_UNUSED bool firstsucc,
     unsigned long fatherdepth,
@@ -114,7 +122,9 @@ static int processleafedge_errfind(GT_UNUSED bool firstsucc,
   RDJ_ERRFIND_SHOW_KMER;
 #endif
   if (fatherdepth < state->k - 1)
+  {
     gt_errfind_reset(state);
+  }
   else if (!state->seprange)
   {
     if (fatherdepth == state->k - 1 &&
@@ -174,6 +184,7 @@ static int processlcpinterval_errfind(unsigned long lcp,
     if (!alltrusted)
     {
       unsigned int trusted_cnum = 0;
+      GtUchar trusted_char = 0;
       unsigned long trusted_count = 0;
       bool trusted_found = false;
       for (cnum = 0; cnum < state->alphasize && !trusted_found; cnum++)
@@ -183,37 +194,41 @@ static int processlcpinterval_errfind(unsigned long lcp,
         {
           trusted_found = true;
           trusted_cnum = cnum;
+          trusted_char = gt_encseq_get_encoded_char_nospecial(state->encseq,
+             state->kpositions[cnum * state->c], GT_READMODE_FORWARD);
+#ifdef RDJ_ERRFIND_DEBUG
+          gt_log_log("trusted_char: %c (cnum: %u), count: %lu, pos: %lu",
+              "acgt"[trusted_char], trusted_cnum, state->count[trusted_cnum],
+              state->kpositions[trusted_cnum * state->c]);
+#endif
         }
       }
-      if (trusted_found)
+      for (cnum = 0; cnum < state->alphasize && state->count[cnum] > 0;
+          cnum++)
       {
-        GtUchar trusted_char;
-#ifdef RDJ_ERRFIND_DEBUG
-        gt_log_log("trusted_cnum: %u (count: %lu)", trusted_cnum,
-            state->count[trusted_cnum]);
-        gt_log_log("trusted_char is at position: %lu",
-            state->kpositions[trusted_cnum * state->c]);
-#endif
-        trusted_char = gt_encseq_get_encoded_char_nospecial(state->encseq,
-           state->kpositions[trusted_cnum * state->c], GT_READMODE_FORWARD);
-        for (cnum = 0; cnum < state->alphasize && state->count[cnum] > 0;
-            cnum++)
+        if (state->count[cnum] < state->c)
         {
-          if (cnum != trusted_cnum && state->count[cnum] < state->c)
+          unsigned long firstposindex = cnum * state->c;
+          unsigned long i;
+          for (i = 0; i < state->count[cnum]; i++)
           {
-            unsigned long i, first;
-            first = cnum * state->c;
-            for (i = 0; i < state->count[cnum]; i++)
+            if (!state->quiet)
             {
-#ifdef RDJ_ERRFIND_DEBUG
-              gt_log_log("correction %lu: %u -> %u (%u)",
-                  state->kpositions[first + i], cnum, trusted_cnum,
-                  trusted_char);
-#endif
-              if (!state->quiet)
-                printf("%lu:%u\n", state->kpositions[first + i],
-                    (unsigned int)trusted_char);
+              printf("%lu:", state->kpositions[firstposindex + i]);
+              if (trusted_found)
+                printf("%u\n", (unsigned int)trusted_char);
+              else
+                printf("?\n");
             }
+#ifdef RDJ_ERRFIND_DEBUG
+            if (trusted_found)
+              gt_log_log("correctable: %lu (cnum:%u) -> cnum:%u (char: %c)",
+                  state->kpositions[firstposindex + i], cnum, trusted_cnum,
+                  "acgt"[trusted_char]);
+            else
+              gt_log_log("non-correctable: %lu (cnum:%u)",
+                  state->kpositions[firstposindex + i], cnum);
+#endif
           }
         }
       }
@@ -232,15 +247,14 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
 
   state = gt_malloc(sizeof (*state));
   state->alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
-  state->currentchar = 0;
   state->kpositions = gt_malloc(sizeof (unsigned long) * state->alphasize * c);
   state->count = gt_malloc(sizeof (unsigned long) * state->alphasize);
   state->encseq = encseq;
   state->k = k;
   state->c = c;
-  state->seprange = false;
   state->debug_value = debug_value;
   state->quiet = (state->debug_value == GT_UNDEF_ULONG ? false : true);
+  gt_errfind_reset(state);
 
   had_err = gt_esa_bottomup_errfind(ssar, state, err);
 
