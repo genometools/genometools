@@ -426,12 +426,12 @@ static void gt_firstcodes_flush_exit(const char *filename,int line)
 static void gt_firstcodes_accumulatecounts_flush(void *data)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
+  GtRadixreader *radixreader = NULL;
 
   if (fci->buf.nextfree > 0)
   {
     unsigned long firstelem;
     const unsigned long *ptr;
-    GtRadixreader radixreader;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
@@ -441,9 +441,9 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
       firstelem = fci->buf.spaceGtUlong[0];
     } else
     {
-      gt_radixsort_linear_rr(&radixreader,fci->radixsort_code,
-                             fci->buf.nextfree);
-      GT_RADIXREADER_NEXT(firstelem,&radixreader,
+      radixreader = gt_radixsort_linear_rr(fci->radixsort_code,
+                                           fci->buf.nextfree);
+      GT_RADIXREADER_NEXT(firstelem,radixreader,
                           gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
     ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,firstelem);
@@ -456,7 +456,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
       } else
       {
         fci->firstcodehits +=
-          gt_firstcodes_accumulatecounts_merge_rr(fci,&radixreader,firstelem,
+          gt_firstcodes_accumulatecounts_merge_rr(fci,radixreader,firstelem,
                                                   ptr);
       }
     }
@@ -547,7 +547,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
   {
     GtUlongPair firstelem;
     const unsigned long *ptr;
-    GtRadixreader radixreader;
+    GtRadixreader *radixreader = NULL;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
@@ -557,9 +557,9 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
       firstelem = fci->buf.spaceGtUlongPair[0];
     } else
     {
-      gt_radixsort_linear_rr(&radixreader,fci->radixsort_codepos,
-                             fci->buf.nextfree);
-      GT_RADIXREADER_NEXT_PAIR(firstelem,&radixreader,
+      radixreader = gt_radixsort_linear_rr(fci->radixsort_codepos,
+                                           fci->buf.nextfree);
+      GT_RADIXREADER_NEXT_PAIR(firstelem,radixreader,
                                gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
     ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
@@ -575,7 +575,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
       } else
       {
         fci->firstcodeposhits
-          += gt_firstcodes_insertsuffixes_merge_rr(fci,&radixreader,firstelem,
+          += gt_firstcodes_insertsuffixes_merge_rr(fci,radixreader,firstelem,
                                                    ptr);
       }
     }

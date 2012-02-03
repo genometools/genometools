@@ -63,6 +63,7 @@ struct GtRadixsortinfo
   unsigned int parts;
   GtRange *ranges;
   size_t basesize, maxvalue;
+  GtRadixreader *radixreader;
 };
 
 GtRadixsortinfo *gt_radixsort_new(bool pair,
@@ -86,8 +87,6 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
   radixsort->pair = pair;
   radixsort->count = gt_malloc(sizeof (*radixsort->count) *
                                (radixsort->maxvalue+1));
-  gt_assert(parts >= 1U);
-  radixsort->parts = parts;
   if (arr == NULL)
   {
     if (pair)
@@ -113,7 +112,28 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
     }
     radixsort->ownarr = false;
   }
-  radixsort->tempalloc = (parts == 1U) ? maxlen : maxlen/parts + 1;
+  gt_assert(parts >= 1U);
+  radixsort->parts = parts;
+  if (parts == 1U)
+  {
+    radixsort->tempalloc = maxlen;
+    radixsort->radixreader = NULL;
+  } else
+  {
+    radixsort->tempalloc = maxlen/parts + 1;
+    radixsort->radixreader = gt_malloc(sizeof (*radixsort->radixreader));
+    if (parts == 2U)
+    {
+      radixsort->radixreader->ptrtab = NULL;
+      radixsort->radixreader->priorityqueue = NULL;
+    } else
+    {
+      radixsort->radixreader->ptrtab
+        = gt_malloc(sizeof (*radixsort->radixreader->ptrtab) * parts);
+      radixsort->radixreader->priorityqueue
+        = gt_priorityqueue_new((unsigned long) radixsort->parts);
+    }
+  }
   radixsort->ranges = gt_malloc(sizeof(*radixsort->ranges) * parts);
   if (pair)
   {
@@ -183,6 +203,12 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsort)
     {
       gt_free(radixsort->arr);
       gt_free(radixsort->arrpair);
+    }
+    if (radixsort->radixreader != NULL)
+    {
+      gt_free(radixsort->radixreader->ptrtab);
+      gt_priorityqueue_delete(radixsort->radixreader->priorityqueue);
+      gt_free(radixsort->radixreader);
     }
     gt_free(radixsort);
   }
@@ -316,30 +342,7 @@ static void gt_radixsort_GtUlongPair_linear(GtRadixsortinfo *radixsort,
   }
 }
 
-static void gt_radixreader_init(GtRadixreader *radixreader,
-                                const GtRadixsortinfo *radixsort,
-                                unsigned long len1,
-                                unsigned long len)
-{
-  if (radixsort->pair)
-  {
-    radixreader->ptr1_pair = radixsort->arrpair;
-    radixreader->ptr2_pair = radixreader->end1_pair = radixsort->arrpair + len1;
-    radixreader->end2_pair = radixsort->arrpair + len;
-    radixreader->ptr1 = radixreader->ptr2 = radixreader->end1
-                                          = radixreader->end2 = NULL;
-  } else
-  {
-    radixreader->ptr1 = radixsort->arr;
-    radixreader->ptr2 = radixreader->end1 = radixsort->arr + len1;
-    radixreader->end2 = radixsort->arr + len;
-    radixreader->ptr1_pair = radixreader->ptr2_pair = radixreader->end1_pair
-                           = radixreader->end2_pair = NULL;
-  }
-}
-
-#ifdef WITHVERIFY
-static void gt_radixsort_verify(GtRadixreader *rr)
+void gt_radixsort_verify(GtRadixreader *rr)
 {
   GtUlong current, previous = 0;
 
@@ -350,9 +353,7 @@ static void gt_radixsort_verify(GtRadixreader *rr)
                                        works for the first case */
     previous = current;
   }
-  printf("verified\n");
 }
-#endif
 
 void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
 {
@@ -366,27 +367,37 @@ void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
   }
 }
 
-void gt_radixsort_linear_rr(GtRadixreader *rr,
-                            GtRadixsortinfo *radixsort,unsigned long len)
+GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
+                                      unsigned long len)
 {
 
   gt_assert(radixsort->parts >= 2U);
   if (radixsort->parts == 2U)
   {
     unsigned long len1 = len/2;
+    GtRadixreader *rr;
 
     gt_assert(len >= len1);
+    gt_assert(radixsort->radixreader != NULL);
+    rr = radixsort->radixreader;
     if (radixsort->pair)
     {
       gt_radixsort_GtUlongPair_linear(radixsort,0,len1);
       gt_radixsort_GtUlongPair_linear(radixsort,len1,len - len1);
+      rr->ptr1_pair = radixsort->arrpair;
+      rr->ptr2_pair = rr->end1_pair = radixsort->arrpair + len1;
+      rr->end2_pair = radixsort->arrpair + len;
+      rr->ptr1 = rr->ptr2 = rr->end1 = rr->end2 = NULL;
     } else
     {
       gt_radixsort_GtUlong_linear(radixsort,0,len1);
       gt_radixsort_GtUlong_linear(radixsort,len1,len - len1);
+      rr->ptr1 = radixsort->arr;
+      rr->ptr2 = rr->end1 = radixsort->arr + len1;
+      rr->end2 = radixsort->arr + len;
+      rr->ptr1_pair = rr->ptr2_pair = rr->end1_pair = rr->end2_pair = NULL;
     }
-    gt_radixreader_init(rr,radixsort,len1,len);
-    /*gt_radixsort_verify(rr);*/
+    /*gt_radixsort_verify(radixsort->radixreader);*/
   } else
   {
     unsigned int idx;
@@ -418,6 +429,7 @@ void gt_radixsort_linear_rr(GtRadixreader *rr,
       sumwidth += radixsort->ranges[idx].end - radixsort->ranges[idx].start + 1;
     }
     gt_assert(sumwidth == len);
+    gt_assert(radixsort->radixreader != NULL);
     for (idx = 0; idx < radixsort->parts; idx++)
     {
       unsigned long currentwidth = radixsort->ranges[idx].end -
@@ -430,9 +442,14 @@ void gt_radixsort_linear_rr(GtRadixreader *rr,
       {
         gt_radixsort_GtUlong_linear(radixsort,radixsort->ranges[idx].start,
                                     currentwidth);
+        radixsort->radixreader->ptrtab[idx].currentptr
+          = radixsort->arr + radixsort->ranges[idx].start;
+        radixsort->radixreader->ptrtab[idx].endptr
+          = radixsort->arr + radixsort->ranges[idx].end + 1;
       }
     }
   }
+  return radixsort->radixreader;
 }
 
 static void gt_radix_phase_GtUlong_recursive(size_t offset,

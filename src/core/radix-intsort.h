@@ -19,32 +19,38 @@
 #define RADIX_INTSORT_H
 
 #include "core/types_api.h"
+#include "extended/priorityqueue.h"
 
 #define GT_RADIXREADER_NEXT(VALUE,RR,STOPSTATEMENT)\
-        if ((RR)->ptr1 < (RR)->end1)\
+        if ((RR)->ptrtab == NULL)\
         {\
-          if ((RR)->ptr2 < (RR)->end2)\
+          if ((RR)->ptr1 < (RR)->end1)\
           {\
-            if (*(RR)->ptr1 <= *(RR)->ptr2)\
+            if ((RR)->ptr2 < (RR)->end2)\
             {\
-              VALUE = *(RR)->ptr1++;\
+              if (*(RR)->ptr1 <= *(RR)->ptr2)\
+              {\
+                VALUE = *(RR)->ptr1++;\
+              } else\
+              {\
+                VALUE = *(RR)->ptr2++;\
+              }\
             } else\
             {\
-              VALUE = *(RR)->ptr2++;\
+              VALUE = *(RR)->ptr1++;\
             }\
           } else\
           {\
-            VALUE = *(RR)->ptr1++;\
+            if ((RR)->ptr2 < (RR)->end2)\
+            {\
+              VALUE = *(RR)->ptr2++;\
+            } else\
+            {\
+              STOPSTATEMENT;\
+            }\
           }\
         } else\
         {\
-          if ((RR)->ptr2 < (RR)->end2)\
-          {\
-            VALUE = *(RR)->ptr2++;\
-          } else\
-          {\
-            STOPSTATEMENT;\
-          }\
         }
 
 #define GT_RADIXREADER_NEXT_PAIR(VALUE,RR,STOPSTATEMENT)\
@@ -76,8 +82,15 @@
 
 typedef struct
 {
+  GtUlong *currentptr, *endptr;
+} GtRadixreaderPointerpair;
+
+typedef struct
+{
   GtUlong *ptr1, *ptr2, *end1, *end2;
   GtUlongPair *ptr1_pair, *ptr2_pair, *end1_pair, *end2_pair;
+  GtRadixreaderPointerpair *ptrtab;
+  GtPriorityQueue *priorityqueue;
 } GtRadixreader;
 
 typedef struct GtRadixsortinfo GtRadixsortinfo;
@@ -91,6 +104,8 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
 unsigned long gt_radixsort_entries(bool pair,unsigned int parts,
                                    size_t memlimit);
 
+void gt_radixsort_verify(GtRadixreader *rr);
+
 GtUlong *gt_radixsort_arr(GtRadixsortinfo *radixsort);
 
 GtUlongPair *gt_radixsort_arrpair(GtRadixsortinfo *radixsort);
@@ -101,8 +116,8 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsort);
 
 void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len);
 
-void gt_radixsort_linear_rr(GtRadixreader *rr,
-                            GtRadixsortinfo *radixsort,unsigned long len);
+GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
+                                      unsigned long len);
 
 void gt_radixsort_GtUlong_divide(GtUlong *source,
                                  GtUlong *dest,

@@ -334,9 +334,8 @@ static void check_radixsort_GtUlong_linear_gen(bool smalltables,
     gt_sortbench_verify(arr,len);
   } else
   {
-    GtRadixreader radixreader;
-
-    gt_radixsort_linear_rr(&radixreader,radixsort,len);
+    GtRadixreader *radixreader = gt_radixsort_linear_rr(radixsort,len);
+    gt_radixsort_verify(radixreader);
   }
   gt_radixsort_delete(radixsort);
 }

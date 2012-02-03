@@ -23,8 +23,11 @@ if $gttestdata
     run_test "#$bin/gt encseq2spm -ii sfx -l 45 -radixlarge"
     run_test "#$bin/gt encseq2spm -ii sfx -l 45 -memlimit 3MB"
     run_test "#$bin/gt encseq2spm -ii sfx -l 45 -memlimit 2MB",:retval => 1
-    run_test "#$bin/gt suffixerator -db #{readset} #{$testdata}/U89959_genomic.fas -indexname sfx-big" 
-    run_test "#$bin/gt encseq2spm -ii sfx-big -l 45",:retval => 1
+    if not Kernel.system("#{$bin}gt -64bit")
+      run_test "#$bin/gt suffixerator -db #{readset} " + \
+               "#{$testdata}/U89959_genomic.fas -indexname sfx-big" 
+      run_test "#$bin/gt encseq2spm -ii sfx-big -l 45",:retval => 1
+    end
   end
 
   # compare results with precalculated known results
