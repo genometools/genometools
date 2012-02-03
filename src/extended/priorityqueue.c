@@ -26,7 +26,7 @@
 struct GtPriorityQueue
 {
   unsigned long capacity, numofelements;
-  GtPQelementtype *elements;
+  GtPQelementtype minelement, *elements;
 };
 
 GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
@@ -37,7 +37,8 @@ GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
   pq->elements = gt_malloc(sizeof (*pq->elements) * (maxnumofelements + 1));
   pq->capacity = maxnumofelements;
   pq->numofelements = 0;
-  pq->elements[0] = 0;
+  pq->elements[0].value = 0;
+  pq->elements[0].key = 0;
   return pq;
 }
 
@@ -48,7 +49,7 @@ static void gt_priorityqueue_checkorder(const GtPriorityQueue *pq)
   gt_assert(pq != NULL);
   for (ptr = pq->elements; ptr < pq->elements + pq->numofelements - 1; ptr++)
   {
-    gt_assert(*ptr >= *(ptr+1));
+    gt_assert(ptr->value >= (ptr+1)->value);
   }
 }
 
@@ -64,7 +65,7 @@ bool gt_priorityqueue_is_full(const GtPriorityQueue *pq)
   return pq->numofelements == pq->capacity ? true : false;
 }
 
-void gt_priorityqueue_add(GtPriorityQueue *pq, GtPQelementtype value)
+void gt_priorityqueue_add(GtPriorityQueue *pq, const GtPQelementtype *elem)
 {
   gt_assert(pq != NULL && !gt_priorityqueue_is_full(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
@@ -73,12 +74,12 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, GtPQelementtype value)
 
     /* store elements in reverse order, i.e.\ with the minimum element
        at the last index */
-    pq->elements[pq->numofelements++] = value;
+    pq->elements[pq->numofelements++] = *elem;
     /* move last element to the left until and element larger or equal
        value is found */
     for (ptr = pq->elements + pq->numofelements - 1; ptr > pq->elements; ptr--)
     {
-      if (*(ptr-1) < *ptr)
+      if ((ptr-1)->value < ptr->value)
       {
         tmp = *ptr;
         *ptr = *(ptr-1);
@@ -93,43 +94,42 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, GtPQelementtype value)
   {
     unsigned long idx;
 
-    for (idx = ++pq->numofelements; idx/2 > 0 && pq->elements[idx/2] > value;
+    for (idx = ++pq->numofelements;
+         idx/2 > 0 && pq->elements[idx/2].value > elem->value;
          idx /= 2)
     {
       gt_assert(idx > 0);
       pq->elements[idx] = pq->elements[idx/2];
     }
     gt_assert(idx > 0);
-    pq->elements[idx] = value;
+    pq->elements[idx] = *elem;
   }
 }
 
-GtPQelementtype gt_priorityqueue_delete_min(GtPriorityQueue *pq)
+GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
 {
-  GtPQelementtype minelement;
-
   gt_assert(pq != NULL && !gt_priorityqueue_is_empty(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
   {
-    minelement = pq->elements[--pq->numofelements];
+    pq->minelement = pq->elements[--pq->numofelements];
     gt_priorityqueue_checkorder(pq);
   } else
   {
     unsigned long idx, child;
     GtPQelementtype lastelement;
 
-    minelement = pq->elements[1];
+    pq->minelement = pq->elements[1];
     lastelement = pq->elements[pq->numofelements--];
     for (idx = 1UL; idx * 2 <= pq->numofelements; idx = child)
     {
       child = idx * 2;
       gt_assert(child > 0);
       if (child != pq->numofelements &&
-          pq->elements[child + 1] < pq->elements[child])
+          pq->elements[child + 1].value < pq->elements[child].value)
       {
         child++;
       }
-      if (lastelement > pq->elements[child])
+      if (lastelement.value > pq->elements[child].value)
       {
         pq->elements[idx] = pq->elements[child];
       } else
@@ -140,14 +140,15 @@ GtPQelementtype gt_priorityqueue_delete_min(GtPriorityQueue *pq)
     gt_assert(idx > 0);
     pq->elements[idx] = lastelement;
   }
-  return minelement;
+  return &pq->minelement;
 }
 
-GtPQelementtype gt_priorityqueue_find_min(const GtPriorityQueue *pq)
+const GtPQelementtype *gt_priorityqueue_find_min(const GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priorityqueue_is_empty(pq));
-  return pq->elements[pq->capacity < (unsigned long) GT_MINPQSIZE
-                       ? pq->numofelements-1 : 1UL];
+  return pq->elements +
+         (pq->capacity < (unsigned long) GT_MINPQSIZE ? pq->numofelements-1
+                                                      : 1UL);
 }
 
 void gt_priorityqueue_delete(GtPriorityQueue *pq)

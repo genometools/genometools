@@ -19,12 +19,15 @@
 #define PRIORITYQUEUE_H
 
 typedef struct GtPriorityQueue GtPriorityQueue;
-typedef long GtPQelementtype;
+typedef struct
+{
+  unsigned long value, key;
+} GtPQelementtype;
 
 GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements);
-void gt_priorityqueue_add(GtPriorityQueue *pq, GtPQelementtype value);
-GtPQelementtype gt_priorityqueue_delete_min(GtPriorityQueue *pq);
-GtPQelementtype gt_priorityqueue_find_min(const GtPriorityQueue *pq);
+void gt_priorityqueue_add(GtPriorityQueue *pq, const GtPQelementtype *elem);
+GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq);
+const GtPQelementtype *gt_priorityqueue_find_min(const GtPriorityQueue *pq);
 bool gt_priorityqueue_is_empty(const GtPriorityQueue *pq);
 bool gt_priorityqueue_is_full(const GtPriorityQueue *pq);
 void gt_priorityqueue_delete(GtPriorityQueue *pq);
