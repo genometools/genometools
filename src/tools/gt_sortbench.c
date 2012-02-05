@@ -326,15 +326,15 @@ static void check_radixsort_GtUlong_linear_gen(bool smalltables,
 {
   const bool pair = false;
   GtRadixsortinfo *radixsort;
+  GtRadixreader *radixreader;
 
   radixsort = gt_radixsort_new(pair,smalltables,len,parts,arr);
+  radixreader = gt_radixsort_linear(radixsort,len);
   if (parts == 1U)
   {
-    gt_radixsort_linear(radixsort,len);
     gt_sortbench_verify(arr,len);
   } else
   {
-    GtRadixreader *radixreader = gt_radixsort_linear_rr(radixsort,len);
     gt_radixsort_verify(radixreader);
     printf("verified\n");
   }

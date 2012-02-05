@@ -190,10 +190,8 @@ size_t gt_radixsort_size(const GtRadixsortinfo *radixsort);
 
 void gt_radixsort_delete(GtRadixsortinfo *radixsort);
 
-void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len);
-
-GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
-                                      unsigned long len);
+GtRadixreader *gt_radixsort_linear(GtRadixsortinfo *radixsort,
+                                   unsigned long len);
 
 void gt_radixsort_GtUlong_divide(GtUlong *source,
                                  GtUlong *dest,

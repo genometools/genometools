@@ -356,22 +356,19 @@ void gt_radixsort_verify(GtRadixreader *rr)
   }
 }
 
-void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
+GtRadixreader *gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
 {
-  gt_assert(radixsort->parts == 1U);
-  if (radixsort->pair)
+  if (radixsort->parts == 1U)
   {
-    gt_radixsort_GtUlongPair_linear(radixsort,0,len);
-  } else
-  {
-    gt_radixsort_GtUlong_linear(radixsort,0,len);
+    if (radixsort->pair)
+    {
+      gt_radixsort_GtUlongPair_linear(radixsort,0,len);
+    } else
+    {
+      gt_radixsort_GtUlong_linear(radixsort,0,len);
+    }
+    return NULL;
   }
-}
-
-GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
-                                      unsigned long len)
-{
-  gt_assert(radixsort->parts >= 2U);
   if (radixsort->parts == 2U)
   {
     unsigned long len1 = len/2;

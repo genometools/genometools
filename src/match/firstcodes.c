@@ -435,14 +435,12 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
+    radixreader = gt_radixsort_linear(fci->radixsort_code,fci->buf.nextfree);
     if (fci->radixparts == 1U)
     {
-      gt_radixsort_linear(fci->radixsort_code,fci->buf.nextfree);
       firstelem = fci->buf.spaceGtUlong[0];
     } else
     {
-      radixreader = gt_radixsort_linear_rr(fci->radixsort_code,
-                                           fci->buf.nextfree);
       GT_RADIXREADER_NEXT(firstelem,radixreader,
                           gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
@@ -551,14 +549,12 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
+    radixreader = gt_radixsort_linear(fci->radixsort_codepos,fci->buf.nextfree);
     if (fci->radixparts == 1U)
     {
-      gt_radixsort_linear(fci->radixsort_codepos,fci->buf.nextfree);
       firstelem = fci->buf.spaceGtUlongPair[0];
     } else
     {
-      radixreader = gt_radixsort_linear_rr(fci->radixsort_codepos,
-                                           fci->buf.nextfree);
       GT_RADIXREADER_NEXT_PAIR(firstelem,radixreader,
                                gt_firstcodes_flush_exit(__FILE__,__LINE__));
     }
