@@ -174,10 +174,10 @@ typedef struct GtRadixsortinfo GtRadixsortinfo;
 GtRadixsortinfo *gt_radixsort_new(bool pair,
                                   bool smalltables,
                                   unsigned long maxlen,
-                                  unsigned int parts,
+                                  unsigned int rparts,
                                   void *arr);
 
-unsigned long gt_radixsort_entries(bool pair,unsigned int parts,
+unsigned long gt_radixsort_entries(bool pair,unsigned int rparts,
                                    size_t memlimit);
 
 void gt_radixsort_verify(GtRadixreader *rr);
