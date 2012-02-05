@@ -66,7 +66,7 @@ static void* gt_encseq2spm_arguments_new(void)
   arguments->radixlarge = false;
   arguments->singlescan = 0;
   arguments->numofparts = 0;
-  arguments->radixparts = 2U;
+  arguments->radixparts = 1U;
   arguments->encseqinput = gt_str_new();
   arguments->spmspec = gt_str_new();
   arguments->memlimitarg = gt_str_new();
@@ -184,7 +184,7 @@ static GtOptionParser* gt_encseq2spm_option_parser_new(void *tool_arguments)
   /* -radixparts */
   option = gt_option_new_uint("radixparts", "specify the number of parts "
                               "for radixsort",
-                              &arguments->radixparts, 2U);
+                              &arguments->radixparts, 1U);
   gt_option_parser_add_option(op, option);
   gt_option_is_development_option(option);
 

@@ -21,6 +21,7 @@
 #include <string.h>
 #include <limits.h>
 #include "core/assert_api.h"
+#include "core/log_api.h"
 #include "core/stack-inlined.h"
 #include "core/types_api.h"
 #include "core/radix-intsort.h"
@@ -61,6 +62,7 @@ struct GtRadixsortinfo
   bool ownarr, pair;
   unsigned long maxlen, tempalloc;
   unsigned int rparts;
+  bool withthreads;
   GtRange *ranges;
   size_t basesize, maxvalue;
   GtRadixreader *radixreader;
@@ -70,6 +72,7 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
                                   bool smalltables,
                                   unsigned long maxlen,
                                   unsigned int rparts,
+                                  bool withthreads,
                                   void *arr)
 {
   GtRadixsortinfo *radixsort = gt_malloc(sizeof (*radixsort));
@@ -85,6 +88,11 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
     radixsort->maxvalue = UINT16_MAX;
   }
   radixsort->pair = pair;
+  radixsort->withthreads = withthreads;
+  if (withthreads)
+  {
+    gt_log_log("perform sorting with threads");
+  }
   radixsort->count = gt_malloc(sizeof (*radixsort->count) *
                                (radixsort->maxvalue+1));
   if (arr == NULL)
@@ -181,14 +189,20 @@ size_t gt_radixsort_size(const GtRadixsortinfo *radixsort)
 }
 
 unsigned long gt_radixsort_entries(bool pair,unsigned int rparts,
-                                   size_t memlimit)
+                                   size_t memlimit,bool withthreads)
 {
   double factor;
 
   gt_assert(rparts >= 1U);
   /* Note that calculation includes data and temp. The space for temp
      depends on the number of parts. */
-  factor = 1.0 + 1.0/(double) rparts;
+  if (withthreads)
+  {
+    factor = 1.0 + 1.0/(double) rparts;
+  } else
+  {
+    factor = 2.0;
+  }
   return (unsigned long) memlimit/(gt_radixsort_elemsize(pair) * factor);
 }
 

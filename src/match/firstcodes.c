@@ -1206,6 +1206,7 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
                                     unsigned long maximumspace,
                                     unsigned long phase2extra,
                                     unsigned int radixparts,
+                                    bool withthreads,
                                     GtError *err)
 {
   if (maximumspace > 0)
@@ -1226,7 +1227,8 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
                            (gt_firstcodes_spacelog_total(fci->fcsl) +
                             phase2extra);
 
-      fci->buf.allocated = gt_radixsort_entries(pair,radixparts,remainspace);
+      fci->buf.allocated = gt_radixsort_entries(pair,radixparts,remainspace,
+                                                withthreads);
       if (fci->buf.allocated < fci->differentcodes/16UL)
       {
         fci->buf.allocated = fci->differentcodes/16UL;
@@ -1240,7 +1242,8 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
 
       fci->buf.allocated
         = gt_radixsort_entries(pair,radixparts,
-                               gt_firstcodes_spacelog_total(fci->fcsl)/7UL);
+                               gt_firstcodes_spacelog_total(fci->fcsl)/7UL,
+                               withthreads);
     } else
     {
       fci->buf.allocated = fci->differentcodes/5;
@@ -1258,6 +1261,7 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                                                unsigned int kmersize,
                                                unsigned int minmatchlength,
                                                unsigned int radixparts,
+                                               bool withthreads,
                                                bool radixsmall,
                                                GtLogger *logger,
                                                GtTimer *timer)
@@ -1270,7 +1274,9 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
   }
   gt_assert(fci->buf.allocated > 0);
   fci->radixsort_code = gt_radixsort_new(pair,radixsmall,fci->buf.allocated,
-                                         radixparts,NULL);
+                                         radixparts,
+                                         withthreads,
+                                         NULL);
   fci->buf.spaceGtUlong = gt_radixsort_arr(fci->radixsort_code);
   GT_FCI_ADDWORKSPACE(fci->fcsl,"radixsort_code",
                       gt_radixsort_size(fci->radixsort_code));
@@ -1436,6 +1442,7 @@ static void gt_firstcodes_handle_tmp(GtFirstcodesinfo *fci,
 static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
                                                   unsigned long maximumspace,
                                                   unsigned int radixparts,
+                                                  bool withthreads,
                                                   const GtSuftabparts
                                                     *suftabparts,
                                                   unsigned long phase2extra)
@@ -1452,7 +1459,8 @@ static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
       const bool pair = true;
       fci->buf.allocated
         = gt_radixsort_entries(pair,radixparts,
-                               (size_t) maximumspace - used);
+                               (size_t) maximumspace - used,
+                               withthreads);
     } else
     {
       fci->buf.allocated /= 4UL;
@@ -1684,6 +1692,17 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   {
     return 0;
   }
+  if (threads > 1U)
+  {
+    if (radixparts > 1U)
+    {
+      gt_error_set(err,"option -radixparts and option -j cannot be combined");
+      return -1;
+    } else
+    {
+      radixparts = threads;
+    }
+  }
   if (gt_firstcodes_init(&fci,
                          encseq,
                          kmersize,
@@ -1737,6 +1756,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  maximumspace,
                                  phase2extra,
                                  radixparts,
+                                 threads > 1U ? true : false,
                                  err) != 0)
     {
       haserr = true;
@@ -1750,6 +1770,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                        kmersize,
                                        minmatchlength,
                                        radixparts,
+                                       threads > 1U ? true : false,
                                        radixsmall,
                                        logger,
                                        timer);
@@ -1824,6 +1845,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     gt_firstcodes_allocsize_for_insertion(&fci,
                                           maximumspace,
                                           radixparts,
+                                          threads > 1U ? true : false,
                                           suftabparts,
                                           phase2extra);
     if (!onlyaccumulation)
@@ -1831,6 +1853,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       fci.radixsort_codepos = gt_radixsort_new(true,radixsmall,
                                                fci.buf.allocated,
                                                radixparts,
+                                               threads > 1U ? true : false,
                                                NULL);
       GT_FCI_ADDWORKSPACE(fci.fcsl,"radixsort_codepos",
                           gt_radixsort_size(fci.radixsort_codepos));

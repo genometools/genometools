@@ -175,10 +175,11 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
                                   bool smalltables,
                                   unsigned long maxlen,
                                   unsigned int rparts,
+                                  bool withthreads,
                                   void *arr);
 
 unsigned long gt_radixsort_entries(bool pair,unsigned int rparts,
-                                   size_t memlimit);
+                                   size_t memlimit,bool withthreads);
 
 void gt_radixsort_verify(GtRadixreader *rr);
 
