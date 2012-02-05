@@ -54,14 +54,13 @@
           {\
             GtRadixreaderPQelemtype *minelem = (RR)->pq_values +\
                                                (--(RR)->pq_numofelements);\
+            GtRadixreaderPointerpair *ptrtabptr = (RR)->ptrtab + minelem->part;\
             VALUE = minelem->sortkey;\
-            if ((RR)->ptrtab[minelem->part].currentptr <\
-                (RR)->ptrtab[minelem->part].endptr)\
+            if (ptrtabptr->currentptr < ptrtabptr->endptr)\
             {\
               gt_radixreaderPQadd((RR),\
-                                  *(RR)->ptrtab[minelem->part].currentptr,\
+                                  *(ptrtabptr->currentptr++),\
                                   minelem->part,0);\
-              (RR)->ptrtab[minelem->part].currentptr++;\
             }\
           } else\
           {\
@@ -70,26 +69,50 @@
         }
 
 #define GT_RADIXREADER_NEXT_PAIR(VALUE,RR,STOPSTATEMENT)\
-        if ((RR)->ptr1_pair < (RR)->end1_pair)\
+        if ((RR)->ptrtab == NULL)\
         {\
-          if ((RR)->ptr2_pair < (RR)->end2_pair)\
+          if ((RR)->ptr1_pair < (RR)->end1_pair)\
           {\
-            if ((RR)->ptr1_pair->a <= (RR)->ptr2_pair->a)\
+            if ((RR)->ptr2_pair < (RR)->end2_pair)\
             {\
-              VALUE = *(RR)->ptr1_pair++;\
+              if ((RR)->ptr1_pair->a <= (RR)->ptr2_pair->a)\
+              {\
+                VALUE = *(RR)->ptr1_pair++;\
+              } else\
+              {\
+                VALUE = *(RR)->ptr2_pair++;\
+              }\
             } else\
             {\
-              VALUE = *(RR)->ptr2_pair++;\
+              VALUE = *(RR)->ptr1_pair++;\
             }\
           } else\
           {\
-            VALUE = *(RR)->ptr1_pair++;\
+            if ((RR)->ptr2_pair < (RR)->end2_pair)\
+            {\
+              VALUE = *(RR)->ptr2_pair++;\
+            } else\
+            {\
+              STOPSTATEMENT;\
+            }\
           }\
         } else\
         {\
-          if ((RR)->ptr2_pair < (RR)->end2_pair)\
+          if ((RR)->pq_numofelements > 0)\
           {\
-            VALUE = *(RR)->ptr2_pair++;\
+            GtRadixreaderPQelemtype *minelem = (RR)->pq_values +\
+                                               (--(RR)->pq_numofelements);\
+            GtRadixreaderPointerpair *ptrtabptr = (RR)->ptrtab + minelem->part;\
+            VALUE.a = minelem->sortkey;\
+            VALUE.b = minelem->suffixref;\
+            if (ptrtabptr->currentptr_pair < ptrtabptr->endptr_pair)\
+            {\
+              gt_radixreaderPQadd(RR,\
+                                  ptrtabptr->currentptr_pair->a,\
+                                  minelem->part,\
+                                  ptrtabptr->currentptr_pair->b);\
+              ptrtabptr->currentptr_pair++;\
+            }\
           } else\
           {\
             STOPSTATEMENT;\
@@ -106,6 +129,7 @@ typedef struct
 typedef struct
 {
   GtUlong *currentptr, *endptr;
+  GtUlongPair *currentptr_pair, *endptr_pair;
 } GtRadixreaderPointerpair;
 
 typedef struct
@@ -119,10 +143,10 @@ typedef struct
 
 typedef struct GtRadixsortinfo GtRadixsortinfo;
 
-static inline void gt_radixreaderPQadd(GtRadixreader *rr,
-                                       unsigned long sortkey,
-                                       unsigned int part,
-                                       unsigned long suffixref)
+/*@unused@*/ static inline void gt_radixreaderPQadd(GtRadixreader *rr,
+                                                    unsigned long sortkey,
+                                                    unsigned int part,
+                                                    unsigned long suffixref)
 {
   GtRadixreaderPQelemtype *ptr;
 

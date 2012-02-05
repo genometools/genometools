@@ -371,7 +371,6 @@ void gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
 GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
                                       unsigned long len)
 {
-
   gt_assert(radixsort->parts >= 2U);
   if (radixsort->parts == 2U)
   {
@@ -431,6 +430,7 @@ GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
     }
     gt_assert(sumwidth == len);
     gt_assert(radixsort->radixreader != NULL);
+    radixsort->radixreader->pq_numofelements = 0;
     for (idx = 0; idx < radixsort->parts; idx++)
     {
       unsigned long currentwidth = radixsort->ranges[idx].end -
@@ -438,18 +438,32 @@ GtRadixreader *gt_radixsort_linear_rr(GtRadixsortinfo *radixsort,
       gt_assert (currentwidth <= radixsort->tempalloc);
       if (radixsort->pair)
       {
-        gt_assert(false);
+        gt_radixsort_GtUlongPair_linear(radixsort,radixsort->ranges[idx].start,
+                                        currentwidth);
+        gt_radixreaderPQadd(radixsort->radixreader,
+                            radixsort->arrpair[radixsort->ranges[idx].start].a,
+                            idx,
+                            radixsort->arrpair[radixsort->ranges[idx].start].b);
+        radixsort->radixreader->ptrtab[idx].currentptr_pair
+          = radixsort->arrpair + radixsort->ranges[idx].start + 1;
+        radixsort->radixreader->ptrtab[idx].endptr_pair
+          = radixsort->arrpair + radixsort->ranges[idx].end + 1;
+        radixsort->radixreader->ptrtab[idx].currentptr = NULL;
+        radixsort->radixreader->ptrtab[idx].endptr = NULL;
       } else
       {
         gt_radixsort_GtUlong_linear(radixsort,radixsort->ranges[idx].start,
                                     currentwidth);
         gt_radixreaderPQadd(radixsort->radixreader,
                             radixsort->arr[radixsort->ranges[idx].start],
-                            idx,0);
+                            idx,
+                            0);
         radixsort->radixreader->ptrtab[idx].currentptr
           = radixsort->arr + radixsort->ranges[idx].start + 1;
         radixsort->radixreader->ptrtab[idx].endptr
           = radixsort->arr + radixsort->ranges[idx].end + 1;
+        radixsort->radixreader->ptrtab[idx].currentptr_pair = NULL;
+        radixsort->radixreader->ptrtab[idx].endptr_pair = NULL;
       }
     }
   }

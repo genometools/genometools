@@ -5,7 +5,10 @@ def run_encseq2spm(readset)
     opts="-l #{len} -ii sfx -spm count -checksuftab"
     run_test "#$bin/gt #{threads} encseq2spm #{opts}"
     [1,2,5].each do |parts|
-      run_test "#$bin/gt #{threads} encseq2spm -parts #{parts} #{opts}"
+      [1,2,3].each do |radixparts|
+        run_test "#$bin/gt #{threads} encseq2spm -parts #{parts} " +
+                 "-radixparts #{radixparts} #{opts}"
+      end
     end
   end
 end
