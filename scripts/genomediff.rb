@@ -80,56 +80,32 @@ module Genomediff
     exit 1 unless File.exist?(newfile)
     return newfile
   end
-  def Genomediff.reverse_and_concat(file, verbose)
-    tf = Tempfile.new("gt_rev")
-    tmpfile = tf.path
-    tf.close
-    dirname = File.dirname(file)
-    output =  `$GTDIR/bin/gt            \
-               convertseq -o #{tmpfile} \
-               -force -r #{file}`
-    puts output if verbose
-    basename = File.basename(file, ".*")
-    newfile = File.join(dirname, basename + "_plus_rev.fas")
-    FileUtils.cp(file, newfile)
-    file = newfile
-    File.open(file, 'a') {|fp|
-      File.open(tmpfile, 'r') {|tf|
-        while line = tf.gets
-          fp.puts line
-        end
-      }
-    }
-    exit 1 unless File.exist?(newfile)
-    return newfile
-  end
-  def Genomediff.pck_index(files,bsize,parts,idxname,parameter)
-    return `$GTDIR/bin/gt        \
-            packedindex mkindex  \
-            -db #{files}         \
-            -dna                 \
-            -dir rev             \
-            -ssp                 \
-            -bsize #{bsize}      \
-            -sprank              \
-            -pl                  \
-            -parts #{parts}      \
-            -indexname #{idxname}\
+
+  def Genomediff.pck_index(files,idxname,parameter)
+    return `$GTDIR/bin/gt                  \
+            packedindex mkindex            \
+            -mirrored                      \
+            -dna -dir rev -ssp -sprank -pl \
+            -db #{files}                   \
+            -indexname #{idxname}          \
             #{parameter}`
   end
-  def Genomediff.esa_index(files,parts,idxname,parameter)
+
+  def Genomediff.esa_index(files,idxname,parameter)
     return `$GTDIR/bin/gt suffixerator \
+            -mirrored                  \
+            -dna -suf -tis -lcp -ssp   \
             -db #{files}               \
             -indexname #{idxname}      \
-            -parts #{parts}            \
-            -dna -suf -tis -lcp -ssp   \
             #{parameter}`
   end
+
   def Genomediff.pck_genomediff(idxname,parameter)
     return `$GTDIR/bin/gt genomediff \
                      -pck #{idxname} \
                      #{parameter}`
   end
+
   def Genomediff.esa_genomediff(idxname,parameter)
     return `$GTDIR/bin/gt genomediff \
                      -esa #{idxname} \
