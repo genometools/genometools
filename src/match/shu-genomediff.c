@@ -326,7 +326,7 @@ int gt_genomediff_shu(GtLogger *logger,
         {
           if (arguments->shulen_only)
           {
-            printf("0\t");
+            printf("%.6f\t",0.0);
           }
         }
         else
@@ -412,7 +412,7 @@ int gt_genomediff_shu(GtLogger *logger,
         {
           if (i_idx == j_idx)
           {
-            printf("0\t\t");
+            printf("%.6f\t",0.0);
           }
           else
           {
@@ -506,7 +506,7 @@ int gt_genomediff_shu(GtLogger *logger,
         {
           if (i_idx == j_idx)
           {
-            printf("0\t\t");
+            printf("%.6f\t",0.0);
             continue;
           }
           printf("%f\t", div[i_idx][j_idx]);
@@ -529,7 +529,7 @@ int gt_genomediff_shu(GtLogger *logger,
         {
           if ( i_idx == j_idx )
           {
-            printf("0\t\t");
+            printf("%.6f\t",0.0);
           }
           else
           {

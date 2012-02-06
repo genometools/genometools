@@ -145,7 +145,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /* thresholds */
   /* divergence error */
   option = gt_option_new_double("thr",
-                                "Threshold for difference (du, dl) in"
+                                "Threshold for difference (du, dl) in "
                                 "divergence calculation.\n"
                                 "default: 1e-9",
                                 &arguments->divergence_threshold,
@@ -197,7 +197,7 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
   /* scan */
   optionscan = gt_option_new_bool("scan",
                                   "do not load esa index but scan"
-                                  " it sequentialy",
+                                  " it sequentially",
                                   &arguments->scan,
                                   true);
   gt_option_exclude(optionscan, optionpckindex);
