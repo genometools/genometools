@@ -1,0 +1,375 @@
+\documentclass[12pt,titlepage]{article}
+
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{xspace}
+\usepackage{listings}
+\usepackage{optionman}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{xcolor}
+%\usepackage[binary-units]{siunitx}
+%\usepackage{TheSansUHH}
+
+\newcommand{\Gdiff}{\texttt{genomediff}\xspace}
+\newcommand{\RGdiff}{\texttt{run\_genomediff.rb}\xspace}
+\newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
+\newcommand{\Gt}{\texttt{gt}\xspace}
+\newcommand{\Kr}{\ensuremath{K_r}\xspace}
+\newcommand{\Gtsuffixerator}{\texttt{gt suffixerator}\xspace}
+\newcommand{\Gtpackedindex}{\texttt{gt packedindex mkindex}\xspace}
+\newcommand{\ESA}{ESA\xspace}
+\newcommand{\FastA}{FastA\xspace}
+\newcommand{\File}[1]{\texttt{\small #1}}
+\newcommand{\ShuS}{\textit{shustrings}\xspace}
+
+\lstset{language=bash,
+basicstyle=\ttfamily
+}
+\definecolor{darkgreen}{rgb}{0.3,0.5,0.3}
+\definecolor{darkblue}{rgb}{0.3,0.3,0.5}
+\definecolor{darkred}{rgb}{0.5,0.3,0.3}
+\lstdefinelanguage{LUA}{%
+sensitive=true,%
+columns=fixed,%
+keywordstyle=[1]{\color{darkblue}\bfseries},%
+keywordstyle=[2]{\color{darkgreen}\bfseries},%
+morekeywords=[1]{local,if,then,else,end,while,do, coroutine,yield},% Official LUA keywords
+morekeywords=[2]{units},% Your private keywords
+otherkeywords={.,=,~,*,>,:},%
+morestring=[b]",%
+stringstyle={\color{darkred}\itshape},%
+breaklines=true,%
+linewidth=\textwidth,%
+comment=[l]{--}%
+}
+\title{\Gdiff user manual}
+
+\author{\begin{tabular}{c}
+  \textit{Dirk Willrodt}\\[1cm]
+  Research Group for Genome Informatics\\
+  Center for Bioinformatics\\
+  University of Hamburg\\
+  Bundesstrasse 43\\
+  20146 Hamburg\\
+  Germany\\[1cm]
+  \url{willrodt@zbh.uni-hamburg.de}\\
+\end{tabular}}
+
+\begin{document}
+%\tsuhhfamily
+\maketitle
+
+\section*{This Manual}
+Some text is highlighted by different fonts according to the following rules.
+
+\begin{itemize}
+\item \texttt{Typewriter font} is used for the names of software tools.
+\item \File{Small typewriter font} is used for file names.
+\item \begin{footnotesize}\texttt{Footnote sized typewriter font}
+      \end{footnotesize} with a leading
+      \begin{footnotesize}\texttt{'-'}\end{footnotesize}
+      is used for program options.
+\item \Showoptionarg{small italic font} is used for the argument(s) of an
+      option.
+\end{itemize}
+
+
+\section{Introduction}
+
+This document describes \Gdiff, a software tool for measuring evolutionary
+distances between sets of closely related genomes. These distances are Jukes-Cantor
+corrected divergence between the pairs of genomes, that is the number of
+mutations per base between them.
+
+This distance is called \Kr and is based on so called \ShuS
+\cite{HAU:DOM:WIE:2008,HAU:PFA:DOM:WIE:2009,HAU:REE:PFA:2011}. The calculation
+of all pairwise distances is alignment free, but the resulting distances have
+the same biological meaning as if calculated with a multiple sequence alignment.
+
+This software is only able to process closely related distances, because \Kr is
+only reliable for distances $<0.5$.
+
+\Gdiff is written in C and it is based on the \GenomeTools
+library~\cite{genometools}. It is called as part of the single binary named \Gt.
+
+The source code can be compiled on 32-bit and 64-bit platforms without making
+any changes to the sources.
+
+\section{Building \Gdiff} \label{Building}
+
+As \Gdiff is part of the \GenomeTools software suite, a source distribution of
+\GenomeTools must be obtained, e.g.\@ via the \GenomeTools home page
+(\url{http://genometools.org}), and decompressed into a source directory:
+
+\begin{lstlisting}
+$ tar -xzvf genometools-X.X.X.tar.gz
+$ cd genometools-X.X.X
+\end{lstlisting}
+
+Then, it suffices to call \lstinline{make} to compile the source using the provided
+makefile.
+
+It is recommended to use the 64bit-version of the \GenomeTools executable if
+Your system supports this.
+
+The option \lstinline!amalgamation=yes! allows the compiler to use better
+optimization.
+
+\begin{lstlisting}
+$ make 64bit=yes amalgamation=yes
+\end{lstlisting}
+
+After successful compilation, the \GenomeTools executable containing \Gdiff
+can then be installed for system-wide use as follows (do this as root):
+
+\begin{lstlisting}
+$ make install
+\end{lstlisting}%$
+
+If a \texttt{prefix=<path>} option is appended to this line, a custom directory
+can be specified as the installation target directory, e.g.\@
+
+\begin{lstlisting}
+$ make install prefix=/home/user/gt
+\end{lstlisting}%$
+%$
+
+will install the \Gt binary in the \File{/home/user/gt/bin} directory. Please
+also consult the \File{README} and \File{INSTALL} files in the root
+directory of the uncompressed source tree for more information and
+troubleshooting advice.
+
+\section{Usage}
+
+\subsection{\Gdiff command line options}
+
+Since \Gdiff is part of \GenomeTools it is invoked as follows:
+
+\texttt{gt genomediff [\textit{\small options}]}
+\Showoption{pck}$|$\Showoption{esa} \Showoptionarg{indexname}
+
+where \Showoptionarg{indexname} is the path without file extension of either
+an enhanced suffix array (\ESA), indicated by \Showoption{esa}, or a FM-index
+which would require option
+\Showoption{pck}.
+
+A short description of all possible options is given in Table \ref{tab:gdopts}
+
+\begin{table}[hbpt]
+  \centering
+  \caption{\Gdiff{} command line options}
+\begin{footnotesize}
+  \label{tab:gdopts}
+  \begin{tabular}{lp{0.6\textwidth}}
+    \toprule
+    \Showoptiongroup{Input options}
+    \Showoption{esa} \Showoptionarg{indexname} & specify path to enhanced
+    suffix array \\
+    \Showoption{pck} \Showoptionarg{indexname} & specify path to FM-index \\
+    \Showoption{unitfile} \Showoptionarg{filename} & specify file which
+    groups the inputfiles into units to be compared to each other. See
+    Listing \ref{code:lua} for an example.
+    \\\midrule
+    \Showoptiongroup{\ESA options}
+    \Showoption{scan} \Showoptionarg{yes$|$no} & scan \ESA sequentially or load
+    into memory. \Showoptionarg{yes} is the default and recommended.
+    \\\midrule
+    \Showoptiongroup{Miscellaneous options}
+    \Showoption{v} & be verbose \\
+    \Showoption{help} & print help and exit \\
+    \Showoption{help+} & print extended help and exit \\\bottomrule
+  \end{tabular}
+\end{footnotesize}
+\end{table}
+
+\begin{lstlisting}[%
+  float=hbpt,%
+  showlines=true,%
+  frame=tb,%
+  caption={Example of lua-unitfile; {\bfseries\small The section
+    '\texttt{units}' is mandatory, '\texttt{genome1/2}' are examples of
+    names, filenames are paths without filename extension.}},%
+  label={code:lua}, language=LUA]
+units = {
+  genome1 = { "file1", "file2" },
+  genome2 = { "file3", "file4" }
+}
+\end{lstlisting}
+
+\subsection{Input files}
+
+The indexfiles can be built from sequence files using \Gtsuffixerator{} for
+enhanced suffix arrays or \Gtpackedindex{} for FM-indices. The use of
+enhanced suffix arrays is recommended.
+
+\subsection{Output}
+
+The output on \texttt{stdout} consists of a line with the number of genomes or units
+that were compared. It is followed by a quadratic matrix of pairwise
+distances where each line consists of a file or unitname and tabulator
+separated distance values.
+
+Depending on the options of the \Gt call there are one ore more comment lines
+which start with \texttt{\#}.
+
+\section{Simple ruby script}
+
+\GenomeTools comes with a collection of helpful scripts, mainly written in
+Ruby. These scripts can be found in the \File{scripts} folder in the
+\GenomeTools source.
+
+To simplify calling \Gdiff there exists a script called \RGdiff. It calls all
+necessary tools with reasonable standard parameters. It also prepares the
+data, by removing all stretches of wildcards and replacing them with single
+\texttt{'N'}s.
+
+\subsection{\RGdiff command line options}
+
+The script is called as follows:
+
+\texttt{(PATH)/\RGdiff [\textit{\small options}]} \Showoptionarg{files}
+
+Where \Showoptionarg{files} are the genomes to be compared in separate
+\FastA files.
+
+A short description of all possible options is given in Table
+\ref{tab:scopts}.
+
+\begin{table}[hbpt]
+  \centering
+  \caption{\RGdiff command line options}
+\begin{footnotesize}
+  \label{tab:scopts}
+  \begin{tabular}{lp{0.6\textwidth}}
+    \toprule
+    \Showoptiongroup{Index options}
+    \Showoption{-pck} & use (packed) fm-index, default is \ESA\\
+    \Showoption{p}/\Showoption{-parts} \Showoptionarg{N} & affects index
+    calculation, splits index into \Showoptionarg{N} parts, thereby reducing
+    memory requirements.\\
+    \Showoption{m}/\Showoption{-maxmem} \Showoptionarg{M} & as \Showoption{-parts} but
+    \Showoptionarg{M} is an upper bound for memory consumption in
+    MiB during index calculation and number of parts is
+    calculated.\\
+    \Showoption{-name} \Showoptionarg{NAME} & the path/basename for the index,
+    defaults to \Showoptionarg{esa} or \Showoptionarg{pck}.
+    \\\midrule
+    \Showoptiongroup{Data options}
+    \Showoption{-reduceN} & Scans the sequence files before index
+    construction and reduces all wildcard stretches to single
+    \texttt{'N'}s\\
+    \Showoption{-unitfile} \Showoptionarg{unitfile} & unitfile, groups files
+    into genomes, see Listing \ref{code:lua} for an example.
+    \\\midrule
+    \Showoptiongroup{Advanced options}
+    \Showoption{-idxopts} \Showoptionarg{'opts'} & options for
+      indexconstruction, see help of \Gtsuffixerator or \Gtpackedindex for
+      options. Use \texttt{''} to group.\\
+    \Showoption{-diffopts} \Showoptionarg{'opts'} & options for
+    \Kr-calculation. Use \texttt{''} to group.
+    \\\midrule
+    \Showoptiongroup{Miscellaneous options}
+    \Showoption{h}/\Showoption{-help} & print help and exit
+    \\\bottomrule
+  \end{tabular}
+\end{footnotesize}
+\end{table}
+
+\section{Example}
+
+This section describes two example scenarios, first comparing multiple
+genomes that are organised in separate multiple \FastA-files and the second
+comparing two genomes consisting of multiple files each.
+
+\subsection{Compare genomes in separate files}
+
+Assume whe have three files \File{genome1.fas}, \File{genome2.fas} and
+\File{genome3.fas} each of which could contain multiple \FastA entries. Our
+machine has only 2\,GiB RAM. Assuming the index construction
+would need 5\,GiB, we need to split it in at least three parts or
+restrict maximal memory requirements.
+
+The simplest way to calculate the distance matrix for these three genomes
+would be to call:
+
+\lstinline{run_genomediff.rb --parts 3 genome1.fas genome2.fas genome3.fas}
+
+or:
+
+\lstinline{run_genomediff.rb --memlimit 1024 genome1.fas genome2.fas genome3.fas}
+
+This would use \Gtsuffixerator to build an \ESA of the three sequence files
+including the reverse complement. \Showoption{-memlimit} should be reasonable
+less than available main memory.
+
+The index will be stored in the current folder as separate files with
+basename \File{esa} in the current directory and can be used for further
+experiments.
+
+The distance matrix will be printed to the terminal, in order to store it use
+
+\lstinline{run_genomediff.rb genome1.fas genome2.fas genome3.fas > outfile}
+
+to store the results in file \File{outfile}. This file might look like this:
+\begin{verbatim}
+# Table of Kr
+3
+genome1.fas	0.000000	0.115125	0.267473
+genome2.fas	0.115125	0.000000	0.293082
+genome3.fas	0.267473	0.293082	0.000000
+\end{verbatim}
+
+This tabulator separated table can be used with \textit{Phylip} or
+\textit{R} to calculate a phylogenetic tree.
+
+Another way to calculate the same distances would be to call the tools
+separately, for example create an \ESA whith \Gtsuffixerator like this:
+
+\begin{lstlisting}
+gt suffixerator                         \
+-mirrored -dna -suf -tis -lcp -ssp      \
+-db genome1.fas genome2.fas genome3.fas \
+-indexname esa                          \
+-memlimit 1024                          \
+\end{lstlisting}
+
+and afterwards call \Gdiff:
+
+\begin{lstlisting}
+gt genomediff -esa esa > outfile
+\end{lstlisting}
+
+\subsection{Compare two genomes in multiple files}
+
+Assume we have two genomes that consist of multiple chromosomes in separate
+files. For example genome1 consists of \File{g1\_chr1.fas} and
+\File{g1\_chr2.fas} while the two files for genome2 are named accordingly.
+The unitfile should be saved like this:
+\begin{lstlisting}[language=lua]
+units = {
+  genome1 = { "g1_chr1", "g1_chr2" },
+  genome2 = { "g2_chr1", "g2_chr2" }
+}
+\end{lstlisting}
+The name of the unitfile in our example will be \File{units}
+
+Now we could call \RGdiff like this:
+
+\begin{lstlisting}
+run_genomediff.rb --unitfile units \
+g1_chr1.fas g1_chr2.fas g2_chr1.fas g2_chr2.fas
+\end{lstlisting}
+
+\begin{verbatim}
+# Table of Kr
+2
+genome1	0.000000	0.115125
+genome2	0.115125	0.000000
+\end{verbatim}
+
+\section*{Bibliography}
+\bibliographystyle{unsrt}
+\bibliography{gtmanuals}
+\end{document}
+% vim:spell spelllang=en_gb

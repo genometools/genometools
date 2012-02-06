@@ -7,7 +7,8 @@ ALL=readjoiner.pdf\
     packedindex.pdf\
     repfind.pdf\
     tallymer.pdf\
-    tagerator.pdf
+    tagerator.pdf\
+		genomediff.pdf
 
 TALLYMERTMP=tallymer-tmp
 TAGERATORTMP=tagerator-tmp
@@ -84,13 +85,13 @@ tagerator.dvi:${TAGERATORTMP}.tex
 	latex ${TAGERATORTMP}
 	mv ${TAGERATORTMP}.dvi $@
 
-%.pdf:%.tex
-	pdflatex $<
-	pdflatex $<
+#%.pdf:%.tex
+	#pdflatex $<
+	#pdflatex $<
 
-%.dvi:%.tex
-	latex $<
-	latex $<
+#%.dvi:%.tex
+	#latex $<
+	#latex $<
 
 clean:
 	${RM} *.aux  *.log *.bbl  *.blg *.dvi *.mer *.mct *.mbd comment.cut
