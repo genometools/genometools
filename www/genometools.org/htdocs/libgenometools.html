@@ -3387,6 +3387,24 @@ Enable ID attribute checking in <code>gff3_parser</code>. Thereby, the memory
    size(s).
 </p>
 <hr>
+<a name="gt_gff3_parser_check_region_boundaries"></a>
+
+<code>void           gt_gff3_parser_check_region_boundaries(GtGFF3Parser *gff3_parser)</code>
+<p>
+Enable sequence region boundary checking in <code>gff3_parser</code>. That is,
+   encountering features outside the sequence region boundaries will result in
+   an error.
+</p>
+<hr>
+<a name="gt_gff3_parser_do_not_check_region_boundaries"></a>
+
+<code>void           gt_gff3_parser_do_not_check_region_boundaries(GtGFF3Parser
+                                                                  *gff3_parser)</code>
+<p>
+Disable sequence region boundary checking in <code>gff3_parser</code>. That is,
+   features outside the sequence region boundaries will be permitted.
+</p>
+<hr>
 <a name="gt_gff3_parser_set_offset"></a>
 
 <code>void           gt_gff3_parser_set_offset(GtGFF3Parser *gff3_parser, long offset)</code>
@@ -8163,7 +8181,11 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_gff3_parser_check_id_attributes"><code>gt_gff3_parser_check_id_attributes</code></a><br>
 
+  <a href="#gt_gff3_parser_check_region_boundaries"><code>gt_gff3_parser_check_region_boundaries</code></a><br>
+
   <a href="#gt_gff3_parser_delete"><code>gt_gff3_parser_delete</code></a><br>
+
+  <a href="#gt_gff3_parser_do_not_check_region_boundaries"><code>gt_gff3_parser_do_not_check_region_boundaries</code></a><br>
 
   <a href="#gt_gff3_parser_enable_tidy_mode"><code>gt_gff3_parser_enable_tidy_mode</code></a><br>
 
@@ -8850,7 +8872,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-01-10
+Last update: 2012-01-26
 </div>
 </div>
 <!-- Piwik -->
