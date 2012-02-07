@@ -46,7 +46,7 @@ typedef struct
   GtStr *outfilenameleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
-#ifdef __LP64
+#ifdef _LP64
   uint32_t modvaluemask;
   unsigned int modvaluebits;
   GtArrayGtUlong bitchangepoints;
@@ -109,7 +109,7 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
   }
 }
 
-#ifdef __LP64
+#ifdef _LP64
 #define GT_CHANGEPOINT_GET(CP)\
         unsigned long CP;\
         for (CP = 0; CP < fct->bitchangepoints.nextfreeGtUlong &&\
@@ -121,7 +121,7 @@ GT_UNUSED
 static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
 {
-#ifdef __LP64
+#ifdef _LP64
   GT_CHANGEPOINT_GET(changepoint);
   gt_assert(idx < fct->differentcodes);
   if (fct->leftborder[idx] > 0)

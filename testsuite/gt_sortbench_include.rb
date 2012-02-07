@@ -12,6 +12,10 @@ methods.each do |met|
   Keywords "gt_sortbench"
   Test do
     lenlist.each do |len|
+      if met.match(/^radixlin/) and not met.match(/-parts/)
+        run "#{$bin}gt -j 2 dev sortbench -impl #{met} -size #{len}"
+        run "#{$bin}gt -j 3 dev sortbench -impl #{met} -size #{len}"
+      end
       run "#{$bin}gt dev sortbench -impl #{met} -size #{len}"
       run "#{$bin}gt dev sortbench -impl #{met} -size #{len} -maxval 10000"
     end

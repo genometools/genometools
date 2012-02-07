@@ -20,13 +20,13 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
+#include "core/minmax.h"
 #include "core/assert_api.h"
-#include "core/log_api.h"
 #include "core/stack-inlined.h"
 #include "core/types_api.h"
-#include "core/radix-intsort.h"
 #include "core/range_api.h"
 #include "core/array2dim_api.h"
+#include "core/radix-intsort.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
@@ -96,10 +96,6 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
   gt_assert(rparts >= 1U);
   radixsort->rparts = rparts;
   radixsort->maxlen = maxlen;
-  if (withthreads)
-  {
-    gt_log_log("perform sorting with threads");
-  }
   if (withthreads && radixsort->rparts > 1U)
   {
     gt_array2dim_malloc(radixsort->count_tab,(unsigned long) radixsort->rparts,
@@ -332,6 +328,7 @@ static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,
   {
     *cptr = 0;
   }
+
   for (sptr = source; sptr < source + len; sptr++)
   {
     countptr[GT_RADIX_KEY_PAIR(radixsort->maxvalue,shift,sptr)]++;
@@ -404,88 +401,39 @@ typedef struct
   GtThread *thread;
 } GtRadixthreadinfo;
 
-static void *gt_radixsort_threadedcall(void *data)
+static void *gt_radixsort_threaded_call(void *data)
 {
   GtRadixthreadinfo *radixthreadinfo = (GtRadixthreadinfo *) data;
 
-  gt_radixsort_GtUlong_linear(radixthreadinfo->radixsort,
-                              radixthreadinfo->offset,
-                              radixthreadinfo->len,
-                              radixthreadinfo->part);
+  (radixthreadinfo->radixsort->pair
+      ? gt_radixsort_GtUlongPair_linear
+      : gt_radixsort_GtUlong_linear)(radixthreadinfo->radixsort,
+                                     radixthreadinfo->offset,
+                                     radixthreadinfo->len,
+                                     radixthreadinfo->part);
   return NULL;
 }
 #endif
 
 GtRadixreader *gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
 {
+  gt_assert(len > 0);
   if (radixsort->rparts == 1U)
   {
-    if (radixsort->pair)
-    {
-      gt_radixsort_GtUlongPair_linear(radixsort,0,len,0);
-    } else
-    {
-      gt_radixsort_GtUlong_linear(radixsort,0,len,0);
-    }
+    (radixsort->pair ? gt_radixsort_GtUlongPair_linear
+                     : gt_radixsort_GtUlong_linear)(radixsort,0,len,0);
     return NULL;
   }
-  if (radixsort->rparts == 2U)
-  {
-    unsigned long len1 = len/2;
-    GtRadixreader *rr;
-
-    gt_assert(len >= len1);
-    gt_assert(radixsort->radixreader != NULL);
-    rr = radixsort->radixreader;
-    if (radixsort->pair)
-    {
-      gt_radixsort_GtUlongPair_linear(radixsort,0,len1,0);
-      gt_radixsort_GtUlongPair_linear(radixsort,len1,len - len1,0);
-      rr->ptr1_pair = radixsort->arrpair;
-      rr->ptr2_pair = rr->end1_pair = radixsort->arrpair + len1;
-      rr->end2_pair = radixsort->arrpair + len;
-      rr->ptr1 = rr->ptr2 = rr->end1 = rr->end2 = NULL;
-    } else
-    {
-#ifdef GT_THREADS_ENABLED
-      if (radixsort->withthreads)
-      {
-        GtRadixthreadinfo rsthreadinfo[2];
-
-        rsthreadinfo[0].part = 0;
-        rsthreadinfo[0].radixsort = radixsort;
-        rsthreadinfo[0].offset = 0;
-        rsthreadinfo[0].len = len1;
-        rsthreadinfo[0].thread = gt_thread_new (gt_radixsort_threadedcall,
-                                                rsthreadinfo,NULL);
-        gt_assert(rsthreadinfo[0].thread != NULL);
-        rsthreadinfo[1].part = 1U;
-        rsthreadinfo[1].radixsort = radixsort;
-        rsthreadinfo[1].offset = len1;
-        rsthreadinfo[1].len = len - len1;
-        rsthreadinfo[1].thread = gt_thread_new (gt_radixsort_threadedcall,
-                                                rsthreadinfo + 1,NULL);
-        gt_assert(rsthreadinfo[1].thread != NULL);
-        gt_thread_join(rsthreadinfo[0].thread);
-        gt_thread_delete(rsthreadinfo[0].thread);
-        gt_thread_join(rsthreadinfo[1].thread);
-        gt_thread_delete(rsthreadinfo[1].thread);
-      } else
-#endif
-      {
-        gt_radixsort_GtUlong_linear(radixsort,0,len1,0);
-        gt_radixsort_GtUlong_linear(radixsort,len1,len - len1,0);
-      }
-      rr->ptr1 = radixsort->arr;
-      rr->ptr2 = rr->end1 = radixsort->arr + len1;
-      rr->end2 = radixsort->arr + len;
-      rr->ptr1_pair = rr->ptr2_pair = rr->end1_pair = rr->end2_pair = NULL;
-    }
-    /*gt_radixsort_verify(radixsort->radixreader);*/
-  } else
   {
     unsigned int idx;
     unsigned long sumwidth = 0, width;
+    GtRadixreader *rr;
+#ifdef GT_THREADS_ENABLED
+    GtRadixthreadinfo *rsthreadinfo = radixsort->withthreads
+                                        ? gt_malloc(sizeof (*rsthreadinfo) *
+                                                    radixsort->rparts)
+                                        : NULL;
+#endif
 
     if (len % radixsort->rparts == 0)
     {
@@ -505,51 +453,147 @@ GtRadixreader *gt_radixsort_linear(GtRadixsortinfo *radixsort,unsigned long len)
       }
       if (idx < radixsort->rparts - 1)
       {
-        radixsort->ranges[idx].end = (idx+1) * width - 1;
+        radixsort->ranges[idx].end = MIN(len-1,(idx+1) * width - 1);
       } else
       {
         radixsort->ranges[idx].end = len - 1;
       }
-      sumwidth += radixsort->ranges[idx].end - radixsort->ranges[idx].start + 1;
+      if (radixsort->ranges[idx].start <= radixsort->ranges[idx].end)
+      {
+        sumwidth += radixsort->ranges[idx].end -
+                    radixsort->ranges[idx].start + 1;
+      }
     }
     gt_assert(sumwidth == len);
     gt_assert(radixsort->radixreader != NULL);
-    radixsort->radixreader->pq_numofelements = 0;
+    rr = radixsort->radixreader;
+    rr->pq_numofelements = 0;
     for (idx = 0; idx < radixsort->rparts; idx++)
     {
-      unsigned long currentwidth = radixsort->ranges[idx].end -
-                                   radixsort->ranges[idx].start + 1;
-      gt_assert (currentwidth > 0 && currentwidth <= radixsort->tempalloc);
-      if (radixsort->pair)
+      unsigned long currentwidth;
+#ifndef NDEBUG
+      unsigned long offset = radixsort->withthreads
+                               ? radixsort->ranges[idx].start
+                               : 0;
+#endif
+      if (radixsort->ranges[idx].start <= radixsort->ranges[idx].end)
       {
-        gt_radixsort_GtUlongPair_linear(radixsort,radixsort->ranges[idx].start,
-                                        currentwidth,0);
-        gt_radixreaderPQadd(radixsort->radixreader,
-                            radixsort->arrpair[radixsort->ranges[idx].start].a,
-                            idx,
-                            radixsort->arrpair[radixsort->ranges[idx].start].b);
-        radixsort->radixreader->ptrtab[idx].currentptr_pair
-          = radixsort->arrpair + radixsort->ranges[idx].start + 1;
-        radixsort->radixreader->ptrtab[idx].endptr_pair
-          = radixsort->arrpair + radixsort->ranges[idx].end + 1;
-        radixsort->radixreader->ptrtab[idx].currentptr = NULL;
-        radixsort->radixreader->ptrtab[idx].endptr = NULL;
+        currentwidth = radixsort->ranges[idx].end -
+                       radixsort->ranges[idx].start + 1;
       } else
       {
-        gt_radixsort_GtUlong_linear(radixsort,radixsort->ranges[idx].start,
-                                    currentwidth,0);
-        gt_radixreaderPQadd(radixsort->radixreader,
-                            radixsort->arr[radixsort->ranges[idx].start],
-                            idx,
-                            0);
-        radixsort->radixreader->ptrtab[idx].currentptr
-          = radixsort->arr + radixsort->ranges[idx].start + 1;
-        radixsort->radixreader->ptrtab[idx].endptr
-          = radixsort->arr + radixsort->ranges[idx].end + 1;
-        radixsort->radixreader->ptrtab[idx].currentptr_pair = NULL;
-        radixsort->radixreader->ptrtab[idx].endptr_pair = NULL;
+        currentwidth = 0;
+      }
+      gt_assert (offset + currentwidth <= radixsort->tempalloc);
+#ifdef GT_THREADS_ENABLED
+      if (radixsort->withthreads)
+      {
+        gt_assert(rsthreadinfo != NULL);
+        rsthreadinfo[idx].part = idx;
+        rsthreadinfo[idx].radixsort = radixsort;
+        rsthreadinfo[idx].offset = radixsort->ranges[idx].start;
+        rsthreadinfo[idx].len = currentwidth;
+        if (currentwidth > 0)
+        {
+          rsthreadinfo[idx].thread = gt_thread_new (gt_radixsort_threaded_call,
+                                                    rsthreadinfo+idx,NULL);
+          gt_assert(rsthreadinfo[idx].thread != NULL);
+        } else
+        {
+          rsthreadinfo[idx].thread = NULL;
+        }
+      } else
+#endif
+      {
+        if (currentwidth > 0)
+        {
+          (radixsort->pair ? gt_radixsort_GtUlongPair_linear
+                           : gt_radixsort_GtUlong_linear)
+            (radixsort,radixsort->ranges[idx].start,currentwidth,0);
+        }
       }
     }
+#ifdef GT_THREADS_ENABLED
+    if (radixsort->withthreads)
+    {
+      for (idx = 0; idx < radixsort->rparts; idx++)
+      {
+        gt_assert(rsthreadinfo != NULL);
+        if (rsthreadinfo[idx].thread != NULL)
+        {
+          gt_thread_join(rsthreadinfo[idx].thread);
+          gt_thread_delete(rsthreadinfo[idx].thread);
+        }
+      }
+    }
+#endif
+    if (radixsort->rparts == 2U)
+    {
+      if (radixsort->pair)
+      {
+        rr->ptr1_pair = radixsort->arrpair;
+        rr->ptr2_pair = rr->end1_pair
+                      = radixsort->arrpair + radixsort->ranges[1].start;
+        rr->end2_pair = radixsort->arrpair + radixsort->ranges[1].end + 1;
+        rr->ptr1 = rr->ptr2 = rr->end1 = rr->end2 = NULL;
+      } else
+      {
+        rr->ptr1 = radixsort->arr;
+        rr->ptr2 = rr->end1
+                 = radixsort->arr + radixsort->ranges[1].start;
+        rr->end2 = radixsort->arr + radixsort->ranges[1].end + 1;
+        rr->ptr1_pair = rr->ptr2_pair = rr->end1_pair = rr->end2_pair = NULL;
+      }
+    } else
+    {
+      for (idx = 0; idx < radixsort->rparts; idx++)
+      {
+        unsigned long currentwidth;
+        if (radixsort->ranges[idx].start <= radixsort->ranges[idx].end)
+        {
+          currentwidth = radixsort->ranges[idx].end -
+                         radixsort->ranges[idx].start + 1;
+        } else
+        {
+          currentwidth = 0;
+        }
+        if (radixsort->pair)
+        {
+          if (currentwidth > 0)
+          {
+            gt_radixreaderPQadd(
+                       rr,
+                       radixsort->arrpair[radixsort->ranges[idx].start].a,
+                       idx,
+                       radixsort->arrpair[radixsort->ranges[idx].start].b);
+          }
+          rr->ptrtab[idx].currentptr_pair
+            = radixsort->arrpair + radixsort->ranges[idx].start + 1;
+          rr->ptrtab[idx].endptr_pair
+            = radixsort->arrpair + radixsort->ranges[idx].end + 1;
+          rr->ptrtab[idx].currentptr = NULL;
+          rr->ptrtab[idx].endptr = NULL;
+        } else
+        {
+          if (currentwidth > 0)
+          {
+            gt_radixreaderPQadd(rr,
+                                radixsort->arr[radixsort->ranges[idx].start],
+                                idx,
+                                0);
+          }
+          rr->ptrtab[idx].currentptr
+            = radixsort->arr + radixsort->ranges[idx].start + 1;
+          rr->ptrtab[idx].endptr
+            = radixsort->arr + radixsort->ranges[idx].end + 1;
+          rr->ptrtab[idx].currentptr_pair = NULL;
+          rr->ptrtab[idx].endptr_pair = NULL;
+        }
+      }
+    }
+#ifdef GT_THREADS_ENABLED
+    gt_free(rsthreadinfo);
+#endif
   }
   gt_assert(radixsort->radixreader != NULL);
   return radixsort->radixreader;

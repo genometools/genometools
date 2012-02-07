@@ -46,7 +46,7 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   gt_assert(fct->countocc_exceptions != NULL);
   fct->outfilenameleftborder = NULL;
   fct->leftborder_samples = NULL;
-#ifdef __LP64
+#ifdef _LP64
   fct->modvaluebits = 32U; /* XXX remove the following later */
   if (fct->modvaluebits == 32U)
   {
@@ -225,7 +225,7 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
 
 #define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
 
-#ifdef __LP64
+#ifdef _LP64
 #define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
@@ -254,7 +254,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                 spacewithhashmap = 0, spacewithouthashmap = 0;
   uint32_t currentcount;
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
-#ifdef __LP64
+#ifdef _LP64
   const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
   unsigned long exceedvalue = 1UL << fct->modvaluebits;
 #endif
@@ -273,7 +273,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                   100.0 * (double) fct->hashmap_getcount/
                                    fct->all_incrementcount);
 
-#ifdef __LP64
+#ifdef _LP64
   if (btp <= fct->modvaluebits)
   {
     fct->bitchangepoints.allocatedGtUlong = 0;
@@ -317,7 +317,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
     currentcount = GT_PARTIALSUM_COUNT_GET(idx);
-#ifdef __LP64
+#ifdef _LP64
     gt_assert(currentcount <= fct->modvaluemask);
 #endif
 #ifdef SKDEBUG
@@ -328,7 +328,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       maxbucketsize = (unsigned long) currentcount;
     }
     partsum += currentcount;
-#ifdef __LP64
+#ifdef _LP64
     if (fct->bitchangepoints.allocatedGtUlong > 0 && partsum >= exceedvalue)
     {
       gt_assert(idx > 0 && fct->bitchangepoints.nextfreeGtUlong <
@@ -396,7 +396,7 @@ unsigned long gt_firstcodes_get_sample(const GtFirstcodestab *fct,
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
                                            unsigned long idx)
 {
-#ifdef __LP64
+#ifdef _LP64
   GT_CHANGEPOINT_GET(changepoint);
 
   return (unsigned long) fct->leftborder[idx]
@@ -483,7 +483,7 @@ void gt_firstcodes_tab_delete(GtFirstcodesspacelog *fcsl,GtFirstcodestab *fct)
   gt_firstcodes_samples_delete(fcsl,fct);
   gt_str_delete(fct->outfilenameleftborder);
   fct->outfilenameleftborder = NULL;
-#ifdef __LP64
+#ifdef _LP64
   GT_FREEARRAY(&fct->bitchangepoints,GtUlong);
 #endif
 }
@@ -502,7 +502,7 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->all_incrementcount = 0;
   fct->hashmap_getcount = 0;
   fct->outfilenameleftborder = NULL;
-#ifdef __LP64
+#ifdef _LP64
   GT_INITARRAY(&fct->bitchangepoints,GtUlong);
 #endif
 }

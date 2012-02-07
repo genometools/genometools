@@ -18,6 +18,7 @@
 #ifndef RADIX_INTSORT_H
 #define RADIX_INTSORT_H
 
+#include <stdbool.h>
 #include "core/types_api.h"
 
 #define GT_RADIXREADER_NEXT(VALUE,RR,STOPSTATEMENT)\
@@ -154,20 +155,20 @@ typedef struct GtRadixsortinfo GtRadixsortinfo;
        at the last index */
     /* move elements to the right until an element larger or equal than
        the key is found. */
-  for (ptr = rr->pq_values + rr->pq_numofelements - 1; ptr >= rr->pq_values;
+  for (ptr = rr->pq_values + rr->pq_numofelements; ptr > rr->pq_values;
        ptr--)
   {
-    if (ptr->sortkey < sortkey)
+    if ((ptr-1)->sortkey < sortkey)
     {
-      *(ptr+1) = *ptr;
+      *ptr = *(ptr-1);
     } else
     {
       break;
     }
   }
-  (ptr+1)->sortkey = sortkey;
-  (ptr+1)->part = part;
-  (ptr+1)->suffixref = suffixref;
+  ptr->sortkey = sortkey;
+  ptr->part = part;
+  ptr->suffixref = suffixref;
   rr->pq_numofelements++;
 }
 

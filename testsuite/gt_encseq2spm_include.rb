@@ -1,13 +1,13 @@
 def run_encseq2spm(readset)
-  threads="-j 1"
   run_test "#$bin/gt suffixerator -db #{readset} -indexname sfx" 
   [32,35].each do |len|
     opts="-l #{len} -ii sfx -spm count -checksuftab"
-    run_test "#$bin/gt #{threads} encseq2spm #{opts}"
+    run_test "#$bin/gt encseq2spm #{opts}"
     [1,2,5].each do |parts|
       [1,2,3].each do |radixparts|
-        run_test "#$bin/gt #{threads} encseq2spm -parts #{parts} " +
+        run_test "#$bin/gt encseq2spm -parts #{parts} " +
                  "-radixparts #{radixparts} #{opts}"
+        run_test "#$bin/gt -j #{radixparts} encseq2spm -parts #{parts} #{opts}"
       end
     end
   end

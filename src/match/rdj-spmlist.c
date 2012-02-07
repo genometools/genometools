@@ -51,7 +51,7 @@
  *
  * */
 
-#if defined(__LP64) || (BITS == 32)
+#if defined(_LP64) || (BITS == 32)
 #define GT_RDJ_LENGTHASSERTION(BITS)\
         gt_assert(length <= (UINT ## BITS ## _MAX >> 2))
 #else
