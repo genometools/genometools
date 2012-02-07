@@ -26,7 +26,7 @@
 struct GtPriorityQueue
 {
   unsigned long capacity, numofelements;
-  GtPQelementtype minelement, *elements;
+  GtPriorityQueueElementType minelement, *elements;
 };
 
 GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
@@ -44,7 +44,7 @@ GtPriorityQueue *gt_priorityqueue_new(unsigned long maxnumofelements)
 
 static void gt_priorityqueue_checkorder(const GtPriorityQueue *pq)
 {
-  GtPQelementtype *ptr;
+  GtPriorityQueueElementType *ptr;
 
   gt_assert(pq != NULL);
   for (ptr = pq->elements; ptr < pq->elements + pq->numofelements - 1; ptr++)
@@ -71,7 +71,7 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
   gt_assert(pq != NULL && !gt_priorityqueue_is_full(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
   {
-    GtPQelementtype *ptr;
+    GtPriorityQueueElementType *ptr;
 
     /* store elements in reverse order, i.e.\ with the minimum element
        at the last index */
@@ -107,7 +107,7 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
   }
 }
 
-GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
+GtPriorityQueueElementType *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priorityqueue_is_empty(pq));
   if (pq->capacity < (unsigned long) GT_MINPQSIZE)
@@ -117,7 +117,7 @@ GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
   } else
   {
     unsigned long idx, child;
-    GtPQelementtype lastelement;
+    GtPriorityQueueElementType lastelement;
 
     pq->minelement = pq->elements[1];
     lastelement = pq->elements[pq->numofelements--];
@@ -144,7 +144,8 @@ GtPQelementtype *gt_priorityqueue_delete_min(GtPriorityQueue *pq)
   return &pq->minelement;
 }
 
-const GtPQelementtype *gt_priorityqueue_find_min(const GtPriorityQueue *pq)
+const GtPriorityQueueElementType *gt_priorityqueue_find_min(const
+                                                            GtPriorityQueue *pq)
 {
   gt_assert(pq != NULL && !gt_priorityqueue_is_empty(pq));
   return pq->elements +
