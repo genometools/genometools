@@ -248,7 +248,8 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
-                                        unsigned long expectedlastpartsum)
+                                        GT_UNUSED unsigned long
+                                                            expectedlastpartsum)
 {
   unsigned long idx, partsum, maxbucketsize, bitmask, samplecount = 0,
                 spacewithhashmap = 0, spacewithouthashmap = 0;

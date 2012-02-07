@@ -1497,7 +1497,7 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
                                       GtTimer *timer,
                                       GtError *err)
 {
-  unsigned long spaceforbucketprocessing;
+  unsigned long spaceforbucketprocessing = 0;
   void *mapptr;
   bool haserr = false;
 
