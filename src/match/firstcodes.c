@@ -77,7 +77,6 @@ typedef struct
 #endif
   unsigned int flushcount,
                shiftright2index,
-               radixparts,
                marksuffixunits,
                markprefixunits,
                bitsforposref;
@@ -436,7 +435,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     radixreader = gt_radixsort_linear(fci->radixsort_code,fci->buf.nextfree);
-    if (fci->radixparts == 1U)
+    if (radixreader == NULL)
     {
       firstelem = fci->buf.spaceGtUlong[0];
     } else
@@ -447,7 +446,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
     ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,firstelem);
     if (ptr != NULL)
     {
-      if (fci->radixparts == 1U)
+      if (radixreader == NULL)
       {
         fci->firstcodehits +=
           gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,ptr);
@@ -550,7 +549,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     radixreader = gt_radixsort_linear(fci->radixsort_codepos,fci->buf.nextfree);
-    if (fci->radixparts == 1U)
+    if (radixreader == NULL)
     {
       firstelem = fci->buf.spaceGtUlongPair[0];
     } else
@@ -563,7 +562,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
                              firstelem.a);
     if (ptr != NULL)
     {
-      if (fci->radixparts == 1U)
+      if (radixreader == NULL)
       {
         fci->firstcodeposhits
           += gt_firstcodes_insertsuffixes_merge(fci,fci->buf.spaceGtUlongPair,
@@ -1043,7 +1042,6 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
                               unsigned int kmersize,
                               bool withsuftabcheck,
                               unsigned int minmatchlength,
-                              unsigned int radixparts,
                               GtError *err)
 {
   unsigned long totallength, maxseqlength, maxrelpos;
@@ -1089,7 +1087,6 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
     maxrelpos = 0;
   }
   bitsforrelpos = gt_determinebitspervalue(maxrelpos);
-  fci->radixparts = radixparts;
   fci->buf.snrp = gt_seqnumrelpos_new(bitsforrelpos,encseq);
   fci->buf.markprefix = NULL;
   fci->buf.marksuffix = NULL;
@@ -1485,6 +1482,9 @@ static int gt_firstcodes_process_part(GtFirstcodesinfo *fci,
                                       const GtSuftabparts *suftabparts,
                                       unsigned int part,
                                       unsigned long maximumspace,
+#ifndef GT_THREADS_ENABLED
+                                      GT_UNUSED
+#endif
                                       unsigned int threads,
                                       unsigned long suftabentries,
                                       bool withsuftabcheck,
@@ -1708,7 +1708,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                          kmersize,
                          withsuftabcheck,
                          minmatchlength,
-                         radixparts,
                          err) != 0)
   {
     haserr = true;
