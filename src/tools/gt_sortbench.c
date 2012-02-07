@@ -359,7 +359,7 @@ static void check_radixsort_GtUlong_linear_gen(bool smalltables,
 
   radixsort = gt_radixsort_new(pair,smalltables,len,rparts,withthreads,arr);
   radixreader = gt_radixsort_linear(radixsort,len);
-  if (rparts == 1U)
+  if (radixreader == NULL)
   {
     gt_sortbench_verify(arr,len);
   } else

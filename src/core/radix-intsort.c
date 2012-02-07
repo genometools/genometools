@@ -94,7 +94,7 @@ GtRadixsortinfo *gt_radixsort_new(bool pair,
   radixsort->pair = pair;
   radixsort->withthreads = withthreads;
   gt_assert(rparts >= 1U);
-  radixsort->rparts = maxlen <= 1000UL ? 1U : rparts;
+  radixsort->rparts = rparts;
   radixsort->maxlen = maxlen;
   if (withthreads)
   {
