@@ -229,15 +229,18 @@ unsigned long gt_encseq_extract2bitencwithtwobitencodingstoppos(
 
 /* The following function extracts the twobitencoding beginning at position
    <pos> in the given encoded sequence <encseq> and ending at
-   the next stop position wrt. to the readmode; The result is stored in
-   <tbereservoir> which points to an array of size <sizeofvector>. */
+   the next stop position wrt. to the readmode. The extraction
+   stops after at most <maxdepth> character have been extracted.
+   The result is stored in <tbereservoir> which points to an array of
+   size <sizeofvector>. */
 
 unsigned int gt_encseq_extract2bitencvector(
                                          GtArrayGtTwobitencoding *tbereservoir,
                                          const GtEncseq *encseq,
                                          GtEncseqReader *esr,
                                          GtReadmode readmode,
-                                         unsigned long pos);
+                                         unsigned long pos,
+                                         unsigned long maxdepth);
 
 /* The following function extracts the twobitencoding for the
    sequence with sequence number <seqnum> beginning at the relative

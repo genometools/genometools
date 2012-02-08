@@ -64,7 +64,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 GtSuffixsortspace *sssp,
                                 unsigned long subbucketleft,
                                 unsigned long width,
-                                unsigned long depth);
+                                unsigned long depth,
+                                unsigned long maxdepth);
 
 void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       GtShortreadsortworkinfo *srsw,

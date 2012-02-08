@@ -6428,7 +6428,8 @@ unsigned int gt_encseq_extract2bitencvector(
                                        const GtEncseq *encseq,
                                        GtEncseqReader *esr,
                                        GtReadmode readmode,
-                                       unsigned long pos)
+                                       unsigned long pos,
+                                       GT_UNUSED unsigned long maxdepth)
 {
   GtEndofTwobitencoding etbecurrent;
   unsigned long twobitencodingstoppos;

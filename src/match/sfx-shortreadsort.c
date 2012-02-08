@@ -556,14 +556,16 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 GtSuffixsortspace *sssp,
                                 unsigned long subbucketleft,
                                 unsigned long width,
-                                unsigned long depth)
+                                unsigned long depth,
+                                unsigned long maxdepth)
 {
-  unsigned long idx, pos;
+  unsigned long idx, pos, remaindepth;
   GtSuffixsortspace_exportptr *exportptr;
 
   gt_shortreadsort_resize(srsw, false, width, maxremain);
   exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
+  remaindepth = depth >= maxdepth ? 0 : maxdepth - depth;
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
@@ -577,7 +579,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                          encseq,
                                          esr,
                                          readmode,
-                                         pos+depth);
+                                         pos+depth,
+                                         remaindepth);
     }
   } else
   {
@@ -592,7 +595,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                          encseq,
                                          esr,
                                          readmode,
-                                         pos+depth);
+                                         pos+depth,
+                                         remaindepth);
     }
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
@@ -621,6 +625,28 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
     }
   }
   gt_suffixsortspace_export_done(sssp);
+}
+
+void gt_shortreadsort_sssp_add_unsorted(GtShortreadsortworkinfo *srsw,
+                                       unsigned long subbucketleft,
+                                       unsigned long width,
+                                       unsigned long maxdepth)
+{
+  unsigned long idx, lcpvalue, laststart = 0;
+
+  for (idx = 1UL; idx < width; idx++)
+  {
+    lcpvalue = lcpsubtab_getvalue(srsw->sssplcpvalues,subbucketleft + idx);
+    if (lcpvalue < maxdepth)
+    {
+      if (laststart < idx-1)
+      {
+        printf("unsorted %lu %lu\n",subbucketleft + laststart,
+                                    subbucketleft + idx - 1);
+      }
+      laststart = idx;
+    }
+  }
 }
 
 void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
