@@ -240,7 +240,8 @@ unsigned int gt_encseq_extract2bitencvector(
                                          GtEncseqReader *esr,
                                          GtReadmode readmode,
                                          unsigned long pos,
-                                         unsigned long maxdepth);
+                                         bool withstoppos,
+                                         unsigned long stoppos);
 
 /* The following function extracts the twobitencoding for the
    sequence with sequence number <seqnum> beginning at the relative
@@ -265,14 +266,18 @@ int gt_encseq_compare_pairof_twobitencodings(bool fwd,
                                            const GtEndofTwobitencoding *ptbe1,
                                            const GtEndofTwobitencoding *ptbe2);
 
+/* The following function compares the two bit encodings and returns the
+   length of the longest common prefix of the sequence they represent */
+
+unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
+                                                      GtTwobitencoding tbe2);
+
 /* The following function compares the two bit encodings <tbe1> and <tbe2>
   and stores the result of the comparison in <commonunits>. The comparison is
   done in forward direction iff <fwd> is true.
   The comparison is done for the complemented characters iff <complement>
   is true. */
 
-unsigned int gt_encseq_lcpofdifferenttwobitencodings(GtTwobitencoding tbe1,
-                                                      GtTwobitencoding tbe2);
 int gt_encseq_compare_pairof_different_twobitencodings(
                                             bool fwd,
                                             bool complement,

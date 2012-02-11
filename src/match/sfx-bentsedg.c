@@ -265,8 +265,7 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
                              unsigned long width,
                              unsigned long offset)
 {
-  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp,
-                lcpindex, lcplen = 0;
+  unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp, lcplen = 0;
   int retval;
   GtCommonunits commonunits;
 
@@ -338,13 +337,13 @@ static void bs_insertionsort(GtBentsedgresources *bsr,
       gt_assert(retval != 0);
       if (bsr->tableoflcpvalues != NULL)
       {
-        lcpindex = subbucketleft+pl;
         if (pl < pm && retval > 0)
         {
-          lcptab_update(bsr->tableoflcpvalues,lcpindex+1,
-                        lcpsubtab_getvalue(bsr->tableoflcpvalues,lcpindex));
+          lcptab_update(bsr->tableoflcpvalues,subbucketleft,pl+1,
+                        lcpsubtab_getvalue(bsr->tableoflcpvalues,subbucketleft,
+                                           pl));
         }
-        lcptab_update(bsr->tableoflcpvalues,lcpindex,lcplen);
+        lcptab_update(bsr->tableoflcpvalues,subbucketleft,pl,lcplen);
       }
       if (retval < 0)
       {
@@ -362,7 +361,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
                                      unsigned long maxdepth)
 {
   unsigned long sval1, sval2, pm, pl, startpos1, startpos2, temp,
-                lcpindex, lcplen = 0, idx = 0;
+                lcplen = 0, idx = 0;
   int retval;
   bool tempb;
   GtCommonunits commonunits;
@@ -447,13 +446,13 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
 #endif
       if (bsr->tableoflcpvalues != NULL && retval != 0)
       {
-        lcpindex = subbucketleft + pl;
         if (pl < pm && retval > 0)
         {
-          lcptab_update(bsr->tableoflcpvalues,lcpindex+1,
-                        lcpsubtab_getvalue(bsr->tableoflcpvalues,lcpindex));
+          lcptab_update(bsr->tableoflcpvalues,subbucketleft,pl+1,
+                        lcpsubtab_getvalue(bsr->tableoflcpvalues,subbucketleft,
+                                           pl));
         }
-        lcptab_update(bsr->tableoflcpvalues,lcpindex,lcplen);
+        lcptab_update(bsr->tableoflcpvalues,subbucketleft,pl,lcplen);
       }
       if (retval < 0)
       {
@@ -863,7 +862,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     }
 #endif
     if (!bsr->sfxstrategy->cmpcharbychar &&
-        bsr->sortmaxdepth == 0 && /* XXX remove this line */
+        (bsr->sortmaxdepth == 0 || bsr->tableoflcpvalues != NULL) &&
         gt_shortreadsort_size(false,width,
                               bsr->maxremain) <= bsr->sizeofworkspace)
     {
@@ -878,6 +877,18 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                                  depth,
                                  (unsigned long) bsr->sortmaxdepth);
       bsr->countshortreadsort++;
+      if (bsr->sortmaxdepth > 0 &&
+          bsr->tableoflcpvalues != NULL &&
+          bsr->sfxstrategy->differencecover > 0)
+      {
+        gt_shortreadsort_sssp_add_unsorted(bsr->tableoflcpvalues,
+                       gt_suffixsortspace_bucketleftidx_get(bsr->sssp),
+                                           subbucketleft,
+                                           width,
+                                           (unsigned long) bsr->sortmaxdepth,
+                                           bsr->processunsortedsuffixrange,
+                                           bsr->processunsortedsuffixrangeinfo);
+      }
       return;
     }
     if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
@@ -1020,7 +1031,7 @@ static void sarrcountingsort(GtBentsedgresources *bsr,
     }
     if (bsr->tableoflcpvalues != NULL && bsr->leftlcpdist[idx] < end)
     { /* at least one element */
-      lcptab_update(bsr->tableoflcpvalues,subbucketleft+end,depth + idx);
+      lcptab_update(bsr->tableoflcpvalues,subbucketleft,end,depth + idx);
     }
     bsr->leftlcpdist[idx] = 0;
   }
@@ -1052,7 +1063,8 @@ static void sarrcountingsort(GtBentsedgresources *bsr,
     }
     if (bsr->tableoflcpvalues != NULL && bsr->rightlcpdist[idx] < end)
     { /* at least one element */
-      lcptab_update(bsr->tableoflcpvalues,subbucketleft + width - end,
+      gt_assert(width >= end);
+      lcptab_update(bsr->tableoflcpvalues,subbucketleft,width - end,
                     depth + idx);
     }
     bsr->rightlcpdist[idx] = 0;
@@ -1271,7 +1283,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        lcptab_update(bsr->tableoflcpvalues,subbucketleft + leftplusw,
+        lcptab_update(bsr->tableoflcpvalues,subbucketleft,leftplusw,
                       depth + smallermaxlcp);
       }
       if (wtmp > 1UL)
@@ -1307,7 +1319,7 @@ static void gt_sort_bentleysedgewick(GtBentsedgresources *bsr,
           element in the first part of the right side.
         */
         lcptab_update(bsr->tableoflcpvalues,
-                      subbucketleft + bucketright - wtmp + 1,
+                      subbucketleft,bucketright - wtmp + 1,
                       depth + greatermaxlcp);
       }
       if (wtmp > 1UL)

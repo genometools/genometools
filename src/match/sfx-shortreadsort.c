@@ -347,14 +347,13 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
           if (data->sssplcpvalues != NULL)
           {
-            unsigned long lcpindex = subbucketleft + pl;
             if (pl < pm && r > 0)
             {
-              lcptab_update(data->sssplcpvalues,lcpindex+1,
+              lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
                             lcpsubtab_getvalue(data->sssplcpvalues,
-                                               lcpindex));
+                                               subbucketleft,pl));
             }
-            lcptab_update(data->sssplcpvalues,lcpindex,
+            lcptab_update(data->sssplcpvalues,subbucketleft,pl,
                           depth + data->tmplcplen);
           } else
           {
@@ -496,14 +495,15 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           which is at a minimum distance to the pivot and thus to an
           element in the final part of the left side.
         */
-        lcptab_update(data->sssplcpvalues,subbucketleft+current.startindex+s,
-                      depth+smallermaxlcp);
+        lcptab_update(data->sssplcpvalues,
+                      subbucketleft,current.startindex + s,
+                      depth + smallermaxlcp);
       } else
       {
         if (data->firstcodeslcpvalues != NULL)
         {
           gt_assert(depth + smallermaxlcp <= UINT16_MAX);
-          data->firstcodeslcpvalues[current.startindex+s]
+          data->firstcodeslcpvalues[current.startindex + s]
             = (uint16_t) (depth + smallermaxlcp);
         }
       }
@@ -525,7 +525,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           element in the first part of the right side.
         */
         gt_assert(pn >= s);
-        lcptab_update(data->sssplcpvalues, subbucketleft + pn - s,
+        lcptab_update(data->sssplcpvalues,subbucketleft,pn - s,
                       depth + greatermaxlcp);
       } else
       {
@@ -559,13 +559,12 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                 unsigned long depth,
                                 unsigned long maxdepth)
 {
-  unsigned long idx, pos, remaindepth;
+  unsigned long idx, pos;
   GtSuffixsortspace_exportptr *exportptr;
 
   gt_shortreadsort_resize(srsw, false, width, maxremain);
   exportptr = gt_suffixsortspace_exportptr(subbucketleft, sssp);
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
-  remaindepth = depth >= maxdepth ? 0 : maxdepth - depth;
   if (exportptr->ulongtabsectionptr != NULL)
   {
     for (idx = 0; idx < width; idx++)
@@ -580,7 +579,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                          esr,
                                          readmode,
                                          pos+depth,
-                                         remaindepth);
+                                         maxdepth > 0 ? true : false,
+                                         pos + maxdepth);
     }
   } else
   {
@@ -596,7 +596,8 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
                                          esr,
                                          readmode,
                                          pos+depth,
-                                         remaindepth);
+                                         maxdepth > 0 ? true : false,
+                                         pos + maxdepth);
     }
   }
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width, srsw, depth,
@@ -627,25 +628,36 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-void gt_shortreadsort_sssp_add_unsorted(GtShortreadsortworkinfo *srsw,
-                                       unsigned long subbucketleft,
-                                       unsigned long width,
-                                       unsigned long maxdepth)
+void gt_shortreadsort_sssp_add_unsorted(const GtLcpvalues *sssplcpvalues,
+                                        unsigned long bucketleftidx,
+                                        unsigned long subbucketleft,
+                                        unsigned long width,
+                                        unsigned long maxdepth,
+                                        GtProcessunsortedsuffixrange
+                                          processunsortedsuffixrange,
+                                        void *processunsortedsuffixrangeinfo)
 {
   unsigned long idx, lcpvalue, laststart = 0;
 
   for (idx = 1UL; idx < width; idx++)
   {
-    lcpvalue = lcpsubtab_getvalue(srsw->sssplcpvalues,subbucketleft + idx);
+    lcpvalue = lcpsubtab_getvalue(sssplcpvalues,subbucketleft,idx);
     if (lcpvalue < maxdepth)
     {
       if (laststart < idx-1)
       {
-        printf("unsorted %lu %lu\n",subbucketleft + laststart,
-                                    subbucketleft + idx - 1);
+        processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                                   bucketleftidx + subbucketleft + laststart,
+                                   idx - laststart,maxdepth);
       }
       laststart = idx;
     }
+  }
+  if (laststart < width-1)
+  {
+    processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                               bucketleftidx + subbucketleft + laststart,
+                               width - laststart,maxdepth);
   }
 }
 

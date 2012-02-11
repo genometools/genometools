@@ -23,11 +23,6 @@
 #include "sfx-suffixgetset.h"
 #include "sfx-lcpvalues.h"
 
-typedef void (*GtProcessunsortedsuffixrange)(void *,
-                                        unsigned long,
-                                        unsigned long,
-                                        unsigned long);
-
 typedef struct GtBlindtrie GtBlindtrie;
 
 GtBlindtrie *gt_blindtrie_new(GtSuffixsortspace *suffixsortspace,

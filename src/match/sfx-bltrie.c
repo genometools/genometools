@@ -806,7 +806,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
       {
         if (tableoflcpvalues != NULL)
         {
-          lcptab_update(tableoflcpvalues,subbucketleft + nextfree,
+          lcptab_update(tableoflcpvalues,subbucketleft,nextfree,
                         lcpnodedepth + offset);
         }
         if (maxdepth > 0)
@@ -1175,7 +1175,7 @@ static void processoverflowsuffixes(GtBlindtrie *blindtrie,
     {
       if (tableoflcpvalues != NULL)
       {
-        lcptab_update(tableoflcpvalues,subbucketleft+nextsuffixtooutput,offset);
+        lcptab_update(tableoflcpvalues,subbucketleft,nextsuffixtooutput,offset);
       }
       blindtrie_suffixout(blindtrie,subbucketleft,offset,nextsuffixtooutput,
                           blindtrie->overflowsuffixes.spaceGtUlong[idx]);

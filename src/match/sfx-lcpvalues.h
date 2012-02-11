@@ -35,25 +35,33 @@ typedef struct
   unsigned long *bucketoflcpvalues,
                 numofentries,
                 numoflargelcpvalues,
-                subbucketleft;
+                lcptaboffset; /* This can be positive when the lcp-values
+                                 for an entire range of suffixes (covering
+                                 more than one bucket) must
+                                 be sorted, as in the case of the difference
+                                 cover. In other cases, only the lcp-values
+                                 for a single bucket must be computed, which
+                                 means that the value is 0. */
 } GtLcpvalues;
 
 /*@unused@*/ static inline void lcptab_update(GtLcpvalues *tableoflcpvalues,
+                                              unsigned long subbucketleft,
                                               unsigned long idx,
                                               unsigned long value)
 {
   gt_assert (tableoflcpvalues != NULL &&
              tableoflcpvalues->bucketoflcpvalues != NULL &&
-             tableoflcpvalues->subbucketleft+idx <
+             tableoflcpvalues->lcptaboffset+subbucketleft+idx <
              tableoflcpvalues->numofentries);
 #ifndef NDEBUG
   if (tableoflcpvalues->isset != NULL)
   {
-    GT_SETIBIT(tableoflcpvalues->isset,tableoflcpvalues->subbucketleft+idx);
+    GT_SETIBIT(tableoflcpvalues->isset,
+               tableoflcpvalues->lcptaboffset+subbucketleft+idx);
   }
 #endif
-  tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->subbucketleft+idx]
-    = value;
+  tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->lcptaboffset +
+                                      subbucketleft + idx] = value;
   if (value >= (unsigned long) LCPOVERFLOW)
   {
     tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as there may
@@ -64,17 +72,18 @@ typedef struct
 
 /*@unused@*/ static inline unsigned long lcpsubtab_getvalue(
                                         const GtLcpvalues *tableoflcpvalues,
+                                        unsigned long subbucketleft,
                                         unsigned long idx)
 {
   gt_assert (tableoflcpvalues != NULL &&
              tableoflcpvalues->bucketoflcpvalues != NULL &&
-             tableoflcpvalues->subbucketleft+idx <
+             tableoflcpvalues->lcptaboffset+subbucketleft+idx <
              tableoflcpvalues->numofentries);
   gt_assert(tableoflcpvalues->isset == NULL ||
             GT_ISIBITSET(tableoflcpvalues->isset,
-                         tableoflcpvalues->subbucketleft+idx));
+                         tableoflcpvalues->lcptaboffset+subbucketleft+idx));
   return tableoflcpvalues->bucketoflcpvalues
-                           [tableoflcpvalues->subbucketleft+idx];
+                           [tableoflcpvalues->lcptaboffset+subbucketleft+idx];
 }
 
 Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
@@ -103,7 +112,7 @@ unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo);
 
 void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
                              GtCodetype code,
-                             unsigned long subbucketleft);
+                             unsigned long lcptaboffset);
 
 void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,

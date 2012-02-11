@@ -323,6 +323,7 @@ void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
 unsigned long gt_suffixsortspace_bucketleftidx_get(const GtSuffixsortspace
                                                    *sssp)
 {
+  gt_assert(sssp != NULL);
   return sssp->bucketleftidx;
 }
 

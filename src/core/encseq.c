@@ -6429,7 +6429,8 @@ unsigned int gt_encseq_extract2bitencvector(
                                        GtEncseqReader *esr,
                                        GtReadmode readmode,
                                        unsigned long pos,
-                                       GT_UNUSED unsigned long maxdepth)
+                                       bool withstoppos,
+                                       unsigned long stoppos)
 {
   GtEndofTwobitencoding etbecurrent;
   unsigned long twobitencodingstoppos;
@@ -6437,7 +6438,8 @@ unsigned int gt_encseq_extract2bitencvector(
   int idx;
   bool fwd;
 
-  if (pos == encseq->totallength || pos == encseq->logicaltotallength)
+  if (pos == encseq->totallength || pos == encseq->logicaltotallength ||
+      (withstoppos && pos >= stoppos))
   {
     return 0;
   }
@@ -6449,6 +6451,26 @@ unsigned int gt_encseq_extract2bitencvector(
   } else
   {
     twobitencodingstoppos = fwd ? GT_TWOBITENCODINGSTOPPOSUNDEF(encseq) : 0;
+  }
+  if (withstoppos)
+  {
+    if (fwd)
+    {
+      if (twobitencodingstoppos > stoppos)
+      {
+        twobitencodingstoppos = stoppos;
+      }
+    } else
+    {
+      if (stoppos < encseq->logicaltotallength)
+      {
+        stoppos = GT_REVERSEPOS(encseq->logicaltotallength, stoppos);
+        if (twobitencodingstoppos < stoppos)
+        {
+          twobitencodingstoppos = stoppos;
+        }
+      }
+    }
   }
   if (GT_ISDIRREVERSE(readmode))
   {

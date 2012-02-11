@@ -76,4 +76,13 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       unsigned long width,
                                       unsigned long depth);
 
+void gt_shortreadsort_sssp_add_unsorted(const GtLcpvalues *sssplcpvalues,
+                                        unsigned long bucketleftidx,
+                                        unsigned long subbucketleft,
+                                        unsigned long width,
+                                        unsigned long maxdepth,
+                                        GtProcessunsortedsuffixrange
+                                          processunsortedsuffixrange,
+                                        void *processunsortedsuffixrangeinfo);
+
 #endif

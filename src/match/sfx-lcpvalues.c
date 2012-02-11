@@ -139,7 +139,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
       maxprefixindex = gt_bcktab_pfxidx2lcpvalues_ulong(
                           &minprefixindex,
                           lcpsubtab->tableoflcpvalues.bucketoflcpvalues +
-                          lcpsubtab->tableoflcpvalues.subbucketleft,
+                          lcpsubtab->tableoflcpvalues.lcptaboffset,
                           specialsinbucket,
                           bcktab,
                           code);
@@ -149,7 +149,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
         for (idx=0; idx<specialsinbucket; idx++)
         {
           GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
-                     lcpsubtab->tableoflcpvalues.subbucketleft+idx);
+                     lcpsubtab->tableoflcpvalues.lcptaboffset+idx);
         }
       }
 #endif
@@ -182,10 +182,10 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   } else
   {
     lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-               [lcpsubtab->tableoflcpvalues.subbucketleft] = lcpvalue;
+               [lcpsubtab->tableoflcpvalues.lcptaboffset] = lcpvalue;
 #ifndef NDEBUG
     GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
-               lcpsubtab->tableoflcpvalues.subbucketleft);
+               lcpsubtab->tableoflcpvalues.lcptaboffset);
 #endif
   }
   return minprefixindex;
@@ -302,7 +302,7 @@ void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
                               sizeof (GtBitsequence);
     outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
     outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = numoflcpvalues;
-    outlcpinfo->lcpsubtab.tableoflcpvalues.subbucketleft = 0;
+    outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset = 0;
   }
 }
 
@@ -333,7 +333,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   }
   for (idx=bucketleft; idx<=bucketright; idx++)
   {
-    lcpvalue = lcpsubtab_getvalue(&lcpsubtab->tableoflcpvalues,idx);
+    lcpvalue = lcpsubtab_getvalue(&lcpsubtab->tableoflcpvalues,0,idx);
     if (lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
     {
       lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
@@ -514,14 +514,14 @@ unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo)
 
 void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
                              GtCodetype code,
-                             unsigned long subbucketleft)
+                             unsigned long lcptaboffset)
 {
   if (outlcpinfo != NULL)
   {
     outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
     if (outlcpinfo->lcpsubtab.lcp2file == NULL)
     {
-      outlcpinfo->lcpsubtab.tableoflcpvalues.subbucketleft = subbucketleft;
+      outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset = lcptaboffset;
     }
     if (code > 0)
     {
@@ -576,7 +576,7 @@ void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
       /* first part first code */
       lcpvalue = 0;
     }
-    lcptab_update(tableoflcpvalues,0,lcpvalue);
+    lcptab_update(tableoflcpvalues,0,0,lcpvalue);
     /* all other lcp-values are computed and they can be output */
     outlcpvalues(&outlcpinfo->lcpsubtab,
                  0,
@@ -706,7 +706,7 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
 #endif
       lcpsubtab->tableoflcpvalues.bucketoflcpvalues
         = (unsigned long *) lcpsubtab->lcp2file->reservoir;
-      lcpsubtab->tableoflcpvalues.subbucketleft = 0;
+      lcpsubtab->tableoflcpvalues.lcptaboffset = 0;
       lcpsubtab->tableoflcpvalues.numofentries
         = (unsigned long) lcpsubtab->lcp2file->sizereservoir/
           sizeof (*lcpsubtab->tableoflcpvalues.bucketoflcpvalues);
