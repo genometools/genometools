@@ -1836,7 +1836,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       srswtab[threadcount]
         = gt_shortreadsort_new(maxbucketsize,maxseqlength - kmersize,
-                               readmode,true);
+                               readmode,true,false);
     }
     GT_FCI_ADDWORKSPACE(fci.fcsl,"shortreadsort",
                         threads * gt_shortreadsort_size(true,maxbucketsize,

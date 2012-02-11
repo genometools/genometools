@@ -38,13 +38,13 @@ struct GtShortreadsortworkinfo
   GtLcpvalues *sssplcpvalues;    /* always NULL in the context of
                                     firstcodes; otherwise: NULL iff
                                     lcpvalues are not required. */
-  uint16_t *firstcodeslcpvalues; /* always NULL for firstcodes;
+  uint16_t *mediumsizelcpvalues; /* always NULL for firstcodes;
                                     otherwise: NULL if lcpvalues are
                                     not required */
   unsigned long *seqnum_relpos_bucket; /* only for firstcodes */
   GtArrayGtTwobitencoding tbereservoir;
   unsigned long tmplcplen, currentbucketsize, sumofstoredvalues;
-  bool fwd, complement;
+  bool fwd, complement, withmediumsizelcps;
 };
 
 static unsigned long gt_shortreadsort_encoding_size(unsigned long bucketsize,
@@ -77,6 +77,7 @@ static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
                                     unsigned long bucketsize,
                                     unsigned long maxremain)
 {
+  gt_assert(!firstcodes || !srsw->withmediumsizelcps);
   gt_assert(bucketsize <= (unsigned long) UINT32_MAX);
   if (srsw->currentbucketsize < bucketsize)
   {
@@ -84,21 +85,19 @@ static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
                                           sizeof (*srsw->shortreadsorttable) *
                                           bucketsize);
   }
-  if (firstcodes)
+  if (firstcodes && srsw->currentbucketsize < bucketsize)
   {
-    if (srsw->currentbucketsize < bucketsize)
-    {
-      srsw->firstcodeslcpvalues
-        = gt_realloc(srsw->firstcodeslcpvalues,
-                     sizeof (*srsw->firstcodeslcpvalues) * bucketsize);
-      srsw->firstcodeslcpvalues[0] = 0; /* since it is not set otherwise */
-      srsw->seqnum_relpos_bucket
-        = gt_realloc(srsw->seqnum_relpos_bucket,
-                     sizeof (*srsw->seqnum_relpos_bucket) * bucketsize);
-    }
-  } else
+    srsw->seqnum_relpos_bucket
+      = gt_realloc(srsw->seqnum_relpos_bucket,
+                   sizeof (*srsw->seqnum_relpos_bucket) * bucketsize);
+  }
+  if ((firstcodes || srsw->withmediumsizelcps) &&
+      srsw->currentbucketsize < bucketsize)
   {
-    srsw->firstcodeslcpvalues = NULL;
+    srsw->mediumsizelcpvalues
+      = gt_realloc(srsw->mediumsizelcpvalues,
+                   sizeof (*srsw->mediumsizelcpvalues) * bucketsize);
+    srsw->mediumsizelcpvalues[0] = 0; /* since it is not set otherwise */
   }
   srsw->tbereservoir.nextfreeGtTwobitencoding = 0;
   if (srsw->currentbucketsize < bucketsize)
@@ -116,7 +115,8 @@ static void gt_shortreadsort_resize(GtShortreadsortworkinfo *srsw,
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               unsigned long maxremain,
                                               GtReadmode readmode,
-                                              bool firstcodes)
+                                              bool firstcodes,
+                                              bool withmediumsizelcps)
 {
   GtShortreadsortworkinfo *srsw;
 
@@ -127,7 +127,8 @@ GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
   srsw->sumofstoredvalues = 0;
   srsw->currentbucketsize = 0;
   srsw->shortreadsorttable = NULL;
-  srsw->firstcodeslcpvalues = NULL;
+  srsw->mediumsizelcpvalues = NULL;
+  srsw->withmediumsizelcps = withmediumsizelcps;
   srsw->seqnum_relpos_bucket = NULL;
   GT_INITARRAY(&srsw->tbereservoir,GtTwobitencoding);
   if (maxwidth > 0)
@@ -149,8 +150,8 @@ void gt_shortreadsort_delete(GtShortreadsortworkinfo *srsw)
   {
     gt_free(srsw->shortreadsorttable);
     srsw->shortreadsorttable = NULL;
-    gt_free(srsw->firstcodeslcpvalues);
-    srsw->firstcodeslcpvalues = NULL;
+    gt_free(srsw->mediumsizelcpvalues);
+    srsw->mediumsizelcpvalues = NULL;
     gt_free(srsw->seqnum_relpos_bucket);
     srsw->seqnum_relpos_bucket = NULL;
     GT_FREEARRAY(&srsw->tbereservoir,GtTwobitencoding);
@@ -345,27 +346,28 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         for (pl = pm; pl > current.startindex; pl--)
         {
           r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
-          if (data->sssplcpvalues != NULL)
+          if (data->mediumsizelcpvalues != NULL)
           {
+            gt_assert (data->sssplcpvalues == NULL);
             if (pl < pm && r > 0)
             {
-              lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
-                            lcpsubtab_getvalue(data->sssplcpvalues,
-                                               subbucketleft,pl));
+              data->mediumsizelcpvalues[pl+1] = data->mediumsizelcpvalues[pl];
             }
-            lcptab_update(data->sssplcpvalues,subbucketleft,pl,
-                          depth + data->tmplcplen);
+            gt_assert(depth + data->tmplcplen <= UINT16_MAX);
+            data->mediumsizelcpvalues[pl]
+              = (uint16_t) (depth + data->tmplcplen);
           } else
           {
-            if (data->firstcodeslcpvalues != NULL)
+            if (data->sssplcpvalues != NULL)
             {
               if (pl < pm && r > 0)
               {
-                data->firstcodeslcpvalues[pl+1] = data->firstcodeslcpvalues[pl];
+                lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
+                              lcpsubtab_getvalue(data->sssplcpvalues,
+                                                 subbucketleft,pl));
               }
-              gt_assert(depth + data->tmplcplen <= UINT16_MAX);
-              data->firstcodeslcpvalues[pl]
-                = (uint16_t) (depth + data->tmplcplen);
+              lcptab_update(data->sssplcpvalues,subbucketleft,pl,
+                            depth + data->tmplcplen);
             }
           }
           if (r <= 0)
@@ -487,24 +489,25 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     gt_assert(pb >= pa);
     if ((s = (unsigned long) (pb - pa)) > 0)
     {
-      if (data->sssplcpvalues != NULL)
+      if (data->mediumsizelcpvalues != NULL)
       {
-        /*
-          left part has suffix with lcp up to length smallermaxlcp w.r.t.
-          to the pivot. This lcp belongs to a suffix on the left
-          which is at a minimum distance to the pivot and thus to an
-          element in the final part of the left side.
-        */
-        lcptab_update(data->sssplcpvalues,
-                      subbucketleft,current.startindex + s,
-                      depth + smallermaxlcp);
+        gt_assert (data->sssplcpvalues == NULL);
+        gt_assert(depth + smallermaxlcp <= UINT16_MAX);
+        data->mediumsizelcpvalues[current.startindex + s]
+          = (uint16_t) (depth + smallermaxlcp);
       } else
       {
-        if (data->firstcodeslcpvalues != NULL)
+        if (data->sssplcpvalues != NULL)
         {
-          gt_assert(depth + smallermaxlcp <= UINT16_MAX);
-          data->firstcodeslcpvalues[current.startindex + s]
-            = (uint16_t) (depth + smallermaxlcp);
+          /*
+            left part has suffix with lcp up to length smallermaxlcp w.r.t.
+            to the pivot. This lcp belongs to a suffix on the left
+            which is at a minimum distance to the pivot and thus to an
+            element in the final part of the left side.
+          */
+          lcptab_update(data->sssplcpvalues,
+                        subbucketleft,current.startindex + s,
+                        depth + smallermaxlcp);
         }
       }
       if (s > 1UL)
@@ -516,24 +519,24 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     gt_assert(pd >= pc);
     if ((s = (unsigned long) (pd - pc)) > 0)
     {
-      if (data->sssplcpvalues != NULL)
+      if (data->mediumsizelcpvalues != NULL)
       {
-        /*
-          right part has suffix with lcp up to length largermaxlcp w.r.t.
-          to the pivot. This lcp belongs to a suffix on the right
-          which is at a minimum distance to the pivot and thus to an
-          element in the first part of the right side.
-        */
-        gt_assert(pn >= s);
-        lcptab_update(data->sssplcpvalues,subbucketleft,pn - s,
-                      depth + greatermaxlcp);
+        gt_assert (data->sssplcpvalues == NULL &&
+                   depth + greatermaxlcp <= UINT16_MAX);
+        data->mediumsizelcpvalues[pn - s] = (uint16_t) (depth + greatermaxlcp);
       } else
       {
-        if (data->firstcodeslcpvalues != NULL)
+        if (data->sssplcpvalues != NULL)
         {
-          gt_assert(depth + greatermaxlcp <= UINT16_MAX);
-          data->firstcodeslcpvalues[pn - s]
-            = (uint16_t) (depth + greatermaxlcp);
+          /*
+            right part has suffix with lcp up to length largermaxlcp w.r.t.
+            to the pivot. This lcp belongs to a suffix on the right
+            which is at a minimum distance to the pivot and thus to an
+            element in the first part of the right side.
+          */
+          gt_assert(pn >= s);
+          lcptab_update(data->sssplcpvalues,subbucketleft,pn - s,
+                        depth + greatermaxlcp);
         }
       }
       if (s > 1UL)
@@ -628,7 +631,7 @@ void gt_shortreadsort_sssp_sort(GtShortreadsortworkinfo *srsw,
   gt_suffixsortspace_export_done(sssp);
 }
 
-void gt_shortreadsort_sssp_add_unsorted(const GtLcpvalues *sssplcpvalues,
+void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                         unsigned long bucketleftidx,
                                         unsigned long subbucketleft,
                                         unsigned long width,
@@ -639,9 +642,16 @@ void gt_shortreadsort_sssp_add_unsorted(const GtLcpvalues *sssplcpvalues,
 {
   unsigned long idx, lcpvalue, laststart = 0;
 
+  gt_assert(srsw->mediumsizelcpvalues != NULL || srsw->sssplcpvalues != NULL);
   for (idx = 1UL; idx < width; idx++)
   {
-    lcpvalue = lcpsubtab_getvalue(sssplcpvalues,subbucketleft,idx);
+    if (srsw->mediumsizelcpvalues != NULL)
+    {
+      lcpvalue = (unsigned long) srsw->mediumsizelcpvalues[idx];
+    } else
+    {
+      lcpvalue = lcpsubtab_getvalue(srsw->sssplcpvalues,subbucketleft,idx);
+    }
     if (lcpvalue < maxdepth)
     {
       if (laststart < idx-1)
@@ -706,5 +716,5 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
       = srsw->shortreadsorttable[idx].suffixrepresentation;
   }
   srsresult->suftab_bucket = srsw->seqnum_relpos_bucket;
-  srsresult->lcptab_bucket = srsw->firstcodeslcpvalues;
+  srsresult->lcptab_bucket = srsw->mediumsizelcpvalues;
 }

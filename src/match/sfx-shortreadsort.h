@@ -46,7 +46,8 @@ size_t gt_shortreadsort_size(bool firstcodes,unsigned long bucketsize,
 GtShortreadsortworkinfo *gt_shortreadsort_new(unsigned long maxwidth,
                                               unsigned long maxremain,
                                               GtReadmode readmode,
-                                              bool firstcodes);
+                                              bool firstcodes,
+                                              bool withmediumsizelcps);
 
 unsigned long gt_shortreadsort_sumofstoredvalues(
                                       const GtShortreadsortworkinfo *srsw);
@@ -76,7 +77,7 @@ void gt_shortreadsort_firstcodes_sort(GtShortreadsortresult *srsresult,
                                       unsigned long width,
                                       unsigned long depth);
 
-void gt_shortreadsort_sssp_add_unsorted(const GtLcpvalues *sssplcpvalues,
+void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                         unsigned long bucketleftidx,
                                         unsigned long subbucketleft,
                                         unsigned long width,
