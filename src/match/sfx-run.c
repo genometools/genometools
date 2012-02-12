@@ -71,7 +71,7 @@ typedef struct
   unsigned long numberofallsortedsuffixes;
   const GtEncseq *encseq;
   Definedunsignedlong longest;
-  Outlcpinfo *outlcpinfo;
+  GtOutlcpinfo *outlcpinfo;
 } Outfileinfo;
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,

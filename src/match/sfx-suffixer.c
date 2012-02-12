@@ -77,7 +77,7 @@ struct Sfxiterator
 
   /* invariant for each part */
   GtSuftabparts *suftabparts;
-  Outlcpinfo *outlcpinfoforsample;
+  GtOutlcpinfo *outlcpinfoforsample;
   GtBcktab *bcktab;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
   GtDifferencecover *dcov;
@@ -88,7 +88,7 @@ struct Sfxiterator
              currentmaxcode;
   unsigned long widthofpart;
   unsigned int part;
-  Outlcpinfo *outlcpinfo;
+  GtOutlcpinfo *outlcpinfo;
   GtSuffixposbuffer fusp;
   GtRange overhang;
   bool exhausted;
@@ -1351,7 +1351,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->totallength = gt_encseq_total_length(encseq);
     gt_logger_log(logger,"totallength=%lu",sfi->totallength);
     sfi->specialcharacters = specialcharacters;
-    sfi->outlcpinfo = (Outlcpinfo *) voidoutlcpinfo;
+    sfi->outlcpinfo = (GtOutlcpinfo *) voidoutlcpinfo;
     sfi->outlcpinfoforsample = NULL;
     sfi->sri = NULL;
     sfi->part = 0;

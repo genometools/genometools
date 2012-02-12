@@ -47,7 +47,7 @@ GtDifferencecover *gt_differencecover_prepare_sample(
                                         GtReadmode readmode,
                                         unsigned int prefixlength,
                                         const Sfxstrategy *sfxstrategy,
-                                        Outlcpinfo *outlcpinfosample,
+                                        GtOutlcpinfo *outlcpinfosample,
                                         GtLogger *logger,
                                         GtTimer *sfxprogress,
                                         GtError *err);

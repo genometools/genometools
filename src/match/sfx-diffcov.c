@@ -1040,7 +1040,7 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
 }
 
 static void dc_differencecover_sortsample(GtDifferencecover *dcov,
-                                          Outlcpinfo *outlcpinfosample,
+                                          GtOutlcpinfo *outlcpinfosample,
                                           const Sfxstrategy *mainsfxstrategy,
                                           bool withcheck)
 {
@@ -1301,7 +1301,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
 }
 
 static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
-                                           Outlcpinfo *outlcpinfosample,
+                                           GtOutlcpinfo *outlcpinfosample,
                                            const Sfxstrategy *mainsfxstrategy,
                                            bool withcheck)
 {
@@ -1458,7 +1458,7 @@ GtDifferencecover *gt_differencecover_prepare_sample(
                                         GtReadmode readmode,
                                         unsigned int prefixlength,
                                         const Sfxstrategy *sfxstrategy,
-                                        Outlcpinfo *outlcpinfosample,
+                                        GtOutlcpinfo *outlcpinfosample,
                                         GtLogger *logger,
                                         GtTimer *sfxprogress,
                                         GtError *err)

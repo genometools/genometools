@@ -25,7 +25,7 @@
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
 
-typedef struct Outlcpinfo Outlcpinfo;
+typedef struct GtOutlcpinfo GtOutlcpinfo;
 
 typedef struct
 {
@@ -86,49 +86,49 @@ typedef struct
                            [tableoflcpvalues->lcptaboffset+subbucketleft+idx];
 }
 
-Outlcpinfo *gt_Outlcpinfo_new(const char *indexname,
-                              unsigned int numofchars,
-                              unsigned int prefixlength,
-                              bool withdistribution,
-                              GtError *err);
+GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
+                                unsigned int numofchars,
+                                unsigned int prefixlength,
+                                bool withdistribution,
+                                GtError *err);
 
-size_t gt_Outlcpinfo_size(const Outlcpinfo *outlcpinfo);
+size_t gt_Outlcpinfo_size(const GtOutlcpinfo *outlcpinfo);
 
-void gt_Outlcpinfo_reinit(Outlcpinfo *outlcpinfo,
+void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength,
                           unsigned long numoflcpvalues);
 
-void gt_Outlcpinfo_delete(Outlcpinfo *outlcpinfo);
+void gt_Outlcpinfo_delete(GtOutlcpinfo *outlcpinfo);
 
-unsigned long gt_Outlcpinfo_numoflargelcpvalues(const Outlcpinfo *outlcpinfo);
+unsigned long gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo);
 
-double gt_Outlcpinfo_lcptabsum(const Outlcpinfo *outlcpinfo);
+double gt_Outlcpinfo_lcptabsum(const GtOutlcpinfo *outlcpinfo);
 
-void gt_Outlcpinfo_numsuffixes2output_set(Outlcpinfo *outlcpinfo,
+void gt_Outlcpinfo_numsuffixes2output_set(GtOutlcpinfo *outlcpinfo,
                                           unsigned long numsuffixes2output);
 
-unsigned long gt_Outlcpinfo_maxbranchdepth(const Outlcpinfo *outlcpinfo);
+unsigned long gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo);
 
-void gt_Outlcpinfo_prebucket(Outlcpinfo *outlcpinfo,
+void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
                              GtCodetype code,
                              unsigned long lcptaboffset);
 
-void gt_Outlcpinfo_nonspecialsbucket(Outlcpinfo *outlcpinfo,
+void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,
                                      GT_UNUSED GtSuffixsortspace *sssp,
                                      GtLcpvalues *tableoflcpvalues,
                                      const GtBucketspecification *bucketspec,
                                      GtCodetype code);
 
-void gt_Outlcpinfo_postbucket(Outlcpinfo *outlcpinfo,
+void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
                               GtSuffixsortspace *sssp,
                               const GtBcktab *bcktab,
                               const GtBucketspecification *bucketspec,
                               GtCodetype code);
 
-GtLcpvalues *gt_Outlcpinfo_resizereservoir(Outlcpinfo *outlcpinfo,
+GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
                                            const GtBcktab *bcktab);
 
 void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
@@ -136,7 +136,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    const GtSuffixsortspace *sortedsample,
                                    unsigned long effectivesamplesize,
                                    unsigned long maxdepth,
-                                   GT_UNUSED const Outlcpinfo
+                                   GT_UNUSED const GtOutlcpinfo
                                      *outlcpinfosample);
 
 #endif
