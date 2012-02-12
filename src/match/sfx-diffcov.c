@@ -124,21 +124,21 @@ struct Differencecover
 
 #include "tab-diffcover.h"
 
-static unsigned long suffixptrgetdcov(const Differencecover *dcov,
-                                      unsigned long idx)
+static unsigned long dc_suffixptrget(const Differencecover *dcov,
+                                     unsigned long idx)
 {
   gt_suffixsortspace_nooffsets(dcov->sortedsample);
   return gt_suffixsortspace_get(dcov->sortedsample,0,idx);
 }
 
-static void suffixptrsetdcov(const Differencecover *dcov,
+static void dc_suffixptrset(const Differencecover *dcov,
                              unsigned long idx,unsigned long value)
 {
   gt_suffixsortspace_nooffsets(dcov->sortedsample);
   gt_suffixsortspace_set(dcov->sortedsample,0,idx,value);
 }
 
-static void fillcoverrank(Differencecover *dcov)
+static void dc_fillcoverrank(Differencecover *dcov)
 {
   unsigned int i;
   Diffrank j;
@@ -156,13 +156,13 @@ static void fillcoverrank(Differencecover *dcov)
   }
 }
 
-static bool checkifindifferencecover(const Differencecover *dcov,
+static bool dc_is_in_differencecover(const Differencecover *dcov,
                                      unsigned long modpos)
 {
   return dcov->coverrank[modpos] == dcov->size ? false : true;
 }
 
-static void filldiff2pos(Differencecover *dcov)
+static void dc_filldiff2pos(Differencecover *dcov)
 {
   Diffvalue *iptr, *jptr;
 
@@ -181,8 +181,8 @@ static void filldiff2pos(Differencecover *dcov)
 
 /* XXX: the following function is currently not used */
 
-static unsigned int computehvalue(const Differencecover *dcov,
-                                  unsigned long totallength)
+static unsigned int cd_computehvalue(const Differencecover *dcov,
+                                     unsigned long totallength)
 {
   Diffvalue next;
   unsigned int h, nmodv = MODV(totallength);
@@ -284,7 +284,7 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   dcov->vparam = 1U << (dcov->logmod);
   dcov->vmodmask = dcov->vparam-1;
 #ifdef WITHcomputehvalue
-  dcov->hvalue = computehvalue(dcov,totallength);
+  dcov->hvalue = dc_computehvalue(dcov,totallength);
 #endif
   dcov->encseq = encseq;
   dcov->readmode = readmode;
@@ -292,7 +292,7 @@ Differencecover *gt_differencecover_new(unsigned int vparam,
   dcov->sortedsample = NULL;
   dcov->filltable = NULL;
   dcov->multimappower = NULL;
-  fillcoverrank(dcov);
+  dc_fillcoverrank(dcov);
   dcov->diff2pos = NULL; /* this is later initialized */
   dcov->esr = NULL;
   dcov->allocateditvinfo = 0;
@@ -319,9 +319,9 @@ size_t gt_differencecover_requiredspace(const Differencecover *dcov)
   return dcov->requiredspace;
 }
 
-static unsigned int differencecover_offset(const Differencecover *dcov,
-                                           unsigned long pos1,
-                                           unsigned long pos2)
+static unsigned int dc_differencecover_offset(const Differencecover *dcov,
+                                              unsigned long pos1,
+                                              unsigned long pos2)
 {
   return (unsigned int) MODV(dcov->diff2pos[MODV(pos2-pos1)] - pos1);
 }
@@ -346,22 +346,23 @@ void gt_differencecover_delete(Differencecover *dcov)
   }
 }
 
-static unsigned long differencecover_packsamplepos(const Differencecover *dcov,
+static unsigned long dc_differencecover_packsamplepos(
+                                                   const Differencecover *dcov,
                                                    unsigned long pos)
 {
   unsigned long result;
 
-  result =  dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
-            DIVV(pos);
+  result = dcov->coverrank[MODV(pos)] * (DIVV(dcov->totallength) + 1) +
+           DIVV(pos);
   gt_assert(result < dcov->maxsamplesize);
   return result;
 }
 
 GT_DECLAREARRAYSTRUCT(Codeatposition);
 
-static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
-                                                     const GtArrayCodeatposition
-                                                       *codelist)
+static unsigned long dc_derivespecialcodesonthefly(Differencecover *dcov,
+                                                   const GtArrayCodeatposition
+                                                           *codelist)
 {
   unsigned int prefixindex, unitsnotspecial;
   Enumcodeatposition *ecp;
@@ -381,7 +382,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
       {
         gt_assert(specialcontext.position >= (unsigned long) prefixindex);
         pos = (unsigned long) (specialcontext.position - prefixindex);
-        if (checkifindifferencecover(dcov,MODV(pos)))
+        if (dc_is_in_differencecover(dcov,MODV(pos)))
         {
           if (codelist != NULL)
           {
@@ -415,7 +416,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
           sampleindex = gt_bcktab_leftborder_insertionindex(dcov->leftborder,
                                                             code);
           gt_assert(sampleindex < dcov->effectivesamplesize);
-          suffixptrsetdcov(dcov,sampleindex,pos);
+          dc_suffixptrset(dcov,sampleindex,pos);
         }
       }
     }
@@ -429,7 +430,7 @@ static unsigned long dcov_derivespecialcodesonthefly(Differencecover *dcov,
   return countderived;
 }
 
-static int compareCodeatpositon(const void *vala,const void *valb)
+static int dc_compareCodeatpositon(const void *vala,const void *valb)
 {
   const Codeatposition *a = (const Codeatposition *) vala;
   const Codeatposition *b = (const Codeatposition *) valb;
@@ -454,7 +455,7 @@ static int compareCodeatpositon(const void *vala,const void *valb)
   return 0;
 }
 
-static void validate_samplepositons(const Differencecover *dcov)
+static void dc_validate_samplepositons(const Differencecover *dcov)
 {
   unsigned long pos;
   unsigned int modvalue;
@@ -471,7 +472,7 @@ static void validate_samplepositons(const Differencecover *dcov)
     gt_assert(diffptr == afterend || *diffptr >= (Diffvalue) modvalue);
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
-      idx = differencecover_packsamplepos(dcov,pos);
+      idx = dc_differencecover_packsamplepos(dcov,pos);
       gt_assert(sampleidxused != NULL);
       if (GT_ISIBITSET(sampleidxused,idx))
       {
@@ -494,18 +495,18 @@ static void validate_samplepositons(const Differencecover *dcov)
   gt_free(sampleidxused);
 }
 
-static void inversesuftab_set(Differencecover *dcov,
-                              unsigned long pos,
-                              unsigned long sampleindex)
+static void dc_inversesuftab_set(Differencecover *dcov,
+                                 unsigned long pos,
+                                 unsigned long sampleindex)
 {
   gt_assert (sampleindex < dcov->samplesize);
-  dcov->inversesuftab[differencecover_packsamplepos(dcov,pos)] = sampleindex;
+  dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)] = sampleindex;
 }
 
-static unsigned long inversesuftab_get(const Differencecover *dcov,
-                                       unsigned long pos)
+static unsigned long dc_inversesuftab_get(const Differencecover *dcov,
+                                          unsigned long pos)
 {
-  return dcov->inversesuftab[differencecover_packsamplepos(dcov,pos)];
+  return dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)];
 }
 
 static void dc_initinversesuftabnonspecials(Differencecover *dcov)
@@ -514,15 +515,15 @@ static void dc_initinversesuftabnonspecials(Differencecover *dcov)
 
   for (sampleindex=0; sampleindex < dcov->effectivesamplesize; sampleindex++)
   {
-    pos = suffixptrgetdcov(dcov,sampleindex);
-    inversesuftab_set(dcov,pos,sampleindex);
+    pos = dc_suffixptrget(dcov,sampleindex);
+    dc_inversesuftab_set(dcov,pos,sampleindex);
   }
 }
 
-static unsigned long insertfullspecialrangesample(Differencecover *dcov,
-                                                  unsigned long specialidx,
-                                                  unsigned long leftpos,
-                                                  unsigned long rightpos)
+static unsigned long dc_insertfullspecialrangesample(Differencecover *dcov,
+                                                     unsigned long specialidx,
+                                                     unsigned long leftpos,
+                                                     unsigned long rightpos)
 {
   unsigned long pos;
 
@@ -542,9 +543,9 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
 
       gt_assert(pos < dcov->totallength);
       revpos = GT_REVERSEPOS(dcov->totallength,pos);
-      if (checkifindifferencecover(dcov,MODV(revpos)))
+      if (dc_is_in_differencecover(dcov,MODV(revpos)))
       {
-        inversesuftab_set(dcov,revpos,specialidx);
+        dc_inversesuftab_set(dcov,revpos,specialidx);
         specialidx++;
       }
       if (pos == leftpos)
@@ -554,9 +555,9 @@ static unsigned long insertfullspecialrangesample(Differencecover *dcov,
       pos--;
     } else
     {
-      if (checkifindifferencecover(dcov,MODV(pos)))
+      if (dc_is_in_differencecover(dcov,MODV(pos)))
       {
-        inversesuftab_set(dcov,pos,specialidx);
+        dc_inversesuftab_set(dcov,pos,specialidx);
         specialidx++;
       }
       if (pos == rightpos-1)
@@ -590,18 +591,18 @@ static void dc_initinversesuftabspecials(Differencecover *dcov)
       printf("specialrange %lu %lu\n",(unsigned long) range.leftpos,
                                       (unsigned long) range.rightpos);
       */
-      specialidx = insertfullspecialrangesample(dcov,
-                                                specialidx,
-                                                range.start,
-                                                range.end);
+      specialidx = dc_insertfullspecialrangesample(dcov,
+                                                   specialidx,
+                                                   range.start,
+                                                   range.end);
     }
     gt_specialrangeiterator_delete(sri);
     sri = NULL;
   }
-  if (checkifindifferencecover(dcov,MODV(dcov->totallength)))
+  if (dc_is_in_differencecover(dcov,MODV(dcov->totallength)))
   {
     gt_assert(dcov->samplesize > 0);
-    inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
+    dc_inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
   }
 }
 
@@ -644,19 +645,19 @@ static void dc_initinversesuftabnonspecialsadjust(Differencecover *dcov)
                                           rightchar);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),idx);
+      dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,dcov->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left + bucketspec.nonspecialsinbucket;
          idx++)
     {
-      inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),bucketspec.left);
+      dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),bucketspec.left);
     }
   }
   for (/* Nothing */; idx < dcov->effectivesamplesize; idx++)
   {
-    inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),idx);
+    dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),idx);
   }
 }
 
@@ -668,7 +669,7 @@ static void dc_anchorleftmost(Differencecover *dcov,
 
   for (idx = blisbl; idx < blisbl + width; idx++)
   {
-    inversesuftab_set(dcov,suffixptrgetdcov(dcov,idx),blisbl);
+    dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),blisbl);
   }
 }
 
@@ -743,7 +744,7 @@ static void dc_processunsortedrange(Differencecover *dcov,
   }
 }
 
-static int dcov_compareitv(const void *a,const void *b)
+static int dc_compareitv(const void *a,const void *b)
 {
   const Itventry *itva = (const Itventry *) a,
                  *itvb = (const Itventry *) b;
@@ -781,10 +782,10 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   */
   for (idx=0; idx<width; idx++)
   {
-    startpos = suffixptrgetdcov(dcov,blisbl+idx);
+    startpos = dc_suffixptrget(dcov,blisbl+idx);
     dcov->itvinfo[idx].suffixstart = startpos;
     dcov->itvinfo[idx].key
-      = inversesuftab_get(dcov,startpos + dcov->currentdepth);
+      = dc_inversesuftab_get(dcov,startpos + dcov->currentdepth);
     /*
     printf("key=%lu,startpos=%lu,currentdepth=%lu\n",
                     dcov->itvinfo[idx].key,
@@ -792,10 +793,10 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
                     dcov->currentdepth);
     */
   }
-  qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dcov_compareitv);
+  qsort(dcov->itvinfo,(size_t) width,sizeof (*dcov->itvinfo),dc_compareitv);
   for (idx=0; idx<width; idx++)
   {
-    suffixptrsetdcov(dcov,blisbl+idx,dcov->itvinfo[idx].suffixstart);
+    dc_suffixptrset(dcov,blisbl+idx,dcov->itvinfo[idx].suffixstart);
   }
   rangestart = 0;
   for (idx=1UL; idx<width; idx++)
@@ -812,8 +813,8 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
       } else
       {
         unsigned long currentsuftabentry
-          = suffixptrgetdcov(dcov,blisbl+rangestart);
-        inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
+          = dc_suffixptrget(dcov,blisbl+rangestart);
+        dc_inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
       }
       rangestart = idx;
     }
@@ -828,8 +829,8 @@ static void dc_sortsuffixesonthislevel(Differencecover *dcov,
   } else
   {
     unsigned long currentsuftabentry
-      = suffixptrgetdcov(dcov,blisbl+rangestart);
-    inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
+      = dc_suffixptrget(dcov,blisbl+rangestart);
+    dc_inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
   }
 }
 
@@ -898,9 +899,9 @@ int gt_differencecover_compare (const Differencecover *dcov,
 
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
-  offset = differencecover_offset(dcov,suffixpos1,suffixpos2);
-  idx1 = inversesuftab_get(dcov,suffixpos1 + offset);
-  idx2 = inversesuftab_get(dcov,suffixpos2 + offset);
+  offset = dc_differencecover_offset(dcov,suffixpos1,suffixpos2);
+  idx1 = dc_inversesuftab_get(dcov,suffixpos1 + offset);
+  idx2 = dc_inversesuftab_get(dcov,suffixpos2 + offset);
   if (idx1 < idx2)
   {
     return -1;
@@ -1007,12 +1008,12 @@ static void dc_sortremainingsamples(Differencecover *dcov)
   dcov->rangestobesorted = NULL;
 }
 
-static void init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
-                                        const Sfxstrategy *mainsfxstrategy,
-                                        bool bitwise_cmp_ok,
-                                        unsigned long effectivesamplesize,
-                                        unsigned long totallength,
-                                        GtLogger *logger)
+static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
+                                           const Sfxstrategy *mainsfxstrategy,
+                                           bool bitwise_cmp_ok,
+                                           unsigned long effectivesamplesize,
+                                           unsigned long totallength,
+                                           GtLogger *logger)
 {
   if (mainsfxstrategy != NULL)
   {
@@ -1039,7 +1040,7 @@ static void init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
                 sfxstrategy->maxcountingsort);
 }
 
-static void gt_differencecover_sortsample(Differencecover *dcov,
+static void dc_differencecover_sortsample(Differencecover *dcov,
                                           Outlcpinfo *outlcpinfosample,
                                           const Sfxstrategy *mainsfxstrategy,
                                           bool withcheck)
@@ -1138,14 +1139,14 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   {
     qsort(codelist.spaceCodeatposition,
           (size_t) codelist.nextfreeCodeatposition,
-          sizeof (*codelist.spaceCodeatposition),compareCodeatpositon);
+          sizeof (*codelist.spaceCodeatposition),dc_compareCodeatpositon);
   }
   dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
                                               dcov->totallength,
                                               false,
                                               dcov->logger);
-  posinserted = dcov_derivespecialcodesonthefly(dcov,
-                                                withcheck ? &codelist : NULL);
+  posinserted = dc_derivespecialcodesonthefly(dcov,
+                                              withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
@@ -1153,6 +1154,8 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   {
     if (diffptr < afterend && (Diffvalue) modvalue == *diffptr)
     {
+      /* XXX: Use a function to extract the code in constant time for
+         twobitencoding. */
       code = gt_encseq_extractprefixcode(&unitsnotspecial,
                                          dcov->encseq,
                                          dcov->filltable,
@@ -1166,7 +1169,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
         sampleindex = gt_bcktab_leftborder_insertionindex(dcov->leftborder,
                                                           code);
         gt_assert(sampleindex < dcov->effectivesamplesize);
-        suffixptrsetdcov(dcov,sampleindex,pos);
+        dc_suffixptrset(dcov,sampleindex,pos);
         posinserted++;
       }
       diffptr++;
@@ -1210,13 +1213,13 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
     Sfxstrategy sfxstrategy;
 
     gt_assert (dcov->vparam > dcov->prefixlength);
-    init_sfxstrategy_for_sample(&sfxstrategy,
-                                mainsfxstrategy,
-                                gt_encseq_bitwise_cmp_ok(dcov->encseq)
-                                  ? false : true,
-                                dcov->effectivesamplesize,
-                                dcov->totallength,
-                                dcov->logger);
+    dc_init_sfxstrategy_for_sample(&sfxstrategy,
+                                   mainsfxstrategy,
+                                   gt_encseq_bitwise_cmp_ok(dcov->encseq)
+                                     ? false : true,
+                                   dcov->effectivesamplesize,
+                                   dcov->totallength,
+                                   dcov->logger);
     gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength,
                          dcov->effectivesamplesize);
     if (outlcpinfosample != NULL)
@@ -1273,7 +1276,7 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
                            0);
     for (idx=0; idx < dcov->effectivesamplesize; idx++)
     {
-      unsigned long idx2 = inversesuftab_get(dcov,suffixptrgetdcov(dcov,idx));
+      unsigned long idx2 = dc_inversesuftab_get(dcov,dc_suffixptrget(dcov,idx));
       if (idx != idx2)
       {
         fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
@@ -1295,10 +1298,10 @@ static void gt_differencecover_sortsample(Differencecover *dcov,
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
   gt_assert(dcov->diff2pos == NULL);
-  filldiff2pos(dcov);
+  dc_filldiff2pos(dcov);
 }
 
-static void gt_differencecover_sortsample0(Differencecover *dcov,
+static void dc_differencecover_sortsample0(Differencecover *dcov,
                                            Outlcpinfo *outlcpinfosample,
                                            const Sfxstrategy *mainsfxstrategy,
                                            bool withcheck)
@@ -1370,7 +1373,7 @@ static void gt_differencecover_sortsample0(Differencecover *dcov,
         cc = gt_encseq_get_encoded_char(dcov->encseq,pos,dcov->readmode);
         if (ISNOTSPECIAL(cc))
         {
-          suffixptrsetdcov(dcov,posinserted,pos);
+          dc_suffixptrset(dcov,posinserted,pos);
           posinserted++;
         }
       }
@@ -1387,13 +1390,13 @@ static void gt_differencecover_sortsample0(Differencecover *dcov,
   }
   gt_assert(posinserted == dcov->effectivesamplesize);
 
-  init_sfxstrategy_for_sample(&sfxstrategy,
-                              mainsfxstrategy,
-                              gt_encseq_bitwise_cmp_ok(dcov->encseq)
-                                ? false : true,
-                              dcov->effectivesamplesize,
-                              dcov->totallength,
-                              dcov->logger);
+  dc_init_sfxstrategy_for_sample(&sfxstrategy,
+                                 mainsfxstrategy,
+                                 gt_encseq_bitwise_cmp_ok(dcov->encseq)
+                                   ? false : true,
+                                 dcov->effectivesamplesize,
+                                 dcov->totallength,
+                                 dcov->logger);
   gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength,
                        dcov->effectivesamplesize);
   gt_sortallsuffixesfromstart(dcov->sortedsample,
@@ -1436,7 +1439,7 @@ static void gt_differencecover_sortsample0(Differencecover *dcov,
                            0);
     for (idx=0; idx < dcov->effectivesamplesize; idx++)
     {
-      unsigned long idx2 = inversesuftab_get(dcov,suffixptrgetdcov(dcov,idx));
+      unsigned long idx2 = dc_inversesuftab_get(dcov,dc_suffixptrget(dcov,idx));
       if (idx != idx2)
       {
         fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
@@ -1447,7 +1450,7 @@ static void gt_differencecover_sortsample0(Differencecover *dcov,
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
   gt_assert(dcov->diff2pos == NULL);
-  filldiff2pos(dcov);
+  dc_filldiff2pos(dcov);
 }
 
 Differencecover *gt_differencecover_prepare_sample(
@@ -1488,8 +1491,8 @@ Differencecover *gt_differencecover_prepare_sample(
     {
       gt_logger_log(logger,"presorting sample suffixes according to "
                            "difference cover modulo %u",vparam);
-      (prefixlength > 0 ? gt_differencecover_sortsample
-                        : gt_differencecover_sortsample0)
+      (prefixlength > 0 ? dc_differencecover_sortsample
+                        : dc_differencecover_sortsample0)
                           (dcov,outlcpinfosample,sfxstrategy,
                            sfxstrategy->dccheck);
     }
@@ -1497,8 +1500,7 @@ Differencecover *gt_differencecover_prepare_sample(
   return dcov;
 }
 
-void gt_differencecover_check(const GtEncseq *encseq,
-                               GtReadmode readmode)
+void gt_differencecover_check(const GtEncseq *encseq,GtReadmode readmode)
 {
   Differencecover *dcov;
   size_t logmod;
@@ -1522,9 +1524,9 @@ void gt_differencecover_check(const GtEncseq *encseq,
     printf("v=%u (size=%u)\n",dcov->vparam,dcov->size);
     if (withcheck)
     {
-      validate_samplepositons(dcov);
+      dc_validate_samplepositons(dcov);
     }
-    gt_differencecover_sortsample(dcov,NULL,NULL,withcheck);
+    dc_differencecover_sortsample(dcov,NULL,NULL,withcheck);
     gt_differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",

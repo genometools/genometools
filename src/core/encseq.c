@@ -7547,7 +7547,7 @@ GtCodetype gt_encseq_extractprefixcode(unsigned int *unitsnotspecial,
     twobitencodingstoppos = encseq->logicaltotallength;
   }
   *unitsnotspecial = 0;
-  for (pos=frompos; pos < twobitencodingstoppos; pos++)
+  for (pos = frompos; pos < twobitencodingstoppos; pos++)
   {
     cc = gt_encseq_reader_next_encoded_char(esr);
     if (ISNOTSPECIAL(cc))
