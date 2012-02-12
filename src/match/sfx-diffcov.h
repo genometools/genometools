@@ -28,20 +28,20 @@
 #include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
 
-typedef struct Differencecover Differencecover;
+typedef struct GtDifferencecover GtDifferencecover;
 
 /* The following function is used for test purposes only */
 
 void gt_differencecover_check(const GtEncseq *encseq,
                                GtReadmode readmode);
 
-Differencecover *gt_differencecover_new(unsigned int vparam,
-                                        const GtEncseq *encseq,
-                                        GtReadmode readmode,
-                                        unsigned int outerprefixlength,
-                                        GtLogger *logger);
+GtDifferencecover *gt_differencecover_new(unsigned int vparam,
+                                          const GtEncseq *encseq,
+                                          GtReadmode readmode,
+                                          unsigned int outerprefixlength,
+                                          GtLogger *logger);
 
-Differencecover *gt_differencecover_prepare_sample(
+GtDifferencecover *gt_differencecover_prepare_sample(
                                         unsigned int vparam,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,
@@ -52,20 +52,20 @@ Differencecover *gt_differencecover_prepare_sample(
                                         GtTimer *sfxprogress,
                                         GtError *err);
 
-void gt_differencecover_delete(Differencecover *dcov);
+void gt_differencecover_delete(GtDifferencecover *dcov);
 
-size_t gt_differencecover_requiredspace(const Differencecover *dcov);
+size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov);
 
 void gt_differencecover_sortunsortedbucket(void *data,
                                            unsigned long blisbl,
                                            unsigned long width,
                                            GT_UNUSED unsigned long depth);
 
-int gt_differencecover_compare (const Differencecover *dcov,
+int gt_differencecover_compare (const GtDifferencecover *dcov,
                                 unsigned long suffixpos1,
                                 unsigned long suffixpos2);
 
-void gt_differencecoversetsuffixsortspace(Differencecover *dcov,
+void gt_differencecoversetsuffixsortspace(GtDifferencecover *dcov,
                                           GtSuffixsortspace *sssp);
 
 #endif

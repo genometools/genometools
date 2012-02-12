@@ -80,7 +80,7 @@ struct Sfxiterator
   Outlcpinfo *outlcpinfoforsample;
   GtBcktab *bcktab;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
-  Differencecover *dcov;
+  GtDifferencecover *dcov;
 
   /* changed in each part */
   GtSuffixsortspace *suffixsortspace;
