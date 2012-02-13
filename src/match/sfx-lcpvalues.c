@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -107,6 +107,7 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
                                Suffixwithcode *previoussuffix,
                                GT_UNUSED unsigned long firstspecialsuffix,
                                unsigned int minchanged,
+                               unsigned long nonspecialsinbucket,
                                unsigned long specialsinbucket,
                                GtCodetype code,
                                const GtBcktab *bcktab)
@@ -136,20 +137,21 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
       }
     } else
     {
+      unsigned long start = lcpsubtab->tableoflcpvalues.lcptaboffset +
+                            nonspecialsinbucket;
       maxprefixindex = gt_bcktab_pfxidx2lcpvalues_ulong(
                           &minprefixindex,
-                          lcpsubtab->tableoflcpvalues.bucketoflcpvalues +
-                          lcpsubtab->tableoflcpvalues.lcptaboffset,
+                          lcpsubtab->tableoflcpvalues.bucketoflcpvalues + start,
                           specialsinbucket,
                           bcktab,
                           code);
 #ifndef NDEBUG
       {
         unsigned long idx;
-        for (idx=0; idx<specialsinbucket; idx++)
+
+        for (idx=start; idx<start + specialsinbucket; idx++)
         {
-          GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
-                     lcpsubtab->tableoflcpvalues.lcptaboffset+idx);
+          GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,idx);
         }
       }
 #endif
@@ -182,10 +184,11 @@ static unsigned int bucketends(Lcpsubtab *lcpsubtab,
   } else
   {
     lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-               [lcpsubtab->tableoflcpvalues.lcptaboffset] = lcpvalue;
+               [lcpsubtab->tableoflcpvalues.lcptaboffset + nonspecialsinbucket]
+               = lcpvalue;
 #ifndef NDEBUG
     GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
-               lcpsubtab->tableoflcpvalues.lcptaboffset);
+               lcpsubtab->tableoflcpvalues.lcptaboffset + nonspecialsinbucket);
 #endif
   }
   return minprefixindex;
@@ -447,7 +450,6 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtSuffixsortspace *sortedsample,
                                    unsigned long effectivesamplesize,
-                                   unsigned long maxdepth,
                                    const GtOutlcpinfo *outlcpinfosample)
 {
   GT_UNUSED int cmp;
@@ -462,22 +464,21 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                              &reallcp,
                                              false,
                                              false,
-                                             maxdepth,
+                                             0,
                                              startpos1,
                                              startpos2,
                                              NULL,
                                              NULL);
+    gt_assert(cmp <= 0);
     gt_assert(GT_ISIBITSET(outlcpinfosample->lcpsubtab.tableoflcpvalues
                                                       .isset,idx));
     currentlcp
       = outlcpinfosample->lcpsubtab.tableoflcpvalues.bucketoflcpvalues[idx];
-    gt_assert(cmp <= 0);
-    gt_assert(reallcp <= maxdepth);
-    if (currentlcp > maxdepth || reallcp < currentlcp)
+    if (currentlcp > reallcp)
     {
       fprintf(stderr,"idx=%lu,suffixpair=%lu,%lu: "
-                     "reallcp = %lu != %lu = currentlcp\n",
-                      idx,startpos1,startpos2,reallcp,currentlcp);
+                     "currentlcp = %lu < %lu = reallcp\n",
+                      idx,startpos1,startpos2,currentlcp,reallcp);
       gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos1,20UL);
       fprintf(stderr,"\n");
       gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos2,20UL);
@@ -621,6 +622,7 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
                                   /* first special element in bucket */
                                   suffixvalue,
                                   outlcpinfo->minchanged,
+                                  bucketspec->nonspecialsinbucket,
                                   bucketspec->specialsinbucket,
                                   code,
                                   bcktab);

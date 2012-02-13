@@ -137,8 +137,6 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtSuffixsortspace *sortedsample,
                                    unsigned long effectivesamplesize,
-                                   unsigned long maxdepth,
-                                   GT_UNUSED const GtOutlcpinfo
-                                     *outlcpinfosample);
+                                   const GtOutlcpinfo *outlcpinfosample);
 
 #endif

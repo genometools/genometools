@@ -1312,17 +1312,14 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
     }
-    /*
     if (outlcpinfosample != NULL)
     {
       gt_Outlcpinfo_check_lcpvalues(dcov->encseq,
                                     dcov->readmode,
                                     dcov->sortedsample,
                                     dcov->effectivesamplesize,
-                                    (unsigned long) dcov->vparam,
                                     outlcpinfosample);
     }
-    */
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
