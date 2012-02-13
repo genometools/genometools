@@ -429,7 +429,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    unsigned long firstelem;
+    unsigned long firstelem = 0;
     const unsigned long *ptr;
 
     gt_assert(fci->allfirstcodes != NULL);
@@ -542,7 +542,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    GtUlongPair firstelem;
+    GtUlongPair firstelem = { 0 };
     const unsigned long *ptr;
     GtRadixreader *radixreader = NULL;
 
