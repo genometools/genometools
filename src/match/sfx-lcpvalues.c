@@ -453,7 +453,8 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    const GtOutlcpinfo *outlcpinfosample)
 {
   GT_UNUSED int cmp;
-  unsigned long idx, reallcp, startpos1, startpos2, currentlcp;
+  unsigned long idx, reallcp, startpos1, startpos2, currentlcp,
+                totalcmpmissing = 0;
 
   startpos1 = gt_suffixsortspace_getdirect(sortedsample,0);
   for (idx=1UL; idx<effectivesamplesize; idx++)
@@ -484,9 +485,14 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
       gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos2,20UL);
       fprintf(stderr,"\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
+    } else
+    {
+      totalcmpmissing += (reallcp - currentlcp);
     }
     startpos1 = startpos2;
   }
+  printf("totalcmpmissing = %lu(avg=%.2f)\n",
+         totalcmpmissing,(double) totalcmpmissing/effectivesamplesize);
 }
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo)
