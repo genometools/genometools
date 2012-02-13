@@ -131,6 +131,8 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
 GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
                                            const GtBcktab *bcktab);
 
+GtLcpvalues *gt_Outlcpinfo_lcpvalues_ref(GtOutlcpinfo *outlcpinfo);
+
 void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtSuffixsortspace *sortedsample,

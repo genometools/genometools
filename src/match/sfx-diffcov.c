@@ -108,6 +108,7 @@ struct GtDifferencecover
   Inl_Queue *rangestobesorted;
   GtDcItventry *itvinfo;
   GtArrayGtDcPairsuffixptr firstgeneration;
+  GtLcpvalues *samplelcpvalues;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   GtLogger *logger;
@@ -307,6 +308,7 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->currentqueuesize = 0;
   dcov->maxqueuesize = 0;
   dcov->inversesuftab = NULL;
+  dcov->samplelcpvalues = NULL;
   dcov->firstgenerationtotalwidth = 0;
   dcov->firstgenerationcount = 0;
   GT_INITARRAY(&dcov->firstgeneration,GtDcPairsuffixptr);
@@ -759,6 +761,19 @@ static int dc_compareitv(const void *a,const void *b)
   return 0;
 }
 
+static void dc_setlcpvaluesofrunsortedrange(GtLcpvalues *samplelcpvalues,
+                                            unsigned long blisbl,
+                                            unsigned long width,
+                                            unsigned long lcpvalue)
+{
+  unsigned long idx;
+
+  for (idx = blisbl+1; idx < blisbl + width; idx++)
+  {
+    lcptab_update(samplelcpvalues,0,idx,lcpvalue);
+  }
+}
+
 static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
                                        unsigned long blisbl,
                                        unsigned long width)
@@ -808,6 +823,13 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
                                 blisbl + rangestart,
                                 idx - rangestart,
                                 GT_MULT2(dcov->currentdepth));
+        if (dcov->samplelcpvalues != NULL)
+        {
+          dc_setlcpvaluesofrunsortedrange(dcov->samplelcpvalues,
+                                          blisbl + rangestart,
+                                          idx - rangestart,
+                                          GT_MULT2(dcov->currentdepth));
+        }
         dc_anchorleftmost(dcov, blisbl + rangestart, idx - rangestart);
       } else
       {
@@ -824,6 +846,13 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
                             blisbl + rangestart,
                             width - rangestart,
                             GT_MULT2(dcov->currentdepth));
+    if (dcov->samplelcpvalues != NULL)
+    {
+      dc_setlcpvaluesofrunsortedrange(dcov->samplelcpvalues,
+                                      blisbl + rangestart,
+                                      width - rangestart,
+                                      GT_MULT2(dcov->currentdepth));
+    }
     dc_anchorleftmost(dcov, blisbl + rangestart, width - rangestart);
   } else
   {
@@ -1201,6 +1230,13 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                            false,  /* specialsareequalatdepth0 */
                            (unsigned long) dcov->prefixlength);
   }
+  gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength,
+                       dcov->effectivesamplesize);
+  if (outlcpinfosample != NULL)
+  {
+    dcov->requiredspace += gt_Outlcpinfo_size(outlcpinfosample);
+    dcov->samplelcpvalues = gt_Outlcpinfo_lcpvalues_ref(outlcpinfosample);
+  }
   if (dcov->vparam == dcov->prefixlength)
   {
     dc_initinversesuftabspecials(dcov);
@@ -1219,12 +1255,6 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                    dcov->effectivesamplesize,
                                    dcov->totallength,
                                    dcov->logger);
-    gt_Outlcpinfo_reinit(outlcpinfosample,dcov->numofchars,dcov->prefixlength,
-                         dcov->effectivesamplesize);
-    if (outlcpinfosample != NULL)
-    {
-      dcov->requiredspace += gt_Outlcpinfo_size(outlcpinfosample);
-    }
     gt_sortallbuckets(dcov->sortedsample,
                       dcov->effectivesamplesize,
                       NULL,

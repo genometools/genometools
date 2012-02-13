@@ -677,14 +677,20 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
     {
       outlcpinfo->previousbucketwasempty = false;
     }
+    if (outlcpinfo->lcpsubtab.lcp2file == NULL)
+    {
+      outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset = 0;
+    }
   }
 }
 
 GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
                                            const GtBcktab *bcktab)
 {
-  Lcpsubtab *lcpsubtab = &outlcpinfo->lcpsubtab;
+  Lcpsubtab *lcpsubtab;
 
+  gt_assert(outlcpinfo != NULL);
+  lcpsubtab = &outlcpinfo->lcpsubtab;
   if (lcpsubtab->lcp2file != NULL)
   {
     size_t sizeforlcpvalues; /* in bytes */
@@ -713,4 +719,10 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
     }
   }
   return &lcpsubtab->tableoflcpvalues;
+}
+
+GtLcpvalues *gt_Outlcpinfo_lcpvalues_ref(GtOutlcpinfo *outlcpinfo)
+{
+  gt_assert(outlcpinfo != NULL);
+  return &outlcpinfo->lcpsubtab.tableoflcpvalues;
 }
