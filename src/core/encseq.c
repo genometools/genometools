@@ -6884,6 +6884,20 @@ const GtTwobitencoding *gt_encseq_twobitencoding_export(const GtEncseq *encseq)
   return encseq->twobitencoding;
 }
 
+size_t gt_encseq_twobitencoding_mapoffset(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return (unsigned char*)encseq->twobitencoding -
+    (unsigned char*)encseq->mappedptr;
+}
+
+size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq)
+{
+  gt_assert(encseq != NULL);
+  return (unsigned char*)encseq->headerptr.characterdistribution -
+    (unsigned char*)encseq->mappedptr;
+}
+
 int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
                                         const GtEncseq *encseq,
                                         GtReadmode readmode,

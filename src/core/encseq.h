@@ -167,6 +167,10 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
 
 const GtTwobitencoding *gt_encseq_twobitencoding_export(const GtEncseq *encseq);
 
+size_t gt_encseq_twobitencoding_mapoffset(const GtEncseq *encseq);
+
+size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq);
+
 /* Saves an encoded sequence characterized by the given parameters into the
    index of the given name. Only sequence collections of type eqlength are
    supported. The other parameters must be consistent with this. */
