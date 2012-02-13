@@ -861,7 +861,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
-    if (!bsr->sfxstrategy->cmpcharbychar &&
+    if (bsr->srsw != NULL &&
         gt_shortreadsort_size(false,width,
                               bsr->maxremain) <= bsr->sizeofworkspace)
     {
@@ -876,7 +876,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                                  depth,
                                  (unsigned long) bsr->sortmaxdepth);
       bsr->countshortreadsort++;
-      if (bsr->sortmaxdepth > 0 && bsr->sfxstrategy->differencecover > 0)
+      if (bsr->sortmaxdepth > 0)
       {
         gt_shortreadsort_sssp_add_unsorted(
                               bsr->srsw,
@@ -1395,11 +1395,13 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->srsw = NULL;
   if (!sfxstrategy->cmpcharbychar)
   {
-    const bool withmediumsizelcps
-      = (sortmaxdepth > 0 && sfxstrategy->differencecover > 0 && !withlcps)
-        ? true : false;
-    bsr->srsw = gt_shortreadsort_new(0,bsr->maxremain,readmode,false,
-                                     withmediumsizelcps);
+    const bool withmediumsizelcps = (sortmaxdepth > 0 && !withlcps)
+                                    ? true : false;
+    if (sortmaxdepth == 0 || gt_has_twobitencoding_stoppos_support(encseq))
+    {
+      bsr->srsw = gt_shortreadsort_new(0,bsr->maxremain,readmode,false,
+                                       withmediumsizelcps);
+    }
     for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
     {
       bsr->leftlcpdist[idx] = bsr->rightlcpdist[idx] = 0;
@@ -1521,7 +1523,10 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
   if (outlcpinfo != NULL)
   {
     bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,bcktab);
-    gt_shortreadsort_assigntableoflcpvalues(bsr.srsw,bsr.tableoflcpvalues);
+    if (bsr.srsw != NULL)
+    {
+      gt_shortreadsort_assigntableoflcpvalues(bsr.srsw,bsr.tableoflcpvalues);
+    }
   }
   bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
   bsr.processunsortedsuffixrange = processunsortedsuffixrange;
@@ -1605,7 +1610,10 @@ void gt_sortallsuffixesfromstart(GtSuffixsortspace *suffixsortspace,
     if (outlcpinfo != NULL)
     {
       bsr.tableoflcpvalues = gt_Outlcpinfo_resizereservoir(outlcpinfo,NULL);
-      gt_shortreadsort_assigntableoflcpvalues(bsr.srsw,bsr.tableoflcpvalues);
+      if (bsr.srsw != NULL)
+      {
+        gt_shortreadsort_assigntableoflcpvalues(bsr.srsw,bsr.tableoflcpvalues);
+      }
     }
     bsr.processunsortedsuffixrangeinfo = processunsortedsuffixrangeinfo;
     bsr.processunsortedsuffixrange = processunsortedsuffixrange;

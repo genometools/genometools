@@ -645,13 +645,9 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
   gt_assert(srsw->mediumsizelcpvalues != NULL || srsw->sssplcpvalues != NULL);
   for (idx = 1UL; idx < width; idx++)
   {
-    if (srsw->mediumsizelcpvalues != NULL)
-    {
-      lcpvalue = (unsigned long) srsw->mediumsizelcpvalues[idx];
-    } else
-    {
-      lcpvalue = lcpsubtab_getvalue(srsw->sssplcpvalues,subbucketleft,idx);
-    }
+    lcpvalue = srsw->mediumsizelcpvalues != NULL
+                 ? (unsigned long) srsw->mediumsizelcpvalues[idx]
+                 : lcpsubtab_getvalue(srsw->sssplcpvalues,subbucketleft,idx);
     if (lcpvalue < maxdepth)
     {
       if (laststart < idx-1)
@@ -661,6 +657,13 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
                                    idx - laststart,maxdepth);
       }
       laststart = idx;
+    } else
+    {
+      if (lcpvalue > maxdepth)
+      {
+        fprintf(stderr,"lcpvalue = %lu > %lu = maxdepth\n",lcpvalue,maxdepth);
+      }
+      gt_assert(lcpvalue == maxdepth);
     }
   }
   if (laststart < width-1)

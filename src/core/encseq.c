@@ -6450,6 +6450,7 @@ unsigned int gt_encseq_extract2bitencvector(
     twobitencodingstoppos = gt_getnexttwobitencodingstoppos(fwd, esr);
   } else
   {
+    gt_assert(!withstoppos);
     twobitencodingstoppos = fwd ? GT_TWOBITENCODINGSTOPPOSUNDEF(encseq) : 0;
   }
   if (withstoppos)
