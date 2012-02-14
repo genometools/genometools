@@ -57,6 +57,7 @@
 #include "extended/hmm.h"
 #include "extended/luaserialize.h"
 #include "extended/redblack.h"
+#include "extended/rbtree.h"
 #include "extended/splicedseq.h"
 #include "extended/string_matching.h"
 #include "extended/tag_value_map.h"
@@ -276,6 +277,7 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "quality module", gt_quality_unit_test);
   gt_hashmap_add(unit_tests, "range class", gt_range_unit_test);
   gt_hashmap_add(unit_tests, "red-black tree class", gt_rbt_unit_test);
+  gt_hashmap_add(unit_tests, "red-black tree class (BSD)", gt_rbtree_unit_test);
   gt_hashmap_add(unit_tests, "safearith module", gt_safearith_unit_test);
   gt_hashmap_add(unit_tests, "safearith example", gt_safearith_example);
   gt_hashmap_add(unit_tests, "sequence buffer class",

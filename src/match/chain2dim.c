@@ -24,7 +24,7 @@
 #include "core/ma.h"
 #include "core/arraydef.h"
 #include "core/logger.h"
-#include "extended/redblack.h"
+#include "extended/rbtree.h"
 #include "chain2dim.h"
 #include "prsqualint.h"
 
@@ -235,7 +235,7 @@ typedef struct
 
 typedef struct
 {
-  GtRBTnode *dictroot;
+  GtRBTree *dictroot;
   unsigned long *endpointperm;
 } Matchstore;
 
@@ -565,9 +565,9 @@ static void gt_chain2dim_bruteforcechainingscores(const GtChain2Dimmode
   If the match points are identical, then the order is undefined.
 */
 
-static int gt_chain2dim_cmpendMatchpoint2(const GtKeytype keya,
-                             const GtKeytype keyb,
-                             GT_UNUSED void *info)
+static int gt_chain2dim_cmpendMatchpoint2(const void* keya,
+                                          const void* keyb,
+                                          GT_UNUSED void *info)
 {
   if (((Matchpoint *) keya)->fpposition < ((Matchpoint *) keyb)->fpposition)
   {
@@ -601,18 +601,16 @@ static GtChain2Dimscoretype gt_chain2dim_evalpriority(bool addterminal,
 }
 
 static void gt_chain2dim_insertintodict(bool addterminal,
-                           const GtChain2Dimmatchtable *matchtable,
-                           Matchstore *matchstore,
-                           Matchpoint *qmatch2)
+                                        const GtChain2Dimmatchtable *matchtable,
+                                        Matchstore *matchstore,
+                                        Matchpoint *qmatch2)
 {
   Matchpoint *retval2;
   bool nodecreated;
 
-  retval2 = (Matchpoint *) gt_rbt_search ((const GtKeytype) qmatch2,
-                                          &nodecreated,
-                                          &matchstore->dictroot,
-                                          gt_chain2dim_cmpendMatchpoint2,
-                                          NULL);
+  retval2 = (Matchpoint *) gt_rbtree_search(matchstore->dictroot,
+                                            qmatch2,
+                                            &nodecreated);
   gt_assert(retval2 != NULL);
   if (!nodecreated)
   {
@@ -622,7 +620,6 @@ static void gt_chain2dim_insertintodict(bool addterminal,
       gt_assert(retval2->fpposition == qmatch2->fpposition);
       retval2->fpident = qmatch2->fpident;
     }
-    gt_free(qmatch2);
   }
 }
 
@@ -636,10 +633,10 @@ static void gt_chain2dim_activatematchpoint(bool addterminal,
 
   qpriority = gt_chain2dim_evalpriority(addterminal,matchtable,
                                         FRAGIDENT(qmatch2));
-  tmp2 = (Matchpoint *) gt_rbt_previousequalkey ((const GtKeytype) qmatch2,
-                                                matchstore->dictroot,
-                                                gt_chain2dim_cmpendMatchpoint2,
-                                                NULL);
+  tmp2 = (Matchpoint *) gt_rbtree_previous_equal_key(matchstore->dictroot,
+                                                 qmatch2,
+                                                 gt_chain2dim_cmpendMatchpoint2,
+                                                 NULL);
   if (tmp2 == NULL ||
       qpriority > gt_chain2dim_evalpriority(addterminal,matchtable,
                                             FRAGIDENT(tmp2)))
@@ -647,25 +644,21 @@ static void gt_chain2dim_activatematchpoint(bool addterminal,
     gt_chain2dim_insertintodict(addterminal,matchtable,matchstore,qmatch2);
     while (true)
     {
-      tmp2 = (Matchpoint *) gt_rbt_nextkey ((const GtKeytype) qmatch2,
-                                           matchstore->dictroot,
-                                           gt_chain2dim_cmpendMatchpoint2,
-                                           NULL);
+      tmp2 = (Matchpoint *) gt_rbtree_next_key(matchstore->dictroot,
+                                               qmatch2,
+                                               gt_chain2dim_cmpendMatchpoint2,
+                                               NULL);
       if (tmp2 == NULL || qpriority <= gt_chain2dim_evalpriority(addterminal,
                                                     matchtable,
                                                     FRAGIDENT(tmp2)))
       {
         break;
       }
-      if (gt_rbt_delete ((const GtKeytype) tmp2,
-                        &matchstore->dictroot,
-                        gt_chain2dim_cmpendMatchpoint2,
-                        NULL) != 0)
+      if (gt_rbtree_erase(matchstore->dictroot, tmp2) != 0)
       {
         fprintf(stderr,"cannot delete successor node\n");
         exit(GT_EXIT_PROGRAMMING_ERROR);
       }
-      gt_free(tmp2);
     }
   } else
   {
@@ -696,11 +689,10 @@ static void gt_chain2dim_evalmatchscore(const GtChain2Dimmode *chainmode,
     keymatch2.fpposition = startpos2 - 1;  /* it is a start position */
     keymatch2.fpident = MAKEENDPOINT(matchpointident);
                        /* but considered as endpoint */
-    qmatch2 = (Matchpoint *) gt_rbt_previousequalkey(
-                                  (const GtKeytype) &keymatch2,
-                                  matchstore->dictroot,
-                                  gt_chain2dim_cmpendMatchpoint2,
-                                  NULL);
+    qmatch2 = (Matchpoint *) gt_rbtree_previous_equal_key(matchstore->dictroot,
+                                                 &keymatch2,
+                                                 gt_chain2dim_cmpendMatchpoint2,
+                                                 NULL);
     if (qmatch2 != NULL)
     {
       if (chainmode->maxgapwidth != 0 &&
@@ -844,8 +836,8 @@ static bool gt_chain2dim_retrievemaximalscore(GtChain2Dimscoretype *maxscore,
   return maxscoredefined;
 }
 
-static int comparescores(const GtKeytype key1,
-                         const GtKeytype key2,
+static int comparescores(const void *key1,
+                         const void *key2,
                          GT_UNUSED void *info)
 {
   if (*((GtChain2Dimscoretype *) key1) < *(((GtChain2Dimscoretype *) key2)))
@@ -863,8 +855,8 @@ typedef struct
 {
   unsigned long currentdictsize,     /* current size of the dictionary */
                 maxdictsize;         /* maximal size of the dictionary */
-  GtRBTnode *worstelement,           /* reference to worst key */
-            *root,                   /* root of tree */
+  GtRBTree  *root;                    /* root of tree */
+  void      *worstelement,           /* reference to worst key */
             *lastcallinsertedelem,   /* element inserted in last call */
             *lastcalldeletedelem;    /* element deleted in last call */
 } Dictmaxsize;
@@ -876,7 +868,7 @@ static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
   dict = gt_malloc(sizeof (*dict));
   dict->currentdictsize = 0;
   dict->maxdictsize = maxsize;
-  dict->root = NULL;
+  dict->root = gt_rbtree_new(comparescores, NULL, NULL);
   dict->lastcallinsertedelem = NULL;
   dict->lastcalldeletedelem = NULL;
   dict->worstelement = NULL;
@@ -885,20 +877,16 @@ static Dictmaxsize *dictmaxsize_new(unsigned long maxsize)
 
 static void dictmaxsize_delete(Dictmaxsize *dict)
 {
-  gt_rbt_destroy (false,NULL,NULL,dict->root);
+  gt_rbtree_delete(dict->root);
   gt_free(dict);
 }
 
-typedef int (*Dictcomparefunction)(const GtKeytype,const GtKeytype,void *);
-typedef void (*Freekeyfunction)(const GtKeytype,void *);
-typedef bool (*Comparewithkey)(const GtKeytype,void *);
-
 static void insertDictmaxsize(Dictmaxsize *dict,
-                              Dictcomparefunction comparefunction,
+                              GtRBTreeCompareFunc comparefunction,
                               void *cmpinfo,
                               void *elemin)
 {
-  bool nodecreated;
+  bool nodecreated = false;
 
   if (dict->currentdictsize < dict->maxdictsize)
   {
@@ -907,11 +895,7 @@ static void insertDictmaxsize(Dictmaxsize *dict,
     {
       dict->worstelement = elemin;
     }
-    (void) gt_rbt_search(elemin,
-                         &nodecreated,
-                         &dict->root,
-                         comparefunction,
-                         cmpinfo);
+    (void) gt_rbtree_search(dict->root, elemin, &nodecreated);
     if (nodecreated)
     {
       dict->currentdictsize++;
@@ -920,29 +904,22 @@ static void insertDictmaxsize(Dictmaxsize *dict,
   } else
   {
 /*
-  new element is not as worse as worst element, so insert it and
+  new element is not as bad as worst element, so insert it and
   and delete the worst element
 */
     if (comparefunction(dict->worstelement,elemin,cmpinfo) < 0)
     {
-      (void) gt_rbt_search(elemin,
-                           &nodecreated,
-                           &dict->root,
-                           comparefunction,
-                           cmpinfo);
+      (void) gt_rbtree_search(dict->root, elemin, &nodecreated);
       if (nodecreated)
       {
         dict->lastcallinsertedelem = elemin;
-        if (gt_rbt_delete(dict->worstelement,
-                          &dict->root,
-                          comparefunction,
-                          cmpinfo) != 0)
+        if (gt_rbtree_erase(dict->root, dict->worstelement) != 0)
         {
           fprintf(stderr,"insertDictmaxsize: deletion failed\n");
           exit(GT_EXIT_PROGRAMMING_ERROR);
         }
         dict->lastcalldeletedelem = dict->worstelement;
-        dict->worstelement = gt_rbt_minimumkey(dict->root);
+        dict->worstelement = gt_rbtree_minimum_key(dict->root);
       }
     }
   }
@@ -977,7 +954,7 @@ static void retrievechainbestscores(bool *minscoredefined,
     *minscoredefined = false;
   } else
   {
-    minkey = gt_rbt_minimumkey(dictbestmatches->root);
+    minkey = gt_rbtree_minimum_key(dictbestmatches->root);
     gt_assert(minkey != NULL);
     *minscore = *((GtChain2Dimscoretype *) minkey);
     *minscoredefined = true;
@@ -1077,7 +1054,8 @@ static void mergestartandendpoints(const GtChain2Dimmode *chainmode,
   unsigned int postsortdim = 1U - presortdim;
 
   addterminal = (chainmode->chainkind == GLOBALCHAINING) ? false : true;
-  matchstore->dictroot = NULL;
+  matchstore->dictroot = gt_rbtree_new(gt_chain2dim_cmpendMatchpoint2,
+                                       gt_free_func, NULL);
   for (xidx = 0, startcount = 0, endcount = 0;
        startcount < matchtable->nextfree &&
        endcount < matchtable->nextfree;
@@ -1166,7 +1144,7 @@ static unsigned int gt_chain2dim_findmaximalscores(const GtChain2Dimmode
   switch (chainmode->chainkind)
   {
     case GLOBALCHAINING:
-      maxpoint = gt_rbt_maximumkey(matchstore->dictroot);
+      maxpoint = gt_rbtree_maximum_key(matchstore->dictroot);
       gt_assert(maxpoint != NULL);
       matchnum = FRAGIDENT(maxpoint);
       minscore = matchtable->matches[matchnum].score;
@@ -1361,7 +1339,7 @@ void gt_chain_fastchaining(const GtChain2Dimmode *chainmode,
                                logger);
     if (chainmode->chainkind != GLOBALCHAININGWITHOVERLAPS)
     {
-      gt_rbt_destroy (true,NULL,NULL,matchstore.dictroot);
+      gt_rbtree_delete(matchstore.dictroot);
     }
   } else
   {
