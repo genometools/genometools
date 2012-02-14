@@ -20,7 +20,9 @@
 
 /* Strcmp module */
 
-/* Returns 0 if <s1> == <s2>, otherwise the equivalent of <strcmp(s1,s2)>. */
+/* Returns 0 if <s1> == <s2>, otherwise the equivalent of <strcmp(s1,s2)>.
+   Useful as a performance improvement in some cases (for example, to compare
+   symbols). */
 int gt_strcmp(const char *s1, const char *s2);
 
 #endif
