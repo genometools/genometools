@@ -752,6 +752,7 @@ VERSION:="`cat $(CURDIR)/VERSION`"
 SYSTEMNAME:="$(SYSTEM)_$(MACHINE)"
 GTDISTBASENAME:="gt-$(VERSION)-$(SYSTEMNAME)-${BIT}"
 DISTDIR:="$(CURDIR)/dist/$(SYSTEMNAME)"
+SCRIPTSDIR:="$(CURDIR)/scripts"
 GTDISTDIR:="$(DISTDIR)/$(GTDISTBASENAME)"
 
 dist: all manuals static
@@ -775,7 +776,7 @@ endif
 	@cp -r $(CURDIR)/gtpython $(GTDISTDIR)
 	@cp -r $(CURDIR)/gtruby $(GTDISTDIR)
 	@$(MAKE) prefix=$(GTDISTDIR) install
-	@cd $(DISTDIR) && tar --owner=root -cf $(GTDISTBASENAME).tar $(GTDISTBASENAME)
+	@cd $(DISTDIR) && $(SCRIPTSDIR)/tar_root.sh $(GTDISTBASENAME)
 	@cd $(DISTDIR) && gzip -f -9 $(GTDISTBASENAME).tar
 	@echo "$(DISTDIR)/$(GTDISTBASENAME).tar.gz"
 
