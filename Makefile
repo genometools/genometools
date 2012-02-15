@@ -514,6 +514,7 @@ endif
 
 ifneq ($(useshared),yes)
   ADDITIONAL_SO_DEPS:=lib/libbz2.a \
+                      lib/libexpat.a \
                       lib/libz.a
 endif
 
