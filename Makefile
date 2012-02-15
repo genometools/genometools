@@ -41,10 +41,8 @@ EXP_LDLIBS:=$(LIBS) -lm -ldl
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
-# rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
-EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DLUA_DL_DLOPEN -DUNISTD_H="<unistd.h>" \
-            -DEXPAT_H="<expat.h>" -DRNV_VERSION=\"1.7.8\" \
+EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DLUA_DL_DLOPEN \
             -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 EXP_CPPFLAGS+=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
 GT_CPPFLAGS:=$(INCLUDEOPT)
@@ -132,20 +130,6 @@ LIBTECLA_SRC:=$(TECLA_DIR)/chrqueue.c $(TECLA_DIR)/cplfile.c \
               $(TECLA_DIR)/strngmem.c $(TECLA_DIR)/version.c
 LIBTECLA_OBJ:=$(LIBTECLA_SRC:%.c=obj/%.o)
 LIBTECLA_DEP:=$(LIBTECLA_SRC:%.c=obj/%.d)
-
-RNV_DIR:=src/external/rnv-1.7.10
-LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
-            $(RNV_DIR)/rnv.c $(RNV_DIR)/rnx.c $(RNV_DIR)/drv.c \
-            $(RNV_DIR)/ary.c $(RNV_DIR)/xsd.c $(RNV_DIR)/xsd_tm.c \
-            $(RNV_DIR)/dxl.c $(RNV_DIR)/dsl.c $(RNV_DIR)/sc.c $(RNV_DIR)/u.c \
-            $(RNV_DIR)/ht.c $(RNV_DIR)/er.c $(RNV_DIR)/xmlc.c $(RNV_DIR)/s.c \
-            $(RNV_DIR)/m.c $(RNV_DIR)/rx.c
-LIBRNV_OBJ:=$(LIBRNV_SRC:%.c=obj/%.o)
-LIBRNV_DEP:=$(LIBRNV_SRC:%.c=obj/%.d)
-
-RNVMAIN_SRC:=$(RNV_DIR)/xcl.c
-RNVMAIN_OBJ:=$(RNVMAIN_SRC:%.c=obj/%.o)
-RNVMAIN_DEP:=$(RNVMAIN_SRC:%.c=obj/%.d)
 
 BZ2_DIR:=src/external/bzip2-1.0.6
 LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
@@ -450,7 +434,7 @@ prefix ?= /usr/local
 patch ?= patch
 
 all: lib/libgenometools.a $(SHARED_LIBGENOMETOOLS) \
-     bin/skproto bin/gt bin/lua bin/rnv bin/examples/custom_stream \
+     bin/skproto bin/gt bin/lua bin/examples/custom_stream \
      bin/examples/gff3sort bin/examples/gff3validator bin/examples/noop \
      $(ANNOTATIONSKETCH_EXAMPLES)
 
@@ -513,14 +497,6 @@ lib/libtecla.a: $(LIBTECLA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBTECLA_OBJ)
-ifdef RANLIB
-	@$(RANLIB) $@
-endif
-
-lib/librnv.a: $(LIBRNV_OBJ)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@ar ru $@ $(LIBRNV_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -590,11 +566,6 @@ bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm -ldl -o $@
-
-bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
@@ -727,8 +698,6 @@ obj/src/core/versionfunc.o: obj/gt_config.h
 	 $(TOOLS_DEP) \
          $(LUAMAIN_DEP) \
 	 $(LIBTECLA_DEP) \
-	 $(LIBRNV_DEP) \
-	 $(RNVMAIN_DEP) \
 	 $(LIBBZ2_DEP) \
          $(HMMER_DEP) \
 	 $(ZLIB_DEP) \
