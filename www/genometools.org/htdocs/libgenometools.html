@@ -7107,6 +7107,8 @@ Like <code>qsort(3)</code>, but allows an additional <code>data</code> pointer p
 <code>int  gt_strcmp(const char *s1, const char *s2)</code>
 <p>
 Returns 0 if <code>s1</code> == <code>s2</code>, otherwise the equivalent of <code>strcmp(s1,s2)</code>.
+   Useful as a performance improvement in some cases (for example, to compare
+   symbols).
 </p>
 <hr>
 <a name="Symbol"></a>
@@ -8872,7 +8874,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-01-26
+Last update: 2012-02-15
 </div>
 </div>
 <!-- Piwik -->
