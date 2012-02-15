@@ -258,7 +258,7 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB,
 
   if (use_rootEST) {
     /* insert spliced alignment into tree rooted at <rootEST> */
-    saA = (GthSA*) gt_rbtree_search_with_cmp(sa_collection->rootlist, saB,
+    saA = (GthSA*) gt_rbtree_search_with_cmp(sa_collection->rootEST, saB,
                                              compare_duplicate_and_genomic_pos,
                                              &sa_collection->duplicate_check,
                                              &nodecreated);
