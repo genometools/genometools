@@ -16,7 +16,7 @@
 */
 
 #include "core/unused_api.h"
-#include "extended/redblack.h"
+#include "extended/rbtree.h"
 #include "gth/sa_cmp.h"
 #include "gth/sa_collection.h"
 
@@ -34,16 +34,9 @@
 */
 struct GthSACollection {
   GthDuplicateCheck duplicate_check;
-  GtRBTnode *rootlist,
-            *rootEST;
+  GtRBTree *rootlist,
+           *rootEST;
 };
-
-GthSACollection* gth_sa_collection_new(GthDuplicateCheck duplicate_check)
-{
-  GthSACollection *sa_collection= gt_calloc(1, sizeof *sa_collection);
-  sa_collection->duplicate_check = duplicate_check;
-  return sa_collection;
-}
 
 typedef enum
 {
@@ -94,7 +87,7 @@ static int compare_strands(bool strandsignA, bool strandsignB)
   compare_duplicate_and_genomic_pos() given below.
 */
 
-static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
+static int compare_duplicate(const void* dataA, const void* dataB,
                              void *cmpinfo)
 {
   int rval;
@@ -151,8 +144,8 @@ static int compare_duplicate(const GtKeytype dataA, const GtKeytype dataB,
   This function is used as ordering for the tree rooted at <rootEST>.
 */
 
-static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
-                                             const GtKeytype dataB,
+static int compare_duplicate_and_genomic_pos(const void* dataA,
+                                             const void* dataB,
                                              void *cmpinfo)
 {
   int rval;
@@ -167,7 +160,7 @@ static int compare_duplicate_and_genomic_pos(const GtKeytype dataA,
   The following function is used as ordering for the tree rooted at <rootlist>.
 */
 
-static int compare_sa(const GtKeytype dataA, const GtKeytype dataB,
+static int compare_sa(const void* dataA, const void* dataB,
                       void *cmpinfo)
 {
   GthSA *saA = (GthSA*) dataA;
@@ -256,19 +249,39 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB,
   gt_assert(sa_collection && saB);
 
   /* insert spliced alignment into tree rooted at <rootlist> */
-  saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootlist,
-                               compare_sa, &sa_collection->duplicate_check);
+  saA = (GthSA*) gt_rbtree_search_with_cmp(sa_collection->rootlist, saB,
+                                           compare_sa,
+                                           &sa_collection->duplicate_check,
+                                           &nodecreated);
   /* insertion into binary tree succeeded */
   gt_assert(saA && nodecreated);
 
   if (use_rootEST) {
     /* insert spliced alignment into tree rooted at <rootEST> */
-    saA = (GthSA*) gt_rbt_search(saB, &nodecreated, &sa_collection->rootEST,
-                                 compare_duplicate_and_genomic_pos,
-                                 &sa_collection->duplicate_check);
+    saA = (GthSA*) gt_rbtree_search_with_cmp(sa_collection->rootlist, saB,
+                                             compare_duplicate_and_genomic_pos,
+                                             &sa_collection->duplicate_check,
+                                             &nodecreated);
     /* insertion into binary tree succeeded */
     gt_assert(saA && nodecreated);
   }
+}
+
+static void sa_free(void *sa)
+{
+  gth_sa_delete(sa);
+}
+
+GthSACollection* gth_sa_collection_new(GthDuplicateCheck duplicate_check)
+{
+  GthSACollection *sa_collection= gt_calloc(1, sizeof *sa_collection);
+  sa_collection->duplicate_check = duplicate_check;
+  sa_collection->rootlist = gt_rbtree_new(compare_sa, sa_free,
+                                          &sa_collection->duplicate_check);
+  sa_collection->rootEST = gt_rbtree_new(compare_duplicate_and_genomic_pos,
+                                         NULL,
+                                         &sa_collection->duplicate_check);
+  return sa_collection;
 }
 
 bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
@@ -291,8 +304,9 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
   }
 
   if (sa_collection->duplicate_check != GTH_DC_NONE) {
-    saA = (GthSA*) gt_rbt_find(saB, sa_collection->rootEST, compare_duplicate,
-                               &sa_collection->duplicate_check);
+    saA = (GthSA*) gt_rbtree_find_with_cmp(sa_collection->rootEST, saB,
+                                           compare_duplicate,
+                                           &sa_collection->duplicate_check);
   }
 
   if (saA == NULL) {
@@ -323,7 +337,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
     }
 
     /* going to the left */
-    spliced_alignmentptr = gt_rbt_previouskey(saA, sa_collection->rootEST,
+    spliced_alignmentptr = gt_rbtree_previous_key(sa_collection->rootEST, saA,
                                               compare_duplicate_and_genomic_pos,
                                               &sa_collection->duplicate_check);
 
@@ -348,16 +362,16 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       }
 
       /* retrieving next alignment */
-      spliced_alignmentptr = gt_rbt_previouskey(spliced_alignmentptr,
-                                                sa_collection->rootEST,
+      spliced_alignmentptr = gt_rbtree_next_key(sa_collection->rootEST,
+                                              spliced_alignmentptr,
                                               compare_duplicate_and_genomic_pos,
-                                               &sa_collection->duplicate_check);
+                                              &sa_collection->duplicate_check);
     }
 
     /* going to right */
-    spliced_alignmentptr = gt_rbt_nextkey(saA, sa_collection->rootEST,
-                                          compare_duplicate_and_genomic_pos,
-                                          &sa_collection->duplicate_check);
+    spliced_alignmentptr = gt_rbtree_next_key(sa_collection->rootEST, saA,
+                                              compare_duplicate_and_genomic_pos,
+                                              &sa_collection->duplicate_check);
     while ((spliced_alignmentptr) &&
            (!compare_duplicate(saB, spliced_alignmentptr,
                                &sa_collection->duplicate_check))) {
@@ -379,10 +393,11 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       }
 
       /* retrieving next alignment */
-      spliced_alignmentptr = gt_rbt_nextkey(spliced_alignmentptr,
-                                            sa_collection->rootEST,
-                                            compare_duplicate_and_genomic_pos,
-                                            &sa_collection->duplicate_check);
+      spliced_alignmentptr = gt_rbtree_next_key(sa_collection->rootEST,
+                                              spliced_alignmentptr,
+                                              compare_duplicate_and_genomic_pos,
+                                              &sa_collection->duplicate_check);
+
     }
 
     /* DISCARD and REPLACE are not true at the same time */
@@ -398,12 +413,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       /* deleting all alignments which need to be replaced by saA */
       for (i = 0; i < gt_array_size(alignmentstodelete); i++) {
         satodel = *(GthSA**) gt_array_get(alignmentstodelete, i);
-        (void) gt_rbt_delete(satodel, &sa_collection->rootlist, compare_sa,
-                             &sa_collection->duplicate_check);
-        (void) gt_rbt_delete(satodel, &sa_collection->rootEST,
-                             compare_duplicate_and_genomic_pos,
-                             &sa_collection->duplicate_check);
-
+        (void) gt_rbtree_erase(sa_collection->rootlist, satodel);
+        (void) gt_rbtree_erase(sa_collection->rootEST, satodel);
         /* the ith spliced alignment has been removed from the tree now,
            but the memory still needs to be freed */
         gth_sa_delete(satodel);
@@ -424,17 +435,17 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
   return true;
 }
 
-static int storealignmentptr(GtKeytype data, GtRbtVisit which,
-                              GT_UNUSED unsigned long depth, void *actinfo)
+static int storealignmentptr(void* data, GtRBTreeContext which,
+                             GT_UNUSED unsigned long depth, void *actinfo)
 {
   GthSA *sa = (GthSA*) data;
   GtArray *alignments = (GtArray*) actinfo;
   switch (which) {
-    case GT_RBT_PREORDER:
-    case GT_RBT_ENDORDER:
+    case GT_RBTREE_PREORDER:
+    case GT_RBTREE_ENDORDER:
       break;
-    case GT_RBT_POSTORDER:
-    case GT_RBT_LEAF:
+    case GT_RBTREE_POSTORDER:
+    case GT_RBTREE_LEAF:
       gt_array_add(alignments, sa);
       break;
     default: gt_assert(0);
@@ -450,7 +461,8 @@ static GtArray* sa_collection_get_alignments(const GthSACollection
   GtArray *alignments = gt_array_new(sizeof (GthSA*));
   GT_UNUSED int had_err;
   /* traverse the tree */
-  had_err = gt_rbt_walk(sa_collection->rootlist, storealignmentptr, alignments);
+  had_err = gt_rbtree_walk(sa_collection->rootlist, storealignmentptr,
+                           alignments);
   gt_assert(!had_err); /* storealignmentptr() is sane */
   return alignments;
 }
@@ -495,11 +507,6 @@ bool gth_sa_collection_contains_sa(const GthSACollection *sa_collection)
   return sa_collection->rootlist ? true : false;
 }
 
-static void sa_free(void *sa, GT_UNUSED void *unused)
-{
-  gth_sa_delete(sa);
-}
-
 void gth_sa_collection_traverse(const GthSACollection *sa_collection,
                                 GthSAVisitor *sa_visitor, GthInput *input)
 {
@@ -538,10 +545,11 @@ void gth_sa_collection_set_md5s(GthSACollection *sa_collection, GthInput *input)
 void gth_sa_collection_delete(GthSACollection *sa_collection)
 {
   if (!sa_collection) return;
-  gt_rbt_destroy(true, sa_free, NULL, sa_collection->rootlist);
+  gt_rbtree_delete(sa_collection->rootlist);
   /* for the second tree no free function is needed, because all elements have
      been freed already by the previous redblacktreedestroy() */
-  gt_rbt_destroy(false, NULL, NULL, sa_collection->rootEST);
+  gt_rbtree_delete(sa_collection->rootEST);
+
   gt_free(sa_collection);
 }
 
