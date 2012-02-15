@@ -15,11 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RADIX_INTSORT_H
-#define RADIX_INTSORT_H
+#ifndef RADIX_SORT_H
+#define RADIX_SORT_H
 
 #include <stdbool.h>
 #include "core/types_api.h"
+
+/* move radixreader code to own header file */
 
 #define GT_RADIXREADER_NEXT(VALUE,RR,STOPSTATEMENT)\
         if ((RR)->ptrtab == NULL)\
@@ -122,27 +124,25 @@
 
 typedef struct
 {
-  unsigned long sortkey;
-  unsigned long suffixref;
+  unsigned long sortkey,
+                suffixref;
   unsigned int part;
 } GtRadixreaderPQelemtype;
 
 typedef struct
 {
-  GtUlong *currentptr, *endptr;
+  unsigned long *currentptr, *endptr;
   GtUlongPair *currentptr_pair, *endptr_pair;
 } GtRadixreaderPointerpair;
 
 typedef struct
 {
-  GtUlong *ptr1, *ptr2, *end1, *end2;
+  unsigned long *ptr1, *ptr2, *end1, *end2;
   GtUlongPair *ptr1_pair, *ptr2_pair, *end1_pair, *end2_pair;
   GtRadixreaderPointerpair *ptrtab;
   unsigned long pq_numofelements;
   GtRadixreaderPQelemtype *pq_values;
 } GtRadixreader;
-
-typedef struct GtRadixsortinfo GtRadixsortinfo;
 
 /*@unused@*/ static inline void gt_radixreaderPQadd(GtRadixreader *rr,
                                                     unsigned long sortkey,
@@ -172,35 +172,44 @@ typedef struct GtRadixsortinfo GtRadixsortinfo;
   rr->pq_numofelements++;
 }
 
-GtRadixsortinfo *gt_radixsort_new(bool pair,
-                                  bool smalltables,
-                                  unsigned long maxlen,
-                                  unsigned int rparts,
-                                  bool withthreads,
-                                  void *arr);
+typedef struct GtRadixsortinfo GtRadixsortinfo;
 
-unsigned long gt_radixsort_entries(bool pair,unsigned int rparts,
-                                   size_t memlimit,bool withthreads);
+GtRadixsortinfo *gt_radixsort_new_ulong(bool smalltables,
+                                        unsigned long maxlen,
+                                        unsigned int rparts,
+                                        bool withthreads,
+                                        unsigned long *arr);
 
-void gt_radixsort_verify(GtRadixreader *rr);
+GtRadixsortinfo *gt_radixsort_new_ulongpair(bool smalltables,
+                                            unsigned long maxlen,
+                                            unsigned int rparts,
+                                            bool withthreads,
+                                            GtUlongPair *arr);
 
-GtUlong *gt_radixsort_arr(GtRadixsortinfo *radixsort);
-
-GtUlongPair *gt_radixsort_arrpair(GtRadixsortinfo *radixsort);
-
-size_t gt_radixsort_size(const GtRadixsortinfo *radixsort);
+GtRadixreader *gt_radixsort_sort(GtRadixsortinfo *radixsort,
+                                 unsigned long len);
 
 void gt_radixsort_delete(GtRadixsortinfo *radixsort);
 
-GtRadixreader *gt_radixsort_linear(GtRadixsortinfo *radixsort,
-                                   unsigned long len);
+unsigned long gt_radixsort_estimate_num_of_entries(bool pair,
+                                                   unsigned int rparts,
+                                                   size_t memlimit,
+                                                   bool withthreads);
 
-void gt_radixsort_GtUlong_divide(GtUlong *source,
-                                 GtUlong *dest,
-                                 unsigned long len);
+size_t gt_radixsort_size(const GtRadixsortinfo *radixsort);
 
-void gt_radixsort_GtUlong_recursive(GtUlong *source,
-                                    GtUlong *dest,
-                                    unsigned long len);
+unsigned long *gt_radixsort_space_ulong(GtRadixsortinfo *radixsort);
+
+GtUlongPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsort);
+
+void gt_radixsort_verify(GtRadixreader *rr);
+
+void gt_radixsort_divide(unsigned long *source,
+                         unsigned long *dest,
+                         unsigned long len);
+
+void gt_radixsort_recursive(unsigned long *source,
+                            unsigned long *dest,
+                            unsigned long len);
 
 #endif

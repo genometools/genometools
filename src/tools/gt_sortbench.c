@@ -25,7 +25,7 @@
 #include "core/qsort_r.h"
 #include "core/str.h"
 #include "core/timer.h"
-#include "core/radix-intsort.h"
+#include "core/radix_sort.h"
 #include "core/unused_api.h"
 #include "tools/gt_sortbench.h"
 #ifdef GT_THREADS_ENABLED
@@ -353,12 +353,11 @@ static void check_radixsort_GtUlong_linear_gen(bool smalltables,
                                                unsigned long *arr,
                                                unsigned long len)
 {
-  const bool pair = false;
   GtRadixsortinfo *radixsort;
   GtRadixreader *radixreader;
 
-  radixsort = gt_radixsort_new(pair,smalltables,len,rparts,withthreads,arr);
-  radixreader = gt_radixsort_linear(radixsort,len);
+  radixsort = gt_radixsort_new_ulong(smalltables,len,rparts,withthreads,arr);
+  radixreader = gt_radixsort_sort(radixsort,len);
   if (radixreader == NULL)
   {
     gt_sortbench_verify(arr,len);
@@ -393,7 +392,7 @@ static void check_radixsort_GtUlong_recursive(unsigned long *arr,
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radixsort_GtUlong_recursive(arr, temp, len);
+  gt_radixsort_recursive(arr, temp, len);
   gt_sortbench_verify(arr,len);
   gt_free(temp);
 }
@@ -405,7 +404,7 @@ static void check_radixsort_GtUlong_divide(unsigned long *arr,
 {
   unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
 
-  gt_radixsort_GtUlong_divide(arr, temp, len);
+  gt_radixsort_divide(arr, temp, len);
   gt_sortbench_verify(arr,len);
   gt_free(temp);
 }

@@ -23,7 +23,7 @@
 #include "core/fa.h"
 #include "core/logger_api.h"
 #include "core/mathsupport.h"
-#include "core/radix-intsort.h"
+#include "core/radix_sort.h"
 #include "core/showtime.h"
 #include "core/spacecalc.h"
 #include "core/spacepeak.h"
@@ -434,7 +434,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
-    radixreader = gt_radixsort_linear(fci->radixsort_code,fci->buf.nextfree);
+    radixreader = gt_radixsort_sort(fci->radixsort_code,fci->buf.nextfree);
     if (radixreader == NULL)
     {
       firstelem = fci->buf.spaceGtUlong[0];
@@ -548,7 +548,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
-    radixreader = gt_radixsort_linear(fci->radixsort_codepos,fci->buf.nextfree);
+    radixreader = gt_radixsort_sort(fci->radixsort_codepos,fci->buf.nextfree);
     if (radixreader == NULL)
     {
       firstelem = fci->buf.spaceGtUlongPair[0];
@@ -1224,8 +1224,9 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
                            (gt_firstcodes_spacelog_total(fci->fcsl) +
                             phase2extra);
 
-      fci->buf.allocated = gt_radixsort_entries(pair,radixparts,remainspace,
-                                                withthreads);
+      fci->buf.allocated = gt_radixsort_estimate_num_of_entries(pair,radixparts,
+                                                                remainspace,
+                                                                withthreads);
       if (fci->buf.allocated < fci->differentcodes/16UL)
       {
         fci->buf.allocated = fci->differentcodes/16UL;
@@ -1237,10 +1238,10 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
     {
       const bool pair = false;
 
-      fci->buf.allocated
-        = gt_radixsort_entries(pair,radixparts,
-                               gt_firstcodes_spacelog_total(fci->fcsl)/7UL,
-                               withthreads);
+      fci->buf.allocated = gt_radixsort_estimate_num_of_entries(
+                                   pair,radixparts,
+                                   gt_firstcodes_spacelog_total(fci->fcsl)/7UL,
+                                   withthreads);
     } else
     {
       fci->buf.allocated = fci->differentcodes/5;
@@ -1263,18 +1264,17 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                                                GtLogger *logger,
                                                GtTimer *timer)
 {
-  const bool pair = false;
-
   if (timer != NULL)
   {
     gt_timer_show_progress(timer, "to accumulate counts",stdout);
   }
   gt_assert(fci->buf.allocated > 0);
-  fci->radixsort_code = gt_radixsort_new(pair,radixsmall,fci->buf.allocated,
-                                         radixparts,
-                                         withthreads,
-                                         NULL);
-  fci->buf.spaceGtUlong = gt_radixsort_arr(fci->radixsort_code);
+  fci->radixsort_code = gt_radixsort_new_ulong(radixsmall,
+                                               fci->buf.allocated,
+                                               radixparts,
+                                               withthreads,
+                                               NULL);
+  fci->buf.spaceGtUlong = gt_radixsort_space_ulong(fci->radixsort_code);
   GT_FCI_ADDWORKSPACE(fci->fcsl,"radixsort_code",
                       gt_radixsort_size(fci->radixsort_code));
   fci->buf.fciptr = fci; /* as we need to give fci to the flush function */
@@ -1455,9 +1455,9 @@ static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
     {
       const bool pair = true;
       fci->buf.allocated
-        = gt_radixsort_entries(pair,radixparts,
-                               (size_t) maximumspace - used,
-                               withthreads);
+        = gt_radixsort_estimate_num_of_entries(pair,radixparts,
+                                               (size_t) maximumspace - used,
+                                               withthreads);
     } else
     {
       fci->buf.allocated /= 4UL;
@@ -1849,14 +1849,16 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                           phase2extra);
     if (!onlyaccumulation)
     {
-      fci.radixsort_codepos = gt_radixsort_new(true,radixsmall,
-                                               fci.buf.allocated,
-                                               radixparts,
-                                               threads > 1U ? true : false,
-                                               NULL);
+      fci.radixsort_codepos = gt_radixsort_new_ulongpair(radixsmall,
+                                                         fci.buf.allocated,
+                                                         radixparts,
+                                                         threads > 1U
+                                                           ? true : false,
+                                                         NULL);
       GT_FCI_ADDWORKSPACE(fci.fcsl,"radixsort_codepos",
                           gt_radixsort_size(fci.radixsort_codepos));
-      fci.buf.spaceGtUlongPair = gt_radixsort_arrpair(fci.radixsort_codepos);
+      fci.buf.spaceGtUlongPair
+        = gt_radixsort_space_ulongpair(fci.radixsort_codepos);
     }
     fci.codebuffer_total = 0;
     fci.flushcount = 0;
