@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2009 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2009 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2009-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2009-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,6 +13,23 @@
   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+/* This module implements the difference cover based suffix sorting
+   method from the following paper:
+
+  @INPROCEEDINGS{BUR:KAER:2003,
+  author = {Burkhardt, S. and K{\"a}rkk{\"a}inen, J.},
+  title = {{Fast Lightweight Suffix Array Construction and Checking}},
+  booktitle = {{Proceedings of the 14th Annual Symposium on Combinatorial
+                Pattern Matching (CPM)}},
+  year = {2003},
+  editor = {{Baeza-Yates, R. and Ch{\'a}vez, E. and Crochemore, M.}},
+  volume = {2676},
+  series = {LNCS},
+  pages = {200-210},
+  publisher = {Springer-Verlag}
+}
 */
 
 #include <stdbool.h>
@@ -86,8 +103,10 @@ struct GtDifferencecover
                hvalue,  /* not necessary */
                numofchars,
                prefixlength;
-  Diffrank *coverrank;
-  Diffvalue *diffvalues, *diff2pos;
+  unsigned long *coverrank_evaluated;
+  GtBitsequence *coverrank_bits;
+  Diffvalue *diffvalues,  /* points to the difference cover */
+            *diff2pos;    /* table d from BUR:KAER:2003 */
   size_t requiredspace;
   unsigned long totallength;
   GtLeftborder *leftborder; /* points to bcktab->leftborder */
@@ -142,24 +161,31 @@ static void dc_fillcoverrank(GtDifferencecover *dcov)
 {
   unsigned int i;
   Diffrank j;
+  const unsigned long step = GT_DIVV(dcov->totallength) + 1;
+  unsigned long sum;
 
-  dcov->coverrank = gt_malloc(sizeof (*dcov->coverrank) * dcov->vparam);
-  dcov->requiredspace += sizeof (*dcov->coverrank) * dcov->vparam;
+  dcov->coverrank_evaluated
+    = gt_malloc(sizeof (*dcov->coverrank_evaluated) * dcov->vparam);
+  GT_INITBITTAB(dcov->coverrank_bits,dcov->vparam);
+  dcov->requiredspace += sizeof (*dcov->coverrank_evaluated) * dcov->vparam;
   gt_assert(dcov->size <= Diffrankmax);
   for (i=0; i<dcov->vparam; i++)
   {
-    dcov->coverrank[i] = dcov->size;
+    dcov->coverrank_evaluated[i] = ULONG_MAX; /* initialize as undefined */
   }
-  for (j=0; j<dcov->size; j++)
+  for (sum = 0, j=0; j<dcov->size; j++, sum += step)
   {
-    dcov->coverrank[dcov->diffvalues[j]] = j;
+    Diffvalue d = dcov->diffvalues[j];
+    dcov->coverrank_evaluated[d] = sum; /* jth value from difference cover
+                                           gets rank j * step. */
+    GT_SETIBIT(dcov->coverrank_bits,d);
   }
 }
 
 static bool dc_is_in_differencecover(const GtDifferencecover *dcov,
                                      unsigned long modpos)
 {
-  return dcov->coverrank[modpos] == dcov->size ? false : true;
+  return GT_ISIBITSET(dcov->coverrank_bits,modpos) ? true : false;
 }
 
 static void dc_filldiff2pos(GtDifferencecover *dcov)
@@ -320,11 +346,13 @@ size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov)
   return dcov->requiredspace;
 }
 
+/* The following is the \delta function from BUR:KAER:2003. */
+
 static unsigned int dc_differencecover_offset(const GtDifferencecover *dcov,
                                               unsigned long pos1,
                                               unsigned long pos2)
 {
-  return (unsigned int) GT_MODV(dcov->diff2pos[GT_MODV(pos2-pos1)] - pos1);
+  return (unsigned int) GT_MODV(dcov->diff2pos[GT_MODV(pos2 - pos1)] - pos1);
 }
 
 void gt_differencecover_delete(GtDifferencecover *dcov)
@@ -337,8 +365,10 @@ void gt_differencecover_delete(GtDifferencecover *dcov)
     gt_assert(dcov->multimappower == NULL);
     gt_assert(dcov->esr == NULL);
 
-    gt_free(dcov->coverrank);
-    dcov->coverrank = NULL;
+    gt_free(dcov->coverrank_evaluated);
+    dcov->coverrank_evaluated = NULL;
+    gt_free(dcov->coverrank_bits);
+    dcov->coverrank_bits = NULL;
     gt_free(dcov->diff2pos);
     dcov->diff2pos = NULL;
     gt_free(dcov->inversesuftab);
@@ -347,16 +377,13 @@ void gt_differencecover_delete(GtDifferencecover *dcov)
   }
 }
 
+/* the following implements the \mu function from BAE:KAER:2003 */
+
 static unsigned long dc_differencecover_packsamplepos(
                                                  const GtDifferencecover *dcov,
                                                  unsigned long pos)
 {
-  unsigned long result;
-
-  result = dcov->coverrank[GT_MODV(pos)] * (GT_DIVV(dcov->totallength) + 1) +
-           GT_DIVV(pos);
-  gt_assert(result < dcov->maxsamplesize);
-  return result;
+  return dcov->coverrank_evaluated[GT_MODV(pos)] + GT_DIVV(pos);
 }
 
 GT_DECLAREARRAYSTRUCT(Codeatposition);
