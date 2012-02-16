@@ -200,6 +200,11 @@ static int gt_readjoiner_overlap_arguments_check(int rest_argc,
     {
       haserr = true;
     }
+    if (!haserr && !gt_ma_bookkeeping_enabled()) {
+      gt_error_set(err, "option '-memlimit' requires "
+                        "GT_MEM_BOOKKEEPING=on");
+      haserr = true;
+    }
   }
   if (!haserr && gt_option_is_set(arguments->refoptionphase2extra))
   {
@@ -211,6 +216,15 @@ static int gt_readjoiner_overlap_arguments_check(int rest_argc,
       haserr = true;
     }
   }
+#ifdef GT_THREADS_ENABLED
+  if (!haserr) {
+    if (gt_jobs > 1 && gt_ma_bookkeeping_enabled()) {
+      gt_error_set(err, "gt option '-j' and GT_MEM_BOOKKEEPING=on "
+                        "are incompatible");
+      haserr = true;
+    }
+  }
+#endif
   return haserr ? -1 : 0;
 }
 
