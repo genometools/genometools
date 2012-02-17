@@ -116,7 +116,7 @@ void gt_tag_value_map_remove(GtTagValueMap *map, const char *tag)
   value_len = strlen(value);
   /* move memory from end position of value to start position of tag */
   memmove(value - tag_len - 1, value + value_len + 1,
-          map_len - ((size_t) value - (size_t) *map + value_len) + 1);
+          map_len - ((size_t) value - (size_t) *map + value_len));
   *map = gt_realloc(*map, map_len - (tag_len + 1 + value_len + 1) + 1);
   gt_assert((*map)[map_len - (tag_len + 1 + value_len + 1)] == '\0');
 }
