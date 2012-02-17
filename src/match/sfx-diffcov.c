@@ -1095,6 +1095,46 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
                 sfxstrategy->maxcountingsort);
 }
 
+#ifdef WITHFILLLCP
+static void dc_filllcpvalues(GtDifferencecover *dcov)
+{
+  Diffvalue *diffptr;
+  unsigned long kvalue, lvalue, start0, start1, suffix;
+  GtUchar cc1, cc2;
+
+  for (diffptr = dcov->diffvalues; diffptr < dcov->diffvalues + dcov->size;
+       diffptr++)
+  {
+    kvalue = (unsigned long) *diffptr;
+    lvalue = 0;
+    while (kvalue < dcov->samplesize)
+    {
+      suffix = dc_inversesuftab_get(dcov,kvalue);
+      gt_assert(suffix > 0);
+      start0 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix-1);
+      start1 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix);
+      while (start0 + lvalue < dcov->totallength &&
+             start1 + lvalue < dcov->totallength)
+      {
+        cc1 = gt_encseq_get_encoded_char(dcov->encseq,start0+lvalue,
+                                         dcov->readmode);
+        cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lvalue,
+                                         dcov->readmode);
+        if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+        {
+          break;
+        }
+        lvalue++;
+      }
+      printf("lcp %lu=%lu\n",suffix,lvalue);
+      lvalue = lvalue > (unsigned long) dcov->vparam
+                 ? (lvalue - (unsigned long) dcov->vparam) : 0;
+      kvalue += dcov->size;
+    }
+  }
+}
+#endif
+
 static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                           GtOutlcpinfo *outlcpinfosample,
                                           const Sfxstrategy *mainsfxstrategy,
@@ -1189,7 +1229,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
   gt_logger_log(dcov->logger,"specials=%lu, fullspecials=%lu",
-              specials,fullspecials);
+                specials,fullspecials);
   if (withcheck)
   {
     qsort(codelist.spaceCodeatposition,
@@ -1347,6 +1387,12 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                     dcov->effectivesamplesize,
                                     outlcpinfosample);
     }
+  }
+  if (outlcpinfosample != NULL)
+  {
+#ifdef WITHFILLLCP
+    dc_filllcpvalues(dcov);
+#endif
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
