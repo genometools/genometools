@@ -160,13 +160,15 @@ static int compare_duplicate_and_genomic_pos(const void* dataA,
   The following function is used as ordering for the tree rooted at <rootlist>.
 */
 
-static int compare_sa(const void* dataA, const void* dataB,
-                      void *cmpinfo)
+static int compare_sa(const void *dataA, const void *dataB, void *cmpinfo)
 {
   GthSA *saA = (GthSA*) dataA;
   GthSA *saB = (GthSA*) dataB;
   GtRange rangeA, rangeB;
   GthDuplicateCheck duplicate_check = *(GthDuplicateCheck*) cmpinfo;
+
+  if (saA == saB)
+    return 0;
 
   rangeA = gth_sa_range_forward(saA);
   rangeB = gth_sa_range_forward(saB);
