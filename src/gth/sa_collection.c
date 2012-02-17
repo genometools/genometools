@@ -36,6 +36,7 @@ struct GthSACollection {
   GthDuplicateCheck duplicate_check;
   GtRBTree *rootlist,
            *rootEST;
+  bool contains_sa;
 };
 
 typedef enum
@@ -434,6 +435,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
   /* returning true to indicate that an element has been inserted */
   if (stat)
     gth_stat_increment_numofSAs(stat);
+  sa_collection->contains_sa = true;
   return true;
 }
 
@@ -506,7 +508,7 @@ bool gth_sa_collections_are_equal(const GthSACollection *sa_collectionA,
 bool gth_sa_collection_contains_sa(const GthSACollection *sa_collection)
 {
   gt_assert(sa_collection);
-  return sa_collection->rootlist ? true : false;
+  return sa_collection->contains_sa;
 }
 
 void gth_sa_collection_traverse(const GthSACollection *sa_collection,
