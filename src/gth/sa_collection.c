@@ -416,11 +416,8 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       /* deleting all alignments which need to be replaced by saA */
       for (i = 0; i < gt_array_size(alignmentstodelete); i++) {
         satodel = *(GthSA**) gt_array_get(alignmentstodelete, i);
-        (void) gt_rbtree_erase(sa_collection->rootlist, satodel);
         (void) gt_rbtree_erase(sa_collection->rootEST, satodel);
-        /* the ith spliced alignment has been removed from the tree now,
-           but the memory still needs to be freed */
-        gth_sa_delete(satodel);
+        (void) gt_rbtree_erase(sa_collection->rootlist, satodel);
       }
     }
 
