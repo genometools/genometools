@@ -450,7 +450,8 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    GtReadmode readmode,
                                    const GtSuffixsortspace *sortedsample,
                                    unsigned long effectivesamplesize,
-                                   const GtOutlcpinfo *outlcpinfosample)
+                                   const GtOutlcpinfo *outlcpinfosample,
+                                   bool checkequality)
 {
   GT_UNUSED int cmp;
   unsigned long idx, reallcp, startpos1, startpos2, currentlcp,
@@ -475,14 +476,16 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                                       .isset,idx));
     currentlcp
       = outlcpinfosample->lcpsubtab.tableoflcpvalues.bucketoflcpvalues[idx];
-    if (currentlcp > reallcp)
+    if ((checkequality && currentlcp != reallcp) ||
+        (!checkequality && currentlcp > reallcp))
     {
       fprintf(stderr,"idx=%lu,suffixpair=%lu,%lu: "
-                     "currentlcp = %lu < %lu = reallcp\n",
-                      idx,startpos1,startpos2,currentlcp,reallcp);
-      gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos1,20UL);
+                     "currentlcp = %lu %s %lu = reallcp\n",
+                      idx,startpos1,startpos2,currentlcp,
+                      checkequality ? "!=" : ">",reallcp);
+      gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos1,50UL);
       fprintf(stderr,"\n");
-      gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos2,20UL);
+      gt_encseq_showatstartposwithdepth(stderr,encseq,readmode,startpos2,50UL);
       fprintf(stderr,"\n");
       exit(GT_EXIT_PROGRAMMING_ERROR);
     } else

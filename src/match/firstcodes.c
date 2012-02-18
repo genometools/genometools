@@ -542,7 +542,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    GtUlongPair firstelem = { 0 };
+    GtUlongPair firstelem = {0,0};
     const unsigned long *ptr;
     GtRadixreader *radixreader = NULL;
 
