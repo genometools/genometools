@@ -270,16 +270,11 @@ static void insert_alignment(GthSACollection *sa_collection, GthSA *saB,
   }
 }
 
-static void sa_free(void *sa)
-{
-  gth_sa_delete(sa);
-}
-
 GthSACollection* gth_sa_collection_new(GthDuplicateCheck duplicate_check)
 {
   GthSACollection *sa_collection= gt_calloc(1, sizeof *sa_collection);
   sa_collection->duplicate_check = duplicate_check;
-  sa_collection->rootlist = gt_rbtree_new(compare_sa, sa_free,
+  sa_collection->rootlist = gt_rbtree_new(compare_sa, (GtFree) gth_sa_delete,
                                           &sa_collection->duplicate_check);
   sa_collection->rootEST = gt_rbtree_new(compare_duplicate_and_genomic_pos,
                                          NULL,
