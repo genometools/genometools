@@ -891,7 +891,8 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     }
     if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
     {
-      bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
+      bsr->processunsortedsuffixrange(
+                         bsr->processunsortedsuffixrangeinfo,
                          gt_suffixsortspace_bucketleftidx_get(bsr->sssp) +
                          subbucketleft,
                          width,depth);

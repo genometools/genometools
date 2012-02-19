@@ -71,7 +71,7 @@ struct GtOutlcpinfo
   Lcpsubtab lcpsubtab;
 };
 
-/* Now some functions related to the computation of lcp values follows */
+/* Now some functions related to the computation of lcp values follow */
 
 static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
                                           const Suffixwithcode *currentsuffix,
@@ -86,8 +86,11 @@ static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,
   } else
   {
     gt_assert(previoussuffix->code < currentsuffix->code);
-    lcpvalue = MIN(minchanged,MIN(previoussuffix->prefixindex,
-                                  currentsuffix->prefixindex));
+    lcpvalue = MIN(previoussuffix->prefixindex,currentsuffix->prefixindex);
+    if (minchanged < lcpvalue)
+    {
+      lcpvalue = minchanged;
+    }
   }
   return (unsigned long) lcpvalue;
 }

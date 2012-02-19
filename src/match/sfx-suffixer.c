@@ -1890,8 +1890,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       sfi->bcktab,
                       sfi->numofchars,
                       sfi->prefixlength,
-                      sfi->sfxstrategy.differencecover == 0
-                        ? sfi->outlcpinfo : NULL,
+                      sfi->outlcpinfo,
                       sfi->sfxstrategy.differencecover,
                       &sfi->sfxstrategy,
                       sfi->sfxstrategy.differencecover == 0
