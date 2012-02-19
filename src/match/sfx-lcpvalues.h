@@ -45,6 +45,12 @@ typedef struct
                                  means that the value is 0. */
 } GtLcpvalues;
 
+typedef void (*GtCompletelargelcpvalues)(void *,
+                                         const GtSuffixsortspace *,
+                                         GtLcpvalues *,
+                                         unsigned long,
+                                         unsigned long);
+
 /*@unused@*/ static inline void gt_lcptab_update(GtLcpvalues *tableoflcpvalues,
                                                  unsigned long subbucketleft,
                                                  unsigned long idx,

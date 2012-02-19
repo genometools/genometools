@@ -1025,6 +1025,16 @@ void gt_differencecover_sortunsortedbucket(void *data,
   QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, NULL,width,data);
 }
 
+void gt_differencecover_completelargelcpvalues(
+                                   GT_UNUSED void *data,
+                                   GT_UNUSED const GtSuffixsortspace *sssp,
+                                   GT_UNUSED GtLcpvalues *tableoflcpvalues,
+                                   GT_UNUSED unsigned long width,
+                                   GT_UNUSED unsigned long posoffset)
+{
+  /*printf("completelarge [%lu,%lu]\n",posoffset,posoffset+width-1);*/
+}
+
 static void dc_sortremainingsamples(GtDifferencecover *dcov)
 {
   GtDcPairsuffixptr *pairptr;
@@ -1365,6 +1375,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                       dcov->vparam,
                       &sfxstrategy,
                       dc_addunsortedrange,
+                      NULL,
                       (void *) dcov,
                       &bucketiterstep,
                       dcov->logger);

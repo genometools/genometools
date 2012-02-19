@@ -1503,6 +1503,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        const Sfxstrategy *sfxstrategy,
                        GtProcessunsortedsuffixrange
                          processunsortedsuffixrange,
+                       GtCompletelargelcpvalues completelargelcpvalues,
                        void *processunsortedsuffixrangeinfo,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger)
@@ -1559,6 +1560,15 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
         gt_sort_bentleysedgewick(&bsr,bucketspec.nonspecialsinbucket,
                                  (unsigned long) prefixlength);
         gt_suffixsortspace_bucketleftidx_set(bsr.sssp,0);
+      }
+      if (completelargelcpvalues != NULL)
+      {
+        gt_assert(sortmaxdepth > 0);
+        completelargelcpvalues(processunsortedsuffixrangeinfo,
+                               bsr.sssp,
+                               bsr.tableoflcpvalues,
+                               bucketspec.nonspecialsinbucket,
+                               bucketspec.left);
       }
       gt_Outlcpinfo_nonspecialsbucket(outlcpinfo,
                                       prefixlength,
