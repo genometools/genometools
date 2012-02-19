@@ -1,4 +1,5 @@
 /*
+  Copyright (c) 2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2008 Simon J. Puglisi <simon.puglisi@rmit.edu.au>
 */
@@ -11,8 +12,8 @@
 
 typedef struct GtRMQ GtRMQ;
 
-GtRMQ*        gt_rmq_new(long* arr, unsigned long size);
-unsigned long gt_rmq_find_min_index(GtRMQ *rmq, unsigned long start,
+GtRMQ*        gt_rmq_new(const unsigned long *data, unsigned long size);
+unsigned long gt_rmq_find_min_index(const GtRMQ *rmq, unsigned long start,
                                     unsigned long end);
 void          gt_rmq_delete(GtRMQ *rmq);
 
