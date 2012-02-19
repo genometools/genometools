@@ -44,10 +44,10 @@ typedef struct
                                  means that the value is 0. */
 } GtLcpvalues;
 
-/*@unused@*/ static inline void lcptab_update(GtLcpvalues *tableoflcpvalues,
-                                              unsigned long subbucketleft,
-                                              unsigned long idx,
-                                              unsigned long value)
+/*@unused@*/ static inline void gt_lcptab_update(GtLcpvalues *tableoflcpvalues,
+                                                 unsigned long subbucketleft,
+                                                 unsigned long idx,
+                                                 unsigned long value)
 {
   gt_assert (tableoflcpvalues != NULL &&
              tableoflcpvalues->bucketoflcpvalues != NULL &&
@@ -70,7 +70,7 @@ typedef struct
   }
 }
 
-/*@unused@*/ static inline unsigned long lcpsubtab_getvalue(
+/*@unused@*/ static inline unsigned long gt_lcptab_getvalue(
                                         const GtLcpvalues *tableoflcpvalues,
                                         unsigned long subbucketleft,
                                         unsigned long idx)

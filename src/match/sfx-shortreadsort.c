@@ -362,12 +362,12 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
             {
               if (pl < pm && r > 0)
               {
-                lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
-                              lcpsubtab_getvalue(data->sssplcpvalues,
-                                                 subbucketleft,pl));
+                gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
+                                 gt_lcptab_getvalue(data->sssplcpvalues,
+                                                       subbucketleft,pl));
               }
-              lcptab_update(data->sssplcpvalues,subbucketleft,pl,
-                            depth + data->tmplcplen);
+              gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl,
+                               depth + data->tmplcplen);
             }
           }
           if (r <= 0)
@@ -505,9 +505,9 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
             which is at a minimum distance to the pivot and thus to an
             element in the final part of the left side.
           */
-          lcptab_update(data->sssplcpvalues,
-                        subbucketleft,current.startindex + s,
-                        depth + smallermaxlcp);
+          gt_lcptab_update(data->sssplcpvalues,
+                           subbucketleft,current.startindex + s,
+                           depth + smallermaxlcp);
         }
       }
       if (s > 1UL)
@@ -535,8 +535,8 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
             element in the first part of the right side.
           */
           gt_assert(pn >= s);
-          lcptab_update(data->sssplcpvalues,subbucketleft,pn - s,
-                        depth + greatermaxlcp);
+          gt_lcptab_update(data->sssplcpvalues,subbucketleft,pn - s,
+                           depth + greatermaxlcp);
         }
       }
       if (s > 1UL)
@@ -647,7 +647,7 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
   {
     lcpvalue = srsw->mediumsizelcpvalues != NULL
                  ? (unsigned long) srsw->mediumsizelcpvalues[idx]
-                 : lcpsubtab_getvalue(srsw->sssplcpvalues,subbucketleft,idx);
+                 : gt_lcptab_getvalue(srsw->sssplcpvalues,subbucketleft,idx);
     if (lcpvalue < maxdepth)
     {
       if (laststart < idx-1)

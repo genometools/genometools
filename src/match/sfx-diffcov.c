@@ -808,7 +808,7 @@ static void dc_setlcpvaluesofrunsortedrange(GtLcpvalues *samplelcpvalues,
 
   for (idx = blisbl+1; idx < blisbl + width; idx++)
   {
-    lcptab_update(samplelcpvalues,0,idx,lcpvalue);
+    gt_lcptab_update(samplelcpvalues,0,idx,lcpvalue);
   }
 }
 
@@ -1151,7 +1151,7 @@ static void dc_fill_lcpvalues(GtDifferencecover *dcov)
           }
           lcpvalue++;
         }
-        lcptab_update(dcov->samplelcpvalues,0,suffix,lcpvalue);
+        gt_lcptab_update(dcov->samplelcpvalues,0,suffix,lcpvalue);
         lcpvalue = lcpvalue > (unsigned long) dcov->vparam
                    ? (lcpvalue - (unsigned long) dcov->vparam) : 0;
       }

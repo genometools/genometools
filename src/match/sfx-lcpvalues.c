@@ -336,7 +336,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   }
   for (idx=bucketleft; idx<=bucketright; idx++)
   {
-    lcpvalue = lcpsubtab_getvalue(&lcpsubtab->tableoflcpvalues,0,idx);
+    lcpvalue = gt_lcptab_getvalue(&lcpsubtab->tableoflcpvalues,0,idx);
     if (lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
     {
       lcpsubtab->lcp2file->maxbranchdepth = lcpvalue;
@@ -586,7 +586,7 @@ void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
       /* first part first code */
       lcpvalue = 0;
     }
-    lcptab_update(tableoflcpvalues,0,0,lcpvalue);
+    gt_lcptab_update(tableoflcpvalues,0,0,lcpvalue);
     /* all other lcp-values are computed and they can be output */
     outlcpvalues(&outlcpinfo->lcpsubtab,
                  0,
