@@ -43,6 +43,7 @@ struct GtRMQ {
   unsigned long nsb;
   /*  number of microblocks (always n/s) */
   unsigned long nmb;
+  bool naive_impl;
 };
 
 /*  because M just stores offsets (rel. to start of block), this method */
@@ -166,23 +167,14 @@ static inline unsigned long rmq_log2fast(unsigned long v)
   return (unsigned long) c;
 }
 
-const unsigned char rmq_HighestBitsSet[8] = {(unsigned char) ~0,
-                                             (unsigned char) ~1,
-                                             (unsigned char) ~3,
-                                             (unsigned char) ~7,
-                                             (unsigned char) ~15,
-                                             (unsigned char) ~31,
-                                             (unsigned char) ~63,
-                                             (unsigned char) ~127};
-
-unsigned char clearbits(unsigned char n, unsigned long x)
+static unsigned char rmq_clearbits(unsigned char n, unsigned long x)
 {
-  return (unsigned char) (n & rmq_HighestBitsSet[x]);
+  return n & (unsigned char) (255 << x);
 }
 
-unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
-                                    unsigned long start,
-                                    unsigned long end)
+static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
+                                                unsigned long start,
+                                                unsigned long end)
 {
   unsigned long i = start,
                 j = end;
@@ -193,7 +185,7 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
   unsigned long i_pos = i - s_mi;          /* pos. of i in its microblock */
 
   if (mb_i == mb_j) { /*  only one microblock-query */
-    min_i = clearbits(rmq->Prec[rmq->type[mb_i]][j-s_mi], i_pos);
+    min_i = rmq_clearbits(rmq->Prec[rmq->type[mb_i]][j-s_mi], i_pos);
     min = min_i == 0 ? j : s_mi + lsb(min_i);
   }
   else {
@@ -202,7 +194,7 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
     unsigned long s_mj = mb_j * rmq->s;  /* start of j's microblock */
     unsigned long j_pos = j - s_mj;      /* position of j in its microblock */
     unsigned long block_difference;
-    min_i = clearbits(rmq->Prec[rmq->type[mb_i]][rmq->s-1], i_pos);
+    min_i = rmq_clearbits(rmq->Prec[rmq->type[mb_i]][rmq->s-1], i_pos);
     /* left in-microblock-query */
     min = min_i == 0 ? s_mi + rmq->s - 1 : s_mi + lsb(min_i);
     /*  right in-microblock-query */
@@ -289,6 +281,32 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
   return min;
 }
 
+unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
+                                    unsigned long start,
+                                    unsigned long end)
+{
+  if (rmq->naive_impl)
+  {
+    unsigned long minval, idx, ret;
+
+    gt_assert(rmq->arr_ptr != NULL && start < end && end < rmq->nb);
+    minval = rmq->arr_ptr[start];
+    ret = start;
+    for (idx = start+1; idx <= end; idx++)
+    {
+      if (rmq->arr_ptr[idx] < minval)
+      {
+        ret = idx;
+        minval = rmq->arr_ptr[idx];
+      }
+    }
+    return ret;
+  } else
+  {
+    return gt_rmq_find_min_index_fast(rmq,start,end);
+  }
+}
+
 GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
 {
   GtRMQ *rmq = gt_calloc((size_t) 1, sizeof (GtRMQ));
@@ -309,10 +327,10 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
 
   rmq->arr_ptr = data;
   rmq->n = size;
-  rmq->s = (unsigned long) 1 << 3;              /*  microblock-size */
-  rmq->sprime = (unsigned long) 1 << 4;         /*  block-size */
-  rmq->sprimeprime = (unsigned long) 1 << 8;    /*  superblock-size */
-  rmq->nb = rmq_block(rmq, size-1)+1;       /*  number of blocks */
+  rmq->s = 1UL << 3;              /*  microblock-size */
+  rmq->sprime = 1UL << 4;         /*  block-size */
+  rmq->sprimeprime = 1UL << 8;    /*  superblock-size */
+  rmq->nb = rmq_block(rmq, size-1) + 1;     /*  number of blocks */
   rmq->nsb = rmq_superblock(rmq, size-1)+1; /*  number of superblocks */
   rmq->nmb = rmq_microblock(rmq, size-1)+1; /*  number of microblocks */
 
@@ -323,11 +341,17 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
       happens iff n < 113. For such small instances it isn't advisable anyway
       to use this data structure, because simpler methods are faster and less
       space consuming. */
-  if (rmq->nb<rmq->sprimeprime/(2*rmq->sprime)) {
-    fprintf(stderr, "Array too small...exit\n");
-    exit(-1);
+  if (rmq->nb < rmq->sprimeprime/(2*rmq->sprime))
+  {
+    rmq->M = NULL;
+    rmq->Mprime = NULL;
+    rmq->type = NULL;
+    rmq->Prec = NULL;
+    rmq->naive_impl = true;
+    return rmq;
   }
 
+  rmq->naive_impl = false;
   /*  Type-calculation for the microblocks and pre-computation of
       in-microblock-queries: */
   rmq->type = gt_calloc((size_t) rmq->nmb, sizeof (unsigned short));
@@ -489,15 +513,30 @@ void gt_rmq_delete(GtRMQ *rmq)
   unsigned long i;
   if (!rmq) return;
   gt_free(rmq->type);
-  for (i = 0; i < rmq_catalan[rmq->s][rmq->s]; i++)
-    gt_free(rmq->Prec[i]);
-  gt_free(rmq->Prec);
-  for (i = 0; i < rmq->M_depth; i++)
-    gt_free(rmq->M[i]);
-  gt_free(rmq->M);
-  for (i = 0; i < rmq->Mprime_depth; i++)
-    gt_free(rmq->Mprime[i]);
-  gt_free(rmq->Mprime);
+  if (rmq->Prec != NULL)
+  {
+    for (i = 0; i < rmq_catalan[rmq->s][rmq->s]; i++)
+    {
+      gt_free(rmq->Prec[i]);
+    }
+    gt_free(rmq->Prec);
+  }
+  if (rmq->M != NULL)
+  {
+    for (i = 0; i < rmq->M_depth; i++)
+    {
+      gt_free(rmq->M[i]);
+    }
+    gt_free(rmq->M);
+  }
+  if (rmq->Mprime != NULL)
+  {
+    for (i = 0; i < rmq->Mprime_depth; i++)
+    {
+      gt_free(rmq->Mprime[i]);
+    }
+    gt_free(rmq->Mprime);
+  }
   gt_free(rmq);
 }
 

@@ -135,6 +135,7 @@ struct GtDifferencecover
   GtLogger *logger;
   GtSuffixsortspace *sssp,
                     *sortedsample;
+  GtRMQ *rmq;
   unsigned long sortoffset;
 };
 
@@ -275,6 +276,7 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->logger = logger;
   dcov->sssp = NULL;
   dcov->shat = NULL;
+  dcov->rmq = NULL;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
                                       sizeof (differencecoversizes[0]));
@@ -383,6 +385,8 @@ void gt_differencecover_delete(GtDifferencecover *dcov)
     dcov->inversesuftab = NULL;
     gt_free(dcov->shat);
     dcov->shat = NULL;
+    gt_rmq_delete(dcov->rmq);
+    dcov->rmq = NULL;
     gt_free(dcov);
   }
 }
@@ -1158,6 +1162,7 @@ static void dc_fill_lcpvalues(GtDifferencecover *dcov)
       kvalue += dcov->size;
     }
   }
+  dcov->rmq = gt_lcpvalues_rmq_new(dcov->samplelcpvalues);
 }
 
 static void dc_differencecover_sortsample(GtDifferencecover *dcov,

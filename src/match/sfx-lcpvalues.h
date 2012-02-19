@@ -21,6 +21,7 @@
 #include "core/codetype.h"
 #include "core/unused_api.h"
 #include "core/encseq.h"
+#include "extended/rmq.h"
 #include "lcpoverflow.h"
 #include "bcktab.h"
 #include "sfx-suffixgetset.h"
@@ -139,5 +140,7 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
                                    unsigned long effectivesamplesize,
                                    const GtOutlcpinfo *outlcpinfosample,
                                    bool checkequality);
+
+GtRMQ *gt_lcpvalues_rmq_new(const GtLcpvalues *samplelcpvalues);
 
 #endif

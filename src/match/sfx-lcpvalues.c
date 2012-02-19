@@ -21,6 +21,7 @@
 #include "core/minmax.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
+#include "extended/rmq.h"
 #include "esa-fileend.h"
 #include "sfx-lcpvalues.h"
 #include "turnwheels.h"
@@ -736,4 +737,10 @@ GtLcpvalues *gt_Outlcpinfo_lcpvalues_ref(GtOutlcpinfo *outlcpinfo)
 {
   gt_assert(outlcpinfo != NULL);
   return &outlcpinfo->lcpsubtab.tableoflcpvalues;
+}
+
+GtRMQ *gt_lcpvalues_rmq_new(const GtLcpvalues *samplelcpvalues)
+{
+  return gt_rmq_new(samplelcpvalues->bucketoflcpvalues,
+                    samplelcpvalues->numofentries);
 }
