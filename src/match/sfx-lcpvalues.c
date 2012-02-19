@@ -107,14 +107,14 @@ static void outsmalllcpvalues(Lcpoutput2file *lcp2file,
              lcp2file->outfplcptab);
 }
 
-static unsigned int bucketends(Lcpsubtab *lcpsubtab,
-                               Suffixwithcode *previoussuffix,
-                               GT_UNUSED unsigned long firstspecialsuffix,
-                               unsigned int minchanged,
-                               unsigned long nonspecialsinbucket,
-                               unsigned long specialsinbucket,
-                               GtCodetype code,
-                               const GtBcktab *bcktab)
+static unsigned int lcp_bucketends(Lcpsubtab *lcpsubtab,
+                                   Suffixwithcode *previoussuffix,
+                                   GT_UNUSED unsigned long firstspecialsuffix,
+                                   unsigned int minchanged,
+                                   unsigned long nonspecialsinbucket,
+                                   unsigned long specialsinbucket,
+                                   GtCodetype code,
+                                   const GtBcktab *bcktab)
 {
   unsigned long lcpvalue;
   unsigned int maxprefixindex, minprefixindex;
@@ -314,17 +314,13 @@ void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
 }
 
 static void outlcpvalues(Lcpsubtab *lcpsubtab,
-                         unsigned long bucketleft,
-                         unsigned long bucketright,
+                         unsigned long width,
                          unsigned long posoffset)
 {
   unsigned long idx, lcpvalue;
   Largelcpvalue *largelcpvalueptr;
 
-  if (lcpsubtab->lcp2file == NULL)
-  {
-    return;
-  }
+  gt_assert(lcpsubtab->lcp2file != NULL);
   lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue = 0;
   if (lcpsubtab->tableoflcpvalues.numoflargelcpvalues > 0 &&
       lcpsubtab->tableoflcpvalues.numoflargelcpvalues >=
@@ -338,7 +334,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
     lcpsubtab->lcp2file->largelcpvalues.allocatedLargelcpvalue
       = lcpsubtab->tableoflcpvalues.numoflargelcpvalues;
   }
-  for (idx=bucketleft; idx<=bucketright; idx++)
+  for (idx=0; idx<width; idx++)
   {
     lcpvalue = gt_lcptab_getvalue(&lcpsubtab->tableoflcpvalues,0,idx);
     if (lcpsubtab->lcp2file->maxbranchdepth < lcpvalue)
@@ -347,8 +343,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
     }
     if (lcpvalue < (unsigned long) LCPOVERFLOW)
     {
-      lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft]
-        = (uint8_t) lcpvalue;
+      lcpsubtab->lcp2file->smalllcpvalues[idx] = (uint8_t) lcpvalue;
     } else
     {
       gt_assert(lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue
@@ -357,9 +352,9 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       largelcpvalueptr
         = lcpsubtab->lcp2file->largelcpvalues.spaceLargelcpvalue +
           lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue++;
-      largelcpvalueptr->position = posoffset+idx;
+      largelcpvalueptr->position = posoffset + idx;
       largelcpvalueptr->value = lcpvalue;
-      lcpsubtab->lcp2file->smalllcpvalues[idx-bucketleft] = LCPOVERFLOW;
+      lcpsubtab->lcp2file->smalllcpvalues[idx] = LCPOVERFLOW;
     }
     lcpsubtab->lcptabsum += (double) lcpvalue;
     if (lcpsubtab->distlcpvalues != NULL)
@@ -367,8 +362,7 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
       gt_disc_distri_add(lcpsubtab->distlcpvalues, lcpvalue);
     }
   }
-  outsmalllcpvalues(lcpsubtab->lcp2file,
-                    (unsigned long) (bucketright - bucketleft + 1));
+  outsmalllcpvalues(lcpsubtab->lcp2file,width);
   if (lcpsubtab->lcp2file->largelcpvalues.nextfreeLargelcpvalue > 0)
   {
     lcpsubtab->lcp2file->totalnumoflargelcpvalues
@@ -592,10 +586,12 @@ void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
     }
     gt_lcptab_update(tableoflcpvalues,0,0,lcpvalue);
     /* all other lcp-values are computed and they can be output */
-    outlcpvalues(&outlcpinfo->lcpsubtab,
-                 0,
-                 bucketspec->nonspecialsinbucket-1,
-                 bucketspec->left);
+    if (outlcpinfo->lcpsubtab.lcp2file != NULL)
+    {
+      outlcpvalues(&outlcpinfo->lcpsubtab,
+                   bucketspec->nonspecialsinbucket,
+                   bucketspec->left);
+    }
     /* previoussuffix becomes last nonspecial element in current bucket */
     outlcpinfo->previoussuffix.code = code;
     outlcpinfo->previoussuffix.prefixindex = prefixlength;
@@ -630,15 +626,15 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
                                  0,
                                  bucketspec->left
                                    + bucketspec->nonspecialsinbucket);
-      minprefixindex = bucketends(&outlcpinfo->lcpsubtab,
-                                  &outlcpinfo->previoussuffix,
-                                  /* first special element in bucket */
-                                  suffixvalue,
-                                  outlcpinfo->minchanged,
-                                  bucketspec->nonspecialsinbucket,
-                                  bucketspec->specialsinbucket,
-                                  code,
-                                  bcktab);
+      minprefixindex = lcp_bucketends(&outlcpinfo->lcpsubtab,
+                                      &outlcpinfo->previoussuffix,
+                                      /* first special element in bucket */
+                                      suffixvalue,
+                                      outlcpinfo->minchanged,
+                                      bucketspec->nonspecialsinbucket,
+                                      bucketspec->specialsinbucket,
+                                      code,
+                                      bcktab);
       if (outlcpinfo->lcpsubtab.lcp2file != NULL)
       {
         outsmalllcpvalues(outlcpinfo->lcpsubtab.lcp2file,
