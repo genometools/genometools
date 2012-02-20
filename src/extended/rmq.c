@@ -12,6 +12,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/unused_api.h"
 #include "extended/rmq.h"
 
 struct GtRMQ {
@@ -556,7 +557,8 @@ void gt_rmq_delete(GtRMQ *rmq)
 }
 
 /* O(size) */
-static unsigned long gt_rmq_naive(const unsigned long *data, unsigned long size,
+static unsigned long gt_rmq_naive(const unsigned long *data,
+                                  GT_UNUSED unsigned long size,
                                   unsigned long start, unsigned long end)
 {
   unsigned long minval = ULONG_MAX, i, ret = 0UL;
