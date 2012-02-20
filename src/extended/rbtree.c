@@ -57,7 +57,6 @@
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
 #include "extended/rbtree.h"
-#include "extended/redblack.h"
 
 #ifndef HEIGHT_LIMIT
 #define HEIGHT_LIMIT 64
