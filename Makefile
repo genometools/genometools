@@ -492,7 +492,7 @@ $(HMMER_OBJ) $(EASEL_OBJ): hmmerlibs
 # HMMER libs must be built with -fPIC to support shared libs on AMD64
 hmmerlibs: hmmer_get
 	@echo "[build HMMER3]"
-	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fomit-frame-pointer\ -fPIC\ $(HMMER_CFLAGS) \
+	@(cd $(HMMER_BASE) && CFLAGS=-O3\ -fPIC\ $(HMMER_CFLAGS) \
 	   ./configure -q --enable-threads > /dev/null)
 	@$(MAKE) -s -C $(HMMER_BASE) > /dev/null
 
@@ -678,11 +678,13 @@ obj/src/ltr/pdom.o: src/ltr/pdom.c $(HMMERADDTARGET)
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
-	  ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
+	  $(filter-out -fomit-frame-pointer, \
+	    ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" }) \
 	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
 	  $(GT_CFLAGS) $(3)
 	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
-	  ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
+	  $(filter-out -fomit-frame-pointer, \
+	    ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" }) \
 	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
     $(3) -MM -MP -MT $@
 
