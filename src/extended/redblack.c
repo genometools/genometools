@@ -1280,27 +1280,23 @@ typedef enum
   Find
 } DoAction;
 
-/* Set to 1 if a test is flunked.
- static signed long error = 0;
- */
-
 /* The keys we add to the tree.  */
-static unsigned long xtab[SIZE];
+static unsigned long *xtab;
 
 /*
  * Pointers into the key array, possibly permutated, to define an order for
  * insertion/removal.
  */
-static unsigned long ytab[SIZE];
+static unsigned long *ytab;
 
 /* Flags set for each element visited during a tree walk.  */
-static unsigned long ztab[SIZE];
+static unsigned long *ztab;
 
 /*
  * Depths for all the elements, to check that the depth is constant for all
  * three visits.
  */
-static unsigned long depths[SIZE];
+static unsigned long *depths;
 
 /* Maximum depth during a tree walk.  */
 static unsigned long max_depth;
@@ -1370,7 +1366,7 @@ static int walk_tree (const void *root,unsigned long expected_count)
   unsigned long i;
   int error = 0;
 
-  memset (ztab, 0, sizeof ztab);
+  memset (ztab, 0, (SIZE * sizeof (*ztab)));
   max_depth = 0;
 
   if (gt_rbt_walk (root, walk_action, NULL) != 0)
@@ -1516,8 +1512,13 @@ int gt_rbt_unit_test (GtError *err)
   int had_err = 0;
   GtRBTnode *root = NULL;
   unsigned long i, j;
-
   gt_error_check (err);
+
+  xtab = gt_malloc(GT_RBTREE_SIZE * sizeof (*xtab));
+  ytab = gt_malloc(GT_RBTREE_SIZE * sizeof (*ytab));
+  ztab = gt_malloc(GT_RBTREE_SIZE * sizeof (*ztab));
+  depths = gt_malloc(GT_RBTREE_SIZE * sizeof (*depths));
+
   for (i = 0; i < (unsigned long) SIZE; ++i)
   {
     xtab[i] = i;
@@ -1581,5 +1582,11 @@ int gt_rbt_unit_test (GtError *err)
     MANGLECHECK (GT_RBT_ASCENDING, Build_and_del, i);
     MANGLECHECK (GT_RBT_DESCENDING, Build_and_del, i);
   }
+
+  gt_free(xtab);
+  gt_free(ytab);
+  gt_free(ztab);
+  gt_free(depths);
+
   return had_err;
 }

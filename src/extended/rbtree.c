@@ -171,8 +171,9 @@ void gt_rbtree_clear(GtRBTree *tree)
   tree->root = NULL;
 }
 
-void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *data,
-                              GtRBTreeCompareFunc cmpfunc, void *info)
+static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *data,
+                                              GtRBTreeCompareFunc cmpfunc,
+                                              void *info)
 {
   GtRBTreeNode *it = tree->root;
 
@@ -190,9 +191,15 @@ void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *data,
   return it == NULL ? NULL : it->data;
 }
 
+void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *data,
+                              GtRBTreeCompareFunc cmpfunc, void *info)
+{
+  return gt_rbtree_find_with_cmp_g(tree, data, cmpfunc, info);
+}
+
 void *gt_rbtree_find(GtRBTree *tree, void *data)
 {
-  return gt_rbtree_find_with_cmp(tree, data, tree->cmp, tree->info);
+  return gt_rbtree_find_with_cmp_g(tree, data, tree->cmp, tree->info);
 }
 
 static inline int gt_rbtree_insert_g(GtRBTree *tree, void *data,
@@ -793,22 +800,22 @@ typedef enum
 } GtRBTreeDoAction;
 
 /* The keys we add to the tree.  */
-static unsigned long gt_rbtree_xtab[GT_RBTREE_SIZE];
+static unsigned long *gt_rbtree_xtab;
 
 /*
  * Pointers into the key array, possibly permutated, to define an order for
  * insertion/removal.
  */
-static unsigned long gt_rbtree_ytab[GT_RBTREE_SIZE];
+static unsigned long *gt_rbtree_ytab;
 
 /* Flags set for each element visited during a tree walk.  */
-static unsigned long gt_rbtree_ztab[GT_RBTREE_SIZE];
+static unsigned long *gt_rbtree_ztab;
 
 /*
  * Depths for all the elements, to check that the depth is constant for all
  * three visits.
  */
-static unsigned long gt_rbtree_depths[GT_RBTREE_SIZE];
+static unsigned long *gt_rbtree_depths;
 
 /* Maximum depth during a tree walk.  */
 static unsigned long gt_rbtree_max_depth;
@@ -855,7 +862,7 @@ static int nrbt_walk_tree(GtRBTree *tree,unsigned long expected_count)
   unsigned long i;
   int error = 0;
 
-  memset (gt_rbtree_ztab, 0, sizeof gt_rbtree_ztab);
+  memset(gt_rbtree_ztab, 0, (GT_RBTREE_SIZE * sizeof (*gt_rbtree_ztab)));
   gt_rbtree_max_depth = 0;
 
   if (gt_rbtree_walk(tree, nrbt_walk_action, NULL) != 0) {
@@ -975,9 +982,15 @@ int gt_rbtree_unit_test(GtError *err)
   int had_err = 0;
   GtRBTree *tree = NULL;
   unsigned long i, j;
-
   gt_error_check (err);
+
+  gt_rbtree_xtab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_xtab));
+  gt_rbtree_ytab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_ytab));
+  gt_rbtree_ztab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_ztab));
+  gt_rbtree_depths = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_depths));
+
   tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
+  gt_ensure(had_err, tree != NULL);
   for (i = 0; i < (unsigned long) GT_RBTREE_SIZE; ++i) {
     gt_rbtree_xtab[i] = i;
   }
@@ -1036,106 +1049,10 @@ int gt_rbtree_unit_test(GtError *err)
     NRBT_MANGLECHECK (GT_RBTREE_DESCENDING, GtRBTreeBuildDelete, i);
   }
   gt_rbtree_delete(tree);
+  gt_free(gt_rbtree_xtab);
+  gt_free(gt_rbtree_ytab);
+  gt_free(gt_rbtree_ztab);
+  gt_free(gt_rbtree_depths);
 
   return had_err;
 }
-
-/*
-static int cmp_fn(const GtKeytype a,const GtKeytype b,GT_UNUSED void *info)
-{
-  unsigned long va, vb;
-
-  va = *(unsigned long *) a;
-  vb = *(unsigned long *) b;
-  if (va < vb) {
-    return -1;
-  }
-  if (va > vb) {
-    return 1;
-  }
-  return 0;
-}
-
-static int gt_rbtree_basic_test(GtError *err)
-{
-  int had_err = 0;
-  GtRBTree *tree = NULL;
-  GtRBTnode *root = NULL;
-  unsigned long i;
-  bool nodecreated;
-
-  gt_error_check(err);
-  tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
-
-  for (i = 0; i < (unsigned long) GT_RBTREE_SIZE-10; ++i) {
-    gt_rbtree_xtab[i] = i;
-  }
-  for (i = GT_RBTREE_SIZE-10; i < (unsigned long) GT_RBTREE_SIZE; ++i) {
-    gt_rbtree_xtab[i] = gt_rand_max((unsigned long) GT_RBTREE_SIZE);
-  }
-  gt_rbtree_permuteintarray(gt_rbtree_xtab);
-
-  for (i = 0; !had_err && i < (unsigned long) GT_RBTREE_SIZE; ++i) {
-    gt_rbt_search(gt_rbtree_xtab+i, &nodecreated, &root, cmp_fn, NULL);
-    gt_rbtree_search(tree, gt_rbtree_xtab+i, &nodecreated);
-    gt_ensure(had_err, gt_rbtree_find(tree, gt_rbtree_xtab+i));
-  }
-
-  for (i = 0; !had_err && i < GT_RBTREE_PASSES; ++i) {
-    unsigned long pos = gt_rand_max((unsigned long) GT_RBTREE_SIZE);
-    unsigned long *val1, *val2;
-    val1 = gt_rbtree_search(tree, gt_rbtree_xtab+pos, &nodecreated);
-    gt_ensure(had_err, !nodecreated);
-    val2 = gt_rbt_search(gt_rbtree_xtab+pos, &nodecreated, &root, cmp_fn, NULL);
-    gt_ensure(had_err, !nodecreated);
-
-    gt_ensure(had_err, *val1 == *val2);
-    val2 = gt_rbtree_find(tree, gt_rbtree_xtab+pos);
-    gt_ensure(had_err, *val1 == *val2);
-
-    val1 = gt_rbt_maximumkey(root);
-    val2 = gt_rbtree_maximum_key(tree);
-    gt_ensure(had_err, *val1 == *val2);
-
-    val1 = gt_rbt_minimumkey(root);
-    val2 = gt_rbtree_minimum_key(tree);
-    gt_ensure(had_err, *val1 == *val2);
-
-    val1 = gt_rbt_nextkey(gt_rbtree_xtab+pos, root, cmp_fn, NULL);
-    val2 = gt_rbtree_next_key(tree, gt_rbtree_xtab+pos, nrbt_cmp_fn, NULL);
-    if (!val1 || !val2) {
-      gt_ensure(had_err, val1 == val2);
-    } else {
-      gt_ensure(had_err, *val1 == *val2);
-    }
-
-    val1 = gt_rbt_previouskey(gt_rbtree_xtab+pos, root, cmp_fn, NULL);
-    val2 = gt_rbtree_previous_key(tree, gt_rbtree_xtab+pos, nrbt_cmp_fn, NULL);
-    if (!val1 || !val2) {
-      gt_ensure(had_err, val1 == val2);
-    } else {
-      gt_ensure(had_err, *val1 == *val2);
-    }
-
-    val1 = gt_rbt_nextequalkey(gt_rbtree_xtab+pos, root, cmp_fn, NULL);
-    val2 = gt_rbtree_next_equal_key(tree, gt_rbtree_xtab+pos, nrbt_cmp_fn,
-                                    NULL);
-    if (!val1 || !val2) {
-      gt_ensure(had_err, val1 == val2);
-    } else {
-      gt_ensure(had_err, *val1 == *val2);
-    }
-
-    val1 = gt_rbt_previousequalkey(gt_rbtree_xtab+pos, root, cmp_fn, NULL);
-    val2 = gt_rbtree_previous_equal_key(tree, gt_rbtree_xtab+pos, nrbt_cmp_fn,
-                                        NULL);
-    if (!val1 || !val2) {
-      gt_ensure(had_err, val1 == val2);
-    } else {
-      gt_ensure(had_err, *val1 == *val2);
-    }
-  }
-  gt_rbtree_delete(tree);
-  return had_err;
-}
-*/
