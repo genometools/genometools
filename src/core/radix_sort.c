@@ -53,8 +53,8 @@ static void gt_radix_showbytewise(unsigned long value)
 }
 #endif
 
-/* if sorting for table large than UINT_MAX is required, set the following
-   type to unsigned long */
+/* if sorting for tables larger than UINT_MAX is required, set the following
+   type to unsigned long. */
 
 typedef unsigned int Countbasetype;
 
@@ -63,12 +63,11 @@ struct GtRadixsortinfo
   Countbasetype **count_tab;
   unsigned long *arr, *temp;
   GtUlongPair *arrpair, *temppair;
-  bool ownarr, pair;
   unsigned long maxlen, tempalloc;
   unsigned int rparts;
-  bool withthreads;
-  GtRange *ranges;
   size_t basesize, maxvalue;
+  bool withthreads, ownarr, pair;
+  GtRange *ranges;
   GtRadixreader *radixreader;
 };
 
@@ -222,10 +221,10 @@ size_t gt_radixsort_size(const GtRadixsortinfo *radixsort)
          elemsize * (radixsort->maxlen + radixsort->tempalloc);
 }
 
-unsigned long gt_radixsort_estimate_num_of_entries (bool pair,
-                                                    unsigned int rparts,
-                                                    size_t memlimit,
-                                                    bool withthreads)
+static unsigned long gt_radixsort_max_num_of_entries (bool pair,
+                                                      unsigned int rparts,
+                                                      bool withthreads,
+                                                      size_t memlimit)
 {
   double factor;
 
@@ -240,6 +239,20 @@ unsigned long gt_radixsort_estimate_num_of_entries (bool pair,
     factor = 2.0;
   }
   return (unsigned long) memlimit/(gt_radixsort_elemsize(pair) * factor);
+}
+
+unsigned long gt_radixsort_max_num_of_entries_ulong(unsigned int rparts,
+                                                    bool withthreads,
+                                                    size_t memlimit)
+{
+  return gt_radixsort_max_num_of_entries (false,rparts,withthreads,memlimit);
+}
+
+unsigned long gt_radixsort_max_num_of_entries_ulongpair(unsigned int rparts,
+                                                        bool withthreads,
+                                                        size_t memlimit)
+{
+  return gt_radixsort_max_num_of_entries (true,rparts,withthreads,memlimit);
 }
 
 void gt_radixsort_delete(GtRadixsortinfo *radixsort)

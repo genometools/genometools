@@ -40,6 +40,8 @@ env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_encseq'
 
 env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_suffixerator'
 
+env -i GT_MEM_BOOKKEEPING=on ${program} -keywords 'gt_encseq2spm'
+
 env -i GT_MEM_BOOKKEEPING=on \
        ${program} -keywords 'gt_suffixerator and gttestdata' \
        -gttestdata ${GTTESTDATA}

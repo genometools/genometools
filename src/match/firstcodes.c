@@ -1219,14 +1219,13 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
       return -1;
     } else
     {
-      const bool pair = false;
       size_t remainspace = (size_t) maximumspace -
                            (gt_firstcodes_spacelog_total(fci->fcsl) +
                             phase2extra);
 
-      fci->buf.allocated = gt_radixsort_estimate_num_of_entries(pair,radixparts,
-                                                                remainspace,
-                                                                withthreads);
+      fci->buf.allocated = gt_radixsort_max_num_of_entries_ulong(radixparts,
+                                                                 withthreads,
+                                                                 remainspace);
       if (fci->buf.allocated < fci->differentcodes/16UL)
       {
         fci->buf.allocated = fci->differentcodes/16UL;
@@ -1236,12 +1235,11 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
   {
     if (numofparts == 0)
     {
-      const bool pair = false;
-
-      fci->buf.allocated = gt_radixsort_estimate_num_of_entries(
-                                   pair,radixparts,
-                                   gt_firstcodes_spacelog_total(fci->fcsl)/7UL,
-                                   withthreads);
+      fci->buf.allocated
+        = gt_radixsort_max_num_of_entries_ulong(radixparts,
+                                                withthreads,
+                                                gt_firstcodes_spacelog_total(
+                                                      fci->fcsl)/7UL);
     } else
     {
       fci->buf.allocated = fci->differentcodes/5;
@@ -1453,11 +1451,9 @@ static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
 
     if ((unsigned long) used < maximumspace)
     {
-      const bool pair = true;
       fci->buf.allocated
-        = gt_radixsort_estimate_num_of_entries(pair,radixparts,
-                                               (size_t) maximumspace - used,
-                                               withthreads);
+        = gt_radixsort_max_num_of_entries_ulongpair(radixparts,withthreads,
+                                               (size_t) maximumspace - used);
     } else
     {
       fci->buf.allocated /= 4UL;
