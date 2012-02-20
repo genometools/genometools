@@ -15,6 +15,8 @@ typedef struct GtRMQ GtRMQ;
 GtRMQ*        gt_rmq_new(const unsigned long *data, unsigned long size);
 unsigned long gt_rmq_find_min_index(const GtRMQ *rmq, unsigned long start,
                                     unsigned long end);
+unsigned long gt_rmq_find_min_value(const GtRMQ *rmq, unsigned long start,
+                                    unsigned long end);
 void          gt_rmq_delete(GtRMQ *rmq);
 
 int           gt_rmq_unit_test(GtError *err);

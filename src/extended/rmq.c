@@ -177,13 +177,17 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
                                                 unsigned long end)
 {
   unsigned long i = start,
-                j = end;
-  unsigned long mb_i = rmq_microblock(rmq, i); /* i's microblock */
-  unsigned long mb_j = rmq_microblock(rmq, j); /* j's microblock */
-  unsigned long min, min_i, min_j;         /* min: to be returned */
-  unsigned long s_mi = mb_i * (rmq->s);    /* start of i's microblock */
-  unsigned long i_pos = i - s_mi;          /* pos. of i in its microblock */
+                j = end,
+                mb_i,               /* i's microblock */
+                mb_j,               /* j's microblock */
+                min, min_i, min_j,  /* min: to be returned */
+                s_mi,               /* start of i's microblock */
+                i_pos;              /* pos. of i in its microblock */
 
+  mb_j = rmq_microblock(rmq, j);
+  mb_i = rmq_microblock(rmq, i);
+  s_mi = mb_i * rmq->s;
+  i_pos = i - s_mi;
   if (mb_i == mb_j) { /*  only one microblock-query */
     min_i = rmq_clearbits(rmq->Prec[rmq->type[mb_i]][j-s_mi], i_pos);
     min = min_i == 0 ? j : s_mi + lsb(min_i);
@@ -198,8 +202,9 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
     /* left in-microblock-query */
     min = min_i == 0 ? s_mi + rmq->s - 1 : s_mi + lsb(min_i);
     /*  right in-microblock-query */
-    min_j = rmq->Prec[rmq->type[mb_j]][j_pos] == 0 ?
-      j : s_mj + lsb(rmq->Prec[rmq->type[mb_j]][j_pos]);
+    min_j = rmq->Prec[rmq->type[mb_j]][j_pos] == 0
+               ? j
+               : s_mj + lsb(rmq->Prec[rmq->type[mb_j]][j_pos]);
     if (rmq->arr_ptr[min_j] < rmq->arr_ptr[min]) min = min_j;
 
     if (mb_j > mb_i + 1) { /*  otherwise we're done! */
@@ -285,11 +290,15 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
                                     unsigned long start,
                                     unsigned long end)
 {
+  gt_assert(rmq->arr_ptr != NULL && start <= end && end < rmq->n);
+  if (start == end)
+  {
+    return end;
+  }
   if (rmq->naive_impl)
   {
     unsigned long minval, idx, ret;
 
-    gt_assert(rmq->arr_ptr != NULL && start < end && end < rmq->nb);
     minval = rmq->arr_ptr[start];
     ret = start;
     for (idx = start+1; idx <= end; idx++)
@@ -305,6 +314,12 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
   {
     return gt_rmq_find_min_index_fast(rmq,start,end);
   }
+}
+
+unsigned long gt_rmq_find_min_value(const GtRMQ *rmq, unsigned long start,
+                                    unsigned long end)
+{
+  return rmq->arr_ptr[gt_rmq_find_min_index(rmq,start,end)];
 }
 
 GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)

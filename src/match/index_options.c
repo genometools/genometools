@@ -173,12 +173,6 @@ static int gt_index_options_checkandsetoptions(void *oip, GtError *err)
   gt_assert(oi != NULL && oi->type != GT_INDEX_OPTIONS_UNDEFINED);
   gt_error_check(err);
 
-  if (!had_err && oi->sfxstrategy.differencecover > 0
-      && oi->optionoutlcptab != NULL
-      && gt_option_is_set(oi->optionoutlcptab))
-  {
-    printf("# WARNING: lcp table is not yet correct if option -dc is used\n");
-  }
   if (!had_err && oi->type == GT_INDEX_OPTIONS_PACKED) {
 #ifndef S_SPLINT_S
     gt_computePackedIndexDefaults(&oi->bwtIdxParams, BWTBaseFeatures);

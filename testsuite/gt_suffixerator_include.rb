@@ -59,10 +59,12 @@ def checkdc(filelist)
   filearg=flattenfilelist(filelist)
   run_test "#{$bin}gt suffixerator -v -pl -dc 64 -dccheck " +
            "-lcp -suf -ssp -tis -indexname sfx -db " + flattenfilelist(filelist)
-  run_test "#{$bin}gt dev sfxmap -suf -tis -ssp -v -esa sfx",
+  run_test "#{$bin}gt dev sfxmap -lcp -suf -tis -ssp -v -esa sfx",
            :maxtime => 600
-  run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 -dccheck " +
+  run_test "#{$bin}gt suffixerator -v -pl -parts 3 -dc 64 " +
            "-lcp -suf -tis -indexname sfx3 -db " + flattenfilelist(filelist)
+  run_test "#{$bin}gt dev sfxmap -lcp -suf -ssp -v -esa sfx3",
+           :maxtime => 600
   run "diff sfx3.suf sfx.suf"
 end
 

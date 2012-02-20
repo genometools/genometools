@@ -444,7 +444,7 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       printf("cmp %lu and %lu: retval = %d, lcplen = %lu\n",
              sval1, sval2, retval, (unsigned long) lcplen);
 #endif
-      if (bsr->tableoflcpvalues != NULL && retval != 0)
+      if (bsr->tableoflcpvalues != NULL)
       {
         if (pl < pm && retval > 0)
         {
