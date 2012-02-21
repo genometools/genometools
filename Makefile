@@ -404,6 +404,15 @@ else
   OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
+  CAIRO_FILTER_OUT:=src/gtlua/annotationsketch_lua.c \
+                    src/gtlua/canvas_lua.c \
+                    src/gtlua/diagram_lua.c \
+                    src/gtlua/feature_index_lua.c \
+                    src/gtlua/feature_stream_lua.c \
+                    src/gtlua/feature_visitor_lua.c \
+                    src/gtlua/image_info_lua.c \
+                    src/gtlua/layout_lua.c
+
 endif
 
 ifeq ($(threads),yes)
@@ -413,14 +422,16 @@ ifeq ($(threads),yes)
 endif
 
 # the GenomeTools library
-LIBGENOMETOOLS_PRESRC:=$(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c))
+LIBGENOMETOOLS_PRESRC:=$(filter-out src/ltr/pdom.c,\
+                   $(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c)))
+# remove AnnotationSketch-only bindings
+LIBGENOMETOOLS_PRESRC:=$(filter-out $(CAIRO_FILTER_OUT),\
+                         $(LIBGENOMETOOLS_PRESRC))
 ifeq ($(amalgamation),yes)
-  LIBGENOMETOOLS_SRC:=obj/amalgamation.c src/ltr/pdom.c
-  LIBGENOMETOOLS_PRESRC:=$(filter-out src/ltr/pdom.c,$(LIBGENOMETOOLS_PRESRC))
+  LIBGENOMETOOLS_SRC:=obj/amalgamation.c
 else
   LIBGENOMETOOLS_SRC:=$(LIBGENOMETOOLS_PRESRC)
 endif
-
 LIBGENOMETOOLS_OBJ:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.o)
 LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 
@@ -434,7 +445,8 @@ ifneq ($(useshared),yes)
 endif
 
 ifeq ($(with-hmmer),yes)
-  LIBGENOMETOOLS_OBJ += $(HMMER_OBJ) $(EASEL_OBJ)
+  LIBGENOMETOOLS_SRC += src/ltr/pdom.c
+  LIBGENOMETOOLS_OBJ += $(HMMER_OBJ) $(EASEL_OBJ) obj/src/ltr/pdom.o
 endif
 
 GT_CFLAGS_NO_WERROR:=$(GT_CFLAGS) -w
