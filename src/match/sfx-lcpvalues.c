@@ -377,20 +377,20 @@ static void outlcpvalues(Lcpsubtab *lcpsubtab,
   }
 }
 
-#define NUMBEROFZEROS 1024
-
 static unsigned long outmany0lcpvalues(unsigned long many,
                                        FILE *outfplcptab)
 {
   unsigned long i, countout;
-  uint8_t outvalues[NUMBEROFZEROS] = {0};
+#define GT_LCPBUF_NUMBEROFZEROS 1024
+  uint8_t outvalues[GT_LCPBUF_NUMBEROFZEROS] = {0};
 
-  countout = many/NUMBEROFZEROS;
+  countout = many/GT_LCPBUF_NUMBEROFZEROS;
   for (i=0; i<countout; i++)
   {
-    gt_xfwrite(outvalues,sizeof (uint8_t),(size_t) NUMBEROFZEROS,outfplcptab);
+    gt_xfwrite(outvalues,sizeof (uint8_t),(size_t) GT_LCPBUF_NUMBEROFZEROS,
+               outfplcptab);
   }
-  gt_xfwrite(outvalues,sizeof (uint8_t),(size_t) many % NUMBEROFZEROS,
+  gt_xfwrite(outvalues,sizeof (uint8_t),(size_t) many % GT_LCPBUF_NUMBEROFZEROS,
              outfplcptab);
   return many;
 }
