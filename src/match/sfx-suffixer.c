@@ -1365,7 +1365,7 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
       if (sfi->outlcpinfo != NULL)
       {
         sfi->outlcpinfoforsample
-          = gt_Outlcpinfo_new(NULL,sfi->numofchars,0,false,err);
+          = gt_Outlcpinfo_new(NULL,sfi->numofchars,0,false,NULL,NULL,err);
         if (sfi->outlcpinfoforsample == NULL)
         {
           haserr = true;

@@ -8,6 +8,6 @@ fi
 
 cd testsuite
 
-./testsuite.rb -gttestdata ${GTTESTDATA} -keywords ${1}
+env -i ./testsuite.rb -gttestdata ${GTTESTDATA} -keywords ${1}
 
 cd ..

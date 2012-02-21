@@ -43,8 +43,15 @@ typedef struct
 
 typedef struct
 {
+  GtFinalProcessBucket final_process_bucket;
+  void *final_process_bucket_info;
+} GtProcesslcpvalues;
+
+typedef struct
+{
   GtLcpvalues tableoflcpvalues;
   Lcpoutput2file *lcp2file;
+  GtProcesslcpvalues *lcpprocess;
   double lcptabsum;
   GtDiscDistri *distlcpvalues;
 } Lcpsubtab;
@@ -202,6 +209,8 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                                 unsigned int numofchars,
                                 unsigned int prefixlength,
                                 bool withdistribution,
+                                GtFinalProcessBucket final_process_bucket,
+                                void *final_process_bucket_info,
                                 GtError *err)
 {
   bool haserr = false;
@@ -220,8 +229,21 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   if (indexname == NULL)
   {
     outlcpinfo->lcpsubtab.lcp2file = NULL;
+    if (final_process_bucket != NULL)
+    {
+      outlcpinfo->lcpsubtab.lcpprocess
+        = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.lcpprocess));
+      outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket
+        = final_process_bucket;
+      outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket_info
+        = final_process_bucket_info;
+    } else
+    {
+      outlcpinfo->lcpsubtab.lcpprocess = NULL;
+    }
   } else
   {
+    outlcpinfo->lcpsubtab.lcpprocess = NULL;
     outlcpinfo->lcpsubtab.lcp2file
       = gt_malloc(sizeof (*outlcpinfo->lcpsubtab.lcp2file));
     outlcpinfo->sizeofinfo += sizeof (*outlcpinfo->lcpsubtab.lcp2file);
@@ -266,6 +288,11 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo->previoussuffix.prefixindex = 0;
   outlcpinfo->previoussuffix.defined = false;
   outlcpinfo->previousbucketwasempty = false;
+  outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues = NULL;
+  outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = 0;
+#ifndef NDEBUG
+  outlcpinfo->lcpsubtab.tableoflcpvalues.isset = NULL;
+#endif
   if (haserr)
   {
     gt_free(outlcpinfo);
@@ -280,6 +307,35 @@ size_t gt_Outlcpinfo_size(const GtOutlcpinfo *outlcpinfo)
   return outlcpinfo->sizeofinfo;
 }
 
+static size_t gt_tableoflcpvalues_realloc(GtLcpvalues *tableoflcpvalues,
+                                          unsigned long numoflcpvalues)
+{
+  if (numoflcpvalues > tableoflcpvalues->numofentries)
+  {
+    size_t sizeofinfo;
+
+    tableoflcpvalues->bucketoflcpvalues
+      = gt_realloc(tableoflcpvalues->bucketoflcpvalues,
+                   sizeof (*tableoflcpvalues->bucketoflcpvalues) *
+                   numoflcpvalues);
+    sizeofinfo = sizeof (*tableoflcpvalues->bucketoflcpvalues) *
+                         (numoflcpvalues - tableoflcpvalues->numofentries);
+#ifndef NDEBUG
+    GT_INITBITTABGENERIC(tableoflcpvalues->isset,
+                         tableoflcpvalues->isset,
+                         numoflcpvalues);
+#endif
+    sizeofinfo += GT_NUMOFINTSFORBITS(numoflcpvalues -
+                                      tableoflcpvalues->numofentries)
+                  * sizeof (GtBitsequence);
+    tableoflcpvalues->numoflargelcpvalues = 0;
+    tableoflcpvalues->numofentries = numoflcpvalues;
+    tableoflcpvalues->lcptaboffset = 0;
+    return sizeofinfo;
+  }
+  return 0;
+}
+
 void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
                           unsigned int numofchars,
                           unsigned int prefixlength,
@@ -287,7 +343,6 @@ void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
 {
   if (outlcpinfo != NULL)
   {
-    size_t sizeofbucketoflcpvalues;
     if (prefixlength > 0)
     {
       outlcpinfo->turnwheel = gt_turningwheel_new(prefixlength,numofchars);
@@ -296,20 +351,9 @@ void gt_Outlcpinfo_reinit(GtOutlcpinfo *outlcpinfo,
     {
       outlcpinfo->turnwheel = NULL;
     }
-    sizeofbucketoflcpvalues = sizeof (*outlcpinfo->lcpsubtab.tableoflcpvalues.
-                                      bucketoflcpvalues) * numoflcpvalues;
-    outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues
-      = gt_malloc(sizeofbucketoflcpvalues);
-    outlcpinfo->sizeofinfo += sizeofbucketoflcpvalues;
-#ifndef NDEBUG
-    GT_INITBITTAB(outlcpinfo->lcpsubtab.tableoflcpvalues.isset,
-                  numoflcpvalues);
-#endif
-    outlcpinfo->sizeofinfo += GT_NUMOFINTSFORBITS(numoflcpvalues) *
-                              sizeof (GtBitsequence);
-    outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
-    outlcpinfo->lcpsubtab.tableoflcpvalues.numofentries = numoflcpvalues;
-    outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset = 0;
+    outlcpinfo->sizeofinfo
+      += gt_tableoflcpvalues_realloc(&outlcpinfo->lcpsubtab.tableoflcpvalues,
+                                     numoflcpvalues);
   }
 }
 
@@ -431,6 +475,7 @@ void gt_Outlcpinfo_delete(GtOutlcpinfo *outlcpinfo)
     gt_free(outlcpinfo->lcpsubtab.tableoflcpvalues.isset);
 #endif
   }
+  gt_free(outlcpinfo->lcpsubtab.lcpprocess);
   outlcpinfo->lcpsubtab.tableoflcpvalues.bucketoflcpvalues = NULL;
 #ifndef NDEBUG
   outlcpinfo->lcpsubtab.tableoflcpvalues.isset = NULL;
@@ -492,14 +537,17 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
     }
     startpos1 = startpos2;
   }
-  printf("totalcmpmissing = %lu(avg=%.2f)\n",
-         totalcmpmissing,(double) totalcmpmissing/effectivesamplesize);
+  /*printf("totalcmpmissing = %lu(avg=%.2f)\n",
+         totalcmpmissing,(double) totalcmpmissing/effectivesamplesize);*/
 }
 
 unsigned long gt_Outlcpinfo_numoflargelcpvalues(const GtOutlcpinfo *outlcpinfo)
 {
-  gt_assert(outlcpinfo->lcpsubtab.lcp2file != NULL);
-  return outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues;
+  if (outlcpinfo->lcpsubtab.lcp2file != NULL)
+  {
+    return outlcpinfo->lcpsubtab.lcp2file->totalnumoflargelcpvalues;
+  }
+  return 0;
 }
 
 double gt_Outlcpinfo_lcptabsum(const GtOutlcpinfo *outlcpinfo)
@@ -516,8 +564,11 @@ void gt_Outlcpinfo_numsuffixes2output_set(GtOutlcpinfo *outlcpinfo,
 
 unsigned long gt_Outlcpinfo_maxbranchdepth(const GtOutlcpinfo *outlcpinfo)
 {
-  gt_assert(outlcpinfo->lcpsubtab.lcp2file != NULL);
-  return outlcpinfo->lcpsubtab.lcp2file->maxbranchdepth;
+  if (outlcpinfo->lcpsubtab.lcp2file != NULL)
+  {
+    return outlcpinfo->lcpsubtab.lcp2file->maxbranchdepth;
+  }
+  return 0;
 }
 
 void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
@@ -526,8 +577,11 @@ void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
 {
   if (outlcpinfo != NULL)
   {
-    outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
-    if (outlcpinfo->lcpsubtab.lcp2file == NULL)
+    if (outlcpinfo->lcpsubtab.lcp2file != NULL ||
+        outlcpinfo->lcpsubtab.lcpprocess != NULL)
+    {
+      outlcpinfo->lcpsubtab.tableoflcpvalues.numoflargelcpvalues = 0;
+    } else
     {
       outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset = lcptaboffset;
     }
@@ -591,6 +645,18 @@ void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
       outlcpvalues(&outlcpinfo->lcpsubtab,
                    bucketspec->nonspecialsinbucket,
                    bucketspec->left);
+    } else
+    {
+      if (outlcpinfo->lcpsubtab.lcpprocess != NULL)
+      {
+        outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket(
+            outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket_info,
+            NULL,
+            tableoflcpvalues,
+            0,
+            bucketspec->nonspecialsinbucket,
+            bucketspec->left);
+      }
     }
     /* previoussuffix becomes last nonspecial element in current bucket */
     outlcpinfo->previoussuffix.code = code;
@@ -639,6 +705,18 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
       {
         outsmalllcpvalues(outlcpinfo->lcpsubtab.lcp2file,
                           bucketspec->specialsinbucket);
+      } else
+      {
+        if (outlcpinfo->lcpsubtab.lcpprocess != NULL)
+        {
+          outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket(
+              outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket_info,
+              NULL,
+              &outlcpinfo->lcpsubtab.tableoflcpvalues,
+              bucketspec->nonspecialsinbucket,
+              bucketspec->specialsinbucket,
+              bucketspec->left);
+        }
       }
       /* there is at least one special element: this is the last element
          in the bucket, and thus the previoussuffix for the next round */
@@ -688,7 +766,11 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
     {
       outlcpinfo->previousbucketwasempty = false;
     }
-    if (outlcpinfo->lcpsubtab.lcp2file == NULL)
+    if (outlcpinfo->lcpsubtab.lcp2file != NULL ||
+        outlcpinfo->lcpsubtab.lcpprocess != NULL)
+    {
+      gt_assert(outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset == 0);
+    } else
     {
       outlcpinfo->lcpsubtab.tableoflcpvalues.lcptaboffset = 0;
     }
@@ -727,6 +809,14 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
       lcpsubtab->tableoflcpvalues.numofentries
         = (unsigned long) lcpsubtab->lcp2file->sizereservoir/
           sizeof (*lcpsubtab->tableoflcpvalues.bucketoflcpvalues);
+    }
+  } else
+  {
+    if (lcpsubtab->lcpprocess != NULL)
+    {
+      outlcpinfo->sizeofinfo
+        += gt_tableoflcpvalues_realloc(&lcpsubtab->tableoflcpvalues,
+                                       gt_bcktab_maxbucketsize(bcktab));
     }
   }
   return &lcpsubtab->tableoflcpvalues;

@@ -30,6 +30,12 @@
 #include "sfx-lcpvalues.h"
 #include "sfx-suffixgetset.h"
 
+typedef void (*GtCompletelargelcpvalues) (void *,
+                                         const GtSuffixsortspace *,
+                                         GtLcpvalues *,
+                                         unsigned long,
+                                         unsigned long);
+
 void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        unsigned long numberofsuffixes,
                        GtBucketspec2 *bucketspec2,
@@ -43,8 +49,7 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        GtOutlcpinfo *outlcpinfo,
                        unsigned int sortmaxdepth,
                        const Sfxstrategy *sfxstrategy,
-                       GtProcessunsortedsuffixrange
-                         processunsortedsuffixrange,
+                       GtProcessunsortedsuffixrange processunsortedsuffixrange,
                        GtCompletelargelcpvalues completelargelcpvalues,
                        void *processunsortedsuffixrangeinfo,
                        unsigned long long *bucketiterstep,

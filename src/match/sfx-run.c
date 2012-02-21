@@ -96,6 +96,8 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_index_options_lcpdist_value(so->idxopts),
+                          NULL, /* XXX modify this */
+                          NULL,
                           err);
     if (outfileinfo->outlcpinfo == NULL)
     {

@@ -1310,6 +1310,11 @@ size_t gt_bcktab_sizeforlcpvalues(const GtBcktab *bcktab)
   return MAX(sizelcps,sizespeciallcps);
 }
 
+unsigned long gt_bcktab_maxbucketsize(const GtBcktab *bcktab)
+{
+  return bcktab->maxbucketinfo.maxbucketsize;
+}
+
 GtCodetype gt_bcktab_findfirstlarger(const GtBcktab *bcktab,
                                      unsigned long suftaboffset)
 {
