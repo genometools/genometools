@@ -888,7 +888,7 @@ void gt_diagram_reset_track_selector_func(GtDiagram *diagram)
   gt_rwlock_unlock(diagram->lock);
 }
 
-GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram, GtError *err)
+GtHashmap* gt_diagram_get_blocks(GtDiagram *diagram, GtError *err)
 {
   GtHashmap *ret;
   int had_err = 0;

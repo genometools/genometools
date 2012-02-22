@@ -24,7 +24,7 @@
 #include "core/error.h"
 #include "core/hashmap.h"
 
-GtHashmap* gt_diagram_get_blocks(const GtDiagram *diagram, GtError *err);
+GtHashmap* gt_diagram_get_blocks(GtDiagram *diagram, GtError *err);
 GtArray*   gt_diagram_get_custom_tracks(const GtDiagram *diagram);
 void       gt_diagram_reset(GtDiagram *diagram);
 int        gt_diagram_unit_test(GtError*);
