@@ -36,7 +36,7 @@ EXP_CFLAGS:=$(CFLAGS)
 EXP_LDFLAGS:=$(LDFLAGS)
 EXP_CXXFLAGS:=$(CXXFLAGS)
 EXP_CPPFLAGS:=$(CPPFLAGS)
-EXP_LDLIBS:=$(LIBS) -lm -ldl
+EXP_LDLIBS:=$(LIBS) -lm
 # ...while those starting with GT_ are for internal purposes only
 GT_CFLAGS:=-g -Wall -Wunused-parameter -pipe -fPIC -Wpointer-arith
 # expat needs -DHAVE_MEMMOVE
@@ -328,7 +328,9 @@ ifeq ($(SYSTEM),Darwin)
   EXT_FLAGS += -DLUA_DL_DYLD
 else
   EXT_FLAGS += -DLUA_DL_DLOPEN
-  LUA_LDLIB := -ldl
+  ifneq ($(SYSTEM),FreeBSD)
+    LUA_LDLIB := -ldl
+  endif
 endif
 
 ifeq ($(64bit),yes)
@@ -610,7 +612,7 @@ $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm -ldl -o $@
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm $(LUA_LDLIB) -o $@
 
 obj/gt_config.h: VERSION
 	@echo '[create $@]'
