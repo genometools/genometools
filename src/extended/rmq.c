@@ -168,6 +168,8 @@ static inline unsigned long rmq_log2fast(unsigned long v)
   return (unsigned long) c;
 }
 
+#define GT_LOG2(v) (log(v) / M_LN2)
+
 static unsigned char rmq_clearbits(unsigned char n, unsigned long x)
 {
   return n & (unsigned char) (255 << x);
@@ -438,14 +440,14 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
   gt_free(gstack);
 
   /*  space for out-of-block- and out-of-superblock-queries: */
-  rmq->M_depth =(unsigned long) floor(log2(((double) rmq->sprimeprime
+  rmq->M_depth =(unsigned long) floor(GT_LOG2(((double) rmq->sprimeprime
                                               / (double) rmq->sprime)));
   rmq->M = gt_calloc((size_t) rmq->M_depth, sizeof (unsigned char*));
   rmq->M[0] = gt_calloc((size_t) rmq->nb, sizeof (unsigned char));
 #ifdef MEM_COUNT
   mem += sizeof (unsigned char)*rmq->nb;
 #endif
-  rmq->Mprime_depth = (unsigned long) floor(log2((double) rmq->nsb)) + 1;
+  rmq->Mprime_depth = (unsigned long) floor(GT_LOG2((double) rmq->nsb)) + 1;
   rmq->Mprime = gt_calloc((size_t) rmq->Mprime_depth, sizeof (unsigned long*));
   rmq->Mprime[0] = gt_calloc((size_t) rmq->nsb, sizeof (unsigned long));
 #ifdef MEM_COUNT
