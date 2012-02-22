@@ -50,18 +50,12 @@ static int gt_array_in_stream_next(GtNodeStream *gs, GtGenomeNode **gn,
   return had_err;
 }
 
-static void gt_array_in_stream_free(GtNodeStream *gs)
-{
-  GtArrayInStream *ais;
-  ais = gt_array_in_stream_cast(gs);
-}
-
 const GtNodeStreamClass* gt_array_in_stream_class(void)
 {
   static const GtNodeStreamClass *gsc = NULL;
   if (!gsc)
     gsc = gt_node_stream_class_new(sizeof (GtArrayInStream),
-                                   gt_array_in_stream_free,
+                                   NULL,
                                    gt_array_in_stream_next);
   return gsc;
 }

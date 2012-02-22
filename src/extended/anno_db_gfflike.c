@@ -641,8 +641,8 @@ DEFINE_HASHMAP(unsigned long, ul, GtFeatureNode*, node, gt_ht_ul_elem_hash,
                inline)
 
 int gt_feature_index_gfflike_add_region_node(GtFeatureIndex *gfi,
-                                         GtRegionNode *rn,
-                                         GtError *err)
+                                             GtRegionNode *rn,
+                                             GtError *err)
 {
   char *seqid;
   GtFeatureIndexGFFlike *fi;

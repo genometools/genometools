@@ -259,36 +259,38 @@ GT_UNUSED static int gt_cluster_matches_gap(GtArray *matches,
 
   num_of_matches = gt_array_size(matches);
   if (gt_clustered_set_num_of_elements(cs, err) != num_of_matches) {
-    had_err = 1;
+    had_err = -1;
     gt_error_set(err,
                  "number of matches (%lu) unequals number of elements in"
                  "clustered set (%lu)",
                  num_of_matches, gt_clustered_set_num_of_elements(cs, err));
   }
-  matchedgetab.edges = gt_array_new(sizeof (GtMatchEdge));
-  matchedgetab.num_of_edges = 0;
+  if (!had_err) {
+    matchedgetab.edges = gt_array_new(sizeof (GtMatchEdge));
+    matchedgetab.num_of_edges = 0;
 
-  mref = gt_mirror_and_sort_matches(matches);
+    mref = gt_mirror_and_sort_matches(matches);
 
-  for (i = 0; i < (2 * (num_of_matches) - 1); i++) {
-    for (j = i + 1; j < (2 * num_of_matches); j++) {
-      match = *(GtMatch**) gt_array_get(matches, mref[i].matchnum);
-      gt_match_get_range_seq1(match, &range);
-      length = gt_range_length(&range);
-      gap_size = mref[j].startpos - mref[i].startpos + length;
+    for (i = 0; i < (2 * (num_of_matches) - 1); i++) {
+      for (j = i + 1; j < (2 * num_of_matches); j++) {
+        match = *(GtMatch**) gt_array_get(matches, mref[i].matchnum);
+        gt_match_get_range_seq1(match, &range);
+        length = gt_range_length(&range);
+        gap_size = mref[j].startpos - mref[i].startpos + length;
 
-      if (gap_size > max_gap_size)
-        break;
-      if (mref[i].matchnum != mref[j].matchnum) {
-        STORECLUSTEREDGEG (mref[i].matchnum, mref[j].matchnum, gap_size);
+        if (gap_size > max_gap_size)
+          break;
+        if (mref[i].matchnum != mref[j].matchnum) {
+          STORECLUSTEREDGEG (mref[i].matchnum, mref[j].matchnum, gap_size);
+        }
       }
     }
+    if (gt_cluster_matches(cs, &matchedgetab, err) != 0)
+      had_err = -1;
+    gt_array_delete(matchedgetab.edges);
+    gt_free(mref);
   }
-  if (gt_cluster_matches(cs, &matchedgetab, err) != 0)
-    return -1;
-  gt_array_delete(matchedgetab.edges);
-  gt_free(mref);
-  return 0;
+  return had_err;
 }
 
 static void free_hash(void *elem)

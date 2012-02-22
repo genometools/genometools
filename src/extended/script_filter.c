@@ -17,6 +17,7 @@
 
 #include "core/ma.h"
 #include "core/symbol.h"
+#include "core/unused_api.h"
 #include "extended/script_filter.h"
 #include "gtlua/genome_node_lua.h"
 #include "gtlua/gt_lua.h"
@@ -192,7 +193,7 @@ bool gt_script_filter_validate(GtScriptFilter *script_filter, GtError *err)
   const char *result;
 
 #ifndef NDEBUG
-  int stack_size;
+  GT_UNUSED int stack_size;
 #endif
   gt_assert(script_filter);
   gt_error_check(err);

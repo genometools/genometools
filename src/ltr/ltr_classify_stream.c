@@ -57,8 +57,7 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
   const char *clid1,
              *clid2,
              *fnt;
-  bool broken = false,
-       compatible = false,
+  bool compatible = false,
        seen_a = false,
        first_ltr = true;
   unsigned long clnum1,
@@ -122,7 +121,6 @@ static bool ltr_candidates_compatible(GtGenomeNode *candidate1,
                (clnum1 != GT_UNDEF_ULONG && clnum2 == GT_UNDEF_ULONG))
         compatible = true;
       else if (clnum1 != clnum2) {
-        broken = true;
         compatible = false;
         break;
       }
