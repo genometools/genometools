@@ -283,7 +283,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                     &idxo->sfxstrategy.differencecover,
                                     0,
                                     4U);
-  gt_option_argument_is_optional(idxo->optiondifferencecover);
   gt_option_parser_add_option(op, idxo->optiondifferencecover);
 
   idxo->optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
@@ -446,13 +445,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_parser_add_option(op, idxo->option);
 
   gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
-  /* XXX
-  if (idxo->optionoutlcptab != NULL)
-  {
-    gt_option_exclude(idxo->optionoutlcptab, idxo->optiondifferencecover);
-  }
-  */
-
   gt_option_parser_register_hook(op, gt_index_options_checkandsetoptions, idxo);
 
   return idxo;
