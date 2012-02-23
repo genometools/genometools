@@ -74,6 +74,16 @@ typedef struct
   GtOutlcpinfo *outlcpinfo;
 } Outfileinfo;
 
+static void gt_suflcptab2genomediff(GT_UNUSED void * data,
+                                    GT_UNUSED const GtSuffixsortspace *sssp,
+                                    GT_UNUSED GtLcpvalues *tableoflcpvalues,
+                                    GT_UNUSED unsigned long bucketoffset,
+                                    unsigned long width,
+                                    GT_UNUSED unsigned long posoffset)
+{
+  printf("genomediff (%lu)\n",width);
+}
+
 static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
                            const GtEncseq *encseq,
@@ -90,14 +100,17 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->longest.valueunsignedlong = 0;
   if (gt_index_options_outlcptab_value(so->idxopts))
   {
-    gt_assert(gt_str_get(so->indexname) != NULL);
+    bool rungenomediff = gt_index_options_genomediff_value(so->idxopts);
+
+    gt_assert(gt_str_get(so->indexname) != NULL || rungenomediff);
     outfileinfo->outlcpinfo
-      = gt_Outlcpinfo_new(gt_str_get(so->indexname),
+      = gt_Outlcpinfo_new(rungenomediff ? NULL : gt_str_get(so->indexname),
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_index_options_lcpdist_value(so->idxopts),
-                          NULL, /* XXX modify this */
-                          NULL,
+                          rungenomediff ? gt_suflcptab2genomediff
+                                        : NULL,
+                          NULL, /* possibly add structure for function */
                           err);
     if (outfileinfo->outlcpinfo == NULL)
     {
