@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "core/fa.h"
 #include "core/unused_api.h"
 #include "core/undef_api.h"
 #include "core/log.h"
@@ -41,6 +42,12 @@ typedef struct {
 
   unsigned long debug_value;
   bool quiet;
+
+  bool edit_twobitencoding;
+  GtTwobitencoding *twobitencoding;
+  unsigned long firstmirrorpos;
+  unsigned long totallength;
+  unsigned long *encseq_charcount;
 
   /* statistics */
   unsigned long ncorrections;
@@ -166,69 +173,87 @@ static int processbranchingedge_errfind(GT_UNUSED bool firstsucc,
   return 0;
 }
 
+static inline bool gt_errfind_are_all_trusted(const GtBUstate_errfind *state)
+{
+  unsigned int cnum;
+  bool alltrusted = true;
+  for (cnum = 0; cnum < state->alphasize && alltrusted; cnum++)
+    if (state->count[cnum] < state->c)
+      alltrusted = false;
+#ifdef RDJ_ERRFIND_DEBUG
+  for (cnum = 0; cnum < state->alphasize; cnum++)
+    gt_log_log("cnum %u count: %lu", cnum, state->count[cnum]);
+#endif
+  return alltrusted;
+}
+
+static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
+{
+  unsigned int cnum;
+  GtUchar trusted_char = GT_UNDEF_UCHAR;
+  unsigned long trusted_count = 0;
+  for (cnum = 0; cnum < state->alphasize && trusted_char == GT_UNDEF_UCHAR;
+      cnum++)
+  {
+    if (state->count[cnum] >= state->c && state->count[cnum] > trusted_count)
+    {
+      trusted_char = gt_encseq_get_encoded_char_nospecial(state->encseq,
+         state->kpositions[cnum * state->c], GT_READMODE_FORWARD);
+#ifdef RDJ_ERRFIND_DEBUG
+      gt_log_log("trusted_char: %c (cnum: %u), count: %lu, pos: %lu",
+          "acgt"[trusted_char], cnum, state->count[cnum],
+          state->kpositions[cnum * state->c]);
+#endif
+    }
+  }
+  return trusted_char;
+}
+
+static inline void gt_errfind_edit_encseq(unsigned long pos,
+    GtUchar trusted_char, GtBUstate_errfind *state)
+{
+  size_t codenum = pos / GT_UNITSIN2BITENC;
+  GtTwobitencoding code = state->twobitencoding[codenum];
+  size_t posincode = (GT_UNITSIN2BITENC - 1UL - (pos % GT_UNITSIN2BITENC)) << 1;
+  GtUchar currentchar = code & ((GtTwobitencoding)3 << posincode) >> posincode;
+  code = (code & (~((GtTwobitencoding)3 << posincode))) |
+    (trusted_char << posincode);
+  state->encseq_charcount[currentchar]--;
+  state->twobitencoding[codenum] = code;
+  state->encseq_charcount[trusted_char]++;
+}
+
 static int processlcpinterval_errfind(unsigned long lcp,
     GT_UNUSED GtBUinfo_errfind *info, GtBUstate_errfind *state,
     GT_UNUSED GtError *err)
 {
-  if (lcp == state->k - 1)
+  if (lcp == state->k - 1 && !gt_errfind_are_all_trusted(state))
   {
-    unsigned int cnum;
-    bool alltrusted = true;
-    for (cnum = 0; cnum < state->alphasize && alltrusted; cnum++)
-      if (state->count[cnum] < state->c)
-        alltrusted = false;
-#ifdef RDJ_ERRFIND_DEBUG
-    for (cnum = 0; cnum < state->alphasize; cnum++)
-      gt_log_log("cnum %u count: %lu", cnum, state->count[cnum]);
-#endif
-    if (!alltrusted)
+    GtUchar trusted_char = gt_errfind_trusted_char(state);
+    if (trusted_char != GT_UNDEF_UCHAR)
     {
-      unsigned int trusted_cnum = 0;
-      GtUchar trusted_char = 0;
-      unsigned long trusted_count = 0;
-      bool trusted_found = false;
-      for (cnum = 0; cnum < state->alphasize && !trusted_found; cnum++)
-      {
-        if (state->count[cnum] >= state->c &&
-            state->count[cnum] > trusted_count)
-        {
-          trusted_found = true;
-          trusted_cnum = cnum;
-          trusted_char = gt_encseq_get_encoded_char_nospecial(state->encseq,
-             state->kpositions[cnum * state->c], GT_READMODE_FORWARD);
-#ifdef RDJ_ERRFIND_DEBUG
-          gt_log_log("trusted_char: %c (cnum: %u), count: %lu, pos: %lu",
-              "acgt"[trusted_char], trusted_cnum, state->count[trusted_cnum],
-              state->kpositions[trusted_cnum * state->c]);
-#endif
-        }
-      }
-      for (cnum = 0; cnum < state->alphasize && state->count[cnum] > 0;
-          cnum++)
+      unsigned int cnum;
+      for (cnum = 0; cnum < state->alphasize && state->count[cnum] > 0; cnum++)
       {
         if (state->count[cnum] < state->c)
         {
-          unsigned long firstposindex = cnum * state->c;
           unsigned long i;
           for (i = 0; i < state->count[cnum]; i++)
           {
-            if (!state->quiet)
+            unsigned long pos = state->kpositions[cnum * state->c + i];
+            if (pos >= state->firstmirrorpos)
             {
-              printf("%lu:", state->kpositions[firstposindex + i]);
-              if (trusted_found)
-                printf("%u\n", (unsigned int)trusted_char);
-              else
-                printf("?\n");
+              pos = state->totallength - 1UL - pos;
+              trusted_char = (GtUchar)3 - trusted_char;
             }
-#ifdef RDJ_ERRFIND_DEBUG
-            if (trusted_found)
-              gt_log_log("correctable: %lu (cnum:%u) -> cnum:%u (char: %c)",
-                  state->kpositions[firstposindex + i], cnum, trusted_cnum,
-                  "acgt"[trusted_char]);
-            else
-              gt_log_log("non-correctable: %lu (cnum:%u)",
-                  state->kpositions[firstposindex + i], cnum);
-#endif
+            if (state->edit_twobitencoding)
+            {
+              gt_errfind_edit_encseq(pos, trusted_char, state);
+            }
+            /*else if (!state->quiet)*/
+            {
+              printf("%lu:%u\n", pos, (unsigned int)trusted_char);
+            }
           }
         }
       }
@@ -240,16 +265,56 @@ static int processlcpinterval_errfind(unsigned long lcp,
 #include "match/esa-bottomup-errfind.inc"
 
 int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
-    unsigned long k, unsigned long c, unsigned long debug_value, GtError *err)
+    unsigned long k, unsigned long c, unsigned long debug_value,
+    bool edit_twobitencoding, const char *indexname, GtError *err)
 {
   GtBUstate_errfind *state;
   int had_err = 0;
+  unsigned char *mapptr = NULL;
 
   state = gt_malloc(sizeof (*state));
   state->alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   state->kpositions = gt_malloc(sizeof (unsigned long) * state->alphasize * c);
   state->count = gt_malloc(sizeof (unsigned long) * state->alphasize);
   state->encseq = encseq;
+  state->totallength = gt_encseq_total_length(encseq);
+  state->firstmirrorpos = state->totallength;
+  if (gt_encseq_is_mirrored(encseq))
+    state->firstmirrorpos >>= 1;
+
+  state->edit_twobitencoding = edit_twobitencoding;
+  state->encseq_charcount = NULL;
+  if (edit_twobitencoding)
+  {
+    if (!gt_has_twobitencoding(encseq))
+    {
+      gt_error_set(err, "encseq correction is only "
+          "implemented if the sequence has a twobitencoding");
+      had_err = -1;
+    }
+    else if (gt_encseq_accesstype_get(encseq) != GT_ACCESS_TYPE_EQUALLENGTH)
+    {
+      gt_error_set(err, "encseq correction is currently only "
+          "implemented if the sequence access type is EQUALLENGTH");
+      had_err = -1;
+    }
+    else
+    {
+      size_t t_offset = gt_encseq_twobitencoding_mapoffset(encseq);
+      size_t c_offset = gt_encseq_chardistri_mapoffset(encseq);
+      GtStr *encseqfilename = gt_str_new_cstr(indexname);
+      gt_str_append_cstr(encseqfilename, GT_ENCSEQFILESUFFIX);
+      mapptr = (unsigned char*)gt_fa_mmap_write(gt_str_get(encseqfilename),
+          NULL, err);
+      state->twobitencoding = (GtTwobitencoding*)(mapptr + t_offset);
+      state->encseq_charcount = (unsigned long*)(mapptr + c_offset);
+      gt_str_delete(encseqfilename);
+    }
+  }
+  else
+  {
+    state->twobitencoding = NULL;
+  }
   state->k = k;
   state->c = c;
   state->debug_value = debug_value;
@@ -257,6 +322,11 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
   gt_errfind_reset(state);
 
   had_err = gt_esa_bottomup_errfind(ssar, state, err);
+
+  if (!had_err && edit_twobitencoding)
+  {
+    gt_fa_xmunmap(mapptr);
+  }
 
   gt_free(state->kpositions);
   gt_free(state->count);
