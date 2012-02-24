@@ -75,23 +75,19 @@ typedef struct
 } Outfileinfo;
 
 static void gt_suflcptab2genomediff(GT_UNUSED void *data,
-                                    GT_UNUSED const GtSuffixsortspace *sssp,
-                                    GT_UNUSED GtLcpvalues *tableoflcpvalues,
-                                    GT_UNUSED unsigned long bucketoffset,
+                                    const GtSuffixsortspace *sssp,
+                                    GtLcpvalues *tableoflcpvalues,
+                                    unsigned long bucketoffset,
                                     unsigned long width,
-                                    GT_UNUSED unsigned long posoffset)
+                                    unsigned long posoffset)
 {
-  unsigned long idx,
-                lcpvalue;
-                /*suffix;*/
+  unsigned long idx, lcpvalue, suffix;
 
   for (idx=0; idx < width; idx++)
   {
     lcpvalue = gt_lcptab_getvalue(tableoflcpvalues,bucketoffset,idx);
-    /*
-    suffix = gt_suffixsortspace_get(sssp,0,idx);
-    */
-    printf("%lu\n",MIN(lcpvalue,LCPOVERFLOW));
+    suffix = gt_suffixsortspace_get(sssp,bucketoffset+posoffset,idx);
+    printf("%lu %lu\n",suffix,MIN(lcpvalue,LCPOVERFLOW));
   }
 }
 
@@ -199,6 +195,7 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
                                   unsigned int prefixlength,
                                   unsigned int numofparts,
                                   unsigned long maximumspace,
+                                  bool swallow_tail,
                                   const Sfxstrategy *sfxstrategy,
                                   GtTimer *sfxprogress,
                                   bool withprogressbar,
@@ -227,15 +224,18 @@ static int suffixeratorwithoutput(Outfileinfo *outfileinfo,
   {
     const GtSuffixsortspace *suffixsortspace;
     unsigned long numberofsuffixes;
+    bool specialsuffixes = false;
 
     while (true)
     {
-      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,NULL,sfi);
+      suffixsortspace = gt_Sfxiterator_next(&numberofsuffixes,&specialsuffixes,
+                                            sfi);
       if (suffixsortspace == NULL)
       {
         break;
       }
-      if (outfileinfo->outfpsuftab != NULL)
+      if (outfileinfo->outfpsuftab != NULL &&
+          (!specialsuffixes || !swallow_tail))
       {
         if (gt_suffixsortspace_to_file (outfileinfo->outfpsuftab,
                                         suffixsortspace,
@@ -581,6 +581,7 @@ static int runsuffixerator(bool doesa,
                                prefixlength,
                                gt_index_options_numofparts_value(so->idxopts),
                                gt_index_options_maximumspace_value(so->idxopts),
+                               gt_index_options_swallow_tail_value(so->idxopts),
                                &sfxstrategy,
                                sfxprogress,
                                so->showprogress,
