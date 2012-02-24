@@ -81,7 +81,14 @@ static void gt_suflcptab2genomediff(GT_UNUSED void * data,
                                     unsigned long width,
                                     GT_UNUSED unsigned long posoffset)
 {
-  printf("genomediff (%lu)\n",width);
+  unsigned long idx;
+
+  for (idx=0; idx < width; idx++)
+  {
+    unsigned long lcpvalue
+      = gt_lcptab_getvalue(tableoflcpvalues,bucketoffset,idx);
+    printf("%lu\n",MIN(lcpvalue,LCPOVERFLOW));
+  }
 }
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
@@ -577,6 +584,18 @@ static int runsuffixerator(bool doesa,
         {
           haserr = true;
         }
+        /* This is just for test purposes to mimic the contents of the
+           * .lcp-file. */
+        /*
+        if (gt_index_options_genomediff_value(so->idxopts))
+        {
+          unsigned long idx;
+
+          for (idx=0; idx <= gt_encseq_specialcharacters(encseq); idx++)
+          {
+            printf("0\n");
+          }
+        }*/
       } else
       {
 #ifndef S_SPLINT_S
