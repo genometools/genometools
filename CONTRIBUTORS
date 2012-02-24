@@ -3,6 +3,7 @@ gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 
 - Stefan Bienert (patches)
 - David Ellinghaus (parts of ltr/ subdirectory, ltrharvest tool)
+- Johannes Fischer (range minimum query code)
 - Giorgio Gonnella (codegen, simreads tool, patches)
 - Thomas Jahns (BitPackArray and BitPackString class, block-compressed FM-index)
 - Malte Mader (AnnotationSketch, sketch tool)
