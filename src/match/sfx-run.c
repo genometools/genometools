@@ -76,7 +76,7 @@ typedef struct
 
 static void gt_suflcptab2genomediff(GT_UNUSED void *data,
                                     const GtSuffixsortspace *sssp,
-                                    GtLcpvalues *tableoflcpvalues,
+                                    const GtLcpvalues *tableoflcpvalues,
                                     unsigned long bucketoffset,
                                     unsigned long width,
                                     unsigned long posoffset)

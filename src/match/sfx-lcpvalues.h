@@ -47,7 +47,7 @@ typedef struct
 
 typedef void (*GtFinalProcessBucket)(void *,
                                      const GtSuffixsortspace *,
-                                     GtLcpvalues *,
+                                     const GtLcpvalues *,
                                      unsigned long,
                                      unsigned long,
                                      unsigned long);
