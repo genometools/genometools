@@ -256,8 +256,9 @@ gt_encseq_options_register_generic(GtOptionParser *op,
 
   /* decoding options */
   if (strategy == GT_ENCSEQ_OPTS_LOAD) {
-    oi->optionmirrored = gt_option_new_bool("mirrored", "additionally output "
-                                            "reverse complements",
+    oi->optionmirrored = gt_option_new_bool("mirrored", "virtually append the "
+                                            "reverse complement of each "
+                                            "sequence",
                                             &oi->mirrored,
                                             false);
     gt_option_parser_add_option(op, oi->optionmirrored);
