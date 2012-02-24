@@ -56,8 +56,9 @@ struct GtIndexOptions
        outbcktab,
        outkystab,
        outkyssort,
+       lcpdist,
        genomediff,
-       lcpdist;
+       swallow_tail;
   GtStr *kysargumentstring,
         *indexname,
         *dir,
@@ -105,6 +106,7 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->outbcktab = false;
   oi->lcpdist = false;
   oi->genomediff = false;
+  oi->swallow_tail = false;
   oi->option = NULL;
   oi->optiondir = NULL;
   oi->optionoutsuftab = NULL;
@@ -373,6 +375,13 @@ static GtIndexOptions* gt_index_options_register_generic_create(
     gt_option_exclude(idxo->option, idxo->optionoutsuftab);
     gt_option_parser_add_option(op, idxo->option);
 
+    idxo->option = gt_option_new_bool("swallow-tail",
+                              "swallow the tail of the suffix array and lcptab",
+                              &idxo->swallow_tail,
+                              false);
+    gt_option_is_development_option(idxo->option);
+    gt_option_parser_add_option(op, idxo->option);
+
     idxo->optionoutbwttab = gt_option_new_bool("bwt",
                                    "output Burrows-Wheeler Transformation "
                                    "(bwttab) to file",
@@ -531,6 +540,7 @@ GT_INDEX_OPTS_GETTER_DEF_VAL(sfxstrategy, Sfxstrategy);
 GT_INDEX_OPTS_GETTER_DEF_VAL(readmode, GtReadmode);
 GT_INDEX_OPTS_GETTER_DEF_VAL(lcpdist, bool);
 GT_INDEX_OPTS_GETTER_DEF_VAL(genomediff, bool);
+GT_INDEX_OPTS_GETTER_DEF_VAL(swallow_tail, bool);
 #ifndef S_SPLINT_S
 GT_INDEX_OPTS_GETTER_DEF_VAL(bwtIdxParams, struct bwtOptions);
 #endif

@@ -74,7 +74,8 @@ struct GtOutlcpinfo
   unsigned int minchanged;
   size_t sizeofinfo;
   Suffixwithcode previoussuffix;
-  bool previousbucketwasempty;
+  bool previousbucketwasempty,
+       swallow_tail_lcpvalues;
   Lcpsubtab lcpsubtab;
 };
 
@@ -209,6 +210,7 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                                 unsigned int numofchars,
                                 unsigned int prefixlength,
                                 bool withdistribution,
+                                bool swallow_tail_lcpvalues,
                                 GtFinalProcessBucket final_process_bucket,
                                 void *final_process_bucket_info,
                                 GtError *err)
@@ -219,6 +221,7 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
   outlcpinfo = gt_malloc(sizeof (*outlcpinfo));
   outlcpinfo->sizeofinfo = sizeof (*outlcpinfo);
   outlcpinfo->lcpsubtab.lcptabsum = 0.0;
+  outlcpinfo->swallow_tail_lcpvalues = swallow_tail_lcpvalues;
   if (withdistribution)
   {
     outlcpinfo->lcpsubtab.distlcpvalues = gt_disc_distri_new();
@@ -448,7 +451,8 @@ void gt_Outlcpinfo_delete(GtOutlcpinfo *outlcpinfo)
   gt_turningwheel_delete(outlcpinfo->turnwheel);
   if (outlcpinfo->lcpsubtab.lcp2file != NULL)
   {
-    if (outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues <
+    if (!outlcpinfo->swallow_tail_lcpvalues &&
+        outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues <
         outlcpinfo->numsuffixes2output)
     {
       outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues
@@ -457,7 +461,8 @@ void gt_Outlcpinfo_delete(GtOutlcpinfo *outlcpinfo)
                                                   ->countoutputlcpvalues,
                              outlcpinfo->lcpsubtab.lcp2file->outfplcptab);
     }
-    gt_assert(outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues ==
+    gt_assert(outlcpinfo->swallow_tail_lcpvalues ||
+              outlcpinfo->lcpsubtab.lcp2file->countoutputlcpvalues ==
               outlcpinfo->numsuffixes2output);
     GT_FREEARRAY(&outlcpinfo->lcpsubtab.lcp2file->largelcpvalues,
                  Largelcpvalue);
@@ -604,7 +609,7 @@ void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
 
 void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,
-                                     GT_UNUSED GtSuffixsortspace *sssp,
+                                     const GtSuffixsortspace *sssp,
                                      GtLcpvalues *tableoflcpvalues,
                                      const GtBucketspecification *bucketspec,
                                      GtCodetype code)
@@ -651,7 +656,7 @@ void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
       {
         outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket(
             outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket_info,
-            NULL,
+            sssp,
             tableoflcpvalues,
             0,
             bucketspec->nonspecialsinbucket,
@@ -677,7 +682,7 @@ void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
 
 void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
-                              GtSuffixsortspace *sssp,
+                              const GtSuffixsortspace *sssp,
                               const GtBcktab *bcktab,
                               const GtBucketspecification *bucketspec,
                               GtCodetype code)
@@ -711,7 +716,7 @@ void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
         {
           outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket(
               outlcpinfo->lcpsubtab.lcpprocess->final_process_bucket_info,
-              NULL,
+              sssp,
               &outlcpinfo->lcpsubtab.tableoflcpvalues,
               bucketspec->nonspecialsinbucket,
               bucketspec->specialsinbucket,

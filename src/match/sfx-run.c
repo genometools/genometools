@@ -74,19 +74,23 @@ typedef struct
   GtOutlcpinfo *outlcpinfo;
 } Outfileinfo;
 
-static void gt_suflcptab2genomediff(GT_UNUSED void * data,
+static void gt_suflcptab2genomediff(GT_UNUSED void *data,
                                     GT_UNUSED const GtSuffixsortspace *sssp,
                                     GT_UNUSED GtLcpvalues *tableoflcpvalues,
                                     GT_UNUSED unsigned long bucketoffset,
                                     unsigned long width,
                                     GT_UNUSED unsigned long posoffset)
 {
-  unsigned long idx;
+  unsigned long idx,
+                lcpvalue;
+                /*suffix;*/
 
   for (idx=0; idx < width; idx++)
   {
-    unsigned long lcpvalue
-      = gt_lcptab_getvalue(tableoflcpvalues,bucketoffset,idx);
+    lcpvalue = gt_lcptab_getvalue(tableoflcpvalues,bucketoffset,idx);
+    /*
+    suffix = gt_suffixsortspace_get(sssp,0,idx);
+    */
     printf("%lu\n",MIN(lcpvalue,LCPOVERFLOW));
   }
 }
@@ -115,6 +119,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_index_options_lcpdist_value(so->idxopts),
+                          gt_index_options_swallow_tail_value(so->idxopts),
                           rungenomediff ? gt_suflcptab2genomediff
                                         : NULL,
                           NULL, /* possibly add structure for function */
@@ -584,18 +589,6 @@ static int runsuffixerator(bool doesa,
         {
           haserr = true;
         }
-        /* This is just for test purposes to mimic the contents of the
-           * .lcp-file. */
-        /*
-        if (gt_index_options_genomediff_value(so->idxopts))
-        {
-          unsigned long idx;
-
-          for (idx=0; idx <= gt_encseq_specialcharacters(encseq); idx++)
-          {
-            printf("0\n");
-          }
-        }*/
       } else
       {
 #ifndef S_SPLINT_S

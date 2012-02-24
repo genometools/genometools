@@ -98,6 +98,7 @@ GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                                 unsigned int numofchars,
                                 unsigned int prefixlength,
                                 bool withdistribution,
+                                bool swallow_tail_lcpvalues,
                                 GtFinalProcessBucket final_process_bucket,
                                 void *final_process_bucket_info,
                                 GtError *err);
@@ -126,14 +127,14 @@ void gt_Outlcpinfo_prebucket(GtOutlcpinfo *outlcpinfo,
 
 void gt_Outlcpinfo_nonspecialsbucket(GtOutlcpinfo *outlcpinfo,
                                      unsigned int prefixlength,
-                                     GT_UNUSED GtSuffixsortspace *sssp,
+                                     const GtSuffixsortspace *sssp,
                                      GtLcpvalues *tableoflcpvalues,
                                      const GtBucketspecification *bucketspec,
                                      GtCodetype code);
 
 void gt_Outlcpinfo_postbucket(GtOutlcpinfo *outlcpinfo,
                               unsigned int prefixlength,
-                              GtSuffixsortspace *sssp,
+                              const GtSuffixsortspace *sssp,
                               const GtBcktab *bcktab,
                               const GtBucketspecification *bucketspec,
                               GtCodetype code);
