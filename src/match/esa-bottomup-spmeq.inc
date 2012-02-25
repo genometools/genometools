@@ -28,7 +28,6 @@ static void freeBUinfo_spmeq(GtBUinfo_spmeq *,GtBUstate_spmeq *);
 
 static int processleafedge_spmeq(bool,
     unsigned long,
-    unsigned long,
     GtBUinfo_spmeq *,
 #ifdef GT_ESA_BOTTOM_UP_RAM
     unsigned long, /* seqnum */
@@ -42,9 +41,7 @@ static int processleafedge_spmeq(bool,
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
 static int processbranchingedge_spmeq(bool firstsucc,
     unsigned long,
-    unsigned long,
     GtBUinfo_spmeq *,
-    unsigned long,
     unsigned long,
     unsigned long,
     GtBUinfo_spmeq *,
@@ -53,8 +50,6 @@ static int processbranchingedge_spmeq(bool firstsucc,
 #endif
 
 static int processlcpinterval_spmeq(unsigned long,
-    unsigned long,
-    unsigned long,
     GtBUinfo_spmeq *,
     GtBUstate_spmeq *,
     GtError *err);
@@ -78,8 +73,7 @@ static int processlcpinterval_spmeq(unsigned long,
         gt_assert(stack->spaceGtBUItvinfo != NULL);\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lcp = LCP;\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].lb = LB;\
-        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo].rb = ULONG_MAX;\
-        stack->nextfreeGtBUItvinfo++
+        stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo++].rb = ULONG_MAX
 
 typedef struct
 {
@@ -144,7 +138,7 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
   unsigned long lcpvalue,
                 previoussuffix = 0,
                 idx,
-                nonspecials,
+                numberofsuffixes,
                 lastsuftabvalue = 0;
   GtBUItvinfo_spmeq *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot = true;
@@ -152,8 +146,8 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
 
   stack = gt_GtArrayGtBUItvinfo_new_spmeq();
   PUSH_ESA_BOTTOMUP_spmeq(0,0);
-  nonspecials = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  for (idx = 0; idx < nonspecials; idx++)
+  numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
+  for (idx = 0; idx < numberofsuffixes; idx++)
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
@@ -169,9 +163,10 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
       }
       if (processleafedge_spmeq(firstedge,
                           TOP_ESA_BOTTOMUP_spmeq.lcp,
-                          TOP_ESA_BOTTOMUP_spmeq.lb,
                           &TOP_ESA_BOTTOMUP_spmeq.info,
-                          previoussuffix,bustate,err) != 0)
+                          previoussuffix,
+                          bustate,
+                          err) != 0)
       {
         haserr = true;
         break;
@@ -183,8 +178,6 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
       lastinterval = POP_ESA_BOTTOMUP_spmeq;
       lastinterval->rb = idx;
       if (processlcpinterval_spmeq(lastinterval->lcp,
-                             lastinterval->lb,
-                             lastinterval->rb,
                              &lastinterval->info,
                              bustate,
                              err) != 0)
@@ -205,11 +198,9 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_spmeq(firstedge,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
-                                 TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
                                  lastinterval->lcp,
-                                 lastinterval->lb,
-                                 lastinterval->rb,
+                                 lastinterval->rb - lastinterval->lb + 1,
                                  &lastinterval->info,
                                  bustate,
                                  err) != 0)
@@ -238,13 +229,12 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_spmeq(true,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
-                                 TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
                                  lastintervallcp,
-                                 lastintervallb,
-                                 lastintervalrb,
+                                 lastintervalrb - lastintervallb + 1,
                                  NULL,
-                                 bustate,err) != 0)
+                                 bustate,
+                                 err) != 0)
         {
           haserr = true;
           break;
@@ -256,9 +246,10 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
         PUSH_ESA_BOTTOMUP_spmeq(lcpvalue,idx);
         if (processleafedge_spmeq(true,
                             TOP_ESA_BOTTOMUP_spmeq.lcp,
-                            TOP_ESA_BOTTOMUP_spmeq.lb,
                             &TOP_ESA_BOTTOMUP_spmeq.info,
-                            previoussuffix,bustate,err) != 0)
+                            previoussuffix,
+                            bustate,
+                            err) != 0)
         {
           haserr = true;
           break;
@@ -271,17 +262,16 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
   {
     if (processleafedge_spmeq(false,
                         TOP_ESA_BOTTOMUP_spmeq.lcp,
-                        TOP_ESA_BOTTOMUP_spmeq.lb,
                         &TOP_ESA_BOTTOMUP_spmeq.info,
-                        lastsuftabvalue,bustate,err) != 0)
+                        lastsuftabvalue,
+                        bustate,
+                        err) != 0)
     {
       haserr = true;
     } else
     {
       TOP_ESA_BOTTOMUP_spmeq.rb = idx;
       if (processlcpinterval_spmeq(TOP_ESA_BOTTOMUP_spmeq.lcp,
-                             TOP_ESA_BOTTOMUP_spmeq.lb,
-                             TOP_ESA_BOTTOMUP_spmeq.rb,
                              &TOP_ESA_BOTTOMUP_spmeq.info,
                              bustate,
                              err) != 0)
@@ -296,31 +286,40 @@ int gt_esa_bottomup_spmeq(Sequentialsuffixarrayreader *ssar,
 
 #else
 
-int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
-                        const GtSeqnumrelpos *snrp,
-                        const uint16_t *lcptab_bucket,
-                        unsigned long nonspecials,
+int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
+                        const GtBUlcptype_spmeq *lcptab_bucket,
+                        unsigned long numberofsuffixes,
                         GtArrayGtBUItvinfo_spmeq *stack,
                         GtBUstate_spmeq *bustate,
+#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
+                        const GtSeqnumrelpos *snrp,
+#endif
                         GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
-                tmp,
+                previoussuffix,
+                lastsuftabvalue,
+#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
                 previousseqnum = 0,
                 previousrelpos = 0,
+#endif
                 idx;
   GtBUItvinfo_spmeq *lastinterval = NULL;
-  bool haserr = false, firstedge, firstedgefromroot = true;
+  bool haserr = false, 
+       firstedge, 
+       firstedgefromroot = true; /* must be part of state */
 
-  gt_assert(nonspecials > 0);
+  gt_assert(numberofsuffixes > 0);
   PUSH_ESA_BOTTOMUP_spmeq(0,0);
-  for (idx = 0; idx < nonspecials-1; idx++)
+  for (idx = 0; idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
-    tmp = seqnum_relpos_bucket[idx];
-    previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,tmp);
-    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,tmp);
+    previoussuffix = bucketofsuffixes[idx];
+#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
+    previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);
+    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);
+#endif
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmeq.lcp)
     {
       if (TOP_ESA_BOTTOMUP_spmeq.lcp > 0 || !firstedgefromroot)
@@ -333,9 +332,15 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
       }
       if (processleafedge_spmeq(firstedge,
                           TOP_ESA_BOTTOMUP_spmeq.lcp,
-                          TOP_ESA_BOTTOMUP_spmeq.lb,
                           &TOP_ESA_BOTTOMUP_spmeq.info,
-                          previousseqnum,previousrelpos,bustate,err) != 0)
+#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
+                          previousseqnum,
+                          previousrelpos,
+#else
+                          previoussuffix,
+#endif
+                          bustate,
+                          err) != 0)
       {
         haserr = true;
         break;
@@ -347,8 +352,6 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
       lastinterval = POP_ESA_BOTTOMUP_spmeq;
       lastinterval->rb = idx;
       if (processlcpinterval_spmeq(lastinterval->lcp,
-                             lastinterval->lb,
-                             lastinterval->rb,
                              &lastinterval->info,
                              bustate,
                              err) != 0)
@@ -369,11 +372,9 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_spmeq(firstedge,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
-                                 TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
                                  lastinterval->lcp,
-                                 lastinterval->lb,
-                                 lastinterval->rb,
+                                 lastinterval->rb - lastinterval->lb + 1,
                                  &lastinterval->info,
                                  bustate,
                                  err) != 0)
@@ -402,13 +403,12 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
 #ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_spmeq(true,
                                  TOP_ESA_BOTTOMUP_spmeq.lcp,
-                                 TOP_ESA_BOTTOMUP_spmeq.lb,
                                  &TOP_ESA_BOTTOMUP_spmeq.info,
                                  lastintervallcp,
-                                 lastintervallb,
-                                 lastintervalrb,
+                                 lastintervalrb - lastintervallb + 1,
                                  NULL,
-                                 bustate,err) != 0)
+                                 bustate,
+                                 err) != 0)
         {
           haserr = true;
           break;
@@ -420,9 +420,15 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
         PUSH_ESA_BOTTOMUP_spmeq(lcpvalue,idx);
         if (processleafedge_spmeq(true,
                             TOP_ESA_BOTTOMUP_spmeq.lcp,
-                            TOP_ESA_BOTTOMUP_spmeq.lb,
                             &TOP_ESA_BOTTOMUP_spmeq.info,
-                            previousseqnum,previousrelpos,bustate,err) != 0)
+#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
+                            previousseqnum,
+                            previousrelpos,
+#else
+                            previoussuffix,
+#endif
+                            bustate,
+                            err) != 0)
         {
           haserr = true;
           break;
@@ -433,24 +439,24 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *seqnum_relpos_bucket,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmeq.lcp > 0)
   {
-    unsigned long lastseqnum, lastrelpos;
-
-    tmp = seqnum_relpos_bucket[nonspecials-1];
-    lastseqnum = gt_seqnumrelpos_decode_seqnum(snrp,tmp);
-    lastrelpos = gt_seqnumrelpos_decode_relpos(snrp,tmp);
+    lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
     if (processleafedge_spmeq(false,
                         TOP_ESA_BOTTOMUP_spmeq.lcp,
-                        TOP_ESA_BOTTOMUP_spmeq.lb,
                         &TOP_ESA_BOTTOMUP_spmeq.info,
-                        lastseqnum,lastrelpos,bustate,err) != 0)
+#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
+                        gt_seqnumrelpos_decode_seqnum(snrp,lastsuftabvalue),
+                        gt_seqnumrelpos_decode_relpos(snrp,lastsuftabvalue),
+#else
+                        lastsuftabvalue,
+#endif
+                        bustate,
+                        err) != 0)
     {
       haserr = true;
     } else
     {
       TOP_ESA_BOTTOMUP_spmeq.rb = idx;
       if (processlcpinterval_spmeq(TOP_ESA_BOTTOMUP_spmeq.lcp,
-                             TOP_ESA_BOTTOMUP_spmeq.lb,
-                             TOP_ESA_BOTTOMUP_spmeq.rb,
                              &TOP_ESA_BOTTOMUP_spmeq.info,
                              bustate,
                              err) != 0)

@@ -61,7 +61,7 @@ static void freeBUinfo_errfind(GT_UNUSED GtBUinfo_errfind *buinfo,
 }
 
 static int processleafedge_errfind(GT_UNUSED bool firstsucc,
-    unsigned long fatherdepth, GT_UNUSED unsigned long fatherlb,
+    unsigned long fatherdepth,
     GT_UNUSED GtBUinfo_errfind *father, unsigned long leafnumber,
     GtBUstate_errfind *state, GT_UNUSED GtError *err)
 {
@@ -126,9 +126,9 @@ static int processleafedge_errfind(GT_UNUSED bool firstsucc,
 }
 
 static int processbranchingedge_errfind(GT_UNUSED bool firstsucc,
-    GT_UNUSED unsigned long fatherdepth, GT_UNUSED unsigned long fatherlb,
+    GT_UNUSED unsigned long fatherdepth,
     GT_UNUSED GtBUinfo_errfind *father, GT_UNUSED unsigned long sondepth,
-    GT_UNUSED unsigned long sonlb, GT_UNUSED unsigned long sonrb,
+    GT_UNUSED unsigned long sonwidth,
     GT_UNUSED GtBUinfo_errfind *son, GT_UNUSED GtBUstate_errfind *state,
     GT_UNUSED GtError *err)
 {
@@ -151,7 +151,6 @@ static int processbranchingedge_errfind(GT_UNUSED bool firstsucc,
 }
 
 static int processlcpinterval_errfind(unsigned long lcp,
-    GT_UNUSED unsigned long lb, GT_UNUSED unsigned long rb,
     GT_UNUSED GtBUinfo_errfind *info, GtBUstate_errfind *state,
     GT_UNUSED GtError *err)
 {

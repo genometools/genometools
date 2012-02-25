@@ -58,7 +58,6 @@ static void freeBUinfo_spmsk(GT_UNUSED GtBUinfo_spmsk *info,
 
 static int processleafedge_spmsk(bool firstedge,
                                  unsigned long fd,
-                                 GT_UNUSED unsigned long flb,
                                  GtBUinfo_spmsk *finfo,
                                  unsigned long seqnum,
                                  unsigned long relpos,
@@ -86,8 +85,6 @@ static int processleafedge_spmsk(bool firstedge,
 }
 
 static int processlcpinterval_spmsk(unsigned long lcp,
-                                    GT_UNUSED unsigned long lb,
-                                    GT_UNUSED unsigned long rb,
                                     GtBUinfo_spmsk *info,
                                     GtBUstate_spmsk *state,
                                     GT_UNUSED GtError *err)
@@ -127,7 +124,10 @@ static int processlcpinterval_spmsk(unsigned long lcp,
 
 #define GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
 #define GT_ESA_BOTTOM_UP_RAM
+typedef uint16_t GtBUlcptype_spmsk;
+#define GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
 #include "esa-bottomup-spmsk.inc"
+#undef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
 
 GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
@@ -182,11 +182,11 @@ int gt_spmsk_inl_process(void *data,
   gt_assert(lcptab_bucket != NULL);
   state->spaceforbucketprocessing = spaceforbucketprocessing;
   if (gt_esa_bottomup_RAM_spmsk(seqnum_relpos_bucket,
-                                snrp,
                                 lcptab_bucket,
                                 nonspecials,
                                 (GtArrayGtBUItvinfo_spmsk *) state->stack,
                                 state,
+                                snrp,
                                 err) != 0)
   {
     return -1;

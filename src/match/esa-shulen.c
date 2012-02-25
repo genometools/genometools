@@ -115,7 +115,6 @@ static void shownode(int line,const GtBUstate_shulen *state,
 
 static int processleafedge_shulen(bool firstsucc,
                                   unsigned long fatherdepth,
-                                  GT_UNUSED unsigned long fatherlb,
                                   GtBUinfo_shulen *father,
                                   unsigned long leafnumber,
                                   GtBUstate_shulen *state,
@@ -216,11 +215,9 @@ static void cartproduct_shulen(GtBUstate_shulen *state,
 
 static int processbranchingedge_shulen(bool firstsucc,
                                        unsigned long fatherdepth,
-                                       GT_UNUSED unsigned long fatherlp,
                                        GtBUinfo_shulen *father,
                                        GT_UNUSED unsigned long sondepth,
-                                       GT_UNUSED unsigned long sonlb,
-                                       GT_UNUSED unsigned long sonrb,
+                                       GT_UNUSED unsigned long sonwidth,
                                        GtBUinfo_shulen *son,
                                        GtBUstate_shulen *state,
                                        GT_UNUSED GtError *err)
@@ -280,8 +277,6 @@ static int processbranchingedge_shulen(bool firstsucc,
 }
 
 static int processlcpinterval_shulen(GT_UNUSED unsigned long lcp,
-                                     GT_UNUSED unsigned long lb,
-                                     GT_UNUSED unsigned long rb,
                                      GT_UNUSED GtBUinfo_shulen *info,
                                      GT_UNUSED GtBUstate_shulen *state,
                                      GT_UNUSED GtError *err)

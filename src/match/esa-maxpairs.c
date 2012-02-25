@@ -177,7 +177,6 @@ static void setpostabto0_maxpairs(GtBUstate_maxpairs *state)
 
 static int processleafedge_maxpairs(bool firstsucc,
                                     unsigned long fatherdepth,
-                                    GT_UNUSED unsigned long fatherlb,
                                     GtBUinfo_maxpairs *father,
                                     unsigned long leafnumber,
                                     GtBUstate_maxpairs *state,
@@ -259,11 +258,9 @@ static int processleafedge_maxpairs(bool firstsucc,
 
 static int processbranchingedge_maxpairs(bool firstsucc,
                                          unsigned long fatherdepth,
-                                         GT_UNUSED unsigned long fatherlb,
                                          GtBUinfo_maxpairs *father,
                                          GT_UNUSED unsigned long sondepth,
-                                         GT_UNUSED unsigned long sonlb,
-                                         GT_UNUSED unsigned long sonrb,
+                                         GT_UNUSED unsigned long sonwidth,
                                          GtBUinfo_maxpairs *son,
                                          GtBUstate_maxpairs *state,
                                          GtError *err)
@@ -350,8 +347,6 @@ static int processbranchingedge_maxpairs(bool firstsucc,
 }
 
 static int processlcpinterval_maxpairs(GT_UNUSED unsigned long lcp,
-                                       GT_UNUSED unsigned long lb,
-                                       GT_UNUSED unsigned long rb,
                                        GT_UNUSED GtBUinfo_maxpairs *info,
                                        GT_UNUSED GtBUstate_maxpairs *state,
                                        GT_UNUSED GtError *err)
