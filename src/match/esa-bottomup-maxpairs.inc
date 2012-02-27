@@ -140,7 +140,6 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    /* no init of previousseqnum and previousrelpos */
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {

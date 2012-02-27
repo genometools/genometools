@@ -74,8 +74,8 @@ def previoussuffix_param_get(options)
   if options.absolute
     return "previoussuffix,"
   else
-    return "previousseqnum,\n" +
-           "                          previousrelpos,"
+    return "gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix),\n" +
+           "                          gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),"
   end
 end
 
@@ -85,15 +85,6 @@ def previoussuffix_expr_get(options)
   else 
     return "gt_seqnumrelpos_decode_seqnum(snrp,lastsuftabvalue),\n" +
            "                        gt_seqnumrelpos_decode_relpos(snrp,lastsuftabvalue),"
-  end
-end
-
-def previousseqnumrelpos(options)
-  if not options.absolute
-    return "previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);\n" +
-           "    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);"
-  else
-    return "/* no init of previousseqnum and previousrelpos */"
   end
 end
 
@@ -185,7 +176,6 @@ end
 
 def process_suf_lcp(key,options)
 print <<END_OF_FILE
-    #{previousseqnumrelpos(options)}
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
     {
@@ -320,15 +310,6 @@ def return_snrp_decl(options)
     return "const GtSeqnumrelpos *snrp,"
   else
     return "/* no parameter snrp */"
-  end
-end
-
-def return_previous_decl(options)
-  if not options.absolute
-    return "unsigned long previousseqnum = 0,\n" +
-           "                previousrelpos = 0;"
-  else
-    return "/* no declaration of previousseqnum and previousrelpos */"
   end
 end
 
@@ -514,7 +495,6 @@ int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
                         #{return_snrp_decl(options)}
                         GtError *err)
 {
-  #{return_previous_decl(options)}
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,

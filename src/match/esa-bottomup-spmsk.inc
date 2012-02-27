@@ -123,8 +123,6 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
                         const GtSeqnumrelpos *snrp,
                         GtError *err)
 {
-  unsigned long previousseqnum = 0,
-                previousrelpos = 0;
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,
@@ -140,8 +138,6 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
-    previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);
-    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
@@ -156,8 +152,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
       if (processleafedge_spmsk(firstedge,
                           TOP_ESA_BOTTOMUP_spmsk.lcp,
                           &TOP_ESA_BOTTOMUP_spmsk.info,
-                          previousseqnum,
-                          previousrelpos,
+                          gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix),
+                          gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),
                           bustate,
                           err) != 0)
       {
@@ -203,8 +199,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
         if (processleafedge_spmsk(true,
                             TOP_ESA_BOTTOMUP_spmsk.lcp,
                             &TOP_ESA_BOTTOMUP_spmsk.info,
-                            previousseqnum,
-                          previousrelpos,
+                            gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix),
+                          gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),
                             bustate,
                             err) != 0)
         {
