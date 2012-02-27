@@ -40,13 +40,13 @@ typedef struct /* information stored for each node of the lcp interval tree */
 
 typedef struct  /* global information */
 {
-  unsigned long numofdbfiles,
-                lastleafnumber;
+  unsigned long numofdbfiles;
   uint64_t **shulengthdist;
   const GtEncseq *encseq;
   unsigned long *file_to_genome_map;
 #ifdef SHUDEBUG
-  unsigned long nextid;
+  unsigned long lastleafnumber,
+                nextid;
 #endif
 } GtBUstate_shulen;
 
@@ -184,8 +184,8 @@ static int processleafedge_shulen(bool firstsucc,
 #ifdef SHUDEBUG
   printf("gnumdist[id=%lu,filenum=%lu]=%lu\n",father->id,gnum,
                                               father->gnumdist[gnum]);
-#endif
   state->lastleafnumber = leafnumber;
+#endif
   return 0;
 }
 
