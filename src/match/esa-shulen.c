@@ -276,6 +276,46 @@ static int processbranchingedge_shulen(bool firstsucc,
   return 0;
 }
 
+static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
+{
+  unsigned long referidx, shulenidx;
+  uint64_t **shulengthdist;
+
+  gt_array2dim_malloc(shulengthdist,numofdbfiles,numofdbfiles);
+  for (referidx=0; referidx < numofdbfiles; referidx++)
+  {
+    for (shulenidx=0; shulenidx < numofdbfiles; shulenidx++)
+    {
+      shulengthdist[referidx][shulenidx] = 0;
+    }
+  }
+  return shulengthdist;
+}
+
+static void shulengthdist_print(uint64_t **shulengthdist,
+                                unsigned long numofdbfiles)
+{
+  unsigned long referidx, shulenidx;
+
+  printf("%lu\n",numofdbfiles);
+  for (shulenidx=0; shulenidx < numofdbfiles; shulenidx++)
+  {
+    printf("%lu\t",shulenidx);
+    for (referidx=0; referidx < numofdbfiles; referidx++)
+    {
+      if (referidx != shulenidx)
+      {
+	printf(Formatuint64_t"\t",
+	       PRINTuint64_tcast(shulengthdist[referidx][shulenidx]));
+      } else
+      {
+	printf("0\t");
+      }
+    }
+    printf("\n");
+  }
+}
+
 #include "esa-bottomup-shulen.inc"
 
 int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
@@ -284,7 +324,6 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
 {
   GtBUstate_shulen *state;
   bool haserr = false;
-  unsigned long referidx, shulenidx;
 
   state = gt_malloc(sizeof (*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
@@ -292,38 +331,14 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
 #ifdef SHUDEBUG
   state->nextid = 0;
 #endif
-  gt_array2dim_malloc(state->shulengthdist,state->numofdbfiles,
-                      state->numofdbfiles);
-  for (referidx=0; referidx < state->numofdbfiles; referidx++)
-  {
-    for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
-    {
-      state->shulengthdist[referidx][shulenidx] = 0;
-    }
-  }
+  state->shulengthdist = shulengthdist_new(state->numofdbfiles);
   if (gt_esa_bottomup_shulen(ssar, state, err) != 0)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    printf("%lu\n",state->numofdbfiles);
-    for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
-    {
-      printf("%lu\t",shulenidx);
-      for (referidx=0; referidx < state->numofdbfiles; referidx++)
-      {
-        if (referidx != shulenidx)
-        {
-          printf(Formatuint64_t"\t",
-                 PRINTuint64_tcast(state->shulengthdist[referidx][shulenidx]));
-        } else
-        {
-          printf("0\t");
-        }
-      }
-      printf("\n");
-    }
+    shulengthdist_print(state->shulengthdist,state->numofdbfiles);
   }
   gt_array2dim_delete(state->shulengthdist);
   gt_free(state);
