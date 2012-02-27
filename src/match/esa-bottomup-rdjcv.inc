@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-/* Nothing */
+/* no include for seqnumrelpos.h */
 
 static void initBUinfo_rdjcv(GtBUinfo_rdjcv *,GtBUstate_rdjcv *);
 
@@ -40,7 +40,7 @@ static int processbranchingedge_rdjcv(bool firstsucc,
     GtBUstate_rdjcv *,
     GtError *);
 
-/* Nothing */
+/* no declaration of processlcpinterval_rdjcv */
 
 #define TOP_ESA_BOTTOMUP_rdjcv\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -120,7 +120,7 @@ static GtBUItvinfo_rdjcv *allocateBUstack_rdjcv(GtBUItvinfo_rdjcv *ptr,
 
 int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_rdjcv *bustate,
-                    /* Nothing*/
+                    /* no parameter snrp */
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -136,11 +136,12 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
   stack = gt_GtArrayGtBUItvinfo_new_rdjcv();
   PUSH_ESA_BOTTOMUP_rdjcv(0,0);
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  for (idx = 0; idx < numberofsuffixes; idx++)
+  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    /* Nothing */
+    /* no init of previousseqnum and previousrelpos */
+    gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_rdjcv.lcp)
     {
       if (TOP_ESA_BOTTOMUP_rdjcv.lcp > 0 || !firstedgefromroot)
@@ -159,15 +160,14 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                           err) != 0)
       {
         haserr = true;
-        break;
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_rdjcv.lcp)
+    while (!haserr && lcpvalue < TOP_ESA_BOTTOMUP_rdjcv.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP_rdjcv;
       lastinterval->rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_rdjcv */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_rdjcv.lcp)
       {
         if (TOP_ESA_BOTTOMUP_rdjcv.lcp > 0 || !firstedgefromroot)
@@ -188,16 +188,11 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                    err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       }
     }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_rdjcv.lcp)
+    if (!haserr && lcpvalue > TOP_ESA_BOTTOMUP_rdjcv.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -215,7 +210,6 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                        err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       } else
@@ -229,7 +223,6 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                             err) != 0)
         {
           haserr = true;
-          break;
         }
       }
     }
@@ -237,7 +230,7 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_rdjcv.lcp > 0)
   {
-    /* Nothing */
+    /* no assignment to lastsuftabvalue */
     if (processleafedge_rdjcv(false,
                         TOP_ESA_BOTTOMUP_rdjcv.lcp,
                         &TOP_ESA_BOTTOMUP_rdjcv.info,
@@ -249,7 +242,7 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_rdjcv.rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_rdjcv */
     }
   }
   gt_GtArrayGtBUItvinfo_delete_rdjcv(stack,bustate);

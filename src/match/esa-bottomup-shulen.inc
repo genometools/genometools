@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-/* Nothing */
+/* no include for seqnumrelpos.h */
 
 static void initBUinfo_shulen(GtBUinfo_shulen *,GtBUstate_shulen *);
 
@@ -40,7 +40,7 @@ static int processbranchingedge_shulen(bool firstsucc,
     GtBUstate_shulen *,
     GtError *);
 
-/* Nothing */
+/* no declaration of processlcpinterval_shulen */
 
 #define TOP_ESA_BOTTOMUP_shulen\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -120,7 +120,7 @@ static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
 
 int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_shulen *bustate,
-                    /* Nothing*/
+                    /* no parameter snrp */
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -136,11 +136,12 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
   stack = gt_GtArrayGtBUItvinfo_new_shulen();
   PUSH_ESA_BOTTOMUP_shulen(0,0);
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  for (idx = 0; idx < numberofsuffixes; idx++)
+  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    /* Nothing */
+    /* no init of previousseqnum and previousrelpos */
+    gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
     {
       if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
@@ -159,15 +160,14 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                           err) != 0)
       {
         haserr = true;
-        break;
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_shulen.lcp)
+    while (!haserr && lcpvalue < TOP_ESA_BOTTOMUP_shulen.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP_shulen;
       lastinterval->rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_shulen */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
       {
         if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
@@ -188,16 +188,11 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                    err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       }
     }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_shulen.lcp)
+    if (!haserr && lcpvalue > TOP_ESA_BOTTOMUP_shulen.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -215,7 +210,6 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                        err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       } else
@@ -229,7 +223,6 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                             err) != 0)
         {
           haserr = true;
-          break;
         }
       }
     }
@@ -237,7 +230,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_shulen.lcp > 0)
   {
-    /* Nothing */
+    /* no assignment to lastsuftabvalue */
     if (processleafedge_shulen(false,
                         TOP_ESA_BOTTOMUP_shulen.lcp,
                         &TOP_ESA_BOTTOMUP_shulen.info,
@@ -249,7 +242,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_shulen.rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_shulen */
     }
   }
   gt_GtArrayGtBUItvinfo_delete_shulen(stack,bustate);

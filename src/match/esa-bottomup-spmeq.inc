@@ -28,7 +28,7 @@ static int processleafedge_spmeq(bool,
     unsigned long,
     GtBUinfo_spmeq *,
     unsigned long, /* seqnum */
-unsigned long, /* relpos */
+    unsigned long, /* relpos */
     GtBUstate_spmeq *,
     GtError *err);
 
@@ -41,7 +41,7 @@ static int processbranchingedge_spmeq(bool firstsucc,
     GtBUstate_spmeq *,
     GtError *);
 
-/* Nothing */
+/* no declaration of processlcpinterval_spmeq */
 
 #define TOP_ESA_BOTTOMUP_spmeq\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -118,6 +118,7 @@ static GtBUItvinfo_spmeq *allocateBUstack_spmeq(GtBUItvinfo_spmeq *ptr,
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
+
 int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
                         unsigned long numberofsuffixes,
@@ -127,25 +128,25 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                         GtError *err)
 {
   unsigned long previousseqnum = 0,
-              previousrelpos = 0;
+                previousrelpos = 0;
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,
                 lastsuftabvalue,
                 idx;
   GtBUItvinfo_spmeq *lastinterval = NULL;
-  bool haserr = false,
-       firstedge,
-       firstedgefromroot = true; /* must be part of state */
+  bool haserr = false, firstedge, firstedgefromroot;
 
-  gt_assert(numberofsuffixes > 0);
   PUSH_ESA_BOTTOMUP_spmeq(0,0);
-  for (idx = 0; idx < numberofsuffixes-1; idx++)
+  firstedgefromroot = true;
+  gt_assert(numberofsuffixes > 0);
+  for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
     previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);
     previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);
+    gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmeq.lcp)
     {
       if (TOP_ESA_BOTTOMUP_spmeq.lcp > 0 || !firstedgefromroot)
@@ -165,15 +166,14 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                           err) != 0)
       {
         haserr = true;
-        break;
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_spmeq.lcp)
+    while (!haserr && lcpvalue < TOP_ESA_BOTTOMUP_spmeq.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP_spmeq;
       lastinterval->rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_spmeq */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_spmeq.lcp)
       {
         if (TOP_ESA_BOTTOMUP_spmeq.lcp > 0 || !firstedgefromroot)
@@ -194,16 +194,11 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                    err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       }
     }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_spmeq.lcp)
+    if (!haserr && lcpvalue > TOP_ESA_BOTTOMUP_spmeq.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -221,7 +216,6 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                        err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       } else
@@ -236,7 +230,6 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                             err) != 0)
         {
           haserr = true;
-          break;
         }
       }
     }
@@ -257,7 +250,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
     } else
     {
       TOP_ESA_BOTTOMUP_spmeq.rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_spmeq */
     }
   }
   stack->nextfreeGtBUItvinfo = 0; /* empty the stack */

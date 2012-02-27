@@ -18,7 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-/* Nothing */
+/* no include for seqnumrelpos.h */
 
 static void initBUinfo_maxpairs(GtBUinfo_maxpairs *,GtBUstate_maxpairs *);
 
@@ -40,7 +40,7 @@ static int processbranchingedge_maxpairs(bool firstsucc,
     GtBUstate_maxpairs *,
     GtError *);
 
-/* Nothing */
+/* no declaration of processlcpinterval_maxpairs */
 
 #define TOP_ESA_BOTTOMUP_maxpairs\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -120,7 +120,7 @@ static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
 
 int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_maxpairs *bustate,
-                    /* Nothing*/
+                    /* no parameter snrp */
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -136,11 +136,12 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
   stack = gt_GtArrayGtBUItvinfo_new_maxpairs();
   PUSH_ESA_BOTTOMUP_maxpairs(0,0);
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  for (idx = 0; idx < numberofsuffixes; idx++)
+  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    /* Nothing */
+    /* no init of previousseqnum and previousrelpos */
+    gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {
       if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
@@ -159,15 +160,14 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                           err) != 0)
       {
         haserr = true;
-        break;
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_maxpairs.lcp)
+    while (!haserr && lcpvalue < TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP_maxpairs;
       lastinterval->rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_maxpairs */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
       {
         if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
@@ -188,16 +188,11 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                    err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       }
     }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_maxpairs.lcp)
+    if (!haserr && lcpvalue > TOP_ESA_BOTTOMUP_maxpairs.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -215,7 +210,6 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                        err) != 0)
         {
           haserr = true;
-          break;
         }
         lastinterval = NULL;
       } else
@@ -229,7 +223,6 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                             err) != 0)
         {
           haserr = true;
-          break;
         }
       }
     }
@@ -237,7 +230,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_maxpairs.lcp > 0)
   {
-    /* Nothing */
+    /* no assignment to lastsuftabvalue */
     if (processleafedge_maxpairs(false,
                         TOP_ESA_BOTTOMUP_maxpairs.lcp,
                         &TOP_ESA_BOTTOMUP_maxpairs.info,
@@ -249,7 +242,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_maxpairs.rb = idx;
-      /* Nothing */
+      /* no call to processlcpinterval_maxpairs */
     }
   }
   gt_GtArrayGtBUItvinfo_delete_maxpairs(stack,bustate);

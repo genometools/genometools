@@ -15,7 +15,8 @@ def parseargs(argv)
   options.absolute = false
   options.with_process_branching = true
   options.with_process_lcpinterval = true
-  options.withlastsuftabvalue = true
+  options.process_lastvalue = true
+  options.withlastfrompreviousbucket = false
   options.lcptypeulong = false
   opts = OptionParser.new
   opts.on("-k","--key STRING","use given key as suffix for all symbols") do |x|
@@ -33,15 +34,21 @@ def parseargs(argv)
   opts.on("--no_process_lcpinterval","no processlcpinterval function") do |x|
     options.with_process_lcpinterval = false
   end
-  opts.on("--nolastvalue","no proceccing of lastsuftabvalue") do |x|
-    options.withlastsuftabvalue = false
+  opts.on("--no_process_lastvalue","no proceccing of lastsuftabvalue") do |x|
+    options.process_lastvalue = false
   end
   opts.on("--lcptypeulong","use unsigned long for lcp type") do |x|
     options.lcptypeulong = true
   end
+  opts.on("--withlastfrompreviousbucket","process last value from previous bucket") do |x|
+    options.withlastfrompreviousbucket = true
+  end
   rest = opts.parse(argv)
   if not rest.empty?
     usage(opts,"superfluous arguments")
+  end
+  if options.key.nil?
+    usage(opts,"option --key is mandatory")
   end
   return options
 end
@@ -51,7 +58,7 @@ def processleafedgeargs(options)
     return "unsigned long, /* position */"
   else
     return "unsigned long, /* seqnum */\n" +
-           "unsigned long, /* relpos */"
+           "    unsigned long, /* relpos */"
   end
 end
 
@@ -86,7 +93,7 @@ def previousseqnumrelpos(options)
     return "previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);\n" +
            "    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);"
   else
-    return "/* Nothing */"
+    return "/* no init of previousseqnum and previousrelpos */"
   end
 end
 
@@ -102,10 +109,9 @@ def processbranching_call1(key,options)
            "                   err) != 0)\n" +
            "        {\n" +
            "          haserr = true;\n" +
-           "          break;\n" +
            "        }"
   else
-    return "/* Nothing */"
+    return "/* no call to processbranchingedge_#{key} */"
   end
 end
 
@@ -124,7 +130,6 @@ def processbranching_call2(key,options)
            "                       err) != 0)\n" +
            "        {\n" +
            "          haserr = true;\n" +
-           "          break;\n" +
            "        }"
   else
     return "PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);"
@@ -138,7 +143,7 @@ def processlcpinterval_decl(key,options)
                        "    GtBUstate_#{key} *,\n" +
                        "    GtError *err);"
   else
-    return "/* Nothing */"
+    return "/* no declaration of processlcpinterval_#{key} */"
   end
 end
 
@@ -150,10 +155,9 @@ def processlcpinterval_call1(key,options)
            "                             err) != 0)\n" +
            "      {\n" +
            "        haserr = true;\n" +
-           "        break;\n" +
            "      }"
   else
-    return "/* Nothing */"
+    return "/* no call to processlcpinterval_#{key} */"
   end
 end
 
@@ -167,13 +171,22 @@ def processlcpinterval_call2(key,options)
            "        haserr = true;\n" +
            "      }"
   else
-    return "/* Nothing */"
+    return "/* no call to processlcpinterval_#{key} */"
   end
 end
 
-def mainloop(key,options)
+def showidxexpr(options)
+  if options.withlastfrompreviousbucket
+    return "idx + bustate->idxoffset"
+  else
+    return "idx"
+  end
+end
+
+def process_suf_lcp(key,options)
 print <<END_OF_FILE
     #{previousseqnumrelpos(options)}
+    gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
     {
       if (TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot)
@@ -192,14 +205,13 @@ print <<END_OF_FILE
                           err) != 0)
       {
         haserr = true;
-        break;
       }
     }
     gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_#{key}.lcp)
+    while (!haserr && lcpvalue < TOP_ESA_BOTTOMUP_#{key}.lcp)
     {
       lastinterval = POP_ESA_BOTTOMUP_#{key};
-      lastinterval->rb = idx;
+      lastinterval->rb = #{showidxexpr(options)};
       #{processlcpinterval_call1(key,options)}
       if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
       {
@@ -215,11 +227,7 @@ print <<END_OF_FILE
         lastinterval = NULL;
       }
     }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_#{key}.lcp)
+    if (!haserr && lcpvalue > TOP_ESA_BOTTOMUP_#{key}.lcp)
     {
       if (lastinterval != NULL)
       {
@@ -228,7 +236,7 @@ print <<END_OF_FILE
         lastinterval = NULL;
       } else
       {
-        PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,idx);
+        PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,#{showidxexpr(options)});
         if (processleafedge_#{key}(true,
                             TOP_ESA_BOTTOMUP_#{key}.lcp,
                             &TOP_ESA_BOTTOMUP_#{key}.info,
@@ -237,7 +245,6 @@ print <<END_OF_FILE
                             err) != 0)
         {
           haserr = true;
-          break;
         }
       }
     }
@@ -248,11 +255,12 @@ def lastsuftabvalue_fromarray(options)
   if not options.usefile
     return "lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];"
   else
-    return "/* Nothing */"
+    return "/* no assignment to lastsuftabvalue */"
   end
 end
 
 def lastsuftabvalue_get(key,options)
+  if options.process_lastvalue
 print <<END_OF_FILE
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_#{key}.lcp > 0)
@@ -268,18 +276,27 @@ print <<END_OF_FILE
       haserr = true;
     } else
     {
-      TOP_ESA_BOTTOMUP_#{key}.rb = idx;
+      TOP_ESA_BOTTOMUP_#{key}.rb = #{showidxexpr(options)};
       #{processlcpinterval_call2(key,options)}
     }
   }
 END_OF_FILE
+  else
+print <<END_OF_FILE
+  if (!haserr)
+  {
+    bustate->previousbucketlastsuffix = bucketofsuffixes[numberofsuffixes-1];
+    bustate->firstedgefromroot = firstedgefromroot;
+  }
+END_OF_FILE
+  end
 end
 
 def seqnumrelpos_include(options)
   if not options.absolute
     return "#include \"seqnumrelpos.h\""
   else
-    return "/* Nothing */"
+    return "/* no include for seqnumrelpos.h */"
   end
 end
 
@@ -294,7 +311,7 @@ def processbranchingedge_decl(key,options)
            "    GtBUstate_#{key} *,\n" +
            "    GtError *);"
   else
-   return "/* Nothing*/"
+   return "/* no declaration of processbranchingedge_#{key} */"
   end
 end
 
@@ -302,16 +319,43 @@ def return_snrp_decl(options)
   if not options.absolute
     return "const GtSeqnumrelpos *snrp,"
   else
-    return "/* Nothing*/"
+    return "/* no parameter snrp */"
   end
 end
 
 def return_previous_decl(options)
   if not options.absolute
     return "unsigned long previousseqnum = 0,\n" +
-           "              previousrelpos = 0;"
+           "                previousrelpos = 0;"
   else
-    return "/* Nothing*/"
+    return "/* no declaration of previousseqnum and previousrelpos */"
+  end
+end
+
+def initfirstinterval(key,options)
+  if options.withlastfrompreviousbucket
+print <<END_OF_FILE
+
+  if (bustate->previousbucketlastsuffix != ULONG_MAX)
+  {
+    previoussuffix = bustate->previousbucketlastsuffix;
+    lcpvalue = (unsigned long) lcptab_bucket[0];
+    firstedgefromroot = bustate->firstedgefromroot;
+END_OF_FILE
+    process_suf_lcp(key,options)
+print <<END_OF_FILE
+  } else
+  {
+    PUSH_ESA_BOTTOMUP_#{key}(0,0);
+    firstedgefromroot = true;
+  }
+END_OF_FILE
+  else
+print <<END_OF_FILE
+
+  PUSH_ESA_BOTTOMUP_#{key}(0,0);
+  firstedgefromroot = true;
+END_OF_FILE
   end
 end
 
@@ -454,13 +498,14 @@ int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
   stack = gt_GtArrayGtBUItvinfo_new_#{key}();
   PUSH_ESA_BOTTOMUP_#{key}(0,0);
   numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  for (idx = 0; idx < numberofsuffixes; idx++)
+  for (idx = 0; !haserr && idx < numberofsuffixes; idx++)
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
 END_OF_FILE
 else
 print <<END_OF_FILE
+
 int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
                         #{lcptype(options)} *lcptab_bucket,
                         unsigned long numberofsuffixes,
@@ -476,26 +521,25 @@ int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
                 lastsuftabvalue,
                 idx;
   GtBUItvinfo_#{key} *lastinterval = NULL;
-  bool haserr = false,
-       firstedge,
-       firstedgefromroot = true; /* must be part of state */
+  bool haserr = false, firstedge, firstedgefromroot;
+END_OF_FILE
 
+initfirstinterval(key,options)
+
+print <<END_OF_FILE
   gt_assert(numberofsuffixes > 0);
-  PUSH_ESA_BOTTOMUP_#{key}(0,0);
-  for (idx = 0; idx < numberofsuffixes-1; idx++)
+  for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
 END_OF_FILE
 end
-mainloop(key,options)
+process_suf_lcp(key,options)
 puts "  }"
-if options.withlastsuftabvalue
-  lastsuftabvalue_get(key,options)
-end
+lastsuftabvalue_get(key,options)
 if options.usefile
   puts "  gt_GtArrayGtBUItvinfo_delete_#{key}(stack,bustate);"
-else
+elsif options.process_lastvalue
   puts "  stack->nextfreeGtBUItvinfo = 0; /* empty the stack */"
 end
 puts "  return haserr ? -1 : 0;"
