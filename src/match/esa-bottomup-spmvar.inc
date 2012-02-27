@@ -230,7 +230,7 @@ int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
                             TOP_ESA_BOTTOMUP_spmvar.lcp,
                             &TOP_ESA_BOTTOMUP_spmvar.info,
                             gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix),
-                          gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),
+                            gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),
                             bustate,
                             err) != 0)
         {

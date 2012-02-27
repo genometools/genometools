@@ -70,22 +70,26 @@ def lcptype(options)
   end
 end
 
-def previoussuffix_param_get(options)
+def spacer(width)
+  s = ""
+  0.upto(width-1) do |idx|
+    s += " "
+  end
+  return s
+end
+
+def previoussuffix_expr_get(width,variable,options)
   if options.absolute
-    return "previoussuffix,"
-  else
-    return "gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix),\n" +
-           "                          gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),"
+    return variable + ","
+  else 
+    return "gt_seqnumrelpos_decode_seqnum(snrp,#{variable}),\n" +
+           spacer(width) +
+           "gt_seqnumrelpos_decode_relpos(snrp,#{variable}),"
   end
 end
 
-def previoussuffix_expr_get(options)
-  if options.absolute
-    return "lastsuftabvalue,"
-  else 
-    return "gt_seqnumrelpos_decode_seqnum(snrp,lastsuftabvalue),\n" +
-           "                        gt_seqnumrelpos_decode_relpos(snrp,lastsuftabvalue),"
-  end
+def previoussuffix_param_get(width,options)
+  return previoussuffix_expr_get(width,"previoussuffix",options)
 end
 
 def processbranching_call1(key,options)
@@ -190,7 +194,7 @@ print <<END_OF_FILE
       if (processleafedge_#{key}(firstedge,
                           TOP_ESA_BOTTOMUP_#{key}.lcp,
                           &TOP_ESA_BOTTOMUP_#{key}.info,
-                          #{previoussuffix_param_get(options)}
+                          #{previoussuffix_param_get(26,options)}
                           bustate,
                           err) != 0)
       {
@@ -230,7 +234,7 @@ print <<END_OF_FILE
         if (processleafedge_#{key}(true,
                             TOP_ESA_BOTTOMUP_#{key}.lcp,
                             &TOP_ESA_BOTTOMUP_#{key}.info,
-                            #{previoussuffix_param_get(options)}
+                            #{previoussuffix_param_get(28,options)}
                             bustate,
                             err) != 0)
         {
@@ -259,7 +263,7 @@ print <<END_OF_FILE
     if (processleafedge_#{key}(false,
                         TOP_ESA_BOTTOMUP_#{key}.lcp,
                         &TOP_ESA_BOTTOMUP_#{key}.info,
-                        #{previoussuffix_expr_get(options)}
+                        #{previoussuffix_expr_get(24,"lastsuftabvalue",options)}
                         bustate,
                         err) != 0)
     {

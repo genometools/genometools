@@ -221,7 +221,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                             TOP_ESA_BOTTOMUP_spmeq.lcp,
                             &TOP_ESA_BOTTOMUP_spmeq.info,
                             gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix),
-                          gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),
+                            gt_seqnumrelpos_decode_relpos(snrp,previoussuffix),
                             bustate,
                             err) != 0)
         {
