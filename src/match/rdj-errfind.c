@@ -216,7 +216,6 @@ static int processlcpinterval_errfind(unsigned long lcp,
   return 0;
 }
 
-#undef GT_ESA_BOTTOM_UP_RAM
 #include "match/esa-bottomup-errfind.inc"
 
 int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,

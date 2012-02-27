@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,9 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-#ifdef GT_ESA_BOTTOM_UP_RAM
 #include "seqnumrelpos.h"
-#endif
 
 static void initBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 
@@ -29,25 +27,12 @@ static void freeBUinfo_spmsk(GtBUinfo_spmsk *,GtBUstate_spmsk *);
 static int processleafedge_spmsk(bool,
     unsigned long,
     GtBUinfo_spmsk *,
-#ifdef GT_ESA_BOTTOM_UP_RAM
     unsigned long, /* seqnum */
-    unsigned long, /* relpos */
-#else
-    unsigned long, /* position */
-#endif
+unsigned long, /* relpos */
     GtBUstate_spmsk *,
     GtError *err);
 
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-static int processbranchingedge_spmsk(bool firstsucc,
-    unsigned long,
-    GtBUinfo_spmsk *,
-    unsigned long,
-    unsigned long,
-    GtBUinfo_spmsk *,
-    GtBUstate_spmsk *,
-    GtError *);
-#endif
+/* Nothing*/
 
 static int processlcpinterval_spmsk(unsigned long,
     GtBUinfo_spmsk *,
@@ -56,13 +41,15 @@ static int processlcpinterval_spmsk(unsigned long,
 
 #define TOP_ESA_BOTTOMUP_spmsk\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
+
 #define POP_ESA_BOTTOMUP_spmsk\
         (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
 #define PUSH_ESA_BOTTOMUP_spmsk(LCP,LB)\
         if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
-          gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
+          gt_assert(stack->nextfreeGtBUItvinfo ==\
+                    stack->allocatedGtBUItvinfo);\
           stack->spaceGtBUItvinfo\
             = allocateBUstack_spmsk(stack->spaceGtBUItvinfo,\
                               stack->allocatedGtBUItvinfo,\
@@ -127,187 +114,24 @@ static GtBUItvinfo_spmsk *allocateBUstack_spmsk(GtBUItvinfo_spmsk *ptr,
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
-
-#ifndef GT_ESA_BOTTOM_UP_RAM
-
-int gt_esa_bottomup_spmsk(Sequentialsuffixarrayreader *ssar,
-                    GtBUstate_spmsk *bustate,
-                    GtError *err)
-{
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
-                previoussuffix = 0,
-                idx,
-                numberofsuffixes,
-                lastsuftabvalue = 0;
-  GtBUItvinfo_spmsk *lastinterval = NULL;
-  bool haserr = false, firstedge, firstedgefromroot = true;
-  GtArrayGtBUItvinfo_spmsk *stack;
-
-  stack = gt_GtArrayGtBUItvinfo_new_spmsk();
-  PUSH_ESA_BOTTOMUP_spmsk(0,0);
-  numberofsuffixes = gt_Sequentialsuffixarrayreader_nonspecials(ssar);
-  for (idx = 0; idx < numberofsuffixes; idx++)
-  {
-    NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
-    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
-    if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
-    {
-      if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
-      {
-        firstedge = false;
-      } else
-      {
-        firstedge = true;
-        firstedgefromroot = false;
-      }
-      if (processleafedge_spmsk(firstedge,
-                          TOP_ESA_BOTTOMUP_spmsk.lcp,
-                          &TOP_ESA_BOTTOMUP_spmsk.info,
-                          previoussuffix,
-                          bustate,
-                          err) != 0)
-      {
-        haserr = true;
-        break;
-      }
-    }
-    gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_spmsk.lcp)
-    {
-      lastinterval = POP_ESA_BOTTOMUP_spmsk;
-      lastinterval->rb = idx;
-      if (processlcpinterval_spmsk(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
-      {
-        if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
-        {
-          firstedge = false;
-        } else
-        {
-          firstedge = true;
-          firstedgefromroot = false;
-        }
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk(firstedge,
-                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
-                                 &TOP_ESA_BOTTOMUP_spmsk.info,
-                                 lastinterval->lcp,
-                                 lastinterval->rb - lastinterval->lb + 1,
-                                 &lastinterval->info,
-                                 bustate,
-                                 err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-#endif
-        lastinterval = NULL;
-      }
-    }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_spmsk.lcp)
-    {
-      if (lastinterval != NULL)
-      {
-        unsigned long lastintervallb = lastinterval->lb;
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        unsigned long lastintervallcp = lastinterval->lcp,
-                      lastintervalrb = lastinterval->rb;
-#endif
-        PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk(true,
-                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
-                                 &TOP_ESA_BOTTOMUP_spmsk.info,
-                                 lastintervallcp,
-                                 lastintervalrb - lastintervallb + 1,
-                                 NULL,
-                                 bustate,
-                                 err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-#endif
-        lastinterval = NULL;
-      } else
-      {
-        PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,idx);
-        if (processleafedge_spmsk(true,
-                            TOP_ESA_BOTTOMUP_spmsk.lcp,
-                            &TOP_ESA_BOTTOMUP_spmsk.info,
-                            previoussuffix,
-                            bustate,
-                            err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-    }
-  }
-  gt_assert(stack->nextfreeGtBUItvinfo > 0);
-  if (!haserr && TOP_ESA_BOTTOMUP_spmsk.lcp > 0)
-  {
-    if (processleafedge_spmsk(false,
-                        TOP_ESA_BOTTOMUP_spmsk.lcp,
-                        &TOP_ESA_BOTTOMUP_spmsk.info,
-                        lastsuftabvalue,
-                        bustate,
-                        err) != 0)
-    {
-      haserr = true;
-    } else
-    {
-      TOP_ESA_BOTTOMUP_spmsk.rb = idx;
-      if (processlcpinterval_spmsk(TOP_ESA_BOTTOMUP_spmsk.lcp,
-                             &TOP_ESA_BOTTOMUP_spmsk.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
-    }
-  }
-  gt_GtArrayGtBUItvinfo_delete_spmsk(stack,bustate);
-  return haserr ? -1 : 0;
-}
-
-#else
-
 int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
-                        const GtBUlcptype_spmsk *lcptab_bucket,
+                        const uint16_t *lcptab_bucket,
                         unsigned long numberofsuffixes,
                         GtArrayGtBUItvinfo_spmsk *stack,
                         GtBUstate_spmsk *bustate,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
                         const GtSeqnumrelpos *snrp,
-#endif
                         GtError *err)
 {
+  unsigned long previousseqnum = 0,
+              previousrelpos = 0;
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,
                 lastsuftabvalue,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-                previousseqnum = 0,
-                previousrelpos = 0,
-#endif
                 idx;
   GtBUItvinfo_spmsk *lastinterval = NULL;
-  bool haserr = false, 
-       firstedge, 
+  bool haserr = false,
+       firstedge,
        firstedgefromroot = true; /* must be part of state */
 
   gt_assert(numberofsuffixes > 0);
@@ -316,10 +140,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
     previoussuffix = bucketofsuffixes[idx];
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
     previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);
     previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);
-#endif
     if (lcpvalue <= TOP_ESA_BOTTOMUP_spmsk.lcp)
     {
       if (TOP_ESA_BOTTOMUP_spmsk.lcp > 0 || !firstedgefromroot)
@@ -333,12 +155,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
       if (processleafedge_spmsk(firstedge,
                           TOP_ESA_BOTTOMUP_spmsk.lcp,
                           &TOP_ESA_BOTTOMUP_spmsk.info,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
                           previousseqnum,
                           previousrelpos,
-#else
-                          previoussuffix,
-#endif
                           bustate,
                           err) != 0)
       {
@@ -369,20 +187,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
           firstedge = true;
           firstedgefromroot = false;
         }
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk(firstedge,
-                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
-                                 &TOP_ESA_BOTTOMUP_spmsk.info,
-                                 lastinterval->lcp,
-                                 lastinterval->rb - lastinterval->lb + 1,
-                                 &lastinterval->info,
-                                 bustate,
-                                 err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-#endif
+        /* Nothing */
         lastinterval = NULL;
       }
     }
@@ -395,25 +200,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
       if (lastinterval != NULL)
       {
         unsigned long lastintervallb = lastinterval->lb;
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        unsigned long lastintervallcp = lastinterval->lcp,
-                      lastintervalrb = lastinterval->rb;
-#endif
         PUSH_ESA_BOTTOMUP_spmsk(lcpvalue,lastintervallb);
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_spmsk(true,
-                                 TOP_ESA_BOTTOMUP_spmsk.lcp,
-                                 &TOP_ESA_BOTTOMUP_spmsk.info,
-                                 lastintervallcp,
-                                 lastintervalrb - lastintervallb + 1,
-                                 NULL,
-                                 bustate,
-                                 err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-#endif
         lastinterval = NULL;
       } else
       {
@@ -421,12 +208,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
         if (processleafedge_spmsk(true,
                             TOP_ESA_BOTTOMUP_spmsk.lcp,
                             &TOP_ESA_BOTTOMUP_spmsk.info,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
                             previousseqnum,
-                            previousrelpos,
-#else
-                            previoussuffix,
-#endif
+                          previousrelpos,
                             bustate,
                             err) != 0)
         {
@@ -443,12 +226,8 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
     if (processleafedge_spmsk(false,
                         TOP_ESA_BOTTOMUP_spmsk.lcp,
                         &TOP_ESA_BOTTOMUP_spmsk.info,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
                         gt_seqnumrelpos_decode_seqnum(snrp,lastsuftabvalue),
                         gt_seqnumrelpos_decode_relpos(snrp,lastsuftabvalue),
-#else
-                        lastsuftabvalue,
-#endif
                         bustate,
                         err) != 0)
     {
@@ -468,7 +247,3 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   stack->nextfreeGtBUItvinfo = 0; /* empty the stack */
   return haserr ? -1 : 0;
 }
-
-#endif
-/* vim: ft=c
-*/

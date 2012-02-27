@@ -1,11 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 
 TEMPLATE=src/match/esa-bottomup
+SC=scripts/gen-esa-bottomup.rb
 
-for suffix in maxpairs shulen spmsk rdjce rdjcv spmeq spmvar errfind
-do
-  file=${TEMPLATE}-${suffix}.inc
-  rm -f $file
-  scripts/appendsuffix.rb ${TEMPLATE}.gen ${suffix} GtBUinfo GtBUstate GtBUlcptype \
-                          GtArrayGtBUItvinfo > $file
-done
+${SC} --key spmsk --nobranch > ${TEMPLATE}-spmsk.inc
+${SC} --key spmeq > ${TEMPLATE}-spmeq.inc
+${SC} --key spmvar > ${TEMPLATE}-spmvar.inc
+${SC} --key rdjcv --reader --absolute > ${TEMPLATE}-rdjcv.inc
+${SC} --key rdjce --reader --absolute > ${TEMPLATE}-rdjce.inc
+${SC} --key shulen --reader --absolute > ${TEMPLATE}-shulen.inc
+${SC} --key maxpairs --reader --absolute > ${TEMPLATE}-maxpairs.inc
+${SC} --key errfind --reader --absolute > ${TEMPLATE}-errfind.inc

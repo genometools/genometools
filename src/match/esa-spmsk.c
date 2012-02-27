@@ -122,12 +122,7 @@ static int processlcpinterval_spmsk(unsigned long lcp,
   return 0;
 }
 
-#define GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-#define GT_ESA_BOTTOM_UP_RAM
-typedef uint16_t GtBUlcptype_spmsk;
-#define GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
 #include "esa-bottomup-spmsk.inc"
-#undef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
 
 GtBUstate_spmsk *gt_spmsk_inl_new(const GtEncseq *encseq,
                             GtReadmode readmode,
@@ -198,5 +193,3 @@ void gt_spmsk_inl_process_end(GT_UNUSED void *data)
 {
   return;
 }
-
-#undef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE

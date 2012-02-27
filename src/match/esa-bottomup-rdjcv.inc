@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,9 +18,7 @@
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-#ifdef GT_ESA_BOTTOM_UP_RAM
-#include "seqnumrelpos.h"
-#endif
+/* Nothing */
 
 static void initBUinfo_rdjcv(GtBUinfo_rdjcv *,GtBUstate_rdjcv *);
 
@@ -29,16 +27,10 @@ static void freeBUinfo_rdjcv(GtBUinfo_rdjcv *,GtBUstate_rdjcv *);
 static int processleafedge_rdjcv(bool,
     unsigned long,
     GtBUinfo_rdjcv *,
-#ifdef GT_ESA_BOTTOM_UP_RAM
-    unsigned long, /* seqnum */
-    unsigned long, /* relpos */
-#else
     unsigned long, /* position */
-#endif
     GtBUstate_rdjcv *,
     GtError *err);
 
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
 static int processbranchingedge_rdjcv(bool firstsucc,
     unsigned long,
     GtBUinfo_rdjcv *,
@@ -47,7 +39,6 @@ static int processbranchingedge_rdjcv(bool firstsucc,
     GtBUinfo_rdjcv *,
     GtBUstate_rdjcv *,
     GtError *);
-#endif
 
 static int processlcpinterval_rdjcv(unsigned long,
     GtBUinfo_rdjcv *,
@@ -56,13 +47,15 @@ static int processlcpinterval_rdjcv(unsigned long,
 
 #define TOP_ESA_BOTTOMUP_rdjcv\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
+
 #define POP_ESA_BOTTOMUP_rdjcv\
         (stack->spaceGtBUItvinfo + (--stack->nextfreeGtBUItvinfo))
 
 #define PUSH_ESA_BOTTOMUP_rdjcv(LCP,LB)\
         if (stack->nextfreeGtBUItvinfo >= stack->allocatedGtBUItvinfo)\
         {\
-          gt_assert(stack->nextfreeGtBUItvinfo == stack->allocatedGtBUItvinfo);\
+          gt_assert(stack->nextfreeGtBUItvinfo ==\
+                    stack->allocatedGtBUItvinfo);\
           stack->spaceGtBUItvinfo\
             = allocateBUstack_rdjcv(stack->spaceGtBUItvinfo,\
                               stack->allocatedGtBUItvinfo,\
@@ -128,10 +121,9 @@ static GtBUItvinfo_rdjcv *allocateBUstack_rdjcv(GtBUItvinfo_rdjcv *ptr,
   return itvinfo;
 }
 
-#ifndef GT_ESA_BOTTOM_UP_RAM
-
 int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_rdjcv *bustate,
+                    /* Nothing*/
                     GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
@@ -151,6 +143,7 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
   {
     NEXTSEQUENTIALLCPTABVALUEWITHLAST(lcpvalue,lastsuftabvalue,ssar);
     NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+    /* Nothing */
     if (lcpvalue <= TOP_ESA_BOTTOMUP_rdjcv.lcp)
     {
       if (TOP_ESA_BOTTOMUP_rdjcv.lcp > 0 || !firstedgefromroot)
@@ -195,20 +188,18 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
           firstedge = true;
           firstedgefromroot = false;
         }
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_rdjcv(firstedge,
-                                 TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                                 &TOP_ESA_BOTTOMUP_rdjcv.info,
-                                 lastinterval->lcp,
-                                 lastinterval->rb - lastinterval->lb + 1,
-                                 &lastinterval->info,
-                                 bustate,
-                                 err) != 0)
+                   TOP_ESA_BOTTOMUP_rdjcv.lcp,
+                   &TOP_ESA_BOTTOMUP_rdjcv.info,
+                   lastinterval->lcp,
+                   lastinterval->rb - lastinterval->lb + 1,
+                   &lastinterval->info,
+                   bustate,
+                   err) != 0)
         {
           haserr = true;
           break;
         }
-#endif
         lastinterval = NULL;
       }
     }
@@ -221,25 +212,21 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
       if (lastinterval != NULL)
       {
         unsigned long lastintervallb = lastinterval->lb;
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         unsigned long lastintervallcp = lastinterval->lcp,
-                      lastintervalrb = lastinterval->rb;
-#endif
+              lastintervalrb = lastinterval->rb;
         PUSH_ESA_BOTTOMUP_rdjcv(lcpvalue,lastintervallb);
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
         if (processbranchingedge_rdjcv(true,
-                                 TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                                 &TOP_ESA_BOTTOMUP_rdjcv.info,
-                                 lastintervallcp,
-                                 lastintervalrb - lastintervallb + 1,
-                                 NULL,
-                                 bustate,
-                                 err) != 0)
+                       TOP_ESA_BOTTOMUP_rdjcv.lcp,
+                       &TOP_ESA_BOTTOMUP_rdjcv.info,
+                       lastintervallcp,
+                       lastintervalrb - lastintervallb + 1,
+                       NULL,
+                       bustate,
+                       err) != 0)
         {
           haserr = true;
           break;
         }
-#endif
         lastinterval = NULL;
       } else
       {
@@ -260,6 +247,7 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_rdjcv.lcp > 0)
   {
+    /* Nothing */
     if (processleafedge_rdjcv(false,
                         TOP_ESA_BOTTOMUP_rdjcv.lcp,
                         &TOP_ESA_BOTTOMUP_rdjcv.info,
@@ -283,192 +271,3 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
   gt_GtArrayGtBUItvinfo_delete_rdjcv(stack,bustate);
   return haserr ? -1 : 0;
 }
-
-#else
-
-int gt_esa_bottomup_RAM_rdjcv(const unsigned long *bucketofsuffixes,
-                        const GtBUlcptype_rdjcv *lcptab_bucket,
-                        unsigned long numberofsuffixes,
-                        GtArrayGtBUItvinfo_rdjcv *stack,
-                        GtBUstate_rdjcv *bustate,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-                        const GtSeqnumrelpos *snrp,
-#endif
-                        GtError *err)
-{
-  const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
-                previoussuffix,
-                lastsuftabvalue,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-                previousseqnum = 0,
-                previousrelpos = 0,
-#endif
-                idx;
-  GtBUItvinfo_rdjcv *lastinterval = NULL;
-  bool haserr = false, 
-       firstedge, 
-       firstedgefromroot = true; /* must be part of state */
-
-  gt_assert(numberofsuffixes > 0);
-  PUSH_ESA_BOTTOMUP_rdjcv(0,0);
-  for (idx = 0; idx < numberofsuffixes-1; idx++)
-  {
-    lcpvalue = (unsigned long) lcptab_bucket[idx+1];
-    previoussuffix = bucketofsuffixes[idx];
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-    previousseqnum = gt_seqnumrelpos_decode_seqnum(snrp,previoussuffix);
-    previousrelpos = gt_seqnumrelpos_decode_relpos(snrp,previoussuffix);
-#endif
-    if (lcpvalue <= TOP_ESA_BOTTOMUP_rdjcv.lcp)
-    {
-      if (TOP_ESA_BOTTOMUP_rdjcv.lcp > 0 || !firstedgefromroot)
-      {
-        firstedge = false;
-      } else
-      {
-        firstedge = true;
-        firstedgefromroot = false;
-      }
-      if (processleafedge_rdjcv(firstedge,
-                          TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                          &TOP_ESA_BOTTOMUP_rdjcv.info,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-                          previousseqnum,
-                          previousrelpos,
-#else
-                          previoussuffix,
-#endif
-                          bustate,
-                          err) != 0)
-      {
-        haserr = true;
-        break;
-      }
-    }
-    gt_assert(lastinterval == NULL);
-    while (lcpvalue < TOP_ESA_BOTTOMUP_rdjcv.lcp)
-    {
-      lastinterval = POP_ESA_BOTTOMUP_rdjcv;
-      lastinterval->rb = idx;
-      if (processlcpinterval_rdjcv(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (lcpvalue <= TOP_ESA_BOTTOMUP_rdjcv.lcp)
-      {
-        if (TOP_ESA_BOTTOMUP_rdjcv.lcp > 0 || !firstedgefromroot)
-        {
-          firstedge = false;
-        } else
-        {
-          firstedge = true;
-          firstedgefromroot = false;
-        }
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_rdjcv(firstedge,
-                                 TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                                 &TOP_ESA_BOTTOMUP_rdjcv.info,
-                                 lastinterval->lcp,
-                                 lastinterval->rb - lastinterval->lb + 1,
-                                 &lastinterval->info,
-                                 bustate,
-                                 err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-#endif
-        lastinterval = NULL;
-      }
-    }
-    if (haserr)
-    {
-      break;
-    }
-    if (lcpvalue > TOP_ESA_BOTTOMUP_rdjcv.lcp)
-    {
-      if (lastinterval != NULL)
-      {
-        unsigned long lastintervallb = lastinterval->lb;
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        unsigned long lastintervallcp = lastinterval->lcp,
-                      lastintervalrb = lastinterval->rb;
-#endif
-        PUSH_ESA_BOTTOMUP_rdjcv(lcpvalue,lastintervallb);
-#ifndef GT_ESA_BOTTOM_UP_IGNORE_PROCESSBRANCHING_EDGE
-        if (processbranchingedge_rdjcv(true,
-                                 TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                                 &TOP_ESA_BOTTOMUP_rdjcv.info,
-                                 lastintervallcp,
-                                 lastintervalrb - lastintervallb + 1,
-                                 NULL,
-                                 bustate,
-                                 err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-#endif
-        lastinterval = NULL;
-      } else
-      {
-        PUSH_ESA_BOTTOMUP_rdjcv(lcpvalue,idx);
-        if (processleafedge_rdjcv(true,
-                            TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                            &TOP_ESA_BOTTOMUP_rdjcv.info,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-                            previousseqnum,
-                            previousrelpos,
-#else
-                            previoussuffix,
-#endif
-                            bustate,
-                            err) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-    }
-  }
-  gt_assert(stack->nextfreeGtBUItvinfo > 0);
-  if (!haserr && TOP_ESA_BOTTOMUP_rdjcv.lcp > 0)
-  {
-    lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
-    if (processleafedge_rdjcv(false,
-                        TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                        &TOP_ESA_BOTTOMUP_rdjcv.info,
-#ifdef GT_ESA_BOTTOM_UP_SEQNUM_RELPOS
-                        gt_seqnumrelpos_decode_seqnum(snrp,lastsuftabvalue),
-                        gt_seqnumrelpos_decode_relpos(snrp,lastsuftabvalue),
-#else
-                        lastsuftabvalue,
-#endif
-                        bustate,
-                        err) != 0)
-    {
-      haserr = true;
-    } else
-    {
-      TOP_ESA_BOTTOMUP_rdjcv.rb = idx;
-      if (processlcpinterval_rdjcv(TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                             &TOP_ESA_BOTTOMUP_rdjcv.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
-    }
-  }
-  stack->nextfreeGtBUItvinfo = 0; /* empty the stack */
-  return haserr ? -1 : 0;
-}
-
-#endif
-/* vim: ft=c
-*/
