@@ -40,10 +40,7 @@ static int processbranchingedge_rdjcv(bool firstsucc,
     GtBUstate_rdjcv *,
     GtError *);
 
-static int processlcpinterval_rdjcv(unsigned long,
-    GtBUinfo_rdjcv *,
-    GtBUstate_rdjcv *,
-    GtError *err);
+/* Nothing */
 
 #define TOP_ESA_BOTTOMUP_rdjcv\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -170,14 +167,7 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_rdjcv;
       lastinterval->rb = idx;
-      if (processlcpinterval_rdjcv(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
+      /* Nothing */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_rdjcv.lcp)
       {
         if (TOP_ESA_BOTTOMUP_rdjcv.lcp > 0 || !firstedgefromroot)
@@ -259,13 +249,7 @@ int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_rdjcv.rb = idx;
-      if (processlcpinterval_rdjcv(TOP_ESA_BOTTOMUP_rdjcv.lcp,
-                             &TOP_ESA_BOTTOMUP_rdjcv.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
+      /* Nothing */
     }
   }
   gt_GtArrayGtBUItvinfo_delete_rdjcv(stack,bustate);

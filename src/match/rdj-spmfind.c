@@ -489,13 +489,6 @@ static inline int processbranchingedge_spmvar(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processlcpinterval_spmeq(GT_UNUSED unsigned long lcp,
-    GT_UNUSED GtBUinfo_spmeq *info, GT_UNUSED GtBUstate_spmeq *state,
-    GT_UNUSED GtError *err)
-{
-  return 0;
-}
-
 static int processlcpinterval_spmvar(unsigned long lcp,
     GtBUinfo_spmvar *info, GtBUstate_spmvar *state, GT_UNUSED GtError *err)
 {

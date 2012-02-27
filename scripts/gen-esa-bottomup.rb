@@ -13,7 +13,8 @@ def parseargs(argv)
   options.key = nil
   options.usefile = false
   options.absolute = false
-  options.branching = true
+  options.with_process_branching = true
+  options.with_process_lcpinterval = true
   options.withlastsuftabvalue = true
   options.lcptypeulong = false
   opts = OptionParser.new
@@ -26,8 +27,11 @@ def parseargs(argv)
   opts.on("--absolute","use absolute start positions to address suffixes") do |x|
     options.absolute = true
   end
-  opts.on("--nobranch","no branchingedge function") do |x|
-    options.branching = false
+  opts.on("--no_process_branchingedge","no processbranchingedge function") do |x|
+    options.with_process_branching = false
+  end
+  opts.on("--no_process_lcpinterval","no processlcpinterval function") do |x|
+    options.with_process_lcpinterval = false
   end
   opts.on("--nolastvalue","no proceccing of lastsuftabvalue") do |x|
     options.withlastsuftabvalue = false
@@ -42,8 +46,8 @@ def parseargs(argv)
   return options
 end
 
-def processleafedgeargs(absolute)
-  if absolute
+def processleafedgeargs(options)
+  if options.absolute
     return "unsigned long, /* position */"
   else
     return "unsigned long, /* seqnum */\n" +
@@ -59,8 +63,8 @@ def lcptype(options)
   end
 end
 
-def previoussuffix_param_get(absolute)
-  if absolute
+def previoussuffix_param_get(options)
+  if options.absolute
     return "previoussuffix,"
   else
     return "previousseqnum,\n" +
@@ -68,8 +72,8 @@ def previoussuffix_param_get(absolute)
   end
 end
 
-def previoussuffix_expr_get(absolute)
-  if absolute
+def previoussuffix_expr_get(options)
+  if options.absolute
     return "lastsuftabvalue,"
   else 
     return "gt_seqnumrelpos_decode_seqnum(snrp,lastsuftabvalue),\n" +
@@ -86,8 +90,8 @@ def previousseqnumrelpos(options)
   end
 end
 
-def processbranching_get1(key,options)
-  if options.branching
+def processbranching_call1(key,options)
+  if options.with_process_branching
     return "if (processbranchingedge_#{key}(firstedge,\n" +
            "                   TOP_ESA_BOTTOMUP_#{key}.lcp,\n" +
            "                   &TOP_ESA_BOTTOMUP_#{key}.info,\n" +
@@ -105,25 +109,65 @@ def processbranching_get1(key,options)
   end
 end
 
-def processbranching_get2(key,options)
-if options.branching
-  return "unsigned long lastintervallcp = lastinterval->lcp,\n" +
-         "              lastintervalrb = lastinterval->rb;\n" +
-         "        PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);\n" +
-         "        if (processbranchingedge_#{key}(true,\n" +
-         "                       TOP_ESA_BOTTOMUP_#{key}.lcp,\n" +
-         "                       &TOP_ESA_BOTTOMUP_#{key}.info,\n" +
-         "                       lastintervallcp,\n" +
-         "                       lastintervalrb - lastintervallb + 1,\n" +
-         "                       NULL,\n" +
-         "                       bustate,\n" +
-         "                       err) != 0)\n" +
-         "        {\n" +
-         "          haserr = true;\n" +
-         "          break;\n" +
-         "        }"
+def processbranching_call2(key,options)
+  if options.with_process_branching
+    return "unsigned long lastintervallcp = lastinterval->lcp,\n" +
+           "              lastintervalrb = lastinterval->rb;\n" +
+           "        PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);\n" +
+           "        if (processbranchingedge_#{key}(true,\n" +
+           "                       TOP_ESA_BOTTOMUP_#{key}.lcp,\n" +
+           "                       &TOP_ESA_BOTTOMUP_#{key}.info,\n" +
+           "                       lastintervallcp,\n" +
+           "                       lastintervalrb - lastintervallb + 1,\n" +
+           "                       NULL,\n" +
+           "                       bustate,\n" +
+           "                       err) != 0)\n" +
+           "        {\n" +
+           "          haserr = true;\n" +
+           "          break;\n" +
+           "        }"
   else
     return "PUSH_ESA_BOTTOMUP_#{key}(lcpvalue,lastintervallb);"
+  end
+end
+
+def processlcpinterval_decl(key,options)
+  if options.with_process_lcpinterval
+    return "static int processlcpinterval_#{key}(unsigned long,\n" +
+                       "    GtBUinfo_#{key} *,\n" +
+                       "    GtBUstate_#{key} *,\n" +
+                       "    GtError *err);"
+  else
+    return "/* Nothing */"
+  end
+end
+
+def processlcpinterval_call1(key,options)
+  if options.with_process_lcpinterval
+    return "if (processlcpinterval_#{key}(lastinterval->lcp,\n" +
+           "                             &lastinterval->info,\n" +
+           "                             bustate,\n" +
+           "                             err) != 0)\n" +
+           "      {\n" +
+           "        haserr = true;\n" +
+           "        break;\n" +
+           "      }"
+  else
+    return "/* Nothing */"
+  end
+end
+
+def processlcpinterval_call2(key,options)
+  if options.with_process_lcpinterval
+    return "if (processlcpinterval_#{key}(TOP_ESA_BOTTOMUP_#{key}.lcp,\n" +
+           "                             &TOP_ESA_BOTTOMUP_#{key}.info,\n" +
+           "                             bustate,\n" +
+           "                             err) != 0)\n" +
+           "      {\n" +
+           "        haserr = true;\n" +
+           "      }"
+  else
+    return "/* Nothing */"
   end
 end
 
@@ -143,7 +187,7 @@ print <<END_OF_FILE
       if (processleafedge_#{key}(firstedge,
                           TOP_ESA_BOTTOMUP_#{key}.lcp,
                           &TOP_ESA_BOTTOMUP_#{key}.info,
-                          #{previoussuffix_param_get(options.absolute)}
+                          #{previoussuffix_param_get(options)}
                           bustate,
                           err) != 0)
       {
@@ -156,14 +200,7 @@ print <<END_OF_FILE
     {
       lastinterval = POP_ESA_BOTTOMUP_#{key};
       lastinterval->rb = idx;
-      if (processlcpinterval_#{key}(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
+      #{processlcpinterval_call1(key,options)}
       if (lcpvalue <= TOP_ESA_BOTTOMUP_#{key}.lcp)
       {
         if (TOP_ESA_BOTTOMUP_#{key}.lcp > 0 || !firstedgefromroot)
@@ -174,7 +211,7 @@ print <<END_OF_FILE
           firstedge = true;
           firstedgefromroot = false;
         }
-        #{processbranching_get1(key,options)}
+        #{processbranching_call1(key,options)}
         lastinterval = NULL;
       }
     }
@@ -187,7 +224,7 @@ print <<END_OF_FILE
       if (lastinterval != NULL)
       {
         unsigned long lastintervallb = lastinterval->lb;
-        #{processbranching_get2(key,options)}
+        #{processbranching_call2(key,options)}
         lastinterval = NULL;
       } else
       {
@@ -195,7 +232,7 @@ print <<END_OF_FILE
         if (processleafedge_#{key}(true,
                             TOP_ESA_BOTTOMUP_#{key}.lcp,
                             &TOP_ESA_BOTTOMUP_#{key}.info,
-                            #{previoussuffix_param_get(options.absolute)}
+                            #{previoussuffix_param_get(options)}
                             bustate,
                             err) != 0)
         {
@@ -224,7 +261,7 @@ print <<END_OF_FILE
     if (processleafedge_#{key}(false,
                         TOP_ESA_BOTTOMUP_#{key}.lcp,
                         &TOP_ESA_BOTTOMUP_#{key}.info,
-                        #{previoussuffix_expr_get(options.absolute)}
+                        #{previoussuffix_expr_get(options)}
                         bustate,
                         err) != 0)
     {
@@ -232,19 +269,13 @@ print <<END_OF_FILE
     } else
     {
       TOP_ESA_BOTTOMUP_#{key}.rb = idx;
-      if (processlcpinterval_#{key}(TOP_ESA_BOTTOMUP_#{key}.lcp,
-                             &TOP_ESA_BOTTOMUP_#{key}.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
+      #{processlcpinterval_call2(key,options)}
     }
   }
 END_OF_FILE
 end
 
-def showseqnumrelpos(options)
+def seqnumrelpos_include(options)
   if not options.absolute
     return "#include \"seqnumrelpos.h\""
   else
@@ -252,8 +283,8 @@ def showseqnumrelpos(options)
   end
 end
 
-def showprocessbranchingedge_decl(key,options)
-  if options.branching
+def processbranchingedge_decl(key,options)
+  if options.with_process_branching
     return "static int processbranchingedge_#{key}(bool firstsucc,\n" +
            "    unsigned long,\n" +
            "    GtBUinfo_#{key} *,\n" +
@@ -308,7 +339,7 @@ print <<END_OF_FILE
 #include <limits.h>
 #include "core/ma.h"
 #include "esa-seqread.h"
-#{showseqnumrelpos(options)}
+#{seqnumrelpos_include(options)}
 
 static void initBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
 
@@ -317,16 +348,13 @@ static void freeBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
 static int processleafedge_#{key}(bool,
     unsigned long,
     GtBUinfo_#{key} *,
-    #{processleafedgeargs(options.absolute)}
+    #{processleafedgeargs(options)}
     GtBUstate_#{key} *,
     GtError *err);
 
-#{showprocessbranchingedge_decl(key,options)}
+#{processbranchingedge_decl(key,options)}
 
-static int processlcpinterval_#{key}(unsigned long,
-    GtBUinfo_#{key} *,
-    GtBUstate_#{key} *,
-    GtError *err);
+#{processlcpinterval_decl(key,options)}
 
 #define TOP_ESA_BOTTOMUP_#{key}\\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]

@@ -41,10 +41,7 @@ static int processbranchingedge_spmeq(bool firstsucc,
     GtBUstate_spmeq *,
     GtError *);
 
-static int processlcpinterval_spmeq(unsigned long,
-    GtBUinfo_spmeq *,
-    GtBUstate_spmeq *,
-    GtError *err);
+/* Nothing */
 
 #define TOP_ESA_BOTTOMUP_spmeq\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -176,14 +173,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
     {
       lastinterval = POP_ESA_BOTTOMUP_spmeq;
       lastinterval->rb = idx;
-      if (processlcpinterval_spmeq(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
+      /* Nothing */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_spmeq.lcp)
       {
         if (TOP_ESA_BOTTOMUP_spmeq.lcp > 0 || !firstedgefromroot)
@@ -267,13 +257,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
     } else
     {
       TOP_ESA_BOTTOMUP_spmeq.rb = idx;
-      if (processlcpinterval_spmeq(TOP_ESA_BOTTOMUP_spmeq.lcp,
-                             &TOP_ESA_BOTTOMUP_spmeq.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
+      /* Nothing */
     }
   }
   stack->nextfreeGtBUItvinfo = 0; /* empty the stack */

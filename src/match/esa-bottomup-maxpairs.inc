@@ -40,10 +40,7 @@ static int processbranchingedge_maxpairs(bool firstsucc,
     GtBUstate_maxpairs *,
     GtError *);
 
-static int processlcpinterval_maxpairs(unsigned long,
-    GtBUinfo_maxpairs *,
-    GtBUstate_maxpairs *,
-    GtError *err);
+/* Nothing */
 
 #define TOP_ESA_BOTTOMUP_maxpairs\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -170,14 +167,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_maxpairs;
       lastinterval->rb = idx;
-      if (processlcpinterval_maxpairs(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
+      /* Nothing */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_maxpairs.lcp)
       {
         if (TOP_ESA_BOTTOMUP_maxpairs.lcp > 0 || !firstedgefromroot)
@@ -259,13 +249,7 @@ int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_maxpairs.rb = idx;
-      if (processlcpinterval_maxpairs(TOP_ESA_BOTTOMUP_maxpairs.lcp,
-                             &TOP_ESA_BOTTOMUP_maxpairs.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
+      /* Nothing */
     }
   }
   gt_GtArrayGtBUItvinfo_delete_maxpairs(stack,bustate);

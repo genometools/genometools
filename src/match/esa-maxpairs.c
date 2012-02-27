@@ -346,14 +346,6 @@ static int processbranchingedge_maxpairs(bool firstsucc,
   return 0;
 }
 
-static int processlcpinterval_maxpairs(GT_UNUSED unsigned long lcp,
-                                       GT_UNUSED GtBUinfo_maxpairs *info,
-                                       GT_UNUSED GtBUstate_maxpairs *state,
-                                       GT_UNUSED GtError *err)
-{
-  return 0;
-}
-
 #include "esa-bottomup-maxpairs.inc"
 
 int gt_enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,

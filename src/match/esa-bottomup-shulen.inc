@@ -40,10 +40,7 @@ static int processbranchingedge_shulen(bool firstsucc,
     GtBUstate_shulen *,
     GtError *);
 
-static int processlcpinterval_shulen(unsigned long,
-    GtBUinfo_shulen *,
-    GtBUstate_shulen *,
-    GtError *err);
+/* Nothing */
 
 #define TOP_ESA_BOTTOMUP_shulen\
         stack->spaceGtBUItvinfo[stack->nextfreeGtBUItvinfo-1]
@@ -170,14 +167,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     {
       lastinterval = POP_ESA_BOTTOMUP_shulen;
       lastinterval->rb = idx;
-      if (processlcpinterval_shulen(lastinterval->lcp,
-                             &lastinterval->info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-        break;
-      }
+      /* Nothing */
       if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
       {
         if (TOP_ESA_BOTTOMUP_shulen.lcp > 0 || !firstedgefromroot)
@@ -259,13 +249,7 @@ int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
     } else
     {
       TOP_ESA_BOTTOMUP_shulen.rb = idx;
-      if (processlcpinterval_shulen(TOP_ESA_BOTTOMUP_shulen.lcp,
-                             &TOP_ESA_BOTTOMUP_shulen.info,
-                             bustate,
-                             err) != 0)
-      {
-        haserr = true;
-      }
+      /* Nothing */
     }
   }
   gt_GtArrayGtBUItvinfo_delete_shulen(stack,bustate);

@@ -276,14 +276,6 @@ static int processbranchingedge_shulen(bool firstsucc,
   return 0;
 }
 
-static int processlcpinterval_shulen(GT_UNUSED unsigned long lcp,
-                                     GT_UNUSED GtBUinfo_shulen *info,
-                                     GT_UNUSED GtBUstate_shulen *state,
-                                     GT_UNUSED GtError *err)
-{
-  return 0;
-}
-
 #include "esa-bottomup-shulen.inc"
 
 int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,

@@ -171,20 +171,6 @@ static inline int processbranchingedge_rdjcv(GT_UNUSED bool firstsucc,
   return 0;
 }
 
-static int processlcpinterval_rdjcv(GT_UNUSED unsigned long lcp,
-    GT_UNUSED GtBUinfo_rdjcv *info, GT_UNUSED GtBUstate_rdjcv *state,
-    GT_UNUSED GtError *err)
-{
-  return 0;
-}
-
-static int processlcpinterval_rdjce(GT_UNUSED unsigned long lcp,
-    GT_UNUSED GtBUinfo_rdjce *info, GT_UNUSED GtBUstate_rdjce *state,
-    GT_UNUSED GtError *err)
-{
-  return 0;
-}
-
 #include "match/esa-bottomup-rdjcv.inc"
 
 #include "match/esa-bottomup-rdjce.inc"
