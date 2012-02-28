@@ -299,11 +299,17 @@ static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
   return shulengthdist;
 }
 
-static void shulengthdist_print(uint64_t ** shulengthdist,
+/*
+  XXX: check what kind of const annotation is necesseay to
+  make the contents of shulengthdist non-writable.
+*/
+
+static void shulengthdist_print(uint64_t **shulengthdist,
                                 unsigned long numofdbfiles)
 {
   unsigned long idx1, idx2;
 
+  /*shulengthdist[0][0] = 0; for testing */
   printf("%lu\n",numofdbfiles);
   for (idx2=0; idx2 < numofdbfiles; idx2++)
   {
