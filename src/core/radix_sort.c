@@ -49,18 +49,17 @@
 #include <stdint.h>
 #include <string.h>
 #include <limits.h>
-#include "core/array2dim_api.h"
-#include "core/assert_api.h"
 #include "core/minmax.h"
-#include "core/radix_sort.h"
-#include "core/range_api.h"
+#include "core/assert_api.h"
 #include "core/stack-inlined.h"
-#include "core/divmodmul.h"
+#include "core/types_api.h"
+#include "core/range_api.h"
+#include "core/array2dim_api.h"
+#include "core/radix_sort.h"
+#include "core/unused_api.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
-#include "core/types_api.h"
-#include "core/unused_api.h"
 
 #define GT_RADIX_KEY(MASK,SHIFT,VALUE)    (((VALUE) >> (SHIFT)) & (MASK))
 #define GT_RADIX_KEY_PTR(MASK,SHIFT,PTR)  GT_RADIX_KEY(MASK,SHIFT,*(PTR))
