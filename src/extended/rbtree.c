@@ -566,6 +566,15 @@ void* gt_rbtree_maximum_key(GtRBTree *tree)
   return gt_rbtree_maximum_key_for_node(tree->root);
 }
 
+void* gt_rbtree_root_key(GtRBTree *tree)
+{
+  gt_assert(tree);
+  if (tree->size == 0 || tree->root == NULL)
+    return NULL;
+  else
+    return tree->root->data;
+}
+
 void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
                              GtRBTreeCompareFunc cmpfun, void *cmpinfo)
 {
@@ -980,7 +989,7 @@ int gt_rbtree_unit_test(GtError *err)
 {
   int had_err = 0;
   GtRBTree *tree = NULL;
-  unsigned long i, j;
+  unsigned long i, j, k, *v;
   gt_error_check (err);
 
   gt_rbtree_xtab = gt_malloc(GT_RBTREE_SIZE * sizeof (*gt_rbtree_xtab));
@@ -1052,6 +1061,21 @@ int gt_rbtree_unit_test(GtError *err)
   gt_free(gt_rbtree_ytab);
   gt_free(gt_rbtree_ztab);
   gt_free(gt_rbtree_depths);
+
+  i = 0; j = 1, k = 2;
+  tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
+  v = gt_rbtree_root_key(tree);
+  gt_ensure(had_err, !v);
+  gt_rbtree_insert(tree, &i);
+  v = gt_rbtree_root_key(tree);
+  gt_ensure(had_err, v == &i);
+  gt_ensure(had_err, *v == i);
+  gt_rbtree_insert(tree, &j);
+  gt_rbtree_insert(tree, &k);
+  v = gt_rbtree_root_key(tree);
+  gt_ensure(had_err, v == &j);
+  gt_ensure(had_err, *v == j);
+  gt_rbtree_delete(tree);
 
   return had_err;
 }

@@ -63,6 +63,7 @@ int            gt_rbtree_walk_reverse(GtRBTree *tree, GtRBTreeAction action,
                                     void *actinfo);
 void*          gt_rbtree_minimum_key(GtRBTree *tree);
 void*          gt_rbtree_maximum_key(GtRBTree *tree);
+void*          gt_rbtree_root_key(GtRBTree *tree);
 void*          gt_rbtree_next_key(GtRBTree *tree, void *key,
                                   GtRBTreeCompareFunc cmpfun,
                                   void *cmpinfo);
