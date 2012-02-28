@@ -17,4 +17,5 @@ ${SC} --key shulen --reader --absolute \
                    --no_process_lcpinterval > ${TEMPLATE}-shulen.inc
 ${SC} --key shulen --lcptypeulong --absolute --no_process_lastvalue \
                    --no_process_lcpinterval \
-                   --withlastfrompreviousbucket > ${TEMPLATE}-shulen-RAM.inc
+                   --withlastfrompreviousbucket \
+                   --no_declarations > ${TEMPLATE}-shulen-RAM.inc

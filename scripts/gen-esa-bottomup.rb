@@ -18,6 +18,7 @@ def parseargs(argv)
   options.process_lastvalue = true
   options.withlastfrompreviousbucket = false
   options.lcptypeulong = false
+  options.nodeclarations = false
   opts = OptionParser.new
   opts.on("-k","--key STRING","use given key as suffix for all symbols") do |x|
     options.key = x
@@ -42,6 +43,9 @@ def parseargs(argv)
   end
   opts.on("--withlastfrompreviousbucket","process last value from previous bucket") do |x|
     options.withlastfrompreviousbucket = true
+  end
+  opts.on("--no_declarations","do not output declarations") do |x|
+    options.nodeclarations = true
   end
   rest = opts.parse(argv)
   if not rest.empty?
@@ -247,7 +251,7 @@ end
 
 def lastsuftabvalue_fromarray(options)
   if not options.usefile
-    return "lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];"
+    return "unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];"
   else
     return "/* no assignment to lastsuftabvalue */"
   end
@@ -326,6 +330,7 @@ print <<END_OF_FILE
     previoussuffix = bustate->previousbucketlastsuffix;
     lcpvalue = (unsigned long) lcptab_bucket[0];
     firstedgefromroot = bustate->firstedgefromroot;
+    idx = 0;
 END_OF_FILE
     process_suf_lcp(key,options)
 print <<END_OF_FILE
@@ -345,7 +350,7 @@ END_OF_FILE
 end
 
 options = parseargs(ARGV)
-key=options.key
+key = options.key
 
 print <<END_OF_FILE
 /*
@@ -369,6 +374,10 @@ print <<END_OF_FILE
 #include "core/ma.h"
 #include "esa-seqread.h"
 #{seqnumrelpos_include(options)}
+END_OF_FILE
+
+if not options.nodeclarations
+print <<END_OF_FILE
 
 static void initBUinfo_#{key}(GtBUinfo_#{key} *,GtBUstate_#{key} *);
 
@@ -461,6 +470,7 @@ static GtBUItvinfo_#{key} *allocateBUstack_#{key}(GtBUItvinfo_#{key} *ptr,
   return itvinfo;
 }
 END_OF_FILE
+end
 
 if options.usefile
 print <<END_OF_FILE
@@ -502,7 +512,6 @@ int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,
-                lastsuftabvalue,
                 idx;
   GtBUItvinfo_#{key} *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot;

@@ -44,6 +44,7 @@
 #include "sfx-apfxlen.h"
 #include "sfx-suffixgetset.h"
 #include "sfx-lcpvalues.h"
+#include "esa-shulen.h"
 
 #ifndef S_SPLINT_S
 #include "eis-encidxseq.h"
@@ -72,8 +73,10 @@ typedef struct
   const GtEncseq *encseq;
   Definedunsignedlong longest;
   GtOutlcpinfo *outlcpinfo;
+  GtBUstate_shulen *bustate_shulen;
 } Outfileinfo;
 
+/*
 static void gt_suflcptab2genomediff(GT_UNUSED void *data,
                                     const GtSuffixsortspace *sssp,
                                     const GtLcpvalues *tableoflcpvalues,
@@ -90,6 +93,27 @@ static void gt_suflcptab2genomediff(GT_UNUSED void *data,
     printf("%lu %lu\n",suffix,MIN(lcpvalue,LCPOVERFLOW));
   }
 }
+*/
+
+static void gt_suflcptab2genomediff(void *data,
+                                    const GtSuffixsortspace *sssp,
+                                    const GtLcpvalues *tableoflcpvalues,
+                                    unsigned long bucketoffset,
+                                    unsigned long numberofsuffixes,
+                                    unsigned long posoffset)
+{
+  GtBUstate_shulen *bustate = (GtBUstate_shulen *) data;
+  const unsigned long *bucketofsuffixes
+    = gt_suffixsortspace_getptr(sssp,bucketoffset+posoffset);
+  const unsigned long *lcptab_bucket
+    = gt_lcptab_getptr(tableoflcpvalues,bucketoffset);
+
+  (void) gt_sfx_multiesa2shulengthdist(bustate,
+                                       bucketofsuffixes,
+                                       lcptab_bucket,
+                                       numberofsuffixes,
+                                       NULL);
+}
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,
                            unsigned int prefixlength,
@@ -105,11 +129,16 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
   outfileinfo->numberofallsortedsuffixes = 0;
   outfileinfo->longest.defined = false;
   outfileinfo->longest.valueunsignedlong = 0;
+  outfileinfo->bustate_shulen = NULL;
   if (gt_index_options_outlcptab_value(so->idxopts))
   {
     bool rungenomediff = gt_index_options_genomediff_value(so->idxopts);
 
     gt_assert(gt_str_get(so->indexname) != NULL || rungenomediff);
+    if (rungenomediff)
+    {
+      outfileinfo->bustate_shulen = gt_sfx_multiesashulengthdist_new(encseq);
+    }
     outfileinfo->outlcpinfo
       = gt_Outlcpinfo_new(rungenomediff ? NULL : gt_str_get(so->indexname),
                           gt_encseq_alphabetnumofchars(encseq),
@@ -118,7 +147,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                           gt_index_options_swallow_tail_value(so->idxopts),
                           rungenomediff ? gt_suflcptab2genomediff
                                         : NULL,
-                          NULL, /* possibly add structure for function */
+                          outfileinfo->bustate_shulen,
                           err);
     if (outfileinfo->outlcpinfo == NULL)
     {
@@ -644,6 +673,7 @@ static int runsuffixerator(bool doesa,
     }
   }
   gt_Outlcpinfo_delete(outfileinfo.outlcpinfo);
+  gt_sfx_multiesashulengthdist_delete(outfileinfo.bustate_shulen);
   gt_encseq_delete(encseq);
   encseq = NULL;
   if (!haserr

@@ -38,7 +38,7 @@ typedef struct /* information stored for each node of the lcp interval tree */
 #endif
 } GtBUinfo_shulen;
 
-typedef struct  /* global information */
+struct GtBUstate_shulen /* global information */
 {
   unsigned long numofdbfiles;
   uint64_t **shulengthdist;
@@ -48,7 +48,14 @@ typedef struct  /* global information */
   unsigned long lastleafnumber,
                 nextid;
 #endif
-} GtBUstate_shulen;
+  /* the remaining components are used for the genomediff function
+     called from the suffixerator */
+  unsigned long idxoffset,
+                previousbucketlastsuffix;
+  bool firstedgefromroot;
+  GtShuUnitFileInfo_tag *unit_info;
+  void *stack;
+};
 
 static void resetgnumdist_shulen(GtBUinfo_shulen *father,
                                     unsigned long numofdbfiles)
@@ -278,38 +285,38 @@ static int processbranchingedge_shulen(bool firstsucc,
 
 static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
 {
-  unsigned long referidx, shulenidx;
+  unsigned long idx1, idx2;
   uint64_t **shulengthdist;
 
   gt_array2dim_malloc(shulengthdist,numofdbfiles,numofdbfiles);
-  for (referidx=0; referidx < numofdbfiles; referidx++)
+  for (idx1=0; idx1 < numofdbfiles; idx1++)
   {
-    for (shulenidx=0; shulenidx < numofdbfiles; shulenidx++)
+    for (idx2=0; idx2 < numofdbfiles; idx2++)
     {
-      shulengthdist[referidx][shulenidx] = 0;
+      shulengthdist[idx1][idx2] = 0;
     }
   }
   return shulengthdist;
 }
 
-static void shulengthdist_print(uint64_t **shulengthdist,
+static void shulengthdist_print(uint64_t ** shulengthdist,
                                 unsigned long numofdbfiles)
 {
-  unsigned long referidx, shulenidx;
+  unsigned long idx1, idx2;
 
   printf("%lu\n",numofdbfiles);
-  for (shulenidx=0; shulenidx < numofdbfiles; shulenidx++)
+  for (idx2=0; idx2 < numofdbfiles; idx2++)
   {
-    printf("%lu\t",shulenidx);
-    for (referidx=0; referidx < numofdbfiles; referidx++)
+    printf("%lu\t",idx2);
+    for (idx1=0; idx1 < numofdbfiles; idx1++)
     {
-      if (referidx != shulenidx)
+      if (idx1 != idx2)
       {
-	printf(Formatuint64_t"\t",
-	       PRINTuint64_tcast(shulengthdist[referidx][shulenidx]));
+        printf(Formatuint64_t"\t",
+               PRINTuint64_tcast(shulengthdist[idx1][idx2]));
       } else
       {
-	printf("0\t");
+        printf("0\t");
       }
     }
     printf("\n");
@@ -318,9 +325,9 @@ static void shulengthdist_print(uint64_t **shulengthdist,
 
 #include "esa-bottomup-shulen.inc"
 
-int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
-                              const GtEncseq *encseq,
-                              GtError *err)
+int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
+                                    const GtEncseq *encseq,
+                                    GtError *err)
 {
   GtBUstate_shulen *state;
   bool haserr = false;
@@ -467,27 +474,82 @@ int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
   return haserr ? -1 : 0;
 }
 
-int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
-                                 const GtEncseq *encseq,
-                                 uint64_t **shulen,
-                                 struct GtShuUnitFileInfo_tag *unit_info,
-                                 GtError *err)
+int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
+                              const GtEncseq *encseq,
+                              uint64_t **shulen,
+                              const GtShuUnitFileInfo_tag *unit_info,
+                              GtError *err)
 {
-  GtBUstate_shulen *state;
+  GtBUstate_shulen *bustate;
   bool haserr = false;
 
-  state = gt_malloc(sizeof (*state));
-  state->numofdbfiles = unit_info->num_of_genomes;
-  state->file_to_genome_map = unit_info->map_files;
-  state->encseq = encseq;
+  bustate = gt_malloc(sizeof (*bustate));
+  bustate->numofdbfiles = unit_info->num_of_genomes;
+  bustate->file_to_genome_map = unit_info->map_files;
+  bustate->encseq = encseq;
 #ifdef SHUDEBUG
-  state->nextid = 0;
+  bustate->nextid = 0;
 #endif
-  state->shulengthdist = shulen;
-  if (gt_esa_bottomup_shulen(ssar, state, err) != 0)
+  bustate->shulengthdist = shulen;
+  if (gt_esa_bottomup_shulen(ssar, bustate, err) != 0)
   {
     haserr = true;
   }
-  gt_free(state);
+  gt_free(bustate);
   return haserr ? -1 : 0;
+}
+
+GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq)
+{
+  GtBUstate_shulen *bustate;
+
+  bustate = gt_malloc(sizeof (*bustate));
+  bustate->encseq = encseq;
+  bustate->previousbucketlastsuffix = ULONG_MAX;
+  bustate->idxoffset = 0;
+  bustate->firstedgefromroot = false;
+#ifdef SHUDEBUG
+  bustate->nextid = 0;
+#endif
+  bustate->unit_info = gt_shu_unit_info_new(encseq);
+  bustate->numofdbfiles = gt_encseq_num_of_files(encseq);
+  bustate->file_to_genome_map = bustate->unit_info->map_files;
+  bustate->shulengthdist
+    = shulengthdist_new(bustate->unit_info->num_of_genomes);
+  bustate->stack = (void *) gt_GtArrayGtBUItvinfo_new_shulen();
+  return bustate;
+}
+
+#include "esa-bottomup-shulen-RAM.inc"
+
+int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
+                                  const unsigned long *bucketofsuffixes,
+                                  const unsigned long *lcptab_bucket,
+                                  unsigned long numberofsuffixes,
+                                  GtError *err)
+{
+  int retval;
+
+  retval = gt_esa_bottomup_RAM_shulen(bucketofsuffixes,
+                                      lcptab_bucket,
+                                      numberofsuffixes,
+                                      bustate->stack,
+                                      bustate,
+                                      err);
+  bustate->idxoffset += numberofsuffixes;
+  return retval;
+}
+
+void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate)
+{
+  if (bustate == NULL)
+  {
+    return;
+  }
+  gt_shu_unit_info_delete(bustate->unit_info);
+  gt_assert(bustate->shulengthdist != NULL);
+  shulengthdist_print(bustate->shulengthdist,bustate->numofdbfiles);
+  gt_array2dim_delete(bustate->shulengthdist);
+  gt_GtArrayGtBUItvinfo_delete_shulen(bustate->stack,bustate);
+  gt_free(bustate);
 }

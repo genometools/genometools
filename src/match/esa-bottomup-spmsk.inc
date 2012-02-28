@@ -126,7 +126,6 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,
-                lastsuftabvalue,
                 idx;
   GtBUItvinfo_spmsk *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot;
@@ -212,7 +211,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmsk.lcp > 0)
   {
-    lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
+    unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
     if (processleafedge_spmsk(false,
                         TOP_ESA_BOTTOMUP_spmsk.lcp,
                         &TOP_ESA_BOTTOMUP_spmsk.info,

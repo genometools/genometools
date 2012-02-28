@@ -94,6 +94,9 @@ typedef void (*GtFinalProcessBucket)(void *,
                            [tableoflcpvalues->lcptaboffset+subbucketleft+idx];
 }
 
+const unsigned long *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
+                                      unsigned long subbucketleft);
+
 GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                                 unsigned int numofchars,
                                 unsigned int prefixlength,

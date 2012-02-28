@@ -58,7 +58,7 @@ static int callmultishulengthdist(const char *indexname,
   }
   if (!haserr)
   {
-    if (gt_multiesa2shulengthdist(ssar,
+    if (gt_multiesa2shulengthdist_print(ssar,
                                   gt_encseqSequentialsuffixarrayreader(ssar),
                                   err) != 0)
     {

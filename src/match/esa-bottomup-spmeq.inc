@@ -130,7 +130,6 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
   const unsigned long incrementstacksize = 32UL;
   unsigned long lcpvalue,
                 previoussuffix,
-                lastsuftabvalue,
                 idx;
   GtBUItvinfo_spmeq *lastinterval = NULL;
   bool haserr = false, firstedge, firstedgefromroot;
@@ -233,7 +232,7 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
   gt_assert(stack->nextfreeGtBUItvinfo > 0);
   if (!haserr && TOP_ESA_BOTTOMUP_spmeq.lcp > 0)
   {
-    lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
+    unsigned long lastsuftabvalue = bucketofsuffixes[numberofsuffixes-1];
     if (processleafedge_spmeq(false,
                         TOP_ESA_BOTTOMUP_spmeq.lcp,
                         &TOP_ESA_BOTTOMUP_spmeq.info,

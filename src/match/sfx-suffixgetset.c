@@ -309,6 +309,14 @@ unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
                                               - sssp->partoffset);
 }
 
+const unsigned long *gt_suffixsortspace_getptr(const GtSuffixsortspace *sssp,
+                                               unsigned long subbucketleft)
+{
+  gt_assert(sssp->ulongtab != NULL);
+  return sssp->ulongtab + sssp->bucketleftidx + subbucketleft
+                        - sssp->partoffset;
+}
+
 void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
                             unsigned long subbucketleft,
                             unsigned long idx,

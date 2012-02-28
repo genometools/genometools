@@ -58,7 +58,7 @@ static int load(lua_State *L,
 }
 
 static int traverse_units(lua_State *L,
-                          struct GtShuUnitFileInfo_tag *unit_info,
+                          GtShuUnitFileInfo_tag *unit_info,
                           GtError *err)
 {
   int had_err = 0,
@@ -162,8 +162,8 @@ static int traverse_units(lua_State *L,
   return had_err;
 }
 
-int gt_read_genomediff_unitfile(GtStr *unitfile,
-                                struct GtShuUnitFileInfo_tag *unit_info,
+int gt_read_genomediff_unitfile(const GtStr *unitfile,
+                                GtShuUnitFileInfo_tag *unit_info,
                                 GT_UNUSED GtLogger *logger,
                                 GtError *err)
 {
@@ -182,8 +182,34 @@ int gt_read_genomediff_unitfile(GtStr *unitfile,
   return had_err;
 }
 
-void gt_delete_unit_file_info(struct GtShuUnitFileInfo_tag *unit_info) {
+void gt_shu_unit_info_delete(GtShuUnitFileInfo_tag *unit_info) {
   gt_free(unit_info->map_files);
   gt_str_array_delete(unit_info->genome_names);
   gt_free(unit_info);
+}
+
+void gt_shu_unit_info_files_as_units(GtShuUnitFileInfo_tag *unit_info)
+{
+  unsigned long i_idx;
+
+  unit_info->num_of_genomes = unit_info->num_of_files;
+  unit_info->genome_names = gt_str_array_new();
+  for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
+  {
+    gt_str_array_add_cstr(unit_info->genome_names,
+                          gt_str_array_get(unit_info->file_names, i_idx));
+  }
+}
+
+GtShuUnitFileInfo_tag *gt_shu_unit_info_new(const GtEncseq *encseq)
+{
+  GtShuUnitFileInfo_tag *unit_info = gt_malloc(sizeof (*unit_info));
+
+  unit_info->map_files = NULL;
+  unit_info->genome_names = NULL;
+  unit_info->num_of_genomes = 0;
+  unit_info->num_of_files = gt_encseq_num_of_files(encseq);
+  unit_info->file_names = gt_encseq_filenames(encseq);
+  gt_shu_unit_info_files_as_units(unit_info);
+  return unit_info;
 }

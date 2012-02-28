@@ -79,6 +79,13 @@ struct GtOutlcpinfo
   Lcpsubtab lcpsubtab;
 };
 
+const unsigned long *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
+                                      unsigned long subbucketleft)
+{
+  return tableoflcpvalues->bucketoflcpvalues + tableoflcpvalues->lcptaboffset
+                                             + subbucketleft;
+}
+
 /* Now some functions related to the computation of lcp values follow */
 
 static unsigned long computelocallcpvalue(const Suffixwithcode *previoussuffix,

@@ -25,19 +25,31 @@
 #include "match/esa-seqread.h"
 #include "match/shu_unitfile.h"
 
-int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
-                              const GtEncseq *encseq,
-                              GtError *err);
+typedef struct GtBUstate_shulen GtBUstate_shulen;
+
+int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
+                                    const GtEncseq *encseq,
+                                    GtError *err);
 
 int gt_esa2shulengthqueryfiles(unsigned long *totalgmatchlength,
                                const Suffixarray *suffixarray,
                                const GtStrArray *queryfilenames,
                                GtError *err);
 
-int gt_get_multiesashulengthdist(Sequentialsuffixarrayreader *ssar,
-                                const GtEncseq *encseq,
-                                uint64_t **shulen,
-                                struct GtShuUnitFileInfo_tag *unit_info,
-                                GtError *err);
+int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
+                              const GtEncseq *encseq,
+                              uint64_t **shulen,
+                              const GtShuUnitFileInfo_tag *unit_info,
+                              GtError *err);
+
+GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq);
+
+int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
+                                  const unsigned long *bucketofsuffixes,
+                                  const unsigned long *lcptab_bucket,
+                                  unsigned long numberofsuffixes,
+                                  GtError *err);
+
+void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate);
 
 #endif

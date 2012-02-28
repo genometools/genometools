@@ -38,15 +38,15 @@
 
 #include "match/shu-genomediff.h"
 
-static inline int parse_unit(const GtEncseq *encseq,
-                             struct GtShuUnitFileInfo_tag *unit_info,
-                             const GtGenomediffArguments *arguments,
-                             GtTimer *timer,
-                             GtLogger *logger,
-                             GtError *err)
+static int parse_unit(const GtEncseq *encseq,
+                      GtShuUnitFileInfo_tag *unit_info,
+                      const GtGenomediffArguments *arguments,
+                      GtTimer *timer,
+                      GtLogger *logger,
+                      GtError *err)
 {
   int had_err = 0;
-  unsigned long i_idx;
+
   unit_info->num_of_files = gt_encseq_num_of_files(encseq);
   unit_info->file_names = gt_encseq_filenames(encseq);
   if (arguments->with_units)
@@ -66,13 +66,7 @@ static inline int parse_unit(const GtEncseq *encseq,
   }
   else
   {
-    unit_info->num_of_genomes = unit_info->num_of_files;
-    unit_info->genome_names = gt_str_array_new();
-    for (i_idx = 0; i_idx < unit_info->num_of_files; i_idx++)
-    {
-      gt_str_array_add_cstr(unit_info->genome_names,
-                            gt_str_array_get(unit_info->file_names, i_idx));
-    }
+    gt_shu_unit_info_files_as_units(unit_info);
   }
   return had_err;
 }
@@ -88,11 +82,11 @@ int gt_genomediff_shu(GtLogger *logger,
          *gc_content = NULL;
   unsigned long *genome_length = NULL,
                 i_idx, j_idx;
-  uint64_t **shulen = NULL;
+  uint64_t **shulendist = NULL;
   const GtEncseq *encseq = NULL;
   Genericindex *genericindexSubject = NULL;
   Sequentialsuffixarrayreader *ssar = NULL;
-  struct GtShuUnitFileInfo_tag *unit_info;
+  GtShuUnitFileInfo_tag *unit_info;
 
   unit_info = gt_malloc(sizeof (*unit_info));
   unit_info->map_files = NULL;
@@ -133,23 +127,20 @@ int gt_genomediff_shu(GtLogger *logger,
                            timer,
                            logger,
                            err);
-      gt_array2dim_calloc(shulen,
+    }
+    if (!had_err)
+    {
+      gt_array2dim_calloc(shulendist,
                           unit_info->num_of_genomes,
                           unit_info->num_of_genomes);
       genome_length = gt_calloc((size_t) unit_info->num_of_genomes,
                                 sizeof (unsigned long));
-    }
-    if (!had_err)
-    {
       if (timer != NULL)
       {
         gt_timer_show_progress(timer, "dfs esa index", stdout);
       }
-      if (gt_get_multiesashulengthdist(ssar,
-                                       encseq,
-                                       shulen,
-                                       unit_info,
-                                       err) != 0)
+      if (gt_multiesa2shulengthdist(ssar, encseq, shulendist,
+                                    unit_info, err) != 0)
       {
         had_err = -1;
       }
@@ -186,7 +177,7 @@ int gt_genomediff_shu(GtLogger *logger,
                            timer,
                            logger,
                            err);
-      gt_array2dim_calloc(shulen,
+      gt_array2dim_calloc(shulendist,
                           unit_info->num_of_genomes,
                           unit_info->num_of_genomes);
       genome_length = gt_calloc((size_t) unit_info->num_of_genomes,
@@ -213,12 +204,12 @@ int gt_genomediff_shu(GtLogger *logger,
       num_of_chars = (unsigned long) gt_alphabet_num_of_chars(alphabet);
       total_length = genericindex_get_totallength(genericindexSubject);
       subjectindex = genericindex_get_packedindex(genericindexSubject);
-      gt_assert(shulen);
+      gt_assert(shulendist);
       gt_assert(subjectindex);
       had_err = gt_pck_calculate_shulen(subjectindex,
                                         encseq,
                                         unit_info,
-                                        shulen,
+                                        shulendist,
                                         num_of_chars,
                                         total_length,
                                         !arguments->traverse_only,
@@ -232,10 +223,10 @@ int gt_genomediff_shu(GtLogger *logger,
       gt_logger_log(logger, "stopping after traversal");
       genericindex_delete(genericindexSubject);
       gt_free(genome_length);
-      gt_delete_unit_file_info(unit_info);
-      if (shulen != NULL)
+      gt_shu_unit_info_delete(unit_info);
+      if (shulendist != NULL)
       {
-        gt_array2dim_delete(shulen);
+        gt_array2dim_delete(shulendist);
       }
       return had_err;
     }
@@ -292,7 +283,7 @@ int gt_genomediff_shu(GtLogger *logger,
   /*calculate avg shulen or print sum shulen*/
   if (!had_err)
   {
-    gt_assert(shulen);
+    gt_assert(shulendist);
     if (timer != NULL)
     {
       if (arguments->shulen_only)
@@ -334,14 +325,15 @@ int gt_genomediff_shu(GtLogger *logger,
           if (arguments->shulen_only)
           {
             printf(Formatuint64_t"\t", arguments->with_esa ?
-                              PRINTuint64_tcast(shulen[j_idx][i_idx]) :
-                              PRINTuint64_tcast(shulen[i_idx][j_idx]));
+                              PRINTuint64_tcast(shulendist[j_idx][i_idx]) :
+                              PRINTuint64_tcast(shulendist[i_idx][j_idx]));
           }
           else
           {
-            div[i_idx][j_idx] = arguments->with_esa ?
-                                  ((double) shulen[j_idx][i_idx]) / length_i :
-                                  ((double) shulen[i_idx][j_idx]) / length_i;
+            div[i_idx][j_idx]
+              = arguments->with_esa
+                  ? ((double) shulendist[j_idx][i_idx]) / length_i
+                  : ((double) shulendist[i_idx][j_idx]) / length_i;
           }
         }
       }
@@ -551,13 +543,12 @@ int gt_genomediff_shu(GtLogger *logger,
   {
     genericindex_delete(genericindexSubject);
   }
-
   gt_free(genome_length);
   gt_free(gc_content);
-  gt_delete_unit_file_info(unit_info);
-  if (shulen != NULL)
+  gt_shu_unit_info_delete(unit_info);
+  if (shulendist != NULL)
   {
-    gt_array2dim_delete(shulen);
+    gt_array2dim_delete(shulendist);
   }
   if (div != NULL)
   {
