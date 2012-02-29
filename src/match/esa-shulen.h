@@ -50,6 +50,9 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
                                   unsigned long numberofsuffixes,
                                   GtError *err);
 
+int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,
+                                       GtError *err);
+
 void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate);
 
 #endif

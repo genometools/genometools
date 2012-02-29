@@ -136,7 +136,10 @@ int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
 
   PUSH_ESA_BOTTOMUP_spmeq(0,0);
   firstedgefromroot = true;
-  gt_assert(numberofsuffixes > 0);
+  if (numberofsuffixes == 0)
+  {
+    return haserr ? -1 : 0;
+  }
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];

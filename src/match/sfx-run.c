@@ -123,13 +123,6 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 {
   bool haserr = false;
 
-  outfileinfo->outfpsuftab = NULL;
-  outfileinfo->outfpbwttab = NULL;
-  outfileinfo->outfpbcktab = NULL;
-  outfileinfo->numberofallsortedsuffixes = 0;
-  outfileinfo->longest.defined = false;
-  outfileinfo->longest.valueunsignedlong = 0;
-  outfileinfo->bustate_shulen = NULL;
   if (gt_index_options_outlcptab_value(so->idxopts))
   {
     bool rungenomediff = gt_index_options_genomediff_value(so->idxopts);
@@ -587,6 +580,11 @@ static int runsuffixerator(bool doesa,
   outfileinfo.outfpbwttab = NULL;
   outfileinfo.outlcpinfo = NULL;
   outfileinfo.outfpbcktab = NULL;
+  outfileinfo.numberofallsortedsuffixes = 0;
+  outfileinfo.longest.defined = false;
+  outfileinfo.longest.valueunsignedlong = 0;
+  outfileinfo.bustate_shulen = NULL;
+  outfileinfo.encseq = NULL;
   if (!haserr)
   {
     if (initoutfileinfo(&outfileinfo,prefixlength,encseq,so,err) != 0)
@@ -637,6 +635,11 @@ static int runsuffixerator(bool doesa,
 #endif
       }
     }
+  }
+  if (!haserr && outfileinfo.bustate_shulen != NULL &&
+      gt_sfx_multiesa2shulengthdist_last(outfileinfo.bustate_shulen,err) != 0)
+  {
+    haserr = true;
   }
   gt_fa_fclose(outfileinfo.outfpsuftab);
   gt_fa_fclose(outfileinfo.outfpbwttab);

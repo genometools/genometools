@@ -304,16 +304,23 @@ static uint64_t **shulengthdist_new(unsigned long numofdbfiles)
   make the contents of shulengthdist non-writable.
 */
 
-static void shulengthdist_print(uint64_t **shulengthdist,
+static void shulengthdist_print(const GtStrArray *file_names,
+                                uint64_t **shulengthdist,
                                 unsigned long numofdbfiles)
 {
   unsigned long idx1, idx2;
 
   /*shulengthdist[0][0] = 0; for testing */
-  printf("%lu\n",numofdbfiles);
+  printf("# sum of shulen\n%lu\n",numofdbfiles);
   for (idx2=0; idx2 < numofdbfiles; idx2++)
   {
-    printf("%lu\t",idx2);
+    if (file_names != NULL)
+    {
+      printf("%s\t",gt_str_array_get(file_names,idx2));
+    } else
+    {
+      printf("%lu\t",idx2);
+    }
     for (idx1=0; idx1 < numofdbfiles; idx1++)
     {
       if (idx1 != idx2)
@@ -322,7 +329,7 @@ static void shulengthdist_print(uint64_t **shulengthdist,
                PRINTuint64_tcast(shulengthdist[idx1][idx2]));
       } else
       {
-        printf("0\t");
+        printf("0.000000\t");
       }
     }
     printf("\n");
@@ -351,7 +358,7 @@ int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr)
   {
-    shulengthdist_print(state->shulengthdist,state->numofdbfiles);
+    shulengthdist_print(NULL,state->shulengthdist,state->numofdbfiles);
   }
   gt_array2dim_delete(state->shulengthdist);
   gt_free(state);
@@ -546,16 +553,30 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
   return retval;
 }
 
+int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,GtError *err)
+{
+  unsigned long lcptab_bucket[1];
+
+  lcptab_bucket[0] = 0;
+  if (gt_esa_bottomup_RAM_shulen(NULL, lcptab_bucket,0,bustate->stack,bustate,
+                                 err) != 0)
+  {
+    return -1;
+  }
+  return 0;
+}
+
 void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate)
 {
   if (bustate == NULL)
   {
     return;
   }
-  gt_shu_unit_info_delete(bustate->unit_info);
   gt_assert(bustate->shulengthdist != NULL);
-  shulengthdist_print(bustate->shulengthdist,bustate->numofdbfiles);
+  shulengthdist_print(bustate->unit_info->file_names,
+                      bustate->shulengthdist,bustate->numofdbfiles);
   gt_array2dim_delete(bustate->shulengthdist);
+  gt_shu_unit_info_delete(bustate->unit_info);
   gt_GtArrayGtBUItvinfo_delete_shulen(bustate->stack,bustate);
   gt_free(bustate);
 }
