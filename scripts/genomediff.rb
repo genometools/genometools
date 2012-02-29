@@ -83,6 +83,22 @@ module Genomediff
     return newfile
   end
 
+  def Genomediff.reverse_and_concat(file)
+    tf = Tempfile.new("gt_rev")
+    tmpfile = tf.path
+    tf.close
+    dirname = File.dirname(file)
+    `$GTDIR/bin/gt            \
+     convertseq -o #{tmpfile} \
+     -force -r #{file}`
+    basename = File.basename(file, ".*")
+    newfile = File.join(dirname, basename + "_plus_rev.fas")
+    `cat #{file} #{tmpfile} > #{newfile}`
+    exit 1 unless File.exist?(newfile)
+    File.unlink(tmpfile)
+    return newfile
+  end
+
   def Genomediff.pck_index(files,idxname,parameter)
     return `$GTDIR/bin/gt                  \
             packedindex mkindex            \
