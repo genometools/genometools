@@ -21,7 +21,7 @@ require 'tempfile'
 require 'fileutils'
 
 module Genomediff
-  def Genomediff.reduceN(file)
+  def Genomediff.reduceN(file,removeN)
     alphabet = [?a, ?A, ?c, ?C, ?g, ?G, ?t, ?T]
     newline = [?\n]
     charcount = 0
@@ -57,10 +57,12 @@ module Genomediff
           if cc == ?\n
             next
           end
-          if not wildcard and !alphabet.include?(cc)
+          if not wildcard and not alphabet.include?(cc)
             wildcard = true
-            nfp.putc ?N
-            charcount += 1
+            unless removeN
+              nfp.putc ?N 
+              charcount += 1
+            end
             next
           elsif wildcard
             if alphabet.include?(cc)
