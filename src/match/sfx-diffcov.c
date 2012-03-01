@@ -1196,6 +1196,21 @@ void gt_differencecover_completelargelcpvalues(void *data,
   }
 }
 
+static void dc_verify_inversesuftab(const GtDifferencecover *dcov)
+{
+  unsigned long idx;
+
+  for (idx=0; idx < dcov->effectivesamplesize; idx++)
+  {
+    unsigned long idx2 = dc_inversesuftab_get(dcov,dc_suffixptrget(dcov,idx));
+    if (idx != idx2)
+    {
+      fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
+      exit(GT_EXIT_PROGRAMMING_ERROR);
+    }
+  }
+}
+
 static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                           GtOutlcpinfo *outlcpinfosample,
                                           const Sfxstrategy *mainsfxstrategy,
@@ -1382,6 +1397,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                    dcov->effectivesamplesize,
                                    dcov->totallength,
                                    dcov->logger);
+    /* now sort the suffix sample up to a prefix of length vparam */
     gt_sortallbuckets(dcov->sortedsample,
                       dcov->effectivesamplesize,
                       NULL,
@@ -1419,8 +1435,6 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   dc_sortremainingsamples(dcov);
   if (withcheck)
   {
-    unsigned long idx;
-
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
                            dcov->encseq,
@@ -1431,15 +1445,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                            false, /* specialsareequal  */
                            false,  /* specialsareequalatdepth0 */
                            0);
-    for (idx=0; idx < dcov->effectivesamplesize; idx++)
-    {
-      unsigned long idx2 = dc_inversesuftab_get(dcov,dc_suffixptrget(dcov,idx));
-      if (idx != idx2)
-      {
-        fprintf(stderr,"idx = %lu != %lu = idx2\n",idx,idx2);
-        exit(GT_EXIT_PROGRAMMING_ERROR);
-      }
-    }
+    dc_verify_inversesuftab(dcov);
     if (outlcpinfosample != NULL)
     {
       gt_Outlcpinfo_check_lcpvalues(dcov->encseq,
