@@ -1062,16 +1062,16 @@ int gt_rbtree_unit_test(GtError *err)
   gt_free(gt_rbtree_ztab);
   gt_free(gt_rbtree_depths);
 
-  i = 0; j = 1, k = 2;
+  i = 0; j = 1UL, k = 2UL;
   tree = gt_rbtree_new(nrbt_cmp_fn, NULL, NULL);
   v = gt_rbtree_root_key(tree);
   gt_ensure(had_err, !v);
-  gt_rbtree_insert(tree, &i);
+  (void) gt_rbtree_insert(tree, &i);
   v = gt_rbtree_root_key(tree);
   gt_ensure(had_err, v == &i);
   gt_ensure(had_err, *v == i);
-  gt_rbtree_insert(tree, &j);
-  gt_rbtree_insert(tree, &k);
+  (void) gt_rbtree_insert(tree, &j);
+  (void) gt_rbtree_insert(tree, &k);
   v = gt_rbtree_root_key(tree);
   gt_ensure(had_err, v == &j);
   gt_ensure(had_err, *v == j);

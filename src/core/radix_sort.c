@@ -415,7 +415,8 @@ static void gt_radixsort_GtUlongPair_linear(GtRadixsortinfo *radixsort,
 
 void gt_radixsort_verify(GtRadixreader *rr)
 {
-  unsigned long current, GT_UNUSED previous = 0;
+  unsigned long current;
+  GT_UNUSED unsigned long previous = 0;
 
   while (true)
   {
