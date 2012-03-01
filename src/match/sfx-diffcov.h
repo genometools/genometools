@@ -52,6 +52,8 @@ GtDifferencecover *gt_differencecover_prepare_sample(
                                         GtTimer *sfxprogress,
                                         GtError *err);
 
+bool gt_differencecover_is_empty(const GtDifferencecover *dcov);
+
 void gt_differencecover_delete(GtDifferencecover *dcov);
 
 size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov);

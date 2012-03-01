@@ -1390,7 +1390,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
           haserr = true;
         } else
         {
-          estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
+          if (gt_differencecover_is_empty(sfi->dcov))
+          {
+            gt_differencecover_delete(sfi->dcov);
+            sfi->dcov = NULL;
+          } else
+          {
+            estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
+          }
         }
       }
     }
@@ -1869,7 +1876,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                   sumofwidthforpart,sfi->numofchars);
   }
   SHOWACTUALSPACE;
-  if (sfi->sfxstrategy.differencecover > 0)
+  if (sfi->sfxstrategy.differencecover > 0 && sfi->dcov != NULL)
   {
     gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
   }
@@ -1891,15 +1898,15 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       sfi->numofchars,
                       sfi->prefixlength,
                       sfi->outlcpinfo,
-                      sfi->sfxstrategy.differencecover,
+                      sfi->dcov == NULL ? 0
+                                        : sfi->sfxstrategy.differencecover,
                       &sfi->sfxstrategy,
-                      sfi->sfxstrategy.differencecover == 0
-                        ? NULL : gt_differencecover_sortunsortedbucket,
-                      (sfi->sfxstrategy.differencecover == 0 ||
-                       sfi->outlcpinfo == NULL)
-                        ? NULL : gt_differencecover_completelargelcpvalues,
-                      sfi->sfxstrategy.differencecover == 0
-                        ? NULL : (void *) sfi->dcov,
+                      sfi->dcov == NULL ? NULL
+                                        : gt_differencecover_sortunsortedbucket,
+                      (sfi->dcov == NULL || sfi->outlcpinfo == NULL)
+                        ? NULL
+                        : gt_differencecover_completelargelcpvalues,
+                      (void *) sfi->dcov,
                       &sfi->bucketiterstep,
                       sfi->logger);
   }

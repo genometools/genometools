@@ -512,6 +512,10 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
   unsigned long idx, reallcp, startpos1, startpos2, currentlcp,
                 totalcmpmissing = 0;
 
+  if (effectivesamplesize == 0)
+  {
+    return;
+  }
   startpos1 = gt_suffixsortspace_getdirect(sortedsample,0);
   for (idx=1UL; idx<effectivesamplesize; idx++)
   {

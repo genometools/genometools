@@ -361,6 +361,12 @@ static unsigned int dc_differencecover_offset(const GtDifferencecover *dcov,
   return (unsigned int) GT_MODV(dcov->diff2pos[GT_MODV(pos2 - pos1)] - pos1);
 }
 
+bool gt_differencecover_is_empty(const GtDifferencecover *dcov)
+{
+  gt_assert(dcov != NULL);
+  return dcov->effectivesamplesize == 0 ? true : false;
+}
+
 void gt_differencecover_delete(GtDifferencecover *dcov)
 {
   if (dcov != NULL)
@@ -534,11 +540,17 @@ static void dc_validate_samplepositons(const GtDifferencecover *dcov)
   gt_free(sampleidxused);
 }
 
-static void dc_inversesuftab_set(GtDifferencecover *dcov,
+static void dc_inversesuftab_set(GT_UNUSED int line,GtDifferencecover *dcov,
                                  unsigned long pos,
                                  unsigned long sampleindex)
 {
   gt_assert (sampleindex < dcov->samplesize);
+  if (sampleindex >= dcov->effectivesamplesize)
+  {
+    /*gt_assert(line == 593 || line == 605 || line == 650);*/
+    /*printf("line %d: inversesuftab for pos %lu becomes %lu\n",
+            line,pos,sampleindex);*/
+  }
   dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)] = sampleindex;
 }
 
@@ -555,7 +567,7 @@ static void dc_initinversesuftabnonspecials(GtDifferencecover *dcov)
   for (sampleindex=0; sampleindex < dcov->effectivesamplesize; sampleindex++)
   {
     pos = dc_suffixptrget(dcov,sampleindex);
-    dc_inversesuftab_set(dcov,pos,sampleindex);
+    dc_inversesuftab_set(__LINE__,dcov,pos,sampleindex);
   }
 }
 
@@ -584,7 +596,7 @@ static unsigned long dc_insertfullspecialrangesample(GtDifferencecover *dcov,
       revpos = GT_REVERSEPOS(dcov->totallength,pos);
       if (dc_is_in_differencecover(dcov,GT_MODV(revpos)))
       {
-        dc_inversesuftab_set(dcov,revpos,specialidx);
+        dc_inversesuftab_set(__LINE__,dcov,revpos,specialidx);
         specialidx++;
       }
       if (pos == leftpos)
@@ -596,7 +608,7 @@ static unsigned long dc_insertfullspecialrangesample(GtDifferencecover *dcov,
     {
       if (dc_is_in_differencecover(dcov,GT_MODV(pos)))
       {
-        dc_inversesuftab_set(dcov,pos,specialidx);
+        dc_inversesuftab_set(__LINE__,dcov,pos,specialidx);
         specialidx++;
       }
       if (pos == rightpos-1)
@@ -641,7 +653,7 @@ static void dc_initinversesuftabspecials(GtDifferencecover *dcov)
   if (dc_is_in_differencecover(dcov,GT_MODV(dcov->totallength)))
   {
     gt_assert(dcov->samplesize > 0);
-    dc_inversesuftab_set(dcov,dcov->totallength,dcov->samplesize-1);
+    dc_inversesuftab_set(__LINE__,dcov,dcov->totallength,dcov->samplesize-1);
   }
 }
 
@@ -684,19 +696,20 @@ static void dc_initinversesuftabnonspecialsadjust(GtDifferencecover *dcov)
                                           rightchar);
     for (/* Nothing */; idx < bucketspec.left; idx++)
     {
-      dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),idx);
+      dc_inversesuftab_set(__LINE__,dcov,dc_suffixptrget(dcov,idx),idx);
     }
     dc_updatewidth (dcov,bucketspec.nonspecialsinbucket,dcov->prefixlength);
     for (/* Nothing */;
          idx < bucketspec.left + bucketspec.nonspecialsinbucket;
          idx++)
     {
-      dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),bucketspec.left);
+      dc_inversesuftab_set(__LINE__,dcov,dc_suffixptrget(dcov,idx),
+                           bucketspec.left);
     }
   }
   for (/* Nothing */; idx < dcov->effectivesamplesize; idx++)
   {
-    dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),idx);
+    dc_inversesuftab_set(__LINE__,dcov,dc_suffixptrget(dcov,idx),idx);
   }
 }
 
@@ -708,7 +721,7 @@ static void dc_anchorleftmost(GtDifferencecover *dcov,
 
   for (idx = blisbl; idx < blisbl + width; idx++)
   {
-    dc_inversesuftab_set(dcov,dc_suffixptrget(dcov,idx),blisbl);
+    dc_inversesuftab_set(__LINE__,dcov,dc_suffixptrget(dcov,idx),blisbl);
   }
 }
 
@@ -873,7 +886,8 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
       {
         unsigned long currentsuftabentry
           = dc_suffixptrget(dcov,blisbl+rangestart);
-        dc_inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
+        dc_inversesuftab_set(__LINE__,dcov,currentsuftabentry,
+                             blisbl+rangestart);
       }
       rangestart = idx;
     }
@@ -896,7 +910,7 @@ static void dc_sortsuffixesonthislevel(GtDifferencecover *dcov,
   {
     unsigned long currentsuftabentry
       = dc_suffixptrget(dcov,blisbl+rangestart);
-    dc_inversesuftab_set(dcov,currentsuftabentry,blisbl+rangestart);
+    dc_inversesuftab_set(__LINE__,dcov,currentsuftabentry,blisbl+rangestart);
   }
 }
 
@@ -1311,10 +1325,16 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
           (size_t) codelist.nextfreeCodeatposition,
           sizeof (*codelist.spaceCodeatposition),dc_compareCodeatpositon);
   }
-  dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
-                                              dcov->totallength,
-                                              false,
-                                              dcov->logger);
+  if (dcov->effectivesamplesize > 0)
+  {
+    dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
+                                                dcov->totallength,
+                                                false,
+                                                dcov->logger);
+  } else
+  {
+    gt_assert(dcov->sortedsample == NULL);
+  }
   posinserted = dc_derivespecialcodesonthefly(dcov,
                                               withcheck ? &codelist : NULL);
   GT_FREEARRAY(&codelist,Codeatposition);
@@ -1359,7 +1379,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   gt_encseq_reader_delete(dcov->esr);
   dcov->esr = NULL;
   gt_assert(posinserted == dcov->effectivesamplesize);
-  if (withcheck)
+  if (withcheck && dcov->effectivesamplesize > 0)
   {
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
@@ -1398,25 +1418,28 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                    dcov->totallength,
                                    dcov->logger);
     /* now sort the suffix sample up to a prefix of length vparam */
-    gt_sortallbuckets(dcov->sortedsample,
-                      dcov->effectivesamplesize,
-                      NULL,
-                      dcov->encseq,
-                      dcov->readmode,
-                      0, /* mincode */
-                      dcov->maxcode,
-                      dcov->bcktab,
-                      dcov->numofchars,
-                      dcov->prefixlength,
-                      outlcpinfosample,
-                      dcov->vparam,
-                      &sfxstrategy,
-                      dc_addunsortedrange,
-                      NULL,
-                      (void *) dcov,
-                      &bucketiterstep,
-                      dcov->logger);
-    if (withcheck)
+    if (dcov->effectivesamplesize > 0)
+    {
+      gt_sortallbuckets(dcov->sortedsample,
+                        dcov->effectivesamplesize,
+                        NULL,
+                        dcov->encseq,
+                        dcov->readmode,
+                        0, /* mincode */
+                        dcov->maxcode,
+                        dcov->bcktab,
+                        dcov->numofchars,
+                        dcov->prefixlength,
+                        outlcpinfosample,
+                        dcov->vparam,
+                        &sfxstrategy,
+                        dc_addunsortedrange,
+                        NULL,
+                        (void *) dcov,
+                        &bucketiterstep,
+                        dcov->logger);
+    }
+    if (withcheck && dcov->effectivesamplesize > 0)
     {
       gt_checksortedsuffixes(__FILE__,
                              __LINE__,
@@ -1433,7 +1456,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   gt_bcktab_delete(dcov->bcktab);
   dcov->bcktab = NULL;
   dc_sortremainingsamples(dcov);
-  if (withcheck)
+  if (withcheck && dcov->effectivesamplesize > 0)
   {
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
@@ -1471,7 +1494,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
-  if (outlcpinfosample != NULL)
+  if (dcov->effectivesamplesize > 0 && outlcpinfosample != NULL)
   {
     dcov->rmq = gt_lcpvalues_rmq_new(dcov->samplelcpvalues);
   }
@@ -1586,7 +1609,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
                               dc_addunsortedrange,
                               (void *) dcov,
                               dcov->logger);
-  if (withcheck)
+  if (withcheck && dcov->effectivesamplesize > 0)
   {
     gt_checksortedsuffixes(__FILE__,
                            __LINE__,
@@ -1600,7 +1623,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
                            (unsigned long) dcov->vparam);
   }
   dc_sortremainingsamples(dcov);
-  if (withcheck)
+  if (withcheck && dcov->effectivesamplesize > 0)
   {
     unsigned long idx;
 
