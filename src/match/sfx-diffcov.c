@@ -118,8 +118,7 @@ struct GtDifferencecover
   const GtCodetype **multimappower;
   GtCodetype *filltable;
   GtEncseqReader *esr;
-  unsigned long *shat,
-                *inversesuftab,
+  unsigned long *inversesuftab,
                 allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize,
@@ -275,7 +274,6 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->totallength = gt_encseq_total_length(encseq);
   dcov->logger = logger;
   dcov->sssp = NULL;
-  dcov->shat = NULL;
   dcov->rmq = NULL;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
@@ -383,8 +381,6 @@ void gt_differencecover_delete(GtDifferencecover *dcov)
     dcov->diff2pos = NULL;
     gt_free(dcov->inversesuftab);
     dcov->inversesuftab = NULL;
-    gt_free(dcov->shat);
-    dcov->shat = NULL;
     gt_rmq_delete(dcov->rmq);
     dcov->rmq = NULL;
     gt_free(dcov);
@@ -1117,35 +1113,33 @@ static unsigned long dc_suffix2shatindex(const GtDifferencecover *dcov,
   return dcov->size * GT_DIVV(suffix) + dcov->coverrank[GT_MODV(suffix)];
 }
 
+static unsigned long dc_lookupshatvalue(const GtDifferencecover *dcov,
+                                    unsigned long idx)
+{
+  unsigned long pos;
+
+  gt_assert(idx < dcov->samplesize);
+  pos = idx/dcov->size * dcov->vparam + dcov->diffvalues[idx % dcov->size];
+  return dc_inversesuftab_get(dcov,pos);
+}
+
 static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
 {
 
-  unsigned long suffix, idx, j, kvalue, lcpvalue, start0, start1;
+  unsigned long suffix, kvalue, lcpvalue, start0, start1;
   unsigned int svalue;
   GtUchar cc1, cc2;
 
-  dcov->shat = gt_malloc(sizeof (*dcov->shat) * dcov->samplesize);
-  for (j = 0; j < dcov->samplesize; j++)
-  {
-    dcov->shat[j] = ULONG_MAX;
-  }
-  for (j = 0; j < dcov->effectivesamplesize; j++)
-  {
-    suffix = gt_suffixsortspace_get(dcov->sortedsample,0,j);
-    idx = dc_suffix2shatindex(dcov,suffix);
-    gt_assert(idx < dcov->samplesize);
-    gt_assert(dcov->shat[idx] == ULONG_MAX);
-    dcov->shat[idx] = j;
-  }
   for (svalue = 0; svalue < dcov->size; svalue++)
   {
     kvalue = (unsigned long) svalue;
     lcpvalue = 0;
     while (kvalue < dcov->samplesize)
     {
-      suffix = dcov->shat[kvalue];
+      suffix = dc_lookupshatvalue(dcov,kvalue);
       if (suffix > 0 && suffix < dcov->effectivesamplesize)
       {
+        gt_assert(suffix < dcov->effectivesamplesize);
         start0 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix-1);
         start1 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix);
         while (start0 + lcpvalue < dcov->totallength &&
@@ -1168,7 +1162,6 @@ static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
       kvalue += dcov->size;
     }
   }
-  dcov->rmq = gt_lcpvalues_rmq_new(dcov->samplelcpvalues);
 }
 
 void gt_differencecover_completelargelcpvalues(void *data,
@@ -1190,8 +1183,8 @@ void gt_differencecover_completelargelcpvalues(void *data,
       s0 = gt_suffixsortspace_get(sssp, posoffset, idx-1);
       s1 = gt_suffixsortspace_get(sssp, posoffset, idx);
       deltavalue = (unsigned long) dc_differencecover_offset(dcov,s0,s1);
-      r0 = dcov->shat[dc_suffix2shatindex(dcov,s0 + deltavalue)];
-      r1 = dcov->shat[dc_suffix2shatindex(dcov,s1 + deltavalue)];
+      r0 = dc_lookupshatvalue(dcov,dc_suffix2shatindex(dcov,s0 + deltavalue));
+      r1 = dc_lookupshatvalue(dcov,dc_suffix2shatindex(dcov,s1 + deltavalue));
       lcpvalue = deltavalue;
       if (r0 < dcov->effectivesamplesize && r1 < dcov->effectivesamplesize)
       {
@@ -1472,6 +1465,10 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   }
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
+  if (outlcpinfosample != NULL)
+  {
+    dcov->rmq = gt_lcpvalues_rmq_new(dcov->samplelcpvalues);
+  }
   gt_assert(dcov->diff2pos == NULL);
   dc_filldiff2pos(dcov);
 }
