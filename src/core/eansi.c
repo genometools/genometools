@@ -22,7 +22,7 @@ FILE* gt_efopen(const char *path, const char *mode, GtError *err)
   FILE *file;
   gt_error_check(err);
   if ((file = fopen(path, mode)) == NULL) {
-    gt_error_set(err, "fopen(): cannot open file '%s': %s\n", path,
+    gt_error_set(err, "fopen(): cannot open file '%s': %s", path,
               strerror(errno));
   }
   return file;

@@ -71,7 +71,7 @@ GtThread* gt_thread_new(GtThreadFunc function, void *data, GtError *err)
   thread = gt_malloc(sizeof (pthread_t));
   rval = pthread_create((pthread_t*) thread, NULL, function, data);
   if (rval) {
-    gt_error_set(err, "cannot create thread: %s\n", strerror(rval));
+    gt_error_set(err, "cannot create thread: %s", strerror(rval));
     gt_free(thread);
     return NULL;
   }

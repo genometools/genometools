@@ -45,7 +45,7 @@ Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
 
   if (maxpatternlen < minpatternlen)
   {
-    gt_error_set(err,"maxpatternlen=%lu < %lu\n",
+    gt_error_set(err,"maxpatternlen=%lu < %lu",
                     maxpatternlen,
                     minpatternlen);
     return NULL;
@@ -54,7 +54,7 @@ Enumpatterniterator *gt_newenumpatterniterator(unsigned long minpatternlen,
   epi->totallength = gt_encseq_total_length(encseq);
   if (epi->totallength <= (unsigned long) maxpatternlen)
   {
-    gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu\n",
+    gt_error_set(err,"totallength=%lu <= maxpatternlen = %lu",
                     epi->totallength,
                     maxpatternlen);
     FREESPACE(epi);

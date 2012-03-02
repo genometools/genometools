@@ -398,7 +398,7 @@ static GthBSSMParam* load_old_binary_format(GtStr *path, const char *filename,
   bssm_param = gt_malloc(sizeof *bssm_param);
   gt_xfread(&bssm_param->version_num,  sizeof (unsigned char), 1, file);
   if (bssm_param->version_num != (unsigned char) 2) {
-    gt_error_set(err, "BSSM file %s has unrecognized version number %u\n",
+    gt_error_set(err, "BSSM file %s has unrecognized version number %u",
                  filename, bssm_param->version_num);
     had_err = -1;
   }

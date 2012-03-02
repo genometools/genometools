@@ -2294,7 +2294,7 @@ gt_loadBlockEncIdxSeqGen(MRAEnc *alphabet,
         }
         else
         {
-          gt_error_set(err, "Unknown header field: %4s\n", buf + offset);
+          gt_error_set(err, "Unknown header field: %4s", buf + offset);
           loadBlockEncIdxSeqErrRet();
         }
       }

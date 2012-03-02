@@ -190,7 +190,7 @@ static int gt_shulengthdist_runner(GT_UNUSED int argc,
   logger = gt_logger_new(arguments->beverbose, GT_LOGGER_DEFLT_PREFIX, stdout);
   if (parsed_args < argc)
   {
-    gt_error_set(err,"superfluous arguments: \"%s\"\n",argv[argc-1]);
+    gt_error_set(err,"superfluous arguments: \"%s\"",argv[argc-1]);
     haserr = true;
   }
   if (!haserr)

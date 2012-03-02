@@ -24,7 +24,7 @@ BZFILE* gt_ebzopen(const char *path, const char *mode, GtError *err)
   BZFILE* file;
   gt_error_check(err);
   if (!(file = BZ2_bzopen(path, mode))) {
-    gt_error_set(err, "BZ2_bzopen(): cannot open file '%s': %s\n", path,
+    gt_error_set(err, "BZ2_bzopen(): cannot open file '%s': %s", path,
               strerror(errno));
   }
   return file;

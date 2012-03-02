@@ -287,7 +287,7 @@ static int gt_esa_scantables(Sequentialsuffixarrayreader *ssar,
       }
     } else
     {
-      gt_error_set(err,"illegal mode %u: use 1 or 2\n",mode);
+      gt_error_set(err,"illegal mode %u: use 1 or 2",mode);
       haserr = true;
     }
   }
