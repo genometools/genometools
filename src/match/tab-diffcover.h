@@ -256,10 +256,22 @@ static Diffvalue differencecovertab[] = {
 };
 
 static Diffrank differencecoversizes[] = {
-    UCcast (1), UCcast (2), UCcast (3), UCcast (4), UCcast (5),
-    UCcast (7), UCcast (9), UCcast (13), UCcast (20), UCcast (28),
-    UCcast (40), UCcast (58), UCcast (82), UCcast (112), UCcast (160),
-    UCcast (226)
+    UCcast (1), /* 2^0 */
+    UCcast (2), /* 2^1 */
+    UCcast (3), /* 2^2 */
+    UCcast (4), /* 2^3 */
+    UCcast (5), /* 2^4 */
+    UCcast (7), /* 2^5 */
+    UCcast (9), /* 2^6 */
+    UCcast (13), /* 2^7 */
+    UCcast (20), /* 2^8 */
+    UCcast (28), /* 2^9 */
+    UCcast (40), /* 2^10 */
+    UCcast (58), /* 2^11 */
+    UCcast (82), /* 2^12 */
+    UCcast (112), /* 2^13 */
+    UCcast (160), /* 2^14 */
+    UCcast (226) /* 2^15 */
 };
 
 #endif

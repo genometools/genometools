@@ -545,12 +545,6 @@ static void dc_inversesuftab_set(GT_UNUSED int line,GtDifferencecover *dcov,
                                  unsigned long sampleindex)
 {
   gt_assert (sampleindex < dcov->samplesize);
-  if (sampleindex >= dcov->effectivesamplesize)
-  {
-    /*gt_assert(line == 593 || line == 605 || line == 650);*/
-    /*printf("line %d: inversesuftab for pos %lu becomes %lu\n",
-            line,pos,sampleindex);*/
-  }
   dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)] = sampleindex;
 }
 
@@ -623,8 +617,14 @@ static unsigned long dc_insertfullspecialrangesample(GtDifferencecover *dcov,
 
 static void dc_initinversesuftabspecials(GtDifferencecover *dcov)
 {
+  unsigned long idx;
+
   dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
                                   dcov->maxsamplesize);
+  for (idx = 0; idx < dcov->maxsamplesize; idx++)
+  {
+    dcov->inversesuftab[idx] = ULONG_MAX;
+  }
   dcov->requiredspace += sizeof (*dcov->inversesuftab) * dcov->maxsamplesize;
   if (gt_encseq_has_specialranges(dcov->encseq))
   {
@@ -1134,13 +1134,18 @@ static unsigned long dc_lookupshatvalue(const GtDifferencecover *dcov,
 
   gt_assert(idx < dcov->samplesize);
   pos = idx/dcov->size * dcov->vparam + dcov->diffvalues[idx % dcov->size];
+  /*
+  printf("idx=%lu,pos=%lu,inversesuftab_index=%lu\n",idx,pos,
+           dc_differencecover_packsamplepos(dcov,pos));
+  */
   return dc_inversesuftab_get(dcov,pos);
 }
 
 static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
 {
 
-  unsigned long suffix, kvalue, lcpvalue, start0, start1;
+  unsigned long suffix, kvalue, lcpvalue, start0, start1,
+                *inversesuftabptr = dcov->inversesuftab;
   unsigned int svalue;
   GtUchar cc1, cc2;
 
@@ -1150,10 +1155,17 @@ static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
     lcpvalue = 0;
     while (kvalue < dcov->samplesize)
     {
-      suffix = dc_lookupshatvalue(dcov,kvalue);
+      do
+      {
+        if (inversesuftabptr >= dcov->inversesuftab + dcov->maxsamplesize)
+        {
+          suffix = ULONG_MAX;
+          break;
+        }
+        suffix = *inversesuftabptr++;
+      } while (suffix == ULONG_MAX);
       if (suffix > 0 && suffix < dcov->effectivesamplesize)
       {
-        gt_assert(suffix < dcov->effectivesamplesize);
         start0 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix-1);
         start1 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix);
         while (start0 + lcpvalue < dcov->totallength &&
