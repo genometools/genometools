@@ -58,7 +58,7 @@ struct GtBUstate_shulen /* global information */
 };
 
 static void resetgnumdist_shulen(GtBUinfo_shulen *father,
-                                    unsigned long numofdbfiles)
+                                 unsigned long numofdbfiles)
 {
   unsigned long idx;
 
@@ -101,7 +101,8 @@ static void contribute_shulen(GT_UNUSED int line,
 }
 
 #ifdef SHUDEBUG
-static void shownode(int line,const GtBUstate_shulen *state,
+static void shownode(int line,
+                     const GtBUstate_shulen *state,
                      const char *kind,
                      const GtBUinfo_shulen *node)
 {
@@ -172,17 +173,22 @@ static int processleafedge_shulen(bool firstsucc,
 #endif
     for (idx = 0; idx < state->numofdbfiles; idx++)
     {
-      if (idx != gnum)
+      if (idx != gnum && father->gnumdist[idx] > 0)
       {
-        if (father->gnumdist[idx] > 0)
+        contribute_shulen(__LINE__,
+                          state->shulengthdist,
+                          idx,
+                          gnum,
+                          1UL,
+                          fatherdepth+1);
+        if (father->gnumdist[gnum] == 0)
         {
-          contribute_shulen(__LINE__,state->shulengthdist,idx,gnum,
-                            1UL,fatherdepth+1);
-          if (father->gnumdist[gnum] == 0)
-          {
-            contribute_shulen(__LINE__,state->shulengthdist,gnum,idx,
-                              father->gnumdist[idx],fatherdepth + 1);
-          }
+          contribute_shulen(__LINE__,
+                            state->shulengthdist,
+                            gnum,
+                            idx,
+                            father->gnumdist[idx],
+                            fatherdepth + 1);
         }
       }
     }
@@ -212,8 +218,12 @@ static void cartproduct_shulen(GtBUstate_shulen *state,
         if (node2->gnumdist[shulenidx] > 0)
         {
           gt_assert(referidx != shulenidx);
-          contribute_shulen(__LINE__,state->shulengthdist,referidx,shulenidx,
-                            node2->gnumdist[shulenidx],depth + 1);
+          contribute_shulen(__LINE__,
+                            state->shulengthdist,
+                            referidx,
+                            shulenidx,
+                            node2->gnumdist[shulenidx],
+                            depth + 1);
         }
       }
     }
@@ -275,7 +285,7 @@ static int processbranchingedge_shulen(bool firstsucc,
       son->gnumdist[idx] = 0;
 #ifdef SHUDEBUG
       printf("gnumdist[id=%lu,filenum=%lu]=%lu\n",father->id,idx,
-                                                father->gnumdist[idx]);
+                                                  father->gnumdist[idx]);
       printf("gnumdist[id=%lu,filenum=%lu]=0\n",son->id,idx);
 #endif
     }
