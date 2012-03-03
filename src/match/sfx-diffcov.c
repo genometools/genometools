@@ -117,7 +117,7 @@ struct GtDifferencecover
   unsigned long samplesize, effectivesamplesize, maxsamplesize;
   const GtCodetype **multimappower;
   GtCodetype *filltable;
-  GtEncseqReader *esr;
+  GtEncseqReader *esr1, *esr2;
   unsigned long *inversesuftab,
                 allocateditvinfo,
                 currentqueuesize,
@@ -326,7 +326,8 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->multimappower = NULL;
   dc_fillcoverrank(dcov);
   dcov->diff2pos = NULL; /* this is later initialized */
-  dcov->esr = NULL;
+  dcov->esr1 = NULL;
+  dcov->esr2 = NULL;
   dcov->allocateditvinfo = 0;
   dcov->itvinfo = NULL;
   dcov->currentdepth = 0;
@@ -375,7 +376,8 @@ void gt_differencecover_delete(GtDifferencecover *dcov)
     gt_assert(dcov->sortedsample == NULL);
     gt_assert(dcov->filltable == NULL);
     gt_assert(dcov->multimappower == NULL);
-    gt_assert(dcov->esr == NULL);
+    gt_assert(dcov->esr1 == NULL);
+    gt_assert(dcov->esr2 == NULL);
 
     gt_free(dcov->coverrank_evaluated);
     dcov->coverrank_evaluated = NULL;
@@ -441,7 +443,7 @@ static unsigned long dc_derivespecialcodesonthefly(GtDifferencecover *dcov,
                                              dcov->encseq,
                                              dcov->filltable,
                                              dcov->readmode,
-                                             dcov->esr,
+                                             dcov->esr1,
                                              dcov->multimappower,
                                              pos,
                                              dcov->prefixlength);
@@ -1141,12 +1143,14 @@ static unsigned long dc_lookupshatvalue(const GtDifferencecover *dcov,
   return dc_inversesuftab_get(dcov,pos);
 }
 
-static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
+static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
 {
 
   unsigned long suffix, kvalue, lcpinherit, start0, start1, currentlcpvalue,
                 *inversesuftabptr = dcov->inversesuftab;
   unsigned int svalue;
+  int retval;
+  GtCommonunits commonunits;
   GtUchar cc1, cc2;
 
   for (svalue = 0; svalue < dcov->size; svalue++)
@@ -1178,18 +1182,34 @@ static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
           }
           start0 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix-1);
           start1 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix);
-          while (start0 + lcpinherit < dcov->totallength &&
-                 start1 + lcpinherit < dcov->totallength)
+          if (cmpcharbychar)
           {
-            cc1 = gt_encseq_get_encoded_char(dcov->encseq,start0+lcpinherit,
-                                             dcov->readmode);
-            cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lcpinherit,
-                                             dcov->readmode);
-            if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+            while (start0 + lcpinherit < dcov->totallength &&
+                   start1 + lcpinherit < dcov->totallength)
             {
-              break;
+              cc1 = gt_encseq_get_encoded_char(dcov->encseq,start0+lcpinherit,
+                                               dcov->readmode);
+              cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lcpinherit,
+                                               dcov->readmode);
+              if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+              {
+                break;
+              }
+              lcpinherit++;
             }
-            lcpinherit++;
+          } else
+          {
+            retval = gt_encseq_compare_viatwobitencoding(&commonunits,
+                                                         dcov->encseq,
+                                                         dcov->readmode,
+                                                         dcov->esr1,
+                                                         dcov->esr2,
+                                                         start0,
+                                                         start1,
+                                                         lcpinherit,
+                                                         0);
+            gt_assert(retval <= 0);
+            lcpinherit = commonunits.finaldepth;
           }
           gt_lcptab_update(dcov->samplelcpvalues,0,suffix,lcpinherit);
           lcpinherit = lcpinherit > (unsigned long) dcov->vparam
@@ -1270,9 +1290,12 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                NULL);
   dcov->multimappower = gt_bcktab_multimappower(dcov->bcktab);
   dcov->maxcode = gt_bcktab_numofallcodes(dcov->bcktab) - 1;
-  dcov->esr = gt_encseq_create_reader_with_readmode(dcov->encseq,
-                                                    dcov->readmode,
-                                                    0);
+  dcov->esr1 = gt_encseq_create_reader_with_readmode(dcov->encseq,
+                                                     dcov->readmode,
+                                                     0);
+  dcov->esr2 = gt_encseq_create_reader_with_readmode(dcov->encseq,
+                                                     dcov->readmode,
+                                                     0);
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   dcov->filltable = gt_filllargestchartable(dcov->numofchars,
                                             dcov->prefixlength);
@@ -1291,7 +1314,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                            dcov->encseq,
                                            dcov->filltable,
                                            dcov->readmode,
-                                           dcov->esr,
+                                           dcov->esr1,
                                            dcov->multimappower,
                                            pos,
                                            dcov->prefixlength);
@@ -1373,7 +1396,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                          dcov->encseq,
                                          dcov->filltable,
                                          dcov->readmode,
-                                         dcov->esr,
+                                         dcov->esr1,
                                          dcov->multimappower,
                                          pos,
                                          dcov->prefixlength);
@@ -1399,8 +1422,6 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   dcov->multimappower = NULL;
   gt_free(dcov->filltable);
   dcov->filltable = NULL;
-  gt_encseq_reader_delete(dcov->esr);
-  dcov->esr = NULL;
   gt_assert(posinserted == dcov->effectivesamplesize);
   if (withcheck && dcov->effectivesamplesize > 0)
   {
@@ -1504,7 +1525,8 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   }
   if (outlcpinfosample != NULL)
   {
-    dc_fill_samplelcpvalues(dcov);
+    dc_fill_samplelcpvalues(mainsfxstrategy->cmpcharbychar ||
+                            !gt_encseq_bitwise_cmp_ok(dcov->encseq),dcov);
     if (withcheck)
     {
       gt_Outlcpinfo_check_lcpvalues(dcov->encseq,
@@ -1515,6 +1537,10 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                     true);
     }
   }
+  gt_encseq_reader_delete(dcov->esr1);
+  dcov->esr1 = NULL;
+  gt_encseq_reader_delete(dcov->esr2);
+  dcov->esr2 = NULL;
   gt_suffixsortspace_delete(dcov->sortedsample,false);
   dcov->sortedsample = NULL;
   if (dcov->effectivesamplesize > 0 && outlcpinfosample != NULL)
@@ -1540,7 +1566,8 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   dcov->bcktab = NULL;
   dcov->multimappower = NULL;
   dcov->maxcode = 0;
-  dcov->esr = NULL;
+  dcov->esr1 = NULL;
+  dcov->esr2 = NULL;
   dcov->rangestobesorted = gt_inl_queue_new(MAX(16UL,GT_DIV2(dcov->maxcode)));
   dcov->filltable = NULL;
   dcov->leftborder = NULL;
