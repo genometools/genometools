@@ -46,7 +46,7 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq);
 
 int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
                                   const unsigned long *bucketofsuffixes,
-                                  const unsigned long *lcptab_bucket,
+                                  const GtLcpvaluetype *lcptab_bucket,
                                   unsigned long numberofsuffixes,
                                   GtError *err);
 

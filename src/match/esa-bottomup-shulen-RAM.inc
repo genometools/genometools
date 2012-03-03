@@ -21,7 +21,7 @@
 /* no include for seqnumrelpos.h */
 
 int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
-                        const unsigned long *lcptab_bucket,
+                        const GtLcpvaluetype *lcptab_bucket,
                         unsigned long numberofsuffixes,
                         GtArrayGtBUItvinfo_shulen *stack,
                         GtBUstate_shulen *bustate,

@@ -29,7 +29,7 @@
 
 struct GtRMQ {
   /*  array */
-  const unsigned long *arr_ptr;
+  const GtRMQvaluetype *arr_ptr;
   /*  size of array a */
   unsigned long n;
   /*  table M for the out-of-block queries (contains indices of block-minima) */
@@ -310,7 +310,8 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
   }
   if (rmq->naive_impl)
   {
-    unsigned long minval, idx, ret;
+    GtRMQvaluetype minval;
+    unsigned long idx, ret;
 
     minval = rmq->arr_ptr[start];
     ret = start;
@@ -329,17 +330,18 @@ unsigned long gt_rmq_find_min_index(const GtRMQ *rmq,
   }
 }
 
-unsigned long gt_rmq_find_min_value(const GtRMQ *rmq, unsigned long start,
-                                    unsigned long end)
+GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq,
+                                     unsigned long start,
+                                     unsigned long end)
 {
   return rmq->arr_ptr[gt_rmq_find_min_index(rmq,start,end)];
 }
 
-GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
+GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
 {
   GtRMQ *rmq = gt_calloc((size_t) 1, sizeof (GtRMQ));
+  GtRMQvaluetype *rp;
   unsigned long i, j,
-                *rp,
                 z = 0,            /*  index in array a */
                 start,            /*  start of current block */
                 end,              /*  end of current block */
@@ -410,17 +412,17 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
     q = rmq->s;        /*  init q */
     p = rmq->s-1;      /*  init p */
     rmq->type[i] = 0;  /*  init type (will be increased!) */
-    rp[1] = data[z]; /*  init rightmost path */
+    rp[1] = rmq->arr_ptr[z]; /*  init rightmost path */
 
     while (++z < end) {   /*  step through current block: */
       p--;
-      while (rp[q-p-1] > data[z])
+      while (rp[q-p-1] > rmq->arr_ptr[z])
       {
         rmq->type[i] += gt_rmq_catalan[p][q]; /*  update type */
         q--;
       }
       gt_assert(q > p);
-      rp[q-p] = data[z]; /*  add last element to rightmost path */
+      rp[q-p] = rmq->arr_ptr[z]; /*  add last element to rightmost path */
     }
 
     /*  precompute in-block-queries for this microblock (if necessary) */
@@ -429,7 +431,8 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
       rmq->Prec[rmq->type[i]][0] = 0U;
       gstacksize = 0;
       for (j = start; j < end; j++) {
-        while (gstacksize > 0U && (data[j] < data[gstack[gstacksize-1]])) {
+        while (gstacksize > 0U &&
+               rmq->arr_ptr[j] < rmq->arr_ptr[gstack[gstacksize-1]]) {
           gstacksize--;
         }
         if (gstacksize > 0U) {
@@ -474,12 +477,14 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
     end = start + rmq->sprime;   /*  end of block (not inclusive!) */
     if (end > size)
       end = size;   /*  last block could be smaller than sprime! */
-    if (data[z] < data[q])
+    if (rmq->arr_ptr[z] < rmq->arr_ptr[q])
       q = z; /*  update minimum in superblock */
 
     while (++z < end) { /*  step through current block: */
-      if (data[z] < data[p]) p = z; /*  update minimum in block */
-      if (data[z] < data[q]) q = z; /*  update minimum in superblock */
+      if (rmq->arr_ptr[z] < rmq->arr_ptr[p])
+        p = z; /*  update minimum in block */
+      if (rmq->arr_ptr[z] < rmq->arr_ptr[q])
+        q = z; /*  update minimum in superblock */
     }
     rmq->M[0][i] = (unsigned char) (p-start); /*  store index of block-minimum
                                                   (offset!) */
@@ -499,8 +504,8 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
 #endif
     for (i = 0; i < rmq->nb - dist; i++) { /*  be careful: loop may go too
                                                far */
-      rmq->M[j][i] = data[gt_rmq_trueindex(rmq, j-1, i)] <=
-                     data[gt_rmq_trueindex(rmq, j-1,i+dist)]
+      rmq->M[j][i] = rmq->arr_ptr[gt_rmq_trueindex(rmq, j-1, i)] <=
+                     rmq->arr_ptr[gt_rmq_trueindex(rmq, j-1,i+dist)]
                        ? rmq->M[j-1][i]
                        : (unsigned char) (rmq->M[j-1][i+dist] +
                                           (dist*rmq->sprime)); /* add
@@ -522,9 +527,9 @@ GtRMQ* gt_rmq_new(const unsigned long *data, unsigned long size)
 #endif
     for (i = 0; i < rmq->nsb - dist; i++) {
       rmq->Mprime[j][i] =
-         (data[rmq->Mprime[j-1][i]] <= data[rmq->Mprime[j-1][i+dist]]) ?
-          rmq->Mprime[j-1][i] :
-          rmq->Mprime[j-1][i+dist];
+         (rmq->arr_ptr[rmq->Mprime[j-1][i]] <=
+          rmq->arr_ptr[rmq->Mprime[j-1][i+dist]]) ? rmq->Mprime[j-1][i]
+                                                  : rmq->Mprime[j-1][i+dist];
     }
     for (i = rmq->nsb - dist; i < rmq->nsb; i++)
       rmq->Mprime[j][i] = rmq->Mprime[j-1][i]; /*  overhang */
@@ -569,17 +574,22 @@ void gt_rmq_delete(GtRMQ *rmq)
 }
 
 /* O(size) */
-static unsigned long gt_rmq_naive(const unsigned long *data,
+static unsigned long gt_rmq_naive(const GtRMQvaluetype *data,
                                   GT_UNUSED unsigned long size,
                                   unsigned long start, unsigned long end)
 {
-  unsigned long minval = ULONG_MAX, i, ret = 0UL;
+  GtRMQvaluetype minval;
+  unsigned long idx, ret = 0UL;
 
   gt_assert(data && start < end && end < size);
-  for (i = start; i <= end; i++) {
-    if (data[i] < minval) {
-      ret = i;
-      minval = data[i];
+  minval = data[start];
+  ret = start;
+  for (idx = start+1; idx <= end; idx++)
+  {
+    if (data[idx] < minval)
+    {
+      ret = idx;
+      minval = data[idx];
     }
   }
   return ret;
@@ -593,7 +603,7 @@ static unsigned long gt_rmq_naive(const unsigned long *data,
 int gt_rmq_unit_test(GtError *err)
 {
   int had_err = 0;
-  unsigned long *data;
+  GtRMQvaluetype *data;
   unsigned long i;
   GtRMQ *rmq;
   gt_error_check(err);
@@ -601,7 +611,7 @@ int gt_rmq_unit_test(GtError *err)
   data = gt_calloc((size_t) GT_RMQ_TESTARRSIZE, sizeof (*data));
 
   for (i = 0; i < GT_RMQ_TESTARRSIZE; i++) {
-    data[i] = gt_rand_max(GT_RMQ_TESTMAXVAL);
+    data[i] = (GtRMQvaluetype) gt_rand_max(GT_RMQ_TESTMAXVAL);
   }
 
   rmq = gt_rmq_new(data, GT_RMQ_TESTARRSIZE);

@@ -79,8 +79,8 @@ struct GtOutlcpinfo
   Lcpsubtab lcpsubtab;
 };
 
-const unsigned long *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
-                                      unsigned long subbucketleft)
+const GtLcpvaluetype *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
+                                       unsigned long subbucketleft)
 {
   return tableoflcpvalues->bucketoflcpvalues + tableoflcpvalues->lcptaboffset
                                              + subbucketleft;
@@ -158,7 +158,7 @@ static unsigned int lcp_bucketends(Lcpsubtab *lcpsubtab,
     {
       unsigned long start = lcpsubtab->tableoflcpvalues.lcptaboffset +
                             nonspecialsinbucket;
-      maxprefixindex = gt_bcktab_pfxidx2lcpvalues_ulong(
+      maxprefixindex = gt_bcktab_pfxidx2lcpvalues_Lcpvaluetype(
                           &minprefixindex,
                           lcpsubtab->tableoflcpvalues.bucketoflcpvalues + start,
                           specialsinbucket,
@@ -202,9 +202,10 @@ static unsigned int lcp_bucketends(Lcpsubtab *lcpsubtab,
     lcpsubtab->lcp2file->smalllcpvalues[0] = (uint8_t) lcpvalue;
   } else
   {
+    gt_assert(lcpvalue <= GT_LCPVALUE_MAX);
     lcpsubtab->tableoflcpvalues.bucketoflcpvalues
                [lcpsubtab->tableoflcpvalues.lcptaboffset + nonspecialsinbucket]
-               = lcpvalue;
+               = (GtLcpvaluetype) lcpvalue;
 #ifndef NDEBUG
     GT_SETIBIT(lcpsubtab->tableoflcpvalues.isset,
                lcpsubtab->tableoflcpvalues.lcptaboffset + nonspecialsinbucket);
@@ -533,8 +534,8 @@ void gt_Outlcpinfo_check_lcpvalues(const GtEncseq *encseq,
     gt_assert(cmp <= 0);
     gt_assert(GT_ISIBITSET(outlcpinfosample->lcpsubtab.tableoflcpvalues
                                                       .isset,idx));
-    currentlcp
-      = outlcpinfosample->lcpsubtab.tableoflcpvalues.bucketoflcpvalues[idx];
+    currentlcp = (unsigned long) outlcpinfosample->lcpsubtab.tableoflcpvalues.
+                                 bucketoflcpvalues[idx];
     if ((checkequality && currentlcp != reallcp) ||
         (!checkequality && currentlcp > reallcp))
     {
@@ -820,7 +821,7 @@ GtLcpvalues *gt_Outlcpinfo_resizereservoir(GtOutlcpinfo *outlcpinfo,
       lcpsubtab->tableoflcpvalues.isset = NULL;
 #endif
       lcpsubtab->tableoflcpvalues.bucketoflcpvalues
-        = (unsigned long *) lcpsubtab->lcp2file->reservoir;
+        = (GtLcpvaluetype *) lcpsubtab->lcp2file->reservoir;
       lcpsubtab->tableoflcpvalues.lcptaboffset = 0;
       lcpsubtab->tableoflcpvalues.numofentries
         = (unsigned long) lcpsubtab->lcp2file->sizereservoir/

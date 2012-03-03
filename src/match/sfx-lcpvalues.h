@@ -33,8 +33,8 @@ typedef struct
 #ifndef NDEBUG
   GtBitsequence *isset;
 #endif
-  unsigned long *bucketoflcpvalues,
-                numofentries,
+  GtLcpvaluetype *bucketoflcpvalues;
+  unsigned long numofentries,
                 numoflargelcpvalues,
                 lcptaboffset; /* This can be positive when the lcp-values
                                  for an entire range of suffixes (covering
@@ -68,8 +68,10 @@ typedef void (*GtFinalProcessBucket)(void *,
                tableoflcpvalues->lcptaboffset+subbucketleft+idx);
   }
 #endif
+  gt_assert(value <= GT_LCPVALUE_MAX);
   tableoflcpvalues->bucketoflcpvalues[tableoflcpvalues->lcptaboffset +
-                                      subbucketleft + idx] = value;
+                                      subbucketleft + idx]
+                                      = (GtLcpvaluetype) value;
   if (value >= (unsigned long) LCPOVERFLOW)
   {
     tableoflcpvalues->numoflargelcpvalues++; /* this may overcount as there may
@@ -90,12 +92,12 @@ typedef void (*GtFinalProcessBucket)(void *,
   gt_assert(tableoflcpvalues->isset == NULL ||
             GT_ISIBITSET(tableoflcpvalues->isset,
                          tableoflcpvalues->lcptaboffset+subbucketleft+idx));
-  return tableoflcpvalues->bucketoflcpvalues
+  return (unsigned long) tableoflcpvalues->bucketoflcpvalues
                            [tableoflcpvalues->lcptaboffset+subbucketleft+idx];
 }
 
-const unsigned long *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
-                                      unsigned long subbucketleft);
+const GtLcpvaluetype *gt_lcptab_getptr(const GtLcpvalues *tableoflcpvalues,
+                                       unsigned long subbucketleft);
 
 GtOutlcpinfo *gt_Outlcpinfo_new(const char *indexname,
                                 unsigned int numofchars,

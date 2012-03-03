@@ -17,7 +17,7 @@ def parseargs(argv)
   options.with_process_lcpinterval = true
   options.process_lastvalue = true
   options.withlastfrompreviousbucket = false
-  options.lcptypeulong = false
+  options.gtlcpvaluetypeset = false
   options.nodeclarations = false
   opts = OptionParser.new
   opts.on("-k","--key STRING","use given key as suffix for all symbols") do |x|
@@ -38,8 +38,8 @@ def parseargs(argv)
   opts.on("--no_process_lastvalue","no proceccing of lastsuftabvalue") do |x|
     options.process_lastvalue = false
   end
-  opts.on("--lcptypeulong","use unsigned long for lcp type") do |x|
-    options.lcptypeulong = true
+  opts.on("--gtlcpvaluetypeset","use GtLcpvaluetype for lcp type") do |x|
+    options.gtlcpvaluetypeset = true
   end
   opts.on("--withlastfrompreviousbucket","process last value from previous bucket") do |x|
     options.withlastfrompreviousbucket = true
@@ -67,8 +67,8 @@ def processleafedgeargs(options)
 end
 
 def lcptype(options)
-  if options.lcptypeulong
-    return "const unsigned long"
+  if options.gtlcpvaluetypeset
+    return "const GtLcpvaluetype"
   else
     return "const uint16_t"
   end

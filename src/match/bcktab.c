@@ -1193,8 +1193,9 @@ unsigned int gt_bcktab_pfxidx2lcpvalues_uint8(unsigned int *minprefixindex,
   return maxprefixindex;
 }
 
-unsigned int gt_bcktab_pfxidx2lcpvalues_ulong(unsigned int *minprefixindex,
-                                              unsigned long *bucketoflcpvalues,
+unsigned int gt_bcktab_pfxidx2lcpvalues_Lcpvaluetype(
+                                              unsigned int *minprefixindex,
+                                              GtLcpvaluetype *bucketoflcpvalues,
                                               unsigned long specialsinbucket,
                                               const GtBcktab *bcktab,
                                               GtCodetype code)
@@ -1226,7 +1227,7 @@ unsigned int gt_bcktab_pfxidx2lcpvalues_ulong(unsigned int *minprefixindex,
           for (idx=0; idx < value; idx++)
           {
             gt_assert(insertpos > 0);
-            bucketoflcpvalues[--insertpos] = (unsigned long) prefixindex;
+            bucketoflcpvalues[--insertpos] = (GtLcpvaluetype) prefixindex;
           }
         }
       }
@@ -1241,7 +1242,8 @@ unsigned int gt_bcktab_pfxidx2lcpvalues_ulong(unsigned int *minprefixindex,
     }
     while (insertpos > 0)
     {
-      bucketoflcpvalues[--insertpos] = (unsigned long) (bcktab->prefixlength-1);
+      bucketoflcpvalues[--insertpos]
+        = (GtLcpvaluetype) (bcktab->prefixlength-1);
     }
   }
   return maxprefixindex;

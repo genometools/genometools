@@ -105,7 +105,7 @@ static void gt_suflcptab2genomediff(void *data,
   GtBUstate_shulen *bustate = (GtBUstate_shulen *) data;
   const unsigned long *bucketofsuffixes
     = gt_suffixsortspace_getptr(sssp,bucketoffset+posoffset);
-  const unsigned long *lcptab_bucket
+  const GtLcpvaluetype *lcptab_bucket
     = gt_lcptab_getptr(tableoflcpvalues,bucketoffset);
 
   (void) gt_sfx_multiesa2shulengthdist(bustate,

@@ -25,6 +25,9 @@
 #include "core/logger_api.h"
 #include "sfx-maprange.h"
 
+typedef uint32_t GtLcpvaluetype;
+#define GT_LCPVALUE_MAX UINT32_MAX
+
 typedef struct
 {
   unsigned long left,
@@ -144,8 +147,9 @@ unsigned int gt_bcktab_pfxidx2lcpvalues_uint8(unsigned int *minprefixindex,
                                               const GtBcktab *bcktab,
                                               GtCodetype code);
 
-unsigned int gt_bcktab_pfxidx2lcpvalues_ulong(unsigned int *minprefixindex,
-                                              unsigned long *bucketoflcpvalues,
+unsigned int gt_bcktab_pfxidx2lcpvalues_Lcpvaluetype(
+                                              unsigned int *minprefixindex,
+                                              GtLcpvaluetype *bucketoflcpvalues,
                                               unsigned long specialsinbucket,
                                               const GtBcktab *bcktab,
                                               GtCodetype code);

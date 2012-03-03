@@ -15,7 +15,7 @@ ${SC} --key spmeq --no_process_lcpinterval > ${TEMPLATE}-spmeq.inc
 ${SC} --key spmvar > ${TEMPLATE}-spmvar.inc
 ${SC} --key shulen --reader --absolute \
                    --no_process_lcpinterval > ${TEMPLATE}-shulen.inc
-${SC} --key shulen --lcptypeulong --absolute --no_process_lastvalue \
+${SC} --key shulen --gtlcpvaluetypeset --absolute --no_process_lastvalue \
                    --no_process_lcpinterval \
                    --withlastfrompreviousbucket \
                    --no_declarations > ${TEMPLATE}-shulen-RAM.inc

@@ -18,7 +18,7 @@
 #ifndef UINT64HASHTABLE_H
 #define UINT64HASHTABLE_H
 
-#include "inttypes.h"
+#include <inttypes.h>
 #include "core/timer_api.h"
 #include "core/error.h"
 

@@ -547,7 +547,7 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq)
 
 int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
                                   const unsigned long *bucketofsuffixes,
-                                  const unsigned long *lcptab_bucket,
+                                  const GtLcpvaluetype *lcptab_bucket,
                                   unsigned long numberofsuffixes,
                                   GtError *err)
 {
@@ -565,7 +565,7 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
 
 int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,GtError *err)
 {
-  unsigned long lcptab_bucket[1];
+  GtLcpvaluetype lcptab_bucket[1];
 
   lcptab_bucket[0] = 0;
   if (gt_esa_bottomup_RAM_shulen(NULL, lcptab_bucket,0,bustate->stack,bustate,
