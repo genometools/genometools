@@ -1144,16 +1144,16 @@ static unsigned long dc_lookupshatvalue(const GtDifferencecover *dcov,
 static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
 {
 
-  unsigned long suffix, kvalue, lcpvalue, start0, start1,
+  unsigned long suffix, kvalue, lcpinherit, start0, start1, currentlcpvalue,
                 *inversesuftabptr = dcov->inversesuftab;
   unsigned int svalue;
   GtUchar cc1, cc2;
 
   for (svalue = 0; svalue < dcov->size; svalue++)
   {
-    kvalue = (unsigned long) svalue;
-    lcpvalue = 0;
-    while (kvalue < dcov->samplesize)
+    lcpinherit = 0;
+    for (kvalue = (unsigned long) svalue; kvalue < dcov->samplesize;
+         kvalue += dcov->size)
     {
       do
       {
@@ -1166,26 +1166,37 @@ static void dc_fill_samplelcpvalues(GtDifferencecover *dcov)
       } while (suffix == ULONG_MAX);
       if (suffix > 0 && suffix < dcov->effectivesamplesize)
       {
-        start0 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix-1);
-        start1 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix);
-        while (start0 + lcpvalue < dcov->totallength &&
-               start1 + lcpvalue < dcov->totallength)
+        currentlcpvalue = gt_lcptab_getvalue(dcov->samplelcpvalues,0,suffix);
+        if (currentlcpvalue < (unsigned long) dcov->vparam)
         {
-          cc1 = gt_encseq_get_encoded_char(dcov->encseq,start0+lcpvalue,
-                                           dcov->readmode);
-          cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lcpvalue,
-                                           dcov->readmode);
-          if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+          lcpinherit = 0;
+        } else
+        {
+          if (lcpinherit < currentlcpvalue)
           {
-            break;
+            lcpinherit = currentlcpvalue;
           }
-          lcpvalue++;
+          start0 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix-1);
+          start1 = gt_suffixsortspace_get(dcov->sortedsample,0,suffix);
+          while (start0 + lcpinherit < dcov->totallength &&
+                 start1 + lcpinherit < dcov->totallength)
+          {
+            cc1 = gt_encseq_get_encoded_char(dcov->encseq,start0+lcpinherit,
+                                             dcov->readmode);
+            cc2 = gt_encseq_get_encoded_char(dcov->encseq,start1+lcpinherit,
+                                             dcov->readmode);
+            if (ISSPECIAL(cc1) || ISSPECIAL(cc2) || cc1 != cc2)
+            {
+              break;
+            }
+            lcpinherit++;
+          }
+          gt_lcptab_update(dcov->samplelcpvalues,0,suffix,lcpinherit);
+          lcpinherit = lcpinherit > (unsigned long) dcov->vparam
+                         ? (lcpinherit - (unsigned long) dcov->vparam)
+                         : 0;
         }
-        gt_lcptab_update(dcov->samplelcpvalues,0,suffix,lcpvalue);
-        lcpvalue = lcpvalue > (unsigned long) dcov->vparam
-                   ? (lcpvalue - (unsigned long) dcov->vparam) : 0;
       }
-      kvalue += dcov->size;
     }
   }
 }
