@@ -118,7 +118,7 @@ static GtBUItvinfo_maxpairs *allocateBUstack_maxpairs(GtBUItvinfo_maxpairs *ptr,
   return itvinfo;
 }
 
-int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
+static int gt_esa_bottomup_maxpairs(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_maxpairs *bustate,
                     /* no parameter snrp */
                     GtError *err)

@@ -85,7 +85,7 @@ end
 def previoussuffix_expr_get(width,variable,options)
   if options.absolute
     return variable + ","
-  else 
+  else
     return "gt_seqnumrelpos_decode_seqnum(snrp,#{variable}),
            #{" " * width} gt_seqnumrelpos_decode_relpos(snrp,#{variable}),"
   end
@@ -320,23 +320,19 @@ def return_snrp_decl(options)
   end
 end
 
+    #idx = 0;
+
 def initfirstinterval(key,options)
   if options.withlastfrompreviousbucket
 print <<END_OF_FILE
 
-  if (bustate->previousbucketlastsuffix != ULONG_MAX)
-  {
-    previoussuffix = bustate->previousbucketlastsuffix;
-    lcpvalue = (unsigned long) lcptab_bucket[0];
-    firstedgefromroot = bustate->firstedgefromroot;
-    idx = 0;
-END_OF_FILE
-    process_suf_lcp(key,options)
-print <<END_OF_FILE
-  } else
+  if (bustate->previousbucketlastsuffix == ULONG_MAX)
   {
     PUSH_ESA_BOTTOMUP_#{key}(0,0);
     firstedgefromroot = true;
+  } else
+  {
+    firstedgefromroot = bustate->firstedgefromroot;
   }
 END_OF_FILE
   else
@@ -471,10 +467,41 @@ static GtBUItvinfo_#{key} *allocateBUstack_#{key}(GtBUItvinfo_#{key} *ptr,
 END_OF_FILE
 end
 
+if options.withlastfrompreviousbucket
+print <<END_OF_FILE
+
+static int gt_esa_bottomup_RAM_previousfromlast_#{key}(
+                        unsigned long previoussuffix,
+                        unsigned long lcpvalue,
+                        GtArrayGtBUItvinfo_#{key} *stack,
+                        GtBUstate_#{key} *bustate,
+                        #{return_snrp_decl(options)}
+                        GtError *err)
+{
+  const unsigned long incrementstacksize = 32UL;
+  unsigned long idx = 0;
+  GtBUItvinfo_#{key} *lastinterval = NULL;
+  bool haserr = false, firstedge,
+       firstedgefromroot = bustate->firstedgefromroot;
+
+END_OF_FILE
+
+  process_suf_lcp(key,options)
+
+print <<END_OF_FILE
+  if (!haserr)
+  {
+    bustate->firstedgefromroot = firstedgefromroot;
+  }
+  return haserr ? -1 : 0;
+}
+END_OF_FILE
+end
+
 if options.usefile
 print <<END_OF_FILE
 
-int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
+static int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_#{key} *bustate,
                     #{return_snrp_decl(options)}
                     GtError *err)
@@ -499,8 +526,7 @@ int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
 END_OF_FILE
 else
 print <<END_OF_FILE
-
-int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
                         #{lcptype(options)} *lcptab_bucket,
                         unsigned long numberofsuffixes,
                         GtArrayGtBUItvinfo_#{key} *stack,
@@ -519,10 +545,7 @@ END_OF_FILE
 initfirstinterval(key,options)
 
 print <<END_OF_FILE
-  if (numberofsuffixes == 0)
-  {
-    return haserr ? -1 : 0;
-  }
+  gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];

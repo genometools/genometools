@@ -118,7 +118,7 @@ static GtBUItvinfo_rdjcv *allocateBUstack_rdjcv(GtBUItvinfo_rdjcv *ptr,
   return itvinfo;
 }
 
-int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
+static int gt_esa_bottomup_rdjcv(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_rdjcv *bustate,
                     /* no parameter snrp */
                     GtError *err)

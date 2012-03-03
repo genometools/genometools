@@ -551,24 +551,42 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
                                   unsigned long numberofsuffixes,
                                   GtError *err)
 {
-  int retval;
+  bool haserr = false;
 
-  retval = gt_esa_bottomup_RAM_shulen(bucketofsuffixes,
-                                      lcptab_bucket,
-                                      numberofsuffixes,
-                                      bustate->stack,
-                                      bustate,
-                                      err);
+  if (bustate->previousbucketlastsuffix != ULONG_MAX &&
+      gt_esa_bottomup_RAM_previousfromlast_shulen(
+                                 bustate->previousbucketlastsuffix,
+                                 (unsigned long) lcptab_bucket[0],
+                                 bustate->stack,
+                                 bustate,
+                                 err) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (gt_esa_bottomup_RAM_shulen(bucketofsuffixes,
+                                   lcptab_bucket,
+                                   numberofsuffixes,
+                                   bustate->stack,
+                                   bustate,
+                                   err) != 0)
+    {
+      haserr = true;
+    }
+  }
   bustate->idxoffset += numberofsuffixes;
-  return retval;
+  return haserr ? -1 : 0;
 }
 
 int gt_sfx_multiesa2shulengthdist_last(GtBUstate_shulen *bustate,GtError *err)
 {
-  GtLcpvaluetype lcptab_bucket[1];
-
-  lcptab_bucket[0] = 0;
-  if (gt_esa_bottomup_RAM_shulen(NULL, lcptab_bucket,0,bustate->stack,bustate,
+  if (bustate->previousbucketlastsuffix != ULONG_MAX &&
+      gt_esa_bottomup_RAM_previousfromlast_shulen(
+                                 bustate->previousbucketlastsuffix,
+                                 0,
+                                 bustate->stack,
+                                 bustate,
                                  err) != 0)
   {
     return -1;

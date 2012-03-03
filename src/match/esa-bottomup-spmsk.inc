@@ -114,8 +114,7 @@ static GtBUItvinfo_spmsk *allocateBUstack_spmsk(GtBUItvinfo_spmsk *ptr,
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
-
-int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
+static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
                         unsigned long numberofsuffixes,
                         GtArrayGtBUItvinfo_spmsk *stack,
@@ -132,10 +131,7 @@ int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
 
   PUSH_ESA_BOTTOMUP_spmsk(0,0);
   firstedgefromroot = true;
-  if (numberofsuffixes == 0)
-  {
-    return haserr ? -1 : 0;
-  }
+  gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];

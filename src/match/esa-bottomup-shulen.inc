@@ -118,7 +118,7 @@ static GtBUItvinfo_shulen *allocateBUstack_shulen(GtBUItvinfo_shulen *ptr,
   return itvinfo;
 }
 
-int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
+static int gt_esa_bottomup_shulen(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_shulen *bustate,
                     /* no parameter snrp */
                     GtError *err)

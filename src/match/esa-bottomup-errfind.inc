@@ -121,7 +121,7 @@ static GtBUItvinfo_errfind *allocateBUstack_errfind(GtBUItvinfo_errfind *ptr,
   return itvinfo;
 }
 
-int gt_esa_bottomup_errfind(Sequentialsuffixarrayreader *ssar,
+static int gt_esa_bottomup_errfind(Sequentialsuffixarrayreader *ssar,
                     GtBUstate_errfind *bustate,
                     /* no parameter snrp */
                     GtError *err)

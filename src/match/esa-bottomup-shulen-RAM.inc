@@ -20,27 +20,20 @@
 #include "esa-seqread.h"
 /* no include for seqnumrelpos.h */
 
-int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
-                        const GtLcpvaluetype *lcptab_bucket,
-                        unsigned long numberofsuffixes,
+static int gt_esa_bottomup_RAM_previousfromlast_shulen(
+                        unsigned long previoussuffix,
+                        unsigned long lcpvalue,
                         GtArrayGtBUItvinfo_shulen *stack,
                         GtBUstate_shulen *bustate,
                         /* no parameter snrp */
                         GtError *err)
 {
   const unsigned long incrementstacksize = 32UL;
-  unsigned long lcpvalue,
-                previoussuffix,
-                idx;
+  unsigned long idx = 0;
   GtBUItvinfo_shulen *lastinterval = NULL;
-  bool haserr = false, firstedge, firstedgefromroot;
+  bool haserr = false, firstedge,
+       firstedgefromroot = bustate->firstedgefromroot;
 
-  if (bustate->previousbucketlastsuffix != ULONG_MAX)
-  {
-    previoussuffix = bustate->previousbucketlastsuffix;
-    lcpvalue = (unsigned long) lcptab_bucket[0];
-    firstedgefromroot = bustate->firstedgefromroot;
-    idx = 0;
     gt_assert(stack->nextfreeGtBUItvinfo > 0);
     if (lcpvalue <= TOP_ESA_BOTTOMUP_shulen.lcp)
     {
@@ -126,15 +119,36 @@ int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
         }
       }
     }
-  } else
+  if (!haserr)
+  {
+    bustate->firstedgefromroot = firstedgefromroot;
+  }
+  return haserr ? -1 : 0;
+}
+static int gt_esa_bottomup_RAM_shulen(const unsigned long *bucketofsuffixes,
+                        const GtLcpvaluetype *lcptab_bucket,
+                        unsigned long numberofsuffixes,
+                        GtArrayGtBUItvinfo_shulen *stack,
+                        GtBUstate_shulen *bustate,
+                        /* no parameter snrp */
+                        GtError *err)
+{
+  const unsigned long incrementstacksize = 32UL;
+  unsigned long lcpvalue,
+                previoussuffix,
+                idx;
+  GtBUItvinfo_shulen *lastinterval = NULL;
+  bool haserr = false, firstedge, firstedgefromroot;
+
+  if (bustate->previousbucketlastsuffix == ULONG_MAX)
   {
     PUSH_ESA_BOTTOMUP_shulen(0,0);
     firstedgefromroot = true;
-  }
-  if (numberofsuffixes == 0)
+  } else
   {
-    return haserr ? -1 : 0;
+    firstedgefromroot = bustate->firstedgefromroot;
   }
+  gt_assert (numberofsuffixes > 0);
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
