@@ -1325,14 +1325,14 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
     sfi->withprogressbar = withprogressbar;
     if (sfxstrategy != NULL)
     {
-       sfi->sfxstrategy = *sfxstrategy;
-       if (sfxstrategy->cmpcharbychar || !gt_encseq_bitwise_cmp_ok(encseq))
-       {
-         sfi->sfxstrategy.cmpcharbychar = true;
-       } else
-       {
-         sfi->sfxstrategy.cmpcharbychar = false;
-       }
+      sfi->sfxstrategy = *sfxstrategy;
+      if (sfxstrategy->cmpcharbychar || !gt_encseq_bitwise_cmp_ok(encseq))
+      {
+        sfi->sfxstrategy.cmpcharbychar = true;
+      } else
+      {
+        sfi->sfxstrategy.cmpcharbychar = false;
+      }
     } else
     {
       defaultsfxstrategy(&sfi->sfxstrategy,
