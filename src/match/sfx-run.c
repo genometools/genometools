@@ -102,17 +102,13 @@ static void gt_suflcptab2genomediff(void *data,
                                     unsigned long numberofsuffixes,
                                     unsigned long posoffset)
 {
-  GtBUstate_shulen *bustate = (GtBUstate_shulen *) data;
-  const unsigned long *bucketofsuffixes
-    = gt_suffixsortspace_getptr(sssp,bucketoffset+posoffset);
-  const GtLcpvaluetype *lcptab_bucket
-    = gt_lcptab_getptr(tableoflcpvalues,bucketoffset);
-
-  (void) gt_sfx_multiesa2shulengthdist(bustate,
-                                       bucketofsuffixes,
-                                       lcptab_bucket,
-                                       numberofsuffixes,
-                                       NULL);
+  (void) gt_sfx_multiesa2shulengthdist(
+                  (GtBUstate_shulen *) data,
+                  gt_suffixsortspace_getptr_ulong(sssp,bucketoffset+posoffset),
+                  gt_suffixsortspace_getptr_uint32(sssp,bucketoffset+posoffset),
+                  gt_lcptab_getptr(tableoflcpvalues,bucketoffset),
+                  numberofsuffixes,
+                  NULL);
 }
 
 static int initoutfileinfo(Outfileinfo *outfileinfo,

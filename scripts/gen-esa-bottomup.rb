@@ -19,6 +19,7 @@ def parseargs(argv)
   options.withlastfrompreviousbucket = false
   options.gtlcpvaluetypeset = false
   options.nodeclarations = false
+  options.additionaluint32bucket = false
   opts = OptionParser.new
   opts.on("-k","--key STRING","use given key as suffix for all symbols") do |x|
     options.key = x
@@ -44,6 +45,9 @@ def parseargs(argv)
   opts.on("--withlastfrompreviousbucket","process last value from previous bucket") do |x|
     options.withlastfrompreviousbucket = true
   end
+  opts.on("--additionaluint32bucket","add uint32-bucket argument") do |x|
+    options.additionaluint32bucket = true
+  end
   opts.on("--no_declarations","do not output declarations") do |x|
     options.nodeclarations = true
   end
@@ -63,14 +67,6 @@ def processleafedgeargs(options)
   else
     return "unsigned long, /* seqnum */
     unsigned long, /* relpos */"
-  end
-end
-
-def lcptype(options)
-  if options.gtlcpvaluetypeset
-    return "const GtLcpvaluetype"
-  else
-    return "const uint16_t"
   end
 end
 
@@ -282,7 +278,8 @@ END_OF_FILE
 print <<END_OF_FILE
   if (!haserr)
   {
-    bustate->previousbucketlastsuffix = bucketofsuffixes[numberofsuffixes-1];
+    bustate->previousbucketlastsuffix
+      = #{accessbucketofsuffixes("numberofsuffixes-1",options)}
     bustate->firstedgefromroot = firstedgefromroot;
   }
 END_OF_FILE
@@ -320,7 +317,31 @@ def return_snrp_decl(options)
   end
 end
 
-    #idx = 0;
+def lcptype(options)
+  if options.gtlcpvaluetypeset
+    return "const GtLcpvaluetype"
+  else
+    return "const uint16_t"
+  end
+end
+
+def additionaluint32bucket(options)
+  if options.additionaluint32bucket
+    return "const uint32_t *bucketofsuffixes_uint32,\n" + (" " * 24) + lcptype(options)
+  else
+    return "#{lcptype(options)}"
+  end
+end
+
+def accessbucketofsuffixes(idx,options)
+  if options.additionaluint32bucket
+    return "bucketofsuffixes != NULL ? bucketofsuffixes[#{idx}]
+                                 : (unsigned long)
+                                   bucketofsuffixes_uint32[#{idx}];"
+  else
+    return "bucketofsuffixes[#{idx}];"
+  end
+end
 
 def initfirstinterval(key,options)
   if options.withlastfrompreviousbucket
@@ -526,8 +547,9 @@ static int gt_esa_bottomup_#{key}(Sequentialsuffixarrayreader *ssar,
 END_OF_FILE
 else
 print <<END_OF_FILE
+
 static int gt_esa_bottomup_RAM_#{key}(const unsigned long *bucketofsuffixes,
-                        #{lcptype(options)} *lcptab_bucket,
+                        #{additionaluint32bucket(options)} *lcptab_bucket,
                         unsigned long numberofsuffixes,
                         GtArrayGtBUItvinfo_#{key} *stack,
                         GtBUstate_#{key} *bustate,
@@ -549,7 +571,7 @@ print <<END_OF_FILE
   for (idx = 0; !haserr && idx < numberofsuffixes-1; idx++)
   {
     lcpvalue = (unsigned long) lcptab_bucket[idx+1];
-    previoussuffix = bucketofsuffixes[idx];
+    previoussuffix = #{accessbucketofsuffixes("idx",options)}
 END_OF_FILE
 end
 process_suf_lcp(key,options)

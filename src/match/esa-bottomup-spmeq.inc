@@ -118,6 +118,7 @@ static GtBUItvinfo_spmeq *allocateBUstack_spmeq(GtBUItvinfo_spmeq *ptr,
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
+
 static int gt_esa_bottomup_RAM_spmeq(const unsigned long *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
                         unsigned long numberofsuffixes,

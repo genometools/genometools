@@ -547,6 +547,7 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq)
 
 int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
                                   const unsigned long *bucketofsuffixes,
+                                  const uint32_t *bucketofsuffixes_uint32,
                                   const GtLcpvaluetype *lcptab_bucket,
                                   unsigned long numberofsuffixes,
                                   GtError *err)
@@ -566,6 +567,7 @@ int gt_sfx_multiesa2shulengthdist(GtBUstate_shulen *bustate,
   if (!haserr)
   {
     if (gt_esa_bottomup_RAM_shulen(bucketofsuffixes,
+                                   bucketofsuffixes_uint32,
                                    lcptab_bucket,
                                    numberofsuffixes,
                                    bustate->stack,

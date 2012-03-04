@@ -18,4 +18,5 @@ ${SC} --key shulen --reader --absolute \
 ${SC} --key shulen --gtlcpvaluetypeset --absolute --no_process_lastvalue \
                    --no_process_lcpinterval \
                    --withlastfrompreviousbucket \
+                   --additionaluint32bucket \
                    --no_declarations > ${TEMPLATE}-shulen-RAM.inc

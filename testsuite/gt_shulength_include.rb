@@ -24,7 +24,7 @@ def checkshulengthdistforlist(filelist)
   run_test "#{$bin}gt genomediff -shulen -esa all"
   run "mv #{last_stdout} shulen.gd"
   run_test "#{$bin}gt suffixerator -db #{realfilelist.join(' ')} " +
-           "-indexname all -dna -genomediff -lcp"
+           "-dc 128 -indexname all -dna -genomediff -lcp -suftabuint"
   run "mv #{last_stdout} shulen.sfx"
   run "diff shulen.gd  shulen.sfx"
 end

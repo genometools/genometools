@@ -96,8 +96,12 @@ unsigned long gt_suffixsortspace_get(const GtSuffixsortspace *sssp,
                                      unsigned long subbucketleft,
                                      unsigned long idx);
 
-const unsigned long *gt_suffixsortspace_getptr(const GtSuffixsortspace *sssp,
+const unsigned long *gt_suffixsortspace_getptr_ulong(
+                                               const GtSuffixsortspace *sssp,
                                                unsigned long subbucketleft);
+
+const uint32_t *gt_suffixsortspace_getptr_uint32(const GtSuffixsortspace *sssp,
+                                                 unsigned long subbucketleft);
 
 void gt_suffixsortspace_set(GtSuffixsortspace *sssp,
                             unsigned long subbucketleft,

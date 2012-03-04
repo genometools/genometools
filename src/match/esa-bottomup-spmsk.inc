@@ -114,6 +114,7 @@ static GtBUItvinfo_spmsk *allocateBUstack_spmsk(GtBUItvinfo_spmsk *ptr,
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
+
 static int gt_esa_bottomup_RAM_spmsk(const unsigned long *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
                         unsigned long numberofsuffixes,

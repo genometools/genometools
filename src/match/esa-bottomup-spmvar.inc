@@ -121,6 +121,7 @@ static GtBUItvinfo_spmvar *allocateBUstack_spmvar(GtBUItvinfo_spmvar *ptr,
   gt_assert(itvinfo != NULL);
   return itvinfo;
 }
+
 static int gt_esa_bottomup_RAM_spmvar(const unsigned long *bucketofsuffixes,
                         const uint16_t *lcptab_bucket,
                         unsigned long numberofsuffixes,
