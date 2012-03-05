@@ -1373,9 +1373,10 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   }
   if (dcov->effectivesamplesize > 0)
   {
+    gt_assert(mainsfxstrategy != NULL);
     dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
                                                 dcov->totallength,
-                                                false,
+                                                mainsfxstrategy->suftabuint,
                                                 dcov->logger);
   } else
   {
@@ -1525,6 +1526,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   }
   if (outlcpinfosample != NULL)
   {
+    gt_assert(mainsfxstrategy != NULL);
     dc_fill_samplelcpvalues(mainsfxstrategy->cmpcharbychar ||
                             !gt_encseq_bitwise_cmp_ok(dcov->encseq),dcov);
     if (withcheck)
@@ -1609,7 +1611,7 @@ static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
   gt_logger_log(dcov->logger,"fullspecials=%lu",fullspecials);
   dcov->sortedsample = gt_suffixsortspace_new(dcov->effectivesamplesize,
                                               dcov->totallength,
-                                              false,
+                                              sfxstrategy.suftabuint,
                                               dcov->logger);
   posinserted = 0;
   diffptr = dcov->diffvalues;
@@ -1739,6 +1741,7 @@ GtDifferencecover *gt_differencecover_prepare_sample(
       dcov = NULL;
     } else
     {
+      gt_assert(sfxstrategy != NULL);
       gt_logger_log(logger,"presorting sample suffixes according to "
                            "difference cover modulo %u",vparam);
       (prefixlength > 0 ? dc_differencecover_sortsample
