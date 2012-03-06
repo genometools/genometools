@@ -70,6 +70,7 @@ void gt_differencecover_completelargelcpvalues(void *data,
                                                unsigned long posoffset);
 
 int gt_differencecover_compare (const GtDifferencecover *dcov,
+                                unsigned long *lcpvalue,
                                 unsigned long suffixpos1,
                                 unsigned long suffixpos2);
 

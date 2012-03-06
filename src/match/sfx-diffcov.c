@@ -952,6 +952,52 @@ static void dc_addunsortedrange(void *voiddcov,
   ptr->width = width;
 }
 
+int gt_differencecover_compare (const GtDifferencecover *dcov,
+                                unsigned long *lcpvalue,
+                                unsigned long suffixpos1,
+                                unsigned long suffixpos2)
+{
+  unsigned int offset;
+  int retval;
+  unsigned long idx1, idx2;
+
+  gt_assert(suffixpos1 < dcov->totallength);
+  gt_assert(suffixpos2 < dcov->totallength);
+  offset = dc_differencecover_delta(dcov,suffixpos1,suffixpos2);
+  idx1 = dc_inversesuftab_get(dcov,suffixpos1 + offset);
+  idx2 = dc_inversesuftab_get(dcov,suffixpos2 + offset);
+  if (idx1 < idx2)
+  {
+    retval = -1;
+  } else
+  {
+    if (idx1 > idx2)
+    {
+      unsigned long tmp = idx1;
+      idx1 = idx2;
+      idx2 = tmp;
+      retval = 1;
+    } else
+    {
+      retval = 0;
+    }
+  }
+  gt_assert(retval != 0);
+  if (lcpvalue != NULL)
+  {
+    gt_assert(dcov->rmq != NULL);
+    if (idx1 < dcov->effectivesamplesize && idx2 < dcov->effectivesamplesize)
+    {
+      *lcpvalue = (unsigned long)
+                  gt_rmq_find_min_value(dcov->rmq, idx1+1, idx2) + offset;
+    } else
+    {
+      *lcpvalue = (unsigned long) offset;
+    }
+  }
+  return retval;
+}
+
 #ifdef  QSORTNAME
 #undef  QSORTNAME
 #endif
@@ -966,30 +1012,6 @@ static void dc_addunsortedrange(void *voiddcov,
 
 typedef GtDifferencecover * QSORTNAME(Datatype);
 
-int gt_differencecover_compare (const GtDifferencecover *dcov,
-                                unsigned long suffixpos1,
-                                unsigned long suffixpos2)
-{
-  unsigned int offset;
-  unsigned long idx1, idx2;
-
-  gt_assert(suffixpos1 < dcov->totallength);
-  gt_assert(suffixpos2 < dcov->totallength);
-  offset = dc_differencecover_delta(dcov,suffixpos1,suffixpos2);
-  idx1 = dc_inversesuftab_get(dcov,suffixpos1 + offset);
-  idx2 = dc_inversesuftab_get(dcov,suffixpos2 + offset);
-  if (idx1 < idx2)
-  {
-    return -1;
-  }
-  if (idx1 > idx2)
-  {
-    return 1;
-  }
-  gt_assert(false);
-  return 0;
-}
-
 static int QSORTNAME(qsortcmparr) (
                   GT_UNUSED const void *subbucket,
                   unsigned long a,
@@ -1001,7 +1023,7 @@ static int QSORTNAME(qsortcmparr) (
   gt_assert(data->sssp != NULL);
   suffixpos1 = dc_ARRAY_GET(NULL,a);
   suffixpos2 = dc_ARRAY_GET(NULL,b);
-  return gt_differencecover_compare (data, suffixpos1, suffixpos2);
+  return gt_differencecover_compare (data, NULL, suffixpos1, suffixpos2);
 }
 
 typedef void * QSORTNAME(Sorttype);
