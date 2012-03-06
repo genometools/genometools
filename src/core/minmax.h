@@ -39,4 +39,10 @@
 #define MAX3(a, b, c) (((a)>(b))?((a)>(c)?(a):(c)):((b)>(c)?(b):(c)))
 #endif
 
+#define GT_UPDATE_MAX(MAXVAL,NEWVAL)\
+        if ((MAXVAL) < (NEWVAL))\
+        {\
+          MAXVAL = NEWVAL;\
+        }
+
 #endif

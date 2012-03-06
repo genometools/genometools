@@ -66,7 +66,7 @@
         {\
           MINVAL = LCP;\
         }\
-        GT_BSR_UPDATEMAXLCP(MAXVAL,LCP)
+        GT_UPDATE_MAX(MAXVAL,LCP)
 
 #define CMPCHARBYCHARPTR2INT(VAR,SUBBUCKETLEFT,TMPVAR,IDX)\
         VAR = (((cptr = gt_suffixsortspace_get(bsr->sssp,SUBBUCKETLEFT,IDX)+\

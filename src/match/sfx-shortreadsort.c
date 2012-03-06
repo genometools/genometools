@@ -409,7 +409,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         r = QSORTNAME(qsortcmparr) (pb, current.startindex, data);
         if (r > 0)
         {
-          GT_BSR_UPDATEMAXLCP(greatermaxlcp,data->tmplcplen);
+          GT_UPDATE_MAX(greatermaxlcp,data->tmplcplen);
           break;
         }
         if (r == 0)
@@ -419,7 +419,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           pa++;
         } else
         {
-          GT_BSR_UPDATEMAXLCP(smallermaxlcp,data->tmplcplen);
+          GT_UPDATE_MAX(smallermaxlcp,data->tmplcplen);
         }
         pb++;
       }
@@ -428,7 +428,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
         r = QSORTNAME(qsortcmparr) (pc, current.startindex, data);
         if (r < 0)
         {
-          GT_BSR_UPDATEMAXLCP(smallermaxlcp,data->tmplcplen);
+          GT_UPDATE_MAX(smallermaxlcp,data->tmplcplen);
           break;
         }
         if (r == 0)
@@ -439,7 +439,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           pd--;
         } else
         {
-          GT_BSR_UPDATEMAXLCP(greatermaxlcp,data->tmplcplen);
+          GT_UPDATE_MAX(greatermaxlcp,data->tmplcplen);
         }
         gt_assert(pc > 0);
         pc--;

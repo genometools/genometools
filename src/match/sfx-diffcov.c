@@ -46,6 +46,7 @@
 #include "core/encseq.h"
 #include "core/logger.h"
 #include "core/encseq.h"
+#include "core/stack-inlined.h"
 #include "intcode-def.h"
 #include "bcktab.h"
 #include "initbasepower.h"
@@ -127,7 +128,7 @@ struct GtDifferencecover
   Inl_Queue *rangestobesorted;
   GtDcItventry *itvinfo;
   GtArrayGtDcPairsuffixptr firstgeneration;
-  GtLcpvalues *samplelcpvalues;
+  GtLcpvalues *samplelcpvalues, *sssplcpvalues;
   unsigned long firstgenerationtotalwidth,
                 firstgenerationcount;
   GtLogger *logger;
@@ -135,6 +136,7 @@ struct GtDifferencecover
                     *sortedsample;
   GtRMQ *rmq;
   unsigned long sortoffset;
+  unsigned long tmplcplen;
 };
 
 /* Compute difference cover on the fly */
@@ -338,6 +340,7 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->maxqueuesize = 0;
   dcov->inversesuftab = NULL;
   dcov->samplelcpvalues = NULL;
+  dcov->sssplcpvalues = NULL;
   dcov->firstgenerationtotalwidth = 0;
   dcov->firstgenerationcount = 0;
   GT_INITARRAY(&dcov->firstgeneration,GtDcPairsuffixptr);
@@ -1013,7 +1016,6 @@ int gt_differencecover_compare (const GtDifferencecover *dcov,
 typedef GtDifferencecover * QSORTNAME(Datatype);
 
 static int QSORTNAME(qsortcmparr) (
-                  GT_UNUSED const void *subbucket,
                   unsigned long a,
                   unsigned long b,
                   const QSORTNAME(Datatype) data)
@@ -1028,7 +1030,270 @@ static int QSORTNAME(qsortcmparr) (
 
 typedef void * QSORTNAME(Sorttype);
 
-#include "qsort-array.gen"
+/*
+ * Qsort routine from Bentley & McIlroy's ``Engineering a Sort Function''.
+ */
+
+#ifndef GT_QSORT_ARR_SWAP
+#define GT_QSORT_ARR_SWAP(ARR,A,B)\
+        if ((A) != (B))\
+        {\
+          tmp = QSORTNAME(ARRAY_GET)(ARR,A);\
+          QSORTNAME(ARRAY_SET)(ARR,A,QSORTNAME(ARRAY_GET)(ARR,B));\
+          QSORTNAME(ARRAY_SET)(ARR,B,tmp);\
+        }
+#endif
+
+#ifndef GT_QSORT_ARR_VECSWAP
+#define GT_QSORT_ARR_VECSWAP(ARR,A,B,N)\
+        aidx = A;\
+        bidx = B;\
+        while ((N)-- > 0)\
+        {\
+          tmp = QSORTNAME(ARRAY_GET)(ARR,aidx);\
+          QSORTNAME(ARRAY_SET)(ARR,aidx,QSORTNAME(ARRAY_GET)(ARR,bidx));\
+          QSORTNAME(ARRAY_SET)(ARR,bidx,tmp);\
+          aidx++;\
+          bidx++;\
+        }
+#endif
+
+static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
+                     (unsigned long a, unsigned long b, unsigned long c,
+                      QSORTNAME(Datatype) data)
+{
+  return QSORTNAME(qsortcmparr) (a, b, data) < 0
+           ? (QSORTNAME(qsortcmparr) (b, c, data) < 0
+                ? b
+                : (QSORTNAME(qsortcmparr) (a, c, data) < 0
+                     ? c : a))
+           : (QSORTNAME(qsortcmparr) (b, c, data) > 0
+                ? b
+                : (QSORTNAME(qsortcmparr) (a, c, data) < 0
+                     ? a
+                     : c));
+}
+
+#ifndef GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
+typedef struct
+{
+  unsigned long startindex,
+                len;
+} Intervalarrtobesorted;
+
+GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
+#define GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
+#endif
+
+static void QSORTNAME(gt_inlinedarr_qsort_r) (
+                                   unsigned long insertionsortthreshold,
+                                   bool handlenotswapped,
+                                   unsigned long len,
+                                   QSORTNAME(Datatype) data,
+                                   unsigned long depth,
+                                   unsigned long subbucketleft)
+{
+  unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s,
+                smallermaxlcp, greatermaxlcp;
+  int r;
+  bool swapped;
+  GtStackIntervalarrtobesorted intervalstack;
+  Intervalarrtobesorted current;
+
+  GT_STACK_INIT(&intervalstack,32UL);
+  current.startindex = 0;
+  current.len = len;
+  GT_STACK_PUSH(&intervalstack,current);
+  if (insertionsortthreshold <= 2UL)
+  {
+    insertionsortthreshold = 6UL;
+  }
+  while (!GT_STACK_ISEMPTY(&intervalstack))
+  {
+    swapped = false;
+    current = GT_STACK_POP(&intervalstack);
+    if (current.len <= insertionsortthreshold)
+    {
+      for (pm = current.startindex + 1;
+           pm < current.startindex + current.len; pm++)
+      {
+        for (pl = pm; pl > current.startindex; pl--)
+        {
+          r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
+          if (data->sssplcpvalues != NULL)
+          {
+            if (pl < pm && r > 0)
+            {
+              gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl+1,
+                               gt_lcptab_getvalue(data->sssplcpvalues,
+                                                     subbucketleft,pl));
+            }
+            gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl,
+                             depth + data->tmplcplen);
+          }
+          if (r <= 0)
+          {
+            break;
+          }
+          GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
+        }
+      }
+      continue;
+    }
+    pm = current.startindex + GT_DIV2 (current.len);
+    if (current.len > 7UL)
+    {
+      pl = current.startindex;
+      pn = current.startindex + current.len - 1;
+      if (current.len > 40UL)
+      {
+        s = GT_DIV8 (current.len);
+        pl = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pl + s,
+                                                     pl + GT_MULT2 (s), data);
+        gt_assert(pm >= s);
+        pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pm - s, pm,
+                                                     pm + s, data);
+        gt_assert(pn >= GT_MULT2(s));
+        pn = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pn - GT_MULT2 (s),
+                                                     pn - s, pn, data);
+      }
+      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pm, pn, data);
+    }
+    GT_QSORT_ARR_SWAP (arr, current.startindex, pm);
+    pa = pb = current.startindex + 1;
+    pc = pd = current.startindex + current.len - 1;
+    smallermaxlcp = greatermaxlcp = 0;
+    while (1)
+    {
+      while (pb <= pc)
+      {
+        r = QSORTNAME(qsortcmparr) (pb, current.startindex, data);
+        if (r > 0)
+        {
+          GT_UPDATE_MAX(greatermaxlcp,data->tmplcplen);
+          break;
+        }
+        if (r == 0)
+        {
+          swapped = true;
+          GT_QSORT_ARR_SWAP (arr, pa, pb);
+          pa++;
+        } else
+        {
+          GT_UPDATE_MAX(smallermaxlcp,data->tmplcplen);
+        }
+        pb++;
+      }
+      while (pb <= pc)
+      {
+        r = QSORTNAME(qsortcmparr) (pc, current.startindex, data);
+        if (r < 0)
+        {
+          GT_UPDATE_MAX(smallermaxlcp,data->tmplcplen);
+          break;
+        }
+        if (r == 0)
+        {
+          swapped = true;
+          GT_QSORT_ARR_SWAP (arr, pc, pd);
+          gt_assert(pd > 0);
+          pd--;
+        } else
+        {
+          GT_UPDATE_MAX(greatermaxlcp,data->tmplcplen);
+        }
+        gt_assert(pc > 0);
+        pc--;
+      }
+      if (pb > pc)
+      {
+        break;
+      }
+      GT_QSORT_ARR_SWAP (arr, pb, pc);
+      swapped = true;
+      pb++;
+      gt_assert(pc > 0);
+      pc--;
+    }
+    /* The following switch is not explained in the above mentioned
+       paper and therefore we ignore it. */
+    if (handlenotswapped && !swapped)
+    {                                  /* Switch to insertion sort */
+      gt_assert(current.len <= 40UL);
+      for (pm = current.startindex + 1;
+           pm < current.startindex + current.len; pm++)
+      {
+        for (pl = pm; pl > current.startindex; pl--)
+        {
+          r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
+          if (r <= 0)
+          {
+            break;
+          }
+          GT_QSORT_ARR_SWAP (arr, pl, pl - 1);
+        }
+      }
+      continue;
+    }
+    pn = current.startindex + current.len;
+    gt_assert(pa >= current.startindex);
+    gt_assert(pb >= pa);
+    s = MIN ((unsigned long) (pa - current.startindex),
+             (unsigned long) (pb - pa));
+    gt_assert(pb >= s);
+    GT_QSORT_ARR_VECSWAP (arr, current.startindex, pb - s, s);
+    gt_assert(pd >= pc);
+    gt_assert(pn > pd);
+    s = MIN ((unsigned long) (pd - pc), (unsigned long) (pn - pd - 1));
+    gt_assert(pn > s);
+    GT_QSORT_ARR_VECSWAP (arr, pb, pn - s, s);
+    gt_assert(pb >= pa);
+    if ((s = (unsigned long) (pb - pa)) > 0)
+    {
+      if (data->sssplcpvalues != NULL)
+      {
+        /*
+          left part has suffix with lcp up to length smallermaxlcp w.r.t.
+          to the pivot. This lcp belongs to a suffix on the left
+          which is at a minimum distance to the pivot and thus to an
+          element in the final part of the left side.
+        */
+        gt_lcptab_update(data->sssplcpvalues,
+                         subbucketleft,current.startindex + s,
+                         depth + smallermaxlcp);
+      }
+      if (s > 1UL)
+      {
+        current.len = s;
+        GT_STACK_PUSH(&intervalstack,current);
+      }
+    }
+    gt_assert(pd >= pc);
+    if ((s = (unsigned long) (pd - pc)) > 0)
+    {
+      if (data->sssplcpvalues != NULL)
+      {
+        /*
+          right part has suffix with lcp up to length largermaxlcp w.r.t.
+          to the pivot. This lcp belongs to a suffix on the right
+          which is at a minimum distance to the pivot and thus to an
+          element in the first part of the right side.
+        */
+        gt_assert(pn >= s);
+        gt_lcptab_update(data->sssplcpvalues,subbucketleft,pn - s,
+                         depth + greatermaxlcp);
+      }
+      if (s > 1UL)
+      {
+        gt_assert(pn >= s);
+        current.startindex = pn - s;
+        current.len = s;
+        GT_STACK_PUSH(&intervalstack,current);
+      }
+    }
+  }
+  GT_STACK_DELETE(&intervalstack);
+}
 
 void gt_differencecover_sortunsortedbucket(void *data,
                                            unsigned long blisbl,
@@ -1036,12 +1301,14 @@ void gt_differencecover_sortunsortedbucket(void *data,
                                            GT_UNUSED unsigned long depth)
 {
   GtDifferencecover *dcov = (GtDifferencecover *) data;
+  const unsigned long bucketleftidx
+    = gt_suffixsortspace_bucketleftidx_get(dcov->sssp);
 
   gt_assert(depth >= (unsigned long) dcov->vparam);
   gt_assert(dcov->diff2pos != NULL);
   gt_assert(width >= 2UL);
   gt_assert(dcov->sssp != NULL);
-  gt_assert(blisbl >= gt_suffixsortspace_bucketleftidx_get(dcov->sssp));
+  gt_assert(blisbl >= bucketleftidx);
   /* blisbl = bucketleftindex + subbucketleft already contains
      bucketleftindex, therefore we cannot use
      gt_suffixsortspace_set or
@@ -1050,7 +1317,8 @@ void gt_differencecover_sortunsortedbucket(void *data,
      = blisbl - partoffset + idx. Thus, instead we use the functions
      to directly access the suffix sortspace. */
   dcov->sortoffset = blisbl - gt_suffixsortspace_bucketleftidx_get(dcov->sssp);
-  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, NULL,width,data);
+  QSORTNAME(gt_inlinedarr_qsort_r) (6UL, false, width,data,depth,
+                                    blisbl - bucketleftidx);
 }
 
 static void dc_sortremainingsamples(GtDifferencecover *dcov)

@@ -26,12 +26,6 @@
 #include "spmsuftab.h"
 #include "seqnumrelpos.h"
 
-#define GT_BSR_UPDATEMAXLCP(MAXVAL,LCP)\
-        if ((MAXVAL) < (LCP))\
-        {\
-          MAXVAL = LCP;\
-        }
-
 typedef struct GtShortreadsortworkinfo GtShortreadsortworkinfo;
 
 typedef struct
