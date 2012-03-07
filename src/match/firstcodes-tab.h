@@ -76,12 +76,13 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
         fct->countocc_small[idx]++;
       } else
       {
-        if (fct->countocc_small[idx] == GT_FIRSTCODES_MAXSMALL)
-        {
-          fct->countocc_small[idx] = 0;
-          ul_u32_gt_hashmap_add(fct->countocc_exceptions, idx, (uint32_t) 1);
-          fct->hashmap_addcount++;
-        }
+        gt_assert (fct->countocc_small[idx] == GT_FIRSTCODES_MAXSMALL);
+        fct->countocc_small[idx] = 0;
+        ul_u32_gt_hashmap_add(fct->countocc_exceptions, idx, (uint32_t) 1);
+        fct->lastincremented_idx = idx;
+        fct->lastincremented_valueptr
+          = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+        fct->hashmap_addcount++;
       }
     } else
     {
