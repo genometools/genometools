@@ -78,10 +78,10 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
       {
         gt_assert (fct->countocc_small[idx] == GT_FIRSTCODES_MAXSMALL);
         fct->countocc_small[idx] = 0;
-        ul_u32_gt_hashmap_add(fct->countocc_exceptions, idx, (uint32_t) 1);
-        fct->lastincremented_idx = idx;
         fct->lastincremented_valueptr
-          = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+          = ul_u32_gt_hashmap_add_and_return_storage(fct->countocc_exceptions,
+                                                     idx, (uint32_t) 1);
+        fct->lastincremented_idx = idx;
         fct->hashmap_addcount++;
       }
     } else
@@ -99,8 +99,7 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
           = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
 
         fct->hashmap_getcount++;
-        gt_assert(valueptr != NULL);
-        gt_assert(*valueptr < UINT32_MAX);
+        gt_assert(valueptr != NULL && *valueptr < UINT32_MAX);
         (*valueptr)++;
         fct->lastincremented_idx = idx;
         fct->lastincremented_valueptr = valueptr;

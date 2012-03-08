@@ -264,7 +264,9 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
 #endif
 
   gt_assert(fct->differentcodes < UINT32_MAX);
-  gt_log_log("hashmap_addcount=%lu",fct->hashmap_addcount);
+  gt_log_log("hashmap_addcount=%lu (%.2f%%)",fct->hashmap_addcount,
+                  100.0 * (double) fct->hashmap_addcount/
+                                   fct->differentcodes);
   gt_log_log("hashmap_incrementcount=%lu (%.2f%%)",
                   fct->hashmap_incrementcount,
                   100.0 * (double) fct->hashmap_incrementcount/
