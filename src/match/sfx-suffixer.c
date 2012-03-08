@@ -1878,7 +1878,8 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   SHOWACTUALSPACE;
   if (sfi->sfxstrategy.differencecover > 0 && sfi->dcov != NULL)
   {
-    gt_differencecoversetsuffixsortspace(sfi->dcov,sfi->suffixsortspace);
+    gt_differencecover_set_sssp_lcp(sfi->dcov,sfi->suffixsortspace,
+                                    sfi->outlcpinfo);
   }
   if (sfi->part == 0)
   {
@@ -1905,7 +1906,7 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                                         : gt_differencecover_sortunsortedbucket,
                       (sfi->dcov == NULL || sfi->outlcpinfo == NULL)
                         ? NULL
-                        : gt_differencecover_completelargelcpvalues,
+                        : NULL, /*gt_differencecover_completelargelcpvalues*/
                       (void *) sfi->dcov,
                       &sfi->bucketiterstep,
                       sfi->logger);

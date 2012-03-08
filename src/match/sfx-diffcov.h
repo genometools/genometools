@@ -74,7 +74,8 @@ int gt_differencecover_compare (const GtDifferencecover *dcov,
                                 unsigned long suffixpos1,
                                 unsigned long suffixpos2);
 
-void gt_differencecoversetsuffixsortspace(GtDifferencecover *dcov,
-                                          GtSuffixsortspace *sssp);
+void gt_differencecover_set_sssp_lcp(GtDifferencecover *dcov,
+                                     GtSuffixsortspace *sssp,
+                                     GtOutlcpinfo *outlcpinfo);
 
 #endif
