@@ -55,7 +55,7 @@ module GT
         node.each_attribute do |k,v|
            attribs.push("#{k}=#{v}")
         end
-        puts attribs.join(',')
+        puts attribs.sort.join(',')
       end
       0
     end
