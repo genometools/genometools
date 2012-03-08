@@ -71,6 +71,9 @@ void*        gt_hashtable_get(GtHashtable*, const void *elem);
  * @return 1 if add succeeded, 0 if elem is already in table.
  */
 int          gt_hashtable_add(GtHashtable*, const void *elem);
+int          gt_hashtable_add_with_storage_ptr(GtHashtable*,
+                                               const void *elem,
+                                               void **stor_ptr);
 int          gt_hashtable_remove(GtHashtable*, const void *elem);
 /**
  * @brief iterate over the hashtable in key order given by compare

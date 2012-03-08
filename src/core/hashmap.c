@@ -19,6 +19,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/hashmap.h"
+#include "core/hashmap-generic.h"
 
 /* Hashmaps are implemented as Hashtables */
 
@@ -160,11 +161,21 @@ void gt_hashmap_reset(GtHashmap *hm)
     break;                                      \
   }
 
+DECLARE_HASHMAP(unsigned long, testul, unsigned long long, testull,
+                static, inline)
+DEFINE_HASHMAP(unsigned long, testul, unsigned long long, testull,
+               gt_ht_ul_elem_hash, gt_ht_ul_elem_cmp,
+               NULL_DESTRUCTOR, NULL_DESTRUCTOR, static, inline)
+
 static int
 gt_hashmap_test(GtHashType hash_type)
 {
   char *s1 = "foo", *s2 = "bar";
+  GT_UNUSED unsigned long ul1 = 1UL, ul2 = 2UL;
+  GT_UNUSED unsigned long long ull1 = 3ULL, ull2 = 4ULL, *sptr = NULL,
+                               *tptr = NULL;
   GtHashmap *hm;
+  GtHashtable *ht;
   int had_err = 0;
   do {
     /* empty hash */
@@ -212,6 +223,20 @@ gt_hashmap_test(GtHashType hash_type)
       my_ensure(had_err, !strcmp(gt_hashmap_get(hm, s2),  s1));
       gt_hashmap_delete(hm);
     }
+
+    /* test direct modification of hash contents */
+    ht = testul_testull_gt_hashmap_new();
+    my_ensure(had_err, !sptr);
+    sptr = testul_testull_gt_hashmap_add_and_return_storage(ht, ul1, ull1);
+    my_ensure(had_err, *sptr == ull1);
+    sptr = testul_testull_gt_hashmap_add_and_return_storage(ht, ul1, ull2);
+    my_ensure(had_err, *sptr == ull2);
+    (*sptr)++;
+    tptr = testul_testull_gt_hashmap_get(ht, ul1);
+    my_ensure(had_err, tptr == sptr);
+    my_ensure(had_err, *tptr == ull2+1);
+    gt_hashtable_delete(ht);
+
   } while (0);
   return had_err;
 }

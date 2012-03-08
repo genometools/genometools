@@ -92,7 +92,7 @@ GtHashtable* gt_hashtable_new(HashElemInfo table_info)
 
 static void
 gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
-        unsigned short high_mul, unsigned short low_mul)
+             unsigned short high_mul, unsigned short low_mul)
 {
   htsize_t table_size;
   gt_assert(high_mul > low_mul);
@@ -120,7 +120,7 @@ gt_ht_reinit(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
 
 static void
 gt_ht_init(GtHashtable *ht, HashElemInfo table_info, unsigned short size_log,
-        unsigned short high_mul, unsigned short low_mul)
+           unsigned short high_mul, unsigned short low_mul)
 {
   gt_assert(size_log < sizeof (htsize_t) * CHAR_BIT);
   ht->current_fill = 0;
@@ -145,7 +145,7 @@ GtHashtable* gt_hashtable_new_with_start_size(HashElemInfo table_info,
 }
 
 static int
-gt_ht_insert(GtHashtable *ht, const void *elem);
+gt_ht_insert(GtHashtable *ht, const void *elem, void **stor_ptr);
 
 static enum iterator_op
 gt_ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
@@ -153,7 +153,7 @@ gt_ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
 #ifndef NDEBUG
   int ins_count =
 #endif
-    gt_ht_insert(data, elem);
+    gt_ht_insert(data, elem, NULL);
 #ifndef NDEBUG
   if (!ins_count)
   {
@@ -244,7 +244,18 @@ int gt_hashtable_add(GtHashtable *ht, const void *elem)
   gt_assert(ht && elem);
   if (ht->current_fill + 1 > ht->high_fill)
     gt_ht_resize(ht, ht->table_size_log + 1);
-  insert_count = gt_ht_insert(ht, elem);
+  insert_count = gt_ht_insert(ht, elem, NULL);
+  return insert_count;
+}
+
+int gt_hashtable_add_with_storage_ptr(GtHashtable *ht, const void *elem,
+                                      void **stor_ptr)
+{
+  int insert_count;
+  gt_assert(ht && elem);
+  if (ht->current_fill + 1 > ht->high_fill)
+    gt_ht_resize(ht, ht->table_size_log + 1);
+  insert_count = gt_ht_insert(ht, elem, stor_ptr);
   return insert_count;
 }
 
@@ -260,7 +271,7 @@ gt_ht_find_free_idx(GtHashtable *ht, htsize_t start_idx, int search_dir)
 }
 
 static int
-gt_ht_insert(GtHashtable *ht, const void *elem)
+gt_ht_insert(GtHashtable *ht, const void *elem, void **stor_ptr)
 {
   htsize_t insert_pos;
   do {
@@ -291,9 +302,12 @@ gt_ht_insert(GtHashtable *ht, const void *elem)
     do {
       idx = link;
       link = HT_GET_LINK(ht, idx);
-      if (!ht->table_info.cmp(elem, gt_ht_elem_ptr(ht, idx)))
+      if (!ht->table_info.cmp(elem, gt_ht_elem_ptr(ht, idx))) {
+        if (stor_ptr)
+          *stor_ptr = gt_ht_elem_ptr(ht, idx);
         /* don't insert elements already present! */
         return 0;
+      }
     } while (link != end_mark);
     {
       /* we can search, starting at idx, for a
@@ -305,6 +319,8 @@ gt_ht_insert(GtHashtable *ht, const void *elem)
     }
   } while (0);
   gt_ht_cp_elem(ht, insert_pos, elem);
+  if (stor_ptr)
+    *stor_ptr = gt_ht_elem_ptr(ht, insert_pos);
   HT_SET_LINK(ht, insert_pos, end_mark);
   ht->current_fill += 1;
   return 1;
