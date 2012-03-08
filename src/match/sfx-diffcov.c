@@ -116,6 +116,12 @@ typedef struct
   bool defined;
 } GtDcFirstwithnewdepth;
 
+typedef struct
+{
+  unsigned int offset;
+  unsigned long idx1, idx2;
+} GtLcptrace;
+
 struct GtDifferencecover
 {
   unsigned int vparam,
@@ -157,7 +163,6 @@ struct GtDifferencecover
                     *sortedsample;
   GtRMQ *rmq;
   unsigned long sortoffset;
-  unsigned long tmplcplen;
 };
 
 /* Compute difference cover on the fly */
@@ -299,7 +304,6 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->logger = logger;
   dcov->sssp = NULL;
   dcov->rmq = NULL;
-  dcov->tmplcplen = 0;
   for (dcov->logmod = 0;
        dcov->logmod < (unsigned int) (sizeof (differencecoversizes)/
                                       sizeof (differencecoversizes[0]));
@@ -982,50 +986,34 @@ static void dc_addunsortedrange(void *voiddcov,
   ptr->width = width;
 }
 
+static unsigned long gt_differencecover_eval_lcp(const GtLcptrace *lcptrace,
+                                                 const GtDifferencecover *dcov)
+{
+  if (lcptrace->idx1 < dcov->effectivesamplesize &&
+      lcptrace->idx2 < dcov->effectivesamplesize)
+  {
+    gt_assert(dcov->rmq != NULL);
+    return (unsigned long)
+            gt_rmq_find_min_value(dcov->rmq,
+                                  MIN(lcptrace->idx1,lcptrace->idx2)+1,
+                                  MAX(lcptrace->idx1,lcptrace->idx2))
+             + lcptrace->offset;
+  }
+  return (unsigned long) lcptrace->offset;
+}
+
 int gt_differencecover_compare (const GtDifferencecover *dcov,
-                                unsigned long *lcpvalue,
+                                GtLcptrace *lcptrace,
                                 unsigned long suffixpos1,
                                 unsigned long suffixpos2)
 {
-  unsigned int offset;
-  int retval;
-  unsigned long idx1, idx2;
-
   gt_assert(suffixpos1 < dcov->totallength);
   gt_assert(suffixpos2 < dcov->totallength);
-  offset = dc_differencecover_delta(dcov,suffixpos1,suffixpos2);
-  idx1 = dc_inversesuftab_get(dcov,suffixpos1 + offset);
-  idx2 = dc_inversesuftab_get(dcov,suffixpos2 + offset);
-  if (idx1 < idx2)
-  {
-    retval = -1;
-  } else
-  {
-    if (idx1 > idx2)
-    {
-      unsigned long tmp = idx1;
-      idx1 = idx2;
-      idx2 = tmp;
-      retval = 1;
-    } else
-    {
-      retval = 0;
-    }
-  }
-  gt_assert(retval != 0);
-  if (lcpvalue != NULL)
-  {
-    gt_assert(dcov->rmq != NULL);
-    if (idx1 < dcov->effectivesamplesize && idx2 < dcov->effectivesamplesize)
-    {
-      *lcpvalue = (unsigned long)
-                  gt_rmq_find_min_value(dcov->rmq, idx1+1, idx2) + offset;
-    } else
-    {
-      *lcpvalue = (unsigned long) offset;
-    }
-  }
-  return retval;
+  lcptrace->offset = dc_differencecover_delta(dcov,suffixpos1,suffixpos2);
+  lcptrace->idx1 = dc_inversesuftab_get(dcov,suffixpos1 + lcptrace->offset);
+  lcptrace->idx2 = dc_inversesuftab_get(dcov,suffixpos2 + lcptrace->offset);
+  gt_assert(lcptrace->idx1 != lcptrace->idx2);
+  return lcptrace->idx1 < lcptrace->idx2 ? -1 : 1;
 }
 
 #ifdef  QSORTNAME
@@ -1045,6 +1033,7 @@ typedef GtDifferencecover * QSORTNAME(Datatype);
 static int QSORTNAME(qsortcmparr) (
                   unsigned long a,
                   unsigned long b,
+                  GtLcptrace *lcptrace,
                   const QSORTNAME(Datatype) data)
 {
   unsigned long suffixpos1, suffixpos2;
@@ -1052,10 +1041,7 @@ static int QSORTNAME(qsortcmparr) (
   gt_assert(data->sssp != NULL);
   suffixpos1 = dc_ARRAY_GET(NULL,a);
   suffixpos2 = dc_ARRAY_GET(NULL,b);
-  return gt_differencecover_compare (data, data->sssplcpvalues == NULL
-                                            ? NULL
-                                            : &data->tmplcplen,
-                                     suffixpos1, suffixpos2);
+  return gt_differencecover_compare (data, lcptrace, suffixpos1, suffixpos2);
 }
 
 typedef void * QSORTNAME(Sorttype);
@@ -1090,16 +1076,17 @@ typedef void * QSORTNAME(Sorttype);
 
 static inline unsigned long QSORTNAME(gt_inlined_qsort_arr_r_med3)
                      (unsigned long a, unsigned long b, unsigned long c,
-                      QSORTNAME(Datatype) data)
+                      GtLcptrace *lcptrace,
+                      const QSORTNAME(Datatype) data)
 {
-  return QSORTNAME(qsortcmparr) (a, b, data) < 0
-           ? (QSORTNAME(qsortcmparr) (b, c, data) < 0
+  return QSORTNAME(qsortcmparr) (a, b, lcptrace, data) < 0
+           ? (QSORTNAME(qsortcmparr) (b, c, lcptrace, data) < 0
                 ? b
-                : (QSORTNAME(qsortcmparr) (a, c, data) < 0
+                : (QSORTNAME(qsortcmparr) (a, c, lcptrace, data) < 0
                      ? c : a))
-           : (QSORTNAME(qsortcmparr) (b, c, data) > 0
+           : (QSORTNAME(qsortcmparr) (b, c, lcptrace, data) > 0
                 ? b
-                : (QSORTNAME(qsortcmparr) (a, c, data) < 0
+                : (QSORTNAME(qsortcmparr) (a, c, lcptrace, data) < 0
                      ? a
                      : c));
 }
@@ -1128,6 +1115,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
   bool swapped;
   GtStackIntervalarrtobesorted intervalstack;
   Intervalarrtobesorted current;
+  GtLcptrace lcptrace;
 
   GT_STACK_INIT(&intervalstack,32UL);
   current.startindex = 0;
@@ -1148,7 +1136,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       {
         for (pl = pm; pl > current.startindex; pl--)
         {
-          r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
+          r = QSORTNAME(qsortcmparr) (pl - 1, pl, &lcptrace, data);
           if (data->sssplcpvalues != NULL)
           {
             if (pl < pm && r > 0)
@@ -1158,7 +1146,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
                                                      subbucketleft,pl));
             }
             gt_lcptab_update(data->sssplcpvalues,subbucketleft,pl,
-                             data->tmplcplen);
+                             gt_differencecover_eval_lcp(&lcptrace, data));
           }
           if (r <= 0)
           {
@@ -1178,15 +1166,18 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       {
         s = GT_DIV8 (current.len);
         pl = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pl + s,
-                                                     pl + GT_MULT2 (s), data);
+                                                     pl + GT_MULT2 (s),
+                                                     &lcptrace, data);
         gt_assert(pm >= s);
         pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pm - s, pm,
-                                                     pm + s, data);
+                                                     pm + s,
+                                                     &lcptrace, data);
         gt_assert(pn >= GT_MULT2(s));
         pn = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pn - GT_MULT2 (s),
-                                                     pn - s, pn, data);
+                                                     pn - s, pn,
+                                                     &lcptrace, data);
       }
-      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pm, pn, data);
+      pm = QSORTNAME(gt_inlined_qsort_arr_r_med3) (pl, pm, pn, &lcptrace, data);
     }
     GT_QSORT_ARR_SWAP (arr, current.startindex, pm);
     pa = pb = current.startindex + 1;
@@ -1196,10 +1187,15 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
     {
       while (pb <= pc)
       {
-        r = QSORTNAME(qsortcmparr) (pb, current.startindex, data);
+        r = QSORTNAME(qsortcmparr) (pb, current.startindex, &lcptrace, data);
         if (r > 0)
         {
-          GT_UPDATE_MAX(greatermaxlcp,data->tmplcplen);
+          if (data->sssplcpvalues != NULL)
+          {
+            unsigned long tmplcplen
+              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GT_UPDATE_MAX(greatermaxlcp,tmplcplen);
+          }
           break;
         }
         if (r == 0)
@@ -1209,16 +1205,26 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           pa++;
         } else
         {
-          GT_UPDATE_MAX(smallermaxlcp,data->tmplcplen);
+          if (data->sssplcpvalues != NULL)
+          {
+            unsigned long tmplcplen
+              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GT_UPDATE_MAX(smallermaxlcp,tmplcplen);
+          }
         }
         pb++;
       }
       while (pb <= pc)
       {
-        r = QSORTNAME(qsortcmparr) (pc, current.startindex, data);
+        r = QSORTNAME(qsortcmparr) (pc, current.startindex, &lcptrace, data);
         if (r < 0)
         {
-          GT_UPDATE_MAX(smallermaxlcp,data->tmplcplen);
+          if (data->sssplcpvalues != NULL)
+          {
+            unsigned long tmplcplen
+              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GT_UPDATE_MAX(smallermaxlcp,tmplcplen);
+          }
           break;
         }
         if (r == 0)
@@ -1229,7 +1235,12 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
           pd--;
         } else
         {
-          GT_UPDATE_MAX(greatermaxlcp,data->tmplcplen);
+          if (data->sssplcpvalues != NULL)
+          {
+            unsigned long tmplcplen
+              = gt_differencecover_eval_lcp(&lcptrace,data);
+            GT_UPDATE_MAX(greatermaxlcp,tmplcplen);
+          }
         }
         gt_assert(pc > 0);
         pc--;
@@ -1254,7 +1265,7 @@ static void QSORTNAME(gt_inlinedarr_qsort_r) (
       {
         for (pl = pm; pl > current.startindex; pl--)
         {
-          r = QSORTNAME(qsortcmparr) (pl - 1, pl, data);
+          r = QSORTNAME(qsortcmparr) (pl - 1, pl, &lcptrace, data);
           if (r <= 0)
           {
             break;
