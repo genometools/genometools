@@ -30,6 +30,27 @@
   pages = {200-210},
   publisher = {Springer-Verlag}
 }
+
+  The computation of the lcp follows the general concept of
+
+  @INPROCEEDINGS{PUG:TUR:2008,
+  author = {Puglisi, S.J. and Turpin, A.},
+  title = {Space-Time Tradeoffs for Longest-Common-Prefix Array Computation},
+  booktitle = {Proceedings of Algorithms and Computation, 19th International
+               Symposium, {ISAAC} 2008, Gold Coast, Australia,
+               December 15-17, 2008. Proceedings},
+  year = {2008},
+  editor = {Hong, S.-H. and Nagamochi, H. and Fukunaga, T.},
+  volume = {5369},
+  series = {Lecture Notes in Computer Science},
+  pages = {124--135},
+  publisher = {Springer},
+  url = {http://dx.doi.org/10.1007/978-3-540-92182-0}
+}
+
+  based on the method of BUR:KAER:2003 to map sample positions to
+  indexes in the sorted array of suffixes.
+
 */
 
 #include <stdbool.h>
