@@ -44,6 +44,10 @@ struct GtBUstate_shulen /* global information */
   uint64_t **shulengthdist;
   const GtEncseq *encseq;
   unsigned long *file_to_genome_map;
+#undef GENOMEDIFF_PAPER_IMPL
+#ifdef GENOMEDIFF_PAPER_IMPL
+  unsigned long *leafdist;
+#endif
 #ifdef SHUDEBUG
   unsigned long lastleafnumber,
                 nextid;
@@ -121,6 +125,74 @@ static void shownode(int line,
 }
 #endif
 
+static void cartproduct_shulen(GtBUstate_shulen *state,
+                               unsigned long depth,
+                               const unsigned long *refnumdist,
+                               const unsigned long *querynumdist)
+{
+  unsigned long referidx, shulenidx;
+
+  for (referidx=0; referidx < state->numofdbfiles; referidx++)
+  {
+    if (refnumdist[referidx] > 0 && querynumdist[referidx] == 0)
+    {
+      for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
+      {
+        if (querynumdist[shulenidx] > 0)
+        {
+          gt_assert(referidx != shulenidx);
+          contribute_shulen(__LINE__,
+                            state->shulengthdist,
+                            referidx,
+                            shulenidx,
+                            querynumdist[shulenidx],
+                            depth + 1);
+        }
+      }
+    }
+  }
+}
+
+static void shu_compute_leaf_edge_contrib(GtBUstate_shulen *state,
+                                          const unsigned long *fathernumdist,
+                                          unsigned long gnum,
+                                          unsigned long fatherdepth)
+{
+  unsigned long idx;
+#ifdef GENOMEDIFF_PAPER_IMPL
+  gt_assert(state->leafdist != NULL);
+  for (idx = 0; idx < state->numofdbfiles; idx++)
+  {
+    state->leafdist[idx] = 0;
+  }
+  state->leafdist[gnum] = 1UL;
+  cartproduct_shulen(state,fatherdepth,fathernumdist,state->leafdist);
+  cartproduct_shulen(state,fatherdepth,state->leafdist,fathernumdist);
+#else
+  for (idx = 0; idx < state->numofdbfiles; idx++)
+  {
+    if (idx != gnum && fathernumdist[idx] > 0)
+    {
+      contribute_shulen(__LINE__,
+                        state->shulengthdist,
+                        idx,
+                        gnum,
+                        1UL,
+                        fatherdepth+1);
+      if (fathernumdist[gnum] == 0)
+      {
+        contribute_shulen(__LINE__,
+                          state->shulengthdist,
+                          gnum,
+                          idx,
+                          fathernumdist[idx],
+                          fatherdepth + 1);
+      }
+    }
+  }
+#endif
+}
+
 static int processleafedge_shulen(bool firstsucc,
                                   unsigned long fatherdepth,
                                   GtBUinfo_shulen *father,
@@ -128,7 +200,7 @@ static int processleafedge_shulen(bool firstsucc,
                                   GtBUstate_shulen *state,
                                   GT_UNUSED GtError *err)
 {
-  unsigned long idx, gnum;
+  unsigned long gnum;
 
 #ifdef SHUDEBUG
   printf("processleafedge %lu firstsucc=%s, "
@@ -171,27 +243,7 @@ static int processleafedge_shulen(bool firstsucc,
 #ifdef SHUDEBUG
     shownode(__LINE__,state,"father",father);
 #endif
-    for (idx = 0; idx < state->numofdbfiles; idx++)
-    {
-      if (idx != gnum && father->gnumdist[idx] > 0)
-      {
-        contribute_shulen(__LINE__,
-                          state->shulengthdist,
-                          idx,
-                          gnum,
-                          1UL,
-                          fatherdepth+1);
-        if (father->gnumdist[gnum] == 0)
-        {
-          contribute_shulen(__LINE__,
-                            state->shulengthdist,
-                            gnum,
-                            idx,
-                            father->gnumdist[idx],
-                            fatherdepth + 1);
-        }
-      }
-    }
+    shu_compute_leaf_edge_contrib(state,father->gnumdist,gnum,fatherdepth);
   }
   father->gnumdist[gnum]++;
 #ifdef SHUDEBUG
@@ -200,34 +252,6 @@ static int processleafedge_shulen(bool firstsucc,
   state->lastleafnumber = leafnumber;
 #endif
   return 0;
-}
-
-static void cartproduct_shulen(GtBUstate_shulen *state,
-                               unsigned long depth,
-                               const GtBUinfo_shulen *node1,
-                               const GtBUinfo_shulen *node2)
-{
-  unsigned long referidx, shulenidx;
-
-  for (referidx=0; referidx < state->numofdbfiles; referidx++)
-  {
-    if (node1->gnumdist[referidx] > 0 && node2->gnumdist[referidx] == 0)
-    {
-      for (shulenidx=0; shulenidx < state->numofdbfiles; shulenidx++)
-      {
-        if (node2->gnumdist[shulenidx] > 0)
-        {
-          gt_assert(referidx != shulenidx);
-          contribute_shulen(__LINE__,
-                            state->shulengthdist,
-                            referidx,
-                            shulenidx,
-                            node2->gnumdist[shulenidx],
-                            depth + 1);
-        }
-      }
-    }
-  }
 }
 
 static int processbranchingedge_shulen(bool firstsucc,
@@ -274,8 +298,8 @@ static int processbranchingedge_shulen(bool firstsucc,
     gt_assert(son != NULL);
     shownode(__LINE__,state,"son",son);
 #endif
-    cartproduct_shulen(state, fatherdepth, father, son);
-    cartproduct_shulen(state, fatherdepth, son, father);
+    cartproduct_shulen(state, fatherdepth, father->gnumdist, son->gnumdist);
+    cartproduct_shulen(state, fatherdepth, son->gnumdist, father->gnumdist);
   }
   if (son != NULL)
   {
@@ -358,6 +382,9 @@ int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
   state = gt_malloc(sizeof (*state));
   state->numofdbfiles = gt_encseq_num_of_files(encseq);
   state->encseq = encseq;
+#ifdef GENOMEDIFF_PAPER_IMPL
+  state->leafdist = gt_malloc(sizeof (*state->leafdist) * state->numofdbfiles);
+#endif
 #ifdef SHUDEBUG
   state->nextid = 0;
 #endif
@@ -371,6 +398,9 @@ int gt_multiesa2shulengthdist_print(Sequentialsuffixarrayreader *ssar,
     shulengthdist_print(NULL,state->shulengthdist,state->numofdbfiles);
   }
   gt_array2dim_delete(state->shulengthdist);
+#ifdef GENOMEDIFF_PAPER_IMPL
+  gt_free(state->leafdist);
+#endif
   gt_free(state);
   return haserr ? -1 : 0;
 }
@@ -510,6 +540,10 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   bustate->numofdbfiles = unit_info->num_of_genomes;
   bustate->file_to_genome_map = unit_info->map_files;
   bustate->encseq = encseq;
+#ifdef GENOMEDIFF_PAPER_IMPL
+  bustate->leafdist
+    = gt_malloc(sizeof (*bustate->leafdist) * bustate->numofdbfiles);
+#endif
 #ifdef SHUDEBUG
   bustate->nextid = 0;
 #endif
@@ -518,6 +552,9 @@ int gt_multiesa2shulengthdist(Sequentialsuffixarrayreader *ssar,
   {
     haserr = true;
   }
+#ifdef GENOMEDIFF_PAPER_IMPL
+  gt_free(bustate->leafdist);
+#endif
   gt_free(bustate);
   return haserr ? -1 : 0;
 }
@@ -536,9 +573,12 @@ GtBUstate_shulen *gt_sfx_multiesashulengthdist_new(const GtEncseq *encseq)
 #endif
   bustate->unit_info = gt_shu_unit_info_new(encseq);
   bustate->numofdbfiles = gt_encseq_num_of_files(encseq);
+#ifdef GENOMEDIFF_PAPER_IMPL
+  bustate->leafdist
+    = gt_malloc(sizeof (*bustate->leafdist) * bustate->numofdbfiles);
+#endif
   bustate->file_to_genome_map = bustate->unit_info->map_files;
-  bustate->shulengthdist
-    = shulengthdist_new(bustate->unit_info->num_of_genomes);
+  bustate->shulengthdist = shulengthdist_new(bustate->numofdbfiles);
   bustate->stack = (void *) gt_GtArrayGtBUItvinfo_new_shulen();
   return bustate;
 }
@@ -608,5 +648,8 @@ void gt_sfx_multiesashulengthdist_delete(GtBUstate_shulen *bustate)
   gt_array2dim_delete(bustate->shulengthdist);
   gt_shu_unit_info_delete(bustate->unit_info);
   gt_GtArrayGtBUItvinfo_delete_shulen(bustate->stack,bustate);
+#ifdef GENOMEDIFF_PAPER_IMPL
+  gt_free(bustate->leafdist);
+#endif
   gt_free(bustate);
 }
