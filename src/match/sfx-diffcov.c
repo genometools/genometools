@@ -101,7 +101,7 @@ typedef struct
 
 GT_DECLAREARRAYSTRUCT(GtDcPairsuffixptr);
 
-typedef GtDcPairsuffixptr Inl_Queueelem;
+typedef GtDcPairsuffixptr GtInl_Queueelem;
 
 #include "queue-inline.h"
 
@@ -152,7 +152,7 @@ struct GtDifferencecover
                 currentdepth;
   GtCodetype maxcode;
   GtDcFirstwithnewdepth firstwithnewdepth;
-  Inl_Queue *rangestobesorted;
+  GtInl_Queue *rangestobesorted;
   GtDcItventry *itvinfo;
   GtArrayGtDcPairsuffixptr firstgeneration;
   GtLcpvalues *samplelcpvalues, *sssplcpvalues;

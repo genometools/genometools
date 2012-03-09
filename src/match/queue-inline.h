@@ -31,9 +31,9 @@ typedef struct
                queuesize,    /* size of the queue */
                noofelements; /* no ofelements between enqueueindex+1
                                 and dequeindex */
-} Inl_Queue;
+} GtInl_Queue;
 
-typedef int (*Inl_Queueprocessor)(void **,void *info);
+typedef int (*GtInl_Queueprocessor)(void **,void *info);
 
 /*
   The following function delivers an empty queue with a reservoir of
@@ -41,9 +41,9 @@ typedef int (*Inl_Queueprocessor)(void **,void *info);
   reservoir can, if necessary, be enlarged.
 */
 
-static inline Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
+static inline GtInl_Queue *gt_inl_queue_new(unsigned long queuesize)
 {
-  Inl_Queue *q;
+  GtInl_Queue *q;
 
   q = gt_malloc(sizeof (*q));
   gt_assert(queuesize > 0);
@@ -58,18 +58,22 @@ static inline Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
   The following function frees the space required for the queue.
 */
 
-static inline void gt_inl_queue_delete(Inl_Queue *q)
+static inline void gt_inl_queue_delete(GtInl_Queue *q)
 {
-  gt_free(q->queuespace);
-  gt_free(q);
+  if (q != NULL)
+  {
+    gt_free(q->queuespace);
+    gt_free(q);
+  }
 }
 
 /*
   The following function returns true iff the queue is empty.
 */
 
-static inline bool gt_inl_queue_isempty(const Inl_Queue *q)
+static inline bool gt_inl_queue_isempty(const GtInl_Queue *q)
 {
+  gt_assert(q != NULL);
   return (q->noofelements == 0) ? true : false;
 }
 
@@ -78,10 +82,11 @@ static inline bool gt_inl_queue_isempty(const Inl_Queue *q)
   space reservoir.
 */
 
-static inline void extendqueuesize(Inl_Queue *q,bool doublesize)
+static inline void extendqueuesize(GtInl_Queue *q,bool doublesize)
 {
   unsigned long addconst, idx, newsize;
 
+  gt_assert(q != NULL);
   if (doublesize)
   {
     addconst = q->queuesize;
@@ -111,9 +116,10 @@ static inline void extendqueuesize(Inl_Queue *q,bool doublesize)
   the queue.
 */
 
-static inline void gt_inl_queue_add(Inl_Queue *q, void *elem,
+static inline void gt_inl_queue_add(GtInl_Queue *q, void *elem,
                                     bool doublesize)
 {
+  gt_assert(q != NULL);
   if (q->noofelements == q->queuesize)
   {
     extendqueuesize(q,doublesize);
@@ -134,11 +140,11 @@ static inline void gt_inl_queue_add(Inl_Queue *q, void *elem,
   start of the queue.
 */
 
-static inline void* gt_inl_queue_get(Inl_Queue *q)
+static inline void* gt_inl_queue_get(GtInl_Queue *q)
 {
   void* value;
 
-  gt_assert(q->noofelements > 0);
+  gt_assert(q != NULL && q->noofelements > 0);
   q->noofelements--;
   value = q->queuespace[q->dequeueindex];
   if (q->dequeueindex > 0)
@@ -152,15 +158,15 @@ static inline void* gt_inl_queue_get(Inl_Queue *q)
   return value;
 }
 
-/*@unused@*/ static inline void** gt_inl_queue_head(const Inl_Queue *q)
+/*@unused@*/ static inline void** gt_inl_queue_head(const GtInl_Queue *q)
 {
-  gt_assert(q->noofelements > 0);
+  gt_assert(q != NULL && q->noofelements > 0);
   return &q->queuespace[q->dequeueindex];
 }
 
-/*@unused@*/ static inline void** gt_inl_queue_tail(const Inl_Queue *q)
+/*@unused@*/ static inline void** gt_inl_queue_tail(const GtInl_Queue *q)
 {
-  gt_assert(q->noofelements > 0);
+  gt_assert(q != NULL && q->noofelements > 0);
   if (q->enqueueindex == q->queuesize-1)
   {
     return &q->queuespace[0];
@@ -168,9 +174,9 @@ static inline void* gt_inl_queue_get(Inl_Queue *q)
   return &q->queuespace[q->enqueueindex+1];
 }
 
-/*@unused@*/ static inline void gt_inl_queue_deletehead(Inl_Queue *q)
+/*@unused@*/ static inline void gt_inl_queue_deletehead(GtInl_Queue *q)
 {
-  gt_assert(q->noofelements > 0);
+  gt_assert(q != NULL && q->noofelements > 0);
   q->noofelements--;
   if (q->dequeueindex > 0)
   {
@@ -182,14 +188,15 @@ static inline void* gt_inl_queue_get(Inl_Queue *q)
   }
 }
 
-/*@unused@*/ static inline int gt_inl_queue_iterate(const Inl_Queue *q,
-                                              Inl_Queueprocessor queueprocessor,
-                                              void *info)
+/*@unused@*/ static inline int gt_inl_queue_iterate(const GtInl_Queue *q,
+                                           GtInl_Queueprocessor queueprocessor,
+                                           void *info)
 {
-  unsigned long idx;
-
+  gt_assert(q != NULL);
   if (q->noofelements > 0)
   {
+    unsigned long idx;
+
     if (q->enqueueindex < q->dequeueindex)
     {
       for (idx=q->enqueueindex+1; idx<=q->dequeueindex; idx++)
