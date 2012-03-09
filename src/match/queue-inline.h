@@ -22,7 +22,6 @@
 #include <stdlib.h>
 #include "core/assert_api.h"
 #include "core/divmodmul.h"
-#include "spacedef.h"
 
 typedef struct
 {
@@ -48,7 +47,7 @@ static inline Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
 
   q = gt_malloc(sizeof (*q));
   gt_assert(queuesize > 0);
-  ALLOCASSIGNSPACE(q->queuespace,NULL,void*,queuesize);
+  q->queuespace = gt_malloc(sizeof (*q->queuespace) * queuesize);
   q->noofelements = 0;
   q->queuesize = queuesize;
   q->dequeueindex = q->enqueueindex = queuesize - 1;
@@ -61,8 +60,8 @@ static inline Inl_Queue *gt_inl_queue_new(unsigned long queuesize)
 
 static inline void gt_inl_queue_delete(Inl_Queue *q)
 {
-  FREESPACE(q->queuespace);
-  FREESPACE(q);
+  gt_free(q->queuespace);
+  gt_free(q);
 }
 
 /*
@@ -91,7 +90,7 @@ static inline void extendqueuesize(Inl_Queue *q,bool doublesize)
     addconst = MIN(1024UL,q->queuesize);
   }
   newsize = q->queuesize + addconst;
-  ALLOCASSIGNSPACE(q->queuespace,q->queuespace,void*,newsize);
+  q->queuespace = gt_realloc(q->queuespace,sizeof (*q->queuespace) * newsize);
   gt_assert(q->enqueueindex == q->dequeueindex);
   gt_assert(addconst > 0);
   for (idx=q->queuesize-1; idx>q->enqueueindex; idx--)
