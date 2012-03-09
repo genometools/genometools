@@ -24,6 +24,7 @@
 #include "core/gtdatapath.h"
 #include "core/option_api.h"
 #include "core/outputfile.h"
+#include "core/ma.h"
 #include "core/splitter.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
@@ -40,7 +41,7 @@
 #include "annotationsketch/canvas_cairo_file.h"
 #include "annotationsketch/diagram.h"
 #include "annotationsketch/feature_index_memory_api.h"
-#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_stream_api.h"
 #include "annotationsketch/gt_sketch.h"
 #include "annotationsketch/image_info.h"
 #include "annotationsketch/layout.h"
@@ -95,7 +96,7 @@ static GtOPrval sketch_parse_options(int *parsed_args,
 
   /* -pipe */
   option = gt_option_new_bool("pipe", "use pipe mode (i.e., show all gff3 "
-                           "features on stdout)", &arguments->pipe, false);
+                              "features on stdout)", &arguments->pipe, false);
   gt_option_parser_add_option(op, option);
 
   /* -flattenfiles */
@@ -155,6 +156,7 @@ static GtOPrval sketch_parse_options(int *parsed_args,
                              arguments->format, formats[0], formats);
   gt_option_parser_add_option(op, option);
 
+  /* -input */
   option = gt_option_new_choice("input", "input data format\n"
                                        "choose from gff|bed|gtf",
                              arguments->input, inputs[0], inputs);
@@ -232,7 +234,8 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   AnnotationSketchArguments arguments;
   GtFeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  const char *file, *seqid = NULL;
+  const char *file;
+  char *seqid = NULL;
   GtRange qry_range, sequence_region_range;
   GtArray *results = NULL;
   GtStyle *sty = NULL;
@@ -242,6 +245,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   GtImageInfo* ii = NULL;
   GtCanvas *canvas = NULL;
   unsigned long height;
+  bool has_seqid;
 
   gt_error_check(err);
 
@@ -345,16 +349,22 @@ int gt_sketch(int argc, const char **argv, GtError *err)
     gt_node_stream_delete(in_stream);
   }
 
+  if (!had_err) {
+    had_err = gt_feature_index_has_seqid(features,
+                                         &has_seqid,
+                                         gt_str_get(arguments.seqid),
+                                         err);
+  }
+
   /* if seqid is empty, take first one added to index */
   if (!had_err && strcmp(gt_str_get(arguments.seqid),"") == 0) {
-    seqid = gt_feature_index_get_first_seqid(features);
+    seqid = gt_feature_index_get_first_seqid(features, err);
     if (seqid == NULL) {
       gt_error_set(err, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
-  else if (!had_err && !gt_feature_index_has_seqid(features,
-                                                gt_str_get(arguments.seqid))) {
+  else if (!had_err && !has_seqid) {
     gt_error_set(err, "sequence region '%s' does not exist in GFF input file",
                  gt_str_get(arguments.seqid));
     had_err = -1;
@@ -364,8 +374,12 @@ int gt_sketch(int argc, const char **argv, GtError *err)
 
   results = gt_array_new(sizeof (GtGenomeNode*));
   if (!had_err) {
-    gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
-                                         seqid);
+    had_err = gt_feature_index_get_range_for_seqid(features,
+                                                   &sequence_region_range,
+                                                   seqid,
+                                                   err);
+  }
+  if (!had_err) {
     qry_range.start = (arguments.start == GT_UNDEF_ULONG ?
                          sequence_region_range.start :
                          arguments.start);
@@ -465,6 +479,7 @@ int gt_sketch(int argc, const char **argv, GtError *err)
   }
 
   /* free */
+  gt_free(seqid);
   gt_canvas_delete(canvas);
   gt_layout_delete(l);
   gt_image_info_delete(ii);

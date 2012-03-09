@@ -18,7 +18,7 @@
 #ifndef WITHOUT_CAIRO
 
 #include "lauxlib.h"
-#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_stream_api.h"
 #include "extended/luahelper.h"
 #include "gtlua/genome_stream_lua.h"
 #include "gtlua/feature_index_lua.h"

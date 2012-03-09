@@ -45,17 +45,19 @@ class FeatureIndex:
     from_param = classmethod(from_param)
 
     def get_features_for_seqid(self, seqid):
+        err = Error()
+        result = []
         rval = gtlib.gt_feature_index_get_features_for_seqid(self.fi,
-                seqid)
+                seqid, err)
         if rval:
             a = Array(rval, True)
-            result = []
             for i in range(a.size()):
                 fptr = gtlib.gt_genome_node_ref(a.get(i))
                 result.append(FeatureNode.create_from_ptr(fptr))
             return result
         else:
-            return None
+            gterror(err)
+        return result
 
     def add_gff3file(self, filename):
         err = Error()
@@ -64,23 +66,44 @@ class FeatureIndex:
         if rval != 0:
             gterror(err)
 
+    def has_seqid(self, seqid):
+        from ctypes import c_int, byref
+        val = c_int()
+        err = Error()
+        ret = gtlib.gt_feature_index_has_seqid(self.fi, byref(val),
+                seqid, err)
+        if ret != 0:
+            gterror(err)
+        else:
+          return (val.value > 0)
+
     def get_first_seqid(self):
-        return gtlib.gt_feature_index_get_first_seqid(self.fi)
+        err = Error()
+        str = gtlib.gt_feature_index_get_first_seqid(self.fi, err)
+        if str == None:
+            gterror(err)
+        return str
 
     def get_seqids(self):
         result = []
-        stra = StrArray(gtlib.gt_feature_index_get_seqids(self.fi))
+        err = Error()
+        stra = StrArray(gtlib.gt_feature_index_get_seqids(self.fi, err))
+        if stra == None:
+            gterror(err)
         for i in range(stra.size()):
             result.append(stra.get(i))
         return result
 
     def get_range_for_seqid(self, seqid):
         from ctypes import byref
-        if gtlib.gt_feature_index_has_seqid(self.fi, seqid) == 0:
+        err = Error()
+        if self.has_seqid(seqid) == 0:
             gterror("feature_index does not contain seqid")
         range = Range()
-        gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range),
-                seqid)
+        rval = gtlib.gt_feature_index_get_range_for_seqid(self.fi, byref(range),
+                seqid, err)
+        if rval != 0:
+            gterror(err)
         return range
 
     def get_features_for_range(self, start, end, seqid):
@@ -104,8 +127,12 @@ class FeatureIndex:
         gtlib.gt_feature_index_add_gff3file.argtypes = [c_void_p,
                 c_char_p, Error]
         gtlib.gt_feature_index_get_first_seqid.restype = c_char_p
-        gtlib.gt_feature_index_get_seqids.restype = c_void_p
-        gtlib.gt_feature_index_has_seqid.argtypes = [c_void_p, c_char_p]
+        gtlib.gt_feature_index_get_first_seqid.argtypes = [c_void_p, Error]
+        gtlib.gt_feature_index_get_seqids.restype = c_int
+        gtlib.gt_feature_index_get_first_seqid.argtypes = [c_void_p, Error]
+        gtlib.gt_feature_index_has_seqid.restype = c_int
+        gtlib.gt_feature_index_has_seqid.argtypes = [c_void_p, POINTER(c_int),
+                c_char_p, Error]
         gtlib.gt_feature_index_get_range_for_seqid.argtypes = [c_void_p,
                 POINTER(Range), c_char_p]
         gtlib.gt_feature_index_get_features_for_range.argtypes = [c_void_p,
@@ -128,3 +155,15 @@ class FeatureIndexMemory(FeatureIndex):
     from_param = classmethod(from_param)
 
 
+class FeatureIndexFromPtr(FeatureIndex):
+
+    def __init__(self, ptr):
+        self.fi = ptr
+        self._as_parameter_ = self.fi
+
+    def from_param(cls, obj):
+        if not isinstance(obj, FeatureIndexFromPtr):
+            raise TypeError, "argument must be a FeatureIndexFromPtr"
+        return obj._as_parameter_
+
+    from_param = classmethod(from_param)

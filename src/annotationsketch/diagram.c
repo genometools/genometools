@@ -972,7 +972,7 @@ int gt_diagram_unit_test(GtError *err)
   sh.sty = gt_style_new(err);
   sh.err = err;
   sh.errstatus = 0;
-  gt_feature_index_add_feature_node(sh.fi, gt_feature_node_cast(gn));
+  gt_feature_index_add_feature_node(sh.fi, gt_feature_node_cast(gn), err);
   gt_genome_node_delete(gn);
   sh.d = gt_diagram_new(sh.fi, "ctg123", &testrng, sh.sty, err);
 

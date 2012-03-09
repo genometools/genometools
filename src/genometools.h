@@ -74,6 +74,8 @@
 
 /* the extended module */
 #include "extended/add_introns_stream_api.h"
+#include "extended/anno_db_gfflike_api.h"
+#include "extended/anno_db_schema_api.h"
 #include "extended/bed_in_stream_api.h"
 #include "extended/comment_node_api.h"
 #include "extended/csa_stream_api.h"
@@ -95,6 +97,8 @@
 #include "extended/merge_stream_api.h"
 #include "extended/node_stream_api.h"
 #include "extended/node_visitor_api.h"
+#include "extended/rdb_api.h"
+#include "extended/rdb_sqlite_api.h"
 #include "extended/region_mapping_api.h"
 #include "extended/region_node_api.h"
 #include "extended/select_stream_api.h"
@@ -120,6 +124,7 @@
 #include "annotationsketch/diagram_api.h"
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/feature_index_memory_api.h"
+#include "annotationsketch/feature_stream_api.h"
 #include "annotationsketch/graphics_api.h"
 #include "annotationsketch/image_info_api.h"
 #include "annotationsketch/layout_api.h"

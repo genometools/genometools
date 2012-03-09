@@ -1,7 +1,7 @@
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c)      2008 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2010 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2010 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -31,17 +31,21 @@ module GT
                                            "const char*, " +
                                            "GtError*)"
   extern "GtArray* gt_feature_index_get_features_for_seqid(Gt_FeatureIndex*, " +
-                                                          "const char*)"
-  extern "const char* gt_feature_index_get_first_seqid(const GtFeatureIndex*)"
-  extern "GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex*)"
-  extern "void gt_feature_index_get_range_for_seqid(GtFeatureIndex*, " +
-                                                   "GtRange*, const char*)"
-  extern "bool gt_feature_index_has_seqid(const GtFeatureIndex*, const char*)"
+                                                          "const char*, " +
+                                                          "GtError*)"
+  extern "char* gt_feature_index_get_first_seqid(const GtFeatureIndex*, " +
+                                                "GtError*)"
+  extern "GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex*, " +
+                                                 "GtError*)"
+  extern "int  gt_feature_index_get_range_for_seqid(GtFeatureIndex*, " +
+                                                   "GtRange*, const char*, " +
+                                                   "GtError*)"
+  extern "int  gt_feature_index_has_seqid(const GtFeatureIndex*, int*, " +
+                                        "const char*, GtError*)"
   extern "int  gt_feature_index_get_features_for_range(GtFeatureIndex*,
                                                        GtArray*, const char*,
                                                        const GtRange*,
                                                        GtError*)"
-
   class FeatureIndex
     attr_reader :feature_index
 
@@ -51,7 +55,9 @@ module GT
     end
 
     def get_features_for_seqid(seqid)
-      rval = GT.gt_feature_index_get_features_for_seqid(@feature_index, seqid)
+      err = GT::Error.new()
+      rval = GT.gt_feature_index_get_features_for_seqid(@feature_index, seqid, \
+                                                        err)
       if rval then
         a = GT::Array.new(rval)
         result = []
@@ -61,7 +67,7 @@ module GT
         end
         result
       else
-        nil
+        GT.gterror(err)
       end
     end
 
@@ -90,21 +96,44 @@ module GT
     end
 
     def get_first_seqid
-      GT.gt_feature_index_get_first_seqid(@feature_index)
+      err = Error.new()
+      val = GT.gt_feature_index_get_first_seqid(@feature_index, err.to_ptr)
+      if val.nil? then GT.gterror(err) end
+      val
     end
 
     def get_seqids
-      GT::StrArray.new(GT.gt_feature_index_get_seqids(@feature_index)).to_a
+      err = Error.new()
+      sap = GT.gt_feature_index_get_seqids(@feature_index, err.to_ptr)
+      if sap.nil? then GT.gterror(err) end
+      GT::StrArray.new(sap).to_a
+    end
+
+    def has_seqid?(seqid)
+      err = Error.new()
+      val = (GT::struct ["bool val"]).malloc
+      rval = GT.gt_feature_index_has_seqid(@feature_index, val, seqid, err)
+      if rval != 0 then
+        GT.gterror(err)
+      else
+        return (val.val == true)
+      end
     end
 
     def get_range_for_seqid(seqid)
-      if not GT.gt_feature_index_has_seqid(@feature_index, seqid)
+      err = Error.new()
+      if not self.has_seqid?(seqid) then
         GT.gterror("feature_index does not contain seqid")
       end
       range = DL::malloc(DL::sizeof("LL"))
-      GT.gt_feature_index_get_range_for_seqid(@feature_index, range, seqid)
-      range.struct!("LL", :start, :stop)
-      Range.new(range[:start],range[:stop])
+      rval = GT.gt_feature_index_get_range_for_seqid(@feature_index, range, \
+                                                     seqid, err)
+      if rval != 0 then
+        GT.gterror(err)
+      else
+        range.struct!("LL", :start, :stop)
+        Range.new(range[:start],range[:stop])
+      end
     end
 
     def to_ptr
@@ -116,6 +145,15 @@ module GT
     def initialize
       @feature_index = GT.gt_feature_index_memory_new()
       @feature_index.free = GT::symbol("gt_feature_index_delete", "0P")
+    end
+  end
+
+  class FeatureIndexFromPtr < FeatureIndex
+    def initialize(ptr, own = false)
+      @feature_index = ptr
+      if own then
+        @feature_index.free = GT::symbol("gt_feature_index_delete", "0P")
+      end
     end
   end
 end

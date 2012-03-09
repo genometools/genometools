@@ -49,8 +49,12 @@ int main(int argc, char *argv[])
     handle_error(err);
 
   /* create diagram for first sequence ID in feature index */
-  seqid = gt_feature_index_get_first_seqid(feature_index);
-  gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
+  if (!(seqid = gt_feature_index_get_first_seqid(feature_index, err))) {
+    if (gt_error_is_set(err))
+      handle_error(err);
+  }
+  if (gt_feature_index_get_range_for_seqid(feature_index, &range, seqid, err))
+    handle_error(err);
   diagram = gt_diagram_new(feature_index, seqid, &range, style, err);
   if (gt_error_is_set(err))
     handle_error(err);

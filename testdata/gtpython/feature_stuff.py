@@ -32,7 +32,7 @@ class TestFailedError(Exception):
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         sys.stderr.write("Usage: " + (sys.argv)[0] + " GFF3_file\n")
-        sys.stderr.write('Test the FeatureIndex and FeatureStream bindings onGFF3 file.')
+        sys.stderr.write('Test the FeatureIndex and FeatureStream bindings on GFF3_file.')
         sys.exit(1)
 
     genome_stream = GFF3InStream((sys.argv)[1])

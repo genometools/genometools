@@ -75,3 +75,6 @@ src/external/hmmer-2.3.2/squid/squidconf.h
 src/external/hmmer-2.3.2/src/config.h
 tags
 testdata/genomediff
+*.pyc
+*.db
+src/external/hmmer*

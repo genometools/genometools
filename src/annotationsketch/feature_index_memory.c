@@ -1,9 +1,9 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007      Malte Mader <mader@zbh.uni-hamburg.de>
   Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +22,9 @@
 #include "annotationsketch/feature_index_memory.h"
 #include "annotationsketch/feature_index_rep.h"
 #include "annotationsketch/feature_index.h"
-#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_stream_api.h"
 #include "core/cstr_table.h"
+#include "core/cstr_api.h"
 #include "core/ensure.h"
 #include "core/hashmap.h"
 #include "core/interval_tree.h"
@@ -63,8 +64,9 @@ static void region_info_delete(RegionInfo *info)
   gt_free(info);
 }
 
-void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
-                                             GtRegionNode *rn)
+int gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
+                                            GtRegionNode *rn,
+                                            GT_UNUSED GtError *err)
 {
   char *seqid;
   GtFeatureIndexMemory *fi;
@@ -83,10 +85,12 @@ void gt_feature_index_memory_add_region_node(GtFeatureIndex *gfi,
     if (fi->nof_region_nodes++ == 0)
       fi->firstseqid = seqid;
   }
+  return 0;
 }
 
-void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
-                                              GtFeatureNode *fn)
+int gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
+                                             GtFeatureNode *fn,
+                                             GT_UNUSED GtError *err)
 {
   GtGenomeNode *gn;
   char* seqid;
@@ -127,6 +131,56 @@ void gt_feature_index_memory_add_feature_node(GtFeatureIndex *gfi,
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
+  return 0;
+}
+
+typedef struct {
+  GtIntervalTreeNode *node;
+  GtGenomeNode *genome_node;
+} GtFeatureIndexMemoryByPtrExtractInfo;
+
+static int gt_feature_index_memory_get_itreenode_by_ptr(GtIntervalTreeNode *n,
+                                                        void *data)
+{
+  GtFeatureIndexMemoryByPtrExtractInfo *i =
+                                   (GtFeatureIndexMemoryByPtrExtractInfo*) data;
+  if (i->genome_node == gt_interval_tree_node_get_data(n)) {
+    i->node = n;
+  }
+  return 0;
+}
+
+int gt_feature_index_memory_remove_node(GtFeatureIndex *gfi,
+                                        GtFeatureNode *gn,
+                                        GT_UNUSED GtError *err)
+{
+  char* seqid;
+  GtFeatureIndexMemory *fi;
+  GtRange node_range;
+  GtFeatureIndexMemoryByPtrExtractInfo info;
+  RegionInfo *rinfo;
+  gt_assert(gfi && gn);
+
+  fi = gt_feature_index_memory_cast(gfi);
+  node_range = gt_genome_node_get_range((GtGenomeNode*) gn);
+  if (!gt_hashmap_get(fi->nodes_in_index, gn))
+    return 0;
+  seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) gn));
+  rinfo = (RegionInfo*) gt_hashmap_get(fi->regions, seqid);
+  if (!rinfo)
+    return 0;
+  info.genome_node = (GtGenomeNode*) gn;
+  info.node = NULL;
+
+  gt_interval_tree_iterate_overlapping(rinfo->features,
+                                   gt_feature_index_memory_get_itreenode_by_ptr,
+                                   node_range.start,
+                                   node_range.end,
+                                   &info);
+
+  if (info.node)
+    gt_interval_tree_remove(rinfo->features, info.node);
+  return 0;
 }
 
 static int collect_features_from_itree(GtIntervalTreeNode *node, void *data)
@@ -138,7 +192,8 @@ static int collect_features_from_itree(GtIntervalTreeNode *node, void *data)
 }
 
 GtArray* gt_feature_index_memory_get_features_for_seqid(GtFeatureIndex *gfi,
-                                                        const char *seqid)
+                                                        const char *seqid,
+                                                        GT_UNUSED GtError *err)
 {
   RegionInfo *ri;
   GT_UNUSED int had_err = 0;
@@ -203,13 +258,14 @@ GtFeatureNode*  gt_feature_index_memory_get_node_by_ptr(GtFeatureIndexMemory
   return retnode;
 }
 
-const char* gt_feature_index_memory_get_first_seqid(const GtFeatureIndex *gfi)
+char* gt_feature_index_memory_get_first_seqid(const GtFeatureIndex *gfi,
+                                              GT_UNUSED GtError *err)
 {
   GtFeatureIndexMemory *fi;
   gt_assert(gfi);
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
-  return fi->firstseqid;
+  return fi->firstseqid ? gt_cstr_dup(fi->firstseqid) : NULL;
 }
 
 static int store_seqid(void *key, GT_UNUSED void *value, void *data,
@@ -224,7 +280,8 @@ static int store_seqid(void *key, GT_UNUSED void *value, void *data,
   return 0;
 }
 
-GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi)
+GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi,
+                                               GT_UNUSED GtError *err)
 {
   GtCstrTable* seqids;
   GtStrArray *ret;
@@ -242,9 +299,10 @@ GtStrArray* gt_feature_index_memory_get_seqids(const GtFeatureIndex *gfi)
   return ret;
 }
 
-void gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
-                                                 GtRange *range,
-                                                 const char *seqid)
+int gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
+                                                GtRange *range,
+                                                const char *seqid,
+                                                GT_UNUSED GtError *err)
 {
   RegionInfo *info;
   GtFeatureIndexMemory *fi;
@@ -259,16 +317,20 @@ void gt_feature_index_memory_get_range_for_seqid(GtFeatureIndex *gfi,
   }
   else if (info->region)
     *range = gt_genome_node_get_range((GtGenomeNode*) info->region);
+  return 0;
 }
 
-bool gt_feature_index_memory_has_seqid(const GtFeatureIndex *gfi,
-                                       const char *seqid)
+int gt_feature_index_memory_has_seqid(const GtFeatureIndex *gfi,
+                                      bool *has_seqid,
+                                      const char *seqid,
+                                      GT_UNUSED GtError *err)
 {
   GtFeatureIndexMemory *fi;
   gt_assert(gfi);
 
   fi = gt_feature_index_memory_cast((GtFeatureIndex*) gfi);
-  return (gt_hashmap_get(fi->regions, seqid));
+  *has_seqid = (gt_hashmap_get(fi->regions, seqid) != NULL);
+  return 0;
 }
 
 void gt_feature_index_memory_delete(GtFeatureIndex *gfi)
@@ -287,9 +349,11 @@ const GtFeatureIndexClass* gt_feature_index_memory_class(void)
     fic = gt_feature_index_class_new(sizeof (GtFeatureIndexMemory),
                      gt_feature_index_memory_add_region_node,
                      gt_feature_index_memory_add_feature_node,
+                     gt_feature_index_memory_remove_node,
                      gt_feature_index_memory_get_features_for_seqid,
                      gt_feature_index_memory_get_features_for_range,
                      gt_feature_index_memory_get_first_seqid,
+                     NULL,
                      gt_feature_index_memory_get_seqids,
                      gt_feature_index_memory_get_range_for_seqid,
                      gt_feature_index_memory_has_seqid,
@@ -316,7 +380,6 @@ int gt_feature_index_memory_unit_test(GtError *err)
   int had_err = 0, status = 0;
   GtFeatureIndex *fi = NULL;
   GtFeatureNode *tmp, *fn;
-
   GtError *testerr;
   gt_error_check(err);
 
@@ -330,7 +393,7 @@ int gt_feature_index_memory_unit_test(GtError *err)
   /* run subclass specific tests */
   testerr = gt_error_new();
   fn = gt_feature_node_cast(gt_feature_node_new_standard_gene());
-  gt_feature_index_add_feature_node(fi, fn);
+  gt_ensure(had_err, !gt_feature_index_add_feature_node(fi, fn, testerr));
 
   /* test gt_feature_index_memory_get_node_by_ptr() */
   tmp = gt_feature_index_memory_get_node_by_ptr(

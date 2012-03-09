@@ -18,6 +18,7 @@
 #ifndef FEATURE_NODE_REP_H
 #define FEATURE_NODE_REP_H
 
+#include "extended/feature_node_observer.h"
 #include "extended/genome_node_rep.h"
 #include "extended/tag_value_map_api.h"
 
@@ -32,6 +33,7 @@ struct GtFeatureNode {
   unsigned int bit_field;
   GtDlist *children; /* created on demand */
   GtFeatureNode *representative;
+  GtFeatureNodeObserver *observer;
 };
 
 #endif

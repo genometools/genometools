@@ -38,21 +38,21 @@ static void feature_visitor_free(GtNodeVisitor *gv)
 }
 
 static int feature_visitor_feature_node(GtNodeVisitor *gv, GtFeatureNode *fn,
-                                        GT_UNUSED GtError *err)
+                                        GtError *err)
 {
   GtFeatureVisitor *v = feature_visitor_cast(gv);
+  int rval = 0;
   gt_error_check(err);
-  gt_feature_index_add_feature_node(v->feature_index, fn);
-  return 0;
+  rval = gt_feature_index_add_feature_node(v->feature_index, fn, err);
+  return rval;
 }
 
 static int feature_visitor_region_node(GtNodeVisitor *gv, GtRegionNode *rn,
-                                       GT_UNUSED GtError *err)
+                                       GtError *err)
 {
   GtFeatureVisitor *v = feature_visitor_cast(gv);
   gt_error_check(err);
-  gt_feature_index_add_region_node(v->feature_index, rn);
-  return 0;
+  return gt_feature_index_add_region_node(v->feature_index, rn, err);
 }
 
 const GtNodeVisitorClass* gt_feature_visitor_class()

@@ -94,6 +94,10 @@ static void feature_node_free(GtGenomeNode *gn)
     }
   }
   gt_dlist_delete(fn->children);
+  if (fn->observer && fn->observer->deleted)
+    fn->observer->deleted(fn, fn->observer->data);
+  if (fn->observer)
+    gt_feature_node_observer_delete(fn->observer);
 }
 
 const char* gt_feature_node_get_attribute(const GtFeatureNode *fn,
@@ -136,6 +140,8 @@ static void feature_node_set_range(GtGenomeNode *gn, const GtRange *range)
 {
   GtFeatureNode *fn = gt_feature_node_cast(gn);
   fn->range = *range;
+  if (fn->observer && fn->observer->range_changed)
+    fn->observer->range_changed(fn, &(fn->range), fn->observer->data);
 }
 
 static void feature_node_change_seqid(GtGenomeNode *gn, GtStr *seqid)
@@ -150,6 +156,8 @@ void gt_feature_node_set_source(GtFeatureNode *fn, GtStr *source)
 {
   gt_assert(fn && source && !fn->source);
   fn->source = gt_str_ref(source);
+  if (fn->observer && fn->observer->source_changed)
+    fn->observer->source_changed(fn, source, fn->observer->data);
 }
 
 void gt_feature_node_set_phase(GtFeatureNode *fn, GtPhase phase)
@@ -157,6 +165,8 @@ void gt_feature_node_set_phase(GtFeatureNode *fn, GtPhase phase)
   gt_assert(fn);
   fn->bit_field &= ~(PHASE_MASK << PHASE_OFFSET);
   fn->bit_field |= phase << PHASE_OFFSET;
+  if (fn->observer && fn->observer->phase_changed)
+    fn->observer->phase_changed(fn, phase, fn->observer->data);
 }
 
 static int feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv,
@@ -166,6 +176,22 @@ static int feature_node_accept(GtGenomeNode *gn, GtNodeVisitor *nv,
   gt_error_check(err);
   fn = gt_feature_node_cast(gn);
   return gt_node_visitor_visit_feature_node(nv, fn, err);
+}
+
+void gt_feature_node_set_observer(GtFeatureNode *fn, GtFeatureNodeObserver *o)
+{
+  gt_assert(fn && o);
+  if (fn->observer)
+    gt_feature_node_observer_delete(fn->observer);
+  fn->observer = gt_feature_node_observer_ref(o);
+}
+
+void gt_feature_node_unset_observer(GtFeatureNode *fn)
+{
+  gt_assert(fn);
+  if (fn->observer)
+    gt_feature_node_observer_delete(fn->observer);
+  fn->observer = NULL;
 }
 
 const GtGenomeNodeClass* gt_feature_node_class()
@@ -215,10 +241,12 @@ GtGenomeNode* gt_feature_node_new(GtStr *seqid, const char *type,
   fn->score       = GT_UNDEF_FLOAT;
   fn->range.start = start;
   fn->range.end   = end;
+  fn->representative = NULL;
   fn->attributes  = NULL;
   fn->bit_field   = 0;
   fn->bit_field  |= strand << STRAND_OFFSET;
   fn->children    = NULL; /* the children list is create on demand */
+  fn->observer    = NULL;
   gt_feature_node_set_phase(fn, GT_PHASE_UNDEFINED);
   set_transcriptfeaturetype(fn, TRANSCRIPT_FEATURE_TYPE_UNDETERMINED);
   set_tree_status(&fn->bit_field, IS_TREE);
@@ -365,6 +393,8 @@ void gt_feature_node_set_type(GtFeatureNode *fn, const char *type)
 {
   gt_assert(fn && type);
   fn->type = gt_symbol(type);
+  if (fn->observer && fn->observer->type_changed)
+    fn->observer->type_changed(fn, fn->type, fn->observer->data);
 }
 
 bool gt_feature_node_has_type(GtFeatureNode *fn, const char *type)
@@ -387,7 +417,8 @@ bool gt_feature_node_is_multi(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   if ((fn->bit_field >> MULTI_FEATURE_OFFSET) & MULTI_FEATURE_MASK) {
-    gt_assert(!gt_feature_node_is_pseudo(fn));
+    gt_assert(!((fn->bit_field >> PSEUDO_FEATURE_OFFSET) &
+                   PSEUDO_FEATURE_MASK));
     return true;
   }
   return false;
@@ -397,7 +428,7 @@ bool gt_feature_node_is_pseudo(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   if ((fn->bit_field >> PSEUDO_FEATURE_OFFSET) & PSEUDO_FEATURE_MASK) {
-    gt_assert(!gt_feature_node_is_multi(fn));
+    gt_assert(!((fn->bit_field >> MULTI_FEATURE_OFFSET) & MULTI_FEATURE_MASK));
     return true;
   }
   return false;
@@ -413,6 +444,10 @@ void gt_feature_node_make_multi_representative(GtFeatureNode *fn)
 {
   gt_assert(fn && !gt_feature_node_is_multi(fn));
   feature_node_set_multi(fn);
+  if (fn->observer && fn->observer->multi_changed) {
+    fn->observer->multi_changed(fn, gt_feature_node_is_multi(fn),
+                                fn->representative, fn->observer->data);
+  }
 }
 
 void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
@@ -422,6 +457,10 @@ void gt_feature_node_set_multi_representative(GtFeatureNode *fn,
   gt_assert(rep && gt_feature_node_is_multi(rep));
   feature_node_set_multi(fn);
   fn->representative = rep;
+  if (fn->observer && fn->observer->multi_changed) {
+    fn->observer->multi_changed(fn, gt_feature_node_is_multi(fn),
+                                fn->representative, fn->observer->data);
+  }
 }
 
 void gt_feature_node_unset_multi(GtFeatureNode *fn)
@@ -462,6 +501,8 @@ void gt_feature_node_set_strand(GtFeatureNode *fn, GtStrand strand)
   gt_assert(fn);
   fn->bit_field &= ~(STRAND_MASK << STRAND_OFFSET);
   fn->bit_field |= strand << STRAND_OFFSET;
+  if (fn->observer && fn->observer->strand_changed)
+    fn->observer->strand_changed(fn, strand, fn->observer->data);
 }
 
 GtPhase gt_feature_node_get_phase(const GtFeatureNode *fn)
@@ -580,6 +621,8 @@ void gt_feature_node_set_end(GtFeatureNode *fn, unsigned long end)
 {
   gt_assert(fn && fn->range.start <= end);
   fn->range.end = end;
+  if (fn->observer && fn->observer->range_changed)
+    fn->observer->range_changed(fn, &(fn->range), fn->observer->data);
 }
 
 void gt_feature_node_set_score(GtFeatureNode *fn, float score)
@@ -587,6 +630,8 @@ void gt_feature_node_set_score(GtFeatureNode *fn, float score)
   gt_assert(fn);
   fn->bit_field |= 1 << SCORE_IS_DEFINED_OFFSET;
   fn->score = score;
+  if (fn->observer && fn->observer->score_changed)
+    fn->observer->score_changed(fn, score, fn->observer->data);
 }
 
 void gt_feature_node_unset_score(GtFeatureNode *fn)
@@ -594,6 +639,8 @@ void gt_feature_node_unset_score(GtFeatureNode *fn)
   gt_assert(fn);
   fn->bit_field &= ~(1 << SCORE_IS_DEFINED_OFFSET);
   fn->score = GT_UNDEF_FLOAT;
+  if (fn->observer && fn->observer->score_changed)
+    fn->observer->score_changed(fn, fn->score, fn->observer->data);
 }
 
 void gt_feature_node_add_attribute(GtFeatureNode *fn,
@@ -607,6 +654,10 @@ void gt_feature_node_add_attribute(GtFeatureNode *fn,
     fn->attributes = gt_tag_value_map_new(attr_name, attr_value);
   else
     gt_tag_value_map_add(&fn->attributes, attr_name, attr_value);
+  if (fn->observer && fn->observer->attribute_changed) {
+    fn->observer->attribute_changed(fn, true, attr_name, attr_value,
+                                    fn->observer->data);
+  }
 }
 
 void gt_feature_node_set_attribute(GtFeatureNode *fn,
@@ -620,6 +671,10 @@ void gt_feature_node_set_attribute(GtFeatureNode *fn,
     fn->attributes = gt_tag_value_map_new(attr_name, attr_value);
   else
     gt_tag_value_map_set(&fn->attributes, attr_name, attr_value);
+  if (fn->observer && fn->observer->attribute_changed) {
+    fn->observer->attribute_changed(fn, false, attr_name, attr_value,
+                                    fn->observer->data);
+  }
 }
 
 void gt_feature_node_remove_attribute(GtFeatureNode *fn,
@@ -629,6 +684,9 @@ void gt_feature_node_remove_attribute(GtFeatureNode *fn,
   gt_assert(strlen(attr_name)); /* attribute name cannot be empty */
   gt_assert(fn->attributes); /* attribute list must exist already */
   gt_tag_value_map_remove(&fn->attributes, attr_name);
+  if (fn->observer && fn->observer->attribute_deleted) {
+    fn->observer->attribute_deleted(fn, attr_name, fn->observer->data);
+  }
 }
 
 void gt_feature_node_foreach_attribute(GtFeatureNode *fn,
@@ -1019,6 +1077,8 @@ void gt_feature_node_add_child(GtFeatureNode *parent, GtFeatureNode *child)
   set_tree_status(&parent->bit_field, TREE_STATUS_UNDETERMINED);
   /* update parent info of <child> */
   add_parent(&child->bit_field);
+  if (parent->observer && parent->observer->child_added)
+    parent->observer->child_added(parent, child, parent->observer->data);
 }
 
 static int remove_leaf(GtFeatureNode *node, void *data, GT_UNUSED GtError *err)
@@ -1053,6 +1113,8 @@ void gt_feature_node_mark(GtFeatureNode *fn)
 {
   gt_assert(fn);
   fn->bit_field |= 1;
+  if (fn->observer && fn->observer->mark_changed)
+    fn->observer->mark_changed(fn, true, fn->observer->data);
 }
 
 bool gt_feature_node_is_marked(const GtFeatureNode *fn)

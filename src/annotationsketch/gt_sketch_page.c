@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2008-2009 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2009 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -233,11 +234,13 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   GtLayout *l = NULL;
   GtBioseq *bioseq = NULL;
   GtCanvas *canvas = NULL;
-  const char *seqid = NULL, *outfile;
+  char *seqid = NULL;
+  const char *outfile = NULL;
   unsigned long start, height, num_pages = 0;
   double offsetpos, usable_height;
   cairo_surface_t *surf = NULL;
   cairo_t *cr = NULL;
+  bool has_seqid;
   GtTextWidthCalculator *twc;
   gt_error_check(err);
 
@@ -264,6 +267,10 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     gt_style_file = gt_str_ref(arguments->stylefile);
   }
   had_err = gt_style_load_file(sty, gt_str_get(gt_style_file), err);
+  if (!had_err) {
+    had_err = gt_feature_index_has_seqid(features, &has_seqid,
+                                         gt_str_get(arguments->seqid), err);
+  }
 
   outfile = argv[parsed_args];
   if (!had_err)
@@ -271,16 +278,14 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     /* get features */
     had_err = gt_feature_index_add_gff3file(features, argv[parsed_args+1], err);
      if (!had_err && gt_str_length(arguments->seqid) == 0) {
-      seqid = gt_feature_index_get_first_seqid(features);
+      seqid = gt_feature_index_get_first_seqid(features, err);
       if (seqid == NULL)
       {
         gt_error_set(err, "GFF input file must contain a sequence region!");
         had_err = -1;
       }
     }
-    else if (!had_err
-               && !gt_feature_index_has_seqid(features,
-                                              gt_str_get(arguments->seqid)))
+    else if (!had_err && !has_seqid)
     {
       gt_error_set(err, "sequence region '%s' does not exist in GFF input file",
                    gt_str_get(arguments->seqid));
@@ -300,8 +305,12 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
   if (!had_err)
   {
     /* set display range */
-    gt_feature_index_get_range_for_seqid(features, &sequence_region_range,
-                                         seqid);
+    had_err = gt_feature_index_get_range_for_seqid(features,
+                                                   &sequence_region_range,
+                                                   seqid, err);
+  }
+  if (!had_err)
+  {
     qry_range.start = (arguments->range.start == GT_UNDEF_ULONG ?
                          sequence_region_range.start :
                          arguments->range.start);
@@ -413,6 +422,7 @@ static int gt_sketch_page_runner(GT_UNUSED int argc,
     if (bioseq)
       gt_bioseq_delete(bioseq);
     gt_style_delete(sty);
+    gt_free(seqid);
     gt_str_delete(gt_style_file);
     gt_feature_index_delete(features);
   }

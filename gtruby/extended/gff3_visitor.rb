@@ -21,7 +21,7 @@ require 'extended/genome_stream'
 module GT
   extend DL::Importable
   gtdlload "libgenometools"
-  extern "GtNodeVisitor* gt_gff3_visitor_new(GtGenFile*)"
+  extern "GtNodeVisitor* gt_gff3_visitor_new(GtFile*)"
 
   class GFF3Visitor
     def initialize

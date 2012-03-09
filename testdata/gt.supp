@@ -62,3 +62,24 @@
    fun:gt_lib_init
    ...
 }
+{
+   toy_font_static_data_problem
+   Memcheck:Addr4
+   ...
+   fun:FcConfigParseAndLoad
+   ...
+}
+{
+   toy_font_static_data_problem
+   Memcheck:Addr8
+   ...
+   fun:FcConfigParseAndLoad
+   ...
+}
+{
+   toy_font_static_data_problem
+   Memcheck:Leak
+   ...
+   fun:_cairo_ft_font_face_create_for_toy
+   ...
+}

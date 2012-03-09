@@ -23,6 +23,7 @@
 #include "core/strand_api.h"
 #include "core/str_array.h"
 #include "extended/feature_node_api.h"
+#include "extended/feature_node_observer.h"
 #include "extended/feature_type.h"
 #include "extended/genome_node.h"
 #include "extended/transcript_feature_type.h"
@@ -46,6 +47,9 @@ bool           gt_feature_node_has_CDS(const GtFeatureNode*);
 bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
 double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*,
                                                         unsigned long *num_ss);
+void           gt_feature_node_set_observer(GtFeatureNode*,
+                                            GtFeatureNodeObserver*);
+void           gt_feature_node_unset_observer(GtFeatureNode*);
 int            gt_feature_node_unit_test(GtError*);
 
 /* Perform depth first traversal of the given <feature_node>. */

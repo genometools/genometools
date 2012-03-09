@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2008-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2008-2012 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,8 @@ from add_introns_stream import *
 from inter_feature_stream import *
 from dup_feature_stream import *
 from merge_feature_stream import *
+from rdb import *
+from anno_db import *
 
 CommentNode.register(gtlib)
 GenomeNode.register(gtlib)
@@ -47,3 +49,5 @@ AddIntronsStream.register(gtlib)
 InterFeatureStream.register(gtlib)
 DuplicateFeatureStream.register(gtlib)
 MergeFeatureStream.register(gtlib)
+RDBSqlite.register(gtlib)
+AnnoDBSchema.register(gtlib)

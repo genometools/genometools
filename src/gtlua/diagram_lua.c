@@ -39,11 +39,15 @@ static int diagram_lua_new(lua_State *L)
   GtError *err;
   const char *seqid;
   GtStyle *style;
+  bool has_seqid;
   /* get feature index */
   feature_index = check_feature_index(L, 1);
+  err = gt_error_new();
   /* get seqid */
   seqid = luaL_checkstring(L, 2);
-  luaL_argcheck(L, gt_feature_index_has_seqid(*feature_index, seqid),
+  if (gt_feature_index_has_seqid(*feature_index, &has_seqid, seqid, err))
+    return gt_lua_error(L, err);
+  luaL_argcheck(L, has_seqid,
                 2, "feature index does not contain the given sequence id");
   /* get range */
   range = check_range(L, 3);
@@ -51,7 +55,6 @@ static int diagram_lua_new(lua_State *L)
   style = gt_lua_get_style_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (GtDiagram*));
   gt_assert(diagram);
-  err = gt_error_new();
   *diagram = gt_diagram_new(*feature_index, seqid, range, style, err);
   if (gt_error_is_set(err))
     return gt_lua_error(L, err);

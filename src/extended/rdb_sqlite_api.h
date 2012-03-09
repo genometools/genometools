@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011 Sascha Kastens <sascha.kastens@studium.uni-hamburg.de>
+  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,14 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATURE_STREAM_H
-#define FEATURE_STREAM_H
+#ifndef RDB_SQLITE_API_H
+#define RDB_SQLITE_API_H
 
-#include <stdio.h>
-#include "annotationsketch/feature_index.h"
-#include "extended/node_stream_api.h"
+typedef struct GtRDBSqlite GtRDBSqlite;
+typedef struct GtRDBStmtSqlite GtRDBStmtSqlite;
 
-/* create a FeatureStream which writes to GtFeatureIndex */
-GtNodeStream* gt_feature_stream_new(GtNodeStream*, GtFeatureIndex*);
+#include "extended/rdb_api.h"
+
+GtRDB* gt_rdb_sqlite_new(const char *dbpath, GtError *err);
 
 #endif

@@ -52,6 +52,7 @@
 #include "core/tokenizer.h"
 #include "core/translator.h"
 #include "extended/alignment.h"
+#include "extended/anno_db_gfflike_api.h"
 #include "extended/evaluator.h"
 #include "extended/feature_node.h"
 #include "extended/feature_node_iterator_api.h"
@@ -90,6 +91,7 @@
 #include "tools/gt_eval.h"
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_extractseq.h"
+#include "tools/gt_featureindex.h"
 #include "tools/gt_fingerprint.h"
 #include "tools/gt_genomediff.h"
 #include "tools/gt_gff3.h"
@@ -106,6 +108,7 @@
 #include "tools/gt_mergefeat.h"
 #include "tools/gt_mgth.h"
 #include "tools/gt_mkfmindex.h"
+#include "tools/gt_mkfeatureindex.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_orffinder.h"
 #include "tools/gt_packedindex.h"
@@ -163,8 +166,8 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "eval", gt_eval());
   gt_toolbox_add_tool(tools, "extractfeat", gt_extractfeat());
   gt_toolbox_add_tool(tools, "extractseq", gt_extractseq());
-  /* hidden "link" from filter to the select tool for backward compatibility */
   gt_toolbox_add_hidden_tool(tools, "filter", gt_select());
+  gt_toolbox_add_tool(tools, "featureindex", gt_featureindex());
   gt_toolbox_add_tool(tools, "fingerprint", gt_fingerprint());
   gt_toolbox_add_tool(tools, "genomediff", gt_genomediff());
   gt_toolbox_add_tool(tools, "gff3", gt_gff3());
@@ -186,9 +189,10 @@ GtToolbox* gtt_tools(void)
      compatibility */
   gt_toolbox_add_hidden_tool(tools, "mutate", gt_seqmutate());
   gt_toolbox_add(tools, "mkfmindex", gt_mkfmindex);
+  gt_toolbox_add_tool(tools, "mkfeatureindex", gt_mkfeatureindex());
   gt_toolbox_add_tool(tools, "orffinder", gt_orffinder());
   gt_toolbox_add_tool(tools, "packedindex", gt_packedindex());
-    gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
+  gt_toolbox_add_tool(tools, "prebwt", gt_prebwt());
   gt_toolbox_add_tool(tools, "repfind", gt_repfind());
   gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
@@ -223,8 +227,10 @@ GtHashmap* gtt_unit_tests(void)
   GtHashmap *unit_tests = gt_hashmap_new(GT_HASH_STRING, NULL, NULL);
 
   /* add unit tests */
+
   gt_hashmap_add(unit_tests, "compactulongstore class",
                  gt_GtCompactulongstore_unit_test);
+  gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "alignment class", gt_alignment_unit_test);
   gt_hashmap_add(unit_tests, "array class", gt_array_unit_test);
   gt_hashmap_add(unit_tests, "array example", gt_array_example);
@@ -313,6 +319,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "element class", gt_element_unit_test);
   gt_hashmap_add(unit_tests, "memory feature index class",
                  gt_feature_index_memory_unit_test);
+  gt_hashmap_add(unit_tests, "database feature index class (GFF-like)",
+                 gt_anno_db_gfflike_unit_test);
   gt_hashmap_add(unit_tests, "imageinfo class", gt_image_info_unit_test);
   gt_hashmap_add(unit_tests, "line class", gt_line_unit_test);
   gt_hashmap_add(unit_tests, "track class", gt_track_unit_test);

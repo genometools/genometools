@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "annotationsketch/feature_stream.h"
+#include "annotationsketch/feature_stream_api.h"
 #include "annotationsketch/feature_visitor.h"
 #include "annotationsketch/feature_index.h"
 #include "extended/visitor_stream_api.h"

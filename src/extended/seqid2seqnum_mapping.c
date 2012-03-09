@@ -20,6 +20,7 @@
 #include "core/ma_api.h"
 #include "core/parseutils.h"
 #include "core/undef_api.h"
+#include "core/unused_api.h"
 #include "extended/seqid2seqnum_mapping.h"
 
 typedef GtArray SeqidInfo;
@@ -100,7 +101,7 @@ struct GtSeqid2SeqnumMapping {
 };
 
 static int fill_mapping(GtSeqid2SeqnumMapping *mapping, GtBioseq *bioseq,
-                        GtError *err)
+                        GT_UNUSED GtError *err)
 {
   SeqidInfo *seqid_info;
   unsigned long i, j;

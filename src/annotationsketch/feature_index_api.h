@@ -1,9 +1,9 @@
 /*
-  Copyright (c) 2007-2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
   Copyright (c)      2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007      Malte Mader <mader@zbh.uni-hamburg.de>
   Copyright (c) 2007      Christin Schaerfer <schaerfer@zbh.uni-hamburg.de>
-  Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -35,12 +35,18 @@
 typedef struct GtFeatureIndex GtFeatureIndex;
 
 /* Add <region_node> to <feature_index>. */
-void        gt_feature_index_add_region_node(GtFeatureIndex *feature_index,
-                                             GtRegionNode *region_node);
+int         gt_feature_index_add_region_node(GtFeatureIndex *feature_index,
+                                             GtRegionNode *region_node,
+                                             GtError *err);
 /* Add <feature_node> to <feature_index>, associating it with a sequence
    region denoted by its identifier string. */
-void        gt_feature_index_add_feature_node(GtFeatureIndex *feature_index,
-                                              GtFeatureNode *feature_node);
+int         gt_feature_index_add_feature_node(GtFeatureIndex *feature_index,
+                                              GtFeatureNode *feature_node,
+                                              GtError *err);
+/* Removes node <genome_node> from <feature_index>. */
+int         gt_feature_index_remove_node(GtFeatureIndex *feature_index,
+                                         GtFeatureNode *node,
+                                         GtError *err);
 /* Add all features contained in <gff3file> to <feature_index>, if <gff3file> is
    valid. Otherwise, <feature_index> is not changed and <err> is set. */
 int         gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
@@ -48,7 +54,8 @@ int         gt_feature_index_add_gff3file(GtFeatureIndex *feature_index,
 /* Returns an array of <GtFeatureNodes> associated with a given sequence region
    identifier <seqid>. */
 GtArray*    gt_feature_index_get_features_for_seqid(GtFeatureIndex*,
-                                                    const char *seqid);
+                                                    const char *seqid,
+                                                    GtError *err);
 /* Look up genome features in <feature_index> for sequence region <seqid> in
    <range> and store them in <results>. */
 int         gt_feature_index_get_features_for_range(GtFeatureIndex
@@ -58,20 +65,27 @@ int         gt_feature_index_get_features_for_range(GtFeatureIndex
                                                     const GtRange *range,
                                                     GtError*);
 /* Returns the first sequence region identifier added to <feature_index>. */
-const char* gt_feature_index_get_first_seqid(const GtFeatureIndex
-                                             *feature_index);
+char*       gt_feature_index_get_first_seqid(const GtFeatureIndex
+                                             *feature_index,
+                                             GtError *err);
 /* Returns a <GtStrArray> of all sequence region identifiers contained in
    <feature_index> (in alphabetical order). */
-GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex *feature_index);
+GtStrArray* gt_feature_index_get_seqids(const GtFeatureIndex *feature_index,
+                                        GtError *err);
 /* Writes the range of all features contained in the <feature_index> for
    region identifier <seqid> to the <GtRange> pointer <range>. */
-void        gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
+int         gt_feature_index_get_range_for_seqid(GtFeatureIndex *feature_index,
                                                  GtRange *range,
-                                                 const char *seqid);
-/* Returns <true> if the sequence region identified by <seqid> has been
-  registered in the <feature_index>. */
-bool        gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
-                                       const char *seqid);
+                                                 const char *seqid,
+                                                 GtError *err);
+/* Returns <has_seqid>  to true if the sequence region identified by <seqid>
+   has been registered in the <feature_index>. */
+int         gt_feature_index_has_seqid(const GtFeatureIndex *feature_index,
+                                       bool *has_seqid,
+                                       const char *seqid,
+                                       GtError *err);
+/* TODO: document me */
+int         gt_feature_index_save(GtFeatureIndex *feature_index, GtError *err);
 /* Deletes the <feature_index> and all its referenced features. */
 void        gt_feature_index_delete(GtFeatureIndex*);
 

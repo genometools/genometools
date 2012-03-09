@@ -209,6 +209,7 @@ static bool id_string_is_unique(GtStr *id, GtStr *buf, GtCstrTable *tab,
   make_unique_id_string(buf, i);
   return !gt_cstr_table_get(tab, gt_str_get(buf));
 }
+
 static GtStr* make_id_unique(GtGFF3Visitor *gff3_visitor, GtFeatureNode *fn)
 {
   unsigned long i = 1;

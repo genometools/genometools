@@ -57,7 +57,8 @@ int main(int argc, char *argv[])
 
   /* create diagram for first sequence ID in feature index */
   seqid = argv[5];
-  gt_feature_index_get_range_for_seqid(feature_index, &range, seqid);
+  if (gt_feature_index_get_range_for_seqid(feature_index, &range, seqid, err))
+    handle_error(err);
   sscanf(argv[6], "%lu", &range.start);
   sscanf(argv[7], "%lu", &range.end);
   sscanf(argv[8], "%lu", &windowsize);

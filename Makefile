@@ -24,7 +24,8 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/expat-2.0.1/lib \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/libtecla-1.6.1 \
-            -I$(CURDIR)/src/external/samtools-0.1.18
+            -I$(CURDIR)/src/external/samtools-0.1.18 \
+            -I$(CURDIR)/src/external/sqlite-3.7.10
 # these variables are exported by the configuration script
 ifndef CC
   CC:=gcc
@@ -141,6 +142,11 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
             $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
+
+SQLITE3_DIR:=src/external/sqlite-3.7.10
+SQLITE3_SRC:=$(SQLITE3_DIR)/sqlite3.c
+SQLITE3_OBJ:=$(SQLITE3_SRC:%.c=obj/%.o)
+SQLITE3_DEP:=$(SQLITE3_SRC:%.c=obj/%.d)
 
 HMMER_BASE:=src/external/hmmer-3.0
 HMMER_DIR:=$(HMMER_BASE)/src
@@ -424,6 +430,26 @@ ifeq ($(threads),yes)
   GTSHAREDLIB_LIBDEP += -lpthread
 endif
 
+ifneq ($(with-sqlite),no)
+  ifeq ($(useshared),yes)
+    EXP_LDLIBS += -lsqlite3
+    GTSHAREDLIB_LIBDEP += -lsqlite3
+  else
+    LIBGENOMETOOLS_DIRS := $(SQLITE3_DIR) $(LIBGENOMETOOLS_DIRS)
+    GT_CPPFLAGS +=  -I$(CURDIR)/$(SQLITE3_DIR)
+    OVERRIDELIBS += lib/libsqlite.a
+  endif
+  EXP_CPPFLAGS += -DHAVE_SQLITE -DSQLITE_THREADSAFE=1
+  EXP_LDLIBS += -lpthread -ldl
+  STEST_FLAGS += -sqlite
+endif
+
+ifeq ($(with-mysql),yes)
+  GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lmysqlclient
+  EXP_CPPFLAGS += -DHAVE_MYSQL
+  EXP_LDLIBS += -lmysqlclient
+endif
+
 # the GenomeTools library
 LIBGENOMETOOLS_PRESRC:=$(filter-out src/ltr/pdom.c,\
                    $(foreach DIR,$(LIBGENOMETOOLS_DIRS),$(wildcard $(DIR)/*.c)))
@@ -445,6 +471,12 @@ ifneq ($(useshared),yes)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
                         $(LIBEXPAT_DEP) \
                         $(SAMTOOLS_DEP)
+endif
+
+ifneq ($(with-sqlite),no)
+  ifneq ($(useshared),yes)
+    LIBGENOMETOOLS_OBJ := $(LIBGENOMETOOLS_OBJ) lib/libsqlite.a
+  endif
 endif
 
 ifeq ($(with-hmmer),yes)
@@ -490,6 +522,14 @@ lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBEXPAT_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+lib/libsqlite.a: $(SQLITE3_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(SQLITE3_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -702,6 +742,14 @@ obj/src/ltr/pdom.o: src/ltr/pdom.c $(HMMERADDTARGET)
 	    ${shell grep -s "CFLAGS   " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" }) \
 	  ${shell grep -s "SIMDFLAGS " $(HMMER_BASE)/Makefile | cut -f 2- -d "=" } \
     $(3) -MM -MP -MT $@
+
+# SQLite does not compile with -Werror, removing this for now...
+obj/$(SQLITE3_DIR)/%.o: $(SQLITE3_DIR)/%.c
+	@echo "[compile $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) $(3) -fPIC
+	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(3) -MM -MP \
+	  -MT $@ -fPIC
 
 define COMPILE_template
 $(1): $(2)
