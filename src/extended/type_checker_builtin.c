@@ -54,7 +54,7 @@ static const char *gt_feature_node_type_strings[] = { "CDS",
                                                      "undefined"
                                                    };
 
-static const char* find_type(const char *gft_string)
+static const char* type_checker_builtin_find_type(const char *gft_string)
 {
   void *result;
   gt_assert(gft_string);
@@ -76,7 +76,7 @@ static bool gt_type_checker_builtin_create_gft(GT_UNUSED GtTypeChecker
                                                const char *type)
 {
   gt_assert(type_checker && type);
-  return find_type(type) ? true : false;
+  return type_checker_builtin_find_type(type) ? true : false;
 }
 
 const GtTypeCheckerClass* gt_type_checker_builtin_class(void)
