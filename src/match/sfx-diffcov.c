@@ -778,7 +778,7 @@ static void dc_processunsortedrange(GtDifferencecover *dcov,
                                     unsigned long width,
                                     unsigned long depth)
 {
-  GtDcPairsuffixptr *pairelem;
+  GtDcPairsuffixptr pairelem;
 
   gt_assert(width >= 2UL && depth > 0);
   gt_assert(!dcov->firstwithnewdepth.defined ||
@@ -815,9 +815,8 @@ static void dc_processunsortedrange(GtDifferencecover *dcov,
     dcov->firstwithnewdepth.totalwidth = width;
     dcov->firstwithnewdepth.maxwidth = width;
   }
-  pairelem = gt_malloc(sizeof (*pairelem));
-  pairelem->blisbl = blisbl;
-  pairelem->width = width;
+  pairelem.blisbl = blisbl;
+  pairelem.width = width;
   gt_inl_queue_add(dcov->rangestobesorted,pairelem,false);
   dcov->currentqueuesize++;
   if (dcov->maxqueuesize < dcov->currentqueuesize)
@@ -951,7 +950,7 @@ static void dc_bcktab2firstlevelintervals(GtDifferencecover *dcov)
   GtBucketspecification bucketspec;
   const GtCodetype mincode = 0;
 
-  printf("# maxbucketsize=%lu\n",dcov->allocateditvinfo);
+  gt_logger_log(dcov->logger,"maxbucketsize=%lu",dcov->allocateditvinfo);
   rightchar = (unsigned int) (mincode % dcov->numofchars);
   for (code = 0; code <= dcov->maxcode; code++)
   {
@@ -1399,13 +1398,11 @@ static void dc_sortremainingsamples(GtDifferencecover *dcov)
   GT_FREEARRAY(&dcov->firstgeneration,GtDcPairsuffixptr);
   while (!gt_inl_queue_isempty(dcov->rangestobesorted))
   {
-    GtDcPairsuffixptr *thispairptr;
-    thispairptr = (GtDcPairsuffixptr*) gt_inl_queue_get(dcov->rangestobesorted);
+    GtDcPairsuffixptr thispair;
+    thispair = gt_inl_queue_get(dcov->rangestobesorted);
     gt_assert(dcov->currentqueuesize > 0);
     dcov->currentqueuesize--;
-    dc_sortsuffixesonthislevel(dcov,thispairptr->blisbl,
-                               thispairptr->width);
-    gt_free(thispairptr);
+    dc_sortsuffixesonthislevel(dcov,thispair.blisbl,thispair.width);
   }
   gt_logger_log(dcov->logger,"maxqueuesize=%lu",dcov->maxqueuesize);
   gt_free(dcov->itvinfo);

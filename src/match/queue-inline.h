@@ -25,7 +25,7 @@
 
 typedef struct
 {
- void **queuespace;  /* the space to store the queue elements */
+ GtInl_Queueelem *queuespace;  /* the space to store the queue elements */
  unsigned long enqueueindex, /* entry into which element is to be enqued */
                dequeueindex, /* last element of queue */
                queuesize,    /* size of the queue */
@@ -33,7 +33,7 @@ typedef struct
                                 and dequeindex */
 } GtInl_Queue;
 
-typedef int (*GtInl_Queueprocessor)(void **,void *info);
+typedef int (*GtInl_Queueprocessor)(GtInl_Queueelem *,void *info);
 
 /*
   The following function delivers an empty queue with a reservoir of
@@ -116,7 +116,7 @@ static inline void extendqueuesize(GtInl_Queue *q,bool doublesize)
   the queue.
 */
 
-static inline void gt_inl_queue_add(GtInl_Queue *q, void *elem,
+static inline void gt_inl_queue_add(GtInl_Queue *q, GtInl_Queueelem elem,
                                     bool doublesize)
 {
   gt_assert(q != NULL);
@@ -140,9 +140,9 @@ static inline void gt_inl_queue_add(GtInl_Queue *q, void *elem,
   start of the queue.
 */
 
-static inline void* gt_inl_queue_get(GtInl_Queue *q)
+static inline GtInl_Queueelem gt_inl_queue_get(GtInl_Queue *q)
 {
-  void* value;
+  GtInl_Queueelem value;
 
   gt_assert(q != NULL && q->noofelements > 0);
   q->noofelements--;
@@ -158,20 +158,22 @@ static inline void* gt_inl_queue_get(GtInl_Queue *q)
   return value;
 }
 
-/*@unused@*/ static inline void** gt_inl_queue_head(const GtInl_Queue *q)
+/*@unused@*/ static inline GtInl_Queueelem *gt_inl_queue_head(
+                                                     const GtInl_Queue *q)
 {
   gt_assert(q != NULL && q->noofelements > 0);
-  return &q->queuespace[q->dequeueindex];
+  return q->queuespace + q->dequeueindex;
 }
 
-/*@unused@*/ static inline void** gt_inl_queue_tail(const GtInl_Queue *q)
+/*@unused@*/ static inline GtInl_Queueelem *gt_inl_queue_tail(
+                                                      const GtInl_Queue *q)
 {
   gt_assert(q != NULL && q->noofelements > 0);
   if (q->enqueueindex == q->queuesize-1)
   {
-    return &q->queuespace[0];
+    return q->queuespace;
   }
-  return &q->queuespace[q->enqueueindex+1];
+  return q->queuespace + q->enqueueindex + 1;
 }
 
 /*@unused@*/ static inline void gt_inl_queue_deletehead(GtInl_Queue *q)
