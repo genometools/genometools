@@ -73,6 +73,7 @@ struct GtIndexOptions
            *optionoutbcktab,
            *optionprefixlength,
            *optioncmpcharbychar,
+           *optionnoshortreadsort,
            *optionspmopt,
            *optionstorespecialcodes,
            *optionmaxwidthrealmedian,
@@ -296,6 +297,13 @@ static GtIndexOptions* gt_index_options_register_generic_create(
                                            false);
   gt_option_is_development_option(idxo->optioncmpcharbychar);
   gt_option_parser_add_option(op, idxo->optioncmpcharbychar);
+
+  idxo->optionnoshortreadsort = gt_option_new_bool("noshortreadsort",
+                                           "do not use short read sort",
+                                           &idxo->sfxstrategy.noshortreadsort,
+                                           false);
+  gt_option_is_development_option(idxo->optionnoshortreadsort);
+  gt_option_parser_add_option(op, idxo->optionnoshortreadsort);
 
   idxo->optionmaxwidthrealmedian = gt_option_new_ulong("maxwidthrealmedian",
                                                  "compute real median for "

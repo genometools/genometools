@@ -862,6 +862,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     }
 #endif
     if (bsr->srsw != NULL &&
+        !bsr->sfxstrategy->noshortreadsort &&
         gt_shortreadsort_size(false,width,
                               bsr->maxremain) <= bsr->sizeofworkspace)
     {

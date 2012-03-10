@@ -43,6 +43,7 @@ typedef struct
        kmerswithencseqreader,
        dccheck,
        samplewithprefixlengthnull,
+       noshortreadsort,
        outsuftabonfile;
 } Sfxstrategy;
 
@@ -64,6 +65,7 @@ typedef struct
   sfxstrategy->dccheck = false;
   sfxstrategy->samplewithprefixlengthnull = false;
   sfxstrategy->outsuftabonfile = true;
+  sfxstrategy->noshortreadsort = false;
 }
 
 #endif
