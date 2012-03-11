@@ -159,6 +159,7 @@ shu_unitfile.c
 spaced-seeds.c
 specialrank.c
 spmsuftab.c
+squarededist.c
 substriter.c
 tagerator.c
 test-pairwise.c
