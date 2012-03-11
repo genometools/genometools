@@ -21,9 +21,12 @@
 
 #include <inttypes.h>
 #include "core/error_api.h"
-#include "core/range_api.h"
 
+#ifdef GT_LONGLCPVALUES
+typedef unsigned long GtRMQvaluetype;
+#else
 typedef uint32_t GtRMQvaluetype;
+#endif
 
 typedef struct GtRMQ GtRMQ;
 

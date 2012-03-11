@@ -25,8 +25,13 @@
 #include "core/logger_api.h"
 #include "sfx-maprange.h"
 
+#ifdef GT_LONGLCPVALUES
+typedef unsigned long GtLcpvaluetype;
+#define GT_LCPVALUE_MAX ULONG_MAX
+#else
 typedef uint32_t GtLcpvaluetype;
 #define GT_LCPVALUE_MAX UINT32_MAX
+#endif
 
 typedef struct
 {
