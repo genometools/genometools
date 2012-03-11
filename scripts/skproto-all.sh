@@ -139,6 +139,7 @@ sfx-linlcp.c
 sfx-mappedstr.c
 sfx-maprange.c
 sfx-outprj.c
+sfx-opt.c
 sfx-partssuf.c
 sfx-progress.c
 sfx-readint.c

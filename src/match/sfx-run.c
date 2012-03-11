@@ -36,10 +36,9 @@
 #include "giextract.h"
 #include "stamp.h"
 #include "intcode-def.h"
-#include "sfx-optdef.h"
 #include "sfx-suffixer.h"
 #include "sfx-run.h"
-#include "sfx-opt.pr"
+#include "sfx-opt.h"
 #include "sfx-outprj.h"
 #include "sfx-apfxlen.h"
 #include "sfx-suffixgetset.h"
@@ -724,6 +723,6 @@ int gt_parseargsandcallsuffixerator(bool doesa,int argc,
       haserr = true;
     }
   }
-  gt_wrapsfxoptions(&so);
+  gt_sfxoptions_delete(&so);
   return haserr ? -1 : 0;
 }

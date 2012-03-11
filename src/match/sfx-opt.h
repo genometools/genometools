@@ -16,12 +16,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OPTDEF_H
-#define SFX_OPTDEF_H
+#ifndef SFX_OPT_H
+#define SFX_OPT_H
 
 #include <stdbool.h>
 #include "core/encseq_options.h"
-#include "match/index_options.h"
+#include "index_options.h"
 
 typedef struct
 {
@@ -34,5 +34,13 @@ typedef struct
         *inputindex;
   GtStrArray *db;
 } Suffixeratoroptions;
+
+void gt_sfxoptions_delete(Suffixeratoroptions *so);
+
+int gt_suffixeratoroptions(Suffixeratoroptions *so,
+                        bool doesa,
+                        int argc,
+                        const char **argv,
+                        GtError *err);
 
 #endif
