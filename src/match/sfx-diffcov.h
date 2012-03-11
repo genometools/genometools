@@ -41,6 +41,8 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
                                           unsigned int outerprefixlength,
                                           GtLogger *logger);
 
+unsigned long gt_differencecover_samplesize(const GtDifferencecover *dcov);
+
 GtDifferencecover *gt_differencecover_prepare_sample(
                                         unsigned int vparam,
                                         const GtEncseq *encseq,

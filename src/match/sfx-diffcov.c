@@ -68,6 +68,7 @@
 #include "core/logger.h"
 #include "core/encseq.h"
 #include "core/stack-inlined.h"
+#include "core/spacecalc.h"
 #include "intcode-def.h"
 #include "bcktab.h"
 #include "initbasepower.h"
@@ -376,6 +377,11 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->firstgenerationcount = 0;
   GT_INITARRAY(&dcov->firstgeneration,GtDcPairsuffixptr);
   return dcov;
+}
+
+unsigned long gt_differencecover_samplesize(const GtDifferencecover *dcov)
+{
+  return dcov->samplesize;
 }
 
 size_t gt_differencecover_requiredspace(const GtDifferencecover *dcov)
@@ -1570,6 +1576,7 @@ static void dc_verify_inversesuftab(const GtDifferencecover *dcov)
 static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                                           GtOutlcpinfo *outlcpinfosample,
                                           const Sfxstrategy *mainsfxstrategy,
+                                          GtTimer *sfxprogress,
                                           bool withcheck)
 {
   unsigned long pos, sampleindex, posinserted, fullspecials = 0, specials = 0;
@@ -1846,7 +1853,18 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
   dcov->sortedsample = NULL;
   if (dcov->effectivesamplesize > 0 && outlcpinfosample != NULL)
   {
+    size_t rmqsize;
+
+    if (sfxprogress != NULL)
+    {
+      gt_timer_show_progress(sfxprogress,"preparing the RMQ",stdout);
+    }
     dcov->rmq = gt_lcpvalues_rmq_new(dcov->samplelcpvalues);
+    rmqsize = gt_rmq_size(dcov->rmq);
+    gt_logger_log(dcov->logger,
+                  "RMQ requires %.2f MB (%.2f bytes per sample position)",
+                  GT_MEGABYTES(rmqsize),
+                  (double) rmqsize/dcov->samplesize);
   }
   gt_assert(dcov->diff2pos == NULL);
   dc_filldiff2pos(dcov);
@@ -1855,6 +1873,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
 static void dc_differencecover_sortsample0(GtDifferencecover *dcov,
                                            GtOutlcpinfo *outlcpinfosample,
                                            const Sfxstrategy *mainsfxstrategy,
+                                           GT_UNUSED GtTimer *sfxprogress,
                                            bool withcheck)
 {
   unsigned long pos, posinserted, fullspecials = 0;
@@ -2046,6 +2065,7 @@ GtDifferencecover *gt_differencecover_prepare_sample(
       (prefixlength > 0 ? dc_differencecover_sortsample
                         : dc_differencecover_sortsample0)
                           (dcov,outlcpinfosample,sfxstrategy,
+                           sfxprogress,
                            sfxstrategy->dccheck);
     }
   }
@@ -2078,7 +2098,7 @@ void gt_differencecover_check(const GtEncseq *encseq,GtReadmode readmode)
     {
       dc_validate_samplepositons(dcov);
     }
-    dc_differencecover_sortsample(dcov,NULL,NULL,withcheck);
+    dc_differencecover_sortsample(dcov,NULL,NULL,NULL,withcheck);
     gt_differencecover_delete(dcov);
   }
   printf("# %u difference covers checked\n",

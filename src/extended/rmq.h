@@ -31,6 +31,9 @@ typedef uint32_t GtRMQvaluetype;
 typedef struct GtRMQ GtRMQ;
 
 GtRMQ*        gt_rmq_new(const GtRMQvaluetype *data, unsigned long size);
+
+size_t gt_rmq_size(const GtRMQ *rmq);
+
 unsigned long gt_rmq_find_min_index(const GtRMQ *rmq, unsigned long start,
                                     unsigned long end);
 GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq, unsigned long start,

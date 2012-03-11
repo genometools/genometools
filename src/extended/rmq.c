@@ -24,6 +24,7 @@
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
+#include "core/divmodmul.h"
 #include "core/unused_api.h"
 #include "extended/rmq.h"
 
@@ -45,17 +46,18 @@ struct GtRMQ {
   /*  precomputed in-block queries */
   unsigned char **Prec;
   /*  microblock size */
-  unsigned long s;
+  unsigned long microblocksize;
   /*  block size */
-  unsigned long sprime;
+  unsigned long blocksize;
   /*  superblock size */
-  unsigned long sprimeprime;
-  /*  number of blocks (always n/sprime) */
+  unsigned long superblocksize;
+  /*  number of blocks (always n/blocksize) */
   unsigned long nb;
-  /*  number of superblocks (always n/sprimeprime) */
+  /*  number of superblocks (always n/superblocksize) */
   unsigned long nsb;
   /*  number of microblocks (always n/s) */
   unsigned long nmb;
+  size_t memorycount;
   bool naive_impl;
 };
 
@@ -64,22 +66,23 @@ struct GtRMQ {
 static inline unsigned long gt_rmq_trueindex(const GtRMQ *rmq, unsigned long k,
                                              unsigned long block)
 {
-  return rmq->M[k][block]+(block*rmq->sprime);
+  gt_assert(rmq->blocksize == 16UL);
+  return rmq->M[k][block]+(block * rmq->blocksize);
 }
 /*  return microblock-number of entry i: */
 static inline unsigned long gt_rmq_microblock(const GtRMQ *rmq, unsigned long i)
 {
-  return i/rmq->s;
+  return i/rmq->microblocksize;
 }
 /*  return block-number of entry i: */
 static inline unsigned long gt_rmq_block(const GtRMQ *rmq, unsigned long i)
 {
-  return i/rmq->sprime;
+  return i/rmq->blocksize;
 }
 /*  return superblock-number of entry i: */
 static inline unsigned long gt_rmq_superblock(const GtRMQ *rmq, unsigned long i)
 {
-  return i/rmq->sprimeprime;
+  return i/rmq->superblocksize;
 }
 
 static const unsigned long gt_rmq_catalan[17UL][17UL] = {
@@ -201,7 +204,7 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
 
   mb_j = gt_rmq_microblock(rmq, j);
   mb_i = gt_rmq_microblock(rmq, i);
-  s_mi = mb_i * rmq->s;
+  s_mi = mb_i * rmq->microblocksize;
   i_pos = i - s_mi;
   if (mb_i == mb_j) { /*  only one microblock-query */
     min_i = gt_rmq_clearbits(rmq->Prec[rmq->type[mb_i]][j-s_mi], i_pos);
@@ -210,12 +213,14 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
   else {
     unsigned long b_i = gt_rmq_block(rmq, i);   /* i's block */
     unsigned long b_j = gt_rmq_block(rmq, j);   /* j's block */
-    unsigned long s_mj = mb_j * rmq->s;  /* start of j's microblock */
+    unsigned long s_mj
+      = mb_j * rmq->microblocksize; /* start of j's microblock */
     unsigned long j_pos = j - s_mj;      /* position of j in its microblock */
     unsigned long block_difference;
-    min_i = gt_rmq_clearbits(rmq->Prec[rmq->type[mb_i]][rmq->s-1], i_pos);
+    min_i = gt_rmq_clearbits(rmq->Prec[rmq->type[mb_i]][rmq->microblocksize-1],
+                             i_pos);
     /* left in-microblock-query */
-    min = min_i == 0 ? s_mi + rmq->s - 1 : s_mi + lsb(min_i);
+    min = min_i == 0 ? s_mi + rmq->microblocksize - 1 : s_mi + lsb(min_i);
     /*  right in-microblock-query */
     min_j = rmq->Prec[rmq->type[mb_j]][j_pos] == 0
                ? j
@@ -223,22 +228,24 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
     if (rmq->arr_ptr[min_j] < rmq->arr_ptr[min]) min = min_j;
 
     if (mb_j > mb_i + 1) { /*  otherwise we're done! */
-      unsigned long s_bi = b_i * rmq->sprime;      /*  start of block i */
-      unsigned long s_bj = b_j * rmq->sprime;      /*  start of block j */
-      if (s_bi+rmq->s > i) { /*  do another microblock-query! */
+      unsigned long s_bi = b_i * rmq->blocksize;      /*  start of block i */
+      unsigned long s_bj = b_j * rmq->blocksize;      /*  start of block j */
+      if (s_bi+rmq->microblocksize > i) { /*  do another microblock-query! */
         mb_i++; /*  go one microblock to the right */
-        min_i = rmq->Prec[rmq->type[mb_i]][rmq->s-1] == 0 ?
-          s_bi + rmq->sprime - 1 :
-          s_mi + rmq->s + lsb(rmq->Prec[rmq->type[mb_i]][rmq->s-1]); /* right
-                                                                        in-block
-                                                                        query */
+        min_i = rmq->Prec[rmq->type[mb_i]][rmq->microblocksize-1] == 0 ?
+          s_bi + rmq->blocksize - 1 :
+          s_mi + rmq->microblocksize +
+                 lsb(rmq->Prec[rmq->type[mb_i]][rmq->microblocksize-1]);
+                  /* right in-block query */
         if (rmq->arr_ptr[min_i] < rmq->arr_ptr[min]) min = min_i;
       }
-      if (j >= s_bj+rmq->s) { /*  and yet another microblock-query! */
+      if (j >= s_bj+rmq->microblocksize) {
+        /*  and yet another microblock-query! */
         mb_j--; /*  go one microblock to the left */
-        min_j = rmq->Prec[rmq->type[mb_j]][rmq->s-1] == 0 ?
+        min_j = rmq->Prec[rmq->type[mb_j]][rmq->microblocksize-1] == 0 ?
           s_mj - 1 :
-          s_bj + lsb(rmq->Prec[rmq->type[mb_j]][rmq->s-1]); /* right in-block
+          s_bj + lsb(rmq->Prec[rmq->type[mb_j]][rmq->microblocksize-1]);
+               /* right in-block
                                                                query */
         if (rmq->arr_ptr[min_j] < rmq->arr_ptr[min]) min = min_j;
       }
@@ -248,7 +255,7 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
         unsigned long k, twotothek, block_tmp;  /* for index calculations in
                                                    M and M' */
         b_i++; /*  block where out-of-block-query starts */
-        if (s_bj - s_bi - rmq->sprime <= rmq->sprimeprime) { /* just one
+        if (s_bj - s_bi - rmq->blocksize <= rmq->superblocksize) { /* just one
                                                                 out-of-block
                                                                 query */
           k = gt_rmq_log2fast(block_difference - 2);
@@ -262,7 +269,7 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
           unsigned long sb_j = gt_rmq_superblock(rmq, j); /*  j's superblock */
 
           /* end of left out-of-block query */
-          block_tmp = gt_rmq_block(rmq, (sb_i+1)*rmq->sprimeprime);
+          block_tmp = gt_rmq_block(rmq, (sb_i+1) * rmq->superblocksize);
           k = gt_rmq_log2fast(block_tmp - b_i);
           twotothek = 1 << k; /*  2^k */
           i = gt_rmq_trueindex(rmq, k, b_i);
@@ -270,7 +277,7 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
           min_i = rmq->arr_ptr[i] <= rmq->arr_ptr[j] ? i : j;
 
           /* start of right out-of-block query */
-          block_tmp = gt_rmq_block(rmq, sb_j*rmq->sprimeprime);
+          block_tmp = gt_rmq_block(rmq, sb_j * rmq->superblocksize);
           k = gt_rmq_log2fast(b_j - block_tmp);
           twotothek = 1 << k; /*  2^k */
           block_tmp--; /*  going one block to the left doesn't harm
@@ -337,9 +344,16 @@ GtRMQvaluetype gt_rmq_find_min_value(const GtRMQ *rmq,
   return rmq->arr_ptr[gt_rmq_find_min_index(rmq,start,end)];
 }
 
+static void *rmq_calloc(GtRMQ *rmq,size_t nmemb,size_t size)
+{
+  gt_assert(rmq != NULL);
+  rmq->memorycount += nmemb * size;
+  return gt_calloc(nmemb,size);
+}
+
 GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
 {
-  GtRMQ *rmq = gt_calloc((size_t) 1, sizeof (GtRMQ));
+  GtRMQ *rmq;
   GtRMQvaluetype *rp;
   unsigned long i, j,
                 z = 0,            /*  index in array a */
@@ -349,17 +363,16 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
                 p,                /*  --------- " ---------------- */
                 *gstack,
                 gstacksize,
-                g; /*  first position to the left of i where a[g[i]] < a[i] */
-#ifdef GT_RMQ_MEM_COUNT
-  unsigned long mem = sizeof (unsigned short)*nmb;
-#endif
-  unsigned long dist = 1UL; /*  always 2^(j-1) */
+                g, /*  first position to the left of i where a[g[i]] < a[i] */
+                dist = 1UL; /*  always 2^(j-1) */
 
+  rmq = gt_calloc((size_t) 1, sizeof (*rmq));
+  rmq->memorycount += sizeof (*rmq);
   rmq->arr_ptr = data;
   rmq->n = size;
-  rmq->s = 1UL << 3;              /*  microblock-size */
-  rmq->sprime = 1UL << 4;         /*  block-size */
-  rmq->sprimeprime = 1UL << 8;    /*  superblock-size */
+  rmq->microblocksize = 1UL << 3;              /*  microblock-size */
+  rmq->blocksize = 1UL << 4;         /*  block-size */
+  rmq->superblocksize = 1UL << 8;    /*  superblock-size */
   rmq->nb = gt_rmq_block(rmq, size-1) + 1;     /*  number of blocks */
   rmq->nsb = gt_rmq_superblock(rmq, size-1)+1; /*  number of superblocks */
   rmq->nmb = gt_rmq_microblock(rmq, size-1)+1; /*  number of microblocks */
@@ -371,7 +384,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
       happens iff n < 113. For such small instances it isn't advisable anyway
       to use this data structure, because simpler methods are faster and less
       space consuming. */
-  if (rmq->nb < rmq->sprimeprime/(2*rmq->sprime))
+  if (rmq->nb < rmq->superblocksize/(GT_MULT2(rmq->blocksize)))
   {
     rmq->M = NULL;
     rmq->Mprime = NULL;
@@ -384,33 +397,35 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
   rmq->naive_impl = false;
   /*  Type-calculation for the microblocks and pre-computation of
       in-microblock-queries: */
-  rmq->type = gt_calloc((size_t) rmq->nmb, sizeof (unsigned short));
+  rmq->type = rmq_calloc(rmq,(size_t) rmq->nmb, sizeof (*rmq->type));
 
   /*  prec[i]: the jth bit is 1 iff j is 1. pos. to the left of i
       where a[j] < a[i]  */
-  rmq->Prec = gt_calloc((size_t) gt_rmq_catalan[rmq->s][rmq->s],
-                        sizeof (unsigned char*));
-  for (i = 0; i < gt_rmq_catalan[rmq->s][rmq->s]; i++) {
-    rmq->Prec[i] = gt_calloc((size_t) rmq->s, sizeof (unsigned char));
-#ifdef GT_RMQ_MEM_COUNT
-    rmq->mem += sizeof (unsigned char)*rmq->s;
-#endif
+  rmq->Prec = rmq_calloc(rmq,
+                         (size_t) gt_rmq_catalan[rmq->microblocksize]
+                                                [rmq->microblocksize],
+                        sizeof (*rmq->Prec));
+  for (i = 0; i < gt_rmq_catalan[rmq->microblocksize][rmq->microblocksize];
+       i++)
+  {
+    rmq->Prec[i] = rmq_calloc(rmq,(size_t) rmq->microblocksize,
+                              sizeof (**rmq->Prec));
     rmq->Prec[i][0] = 1U; /*  init with impossible value */
   }
 
-  rp = gt_calloc((size_t) (rmq->s)+1, sizeof (*rp)); /* rp: rightmost path
-                                                         in Cartesian tree */
+  rp = rmq_calloc(rmq,(size_t) (rmq->microblocksize)+1, sizeof (*rp));
+       /* rp: rightmost path in Cartesian tree */
   rp[0] = 0; /* originally LONG_MIN, but for unsigned long 0 suffices */
-  gstack = gt_calloc((size_t) rmq->s, sizeof (unsigned long));
+  gstack = rmq_calloc(rmq,(size_t) rmq->microblocksize, sizeof (*gstack));
 
   for (i = 0; i < rmq->nmb; i++) { /*  step through microblocks */
     start = z;            /*  init start */
-    end = start + rmq->s;      /*  end of block (not inclusive!) */
+    end = start + rmq->microblocksize;      /*  end of block (not inclusive!) */
     if (end > size) end = size; /*  last block could be smaller than s! */
 
     /*  compute block type as in Fischer/Heun CPM'06: */
-    q = rmq->s;        /*  init q */
-    p = rmq->s-1;      /*  init p */
+    q = rmq->microblocksize;        /*  init q */
+    p = rmq->microblocksize - 1;      /*  init p */
     rmq->type[i] = 0;  /*  init type (will be increased!) */
     rp[1] = rmq->arr_ptr[z]; /*  init rightmost path */
 
@@ -439,7 +454,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
           g = gstack[gstacksize-1];
           rmq->Prec[rmq->type[i]][j-start]
             = rmq->Prec[rmq->type[i]][g-start] |
-              (unsigned char) (1 << (g % rmq->s));
+              (unsigned char) (1 << (g % rmq->microblocksize));
         }
         else
         {
@@ -453,19 +468,14 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
   gt_free(gstack);
 
   /*  space for out-of-block- and out-of-superblock-queries: */
-  rmq->M_depth =(unsigned long) floor(GT_LOG2(((double) rmq->sprimeprime
-                                              / (double) rmq->sprime)));
-  rmq->M = gt_calloc((size_t) rmq->M_depth, sizeof (unsigned char*));
-  rmq->M[0] = gt_calloc((size_t) rmq->nb, sizeof (unsigned char));
-#ifdef GT_RMQ_MEM_COUNT
-  mem += sizeof (unsigned char)*rmq->nb;
-#endif
+  rmq->M_depth = (unsigned long) floor(GT_LOG2(((double) rmq->superblocksize
+                                               / (double) rmq->blocksize)));
+  rmq->M = rmq_calloc(rmq,(size_t) rmq->M_depth, sizeof (*rmq->M));
+  rmq->M[0] = rmq_calloc(rmq,(size_t) rmq->nb, sizeof (**rmq->M));
   rmq->Mprime_depth = (unsigned long) floor(GT_LOG2((double) rmq->nsb)) + 1;
-  rmq->Mprime = gt_calloc((size_t) rmq->Mprime_depth, sizeof (unsigned long*));
-  rmq->Mprime[0] = gt_calloc((size_t) rmq->nsb, sizeof (unsigned long));
-#ifdef GT_RMQ_MEM_COUNT
-  mem += sizeof (unsigned long)*rmq->nsb;
-#endif
+  rmq->Mprime = rmq_calloc(rmq,(size_t) rmq->Mprime_depth,
+                           sizeof (*rmq->Mprime));
+  rmq->Mprime[0] = rmq_calloc(rmq,(size_t) rmq->nsb, sizeof (**rmq->Mprime));
 
   /*  fill 0'th rows of M and Mprime: */
   z = 0; /*  minimum in current block */
@@ -474,9 +484,9 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
   for (i = 0; i < rmq->nb; i++) { /*  step through blocks */
     start = z;              /*  init start */
     p = start;              /*  init minimum */
-    end = start + rmq->sprime;   /*  end of block (not inclusive!) */
+    end = start + rmq->blocksize;   /*  end of block (not inclusive!) */
     if (end > size)
-      end = size;   /*  last block could be smaller than sprime! */
+      end = size;   /*  last block could be smaller than blocksize! */
     if (rmq->arr_ptr[z] < rmq->arr_ptr[q])
       q = z; /*  update minimum in superblock */
 
@@ -488,7 +498,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
     }
     rmq->M[0][i] = (unsigned char) (p-start); /*  store index of block-minimum
                                                   (offset!) */
-    if (z % rmq->sprimeprime == 0 || z == size) {  /*  reached end of
+    if (z % rmq->superblocksize == 0 || z == size) {  /*  reached end of
                                                        superblock? */
       rmq->Mprime[0][g++] = q;               /*  store index of
                                                  superblock-minimum */
@@ -498,17 +508,14 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
 
   /*  fill M: */
   for (j = 1UL; j < rmq->M_depth; j++) {
-    rmq->M[j] = gt_calloc((size_t) rmq->nb, sizeof (unsigned char));
-#ifdef GT_RMQ_MEM_COUNT
-      mem += sizeof (unsigned char)*nrmq->b;
-#endif
+    rmq->M[j] = rmq_calloc(rmq,(size_t) rmq->nb, sizeof (**rmq->M));
     for (i = 0; i < rmq->nb - dist; i++) { /*  be careful: loop may go too
                                                far */
       rmq->M[j][i] = rmq->arr_ptr[gt_rmq_trueindex(rmq, j-1, i)] <=
                      rmq->arr_ptr[gt_rmq_trueindex(rmq, j-1,i+dist)]
                        ? rmq->M[j-1][i]
                        : (unsigned char) (rmq->M[j-1][i+dist] +
-                                          (dist*rmq->sprime)); /* add
+                                          (dist*rmq->blocksize)); /* add
                                                                   'skipped'
                                                                   elements
                                                                   in a */
@@ -521,10 +528,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
   /*  fill M': */
   dist = 1UL; /*  always 2^(j-1) */
   for (j = 1UL; j < rmq->Mprime_depth; j++) {
-    rmq->Mprime[j] = gt_calloc((size_t) rmq->nsb, sizeof (unsigned long));
-#ifdef GT_RMQ_MEM_COUNT
-        mem += sizeof (unsigned long)*rmq->nsb;
-#endif
+    rmq->Mprime[j] = rmq_calloc(rmq,(size_t) rmq->nsb, sizeof (**rmq->Mprime));
     for (i = 0; i < rmq->nsb - dist; i++) {
       rmq->Mprime[j][i] =
          (rmq->arr_ptr[rmq->Mprime[j-1][i]] <=
@@ -535,10 +539,13 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
       rmq->Mprime[j][i] = rmq->Mprime[j-1][i]; /*  overhang */
     dist *= 2;
   }
-#ifdef GT_RMQ_MEM_COUNT
-  fprintf(stderr, "allocated %lu bytes\n", mem);
-#endif
   return rmq;
+}
+
+size_t gt_rmq_size(const GtRMQ *rmq)
+{
+  gt_assert(rmq != NULL);
+  return rmq->memorycount;
 }
 
 void gt_rmq_delete(GtRMQ *rmq)
@@ -548,7 +555,8 @@ void gt_rmq_delete(GtRMQ *rmq)
   gt_free(rmq->type);
   if (rmq->Prec != NULL)
   {
-    for (i = 0; i < gt_rmq_catalan[rmq->s][rmq->s]; i++)
+    for (i = 0; i < gt_rmq_catalan[rmq->microblocksize][rmq->microblocksize];
+         i++)
     {
       gt_free(rmq->Prec[i]);
     }

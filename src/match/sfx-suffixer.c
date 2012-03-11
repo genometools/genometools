@@ -1396,7 +1396,13 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
             sfi->dcov = NULL;
           } else
           {
-            estimatedspace += gt_differencecover_requiredspace(sfi->dcov);
+            size_t dcovspace = gt_differencecover_requiredspace(sfi->dcov);
+            gt_logger_log(sfi->logger,"difference cover requires %.2f MB"
+                           " (%.2f bytes per sampled position)",
+                          GT_MEGABYTES(dcovspace),
+                          (double) dcovspace/
+                                   gt_differencecover_samplesize(sfi->dcov));
+            estimatedspace += dcovspace;
           }
         }
       }
