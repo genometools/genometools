@@ -78,6 +78,7 @@ firstcodes-spacelog.c
 firstcodes-tab.c
 firstcodes.c
 giextract.c
+greedyedist.c
 greedyfwdmat.c
 hashfirstcodes.c
 idx-limdfs.c

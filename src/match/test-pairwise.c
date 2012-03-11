@@ -24,7 +24,7 @@
 #include "spacedef.h"
 #include "test-pairwise.h"
 
-#include "greedyedist.pr"
+#include "greedyedist.h"
 #include "squarededist.h"
 
 void gt_runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,

@@ -16,6 +16,7 @@
 */
 
 #include "core/types_api.h"
+#include "squarededist.h"
 #include "spacedef.h"
 
 static unsigned long gt_squarededistunit2 (const GtUchar *u, unsigned long m,

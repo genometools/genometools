@@ -20,6 +20,7 @@
 #include "core/chardef.h"
 #include "core/minmax.h"
 #include "core/types_api.h"
+#include "greedyedist.h"
 #include "spacedef.h"
 
 #define COMPARESYMBOLS(A,B)\

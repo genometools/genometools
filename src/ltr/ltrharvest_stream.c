@@ -35,7 +35,7 @@
 #include "match/esa-seqread.h"
 #include "match/esa-maxpairs.h"
 #include "match/esa-mmsearch.h"
-#include "match/greedyedist.pr"
+#include "match/greedyedist.h"
 #include "match/spacedef.h"
 #include "ltr/ltrharvest_stream.h"
 #include "ltr/ltr_xdrop.h"
