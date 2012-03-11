@@ -113,7 +113,7 @@ static GtOPrval parse_options(int *parsed_args,
 static void showoptions(const Suffixeratoroptions *so)
 {
   unsigned long i;
-  Sfxstrategy strategy;
+  Sfxstrategy sfxtrategy;
   GtLogger *logger = gt_logger_new(true, GT_LOGGER_DEFLT_PREFIX, stdout);
 
   if (gt_str_length(gt_encseq_options_smap_value(so->encopts)) > 0)
@@ -145,9 +145,9 @@ static void showoptions(const Suffixeratoroptions *so)
     gt_logger_log_force(logger, "prefixlength=%u",
                         gt_index_options_prefixlength_value(so->idxopts));
   }
-  strategy = gt_index_options_sfxstrategy_value(so->idxopts);
+  sfxtrategy = gt_index_options_sfxstrategy_value(so->idxopts);
   gt_logger_log_force(logger, "storespecialcodes=%s",
-                        strategy.storespecialcodes ? "true" : "false");
+                        sfxtrategy.storespecialcodes ? "true" : "false");
   for (i=0; i<gt_str_array_size(so->db); i++)
   {
     gt_logger_log_force(logger, "inputfile[%lu]=%s", i,
@@ -188,11 +188,11 @@ static void showoptions(const Suffixeratoroptions *so)
                             gt_index_options_numofparts_value(so->idxopts));
   }
   gt_logger_log_force(logger, "maxinsertionsort=%lu",
-                        strategy.maxinsertionsort);
+                        sfxtrategy.maxinsertionsort);
   gt_logger_log_force(logger, "maxbltriesort=%lu",
-                        strategy.maxbltriesort);
+                        sfxtrategy.maxbltriesort);
   gt_logger_log_force(logger, "maxcountingsort=%lu",
-                        strategy.maxcountingsort);
+                        sfxtrategy.maxcountingsort);
   gt_logger_log_force(logger, "lcpdist=%s",
                         gt_index_options_lcpdist_value(so->idxopts)
                           ? "true"
