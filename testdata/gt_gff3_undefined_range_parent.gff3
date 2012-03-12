@@ -1,0 +1,5 @@
+##gff-version 3
+##sequence-region NG_017013.1 1 26144
+NG_017013.1	annotation	remark	.	.	.	.	.	comment=foo;ID=bar
+NG_017013.1	feature	STS	23478	24350	.	+	.	db_xref=UniSTS%3A277840;standard_name=TP53_278;Parent=bar
+NG_017013.1	feature	STS	23999	24075	.	+	.	db_xref=UniSTS%3A59997;standard_name=WI-20715;gene=TP53
