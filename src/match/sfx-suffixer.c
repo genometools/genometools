@@ -1397,8 +1397,11 @@ Sfxiterator *gt_Sfxiterator_new_withadditionalvalues(
           } else
           {
             size_t dcovspace = gt_differencecover_requiredspace(sfi->dcov);
-            gt_logger_log(sfi->logger,"difference cover requires %.2f MB"
-                           " (%.2f bytes per sampled position)",
+            gt_logger_log(sfi->logger,"difference cover%srequires %.2f MB"
+                           " (%.2f bytes/sample position)",
+                          sfi->outlcpinfoforsample != NULL
+                            ? " (including RMQ) "
+                            : " ",
                           GT_MEGABYTES(dcovspace),
                           (double) dcovspace/
                                    gt_differencecover_samplesize(sfi->dcov));

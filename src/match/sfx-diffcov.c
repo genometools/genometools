@@ -123,6 +123,10 @@ typedef struct
   unsigned long idx1, idx2;
 } GtLcptrace;
 
+typedef uint32_t GtDifferencecover_Inversesuftabtype;
+#define GT_DIFFERENCECOVER_INVERSESUFTAB_UNDEF UINT32_MAX
+#define GT_DIFFERENCECOVER_MAX_SAMPLESIZE      (UINT32_MAX-1)
+
 struct GtDifferencecover
 {
   unsigned int vparam,
@@ -142,12 +146,12 @@ struct GtDifferencecover
   GtBcktab *bcktab;
   const GtEncseq *encseq;
   GtReadmode readmode;
-  unsigned long samplesize, effectivesamplesize, maxsamplesize;
+  unsigned long samplesize, effectivesamplesize, samplesize_upperbound;
   const GtCodetype **multimappower;
   GtCodetype *filltable;
   GtEncseqReader *esr1, *esr2;
-  unsigned long *inversesuftab,
-                allocateditvinfo,
+  GtDifferencecover_Inversesuftabtype *inversesuftab;
+  unsigned long allocateditvinfo,
                 currentqueuesize,
                 maxqueuesize,
                 currentdepth;
@@ -303,6 +307,7 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   dcov->numofchars = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
   dcov->totallength = gt_encseq_total_length(encseq);
   dcov->logger = logger;
+  dcov->samplesize_upperbound = 0;
   dcov->sssp = NULL;
   dcov->rmq = NULL;
   for (dcov->logmod = 0;
@@ -313,9 +318,14 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
     if (v == vparam)
     {
       dcov->size = differencecoversizes[dcov->logmod];
+      dcov->samplesize_upperbound
+        = (unsigned long) (GT_DIVV(dcov->totallength) + 1) * dcov->size;
       dcov->diffvalues = differencecovertab + offset;
-      found = true;
-      break;
+      if (dcov->samplesize_upperbound <= GT_DIFFERENCECOVER_MAX_SAMPLESIZE)
+      {
+        found = true;
+        break;
+      }
     }
     offset += differencecoversizes[dcov->logmod];
     v = GT_MULT2(v);
@@ -325,8 +335,6 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
     gt_free(dcov);
     return NULL;
   }
-  dcov->maxsamplesize = (unsigned long) (GT_DIVV(dcov->totallength) + 1) *
-                                         dcov->size;
   if (outerprefixlength == 0)
   {
     dcov->prefixlength = 0;
@@ -334,7 +342,7 @@ GtDifferencecover *gt_differencecover_new(unsigned int vparam,
   {
     dcov->prefixlength
       = gt_recommendedprefixlength(dcov->numofchars,
-                                   dcov->maxsamplesize,
+                                   dcov->samplesize_upperbound,
                                    GT_RECOMMENDED_MULTIPLIER_DEFAULT,
                                    true);
     if (outerprefixlength > 0 && dcov->prefixlength > outerprefixlength)
@@ -544,7 +552,7 @@ static void dc_validate_samplepositons(const GtDifferencecover *dcov)
   unsigned long idx;
   GtBitsequence *sampleidxused = NULL;
 
-  GT_INITBITTAB(sampleidxused,dcov->maxsamplesize);
+  GT_INITBITTAB(sampleidxused,dcov->samplesize_upperbound);
   diffptr = dcov->diffvalues;
   afterend = dcov->diffvalues + dcov->size;
   for (pos = 0, modvalue = 0; pos <= dcov->totallength; pos++)
@@ -581,13 +589,15 @@ static void dc_inversesuftab_set(GT_UNUSED int line,GtDifferencecover *dcov,
                                  unsigned long sampleindex)
 {
   gt_assert (sampleindex < dcov->samplesize);
-  dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)] = sampleindex;
+  dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)]
+    = (uint32_t) sampleindex;
 }
 
 static unsigned long dc_inversesuftab_get(const GtDifferencecover *dcov,
                                           unsigned long pos)
 {
-  return dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)];
+  return (unsigned long)
+         dcov->inversesuftab[dc_differencecover_packsamplepos(dcov,pos)];
 }
 
 static void dc_initinversesuftabnonspecials(GtDifferencecover *dcov)
@@ -656,12 +666,13 @@ static void dc_initinversesuftabspecials(GtDifferencecover *dcov)
   unsigned long idx;
 
   dcov->inversesuftab = gt_malloc(sizeof (*dcov->inversesuftab) *
-                                  dcov->maxsamplesize);
-  for (idx = 0; idx < dcov->maxsamplesize; idx++)
+                                  dcov->samplesize_upperbound);
+  for (idx = 0; idx < dcov->samplesize_upperbound; idx++)
   {
-    dcov->inversesuftab[idx] = ULONG_MAX;
+    dcov->inversesuftab[idx] = GT_DIFFERENCECOVER_INVERSESUFTAB_UNDEF;
   }
-  dcov->requiredspace += sizeof (*dcov->inversesuftab) * dcov->maxsamplesize;
+  dcov->requiredspace += sizeof (*dcov->inversesuftab) *
+                         dcov->samplesize_upperbound;
   if (gt_encseq_has_specialranges(dcov->encseq))
   {
     GtSpecialrangeiterator *sri;
@@ -1452,8 +1463,8 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
 static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
 {
 
-  unsigned long suffix, kvalue, lcpinherit, start0, start1, currentlcpvalue,
-                *inversesuftabptr = dcov->inversesuftab;
+  unsigned long suffix, kvalue, lcpinherit, start0, start1, currentlcpvalue;
+  GtDifferencecover_Inversesuftabtype *inversesuftabptr = dcov->inversesuftab;
   unsigned int svalue;
   int retval;
   GtCommonunits commonunits;
@@ -1467,13 +1478,15 @@ static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
     {
       do
       {
-        if (inversesuftabptr >= dcov->inversesuftab + dcov->maxsamplesize)
+        if (inversesuftabptr >= dcov->inversesuftab +
+                                dcov->samplesize_upperbound)
         {
-          suffix = ULONG_MAX;
+          suffix = (unsigned long) GT_DIFFERENCECOVER_INVERSESUFTAB_UNDEF;
           break;
         }
-        suffix = *inversesuftabptr++;
-      } while (suffix == ULONG_MAX);
+        suffix = (unsigned long) *inversesuftabptr;
+        inversesuftabptr++;
+      } while (suffix == (unsigned long)GT_DIFFERENCECOVER_INVERSESUFTAB_UNDEF);
       if (suffix > 0 && suffix < dcov->effectivesamplesize)
       {
         currentlcpvalue = gt_lcptab_getvalue(dcov->samplelcpvalues,0,suffix);
@@ -1663,9 +1676,10 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
     }
   }
   dcov->effectivesamplesize = dcov->samplesize - fullspecials;
+  gt_assert(dcov->samplesize <= dcov->samplesize_upperbound);
   (void) gt_bcktab_leftborderpartialsums(NULL,NULL,dcov->bcktab);
   gt_logger_log(dcov->logger,
-              "%lu positions are sampled (%.2f%%) pl=%u",
+              "%lu positions are sampled (%.2f%%), pl=%u",
               dcov->samplesize,
               100.0 * (double) dcov->samplesize/(dcov->totallength+1),
               dcov->prefixlength);
@@ -1865,6 +1879,7 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                   "RMQ requires %.2f MB (%.2f bytes per sample position)",
                   GT_MEGABYTES(rmqsize),
                   (double) rmqsize/dcov->samplesize);
+    dcov->requiredspace += rmqsize;
   }
   gt_assert(dcov->diff2pos == NULL);
   dc_filldiff2pos(dcov);
