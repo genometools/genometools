@@ -1174,6 +1174,13 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
     attributes = tokens[8];
   }
 
+  if (parser->tidy && (start[0] == '.' || end[0] == '.')) {
+    gt_warning("feature \"%s\" on line %u in file \"%s\" has undefined "
+               "range, discarding feature", type, line_number, filename);
+    gt_splitter_delete(splitter);
+    return 0;
+  }
+
   /* parse the feature type */
   if (!had_err) {
     if (parser->type_checker &&

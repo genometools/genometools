@@ -931,6 +931,40 @@ Test do
   run "diff #{last_stdout} #{$testdata}standard_gene_simple.gff3"
 end
 
+Name "gt gff3 lone node with undefined range"
+Keywords "gt_gff3 undefinedrange"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_undefined_range.gff3", \
+           :retval => 1
+  grep last_stderr, /could not parse number '.'/
+end
+
+Name "gt gff3 lone node with undefined range (-tidy)"
+Keywords "gt_gff3 undefinedrange"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}gt_gff3_undefined_range.gff3"
+  grep last_stderr, /has undefined range, discarding/
+  run "diff #{last_stdout} #{$testdata}gt_gff3_undefined_range_tidy.gff3"
+end
+
+Name "gt gff3 parent node with undefined range"
+Keywords "gt_gff3 undefinedrange"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_undefined_range_parent.gff3", \
+           :retval => 1
+  grep last_stderr, /could not parse number '.'/
+end
+
+Name "gt gff3 parent node with undefined range (-tidy)"
+Keywords "gt_gff3 undefinedrange"
+Test do
+  run_test "#{$bin}gt gff3 -tidy " + \
+           "#{$testdata}gt_gff3_undefined_range_parent.gff3"
+  grep last_stderr, /has undefined range, discarding/
+  grep last_stderr, /Parent "bar" on line 4 .* has not been previously defined/
+  run "diff #{last_stdout} #{$testdata}gt_gff3_undefined_range_parent_tidy.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
