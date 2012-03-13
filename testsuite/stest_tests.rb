@@ -53,7 +53,7 @@ Test do
       run "no-such-exe foo"
     end
   }, [], :retval => 1
-  grep($last_stdout, /problem: exec failed/)
+  grep(last_stdout, /problem: exec failed/)
 end
 
 Name "Unavailable executables"
@@ -72,8 +72,8 @@ Test do
       run "some-other bar"
     end
   }, [], :retval => 1
-  grep($last_stdout, /problem: exec failed/)
-  grep($last_stdout, /2:.*: error/)
+  grep(last_stdout, /problem: exec failed/)
+  grep(last_stdout, /2:.*: error/)
 end
 
 Name "Arguments"
@@ -233,8 +233,8 @@ Test do
     Name "gt"
     Test do
       run "echo foo"
-      grep($last_stdout, /foo/)
-      grep($last_stdout, /bar/, true)
+      grep(last_stdout, /foo/)
+      grep(last_stdout, /bar/, true)
     end
   }
 end
@@ -246,7 +246,7 @@ Test do
     Name "sg"
     Test do
       run "echo foo"
-      grep($last_stdout, ".")
+      grep(last_stdout, ".")
     end
   }
 end
@@ -258,7 +258,7 @@ Test do
     Name "foo"
     Test do
       run "echo foo"
-      grep([$last_stdout, $last_stderr], /^foo/)
+      grep([last_stdout, last_stderr], /^foo/)
       run "echo bar", :stdout => "s", :stderr => "e"
       grep(%w{e s}, /^bar/)
     end
@@ -267,10 +267,10 @@ Test do
     Name "will-fail"
     Test do
       run "echo hello"
-      grep([$last_stdout, $last_stderr], /nowhere/)
+      grep([last_stdout, last_stderr], /nowhere/)
     end
   }, [], :retval => 1
-  grep($last_stdout, /: failed/)
+  grep(last_stdout, /: failed/)
 end
 
 Name "Return Codes"
@@ -330,7 +330,7 @@ Test do
       run "sleep 3", :maxtime => 1
     end
   }, [], :retval => 1
-  grep $last_stdout, /did not finish on time/
+  grep last_stdout, /did not finish on time/
 end
 
 Name "Range Selection"
@@ -344,9 +344,9 @@ Test do
     Name "baz"
     Test {}
   }, %w{-select 2..3}
-  grep $last_stdout, "bar"
-  grep $last_stdout, "baz"
-  grep $last_stdout, "foo", true
+  grep last_stdout, "bar"
+  grep last_stdout, "baz"
+  grep last_stdout, "foo", true
 end
 
 Name "Require/Provide"
@@ -371,6 +371,6 @@ Test do
       run "echo"
     end
   }
-  grep $last_stdout, /1:.*: ok/
+  grep last_stdout, /1:.*: ok/
 end
 
