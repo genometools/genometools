@@ -1443,7 +1443,7 @@ static void dc_init_sfxstrategy_for_sample(Sfxstrategy *sfxstrategy,
 #define SETMAXCOUNT(COMP)\
     if (mainsfxstrategy->COMP >= 1UL)\
     {\
-      sfxstrategy->COMP = MAX(1UL,mainsfxstrategy->COMP * sampledproportion);\
+      sfxstrategy->COMP = MAX(2UL,mainsfxstrategy->COMP * sampledproportion);\
     }
     SETMAXCOUNT(maxcountingsort);
     SETMAXCOUNT(maxbltriesort);
