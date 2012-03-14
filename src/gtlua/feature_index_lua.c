@@ -20,6 +20,7 @@
 #include "lauxlib.h"
 #include "annotationsketch/feature_index_memory_api.h"
 #include "core/unused_api.h"
+#include "core/ma.h"
 #include "extended/feature_node.h"
 #include "extended/luahelper.h"
 #include "gtlua/feature_index_lua.h"
@@ -44,11 +45,11 @@ static int feature_index_lua_add_region_node(lua_State *L)
   GtRegionNode *rn;
   GtError *err;
   gt_assert(L);
-  err = gt_error_new();
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
   rn = gt_region_node_try_cast(*gn);
   luaL_argcheck(L, rn, 2, "not a region node");
+  err = gt_error_new();
   if (gt_feature_index_add_region_node(*fi, rn, err))
     return gt_lua_error(L, err);
   gt_error_delete(err);
@@ -61,7 +62,6 @@ static int feature_index_lua_add_gff3file(lua_State *L)
   const char *filename;
   GtError *err;
   gt_assert(L);
-  err = gt_error_new();
   fi = check_feature_index(L, 1);
   filename = luaL_checkstring(L, 2);
   err = gt_error_new();
@@ -80,17 +80,19 @@ static int feature_index_lua_add_feature_node(lua_State *L)
   GtError *err;
   bool has_seqid;
   gt_assert(L);
-  err = gt_error_new();
   fi = check_feature_index(L, 1);
   gn = check_genome_node(L, 2);
   fn = gt_feature_node_cast(*gn);
   luaL_argcheck(L, fn, 2, "not a feature node");
   seqid = gt_genome_node_get_seqid(*gn);
   luaL_argcheck(L, seqid, 2, "feature does not have a sequence id");
+  err = gt_error_new();
   if (gt_feature_index_has_seqid(*fi, &has_seqid, gt_str_get(seqid), err))
     return gt_lua_error(L, err);
+  gt_error_delete(err);
   luaL_argcheck(L, has_seqid, 2,
                 "feature index does not contain corresponding sequence region");
+  err = gt_error_new();
   if (gt_feature_index_add_feature_node(*fi, fn, err))
     return gt_lua_error(L, err);
   gt_error_delete(err);
@@ -120,9 +122,9 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
   const char *seqid;
   GtArray *features;
   GtError *err;
-  err = gt_error_new();
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
+  err = gt_error_new();
   features = gt_feature_index_get_features_for_seqid(*feature_index, seqid,
                                                      err);
   if (!features)
@@ -143,15 +145,17 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   GtArray *features;
   GT_UNUSED int had_err;
 
-  err = gt_error_new();
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
+  err = gt_error_new();
   if (gt_feature_index_has_seqid(*feature_index, &has_seqid, seqid, err))
     return gt_lua_error(L, err);
+  gt_error_delete(err);
   luaL_argcheck(L, has_seqid, 2,
                 "feature_index does not contain seqid");
   range = check_range(L, 3);
   features = gt_array_new(sizeof (GtGenomeNode*));
+  err = gt_error_new();
   had_err = gt_feature_index_get_features_for_range(*feature_index, features,
                                                     seqid, range, err);
   if (had_err)
@@ -165,17 +169,18 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
 static int feature_index_lua_get_first_seqid(lua_State *L)
 {
   GtFeatureIndex **feature_index;
-  const char *seqid;
+  char *seqid;
   GtError *err;
-  err = gt_error_new();
   feature_index = check_feature_index(L, 1);
+  err = gt_error_new();
   seqid = gt_feature_index_get_first_seqid(*feature_index, err);
   if (gt_error_is_set(err))
     return gt_lua_error(L, err);
   gt_error_delete(err);
-  if (seqid)
+  if (seqid) {
     lua_pushstring(L, seqid);
-  else
+    gt_free(seqid);
+  } else
     lua_pushnil(L);
   return 1;
 }
@@ -185,8 +190,8 @@ static int feature_index_lua_get_seqids(lua_State *L)
   GtFeatureIndex **feature_index;
   GtStrArray *seqids;
   GtError *err;
-  err = gt_error_new();
   feature_index = check_feature_index(L, 1);
+  err = gt_error_new();
   seqids = gt_feature_index_get_seqids(*feature_index, err);
   if (!seqids)
     return gt_lua_error(L, err);
@@ -204,16 +209,18 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
   GtError *err;
   GtRange range;
   bool has_seqid;
-  err = gt_error_new();
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
+  err = gt_error_new();
   if (gt_feature_index_has_seqid(*feature_index, &has_seqid, seqid, err))
     return gt_lua_error(L, err);
   gt_error_delete(err);
   luaL_argcheck(L, has_seqid, 2,
                 "feature_index does not contain seqid");
+  err = gt_error_new();
   if (gt_feature_index_get_range_for_seqid(*feature_index, &range, seqid, err))
     return gt_lua_error(L, err);
+  gt_error_delete(err);
   return gt_lua_range_push(L, range);
 }
 

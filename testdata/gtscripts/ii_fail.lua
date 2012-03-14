@@ -18,8 +18,8 @@
 -- testing the Lua bindings for AnnotationSketch (similar to the sketch tool)
 
 function usage()
-  io.stderr:write(string.format("Usage: %s PNG_file GFF3_file\n", arg[0]))
-  io.stderr:write("Create PNG representation of GFF3 annotation file.\n")
+  io.stderr:write(string.format("Usage: %s GFF3_file\n", arg[0]))
+  io.stderr:write("Try to create PNG representation of GFF3 annotation file.\n")
   os.exit(1)
 end
 
@@ -45,5 +45,5 @@ range = feature_index:get_range_for_seqid(seqid)
 ii = {}
 
 diagram = gt.diagram_new(feature_index, seqid, range)
-canvas = gt.canvas_new_png(800, ii)
+canvas = gt.canvas_cairo_file_new_png(800, 200, ii)
 diagram:sketch(canvas)

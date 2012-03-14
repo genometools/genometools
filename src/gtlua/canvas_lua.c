@@ -39,14 +39,14 @@ static int canvas_cairo_file_lua_new_generic(lua_State *L, GtGraphicsOutType t)
   style = gt_lua_get_style_from_registry(L);
   canvas = lua_newuserdata(L, sizeof (GtCanvas*));
   gt_assert(canvas);
-  err = gt_error_new();
   /* if a imageinfo object is passed, it must be correct type */
-  if (lua_isnil(L, 3))
+  if (lua_isnil(L, 3)) {
+    err = gt_error_new();
     *canvas = gt_canvas_cairo_file_new(style, t, width, height, NULL, err);
-  else
-  {
+  } else {
     ii = check_imageinfo(L, 3);
-   *canvas = gt_canvas_cairo_file_new(style, t, width, height, *ii, err);
+    err = gt_error_new();
+    *canvas = gt_canvas_cairo_file_new(style, t, width, height, *ii, err);
   }
   if (gt_error_is_set(err))
     return gt_lua_error(L, err);
@@ -83,12 +83,12 @@ static int canvas_cairo_file_lua_to_file(lua_State *L)
   GtError *err;
   const char *fn;
   int had_err = 0;
-  err = gt_error_new();
   canvas = check_canvas(L, 1);
   ccf = canvas_cairo_file_try_cast(*canvas);
   luaL_argcheck(L, ccf, 1, "must be a CanvasCairoFile object");
   fn = luaL_checkstring(L, 2);
   gt_assert(canvas);
+  err = gt_error_new();
   had_err = gt_canvas_cairo_file_to_file(ccf, fn, err);
   if (had_err)
     return gt_lua_error(L, err);
