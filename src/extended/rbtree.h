@@ -42,18 +42,18 @@ GtRBTree*      gt_rbtree_new(GtRBTreeCompareFunc cmp, GtRBTreeFreeFunc free,
                              void *info);
 void           gt_rbtree_delete(GtRBTree *tree);
 void           gt_rbtree_clear(GtRBTree *tree);
-void*          gt_rbtree_find(GtRBTree *tree, void *data);
-void*          gt_rbtree_find_with_cmp(GtRBTree *tree, void *data,
+void*          gt_rbtree_find(GtRBTree *tree, void *key);
+void*          gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
                                        GtRBTreeCompareFunc cmpfunc, void *info);
-int            gt_rbtree_insert(GtRBTree *tree, void *data);
-int            gt_rbtree_insert_with_cmp(GtRBTree *tree, void *data,
+int            gt_rbtree_insert(GtRBTree *tree, void *key);
+int            gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
                                          GtRBTreeCompareFunc cmpfunc,
                                          void *info);
 void*          gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated);
 void*          gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
                                          GtRBTreeCompareFunc cmpfunc,
                                          void *info, bool *nodecreated);
-int            gt_rbtree_erase(GtRBTree *tree, void *data);
+int            gt_rbtree_erase(GtRBTree *tree, void *key);
 size_t         gt_rbtree_size(GtRBTree *tree);
 int            gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action,
                               void *actinfo);
@@ -82,7 +82,7 @@ GtRBTreeIter*  gt_rbtree_iter_new_from_first(GtRBTree *tree);
 GtRBTreeIter*  gt_rbtree_iter_new_from_last(GtRBTree *tree);
 void*          gt_rbtree_iter_next(GtRBTreeIter *trav);
 void*          gt_rbtree_iter_prev(GtRBTreeIter *trav);
-void*          gt_rbtree_iter_data(GtRBTreeIter *trav);
+void*          gt_rbtree_iter_key(GtRBTreeIter *trav);
 void           gt_rbtree_iter_delete(GtRBTreeIter *trav);
 
 #endif

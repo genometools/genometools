@@ -220,8 +220,8 @@ static GtOptionParser* gt_genomediff_option_parser_new(void *tool_arguments)
 }
 
 static int gt_genomediff_arguments_check(GT_UNUSED int rest_argc,
-                                       void *tool_arguments,
-                                       GT_UNUSED GtError *err)
+                                         void *tool_arguments,
+                                         GT_UNUSED GtError *err)
 {
   GtGenomediffArguments *arguments = tool_arguments;
   int had_err = 0;

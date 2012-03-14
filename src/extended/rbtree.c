@@ -65,7 +65,7 @@
 typedef struct GtRBTreeNode
 {
   int red;
-  void *data;
+  void *key;
   struct GtRBTreeNode *link[2];  /* Left (0) and right (1) links */
 } GtRBTreeNode;
 
@@ -107,7 +107,7 @@ static inline GtRBTreeNode *gt_rbtree_double(GtRBTreeNode *root, int dir)
   return gt_rbtree_single (root, dir);
 }
 
-static GtRBTreeNode *gt_rbtree_new_node(void *data)
+static GtRBTreeNode *gt_rbtree_new_node(void *key)
 {
   GtRBTreeNode *rn = (GtRBTreeNode *) gt_malloc(sizeof *rn);
 
@@ -115,7 +115,7 @@ static GtRBTreeNode *gt_rbtree_new_node(void *data)
     return NULL;
 
   rn->red = 1;
-  rn->data = data;
+  rn->key = key;
   rn->link[0] = rn->link[1] = NULL;
 
   return rn;
@@ -125,6 +125,7 @@ GtRBTree *gt_rbtree_new(GtRBTreeCompareFunc cmp, GtRBTreeFreeFunc free,
                         void *info)
 {
   GtRBTree *rt = (GtRBTree *) gt_malloc(sizeof *rt);
+  gt_assert(cmp);
 
   if (rt == NULL)
     return NULL;
@@ -146,8 +147,13 @@ void gt_rbtree_delete(GtRBTree *tree)
 
 void gt_rbtree_clear(GtRBTree *tree)
 {
-  GtRBTreeNode *it = tree->root;
+  GtRBTreeNode *it;
   GtRBTreeNode *save;
+  if (!tree)
+    return;
+  it = tree->root;
+  if (!it)
+    return;
 
   /* Rotate away the left links so that we can treat this like the destruction
      of a linked list */
@@ -156,7 +162,7 @@ void gt_rbtree_clear(GtRBTree *tree)
       /* No left links, just kill the node and move on */
       save = it->link[1];
       if (tree->free != NULL)
-        tree->free(it->data);
+        tree->free(it->key);
       gt_free(it);
     } else {
       /* Rotate away the left link and check again */
@@ -170,14 +176,14 @@ void gt_rbtree_clear(GtRBTree *tree)
   tree->root = NULL;
 }
 
-static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *data,
+static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
                                               GtRBTreeCompareFunc cmpfunc,
                                               void *info)
 {
   GtRBTreeNode *it = tree->root;
 
   while (it != NULL) {
-    int cmp = cmpfunc(it->data, data, info);
+    int cmp = cmpfunc(it->key, key, info);
 
     if (cmp == 0)
       break;
@@ -187,21 +193,26 @@ static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *data,
     it = it->link[(int) (cmp < 0)];
   }
 
-  return it == NULL ? NULL : it->data;
+  return it == NULL ? NULL : it->key;
 }
 
-void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *data,
+void *gt_rbtree_find_with_cmp(GtRBTree *tree, void *key,
                               GtRBTreeCompareFunc cmpfunc, void *info)
 {
-  return gt_rbtree_find_with_cmp_g(tree, data, cmpfunc, info);
+  gt_assert(tree);
+  gt_assert(cmpfunc);
+  gt_assert(key);
+  return gt_rbtree_find_with_cmp_g(tree, key, cmpfunc, info);
 }
 
-void *gt_rbtree_find(GtRBTree *tree, void *data)
+void *gt_rbtree_find(GtRBTree *tree, void *key)
 {
-  return gt_rbtree_find_with_cmp_g(tree, data, tree->cmp, tree->info);
+  gt_assert(tree);
+  gt_assert(key);
+  return gt_rbtree_find_with_cmp_g(tree, key, tree->cmp, tree->info);
 }
 
-static inline int gt_rbtree_insert_g(GtRBTree *tree, void *data,
+static inline int gt_rbtree_insert_g(GtRBTree *tree, void *key,
                                      bool *nodecreated,
                                      GtRBTreeCompareFunc cmpfunc,
                                      void *info)
@@ -209,7 +220,7 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *data,
   *nodecreated = false;
   if (tree->root == NULL) {
     /* We have an empty tree; attach the new node directly to the root */
-    tree->root = gt_rbtree_new_node(data);
+    tree->root = gt_rbtree_new_node(key);
     *nodecreated = true;
 
     if (tree->root == NULL)
@@ -230,7 +241,7 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *data,
       if (q == NULL) {
         /* Insert a new node at the first null link */
         gt_assert(p != NULL);
-        p->link[dir] = q = gt_rbtree_new_node(data);
+        p->link[dir] = q = gt_rbtree_new_node(key);
         *nodecreated = true;
 
         if (q == NULL)
@@ -257,11 +268,11 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *data,
         Stop working if we inserted a node. This
         check also disallows duplicates in the tree
       */
-      if (cmpfunc(q->data, data, info) == 0)
+      if (cmpfunc(q->key, key, info) == 0)
         break;
 
       last = dir;
-      dir = (int) (cmpfunc(q->data, data, info) < 0);
+      dir = (int) (cmpfunc(q->key, key, info) < 0);
 
       /* Move the helpers down */
       if (g != NULL)
@@ -283,22 +294,34 @@ static inline int gt_rbtree_insert_g(GtRBTree *tree, void *data,
   return 0;
 }
 
-int gt_rbtree_insert(GtRBTree *tree, void *data)
+int gt_rbtree_insert(GtRBTree *tree, void *key)
 {
   GT_UNUSED bool nodecreated;
-  return gt_rbtree_insert_g(tree, data, &nodecreated, tree->cmp, tree->info);
+  gt_assert(tree);
+  gt_assert(key);
+  return gt_rbtree_insert_g(tree, key, &nodecreated, tree->cmp, tree->info);
 }
 
-int gt_rbtree_insert_with_cmp(GtRBTree *tree, void *data,
+int gt_rbtree_insert_with_cmp(GtRBTree *tree, void *key,
                               GtRBTreeCompareFunc cmpfunc, void *info)
 {
   GT_UNUSED bool nodecreated;
-  return gt_rbtree_insert_g(tree, data, &nodecreated, cmpfunc, info);
+  gt_assert(tree);
+  gt_assert(key);
+  gt_assert(cmpfunc);
+  return gt_rbtree_insert_g(tree, key, &nodecreated, cmpfunc, info);
 }
 
 void* gt_rbtree_search(GtRBTree *tree, void *key, bool *nodecreated)
 {
-  return gt_rbtree_insert_g(tree, key, nodecreated, tree->cmp, tree->info) == 0
+  gt_assert(tree);
+  gt_assert(key);
+  gt_assert(nodecreated);
+  return gt_rbtree_insert_g(tree,
+                            key,
+                            nodecreated,
+                            tree->cmp,
+                            tree->info) == 0
     ? key
     : NULL;
 }
@@ -307,14 +330,20 @@ void* gt_rbtree_search_with_cmp(GtRBTree *tree, void *key,
                                 GtRBTreeCompareFunc cmpfunc, void *info,
                                 bool *nodecreated)
 {
+  gt_assert(tree);
+  gt_assert(nodecreated);
+  gt_assert(cmpfunc);
+  gt_assert(key);
   return gt_rbtree_insert_g(tree, key, nodecreated, cmpfunc, info) == 0
     ? key
     : NULL;
 }
 
-int gt_rbtree_erase(GtRBTree *tree, void *data)
+int gt_rbtree_erase(GtRBTree *tree, void *key)
 {
   int rv = -1;
+  gt_assert(tree);
+  gt_assert(key);
   if (tree->root != NULL) {
     GtRBTreeNode head = {0,0,{NULL, NULL}}; /* False tree root */
     GtRBTreeNode *q, *p, *g; /* Helpers */
@@ -333,11 +362,11 @@ int gt_rbtree_erase(GtRBTree *tree, void *data)
       /* Move the helpers down */
       g = p, p = q;
       q = q->link[dir];
-      dir = (int) (tree->cmp(q->data, data, tree->info) < 0);
+      dir = (int) (tree->cmp(q->key, key, tree->info) < 0);
 
-      /* Save the node with matching data and keep going; we'll do removal
+      /* Save the node with matching key and keep going; we'll do removal
          tasks at the end */
-      if (tree->cmp(q->data, data, tree->info) == 0)
+      if (tree->cmp(q->key, key, tree->info) == 0)
         f = q;
 
       /* Push the red node down with rotations and color flips */
@@ -378,8 +407,8 @@ int gt_rbtree_erase(GtRBTree *tree, void *data)
     /* Replace and remove the saved node */
     if (f != NULL) {
       if (tree->free != NULL)
-        tree->free(f->data);
-      f->data = q->data;
+        tree->free(f->key);
+      f->key = q->key;
       gt_assert(p);
       p->link[(int) (p->link[1] == q)] = q->link[(int) (q->link[0] == NULL)];
       gt_free(q);
@@ -400,6 +429,7 @@ int gt_rbtree_erase(GtRBTree *tree, void *data)
 
 size_t gt_rbtree_size(GtRBTree *tree)
 {
+  gt_assert(tree);
   return tree->size;
 }
 
@@ -407,11 +437,11 @@ static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
                              unsigned long level, void *actinfo)
 {
   if (root->link[0] == NULL && root->link[1] == NULL) {
-    if (action(root->data, GT_RBTREE_LEAF, level, actinfo) != 0) {
+    if (action(root->key, GT_RBTREE_LEAF, level, actinfo) != 0) {
       return -1;
     }
   } else {
-    if (action(root->data, GT_RBTREE_PREORDER, level, actinfo) != 0) {
+    if (action(root->key, GT_RBTREE_PREORDER, level, actinfo) != 0) {
       return -2;
     }
     if (root->link[0] != NULL) {
@@ -419,7 +449,7 @@ static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
         return -3;
       }
     }
-    if (action(root->data, GT_RBTREE_POSTORDER, level, actinfo) != 0) {
+    if (action(root->key, GT_RBTREE_POSTORDER, level, actinfo) != 0) {
       return -4;
     }
     if (root->link[1] != NULL) {
@@ -427,7 +457,7 @@ static int gt_rbtree_recurse(GtRBTreeNode *root, GtRBTreeAction action,
         return -5;
       }
     }
-    if (action(root->data, GT_RBTREE_ENDORDER, level, actinfo) != 0) {
+    if (action(root->key, GT_RBTREE_ENDORDER, level, actinfo) != 0) {
       return -6;
     }
   }
@@ -445,24 +475,24 @@ static int gt_rbtree_recursewithstop(GtRBTreeNode *root, GtRBTreeAction action,
   int retcode;
 
   if (root->link[0] == NULL && root->link[1] == NULL) {
-    retcode = action(root->data, GT_RBTREE_LEAF, level, actinfo);
+    retcode = action(root->key, GT_RBTREE_LEAF, level, actinfo);
     RBT_CHECK_RETURN_CODE;
   } else {
-    retcode = action(root->data, GT_RBTREE_PREORDER, level, actinfo);
+    retcode = action(root->key, GT_RBTREE_PREORDER, level, actinfo);
     RBT_CHECK_RETURN_CODE;
     if (root->link[0] != NULL) {
       retcode = gt_rbtree_recursewithstop(root->link[0], action,
                                       level + 1, actinfo);
       RBT_CHECK_RETURN_CODE;
     }
-    retcode = action(root->data, GT_RBTREE_POSTORDER, level, actinfo);
+    retcode = action(root->key, GT_RBTREE_POSTORDER, level, actinfo);
     RBT_CHECK_RETURN_CODE;
     if (root->link[1] != NULL) {
       retcode = gt_rbtree_recursewithstop(root->link[1], action,
                                       level + 1, actinfo);
       RBT_CHECK_RETURN_CODE;
     }
-    retcode = action(root->data, GT_RBTREE_ENDORDER, level, actinfo);
+    retcode = action(root->key, GT_RBTREE_ENDORDER, level, actinfo);
     RBT_CHECK_RETURN_CODE;
   }
   return 0;
@@ -473,12 +503,12 @@ static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
                                          unsigned long level, void *actinfo)
 {
   if (root->link[0] == NULL && root->link[1] == NULL) {
-    if (action(root->data, GT_RBTREE_LEAF, level, actinfo) != 0)
+    if (action(root->key, GT_RBTREE_LEAF, level, actinfo) != 0)
     {
       return -1;
     }
   } else {
-    if (action(root->data, GT_RBTREE_PREORDER, level, actinfo) != 0) {
+    if (action(root->key, GT_RBTREE_PREORDER, level, actinfo) != 0) {
       return -2;
     }
     if (root->link[1] != NULL) {
@@ -487,7 +517,7 @@ static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
         return -3;
       }
     }
-    if (action(root->data, GT_RBTREE_POSTORDER, level, actinfo) != 0) {
+    if (action(root->key, GT_RBTREE_POSTORDER, level, actinfo) != 0) {
       return -4;
     }
     if (root->link[0] != NULL) {
@@ -496,7 +526,7 @@ static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
         return -5;
       }
     }
-    if (action (root->data, GT_RBTREE_ENDORDER, level, actinfo) != 0) {
+    if (action (root->key, GT_RBTREE_ENDORDER, level, actinfo) != 0) {
       return -6;
     }
   }
@@ -505,7 +535,9 @@ static int gt_rbtree_recursereverseorder(GtRBTreeNode *root,
 
 int gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
 {
-  if (tree->root != NULL && action != NULL) {
+  gt_assert(tree);
+  gt_assert(action);
+  if (tree->root != NULL) {
     if (gt_rbtree_recurse(tree->root, action, 0, actinfo) != 0) {
       return -1;
     }
@@ -515,7 +547,9 @@ int gt_rbtree_walk(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
 
 int gt_rbtree_walk_stop(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
 {
-  if (tree->root != NULL && action != NULL) {
+  gt_assert(tree);
+  gt_assert(action);
+  if (tree->root != NULL) {
     int retcode = gt_rbtree_recursewithstop(tree->root, action, 0, actinfo);
     RBT_CHECK_RETURN_CODE;
   }
@@ -524,7 +558,9 @@ int gt_rbtree_walk_stop(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
 
 int gt_rbtree_walk_reverse(GtRBTree *tree, GtRBTreeAction action, void *actinfo)
 {
-  if (tree->root != NULL && action != NULL) {
+  gt_assert(tree);
+  gt_assert(action);
+  if (tree->root != NULL) {
     if (gt_rbtree_recursereverseorder(tree->root, action, 0, actinfo) != 0) {
       return -1;
     }
@@ -540,7 +576,7 @@ static inline void* gt_rbtree_minimum_key_for_node(GtRBTreeNode *root)
   while (root->link[0] != NULL) {
     root = root->link[0];
   }
-  return root->data;
+  return root->key;
 }
 
 static inline void* gt_rbtree_maximum_key_for_node(GtRBTreeNode *root)
@@ -551,7 +587,7 @@ static inline void* gt_rbtree_maximum_key_for_node(GtRBTreeNode *root)
   while (root->link[1] != NULL) {
     root = root->link[1];
   }
-  return root->data;
+  return root->key;
 }
 
 void* gt_rbtree_minimum_key(GtRBTree *tree)
@@ -572,24 +608,28 @@ void* gt_rbtree_root_key(GtRBTree *tree)
   if (tree->size == 0 || tree->root == NULL)
     return NULL;
   else
-    return tree->root->data;
+    return tree->root->key;
 }
 
 void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
                              GtRBTreeCompareFunc cmpfun, void *cmpinfo)
 {
   int cmp;
-  const GtRBTreeNode *current = tree->root,
+  const GtRBTreeNode *current,
                      *found = NULL;
+  gt_assert(tree);
+  gt_assert(key);
+  gt_assert(cmpfun);
+  current = tree->root;
 
   while (current != NULL) {
-    cmp = cmpfun(key, current->data, cmpinfo);
+    cmp = cmpfun(key, current->key, cmpinfo);
     if (cmp == 0) {
       if (current->link[0] == NULL) {
         if (found == NULL) {
           return NULL;
         }
-        return found->data;
+        return found->key;
       }
       return gt_rbtree_maximum_key_for_node(current->link[0]);
     } else {
@@ -604,21 +644,24 @@ void* gt_rbtree_previous_key(GtRBTree *tree, void *key,
   if (found == NULL) {
     return NULL;
   }
-  return found->data;
+  return found->key;
 }
 
 void* gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
                                    GtRBTreeCompareFunc cmpfun, void *cmpinfo)
 {
   int cmp;
-  const GtRBTreeNode *current = tree->root,
+  const GtRBTreeNode *current,
                      *found = NULL;
   gt_assert(tree);
+  gt_assert(key);
+  gt_assert(cmpfun);
+  current = tree->root;
 
   while (current != NULL) {
-    cmp = cmpfun(key, current->data, cmpinfo);
+    cmp = cmpfun(key, current->key, cmpinfo);
     if (cmp == 0) {
-      return current->data;
+      return current->key;
     } else {
       if (cmp < 0) {
         current = current->link[0];
@@ -631,25 +674,28 @@ void* gt_rbtree_previous_equal_key(GtRBTree *tree, void *key,
   if (found == NULL) {
     return NULL;
   }
-  return found->data;
+  return found->key;
 }
 
 void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtRBTreeCompareFunc cmpfun,
                          void *cmpinfo)
 {
   int cmp;
-  const GtRBTreeNode *current = tree->root,
+  const GtRBTreeNode *current,
                      *found = NULL;
   gt_assert(tree);
+  gt_assert(key);
+  gt_assert(cmpfun);
+  current = tree->root;
 
   while (current != NULL) {
-    cmp = cmpfun(key, current->data, cmpinfo);
+    cmp = cmpfun(key, current->key, cmpinfo);
     if (cmp == 0) {
       if (current->link[1] == NULL) {
         if (found == NULL) {
           return NULL;
         }
-        return found->data;
+        return found->key;
       }
       return gt_rbtree_minimum_key_for_node(current->link[1]);
     } else {
@@ -664,20 +710,24 @@ void* gt_rbtree_next_key(GtRBTree *tree, void *key, GtRBTreeCompareFunc cmpfun,
   if (found == NULL) {
     return NULL;
   }
-  return found->data;
+  return found->key;
 }
 
 void* gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
                                GtRBTreeCompareFunc cmpfun, void *cmpinfo)
 {
   int cmp;
-  const GtRBTreeNode *current = tree->root,
+  const GtRBTreeNode *current,
                      *found = NULL;
+  gt_assert(tree);
+  gt_assert(key);
+  gt_assert(cmpfun);
+  current = tree->root;
 
   while (current != NULL) {
-    cmp = cmpfun(key, current->data, cmpinfo);
+    cmp = cmpfun(key, current->key, cmpinfo);
     if (cmp == 0) {
-      return current->data;
+      return current->key;
     } else {
       if (cmp < 0) {
         found = current;
@@ -690,7 +740,7 @@ void* gt_rbtree_next_equal_key(GtRBTree *tree, void *key,
   if (found == NULL) {
     return NULL;
   }
-  return found->data;
+  return found->key;
 }
 
 static inline void *start(GtRBTreeIter *trav, GtRBTree *tree, int dir)
@@ -709,7 +759,7 @@ static inline void *start(GtRBTreeIter *trav, GtRBTree *tree, int dir)
         }
     }
 
-  return trav->it == NULL ? NULL : trav->it->data;
+  return trav->it == NULL ? NULL : trav->it->key;
 }
 
 static inline void *move(GtRBTreeIter *trav, int dir, GT_UNUSED bool strict)
@@ -738,12 +788,13 @@ static inline void *move(GtRBTreeIter *trav, int dir, GT_UNUSED bool strict)
     } while (last == trav->it->link[dir]);
   }
 
-  return trav->it == NULL ? NULL : trav->it->data;
+  return trav->it == NULL ? NULL : trav->it->key;
 }
 
 GtRBTreeIter* gt_rbtree_iter_new_from_first(GtRBTree *tree)
 {
   GtRBTreeIter *trav = gt_malloc(sizeof (GtRBTreeIter));
+  gt_assert(tree);
   (void) start(trav, tree, 0);
   return trav;
 }
@@ -751,24 +802,29 @@ GtRBTreeIter* gt_rbtree_iter_new_from_first(GtRBTree *tree)
 GtRBTreeIter* gt_rbtree_iter_new_from_last(GtRBTree *tree)
 {
   GtRBTreeIter *trav = gt_malloc(sizeof (GtRBTreeIter));
+  gt_assert(tree);
   (void) start(trav, tree, 1);
   return trav;
 }
 
 void *gt_rbtree_iter_next(GtRBTreeIter *trav)
 {
+  gt_assert(trav);
   return move(trav, 1, false); /* Toward larger items */
 }
 
 void *gt_rbtree_iter_prev(GtRBTreeIter *trav)
 {
+  gt_assert(trav);
   return move(trav, 0, false); /* Toward smaller items */
 }
 
 void *gt_rbtree_iter_data (GtRBTreeIter *trav)
 {
-  GtRBTreeNode *node = (trav != NULL ? trav->it : NULL);
-  return (node != NULL ? node->data : NULL);
+  GtRBTreeNode *node;
+  gt_assert(trav);
+  node = trav->it;
+  return (node != NULL ? node->key : NULL);
 }
 
 void gt_rbtree_iter_delete (GtRBTreeIter *trav)
