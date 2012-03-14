@@ -22,6 +22,10 @@ typedef struct GtMatchOpen GtMatchOpen;
 
 #include "extended/match_api.h"
 
+/* Creates a new <GtMatch> object meant to store results in the OpenMatch
+   format. That is, it stores long values <weight> in addition to the generic
+   match contents <seqid1>, <seqid2>, <start_seq1>, <start_seq2>, <end_seq1>,
+   and <end_seq2>. */
 GtMatch* gt_match_open_new(char *seqid1,
                            char *seqid2,
                            unsigned long start_seq1,
@@ -30,8 +34,10 @@ GtMatch* gt_match_open_new(char *seqid1,
                            unsigned long end_seq2,
                            long weight);
 
+/* Sets <weight> to be the weight value in <mo>. */
 void gt_match_open_set_weight(GtMatchOpen *mo, long weight);
 
+/* Returns the weight value stored in <mo>. */
 long gt_match_open_get_weight(GtMatchOpen *mo);
 
 #endif

@@ -22,6 +22,11 @@ typedef struct GtMatchBlast GtMatchBlast;
 
 #include "extended/match_api.h"
 
+/* Creates a new <GtMatch> object meant to store results in the BLAST
+   format. That is, it stores double values <evalue> for match E-values,
+   <bitscore>s and the alignment length <ali_l> in addition to the generic
+   match contents <seqid1>, <seqid2>, <start_seq1>, <start_seq2>, <end_seq1>,
+   and <end_seq2>. */
 GtMatch* gt_match_blast_new(char *seqid1,
                             char *seqid2,
                             unsigned long start_seq1,
@@ -32,16 +37,22 @@ GtMatch* gt_match_blast_new(char *seqid1,
                             float bitscore,
                             unsigned long ali_l);
 
+/* Sets <evalue> to be the E-value in <mb>. */
 void gt_match_blast_set_evalue(GtMatchBlast *mb, long double evalue);
 
+/* Sets <bits> to be the bit-score in <mb>. */
 void gt_match_blast_set_bitscore(GtMatchBlast *mb, float bits);
 
+/* Sets <length> to be the alignment length in <mb>. */
 void gt_match_blast_set_align_length(GtMatchBlast *mb, unsigned long length);
 
+/* Returns the E-value stored in <mo>. */
 long double gt_match_blast_get_evalue(GtMatchBlast *mb);
 
+/* Returns the bit-score value stored in <mo>. */
 float gt_match_blast_get_bitscore(GtMatchBlast *mb);
 
+/* Returns the alignment length stored in <mo>. */
 unsigned long gt_match_blast_get_align_length(GtMatchBlast *mb);
 
 #endif
