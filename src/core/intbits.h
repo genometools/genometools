@@ -245,38 +245,21 @@ static const unsigned char ReversedByte[256] =
   return out;
 }
 
-#define GT_INTBITS_SWAPBITPAIRS(bs,L1,L2,D) ((bs & (3UL << L1)) >> D) |\
-                                    ((bs & (3UL << L2)) << D)
-
-/*@unused@*/
 static inline GtBitsequence gt_intbits_reverse_unitwise(GtBitsequence bs)
 {
 #ifdef _LP64
-  return (GtBitsequence) (GT_INTBITS_SWAPBITPAIRS(bs, 62, 0,62) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 60, 2,58) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 58, 4,54) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 56, 6,50) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 54, 8,46) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 52,10,42) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 50,12,38) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 48,14,34) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 46,16,30) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 44,18,26) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 42,20,22) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 40,22,18) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 38,24,14) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 36,26,10) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 34,28, 6) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 32,30, 2));
+  /* 10 shifts, 10 &, 5 |, 4 assignments = 29 ops */
+  bs = (bs & 0xFFFFFFFF00000000) >> 32 | (bs & 0x00000000FFFFFFFF) << 32;
+  bs = (bs & 0xFFFF0000FFFF0000) >> 16 | (bs & 0x0000FFFF0000FFFF) << 16;
+  bs = (bs & 0xFF00FF00FF00FF00) >> 8 |  (bs & 0x00FF00FF00FF00FF) << 8;
+  bs = (bs & 0XF0F0F0F0F0F0F0F0) >> 4 |  (bs & 0x0F0F0F0F0F0F0F0F) << 4;
+  return (bs & 0xCCCCCCCCCCCCCCCC) >> 2 |  (bs & 0x3333333333333333) << 2;
 #else
-  return (GtBitsequence) (GT_INTBITS_SWAPBITPAIRS(bs, 30, 0,30) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 28, 2,26) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 26, 4,22) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 24, 6,18) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 22, 8,14) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 20,10,10) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 18,12, 6) |
-                          GT_INTBITS_SWAPBITPAIRS(bs, 16,14, 2));
+  /* 8 shifts, 8 &, 4 |, 3 assignments = 23 ops */
+  bs = (bs & 0xFFFF0000) >> 16 | (bs & 0x0000FFFF) << 16;
+  bs = (bs & 0xFF00FF00) >> 8 |  (bs & 0x00FF00FF) << 8;
+  bs = (bs & 0XF0F0F0F0) >> 4 |  (bs & 0x0F0F0F0F) << 4;
+  return (bs & 0xCCCCCCCC) >> 2 |  (bs & 0x33333333) << 2;
 #endif
 }
 #endif
