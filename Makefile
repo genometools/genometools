@@ -913,6 +913,9 @@ install: all
           || mkdir -p $(prefix)/include/genometools/annotationsketch
 	cp src/annotationsketch/*_api.h \
           $(prefix)/include/genometools/annotationsketch
+	test -d $(prefix)/include/genometools/ltr \
+          || mkdir -p $(prefix)/include/genometools/ltr
+	cp src/ltr/*_api.h $(prefix)/include/genometools/ltr
 	cp obj/gt_config.h $(prefix)/include/genometools
 	cp src/genometools.h $(prefix)/include/genometools
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib

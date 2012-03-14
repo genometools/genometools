@@ -119,6 +119,8 @@
 #include "extended/type_checker_obo_api.h"
 #include "extended/uniq_stream_api.h"
 #include "extended/visitor_stream_api.h"
+
+/* the LTR module */
 #include "ltr/ltr_cluster_stream_api.h"
 #include "ltr/ltr_classify_stream_api.h"
 
