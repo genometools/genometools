@@ -39,6 +39,8 @@
 #include "core/grep_api.h"
 #include "core/hashmap.h"
 #include "core/hashtable.h"
+#include "extended/elias_gamma.h"
+#include "extended/golomb.h"
 #include "core/interval_tree.h"
 #include "core/mathsupport.h"
 #include "core/quality.h"
@@ -246,6 +248,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "dlist class", gt_dlist_unit_test);
   gt_hashmap_add(unit_tests, "dlist example", gt_dlist_example);
   gt_hashmap_add(unit_tests, "dynamic bittab class", gt_dynbittab_unit_test);
+  gt_hashmap_add(unit_tests, "elias gamma class",
+                 gt_elias_gamma_unit_test);
   gt_hashmap_add(unit_tests, "evaluator class", gt_evaluator_unit_test);
   gt_hashmap_add(unit_tests, "encseq builder class",
                 gt_encseq_builder_unit_test);
@@ -256,6 +260,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "gff3 escaping module",
                  gt_gff3_escaping_unit_test);
   gt_hashmap_add(unit_tests, "grep module", gt_grep_unit_test);
+  gt_hashmap_add(unit_tests, "golomb class",
+                 gt_golomb_unit_test);
   gt_hashmap_add(unit_tests, "hashmap class", gt_hashmap_unit_test);
   gt_hashmap_add(unit_tests, "hashtable class", gt_hashtable_unit_test);
   gt_hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
