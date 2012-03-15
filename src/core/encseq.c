@@ -42,9 +42,7 @@
 #include "core/encseq.h"
 #include "core/encseq_access_type.h"
 #include "core/encseq_metadata.h"
-#ifndef GT_INLINEDENCSEQ
 #include "core/encseq_rep.h"
-#endif
 #include "core/ensure.h"
 #include "core/error.h"
 #include "core/filelengthvalues.h"
@@ -134,7 +132,6 @@ void gt_encseq_plainseq2bytecode(GtUchar *bytecode,
   }
 }
 
-#ifndef INLINEDENCSEQ
 static void encseq2bytecode(GtUchar *dest,
                             const GtEncseq *encseq,
                             const unsigned long startindex,
@@ -228,17 +225,6 @@ void gt_encseq_sequence2bytecode(GtUchar *dest,
     encseq2bytecode(dest,encseq,startindex,len);
   }
 }
-#else
-void gt_encseq_sequence2bytecode(GtUchar *dest,
-                                 const GtEncseq *encseq,
-                                 unsigned long startindex,
-                                 unsigned long len)
-{
-  gt_assert(encseq != NULL && encseq->sat == GT_ACCESS_TYPE_DIRECTACCESS);
-  gt_encseq_plainseq2bytecode(dest,encseq->plainseq + startindex,
-                                       len);
-}
-#endif
 
 unsigned long gt_encseq_version(const GtEncseq *encseq)
 {
@@ -252,7 +238,6 @@ bool gt_encseq_is_64_bit(const GtEncseq *encseq)
   return ((int) encseq->is64bit == 1);
 }
 
-#ifndef GT_INLINEDENCSEQ
 unsigned long gt_encseq_total_length(const GtEncseq *encseq)
 {
   gt_assert(encseq != NULL);
@@ -455,7 +440,6 @@ GtUchar gt_encseq_get_encoded_char_nospecial(const GtEncseq *encseq,
            : cc;
   }
 }
-#endif
 
 bool gt_encseq_position_is_separator(const GtEncseq *encseq,
                                      unsigned long pos,
@@ -536,7 +520,6 @@ static void binpreparenextrangeGtEncseqReader(GtEncseqReader *esr,
 static void singlepositioninseparatorViaequallength_updatestate(
                                    GtEncseqReader *esr);
 
-#ifndef INLINEDENCSEQ
 GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
 {
   GtUchar cc;
@@ -602,8 +585,6 @@ GtUchar gt_encseq_reader_next_encoded_char(GtEncseqReader *esr)
       exit(GT_EXIT_PROGRAMMING_ERROR);
   }
 }
-
-#endif /* INLINEDENCSEQ */
 
 char gt_encseq_reader_next_decoded_char(GtEncseqReader *esr)
 {
@@ -4707,9 +4688,6 @@ static GtEncseq *files2encodedsequence(const GtStrArray *filenametab,
   Gtssptaboutinfo *ssptaboutinfo = NULL;
 
   gt_error_check(err);
-#ifdef INLINEDENCSEQ
-  gt_logger_log(logger,"inlined encoded sequence");
-#endif
   if (!haserr)
   {
     unsigned long lengthofdbfilenames

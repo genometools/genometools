@@ -75,9 +75,6 @@ typedef struct GtEncseqReader GtEncseqReader;
 /* The file suffix used for original input sequence tables. */
 #define GT_OISTABFILESUFFIX ".ois"
 
-#ifdef GT_INLINEDENCSEQ
-  #include "core/encseq_inlined.h"
-#else
 /* Returns the total number of characters in all sequences of <encseq>,
    including separators and wildcards. */
 unsigned long     gt_encseq_total_length(const GtEncseq *encseq);
@@ -94,8 +91,6 @@ GtUchar           gt_encseq_get_encoded_char(const GtEncseq *encseq,
 char              gt_encseq_get_decoded_char(const GtEncseq *encseq,
                                              unsigned long pos,
                                              GtReadmode readmode);
-#endif
-
 /* Returns true iff <pos> is a separator position of <encseq>
    read in the direction as indicated by <readmode>. */
 bool              gt_encseq_position_is_separator(const GtEncseq *encseq,

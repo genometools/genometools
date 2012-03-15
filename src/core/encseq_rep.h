@@ -22,11 +22,7 @@
 
 /*
   The contents of this file is to be considered private
-  implementation detail but, whenever the code is compiled with option
-  GT_INLINEDENCSEQ, is exposed to the compiler solely for performance
-  optimization. So we can compare the time overhead of a bytearray
-  implementation of strings to all other representations implemented in
-  encseq.c.
+  implementation detail.
 */
 
 #include "core/alphabet.h"

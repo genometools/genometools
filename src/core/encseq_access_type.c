@@ -93,7 +93,6 @@ bool gt_encseq_access_type_isviautables(GtEncseqAccessType sat)
           *wildcardranges = wildcardrangestab[IDX];\
         }
 
-#ifndef INLINEDENCSEQ
 static GtEncseqAccessType determinesmallestrep(
                                   unsigned long *specialranges,
                                   unsigned long *wildcardranges,
@@ -222,20 +221,3 @@ int gt_encseq_access_type_determine(unsigned long *specialranges,
   }
   return haserr ? -1 : (int) sat;
 }
-
-#else
-int gt_encseq_access_type_determine(unsigned long *specialranges,
-                                    unsigned long *wildcardranges,
-                                    GT_UNUSED unsigned long totallength,
-                                    GT_UNUSED unsigned long lengthofdbfilenames,
-                                    const unsigned long *specialrangestab,
-                                    const unsigned long *wildcardrangestab,
-                                    GT_UNUSED unsigned int numofchars,
-                                    GT_UNUSED const char *str_sat,
-                                    GT_UNUSED GtError *err)
-{
-  *specialranges = specialrangestab[0];
-  *wildcardranges = wildcardrangestab[0];
-  return (int)  GT_ACCESS_TYPE_DIRECTACCESS;
-}
-#endif
