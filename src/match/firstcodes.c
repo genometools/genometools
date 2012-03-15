@@ -1714,7 +1714,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     if (gt_showtime_enabled())
     {
       timer = gt_timer_new_with_progress_description("to collect initial "
-                                                     "prefixess");
+                                                     "prefixes");
       gt_timer_start(timer);
     }
     gt_firstcodes_collectcodes(&fci,

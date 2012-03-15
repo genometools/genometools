@@ -91,7 +91,7 @@ static inline unsigned long gt_rmq_superblock(unsigned long idx)
 #define GT_RMQ_CATALAN_MAX 17
 
 static const unsigned long gt_rmq_catalan[GT_RMQ_CATALAN_MAX]
-                                         [GT_RMQ_CATALAN_MAX] = 
+                                         [GT_RMQ_CATALAN_MAX] =
 {
   {1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL,1UL},
   {0UL,1UL,2UL,3UL,4UL,5UL,6UL,7UL,8UL,9UL,10UL,11UL,12UL,13UL,14UL,15UL,16UL},
@@ -146,7 +146,7 @@ static const int gt_rmq_LSBTable256[256] =
   4,0,1,0,2,0,1,0,3,0,1,0,2,0,1,0
 };
 
-static inline unsigned long lsb(unsigned long v)
+static inline unsigned long gt_least_significant_bit(unsigned long v)
 {
   return (unsigned long) gt_rmq_LSBTable256[v];
 }
@@ -214,7 +214,7 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
   if (mb_i == mb_j)
   { /* only one microblock-query */
     min_i = gt_rmq_clearbits(rmq->Prec[rmq->type[mb_i]][j-s_mi], i_pos);
-    min = min_i == 0 ? j : s_mi + lsb(min_i);
+    min = min_i == 0 ? j : s_mi + gt_least_significant_bit(min_i);
   } else
   {
     unsigned long b_i = gt_rmq_block(i);   /* i's block */
@@ -227,11 +227,13 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
                                       [GT_RMQ_microblocksize - 1],
                              i_pos);
     /* left in-microblock-query */
-    min = min_i == 0 ? s_mi + GT_RMQ_microblocksize - 1 : s_mi + lsb(min_i);
+    min = min_i == 0 ? s_mi + GT_RMQ_microblocksize - 1
+                     : s_mi + gt_least_significant_bit(min_i);
     /* right in-microblock-query */
-    min_j = rmq->Prec[rmq->type[mb_j]][j_pos] == 0
-               ? j
-               : s_mj + lsb(rmq->Prec[rmq->type[mb_j]][j_pos]);
+    min_j
+      = rmq->Prec[rmq->type[mb_j]][j_pos] == 0
+          ? j
+          : s_mj + gt_least_significant_bit(rmq->Prec[rmq->type[mb_j]][j_pos]);
     if (rmq->arr_ptr[min_j] < rmq->arr_ptr[min]) min = min_j;
 
     if (mb_j > mb_i + 1)
@@ -244,7 +246,8 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
         min_i = rmq->Prec[rmq->type[mb_i]][GT_RMQ_microblocksize - 1] == 0 ?
           s_bi + GT_RMQ_blocksize - 1 :
           s_mi + GT_RMQ_microblocksize +
-                 lsb(rmq->Prec[rmq->type[mb_i]][GT_RMQ_microblocksize-1]);
+                 gt_least_significant_bit(
+                     rmq->Prec[rmq->type[mb_i]][GT_RMQ_microblocksize-1]);
                   /* right in-block query */
         if (rmq->arr_ptr[min_i] < rmq->arr_ptr[min]) min = min_i;
       }
@@ -254,7 +257,8 @@ static unsigned long gt_rmq_find_min_index_fast(const GtRMQ *rmq,
         mb_j--; /* go one microblock to the left */
         min_j = rmq->Prec[rmq->type[mb_j]][GT_RMQ_microblocksize-1] == 0 ?
           s_mj - 1 :
-          s_bj + lsb(rmq->Prec[rmq->type[mb_j]][GT_RMQ_microblocksize-1]);
+          s_bj + gt_least_significant_bit(
+                        rmq->Prec[rmq->type[mb_j]][GT_RMQ_microblocksize-1]);
                /* right in-block query */
         if (rmq->arr_ptr[min_j] < rmq->arr_ptr[min]) min = min_j;
       }
@@ -407,6 +411,7 @@ GtRMQ* gt_rmq_new(const GtRMQvaluetype *data, unsigned long size)
 
   /* prec[i]: the jth bit is 1 iff j is 1. pos. to the left of i
       where a[j] < a[i]  */
+  gt_assert(GT_RMQ_microblocksize < (unsigned long) GT_RMQ_CATALAN_MAX);
   rmq->Prec = rmq_calloc(rmq,(size_t) gt_rmq_catalan[GT_RMQ_microblocksize]
                                                     [GT_RMQ_microblocksize],
                          sizeof (*rmq->Prec));

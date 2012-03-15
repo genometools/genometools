@@ -245,6 +245,7 @@ static const unsigned char ReversedByte[256] =
   return out;
 }
 
+/*@unused@*/
 static inline GtBitsequence gt_intbits_reverse_unitwise(GtBitsequence bs)
 {
 #ifdef _LP64
