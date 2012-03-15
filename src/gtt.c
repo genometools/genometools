@@ -40,6 +40,7 @@
 #include "core/hashmap.h"
 #include "core/hashtable.h"
 #include "extended/elias_gamma.h"
+#include "extended/huffman.h"
 #include "extended/golomb.h"
 #include "core/interval_tree.h"
 #include "core/mathsupport.h"
@@ -265,6 +266,8 @@ GtHashmap* gtt_unit_tests(void)
   gt_hashmap_add(unit_tests, "hashmap class", gt_hashmap_unit_test);
   gt_hashmap_add(unit_tests, "hashtable class", gt_hashtable_unit_test);
   gt_hashmap_add(unit_tests, "hmm class", gt_hmm_unit_test);
+  gt_hashmap_add(unit_tests, "huffman coding class",
+                 gt_huffman_unit_test);
   gt_hashmap_add(unit_tests, "interval tree class", gt_interval_tree_unit_test);
   gt_hashmap_add(unit_tests, "Lua serializer module",
                  gt_lua_serializer_unit_test);
