@@ -219,6 +219,5 @@ struct GtEncseq
 
   unsigned long minseqlen,
                 maxseqlen;
-  char *oistab;  /* XXX: original input sequence(s) */
 };
 #endif

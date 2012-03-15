@@ -1986,11 +1986,6 @@ void gt_encseq_delete(GtEncseq *encseq)
     }
     encseq->sdstab = NULL;
   }
-  if (encseq->oistab != NULL)
-  {
-    gt_fa_xmunmap((void *) encseq->oistab);
-    encseq->oistab = NULL;
-  }
   if (encseq->fsptab != NULL)
   {
     gt_free(encseq->fsptab);
@@ -4295,7 +4290,6 @@ static GtEncseq *determineencseqkeyvalues(GtEncseqAccessType sat,
   encseq->hasallocatedsdstab = false;
   encseq->destablength = 0;
   encseq->fsptab = NULL;
-  encseq->oistab = NULL;
   encseq->hasallocatedssptab = false;
   if (equallength == NULL)
   {
