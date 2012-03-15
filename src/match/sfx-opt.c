@@ -96,7 +96,7 @@ static GtOPrval parse_options(int *parsed_args,
                                    &so->genomediff,
                                    false);
   gt_option_is_extended_option(optiongenomediff);
-  if (gt_index_options_outsuftab_option(so->idxopts)) {
+  if (gt_index_options_outsuftab_option(so->idxopts) != NULL) {
     gt_option_exclude(optiongenomediff,
                       gt_index_options_outsuftab_option(so->idxopts));
   }
