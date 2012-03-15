@@ -57,7 +57,6 @@ struct GtIndexOptions
        outkystab,
        outkyssort,
        lcpdist,
-       genomediff,
        swallow_tail;
   GtStr *kysargumentstring,
         *indexname,
@@ -106,7 +105,6 @@ static GtIndexOptions* gt_index_options_new(void)
   oi->outbwttab = false;
   oi->outbcktab = false;
   oi->lcpdist = false;
-  oi->genomediff = false;
   oi->swallow_tail = false;
   oi->option = NULL;
   oi->optiondir = NULL;
@@ -372,17 +370,6 @@ static GtIndexOptions* gt_index_options_register_generic_create(
     gt_option_imply(idxo->option, idxo->optionoutlcptab);
     gt_option_parser_add_option(op, idxo->option);
 
-    idxo->option = gt_option_new_bool("genomediff",
-                              "directly process the lcp intervals using "
-                              "the genomediff algorithm (suffix array and "
-                              "lcp-table is not output",
-                              &idxo->genomediff,
-                              false);
-    gt_option_is_extended_option(idxo->option);
-    gt_option_imply(idxo->option, idxo->optionoutlcptab);
-    gt_option_exclude(idxo->option, idxo->optionoutsuftab);
-    gt_option_parser_add_option(op, idxo->option);
-
     idxo->option = gt_option_new_bool("swallow-tail",
                               "swallow the tail of the suffix array and lcptab",
                               &idxo->swallow_tail,
@@ -547,7 +534,6 @@ GT_INDEX_OPTS_GETTER_DEF_VAL(outkyssort, bool);
 GT_INDEX_OPTS_GETTER_DEF_VAL(sfxstrategy, Sfxstrategy);
 GT_INDEX_OPTS_GETTER_DEF_VAL(readmode, GtReadmode);
 GT_INDEX_OPTS_GETTER_DEF_VAL(lcpdist, bool);
-GT_INDEX_OPTS_GETTER_DEF_VAL(genomediff, bool);
 GT_INDEX_OPTS_GETTER_DEF_VAL(swallow_tail, bool);
 #ifndef S_SPLINT_S
 GT_INDEX_OPTS_GETTER_DEF_VAL(bwtIdxParams, struct bwtOptions);

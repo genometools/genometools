@@ -118,22 +118,21 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
 {
   bool haserr = false;
 
-  if (gt_index_options_outlcptab_value(so->idxopts))
+  if (so->outlcptab)
   {
-    bool rungenomediff = gt_index_options_genomediff_value(so->idxopts);
 
-    gt_assert(gt_str_get(so->indexname) != NULL || rungenomediff);
-    if (rungenomediff)
+    gt_assert(gt_str_get(so->indexname) != NULL || so->genomediff);
+    if (so->genomediff)
     {
       outfileinfo->bustate_shulen = gt_sfx_multiesashulengthdist_new(encseq);
     }
     outfileinfo->outlcpinfo
-      = gt_Outlcpinfo_new(rungenomediff ? NULL : gt_str_get(so->indexname),
+      = gt_Outlcpinfo_new(so->genomediff ? NULL : gt_str_get(so->indexname),
                           gt_encseq_alphabetnumofchars(encseq),
                           prefixlength,
                           gt_index_options_lcpdist_value(so->idxopts),
                           gt_index_options_swallow_tail_value(so->idxopts),
-                          rungenomediff ? gt_suflcptab2genomediff
+                          so->genomediff ? gt_suflcptab2genomediff
                                         : NULL,
                           outfileinfo->bustate_shulen,
                           err);
@@ -156,7 +155,7 @@ static int initoutfileinfo(Outfileinfo *outfileinfo,
                  BCKTABSUFFIX);
   if (gt_index_options_outsuftab_value(so->idxopts)
         || gt_index_options_outbwttab_value(so->idxopts)
-        || gt_index_options_outlcptab_value(so->idxopts)
+        || so->outlcptab
         || gt_index_options_outbcktab_value(so->idxopts))
   {
     outfileinfo->encseq = encseq;
@@ -408,7 +407,7 @@ static int run_packedindexconstruction(GtLogger *logger,
 #endif
 
 static int runsuffixerator(bool doesa,
-                           const Suffixeratoroptions *so,
+                           Suffixeratoroptions *so,
                            GtLogger *logger,
                            GtError *err)
 {
@@ -422,6 +421,10 @@ static int runsuffixerator(bool doesa,
   GtReadmode readmode = gt_index_options_readmode_value(so->idxopts);
 
   gt_error_check(err);
+
+  so->outlcptab = so->genomediff
+    ? true
+    : gt_index_options_outlcptab_value(so->idxopts);
 
   if (gt_showtime_enabled())
   {
@@ -542,7 +545,7 @@ static int runsuffixerator(bool doesa,
   {
     if (gt_index_options_outsuftab_value(so->idxopts)
         || gt_index_options_outbwttab_value(so->idxopts)
-        || gt_index_options_outlcptab_value(so->idxopts)
+        || so->outlcptab
         || gt_index_options_outbcktab_value(so->idxopts)
         || !doesa)
     {
@@ -591,7 +594,7 @@ static int runsuffixerator(bool doesa,
   {
     if (gt_index_options_outsuftab_value(so->idxopts)
         || gt_index_options_outbwttab_value(so->idxopts)
-        || gt_index_options_outlcptab_value(so->idxopts)
+        || so->outlcptab
         || !doesa)
     {
       if (doesa)

@@ -26,7 +26,9 @@
 typedef struct
 {
   bool beverbose,
-       showprogress;
+       showprogress,
+       genomediff,
+       outlcptab;
   GtEncseqOptions *encopts,
                   *loadopts;
   GtIndexOptions *idxopts;

@@ -40,6 +40,7 @@ static GtOPrval parse_options(int *parsed_args,
   GtOptionParser *op;
   GtOption *option,
            *optionshowprogress,
+           *optiongenomediff,
            *optionii;
   GtOPrval oprval;
   gt_error_check(err);
@@ -79,7 +80,6 @@ static GtOPrval parse_options(int *parsed_args,
   optionii = gt_option_new_filename("ii", "specify existing encoded sequence",
                                     so->inputindex);
   gt_option_parser_add_option(op, optionii);
-
   gt_option_is_mandatory_either(gt_encseq_options_db_option(so->encopts),
                                 optionii);
   gt_option_exclude(gt_encseq_options_db_option(so->encopts), optionii);
@@ -88,6 +88,19 @@ static GtOPrval parse_options(int *parsed_args,
   gt_option_exclude(optionii, gt_encseq_options_protein_option(so->encopts));
   gt_option_exclude(optionii, gt_encseq_options_plain_option(so->encopts));
   gt_option_exclude(optionii, gt_encseq_options_sat_option(so->encopts));
+
+  optiongenomediff = gt_option_new_bool("genomediff",
+                                   "directly process the lcp intervals using "
+                                   "the genomediff algorithm (suffix array and "
+                                   "lcp-tables are not output)",
+                                   &so->genomediff,
+                                   false);
+  gt_option_is_extended_option(optiongenomediff);
+  if (gt_index_options_outsuftab_option(so->idxopts)) {
+    gt_option_exclude(optiongenomediff,
+                      gt_index_options_outsuftab_option(so->idxopts));
+  }
+  gt_option_parser_add_option(op, optiongenomediff);
 
   /* suffixerator and friends do not take arguments */
   gt_option_parser_set_min_max_args(op, 0U, 0U);
