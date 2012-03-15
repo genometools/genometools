@@ -1466,7 +1466,7 @@ static void dc_fill_samplelcpvalues(bool cmpcharbychar,GtDifferencecover *dcov)
   unsigned long suffix, kvalue, lcpinherit, start0, start1, currentlcpvalue;
   GtDifferencecover_Inversesuftabtype *inversesuftabptr = dcov->inversesuftab;
   unsigned int svalue;
-  int retval;
+  GT_UNUSED int retval;
   GtCommonunits commonunits;
   GtUchar cc1, cc2;
 
