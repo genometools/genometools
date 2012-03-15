@@ -5879,12 +5879,9 @@ static inline GtTwobitencoding calctbeforward(const GtTwobitencoding *tbe,
 static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
                                               unsigned long startpos)
 {
-  unsigned int remain = (unsigned int) GT_MODBYUNITSIN2BITENC(startpos);
+  unsigned long remain = (unsigned long) GT_MODBYUNITSIN2BITENC(startpos);
 
-  if (remain == (unsigned int) (GT_UNITSIN2BITENC - 1)) /* right end of word */
-  {
-    return tbe[GT_DIVBYUNITSIN2BITENC(startpos)];
-  } else
+  if (remain < (unsigned long) (GT_UNITSIN2BITENC - 1)) /* right end of word */
   {
     unsigned long unit = GT_DIVBYUNITSIN2BITENC(startpos);
     GtTwobitencoding tmp = (GtTwobitencoding)
@@ -5895,6 +5892,7 @@ static inline GtTwobitencoding calctbereverse(const GtTwobitencoding *tbe,
     }
     return tmp;
   }
+  return tbe[GT_DIVBYUNITSIN2BITENC(startpos)];
 }
 
 static inline GtBitsequence fwdextractspecialbits(
@@ -6549,20 +6547,17 @@ static int prefixofdifferenttwobitencodings(bool complement,
                                             GtTwobitencoding tbe1,
                                             GtTwobitencoding tbe2)
 {
-  unsigned int tmplcpvalue = 0;
-
   gt_assert((tbe1 ^ tbe2) > 0);
-  tmplcpvalue = (unsigned int) GT_DIV2(GT_MULT2(GT_UNITSIN2BITENC) -
-                                       requiredUIntBits(tbe1 ^ tbe2));
-  gt_assert(tmplcpvalue < (unsigned int) GT_UNITSIN2BITENC);
-  commonunits->common = tmplcpvalue;
+  commonunits->common = (unsigned int) GT_DIV2(GT_MULT2(GT_UNITSIN2BITENC) -
+                                               requiredUIntBits(tbe1 ^ tbe2));
+  gt_assert(commonunits->common < (unsigned int) GT_UNITSIN2BITENC);
   commonunits->leftspecial = commonunits->rightspecial = false;
   if (complement)
   {
     return GT_COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMLEFT(tbe1,
-                                                              tmplcpvalue)) <
+                                                   commonunits->common)) <
            GT_COMPLEMENTBASE(EXTRACTENCODEDCHARSCALARFROMLEFT(tbe2,
-                                                              tmplcpvalue))
+                                                   commonunits->common))
            ? -1 : 1;
   }
   return tbe1 < tbe2 ? -1 : 1;
