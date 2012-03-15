@@ -123,6 +123,7 @@
 /* the LTR module */
 #include "ltr/ltr_cluster_stream_api.h"
 #include "ltr/ltr_classify_stream_api.h"
+#include "ltr/ltr_refseq_match_stream_api.h"
 
 #ifndef WITHOUT_CAIRO
 /* the AnnotationSketch module (depends on Cairo) */
