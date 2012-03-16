@@ -118,6 +118,7 @@
 #include "tools/gt_select.h"
 #include "tools/gt_seq.h"
 #include "tools/gt_seqfilter.h"
+#include "tools/gt_seqids.h"
 #include "tools/gt_seqmutate.h"
 #include "tools/gt_seqorder.h"
 #include "tools/gt_seqstat.h"
@@ -201,6 +202,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "scriptfilter", gt_script_filter());
   gt_toolbox_add_tool(tools, "select", gt_select());
   gt_toolbox_add_tool(tools, "seq", gt_seq());
+  gt_toolbox_add_tool(tools, "seqids", gt_seqids());
   gt_toolbox_add_tool(tools, "readjoiner", gt_readjoiner());
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "seqmutate", gt_seqmutate());
