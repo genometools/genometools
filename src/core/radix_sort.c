@@ -370,7 +370,6 @@ static unsigned long recursivecalls = 0;
 
 static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
                                              unsigned long numofelems,
-                                             unsigned long bitMask,
                                              unsigned long shiftRightAmount)
 {
   unsigned long idx, current, count[UINT8_MAX+1] = {0},
@@ -382,7 +381,7 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
   recursivecalls++;
   for (current = 0; current < numofelems; current++)
   {
-    digit = (a[current] & bitMask) >> shiftRightAmount;
+    digit = GT_RADIX_KEY(UINT8_MAX,shiftRightAmount,a[current]);
     count[digit]++;
   }
   startOfBin[0] = endOfBin[0] = nextBin = 0;
@@ -395,7 +394,7 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
     currentvalue = a[current];
     while (true)
     {
-      digit = (currentvalue & bitMask) >> shiftRightAmount;
+      digit = GT_RADIX_KEY(UINT8_MAX,shiftRightAmount,currentvalue);
       if (endOfBin[digit] == current)
       {
         break;
@@ -420,17 +419,16 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
       current = endOfBin[nextBin-1];
     }
   }
-  bitMask >>= 8;
-  shiftRightAmount -= 8;
-  if (bitMask != 0)
+  if (shiftRightAmount > 0)
   {
+    gt_assert (shiftRightAmount >= 8UL);
+    shiftRightAmount -= 8;
     for (idx = 0; idx <= UINT8_MAX; idx++)
     {
       if (endOfBin[idx] - startOfBin[idx] >= 32UL)
       {
         gt_radixsort_inplace_GtUlong_rec(a + startOfBin[idx],
                                          endOfBin[idx] - startOfBin[idx],
-                                         bitMask,
                                          shiftRightAmount);
       } else
       {
@@ -445,8 +443,8 @@ void gt_radixsort_inplace_GtUlong(unsigned long *a,unsigned long a_size)
 {
   if (a_size >= 2UL)
   {
-    unsigned long bitMask = 0xFF00000000000000, shiftRightAmount = 56UL;
-    gt_radixsort_inplace_GtUlong_rec(a,a_size,bitMask,shiftRightAmount);
+    unsigned long shiftRightAmount = 56UL;
+    gt_radixsort_inplace_GtUlong_rec(a,a_size,shiftRightAmount);
   }
 }
 
