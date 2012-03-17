@@ -451,7 +451,9 @@ static int gt_encseq2spm_runner(GT_UNUSED int argc,
                                                       arguments->phase2extra,
                                      /* use true */   arguments->radixlarge ?
                                                         false : true,
-                                     /* use 2 */      arguments->radixparts,
+                                     /* use 2 without threads and
+                                        use 1 with threads */
+                                                      arguments->radixparts,
                                                       spmsk_states != NULL
                                                         ? gt_spmsk_inl_process
                                                         : NULL,
