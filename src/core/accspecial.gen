@@ -108,13 +108,11 @@ static unsigned long GT_APPENDINT(gt_encseq_seqstartposSW)(
                            const GT_APPENDINT(GtSWtable) *swtable,
                            unsigned long seqnum)
 {
-  if (seqnum > 0)
-  {
-    return GT_APPENDINT(sepnum2pageoffset)(swtable,seqnum - 1) *
-           (swtable->maxrangevalue + 1) +
-           swtable->positions[seqnum - 1] + 1;
-  }
-  return 0;
+  return (seqnum > 0)
+           ? GT_APPENDINT(sepnum2pageoffset)(swtable,seqnum - 1) *
+             (swtable->maxrangevalue + 1) +
+             swtable->positions[seqnum - 1] + 1
+           : 0;
 }
 
 static unsigned long GT_APPENDINT(position2seqnum)(

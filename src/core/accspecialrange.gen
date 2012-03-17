@@ -486,13 +486,9 @@ static void GT_APPENDINT(determinerange)(GtRange *range,
   range->start = transpagenum *
                  (1UL + (unsigned long) swtable->maxrangevalue) +
                  swtable->positions[cellnum];
-  if (swtable->rangelengths != NULL)
-  {
-    range->end = range->start + swtable->rangelengths[cellnum] + 1;
-  } else
-  {
-    range->end = range->start + 1;
-  }
+  range->end = (swtable->rangelengths != NULL)
+                  ? range->start + swtable->rangelengths[cellnum] + 1
+                  : range->start + 1;
   /*
   printf("new range [%lu,%lu] for rangelength=%s,maxvalue=%u,transpagenum=%lu,"
          "positions[cellnum=%lu]=%lu\n",
@@ -514,16 +510,14 @@ static void GT_APPENDINT(binpreparenextrangeGtEncseqReader)(
   GT_APPENDINT(GtSWtable) *swtable = NULL;
   GtEncseqReaderViatablesinfo *swstate = NULL;
 
-  switch (kindsw)
+  if (kindsw == SWtable_wildcardrange)
   {
-    case SWtable_wildcardrange:
-      swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
-      swstate = esr->wildcardrangestate;
-      break;
-    case SWtable_ssptab:
-      swtable = &(GT_APPENDINT(esr->encseq->ssptab.st));
-      swstate = esr->ssptabstate;
-      break;
+    swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
+    swstate = esr->wildcardrangestate;
+  } else
+  {
+    swtable = &(GT_APPENDINT(esr->encseq->ssptab.st));
+    swstate = esr->ssptabstate;
   }
   swstate->hasprevious = swstate->hascurrent = swstate->hasmore = false;
   swstate->exhausted = false;
@@ -756,18 +750,14 @@ static void GT_APPENDINT(advancerangeGtEncseqReader)(GtEncseqReader *esr,
   GT_APPENDINT(GtSWtable) *swtable = NULL;
   GtEncseqReaderViatablesinfo *swstate = NULL;
 
-  switch (kindsw)
+  if (kindsw == SWtable_wildcardrange)
   {
-    case SWtable_wildcardrange:
-      swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
-      swstate = esr->wildcardrangestate;
-      break;
-    case SWtable_ssptab:
-      swtable = &(GT_APPENDINT(esr->encseq->ssptab.st));
-      swstate = esr->ssptabstate;
-      break;
-    default:
-      gt_assert(false);
+    swtable = &(GT_APPENDINT(esr->encseq->wildcardrangetable.st));
+    swstate = esr->wildcardrangestate;
+  } else
+  {
+    swtable = &(GT_APPENDINT(esr->encseq->ssptab.st));
+    swstate = esr->ssptabstate;
   }
   gt_assert(swstate != NULL);
   while (true)
