@@ -405,11 +405,11 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
     }
     a[current++] = currentvalue;
     (*binptr)++;
-    while (current >= startOfBin[nextBin] && nextBin <= UINT8_MAX)
+    while (nextBin <= UINT8_MAX && current >= startOfBin[nextBin])
     {
       nextBin++;
     }
-    while (endOfBin[nextBin-1] == startOfBin[nextBin] && nextBin <= UINT8_MAX)
+    while (nextBin <= UINT8_MAX && endOfBin[nextBin-1] == startOfBin[nextBin])
     {
       nextBin++;
     }
@@ -442,7 +442,8 @@ void gt_radixsort_inplace_GtUlong(unsigned long *a,unsigned long a_size)
 {
   if (a_size >= 2UL)
   {
-    unsigned long shiftRightAmount = CHAR_BIT * (sizeof (unsigned long) - 1);
+    unsigned long shiftRightAmount = (unsigned long)
+                                     CHAR_BIT * (sizeof (unsigned long) - 1);
     gt_radixsort_inplace_GtUlong_rec(a,a_size,shiftRightAmount);
   }
 }
