@@ -165,7 +165,7 @@ static GtOptionParser* gt_readjoiner_overlap_option_parser_new(
 
   /* -radixparts */
   option = gt_option_new_uint("radixparts", "specify the radixpart parameter",
-      &arguments->radixparts, 2U);
+      &arguments->radixparts, 1U);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
