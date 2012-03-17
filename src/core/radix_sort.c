@@ -346,17 +346,43 @@ static void gt_radixsort_GtUlong_linear(GtRadixsortinfo *radixsort,
   }
 }
 
+static void gt_radixsort_inplace_insertionsort(unsigned long *a,
+                                               unsigned long a_size)
+{
+  unsigned long currentElement, idx, j;
+
+  for (idx = 1UL; idx < a_size; idx++)
+  {
+    if (a[idx] < a[idx - 1])
+    {
+      currentElement = a[idx];
+      a[idx] = a[idx - 1];
+      for (j = idx-1; j > 0 && currentElement < a[j-1]; j--)
+      {
+        a[j] = a[j - 1];
+      }
+      a[j] = currentElement;
+    }
+  }
+}
+
+static unsigned long recursivecalls = 0;
+
 static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
                                              unsigned long numofelems,
                                              unsigned long bitMask,
                                              unsigned long shiftRightAmount)
 {
   unsigned long idx, current, count[UINT8_MAX+1] = {0},
-                startOfBin[UINT8_MAX+1], endOfBin[UINT8_MAX+1], nextBin;
+                startOfBin[UINT8_MAX+1], currentvalue, tmp,
+                endOfBin[UINT8_MAX+1],
+                nextBin;
+  uint8_t digit;
 
+  recursivecalls++;
   for (current = 0; current < numofelems; current++)
   {
-    uint8_t digit = (uint8_t) ((a[current] & bitMask) >> shiftRightAmount);
+    digit = (uint8_t) ((a[current] & bitMask) >> shiftRightAmount);
     count[digit]++;
   }
   startOfBin[0] = endOfBin[0] = nextBin = 0;
@@ -366,29 +392,32 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
   }
   for (current = 0; current < numofelems;)
   {
-    uint8_t digit = (uint8_t) ((a[current] & bitMask) >> shiftRightAmount);
-    if (endOfBin[digit] != current)
+    currentvalue = a[current];
+    while (true)
     {
-      unsigned long tmp = a[current];
-      a[current] = a[endOfBin[digit]];
+      digit = (uint8_t) ((currentvalue & bitMask) >> shiftRightAmount);
+      if (endOfBin[digit] == current)
+      {
+        break;
+      }
+      tmp = currentvalue;
+      currentvalue = a[endOfBin[digit]];
       a[endOfBin[digit]] = tmp;
       endOfBin[digit]++;
-    } else
+    }
+    a[current++] = currentvalue;
+    endOfBin[digit]++;
+    while (current >= startOfBin[nextBin] && nextBin <= UINT8_MAX)
     {
-      endOfBin[digit]++;
-      current++;
-      while (current >= startOfBin[nextBin] && nextBin <= UINT8_MAX)
-      {
-        nextBin++;
-      }
-      while (endOfBin[nextBin-1] == startOfBin[nextBin] && nextBin <= UINT8_MAX)
-      {
-        nextBin++;
-      }
-      if (current < endOfBin[nextBin-1])
-      {
-        current = endOfBin[nextBin-1];
-      }
+      nextBin++;
+    }
+    while (endOfBin[nextBin-1] == startOfBin[nextBin] && nextBin <= UINT8_MAX)
+    {
+      nextBin++;
+    }
+    if (current < endOfBin[nextBin-1])
+    {
+      current = endOfBin[nextBin-1];
     }
   }
   bitMask >>= 8;
@@ -397,12 +426,16 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
   {
     for (idx = 0; idx <= UINT8_MAX; idx++)
     {
-      if (endOfBin[idx] - startOfBin[idx] >= 2UL)
+      if (endOfBin[idx] - startOfBin[idx] >= 32UL)
       {
         gt_radixsort_inplace_GtUlong_rec(a + startOfBin[idx],
                                          endOfBin[idx] - startOfBin[idx],
                                          bitMask,
                                          shiftRightAmount);
+      } else
+      {
+        gt_radixsort_inplace_insertionsort(a + startOfBin[idx],
+                                           endOfBin[idx] - startOfBin[idx]);
       }
     }
   }
