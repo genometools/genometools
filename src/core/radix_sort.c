@@ -375,14 +375,13 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
   unsigned long idx, current, count[UINT8_MAX+1] = {0},
                 startOfBin[UINT8_MAX+1], currentvalue, tmp,
                 endOfBin[UINT8_MAX+1],
-                digit,
-                nextBin;
+                nextBin,
+                *binptr;
 
   recursivecalls++;
   for (current = 0; current < numofelems; current++)
   {
-    digit = GT_RADIX_KEY(UINT8_MAX,shiftRightAmount,a[current]);
-    count[digit]++;
+    count[GT_RADIX_KEY(UINT8_MAX,shiftRightAmount,a[current])]++;
   }
   startOfBin[0] = endOfBin[0] = nextBin = 0;
   for (idx = 1UL; idx <= UINT8_MAX; idx++)
@@ -394,18 +393,18 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
     currentvalue = a[current];
     while (true)
     {
-      digit = GT_RADIX_KEY(UINT8_MAX,shiftRightAmount,currentvalue);
-      if (endOfBin[digit] == current)
+      binptr = endOfBin + GT_RADIX_KEY(UINT8_MAX,shiftRightAmount,currentvalue);
+      if (*binptr == current)
       {
         break;
       }
       tmp = currentvalue;
-      currentvalue = a[endOfBin[digit]];
-      a[endOfBin[digit]] = tmp;
-      endOfBin[digit]++;
+      currentvalue = a[*binptr];
+      a[*binptr] = tmp;
+      (*binptr)++;
     }
     a[current++] = currentvalue;
-    endOfBin[digit]++;
+    (*binptr)++;
     while (current >= startOfBin[nextBin] && nextBin <= UINT8_MAX)
     {
       nextBin++;
@@ -443,7 +442,7 @@ void gt_radixsort_inplace_GtUlong(unsigned long *a,unsigned long a_size)
 {
   if (a_size >= 2UL)
   {
-    unsigned long shiftRightAmount = 56UL;
+    unsigned long shiftRightAmount = CHAR_BIT * (sizeof (unsigned long) - 1);
     gt_radixsort_inplace_GtUlong_rec(a,a_size,shiftRightAmount);
   }
 }
