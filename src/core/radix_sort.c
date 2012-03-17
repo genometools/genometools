@@ -376,13 +376,13 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
   unsigned long idx, current, count[UINT8_MAX+1] = {0},
                 startOfBin[UINT8_MAX+1], currentvalue, tmp,
                 endOfBin[UINT8_MAX+1],
+                digit,
                 nextBin;
-  uint8_t digit;
 
   recursivecalls++;
   for (current = 0; current < numofelems; current++)
   {
-    digit = (uint8_t) ((a[current] & bitMask) >> shiftRightAmount);
+    digit = (a[current] & bitMask) >> shiftRightAmount;
     count[digit]++;
   }
   startOfBin[0] = endOfBin[0] = nextBin = 0;
@@ -395,7 +395,7 @@ static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
     currentvalue = a[current];
     while (true)
     {
-      digit = (uint8_t) ((currentvalue & bitMask) >> shiftRightAmount);
+      digit = (currentvalue & bitMask) >> shiftRightAmount;
       if (endOfBin[digit] == current)
       {
         break;
