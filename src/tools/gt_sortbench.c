@@ -61,7 +61,8 @@ static void gt_sortbench_arguments_delete(void *tool_arguments)
 
 static const char *gt_sort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct",
-       "radixrec","radixdiv","radixlinsmall","radixlinlarge",NULL};
+       "radixrec","radixdiv","radixlinsmall","radixlinlarge",
+       "radixinplace",NULL};
 
 static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 {
@@ -75,13 +76,13 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
   op = gt_option_parser_new("[option ...]",
                             "Benchmarks quicksort implementations.");
 
-  option = gt_option_new_choice("impl", "implementation\nchoose from "
-                                "thomas|system|inlinedptr|inlinedarr|direct|\n"
-                                "radixlinsmall|radixlinlarge|radixrec|\n"
-                                "radixdiv|radixlinsmall2|radixlinslarge2",
-                                arguments->impl,
-                                gt_sort_implementation_names[0],
-                                gt_sort_implementation_names);
+  option = gt_option_new_choice(
+                 "impl", "implementation\nchoose from "
+                 "thomas|system|inlinedptr|inlinedarr|direct|radixrec|\n"
+                 "radixdiv|radixlinsmall|radixlinlarge|radixinplace",
+                  arguments->impl,
+                  gt_sort_implementation_names[0],
+                  gt_sort_implementation_names);
   gt_option_parser_add_option(op, option);
 
   option = gt_option_new_ulong("size", "number of integers to sort",
@@ -409,6 +410,14 @@ static void check_radixsort_GtUlong_divide(unsigned long *arr,
   gt_free(temp);
 }
 
+static void check_radixsort_inplace(unsigned long *arr, unsigned long len,
+                                    GT_UNUSED unsigned int rparts,
+                                    GT_UNUSED bool withthreads)
+{
+  gt_radixsort_inplace_GtUlong(arr,len);
+  gt_sortbench_verify(arr,len);
+}
+
 typedef void (*GtQsortimplementationfunc)(unsigned long *,unsigned long,
                                           unsigned int,bool);
 
@@ -423,6 +432,7 @@ static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
   check_radixsort_GtUlong_divide,
   check_radixsort_GtUlong_linear_small,
   check_radixsort_GtUlong_linear_large,
+  check_radixsort_inplace
 };
 
 #define GT_NUM_OF_SORT_IMPLEMENTATIONS\

@@ -317,6 +317,12 @@ GtUlongPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsort);
 */
 void gt_radixsort_verify(GtRadixreader *rr);
 
+/* The following function implements a radixsort which does not require
+   extra workspace. Its taken from
+   http://drdobbs.com/architecture-and-design/221600153 */
+
+void gt_radixsort_inplace_GtUlong(unsigned long *a,unsigned long a_size);
+
 /* The following two function implement the radixsort algorithm using a
    different approaches, which are not as fast as the functions
    encapsulated in the <GtRadixreaderinfo>.

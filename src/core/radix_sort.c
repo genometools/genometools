@@ -346,6 +346,77 @@ static void gt_radixsort_GtUlong_linear(GtRadixsortinfo *radixsort,
   }
 }
 
+static void gt_radixsort_inplace_GtUlong_rec(unsigned long *a,
+                                             unsigned long numofelems,
+                                             unsigned long bitMask,
+                                             unsigned long shiftRightAmount)
+{
+  unsigned long idx, current, count[UINT8_MAX+1] = {0},
+                startOfBin[UINT8_MAX+1], endOfBin[UINT8_MAX+1], nextBin;
+
+  for (current = 0; current < numofelems; current++)
+  {
+    uint8_t digit = (uint8_t) ((a[current] & bitMask) >> shiftRightAmount);
+    count[digit]++;
+  }
+  startOfBin[0] = endOfBin[0] = nextBin = 0;
+  for (idx = 1UL; idx <= UINT8_MAX; idx++)
+  {
+    startOfBin[idx] = endOfBin[idx] = startOfBin[idx-1] + count[idx-1];
+  }
+  for (current = 0; current < numofelems;)
+  {
+    uint8_t digit = (uint8_t) ((a[current] & bitMask) >> shiftRightAmount);
+    if (endOfBin[digit] != current)
+    {
+      unsigned long tmp = a[current];
+      a[current] = a[endOfBin[digit]];
+      a[endOfBin[digit]] = tmp;
+      endOfBin[digit]++;
+    } else
+    {
+      endOfBin[digit]++;
+      current++;
+      while (current >= startOfBin[nextBin] && nextBin <= UINT8_MAX)
+      {
+        nextBin++;
+      }
+      while (endOfBin[nextBin-1] == startOfBin[nextBin] && nextBin <= UINT8_MAX)
+      {
+        nextBin++;
+      }
+      if (current < endOfBin[nextBin-1])
+      {
+        current = endOfBin[nextBin-1];
+      }
+    }
+  }
+  bitMask >>= 8;
+  shiftRightAmount -= 8;
+  if (bitMask != 0)
+  {
+    for (idx = 0; idx <= UINT8_MAX; idx++)
+    {
+      if (endOfBin[idx] - startOfBin[idx] >= 2UL)
+      {
+        gt_radixsort_inplace_GtUlong_rec(a + startOfBin[idx],
+                                         endOfBin[idx] - startOfBin[idx],
+                                         bitMask,
+                                         shiftRightAmount);
+      }
+    }
+  }
+}
+
+void gt_radixsort_inplace_GtUlong(unsigned long *a,unsigned long a_size)
+{
+  if (a_size >= 2UL)
+  {
+    unsigned long bitMask = 0xFF00000000000000, shiftRightAmount = 56UL;
+    gt_radixsort_inplace_GtUlong_rec(a,a_size,bitMask,shiftRightAmount);
+  }
+}
+
 static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,
                                                   GtUlongPair *source,
                                                   GtUlongPair *dest,
