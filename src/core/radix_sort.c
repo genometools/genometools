@@ -473,7 +473,6 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
                 count[UINT8_MAX+1] = {0},
                 startOfBin[UINT8_MAX+1],
                 endOfBin[UINT8_MAX+1];
-  unsigned long insertionsortwidthdist[32] = {0};
 
   GT_STACK_INIT(&stack,64UL);
   tmpstackelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
@@ -530,37 +529,25 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
       for (idx = UINT8_MAX; idx >= 0; idx--)
       {
         width = endOfBin[idx] - startOfBin[idx];
-        if (width >= 32UL)
+        if (width >= 2UL)
         {
-          tmpstackelem.left = currentstackelem.left + startOfBin[idx];
-          tmpstackelem.len = width;
-          GT_STACK_PUSH(&stack,tmpstackelem);
-        } else
-        {
-          if (width >= 2UL)
+          if (width <= 32UL)
           {
-            insertionsortwidthdist[width]++;
             gt_radixsort_inplace_insertionsort(
-                                      currentstackelem.left + startOfBin[idx],
-                                      width);
+                                        currentstackelem.left + startOfBin[idx],
+                                        width);
+          } else
+          {
+            tmpstackelem.left = currentstackelem.left + startOfBin[idx];
+            tmpstackelem.len = width;
+            GT_STACK_PUSH(&stack,tmpstackelem);
           }
         }
-        count[idx] = 0;
-      }
-    } else
-    {
-      for (idx = 0; idx <= UINT8_MAX; idx++)
-      {
         count[idx] = 0;
       }
     }
   }
   GT_STACK_DELETE(&stack);
-  for (idx=0; idx<32L; idx++)
-  {
-    printf("insertionsortwidthdist[%02ld]=%lu\n",idx,
-            insertionsortwidthdist[idx]);
-  }
 }
 
 static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,
