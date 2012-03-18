@@ -29,6 +29,8 @@
 #include "core/spacepeak.h"
 #include "core/undef_api.h"
 #include "core/unused_api.h"
+#include "core/minmax.h"
+#include "core/qsort-ulong.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
@@ -927,18 +929,6 @@ static int gt_firstcodes_thread_sortremaining(
 }
 #endif
 
-#ifdef  QSORTNAME
-#undef  QSORTNAME
-#endif
-
-#define QSORTNAME(NAME)                        firstcodes_##NAME
-#define firstcodes_ARRAY_GET(ARR,RELIDX)       ARR[RELIDX]
-#define firstcodes_ARRAY_SET(ARR,RELIDX,VALUE) ARR[RELIDX] = VALUE
-
-typedef unsigned long QSORTNAME(Sorttype);
-
-#include "match/qsort-direct.gen"
-
 static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
 {
 #ifdef WITHCACHE
@@ -1166,7 +1156,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
   {
     gt_timer_show_progress(timer, "to sort initial prefixes",stdout);
   }
-  QSORTNAME(gt_direct_qsort)(6UL, false,fci->allfirstcodes,fci->numofsequences);
+  gt_direct_qsort_ulong (6UL, false,fci->allfirstcodes,fci->numofsequences);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
   fci->buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,

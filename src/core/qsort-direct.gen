@@ -58,11 +58,10 @@ GT_STACK_DECLARESTRUCT(Intervalarrtobesorted,32UL);
 #define GT_STACK_INTERVALARRAYTOBESORTED_DEFINED
 #endif
 
-static void QSORTNAME(gt_direct_qsort) (
-                                   unsigned long insertionsortthreshold,
-                                   bool handlenotswapped,
-                                   QSORTNAME(Sorttype) *arr,
-                                   unsigned long len)
+void QSORTNAME(gt_direct_qsort) (unsigned long insertionsortthreshold,
+                                 bool handlenotswapped,
+                                 QSORTNAME(Sorttype) *arr,
+                                 unsigned long len)
 {
   unsigned long tmp, pa, pb, pc, pd, pl, pm, pn, aidx, bidx, s;
   bool swapped;

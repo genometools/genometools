@@ -27,6 +27,7 @@
 #include "core/timer.h"
 #include "core/radix_sort.h"
 #include "core/unused_api.h"
+#include "core/qsort-ulong.h"
 #include "tools/gt_sortbench.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
@@ -285,13 +286,11 @@ static void check_inlinedarr_qsort(unsigned long *arr, unsigned long len,
   gt_sortbench_verify(arr,len);
 }
 
-#include "match/qsort-direct.gen"
-
 static void check_direct_qsort(unsigned long *arr, unsigned long len,
                                GT_UNUSED unsigned int rparts,
                                GT_UNUSED bool withthreads)
 {
-  QSORTNAME(gt_direct_qsort) (6UL, false, arr, len);
+  gt_direct_qsort_ulong (6UL, false, arr, len);
   gt_sortbench_verify(arr,len);
 }
 
