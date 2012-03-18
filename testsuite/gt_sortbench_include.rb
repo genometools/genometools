@@ -1,4 +1,5 @@
-methods = ["radixinplace","thomas","system","inlinedptr","inlinedarr","direct",
+methods = ["radixinplace","radixinplace-recursive","thomas",
+           "system","inlinedptr","inlinedarr","direct",
            "radixlinsmall","radixlinlarge",
            "radixlinsmall -parts 2","radixlinlarge -parts 2",
            "radixlinsmall -parts 3","radixlinlarge -parts 3",
