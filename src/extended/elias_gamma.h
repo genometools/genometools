@@ -21,9 +21,9 @@
 #include "core/error_api.h"
 
 /* The <GtEliasGammaBitwiseDecoder> class is used to decode elias gamma encoded
-   integers.
-   See Elias, Peter (March 1975). "Universal codeword sets and representations
-   of the integers"*/
+   integers. For details see Elias, Peter: "Universal codeword sets and
+   representations of the integers", IEEE Transactions on Information Theory,
+   21(2):194--203 (1975). */
 typedef struct GtEliasGammaBitwiseDecoder GtEliasGammaBitwiseDecoder;
 
 /* Encodes the given positive integer <x>, writes it to a new <GtBittab> object
@@ -34,14 +34,15 @@ GtBittab*                   gt_elias_gamma_encode(unsigned long x);
    meant to decode a code word bit by bit.*/
 GtEliasGammaBitwiseDecoder* gt_elias_gamma_bitwise_decoder_new();
 
-/* Appends <bit> to the code word currently being decoded. Returns 0 if the
-   code word was completely read and writes its value to the location
-   pointed to by <x>. Returns 1 if more bits are needed to decode the current
-   code word. */
+/* Appends <bit> to the code word currently being decoded by <egbd>.
+   Returns 0 if the code word was completely read and writes its value to the
+   location pointed to by <x>. Returns 1 if more bits are needed to decode the
+   current code word. */
 int                         gt_elias_gamma_bitwise_decoder_next(
                                                GtEliasGammaBitwiseDecoder *egbd,
                                                bool bit, unsigned long *x);
-/* Deletes <egcbd>. */
+
+/* Deletes <egbd> and frees all associated memory. */
 void                        gt_elias_gamma_bitwise_decoder_delete(
                                               GtEliasGammaBitwiseDecoder *egbd);
 
