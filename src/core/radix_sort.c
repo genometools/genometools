@@ -500,17 +500,17 @@ static unsigned long *gt_evenly_divide_stack(const GtStackGtRadixsort_stackelem
   maxindex = stack->nextfree - 1;
   leftborder = gt_malloc(sizeof (*leftborder) * (maxindex+1));
   leftborder[0] = stack->space[0].len;
-  printf("0 [0,%lu] of width %lu\n",stack->space[0].len,
-                                    stack->space[0].len);
+  /*printf("0 [0,%lu] of width %lu\n",stack->space[0].len,
+                                    stack->space[0].len);*/
   for (idx = 1UL; idx <= maxindex; idx++)
   {
     leftborder[idx] = leftborder[idx-1] + stack->space[idx].len;
-    printf("%lu [%lu,%lu] of width %lu\n",idx,leftborder[idx-1],
+    /*printf("%lu [%lu,%lu] of width %lu\n",idx,leftborder[idx-1],
                                           leftborder[idx]-1,
-                                          stack->space[idx].len);
+                                          stack->space[idx].len);*/
   }
   widthofpart = len/numofparts;
-  printf("widthofpart=%lu\n",widthofpart);
+  /*printf("widthofpart=%lu\n",widthofpart);*/
   endindexes = gt_malloc(sizeof (*endindexes) * numofparts);
   remainder = (unsigned int) (len % (unsigned long) numofparts);
   for (part=0; part < numofparts; part++)
@@ -537,7 +537,7 @@ static unsigned long *gt_evenly_divide_stack(const GtStackGtRadixsort_stackelem
   }
   for (j=0; j < numofparts; j++)
   {
-    printf("endindex[j]=%lu",endindexes[j]);
+    /*printf("endindex[j]=%lu",endindexes[j]);*/
     if (j == 0)
     {
       leftbound = 0;
@@ -546,11 +546,17 @@ static unsigned long *gt_evenly_divide_stack(const GtStackGtRadixsort_stackelem
       leftbound = leftborder[endindexes[j-1]]-1;
     }
     rightbound = leftborder[endindexes[j]];
-    printf("[%lu,%lu] of width %lu\n",leftbound,rightbound,
-                                      rightbound - leftbound);
+    /*printf("[%lu,%lu] of width %lu\n",leftbound,rightbound,
+                                      rightbound - leftbound);*/
   }
   gt_free(leftborder);
   return endindexes;
+}
+
+static void *gt_radixsort_thread_caller(void *data)
+{
+  gt_radixsort_sub_inplace_GtUlong((GtStackGtRadixsort_stackelem *) data);
+  return NULL;
 }
 #endif
 
@@ -643,9 +649,11 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
     unsigned int t;
     unsigned long last = 0, j;
     GtStackGtRadixsort_stackelem *stacktab;
+    GtThread **threadtab;
     unsigned long *endindexes = gt_evenly_divide_stack(&stack,len,threads);
 
     stacktab = gt_malloc(sizeof (*stacktab) * threads);
+    threadtab = gt_malloc(sizeof (*threadtab) * threads);
     for (t = 0; t < threads; t++)
     {
       GT_STACK_INIT(stacktab + t,UINT8_MAX);
@@ -654,14 +662,19 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
         GT_STACK_PUSH(stacktab + t,stack.space[j]);
       }
       last = endindexes[t] + 1;
+      threadtab[t] = gt_thread_new (gt_radixsort_thread_caller,
+                                    stacktab + t,NULL);
+      gt_assert (threadtab[t] != NULL);
     }
     gt_free(endindexes);
     GT_STACK_DELETE(&stack);
     for (t = 0; t < threads; t++)
     {
-      gt_radixsort_sub_inplace_GtUlong(stacktab + t);
+      gt_thread_join(threadtab[t]);
+      gt_thread_delete(threadtab[t]);
     }
     gt_free(stacktab);
+    gt_free(threadtab);
 #endif
   }
 }
