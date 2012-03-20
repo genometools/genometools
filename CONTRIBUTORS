@@ -2,6 +2,7 @@ The following contributors helped to develop GenomeTools. Please drop a note to
 gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 
 - Stefan Bienert (patches)
+- Joachim Bonnet (Huffman/Golomb/Elias coding, GtBit{In,Out}Stream)
 - David Ellinghaus (parts of ltr/ subdirectory, ltrharvest tool)
 - Johannes Fischer (range minimum query code)
 - Giorgio Gonnella (codegen, simreads tool, readjoiner tools,  patches)
@@ -11,4 +12,3 @@ gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 - Christin Schaerfer (AnnotationSketch, sketch tool)
 - David Schmitz-Huebsch (mgth/ subdirectory, mgth tool)
 - Dirk Willrodt (genomediff tool, SAM/BAM, patches)
-- Joachim Bonnet (Huffman/Golomb/Elias coding, GtBit{In,Out}Stream)
