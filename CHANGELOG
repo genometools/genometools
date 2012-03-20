@@ -1,9 +1,22 @@
-changes in version 1.4.0 (2011-07-30)
+changes in version 1.4.0 (2012-03-20)
 
+- bugfixes and cleanups
 - the tool `gt mutate` has been renamed to `gt seqmutate`. The same
   functionality is still available with `gt mutate` in order not to break
   existing scripts.
 - `gt extractfeat` has new options -seqid and -target
+- `gt suffixerator` has new options -lcpdist, -genomediff
+- `gt readjoiner' toolbox added for short read assembly
+- `gt encseq encode' has new option -lossless
+- `gt gff3 -tidy' recognizes and fixes more GFF3 errors
+- test suite is now multithreaded
+- added GtSamAlignment, GtSamfileIterator for SAM/BAM access
+- added GtHuffman*, GtGolomb*, GtEliasGamma* for integer encoding
+- added GtBit{In,Out}Stream
+- further optimizations in GtEncseq
+- ensure compatibility with GCC >=4.6 (as in Ubuntu oneiric)
+- BSD-licensed implementation is now used in GtRBTree
+- added GtRMQ class for efficient range minimum queries
 
 
 changes in version 1.3.9 (2011-07-02)
