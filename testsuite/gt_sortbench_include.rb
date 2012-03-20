@@ -17,8 +17,15 @@ methods.each do |met|
         run "#{$bin}gt -j 2 dev sortbench -impl #{met} -size #{len}"
         run "#{$bin}gt -j 3 dev sortbench -impl #{met} -size #{len}"
       end
-      run "#{$bin}gt dev sortbench -impl #{met} -size #{len}"
-      run "#{$bin}gt dev sortbench -impl #{met} -size #{len} -maxval 10000"
+      if met.match(/^radixinplace/)
+        ["","-j 4"].each do |opt|
+          run "#{$bin}gt #{opt} dev sortbench -impl #{met} -size #{len} -maxval 1000"
+          run "#{$bin}gt #{opt} dev sortbench -impl #{met} -size #{len}"
+        end
+      else
+        run "#{$bin}gt dev sortbench -impl #{met} -size #{len}"
+        run "#{$bin}gt dev sortbench -impl #{met} -size #{len} -maxval 10000"
+      end
     end
   end
 end
