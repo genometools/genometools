@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2011 Joachim Bonnet <joachim.bonnet@studium.uni-hamburg.de>
+  Copyright (c) 2012 Dirk Willrodt <willrodt@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -33,7 +34,7 @@ typedef struct GtHuffmanBitwiseDecoder GtHuffmanBitwiseDecoder;
 
 /* Function type, used to get the count of a specific symbol represented by
    <symbol_number> in <distribution>. Needed by <GtHuffman>. */
-typedef unsigned long long (*GtDistrFunc) (void *distribution,
+typedef unsigned long long (*GtDistrFunc) (const void *distribution,
                                            unsigned long symbol_number);
 
 /* Function type, used when iterating over all encoded symbols in a <GtHuffman>
@@ -41,7 +42,8 @@ typedef unsigned long long (*GtDistrFunc) (void *distribution,
    the distribution of symbols, <code> points to the bitstring and <code_length>
    is its corresponding length.
    <action_info> points to a structure that might contain information for the
-   <GtHuffmanActFunc> for example when calculating the average code length. */
+   <GtHuffmanActFunc> for example when calculating the average code length.
+   Should return 0 on success and -1 on error. */
 typedef int (*GtHuffmanActFunc) (unsigned long symbol,
                                  unsigned long long freq,
                                  GtBitsequence code,
@@ -52,53 +54,49 @@ typedef int (*GtHuffmanActFunc) (unsigned long symbol,
    structure containing the distribution of a set of symbols. <distr_func> is a
    function returning the number of occurrences for a given symbol. symbols are
    represented by numbers in range [0,num_of_symbols - 1]. */
-GtHuffman*              gt_huffman_new(void *distribution,
-                                       GtDistrFunc distr_func,
-                                       unsigned long num_of_symbols,
-                                       GtError *err);
+GtHuffman*               gt_huffman_new(const void *distribution,
+                                        GtDistrFunc distr_func,
+                                        unsigned long num_of_symbols);
 
 /* Traverses the huffman tree and calculates total number of symbols in text and
    total number of bits needed to represent the text. */
-void                    gt_huffman_size(GtHuffman *huffman,
-                                        uint64_t *bits,
-                                        unsigned long *chars);
+void                     gt_huffman_size(const GtHuffman *huffman,
+                                         uint64_t *bits,
+                                         unsigned long *chars);
 
 /* Prints the code for each symbol to stdout. One symbol per line. */
-void                    gt_huffman_print_codes(GtHuffman *huffman,
-                                               GtError *err);
+void                     gt_huffman_print_codes(const GtHuffman *huffman);
 
 /* Iterato over all encoded symbols and perform <action_func> with its
    statistics. <action_info> can be null or any struct to hold information for
    the action_func*/
-int                     gt_huffman_iterate(GtHuffman *huffman,
-                                           GtHuffmanActFunc action_func,
-                                           void *action_info,
-                                           GtError *err);
+int                      gt_huffman_iterate(const GtHuffman *huffman,
+                                            GtHuffmanActFunc action_func,
+                                            void *action_info);
 
 /* Encodes a single symbol and writes its code to <code> and the number of bits
    for its code to <codelength>. */
-void                    gt_huffman_encode(GtHuffman *huffman,
-                                          unsigned long symbol,
-                                          GtBitsequence *code,
-                                          unsigned long *codelength);
+void                     gt_huffman_encode(const GtHuffman *huffman,
+                                           unsigned long symbol,
+                                           GtBitsequence *code,
+                                           unsigned long *codelength);
 
 /* Returns the number of symbols with frequency > 0. */
-unsigned long           gt_huffman_numofsymbols(GtHuffman *huffman);
+unsigned long            gt_huffman_numofsymbols(const GtHuffman *huffman);
 
 /* Returns the number of symbols with frequency >= 0. */
-unsigned long           gt_huffman_totalnumofsymbols(GtHuffman *huffman);
+unsigned long            gt_huffman_totalnumofsymbols(const GtHuffman *huffman);
 
 /* Returns a new <GtHuffmanDecoder> object. This decoder is meant to decode a
    huffman encoded bitstring. <length> is the number of elements in
    <bitsequence>. The <bit_offset> tells the decoder at which bit of the first
    <GtBitsequence> to start, <pad_length> is the number of bits in the last
    element of <bitsequence> that are not part of the encoded data. */
-GtHuffmanDecoder        *gt_huffman_decoder_new(GtHuffman *huffman,
-                                                GtBitsequence *bitsequence,
-                                                unsigned long length,
-                                                unsigned long bit_offset,
-                                                unsigned long pad_length,
-                                                GtError *err);
+GtHuffmanDecoder*        gt_huffman_decoder_new(GtHuffman *huffman,
+                                                 GtBitsequence *bitsequence,
+                                                 unsigned long length,
+                                                 unsigned long bit_offset,
+                                                 unsigned long pad_length);
 
 /* Function type, used by <GtHuffmanDecoder> to ask for a pointer to
    <GtBitsequence> to read. Sets <bitsequence> to the new memory, <length> to
@@ -119,15 +117,15 @@ typedef int (*GtHuffmanDecoderGetMemFunc) (GtBitsequence **bitsequence,
    chunk of data.
    This type of encoder is helpfull if the encoded data is sampled or read in
    chunks from mmapped files. */
-GtHuffmanDecoder        *gt_huffman_decoder_new_from_memory(
+GtHuffmanDecoder*        gt_huffman_decoder_new_from_memory(
                                             GtHuffman *huffman,
                                             GtHuffmanDecoderGetMemFunc mem_func,
                                             void *info,
                                             GtError *err);
 
 /* Make the decoder <hd> call the <mem_func> to get new memory. Returns -1 on
-   error */
-int                     gt_huffman_decoder_get_new_mem_chunk(
+   error. This can be used to reset the decoder. */
+int                      gt_huffman_decoder_get_new_mem_chunk(
                                                            GtHuffmanDecoder *hd,
                                                            GtError *err);
 
@@ -135,36 +133,35 @@ int                     gt_huffman_decoder_get_new_mem_chunk(
    <symbols> and returns the decoder's status. Returns 0 if EOF was reached, 1
    if there are more symbols to read and -1 if an error occured. <symbols> must
    be an array with type unsigned long. */
-int                     gt_huffman_decoder_next(GtHuffmanDecoder *hd,
-                                                GtArray *symbols,
-                                                unsigned long num_of_symbols,
-                                                GtError *err);
+int                      gt_huffman_decoder_next(GtHuffmanDecoder *hd,
+                                                 GtArray *symbols,
+                                                 unsigned long num_of_symbols,
+                                                 GtError *err);
 
 /* Returns a new GtHuffmanBitwiseDecoder object. This decoder that is
    meant to decode a code bit by bit.*/
-GtHuffmanBitwiseDecoder *gt_huffman_bitwise_decoder_new(GtHuffman *hc,
+GtHuffmanBitwiseDecoder* gt_huffman_bitwise_decoder_new(GtHuffman *hc,
                                                         GtError *err);
 
 /* Moves inside the huffman tree exactly by one node according to <bit>
-  (true: visit right child, false: visit left child).
-   Returns 0 if a leaf was reached and then writes the corresponding symbol to
-   <symbol>. Returns 1 if no leaf was reached yet.*/
-int                     gt_huffman_bitwise_decoder_next(
-                                                 GtHuffmanBitwiseDecoder *hbwd,
-                                                 bool bit,
-                                                 unsigned long *symbol,
-                                                 GtError *err);
+  (true: visit right child, false: visit left child). Returns 0 if a leaf was
+  reached and then writes the corresponding symbol to <symbol>. Returns 1 if no
+  leaf was reached yet.*/
+int                      gt_huffman_bitwise_decoder_next(
+                                                  GtHuffmanBitwiseDecoder *hbwd,
+                                                  bool bit,
+                                                  unsigned long *symbol);
 
 /* Deletes <hd>. */
-void                    gt_huffman_decoder_delete(GtHuffmanDecoder *hd);
+void                     gt_huffman_decoder_delete(GtHuffmanDecoder *hd);
 
 /* Deletes <huffman>. */
-void                    gt_huffman_delete(GtHuffman *huffman);
+void                     gt_huffman_delete(GtHuffman *huffman);
 
 /* Deletes <hbwd>. */
-void                    gt_huffman_bitwise_decoder_delete(
+void                     gt_huffman_bitwise_decoder_delete(
                                                 GtHuffmanBitwiseDecoder *hbwd);
 
-int                     gt_huffman_unit_test(GtError *err);
+int                      gt_huffman_unit_test(GtError *err);
 
 #endif
