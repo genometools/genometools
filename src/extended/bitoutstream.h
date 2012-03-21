@@ -48,7 +48,7 @@ void            gt_bitoutstream_flush_advance(GtBitOutStream *bitstream);
 
 /* Returns the position of the file pointer <fp> associated with <bitstream>.
    For reliable results gt_bitoutstream_flush has to be called before! */
-off_t           gt_bitoutstream_pos(GtBitOutStream *bitstream);
+off_t           gt_bitoutstream_pos(const GtBitOutStream *bitstream);
 
 void            gt_bitoutstream_delete(GtBitOutStream *bitstream);
 

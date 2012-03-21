@@ -38,7 +38,7 @@ struct GtBitInStream {
   unsigned long num_of_pages;
 };
 
-GtBitInStream *gt_bitinstream_new(char* path,
+GtBitInStream *gt_bitinstream_new(const char* path,
                                   off_t offset,
                                   unsigned long pages_to_map)
 {

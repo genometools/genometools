@@ -86,7 +86,7 @@ void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
   }
 }
 
-off_t gt_bitoutstream_pos(GtBitOutStream *bitstream)
+off_t gt_bitoutstream_pos(const GtBitOutStream *bitstream)
 {
   return (off_t) ftell(bitstream->fp);
 }

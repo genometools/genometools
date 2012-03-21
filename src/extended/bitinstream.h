@@ -29,7 +29,7 @@ typedef struct GtBitInStream GtBitInStream;
    name of the file, <offset> is the page offset where mapping should start, it
    has to be a multiple of pagesize. <pages_to_map> is the number of pages to
    map at once. If <path> is not valid exits with <EXIT_FAILURE>*/
-GtBitInStream *gt_bitinstream_new(char *path,
+GtBitInStream *gt_bitinstream_new(const char *path,
                                   off_t offset,
                                   unsigned long pages_to_map);
 
