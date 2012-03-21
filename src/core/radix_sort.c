@@ -570,24 +570,28 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
 #else
   const unsigned int threads = 1U;
 #endif
-  unsigned long current, currentvalue, tmp, width, nextBin, *binptr,
-                count[UINT8_MAX+1] = {0},
-                startOfBin[UINT8_MAX+1],
+  unsigned long previousvalue, current, currentvalue, tmp, width,
+                nextBin, *binptr, *count,
+                startOfBin[UINT8_MAX+1] = {0},
                 endOfBin[UINT8_MAX+1];
 
   GT_STACK_INIT(&stack,UINT8_MAX);
   currentstackelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
   currentstackelem.left = source;
   currentstackelem.len = len;
+  count = startOfBin; /* use same memory for count and startOfBin */
   for (current = 0; current < currentstackelem.len; current++)
   {
     count[GT_RADIX_KEY(UINT8_MAX,currentstackelem.shift,
                        currentstackelem.left[current])]++;
   }
+  previousvalue = count[0];
   startOfBin[0] = endOfBin[0] = nextBin = 0;
   for (idx = 1L; idx <= UINT8_MAX; idx++)
   {
-    startOfBin[idx] = endOfBin[idx] = startOfBin[idx-1] + count[idx-1];
+    tmp = startOfBin[idx-1] + previousvalue;
+    previousvalue = count[idx];
+    startOfBin[idx] = endOfBin[idx] = tmp;
   }
   for (current = 0; current < currentstackelem.len; /* Nothing */)
   {
@@ -607,10 +611,12 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
     }
     currentstackelem.left[current++] = currentvalue;
     (*binptr)++;
+    /* skip over empty bins */
     while (nextBin <= UINT8_MAX && current >= startOfBin[nextBin])
     {
       nextBin++;
     }
+    /* skip over full bins */
     while (nextBin <= UINT8_MAX && endOfBin[nextBin-1] == startOfBin[nextBin])
     {
       nextBin++;
