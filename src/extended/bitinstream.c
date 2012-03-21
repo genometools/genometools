@@ -40,10 +40,8 @@ struct GtBitInStream {
 
 GtBitInStream *gt_bitinstream_new(char* path,
                                   off_t offset,
-                                  unsigned long pages_to_map,
-                                  GtError *err)
+                                  unsigned long pages_to_map)
 {
-  int had_err = 0;
   GtBitInStream *bitstream = gt_malloc(sizeof (*bitstream));
 
   bitstream->pagesize =sysconf(_SC_PAGESIZE);
@@ -54,21 +52,16 @@ GtBitInStream *gt_bitinstream_new(char* path,
   if (bitstream->filesize < bitstream->num_of_pages * bitstream->pagesize)
     bitstream->num_of_pages = (bitstream->filesize / bitstream->pagesize) + 1;
 
-  had_err = gt_bitinstream_reinit(bitstream,
-                                  offset,
-                                  err);
+  gt_bitinstream_reinit(bitstream,
+                        offset);
 
   bitstream->bufferlength = (bitstream->num_of_pages * bitstream->pagesize) /
                             sizeof (*bitstream->bitseqbuffer);
-  if (!had_err)
-    return bitstream;
-  else
-    return NULL;
+  return bitstream;
 }
 
-int gt_bitinstream_reinit(GtBitInStream *bitstream,
-                              off_t offset,
-                              GT_UNUSED GtError *err)
+void gt_bitinstream_reinit(GtBitInStream *bitstream,
+                           off_t offset)
 {
   bitstream->cur_page = offset;
   gt_assert(bitstream->cur_page < bitstream->filesize);
@@ -83,15 +76,12 @@ int gt_bitinstream_reinit(GtBitInStream *bitstream,
 
   bitstream->cur_bit = 0;
   bitstream->cur_bitseq = 0;
-
-  return 0;
 }
 
 int gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
-                                    bool * bit,
-                                    GtError *err)
+                                bool * bit)
 {
-  int had_err = 0;
+  const int eof = 0, more_to_read = 1;
   if (bitstream->cur_bit == GT_INTWORDSIZE) {
     if (bitstream->cur_bitseq < bitstream->bufferlength - 1) {
       bitstream->cur_bit = 0;
@@ -101,20 +91,17 @@ int gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
       if (bitstream->filesize <=
             bitstream->cur_page + (bitstream->num_of_pages *
               bitstream->pagesize))
-        return 0;
+        return eof;
       else
-        had_err = gt_bitinstream_reinit(bitstream,
-                                        bitstream->cur_page +
-                                          bitstream->pagesize *
-                                          bitstream->num_of_pages,
-                                        err);
+        gt_bitinstream_reinit(bitstream,
+                              bitstream->cur_page +
+                                bitstream->pagesize *
+                                bitstream->num_of_pages);
     }
-    if (had_err)
-      return had_err;
   }
   *bit =  GT_ISBITSET(bitstream->bitseqbuffer[bitstream->cur_bitseq],
                       bitstream->cur_bit++);
-  return 1;
+  return more_to_read;
 }
 
 void gt_bitinstream_delete(GtBitInStream *bitstream)

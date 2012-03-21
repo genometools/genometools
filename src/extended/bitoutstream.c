@@ -33,67 +33,65 @@ struct GtBitOutStream {
 
 GtBitOutStream* gt_bitoutstream_new(FILE *fp)
 {
-  GtBitOutStream *b;
-  b = gt_calloc((size_t) 1, sizeof (GtBitOutStream));
-  b->bits_left = GT_INTWORDSIZE;
-  b->fp = fp;
-  b->bitseqbuffer = 0;
-  b->pagesize = sysconf(_SC_PAGESIZE);
-  return b;
+  GtBitOutStream *bitstream;
+  gt_assert(fp);
+
+  bitstream = gt_calloc((size_t) 1, sizeof (GtBitOutStream));
+  bitstream->bits_left = GT_INTWORDSIZE;
+  bitstream->fp = fp;
+  bitstream->bitseqbuffer = 0;
+  bitstream->pagesize = sysconf(_SC_PAGESIZE);
+  return bitstream;
 }
 
-int gt_bitoutstream_append(GtBitOutStream *b,
-                           GtBitsequence code,
-                           unsigned long bits2write,
-                           GT_UNUSED GtError *err)
+void gt_bitoutstream_append(GtBitOutStream *bitstream,
+                            GtBitsequence code,
+                            unsigned long bits2write)
 {
-  int had_err = 0;
-
-  if (b->bits_left < bits2write) {
+  if (bitstream->bits_left < bits2write) {
     unsigned int overhang = 0;
-    overhang = bits2write - b->bits_left;
-    b->bitseqbuffer |= code >> overhang;
-    gt_xfwrite(&b->bitseqbuffer,
+    overhang = bits2write - bitstream->bits_left;
+    bitstream->bitseqbuffer |= code >> overhang;
+    gt_xfwrite(&bitstream->bitseqbuffer,
                sizeof (GtBitsequence),
-               1, b->fp);
-    b->bitseqbuffer = 0;
-    b->bits_left = GT_INTWORDSIZE - overhang;
+               1, bitstream->fp);
+    bitstream->bitseqbuffer = 0;
+    bitstream->bits_left = GT_INTWORDSIZE - overhang;
   }
   else {
-    b->bits_left -= bits2write;
+    bitstream->bits_left -= bits2write;
   }
-  b->bitseqbuffer |= code << b->bits_left;
-  return had_err;
+  bitstream->bitseqbuffer |= code << bitstream->bits_left;
 }
 
-int gt_bitoutstream_flush(GtBitOutStream *b,
-                          GT_UNUSED GtError *err)
+void gt_bitoutstream_flush(GtBitOutStream *bitstream)
 {
-  gt_xfwrite(&b->bitseqbuffer, sizeof (GtBitsequence), 1, b->fp);
+  gt_assert(bitstream);
+  gt_xfwrite(&bitstream->bitseqbuffer, sizeof (GtBitsequence),
+             1, bitstream->fp);
 
-  b->bitseqbuffer = 0;
-  b->bits_left = GT_INTWORDSIZE;
-  return 0;
+  bitstream->bitseqbuffer = 0;
+  bitstream->bits_left = GT_INTWORDSIZE;
 }
 
-int gt_bitoutstream_flush_and_jump_to_next_page(GtBitOutStream *b,
-                                                GtError *err)
+void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
 {
   unsigned long fpos;
-  gt_bitoutstream_flush(b, err);
-  if (!(ftell(b->fp) % b->pagesize))
-    return 0;
-  fpos = (ftell(b->fp) / b->pagesize + 1) * b->pagesize;
-  gt_xfseek(b->fp, fpos, SEEK_SET);
-  return 0;
+  gt_assert(bitstream);
+  gt_bitoutstream_flush(bitstream);
+  if ((ftell(bitstream->fp) % bitstream->pagesize) != 0) {
+    fpos = (ftell(bitstream->fp) / bitstream->pagesize + 1) *
+           bitstream->pagesize;
+    gt_xfseek(bitstream->fp, fpos, SEEK_SET);
+  }
 }
 
-off_t gt_bitoutstream_pos(GtBitOutStream *b)
+off_t gt_bitoutstream_pos(GtBitOutStream *bitstream)
 {
-  return (off_t) ftell(b->fp);
+  return (off_t) ftell(bitstream->fp);
 }
 
-void gt_bitoutstream_delete(GtBitOutStream *b)
+void gt_bitoutstream_delete(GtBitOutStream *bitstream)
 {
-  gt_free(b);
+  gt_free(bitstream);
 }

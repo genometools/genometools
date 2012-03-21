@@ -25,28 +25,26 @@
    it handles the filling of words of size <GtBitsequence>. */
 typedef struct GtBitOutStream GtBitOutStream;
 
-/* Returns a new <GtBitOutStream>, <fp> needs to be opened for writing. */
+/* Returns a new <GtBitOutStream>, <fp> needs to be valid and opened for
+   writing. */
 GtBitOutStream* gt_bitoutstream_new(FILE *fp);
 
 /* Append the bitcode <code> to the file associated with <bitstream>.
    <bits_to_write> is the number of bits in <code> that have to be appended.
    Assumes the bits are stored in the least significant bits of <code> like
    standard binary encoding. */
-int             gt_bitoutstream_append(GtBitOutStream *bitstream,
+void            gt_bitoutstream_append(GtBitOutStream *bitstream,
                                        GtBitsequence code,
-                                       unsigned long bits_to_write,
-                                       GtError *err);
+                                       unsigned long bits_to_write);
 
 /* Write all currently appended <code>s to the <FILE> <fp> associated with
    <GtBitOutStream> <bitstream>. Possibly 'empty' bits in the current word will
    be set to zero and all non empty bits will be shifted to the most significant
    bits. */
-int             gt_bitoutstream_flush(GtBitOutStream *bitstream,
-                                      GtError *err);
+void            gt_bitoutstream_flush(GtBitOutStream *bitstream);
 
 /* Like before but moves file pointer to the next start of a page. */
-int             gt_bitoutstream_flush_advance(GtBitOutStream *bitstream,
-                                              GtError *err);
+void            gt_bitoutstream_flush_advance(GtBitOutStream *bitstream);
 
 /* Returns the position of the file pointer <fp> associated with <bitstream>.
    For reliable results gt_bitoutstream_flush has to be called before! */

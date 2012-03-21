@@ -28,22 +28,19 @@ typedef struct GtBitInStream GtBitInStream;
 /* Returns a new <GtBitInStream>,  <path> is a '\0' terminated string with the
    name of the file, <offset> is the page offset where mapping should start, it
    has to be a multiple of pagesize. <pages_to_map> is the number of pages to
-   map at once. */
+   map at once. If <path> is not valid exits with <EXIT_FAILURE>*/
 GtBitInStream *gt_bitinstream_new(char *path,
                                   off_t offset,
-                                  unsigned long pages_to_map,
-                                  GtError *err);
+                                  unsigned long pages_to_map);
 
 /* Tells <bitstream> to remap the file with a new offset */
-int           gt_bitinstream_reinit(GtBitInStream *bitstream,
-                                    off_t offset,
-                                    GtError *err);
+void           gt_bitinstream_reinit(GtBitInStream *bitstream,
+                                     off_t offset);
 
-/* Sets <bit>, returns -1 on error, 0 if there are no more bits to read and 1 if
+/* Sets <bit>, returns 0 if there are no more bits to read and 1 if
    successfully read one bit. */
 int           gt_bitinstream_get_next_bit(GtBitInStream *bitstream,
-                                          bool *bit,
-                                          GtError *err);
+                                          bool *bit);
 
 void          gt_bitinstream_delete(GtBitInStream *bitstream);
 
