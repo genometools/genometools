@@ -80,12 +80,7 @@ else
 endif
 
 # libraries for which we build replacements (that also appear in dependencies)
-EXP_LDLIBS+=-lz -lbz2
-ifneq ($(useshared),yes)
-  OVERRIDELIBS:=lib/libbz2.a
-else
-  OVERRIDELIBS:=
-endif
+OVERRIDELIBS:=-lbz2 -lz
 
 # compiled executables
 GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
@@ -235,9 +230,6 @@ SAMTOOLS_SRC:=$(SAMTOOLS_DIR)/bgzf.c \
               $(SAMTOOLS_DIR)/bam_cat.c
 SAMTOOLS_OBJ:=$(SAMTOOLS_SRC:%.c=obj/%.o)
 SAMTOOLS_DEP:=$(SAMTOOLS_SRC:%.c=obj/%.d)
-
-# the objects which are included into the single GenomeTools shared library
-GTSHAREDLIB_LIBDEP:=-lbz2 -lz
 
 # add necessary shared lib dependencies then not building them ourselves
 ifeq ($(useshared),yes)
@@ -410,7 +402,6 @@ ifneq ($(cairo),no)
   LIBGENOMETOOLS_DIRS:=$(LIBGENOMETOOLS_DIRS) src/annotationsketch
   STATIC_CAIRO_LIBS := -pthread -lfreetype -lpixman-1 -lpng -static -o $$@
 else
-  OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
   CAIRO_FILTER_OUT:=src/gtlua/annotationsketch_lua.c \
@@ -467,10 +458,14 @@ LIBGENOMETOOLS_DEP:=$(LIBGENOMETOOLS_SRC:%.c=obj/%.d)
 ifneq ($(useshared),yes)
   LIBGENOMETOOLS_OBJ += $(LIBLUA_OBJ) \
                         $(LIBEXPAT_OBJ) \
-                        $(SAMTOOLS_OBJ)
+                        $(SAMTOOLS_OBJ) \
+                        $(LIBBZ2_OBJ) \
+                        $(ZLIB_OBJ)
   LIBGENOMETOOLS_DEP += $(LIBLUA_DEP) \
                         $(LIBEXPAT_DEP) \
-                        $(SAMTOOLS_DEP)
+                        $(SAMTOOLS_DEP) \
+                        $(LIBBZ2_DEP) \
+                        $(ZLIB_DEP)
 endif
 
 ifneq ($(with-sqlite),no)
