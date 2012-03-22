@@ -149,31 +149,31 @@ void gt_rbtree_clear(GtRBTree *tree)
 {
   GtRBTreeNode *it;
   GtRBTreeNode *save;
-  if (!tree)
-    return;
-  it = tree->root;
-  if (!it)
-    return;
+  if (tree) {
+    it = tree->root;
+    if (it) {
 
-  /* Rotate away the left links so that we can treat this like the destruction
-     of a linked list */
-  while (it != NULL) {
-    if (it->link[0] == NULL) {
-      /* No left links, just kill the node and move on */
-      save = it->link[1];
-      if (tree->free != NULL)
-        tree->free(it->key);
-      gt_free(it);
-    } else {
-      /* Rotate away the left link and check again */
-      save = it->link[0];
-      it->link[0] = save->link[1];
-      save->link[1] = it;
+      /* Rotate away the left links so that we can treat this like the
+         destruction of a linked list */
+      while (it != NULL) {
+        if (it->link[0] == NULL) {
+          /* No left links, just kill the node and move on */
+          save = it->link[1];
+          if (tree->free != NULL)
+            tree->free(it->key);
+          gt_free(it);
+        } else {
+          /* Rotate away the left link and check again */
+          save = it->link[0];
+          it->link[0] = save->link[1];
+          save->link[1] = it;
+        }
+        it = save;
+      }
+      tree->size = 0;
+      tree->root = NULL;
     }
-    it = save;
   }
-  tree->size = 0;
-  tree->root = NULL;
 }
 
 static inline void *gt_rbtree_find_with_cmp_g(GtRBTree *tree, void *key,
