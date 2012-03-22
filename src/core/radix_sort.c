@@ -492,26 +492,18 @@ static unsigned long *gt_evenly_divide_stack(const GtStackGtRadixsort_stackelem
                                              unsigned long len,
                                              unsigned int numofparts)
 {
-  unsigned long *endindexes, *leftborder, widthofpart, idx, maxindex,
-                j, leftbound, rightbound, offset = 0;
+  unsigned long *endindexes, *leftborder, widthofpart, idx, offset = 0;
   unsigned int part, remainder;
 
   gt_assert(numofparts >= 2U);
-  maxindex = stack->nextfree - 1;
-  leftborder = gt_malloc(sizeof (*leftborder) * (maxindex+1));
+  leftborder = gt_malloc(sizeof (*leftborder) * stack->nextfree);
   leftborder[0] = stack->space[0].len;
-  /*printf("0 [0,%lu] of width %lu\n",stack->space[0].len,
-                                    stack->space[0].len);*/
-  for (idx = 1UL; idx <= maxindex; idx++)
+  for (idx = 1UL; idx < stack->nextfree; idx++)
   {
     leftborder[idx] = leftborder[idx-1] + stack->space[idx].len;
-    /*printf("%lu [%lu,%lu] of width %lu\n",idx,leftborder[idx-1],
-                                          leftborder[idx]-1,
-                                          stack->space[idx].len);*/
   }
-  widthofpart = len/numofparts;
-  /*printf("widthofpart=%lu\n",widthofpart);*/
   endindexes = gt_malloc(sizeof (*endindexes) * numofparts);
+  widthofpart = len/numofparts;
   remainder = (unsigned int) (len % (unsigned long) numofparts);
   for (part=0; part < numofparts; part++)
   {
@@ -525,29 +517,14 @@ static unsigned long *gt_evenly_divide_stack(const GtStackGtRadixsort_stackelem
     }
     if (part == numofparts - 1)
     {
-      endindexes[part] = maxindex;
+      endindexes[part] = stack->nextfree-1;
     } else
     {
-      unsigned long start = (part == 0) ? 0 : endindexes[part-1] + 1;
+      unsigned long start = part == 0 ? 0 : endindexes[part-1] + 1;
 
       endindexes[part] = gt_radixsort_findfirstlarger(leftborder,start,
-                                                      maxindex,offset);
-      gt_assert(endindexes[part] <= maxindex);
+                                                      stack->nextfree-1,offset);
     }
-  }
-  for (j=0; j < numofparts; j++)
-  {
-    /*printf("endindex[j]=%lu",endindexes[j]);*/
-    if (j == 0)
-    {
-      leftbound = 0;
-    } else
-    {
-      leftbound = leftborder[endindexes[j-1]]-1;
-    }
-    rightbound = leftborder[endindexes[j]];
-    /*printf("[%lu,%lu] of width %lu\n",leftbound,rightbound,
-                                      rightbound - leftbound);*/
   }
   gt_free(leftborder);
   return endindexes;
