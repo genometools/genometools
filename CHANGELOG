@@ -1,4 +1,4 @@
-changes in version 1.4.0 (2012-03-20)
+changes in version 1.4.0 (2012-03-22)
 
 - bugfixes and cleanups
 - the tool `gt mutate` has been renamed to `gt seqmutate`. The same
