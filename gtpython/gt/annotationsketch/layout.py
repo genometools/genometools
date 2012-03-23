@@ -61,7 +61,7 @@ class Layout:
         gtlib.gt_layout_get_height(self.layout, byref(height), err)
         if err.is_set():
             gterror(err)
-        return height
+        return height.value
 
     def set_track_ordering_func(self, func):
 
