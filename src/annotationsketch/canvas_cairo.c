@@ -691,7 +691,8 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
 
   if (show_track_captions)
   {
-    double theight = TOY_TEXT_HEIGHT;
+    double theight = TOY_TEXT_HEIGHT,
+           captionspace = CAPTION_BAR_SPACE_DEFAULT;
     if (gt_style_get_num(canvas->pvt->sty,
                          "format", "track_caption_font_size",
                          &theight, NULL, err) == GT_STYLE_QUERY_ERROR) {
@@ -708,7 +709,12 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
                                   canvas->pvt->y,
                                   color,
                                   gt_custom_track_get_title(ct));
-    canvas->pvt->y += theight + CAPTION_BAR_SPACE_DEFAULT;
+    if (gt_style_get_num(canvas->pvt->sty,
+                         "format", "track_caption_space",
+                         &captionspace, NULL, err) == GT_STYLE_QUERY_ERROR) {
+      return -1;
+    }
+    canvas->pvt->y += theight + captionspace;
   }
 
   /* call rendering function */
@@ -721,14 +727,6 @@ int gt_canvas_cairo_visit_custom_track(GtCanvas *canvas,
   canvas->pvt->y += gt_custom_track_get_height(ct);
 
   /* put spacers after track */
-  space = BAR_VSPACE_DEFAULT;
-  if (gt_style_get_num(canvas->pvt->sty,
-                       "format", "bar_vspace",
-                       &space, NULL, err) == GT_STYLE_QUERY_ERROR) {
-    return -1;
-  }
-  canvas->pvt->y += space;
-
   space = TRACK_VSPACE_DEFAULT;
   if (gt_style_get_num(canvas->pvt->sty, "format", "track_vspace", &space,
                        NULL, err) == GT_STYLE_QUERY_ERROR) {
