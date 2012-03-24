@@ -575,6 +575,8 @@ static void gt_radixbuffer_delete(GtRadixbuffer *radixbuffer)
   gt_free(radixbuffer);
 }
 
+#define UNDEFBUF (~0)
+
 static unsigned long  gt_radixsort_bin_get(const GtRadixbuffer *rbuf,
                                            unsigned long binnum,
                                            unsigned long idx)
@@ -585,6 +587,8 @@ static unsigned long  gt_radixsort_bin_get(const GtRadixbuffer *rbuf,
   gt_assert(rbuf->nextidx[binnum] < rbuf->buf_size);
   gt_assert(idx == rbuf->endofbin[binnum]);
   gt_assert(bufindex < ((UINT8_MAX + 1) << rbuf->log_bufsize));
+  /*printf("bin %lu: bufindex=%lu,idx=%lu\n",binnum,bufindex,idx);*/
+  gt_assert(rbuf->values[bufindex] != UNDEFBUF);
   return rbuf->values[bufindex];
 }
 
@@ -600,9 +604,10 @@ static void gt_radixsort_bin_update(unsigned long *target,
 
   gt_assert(rbuf->nextidx[binnum] < rbuf->buf_size);
   gt_assert(idx == rbuf->endofbin[binnum]);
-  gt_assert(bufindex < (UINT8_MAX + 1) << rbuf->log_bufsize);
+  gt_assert(bufindex < ((UINT8_MAX + 1) << rbuf->log_bufsize));
+  gt_assert(value != UNDEFBUF);
   rbuf->values[bufindex] = value;
-  target[idx] = value;
+  /*target[idx] = value;*/
   if (rbuf->nextidx[binnum] < rbuf->buf_size - 1)
   {
     rbuf->nextidx[binnum]++;
@@ -614,7 +619,8 @@ static void gt_radixsort_bin_update(unsigned long *target,
     targetoffset = idx - (rbuf->buf_size-1);
     for (j=0; j<rbuf->buf_size; j++)
     {
-      gt_assert(target[targetoffset + j] == rbuf->values[binoffset + j]);
+      // gt_assert(target[targetoffset + j] == rbuf->values[binoffset + j]);
+      target[targetoffset + j] = rbuf->values[binoffset + j];
     }
     if (binnum < UINT8_MAX)
     {
@@ -638,8 +644,7 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpstackelem, currentstackelem;
   GtRadixbuffer *rbuf;
-
-  long idx;
+  unsigned long idx;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = gt_jobs;
 #else
@@ -648,6 +653,7 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   unsigned long previousvalue, binoffset = 0, bufoffset = 0,
                 current, currentvalue, tmp, width,
                 nextBin, binidx, binnum = 0, *count;
+  bool binnumdefined = false;
 
   GT_STACK_INIT(&stack,UINT8_MAX);
   currentstackelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
@@ -657,24 +663,38 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   count = rbuf->startofbin; /* use same memory for count and startofbin */
   for (current = 0; current < currentstackelem.len; current++)
   {
+    gt_assert(currentstackelem.left[current] != UNDEFBUF);
     count[GT_RADIX_KEY(UINT8_MAX,currentstackelem.shift,
                        currentstackelem.left[current])]++;
+  }
+  for (idx = 0; idx < (UINT8_MAX + 1) << rbuf->log_bufsize; idx++)
+  {
+    rbuf->values[idx] = UNDEFBUF;
   }
   for (idx = 0; idx <= UINT8_MAX; idx++)
   {
     unsigned long j;
     const unsigned long end = MIN(rbuf->buf_size,count[idx]);
 
+    if (!binnumdefined && end > 0)
+    {
+      binnum = idx;
+      binnumdefined = true;
+    }
     for (j=0; j<end; j++)
     {
       rbuf->values[bufoffset+j] = currentstackelem.left[binoffset+j];
+      /*
+      printf("idx=%lu,j=%lu: values[%lu]=%lu\n",idx,j,bufoffset+j,
+                                                rbuf->values[bufoffset+j]);
+      */
     }
     bufoffset += rbuf->buf_size;
     binoffset += count[idx];
   }
   previousvalue = count[0];
   rbuf->startofbin[0] = rbuf->endofbin[0] = nextBin = 0;
-  for (idx = 1L; idx <= UINT8_MAX; idx++)
+  for (idx = 1UL; idx <= UINT8_MAX; idx++)
   {
     tmp = rbuf->startofbin[idx-1] + previousvalue;
     previousvalue = count[idx];
@@ -713,7 +733,28 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
     if (current < rbuf->endofbin[nextBin-1])
     {
       current = rbuf->endofbin[nextBin-1];
-      binnum = nextBin - 1;
+    }
+    binnum = nextBin - 1;
+  }
+  for (binnum = 0; binnum <= UINT8_MAX; binnum++)
+  {
+    if (rbuf->nextidx[binnum] > 0)
+    {
+      unsigned long j, end, targetoffset, bufoffset;
+      if (binnum < UINT8_MAX)
+      {
+        end = rbuf->startofbin[binnum+1];
+      } else
+      {
+        end = currentstackelem.len;
+      }
+      gt_assert(end >= rbuf->nextidx[binnum]);
+      targetoffset = end - rbuf->nextidx[binnum];
+      bufoffset = binnum << rbuf->log_bufsize;
+      for (j=0; j<rbuf->nextidx[binnum]; j++)
+      {
+        currentstackelem.left[targetoffset + j] = rbuf->values[bufoffset + j];
+      }
     }
   }
   tmpstackelem.shift = currentstackelem.shift - CHAR_BIT;
