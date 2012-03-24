@@ -77,9 +77,13 @@ void gt_bitoutstream_flush(GtBitOutStream *bitstream)
 void gt_bitoutstream_flush_advance(GtBitOutStream *bitstream)
 {
   unsigned long fpos;
+  bool is_not_at_pageborder = (ftell(bitstream->fp) % bitstream->pagesize) != 0;
+
   gt_assert(bitstream);
+
   gt_bitoutstream_flush(bitstream);
-  if ((ftell(bitstream->fp) % bitstream->pagesize) != 0) {
+
+  if (is_not_at_pageborder) {
     fpos = (ftell(bitstream->fp) / bitstream->pagesize + 1) *
            bitstream->pagesize;
     gt_xfseek(bitstream->fp, fpos, SEEK_SET);
