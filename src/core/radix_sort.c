@@ -549,7 +549,7 @@ static GtRadixbuffer *gt_radixbuffer_new(void)
   GtRadixbuffer *buf;
 
   buf = gt_malloc(sizeof (*buf));
-  buf->log_bufsize = 4;
+  buf->log_bufsize = 5;
   buf->buf_size = 1UL << buf->log_bufsize;
   buf->values = gt_malloc(sizeof (*buf->values) * (UINT8_MAX + 1) *
                           buf->buf_size);
@@ -616,16 +616,13 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   GtStackGtRadixsort_stackelem stack;
   GtRadixsort_stackelem tmpstackelem, currentstackelem;
   GtRadixbuffer *rbuf;
-  unsigned long idx;
+  unsigned long current, previousvalue, binoffset, binnum, bufoffset,
+                nextbin, firstnonemptybin = UINT8_MAX+1, *count;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = gt_jobs;
 #else
   const unsigned int threads = 1U;
 #endif
-  unsigned long previousvalue, binoffset = 0, bufoffset = 0,
-                current, currentvalue, tmp, width,
-                nextBin, binidx, binnum = 0, *count;
-  bool binnumdefined = false;
 
   GT_STACK_INIT(&stack,UINT8_MAX);
   currentstackelem.shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
@@ -638,94 +635,100 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
     count[GT_RADIX_KEY(UINT8_MAX,currentstackelem.shift,
                        currentstackelem.left[current])]++;
   }
-  for (idx = 0; idx <= UINT8_MAX; idx++)
+  for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
+       bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
   {
     unsigned long j;
-    const unsigned long end = MIN(rbuf->buf_size,count[idx]);
+    const unsigned long end = MIN(rbuf->buf_size,count[binnum]);
 
-    if (!binnumdefined && end > 0)
+    if (firstnonemptybin == UINT8_MAX+1 && end > 0)
     {
-      binnum = idx;
-      binnumdefined = true;
+      firstnonemptybin = binnum;
     }
     for (j=0; j<end; j++)
     {
       rbuf->values[bufoffset + j] = currentstackelem.left[binoffset + j];
     }
-    bufoffset += rbuf->buf_size;
-    binoffset += count[idx];
   }
   previousvalue = count[0];
-  rbuf->startofbin[0] = rbuf->endofbin[0] = nextBin = 0;
-  for (idx = 1UL; idx <= UINT8_MAX; idx++)
+  rbuf->startofbin[0] = rbuf->endofbin[0] = nextbin = 0;
+  for (binnum = 1UL; binnum <= UINT8_MAX; binnum++)
   {
-    tmp = rbuf->startofbin[idx-1] + previousvalue;
-    previousvalue = count[idx];
-    rbuf->startofbin[idx] = rbuf->endofbin[idx] = tmp;
+    unsigned long tmp = rbuf->startofbin[binnum-1] + previousvalue;
+    previousvalue = count[binnum];
+    rbuf->startofbin[binnum] = rbuf->endofbin[binnum] = tmp;
   }
+  /* to simplify compution of bin end */
   rbuf->startofbin[UINT8_MAX+1] = currentstackelem.len;
-  for (current = 0; current < currentstackelem.len; /* Nothing */)
+  for (current = 0, binnum = firstnonemptybin;
+       current < currentstackelem.len; binnum = nextbin - 1)
   {
-    currentvalue = gt_radixsort_bin_get(rbuf,binnum);
+    unsigned long currentvalue = gt_radixsort_bin_get(rbuf,binnum);
+
     while (true)
     {
+      unsigned long binidx;
+
       binnum = GT_RADIX_KEY(UINT8_MAX,currentstackelem.shift,currentvalue);
       binidx = rbuf->endofbin[binnum];
-      if (binidx == current)
+      if (binidx != current)
+      {
+        unsigned long tmp = currentvalue;
+        currentvalue = gt_radixsort_bin_get(rbuf,binnum);
+        gt_radixsort_bin_update(currentstackelem.left,rbuf,binnum,tmp);
+      } else
       {
         break;
       }
-      tmp = currentvalue;
-      currentvalue = gt_radixsort_bin_get(rbuf,binnum);
-      gt_radixsort_bin_update(currentstackelem.left,rbuf,binnum,tmp);
     }
     gt_radixsort_bin_update(currentstackelem.left,rbuf,binnum,currentvalue);
     current++;
     /* skip over empty bins */
-    while (nextBin <= UINT8_MAX && current >= rbuf->startofbin[nextBin])
+    while (nextbin <= UINT8_MAX && current >= rbuf->startofbin[nextbin])
     {
-      nextBin++;
+      nextbin++;
     }
     /* skip over full bins */
-    while (nextBin <= UINT8_MAX &&
-           rbuf->endofbin[nextBin-1] == rbuf->startofbin[nextBin])
+    while (nextbin <= UINT8_MAX &&
+           rbuf->endofbin[nextbin-1] == rbuf->startofbin[nextbin])
     {
-      nextBin++;
+      nextbin++;
     }
-    if (current < rbuf->endofbin[nextBin-1])
+    if (current < rbuf->endofbin[nextbin-1])
     {
-      current = rbuf->endofbin[nextBin-1];
+      current = rbuf->endofbin[nextbin-1];
     }
-    binnum = nextBin - 1;
   }
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
-    if (rbuf->nextidx[binnum] > 0)
-    {
-      unsigned long j, targetoffset;
+    unsigned long bufleft = rbuf->nextidx[binnum];
 
-      bufoffset = binnum << rbuf->log_bufsize;
-      targetoffset = rbuf->startofbin[binnum+1] - rbuf->nextidx[binnum];
-      for (j=0; j < rbuf->nextidx[binnum]; j++)
+    if (bufleft > 0)
+    {
+      unsigned long j, *targetptr, *valptr;
+
+      valptr = rbuf->values + (binnum << rbuf->log_bufsize);
+      targetptr = currentstackelem.left + rbuf->startofbin[binnum+1] - bufleft;
+      for (j=0; j < bufleft; j++)
       {
-        currentstackelem.left[targetoffset + j] = rbuf->values[bufoffset + j];
+        targetptr[j] = valptr[j];
       }
     }
   }
   tmpstackelem.shift = currentstackelem.shift - CHAR_BIT;
-  for (idx = 0; idx <= UINT8_MAX; idx++)
+  for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
-    width = rbuf->endofbin[idx] - rbuf->startofbin[idx];
+    unsigned long width = rbuf->endofbin[binnum] - rbuf->startofbin[binnum];
     if (width >= 2UL)
     {
       if (width <= 32UL)
       {
         gt_radixsort_inplace_insertionsort(
-                                  currentstackelem.left + rbuf->startofbin[idx],
-                                  width);
+                               currentstackelem.left + rbuf->startofbin[binnum],
+                               width);
       } else
       {
-        tmpstackelem.left = currentstackelem.left + rbuf->startofbin[idx];
+        tmpstackelem.left = currentstackelem.left + rbuf->startofbin[binnum];
         tmpstackelem.len = width;
         GT_STACK_PUSH(&stack,tmpstackelem);
       }
