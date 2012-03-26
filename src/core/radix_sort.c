@@ -617,23 +617,21 @@ static void gt_radixsort_bin_update(GtRadixsorttype *target,
   rbuf->endofbin[binnum]++;
 }
 
-void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
+static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
+                                       GtRadixsorttype *source,
+                                       unsigned long len,
+                                       uint8_t rightshift)
 {
-  GtStackGtRadixsort_stackelem stack;
-  GtRadixbuffer *rbuf;
   unsigned long current, previouscount, binoffset, binnum, bufoffset,
                 nextbin, firstnonemptybin = UINT8_MAX+1, *count;
   GtRadixsorttype *sp;
   const GtRadixsorttype *spend = source + len;
-  const uint8_t rightshift = (sizeof (unsigned long) - 1) * CHAR_BIT;
-#ifdef GT_THREADS_ENABLED
-  const unsigned int threads = gt_jobs;
-#else
-  const unsigned int threads = 1U;
-#endif
 
-  rbuf = gt_radixbuffer_new();
   count = rbuf->startofbin; /* use same memory for count and startofbin */
+  for (binnum = 0; binnum <= UINT8_MAX; binnum++)
+  {
+    count[binnum] = 0;
+  }
   for (sp = source; sp < spend; sp++)
   {
     count[GT_RADIX_KEY(UINT8_MAX,rightshift,*sp)]++;
@@ -716,11 +714,15 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
       }
     }
   }
-  gt_free(rbuf->values);
-  rbuf->values = NULL;
-  gt_free(rbuf->nextidx);
-  rbuf->nextidx = NULL;
-  GT_STACK_INIT(&stack,UINT8_MAX);
+}
+
+static void gt_radixsort_process_bin(GtStackGtRadixsort_stackelem *stack,
+                                     GtRadixbuffer *rbuf,
+                                     GtRadixsorttype *source,
+                                     uint8_t rightshift)
+{
+  unsigned long binnum;
+
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
     unsigned long width = rbuf->endofbin[binnum] - rbuf->startofbin[binnum];
@@ -737,10 +739,31 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
       {
         tmpstackelem.left = source + rbuf->startofbin[binnum];
         tmpstackelem.len = width;
-        GT_STACK_PUSH(&stack,tmpstackelem);
+        GT_STACK_PUSH(stack,tmpstackelem);
       }
     }
   }
+}
+
+void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
+{
+  GtStackGtRadixsort_stackelem stack;
+  GtRadixbuffer *rbuf;
+  const uint8_t rightshift = (sizeof (unsigned long) - 1) * CHAR_BIT;
+#ifdef GT_THREADS_ENABLED
+  const unsigned int threads = gt_jobs;
+#else
+  const unsigned int threads = 1U;
+#endif
+
+  rbuf = gt_radixbuffer_new();
+  gt_radixsort_splitintobins(rbuf,source,len,rightshift);
+  gt_free(rbuf->values);
+  rbuf->values = NULL;
+  gt_free(rbuf->nextidx);
+  rbuf->nextidx = NULL;
+  GT_STACK_INIT(&stack,UINT8_MAX);
+  gt_radixsort_process_bin(&stack,rbuf,source,rightshift);
   if (threads == 1U || stack.nextfree < (unsigned long) threads)
   {
     gt_radixsort_sub_inplace_GtUlong(&stack);
