@@ -114,8 +114,8 @@ int gt_elias_gamma_unit_test(GtError *err)
 {
   long i,
        j;
-  unsigned long number,
-                unit_test_x_size = 100;
+  unsigned long unit_test_x_size = 100,
+                number = unit_test_x_size + 1;
   int stat = -1,
       had_err = 0;
   GtBittab *code;

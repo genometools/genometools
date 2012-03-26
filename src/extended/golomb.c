@@ -185,10 +185,10 @@ int gt_golomb_unit_test(GtError *err)
   GtGolomb *gc;
   GtBittab *code = NULL;
   GtGolombBitwiseDecoder *gbwd = NULL;
-  unsigned long number,
+  unsigned long unit_test_x_size = 100,
                 idx_j,
                 idx_k,
-                unit_test_x_size = 100,
+                number = unit_test_x_size + 1,
                 unit_test_b_size = 100;
 
   for (idx_j = 1; idx_j <= unit_test_b_size; idx_j++) {
