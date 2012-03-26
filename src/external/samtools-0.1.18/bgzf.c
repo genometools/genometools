@@ -75,6 +75,7 @@ static const int Z_DEFAULT_MEM_LEVEL = 8;
 
 inline
 void
+static
 packInt16(uint8_t* buffer, uint16_t value)
 {
     buffer[0] = value;
@@ -83,6 +84,7 @@ packInt16(uint8_t* buffer, uint16_t value)
 
 inline
 int
+static
 unpackInt16(const uint8_t* buffer)
 {
     return (buffer[0] | (buffer[1] << 8));
@@ -90,6 +92,7 @@ unpackInt16(const uint8_t* buffer)
 
 inline
 void
+static
 packInt32(uint8_t* buffer, uint32_t value)
 {
     buffer[0] = value;
