@@ -15,12 +15,11 @@ feature requests:
 - EXIT_SUCCESS und EXIT_FAILURE only in gtr.c and gt.c
 - no exit() calls inside library
 - update design.html, describe interface inheritance
-- check for circles
+- check for circles (feature nodes)
 - write proper memory allocator
 - function similary to option_new_choice(), but which allows to set multiple
   strings from the given set
 - make sure that exons and mRNAs of a gene lie in the range defined by the gene
-- compute the phase correctly (in cds_visitor?)
 - establish naming conventions and use them throughout entire codebase
 - implement simpler solution for multiset_matching
 - implement cleanup stack exeception handling
@@ -33,5 +32,5 @@ merge libgtcore and libgtmatch:
 -------------------------------
 
 - replace FastaReader with SeqIterator
-- Encodedseq und Bioseq mergen ()
+- Encodedseq und Bioseq mergen
 - merge Timer und measure-time.c (Ereignis, formatierter String)
