@@ -285,6 +285,15 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_fail_1.gff3", :retval => 1)
 end
 
+Name "gt gff3 -addintrons overlapping exons"
+Keywords "gt_gff3 addintrons"
+Test do
+  run_test "#{$bin}gt gff3 -addintrons " + \
+           "#{$testdata}gt_gff3_addintrons_overlapping_exons.gff3"
+  grep last_stderr, /overlapping boundary .* not placing 'intron' inter-feature/
+  run "diff #{last_stdout} #{$testdata}gt_gff3_addintrons_overlapping_exons_with_introns.gff3"
+end
+
 Name "gt gff3 test option -addintrons"
 Keywords "gt_gff3"
 Test do

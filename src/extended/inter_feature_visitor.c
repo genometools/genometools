@@ -52,7 +52,16 @@ static int inter_feature_in_children(GtFeatureNode *current_feature, void *data,
       previous_range = gt_genome_node_get_range((GtGenomeNode*)
                                                 aiv->previous_feature);
       current_range = gt_genome_node_get_range((GtGenomeNode*) current_feature);
-      gt_assert(previous_range.end < current_range.start);
+      if (previous_range.end >= current_range.start) {
+        gt_warning("overlapping boundary features %lu-%lu and %lu-%lu, "
+                   "not placing '%s' inter-feature",
+                   previous_range.start,
+                   previous_range.end,
+                   current_range.start,
+                   current_range.end,
+                   aiv->inter_type);
+        return 0;
+      }
       if (current_range.start - previous_range.end < 2) {
         gt_warning("no space for inter-feature '%s' between %lu and %lu",
                    aiv->inter_type,
