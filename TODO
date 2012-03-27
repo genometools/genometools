@@ -1,9 +1,3 @@
-bugs:
------
-
-- fix self-referential parent (e.g., GFF3 entry with ID=gene1;Parent=gene1)
-
-
 feature requests:
 -----------------
 

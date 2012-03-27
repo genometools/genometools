@@ -974,6 +974,13 @@ Test do
   run "diff #{last_stdout} #{$testdata}gt_gff3_undefined_range_parent_tidy.gff3"
 end
 
+Name "gt gff3 self-referential feature node"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}self_referential.gff3", :retval => 1
+  grep last_stderr, /self-referential/
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

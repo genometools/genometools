@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -651,6 +651,13 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
                    gt_genome_node_get_line_number(parent_gf),
                    gt_str_get(gt_genome_node_get_seqid(feature_node)),
                    gt_str_get(gt_genome_node_get_seqid(parent_gf)));
+      had_err = -1;
+    }
+    else if (parent_gf == feature_node) {
+      gt_error_set(err, "feature on line %u in file \"%s\" is "
+                   "self-referential (%s and %s are the same)",
+                   gt_genome_node_get_line_number(feature_node), filename,
+                   GT_GFF_PARENT, GT_GFF_ID);
       had_err = -1;
     }
     else {
