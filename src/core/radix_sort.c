@@ -458,6 +458,7 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
                 nextbin, firstnonemptybin = UINT8_MAX+1, *count;
   GtRadixsorttype *sp;
   const GtRadixsorttype *spend = source + len;
+  bool cached = len > (UINT8_MAX << rbuf->log_bufsize) ? true : false;
 
   count = rbuf->startofbin; /* use same memory for count and startofbin */
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
@@ -469,19 +470,22 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
   {
     count[GT_RADIX_KEY(UINT8_MAX,rightshift,*sp)]++;
   }
-  for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
-       bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
+  if (cached)
   {
-    unsigned long j;
-    const unsigned long end = MIN(rbuf->buf_size,count[binnum]);
+    for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
+         bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
+    {
+      unsigned long j;
+      const unsigned long end = MIN(rbuf->buf_size,count[binnum]);
 
-    if (firstnonemptybin == UINT8_MAX+1 && end > 0)
-    {
-      firstnonemptybin = binnum;
-    }
-    for (j=0; j<end; j++)
-    {
-      rbuf->values[bufoffset + j] = source[binoffset + j];
+      if (firstnonemptybin == UINT8_MAX+1 && end > 0)
+      {
+        firstnonemptybin = binnum;
+      }
+      for (j=0; j<end; j++)
+      {
+        rbuf->values[bufoffset + j] = source[binoffset + j];
+      }
     }
   }
   previouscount = count[0];
@@ -497,23 +501,38 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
   for (current = 0, binnum = firstnonemptybin;
        current < len; binnum = nextbin - 1)
   {
-    GtRadixsorttype currentvalue = gt_radixsort_bin_get(rbuf,binnum);
-
+    GtRadixsorttype currentvalue = cached ? gt_radixsort_bin_get(rbuf,binnum)
+                                          : source[current];
     while (true)
     {
       binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue);
       if (current != rbuf->endofbin[binnum])
       {
         GtRadixsorttype tmp = currentvalue;
-        currentvalue = gt_radixsort_bin_get(rbuf,binnum);
-        gt_radixsort_bin_update(source,rbuf,binnum,tmp);
+        if (cached)
+        {
+          currentvalue = gt_radixsort_bin_get(rbuf,binnum);
+          gt_radixsort_bin_update(source,rbuf,binnum,tmp);
+        } else
+        {
+          currentvalue = source[rbuf->endofbin[binnum]];
+          source[rbuf->endofbin[binnum]] = tmp;
+          rbuf->endofbin[binnum]++;
+        }
       } else
       {
         break;
       }
     }
-    gt_radixsort_bin_update(source,rbuf,binnum,currentvalue);
-    current++;
+    if (cached)
+    {
+      gt_radixsort_bin_update(source,rbuf,binnum,currentvalue);
+      current++;
+    } else
+    {
+      source[current++] = currentvalue;
+      rbuf->endofbin[binnum]++;
+    }
     /* skip over empty bins */
     while (nextbin <= UINT8_MAX && current >= rbuf->startofbin[nextbin])
     {
@@ -530,27 +549,31 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
       current = rbuf->endofbin[nextbin-1];
     }
   }
-  for (binnum = 0; binnum <= UINT8_MAX; binnum++)
+  if (cached)
   {
-    unsigned long bufleft = rbuf->nextidx[binnum];
-
-    if (bufleft > 0)
+    for (binnum = 0; binnum <= UINT8_MAX; binnum++)
     {
-      unsigned long j;
-      GtRadixsorttype *targetptr, *valptr;
+      unsigned long bufleft = rbuf->nextidx[binnum];
 
-      valptr = rbuf->values + (binnum << rbuf->log_bufsize);
-      targetptr = source + rbuf->startofbin[binnum+1] - bufleft;
-      for (j=0; j < bufleft; j++)
+      if (bufleft > 0)
       {
-        targetptr[j] = valptr[j];
+        unsigned long j;
+        GtRadixsorttype *targetptr, *valptr;
+
+        valptr = rbuf->values + (binnum << rbuf->log_bufsize);
+        targetptr = source + rbuf->startofbin[binnum+1] - bufleft;
+        for (j=0; j < bufleft; j++)
+        {
+          targetptr[j] = valptr[j];
+        }
       }
     }
   }
 }
 
 static void gt_radixsort_process_bin(GtStackGtRadixsort_stackelem *stack,
-                                     GtRadixbuffer *rbuf,
+                                     const unsigned long *startofbin,
+                                     const unsigned long *endofbin,
                                      GtRadixsorttype *source,
                                      uint8_t rightshift)
 {
@@ -558,7 +581,7 @@ static void gt_radixsort_process_bin(GtStackGtRadixsort_stackelem *stack,
 
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
-    unsigned long width = rbuf->endofbin[binnum] - rbuf->startofbin[binnum];
+    unsigned long width = endofbin[binnum] - startofbin[binnum];
     GtRadixsort_stackelem tmpstackelem;
 
     if (width >= 2UL)
@@ -566,11 +589,10 @@ static void gt_radixsort_process_bin(GtStackGtRadixsort_stackelem *stack,
       tmpstackelem.shift = rightshift - CHAR_BIT;
       if (width <= 32UL)
       {
-        gt_radixsort_inplace_insertionsort(source + rbuf->startofbin[binnum],
-                                           width);
+        gt_radixsort_inplace_insertionsort(source + startofbin[binnum],width);
       } else
       {
-        tmpstackelem.left = source + rbuf->startofbin[binnum];
+        tmpstackelem.left = source + startofbin[binnum];
         tmpstackelem.len = width;
         GT_STACK_PUSH(stack,tmpstackelem);
       }
@@ -578,90 +600,6 @@ static void gt_radixsort_process_bin(GtStackGtRadixsort_stackelem *stack,
   }
 }
 
-#ifdef SUBOLD
-static void gt_radixsort_sub_inplace_GtUlong(GtStackGtRadixsort_stackelem
-                                                *stack)
-{
-  GtRadixsort_stackelem tmpstackelem, currentstackelem;
-  long idx;
-  unsigned long current, currentvalue, tmp, width, nextBin, *binptr,
-                count[UINT8_MAX+1] = {0},
-                startofbin[UINT8_MAX+1],
-                endofbin[UINT8_MAX+1];
-
-  while (!GT_STACK_ISEMPTY(stack))
-  {
-    currentstackelem = GT_STACK_POP(stack);
-    for (current = 0; current < currentstackelem.len; current++)
-    {
-      count[GT_RADIX_KEY(UINT8_MAX,currentstackelem.shift,
-                         currentstackelem.left[current])]++;
-    }
-    startofbin[0] = endofbin[0] = nextBin = 0;
-    for (idx = 1L; idx <= UINT8_MAX; idx++)
-    {
-      startofbin[idx] = endofbin[idx] = startofbin[idx-1] + count[idx-1];
-    }
-    for (current = 0; current < currentstackelem.len; /* Nothing */)
-    {
-      currentvalue = currentstackelem.left[current];
-      while (true)
-      {
-        binptr = endofbin + GT_RADIX_KEY(UINT8_MAX,currentstackelem.shift,
-                                         currentvalue);
-        if (*binptr == current)
-        {
-          break;
-        }
-        tmp = currentvalue;
-        currentvalue = currentstackelem.left[*binptr];
-        currentstackelem.left[*binptr] = tmp;
-        (*binptr)++;
-      }
-      currentstackelem.left[current++] = currentvalue;
-      (*binptr)++;
-      while (nextBin <= UINT8_MAX && current >= startofbin[nextBin])
-      {
-        nextBin++;
-      }
-      while (nextBin <= UINT8_MAX && endofbin[nextBin-1] == startofbin[nextBin])
-      {
-        nextBin++;
-      }
-      if (current < endofbin[nextBin-1])
-      {
-        current = endofbin[nextBin-1];
-      }
-    }
-    if (currentstackelem.shift > 0)
-    {
-      tmpstackelem.shift = currentstackelem.shift - CHAR_BIT;
-      for (idx = UINT8_MAX; idx >= 0; idx--)
-      {
-        width = endofbin[idx] - startofbin[idx];
-        if (width >= 2UL)
-        {
-          if (width <= 32UL)
-          {
-            gt_radixsort_inplace_insertionsort(
-                                        currentstackelem.left + startofbin[idx],
-                                        width);
-          } else
-          {
-            tmpstackelem.left = currentstackelem.left + startofbin[idx];
-            tmpstackelem.len = width;
-            GT_STACK_PUSH(stack,tmpstackelem);
-          }
-        }
-      }
-    }
-    for (idx = UINT8_MAX; idx >= 0; idx--)
-    {
-      count[idx] = 0;
-    }
-  }
-}
-#else
 static void gt_radixsort_sub_inplace_GtUlong(GtRadixbuffer *rbuf,
                                            GtStackGtRadixsort_stackelem *stack)
 {
@@ -674,13 +612,11 @@ static void gt_radixsort_sub_inplace_GtUlong(GtRadixbuffer *rbuf,
                                currentstackelem.len,currentstackelem.shift);
     if (currentstackelem.shift > 0)
     {
-      gt_radixsort_process_bin(stack,rbuf,currentstackelem.left,
-                               currentstackelem.shift);
+      gt_radixsort_process_bin(stack,rbuf->startofbin,rbuf->endofbin,
+                               currentstackelem.left,currentstackelem.shift);
     }
   }
 }
-
-#endif
 
 #ifdef GT_THREADS_ENABLED
 static unsigned long gt_radixsort_findfirstlarger(const unsigned long
@@ -789,7 +725,8 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   rbuf->nextidx = NULL;
   */
   GT_STACK_INIT(&stack,UINT8_MAX);
-  gt_radixsort_process_bin(&stack,rbuf,source,rightshift);
+  gt_radixsort_process_bin(&stack,rbuf->startofbin,rbuf->endofbin,source,
+                           rightshift);
   if (threads == 1U || stack.nextfree < (unsigned long) threads)
   {
     gt_radixsort_sub_inplace_GtUlong(rbuf,&stack);
