@@ -30,8 +30,8 @@
 #define STRING_MATCHING_MAX_PATTERN_LENGTH  66
 
 void gt_string_matching_bmh(const char *s, unsigned long n,
-                         const char *p, unsigned long m,
-                         ProcessMatch process_match, void *data)
+                            const char *p, unsigned long m,
+                            ProcessMatch process_match, void *data)
 {
   unsigned long i, j, pos, d[UCHAR_MAX];
   gt_assert(s && p);
@@ -77,8 +77,8 @@ static unsigned long* compute_prefixtab(const char *p, unsigned long m)
 }
 
 unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
-                                  const char *p, unsigned long m,
-                                  ProcessMatch process_match, void *data)
+                                     const char *p, unsigned long m,
+                                     ProcessMatch process_match, void *data)
 {
   unsigned long *prefixtab,
                 j = 0,   /* position in s corresponding to the first character
@@ -122,8 +122,8 @@ unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
 }
 
 void gt_string_matching_shift_and(const char *s, unsigned long n,
-                               const char *p, unsigned long m,
-                               ProcessMatch process_match, void *data)
+                                  const char *p, unsigned long m,
+                                  ProcessMatch process_match, void *data)
 {
   GtBittab *D, *B[UCHAR_MAX] = { NULL };
   unsigned long i, j;
@@ -157,8 +157,8 @@ void gt_string_matching_shift_and(const char *s, unsigned long n,
 }
 
 void gt_string_matching_brute_force(const char *s, unsigned long n,
-                                 const char *p, unsigned long m,
-                                 ProcessMatch process_match, void *data)
+                                    const char *p, unsigned long m,
+                                    ProcessMatch process_match, void *data)
 {
   unsigned long i;
   gt_assert(s && p);

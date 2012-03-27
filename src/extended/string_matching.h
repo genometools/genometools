@@ -25,24 +25,24 @@ typedef bool (*ProcessMatch)(unsigned long pos, void *data);
 
 /* Boyer-Moore-Horspool alg. (O(n*m) time worst-case; sublinear on average). */
 void gt_string_matching_bmh(const char *s, unsigned long n,
-                         const char *p, unsigned long m,
-                         ProcessMatch, void *data);
+                            const char *p, unsigned long m,
+                            ProcessMatch, void *data);
 
 /* Knuth-Morris-Pratt algorithm (O(n+m) time).
    Returns the last common prefix length.*/
 unsigned long gt_string_matching_kmp(const char *s, unsigned long n,
-                                  const char *p, unsigned long m,
-                                   ProcessMatch, void *data);
+                                     const char *p, unsigned long m,
+                                     ProcessMatch, void *data);
 
 /* Shift-And algorithm (O(n*(m/|w|) time, |w| is the word size). */
 void gt_string_matching_shift_and(const char *s, unsigned long n,
-                               const char *p, unsigned long m,
-                               ProcessMatch, void *data);
+                                  const char *p, unsigned long m,
+                                  ProcessMatch, void *data);
 
 /* Brute Force algorithm (O(n*m) time worst-case). */
 void gt_string_matching_brute_force(const char *s, unsigned long n,
-                                 const char *p, unsigned long m,
-                                 ProcessMatch, void *data);
+                                    const char *p, unsigned long m,
+                                    ProcessMatch, void *data);
 
 int  gt_string_matching_unit_test(GtError*);
 
