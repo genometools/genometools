@@ -451,24 +451,17 @@ static void gt_radixsort_bin_update(GtRadixsorttype *target,
   rbuf->endofbin[binnum]++;
 }
 
-static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
-                                       GtRadixsorttype *source,
-                                       unsigned long len,
-                                       uint8_t rightshift)
+static void gt_radixsort_cached_splitintobins(GtRadixbuffer *rbuf,
+                                              GtRadixsorttype *source,
+                                              unsigned long len,
+                                              uint8_t rightshift)
 {
   unsigned long current, previouscount, binoffset, binnum, bufoffset,
                 nextbin, firstnonemptybin = UINT8_MAX+1, *count;
   GtRadixsorttype *sp;
   const GtRadixsorttype *spend = source + len;
-  bool cached = len > (UINT8_MAX << rbuf->log_bufsize) ? true : false;
 
-  if (cached)
-  {
-    rbuf->countcached++;
-  } else
-  {
-    rbuf->countuncached++;
-  }
+  rbuf->countcached++;
   count = rbuf->startofbin; /* use same memory for count and startofbin */
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
@@ -479,22 +472,19 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
   {
     count[GT_RADIX_KEY(UINT8_MAX,rightshift,*sp)]++;
   }
-  if (cached)
+  for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
+       bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
   {
-    for (bufoffset = 0, binoffset = 0, binnum = 0; binnum <= UINT8_MAX;
-         bufoffset += rbuf->buf_size, binoffset += count[binnum], binnum++)
-    {
-      unsigned long j;
-      const unsigned long end = MIN(rbuf->buf_size,count[binnum]);
+    unsigned long j;
+    const unsigned long end = MIN(rbuf->buf_size,count[binnum]);
 
-      if (firstnonemptybin == UINT8_MAX+1 && end > 0)
-      {
-        firstnonemptybin = binnum;
-      }
-      for (j=0; j<end; j++)
-      {
-        rbuf->values[bufoffset + j] = source[binoffset + j];
-      }
+    if (firstnonemptybin == UINT8_MAX+1 && end > 0)
+    {
+      firstnonemptybin = binnum;
+    }
+    for (j=0; j<end; j++)
+    {
+      rbuf->values[bufoffset + j] = source[binoffset + j];
     }
   }
   previouscount = count[0];
@@ -510,38 +500,22 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
   for (current = 0, binnum = firstnonemptybin;
        current < len; binnum = nextbin - 1)
   {
-    GtRadixsorttype currentvalue = cached ? gt_radixsort_bin_get(rbuf,binnum)
-                                          : source[current];
+    GtRadixsorttype currentvalue = gt_radixsort_bin_get(rbuf,binnum);
     while (true)
     {
       binnum = GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue);
       if (current != rbuf->endofbin[binnum])
       {
         GtRadixsorttype tmp = currentvalue;
-        if (cached)
-        {
-          currentvalue = gt_radixsort_bin_get(rbuf,binnum);
-          gt_radixsort_bin_update(source,rbuf,binnum,tmp);
-        } else
-        {
-          currentvalue = source[rbuf->endofbin[binnum]];
-          source[rbuf->endofbin[binnum]] = tmp;
-          rbuf->endofbin[binnum]++;
-        }
+        currentvalue = gt_radixsort_bin_get(rbuf,binnum);
+        gt_radixsort_bin_update(source,rbuf,binnum,tmp);
       } else
       {
         break;
       }
     }
-    if (cached)
-    {
-      gt_radixsort_bin_update(source,rbuf,binnum,currentvalue);
-      current++;
-    } else
-    {
-      source[current++] = currentvalue;
-      rbuf->endofbin[binnum]++;
-    }
+    gt_radixsort_bin_update(source,rbuf,binnum,currentvalue);
+    current++;
     /* skip over empty bins */
     while (nextbin <= UINT8_MAX && current >= rbuf->startofbin[nextbin])
     {
@@ -558,26 +532,102 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
       current = rbuf->endofbin[nextbin-1];
     }
   }
-  if (cached)
+  for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
-    for (binnum = 0; binnum <= UINT8_MAX; binnum++)
+    unsigned long bufleft = rbuf->nextidx[binnum];
+
+    if (bufleft > 0)
     {
-      unsigned long bufleft = rbuf->nextidx[binnum];
+      unsigned long j;
+      GtRadixsorttype *targetptr, *valptr;
 
-      if (bufleft > 0)
+      valptr = rbuf->values + (binnum << rbuf->log_bufsize);
+      targetptr = source + rbuf->startofbin[binnum+1] - bufleft;
+      for (j=0; j < bufleft; j++)
       {
-        unsigned long j;
-        GtRadixsorttype *targetptr, *valptr;
-
-        valptr = rbuf->values + (binnum << rbuf->log_bufsize);
-        targetptr = source + rbuf->startofbin[binnum+1] - bufleft;
-        for (j=0; j < bufleft; j++)
-        {
-          targetptr[j] = valptr[j];
-        }
+        targetptr[j] = valptr[j];
       }
     }
   }
+}
+
+static void gt_radixsort_uncached_splitintobins(GtRadixbuffer *rbuf,
+                                                GtRadixsorttype *source,
+                                                unsigned long len,
+                                                uint8_t rightshift)
+{
+  unsigned long current, previouscount, binnum, nextbin, *count;
+  GtRadixsorttype *sp;
+  const GtRadixsorttype *spend = source + len;
+
+  rbuf->countuncached++;
+  count = rbuf->startofbin; /* use same memory for count and startofbin */
+  for (binnum = 0; binnum <= UINT8_MAX; binnum++)
+  {
+    count[binnum] = 0;
+    rbuf->nextidx[binnum] = 0;
+  }
+  for (sp = source; sp < spend; sp++)
+  {
+    count[GT_RADIX_KEY(UINT8_MAX,rightshift,*sp)]++;
+  }
+  previouscount = count[0];
+  rbuf->startofbin[0] = rbuf->endofbin[0] = nextbin = 0;
+  for (binnum = 1UL; binnum <= UINT8_MAX; binnum++)
+  {
+    unsigned long tmp = rbuf->startofbin[binnum-1] + previouscount;
+    previouscount = count[binnum];
+    rbuf->startofbin[binnum] = rbuf->endofbin[binnum] = tmp;
+  }
+  /* to simplify compution of bin end */
+  rbuf->startofbin[UINT8_MAX+1] = len;
+  for (current = 0; current < len; /* Nothing */)
+  {
+    GtRadixsorttype currentvalue = source[current];
+    unsigned long *binptr;
+
+    while (true)
+    {
+      binptr = rbuf->endofbin + GT_RADIX_KEY(UINT8_MAX,rightshift,currentvalue);
+      if (current != *binptr)
+      {
+        GtRadixsorttype tmp = currentvalue;
+        currentvalue = source[*binptr];
+        source[*binptr] = tmp;
+        (*binptr)++;
+      } else
+      {
+        break;
+      }
+    }
+    source[current++] = currentvalue;
+    (*binptr)++;
+    /* skip over empty bins */
+    while (nextbin <= UINT8_MAX && current >= rbuf->startofbin[nextbin])
+    {
+      nextbin++;
+    }
+    /* skip over full bins */
+    while (nextbin <= UINT8_MAX &&
+           rbuf->endofbin[nextbin-1] == rbuf->startofbin[nextbin])
+    {
+      nextbin++;
+    }
+    if (current < rbuf->endofbin[nextbin-1])
+    {
+      current = rbuf->endofbin[nextbin-1];
+    }
+  }
+}
+
+static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
+                                       GtRadixsorttype *source,
+                                       unsigned long len,
+                                       uint8_t rightshift)
+{
+  (len > (UINT8_MAX << rbuf->log_bufsize) ? gt_radixsort_cached_splitintobins
+                                          : gt_radixsort_uncached_splitintobins)
+                                            (rbuf,source,len,rightshift);
 }
 
 static void gt_radixsort_process_bin(GtStackGtRadixsort_stackelem *stack,
@@ -618,7 +668,8 @@ static void gt_radixsort_sub_inplace_GtUlong(GtRadixbuffer *rbuf,
   {
     currentstackelem = GT_STACK_POP(stack);
     gt_radixsort_splitintobins(rbuf,currentstackelem.left,
-                               currentstackelem.len,currentstackelem.shift);
+                               currentstackelem.len,
+                               currentstackelem.shift);
     if (currentstackelem.shift > 0)
     {
       gt_radixsort_process_bin(stack,rbuf->startofbin,rbuf->endofbin,
@@ -777,12 +828,10 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   countcached += rbuf->countcached;
   countuncached += rbuf->countuncached;
   gt_radixbuffer_delete(rbuf);
-  /*
   printf("countcached=%lu (%.2f)\n",countcached,
                            (double) countcached/(countcached+countuncached));
   printf("countuncached=%lu (%.2f)\n",countuncached,
                            (double) countuncached/(countcached+countuncached));
-  */
 }
 
 static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,
