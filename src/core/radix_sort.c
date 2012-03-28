@@ -382,6 +382,7 @@ typedef struct
   unsigned long buf_size, *startofbin, *endofbin, *nextidx;
   GtRadixsorttype *values;
   int log_bufsize;
+  unsigned long countcached, countuncached;
 } GtRadixbuffer;
 
 static GtRadixbuffer *gt_radixbuffer_new(void)
@@ -396,6 +397,7 @@ static GtRadixbuffer *gt_radixbuffer_new(void)
   buf->startofbin = gt_malloc(sizeof (*buf->startofbin) * (UINT8_MAX + 2));
   buf->endofbin = gt_malloc(sizeof (*buf->endofbin) * (UINT8_MAX + 1));
   buf->nextidx = gt_malloc(sizeof (*buf->nextidx) * (UINT8_MAX + 1));
+  buf->countcached = buf->countuncached = 0;
   return buf;
 }
 
@@ -460,6 +462,13 @@ static void gt_radixsort_splitintobins(GtRadixbuffer *rbuf,
   const GtRadixsorttype *spend = source + len;
   bool cached = len > (UINT8_MAX << rbuf->log_bufsize) ? true : false;
 
+  if (cached)
+  {
+    rbuf->countcached++;
+  } else
+  {
+    rbuf->countuncached++;
+  }
   count = rbuf->startofbin; /* use same memory for count and startofbin */
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
@@ -710,6 +719,7 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   GtStackGtRadixsort_stackelem stack;
   GtRadixbuffer *rbuf;
   const uint8_t rightshift = (sizeof (unsigned long) - 1) * CHAR_BIT;
+  unsigned long countcached = 0, countuncached = 0;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = gt_jobs;
 #else
@@ -718,12 +728,6 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
 
   rbuf = gt_radixbuffer_new();
   gt_radixsort_splitintobins(rbuf,source,len,rightshift);
-  /*
-  gt_free(rbuf->values);
-  rbuf->values = NULL;
-  gt_free(rbuf->nextidx);
-  rbuf->nextidx = NULL;
-  */
   GT_STACK_INIT(&stack,UINT8_MAX);
   gt_radixsort_process_bin(&stack,rbuf->startofbin,rbuf->endofbin,source,
                            rightshift);
@@ -763,12 +767,22 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
     for (t = 0; t < threads; t++)
     {
       GT_STACK_DELETE(&threadinfo[t].stack);
+      countcached += threadinfo[t].rbuf->countcached;
+      countuncached += threadinfo[t].rbuf->countuncached;
       gt_radixbuffer_delete(threadinfo[t].rbuf);
     }
     gt_free(threadinfo);
 #endif
   }
+  countcached += rbuf->countcached;
+  countuncached += rbuf->countuncached;
   gt_radixbuffer_delete(rbuf);
+  /*
+  printf("countcached=%lu (%.2f)\n",countcached,
+                           (double) countcached/(countcached+countuncached));
+  printf("countuncached=%lu (%.2f)\n",countuncached,
+                           (double) countuncached/(countcached+countuncached));
+  */
 }
 
 static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,
