@@ -47,7 +47,8 @@
 #define GT_STACK_DECLARESTRUCT(TYPE,STATICSIZE)\
         typedef struct\
         {\
-          unsigned long allocated, nextfree, staticsize, sizeincrement;\
+          unsigned long allocated, maxsize, nextfree,\
+                        staticsize, sizeincrement;\
           TYPE staticspace[STATICSIZE], *space;\
           int (*initialiseelement)(void *);\
         } GtStack##TYPE
@@ -62,6 +63,7 @@
         (S)->sizeincrement = SIZEINCREMENT;\
         (S)->allocated = (S)->staticsize;\
         (S)->nextfree = 0;\
+        (S)->maxsize = 0;\
         (S)->space = &(S)->staticspace[0];\
         (S)->initialiseelement = INITFUNC;\
         if ((S)->initialiseelement != NULL)\
@@ -124,7 +126,11 @@
 
 #define GT_STACK_PUSH(S,VALUE)\
         GT_STACK_CHECK_SPACE(S)\
-        (S)->space[(S)->nextfree++] = VALUE
+        (S)->space[(S)->nextfree++] = VALUE;\
+        if ((S)->maxsize < (S)->nextfree)\
+        {\
+          (S)->maxsize = (S)->nextfree;\
+        }
 
 /*
   check if the stack is empty.
@@ -168,5 +174,11 @@
 #define GT_STACK_NEXT_FREE(S,PTR)\
         GT_STACK_CHECK_SPACE(S);\
         PTR = (S)->space+(S)->nextfree++
+
+/*
+  return the maximum size of a stack
+*/
+
+#define GT_STACK_MAXSIZE(S) (S)->maxsize
 
 #endif

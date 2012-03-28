@@ -861,7 +861,7 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   GtStackGtRadixsort_stackelem stack;
   GtRadixbuffer *rbuf;
   unsigned long maxwidth, countcached = 0, countuncached = 0,
-                countinsertionsort = 0;
+                countinsertionsort = 0, maxsize = 0;
   const size_t shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = gt_jobs;
@@ -876,6 +876,10 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   if (threads == 1U || stack.nextfree < (unsigned long) threads)
   {
     gt_radixsort_sub_inplace_GtUlong(rbuf,&stack);
+    if (maxsize < GT_STACK_MAXSIZE(&stack))
+    {
+      maxsize = GT_STACK_MAXSIZE(&stack);
+    }
     GT_STACK_DELETE(&stack);
   } else
   {
@@ -900,6 +904,10 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
       gt_assert (threadinfo[t].thread != NULL);
     }
     gt_free(endindexes);
+    if (maxsize < GT_STACK_MAXSIZE(&stack))
+    {
+      maxsize = GT_STACK_MAXSIZE(&stack);
+    }
     GT_STACK_DELETE(&stack);
     for (t = 0; t < threads; t++)
     {
@@ -908,6 +916,10 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
     }
     for (t = 0; t < threads; t++)
     {
+      if (maxsize < GT_STACK_MAXSIZE(&threadinfo[t].stack))
+      {
+        maxsize = GT_STACK_MAXSIZE(&threadinfo[t].stack);
+      }
       GT_STACK_DELETE(&threadinfo[t].stack);
       countcached += threadinfo[t].rbuf->countcached;
       countuncached += threadinfo[t].rbuf->countuncached;
@@ -921,6 +933,7 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   countuncached += rbuf->countuncached;
   countinsertionsort += rbuf->countinsertionsort;
   gt_radixbuffer_delete(rbuf);
+  printf("maxsize=%lu\n",maxsize);
   printf("countcached=%lu\n",countcached);
   printf("countuncached=%lu\n",countuncached);
   printf("countinsertionsort=%lu\n",countinsertionsort);
