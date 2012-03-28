@@ -330,10 +330,6 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len);
    encapsulated in the <GtRadixreaderinfo>.
 */
 
-void gt_radixsort_divide(unsigned long *source,
-                         unsigned long *dest,
-                         unsigned long len);
-
 void gt_radixsort_recursive(unsigned long *source,
                             unsigned long *dest,
                             unsigned long len);
