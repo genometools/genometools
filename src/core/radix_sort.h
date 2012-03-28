@@ -325,13 +325,4 @@ void gt_radixsort_verify(GtRadixreader *rr);
 
 void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len);
 
-/* The following two function implement the radixsort algorithm using a
-   different approaches, which are not as fast as the functions
-   encapsulated in the <GtRadixreaderinfo>.
-*/
-
-void gt_radixsort_recursive(unsigned long *source,
-                            unsigned long *dest,
-                            unsigned long len);
-
 #endif

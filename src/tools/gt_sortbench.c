@@ -62,8 +62,7 @@ static void gt_sortbench_arguments_delete(void *tool_arguments)
 
 static const char *gt_sort_implementation_names[]
     = {"thomas","system","inlinedptr","inlinedarr","direct",
-       "radixrec","radixlinsmall","radixlinlarge",
-       "radixinplace",NULL};
+       "radixlinsmall","radixlinlarge","radixinplace",NULL};
 
 static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 {
@@ -79,7 +78,7 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 
   option = gt_option_new_choice(
                  "impl", "implementation\nchoose from "
-                 "thomas|system|inlinedptr|inlinedarr|direct|radixrec|\n"
+                 "thomas|system|inlinedptr|inlinedarr|direct|\n"
                  "radixlinsmall|radixlinlarge|radixinplace",
                   arguments->impl,
                   gt_sort_implementation_names[0],
@@ -385,18 +384,6 @@ static void check_radixsort_GtUlong_linear_large(unsigned long *arr,
   check_radixsort_GtUlong_linear_gen(false,rparts,withthreads,arr,len);
 }
 
-static void check_radixsort_GtUlong_recursive(unsigned long *arr,
-                                              unsigned long len,
-                                              GT_UNUSED unsigned int rparts,
-                                              GT_UNUSED bool withthreads)
-{
-  unsigned long *temp = gt_malloc((size_t) len * sizeof (*temp));
-
-  gt_radixsort_recursive(arr, temp, len);
-  gt_sortbench_verify(arr,len);
-  gt_free(temp);
-}
-
 static void check_radixsort_inplace(unsigned long *arr, unsigned long len,
                                     GT_UNUSED unsigned int rparts,
                                     GT_UNUSED bool withthreads)
@@ -415,7 +402,6 @@ static GtQsortimplementationfunc gt_sort_implementation_funcs[] =
   check_inlinedptr_qsort,
   check_inlinedarr_qsort,
   check_direct_qsort,
-  check_radixsort_GtUlong_recursive,
   check_radixsort_GtUlong_linear_small,
   check_radixsort_GtUlong_linear_large,
   check_radixsort_inplace
