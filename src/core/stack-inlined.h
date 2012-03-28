@@ -85,6 +85,7 @@
         if ((S)->allocated > (S)->staticsize)\
         {\
           gt_free((S)->space);\
+          (S)->space = NULL;\
         }
 
 /*
