@@ -347,6 +347,66 @@ static void gt_radixsort_GtUlong_linear(GtRadixsortinfo *radixsort,
   }
 }
 
+static void gt_radixsort_lsb_linear_phase(unsigned long *count,
+                                          unsigned long *source,
+                                          unsigned long *dest,
+                                          unsigned long len,
+                                          size_t shift)
+{
+  unsigned long idx, *cptr, *countptr, *sptr;
+
+  /* count occurences of every byte value */
+  countptr = count;
+  for (cptr = countptr; cptr <= countptr + UINT8_MAX; cptr++)
+  {
+    *cptr = 0;
+  }
+
+  for (sptr = source; sptr < source + len; sptr++)
+  {
+    countptr[GT_RADIX_KEY_PTR(UINT8_MAX,shift,sptr)]++;
+  }
+
+  /* compute partial sums */
+  for (cptr = countptr+1; cptr <= countptr + UINT8_MAX; cptr++)
+  {
+    *cptr += *(cptr-1);
+  }
+
+  /* fill dest with the right values in the right place */
+  for (sptr = source + len - 1; sptr >= source; sptr--)
+  {
+    idx = --countptr[GT_RADIX_KEY_PTR(UINT8_MAX,shift,sptr)];
+    dest[idx] = *sptr;
+  }
+}
+
+void gt_radixsort_lsb_linear(size_t enditer,
+                             unsigned long *source,
+                             unsigned long *dest,
+                             unsigned long len)
+{
+  size_t iter;
+  unsigned long *origdest, count[UINT8_MAX+1];
+
+  origdest = dest;
+  for (iter = 0; iter <= enditer; iter++)
+  {
+    unsigned long *ptr;
+
+    gt_radixsort_lsb_linear_phase (count,source, dest, len,
+                                   iter * CHAR_BIT * sizeof (uint8_t));
+    ptr = source;
+    source = dest;
+    dest = ptr;
+  }
+  if (source == origdest)
+  {
+    gt_assert(dest != origdest);
+    memcpy(dest,source,sizeof (*source) * len);
+  }
+}
+
 typedef unsigned long GtRadixsorttype;
 
 static void gt_radixsort_inplace_insertionsort(GtRadixsorttype *a,
@@ -422,66 +482,6 @@ static void gt_radixbuffer_delete(GtRadixbuffer *radixbuffer)
   gt_free(radixbuffer->startofbin);
   gt_free(radixbuffer->endofbin);
   gt_free(radixbuffer);
-}
-
-static void gt_radixsort_lsb_linear_phase(unsigned long *count,
-                                          unsigned long *source,
-                                          unsigned long *dest,
-                                          unsigned long len,
-                                          size_t shift)
-{
-  unsigned long idx, *cptr, *countptr, *sptr;
-
-  /* count occurences of every byte value */
-  countptr = count;
-  for (cptr = countptr; cptr <= countptr + UINT8_MAX; cptr++)
-  {
-    *cptr = 0;
-  }
-
-  for (sptr = source; sptr < source + len; sptr++)
-  {
-    countptr[GT_RADIX_KEY_PTR(UINT8_MAX,shift,sptr)]++;
-  }
-
-  /* compute partial sums */
-  for (cptr = countptr+1; cptr <= countptr + UINT8_MAX; cptr++)
-  {
-    *cptr += *(cptr-1);
-  }
-
-  /* fill dest with the right values in the right place */
-  for (sptr = source + len - 1; sptr >= source; sptr--)
-  {
-    idx = --countptr[GT_RADIX_KEY_PTR(UINT8_MAX,shift,sptr)];
-    dest[idx] = *sptr;
-  }
-}
-
-void gt_radixsort_lsb_linear(size_t enditer,
-                             unsigned long *source,
-                             unsigned long *dest,
-                             unsigned long len)
-{
-  size_t iter;
-  unsigned long *origdest, count[UINT8_MAX+1];
-
-  origdest = dest;
-  for (iter = 0; iter <= enditer; iter++)
-  {
-    unsigned long *ptr;
-
-    gt_radixsort_lsb_linear_phase (count,source, dest, len,
-                                   iter * CHAR_BIT * sizeof (uint8_t));
-    ptr = source;
-    source = dest;
-    dest = ptr;
-  }
-  if (source == origdest)
-  {
-    gt_assert(dest != origdest);
-    memcpy(dest,source,sizeof (*source) * len);
-  }
 }
 
 static GtRadixsorttype gt_radixsort_bin_get(const GtRadixbuffer *rbuf,
