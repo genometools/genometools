@@ -6,7 +6,7 @@ changes in version 1.4.0 (2012-03-22)
   existing scripts.
 - `gt extractfeat` has new options -seqid and -target
 - `gt suffixerator` has new options -lcpdist, -genomediff
-- `gt readjoiner' toolbox added for short read assembly
+- `gt readjoiner' toolbox added for sequence assembly
 - `gt encseq encode' has new option -lossless
 - `gt gff3 -tidy' recognizes and fixes more GFF3 errors
 - test suite is now multithreaded
