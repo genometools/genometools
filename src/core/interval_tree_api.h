@@ -58,11 +58,20 @@ void                gt_interval_tree_insert(GtIntervalTree *tree,
                                             GtIntervalTreeNode *node);
 
 /* Collects data pointers of all <GtIntervalTreeNode>s in the tree which
-   overlapp with the query range (from <start> to <end>) in a <GtArray>. */
+   overlap with the query range (from <start> to <end>) in a <GtArray>. */
 void                gt_interval_tree_find_all_overlapping(GtIntervalTree*,
                                                           unsigned long start,
                                                           unsigned long end,
                                                           GtArray*);
+
+/* Call <func> for all <GtIntervalTreeNode>s in the tree which overlap with
+   the query range (from <start> to <end>). Use <data> to pass in arbitrary
+   user data. */
+void                gt_interval_tree_iterate_overlapping(GtIntervalTree *it,
+                                                GtIntervalTreeIteratorFunc func,
+                                                unsigned long start,
+                                                unsigned long end,
+                                                void *data);
 
 /* Traverses the <GtIntervalTree> in a depth-first fashion, applying <func> to
    each node encountered. The <data> pointer can be used to reference arbitrary
@@ -70,6 +79,15 @@ void                gt_interval_tree_find_all_overlapping(GtIntervalTree*,
 int                 gt_interval_tree_traverse(GtIntervalTree*,
                                               GtIntervalTreeIteratorFunc func,
                                               void *data);
+
+/* Removes the entry referenced by <node> from the <GtIntervalTree>.
+   The data attached to <node> is freed according to the free function defined
+   in the tree.
+   Note that the memory pointed to by <node> can be re-used internally,
+   referencing other data in the tree. Make sure to handle this pointer as
+   expired after calling <gt_interval_tree_remove()>! */
+void                gt_interval_tree_remove(GtIntervalTree*,
+                                            GtIntervalTreeNode *node);
 
 /* Deletes a <GtIntervalTree>. If a <GtFree> function was set in the tree
    constructor, data pointers specified in the nodes are freed using the given

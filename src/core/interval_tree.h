@@ -22,6 +22,6 @@
 
 #include "core/interval_tree_api.h"
 
-int               gt_interval_tree_unit_test(GtError*);
+int gt_interval_tree_unit_test(GtError*);
 
 #endif
