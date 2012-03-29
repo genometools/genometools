@@ -436,20 +436,23 @@ static unsigned long gt_radixsort_findfirstlarger(const unsigned long
   return found;
 }
 
-static unsigned long *gt_evenly_divide_lentab(const unsigned long *lentab,
+static unsigned long *gt_evenly_divide_lentab(unsigned long *lentab,
                                               unsigned long numofelems,
                                               unsigned long len,
                                               unsigned int numofparts)
 {
-  unsigned long *endindexes, *leftborder, widthofpart, idx, offset = 0;
+  unsigned long *endindexes, *leftborder, widthofpart, idx, previousvalue,
+                offset = 0;
   unsigned int part, remainder;
 
   gt_assert(numofparts >= 2U);
-  leftborder = gt_malloc(sizeof (*leftborder) * numofelems);
-  leftborder[0] = lentab[0];
+  leftborder = lentab; /* reuse space for lentab */
+  previousvalue = leftborder[0];
   for (idx = 1UL; idx < numofelems; idx++)
   {
-    leftborder[idx] = leftborder[idx-1] + lentab[idx];
+    unsigned long tmp = leftborder[idx-1] + previousvalue;
+    previousvalue = leftborder[idx];
+    leftborder[idx] = tmp;
   }
   endindexes = gt_malloc(sizeof (*endindexes) * numofparts);
   widthofpart = len/numofparts;
@@ -889,16 +892,17 @@ void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
   } else
   {
 #ifdef GT_THREADS_ENABLED
-    unsigned long last = 0, j, lentab[UINT8_MAX+1], *endindexes;
+    unsigned long last = 0, j, *lentab, *endindexes;
     unsigned int t;
     GtRadixinplacethreadinfo *threadinfo;
 
-    gt_assert(stack.nextfree <= UINT8_MAX+1);
+    lentab = gt_malloc(sizeof (*lentab) * stack.nextfree);
     for (j=0; j<stack.nextfree; j++)
     {
       lentab[j] = stack.space[j].len;
     }
     endindexes = gt_evenly_divide_lentab(lentab,stack.nextfree,len,threads);
+    lentab = NULL;
     threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
     for (t = 0; t < threads; t++)
     {
