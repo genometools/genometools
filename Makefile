@@ -25,7 +25,12 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/bzip2-1.0.6 \
             -I$(CURDIR)/src/external/libtecla-1.6.1 \
             -I$(CURDIR)/src/external/samtools-0.1.18 \
-            -I$(CURDIR)/src/external/sqlite-3.7.10
+            -I$(CURDIR)/src/external/sqlite-3.7.10 \
+            $(shell pkg-config --cflags pango) \
+            $(shell pkg-config --cflags cairo) \
+            $(shell pkg-config --cflags pangocairo) \
+            $(shell pkg-config --cflags glib-2.0)
+
 # these variables are exported by the configuration script
 ifndef CC
   CC:=gcc
@@ -397,7 +402,11 @@ ifneq ($(cairo),no)
                  -I/usr/include/fontconfig -I/usr/local/include/fontconfig \
                  -I/sw/lib/fontconfig2/include/fontconfig \
                  -I/opt/local/include/fontconfig
-  EXP_LDLIBS:=-lcairo -lfontconfig $(EXP_LDLIBS)
+  EXP_LDLIBS:=-lcairo -lfontconfig $(EXP_LDLIBS) \
+            $(shell pkg-config --libs pango) \
+            $(shell pkg-config --libs cairo) \
+            $(shell pkg-config --libs pangocairo) \
+            $(shell pkg-config --libs glib-2.0)
   ANNOTATIONSKETCH_EXAMPLES := bin/examples/sketch_constructed \
                                bin/examples/sketch_parsed_with_ctrack \
                                bin/examples/sketch_parsed_with_ordering \

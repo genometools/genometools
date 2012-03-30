@@ -16,6 +16,7 @@
 */
 
 #include <cairo.h>
+#include <pango/pangocairo.h>
 #include "core/ensure.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
@@ -33,6 +34,7 @@
 struct GtTextWidthCalculatorCairo {
   const GtTextWidthCalculator parent_instance;
   GtStyle *style;
+  PangoLayout *layout;
   cairo_t *context;
   cairo_surface_t *mysurf;
   bool own_context;
@@ -74,6 +76,7 @@ void gt_text_width_calculator_cairo_delete(GtTextWidthCalculator *twc)
   GtTextWidthCalculatorCairo *twcc;
   if (!twc) return;
   twcc = gt_text_width_calculator_cairo_cast(twc);
+  g_object_unref(twcc->layout);
   if (twcc->style)
     gt_style_delete(twcc->style);
   if (twcc->own_context)
@@ -115,6 +118,6 @@ GtTextWidthCalculator* gt_text_width_calculator_cairo_new(cairo_t *context,
     twcc->context = context;
     twcc->own_context = false;
   }
-
+  twcc->layout = pango_cairo_create_layout(twcc->context);
   return twc;
 }

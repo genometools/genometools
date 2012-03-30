@@ -26,6 +26,7 @@
 #ifdef CAIRO_HAS_SVG_SURFACE
 #include <cairo-svg.h>
 #endif
+#include <pango/pangocairo.h>
 
 #include <math.h>
 #include "annotationsketch/graphics_cairo.h"
