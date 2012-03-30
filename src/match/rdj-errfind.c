@@ -19,6 +19,7 @@
 #include "core/unused_api.h"
 #include "core/undef_api.h"
 #include "core/log.h"
+#include "match/rdj-twobitenc-editor.h"
 #include "match/rdj-errfind.h"
 
 /*#define RDJ_ERRFIND_DEBUG*/
@@ -43,11 +44,10 @@ typedef struct {
   unsigned long debug_value;
   bool quiet;
 
-  bool edit_twobitencoding;
-  GtTwobitencoding *twobitencoding;
   unsigned long firstmirrorpos;
   unsigned long totallength;
-  unsigned long *encseq_charcount;
+
+  GtTwobitencEditor *editor;
 
   /* statistics */
   unsigned long ncorrections;
@@ -209,20 +209,6 @@ static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
   return trusted_char;
 }
 
-static inline void gt_errfind_edit_encseq(unsigned long pos,
-    GtUchar trusted_char, GtBUstate_errfind *state)
-{
-  size_t codenum = pos / GT_UNITSIN2BITENC;
-  GtTwobitencoding code = state->twobitencoding[codenum];
-  size_t posincode = (GT_UNITSIN2BITENC - 1UL - (pos % GT_UNITSIN2BITENC)) << 1;
-  GtUchar currentchar = code & ((GtTwobitencoding)3 << posincode) >> posincode;
-  code = (code & (~((GtTwobitencoding)3 << posincode))) |
-    (trusted_char << posincode);
-  state->encseq_charcount[currentchar]--;
-  state->twobitencoding[codenum] = code;
-  state->encseq_charcount[trusted_char]++;
-}
-
 static int processlcpinterval_errfind(unsigned long lcp,
     GT_UNUSED GtBUinfo_errfind *info, GtBUstate_errfind *state,
     GT_UNUSED GtError *err)
@@ -246,9 +232,9 @@ static int processlcpinterval_errfind(unsigned long lcp,
               pos = state->totallength - 1UL - pos;
               trusted_char = (GtUchar)3 - trusted_char;
             }
-            if (state->edit_twobitencoding)
+            if (state->editor != NULL)
             {
-              gt_errfind_edit_encseq(pos, trusted_char, state);
+              gt_twobitenc_editor_edit(state->editor, pos, trusted_char);
             }
             /*else if (!state->quiet)*/
             {
@@ -270,7 +256,6 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
 {
   GtBUstate_errfind *state;
   int had_err = 0;
-  unsigned char *mapptr = NULL;
 
   state = gt_malloc(sizeof (*state));
   state->alphasize = gt_alphabet_num_of_chars(gt_encseq_alphabet(encseq));
@@ -282,38 +267,12 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
   if (gt_encseq_is_mirrored(encseq))
     state->firstmirrorpos >>= 1;
 
-  state->edit_twobitencoding = edit_twobitencoding;
-  state->encseq_charcount = NULL;
+  state->editor = NULL;
   if (edit_twobitencoding)
   {
-    if (!gt_has_twobitencoding(encseq))
-    {
-      gt_error_set(err, "encseq correction is only "
-          "implemented if the sequence has a twobitencoding");
+    state->editor = gt_twobitenc_editor_new(encseq, indexname, err);
+    if (state->editor == NULL)
       had_err = -1;
-    }
-    else if (gt_encseq_accesstype_get(encseq) != GT_ACCESS_TYPE_EQUALLENGTH)
-    {
-      gt_error_set(err, "encseq correction is currently only "
-          "implemented if the sequence access type is EQUALLENGTH");
-      had_err = -1;
-    }
-    else
-    {
-      size_t t_offset = gt_encseq_twobitencoding_mapoffset(encseq);
-      size_t c_offset = gt_encseq_chardistri_mapoffset(encseq);
-      GtStr *encseqfilename = gt_str_new_cstr(indexname);
-      gt_str_append_cstr(encseqfilename, GT_ENCSEQFILESUFFIX);
-      mapptr = (unsigned char*)gt_fa_mmap_write(gt_str_get(encseqfilename),
-          NULL, err);
-      state->twobitencoding = (GtTwobitencoding*)(mapptr + t_offset);
-      state->encseq_charcount = (unsigned long*)(mapptr + c_offset);
-      gt_str_delete(encseqfilename);
-    }
-  }
-  else
-  {
-    state->twobitencoding = NULL;
   }
   state->k = k;
   state->c = c;
@@ -323,9 +282,9 @@ int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
 
   had_err = gt_esa_bottomup_errfind(ssar, state, err);
 
-  if (!had_err && edit_twobitencoding)
+  if (state->editor != NULL)
   {
-    gt_fa_xmunmap(mapptr);
+    gt_twobitenc_editor_delete(state->editor);
   }
 
   gt_free(state->kpositions);

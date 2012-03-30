@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2012 Giorgio Gonnella <gonnella@zbh.uni-hamburg.de>
+  Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,15 +15,20 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RDJ_ERRFIND_H
-#define RDJ_ERRFIND_H
+#ifndef RDJ_TWOBITENC_EDITOR_H
+#define RDJ_TWOBITENC_EDITOR_H
 
-#include "core/error_api.h"
 #include "core/encseq.h"
-#include "match/esa-seqread.h"
+#include "core/error_api.h"
 
-int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
-    unsigned long k, unsigned long c, unsigned long debug_value,
-    bool encseq_output, const char *indexname, GtError *err);
+typedef struct GtTwobitencEditor GtTwobitencEditor;
+
+GtTwobitencEditor *gt_twobitenc_editor_new(const GtEncseq *encseq,
+    const char* indexname, GtError *err);
+
+void gt_twobitenc_editor_edit(GtTwobitencEditor *twobitenc_editor,
+    unsigned long pos, GtUchar newchar);
+
+void gt_twobitenc_editor_delete(GtTwobitencEditor *twobitenc_editor);
 
 #endif
