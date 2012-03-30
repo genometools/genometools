@@ -67,7 +67,7 @@ static GtOptionParser* gt_readjoiner_correct_option_parser_new(
                                   &arguments->c, 3UL, 1UL);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_bool("encseq","output a corrected encseq",
+  option = gt_option_new_bool("encseq","correct encoded sequence",
       &arguments->edit_twobitencoding, true);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
@@ -77,8 +77,8 @@ static GtOptionParser* gt_readjoiner_correct_option_parser_new(
   gt_option_is_mandatory(option);
   gt_option_parser_add_option(op, option);
 
-  option = gt_option_new_ulong("dbg","debug parameter, meaning variable",
-                               &arguments->debug_value, GT_UNDEF_ULONG);
+  option = gt_option_new_ulong("dbg","(debug value) "
+      "see code for current meaning", &arguments->debug_value, GT_UNDEF_ULONG);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -110,8 +110,9 @@ static int gt_readjoiner_correct_runner(GT_UNUSED int argc,
     GtStr *indexname_corrected = gt_str_clone(arguments->indexname);
     gt_str_append_cstr(arguments->indexname, GT_READJOINER_CORRECT_TAG);
     had_err = gt_errfind(ssar, gt_encseqSequentialsuffixarrayreader(ssar),
-           arguments->k, arguments->c, arguments->edit_twobitencoding,
-           arguments->debug_value, gt_str_get(indexname_corrected), err);
+           arguments->k, arguments->c, arguments->debug_value,
+           arguments->edit_twobitencoding, gt_str_get(indexname_corrected),
+           err);
     gt_freeSequentialsuffixarrayreader(&ssar);
     gt_str_delete(indexname_corrected);
   }

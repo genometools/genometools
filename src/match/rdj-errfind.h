@@ -24,6 +24,6 @@
 
 int gt_errfind(Sequentialsuffixarrayreader *ssar, const GtEncseq *encseq,
     unsigned long k, unsigned long c, unsigned long debug_value,
-    bool encseq_output, const char *indexname, GtError *err);
+    bool edit_twobitencoding, const char *indexname, GtError *err);
 
 #endif

@@ -190,10 +190,10 @@ static inline bool gt_errfind_are_all_trusted(const GtBUstate_errfind *state)
 static inline GtUchar gt_errfind_trusted_char(const GtBUstate_errfind *state)
 {
   unsigned int cnum;
-  GtUchar trusted_char = GT_UNDEF_UCHAR;
+  GtUchar trusted_char = (GtUchar)GT_UNDEF_UCHAR;
   unsigned long trusted_count = 0;
-  for (cnum = 0; cnum < state->alphasize && trusted_char == GT_UNDEF_UCHAR;
-      cnum++)
+  for (cnum = 0; cnum < state->alphasize &&
+      trusted_char == (GtUchar)GT_UNDEF_UCHAR; cnum++)
   {
     if (state->count[cnum] >= state->c && state->count[cnum] > trusted_count)
     {
@@ -216,7 +216,7 @@ static int processlcpinterval_errfind(unsigned long lcp,
   if (lcp == state->k - 1 && !gt_errfind_are_all_trusted(state))
   {
     GtUchar trusted_char = gt_errfind_trusted_char(state);
-    if (trusted_char != GT_UNDEF_UCHAR)
+    if (trusted_char != (GtUchar)GT_UNDEF_UCHAR)
     {
       unsigned int cnum;
       for (cnum = 0; cnum < state->alphasize && state->count[cnum] > 0; cnum++)
@@ -235,11 +235,10 @@ static int processlcpinterval_errfind(unsigned long lcp,
             }
             if (state->editor != NULL)
             {
-              gt_twobitenc_editor_edit(state->editor, pos, newchar);
-            }
-            /*else if (!state->quiet)*/
-            {
+#ifdef RDJ_ERRFIND_DEBUG
               printf("%lu:%u\n", pos, (unsigned int)newchar);
+#endif
+              gt_twobitenc_editor_edit(state->editor, pos, newchar);
             }
           }
         }
