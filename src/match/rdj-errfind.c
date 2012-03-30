@@ -227,18 +227,19 @@ static int processlcpinterval_errfind(unsigned long lcp,
           for (i = 0; i < state->count[cnum]; i++)
           {
             unsigned long pos = state->kpositions[cnum * state->c + i];
+            GtUchar newchar = trusted_char;
             if (pos >= state->firstmirrorpos)
             {
               pos = state->totallength - 1UL - pos;
-              trusted_char = (GtUchar)3 - trusted_char;
+              newchar = (GtUchar)3 - newchar;
             }
             if (state->editor != NULL)
             {
-              gt_twobitenc_editor_edit(state->editor, pos, trusted_char);
+              gt_twobitenc_editor_edit(state->editor, pos, newchar);
             }
             /*else if (!state->quiet)*/
             {
-              printf("%lu:%u\n", pos, (unsigned int)trusted_char);
+              printf("%lu:%u\n", pos, (unsigned int)newchar);
             }
           }
         }

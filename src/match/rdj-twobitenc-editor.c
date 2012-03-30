@@ -75,21 +75,22 @@ GtTwobitencEditor *gt_twobitenc_editor_new(const GtEncseq *encseq,
 void gt_twobitenc_editor_edit(GtTwobitencEditor *twobitenc_editor,
     unsigned long pos, GtUchar newchar)
 {
-  size_t codenum;
+  size_t codenum, posincode;
   GtTwobitencoding oldcode, newcode;
-  size_t posincode;
-  GtUchar currentchar;
+  GtUchar oldchar;
 
   gt_assert(twobitenc_editor);
   codenum = (size_t)pos / GT_UNITSIN2BITENC;
   oldcode = twobitenc_editor->twobitencoding[codenum];
   posincode = (GT_UNITSIN2BITENC - 1 -
       ((size_t)pos % GT_UNITSIN2BITENC)) << 1;
-  currentchar = (oldcode & ((GtTwobitencoding)3 << posincode)) >> posincode;
+  oldchar = (oldcode & ((GtTwobitencoding)3 << posincode)) >> posincode;
   newcode = (oldcode & (~((GtTwobitencoding)3 << posincode)));
   newcode |= ((GtTwobitencoding)newchar << posincode);
-  twobitenc_editor->charcount[currentchar]--;
   twobitenc_editor->twobitencoding[codenum] = newcode;
+
+  /* fix counts */
+  twobitenc_editor->charcount[oldchar]--;
   twobitenc_editor->charcount[newchar]++;
 }
 
