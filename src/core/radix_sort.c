@@ -507,12 +507,12 @@ GT_STACK_DECLARESTRUCT(GtRadixsort_stackelem,2 * (UINT8_MAX+1));
 
 typedef struct
 {
-  unsigned long buf_size, countcached, countuncached, countinsertionsort;
+  unsigned long buf_size, cachesize, countcached, countuncached,
+           countinsertionsort;
   GtCountbasetype *startofbin, *endofbin;
   uint8_t *nextidx;
   int log_bufsize;
   bool pairs;
-  unsigned long cachesize;
   GtRadixvalues values;
 } GtRadixbuffer;
 
