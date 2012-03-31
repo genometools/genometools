@@ -584,6 +584,7 @@ struct GtRadixsortinfo2
   GtRadixbuffer *rbuf;
 #ifdef GT_THREADS_ENABLED
   unsigned long *lentab, *endindexes;
+  GtRadixinplacethreadinfo *threadinfo;
 #endif
 };
 
@@ -598,10 +599,22 @@ GtRadixsortinfo2 *gt_radixsortinfo2_new(bool pairs)
 #ifdef GT_THREADS_ENABLED
   {
     const unsigned int threads = gt_jobs;
-    radixsortinfo->lentab = gt_malloc(sizeof (*radixsortinfo->endindexes) *
-                                      (UINT8_MAX+1));
-    radixsortinfo->endindexes = gt_malloc(sizeof (*radixsortinfo->endindexes) *
-                                          threads);
+
+    if (threads > 1U)
+    {
+      unsigned int t;
+      radixsortinfo->lentab
+        = gt_malloc(sizeof (*radixsortinfo->endindexes) * (UINT8_MAX+1));
+      radixsortinfo->endindexes
+        = gt_malloc(sizeof (*radixsortinfo->endindexes) * threads);
+      radixsortinfo->threadinfo
+        = gt_malloc(sizeof (*radixsortinfo->threadinfo) * threads);
+      for (t = 0; threads > 1U && t < threads; t++)
+      {
+        GT_STACK_INIT(&radixsortinfo->threadinfo[t].stack,32UL);
+        radixsortinfo->threadinfo[t].rbuf = gt_radixbuffer_new(pairs);
+      }
+    }
   }
 #endif
   return radixsortinfo;
@@ -611,12 +624,24 @@ void gt_radixsortinfo2_delete(GtRadixsortinfo2 *radixsortinfo)
 {
   if (radixsortinfo != NULL)
   {
+#ifdef GT_THREADS_ENABLED
+    const unsigned int threads = gt_jobs;
+
+    if (threads > 1U)
+    {
+      unsigned int t;
+      gt_free(radixsortinfo->lentab);
+      gt_free(radixsortinfo->endindexes);
+      for (t = 0; threads > 1U && t < threads; t++)
+      {
+        GT_STACK_DELETE(&radixsortinfo->threadinfo[t].stack);
+        gt_radixbuffer_delete(radixsortinfo->threadinfo[t].rbuf);
+      }
+      gt_free(radixsortinfo->threadinfo);
+    }
+#endif
     gt_radixbuffer_delete(radixsortinfo->rbuf);
     GT_STACK_DELETE(&radixsortinfo->stack);
-#ifdef GT_THREADS_ENABLED
-    gt_free(radixsortinfo->lentab);
-    gt_free(radixsortinfo->endindexes);
-#endif
     gt_free(radixsortinfo);
   }
 }
@@ -674,7 +699,6 @@ static void gt_radixsort_inplace(GtRadixsortinfo2 *radixsortinfo,
 #ifdef GT_THREADS_ENABLED
     unsigned long last = 0, j;
     unsigned int t;
-    GtRadixinplacethreadinfo *threadinfo;
 
     gt_assert(radixsortinfo->stack.nextfree <= UINT8_MAX+1);
     for (j=0; j<radixsortinfo->stack.nextfree; j++)
@@ -684,34 +708,32 @@ static void gt_radixsort_inplace(GtRadixsortinfo2 *radixsortinfo,
     gt_evenly_divide_lentab(radixsortinfo->endindexes,
                             radixsortinfo->lentab,
                             radixsortinfo->stack.nextfree,len,threads);
-    threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
     for (t = 0; t < threads; t++)
     {
-      GT_STACK_INIT(&threadinfo[t].stack,32UL);
-      threadinfo[t].rbuf = gt_radixbuffer_new(pairs);
+      GT_STACK_MAKEEMPTY(&radixsortinfo->threadinfo[t].stack);
       for (j = last; j <= radixsortinfo->endindexes[t]; j++)
       {
-        GT_STACK_PUSH(&threadinfo[t].stack,radixsortinfo->stack.space[j]);
+        GT_STACK_PUSH(&radixsortinfo->threadinfo[t].stack,
+                      radixsortinfo->stack.space[j]);
       }
       last = radixsortinfo->endindexes[t] + 1;
-      threadinfo[t].thread = gt_thread_new (gt_radixsort_thread_caller,
-                                            threadinfo + t,NULL);
-      gt_assert (threadinfo[t].thread != NULL);
+      radixsortinfo->threadinfo[t].thread
+        = gt_thread_new (gt_radixsort_thread_caller,
+                         radixsortinfo->threadinfo + t,NULL);
+      gt_assert (radixsortinfo->threadinfo[t].thread != NULL);
     }
     for (t = 0; t < threads; t++)
     {
-      gt_thread_join(threadinfo[t].thread);
-      gt_thread_delete(threadinfo[t].thread);
+      gt_thread_join(radixsortinfo->threadinfo[t].thread);
+      gt_thread_delete(radixsortinfo->threadinfo[t].thread);
     }
     for (t = 0; t < threads; t++)
     {
-      GT_STACK_DELETE(&threadinfo[t].stack);
-      countcached += threadinfo[t].rbuf->countcached;
-      countuncached += threadinfo[t].rbuf->countuncached;
-      countinsertionsort += threadinfo[t].rbuf->countinsertionsort;
-      gt_radixbuffer_delete(threadinfo[t].rbuf);
+      countcached += radixsortinfo->threadinfo[t].rbuf->countcached;
+      countuncached += radixsortinfo->threadinfo[t].rbuf->countuncached;
+      countinsertionsort
+        += radixsortinfo->threadinfo[t].rbuf->countinsertionsort;
     }
-    gt_free(threadinfo);
 #endif
   }
   countcached += radixsortinfo->rbuf->countcached;
