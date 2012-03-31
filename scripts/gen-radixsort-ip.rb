@@ -303,14 +303,13 @@ gt_radixsort_#{makekey(options)}_inplace_insertionsort(#{maketype(options)} *a,
   }
 }
 
-static GtCountbasetype gt_radixsort_#{makekey(options)}_process_bin(
+static void gt_radixsort_#{makekey(options)}_process_bin(
                                      GtStackGtRadixsort_stackelem *stack,
                                      GtRadixbuffer *rbuf,
                                      #{maketype(options)} *source,
                                      size_t shift)
 {
   unsigned long binnum;
-  GtCountbasetype maxwidth = 0;
 
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
@@ -320,10 +319,6 @@ static GtCountbasetype gt_radixsort_#{makekey(options)}_process_bin(
     {
       #{maketype(options)} *ptr = source + rbuf->startofbin[binnum];
 
-      if (maxwidth < width)
-      {
-        maxwidth = width;
-      }
       if (width == (GtCountbasetype) 2)
       {
         if (#{derefptr("ptr",options)} > #{derefptr("(ptr+1)",options)})
@@ -350,7 +345,6 @@ static GtCountbasetype gt_radixsort_#{makekey(options)}_process_bin(
       }
     }
   }
-  return maxwidth;
 }
 
 static void gt_radixsort_#{makekey(options)}_sub_inplace(GtRadixbuffer *rbuf,

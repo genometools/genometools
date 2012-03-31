@@ -161,6 +161,13 @@
         ((S)->space[--(S)->nextfree])
 
 /*
+  reduce the stack such that it becomes empty.
+*/
+
+#define GT_STACK_MAKEEMPTY(S)\
+        (S)->nextfree = 0
+
+/*
   reduce the stack such that it only contains one element.
 */
 

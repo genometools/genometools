@@ -443,12 +443,13 @@ static unsigned long gt_radixsort_findfirstlarger(const unsigned long
   return found;
 }
 
-static unsigned long *gt_evenly_divide_lentab(unsigned long *lentab,
-                                              unsigned long numofelems,
-                                              unsigned long len,
-                                              unsigned int numofparts)
+static void gt_evenly_divide_lentab(unsigned long *endindexes,
+                                    unsigned long *lentab,
+                                    unsigned long numofelems,
+                                    unsigned long len,
+                                    unsigned int numofparts)
 {
-  unsigned long *endindexes, *leftborder, widthofpart, idx, previousvalue,
+  unsigned long *leftborder, widthofpart, idx, previousvalue,
                 offset = 0;
   unsigned int part, remainder;
 
@@ -461,7 +462,6 @@ static unsigned long *gt_evenly_divide_lentab(unsigned long *lentab,
     previousvalue = leftborder[idx];
     leftborder[idx] = tmp;
   }
-  endindexes = gt_malloc(sizeof (*endindexes) * numofparts);
   widthofpart = len/numofparts;
   remainder = (unsigned int) (len % (unsigned long) numofparts);
   for (part=0; part < numofparts; part++)
@@ -485,8 +485,6 @@ static unsigned long *gt_evenly_divide_lentab(unsigned long *lentab,
                                                       numofelems-1,offset);
     }
   }
-  gt_free(leftborder);
-  return endindexes;
 }
 #endif
 
@@ -516,19 +514,12 @@ typedef struct
   GtRadixvalues values;
 } GtRadixbuffer;
 
-static GtRadixbuffer *gt_radixbuffer_new(unsigned long maxwidth,
-                                         bool pairs)
+static GtRadixbuffer *gt_radixbuffer_new(bool pairs)
 {
   GtRadixbuffer *buf;
 
   buf = gt_malloc(sizeof (*buf));
-  if (maxwidth < 1024UL * 1024UL)
-  {
-    buf->log_bufsize = 6;
-  } else
-  {
-    buf->log_bufsize = 5;
-  }
+  buf->log_bufsize = 5;
   buf->buf_size = 1UL << buf->log_bufsize;
   gt_assert(buf->buf_size <= UINT8_MAX);
   buf->cachesize = (UINT8_MAX+1) << buf->log_bufsize;
@@ -587,15 +578,56 @@ static void *gt_radixsort_thread_caller(void *data)
 }
 #endif
 
-static void gt_radixsort_inplace(GtRadixvalues *radixvalues,bool pairs,
-                                 unsigned long len)
+struct GtRadixsortinfo2
 {
   GtStackGtRadixsort_stackelem stack;
   GtRadixbuffer *rbuf;
+#ifdef GT_THREADS_ENABLED
+  unsigned long *lentab, *endindexes;
+#endif
+};
+
+typedef struct GtRadixsortinfo2 GtRadixsortinfo2;
+
+GtRadixsortinfo2 *gt_radixsortinfo2_new(bool pairs)
+{
+  GtRadixsortinfo2 *radixsortinfo = gt_malloc(sizeof (*radixsortinfo));
+
+  radixsortinfo->rbuf = gt_radixbuffer_new(pairs);
+  GT_STACK_INIT(&radixsortinfo->stack,32UL);
+#ifdef GT_THREADS_ENABLED
+  {
+    const unsigned int threads = gt_jobs;
+    radixsortinfo->lentab = gt_malloc(sizeof (*radixsortinfo->endindexes) *
+                                      (UINT8_MAX+1));
+    radixsortinfo->endindexes = gt_malloc(sizeof (*radixsortinfo->endindexes) *
+                                          threads);
+  }
+#endif
+  return radixsortinfo;
+}
+
+void gt_radixsortinfo2_delete(GtRadixsortinfo2 *radixsortinfo)
+{
+  if (radixsortinfo != NULL)
+  {
+    gt_radixbuffer_delete(radixsortinfo->rbuf);
+    GT_STACK_DELETE(&radixsortinfo->stack);
+#ifdef GT_THREADS_ENABLED
+    gt_free(radixsortinfo->lentab);
+    gt_free(radixsortinfo->endindexes);
+#endif
+    gt_free(radixsortinfo);
+  }
+}
+
+static void gt_radixsort_inplace(GtRadixsortinfo2 *radixsortinfo,
+                                 GtRadixvalues *radixvalues,bool pairs,
+                                 unsigned long len)
+{
   unsigned long countcached = 0, countuncached = 0,
-                countinsertionsort = 0, maxsize = 0;
+                countinsertionsort = 0;
   const size_t shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
-  GtCountbasetype maxwidth;
 #ifdef GT_THREADS_ENABLED
   const unsigned int threads = gt_jobs;
 #else
@@ -609,70 +641,63 @@ static void gt_radixsort_inplace(GtRadixvalues *radixvalues,bool pairs,
                    "#define GT_RADIX_LARGEARRAYS\n",__FILE__,__LINE__);
     exit(GT_EXIT_PROGRAMMING_ERROR);
   }
-  rbuf = gt_radixbuffer_new(len,pairs);
   if (pairs)
   {
-    gt_radixsort_ulongpair_shuffle(rbuf,radixvalues->ulongpairptr,
+    gt_radixsort_ulongpair_shuffle(radixsortinfo->rbuf,
+                                   radixvalues->ulongpairptr,
                                    (GtCountbasetype) len,shift);
   } else
   {
-    gt_radixsort_ulong_shuffle(rbuf,radixvalues->ulongptr,
+    gt_radixsort_ulong_shuffle(radixsortinfo->rbuf,radixvalues->ulongptr,
                                (GtCountbasetype) len,shift);
   }
-  GT_STACK_INIT(&stack,32UL);
+  GT_STACK_MAKEEMPTY(&radixsortinfo->stack);
   if (pairs)
   {
-    maxwidth = gt_radixsort_ulongpair_process_bin(&stack,rbuf,
-                                                  radixvalues->ulongpairptr,
-                                                  shift);
+    gt_radixsort_ulongpair_process_bin(&radixsortinfo->stack,
+                                       radixsortinfo->rbuf,
+                                       radixvalues->ulongpairptr,
+                                       shift);
   } else
   {
-    maxwidth = gt_radixsort_ulong_process_bin(&stack,rbuf,
-                                              radixvalues->ulongptr,shift);
+    gt_radixsort_ulong_process_bin(&radixsortinfo->stack,
+                                   radixsortinfo->rbuf,
+                                   radixvalues->ulongptr,shift);
   }
-  if (threads == 1U || stack.nextfree < (unsigned long) threads)
+  if (threads == 1U || radixsortinfo->stack.nextfree < (unsigned long) threads)
   {
     (pairs ? gt_radixsort_ulongpair_sub_inplace
-           : gt_radixsort_ulong_sub_inplace) (rbuf,&stack);
-    if (maxsize < GT_STACK_MAXSIZE(&stack))
-    {
-      maxsize = GT_STACK_MAXSIZE(&stack);
-    }
-    GT_STACK_DELETE(&stack);
+           : gt_radixsort_ulong_sub_inplace) (radixsortinfo->rbuf,
+                                              &radixsortinfo->stack);
   } else
   {
 #ifdef GT_THREADS_ENABLED
-    unsigned long last = 0, j, *lentab, *endindexes;
+    unsigned long last = 0, j;
     unsigned int t;
     GtRadixinplacethreadinfo *threadinfo;
 
-    lentab = gt_malloc(sizeof (*lentab) * stack.nextfree);
-    for (j=0; j<stack.nextfree; j++)
+    gt_assert(radixsortinfo->stack.nextfree <= UINT8_MAX+1);
+    for (j=0; j<radixsortinfo->stack.nextfree; j++)
     {
-      lentab[j] = stack.space[j].len;
+      radixsortinfo->lentab[j] = radixsortinfo->stack.space[j].len;
     }
-    endindexes = gt_evenly_divide_lentab(lentab,stack.nextfree,len,threads);
-    lentab = NULL;
+    gt_evenly_divide_lentab(radixsortinfo->endindexes,
+                            radixsortinfo->lentab,
+                            radixsortinfo->stack.nextfree,len,threads);
     threadinfo = gt_malloc(sizeof (*threadinfo) * threads);
     for (t = 0; t < threads; t++)
     {
       GT_STACK_INIT(&threadinfo[t].stack,32UL);
-      threadinfo[t].rbuf = gt_radixbuffer_new(maxwidth,pairs);
-      for (j = last; j <= endindexes[t]; j++)
+      threadinfo[t].rbuf = gt_radixbuffer_new(pairs);
+      for (j = last; j <= radixsortinfo->endindexes[t]; j++)
       {
-        GT_STACK_PUSH(&threadinfo[t].stack,stack.space[j]);
+        GT_STACK_PUSH(&threadinfo[t].stack,radixsortinfo->stack.space[j]);
       }
-      last = endindexes[t] + 1;
+      last = radixsortinfo->endindexes[t] + 1;
       threadinfo[t].thread = gt_thread_new (gt_radixsort_thread_caller,
                                             threadinfo + t,NULL);
       gt_assert (threadinfo[t].thread != NULL);
     }
-    gt_free(endindexes);
-    if (maxsize < GT_STACK_MAXSIZE(&stack))
-    {
-      maxsize = GT_STACK_MAXSIZE(&stack);
-    }
-    GT_STACK_DELETE(&stack);
     for (t = 0; t < threads; t++)
     {
       gt_thread_join(threadinfo[t].thread);
@@ -680,10 +705,6 @@ static void gt_radixsort_inplace(GtRadixvalues *radixvalues,bool pairs,
     }
     for (t = 0; t < threads; t++)
     {
-      if (maxsize < GT_STACK_MAXSIZE(&threadinfo[t].stack))
-      {
-        maxsize = GT_STACK_MAXSIZE(&threadinfo[t].stack);
-      }
       GT_STACK_DELETE(&threadinfo[t].stack);
       countcached += threadinfo[t].rbuf->countcached;
       countuncached += threadinfo[t].rbuf->countuncached;
@@ -693,12 +714,10 @@ static void gt_radixsort_inplace(GtRadixvalues *radixvalues,bool pairs,
     gt_free(threadinfo);
 #endif
   }
-  countcached += rbuf->countcached;
-  countuncached += rbuf->countuncached;
-  countinsertionsort += rbuf->countinsertionsort;
-  gt_radixbuffer_delete(rbuf);
+  countcached += radixsortinfo->rbuf->countcached;
+  countuncached += radixsortinfo->rbuf->countuncached;
+  countinsertionsort += radixsortinfo->rbuf->countinsertionsort;
   /*
-  printf("maxsize=%lu\n",maxsize);
   printf("countcached=%lu\n",countcached);
   printf("countuncached=%lu\n",countuncached);
   printf("countinsertionsort=%lu\n",countinsertionsort);
@@ -708,17 +727,25 @@ static void gt_radixsort_inplace(GtRadixvalues *radixvalues,bool pairs,
 void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
 {
   GtRadixvalues radixvalues;
+  const bool pairs = false;
+  GtRadixsortinfo2 *radixsortinfo;
 
+  radixsortinfo = gt_radixsortinfo2_new(pairs);
   radixvalues.ulongptr = source;
-  gt_radixsort_inplace(&radixvalues,false,len);
+  gt_radixsort_inplace(radixsortinfo,&radixvalues,pairs,len);
+  gt_radixsortinfo2_delete(radixsortinfo);
 }
 
 void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, unsigned long len)
 {
   GtRadixvalues radixvalues;
+  const bool pairs = true;
+  GtRadixsortinfo2 *radixsortinfo;
 
+  radixsortinfo = gt_radixsortinfo2_new(pairs);
   radixvalues.ulongpairptr = source;
-  gt_radixsort_inplace(&radixvalues,true,len);
+  gt_radixsort_inplace(radixsortinfo,&radixvalues,pairs,len);
+  gt_radixsortinfo2_delete(radixsortinfo);
 }
 
 static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,

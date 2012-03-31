@@ -244,14 +244,13 @@ gt_radixsort_ulong_inplace_insertionsort(unsigned long *a,
   }
 }
 
-static GtCountbasetype gt_radixsort_ulong_process_bin(
+static void gt_radixsort_ulong_process_bin(
                                      GtStackGtRadixsort_stackelem *stack,
                                      GtRadixbuffer *rbuf,
                                      unsigned long *source,
                                      size_t shift)
 {
   unsigned long binnum;
-  GtCountbasetype maxwidth = 0;
 
   for (binnum = 0; binnum <= UINT8_MAX; binnum++)
   {
@@ -261,10 +260,6 @@ static GtCountbasetype gt_radixsort_ulong_process_bin(
     {
       unsigned long *ptr = source + rbuf->startofbin[binnum];
 
-      if (maxwidth < width)
-      {
-        maxwidth = width;
-      }
       if (width == (GtCountbasetype) 2)
       {
         if (*ptr > *(ptr+1))
@@ -291,7 +286,6 @@ static GtCountbasetype gt_radixsort_ulong_process_bin(
       }
     }
   }
-  return maxwidth;
 }
 
 static void gt_radixsort_ulong_sub_inplace(GtRadixbuffer *rbuf,
