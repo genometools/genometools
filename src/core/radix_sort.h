@@ -325,4 +325,17 @@ void gt_radixsort_verify(GtRadixreader *rr);
 
 void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len);
 
+typedef struct GtRadixsortIPinfo GtRadixsortIPinfo;
+
+GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen);
+
+size_t gt_radixsortinfo2_size(GtRadixsortIPinfo *radixsortinfo);
+
+void gt_radixsort_inplace_sort(GtRadixsortIPinfo *radixsortinfo,
+                               unsigned long len);
+
+void gt_radixsortinfo2_delete(GtRadixsortIPinfo *radixsortinfo);
+
+unsigned long *gt_radixsortinfo2_space_ulong(GtRadixsortIPinfo *radixsortinfo);
+
 #endif
