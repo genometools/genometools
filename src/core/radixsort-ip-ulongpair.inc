@@ -234,10 +234,10 @@ gt_radixsort_ulongpair_inplace_insertionsort(GtUlongPair *a,
     {
       GtUlongPair currentElement = *optr;
 
-      optr->a = (optr-1)->a;
+      *optr = *(optr-1);
       for (iptr = optr-1; iptr > a && currentElement.a < (iptr-1)->a; iptr--)
       {
-        iptr->a = (iptr-1)->a;
+        *iptr = *(iptr-1);
       }
       *iptr = currentElement;
     }

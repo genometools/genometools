@@ -293,10 +293,10 @@ gt_radixsort_#{makekey(options)}_inplace_insertionsort(#{maketype(options)} *a,
     {
       #{maketype(options)} currentElement = *optr;
 
-      #{derefptr("optr",options)} = #{derefptr("(optr-1)",options)};
+      *optr = *(optr-1);
       for (iptr = optr-1; iptr > a && #{derefval("currentElement",options)} < #{derefptr("(iptr-1)",options)}; iptr--)
       {
-        #{derefptr("iptr",options)} = #{derefptr("(iptr-1)",options)};
+        *iptr = *(iptr-1);
       }
       *iptr = currentElement;
     }

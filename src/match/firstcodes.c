@@ -82,7 +82,7 @@ typedef struct
                marksuffixunits,
                markprefixunits,
                bitsforposref;
-  GtRadixsortinfo *radixsort_code,
+  GtRadixsortIPinfo *radixsort_code,
                   *radixsort_codepos;
   GtSpmsuftab *spmsuftab;
   GtSfxmappedrange *mappedleftborder,
@@ -387,47 +387,9 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
   return found;
 }
 
-static unsigned long gt_firstcodes_accumulatecounts_merge_rr(
-                                        GtFirstcodesinfo *fci,
-                                        GtRadixreader *radixreader,
-                                        unsigned long current,
-                                        const unsigned long *subjectstream_fst)
-{
-  unsigned long found = 0;
-  const unsigned long *subject = subjectstream_fst,
-                      *subjectstream_lst = fci->allfirstcodes
-                                           + fci->differentcodes - 1;
-
-  while (subject <= subjectstream_lst)
-  {
-    if (current <= *subject)
-    {
-      if (current == *subject)
-      {
-        gt_firstcodes_countocc_increment(&fci->tab,(unsigned long)
-                                         (subject - fci->allfirstcodes),
-                                         false);
-        found++;
-      }
-      GT_RADIXREADER_NEXT(current,radixreader,break);
-    } else
-    {
-      subject++;
-    }
-  }
-  return found;
-}
-
-static void gt_firstcodes_flush_exit(const char *filename,int line)
-{
-  fprintf(stderr,"file %s, line %d: programming error\n",filename,line);
-  exit(GT_EXIT_PROGRAMMING_ERROR);
-}
-
 static void gt_firstcodes_accumulatecounts_flush(void *data)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
-  GtRadixreader *radixreader = NULL;
 
   if (fci->buf.nextfree > 0)
   {
@@ -436,28 +398,13 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
-    radixreader = gt_radixsort_sort(fci->radixsort_code,fci->buf.nextfree);
-    if (radixreader == NULL)
-    {
-      firstelem = fci->buf.spaceGtUlong[0];
-    } else
-    {
-      GT_RADIXREADER_NEXT(firstelem,radixreader,
-                          gt_firstcodes_flush_exit(__FILE__,__LINE__));
-    }
+    gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
+    firstelem = fci->buf.spaceGtUlong[0];
     ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,firstelem);
     if (ptr != NULL)
     {
-      if (radixreader == NULL)
-      {
-        fci->firstcodehits +=
-          gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,ptr);
-      } else
-      {
-        fci->firstcodehits +=
-          gt_firstcodes_accumulatecounts_merge_rr(fci,radixreader,firstelem,
-                                                  ptr);
-      }
+      fci->firstcodehits
+        += gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,ptr);
     }
     fci->flushcount++;
     fci->buf.nextfree = 0;
@@ -502,42 +449,6 @@ static unsigned long gt_firstcodes_insertsuffixes_merge(
   return found;
 }
 
-static unsigned long gt_firstcodes_insertsuffixes_merge_rr(
-                                        GtFirstcodesinfo *fci,
-                                        GtRadixreader *radixreader,
-                                        GtUlongPair current,
-                                        const unsigned long *subjectstream_fst)
-{
-  unsigned long found = 0, idx;
-  const unsigned long *subject = subjectstream_fst,
-                      *subjectstream_lst = fci->allfirstcodes +
-                                           fci->currentmaxindex;
-
-  while (subject <= subjectstream_lst)
-  {
-    if (current.a <= *subject)
-    {
-      if (current.a == *subject)
-      {
-        idx = gt_firstcodes_insertionindex(&fci->tab,
-                                           (unsigned long)
-                                           (subject - fci->allfirstcodes));
-        gt_assert(idx < fci->firstcodehits + fci->numofsequences);
-        gt_spmsuftab_set(fci->spmsuftab,idx,
-                         gt_spmsuftab_usebitsforpositions(fci->spmsuftab)
-                           ? gt_seqnumrelpos_decode_pos(fci->buf.snrp,current.b)
-                           : current.b);
-        found++;
-      }
-      GT_RADIXREADER_NEXT_PAIR(current,radixreader,break);
-    } else
-    {
-      subject++;
-    }
-  }
-  return found;
-}
-
 static void gt_firstcodes_insertsuffixes_flush(void *data)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
@@ -546,35 +457,28 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
   {
     GtUlongPair firstelem = {0,0};
     const unsigned long *ptr;
-    GtRadixreader *radixreader = NULL;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
-    radixreader = gt_radixsort_sort(fci->radixsort_codepos,fci->buf.nextfree);
-    if (radixreader == NULL)
+    gt_radixsort_inplace_sort(fci->radixsort_codepos,fci->buf.nextfree);
     {
-      firstelem = fci->buf.spaceGtUlongPair[0];
-    } else
-    {
-      GT_RADIXREADER_NEXT_PAIR(firstelem,radixreader,
-                               gt_firstcodes_flush_exit(__FILE__,__LINE__));
+      unsigned long idx;
+
+      for (idx = 1UL; idx < fci->buf.nextfree; idx++)
+      {
+        gt_assert(fci->buf.spaceGtUlongPair[idx-1].a <=
+                  fci->buf.spaceGtUlongPair[idx].a);
+      }
     }
+    firstelem = fci->buf.spaceGtUlongPair[0];
     ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
                              fci->currentmaxindex,
                              firstelem.a);
     if (ptr != NULL)
     {
-      if (radixreader == NULL)
-      {
-        fci->firstcodeposhits
-          += gt_firstcodes_insertsuffixes_merge(fci,fci->buf.spaceGtUlongPair,
-                                                ptr);
-      } else
-      {
-        fci->firstcodeposhits
-          += gt_firstcodes_insertsuffixes_merge_rr(fci,radixreader,firstelem,
-                                                   ptr);
-      }
+      fci->firstcodeposhits
+        += gt_firstcodes_insertsuffixes_merge(fci,fci->buf.spaceGtUlongPair,
+                                              ptr);
     }
     fci->flushcount++;
     fci->buf.nextfree = 0;
@@ -940,7 +844,7 @@ static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
 #endif
   if (fci->radixsort_codepos != NULL)
   {
-    gt_radixsort_delete(fci->radixsort_codepos);
+    gt_radixsortinfo2_delete(fci->radixsort_codepos);
     GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"radixsort_codepos");
     fci->radixsort_codepos = NULL;
   }
@@ -1192,8 +1096,6 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
                                     unsigned int numofparts,
                                     unsigned long maximumspace,
                                     unsigned long phase2extra,
-                                    unsigned int radixparts,
-                                    bool withthreads,
                                     GtError *err)
 {
   if (maximumspace > 0)
@@ -1213,9 +1115,8 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
                            (gt_firstcodes_spacelog_total(fci->fcsl) +
                             phase2extra);
 
-      fci->buf.allocated = gt_radixsort_max_num_of_entries_ulong(radixparts,
-                                                                 withthreads,
-                                                                 remainspace);
+      fci->buf.allocated
+        = gt_radixsortinfo2_max_num_of_entries_ulong(remainspace);
       if (fci->buf.allocated < fci->differentcodes/16UL)
       {
         fci->buf.allocated = fci->differentcodes/16UL;
@@ -1225,11 +1126,8 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
   {
     if (numofparts == 0)
     {
-      fci->buf.allocated
-        = gt_radixsort_max_num_of_entries_ulong(radixparts,
-                                                withthreads,
-                                                gt_firstcodes_spacelog_total(
-                                                      fci->fcsl)/7UL);
+      fci->buf.allocated = gt_radixsortinfo2_max_num_of_entries_ulong(
+                                 gt_firstcodes_spacelog_total(fci->fcsl)/7UL);
     } else
     {
       fci->buf.allocated = fci->differentcodes/5;
@@ -1246,9 +1144,6 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                                                const GtEncseq *encseq,
                                                unsigned int kmersize,
                                                unsigned int minmatchlength,
-                                               unsigned int radixparts,
-                                               bool withthreads,
-                                               bool radixsmall,
                                                GtLogger *logger,
                                                GtTimer *timer)
 {
@@ -1257,14 +1152,10 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
     gt_timer_show_progress(timer, "to accumulate counts",stdout);
   }
   gt_assert(fci->buf.allocated > 0);
-  fci->radixsort_code = gt_radixsort_new_ulong(radixsmall,
-                                               fci->buf.allocated,
-                                               radixparts,
-                                               withthreads,
-                                               NULL);
-  fci->buf.spaceGtUlong = gt_radixsort_space_ulong(fci->radixsort_code);
+  fci->radixsort_code = gt_radixsortinfo2_new(false,fci->buf.allocated);
+  fci->buf.spaceGtUlong = gt_radixsortinfo2_space_ulong(fci->radixsort_code);
   GT_FCI_ADDWORKSPACE(fci->fcsl,"radixsort_code",
-                      gt_radixsort_size(fci->radixsort_code));
+                      gt_radixsortinfo2_size(fci->radixsort_code));
   fci->buf.fciptr = fci; /* as we need to give fci to the flush function */
   fci->buf.flush_function = gt_firstcodes_accumulatecounts_flush;
   gt_logger_log(logger,"maximum space for accumulation counts %.2f MB",
@@ -1292,7 +1183,7 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                          fci->flushcount,
                          fci->firstcodehits/fci->flushcount);
   }
-  gt_radixsort_delete(fci->radixsort_code);
+  gt_radixsortinfo2_delete(fci->radixsort_code);
   fci->radixsort_code = NULL;
   GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"radixsort_code");
   if (timer != NULL)
@@ -1426,24 +1317,21 @@ static void gt_firstcodes_handle_tmp(GtFirstcodesinfo *fci,
 
 static void gt_firstcodes_allocsize_for_insertion(GtFirstcodesinfo *fci,
                                                   unsigned long maximumspace,
-                                                  unsigned int radixparts,
-                                                  bool withthreads,
                                                   const GtSuftabparts
                                                     *suftabparts,
                                                   unsigned long phase2extra)
 {
   if (maximumspace > 0)
   {
-    const unsigned long maxrounds = radixparts == 1U ? 500UL : 400UL;
+    const unsigned long maxrounds = 400UL;
     size_t used = gt_firstcodes_spacelog_workspace(fci->fcsl) +
                   phase2extra +
                   gt_suftabparts_largestsizemappedpartwise(suftabparts);
 
     if ((unsigned long) used < maximumspace)
     {
-      fci->buf.allocated
-        = gt_radixsort_max_num_of_entries_ulongpair(radixparts,withthreads,
-                                               (size_t) maximumspace - used);
+      fci->buf.allocated = gt_radixsortinfo2_max_num_of_entries_ulongpair(
+                                                (size_t) maximumspace - used);
     } else
     {
       fci->buf.allocated /= 4UL;
@@ -1646,8 +1534,8 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                   GT_UNUSED
                                                   unsigned int addbscache_depth,
                                                   unsigned long phase2extra,
-                                                  bool radixsmall,
-                                                  unsigned int radixparts,
+                    GT_UNUSED bool radixsmall,      /* set to true */
+                    GT_UNUSED unsigned int radixparts, /* set to 2U */
                                                   GtFirstcodesintervalprocess
                                                     itvprocess,
                                                  GtFirstcodesintervalprocess_end
@@ -1677,17 +1565,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
   if (maxseqlength < (unsigned long) minmatchlength)
   {
     return 0;
-  }
-  if (threads > 1U)
-  {
-    if (radixparts > 1U)
-    {
-      gt_error_set(err,"option -radixparts and option -j cannot be combined");
-      return -1;
-    } else
-    {
-      radixparts = threads;
-    }
   }
   if (gt_firstcodes_init(&fci,
                          encseq,
@@ -1740,8 +1617,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                  numofparts,
                                  maximumspace,
                                  phase2extra,
-                                 radixparts,
-                                 threads > 1U ? true : false,
                                  err) != 0)
     {
       haserr = true;
@@ -1754,9 +1629,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                        encseq,
                                        kmersize,
                                        minmatchlength,
-                                       radixparts,
-                                       threads > 1U ? true : false,
-                                       radixsmall,
                                        logger,
                                        timer);
     suftabentries = fci.firstcodehits + fci.numofsequences;
@@ -1829,22 +1701,15 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                                         maxseqlength-kmersize));
     gt_firstcodes_allocsize_for_insertion(&fci,
                                           maximumspace,
-                                          radixparts,
-                                          threads > 1U ? true : false,
                                           suftabparts,
                                           phase2extra);
     if (!onlyaccumulation)
     {
-      fci.radixsort_codepos = gt_radixsort_new_ulongpair(radixsmall,
-                                                         fci.buf.allocated,
-                                                         radixparts,
-                                                         threads > 1U
-                                                           ? true : false,
-                                                         NULL);
+      fci.radixsort_codepos = gt_radixsortinfo2_new(true,fci.buf.allocated);
       GT_FCI_ADDWORKSPACE(fci.fcsl,"radixsort_codepos",
-                          gt_radixsort_size(fci.radixsort_codepos));
+                          gt_radixsortinfo2_size(fci.radixsort_codepos));
       fci.buf.spaceGtUlongPair
-        = gt_radixsort_space_ulongpair(fci.radixsort_codepos);
+        = gt_radixsortinfo2_space_ulongpair(fci.radixsort_codepos);
     }
     fci.codebuffer_total = 0;
     fci.flushcount = 0;
@@ -1925,7 +1790,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.allfirstcodes = NULL;
     gt_Sfxmappedrangelist_delete(sfxmrlist);
     fci.buf.spaceGtUlong = NULL;
-    gt_radixsort_delete(fci.radixsort_code);
+    gt_radixsortinfo2_delete(fci.radixsort_code);
   }
   gt_suftabparts_delete(suftabparts);
   gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
