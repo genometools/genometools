@@ -661,7 +661,7 @@ GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen)
   return radixsortinfo;
 }
 
-size_t gt_radixsortinfo2_size(GtRadixsortIPinfo *radixsortinfo)
+size_t gt_radixsortinfo2_size(const GtRadixsortIPinfo *radixsortinfo)
 {
   return radixsortinfo->size;
 }

@@ -329,7 +329,7 @@ typedef struct GtRadixsortIPinfo GtRadixsortIPinfo;
 
 GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen);
 
-size_t gt_radixsortinfo2_size(GtRadixsortIPinfo *radixsortinfo);
+size_t gt_radixsortinfo2_size(const GtRadixsortIPinfo *radixsortinfo);
 
 unsigned long gt_radixsortinfo2_max_num_of_entries_ulong(size_t memlimit);
 
