@@ -702,6 +702,16 @@ void gt_radixsortinfo2_delete(GtRadixsortIPinfo *radixsortinfo)
   }
 }
 
+unsigned long gt_radixsortinfo2_max_num_of_entries_ulong(size_t memlimit)
+{
+  return (unsigned long) memlimit/gt_radixsort_elemsize(false);
+}
+
+unsigned long gt_radixsortinfo2_max_num_of_entries_ulongpair(size_t memlimit)
+{
+  return (unsigned long) memlimit/gt_radixsort_elemsize(true);
+}
+
 static void gt_radixsort_inplace(GtRadixsortIPinfo *radixsortinfo,
                                  GtRadixvalues *radixvalues,
                                  unsigned long len)
@@ -841,6 +851,12 @@ unsigned long *gt_radixsortinfo2_space_ulong(GtRadixsortIPinfo *radixsortinfo)
 {
   gt_assert(!radixsortinfo->pairs);
   return radixsortinfo->sortspace.ulongptr;
+}
+
+GtUlongPair *gt_radixsortinfo2_space_ulongpair(GtRadixsortIPinfo *radixsortinfo)
+{
+  gt_assert(radixsortinfo->pairs);
+  return radixsortinfo->sortspace.ulongpairptr;
 }
 
 static void gt_radixsort_GtUlongPair_linear_phase(GtRadixsortinfo *radixsort,

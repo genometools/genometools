@@ -331,11 +331,18 @@ GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen);
 
 size_t gt_radixsortinfo2_size(GtRadixsortIPinfo *radixsortinfo);
 
+unsigned long gt_radixsortinfo2_max_num_of_entries_ulong(size_t memlimit);
+
+unsigned long gt_radixsortinfo2_max_num_of_entries_ulongpair(size_t memlimit);
+
 void gt_radixsort_inplace_sort(GtRadixsortIPinfo *radixsortinfo,
                                unsigned long len);
 
 void gt_radixsortinfo2_delete(GtRadixsortIPinfo *radixsortinfo);
 
 unsigned long *gt_radixsortinfo2_space_ulong(GtRadixsortIPinfo *radixsortinfo);
+
+GtUlongPair *gt_radixsortinfo2_space_ulongpair(
+                                            GtRadixsortIPinfo *radixsortinfo);
 
 #endif
