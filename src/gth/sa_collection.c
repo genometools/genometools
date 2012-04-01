@@ -360,7 +360,7 @@ bool gth_sa_collection_insert_sa(GthSACollection *sa_collection, GthSA *saB,
       }
 
       /* retrieving next alignment */
-      spliced_alignmentptr = gt_rbtree_next_key(sa_collection->rootEST,
+      spliced_alignmentptr = gt_rbtree_previous_key(sa_collection->rootEST,
                                               spliced_alignmentptr,
                                               compare_duplicate_and_genomic_pos,
                                               &sa_collection->duplicate_check);
