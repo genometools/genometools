@@ -311,7 +311,7 @@ static void *gt_radixsort_thread_caller(void *data)
 }
 #endif
 
-struct GtRadixsortIPinfo
+struct GtRadixsortinfo
 {
   GtStackGtRadixsort_stackelem stack;
   GtRadixbuffer *rbuf;
@@ -325,9 +325,9 @@ struct GtRadixsortIPinfo
 #endif
 };
 
-GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen)
+static GtRadixsortinfo *gt_radixsort_new(bool pairs,unsigned long maxlen)
 {
-  GtRadixsortIPinfo *radixsortinfo = gt_malloc(sizeof (*radixsortinfo));
+  GtRadixsortinfo *radixsortinfo = gt_malloc(sizeof (*radixsortinfo));
 
   radixsortinfo->size = sizeof (*radixsortinfo);
   radixsortinfo->rbuf = gt_radixbuffer_new(pairs);
@@ -382,12 +382,22 @@ GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen)
   return radixsortinfo;
 }
 
-size_t gt_radixsortinfo2_size(const GtRadixsortIPinfo *radixsortinfo)
+GtRadixsortinfo *gt_radixsort_new_ulong(unsigned long maxlen)
+{
+  return gt_radixsort_new(false,maxlen);
+}
+
+GtRadixsortinfo *gt_radixsort_new_ulongpair(unsigned long maxlen)
+{
+  return gt_radixsort_new(true,maxlen);
+}
+
+size_t gt_radixsort_size(const GtRadixsortinfo *radixsortinfo)
 {
   return radixsortinfo->size;
 }
 
-void gt_radixsortinfo2_delete(GtRadixsortIPinfo *radixsortinfo)
+void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
 {
   if (radixsortinfo != NULL)
   {
@@ -428,17 +438,17 @@ static size_t gt_radixsort_elemsize(bool pair)
   return pair ? sizeof (GtUlongPair) : sizeof (unsigned long);
 }
 
-unsigned long gt_radixsortinfo2_max_num_of_entries_ulong(size_t memlimit)
+unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit)
 {
   return (unsigned long) memlimit/gt_radixsort_elemsize(false);
 }
 
-unsigned long gt_radixsortinfo2_max_num_of_entries_ulongpair(size_t memlimit)
+unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit)
 {
   return (unsigned long) memlimit/gt_radixsort_elemsize(true);
 }
 
-static void gt_radixsort_inplace(GtRadixsortIPinfo *radixsortinfo,
+static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                                  GtRadixvalues *radixvalues,
                                  unsigned long len)
 {
@@ -541,26 +551,26 @@ static void gt_radixsort_inplace(GtRadixsortIPinfo *radixsortinfo,
 void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
 {
   GtRadixvalues radixvalues;
-  GtRadixsortIPinfo *radixsortinfo;
+  GtRadixsortinfo *radixsortinfo;
 
-  radixsortinfo = gt_radixsortinfo2_new(false,0);
+  radixsortinfo = gt_radixsort_new(false,0);
   radixvalues.ulongptr = source;
   gt_radixsort_inplace(radixsortinfo,&radixvalues,len);
-  gt_radixsortinfo2_delete(radixsortinfo);
+  gt_radixsort_delete(radixsortinfo);
 }
 
 void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, unsigned long len)
 {
   GtRadixvalues radixvalues;
-  GtRadixsortIPinfo *radixsortinfo;
+  GtRadixsortinfo *radixsortinfo;
 
-  radixsortinfo = gt_radixsortinfo2_new(true,0);
+  radixsortinfo = gt_radixsort_new(true,0);
   radixvalues.ulongpairptr = source;
   gt_radixsort_inplace(radixsortinfo,&radixvalues,len);
-  gt_radixsortinfo2_delete(radixsortinfo);
+  gt_radixsort_delete(radixsortinfo);
 }
 
-void gt_radixsort_inplace_sort(GtRadixsortIPinfo *radixsortinfo,
+void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
                                unsigned long len)
 {
   if (radixsortinfo->pairs)
@@ -573,13 +583,13 @@ void gt_radixsort_inplace_sort(GtRadixsortIPinfo *radixsortinfo,
   }
 }
 
-unsigned long *gt_radixsortinfo2_space_ulong(GtRadixsortIPinfo *radixsortinfo)
+unsigned long *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo)
 {
   gt_assert(!radixsortinfo->pairs);
   return radixsortinfo->sortspace.ulongptr;
 }
 
-GtUlongPair *gt_radixsortinfo2_space_ulongpair(GtRadixsortIPinfo *radixsortinfo)
+GtUlongPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo)
 {
   gt_assert(radixsortinfo->pairs);
   return radixsortinfo->sortspace.ulongpairptr;
