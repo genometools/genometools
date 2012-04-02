@@ -640,14 +640,14 @@ GtRadixsortIPinfo *gt_radixsortinfo2_new(bool pairs,unsigned long maxlen)
       unsigned int t;
       radixsortinfo->lentab
         = gt_malloc(sizeof (*radixsortinfo->lentab) * (UINT8_MAX+1));
-      radixsortinfo->size += sizeof (*radixsortinfo->lentab) * maxlen;
+      radixsortinfo->size += sizeof (*radixsortinfo->lentab) * (UINT8_MAX+1);
       radixsortinfo->endindexes
         = gt_malloc(sizeof (*radixsortinfo->endindexes) * threads);
       radixsortinfo->size += sizeof (*radixsortinfo->endindexes) * threads;
       radixsortinfo->threadinfo
         = gt_malloc(sizeof (*radixsortinfo->threadinfo) * threads);
       radixsortinfo->size += sizeof (*radixsortinfo->threadinfo) * threads;
-      for (t = 0; threads > 1U && t < threads; t++)
+      for (t = 0; t < threads; t++)
       {
         GT_STACK_INIT(&radixsortinfo->threadinfo[t].stack,32UL);
         radixsortinfo->size += sizeof (radixsortinfo->threadinfo[t].stack);
@@ -678,7 +678,7 @@ void gt_radixsortinfo2_delete(GtRadixsortIPinfo *radixsortinfo)
       unsigned int t;
       gt_free(radixsortinfo->lentab);
       gt_free(radixsortinfo->endindexes);
-      for (t = 0; threads > 1U && t < threads; t++)
+      for (t = 0; t < threads; t++)
       {
         GT_STACK_DELETE(&radixsortinfo->threadinfo[t].stack);
         gt_radixbuffer_delete(radixsortinfo->threadinfo[t].rbuf);
