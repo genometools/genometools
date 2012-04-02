@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-# Copyright (c) 2004-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2004-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2004-2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2004-2008       Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,11 +17,11 @@
 #
 
 # clean (i.e., remove!) all files comprising the index constructed by mkvtree
-# and all .polya and .polya.info files constructed by gth
-# furthermore, all bioseq files (.gt_bsi .gt_bsr) are removed
+# and all *.polya and *.polya.info files constructed by gth
+# furthermore, all bioseq files (*.bsi, *.bsr, and *.md5) are removed
 
 rm -f *.ssp *.llv *.skp *.al[12] *.des *.prj *.lcp *.suf
 rm -f *.tis *.ois *.bwt *.bck *.sds *.iso *.sti *.sti1 *.cld
 rm -f *.cld1 *.crf *.cfr *.lsf
 rm -f *.polya *.polya.info
-rm -f *.gt_bsi *.gt_bsr *.gt_bsf
+rm -f *.bsi *.bsr *.md5
