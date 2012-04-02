@@ -96,16 +96,20 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
 
 static void create_md5_cache_files(GthInput *input)
 {
-  char indexname[PATH_MAX+MAXSUFFIXLEN+1];
   GthMD5Cache *md5_cache;
   const char *filename;
   GthSeqCol *seq_col;
+  GtStr *indexname;
   unsigned long i;
   gt_assert(input);
+  indexname = gt_str_new();
   for (i = 0; i < gt_str_array_size(input->genomicfiles); i++) {
     filename = gth_input_get_genomic_filename(input, i);
-    sprintf(indexname, "%s.%s", filename, DNASUFFIX);
-    seq_col = input->seq_col_constructor(indexname, false, true, false);
+    gt_str_set(indexname, filename);
+    gt_str_append_char(indexname, '.');
+    gt_str_append_cstr(indexname, DNASUFFIX);
+    seq_col = input->seq_col_constructor(gt_str_get(indexname),
+                                         false, true,false);
     md5_cache = gth_md5_cache_new(filename, seq_col);
     gth_md5_cache_delete(md5_cache);
     gth_seq_col_delete(seq_col);
@@ -113,14 +117,18 @@ static void create_md5_cache_files(GthInput *input)
   for (i = 0; i < gt_str_array_size(input->referencefiles); i++) {
     GthAlphatype alphatype = gth_input_get_alphatype(input, i);
     filename = gth_input_get_reference_filename(input, i);
-    sprintf(indexname, "%s.%s", filename,
-            alphatype == DNA_ALPHA ? DNASUFFIX
-                                   : gt_str_get(input->proteinsmap));
-    seq_col = input->seq_col_constructor(indexname, false, true, false);
+    gt_str_set(indexname, filename);
+    gt_str_append_char(indexname, '.');
+    gt_str_append_cstr(indexname, alphatype == DNA_ALPHA
+                                  ? DNASUFFIX
+                                  : gt_str_get(input->proteinsmap));
+    seq_col = input->seq_col_constructor(gt_str_get(indexname),
+                                         false, true, false);
     md5_cache = gth_md5_cache_new(filename, seq_col);
     gth_md5_cache_delete(md5_cache);
     gth_seq_col_delete(seq_col);
   }
+  gt_str_delete(indexname);
 }
 
 int gth_input_preprocess(GthInput *input,
@@ -505,8 +513,6 @@ void gth_input_load_genomic_file_func(GthInput *input,
                                       GT_UNUSED const char *src_file,
                                       GT_UNUSED int src_line)
 {
-  char indexname[PATH_MAX+MAXSUFFIXLEN+1];
-
   /* valid genomic file number */
   gt_assert(input && gen_file_num < gt_str_array_size(input->genomicfiles));
 
@@ -517,6 +523,7 @@ void gth_input_load_genomic_file_func(GthInput *input,
 
   if (input->gen_file_num != gen_file_num) {
     const char *genomic_filename;
+    GtStr *indexname;
 
     /* free old genomic file */
     if (input->gen_file_num != GT_UNDEF_ULONG) {
@@ -529,10 +536,14 @@ void gth_input_load_genomic_file_func(GthInput *input,
 
     /* map genomic file */
     genomic_filename = gth_input_get_genomic_filename(input, gen_file_num);
-    sprintf(indexname, "%s.%s", genomic_filename, DNASUFFIX);
+    indexname = gt_str_new_cstr(genomic_filename);
+    gt_str_append_char(indexname, '.');
+    gt_str_append_cstr(indexname, DNASUFFIX);
     input->gen_seq_col =
-      input->seq_col_constructor(indexname, input->searchmode & GTHREVERSE,
+      input->seq_col_constructor(gt_str_get(indexname),
+                                 input->searchmode & GTHREVERSE,
                                  !translate, translate);
+    gt_str_delete(indexname);
     input->genomic_translate = translate;
 
     /* at least one sequence in genomic virtual tree  */
@@ -559,9 +570,6 @@ void gth_input_load_reference_file_func(GthInput *input,
                                         GT_UNUSED const char *src_file,
                                         GT_UNUSED int src_line)
 {
-  char indexname[PATH_MAX+MAXSUFFIXLEN+1];
-  GthAlphatype alphatype;
-
   /* valid reference file number */
   gt_assert(input &&
             ref_file_num < gt_str_array_size(input->referencefiles));
@@ -573,6 +581,8 @@ void gth_input_load_reference_file_func(GthInput *input,
 
   if (input->ref_file_num != ref_file_num) {
     const char *reference_filename;
+    GthAlphatype alphatype;
+    GtStr *indexname;
 
     /* free old reference file */
     if (input->ref_file_num != GT_UNDEF_ULONG) {
@@ -591,18 +601,21 @@ void gth_input_load_reference_file_func(GthInput *input,
 
     /* loading reference sequence */
     reference_filename = gth_input_get_reference_filename(input, ref_file_num);
-    sprintf(indexname, "%s.%s", reference_filename,
-            alphatype == DNA_ALPHA ? DNASUFFIX
-                                   : gt_str_get(input->proteinsmap));
+    indexname = gt_str_new_cstr(reference_filename);
+    gt_str_append_char(indexname, '.');
+    gt_str_append_cstr(indexname, alphatype == DNA_ALPHA
+                                  ? DNASUFFIX
+                                  : gt_str_get(input->proteinsmap));
     if (alphatype == DNA_ALPHA) {
-      input->ref_seq_col = input->seq_col_constructor(indexname, true,
-                                                            !translate,
-                                                            translate);
+      input->ref_seq_col = input->seq_col_constructor(gt_str_get(indexname),
+                                                      true, !translate,
+                                                      translate);
     }
     else {
-      input->ref_seq_col = input->seq_col_constructor(indexname, false,
-                                                            true, true);
+      input->ref_seq_col = input->seq_col_constructor(gt_str_get(indexname),
+                                                      false, true, true);
     }
+    gt_str_delete(indexname);
     input->reference_translate = translate;
 
     /* at least on reference sequence in virtual tree */
