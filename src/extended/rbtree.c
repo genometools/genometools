@@ -149,9 +149,9 @@ void gt_rbtree_clear(GtRBTree *tree)
 {
   GtRBTreeNode *it;
   GtRBTreeNode *save;
-  if (tree) {
+  if (tree != NULL) {
     it = tree->root;
-    if (it) {
+    if (it != NULL) {
 
       /* Rotate away the left links so that we can treat this like the
          destruction of a linked list */
