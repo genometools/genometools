@@ -77,18 +77,18 @@ void gt_priorityqueue_add(GtPriorityQueue *pq, unsigned long sortkey,
        at the last index */
     /* move elements to the right until an element larger or equal than
        the key is found. */
-    for (ptr = pq->elements + pq->numofelements - 1; ptr >= pq->elements; ptr--)
+    for (ptr = pq->elements + pq->numofelements; ptr > pq->elements; ptr--)
     {
-      if (ptr->sortkey < sortkey)
+      if ((ptr-1)->sortkey < sortkey)
       {
-        *(ptr+1) = *ptr;
+        *ptr = *(ptr-1);
       } else
       {
         break;
       }
     }
-    (ptr+1)->sortkey = sortkey;
-    (ptr+1)->value = value;
+    ptr->sortkey = sortkey;
+    ptr->value = value;
     pq->numofelements++;
   } else
   {
