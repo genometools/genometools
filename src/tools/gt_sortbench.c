@@ -109,13 +109,12 @@ static GtOptionParser* gt_sortbench_option_parser_new(void *tool_arguments)
 
 static int gt_sortbench_arguments_check(GT_UNUSED int rest_argc,
                                         void *tool_arguments,
-                                        GtError *err)
+                                        GT_UNUSED GtError *err)
 {
   GT_UNUSED QSortBenchArguments *arguments = tool_arguments;
   int had_err = 0;
 
-  gt_error_check(err);
-  gt_assert(arguments);
+  gt_assert(arguments != NULL);
   return had_err;
 }
 
