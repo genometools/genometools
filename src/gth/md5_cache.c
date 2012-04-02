@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -17,6 +17,7 @@
 #include "core/ma_api.h"
 #include "core/md5_tab.h"
 #include "core/str_cache.h"
+#include "gth/gthdef.h"
 #include "gth/md5_cache.h"
 
 struct GthMD5Cache {
@@ -59,7 +60,8 @@ GthMD5Cache* gth_md5_cache_new(const char *indexname, GthSeqCol *seq_col)
   md5_cache = gt_malloc(sizeof *md5_cache);
   md5_cache->md5_tab = gt_md5_tab_new(indexname, seq_col, seq_col_get_seq,
                                       seq_col_get_seq_len,
-                                      gth_seq_col_num_of_seqs(seq_col), true);
+                                      gth_seq_col_num_of_seqs(seq_col), true,
+                                      !getenv(GTHNOFLOCKENVNAME));
   md5_cache->str_cache = gt_str_cache_new(md5_cache->md5_tab, get_md5_str,
                                           gt_md5_tab_size(md5_cache->md5_tab));
   return md5_cache;

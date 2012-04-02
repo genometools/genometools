@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -34,15 +34,18 @@ struct GtMD5Tab{
 };
 
 static bool read_fingerprints(GtMD5Tab *md5_tab,
-                              const char *fingerprints_filename)
+                              const char *fingerprints_filename,
+                              bool use_file_locking)
 {
   bool reading_succeeded = true;
   size_t len;
   gt_assert(md5_tab && fingerprints_filename);
   /* open file */
   gt_assert(gt_file_exists(fingerprints_filename));
-  md5_tab->fingerprints_file = gt_fa_xfopen(fingerprints_filename, "r");
-  gt_fa_lock_shared(md5_tab->fingerprints_file);
+  if (use_file_locking) {
+    md5_tab->fingerprints_file = gt_fa_xfopen(fingerprints_filename, "r");
+    gt_fa_lock_shared(md5_tab->fingerprints_file);
+  }
   md5_tab->fingerprints = gt_fa_xmmap_read(fingerprints_filename, &len);
   if (len != md5_tab->num_of_md5s * 33) {
     gt_fa_xmunmap(md5_tab->fingerprints);
@@ -80,12 +83,14 @@ static void dump_md5_fingerprints(char **md5_fingerprints,
 
 static void write_fingerprints(char **md5_fingerprints,
                                unsigned long num_of_md5s,
-                               GtStr *fingerprints_filename)
+                               GtStr *fingerprints_filename,
+                               bool use_file_locking)
 {
   FILE *fingerprints_file;
   gt_assert(md5_fingerprints && num_of_md5s && fingerprints_filename);
   fingerprints_file = gt_fa_xfopen(gt_str_get(fingerprints_filename), "w");
-  gt_fa_lock_exclusive(fingerprints_file);
+  if (use_file_locking)
+    gt_fa_lock_exclusive(fingerprints_file);
   dump_md5_fingerprints(md5_fingerprints, num_of_md5s, fingerprints_file);
   gt_fa_unlock(fingerprints_file);
   gt_fa_xfclose(fingerprints_file);
@@ -93,7 +98,8 @@ static void write_fingerprints(char **md5_fingerprints,
 
 GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
                          GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                         unsigned long num_of_seqs, bool use_cache_file)
+                         unsigned long num_of_seqs, bool use_cache_file,
+                         bool use_file_locking)
 {
   GtMD5Tab *md5_tab;
   bool reading_succeeded = false;
@@ -108,7 +114,8 @@ GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
     /* only try to read the fingerprint file if the sequence file was not
        modified in the meantime */
     reading_succeeded = read_fingerprints(md5_tab,
-                                          gt_str_get(fingerprints_filename));
+                                          gt_str_get(fingerprints_filename),
+                                          use_file_locking);
   }
   if (!reading_succeeded) {
     md5_tab->md5_fingerprints = gt_calloc(num_of_seqs, sizeof (char*));
@@ -117,7 +124,7 @@ GtMD5Tab* gt_md5_tab_new(const char *sequence_file, void *seqs,
     md5_tab->owns_md5s = true;
     if (use_cache_file) {
       write_fingerprints(md5_tab->md5_fingerprints, md5_tab->num_of_md5s,
-                         fingerprints_filename);
+                         fingerprints_filename, use_file_locking);
     }
   }
   gt_str_delete(fingerprints_filename);

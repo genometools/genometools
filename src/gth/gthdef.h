@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2003-2007, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2007       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -25,5 +25,8 @@
 
 /* the name of the environment variable containing the path for gth data */
 #define GTHDATAENVNAME                  "GTHDATADIR"
+
+/* the name of the environment variable used to disable file locking */
+#define GTHNOFLOCKENVNAME               "GTHNOFLOCK"
 
 #endif

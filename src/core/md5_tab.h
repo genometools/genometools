@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -33,11 +33,14 @@ typedef unsigned long (*GtGetSeqLenFunc)(void *seqs, unsigned long index);
    is <true>, the MD5 sums are read from a cache file (named
    "<sequence_file><GT_MD5TAB_FILE_SUFFIX>"), if it exists or written to it, if
    it doesn't exist. If <use_cache_file> is <false>, no cache file is read or
-   written. */
+   written. If <use_file_locking> is <true>, file locking is used to access the
+   cache file (recommended). */
 GtMD5Tab*     gt_md5_tab_new(const char *sequence_file, void *seqs,
                              GtGetSeqFunc get_seq, GtGetSeqLenFunc get_seq_len,
-                             unsigned long num_of_seqs, bool use_cache_file);
+                             unsigned long num_of_seqs, bool use_cache_file,
+                             bool use_file_locking);
 void          gt_md5_tab_delete(GtMD5Tab *md5_tab);
+void          gt_md5_tab_disable_file_locking(GtMD5Tab *md5_tab);
 /* Return the MD5 sum for sequence <index>. */
 const char*   gt_md5_tab_get(const GtMD5Tab*, unsigned long index);
 /* Map <md5> back to sequence index. */

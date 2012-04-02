@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -486,7 +486,7 @@ const char* gt_bioseq_get_md5_fingerprint(GtBioseq *bs, unsigned long idx)
     bs->md5_tab = gt_md5_tab_new(gt_str_get(bs->sequence_file), bs,
                                  bioseq_get_seq, bioseq_get_seq_len,
                                  gt_bioseq_number_of_sequences(bs),
-                                 !bs->use_stdin);
+                                 !bs->use_stdin, true);
   }
   gt_assert(gt_md5_tab_get(bs->md5_tab, idx));
   return gt_md5_tab_get(bs->md5_tab, idx);
@@ -524,7 +524,7 @@ unsigned long gt_bioseq_md5_to_index(GtBioseq *bs, const char *md5)
     bs->md5_tab = gt_md5_tab_new(gt_str_get(bs->sequence_file), bs,
                                  bioseq_get_seq, bioseq_get_seq_len,
                                  gt_bioseq_number_of_sequences(bs),
-                                 !bs->use_stdin);
+                                 !bs->use_stdin, true);
   }
   return gt_md5_tab_map(bs->md5_tab, md5);
 }
