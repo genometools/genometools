@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -72,6 +72,7 @@ int gt_gth(int argc, const char **argv, const GthPlugins *plugins, GtError *err)
   if (!had_err) {
     had_err = gth_input_preprocess(input, false,
                                    call_info->simfilterparam.noautoindex,
+                                   call_info->simfilterparam.createindicesonly,
                                    call_info->simfilterparam.skipindexcheck,
                                    call_info->simfilterparam.maskpolyAtails,
                                    call_info->simfilterparam.online,

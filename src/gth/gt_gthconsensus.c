@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -48,6 +48,7 @@ static int process_consensus_files(GtStrArray *consensusfiles,
   if (!had_err) {
     had_err = gth_input_preprocess(input, true,
                                    call_info->simfilterparam.noautoindex,
+                                   call_info->simfilterparam.createindicesonly,
                                    call_info->simfilterparam.skipindexcheck,
                                    call_info->simfilterparam.maskpolyAtails,
                                    call_info->simfilterparam.online,

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -45,6 +45,7 @@ GthInput*      gth_input_new(GthInputFilePreprocessor file_preprocessor,
 int            gth_input_preprocess(GthInput*,
                                     bool gthconsensus,
                                     bool noautoindex,
+                                    bool createindicesonly,
                                     bool skipindexcheck,
                                     bool maskpolyAtails,
                                     bool online,

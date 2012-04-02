@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -94,9 +94,39 @@ GthInput *gth_input_new(GthInputFilePreprocessor file_preprocessor,
   return input;
 }
 
+static void create_md5_cache_files(GthInput *input)
+{
+  char indexname[PATH_MAX+MAXSUFFIXLEN+1];
+  GthMD5Cache *md5_cache;
+  const char *filename;
+  GthSeqCol *seq_col;
+  unsigned long i;
+  gt_assert(input);
+  for (i = 0; i < gt_str_array_size(input->genomicfiles); i++) {
+    filename = gth_input_get_genomic_filename(input, i);
+    sprintf(indexname, "%s.%s", filename, DNASUFFIX);
+    seq_col = input->seq_col_constructor(indexname, false, true, false);
+    md5_cache = gth_md5_cache_new(filename, seq_col);
+    gth_md5_cache_delete(md5_cache);
+    gth_seq_col_delete(seq_col);
+  }
+  for (i = 0; i < gt_str_array_size(input->referencefiles); i++) {
+    GthAlphatype alphatype = gth_input_get_alphatype(input, i);
+    filename = gth_input_get_reference_filename(input, i);
+    sprintf(indexname, "%s.%s", filename,
+            alphatype == DNA_ALPHA ? DNASUFFIX
+                                   : gt_str_get(input->proteinsmap));
+    seq_col = input->seq_col_constructor(indexname, false, true, false);
+    md5_cache = gth_md5_cache_new(filename, seq_col);
+    gth_md5_cache_delete(md5_cache);
+    gth_seq_col_delete(seq_col);
+  }
+}
+
 int gth_input_preprocess(GthInput *input,
                          bool gthconsensus,
                          bool noautoindex,
+                         bool createindicesonly,
                          bool skipindexcheck,
                          bool maskpolyAtails,
                          bool online,
@@ -122,6 +152,12 @@ int gth_input_preprocess(GthInput *input,
                            duplicate_check == GTH_DC_BOTH;
     input->use_desc_cache = duplicate_check == GTH_DC_DESC ||
                             duplicate_check == GTH_DC_BOTH;
+  }
+  if (!had_err && input->use_md5_cache && createindicesonly) {
+    /* for performance reasons (mapping of all index files), this is only done
+       if <createindicesonly> is <true>. otherwise, this is done automatically,
+       if the corresponding cache is accessed. */
+    create_md5_cache_files(input);
   }
   return had_err;
 }
@@ -159,14 +195,14 @@ void gth_input_add_reference_file(GthInput *input, const char *filename,
 }
 
 const char* gth_input_get_genomic_filename(const GthInput *input,
-                                              unsigned long gen_file_num)
+                                           unsigned long gen_file_num)
 {
   gt_assert(input);
   return gt_str_array_get(input->genomicfiles, gen_file_num);
 }
 
 const char* gth_input_get_reference_filename(const GthInput *input,
-                                                unsigned long ref_file_num)
+                                             unsigned long ref_file_num)
 {
   gt_assert(input);
   return gt_str_array_get(input->referencefiles, ref_file_num);
