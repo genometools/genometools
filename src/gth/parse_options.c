@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2003-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2003-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -309,7 +309,7 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
   optscorematrix = gt_option_new_string("scorematrix", "read amino acid "
                                      "substitution scoring matrix from file in "
                                      "the path given by the environment "
-                                      "variable GTHDATADIR",
+                                      "variable "GTHDATAENVNAME,
                                       call_info->scorematrixfile,
                                       GTH_DEFAULT_SCOREMATRIX);
   if (gthconsensus_parsing)
