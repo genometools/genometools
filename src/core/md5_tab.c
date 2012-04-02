@@ -92,7 +92,8 @@ static void write_fingerprints(char **md5_fingerprints,
   if (use_file_locking)
     gt_fa_lock_exclusive(fingerprints_file);
   dump_md5_fingerprints(md5_fingerprints, num_of_md5s, fingerprints_file);
-  gt_fa_unlock(fingerprints_file);
+  if (use_file_locking)
+    gt_fa_unlock(fingerprints_file);
   gt_fa_xfclose(fingerprints_file);
 }
 
