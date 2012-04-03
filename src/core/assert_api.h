@@ -36,7 +36,7 @@
         do {                                                                 \
           if (!(expression)) {                                               \
             fprintf(stderr, "Assertion failed: (%s), function %s, file %s, " \
-                    "line %d.\nThis is probably a bug, please report it.\n", \
+                    "line %d.\nThis is a bug, please report it.\n",          \
                     #expression, __func__, __FILE__, __LINE__);              \
             /*@ignore@*/                                                     \
             exit(GT_EXIT_PROGRAMMING_ERROR);                                 \
