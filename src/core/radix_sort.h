@@ -56,65 +56,54 @@
    the results of the final sorting are immediately processed anyway.
    Thus we only need a mechanism to simultaneously read the <p> sorted parts.
    This mechanism is implemented by the class GtRadixreader which, for
-   efficiency reasons, is not opaque and mainly accessed via macros.
-*/
+   efficiency reasons, is not opaque and mainly accessed via macros. */
 
-/* Same as before, but for the case that pairs are to be sorted.
-*/
-
+/* Same as before, but for the case that pairs are to be sorted. */
 void gt_radixsort_lsb_linear(unsigned long *source,unsigned long len);
 
-/* Determine of maximum number of entries in an array such that
-   the given memory limit <memlimit> (in bytes) for the array itself and
-   the auxiliary array is not exceeded.
-*/
-
+/* Determine the maximum number of entries in an array of <unsigned long> such
+   that the given memory limit <memlimit> (in bytes) for the array itself and
+   the auxiliary array is not exceeded. */
 unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
 
+/* Determine the maximum number of entries in an array of <GtUlongPair>s such
+   that the given memory limit <memlimit> (in bytes) for the array itself and
+   the auxiliary array is not exceeded. */
 unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
 
-void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len);
+/* XXX: why is `GtUlong' used here instead of 'unsigned long'? */
+void             gt_radixsort_inplace_GtUlong(unsigned long *source,
+                                              unsigned long len);
 
 typedef struct GtRadixsortinfo GtRadixsortinfo;
 
 /* The following function creates an object of class <GtRadixsortinfo> and
    return a pointer to it. The object can be used to sort arrays of
-   <unsigned long>-integers. <maxlen> is the
-   maximum size of the array to be sorted.
-   */
-
-GtRadixsortinfo *gt_radixsort_new_ulong(unsigned long maxlen);
+   <unsigned long> integers. <maxlen> is the maximum size of the array to
+   be sorted. */
+GtRadixsortinfo* gt_radixsort_new_ulong(unsigned long maxlen);
 
 /* The following function is like the previous, except that the
-   created object can be used to sort arrays of <GtUlongPair>-values. */
+   created object can be used to sort arrays of <GtUlongPair> values. */
+GtRadixsortinfo* gt_radixsort_new_ulongpair(unsigned long maxlen);
 
-GtRadixsortinfo *gt_radixsort_new_ulongpair(unsigned long maxlen);
-
-/* Return the size of the <GtRadixsortinfo>-object. */
-
-size_t gt_radixsort_size(const GtRadixsortinfo *radixsortinfo);
+/* Return the size of the <GtRadixsortinfo> object. */
+size_t           gt_radixsort_size(const GtRadixsortinfo *radixsortinfo);
 
 /* This is the function to perform the sorting task for the first
-   <len> elements of the array stored in the object <radixsortinfo>.
-*/
-
-void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
-                               unsigned long len);
+   <len> elements of the array stored in the object <radixsortinfo> */
+void             gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
+                                           unsigned long len);
 
 /* Return a pointer to the memory area in which the elements to
-   be sorted can be stored.
-*/
-
-unsigned long *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo);
+   be sorted can be stored. */
+unsigned long*   gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo);
 
 /* The analogue function as before, but for the case that
-   arrays over type <GtUlongPair> are to be sorted.
-*/
+   arrays over type <GtUlongPair> are to be sorted. */
+GtUlongPair*     gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo);
 
-GtUlongPair *gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo);
-
-/* Delete a <GtRadixsortinfo>-object. */
-
-void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
+/* Delete a <GtRadixsortinfo> object. */
+void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
 
 #endif
