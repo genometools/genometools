@@ -178,7 +178,7 @@ static GtOPrval sketch_parse_options(int *parsed_args,
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
-  /* -flattenfiles */
+  /* -streams */
   option = gt_option_new_bool("streams", "use streams to write data to file",
                               &arguments->use_streams, false);
   gt_option_is_development_option(option);
