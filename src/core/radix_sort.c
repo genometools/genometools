@@ -325,6 +325,8 @@ struct GtRadixsortinfo
 #endif
 };
 
+#define GT_THREADS_JOBS gt_jobs
+
 static GtRadixsortinfo *gt_radixsort_new(bool pairs,unsigned long maxlen)
 {
   GtRadixsortinfo *radixsortinfo = gt_malloc(sizeof (*radixsortinfo));
@@ -354,7 +356,7 @@ static GtRadixsortinfo *gt_radixsort_new(bool pairs,unsigned long maxlen)
   radixsortinfo->size += sizeof (radixsortinfo->stack);
 #ifdef GT_THREADS_ENABLED
   {
-    const unsigned int threads = gt_jobs;
+    const unsigned int threads = GT_THREADS_JOBS;
 
     if (threads > 1U)
     {
@@ -402,7 +404,7 @@ void gt_radixsort_delete(GtRadixsortinfo *radixsortinfo)
   if (radixsortinfo != NULL)
   {
 #ifdef GT_THREADS_ENABLED
-    const unsigned int threads = gt_jobs;
+    const unsigned int threads = GT_THREADS_JOBS;
 
     if (threads > 1U)
     {
@@ -456,7 +458,7 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
                 countinsertionsort = 0;
   const size_t shift = (sizeof (unsigned long) - 1) * CHAR_BIT;
 #ifdef GT_THREADS_ENABLED
-  const unsigned int threads = gt_jobs;
+  const unsigned int threads = GT_THREADS_JOBS;
 #else
   const unsigned int threads = 1U;
 #endif
@@ -570,17 +572,9 @@ void gt_radixsort_inplace_GtUlongPair(GtUlongPair *source, unsigned long len)
   gt_radixsort_delete(radixsortinfo);
 }
 
-void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,
-                               unsigned long len)
+void gt_radixsort_inplace_sort(GtRadixsortinfo *radixsortinfo,unsigned long len)
 {
-  if (radixsortinfo->pairs)
-  {
-    gt_radixsort_inplace_GtUlongPair(radixsortinfo->sortspace.ulongpairptr,
-                                     len);
-  } else
-  {
-    gt_radixsort_inplace_GtUlong(radixsortinfo->sortspace.ulongptr,len);
-  }
+  gt_radixsort_inplace(radixsortinfo,&radixsortinfo->sortspace,len);
 }
 
 unsigned long *gt_radixsort_space_ulong(GtRadixsortinfo *radixsortinfo)

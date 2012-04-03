@@ -393,14 +393,13 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    unsigned long firstelem = 0;
     const unsigned long *ptr;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
-    firstelem = fci->buf.spaceGtUlong[0];
-    ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,firstelem);
+    ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,
+                             fci->buf.spaceGtUlong[0]);
     if (ptr != NULL)
     {
       fci->firstcodehits
@@ -455,25 +454,14 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    GtUlongPair firstelem = {0,0};
     const unsigned long *ptr;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_codepos,fci->buf.nextfree);
-    {
-      unsigned long idx;
-
-      for (idx = 1UL; idx < fci->buf.nextfree; idx++)
-      {
-        gt_assert(fci->buf.spaceGtUlongPair[idx-1].a <=
-                  fci->buf.spaceGtUlongPair[idx].a);
-      }
-    }
-    firstelem = fci->buf.spaceGtUlongPair[0];
     ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
                              fci->currentmaxindex,
-                             firstelem.a);
+                             fci->buf.spaceGtUlongPair[0].a);
     if (ptr != NULL)
     {
       fci->firstcodeposhits
