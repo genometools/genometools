@@ -52,7 +52,8 @@ typedef struct {
        addintrons,
        showrecmaps,
        flattenfiles,
-       unsafe;
+       unsafe,
+       use_streams;
   GtStr *seqid, *format, *stylefile, *input;
   unsigned long start,
                 end;
@@ -174,6 +175,12 @@ static GtOPrval sketch_parse_options(int *parsed_args,
   option = gt_option_new_bool("showrecmaps",
                               "show RecMaps after image creation",
                               &arguments->showrecmaps, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
+  /* -flattenfiles */
+  option = gt_option_new_bool("streams", "use streams to write data to file",
+                              &arguments->use_streams, false);
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
@@ -436,9 +443,23 @@ int gt_sketch(int argc, const char **argv, GtError *err)
                    gt_feature_node_get_type(gt_rec_map_get_genome_feature(rm)));
           }
         }
-        had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas,
-                                               file,
-                                               err);
+        if (arguments.use_streams) {
+          GtFile *outfile;
+          GtStr *str = gt_str_new();
+          gt_canvas_cairo_file_to_stream((GtCanvasCairoFile*) canvas, str);
+          outfile = gt_file_open(GT_FILE_MODE_UNCOMPRESSED, file, "w+", err);
+          if (outfile) {
+            gt_file_xwrite(outfile, gt_str_get_mem(str), gt_str_length(str));
+            gt_file_delete(outfile);
+          } else {
+            had_err = -1;
+          }
+          gt_str_delete(str);
+        } else {
+          had_err = gt_canvas_cairo_file_to_file((GtCanvasCairoFile*) canvas,
+                                                 file,
+                                                 err);
+        }
       }
     }
   }

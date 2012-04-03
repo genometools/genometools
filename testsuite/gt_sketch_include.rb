@@ -100,6 +100,20 @@ Test do
   run "diff in.gff3 out.gff3"
 end
 
+Name "gt sketch streams <-> file output"
+Keywords "gt_sketch streams annotationsketch"
+Test do
+  m = `#{$bin}gt sketch -help`.match(/graphics format\s+choose from ([^ ]+)/m)
+  raise TestFailedError if m.nil?
+  m[1].chomp.split("|").each do |format|
+    run_test "#{$bin}gt sketch -format #{format} out.#{format} #{$testdata}eden.gff3"
+    run_test "#{$bin}gt sketch -streams -format #{format} streamout.#{format} #{$testdata}eden.gff3"
+    # some formats will diff in their creation date, remove it
+    run "sed -i '/CreationDate/d' out.#{format} streamout.#{format}"
+    run "diff out.#{format} streamout.#{format}"
+  end
+end
+
 Name "gt sketch -showrecmaps"
 Keywords "gt_sketch showrecmaps"
 Test do
@@ -132,7 +146,6 @@ Test do
            :maxtime => 600
   run "diff #{last_stdout} #{$testdata}gt_sketch_textwidth_2.recmaps"
 end
-
 
 Name "gt sketch runtime Lua failures"
 Keywords "gt_sketch lua"
