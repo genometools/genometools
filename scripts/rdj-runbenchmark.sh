@@ -241,6 +241,32 @@ function __checkcontigs {
 # and optionally a string to pass to the command;
 # the minimal SPM length must be specified setting the $MINLEN variable
 
+function run_suffixerator {
+  _PIPELINE=sfx
+  _STEP=sfx
+  _READSET=$1
+  __READS=$READSETSDIR/$_READSET.reads.fas
+  _CMD="$GT $GTOPTS"
+  _CMD_ARGS="suffixerator -mirrored -indexname $_READSET $2 -db $__READS "
+  _CMD_ARGS+="-lcp -suf -ssp -v"
+  __start
+  __append_version_genometools
+  __run
+  __end
+}
+
+function run_readjoiner_correct {
+  _PIPELINE=sfx
+  _STEP=rdjC
+  _READSET=$1
+  _CMD="$GT $GTOPTS"
+  _CMD_ARGS="readjoiner correct $2 -ii $_READSET"
+  __start
+  __append_version_genometools
+  __run
+  __end
+}
+
 function run_readjoiner_prefilter {
   _PIPELINE=rdj
   _STEP=rdjP
