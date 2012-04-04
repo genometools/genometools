@@ -1478,8 +1478,18 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     parser->last_terminator = line_number;
   }
   else {
-    gt_warning("skipping unknown meta line %u in file \"%s\": %s", line_number,
-               filename, line);
+    if (strncmp(line, GT_GFF_SPECIES, strlen(GT_GFF_SPECIES))
+          && strncmp(line, GT_GFF_FEATURE_ONTOLOGY,
+                     strlen(GT_GFF_FEATURE_ONTOLOGY))
+          && strncmp(line, GT_GFF_ATTRIBUTE_ONTOLOGY,
+                     strlen(GT_GFF_ATTRIBUTE_ONTOLOGY))
+          && strncmp(line, GT_GFF_SOURCE_ONTOLOGY,
+                     strlen(GT_GFF_SOURCE_ONTOLOGY))
+          && strncmp(line, GT_GFF_GENOME_BUILD,
+                     strlen(GT_GFF_GENOME_BUILD))) {
+      gt_warning("skipping unknown meta line %u in file \"%s\": %s",
+                 line_number, filename, line);
+    }
   }
   gt_str_delete(changed_seqid);
   return had_err;
