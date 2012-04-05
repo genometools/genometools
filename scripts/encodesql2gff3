@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2006-2007, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2007       Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +22,8 @@ require 'gff3'
 # read input
 sequences = {}
 ARGF.each do |line|
-  name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts,
-  exonEnds, id, name2, cdsStartStat, cdsEndStat, exonFrames  = line.split
+  bin, name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts,
+  exonEnds, score, name2, cdsStartStat, cdsEndStat, exonFrames  = line.split
   if sequences[chrom] then
      sequences[chrom].update_range(txStart.to_i+1, txEnd.to_i)
   else
