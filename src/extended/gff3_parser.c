@@ -1287,7 +1287,7 @@ static int parse_first_gff3_line(const char *line, const char *filename,
   if (strncmp(line, GT_GFF_VERSION_PREFIX, strlen(GT_GFF_VERSION_PREFIX))) {
     if (tidy) {
       gt_warning("line 1 in file \"%s\" does not begin with \"%s\", create "
-                 "\"%s %d\" line automaticallly", filename,
+                 "\"%s %d\" line automatically", filename,
                  GT_GFF_VERSION_PREFIX, GT_GFF_VERSION_PREFIX, GT_GFF_VERSION);
       return 0;
     }
