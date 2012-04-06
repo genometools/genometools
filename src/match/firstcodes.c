@@ -1168,7 +1168,7 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                          100.0 * (double) fci->firstcodehits/
                                           gt_encseq_total_length(encseq),
                          fci->flushcount,
-                         fci->firstcodehits/fci->flushcount);
+                         fci->codebuffer_total/fci->flushcount);
   }
   gt_radixsort_delete(fci->radixsort_code);
   fci->radixsort_code = NULL;
@@ -1755,7 +1755,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                            fci.firstcodeposhits,
                            100.0 * (double) fci.firstcodeposhits/totallength,
                            fci.flushcount,
-                           fci.firstcodeposhits/fci.flushcount);
+                           fci.codebuffer_total/fci.flushcount);
       gt_assert(fci.firstcodeposhits == suftabentries);
     } else
     {
