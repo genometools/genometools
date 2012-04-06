@@ -21,17 +21,12 @@
 #include <stdbool.h>
 #include "core/types_api.h"
 
-/* The following function implements a radixsort which does not require
-   extra workspace, i.e. it is inplace. The main idea is adapoted from
-   http://drdobbs.com/architecture-and-design/221600153
-   Instead of a recursive approach we use an iterative approach.
-*/
-
 /* This file describes the interface of a radixsort implementation
    which allows for keys of type <unsigned long>, optionally associated
    with values of type <unsigned long>. Thus the implementation can
-   sorted arrays referenced by pointers of type <unsigned long *>,
+   sort arrays referenced by pointers of type <unsigned long *>,
    or arrays referenced by pointers of type <GtUlongPair *>.
+<<<<<<< HEAD
    In the latter case, the component <a> is the key and <b> is the
    value.
 
@@ -74,14 +69,42 @@ unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
 /* XXX: why is `GtUlong' used here instead of 'unsigned long'? */
 void             gt_radixsort_inplace_GtUlong(unsigned long *source,
                                               unsigned long len);
+=======
+   In the latter case, the component <a> is the key and <b> is the value.
+*/
+
+/* sort an array of values of type <unsigned long> */
+
+void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len);
+
+/* Determine maximum number of entries in an array of type <unsigned long>
+   such that the given memory limit <memlimit> (in bytes) for the array
+   is not exceeded.
+*/
+
+unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
+
+/* Determine maximum number of entries in an array of type <GtPairUlong>
+   such that the given memory limit <memlimit> (in bytes) for the array
+   is not exceeded.
+*/
+
+unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
+
+/* The following type represents the workspace for the radixsort
+   implementation. We use it in applications with on the order of hundred
+   calls to the sorting function. Each such call is supplied with the
+   same working space thus saving many workspace creations and deletions. */
 
 typedef struct GtRadixsortinfo GtRadixsortinfo;
 
 /* The following function creates an object of class <GtRadixsortinfo> and
-   return a pointer to it. The object can be used to sort arrays of
-   <unsigned long> integers. <maxlen> is the maximum size of the array to
-   be sorted. */
-GtRadixsortinfo* gt_radixsort_new_ulong(unsigned long maxlen);
+   returns a pointer to it. The object can be used to sort arrays of
+   <unsigned long>-integers. <maxlen> is the
+   maximum size of the array to be sorted.
+*/
+
+GtRadixsortinfo *gt_radixsort_new_ulong(unsigned long maxlen);
 
 /* The following function is like the previous, except that the
    created object can be used to sort arrays of <GtUlongPair> values. */
@@ -105,5 +128,11 @@ GtUlongPair*     gt_radixsort_space_ulongpair(GtRadixsortinfo *radixsortinfo);
 
 /* Delete a <GtRadixsortinfo> object. */
 void             gt_radixsort_delete(GtRadixsortinfo *radixsortinfo);
+
+/* For testing purposes we also provide a radixsort which start with
+   the least signifcant bits.
+*/
+
+void gt_radixsort_lsb_linear(unsigned long *source,unsigned long len);
 
 #endif

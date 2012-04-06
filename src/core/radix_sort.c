@@ -15,6 +15,35 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+/* This module implements a radixsort-algorithm with the following features:
+
+   1) It does not require extra workspace, i.e. it is inplace.
+   The main idea is adapoted from
+   http://drdobbs.com/architecture-and-design/221600153
+
+   2) It is iterative rather than recursive as the original version.
+
+   3) We use a buffer for each of the bins the suffixes are
+   moved to. Instead of performing single random writes to and single
+   random reads from array which is sorted inplace, the elements are
+   moved to and from the buffers of fixed size p (each bin has a buffer
+   of size p). The elements from the bin are moved to the buffer and flushed
+   from the buffer when necessary. Thus a sequence of p random accesses to the
+   target array is replaced by a single write and read of p values from
+   a bin. This method heavily improves the cache behaviour.
+
+   4) The radix sort method starts with the most significant bits first.
+   Thus after dividing the keys into buckets according to the first
+   byte, the sorting problem divides into sorting 256 bins independently
+   from each other. We exploit this by evenly dividing the initially sorted
+   array on the bin boundaries, according to the number of available threads. So
+   the bins can be sorted by independet threads which have independent
+   workspace.
+
+   5) The implementation allows to sort an unsigned long -array and an array
+   over type <GtUlongPair>, where the component <a> is the soring key.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
