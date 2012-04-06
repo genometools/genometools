@@ -30,7 +30,6 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "core/minmax.h"
-#include "core/qsort-ulong.h"
 #ifdef GT_THREADS_ENABLED
 #include "core/thread.h"
 #endif
@@ -1048,13 +1047,13 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
   {
     gt_timer_show_progress(timer, "to sort initial prefixes",stdout);
   }
-  gt_direct_qsort_ulong (6UL, false,fci->allfirstcodes,fci->numofsequences);
+  gt_radixsort_inplace_GtUlong(fci->allfirstcodes,fci->numofsequences);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
   fci->buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
                                             fci->markprefixunits);
   fci->shiftright2index = gt_marksubstring_shiftright(fci->buf.markprefix)
-                         + GT_LOGWORDSIZE;
+                          + GT_LOGWORDSIZE;
   GT_FCI_ADDSPLITSPACE(fci->fcsl,"markprefix",
                       (size_t) gt_marksubstring_size(fci->buf.markprefix));
   fci->buf.marksuffix = gt_marksubstring_new(numofchars,kmersize,true,

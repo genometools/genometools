@@ -20,6 +20,7 @@
 #define STACK_INLINED_H
 #include <stdbool.h>
 #include <string.h>
+#include "core/assert_api.h"
 #include "core/ma.h"
 
 /*
