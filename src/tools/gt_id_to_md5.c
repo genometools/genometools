@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -22,6 +22,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
+#include "extended/gtdatahelp.h"
 #include "extended/seqid2file.h"
 #include "extended/id_to_md5_stream_api.h"
 #include "tools/gt_id_to_md5.h"
@@ -78,6 +79,8 @@ static GtOptionParser* gt_id_to_md5_option_parser_new(void *tool_arguments)
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
+
+  gt_option_parser_set_comment_func(op, gt_gtdata_show_help, NULL);
 
   return op;
 }
