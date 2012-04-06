@@ -142,17 +142,19 @@ static unsigned long gt_radixsort_findfirstlarger(const unsigned long
                                                   unsigned long end,
                                                   unsigned long offset)
 {
-  unsigned long left = start, right = end, found = end, mid, midval;
+  const unsigned long *left = leftborder + start,
+                      *right = leftborder + end,
+                      *found = leftborder + end;
 
   while (left <= right)
   {
-    mid = GT_DIV2(left+right);
-    midval = leftborder[mid];
-    if (offset == midval)
+    const unsigned long *mid = left + GT_DIV2(right-left);
+    gt_assert(mid >= leftborder + start && mid <= leftborder + end);
+    if (offset == *mid)
     {
-      return mid;
+      return mid - leftborder;
     }
-    if (offset < midval)
+    if (offset < *mid)
     {
       found = mid;
       right = mid - 1;
@@ -161,7 +163,8 @@ static unsigned long gt_radixsort_findfirstlarger(const unsigned long
       left = mid + 1;
     }
   }
-  return found;
+  gt_assert(found >= leftborder);
+  return (unsigned long) (found - leftborder);
 }
 
 static void gt_evenly_divide_lentab(unsigned long *endindexes,
@@ -170,8 +173,7 @@ static void gt_evenly_divide_lentab(unsigned long *endindexes,
                                     unsigned long len,
                                     unsigned int numofparts)
 {
-  unsigned long *leftborder, widthofpart, idx, previousvalue,
-                offset = 0;
+  unsigned long *leftborder, widthofpart, idx, previousvalue, offset = 0;
   unsigned int part, remainder;
 
   gt_assert(numofparts >= 2U);
