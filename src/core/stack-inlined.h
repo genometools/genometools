@@ -180,7 +180,11 @@
 
 #define GT_STACK_NEXT_FREE(S,PTR)\
         GT_STACK_CHECK_SPACE(S);\
-        PTR = (S)->space+(S)->nextfree++
+        PTR = (S)->space + (S)->nextfree++;\
+        if ((S)->maxsize < (S)->nextfree)\
+        {\
+          (S)->maxsize = (S)->nextfree;\
+        }
 
 /*
   return the maximum size of a stack
