@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -16,7 +16,9 @@
 
 #include "core/bioseq.h"
 #include "core/bioseq_collection.h"
+#include "core/cstr_api.h"
 #include "core/grep_api.h"
+#include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
 #include "core/undef_api.h"
@@ -24,6 +26,7 @@
 struct GtBioseqCollection {
   GtBioseq **bioseqs;
   unsigned long num_of_seqfiles;
+  GtHashmap *grep_cache;
 };
 
 GtBioseqCollection* gt_bioseq_collection_new(GtStrArray *sequence_files,
@@ -35,7 +38,7 @@ GtBioseqCollection* gt_bioseq_collection_new(GtStrArray *sequence_files,
   gt_error_check(err);
   gt_assert(sequence_files);
   gt_assert(gt_str_array_size(sequence_files));
-  bsc = gt_malloc(sizeof *bsc);
+  bsc = gt_calloc(1, sizeof *bsc);
   bsc->num_of_seqfiles = gt_str_array_size(sequence_files);
   bsc->bioseqs = gt_calloc(bsc->num_of_seqfiles, sizeof (GtBioseq*));
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
@@ -54,29 +57,52 @@ void gt_bioseq_collection_delete(GtBioseqCollection *bsc)
 {
   unsigned long i;
   if (!bsc) return;
+  gt_hashmap_delete(bsc->grep_cache);
   for (i = 0; i < bsc->num_of_seqfiles; i++)
     gt_bioseq_delete(bsc->bioseqs[i]);
   gt_free(bsc->bioseqs);
   gt_free(bsc);
 }
 
+typedef struct {
+  unsigned long filenum,
+                seqnum;
+} SeqInfo;
+
 static int grep_desc(GtBioseqCollection *bsc, unsigned long *filenum,
                      unsigned long *seqnum, GtStr *seqid, GtError *err)
 {
   unsigned long i, j;
+  SeqInfo *seq_info;
   bool match;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(bsc && filenum && seqnum && seqid);
+  /* create cache */
+  if (!bsc->grep_cache) {
+    bsc->grep_cache = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
+                                     gt_free_func);
+  }
+  /* try to read from cache */
+  if ((seq_info = gt_hashmap_get(bsc->grep_cache, gt_str_get(seqid)))) {
+    *filenum = seq_info->filenum;
+    *seqnum = seq_info->seqnum;
+    return 0;
+  }
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
     GtBioseq *bioseq = bsc->bioseqs[i];
     for (j = 0; !had_err && j < gt_bioseq_number_of_sequences(bioseq); j++) {
       const char *desc = gt_bioseq_get_description(bioseq, j);
       had_err = gt_grep(&match, gt_str_get(seqid), desc, err);
       if (!had_err && match) {
-        /* XXX: cache results? */
         *filenum = i;
         *seqnum = j;
+        /* cache results */
+        seq_info = gt_malloc(sizeof *seq_info);
+        seq_info->filenum = i;
+        seq_info->seqnum = j;
+        gt_hashmap_add(bsc->grep_cache, gt_cstr_dup(gt_str_get(seqid)),
+                       seq_info);
         break;
       }
     }
