@@ -1017,7 +1017,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         had_err = -1;
       }
     }
-    /* save all attributes, although the Parent and ID attribute is newly
+    /* save all attributes, although the Parent and ID attributes are newly
        created in GFF3 output */
     if (!had_err && attr_valid) {
       if ((old_value = gt_feature_node_get_attribute((GtFeatureNode*)
