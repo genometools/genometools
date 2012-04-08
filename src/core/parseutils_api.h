@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -53,7 +53,8 @@ int gt_parse_range(GtRange *rng, const char *start, const char *end,
                    unsigned int line_number, const char *filename, GtError*);
 
 /* Like <gt_parse_range>, but issues a warning if <start> is larger then <end>
-   and swaps both values. */
+   and swaps both values. It also issues a warning, if <start> and/or <end> is
+   not-positive and sets the corresponding value to 1. */
 int gt_parse_range_tidy(GtRange *rng, const char *start, const char *end,
                         unsigned int line_number, const char *filename,
                         GtError*);
