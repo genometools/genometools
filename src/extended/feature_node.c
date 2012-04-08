@@ -969,7 +969,7 @@ void gt_feature_node_add_child(GtFeatureNode *parent, GtFeatureNode *child)
   /* create children list on demand */
   if (!parent->children)
     parent->children = gt_dlist_new((GtCompare) gt_genome_node_cmp);
-  gt_dlist_add(parent->children, child); /* XXX: check for circles */
+  gt_dlist_add(parent->children, child); /* XXX: check for cycles */
   /* update tree status of <parent> */
   set_tree_status(&parent->bit_field, TREE_STATUS_UNDETERMINED);
   /* update parent info of <child> */
