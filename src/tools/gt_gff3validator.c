@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2009, 2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008            Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -23,6 +23,7 @@
 
 typedef struct {
   GtStr *typecheck;
+  bool strict;
 } GFF3ValidatorArguments;
 
 static void* gt_gff3validator_arguments_new(void)
@@ -58,6 +59,13 @@ static GtOptionParser* gt_gff3validator_option_parser_new(void *tool_arguments)
                                arguments->typecheck);
   gt_option_parser_add_option(op, option);
 
+  /* -strict */
+  option = gt_option_new_bool("strict", "be very strict during GFF3 parsing "
+                              "(stricter than the specification requires)",
+                              &arguments->strict, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 
@@ -86,6 +94,10 @@ static int gt_gff3validator_runner(int argc, const char **argv, int parsed_args,
     if (!had_err)
       gt_gff3_in_stream_set_type_checker(gff3_in_stream, type_checker);
   }
+
+  /* enable strict mode (if necessary) */
+  if (!had_err && arguments->strict)
+    gt_gff3_in_stream_enable_strict_mode((GtGFF3InStream*) gff3_in_stream);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err)

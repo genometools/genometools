@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -39,4 +39,7 @@ int                      gt_gff3_in_stream_set_offsetfile(GtNodeStream*, GtStr*,
 void                     gt_gff3_in_stream_disable_add_ids(GtNodeStream*);
 void                     gt_gff3_in_stream_fix_region_boundaries(
                                                                GtGFF3InStream*);
+void                     gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream
+                                                              *gff3_in_stream);
+
 #endif

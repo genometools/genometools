@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -36,6 +36,7 @@
 #define GT_GFF_PARENT          "Parent"
 #define GT_GFF_TARGET          "Target"
 
+void gt_gff3_parser_enable_strict_mode(GtGFF3Parser*);
 int  gt_gff3_parser_set_offsetfile(GtGFF3Parser*, GtStr*, GtError*);
 int  gt_gff3_parser_parse_target_attributes(const char *values,
                                             unsigned long *num_of_targets,

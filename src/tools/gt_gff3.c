@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -42,6 +42,7 @@ typedef struct {
        addintrons,
        verbose,
        typecheck_built_in,
+       strict,
        tidy,
        show,
        fixboundaries;
@@ -77,8 +78,9 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
 {
   GFF3Arguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *sort_option, *mergefeat_option, *addintrons_option, *offset_option,
-           *offsetfile_option, *typecheck_option, *built_in_option, *option;
+  GtOption *sort_option, *strict_option, *tidy_option, *mergefeat_option,
+           *addintrons_option, *offset_option, *offsetfile_option,
+           *typecheck_option, *built_in_option, *option;
   gt_assert(arguments);
 
   /* init */
@@ -92,10 +94,18 @@ static GtOptionParser* gt_gff3_option_parser_new(void *tool_arguments)
                                    &arguments->sort, false);
   gt_option_parser_add_option(op, sort_option);
 
+  /* -strict */
+  strict_option = gt_option_new_bool("strict", "be very strict during GFF3 "
+                                     "parsing (stricter than the specification "
+                                     "requires)", &arguments->strict, false);
+  gt_option_is_development_option(strict_option);
+  gt_option_parser_add_option(op, strict_option);
+
   /* -tidy */
-  option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up during "
-                              "parsing", &arguments->tidy, false);
-  gt_option_parser_add_option(op, option);
+  tidy_option = gt_option_new_bool("tidy", "try to tidy the GFF3 files up "
+                                   "during parsing", &arguments->tidy, false);
+  gt_option_parser_add_option(op, tidy_option);
+  gt_option_exclude(strict_option, tidy_option);
 
   /* -retainids */
   option = gt_option_new_bool("retainids",
@@ -246,6 +256,9 @@ static int gt_gff3_runner(int argc, const char **argv, int parsed_args,
                                                arguments->offsetfile, err);
   }
 
+  /* enable strict mode (if necessary) */
+  if (!had_err && arguments->strict)
+    gt_gff3_in_stream_enable_strict_mode((GtGFF3InStream*) gff3_in_stream);
   /* enable tidy mode (if necessary) */
   if (!had_err && arguments->tidy)
     gt_gff3_in_stream_enable_tidy_mode((GtGFF3InStream*) gff3_in_stream);

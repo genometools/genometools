@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -37,6 +37,7 @@ void          gt_gff3_in_stream_plain_check_region_boundaries(
 void          gt_gff3_in_stream_plain_do_not_check_region_boundaries(
                                                           GtGFF3InStreamPlain*);
 void          gt_gff3_in_stream_plain_enable_tidy_mode(GtNodeStream*);
+void          gt_gff3_in_stream_plain_enable_strict_mode(GtNodeStream*);
 void          gt_gff3_in_stream_plain_show_progress_bar(GtGFF3InStreamPlain*);
 void          gt_gff3_in_stream_plain_set_type_checker(GtNodeStream*,
                                                        GtTypeChecker*);

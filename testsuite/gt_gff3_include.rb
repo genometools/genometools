@@ -733,6 +733,29 @@ Test do
   grep last_stderr, "start '-1' is negative"
 end
 
+Name "gt gff3 negative sequence region start (-strict)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -strict #{$testdata}sequence_region_negative_start.gff3",
+           :retval => 1
+  grep last_stderr, "start '-1' is negative"
+end
+
+Name "gt gff3 negative sequence region end"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}sequence_region_negative_end.gff3"
+  grep last_stderr, "end '-1497228' is negative"
+end
+
+Name "gt gff3 negative sequence region end (-strict)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -strict #{$testdata}sequence_region_negative_end.gff3",
+           :retval => 1
+  grep last_stderr, "end '-1497228' is negative"
+end
+
 Name "gt gff3 negative sequence region end"
 Keywords "gt_gff3"
 Test do

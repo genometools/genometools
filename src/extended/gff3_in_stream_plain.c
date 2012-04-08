@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -301,6 +301,13 @@ int gt_gff3_in_stream_plain_set_offsetfile(GtNodeStream *ns, GtStr *offsetfile,
   GtGFF3InStreamPlain *is = gff3_in_stream_plain_cast(ns);
   gt_assert(is);
   return gt_gff3_parser_set_offsetfile(is->gff3_parser, offsetfile, err);
+}
+
+void gt_gff3_in_stream_plain_enable_strict_mode(GtNodeStream *ns)
+{
+  GtGFF3InStreamPlain *is = gff3_in_stream_plain_cast(ns);
+  gt_assert(is);
+  gt_gff3_parser_enable_strict_mode(is->gff3_parser);
 }
 
 void gt_gff3_in_stream_plain_enable_tidy_mode(GtNodeStream *ns)

@@ -47,6 +47,7 @@ struct GtGFF3Parser {
   bool incomplete_node, /* at least on node is potentially incomplete */
        checkids,
        checkregions,
+       strict,
        tidy,
        fasta_parsing, /* parser is in FASTA parsing mode */
        eof_emitted;
@@ -136,9 +137,15 @@ int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
   return -1;
 }
 
+void gt_gff3_parser_enable_strict_mode(GtGFF3Parser *parser)
+{
+  gt_assert(parser && !parser->tidy);
+  parser->strict = true;
+}
+
 void gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *parser)
 {
-  gt_assert(parser);
+  gt_assert(parser && !parser->strict);
   parser->tidy = true;
 }
 
@@ -1202,7 +1209,9 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
 
   /* parse the range */
   if (!had_err) {
-    if (parser->tidy) {
+    if (parser->strict)
+      had_err = gt_parse_range(&range, start, end, line_number, filename, err);
+    else if (parser->tidy) {
       had_err = gt_parse_range_tidy(&range, start, end, line_number, filename,
                                     err);
     }
@@ -1426,7 +1435,11 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       }
     }
     if (!had_err) {
-      if (parser->tidy) {
+      if (parser->strict) {
+        had_err = gt_parse_range(&range, seqstart, tmpline, line_number,
+                                 filename, err);
+      }
+      else if (parser->tidy) {
         had_err = gt_parse_range_tidy(&range, seqstart, tmpline, line_number,
                                       filename, err);
       }

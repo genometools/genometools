@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -114,6 +114,12 @@ void gt_gff3_in_stream_disable_add_ids(GtNodeStream *ns)
   GtGFF3InStream *is = gff3_in_stream_cast(ns);
   gt_assert(is && is->add_ids_stream);
   gt_add_ids_stream_disable(is->add_ids_stream);
+}
+
+void gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream *is)
+{
+  gt_assert(is);
+  gt_gff3_in_stream_plain_enable_strict_mode(is->gff3_in_stream_plain);
 }
 
 void gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream *is)
