@@ -1206,8 +1206,10 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
       had_err = gt_parse_range_tidy(&range, start, end, line_number, filename,
                                     err);
     }
-    else
-      had_err = gt_parse_range(&range, start, end, line_number, filename, err);
+    else {
+      had_err = gt_parse_range_correct_neg(&range, start, end, line_number,
+                                           filename, err);
+    }
   }
   if (!had_err && range.start == 0) {
       gt_error_set(err, "illegal feature start 0 on line %u in file \"%s\" "
@@ -1429,8 +1431,8 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                                       filename, err);
       }
       else {
-        had_err = gt_parse_range(&range, seqstart, tmpline, line_number,
-                                 filename, err);
+        had_err = gt_parse_range_correct_neg(&range, seqstart, tmpline,
+                                             line_number, filename, err);
       }
     }
     if (!had_err && range.start == 0) {

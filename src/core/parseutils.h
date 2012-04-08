@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -41,5 +41,11 @@ int gt_parse_int_line(int*, const char *integer,
    That is, the part between ':' and '..' denotes the range start and the part
    after '..' the end. Returns 0 upon success and -1 upon failure. */
 int gt_parse_description_range(const char *description, GtRange *range);
+
+/* Like <gt_parse_range>, but issues a warning, if <start> and/or <end> is
+   negative and sets the corresponding value to 1. */
+int gt_parse_range_correct_neg(GtRange *rng, const char *start, const char *end,
+                               unsigned int line_number, const char *filename,
+                               GtError*);
 
 #endif

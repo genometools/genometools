@@ -105,7 +105,7 @@ int gt_parse_double(double *out, const char *nptr)
 
 static int parse_range(GtRange *range, const char *start, const char *end,
                        unsigned int line_number, const char *filename,
-                       bool tidy, GtError *err)
+                       bool tidy, bool correct_negative, GtError *err)
 {
   long start_val, end_val;
   char *ep;
@@ -130,7 +130,7 @@ static int parse_range(GtRange *range, const char *start, const char *end,
     return -1;
   }
   if (start_val < 0) {
-    if (tidy) {
+    if (tidy || correct_negative) {
       gt_warning("start '%s' is negative on line %u in file '%s'; reset to 1",
                  start, line_number, filename);
       start_val = 1;
@@ -161,7 +161,7 @@ static int parse_range(GtRange *range, const char *start, const char *end,
     return -1;
   }
   if (end_val < 0) {
-    if (tidy) {
+    if (tidy || correct_negative) {
       gt_warning("end '%s' is negative on line %u in file '%s'; reset to 1",
                  end, line_number, filename);
       end_val = 1;
@@ -205,14 +205,24 @@ static int parse_range(GtRange *range, const char *start, const char *end,
 int gt_parse_range(GtRange *range, const char *start, const char *end,
                    unsigned int line_number, const char *filename, GtError *err)
 {
-  return parse_range(range, start, end, line_number, filename, false, err);
+  return parse_range(range, start, end, line_number, filename, false, false,
+                     err);
 }
 
 int gt_parse_range_tidy(GtRange *range, const char *start, const char *end,
                         unsigned int line_number, const char *filename,
                         GtError *err)
 {
-  return parse_range(range, start, end, line_number, filename, true, err);
+  return parse_range(range, start, end, line_number, filename, true, true,
+                     err);
+}
+
+int gt_parse_range_correct_neg(GtRange *range, const char *start,
+                               const char *end, unsigned int line_number,
+                               const char *filename, GtError *err)
+{
+  return parse_range(range, start, end, line_number, filename, false, true,
+                     err);
 }
 
 int gt_parse_score(bool *score_is_defined, float *score_value,
