@@ -34,8 +34,9 @@ typedef enum {
    Must return a status code (0 = continue iteration, 1 = stop iteration,
    2 = deleted element, 3 = modified key, 4 = redo iteration).
    Gets called with the key and value of the current hashmap member, and the
-   <GtError> object given in the original gt_hashmap_foreach*() call. */
-typedef int (*GtHashmapVisitFunc)(void *key, void *value, void *data, GtError*);
+   <err> object given in the original gt_hashmap_foreach*() call. */
+typedef int (*GtHashmapVisitFunc)(void *key, void *value, void *data,
+                                  GtError *err);
 
 /* Creates a new <GtHashmap> object of type <keyhashtype>. If <keyfree> and/or
    <valuefree> are given, they will be used to free the hashmap members
@@ -60,17 +61,17 @@ void       gt_hashmap_remove(GtHashmap *hashmap, const void *key);
    For each member, <func> is called (see interface). */
 int        gt_hashmap_foreach_ordered(GtHashmap *hashmap,
                                       GtHashmapVisitFunc func,
-                                      void *data, GtCompare cmp, GtError*);
-/* Iterate over <hashmap> in arbitrary order given by compare function <cmp>.
+                                      void *data, GtCompare cmp, GtError *err);
+/* Iterate over <hashmap> in arbitrary order.
    For each member, <func> is called (see interface). */
 int        gt_hashmap_foreach(GtHashmap *hashmap, GtHashmapVisitFunc func,
-                              void *data, GtError*);
+                              void *data, GtError *err);
 /* Iterate over <hashmap> in either alphabetical order (if <GtHashType> was
    specified as <GT_HASH_STRING>) or numerical order (if <GtHashType> was
    specified as <GT_HASH_DIRECT>). */
 int        gt_hashmap_foreach_in_key_order(GtHashmap *hashmap,
                                            GtHashmapVisitFunc func,
-                                           void *data, GtError*);
+                                           void *data, GtError *err);
 /* Reset <hashmap> by unsetting values for all keys, calling the free function
    if necessary. */
 void       gt_hashmap_reset(GtHashmap *hashmap);
