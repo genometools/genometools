@@ -1051,6 +1051,20 @@ Test do
   grep last_stderr, "Parent .* was not defined"
 end
 
+Name "gt gff3 terminator separation"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}terminator_separation.gff3", :retval => 1
+  grep last_stderr, "Parent .* was not defined"
+end
+
+Name "gt gff3 terminator separation (-checkids)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -checkids #{$testdata}terminator_separation.gff3", :retval => 1
+  grep last_stderr, "the child with Parent .* is separated from its corresponding Parent"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

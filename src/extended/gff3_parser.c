@@ -619,35 +619,54 @@ static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
   }
 }
 
-static void process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
-                          GtFeatureInfo *feature_info, GtQueue *genome_nodes)
+static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
+                         GtFeatureInfo *feature_info,
+                         unsigned int last_terminator, GtQueue *genome_nodes,
+                         GtError *err)
 {
   GtStrArray *valid_parents;
   GtGenomeNode* parent_gf;
   unsigned long i;
+  int had_err = 0;
+  gt_error_check(err);
   gt_assert(child && parent_splitter && feature_info && genome_nodes);
   valid_parents = gt_str_array_new();
-  for (i = 0; i < gt_splitter_size(parent_splitter); i++) {
+  for (i = 0; !had_err && i < gt_splitter_size(parent_splitter); i++) {
     const char *parent = gt_splitter_get_token(parent_splitter, i);
     parent_gf = (GtGenomeNode*) gt_feature_info_get(feature_info,
                                                     parent);
     gt_assert(parent_gf);
-    if (i)
-      child = gt_genome_node_ref(child);
-    gt_feature_node_add_child((GtFeatureNode*) parent_gf,
-                              (GtFeatureNode*) child);
-    gt_str_array_add_cstr(valid_parents, parent);
+    if (gt_genome_node_get_line_number(parent_gf) < last_terminator) {
+      gt_error_set(err, "the child with %s \"%s\" on line %u in file "
+                   "\"%s\" is separated from its corresponding %s on line %u "
+                   "by terminator %s on line %u", GT_GFF_PARENT, parent,
+                   gt_genome_node_get_line_number(child),
+                   gt_genome_node_get_filename(child), GT_GFF_PARENT,
+                   gt_genome_node_get_line_number(parent_gf), GT_GFF_TERMINATOR,
+                   last_terminator);
+      had_err = -1;
+    }
+    if (!had_err) {
+      if (i)
+        child = gt_genome_node_ref(child);
+      gt_feature_node_add_child((GtFeatureNode*) parent_gf,
+                                (GtFeatureNode*) child);
+      gt_str_array_add_cstr(valid_parents, parent);
+    }
   }
-  gt_assert(gt_splitter_size(parent_splitter) ==
-            gt_str_array_size(valid_parents));
-  /* make sure all (valid) parents have the same (pseudo-)root */
-  if (gt_str_array_size(valid_parents) >= 2) {
-    GtArray *roots = find_roots(valid_parents, feature_info);
-    if (roots_differ(roots))
-      join_roots(roots, feature_info, genome_nodes);
-    gt_array_delete(roots);
+  if (!had_err) {
+    gt_assert(gt_splitter_size(parent_splitter) ==
+              gt_str_array_size(valid_parents));
+    /* make sure all (valid) parents have the same (pseudo-)root */
+    if (gt_str_array_size(valid_parents) >= 2) {
+      GtArray *roots = find_roots(valid_parents, feature_info);
+      if (roots_differ(roots))
+        join_roots(roots, feature_info, genome_nodes);
+      gt_array_delete(roots);
+    }
   }
   gt_str_array_delete(valid_parents);
+  return had_err;
 }
 
 static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
@@ -707,9 +726,9 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
 
   if (!had_err) {
     if (!missing_parents) {
-      gt_assert(parser->incomplete_node);
-      process_child(feature_node, parent_splitter, parser->feature_info,
-                    genome_nodes);
+      had_err = process_child(feature_node, parent_splitter,
+                              parser->feature_info, parser->last_terminator,
+                              genome_nodes, err);
     }
     else {
       gt_orphanage_add(parser->orphanage, feature_node, missing_parents);
@@ -1385,7 +1404,8 @@ static int gff3_parser_parse_fasta_entry(GtQueue *genome_nodes,
 }
 
 static int process_orphans(GtOrphanage *orphanage, GtFeatureInfo *feature_info,
-                           GtQueue *genome_nodes, GtError *err)
+                           unsigned int last_terminator, GtQueue *genome_nodes,
+                           GtError *err)
 {
   GtGenomeNode *orphan;
   int had_err = 0;
@@ -1415,8 +1435,10 @@ static int process_orphans(GtOrphanage *orphanage, GtFeatureInfo *feature_info,
         had_err = -1;
       }
     }
-    if (!had_err)
-      process_child(orphan, splitter, feature_info, genome_nodes);
+    if (!had_err) {
+      had_err = process_child(orphan, splitter, feature_info, last_terminator,
+                              genome_nodes, err);
+    }
     gt_splitter_delete(splitter);
     gt_free(parent_attr_dup);
   }
@@ -1553,7 +1575,7 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
   else if (strcmp(line, GT_GFF_TERMINATOR) == 0) { /* terminator */
     /* now all nodes are complete */
     had_err = process_orphans(parser->orphanage, parser->feature_info,
-                              genome_nodes, err);
+                              parser->last_terminator, genome_nodes, err);
     parser->incomplete_node = false;
     if (!parser->checkids)
       gt_feature_info_reset(parser->feature_info);
@@ -1644,7 +1666,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
 
   if (!had_err) {
     had_err = process_orphans(parser->orphanage, parser->feature_info,
-                              genome_nodes, err);
+                              parser->last_terminator, genome_nodes, err);
   }
 
   if (had_err) {
