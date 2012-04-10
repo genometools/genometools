@@ -694,7 +694,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
                                                     parent);
     if (!parent_gf) {
       if (parser->strict) {
-        gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" has not been "
+        gt_error_set(err, "%s \"%s\" on line %u in file \"%s\" was not "
                      "previously defined (via \"%s=\")", GT_GFF_PARENT, parent,
                      line_number, filename, GT_GFF_ID);
         had_err = -1;

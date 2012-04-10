@@ -1013,7 +1013,7 @@ Name "gt gff3 reverse feature order (-strict)"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 -strict #{$testdata}reverse_feature_order.gff3", :retval => 1)
-  grep last_stderr, "has not been previously defined"
+  grep last_stderr, "was not previously defined"
 end
 
 Name "gt gff3 reverse feature order, multiple parents"
@@ -1027,7 +1027,7 @@ Name "gt gff3 reverse feature order, multiple parents (-strict)"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 -strict #{$testdata}reverse_feature_order_multiple_parents.gff3", :retval => 1)
-  grep last_stderr, "has not been previously defined"
+  grep last_stderr, "was not previously defined"
 end
 
 Name "gt gff3 reverse feature order, multi-level orphans"
@@ -1041,7 +1041,7 @@ Name "gt gff3 reverse feature order, multi-level orphans (-strict)"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 -strict #{$testdata}reverse_standard_gene_as_tree.gff3", :retval => 1)
-  grep last_stderr, "has not been previously defined"
+  grep last_stderr, "was not previously defined"
 end
 
 Name "gt gff3 simple orphan"
