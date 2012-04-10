@@ -350,7 +350,7 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   return 0;
 }
 
-static int gff3_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *en,
+static int gff3_visitor_eof_node(GtNodeVisitor *nv, GT_UNUSED GtEOFNode *en,
                                  GT_UNUSED GtError *err)
 {
   gt_error_check(err);
