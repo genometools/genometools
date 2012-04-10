@@ -1086,6 +1086,20 @@ Test do
   grep last_stderr, "is empty"
 end
 
+Name "gt gff3 header file"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}header.gff3"
+  run "diff #{last_stdout} #{$testdata}header.gff3"
+end
+
+Name "gt gff3 fasta sequence file"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}fasta_seq.gff3"
+  run "diff #{last_stdout} #{$testdata}fasta_seq.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

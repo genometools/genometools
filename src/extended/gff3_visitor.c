@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -338,6 +338,7 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
   gt_error_check(err);
   gff3_visitor = gff3_visitor_cast(nv);
   gt_assert(nv && sn);
+  gff3_version_string(nv);
   if (!gff3_visitor->fasta_directive_shown) {
     gt_file_xprintf(gff3_visitor->outfp, "%s\n", GT_GFF_FASTA_DIRECTIVE);
     gff3_visitor->fasta_directive_shown = true;
@@ -346,6 +347,15 @@ static int gff3_visitor_sequence_node(GtNodeVisitor *nv, GtSequenceNode *sn,
                       gt_sequence_node_get_sequence(sn),
                       gt_sequence_node_get_sequence_length(sn),
                       gff3_visitor->fasta_width, gff3_visitor->outfp);
+  return 0;
+}
+
+static int gff3_visitor_eof_node(GtNodeVisitor *nv, GtEOFNode *en,
+                                 GT_UNUSED GtError *err)
+{
+  gt_error_check(err);
+  gt_assert(nv && en);
+  gff3_version_string(nv);
   return 0;
 }
 
@@ -359,7 +369,7 @@ const GtNodeVisitorClass* gt_gff3_visitor_class()
                                     gff3_visitor_feature_node,
                                     gff3_visitor_region_node,
                                     gff3_visitor_sequence_node,
-                                    NULL);
+                                    gff3_visitor_eof_node);
   }
   return nvc;
 }
