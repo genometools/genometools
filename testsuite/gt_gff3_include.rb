@@ -1104,7 +1104,7 @@ def large_gff3_test(name, file)
 end
 
 if $gttestdata then
-  large_gff3_test("Saccharomyces cerevisiae", "saccharomyces_cerevisiae.gff")
+  large_gff3_test("Saccharomyces cerevisiae", "sgd/saccharomyces_cerevisiae.gff")
   large_gff3_test("Drosophila melanogaster",
                   "Drosophila_melanogaster.BDGP5.4.50.gff3")
 
