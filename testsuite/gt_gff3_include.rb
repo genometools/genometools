@@ -531,7 +531,7 @@ Name "gt gff3 -typecheck minimal header"
 Keywords "gt_gff3 typecheck"
 Test do
   run_test "#{$bin}gt gff3 -typecheck " +
-           "#{$testdata}obo_files/minimal_header.obo #{$testdata}empty_file"
+           "#{$testdata}obo_files/minimal_header.obo #{$testdata}header.gff3"
 end
 
 Name "gt gff3 -typecheck corrupt header"
@@ -547,7 +547,7 @@ Name "gt gff3 -typecheck minimal stanza"
 Keywords "gt_gff3 typecheck"
 Test do
   run_test "#{$bin}gt gff3 -typecheck " +
-           "#{$testdata}obo_files/minimal_stanza.obo #{$testdata}empty_file"
+           "#{$testdata}obo_files/minimal_stanza.obo #{$testdata}header.gff3"
 end
 
 Name "gt gff3 -typecheck corrupt term stanza"
@@ -581,14 +581,14 @@ Name "gt gff3 -typecheck windows newline"
 Keywords "gt_gff3 typecheck"
 Test do
   run_test "#{$bin}gt gff3 -typecheck " +
-           "#{$testdata}obo_files/windows_newline.obo #{$testdata}empty_file"
+           "#{$testdata}obo_files/windows_newline.obo #{$testdata}header.gff3"
 end
 
 Name "gt gff3 -typecheck comment in stanza"
 Keywords "gt_gff3 typecheck"
 Test do
   run_test "#{$bin}gt gff3 -typecheck " +
-           "#{$testdata}obo_files/comment_in_stanza.obo #{$testdata}empty_file"
+           "#{$testdata}obo_files/comment_in_stanza.obo #{$testdata}header.gff3"
 end
 
 Name "gt gff3 -typecheck sofa.obo"
@@ -1077,6 +1077,13 @@ Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_feature_with_multiple_parents.gff3",
            :retval => 1
   grep last_stderr, "has multiple parents which require different phases"
+end
+
+Name "gt gff3 empty file"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}empty_file", :retval => 1
+  grep last_stderr, "is empty"
 end
 
 def large_gff3_test(name, file)

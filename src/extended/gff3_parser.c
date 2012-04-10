@@ -1664,6 +1664,11 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
     gt_str_reset(line_buffer);
   }
 
+  if (!had_err && rval == EOF && *line_number == 0) {
+    gt_error_set(err, "GFF3 file \"%s\" is empty", gt_str_get(filenamestr));
+    had_err = -1;
+  }
+
   if (!had_err) {
     had_err = process_orphans(parser->orphanage, parser->feature_info,
                               parser->last_terminator, genome_nodes, err);
