@@ -26,7 +26,6 @@
 *.mer
 *.ois
 *.orig
-*.out
 *.pbt
 *.polya
 *.polya.info
@@ -52,6 +51,7 @@
 /doc/manuals/*.bbl
 /doc/manuals/*.blg
 /doc/manuals/*.log
+/doc/manuals/*.out
 /doc/manuals/*.toc
 /doc/manuals/auto
 /lib

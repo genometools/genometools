@@ -114,7 +114,7 @@ Name "gt gff3 prob 12"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
-  grep last_stderr, "has not been previously defined"
+  grep last_stderr, "Parent .* was not defined"
 end
 
 Name "gt gff3 prob 12 (-checkids)"
@@ -700,7 +700,7 @@ Keywords "gt_gff3 multi-feature"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}multi_feature_undefined_parent.gff3",
            :retval => 1)
-  grep last_stderr, "has not been previously defined"
+  grep last_stderr, "Parent .* on line 3 .* was not defined"
 end
 
 Name "gt gff3 multi-feature (different sequence ID)"
@@ -773,7 +773,8 @@ end
 Name "gt gff3 undefined parent (one of two)"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 -tidy #{$testdata}undefined_parent.gff3"
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}undefined_parent.gff3", :retval => 1
+  grep last_stderr, "Parent .* was not defined"
 end
 
 Name "gt gff3 missing gff3 header"
@@ -989,10 +990,9 @@ Name "gt gff3 parent node with undefined range (-tidy)"
 Keywords "gt_gff3 undefinedrange"
 Test do
   run_test "#{$bin}gt gff3 -tidy " + \
-           "#{$testdata}gt_gff3_undefined_range_parent.gff3"
+           "#{$testdata}gt_gff3_undefined_range_parent.gff3", :retval => 1
   grep last_stderr, /has undefined range, discarding/
-  grep last_stderr, /Parent "bar" on line 4 .* has not been previously defined/
-  run "diff #{last_stdout} #{$testdata}gt_gff3_undefined_range_parent_tidy.gff3"
+  grep last_stderr, "Parent .* on line 4 .* was not defined"
 end
 
 Name "gt gff3 self-referential feature node"
@@ -1000,6 +1000,27 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}self_referential.gff3", :retval => 1
   grep last_stderr, /self-referential/
+end
+
+Name "gt gff3 reverse feature order"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}reverse_feature_order.gff3"
+  run "diff #{last_stdout} #{$testdata}reverse_feature_order.out"
+end
+
+Name "gt gff3 reverse feature order (-strict)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -strict #{$testdata}reverse_feature_order.gff3", :retval => 1)
+  grep last_stderr, "has not been previously defined"
+end
+
+Name "gt gff3 simple orphan"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}simple_orphan.gff3", :retval => 1)
+  grep last_stderr, "Parent .* was not defined"
 end
 
 def large_gff3_test(name, file)
