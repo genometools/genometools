@@ -1377,7 +1377,7 @@ static int gff3_parser_parse_fasta_entry(GtQueue *genome_nodes,
 {
   int had_err = 0;
   gt_error_check(err);
-  gt_assert(line && line_number && fpin);
+  gt_assert(line && line_number);
   if (line[0] != '>') {
     gt_error_set(err, "line %d does not start with '>' as expected",
                  line_number);
