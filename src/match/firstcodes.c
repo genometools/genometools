@@ -1145,7 +1145,7 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                       gt_radixsort_size(fci->radixsort_code));
   fci->buf.fciptr = fci; /* as we need to give fci to the flush function */
   fci->buf.flush_function = gt_firstcodes_accumulatecounts_flush;
-  gt_logger_log(logger,"maximum space for accumulation counts %.2f MB",
+  gt_logger_log(logger,"maximum space for accumulating counts %.2f MB",
                 GT_MEGABYTES(gt_firstcodes_spacelog_total(fci->fcsl)));
   gt_firstcodes_accum_runkmerscan(encseq, kmersize, minmatchlength,&fci->buf);
   gt_firstcodes_accumulatecounts_flush(fci);
