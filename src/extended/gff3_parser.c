@@ -1077,8 +1077,8 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         /* handle duplicate attribute */
         if (parser->tidy) {
           GtStr *combined_value;
-          gt_warning("more than one %s attribute on line %u in file \"%s\"",
-                     attr_tag, line_number, filename);
+          gt_warning("more than one %s attribute on line %u in file \"%s\"; "
+                     "join them", attr_tag, line_number, filename);
           combined_value = gt_str_new_cstr(old_value);
           gt_str_append_char(combined_value, ',');
           gt_str_append_cstr(combined_value, attr_value);
