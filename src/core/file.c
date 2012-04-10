@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -217,10 +217,13 @@ int gt_file_xfgetc(GtFile *file)
 
 void gt_file_unget_char(GtFile *file, char c)
 {
-  gt_assert(file);
-  gt_assert(!file->unget_used); /* only one char can be unget at a time */
-  file->unget_char = c;
-  file->unget_used = true;
+  if (file) {
+    gt_assert(!file->unget_used); /* only one char can be unget at a time */
+    file->unget_char = c;
+    file->unget_used = true;
+  }
+  else
+    gt_xungetc(c, stdin);
 }
 
 static int vgzprintf(gzFile file, const char *format, va_list va, int buflen)
