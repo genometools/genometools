@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -24,13 +24,15 @@
 
 struct GtCDSCheckVisitor {
   const GtNodeVisitor parent_instance;
+  GtHashmap *cds_features;
   bool tidy;
 };
 
 #define cds_check_visitor_cast(NS)\
         gt_node_visitor_cast(gt_cds_check_visitor_class(), NS)
 
-static int check_cds_phases(GtArray *cds_features, bool tidy, GtError *err)
+static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
+                            GtError *err)
 {
   GtPhase current_phase, correct_phase = GT_PHASE_ZERO;
   GtFeatureNode *fn;
@@ -54,29 +56,40 @@ static int check_cds_phases(GtArray *cds_features, bool tidy, GtError *err)
        partially annotated genes. */
     if ((!i && gt_feature_node_get_phase(fn) == GT_PHASE_UNDEFINED) ||
         (i && gt_feature_node_get_phase(fn) != correct_phase)) {
-      if (!tidy) {
-        gt_error_set(err, "%s feature on line %u in file \"%s\" has the wrong "
-                     "phase %c (should be %c)", gt_ft_CDS,
+      if (gt_hashmap_get(v->cds_features, fn)) {
+        gt_error_set(err, "%s feature on line %u in file \"%s\" has multiple "
+                     "parents which require different phases (uncorrectable)",
+                     gt_ft_CDS,
+                     gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                     gt_genome_node_get_filename((GtGenomeNode*) fn));
+        had_err = -1;
+      }
+      else {
+        if (!v->tidy) {
+          gt_error_set(err, "%s feature on line %u in file \"%s\" has the "
+                       "wrong phase %c (should be %c)", gt_ft_CDS,
+                       gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                       gt_genome_node_get_filename((GtGenomeNode*) fn),
+                       GT_PHASE_CHARS[gt_feature_node_get_phase(fn)],
+                       GT_PHASE_CHARS[correct_phase]);
+          had_err = -1;
+        }
+        else {
+          gt_warning("%s feature on line %u in file \"%s\" has the wrong phase "
+                     "%c -> correcting it to %c", gt_ft_CDS,
                      gt_genome_node_get_line_number((GtGenomeNode*) fn),
                      gt_genome_node_get_filename((GtGenomeNode*) fn),
                      GT_PHASE_CHARS[gt_feature_node_get_phase(fn)],
                      GT_PHASE_CHARS[correct_phase]);
-        had_err = -1;
-      }
-      else {
-        gt_warning("%s feature on line %u in file \"%s\" has the wrong phase "
-                   "%c -> correcting it to %c", gt_ft_CDS,
-                   gt_genome_node_get_line_number((GtGenomeNode*) fn),
-                   gt_genome_node_get_filename((GtGenomeNode*) fn),
-                   GT_PHASE_CHARS[gt_feature_node_get_phase(fn)],
-                   GT_PHASE_CHARS[correct_phase]);
-        gt_feature_node_set_phase(fn, correct_phase);
+          gt_feature_node_set_phase(fn, correct_phase);
+        }
       }
     }
     if (!had_err) {
       current_phase = gt_feature_node_get_phase(fn);
       current_length = gt_genome_node_get_length((GtGenomeNode*) fn);
       correct_phase = (3 - (current_length - current_phase) % 3) % 3;
+      gt_hashmap_add(v->cds_features, fn, fn); /* recored CDS feature */
     }
   }
   return had_err;
@@ -86,14 +99,13 @@ static int check_cds_phases_hm(GT_UNUSED void *key, void *value, void *data,
                                GtError *err)
 {
   GtArray *cds_features = value;
-  bool *tidy = data;
   gt_error_check(err);
-  gt_assert(cds_features && tidy);
-  return check_cds_phases(cds_features, *tidy, err);
+  gt_assert(cds_features && data);
+  return check_cds_phases(cds_features, data, err);
 }
 
-static int check_cds_phases_if_necessary(GtFeatureNode *fn, bool tidy,
-                                         GtError *err)
+static int check_cds_phases_if_necessary(GtFeatureNode *fn,
+                                         GtCDSCheckVisitor *v, GtError *err)
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *node;
@@ -131,11 +143,9 @@ static int check_cds_phases_if_necessary(GtFeatureNode *fn, bool tidy,
     }
   }
   if (cds_features)
-    had_err = check_cds_phases(cds_features, tidy, err);
-  if (!had_err && multi_features) {
-    had_err = gt_hashmap_foreach(multi_features, check_cds_phases_hm, &tidy,
-                                 err);
-  }
+    had_err = check_cds_phases(cds_features, v, err);
+  if (!had_err && multi_features)
+    had_err = gt_hashmap_foreach(multi_features, check_cds_phases_hm, v, err);
   gt_array_delete(cds_features);
   gt_hashmap_delete(multi_features);
   gt_feature_node_iterator_delete(fni);
@@ -153,9 +163,16 @@ static int cds_check_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   gt_assert(v && fn);
   fni = gt_feature_node_iterator_new(fn);
   while (!had_err && (node = gt_feature_node_iterator_next(fni)))
-    had_err = check_cds_phases_if_necessary(node, v->tidy, err);
+    had_err = check_cds_phases_if_necessary(node, v, err);
   gt_feature_node_iterator_delete(fni);
+  gt_hashmap_reset(v->cds_features);
   return had_err;
+}
+
+static void cds_check_visitor_free(GtNodeVisitor *nv)
+{
+  GtCDSCheckVisitor *v = cds_check_visitor_cast(nv);
+  gt_hashmap_delete(v->cds_features);
 }
 
 const GtNodeVisitorClass* gt_cds_check_visitor_class()
@@ -163,7 +180,7 @@ const GtNodeVisitorClass* gt_cds_check_visitor_class()
   static const GtNodeVisitorClass *nvc = NULL;
   if (!nvc) {
     nvc = gt_node_visitor_class_new(sizeof (GtCDSCheckVisitor),
-                                    NULL,
+                                    cds_check_visitor_free,
                                     NULL,
                                     cds_check_visitor_feature_node,
                                     NULL,
@@ -175,7 +192,10 @@ const GtNodeVisitorClass* gt_cds_check_visitor_class()
 
 GtNodeVisitor* gt_cds_check_visitor_new(void)
 {
-  return gt_node_visitor_create(gt_cds_check_visitor_class());
+  GtNodeVisitor *nv = gt_node_visitor_create(gt_cds_check_visitor_class());
+  GtCDSCheckVisitor *v = cds_check_visitor_cast(nv);
+  v->cds_features = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
+  return nv;
 }
 
 void gt_cds_check_visitor_enable_tidy_mode(GtCDSCheckVisitor *v)

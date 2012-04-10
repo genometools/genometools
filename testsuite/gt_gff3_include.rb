@@ -1071,6 +1071,14 @@ Test do
   grep last_stderr, "the child with Parent .* is separated from its corresponding Parent"
 end
 
+Name "gt gff3 CDS feature with multiple (incompatible) parents"
+Keywords "gt_gff3 "
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_feature_with_multiple_parents.gff3",
+           :retval => 1
+  grep last_stderr, "has multiple parents which require different phases"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
