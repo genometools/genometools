@@ -66,16 +66,9 @@ unsigned long gt_radixsort_max_num_of_entries_ulong(size_t memlimit);
    the auxiliary array is not exceeded. */
 unsigned long gt_radixsort_max_num_of_entries_ulongpair(size_t memlimit);
 
-/* XXX: why is `GtUlong' used here instead of 'unsigned long'? */
-void             gt_radixsort_inplace_GtUlong(unsigned long *source,
-                                              unsigned long len);
-=======
-   In the latter case, the component <a> is the key and <b> is the value.
-*/
-
 /* sort an array of values of type <unsigned long> */
 
-void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len);
+void gt_radixsort_inplace_ulong(unsigned long *source, unsigned long len);
 
 /* Determine maximum number of entries in an array of type <unsigned long>
    such that the given memory limit <memlimit> (in bytes) for the array

@@ -318,7 +318,7 @@ static void check_radixsort_lsb(unsigned long *arr, unsigned long len)
 
 static void check_radixsort_inplace(unsigned long *arr, unsigned long len)
 {
-  gt_radixsort_inplace_GtUlong(arr,len);
+  gt_radixsort_inplace_ulong(arr,len);
   gt_sortbench_verify(arr,len);
 }
 

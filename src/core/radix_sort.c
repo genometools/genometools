@@ -581,7 +581,7 @@ static void gt_radixsort_inplace(GtRadixsortinfo *radixsortinfo,
   */
 }
 
-void gt_radixsort_inplace_GtUlong(unsigned long *source, unsigned long len)
+void gt_radixsort_inplace_ulong(unsigned long *source, unsigned long len)
 {
   GtRadixvalues radixvalues;
   GtRadixsortinfo *radixsortinfo;

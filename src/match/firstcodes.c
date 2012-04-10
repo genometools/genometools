@@ -1047,7 +1047,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
   {
     gt_timer_show_progress(timer, "to sort initial prefixes",stdout);
   }
-  gt_radixsort_inplace_GtUlong(fci->allfirstcodes,fci->numofsequences);
+  gt_radixsort_inplace_ulong(fci->allfirstcodes,fci->numofsequences);
   numofchars = gt_encseq_alphabetnumofchars(encseq);
   gt_assert(numofchars == 4U);
   fci->buf.markprefix = gt_marksubstring_new(numofchars,kmersize,false,
