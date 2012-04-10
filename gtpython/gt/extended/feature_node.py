@@ -24,7 +24,6 @@ from gt.core.str_array import StrArray
 from gt.extended.genome_node import GenomeNode
 from gt.props import cachedproperty
 
-
 class FeatureNode(GenomeNode):
 
     def __init__(self):
@@ -37,7 +36,7 @@ class FeatureNode(GenomeNode):
         if not strand in strandchars:
             gterror("Invalid strand '%s' -- must be one of %s" % (strand,
                     strandchars))
-        s = Str(seqid)
+        s = Str(str(seqid.encode("utf-8")))
         fn = gtlib.gt_feature_node_new(s, type, start, end, \
                                        strandchars.index(strand))
         n = cls.create_from_ptr(fn, True)
@@ -74,7 +73,7 @@ class FeatureNode(GenomeNode):
         return gtlib.gt_feature_node_get_source(self.gn)
 
     def set_source(self, source):
-        s = Str(source)
+        s = Str(str(source.encode("utf-8")))
         gtlib.gt_feature_node_set_source(self.gn, s)
 
     source = cachedproperty(get_source, set_source)

@@ -56,10 +56,10 @@ class EncseqEncoder:
     from_param = classmethod(from_param)
 
     def set_representation_type(self, sat):
-        gtlib.gt_encseq_encoder_set_access_type(self.ee, Str(sat))
+        gtlib.gt_encseq_encoder_set_access_type(self.ee, Str(str(sat.encode("utf-8"))))
 
     def set_symbolmap_file(self, fn):
-        gtlib.gt_encseq_encoder_set_symbolmap_file(self.ee, Str(fn))
+        gtlib.gt_encseq_encoder_set_symbolmap_file(self.ee, Str(str(fn.encode("utf-8"))))
 
     def enable_description_support(self):
         gtlib.gt_encseq_encoder_enable_description_support(self.ee)
@@ -478,7 +478,7 @@ class Encseq:
         gtlib.gt_encseq_filenum.argtypes = [c_void_p, c_ulong]
         gtlib.gt_encseq_filenames.restype = c_void_p
         gtlib.gt_encseq_filenames.argtypes = [c_void_p]
-        
+
     register = classmethod(register)
 
 

@@ -123,6 +123,12 @@ if not $arguments["nocairo"] then
     run "diff #{last_stdout} #{$testdata}standard_gene_as_tree.hotspots"
   end
 
+  Name "gtpython: unicode strings"
+  Keywords "gt_python"
+  Test do
+    run_python("#{$testdata}gtpython/unicode_strings.py #{$cur}/gtdata/sketch/default.style test.png")
+  end
+
   Name "gtpython: unittests"
   Keywords "gt_python unittests"
   Test do

@@ -64,7 +64,7 @@ class Style:
 
     def load_str(self, string):
         err = Error()
-        strg = Str(string)
+        strg = Str(str(string.encode("utf-8")))
         rval = gtlib.gt_style_load_str(self.style, strg, err)
         if rval != 0:
             gterror(err)
@@ -112,7 +112,7 @@ class Style:
             gterror(err)
 
     def set_cstr(self, section, key, value):
-        string = Str(value)
+        string = Str(str(value.encode("utf-8")))
         gtlib.gt_style_set_str(self.style, section, key, string)
 
     def get_num(self, section, key, gn=None):
