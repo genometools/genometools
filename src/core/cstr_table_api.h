@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008-2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008            Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,10 @@ const char*   gt_cstr_table_get(const GtCstrTable *table, const char *cstr);
 /* Return a <GtStrArray*> which contains all <cstr>s added to <table> in
    alphabetical order. The caller is responsible to free it! */
 GtStrArray*   gt_cstr_table_get_all(const GtCstrTable *table);
+/* Remove <cstr> from <table>. */
+void          gt_cstr_table_remove(GtCstrTable *table, const char *cstr);
+/* Reset <table> (that is, remove all contained C strings). */
+void          gt_cstr_table_reset(GtCstrTable *table);
 /* Delete C string <table>. */
 void          gt_cstr_table_delete(GtCstrTable *table);
 

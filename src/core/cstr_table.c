@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -80,6 +80,18 @@ GtStrArray* gt_cstr_table_get_all(const GtCstrTable *table)
                                          gt_strcmpptr, NULL);
   gt_assert(!had_err);
   return cstrs;
+}
+
+void gt_cstr_table_remove(GtCstrTable *table, const char *cstr)
+{
+  gt_assert(table && cstr);
+  gt_hashtable_remove(table->strings, &cstr);
+}
+
+void gt_cstr_table_reset(GtCstrTable *table)
+{
+  gt_assert(table);
+  gt_hashtable_reset(table->strings);
 }
 
 int gt_cstr_table_unit_test(GtError *err)
