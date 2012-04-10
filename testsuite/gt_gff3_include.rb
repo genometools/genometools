@@ -636,6 +636,12 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}standard_fasta_example.gff3"
 end
 
+Name "gt gff3 standard fasta example (stdin)"
+Keywords "gt_gff3 fasta"
+Test do
+  run_test "#{$bin}gt gff3 < #{$testdata}standard_fasta_example.gff3"
+end
+
 Name "gt gff3 two fasta sequences"
 Keywords "gt_gff3 fasta"
 Test do
