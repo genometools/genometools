@@ -1552,12 +1552,12 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
   }
   else if (strcmp(line, GT_GFF_TERMINATOR) == 0) { /* terminator */
     /* now all nodes are complete */
+    had_err = process_orphans(parser->orphanage, parser->feature_info,
+                              genome_nodes, err);
     parser->incomplete_node = false;
     if (!parser->checkids)
       gt_feature_info_reset(parser->feature_info);
     parser->last_terminator = line_number;
-    had_err = process_orphans(parser->orphanage, parser->feature_info,
-                              genome_nodes, err);
   }
   else {
     if (strncmp(line, GT_GFF_SPECIES, strlen(GT_GFF_SPECIES))

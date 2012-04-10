@@ -1016,6 +1016,20 @@ Test do
   grep last_stderr, "has not been previously defined"
 end
 
+Name "gt gff3 reverse feature order, multiple parents"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}reverse_feature_order_multiple_parents.gff3"
+  run "diff #{last_stdout} #{$testdata}reverse_feature_order_multiple_parents.out"
+end
+
+Name "gt gff3 reverse feature order, multiple parents (-strict)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -strict #{$testdata}reverse_feature_order_multiple_parents.gff3", :retval => 1)
+  grep last_stderr, "has not been previously defined"
+end
+
 Name "gt gff3 simple orphan"
 Keywords "gt_gff3"
 Test do
