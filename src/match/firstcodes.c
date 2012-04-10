@@ -46,8 +46,6 @@
 #include "sfx-suffixer.h"
 #include "spmsuftab.h"
 
-#define WITHCACHE
-#ifdef WITHCACHE
 typedef struct
 {
   unsigned long *ptr, code;
@@ -60,8 +58,6 @@ typedef struct
   unsigned int depth;
 } GtArrayGtIndexwithcode;
 
-#endif
-
 typedef struct
 {
   unsigned long firstcodehits,
@@ -73,9 +69,7 @@ typedef struct
                 currentmaxindex,
                 differentcodes, /* a copy of the same value as in tab */
                 widthofpart;
-#ifdef WITHCACHE
   GtArrayGtIndexwithcode binsearchcache;
-#endif
   unsigned int flushcount,
                shiftright2index,
                marksuffixunits,
@@ -131,8 +125,6 @@ static void gt_storefirstcodes(void *processinfo,
   fci->allfirstcodes[fci->countsequences++] = code;
 }
 
-#ifdef WITHCACHE
-
 static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
                                              unsigned int addbscache_depth)
 {
@@ -181,7 +173,6 @@ static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
              (unsigned long) allocbytes);
   GT_FCI_ADDWORKSPACE(fci->fcsl,"binsearchcache",allocbytes);
 }
-#endif
 
 #define SHOWFOUND(F)\
         if ((F) == NULL)\
@@ -193,24 +184,21 @@ static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
                    (unsigned long) ((F) - fci->allfirstcodes));\
         }
 
-const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
-                                        GT_UNUSED bool withcache,
-                                        unsigned long leftbound,
-                                        unsigned long rightbound,
-                                        unsigned long code)
+const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
+                                            unsigned long code)
 {
   const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
+  unsigned long leftbound = 0, rightbound = fci->differentcodes-1;
 #ifdef FIRSTCODES_DIFFERENCES
   const unsigned long *foundlinear = NULL;
 #endif
 
-#ifdef WITHCACHE
   unsigned int depth;
 
   /*
   printf("leftbound = %lu, rightbound = %lu\n",leftbound,rightbound);
   */
-  if (withcache && fci->binsearchcache.spaceGtIndexwithcode != NULL)
+  if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     const GtIndexwithcode *leftic, *midic, *rightic;
 
@@ -265,7 +253,8 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
           }
         } else
         {
-          return midic->ptr;
+          gt_assert(midic->ptr != NULL);
+          return (unsigned long) (midic->ptr - fci->allfirstcodes);
         }
       }
     }
@@ -309,12 +298,9 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
 #endif
   } else
   {
-#endif
     leftptr = fci->allfirstcodes + leftbound;
     rightptr = fci->allfirstcodes + rightbound;
-#ifdef WITHCACHE
   }
-#endif
   while (leftptr <= rightptr)
   {
     midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
@@ -335,7 +321,8 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
           gt_assert(midptr == foundlinear);
         }
 #endif
-        return midptr;
+        gt_assert(midptr != NULL);
+        return (unsigned long) (midptr - fci->allfirstcodes);
       }
     }
   }
@@ -350,6 +337,35 @@ const unsigned long *gt_firstcodes_find(const GtFirstcodesinfo *fci,
     }
   }
 #endif
+  return (found != NULL) ? (unsigned long) (found - fci->allfirstcodes)
+                         : ULONG_MAX;
+}
+
+const unsigned long *gt_firstcodes_find_insert(const GtFirstcodesinfo *fci,
+                                               unsigned long code)
+{
+  const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
+
+  leftptr = fci->allfirstcodes + fci->currentminindex;
+  rightptr = fci->allfirstcodes + fci->currentmaxindex;
+  while (leftptr <= rightptr)
+  {
+    midptr = leftptr + GT_DIV2((unsigned long) (rightptr-leftptr));
+    if (code < *midptr)
+    {
+      rightptr = midptr - 1;
+      found = midptr;
+    } else
+    {
+      if (code > *midptr)
+      {
+        leftptr = midptr + 1;
+      } else
+      {
+        return midptr;
+      }
+    }
+  }
   return found;
 }
 
@@ -392,17 +408,18 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    const unsigned long *ptr;
+    unsigned long foundindex;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
-    ptr = gt_firstcodes_find(fci,true,0,fci->differentcodes-1,
-                             fci->buf.spaceGtUlong[0]);
-    if (ptr != NULL)
+    foundindex = gt_firstcodes_find_accu(fci,fci->buf.spaceGtUlong[0]);
+    if (foundindex != ULONG_MAX)
     {
       fci->firstcodehits
-        += gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,ptr);
+        += gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,
+                                                fci->allfirstcodes +
+                                                foundindex);
     }
     fci->flushcount++;
     fci->buf.nextfree = 0;
@@ -458,9 +475,7 @@ static void gt_firstcodes_insertsuffixes_flush(void *data)
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_codepos,fci->buf.nextfree);
-    ptr = gt_firstcodes_find(fci,false,fci->currentminindex,
-                             fci->currentmaxindex,
-                             fci->buf.spaceGtUlongPair[0].a);
+    ptr = gt_firstcodes_find_insert(fci,fci->buf.spaceGtUlongPair[0].a);
     if (ptr != NULL)
     {
       fci->firstcodeposhits
@@ -822,13 +837,11 @@ static int gt_firstcodes_thread_sortremaining(
 
 static void gt_firstcode_delete_before_end(GtFirstcodesinfo *fci)
 {
-#ifdef WITHCACHE
   if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"binsearchcache");
     GT_FREEARRAY(&fci->binsearchcache,GtIndexwithcode);
   }
-#endif
   if (fci->radixsort_codepos != NULL)
   {
     gt_radixsort_delete(fci->radixsort_codepos);
@@ -1016,9 +1029,7 @@ static int gt_firstcodes_init(GtFirstcodesinfo *fci,
   fci->firstcodehits = 0;
   fci->firstcodeposhits = 0;
   fci->bitsforposref = bitsforseqnum + bitsforrelpos;
-#ifdef WITHCACHE
   GT_INITARRAY(&fci->binsearchcache,GtIndexwithcode);
-#endif
   return haserr ? -1 : 0;
 }
 
@@ -1597,9 +1608,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     fci.flushcount = 0;
     fci.codebuffer_total = 0;
-#ifdef WITHCACHE
     gt_firstcodes_fillbinsearchcache(&fci,addbscache_depth);
-#endif
     if (gt_firstcodes_allocspace(&fci,
                                  numofparts,
                                  maximumspace,
