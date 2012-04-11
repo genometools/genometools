@@ -1582,6 +1582,18 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       gt_feature_info_reset(parser->feature_info);
     parser->last_terminator = line_number;
   }
+  else if (strncmp(line, GT_GFF_VERSION_PREFIX,
+                   strlen(GT_GFF_VERSION_PREFIX)) == 0) {
+    if (parser->tidy) {
+      gt_warning("skipping illegal GFF version pragma in line %u of file "
+                 "\"%s\": %s", line_number, filename, line);
+    }
+    else {
+      gt_error_set(err, "illegal GFF version pragma in line %u of file \"%s\": "
+                   "%s", line_number, filename, line);
+      had_err = -1;
+    }
+  }
   else {
     if (strncmp(line, GT_GFF_SPECIES, strlen(GT_GFF_SPECIES))
           && strncmp(line, GT_GFF_FEATURE_ONTOLOGY,

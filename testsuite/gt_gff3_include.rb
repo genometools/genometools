@@ -1100,6 +1100,20 @@ Test do
   run "diff #{last_stdout} #{$testdata}fasta_seq.gff3"
 end
 
+Name "gt gff3 multiple header lines"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}multiple_header_lines.gff3", :retval => 1
+  grep last_stderr, "illegal GFF version pragma"
+end
+
+Name "gt gff3 multiple header lines (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}multiple_header_lines.gff3"
+  grep last_stderr, "skipping illegal GFF version pragma"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
