@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 #
-# Copyright (c) 2008 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
-# Copyright (c) 2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c) 2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2012 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,16 +19,15 @@
 GENOMETOOLS_PATH = "/home/satta/genometools_for_web"
 GTRUBY_PATH      = "#{GENOMETOOLS_PATH}/gtruby"
 # the LD_LIBRARY_PATH has to be set externally to "#{GENOMETOOLS_PATH}/lib"!
-STYLE_FILE       = "#{GENOMETOOLS_PATH}/gtdata/sketch/default.style"
 DEFAULT_ANNOTATION_FILE = "#{GENOMETOOLS_PATH}/testdata/standard_gene_as_tree.gff3"
 SCRIPT_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin"
 UPLOAD_PATH      = "/tmp"
-IMAGE_DIR        = "imgs"   # relative paths from SCRIPT_PATH please
 MAXSIZE          = 2097152
 
 $: << (GTRUBY_PATH)
 require "gtruby"
 require "cgi"
+require 'tempfile'
 
 puts "Content-type: text/html"
 puts ""
@@ -85,31 +84,18 @@ HTML_HEADER = <<END
 <li><a href="../libgenometools.html">C API</a></li>
 <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
-  <ul class="submenu">
-    <li><a href="../annotationsketch.html#collapsing">Collapsing</a></li>
-    <li><a href="../annotationsketch.html#styles">Styles</a></li>
-    <li><a href="../trackselectors.html">Track assignment</a></li>
-    <li><a href="../customtracks.html">Custom tracks</a></li>
-    <li><a href="../annotationsketch.html#gtsketch">The <tt>gt sketch</tt> tool</a></li>
-    <li><a href="../examples.html">Code examples</a></li>
-    <li><a id="current" href="cgi-bin/annotationsketch_demo.cgi">Try it online</a></li>
-    <li><a href="../libgenometools.html">API reference</a></li>
-  </ul>
 <li><a href="../license.html">License</a></li>
 </ul>
 </div>
 <div id="main">
-  <h1><em>AnnotationSketch</em> online demo</h1>
+  <h1><em>GFF3 online validator</h1>
   <p>Use this form to upload a GFF3 annotation file (up to 2MB) which is then
-     drawn using an <em>AnnotationSketch</em>-based Ruby script and output to
-     your browser. Some basic options, such as displayed sequence region and
-     range, or the generated image width, can be set. For more options, the
-     stand-alone <tt>gt sketch</tt> tool can be used.</p>
+     validated against the current <a href="#">Sequence Ontology OBO file</a>.</p>
 END
 
 HTML_FOOTER = <<END
 <div id="footer">
-Copyright &copy; 2007-2011 Sascha Steinbiss. Last update: 2011-02-11
+Copyright &copy; 2012 Sascha Steinbiss. Last update: 2012-04-11
 </div>
 </div>
 <!-- Piwik -->
@@ -129,45 +115,33 @@ piwikTracker.enableLinkTracking();
 END
 
 UPLOAD_FORM = <<END
-    <form action="annotationsketch_demo.cgi" method="POST" enctype="multipart/form-data">
+    <form action="validator.cgi" method="POST" enctype="multipart/form-data">
     <table>
+      <input type="hidden" name="submitted" value="true">
       <tr><td>Annotation file:</td>
         <td>
           <input type="radio" name="example" value="example" onclick="disable(this.form.file);" %s>Example file<br>
           <input type="radio" name="example" value="file" onclick="enable(this.form.file);" %s>Custom file: <input name="file" type="file" %s>
-          <input type="hidden" name="submitted" value="true">
+        </td>
+      </tr>
+      <tr><td>Validation options:</td>
+        <td>
+          <input type="radio" name="mode" value="default" %s>Default (SO specification compliant)<br>
+          <input type="radio" name="mode" value="strict" %s>Strict mode (stricter than SO specification)<br>
+          <input type="radio" name="mode" value="tidy" %s>Tidy mode (tries to fix errors)
         </td>
       </tr>
       <tr>
-        <td>Sequence region:</td>
-        <td><input name="seqid" type="text" value="%s"></td>
-      </tr>
-      <tr><td></td><td style="font-size:small;">
-                   (leave blank to use first sequence region in file)</td>
-      </tr>
-      <tr>
-        <td>Range to display:</td>
-        <td><input name="rangestart" size="10" type="text" value="%s">bp
-         &ndash;
-        <input name="rangeend" size="10" type="text" value="%s">bp</td>
-        <tr><td></td><td style="font-size:small;">
-                     (leave blank to show complete sequence region)</td>
-      </tr>
-      <tr>
-        <td>Image width:</td>
-        <td><input name="width" type="text" value="%s"> pixels</td>
-      </tr>
-      <tr>
-        <td colspan=2><input value="Sketch this file!" type="submit"></td>
+        <td colspan=2><input value="Validate this file!" type="submit"></td>
       </tr>
       </table>
     </form>
 END
 
 HTML_IMAGE = <<END
- <h2><em>AnnotationSketch</em> diagram of %s</h2>
+ <h2>Validation results for %s</h2>
  <div>
-  <p><img src="%s" alt="AnnotationSketch diagram"></p>
+  <p>%s</p>
  </div>
 END
 
@@ -192,13 +166,28 @@ if cgi.params.has_key?('submitted') then
       d_str1 = 'checked="checked"'
       d_str2 = ""
     end
-    puts UPLOAD_FORM % [e_str, \
+    if cgi["mode"].nil? or cgi["mode"].send(read_method) == "default" then
+      m_str1 = 'checked="checked"'
+      m_str2 = ""
+      m_str3 = ""
+    end
+    if cgi["mode"].send(read_method) == "tidy" then
+      m_str1 = ""
+      m_str2 = ""
+      m_str3 = 'checked="checked"'
+    end
+    if cgi["mode"].send(read_method) == "strict" then
+      m_str1 = ""
+      m_str2 = 'checked="checked"'
+      m_str3 = ""
+    end
+
+    puts UPLOAD_FORM % [e_str,  \
                         d_str1, \
                         d_str2, \
-                        cgi['seqid'].string.strip_html, \
-                        cgi['rangestart'].string.strip_html, \
-                        cgi['rangeend'].string.strip_html, \
-                        cgi['width'].string.strip_html]
+                        m_str1, \
+                        m_str2, \
+                        m_str3]
 
     if cgi["example"].nil? or cgi["example"].send(read_method) == "example" then
       targetfilename = DEFAULT_ANNOTATION_FILE
@@ -208,7 +197,7 @@ if cgi.params.has_key?('submitted') then
       if ufile.first.length == 0 then
         GT::gterror("No file was uploaded!")
       elsif ufile.first.length > MAXSIZE then
-        GT::gterror("Your uploaded file was too large! This demo service
+        GT::gterror("Your uploaded file was too large! This service
                      supports annotation files up to #{(MAXSIZE/1024)}KB. Please
                      upload a smaller file.")
       end
@@ -220,64 +209,32 @@ if cgi.params.has_key?('submitted') then
         file.write(ufile.first.read)
       end
     end
-    feature_index = GT::FeatureIndexMemory.new()
-    feature_index.add_gff3file(targetfilename)
 
-    if cgi['width'].string != "" then
-      width = cgi['width'].send(read_method).to_i
-      if width < 70 then
-        GT::gterror("Please set a width of more than 70 pixels!")
-      end
-    else
-      width = 800
-    end
+    errfile = Tempfile.new('validator')
+    $stderr.reopen(errfile)
 
-    if cgi['seqid'].string.to_s != "" then
-      seqid = cgi['seqid'].string
-      seqids = feature_index.get_seqids
-      if !seqids.include?(seqid) then
-        if not cgi["example"].send(read_method) == "example" then
-          File.unlink(targetfilename)
-        end
-        GT::gterror("Invalid sequence region '#{seqid}':
-                     must be #{"one of" unless seqids.length == 1}
-                     #{seqids.collect{|v|"&quot;#{v}&quot;"}.join(" or ")}!")
-      end
-    else
-      seqid = feature_index.get_first_seqid
+    stream = GT::GFF3InStream.new(targetfilename)
+    if cgi["mode"].send(read_method) == "tidy" then
+      stream.enable_tidy_mode
+    elsif cgi["mode"].send(read_method) == "strict" then
+      stream.enable_strict_mode
     end
+    gn = stream.next_tree()
 
-    if cgi['rangestart'] and cgi['rangestart'].string != "" \
-     and cgi['rangeend'] and  cgi['rangeend'].string != "" then
-      range = GT::Range.malloc
-      range.start = cgi['rangestart'].string.to_i
-      range.end   = cgi['rangeend'].string.to_i
-      if range.start >= range.end then
-        GT::gterror("Invalid range, must be numeric and
-                     <i>start</i> must be &lt; <i>end</i>!")
-      end
-    else
-      range = feature_index.get_range_for_seqid(seqid)
+    while (gn) do
+      gn = stream.next_tree()
     end
+    puts "<h2>Validation successful!</h2>"
+    errfile.rewind
+    puts "<p>#{errfile.read}</p>"
+    errfile.close
+    errfile.unlink
 
-    style = GT::Style.new()
-    style.load_file(STYLE_FILE)
-    d = GT::Diagram.from_index(feature_index, seqid, range, style)
-    l = GT::Layout.new(d, width, style)
-    c = GT::CanvasCairoFile.new(style, width, l.get_height())
-    l.sketch(c)
-    c.to_file("#{SCRIPT_PATH}/#{IMAGE_DIR}/#{originalfilename}.png")
-    puts HTML_IMAGE % [originalfilename.strip_html, \
-                       "#{IMAGE_DIR}/#{originalfilename}.png"]
-    if not cgi["example"].send(read_method) == "example" then
-      File.unlink(targetfilename)
-    end
   rescue Exception => err:
-    puts "<h2>An error has occurred</h2><p>#{err}</p>"
+    puts "<h2>Validation unsuccessful!</h2><p>#{err}</p>"
   end
 else
-  puts UPLOAD_FORM % ['checked="checked"', '', 'disabled="disabled"', '', '', \
-                      '', 800]
+  puts UPLOAD_FORM % ['checked="checked"', '', 'disabled="disabled"', 'checked="checked"', '' ,'']
 end
 
 print HTML_FOOTER
