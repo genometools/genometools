@@ -140,4 +140,16 @@ if not $arguments["nocairo"] then
   Test do
     run_ruby "#{$testdata}gtruby/range.rb"
   end
+
+  Name "gtruby: TypeChecker class"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/type_checker.rb #{$cur}/gtdata/obo_files/so.obo"
+  end
+
+  Name "gtruby: TypeChecker class (failure)"
+  Keywords "gt_ruby"
+  Test do
+    run_ruby "#{$testdata}gtruby/type_checker.rb #{$gtdata}/obo_files/so", :retval => 1
+  end
 end
