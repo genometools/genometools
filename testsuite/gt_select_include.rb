@@ -16,7 +16,7 @@ Name "gt select test (-seqid undef)"
 Keywords "gt_select"
 Test do
   run_test "#{$bin}gt select -seqid undef #{$testdata}standard_gene_as_tree.gff3"
-  run "diff #{last_stdout} #{$testdata}empty_file"
+  run "diff #{last_stdout} #{$testdata}header.gff3"
 end
 
 Name "gt select test (-source .)"
@@ -187,7 +187,7 @@ Keywords "gt_select contain"
 Test do
   run_test "#{$bin}gt select -contain 1500000 1600000 " +
            "#{$testdata}standard_gene_as_tree.gff3"
-  run "diff #{last_stdout} #{$testdata}empty_file"
+  run "diff #{last_stdout} #{$testdata}header.gff3"
 end
 
 Name "gt select test (-targetstrand)"
