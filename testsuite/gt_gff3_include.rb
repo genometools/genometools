@@ -1170,6 +1170,26 @@ Test do
   grep last_stderr, "illegal uppercase attribute"
 end
 
+Name "gt gff3 illegal Is_circular value"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}illegal_is_circular_value.gff3", :retval => 1
+  grep last_stderr, " of Is_circular attribute .* does not equal "
+end
+
+Name "gt gff3 Is_circular example"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}is_circular_example.gff3"
+  run "diff #{last_stdout} #{$testdata}is_circular_example_with_sequence_region.gff3"
+end
+
+Name "gt gff3 Is_circular example (with sequence-region)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}is_circular_example_with_sequence_region.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

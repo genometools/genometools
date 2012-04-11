@@ -1,0 +1,5 @@
+##gff-version 3
+# organism Enterobacteria phage f1
+# Note Bacteriophage f1, complete genome.
+J02448	GenBank	region	1	6407	.	+	.	ID=J02448;Name=J02448;Is_circular=true;
+J02448	GenBank	CDS	6006	7238	.	+	0	ID=geneII;Name=II;Note=protein II;

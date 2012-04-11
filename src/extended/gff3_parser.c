@@ -64,7 +64,8 @@ typedef struct {
   GtStr *seqid_str;
   GtRange range;
   unsigned int line_number;
-  bool pseudo;
+  bool pseudo,
+       is_circular;
 } SimpleSequenceRegion;
 
 static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
@@ -72,11 +73,10 @@ static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
                                                         unsigned int
                                                         line_number)
 {
-  SimpleSequenceRegion *ssr = gt_malloc(sizeof *ssr);
+  SimpleSequenceRegion *ssr = gt_calloc(1, sizeof *ssr);
   ssr->seqid_str = gt_str_new_cstr(seqid);
   ssr->range = range;
   ssr->line_number = line_number;
-  ssr->pseudo = false;
   return ssr;
 }
 
@@ -336,7 +336,8 @@ static int get_seqid_str(GtStr **seqid_str, const char *seqid, GtRange range,
     gt_hashmap_add(parser->seqid_to_ssr_mapping, gt_str_get(ssr->seqid_str),
                    ssr);
   }
-  else if (!gt_range_contains(&ssr->range, &range) && parser->checkregions) {
+  else if (parser->checkregions && !ssr->is_circular &&
+           !gt_range_contains(&ssr->range, &range) && parser->checkregions) {
     gt_error_set(err, "range (%lu,%lu) of feature on line %u in file \"%s\" is "
                  "not contained in range (%lu,%lu) of corresponding sequence "
                  "region on line %u", range.start, range.end, line_number,
@@ -1012,8 +1013,9 @@ void gt_gff3_parser_build_target_str(GtStr *target, GtStrArray *target_ids,
 
 static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                             bool *is_child, GtGFF3Parser *parser,
-                            GtQueue *genome_nodes, const char *filename,
-                            unsigned int line_number, GtError *err)
+                            const char *seqid, GtQueue *genome_nodes,
+                            const char *filename, unsigned int line_number,
+                            GtError *err)
 {
   GtSplitter *attribute_splitter, *tmp_splitter, *parent_splitter;
   char *id_value = NULL, *parent_value = NULL;
@@ -1105,15 +1107,15 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
       /* check if uppercase attributes are the predefined ones */
       if (strcmp(attr_tag, GT_GFF_ID) &&
           strcmp(attr_tag, GT_GFF_NAME) &&
-           strcmp(attr_tag, GT_GFF_ALIAS) &&
-           strcmp(attr_tag, GT_GFF_PARENT) &&
-           strcmp(attr_tag, GT_GFF_TARGET) &&
-           strcmp(attr_tag, GT_GFF_GAP) &&
-           strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
-           strcmp(attr_tag, GT_GFF_NOTE) &&
-           strcmp(attr_tag, GT_GFF_DBXREF) &&
-           strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
-           strcmp(attr_tag, GT_GFF_IS_CIRCULAR)) {
+          strcmp(attr_tag, GT_GFF_ALIAS) &&
+          strcmp(attr_tag, GT_GFF_PARENT) &&
+          strcmp(attr_tag, GT_GFF_TARGET) &&
+          strcmp(attr_tag, GT_GFF_GAP) &&
+          strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
+          strcmp(attr_tag, GT_GFF_NOTE) &&
+          strcmp(attr_tag, GT_GFF_DBXREF) &&
+          strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
+          strcmp(attr_tag, GT_GFF_IS_CIRCULAR)) {
         gt_error_set(err, "illegal uppercase attribute \"%s\" on line %u in "
                           "file \"%s\" (uppercase attributes are reserved)",
                           attr_tag, line_number, filename);
@@ -1154,6 +1156,19 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         id_value = attr_value; /* process later */
       else if (!strcmp(attr_tag, GT_GFF_PARENT))
         parent_value = attr_value; /* process later */
+      else if (!strcmp(attr_tag, GT_GFF_IS_CIRCULAR)) {
+        SimpleSequenceRegion *ssr;
+        if (strcmp(attr_value, "true")) {
+          gt_error_set(err, "value \"%s\" of %s attribute on line %u in file "
+                       "\"%s\" does not equal \"true\"", attr_value,
+                       GT_GFF_IS_CIRCULAR, line_number, filename);
+          had_err = -1;
+        }
+        ssr = gt_hashmap_get(parser->seqid_to_ssr_mapping, seqid);
+        gt_assert(ssr); /* XXX */
+        gt_assert(!ssr->is_circular); /* XXX */
+        ssr->is_circular = true;
+      }
       else if (!strcmp(attr_tag, GT_GFF_TARGET)) {
         /* the value of ``Target'' attributes have a special syntax which is
            checked here */
@@ -1366,7 +1381,7 @@ static int parse_gff3_feature_line(GtGFF3Parser *parser,
   /* parse the attributes */
   if (!had_err) {
     had_err = parse_attributes(attributes, feature_node, &is_child, parser,
-                               genome_nodes, filename, line_number, err);
+                               seqid, genome_nodes, filename, line_number, err);
   }
 
   if (!had_err && score_is_defined)

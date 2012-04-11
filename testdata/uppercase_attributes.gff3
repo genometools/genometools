@@ -1,4 +1,4 @@
 ##gff-version   3
 ##sequence-region   seq 1 1000
-seq	.	gene	1	1000	.	+	.	ID=gene1;Name=gene_name;Alias=gene_alias;Target=cDNA 1 426 +;Gap=xxx;Derives_from=xxx;Note=note;Dbxref=xxx;Ontology_term=xxx;Is_circular=xxx
+seq	.	gene	1	1000	.	+	.	ID=gene1;Name=gene_name;Alias=gene_alias;Target=cDNA 1 426 +;Gap=xxx;Derives_from=xxx;Note=note;Dbxref=xxx;Ontology_term=xxx;Is_circular=true
 ###

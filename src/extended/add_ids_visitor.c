@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -43,13 +43,15 @@ struct GtAddIDsVisitor {
 typedef struct {
   GtGenomeNode *sequence_region; /* the automatically created sequence region */
   GtArray *feature_nodes; /* the features nodes which belong to this region */
+  bool is_circular;
 } AutomaticSequenceRegion;
 
-static AutomaticSequenceRegion* automatic_sequence_region_new(void)
+static AutomaticSequenceRegion* automatic_sequence_region_new(bool is_circular)
 {
   AutomaticSequenceRegion *auto_sr;
   auto_sr = gt_malloc(sizeof (AutomaticSequenceRegion));
   auto_sr->feature_nodes = gt_array_new(sizeof (GtFeatureNode*));
+  auto_sr->is_circular = is_circular;
   return auto_sr;
 }
 
@@ -87,21 +89,26 @@ static int add_ids_visitor_comment_node(GtNodeVisitor *nv, GtCommentNode *c,
 static int add_ids_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                                         GT_UNUSED GtError *err)
 {
-  GtAddIDsVisitor *aiv;
   AutomaticSequenceRegion *auto_sr;
+  GtAddIDsVisitor *aiv;
   const char *seqid;
+  bool is_circular;
   aiv = add_ids_visitor_cast(nv);
   seqid = gt_str_get(gt_genome_node_get_seqid((GtGenomeNode*) fn));
   if (!gt_cstr_table_get(aiv->defined_seqids, seqid)) {
     GtFeatureNodeIterator *fni;
     GtFeatureNode *node;
     GtRange range = gt_genome_node_get_range((GtGenomeNode*) fn);
-    fni = gt_feature_node_iterator_new(fn);
-    while ((node = gt_feature_node_iterator_next(fni))) {
-      GtRange node_range = gt_genome_node_get_range((GtGenomeNode*) node);
-      range = gt_range_join(&range, &node_range);
+    is_circular = gt_feature_node_get_attribute(fn, GT_GFF_IS_CIRCULAR)
+                  ? true : false;
+    if (!is_circular) {
+      fni = gt_feature_node_iterator_new(fn);
+      while ((node = gt_feature_node_iterator_next(fni))) {
+        GtRange node_range = gt_genome_node_get_range((GtGenomeNode*) node);
+        range = gt_range_join(&range, &node_range);
+      }
+      gt_feature_node_iterator_delete(fni);
     }
-    gt_feature_node_iterator_delete(fni);
     /* sequence region has not been previously introduced -> check if one has
        already been created automatically */
     auto_sr = gt_hashmap_get(aiv->undefined_sequence_regions, seqid);
@@ -114,7 +121,7 @@ static int add_ids_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                  gt_genome_node_get_line_number((GtGenomeNode*) fn),
                  gt_genome_node_get_filename((GtGenomeNode*) fn),
                  GT_GFF_SEQUENCE_REGION);
-      auto_sr = automatic_sequence_region_new();
+      auto_sr = automatic_sequence_region_new(is_circular);
       seqid_str = gt_genome_node_get_seqid((GtGenomeNode*) fn);
       auto_sr->sequence_region = gt_region_node_new(seqid_str, range.start,
                                                                range.end);
@@ -122,11 +129,21 @@ static int add_ids_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
                      auto_sr);
     }
     else {
-      GtRange joined_range,
-              sr_range = gt_genome_node_get_range(auto_sr->sequence_region);
-      /* update the range of the sequence region */
-      joined_range = gt_range_join(&range, &sr_range);
-      gt_genome_node_set_range(auto_sr->sequence_region, &joined_range);
+      if (auto_sr->is_circular) {
+        gt_assert(!is_circular); /* XXX */
+      }
+      else if (is_circular) {
+        gt_assert(!auto_sr->is_circular); /* XXX */
+        auto_sr->is_circular = true;
+        gt_genome_node_set_range(auto_sr->sequence_region, &range);
+      }
+      else {
+        GtRange joined_range,
+                sr_range = gt_genome_node_get_range(auto_sr->sequence_region);
+        /* update the range of the sequence region */
+        joined_range = gt_range_join(&range, &sr_range);
+        gt_genome_node_set_range(auto_sr->sequence_region, &joined_range);
+      }
     }
     gt_array_add(auto_sr->feature_nodes, fn);
   }
