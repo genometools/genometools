@@ -1382,6 +1382,20 @@ Return a <code>GtStrArray*</code> which contains all <code>cstr</code>s added to
    alphabetical order. The caller is responsible to free it!
 </p>
 <hr>
+<a name="gt_cstr_table_remove"></a>
+
+<code>void           gt_cstr_table_remove(GtCstrTable *table, const char *cstr)</code>
+<p>
+Remove <code>cstr</code> from <code>table</code>.
+</p>
+<hr>
+<a name="gt_cstr_table_reset"></a>
+
+<code>void           gt_cstr_table_reset(GtCstrTable *table)</code>
+<p>
+Reset <code>table</code> (that is, remove all contained C strings).
+</p>
+<hr>
 <a name="gt_cstr_table_delete"></a>
 
 <code>void           gt_cstr_table_delete(GtCstrTable *table)</code>
@@ -3983,7 +3997,7 @@ Remove the member with key <code>key</code> from <code>hashmap</code>.
 
 <code>int         gt_hashmap_foreach_ordered(GtHashmap *hashmap,
                                       GtHashmapVisitFunc func,
-                                      void *data, GtCompare cmp, GtError*)</code>
+                                      void *data, GtCompare cmp, GtError *err)</code>
 <p>
 Iterate over <code>hashmap</code> in order given by compare function <code>cmp</code>.
    For each member, <code>func</code> is called (see interface).
@@ -3992,9 +4006,9 @@ Iterate over <code>hashmap</code> in order given by compare function <code>cmp</
 <a name="gt_hashmap_foreach"></a>
 
 <code>int         gt_hashmap_foreach(GtHashmap *hashmap, GtHashmapVisitFunc func,
-                              void *data, GtError*)</code>
+                              void *data, GtError *err)</code>
 <p>
-Iterate over <code>hashmap</code> in arbitrary order given by compare function <code>cmp</code>.
+Iterate over <code>hashmap</code> in arbitrary order.
    For each member, <code>func</code> is called (see interface).
 </p>
 <hr>
@@ -4002,7 +4016,7 @@ Iterate over <code>hashmap</code> in arbitrary order given by compare function <
 
 <code>int         gt_hashmap_foreach_in_key_order(GtHashmap *hashmap,
                                            GtHashmapVisitFunc func,
-                                           void *data, GtError*)</code>
+                                           void *data, GtError *err)</code>
 <p>
 Iterate over <code>hashmap</code> in either alphabetical order (if <code>GtHashType</code> was
    specified as <code>GT_HASH_STRING</code>) or numerical order (if <code>GtHashType</code> was
@@ -7086,7 +7100,8 @@ Parse a range given by <code>start</code> and <code>end</code>, writing the resu
                         GtError*)</code>
 <p>
 Like <code>gt_parse_range</code>, but issues a warning if <code>start</code> is larger then <code>end</code>
-   and swaps both values.
+   and swaps both values. It also issues a warning, if <code>start</code> and/or <code>end</code> is
+   not-positive and sets the corresponding value to 1.
 </p>
 <hr>
 <a name="Qsort"></a>
@@ -7724,6 +7739,10 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
   <a href="#gt_cstr_table_get_all"><code>gt_cstr_table_get_all</code></a><br>
 
   <a href="#gt_cstr_table_new"><code>gt_cstr_table_new</code></a><br>
+
+  <a href="#gt_cstr_table_remove"><code>gt_cstr_table_remove</code></a><br>
+
+  <a href="#gt_cstr_table_reset"><code>gt_cstr_table_reset</code></a><br>
 
   <a href="#gt_custom_track_delete"><code>gt_custom_track_delete</code></a><br>
 
@@ -8874,7 +8893,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-02-23
+Last update: 2012-04-11
 </div>
 </div>
 <!-- Piwik -->
