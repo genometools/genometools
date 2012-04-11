@@ -1606,7 +1606,12 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
       gt_queue_add(genome_nodes, gn);
     }
   }
-  else if (strcmp(line, GT_GFF_TERMINATOR) == 0) { /* terminator */
+  else if (strncmp(line, GT_GFF_TERMINATOR,
+                   strlen(GT_GFF_TERMINATOR)) == 0) { /* terminator */
+    if (line_length > strlen(GT_GFF_TERMINATOR)) {
+      gt_warning("superfluous information after terminator in line %u of file "
+                 "\"%s\": %s", line_number, filename, line);
+    }
     /* now all nodes are complete */
     if (!parser->strict) {
       had_err = process_orphans(parser->orphanage, parser->feature_info,
