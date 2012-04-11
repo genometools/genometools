@@ -213,14 +213,17 @@ if cgi.params.has_key?('submitted') then
     errfile = Tempfile.new('validator')
     $stderr.reopen(errfile)
 
+    checker = GT::TypeCheckerOBO.new("#{GENOMETOOLS_PATH}/gtdata/obo_files/so.obo")
+
     stream = GT::GFF3InStream.new(targetfilename)
     if cgi["mode"].send(read_method) == "tidy" then
       stream.enable_tidy_mode
     elsif cgi["mode"].send(read_method) == "strict" then
       stream.enable_strict_mode
     end
-    gn = stream.next_tree()
+    stream.set_type_checker(checker)
 
+    gn = stream.next_tree()
     while (gn) do
       gn = stream.next_tree()
     end
