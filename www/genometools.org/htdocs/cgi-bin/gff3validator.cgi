@@ -168,6 +168,8 @@ if cgi.params.has_key?('submitted') then
   tidy = (cgi.params["tidy"].length > 0)
   show = (cgi.params["show"].length > 0)
   begin
+    show_checked = ''
+    tidy_checked = ''
     if tidy then
       tidy_checked = 'checked="checked"'
     end
@@ -199,10 +201,10 @@ if cgi.params.has_key?('submitted') then
     checker = GT::TypeCheckerOBO.new("#{GENOMETOOLS_PATH}/gtdata/obo_files/so.obo")
 
     stream = GT::GFF3InStream.new(targetfilename, false)
+    stream.set_type_checker(checker)
     if tidy then
       stream.enable_tidy_mode
     end
-    stream.set_type_checker(checker)
 
     gn = stream.next_tree()
     while (gn) do
@@ -222,7 +224,7 @@ if cgi.params.has_key?('submitted') then
         if show and (m = /line ([0-9]+)/.match(entry)) then
           linenumber = m[1].to_i
           puts "<p style='background-color:#EEEEEE;'><pre><table class='padded-table'>"
-          if linenumber > 0 then
+          if linenumber-1 > 0 then
             print_gff3line(file[linenumber-2].chomp,linenumber-1)
           end
           print_gff3line(file[linenumber-1].chomp, linenumber, true)
