@@ -1097,7 +1097,6 @@ Name "gt gff3 fasta sequence file"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}fasta_seq.gff3"
-  run "diff #{last_stdout} #{$testdata}fasta_seq.gff3"
 end
 
 Name "gt gff3 multiple header lines"
@@ -1113,6 +1112,23 @@ Test do
   run_test "#{$bin}gt gff3 -tidy #{$testdata}multiple_header_lines.gff3"
   grep last_stderr, "skipping illegal GFF version pragma"
 end
+
+Name "gt gff3 meta directives"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}meta_directives.gff3"
+  grep last_stderr, ".*", true
+  run "diff #{last_stdout} #{$testdata}meta_directives.gff3"
+end
+
+Name "gt gff3 unknown meta directive"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}unknown_meta_directive.gff3"
+  grep last_stderr, "unknown meta-directive encountered in line"
+  run "diff #{last_stdout} #{$testdata}unknown_meta_directive.gff3"
+end
+
 
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"

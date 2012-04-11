@@ -1604,9 +1604,13 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
                      strlen(GT_GFF_SOURCE_ONTOLOGY))
           && strncmp(line, GT_GFF_GENOME_BUILD,
                      strlen(GT_GFF_GENOME_BUILD))) {
-      gt_warning("skipping unknown meta line %u in file \"%s\": %s",
-                 line_number, filename, line);
+      gt_warning("unknown meta-directive encountered in line %u in file "
+                 "\"%s\", keep as comment: %s", line_number, filename, line);
     }
+    /* storing comment */
+    gn = gt_comment_node_new(line+1);
+    gt_genome_node_set_origin(gn, filenamestr, line_number);
+    gt_queue_add(genome_nodes, gn);
   }
   gt_str_delete(changed_seqid);
   return had_err;

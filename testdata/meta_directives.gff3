@@ -1,0 +1,9 @@
+##gff-version   3
+##sequence-region   seq 1 1000
+##feature-ontology URI
+##attribute-ontology URI
+##source-ontology URI
+##species NCBI_Taxonomy_URI
+##genome-build source buildName
+##genome-build NCBI B36
+##genome-build WormBase ws110 (worm)
