@@ -88,13 +88,14 @@ table.padded-table td {
 <li><a href="../libgenometools.html">C API</a></li>
 <li><a href="../docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="../annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
 <li><a href="../license.html">License</a></li>
 </ul>
 </div>
 <div id="main">
   <h1><em>GFF3 online validator</h1>
-  <p>Use this form to upload a GFF3 annotation file (up to 10 MB) which is then
-     validated against the current <a href="http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log">Sequence Ontology OBO file</a>.</p>
+  <p>Use this form to upload a GFF3 annotation file (up to 10 MB, can be .gz or
+.bz2 compressed) which is then validated against the <a href="http://www.sequenceontology.org/gff3.shtml">GFF3 specification</a> using the current <a href="http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log">Sequence Ontology OBO file</a>.</p>
 END
 
 HTML_FOOTER = <<END
@@ -119,7 +120,7 @@ piwikTracker.enableLinkTracking();
 END
 
 UPLOAD_FORM = <<END
-    <form action="validator.cgi" method="POST" enctype="multipart/form-data">
+    <form action="gff3validator.cgi" method="POST" enctype="multipart/form-data">
     <table>
       <input type="hidden" name="submitted" value="true">
       <tr><td>Annotation file:</td>
@@ -127,11 +128,10 @@ UPLOAD_FORM = <<END
           <input name="file" type="file">
         </td>
       </tr>
-      <tr><td>Validation options:</td>
+      <tr><td></td>
         <td>
-          <input type="radio" name="mode" value="default" %s>Default (SO specification compliant)<br>
-          <input type="radio" name="mode" value="strict" %s>Strict mode (stricter than SO specification)<br>
-          <input type="radio" name="mode" value="tidy" %s>Tidy mode (tries to fix errors)
+          <input type="checkbox" name="tidy" %s>enable &quot;tidy&quot; mode (tries to fix errors) <br />
+          <input type="checkbox" name="show" %s>also report content of affected GFF lines <br />
         </td>
       </tr>
       <tr>
@@ -139,6 +139,9 @@ UPLOAD_FORM = <<END
       </tr>
       </table>
     </form>
+    <p>This GFF3 validator is part of the <em>GenomeTools</em> distribution which you
+can <a href="http://genometools.org/pub">download</a> to your computer.
+Use the <tt>gff3validator</tt> tool to validate your own &ndash; possibly larger &ndash; GFF3 files and the <tt>gff3</tt> tool with option <tt>-tidy</tt> to tidy them up (<tt>-help</tt> shows further options).</p>
 END
 
 HTML_IMAGE = <<END
@@ -162,34 +165,17 @@ def print_gff3line(line, lineno, red = false)
 end
 
 if cgi.params.has_key?('submitted') then
-  # CGI parameters behave differently with uploaded file size.
-  # StringIO.read does not seem to work right either.
-  # account for that by checking for the type of the parameters
-  if cgi["example"].kind_of?(StringIO) then
-    read_method = :string
-  else
-    read_method = :read
-  end
+  tidy = (cgi.params["tidy"].length > 0)
+  show = (cgi.params["show"].length > 0)
   begin
-    if cgi["mode"].nil? or cgi["mode"].send(read_method) == "default" then
-      m_str1 = 'checked="checked"'
-      m_str2 = ""
-      m_str3 = ""
+    if tidy then
+      tidy_checked = 'checked="checked"'
     end
-    if cgi["mode"].send(read_method) == "tidy" then
-      m_str1 = ""
-      m_str2 = ""
-      m_str3 = 'checked="checked"'
-    end
-    if cgi["mode"].send(read_method) == "strict" then
-      m_str1 = ""
-      m_str2 = 'checked="checked"'
-      m_str3 = ""
+    if show then
+      show_checked = 'checked="checked"'
     end
 
-    puts UPLOAD_FORM % [m_str1, \
-                        m_str2, \
-                        m_str3]
+    puts UPLOAD_FORM % [tidy_checked, show_checked]
 
     ufile = cgi.params['file']
     if ufile.first.length == 0 then
@@ -213,10 +199,8 @@ if cgi.params.has_key?('submitted') then
     checker = GT::TypeCheckerOBO.new("#{GENOMETOOLS_PATH}/gtdata/obo_files/so.obo")
 
     stream = GT::GFF3InStream.new(targetfilename, false)
-    if cgi["mode"].send(read_method) == "tidy" then
+    if tidy then
       stream.enable_tidy_mode
-    elsif cgi["mode"].send(read_method) == "strict" then
-      stream.enable_strict_mode
     end
     stream.set_type_checker(checker)
 
@@ -226,7 +210,7 @@ if cgi.params.has_key?('submitted') then
     end
     errfile.flush
 
-    puts "<h2>Validation successful!</h2>"
+    puts "<h2 style='color:green;'>Validation successful!</h2>"
     errfile.rewind
     entries = errfile.readlines
     if entries.length > 0 then
@@ -235,7 +219,7 @@ if cgi.params.has_key?('submitted') then
       entries.each do |entry|
         puts "<div style='background-color:#EFEFEF; padding:0px 5px;'>"
         puts "<p>#{entry}</p>"
-        if m = /line ([0-9]+)/.match(entry) then
+        if show and (m = /line ([0-9]+)/.match(entry)) then
           linenumber = m[1].to_i
           puts "<p style='background-color:#EEEEEE;'><pre><table class='padded-table'>"
           if linenumber > 0 then
@@ -254,10 +238,10 @@ if cgi.params.has_key?('submitted') then
     errfile.unlink
 
   rescue Exception => err
-    puts "<h2>Validation unsuccessful!</h2><p>#{err}</p>"
+    puts "<h2 style='color:red;'>Validation unsuccessful!</h2><p>#{err}</p>"
   end
 else
-  puts UPLOAD_FORM % ['checked="checked"', '', '']
+  puts UPLOAD_FORM % ['', 'checked="checked"']
 end
 
 print HTML_FOOTER

@@ -17,6 +17,7 @@
 <li><a id="current" href="libgenometools.html">C API</a></li>
 <li><a href="docs.html"><tt>gtscript</tt> docs</a></li>
 <li><a href="annotationsketch.html"><tt>AnnotationSketch</tt></a></li>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
 <li><a href="license.html">License</a></li>
 </ul>
 </div>
@@ -6850,17 +6851,17 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
    0 if <code>a</code> is <em>equal</em> to <code>b</code>, and greater 0 if <code>a</code> is <em>larger</em> than <code>b</code>.
    Thereby, the operators <em>smaller</em>, <em>equal</em>, and <em>larger</em> are
    implementation dependent.
-   Do not count on these functions to return -1, 0, or 1!  
+   Do not count on these functions to return -1, 0, or 1!
 </p>
 <hr>
 <code>int  (*GtCompareWithData)(const void*, const void*, void *data)</code>
 <p>
- Similar to <code>GtCompare</code>, but with an additional <code>data</code> pointer. 
+ Similar to <code>GtCompare</code>, but with an additional <code>data</code> pointer.
 </p>
 <hr>
 <code>void (*GtFree)(void*)</code>
 <p>
- The generic free function pointer type. 
+ The generic free function pointer type.
 </p>
 <hr>
 <a name="Grep"></a>
@@ -7238,7 +7239,7 @@ Check that the <em>GenomeTools</em> library in use is compatible with the given
 <h2>Module Warning</h2>
 <code>void (*GtWarningHandler)(void *data, const char *format, va_list ap)</code>
 <p>
- Handler type used to process warnings. 
+ Handler type used to process warnings.
 </p>
 <hr>
 <a name="gt_warning"></a>

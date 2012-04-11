@@ -95,6 +95,7 @@ HTML_HEADER = <<END
     <li><a id="current" href="cgi-bin/annotationsketch_demo.cgi">Try it online</a></li>
     <li><a href="../libgenometools.html">API reference</a></li>
   </ul>
+<li><a href="/cgi-bin/gff3validator.cgi">GFF3 validator</a></li>
 <li><a href="../license.html">License</a></li>
 </ul>
 </div>
