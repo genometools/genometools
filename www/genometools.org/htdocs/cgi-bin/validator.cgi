@@ -19,10 +19,9 @@
 GENOMETOOLS_PATH = "/home/satta/genometools_for_web"
 GTRUBY_PATH      = "#{GENOMETOOLS_PATH}/gtruby"
 # the LD_LIBRARY_PATH has to be set externally to "#{GENOMETOOLS_PATH}/lib"!
-DEFAULT_ANNOTATION_FILE = "#{GENOMETOOLS_PATH}/testdata/standard_gene_as_tree.gff3"
 SCRIPT_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin"
 UPLOAD_PATH      = "/tmp"
-MAXSIZE          = 2097152
+MAXSIZE          = 10485760
 
 $: << (GTRUBY_PATH)
 require "gtruby"
@@ -60,6 +59,11 @@ HTML_HEADER = <<END
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <title>GFF3 Online Validator</title>
 <link rel="stylesheet" type="text/css" href="../style.css">
+<style type="text/css">
+table.padded-table td {
+  padding: 0px 7px;
+	}
+</style>
 <script type="text/javascript">
  function disable(field) {
    field.disabled = true;
@@ -89,8 +93,8 @@ HTML_HEADER = <<END
 </div>
 <div id="main">
   <h1><em>GFF3 online validator</h1>
-  <p>Use this form to upload a GFF3 annotation file (up to 2MB) which is then
-     validated against the current <a href="#">Sequence Ontology OBO file</a>.</p>
+  <p>Use this form to upload a GFF3 annotation file (up to 10 MB) which is then
+     validated against the current <a href="http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log">Sequence Ontology OBO file</a>.</p>
 END
 
 HTML_FOOTER = <<END
@@ -120,8 +124,7 @@ UPLOAD_FORM = <<END
       <input type="hidden" name="submitted" value="true">
       <tr><td>Annotation file:</td>
         <td>
-          <input type="radio" name="example" value="example" onclick="disable(this.form.file);" %s>Example file<br>
-          <input type="radio" name="example" value="file" onclick="enable(this.form.file);" %s>Custom file: <input name="file" type="file" %s>
+          <input name="file" type="file">
         </td>
       </tr>
       <tr><td>Validation options:</td>
@@ -147,6 +150,17 @@ END
 
 puts HTML_HEADER
 
+def print_gff3line(line, lineno, red = false)
+  puts "<tr>"
+  puts "<td style='font-family: Verdana, Geneva, Arial, sans-serif;'>#{lineno}</td>"
+  puts "<td>#{if red then "&rarr;" end}</td>"
+  line.split("\t").each do |v|
+    print "<td #{if red then "style='color:red;'" end}>#{v}</td>"
+  end
+  puts
+  puts "</tr>"
+end
+
 if cgi.params.has_key?('submitted') then
   # CGI parameters behave differently with uploaded file size.
   # StringIO.read does not seem to work right either.
@@ -157,15 +171,6 @@ if cgi.params.has_key?('submitted') then
     read_method = :read
   end
   begin
-    if cgi["example"].nil? or cgi["example"].send(read_method) == "example" then
-      e_str = 'checked="checked"'
-      d_str1 = ""
-      d_str2 = 'disabled="disabled"'
-    else
-      e_str = ""
-      d_str1 = 'checked="checked"'
-      d_str2 = ""
-    end
     if cgi["mode"].nil? or cgi["mode"].send(read_method) == "default" then
       m_str1 = 'checked="checked"'
       m_str2 = ""
@@ -182,32 +187,24 @@ if cgi.params.has_key?('submitted') then
       m_str3 = ""
     end
 
-    puts UPLOAD_FORM % [e_str,  \
-                        d_str1, \
-                        d_str2, \
-                        m_str1, \
+    puts UPLOAD_FORM % [m_str1, \
                         m_str2, \
                         m_str3]
 
-    if cgi["example"].nil? or cgi["example"].send(read_method) == "example" then
-      targetfilename = DEFAULT_ANNOTATION_FILE
-      originalfilename = File.basename(DEFAULT_ANNOTATION_FILE)
-    else
-      ufile = cgi.params['file']
-      if ufile.first.length == 0 then
-        GT::gterror("No file was uploaded!")
-      elsif ufile.first.length > MAXSIZE then
-        GT::gterror("Your uploaded file was too large! This service
-                     supports annotation files up to #{(MAXSIZE/1024)}KB. Please
-                     upload a smaller file.")
-      end
-      # mangle file path to avoid directory traversal attacks
-      originalfilename = ufile.first.original_filename
-      truncated_filename = File.basename(File.expand_path(originalfilename))
-      targetfilename = "#{UPLOAD_PATH}/#{truncated_filename}"
-      File.open(targetfilename, "w+") do |file|
-        file.write(ufile.first.read)
-      end
+    ufile = cgi.params['file']
+    if ufile.first.length == 0 then
+      GT::gterror("No file was uploaded!")
+    elsif ufile.first.length > MAXSIZE then
+      GT::gterror("Your uploaded file was too large! This service
+                   supports annotation files up to #{(MAXSIZE/1024)}KB. Please
+                   upload a smaller file.")
+    end
+    # mangle file path to avoid directory traversal attacks
+    originalfilename = ufile.first.original_filename
+    truncated_filename = File.basename(File.expand_path(originalfilename))
+    targetfilename = "#{UPLOAD_PATH}/#{truncated_filename}"
+    File.open(targetfilename, "w+") do |file|
+      file.write(ufile.first.read)
     end
 
     errfile = Tempfile.new('validator')
@@ -215,7 +212,7 @@ if cgi.params.has_key?('submitted') then
 
     checker = GT::TypeCheckerOBO.new("#{GENOMETOOLS_PATH}/gtdata/obo_files/so.obo")
 
-    stream = GT::GFF3InStream.new(targetfilename)
+    stream = GT::GFF3InStream.new(targetfilename, false)
     if cgi["mode"].send(read_method) == "tidy" then
       stream.enable_tidy_mode
     elsif cgi["mode"].send(read_method) == "strict" then
@@ -227,17 +224,40 @@ if cgi.params.has_key?('submitted') then
     while (gn) do
       gn = stream.next_tree()
     end
+    errfile.flush
+
     puts "<h2>Validation successful!</h2>"
     errfile.rewind
-    puts "<p>#{errfile.read}</p>"
+    entries = errfile.readlines
+    if entries.length > 0 then
+      puts "<p>#{entries.length} issue#{"s" unless entries.length == 1} remaining:</p>"
+      file = File.open(targetfilename).readlines
+      entries.each do |entry|
+        puts "<div style='background-color:#EFEFEF; padding:0px 5px;'>"
+        puts "<p>#{entry}</p>"
+        if m = /line ([0-9]+)/.match(entry) then
+          linenumber = m[1].to_i
+          puts "<p style='background-color:#EEEEEE;'><pre><table class='padded-table'>"
+          if linenumber > 0 then
+            print_gff3line(file[linenumber-2].chomp,linenumber-1)
+          end
+          print_gff3line(file[linenumber-1].chomp, linenumber, true)
+          if linenumber <= (file.length)-1 then
+            print_gff3line(file[linenumber].chomp, linenumber+1)
+          end
+          puts "</table></pre></p>"
+        end
+        puts "</div>"
+      end
+    end
     errfile.close
     errfile.unlink
 
-  rescue Exception => err:
+  rescue Exception => err
     puts "<h2>Validation unsuccessful!</h2><p>#{err}</p>"
   end
 else
-  puts UPLOAD_FORM % ['checked="checked"', '', 'disabled="disabled"', 'checked="checked"', '' ,'']
+  puts UPLOAD_FORM % ['checked="checked"', '', '']
 end
 
 print HTML_FOOTER

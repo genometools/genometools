@@ -25,7 +25,8 @@ module GT
   extend DL::Importable
   gtdlload "libgenometools"
   typealias "bool", "ibool"
-  extern "GtNodeStream* gt_gff3_in_stream_new_sorted(const char *, bool)"
+  extern "GtNodeStream* gt_gff3_in_stream_new_sorted(const char*)"
+  extern "GtNodeStream* gt_gff3_in_stream_new_unsorted(int, const char**)"
   extern "GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream*)"
   extern "void gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream*)"
   extern "void gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream*)"
@@ -33,11 +34,15 @@ module GT
                                                   GtTypeChecker*)"
 
   class GFF3InStream < GenomeStream
-    def initialize(filename)
+    def initialize(filename, sorted = true)
       if not File.readable?(filename)
         GT.gterror("file '#{filename}' not readable")
       end
-      @genome_stream = GT.gt_gff3_in_stream_new_sorted(filename, false)
+      if sorted then
+        @genome_stream = GT.gt_gff3_in_stream_new_sorted(filename.to_s)
+      else
+        @genome_stream = GT.gt_gff3_in_stream_new_unsorted(1, [filename.to_s])
+      end
       @genome_stream.free = GT::symbol("gt_node_stream_delete", "0P")
     end
 
