@@ -691,12 +691,14 @@ static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
 }
 
 static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
-                               bool *is_child, GtGFF3Parser *parser,
-                               GtQueue *genome_nodes, const char *filename,
-                               unsigned int line_number, GtError *err)
+                               const char *id, bool *is_child,
+                               GtGFF3Parser *parser, GtQueue *genome_nodes,
+                               const char *filename, unsigned int line_number,
+                               GtError *err)
 {
   GtSplitter *parent_splitter;
   GtStrArray *missing_parents = NULL;
+  bool orphaned_parent = false;
   GtGenomeNode* parent_gf;
   const char *parent;
   unsigned long i;
@@ -726,6 +728,11 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
         gt_str_array_add_cstr(missing_parents, parent);
       }
     }
+    else if (!parser->strict &&
+             gt_orphanage_is_orphan(parser->orphanage, parent)) {
+      /* children of orphaned parends are orphans themself */
+      orphaned_parent = true;
+    }
     else if (gt_str_cmp(gt_genome_node_get_seqid(parent_gf),
                         gt_genome_node_get_seqid(feature_node))) {
       gt_error_set(err, "child on line %u in file \"%s\" has different "
@@ -746,14 +753,14 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
   }
 
   if (!had_err) {
-    if (!missing_parents) {
+    if (!missing_parents && !orphaned_parent) {
       had_err = process_child(feature_node, parent_splitter,
                               parser->feature_info, parser->strict,
                               parser->last_terminator, genome_nodes, err);
     }
     else {
       gt_assert(!parser->strict);
-      gt_orphanage_add(parser->orphanage, feature_node, missing_parents);
+      gt_orphanage_add(parser->orphanage, feature_node, id, missing_parents);
       parser->incomplete_node = true;
     }
     *is_child = true;
@@ -1007,6 +1014,7 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
                             unsigned int line_number, GtError *err)
 {
   GtSplitter *attribute_splitter, *tmp_splitter, *parent_splitter;
+  char *id_value = NULL, *parent_value = NULL;
   unsigned long i;
   int had_err = 0;
 
@@ -1121,16 +1129,10 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
     }
     /* some attributes require special care */
     if (!had_err && attr_valid) {
-      if (!strcmp(attr_tag, GT_GFF_ID)) {
-        had_err = store_id(attr_value, (GtFeatureNode*) feature_node,
-                           is_child, parser, genome_nodes, filename,
-                           line_number, err);
-      }
-      else if (!strcmp(attr_tag, GT_GFF_PARENT)) {
-        had_err = process_parent_attr(attr_value, feature_node, is_child,
-                                      parser, genome_nodes, filename,
-                                      line_number, err);
-      }
+      if (!strcmp(attr_tag, GT_GFF_ID))
+        id_value = attr_value; /* process later */
+      else if (!strcmp(attr_tag, GT_GFF_PARENT))
+        parent_value = attr_value; /* process later */
       else if (!strcmp(attr_tag, GT_GFF_TARGET)) {
         /* the value of ``Target'' attributes have a special syntax which is
            checked here */
@@ -1168,6 +1170,16 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         }
       }
     }
+  }
+
+  if (!had_err && id_value) {
+    had_err = store_id(id_value, (GtFeatureNode*) feature_node, is_child,
+                       parser, genome_nodes, filename, line_number, err);
+  }
+  if (!had_err && parent_value) {
+    had_err = process_parent_attr(parent_value, feature_node, id_value,
+                                  is_child, parser, genome_nodes, filename,
+                                  line_number, err);
   }
 
   if (!had_err && gt_feature_node_is_multi((GtFeatureNode*) feature_node)) {

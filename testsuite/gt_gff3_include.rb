@@ -1143,6 +1143,13 @@ Test do
   grep last_stderr, "was not previously defined"
 end
 
+Name "gt gff3 orphaned parent"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}orphaned_parent.gff3", :retval => 1
+  grep last_stderr, "was not defined"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

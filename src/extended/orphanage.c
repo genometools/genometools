@@ -24,7 +24,8 @@
 
 struct GtOrphanage {
   GtQueue *orphans;
-  GtCstrTable *missing_parents;
+  GtCstrTable *missing_parents,
+              *orphan_ids;
 };
 
 GtOrphanage* gt_orphanage_new(void)
@@ -32,12 +33,14 @@ GtOrphanage* gt_orphanage_new(void)
   GtOrphanage *o = gt_malloc(sizeof *o);
   o->orphans = gt_queue_new();
   o->missing_parents = gt_cstr_table_new();
+  o->orphan_ids = gt_cstr_table_new();
   return o;
 }
 
 void gt_orphanage_delete(GtOrphanage *o)
 {
   if (!o) return;
+  gt_cstr_table_delete(o->orphan_ids);
   gt_cstr_table_delete(o->missing_parents);
   while (gt_queue_size(o->orphans))
     gt_genome_node_delete(gt_queue_get(o->orphans));
@@ -51,22 +54,26 @@ void gt_orphanage_reset(GtOrphanage *o)
   while (gt_queue_size(o->orphans))
     gt_genome_node_delete(gt_queue_get(o->orphans));
   gt_cstr_table_reset(o->missing_parents);
+  gt_cstr_table_reset(o->orphan_ids);
 }
 
 void gt_orphanage_add(GtOrphanage *o, GtGenomeNode *orphan,
-                      GtStrArray *missing_parents)
+                      const char *orphan_id, GtStrArray *missing_parents)
 {
   const char *missing_parent;
   unsigned long i;
-  gt_assert(o && orphan && missing_parents);
-  gt_assert(gt_str_array_size(missing_parents));
+  gt_assert(o && orphan);
   gt_assert(gt_feature_node_get_attribute((GtFeatureNode*) orphan,
                                           GT_GFF_PARENT));
   gt_queue_add(o->orphans, orphan);
-  for (i = 0; i < gt_str_array_size(missing_parents); i++) {
-    missing_parent = gt_str_array_get(missing_parents, i);
-    if (!gt_cstr_table_get(o->missing_parents, missing_parent))
-      gt_cstr_table_add(o->missing_parents, missing_parent);
+  if (orphan_id && !gt_cstr_table_get(o->orphan_ids, orphan_id))
+    gt_cstr_table_add(o->orphan_ids, orphan_id);
+  if (missing_parents) {
+    for (i = 0; i < gt_str_array_size(missing_parents); i++) {
+      missing_parent = gt_str_array_get(missing_parents, i);
+      if (!gt_cstr_table_get(o->missing_parents, missing_parent))
+        gt_cstr_table_add(o->missing_parents, missing_parent);
+    }
   }
 }
 
@@ -88,6 +95,14 @@ bool gt_orphanage_parent_is_missing(GtOrphanage *o, const char *parent_id)
 {
   gt_assert(o && parent_id);
   if (gt_cstr_table_get(o->missing_parents, parent_id))
+    return true;
+  return false;
+}
+
+bool gt_orphanage_is_orphan(GtOrphanage *o, const char *id)
+{
+ gt_assert(o && id);
+  if (gt_cstr_table_get(o->orphan_ids, id))
     return true;
   return false;
 }

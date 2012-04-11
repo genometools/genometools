@@ -24,9 +24,11 @@ void          gt_orphanage_delete(GtOrphanage*);
 void          gt_orphanage_reset(GtOrphanage*);
 /* Takes ownership of <orphan*>. */
 void          gt_orphanage_add(GtOrphanage*, GtGenomeNode *orphan,
+                               const char *orphan_id,
                                GtStrArray *missing_parents);
 void          gt_orphanage_reg_parent(GtOrphanage*, const char *id);
 GtGenomeNode* gt_orphanage_get_orphan(GtOrphanage*);
 bool          gt_orphanage_parent_is_missing(GtOrphanage*, const char *id);
+bool          gt_orphanage_is_orphan(GtOrphanage*, const char *id);
 
 #endif
