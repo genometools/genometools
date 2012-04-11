@@ -50,7 +50,7 @@ module GT
     end
 
     def enable_tidy_mode
-      GT.gt_gff3_in_stream_enable_strict_mode(@genome_stream)
+      GT.gt_gff3_in_stream_enable_tidy_mode(@genome_stream)
     end
   end
 end
