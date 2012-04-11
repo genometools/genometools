@@ -663,6 +663,7 @@ static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
                          gt_genome_node_get_line_number(child),
                          gt_genome_node_get_filename(child), GT_GFF_PARENT,
                          GT_GFF_ID, parent);
+            gt_genome_node_delete(child);
             had_err = -1;
           }
         }
