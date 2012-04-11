@@ -484,7 +484,8 @@ static int store_id(const char *id, GtFeatureNode *feature_node,
   }
   else {
     gt_feature_info_add(parser->feature_info, id, feature_node);
-    gt_orphanage_reg_parent(parser->orphanage, id);
+    if (!parser->strict)
+      gt_orphanage_reg_parent(parser->orphanage, id);
   }
 
   if (!had_err)
@@ -732,6 +733,7 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
                               genome_nodes, err);
     }
     else {
+      gt_assert(!parser->strict);
       gt_orphanage_add(parser->orphanage, feature_node, missing_parents);
       parser->incomplete_node = true;
     }
@@ -1575,8 +1577,10 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
   }
   else if (strcmp(line, GT_GFF_TERMINATOR) == 0) { /* terminator */
     /* now all nodes are complete */
-    had_err = process_orphans(parser->orphanage, parser->feature_info,
-                              parser->last_terminator, genome_nodes, err);
+    if (!parser->strict) {
+      had_err = process_orphans(parser->orphanage, parser->feature_info,
+                                parser->last_terminator, genome_nodes, err);
+    }
     parser->incomplete_node = false;
     if (!parser->checkids)
       gt_feature_info_reset(parser->feature_info);
@@ -1686,7 +1690,7 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
     had_err = -1;
   }
 
-  if (!had_err) {
+  if (!had_err && !parser->strict) {
     had_err = process_orphans(parser->orphanage, parser->feature_info,
                               parser->last_terminator, genome_nodes, err);
   }
