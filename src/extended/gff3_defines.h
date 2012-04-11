@@ -36,7 +36,14 @@
 /* predfined attributes */
 #define GT_GFF_ID              "ID"
 #define GT_GFF_NAME            "Name"
+#define GT_GFF_ALIAS           "Alias"
 #define GT_GFF_PARENT          "Parent"
 #define GT_GFF_TARGET          "Target"
+#define GT_GFF_GAP             "Gap"
+#define GT_GFF_DERIVES_FROM    "Derives_from"
+#define GT_GFF_NOTE            "Note"
+#define GT_GFF_DBXREF          "Dbxref"
+#define GT_GFF_ONTOLOGY_TERM   "Ontology_term"
+#define GT_GFF_IS_CIRCULAR     "Is_circular"
 
 #endif

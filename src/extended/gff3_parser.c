@@ -1101,6 +1101,25 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
         had_err = -1;
       }
     }
+    if (!had_err && attr_valid && isupper(attr_tag[0])) {
+      /* check if uppercase attributes are the predefined ones */
+      if (strcmp(attr_tag, GT_GFF_ID) &&
+          strcmp(attr_tag, GT_GFF_NAME) &&
+           strcmp(attr_tag, GT_GFF_ALIAS) &&
+           strcmp(attr_tag, GT_GFF_PARENT) &&
+           strcmp(attr_tag, GT_GFF_TARGET) &&
+           strcmp(attr_tag, GT_GFF_GAP) &&
+           strcmp(attr_tag, GT_GFF_DERIVES_FROM) &&
+           strcmp(attr_tag, GT_GFF_NOTE) &&
+           strcmp(attr_tag, GT_GFF_DBXREF) &&
+           strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
+           strcmp(attr_tag, GT_GFF_IS_CIRCULAR)) {
+        gt_error_set(err, "illegal uppercase attribute \"%s\" on line %u in "
+                          "file \"%s\" (uppercase attributes are reserved)",
+                          attr_tag, line_number, filename);
+        had_err = -1;
+      }
+    }
     /* save all attributes, although the Parent and ID attributes are newly
        created in GFF3 output */
     if (!had_err && attr_valid) {

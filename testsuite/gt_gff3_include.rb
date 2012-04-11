@@ -1157,6 +1157,19 @@ Test do
   grep last_stderr, "was not defined"
 end
 
+Name "gt gff3 uppercase attributes"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}uppercase_attributes.gff3"
+end
+
+Name "gt gff3 illegal uppercase attribute"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}illegal_uppercase_attribute.gff3", :retval => 1
+  grep last_stderr, "illegal uppercase attribute"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"
