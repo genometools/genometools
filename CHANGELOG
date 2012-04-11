@@ -1,6 +1,7 @@
-changes in version 1.4.1 (2012-04-10)
+changes in version 1.4.1 (2012-04-11)
 
 - the GFF3 parser now handles children which are defined before their parents
+- many small improvements to the GFF3 parser
 
 
 changes in version 1.4.0 (2012-04-02)
