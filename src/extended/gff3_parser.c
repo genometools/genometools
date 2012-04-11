@@ -621,7 +621,7 @@ static void join_roots(GtArray *roots, GtFeatureInfo *feature_info,
 }
 
 static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
-                         GtFeatureInfo *feature_info,
+                         GtFeatureInfo *feature_info, bool strict,
                          unsigned int last_terminator, GtQueue *genome_nodes,
                          GtError *err)
 {
@@ -651,6 +651,25 @@ static int process_child(GtGenomeNode *child, GtSplitter *parent_splitter,
     if (!had_err) {
       if (i)
         child = gt_genome_node_ref(child);
+      /* check for cycles (in strict mode, no cycles can occur) */
+      if (!strict) {
+        GtFeatureNodeIterator *fni;
+        GtFeatureNode *node;
+        fni = gt_feature_node_iterator_new((GtFeatureNode*) child);
+        while (!had_err && (node = gt_feature_node_iterator_next(fni))) {
+          if (node == (GtFeatureNode*) parent_gf) {
+            gt_error_set(err, "linking the feature on line %u in file \"%s\" "
+                         "to its %s with %s \"%s\" would cause a cycle",
+                         gt_genome_node_get_line_number(child),
+                         gt_genome_node_get_filename(child), GT_GFF_PARENT,
+                         GT_GFF_ID, parent);
+            had_err = -1;
+          }
+        }
+        gt_feature_node_iterator_delete(fni);
+      }
+    }
+    if (!had_err) {
       gt_feature_node_add_child((GtFeatureNode*) parent_gf,
                                 (GtFeatureNode*) child);
       gt_str_array_add_cstr(valid_parents, parent);
@@ -729,8 +748,8 @@ static int process_parent_attr(char *parent_attr, GtGenomeNode *feature_node,
   if (!had_err) {
     if (!missing_parents) {
       had_err = process_child(feature_node, parent_splitter,
-                              parser->feature_info, parser->last_terminator,
-                              genome_nodes, err);
+                              parser->feature_info, parser->strict,
+                              parser->last_terminator, genome_nodes, err);
     }
     else {
       gt_assert(!parser->strict);
@@ -1407,8 +1426,8 @@ static int gff3_parser_parse_fasta_entry(GtQueue *genome_nodes,
 }
 
 static int process_orphans(GtOrphanage *orphanage, GtFeatureInfo *feature_info,
-                           unsigned int last_terminator, GtQueue *genome_nodes,
-                           GtError *err)
+                           bool strict, unsigned int last_terminator,
+                           GtQueue *genome_nodes, GtError *err)
 {
   GtGenomeNode *orphan;
   int had_err = 0;
@@ -1439,8 +1458,8 @@ static int process_orphans(GtOrphanage *orphanage, GtFeatureInfo *feature_info,
       }
     }
     if (!had_err) {
-      had_err = process_child(orphan, splitter, feature_info, last_terminator,
-                              genome_nodes, err);
+      had_err = process_child(orphan, splitter, feature_info, strict,
+                              last_terminator, genome_nodes, err);
     }
     gt_splitter_delete(splitter);
     gt_free(parent_attr_dup);
@@ -1579,7 +1598,8 @@ static int parse_meta_gff3_line(GtGFF3Parser *parser, GtQueue *genome_nodes,
     /* now all nodes are complete */
     if (!parser->strict) {
       had_err = process_orphans(parser->orphanage, parser->feature_info,
-                                parser->last_terminator, genome_nodes, err);
+                                parser->strict, parser->last_terminator,
+                                genome_nodes, err);
     }
     parser->incomplete_node = false;
     if (!parser->checkids)
@@ -1692,7 +1712,8 @@ int gt_gff3_parser_parse_genome_nodes(GtGFF3Parser *parser, int *status_code,
 
   if (!had_err && !parser->strict) {
     had_err = process_orphans(parser->orphanage, parser->feature_info,
-                              parser->last_terminator, genome_nodes, err);
+                              parser->strict, parser->last_terminator,
+                              genome_nodes, err);
   }
 
   if (had_err) {

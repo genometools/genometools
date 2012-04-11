@@ -1129,6 +1129,19 @@ Test do
   run "diff #{last_stdout} #{$testdata}unknown_meta_directive.gff3"
 end
 
+Name "gt gff3 simple cycle"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cycle_simple.gff3", :retval => 1
+  grep last_stderr, "would cause a cycle"
+end
+
+Name "gt gff3 simple cycle (-strict)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -strict #{$testdata}cycle_simple.gff3", :retval => 1
+  grep last_stderr, "was not previously defined"
+end
 
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
