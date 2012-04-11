@@ -24,6 +24,7 @@
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_stream_api.h"
 #include "extended/targetbest_select_stream.h"

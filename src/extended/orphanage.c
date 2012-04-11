@@ -15,11 +15,13 @@
 */
 
 #include "core/cstr_api.h"
+#include "core/cstr_table_api.h"
 #include "core/hashmap_api.h"
 #include "core/ma_api.h"
+#include "core/queue_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node_api.h"
-#include "extended/gff3_parser.h"
+#include "extended/gff3_defines.h"
 #include "extended/orphanage.h"
 
 struct GtOrphanage {

@@ -20,6 +20,7 @@
 #include "core/str_array.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_visitor_api.h"
 #include "extended/id_to_md5_visitor.h"

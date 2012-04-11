@@ -16,15 +16,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "annotationsketch/block.h"
+#include "annotationsketch/default_formats.h"
+#include "annotationsketch/line.h"
 #include "core/ensure.h"
 #include "core/interval_tree.h"
 #include "core/ma.h"
 #include "core/mathsupport.h"
 #include "core/range.h"
 #include "core/undef_api.h"
-#include "annotationsketch/block.h"
-#include "annotationsketch/default_formats.h"
-#include "annotationsketch/line.h"
+#include "extended/gff3_defines.h"
 
 struct GtLine {
   bool has_captions;
@@ -142,10 +143,10 @@ int gt_line_unit_test(GtError *err)
 
   l1 = gt_line_new();
 
-  gt_feature_node_add_attribute((GtFeatureNode*) parent, "Name", foo);
-  gt_feature_node_add_attribute((GtFeatureNode*) gn1, "Name", bar);
-  gt_feature_node_add_attribute((GtFeatureNode*) gn2, "Name", bar);
-  gt_feature_node_add_attribute((GtFeatureNode*) gn3, "Name", blub);
+  gt_feature_node_add_attribute((GtFeatureNode*) parent, GT_GFF_NAME, foo);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn1, GT_GFF_NAME, bar);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn2, GT_GFF_NAME, bar);
+  gt_feature_node_add_attribute((GtFeatureNode*) gn3, GT_GFF_NAME, blub);
 
   b1 = gt_block_new();
   b2 = gt_block_new();

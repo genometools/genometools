@@ -29,6 +29,7 @@
 #include "core/warning_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gtf_parser.h"
 #include "extended/region_node_builder.h"
 
@@ -155,7 +156,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
 
     if ((tname = gt_hashmap_get(cinfo->transcript_id_to_name_mapping,
                               (const char*) key))) {
-      gt_feature_node_add_attribute((GtFeatureNode*) mRNA_node, "Name",
+      gt_feature_node_add_attribute((GtFeatureNode*) mRNA_node, GT_GFF_NAME,
                                       tname);
     }
 
@@ -215,7 +216,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 
     if ((gname = gt_hashmap_get(cinfo->gene_id_to_name_mapping,
                               (const char*) key))) {
-      gt_feature_node_add_attribute((GtFeatureNode*) gene_node, "Name",
+      gt_feature_node_add_attribute((GtFeatureNode*) gene_node, GT_GFF_NAME,
                                       gname);
     }
 

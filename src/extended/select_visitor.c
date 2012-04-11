@@ -22,6 +22,7 @@
 #include "core/undef_api.h"
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_parser.h"
 #include "extended/node_visitor_api.h"
 #include "extended/select_visitor.h"

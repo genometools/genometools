@@ -21,7 +21,7 @@
 #include "core/ma.h"
 #include "extended/feature_info.h"
 #include "extended/genome_node.h"
-#include "extended/gff3_parser.h"
+#include "extended/gff3_defines.h"
 
 struct GtFeatureInfo {
   GtHashmap *id_to_genome_node,

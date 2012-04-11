@@ -16,16 +16,17 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "core/ensure.h"
-#include "core/hashtable.h"
-#include "core/ma.h"
-#include "core/undef_api.h"
-#include "core/unused_api.h"
 #include "annotationsketch/default_formats.h"
 #include "annotationsketch/line.h"
 #include "annotationsketch/line_breaker_bases.h"
 #include "annotationsketch/style.h"
 #include "annotationsketch/track.h"
+#include "core/ensure.h"
+#include "core/hashtable.h"
+#include "core/ma.h"
+#include "core/undef_api.h"
+#include "core/unused_api.h"
+#include "extended/gff3_defines.h"
 
 struct GtTrack {
   GtStr *title;
@@ -287,8 +288,9 @@ int gt_track_unit_test(GtError *err)
     gt_feature_node_add_child((GtFeatureNode*) parent[i],
                               (GtFeatureNode*) gn[i]);
 
-    gt_feature_node_add_attribute((GtFeatureNode*) parent[i], "Name", "parent");
-    gt_feature_node_add_attribute((GtFeatureNode*) gn[i], "Name", "child");
+    gt_feature_node_add_attribute((GtFeatureNode*) parent[i], GT_GFF_NAME,
+                                  "parent");
+    gt_feature_node_add_attribute((GtFeatureNode*) gn[i], GT_GFF_NAME, "child");
   }
 
   for (i=0;i<4;i++)

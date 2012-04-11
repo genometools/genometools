@@ -25,6 +25,7 @@
 #include "extended/bed_parser.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/region_node_builder.h"
 
 #define BROWSER_KEYWORD  "browser"
@@ -291,8 +292,10 @@ static void construct_thick_feature(GtBEDParser *bed_parser, GtFeatureNode *fn,
                                       : BED_THICK_FEATURE_TYPE,
                                       range.start, range.end,
                                       gt_feature_node_get_strand(fn));
-  if ((name = gt_feature_node_get_attribute(fn, "Name")))
-    gt_feature_node_add_attribute((GtFeatureNode*) thick_feature, "Name", name);
+  if ((name = gt_feature_node_get_attribute(fn, GT_GFF_NAME))) {
+    gt_feature_node_add_attribute((GtFeatureNode*) thick_feature, GT_GFF_NAME,
+                                  name);
+  }
   gt_feature_node_set_score((GtFeatureNode*) thick_feature,
                             gt_feature_node_get_score(fn));
   gt_feature_node_set_strand((GtFeatureNode*) thick_feature,
@@ -338,8 +341,10 @@ static int create_block_features(GtBEDParser *bed_parser, GtFeatureNode *fn,
                                   ? bed_parser->block_type
                                   : BED_BLOCK_TYPE,
                                   start, end, gt_feature_node_get_strand(fn));
-      if ((name = gt_feature_node_get_attribute(fn, "Name")))
-        gt_feature_node_add_attribute((GtFeatureNode*) block, "Name", name);
+      if ((name = gt_feature_node_get_attribute(fn, GT_GFF_NAME))) {
+        gt_feature_node_add_attribute((GtFeatureNode*) block, GT_GFF_NAME,
+                                      name);
+      }
       gt_feature_node_set_score((GtFeatureNode*) block,
                                 gt_feature_node_get_score(fn));
       gt_feature_node_set_strand((GtFeatureNode*) block,
@@ -458,7 +463,7 @@ static int bed_rest(GtBEDParser *bed_parser, GtIO *bed_file, GtError *err)
   if (!had_err) {
     word(bed_parser->word, bed_file);
     if (gt_str_length(bed_parser->word)) {
-      gt_feature_node_add_attribute((GtFeatureNode*) gn, "Name",
+      gt_feature_node_add_attribute((GtFeatureNode*) gn, GT_GFF_NAME,
                                     gt_str_get(bed_parser->word));
     }
     if (bed_separator(bed_file))

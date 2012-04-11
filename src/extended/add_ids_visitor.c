@@ -16,6 +16,7 @@
 
 #include <string.h>
 #include "core/assert_api.h"
+#include "core/cstr_table_api.h"
 #include "core/hashmap.h"
 #include "core/ma_api.h"
 #include "core/minmax.h"
@@ -25,7 +26,7 @@
 #include "core/warning_api.h"
 #include "extended/add_ids_visitor.h"
 #include "extended/feature_node_iterator_api.h"
-#include "extended/gff3_parser.h"
+#include "extended/gff3_defines.h"
 #include "extended/node_visitor_api.h"
 
 struct GtAddIDsVisitor {

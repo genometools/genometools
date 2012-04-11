@@ -23,6 +23,7 @@
 #include "core/versionfunc.h"
 #include "extended/add_introns_stream_api.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_parser.h"

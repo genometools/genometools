@@ -37,6 +37,7 @@
 #include "core/unused_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 
 /* used to index non-multiline-feature blocks
    undefined pointer -- never dereference! */
@@ -160,8 +161,8 @@ static const char* get_node_name_or_id(GtFeatureNode *gn)
 {
   const char *ret;
   if (!gn) return NULL;
-  if (!(ret = gt_feature_node_get_attribute(gn, "Name"))) {
-    if (!(ret = gt_feature_node_get_attribute(gn, "ID")))
+  if (!(ret = gt_feature_node_get_attribute(gn, GT_GFF_NAME))) {
+    if (!(ret = gt_feature_node_get_attribute(gn, GT_GFF_ID)))
       ret = NULL;
   }
   return ret;

@@ -18,6 +18,7 @@
 #include "extended/feature_node_iterator_api.h"
 #include "extended/feature_node.h"
 #include "extended/genome_node.h"
+#include "extended/gff3_defines.h"
 #include "extended/gff3_parser.h"
 #include "extended/region_mapping_api.h"
 #include "extended/reverse.h"
