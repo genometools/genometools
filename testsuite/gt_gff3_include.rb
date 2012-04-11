@@ -1093,6 +1093,13 @@ Test do
   run "diff #{last_stdout} #{$testdata}header.gff3"
 end
 
+Name "gt gff3 header 3.1.21 file"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}header_3_1_21.gff3"
+  run "diff #{last_stdout} #{$testdata}header.gff3"
+end
+
 Name "gt gff3 fasta sequence file"
 Keywords "gt_gff3"
 Test do
