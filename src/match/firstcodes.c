@@ -48,7 +48,7 @@
 
 typedef struct
 {
-  unsigned long *ptr, code;
+  unsigned long *ptr, code, index;
 } GtIndexwithcode;
 
 typedef struct
@@ -82,6 +82,7 @@ typedef struct
                    *mappedallfirstcodes,
                    *mappedmarkprefix;
   unsigned long *allfirstcodes;
+#define FIRSTCODES_DIFFERENCES
 #ifdef FIRSTCODES_DIFFERENCES
   unsigned long *allfirstcodes_differences;
 #endif
@@ -125,6 +126,28 @@ static void gt_storefirstcodes(void *processinfo,
   fci->allfirstcodes[fci->countsequences++] = code;
 }
 
+#ifdef FIRSTCODES_DIFFERENCES
+static void init_firstcodes_differences(GtFirstcodesinfo *fci)
+{
+  unsigned long idx, previouscode, currentcode;
+
+  /* XXX overlay allfirstcodes_differences and allfirstcodes */
+  fci->allfirstcodes_differences
+    = malloc(sizeof(*fci->allfirstcodes_differences) * fci->differentcodes);
+  gt_assert(fci->allfirstcodes_differences != NULL);
+  /* XXX unnecessary */
+  fci->allfirstcodes_differences[0] = fci->allfirstcodes[0];
+  previouscode = fci->allfirstcodes[0];
+  for (idx=1UL; idx < fci->differentcodes; idx++)
+  {
+    currentcode = fci->allfirstcodes[idx];
+    gt_assert(previouscode < currentcode);
+    fci->allfirstcodes_differences[idx] = currentcode - previouscode;
+    previouscode = currentcode;
+  }
+}
+#endif
+
 static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
                                              unsigned int addbscache_depth)
 {
@@ -151,21 +174,15 @@ static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
            spaceGtIndexwithcode[fci->binsearchcache.nextfreeGtIndexwithcode]
                                .ptr = fci->allfirstcodes + current;
       fci->binsearchcache.
+           spaceGtIndexwithcode[fci->binsearchcache.nextfreeGtIndexwithcode]
+                               .index = current;
+      fci->binsearchcache.
            spaceGtIndexwithcode[fci->binsearchcache.nextfreeGtIndexwithcode++]
                                .code = fci->allfirstcodes[current];
       current += fci->binsearchcache.width;
     }
 #ifdef FIRSTCODES_DIFFERENCES
-    fci->allfirstcodes_differences
-      = malloc(sizeof(*fci->allfirstcodes_differences) * fci->differentcodes);
-    gt_assert(fci->allfirstcodes_differences != NULL);
-    fci->allfirstcodes_differences[0] = fci->allfirstcodes[0];
-    for (idx=1UL; idx < fci->differentcodes; idx++)
-    {
-      gt_assert(fci->allfirstcodes[idx-1] < fci->allfirstcodes[idx]);
-      fci->allfirstcodes_differences[idx]
-        = fci->allfirstcodes[idx] - fci->allfirstcodes[idx-1];
-    }
+    init_firstcodes_differences(fci);
 #endif
   }
   gt_log_log("binsearchcache.depth=%u => %lu bytes",
@@ -188,19 +205,14 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
                                             unsigned long code)
 {
   const unsigned long *found = NULL, *leftptr = NULL, *midptr, *rightptr = NULL;
-  unsigned long leftbound = 0, rightbound = fci->differentcodes-1;
 #ifdef FIRSTCODES_DIFFERENCES
   const unsigned long *foundlinear = NULL;
 #endif
 
-  unsigned int depth;
-
-  /*
-  printf("leftbound = %lu, rightbound = %lu\n",leftbound,rightbound);
-  */
   if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     const GtIndexwithcode *leftic, *midic, *rightic;
+    unsigned int depth;
 
     leftic = fci->binsearchcache.spaceGtIndexwithcode;
     rightic = fci->binsearchcache.spaceGtIndexwithcode +
@@ -264,23 +276,19 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
     {
       unsigned long tmpcode;
 
-      tmpcode = *leftptr;
+      tmpcode = *leftptr; /* Problem access to allfirstcodes */
       if (code <= tmpcode)
       {
         foundlinear = leftptr;
       } else
       {
-        unsigned long idx, endidx;
-        endidx = (unsigned long) (rightptr - fci->allfirstcodes);
-        idx = (unsigned long) (leftptr - fci->allfirstcodes + 1);
-        /*printf("code=%lu,idx=%lu,endidx=%lu,tmpcode=%lu\n",code,idx,endidx,
-                                                           tmpcode);*/
+        unsigned long idx;
+        const unsigned long endidx
+          = (unsigned long) (rightptr - fci->allfirstcodes);
         for (idx = (unsigned long) (leftptr - fci->allfirstcodes + 1);
              idx <= endidx; idx++)
         {
           tmpcode += fci->allfirstcodes_differences[idx];
-          /*printf("idx=%lu:add differences = %lu => %lu\n",
-                  idx,fci->allfirstcodes_differences[idx],tmpcode);*/
           if (fci->allfirstcodes[idx] != tmpcode)
           {
             fprintf(stderr,"fci->allfirstcodes[%lu] = %lu != %lu = tmpcode\n",
@@ -298,8 +306,8 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
 #endif
   } else
   {
-    leftptr = fci->allfirstcodes + leftbound;
-    rightptr = fci->allfirstcodes + rightbound;
+    leftptr = fci->allfirstcodes;
+    rightptr = fci->allfirstcodes + fci->differentcodes - 1;
   }
   while (leftptr <= rightptr)
   {
@@ -316,7 +324,7 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
       } else
       {
 #ifdef FIRSTCODES_DIFFERENCES
-        if (withcache && fci->binsearchcache.spaceGtIndexwithcode != NULL)
+        if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
         {
           gt_assert(midptr == foundlinear);
         }
@@ -327,7 +335,7 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
     }
   }
 #ifdef FIRSTCODES_DIFFERENCES
-  if (withcache && fci->binsearchcache.spaceGtIndexwithcode != NULL)
+  if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     if (found != foundlinear)
     {
@@ -340,6 +348,113 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
   return (found != NULL) ? (unsigned long) (found - fci->allfirstcodes)
                          : ULONG_MAX;
 }
+
+#ifdef NEWFINDACCU
+const unsigned long gt_firstcodes_find_accu_diff(const GtFirstcodesinfo *fci,
+                                                 unsigned long code)
+{
+  unsigned long left = ULONG_MAX, right = ULONG_MAX, foundlinear = ULONG_MAX;;
+
+  if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
+  {
+    const GtIndexwithcode *leftic, *midic, *rightic;
+    unsigned int depth;
+
+    leftic = fci->binsearchcache.spaceGtIndexwithcode;
+    rightic = fci->binsearchcache.spaceGtIndexwithcode +
+              fci->binsearchcache.nextfreeGtIndexwithcode - 1;
+    for (depth = 0; /* Nothing */; depth++)
+    {
+      midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
+      if (code < midic->code)
+      {
+        foundlinear = midic->index;
+        if (depth < fci->binsearchcache.depth)
+        {
+          rightic = midic - 1;
+        } else
+        {
+          gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
+          if (leftic > fci->binsearchcache.spaceGtIndexwithcode)
+          {
+            left = (leftic-1)->index + 1;
+          } else
+          {
+            left = 0;
+          }
+          gt_assert(rightic->index > 0);
+          right = rightic->index - 1;
+          break;
+        }
+      } else
+      {
+        if (code > midic->code)
+        {
+          if (depth < fci->binsearchcache.depth)
+          {
+            leftic = midic + 1;
+          } else
+          {
+            gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
+            left = leftic->index + 1;
+            if (rightic < fci->binsearchcache.spaceGtIndexwithcode +
+                          fci->binsearchcache.nextfreeGtIndexwithcode - 1)
+            {
+              gt_assert((rightic+1)->index > 0);
+              right = (rightic+1)->index - 1;
+            } else
+            {
+              right = fci->differentcodes - 1;
+            }
+            break;
+          }
+        } else
+        {
+          gt_assert(midic->index != ULONG_MAX);
+          return midic->index;
+        }
+      }
+    }
+    gt_assert(left != ULONG_MAX && right != ULONG_MAX);
+  } else
+  {
+    left = 0;
+    right = fci->differentcodes - 1;
+  }
+  if (left <= right)
+  {
+    unsigned long tmpcode;
+
+    tmpcode = *leftptr;
+    if (code <= tmpcode)
+    {
+      foundlinear = leftptr;
+    } else
+    {
+      unsigned long idx;
+      const unsigned long endidx
+        = (unsigned long) (rightptr - fci->allfirstcodes);
+      for (idx = (unsigned long) (leftptr - fci->allfirstcodes + 1);
+           idx <= endidx; idx++)
+      {
+        tmpcode += fci->allfirstcodes_differences[idx];
+        if (fci->allfirstcodes[idx] != tmpcode)
+        {
+          fprintf(stderr,"fci->allfirstcodes[%lu] = %lu != %lu = tmpcode\n",
+                         idx,fci->allfirstcodes[idx],tmpcode);
+          exit(EXIT_FAILURE);
+        }
+        if (code <= tmpcode)
+        {
+          foundlinear = fci->allfirstcodes + idx;
+          break;
+        }
+      }
+    }
+  }
+  return foundlinear;
+}
+#endif
 
 const unsigned long *gt_firstcodes_find_insert(const GtFirstcodesinfo *fci,
                                                unsigned long code)
