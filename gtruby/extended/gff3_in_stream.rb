@@ -29,6 +29,8 @@ module GT
   extern "GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream*)"
   extern "void gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream*)"
   extern "void gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream*)"
+  extern "void gt_gff3_in_stream_set_type_checker(GtNodeStream*,
+                                                  GtTypeChecker*)"
 
   class GFF3InStream < GenomeStream
     def initialize(filename)
@@ -51,6 +53,13 @@ module GT
 
     def enable_tidy_mode
       GT.gt_gff3_in_stream_enable_tidy_mode(@genome_stream)
+    end
+
+    def set_type_checker(checker)
+      if !checker.is_a?(GT::TypeChecker) then
+        GT.gterror("'checker' parameter must be a TypeChecker object!")
+      end
+      GT.gt_gff3_in_stream_set_type_checker(@genome_stream, checker)
     end
   end
 end
