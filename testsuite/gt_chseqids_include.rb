@@ -22,8 +22,8 @@ end
 Name "gt chseqids empty gff3 file"
 Keywords "gt_chseqids"
 Test do
-  run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_1.chseqids #{$testdata}empty_file"
-  run "diff #{last_stdout} #{$testdata}empty_file"
+  run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_1.chseqids #{$testdata}empty_file", :retval => 1
+  grep last_stderr, "GFF3 file .* is empty"
 end
 
 Name "gt chseqids corrupt.gff3"
