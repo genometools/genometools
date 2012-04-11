@@ -1,6 +1,7 @@
 #
 # Copyright (c) 2007-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
+# Copyright (c)      2012 Sascha Steinbiss <steinbiss@zbh.uni-hamburg.de>
+# Copyright (c) 2007-2012 Center for Bioinformatics, University of Hamburg
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +27,8 @@ module GT
   typealias "bool", "ibool"
   extern "GtNodeStream* gt_gff3_in_stream_new_sorted(const char *, bool)"
   extern "GtStrArray* gt_gff3_in_stream_get_used_types(GtNodeStream*)"
+  extern "void gt_gff3_in_stream_enable_strict_mode(GtGFF3InStream*)"
+  extern "void gt_gff3_in_stream_enable_tidy_mode(GtGFF3InStream*)"
 
   class GFF3InStream < GenomeStream
     def initialize(filename)
@@ -40,6 +43,14 @@ module GT
       str_array_ptr = GT.gt_gff3_in_stream_get_used_types(@genome_stream)
       used_types = GT::StrArray.new(str_array_ptr)
       used_types.to_a
+    end
+
+    def enable_strict_mode
+      GT.gt_gff3_in_stream_enable_strict_mode(@genome_stream)
+    end
+
+    def enable_tidy_mode
+      GT.gt_gff3_in_stream_enable_strict_mode(@genome_stream)
     end
   end
 end
