@@ -58,7 +58,7 @@ HTML_HEADER = <<END
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-<title>The AnnotationSketch module</title>
+<title>GFF3 Online Validator</title>
 <link rel="stylesheet" type="text/css" href="../style.css">
 <script type="text/javascript">
  function disable(field) {
