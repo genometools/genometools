@@ -21,7 +21,7 @@ GTRUBY_PATH      = "#{GENOMETOOLS_PATH}/gtruby"
 # the LD_LIBRARY_PATH has to be set externally to "#{GENOMETOOLS_PATH}/lib"!
 SCRIPT_PATH      = "/var/www/servers/genometools.org/htdocs/cgi-bin"
 UPLOAD_PATH      = "/tmp"
-MAXSIZE          = 10485760
+MAXSIZE          = 52428800
 
 $: << (GTRUBY_PATH)
 require "gtruby"
