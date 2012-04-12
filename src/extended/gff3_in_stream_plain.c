@@ -262,7 +262,6 @@ void gt_gff3_in_stream_plain_set_type_checker(GtNodeStream *ns,
 {
   GtGFF3InStreamPlain *is = gff3_in_stream_plain_cast(ns);
   gt_assert(is);
-  gt_gff3_parser_delete(is->gff3_parser);
   gt_gff3_parser_set_type_checker(is->gff3_parser, type_checker);
 }
 
