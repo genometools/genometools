@@ -89,7 +89,7 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
       current_phase = gt_feature_node_get_phase(fn);
       current_length = gt_genome_node_get_length((GtGenomeNode*) fn);
       correct_phase = (3 - (current_length - current_phase) % 3) % 3;
-      gt_hashmap_add(v->cds_features, fn, fn); /* recored CDS feature */
+      gt_hashmap_add(v->cds_features, fn, fn); /* record CDS feature */
     }
   }
   return had_err;
