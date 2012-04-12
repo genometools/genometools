@@ -1,6 +1,6 @@
 ##gff-version   3
 ##sequence-region   ENm002 1 1000000
-ENm002	ENCODE	gene	774908	816850	.	-	.	ID=gene1;Name=AC004039.5-002;Name2=KIF3A
+ENm002	ENCODE	gene	774908	816850	.	-	.	ID=gene1;Name=AC004039.5-002;name2=KIF3A
 ENm002	ENCODE	exon	774908	775960	.	-	.	Parent=gene1
 ENm002	ENCODE	CDS	775912	775960	.	-	1	Parent=gene1
 ENm002	ENCODE	exon	778449	778573	.	-	.	Parent=gene1
