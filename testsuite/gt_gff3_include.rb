@@ -1170,6 +1170,13 @@ Test do
   grep last_stderr, "illegal uppercase attribute"
 end
 
+Name "gt gff3 illegal uppercase attribute (-tidy)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}illegal_uppercase_attribute.gff3"
+  grep last_stderr, "illegal uppercase attribute"
+end
+
 Name "gt gff3 illegal Is_circular value"
 Keywords "gt_gff3"
 Test do

@@ -1039,9 +1039,10 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
   gt_splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
 
   for (i = 0; !had_err && i < gt_splitter_size(attribute_splitter); i++) {
-    const char *attr_tag = NULL, *old_value;
+    const char *old_value;
     bool attr_valid = true;
-    char *attr_value = NULL,
+    char *attr_tag = NULL,
+         *attr_value = NULL,
          *token = gt_splitter_get_token(attribute_splitter, i);
     if (strncmp(token, ".", 1) == 0) {
       if (gt_splitter_size(attribute_splitter) > 1) {
@@ -1124,10 +1125,18 @@ static int parse_attributes(char *attributes, GtGenomeNode *feature_node,
           strcmp(attr_tag, GT_GFF_DBXREF) &&
           strcmp(attr_tag, GT_GFF_ONTOLOGY_TERM) &&
           strcmp(attr_tag, GT_GFF_IS_CIRCULAR)) {
-        gt_error_set(err, "illegal uppercase attribute \"%s\" on line %u in "
-                          "file \"%s\" (uppercase attributes are reserved)",
-                          attr_tag, line_number, filename);
-        had_err = -1;
+        if (parser->tidy) {
+          gt_warning("illegal uppercase attribute \"%s\" on line %u in file "
+                     "\"%s\"; change to lowercase", attr_tag, line_number,
+                     filename);
+          attr_tag[0] = tolower(attr_tag[0]);
+        }
+        else {
+          gt_error_set(err, "illegal uppercase attribute \"%s\" on line %u in "
+                            "file \"%s\" (uppercase attributes are reserved)",
+                            attr_tag, line_number, filename);
+          had_err = -1;
+        }
       }
     }
     /* save all attributes, although the Parent and ID attributes are newly
