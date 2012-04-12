@@ -36,9 +36,7 @@ struct GtGFF3InStreamPlain {
        stdin_argument,
        stdin_processed,
        file_is_open,
-       progress_bar,
-       checkids,
-       checkregions;
+       progress_bar;
   GtFile *fpin;
   unsigned long long line_number;
   GtQueue *genome_node_buffer;
@@ -237,22 +235,19 @@ static GtNodeStream* gff3_in_stream_plain_new(GtStrArray *files,
 void gt_gff3_in_stream_plain_check_id_attributes(GtGFF3InStreamPlain *is)
 {
   gt_assert(is);
-  is->checkids = true;
   gt_gff3_parser_check_id_attributes(is->gff3_parser);
 }
 
 void gt_gff3_in_stream_plain_check_region_boundaries(GtGFF3InStreamPlain *is)
 {
   gt_assert(is);
-  is->checkregions = true;
   gt_gff3_parser_check_region_boundaries(is->gff3_parser);
 }
 
-void gt_gff3_in_stream_plain_do_not_check_region_boundaries(
-                                                        GtGFF3InStreamPlain *is)
+void gt_gff3_in_stream_plain_do_not_check_region_boundaries(GtGFF3InStreamPlain
+                                                            *is)
 {
   gt_assert(is);
-  is->checkregions = true;
   gt_gff3_parser_do_not_check_region_boundaries(is->gff3_parser);
 }
 
@@ -268,9 +263,7 @@ void gt_gff3_in_stream_plain_set_type_checker(GtNodeStream *ns,
   GtGFF3InStreamPlain *is = gff3_in_stream_plain_cast(ns);
   gt_assert(is);
   gt_gff3_parser_delete(is->gff3_parser);
-  is->gff3_parser = gt_gff3_parser_new(type_checker);
-  if (is->checkids)
-    gt_gff3_parser_check_id_attributes(is->gff3_parser);
+  gt_gff3_parser_set_type_checker(is->gff3_parser, type_checker);
 }
 
 GtStrArray* gt_gff3_in_stream_plain_get_used_types(GtNodeStream *ns)

@@ -128,6 +128,14 @@ void gt_gff3_parser_set_offset(GtGFF3Parser *parser, long offset)
   parser->offset = offset;
 }
 
+void gt_gff3_parser_set_type_checker(GtGFF3Parser *parser,
+                                     GtTypeChecker *type_checker)
+{
+  gt_assert(parser && type_checker);
+  gt_type_checker_delete(parser->type_checker);
+  parser->type_checker = gt_type_checker_ref(type_checker);
+}
+
 int gt_gff3_parser_set_offsetfile(GtGFF3Parser *parser, GtStr *offsetfile,
                                   GtError *err)
 {

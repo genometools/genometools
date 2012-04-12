@@ -3427,6 +3427,14 @@ Disable sequence region boundary checking in <code>gff3_parser</code>. That is,
 Transform all features parsed by <code>gff3_parser</code> by the given <code>offset</code>.
 </p>
 <hr>
+<a name="gt_gff3_parser_set_type_checker"></a>
+
+<code>void           gt_gff3_parser_set_type_checker(GtGFF3Parser *gff3_parser,
+                                              GtTypeChecker *type_checker)</code>
+<p>
+Set <code>type_checker</code> used by <code>gff3_parser</code>.
+</p>
+<hr>
 <a name="gt_gff3_parser_enable_tidy_mode"></a>
 
 <code>void           gt_gff3_parser_enable_tidy_mode(GtGFF3Parser *gff3_parser)</code>
@@ -6851,17 +6859,17 @@ Guesse if the sequences contained in the files given in <code>filenames</code> a
    0 if <code>a</code> is <em>equal</em> to <code>b</code>, and greater 0 if <code>a</code> is <em>larger</em> than <code>b</code>.
    Thereby, the operators <em>smaller</em>, <em>equal</em>, and <em>larger</em> are
    implementation dependent.
-   Do not count on these functions to return -1, 0, or 1!
+   Do not count on these functions to return -1, 0, or 1!  
 </p>
 <hr>
 <code>int  (*GtCompareWithData)(const void*, const void*, void *data)</code>
 <p>
- Similar to <code>GtCompare</code>, but with an additional <code>data</code> pointer.
+ Similar to <code>GtCompare</code>, but with an additional <code>data</code> pointer. 
 </p>
 <hr>
 <code>void (*GtFree)(void*)</code>
 <p>
- The generic free function pointer type.
+ The generic free function pointer type. 
 </p>
 <hr>
 <a name="Grep"></a>
@@ -7239,7 +7247,7 @@ Check that the <em>GenomeTools</em> library in use is compatible with the given
 <h2>Module Warning</h2>
 <code>void (*GtWarningHandler)(void *data, const char *format, va_list ap)</code>
 <p>
- Handler type used to process warnings.
+ Handler type used to process warnings. 
 </p>
 <hr>
 <a name="gt_warning"></a>
@@ -8219,6 +8227,8 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 
   <a href="#gt_gff3_parser_set_offset"><code>gt_gff3_parser_set_offset</code></a><br>
 
+  <a href="#gt_gff3_parser_set_type_checker"><code>gt_gff3_parser_set_type_checker</code></a><br>
+
   <a href="#gt_gff3_visitor_new"><code>gt_gff3_visitor_new</code></a><br>
 
   <a href="#gt_gff3_visitor_retain_id_attributes"><code>gt_gff3_visitor_retain_id_attributes</code></a><br>
@@ -8894,7 +8904,7 @@ Similar to <code>vsnprintf(3)</code>, terminates on error.
 <div id="footer">
 Copyright &copy; 2008-2011
 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a>
-Last update: 2012-04-11
+Last update: 2012-04-12
 </div>
 </div>
 <!-- Piwik -->
