@@ -223,25 +223,33 @@ static int assign_block_caption(GtDiagram *d,
   const char *nnid_p = NULL, *nnid_n = NULL;
   GtStr *caption = NULL;
   bool status = true;
-  nnid_p = get_node_name_or_id(parent);
-  nnid_n = get_node_name_or_id(node);
-  if (get_caption_display_status(d, gt_feature_node_get_type(node), &status,
-                                 err) < 0) {
+  int rval;
+
+  caption = gt_str_new();
+  rval = gt_style_get_str(d->style,
+                          gt_feature_node_get_type(node), "block_caption",
+                          caption, node, err);
+  if (rval == GT_STYLE_QUERY_ERROR) {
+    gt_str_delete(caption);
     return -1;
-  }
-  if ((nnid_p || nnid_n) && status)
-  {
-    caption = gt_str_new();
-    if (parent)
+  } else if (rval == GT_STYLE_QUERY_NOT_SET) {
+    nnid_p = get_node_name_or_id(parent);
+    nnid_n = get_node_name_or_id(node);
+    if ((nnid_p || nnid_n) && status)
     {
-      if (nnid_p && gt_feature_node_has_children(parent))
-        gt_str_append_cstr(caption, nnid_p);
-      else
-        gt_str_append_cstr(caption, "-");
-      gt_str_append_cstr(caption, "/");
+      if (parent) {
+        if (nnid_p && gt_feature_node_has_children(parent))
+          gt_str_append_cstr(caption, nnid_p);
+        else
+          gt_str_append_cstr(caption, "-");
+        gt_str_append_cstr(caption, "/");
+      }
+      if (nnid_n)
+        gt_str_append_cstr(caption, nnid_n);
+    } else {
+      gt_str_delete(caption);
+      caption = NULL;
     }
-    if (nnid_n)
-      gt_str_append_cstr(caption, nnid_n);
   }
   gt_block_set_caption(block, caption);
   return 0;
