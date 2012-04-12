@@ -75,7 +75,7 @@ table.padded-table td {
 </div>
 <div id="main">
   <h1><em>GFF3 online validator</h1>
-  <p>Use this form to upload a GFF3 annotation file (up to 10 MB, can be .gz or
+  <p>Use this form to upload a GFF3 annotation file (up to 50 MB, can be .gz or
 .bz2 compressed) which is then validated against the <a href="http://www.sequenceontology.org/gff3.shtml">GFF3 specification</a> using the current <a href="http://song.cvs.sourceforge.net/song/ontology/so.obo?view=log">Sequence Ontology OBO file</a>.</p>
 END
 
