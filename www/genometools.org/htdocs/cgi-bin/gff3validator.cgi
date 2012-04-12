@@ -33,25 +33,6 @@ puts ""
 
 cgi = CGI.new("html4")
 
-class String
-# String#strip_html - Removes HTML tags from a string.
-# Author:: Rob Pitt
-# Removes HTML tags from a string. Allows you to specify some tags to be kept.
-  def strip_html( allowed = [] )
-    re = if allowed.any?
-      Regexp.new(
-        %(<(?!(\\s|\\/)*(#{
-          allowed.map {|tag| Regexp.escape( tag )}.join( "|" )
-        })( |>|\\/|'|"|<|\\s*\\z))[^>]*(>+|\\s*\\z)),
-        Regexp::IGNORECASE | Regexp::MULTILINE, 'u'
-      )
-    else
-      /<[^>]*(>+|\s*\z)/m
-    end
-    gsub(re,'')
-  end
-end
-
 HTML_HEADER = <<END
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -142,13 +123,6 @@ UPLOAD_FORM = <<END
     <p>This GFF3 validator is part of the <em>GenomeTools</em> distribution which you
 can <a href="http://genometools.org/pub">download</a> to your computer.
 Use the <tt>gff3validator</tt> tool to validate your own &ndash; possibly larger &ndash; GFF3 files and the <tt>gff3</tt> tool with option <tt>-tidy</tt> to tidy them up (<tt>-help</tt> shows further options).</p>
-END
-
-HTML_IMAGE = <<END
- <h2>Validation results for %s</h2>
- <div>
-  <p>%s</p>
- </div>
 END
 
 puts HTML_HEADER
