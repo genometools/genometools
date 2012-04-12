@@ -225,20 +225,12 @@ static GtNodeStream* gff3_in_stream_plain_new(GtStrArray *files,
   GtNodeStream *ns = gt_node_stream_create(gt_gff3_in_stream_plain_class(),
                                            ensure_sorting);
   GtGFF3InStreamPlain *gff3_in_stream_plain = gff3_in_stream_plain_cast(ns);
-  gff3_in_stream_plain->next_file          = 0;
-  gff3_in_stream_plain->files              = files;
-  gff3_in_stream_plain->stdinstr           = gt_str_new_cstr("stdin");
-  gff3_in_stream_plain->ensure_sorting     = ensure_sorting;
-  gff3_in_stream_plain->stdin_argument     = false;
-  gff3_in_stream_plain->file_is_open       = false;
-  gff3_in_stream_plain->fpin               = NULL;
-  gff3_in_stream_plain->line_number        = 0;
-  gff3_in_stream_plain->genome_node_buffer = gt_queue_new();
-  gff3_in_stream_plain->checkids           = false;
-  gff3_in_stream_plain->checkregions       = false;
-  gff3_in_stream_plain->gff3_parser        = gt_gff3_parser_new(NULL);
-  gff3_in_stream_plain->used_types         = gt_cstr_table_new();
-  gff3_in_stream_plain->progress_bar       = false;
+  gff3_in_stream_plain->files               = files;
+  gff3_in_stream_plain->stdinstr            = gt_str_new_cstr("stdin");
+  gff3_in_stream_plain->ensure_sorting      = ensure_sorting;
+  gff3_in_stream_plain->genome_node_buffer  = gt_queue_new();
+  gff3_in_stream_plain->gff3_parser         = gt_gff3_parser_new(NULL);
+  gff3_in_stream_plain->used_types          = gt_cstr_table_new();
   return ns;
 }
 
