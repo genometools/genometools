@@ -223,8 +223,6 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
   }
 }
 
-#define GT_PARTIALSUM_COUNT_GET(IDX)   gt_firstcodes_countocc_get(fct,IDX)
-
 #ifdef _LP64
 #define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
@@ -292,7 +290,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   }
   fct->bitchangepoints.nextfreeGtUlong = 0;
 #endif
-  currentcount = GT_PARTIALSUM_COUNT_GET(0);
+  currentcount = gt_firstcodes_countocc_get(fct,0);
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
 #ifdef SKDEBUG
@@ -319,7 +317,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
-    currentcount = GT_PARTIALSUM_COUNT_GET(idx);
+    currentcount = gt_firstcodes_countocc_get(fct,idx);
 #ifdef _LP64
     gt_assert(currentcount <= fct->modvaluemask);
 #endif

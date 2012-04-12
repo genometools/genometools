@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2011 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
-  Copyright (c) 2011 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2011-2012 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2011-2012 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -45,6 +45,7 @@
 #include "sfx-shortreadsort.h"
 #include "sfx-suffixer.h"
 #include "spmsuftab.h"
+#include "stamp.h"
 
 typedef struct
 {
@@ -209,9 +210,14 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
   const unsigned long *foundlinear = NULL;
 #endif
 
+  if (code <= fci->allfirstcodes[0])
+  {
+    return 0;
+  }
   if (fci->binsearchcache.spaceGtIndexwithcode != NULL)
   {
     const GtIndexwithcode *leftic, *midic, *rightic;
+    unsigned long previouscode = ULONG_MAX;
     unsigned int depth;
 
     leftic = fci->binsearchcache.spaceGtIndexwithcode;
@@ -235,9 +241,12 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
           if (leftic > fci->binsearchcache.spaceGtIndexwithcode)
           {
             leftptr = (leftic-1)->ptr + 1;
+            previouscode = (leftic-1)->code;
           } else
           {
-            leftptr = fci->allfirstcodes;
+            gt_assert(code > fci->allfirstcodes[0]);
+            leftptr = fci->allfirstcodes + 1;
+            previouscode = fci->allfirstcodes[0];
           }
           rightptr = rightic->ptr - 1;
           break;
@@ -253,6 +262,7 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
           {
             gt_assert(leftic->ptr != NULL && rightic->ptr != NULL);
             leftptr = leftic->ptr + 1;
+            previouscode = leftic->code;
             if (rightic < fci->binsearchcache.spaceGtIndexwithcode +
                           fci->binsearchcache.nextfreeGtIndexwithcode - 1)
             {
@@ -274,15 +284,17 @@ const unsigned long gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
 #ifdef FIRSTCODES_DIFFERENCES
     if (leftptr <= rightptr)
     {
-      unsigned long tmpcode;
+      unsigned long tmpcode, idx;
 
-      tmpcode = *leftptr; /* Problem access to allfirstcodes */
+      gt_assert(previouscode != ULONG_MAX);
+      idx = (unsigned long) (leftptr - fci->allfirstcodes);
+      gt_assert(*leftptr == previouscode + fci->allfirstcodes_differences[idx]);
+      tmpcode = *leftptr;
       if (code <= tmpcode)
       {
         foundlinear = leftptr;
       } else
       {
-        unsigned long idx;
         const unsigned long endidx
           = (unsigned long) (rightptr - fci->allfirstcodes);
         for (idx = (unsigned long) (leftptr - fci->allfirstcodes + 1);
