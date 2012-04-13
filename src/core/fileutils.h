@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,6 +18,12 @@
 #define FILEUTILS_H
 
 #include "core/fileutils_api.h"
+
+/* Find regular executable <file> in $PATH, if it has no dirname; set <path> to
+   dirname otherwise. Sets <path> to the empty string if regular executable
+   <file> could not be found in $PATH. */
+int            gt_file_find_exec_in_path(GtStr *path, const char *file,
+                                         GtError*);
 
 /* Returns true if the file with the name composed of the concatenation of
    <path> and <suffix> exists, false otherwise. */

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
@@ -32,6 +32,8 @@ typedef int off_t;
 #include "core/sequence_buffer.h"
 #include "core/cstr_api.h"
 
+typedef bool (*FileExistsFunc)(const char *path);
+
 bool gt_file_exists(const char *path)
 {
   FILE *file;
@@ -39,6 +41,22 @@ bool gt_file_exists(const char *path)
     return false;
   gt_xfclose(file);
   return true;
+}
+
+static bool file_exists_and_is_regular_executable(const char *path)
+{
+  bool is_exec = false;
+  struct stat sb;
+  FILE *file;
+  if ((file = fopen(path, "r")) == NULL)
+    return false;
+  gt_xfstat(fileno(file), &sb);
+  if (S_ISREG(sb.st_mode) &&
+      (sb.st_mode & S_IXUSR || sb.st_mode & S_IXGRP || sb.st_mode & S_IXOTH)) {
+    is_exec = true;
+  }
+  gt_xfclose(file);
+  return is_exec;
 }
 
 bool gt_file_with_suffix_exists(const char *path, const char *suffix)
@@ -113,13 +131,9 @@ void gt_file_dirname(GtStr *path, const char *file)
     gt_str_append_cstr_nt(path, file, (unsigned long) i);
 }
 
-int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
-{
-  return gt_file_find_in_env(path, file, "PATH", err);
-}
-
-int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
-                        GtError *err)
+static int file_find_in_env_generic(GtStr *path, const char *file,
+                                    const char *env, FileExistsFunc file_exists,
+                                    GtError *err)
 {
   char *pathvariable, *pathcomponent = NULL;
   GtSplitter *splitter = NULL;
@@ -128,6 +142,7 @@ int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
 
   gt_error_check(err);
   gt_assert(file);
+  gt_assert(file_exists);
 
   /* check if 'file' has dirname */
   gt_file_dirname(path, file);
@@ -152,7 +167,7 @@ int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
       gt_str_append_cstr(path, pathcomponent);
       gt_str_append_char(path, '/');
       gt_str_append_cstr(path, file);
-      if (gt_file_exists(gt_str_get(path)))
+      if (file_exists(gt_str_get(path)))
         break;
     }
     if (i < gt_splitter_size(splitter)) {
@@ -171,6 +186,23 @@ int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
   gt_splitter_delete(splitter);
 
   return had_err;
+}
+
+int gt_file_find_in_path(GtStr *path, const char *file, GtError *err)
+{
+  return file_find_in_env_generic(path, file, "PATH", gt_file_exists, err);
+}
+
+int gt_file_find_exec_in_path(GtStr *path, const char *file, GtError *err)
+{
+  return file_find_in_env_generic(path, file, "PATH",
+                                  file_exists_and_is_regular_executable, err);
+}
+
+int gt_file_find_in_env(GtStr *path, const char *file, const char *env,
+                        GtError *err)
+{
+  return file_find_in_env_generic(path, file, env, gt_file_exists, err);
 }
 
 off_t gt_file_estimate_size(const char *file)
