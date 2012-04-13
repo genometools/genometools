@@ -26,6 +26,7 @@
 #include "core/hashtable.h"
 #include "core/ma.h"
 #include "core/qsort_r.h"
+#include "core/thread.h"
 
 union link_data
 {
@@ -68,6 +69,7 @@ struct GtHashtable
   htsize_t table_mask, high_fill, low_fill, current_fill;
   union link_data links;
   unsigned short table_size_log, high_fill_mul, low_fill_mul;
+  GtRWLock *lock;
 };
 
 static inline void *
@@ -140,12 +142,16 @@ GtHashtable* gt_hashtable_new_with_start_size(HashElemInfo table_info,
 {
   GtHashtable *ht;
   ht = gt_malloc(sizeof (*ht));
+  ht->lock = gt_rwlock_new();
   gt_ht_init(ht, table_info, size_log, DEFAULT_HIGH_MUL, DEFAULT_LOW_MUL);
   return ht;
 }
 
 static int
 gt_ht_insert(GtHashtable *ht, const void *elem, void **stor_ptr);
+
+static int gt_hashtable_foreach_g(GtHashtable *ht, Elemvisitfunc visitor,
+                                  void *data, GtError *err, bool lock);
 
 static enum iterator_op
 gt_ht_insert_wrapper(void *elem, void *data, GT_UNUSED GtError *err)
@@ -174,12 +180,16 @@ gt_ht_resize(GtHashtable *ht, unsigned short new_size_log)
   gt_assert(ht);
   if (new_size_log != ht->table_size_log)
   {
+    /* save lock from old table */
+    GtRWLock *l = ht->lock;
     gt_ht_init(&new_ht, ht->table_info, new_size_log, ht->high_fill_mul,
-            ht->low_fill_mul);
+               ht->low_fill_mul);
     gt_assert(ht->current_fill < new_size);
-    gt_hashtable_foreach(ht, gt_ht_insert_wrapper, &new_ht, NULL);
+    gt_hashtable_foreach_g(ht, gt_ht_insert_wrapper, &new_ht, NULL, false);
     gt_ht_destruct(ht);
     memcpy(ht, &new_ht, sizeof (*ht));
+    /* restore lock */
+    ht->lock = l;
   }
 }
 
@@ -227,14 +237,17 @@ gt_ht_traverse_list_of_key_debug(GtHashtable *ht, const void *elem)
 void* gt_hashtable_get(GtHashtable *ht, const void *elem)
 {
   gt_assert(ht);
+  gt_rwlock_wrlock(ht->lock);
 #if TJ_DEBUG > 1
   gt_ht_traverse_list_of_key_debug(ht, elem);
 #endif
   gt_ht_traverse_list_of_key(ht, elem, ,
                           if (link != free_mark
                               && !ht->table_info.cmp(elem,
-                                                     gt_ht_elem_ptr(ht, idx)))
-                            return gt_ht_elem_ptr(ht, idx),);
+                                                     gt_ht_elem_ptr(ht, idx))) {
+                            gt_rwlock_unlock(ht->lock);
+                            return gt_ht_elem_ptr(ht, idx); },);
+  gt_rwlock_unlock(ht->lock);
   return NULL;
 }
 
@@ -242,9 +255,11 @@ int gt_hashtable_add(GtHashtable *ht, const void *elem)
 {
   int insert_count;
   gt_assert(ht && elem);
+  gt_rwlock_wrlock(ht->lock);
   if (ht->current_fill + 1 > ht->high_fill)
     gt_ht_resize(ht, ht->table_size_log + 1);
   insert_count = gt_ht_insert(ht, elem, NULL);
+  gt_rwlock_unlock(ht->lock);
   return insert_count;
 }
 
@@ -253,9 +268,11 @@ int gt_hashtable_add_with_storage_ptr(GtHashtable *ht, const void *elem,
 {
   int insert_count;
   gt_assert(ht && elem);
+  gt_rwlock_wrlock(ht->lock);
   if (ht->current_fill + 1 > ht->high_fill)
     gt_ht_resize(ht, ht->table_size_log + 1);
   insert_count = gt_ht_insert(ht, elem, stor_ptr);
+  gt_rwlock_unlock(ht->lock);
   return insert_count;
 }
 
@@ -335,15 +352,17 @@ gt_ht_shrink(GtHashtable *ht);
 int gt_hashtable_remove(GtHashtable *ht, const void *elem)
 {
   htsize_t remove_pos;
+  int rval = 0;
   gt_assert(ht && elem);
+  gt_rwlock_wrlock(ht->lock);
   remove_pos = gt_ht_remove(ht, elem);
   if (remove_pos != free_mark)
   {
     gt_ht_shrink(ht);
-    return 1;
+    rval = 1;
   }
-  else
-    return 0;
+  gt_rwlock_unlock(ht->lock);
+  return rval;
 }
 
 static inline void
@@ -419,48 +438,20 @@ gt_ht_save_entry_to_array(void *elem, void *data, GT_UNUSED GtError *err)
   return CONTINUE_ITERATION;
 }
 
-int gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
-                                 void *data, GtCompare cmp, GtError *err)
-{
-  GtArray *hash_entries;
-  void *elem;
-  unsigned long i;
-  int had_err;
-  gt_error_check(err);
-  gt_assert(ht && iter && cmp);
-  hash_entries = gt_array_new(ht->table_info.elem_size);
-  {
-    struct hash_to_array_data visitor_data = { ht->table_info.elem_size,
-                                               hash_entries };
-    had_err = gt_hashtable_foreach(ht, gt_ht_save_entry_to_array, &visitor_data,
-                                err);
-  }
-  if (!had_err) {
-    size_t hash_size;
-    gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
-               gt_array_elem_size(hash_entries), data, (GtCompareWithData)cmp);
-    hash_size = gt_array_size(hash_entries);
-    gt_assert(hash_size == gt_hashtable_fill(ht));
-    for (i = 0; !had_err && i < hash_size; i++) {
-      elem = gt_array_get(hash_entries, i);
-      had_err = iter(elem, data, err);
-    }
-  }
-  gt_array_delete(hash_entries);
-  return had_err;
-}
-
 int gt_hashtable_foreach_in_default_order(GtHashtable *ht, Elemvisitfunc iter,
                                           void *data, GtError *err)
 {
   return gt_hashtable_foreach_ordered(ht, iter, data, ht->table_info.cmp, err);
 }
 
-int gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
-                         GtError *err)
+static int gt_hashtable_foreach_g(GtHashtable *ht, Elemvisitfunc visitor,
+                                  void *data, GtError *err, bool lock)
 {
   htsize_t i, table_size = ht->table_mask + 1, deletion_count = 0;
   jmp_buf env;
+  if (lock) {
+    gt_rwlock_wrlock(ht->lock);
+  }
   while (setjmp(env))
     ;
   for (i = 0; i < table_size; ++i)
@@ -478,6 +469,9 @@ int gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
         case CONTINUE_ITERATION:
           break;
         case STOP_ITERATION:
+          if (lock) {
+           gt_rwlock_unlock(ht->lock);
+          }
           return -1;
         case DELETED_ELEM:
           {
@@ -513,13 +507,58 @@ int gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
   if (deletion_count &&
       ht->current_fill < ht->low_fill)
     gt_ht_shrink(ht);
+  if (lock) {
+    gt_rwlock_unlock(ht->lock);
+  }
   return 0;
+}
+
+int gt_hashtable_foreach_ordered(GtHashtable *ht, Elemvisitfunc iter,
+                                 void *data, GtCompare cmp, GtError *err)
+{
+  GtArray *hash_entries;
+  void *elem;
+  unsigned long i;
+  int had_err;
+  gt_error_check(err);
+  gt_assert(ht && iter && cmp);
+  gt_rwlock_wrlock(ht->lock);
+  hash_entries = gt_array_new(ht->table_info.elem_size);
+  {
+    struct hash_to_array_data visitor_data = { ht->table_info.elem_size,
+                                               hash_entries };
+
+    had_err = gt_hashtable_foreach_g(ht, gt_ht_save_entry_to_array,
+                                     &visitor_data, err, false);
+  }
+  gt_rwlock_unlock(ht->lock);
+  if (!had_err) {
+    size_t hash_size;
+    gt_qsort_r(gt_array_get_space(hash_entries), gt_array_size(hash_entries),
+               gt_array_elem_size(hash_entries), data, (GtCompareWithData)cmp);
+    hash_size = gt_array_size(hash_entries);
+    gt_assert(hash_size == gt_hashtable_fill(ht));
+    for (i = 0; !had_err && i < hash_size; i++) {
+      elem = gt_array_get(hash_entries, i);
+      had_err = iter(elem, data, err);
+    }
+  }
+  gt_array_delete(hash_entries);
+  return had_err;
+}
+
+int gt_hashtable_foreach(GtHashtable *ht, Elemvisitfunc visitor, void *data,
+                         GtError *err)
+{
+  return gt_hashtable_foreach_g(ht, visitor, data, err, true);
 }
 
 size_t gt_hashtable_fill(GtHashtable *ht)
 {
+  size_t rval;
   gt_assert(ht);
-  return ht->current_fill;
+  rval = ht->current_fill;
+  return rval;
 }
 
 #define gt_ht_internal_foreach(ht,visitcode)                    \
@@ -542,26 +581,31 @@ size_t gt_hashtable_fill(GtHashtable *ht)
 void gt_hashtable_reset(GtHashtable *ht)
 {
   gt_assert(ht);
-  FreeFuncWData free_elem_with_data =
-    ht->table_info.free_op.free_elem_with_data;
+  FreeFuncWData free_elem_with_data;
+  gt_rwlock_wrlock(ht->lock);
+  free_elem_with_data = ht->table_info.free_op.free_elem_with_data;
   if (free_elem_with_data)
     gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
   ht->current_fill = 0;
   gt_ht_reinit(ht, ht->table_info, MIN_SIZE_LOG, DEFAULT_HIGH_MUL,
             DEFAULT_LOW_MUL);
+  gt_rwlock_unlock(ht->lock);
 }
 
 void gt_hashtable_delete(GtHashtable *ht)
 {
   if (ht)
   {
-    FreeFuncWData free_elem_with_data =
-      ht->table_info.free_op.free_elem_with_data;
+    FreeFuncWData free_elem_with_data;
+    gt_rwlock_wrlock(ht->lock);
+    free_elem_with_data = ht->table_info.free_op.free_elem_with_data;
     if (free_elem_with_data)
       gt_ht_internal_foreach(ht, free_elem_with_data(elem, table_data));
     gt_ht_destruct(ht);
     if (ht->table_info.table_data_free)
       ht->table_info.table_data_free(ht->table_info.table_data);
+    gt_rwlock_unlock(ht->lock);
+    gt_rwlock_delete(ht->lock);
     gt_free(ht);
   }
 }
