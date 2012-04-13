@@ -67,6 +67,7 @@ unsigned long gt_contfinder_discarded_length(GtContfinder *contfinder);
 unsigned long gt_contfinder_read_length(GtContfinder *contfinder);
 
 void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder,
-    bool mirrored);
+    bool mirrored, unsigned long offset, unsigned long depth,
+    bool print);
 
 #endif

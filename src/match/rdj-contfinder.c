@@ -1713,17 +1713,18 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
 #include "match/rdj-radixsort.h"
 
 void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder,
-    bool mirrored)
+    bool mirrored, unsigned long offset, unsigned long depth, bool print)
 {
   unsigned long *suffixes, totallength, width, i;
   totallength = (unsigned long)contfinder->nofseqs * contfinder->len - 1;
-  width = mirrored ? ((totallength + 1) << 1) : (totallength + 1);
+  width = (mirrored ? ((totallength + 1) << 1) : (totallength + 1));
   suffixes = gt_malloc(sizeof (unsigned long) * width);
   for (i = 0; i < width; i++)
     suffixes[i] = i;
-  gt_radixsort_eqlen(contfinder->twobitencoding, suffixes, 0, 0,
-      width, (unsigned long)contfinder->len, totallength);
-  for (i = 0; i < width; i++)
-    printf("%lu\n", suffixes[i]);
+  gt_radixsort_eqlen(contfinder->twobitencoding, suffixes, offset, depth,
+      width - offset, (unsigned long)contfinder->len, totallength);
+  if (print)
+    for (i = 0; i < width; i++)
+      printf("%lu\n", suffixes[i]);
   gt_free(suffixes);
 }
