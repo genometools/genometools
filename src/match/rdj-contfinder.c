@@ -1715,7 +1715,8 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
 #include "match/radixsort_str.h"
 
 void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
-    bool mirrored, unsigned long offset, unsigned long depth, bool print)
+    bool mirrored, unsigned long offset, unsigned long depth,
+    unsigned long maxdepth, bool print)
 {
   unsigned long *suffixes, totallength, width, i;
   totallength = (unsigned long)contfinder->nofseqs * contfinder->len - 1;
@@ -1724,7 +1725,7 @@ void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
   for (i = 0; i < width; i++)
     suffixes[i] = i;
   gt_radixsort_str_eqlen(contfinder->twobitencoding, suffixes, offset, depth,
-      width - offset, (unsigned long)contfinder->len, totallength);
+      maxdepth, width - offset, (unsigned long)contfinder->len, totallength);
   if (print)
     for (i = 0; i < width; i++)
       printf("%lu\n", suffixes[i]);

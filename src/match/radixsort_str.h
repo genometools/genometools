@@ -22,6 +22,7 @@
  * *suffixes + offset = position of first suffix to sort
  * width = number of suffixes to sort
  * depth = start sorting at given depth
+ * maxdepth = stop sorting at given depth (0 means infinite)
  *
  * totallength = "real" length (not the mirror logical length)
  * seqlen = sequence length, including the separator
@@ -30,6 +31,7 @@
 
 void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     unsigned long *suffixes, unsigned long offset, unsigned long depth,
-    unsigned long width, unsigned long seqlen, unsigned long totallength);
+    unsigned long maxdepth, unsigned long width, unsigned long seqlen,
+    unsigned long totallength);
 
 #endif

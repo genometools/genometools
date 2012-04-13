@@ -55,6 +55,11 @@ typedef struct {
   (size_t)(((1 << (GT_RADIXSORT_STR_KMERSIZE << 1)) * \
         GT_RADIXSORT_STR_KMERSIZE) + 1)
 
+#define GT_RADIXSORT_STR_LAST_BUCKET (GT_RADIXSORT_STR_NOFBUCKETS - 1)
+
+#define GT_RADIXSORT_STR_HAS_OVERFLOW(CODE) \
+  (((CODE) & 3) > 0 || (CODE == GT_RADIXSORT_STR_LAST_BUCKET))
+
 #define GT_RADIXSORT_STR_BUCKETNUM(CODE, OVERFLOW) \
   (((gt_radixsort_str_bucketnum_t)(CODE) << GT_RADIXSORT_STR_KMERSIZELOG) + \
    (OVERFLOW))
@@ -95,7 +100,7 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
   gt_radixsort_str_kmercode_t code;
   unsigned long remaining, pos = suffixnum + depth;
   if (suffixnum % seqlen + depth > seqlen - 2)
-    return GT_RADIXSORT_STR_NOFBUCKETS - 1;
+    return GT_RADIXSORT_STR_LAST_BUCKET;
   if (suffixnum <= totallength)
   {
     remaining = seqlen - 1 - pos % seqlen;
@@ -127,7 +132,8 @@ GT_STACK_DECLARESTRUCT(GtRadixsortStrBucketInfo, 1024);
 
 static inline void gt_radixsort_str_insertionsort(
     const GtTwobitencoding *twobitencoding, unsigned long seqlen,
-    unsigned long totallength, const GtRadixsortStrBucketInfo *bucket)
+    unsigned long maxdepth, unsigned long totallength,
+    const GtRadixsortStrBucketInfo *bucket)
 {
   unsigned long i, j;
   for (i = 1UL; i < bucket->width; i++)
@@ -138,10 +144,12 @@ static inline void gt_radixsort_str_insertionsort(
       const unsigned long v = bucket->suffixes[j - 1];
       unsigned long depth;
       gt_radixsort_str_bucketnum_t unk = 0, vnk = 0;
+      gt_assert(maxdepth == 0 || bucket->depth <= maxdepth);
       int uvcmp = 0;
-      for (depth = bucket->depth; uvcmp == 0 && (unk & 3) == 0
-          && (vnk & 3) == 0 && unk != GT_RADIXSORT_STR_NOFBUCKETS - 1 &&
-          vnk != GT_RADIXSORT_STR_NOFBUCKETS - 1;
+      for (depth = bucket->depth;
+          (maxdepth == 0 || depth <= maxdepth)
+          && uvcmp == 0 && !GT_RADIXSORT_STR_HAS_OVERFLOW(unk) &&
+          !GT_RADIXSORT_STR_HAS_OVERFLOW(vnk);
           depth += GT_RADIXSORT_STR_KMERSIZE)
       {
         unk = gt_radixsort_str_get_code(twobitencoding, u, depth,
@@ -160,7 +168,8 @@ static inline void gt_radixsort_str_insertionsort(
 
 void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     unsigned long *suffixes, unsigned long offset, unsigned long depth,
-    unsigned long width, unsigned long seqlen, unsigned long totallength)
+    unsigned long maxdepth, unsigned long width, unsigned long seqlen,
+    unsigned long totallength)
 {
   unsigned long i;
   GtStackGtRadixsortStrBucketInfo stack;
@@ -170,6 +179,9 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
   gt_radixsort_str_bucketnum_t *oracle;
   GtRadixsortStrBucketInfo bucket;
   GtRadixsortStrBucketInfo subbucket;
+
+  gt_assert(maxdepth == 0 || depth <= maxdepth);
+  gt_assert(maxdepth == 0 || maxdepth <= seqlen);
 
   oracle = gt_malloc(sizeof (*oracle) * width);
   sorted = gt_malloc(sizeof (*sorted) * width);
@@ -206,7 +218,8 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
 
     subbucket.suffixes = bucket.suffixes;
     subbucket.depth = bucket.depth + GT_RADIXSORT_STR_KMERSIZE;
-    if (subbucket.depth < seqlen)
+    if (subbucket.depth < seqlen &&
+        (maxdepth == 0 || subbucket.depth <= maxdepth))
     {
       for (i = 0; i < (unsigned long)GT_RADIXSORT_STR_NOFBUCKETS; ++i)
       {
@@ -214,8 +227,8 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
         if (subbucket.width > 1UL)
         {
           if (subbucket.width <= GT_RADIXSORT_STR_INSERTION_SORT_MAX)
-            gt_radixsort_str_insertionsort(twobitencoding, seqlen, totallength,
-                &subbucket);
+            gt_radixsort_str_insertionsort(twobitencoding, seqlen, maxdepth,
+                totallength, &subbucket);
           else
           {
             GT_STACK_PUSH(&stack, subbucket);
