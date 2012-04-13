@@ -3,6 +3,12 @@
 # copy this file to .git/hooks (i.e., overwrite the file .git/hooks/pre-commit)
 # to perform source checks before commits
 
-find "$PWD/src" \( -path "$PWD/src/external" -prune \) -o \
-  \( -name "*.c" -o -name "*.h" \) -print0 | \
-  xargs -0 "$PWD/scripts/src_check"
+FILES=`git diff --cached --name-status HEAD | \
+  awk '$1 != "R" { print $2 }'       | \
+  grep -v -e 'src/external'          | \
+  grep -e '.*\.c$' -e '.*\.h$'`
+
+if [ ${#FILES} -gt 0 ]
+then
+  $PWD/scripts/src_check $FILES
+fi
