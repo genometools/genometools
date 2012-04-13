@@ -55,8 +55,6 @@ int gt_contfinder_run(GtContfinder *contfinder, bool rev, GtFile *outfp,
 
 void gt_contfinder_delete(GtContfinder *contfinder);
 
-void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder);
-
 unsigned long gt_contfinder_totallength_without_sep(GtContfinder *contfinder);
 
 unsigned long gt_contfinder_nofseqs(GtContfinder *contfinder);
@@ -67,5 +65,8 @@ unsigned long gt_contfinder_nofdiscarded(GtContfinder *contfinder);
 unsigned long gt_contfinder_discarded_length(GtContfinder *contfinder);
 
 unsigned long gt_contfinder_read_length(GtContfinder *contfinder);
+
+void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder,
+    bool mirrored);
 
 #endif

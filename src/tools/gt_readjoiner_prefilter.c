@@ -323,7 +323,8 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   {
     if (arguments->testrs)
     {
-      gt_contfinder_radixsort_eqlen_tester(contfinder);
+      gt_contfinder_radixsort_eqlen_tester(contfinder,
+          !arguments->singlestrand);
     }
     gt_contfinder_delete(contfinder);
     if (arguments->encseq && varlen)

@@ -460,16 +460,21 @@ def unpack_uint_array_file(i_filename, o_filename)
   o_file.close
 end
 
-%w{70x_100nt 30x_800nt}.each do |dataset|
-  Name "gt readjoiner: radixsort test (#{dataset})"
-  Keywords "gt_readjoiner gt_readjoiner_radixsort"
-  Test do
-    db = "#$testdata/readjoiner/#{dataset}.fas"
-    run_prefilter(db, "-testrs -encseq no -q")
-    radixsort_results = last_stdout
-    run "#{$bin}gt suffixerator -suf -db #{db} -mirrored -indexname i"
-    unpack_uint_array_file("i.suf", "i.suf.txt")
-    run "diff i.suf.txt #{radixsort_results}"
+[true, false].each do |singlestrand|
+  %w{70x_100nt 30x_800nt}.each do |dataset|
+    Name "gt readjoiner: radixsort test "+
+      "(#{dataset}#{', single strand' if singlestrand})"
+    Keywords "gt_readjoiner gt_readjoiner_radixsort"
+    Test do
+      db = "#$testdata/readjoiner/#{dataset}.fas"
+      run_prefilter(db, "-testrs -encseq no -q"+
+                    "#{' -singlestrand' if singlestrand}")
+      radixsort_results = last_stdout
+      run "#{$bin}gt suffixerator -suf -db #{db}"+
+        "#{' -mirrored' unless singlestrand} -indexname i"
+      unpack_uint_array_file("i.suf", "i.suf.txt")
+      run "diff i.suf.txt #{radixsort_results}"
+    end
   end
 end
 
