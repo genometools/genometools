@@ -125,19 +125,19 @@ GT_STACK_DECLARESTRUCT(GtRadixsortBucketInfo, 1024);
 
 static inline void gt_radixsort_insertionsort(GtTwobitencoding *twobitencoding,
     unsigned long seqlen, unsigned long totallength,
-    GtRadixsortBucketInfo bucket)
+    const GtRadixsortBucketInfo *bucket)
 {
   unsigned long i, j;
-  for (i = 1UL; i < bucket.width; i++)
+  for (i = 1UL; i < bucket->width; i++)
   {
-    const unsigned long u = bucket.suffixes[i];
+    const unsigned long u = bucket->suffixes[i];
     for (j = i; j > 0; j--)
     {
-      const unsigned long v = bucket.suffixes[j - 1];
+      const unsigned long v = bucket->suffixes[j - 1];
       unsigned long depth;
       gt_radixsort_bucketnum_t unk = 0, vnk = 0;
       int uvcmp = 0;
-      for (depth = bucket.depth; uvcmp == 0 && (unk & 3) == 0
+      for (depth = bucket->depth; uvcmp == 0 && (unk & 3) == 0
           && (vnk & 3) == 0 && unk != GT_RADIXSORT_NOFBUCKETS - 1 &&
           vnk != GT_RADIXSORT_NOFBUCKETS - 1; depth += GT_RADIXSORT_KMERSIZE)
       {
@@ -149,9 +149,9 @@ static inline void gt_radixsort_insertionsort(GtTwobitencoding *twobitencoding,
       }
       if (uvcmp <= 0)
         break;
-      bucket.suffixes[j] = v;
+      bucket->suffixes[j] = v;
     }
-    bucket.suffixes[j] = u;
+    bucket->suffixes[j] = u;
   }
 }
 
@@ -212,7 +212,7 @@ void gt_radixsort_eqlen(GtTwobitencoding *twobitencoding,
         {
           if (subbucket.width <= GT_RADIXSORT_INSERTION_SORT_MAX)
             gt_radixsort_insertionsort(twobitencoding, seqlen, totallength,
-                subbucket);
+                &subbucket);
           else
           {
             GT_STACK_PUSH(&stack, subbucket);
