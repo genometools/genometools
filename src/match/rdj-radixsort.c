@@ -86,7 +86,7 @@ static inline gt_radixsort_kmercode_t gt_radixsort_code_at_position(
 }
 
 static inline gt_radixsort_bucketnum_t gt_radixsort_get_code(
-    GtTwobitencoding *twobitencoding, unsigned long suffixnum,
+    const GtTwobitencoding *twobitencoding, unsigned long suffixnum,
     unsigned long depth, unsigned long seqlen, unsigned long totallength)
 {
   uint8_t overflow = 0;
@@ -123,9 +123,9 @@ static inline gt_radixsort_bucketnum_t gt_radixsort_get_code(
 
 GT_STACK_DECLARESTRUCT(GtRadixsortBucketInfo, 1024);
 
-static inline void gt_radixsort_insertionsort(GtTwobitencoding *twobitencoding,
-    unsigned long seqlen, unsigned long totallength,
-    const GtRadixsortBucketInfo *bucket)
+static inline void gt_radixsort_insertionsort(
+    const GtTwobitencoding *twobitencoding, unsigned long seqlen,
+    unsigned long totallength, const GtRadixsortBucketInfo *bucket)
 {
   unsigned long i, j;
   for (i = 1UL; i < bucket->width; i++)
@@ -155,9 +155,9 @@ static inline void gt_radixsort_insertionsort(GtTwobitencoding *twobitencoding,
   }
 }
 
-void gt_radixsort_eqlen(GtTwobitencoding *twobitencoding,
-    unsigned long *suffixes, unsigned long depth, unsigned long width,
-    unsigned long seqlen, unsigned long totallength)
+void gt_radixsort_eqlen(const GtTwobitencoding *twobitencoding,
+    unsigned long *suffixes, unsigned long offset, unsigned long depth,
+    unsigned long width, unsigned long seqlen, unsigned long totallength)
 {
   unsigned long i;
   GtStackGtRadixsortBucketInfo stack;
@@ -173,7 +173,7 @@ void gt_radixsort_eqlen(GtTwobitencoding *twobitencoding,
 
   GT_STACK_INIT(&stack, 1024UL);
 
-  bucket.suffixes = suffixes;
+  bucket.suffixes = suffixes + offset;
   bucket.width = width;
   bucket.depth = depth;
   GT_STACK_PUSH(&stack, bucket);

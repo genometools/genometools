@@ -917,23 +917,6 @@ static inline void gt_contfinder_random_access_decode(GtContfinder contfinder,
   *(nextdecoded) = '\0';
 }
 
-#include "match/rdj-radixsort.h"
-
-void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder)
-{
-  unsigned long *suffixes, totallength, width, i;
-  totallength = (unsigned long)contfinder->nofseqs * contfinder->len - 1;
-  width = ((totallength+1) << 1);
-  suffixes = gt_malloc(sizeof (unsigned long) * width);
-  for (i = 0; i < width; i++)
-    suffixes[i] = i;
-  gt_radixsort_eqlen(contfinder->twobitencoding, suffixes, 0,
-      width, (unsigned long)contfinder->len, totallength);
-  for (i = 0; i < width; i++)
-    printf("%lu\n", suffixes[i]);
-  gt_free(suffixes);
-}
-
 static void gt_contfinder_subtract_chardistri_of_contained(
     GtContfinder *contfinder, gt_contfinder_seqnum_t i)
 {
@@ -1725,4 +1708,21 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
     return NULL;
   }
   return contfinder;
+}
+
+#include "match/rdj-radixsort.h"
+
+void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder)
+{
+  unsigned long *suffixes, totallength, width, i;
+  totallength = (unsigned long)contfinder->nofseqs * contfinder->len - 1;
+  width = ((totallength+1) << 1);
+  suffixes = gt_malloc(sizeof (unsigned long) * width);
+  for (i = 0; i < width; i++)
+    suffixes[i] = i;
+  gt_radixsort_eqlen(contfinder->twobitencoding, suffixes, 0, 0,
+      width, (unsigned long)contfinder->len, totallength);
+  for (i = 0; i < width; i++)
+    printf("%lu\n", suffixes[i]);
+  gt_free(suffixes);
 }

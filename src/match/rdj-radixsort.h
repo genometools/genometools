@@ -19,14 +19,17 @@
 #define RDJ_RADIXSORT_H
 
 /*
+ * *suffixes + offset = position of first suffix to sort
  * width = number of suffixes to sort
- * totallength = "real" length, not the mirror logical length
- * seqlen = length of any internal sequence, ie. including the separator
+ * depth = start sorting at given depth
+ *
+ * totallength = "real" length (not the mirror logical length)
+ * seqlen = sequence length, including the separator
  *
  * */
 
-void gt_radixsort_eqlen(GtTwobitencoding *twobitencoding,
-    unsigned long *suffixes, unsigned long depth, unsigned long width,
-    unsigned long seqlen, unsigned long totallength);
+void gt_radixsort_eqlen(const GtTwobitencoding *twobitencoding,
+    unsigned long *suffixes, unsigned long offset, unsigned long depth,
+    unsigned long width, unsigned long seqlen, unsigned long totallength);
 
 #endif
