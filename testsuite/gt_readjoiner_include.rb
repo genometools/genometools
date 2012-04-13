@@ -464,12 +464,12 @@ def unpack_uint_array_file(i_filename, o_filename, low_filter = 0)
 end
 
 [true, false].each do |singlestrand|
-  [0, 100, 1000].each do |offset|
+  [0, 1000].each do |offset|
     %w{70x_100nt 30x_800nt}.each do |dataset|
-      Name "gt readjoiner: radixsort test "+
+      Name "gt readjoiner radixsort_str test "+
         "(#{dataset}, #{singlestrand ? 'single strand' : 'mirrored'}"+
         ", offset=#{offset})"
-      Keywords "gt_readjoiner gt_readjoiner_radixsort"
+      Keywords "gt_readjoiner radixsort_str"
       Test do
         db = "#$testdata/readjoiner/#{dataset}.fas"
         run_prefilter(db, "-testrs -encseq no -q"+

@@ -173,28 +173,28 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
 
   /* -testrs */
   testrs_option = gt_option_new_bool("testrs",
-      "run gt_radixsort test (match/radixsort.[ch])",
+      "run gt_radixsort_str test (match/radixsort_str.[ch])",
       &arguments->testrs, false);
   gt_option_is_development_option(testrs_option);
   gt_option_parser_add_option(op, testrs_option);
 
   /* -testrs-print */
   testrs_print_option = gt_option_new_bool("testrs-print",
-      "printf gt_radixsort test results",
+      "printf gt_radixsort_str test results",
       &arguments->testrs_print, true);
   gt_option_is_development_option(testrs_print_option);
   gt_option_parser_add_option(op, testrs_print_option);
 
   /* -testrs-offset */
   testrs_offset_option = gt_option_new_ulong("testrs-offset",
-      "offset for gt_radixsort test",
+      "offset for gt_radixsort_str test",
       &arguments->testrs_offset, 0);
   gt_option_is_development_option(testrs_offset_option);
   gt_option_parser_add_option(op, testrs_offset_option);
 
   /* -testrs-depth */
   testrs_depth_option = gt_option_new_ulong("testrs-depth",
-      "depth for gt_radixsort test",
+      "depth for gt_radixsort_str test",
       &arguments->testrs_depth, 0);
   gt_option_is_development_option(testrs_depth_option);
   gt_option_parser_add_option(op, testrs_depth_option);
@@ -348,7 +348,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
   {
     if (arguments->testrs)
     {
-      gt_contfinder_radixsort_eqlen_tester(contfinder,
+      gt_contfinder_radixsort_str_eqlen_tester(contfinder,
           !arguments->singlestrand, arguments->testrs_offset,
           arguments->testrs_depth, arguments->testrs_print);
     }

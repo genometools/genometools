@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RDJ_RADIXSORT_H
-#define RDJ_RADIXSORT_H
+#ifndef RADIXSORT_STR_H
+#define RADIXSORT_STR_H
 
 /*
  * *suffixes + offset = position of first suffix to sort
@@ -28,7 +28,7 @@
  *
  * */
 
-void gt_radixsort_eqlen(const GtTwobitencoding *twobitencoding,
+void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     unsigned long *suffixes, unsigned long offset, unsigned long depth,
     unsigned long width, unsigned long seqlen, unsigned long totallength);
 

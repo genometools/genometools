@@ -1710,9 +1710,11 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
   return contfinder;
 }
 
-#include "match/rdj-radixsort.h"
+/* radixsort_str tester */
 
-void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder,
+#include "match/radixsort_str.h"
+
+void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
     bool mirrored, unsigned long offset, unsigned long depth, bool print)
 {
   unsigned long *suffixes, totallength, width, i;
@@ -1721,7 +1723,7 @@ void gt_contfinder_radixsort_eqlen_tester(GtContfinder *contfinder,
   suffixes = gt_malloc(sizeof (unsigned long) * width);
   for (i = 0; i < width; i++)
     suffixes[i] = i;
-  gt_radixsort_eqlen(contfinder->twobitencoding, suffixes, offset, depth,
+  gt_radixsort_str_eqlen(contfinder->twobitencoding, suffixes, offset, depth,
       width - offset, (unsigned long)contfinder->len, totallength);
   if (print)
     for (i = 0; i < width; i++)
