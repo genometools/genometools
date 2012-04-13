@@ -23,6 +23,9 @@
 #include "match/rdj-radixsort.h"
 
 typedef uint8_t gt_radixsort_kmercode_t;
+/* note: if kmercode_t size is changed, then the RADIXSORT_REVCOMPL
+ * macro must be changed to handle the new size too */
+
 typedef uint16_t gt_radixsort_bucketnum_t;
 
 typedef struct {
@@ -32,6 +35,13 @@ typedef struct {
 } GtRadixsortBucketInfo;
 
 #define GT_RADIXSORT_INSERTION_SORT_MAX 31UL
+
+#define GT_RADIXSORT_UINT8_REVCOMPL(CODE) \
+  (GT_RADIXSORT_KMERCODE_MAX ^ \
+   (((((CODE) & (3 << 6)) >> 6) | (((CODE) & 3) << 6)) | \
+    ((((CODE) & (3 << 4)) >> 2) | (((CODE) & (3 << 2)) << 2))))
+
+#define GT_RADIXSORT_REVCOMPL(CODE) GT_RADIXSORT_UINT8_REVCOMPL(CODE)
 
 #define GT_RADIXSORT_KMERCODE_BITS    \
   (sizeof (gt_radixsort_kmercode_t) * CHAR_BIT)
@@ -43,11 +53,6 @@ typedef struct {
 
 #define GT_RADIXSORT_NOFBUCKETS \
   (size_t)(((1 << (GT_RADIXSORT_KMERSIZE << 1)) * GT_RADIXSORT_KMERSIZE) + 1)
-
-#define GT_RADIXSORT_REVCOMPL(CODE) \
-  (GT_RADIXSORT_KMERCODE_MAX ^ \
-   (((((CODE) & (3 << 6)) >> 6) | (((CODE) & 3) << 6)) | \
-    ((((CODE) & (3 << 4)) >> 2) | (((CODE) & (3 << 2)) << 2))))
 
 #define GT_RADIXSORT_BUCKETNUM(CODE, OVERFLOW) \
   (((gt_radixsort_bucketnum_t)(CODE) << GT_RADIXSORT_KMERSIZELOG) + (OVERFLOW))
