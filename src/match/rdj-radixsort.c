@@ -57,7 +57,7 @@ typedef struct {
 #define GT_RADIXSORT_BUCKETNUM(CODE, OVERFLOW) \
   (((gt_radixsort_bucketnum_t)(CODE) << GT_RADIXSORT_KMERSIZELOG) + (OVERFLOW))
 
-static gt_radixsort_kmercode_t gt_radixsort_code_at_position(
+static inline gt_radixsort_kmercode_t gt_radixsort_code_at_position(
     const GtTwobitencoding *twobitencoding, unsigned long pos)
 {
   unsigned int unitoffset = (unsigned int) GT_MODBYUNITSIN2BITENC(pos);
