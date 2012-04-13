@@ -445,7 +445,7 @@ Test do
   end
 end
 
-def unpack_uint_array_file(i_filename, o_filename)
+def unpack_uint_array_file(i_filename, o_filename, low_filter = 0)
   is64bit = Kernel.system("#{$bin}gt -64bit")
   sizeofint = is64bit ? 8 : 4
   unpackstr = is64bit ? "q" : "l"
@@ -454,26 +454,34 @@ def unpack_uint_array_file(i_filename, o_filename)
   loop do
     v = i_file.read(sizeofint)
     break if v.nil?
-    o_file.puts v.unpack(unpackstr)
+    value = v.unpack(unpackstr)[0]
+    if value >= low_filter
+      o_file.puts value
+    end
   end
   i_file.close
   o_file.close
 end
 
 [true, false].each do |singlestrand|
-  %w{70x_100nt 30x_800nt}.each do |dataset|
-    Name "gt readjoiner: radixsort test "+
-      "(#{dataset}#{', single strand' if singlestrand})"
-    Keywords "gt_readjoiner gt_readjoiner_radixsort"
-    Test do
-      db = "#$testdata/readjoiner/#{dataset}.fas"
-      run_prefilter(db, "-testrs -encseq no -q"+
-                    "#{' -singlestrand' if singlestrand}")
-      radixsort_results = last_stdout
-      run "#{$bin}gt suffixerator -suf -db #{db}"+
-        "#{' -mirrored' unless singlestrand} -indexname i"
-      unpack_uint_array_file("i.suf", "i.suf.txt")
-      run "diff i.suf.txt #{radixsort_results}"
+  [0, 100, 1000].each do |offset|
+    %w{70x_100nt 30x_800nt}.each do |dataset|
+      Name "gt readjoiner: radixsort test "+
+        "(#{dataset}, #{singlestrand ? 'single strand' : 'mirrored'}"+
+        ", offset=#{offset})"
+      Keywords "gt_readjoiner gt_readjoiner_radixsort"
+      Test do
+        db = "#$testdata/readjoiner/#{dataset}.fas"
+        run_prefilter(db, "-testrs -encseq no -q"+
+                      "#{' -singlestrand' if singlestrand}"+
+                      " -testrs-offset #{offset}")
+        run "tail +#{offset+1} #{last_stdout}"
+        radixsort_results = last_stdout
+        run "#{$bin}gt suffixerator -suf -db #{db}"+
+          "#{' -mirrored' unless singlestrand} -indexname i"
+        unpack_uint_array_file("i.suf", "i.suf.txt", offset)
+        run "diff i.suf.txt #{radixsort_results}"
+      end
     end
   end
 end
