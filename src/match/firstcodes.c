@@ -147,27 +147,6 @@ static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
   }
 }
 
-static const unsigned long *gt_firstcodes_findcodelinear(
-                                             unsigned long *newcode,
-                                             const unsigned long *startptr,
-                                             const unsigned long *endptr,
-                                             unsigned long code,
-                                             unsigned long previouscode)
-{
-  const unsigned long *ptr;
-
-  for (ptr = startptr; ptr <= endptr; ptr++)
-  {
-    previouscode += *ptr;
-    if (code <= previouscode)
-    {
-      *newcode = previouscode;
-      return ptr;
-    }
-  }
-  return NULL;
-}
-
 static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
                                              unsigned int addbscache_depth)
 {
@@ -302,16 +281,17 @@ const unsigned long *gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
   }
   if (leftptr <= rightptr)
   {
-    const unsigned long *ret;
-    unsigned long newcode;
+    const unsigned long *ptr;
 
-    gt_assert(previouscode != ULONG_MAX);
-    ret = gt_firstcodes_findcodelinear(&newcode,leftptr,rightptr,code,
-                                       previouscode);
-    if (ret != NULL)
+    for (ptr = leftptr; ptr <= rightptr; ptr++)
     {
-      found = ret;
-      *foundcode = newcode;
+      previouscode += *ptr;
+      if (code <= previouscode)
+      {
+        *foundcode = previouscode;
+        found = ptr;
+        break;
+      }
     }
   }
   return found;
