@@ -46,6 +46,9 @@ typedef struct
   GtStr *outfilenameleftborder;
   unsigned long lastincremented_idx;
   uint32_t *lastincremented_valueptr;
+  unsigned long differencemask, /* for extracting the difference */
+                countmask;
+  unsigned int rshiftforcounts;
 #ifdef _LP64
   uint32_t modvaluemask;
   unsigned int modvaluebits;

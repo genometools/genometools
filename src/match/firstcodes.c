@@ -126,17 +126,32 @@ static void gt_storefirstcodes(void *processinfo,
 
 static void init_firstcodes_differences(GtFirstcodesinfo *fci)
 {
-  unsigned long idx, previouscode, currentcode;
+  unsigned long idx, previouscode, maxdifference = 0;
+  unsigned int bitsformax, bitsforcount;
 
   fci->allfirstcodes0 = previouscode = fci->allfirstcodes[0];
   fci->allfirstcodes[0] = 0; /* to allow using the higher bits */
   for (idx=1UL; idx < fci->differentcodes; idx++)
   {
-    currentcode = fci->allfirstcodes[idx];
+    unsigned long difference,
+                  currentcode = fci->allfirstcodes[idx];
     gt_assert(previouscode < currentcode);
-    fci->allfirstcodes[idx] = currentcode - previouscode;
+    difference = currentcode - previouscode;
+    if (difference > maxdifference)
+    {
+      maxdifference = difference;
+    }
+    fci->allfirstcodes[idx] = difference;
     previouscode = currentcode;
   }
+  bitsformax = gt_determinebitspervalue(maxdifference);
+  fci->tab.differencemask = (1UL << bitsformax) - 1UL;
+  gt_assert(sizeof (unsigned long) * CHAR_BIT >= (size_t) bitsformax);
+  bitsforcount = (unsigned int) sizeof (unsigned long) * CHAR_BIT - bitsformax;
+  fci->tab.countmask = (1UL << bitsforcount) - 1UL;
+  fci->tab.rshiftforcounts = bitsformax;
+  printf("maxdifference=%lu,bitsformax=%u,bitsforcount=%u\n",
+          maxdifference,bitsformax,bitsforcount);
 }
 
 static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
@@ -188,16 +203,6 @@ static void gt_firstcodes_fillbinsearchcache(GtFirstcodesinfo *fci,
              (unsigned long) allocbytes);
   GT_FCI_ADDWORKSPACE(fci->fcsl,"binsearchcache",allocbytes);
 }
-
-#define SHOWFOUND(F)\
-        if ((F) == NULL)\
-        {\
-          fprintf(stderr,"%s = NULL\n",#F);\
-        } else\
-        {\
-          fprintf(stderr,"%s = %lu\n",#F,\
-                   (unsigned long) ((F) - fci->allfirstcodes));\
-        }
 
 const unsigned long *gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
                                              unsigned long *foundcode,
@@ -285,15 +290,16 @@ const unsigned long *gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
   }
   if (leftptr <= rightptr)
   {
-    const unsigned long *ptr;
+    const unsigned long *diff_ptr;
 
-    for (ptr = leftptr; ptr <= rightptr; ptr++)
+    for (diff_ptr = leftptr; diff_ptr <= rightptr; diff_ptr++)
     {
-      previouscode += *ptr;
+#define GT_FCI_EXTRACTDIFF(VAL) ((VAL) & fci->tab.differencemask)
+      previouscode += GT_FCI_EXTRACTDIFF(*diff_ptr);
       if (code <= previouscode)
       {
         *foundcode = previouscode;
-        found = ptr;
+        found = diff_ptr;
         break;
       }
     }
@@ -356,7 +362,7 @@ static unsigned long gt_firstcodes_accumulatecounts_merge(
       if (subjectindex < fci->differentcodes - 1)
       {
         subjectindex++;
-        subjectcode += fci->allfirstcodes[subjectindex];
+        subjectcode += GT_FCI_EXTRACTDIFF(fci->allfirstcodes[subjectindex]);
       } else
       {
         break;
