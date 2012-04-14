@@ -82,7 +82,8 @@ typedef struct
   GtSfxmappedrange *mappedleftborder,
                    *mappedallfirstcodes,
                    *mappedmarkprefix;
-  unsigned long *allfirstcodes;
+  unsigned long *allfirstcodes,
+                allfirstcodes0; /* entry at index 0 */
   GtFirstcodesspacelog *fcsl;
   GtCodeposbuffer buf;
   GtFirstcodestab tab;
@@ -127,7 +128,8 @@ static void init_firstcodes_differences(GtFirstcodesinfo *fci)
 {
   unsigned long idx, previouscode, currentcode;
 
-  previouscode = fci->allfirstcodes[0];
+  fci->allfirstcodes0 = previouscode = fci->allfirstcodes[0];
+  fci->allfirstcodes[0] = 0; /* to allow using the higher bits */
   for (idx=1UL; idx < fci->differentcodes; idx++)
   {
     currentcode = fci->allfirstcodes[idx];
@@ -141,6 +143,8 @@ static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
 {
   unsigned long idx;
 
+  fci->allfirstcodes[0] = fci->allfirstcodes0;
+  fci->allfirstcodes0 = ULONG_MAX;
   for (idx=1UL; idx < fci->differentcodes; idx++)
   {
     fci->allfirstcodes[idx] += fci->allfirstcodes[idx-1];
@@ -202,9 +206,9 @@ const unsigned long *gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
   const unsigned long *found = NULL, *leftptr = NULL, *rightptr = NULL;
   unsigned long previouscode = ULONG_MAX;
 
-  if (code <= fci->allfirstcodes[0])
+  if (code <= fci->allfirstcodes0)
   {
-    *foundcode = fci->allfirstcodes[0];
+    *foundcode = fci->allfirstcodes0;
     return fci->allfirstcodes;
   }
   *foundcode = ULONG_MAX;
@@ -235,9 +239,9 @@ const unsigned long *gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
             previouscode = (leftic-1)->code;
           } else
           {
-            gt_assert(code > fci->allfirstcodes[0]);
+            gt_assert(code > fci->allfirstcodes0);
             leftptr = fci->allfirstcodes + 1;
-            previouscode = fci->allfirstcodes[0];
+            previouscode = fci->allfirstcodes0;
           }
           rightptr = rightic->ptr - 1;
           break;
@@ -276,7 +280,7 @@ const unsigned long *gt_firstcodes_find_accu(const GtFirstcodesinfo *fci,
   } else
   {
     leftptr = fci->allfirstcodes + 1;
-    previouscode = fci->allfirstcodes[0];
+    previouscode = fci->allfirstcodes0;
     rightptr = fci->allfirstcodes + fci->differentcodes - 1;
   }
   if (leftptr <= rightptr)
@@ -1123,7 +1127,6 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
                 fci->codebuffer_total,
                 100.0 * (double) fci->codebuffer_total/
                                  gt_encseq_total_length(encseq));
-  restore_allfirstcodes_from_differences(fci);
   if (fci->firstcodehits > 0)
   {
     gt_assert(fci->flushcount > 0);
@@ -1138,10 +1141,6 @@ static void gt_firstcodes_accumulatecounts_run(GtFirstcodesinfo *fci,
   gt_radixsort_delete(fci->radixsort_code);
   fci->radixsort_code = NULL;
   GT_FCI_SUBTRACTWORKSPACE(fci->fcsl,"radixsort_code");
-  if (timer != NULL)
-  {
-    gt_timer_show_progress(timer,"to compute partial sums",stdout);
-  }
 }
 
 static void gt_firstcodes_map_sections(GtFirstcodesinfo *fci,
@@ -1582,7 +1581,12 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                        logger,
                                        timer);
     suftabentries = fci.firstcodehits + fci.numofsequences;
+    if (timer != NULL)
+    {
+      gt_timer_show_progress(timer,"to compute partial sums",stdout);
+    }
     maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,&fci.tab,suftabentries);
+    restore_allfirstcodes_from_differences(&fci);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
