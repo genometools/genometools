@@ -17,7 +17,7 @@
 
 #include <string.h>
 #include "core/assert_api.h"
-#include "core/fileutils_api.h"
+#include "core/fileutils.h"
 #include "core/gtdatapath.h"
 
 #define GTDATADIR "/gtdata"
@@ -33,7 +33,7 @@ GtStr* gt_get_gtdata_path(const char *prog, GtError *err)
   gt_error_check(err);
   gt_assert(prog);
   path = gt_str_new();
-  had_err = gt_file_find_in_path(path, prog, err);
+  had_err = gt_file_find_exec_in_path(path, prog, err);
   if (!had_err) {
     gt_assert(gt_str_length(path));
     gt_str_append_cstr(path, GTDATADIR);
