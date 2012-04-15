@@ -26,8 +26,7 @@
 
 typedef struct
 {
-  const unsigned long *afcptr;
-  unsigned long code;
+  unsigned long afcindex, code;
 } GtIndexwithcode;
 
 struct GtArrayGtIndexwithcode
@@ -82,8 +81,8 @@ void gt_firstcodes_binsearchcache_fill(GtArrayGtIndexwithcode *binsearchcache,
     {
       gt_assert(current < differentcodes);
       binsearchcache->spaceGtIndexwithcode
-               [binsearchcache->nextfreeGtIndexwithcode].afcptr
-                  = allfirstcodes + current;
+               [binsearchcache->nextfreeGtIndexwithcode].afcindex
+                  = current;
       binsearchcache->spaceGtIndexwithcode
                [binsearchcache->nextfreeGtIndexwithcode++].code
                   = allfirstcodes[current];
@@ -112,20 +111,20 @@ unsigned long gt_firstcodes_binsearchcache_allfirstcodes0(
   return binsearchcache->allfirstcodes0;
 }
 
-const unsigned long *gt_firstcodes_find_accu(
-                                 unsigned long *foundcode,
-                                 const unsigned long *allfirstcodes,
-                                 unsigned long differentcodes,
-                                 const GtArrayGtIndexwithcode *binsearchcache,
-                                 unsigned long code)
+unsigned long gt_firstcodes_find_accu(unsigned long *foundcode,
+                                      const unsigned long *allfirstcodes,
+                                      unsigned long differentcodes,
+                                      const GtArrayGtIndexwithcode
+                                         *binsearchcache,
+                                      unsigned long code)
 {
-  const unsigned long *found = NULL, *leftptr = NULL, *rightptr = NULL;
-  unsigned long previouscode = ULONG_MAX;
+  unsigned long leftptr = ULONG_MAX, rightptr = ULONG_MAX,
+                foundindex = ULONG_MAX, previouscode = ULONG_MAX;
 
   if (code <= binsearchcache->allfirstcodes0)
   {
     *foundcode = binsearchcache->allfirstcodes0;
-    return allfirstcodes;
+    return 0;
   }
   *foundcode = ULONG_MAX;
   if (binsearchcache->spaceGtIndexwithcode != NULL)
@@ -141,26 +140,27 @@ const unsigned long *gt_firstcodes_find_accu(
       midic = leftic + GT_DIV2((unsigned long) (rightic-leftic));
       if (code < midic->code)
       {
-        found = midic->afcptr;
+        foundindex = midic->afcindex;
         *foundcode = midic->code;
         if (depth < binsearchcache->depth)
         {
           rightic = midic - 1;
         } else
         {
-          gt_assert(leftic->afcptr != NULL && rightic->afcptr != NULL);
+          gt_assert(leftic->afcindex != ULONG_MAX &&
+                    rightic->afcindex != ULONG_MAX);
           if (leftic > binsearchcache->spaceGtIndexwithcode)
           {
-            leftptr = (leftic-1)->afcptr + 1;
+            leftptr = (leftic-1)->afcindex + 1;
             previouscode = (leftic-1)->code;
           } else
           {
             gt_assert(code > binsearchcache->allfirstcodes0);
-            leftptr = allfirstcodes + 1;
+            leftptr = 1UL;
             previouscode = binsearchcache->allfirstcodes0;
           }
-          gt_assert(rightic->afcptr > allfirstcodes);
-          rightptr = rightic->afcptr - 1;
+          gt_assert(rightic->afcindex > 0);
+          rightptr = rightic->afcindex - 1;
           break;
         }
       } else
@@ -172,49 +172,50 @@ const unsigned long *gt_firstcodes_find_accu(
             leftic = midic + 1;
           } else
           {
-            gt_assert(leftic->afcptr != NULL && rightic->afcptr != NULL);
-            leftptr = leftic->afcptr + 1;
+            gt_assert(leftic->afcindex != ULONG_MAX &&
+                      rightic->afcindex != ULONG_MAX);
+            leftptr = leftic->afcindex + 1;
             previouscode = leftic->code;
             if (rightic < binsearchcache->spaceGtIndexwithcode +
                           binsearchcache->nextfreeGtIndexwithcode - 1)
             {
-              gt_assert((rightic+1)->afcptr > allfirstcodes);
-              rightptr = (rightic+1)->afcptr - 1;
+              gt_assert((rightic+1)->afcindex > 0);
+              rightptr = (rightic+1)->afcindex - 1;
             } else
             {
-              rightptr = allfirstcodes + differentcodes - 1;
+              rightptr = differentcodes - 1;
             }
             break;
           }
         } else
         {
-          gt_assert(midic->afcptr != NULL);
+          gt_assert(midic->afcindex != ULONG_MAX);
           *foundcode = midic->code;
-          return midic->afcptr;
+          return midic->afcindex;
         }
       }
     }
-    gt_assert(leftptr != NULL && rightptr != NULL);
+    gt_assert(leftptr != ULONG_MAX && rightptr != ULONG_MAX);
   } else
   {
-    leftptr = allfirstcodes + 1;
+    leftptr = 1UL;
     previouscode = binsearchcache->allfirstcodes0;
-    rightptr = allfirstcodes + differentcodes - 1;
+    rightptr = differentcodes - 1;
   }
   if (leftptr <= rightptr)
   {
-    const unsigned long *diff_ptr;
+    unsigned long idx;
 
-    for (diff_ptr = leftptr; diff_ptr <= rightptr; diff_ptr++)
+    for (idx = leftptr; idx <= rightptr; idx++)
     {
-      previouscode += *diff_ptr; /* extract diff */
+      previouscode += allfirstcodes[idx]; /* extract diff */
       if (code <= previouscode)
       {
         *foundcode = previouscode;
-        found = diff_ptr;
+        foundindex = idx;
         break;
       }
     }
   }
-  return found;
+  return foundindex;
 }

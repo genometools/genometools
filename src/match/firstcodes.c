@@ -199,23 +199,21 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
 
   if (fci->buf.nextfree > 0)
   {
-    const unsigned long *found;
-    unsigned long foundcode;
+    unsigned long foundindex, foundcode;
 
     gt_assert(fci->allfirstcodes != NULL);
     fci->codebuffer_total += fci->buf.nextfree;
     gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
-    found = gt_firstcodes_find_accu(&foundcode,
-                                    fci->allfirstcodes,
-                                    fci->differentcodes,
-                                    fci->binsearchcache,
-                                    fci->buf.spaceGtUlong[0]);
-    if (found != NULL)
+    foundindex = gt_firstcodes_find_accu(&foundcode,
+                                         fci->allfirstcodes,
+                                         fci->differentcodes,
+                                         fci->binsearchcache,
+                                         fci->buf.spaceGtUlong[0]);
+    if (foundindex != ULONG_MAX)
     {
       fci->firstcodehits
         += gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,
-                                                (unsigned long)
-                                                (found - fci->allfirstcodes),
+                                                foundindex,
                                                 foundcode);
     }
     fci->flushcount++;

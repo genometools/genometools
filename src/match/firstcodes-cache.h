@@ -38,7 +38,7 @@ void gt_firstcodes_binsearchcache_delete(GtArrayGtIndexwithcode *binsearchcache,
 unsigned long gt_firstcodes_binsearchcache_allfirstcodes0(
                     const GtArrayGtIndexwithcode *binsearchcache);
 
-const unsigned long *gt_firstcodes_find_accu(
+unsigned long gt_firstcodes_find_accu(
                                  unsigned long *foundcode,
                                  const unsigned long *allfirstcodes,
                                  unsigned long differentcodes,
