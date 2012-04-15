@@ -39,12 +39,11 @@ struct GtArrayGtIndexwithcode
 };
 
 GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
-                                      const unsigned long *allfirstcodes,
+                                      unsigned long allfirstcodes0,
                                       unsigned long differentcodes,
                                       unsigned int addbscache_depth,
                                       GtFirstcodesspacelog *fcsl)
 {
-  size_t allocbytes = 0;
   GtArrayGtIndexwithcode *binsearchcache;
 
   binsearchcache = gt_malloc(sizeof (*binsearchcache));
@@ -54,14 +53,31 @@ GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
   binsearchcache->allocatedGtIndexwithcode = 1UL << (binsearchcache->depth+1);
   binsearchcache->width
     = differentcodes/binsearchcache->allocatedGtIndexwithcode;
-  binsearchcache->allfirstcodes0 = allfirstcodes[0];
+  binsearchcache->allfirstcodes0 = allfirstcodes0;
   if (binsearchcache->allocatedGtIndexwithcode < differentcodes)
+  {
+    size_t allocbytes = sizeof (*binsearchcache->spaceGtIndexwithcode)
+                        * binsearchcache->allocatedGtIndexwithcode;
+    binsearchcache->spaceGtIndexwithcode = gt_malloc(allocbytes);
+    gt_log_log("binsearchcache->depth=%u => %lu bytes",
+               binsearchcache->depth,
+               (unsigned long) allocbytes);
+    GT_FCI_ADDWORKSPACE(fcsl,"binsearchcache",allocbytes);
+  } else
+  {
+    binsearchcache->spaceGtIndexwithcode = NULL;
+  }
+  return binsearchcache;
+}
+
+void gt_firstcodes_binsearchcache_fill(GtArrayGtIndexwithcode *binsearchcache,
+                                       const unsigned long *allfirstcodes,
+                                       unsigned long differentcodes)
+{
+  if (binsearchcache->spaceGtIndexwithcode != NULL)
   {
     unsigned long idx, current = binsearchcache->width;
 
-    allocbytes = sizeof (*binsearchcache->spaceGtIndexwithcode)
-                 * binsearchcache->allocatedGtIndexwithcode;
-    binsearchcache->spaceGtIndexwithcode = gt_malloc(allocbytes);
     for (idx=0; idx < binsearchcache->allocatedGtIndexwithcode; idx++)
     {
       gt_assert(current < differentcodes);
@@ -73,15 +89,7 @@ GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
                   = allfirstcodes[current];
       current += binsearchcache->width;
     }
-  } else
-  {
-    binsearchcache->spaceGtIndexwithcode = NULL;
   }
-  gt_log_log("binsearchcache->depth=%u => %lu bytes",
-             binsearchcache->depth,
-             (unsigned long) allocbytes);
-  GT_FCI_ADDWORKSPACE(fcsl,"binsearchcache",allocbytes);
-  return binsearchcache;
 }
 
 void gt_firstcodes_binsearchcache_delete(GtArrayGtIndexwithcode *binsearchcache,

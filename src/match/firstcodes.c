@@ -1421,10 +1421,13 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     fci.flushcount = 0;
     fci.codebuffer_total = 0;
     fci.binsearchcache
-      = gt_firstcodes_binsearchcache_new(fci.allfirstcodes,
+      = gt_firstcodes_binsearchcache_new(fci.allfirstcodes[0],
                                          fci.differentcodes,
                                          addbscache_depth,
                                          fci.fcsl);
+    gt_firstcodes_binsearchcache_fill(fci.binsearchcache,
+                                      fci.allfirstcodes,
+                                      fci.differentcodes);
     init_firstcodes_differences(&fci);
     if (gt_firstcodes_allocspace(&fci,
                                  numofparts,
