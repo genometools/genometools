@@ -162,8 +162,26 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     fct->differentcodes = 0;
   } else
   {
-    unsigned long numofdifferentcodes, *storeptr, *readptr;
+    unsigned long numofdifferentcodes, *storeptr, *readptr,
+                  previouscode, idx, numofdifferentcodes2 = 1UL,
+                  maxdifference = 0;
 
+    previouscode = allfirstcodes[0];
+    for (idx=1UL; idx < numofsequences; idx++)
+    {
+      unsigned long currentcode = allfirstcodes[idx];
+      if (previouscode != currentcode)
+      {
+        numofdifferentcodes2++;
+        if (maxdifference < currentcode - previouscode)
+        {
+          maxdifference = currentcode - previouscode;
+        }
+        previouscode = currentcode;
+      }
+    }
+    gt_logger_log(logger,"maximum difference of neighbored codes %lu",
+                  maxdifference);
     gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
     gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
@@ -190,6 +208,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                        firstincrement);
     }
     numofdifferentcodes = (unsigned long) (storeptr - allfirstcodes + 1);
+    gt_assert(numofdifferentcodes == numofdifferentcodes2);
     if (numofdifferentcodes < numofsequences)
     {
       /* reduce the memory requirement, as the duplicated elements are not
