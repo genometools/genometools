@@ -1287,8 +1287,6 @@ GtOPrval gth_parse_options(GthCallInfo *call_info, GthInput *input,
     gt_option_exclude(optxmlout, optshowseqnums);
   if (optexact && optedist)
     gt_option_exclude(optexact, optedist);
-  if (optintroncutout && optautointroncutout)
-    gt_option_exclude(optintroncutout, optautointroncutout);
   if (optmaskpolyatails && optnoautoindex)
     gt_option_exclude(optmaskpolyatails, optnoautoindex);
   if (optproteinsmap && optnoautoindex)
