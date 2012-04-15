@@ -163,7 +163,6 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   } else
   {
     unsigned long numofdifferentcodes, *storeptr, *readptr;
-    bool firstincrement;
 
     gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
     gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
@@ -173,11 +172,15 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
          readptr < allfirstcodes + numofsequences;
          readptr++)
     {
+      bool firstincrement;
+
       if (*storeptr != *readptr)
       {
         storeptr++;
         *storeptr = *readptr;
         firstincrement = true;
+        gt_marksubstring_mark(markprefix,*readptr);
+        gt_marksubstring_mark(marksuffix,*readptr);
       } else
       {
         firstincrement = false;
@@ -185,8 +188,6 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
       gt_firstcodes_countocc_increment(fct,(unsigned long)
                                        (storeptr - allfirstcodes),
                                        firstincrement);
-      gt_marksubstring_mark(markprefix,*readptr);
-      gt_marksubstring_mark(marksuffix,*readptr);
     }
     numofdifferentcodes = (unsigned long) (storeptr - allfirstcodes + 1);
     if (numofdifferentcodes < numofsequences)
