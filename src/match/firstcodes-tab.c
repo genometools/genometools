@@ -32,6 +32,7 @@
 #include "core/arraydef.h"
 #include "firstcodes-tab.h"
 #include "firstcodes-psbuf.h"
+#include "firstcodes-cache.h"
 
 static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
                                        GtFirstcodestab *fct,
@@ -155,6 +156,8 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     unsigned long numofsequences,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
+                                    GtArrayGtIndexwithcode **binsearchcache,
+                                    unsigned int addbscache_depth,
                                     GtLogger *logger)
 {
   if (numofsequences == 0)
@@ -162,9 +165,8 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     fct->differentcodes = 0;
   } else
   {
-    unsigned long numofdifferentcodes, *storeptr, *readptr,
-                  previouscode, idx, numofdifferentcodes2 = 1UL,
-                  maxdifference = 0;
+    unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode, 
+                  idx, maxdifference = 0, cachewidth, nextstorecache;
 
     previouscode = allfirstcodes[0];
     for (idx=1UL; idx < numofsequences; idx++)
@@ -172,7 +174,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
       unsigned long currentcode = allfirstcodes[idx];
       if (previouscode != currentcode)
       {
-        numofdifferentcodes2++;
+        numofdifferentcodes++;
         if (maxdifference < currentcode - previouscode)
         {
           maxdifference = currentcode - previouscode;
@@ -186,29 +188,44 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
     gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
-    for (storeptr = allfirstcodes, readptr = allfirstcodes+1;
-         readptr < allfirstcodes + numofsequences;
-         readptr++)
+    *binsearchcache
+      = gt_firstcodes_binsearchcache_new(numofdifferentcodes,
+                                         addbscache_depth,
+                                         fcsl);
+    cachewidth = (*binsearchcache) == NULL
+                   ? 0
+                   : gt_firstcodes_binsearchcache_width(*binsearchcache);
+    nextstorecache = cachewidth;
+    for (storeidx = 0, readidx = 1UL; readidx < numofsequences; readidx++)
     {
       bool firstincrement;
+      unsigned long storevalue = allfirstcodes[storeidx],
+                    readvalue = allfirstcodes[readidx];
 
-      if (*storeptr != *readptr)
+      if (storevalue != readvalue)
       {
-        storeptr++;
-        *storeptr = *readptr;
+        if ((*binsearchcache) != NULL && storeidx == nextstorecache)
+        {
+          gt_firstcodes_binsearchcache_set_index_code(*binsearchcache,
+                                                      nextstorecache,
+                                                      storevalue);
+          nextstorecache += cachewidth;
+        }
+        storeidx++;
+        if (storeidx != readidx)
+        {
+          allfirstcodes[storeidx] = readvalue;
+        }
+        gt_marksubstring_mark(markprefix,readvalue);
+        gt_marksubstring_mark(marksuffix,readvalue);
         firstincrement = true;
-        gt_marksubstring_mark(markprefix,*readptr);
-        gt_marksubstring_mark(marksuffix,*readptr);
       } else
       {
         firstincrement = false;
       }
-      gt_firstcodes_countocc_increment(fct,(unsigned long)
-                                       (storeptr - allfirstcodes),
-                                       firstincrement);
+      gt_firstcodes_countocc_increment(fct,storeidx,firstincrement);
     }
-    numofdifferentcodes = (unsigned long) (storeptr - allfirstcodes + 1);
-    gt_assert(numofdifferentcodes == numofdifferentcodes2);
+    gt_assert(numofdifferentcodes == (unsigned long) (storeidx + 1));
     if (numofdifferentcodes < numofsequences)
     {
       /* reduce the memory requirement, as the duplicated elements are not

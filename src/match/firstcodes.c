@@ -71,7 +71,8 @@ typedef struct
   GtSfxmappedrange *mappedleftborder,
                    *mappedallfirstcodes,
                    *mappedmarkprefix;
-  unsigned long *allfirstcodes;
+  unsigned long *allfirstcodes,
+                allfirstcodes0_save;
   GtFirstcodesspacelog *fcsl;
   GtCodeposbuffer buf;
   GtFirstcodestab tab;
@@ -148,8 +149,7 @@ static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
 {
   unsigned long idx;
 
-  fci->allfirstcodes[0]
-    = gt_firstcodes_binsearchcache_allfirstcodes0(fci->binsearchcache);
+  fci->allfirstcodes[0] = fci->allfirstcodes0_save;
   for (idx=1UL; idx < fci->differentcodes; idx++)
   {
     fci->allfirstcodes[idx] += fci->allfirstcodes[idx-1];
@@ -206,6 +206,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
     gt_radixsort_inplace_sort(fci->radixsort_code,fci->buf.nextfree);
     foundindex = gt_firstcodes_find_accu(&foundcode,
                                          fci->allfirstcodes,
+                                         fci->allfirstcodes0_save,
                                          fci->differentcodes,
                                          fci->binsearchcache,
                                          fci->buf.spaceGtUlong[0]);
@@ -854,6 +855,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
                                        GtReadmode readmode,
                                        unsigned int kmersize,
                                        unsigned int minmatchlength,
+                                       unsigned int addbscache_depth,
                                        GtLogger *logger,
                                        GtTimer *timer)
 {
@@ -892,12 +894,15 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
   GT_FCI_ADDWORKSPACE(fci->fcsl,"marksuffix",
                       (size_t) gt_marksubstring_size(fci->buf.marksuffix));
   gt_assert(fci->allfirstcodes != NULL);
+  fci->allfirstcodes0_save = fci->allfirstcodes[0];
   fci->differentcodes = gt_firstcodes_remdups(fci->allfirstcodes,
                                              fci->fcsl,
                                              &fci->tab,
                                              fci->numofsequences,
                                              fci->buf.markprefix,
                                              fci->buf.marksuffix,
+                                             &fci->binsearchcache,
+                                             addbscache_depth,
                                              logger);
   if (fci->differentcodes > 0 && fci->differentcodes < fci->numofsequences)
   {
@@ -1397,6 +1402,7 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                readmode,
                                kmersize,
                                minmatchlength,
+                               addbscache_depth,
                                logger,
                                timer);
     if (fci.differentcodes > 0 && onlyallfirstcodes)
@@ -1407,9 +1413,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
       gt_marksubstring_delete(fci.buf.markprefix,true);
       gt_marksubstring_delete(fci.buf.marksuffix,true);
       gt_firstcodes_countocc_delete(fci.fcsl,&fci.tab);
+      gt_firstcodes_binsearchcache_delete(fci.binsearchcache,fci.fcsl);
       gt_firstcodes_spacelog_delete(fci.fcsl);
       gt_seqnumrelpos_delete(fci.buf.snrp);
       gt_Sfxmappedrangelist_delete(sfxmrlist);
+      fci.binsearchcache = NULL;
       if (timer != NULL)
       {
         gt_timer_delete(timer);
@@ -1418,14 +1426,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     fci.flushcount = 0;
     fci.codebuffer_total = 0;
-    fci.binsearchcache
-      = gt_firstcodes_binsearchcache_new(fci.allfirstcodes[0],
-                                         fci.differentcodes,
-                                         addbscache_depth,
-                                         fci.fcsl);
-    gt_firstcodes_binsearchcache_fill(fci.binsearchcache,
-                                      fci.allfirstcodes,
-                                      fci.differentcodes);
     init_firstcodes_differences(&fci);
     if (gt_firstcodes_allocspace(&fci,
                                  numofparts,

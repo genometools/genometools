@@ -23,24 +23,29 @@
 typedef struct GtArrayGtIndexwithcode GtArrayGtIndexwithcode;
 
 GtArrayGtIndexwithcode *gt_firstcodes_binsearchcache_new(
-                                      unsigned long allfirstcodes0,
                                       unsigned long differentcodes,
                                       unsigned int addbscache_depth,
                                       GtFirstcodesspacelog *fcsl);
 
-void gt_firstcodes_binsearchcache_fill(GtArrayGtIndexwithcode *binsearchcache,
+void gt_firstcodes_binsearchcache_check(GtArrayGtIndexwithcode *binsearchcache,
                                        const unsigned long *allfirstcodes,
                                        unsigned long differentcodes);
 
 void gt_firstcodes_binsearchcache_delete(GtArrayGtIndexwithcode *binsearchcache,
                                          GtFirstcodesspacelog *fcsl);
 
-unsigned long gt_firstcodes_binsearchcache_allfirstcodes0(
-                    const GtArrayGtIndexwithcode *binsearchcache);
+unsigned long gt_firstcodes_binsearchcache_width(const GtArrayGtIndexwithcode
+                                                 *binsearchcache);
+
+void gt_firstcodes_binsearchcache_set_index_code(GtArrayGtIndexwithcode
+                                                 *binsearchcache,
+                                                 unsigned long afcindex,
+                                                 unsigned long code);
 
 unsigned long gt_firstcodes_find_accu(
                                  unsigned long *foundcode,
                                  const unsigned long *allfirstcodes,
+                                 unsigned long allfirstcodes0,
                                  unsigned long differentcodes,
                                  const GtArrayGtIndexwithcode *binsearchcache,
                                  unsigned long code);

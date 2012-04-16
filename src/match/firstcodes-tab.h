@@ -26,6 +26,7 @@
 #include "core/arraydef.h"
 #include "marksubstring.h"
 #include "firstcodes-spacelog.h"
+#include "firstcodes-cache.h"
 
 #define GT_FIRSTCODES_MAXSMALL UINT8_MAX
 
@@ -191,6 +192,8 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     unsigned long numofsequences,
                                     Gtmarksubstring *markprefix,
                                     Gtmarksubstring *marksuffix,
+                                    GtArrayGtIndexwithcode **binsearchcache,
+                                    unsigned int addbscache_depth,
                                     GtLogger *logger);
 
 #endif
