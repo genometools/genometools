@@ -167,8 +167,12 @@ int gt_encseq_compare_viatwobitencoding(GtCommonunits *commonunits,
 
 const GtTwobitencoding *gt_encseq_twobitencoding_export(const GtEncseq *encseq);
 
+/* The following two _mapoffset functions are for internal use only
+ * and required by gt readjoiner correct.
+ * They return an offset value by which the twobitencoding and the
+ * chardistri are found in the encseq representation, thus allowing to
+ * modify in place the representation by mapping the esq file. */
 size_t gt_encseq_twobitencoding_mapoffset(const GtEncseq *encseq);
-
 size_t gt_encseq_chardistri_mapoffset(const GtEncseq *encseq);
 
 /* Saves an encoded sequence characterized by the given parameters into the
