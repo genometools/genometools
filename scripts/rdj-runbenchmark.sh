@@ -321,13 +321,20 @@ function run_diff_spm {
   _PIPELINE=rdj
   _STEP=diff_spm
   _READSET=$1
+  _NOFSPMFILES=$2
   _REFRESULTSDIR=$HOME/data/refresults
   _CMD=diff
   _CMD_ARGS="-q -s"
   _CMD_ARGS+=" $_READSET.spm.txt.sorted"
   _CMD_ARGS+=" $_REFRESULTSDIR/$_READSET/$_READSET.spm.txt.sorted"
   __start
-  $GT readjoiner spmtest -test showlist -readset $_READSET > $_READSET.spm.txt
+  rm -f $_READSET.spm.txt
+  touch $_READSET.spm.txt
+  for (( i=0; i<=$[$_NOFSPMFILES -1]; i++ ))
+  do
+    $GT readjoiner spmtest -test showlist \
+      -readset $_READSET.$i >> $_READSET.spm.txt
+  done
   sort $_READSET.spm.txt > $_READSET.spm.txt.sorted
   __run_without_benchmark
   __end_without_parsetranscript
@@ -339,9 +346,12 @@ function run_diff_contigs {
   _READSET=$1
   _REFRESULTSDIR=$HOME/data/refresults
   _CMD=diff
-  _CMD_ARGS="-q -s $_READSET.contigs.fas "
-  _CMD_ARGS+="$_REFRESULTSDIR/$_READSET/$_READSET.contigs.fas"
+  _CMD_ARGS="-q -s $_READSET.contigs.raw "
+  _CMD_ARGS+="$_REFRESULTSDIR/$_READSET/$_READSET.contigs.raw"
   __start
+  $GT seq -recreate -showfasta -width 0 $_READSET.contigs.fas | \
+    grep -v '^>' | sort > $_READSET.contigs.raw
+  $GT clean
   __run_without_benchmark
   __end_without_parsetranscript
 }
