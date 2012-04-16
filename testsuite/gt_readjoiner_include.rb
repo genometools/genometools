@@ -418,7 +418,7 @@ end
 
 [1, 2].each do |varlen_test|
   Name "gt encseq2spm: different minlen values - test #{varlen_test}"
-  Keywords "gt_readjoiner gt_encseq2spm NEW"
+  Keywords "gt_readjoiner gt_encseq2spm"
   Test do
     encode_reads("#$testdata/readjoiner/varlen_#{varlen_test}.fas")
     [10, 13, 15, 33, 65, 84].each do |minlen|
@@ -428,7 +428,7 @@ end
 end
 
 Name "gt encseq2spm: different minlen values - test 3"
-Keywords "gt_readjoiner gt_encseq2spm NEW"
+Keywords "gt_readjoiner gt_encseq2spm"
 Test do
   run_prefilter("#$testdata/readjoiner/minlen_test.fas")
   run "#$bin/gt encseq2spm -l 14 -ii reads"
@@ -436,12 +436,53 @@ Test do
 end
 
 Name "gt readjoiner overlap: different min match lengths"
-Keywords "gt_readjoiner gt_readjoiner_overlap NEW"
+Keywords "gt_readjoiner gt_readjoiner_overlap"
 Test do
   run_prefilter("#$testdata/readjoiner/minlen_test.fas")
   2.upto(40) do |minlen|
     run_overlap(minlen)
     assert_nofspm(40 - minlen)
+  end
+end
+
+def unpack_uint_array_file(i_filename, o_filename, low_filter = 0)
+  is64bit = Kernel.system("#{$bin}gt -64bit")
+  sizeofint = is64bit ? 8 : 4
+  unpackstr = is64bit ? "q" : "l"
+  i_file = File.open(i_filename)
+  o_file = File.open(o_filename, "w")
+  loop do
+    v = i_file.read(sizeofint)
+    break if v.nil?
+    value = v.unpack(unpackstr)[0]
+    if value >= low_filter
+      o_file.puts value
+    end
+  end
+  i_file.close
+  o_file.close
+end
+
+[true, false].each do |singlestrand|
+  [0, 1000].each do |offset|
+    %w{70x_100nt 30x_800nt}.each do |dataset|
+      Name "gt readjoiner radixsort_str test "+
+        "(#{dataset}, #{singlestrand ? 'single strand' : 'mirrored'}"+
+        ", offset=#{offset})"
+      Keywords "gt_readjoiner radixsort_str"
+      Test do
+        db = "#$testdata/readjoiner/#{dataset}.fas"
+        run_prefilter(db, "-testrs -encseq no -q"+
+                      "#{' -singlestrand' if singlestrand}"+
+                      " -testrs-offset #{offset}")
+        run "tail +#{offset+1} #{last_stdout}"
+        radixsort_results = last_stdout
+        run "#{$bin}gt suffixerator -suf -db #{db}"+
+          "#{' -mirrored' unless singlestrand} -indexname i"
+        unpack_uint_array_file("i.suf", "i.suf.txt", offset)
+        run "diff i.suf.txt #{radixsort_results}"
+      end
+    end
   end
 end
 
@@ -507,3 +548,4 @@ if $gttestdata
   end
 
 end
+

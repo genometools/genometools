@@ -15,18 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef RDJ_RADIXSORT_H
-#define RDJ_RADIXSORT_H
+#ifndef RADIXSORT_STR_H
+#define RADIXSORT_STR_H
 
 /*
+ * *suffixes + offset = position of first suffix to sort
  * width = number of suffixes to sort
- * totallength = "real" length, not the mirror logical length
- * seqlen = length of any internal sequence, ie. including the separator
+ * depth = start sorting at given depth
+ * maxdepth = stop sorting at given depth (0 means infinite)
+ *
+ * totallength = "real" length (not the mirror logical length)
+ * seqlen = sequence length, including the separator
  *
  * */
 
-void gt_radixsort_eqlen(GtTwobitencoding *twobitencoding,
-    unsigned long *suffixes, unsigned long depth, unsigned long width,
-    unsigned long seqlen, unsigned long totallength);
+void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
+    unsigned long *suffixes, unsigned long offset, unsigned long depth,
+    unsigned long maxdepth, unsigned long width, unsigned long seqlen,
+    unsigned long totallength);
 
 #endif
