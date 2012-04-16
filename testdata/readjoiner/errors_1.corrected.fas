@@ -1,0 +1,12 @@
+>0
+cgatcgatcgtagctagctggcggcggcgtagct
+>1 (encseq pos 62 should be g, is a)
+gatcgatcgtagctagctggcggcggcgtagctt
+>2
+atcgatcgtagctagctggcggcggcgtagcttg
+>3
+tcgatcgtagctagctggcggcggcgtagcttgc
+>4
+cgtagctagctggcggcggcgtagcttgccgtgc
+>5
+cgattggcgggatcggcgtcgtatacggctagca

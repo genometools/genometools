@@ -37,7 +37,8 @@ Name "gt readjoiner correct"
 Keywords "gt_readjoiner gt_readjoiner_correct"
 Test do
   run_correct("#{$testdata}/readjoiner/errors_1.fas", 12, 2)
-  run "diff #{last_stdout} #{$testdata}/readjoiner/errors_1.editscript"
+  run "#{$bin}gt encseq decode reads"
+  run "diff #{last_stdout} #{$testdata}/readjoiner/errors_1.corrected.fas"
 end
 
 Name "gt readjoiner prefilter: correct encseq output (eqlen)"
