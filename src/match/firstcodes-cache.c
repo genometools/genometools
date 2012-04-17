@@ -101,7 +101,8 @@ void gt_firstcodes_binsearchcache_set_index_code(GtArrayGtIndexwithcode
 }
 
 void gt_firstcodes_binsearchcache_check(GtArrayGtIndexwithcode *binsearchcache,
-                                       const unsigned long *allfirstcodes,
+                                       GT_UNUSED const unsigned long
+                                                                 *allfirstcodes,
                                        unsigned long differentcodes)
 {
   if (binsearchcache != NULL)
