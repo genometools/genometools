@@ -28,6 +28,7 @@
 #include "firstcodes-spacelog.h"
 #include "firstcodes-cache.h"
 
+typedef uint8_t GtCountAFCtype;
 #define GT_FIRSTCODES_MAXSMALL UINT8_MAX
 
 typedef struct
@@ -41,7 +42,7 @@ typedef struct
                 all_incrementcount;
   unsigned int sampleshift;
   uint32_t *leftborder;
-  uint8_t *countocc_small;
+  GtCountAFCtype *countocc_small;
   GtHashtable *countocc_exceptions;
   unsigned long *leftborder_samples;
   GtStr *outfilenameleftborder;
@@ -69,7 +70,7 @@ static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
 {
   if (firstincrement)
   {
-    fct->countocc_small[idx] = (uint8_t) 1;
+    fct->countocc_small[idx] = (GtCountAFCtype) 1;
   } else
   {
     fct->all_incrementcount++;

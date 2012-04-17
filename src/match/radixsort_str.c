@@ -145,6 +145,7 @@ static inline void gt_radixsort_str_insertionsort(
       unsigned long depth;
       int uvcmp = 0;
       gt_radixsort_str_bucketnum_t unk = 0, vnk = 0;
+
       gt_assert(maxdepth == 0 || bucket->depth <= maxdepth);
       for (depth = bucket->depth;
           (maxdepth == 0 || depth <= maxdepth)
