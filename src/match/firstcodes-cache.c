@@ -15,14 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <math.h>
-#include <limits.h>
-#include "core/ma.h"
-#include "core/log_api.h"
 #include "core/arraydef.h"
 #include "core/divmodmul.h"
-#include "firstcodes-spacelog.h"
+#include "core/log_api.h"
+#include "core/ma.h"
+#include "core/unused_api.h"
 #include "firstcodes-cache.h"
+#include "firstcodes-spacelog.h"
+#include <limits.h>
+#include <math.h>
 
 typedef struct
 {
