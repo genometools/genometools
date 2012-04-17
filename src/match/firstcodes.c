@@ -156,43 +156,6 @@ static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
   }
 }
 
-static unsigned long gt_firstcodes_accumulatecounts_merge(
-                                        GtFirstcodesinfo *fci,
-                                        const unsigned long *querystream_fst,
-                                        unsigned long subjectindex,
-                                        unsigned long subjectcode)
-{
-  unsigned long found = 0;
-  const unsigned long *query = querystream_fst,
-                      *querystream_lst = fci->buf.spaceGtUlong
-                                         + fci->buf.nextfree - 1;
-
-  gt_assert(subjectindex < fci->differentcodes);
-  while (query <= querystream_lst)
-  {
-    if (*query <= subjectcode)
-    {
-      if (*query == subjectcode)
-      {
-        gt_firstcodes_countocc_increment(&fci->tab,subjectindex,false);
-        found++;
-      }
-      query++;
-    } else
-    {
-      if (subjectindex < fci->differentcodes - 1)
-      {
-        subjectindex++;
-        subjectcode += fci->allfirstcodes[subjectindex]; /* extract diff */
-      } else
-      {
-        break;
-      }
-    }
-  }
-  return found;
-}
-
 static void gt_firstcodes_accumulatecounts_flush(void *data)
 {
   GtFirstcodesinfo *fci = (GtFirstcodesinfo *) data;
@@ -213,7 +176,12 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
     if (foundindex != ULONG_MAX)
     {
       fci->firstcodehits
-        += gt_firstcodes_accumulatecounts_merge(fci,fci->buf.spaceGtUlong,
+        += gt_firstcodes_accumulatecounts_merge(&fci->tab,
+                                                fci->allfirstcodes,
+                                                fci->differentcodes,
+                                                fci->buf.spaceGtUlong,
+                                                fci->buf.spaceGtUlong
+                                                + fci->buf.nextfree - 1,
                                                 foundindex,
                                                 foundcode);
     }

@@ -63,57 +63,6 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
                gt_ht_ul_elem_cmp, NULL_DESTRUCTOR, NULL_DESTRUCTOR, static,
                inline)
 
-GT_UNUSED
-static inline void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
-                                                    unsigned long idx,
-                                                    bool firstincrement)
-{
-  if (firstincrement)
-  {
-    fct->countocc_small[idx] = (GtCountAFCtype) 1;
-  } else
-  {
-    fct->all_incrementcount++;
-    if (fct->countocc_small[idx] > 0)
-    {
-      if (fct->countocc_small[idx] < GT_FIRSTCODES_MAXSMALL)
-      {
-        fct->countocc_small[idx]++;
-      } else
-      {
-        gt_assert (fct->countocc_small[idx] == GT_FIRSTCODES_MAXSMALL);
-        fct->countocc_small[idx] = 0;
-        fct->lastincremented_valueptr
-          = ul_u32_gt_hashmap_add_and_return_storage(fct->countocc_exceptions,
-                                                     idx, (uint32_t) 1);
-        fct->lastincremented_idx = idx;
-        fct->hashmap_addcount++;
-      }
-    } else
-    {
-      /* there is already an overflow for this index */
-      if (fct->lastincremented_valueptr != NULL &&
-          fct->lastincremented_idx == idx)
-      {
-        /* last index is identucal to current index. */
-        gt_assert(*fct->lastincremented_valueptr < UINT32_MAX);
-        (*fct->lastincremented_valueptr)++;
-      } else
-      {
-        uint32_t *valueptr
-          = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
-
-        fct->hashmap_getcount++;
-        gt_assert(valueptr != NULL && *valueptr < UINT32_MAX);
-        (*valueptr)++;
-        fct->lastincremented_idx = idx;
-        fct->lastincremented_valueptr = valueptr;
-      }
-      fct->hashmap_incrementcount++;
-    }
-  }
-}
-
 #ifdef _LP64
 #define GT_CHANGEPOINT_GET(CP)\
         unsigned long CP;\
@@ -196,5 +145,14 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     GtArrayGtIndexwithcode **binsearchcache,
                                     unsigned int addbscache_depth,
                                     GtLogger *logger);
+
+unsigned long gt_firstcodes_accumulatecounts_merge(
+                                        GtFirstcodestab *tab,
+                                        const unsigned long *differences,
+                                        unsigned long differentcodes,
+                                        const unsigned long *querystream_fst,
+                                        const unsigned long *querystream_lst,
+                                        unsigned long subjectindex,
+                                        unsigned long subjectcode);
 
 #endif
