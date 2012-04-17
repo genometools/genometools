@@ -49,6 +49,7 @@ typedef struct {
            *refoptionphase2extra;
   bool radixsmall;
   unsigned int radixparts;
+  bool onlyallfirstcodes;
 } GtReadjoinerOverlapArguments;
 
 static void* gt_readjoiner_overlap_arguments_new(void)
@@ -175,6 +176,12 @@ static GtOptionParser* gt_readjoiner_overlap_option_parser_new(
   gt_option_is_development_option(option);
   gt_option_parser_add_option(op, option);
 
+  /* -onlyallfirstcodes */
+  option = gt_option_new_bool("onlyallfirstcodes", "only determines allcodes",
+                              &arguments->onlyallfirstcodes, false);
+  gt_option_is_development_option(option);
+  gt_option_parser_add_option(op, option);
+
   return op;
 }
 
@@ -292,10 +299,11 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
       }
       if (storefirstcodes_getencseqkmers_twobitencoding(encseq, kmersize,
             arguments->numofparts, arguments->maximumspace,
-            arguments->minmatchlength, false, false, false, 5U,
-            arguments->phase2extra, arguments->radixsmall,
-            arguments->radixparts, gt_spmfind_eqlen_process,
-            gt_spmfind_eqlen_process_end, state_table, verbose_logger, err)
+            arguments->minmatchlength, false, false,
+            arguments->onlyallfirstcodes, 5U, arguments->phase2extra,
+            arguments->radixsmall, arguments->radixparts,
+            gt_spmfind_eqlen_process, gt_spmfind_eqlen_process_end,
+            state_table, verbose_logger, err)
             != 0)
       {
         haserr = true;
@@ -326,10 +334,11 @@ static int gt_readjoiner_overlap_runner(GT_UNUSED int argc,
       }
       if (storefirstcodes_getencseqkmers_twobitencoding(encseq, kmersize,
             arguments->numofparts, arguments->maximumspace,
-            arguments->minmatchlength, false, false, false, 5U,
-            arguments->phase2extra, arguments->radixsmall,
-            arguments->radixparts, gt_spmfind_varlen_process,
-            gt_spmfind_varlen_process_end, state_table, verbose_logger, err)
+            arguments->minmatchlength, false, false,
+            arguments->onlyallfirstcodes, 5U, arguments->phase2extra,
+            arguments->radixsmall, arguments->radixparts,
+            gt_spmfind_varlen_process, gt_spmfind_varlen_process_end,
+            state_table, verbose_logger, err)
           != 0)
       {
         haserr = true;
