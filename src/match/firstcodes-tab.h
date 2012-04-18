@@ -52,8 +52,6 @@ typedef struct
                 countmask;
   unsigned int rshiftforcounts;
 #ifdef _LP64
-  uint32_t modvaluemask;
-  unsigned int modvaluebits;
   GtArrayGtUlong bitchangepoints;
 #endif
 } GtFirstcodestab;
@@ -71,6 +69,9 @@ DEFINE_HASHMAP(unsigned long, ul, uint32_t, u32, gt_ht_ul_elem_hash,
             /* Nothing */ ;
 #endif
 
+#define GT_MODVALUEBITS 32
+#define GT_MODVALUEMASK UINT32_MAX
+
 GT_UNUSED
 static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
                                                          unsigned long idx)
@@ -81,15 +82,15 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
   if (fct->leftborder[idx] > 0)
   {
     return (unsigned long) --fct->leftborder[idx]
-                           + (changepoint << fct->modvaluebits);
+                           + (changepoint << GT_MODVALUEBITS);
   } else
   {
     gt_assert(changepoint > 0);
     changepoint--;
     fct->bitchangepoints.spaceGtUlong[changepoint]++;
-    fct->leftborder[idx] = fct->modvaluemask;
+    fct->leftborder[idx] = GT_MODVALUEMASK;
     return (unsigned long)
-           fct->leftborder[idx] + (changepoint << fct->modvaluebits);
+           fct->leftborder[idx] + (changepoint << GT_MODVALUEBITS);
   }
 #else
   gt_assert(idx < fct->differentcodes && fct->leftborder[idx] > 0);

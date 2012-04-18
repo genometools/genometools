@@ -48,14 +48,6 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
   fct->outfilenameleftborder = NULL;
   fct->leftborder_samples = NULL;
 #ifdef _LP64
-  fct->modvaluebits = 32U; /* XXX remove the following later */
-  if (fct->modvaluebits == 32U)
-  {
-    fct->modvaluemask = UINT32_MAX;
-  } else
-  {
-    fct->modvaluemask = (uint32_t) ((1UL << fct->modvaluebits) - 1);
-  }
   GT_INITARRAY(&fct->bitchangepoints,GtUlong);
 #endif
 }
@@ -348,22 +340,12 @@ static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
   }
 }
 
-#ifdef _LP64
 #define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
         if ((BUF)->nextfree == (BUF)->allocated)\
         {\
           gt_leftborderbuffer_flush(BUF);\
         }\
-        (BUF)->spaceuint32_t[(BUF)->nextfree++]\
-          = (uint32_t) ((VALUE) & fct->modvaluemask)
-#else
-#define GT_PARTIALSUM_LEFTBORDER_SET(BUF,VALUE)\
-        if ((BUF)->nextfree == (BUF)->allocated)\
-        {\
-          gt_leftborderbuffer_flush(BUF);\
-        }\
-        (BUF)->spaceuint32_t[(BUF)->nextfree++] = (uint32_t) (VALUE)
-#endif
+        (BUF)->spaceuint32_t[(BUF)->nextfree++] = (uint32_t) (VALUE);
 
 #define GT_FIRSTCODES_ADD_SAMPLE(PARTSUM)\
         gt_assert(samplecount < fct->numofsamples);\
@@ -380,7 +362,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GtLeftborderOutbuffer *leftborderbuffer_all = NULL;
 #ifdef _LP64
   const unsigned int btp = gt_determinebitspervalue(expectedlastpartsum);
-  unsigned long exceedvalue = 1UL << fct->modvaluebits;
+  unsigned long exceedvalue = 1UL << GT_MODVALUEBITS;
 #endif
 #ifdef SKDEBUG
   GtDiscDistri *countdistri = gt_disc_distri_new();
@@ -400,13 +382,13 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                    fct->all_incrementcount);
 
 #ifdef _LP64
-  if (btp <= fct->modvaluebits)
+  if (btp <= GT_MODVALUEBITS)
   {
     fct->bitchangepoints.allocatedGtUlong = 0;
     fct->bitchangepoints.spaceGtUlong = NULL;
   } else
   {
-    fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - fct->modvaluebits);
+    fct->bitchangepoints.allocatedGtUlong = 1UL << (btp - GT_MODVALUEBITS);
     gt_log_log("lastpartsum=%lu, bitchangepoints.allocated=%lu",
               expectedlastpartsum,fct->bitchangepoints.allocatedGtUlong);
     fct->bitchangepoints.spaceGtUlong
@@ -444,7 +426,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   {
     currentcount = gt_firstcodes_countocc_get(fct,idx);
 #ifdef _LP64
-    gt_assert(currentcount <= fct->modvaluemask);
+    gt_assert(currentcount <= GT_MODVALUEMASK);
 #endif
 #ifdef SKDEBUG
     gt_disc_distri_add(countdistri,(unsigned long) currentcount);
@@ -462,8 +444,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
       gt_assert(fct->bitchangepoints.spaceGtUlong != NULL);
       fct->bitchangepoints.spaceGtUlong
         [fct->bitchangepoints.nextfreeGtUlong++] = idx-1;
-      exceedvalue
-        = ((exceedvalue >> fct->modvaluebits) + 1) << fct->modvaluebits;
+      exceedvalue = ((exceedvalue >> GT_MODVALUEBITS) + 1) << GT_MODVALUEBITS;
     }
 #endif
     if ((idx & bitmask) == 0)
@@ -526,7 +507,7 @@ unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
   GT_CHANGEPOINT_GET(changepoint);
 
   return (unsigned long) fct->leftborder[idx]
-                         + (changepoint << fct->modvaluebits);
+                         + (changepoint << GT_MODVALUEBITS);
 #else
   return (unsigned long) fct->leftborder[idx];
 #endif
