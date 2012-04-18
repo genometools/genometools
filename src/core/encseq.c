@@ -9232,7 +9232,7 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
   GtEncseq *encseq = NULL;
   const GtEncseqAccessType sat = GT_ACCESS_TYPE_DIRECTACCESS;
   Gtssptaboutinfo *ssptaboutinfo;
-  unsigned long i;
+  unsigned long i, lastnonspecialrangelength = 0;
   GtSpecialcharinfo samplespecialcharinfo = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
   gt_assert(eb->plainseq);
@@ -9288,8 +9288,26 @@ GtEncseq* gt_encseq_builder_build(GtEncseqBuilder *eb, GtError *err)
     ssptaboutinfo_delete(ssptaboutinfo);
   }
   for (i = 0; i < eb->seqlen; i++) {
-    if (!ISSPECIAL(eb->plainseq[i]))
+    if (!ISSPECIAL(eb->plainseq[i])) {
       encseq->headerptr.characterdistribution[eb->plainseq[i]]++;
+      lastnonspecialrangelength++;
+    } else {
+      if (lastnonspecialrangelength > 0) {
+        if (lastnonspecialrangelength
+              > encseq->specialcharinfo.lengthoflongestnonspecial) {
+          encseq->specialcharinfo.lengthoflongestnonspecial =
+                                                  lastnonspecialrangelength;
+        }
+        lastnonspecialrangelength = 0;
+      }
+    }
+  }
+  if (lastnonspecialrangelength > 0) {
+    if (lastnonspecialrangelength
+          > encseq->specialcharinfo.lengthoflongestnonspecial) {
+      encseq->specialcharinfo.lengthoflongestnonspecial =
+                                              lastnonspecialrangelength;
+    }
   }
   if (eb->wsdstab) {
     encseq->hasallocatedsdstab = true;
