@@ -1367,26 +1367,10 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
     }
   } else
   {
-    if (gt_encseq_lengthoflongestnonspecial(encseq) == 0)
-    { /* XXX This should not happen: probably lengthoflongestnonspecial
-         is not set if encseq is generated in memory only (as for example is
-         done in ltrharvest. Fix this problem. */
-      gt_assert(gt_encseq_max_seq_length(encseq) >
-                (unsigned long) prefixlength);
-      if (gt_encseq_max_seq_length(encseq) <= (unsigned long) prefixlength)
-      {
-        fprintf(stderr,"max_seq_length=%lu <= %u=prefixlength\n",
-                gt_encseq_max_seq_length(encseq),prefixlength);
-        exit(EXIT_FAILURE);
-      }
-      bsr->maxremain = gt_encseq_max_seq_length(encseq) - prefixlength;
-    } else
-    {
-      gt_assert(gt_encseq_lengthoflongestnonspecial(encseq) >
-               (unsigned long) prefixlength);
-      bsr->maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
-                       prefixlength;
-    }
+    gt_assert(gt_encseq_lengthoflongestnonspecial(encseq) >
+             (unsigned long) prefixlength);
+    bsr->maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
+                     prefixlength;
   }
   bsr->sizeofworkspace = gt_size_of_sort_workspace (sfxstrategy);
   GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
