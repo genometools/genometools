@@ -476,7 +476,7 @@ end
         run_prefilter(db, "-testrs -encseq no -q"+
                       "#{' -singlestrand' if singlestrand}"+
                       " -testrs-offset #{offset}")
-        run "tail +#{offset+1} #{last_stdout}"
+        run "tail -n +#{offset+1} #{last_stdout}"
         radixsort_results = last_stdout
         run "#{$bin}gt suffixerator -suf -db #{db}"+
           "#{' -mirrored' unless singlestrand} -indexname i"
