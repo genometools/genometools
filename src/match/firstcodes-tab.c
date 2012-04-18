@@ -52,53 +52,47 @@ static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
 #endif
 }
 
-static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
-                                             unsigned long idx,
-                                             bool firstincrement)
+static void gt_firstcodes_countocc_set(GtFirstcodestab *fct,
+                                       unsigned long idx,
+                                       unsigned long value)
 {
-  if (firstincrement)
+  gt_assert(value > 0);
+  if (value <= GT_FIRSTCODES_MAXSMALL)
   {
-    fct->countocc_small[idx] = (GtCountAFCtype) 1;
+    fct->countocc_small[idx] = (GtCountAFCtype) value;
   } else
   {
-    fct->all_incrementcount++;
-    if (fct->countocc_small[idx] > 0)
+    fct->countocc_small[idx] = 0;
+    ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
+                          value - GT_FIRSTCODES_MAXSMALL);
+    fct->hashmap_addcount++;
+  }
+}
+
+static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
+                                             unsigned long idx,
+                                             unsigned long inc)
+{
+  if (fct->countocc_small[idx] > 0)
+  {
+    if (inc + fct->countocc_small[idx] <= GT_FIRSTCODES_MAXSMALL)
     {
-      if (fct->countocc_small[idx] < GT_FIRSTCODES_MAXSMALL)
-      {
-        fct->countocc_small[idx]++;
-      } else
-      {
-        gt_assert (fct->countocc_small[idx] == GT_FIRSTCODES_MAXSMALL);
-        fct->countocc_small[idx] = 0;
-        fct->lastincremented_valueptr
-          = ul_u32_gt_hashmap_add_and_return_storage(fct->countocc_exceptions,
-                                                     idx, (uint32_t) 1);
-        fct->lastincremented_idx = idx;
-        fct->hashmap_addcount++;
-      }
+      fct->countocc_small[idx] += inc;
     } else
     {
-      /* there is already an overflow for this index */
-      if (fct->lastincremented_valueptr != NULL &&
-          fct->lastincremented_idx == idx)
-      {
-        /* last index is identucal to current index. */
-        gt_assert(*fct->lastincremented_valueptr < UINT32_MAX);
-        (*fct->lastincremented_valueptr)++;
-      } else
-      {
-        uint32_t *valueptr
-          = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
-
-        fct->hashmap_getcount++;
-        gt_assert(valueptr != NULL && *valueptr < UINT32_MAX);
-        (*valueptr)++;
-        fct->lastincremented_idx = idx;
-        fct->lastincremented_valueptr = valueptr;
-      }
-      fct->hashmap_incrementcount++;
+      ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
+                            inc + fct->countocc_small[idx] -
+                            GT_FIRSTCODES_MAXSMALL);
+      fct->hashmap_addcount++;
+      fct->countocc_small[idx] = 0;
     }
+  } else
+  {
+    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+
+    fct->hashmap_getcount++;
+    gt_assert(valueptr != NULL && *valueptr + inc <= UINT32_MAX);
+    (*valueptr) += inc;
   }
 }
 
@@ -208,7 +202,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   } else
   {
     unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode,
-                  idx, maxdifference = 0, cachewidth, nextstorecache;
+                  idx, maxdifference = 0, cachewidth, nextstorecache, lastocc;
 
     previouscode = allfirstcodes[0];
     for (idx=1UL; idx < numofsequences; idx++)
@@ -227,7 +221,6 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     gt_logger_log(logger,"maximum difference of neighbored codes %lu",
                   maxdifference);
     gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
-    gt_firstcodes_countocc_increment(fct,0,true); /* first increment */
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
     gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
     *binsearchcache
@@ -238,9 +231,9 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                    ? 0
                    : gt_firstcodes_binsearchcache_width(*binsearchcache);
     nextstorecache = cachewidth;
+    lastocc = 1UL; /* for first code */
     for (storeidx = 0, readidx = 1UL; readidx < numofsequences; readidx++)
     {
-      bool firstincrement;
       unsigned long storevalue = allfirstcodes[storeidx],
                     readvalue = allfirstcodes[readidx];
 
@@ -253,6 +246,8 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                                       storevalue);
           nextstorecache += cachewidth;
         }
+        gt_firstcodes_countocc_set(fct,storeidx,lastocc);
+        lastocc = 1UL;
         storeidx++;
         if (storeidx != readidx)
         {
@@ -260,13 +255,12 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
         }
         gt_marksubstring_mark(markprefix,readvalue);
         gt_marksubstring_mark(marksuffix,readvalue);
-        firstincrement = true;
       } else
       {
-        firstincrement = false;
+        lastocc++;
       }
-      gt_firstcodes_countocc_increment(fct,storeidx,firstincrement);
     }
+    gt_firstcodes_countocc_set(fct,storeidx,lastocc);
     gt_assert(numofdifferentcodes == (unsigned long) (storeidx + 1));
     if (numofdifferentcodes < numofsequences)
     {
@@ -296,7 +290,7 @@ unsigned long gt_firstcodes_accumulatecounts_merge(
                                         unsigned long subjectindex,
                                         unsigned long subjectcode)
 {
-  unsigned long found = 0;
+  unsigned long found = 0, lastocc = 0;
   const unsigned long *query = querystream_fst;
 
   gt_assert(subjectindex < differentcodes);
@@ -306,12 +300,17 @@ unsigned long gt_firstcodes_accumulatecounts_merge(
     {
       if (*query == subjectcode)
       {
-        gt_firstcodes_countocc_increment(tab,subjectindex,false);
-        found++;
+        lastocc++;
       }
       query++;
     } else
     {
+      if (lastocc > 0)
+      {
+        gt_firstcodes_countocc_increment(tab,subjectindex,lastocc);
+        found += lastocc;
+        lastocc = 0;
+      }
       if (subjectindex < differentcodes - 1)
       {
         subjectindex++;
@@ -321,6 +320,12 @@ unsigned long gt_firstcodes_accumulatecounts_merge(
         break;
       }
     }
+  }
+  if (lastocc > 0)
+  {
+    gt_firstcodes_countocc_increment(tab,subjectindex,lastocc);
+    found += lastocc;
+    lastocc = 0;
   }
   return found;
 }
@@ -372,14 +377,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_log_log("hashmap_addcount=%lu (%.2f%%)",fct->hashmap_addcount,
                   100.0 * (double) fct->hashmap_addcount/
                                    fct->differentcodes);
-  gt_log_log("hashmap_incrementcount=%lu (%.2f%%)",
-                  fct->hashmap_incrementcount,
-                  100.0 * (double) fct->hashmap_incrementcount/
-                                   fct->all_incrementcount);
   gt_log_log("hashmap_getcount=%lu (%.2f%%)",
                   fct->hashmap_getcount,
                   100.0 * (double) fct->hashmap_getcount/
-                                   fct->all_incrementcount);
+                                   fct->differentcodes);
 
 #ifdef _LP64
   if (btp <= GT_MODVALUEBITS)
@@ -602,10 +603,7 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->leftborder_samples = NULL;
   fct->countocc_exceptions = NULL;
   fct->differentcodes = 0;
-  fct->lastincremented_idx = 0;
-  fct->lastincremented_valueptr = NULL;
   fct->hashmap_addcount = 0;
-  fct->hashmap_incrementcount = 0;
   fct->all_incrementcount = 0;
   fct->hashmap_getcount = 0;
   fct->outfilenameleftborder = NULL;

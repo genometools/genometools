@@ -37,7 +37,6 @@ typedef struct
                 numofsamples,
                 sampledistance,
                 hashmap_addcount,
-                hashmap_incrementcount,
                 hashmap_getcount,
                 all_incrementcount;
   unsigned int sampleshift;
@@ -46,8 +45,6 @@ typedef struct
   GtHashtable *countocc_exceptions;
   unsigned long *leftborder_samples;
   GtStr *outfilenameleftborder;
-  unsigned long lastincremented_idx;
-  uint32_t *lastincremented_valueptr;
   unsigned long differencemask, /* for extracting the difference */
                 countmask;
   unsigned int rshiftforcounts;
