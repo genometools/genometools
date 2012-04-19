@@ -181,6 +181,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     Gtmarksubstring *marksuffix,
                                     GtArrayGtIndexwithcode **binsearchcache,
                                     unsigned int addbscache_depth,
+                                    bool withdistbits,
                                     GtLogger *logger)
 {
   if (numofsequences == 0)
@@ -190,7 +191,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   {
     unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode,
                   idx, maxdifference = 0, cachewidth, nextstorecache, lastocc,
-                  storedvalue;
+                  storedvalue, diff, *distbits = NULL;
     unsigned int bitsformax, bitsforcount;
 
     previouscode = allfirstcodes[0];
@@ -233,6 +234,11 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     nextstorecache = cachewidth;
     lastocc = 1UL; /* for first code */
     storedvalue = allfirstcodes[0];
+    allfirstcodes[0] = 0;
+    if (withdistbits)
+    {
+      distbits = gt_calloc((size_t) (64+1),sizeof (*distbits));
+    }
     for (storeidx = 0, readidx = 1UL; readidx < numofsequences; readidx++)
     {
       unsigned long readvalue = allfirstcodes[readidx];
@@ -249,10 +255,13 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
         gt_firstcodes_countocc_set(fct,storeidx,lastocc);
         lastocc = 1UL;
         storeidx++;
-        if (storeidx != readidx)
+        gt_assert(storedvalue < readvalue);
+        diff = readvalue - storedvalue;
+        if (distbits != NULL)
         {
-          allfirstcodes[storeidx] = readvalue;
+          distbits[gt_determinebitspervalue(diff)]++;
         }
+        allfirstcodes[storeidx] = diff;
         storedvalue = readvalue;
         gt_marksubstring_mark(markprefix,readvalue);
         gt_marksubstring_mark(marksuffix,readvalue);
@@ -260,6 +269,20 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
       {
         lastocc++;
       }
+    }
+    if (withdistbits)
+    {
+      int bits;
+
+      gt_assert(distbits != NULL);
+      for (bits = 0; bits <= 64; bits++)
+      {
+        if (distbits[bits] > 0)
+        {
+          printf("%d bits: %lu\n",bits,distbits[bits]);
+        }
+      }
+      gt_free(distbits);
     }
     gt_firstcodes_countocc_set(fct,storeidx,lastocc);
     gt_assert(numofdifferentcodes == (unsigned long) (storeidx + 1));

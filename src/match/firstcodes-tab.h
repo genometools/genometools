@@ -142,6 +142,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     Gtmarksubstring *marksuffix,
                                     GtArrayGtIndexwithcode **binsearchcache,
                                     unsigned int addbscache_depth,
+                                    bool withdistbits,
                                     GtLogger *logger);
 
 unsigned long gt_firstcodes_accumulatecounts_merge(

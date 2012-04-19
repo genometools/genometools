@@ -113,21 +113,6 @@ static void gt_storefirstcodes(void *processinfo,
   fci->allfirstcodes[fci->countsequences++] = code;
 }
 
-static void init_firstcodes_differences(GtFirstcodesinfo *fci)
-{
-  unsigned long idx, previouscode;
-
-  previouscode = fci->allfirstcodes[0];
-  fci->allfirstcodes[0] = 0; /* to allow using the higher bits */
-  for (idx=1UL; idx < fci->differentcodes; idx++)
-  {
-    unsigned long currentcode = fci->allfirstcodes[idx];
-    gt_assert(previouscode < currentcode);
-    fci->allfirstcodes[idx] = currentcode - previouscode;
-    previouscode = currentcode;
-  }
-}
-
 static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
 {
   unsigned long idx;
@@ -672,36 +657,6 @@ void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
                                 NULL);
 }
 
-void run_allcodes_distribution(const unsigned long *allfirstcodes,
-                               unsigned long differentcodes)
-{
-  unsigned long idx, diff, mindiff = 0, maxdiff = 0, distbits[64+1] = {0};
-
-  for (idx = 1UL; idx < differentcodes; idx++)
-  {
-    gt_assert(allfirstcodes[idx-1] < allfirstcodes[idx]);
-    diff = allfirstcodes[idx] - allfirstcodes[idx-1];
-    if (idx == 1UL || diff < mindiff)
-    {
-      mindiff = diff;
-    }
-    if (diff > maxdiff)
-    {
-      maxdiff = diff;
-    }
-    distbits[gt_determinebitspervalue(diff)]++;
-  }
-  printf("allfirstcodes: mindiff=%lu,maxdiff=%lu(%u bits)\n",
-         mindiff,maxdiff,gt_determinebitspervalue(maxdiff));
-  for (idx = 0; idx <= 64UL; idx++)
-  {
-    if (distbits[idx] > 0)
-    {
-      printf("%lu bits: %lu\n",idx,distbits[idx]);
-    }
-  }
-}
-
 static int gt_firstcodes_init(GtFirstcodesinfo *fci,
                               const GtEncseq *encseq,
                               unsigned int kmersize,
@@ -807,6 +762,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
                                        unsigned int kmersize,
                                        unsigned int minmatchlength,
                                        unsigned int addbscache_depth,
+                                       bool withdistbits,
                                        GtLogger *logger,
                                        GtTimer *timer)
 {
@@ -854,6 +810,7 @@ static void gt_firstcodes_collectcodes(GtFirstcodesinfo *fci,
                                              fci->buf.marksuffix,
                                              &fci->binsearchcache,
                                              addbscache_depth,
+                                             withdistbits,
                                              logger);
   if (fci->differentcodes > 0 && fci->differentcodes < fci->numofsequences)
   {
@@ -1354,12 +1311,11 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                kmersize,
                                minmatchlength,
                                addbscache_depth,
+                               onlyallfirstcodes,
                                logger,
                                timer);
-    init_firstcodes_differences(&fci);
     if (fci.differentcodes > 0 && onlyallfirstcodes)
     {
-      /*run_allcodes_distribution(fci.allfirstcodes,fci.differentcodes);*/
       gt_free(fci.allfirstcodes);
       fci.allfirstcodes = NULL;
       gt_marksubstring_delete(fci.buf.markprefix,true);
