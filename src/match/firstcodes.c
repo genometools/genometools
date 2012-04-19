@@ -115,34 +115,17 @@ static void gt_storefirstcodes(void *processinfo,
 
 static void init_firstcodes_differences(GtFirstcodesinfo *fci)
 {
-  unsigned long idx, previouscode, maxdifference = 0;
-  unsigned int bitsformax, bitsforcount;
+  unsigned long idx, previouscode;
 
   previouscode = fci->allfirstcodes[0];
   fci->allfirstcodes[0] = 0; /* to allow using the higher bits */
   for (idx=1UL; idx < fci->differentcodes; idx++)
   {
-    unsigned long difference,
-                  currentcode = fci->allfirstcodes[idx];
+    unsigned long currentcode = fci->allfirstcodes[idx];
     gt_assert(previouscode < currentcode);
-    difference = currentcode - previouscode;
-    if (difference > maxdifference)
-    {
-      maxdifference = difference;
-    }
-    fci->allfirstcodes[idx] = difference;
+    fci->allfirstcodes[idx] = currentcode - previouscode;
     previouscode = currentcode;
   }
-  bitsformax = gt_determinebitspervalue(maxdifference);
-  fci->tab.differencemask = (1UL << bitsformax) - 1UL;
-  gt_assert(sizeof (unsigned long) * CHAR_BIT >= (size_t) bitsformax);
-  bitsforcount = (unsigned int) sizeof (unsigned long) * CHAR_BIT - bitsformax;
-  fci->tab.countmask = (1UL << bitsforcount) - 1UL;
-  fci->tab.rshiftforcounts = bitsformax;
-  /*
-  printf("maxdifference=%lu,bitsformax=%u,bitsforcount=%u\n",
-          maxdifference,bitsformax,bitsforcount);
-  */
 }
 
 static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
@@ -689,8 +672,8 @@ void gt_rungetencseqkmers(const GtEncseq *encseq,unsigned int kmersize)
                                 NULL);
 }
 
-static void run_allcodes_distribution(const unsigned long *allfirstcodes,
-                                      unsigned long differentcodes)
+void run_allcodes_distribution(const unsigned long *allfirstcodes,
+                               unsigned long differentcodes)
 {
   unsigned long idx, diff, mindiff = 0, maxdiff = 0, distbits[64+1] = {0};
 
@@ -1373,9 +1356,10 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
                                addbscache_depth,
                                logger,
                                timer);
+    init_firstcodes_differences(&fci);
     if (fci.differentcodes > 0 && onlyallfirstcodes)
     {
-      run_allcodes_distribution(fci.allfirstcodes,fci.differentcodes);
+      /*run_allcodes_distribution(fci.allfirstcodes,fci.differentcodes);*/
       gt_free(fci.allfirstcodes);
       fci.allfirstcodes = NULL;
       gt_marksubstring_delete(fci.buf.markprefix,true);
@@ -1394,7 +1378,6 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     }
     fci.flushcount = 0;
     fci.codebuffer_total = 0;
-    init_firstcodes_differences(&fci);
     if (gt_firstcodes_allocspace(&fci,
                                  numofparts,
                                  maximumspace,

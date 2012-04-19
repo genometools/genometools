@@ -173,19 +173,6 @@ static void gt_firstcodes_evaluate_countdistri(const GtDiscDistri *countdistri)
 }
 #endif
 
-#ifdef SKDEBUG
-static void checkcodesorder(const unsigned long *tab,unsigned long len,
-                            bool allowequal)
-{
-  unsigned long idx;
-
-  for (idx=1UL; idx < len; idx++)
-  {
-    gt_assert(tab[idx-1] < tab[idx] || (allowequal && tab[idx-1] == tab[idx]));
-  }
-}
-#endif
-
 unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                                     GtFirstcodesspacelog *fcsl,
                                     GtFirstcodestab *fct,
@@ -202,7 +189,9 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
   } else
   {
     unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode,
-                  idx, maxdifference = 0, cachewidth, nextstorecache, lastocc;
+                  idx, maxdifference = 0, cachewidth, nextstorecache, lastocc,
+                  storedvalue;
+    unsigned int bitsformax, bitsforcount;
 
     previouscode = allfirstcodes[0];
     for (idx=1UL; idx < numofsequences; idx++)
@@ -218,8 +207,19 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
         previouscode = currentcode;
       }
     }
-    gt_logger_log(logger,"maximum difference of neighbored codes %lu",
-                  maxdifference);
+    bitsformax = gt_determinebitspervalue(maxdifference);
+    fct->differencemask = (1UL << bitsformax) - 1UL;
+    gt_assert(sizeof (unsigned long) * CHAR_BIT >= (size_t) bitsformax);
+    bitsforcount = (unsigned int)
+                   sizeof (unsigned long) * CHAR_BIT - bitsformax;
+    fct->countmask = (1UL << bitsforcount) - 1UL;
+    fct->rshiftforcounts = bitsformax;
+    gt_logger_log(logger,"maximum difference of neighbored codes %lu (%u bits)",
+                  maxdifference,bitsformax);
+    /*
+    printf("maxdifference=%lu,bitsformax=%u,bitsforcount=%u\n",
+            maxdifference,bitsformax,bitsforcount);
+    */
     gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
     gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
@@ -232,18 +232,18 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
                    : gt_firstcodes_binsearchcache_width(*binsearchcache);
     nextstorecache = cachewidth;
     lastocc = 1UL; /* for first code */
+    storedvalue = allfirstcodes[0];
     for (storeidx = 0, readidx = 1UL; readidx < numofsequences; readidx++)
     {
-      unsigned long storevalue = allfirstcodes[storeidx],
-                    readvalue = allfirstcodes[readidx];
+      unsigned long readvalue = allfirstcodes[readidx];
 
-      if (storevalue != readvalue)
+      if (storedvalue != readvalue)
       {
         if ((*binsearchcache) != NULL && storeidx == nextstorecache)
         {
           gt_firstcodes_binsearchcache_set_index_code(*binsearchcache,
                                                       nextstorecache,
-                                                      storevalue);
+                                                      storedvalue);
           nextstorecache += cachewidth;
         }
         gt_firstcodes_countocc_set(fct,storeidx,lastocc);
@@ -253,6 +253,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
         {
           allfirstcodes[storeidx] = readvalue;
         }
+        storedvalue = readvalue;
         gt_marksubstring_mark(markprefix,readvalue);
         gt_marksubstring_mark(marksuffix,readvalue);
       } else
@@ -267,9 +268,6 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
       /* reduce the memory requirement, as the duplicated elements are not
          needed */
       gt_firstcodes_countocc_resize(fcsl,fct,numofdifferentcodes);
-#ifdef SKDEBUG
-      checkcodesorder(allfirstcodes,numofdifferentcodes,false);
-#endif
     }
     fct->differentcodes = numofdifferentcodes;
   }
