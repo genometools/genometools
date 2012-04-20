@@ -143,9 +143,9 @@ static inline void gt_radixsort_str_insertionsort(
     {
       const unsigned long v = bucket->suffixes[j - 1];
       unsigned long depth;
+      int uvcmp = 0;
       gt_radixsort_str_bucketnum_t unk = 0, vnk = 0;
       gt_assert(maxdepth == 0 || bucket->depth <= maxdepth);
-      int uvcmp = 0;
       for (depth = bucket->depth;
           (maxdepth == 0 || depth <= maxdepth)
           && uvcmp == 0 && !GT_RADIXSORT_STR_HAS_OVERFLOW(unk) &&
