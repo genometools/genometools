@@ -137,9 +137,10 @@ void gt_firstcodes_binsearchcache_delete(GtArrayGtIndexwithcode *binsearchcache,
 }
 
 unsigned long gt_firstcodes_find_accu(unsigned long *foundcode,
-                                      const unsigned long *allfirstcodes,
+                                      const unsigned long *differences,
                                       unsigned long allfirstcodes0,
                                       unsigned long differentcodes,
+                                      unsigned long differencemask,
                                       const GtArrayGtIndexwithcode
                                          *binsearchcache,
                                       unsigned long code)
@@ -235,7 +236,7 @@ unsigned long gt_firstcodes_find_accu(unsigned long *foundcode,
 
     for (idx = leftptr; idx <= rightptr; idx++)
     {
-      previouscode += allfirstcodes[idx]; /* extract diff */
+      previouscode += (differences[idx] & differencemask); /* extract diff */
       if (code <= previouscode)
       {
         *foundcode = previouscode;

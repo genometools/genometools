@@ -44,9 +44,10 @@ void gt_firstcodes_binsearchcache_set_index_code(GtArrayGtIndexwithcode
 
 unsigned long gt_firstcodes_find_accu(
                                  unsigned long *foundcode,
-                                 const unsigned long *allfirstcodes,
+                                 const unsigned long *differences,
                                  unsigned long allfirstcodes0,
                                  unsigned long differentcodes,
+                                 unsigned long differencemask,
                                  const GtArrayGtIndexwithcode *binsearchcache,
                                  unsigned long code);
 

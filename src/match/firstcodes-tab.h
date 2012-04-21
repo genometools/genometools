@@ -43,11 +43,12 @@ typedef struct
   uint32_t *leftborder;
   GtCountAFCtype *countocc_small;
   GtHashtable *countocc_exceptions;
+  GtHashtable *countocc_exceptions2;
   unsigned long *leftborder_samples;
   GtStr *outfilenameleftborder;
   unsigned long differencemask, /* for extracting the difference */
-                countmask;
-  unsigned int rshiftforcounts;
+                countmax;
+  unsigned int shiftforcounts;
 #ifdef _LP64
   GtArrayGtUlong bitchangepoints;
 #endif
@@ -97,6 +98,7 @@ static inline unsigned long gt_firstcodes_insertionindex(GtFirstcodestab *fct,
 
 unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                                         GtFirstcodestab *fct,
+                                        const unsigned long *differences,
                                         unsigned long expectedlastpartsum);
 
 unsigned long gt_firstcodes_get_leftborder(const GtFirstcodestab *fct,
@@ -147,7 +149,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
 
 unsigned long gt_firstcodes_accumulatecounts_merge(
                                         GtFirstcodestab *tab,
-                                        const unsigned long *differences,
+                                        unsigned long *differences,
                                         unsigned long differentcodes,
                                         const unsigned long *querystream_fst,
                                         const unsigned long *querystream_lst,

@@ -113,14 +113,16 @@ static void gt_storefirstcodes(void *processinfo,
   fci->allfirstcodes[fci->countsequences++] = code;
 }
 
-static void restore_allfirstcodes_from_differences(GtFirstcodesinfo *fci)
+static void gt_firstcodes_restore_from_differences(GtFirstcodesinfo *fci)
 {
   unsigned long idx;
 
   fci->allfirstcodes[0] = fci->allfirstcodes0_save;
   for (idx=1UL; idx < fci->differentcodes; idx++)
   {
-    fci->allfirstcodes[idx] += fci->allfirstcodes[idx-1];
+    fci->allfirstcodes[idx]
+      = (fci->allfirstcodes[idx] & fci->tab.differencemask)
+        + fci->allfirstcodes[idx-1];
   }
 }
 
@@ -139,6 +141,7 @@ static void gt_firstcodes_accumulatecounts_flush(void *data)
                                          fci->allfirstcodes,
                                          fci->allfirstcodes0_save,
                                          fci->differentcodes,
+                                         fci->tab.differencemask,
                                          fci->binsearchcache,
                                          fci->buf.spaceGtUlong[0]);
     if (foundindex != ULONG_MAX)
@@ -1357,8 +1360,9 @@ int storefirstcodes_getencseqkmers_twobitencoding(const GtEncseq *encseq,
     {
       gt_timer_show_progress(timer,"to compute partial sums",stdout);
     }
-    maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,&fci.tab,suftabentries);
-    restore_allfirstcodes_from_differences(&fci);
+    maxbucketsize = gt_firstcodes_partialsums(fci.fcsl,&fci.tab,
+                                              fci.allfirstcodes,suftabentries);
+    gt_firstcodes_restore_from_differences(&fci);
     gt_logger_log(logger,"maximum space after computing partial sums: %.2f MB",
                   GT_MEGABYTES(gt_firstcodes_spacelog_total(fci.fcsl)));
     gt_logger_log(logger,"maxbucketsize=%lu",maxbucketsize);
