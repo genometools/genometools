@@ -861,7 +861,7 @@ static int gt_firstcodes_allocspace(GtFirstcodesinfo *fci,
     if (numofparts == 0)
     {
       fci->buf.allocated = gt_radixsort_max_num_of_entries_ulong(
-                                 gt_firstcodes_spacelog_total(fci->fcsl)/7UL);
+                                 gt_firstcodes_spacelog_total(fci->fcsl)/5UL);
     } else
     {
       fci->buf.allocated = fci->differentcodes/5;

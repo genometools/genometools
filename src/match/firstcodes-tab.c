@@ -36,17 +36,22 @@
 
 static void gt_firstcodes_countocc_new(GtFirstcodesspacelog *fcsl,
                                        GtFirstcodestab *fct,
+                                       unsigned int bitsforcount,
                                        unsigned long numofsequences)
 {
-  fct->countocc_small = gt_malloc((size_t) (numofsequences+1) *
-                                  sizeof (*fct->countocc_small));
-  GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
-                      sizeof (*fct->countocc_small) *
-                      (numofsequences+1));
+  if (bitsforcount < (unsigned int) (sizeof (GtCountAFCtype) * CHAR_BIT))
+  {
+    fct->countocc_small = gt_malloc((size_t) (numofsequences+1) *
+                                    sizeof (*fct->countocc_small));
+    GT_FCI_ADDWORKSPACE(fcsl,"countocc_small",
+                        sizeof (*fct->countocc_small) *
+                        (numofsequences+1));
+  } else
+  {
+    fct->countocc_small = NULL;
+  }
   fct->countocc_exceptions = ul_u32_gt_hashmap_new();
   gt_assert(fct->countocc_exceptions != NULL);
-  fct->countocc_exceptions2 = ul_u32_gt_hashmap_new();
-  gt_assert(fct->countocc_exceptions2 != NULL);
   fct->outfilenameleftborder = NULL;
   fct->leftborder_samples = NULL;
 #ifdef _LP64
@@ -60,24 +65,30 @@ static void gt_firstcodes_countocc_set(GtFirstcodestab *fct,
                                        unsigned long value)
 {
   gt_assert(value > 0);
-  if (value <= GT_FIRSTCODES_MAXSMALL)
+  if (fct->countocc_small == NULL)
   {
-    fct->countocc_small[idx] = (GtCountAFCtype) value;
+    if (value <= fct->countmax)
+    {
+      differences[idx] |= (value << fct->shiftforcounts);
+    } else
+    {
+      differences[idx] &= fct->differencemask;
+      ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
+                            (uint32_t) (value - fct->countmax));
+      fct->hashmap_addcount++;
+    }
   } else
   {
-    fct->countocc_small[idx] = 0;
-    ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
-                          value - GT_FIRSTCODES_MAXSMALL);
-    fct->hashmap_addcount++;
-  }
-  if (value <= fct->countmax)
-  {
-    differences[idx] |= (value << fct->shiftforcounts);
-  } else
-  {
-    differences[idx] &= fct->differencemask;
-    ul_u32_gt_hashmap_add(fct->countocc_exceptions2,idx,
-                          (uint32_t) (value - fct->countmax));
+    if (value <= GT_FIRSTCODES_MAXSMALL)
+    {
+      fct->countocc_small[idx] = (GtCountAFCtype) value;
+    } else
+    {
+      fct->countocc_small[idx] = 0;
+      ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
+                            value - GT_FIRSTCODES_MAXSMALL);
+      fct->hashmap_addcount++;
+    }
   }
 }
 
@@ -88,43 +99,50 @@ static void gt_firstcodes_countocc_increment(GtFirstcodestab *fct,
 {
   unsigned long count;
 
-  if ((count = (unsigned long) fct->countocc_small[idx]) > 0)
+  if (fct->countocc_small == NULL)
   {
-    if (inc + count <= GT_FIRSTCODES_MAXSMALL)
+    if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
     {
-      fct->countocc_small[idx] += inc;
+      differences[idx] &= fct->differencemask;
+      if (inc + count <= fct->countmax)
+      {
+        differences[idx] |= ((inc + count) << fct->shiftforcounts);
+      } else
+      {
+        ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
+                              (uint32_t) (inc + count - fct->countmax));
+        fct->hashmap_addcount++;
+      }
     } else
     {
-      ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
-                            inc + count - GT_FIRSTCODES_MAXSMALL);
-      fct->hashmap_addcount++;
-      fct->countocc_small[idx] = 0;
+      uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+
+      gt_assert(valueptr != NULL && *valueptr + inc <= UINT32_MAX);
+      (*valueptr) += inc;
+      fct->hashmap_getcount++;
     }
   } else
   {
-    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
-
-    fct->hashmap_getcount++;
-    gt_assert(valueptr != NULL && *valueptr + inc <= UINT32_MAX);
-    (*valueptr) += inc;
-  }
-  if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
-  {
-    differences[idx] &= fct->differencemask;
-    if (inc + count <= fct->countmax)
+    if ((count = (unsigned long) fct->countocc_small[idx]) > 0)
     {
-      differences[idx] |= ((inc + count) << fct->shiftforcounts);
+      if (inc + count <= GT_FIRSTCODES_MAXSMALL)
+      {
+        fct->countocc_small[idx] += inc;
+      } else
+      {
+        ul_u32_gt_hashmap_add(fct->countocc_exceptions,idx,
+                              inc + count - GT_FIRSTCODES_MAXSMALL);
+        fct->countocc_small[idx] = 0;
+        fct->hashmap_addcount++;
+      }
     } else
     {
-      ul_u32_gt_hashmap_add(fct->countocc_exceptions2,idx,
-                            (uint32_t) (inc + count - fct->countmax));
-    }
-  } else
-  {
-    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions2,idx);
+      uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
 
-    gt_assert(valueptr != NULL && *valueptr + inc <= UINT32_MAX);
-    (*valueptr) += inc;
+      gt_assert(valueptr != NULL && *valueptr + inc <= UINT32_MAX);
+      (*valueptr) += inc;
+      fct->hashmap_getcount++;
+    }
   }
 }
 
@@ -132,12 +150,15 @@ static void gt_firstcodes_countocc_resize(GtFirstcodesspacelog *fcsl,
                                           GtFirstcodestab *fct,
                                           unsigned long numofdifferentcodes)
 {
-  fct->countocc_small = gt_realloc(fct->countocc_small,
-                                   sizeof (*fct->countocc_small) *
-                                           (numofdifferentcodes+1));
-  GT_FCI_SUBTRACTADDWORKSPACE(fcsl,"countocc_small",
-                              sizeof (*fct->countocc_small) *
-                              (numofdifferentcodes+1));
+  if (fct->countocc_small != NULL)
+  {
+    fct->countocc_small = gt_realloc(fct->countocc_small,
+                                     sizeof (*fct->countocc_small) *
+                                             (numofdifferentcodes+1));
+    GT_FCI_SUBTRACTADDWORKSPACE(fcsl,"countocc_small",
+                                sizeof (*fct->countocc_small) *
+                                (numofdifferentcodes+1));
+  }
 }
 
 #ifdef SKDEBUG
@@ -254,7 +275,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     printf("maxdifference=%lu,bitsformaxdifference=%u,bitsforcount=%u\n",
             maxdifference,bitsformaxdifference,bitsforcount);
     */
-    gt_firstcodes_countocc_new(fcsl,fct,numofsequences);
+    gt_firstcodes_countocc_new(fcsl,fct,bitsforcount,numofsequences);
     gt_marksubstring_mark(markprefix,allfirstcodes[0]);
     gt_marksubstring_mark(marksuffix,allfirstcodes[0]);
     *binsearchcache
@@ -385,36 +406,36 @@ unsigned long gt_firstcodes_accumulatecounts_merge(
   return found;
 }
 
-static uint32_t gt_firstcodes_countocc_get2(const GtFirstcodestab *fct,
-                                            const unsigned long *differences,
-                                            unsigned long idx)
-{
-  unsigned long count;
-
-  if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
-  {
-    return (uint32_t) count;
-  } else
-  {
-    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions2,idx);
-
-    gt_assert(valueptr != NULL);
-    return *valueptr + (uint32_t) fct->countmax;
-  }
-}
-
 static uint32_t gt_firstcodes_countocc_get(const GtFirstcodestab *fct,
+                                           const unsigned long *differences,
                                            unsigned long idx)
 {
-  if (fct->countocc_small[idx] > 0)
+  if (fct->countocc_small == NULL)
   {
-    return (uint32_t) fct->countocc_small[idx];
+    unsigned long count;
+
+    if ((count = (differences[idx] >> fct->shiftforcounts)) > 0)
+    {
+      return (uint32_t) count;
+    } else
+    {
+      uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+
+      gt_assert(valueptr != NULL);
+      return *valueptr + (uint32_t) fct->countmax;
+    }
   } else
   {
-    uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
+    if (fct->countocc_small[idx] > 0)
+    {
+      return (uint32_t) fct->countocc_small[idx];
+    } else
+    {
+      uint32_t *valueptr = ul_u32_gt_hashmap_get(fct->countocc_exceptions,idx);
 
-    gt_assert(valueptr != NULL);
-    return *valueptr + (uint32_t) GT_FIRSTCODES_MAXSMALL;
+      gt_assert(valueptr != NULL);
+      return *valueptr + (uint32_t) GT_FIRSTCODES_MAXSMALL;
+    }
   }
 }
 
@@ -448,10 +469,10 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
 #endif
 
   gt_assert(fct->differentcodes < UINT32_MAX);
-  gt_log_log("hashmap_addcount=%lu (%.2f%%)",fct->hashmap_addcount,
+  gt_log_log("hashmap_addcount=%lu (%.5f%%)",fct->hashmap_addcount,
                   100.0 * (double) fct->hashmap_addcount/
                                    fct->differentcodes);
-  gt_log_log("hashmap_getcount=%lu (%.2f%%)",
+  gt_log_log("hashmap_getcount=%lu (%.5f%%)",
                   fct->hashmap_getcount,
                   100.0 * (double) fct->hashmap_getcount/
                                    fct->differentcodes);
@@ -472,8 +493,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   }
   fct->bitchangepoints.nextfreeGtUlong = 0;
 #endif
-  currentcount = gt_firstcodes_countocc_get(fct,0);
-  gt_assert(currentcount == gt_firstcodes_countocc_get2(fct,differences,0));
+  currentcount = gt_firstcodes_countocc_get(fct,differences,0);
   partsum = (unsigned long) currentcount;
   maxbucketsize = (unsigned long) currentcount;
 #ifdef SKDEBUG
@@ -500,8 +520,7 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   GT_PARTIALSUM_LEFTBORDER_SET(leftborderbuffer_all,partsum);
   for (idx = 1UL; idx < fct->differentcodes; idx++)
   {
-    currentcount = gt_firstcodes_countocc_get(fct,idx);
-    gt_assert(currentcount == gt_firstcodes_countocc_get2(fct,differences,idx));
+    currentcount = gt_firstcodes_countocc_get(fct,differences,idx);
 #ifdef _LP64
     gt_assert(currentcount <= GT_MODVALUEMASK);
 #endif
@@ -547,16 +566,17 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
   gt_firstcodes_evaluate_countdistri(countdistri);
   gt_disc_distri_delete(countdistri);
 #endif
-  gt_assert (fct->countocc_small != NULL);
-  gt_free(fct->countocc_small);
-  GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
-  fct->countocc_small = NULL;
+  if (fct->countocc_small != NULL)
+  {
+    gt_free(fct->countocc_small);
+    GT_FCI_SUBTRACTWORKSPACE(fcsl,"countocc_small");
+    fct->countocc_small = NULL;
+  }
   if (fct->hashmap_addcount > 0 && gt_ma_bookkeeping_enabled())
   {
     spacewithhashmap = gt_ma_get_space_current() + gt_fa_get_space_current();
   }
   gt_hashtable_delete(fct->countocc_exceptions);
-  gt_hashtable_delete(fct->countocc_exceptions2);
   if (fct->hashmap_addcount > 0 && gt_ma_bookkeeping_enabled())
   {
     unsigned long hashmapspace;
@@ -568,7 +588,6 @@ unsigned long gt_firstcodes_partialsums(GtFirstcodesspacelog *fcsl,
                GT_MEGABYTES(hashmapspace),hashmapspace/fct->hashmap_addcount);
   }
   fct->countocc_exceptions = NULL;
-  fct->countocc_exceptions2 = NULL;
   return maxbucketsize;
 }
 
@@ -662,8 +681,6 @@ void gt_firstcodes_countocc_delete(GtFirstcodesspacelog *fcsl,
   }
   gt_hashtable_delete(fct->countocc_exceptions);
   fct->countocc_exceptions = NULL;
-  gt_hashtable_delete(fct->countocc_exceptions2);
-  fct->countocc_exceptions2 = NULL;
 }
 
 void gt_firstcodes_tab_delete(GtFirstcodesspacelog *fcsl,GtFirstcodestab *fct)
@@ -682,10 +699,8 @@ void gt_firstcodes_countocc_setnull(GtFirstcodestab *fct)
   fct->countocc_small = NULL;
   fct->leftborder_samples = NULL;
   fct->countocc_exceptions = NULL;
-  fct->countocc_exceptions2 = NULL;
   fct->differentcodes = 0;
   fct->hashmap_addcount = 0;
-  fct->all_incrementcount = 0;
   fct->hashmap_getcount = 0;
   fct->outfilenameleftborder = NULL;
 #ifdef _LP64

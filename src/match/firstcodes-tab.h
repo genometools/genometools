@@ -37,13 +37,11 @@ typedef struct
                 numofsamples,
                 sampledistance,
                 hashmap_addcount,
-                hashmap_getcount,
-                all_incrementcount;
+                hashmap_getcount;
   unsigned int sampleshift;
   uint32_t *leftborder;
   GtCountAFCtype *countocc_small;
   GtHashtable *countocc_exceptions;
-  GtHashtable *countocc_exceptions2;
   unsigned long *leftborder_samples;
   GtStr *outfilenameleftborder;
   unsigned long differencemask, /* for extracting the difference */
