@@ -42,29 +42,32 @@ static int gtf_in_stream_process_file(GtGTFInStream *gtf_in_stream,
 {
   GtGTFParser *gtf_parser;
   GtStr *filenamestr;
-  FILE *fpin;
-  int had_err;
+  GtFile *fpin;
+  int had_err = 0;
   gt_error_check(err);
   gt_assert(gtf_in_stream);
 
   gtf_parser = gt_gtf_parser_new(gtf_in_stream->type_checker);
 
   /* open input file */
-  if (gtf_in_stream->filename)
-    fpin = gt_fa_xfopen(gtf_in_stream->filename, "r");
+  if (gtf_in_stream->filename) {
+    if (!(fpin = gt_file_new(gtf_in_stream->filename, "r", err)))
+      had_err = -1;
+  }
   else
-    fpin = stdin;
+    fpin = NULL;
 
   /* parse input file */
-  filenamestr = gt_str_new_cstr(gtf_in_stream->filename
-                                ? gtf_in_stream->filename : "stdin");
-  had_err = gt_gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
-                                filenamestr, fpin, gtf_in_stream->tidy, err);
-  gt_str_delete(filenamestr);
+  if (!had_err) {
+    filenamestr = gt_str_new_cstr(gtf_in_stream->filename
+                                  ? gtf_in_stream->filename : "stdin");
+    had_err = gt_gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
+                                  filenamestr, fpin, gtf_in_stream->tidy, err);
+    gt_str_delete(filenamestr);
+  }
 
   /* close input file, if necessary */
-  if (gtf_in_stream->filename)
-    gt_fa_xfclose(fpin);
+  gt_file_delete(fpin);
 
   /* free */
   gt_gtf_parser_delete(gtf_parser);

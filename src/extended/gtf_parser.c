@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2008 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2008, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2008       Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -238,7 +238,7 @@ static int construct_genes(GT_UNUSED void *key, void *value, void *data,
 }
 
 int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
-                        GtStr *filenamestr, FILE *fpin, bool be_tolerant,
+                        GtStr *filenamestr, GtFile *fpin, bool be_tolerant,
                         GtError *err)
 {
   GtStr *seqid_str, *source_str, *line_buffer;
@@ -277,7 +277,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
   bool score_is_defined;
   int had_err = 0;
 
-  gt_assert(parser && genome_nodes && fpin);
+  gt_assert(parser && genome_nodes);
   gt_error_check(err);
 
   filename = gt_str_get(filenamestr);
@@ -302,7 +302,7 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
           }                                                         \
         }
 
-  while (gt_str_read_next_line(line_buffer, fpin) != EOF) {
+  while (gt_str_read_next_line_generic(line_buffer, fpin) != EOF) {
     line = gt_str_get(line_buffer);
     line_length = gt_str_length(line_buffer);
     line_number++;
