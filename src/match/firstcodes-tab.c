@@ -165,7 +165,7 @@ unsigned long gt_firstcodes_remdups(unsigned long *allfirstcodes,
     fct->differentcodes = 0;
   } else
   {
-    unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode, 
+    unsigned long numofdifferentcodes = 1UL, storeidx, readidx, previouscode,
                   idx, maxdifference = 0, cachewidth, nextstorecache;
 
     previouscode = allfirstcodes[0];
