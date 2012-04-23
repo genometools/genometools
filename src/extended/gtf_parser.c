@@ -52,7 +52,7 @@ typedef struct {
   GtQueue *genome_nodes;
   GtArray *mRNAs;
   GtHashmap *gene_id_to_name_mapping,
-          *transcript_id_to_name_mapping;
+            *transcript_id_to_name_mapping;
 } ConstructionInfo;
 
 typedef enum {
