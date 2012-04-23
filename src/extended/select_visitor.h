@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -39,6 +39,8 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                      double max_gene_score,
                                      double min_average_splice_site_prob,
                                      unsigned long feature_num);
+void           gt_select_visitor_set_single_intron_factor(GtNodeVisitor*,
+                                                          double);
 unsigned long  gt_select_visitor_node_buffer_size(GtNodeVisitor*);
 GtGenomeNode*  gt_select_visitor_get_node(GtNodeVisitor*);
 

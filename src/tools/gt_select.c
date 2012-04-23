@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -23,7 +23,7 @@
 #include "extended/genome_node.h"
 #include "extended/gff3_in_stream.h"
 #include "extended/gff3_out_stream_api.h"
-#include "extended/select_stream_api.h"
+#include "extended/select_stream.h"
 #include "extended/targetbest_select_stream.h"
 #include "tools/gt_select.h"
 
@@ -47,7 +47,8 @@ typedef struct {
                 feature_num;
   double min_gene_score,
          max_gene_score,
-         min_average_splice_site_prob;
+         min_average_splice_site_prob,
+         single_intron_factor;
   GtOutputFileInfo *ofi;
   GtFile *outfp;
 } SelectArguments;
@@ -82,7 +83,8 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 {
   SelectArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *option, *contain_option, *overlap_option;
+  GtOption *option, *contain_option, *overlap_option, *minaveragessp_option,
+           *singleintron_option;
   gt_assert(arguments);
 
   /* init */
@@ -175,11 +177,23 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, option);
 
   /* -minaveragessp */
-  option = gt_option_new_probability("minaveragessp", "set the minimum average "
-                                     "splice site probability",
-                                     &arguments->min_average_splice_site_prob,
-                                     GT_UNDEF_DOUBLE);
-  gt_option_parser_add_option(op, option);
+  minaveragessp_option =
+    gt_option_new_probability("minaveragessp",
+                              "set the minimum average splice site probability",
+                              &arguments->min_average_splice_site_prob,
+                              GT_UNDEF_DOUBLE);
+  gt_option_parser_add_option(op, minaveragessp_option);
+
+  /* -singleintronfactor */
+  singleintron_option =
+    gt_option_new_double_min("singleintronfactor",
+                             "factor to multiplicate the average splice site "
+                             "probability with for single introns before "
+                             "comparing it to the minimum average splice site "
+                             "probability", &arguments->single_intron_factor,
+                             1.0, 1.0);
+  gt_option_is_development_option(singleintron_option);
+  gt_option_parser_add_option(op, singleintron_option);
 
   /* -featurenum */
   option = gt_option_new_ulong_min("featurenum",
@@ -195,6 +209,9 @@ static GtOptionParser* gt_select_option_parser_new(void *tool_arguments)
 
   /* option exclusions */
   gt_option_exclude(contain_option, overlap_option);
+
+  /* option implications */
+  gt_option_imply(singleintron_option, minaveragessp_option);
 
   /* output file options */
   gt_outputfile_register_options(op, &arguments->outfp, arguments->ofi);
@@ -269,6 +286,8 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
                                        arguments->max_gene_score,
                                        arguments->min_average_splice_site_prob,
                                        arguments->feature_num);
+  gt_select_stream_set_single_intron_factor(select_stream,
+                                            arguments->single_intron_factor);
 
   if (arguments->targetbest)
     targetbest_select_stream = gt_targetbest_select_stream_new(select_stream);

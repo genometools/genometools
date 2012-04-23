@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -107,4 +107,12 @@ GtNodeStream* gt_select_stream_new(GtNodeStream *in_stream, GtStr *seqid,
                           min_gene_score, max_gene_score,
                           min_average_splice_site_prob, feature_num);
   return ns;
+}
+
+void gt_select_stream_set_single_intron_factor(GtNodeStream *ns,
+                                               double single_intron_factor)
+{
+  GtSelectStream *select_stream = gt_select_stream_cast(ns);
+  gt_select_visitor_set_single_intron_factor(select_stream->select_visitor,
+                                             single_intron_factor);
 }

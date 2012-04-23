@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -44,7 +44,8 @@ struct GtSelectVisitor {
                 feature_num;
   double min_gene_score,
          max_gene_score,
-         min_average_splice_site_prob;
+         min_average_splice_site_prob,
+         single_intron_factor;
 };
 
 #define select_visitor_cast(GV)\
@@ -129,13 +130,17 @@ static bool filter_has_CDS(GtFeatureNode *fn, bool has_CDS)
   return false;
 }
 
-static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp)
+static bool filter_min_average_ssp(GtFeatureNode *fn, double minaveragessp,
+                                   double singleintronfactor)
 {
   gt_assert(fn);
-  if (minaveragessp != GT_UNDEF_DOUBLE &&
-      gt_feature_node_has_splice_site(fn) &&
-      gt_feature_node_average_splice_site_prob(fn) < minaveragessp) {
-    return true;
+  if (minaveragessp != GT_UNDEF_DOUBLE && gt_feature_node_has_splice_site(fn)) {
+    unsigned long num_ss;
+    double avg_ssp = gt_feature_node_average_splice_site_prob(fn, &num_ss);
+    if (num_ss <= 2 && avg_ssp < singleintronfactor * minaveragessp)
+      return true;
+    else if (avg_ssp < minaveragessp)
+      return true;
   }
   return false;
 }
@@ -201,8 +206,10 @@ static int select_visitor_feature_node(GtNodeVisitor *nv,
   if (!filter_node)
     filter_node = filter_has_CDS(fn, fv->has_CDS);
 
-  if (!filter_node)
-    filter_node = filter_min_average_ssp(fn, fv->min_average_splice_site_prob);
+  if (!filter_node) {
+    filter_node = filter_min_average_ssp(fn, fv->min_average_splice_site_prob,
+                                         fv->single_intron_factor);
+  }
 
   if (filter_node)
     gt_genome_node_delete((GtGenomeNode*) fn);
@@ -321,8 +328,17 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
   select_visitor->min_gene_score = min_gene_score;
   select_visitor->max_gene_score = max_gene_score;
   select_visitor->min_average_splice_site_prob = min_average_splice_site_prob;
+  select_visitor->single_intron_factor = 1.0;
   select_visitor->feature_num = feature_num;
   return nv;
+}
+
+void gt_select_visitor_set_single_intron_factor(GtNodeVisitor *nv,
+                                                double single_intron_factor)
+{
+  GtSelectVisitor *select_visitor = select_visitor_cast(nv);
+  gt_assert(single_intron_factor >= 1.0);
+  select_visitor->single_intron_factor = single_intron_factor;
 }
 
 unsigned long gt_select_visitor_node_buffer_size(GtNodeVisitor *nv)

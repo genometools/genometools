@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -636,7 +636,8 @@ bool gt_feature_node_has_splice_site(const GtFeatureNode *fn)
   return feature_node_has_gft(fn, gfts);
 }
 
-double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn)
+double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn,
+                                                unsigned long *num_ss)
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *child;
@@ -654,6 +655,8 @@ double gt_feature_node_average_splice_site_prob(const GtFeatureNode *fn)
   gt_feature_node_iterator_delete(fni);
   if (num_of_splice_sites)
     averagessp /= num_of_splice_sites;
+  if (num_ss)
+    *num_ss = num_of_splice_sites;
   return averagessp;
 }
 

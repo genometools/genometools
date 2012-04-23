@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -43,7 +43,8 @@ void           gt_feature_node_foreach_attribute(GtFeatureNode*,
                                                  AttributeIterFunc, void *data);
 bool           gt_feature_node_has_CDS(const GtFeatureNode*);
 bool           gt_feature_node_has_splice_site(const GtFeatureNode*);
-double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*);
+double         gt_feature_node_average_splice_site_prob(const GtFeatureNode*,
+                                                        unsigned long *num_ss);
 int            gt_feature_node_unit_test(GtError*);
 
 /* Perform depth first traversal of the given <feature_node>. */
