@@ -111,7 +111,7 @@ static int construct_mRNAs(GT_UNUSED void *key, void *value, void *data,
 {
   ConstructionInfo *cinfo = (ConstructionInfo*) data;
   GtArray *gt_genome_node_array = (GtArray*) value,
-        *mRNAs = (GtArray*) cinfo->mRNAs;
+          *mRNAs = (GtArray*) cinfo->mRNAs;
   GtGenomeNode *mRNA_node, *first_node, *gn;
   const char *tname;
   GtStrand mRNA_strand;
