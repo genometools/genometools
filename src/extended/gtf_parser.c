@@ -314,7 +314,10 @@ int gt_gtf_parser_parse(GtGTFParser *parser, GtQueue *genome_nodes,
     }
     else if (line[0] == '#') {
       /* storing comment */
-      gn = gt_comment_node_new(line+1);
+      if (line_length >= 2 && line[1] == '#')
+        gn = gt_comment_node_new(line+2); /* store '##' line as '#' line */
+      else
+        gn = gt_comment_node_new(line+1);
       gt_genome_node_set_origin(gn, filenamestr, line_number);
       gt_queue_add(genome_nodes, gn);
     }
