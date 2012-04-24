@@ -67,7 +67,7 @@ GtNodeStream* gt_array_in_stream_new(GtArray *nodes,
   GtNodeStream *gs;
   GtArrayInStream *ais;
   gt_assert(nodes);
-  gs = gt_node_stream_create(gt_array_in_stream_class(), true);
+  gs = gt_node_stream_create(gt_array_in_stream_class(), false);
   ais = gt_array_in_stream_cast(gs);
   ais->nodes = nodes;
   ais->progress = progress;
