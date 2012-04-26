@@ -181,8 +181,7 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
   GtRadixsortStrBucketInfo bucket;
   GtRadixsortStrBucketInfo subbucket;
 
-  gt_assert(maxdepth == 0 || depth <= maxdepth);
-  gt_assert(maxdepth == 0 || maxdepth <= seqlen);
+  gt_assert(maxdepth == 0 || (depth <= maxdepth && maxdepth <= seqlen));
 
   oracle = gt_malloc(sizeof (*oracle) * width);
   sorted = gt_malloc(sizeof (*sorted) * width);
@@ -200,20 +199,28 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     memset(&bucketsize, 0, sizeof (bucketsize));
 
     /* Loop A */
-    for (i = 0; i < bucket.width; ++i)
+    for (i = 0; i < bucket.width; i++)
+    {
       oracle[i] = gt_radixsort_str_get_code(twobitencoding, bucket.suffixes[i],
-          bucket.depth, seqlen, totallength);
+                                            bucket.depth, seqlen, totallength);
+    }
 
     for (i = 0; i < bucket.width; ++i)
-      ++bucketsize[oracle[i]];
+    {
+      bucketsize[oracle[i]]++;
+    }
 
     bucketindex[0] = 0;
     for (i = 1UL; i < (unsigned long)GT_RADIXSORT_STR_NOFBUCKETS; ++i)
+    {
       bucketindex[i] = bucketindex[i - 1] + bucketsize[i - 1];
+    }
 
     /* Loop B */
     for (i = 0; i < bucket.width; ++i)
+    {
       sorted[bucketindex[oracle[i]]++] = bucket.suffixes[i];
+    }
 
     memcpy(bucket.suffixes, sorted, sizeof (unsigned long) * bucket.width);
 
@@ -228,9 +235,10 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
         if (subbucket.width > 1UL)
         {
           if (subbucket.width <= GT_RADIXSORT_STR_INSERTION_SORT_MAX)
+          {
             gt_radixsort_str_insertionsort(twobitencoding, seqlen, maxdepth,
-                totallength, &subbucket);
-          else
+                                           totallength, &subbucket);
+          } else
           {
             GT_STACK_PUSH(&stack, subbucket);
           }
@@ -241,7 +249,6 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
       gt_assert(bucket.suffixes + bucket.width == subbucket.suffixes);
     }
   }
-
   GT_STACK_DELETE(&stack);
   gt_free(sorted);
   gt_free(oracle);
