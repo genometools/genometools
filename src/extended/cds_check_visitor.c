@@ -57,12 +57,19 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
     if ((!i && gt_feature_node_get_phase(fn) == GT_PHASE_UNDEFINED) ||
         (i && gt_feature_node_get_phase(fn) != correct_phase)) {
       if (gt_hashmap_get(v->cds_features, fn)) {
+#if 0
         gt_error_set(err, "%s feature on line %u in file \"%s\" has multiple "
                      "parents which require different phases (uncorrectable)",
                      gt_ft_CDS,
                      gt_genome_node_get_line_number((GtGenomeNode*) fn),
                      gt_genome_node_get_filename((GtGenomeNode*) fn));
         had_err = -1;
+#endif
+        gt_warning("%s feature on line %u in file \"%s\" has multiple "
+                   "parents which require different phases (uncorrectable)",
+                   gt_ft_CDS,
+                   gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                   gt_genome_node_get_filename((GtGenomeNode*) fn));
       }
       else {
         if (!v->tidy) {
