@@ -99,12 +99,18 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
   uint8_t overflow = 0;
   gt_radixsort_str_kmercode_t code;
   unsigned long remaining, pos = suffixnum + depth;
+  /*printf("pos=%lu,suffixnum=%lu\n",pos,suffixnum);*/
   if (suffixnum % seqlen + depth > seqlen - 2)
+  {
+    /*printf("(0) return %lu\n",(unsigned long)
+ * GT_RADIXSORT_STR_LAST_BUCKET);*/
     return GT_RADIXSORT_STR_LAST_BUCKET;
+  }
   if (suffixnum <= totallength)
   {
     remaining = seqlen - 1 - pos % seqlen;
     code = gt_radixsort_str_code_at_position(twobitencoding, pos);
+    /*printf("(1) code=%lu\n",(unsigned long) code);*/
     if (remaining < (unsigned long)GT_RADIXSORT_STR_KMERSIZE)
     {
       overflow = GT_RADIXSORT_STR_KMERSIZE - remaining;
@@ -119,6 +125,7 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
       (unsigned long)GT_RADIXSORT_STR_KMERSIZE : remaining;
     code = GT_RADIXSORT_STR_REVCOMPL(gt_radixsort_str_code_at_position(
           twobitencoding, pos));
+    /*printf("(2) code=%lu\n",(unsigned long) code);*/
     if (remaining < (unsigned long)GT_RADIXSORT_STR_KMERSIZE)
     {
       overflow = GT_RADIXSORT_STR_KMERSIZE - remaining;
@@ -168,9 +175,9 @@ static inline void gt_radixsort_str_insertionsort(
 }
 
 void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
-    unsigned long *suffixes, unsigned long offset, unsigned long depth,
-    unsigned long maxdepth, unsigned long width, unsigned long seqlen,
-    unsigned long totallength)
+                            unsigned long *suffixes, unsigned long depth,
+                            unsigned long maxdepth, unsigned long width,
+                            unsigned long seqlen, unsigned long totallength)
 {
   unsigned long i;
   GtStackGtRadixsortStrBucketInfo stack;
@@ -188,7 +195,7 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
 
   GT_STACK_INIT(&stack, 1024UL);
 
-  bucket.suffixes = suffixes + offset;
+  bucket.suffixes = suffixes;
   bucket.width = width;
   bucket.depth = depth;
   GT_STACK_PUSH(&stack, bucket);
@@ -203,8 +210,8 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     {
       oracle[i] = gt_radixsort_str_get_code(twobitencoding, bucket.suffixes[i],
                                             bucket.depth, seqlen, totallength);
+      /*printf("oracle[%lu]=%lu\n",i,(unsigned long) oracle[i]);*/
     }
-
     for (i = 0; i < bucket.width; ++i)
     {
       bucketsize[oracle[i]]++;

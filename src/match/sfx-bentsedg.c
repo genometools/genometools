@@ -27,6 +27,7 @@
 #include "core/encseq.h"
 #include "bcktab.h"
 #include "kmer2string.h"
+#include "radixsort_str.h"
 #include "sfx-bltrie.h"
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
@@ -160,6 +161,7 @@ typedef struct
   unsigned long countinsertionsort,
                 counttqsort,
                 countshortreadsort,
+                countradixsort,
                 countcountingsort,
                 countbltriesort,
                 maxremain;
@@ -861,6 +863,73 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
+#ifdef WITHRADIXSORT
+    if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
+        !gt_encseq_is_mirrored(bsr->encseq) &&
+        bsr->readmode == GT_READMODE_FORWARD &&
+        bsr->tableoflcpvalues == NULL)
+    {
+      const GtTwobitencoding *twobitencoding
+        = gt_encseq_twobitencoding_export(bsr->encseq);
+      unsigned long idx, *suffixes;
+      GtSuffixsortspace_exportptr *exportptr
+        = gt_suffixsortspace_exportptr(subbucketleft, bsr->sssp);
+      bool allocated = false;
+
+      if (exportptr->ulongtabsectionptr != NULL)
+      {
+        suffixes = exportptr->ulongtabsectionptr;
+      } else
+      {
+        suffixes = gt_malloc(sizeof (*suffixes) * width);
+        allocated = true;
+        for (idx = 0; idx < width; idx++)
+        {
+          suffixes[idx] = (unsigned long) exportptr->uinttabsectionptr[idx];
+        }
+      }
+      /*printf("sort %lu suffixes at depth %lu\n",width,depth);
+      for (idx = 0; idx < width; idx++)
+      {
+        printf("%lu\n",suffixes[idx]);
+      }*/
+      gt_radixsort_str_eqlen(twobitencoding,suffixes,depth,
+                             (unsigned long) bsr->sortmaxdepth,
+                             width, 1 + gt_encseq_equallength(bsr->encseq),
+                             bsr->totallength);
+      /*printf("sorted order\n");
+      for (idx = 0; idx < width; idx++)
+      {
+        printf("%lu\n",suffixes[idx]);
+      }
+      */
+      if (allocated)
+      {
+        for (idx = 0; idx < width; idx++)
+        {
+          exportptr->uinttabsectionptr[idx] = (unsigned int) suffixes[idx];
+          if (exportptr->uinttabsectionptr[idx] == 0)
+          {
+            gt_suffixsortspace_updatelongest(bsr->sssp,subbucketleft + idx);
+          }
+        }
+        gt_free(suffixes);
+      } else
+      {
+        for (idx = 0; idx < width; idx++)
+        {
+          if (exportptr->ulongtabsectionptr[idx] == 0)
+          {
+            gt_suffixsortspace_updatelongest(bsr->sssp,subbucketleft + idx);
+            break;
+          }
+        }
+      }
+      gt_suffixsortspace_export_done(bsr->sssp);
+      bsr->countradixsort++;
+      return;
+    }
+#endif
     if (bsr->srsw != NULL &&
         !bsr->sfxstrategy->noshortreadsort &&
         gt_shortreadsort_size(false,width,
@@ -876,7 +945,6 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                                  width,
                                  depth,
                                  (unsigned long) bsr->sortmaxdepth);
-      bsr->countshortreadsort++;
       if (bsr->sortmaxdepth > 0)
       {
         gt_shortreadsort_sssp_add_unsorted(
@@ -888,6 +956,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
                               bsr->processunsortedsuffixrange,
                               bsr->processunsortedsuffixrangeinfo);
       }
+      bsr->countshortreadsort++;
       return;
     }
     if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
@@ -1428,6 +1497,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->countcountingsort = 0;
   bsr->countbltriesort = 0;
   bsr->countshortreadsort = 0;
+  bsr->countradixsort = 0;
 }
 
 size_t gt_size_of_sort_workspace (const Sfxstrategy *sfxstrategy)
@@ -1463,6 +1533,7 @@ static void bentsedgresources_delete(GtBentsedgresources *bsr, GtLogger *logger)
   gt_logger_log(logger,"countbltriesort=%lu",bsr->countbltriesort);
   gt_logger_log(logger,"countcountingsort=%lu",bsr->countcountingsort);
   gt_logger_log(logger,"countshortreadsort=%lu",bsr->countshortreadsort);
+  gt_logger_log(logger,"countradixsort=%lu",bsr->countradixsort);
   gt_logger_log(logger,"counttqsort=%lu",bsr->counttqsort);
 }
 

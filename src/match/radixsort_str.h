@@ -30,7 +30,7 @@
  * */
 
 void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
-    unsigned long *suffixes, unsigned long offset, unsigned long depth,
+    unsigned long *suffixes, unsigned long depth,
     unsigned long maxdepth, unsigned long width, unsigned long seqlen,
     unsigned long totallength);
 
