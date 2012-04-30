@@ -169,6 +169,13 @@ Test do
            "#{$testdata}standard_gene_as_tree.gff3")
 end
 
+Name "gt gff3 (standard gene as DAG)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}standard_gene_as_dag.gff3"
+  run "diff #{last_stdout} #{$testdata}standard_gene_as_dag_sorted.gff3"
+end
+
 4.upto(14) do |i|
   Name "gt gff3 test #{i}"
   Keywords "gt_gff3"
