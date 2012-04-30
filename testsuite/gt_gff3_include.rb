@@ -1081,8 +1081,7 @@ end
 Name "gt gff3 CDS feature with multiple (incompatible) parents"
 Keywords "gt_gff3 "
 Test do
-  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_feature_with_multiple_parents.gff3",
-           :retval => 1
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_feature_with_multiple_parents.gff3"
   grep last_stderr, "has multiple parents which require different phases"
 end
 
