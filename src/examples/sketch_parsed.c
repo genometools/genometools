@@ -8,7 +8,8 @@ static void handle_error(GtError *err)
 
 int main(int argc, char *argv[])
 {
-  const char *style_file, *png_file, *gff3_file, *seqid;
+  const char *style_file, *png_file, *gff3_file;
+  char *seqid;
   GtStyle *style;
   GtFeatureIndex *feature_index;
   GtRange range;
@@ -56,6 +57,7 @@ int main(int argc, char *argv[])
   if (gt_feature_index_get_range_for_seqid(feature_index, &range, seqid, err))
     handle_error(err);
   diagram = gt_diagram_new(feature_index, seqid, &range, style, err);
+  gt_free(seqid);
   if (gt_error_is_set(err))
     handle_error(err);
 

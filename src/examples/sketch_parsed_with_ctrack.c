@@ -11,7 +11,8 @@ static void handle_error(GtError *err)
 
 int main(int argc, char *argv[])
 {
-  const char *style_file, *png_file, *gff3_file, *seqid;
+  const char *style_file, *png_file, *gff3_file;
+  char *seqid;
   GtStyle *style;
   GtBioseq *bioseq;
   GtFeatureIndex *feature_index;
