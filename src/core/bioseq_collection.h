@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2010 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2010, 2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -40,5 +40,24 @@ int                 gt_bioseq_collection_md5_to_description(GtBioseqCollection*,
                                                             GtStr *desc,
                                                             GtStr *md5_seqid,
                                                             GtError *err);
+unsigned long       gt_bioseq_collection_num_of_files(const
+                                                      GtBioseqCollection*);
+unsigned long       gt_bioseq_collection_num_of_seqs(const GtBioseqCollection*,
+                                                     unsigned long filenum);
+const char*         gt_bioseq_collection_get_md5_fingerprint(const
+                                                            GtBioseqCollection*,
+                                                             unsigned long
+                                                             filenum,
+                                                             unsigned long
+                                                             seqnum);
+const char*         gt_bioseq_collection_get_sequence(const GtBioseqCollection*,
+                                                      unsigned long filenum,
+                                                      unsigned long seqnum);
+unsigned long       gt_bioseq_collection_get_sequence_length(const
+                                                            GtBioseqCollection*,
+                                                             unsigned long
+                                                             filenum,
+                                                             unsigned long
+                                                             seqnum);
 
 #endif

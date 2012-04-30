@@ -196,3 +196,42 @@ int gt_bioseq_collection_md5_to_description(GtBioseqCollection *bsc,
   }
   return had_err;
 }
+
+unsigned long gt_bioseq_collection_num_of_files(const GtBioseqCollection *bsc)
+{
+  gt_assert(bsc);
+  return bsc->num_of_seqfiles;
+}
+
+unsigned long gt_bioseq_collection_num_of_seqs(const GtBioseqCollection *bsc,
+                                               unsigned long filenum)
+{
+  gt_assert(bsc && filenum < bsc->num_of_seqfiles);
+  return gt_bioseq_number_of_sequences(bsc->bioseqs[filenum]);
+}
+
+const char* gt_bioseq_collection_get_md5_fingerprint(const
+                                                     GtBioseqCollection *bsc,
+                                                     unsigned long filenum,
+                                                     unsigned long seqnum)
+{
+  gt_assert(bsc && filenum < bsc->num_of_seqfiles);
+  return gt_bioseq_get_md5_fingerprint(bsc->bioseqs[filenum], seqnum);
+}
+
+const char* gt_bioseq_collection_get_sequence(const GtBioseqCollection *bsc,
+                                              unsigned long filenum,
+                                              unsigned long seqnum)
+{
+  gt_assert(bsc && filenum < bsc->num_of_seqfiles);
+  return gt_bioseq_get_sequence(bsc->bioseqs[filenum], seqnum);
+}
+
+unsigned long gt_bioseq_collection_get_sequence_length(const
+                                                       GtBioseqCollection *bsc,
+                                                       unsigned long filenum,
+                                                       unsigned long seqnum)
+{
+  gt_assert(bsc && filenum < bsc->num_of_seqfiles);
+  return gt_bioseq_get_sequence_length(bsc->bioseqs[filenum], seqnum);
+}

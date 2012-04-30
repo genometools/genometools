@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2008-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2008-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2008      Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,13 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <ctype.h>
 #include <string.h>
 #include "core/bioseq.h"
+#include "core/bioseq_collection.h"
 #include "core/fa.h"
 #include "core/fasta.h"
 #include "core/ma.h"
 #include "core/option_api.h"
 #include "core/outputfile.h"
+#include "core/seq_info_cache.h"
 #include "core/string_distri.h"
 #include "core/unused_api.h"
 #include "core/xansi_api.h"
@@ -29,7 +32,8 @@
 #include "tools/gt_fingerprint.h"
 
 typedef struct {
-  bool show_duplicates;
+  bool show_duplicates,
+       detect_collisions;
   GtStr *checklist,
         *extract;
   unsigned long width;
@@ -62,7 +66,8 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
 {
   FingerprintArguments *arguments = tool_arguments;
   GtOptionParser *op;
-  GtOption *check_option, *duplicates_option, *extract_option, *width_option;
+  GtOption *check_option, *collisions_option, *duplicates_option,
+           *extract_option, *width_option;
   gt_assert(arguments);
   op = gt_option_parser_new("[option ...] sequence_file [...] ",
                             "Compute MD5 fingerprints for each sequence given "
@@ -86,6 +91,12 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
                                          "sequence_file(s).",
                                          &arguments->show_duplicates, false);
   gt_option_parser_add_option(op, duplicates_option);
+
+  /* -collisions */
+  collisions_option = gt_option_new_bool("collisions", "detect hash collisions",
+                                         &arguments->detect_collisions, false);
+  gt_option_is_development_option(collisions_option);
+  gt_option_parser_add_option(op, collisions_option);
 
   /* -extract */
   extract_option = gt_option_new_string("extract",
@@ -191,6 +202,90 @@ static int show_duplicates(GtStringDistri *sd, GtError *err)
   return 0;
 }
 
+static int compare_md5s(GtBioseqCollection *bsc, const GtSeqInfo *si,
+                        unsigned long filenum, unsigned long seqnum,
+                        const char *md5, GtError *err)
+{
+  unsigned long i, seq_a_len, seq_b_len;
+  char *seq_a_upper, *seq_b_upper;
+  const char *seq_a, *seq_b;
+  int had_err = 0;
+  gt_error_check(err);
+  gt_assert(bsc && si && md5);
+  seq_a = gt_bioseq_collection_get_sequence(bsc, si->filenum, si->seqnum);
+  seq_b = gt_bioseq_collection_get_sequence(bsc, filenum, seqnum);
+  seq_a_len = gt_bioseq_collection_get_sequence_length(bsc, si->filenum,
+                                                       si->seqnum);
+  seq_b_len = gt_bioseq_collection_get_sequence_length(bsc, si->filenum,
+                                                       si->seqnum);
+  seq_a_upper = gt_malloc((seq_a_len + 1) * sizeof (char));
+  seq_b_upper = gt_malloc((seq_b_len + 1) * sizeof (char));
+  for (i = 0; i < seq_a_len; i++)
+    seq_a_upper[i] = toupper(seq_a[i]);
+  for (i = 0; i < seq_b_len; i++)
+    seq_b_upper[i] = toupper(seq_b[i]);
+  seq_a_upper[seq_a_len] = '\0';
+  seq_b_upper[seq_b_len] = '\0';
+  if (strcmp(seq_a_upper, seq_b_upper)) {
+    gt_error_set(err, "sequence collision detected for fingerprint '%s'", md5);
+    had_err = -1;
+  }
+  gt_free(seq_b_upper);
+  gt_free(seq_a_upper);
+  return had_err;
+}
+
+static int detect_collisions_on_bsc(GtBioseqCollection *bsc, GtError *err)
+{
+  unsigned long filenum, seqnum;
+  GtSeqInfoCache *sic;
+  gt_error_check(err);
+  gt_assert(bsc);
+  int had_err = 0;
+  sic = gt_seq_info_cache_new();
+  for (filenum = 0;
+       !had_err && filenum < gt_bioseq_collection_num_of_files(bsc);
+       filenum++) {
+    for (seqnum = 0;
+         !had_err && seqnum < gt_bioseq_collection_num_of_seqs(bsc, filenum);
+         seqnum++) {
+      const GtSeqInfo *si_ptr;
+      const char *md5;
+      md5 = gt_bioseq_collection_get_md5_fingerprint(bsc, filenum, seqnum);
+      if ((si_ptr = gt_seq_info_cache_get(sic, md5)))
+        had_err = compare_md5s(bsc, si_ptr, filenum, seqnum, md5, err);
+      else {
+        GtSeqInfo si;
+        si.filenum = filenum;
+        si.seqnum = seqnum;
+        gt_seq_info_cache_add(sic, md5, &si);
+      }
+    }
+  }
+  gt_seq_info_cache_delete(sic);
+  return had_err;
+}
+
+static int detect_collisions(int num_of_seqfiles, const char **seqfiles,
+                             GtError *err)
+{
+  GtStrArray *sequence_files;
+  GtBioseqCollection *bsc;
+  unsigned long i;
+  int had_err = 0;
+  gt_error_check(err);
+  sequence_files = gt_str_array_new();
+  for (i = 0; i < num_of_seqfiles; i++)
+    gt_str_array_add_cstr(sequence_files, seqfiles[i]);
+  if (!(bsc = gt_bioseq_collection_new(sequence_files, err)))
+    had_err = -1;
+  if (!had_err)
+    had_err = detect_collisions_on_bsc(bsc, err);
+  gt_bioseq_collection_delete(bsc);
+  gt_str_array_delete(sequence_files);
+  return had_err;
+}
+
 static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
                                  void *tool_arguments, GtError *err)
 {
@@ -247,6 +342,9 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
   }
 
   gt_string_distri_delete(sd);
+
+  if (!had_err && arguments->detect_collisions)
+    had_err = detect_collisions(argc - parsed_args, argv + parsed_args, err);
 
   return had_err;
 }
