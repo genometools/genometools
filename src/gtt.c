@@ -123,6 +123,7 @@
 #include "tools/gt_seqorder.h"
 #include "tools/gt_seqstat.h"
 #include "tools/gt_seqtransform.h"
+#include "tools/gt_seqtranslate.h"
 #include "tools/gt_sequniq.h"
 #include "tools/gt_shredder.h"
 #include "tools/gt_shulen.h"
@@ -134,7 +135,6 @@
 #include "tools/gt_tagerator.h"
 #include "tools/gt_tallymer.h"
 #include "tools/gt_template.h"
-#include "tools/gt_translate.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 #ifndef WITHOUT_CAIRO
@@ -207,6 +207,7 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "seqfilter", gt_seqfilter());
   gt_toolbox_add_tool(tools, "seqmutate", gt_seqmutate());
   gt_toolbox_add_tool(tools, "seqorder", gt_seqorder());
+  gt_toolbox_add_tool(tools, "seqtranslate", gt_seqtranslate());
   gt_toolbox_add_tool(tools, "sequniq", gt_sequniq());
   gt_toolbox_add(tools, "seqstat", gt_seqstat);
   gt_toolbox_add_tool(tools, "seqtransform", gt_seqtransform());
@@ -220,7 +221,6 @@ GtToolbox* gtt_tools(void)
   gt_toolbox_add_tool(tools, "tallymer", gt_tallymer());
   gt_toolbox_add_tool(tools, "tagerator", gt_tagerator());
   gt_toolbox_add_hidden_tool(tools, "template", gt_template());
-  gt_toolbox_add_tool(tools, "translate", gt_translate());
   gt_toolbox_add_tool(tools, "uniq", gt_uniq());
   gt_toolbox_add(tools, "uniquesub", gt_uniquesub);
 #ifndef WITHOUT_CAIRO

@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GT_TRANSLATE_H
-#define GT_TRANSLATE_H
+#ifndef GT_SEQTRANSLATE_H
+#define GT_SEQTRANSLATE_H
 
 #include "core/tool.h"
 
-/* the translate tool */
-GtTool* gt_translate(void);
+/* the seqtranslate tool */
+GtTool* gt_seqtranslate(void);
 
 #endif

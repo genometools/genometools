@@ -26,7 +26,7 @@
 #include "core/unused_api.h"
 #include "core/warning_api.h"
 #include "extended/reverse.h"
-#include "tools/gt_translate.h"
+#include "tools/gt_seqtranslate.h"
 
 typedef struct {
   GtOutputFileInfo *ofi;
@@ -35,14 +35,14 @@ typedef struct {
   bool reverse;
 } GtTranslateArguments;
 
-static void* gt_translate_arguments_new(void)
+static void* gt_seqtranslate_arguments_new(void)
 {
   GtTranslateArguments *arguments = gt_calloc(1, sizeof *arguments);
   arguments->ofi = gt_outputfileinfo_new();
   return arguments;
 }
 
-static void gt_translate_arguments_delete(void *tool_arguments)
+static void gt_seqtranslate_arguments_delete(void *tool_arguments)
 {
   GtTranslateArguments *arguments = tool_arguments;
   if (!arguments) return;
@@ -51,7 +51,7 @@ static void gt_translate_arguments_delete(void *tool_arguments)
   gt_free(arguments);
 }
 
-static GtOptionParser* gt_translate_option_parser_new(void *tool_arguments)
+static GtOptionParser* gt_seqtranslate_option_parser_new(void *tool_arguments)
 {
   GtTranslateArguments *arguments = tool_arguments;
   GtOptionParser *op;
@@ -77,7 +77,7 @@ static GtOptionParser* gt_translate_option_parser_new(void *tool_arguments)
   return op;
 }
 
-static int gt_translate_arguments_check(GT_UNUSED int rest_argc,
+static int gt_seqtranslate_arguments_check(GT_UNUSED int rest_argc,
                                         GT_UNUSED void *tool_arguments,
                                         GT_UNUSED GtError *err)
 {
@@ -89,11 +89,12 @@ static int gt_translate_arguments_check(GT_UNUSED int rest_argc,
   return had_err;
 }
 
-static int gt_translate_do_translation(GtTranslateArguments *arguments,
+static int gt_seqtranslate_do_translation(GtTranslateArguments *arguments,
                                        const char *sequence,
                                        unsigned long length,
                                        const char *desc,
                                        GtStr **translations,
+                                       bool rev,
                                        GtError *err)
 {
   GtTranslator *tr;
@@ -101,6 +102,7 @@ static int gt_translate_do_translation(GtTranslateArguments *arguments,
   GtCodonIterator *ci;
   char translated;
   int had_err = 0;
+  GtStr *str;
   unsigned int frame,
                i;
 
@@ -115,18 +117,26 @@ static int gt_translate_do_translation(GtTranslateArguments *arguments,
   gt_translator_delete(tr);
   if (trst == GT_TRANSLATOR_ERROR)
     return -1;
+  str = gt_str_new();
   for (i = 0; i < 3; i++) {
     if (gt_str_length(translations[i]) > 0) {
-      gt_fasta_show_entry(desc, gt_str_get(translations[i]),
+      gt_str_append_cstr(str, desc);
+      gt_str_append_cstr(str, " (");
+      gt_str_append_ulong(str, i+1);
+      gt_str_append_cstr(str, rev ? "-" : "+");
+      gt_str_append_cstr(str, ")");
+      gt_fasta_show_entry(gt_str_get(str), gt_str_get(translations[i]),
                           gt_str_length(translations[i]),
                           arguments->fasta_width, arguments->outfp);
       gt_str_reset(translations[i]);
+      gt_str_reset(str);
     }
   }
+  gt_str_delete(str);
   return had_err;
 }
 
-static int gt_translate_runner(int argc, const char **argv, int parsed_args,
+static int gt_seqtranslate_runner(int argc, const char **argv, int parsed_args,
                               void *tool_arguments, GT_UNUSED GtError *err)
 {
   GtTranslateArguments *arguments = tool_arguments;
@@ -171,14 +181,15 @@ static int gt_translate_runner(int argc, const char **argv, int parsed_args,
         gt_warning("sequence '%s' is shorter than codon length of %d, skipping",
                    desc, GT_CODON_LENGTH);
       } else {
-        had_err = gt_translate_do_translation(arguments, sequence, len, desc,
-                                              translations, err);
+        had_err = gt_seqtranslate_do_translation(arguments, sequence, len, desc,
+                                              translations, false, err);
         if (!had_err && arguments->reverse) {
           char *revseq = gt_cstr_dup_nt(sequence, len);
           had_err = gt_reverse_complement(revseq, len, err);
           if (!had_err) {
-            had_err = gt_translate_do_translation(arguments, revseq, len,
-                                                  desc, translations, err);
+            had_err = gt_seqtranslate_do_translation(arguments, revseq, len,
+                                                  desc, translations, true,
+                                                  err);
           }
           gt_free(revseq);
         }
@@ -194,11 +205,11 @@ static int gt_translate_runner(int argc, const char **argv, int parsed_args,
   return had_err;
 }
 
-GtTool* gt_translate(void)
+GtTool* gt_seqtranslate(void)
 {
-  return gt_tool_new(gt_translate_arguments_new,
-                     gt_translate_arguments_delete,
-                     gt_translate_option_parser_new,
-                     gt_translate_arguments_check,
-                     gt_translate_runner);
+  return gt_tool_new(gt_seqtranslate_arguments_new,
+                     gt_seqtranslate_arguments_delete,
+                     gt_seqtranslate_option_parser_new,
+                     gt_seqtranslate_arguments_check,
+                     gt_seqtranslate_runner);
 }
