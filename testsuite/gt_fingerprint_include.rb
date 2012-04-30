@@ -43,6 +43,12 @@ Test do
   grep last_stderr, /fingerprint comparison failed/
 end
 
+Name "fingerprint -collisions"
+Keywords "gt_fingerprint"
+Test do
+  run_test "#{$bin}gt fingerprint -collisions #{$testdata}U89959_ests.fas"
+end
+
 Name "fingerprint -duplicates (found)"
 Keywords "gt_fingerprint"
 Test do
