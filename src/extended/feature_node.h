@@ -33,6 +33,7 @@ typedef int (*GtFeatureNodeTraverseFunc)(GtFeatureNode*, void*, GtError*);
 
 const GtGenomeNodeClass* gt_feature_node_class(void);
 
+GtFeatureNode* gt_feature_node_clone(const GtFeatureNode*);
 void           gt_feature_node_get_exons(GtFeatureNode*,
                                          GtArray *exon_features);
 void           gt_feature_node_determine_transcripttypes(GtFeatureNode*);
@@ -76,7 +77,7 @@ bool           gt_feature_node_is_marked(const GtFeatureNode *feature_node);
 
 /* Returns <true> if the given <feature_node> graph contains a marked node. */
 bool           gt_feature_node_contains_marked(GtFeatureNode *feature_node);
-bool           gt_feature_node_has_children(GtFeatureNode*);
+bool           gt_feature_node_has_children(const GtFeatureNode*);
 bool           gt_feature_node_direct_children_do_not_overlap(GtFeatureNode*);
 /* Returns <true> if all direct childred of <parent> with the same type (s.t.)
    as <child> do not overlap. */

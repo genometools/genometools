@@ -308,6 +308,39 @@ GtGenomeNode* gt_feature_node_new_standard_gene(void)
   return fn;
 }
 
+GtFeatureNode* gt_feature_node_clone(const GtFeatureNode *template)
+{
+  GtFeatureNode *fn;
+  GtStr *seqid;
+  const char *type;
+  unsigned long i, start, end;
+  GtStrand strand;
+  GtStrArray *attributes;
+  gt_assert(template && !gt_feature_node_has_children(template));
+  seqid = gt_genome_node_get_seqid((GtGenomeNode*) template);
+  type = gt_feature_node_get_type(template);
+  start = gt_genome_node_get_start((GtGenomeNode*) template);
+  end = gt_genome_node_get_end((GtGenomeNode*) template);
+  strand = gt_feature_node_get_strand(template);
+  fn = (GtFeatureNode*) gt_feature_node_new(seqid, type, start, end, strand);
+  gt_genome_node_set_origin((GtGenomeNode*) fn,
+                            template->parent_instance.filename,
+                            template->parent_instance.line_number);
+  if (gt_feature_node_has_source(template))
+    gt_feature_node_set_source(fn, template->source);
+  if (gt_feature_node_score_is_defined(template))
+    gt_feature_node_set_score(fn, template->score);
+  attributes = gt_feature_node_get_attribute_list(template);
+  for (i = 0; i < gt_str_array_size(attributes); i++) {
+    const char *tag, *value;
+    tag = gt_str_array_get(attributes, i);
+    value = gt_feature_node_get_attribute(template, tag);
+    gt_feature_node_set_attribute(fn, tag, value);
+  }
+  gt_str_array_delete(attributes);
+  return fn;
+}
+
 const char* gt_feature_node_get_source(const GtFeatureNode *fn)
 {
   gt_assert(fn);
@@ -1039,7 +1072,7 @@ bool gt_feature_node_contains_marked(GtFeatureNode *fn)
   return contains_marked;
 }
 
-bool gt_feature_node_has_children(GtFeatureNode *fn)
+bool gt_feature_node_has_children(const GtFeatureNode *fn)
 {
   gt_assert(fn);
   if (!fn->children || gt_dlist_size(fn->children) == 0)
