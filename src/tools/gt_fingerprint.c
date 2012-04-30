@@ -116,6 +116,9 @@ static GtOptionParser* gt_fingerprint_option_parser_new(GT_UNUSED
   gt_option_exclude(check_option, duplicates_option);
   gt_option_exclude(extract_option, check_option);
   gt_option_exclude(extract_option, duplicates_option);
+  gt_option_exclude(collisions_option, check_option);
+  gt_option_exclude(collisions_option, duplicates_option);
+  gt_option_exclude(collisions_option, extract_option);
 
   /* option implications */
   gt_option_imply(width_option, extract_option);
@@ -318,7 +321,7 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
             extract_found = true;
           }
         }
-        else
+        else if (!arguments->detect_collisions)
           gt_xputs(gt_bioseq_get_md5_fingerprint(bs, j));
       }
     }
@@ -336,12 +339,11 @@ static int gt_fingerprint_runner(int argc, const char **argv, int parsed_args,
       had_err = compare_fingerprints(sd, gt_str_get(arguments->checklist), err);
     else if (arguments->show_duplicates)
       had_err = show_duplicates(sd, err);
+    else if (arguments->detect_collisions)
+      had_err = detect_collisions(argc - parsed_args, argv + parsed_args, err);
   }
 
   gt_string_distri_delete(sd);
-
-  if (!had_err && arguments->detect_collisions)
-    had_err = detect_collisions(argc - parsed_args, argv + parsed_args, err);
 
   return had_err;
 }
