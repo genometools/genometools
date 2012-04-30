@@ -21,12 +21,13 @@
 #include "core/hashmap_api.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
+#include "core/seq_info_cache.h"
 #include "core/undef_api.h"
 
 struct GtBioseqCollection {
   GtBioseq **bioseqs;
   unsigned long num_of_seqfiles;
-  GtHashmap *grep_cache;
+  GtSeqInfoCache *grep_cache;
 };
 
 GtBioseqCollection* gt_bioseq_collection_new(GtStrArray *sequence_files,
@@ -57,36 +58,31 @@ void gt_bioseq_collection_delete(GtBioseqCollection *bsc)
 {
   unsigned long i;
   if (!bsc) return;
-  gt_hashmap_delete(bsc->grep_cache);
+  gt_seq_info_cache_delete(bsc->grep_cache);
   for (i = 0; i < bsc->num_of_seqfiles; i++)
     gt_bioseq_delete(bsc->bioseqs[i]);
   gt_free(bsc->bioseqs);
   gt_free(bsc);
 }
 
-typedef struct {
-  unsigned long filenum,
-                seqnum;
-} SeqInfo;
-
 static int grep_desc(GtBioseqCollection *bsc, unsigned long *filenum,
                      unsigned long *seqnum, GtStr *seqid, GtError *err)
 {
   unsigned long i, j;
-  SeqInfo *seq_info;
+  const GtSeqInfo *seq_info_ptr;
+  GtSeqInfo seq_info;
   bool match;
   int had_err = 0;
   gt_error_check(err);
   gt_assert(bsc && filenum && seqnum && seqid);
   /* create cache */
-  if (!bsc->grep_cache) {
-    bsc->grep_cache = gt_hashmap_new(GT_HASH_STRING, gt_free_func,
-                                     gt_free_func);
-  }
+  if (!bsc->grep_cache)
+    bsc->grep_cache = gt_seq_info_cache_new();
   /* try to read from cache */
-  if ((seq_info = gt_hashmap_get(bsc->grep_cache, gt_str_get(seqid)))) {
-    *filenum = seq_info->filenum;
-    *seqnum = seq_info->seqnum;
+  seq_info_ptr = gt_seq_info_cache_get(bsc->grep_cache, gt_str_get(seqid));
+  if (seq_info_ptr) {
+    *filenum = seq_info_ptr->filenum;
+    *seqnum = seq_info_ptr->seqnum;
     return 0;
   }
   for (i = 0; !had_err && i < bsc->num_of_seqfiles; i++) {
@@ -98,11 +94,10 @@ static int grep_desc(GtBioseqCollection *bsc, unsigned long *filenum,
         *filenum = i;
         *seqnum = j;
         /* cache results */
-        seq_info = gt_malloc(sizeof *seq_info);
-        seq_info->filenum = i;
-        seq_info->seqnum = j;
-        gt_hashmap_add(bsc->grep_cache, gt_cstr_dup(gt_str_get(seqid)),
-                       seq_info);
+        seq_info.filenum = i;
+        seq_info.seqnum = j;
+        gt_seq_info_cache_add(bsc->grep_cache, gt_cstr_dup(gt_str_get(seqid)),
+                              &seq_info);
         break;
       }
     }
