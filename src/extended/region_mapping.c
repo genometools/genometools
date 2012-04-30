@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -20,7 +20,7 @@
 #include "lualib.h"
 #include "core/assert_api.h"
 #include "core/bioseq.h"
-#include "core/bioseq_collection.h"
+#include "core/bioseq_col.h"
 #include "core/ma.h"
 #include "core/md5_seqid.h"
 #include "core/str_array.h"
@@ -37,7 +37,7 @@ struct GtRegionMapping {
        userawseq;
   GtMapping *mapping;
   GtBioseq *bioseq; /* the current bioseq */
-  GtBioseqCollection *bioseq_collection;
+  GtBioseqCol *bioseq_col;
   GtSeqid2SeqnumMapping *seqid2seqnum_mapping;
   const char *rawseq;
   unsigned long rawlength,
@@ -156,15 +156,13 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
       *offset = rm->rawoffset;
       return 0;
     }
-    if (!rm->bioseq_collection) {
-      rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
-                                                       err);
-      if (!rm->bioseq_collection)
+    if (!rm->bioseq_col) {
+      if (!(rm->bioseq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
         had_err = -1;
     }
     if (!had_err) {
-      had_err = gt_bioseq_collection_md5_to_seq(rm->bioseq_collection, rawseq,
-                                                length, seqid, err);
+      had_err = gt_bioseq_col_md5_to_seq(rm->bioseq_col, rawseq, length, seqid,
+                                         err);
     }
     if (!had_err) {
       *offset = 1;
@@ -188,15 +186,13 @@ int gt_region_mapping_get_raw_sequence(GtRegionMapping *rm, const char **rawseq,
     }
     else if (rm->matchdesc) {
       gt_assert(!rm->seqid2seqnum_mapping);
-      if (!rm->bioseq_collection) {
-        rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
-                                                         err);
-        if (!rm->bioseq_collection)
+      if (!rm->bioseq_col) {
+        if (!(rm->bioseq_col= gt_bioseq_col_new(rm->sequence_filenames, err)))
           had_err = -1;
       }
       if (!had_err) {
-        had_err = gt_bioseq_collection_grep_desc(rm->bioseq_collection,
-                                                 rawseq, length, seqid, err);
+        had_err = gt_bioseq_col_grep_desc(rm->bioseq_col, rawseq, length, seqid,
+                                          err);
         if (!had_err)
           *offset = 1;
       }
@@ -225,15 +221,13 @@ int gt_region_mapping_get_description(GtRegionMapping *rm, GtStr *desc,
   gt_assert(rm && desc && md5_seqid);
   /* this method is only implemented for MD5 seqids */
   gt_assert(gt_md5_seqid_has_prefix(gt_str_get(md5_seqid)));
-  if (!rm->bioseq_collection) {
-    rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
-                                                     err);
-    if (!rm->bioseq_collection)
+  if (!rm->bioseq_col) {
+    if (!(rm->bioseq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
       had_err = -1;
   }
   if (!had_err) {
-    had_err = gt_bioseq_collection_md5_to_description(rm->bioseq_collection,
-                                                      desc, md5_seqid, err);
+    had_err = gt_bioseq_col_md5_to_description(rm->bioseq_col, desc, md5_seqid,
+                                               err);
   }
   return had_err;
 }
@@ -263,16 +257,12 @@ const char* gt_region_mapping_get_md5_fingerprint(GtRegionMapping *rm,
     }
     else if (rm->matchdesc) {
       gt_assert(!rm->seqid2seqnum_mapping);
-      if (!rm->bioseq_collection) {
-        rm->bioseq_collection = gt_bioseq_collection_new(rm->sequence_filenames,
-                                                         err);
-        if (!rm->bioseq_collection)
+      if (!rm->bioseq_col) {
+        if (!(rm->bioseq_col = gt_bioseq_col_new(rm->sequence_filenames, err)))
           had_err = -1;
       }
-      if (!had_err) {
-        had_err = gt_bioseq_collection_grep_desc_md5(rm->bioseq_collection,
-                                                     &md5, seqid, err);
-      }
+      if (!had_err)
+        had_err = gt_bioseq_col_grep_desc_md5(rm->bioseq_col, &md5, seqid, err);
       *offset = 1;
     }
     else {
@@ -296,7 +286,7 @@ void gt_region_mapping_delete(GtRegionMapping *rm)
   gt_str_delete(rm->sequence_name);
   gt_mapping_delete(rm->mapping);
   gt_bioseq_delete(rm->bioseq);
-  gt_bioseq_collection_delete(rm->bioseq_collection);
+  gt_bioseq_col_delete(rm->bioseq_col);
   gt_seqid2seqnum_mapping_delete(rm->seqid2seqnum_mapping);
   gt_free(rm);
 }

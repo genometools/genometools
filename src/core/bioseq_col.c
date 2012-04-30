@@ -15,7 +15,7 @@
 */
 
 #include "core/bioseq.h"
-#include "core/bioseq_collection.h"
+#include "core/bioseq_col.h"
 #include "core/cstr_api.h"
 #include "core/grep_api.h"
 #include "core/hashmap_api.h"
@@ -24,16 +24,15 @@
 #include "core/seq_info_cache.h"
 #include "core/undef_api.h"
 
-struct GtBioseqCollection {
+struct GtBioseqCol {
   GtBioseq **bioseqs;
   unsigned long num_of_seqfiles;
   GtSeqInfoCache *grep_cache;
 };
 
-GtBioseqCollection* gt_bioseq_collection_new(GtStrArray *sequence_files,
-                                             GtError *err)
+GtBioseqCol* gt_bioseq_col_new(GtStrArray *sequence_files, GtError *err)
 {
-  GtBioseqCollection *bsc;
+  GtBioseqCol *bsc;
   unsigned long i;
   int had_err = 0;
   gt_error_check(err);
@@ -48,13 +47,13 @@ GtBioseqCollection* gt_bioseq_collection_new(GtStrArray *sequence_files,
       had_err = -1;
   }
   if (had_err) {
-    gt_bioseq_collection_delete(bsc);
+    gt_bioseq_col_delete(bsc);
     return NULL;
   }
   return bsc;
 }
 
-void gt_bioseq_collection_delete(GtBioseqCollection *bsc)
+void gt_bioseq_col_delete(GtBioseqCol *bsc)
 {
   unsigned long i;
   if (!bsc) return;
@@ -65,7 +64,7 @@ void gt_bioseq_collection_delete(GtBioseqCollection *bsc)
   gt_free(bsc);
 }
 
-static int grep_desc(GtBioseqCollection *bsc, unsigned long *filenum,
+static int grep_desc(GtBioseqCol *bsc, unsigned long *filenum,
                      unsigned long *seqnum, GtStr *seqid, GtError *err)
 {
   unsigned long i, j;
@@ -112,9 +111,8 @@ static int grep_desc(GtBioseqCollection *bsc, unsigned long *filenum,
   return had_err;
 }
 
-int gt_bioseq_collection_grep_desc(GtBioseqCollection *bsc, const char **rawseq,
-                                   unsigned long *length, GtStr *seqid,
-                                   GtError *err)
+int gt_bioseq_col_grep_desc(GtBioseqCol *bsc, const char **rawseq,
+                            unsigned long *length, GtStr *seqid, GtError *err)
 {
   unsigned long filenum = 0, seqnum = 0;
   int had_err;
@@ -128,9 +126,8 @@ int gt_bioseq_collection_grep_desc(GtBioseqCollection *bsc, const char **rawseq,
   return had_err;
 }
 
-int gt_bioseq_collection_grep_desc_md5(GtBioseqCollection *bsc,
-                                       const char **md5, GtStr *seqid,
-                                       GtError *err)
+int gt_bioseq_col_grep_desc_md5(GtBioseqCol *bsc, const char **md5,
+                                GtStr *seqid, GtError *err)
 {
   unsigned long filenum = 0, seqnum = 0;
   int had_err;
@@ -142,9 +139,9 @@ int gt_bioseq_collection_grep_desc_md5(GtBioseqCollection *bsc,
   return had_err;
 }
 
-int gt_bioseq_collection_md5_to_seq(GtBioseqCollection *bsc, const char **seq,
-                                    unsigned long *length, GtStr *md5_seqid,
-                                    GtError *err)
+int gt_bioseq_col_md5_to_seq(GtBioseqCol *bsc, const char **seq,
+                             unsigned long *length, GtStr *md5_seqid,
+                             GtError *err)
 {
   unsigned long i, seqnum = GT_UNDEF_ULONG;
   int had_err = 0;
@@ -170,9 +167,9 @@ int gt_bioseq_collection_md5_to_seq(GtBioseqCollection *bsc, const char **seq,
   }
   return had_err;
 }
-int gt_bioseq_collection_md5_to_description(GtBioseqCollection *bsc,
-                                            GtStr *desc, GtStr *md5_seqid,
-                                            GtError *err)
+
+int gt_bioseq_col_md5_to_description(GtBioseqCol *bsc, GtStr *desc,
+                                     GtStr *md5_seqid, GtError *err)
 {
   unsigned long i, seqnum = GT_UNDEF_ULONG;
   int had_err = 0;
@@ -197,40 +194,38 @@ int gt_bioseq_collection_md5_to_description(GtBioseqCollection *bsc,
   return had_err;
 }
 
-unsigned long gt_bioseq_collection_num_of_files(const GtBioseqCollection *bsc)
+unsigned long gt_bioseq_col_num_of_files(const GtBioseqCol *bsc)
 {
   gt_assert(bsc);
   return bsc->num_of_seqfiles;
 }
 
-unsigned long gt_bioseq_collection_num_of_seqs(const GtBioseqCollection *bsc,
-                                               unsigned long filenum)
+unsigned long gt_bioseq_col_num_of_seqs(const GtBioseqCol *bsc,
+                                        unsigned long filenum)
 {
   gt_assert(bsc && filenum < bsc->num_of_seqfiles);
   return gt_bioseq_number_of_sequences(bsc->bioseqs[filenum]);
 }
 
-const char* gt_bioseq_collection_get_md5_fingerprint(const
-                                                     GtBioseqCollection *bsc,
-                                                     unsigned long filenum,
-                                                     unsigned long seqnum)
+const char* gt_bioseq_col_get_md5_fingerprint(const GtBioseqCol *bsc,
+                                              unsigned long filenum,
+                                              unsigned long seqnum)
 {
   gt_assert(bsc && filenum < bsc->num_of_seqfiles);
   return gt_bioseq_get_md5_fingerprint(bsc->bioseqs[filenum], seqnum);
 }
 
-const char* gt_bioseq_collection_get_sequence(const GtBioseqCollection *bsc,
-                                              unsigned long filenum,
-                                              unsigned long seqnum)
+const char* gt_bioseq_col_get_sequence(const GtBioseqCol *bsc,
+                                       unsigned long filenum,
+                                       unsigned long seqnum)
 {
   gt_assert(bsc && filenum < bsc->num_of_seqfiles);
   return gt_bioseq_get_sequence(bsc->bioseqs[filenum], seqnum);
 }
 
-unsigned long gt_bioseq_collection_get_sequence_length(const
-                                                       GtBioseqCollection *bsc,
-                                                       unsigned long filenum,
-                                                       unsigned long seqnum)
+unsigned long gt_bioseq_col_get_sequence_length(const GtBioseqCol *bsc,
+                                                unsigned long filenum,
+                                                unsigned long seqnum)
 {
   gt_assert(bsc && filenum < bsc->num_of_seqfiles);
   return gt_bioseq_get_sequence_length(bsc->bioseqs[filenum], seqnum);

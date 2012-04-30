@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 #include "core/bioseq.h"
-#include "core/bioseq_collection.h"
+#include "core/bioseq_col.h"
 #include "core/fa.h"
 #include "core/fasta.h"
 #include "core/ma.h"
@@ -202,7 +202,7 @@ static int show_duplicates(GtStringDistri *sd, GtError *err)
   return 0;
 }
 
-static int compare_md5s(GtBioseqCollection *bsc, const GtSeqInfo *si,
+static int compare_md5s(GtBioseqCol *bsc, const GtSeqInfo *si,
                         unsigned long filenum, unsigned long seqnum,
                         const char *md5, GtError *err)
 {
@@ -212,12 +212,10 @@ static int compare_md5s(GtBioseqCollection *bsc, const GtSeqInfo *si,
   int had_err = 0;
   gt_error_check(err);
   gt_assert(bsc && si && md5);
-  seq_a = gt_bioseq_collection_get_sequence(bsc, si->filenum, si->seqnum);
-  seq_b = gt_bioseq_collection_get_sequence(bsc, filenum, seqnum);
-  seq_a_len = gt_bioseq_collection_get_sequence_length(bsc, si->filenum,
-                                                       si->seqnum);
-  seq_b_len = gt_bioseq_collection_get_sequence_length(bsc, si->filenum,
-                                                       si->seqnum);
+  seq_a = gt_bioseq_col_get_sequence(bsc, si->filenum, si->seqnum);
+  seq_b = gt_bioseq_col_get_sequence(bsc, filenum, seqnum);
+  seq_a_len = gt_bioseq_col_get_sequence_length(bsc, si->filenum, si->seqnum);
+  seq_b_len = gt_bioseq_col_get_sequence_length(bsc, filenum, seqnum);
   seq_a_upper = gt_malloc((seq_a_len + 1) * sizeof (char));
   seq_b_upper = gt_malloc((seq_b_len + 1) * sizeof (char));
   for (i = 0; i < seq_a_len; i++)
@@ -235,7 +233,7 @@ static int compare_md5s(GtBioseqCollection *bsc, const GtSeqInfo *si,
   return had_err;
 }
 
-static int detect_collisions_on_bsc(GtBioseqCollection *bsc, GtError *err)
+static int detect_collisions_on_bsc(GtBioseqCol *bsc, GtError *err)
 {
   unsigned long filenum, seqnum;
   GtSeqInfoCache *sic;
@@ -243,15 +241,14 @@ static int detect_collisions_on_bsc(GtBioseqCollection *bsc, GtError *err)
   gt_assert(bsc);
   int had_err = 0;
   sic = gt_seq_info_cache_new();
-  for (filenum = 0;
-       !had_err && filenum < gt_bioseq_collection_num_of_files(bsc);
+  for (filenum = 0; !had_err && filenum < gt_bioseq_col_num_of_files(bsc);
        filenum++) {
     for (seqnum = 0;
-         !had_err && seqnum < gt_bioseq_collection_num_of_seqs(bsc, filenum);
+         !had_err && seqnum < gt_bioseq_col_num_of_seqs(bsc, filenum);
          seqnum++) {
       const GtSeqInfo *si_ptr;
       const char *md5;
-      md5 = gt_bioseq_collection_get_md5_fingerprint(bsc, filenum, seqnum);
+      md5 = gt_bioseq_col_get_md5_fingerprint(bsc, filenum, seqnum);
       if ((si_ptr = gt_seq_info_cache_get(sic, md5)))
         had_err = compare_md5s(bsc, si_ptr, filenum, seqnum, md5, err);
       else {
@@ -270,18 +267,18 @@ static int detect_collisions(int num_of_seqfiles, const char **seqfiles,
                              GtError *err)
 {
   GtStrArray *sequence_files;
-  GtBioseqCollection *bsc;
+  GtBioseqCol *bsc;
   unsigned long i;
   int had_err = 0;
   gt_error_check(err);
   sequence_files = gt_str_array_new();
   for (i = 0; i < num_of_seqfiles; i++)
     gt_str_array_add_cstr(sequence_files, seqfiles[i]);
-  if (!(bsc = gt_bioseq_collection_new(sequence_files, err)))
+  if (!(bsc = gt_bioseq_col_new(sequence_files, err)))
     had_err = -1;
   if (!had_err)
     had_err = detect_collisions_on_bsc(bsc, err);
-  gt_bioseq_collection_delete(bsc);
+  gt_bioseq_col_delete(bsc);
   gt_str_array_delete(sequence_files);
   return had_err;
 }
