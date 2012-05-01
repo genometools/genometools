@@ -241,7 +241,7 @@ static int gt_ltrharvest_tabout_visitor_feature_node(GtNodeVisitor *nv,
     }
 
     gt_str_append_cstr(line, gt_feature_node_get_attribute(ltr_retrotrans,
-                                                           "LTR_similarity"));
+                                                           "ltr_similarity"));
     gt_str_append_cstr(line, "  ");
     gt_str_append_ulong(line, seqnum);
     printf("%s\n", gt_str_get(line));
