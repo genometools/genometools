@@ -1,3 +1,8 @@
+changes in version 1.4.2 (2012-05-02)
+
+- CDS features with multiple parents are split in tidy-mode (if possible)
+
+
 changes in version 1.4.1 (2012-04-12)
 
 - the GFF3 parser now handles children which are defined before their parents

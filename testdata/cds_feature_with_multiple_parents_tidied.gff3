@@ -1,0 +1,22 @@
+##gff-version   3
+##sequence-region   3L 8617473 8631957
+3L	FlyBase	gene	8617473	8631773	.	+	.	ID=gene1;Name=Zasp66;fullname=Z band alternatively spliced PDZ-motif protein 66;Alias=FBgn0045924,anon-WO0153538.30,CG6416,Zasp66;Ontology_term=SO:0000010,SO:0000087,GO:0007498,GO:0030018,GO:0008157;Dbxref=FlyBase:FBan0006416,FlyBase_Annotation_IDs:CG6416,GB_protein:AAN11990,GB_protein:ACZ94656,GB_protein:ACZ94657,GB_protein:AAN11991,GB_protein:ACZ94655,GB_protein:ACZ94653,GB_protein:AAN11992,GB_protein:ACZ94654,GB_protein:AAF50384,GB_protein:AAO41263,GB_protein:AAO41264,GB_protein:AAF50386,GB_protein:AAO41265,GB:AA697154,GB:AI388325,GB:AW940728,GB:AW941338,GB:AX201646,GB:AY058415,GB_protein:AAL13644,GB:AY060961,GB_protein:AAL28509,UniProt/TrEMBL:Q7KUB5,UniProt/TrEMBL:Q86BH5,UniProt/TrEMBL:Q86BH6,UniProt/TrEMBL:Q8IQB4,UniProt/TrEMBL:Q95S47,UniProt/TrEMBL:Q95TZ7,UniProt/TrEMBL:Q9VSN0,UniProt/TrEMBL:Q9VSN2,INTERPRO:IPR001478,INTERPRO:IPR006643,EntrezGene:38988,UniProt/TrEMBL:E1JI73,UniProt/TrEMBL:E1JI76,UniProt/TrEMBL:E1JI74,UniProt/TrEMBL:E1JI77,UniProt/TrEMBL:Q058U1,InterologFinder:38988,BIOGRID:64396,FlyAtlas:CG6416-RG%3BCG6416-RG%3BCG6416-RE,GenomeRNAi:38988;gbunit=AE014296;derived_computed_cyto=66D9-66D9
+3L	FlyBase	mRNA	8617473	8631773	.	+	.	ID=mRNA1;Parent=gene1;Name=Zasp66-RE;Alias=CG6416-RE;Dbxref=FlyBase_Annotation_IDs:CG6416-RE,REFSEQ:NM_168283;score_text=Moderately Supported;score=7
+3L	FlyBase	CDS	8617583	8617783	.	+	0	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8620061	8620209	.	+	0	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8620527	8620830	.	+	1	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8628781	8628852	.	+	1	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8630539	8630698	.	+	1	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8631257	8631295	.	+	0	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8631367	8631453	.	+	0	Parent=mRNA1;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	mRNA	8623308	8631773	.	+	.	ID=mRNA2;Parent=gene1;Name=Zasp66-RH;Alias=CG6416-RH;Dbxref=FlyBase_Annotation_IDs:CG6416-RH,REFSEQ:NM_176304;score_text=Strongly Supported;score=15
+3L	FlyBase	CDS	8623655	8623735	.	+	0	Parent=mRNA2;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8627683	8627883	.	+	0	Parent=mRNA1,mRNA2;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8628102	8628181	.	+	0	Parent=mRNA1,mRNA2;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8631257	8631295	.	+	1	Parent=mRNA2;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8631367	8631373	.	+	1	Parent=mRNA2;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	mRNA	8623308	8631773	.	+	.	Parent=gene1;Name=Zasp66-RI;Alias=CG6416-RI;Dbxref=FlyBase_Annotation_IDs:CG6416-RI,REFSEQ:NM_176303;score_text=Moderately Supported;score=7
+3L	FlyBase	mRNA	8623370	8631773	.	+	.	ID=mRNA3;Parent=gene1;Name=Zasp66-RJ;Alias=CG6416-RG,CG6416-RJ;Dbxref=FlyBase_Annotation_IDs:CG6416-RJ,REFSEQ:NM_176306;score_text=Moderately Supported;score=7
+3L	FlyBase	CDS	8623655	8623735	.	+	0	Parent=mRNA3;Name=Zasp66-cds;parent_type=mRNA
+3L	FlyBase	CDS	8630539	8630698	.	+	0	Parent=mRNA3;Name=Zasp66-cds;parent_type=mRNA
+###

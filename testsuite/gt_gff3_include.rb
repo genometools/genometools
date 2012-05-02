@@ -1204,6 +1204,30 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}is_circular_example_with_sequence_region.gff3"
 end
 
+Name "gt gff3 cds_feature_with_multiple_parents.gff3"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_feature_with_multiple_parents_tidied.gff3"
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_feature_with_multiple_parents.gff3"
+  run "diff #{last_stdout} #{$testdata}cds_feature_with_multiple_parents_tidied.gff3"
+end
+
+Name "gt gff3 cds_with_multiple_parents_1.gff3"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_with_multiple_parents_1_tidied.gff3"
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_with_multiple_parents_1.gff3"
+  run "diff #{last_stdout} #{$testdata}cds_with_multiple_parents_1_tidied.gff3"
+end
+
+Name "gt gff3 cds_with_multiple_parents_2.gff3"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}cds_with_multiple_parents_2_tidied.gff3"
+  run_test "#{$bin}gt gff3 -tidy #{$testdata}cds_with_multiple_parents_2.gff3"
+  run "diff #{last_stdout} #{$testdata}cds_with_multiple_parents_2_tidied.gff3"
+end
+
 def large_gff3_test(name, file)
   Name "gt gff3 #{name}"
   Keywords "gt_gff3 large_gff3"

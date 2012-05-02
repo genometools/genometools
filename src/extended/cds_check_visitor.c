@@ -19,20 +19,24 @@
 #include "core/warning_api.h"
 #include "extended/cds_check_visitor.h"
 #include "extended/feature_node_iterator_api.h"
+#include "extended/feature_node.h"
 #include "extended/feature_type.h"
+#include "extended/gff3_defines.h"
 #include "extended/node_visitor_api.h"
 
 struct GtCDSCheckVisitor {
   const GtNodeVisitor parent_instance;
-  GtHashmap *cds_features;
-  bool tidy;
+  GtHashmap *cds_features,
+            *cds_features_to_split;
+  bool tidy,
+       splitting_is_necessary;
 };
 
 #define cds_check_visitor_cast(NS)\
         gt_node_visitor_cast(gt_cds_check_visitor_class(), NS)
 
 static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
-                            GtError *err)
+                            bool is_multi, bool second_pass, GtError *err)
 {
   GtPhase current_phase, correct_phase = GT_PHASE_ZERO;
   GtFeatureNode *fn;
@@ -57,15 +61,38 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
     if ((!i && gt_feature_node_get_phase(fn) == GT_PHASE_UNDEFINED) ||
         (i && gt_feature_node_get_phase(fn) != correct_phase)) {
       if (gt_hashmap_get(v->cds_features, fn)) {
-        gt_error_set(err, "%s feature on line %u in file \"%s\" has multiple "
-                     "parents which require different phases (uncorrectable)",
+        if (v->tidy && !is_multi && !gt_feature_node_has_children(fn)) {
+          /* we can split the feature */
+          gt_warning("%s feature on line %u in file \"%s\" has multiple "
+                     "parents which require different phases; split feature",
                      gt_ft_CDS,
                      gt_genome_node_get_line_number((GtGenomeNode*) fn),
                      gt_genome_node_get_filename((GtGenomeNode*) fn));
-        had_err = -1;
+          gt_hashmap_add(v->cds_features_to_split, fn, fn);
+          v->splitting_is_necessary = true; /* split later */
+        }
+        else {
+          gt_error_set(err, "%s feature on line %u in file \"%s\" has multiple "
+                       "parents which require different phases",
+                       gt_ft_CDS,
+                       gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                       gt_genome_node_get_filename((GtGenomeNode*) fn));
+          had_err = -1;
+        }
       }
       else {
-        if (!v->tidy) {
+        if (v->tidy) {
+          if (!second_pass) {
+            gt_warning("%s feature on line %u in file \"%s\" has the wrong "
+                       "phase %c -> correcting it to %c", gt_ft_CDS,
+                       gt_genome_node_get_line_number((GtGenomeNode*) fn),
+                       gt_genome_node_get_filename((GtGenomeNode*) fn),
+                       GT_PHASE_CHARS[gt_feature_node_get_phase(fn)],
+                       GT_PHASE_CHARS[correct_phase]);
+          }
+          gt_feature_node_set_phase(fn, correct_phase);
+        }
+        else {
           gt_error_set(err, "%s feature on line %u in file \"%s\" has the "
                        "wrong phase %c (should be %c)", gt_ft_CDS,
                        gt_genome_node_get_line_number((GtGenomeNode*) fn),
@@ -73,15 +100,6 @@ static int check_cds_phases(GtArray *cds_features, GtCDSCheckVisitor *v,
                        GT_PHASE_CHARS[gt_feature_node_get_phase(fn)],
                        GT_PHASE_CHARS[correct_phase]);
           had_err = -1;
-        }
-        else {
-          gt_warning("%s feature on line %u in file \"%s\" has the wrong phase "
-                     "%c -> correcting it to %c", gt_ft_CDS,
-                     gt_genome_node_get_line_number((GtGenomeNode*) fn),
-                     gt_genome_node_get_filename((GtGenomeNode*) fn),
-                     GT_PHASE_CHARS[gt_feature_node_get_phase(fn)],
-                     GT_PHASE_CHARS[correct_phase]);
-          gt_feature_node_set_phase(fn, correct_phase);
         }
       }
     }
@@ -101,11 +119,12 @@ static int check_cds_phases_hm(GT_UNUSED void *key, void *value, void *data,
   GtArray *cds_features = value;
   gt_error_check(err);
   gt_assert(cds_features && data);
-  return check_cds_phases(cds_features, data, err);
+  return check_cds_phases(cds_features, data, true, false, err);
 }
 
 static int check_cds_phases_if_necessary(GtFeatureNode *fn,
-                                         GtCDSCheckVisitor *v, GtError *err)
+                                         GtCDSCheckVisitor *v,
+                                         bool second_pass, GtError *err)
 {
   GtFeatureNodeIterator *fni;
   GtFeatureNode *node;
@@ -143,13 +162,92 @@ static int check_cds_phases_if_necessary(GtFeatureNode *fn,
     }
   }
   if (cds_features)
-    had_err = check_cds_phases(cds_features, v, err);
+    had_err = check_cds_phases(cds_features, v, false, second_pass, err);
   if (!had_err && multi_features)
     had_err = gt_hashmap_foreach(multi_features, check_cds_phases_hm, v, err);
   gt_array_delete(cds_features);
   gt_hashmap_delete(multi_features);
   gt_feature_node_iterator_delete(fni);
   return had_err;
+}
+
+static int collect_cds_feature(void *key, GT_UNUSED void *value, void *data,
+                               GtError *err)
+{
+  GtArray *cds_features = data;
+  gt_error_check(err);
+  gt_array_add(cds_features, key);
+  return 0;
+}
+
+static GtArray* find_cds_parents(GtFeatureNode *cds_feature, GtFeatureNode *fn)
+{
+  GtFeatureNodeIterator *fni, *di;
+  GtFeatureNode *parent, *child;
+  GtArray *parents;
+  gt_assert(cds_feature && fn);
+  parents = gt_array_new(sizeof (GtFeatureNode*));
+  fni = gt_feature_node_iterator_new(fn);
+  while ((parent = gt_feature_node_iterator_next(fni))) {
+    di = gt_feature_node_iterator_new_direct(parent);
+    while ((child = gt_feature_node_iterator_next(di))) {
+      if (child == cds_feature)
+        gt_array_add(parents, parent);
+    }
+    gt_feature_node_iterator_delete(di);
+  }
+  gt_feature_node_iterator_delete(fni);
+  return parents;
+}
+
+static void split_cds_feature(GtFeatureNode *cds_feature, GtFeatureNode *fn)
+{
+  GtArray *parents;
+  unsigned long i;
+  gt_assert(cds_feature && fn);
+
+  /* find parents */
+  parents = find_cds_parents(cds_feature, fn);
+
+  /* remove CDS feature */
+  gt_feature_node_remove_leaf(fn, cds_feature);
+
+  /* add CDS feature to all parents */
+  for (i = 0; i < gt_array_size(parents); i++) {
+    GtFeatureNode *parent = *(GtFeatureNode**) gt_array_get(parents, i);
+    const char *id = gt_feature_node_get_attribute(parent, GT_GFF_ID);
+    if (!i) {
+      gt_feature_node_set_attribute(cds_feature, GT_GFF_PARENT, id);
+      gt_feature_node_add_child(parent, cds_feature);
+    }
+    else {
+      GtFeatureNode *new_cds = gt_feature_node_clone(cds_feature);
+      gt_feature_node_set_attribute(new_cds, GT_GFF_PARENT, id);
+      gt_feature_node_add_child(parent, new_cds);
+      gt_genome_node_delete((GtGenomeNode*) cds_feature);
+    }
+  }
+
+  gt_array_delete(parents);
+}
+
+static void split_cds_features(GtHashmap *features_to_split, GtFeatureNode *fn)
+{
+  GtArray *cds_features;
+  unsigned long i;
+  int had_err;
+  gt_assert(features_to_split && fn);
+  cds_features = gt_array_new(sizeof (GtFeatureNode*));
+  had_err = gt_hashmap_foreach(features_to_split, collect_cds_feature,
+                               cds_features, NULL);
+  gt_assert(!had_err); /* collect_cds_feature() is sane */
+  gt_assert(gt_array_size(cds_features));
+  for (i = 0; i < gt_array_size(cds_features); i++) {
+    GtFeatureNode *cds_feature;
+    cds_feature = *(GtFeatureNode**) gt_array_get(cds_features, i);
+    split_cds_feature(cds_feature, fn);
+  }
+  gt_array_delete(cds_features);
 }
 
 static int cds_check_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
@@ -163,15 +261,27 @@ static int cds_check_visitor_feature_node(GtNodeVisitor *nv, GtFeatureNode *fn,
   gt_assert(v && fn);
   fni = gt_feature_node_iterator_new(fn);
   while (!had_err && (node = gt_feature_node_iterator_next(fni)))
-    had_err = check_cds_phases_if_necessary(node, v, err);
+    had_err = check_cds_phases_if_necessary(node, v, false, err);
   gt_feature_node_iterator_delete(fni);
   gt_hashmap_reset(v->cds_features);
+  while (v->splitting_is_necessary) {
+    split_cds_features(v->cds_features_to_split, fn);
+    gt_hashmap_reset(v->cds_features_to_split);
+    v->splitting_is_necessary = false;
+    /* perform second pass to correct phases */
+    fni = gt_feature_node_iterator_new(fn);
+    while (!had_err && (node = gt_feature_node_iterator_next(fni)))
+      had_err = check_cds_phases_if_necessary(node, v, false, err);
+    gt_feature_node_iterator_delete(fni);
+    gt_hashmap_reset(v->cds_features);
+  }
   return had_err;
 }
 
 static void cds_check_visitor_free(GtNodeVisitor *nv)
 {
   GtCDSCheckVisitor *v = cds_check_visitor_cast(nv);
+  gt_hashmap_delete(v->cds_features_to_split);
   gt_hashmap_delete(v->cds_features);
 }
 
@@ -195,6 +305,7 @@ GtNodeVisitor* gt_cds_check_visitor_new(void)
   GtNodeVisitor *nv = gt_node_visitor_create(gt_cds_check_visitor_class());
   GtCDSCheckVisitor *v = cds_check_visitor_cast(nv);
   v->cds_features = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
+  v->cds_features_to_split = gt_hashmap_new(GT_HASH_DIRECT, NULL, NULL);
   return nv;
 }
 

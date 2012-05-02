@@ -1,0 +1,15 @@
+##gff-version   3
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1;Name=EDEN
+ctg123	.	mRNA	1050	9000	.	+	.	ID=mRNA1;Parent=gene1;Name=EDEN.1
+ctg123	.	exon	1050	1500	.	+	.	Parent=mRNA1
+ctg123	.	CDS	1201	1500	.	+	0	Parent=mRNA1
+ctg123	.	CDS	3000	3902	.	+	0	Parent=mRNA1
+ctg123	.	CDS	5000	5500	.	+	0	Parent=mRNA1
+ctg123	.	mRNA	1300	9000	.	+	.	ID=mRNA2;Parent=gene1;Name=EDEN.3
+ctg123	.	exon	1300	1500	.	+	.	Parent=mRNA2
+ctg123	.	exon	3000	3902	.	+	.	Parent=mRNA1,mRNA2
+ctg123	.	CDS	3301	3902	.	+	0	Parent=mRNA2
+ctg123	.	exon	5000	5500	.	+	.	Parent=mRNA1,mRNA2
+ctg123	.	CDS	5000	5500	.	+	1	Parent=mRNA2
+###
