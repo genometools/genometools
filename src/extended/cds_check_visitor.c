@@ -172,7 +172,7 @@ static int check_cds_phases_if_necessary(GtFeatureNode *fn,
 }
 
 static int collect_cds_feature(void *key, GT_UNUSED void *value, void *data,
-                               GtError *err)
+                               GT_UNUSED GtError *err)
 {
   GtArray *cds_features = data;
   gt_error_check(err);
@@ -235,7 +235,7 @@ static void split_cds_features(GtHashmap *features_to_split, GtFeatureNode *fn)
 {
   GtArray *cds_features;
   unsigned long i;
-  int had_err;
+  GT_UNUSED int had_err;
   gt_assert(features_to_split && fn);
   cds_features = gt_array_new(sizeof (GtFeatureNode*));
   had_err = gt_hashmap_foreach(features_to_split, collect_cds_feature,
