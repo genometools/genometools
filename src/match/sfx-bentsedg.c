@@ -863,6 +863,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
+#undef WITHRADIXSORT
 #ifdef WITHRADIXSORT
     if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
         !gt_encseq_is_mirrored(bsr->encseq) &&
@@ -888,26 +889,16 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
           suffixes[idx] = (unsigned long) exportptr->uinttabsectionptr[idx];
         }
       }
-      /*printf("sort %lu suffixes at depth %lu\n",width,depth);
-      for (idx = 0; idx < width; idx++)
-      {
-        printf("%lu\n",suffixes[idx]);
-      }*/
       gt_radixsort_str_eqlen(twobitencoding,suffixes,depth,
                              (unsigned long) bsr->sortmaxdepth,
                              width, 1 + gt_encseq_equallength(bsr->encseq),
                              bsr->totallength);
-      /*printf("sorted order\n");
-      for (idx = 0; idx < width; idx++)
-      {
-        printf("%lu\n",suffixes[idx]);
-      }
-      */
       if (allocated)
       {
+        gt_assert(exportptr->uinttabsectionptr != NULL);
         for (idx = 0; idx < width; idx++)
         {
-          exportptr->uinttabsectionptr[idx] = (unsigned int) suffixes[idx];
+          exportptr->uinttabsectionptr[idx] = (uint32_t) suffixes[idx];
           if (exportptr->uinttabsectionptr[idx] == 0)
           {
             gt_suffixsortspace_updatelongest(bsr->sssp,subbucketleft + idx);
@@ -916,6 +907,7 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
         gt_free(suffixes);
       } else
       {
+        gt_assert(exportptr->ulongtabsectionptr != NULL);
         for (idx = 0; idx < width; idx++)
         {
           if (exportptr->ulongtabsectionptr[idx] == 0)

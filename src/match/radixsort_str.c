@@ -155,19 +155,22 @@ static inline void gt_radixsort_str_insertionsort(
 
       gt_assert(maxdepth == 0 || bucket->depth <= maxdepth);
       for (depth = bucket->depth;
-          (maxdepth == 0 || depth <= maxdepth)
-          && uvcmp == 0 && !GT_RADIXSORT_STR_HAS_OVERFLOW(unk) &&
-          !GT_RADIXSORT_STR_HAS_OVERFLOW(vnk);
-          depth += GT_RADIXSORT_STR_KMERSIZE)
+           (maxdepth == 0 || depth <= maxdepth)
+           && uvcmp == 0
+           && !GT_RADIXSORT_STR_HAS_OVERFLOW(unk)
+           && !GT_RADIXSORT_STR_HAS_OVERFLOW(vnk);
+           depth += GT_RADIXSORT_STR_KMERSIZE)
       {
         unk = gt_radixsort_str_get_code(twobitencoding, u, depth,
-          seqlen, totallength);
+                                        seqlen, totallength);
         vnk = gt_radixsort_str_get_code(twobitencoding, v, depth,
-          seqlen, totallength);
-        uvcmp = (int)vnk - (int)unk;
+                                        seqlen, totallength);
+        uvcmp = (int) vnk - (int) unk;
       }
       if (uvcmp <= 0)
+      {
         break;
+      }
       bucket->suffixes[j] = v;
     }
     bucket->suffixes[j] = u;
@@ -218,7 +221,7 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     }
 
     bucketindex[0] = 0;
-    for (i = 1UL; i < (unsigned long)GT_RADIXSORT_STR_NOFBUCKETS; ++i)
+    for (i = 1UL; i < (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS; ++i)
     {
       bucketindex[i] = bucketindex[i - 1] + bucketsize[i - 1];
     }
@@ -236,7 +239,7 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     if (subbucket.depth < seqlen &&
         (maxdepth == 0 || subbucket.depth <= maxdepth))
     {
-      for (i = 0; i < (unsigned long)GT_RADIXSORT_STR_NOFBUCKETS; ++i)
+      for (i = 0; i < (unsigned long) GT_RADIXSORT_STR_NOFBUCKETS; ++i)
       {
         subbucket.width = bucketsize[i];
         if (subbucket.width > 1UL)
