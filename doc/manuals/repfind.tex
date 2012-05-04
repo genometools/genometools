@@ -31,12 +31,12 @@
 \begin{document}
 \maketitle
 This manual describes the options of the program \Repfind. It also gives
-some examples on how to use it. We postpone the 
+some examples on how to use it. We postpone the
 definition of the basic notions to the appendix.
 
-\Repfind computes all maximal repeats in 
+\Repfind computes all maximal repeats in
 the input sequence represented by the given index,
-and echoes them to standard output. 
+and echoes them to standard output.
 If an error occurs, then the program exits with exit code 1 or 2 (depending on
 the kind of error). Otherwise, the exit code is 0. The index is constructed
 by the \Suffixerator-program, which is, like \Repfind, part of the
@@ -44,8 +44,8 @@ Genometools [1], an open source software for biological sequence analysis.
 The \Suffixerator-program can process files in Fasta, Embl, Genbank or
 Swissprot format. There can be more than one sequence in any
 indexed file.  There are no special options necessary to tell  the
-\Suffixerator-program the sequence format. It automatically detects the 
-appropriate format. We recommend to use either the option \Showoption{dna} or 
+\Suffixerator-program the sequence format. It automatically detects the
+appropriate format. We recommend to use either the option \Showoption{dna} or
 \Showoption{protein}, depending on the kind of input sequences to be processed.
 However, if both of these options are missing \Suffixerator is in most
 cases able to automatically identify the kind of sequence. The input for
@@ -54,7 +54,7 @@ contain IUB special characters \(R,Y,M,K,W,S,B,D,H,V,N\). None of the
 exact matches reported by \Repfind contains such a character as it
 does not match any character not even itself (at a different position).
 \Repfind implements a subset of the options of the repfind-program
-from the REPuter software sweet. While \Repfind (as part of the Genometools)
+from the REPuter software suite. While \Repfind (as part of the GenomeTools)
 is open source, the REPuter software is closed source.
 
 \section{The Options}
@@ -62,15 +62,15 @@ is open source, the REPuter software is closed source.
 The program \Repfind is called as follows:
 \par
 \noindent\texttt{gt} \Repfind [\textit{options}] \Showoption{ii}
-\Showoptionarg{indexname} [\textit{options}] 
+\Showoptionarg{indexname} [\textit{options}]
 
 The options for \Repfind are as follows:
 
 \begin{Justshowoptions}
 \Option{l}{$\ell$}{
-Specifies the length parameter $\ell$. This must be a positive integer 
-smaller than the length of the input sequence. Only repeats of length 
-at least \(\ell\) are reported. If this option is not used, then 
+Specifies the length parameter $\ell$. This must be a positive integer
+smaller than the length of the input sequence. Only repeats of length
+at least \(\ell\) are reported. If this option is not used, then
 \(\ell=20\).}
 
 \Option{f}{}{Compute maximal forward repeats}
@@ -81,7 +81,7 @@ at least \(\ell\) are reported. If this option is not used, then
 (as done in the default case). This option only has an effect for computing
 forward repeats.}
 
-\Option{ii}{$\Showoptionarg{indexname}$}{Use the index 
+\Option{ii}{$\Showoptionarg{indexname}$}{Use the index
 $\Showoptionarg{indexname}$. This is a mandatory option.}
 
 \Option{v}{}{Be verbose}
@@ -90,7 +90,7 @@ $\Showoptionarg{indexname}$. This is a mandatory option.}
 
 \end{Justshowoptions}
 
-\subsection*{Important Remark} 
+\subsection*{Important Remark}
 The user of the program should carefully choose the length parameter \(\ell\).
 The number of maximal repeats exponentially decreases with increasing
 \(\ell\).
@@ -121,14 +121,14 @@ occurs  at position \texttt{relpos2}. The positions are counted beginning with
 0.
 \end{itemize}
 
-Suppose the input sequence \(S=gagctcgagcgctgct\) 
-is contained in the file \texttt{Repfind-example.fna}. Then 
+Suppose the input sequence \(S=gagctcgagcgctgct\)
+is contained in the file \texttt{Repfind-example.fna}. Then
 \begin{footnotesize}
 \begin{verbatim}
 gt suffixerator -db repfinf-sample.seq -indexname repidx -dna -suf -tis -lcp -ssp -pl
 \end{verbatim}
 \end{footnotesize}
-creates the index named \texttt{repidx} required for \Repfind. This is 
+creates the index named \texttt{repidx} required for \Repfind. This is
 called as follows:
 
 \begin{verbatim}
@@ -149,7 +149,7 @@ are position 0 and the second at position 6.
 
 \section{Remarks}
 The programs has been extensively tested, and we are not aware of any bugs.
-If the user detects a bug or would like to suggest other options or 
+If the user detects a bug or would like to suggest other options or
 features of the program, then please \texttt{kurtz@zbh.uni-hamburg.de}
 should be contacted.
 
@@ -166,9 +166,9 @@ a genomic scale. Nucleic Acids Res., 29:4633–4642.
 \appendix
 \section{Basic Notions}\label{Basic}
 We consider a string \(S\) of length \(n\). We index the characters of
-\(S\) from \(0\) to \(n-1\), i.e.\ \(S=\Substring{S}{0}{n-1}\). By 
-\(S^{-1}\) we denote the reverse of \(S\), i.e.\ the string \(u\) of length 
-\(n\) such that \(\Subchar{u}{i}=\Subchar{S}{n-1-i}\) for 
+\(S\) from \(0\) to \(n-1\), i.e.\ \(S=\Substring{S}{0}{n-1}\). By
+\(S^{-1}\) we denote the reverse of \(S\), i.e.\ the string \(u\) of length
+\(n\) such that \(\Subchar{u}{i}=\Subchar{S}{n-1-i}\) for
 any \(i\in[0,n-1]\).
 
 We define two different kinds of repeats:
@@ -187,20 +187,20 @@ We define two different kinds of repeats:
 \end{equation}
 \end{itemize}
 \((l,i,j)\) is a \emph{repeat}, if it either is a forward or reversed,
-repeat. Each repeat \((l,i,j)\) specifies two \emph{substrings} of \(S\): 
+repeat. Each repeat \((l,i,j)\) specifies two \emph{substrings} of \(S\):
 \begin{enumerate}
 \item
-the sequence \(\Substring{S}{i}{i+l-1}\) occurring on the left-hand 
+the sequence \(\Substring{S}{i}{i+l-1}\) occurring on the left-hand
 side of (\ref{forwardEQ}) and (\ref{reversedEQ}).
 This is the \emph{first instance} of \((l,i,j)\).
 \item
-the sequence occurring on the right-hand 
+the sequence occurring on the right-hand
 side of (\ref{forwardEQ}) and (\ref{reversedEQ}).
 This is the \emph{second instance} of \((l,i,j)\).
 \end{enumerate}
 
 By requiring repeats to be \emph{maximal} we can reduce the number of
 interesting repeats:
-An exact repeat is \emph{maximal} if it is not contained in another 
-\emph{exact} repeat of the same kind. 
+An exact repeat is \emph{maximal} if it is not contained in another
+\emph{exact} repeat of the same kind.
 \end{document}
