@@ -99,18 +99,14 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
   uint8_t overflow = 0;
   gt_radixsort_str_kmercode_t code;
   unsigned long remaining, pos = suffixnum + depth;
-  /*printf("pos=%lu,suffixnum=%lu\n",pos,suffixnum);*/
   if (suffixnum % seqlen + depth > seqlen - 2)
   {
-    /*printf("(0) return %lu\n",(unsigned long)
- * GT_RADIXSORT_STR_LAST_BUCKET);*/
     return GT_RADIXSORT_STR_LAST_BUCKET;
   }
   if (suffixnum <= totallength)
   {
     remaining = seqlen - 1 - pos % seqlen;
     code = gt_radixsort_str_code_at_position(twobitencoding, pos);
-    /*printf("(1) code=%lu\n",(unsigned long) code);*/
     if (remaining < (unsigned long)GT_RADIXSORT_STR_KMERSIZE)
     {
       overflow = GT_RADIXSORT_STR_KMERSIZE - remaining;
@@ -125,7 +121,6 @@ static inline gt_radixsort_str_bucketnum_t gt_radixsort_str_get_code(
       (unsigned long)GT_RADIXSORT_STR_KMERSIZE : remaining;
     code = GT_RADIXSORT_STR_REVCOMPL(gt_radixsort_str_code_at_position(
           twobitencoding, pos));
-    /*printf("(2) code=%lu\n",(unsigned long) code);*/
     if (remaining < (unsigned long)GT_RADIXSORT_STR_KMERSIZE)
     {
       overflow = GT_RADIXSORT_STR_KMERSIZE - remaining;
@@ -143,6 +138,7 @@ static inline void gt_radixsort_str_insertionsort(
     const GtRadixsortStrBucketInfo *bucket)
 {
   unsigned long i, j;
+
   for (i = 1UL; i < bucket->width; i++)
   {
     const unsigned long u = bucket->suffixes[i];
@@ -213,7 +209,6 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     {
       oracle[i] = gt_radixsort_str_get_code(twobitencoding, bucket.suffixes[i],
                                             bucket.depth, seqlen, totallength);
-      /*printf("oracle[%lu]=%lu\n",i,(unsigned long) oracle[i]);*/
     }
     for (i = 0; i < bucket.width; ++i)
     {
@@ -227,9 +222,20 @@ void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     }
 
     /* Loop B */
-    for (i = 0; i < bucket.width; ++i)
+    gt_assert(width > 1UL);
+    if (bucket.suffixes[0] > bucket.suffixes[1])
     {
-      sorted[bucketindex[oracle[i]]++] = bucket.suffixes[i];
+      for (i = bucket.width; i > 0; /* Nothing */)
+      {
+        i--;
+        sorted[bucketindex[oracle[i]]++] = bucket.suffixes[i];
+      }
+    } else
+    {
+      for (i = 0; i < bucket.width; i++)
+      {
+        sorted[bucketindex[oracle[i]]++] = bucket.suffixes[i];
+      }
     }
 
     memcpy(bucket.suffixes, sorted, sizeof (unsigned long) * bucket.width);

@@ -27,7 +27,7 @@
 #include "core/encseq.h"
 #include "bcktab.h"
 #include "kmer2string.h"
-#include "radixsort_str.h"
+#include "sfx-radixsort.h"
 #include "sfx-bltrie.h"
 #include "sfx-copysort.h"
 #include "sfx-bentsedg.h"
@@ -166,6 +166,8 @@ typedef struct
                 countbltriesort,
                 maxremain;
   GtShortreadsortworkinfo *srsw;
+  const GtTwobitencoding *twobitencoding;
+  unsigned long equallengthplus1;
 } GtBentsedgresources;
 
 #ifdef WITHCHECKSTARTPOINTER
@@ -863,61 +865,21 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
-#undef WITHRADIXSORT
+#define WITHRADIXSORT
 #ifdef WITHRADIXSORT
     if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
         !gt_encseq_is_mirrored(bsr->encseq) &&
         bsr->readmode == GT_READMODE_FORWARD &&
         bsr->tableoflcpvalues == NULL)
     {
-      const GtTwobitencoding *twobitencoding
-        = gt_encseq_twobitencoding_export(bsr->encseq);
-      unsigned long idx, *suffixes;
-      GtSuffixsortspace_exportptr *exportptr
-        = gt_suffixsortspace_exportptr(subbucketleft, bsr->sssp);
-      bool allocated = false;
-
-      if (exportptr->ulongtabsectionptr != NULL)
-      {
-        suffixes = exportptr->ulongtabsectionptr;
-      } else
-      {
-        suffixes = gt_malloc(sizeof (*suffixes) * width);
-        allocated = true;
-        for (idx = 0; idx < width; idx++)
-        {
-          suffixes[idx] = (unsigned long) exportptr->uinttabsectionptr[idx];
-        }
-      }
-      gt_radixsort_str_eqlen(twobitencoding,suffixes,depth,
-                             (unsigned long) bsr->sortmaxdepth,
-                             width, 1 + gt_encseq_equallength(bsr->encseq),
-                             bsr->totallength);
-      if (allocated)
-      {
-        gt_assert(exportptr->uinttabsectionptr != NULL);
-        for (idx = 0; idx < width; idx++)
-        {
-          exportptr->uinttabsectionptr[idx] = (uint32_t) suffixes[idx];
-          if (exportptr->uinttabsectionptr[idx] == 0)
-          {
-            gt_suffixsortspace_updatelongest(bsr->sssp,subbucketleft + idx);
-          }
-        }
-        gt_free(suffixes);
-      } else
-      {
-        gt_assert(exportptr->ulongtabsectionptr != NULL);
-        for (idx = 0; idx < width; idx++)
-        {
-          if (exportptr->ulongtabsectionptr[idx] == 0)
-          {
-            gt_suffixsortspace_updatelongest(bsr->sssp,subbucketleft + idx);
-            break;
-          }
-        }
-      }
-      gt_suffixsortspace_export_done(bsr->sssp);
+      gt_sfx_radixsort(bsr->twobitencoding,
+                       depth,
+                       bsr->sortmaxdepth,
+                       subbucketleft,
+                       width,
+                       bsr->equallengthplus1,
+                       bsr->totallength,
+                       bsr->sssp);
       bsr->countradixsort++;
       return;
     }
@@ -1417,6 +1379,15 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   bsr->prefixlength = prefixlength;
   bsr->esr1 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
   bsr->esr2 = gt_encseq_create_reader_with_readmode(encseq, readmode, 0);
+  if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH)
+  {
+    bsr->twobitencoding = gt_encseq_twobitencoding_export(bsr->encseq);
+    bsr->equallengthplus1 = 1 + gt_encseq_equallength(bsr->encseq);
+  } else
+  {
+    bsr->twobitencoding = NULL;
+    bsr->equallengthplus1 = 0;
+  }
   if (sortmaxdepth > 0)
   {
     if (sortmaxdepth > prefixlength)
