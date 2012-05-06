@@ -25,13 +25,13 @@
  * maxdepth = stop sorting at given depth (0 means infinite)
  *
  * totallength = "real" length (not the mirror logical length)
- * seqlen = sequence length, including the separator
+ * equallengthplus1 = sequence length, including the separator
  *
  * */
 
 void gt_radixsort_str_eqlen(const GtTwobitencoding *twobitencoding,
     unsigned long *suffixes, unsigned long depth,
-    unsigned long maxdepth, unsigned long width, unsigned long seqlen,
+    unsigned long maxdepth, unsigned long width, unsigned long equallengthplus1,
     unsigned long totallength);
 
 #endif
