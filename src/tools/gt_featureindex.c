@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef WITHOUT_CAIRO
 #include <string.h>
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/feature_stream_api.h"
@@ -333,3 +334,4 @@ GtTool* gt_featureindex(void)
                   gt_featureindex_arguments_check,
                   gt_featureindex_runner);
 }
+#endif

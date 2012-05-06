@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef WITHOUT_CAIRO
 #include <string.h>
 #include "annotationsketch/feature_index_api.h"
 #include "annotationsketch/feature_stream_api.h"
@@ -280,3 +281,5 @@ GtTool* gt_mkfeatureindex(void)
                      gt_mkfeatureindex_arguments_check,
                      gt_mkfeatureindex_runner);
 }
+
+#endif

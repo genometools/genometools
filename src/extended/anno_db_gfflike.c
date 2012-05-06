@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef WITHOUT_CAIRO
 #include <string.h>
 #include "core/assert_api.h"
 #include "core/unused_api.h"
@@ -2068,3 +2069,5 @@ int gt_anno_db_gfflike_unit_test(GtError *err)
   gt_error_delete(testerr);
   return had_err;
 }
+
+#endif
