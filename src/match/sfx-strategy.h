@@ -44,7 +44,8 @@ typedef struct
        dccheck,
        samplewithprefixlengthnull,
        noshortreadsort,
-       outsuftabonfile;
+       outsuftabonfile,
+       withradixsort;
 } Sfxstrategy;
 
  /*@unused@*/ static inline void defaultsfxstrategy(Sfxstrategy *sfxstrategy,
@@ -66,6 +67,7 @@ typedef struct
   sfxstrategy->samplewithprefixlengthnull = false;
   sfxstrategy->outsuftabonfile = true;
   sfxstrategy->noshortreadsort = false;
+  sfxstrategy->withradixsort = false;
 }
 
 #endif

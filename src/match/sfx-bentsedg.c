@@ -865,9 +865,8 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       return;
     }
 #endif
-#define WITHRADIXSORT
-#ifdef WITHRADIXSORT
-    if (gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
+    if (bsr->sfxstrategy->withradixsort &&
+        gt_encseq_accesstype_get(bsr->encseq) == GT_ACCESS_TYPE_EQUALLENGTH &&
         !gt_encseq_is_mirrored(bsr->encseq) &&
         bsr->readmode == GT_READMODE_FORWARD &&
         bsr->tableoflcpvalues == NULL)
@@ -883,7 +882,6 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
       bsr->countradixsort++;
       return;
     }
-#endif
     if (bsr->srsw != NULL &&
         !bsr->sfxstrategy->noshortreadsort &&
         gt_shortreadsort_size(false,width,

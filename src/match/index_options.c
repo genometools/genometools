@@ -461,6 +461,13 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_is_development_option(idxo->option);
   gt_option_parser_add_option(op, idxo->option);
 
+  idxo->option = gt_option_new_bool("withradixsort",
+                              "use radixsort to sort the buckets",
+                              &idxo->sfxstrategy.withradixsort,
+                              false);
+  gt_option_is_development_option(idxo->option);
+  gt_option_parser_add_option(op, idxo->option);
+
   gt_option_imply(idxo->optionkys, gt_encseq_options_sds_option(idxo->encopts));
   gt_option_parser_register_hook(op, gt_index_options_checkandsetoptions, idxo);
 
