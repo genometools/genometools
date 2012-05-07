@@ -80,7 +80,7 @@ else
 endif
 
 # libraries for which we build replacements (that also appear in dependencies)
-OVERRIDELIBS:=-lbz2 -lz
+EXP_LDLIBS+=-lbz2 -lz
 
 # compiled executables
 GTMAIN_SRC:=src/gt.c src/gtr.c src/gtt.c src/interactive.c
@@ -601,49 +601,43 @@ $(1)_static: $(2)
 endef
 
 $(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) \
-                                             lib/libgenometools.a\
-                                             $(OVERRIDELIBS)))
+                                             lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) \
                                         lib/libgenometools.a \
-                                        $(GTLIBS) \
-                                        $(OVERRIDELIBS)))
+                                        $(GTLIBS)))
 
 $(eval $(call PROGRAM_template, bin/examples/custom_stream, \
                                 obj/src/examples/custom_stream.o \
-                                lib/libgenometools.a \
-                                $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3sort, \
                                 obj/src/examples/gff3sort.o \
-                                lib/libgenometools.a \
-                                $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/gff3validator, \
                                 obj/src/examples/gff3validator.o \
-                                lib/libgenometools.a \
-                                $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/noop, \
                                 obj/src/examples/noop.o \
-                                lib/libgenometools.a \
-                                $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_constructed, \
                                 obj/src/examples/sketch_constructed.o \
-                                lib/libgenometools.a $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed, \
                                 obj/src/examples/sketch_parsed.o \
-                                lib/libgenometools.a $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ctrack, \
                                 obj/src/examples/sketch_parsed_with_ctrack.o \
-                                lib/libgenometools.a $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 $(eval $(call PROGRAM_template, bin/examples/sketch_parsed_with_ordering, \
                                 obj/src/examples/sketch_parsed_with_ordering.o \
-                                lib/libgenometools.a $(OVERRIDELIBS)))
+                                lib/libgenometools.a))
 
 bin/lua: $(LUAMAIN_OBJ)
 	@echo "[link $(@F)]"
@@ -751,7 +745,7 @@ $(1): $(2)
 	@echo "[compile $$(@F)]"
 	@test -d $$(@D) || mkdir -p $$(@D)
 	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
-	  $$(GT_CFLAGS) $(3) 
+	  $$(GT_CFLAGS) $(3)
 	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) \
         $(3) -MM -MP -MT $$@
 endef

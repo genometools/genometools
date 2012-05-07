@@ -530,7 +530,7 @@ static int process_feature(GtLTRClusterStream *lcs,
         had_err = -1;
       }
       if (!had_err) {
-        (int) cluster_annotate_nodes(cs, encs, feature, lcs->nodes, err);
+        (void) cluster_annotate_nodes(cs, encs, feature, lcs->nodes, err);
       }
     } else
       had_err = -1;
