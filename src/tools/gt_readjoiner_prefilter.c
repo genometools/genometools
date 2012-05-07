@@ -36,7 +36,7 @@ typedef struct {
   GtStrArray *db;
   /* rdj-radixsort test */
   bool testrs, testrs_print;
-  unsigned long testrs_offset, testrs_depth, testrs_maxdepth;
+  unsigned long testrs_depth, testrs_maxdepth;
 } GtReadjoinerPrefilterArguments;
 
 static void* gt_readjoiner_prefilter_arguments_new(void)
@@ -66,7 +66,7 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
            *fasta_option, *sorted_option, *seqnums_option, *twobit_option,
            *seppos_option, *encseqall_option, *encseq_option, *readset_option,
            *v_option, *q_option, *db_option, *testrs_option,
-           *testrs_offset_option, *testrs_depth_option, *testrs_print_option,
+           *testrs_depth_option, *testrs_print_option,
            *testrs_maxdepth_option;
 
   gt_assert(arguments);
@@ -185,13 +185,6 @@ static GtOptionParser* gt_readjoiner_prefilter_option_parser_new(
       &arguments->testrs_print, true);
   gt_option_is_development_option(testrs_print_option);
   gt_option_parser_add_option(op, testrs_print_option);
-
-  /* -testrs-offset */
-  testrs_offset_option = gt_option_new_ulong("testrs-offset",
-      "offset for gt_radixsort_str test",
-      &arguments->testrs_offset, 0);
-  gt_option_is_development_option(testrs_offset_option);
-  gt_option_parser_add_option(op, testrs_offset_option);
 
   /* -testrs-depth */
   testrs_depth_option = gt_option_new_ulong("testrs-depth",
@@ -357,7 +350,7 @@ static int gt_readjoiner_prefilter_runner(GT_UNUSED int argc,
     if (arguments->testrs)
     {
       gt_contfinder_radixsort_str_eqlen_tester(contfinder,
-          !arguments->singlestrand, arguments->testrs_offset,
+          !arguments->singlestrand,
           arguments->testrs_depth, arguments->testrs_maxdepth,
           arguments->testrs_print);
     }

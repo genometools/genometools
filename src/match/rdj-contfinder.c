@@ -1715,7 +1715,7 @@ GtContfinder* gt_contfinder_new(GtStrArray *filenames, GtStr *indexname,
 #include "match/radixsort_str.h"
 
 void gt_contfinder_radixsort_str_eqlen_tester(GtContfinder *contfinder,
-    bool mirrored, GT_UNUSED unsigned long offset, unsigned long depth,
+    bool mirrored, unsigned long depth,
     unsigned long maxdepth, bool print)
 {
   unsigned long *suffixes, totallength, width, i;

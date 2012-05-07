@@ -465,24 +465,19 @@ def unpack_uint_array_file(i_filename, o_filename, low_filter = 0)
 end
 
 [true, false].each do |singlestrand|
-  [0, 1000].each do |offset|
-    %w{70x_100nt 30x_800nt}.each do |dataset|
-      Name "gt readjoiner radixsort_str test "+
-        "(#{dataset}, #{singlestrand ? 'single strand' : 'mirrored'}"+
-        ", offset=#{offset})"
-      Keywords "gt_readjoiner radixsort_str"
-      Test do
-        db = "#$testdata/readjoiner/#{dataset}.fas"
-        run_prefilter(db, "-testrs -encseq no -q"+
-                      "#{' -singlestrand' if singlestrand}"+
-                      " -testrs-offset #{offset}")
-        run "tail -n +#{offset+1} #{last_stdout}"
-        radixsort_results = last_stdout
-        run "#{$bin}gt suffixerator -suf -db #{db}"+
-          "#{' -mirrored' unless singlestrand} -indexname i"
-        unpack_uint_array_file("i.suf", "i.suf.txt", offset)
-        run "diff i.suf.txt #{radixsort_results}"
-      end
+  %w{70x_100nt 30x_800nt}.each do |dataset|
+    Name "gt readjoiner radixsort_str test "+
+      "(#{dataset}, #{singlestrand ? 'single strand' : 'mirrored'})"
+    Keywords "gt_readjoiner radixsort_str"
+    Test do
+      db = "#$testdata/readjoiner/#{dataset}.fas"
+      run_prefilter(db, "-testrs -encseq no -q"+
+		    "#{' -singlestrand' if singlestrand}")
+      radixsort_results = last_stdout
+      run "#{$bin}gt suffixerator -suf -db #{db}"+
+	  "#{' -mirrored' unless singlestrand} -indexname i"
+      unpack_uint_array_file("i.suf", "i.suf.txt", 0)
+      run "diff i.suf.txt #{radixsort_results}"
     end
   end
 end
