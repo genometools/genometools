@@ -1913,9 +1913,6 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       &sfi->sfxstrategy,
                       sfi->dcov == NULL ? NULL
                                         : gt_differencecover_sortunsortedbucket,
-                      (sfi->dcov == NULL || sfi->outlcpinfo == NULL)
-                        ? NULL
-                        : NULL, /*gt_differencecover_completelargelcpvalues*/
                       (void *) sfi->dcov,
                       &sfi->bucketiterstep,
                       sfi->logger);

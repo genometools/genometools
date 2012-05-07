@@ -1799,7 +1799,6 @@ static void dc_differencecover_sortsample(GtDifferencecover *dcov,
                         dcov->vparam,
                         &sfxstrategy,
                         dc_addunsortedrange,
-                        NULL,
                         (void *) dcov,
                         &bucketiterstep,
                         dcov->logger);

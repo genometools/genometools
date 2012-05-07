@@ -50,7 +50,6 @@ void gt_sortallbuckets(GtSuffixsortspace *suffixsortspace,
                        unsigned int sortmaxdepth,
                        const Sfxstrategy *sfxstrategy,
                        GtProcessunsortedsuffixrange processunsortedsuffixrange,
-                       GtCompletelargelcpvalues completelargelcpvalues,
                        void *processunsortedsuffixrangeinfo,
                        unsigned long long *bucketiterstep,
                        GtLogger *logger);
