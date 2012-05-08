@@ -81,6 +81,7 @@ struct GtIndexOptions
            *optionmemlimit,
            *optiondir,
            *optiondifferencecover,
+           *optionuserdefinedsortmaxdepth,
            *optionkys;
 #ifndef S_SPLINT_S /* splint reports too many errors for the following and so
                       we exclude it */
@@ -281,12 +282,22 @@ static GtIndexOptions* gt_index_options_register_generic_create(
   gt_option_argument_is_optional(idxo->optionprefixlength);
   gt_option_parser_add_option(op, idxo->optionprefixlength);
 
+  idxo->optionuserdefinedsortmaxdepth
+    = gt_option_new_uint_min("sortmaxdepth","sort only up to the given depth",
+                             &idxo->sfxstrategy.userdefinedsortmaxdepth,
+                             0,
+                             1U);
+  gt_option_parser_add_option(op, idxo->optionuserdefinedsortmaxdepth);
+  gt_option_is_development_option(idxo->optionuserdefinedsortmaxdepth);
+
   idxo->optiondifferencecover = gt_option_new_uint_min("dc",
                                     "specify difference cover value",
                                     &idxo->sfxstrategy.differencecover,
                                     0,
                                     4U);
   gt_option_parser_add_option(op, idxo->optiondifferencecover);
+  gt_option_exclude(idxo->optionuserdefinedsortmaxdepth,
+                    idxo->optiondifferencecover);
 
   idxo->optioncmpcharbychar = gt_option_new_bool("cmpcharbychar",
                                            "compare suffixes character "

@@ -32,6 +32,7 @@ typedef struct
                 maxbltriesort,
                 maxcountingsort;
   unsigned int differencecover,
+               userdefinedsortmaxdepth,
                spmopt_minlength;
   bool cmpcharbychar, /* compare suffixes character by character instead
                          of comparing entire words (only for two bit
@@ -68,6 +69,7 @@ typedef struct
   sfxstrategy->outsuftabonfile = true;
   sfxstrategy->noshortreadsort = false;
   sfxstrategy->withradixsort = false;
+  sfxstrategy->userdefinedsortmaxdepth = 0;
 }
 
 #endif

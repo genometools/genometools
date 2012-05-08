@@ -652,9 +652,12 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
     {
       if (laststart < idx-1)
       {
-        processunsortedsuffixrange(processunsortedsuffixrangeinfo,
-                                   bucketleftidx + subbucketleft + laststart,
-                                   idx - laststart,maxdepth);
+        if (processunsortedsuffixrange != NULL)
+        {
+          processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                                     bucketleftidx + subbucketleft + laststart,
+                                     idx - laststart,maxdepth);
+        }
       }
       laststart = idx;
     } else
@@ -669,9 +672,12 @@ void gt_shortreadsort_sssp_add_unsorted(const GtShortreadsortworkinfo *srsw,
   }
   if (laststart < width-1)
   {
-    processunsortedsuffixrange(processunsortedsuffixrangeinfo,
-                               bucketleftidx + subbucketleft + laststart,
-                               width - laststart,maxdepth);
+    if (processunsortedsuffixrange != NULL)
+    {
+      processunsortedsuffixrange(processunsortedsuffixrangeinfo,
+                                 bucketleftidx + subbucketleft + laststart,
+                                 width - laststart,maxdepth);
+    }
   }
 }
 

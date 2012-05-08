@@ -92,7 +92,7 @@ struct GtBlindtrie
   GtReadmode readmode;
   unsigned long totallength,
                 logicaltotallength,
-                maxdepthminusoffset;
+                sortmaxdepthminusoffset;
   bool cmpcharbychar,
        hasmirror,
        has_twobitencoding_stoppos_support;
@@ -298,12 +298,12 @@ static bool blindtrie_isleftofboundary(const GtBlindtrie *blindtrie,
 {
   unsigned long endpos;
 
-  if (blindtrie->maxdepthminusoffset == 0)
+  if (blindtrie->sortmaxdepthminusoffset == 0)
   {
     endpos = blindtrie->totallength;
   } else
   {
-    endpos = currentstartpos + blindtrie->maxdepthminusoffset;
+    endpos = currentstartpos + blindtrie->sortmaxdepthminusoffset;
     if (endpos >= blindtrie->totallength)
     {
       endpos = blindtrie->totallength;
@@ -645,8 +645,8 @@ static unsigned long blindtrie_cmpcharbychar_getlcp(
       break;
     }
   }
-  gt_assert(blindtrie->maxdepthminusoffset == 0 ||
-            lcp <= blindtrie->maxdepthminusoffset);
+  gt_assert(blindtrie->sortmaxdepthminusoffset == 0 ||
+            lcp <= blindtrie->sortmaxdepthminusoffset);
   return lcp;
 }
 
@@ -670,7 +670,7 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                NULL, /* esr */
                                leafpos,
                                depth,
-                               blindtrie->maxdepthminusoffset,
+                               blindtrie->sortmaxdepthminusoffset,
                                leaftwobitencodingstoppos);
   gt_Viatwobitkeyvalues_reinit(blindtrie->vtk2,
                                blindtrie->encseq,
@@ -678,13 +678,13 @@ static unsigned long blindtrie_twobitencoding_getlcp(
                                NULL, /* esr */
                                currentstartpos,
                                depth,
-                               blindtrie->maxdepthminusoffset,
+                               blindtrie->sortmaxdepthminusoffset,
                                currenttwobitencodingstoppos);
   (void) gt_encseq_process_viatwobitencoding(&commonunits,
                                              blindtrie->encseq,
                                              blindtrie->readmode,
                                              depth,
-                                             blindtrie->maxdepthminusoffset,
+                                             blindtrie->sortmaxdepthminusoffset,
                                              blindtrie->vtk1,
                                              blindtrie->vtk2);
   if (blindtrie_isleftofboundary(blindtrie,leafpos,commonunits.finaldepth) &&
@@ -778,7 +778,7 @@ static unsigned long blindtrie_enumeratetrieleaves (
                            GtBlindtrie *blindtrie,
                            unsigned long subbucketleft,
                            unsigned long offset,
-                           unsigned long maxdepth,
+                           unsigned long sortmaxdepth,
                            GtLcpvalues *tableoflcpvalues,
                            void *voiddcov,
                            GtProcessunsortedsuffixrange
@@ -794,7 +794,6 @@ static unsigned long blindtrie_enumeratetrieleaves (
                   GT_BLINDTRIE_ROOTIDX);
   BLINDTRIE_SETCURRENTNODE(blindtrie_firstchild_get(blindtrie,
                            GT_BLINDTRIE_ROOTIDX));
-  gt_assert(maxdepth == 0 || processunsortedsuffixrange != NULL);
   bucketleftidxplussubbucketleft
     = gt_suffixsortspace_bucketleftidx_get(blindtrie->sssp) + subbucketleft;
   for (;;)
@@ -809,22 +808,25 @@ static unsigned long blindtrie_enumeratetrieleaves (
           gt_lcptab_update(tableoflcpvalues,subbucketleft,nextfree,
                            lcpnodedepth + offset);
         }
-        if (maxdepth > 0)
+        if (sortmaxdepth > 0)
         {
-          if (lcpnodedepth + offset == maxdepth)
+          if (lcpnodedepth + offset == sortmaxdepth)
           {
             equalsrangewidth++;
           } else
           {
-            gt_assert(lcpnodedepth + offset < maxdepth);
+            gt_assert(lcpnodedepth + offset < sortmaxdepth);
             if (equalsrangewidth > 0)
             {
-              processunsortedsuffixrange(
+              if (processunsortedsuffixrange != NULL)
+              {
+                processunsortedsuffixrange(
                                voiddcov,
                                bucketleftidxplussubbucketleft
                                  + nextfree - 1 - equalsrangewidth,
                                equalsrangewidth + 1,
-                               maxdepth);
+                               sortmaxdepth);
+              }
               equalsrangewidth = 0;
             }
           }
@@ -874,11 +876,14 @@ static unsigned long blindtrie_enumeratetrieleaves (
   }
   if (nextfree > 0 && equalsrangewidth > 0)
   {
-    processunsortedsuffixrange(voiddcov,
-                               bucketleftidxplussubbucketleft
-                                 + nextfree - 1 - equalsrangewidth,
-                               equalsrangewidth + 1,
-                               maxdepth);
+    if (processunsortedsuffixrange != NULL)
+    {
+      processunsortedsuffixrange(voiddcov,
+                                 bucketleftidxplussubbucketleft
+                                   + nextfree - 1 - equalsrangewidth,
+                                 equalsrangewidth + 1,
+                                 sortmaxdepth);
+    }
     equalsrangewidth = 0;
   }
   return nextfree;
@@ -1095,19 +1100,19 @@ static GtBlindtriesnodeptr blindtrie_findsplitnode(const GtBlindtrie *blindtrie,
 
 static void gt_blindtrie_insertsuffix(GtBlindtrie *blindtrie,
                                       unsigned long offset,
-                                      unsigned long maxdepth,
+                                      unsigned long sortmaxdepth,
                                       unsigned long currentstartpos)
 {
 
-  gt_assert(maxdepth == 0 || maxdepth > offset);
+  gt_assert(sortmaxdepth == 0 || sortmaxdepth > offset);
   if (blindtrie->nextfreeBlindtrienode == 0)
   { /* empty tree */
-    if (maxdepth == 0)
+    if (sortmaxdepth == 0)
     {
-      blindtrie->maxdepthminusoffset = 0;
+      blindtrie->sortmaxdepthminusoffset = 0;
     } else
     {
-      blindtrie->maxdepthminusoffset = maxdepth - offset;
+      blindtrie->sortmaxdepthminusoffset = sortmaxdepth - offset;
     }
     blindtrie->overflowsuffixes.nextfreeGtUlong = 0;
     blindtrie_makeroot(blindtrie,currentstartpos,ULONG_MAX);
@@ -1189,7 +1194,7 @@ static void gt_blindtrie2sorting(GtBlindtrie *blindtrie,
                                  unsigned long subbucketleft,
                                  GtLcpvalues *tableoflcpvalues,
                                  unsigned long offset,
-                                 unsigned long maxdepth,
+                                 unsigned long sortmaxdepth,
                                  void *voiddcov,
                                  GtProcessunsortedsuffixrange
                                    processunsortedsuffixrange)
@@ -1197,8 +1202,8 @@ static void gt_blindtrie2sorting(GtBlindtrie *blindtrie,
   unsigned long nextsuffixtosort;
 
   nextsuffixtosort
-    = blindtrie_enumeratetrieleaves (blindtrie,subbucketleft,offset,maxdepth,
-                                     tableoflcpvalues,
+    = blindtrie_enumeratetrieleaves (blindtrie,subbucketleft,offset,
+                                     sortmaxdepth,tableoflcpvalues,
                                      voiddcov,processunsortedsuffixrange);
   processoverflowsuffixes(blindtrie,
                           offset,
@@ -1212,7 +1217,7 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                              GtLcpvalues *tableoflcpvalues,
                              unsigned long numberofsuffixes,
                              unsigned long offset,
-                             unsigned long maxdepth,
+                             unsigned long sortmaxdepth,
                              void *voiddcov,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange)
@@ -1225,7 +1230,7 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
     currentstartpos = gt_suffixsortspace_get(blindtrie->sssp,subbucketleft,idx);
     gt_blindtrie_insertsuffix(blindtrie,
                               offset,
-                              maxdepth,
+                              sortmaxdepth,
                               currentstartpos + offset);
 #ifdef SKDEBUG
     blindtrie_showstate(blindtrie,
@@ -1238,7 +1243,7 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                        subbucketleft,
                        tableoflcpvalues,
                        offset,
-                       maxdepth,
+                       sortmaxdepth,
                        voiddcov,
                        processunsortedsuffixrange);
 }
@@ -1255,7 +1260,7 @@ bool gt_blindtrie_retrieve(GtBlindtrie *blindtrie,
   }
   if (blindtrie->nextfreeBlindtrienode == 0)
   {
-    blindtrie->maxdepthminusoffset = 0;
+    blindtrie->sortmaxdepthminusoffset = 0;
     blindtrie_makeroot(blindtrie,currentstartpos,currenttwobitencodingstoppos);
     return false;
   } else

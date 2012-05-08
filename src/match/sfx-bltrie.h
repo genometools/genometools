@@ -47,7 +47,7 @@ void gt_blindtrie_suffixsort(GtBlindtrie *blindtrie,
                              GtLcpvalues *tableoflcpvalues,
                              unsigned long numberofsuffixes,
                              unsigned long offset,
-                             unsigned long maxdepth,
+                             unsigned long sortmaxdepth,
                              void *voiddcov,
                              GtProcessunsortedsuffixrange
                                processunsortedsuffixrange);

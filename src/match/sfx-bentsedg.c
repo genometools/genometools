@@ -503,11 +503,14 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
           printf("process interval of width %lu\n",
                  equalsrangewidth + 1);
 #endif
-          bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
-                                          bucketleftidx + subbucketleft
-                                                        + idx - 1
-                                                        - equalsrangewidth,
-                                          equalsrangewidth + 1, maxdepth);
+          if (bsr->processunsortedsuffixrange != NULL)
+          {
+            bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
+                                            bucketleftidx + subbucketleft
+                                                          + idx - 1
+                                                          - equalsrangewidth,
+                                            equalsrangewidth + 1, maxdepth);
+          }
           equalsrangewidth = 0;
         }
       }
@@ -518,10 +521,13 @@ static void bs_insertionsortmaxdepth(GtBentsedgresources *bsr,
       printf("process interval of width %lu\n",
              equalsrangewidth + 1);
 #endif
-      bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
-                                      bucketleftidx + subbucketleft + width - 1
-                                                    - equalsrangewidth,
+      if (bsr->processunsortedsuffixrange != NULL)
+      {
+        bsr->processunsortedsuffixrange(bsr->processunsortedsuffixrangeinfo,
+                                        bucketleftidx + subbucketleft + width
+                                                      - 1 - equalsrangewidth,
                                       equalsrangewidth + 1, maxdepth);
+      }
     }
   }
 }
@@ -913,11 +919,14 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     }
     if (bsr->sortmaxdepth > 0 && depth >= (unsigned long) bsr->sortmaxdepth)
     {
-      bsr->processunsortedsuffixrange(
+      if (bsr->processunsortedsuffixrange != NULL)
+      {
+        bsr->processunsortedsuffixrange(
                          bsr->processunsortedsuffixrangeinfo,
                          gt_suffixsortspace_bucketleftidx_get(bsr->sssp) +
                          subbucketleft,
                          width,depth);
+      }
       return;
     }
     if (multistrategysort(bsr,subbucketleft,width,depth,

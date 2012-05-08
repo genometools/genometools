@@ -1897,6 +1897,26 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
   }
   if (!sfi->sfxstrategy.onlybucketinsertion)
   {
+    unsigned int sortmaxdepth;
+    GtProcessunsortedsuffixrange processunsortedsuffixrange;
+
+    if (sfi->dcov == NULL)
+    {
+      if (sfi->sfxstrategy.userdefinedsortmaxdepth == 0)
+      {
+        sortmaxdepth = 0;
+      } else
+      {
+        sortmaxdepth = sfi->sfxstrategy.userdefinedsortmaxdepth;
+      }
+      processunsortedsuffixrange = NULL;
+    } else
+    {
+      gt_assert(sfi->sfxstrategy.userdefinedsortmaxdepth == 0);
+      sortmaxdepth = sfi->sfxstrategy.differencecover;
+      processunsortedsuffixrange = gt_differencecover_sortunsortedbucket;
+    }
+    gt_assert(sortmaxdepth != 0 || processunsortedsuffixrange == NULL);
     gt_sortallbuckets(sfi->suffixsortspace,
                       sumofwidthforpart,
                       bucketspec2,
@@ -1908,11 +1928,9 @@ static void gt_sfxiterator_preparethispart(Sfxiterator *sfi)
                       sfi->numofchars,
                       sfi->prefixlength,
                       sfi->outlcpinfo,
-                      sfi->dcov == NULL ? 0
-                                        : sfi->sfxstrategy.differencecover,
+                      sortmaxdepth,
                       &sfi->sfxstrategy,
-                      sfi->dcov == NULL ? NULL
-                                        : gt_differencecover_sortunsortedbucket,
+                      processunsortedsuffixrange,
                       (void *) sfi->dcov,
                       &sfi->bucketiterstep,
                       sfi->logger);
