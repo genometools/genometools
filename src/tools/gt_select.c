@@ -27,6 +27,7 @@
 #include "extended/gff3_out_stream_api.h"
 #include "extended/gff3_output.h"
 #include "extended/gff3_parser.h"
+#include "extended/gff3_visitor.h"
 #include "extended/gtdatahelp.h"
 #include "extended/select_stream.h"
 #include "extended/targetbest_select_stream.h"
@@ -300,14 +301,12 @@ static int gt_select_arguments_check(GT_UNUSED int rest_argc,
 }
 
 static int print_to_file_drophandler(GtGenomeNode *gn, void *data,
-                                     GT_UNUSED GtError *err)
+                                     GtError *err)
 {
-  GtFile *file;
+  GtNodeVisitor *v;
   gt_assert(gn && data);
-  file = (GtFile*) data;
-  gt_gff3_output_leading((GtFeatureNode*) gn, file);
-  gt_file_xfputc('\n', file);
-  return 0;
+  v = (GtNodeVisitor*) data;
+  return gt_genome_node_accept(gn, v, err);
 }
 
 static int default_drophandler(GT_UNUSED GtGenomeNode *gn, GT_UNUSED void *data,
@@ -324,8 +323,8 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
   GtNodeStream *gff3_in_stream, *select_stream,
                *targetbest_select_stream = NULL, *gff3_out_stream;
   int had_err;
-
   GtFile *drop_file = NULL;
+  GtNodeVisitor *gff3outvis = NULL;
   gt_error_check(err);
   gt_assert(arguments);
 
@@ -358,10 +357,9 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
 
     if (gt_str_length(arguments->dropped_file) > 0) {
       drop_file = gt_file_new(gt_str_get(arguments->dropped_file), "w", err);
-      gt_file_xprintf(drop_file, "%s   %u\n", GT_GFF_VERSION_PREFIX,
-                                              GT_GFF_VERSION);
+      gff3outvis = gt_gff3_visitor_new(drop_file);
       gt_select_stream_set_drophandler(fs, print_to_file_drophandler,
-                                       (void*) drop_file);
+                                       (void*) gff3outvis);
     } else {
       gt_select_stream_set_drophandler(fs, default_drophandler, NULL);
     }
@@ -388,8 +386,8 @@ static int gt_select_runner(int argc, const char **argv, int parsed_args,
   } else {
     had_err = -1;
   }
-  if (drop_file)
-    gt_file_delete(drop_file);
+  gt_file_delete(drop_file);
+  gt_node_visitor_delete(gff3outvis);
   gt_node_stream_delete(gff3_in_stream);
   return had_err;
 }
