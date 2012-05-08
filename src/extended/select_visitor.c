@@ -405,7 +405,7 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
   select_visitor->is_lua = false;
 
   if (gt_str_array_size(select_visitor->select_files) > 0) {
-    int i, j;
+    int i;
     select_visitor->is_lua = true;
     select_visitor->script_filters = gt_array_new(sizeof (GtScriptFilter*));
     for (i = 0; i < gt_str_array_size(select_visitor->select_files); i++) {
@@ -414,11 +414,6 @@ GtNodeVisitor* gt_select_visitor_new(GtStr *seqid,
                                                  i),
                                 err);
       if (!sf) {
-        for (j = 0; j < gt_array_size(select_visitor->script_filters); j++) {
-          GtScriptFilter *todelete =
-            *(GtScriptFilter**) gt_array_get(select_visitor->script_filters, j);
-          gt_script_filter_delete(todelete);
-        }
         gt_node_visitor_delete(nv);
         return NULL;
         break;
