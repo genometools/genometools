@@ -450,6 +450,9 @@ LIBGENOMETOOLS_PRESRC:=$(filter-out src/ltr/pdom.c,\
 # remove AnnotationSketch-only bindings
 LIBGENOMETOOLS_PRESRC:=$(filter-out $(CAIRO_FILTER_OUT),\
                          $(LIBGENOMETOOLS_PRESRC))
+# remove MySQL-only files
+LIBGENOMETOOLS_PRESRC:=$(filter-out $(MYSQL_FILTER_OUT),\
+                         $(LIBGENOMETOOLS_PRESRC))
 ifeq ($(amalgamation),yes)
   LIBGENOMETOOLS_SRC:=obj/amalgamation.c
 else
