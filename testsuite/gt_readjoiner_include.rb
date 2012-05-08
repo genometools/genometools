@@ -446,10 +446,7 @@ Test do
   end
 end
 
-def unpack_uint_array_file(i_filename, o_filename, low_filter = 0)
-  is64bit = Kernel.system("#{$bin}gt -64bit")
-  sizeofint = is64bit ? 8 : 4
-  unpackstr = is64bit ? "q" : "l"
+def unpack_array_file(i_filename, o_filename, low_filter, sizeofint, unpackstr)
   i_file = File.open(i_filename)
   o_file = File.open(o_filename, "w")
   loop do
@@ -474,10 +471,27 @@ end
       run_prefilter(db, "-testrs -encseq no -q"+
 		    "#{' -singlestrand' if singlestrand}")
       radixsort_results = last_stdout
-      run "#{$bin}gt suffixerator -suf -db #{db}"+
-	  "#{' -mirrored' unless singlestrand} -indexname i"
-      unpack_uint_array_file("i.suf", "i.suf.txt", 0)
+      run "#{$bin}gt suffixerator -suf -lcp -db #{db}"+
+        "#{' -mirrored' unless singlestrand} -indexname i"
+      is64bit = Kernel.system("#{$bin}gt -64bit")
+      sizeofint = is64bit ? 8 : 4
+      unpackstr = is64bit ? "Q" : "L"
+      unpack_array_file("i.suf", "i.suf.txt", 0, sizeofint, unpackstr)
       run "diff i.suf.txt #{radixsort_results}"
+      unpack_array_file("i.lcp", "i.lcp.txt", 0, 1, "C")
+      reflcp = File.new("i.lcp.txt")
+      testlcp = File.new("stderr_1")
+      i = 0
+      reflcp.each_line do |refline|
+        i+=1
+        testline = testlcp.readline
+        if testline != refline and
+          !(testline.to_i >= 255 && refline.to_i == 255)
+          failtest "lcp value is wrong "+
+            "(lcp[#{i-1}], ref: #{refline.to_i}, "+
+            "test: #{testline.to_i})"
+        end
+      end
     end
   end
 end
