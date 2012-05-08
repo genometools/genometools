@@ -164,7 +164,7 @@ typedef struct
                 countradixsort,
                 countcountingsort,
                 countbltriesort,
-                maxremain;
+                srs_maxremain; /* only relevant for short read sort */
   GtShortreadsortworkinfo *srsw;
   const GtTwobitencoding *twobitencoding;
   unsigned long equallengthplus1;
@@ -885,11 +885,11 @@ static void subsort_bentleysedgewick(GtBentsedgresources *bsr,
     if (bsr->srsw != NULL &&
         !bsr->sfxstrategy->noshortreadsort &&
         gt_shortreadsort_size(false,width,
-                              bsr->maxremain) <= bsr->sizeofworkspace)
+                              bsr->srs_maxremain) <= bsr->sizeofworkspace)
     {
       gt_shortreadsort_sssp_sort(bsr->srsw,
                                  bsr->encseq,
-                                 bsr->maxremain,
+                                 bsr->srs_maxremain,
                                  bsr->readmode,
                                  bsr->esr1,
                                  bsr->sssp,
@@ -1390,17 +1390,17 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
   {
     if (sortmaxdepth > prefixlength)
     {
-      bsr->maxremain = sortmaxdepth - (unsigned long) prefixlength;
+      bsr->srs_maxremain = sortmaxdepth - (unsigned long) prefixlength;
     } else
     {
-      bsr->maxremain = 0;
+      bsr->srs_maxremain = 0;
     }
   } else
   {
     gt_assert(gt_encseq_lengthoflongestnonspecial(encseq) >
              (unsigned long) prefixlength);
-    bsr->maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
-                     prefixlength;
+    bsr->srs_maxremain = gt_encseq_lengthoflongestnonspecial(encseq) -
+                         prefixlength;
   }
   bsr->sizeofworkspace = gt_size_of_sort_workspace (sfxstrategy);
   GT_INITARRAY(&bsr->mkvauxstack,GtMKVstack);
@@ -1415,7 +1415,7 @@ static void bentsedgresources_init(GtBentsedgresources *bsr,
                                     ? true : false;
     if (sortmaxdepth == 0 || gt_has_twobitencoding_stoppos_support(encseq))
     {
-      bsr->srsw = gt_shortreadsort_new(0,bsr->maxremain,readmode,false,
+      bsr->srsw = gt_shortreadsort_new(0,bsr->srs_maxremain,readmode,false,
                                        withmediumsizelcps);
     }
     for (idx = 0; idx < (unsigned long) GT_UNITSIN2BITENC; idx++)
