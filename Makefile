@@ -404,6 +404,7 @@ ifneq ($(cairo),no)
 else
   EXP_CPPFLAGS += -DWITHOUT_CAIRO
   STEST_FLAGS += -nocairo
+  # TODO: move annodb out of AnnotationSketch dependency
   CAIRO_FILTER_OUT:=src/gtlua/annotationsketch_lua.c \
                     src/gtlua/canvas_lua.c \
                     src/gtlua/diagram_lua.c \
@@ -411,8 +412,8 @@ else
                     src/gtlua/feature_stream_lua.c \
                     src/gtlua/feature_visitor_lua.c \
                     src/gtlua/image_info_lua.c \
-                    src/gtlua/layout_lua.c
-
+                    src/gtlua/layout_lua.c \
+                    src/extended/anno_db_gfflike.c
 endif
 
 ifeq ($(threads),yes)
@@ -439,6 +440,8 @@ ifeq ($(with-mysql),yes)
   GTSHAREDLIB_LIBDEP:= $(GTSHAREDLIB_LIBDEP) -lmysqlclient
   EXP_CPPFLAGS += -DHAVE_MYSQL
   EXP_LDLIBS += -lmysqlclient
+else
+  MYSQL_FILTER_OUT:=src/extended/rdb_mysql.c
 endif
 
 # the GenomeTools library
