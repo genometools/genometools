@@ -1,2 +1,8 @@
 ##gff-version   3
-seq0	LTRharvest	repeat_region	473776	477112	.	?	.	
+seq0	LTRharvest	repeat_region	473776	477112	.	?	.	ID=repeat_region1
+seq0	LTRharvest	target_site_duplication	473776	473779	.	?	.	Parent=repeat_region1
+seq0	LTRharvest	LTR_retrotransposon	473780	477108	.	?	.	ID=LTR_retrotransposon1;Parent=repeat_region1
+seq0	ORFfinder	reading_frame	473826	474046	.	+	.	Parent=LTR_retrotransposon1;frame=1
+seq0	ORFfinder	reading_frame	473936	474007	.	-	.	Parent=LTR_retrotransposon1;frame=2
+seq0	LTRharvest	target_site_duplication	477109	477112	.	?	.	Parent=repeat_region1
+###

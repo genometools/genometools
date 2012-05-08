@@ -1,4 +1,23 @@
 ##gff-version   3
-seq0	LTRharvest	repeat_region	26701	34275	.	?	.	
-seq0	LTRharvest	repeat_region	34271	40717	.	?	.	
-seq0	LTRharvest	repeat_region	473776	477112	.	?	.	
+seq0	LTRharvest	repeat_region	26701	34275	.	?	.	ID=repeat_region1
+seq0	LTRharvest	target_site_duplication	26701	26704	.	?	.	Parent=repeat_region1
+seq0	LTRharvest	LTR_retrotransposon	26705	34271	.	?	.	ID=LTR_retrotransposon1;Parent=repeat_region1
+seq0	LTRharvest	long_terminal_repeat	33477	34271	.	?	.	Parent=LTR_retrotransposon1
+seq0	LTRharvest	target_site_duplication	34272	34275	.	?	.	Parent=repeat_region1
+###
+seq0	LTRharvest	repeat_region	34271	40717	.	?	.	ID=repeat_region2
+seq0	LTRharvest	target_site_duplication	34271	34274	.	?	.	Parent=repeat_region2
+seq0	LTRharvest	LTR_retrotransposon	34275	40713	.	?	.	ID=LTR_retrotransposon2;Parent=repeat_region2
+seq0	LTRharvest	long_terminal_repeat	34275	34773	.	?	.	Parent=LTR_retrotransposon2
+seq0	ORFfinder	reading_frame	36903	37274	.	+	.	Parent=LTR_retrotransposon2;frame=0
+seq0	ORFfinder	reading_frame	39430	39579	.	-	.	Parent=LTR_retrotransposon2;frame=2
+seq0	LTRharvest	long_terminal_repeat	40215	40713	.	?	.	Parent=LTR_retrotransposon2
+seq0	LTRharvest	target_site_duplication	40714	40717	.	?	.	Parent=repeat_region2
+###
+seq0	LTRharvest	repeat_region	473776	477112	.	?	.	ID=repeat_region3
+seq0	LTRharvest	target_site_duplication	473776	473779	.	?	.	Parent=repeat_region3
+seq0	LTRharvest	LTR_retrotransposon	473780	477108	.	?	.	ID=LTR_retrotransposon3;Parent=repeat_region3
+seq0	ORFfinder	reading_frame	473826	474046	.	+	.	Parent=LTR_retrotransposon3;frame=1
+seq0	ORFfinder	reading_frame	473936	474007	.	-	.	Parent=LTR_retrotransposon3;frame=2
+seq0	LTRharvest	target_site_duplication	477109	477112	.	?	.	Parent=repeat_region3
+###
