@@ -53,7 +53,8 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
 
   /* init */
   op = gt_option_parser_new("(-invert|-sort|-revsort|-shuffle) encseq",
-                         "Output sequences as MultiFasta in specified order.");
+                            "Output sequences as MultiFasta in specified "
+                            "order.");
 
   /* -invert */
   invert_option = gt_option_new_bool("invert", "invert order of sequences",
@@ -67,7 +68,7 @@ static GtOptionParser* gt_seqorder_option_parser_new(void *tool_arguments)
   gt_option_parser_add_option(op, sort_option);
 
   /* -revsort */
-  revsort_option = gt_option_new_bool("revsort", "sort sequences in reverse"
+  revsort_option = gt_option_new_bool("revsort", "sort sequences in reverse "
                            "lexicographic order", &arguments->revsort, false);
   gt_option_exclude(revsort_option, invert_option);
   gt_option_exclude(revsort_option, sort_option);
