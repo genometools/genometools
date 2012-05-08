@@ -107,6 +107,9 @@
 #include "extended/node_visitor_api.h"
 #include "extended/rdb_api.h"
 #include "extended/rdb_sqlite_api.h"
+#ifdef HAVE_MYSQL
+#include "extended/rdb_mysql_api.h"
+#endif
 #include "extended/region_mapping_api.h"
 #include "extended/region_node_api.h"
 #include "extended/script_filter_api.h"
