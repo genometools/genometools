@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   ctg123 1 1497228
+ctg123	.	gene	1000	9000	0.5	+	.	ID=gene1
+ctg123	.	mRNA	1050	7000	.	+	.	ID=mRNA1;Parent=gene1
+ctg123	.	exon	1050	7000	.	+	.	Parent=mRNA1
+ctg123	.	mRNA	7001	9000	.	+	.	ID=mRNA2;Parent=gene1
+ctg123	.	exon	7001	9000	.	+	.	Parent=mRNA2
+###

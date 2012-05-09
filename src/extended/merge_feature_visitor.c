@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006-2011 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2012 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2008 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -60,12 +60,14 @@ static int mergefeat_in_children(GtFeatureNode *current_feature, void *data,
     current_range = gt_genome_node_get_range((GtGenomeNode*) current_feature);
     /* sorted */
     gt_assert(gt_range_compare(&previous_range, &current_range) <= 0);
-    if (previous_range.end + 1 == current_range.start) {
+    /* merge only adjacent features without children */
+    if (previous_range.end + 1 == current_range.start &&
+        !gt_feature_node_number_of_children(previous_feature) &&
+        !gt_feature_node_number_of_children(current_feature)) {
       /* merge nodes */
       gt_feature_node_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
       gt_feature_node_unset_score(previous_feature);
-      gt_assert(!gt_feature_node_number_of_children(current_feature));
       gt_array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
